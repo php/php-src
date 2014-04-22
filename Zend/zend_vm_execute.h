@@ -13840,7 +13840,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -13853,7 +13853,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -13866,7 +13866,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -13879,7 +13879,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -13892,7 +13892,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -13905,7 +13905,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -13918,7 +13918,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -13931,7 +13931,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -13944,7 +13944,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_H
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -13957,7 +13957,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -13970,7 +13970,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_VAR_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16145,7 +16145,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16158,7 +16158,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16171,7 +16171,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16184,7 +16184,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16197,7 +16197,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16210,7 +16210,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16223,7 +16223,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16236,7 +16236,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16249,7 +16249,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16262,7 +16262,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -16275,7 +16275,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18066,7 +18066,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18079,7 +18079,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18092,7 +18092,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18105,7 +18105,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18118,7 +18118,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18131,7 +18131,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18144,7 +18144,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18157,7 +18157,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18170,7 +18170,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18183,7 +18183,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -18196,7 +18196,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20071,7 +20071,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20084,7 +20084,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20097,7 +20097,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20110,7 +20110,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20123,7 +20123,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20136,7 +20136,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20149,7 +20149,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20162,7 +20162,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20175,7 +20175,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20188,7 +20188,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -20201,7 +20201,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21492,7 +21492,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21505,7 +21505,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21518,7 +21518,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21531,7 +21531,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21544,7 +21544,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21557,7 +21557,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21570,7 +21570,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21583,7 +21583,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21596,7 +21596,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21609,7 +21609,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -21622,7 +21622,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_VAR_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23268,7 +23268,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23281,7 +23281,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23294,7 +23294,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23307,7 +23307,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23320,7 +23320,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23333,7 +23333,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23346,7 +23346,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23359,7 +23359,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCO
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23372,7 +23372,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCOD
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23385,7 +23385,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCO
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -23398,7 +23398,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCO
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24592,7 +24592,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24605,7 +24605,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24618,7 +24618,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24631,7 +24631,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24644,7 +24644,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24657,7 +24657,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24670,7 +24670,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24683,7 +24683,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24696,7 +24696,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24709,7 +24709,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -24722,7 +24722,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25833,7 +25833,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25846,7 +25846,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25859,7 +25859,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25872,7 +25872,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25885,7 +25885,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25898,7 +25898,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25911,7 +25911,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25924,7 +25924,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25937,7 +25937,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25950,7 +25950,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -25963,7 +25963,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27073,7 +27073,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27086,7 +27086,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27099,7 +27099,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27112,7 +27112,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27125,7 +27125,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27138,7 +27138,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27151,7 +27151,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27164,7 +27164,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPC
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27177,7 +27177,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCO
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27190,7 +27190,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPC
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27203,7 +27203,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPC
 		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27567,7 +27567,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27580,7 +27580,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27593,7 +27593,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27606,7 +27606,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27619,7 +27619,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27632,7 +27632,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27645,7 +27645,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27658,7 +27658,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27671,7 +27671,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_H
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27684,7 +27684,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -27697,7 +27697,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30325,7 +30325,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30338,7 +30338,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30351,7 +30351,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30364,7 +30364,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30377,7 +30377,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30390,7 +30390,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30403,7 +30403,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30416,7 +30416,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_H
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30429,7 +30429,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HA
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30442,7 +30442,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_H
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -30455,7 +30455,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_H
 		return zend_binary_assign_op_helper_SPEC_CV_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32417,7 +32417,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32430,7 +32430,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32443,7 +32443,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32456,7 +32456,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32469,7 +32469,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32482,7 +32482,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32495,7 +32495,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32508,7 +32508,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32521,7 +32521,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32534,7 +32534,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -32547,7 +32547,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34221,7 +34221,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34234,7 +34234,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34247,7 +34247,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34260,7 +34260,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34273,7 +34273,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34286,7 +34286,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34299,7 +34299,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34312,7 +34312,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34325,7 +34325,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34338,7 +34338,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -34351,7 +34351,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36108,7 +36108,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36121,7 +36121,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36134,7 +36134,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36147,7 +36147,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36160,7 +36160,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36173,7 +36173,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36186,7 +36186,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36199,7 +36199,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36212,7 +36212,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_H
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36225,7 +36225,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -36238,7 +36238,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_
 		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37395,7 +37395,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_CV_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37408,7 +37408,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_CV_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37421,7 +37421,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_CV_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37434,7 +37434,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_CV_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37447,7 +37447,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		return zend_binary_assign_op_helper_SPEC_CV_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37460,7 +37460,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 		return zend_binary_assign_op_helper_SPEC_CV_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37473,7 +37473,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 		return zend_binary_assign_op_helper_SPEC_CV_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37486,7 +37486,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37499,7 +37499,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDL
 		return zend_binary_assign_op_helper_SPEC_CV_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37512,7 +37512,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
@@ -37525,7 +37525,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HAND
 		return zend_binary_assign_op_helper_SPEC_CV_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 }
