@@ -40,13 +40,13 @@
 			STR_RELEASE(str); \
 			str = new_str; \
 		} else { \
-	    	new_str = _zend_shared_memdup((void*)str, sizeof(zend_string) + (str)->len, 0 TSRMLS_CC); \
+	    	new_str = _zend_shared_memdup((void*)str, _STR_HEADER_SIZE + (str)->len + 1, 0 TSRMLS_CC); \
 			STR_RELEASE(str); \
 	    	str = new_str; \
 		} \
     } while (0)
 # define zend_accel_memdup_string(str) \
-	zend_accel_memdup(str, sizeof(zend_string) + (str)->len)
+	zend_accel_memdup(str, _STR_HEADER_SIZE + (str)->len + 1)
 # define zend_accel_store_interned_string(str) do { \
 		if (!IS_ACCEL_INTERNED(str)) { \
 			zend_accel_store_string(str); \

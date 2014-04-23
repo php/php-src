@@ -33,7 +33,7 @@
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 # define ADD_STRING(str) \
-		ADD_DUP_SIZE((str), sizeof(zend_string) + (str)->len)
+		ADD_DUP_SIZE((str), _STR_HEADER_SIZE + (str)->len + 1)
 # define ADD_INTERNED_STRING(str, do_free) do { \
 		if (!IS_ACCEL_INTERNED(str)) { \
 			zend_string *tmp = accel_new_interned_string(str TSRMLS_CC); \
