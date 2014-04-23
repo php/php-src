@@ -830,8 +830,14 @@ PHP_FUNCTION(seek)
 	}
 
 	if (whence == SEEK_SET) {
+		if (offset < 0 || offset >= zend_hash_num_elements(array)) {
+			RETURN_FALSE;
+		}
 		zend_hash_internal_pointer_reset_ex(array, &pos);
 	} else if (whence == SEEK_END) {
+		if (offset > 0 || offset <= -zend_hash_num_elements(array)) {
+			RETURN_FALSE;
+		}
 		zend_hash_internal_pointer_end_ex(array, &pos);
 	} else {
 		pos = array->pInternalPointer;

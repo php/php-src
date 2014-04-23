@@ -37,8 +37,10 @@ var_dump(current($array));
 echo "\n*** Testing seek() : edge cases ***\n";
 
 var_dump(seek($array, count($array), SEEK_SET));
+var_dump(seek($array, -1, SEEK_SET));
 var_dump(current($array));
 var_dump(seek($array, -count($array), SEEK_END));
+var_dump(seek($array, 1, SEEK_END));
 var_dump(current($array));
 
 ?>
@@ -67,7 +69,9 @@ string(%d) "one"
 
 *** Testing seek() : edge cases ***
 bool(false)
+bool(false)
 string(%d) "one"
+bool(false)
 bool(false)
 string(%d) "one"
 ===DONE===
