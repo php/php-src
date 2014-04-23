@@ -572,7 +572,7 @@ static PHP_METHOD(PDO, prepare)
 	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	Z_ADDREF_P(getThis() TSRMLS_CC);
+	Z_ADDREF_P(getThis());
 	php_pdo_dbh_addref(dbh TSRMLS_CC);
 	ZVAL_COPY_VALUE(&stmt->database_object_handle, getThis());
 	/* we haven't created a lazy object yet */
