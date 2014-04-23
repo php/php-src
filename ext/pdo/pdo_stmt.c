@@ -128,7 +128,7 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 		 * we will raise an error, as we can't be sure that it is safe
 		 * to bind multiple parameters onto the same zval in the underlying
 		 * driver */
-		char *name;
+		zval *name;
 		int position = 0;
 
 		if (stmt->named_rewrite_template) {
@@ -137,20 +137,17 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 		}
 		if (!param->name) {
 			/* do the reverse; map the parameter number to the name */
-			if ((name = zend_hash_index_find_ptr(stmt->bound_param_map, param->paramno)) != NULL) {
-				param->name = estrdup(name);
-				param->namelen = strlen(param->name);
+			if ((name = zend_hash_index_find(stmt->bound_param_map, param->paramno)) != NULL) {
+				param->name = STR_COPY(Z_STR_P(name));
 				return 1;
 			}
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined" TSRMLS_CC);
 			return 0;
 		}
     
-		zend_hash_internal_pointer_reset(stmt->bound_param_map);
-		while ((name = zend_hash_get_current_data_ptr(stmt->bound_param_map)) != NULL) {
-			if (strcmp(name, param->name)) {
+		ZEND_HASH_FOREACH_VAL(stmt->bound_param_map, name) {
+			if (strncmp(Z_STRVAL_P(name), param->name->val, param->name->len + 1)) {
 				position++;
-				zend_hash_move_forward(stmt->bound_param_map);
 				continue;
 			}
 			if (param->paramno >= 0) {
@@ -159,7 +156,7 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 			}
 			param->paramno = position;
 			return 1;
-		}
+		} ZEND_HASH_FOREACH_END();
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined" TSRMLS_CC);
 		return 0;
 	}
@@ -182,14 +179,12 @@ static int dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_typ
 
 iterate:
 	if (ht) {
-		zend_hash_internal_pointer_reset(ht);
-		while ((param = zend_hash_get_current_data_ptr(ht)) != NULL) {
+		ZEND_HASH_FOREACH_PTR(ht, param) {
 			if (!stmt->methods->param_hook(stmt, param, event_type TSRMLS_CC)) {
 				ret = 0;
 				break;
 			}
-			zend_hash_move_forward(ht);
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 	if (ret && is_param) {
 		ht = stmt->bound_columns;
@@ -284,7 +279,7 @@ static void param_dtor(zval *el) /* {{{ */
 	}
 
 	if (param->name) {
-		efree(param->name);
+		STR_RELEASE(param->name);
 	}
 
 	if (!ZVAL_IS_UNDEF(&param->parameter)) {
@@ -342,7 +337,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		int i;
 
 		for (i = 0; i < stmt->column_count; i++) {
-			if (strcmp(stmt->columns[i].name, param->name) == 0) {
+			if (strncmp(stmt->columns[i].name, param->name->val, param->name->len + 1) == 0) {
 				param->paramno = i;
 				break;
 			}
@@ -352,26 +347,26 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		 * then this will trigger, and we don't want that */
 		if (param->paramno == -1) {
 			char *tmp;
-			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", param->name);
+			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", param->name->val);
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", tmp TSRMLS_CC);
 			efree(tmp);
 		}
 	}
 
 	if (param->name) {
-		if (is_param && param->name[0] != ':') {
-			char *temp = emalloc(++param->namelen + 1);
-			temp[0] = ':';
-			memmove(temp+1, param->name, param->namelen);
+		if (is_param && param->name->val[0] != ':') {
+			zend_string *temp = STR_ALLOC(param->name->len + 1, 0);
+			temp->val[0] = ':';
+			memmove(temp->val + 1, param->name->val, param->name->len);
 			param->name = temp;
 		} else {
-			param->name = estrndup(param->name, param->namelen);
+			param->name = STR_INIT(param->name->val, param->name->len, 0);
 		}
 	}
 
 	if (is_param && !rewrite_name_to_position(stmt, param TSRMLS_CC)) {
 		if (param->name) {
-			efree(param->name);
+			STR_RELEASE(param->name);
 			param->name = NULL;
 		}
 		return 0;
@@ -385,7 +380,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE
 				TSRMLS_CC)) {
 			if (param->name) {
-				efree(param->name);
+				STR_RELEASE(param->name);
 				param->name = NULL;
 			}
 			return 0;
@@ -402,7 +397,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	/* allocate storage for the parameter, keyed by its "canonical" name */
 	if (param->name) {
 		zval *zv;
-		zv = zend_hash_str_update_mem(hash, param->name, param->namelen, param, sizeof(struct pdo_bound_param_data));
+		zv = zend_hash_update_mem(hash, param->name, param, sizeof(struct pdo_bound_param_data));
 		pparam = Z_PTR_P(zv);
 	} else {
 		zval *zv;
@@ -417,7 +412,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 			/* undo storage allocation; the hash will free the parameter
 			 * name if required */
 			if (pparam->name) {
-				zend_hash_str_del(hash, pparam->name, pparam->namelen);
+				zend_hash_del(hash, pparam->name);
 			} else {
 				zend_hash_index_del(hash, pparam->paramno);
 			}
@@ -456,13 +451,12 @@ static PHP_METHOD(PDOStatement, execute)
 			stmt->bound_params = NULL;
 		}
 
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(input_params));
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input_params), num_index, key, tmp) {
 			memset(&param, 0, sizeof(param));
 
 			if (key) {
 				/* yes this is correct.  we don't want to count the null byte.  ask wez */
-				param.namelen = key->len;
+				param.name = STR_COPY(key);
 				param.paramno = -1;
 			} else {
 				/* we're okay to be zero based here */
@@ -1559,8 +1553,8 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 			"lz|llz!", &param.paramno, &param.parameter, &param_type, &param.max_value_len,
 			&param.driver_params)) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|llz!", &param.name,
-				&param.namelen, &param.parameter, &param_type, &param.max_value_len, 
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz|llz!", &param.name,
+				&param.parameter, &param_type, &param.max_value_len, 
 				&param.driver_params)) {
 			return 0;
 		}	
@@ -1600,8 +1594,8 @@ static PHP_METHOD(PDOStatement, bindValue)
 	
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 			"lz/|l", &param.paramno, &param.parameter, &param_type)) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|l", &param.name,
-				&param.namelen, &param.parameter, &param_type)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz/|l", &param.name,
+				&param.parameter, &param_type)) {
 			RETURN_FALSE;
 		}
 	}
@@ -2139,7 +2133,7 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 			}
 
 			php_stream_printf(out TSRMLS_CC, "paramno=%ld\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
-					param->paramno, param->namelen, param->namelen, param->name ? param->name : "",
+					param->paramno, param->name->len, param->name->len, param->name ? param->name->val : "",
 					param->is_param,
 					param->param_type);
 

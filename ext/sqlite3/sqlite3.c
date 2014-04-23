@@ -1339,21 +1339,21 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 
 	/* We need a : prefix to resolve a name to a parameter number */
 	if (param->name) {
-		if (param->name[0] != ':') {
+		if (param->name->val[0] != ':') {
 			/* pre-increment for character + 1 for null */
-			char *temp = emalloc(++param->name_len + 1);
-			temp[0] = ':';
-			memmove(temp+1, param->name, param->name_len);
+			zend_string *temp = STR_ALLOC(param->name->len + 1, 0);
+			temp->val[0] = ':';
+			memmove(temp->val + 1, param->name->val, param->name->len + 1);
 			param->name = temp;
 		} else {
-			param->name = estrndup(param->name, param->name_len);
+			param->name = STR_INIT(param->name->val, param->name->len, 0);
 		}
 		/* do lookup*/
-		param->param_number = sqlite3_bind_parameter_index(stmt->stmt, param->name);
+		param->param_number = sqlite3_bind_parameter_index(stmt->stmt, param->name->val);
 	}
 
 	if (param->param_number < 1) {
-		efree(param->name);
+		STR_RELEASE(param->name);
 		return 0;
 	}
 
@@ -1362,7 +1362,7 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 	}
 
 	if (param->name) {
-		zend_hash_str_update_mem(hash, param->name, param->name_len, param, sizeof(struct php_sqlite3_bound_param));
+		zend_hash_update_mem(hash, param->name, param, sizeof(struct php_sqlite3_bound_param));
 	} else {
 		zend_hash_index_update_mem(hash, param->param_number, param, sizeof(struct php_sqlite3_bound_param));
 	}
@@ -1385,7 +1385,7 @@ PHP_METHOD(sqlite3stmt, bindParam)
 	param.type = SQLITE3_TEXT;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "lz|l", &param.param_number, &parameter, &param.type) == FAILURE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &param.name, &param.name_len, &parameter, &param.type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz|l", &param.name, &parameter, &param.type) == FAILURE) {
 			return;
 		}
 	}
@@ -1417,7 +1417,7 @@ PHP_METHOD(sqlite3stmt, bindValue)
 	param.type = SQLITE3_TEXT;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "lz/|l", &param.param_number, &parameter, &param.type) == FAILURE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|l", &param.name, &param.name_len, &parameter, &param.type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz/|l", &param.name, &parameter, &param.type) == FAILURE) {
 			return;
 		}
 	}
@@ -2146,7 +2146,7 @@ static void sqlite3_param_dtor(zval *data) /* {{{ */
 	struct php_sqlite3_bound_param *param = (struct php_sqlite3_bound_param*)Z_PTR_P(data);
 
 	if (param->name) {
-		efree(param->name);
+		STR_RELEASE(param->name);
 	}
 
 	if (!ZVAL_IS_NULL(&param->parameter)) {

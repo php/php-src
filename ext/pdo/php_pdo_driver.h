@@ -531,8 +531,7 @@ struct pdo_column_data {
 /* describes a bound parameter */
 struct pdo_bound_param_data {
 	long paramno; /* if -1, then it has a name, and we don't know the index *yet* */
-	char *name;
-	int namelen;
+	zend_string *name;
 
 	long max_value_len;	/* as a hint for pre-allocation */
 	

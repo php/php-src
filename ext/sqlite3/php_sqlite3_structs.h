@@ -39,10 +39,8 @@
 /* Structure for SQLite Statement Parameter. */
 struct php_sqlite3_bound_param  {
 	long param_number;
-	char *name;
-	int name_len;
+	zend_string *name;
 	long type;
-
 	zval parameter;
 };
 
