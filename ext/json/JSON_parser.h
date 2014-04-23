@@ -15,8 +15,8 @@ typedef struct JSON_parser_struct {
     int top;
 	int error_code;
     int* stack;
-    zval **the_zstack;
-    zval *the_static_zstack[JSON_PARSER_DEFAULT_DEPTH];
+    zval *the_zstack;
+    zval the_static_zstack[JSON_PARSER_DEFAULT_DEPTH];
 } * JSON_parser;
 
 enum error_codes {

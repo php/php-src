@@ -66,12 +66,12 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 		if ((ht)->u.flags >= (3 << 8)) {												\
 			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");\
 		}																				\
-		(ht)->u.flags += (1 << 8);														\
+		ZEND_HASH_INC_APPLY_COUNT(ht);													\
 	}
 
 #define HASH_UNPROTECT_RECURSION(ht)													\
 	if ((ht)->u.flags & HASH_FLAG_APPLY_PROTECTION) {									\
-		(ht)->u.flags -= (1 << 8);														\
+		ZEND_HASH_DEC_APPLY_COUNT(ht);													\
 	}
 
 #define ZEND_HASH_IF_FULL_DO_RESIZE(ht)				\

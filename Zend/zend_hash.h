@@ -640,6 +640,11 @@ static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPositio
 	_key = _p->key; \
 	_val = _z;
 
+#define ZEND_HASH_APPLY_SHIFT 8
+#define ZEND_HASH_GET_APPLY_COUNT(ht) (ht->u.flags >> ZEND_HASH_APPLY_SHIFT)
+#define ZEND_HASH_INC_APPLY_COUNT(ht) (ht->u.flags += (1 << ZEND_HASH_APPLY_SHIFT))
+#define ZEND_HASH_DEC_APPLY_COUNT(ht) (ht->u.flags -= (1 << ZEND_HASH_APPLY_SHIFT))
+
 #endif							/* ZEND_HASH_H */
 
 /*
