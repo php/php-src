@@ -817,6 +817,42 @@ PHP_FUNCTION(uksort)
 }
 /* }}} */
 
+/* {{{ proto bool seek(array array_arg, long pos)
+   Sets array argument's internal pointer to the position indiciated by pos */
+PHP_FUNCTION(seek)
+{
+	HashTable *array;
+	long pos = 0, whence = SEEK_CUR;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Hl|l", &array, &pos, &whence) == FAILURE) {
+		return;
+	}
+
+	if (whence == SEEK_SET) {
+		zend_hash_internal_pointer_reset(array);
+	} else if (whence == SEEK_END) {
+		zend_hash_internal_pointer_end(array);
+	}
+
+	if (pos < 0) {
+		while (pos < 0) {
+			if (zend_hash_move_backwards(array) == FAILURE) {
+				RETURN_FALSE;
+			}
+			++pos;
+		}
+	} else if (pos > 0) {
+		while (pos > 0) {
+			if (zend_hash_move_forward(array) == FAILURE) {
+				RETURN_FALSE;
+			}
+			--pos;
+		}
+	}
+
+	RETURN_BOOL(zend_hash_has_more_elements(array) == SUCCESS);
+}
+
 /* {{{ proto mixed end(array array_arg)
    Advances array argument's internal pointer to the last element and return it */
 PHP_FUNCTION(end)
