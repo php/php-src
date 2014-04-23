@@ -2830,6 +2830,43 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 /* }}} */
 #endif
 
+#ifdef LDAP_CONTROL_ASSERT
+/* {{{ proto mixed ldap_control_assertion(resource link, string assert)
+   Assertion control*/
+PHP_FUNCTION(ldap_control_assertion)
+{
+	zval *link;
+	char *assert = NULL;
+	int assert_len = 0;
+	ldap_linkdata *ld;
+	LDAP *ldap;
+	LDAPControl *control;
+
+	int rc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &link, &assert, &assert_len) != SUCCESS) {
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(link) == IS_NULL) {
+		ldap = NULL;
+	} else {
+		ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
+		ldap = ld->link;
+	}
+
+	rc = ldap_create_assertion_control(ldap, assert, 0, &control);
+
+	if (rc != LDAP_SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create assertion control");
+		RETURN_FALSE;
+	}
+
+	ZEND_REGISTER_RESOURCE(return_value, control, le_control);
+}
+/* }}} */
+#endif
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, hostname)
@@ -3031,6 +3068,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_paged_result_response, 0, 0, 2)
 ZEND_END_ARG_INFO();
 #endif
 
+#ifdef LDAP_CONTROL_ASSERT
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_assertion, 0, 0, 2)
+	ZEND_ARG_INFO(0, link)
+	ZEND_ARG_INFO(0, assert)
+ZEND_END_ARG_INFO();
+#endif
+
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_rename, 0, 0, 5)
 	ZEND_ARG_INFO(0, link_identifier)
@@ -3185,6 +3229,10 @@ const zend_function_entry ldap_functions[] = {
 #ifdef LDAP_CONTROL_PAGEDRESULTS
 	PHP_FE(ldap_control_paged_result,							arginfo_ldap_control_paged_result)
 	PHP_FE(ldap_control_paged_result_response,		arginfo_ldap_control_paged_result_response)
+#endif
+
+#ifdef LDAP_CONTROL_ASSERT
+	PHP_FE(ldap_control_assertion,						arginfo_ldap_control_assertion)
 #endif
 	PHP_FE_END
 };
