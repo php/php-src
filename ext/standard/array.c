@@ -817,40 +817,48 @@ PHP_FUNCTION(uksort)
 }
 /* }}} */
 
-/* {{{ proto bool seek(array array_arg, long pos)
-   Sets array argument's internal pointer to the position indiciated by pos */
+/* {{{ proto bool seek(array array_arg, long offset, int whence)
+   Sets array argument's internal pointer to the position indiciated by offset */
 PHP_FUNCTION(seek)
 {
 	HashTable *array;
-	long pos = 0, whence = SEEK_CUR;
+	HashPosition pos;
+	long offset = 0, whence = SEEK_CUR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Hl|l", &array, &pos, &whence) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Hl|l", &array, &offset, &whence) == FAILURE) {
 		return;
 	}
 
 	if (whence == SEEK_SET) {
-		zend_hash_internal_pointer_reset(array);
+		zend_hash_internal_pointer_reset_ex(array, &pos);
 	} else if (whence == SEEK_END) {
-		zend_hash_internal_pointer_end(array);
+		zend_hash_internal_pointer_end_ex(array, &pos);
+	} else {
+		pos = array->pInternalPointer;
 	}
 
-	if (pos < 0) {
-		while (pos < 0) {
-			if (zend_hash_move_backwards(array) == FAILURE) {
+	if (offset < 0) {
+		while (offset < 0) {
+			if (zend_hash_move_backwards_ex(array, &pos) == FAILURE) {
 				RETURN_FALSE;
 			}
-			++pos;
+			++offset;
 		}
-	} else if (pos > 0) {
-		while (pos > 0) {
-			if (zend_hash_move_forward(array) == FAILURE) {
+	} else if (offset > 0) {
+		while (offset > 0) {
+			if (zend_hash_move_forward_ex(array, &pos) == FAILURE) {
 				RETURN_FALSE;
 			}
-			--pos;
+			--offset;
 		}
 	}
 
-	RETURN_BOOL(zend_hash_has_more_elements(array) == SUCCESS);
+	if (zend_hash_has_more_elements_ex(array, &pos) == SUCCESS) {
+		array->pInternalPointer = pos;
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 
 /* {{{ proto mixed end(array array_arg)

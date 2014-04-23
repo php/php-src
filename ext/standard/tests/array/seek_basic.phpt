@@ -67,7 +67,7 @@ string(%d) "one"
 
 *** Testing seek() : edge cases ***
 bool(false)
+string(%d) "one"
 bool(false)
-bool(false)
-bool(false)
+string(%d) "one"
 ===DONE===
