@@ -207,6 +207,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 	zval *options = NULL;
 	char alt_dsn[512];
 	int call_factory = 1;
+	char tmp;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!s!a!", &data_source, &data_source_len,
 				&username, &usernamelen, &password, &passwordlen, &options)) {
@@ -254,8 +255,10 @@ static PHP_METHOD(PDO, dbh_constructor)
 		}
 	}
 
+	tmp = data_source[colon - data_source];
+	data_source[colon - data_source] = '\0';
 	driver = pdo_find_driver(data_source, colon - data_source);
-
+	data_source[colon - data_source] = tmp;
 	if (!driver) {
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */

@@ -90,7 +90,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 			if (param->is_param) {
 				
 				if (param->paramno == -1) {
-					param->paramno = sqlite3_bind_parameter_index(S->stmt, param->name) - 1;
+					param->paramno = sqlite3_bind_parameter_index(S->stmt, param->name->val) - 1;
 				}
 
 				switch (PDO_PARAM_TYPE(param->param_type)) {
@@ -106,18 +106,18 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 					
 					case PDO_PARAM_INT:
 					case PDO_PARAM_BOOL:
-						if (Z_TYPE_P(param->parameter) == IS_NULL) {
+						if (Z_TYPE(param->parameter) == IS_NULL) {
 							if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
 								return 1;
 							}
 						} else {
-							convert_to_long(param->parameter);
+							convert_to_long(&param->parameter);
 #if LONG_MAX > 2147483647
-							if (SQLITE_OK == sqlite3_bind_int64(S->stmt, param->paramno + 1, Z_LVAL_P(param->parameter))) {
+							if (SQLITE_OK == sqlite3_bind_int64(S->stmt, param->paramno + 1, Z_LVAL(param->parameter))) {
 								return 1;
 							}
 #else
-							if (SQLITE_OK == sqlite3_bind_int(S->stmt, param->paramno + 1, Z_LVAL_P(param->parameter))) {
+							if (SQLITE_OK == sqlite3_bind_int(S->stmt, param->paramno + 1, Z_LVAL(param->parameter))) {
 								return 1;
 							}
 #endif
@@ -126,31 +126,29 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						return 0;
 					
 					case PDO_PARAM_LOB:
-						if (Z_TYPE_P(param->parameter) == IS_RESOURCE) {
+						if (Z_TYPE(param->parameter) == IS_RESOURCE) {
 							php_stream *stm;
 							php_stream_from_zval_no_verify(stm, &param->parameter);
 							if (stm) {
-								SEPARATE_ZVAL(&param->parameter);
-								Z_TYPE_P(param->parameter) = IS_STRING;
-								Z_STRLEN_P(param->parameter) = php_stream_copy_to_mem(stm,
-									&Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0);
+								zval_ptr_dtor(&param->parameter);
+								ZVAL_STR(&param->parameter, php_stream_copy_to_mem(stm,	PHP_STREAM_COPY_ALL, 0));
 							} else {
 								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
 								return 0;
 							}
-						} else if (Z_TYPE_P(param->parameter) == IS_NULL) {
+						} else if (Z_TYPE(param->parameter) == IS_NULL) {
 							if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
 								return 1;
 							}
 							pdo_sqlite_error_stmt(stmt);
 							return 0;
 						} else {
-							convert_to_string(param->parameter);
+							convert_to_string(&param->parameter);
 						}
 						
 						if (SQLITE_OK == sqlite3_bind_blob(S->stmt, param->paramno + 1,
-								Z_STRVAL_P(param->parameter),
-								Z_STRLEN_P(param->parameter),
+								Z_STRVAL(param->parameter),
+								Z_STRLEN(param->parameter),
 								SQLITE_STATIC)) {
 							return 1;	
 						}
@@ -159,15 +157,15 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 							
 					case PDO_PARAM_STR:
 					default:
-						if (Z_TYPE_P(param->parameter) == IS_NULL) {
+						if (Z_TYPE(param->parameter) == IS_NULL) {
 							if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
 								return 1;
 							}
 						} else {
-							convert_to_string(param->parameter);
+							convert_to_string(&param->parameter);
 							if(SQLITE_OK == sqlite3_bind_text(S->stmt, param->paramno + 1,
-									Z_STRVAL_P(param->parameter),
-									Z_STRLEN_P(param->parameter),
+									Z_STRVAL(param->parameter),
+									Z_STRLEN(param->parameter),
 									SQLITE_STATIC)) {
 								return 1;	
 							}
@@ -279,7 +277,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_v
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	const char *str;
-	zval *flags;
+	zval flags;
 	
 	if (!S->stmt) {
 		return FAILURE;
@@ -291,8 +289,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_v
 	}
 
 	array_init(return_value);
-	MAKE_STD_ZVAL(flags);
-	array_init(flags);
+	array_init(&flags);
 
 	switch (sqlite3_column_type(S->stmt, colno)) {
 		case SQLITE_NULL:
@@ -304,7 +301,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_v
 			break;
 
 		case SQLITE_BLOB:
-			add_next_index_string(flags, "blob");
+			add_next_index_string(&flags, "blob");
 		case SQLITE_TEXT:
 			add_assoc_string(return_value, "native_type", "string");
 			break;
@@ -326,7 +323,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_v
 	}
 #endif
 
-	add_assoc_zval(return_value, "flags", flags);
+	add_assoc_zval(return_value, "flags", &flags);
 
 	return SUCCESS;
 }

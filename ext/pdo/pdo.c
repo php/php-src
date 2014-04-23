@@ -187,7 +187,7 @@ PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
 		return FAILURE;	/* NOTREACHED */
 	}
 
-	return zend_hash_str_add_mem(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len, (void**)&driver, sizeof(pdo_driver_t *)) != NULL;
+	return zend_hash_str_add_ptr(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len, driver) != NULL;
 }
 
 PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver)
