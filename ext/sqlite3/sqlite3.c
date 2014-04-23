@@ -535,7 +535,7 @@ PHP_METHOD(sqlite3, query)
 	stmt_obj->initialised = 1;
 
 	object_init_ex(return_value, php_sqlite3_result_entry);
-	result = Z_SQLITE3_RESULT_P(return_value TSRMLS_CC);
+	result = Z_SQLITE3_RESULT_P(return_value);
 	result->db_obj = db_obj;
 	result->stmt_obj = stmt_obj;
 	ZVAL_COPY_VALUE(&result->stmt_obj_zval, &stmt);
@@ -1531,7 +1531,7 @@ PHP_METHOD(sqlite3stmt, execute)
 		{
 			sqlite3_reset(stmt_obj->stmt);
 			object_init_ex(return_value, php_sqlite3_result_entry);
-			result = Z_SQLITE3_RESULT_P(return_value TSRMLS_CC);
+			result = Z_SQLITE3_RESULT_P(return_value);
 
 			result->is_prepared_statement = 1;
 			result->db_obj = stmt_obj->db_obj;

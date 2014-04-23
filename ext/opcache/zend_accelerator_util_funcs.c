@@ -299,7 +299,7 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 		    	if (bind && Z_REFCOUNT_P(src) > 1) {
 					accel_xlat_set(old, Z_REF_P(src));
 				}
-				zend_clone_zval(Z_REFVAL_P(src), bind TSRMLS_C);
+				zend_clone_zval(Z_REFVAL_P(src), bind TSRMLS_CC);
 			}
 	    	break;
 	    case IS_CONSTANT_AST:
@@ -330,7 +330,7 @@ static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
 		node->kind = ZEND_CONST;
 		node->children = 0;
 		ZVAL_COPY_VALUE(&node->u.val, &ast->u.val);
-		zend_clone_zval(&node->u.val, 0);
+		zend_clone_zval(&node->u.val, 0 TSRMLS_CC);
 	} else {
 		node = emalloc(sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
 		node->kind = ast->kind;
@@ -412,7 +412,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 
 		/* Copy data */
 		ZVAL_COPY_VALUE(&q->val, &p->val);
-		zend_clone_zval(&q->val, bind TSRMLS_C);
+		zend_clone_zval(&q->val, bind TSRMLS_CC);
 	}
 }
 
