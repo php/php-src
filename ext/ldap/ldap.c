@@ -86,7 +86,7 @@ typedef struct {
 ZEND_DECLARE_MODULE_GLOBALS(ldap)
 static PHP_GINIT_FUNCTION(ldap);
 
-static int le_link, le_result, le_result_entry;
+static int le_link, le_result, le_result_entry, le_control;
 
 #ifdef COMPILE_DL_LDAP
 ZEND_GET_MODULE(ldap)
@@ -126,6 +126,12 @@ static void _free_ldap_result_entry(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{
 	zend_list_delete(entry->id);
 	efree(entry);
 } 
+/* }}} */
+
+static void _free_ldap_control(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
+{
+	ldap_control_free((LDAPControl  *)rsrc->ptr);
+}
 /* }}} */
 
 /* {{{ PHP_INI_BEGIN
@@ -213,6 +219,7 @@ PHP_MINIT_FUNCTION(ldap)
 	le_link = zend_register_list_destructors_ex(_close_ldap_link, NULL, "ldap link", module_number);
 	le_result = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result", module_number);
 	le_result_entry = zend_register_list_destructors_ex(_free_ldap_result_entry, NULL, "ldap result entry", module_number);
+	le_control = zend_register_list_destructors_ex(_free_ldap_control, NULL, "ldap control", module_number);
 
 	Z_TYPE(ldap_module_entry) = type;
 
