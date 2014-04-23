@@ -1655,7 +1655,7 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 					HASH_UNPROTECT_RECURSION(ht2); 
 					return 1; /* That's not supposed to happen */
 				}
-				if (p2) break;
+				if (Z_TYPE(p2->val) != IS_UNDEF) break;
 				idx2++;
 			}						
 			if (p1->key == NULL && p2->key == NULL) { /* numeric indices */
