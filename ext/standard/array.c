@@ -835,6 +835,7 @@ PHP_FUNCTION(seek)
 		}
 		zend_hash_internal_pointer_reset_ex(array, &pos);
 	} else if (whence == SEEK_END) {
+		++offset;
 		if (offset > 0 || offset <= -zend_hash_num_elements(array)) {
 			RETURN_FALSE;
 		}
