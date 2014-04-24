@@ -216,6 +216,12 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_LONG_CONSTANT("LDAP_ESCAPE_FILTER", PHP_LDAP_ESCAPE_FILTER, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("LDAP_ESCAPE_DN", PHP_LDAP_ESCAPE_DN, CONST_PERSISTENT | CONST_CS);
 
+#ifdef LDAP_CONTROL_X_SESSION_TRACKING
+	REGISTER_STRING_CONSTANT("LDAP_CONTROL_X_SESSION_TRACKING_RADIUS_ACCT_SESSION_ID", LDAP_CONTROL_X_SESSION_TRACKING_RADIUS_ACCT_SESSION_ID, CONST_PERSISTENT | CONST_CS);
+	REGISTER_STRING_CONSTANT("LDAP_CONTROL_X_SESSION_TRACKING_RADIUS_ACCT_MULTI_SESSION_ID", LDAP_CONTROL_X_SESSION_TRACKING_RADIUS_ACCT_MULTI_SESSION_ID, CONST_PERSISTENT | CONST_CS);
+	REGISTER_STRING_CONSTANT("LDAP_CONTROL_X_SESSION_TRACKING_USERNAME", LDAP_CONTROL_X_SESSION_TRACKING_USERNAME, CONST_PERSISTENT | CONST_CS);
+#endif
+
 	le_link = zend_register_list_destructors_ex(_close_ldap_link, NULL, "ldap link", module_number);
 	le_result = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result", module_number);
 	le_result_entry = zend_register_list_destructors_ex(_free_ldap_result_entry, NULL, "ldap result entry", module_number);
@@ -2883,6 +2889,45 @@ PHP_FUNCTION(ldap_control_assertion)
 /* }}} */
 #endif
 
+#ifdef LDAP_CONTROL_X_SESSION_TRACKING
+/* {{{ proto mixed ldap_control_session_tracking(resource link, string source_ip, string source_name, string format_oid, string identifier)
+   Session Tracking Control*/
+PHP_FUNCTION(ldap_control_session_tracking)
+{
+	zval *link;
+	char *source_ip = NULL, *source_name = NULL, *format_oid = NULL, *identifier = NULL;
+	int assert_len = 0, source_ip_len = 0, source_name_len = 0, format_oid_len = 0, identifier_len = 0;
+
+	ldap_linkdata *ld;
+	LDAP *ldap;
+	LDAPControl *control;
+
+	int rc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssss", &link, &source_ip, &source_ip_len, &source_name, &source_name_len, &format_oid, &format_oid_len, &identifier, &identifier_len) != SUCCESS) {
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(link) == IS_NULL) {
+		ldap = NULL;
+	} else {
+		ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
+		ldap = ld->link;
+	}
+
+	rc = ldap_create_session_tracking_control(ldap, source_ip, source_name, format_oid, ber_bvstr(identifier), &control);
+
+	if (rc != LDAP_SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create session tracking control");
+		RETURN_FALSE;
+	}
+
+	ZEND_REGISTER_RESOURCE(return_value, control, le_control);
+}
+/* }}} */
+
+#endif
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, hostname)
@@ -3101,6 +3146,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_assertion, 0, 0, 2)
 ZEND_END_ARG_INFO();
 #endif
 
+#ifdef LDAP_CONTROL_X_SESSION_TRACKING
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_session_tracking, 0, 0, 5)
+	ZEND_ARG_INFO(0, link)
+	ZEND_ARG_INFO(0, source_ip)
+	ZEND_ARG_INFO(0, source_name)
+	ZEND_ARG_INFO(0, format_oid)
+	ZEND_ARG_INFO(0, identifier)
+ZEND_END_ARG_INFO();
+#endif
+
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_rename, 0, 0, 5)
 	ZEND_ARG_INFO(0, link_identifier)
@@ -3259,6 +3314,10 @@ const zend_function_entry ldap_functions[] = {
 
 #ifdef LDAP_CONTROL_ASSERT
 	PHP_FE(ldap_control_assertion,						arginfo_ldap_control_assertion)
+#endif
+
+#ifdef LDAP_CONTROL_X_SESSION_TRACKING
+	PHP_FE(ldap_control_session_tracking,				arginfo_ldap_control_session_tracking)
 #endif
 	PHP_FE_END
 };
