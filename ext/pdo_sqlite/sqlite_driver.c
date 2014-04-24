@@ -317,7 +317,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	int i;
 	int ret;
 	int fake_argc;
-	zval *agg_context = NULL;
+	zend_reference *agg_context = NULL;
 	
 	if (is_agg) {
 		is_agg = 2;
@@ -336,20 +336,21 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	/* build up the params */
 
 	if (fake_argc) {
-		zargs = (zval *)safe_emalloc(fake_argc, sizeof(zval), 0);
+		zargs = safe_emalloc(fake_argc, sizeof(zval), 0);
 	}
 
 	if (is_agg) {
-		/* summon the aggregation context */
-		/* ????
-		agg_context = (zval*)sqlite3_aggregate_context(context, sizeof(zval));
+		agg_context = (zend_reference*)sqlite3_aggregate_context(context, sizeof(zend_reference));
 		if (!agg_context) {
-			MAKE_STD_ZVAL(*agg_context);
-			ZVAL_NULL(*agg_context);
+			ZVAL_NULL(&zargs[0]);
+		} else {
+			if (ZVAL_IS_UNDEF(&agg_context->val)) {
+				GC_REFCOUNT(agg_context) = 1;
+				GC_TYPE_INFO(agg_context) = IS_REFERENCE;
+				ZVAL_NULL(&agg_context->val);
+			}
+			ZVAL_REF(&zargs[0], agg_context);
 		}
-		zargs[0] = agg_context;
-		*/
-		ZVAL_NULL(&zargs[0]);
 		ZVAL_LONG(&zargs[1], sqlite3_aggregate_count(context));
 	}
 	
@@ -376,9 +377,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		}
 	}
 
-
 	fc->fci.params = zargs;
-
 
 	if ((ret = zend_call_function(&fc->fci, &fc->fcc TSRMLS_CC)) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the callback");
@@ -422,20 +421,20 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		}
 
 		if (agg_context) {
-			zval_ptr_dtor(agg_context);
+			zval_ptr_dtor(&agg_context->val);
 		}
 	} else {
 		/* we're stepping in an aggregate; the return value goes into
 		 * the context */
 		if (agg_context) {
-			zval_ptr_dtor(agg_context);
-		}/* ???
-		if (retval) {
-			*agg_context = retval;
-			retval = NULL;
+			zval_ptr_dtor(&agg_context->val);
+		}
+		if (!ZVAL_IS_UNDEF(&retval)) {
+			ZVAL_COPY_VALUE(&agg_context->val, &retval);
+			ZVAL_UNDEF(&retval);
 		} else {
-			*agg_context = NULL;
-		}*/
+			ZVAL_UNDEF(&agg_context->val);
+		}
 	}
 
 	if (!ZVAL_IS_UNDEF(&retval)) {
