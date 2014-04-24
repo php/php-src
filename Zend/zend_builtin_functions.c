@@ -729,16 +729,13 @@ repeat:
    Check whether a constant exists */
 ZEND_FUNCTION(defined)
 {
-	char *name;
-	int name_len;
-	zval c;
+	zend_string *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name) == FAILURE) {
 		return;
 	}
 	
-	if (zend_get_constant_ex(name, name_len, &c, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC)) {
-		zval_dtor(&c);
+	if (zend_get_constant_ex(name, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -927,7 +924,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 
 		/* this is necessary to make it able to work with default array
 		 * properties, returned to user */
-		if (Z_CONSTANT(prop_copy)) {
+		if (Z_OPT_CONSTANT(prop_copy)) {
 			zval_update_constant(&prop_copy, 0 TSRMLS_CC);
 		}
 

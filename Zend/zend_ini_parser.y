@@ -112,15 +112,24 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 */
 static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 {
-	zval z_constant;
+	zval *c, tmp;
 
 	/* If name contains ':' it is not a constant. Bug #26893. */
 	if (!memchr(Z_STRVAL_P(name), ':', Z_STRLEN_P(name))
-		   	&& zend_get_constant(Z_STRVAL_P(name), Z_STRLEN_P(name), &z_constant TSRMLS_CC)) {
-		/* z_constant is emalloc()'d */
-		convert_to_string(&z_constant);
-		ZVAL_PSTRINGL(result, Z_STRVAL(z_constant), Z_STRLEN(z_constant));
-		zval_dtor(&z_constant);
+		   	&& (c = zend_get_constant(Z_STR_P(name) TSRMLS_CC)) != 0) {
+		if (Z_TYPE_P(c) != IS_STRING) {
+			ZVAL_COPY_VALUE(&tmp, c);
+			if (Z_OPT_CONSTANT(tmp)) {
+				zval_update_constant_ex(&tmp, (void*)1, NULL TSRMLS_CC);
+			}
+			zval_opt_copy_ctor(&tmp);
+			convert_to_string(&tmp);
+			c = &tmp;
+		}
+		ZVAL_PSTRINGL(result, Z_STRVAL_P(c), Z_STRLEN_P(c));
+		if (c == &tmp) {
+			zval_dtor(&tmp);
+		}
 		STR_FREE(Z_STR_P(name));
 	} else {
 		*result = *name;

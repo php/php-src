@@ -223,7 +223,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			break;
 		case ZEND_CONST:
 			ZVAL_DUP(result, &ast->u.val);
-			if (Z_CONSTANT_P(result)) {
+			if (Z_OPT_CONSTANT_P(result)) {
 				zval_update_constant_ex(result, (void *) 1, scope TSRMLS_CC);
 			}
 			break;

@@ -3854,15 +3854,22 @@ PHP_MINFO_FUNCTION(basic) /* {{{ */
    Given the name of a constant this function will return the constant's associated value */
 PHP_FUNCTION(constant)
 {
-	char *const_name;
-	int const_name_len;
+	zend_string *const_name;
+	zval *c;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &const_name, &const_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &const_name) == FAILURE) {
 		return;
 	}
 
-	if (!zend_get_constant_ex(const_name, const_name_len, return_value, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't find constant %s", const_name);
+	c = zend_get_constant_ex(const_name, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
+	if (c) {
+		ZVAL_COPY_VALUE(return_value, c);
+		if (Z_CONSTANT_P(return_value)) {
+			zval_update_constant_ex(return_value, (void*)1, NULL TSRMLS_CC);
+		}
+		zval_copy_ctor(return_value);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't find constant %s", const_name->val);
 		RETURN_NULL();
 	}
 }

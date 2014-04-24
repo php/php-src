@@ -278,12 +278,14 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 }
 
 
-ZEND_API int zend_get_constant(const char *name, uint name_len, zval *result TSRMLS_DC)
+ZEND_API zval *zend_get_constant_str(const char *name, uint name_len TSRMLS_DC)
 {
 	zend_constant *c;
+	ALLOCA_FLAG(use_heap)
 
 	if ((c = zend_hash_str_find_ptr(EG(zend_constants), name, name_len)) == NULL) {
-		char *lcname = zend_str_tolower_dup(name, name_len);
+		char *lcname = do_alloca(name_len + 1, use_heap);
+		zend_str_tolower_copy(lcname, name, name_len);
 		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lcname, name_len)) != NULL) {
 			if (c->flags & CONST_CS) {
 				c = NULL;
@@ -291,29 +293,47 @@ ZEND_API int zend_get_constant(const char *name, uint name_len, zval *result TSR
 		} else {
 			c = zend_get_special_constant(name, name_len TSRMLS_CC);
 		}
-		efree(lcname);
+		free_alloca(lcname, use_heap);
 	}
 
-	if (c) {
-		ZVAL_DUP(result, &c->value);
-		return 1;
-	}
-
-	return 0;
+	return c ? &c->value : NULL;
 }
 
-ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result, zend_class_entry *scope, ulong flags TSRMLS_DC)
+ZEND_API zval *zend_get_constant(zend_string *name TSRMLS_DC)
 {
 	zend_constant *c;
-	int retval = 1;
+	ALLOCA_FLAG(use_heap)
+
+	if ((c = zend_hash_find_ptr(EG(zend_constants), name)) == NULL) {
+		char *lcname = do_alloca(name->len + 1, use_heap);
+		zend_str_tolower_copy(lcname, name->val, name->len);
+		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lcname, name->len)) != NULL) {
+			if (c->flags & CONST_CS) {
+				c = NULL;
+			}
+		} else {
+			c = zend_get_special_constant(name->val, name->len TSRMLS_CC);
+		}
+		free_alloca(lcname, use_heap);
+	}
+
+	return c ? &c->value : NULL;
+}
+
+ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, ulong flags TSRMLS_DC)
+{
+	zend_constant *c;
 	const char *colon;
 	zend_class_entry *ce = NULL;
 	zend_string *class_name;
+	const char *name = cname->val;
+	uint name_len = cname->len;
 
 	/* Skip leading \\ */
 	if (name[0] == '\\') {
 		name += 1;
 		name_len -= 1;
+		cname = NULL;
 	}
 
 	if ((colon = zend_memrchr(name, ':', name_len)) &&
@@ -321,12 +341,13 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		int class_name_len = colon - name - 1;
 		int const_name_len = name_len - class_name_len - 2;
 		zend_string *constant_name = STR_INIT(colon + 1, const_name_len, 0);
-		zend_string *lcname;
+		char *lcname;
 		zval *ret_constant = NULL;
+		ALLOCA_FLAG(use_heap)
 
 		class_name = STR_INIT(name, class_name_len, 0);
-		lcname = STR_ALLOC(class_name_len, 0);
-		zend_str_tolower_copy(lcname->val, name, class_name_len);
+		lcname = do_alloca(class_name_len + 1, use_heap);
+		zend_str_tolower_copy(lcname, name, class_name_len);
 		if (!scope) {
 			if (EG(in_execution)) {
 				scope = EG(scope);
@@ -336,16 +357,14 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		}
 
 		if (class_name_len == sizeof("self")-1 &&
-		    !memcmp(lcname->val, "self", sizeof("self")-1)) {
+		    !memcmp(lcname, "self", sizeof("self")-1)) {
 			if (scope) {
 				ce = scope;
 			} else {
 				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
-				retval = 0;
 			}
-			STR_FREE(lcname);
 		} else if (class_name_len == sizeof("parent")-1 &&
-		           !memcmp(lcname->val, "parent", sizeof("parent")-1)) {
+		           !memcmp(lcname, "parent", sizeof("parent")-1)) {
 			if (!scope) {
 				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
 			} else if (!scope->parent) {
@@ -353,38 +372,33 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 			} else {
 				ce = scope->parent;
 			}
-			STR_FREE(lcname);
 		} else if (class_name_len == sizeof("static")-1 &&
-		           !memcmp(lcname->val, "static", sizeof("static")-1)) {
+		           !memcmp(lcname, "static", sizeof("static")-1)) {
 			if (EG(called_scope)) {
 				ce = EG(called_scope);
 			} else {
 				zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
 			}
-			STR_FREE(lcname);
 		} else {
-			STR_FREE(lcname);
 			ce = zend_fetch_class(class_name, flags TSRMLS_CC);
 		}
-		if (retval && ce) {
-			if ((ret_constant = zend_hash_find(&ce->constants_table, constant_name)) == NULL) {
-				retval = 0;
+		free_alloca(lcname, use_heap);
+		if (ce) {
+			ret_constant = zend_hash_find(&ce->constants_table, constant_name);
+			if (ret_constant == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
 					zend_error(E_ERROR, "Undefined class constant '%s::%s'", class_name->val, constant_name->val);
 				}
 			} else if (Z_ISREF_P(ret_constant)) {
 				ret_constant = Z_REFVAL_P(ret_constant);
 			}
-		} else if (!ce) {
-			retval = 0;
 		}
 		STR_FREE(class_name);
 		STR_FREE(constant_name);
-		if (retval) {
+		if (ret_constant && Z_CONSTANT_P(ret_constant)) {
 			zval_update_constant_ex(ret_constant, (void*)1, ce TSRMLS_CC);
-			ZVAL_DUP(result, ret_constant);
 		}
-		return retval;
+		return ret_constant;
 	}
 
 	/* non-class constant */
@@ -393,45 +407,43 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		int prefix_len = colon - name;
 		int const_name_len = name_len - prefix_len - 1;
 		const char *constant_name = colon + 1;
-		zend_string *lcname;
-		int found_const = 0;
+		char *lcname;
+		int lcname_len;
+		ALLOCA_FLAG(use_heap)
 
-		lcname = STR_ALLOC(prefix_len + 1 + const_name_len, 0);
-		zend_str_tolower_copy(lcname->val, name, prefix_len);
+		lcname_len = prefix_len + 1 + const_name_len;
+		lcname = do_alloca(lcname_len + 1, use_heap);
+		zend_str_tolower_copy(lcname, name, prefix_len);
 		/* Check for namespace constant */
 
-		lcname->val[prefix_len] = '\\';
-		memcpy(lcname->val + prefix_len + 1, constant_name, const_name_len + 1);
+		lcname[prefix_len] = '\\';
+		memcpy(lcname + prefix_len + 1, constant_name, const_name_len + 1);
 
-		if ((c = zend_hash_find_ptr(EG(zend_constants), lcname)) != NULL) {
-			found_const = 1;
-		} else {
+		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lcname, lcname_len)) == NULL) {
 			/* try lowercase */
-			zend_str_tolower(lcname->val + prefix_len + 1, const_name_len);
-			STR_FORGET_HASH_VAL(lcname);
-			if ((c = zend_hash_find_ptr(EG(zend_constants), lcname)) != NULL) {
-				if ((c->flags & CONST_CS) == 0) {
-					found_const = 1;
+			zend_str_tolower(lcname + prefix_len + 1, const_name_len);
+			if ((c = zend_hash_str_find_ptr(EG(zend_constants), lcname, lcname_len)) != NULL) {
+				if ((c->flags & CONST_CS) != 0) {
+					c = NULL;
 				}
 			}
 		}
-		STR_FREE(lcname);
-		if (found_const) {
-			ZVAL_COPY_VALUE(result, &c->value);
-			zval_update_constant_ex(result, (void*)1, NULL TSRMLS_CC);
-			zval_copy_ctor(result);
-			return 1;
+		free_alloca(lcname, use_heap);
+		if (c) {
+			return &c->value;
 		}
 		/* name requires runtime resolution, need to check non-namespaced name */
 		if ((flags & IS_CONSTANT_UNQUALIFIED) != 0) {
-			name = constant_name;
-			name_len = const_name_len;
-			return zend_get_constant(name, name_len, result TSRMLS_CC);
+			return zend_get_constant_str(constant_name, const_name_len TSRMLS_CC);
 		}
-		return 0;
+		return NULL;
 	}
 
-	return zend_get_constant(name, name_len, result TSRMLS_CC);
+	if (cname) {
+		return zend_get_constant(cname TSRMLS_CC);
+	} else {
+		return zend_get_constant_str(name, name_len TSRMLS_CC);
+	}
 }
 
 zend_constant *zend_quick_get_constant(const zval *key, ulong flags TSRMLS_DC)

@@ -218,16 +218,16 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				/* substitute __COMPILER_HALT_OFFSET__ constant */
 				zend_bool orig_in_execution = EG(in_execution);
 				zend_op_array *orig_op_array = EG(active_op_array);
-				zval offset;
+				zval *offset;
 
 				EG(in_execution) = 1;
 				EG(active_op_array) = op_array;
-				if (zend_get_constant("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1, &offset TSRMLS_CC)) {
+				if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1 TSRMLS_CC)) != NULL) {
 					zend_uint tv = ZEND_RESULT(opline).var;
 
 					literal_dtor(&ZEND_OP2_LITERAL(opline));
 					MAKE_NOP(opline);
-					replace_tmp_by_const(op_array, opline, tv, &offset TSRMLS_CC);
+					replace_tmp_by_const(op_array, opline, tv, offset TSRMLS_CC);
 				}
 				EG(active_op_array) = orig_op_array;
 				EG(in_execution) = orig_in_execution;

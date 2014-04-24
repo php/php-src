@@ -198,15 +198,15 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	if (main_persistent_script) {
 		zend_bool orig_in_execution = EG(in_execution);
 		zend_op_array *orig_op_array = EG(active_op_array);
-		zval offset;
+		zval *offset;
 
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
 		main_persistent_script->early_binding = -1;
 #endif
 		EG(in_execution) = 1;
 		EG(active_op_array) = op_array;
-		if (zend_get_constant("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1, &offset TSRMLS_CC)) {
-			main_persistent_script->compiler_halt_offset = Z_LVAL(offset);
+		if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1 TSRMLS_CC)) != NULL) {
+			main_persistent_script->compiler_halt_offset = Z_LVAL_P(offset);
 		}
 		EG(active_op_array) = orig_op_array;
 		EG(in_execution) = orig_in_execution;

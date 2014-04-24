@@ -509,7 +509,7 @@ ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
 ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
 	zend_bool inline_change = (zend_bool) (zend_uintptr_t) arg;
-	zval const_value;
+	zval *const_value, tmp;
 	char *colon;
 
 	if (IS_CONSTANT_VISITED(p)) {
@@ -520,7 +520,8 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 		SEPARATE_ZVAL_IF_NOT_REF(p);
 		MARK_CONSTANT_VISITED(p);
 		refcount =  Z_REFCOUNTED_P(p) ? Z_REFCOUNT_P(p) : 1;
-		if (!zend_get_constant_ex(Z_STRVAL_P(p), Z_STRLEN_P(p), &const_value, scope, Z_CONST_FLAGS_P(p) TSRMLS_CC)) {
+		const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p) TSRMLS_CC);
+		if (!const_value) {
 			char *actual = Z_STRVAL_P(p);
 
 			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
@@ -584,7 +585,12 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			if (inline_change) {
 				STR_RELEASE(Z_STR_P(p));
 			}
-			ZVAL_COPY_VALUE(p, &const_value);
+//???!
+			ZVAL_COPY_VALUE(p, const_value);
+			if (Z_OPT_CONSTANT_P(p)) {
+				zval_update_constant_ex(p, (void*)1, NULL TSRMLS_CC);
+			}
+			zval_opt_copy_ctor(p);
 		}
 
 		if (Z_REFCOUNTED_P(p)) Z_SET_REFCOUNT_P(p, refcount);
@@ -619,10 +625,11 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			if (GC_FLAGS(str_index) & IS_STR_AST) {
 				zend_ast_ref *ast = *(zend_ast_ref **)str_index->val;
 
-				zend_ast_evaluate(&const_value, ast->ast, scope TSRMLS_CC);
+				zend_ast_evaluate(&tmp, ast->ast, scope TSRMLS_CC);
 				zend_ast_destroy(ast->ast);
 				efree(ast);
-			} else if (!zend_get_constant_ex(str_index->val, str_index->len, &const_value, scope, GC_FLAGS(str_index) & ~(IS_STR_PERSISTENT | IS_STR_INTERNED |IS_STR_PERMANENT) TSRMLS_CC)) {
+				const_value = &tmp;
+			} else if (!(const_value = zend_get_constant_ex(str_index, scope, GC_FLAGS(str_index) & ~(IS_STR_PERSISTENT | IS_STR_INTERNED |IS_STR_PERMANENT) TSRMLS_CC))) {
 				char *actual, *str;
 				const char *save = str_index->val;
 				int len;
@@ -654,10 +661,19 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str, str);
 				}
 				if (str == str_index->val && len == str_index->len) {
-					ZVAL_STR(&const_value, STR_COPY(str_index));
+					ZVAL_STR(&tmp, STR_COPY(str_index));
 				} else {
-					ZVAL_STRINGL(&const_value, str, len);
+					ZVAL_STRINGL(&tmp, str, len);
 				}
+				const_value = &tmp;
+			} else {
+//???!
+				ZVAL_COPY_VALUE(&tmp, const_value);
+				if (Z_OPT_CONSTANT(tmp)) {
+					zval_update_constant_ex(&tmp, (void*)1, NULL TSRMLS_CC);
+				}
+				zval_opt_copy_ctor(&tmp);
+				const_value = &tmp;
 			}
 
 			if (Z_REFCOUNTED_P(element) && Z_REFCOUNT_P(element) > 1) {
@@ -666,16 +682,16 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 				ZVAL_COPY_VALUE(element, &new_val);
 			}
 
-			switch (Z_TYPE(const_value)) {
+			switch (Z_TYPE_P(const_value)) {
 				case IS_STRING:
-					ret = zend_symtable_update_current_key_ex(Z_ARRVAL_P(p), Z_STR(const_value), HASH_UPDATE_KEY_IF_BEFORE);
+					ret = zend_symtable_update_current_key_ex(Z_ARRVAL_P(p), Z_STR_P(const_value), HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_BOOL:
 				case IS_LONG:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, Z_LVAL(const_value), HASH_UPDATE_KEY_IF_BEFORE);
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, Z_LVAL_P(const_value), HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_DOUBLE:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, zend_dval_to_lval(Z_DVAL(const_value)), HASH_UPDATE_KEY_IF_BEFORE);
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, zend_dval_to_lval(Z_DVAL_P(const_value)), HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_NULL:
 					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, STR_EMPTY_ALLOC(), 0, HASH_UPDATE_KEY_IF_BEFORE);
@@ -687,19 +703,19 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			if (ret == SUCCESS) {
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 			}
-			zval_dtor(&const_value);
+			zval_dtor(const_value);
 		}
 		zend_hash_apply_with_argument(Z_ARRVAL_P(p), (apply_func_arg_t) zval_update_constant_inline_change, (void *) scope TSRMLS_CC);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
 		SEPARATE_ZVAL_IF_NOT_REF(p);
 
-		zend_ast_evaluate(&const_value, Z_ASTVAL_P(p), scope TSRMLS_CC);
+		zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope TSRMLS_CC);
 		if (inline_change) {
 			zend_ast_destroy(Z_ASTVAL_P(p));
 			efree(Z_AST_P(p));
 		}
-		ZVAL_COPY_VALUE(p, &const_value);
+		ZVAL_COPY_VALUE(p, &tmp);
 	}
 	return 0;
 }
