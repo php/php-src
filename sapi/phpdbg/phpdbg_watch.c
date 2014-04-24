@@ -463,10 +463,9 @@ PHPDBG_WATCH(array) /* {{{ */
 } /* }}} */
 
 void phpdbg_watch_HashTable_dtor(zval **zv) {
-	TSRMLS_FETCH();
-
 	phpdbg_btree_result *result;
 	zval_ptr_dtor_wrapper(zv);
+	TSRMLS_FETCH();
 
 
 	if ((result = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong)*zv))) {
@@ -545,9 +544,8 @@ void phpdbg_watchpoints_clean(TSRMLS_D) {
 }
 
 static void phpdbg_watch_dtor(void *pDest) {
-	TSRMLS_FETCH();
-
 	phpdbg_watchpoint_t *watch = *(phpdbg_watchpoint_t **)pDest;
+	TSRMLS_FETCH();
 
 	phpdbg_deactivate_watchpoint(watch TSRMLS_CC);
 	phpdbg_remove_watchpoint(watch TSRMLS_CC);
@@ -599,7 +597,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 		void *oldPtr = (char *)&dump->data + ((size_t)watch->addr.ptr - (size_t)dump->page);
 		char reenable = 1;
 
-		if (watch->addr.ptr < dump->page || watch->addr.ptr + watch->size > dump->page + dump->size) {
+		if ((size_t)watch->addr.ptr < (size_t)dump->page || (size_t)watch->addr.ptr + watch->size > (size_t)dump->page + dump->size) {
 			continue;
 		}
 
@@ -774,8 +772,8 @@ void phpdbg_list_watchpoints(TSRMLS_D) {
 }
 
 void phpdbg_watch_efree(void *ptr) {
-	TSRMLS_FETCH();
 	phpdbg_btree_result *result = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), (zend_ulong)ptr);
+	TSRMLS_FETCH();
 
 	if (result) {
 		phpdbg_watchpoint_t *watch = result->ptr;
