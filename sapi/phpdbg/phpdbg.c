@@ -613,7 +613,6 @@ const char phpdbg_ini_hardcoded[] =
 
 /* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name, value) \
-        Z_SET_REFCOUNT(tmp, 0); \
         ZVAL_STRINGL(&tmp, value, sizeof(value) - 1); \
         zend_hash_str_update(configuration_hash, name, sizeof(name) - 1, &tmp);
 
