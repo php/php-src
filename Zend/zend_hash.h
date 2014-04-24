@@ -96,6 +96,7 @@ ZEND_API zval *_zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zv
 #define zend_hash_next_index_insert(ht, pData) \
 		_zend_hash_index_update_or_next_insert(ht, 0, pData, HASH_NEXT_INSERT ZEND_FILE_LINE_CC)
 
+ZEND_API zval *zend_hash_index_add_empty_element(HashTable *ht, ulong h);
 ZEND_API zval *zend_hash_add_empty_element(HashTable *ht, zend_string *key);
 ZEND_API zval *zend_hash_str_add_empty_element(HashTable *ht, const char *key, int len);
 
@@ -568,6 +569,10 @@ static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPositio
 #define ZEND_HASH_FOREACH_PTR(ht, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_ptr = Z_PTR_P(_z);
+
+#define ZEND_HASH_FOREACH_NUM_KEY(ht, _h) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_h = _p->h;
 
 #define ZEND_HASH_FOREACH_STR_KEY(ht, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \

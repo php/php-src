@@ -313,6 +313,15 @@ ZEND_API zval *_zend_hash_str_add_or_update(HashTable *ht, const char *str, int 
 	return ret;
 }
 
+ZEND_API zval *zend_hash_index_add_empty_element(HashTable *ht, ulong h)
+{
+	
+	zval dummy;
+
+	ZVAL_NULL(&dummy);
+	return zend_hash_index_add(ht, h, &dummy);
+}
+
 ZEND_API zval *zend_hash_add_empty_element(HashTable *ht, zend_string *key)
 {
 	
