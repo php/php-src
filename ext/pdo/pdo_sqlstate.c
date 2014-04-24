@@ -319,7 +319,7 @@ int pdo_sqlstate_init_error_table(void)
 	for (i = 0; i < sizeof(err_initializer)/sizeof(err_initializer[0]); i++) {
 		info = &err_initializer[i];
 
-		zend_hash_str_add_mem(&err_hash, info->state, sizeof(info->state) - 1, &info, sizeof(info));
+		zend_hash_str_add_ptr(&err_hash, info->state, sizeof(info->state), info);
 	}
 
 	return SUCCESS;
@@ -328,7 +328,7 @@ int pdo_sqlstate_init_error_table(void)
 const char *pdo_sqlstate_state_to_description(char *state)
 {
 	const struct pdo_sqlstate_info *info;
-	if ((info = zend_hash_str_find_ptr(&err_hash, state, sizeof(err_initializer[0].state) - 1)) != NULL) {
+	if ((info = zend_hash_str_find_ptr(&err_hash, state, sizeof(err_initializer[0].state))) != NULL) {
 		return info->desc;
 	}
 	return NULL;

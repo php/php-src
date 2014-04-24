@@ -1455,48 +1455,49 @@ PHP_METHOD(sqlite3stmt, execute)
 
 	if (stmt_obj->bound_params) {
 		ZEND_HASH_FOREACH_PTR(stmt_obj->bound_params, param) {
-			zval parameter;
-			ZVAL_COPY_VALUE(&parameter, &param->parameter);
-
-			if (Z_ISREF_P(&parameter)) {
-				ZVAL_DUP(&parameter, Z_REFVAL(parameter));
+			zval *parameter;
+			/* parameter must be a reference? */
+			if (Z_ISREF(param->parameter)) {
+				parameter = Z_REFVAL(param->parameter);
+			} else {
+				parameter = &param->parameter;
 			}
 
 			/* If the ZVAL is null then it should be bound as that */
-			if (Z_TYPE(parameter) == IS_NULL) {
+			if (Z_TYPE_P(parameter) == IS_NULL) {
 				sqlite3_bind_null(stmt_obj->stmt, param->param_number);
 				continue;
 			}
 
 			switch (param->type) {
 				case SQLITE_INTEGER:
-					convert_to_long(&parameter);
+					convert_to_long(parameter);
 #if LONG_MAX > 2147483647
-					sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_LVAL(parameter));
+					sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
 #else
-					sqlite3_bind_int(stmt_obj->stmt, param->param_number, Z_LVAL(parameter));
+					sqlite3_bind_int(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
 #endif
 					break;
 
 				case SQLITE_FLOAT:
 					/* convert_to_double(parameter);*/
-					sqlite3_bind_double(stmt_obj->stmt, param->param_number, Z_DVAL(parameter));
+					sqlite3_bind_double(stmt_obj->stmt, param->param_number, Z_DVAL_P(parameter));
 					break;
 
 				case SQLITE_BLOB:
 				{
 					php_stream *stream = NULL;
 					zend_string *buffer;
-					if (Z_TYPE(parameter) == IS_RESOURCE) {
-						php_stream_from_zval_no_verify(stream, &parameter);
+					if (Z_TYPE_P(parameter) == IS_RESOURCE) {
+						php_stream_from_zval_no_verify(stream, parameter);
 						if (stream == NULL) {
 							php_sqlite3_error(stmt_obj->db_obj, "Unable to read stream for parameter %ld", param->param_number);
 							RETURN_FALSE;
 						}
 						buffer = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 					} else {
-						convert_to_string(&parameter);
-						buffer = Z_STR(parameter);
+						convert_to_string(parameter);
+						buffer = Z_STR_P(parameter);
 					}
 
 					sqlite3_bind_blob(stmt_obj->stmt, param->param_number, buffer->val, buffer->len, SQLITE_TRANSIENT);
@@ -1508,8 +1509,8 @@ PHP_METHOD(sqlite3stmt, execute)
 				}
 
 				case SQLITE3_TEXT:
-					convert_to_string(&parameter);
-					sqlite3_bind_text(stmt_obj->stmt, param->param_number, Z_STRVAL(parameter), Z_STRLEN(parameter), SQLITE_STATIC);
+					convert_to_string(parameter);
+					sqlite3_bind_text(stmt_obj->stmt, param->param_number, Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), SQLITE_STATIC);
 					break;
 
 				case SQLITE_NULL:
