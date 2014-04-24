@@ -149,7 +149,8 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
 											return -1;
 										}
                                         c = cdf_ctime(&sec, tbuf);
-                                        if ((ec = strchr(c, '\n')) != NULL)
+                                        if (c != NULL &&
+					    (ec = strchr(c, '\n')) != NULL)
                                                 *ec = '\0';
 
                                         if (NOTMIME(ms) && file_printf(ms,
