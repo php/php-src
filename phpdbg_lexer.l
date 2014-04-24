@@ -77,7 +77,7 @@ INPUT				[^\n]+
 <INITIAL,NORMAL>{
 	{ID}[:]{1}[//]{2}	{
 		phpdbg_init_param(yylval, STR_PARAM);
-		yylval->str = strndup(yytext, yyleng);
+		yylval->str = zend_strndup(yytext, yyleng);
 		yylval->len = yyleng;
 		return T_PROTO;
 	}
@@ -107,13 +107,13 @@ INPUT				[^\n]+
 	}
 	{OPCODE}	{
 		phpdbg_init_param(yylval, OP_PARAM);
-		yylval->str = strndup(yytext, yyleng);
+		yylval->str = zend_strndup(yytext, yyleng);
 		yylval->len = yyleng;
 		return T_OPCODE;
 	}
 	{ID}			{
 		phpdbg_init_param(yylval, STR_PARAM);
-		yylval->str = strndup(yytext, yyleng);
+		yylval->str = zend_strndup(yytext, yyleng);
 		yylval->len = yyleng;
 		return T_ID; 
 	}
@@ -121,7 +121,7 @@ INPUT				[^\n]+
 
 <RAW>{INPUT}		{
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = strndup(yytext, yyleng);
+	yylval->str = zend_strndup(yytext, yyleng);
 	yylval->len = yyleng;
 	BEGIN(INITIAL);
 	return T_INPUT;
