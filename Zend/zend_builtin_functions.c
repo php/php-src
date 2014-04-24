@@ -1991,6 +1991,7 @@ void debug_print_backtrace_args(zval *arg_array TSRMLS_DC)
 ZEND_FUNCTION(debug_print_backtrace)
 {
 	zend_execute_data *ptr, *skip;
+	zend_object *object;
 	int lineno, frameno = 0;
 	const char *function_name;
 	const char *filename;
@@ -2010,6 +2011,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	ptr = EG(current_execute_data);
 
 	/* skip debug_backtrace() */
+	object = ptr->object;
 	ptr = ptr->prev_execute_data;
 
 	while (ptr && (limit == 0 || frameno < limit)) {
@@ -2037,11 +2039,18 @@ ZEND_FUNCTION(debug_print_backtrace)
 			lineno = 0;
 		}
 
+		/* $this may be passed into regular internal functions */
+		if (object &&
+		    ptr->function_state.function->type == ZEND_INTERNAL_FUNCTION &&
+		    !ptr->function_state.function->common.scope) {
+			object = NULL;
+		}
+
 		function_name = (ptr->function_state.function->common.scope &&
 			ptr->function_state.function->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
-					ptr->object ?
-						zend_get_class_entry(ptr->object TSRMLS_CC) : 
+					object ?
+						zend_get_class_entry(object TSRMLS_CC) : 
 						ptr->function_state.function->common.scope,
 					ptr->function_state.function)->val :
 				(ptr->function_state.function->common.function_name ?
@@ -2049,11 +2058,11 @@ ZEND_FUNCTION(debug_print_backtrace)
 				 NULL);
 
 		if (function_name) {
-			if (ptr->object) {
+			if (object) {
 				if (ptr->function_state.function->common.scope) {
 					class_name = ptr->function_state.function->common.scope->name;
 				} else {
-					class_name = zend_get_object_classname(ptr->object TSRMLS_CC);
+					class_name = zend_get_object_classname(object TSRMLS_CC);
 				}
 
 				call_type = "->";
@@ -2141,6 +2150,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			}
 		}
 		include_filename = filename;
+		object = skip->object;
 		ptr = skip->prev_execute_data;
 		++indent;
 	}
@@ -2151,6 +2161,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit TSRMLS_DC)
 {
 	zend_execute_data *ptr, *skip;
+	zend_object *object = Z_OBJ(EG(This));
 	int lineno, frameno = 0;
 	const char *function_name;
 	const char *filename;
@@ -2162,11 +2173,13 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	/* skip "new Exception()" */
 	if (ptr && (skip_last == 0) && ptr->opline && (ptr->opline->opcode == ZEND_NEW)) {
+		object = ptr->object;
 		ptr = ptr->prev_execute_data;
 	}
 
 	/* skip debug_backtrace() */
 	if (skip_last-- && ptr) {
+		object = ptr->object;
 		ptr = ptr->prev_execute_data;
 	}
 
@@ -2217,11 +2230,18 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			filename = NULL;
 		}
 
+		/* $this may be passed into regular internal functions */
+		if (object &&
+		    ptr->function_state.function->type == ZEND_INTERNAL_FUNCTION &&
+		    !ptr->function_state.function->common.scope) {
+			object = NULL;
+		}
+
 		function_name = (ptr->function_state.function->common.scope &&
 			ptr->function_state.function->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
-					ptr->object ?
-						zend_get_class_entry(ptr->object TSRMLS_CC) : 
+					object ?
+						zend_get_class_entry(object TSRMLS_CC) : 
 						ptr->function_state.function->common.scope,
 					ptr->function_state.function)->val :
 				(ptr->function_state.function->common.function_name ?
@@ -2231,19 +2251,19 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		if (function_name) {
 			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char*)function_name);
 
-			if (ptr->object) {
+			if (object) {
 				if (ptr->function_state.function->common.scope) {
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, STR_COPY(ptr->function_state.function->common.scope->name));
 				} else {
-					class_name = zend_get_object_classname(ptr->object TSRMLS_CC);
+					class_name = zend_get_object_classname(object TSRMLS_CC);
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, STR_COPY(class_name));
 					
 				}
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
-					zval object;
-					ZVAL_OBJ(&object, ptr->object);
-					add_assoc_zval_ex(&stack_frame, "object", sizeof("object")-1, &object);
-					Z_ADDREF(object);
+					zval zv;
+					ZVAL_OBJ(&zv, object);
+					add_assoc_zval_ex(&stack_frame, "object", sizeof("object")-1, &zv);
+					Z_ADDREF(zv);
 				}
 
 				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "->");
@@ -2314,6 +2334,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		include_filename = filename; 
 
+		object = skip->object;
 		ptr = skip->prev_execute_data;
 	}
 }

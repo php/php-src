@@ -374,20 +374,19 @@ typedef enum _vm_frame_kind {
 } vm_frame_kind;
 
 struct _zend_execute_data {
-	struct _zend_op *opline;
-	void **run_time_cache;
-	zend_function_state function_state;
-	zend_op_array *op_array;
-	zend_object *object;
-	zend_array *symbol_table;
-	struct _zend_execute_data *prev_execute_data;
+	struct _zend_op     *opline;           /* executed opline                */
+	zend_op_array       *op_array;         /* executed op_array              */
+	zend_function_state  function_state;   /* called function and arguments  */
+	zend_object         *object;           /* current $this                  */
+	zend_class_entry    *scope;            /* function scope (self)          */
+	zend_class_entry    *called_scope;     /* function called scope (static) */
+	zend_array          *symbol_table;
+	void               **run_time_cache;
+	zend_execute_data   *prev_execute_data;
+	zval                *return_value;
+	vm_frame_kind        frame_kind;
+	// TODO: simplify call sequence and remove call_* ???
 	zval old_error_reporting;
-	vm_frame_kind frame_kind;
-	zval *return_value;
-	// TODO: simplify call sequence and remove current_* and call_* ???
-	zend_class_entry *current_scope;
-	zend_class_entry *current_called_scope;
-	zend_object *current_this;
 	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 	zend_object *delayed_exception;
 	call_slot *call_slots;

@@ -770,11 +770,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_array *calling_symbol_table;
 	zend_op_array *original_op_array;
 	zend_op **original_opline_ptr;
-	zend_class_entry *current_scope;
-	zend_class_entry *current_called_scope;
 	zend_class_entry *calling_scope = NULL;
 	zend_class_entry *called_scope = NULL;
-	zend_object *current_this;
 	zend_execute_data execute_data;
 	zend_fcall_info_cache fci_cache_local;
 	zval tmp;
@@ -800,9 +797,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	/* Initialize execute_data */
 	if (EG(current_execute_data)) {
 		execute_data = *EG(current_execute_data);
+		EX(object) = Z_OBJ(EG(This));
+		EX(scope) = EG(scope);
+		EX(called_scope) = EG(called_scope);
 		EX(op_array) = NULL;
 		EX(opline) = NULL;
-		EX(object) = NULL;
 	} else {
 		/* This only happens when we're called outside any execute()'s
 		 * It shouldn't be strictly necessary to NULL execute_data out,
@@ -842,7 +841,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	EX(function_state).function = fci_cache->function_handler;
 	calling_scope = fci_cache->calling_scope;
 	called_scope = fci_cache->called_scope;
-	EX(object) = fci->object = fci_cache->object;
+	fci->object = fci_cache->object;
 	if (fci->object &&
 	    (!EG(objects_store).object_buckets ||
 	     !IS_OBJ_VALID(EG(objects_store).object_buckets[fci->object->handle]))) {
@@ -916,18 +915,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	ZVAL_LONG(&tmp, fci->param_count);
 	zend_vm_stack_push(&tmp TSRMLS_CC);
 
-	current_scope = EG(scope);
 	EG(scope) = calling_scope;
-
-	current_this = Z_OBJ(EG(This));
-
-	current_called_scope = EG(called_scope);
-	if (called_scope) {
-		EG(called_scope) = called_scope;
-	} else if (EX(function_state).function->type != ZEND_INTERNAL_FUNCTION) {
-		EG(called_scope) = NULL;
-	}
-
+	EG(called_scope) = called_scope;
 	if (!fci->object ||
 	    (EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
 		Z_OBJ(EG(This)) = NULL;
@@ -1016,9 +1005,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	if (Z_OBJ(EG(This))) {
 		zval_ptr_dtor(&EG(This));
 	}
-	EG(called_scope) = current_called_scope;
-	EG(scope) = current_scope;
-	Z_OBJ(EG(This)) = current_this;
+
+	Z_OBJ(EG(This)) = EX(object);
+	EG(scope) = EX(scope);
+	EG(called_scope) = EX(called_scope);
 	EG(current_execute_data) = EX(prev_execute_data);
 
 	if (EG(exception)) {
@@ -1711,12 +1701,6 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 				/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 			}
 			ex->symbol_table = EG(active_symbol_table);
-
-			if (ex->op_array->this_var != -1 &&
-			    Z_TYPE_P(EX_VAR_2(ex, ex->op_array->this_var)) == IS_UNDEF &&
-			    Z_OBJ(EG(This))) {
-			    ZVAL_COPY_VALUE(EX_VAR_2(ex, ex->op_array->this_var), &EG(This));
- 			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
 				zval zv;
 					

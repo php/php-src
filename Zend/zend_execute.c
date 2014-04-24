@@ -1624,52 +1624,50 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 		EX(prev_execute_data) = EG(current_execute_data);
 	}
 
-	do {
-		/* Initialize CV variables */
-		zval *var = EX_VAR_NUM(0);
-		zval *end = var + op_array->last_var;
-
-		while (var != end) {
-			ZVAL_UNDEF(var);
-			var++;
-		}
-	} while (0);
-
-	EX(call_slots) = (call_slot*)((char *)execute_data + execute_data_size + vars_size);
-
-
-	EX(op_array) = op_array;
-
-	EG(argument_stack)->top = (zval*)zend_vm_stack_frame_base(execute_data);
-
-	EX(object) = NULL;
-	EX(current_this) = NULL;
-	ZVAL_UNDEF(&EX(old_error_reporting));
-	EX(symbol_table) = EG(active_symbol_table);
-	EX(call) = NULL;
-	EG(current_execute_data) = execute_data;
-	EX(frame_kind) = frame_kind;
-	EX(delayed_exception) = NULL;
 	EX(return_value) = return_value;
+	EX(frame_kind) = frame_kind;
+	ZVAL_UNDEF(&EX(old_error_reporting));
+	EX(delayed_exception) = NULL;
+	EX(call_slots) = (call_slot*)((char *)execute_data + execute_data_size + vars_size);
+	EX(call) = NULL;
+
+	EG(opline_ptr) = &EX(opline);
+	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
+	EX(function_state).function = (zend_function *) op_array;
+	EX(function_state).arguments = NULL;
+	EX(op_array) = op_array;
+	EX(object) = Z_OBJ(EG(This));
+	EX(scope) = EG(scope);
+	EX(called_scope) = EG(called_scope);
+	EX(symbol_table) = EG(active_symbol_table);
+
+	if (EX(symbol_table)) {
+		zend_attach_symbol_table(execute_data);
+	} else {
+		do {
+			/* Initialize CV variables */
+			zval *var = EX_VAR_NUM(0);
+			zval *end = var + op_array->last_var;
+
+			while (var != end) {
+				ZVAL_UNDEF(var);
+				var++;
+			}
+		} while (0);
+
+		if (op_array->this_var != -1 && Z_OBJ(EG(This))) {
+			ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EG(This)));
+			Z_ADDREF(EG(This));
+		}
+	}
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
 		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
 	}
 	EX(run_time_cache) = op_array->run_time_cache;
 
-	if (EX(symbol_table)) {
-		zend_attach_symbol_table(execute_data);
-	}
-
-	if (op_array->this_var != -1 && Z_OBJ(EG(This))) {
-		ZVAL_COPY(EX_VAR(op_array->this_var), &EG(This));
-	}
-
-	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
-	EG(opline_ptr) = &EX(opline);
-
-	EX(function_state).function = (zend_function *) op_array;
-	EX(function_state).arguments = NULL;
+	EG(argument_stack)->top = (zval*)zend_vm_stack_frame_base(execute_data);
+	EG(current_execute_data) = execute_data;
 
 	return execute_data;
 }

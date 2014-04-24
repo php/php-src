@@ -40,9 +40,9 @@ void phpdbg_restore_frame(TSRMLS_D) /* {{{ */
 	EG(opline_ptr) = &PHPDBG_EX(opline);
 	EG(active_op_array) = PHPDBG_EX(op_array);
 	EG(active_symbol_table) = PHPDBG_EX(symbol_table);
-	Z_OBJ(EG(This)) = PHPDBG_EX(current_this);
-	EG(scope) = PHPDBG_EX(current_scope);
-	EG(called_scope) = PHPDBG_EX(current_called_scope);
+	Z_OBJ(EG(This)) = PHPDBG_EX(object);
+	EG(scope) = PHPDBG_EX(scope);
+	EG(called_scope) = PHPDBG_EX(called_scope);
 } /* }}} */
 
 void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
@@ -82,9 +82,9 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 		EG(opline_ptr) = &PHPDBG_EX(opline);
 		EG(active_op_array) = PHPDBG_EX(op_array);
 		EG(active_symbol_table) = PHPDBG_EX(symbol_table);
-		Z_OBJ(EG(This)) = PHPDBG_EX(current_this);
-		EG(scope) = PHPDBG_EX(current_scope);
-		EG(called_scope) = PHPDBG_EX(current_called_scope);
+		Z_OBJ(EG(This)) = PHPDBG_EX(object);
+		EG(scope) = PHPDBG_EX(scope);
+		EG(called_scope) = PHPDBG_EX(called_scope);
 	}
 
 	phpdbg_notice("Switched to frame #%d", frame);
