@@ -18,7 +18,7 @@ ksort($results);
 var_dump($results);
 ?>
 --EXPECTF--
-array(7) {
+array(8) {
   ["%s/resources/dir.zip"]=>
   string(15) "application/zip"
   ["%s/resources/test.awk"]=>
@@ -33,4 +33,6 @@ array(7) {
   string(15) "application/pdf"
   ["%s/resources/test.png"]=>
   string(9) "image/png"
+  ["%s/resources/test.ppt"]=>
+  string(29) "application/vnd.ms-powerpoint"
 }

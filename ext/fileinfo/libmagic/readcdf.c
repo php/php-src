@@ -56,6 +56,8 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
         const char *s;
         int len;
 
+	memset(&ts, 0, sizeof(ts));
+
         for (i = 0; i < count; i++) {
                 cdf_print_property_name(buf, sizeof(buf), info[i].pi_id);
                 switch (info[i].pi_type) {
@@ -142,10 +144,11 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
                                                 return -1;
                                 } else {
                                         char *c, *ec;
+                                        const time_t sec = ts.tv_sec;
                                         if (cdf_timestamp_to_timespec(&ts, tp) == -1) {
 											return -1;
 										}
-                                        c = cdf_ctime(&ts.tv_sec);
+                                        c = cdf_ctime(&sec);
                                         if ((ec = strchr(c, '\n')) != NULL)
                                                 *ec = '\0';
 
