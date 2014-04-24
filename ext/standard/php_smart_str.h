@@ -45,11 +45,11 @@
 
 #ifdef SMART_STR_USE_REALLOC
 #define SMART_STR_DO_REALLOC(b, w) do {								\
-	(b)->s = erealloc((buf)->s, sizeof(zend_string) + (b)->a);		\
+	(b)->s = erealloc((buf)->s, _STR_HEADER_SIZE + (b)->a + 1);		\
 } while (0)
 #else
 #define SMART_STR_DO_REALLOC(b, w) do {								\
-	(b)->s = perealloc((b)->s, sizeof(zend_string) + (b)->a, (w));	\
+	(b)->s = perealloc((b)->s, _STR_HEADER_SIZE + (b)->a + 1, (w));	\
 } while (0)
 #endif
 

@@ -336,7 +336,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 		idx = Z_NEXT(p->val);
 	}
 
-	if (ZCSG(interned_strings_top) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_string) + str->len) >=
+	if (ZCSG(interned_strings_top) + ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + str->len + 1) >=
 	    ZCSG(interned_strings_end)) {
 	    /* no memory, return the same non-interned string */
 		return str;
@@ -348,7 +348,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 	ZCSG(interned_strings).nNumOfElements++;
 	p = ZCSG(interned_strings).arData + idx;
 	p->key = (zend_string*) ZCSG(interned_strings_top);
-	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(sizeof(zend_string) + str->len);
+	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + str->len + 1);
 	p->h = h;
 	GC_REFCOUNT(p->key) = 1;
 #if 1

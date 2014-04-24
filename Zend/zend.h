@@ -347,6 +347,36 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 # define UNEXPECTED(condition) (condition)
 #endif
 
+#ifndef XtOffsetOf
+# if defined(CRAY) || (defined(__ARMCC_VERSION) && !defined(LINUX))
+# ifdef __STDC__
+# define XtOffset(p_type, field) _Offsetof(p_type, field)
+# else
+# ifdef CRAY2
+# define XtOffset(p_type, field) \
+    (sizeof(int)*((unsigned int)&(((p_type)NULL)->field)))
+
+# else /* !CRAY2 */
+
+# define XtOffset(p_type, field) ((unsigned int)&(((p_type)NULL)->field))
+
+# endif /* !CRAY2 */
+# endif /* __STDC__ */
+# else /* ! (CRAY || __arm) */
+
+# define XtOffset(p_type, field) \
+    ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
+
+# endif /* !CRAY */
+
+# ifdef offsetof
+# define XtOffsetOf(s_type, field) offsetof(s_type, field)
+# else
+# define XtOffsetOf(s_type, field) XtOffset(s_type*, field)
+# endif
+
+#endif
+
 #include "zend_string.h"
 
 static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
