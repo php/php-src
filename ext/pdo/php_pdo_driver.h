@@ -606,6 +606,7 @@ struct _pdo_stmt_t {
 		int column;
 		struct {
 			zend_class_entry *ce;	
+			void *_reserved;
 			zval ctor_args;            /* freed */
 			zval retval; 
 			zend_fcall_info fci;

@@ -197,7 +197,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 {
 	zval *object = getThis();
 	pdo_dbh_t *dbh = NULL;
-	zend_bool is_persistent = FALSE;
+	zend_bool is_persistent = 0;
 	char *data_source;
 	int data_source_len;
 	char *colon;
@@ -277,6 +277,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 		zend_resource *le;
 		pdo_dbh_t *pdbh = NULL;
 
+		//?? let's delay the persistent supports later
+#if 0
 		if ((v = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT)) != NULL) {
 			if (Z_TYPE_P(v) == IS_STRING &&
 				!is_numeric_string(Z_STRVAL_P(v), Z_STRLEN_P(v), NULL, NULL, 0) && Z_STRLEN_P(v) > 0) {
@@ -294,6 +296,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 						password ? password : "");
 			}
 		}
+#endif
 
 		if (is_persistent) {
 			/* let's see if we have one cached.... */
@@ -448,6 +451,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 	ZVAL_STRINGL(&z_key, "queryString", sizeof("queryString") - 1);
 	std_object_handlers.write_property(object, &z_key, &query_string, -1 TSRMLS_CC);
 	zval_ptr_dtor(&query_string);
+	zval_ptr_dtor(&z_key);
 
 	if (dbstmt_ce->constructor) {
 		zend_fcall_info fci;
@@ -579,7 +583,7 @@ static PHP_METHOD(PDO, prepare)
 	php_pdo_dbh_addref(dbh TSRMLS_CC);
 	ZVAL_COPY_VALUE(&stmt->database_object_handle, getThis());
 	/* we haven't created a lazy object yet */
-	ZVAL_NULL(&stmt->lazy_object_ref);
+	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options TSRMLS_CC)) {
 		pdo_stmt_construct(stmt, return_value, dbstmt_ce, &ctor_args TSRMLS_CC);
@@ -1118,7 +1122,7 @@ static PHP_METHOD(PDO, query)
 	php_pdo_dbh_addref(dbh TSRMLS_CC);
 	stmt->database_object_handle = *getThis();
 	/* we haven't created a lazy object yet */
-	ZVAL_NULL(&stmt->lazy_object_ref);
+	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, NULL TSRMLS_CC)) {
 		PDO_STMT_CLEAR_ERR();
@@ -1278,6 +1282,14 @@ const zend_function_entry pdo_dbh_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static void cls_method_dtor(zval *el) {
+	zend_function *func = (zend_function*)Z_PTR_P(el);
+	if (func->common.function_name) {
+		STR_RELEASE(func->common.function_name);
+	}
+	efree(func);
+}
+
 /* {{{ overloaded object handlers for PDO class */
 int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 {
@@ -1298,7 +1310,7 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	if (!(dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent))) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory while allocating PDO methods.");
 	}
-	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL, NULL, dbh->is_persistent, 0);
+	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL, cls_method_dtor, dbh->is_persistent, 0);
 
 	while (funcs->fname) {
 		ifunc->type = ZEND_INTERNAL_FUNCTION;
@@ -1532,7 +1544,7 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 		}
 	}
 
-	pefree(dbh, dbh->is_persistent);
+	//???pefree(dbh, dbh->is_persistent);
 }
 
 PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh TSRMLS_DC)
@@ -1557,6 +1569,7 @@ static void pdo_dbh_free_storage(zend_object *std TSRMLS_DC)
 		dbh->methods->persistent_shutdown(dbh TSRMLS_CC);
 	}
 	zend_object_std_dtor(std TSRMLS_CC);
+	dbh_free(dbh);
 }
 
 zend_object *pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
