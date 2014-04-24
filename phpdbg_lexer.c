@@ -1026,7 +1026,7 @@ YY_RULE_SETUP
 #line 78 "/usr/src/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, STR_PARAM);
-		yylval->str = strndup(yytext, yyleng);
+		yylval->str = zend_strndup(yytext, yyleng);
 		yylval->len = yyleng;
 		return T_PROTO;
 	}
@@ -1087,7 +1087,7 @@ YY_RULE_SETUP
 #line 108 "/usr/src/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, OP_PARAM);
-		yylval->str = strndup(yytext, yyleng);
+		yylval->str = zend_strndup(yytext, yyleng);
 		yylval->len = yyleng;
 		return T_OPCODE;
 	}
@@ -1097,7 +1097,7 @@ YY_RULE_SETUP
 #line 114 "/usr/src/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, STR_PARAM);
-		yylval->str = strndup(yytext, yyleng);
+		yylval->str = zend_strndup(yytext, yyleng);
 		yylval->len = yyleng;
 		return T_ID; 
 	}
@@ -1108,7 +1108,7 @@ YY_RULE_SETUP
 #line 122 "/usr/src/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = strndup(yytext, yyleng);
+	yylval->str = zend_strndup(yytext, yyleng);
 	yylval->len = yyleng;
 	BEGIN(INITIAL);
 	return T_INPUT;
