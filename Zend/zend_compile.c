@@ -1900,7 +1900,7 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 				zend_get_type_by_const(CG(active_op_array)->return_hint.type));
 		}
 		
-		ce = zend_fetch_class_by_name(CG(active_op_array)->return_hint.class_name, CG(active_op_array)->return_hint.class_name_len, NULL, 0 TSRMLS_CC);
+		ce = zend_fetch_class_by_name(CG(active_op_array)->return_hint.class_name, CG(active_op_array)->return_hint.class_name_len, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
 		
 		if (!ce || !instanceof_function(zend_ce_generator, ce TSRMLS_CC)) {
 			zend_error_noreturn(E_COMPILE_ERROR, errmsg, CG(active_op_array)->return_hint.class_name);
