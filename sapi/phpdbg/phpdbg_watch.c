@@ -702,7 +702,7 @@ remove_ht_watch:
 				}
 				case WATCH_ON_HASHTABLE:
 
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 					if (watch->addr.ht->inconsistent) {
 						phpdbg_notice("Watchpoint %s was unset, removing watchpoint", watch->str);
 						zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
