@@ -198,24 +198,11 @@ static int php_array_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 	}
 
 	if (Z_TYPE(result) == IS_DOUBLE) {
-		if (Z_DVAL(result) < 0) {
-			return -1;
-		} else if (Z_DVAL(result) > 0) {
-			return 1;
-		} else {
-			return 0;
-		}
+		return ZEND_NORMALIZE_BOOL(Z_DVAL(result));
 	}
 
 	convert_to_long(&result);
-
-	if (Z_LVAL(result) < 0) {
-		return -1;
-	} else if (Z_LVAL(result) > 0) {
-		return 1;
-	}
-
-	return 0;
+	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
 }
 /* }}} */
 
@@ -327,8 +314,7 @@ PHP_FUNCTION(count)
 				ZVAL_LONG(&mode_zv, mode);
 				zend_call_method_with_1_params(array, NULL, NULL, "count", &retval, &mode_zv);
 				if (Z_TYPE(retval) != IS_UNDEF) {
-					convert_to_long_ex(&retval);
-					RETVAL_LONG(Z_LVAL(retval));
+					RETVAL_LONG(zval_get_long(&retval));
 					zval_ptr_dtor(&retval);
 				}
 				zval_dtor(&mode_zv);
@@ -374,24 +360,11 @@ static int php_array_data_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 	}
 
 	if (Z_TYPE(result) == IS_DOUBLE) {
-		if (Z_DVAL(result) < 0) {
-			return -1;
-		} else if (Z_DVAL(result) > 0) {
-			return 1;
-		} else {
-			return 0;
-		}
+		return ZEND_NORMALIZE_BOOL(Z_DVAL(result));
 	}
 
 	convert_to_long(&result);
-
-	if (Z_LVAL(result) < 0) {
-		return -1;
-	} else if (Z_LVAL(result) > 0) {
-		return 1;
-	}
-
-	return 0;
+	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
 }
 /* }}} */
 
@@ -564,10 +537,7 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 	BG(user_compare_fci).retval = &retval;
 	BG(user_compare_fci).no_separation = 0;
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		long ret;
-
-		convert_to_long_ex(&retval);
-		ret = Z_LVAL(retval);
+		long ret = zval_get_long(&retval);
 		zval_ptr_dtor(&retval);
 		zval_ptr_dtor(&args[1]);
 		zval_ptr_dtor(&args[0]);
@@ -725,8 +695,7 @@ static int php_array_user_key_compare(const void *a, const void *b TSRMLS_DC) /*
 	BG(user_compare_fci).retval = &retval;
 	BG(user_compare_fci).no_separation = 0;
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		convert_to_long_ex(&retval);
-		result = Z_LVAL(retval);
+		result = zval_get_long(&retval);
 		zval_ptr_dtor(&retval);
 	} else {
 		result = 0;
@@ -1582,7 +1551,7 @@ PHP_FUNCTION(range)
 	int err = 0, is_step_double = 0;
 	double step = 1.0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/|z/", &zlow, &zhigh, &zstep) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|z", &zlow, &zhigh, &zstep) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1593,8 +1562,7 @@ PHP_FUNCTION(range)
 			is_step_double = 1;
 		}
 
-		convert_to_double_ex(zstep);
-		step = Z_DVAL_P(zstep);
+		step = zval_get_double(zstep);
 
 		/* We only want positive step values. */
 		if (step < 0.0) {
@@ -1620,8 +1588,6 @@ PHP_FUNCTION(range)
 			goto long_str;
 		}
 
-		convert_to_string(zlow);
-		convert_to_string(zhigh);
 		low = (unsigned char *)Z_STRVAL_P(zlow);
 		high = (unsigned char *)Z_STRVAL_P(zhigh);
 
@@ -1659,10 +1625,8 @@ PHP_FUNCTION(range)
 		double low, high, value;
 		long i;
 double_str:
-		convert_to_double(zlow);
-		convert_to_double(zhigh);
-		low = Z_DVAL_P(zlow);
-		high = Z_DVAL_P(zhigh);
+		low = zval_get_double(zlow);
+		high = zval_get_double(zhigh);
 		i = 0;
 
 		if (low > high) { 		/* Negative steps */
@@ -1690,10 +1654,8 @@ double_str:
 		double low, high;
 		long lstep;
 long_str:
-		convert_to_double(zlow);
-		convert_to_double(zhigh);
-		low = Z_DVAL_P(zlow);
-		high = Z_DVAL_P(zhigh);
+		low = zval_get_double(zlow);
+		high = zval_get_double(zhigh);
 		lstep = (long) step;
 
 		if (low > high) { 		/* Negative steps */
@@ -2179,8 +2141,7 @@ PHP_FUNCTION(array_slice)
 	if (ZEND_NUM_ARGS() < 3 || Z_TYPE_P(z_length) == IS_NULL) {
 		length = num_in;
 	} else {
-		convert_to_long_ex(z_length);
-		length = Z_LVAL_P(z_length);
+		length = zval_get_long(z_length);
 	}
 
 	/* Clamp the offset.. */
@@ -2921,24 +2882,11 @@ static int zval_compare(zval *a, zval *b TSRMLS_DC) /* {{{ */
 	}
 
 	if (Z_TYPE(result) == IS_DOUBLE) {
-		if (Z_DVAL(result) < 0) {
-			return -1;
-		} else if (Z_DVAL(result) > 0) {
-			return 1;
-		} else {
-			return 0;
-		}
+		return ZEND_NORMALIZE_BOOL(Z_DVAL(result));
 	}
 
 	convert_to_long(&result);
-
-	if (Z_LVAL(result) < 0) {
-		return -1;
-	} else if (Z_LVAL(result) > 0) {
-		return 1;
-	}
-
-	return 0;
+	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
 }
 /* }}} */
 
@@ -2963,10 +2911,7 @@ static int zval_user_compare(zval *a, zval *b TSRMLS_DC) /* {{{ */
 	BG(user_compare_fci).no_separation = 0;
 
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		long ret;
-
-		convert_to_long_ex(&retval);
-		ret = Z_LVAL(retval);
+		long ret = zval_get_long(&retval);
 		zval_ptr_dtor(&retval);
 		return ret < 0 ? -1 : ret > 0 ? 1 : 0;;
 	} else {

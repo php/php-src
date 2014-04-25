@@ -2002,8 +2002,7 @@ PHP_FUNCTION(fgetcsv)
 		}
 
 		if (len_zv != NULL && Z_TYPE_P(len_zv) != IS_NULL) {
-			convert_to_long_ex(len_zv);
-			len = Z_LVAL_P(len_zv);
+			len = zval_get_long(len_zv);
 			if (len < 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 				RETURN_FALSE;

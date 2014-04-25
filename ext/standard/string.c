@@ -2296,8 +2296,7 @@ PHP_FUNCTION(substr_replace)
 	if (argc > 3) {
 		SEPARATE_ZVAL(len);
 		if (Z_TYPE_P(len) != IS_ARRAY) {
-			convert_to_long_ex(len);
-			l = Z_LVAL_P(len);
+			l = zval_get_long(len);
 		}
 	} else {
 		if (Z_TYPE_P(str) != IS_ARRAY) {
@@ -2422,15 +2421,7 @@ PHP_FUNCTION(substr_replace)
 
 			if (Z_TYPE_P(from) == IS_ARRAY) {
 				if (NULL != (tmp_from = zend_hash_get_current_data_ex(Z_ARRVAL_P(from), &pos_from))) {
-					if(Z_TYPE_P(tmp_from) != IS_LONG) {
-						zval dummy;
-						
-						ZVAL_DUP(&dummy, tmp_from);
-						convert_to_long(&dummy);
-						f = Z_LVAL(dummy);
-					} else {
-						f = Z_LVAL_P(tmp_from);
-					}
+					f = zval_get_long(tmp_from);
 
 					if (f < 0) {
 						f = Z_STRLEN_P(orig_str) + f;
@@ -2458,15 +2449,7 @@ PHP_FUNCTION(substr_replace)
 
 			if (argc > 3 && Z_TYPE_P(len) == IS_ARRAY) {
 				if (NULL != (tmp_len = zend_hash_get_current_data_ex(Z_ARRVAL_P(len), &pos_len))) {
-					if(Z_TYPE_P(tmp_len) != IS_LONG) {
-						zval dummy;
-						
-						ZVAL_DUP(&dummy, tmp_len);
-						convert_to_long(&dummy);
-						l = Z_LVAL(dummy);
-					} else {
-						l = Z_LVAL_P(tmp_len);
-					}
+					l = zval_get_long(tmp_len);
 					zend_hash_move_forward_ex(Z_ARRVAL_P(len), &pos_len);
 				} else {
 					l = Z_STRLEN_P(orig_str);

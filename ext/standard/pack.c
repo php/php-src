@@ -315,22 +315,21 @@ PHP_FUNCTION(pack)
 	for (i = 0; i < formatcount; i++) {
 	    int code = (int) formatcodes[i];
 		int arg = formatargs[i];
-		zval *val;
 
 		switch ((int) code) {
 			case 'a': 
 			case 'A': 
 			case 'Z': {
 				int arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
+
+				zend_string *str = zval_get_string(&argv[currentarg++]);
+
 				memset(&output[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
-				val = &argv[currentarg++];
-				if (Z_ISREF_P(val)) {
-					SEPARATE_ZVAL(val);
-				}
-				convert_to_string_ex(val);
-				memcpy(&output[outputpos], Z_STRVAL_P(val),
-					   (Z_STRLEN_P(val) < arg_cp) ? Z_STRLEN_P(val) : arg_cp);
+				memcpy(&output[outputpos], str->val,
+					   (str->len < arg_cp) ? str->len : arg_cp);
+
 				outputpos += arg;
+				STR_RELEASE(str);
 				break;
 			}
 
@@ -338,18 +337,14 @@ PHP_FUNCTION(pack)
 			case 'H': {
 				int nibbleshift = (code == 'h') ? 0 : 4;
 				int first = 1;
-				char *v;
 
-				val = &argv[currentarg++];
-				if (Z_ISREF_P(val)) {
-					SEPARATE_ZVAL(val);
-				}
-				convert_to_string_ex(val);
-				v = Z_STRVAL_P(val);
+				zend_string *str = zval_get_string(&argv[currentarg++]);
+				char *v = str->val; 
+
 				outputpos--;
-				if(arg > Z_STRLEN_P(val)) {
+				if(arg > str->len) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough characters in string", code);
-					arg = Z_STRLEN_P(val);
+					arg = str->len;
 				}
 
 				while (arg-- > 0) {
@@ -377,6 +372,7 @@ PHP_FUNCTION(pack)
 				}
 
 				outputpos++;
+				STR_RELEASE(str);
 				break;
 			}
 
@@ -435,12 +431,8 @@ PHP_FUNCTION(pack)
 			}
 
 			case 'f': {
-				float v;
-
 				while (arg-- > 0) {
-					val = &argv[currentarg++];
-					convert_to_double_ex(val);
-					v = (float) Z_DVAL_P(val);
+					float v = (float) zval_get_double(&argv[currentarg++]);
 					memcpy(&output[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -448,12 +440,8 @@ PHP_FUNCTION(pack)
 			}
 
 			case 'd': {
-				double v;
-
 				while (arg-- > 0) {
-					val = &argv[currentarg++];
-					convert_to_double_ex(val);
-					v = (double) Z_DVAL_P(val);
+					double v = (double) zval_get_double(&argv[currentarg++]);
 					memcpy(&output[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}

@@ -310,8 +310,7 @@ PHP_FUNCTION(ceil)
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
-		convert_to_double_ex(value);
-		RETURN_DOUBLE(Z_DVAL_P(value));
+		RETURN_DOUBLE(zval_get_double(value));
 	}
 	RETURN_FALSE;
 }
@@ -331,8 +330,7 @@ PHP_FUNCTION(floor)
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(floor(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
-		convert_to_double_ex(value);
-		RETURN_DOUBLE(Z_DVAL_P(value));
+		RETURN_DOUBLE(zval_get_double(value));
 	}
 	RETURN_FALSE;
 }
