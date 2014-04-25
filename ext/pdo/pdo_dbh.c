@@ -579,9 +579,8 @@ static PHP_METHOD(PDO, prepare)
 	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	Z_ADDREF_P(getThis());
-	php_pdo_dbh_addref(dbh TSRMLS_CC);
-	ZVAL_COPY_VALUE(&stmt->database_object_handle, getThis());
+	ZVAL_OBJ(&stmt->database_object_handle, &dbh->std);
+	Z_ADDREF(stmt->database_object_handle);
 	/* we haven't created a lazy object yet */
 	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
@@ -1118,9 +1117,8 @@ static PHP_METHOD(PDO, query)
 	stmt->active_query_stringlen = statement_len;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	Z_ADDREF_P(getThis());
-	php_pdo_dbh_addref(dbh TSRMLS_CC);
-	stmt->database_object_handle = *getThis();
+	ZVAL_OBJ(&stmt->database_object_handle, &dbh->std);
+	Z_ADDREF(stmt->database_object_handle);
 	/* we haven't created a lazy object yet */
 	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
@@ -1150,7 +1148,7 @@ static PHP_METHOD(PDO, query)
 		PDO_HANDLE_STMT_ERR();
 	} else {
 		PDO_HANDLE_DBH_ERR();
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 	}
 
 	RETURN_FALSE;
@@ -1507,11 +1505,8 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	int i;
 
-	if (--dbh->refcount)
-		return;
-
 	if (dbh->query_stmt) {
-		zval_dtor(&dbh->query_stmt_zval);
+		zval_ptr_dtor(&dbh->query_stmt_zval);
 		dbh->query_stmt = NULL;
 	}
 
@@ -1545,16 +1540,6 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 	}
 
 	//???pefree(dbh, dbh->is_persistent);
-}
-
-PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh TSRMLS_DC)
-{
-	dbh->refcount++;
-}
-
-PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh TSRMLS_DC)
-{
-	dbh_free(dbh TSRMLS_CC);
 }
 
 static void pdo_dbh_free_storage(zend_object *std TSRMLS_DC)

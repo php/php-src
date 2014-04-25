@@ -2271,8 +2271,6 @@ static zend_object *dbstmt_clone_obj(zval *zobject TSRMLS_DC)
 	
 	zend_objects_clone_members(&stmt->std, &old_stmt->std TSRMLS_CC);
 	
-	ZVAL_COPY(&stmt->database_object_handle, &old_stmt->database_object_handle);
-			
 	return &stmt->std;
 }
 
@@ -2352,9 +2350,8 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 	
 	do_fetch_opt_finish(stmt, 1 TSRMLS_CC);
 
-	zval_ptr_dtor(&stmt->database_object_handle);
-	if (stmt->dbh) {
-		php_pdo_dbh_delref(stmt->dbh TSRMLS_CC);
+	if (!ZVAL_IS_UNDEF(&stmt->database_object_handle)) {
+		zval_ptr_dtor(&stmt->database_object_handle);
 	}
 	zend_object_std_dtor(&stmt->std TSRMLS_CC);
 }
