@@ -296,6 +296,7 @@ static void param_dtor(zval *el) /* {{{ */
 static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_stmt_t *stmt, int is_param TSRMLS_DC) /* {{{ */
 {
 	HashTable *hash;
+	zval *parameter;
 	struct pdo_bound_param_data *pparam = NULL;
 
 	hash = is_param ? stmt->bound_params : stmt->bound_columns;
@@ -311,19 +312,25 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		}
 	}
 
-	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !ZVAL_IS_NULL(&param->parameter)) {
-		if (Z_TYPE(param->parameter) == IS_DOUBLE) {
+	if (!Z_ISREF(param->parameter)) {
+		parameter = &param->parameter;
+	} else {
+		parameter = Z_REFVAL(param->parameter);
+	}
+
+	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !ZVAL_IS_NULL(&parameter)) {
+		if (Z_TYPE_P(parameter) == IS_DOUBLE) {
 			char *p;
-			int len = spprintf(&p, 0, "%.*H", (int) EG(precision), Z_DVAL(param->parameter));
-			ZVAL_STRINGL(&param->parameter, p, len);
+			int len = spprintf(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(parameter));
+			ZVAL_STRINGL(parameter, p, len);
 			efree(p);
 		} else {
-			convert_to_string(&param->parameter);
+			convert_to_string(parameter);
 		}
-	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT && Z_TYPE(param->parameter) == IS_BOOL) {
-		convert_to_long(&param->parameter);
-	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL && Z_TYPE(param->parameter) == IS_LONG) {
-		convert_to_boolean(&param->parameter);
+	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT && Z_TYPE_P(parameter) == IS_BOOL) {
+		convert_to_long(parameter);
+	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL && Z_TYPE_P(parameter) == IS_LONG) {
+		convert_to_boolean(parameter);
 	}
 
 	param->stmt = stmt;
@@ -700,13 +707,16 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, lon
 
 		ZEND_HASH_FOREACH_PTR(stmt->bound_columns, param) {
 			if (param->paramno >= 0) {
-				convert_to_string(&param->parameter);
+				if (!Z_ISREF(param->parameter)) {
+					continue;
+				}
+				// ???? convert_to_string(&param->parameter);
 
 				/* delete old value */
-				zval_ptr_dtor(&param->parameter);
+				zval_dtor(Z_REFVAL(param->parameter));
 
 				/* set new value */
-				fetch_value(stmt, &param->parameter, param->paramno, (int *)&param->param_type TSRMLS_CC);
+				fetch_value(stmt, Z_REFVAL(param->parameter), param->paramno, (int *)&param->param_type TSRMLS_CC);
 
 				/* TODO: some smart thing that avoids duplicating the value in the
 				 * general loop below.  For now, if you're binding output columns,
@@ -1641,7 +1651,7 @@ static PHP_METHOD(PDOStatement, bindParam)
 static PHP_METHOD(PDOStatement, bindColumn)
 {
 	PHP_STMT_GET_OBJ;
-	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, FALSE));
+	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 0));
 }
 /* }}} */
 
