@@ -214,13 +214,15 @@ static uint zend_persist_op_array_calc(zend_op_array *op_array TSRMLS_DC)
 			if (op_array->arg_info[i].class_name) {
 				ADD_INTERNED_STRING(op_array->arg_info[i].class_name, op_array->arg_info[i].class_name_len + 1);
 			}
-
 		}
 	}
-	
-	ADD_DUP_SIZE(op_array->return_hint, sizeof(zend_return_hint));
-	if (op_array->return_hint->used && op_array->return_hint->type == IS_OBJECT) {
-		ADD_INTERNED_STRING(op_array->return_hint->class_name, op_array->return_hint->class_name_len + 1);
+
+	if (op_array->return_hint &&
+		!zend_shared_alloc_get_xlat_entry(op_array->return_hint)) {
+		ADD_DUP_SIZE(op_array->return_hint, sizeof(zend_return_hint));
+		if (op_array->return_hint->used && op_array->return_hint->type == IS_OBJECT) {
+			ADD_INTERNED_STRING(op_array->return_hint->class_name, op_array->return_hint->class_name_len + 1);
+		}
 	}
 
 	if (op_array->brk_cont_array) {
