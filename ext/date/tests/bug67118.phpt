@@ -6,7 +6,7 @@ date.timezone=Europe/Berlin
 <?php
 class mydt extends datetime
 {
-	publi function __construct($tits\bug67118.phpte = 'now', $tz = NULL, $format = NULL) 
+	public function __construct($time = 'now', $tz = NULL, $format = NULL)
 	{
 		if (!empty($tz) && !is_object($tz)) {
 			$tz = new DateTimeZone($tz);
