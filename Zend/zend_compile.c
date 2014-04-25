@@ -151,7 +151,7 @@ ZEND_API void zend_return_hint_error(int type, zend_function *function, zval *re
 			default:
 				zend_spprintf(&got, 0, "a %s", zend_zval_type_name(returned));
 		}
-	}
+	}	
 
 	zend_error(type, "the %s %s was expected to return %s and returned %s", ftype, scope, expected, got);
 
@@ -2946,14 +2946,6 @@ void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_v
 
 	if (!CG(active_op_array)->function_name) {
 		zend_error_noreturn(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a function");
-	}
-	
-	if (CG(active_op_array)->return_hint.used) {
-		if (CG(active_op_array)->return_hint.type != IS_OBJECT) {
-			zend_error_noreturn(E_COMPILE_ERROR, 
-				"Generators may only yield objects, %s is not a valid type", 
-				zend_get_type_by_const(CG(active_op_array)->return_hint.type));
-		}
 	}
 
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
