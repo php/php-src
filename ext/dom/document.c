@@ -388,7 +388,7 @@ int dom_document_standalone_write(dom_object *obj, zval *newval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	standalone = zval_get_long(newval TSRMLS_CC);
+	standalone = zval_get_long(newval);
 	docp->standalone = ZEND_NORMALIZE_BOOL(standalone);
 
 	return SUCCESS;

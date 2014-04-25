@@ -4048,7 +4048,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, zend_
 
 #define SET_VALUE_FROM_STRUCT(n,m)            \
 	if (strcmp(Z_STRVAL_P(member), m) == 0) { \
-		obj->diff->n = zval_get_long(value TSRMLS_CC); \
+		obj->diff->n = zval_get_long(value); \
 		break;								  \
 	}
 

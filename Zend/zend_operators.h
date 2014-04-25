@@ -338,9 +338,15 @@ ZEND_API void multi_convert_to_long_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 
-ZEND_API long zval_get_long(zval *op TSRMLS_DC);
-ZEND_API double zval_get_double(zval *op TSRMLS_DC);
+ZEND_API long _zval_get_long_func(zval *op TSRMLS_DC);
+ZEND_API double _zval_get_double_func(zval *op TSRMLS_DC);
 ZEND_API zend_string *_zval_get_string_func(zval *op TSRMLS_DC);
+
+#define zval_get_long(op) ((Z_TYPE_P(op) == IS_LONG) ? \
+	Z_LVAL_P(op) : _zval_get_long_func((op) TSRMLS_CC))
+
+#define zval_get_double(op) ((Z_TYPE_P(op) == IS_DOUBLE) ? \
+	Z_DVAL_P(op) : _zval_get_double_func((op) TSRMLS_CC))
 
 #define zval_get_string(op) ((Z_TYPE_P(op) == IS_STRING) ? \
 	STR_COPY(Z_STR_P(op)) : _zval_get_string_func((op) TSRMLS_CC))

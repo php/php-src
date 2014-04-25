@@ -389,7 +389,6 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 			ZVAL_LONG(op, 0);
 			break;
 		case IS_RESOURCE: {
-				TSRMLS_FETCH();
 				long l = Z_RES_HANDLE_P(op);
 				zval_ptr_dtor(op);
 				ZVAL_LONG(op, l);
@@ -450,7 +449,6 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 			ZVAL_DOUBLE(op, 0.0);
 			break;
 		case IS_RESOURCE: {
-				TSRMLS_FETCH();
 				double d = (double) Z_RES_HANDLE_P(op);
 				zval_ptr_dtor(op);
 				ZVAL_DOUBLE(op, d);
@@ -532,7 +530,6 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 			ZVAL_BOOL(op, 0);
 			break;
 		case IS_RESOURCE: {
-				TSRMLS_FETCH();
 				long l = (Z_RES_HANDLE_P(op) ? 1 : 0);
 
 				zval_ptr_dtor(op);
@@ -617,7 +614,6 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			long tmp = Z_RES_HANDLE_P(op);
 			char *str;
 			int len;
-			TSRMLS_FETCH();
 
 			zval_ptr_dtor(op);
 			len = zend_spprintf(&str, 0, "Resource id #%ld", tmp);
@@ -819,8 +815,9 @@ ZEND_API void multi_convert_to_string_ex(int argc, ...) /* {{{ */
 }
 /* }}} */
 
-ZEND_API long zval_get_long(zval *op TSRMLS_DC) /* {{{ */
+ZEND_API long _zval_get_long_func(zval *op TSRMLS_DC) /* {{{ */
 {
+try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			return 0;
@@ -848,6 +845,9 @@ ZEND_API long zval_get_long(zval *op TSRMLS_DC) /* {{{ */
 					return 1;
 				}
 			}
+		case IS_REFERENCE:
+			op = Z_REFVAL_P(op);
+			goto try_again;
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
 			return 0;
@@ -855,8 +855,9 @@ ZEND_API long zval_get_long(zval *op TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API double zval_get_double(zval *op TSRMLS_DC) /* {{{ */
+ZEND_API double _zval_get_double_func(zval *op TSRMLS_DC) /* {{{ */
 {
+try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			return 0.0;
@@ -886,6 +887,9 @@ ZEND_API double zval_get_double(zval *op TSRMLS_DC) /* {{{ */
 					return 1.0;
 				}
 			}
+		case IS_REFERENCE:
+			op = Z_REFVAL_P(op);
+			goto try_again;
 		default:
 			zend_error(E_WARNING, "Cannot convert to real value (type=%d)", Z_TYPE_P(op));
 			return 0.0;
