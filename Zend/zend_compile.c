@@ -1893,18 +1893,23 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 	int name_len;
 
 	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->return_hint.used) {
-		zend_class_entry *ce = NULL;
 		char *errmsg = "Generators may only be hinted as Generator, Iterator or Traversable, %s is not a valid type";
+		char *lower_name;
+		int class_hint_len = CG(active_op_array)->return_hint.class_name_len;
+
 		if (CG(active_op_array)->return_hint.type != IS_OBJECT) {
 			zend_error_noreturn(E_COMPILE_ERROR, errmsg, 
 				zend_get_type_by_const(CG(active_op_array)->return_hint.type));
 		}
-		
-		ce = zend_fetch_class_by_name(CG(active_op_array)->return_hint.class_name, CG(active_op_array)->return_hint.class_name_len, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
-		
-		if (!ce || !instanceof_function(zend_ce_generator, ce TSRMLS_CC)) {
+		lower_name = zend_str_tolower_dup(CG(active_op_array)->return_hint.class_name, class_hint_len);
+		if (0 != zend_binary_strcmp(lower_name, class_hint_len, "traversable", 11)
+			&& 0 != zend_binary_strcmp(lower_name, class_hint_len, "generator", 9)
+			&& 0 != zend_binary_strcmp(lower_name, class_hint_len, "iterator", 8)
+		) {
+			efree(lower_name);
 			zend_error_noreturn(E_COMPILE_ERROR, errmsg, CG(active_op_array)->return_hint.class_name);
 		}
+		efree(lower_name);
 	}
 
 	zend_do_extended_info(TSRMLS_C);
