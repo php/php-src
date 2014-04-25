@@ -6,8 +6,6 @@ PHP                                                                        NEWS
   . Fixed bug #67079 (Missing MIME types for XML/XSL files). (Anatol)
 
 - Core:
-  . Fixed bug #64604 (parse_url is inconsistent with specified port).
-    (Ingo Walz)
   . Fixed bug #65701 (copy() doesn't work when destination filename is created
     by tempnam()). (Boro Sitnikovski)
   . Fixed bug #66015 (Unexpected array indexing in class's static property). (Bob)
