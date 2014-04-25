@@ -269,10 +269,11 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_ACTIVE:
 		oldint = ASSERTG(active);
 		if (ac == 2) {
-			convert_to_string_ex(value);
+			zend_string *value_str = zval_get_string(value);
 			key = STR_INIT("assert.active", sizeof("assert.active")-1, 0);
-			zend_alter_ini_entry_ex(key, Z_STRVAL_P(value), Z_STRLEN_P(value), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str->val, value_str->len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 			STR_RELEASE(key);
+			STR_RELEASE(value_str);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -280,10 +281,11 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_BAIL:
 		oldint = ASSERTG(bail);
 		if (ac == 2) {
-			convert_to_string_ex(value);
+			zend_string *value_str = zval_get_string(value);
 			key = STR_INIT("assert.bail", sizeof("assert.bail")-1, 0);
-			zend_alter_ini_entry_ex(key, Z_STRVAL_P(value), Z_STRLEN_P(value), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str->val, value_str->len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 			STR_RELEASE(key);
+			STR_RELEASE(value_str);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -291,10 +293,11 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_QUIET_EVAL:
 		oldint = ASSERTG(quiet_eval);
 		if (ac == 2) {
-			convert_to_string_ex(value);
+			zend_string *value_str = zval_get_string(value);
 			key = STR_INIT("assert.quiet_eval", sizeof("assert.quiet_eval")-1, 0);
-			zend_alter_ini_entry_ex(key, Z_STRVAL_P(value), Z_STRLEN_P(value), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str->val, value_str->len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 			STR_RELEASE(key);
+			STR_RELEASE(value_str);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -302,10 +305,11 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_WARNING:
 		oldint = ASSERTG(warning);
 		if (ac == 2) {
-			convert_to_string_ex(value);
+			zend_string *value_str = zval_get_string(value);
 			key = STR_INIT("assert.warning", sizeof("assert.warning")-1, 0);
-			zend_alter_ini_entry_ex(key, Z_STRVAL_P(value), Z_STRLEN_P(value), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str->val, value_str->len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 			STR_RELEASE(key);
+			STR_RELEASE(value_str);
 		}
 		RETURN_LONG(oldint);
 		break;

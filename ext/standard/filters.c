@@ -1208,7 +1208,7 @@ typedef struct _php_convert_filter {
 #define PHP_CONV_QPRINT_ENCODE 3 
 #define PHP_CONV_QPRINT_DECODE 4
 
-static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pretval, size_t *pretval_len, char *field_name, size_t field_name_len, int persistent)
+static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pretval, size_t *pretval_len, char *field_name, size_t field_name_len, int persistent TSRMLS_DC)
 {
 	zval *tmpval;
 
@@ -1216,26 +1216,15 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 	*pretval_len = 0;
  
 	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
-		if (Z_TYPE_P(tmpval) != IS_STRING) {
-			zval zt;
-			
-			ZVAL_COPY_VALUE(&zt, tmpval);
-			convert_to_string(&zt);
+		zend_string *str = zval_get_string(tmpval);
 
-			if (NULL == (*pretval = pemalloc(Z_STRLEN(zt) + 1, persistent))) {
-				return PHP_CONV_ERR_ALLOC;
-			}
-
-			*pretval_len = Z_STRLEN(zt);
-			memcpy(*pretval, Z_STRVAL(zt), Z_STRLEN(zt) + 1);
-			zval_dtor(&zt);
-		} else {
-			if (NULL == (*pretval = pemalloc(Z_STRLEN_P(tmpval) + 1, persistent))) {
-				return PHP_CONV_ERR_ALLOC;
-			}
-			*pretval_len = Z_STRLEN_P(tmpval);
-			memcpy(*pretval, Z_STRVAL_P(tmpval), Z_STRLEN_P(tmpval) + 1);
+		if (NULL == (*pretval = pemalloc(str->len + 1, persistent))) {
+			return PHP_CONV_ERR_ALLOC;
 		}
+
+		*pretval_len = str->len;
+		memcpy(*pretval, str->val, str->len + 1);
+		STR_RELEASE(str);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	}
@@ -1331,7 +1320,7 @@ static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *fie
 
 static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
 {
-	long l;
+	unsigned long l;
 	php_conv_err_t err;
 
 	*pretval = 0;
@@ -1343,7 +1332,7 @@ static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval,
 }
 
 #define GET_STR_PROP(ht, var, var_len, fldname, persistent) \
-	php_conv_get_string_prop_ex(ht, &var, &var_len, fldname, sizeof(fldname), persistent) 
+	php_conv_get_string_prop_ex(ht, &var, &var_len, fldname, sizeof(fldname), persistent TSRMLS_CC) 
 
 #define GET_INT_PROP(ht, var, fldname) \
 	php_conv_get_int_prop_ex(ht, &var, fldname, sizeof(fldname))
@@ -1354,7 +1343,7 @@ static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval,
 #define GET_BOOL_PROP(ht, var, fldname) \
 	php_conv_get_bool_prop_ex(ht, &var, fldname, sizeof(fldname))
 
-static php_conv *php_conv_open(int conv_mode, const HashTable *options, int persistent)
+static php_conv *php_conv_open(int conv_mode, const HashTable *options, int persistent TSRMLS_DC)
 {
 	/* FIXME: I'll have to replace this ugly code by something neat
 	   (factories?) in the near future. */ 
@@ -1490,13 +1479,13 @@ out_failure:
 
 static int php_convert_filter_ctor(php_convert_filter *inst,
 	int conv_mode, HashTable *conv_opts,
-	const char *filtername, int persistent)
+	const char *filtername, int persistent TSRMLS_DC)
 {
 	inst->persistent = persistent;
 	inst->filtername = pestrdup(filtername, persistent);
 	inst->stub_len = 0;
 
-	if ((inst->cd = php_conv_open(conv_mode, conv_opts, persistent)) == NULL) {
+	if ((inst->cd = php_conv_open(conv_mode, conv_opts, persistent TSRMLS_CC)) == NULL) {
 		goto out_failure;
 	}
 
@@ -1822,7 +1811,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 	
 	if (php_convert_filter_ctor(inst, conv_mode,
 		(filterparams != NULL ? Z_ARRVAL_P(filterparams) : NULL),
-		filtername, persistent) != SUCCESS) {
+		filtername, persistent TSRMLS_CC) != SUCCESS) {
 		goto out;
 	}	
 

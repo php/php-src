@@ -401,57 +401,30 @@ static int php_array_reverse_data_compare(const void *a, const void *b TSRMLS_DC
 }
 /* }}} */
 
-static int php_array_natural_general_compare(const void *a, const void *b, int fold_case) /* {{{ */
+static int php_array_natural_general_compare(const void *a, const void *b, int fold_case TSRMLS_DC) /* {{{ */
 {
-	Bucket *f, *s;
-	zval *fval, *sval;
-	zval first, second;
-	int result;
+	Bucket *f = (Bucket *) a;
+	Bucket *s = (Bucket *) b;
+	zend_string *str1 = zval_get_string(&f->val);
+	zend_string *str2 = zval_get_string(&s->val);
 
-	f = (Bucket *) a;
-	s = (Bucket *) b;
+	int result = strnatcmp_ex(str1->val, str1->len, str2->val, str2->len, fold_case);
 
-	fval = &f->val;
-	sval = &s->val;
-
-	ZVAL_DEREF(fval);
-	ZVAL_DEREF(sval);
-	ZVAL_COPY_VALUE(&first, fval);
-	ZVAL_COPY_VALUE(&second, sval);
-
-	if (Z_TYPE_P(fval) != IS_STRING) {
-		zval_copy_ctor(&first);
-		convert_to_string(&first);
-	}
-
-	if (Z_TYPE_P(sval) != IS_STRING) {
-		zval_copy_ctor(&second);
-		convert_to_string(&second);
-	}
-
-	result = strnatcmp_ex(Z_STRVAL(first), Z_STRLEN(first), Z_STRVAL(second), Z_STRLEN(second), fold_case);
-
-	if (Z_TYPE_P(fval) != IS_STRING) {
-		zval_dtor(&first);
-	}
-
-	if (Z_TYPE_P(sval) != IS_STRING) {
-		zval_dtor(&second);
-	}
-
+	STR_RELEASE(str1);
+	STR_RELEASE(str2);
 	return result;
 }
 /* }}} */
 
 static int php_array_natural_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
-	return php_array_natural_general_compare(a, b, 0);
+	return php_array_natural_general_compare(a, b, 0 TSRMLS_CC);
 }
 /* }}} */
 
 static int php_array_natural_case_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
-	return php_array_natural_general_compare(a, b, 1);
+	return php_array_natural_general_compare(a, b, 1 TSRMLS_CC);
 }
 /* }}} */
 
@@ -1590,20 +1563,12 @@ PHP_FUNCTION(array_fill_keys)
 			zval_add_ref(val);
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), val);
 		} else {
-			zval key, *key_ptr = entry;
-
-			if (Z_TYPE_P(entry) != IS_STRING) {
-				ZVAL_DUP(&key, entry);
-				convert_to_string(&key);
-				key_ptr = &key;
-			}
+			zend_string *key = zval_get_string(entry);
 
 			zval_add_ref(val);
-			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(key_ptr), val);
+			zend_symtable_update(Z_ARRVAL_P(return_value), key, val);
 
-			if (key_ptr != entry) {
-				zval_dtor(&key);
-			}
+			STR_RELEASE(key);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -4601,20 +4566,12 @@ PHP_FUNCTION(array_combine)
 			zval_add_ref(entry_values);
 			add_index_zval(return_value, Z_LVAL_P(entry_keys), entry_values);
 		} else {
-			zval key, *key_ptr = entry_keys;
-
-			if (Z_TYPE_P(entry_keys) != IS_STRING) {
-				ZVAL_DUP(&key, entry_keys);
-				convert_to_string(&key);
-				key_ptr = &key;
-			}
+			zend_string *key = zval_get_string(entry_keys);
 
 			zval_add_ref(entry_values);
-			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(key_ptr), entry_values);
+			zend_symtable_update(Z_ARRVAL_P(return_value), key, entry_values);
 
-			if (key_ptr != entry_keys) {
-				zval_dtor(&key);
-			}
+			STR_RELEASE(key);
 		}
 
 		zend_hash_move_forward_ex(Z_ARRVAL_P(keys), &pos_keys);

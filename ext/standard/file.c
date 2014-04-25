@@ -653,23 +653,21 @@ PHP_FUNCTION(file_put_contents)
 				zval *tmp;
 
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
-					if (Z_TYPE_P(tmp) != IS_STRING) {
-						SEPARATE_ZVAL(tmp);
-						convert_to_string(tmp);
-					}
-					if (Z_STRLEN_P(tmp)) {
-						numbytes += Z_STRLEN_P(tmp);
-						bytes_written = php_stream_write(stream, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
-						if (bytes_written < 0 || bytes_written != Z_STRLEN_P(tmp)) {
+					zend_string *str = zval_get_string(tmp);
+					if (str->len) {
+						numbytes += str->len;
+						bytes_written = php_stream_write(stream, str->val, str->len);
+						if (bytes_written < 0 || bytes_written != str->len) {
 							if (bytes_written < 0) {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s", Z_STRLEN_P(tmp), filename);
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s", str->len, filename);
 							} else {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", bytes_written, Z_STRLEN_P(tmp));
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", bytes_written, str->len);
 							}
 							numbytes = -1;
 							break;
 						}
 					}
+					STR_RELEASE(str);
 				} ZEND_HASH_FOREACH_END();
 			}
 			break;
@@ -1813,7 +1811,7 @@ quit_loop:
 }
 /* }}} */
 
-#define FPUTCSV_FLD_CHK(c) memchr(Z_STRVAL(field), c, Z_STRLEN(field))
+#define FPUTCSV_FLD_CHK(c) memchr(field_str->val, c, field_str->len)
 
 /* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure [, string escape_char]]])
    Format line as CSV and write to file pointer */
@@ -1881,17 +1879,12 @@ PHP_FUNCTION(fputcsv)
 PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
 {
 	int count, i = 0, ret;
-	zval *field_tmp = NULL, field;
+	zval *field_tmp;
 	smart_str csvline = {0};
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(fields), field_tmp) {
-		ZVAL_COPY_VALUE(&field, field_tmp);
-
-		if (Z_TYPE(field) != IS_STRING) {
-			zval_copy_ctor(&field);
-			convert_to_string(&field);
-		}
+		zend_string *field_str = zval_get_string(field_tmp);
 
 		/* enclose a field that contains a delimiter, an enclosure character, or a newline */
 		if (FPUTCSV_FLD_CHK(delimiter) ||
@@ -1902,8 +1895,8 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 			FPUTCSV_FLD_CHK('\t') ||
 			FPUTCSV_FLD_CHK(' ')
 		) {
-			char *ch = Z_STRVAL(field);
-			char *end = ch + Z_STRLEN(field);
+			char *ch = field_str->val;
+			char *end = ch + field_str->len;
 			int escaped = 0;
 
 			smart_str_appendc(&csvline, enclosure);
@@ -1920,15 +1913,13 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 			}
 			smart_str_appendc(&csvline, enclosure);
 		} else {
-			smart_str_appendl(&csvline, Z_STRVAL(field), Z_STRLEN(field));
+			smart_str_appendl(&csvline, field_str->val, field_str->len);
 		}
 
 		if (++i != count) {
 			smart_str_appendl(&csvline, &delimiter, 1);
 		}
-		if (Z_TYPE_P(field_tmp) != IS_STRING) {
-			zval_dtor(&field);
-		}
+		STR_RELEASE(field_str);
 	} ZEND_HASH_FOREACH_END();
 
 	smart_str_appendc(&csvline, '\n');

@@ -4241,19 +4241,11 @@ PHP_FUNCTION(getopt)
 
 		/* Iterate over the hash to construct the argv array. */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), entry) {
-			zval arg, *arg_ptr = entry;
+			zend_string *arg_str = zval_get_string(entry);
 
-			if (Z_TYPE_P(entry) != IS_STRING) {
-				ZVAL_DUP(&arg, entry);
-				convert_to_string(&arg);
-				arg_ptr = &arg;
-			}
+			argv[pos++] = estrdup(arg_str->val);
 
-			argv[pos++] = estrdup(Z_STRVAL_P(arg_ptr));
-
-			if (arg_ptr != entry) {
-				zval_dtor(&arg);
-			}
+			STR_RELEASE(arg_str);
 		} ZEND_HASH_FOREACH_END();
 
 		/* The C Standard requires argv[argc] to be NULL - this might
@@ -4282,16 +4274,10 @@ PHP_FUNCTION(getopt)
 
 		/* Iterate over the hash to construct the argv array. */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(p_longopts), entry) {
-			zval arg, *arg_ptr = entry;
-
-			if (Z_TYPE_P(entry) != IS_STRING) {
-				ZVAL_DUP(&arg, entry);
-				convert_to_string(&arg);
-				arg_ptr = &arg;
-			}
+			zend_string *arg_str = zval_get_string(entry);
 
 			opts->need_param = 0;
-			opts->opt_name = estrdup(Z_STRVAL_P(arg_ptr));
+			opts->opt_name = estrdup(arg_str->val);
 			len = strlen(opts->opt_name);
 			if ((len > 0) && (opts->opt_name[len - 1] == ':')) {
 				opts->need_param++;
@@ -4304,9 +4290,7 @@ PHP_FUNCTION(getopt)
 			opts->opt_char = 0;
 			opts++;
 
-			if (arg_ptr != entry) {
-				zval_dtor(&arg);
-			}
+			STR_RELEASE(arg_str);
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		opts = (opt_struct*) erealloc(opts, sizeof(opt_struct) * (len + 1));
