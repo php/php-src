@@ -3643,7 +3643,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 	
 	*(offset++) = ')';
 	
-	if (fptr->common.return_hint->used) {
+	if (fptr->common.return_hint && fptr->common.return_hint->used) {
 		REALLOC_BUF_IF_EXCEED(buf, offset, length, 4);
 		*(offset++) = ' ';
 		*(offset++) = ':';
