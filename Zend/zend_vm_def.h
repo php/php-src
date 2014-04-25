@@ -3785,6 +3785,15 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 
 	switch (opline->extended_value) {
 		case IS_NULL:
+			if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
+				ZVAL_DEREF(expr);
+			}
+			if (Z_TYPE_P(expr) == IS_OBJECT && Z_OBJ_HT_P(expr)->cast_object) {
+				if (Z_OBJ_HT_P(expr)->cast_object(expr, result, IS_NULL TSRMLS_CC) == SUCCESS) {
+					break;
+				}
+			}
+
 			ZVAL_NULL(result);
 			break;
 		case IS_BOOL:

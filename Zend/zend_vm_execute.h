@@ -2785,6 +2785,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	switch (opline->extended_value) {
 		case IS_NULL:
+			if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
+				ZVAL_DEREF(expr);
+			}
+			if (Z_TYPE_P(expr) == IS_OBJECT && Z_OBJ_HT_P(expr)->cast_object) {
+				if (Z_OBJ_HT_P(expr)->cast_object(expr, result, IS_NULL TSRMLS_CC) == SUCCESS) {
+					break;
+				}
+			}
+
 			ZVAL_NULL(result);
 			break;
 		case IS_BOOL:
@@ -7863,6 +7872,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	switch (opline->extended_value) {
 		case IS_NULL:
+			if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
+				ZVAL_DEREF(expr);
+			}
+			if (Z_TYPE_P(expr) == IS_OBJECT && Z_OBJ_HT_P(expr)->cast_object) {
+				if (Z_OBJ_HT_P(expr)->cast_object(expr, result, IS_NULL TSRMLS_CC) == SUCCESS) {
+					break;
+				}
+			}
+
 			ZVAL_NULL(result);
 			break;
 		case IS_BOOL:
@@ -13011,6 +13029,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	switch (opline->extended_value) {
 		case IS_NULL:
+			if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
+				ZVAL_DEREF(expr);
+			}
+			if (Z_TYPE_P(expr) == IS_OBJECT && Z_OBJ_HT_P(expr)->cast_object) {
+				if (Z_OBJ_HT_P(expr)->cast_object(expr, result, IS_NULL TSRMLS_CC) == SUCCESS) {
+					break;
+				}
+			}
+
 			ZVAL_NULL(result);
 			break;
 		case IS_BOOL:
@@ -29905,6 +29932,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	switch (opline->extended_value) {
 		case IS_NULL:
+			if (IS_CV == IS_VAR || IS_CV == IS_CV) {
+				ZVAL_DEREF(expr);
+			}
+			if (Z_TYPE_P(expr) == IS_OBJECT && Z_OBJ_HT_P(expr)->cast_object) {
+				if (Z_OBJ_HT_P(expr)->cast_object(expr, result, IS_NULL TSRMLS_CC) == SUCCESS) {
+					break;
+				}
+			}
+
 			ZVAL_NULL(result);
 			break;
 		case IS_BOOL:
