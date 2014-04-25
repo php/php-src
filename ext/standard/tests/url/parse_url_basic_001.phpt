@@ -845,6 +845,13 @@ echo "Done";
   string(1) "/"
 }
 
+--> /rest/Users?filter={"id":"123"}: array(2) {
+  ["path"]=>
+  string(11) "/rest/Users"
+  ["query"]=>
+  string(19) "filter={"id":"123"}"
+}
+
 --> http:///blah.com: bool(false)
 
 --> http://:80: bool(false)
