@@ -108,7 +108,6 @@ ZEND_API void zend_return_hint_error(int type, zend_function *function, zval *re
 	char *expected = NULL;
 	char *got = NULL;
 	char *ftype = (function->common.fn_flags & ZEND_ACC_GENERATOR) ? "generator" : "function";
-	char *rtype = (function->common.fn_flags & ZEND_ACC_GENERATOR) ? "yield"     : "return";
 	
 	if (function->common.scope) {
 		zend_spprintf(&scope, 0, "%s::%s", 
@@ -128,7 +127,7 @@ ZEND_API void zend_return_hint_error(int type, zend_function *function, zval *re
 	}
 	
 	if (message) {
-		zend_error(type, "the %s %s was expected to %s %s, %s", ftype, scope, rtype, expected, message);
+		zend_error(type, "the %s %s was expected to return %s, %s", ftype, scope, expected, message);
 		efree(scope);
 		efree(expected);
 		return;
@@ -154,7 +153,7 @@ ZEND_API void zend_return_hint_error(int type, zend_function *function, zval *re
 		}
 	}
 
-	zend_error(type, "the %s %s was expected to %s %s and returned %s", ftype, scope, rtype, expected, got);
+	zend_error(type, "the %s %s was expected to return %s and returned %s", ftype, scope, expected, got);
 
 	efree(scope);
 	efree(expected);
