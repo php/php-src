@@ -1494,7 +1494,7 @@ void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC) /* {{
 {
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
 		zend_hash_destroy(&symbol_table->ht);
-		efree(symbol_table);
+		FREE_HASHTABLE(symbol_table);
 	} else {
 		/* clean before putting into the cache, since clean
 		   could call dtors, which could use cached hash */

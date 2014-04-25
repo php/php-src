@@ -429,7 +429,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				properties->u.v.nApplyCount--;
 				if (is_temp) {
 					zend_hash_destroy(properties);
-					efree(properties);
+					FREE_HASHTABLE(properties);
 				}
 				break;
 			}
