@@ -221,8 +221,9 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
 				valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
 			} else {
-				convert_to_string_ex(&retval);
-				valuePush(ctxt, xmlXPathNewString(Z_STRVAL(retval)));
+				zend_string *str = zval_get_string(&retval);
+				valuePush(ctxt, xmlXPathNewString(str->val));
+				STR_RELEASE(str);
 			}
 			zval_ptr_dtor(&retval);
 		}
