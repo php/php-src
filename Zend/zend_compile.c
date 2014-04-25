@@ -1901,6 +1901,22 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 			zend_error_noreturn(E_COMPILE_ERROR, errmsg, 
 				zend_get_type_by_const(CG(active_op_array)->return_hint.type));
 		}
+
+		/**
+ 		 * This is a dirty workaround to not crash when opcache is enabled
+ 		 *
+ 		 * Basically, opcache overrides the class table while compiling files.
+ 		 * That means that a instanceof check during compile will fail, as we 
+ 		 * will not be able to load the internal classes.
+ 		 * 
+ 		 * Considering this is an internal edge case, where the return type is
+ 		 * dictated by the engine itself, it is OK to just do a plain string
+ 		 * comparison.
+ 		 *
+ 		 * The alternative would be to introduce a opcode handler just to do this
+ 		 * particular check, which has WAY more overhead both in maintainability
+ 		 * and runtime cost.
+ 		 */
 		lower_name = zend_str_tolower_dup(CG(active_op_array)->return_hint.class_name, class_hint_len);
 		if (0 != zend_binary_strcmp(lower_name, class_hint_len, "traversable", 11)
 			&& 0 != zend_binary_strcmp(lower_name, class_hint_len, "generator", 9)
