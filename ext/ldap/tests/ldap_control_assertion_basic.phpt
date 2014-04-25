@@ -28,7 +28,10 @@ $control = ldap_control_assertion($link, $assertion_string);
 
 var_dump(
 	$control,
-	ldap_modify($link, "dc=my-domain,dc=com", $entry, $control)
+	ldap_modify($link, "dc=my-domain,dc=com", $entry, $control),
+	ldap_modify($link, "dc=my-domain,dc=com", $entry, [$control]),
+	ldap_modify($link, "dc=my-domain,dc=com", $entry, []),
+	ldap_modify($link, "dc=my-domain,dc=com", $entry, NULL)
 );
 
 ?>
@@ -43,5 +46,8 @@ remove_dummy_data($link);
 ?>
 --EXPECTF--
 resource(%d) of type (ldap control)
+bool(true)
+bool(true)
+bool(true)
 bool(true)
 ===DONE===

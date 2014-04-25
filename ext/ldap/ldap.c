@@ -1295,18 +1295,18 @@ PHP_FUNCTION(ldap_dn2ufn)
  */
 static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 {
-	zval *link, *entry, **value, **ivalue, *server_control = NULL, *client_control = NULL;
+	zval *link, *entry, **value, **ivalue, *server_control = NULL, *client_control = NULL, **control;
 	ldap_linkdata *ld;
 	char *dn;
 	LDAPMod **ldap_mods;
 	LDAPControl **server_ctrls = NULL, **client_ctrls = NULL;
-	int i, j, num_attribs, num_values, dn_len;
+	int i, j, num_attribs, num_values, dn_len, num_server_controls = 0;
 	int *num_berval;
 	char *attribute;
 	ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsa|rr", &link, &dn, &dn_len, &entry, &server_control, &client_control) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsa|z!z!", &link, &dn, &dn_len, &entry, &server_control, &client_control) != SUCCESS) {
 		return;
 	}	
 
@@ -1319,15 +1319,33 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 
 
 	if (server_control) {
-		server_ctrls = safe_emalloc(2, sizeof(LDAPControl *), 0);
-		ZEND_FETCH_RESOURCE(server_ctrls[0], LDAPControl *, &server_control, -1, "ldap control", le_control);
-		server_ctrls[1] = NULL;
+		if (Z_TYPE_P(server_control) == IS_ARRAY) {
+			num_server_controls = zend_hash_num_elements(Z_ARRVAL_P(server_control));
+		} else {
+			num_server_controls = 1;
+		}
 	}
 
-	if (client_control) {
-		client_ctrls = safe_emalloc(2, sizeof(LDAPControl *), 0);
-		ZEND_FETCH_RESOURCE(client_ctrls[0], LDAPControl *, &client_control, -1, "ldap control", le_control);
-		client_ctrls[1] = NULL;
+	if (num_server_controls > 0) {
+		server_ctrls = safe_emalloc(num_server_controls + 1, sizeof(LDAPControl *), 0);
+		server_ctrls[num_server_controls] = NULL;
+
+		if (Z_TYPE_P(server_control) == IS_ARRAY) {
+			zend_hash_internal_pointer_reset(Z_ARRVAL_P(server_control));
+			for (i=0; i < num_server_controls; i++) {
+				zend_hash_get_current_data(Z_ARRVAL_P(server_control), (void **)&control);
+				ZEND_FETCH_RESOURCE(server_ctrls[i], LDAPControl *, control, -1, "ldap control", le_control);
+				zend_hash_move_forward(Z_ARRVAL_P(server_control));
+			}
+		} else {
+			ZEND_FETCH_RESOURCE(server_ctrls[0], LDAPControl *, &server_control, -1, "ldap control", le_control);
+		}
+	}
+
+   if (client_control) {
+       client_ctrls = safe_emalloc(2, sizeof(LDAPControl *), 0);
+       ZEND_FETCH_RESOURCE(client_ctrls[0], LDAPControl *, &client_control, -1, "ldap control", le_control);
+       client_ctrls[1] = NULL;
 	}
 
 	/* added by gerrit thomson to fix ldap_add using ldap_mod_add */
