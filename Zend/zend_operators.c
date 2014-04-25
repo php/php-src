@@ -670,23 +670,15 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 }
 /* }}} */
 
-static void convert_scalar_to_array(zval *op, int type TSRMLS_DC) /* {{{ */
+static void convert_scalar_to_array(zval *op TSRMLS_DC) /* {{{ */
 {
 	zval entry;
 
 	ZVAL_COPY_VALUE(&entry, op);
 
-	switch (type) {
-		case IS_ARRAY:
-			ZVAL_NEW_ARR(op);
-			zend_hash_init(Z_ARRVAL_P(op), 8, NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_index_update(Z_ARRVAL_P(op), 0, &entry);
-			break;
-		case IS_OBJECT:
-			object_init(op);
-			zend_hash_str_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar")-1, &entry);
-			break;
-	}
+	ZVAL_NEW_ARR(op);
+	zend_hash_init(Z_ARRVAL_P(op), 8, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_index_update(Z_ARRVAL_P(op), 0, &entry);
 }
 /* }}} */
 
@@ -699,18 +691,14 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 			break;
 /* OBJECTS_OPTIMIZE */
 		case IS_OBJECT:
-			{
+			if (Z_OBJCE_P(op) == zend_ce_closure) {
+				convert_scalar_to_array(op TSRMLS_CC);
+			} else {
 				zval arr;
-
 				ZVAL_NEW_ARR(&arr);
 				zend_hash_init(Z_ARRVAL(arr), 8, NULL, ZVAL_PTR_DTOR, 0);
-				if (Z_OBJCE_P(op) == zend_ce_closure) {
-					convert_scalar_to_array(op, IS_ARRAY TSRMLS_CC);
-					if (Z_TYPE_P(op) == IS_ARRAY) {
-						zval_dtor(&arr);
-						return;
-					}
-				} else if (Z_OBJ_HT_P(op)->get_properties) {
+
+				if (Z_OBJ_HT_P(op)->get_properties) {
 					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op TSRMLS_CC);
 					if (obj_ht) {
 						zend_hash_copy(Z_ARRVAL(arr), obj_ht, zval_add_ref);
@@ -732,7 +720,7 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 			zend_hash_init(Z_ARRVAL_P(op), 8, NULL, ZVAL_PTR_DTOR, 0);
 			break;
 		default:
-			convert_scalar_to_array(op, IS_ARRAY TSRMLS_CC);
+			convert_scalar_to_array(op TSRMLS_CC);
 			break;
 	}
 }
@@ -760,9 +748,13 @@ ZEND_API void convert_to_object(zval *op) /* {{{ */
 		case IS_NULL:
 			object_init(op);
 			break;
-		default:
-			convert_scalar_to_array(op, IS_OBJECT TSRMLS_CC);
+		default: {
+			zval tmp;
+			ZVAL_COPY_VALUE(&tmp, op);
+			object_init(op);
+			zend_hash_str_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar")-1, &tmp);
 			break;
+		}
 	}
 }
 /* }}} */
