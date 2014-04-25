@@ -2947,6 +2947,23 @@ void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_v
 	if (!CG(active_op_array)->function_name) {
 		zend_error_noreturn(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a function");
 	}
+	
+	if (CG(active_op_array)->return_hint.used) {
+		zend_class_entry *ce = NULL;
+		
+		if (CG(active_op_array)->return_hint.type != IS_OBJECT) {
+			zend_error_noreturn(E_COMPILE_ERROR, 
+				"Generators may only yield objects, %s is not a valid type", 
+				zend_get_type_by_const(CG(active_op_array)->return_hint.type));
+		}
+		
+		ce = zend_fetch_class_by_name(CG(active_op_array)->return_hint.class_name, CG(active_op_array)->return_hint.class_name_len, NULL, 0 TSRMLS_CC);
+		
+		if (!ce || !instanceof_function(zend_ce_generator, ce TSRMLS_CC)) {
+			zend_error_noreturn(
+				E_COMPILE_ERROR, "Generators may not yield %s", CG(active_op_array)->return_hint.class_name);
+		}
+	}
 
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
 
