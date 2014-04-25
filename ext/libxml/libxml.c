@@ -89,7 +89,7 @@ static PHP_RINIT_FUNCTION(libxml);
 static PHP_RSHUTDOWN_FUNCTION(libxml);
 static PHP_MSHUTDOWN_FUNCTION(libxml);
 static PHP_MINFO_FUNCTION(libxml);
-static int php_libxml_post_deactivate();
+static int php_libxml_post_deactivate(void);
 
 /* }}} */
 
@@ -883,7 +883,7 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 	return SUCCESS;
 }
 
-static int php_libxml_post_deactivate()
+static int php_libxml_post_deactivate(void)
 {
 	TSRMLS_FETCH();
 	/* reset libxml generic error handling */

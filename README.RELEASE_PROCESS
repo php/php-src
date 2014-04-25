@@ -101,10 +101,10 @@ pointing out "the location of the release" and "the possible release date of
 either the next RC, or the final release".
 
 2. Send an email (see example here http://news.php.net/php.pear.qa/5201) **To**
-``php-qa@lists.php.net`` and ``primary-qa-tests@lists.php.net``.
+``php-qa@lists.php.net`` and ``primary-qa-tester@lists.php.net``.
 This email is to notify the selected projects about a new release so that they
 can make sure their projects keep working. Make sure that you have been setup
-as a moderator for ``primary-qa-tests@lists.php.net`` by having someone (Wez,
+as a moderator for ``primary-qa-tester@lists.php.net`` by having someone (Hannes, Dan,
 Derick) run the following commands for you:
 
 ``ssh lists.php.net``
@@ -139,7 +139,7 @@ Rolling a stable release
 1. Checkout your release branch, you should have created when releasing previous RC
 and bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
 
-2. If a CVE commit needs to be merged to the release, then have it commited to
+2. If a CVE commit needs to be merged to the release, then have it committed to
 the base branches and merged upwards as usual (f.e commit the CVE fix to 5.3,
 merge to 5.4, 5.5 etc...). Then you can cherry-pick it in your release branch.
 Don't forget to update NEWS manually in an extra commit then.

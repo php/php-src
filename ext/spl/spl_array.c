@@ -605,63 +605,84 @@ static void spl_array_unset_dimension(zval *object, zval *offset TSRMLS_DC) /* {
 
 static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *offset, int check_empty TSRMLS_DC) /* {{{ */
 {
-	long index;
-	zval rv, *tmp;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
+	long index;
+	zval rv, *value = NULL, *tmp;
 
 	if (check_inherited && intern->fptr_offset_has) {
+//???		zval offset_tmp;
+//???		ZVAL_COPY_VALUE(&offset_tmp, offset);
+//???		SEPARATE_ARG_IF_REF(&offset_tmp);
+//???		zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, &offset_tmp);
+//???		zval_ptr_dtor(&offset_tmp);
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(offset);
+
 		if (!ZVAL_IS_UNDEF(&rv) && zend_is_true(&rv TSRMLS_CC)) {
-			return 1;
+			zval_ptr_dtor(&rv);
+			if (check_empty == 2) {
+				return 1;
+			} else if (intern->fptr_offset_get) {
+				value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R, &rv TSRMLS_CC);
+			}
+		} else {
+			zval_ptr_dtor(&rv);
+			return 0;
 		}
-		zval_ptr_dtor(&rv);
-		return 0;
 	}
 
-	switch(Z_TYPE_P(offset)) {
-		case IS_STRING:
-			{
-				HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-				if ((tmp = zend_symtable_find_ind(ht, Z_STR_P(offset))) != NULL) {
-					switch (check_empty) {
-						case 0:
-							return Z_TYPE_P(tmp) != IS_NULL;
-						case 2:
-							return 1;
-						default:
-							return zend_is_true(tmp TSRMLS_CC);
+	if (!value) {
+		HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+
+		switch(Z_TYPE_P(offset)) {
+			case IS_STRING: 
+				if ((tmp = zend_symtable_find(ht, Z_STR_P(offset))) != NULL) {
+					if (check_empty == 2) {
+						return 1;
 					}
+				} else {
+					return 0;
 				}
-			}
-			return 0;
-		case IS_DOUBLE:
-		case IS_RESOURCE:
-		case IS_BOOL:
-		case IS_LONG:
-			{
-				HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+				break;
+			case IS_DOUBLE:
+			case IS_RESOURCE:
+			case IS_BOOL: 
+			case IS_LONG:
 				if (Z_TYPE_P(offset) == IS_DOUBLE) {
 					index = (long)Z_DVAL_P(offset);
 				} else {
 					index = Z_LVAL_P(offset);
 				}
 				if ((tmp = zend_hash_index_find(ht, index)) != NULL) {
-					switch (check_empty) {
-						case 0:
-							return Z_TYPE_P(tmp) != IS_NULL;
-						case 2:
-							return 1;
-						default:
-							return zend_is_true(tmp TSRMLS_CC);
+					if (check_empty == 2) {
+						return 1;
 					}
+				} else {
+					return 0;
 				}
+				break;
+			default:
+				zend_error(E_WARNING, "Illegal offset type");
 				return 0;
-			}
-		default:
-			zend_error(E_WARNING, "Illegal offset type");
+		}
+
+		if (check_inherited && intern->fptr_offset_get) {
+			value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R, &rv TSRMLS_CC);
+		} else {
+			value = tmp;
+		}
 	}
+
+	switch (check_empty) {
+		case 0:
+			return Z_TYPE_P(value) != IS_NULL;
+		case 2:
+			return 1;
+		case 1:
+			return zend_is_true(value TSRMLS_CC);
+	}
+
 	return 0;
 } /* }}} */
 

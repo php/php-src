@@ -287,7 +287,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		if (headers != NULL) {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(TSRMLS_C), f->val, headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(TSRMLS_C), f->val);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s", php_getuid(TSRMLS_C), f->val);
 		}
 		STR_RELEASE(f);
 	}

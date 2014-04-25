@@ -120,7 +120,7 @@ static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 		if (Z_TYPE_P(c) != IS_STRING) {
 			ZVAL_COPY_VALUE(&tmp, c);
 			if (Z_OPT_CONSTANT(tmp)) {
-				zval_update_constant_ex(&tmp, (void*)1, NULL TSRMLS_CC);
+				zval_update_constant_ex(&tmp, 1, NULL TSRMLS_CC);
 			}
 			zval_opt_copy_ctor(&tmp);
 			convert_to_string(&tmp);

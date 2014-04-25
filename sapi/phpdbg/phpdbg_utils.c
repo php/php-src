@@ -30,6 +30,8 @@
 
 #ifdef _WIN32
 #	include "win32/time.h"
+#elif defined(HAVE_SYS_IOCTL_H) 
+#	include "sys/ioctl.h"
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -63,6 +65,14 @@ const static phpdbg_color_t colors[] = {
 	PHPDBG_COLOR_D("black-bold",       "1;30"),
 	PHPDBG_COLOR_D("black-underline",  "4;30"),
 	PHPDBG_COLOR_END
+}; /* }}} */
+
+/* {{{ */
+const static phpdbg_element_t elements[] = {
+	PHPDBG_ELEMENT_D("prompt", PHPDBG_COLOR_PROMPT),
+	PHPDBG_ELEMENT_D("error", PHPDBG_COLOR_ERROR),
+	PHPDBG_ELEMENT_D("notice", PHPDBG_COLOR_NOTICE),
+	PHPDBG_ELEMENT_END
 }; /* }}} */
 
 PHPDBG_API int phpdbg_is_numeric(const char *str) /* {{{ */
@@ -161,22 +171,20 @@ PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const cha
 	char *lcname = zend_str_tolower_dup(fname, fname_len);
 
 	if (cname) {
-		zval name;
-		zend_class_entry *ce;
+		zend_class_entry **ce;
 		size_t cname_len = strlen(cname);
 		char *lc_cname = zend_str_tolower_dup(cname, cname_len);
-
-		ZVAL_STRINGL(&name, lc_cname, cname_len);
-		ce = zend_lookup_class(Z_STR(name) TSRMLS_CC);
+		int ret = zend_lookup_class(lc_cname, cname_len, &ce TSRMLS_CC);
 
 		efree(lc_cname);
-		zval_ptr_dtor(&name);
 
-		if (ce != NULL) {
-			func = zend_hash_str_find_ptr(&ce->function_table, lcname, fname_len);
+		if (ret == SUCCESS) {
+			zend_hash_find(&(*ce)->function_table, lcname, fname_len+1,
+				(void**)&func);
 		}
 	} else {
-		func = zend_hash_str_find_ptr(EG(function_table), lcname, fname_len);
+		zend_hash_find(EG(function_table), lcname, fname_len+1,
+			(void**)&func);
 	}
 
 	efree(lcname);
@@ -349,6 +357,21 @@ PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(TSRMLS_D) /* {{{ */
 	return colors;
 } /* }}} */
 
+PHPDBG_API int phpdbg_get_element(const char *name, size_t len TSRMLS_DC) {
+	const phpdbg_element_t *element = elements;
+	
+	while (element && element->name) {
+		if (len == element->name_length) {
+			if (strncasecmp(name, element->name, len) == SUCCESS) {
+				return element->id;
+			}
+		}
+		element++;
+	}
+	
+	return PHPDBG_COLOR_INVALID;
+}
+
 PHPDBG_API void phpdbg_set_prompt(const char *prompt TSRMLS_DC) /* {{{ */
 {
 	/* free formatted prompt */
@@ -386,4 +409,40 @@ PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
 	}
 
 	return PHPDBG_G(prompt)[1];
+} /* }}} */
+
+int phpdbg_rebuild_symtable(TSRMLS_D) {
+	if (!EG(active_op_array)) {
+		phpdbg_error("No active op array!");
+		return FAILURE;
+	}
+
+	if (!EG(active_symbol_table)) {
+		zend_rebuild_symbol_table(TSRMLS_C);
+
+		if (!EG(active_symbol_table)) {
+			phpdbg_error("No active symbol table!");
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+
+PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D) /* {{{ */
+{
+	int columns;	
+#ifdef _WIN32
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+#elif defined(HAVE_SYS_IOCTL_H) 
+	struct winsize w;
+
+	columns = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_col : 100;
+#else
+	columns = 100;
+#endif
+	return columns;
 } /* }}} */

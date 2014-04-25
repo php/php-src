@@ -26,8 +26,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -292,7 +290,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_name, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number)
+	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_size, 0, 0, 2)
@@ -302,22 +300,22 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_scale, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number)
+	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_precision, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number)
+	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_type, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number)
+	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_type_raw, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number)
+	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_is_null, 0, 0, 2)
@@ -1251,6 +1249,9 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("SQLT_BDOUBLE",SQLT_BDOUBLE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_BFLOAT",SQLT_BFLOAT, CONST_CS | CONST_PERSISTENT);
 #endif
+#if defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION >= 12
+	REGISTER_LONG_CONSTANT("SQLT_BOL",SQLT_BOL, CONST_CS | CONST_PERSISTENT);
+#endif
 
 	REGISTER_LONG_CONSTANT("OCI_B_NTY",SQLT_NTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_NTY",SQLT_NTY, CONST_CS | CONST_PERSISTENT);
@@ -1265,6 +1266,9 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("OCI_B_BIN",SQLT_BIN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_B_INT",SQLT_INT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_B_NUM",SQLT_NUM, CONST_CS | CONST_PERSISTENT);
+#if defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION >= 12
+	REGISTER_LONG_CONSTANT("OCI_B_BOL",SQLT_BOL, CONST_CS | CONST_PERSISTENT);
+#endif
 
 /* for OCIFetchStatement */
 	REGISTER_LONG_CONSTANT("OCI_FETCHSTATEMENT_BY_COLUMN", PHP_OCI_FETCHSTATEMENT_BY_COLUMN, CONST_CS | CONST_PERSISTENT);
@@ -2574,7 +2578,11 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 		if (column->data_type != SQLT_RDD && (mode & PHP_OCI_RETURN_LOBS)) {
 			/* PHP_OCI_RETURN_LOBS means that we want the content of the LOB back instead of the locator */
 
+			if (column->chunk_size)
+				descriptor->chunk_size = column->chunk_size;			
 			lob_fetch_status = php_oci_lob_read(descriptor, -1, 0, &lob_buffer, &lob_length TSRMLS_CC);
+			if (descriptor->chunk_size)  /* Cache the chunk_size to avoid recalling OCILobGetChunkSize */
+				column->chunk_size = descriptor->chunk_size;
 			php_oci_temp_lob_close(descriptor TSRMLS_CC);
 			if (lob_fetch_status) {
 				ZVAL_FALSE(value);

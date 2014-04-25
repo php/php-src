@@ -30,11 +30,10 @@ void phpdbg_clean(zend_bool full TSRMLS_DC); /* }}} */
 
 /* {{{ phpdbg command handlers */
 PHPDBG_COMMAND(exec);
-PHPDBG_COMMAND(compile);
 PHPDBG_COMMAND(step);
-PHPDBG_COMMAND(next);
+PHPDBG_COMMAND(continue);
 PHPDBG_COMMAND(run);
-PHPDBG_COMMAND(eval);
+PHPDBG_COMMAND(ev);
 PHPDBG_COMMAND(until);
 PHPDBG_COMMAND(finish);
 PHPDBG_COMMAND(leave);
@@ -47,20 +46,20 @@ PHPDBG_COMMAND(info);
 PHPDBG_COMMAND(clean);
 PHPDBG_COMMAND(clear);
 PHPDBG_COMMAND(help);
-PHPDBG_COMMAND(quiet);
-PHPDBG_COMMAND(aliases);
-PHPDBG_COMMAND(shell);
+PHPDBG_COMMAND(sh);
 PHPDBG_COMMAND(set);
 PHPDBG_COMMAND(source);
+PHPDBG_COMMAND(export);
 PHPDBG_COMMAND(register);
-PHPDBG_COMMAND(quit); /* }}} */
+PHPDBG_COMMAND(quit);
+PHPDBG_COMMAND(watch); /* }}} */
 
 /* {{{ prompt commands */
 extern const phpdbg_command_t phpdbg_prompt_commands[]; /* }}} */
 
 /* {{{ */
 #if PHP_VERSION_ID >= 50500
-void phpdbg_execute_ex(zend_execute_data *execute_data, zval *return_value TSRMLS_DC);
+void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 #else
 void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC);
 #endif /* }}} */

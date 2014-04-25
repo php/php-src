@@ -1262,6 +1262,49 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 #define COOKIE_SECURE	"; secure"
 #define COOKIE_HTTPONLY	"; HttpOnly"
 
+/*
+ * Remove already sent session ID cookie.
+ * It must be directly removed from SG(sapi_header) because sapi_add_header_ex()
+ * removes all of matching cookie. i.e. It deletes all of Set-Cookie headers.
+ */
+static void php_session_remove_cookie(TSRMLS_D) {
+	sapi_header_struct *header;
+	zend_llist *l = &SG(sapi_headers).headers;
+	zend_llist_element *next;
+	zend_llist_element *current;
+	char *session_cookie, *e_session_name;
+	int session_cookie_len, len = sizeof("Set-Cookie")-1;
+
+	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
+	spprintf(&session_cookie, 0, "Set-Cookie: %s=", e_session_name);
+	efree(e_session_name);
+
+	session_cookie_len = strlen(session_cookie);
+	current = l->head;
+	while (current) {
+		header = (sapi_header_struct *)(current->data);
+		next = current->next;
+		if (header->header_len > len && header->header[len] == ':'
+			&& !strncmp(header->header, session_cookie, session_cookie_len)) {
+			if (current->prev) {
+				current->prev->next = next;
+			} else {
+				l->head = next;
+			}
+			if (next) {
+				next->prev = current->prev;
+			} else {
+				l->tail = current->prev;
+			}
+			sapi_free_header(header);
+			efree(current);
+			--l->count;
+		}
+		current = next;
+	}
+	efree(session_cookie);
+}
+
 static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 {
 	smart_str ncookie = {0};
@@ -1330,6 +1373,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 
 	smart_str_0(&ncookie);
 
+	php_session_remove_cookie(TSRMLS_C); /* remove already sent session ID cookie */
 	/*	'replace' must be 0 here, else a previous Set-Cookie
 		header, probably sent with setcookie() will be replaced! */
 	sapi_add_header_ex(estrndup(ncookie.s->val, ncookie.s->len), ncookie.s->len, 0, 0 TSRMLS_CC);
@@ -1718,34 +1762,6 @@ static PHP_FUNCTION(session_module_name)
 }
 /* }}} */
 
-/* {{{ proto mixed session_serializer_name([string newname])
-   Return the current serializer name used for encode/decode session data. If newname is given, the serialzer name is replaced with newname and return bool */
-static PHP_FUNCTION(session_serializer_name)
-{
-	char *name = NULL;
-	int name_len;
-	zend_string *ini_name;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
-		return;
-	}
-
-	/* Return serializer name */
-	if (!name) {
-		RETURN_STRING(zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0));
-	}
-
-	ini_name = STR_INIT("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0);
-	/* Set serializer name */
-	if (zend_alter_ini_entry(ini_name, name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
-	STR_RELEASE(ini_name);
-}
-/* }}} */
-
 /* {{{ proto void session_set_save_handler(string open, string close, string read, string write, string destroy, string gc, string create_sid)
    Sets user-level functions */
 static PHP_FUNCTION(session_set_save_handler)
@@ -1914,7 +1930,7 @@ static PHP_FUNCTION(session_save_path)
 static PHP_FUNCTION(session_id)
 {
 	zend_string *name = NULL;
-	int name_len, argc = ZEND_NUM_ARGS();
+	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "|S", &name) == FAILURE) {
 		return;
@@ -2146,39 +2162,6 @@ static PHP_FUNCTION(session_status)
 }
 /* }}} */
 
-/* {{{ proto int session_gc([int maxlifetime])
-   Execute garbage collection returns number of deleted data */
-static PHP_FUNCTION(session_gc)
-{
-	int nrdels = -1;
-	long maxlifetime = PS(gc_maxlifetime);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &maxlifetime) == FAILURE) {
-		return;
-	}
-
-	/* Session must be active to have PS(mod) */
-	if (PS(session_status) != php_session_active) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Trying to garbage collect without active session");
-		RETURN_FALSE;
-	}
-
-	if (!PS(mod) || !PS(mod)->s_gc) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session save handler does not have gc()");
-		RETURN_FALSE;
-	}
-	PS(mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels TSRMLS_CC);
-
-	if (nrdels < 0) {
-		/* Files save handler return -1 if there is not a permission to remove.
-		   Save handlder should return negative nrdels when something wrong. */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session gc failed. Check permission or session storage");
-		RETURN_FALSE;
-	}
-	RETURN_LONG((long)nrdels);
-}
-/* }}} */
-
 /* {{{ proto void session_register_shutdown(void)
    Registers session_write_close() as a shutdown function */
 static PHP_FUNCTION(session_register_shutdown)
@@ -2219,10 +2202,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_name, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_session_module_name, 0, 0, 0)
-	ZEND_ARG_INFO(0, module)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_serializer_name, 0, 0, 0)
 	ZEND_ARG_INFO(0, module)
 ZEND_END_ARG_INFO()
 
@@ -2271,10 +2250,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_cookie_params, 0, 0, 1)
 	ZEND_ARG_INFO(0, httponly)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_session_gc, 0)
-	ZEND_ARG_INFO(0, maxlifetime)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_session_class_open, 0)
 	ZEND_ARG_INFO(0, save_path)
 	ZEND_ARG_INFO(0, session_name)
@@ -2309,7 +2284,6 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry session_functions[] = {
 	PHP_FE(session_name,              arginfo_session_name)
 	PHP_FE(session_module_name,       arginfo_session_module_name)
-	PHP_FE(session_serializer_name,   arginfo_session_serializer_name)
 	PHP_FE(session_save_path,         arginfo_session_save_path)
 	PHP_FE(session_id,                arginfo_session_id)
 	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
@@ -2327,7 +2301,6 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_abort,             arginfo_session_void)
 	PHP_FE(session_reset,             arginfo_session_void)
 	PHP_FE(session_status,            arginfo_session_void)
-	PHP_FE(session_gc,                arginfo_session_gc)
 	PHP_FE(session_register_shutdown, arginfo_session_void)
 	PHP_FALIAS(session_commit, session_write_close, arginfo_session_void)
 	PHP_FE_END

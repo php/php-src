@@ -26,7 +26,7 @@ struct myStruct {
 ?>';
 var_dump( token_get_all($source));
 
-// with invalid open tag for testing entire source to be unkown token
+// with invalid open tag for testing entire source to be unknown token
 echo "-- with invlalid PHP open tag & valid tokens --\n";
 $source = '<pli 
 echo "hello world"; ?>';

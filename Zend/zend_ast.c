@@ -106,6 +106,13 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
+		case ZEND_POW:
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
+			pow_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
 		case ZEND_DIV:
 			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
 			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
@@ -224,7 +231,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 		case ZEND_CONST:
 			ZVAL_DUP(result, &ast->u.val);
 			if (Z_OPT_CONSTANT_P(result)) {
-				zval_update_constant_ex(result, (void *) 1, scope TSRMLS_CC);
+				zval_update_constant_ex(result, 1, scope TSRMLS_CC);
 			}
 			break;
 		case ZEND_BOOL_AND:
@@ -288,24 +295,15 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 		zend_ast *copy = zend_ast_create_constant(&ast->u.val);
 		zval_copy_ctor(&copy->u.val);
 		return copy;
-	} else {
-		switch (ast->children) {
-			case 1:
-				return zend_ast_create_unary(
-					ast->kind,
-					zend_ast_copy((&ast->u.child)[0]));
-			case 2:
-				return zend_ast_create_binary(
-					ast->kind,
-					zend_ast_copy((&ast->u.child)[0]),
-					zend_ast_copy((&ast->u.child)[1]));
-			case 3:
-				return zend_ast_create_ternary(
-					ast->kind,
-					zend_ast_copy((&ast->u.child)[0]),
-					zend_ast_copy((&ast->u.child)[1]),
-					zend_ast_copy((&ast->u.child)[2]));
+	} else if (ast->children) {
+		zend_ast *new = emalloc(sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
+		int i;
+		new->kind = ast->kind;
+		new->children = ast->children;
+		for (i = 0; i < ast->children; i++) {
+			(&new->u.child)[i] = zend_ast_copy((&ast->u.child)[i]);
 		}
+		return new;
 	}
 	return NULL;
 }

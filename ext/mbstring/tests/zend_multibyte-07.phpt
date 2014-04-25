@@ -1,7 +1,10 @@
 --TEST--
 zend multibyte (7)
 --SKIPIF--
+--XFAIL--
+https://bugs.php.net/bug.php?id=66582
 --INI--
+error_reporting=E_ALL & ~E_DEPRECATED
 zend.multibyte=On
 zend.script_encoding=ISO-8859-1
 mbstring.internal_encoding=EUC-JP

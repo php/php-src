@@ -192,7 +192,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
-/* {{{ proto void PDO::__construct(string dsn, string username, string passwd [, array options])
+/* {{{ proto void PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
    */
 static PHP_METHOD(PDO, dbh_constructor)
 {
@@ -465,23 +465,11 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fci.object = Z_OBJ_P(object);
 		fci.symbol_table = NULL;
 		fci.retval = &retval;
-		if (!ZVAL_IS_UNDEF(ctor_args)) {
-			HashTable *ht = Z_ARRVAL_P(ctor_args);
-			uint idx;
-			Bucket *p;
-
-			fci.param_count = 0;
-			fci.params = safe_emalloc(sizeof(zval), ht->nNumOfElements, 0);
-			for (idx = 0; idx < ht->nNumUsed; idx++) {
-				p = ht->arData + idx;
-				if (ZVAL_IS_UNDEF(&p->val)) continue;
-				ZVAL_COPY_VALUE(&fci.params[fci.param_count++], &p->val);
-			}
-		} else {
-			fci.param_count = 0;
-			fci.params = NULL;
-		}
+		fci.param_count = 0;
+		fci.params = NULL;
 		fci.no_separation = 1;
+
+		zend_fcall_info_args(&fci, ctor_args TSRMLS_CC);
 
 		fcc.initialized = 1;
 		fcc.function_handler = dbstmt_ce->constructor;
@@ -1223,7 +1211,7 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 /* }}} */
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, dsn)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, passwd)

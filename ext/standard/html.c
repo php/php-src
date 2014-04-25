@@ -84,6 +84,18 @@
 #define sjis_lead(c) ((c) != 0x80 && (c) != 0xA0 && (c) < 0xFD)
 #define sjis_trail(c) ((c) >= 0x40  && (c) != 0x7F && (c) < 0xFD)
 
+/* {{{ get_default_charset
+ */
+static char *get_default_charset(TSRMLS_D) {
+	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
+		return PG(internal_encoding);
+	} else if (SG(default_charset) && SG(default_charset)[0] ) {
+		return SG(default_charset);
+	}
+	return NULL;
+}
+/* }}} */
+
 /* {{{ get_next_char
  */
 static inline unsigned int get_next_char(
@@ -1440,6 +1452,9 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		return;
 	}
 
+	if (!hint_charset) {
+		hint_charset = get_default_charset(TSRMLS_C);
+	}
 	replaced = php_escape_html_entities_ex((unsigned char*)str, str_len, all, (int) flags, hint_charset, double_encode TSRMLS_CC);
 	RETVAL_STR(replaced);
 }
@@ -1502,6 +1517,7 @@ PHP_FUNCTION(html_entity_decode)
 {
 	char *str, *hint_charset = NULL;
 	int str_len, hint_charset_len = 0;
+	size_t new_len = 0;
 	long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
@@ -1510,7 +1526,11 @@ PHP_FUNCTION(html_entity_decode)
 		return;
 	}
 
+	if (!hint_charset) {
+		hint_charset = get_default_charset(TSRMLS_C);
+	}
 	replaced = php_unescape_html_entities((unsigned char*)str, str_len, 1 /*all*/, quote_style, hint_charset TSRMLS_CC);
+
 	if (replaced) {
 		RETURN_STR(replaced);
 	}

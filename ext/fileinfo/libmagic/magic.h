@@ -65,6 +65,7 @@
 	MAGIC_NO_CHECK_CDF	| \
 	MAGIC_NO_CHECK_TOKENS	| \
 	MAGIC_NO_CHECK_ENCODING	| \
+	0			  \
 )
 
 /* Defined for backwards compatibility (renamed) */
@@ -74,7 +75,7 @@
 #define	MAGIC_NO_CHECK_FORTRAN	0x000000 /* Don't check ascii/fortran */
 #define	MAGIC_NO_CHECK_TROFF	0x000000 /* Don't check ascii/troff */
 
-#define MAGIC_VERSION		514	/* This implementation */
+#define MAGIC_VERSION		517	/* This implementation */
 
 
 #ifdef __cplusplus

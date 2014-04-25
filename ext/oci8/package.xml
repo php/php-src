@@ -45,12 +45,12 @@ libraries are available.
   <active>no</active>
  </lead>
 
- <date>2013-10-22</date>
+ <date>2014-03-19</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.7</release>
-   <api>2.0.7</api>
+   <release>2.0.9</release>
+   <api>2.0.9</api>
   </version>
   <stability>
    <release>stable</release>
@@ -58,7 +58,7 @@ libraries are available.
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-    Build change: Fix source variable definition for C89 compatibility
+Fixed oci_field_* reflection: $field can be a column name or index
   </notes>
  <contents>
   <dir name="/">
@@ -91,6 +91,7 @@ libraries are available.
     <file name="b47243_1.phpt" role="test" />
     <file name="b47243_2.phpt" role="test" />
     <file name="b47243_3.phpt" role="test" />
+    <file name="bind_boolean_1.phpt" role="test" />
     <file name="bind_char_1_11gR1.phpt" role="test" />
     <file name="bind_char_1.phpt" role="test" />
     <file name="bind_char_2_11gR1.phpt" role="test" />
@@ -268,6 +269,8 @@ libraries are available.
     <file name="error2.phpt" role="test" />
     <file name="error3.phpt" role="test" />
     <file name="error_bind.phpt" role="test" />
+    <file name="error_bind_2.phpt" role="test" />
+    <file name="error_bind_3.phpt" role="test" />
     <file name="error_old.phpt" role="test" />
     <file name="error_parse.phpt" role="test" />
     <file name="error.phpt" role="test" />
@@ -429,6 +432,7 @@ libraries are available.
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
+   <file name="LICENSE" role="doc" />
    <file name="oci8.c" role="src" />
    <file name="oci8_dtrace.d" role="src" />
    <file name="oci8_collection.c" role="src" />
@@ -456,6 +460,37 @@ libraries are available.
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.0.8</release>
+   <api>2.0.8</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+Enhancement - Improve performance of multi-row OCI_RETURN_LOB queries (Bug #66875)
+  </notes>
+ </release>
+
+<release>
+  <version>
+   <release>2.0.7</release>
+   <api>2.0.7</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+Added oci_bind_by_name() support for PL/SQL BOOLEAN type    
+Build change: Fix source variable definition for C89 compatibility
+  </notes>
+</release>
 
 <release>
  <version>

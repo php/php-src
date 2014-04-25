@@ -145,9 +145,6 @@
  * - Debug session 2 <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_1.pps">[pps]</a>, <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_1.pdf">[pdf]</a>, <a href="http://taks.somabo.de/200411_php_conference_frankfrurt_iterator_debug_session.swf">[swf]</a>
  * - Debug session 3 <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_2.pps">[pps]</a>, <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_2.pdf">[pdf]</a>
  *
- * You can download this documentation as a chm file
- * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
- *
  * (c) Marcus Boerger, 2003 - 2007
  */
 

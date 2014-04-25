@@ -172,30 +172,44 @@ Since: DOM Level 2
 int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
-	xmlDtd *intsubset;
-	xmlOutputBuffer *buff = NULL;
+	xmlDtdPtr intsubset;
 
 	if (dtdptr == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	if (dtdptr->doc != NULL && ((intsubset = dtdptr->doc->intSubset) != NULL)) {
-		buff = xmlAllocOutputBuffer(NULL);
-		if (buff != NULL) {
-			xmlNodeDumpOutput (buff, NULL, (xmlNodePtr) intsubset, 0, 0, NULL);
-			xmlOutputBufferFlush(buff);
+	if (dtdptr->doc != NULL && ((intsubset = xmlGetIntSubset(dtdptr->doc)) != NULL)) {
+		smart_str ret_buf = {0};
+		xmlNodePtr cur = intsubset->children;
+
+		while (cur != NULL) {
+			xmlOutputBuffer *buff = xmlAllocOutputBuffer(NULL);
+
+			if (buff != NULL) {
+				xmlNodeDumpOutput (buff, NULL, cur, 0, 0, NULL);
+				xmlOutputBufferFlush(buff);
+
 #ifdef LIBXML2_NEW_BUFFER
-			ZVAL_STRINGL(retval, xmlOutputBufferGetContent(buff), xmlOutputBufferGetSize(buff));
+				smart_str_appendl(&ret_buf, xmlOutputBufferGetContent(buff), xmlOutputBufferGetSize(buff));
 #else
-			ZVAL_STRINGL(retval, buff->buffer->content, buff->buffer->use);
+				smart_str_appendl(&ret_buf, buff->buffer->content, buff->buffer->use);
 #endif
-			(void)xmlOutputBufferClose(buff);
+
+				(void)xmlOutputBufferClose(buff);
+			}
+
+			cur = cur->next;
+		}
+
+		if (ret_buf.s) {
+			smart_str_0(&ret_buf);
+			ZVAL_STR(retval, ret_buf.s);
 			return SUCCESS;
 		}
 	}
 
-	ZVAL_EMPTY_STRING(retval);
+	ZVAL_NULL(retval);
 
 	return SUCCESS;
 

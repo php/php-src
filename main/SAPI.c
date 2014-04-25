@@ -715,7 +715,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 
 	header_line = estrndup(header_line, header_line_len);
 
-	/* cut of trailing spaces, linefeeds and carriage-returns */
+	/* cut off trailing spaces, linefeeds and carriage-returns */
 	if (header_line_len && isspace(header_line[header_line_len-1])) {
 		do {
 			header_line_len--;

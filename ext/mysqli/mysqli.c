@@ -176,8 +176,11 @@ void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC)
 	php_free_stmt_bind_buffer(stmt->param, FETCH_SIMPLE);
 	/* Clean output bind */
 	php_free_stmt_bind_buffer(stmt->result, FETCH_RESULT);
-#endif
 
+	if (stmt->link_handle) {
+	    zend_objects_store_del_ref_by_handle(stmt->link_handle TSRMLS_CC);
+	}
+#endif
 	if (stmt->query) {
 		efree(stmt->query);
 	}
@@ -558,6 +561,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mysqli.max_links",			"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_links,			zend_mysqli_globals,		mysqli_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("mysqli.max_persistent",		"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_persistent,		zend_mysqli_globals,		mysqli_globals,	display_link_numbers)
 	STD_PHP_INI_BOOLEAN("mysqli.allow_persistent",		"1",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_persistent,	zend_mysqli_globals,		mysqli_globals)
+	STD_PHP_INI_BOOLEAN("mysqli.rollback_on_cached_plink",	"0",PHP_INI_SYSTEM,		OnUpdateBool,		rollback_on_cached_plink,	zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_host",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_user",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_pw",				NULL,	PHP_INI_ALL,		OnUpdateString,		default_pw,			zend_mysqli_globals,		mysqli_globals)
@@ -597,6 +601,7 @@ static PHP_GINIT_FUNCTION(mysqli)
 #else
 	mysqli_globals->embedded = 0;
 #endif
+	mysqli_globals->rollback_on_cached_plink = FALSE;
 }
 /* }}} */
 
@@ -716,6 +721,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_USE_RESULT", MYSQLI_USE_RESULT, CONST_CS | CONST_PERSISTENT);
 #if defined (MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_ASYNC", MYSQLI_ASYNC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_STORE_RESULT_COPY_DATA", MYSQLI_STORE_RESULT_COPY_DATA, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* for mysqli_fetch_assoc */
@@ -1069,6 +1075,10 @@ PHP_FUNCTION(mysqli_stmt_construct)
 		efree(stmt);
 		RETURN_FALSE;
 	}
+#ifndef MYSQLI_USE_MYSQLND
+	stmt->link_handle = Z_OBJ_HANDLE(*mysql_link);
+	zend_objects_store_add_ref_by_handle(stmt->link_handle TSRMLS_CC);
+#endif
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
@@ -1287,20 +1297,12 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fci.symbol_table = NULL;
 			fci.object_ptr = return_value;
 			fci.retval_ptr_ptr = &retval_ptr;
-			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
-				if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
-					HashTable *params_ht = Z_ARRVAL_P(ctor_params);
-					uint idx;
-					Bucket *p;
+			fci.params = NULL;
+			fci.param_count = 0;
+			fci.no_separation = 1;
 
-					fci.param_count = 0;
-					fci.params = safe_emalloc(sizeof(zval*), params_ht->nNumOfElements, 0);
-					for (idx = 0; idx < params_ht->nNumUsed; idx++) {
-						p = params_ht->arData + idx;
-						if (!p->xData) continue;
-						fci.params[fci.param_count++] = (zval**)&p->xData;
-					}
-				} else {
+			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
+				if (zend_fcall_info_args(&fci, ctor_params TSRMLS_CC) == FAILURE) {
 					/* Two problems why we throw exceptions here: PHP is typeless
 					 * and hence passing one argument that's not an array could be
 					 * by mistake and the other way round is possible, too. The
@@ -1310,11 +1312,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Parameter ctor_params must be an array", 0 TSRMLS_CC);
 					return;
 				}
-			} else {
-				fci.param_count = 0;
-				fci.params = NULL;
 			}
-			fci.no_separation = 1;
 
 			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;

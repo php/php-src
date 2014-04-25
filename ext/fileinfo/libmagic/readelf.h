@@ -263,6 +263,46 @@ typedef struct {
  */
 #define	NT_GNU_BUILD_ID		3
 
+/*
+ * NetBSD-specific note type: PaX.
+ * There should be 1 NOTE per executable.
+ * name: PaX\0
+ * namesz: 4
+ * desc:
+ *	word[0]: capability bitmask
+ * descsz: 4
+ */
+#define NT_NETBSD_PAX		3
+#define NT_NETBSD_PAX_MPROTECT		0x01	/* Force enable Mprotect */
+#define NT_NETBSD_PAX_NOMPROTECT	0x02	/* Force disable Mprotect */
+#define NT_NETBSD_PAX_GUARD		0x04	/* Force enable Segvguard */
+#define NT_NETBSD_PAX_NOGUARD		0x08	/* Force disable Servguard */
+#define NT_NETBSD_PAX_ASLR		0x10	/* Force enable ASLR */
+#define NT_NETBSD_PAX_NOASLR		0x20	/* Force disable ASLR */
+
+/*
+ * NetBSD-specific note type: MACHINE_ARCH.
+ * There should be 1 NOTE per executable.
+ * name:	NetBSD\0
+ * namesz:	7
+ * desc:	string
+ * descsz:	variable
+ */
+#define NT_NETBSD_MARCH		5
+
+/*
+ * NetBSD-specific note type: COMPILER MODEL.
+ * There should be 1 NOTE per executable.
+ * name:	NetBSD\0
+ * namesz:	7
+ * desc:	string
+ * descsz:	variable
+ */
+#define NT_NETBSD_CMODEL	6
+
+#if !defined(ELFSIZE) && defined(ARCH_ELFSIZE)
+#define ELFSIZE ARCH_ELFSIZE
+#endif
 /* SunOS 5.x hardware/software capabilities */
 typedef struct {
 	Elf32_Word	c_tag;

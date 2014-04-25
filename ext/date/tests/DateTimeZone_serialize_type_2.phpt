@@ -20,16 +20,16 @@ var_dump( $tz2->getName() );
 --EXPECTF--
 object(DateTimeZone)#%d (2) {
   ["timezone_type"]=>
-  int(3)
+  int(2)
   ["timezone"]=>
-  string(16) "America/New_York"
+  string(3) "EST"
 }
-string(88) "O:12:"DateTimeZone":2:{s:13:"timezone_type";i:3;s:8:"timezone";s:16:"America/New_York";}"
+string(74) "O:12:"DateTimeZone":2:{s:13:"timezone_type";i:2;s:8:"timezone";s:3:"EST";}"
 object(DateTimeZone)#%d (2) {
   ["timezone_type"]=>
-  int(3)
+  int(2)
   ["timezone"]=>
-  string(16) "America/New_York"
+  string(3) "EST"
 }
-string(16) "America/New_York"
+string(3) "EST"
 ===DONE===

@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -818,10 +816,6 @@ PHP_MINFO_FUNCTION(ibase)
 	snprintf( (s = tmp), sizeof(tmp), "Firebird API version %d", FB_API_VER);
 #elif (SQLDA_CURRENT_VERSION > 1)
 	s =  "Interbase 7.0 and up";
-#elif !defined(DSC_null)
-	s = "Interbase 6";
-#else
-	s = "Firebird 1.0";
 #endif
 	php_info_print_table_row(2, "Compile-time Client Library Version", s);
 
@@ -840,8 +834,6 @@ PHP_MINFO_FUNCTION(ibase)
 #endif
 		if (info_func) {
 			info_func(s = tmp);
-		} else {
-			s = "Firebird 1.0/Interbase 6";
 		}
 		php_info_print_table_row(2, "Run-time Client Library Version", s);
 	} while (0);

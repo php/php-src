@@ -748,20 +748,11 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		ZVAL_UNDEF(&fci->function_name);
 		fci->symbol_table = NULL;
 		fci->retval = &stmt->fetch.cls.retval;
-		if (!ZVAL_IS_UNDEF(&stmt->fetch.cls.ctor_args)) {
-			HashTable *ht = Z_ARRVAL(stmt->fetch.cls.ctor_args);
-			zval *val;
-
-			fci->param_count = 0;
-			fci->params = safe_emalloc(sizeof(zval), ht->nNumOfElements, 0);
-			ZEND_HASH_FOREACH_VAL(ht, val) {
-				ZVAL_COPY_VALUE(&fci->params[fci->param_count++], val);
-			} ZEND_HASH_FOREACH_END();
-		} else {
-			fci->param_count = 0;
-			fci->params = NULL;
-		}
+		fci->param_count = 0;
+		fci->params = NULL;
 		fci->no_separation = 1;
+
+		zend_fcall_info_args(fci, &stmt->fetch.cls.ctor_args TSRMLS_CC);
 
 		fcc->initialized = 1;
 		fcc->function_handler = ce->constructor;

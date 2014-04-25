@@ -26,7 +26,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zval *literal TSRMLS_DC) /* {{{ */
+static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zend_literal *literal TSRMLS_DC) /* {{{ */
 {
 	int iter = 0;
 
@@ -46,25 +46,26 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 
 	switch (type &~ EXT_TYPE_UNUSED) {
 		case IS_CV:
-			asprintf(&decode, "$%s", ops->vars[op->var]->val);
+			asprintf(&decode, "$%s", ops->vars[op->var].name);
 		break;
 
 		case IS_VAR:
 		case IS_TMP_VAR: {
 			zend_ulong id = 0, *pid = NULL;
 			if (vars != NULL) {
-				if ((pid = zend_hash_index_find_ptr(vars, (zend_ulong) ops->vars - op->var)) == NULL) {
+				if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &pid) != SUCCESS) {
 					id = zend_hash_num_elements(vars);
-					zend_hash_index_update_mem(vars, (zend_ulong)ops->vars - op->var, &id, sizeof(zend_ulong));
-				} else {
-				   	id = *pid;
-				}
+					zend_hash_index_update(
+						vars, (zend_ulong) ops->vars - op->var,
+						(void**) &id,
+						sizeof(zend_ulong), NULL);
+				} else id = *pid;
 			}
 			asprintf(&decode, "@%lu", id);
 		} break;
 
 		case IS_CONST:
-			asprintf(&decode, "C%u", phpdbg_decode_literal(ops, op->zv TSRMLS_CC));
+			asprintf(&decode, "C%u", phpdbg_decode_literal(ops, op->literal TSRMLS_CC));
 		break;
 
 		case IS_UNUSED:
@@ -157,7 +158,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 			   opline,
 			   phpdbg_decode_opcode(opline->opcode),
 			   decode,
-			   execute_data->op_array->filename ? execute_data->op_array->filename->val : "unknown");
+			   execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
 		}
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
@@ -166,7 +167,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 				opline,
 				phpdbg_decode_opcode(opline->opcode),
 				decode,
-				execute_data->op_array->filename ? execute_data->op_array->filename->val : "unknown");
+				execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
 		}
 
 		if (decode) {
@@ -182,6 +183,7 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
 
 const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 {
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
 #define CASE(s) case s: return #s
 	switch (opcode) {
 		CASE(ZEND_NOP);
@@ -359,4 +361,8 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 		default:
 			return "UNKNOWN";
 	}
+#else
+	const char *ret = zend_get_opcode_name(opcode);
+	return ret?ret:"UNKNOWN";
+#endif
 } /* }}} */

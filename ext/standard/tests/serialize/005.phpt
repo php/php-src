@@ -156,9 +156,11 @@ object(TestNAOld)#%d (0) {
 }
 ===NANew===
 unserializer(TestNANew)
-TestNew::__wakeup()
-object(TestNANew)#%d (0) {
-}
+
+Warning: Erroneous data format for unserializing 'TestNANew' in %s005.php on line %d
+
+Notice: unserialize(): Error at offset 19 of 20 bytes in %s005.php on line %d
+bool(false)
 ===NANew2===
 unserializer(TestNANew2)
 TestNew::unserialize()

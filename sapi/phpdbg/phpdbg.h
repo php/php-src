@@ -39,6 +39,9 @@
 #include "zend_globals.h"
 #include "zend_ini_scanner.h"
 #include "zend_stream.h"
+#ifndef _WIN32
+# include "zend_signal.h"
+#endif
 #include "SAPI.h"
 #include <fcntl.h>
 #include <sys/types.h>
@@ -68,6 +71,8 @@
 
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_btree.h"
+#include "phpdbg_watch.h"
 
 #ifdef ZTS
 # define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
@@ -116,23 +121,26 @@
 #define PHPDBG_IN_EVAL                (1<<11)
 
 #define PHPDBG_IS_STEPPING            (1<<12)
-#define PHPDBG_IS_QUIET               (1<<13)
-#define PHPDBG_IS_QUITTING            (1<<14)
-#define PHPDBG_IS_COLOURED            (1<<15)
-#define PHPDBG_IS_CLEANING            (1<<16)
+#define PHPDBG_STEP_OPCODE            (1<<13)
+#define PHPDBG_IS_QUIET               (1<<14)
+#define PHPDBG_IS_QUITTING            (1<<15)
+#define PHPDBG_IS_COLOURED            (1<<16)
+#define PHPDBG_IS_CLEANING            (1<<17)
 
-#define PHPDBG_IN_UNTIL               (1<<17)
-#define PHPDBG_IN_FINISH              (1<<18)
-#define PHPDBG_IN_LEAVE               (1<<19)
+#define PHPDBG_IN_UNTIL               (1<<18)
+#define PHPDBG_IN_FINISH              (1<<19)
+#define PHPDBG_IN_LEAVE               (1<<20)
 
-#define PHPDBG_IS_REGISTERED          (1<<20)
-#define PHPDBG_IS_STEPONEVAL          (1<<21)
-#define PHPDBG_IS_INITIALIZING        (1<<22)
-#define PHPDBG_IS_SIGNALED            (1<<23)
-#define PHPDBG_IS_INTERACTIVE         (1<<24)
-#define PHPDBG_IS_BP_ENABLED          (1<<25)
-#define PHPDBG_IS_REMOTE              (1<<26)
-#define PHPDBG_IS_DISCONNECTED        (1<<27)
+#define PHPDBG_IS_REGISTERED          (1<<21)
+#define PHPDBG_IS_STEPONEVAL          (1<<22)
+#define PHPDBG_IS_INITIALIZING        (1<<23)
+#define PHPDBG_IS_SIGNALED            (1<<24)
+#define PHPDBG_IS_INTERACTIVE         (1<<25)
+#define PHPDBG_IS_BP_ENABLED          (1<<26)
+#define PHPDBG_IS_REMOTE              (1<<27)
+#define PHPDBG_IS_DISCONNECTED        (1<<28)
+
+#define PHPDBG_SHOW_REFCOUNTS         (1<<29)
 
 #define PHPDBG_SEEK_MASK              (PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE)
 #define PHPDBG_BP_RESOLVE_MASK		  (PHPDBG_HAS_FUNCTION_OPLINE_BP|PHPDBG_HAS_METHOD_OPLINE_BP|PHPDBG_HAS_FILE_OPLINE_BP)
@@ -149,7 +157,7 @@
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
 #define PHPDBG_URL "http://phpdbg.com"
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.3.1"
+#define PHPDBG_VERSION "0.4.0"
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
 /* }}} */
 
@@ -159,17 +167,30 @@
 #define PHPDBG_STDERR			2
 #define PHPDBG_IO_FDS 			3 /* }}} */
 
+
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
 	phpdbg_frame_t frame;                        /* frame */
+	zend_uint last_line;                         /* last executed line */
+
+#ifndef _WIN32
+	struct sigaction old_sigsegv_signal;         /* segv signal handler */
+#endif
+	
+	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
+	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */
+	HashTable watchpoints;                       /* watchpoints */
+	zend_llist watchlist_mem;                    /* triggered watchpoints */
+	zend_bool watchpoint_hit;                    /* a watchpoint was hit */
+	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
 
 	char *exec;                                  /* file to execute */
 	size_t exec_len;                             /* size of exec */
 	zend_op_array *ops;                 	     /* op_array */
-	zval retval;                                 /* return value */
+	zval *retval;                                /* return value */
 	int bp_count;                                /* breakpoint count */
 	int vmret;                                   /* return from last opcode handler execution */
 
@@ -178,11 +199,24 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	char *prompt[2];                             /* prompt */
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */
-
-	phpdbg_command_t *lcmd;                      /* last command */
-	phpdbg_param_t lparam;                       /* last param */
+	char *buffer;                                /* buffer */
 
 	zend_ulong flags;                            /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
+
+/* the beginning (= the important part) of the _zend_mm_heap struct defined in Zend/zend_alloc.c
+   Needed for realizing watchpoints */
+struct _zend_mm_heap {
+	int   use_zend_alloc;
+	void *(*_malloc)(size_t);
+	void  (*_free)(void *);
+	void *(*_realloc)(void *, size_t);
+	size_t              free_bitmap;
+	size_t              large_free_bitmap;
+	size_t              block_size;
+	size_t              compact_size;
+	zend_mm_segment    *segments_list;
+	zend_mm_storage    *storage;
+};
 
 #endif /* PHPDBG_H */

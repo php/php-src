@@ -179,6 +179,11 @@ php_stream_filter_status_t userfilter_filter(
 	zval zpropname;
 	int call_result;
 
+	/* the userfilter object probably doesn't exist anymore */
+	if (CG(unclean_shutdown)) {
+		return ret;
+	}
+
 	if (!zend_hash_str_exists(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1)) {
 		zval tmp;
 

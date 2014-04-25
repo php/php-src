@@ -80,8 +80,11 @@ static const struct {
 	{ "Shift_JIS",		cs_sjis },
 	{ "SJIS",			cs_sjis },
 	{ "932",			cs_sjis },
+	{ "SJIS-win",		cs_sjis },
+	{ "CP932",			cs_sjis },
 	{ "EUCJP",			cs_eucjp },
 	{ "EUC-JP",			cs_eucjp },
+	{ "eucJP-win",		cs_eucjp },
 	{ "KOI8-R",			cs_koi8r },
 	{ "koi8-ru",		cs_koi8r },
 	{ "koi8r",			cs_koi8r },
@@ -461,6 +464,7 @@ if (empty($multicp_rows))
 
 ksort($multicp_rows);
 foreach ($multicp_rows as &$v) { ksort($v); }
+unset($v);
 
 echo
 "/* {{{ Start of double code point tables for $name */", "\n\n";

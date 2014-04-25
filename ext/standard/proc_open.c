@@ -34,6 +34,7 @@
 #include "exec.h"
 #include "php_globals.h"
 #include "SAPI.h"
+#include "main/php_network.h"
 
 #ifdef NETWARE
 #include <proc.h>
@@ -109,8 +110,16 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 
 	/* first, we have to get the size of all the elements in the hash */
 	ZEND_HASH_FOREACH_KEY_VAL(target_hash, num_key, string_key, element) {
-		convert_to_string_ex(element);
-		el_len = Z_STRLEN_P(element);
+		zval tmp;
+
+		if (Z_TYPE_P(element) != IS_STRING) {
+			ZVAL_DUP(&tmp, element);
+			convert_to_string(&tmp);
+			el_len = Z_STRLEN(tmp);
+			zval_dtor(&tmp);
+		} else {
+			el_len = Z_STRLEN_P(element);
+		}
 		if (el_len == 0) {
 			continue;
 		}
@@ -121,7 +130,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			if (string_key->len == 0) {
 				continue;
 			}
-			sizeenv += string_key->len + 2;
+			sizeenv += string_key->len + 1;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -131,18 +140,26 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	p = env.envp = (char *) pecalloc(sizeenv + 4, 1, is_persistent);
 
 	ZEND_HASH_FOREACH_KEY_VAL(target_hash, num_key, string_key, element) {
-		convert_to_string_ex(element);
-		el_len = Z_STRLEN_P(element);
+		zval tmp;
 
-		if (el_len == 0) {
-			continue;
+		if (Z_TYPE_P(element) != IS_STRING) {
+			ZVAL_DUP(&tmp, element);
+			convert_to_string(&tmp);
+		} else {
+			ZVAL_COPY_VALUE(&tmp, element);
 		}
 
-		data = Z_STRVAL_P(element);
+		el_len = Z_STRLEN(tmp);
+
+		if (el_len == 0) {
+			goto next_element;
+		}
+
+		data = Z_STRVAL(tmp);
 
 		if (string_key) {
 			if (string_key->len == 0) {
-				continue;
+				goto next_element;
 			}
 
 			l = string_key->len + el_len + 2;
@@ -162,6 +179,10 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			++ep;
 #endif
 			p += el_len + 1;
+		}
+next_element:
+		if (Z_TYPE_P(element) != IS_STRING) {
+			zval_dtor(&tmp);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -518,7 +539,7 @@ PHP_FUNCTION(proc_open)
 		if (Z_TYPE_P(descitem) == IS_RESOURCE) {
 			/* should be a stream - try and dup the descriptor */
 			php_stream *stream;
-			int fd;
+			php_socket_t fd;
 
 			php_stream_from_zval(stream, descitem);
 
@@ -591,7 +612,7 @@ PHP_FUNCTION(proc_open)
 
 			} else if (strcmp(Z_STRVAL_P(ztype), "file") == 0) {
 				zval *zfile, *zmode;
-				int fd;
+				php_socket_t fd;
 				php_stream *stream;
 
 				descriptors[ndesc].mode = DESC_FILE;

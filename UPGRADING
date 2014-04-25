@@ -78,3 +78,5 @@ PHP X.Y UPGRADE NOTES
 11. Other Changes
 ========================================
 
+- Standard
+  . call_user_method() and call_user_method_array() no longer exists.

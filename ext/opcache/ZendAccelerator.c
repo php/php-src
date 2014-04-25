@@ -339,6 +339,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 	if (ZCSG(interned_strings_top) + ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + str->len + 1) >=
 	    ZCSG(interned_strings_end)) {
 	    /* no memory, return the same non-interned string */
+		zend_accel_error(ACCEL_LOG_WARNING, "Interned string buffer overflow");
 		return str;
 	}
 
@@ -2215,8 +2216,10 @@ static void accel_fast_zval_dtor(zval *zvalue)
 #else
 		switch (Z_TYPE_P(zvalue)) {
 #endif
-			case IS_ARRAY:
-			case IS_CONSTANT_ARRAY: {
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
+			case IS_CONSTANT_ARRAY:
+#endif
+			case IS_ARRAY: {
 					TSRMLS_FETCH();
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO

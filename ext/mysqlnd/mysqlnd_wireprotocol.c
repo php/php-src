@@ -90,7 +90,8 @@ const char * const mysqlnd_command_to_text[COM_END] =
   "TIME", "DELAYED_INSERT", "CHANGE_USER", "BINLOG_DUMP",
   "TABLE_DUMP", "CONNECT_OUT", "REGISTER_SLAVE",
   "STMT_PREPARE", "STMT_EXECUTE", "STMT_SEND_LONG_DATA", "STMT_CLOSE",
-  "STMT_RESET", "SET_OPTION", "STMT_FETCH", "DAEMON"
+  "STMT_RESET", "SET_OPTION", "STMT_FETCH", "DAEMON", "BINLOG_DUMP_GTID",
+  "RESET_CONNECTION"
 };
 /* }}} */
 
@@ -1571,13 +1572,13 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 }
 /* }}} */
 
-
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
 enum_func_status
-php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
+									zend_bool as_int_or_float, zend_bool copy_data, MYSQLND_STATS * stats TSRMLS_DC)
 {
+	
 	unsigned int i;
 	zend_bool last_field_was_string = FALSE;
 	zval **current_field, **end_field, **start_field;
@@ -1585,7 +1586,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 	size_t data_size = row_buffer->app;
 	zend_uchar * bit_area = (zend_uchar*) row_buffer->ptr + data_size + 1; /* we allocate from here */
 
-	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol");
+	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
 
 	if (!fields) {
 		DBG_RETURN(FAIL);
@@ -1607,7 +1608,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
 		unsigned long len = php_mysqlnd_net_field_length(&p);
 
-		if (current_field > start_field && last_field_was_string) {
+		if (copy_data == FALSE && current_field > start_field && last_field_was_string) {
 			/*
 			  Normal queries:
 			  We have to put \0 now to the end of the previous field, if it was
@@ -1732,21 +1733,22 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 				p -= len;
 				if (Z_TYPE_PP(current_field) == IS_LONG) {
 					bit_area += 1 + sprintf((char *)start, "%ld", Z_LVAL_PP(current_field));
-					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, 0);
+					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, copy_data);
 				} else if (Z_TYPE_PP(current_field) == IS_STRING){
 					memcpy(bit_area, Z_STRVAL_PP(current_field), Z_STRLEN_PP(current_field));
 					bit_area += Z_STRLEN_PP(current_field);
 					*bit_area++ = '\0';
 					zval_dtor(*current_field);
-					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, 0);
+					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, copy_data);
 				}
-			} else
-			ZVAL_STRINGL(*current_field, (char *)p, len, 0);
+			} else {
+				ZVAL_STRINGL(*current_field, (char *)p, len, copy_data);
+			}
 			p += len;
 			last_field_was_string = TRUE;
 		}
 	}
-	if (last_field_was_string) {
+	if (copy_data == FALSE && last_field_was_string) {
 		/* Normal queries: The buffer has one more byte at the end, because we need it */
 		row_buffer->ptr[data_size] = '\0';
 	}
@@ -1754,6 +1756,36 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 	DBG_RETURN(PASS);
 }
 /* }}} */
+
+
+/* {{{ php_mysqlnd_rowp_read_text_protocol_zval */
+enum_func_status
+php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
+{
+	enum_func_status ret;
+	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_zval");
+	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, FALSE, stats TSRMLS_CC);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_rowp_read_text_protocol_c */
+enum_func_status
+php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
+{
+	enum_func_status ret;
+	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_c");
+	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, TRUE, stats TSRMLS_CC);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
 
 
 /* {{{ php_mysqlnd_rowp_read */

@@ -21,6 +21,7 @@
 #ifndef SAPI_H
 #define SAPI_H
 
+#include "php.h"
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_llist.h"
@@ -291,7 +292,7 @@ struct _sapi_post_entry {
 #define SAPI_HEADER_SEND_FAILED			3
 
 #define SAPI_DEFAULT_MIMETYPE		"text/html"
-#define SAPI_DEFAULT_CHARSET		""
+#define SAPI_DEFAULT_CHARSET		PHP_DEFAULT_CHARSET
 #define SAPI_PHP_VERSION_HEADER		"X-Powered-By: PHP/" PHP_VERSION
 
 #define SAPI_POST_READER_FUNC(post_reader) void post_reader(TSRMLS_D)

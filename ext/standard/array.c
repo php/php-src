@@ -64,9 +64,6 @@
 #define CASE_LOWER				0
 #define CASE_UPPER				1
 
-#define COUNT_NORMAL			0
-#define COUNT_RECURSIVE			1
-
 #define DIFF_NORMAL			1
 #define DIFF_KEY			2
 #define DIFF_ASSOC			6
@@ -268,7 +265,7 @@ PHP_FUNCTION(ksort)
 }
 /* }}} */
 
-static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
+PHPAPI int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 {
 	long cnt = 0;
 	zval *element;
@@ -326,12 +323,15 @@ PHP_FUNCTION(count)
 #ifdef HAVE_SPL
 			/* if not and the object implements Countable we call its count() method */
 			if (Z_OBJ_HT_P(array)->get_class_entry && instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
-				zend_call_method_with_0_params(array, NULL, NULL, "count", &retval);
+				zval mode_zv;
+				ZVAL_LONG(&mode_zv, mode);
+				zend_call_method_with_1_params(array, NULL, NULL, "count", &retval, &mode_zv);
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					convert_to_long_ex(&retval);
 					RETVAL_LONG(Z_LVAL(retval));
 					zval_ptr_dtor(&retval);
 				}
+				zval_dtor(&mode_zv);
 				return;
 			}
 #endif
@@ -2271,9 +2271,8 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 {
 	zval *src_entry, *dest_entry;
 	zend_string *string_key;
-	ulong num_key;
 
-	ZEND_HASH_FOREACH_KEY_VAL(src, num_key, string_key, src_entry) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
 		if (string_key) {
 			if (recursive && (dest_entry = zend_hash_find(dest, string_key)) != NULL) {
 				zval *src_zval = src_entry;
@@ -4041,7 +4040,6 @@ PHP_FUNCTION(array_multisort)
 			hash->arData[k] = indirect[k][i];
 			if (hash->arData[k].key == NULL)
 				hash->arData[k].h = n++;
-
 		}
 		hash->nNextFreeElement = array_size;
 		if (!(hash->u.flags & HASH_FLAG_PACKED)) {

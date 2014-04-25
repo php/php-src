@@ -548,7 +548,6 @@ PHP_FUNCTION(stream_get_transports)
 {
 	HashTable *stream_xport_hash;
 	zend_string *stream_xport;
-	ulong num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -556,7 +555,7 @@ PHP_FUNCTION(stream_get_transports)
 
 	if ((stream_xport_hash = php_stream_xport_get_hash())) {
 		array_init(return_value);
-		ZEND_HASH_FOREACH_KEY(stream_xport_hash, num_key, stream_xport) {
+		ZEND_HASH_FOREACH_STR_KEY(stream_xport_hash, stream_xport) {
 			add_next_index_str(return_value, STR_COPY(stream_xport));
 		} ZEND_HASH_FOREACH_END();
 	} else {
@@ -571,8 +570,6 @@ PHP_FUNCTION(stream_get_wrappers)
 {
 	HashTable *url_stream_wrappers_hash;
 	zend_string *stream_protocol;
-	int key_flags;
-	ulong num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -580,8 +577,8 @@ PHP_FUNCTION(stream_get_wrappers)
 
 	if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
 		array_init(return_value);
-		ZEND_HASH_FOREACH_KEY(url_stream_wrappers_hash, num_key, stream_protocol) {
-			if (key_flags == HASH_KEY_IS_STRING) {
+		ZEND_HASH_FOREACH_STR_KEY(url_stream_wrappers_hash, stream_protocol) {
+			if (stream_protocol) {
 				add_next_index_str(return_value, STR_COPY(stream_protocol));
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -607,7 +604,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
 			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
 			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
-		int tmp_fd;
+		php_socket_t this_fd;
 
 		php_stream_from_zval_no_verify(stream, elem);
 		if (stream == NULL) {
@@ -618,9 +615,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
 		 * */
-		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&tmp_fd, 1) && tmp_fd != -1) {
-
-			php_socket_t this_fd = (php_socket_t)tmp_fd;
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
 
 			PHP_SAFE_FD_SET(this_fd, fds);
 
@@ -630,7 +625,6 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 			cnt++;
 		}
 	} ZEND_HASH_FOREACH_END();
-
 	return cnt ? 1 : 0;
 }
 
@@ -649,10 +643,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 	zend_hash_init(Z_ARRVAL(new_array), zend_hash_num_elements(Z_ARRVAL_P(stream_array)), NULL, ZVAL_PTR_DTOR, 0);
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
-		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
-			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
-			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
-		int tmp_fd;
+		php_socket_t this_fd;
 
 		php_stream_from_zval_no_verify(stream, elem);
 		if (stream == NULL) {
@@ -663,10 +654,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
 		 */
-		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&tmp_fd, 1) && tmp_fd != -1) {
-
-			php_socket_t this_fd = (php_socket_t)tmp_fd;
-
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
 				if (!key) {
 					dest_elem = zend_hash_index_update(Z_ARRVAL(new_array), num_ind, elem);
@@ -887,12 +875,11 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 	zval *wval, *oval;
 	zend_string *wkey, *okey;
 	int ret = SUCCESS;
-	ulong num_key;
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), num_key, wkey, wval) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), wkey, wval) {
 		if (wkey && Z_TYPE_P(wval) == IS_ARRAY) {
 
-		    ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(wval), num_key, okey, oval) {
+		    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(wval), okey, oval) {
 				if (okey) {
 					php_stream_context_set_option(context, wkey->val, okey->val, oval);
 				}

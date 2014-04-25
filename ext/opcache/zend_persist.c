@@ -655,6 +655,10 @@ static int zend_update_parent_ce(zval *zv TSRMLS_DC)
 		ce->__callstatic->op_array.refcount++;
 	}
 #endif
+	if (ce->__debugInfo) {
+		ce->__debugInfo = zend_shared_alloc_get_xlat_entry(ce->__debugInfo);
+		ce->__debugInfo->op_array.refcount++;
+	}
 	zend_hash_apply(&ce->properties_info, (apply_func_t) zend_update_property_info_ce TSRMLS_CC);
 	return 0;
 }

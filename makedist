@@ -35,7 +35,7 @@ if test "${1}" = "1" -a "${2}" -lt "28"; then
 fi
 IFS="$old_IFS"
 
-if test "$PHPROOTx" == "x"; then
+if test "x$PHPROOT" == "x"; then
     PHPROOT=git@git.php.net:php-src.git;
 fi
 

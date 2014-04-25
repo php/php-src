@@ -501,14 +501,13 @@ ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
 
 #include "../TSRM/tsrm_strtok_r.h"
 
-#define IS_VISITED_CONSTANT			0x080
+#define IS_VISITED_CONSTANT			0x80
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)
 #define Z_REAL_TYPE_P(p)			(Z_TYPE_P(p) & ~IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) |= IS_VISITED_CONSTANT
 
-ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope TSRMLS_DC) /* {{{ */
+ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
-	zend_bool inline_change = (zend_bool) (zend_uintptr_t) arg;
 	zval *const_value, tmp;
 	char *colon;
 
@@ -588,7 +587,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 //???!
 			ZVAL_COPY_VALUE(p, const_value);
 			if (Z_OPT_CONSTANT_P(p)) {
-				zval_update_constant_ex(p, (void*)1, NULL TSRMLS_CC);
+				zval_update_constant_ex(p, 1, NULL TSRMLS_CC);
 			}
 			zval_opt_copy_ctor(p);
 		}
@@ -670,7 +669,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 //???!
 				ZVAL_COPY_VALUE(&tmp, const_value);
 				if (Z_OPT_CONSTANT(tmp)) {
-					zval_update_constant_ex(&tmp, (void*)1, NULL TSRMLS_CC);
+					zval_update_constant_ex(&tmp, 1, NULL TSRMLS_CC);
 				}
 				zval_opt_copy_ctor(&tmp);
 				const_value = &tmp;
@@ -721,21 +720,21 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 }
 /* }}} */
 
-ZEND_API int zval_update_constant_inline_change(zval *pp, void *scope TSRMLS_DC) /* {{{ */
+ZEND_API int zval_update_constant_inline_change(zval *pp, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
-	return zval_update_constant_ex(pp, (void*)1, scope TSRMLS_CC);
+	return zval_update_constant_ex(pp, 1, scope TSRMLS_CC);
 }
 /* }}} */
 
-ZEND_API int zval_update_constant_no_inline_change(zval *pp, void *scope TSRMLS_DC) /* {{{ */
+ZEND_API int zval_update_constant_no_inline_change(zval *pp, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
-	return zval_update_constant_ex(pp, (void*)0, scope TSRMLS_CC);
+	return zval_update_constant_ex(pp, 0, scope TSRMLS_CC);
 }
 /* }}} */
 
-ZEND_API int zval_update_constant(zval *pp, void *arg TSRMLS_DC) /* {{{ */
+ZEND_API int zval_update_constant(zval *pp, zend_bool inline_change TSRMLS_DC) /* {{{ */
 {
-	return zval_update_constant_ex(pp, arg, NULL TSRMLS_CC);
+	return zval_update_constant_ex(pp, inline_change, NULL TSRMLS_CC);
 }
 /* }}} */
 

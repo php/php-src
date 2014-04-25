@@ -658,7 +658,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 
 /* {{{ php_hash_environment
  */
-int php_hash_environment(TSRMLS_D)
+PHPAPI int php_hash_environment(TSRMLS_D)
 {
 	memset(PG(http_globals), 0, sizeof(PG(http_globals)));
 	zend_activate_auto_globals(TSRMLS_C);

@@ -27,6 +27,7 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 #include "php_openssl.h"
 
 /* PHP Includes */
@@ -77,6 +78,10 @@
 #endif
 #define DEBUG_SMIME	0
 
+#if !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
+#define HAVE_EVP_PKEY_EC 1
+#endif
+
 /* FIXME: Use the openssl constants instead of
  * enum. It is now impossible to match real values
  * against php constants. Also sorry to break the
@@ -87,7 +92,7 @@ enum php_openssl_key_type {
 	OPENSSL_KEYTYPE_DSA,
 	OPENSSL_KEYTYPE_DH,
 	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
 	OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH +1
 #endif
 };
@@ -418,11 +423,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_export_challenge, 0)
     ZEND_ARG_INFO(0, spki)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_get_cert_locations, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ openssl_functions[]
  */
 const zend_function_entry openssl_functions[] = {
+	PHP_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
+
 /* spki functions */
 	PHP_FE(openssl_spki_new, arginfo_openssl_spki_new)
 	PHP_FE(openssl_spki_verify, arginfo_openssl_spki_verify)
@@ -565,6 +575,16 @@ inline static int php_openssl_open_base_dir_chk(char *filename TSRMLS_DC)
 }
 /* }}} */
 
+php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl)
+{
+	return (php_stream*)SSL_get_ex_data(ssl, ssl_stream_data_index);
+}
+
+int php_openssl_get_ssl_stream_data_index()
+{
+	return ssl_stream_data_index;
+}
+
 /* openssl -> PHP "bridging" */
 /* true global; readonly after module startup */
 static char default_ssl_conf_filename[MAXPATHLEN];
@@ -598,7 +618,7 @@ struct php_x509_request { /* {{{ */
 static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * passphrase, int makeresource, long * resourceval TSRMLS_DC);
 static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC);
-static X509_STORE     * setup_verify(zval * calist TSRMLS_DC);
+static X509_STORE * setup_verify(zval * calist TSRMLS_DC);
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
@@ -693,7 +713,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 		return (time_t)-1;
 	}
 
-	if (ASN1_STRING_length(timestr) != strlen(ASN1_STRING_data(timestr))) {
+	if (ASN1_STRING_length(timestr) != strlen((const char*)ASN1_STRING_data(timestr))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "illegal length in timestamp");
 		return (time_t)-1;
 	}
@@ -898,7 +918,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		req->digest = req->md_alg = EVP_get_digestbyname(req->digest_name);
 	}
 	if (req->md_alg == NULL) {
-		req->md_alg = req->digest = EVP_md5();
+		req->md_alg = req->digest = EVP_sha1();
 	}
 
 	PHP_SSL_CONFIG_SYNTAX_CHECK(extensions_section);
@@ -1071,6 +1091,13 @@ static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo) { /* {
 }
 /* }}} */
 
+/* {{{ INI Settings */
+PHP_INI_BEGIN()
+	PHP_INI_ENTRY("openssl.cafile", NULL, PHP_INI_PERDIR, NULL)
+	PHP_INI_ENTRY("openssl.capath", NULL, PHP_INI_PERDIR, NULL)
+PHP_INI_END()
+/* }}} */
+ 
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(openssl)
@@ -1138,6 +1165,9 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_NO_PADDING", RSA_NO_PADDING, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_OAEP_PADDING", RSA_PKCS1_OAEP_PADDING, CONST_CS|CONST_PERSISTENT);
 
+	/* Informational stream wrapper constants */
+	REGISTER_STRING_CONSTANT("OPENSSL_DEFAULT_STREAM_CIPHERS", OPENSSL_DEFAULT_STREAM_CIPHERS, CONST_CS|CONST_PERSISTENT);
+
 	/* Ciphers */
 #ifndef OPENSSL_NO_RC2
 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_40", PHP_OPENSSL_CIPHER_RC2_40, CONST_CS|CONST_PERSISTENT);
@@ -1160,7 +1190,7 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DSA", OPENSSL_KEYTYPE_DSA, CONST_CS|CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DH", OPENSSL_KEYTYPE_DH, CONST_CS|CONST_PERSISTENT);
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_EC", OPENSSL_KEYTYPE_EC, CONST_CS|CONST_PERSISTENT);
 #endif
 
@@ -1193,6 +1223,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_stream_xport_register("sslv2", php_openssl_ssl_socket_factory TSRMLS_CC);
 #endif
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory TSRMLS_CC);
+	php_stream_xport_register("tlsv1.0", php_openssl_ssl_socket_factory TSRMLS_CC);
 #if OPENSSL_VERSION_NUMBER >= 0x10001001L
 	php_stream_xport_register("tlsv1.1", php_openssl_ssl_socket_factory TSRMLS_CC);
 	php_stream_xport_register("tlsv1.2", php_openssl_ssl_socket_factory TSRMLS_CC);
@@ -1203,7 +1234,9 @@ PHP_MINIT_FUNCTION(openssl)
 
 	php_register_url_stream_wrapper("https", &php_stream_http_wrapper TSRMLS_CC);
 	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper TSRMLS_CC);
-	
+
+	REGISTER_INI_ENTRIES();
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1217,6 +1250,7 @@ PHP_MINFO_FUNCTION(openssl)
 	php_info_print_table_row(2, "OpenSSL Library Version", SSLeay_version(SSLEAY_VERSION));
 	php_info_print_table_row(2, "OpenSSL Header Version", OPENSSL_VERSION_TEXT);
 	php_info_print_table_end();
+	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 
@@ -1235,6 +1269,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 #endif
 	php_stream_xport_unregister("sslv3" TSRMLS_CC);
 	php_stream_xport_unregister("tls" TSRMLS_CC);
+	php_stream_xport_unregister("tlsv1.0" TSRMLS_CC);
 #if OPENSSL_VERSION_NUMBER >= 0x10001001L
 	php_stream_xport_unregister("tlsv1.1" TSRMLS_CC);
 	php_stream_xport_unregister("tlsv1.2" TSRMLS_CC);
@@ -1243,11 +1278,33 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	/* reinstate the default tcp handler */
 	php_stream_xport_register("tcp", php_stream_generic_socket_factory TSRMLS_CC);
 
+	UNREGISTER_INI_ENTRIES();
+
 	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ x509 cert functions */
+
+/* {{{ proto array openssl_get_cert_locations(void)
+   Retrieve an array mapping available certificate locations */
+PHP_FUNCTION(openssl_get_cert_locations)
+{
+	array_init(return_value);
+
+	add_assoc_string(return_value, "default_cert_file", (char *) X509_get_default_cert_file(), 1);
+	add_assoc_string(return_value, "default_cert_file_env", (char *) X509_get_default_cert_file_env(), 1);
+	add_assoc_string(return_value, "default_cert_dir", (char *) X509_get_default_cert_dir(), 1);
+	add_assoc_string(return_value, "default_cert_dir_env", (char *) X509_get_default_cert_dir_env(), 1);
+	add_assoc_string(return_value, "default_private_dir", (char *) X509_get_default_private_dir(), 1);
+	add_assoc_string(return_value, "default_default_cert_area", (char *) X509_get_default_cert_area(), 1);
+	add_assoc_string(return_value, "ini_cafile",
+		zend_ini_string("openssl.cafile", sizeof("openssl.cafile"), 0), 1);
+	add_assoc_string(return_value, "ini_capath",
+		zend_ini_string("openssl.capath", sizeof("openssl.capath"), 0), 1);
+}
+/* }}} */
+
 
 /* {{{ php_openssl_x509_from_zval
 	Given a zval, coerce it into an X509 object.
@@ -1731,7 +1788,7 @@ static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *
 	return result;
 }
 
-static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
+zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
 {
 	if (Z_TYPE_P(val) == IS_STRING) {
 		const char *method = NULL;
@@ -3454,6 +3511,15 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC)
 			}
 			break;
 #endif
+#ifdef HAVE_EVP_PKEY_EC
+		case EVP_PKEY_EC:
+			assert(pkey->pkey.ec != NULL);
+
+			if ( NULL == EC_KEY_get0_private_key(pkey->pkey.ec)) {
+				return 0;
+			}
+			break;
+#endif
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "key type not supported in this PHP build!");
 			break;
@@ -3856,7 +3922,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			}
 
 			break;
-#ifdef EVP_PKEY_EC 
+#ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC:
 			ktype = OPENSSL_KEYTYPE_EC;
 			break;
@@ -4801,6 +4867,7 @@ PHP_FUNCTION(openssl_seal)
 
 	if (!EVP_EncryptInit(&ctx,cipher,NULL,NULL)) {
 		RETVAL_FALSE;
+		EVP_CIPHER_CTX_cleanup(&ctx);
 		goto clean_exit;
 	}
 
@@ -4811,10 +4878,12 @@ PHP_FUNCTION(openssl_seal)
 #endif
 	/* allocate one byte extra to make room for \0 */
 	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(&ctx));
+	EVP_CIPHER_CTX_cleanup(&ctx);
 
 	if (!EVP_SealInit(&ctx, cipher, eks, eksl, NULL, pkeys, nkeys) || !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, data_len)) {
 		RETVAL_FALSE;
 		efree(buf);
+		EVP_CIPHER_CTX_cleanup(&ctx);
 		goto clean_exit;
 	}
 
@@ -4848,6 +4917,7 @@ PHP_FUNCTION(openssl_seal)
 		efree(buf);
 	}
 	RETVAL_LONG(len1 + len2);
+	EVP_CIPHER_CTX_cleanup(&ctx);
 
 clean_exit:
 	for (i=0; i<nkeys; i++) {
@@ -4906,341 +4976,21 @@ PHP_FUNCTION(openssl_open)
 	if (EVP_OpenInit(&ctx, cipher, (unsigned char *)ekey, ekey_len, NULL, pkey) && EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)data, data_len)) {
 		if (!EVP_OpenFinal(&ctx, buf + len1, &len2) || (len1 + len2 == 0)) {
 			efree(buf);
-			if (keyresource == -1) { 
-				EVP_PKEY_free(pkey);
-			}
-			RETURN_FALSE;
+			RETVAL_FALSE;
+		} else {
+			zval_dtor(opendata);
+			buf[len1 + len2] = '\0';
+			ZVAL_STRINGL(opendata, erealloc(buf, len1 + len2 + 1), len1 + len2, 0);
+			RETVAL_TRUE;
 		}
 	} else {
 		efree(buf);
-		if (keyresource == -1) {
-			EVP_PKEY_free(pkey);
-		}
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
 	if (keyresource == -1) {
 		EVP_PKEY_free(pkey);
 	}
-	zval_dtor(opendata);
-	buf[len1 + len2] = '\0';
-	ZVAL_STRINGL(opendata, erealloc(buf, len1 + len2 + 1), len1 + len2, 0);
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* SSL verification functions */
-
-#define GET_VER_OPT(name)               (stream->context && SUCCESS == php_stream_context_get_option(stream->context, "ssl", name, &val))
-#define GET_VER_OPT_STRING(name, str)   if (GET_VER_OPT(name)) { convert_to_string_ex(val); str = Z_STRVAL_PP(val); }
-
-static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
-{
-	php_stream *stream;
-	SSL *ssl;
-	int err, depth, ret;
-	zval **val;
-
-	ret = preverify_ok;
-
-	/* determine the status for the current cert */
-	err = X509_STORE_CTX_get_error(ctx);
-	depth = X509_STORE_CTX_get_error_depth(ctx);
-
-	/* conjure the stream & context to use */
-	ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
-	stream = (php_stream*)SSL_get_ex_data(ssl, ssl_stream_data_index);
-
-	/* if allow_self_signed is set, make sure that verification succeeds */
-	if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT && GET_VER_OPT("allow_self_signed") && zval_is_true(*val)) {
-		ret = 1;
-	}
-
-	/* check the depth */
-	if (GET_VER_OPT("verify_depth")) {
-		convert_to_long_ex(val);
-
-		if (depth > Z_LVAL_PP(val)) {
-			ret = 0;
-			X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
-		}
-	}
-
-	return ret;
-
-}
-/* }}} */
-
-static zend_bool matches_wildcard_name(const char *subjectname, const char *certname)
-{
-	char *wildcard;
-	int prefix_len, suffix_len, subject_len;
-
-	if (strcasecmp(subjectname, certname) == 0) {
-		return 1;
-	}
-
-	if (!(wildcard = strchr(certname, '*'))) {
-		return 0;
-	}
-
-	// 1) prefix, if not empty, must match subject
-	prefix_len = wildcard - certname;
-	if (prefix_len && strncasecmp(subjectname, certname, prefix_len) != 0) {
-		return 0;
-	}
-
-	suffix_len = strlen(wildcard + 1);
-	subject_len = strlen(subjectname);
-	if (suffix_len <= subject_len) {
-		/* 2) suffix must match
-		 * 3) no . between prefix and suffix
-		 **/
-		return strcasecmp(wildcard + 1, subjectname + subject_len - suffix_len) == 0 &&
-			memchr(subjectname + prefix_len, '.', subject_len - suffix_len - prefix_len) == NULL;
-	}
-
-	return 0;
-}
-
-static zend_bool matches_san_list(X509 *peer, const char *subject_name)
-{
-	int i;
-	zend_bool is_match = 0;
-	unsigned char *cert_name;
-
-	GENERAL_NAMES *alt_names = X509_get_ext_d2i(peer, NID_subject_alt_name, 0, 0);
-	int alt_name_count = sk_GENERAL_NAME_num(alt_names);
-
-	for (i = 0; i < alt_name_count; i++) {
-		GENERAL_NAME *san = sk_GENERAL_NAME_value(alt_names, i);
-
-		if (GEN_DNS == san->type) {
-			ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
-			is_match = matches_wildcard_name(subject_name, (char *) cert_name);
-			OPENSSL_free(cert_name);
-		}
-
-		if (is_match) {
-			break;
-		}
-	}
-
-	return is_match;
-}
-
-static zend_bool matches_common_name(X509 *peer, const char *subject_name TSRMLS_DC)
-{
-	char buf[1024];
-	X509_NAME *cert_name;
-	zend_bool is_match = 0;
-	int cert_name_len;
-
-	cert_name = X509_get_subject_name(peer);
-	cert_name_len = X509_NAME_get_text_by_NID(cert_name, NID_commonName, buf, sizeof(buf));
-
-	if (cert_name_len == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate peer certificate CN");
-	} else if (cert_name_len != strlen(buf)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer certificate CN=`%.*s' is malformed", cert_name_len, buf);
-	} else if (matches_wildcard_name(subject_name, buf)) {
-		is_match = 1;
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer certificate CN=`%.*s' did not match expected CN=`%s'", cert_name_len, buf, subject_name);
-	}
-	
-	return is_match;
-}
-
-int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC) /* {{{ */
-{
-	zval **val = NULL;
-	char *cnmatch = NULL;
-	int err;
-
-	/* verification is turned off */
-	if (!(GET_VER_OPT("verify_peer") && zval_is_true(*val))) {
-		return SUCCESS;
-	}
-
-	if (peer == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not get peer certificate");
-		return FAILURE;
-	}
-
-	err = SSL_get_verify_result(ssl);
-	switch (err) {
-		case X509_V_OK:
-			/* fine */
-			break;
-		case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-			if (GET_VER_OPT("allow_self_signed") && zval_is_true(*val)) {
-				/* allowed */
-				break;
-			}
-			/* not allowed, so fall through */
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not verify peer: code:%d %s", err, X509_verify_cert_error_string(err));
-			return FAILURE;
-	}
-
-	/* if the cert passed the usual checks, apply our own local policies now */
-
-	if (GET_VER_OPT("peer_fingerprint")) {
-		if (Z_TYPE_PP(val) == IS_STRING || Z_TYPE_PP(val) == IS_ARRAY) {
-			if (!php_x509_fingerprint_match(peer, *val TSRMLS_CC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer fingerprint doesn't match");
-				return FAILURE;
-			}
-		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected peer fingerprint must be a string or an array");
-		}
-	}
-
-	GET_VER_OPT_STRING("CN_match", cnmatch);
-
-	if (cnmatch) {
-		if (matches_san_list(peer, cnmatch)) {
-			return SUCCESS;
-		} else if (matches_common_name(peer, cnmatch TSRMLS_CC)) {
-			return SUCCESS;
-		} else {
-			return FAILURE;
-		}
-	}
-
-	return SUCCESS;
-}
-/* }}} */
-
-static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
-{
-    php_stream *stream = (php_stream *)data;
-    zval **val = NULL;
-    char *passphrase = NULL;
-    /* TODO: could expand this to make a callback into PHP user-space */
-
-    GET_VER_OPT_STRING("passphrase", passphrase);
-
-    if (passphrase) {
-        if (Z_STRLEN_PP(val) < num - 1) {
-            memcpy(buf, Z_STRVAL_PP(val), Z_STRLEN_PP(val)+1);
-            return Z_STRLEN_PP(val);
-        }
-    }
-    return 0;
-}
-/* }}} */
-
-SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{ */
-{
-	zval **val = NULL;
-	char *cafile = NULL;
-	char *capath = NULL;
-	char *certfile = NULL;
-	char *cipherlist = NULL;
-	int ok = 1;
-
-	ERR_clear_error();
-
-	/* look at context options in the stream and set appropriate verification flags */
-	if (GET_VER_OPT("verify_peer") && zval_is_true(*val)) {
-
-		/* turn on verification callback */
-		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
-
-		/* CA stuff */
-		GET_VER_OPT_STRING("cafile", cafile);
-		GET_VER_OPT_STRING("capath", capath);
-
-		if (cafile || capath) {
-			if (!SSL_CTX_load_verify_locations(ctx, cafile, capath)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set verify locations `%s' `%s'", cafile, capath);
-				return NULL;
-			}
-		}
-
-		if (GET_VER_OPT("verify_depth")) {
-			convert_to_long_ex(val);
-			SSL_CTX_set_verify_depth(ctx, Z_LVAL_PP(val));
-		}
-	} else {
-		SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
-	}
-
-	/* callback for the passphrase (for localcert) */
-	if (GET_VER_OPT("passphrase")) {
-		SSL_CTX_set_default_passwd_cb_userdata(ctx, stream);
-		SSL_CTX_set_default_passwd_cb(ctx, passwd_callback);
-	}
-
-	GET_VER_OPT_STRING("ciphers", cipherlist);
-	if (!cipherlist) {
-		cipherlist = "DEFAULT";
-	}
-	if (SSL_CTX_set_cipher_list(ctx, cipherlist) != 1) {
-		return NULL;
-	}
-
-	GET_VER_OPT_STRING("local_cert", certfile);
-	if (certfile) {
-		char resolved_path_buff[MAXPATHLEN];
-		const char * private_key = NULL;
-
-		if (VCWD_REALPATH(certfile, resolved_path_buff)) {
-			/* a certificate to use for authentication */
-			if (SSL_CTX_use_certificate_chain_file(ctx, resolved_path_buff) != 1) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set local cert chain file `%s'; Check that your cafile/capath settings include details of your certificate and its issuer", certfile);
-				return NULL;
-			}
-			GET_VER_OPT_STRING("local_pk", private_key);
-
-			if (private_key) {
-				char resolved_path_buff_pk[MAXPATHLEN];
-				if (VCWD_REALPATH(private_key, resolved_path_buff_pk)) {
-					if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff_pk, SSL_FILETYPE_PEM) != 1) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff_pk);
-						return NULL;
-					}
-				}
-			} else {
-				if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff);
-					return NULL;
-				}		
-			}
-
-#if OPENSSL_VERSION_NUMBER < 0x10001001L
-			do {
-				/* Unnecessary as of OpenSSLv1.0.1 (will segfault if used with >= 10001001 ) */
-				X509 *cert = NULL;
-				EVP_PKEY *key = NULL;
-				SSL *tmpssl = SSL_new(ctx);
-				cert = SSL_get_certificate(tmpssl);
-
-				if (cert) {
-					key = X509_get_pubkey(cert);
-					EVP_PKEY_copy_parameters(key, SSL_get_privatekey(tmpssl));
-					EVP_PKEY_free(key);
-				}
-				SSL_free(tmpssl);
-			} while (0);
-#endif
-			if (!SSL_CTX_check_private_key(ctx)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Private key does not match certificate!");
-			}
-		}
-	}
-	if (ok) {
-		SSL *ssl = SSL_new(ctx);
-
-		if (ssl) {
-			/* map SSL => stream */
-			SSL_set_ex_data(ssl, ssl_stream_data_index, stream);
-		}
-		return ssl;
-	}
-
-	return NULL;
+	EVP_CIPHER_CTX_cleanup(&ctx);
 }
 /* }}} */
 
@@ -5561,7 +5311,7 @@ PHP_FUNCTION(openssl_cipher_iv_length)
 
 
 /* {{{ proto string openssl_dh_compute_key(string pub_key, resource dh_key)
-   Computes shared sicret for public value of remote DH key and local DH key */
+   Computes shared secret for public value of remote DH key and local DH key */
 PHP_FUNCTION(openssl_dh_compute_key)
 {
 	zval *key;
@@ -5658,3 +5408,4 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
+

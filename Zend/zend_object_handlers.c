@@ -137,8 +137,39 @@ ZEND_API HashTable *zend_std_get_gc(zval *object, zval **table, int *n TSRMLS_DC
 
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
 {
-	*is_temp = 0;
-	return zend_std_get_properties(object TSRMLS_CC);
+	zend_class_entry *ce = Z_OBJCE_P(object);
+	zval retval;
+	HashTable *ht;
+
+	if (!ce->__debugInfo) {
+		*is_temp = 0;
+		return Z_OBJ_HANDLER_P(object, get_properties)
+			? Z_OBJ_HANDLER_P(object, get_properties)(object TSRMLS_CC)
+			: NULL;
+	}
+
+	zend_call_method_with_0_params(object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
+	if (Z_TYPE(retval) == IS_ARRAY) {
+		if (Z_REFCOUNT(retval) <= 1) {
+			*is_temp = 1;
+			ALLOC_HASHTABLE(ht);
+			*ht = *Z_ARRVAL(retval);
+			efree(Z_ARR(retval));
+			return ht;
+		} else {
+			*is_temp = 0;
+			zval_ptr_dtor(&retval);
+		}
+	} else if (Z_TYPE(retval) == IS_NULL) {
+		*is_temp = 1;
+		ALLOC_HASHTABLE(ht);
+		zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
+		return ht;
+	}
+
+	zend_error_noreturn(E_ERROR, ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
+
+	return NULL; /* Compilers are dumb and don't understand that noreturn means that the function does NOT need a return value... */
 }
 /* }}} */
 
@@ -1623,7 +1654,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
-	NULL,									/* get_debug_info */
+	zend_std_get_debug_info,				/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
 	NULL,									/* do_operation */

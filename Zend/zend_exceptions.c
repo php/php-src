@@ -360,6 +360,13 @@ ZEND_METHOD(error_exception, getSeverity)
 		} \
 	} while (0)
 
+
+#define TRACE_ARG_APPEND(vallen) do { \
+		int len = str->len; \
+		str = STR_REALLOC(str, len + vallen, 0); \
+		memmove(str->val + len - l_added + 1 + vallen, str->val + len - l_added + 1, l_added); \
+	} while (0)
+
 /* }}} */
 
 static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
@@ -370,7 +377,7 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 	str = *str_ptr;
 
 	/* the trivial way would be to do:
-	 * conver_to_string_ex(arg);
+	 * convert_to_string_ex(arg);
 	 * append it and kill the now tmp arg.
 	 * but that could cause some E_NOTICE and also damn long lines.
 	 */
@@ -394,8 +401,57 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 				l_added += 3 + 1;
 			}
 			while (--l_added) {
-				if (str->val[str->len - l_added] < 32) {
-					str->val[str->len - l_added] = '?';
+				unsigned char chr = str->val[str->len - l_added];
+				if (chr < 32 || chr == '\\' || chr > 126) {
+					str->val[str->len - l_added] = '\\';
+
+					switch (chr) {
+						case '\n':
+							TRACE_ARG_APPEND(1);
+							str->val[str->len - l_added] = 'n';
+							break;
+						case '\r':
+							TRACE_ARG_APPEND(1);
+							str->val[str->len - l_added] = 'r';
+							break;
+						case '\t':
+							TRACE_ARG_APPEND(1);
+							str->val[str->len - l_added] = 't';
+							break;
+						case '\f':
+							TRACE_ARG_APPEND(1);
+							str->val[str->len - l_added] = 'f';
+							break;
+						case '\v':
+							TRACE_ARG_APPEND(1);
+							str->val[str->len - l_added] = 'v';
+							break;
+#ifndef PHP_WIN32
+						case '\e':
+#else
+						case VK_ESCAPE:
+#endif
+							TRACE_ARG_APPEND(1);
+							str->val[str->len - l_added] = 'e';
+							break;
+						case '\\':
+							TRACE_ARG_APPEND(1);
+							str->val[str->len - l_added] = '\\';
+							break;
+						default:
+							TRACE_ARG_APPEND(3);
+							str->val[str->len - l_added - 2] = 'x';
+							if ((chr >> 4) < 10) {
+								str->val[str->len - l_added - 1] = (chr >> 4) + '0';
+							} else {
+								str->val[str->len - l_added - 1] = (chr >> 4) + 'A' - 10;
+							}
+							if (chr % 16 < 10) {
+								str->val[str->len - l_added] = chr % 16 + '0';
+							} else {
+								str->val[str->len - l_added] = chr % 16 + 'A' - 10;
+							}
+					}
 				}
 			}
 			break;
