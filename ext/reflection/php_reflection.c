@@ -1863,8 +1863,8 @@ ZEND_METHOD(reflection_function, getReturnType)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	
-	if (fptr->common.return_hint.used) {
-		zend_return_hint *hint = &fptr->common.return_hint;
+	if (fptr->common.return_hint->used) {
+		zend_return_hint *hint = fptr->common.return_hint;
 		
 		switch (hint->type) {
 			case IS_OBJECT: {
@@ -1893,7 +1893,7 @@ ZEND_METHOD(reflection_function, hasReturnType)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
-	RETURN_BOOL(fptr->common.return_hint.used);
+	RETURN_BOOL(fptr->common.return_hint->used);
 }
 /* }}} */
 

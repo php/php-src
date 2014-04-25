@@ -406,10 +406,17 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		}
 	}
 	
-	if (op_array->return_hint.used && op_array->return_hint.type == IS_OBJECT) {
-		zend_accel_store_interned_string(op_array->return_hint.class_name, op_array->return_hint.class_name_len+1);
-	}
+	if (op_array->return_hint) {
+		zend_return_hint *return_hint;
 
+		if (!(return_hint = zend_shared_alloc_get_xlat_entry(op_array->return_hint))) {
+			zend_accel_store(op_array->return_hint, sizeof(zend_return_hint));
+			if (op_array->return_hint->used && op_array->return_hint->type == IS_OBJECT) {
+				zend_accel_store_interned_string(op_array->return_hint->class_name, op_array->return_hint->class_name_len+1);
+			}
+		} else op_array->return_hint = return_hint;		
+	}
+	
 	if (op_array->brk_cont_array) {
 		zend_accel_store(op_array->brk_cont_array, sizeof(zend_brk_cont_element) * op_array->last_brk_cont);
 	}
