@@ -30,13 +30,22 @@ Warning: ini_get_all(): Unable to find extension 'nosuchextension' in %s on line
 bool(false)
 array(0) {
 }
-array(2) {
+array(3) {
   ["pcre.backtrack_limit"]=>
   array(3) {
     ["global_value"]=>
     string(7) "1000000"
     ["local_value"]=>
     string(7) "1000000"
+    ["access"]=>
+    int(7)
+  }
+  ["pcre.jit"]=>
+  array(3) {
+    ["global_value"]=>
+    string(1) "1"
+    ["local_value"]=>
+    string(1) "1"
     ["access"]=>
     int(7)
   }
@@ -50,9 +59,11 @@ array(2) {
     int(7)
   }
 }
-array(2) {
+array(3) {
   ["pcre.backtrack_limit"]=>
   string(7) "1000000"
+  ["pcre.jit"]=>
+  string(1) "1"
   ["pcre.recursion_limit"]=>
   string(6) "100000"
 }

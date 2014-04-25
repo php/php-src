@@ -70,6 +70,9 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	HashTable pcre_cache;
 	long backtrack_limit;
 	long recursion_limit;
+#ifdef PCRE_STUDY_JIT_COMPILE
+	zend_bool jit;
+#endif
 	int  error_code;
 ZEND_END_MODULE_GLOBALS(pcre)
 

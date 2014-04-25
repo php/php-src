@@ -117,7 +117,10 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateLong, backtrack_limit, zend_pcre_globals, pcre_globals)
-	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000", PHP_INI_ALL, OnUpdateLong, recursion_limit, zend_pcre_globals, pcre_globals)
+	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000",  PHP_INI_ALL, OnUpdateLong, recursion_limit, zend_pcre_globals, pcre_globals)
+#ifdef PCRE_STUDY_JIT_COMPILE
+	STD_PHP_INI_ENTRY("pcre.jit",             "1",       PHP_INI_ALL, OnUpdateBool, jit,             zend_pcre_globals, pcre_globals)
+#endif
 PHP_INI_END()
 
 
@@ -412,12 +415,22 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex TSRMLS
 		return NULL;
 	}
 
+#ifdef PCRE_STUDY_JIT_COMPILE
+	if (PCRE_G(jit)) {
+		/* Enable PCRE JIT compiler */
+		do_study = 1;
+		soptions |= PCRE_STUDY_JIT_COMPILE;
+	}
+#endif
+
 	/* If study option was specified, study the pattern and
 	   store the result in extra for passing to pcre_exec. */
 	if (do_study) {
 		extra = pcre_study(re, soptions, &error);
 		if (extra) {
 			extra->flags |= PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+			extra->match_limit = PCRE_G(backtrack_limit);
+			extra->match_limit_recursion = PCRE_G(recursion_limit);
 		}
 		if (error != NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while studying pattern");
