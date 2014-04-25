@@ -2844,15 +2844,18 @@ static inline void zend_return_hint_check(zend_execute_data *execute_data, zval 
 
 	if (UNEXPECTED(!retval_ptr || Z_TYPE_P(retval_ptr) == IS_NULL)) {
 		zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
+		return;
 	} else if (retval_ptr){
 		switch (return_hint->type) {
 			case IS_ARRAY: if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_ARRAY)) {
 				zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
+				return;
 			} break;
 			
 			case IS_CALLABLE: if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_OBJECT || 
 				!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC))) {
 				zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
+				return;
 			} break;
 			
 			case IS_OBJECT: {
@@ -2860,13 +2863,13 @@ static inline void zend_return_hint_check(zend_execute_data *execute_data, zval 
 				
 				if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_OBJECT)) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
-					break;
+					return;
 				}
 				
 				if (return_hint->class_name_type == ZEND_FETCH_CLASS_SILENT) {
 					if (UNEXPECTED(!(ce = zend_fetch_class_by_name(return_hint->class_name, return_hint->class_name_len, NULL, return_hint->class_name_type TSRMLS_CC)))) {
 						zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, NULL, "the class could not be found" TSRMLS_CC);
-						break;
+						return;
 					}
 				} else switch (return_hint->class_name_type) {
 					case ZEND_FETCH_CLASS_SELF:
@@ -2876,9 +2879,9 @@ static inline void zend_return_hint_check(zend_execute_data *execute_data, zval 
 
 				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(retval_ptr), ce TSRMLS_CC))) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
-					break;
+					return;
 				}
-			}
+			} break;
 		}
 	}
 }
