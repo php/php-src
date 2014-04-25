@@ -284,7 +284,7 @@ struct _zend_op_array {
 	zend_uint num_args;
 	zend_uint required_num_args;
 	zend_arg_info *arg_info;
-	zend_return_hint return_hint;
+	zend_return_hint *return_hint;
 	/* END of common elements */
 	
 	zend_uint *refcount;
@@ -342,7 +342,7 @@ typedef struct _zend_internal_function {
 	zend_uint num_args;
 	zend_uint required_num_args;
 	zend_arg_info *arg_info;
-	zend_return_hint return_hint;
+	zend_return_hint *return_hint;
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -363,7 +363,7 @@ typedef union _zend_function {
 		zend_uint num_args;
 		zend_uint required_num_args;
 		zend_arg_info *arg_info;
-		zend_return_hint return_hint;
+		zend_return_hint *return_hint;
 	} common;
 
 	zend_op_array op_array;

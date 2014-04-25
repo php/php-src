@@ -2105,7 +2105,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 		
 		/* Temporarily, don't use this */
-		internal_function->return_hint.used = 0;
+		internal_function->return_hint = NULL;
 		
 		if (ptr->flags & ZEND_ACC_ABSTRACT) {
 			if (scope) {

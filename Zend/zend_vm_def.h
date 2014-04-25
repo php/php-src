@@ -2840,48 +2840,50 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, CONST, ANY)
 }
 
 static inline void zend_return_hint_check(zend_execute_data *execute_data, zval *retval_ptr TSRMLS_DC) {
-	zend_return_hint *return_hint = &EX(function_state).function->common.return_hint;
+	zend_return_hint *return_hint = EX(function_state).function->common.return_hint;
 
-	if (UNEXPECTED(!retval_ptr || Z_TYPE_P(retval_ptr) == IS_NULL)) {
-		zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
-		return;
-	} else if (retval_ptr){
-		switch (return_hint->type) {
-			case IS_ARRAY: if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_ARRAY)) {
-				zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
-				return;
-			} break;
-			
-			case IS_CALLABLE: if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_OBJECT || 
-				!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC))) {
-				zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
-				return;
-			} break;
-			
-			case IS_OBJECT: {
-				zend_class_entry *ce = NULL;
-				
-				if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_OBJECT)) {
+	if (return_hint) {
+		if (UNEXPECTED(!retval_ptr || Z_TYPE_P(retval_ptr) == IS_NULL)) {
+			zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
+			return;
+		} else if (retval_ptr){
+			switch (return_hint->type) {
+				case IS_ARRAY: if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_ARRAY)) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 					return;
-				}
+				} break;
+			
+				case IS_CALLABLE: if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_OBJECT || 
+					!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC))) {
+					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
+					return;
+				} break;
+			
+				case IS_OBJECT: {
+					zend_class_entry *ce = NULL;
 				
-				if (return_hint->class_name_type == ZEND_FETCH_CLASS_SILENT) {
-					if (UNEXPECTED(!(ce = zend_fetch_class_by_name(return_hint->class_name, return_hint->class_name_len, NULL, return_hint->class_name_type TSRMLS_CC)))) {
-						zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, NULL, "the class could not be found" TSRMLS_CC);
+					if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_OBJECT)) {
+						zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 						return;
 					}
-				} else switch (return_hint->class_name_type) {
-					case ZEND_FETCH_CLASS_SELF:
-						ce = EG(scope);
-					break;
-				}
+				
+					if (return_hint->class_name_type == ZEND_FETCH_CLASS_SILENT) {
+						if (UNEXPECTED(!(ce = zend_fetch_class_by_name(return_hint->class_name, return_hint->class_name_len, NULL, return_hint->class_name_type TSRMLS_CC)))) {
+							zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, NULL, "the class could not be found" TSRMLS_CC);
+							return;
+						}
+					} else switch (return_hint->class_name_type) {
+						case ZEND_FETCH_CLASS_SELF:
+							ce = EG(scope);
+						break;
+					}
 
-				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(retval_ptr), ce TSRMLS_CC))) {
-					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
-					return;
-				}
-			} break;
+					if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(retval_ptr), ce TSRMLS_CC))) {
+						zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
+						return;
+					}
+				} break;
+			}
 		}
 	}
 }
@@ -2895,7 +2897,8 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-	if (EX(function_state).function->common.return_hint.used) {
+	if (EX(function_state).function->common.return_hint &&
+		EX(function_state).function->common.return_hint->used) {
 		zend_return_hint_check(execute_data, retval_ptr TSRMLS_CC);
 	}
 
@@ -2950,7 +2953,8 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 			retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 			
-			if (EX(function_state).function->common.return_hint.used) {
+			if (EX(function_state).function->common.return_hint &&
+				EX(function_state).function->common.return_hint->used) {
 				zend_return_hint_check(execute_data, retval_ptr TSRMLS_CC);
 			}
 
@@ -2977,7 +2981,8 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 		retval_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 
-		if (EX(function_state).function->common.return_hint.used) {
+		if (EX(function_state).function->common.return_hint &&
+			EX(function_state).function->common.return_hint->used) {
 			zend_return_hint_check(execute_data, *retval_ptr_ptr TSRMLS_CC);
 		}
 
