@@ -71,14 +71,14 @@ foreach($stmt as $data)
 ?>
 --EXPECTF--
 Test::__construct(WOW)
-object(Test)#4 (2) {
+object(Test)#%d (2) {
   ["val"]=>
   string(1) "A"
   ["grp"]=>
   string(6) "Group1"
 }
 Test::__construct(WOW)
-object(Test)#6 (2) {
+object(Test)#%d (2) {
   ["val"]=>
   string(1) "B"
   ["grp"]=>
