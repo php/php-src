@@ -311,7 +311,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		}
 	}
 
-	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && ! ZVAL_IS_NULL(&param->parameter)) {
+	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !ZVAL_IS_NULL(&param->parameter)) {
 		if (Z_TYPE(param->parameter) == IS_DOUBLE) {
 			char *p;
 			int len = spprintf(&p, 0, "%.*H", (int) EG(precision), Z_DVAL(param->parameter));
@@ -469,7 +469,7 @@ static PHP_METHOD(PDOStatement, execute)
 			}
 
 			param.param_type = PDO_PARAM_STR;
-			ZVAL_COPY(tmp, &param.parameter);
+			ZVAL_COPY(&param.parameter, tmp);
 
 			if (!really_register_bound_param(&param, stmt, 1 TSRMLS_CC)) {
 				if (!ZVAL_IS_UNDEF(&param.parameter)) {
