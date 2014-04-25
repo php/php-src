@@ -318,7 +318,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		parameter = Z_REFVAL(param->parameter);
 	}
 
-	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !ZVAL_IS_NULL(&parameter)) {
+	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !ZVAL_IS_NULL(parameter)) {
 		if (Z_TYPE_P(parameter) == IS_DOUBLE) {
 			char *p;
 			int len = spprintf(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(parameter));
@@ -1590,7 +1590,6 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	if (!really_register_bound_param(&param, stmt, is_param TSRMLS_CC)) {
 		if (!ZVAL_IS_UNDEF(&param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
-			ZVAL_UNDEF(&param.parameter);
 		}
 		return 0;
 	}
