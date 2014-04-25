@@ -1892,6 +1892,21 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 	char lcname[16];
 	int name_len;
 
+	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->return_hint.used) {
+		zend_class_entry *ce = NULL;
+		char *errmsg = "Generators may only be hinted as Generator, Iterator or Traversable, %s is not a valid type";
+		if (CG(active_op_array)->return_hint.type != IS_OBJECT) {
+			zend_error_noreturn(E_COMPILE_ERROR, errmsg, 
+				zend_get_type_by_const(CG(active_op_array)->return_hint.type));
+		}
+		
+		ce = zend_fetch_class_by_name(CG(active_op_array)->return_hint.class_name, CG(active_op_array)->return_hint.class_name_len, NULL, 0 TSRMLS_CC);
+		
+		if (!ce || !instanceof_function(zend_ce_generator, ce TSRMLS_CC)) {
+			zend_error_noreturn(E_COMPILE_ERROR, errmsg, CG(active_op_array)->return_hint.class_name);
+		}
+	}
+
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
 
@@ -2948,23 +2963,6 @@ void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_v
 		zend_error_noreturn(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a function");
 	}
 	
-	if (CG(active_op_array)->return_hint.used) {
-		zend_class_entry *ce = NULL;
-		
-		if (CG(active_op_array)->return_hint.type != IS_OBJECT) {
-			zend_error_noreturn(E_COMPILE_ERROR, 
-				"Generators may only yield objects, %s is not a valid type", 
-				zend_get_type_by_const(CG(active_op_array)->return_hint.type));
-		}
-		
-		ce = zend_fetch_class_by_name(CG(active_op_array)->return_hint.class_name, CG(active_op_array)->return_hint.class_name_len, NULL, 0 TSRMLS_CC);
-		
-		if (!ce || !instanceof_function(zend_ce_generator, ce TSRMLS_CC)) {
-			zend_error_noreturn(
-				E_COMPILE_ERROR, "Generators may not yield %s", CG(active_op_array)->return_hint.class_name);
-		}
-	}
-
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
 
 	if (is_variable) {
