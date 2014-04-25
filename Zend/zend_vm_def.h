@@ -5511,11 +5511,6 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
-	
-	/* Validate return hint */
-	if (EX(op_array)->return_hint.used) {
-		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
-	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
