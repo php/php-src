@@ -4,7 +4,7 @@
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
+   | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.php.net/license/3_01.txt                                  |
@@ -18,31 +18,25 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_HELP_H
-#define PHPDBG_HELP_H
-
-#include "TSRM.h"
+#include "zend.h"
 #include "phpdbg.h"
-#include "phpdbg_cmd.h"
 
-#define PHPDBG_HELP(name) PHPDBG_COMMAND(help_##name)
+int mprotect(void *addr, size_t size, int protection) {
+	int var;
+	return (int)VirtualProtect(addr, size, protection == (PROT_READ | PROT_WRITE) ? PAGE_READWRITE : PAGE_READONLY, &var);
+}
 
-/**
- * Helper Forward Declarations
- */
-PHPDBG_HELP(aliases);
+int phpdbg_exception_handler_win32(EXCEPTION_POINTERS *xp) {
+	EXCEPTION_RECORD *xr = xp->ExceptionRecord;
+	CONTEXT *xc = xp->ContextRecord;
 
-extern const phpdbg_command_t phpdbg_help_commands[];
+	if(xr->ExceptionCode == EXCEPTION_ACCESS_VIOLATION) {
+		TSRMLS_FETCH();
 
-#define phpdbg_help_header() \
-	phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s", PHPDBG_VERSION);
-#define phpdbg_help_footer() \
-	phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
+		if (phpdbg_watchpoint_segfault_handler((void *)xr->ExceptionInformation[1] TSRMLS_CC) == SUCCESS) {
+			return EXCEPTION_CONTINUE_EXECUTION;
+		}
+	}
 
-typedef struct _phpdbg_help_text_t {
-	char *key;
-	char *text;
-} phpdbg_help_text_t;
-
-extern phpdbg_help_text_t phpdbg_help_text[];
-#endif /* PHPDBG_HELP_H */
+	return EXCEPTION_CONTINUE_SEARCH;
+}

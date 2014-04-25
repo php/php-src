@@ -105,6 +105,8 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
         const char *s;
         int len;
 
+	memset(&ts, 0, sizeof(ts));
+
         for (i = 0; i < count; i++) {
                 cdf_print_property_name(buf, sizeof(buf), info[i].pi_id);
                 switch (info[i].pi_type) {

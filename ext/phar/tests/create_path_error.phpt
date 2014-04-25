@@ -34,6 +34,8 @@ $checks = array(
     "\xF0\x9F\x98\x8D.ttf", // valid 4 byte char - smiling face with heart-shaped eyes
     "Font\xE9\xBBpro.ttf", //Invalid multi-byte character - missing last byte
     "Font\xBB\x91pro.ttf",   //Invalid multi-byte character - missing first byte
+    "Font\xC0\xAFpro.ttf",   //Invalid multi-byte character - invalid first byte
+    "Font\xF0\x80\x90\x90pro.ttf",   //Invalid multi-byte character - surrogate pair code point
     "\xFC\x81\x81\x81\x81pro.ttf", //RFC 3629 limited char points to 0000-10FFFF aka 5 byte utf-8 not valid
 );
 foreach($checks as $check)
@@ -76,6 +78,8 @@ string(5) "query"
 9:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
 10:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
 11:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+12:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+13:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
 Exception: Entry a does not exist and cannot be created: phar error: invalid path "a" contains illegal character
 ===DONE===
 
