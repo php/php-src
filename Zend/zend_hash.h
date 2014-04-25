@@ -417,27 +417,27 @@ static inline void *zend_hash_str_update_ptr(HashTable *ht, const char *str, int
 
 static inline void *zend_hash_add_mem(HashTable *ht, zend_string *key, void *pData, size_t size)
 {
-	void *p, *r;
+	zval tmp, *zv;
 
-	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
-	memcpy(p, pData, size);
-	if ((r = zend_hash_add_ptr(ht, key, p))) {
-		return r;
+	ZVAL_PTR(&tmp, NULL);
+	if ((zv = zend_hash_add(ht, key, &tmp))) {
+		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+		memcpy(Z_PTR_P(zv), pData, size);
+		return Z_PTR_P(zv);
 	}
-	pefree(p, ht->u.flags & HASH_FLAG_PERSISTENT);
 	return NULL;
 }
 
 static inline void *zend_hash_str_add_mem(HashTable *ht, const char *str, int len, void *pData, size_t size)
 {
-	void *p, *r;
+	zval tmp, *zv;
 
-	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
-	memcpy(p, pData, size);
-	if ((r = zend_hash_str_add_ptr(ht, str, len, p))) {
-		return r;
+	ZVAL_PTR(&tmp, NULL);
+	if ((zv = zend_hash_str_add(ht, str, len, &tmp))) {
+		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+		memcpy(Z_PTR_P(zv), pData, size);
+		return Z_PTR_P(zv);
 	}
-	pefree(p, ht->u.flags & HASH_FLAG_PERSISTENT);
 	return NULL;
 }
 
@@ -488,14 +488,14 @@ static inline void *zend_hash_index_update_mem(HashTable *ht, ulong h, void *pDa
 
 static inline void *zend_hash_next_index_insert_mem(HashTable *ht, void *pData, size_t size)
 {
-	void *p, *r;
+	zval tmp, *zv;
 
-	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
-	memcpy(p, pData, size);
-	if ((r = zend_hash_next_index_insert_ptr(ht, p))) {
-		return r;
+	ZVAL_PTR(&tmp, NULL);
+	if ((zv = zend_hash_next_index_insert(ht, &tmp))) {
+		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+		memcpy(Z_PTR_P(zv), pData, size);
+		return Z_PTR_P(zv);
 	}
-	pefree(p, ht->u.flags & HASH_FLAG_PERSISTENT);
 	return NULL;
 }
 
