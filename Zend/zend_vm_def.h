@@ -2856,19 +2856,25 @@ static inline void zend_return_hint_check(zend_execute_data *execute_data, zval 
 			} break;
 			
 			case IS_OBJECT: {
-				zend_class_entry **ce = NULL;
+				zend_class_entry *ce = NULL;
 				
 				if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_OBJECT)) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 					break;
 				}
 				
-				if (UNEXPECTED(zend_lookup_class(return_hint->class_name, return_hint->class_name_len, &ce TSRMLS_CC) != SUCCESS)) {
-					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, NULL, "the class could not be found" TSRMLS_CC);
+				if (return_hint->class_name_type == ZEND_FETCH_CLASS_SILENT) {
+					if (UNEXPECTED(!(ce = zend_fetch_class_by_name(return_hint->class_name, return_hint->class_name_len, NULL, return_hint->class_name_type TSRMLS_CC)))) {
+						zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, NULL, "the class could not be found" TSRMLS_CC);
+						break;
+					}
+				} else switch (return_hint->class_name_type) {
+					case ZEND_FETCH_CLASS_SELF:
+						ce = EG(scope);
 					break;
 				}
-				
-				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(retval_ptr), *ce TSRMLS_CC))) {
+
+				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(retval_ptr), ce TSRMLS_CC))) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 					break;
 				}

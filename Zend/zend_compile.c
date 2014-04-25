@@ -1929,8 +1929,21 @@ void zend_do_function_return_hint(znode *return_hint TSRMLS_DC) {
 		
 		if (return_hint->op_type == IS_CONST) {
 			if (Z_TYPE(return_hint->u.constant) == IS_STRING) {
-				zend_resolve_class_name(return_hint TSRMLS_CC);
+				int fetch_type = zend_get_class_fetch_type(Z_STRVAL(return_hint->u.constant), Z_STRLEN(return_hint->u.constant));
 				
+				switch (fetch_type) {
+					case ZEND_FETCH_CLASS_SELF:
+						if (!CG(active_class_entry)) {
+							zend_error_noreturn(E_COMPILE_ERROR, "Cannot access self when no class scope is active");
+						}
+						CG(active_op_array)->return_hint.class_name_type = fetch_type;
+					break;
+					
+					default:
+						CG(active_op_array)->return_hint.class_name_type = ZEND_FETCH_CLASS_SILENT;
+						zend_resolve_class_name(return_hint TSRMLS_CC);
+				}
+			
 				CG(active_op_array)->return_hint.type = IS_OBJECT;
 				CG(active_op_array)->return_hint.class_name_len = Z_STRLEN(return_hint->u.constant);
 				CG(active_op_array)->return_hint.class_name = zend_new_interned_string

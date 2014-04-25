@@ -267,10 +267,11 @@ typedef struct _zend_compiled_variable {
 } zend_compiled_variable;
 
 typedef struct _zend_return_hint {
-	zend_uchar type;
+	zend_uchar  type;
 	const char *class_name;
-	zend_uint class_name_len;
-	zend_bool used;
+	zend_uint   class_name_len;
+	int         class_name_type;
+	zend_bool   used;
 } zend_return_hint;
 
 struct _zend_op_array {
