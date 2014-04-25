@@ -57,7 +57,7 @@ static void zend_accel_destroy_zend_function(zval *zv)
 	if (function->type == ZEND_USER_FUNCTION) {
 		if (function->op_array.static_variables) {
 
-			efree(function->op_array.static_variables);
+			FREE_HASHTABLE(function->op_array.static_variables);
 			function->op_array.static_variables = NULL;
 		}
 	}
