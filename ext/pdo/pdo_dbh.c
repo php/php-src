@@ -1178,8 +1178,9 @@ static PHP_METHOD(PDO, quote)
 	}
 
 	if (dbh->methods->quoter(dbh, str, str_len, &qstr, &qlen, paramtype TSRMLS_CC)) {
-		//??? memleak
-		RETURN_STRINGL(qstr, qlen);
+		RETVAL_STRINGL(qstr, qlen);
+		efree(qstr);
+		return;
 	}
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
