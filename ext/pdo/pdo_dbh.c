@@ -87,6 +87,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		add_next_index_string(&info, *pdo_err);
 		add_next_index_long(&info, 0);
 		zend_update_property(pdo_ex, &ex, "errorInfo", sizeof("errorInfo")-1, &info TSRMLS_CC);
+		zval_ptr_dtor(&info);
 
 		zend_throw_exception_object(&ex TSRMLS_CC);
 	}
