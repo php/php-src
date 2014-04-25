@@ -984,7 +984,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 					break;
 				}
 
-				ZVAL_OBJ(return_value, Z_OBJ(stmt->fetch.into));
+				ZVAL_COPY(return_value, &stmt->fetch.into);
 
 				if (zend_get_class_entry(Z_OBJ_P(return_value) TSRMLS_CC) == ZEND_STANDARD_CLASS_DEF_PTR) {
 					how = PDO_FETCH_OBJ;
@@ -1994,7 +1994,7 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP might crash if you don't call $stmt->setFetchMode() to reset to defaults on this persistent statement.  This will be fixed in a later release");
 				}
 #endif	
-				ZVAL_OBJ(&stmt->fetch.into, Z_OBJ(args[skip+1]));
+				ZVAL_COPY(&stmt->fetch.into, &args[skip+1]);
 			}
 			
 			break;
