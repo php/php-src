@@ -1924,16 +1924,18 @@ PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf
 	const char *path_to_open = path;
 	int ret;
 
-	/* Try to hit the cache first */
-	if (flags & PHP_STREAM_URL_STAT_LINK) {
-		if (BG(CurrentLStatFile) && strcmp(path, BG(CurrentLStatFile)) == 0) {
-			memcpy(ssb, &BG(lssb), sizeof(php_stream_statbuf));
-			return 0;
-		}
-	} else {
-		if (BG(CurrentStatFile) && strcmp(path, BG(CurrentStatFile)) == 0) {
-			memcpy(ssb, &BG(ssb), sizeof(php_stream_statbuf));
-			return 0;
+	if (!(flags & PHP_STREAM_URL_STAT_NOCACHE)) {
+		/* Try to hit the cache first */
+		if (flags & PHP_STREAM_URL_STAT_LINK) {
+			if (BG(CurrentLStatFile) && strcmp(path, BG(CurrentLStatFile)) == 0) {
+				memcpy(ssb, &BG(lssb), sizeof(php_stream_statbuf));
+				return 0;
+			}
+		} else {
+			if (BG(CurrentStatFile) && strcmp(path, BG(CurrentStatFile)) == 0) {
+				memcpy(ssb, &BG(ssb), sizeof(php_stream_statbuf));
+				return 0;
+			}
 		}
 	}
 
@@ -1941,19 +1943,21 @@ PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf
 	if (wrapper && wrapper->wops->url_stat) {
 		ret = wrapper->wops->url_stat(wrapper, path_to_open, flags, ssb, context TSRMLS_CC);
 		if (ret == 0) {
-			/* Drop into cache */
-			if (flags & PHP_STREAM_URL_STAT_LINK) {
-				if (BG(CurrentLStatFile)) {
-					efree(BG(CurrentLStatFile));
+		        if (!(flags & PHP_STREAM_URL_STAT_NOCACHE)) {
+				/* Drop into cache */
+				if (flags & PHP_STREAM_URL_STAT_LINK) {
+					if (BG(CurrentLStatFile)) {
+						efree(BG(CurrentLStatFile));
+					}
+					BG(CurrentLStatFile) = estrdup(path);
+					memcpy(&BG(lssb), ssb, sizeof(php_stream_statbuf));
+				} else {
+					if (BG(CurrentStatFile)) {
+						efree(BG(CurrentStatFile));
+					}
+					BG(CurrentStatFile) = estrdup(path);
+					memcpy(&BG(ssb), ssb, sizeof(php_stream_statbuf));
 				}
-				BG(CurrentLStatFile) = estrdup(path);
-				memcpy(&BG(lssb), ssb, sizeof(php_stream_statbuf));
-			} else {
-				if (BG(CurrentStatFile)) {
-					efree(BG(CurrentStatFile));
-				}
-				BG(CurrentStatFile) = estrdup(path);
-				memcpy(&BG(ssb), ssb, sizeof(php_stream_statbuf));
 			}
 		}
 		return ret;

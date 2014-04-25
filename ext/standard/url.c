@@ -181,10 +181,6 @@ PHPAPI php_url *php_url_parse_ex(char const *str, php_size_t length)
 		p = e + 1;
 		pp = p;
 
-		if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
-			s += 2;
-		}
-
 		while (pp-p < 6 && isdigit(*pp)) {
 			pp++;
 		}
@@ -205,6 +201,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, php_size_t length)
 			STR_FREE(ret->scheme);
 			efree(ret);
 			return NULL;
+		} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+			s += 2;
+		} else {
+			goto just_path;
 		}
 	} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
 		s += 2;
