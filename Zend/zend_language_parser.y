@@ -410,15 +410,20 @@ is_variadic:
 	|	T_ELLIPSIS  { $$.op_type = 1; }
 ;
 
-function_return_type:
+non_optional_class_type:
 		T_ARRAY						{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_ARRAY; }
 	|	T_CALLABLE					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_CALLABLE; }
-	|	fully_qualified_class_name  { $$ = $1; }
+	|	fully_qualified_class_name			{ $$ = $1; }
+;
+
+optional_class_type:
+		/* empty */					{ $$.op_type = IS_UNUSED; }
+	|	non_optional_class_type		{ $$ = $1; }
 ;
 
 function_return_hint:
-		/* empty */                              { $$.op_type = IS_UNUSED; }
-	|  ':' function_return_type     { zend_do_function_return_hint(&$2 TSRMLS_CC); }
+		/* empty */                     { $$.op_type = IS_UNUSED; }
+	|  ':' non_optional_class_type     	{ zend_do_function_return_hint(&$2 TSRMLS_CC); }
 ;
 
 unticked_function_declaration_statement:
@@ -578,15 +583,6 @@ parameter:
 	|	optional_class_type is_reference is_variadic T_VARIABLE '=' static_scalar
 			{ zend_do_receive_param(ZEND_RECV_INIT, &$4, &$6, &$1, $2.op_type, $3.op_type TSRMLS_CC); }
 ;
-
-
-optional_class_type:
-		/* empty */					{ $$.op_type = IS_UNUSED; }
-	|	T_ARRAY						{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_ARRAY; }
-	|	T_CALLABLE					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_CALLABLE; }
-	|	fully_qualified_class_name			{ $$ = $1; }
-;
-
 
 function_call_parameter_list:
 		'(' ')'	{ Z_LVAL($$.u.constant) = 0; }
