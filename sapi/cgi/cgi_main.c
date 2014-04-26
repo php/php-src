@@ -215,10 +215,11 @@ static php_cgi_globals_struct php_cgi_globals;
 #define TRANSLATE_SLASHES(path)
 #endif
 
-static int print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
+static int print_module_info(zval *element TSRMLS_DC)
 {
+	zend_module_entry *module = Z_PTR_P(element);
 	php_printf("%s\n", module->name);
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
@@ -238,7 +239,7 @@ static void print_modules(TSRMLS_D)
 //???	zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
-	zend_hash_apply_with_argument(&sorted_registry, (apply_func_arg_t) print_module_info, NULL TSRMLS_CC);
+	zend_hash_apply(&sorted_registry, (apply_func_t) print_module_info TSRMLS_CC);
 	zend_hash_destroy(&sorted_registry);
 }
 
