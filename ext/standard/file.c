@@ -664,6 +664,7 @@ PHP_FUNCTION(file_put_contents)
 								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", bytes_written, str->len);
 							}
 							numbytes = -1;
+							STR_RELEASE(str);
 							break;
 						}
 					}
