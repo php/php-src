@@ -3150,7 +3150,7 @@ ZEND_VM_C_LABEL(send_again):
 	switch (Z_TYPE_P(args)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(args);
-			zval *arg;
+			zval *arg, *top;
 			zend_string *name;
 
 			ZEND_VM_STACK_GROW_IF_NEEDED(zend_hash_num_elements(ht));
@@ -3163,16 +3163,17 @@ ZEND_VM_C_LABEL(send_again):
 					ZEND_VM_NEXT_OPCODE();
 				}
 
+				top = zend_vm_stack_top_inc(TSRMLS_C);
 				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
 					Z_ADDREF_P(arg);
+					ZVAL_COPY_VALUE(top, arg);
 				} else if (Z_ISREF_P(arg)) {
-					ZVAL_DUP(arg, Z_REFVAL_P(arg));
+					ZVAL_DUP(top, Z_REFVAL_P(arg));
 				} else {
-					if (Z_REFCOUNTED_P(arg)) Z_ADDREF_P(arg);
+					ZVAL_COPY(top, arg);
 				}
 
-				zend_vm_stack_push(arg TSRMLS_CC);
 				EX(call)->num_additional_args++;
 				arg_num++;
 			} ZEND_HASH_FOREACH_END();
