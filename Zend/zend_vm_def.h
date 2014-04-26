@@ -3795,6 +3795,10 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 
 	switch (opline->extended_value) {
 		case IS_NULL:
+			/* This code is taken from convert_to_null. However, it does not seems very useful,
+			 * because a conversion to null always results in the same value. This could only
+			 * be relevant if a cast_object handler for IS_NULL has some kind of side-effect. */
+#if 0
 			if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 				ZVAL_DEREF(expr);
 			}
@@ -3803,6 +3807,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 					break;
 				}
 			}
+#endif
 
 			ZVAL_NULL(result);
 			break;
