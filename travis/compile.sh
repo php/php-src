@@ -1,6 +1,12 @@
 #!/bin/bash
+if [[ "$ENABLE_MAINTAINER_ZTS" == 1 ]]; then
+	TS="--enable-maintainer-zts";
+else
+	TS="";
+fi
 ./buildconf
 ./configure --quiet \
+$TS \
 --with-pdo-mysql=mysqlnd \
 --with-mysql=mysqlnd \
 --with-mysqli=mysqlnd \
