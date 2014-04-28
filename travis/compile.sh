@@ -34,5 +34,6 @@
 --enable-sockets \
 --with-bz2 \
 --with-openssl \
+--with-gmp \
 --enable-bcmath
 make --quiet
