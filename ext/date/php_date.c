@@ -4250,17 +4250,26 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 	timelib_time   *time;
 	timelib_error_container *err = NULL;
 	php_interval_obj *diobj;
+    zend_error_handling error_handling;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &time_str, &time_str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	php_date_instantiate(date_ce_interval, return_value TSRMLS_CC);
-
 	time = timelib_strtotime(time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
-	diobj = (php_interval_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	diobj->diff = timelib_rel_time_clone(&time->relative);
-	diobj->initialized = 1;
+
+	if (err && err->error_count) {
+		zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", time_str, 
+			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
+	} else {
+		php_date_instantiate(date_ce_interval, return_value TSRMLS_CC);
+		diobj = (php_interval_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
+		diobj->diff = timelib_rel_time_clone(&time->relative);
+		diobj->initialized = 1;
+	}
+
 	timelib_time_dtor(time);
 	timelib_error_container_dtor(err);
 }
