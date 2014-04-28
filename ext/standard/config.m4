@@ -337,7 +337,7 @@ fi
 dnl
 dnl Check for available functions
 dnl
-AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan mempcpy strpncpy)
+AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p log2 hypot glob strfmon nice fpclass isinf isnan mempcpy strpncpy)
 AC_FUNC_FNMATCH	
 
 dnl
