@@ -43,6 +43,9 @@ PHP                                                                        NEWS
   . Fixed bug #66908 (php-fpm reload leaks epoll_create() file descriptor).
     (Julio Pintos)
 
+- GMP:
+  . Fixed crashes in serialize/unserialize. (Stas)
+
 - JSON:
   . Fixed bug #66021 (Blank line inside empty array/object when
     JSON_PRETTY_PRINT is set). (Kevin Israel)
