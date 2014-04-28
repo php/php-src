@@ -2698,11 +2698,7 @@ static HashTable *row_get_properties(zval *object TSRMLS_DC)
 }
 
 static union _zend_function *row_method_get(
-#if PHP_API_VERSION >= 20041225
 	zval **object_pp,
-#else
-	zval *object,
-#endif
 	char *method_name, int method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc;
