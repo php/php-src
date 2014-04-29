@@ -154,7 +154,11 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, php_int_t
 		case IS_STRING:
 			V_VT(v) = VT_BSTR;
 			olestring = php_com_string_to_olestring(Z_STRVAL_P(z), Z_STRSIZE_P(z), codepage TSRMLS_CC);
-			V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRSIZE_P(z) * sizeof(OLECHAR));
+			if (CP_UTF8 == codepage) {
+				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, wcslen(olestring) * sizeof(OLECHAR));
+			} else {
+				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRSIZE_P(z) * sizeof(OLECHAR));
+			}
 			efree(olestring);
 			break;
 
