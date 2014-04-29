@@ -201,24 +201,28 @@ struct _zend_ast_ref {
 	zend_ast         *ast;
 };
 
-/* data types */
+/* regular data types */
 #define IS_UNDEF					0
 #define IS_NULL						1
-#define IS_INDIRECT             	2
-#define IS_BOOL						3
-#define IS_LONG						4
-#define IS_DOUBLE					5
-#define IS_STRING					6
-#define IS_ARRAY					7
-#define IS_OBJECT					8
-#define IS_RESOURCE					9
-#define IS_REFERENCE				10
+#define IS_BOOL						2
+#define IS_LONG						3
+#define IS_DOUBLE					4
+#define IS_STRING					5
+#define IS_ARRAY					6
+#define IS_OBJECT					7
+#define IS_RESOURCE					8
+#define IS_REFERENCE				9
 
-#define IS_CONSTANT					11
-#define IS_CONSTANT_ARRAY			12
-#define IS_CONSTANT_AST				13
-#define IS_CALLABLE					14
+/* constant expressions */
+#define IS_CONSTANT					10
+#define IS_CONSTANT_ARRAY			11
+#define IS_CONSTANT_AST				12
 
+/* type hinting */
+#define IS_CALLABLE					13
+
+/* internal types */
+#define IS_INDIRECT             	14
 #define IS_STR_OFFSET				15
 #define IS_PTR						16
 
