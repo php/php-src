@@ -45,6 +45,8 @@ PHP                                                                        NEWS
   . Fixed bug #66482 (unknown entry 'priority' in php-fpm.conf).
   . Fixed bug #66908 (php-fpm reload leaks epoll_create() file descriptor).
     (Julio Pintos)
+  . Fixed bug #67060 (sapi/fpm: possible privilege escalation due to insecure
+    default configuration) (CVE-2014-0185). (Stas)
 
 - GMP:
   . Fixed crashes in serialize/unserialize. (Stas)

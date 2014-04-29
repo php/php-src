@@ -14,6 +14,7 @@ UPGRADE NOTES - PHP X.Y
   i. Addition of zend_hash_splice
   j. An additional parameter is sent to Countable::count()
   k. Unserialization of manipulated object strings
+  l. Removal of IS_CONSTANT_ARRAY and IS_CONSTANT_INDEX hack
 
 2. Build system changes
   a. Unix build system changes
@@ -205,6 +206,15 @@ UPGRADE NOTES - PHP X.Y
   start, will most likely be defectively initialized. This is now
   fixed at the appropriate place by checking for the presence of the
   serialize callback in the class entry.
+
+  l. Removal of IS_CONSTANT_ARRAY and IS_CONSTANT_INDEX hack
+
+  These two #defines disappeared. Instead we have now IS_CONSTANT_AST which
+  covers also the functionality IS_CONSTANT_ARRAY bid and furthermore the
+  hack for marking zvals as constant index with IS_CONSTANT_INDEX is now
+  superfluous and so removed.
+  Please note that IS_CONSTANT_AST now has the same value than
+  IS_CONSTANT_ARRAY had.
 
 ========================
 2. Build system changes
