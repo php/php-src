@@ -2700,13 +2700,13 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			EX(call) = call;
 
 			FREE_OP2();
-                        CHECK_EXCEPTION();
-                        ZEND_VM_NEXT_OPCODE();
+			CHECK_EXCEPTION();
+			ZEND_VM_NEXT_OPCODE();
 
 		} else if (OP2_TYPE != IS_CONST && OP2_TYPE != IS_TMP_VAR &&
-		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
+				EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
+				Z_OBJ_HANDLER_P(function_name, get_closure) &&
+				Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}

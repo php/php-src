@@ -1505,13 +1505,13 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			call->is_ctor_call = 0;
 			EX(call) = call;
 
-                        CHECK_EXCEPTION();
-                        ZEND_VM_NEXT_OPCODE();
+			CHECK_EXCEPTION();
+			ZEND_VM_NEXT_OPCODE();
 
 		} else if (IS_CONST != IS_CONST && IS_CONST != IS_TMP_VAR &&
-		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
+				EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
+				Z_OBJ_HANDLER_P(function_name, get_closure) &&
+				Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}
@@ -1873,13 +1873,13 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			EX(call) = call;
 
 			zval_dtor(free_op2.var);
-                        CHECK_EXCEPTION();
-                        ZEND_VM_NEXT_OPCODE();
+			CHECK_EXCEPTION();
+			ZEND_VM_NEXT_OPCODE();
 
 		} else if (IS_TMP_VAR != IS_CONST && IS_TMP_VAR != IS_TMP_VAR &&
-		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
+				EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
+				Z_OBJ_HANDLER_P(function_name, get_closure) &&
+				Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}
@@ -2103,13 +2103,13 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			EX(call) = call;
 
 			zval_ptr_dtor_nogc(&free_op2.var);
-                        CHECK_EXCEPTION();
-                        ZEND_VM_NEXT_OPCODE();
+			CHECK_EXCEPTION();
+			ZEND_VM_NEXT_OPCODE();
 
 		} else if (IS_VAR != IS_CONST && IS_VAR != IS_TMP_VAR &&
-		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
+				EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
+				Z_OBJ_HANDLER_P(function_name, get_closure) &&
+				Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}
@@ -2370,13 +2370,13 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			call->is_ctor_call = 0;
 			EX(call) = call;
 
-                        CHECK_EXCEPTION();
-                        ZEND_VM_NEXT_OPCODE();
+			CHECK_EXCEPTION();
+			ZEND_VM_NEXT_OPCODE();
 
 		} else if (IS_CV != IS_CONST && IS_CV != IS_TMP_VAR &&
-		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
+				EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
+				Z_OBJ_HANDLER_P(function_name, get_closure) &&
+				Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}
