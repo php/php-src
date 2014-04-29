@@ -46,7 +46,13 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, uint strin
 
 	if (string_len > 0) {
 		olestring = (OLECHAR*)safe_emalloc(string_len, sizeof(OLECHAR), 0);
+		/* XXX if that's a real multibyte string, olestring is obviously allocated excessively.
+		This should be fixed by reallocating the olestring, but as emalloc is used, that doesn't
+		matter much. */
 		ok = MultiByteToWideChar(codepage, flags, string, string_len, olestring, string_len);
+		if (ok > 0 && ok < string_len) {
+			olestring[ok] = '\0';
+		}
 	} else {
 		ok = FALSE;
 		olestring = (OLECHAR*)emalloc(sizeof(OLECHAR));
