@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - CLI server:
   . Fixed bug #67079 (Missing MIME types for XML/XSL files). (Anatol)
 
+- COM:
+  . Fixed bug #66431 (Special Character via COM Interface (CP_UTF8)). (Anatol)
+
 - Core:
   . Fixed bug #65701 (copy() doesn't work when destination filename is created
     by tempnam()). (Boro Sitnikovski)
