@@ -567,7 +567,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *v
 #else
 			HMODULE l = GetModuleHandle("fbclient");
 
-			if (!l && !(l = GetModuleHandle("gds32"))) {
+			if (!l) {
 				break;
 			}
 			info_func = (info_func_t)GetProcAddress(l, "isc_get_client_version");
@@ -575,9 +575,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *v
 			if (info_func) {
 				info_func(tmp);
 				ZVAL_STRING(val,tmp,1);
-			} else {
-				ZVAL_STRING(val,"Firebird 1.0/Interbase 6",1);
-			}
+			} 
 #else
 			ZVAL_NULL(val);
 #endif

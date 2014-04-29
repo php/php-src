@@ -464,9 +464,9 @@ PHPDBG_WATCH(array) /* {{{ */
 
 void phpdbg_watch_HashTable_dtor(zval **zv) {
 	phpdbg_btree_result *result;
-	zval_ptr_dtor_wrapper(zv);
 	TSRMLS_FETCH();
 
+	zval_ptr_dtor_wrapper(zv);
 
 	if ((result = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong)*zv))) {
 		phpdbg_watchpoint_t *watch = result->ptr;
@@ -772,8 +772,10 @@ void phpdbg_list_watchpoints(TSRMLS_D) {
 }
 
 void phpdbg_watch_efree(void *ptr) {
-	phpdbg_btree_result *result = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), (zend_ulong)ptr);
+	phpdbg_btree_result *result;
 	TSRMLS_FETCH();
+
+	result = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), (zend_ulong)ptr);
 
 	if (result) {
 		phpdbg_watchpoint_t *watch = result->ptr;
