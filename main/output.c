@@ -165,7 +165,7 @@ PHPAPI int php_output_activate(TSRMLS_D)
 	memset(&output_globals, 0, sizeof(zend_output_globals));
 #endif
 
-	zend_stack_init(&OG(handlers));
+	zend_stack_init(&OG(handlers), sizeof(php_output_handler *));
 	OG(flags) |= PHP_OUTPUT_ACTIVATED;
 
 	return SUCCESS;
@@ -291,7 +291,7 @@ PHPAPI int php_output_flush(TSRMLS_D)
 		if (context.out.data && context.out.used) {
 			zend_stack_del_top(&OG(handlers));
 			php_output_write(context.out.data, context.out.used TSRMLS_CC);
-			zend_stack_push(&OG(handlers), &OG(active), sizeof(php_output_handler *));
+			zend_stack_push(&OG(handlers), &OG(active));
 		}
 		php_output_context_dtor(&context);
 		return SUCCESS;
@@ -578,10 +578,8 @@ PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC)
 			}
 		}
 	}
-	/* zend_stack_push never returns SUCCESS but FAILURE or stack level */
-	if (FAILURE == (handler->level = zend_stack_push(&OG(handlers), &handler, sizeof(php_output_handler *)))) {
-		return FAILURE;
-	}
+	/* zend_stack_push returns stack level */
+	handler->level = zend_stack_push(&OG(handlers), &handler);
 	OG(active) = handler;
 	return SUCCESS;
 }
@@ -591,14 +589,14 @@ PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC)
  * Check whether a certain output handler is in use */
 PHPAPI int php_output_handler_started(const char *name, size_t name_len TSRMLS_DC)
 {
-	php_output_handler ***handlers;
+	php_output_handler **handlers;
 	int i, count = php_output_get_level(TSRMLS_C);
 
 	if (count) {
-		handlers = (php_output_handler ***) zend_stack_base(&OG(handlers));
+		handlers = (php_output_handler **) zend_stack_base(&OG(handlers));
 
 		for (i = 0; i < count; ++i) {
-			if (name_len == (*(handlers[i]))->name_len && !memcmp((*(handlers[i]))->name, name, name_len)) {
+			if (name_len == handlers[i]->name_len && !memcmp(handlers[i]->name, name, name_len)) {
 				return 1;
 			}
 		}

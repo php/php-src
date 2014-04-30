@@ -100,7 +100,7 @@ ZEND_API zend_executor_globals executor_globals;
 static void zend_push_function_call_entry(zend_function *fbc TSRMLS_DC) /* {{{ */
 {
 	zend_function_call_entry fcall = { fbc };
-	zend_stack_push(&CG(function_call_stack), &fcall, sizeof(zend_function_call_entry));
+	zend_stack_push(&CG(function_call_stack), &fcall);
 }
 /* }}} */
 
@@ -202,16 +202,16 @@ void zend_init_compiler_context(TSRMLS_D) /* {{{ */
 
 void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 {
-	zend_stack_init(&CG(bp_stack));
-	zend_stack_init(&CG(function_call_stack));
-	zend_stack_init(&CG(switch_cond_stack));
-	zend_stack_init(&CG(foreach_copy_stack));
-	zend_stack_init(&CG(object_stack));
-	zend_stack_init(&CG(declare_stack));
+	zend_stack_init(&CG(bp_stack), sizeof(zend_llist));
+	zend_stack_init(&CG(function_call_stack), sizeof(zend_function_call_entry));
+	zend_stack_init(&CG(switch_cond_stack), sizeof(zend_switch_entry));
+	zend_stack_init(&CG(foreach_copy_stack), sizeof(zend_op));
+	zend_stack_init(&CG(object_stack), sizeof(znode));
+	zend_stack_init(&CG(declare_stack), sizeof(zend_declarables));
 	CG(active_class_entry) = NULL;
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
-	zend_stack_init(&CG(list_stack));
+	zend_stack_init(&CG(list_stack), sizeof(zend_llist));
 	CG(in_compilation) = 0;
 	CG(start_lineno) = 0;
 	ZVAL_UNDEF(&CG(current_namespace));
@@ -222,7 +222,7 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(current_import_const) = NULL;
 	zend_hash_init(&CG(const_filenames), 8, NULL, NULL, 0);
 	init_compiler_declarables(TSRMLS_C);
-	zend_stack_init(&CG(context_stack));
+	zend_stack_init(&CG(context_stack), sizeof(CG(context)));
 
 	CG(encoding_declared) = 0;
 }
@@ -1243,7 +1243,7 @@ void zend_do_if_after_statement(const znode *closing_bracket_token, unsigned cha
 		zend_llist jmp_list;
 
 		zend_llist_init(&jmp_list, sizeof(int), NULL, 0);
-		zend_stack_push(&CG(bp_stack), (void *) &jmp_list, sizeof(zend_llist));
+		zend_stack_push(&CG(bp_stack), (void *) &jmp_list);
 	}
 	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
 	zend_llist_add_element(jmp_list_ptr, &if_end_op_number);
@@ -1288,7 +1288,7 @@ void zend_do_begin_variable_parse(TSRMLS_D) /* {{{ */
 	zend_llist fetch_list;
 
 	zend_llist_init(&fetch_list, sizeof(zend_op), NULL, 0);
-	zend_stack_push(&CG(bp_stack), (void *) &fetch_list, sizeof(zend_llist));
+	zend_stack_push(&CG(bp_stack), (void *) &fetch_list);
 }
 /* }}} */
 
@@ -1574,7 +1574,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", CG(active_class_entry)->name->val, name->val);
 		}
 
-		zend_stack_push(&CG(context_stack), (void *) &CG(context), sizeof(CG(context)));
+		zend_stack_push(&CG(context_stack), (void *) &CG(context));
 		zend_init_compiler_context(TSRMLS_C);
 
 		if (fn_flags & ZEND_ACC_ABSTRACT) {
@@ -1737,7 +1737,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		CG(active_op_array) = emalloc(sizeof(zend_op_array));
 		memcpy(CG(active_op_array), &op_array, sizeof(zend_op_array));
 		zend_hash_update_ptr(CG(function_table), Z_STR(key), CG(active_op_array));
-		zend_stack_push(&CG(context_stack), (void *) &CG(context), sizeof(CG(context)));
+		zend_stack_push(&CG(context_stack), (void *) &CG(context));
 		zend_init_compiler_context(TSRMLS_C);
 		STR_RELEASE(lcname);
 	}
@@ -1759,7 +1759,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		switch_entry.default_case = 0;
 		switch_entry.control_var = 0;
 
-		zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry, sizeof(switch_entry));
+		zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry);
 	}
 
 	{
@@ -1768,7 +1768,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 		dummy_opline.result_type = IS_UNUSED;
 
-		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline, sizeof(zend_op));
+		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline);
 	}
 
 	if (CG(doc_comment)) {
@@ -2938,7 +2938,7 @@ void zend_initialize_try_catch_element(znode *catch_token TSRMLS_DC) /* {{{ */
 	/* save for backpatching */
 
 	zend_llist_init(&jmp_list, sizeof(int), NULL, 0);
-	zend_stack_push(&CG(bp_stack), (void *) &jmp_list, sizeof(zend_llist));
+	zend_stack_push(&CG(bp_stack), (void *) &jmp_list);
 	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
 	zend_llist_add_element(jmp_list_ptr, &jmp_op_number);
 
@@ -4995,7 +4995,7 @@ void zend_do_switch_cond(const znode *cond TSRMLS_DC) /* {{{ */
 	switch_entry.cond = *cond;
 	switch_entry.default_case = -1;
 	switch_entry.control_var = -1;
-	zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry, sizeof(switch_entry));
+	zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry);
 
 	do_begin_loop(TSRMLS_C);
 
@@ -5607,7 +5607,7 @@ void zend_do_halt_compiler_register(TSRMLS_D) /* {{{ */
 
 void zend_do_push_object(const znode *object TSRMLS_DC) /* {{{ */
 {
-	zend_stack_push(&CG(object_stack), object, sizeof(znode));
+	zend_stack_push(&CG(object_stack), object);
 }
 /* }}} */
 
@@ -6023,8 +6023,8 @@ void zend_do_new_list_end(TSRMLS_D) /* {{{ */
 
 void zend_do_list_init(TSRMLS_D) /* {{{ */
 {
-	zend_stack_push(&CG(list_stack), &CG(list_llist), sizeof(zend_llist));
-	zend_stack_push(&CG(list_stack), &CG(dimension_llist), sizeof(zend_llist));
+	zend_stack_push(&CG(list_stack), &CG(list_llist));
+	zend_stack_push(&CG(list_stack), &CG(dimension_llist));
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
 	zend_do_new_list_begin(TSRMLS_C);
@@ -6422,7 +6422,7 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 	opline->extended_value = is_variable ? ZEND_FE_RESET_VARIABLE : 0;
 
 	COPY_NODE(dummy_opline.result, opline->result);
-	zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline, sizeof(zend_op));
+	zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline);
 
 	/* save the location of FE_FETCH */
 	as_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
@@ -6563,7 +6563,7 @@ void zend_do_foreach_end(const znode *foreach_token, const znode *as_token TSRML
 
 void zend_do_declare_begin(TSRMLS_D) /* {{{ */
 {
-	zend_stack_push(&CG(declare_stack), &CG(declarables), sizeof(zend_declarables));
+	zend_stack_push(&CG(declare_stack), &CG(declarables));
 }
 /* }}} */
 

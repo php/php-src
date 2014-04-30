@@ -144,7 +144,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 
 static void _yy_push_state(int new_state TSRMLS_DC)
 {
-	zend_stack_push(&SCNG(state_stack), (void *) &YYGETCONDITION(), sizeof(int));
+	zend_stack_push(&SCNG(state_stack), (void *) &YYGETCONDITION());
 	YYSETCONDITION(new_state);
 }
 
@@ -187,7 +187,7 @@ static int init_ini_scanner(int scanner_mode, zend_file_handle *fh TSRMLS_DC)
 		ini_filename = NULL;
 	}
 
-	zend_stack_init(&SCNG(state_stack));
+	zend_stack_init(&SCNG(state_stack), sizeof(int));
 	BEGIN(INITIAL);
 
 	return SUCCESS;

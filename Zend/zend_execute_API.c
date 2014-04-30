@@ -174,9 +174,9 @@ void init_executor(TSRMLS_D) /* {{{ */
 
 	EG(current_execute_data) = NULL;
 
-	zend_stack_init(&EG(user_error_handlers_error_reporting));
-	zend_stack_init(&EG(user_error_handlers));
-	zend_stack_init(&EG(user_exception_handlers));
+	zend_stack_init(&EG(user_error_handlers_error_reporting), sizeof(int));
+	zend_stack_init(&EG(user_error_handlers), sizeof(zval));
+	zend_stack_init(&EG(user_exception_handlers), sizeof(zval));
 
 	zend_objects_store_init(&EG(objects_store), 1024);
 
@@ -289,8 +289,7 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 			ZVAL_UNDEF(&EG(user_exception_handler));
 		}
 
-		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
-		zend_stack_init(&EG(user_error_handlers_error_reporting));
+		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
 		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_DESTRUCTOR, 1);
 		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_DESTRUCTOR, 1);
 	} zend_end_try();
