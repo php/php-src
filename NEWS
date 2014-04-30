@@ -13,6 +13,9 @@ PHP                                                                        NEWS
     by tempnam()). (Boro Sitnikovski)
   . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
 
+- Curl:
+  . Fixed bug #64247 (CURLOPT_INFILE doesn't allow reset). (Mike)
+
 - Date:
   . Fixed bug #67118 (DateTime constructor crash with invalid data). (Anatol)
 
