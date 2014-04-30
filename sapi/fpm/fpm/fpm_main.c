@@ -1857,7 +1857,19 @@ consult the installation file that came with this distribution, or visit \n\
 	fcgi_init_request(&request, fcgi_fd);
 
 	zend_first_try {
-		while (fcgi_accept_request(&request) >= 0) {
+		// TODO: There has to be a better way to pass this info from the parent
+		// to the child. I should be able to access the fpm_worker_pool_s.
+		int pm, accept_pipe[2];
+		fpm_pctl_child_info(&pm, accept_pipe);
+		int first_accept_nonblocking = 0, child_accept_fd = -1;
+		if (pm == PM_STYLE_ONDEMAND) {
+			// TODO: move this close to some setup routine somewhere
+			close(accept_pipe[0]);
+			first_accept_nonblocking = 1;
+			child_accept_fd = accept_pipe[1];
+		}
+		while (fcgi_accept_request(&request, first_accept_nonblocking, child_accept_fd) >= 0) {
+			first_accept_nonblocking = 0;
 			request_body_fd = -1;
 			SG(server_context) = (void *) &request;
 			init_request_info(TSRMLS_C);

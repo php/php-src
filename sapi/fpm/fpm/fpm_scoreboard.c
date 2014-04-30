@@ -255,6 +255,7 @@ void fpm_scoreboard_child_use(struct fpm_scoreboard_s *scoreboard, int child_ind
 	}
 	proc->pid = pid;
 	proc->start_epoch = time(NULL);
+	zlog(ZLOG_DEBUG, "[pool %s] child %d using scoreboard proc %d", scoreboard->pool, (int) pid, child_index);
 }
 /* }}} */
 
