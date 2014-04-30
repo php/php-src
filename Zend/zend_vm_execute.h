@@ -1478,11 +1478,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 				zend_class_entry *ce;
 				function_name_strval += 2;
 				function_name_strlen = strlen(function_name_strval);
-				class_name_strlen = Z_STRLEN_P(function_name) - function_name_strlen - 2;
-				class_name_strval = zend_strndup(Z_STRVAL_P(function_name), class_name_strlen + 1);
+//				class_name_strlen = Z_STRLEN_P(function_name) - function_name_strlen - 2;
+//				class_name_strval = zend_strndup(Z_STRVAL_P(function_name), class_name_strlen + 1);
 
-				ce = zend_fetch_class_by_name(class_name_strval, class_name_strlen, NULL, 0 TSRMLS_CC);
-				free(class_name_strval);
+				ce = zend_fetch_class_by_name(Z_STRVAL_P(function_name), Z_STRLEN_P(function_name) - function_name_strlen - 2, NULL, 0 TSRMLS_CC);
+//				free(class_name_strval);
 				if (UNEXPECTED(ce == NULL)) {
 					CHECK_EXCEPTION();
 					ZEND_VM_NEXT_OPCODE();
@@ -1845,11 +1845,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 				zend_class_entry *ce;
 				function_name_strval += 2;
 				function_name_strlen = strlen(function_name_strval);
-				class_name_strlen = Z_STRLEN_P(function_name) - function_name_strlen - 2;
-				class_name_strval = zend_strndup(Z_STRVAL_P(function_name), class_name_strlen + 1);
+//				class_name_strlen = Z_STRLEN_P(function_name) - function_name_strlen - 2;
+//				class_name_strval = zend_strndup(Z_STRVAL_P(function_name), class_name_strlen + 1);
 
-				ce = zend_fetch_class_by_name(class_name_strval, class_name_strlen, NULL, 0 TSRMLS_CC);
-				free(class_name_strval);
+				ce = zend_fetch_class_by_name(Z_STRVAL_P(function_name), Z_STRLEN_P(function_name) - function_name_strlen - 2, NULL, 0 TSRMLS_CC);
+//				free(class_name_strval);
 				if (UNEXPECTED(ce == NULL)) {
 					CHECK_EXCEPTION();
 					ZEND_VM_NEXT_OPCODE();
@@ -2075,11 +2075,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 				zend_class_entry *ce;
 				function_name_strval += 2;
 				function_name_strlen = strlen(function_name_strval);
-				class_name_strlen = Z_STRLEN_P(function_name) - function_name_strlen - 2;
-				class_name_strval = zend_strndup(Z_STRVAL_P(function_name), class_name_strlen + 1);
+//				class_name_strlen = Z_STRLEN_P(function_name) - function_name_strlen - 2;
+//				class_name_strval = zend_strndup(Z_STRVAL_P(function_name), class_name_strlen + 1);
 
-				ce = zend_fetch_class_by_name(class_name_strval, class_name_strlen, NULL, 0 TSRMLS_CC);
-				free(class_name_strval);
+				ce = zend_fetch_class_by_name(Z_STRVAL_P(function_name), Z_STRLEN_P(function_name) - function_name_strlen - 2, NULL, 0 TSRMLS_CC);
+//				free(class_name_strval);
 				if (UNEXPECTED(ce == NULL)) {
 					CHECK_EXCEPTION();
 					ZEND_VM_NEXT_OPCODE();
@@ -2343,11 +2343,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 				zend_class_entry *ce;
 				function_name_strval += 2;
 				function_name_strlen = strlen(function_name_strval);
-				class_name_strlen = Z_STRLEN_P(function_name) - function_name_strlen - 2;
-				class_name_strval = zend_strndup(Z_STRVAL_P(function_name), class_name_strlen + 1);
+//				class_name_strlen = Z_STRLEN_P(function_name) - function_name_strlen - 2;
+//				class_name_strval = zend_strndup(Z_STRVAL_P(function_name), class_name_strlen + 1);
 
-				ce = zend_fetch_class_by_name(class_name_strval, class_name_strlen, NULL, 0 TSRMLS_CC);
-				free(class_name_strval);
+				ce = zend_fetch_class_by_name(Z_STRVAL_P(function_name), Z_STRLEN_P(function_name) - function_name_strlen - 2, NULL, 0 TSRMLS_CC);
+//				free(class_name_strval);
 				if (UNEXPECTED(ce == NULL)) {
 					CHECK_EXCEPTION();
 					ZEND_VM_NEXT_OPCODE();

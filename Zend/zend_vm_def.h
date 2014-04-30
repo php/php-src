@@ -2672,11 +2672,8 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 				zend_class_entry *ce;
 				function_name_strval += 2;
 				function_name_strlen = strlen(function_name_strval);
-				class_name_strlen = Z_STRLEN_P(function_name) - function_name_strlen - 2;
-				class_name_strval = zend_strndup(Z_STRVAL_P(function_name), class_name_strlen + 1);
 
-				ce = zend_fetch_class_by_name(class_name_strval, class_name_strlen, NULL, 0 TSRMLS_CC);
-				free(class_name_strval);
+				ce = zend_fetch_class_by_name(Z_STRVAL_P(function_name), Z_STRLEN_P(function_name) - function_name_strlen - 2, NULL, 0 TSRMLS_CC);
 				if (UNEXPECTED(ce == NULL)) {
 					CHECK_EXCEPTION();
 					ZEND_VM_NEXT_OPCODE();
