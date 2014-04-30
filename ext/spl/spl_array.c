@@ -366,7 +366,12 @@ fetch_dim_string:
 	case IS_DOUBLE:
 		index = (long)Z_DVAL_P(offset);
 		goto num_index;
-	case IS_BOOL:
+	case IS_FALSE:
+		index = 0;
+		goto num_index;
+	case IS_TRUE:
+		index = 1;
+		goto num_index;
 	case IS_LONG:
 		index = Z_LVAL_P(offset);
 num_index:
@@ -488,18 +493,24 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 			zend_symtable_update_ind(ht, Z_STR_P(offset), value);
 			return;
 		case IS_DOUBLE:
+			index = (long)Z_DVAL_P(offset);
+			goto num_index;
 		case IS_RESOURCE:
-		case IS_BOOL:
+			index = Z_RES_HANDLE_P(offset);
+			goto num_index;
+		case IS_FALSE:
+			index = 0;
+			goto num_index;
+		case IS_TRUE:
+			index = 1;
+			goto num_index;
 		case IS_LONG:
+			index = Z_LVAL_P(offset);
+num_index:
 			ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 			if (ht->u.v.nApplyCount > 0) {
 				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 				return;
-			}
-			if (Z_TYPE_P(offset) == IS_DOUBLE) {
-				index = (long)Z_DVAL_P(offset);
-			} else {
-				index = Z_LVAL_P(offset);
 			}
 			zend_hash_index_update(ht, index, value);
 			return;
@@ -574,21 +585,27 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		}
 		break;
 	case IS_DOUBLE:
+		index = (long)Z_DVAL_P(offset);
+		goto num_index;
 	case IS_RESOURCE:
-	case IS_BOOL:
+		index = Z_RES_HANDLE_P(offset);
+		goto num_index;
+	case IS_FALSE:
+		index = 0;
+		goto num_index;
+	case IS_TRUE:
+		index = 1;
+		goto num_index;
 	case IS_LONG:
-		if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			index = (long)Z_DVAL_P(offset);
-		} else {
-			index = Z_LVAL_P(offset);
-		}
+		index = Z_LVAL_P(offset);
+num_index:
 		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 		if (ht->u.v.nApplyCount > 0) {
 			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 			return;
 		}
 		if (zend_hash_index_del(ht, index) == FAILURE) {
-			zend_error(E_NOTICE,"Undefined offset: %ld", Z_LVAL_P(offset));
+			zend_error(E_NOTICE,"Undefined offset: %ld", index);
 		}
 		break;
 	default:
@@ -646,14 +663,20 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 				}
 				break;
 			case IS_DOUBLE:
+				index = (long)Z_DVAL_P(offset);
+				goto num_index;
 			case IS_RESOURCE:
-			case IS_BOOL: 
+				index = Z_RES_HANDLE_P(offset);
+				goto num_index;
+			case IS_FALSE: 
+				index = 0;
+				goto num_index;
+			case IS_TRUE: 
+				index = 1;
+				goto num_index;
 			case IS_LONG:
-				if (Z_TYPE_P(offset) == IS_DOUBLE) {
-					index = (long)Z_DVAL_P(offset);
-				} else {
-					index = Z_LVAL_P(offset);
-				}
+				index = Z_LVAL_P(offset);
+num_index:
 				if ((tmp = zend_hash_index_find(ht, index)) != NULL) {
 					if (check_empty == 2) {
 						return 1;

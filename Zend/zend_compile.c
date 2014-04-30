@@ -3494,14 +3494,12 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 
 						ZVAL_DUP(&zv, precv->op2.zv);
 						zval_update_constant_ex(&zv, 1, fptr->common.scope TSRMLS_CC);
-						if (Z_TYPE(zv) == IS_BOOL) {
-							if (Z_LVAL(zv)) {
-								memcpy(offset, "true", 4);
-								offset += 4;
-							} else {
-								memcpy(offset, "false", 5);
-								offset += 5;
-							}
+						if (Z_TYPE(zv) == IS_FALSE) {
+							memcpy(offset, "false", 5);
+							offset += 5;
+						} else if (Z_TYPE(zv) == IS_TRUE) {
+							memcpy(offset, "true", 4);
+							offset += 4;
 						} else if (Z_TYPE(zv) == IS_NULL) {
 							memcpy(offset, "NULL", 4);
 							offset += 4;
@@ -5973,8 +5971,13 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr 
 				zend_symtable_update(Z_ARRVAL(result->u.constant), STR_EMPTY_ALLOC(), &element);
 				break;
 			case IS_LONG:
-			case IS_BOOL:
 				zend_hash_index_update(Z_ARRVAL(result->u.constant), Z_LVAL(offset->u.constant), &element);
+				break;
+			case IS_FALSE:
+				zend_hash_index_update(Z_ARRVAL(result->u.constant), 0, &element);
+				break;
+			case IS_TRUE:
+				zend_hash_index_update(Z_ARRVAL(result->u.constant), 1, &element);
 				break;
 			case IS_DOUBLE:
 				zend_hash_index_update(Z_ARRVAL(result->u.constant), zend_dval_to_lval(Z_DVAL(offset->u.constant)), &element);

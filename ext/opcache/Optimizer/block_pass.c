@@ -792,16 +792,28 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode == ZEND_IS_NOT_EQUAL ||
 			opline->opcode == ZEND_CASE) {
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
-				Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_BOOL) {
+// TODO: Optimization of comparison with null may be not safe ???
+#if 1
+				(Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_FALSE ||
+				 Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_TRUE)) {
+#else
+				 Z_TYPE(ZEND_OP1_LITERAL(opline)) <= IS_TRUE) {
+#endif
 				opline->opcode =
-					((opline->opcode != ZEND_IS_NOT_EQUAL) == Z_LVAL(ZEND_OP1_LITERAL(opline)))?
+					((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP1_LITERAL(opline))) == IS_TRUE)) ?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				COPY_NODE(opline->op1, opline->op2);
 				SET_UNUSED(opline->op2);
 			} else if (ZEND_OP2_TYPE(opline) == IS_CONST &&
-					   Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_BOOL) {
+// TODO: Optimization of comparison with null may be not safe ???
+#if 1
+					   (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_FALSE ||
+					    Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_TRUE)) {
+#else
+					    Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_TRUE) {
+#endif
 				opline->opcode =
-					((opline->opcode != ZEND_IS_NOT_EQUAL) == Z_LVAL(ZEND_OP2_LITERAL(opline)))?
+					((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP2_LITERAL(opline))) == IS_TRUE)) ?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				SET_UNUSED(opline->op2);
 			}

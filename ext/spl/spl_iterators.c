@@ -977,7 +977,7 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 	for (level = 0; level < object->level; ++level) {
 		zend_call_method_with_0_params(&object->iterators[level].zobject, object->iterators[level].ce, NULL, "hasnext", &has_next);
 		if (Z_TYPE(has_next) != IS_UNDEF) {
-			if (Z_LVAL(has_next)) {
+			if (Z_TYPE(has_next) == IS_TRUE) {
 				smart_str_appendl(&str, object->prefix[1].s->val, object->prefix[1].s->len);
 			} else {
 				smart_str_appendl(&str, object->prefix[2].s->val, object->prefix[2].s->len);
@@ -987,7 +987,7 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 	}
 	zend_call_method_with_0_params(&object->iterators[level].zobject, object->iterators[level].ce, NULL, "hasnext", &has_next);
 	if (Z_TYPE(has_next) != IS_UNDEF) {
-		if (Z_LVAL(has_next)) {
+		if (Z_TYPE(has_next) == IS_TRUE) {
 			smart_str_appendl(&str, object->prefix[3].s->val, object->prefix[3].s->len);
 		} else {
 			smart_str_appendl(&str, object->prefix[4].s->val, object->prefix[4].s->len);
@@ -2041,7 +2041,7 @@ SPL_METHOD(RegexIterator, accept)
 	}
 
 	if (intern->u.regex.flags & REGIT_INVERTED) {
-		RETVAL_BOOL(! Z_LVAL_P(return_value));
+		RETVAL_BOOL(Z_TYPE_P(return_value) != IS_TRUE);
 	}
 
 	if (use_copy) {

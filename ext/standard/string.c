@@ -1146,13 +1146,12 @@ again:
 			}
 				break;
 
-			case IS_BOOL:
-				if (Z_LVAL_P(tmp) == 1) {
-					smart_str_appendl(&implstr, "1", sizeof("1")-1);
-				}
+			case IS_TRUE:
+				smart_str_appendl(&implstr, "1", sizeof("1")-1);
 				break;
 
 			case IS_NULL:
+			case IS_FALSE:
 				break;
 
 			case IS_DOUBLE: {
@@ -1648,11 +1647,14 @@ static int php_needle_char(zval *needle, char *target TSRMLS_DC)
 {
 	switch (Z_TYPE_P(needle)) {
 		case IS_LONG:
-		case IS_BOOL:
 			*target = (char)Z_LVAL_P(needle);
 			return SUCCESS;
 		case IS_NULL:
+		case IS_FALSE:
 			*target = '\0';
+			return SUCCESS;
+		case IS_TRUE:
+			*target = '\1';
 			return SUCCESS;
 		case IS_DOUBLE:
 			*target = (char)(int)Z_DVAL_P(needle);

@@ -594,7 +594,8 @@ safe:
 							plc->freeq = 0;
 							break;
 
-						case IS_BOOL:
+						case IS_FALSE:
+						case IS_TRUE:
 							convert_to_long(&tmp_param);
 							/* fall through */
 						case IS_LONG:

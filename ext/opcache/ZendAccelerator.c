@@ -2250,7 +2250,8 @@ static void accel_fast_zval_dtor(zval *zvalue)
 				break;
 			case IS_LONG:
 			case IS_DOUBLE:
-			case IS_BOOL:
+			case IS_FALSE:
+			case IS_TRUE:
 			case IS_NULL:
 			case IS_STRING:
 			case IS_CONSTANT:

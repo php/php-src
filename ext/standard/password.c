@@ -376,7 +376,8 @@ PHP_FUNCTION(password_hash)
 				}
 				zval_dtor(&cast_option_buffer);
 			}
-			case IS_BOOL:
+			case IS_FALSE:
+			case IS_TRUE:
 			case IS_NULL:
 			case IS_RESOURCE:
 			case IS_ARRAY:

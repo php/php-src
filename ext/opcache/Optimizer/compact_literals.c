@@ -300,28 +300,27 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					}
 					map[i] = l_null;
 					break;
-				case IS_BOOL:
-					if (Z_LVAL(op_array->literals[i])) {
-						if (l_true < 0) {
-							l_true = j;
-							if (i != j) {
-								op_array->literals[j] = op_array->literals[i];
-								info[j] = info[i];
-							}
-							j++;
+				case IS_FALSE:
+					if (l_false < 0) {
+						l_false = j;
+						if (i != j) {
+							op_array->literals[j] = op_array->literals[i];
+							info[j] = info[i];
 						}
-						map[i] = l_true;
-					} else {
-						if (l_false < 0) {
-							l_false = j;
-							if (i != j) {
-								op_array->literals[j] = op_array->literals[i];
-								info[j] = info[i];
-							}
-							j++;
-						}
-						map[i] = l_false;
+						j++;
 					}
+					map[i] = l_false;
+					break;
+				case IS_TRUE:
+					if (l_true < 0) {
+						l_true = j;
+						if (i != j) {
+							op_array->literals[j] = op_array->literals[i];
+							info[j] = info[i];
+						}
+						j++;
+					}
+					map[i] = l_true;
 					break;
 				case IS_LONG:
 					if ((pos = (int)zend_hash_index_find_ptr(&hash, Z_LVAL(op_array->literals[i]))) != 0) {

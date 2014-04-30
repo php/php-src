@@ -686,7 +686,8 @@ repeat:
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
-		case IS_BOOL:
+		case IS_FALSE:
+		case IS_TRUE:
 		case IS_RESOURCE:
 		case IS_NULL:
 			break;

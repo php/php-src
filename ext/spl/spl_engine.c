@@ -48,10 +48,14 @@ PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
 		break;
 	case IS_DOUBLE:
 		return (long)Z_DVAL_P(offset);
-	case IS_RESOURCE:
-	case IS_BOOL:
 	case IS_LONG:
 		return Z_LVAL_P(offset);
+	case IS_FALSE:
+		return 0;
+	case IS_TRUE:
+		return 1;
+	case IS_RESOURCE:
+		return Z_RES_HANDLE_P(offset);
 	}
 	return -1;
 } 

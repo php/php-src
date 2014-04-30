@@ -725,12 +725,10 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			string_write(str, " = ", sizeof(" = ")-1);
 			ZVAL_DUP(&zv, precv->op2.zv);
 			zval_update_constant_ex(&zv, 1, fptr->common.scope TSRMLS_CC);
-			if (Z_TYPE(zv) == IS_BOOL) {
-				if (Z_LVAL(zv)) {
-					string_write(str, "true", sizeof("true")-1);
-				} else {
-					string_write(str, "false", sizeof("false")-1);
-				}
+			if (Z_TYPE(zv) == IS_TRUE) {
+				string_write(str, "true", sizeof("true")-1);
+			} else if (Z_TYPE(zv) == IS_FALSE) {
+				string_write(str, "false", sizeof("false")-1);
 			} else if (Z_TYPE(zv) == IS_NULL) {
 				string_write(str, "NULL", sizeof("NULL")-1);
 			} else if (Z_TYPE(zv) == IS_STRING) {

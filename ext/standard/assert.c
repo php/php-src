@@ -183,10 +183,10 @@ PHP_FUNCTION(assert)
 		}
 
 		convert_to_boolean(&retval);
-		val = Z_LVAL(retval);
+		val = Z_TYPE(retval) == IS_TRUE;
 	} else {
 		convert_to_boolean_ex(assertion);
-		val = Z_LVAL_P(assertion);
+		val = Z_TYPE_P(assertion) == IS_TRUE;
 	}
 
 	if (val) {

@@ -4888,8 +4888,8 @@ static int php_date_period_initialize_from_hash(php_period_obj *period_obj, Hash
 
 	ht_entry = zend_hash_str_find(myht, "include_start_date", sizeof("include_start_date")-1);
 	if (ht_entry &&
-			Z_TYPE_P(ht_entry) == IS_BOOL) {
-		period_obj->include_start_date = Z_BVAL_P(ht_entry);
+			(Z_TYPE_P(ht_entry) == IS_FALSE || Z_TYPE_P(ht_entry) == IS_TRUE)) {
+		period_obj->include_start_date = (Z_TYPE_P(ht_entry) == IS_TRUE);
 	} else {
 		return 0;
 	}

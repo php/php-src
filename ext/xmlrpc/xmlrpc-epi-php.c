@@ -541,7 +541,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					break;
 				case xmlrpc_boolean:
 					convert_to_boolean(val);
-					xReturn = XMLRPC_CreateValueBoolean(key, Z_LVAL_P(val));
+					xReturn = XMLRPC_CreateValueBoolean(key, Z_TYPE_P(val) == IS_TRUE);
 					break;
 				case xmlrpc_int:
 					convert_to_long(val);

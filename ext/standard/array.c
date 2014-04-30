@@ -933,7 +933,7 @@ PHP_FUNCTION(min)
 
 		for (i = 1; i < argc; i++) {
 			is_smaller_function(&result, &args[i], min TSRMLS_CC);
-			if (Z_LVAL(result) == 1) {
+			if (Z_TYPE(result) == IS_TRUE) {
 				min = &args[i];
 			}
 		}
@@ -980,7 +980,7 @@ PHP_FUNCTION(max)
 
 		for (i = 1; i < argc; i++) {
 			is_smaller_or_equal_function(&result, &args[i], max TSRMLS_CC);
-			if (Z_LVAL(result) == 0) {
+			if (Z_TYPE(result) == IS_FALSE) {
 				max = &args[i];
 			}
 		}
@@ -1166,7 +1166,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ 
 	if (strict) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 			is_identical_function(&res, value, entry TSRMLS_CC);
-			if (Z_LVAL(res)) {
+			if (Z_TYPE(res) == IS_TRUE) {
 				if (behavior == 0) {
 					RETURN_TRUE;
 				} else {
@@ -1181,7 +1181,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ 
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
-			if (fast_equal_function(&res, value, entry TSRMLS_CC)) {
+			if (fast_equal_check_function(&res, value, entry TSRMLS_CC)) {
 				if (behavior == 0) {
 					RETURN_TRUE;
 				} else {

@@ -204,27 +204,29 @@ struct _zend_ast_ref {
 /* regular data types */
 #define IS_UNDEF					0
 #define IS_NULL						1
-#define IS_BOOL						2
-#define IS_LONG						3
-#define IS_DOUBLE					4
-#define IS_STRING					5
-#define IS_ARRAY					6
-#define IS_OBJECT					7
-#define IS_RESOURCE					8
-#define IS_REFERENCE				9
+#define IS_FALSE					2
+#define IS_TRUE						3
+#define IS_LONG						4
+#define IS_DOUBLE					5
+#define IS_STRING					6
+#define IS_ARRAY					7
+#define IS_OBJECT					8
+#define IS_RESOURCE					9
+#define IS_REFERENCE				10
 
 /* constant expressions */
-#define IS_CONSTANT					10
-#define IS_CONSTANT_ARRAY			11
-#define IS_CONSTANT_AST				12
+#define IS_CONSTANT					11
+#define IS_CONSTANT_ARRAY			12
+#define IS_CONSTANT_AST				13
 
-/* type hinting */
-#define IS_CALLABLE					13
+/* fake types */
+#define _IS_BOOL					14
+#define IS_CALLABLE					15
 
 /* internal types */
-#define IS_INDIRECT             	14
-#define IS_STR_OFFSET				15
-#define IS_PTR						16
+#define IS_INDIRECT             	16
+#define IS_STR_OFFSET				17
+#define IS_PTR						18
 
 static inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
@@ -369,9 +371,6 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_ISREF(zval)				(Z_TYPE(zval) == IS_REFERENCE)
 #define Z_ISREF_P(zval_p)			Z_ISREF(*(zval_p))
 
-#define Z_BVAL(zval)				(zend_bool)(zval).value.lval
-#define Z_BVAL_P(zval_p)			Z_LVAL(*(zval_p))
-
 #define Z_LVAL(zval)				(zval).value.lval
 #define Z_LVAL_P(zval_p)			Z_LVAL(*(zval_p))
 
@@ -461,10 +460,17 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 		Z_TYPE_INFO_P(z) = IS_NULL;		\
 	} while (0)
 
+#define ZVAL_FALSE(z) do {				\
+		Z_TYPE_INFO_P(z) = IS_FALSE;	\
+	} while (0)
+
+#define ZVAL_TRUE(z) do {				\
+		Z_TYPE_INFO_P(z) = IS_TRUE;		\
+	} while (0)
+
 #define ZVAL_BOOL(z, b) do {			\
-		zval *__z = (z);				\
-		Z_LVAL_P(__z) = ((b) != 0);		\
-		Z_TYPE_INFO_P(__z) = IS_BOOL;	\
+		Z_TYPE_INFO_P(z) =				\
+			(b) ? IS_TRUE : IS_FALSE;	\
 	} while (0)
 
 #define ZVAL_LONG(z, l) {				\

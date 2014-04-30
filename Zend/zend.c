@@ -220,19 +220,15 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 
 again:
 	switch (Z_TYPE_P(expr)) {
-		case IS_NULL: {
+		case IS_NULL:
+		case IS_FALSE: {
 			TSRMLS_FETCH();
 			ZVAL_EMPTY_STRING(expr_copy);
 			break;
 		}
-		case IS_BOOL:
-			if (Z_LVAL_P(expr)) {
-				// TODO: use interned string ???
-				ZVAL_NEW_STR(expr_copy, STR_INIT("1", 1, 0));
-			} else {
-				TSRMLS_FETCH();
-				ZVAL_EMPTY_STRING(expr_copy);
-			}
+		case IS_TRUE:
+			// TODO: use interned string ???
+			ZVAL_NEW_STR(expr_copy, STR_INIT("1", 1, 0));
 			break;
 		case IS_RESOURCE: {
 				char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
@@ -1201,7 +1197,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			ZVAL_UNDEF(&retval);
 			if (call_user_function_ex(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
-					if (Z_TYPE(retval) == IS_BOOL && Z_LVAL(retval) == 0) {
+					if (Z_TYPE(retval) == IS_FALSE) {
 						zend_error_cb(type, error_filename, error_lineno, format, args);
 					}
 					zval_ptr_dtor(&retval);

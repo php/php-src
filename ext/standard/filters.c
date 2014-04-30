@@ -1289,13 +1289,13 @@ static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretva
 	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
 		zval tmp;
 
-		if (Z_TYPE_P(tmpval) != IS_BOOL) {
+		if (Z_TYPE_P(tmpval) != IS_FALSE || Z_TYPE_P(tmpval) != IS_TRUE) {
 			ZVAL_DUP(&tmp, tmpval);
 			zval_copy_ctor(&tmp);
 			convert_to_boolean(&tmp);
 			tmpval = &tmp;
 		}
-		*pretval = Z_BVAL_P(tmpval);
+		*pretval = (Z_TYPE_P(tmpval) == IS_TRUE);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	} 

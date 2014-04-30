@@ -37,6 +37,9 @@ ZEND_API zval *zend_list_insert(void *ptr, int type TSRMLS_DC)
 	zval zv;
 
 	index = zend_hash_next_free_element(&EG(regular_list));
+	if (index == 0) {
+		index = 1;
+	}
 	ZVAL_NEW_RES(&zv, index, ptr, type);
 	return zend_hash_index_update(&EG(regular_list), index, &zv);
 }

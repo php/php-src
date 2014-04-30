@@ -425,7 +425,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 				zval *value = mysqli_read_property(object, member, BP_VAR_IS, key TSRMLS_CC);
 				if (value != EG(uninitialized_zval_ptr)) {
 					convert_to_boolean(value);
-					ret = Z_BVAL_P(value)? 1:0;
+					ret = Z_TYPE_P(value) == IS_TRUE ? 1 : 0;
 					/* refcount is 0 */
 					Z_ADDREF_P(value);
 					zval_ptr_dtor(&value);

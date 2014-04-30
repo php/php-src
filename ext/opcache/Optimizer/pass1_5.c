@@ -82,7 +82,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					case IS_NULL:
 						convert_to_null(&res);
 						break;
-					case IS_BOOL:
+					case _IS_BOOL:
 						convert_to_boolean(&res);
 						break;
 					case IS_LONG:
@@ -104,7 +104,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				} else /* if (opline->result_type == IS_VAR) */ {
 					replace_var_by_const(op_array, opline + 1, tv, &res TSRMLS_CC);
 				}
-			} else if (opline->extended_value == IS_BOOL) {
+			} else if (opline->extended_value == _IS_BOOL) {
 				/* T = CAST(X, IS_BOOL) => T = BOOL(X) */
 				opline->opcode = ZEND_BOOL;
 				opline->extended_value = 0;
@@ -327,8 +327,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			    zend_binary_strcasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)), "define", sizeof("define")-1) == 0 &&
 			    (opline-1)->opcode == ZEND_SEND_VAL &&
 			    ZEND_OP1_TYPE(opline-1) == IS_CONST &&
-			    (Z_TYPE(ZEND_OP1_LITERAL(opline-1)) <= IS_BOOL ||
-			     Z_TYPE(ZEND_OP1_LITERAL(opline-1)) == IS_STRING) &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline-1)) <= IS_STRING &&
 			    (opline-2)->opcode == ZEND_SEND_VAL &&
 			    ZEND_OP1_TYPE(opline-2) == IS_CONST &&
 			    Z_TYPE(ZEND_OP1_LITERAL(opline-2)) == IS_STRING) {
@@ -449,8 +448,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 		case ZEND_DECLARE_CONST:
 			if (collect_constants &&
 			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
-			    (Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_BOOL ||
-			     Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING)) {
+			    Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_STRING) {
 				zend_optimizer_collect_constant(constants, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline));
 			}
 			break;

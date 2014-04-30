@@ -151,7 +151,7 @@ ZEND_VM_HANDLER(15, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 	zend_free_op free_op1, free_op2;
 
 	SAVE_OPLINE();
-	is_identical_function(EX_VAR(opline->result.var),
+	fast_is_identical_function(EX_VAR(opline->result.var),
 		GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R),
 		GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R) TSRMLS_CC);
 	FREE_OP1();
@@ -167,10 +167,9 @@ ZEND_VM_HANDLER(16, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	is_identical_function(result,
+	fast_is_not_identical_function(result,
 		GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R),
 		GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R) TSRMLS_CC);
-	Z_LVAL_P(result) = !Z_LVAL_P(result);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -184,9 +183,9 @@ ZEND_VM_HANDLER(17, ZEND_IS_EQUAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	ZVAL_BOOL(result, fast_equal_function(result,
+	fast_equal_function(result,
 		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC));
+		GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -200,9 +199,9 @@ ZEND_VM_HANDLER(18, ZEND_IS_NOT_EQUAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	ZVAL_BOOL(result, fast_not_equal_function(result,
+	fast_not_equal_function(result,
 		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC));
+		GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -216,9 +215,9 @@ ZEND_VM_HANDLER(19, ZEND_IS_SMALLER, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	ZVAL_BOOL(result, fast_is_smaller_function(result,
+	fast_is_smaller_function(result,
 		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC));
+		GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -232,9 +231,9 @@ ZEND_VM_HANDLER(20, ZEND_IS_SMALLER_OR_EQUAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	ZVAL_BOOL(result, fast_is_smaller_or_equal_function(result,
+	fast_is_smaller_or_equal_function(result,
 		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC));
+		GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -2107,8 +2106,8 @@ ZEND_VM_HANDLER(43, ZEND_JMPZ, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	val = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 
-	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) == IS_BOOL)) {
-		ret = Z_LVAL_P(val);
+	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
+		ret = (Z_TYPE_P(val) == IS_TRUE);
 	} else {
 		ret = i_zend_is_true(val TSRMLS_CC);
 		FREE_OP1();
@@ -2137,8 +2136,8 @@ ZEND_VM_HANDLER(44, ZEND_JMPNZ, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	val = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 
-	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) == IS_BOOL)) {
-		ret = Z_LVAL_P(val);
+	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
+		ret = (Z_TYPE_P(val) == IS_TRUE);
 	} else {
 		ret = i_zend_is_true(val TSRMLS_CC);
 		FREE_OP1();
@@ -2167,8 +2166,8 @@ ZEND_VM_HANDLER(45, ZEND_JMPZNZ, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	val = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 
-	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) == IS_BOOL)) {
-		retval = Z_LVAL_P(val);
+	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
+		retval = (Z_TYPE_P(val) == IS_TRUE);
 	} else {
 		retval = i_zend_is_true(val TSRMLS_CC);
 		FREE_OP1();
@@ -2201,8 +2200,8 @@ ZEND_VM_HANDLER(46, ZEND_JMPZ_EX, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	val = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 
-	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) == IS_BOOL)) {
-		retval = Z_LVAL_P(val);
+	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
+		retval = (Z_TYPE_P(val) == IS_TRUE);
 	} else {
 		retval = i_zend_is_true(val TSRMLS_CC);
 		FREE_OP1();
@@ -2231,8 +2230,8 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	val = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 
-	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) == IS_BOOL)) {
-		retval = Z_LVAL_P(val);
+	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
+		retval = (Z_TYPE_P(val) == IS_TRUE);
 	} else {
 		retval = i_zend_is_true(val TSRMLS_CC);
 		FREE_OP1();
@@ -3448,9 +3447,9 @@ ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	ZVAL_BOOL(result, fast_equal_function(result,
-				 GET_OP1_ZVAL_PTR(BP_VAR_R),
-				 GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC));
+	fast_equal_function(result,
+		 GET_OP1_ZVAL_PTR(BP_VAR_R),
+		 GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC);
 
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -3709,7 +3708,6 @@ ZEND_VM_C_LABEL(add_again):
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				ZEND_VM_C_GOTO(num_index);
 			case IS_LONG:
-			case IS_BOOL:
 				hval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(num_index):
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
@@ -3725,6 +3723,12 @@ ZEND_VM_C_LABEL(str_index):
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				ZEND_VM_C_GOTO(str_index);
+			case IS_FALSE:
+				hval = 0;
+				ZEND_VM_C_GOTO(num_index);
+			case IS_TRUE:
+				hval = 1;
+				ZEND_VM_C_GOTO(num_index);
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				ZEND_VM_C_GOTO(add_again);
@@ -3797,7 +3801,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 
 			ZVAL_NULL(result);
 			break;
-		case IS_BOOL:
+		case _IS_BOOL:
 			ZVAL_BOOL(result, zend_is_true(expr TSRMLS_CC));
 			break;
 		case IS_LONG:
@@ -4067,10 +4071,9 @@ ZEND_VM_C_LABEL(offset_again):
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					zend_hash_index_del(ht, hval);
 					break;
-				case IS_RESOURCE:
-				case IS_BOOL:
 				case IS_LONG:
 					hval = Z_LVAL_P(offset);
+ZEND_VM_C_LABEL(num_index_dim):
 					zend_hash_index_del(ht, hval);
 					break;
 				case IS_STRING:
@@ -4078,7 +4081,7 @@ ZEND_VM_C_LABEL(offset_again):
 						if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 					}
 					if (OP2_TYPE != IS_CONST) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index_dim));
+						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(numeric_index_dim));
 					}
 					if (ht == &EG(symbol_table).ht) {
 						zend_delete_global_variable(Z_STR_P(offset) TSRMLS_CC);
@@ -4089,7 +4092,7 @@ ZEND_VM_C_LABEL(offset_again):
 						zval_ptr_dtor(offset);
 					}
 					break;
-ZEND_VM_C_LABEL(num_index_dim):
+ZEND_VM_C_LABEL(numeric_index_dim):
 					zend_hash_index_del(ht, hval);
 					if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
 						zval_ptr_dtor(offset);
@@ -4098,6 +4101,15 @@ ZEND_VM_C_LABEL(num_index_dim):
 				case IS_NULL:
 					zend_hash_del(ht, STR_EMPTY_ALLOC());
 					break;
+				case IS_FALSE:
+					hval = 0;
+					ZEND_VM_C_GOTO(num_index_dim);
+				case IS_TRUE:
+					hval = 1;
+					ZEND_VM_C_GOTO(num_index_dim);
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					ZEND_VM_C_GOTO(num_index_dim);
 				case IS_REFERENCE:
 					offset = Z_REFVAL_P(offset);
 					ZEND_VM_C_GOTO(offset_again);
@@ -4575,8 +4587,6 @@ ZEND_VM_C_LABEL(isset_again):
 			case IS_DOUBLE:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				ZEND_VM_C_GOTO(num_index_prop);
-			case IS_RESOURCE:
-			case IS_BOOL:
 			case IS_LONG:
 				hval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(num_index_prop):
@@ -4594,6 +4604,15 @@ ZEND_VM_C_LABEL(str_index_prop):
 				str = STR_EMPTY_ALLOC();
 				ZEND_VM_C_GOTO(str_index_prop);
 				break;
+			case IS_FALSE:
+				hval = 0;
+				ZEND_VM_C_GOTO(num_index_prop);
+			case IS_TRUE:
+				hval = 0;
+				ZEND_VM_C_GOTO(num_index_prop);
+			case IS_RESOURCE:
+				hval = Z_RES_HANDLE_P(offset);
+				ZEND_VM_C_GOTO(num_index_prop);
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				ZEND_VM_C_GOTO(isset_again);

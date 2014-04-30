@@ -634,7 +634,8 @@ PHP_FUNCTION(file_put_contents)
 		case IS_NULL:
 		case IS_LONG:
 		case IS_DOUBLE:
-		case IS_BOOL:
+		case IS_FALSE:
+		case IS_TRUE:
 			convert_to_string_ex(data);
 
 		case IS_STRING:

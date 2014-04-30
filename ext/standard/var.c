@@ -129,8 +129,11 @@ PHPAPI void php_var_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 
 again:
 	switch (Z_TYPE_P(struc)) {
-		case IS_BOOL:
-			php_printf("%sbool(%s)\n", COMMON, Z_LVAL_P(struc) ? "true" : "false");
+		case IS_FALSE:
+			php_printf("%sbool(false)\n", COMMON);
+			break;
+		case IS_TRUE:
+			php_printf("%sbool(true)\n", COMMON);
 			break;
 		case IS_NULL:
 			php_printf("%sNULL\n", COMMON);
@@ -304,8 +307,11 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 
 again:
 	switch (Z_TYPE_P(struc)) {
-	case IS_BOOL:
-		php_printf("%sbool(%s)\n", COMMON, Z_LVAL_P(struc)?"true":"false");
+	case IS_FALSE:
+		php_printf("%sbool(false)\n", COMMON);
+		break;
+	case IS_TRUE:
+		php_printf("%sbool(true)\n", COMMON);
 		break;
 	case IS_NULL:
 		php_printf("%sNULL\n", COMMON);
@@ -491,12 +497,11 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC) 
 
 again:
 	switch (Z_TYPE_P(struc)) {
-		case IS_BOOL:
-			if (Z_LVAL_P(struc)) {
-				smart_str_appendl(buf, "true", 4);
-			} else {
-				smart_str_appendl(buf, "false", 5);
-			}
+		case IS_FALSE:
+			smart_str_appendl(buf, "false", 5);
+			break;
+		case IS_TRUE:
+			smart_str_appendl(buf, "true", 4);
 			break;
 		case IS_NULL:
 			smart_str_appendl(buf, "NULL", 4);
@@ -828,10 +833,12 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 
 again:
 	switch (Z_TYPE_P(struc)) {
-		case IS_BOOL:
-			smart_str_appendl(buf, "b:", 2);
-			smart_str_append_long(buf, Z_LVAL_P(struc));
-			smart_str_appendc(buf, ';');
+		case IS_FALSE:
+			smart_str_appendl(buf, "b:0;", 4);
+			return;
+
+		case IS_TRUE:
+			smart_str_appendl(buf, "b:1;", 4);
 			return;
 
 		case IS_NULL:

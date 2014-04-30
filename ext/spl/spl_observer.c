@@ -1064,7 +1064,7 @@ SPL_METHOD(MultipleIterator, attachIterator)
 		zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 		while ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) != NULL) {
 			is_identical_function(&compare_result, info, &element->inf TSRMLS_CC);
-			if (Z_LVAL(compare_result)) {
+			if (Z_TYPE(compare_result) == IS_TRUE) {
 				zend_throw_exception(spl_ce_InvalidArgumentException, "Key duplication error", 0 TSRMLS_CC);
 				return;
 			}
@@ -1149,7 +1149,7 @@ SPL_METHOD(MultipleIterator, valid)
 		zend_call_method_with_0_params(it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_valid, "valid", &retval);
 
 		if (!ZVAL_IS_UNDEF(&retval)) {
-			valid = Z_LVAL(retval);
+			valid = (Z_TYPE(retval) == IS_TRUE);
 			zval_ptr_dtor(&retval);
 		} else {
 			valid = 0;
@@ -1185,7 +1185,7 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 		zend_call_method_with_0_params(it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_valid, "valid", &retval);
 
 		if (!ZVAL_IS_UNDEF(&retval)) {
-			valid = Z_LVAL(retval);
+			valid = Z_TYPE(retval) == IS_TRUE;
 			zval_ptr_dtor(&retval);
 		} else {
 			valid = 0;

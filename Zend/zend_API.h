@@ -594,9 +594,6 @@ END_EXTERN_C()
 	    }										\
 	} while (0)
 
-#define ZVAL_FALSE(z)  					ZVAL_BOOL(z, 0)
-#define ZVAL_TRUE(z)  					ZVAL_BOOL(z, 1)
-
 #define RETVAL_BOOL(b)					ZVAL_BOOL(return_value, b)
 #define RETVAL_NULL() 					ZVAL_NULL(return_value)
 #define RETVAL_LONG(l) 					ZVAL_LONG(return_value, l)

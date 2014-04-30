@@ -456,12 +456,11 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 			}
 			break;
 		}
-		case IS_BOOL:
-			if (Z_LVAL_P(arg)) {
-				TRACE_APPEND_STR("true, ");
-			} else {
-				TRACE_APPEND_STR("false, ");
-			}
+		case IS_FALSE:
+			TRACE_APPEND_STR("false, ");
+			break;
+		case IS_TRUE:
+			TRACE_APPEND_STR("true, ");
 			break;
 		case IS_RESOURCE: {
 			long lval = Z_RES_HANDLE_P(arg);

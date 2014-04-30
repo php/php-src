@@ -363,7 +363,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			0, NULL TSRMLS_CC);
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
-		if (Z_TYPE(retval) == IS_BOOL && Z_LVAL(retval) == 0) {
+		if (Z_TYPE(retval) == IS_FALSE) {
 			/* User reported filter creation error "return false;" */
 			zval_ptr_dtor(&retval);
 

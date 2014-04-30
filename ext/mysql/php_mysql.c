@@ -2165,7 +2165,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 
 #ifdef ZEND_ENGINE_2
 	/* mysqlnd might return FALSE if no more rows */
-	if (into_object && Z_TYPE_P(return_value) != IS_BOOL) {
+	if (into_object && Z_TYPE_P(return_value) != IS_FALSE) {
 		zval dataset;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;

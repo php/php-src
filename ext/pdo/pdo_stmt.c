@@ -327,7 +327,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		} else {
 			convert_to_string(parameter);
 		}
-	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT && Z_TYPE_P(parameter) == IS_BOOL) {
+	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT && (Z_TYPE_P(parameter) == IS_FALSE || Z_TYPE_P(parameter) == IS_TRUE)) {
 		convert_to_long(parameter);
 	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL && Z_TYPE_P(parameter) == IS_LONG) {
 		convert_to_boolean(parameter);

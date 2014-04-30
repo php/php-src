@@ -411,7 +411,8 @@ static void change_node_zval(xmlNodePtr node, zval *value TSRMLS_DC)
 	}
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
-		case IS_BOOL:
+		case IS_FALSE:
+		case IS_TRUE:
 		case IS_DOUBLE:
 		case IS_NULL:
 			if (Z_REFCOUNT_P(value) > 1) {
@@ -525,7 +526,8 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 	if (value) {
 		switch (Z_TYPE_P(value)) {
 			case IS_LONG:
-			case IS_BOOL:
+			case IS_FALSE:
+			case IS_TRUE:
 			case IS_DOUBLE:
 			case IS_NULL:
 				convert_to_string(value);
@@ -1754,7 +1756,7 @@ static int cast_object(zval *object, int type, char *contents TSRMLS_DC)
 		case IS_STRING:
 			convert_to_string(object);
 			break;
-		case IS_BOOL:
+		case _IS_BOOL:
 			convert_to_boolean(object);
 			break;
 		case IS_LONG:
@@ -1782,7 +1784,7 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 
 	sxe = Z_SXEOBJ_P(readobj);
 
-	if (type == IS_BOOL) {
+	if (type == _IS_BOOL) {
 		node = php_sxe_get_first_node(sxe, NULL TSRMLS_CC);
 		prop_hash = sxe_get_prop_hash(readobj, 1 TSRMLS_CC);
 		ZVAL_BOOL(writeobj, node != NULL || zend_hash_num_elements(prop_hash) > 0);

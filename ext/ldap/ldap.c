@@ -2118,7 +2118,7 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			void *val;
 			convert_to_boolean_ex(newval);
-			val = Z_LVAL_PP(newval)
+			val = Z_TYPE_PP(newval) == IS_TRUE
 				? LDAP_OPT_ON : LDAP_OPT_OFF;
 			if (ldap_set_option(ldap, option, val)) {
 				RETURN_FALSE;
@@ -2165,7 +2165,7 @@ PHP_FUNCTION(ldap_set_option)
 				}
 				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "iscritical", sizeof("iscritical"), (void **) &val) == SUCCESS) {
 					convert_to_boolean_ex(val);
-					ctrl->ldctl_iscritical = Z_BVAL_PP(val);
+					ctrl->ldctl_iscritical = Z_TYPE_PP(val) == IS_TRUE;
 				} else {
 					ctrl->ldctl_iscritical = 0;
 				}

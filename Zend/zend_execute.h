@@ -80,12 +80,17 @@ again:
 	switch (Z_TYPE_P(op)) {
 		case IS_UNDEF:
 		case IS_NULL:
+		case IS_FALSE:
 			result = 0;
 			break;
+		case IS_TRUE:
+			result = 1;
+			break;
 		case IS_LONG:
-		case IS_BOOL:
-		case IS_RESOURCE:
 			result = (Z_LVAL_P(op)?1:0);
+			break;
+		case IS_RESOURCE:
+			result = (Z_RES_HANDLE_P(op)?1:0);
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op) ? 1 : 0);
@@ -105,8 +110,8 @@ again:
 			if (IS_ZEND_STD_OBJECT(*op)) {
 				if (Z_OBJ_HT_P(op)->cast_object) {
 					zval tmp;
-					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_BOOL TSRMLS_CC) == SUCCESS) {
-						result = Z_LVAL(tmp);
+					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, _IS_BOOL TSRMLS_CC) == SUCCESS) {
+						result = Z_TYPE(tmp) == IS_TRUE;
 						break;
 					}
 				} else if (Z_OBJ_HT_P(op)->get) {
@@ -115,7 +120,7 @@ again:
 					if (Z_TYPE_P(tmp) != IS_OBJECT) {
 						/* for safety - avoid loop */
 						convert_to_boolean(tmp);
-						result = Z_LVAL_P(tmp);
+						result = Z_TYPE_P(tmp) == IS_TRUE;
 						zval_ptr_dtor(tmp);
 						break;
 					}

@@ -2598,7 +2598,7 @@ static zend_bool php_check_cancel_upload(php_session_rfc1867_progress *progress 
 	if ((cancel_upload = zend_hash_str_find(Z_ARRVAL_P(progress_ary), "cancel_upload", sizeof("cancel_upload") - 1)) == NULL) {
 		return 0;
 	}
-	return Z_TYPE_P(cancel_upload) == IS_BOOL && Z_LVAL_P(cancel_upload);
+	return Z_TYPE_P(cancel_upload) == IS_TRUE;
 } /* }}} */
 
 static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, int force_update TSRMLS_DC) /* {{{ */

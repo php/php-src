@@ -183,7 +183,6 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					}
 					break;
 				case IS_LONG:
-				case IS_BOOL:
 					{
 						char *ekey;
 					  	int ekey_len;
@@ -191,6 +190,12 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 						smart_str_appendl(formstr, ekey, ekey_len);
 						efree(ekey);
 				  	}
+					break;
+				case IS_FALSE:
+					smart_str_appendl(formstr, "0", sizeof("0")-1);
+					break;
+				case IS_TRUE:
+					smart_str_appendl(formstr, "1", sizeof("1")-1);
 					break;
 				case IS_DOUBLE:
 					{

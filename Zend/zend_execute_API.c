@@ -685,7 +685,12 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				case IS_STRING:
 					ret = zend_symtable_update_current_key_ex(Z_ARRVAL_P(p), Z_STR_P(const_value), HASH_UPDATE_KEY_IF_BEFORE);
 					break;
-				case IS_BOOL:
+				case IS_FALSE:
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, 0, HASH_UPDATE_KEY_IF_BEFORE);
+					break;
+				case IS_TRUE:
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, 1, HASH_UPDATE_KEY_IF_BEFORE);
+					break;
 				case IS_LONG:
 					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, Z_LVAL_P(const_value), HASH_UPDATE_KEY_IF_BEFORE);
 					break;

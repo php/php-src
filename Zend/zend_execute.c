@@ -503,7 +503,7 @@ static inline zval* make_real_object(zval *object_ptr TSRMLS_DC)
 	ZVAL_DEREF(object);
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (Z_TYPE_P(object) == IS_NULL
-			|| (Z_TYPE_P(object) == IS_BOOL && Z_LVAL_P(object) == 0)
+			|| Z_TYPE_P(object) == IS_FALSE
 			|| (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0)) {
 			if (EXPECTED(object == object_ptr)) {
 				/* object_ptr is not a reference */
@@ -678,7 +678,7 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 			return;
 		}
 		if (Z_TYPE_P(object) == IS_NULL ||
-		    (Z_TYPE_P(object) == IS_BOOL && Z_LVAL_P(object) == 0) ||
+		    Z_TYPE_P(object) == IS_FALSE ||
 		    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0)) {
 //??? The following block may handle only non-interned empty string,
 //??? but it doesn't work anyway
@@ -1093,8 +1093,11 @@ str_index:
 				zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
 				hval = Z_RES_HANDLE_P(dim);
 				goto num_index;
-			case IS_BOOL:
-				hval = Z_LVAL_P(dim);
+			case IS_FALSE:
+				hval = 0;
+				goto num_index;
+			case IS_TRUE:
+				hval = 1;
 				goto num_index;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -1162,7 +1165,8 @@ convert_to_array:
 					break;
 				case IS_DOUBLE:
 				case IS_NULL:
-				case IS_BOOL:
+				case IS_FALSE:
+				case IS_TRUE:
 					zend_error(E_NOTICE, "String offset cast occurred");
 					break;
 				default:
@@ -1226,8 +1230,7 @@ convert_to_array:
 		}
 	} else {
 		if (type != BP_VAR_UNSET &&
-		    Z_TYPE_P(container) == IS_BOOL &&
-		    Z_LVAL_P(container)==0) {
+		    Z_TYPE_P(container) == IS_FALSE) {
 			goto convert_to_array;
 		}
 		if (type == BP_VAR_UNSET) {
@@ -1284,7 +1287,8 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 					break;
 				case IS_DOUBLE:
 				case IS_NULL:
-				case IS_BOOL:
+				case IS_FALSE:
+				case IS_TRUE:
 					if (type != BP_VAR_IS) {
 						zend_error(E_NOTICE, "String offset cast occurred");
 					}
@@ -1358,8 +1362,8 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 		/* this should modify object only if it's empty */
 		if (type != BP_VAR_UNSET &&
 		    ((Z_TYPE_P(container) == IS_NULL ||
-		     (Z_TYPE_P(container) == IS_BOOL && Z_LVAL_P(container)==0) ||
-		     (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0)))) {
+		      Z_TYPE_P(container) == IS_FALSE ||
+		      (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0)))) {
 			if (container == container_ptr) {
 				SEPARATE_ZVAL(container);
 			}

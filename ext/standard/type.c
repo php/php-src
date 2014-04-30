@@ -36,7 +36,8 @@ PHP_FUNCTION(gettype)
 			RETVAL_STRING("NULL");
 			break;
 
-		case IS_BOOL:
+		case IS_FALSE:
+		case IS_TRUE:
 			RETVAL_STRING("boolean");
 			break;
 
@@ -258,7 +259,14 @@ PHP_FUNCTION(is_resource)
    Returns true if variable is a boolean */
 PHP_FUNCTION(is_bool)
 {
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_BOOL);
+	zval *arg;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZVAL_DEREF(arg);
+	RETURN_BOOL(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE);
 }
 /* }}} */
 
@@ -344,7 +352,8 @@ PHP_FUNCTION(is_scalar)
 	}
 
 	switch (Z_TYPE_P(arg)) {
-		case IS_BOOL:
+		case IS_FALSE:
+		case IS_TRUE:
 		case IS_DOUBLE:
 		case IS_LONG:
 		case IS_STRING:
