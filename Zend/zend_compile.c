@@ -3674,6 +3674,22 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 }
 /* }}} */
 
+static inline zend_class_entry ** fetch_return_hint_ce(zend_function *method TSRMLS_DC) {
+	zend_class_entry **cce;
+	switch (method->common.return_hint->class_name_type) {
+		case ZEND_FETCH_CLASS_SELF:
+			return &method->common.scope;
+		break;
+		default:
+			if (zend_lookup_class(method->common.return_hint->class_name, method->common.return_hint->class_name_len, &cce TSRMLS_CC) != SUCCESS) {
+				zend_error(E_COMPILE_ERROR, "Declaration of %s::%s declares return type %s, which could not be found", 
+					ZEND_FN_SCOPE_NAME(method), method->common.function_name, method->common.return_hint->class_name);
+				return NULL;
+			}
+			return cce;
+	}
+}
+
 static void do_inheritance_check_on_method(zend_function *child, zend_function *parent TSRMLS_DC) /* {{{ */
 {
 	zend_uint child_flags;
@@ -3762,18 +3778,10 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		
 		if (child->common.return_hint->type == IS_OBJECT) {
 			zend_class_entry **pce = NULL, **cce = NULL;
-			
-			if (zend_lookup_class(child->common.return_hint->class_name, child->common.return_hint->class_name_len, &cce TSRMLS_CC) != SUCCESS) {
-				zend_error(E_COMPILE_ERROR, "Declaration of %s::%s declares return type %s, which could not be found", 
-					ZEND_FN_SCOPE_NAME(child), child->common.function_name, child->common.return_hint->class_name);
-				return;
-			}
-			
-			if (zend_lookup_class(parent->common.return_hint->class_name, parent->common.return_hint->class_name_len, &pce TSRMLS_CC) != SUCCESS) {
-				char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
-				zend_error(E_COMPILE_ERROR, "Declaration of %s::%s declares return type %s, which could not be found", 
-					ZEND_FN_SCOPE_NAME(parent), parent->common.function_name, parent->common.return_hint->class_name);
-				efree(method_prototype);
+			cce = fetch_return_hint_ce(child);
+			pce = fetch_return_hint_ce(parent);
+			if (cce == NULL || pce == NULL) {
+				// The error was already thrown.
 				return;
 			}
 			
@@ -3788,6 +3796,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	}
 }
 /* }}} */
+
 
 static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, const zend_hash_key *hash_key, zend_class_entry *child_ce) /* {{{ */
 {
