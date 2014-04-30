@@ -533,6 +533,9 @@ if (isset($argc) && $argc > 1) {
 			$repeat = false;
 
 			switch($switch) {
+				case 't':
+					$test_files[] = trim($argv[++$i]);
+					break;
 				case 'r':
 				case 'l':
 					$test_list = file($argv[++$i]);

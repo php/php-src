@@ -1,5 +1,5 @@
 --TEST--
-Invalid method name in dynamic static call
+Empty method name in dynamic static call
 --FILE--
 <?php
 
@@ -12,6 +12,11 @@ class foo {
 $a = 'foo::';
 $a();
 
+$a = array('foo', '');
+$a();
+
 ?>
 --EXPECTF--
-Fatal error: Call to undefined function foo::() in %s on line %d
+string(0) ""
+string(0) ""
+
