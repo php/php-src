@@ -1301,6 +1301,10 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 			case ZEND_JMP:
 				opline->op1.jmp_addr = &CG(active_op_array)->opcodes[opline->op1.opline_num];
 				break;
+			case ZEND_JMPZNZ:
+				/* absolute index to relative offset */
+				opline->extended_value = (char*)(CG(active_op_array)->opcodes + opline->extended_value) - (char*)opline;
+				/* break omitted intentionally */
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:

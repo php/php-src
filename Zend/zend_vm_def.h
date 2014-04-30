@@ -2180,13 +2180,13 @@ ZEND_VM_HANDLER(45, ZEND_JMPZNZ, CONST|TMP|VAR|CV, ANY)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on true to %d\n", opline->extended_value);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	} else {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on false to %d\n", opline->op2.opline_num);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
+		ZEND_VM_SET_OPCODE(opline->op2.jmp_addr);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	}
 }

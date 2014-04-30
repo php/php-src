@@ -1731,6 +1731,10 @@ static zend_always_inline zval *zend_vm_stack_push_args(int count TSRMLS_DC) /* 
 	CHECK_SYMBOL_TABLES() \
 	OPLINE = new_op
 
+#define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
+	CHECK_SYMBOL_TABLES() \
+	OPLINE = ((zend_op*)(((char*)opline)+(offset)))
+
 #define ZEND_VM_JMP(new_op) \
 	if (EXPECTED(!EG(exception))) { \
 		ZEND_VM_SET_OPCODE(new_op); \

@@ -497,6 +497,10 @@ static void zend_accel_optimize(zend_op_array           *op_array,
 #endif
 				ZEND_OP1(opline).opline_num = ZEND_OP1(opline).jmp_addr - op_array->opcodes;
 				break;
+			case ZEND_JMPZNZ:
+				/* relative offset into absolute index */
+				opline->extended_value = (zend_op*)(((char*)opline) + opline->extended_value) - op_array->opcodes;
+				/* break omitted intentionally */
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
@@ -538,6 +542,10 @@ static void zend_accel_optimize(zend_op_array           *op_array,
 #endif
 				ZEND_OP1(opline).jmp_addr = &op_array->opcodes[ZEND_OP1(opline).opline_num];
 				break;
+			case ZEND_JMPZNZ:
+				/* absolute index to relative offset */
+				opline->extended_value = (char*)(op_array->opcodes + opline->extended_value) - (char*)opline;
+				/* break omitted intentionally */
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:

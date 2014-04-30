@@ -2464,13 +2464,13 @@ static int ZEND_FASTCALL  ZEND_JMPZNZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on true to %d\n", opline->extended_value);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	} else {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on false to %d\n", opline->op2.opline_num);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
+		ZEND_VM_SET_OPCODE(opline->op2.jmp_addr);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	}
 }
@@ -7564,13 +7564,13 @@ static int ZEND_FASTCALL  ZEND_JMPZNZ_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on true to %d\n", opline->extended_value);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	} else {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on false to %d\n", opline->op2.opline_num);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
+		ZEND_VM_SET_OPCODE(opline->op2.jmp_addr);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	}
 }
@@ -12603,13 +12603,13 @@ static int ZEND_FASTCALL  ZEND_JMPZNZ_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on true to %d\n", opline->extended_value);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	} else {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on false to %d\n", opline->op2.opline_num);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
+		ZEND_VM_SET_OPCODE(opline->op2.jmp_addr);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	}
 }
@@ -29533,13 +29533,13 @@ static int ZEND_FASTCALL  ZEND_JMPZNZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on true to %d\n", opline->extended_value);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	} else {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on false to %d\n", opline->op2.opline_num);
 #endif
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
+		ZEND_VM_SET_OPCODE(opline->op2.jmp_addr);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	}
 }
