@@ -1517,7 +1517,7 @@ ZEND_FUNCTION(restore_error_handler)
 		zval *tmp;
 		EG(user_error_handler_error_reporting) = zend_stack_int_top(&EG(user_error_handlers_error_reporting));
 		zend_stack_del_top(&EG(user_error_handlers_error_reporting));
-		zend_stack_top(&EG(user_error_handlers), (void**)&tmp);
+		tmp = zend_stack_top(&EG(user_error_handlers));
 		ZVAL_COPY_VALUE(&EG(user_error_handler), tmp);
 		zend_stack_del_top(&EG(user_error_handlers));
 	}
@@ -1573,9 +1573,7 @@ ZEND_FUNCTION(restore_exception_handler)
 	if (zend_stack_is_empty(&EG(user_exception_handlers))) {
 		ZVAL_UNDEF(&EG(user_exception_handler));
 	} else {
-		zval *tmp;
-
-		zend_stack_top(&EG(user_exception_handlers), (void**)&tmp);
+		zval *tmp = zend_stack_top(&EG(user_exception_handlers));
 		ZVAL_COPY_VALUE(&EG(user_exception_handler), tmp);
 		zend_stack_del_top(&EG(user_exception_handlers));
 	}

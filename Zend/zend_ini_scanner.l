@@ -150,8 +150,7 @@ static void _yy_push_state(int new_state TSRMLS_DC)
 
 static void yy_pop_state(TSRMLS_D)
 {
-	int *stack_state;
-	zend_stack_top(&SCNG(state_stack), (void **) &stack_state);
+	int *stack_state = zend_stack_top(&SCNG(state_stack));
 	YYSETCONDITION(*stack_state);
 	zend_stack_del_top(&SCNG(state_stack));
 }

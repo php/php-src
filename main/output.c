@@ -186,7 +186,7 @@ PHPAPI void php_output_deactivate(TSRMLS_D)
 
 	/* release all output handlers */
 	if (OG(handlers).elements) {
-		while (SUCCESS == zend_stack_top(&OG(handlers), (void *) &handler)) {
+		while ((handler = zend_stack_top(&OG(handlers)))) {
 			php_output_handler_free(handler TSRMLS_CC);
 			zend_stack_del_top(&OG(handlers));
 		}
@@ -1072,7 +1072,7 @@ static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC)
 
 		if (obh_cnt > 1) {
 			zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_TOPDOWN, php_output_stack_apply_op, &context);
-		} else if ((SUCCESS == zend_stack_top(&OG(handlers), (void *) &active)) && (!((*active)->flags & PHP_OUTPUT_HANDLER_DISABLED))) {
+		} else if ((active = zend_stack_top(&OG(handlers))) && (!((*active)->flags & PHP_OUTPUT_HANDLER_DISABLED))) {
 			php_output_handler_op(*active, &context);
 		} else {
 			php_output_context_pass(&context);
@@ -1242,7 +1242,7 @@ static inline int php_output_stack_pop(int flags TSRMLS_DC)
 
 		/* pop it off the stack */
 		zend_stack_del_top(&OG(handlers));
-		if (SUCCESS == zend_stack_top(&OG(handlers), (void *) &current)) {
+		if ((current = zend_stack_top(&OG(handlers)))) {
 			OG(active) = *current;
 		} else {
 			OG(active) = NULL;

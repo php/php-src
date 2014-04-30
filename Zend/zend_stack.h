@@ -33,7 +33,7 @@ typedef struct _zend_stack {
 BEGIN_EXTERN_C()
 ZEND_API int zend_stack_init(zend_stack *stack, int size);
 ZEND_API int zend_stack_push(zend_stack *stack, const void *element);
-ZEND_API int zend_stack_top(const zend_stack *stack, void **element);
+ZEND_API void *zend_stack_top(const zend_stack *stack);
 ZEND_API int zend_stack_del_top(zend_stack *stack);
 ZEND_API int zend_stack_int_top(const zend_stack *stack);
 ZEND_API int zend_stack_is_empty(const zend_stack *stack);

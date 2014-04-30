@@ -45,14 +45,12 @@ ZEND_API int zend_stack_push(zend_stack *stack, const void *element)
 }
 
 
-ZEND_API int zend_stack_top(const zend_stack *stack, void **element)
+ZEND_API void *zend_stack_top(const zend_stack *stack)
 {
 	if (stack->top > 0) {
-		*element = ZEND_STACK_ELEMENT(stack, stack->top - 1);
-		return SUCCESS;
+		return ZEND_STACK_ELEMENT(stack, stack->top - 1);
 	} else {
-		*element = NULL;
-		return FAILURE;
+		return NULL;
 	}
 }
 
@@ -66,13 +64,11 @@ ZEND_API int zend_stack_del_top(zend_stack *stack)
 
 ZEND_API int zend_stack_int_top(const zend_stack *stack)
 {
-	int *e;
-
-	if (zend_stack_top(stack, (void **) &e) == FAILURE) {
-		/* this must be a negative number, since negative numbers can't be address numbers */
-		return FAILURE;
-	} else {
+	int *e = zend_stack_top(stack);
+	if (e) {
 		return *e;
+	} else {
+		return FAILURE;
 	}
 }
 

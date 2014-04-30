@@ -661,7 +661,6 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 {
 	zend_op opline;
 	zend_op *opline_ptr;
-	zend_llist *fetch_list_ptr;
 
 	if (varname->op_type == IS_CONST) {
 		if (Z_TYPE(varname->u.constant) != IS_STRING) {
@@ -703,7 +702,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	}
 
 	if (bp) {
-		zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+		zend_llist *fetch_list_ptr = zend_stack_top(&CG(bp_stack));
 		zend_llist_add_element(fetch_list_ptr, opline_ptr);
 	}
 }
@@ -731,7 +730,7 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 	} else {
 		zend_do_fetch_class(&class_node, class_name TSRMLS_CC);
 	}
-	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+	fetch_list_ptr = zend_stack_top(&CG(bp_stack));
 	if (result->op_type == IS_CV) {
 		init_op(&opline TSRMLS_CC);
 
@@ -804,9 +803,7 @@ void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC
 void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC) /* {{{ */
 {
 	zend_op opline;
-	zend_llist *fetch_list_ptr;
-
-	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+	zend_llist *fetch_list_ptr = zend_stack_top(&CG(bp_stack));
 
 	if (zend_is_function_or_method_call(parent)) {
 		init_op(&opline TSRMLS_CC);
@@ -924,9 +921,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 	zend_op *opline;
 
 	if (value->op_type == IS_CV) {
-		zend_llist *fetch_list_ptr;
-
-		zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+		zend_llist *fetch_list_ptr = zend_stack_top(&CG(bp_stack));
 		if (fetch_list_ptr && fetch_list_ptr->head) {
 			opline = (zend_op *)fetch_list_ptr->head->data;
 
@@ -1245,7 +1240,7 @@ void zend_do_if_after_statement(const znode *closing_bracket_token, unsigned cha
 		zend_llist_init(&jmp_list, sizeof(int), NULL, 0);
 		zend_stack_push(&CG(bp_stack), (void *) &jmp_list);
 	}
-	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
+	jmp_list_ptr = zend_stack_top(&CG(bp_stack));
 	zend_llist_add_element(jmp_list_ptr, &if_end_op_number);
 
 	CG(active_op_array)->opcodes[closing_bracket_token->u.op.opline_num].op2.opline_num = if_end_op_number+1;
@@ -1257,10 +1252,9 @@ void zend_do_if_after_statement(const znode *closing_bracket_token, unsigned cha
 void zend_do_if_end(TSRMLS_D) /* {{{ */
 {
 	int next_op_number = get_next_op_number(CG(active_op_array));
-	zend_llist *jmp_list_ptr;
+	zend_llist *jmp_list_ptr = zend_stack_top(&CG(bp_stack));
 	zend_llist_element *le;
 
-	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
 	for (le=jmp_list_ptr->head; le; le = le->next) {
 		CG(active_op_array)->opcodes[*((int *) le->data)].op1.opline_num = next_op_number;
 	}
@@ -1294,15 +1288,11 @@ void zend_do_begin_variable_parse(TSRMLS_D) /* {{{ */
 
 void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS_DC) /* {{{ */
 {
-	zend_llist *fetch_list_ptr;
-	zend_llist_element *le;
+	zend_llist *fetch_list_ptr = zend_stack_top(&CG(bp_stack));
+	zend_llist_element *le = fetch_list_ptr->head;
 	zend_op *opline = NULL;
 	zend_op *opline_ptr;
 	zend_uint this_var = -1;
-
-	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
-
-	le = fetch_list_ptr->head;
 
 	/* TODO: $foo->x->y->z = 1 should fetch "x" and "y" for R or RW, not just W */
 
@@ -2462,9 +2452,7 @@ void zend_release_labels(int temporary TSRMLS_DC) /* {{{ */
 		CG(context).labels = NULL;
 	}
 	if (!temporary && !zend_stack_is_empty(&CG(context_stack))) {
-		zend_compiler_context *ctx;
-
-		zend_stack_top(&CG(context_stack), (void**)&ctx);
+		zend_compiler_context *ctx = zend_stack_top(&CG(context_stack));
 		CG(context) = *ctx;
 		zend_stack_del_top(&CG(context_stack));
 	}
@@ -2564,8 +2552,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 void zend_do_end_function_call(znode *function_name, znode *result, int is_method, int is_dynamic_fcall TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
-	zend_function_call_entry *fcall;
-	zend_stack_top(&CG(function_call_stack), (void **) &fcall);
+	zend_function_call_entry *fcall = zend_stack_top(&CG(function_call_stack));
 
 	if (is_method && function_name && function_name->op_type == IS_UNUSED) {
 		/* clone */
@@ -2613,13 +2600,11 @@ void zend_do_pass_param(znode *param, zend_uchar op TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	int original_op = op;
-	zend_function_call_entry *fcall;
-	zend_function *function_ptr;
+	zend_function_call_entry *fcall = zend_stack_top(&CG(function_call_stack));
+	zend_function *function_ptr = fcall->fbc;
 	int send_by_reference = 0;
 	int send_function = 0;
 
-	zend_stack_top(&CG(function_call_stack), (void **) &fcall);
-	function_ptr = fcall->fbc;
 	fcall->arg_num++;
 
 	if (fcall->uses_argument_unpacking) {
@@ -2727,9 +2712,8 @@ void zend_do_pass_param(znode *param, zend_uchar op TSRMLS_DC) /* {{{ */
 void zend_do_unpack_params(znode *params TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
-	zend_function_call_entry *fcall;
+	zend_function_call_entry *fcall = zend_stack_top(&CG(function_call_stack));
 
-	zend_stack_top(&CG(function_call_stack), (void **) &fcall);
 	fcall->uses_argument_unpacking = 1;
 
 	if (fcall->fbc) {
@@ -2939,7 +2923,7 @@ void zend_initialize_try_catch_element(znode *catch_token TSRMLS_DC) /* {{{ */
 
 	zend_llist_init(&jmp_list, sizeof(int), NULL, 0);
 	zend_stack_push(&CG(bp_stack), (void *) &jmp_list);
-	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
+	jmp_list_ptr = zend_stack_top(&CG(bp_stack));
 	zend_llist_add_element(jmp_list_ptr, &jmp_op_number);
 
 	catch_token->EA = get_next_op_number(CG(active_op_array));
@@ -3033,7 +3017,7 @@ void zend_do_end_catch(znode *catch_token TSRMLS_DC) /* {{{ */
 	SET_UNUSED(opline->op2);
 	/* save for backpatching */
 
-	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
+	jmp_list_ptr = zend_stack_top(&CG(bp_stack));
 	zend_llist_add_element(jmp_list_ptr, &jmp_op_number);
 
 	CG(active_op_array)->opcodes[catch_token->u.op.opline_num].extended_value = get_next_op_number(CG(active_op_array));
@@ -5006,9 +4990,7 @@ void zend_do_switch_cond(const znode *cond TSRMLS_DC) /* {{{ */
 void zend_do_switch_end(const znode *case_list TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
-	zend_switch_entry *switch_entry_ptr;
-
-	zend_stack_top(&CG(switch_cond_stack), (void **) &switch_entry_ptr);
+	zend_switch_entry *switch_entry_ptr = zend_stack_top(&CG(switch_cond_stack));
 
 	/* add code to jmp to default case */
 	if (switch_entry_ptr->default_case != -1) {
@@ -5050,10 +5032,8 @@ void zend_do_case_before_statement(const znode *case_list, znode *case_token, zn
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	int next_op_number;
-	zend_switch_entry *switch_entry_ptr;
+	zend_switch_entry *switch_entry_ptr = zend_stack_top(&CG(switch_cond_stack));
 	znode result;
-
-	zend_stack_top(&CG(switch_cond_stack), (void **) &switch_entry_ptr);
 
 	if (switch_entry_ptr->control_var == -1) {
 		switch_entry_ptr->control_var = get_temporary_variable(CG(active_op_array));
@@ -5108,9 +5088,7 @@ void zend_do_default_before_statement(const znode *case_list, znode *default_tok
 {
 	int next_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	zend_switch_entry *switch_entry_ptr;
-
-	zend_stack_top(&CG(switch_cond_stack), (void **) &switch_entry_ptr);
+	zend_switch_entry *switch_entry_ptr = zend_stack_top(&CG(switch_cond_stack));
 
 	opline->opcode = ZEND_JMP;
 	SET_UNUSED(opline->op1);
@@ -5514,9 +5492,7 @@ void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC) /* 
 void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC) /* {{{ */
 {
 	zend_op opline;
-	zend_llist *fetch_list_ptr;
-
-	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+	zend_llist *fetch_list_ptr = zend_stack_top(&CG(bp_stack));
 
 	if (object->op_type == IS_CV) {
 		if (object->u.op.var == CG(active_op_array)->this_var) {
@@ -5614,9 +5590,7 @@ void zend_do_push_object(const znode *object TSRMLS_DC) /* {{{ */
 void zend_do_pop_object(znode *object TSRMLS_DC) /* {{{ */
 {
 	if (object) {
-		znode *tmp;
-
-		zend_stack_top(&CG(object_stack), (void **) &tmp);
+		znode *tmp = zend_stack_top(&CG(object_stack));
 		*object = *tmp;
 	}
 	zend_stack_del_top(&CG(object_stack));
@@ -6084,10 +6058,10 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC) /* {{{ */
 		zend_llist *p;
 
 		/* restore previous lists */
-		zend_stack_top(&CG(list_stack), (void **) &p);
+		p = zend_stack_top(&CG(list_stack));
 		CG(dimension_llist) = *p;
 		zend_stack_del_top(&CG(list_stack));
-		zend_stack_top(&CG(list_stack), (void **) &p);
+		p = zend_stack_top(&CG(list_stack));
 		CG(list_llist) = *p;
 		zend_stack_del_top(&CG(list_stack));
 	}
@@ -6553,7 +6527,7 @@ void zend_do_foreach_end(const znode *foreach_token, const znode *as_token TSRML
 
 	do_end_loop(as_token->u.op.opline_num, 1 TSRMLS_CC);
 
-	zend_stack_top(&CG(foreach_copy_stack), (void **) &container_ptr);
+	container_ptr = zend_stack_top(&CG(foreach_copy_stack));
 	generate_free_foreach_copy(container_ptr TSRMLS_CC);
 	zend_stack_del_top(&CG(foreach_copy_stack));
 
@@ -6632,9 +6606,7 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 
 void zend_do_declare_end(const znode *declare_token TSRMLS_DC) /* {{{ */
 {
-	zend_declarables *declarables;
-
-	zend_stack_top(&CG(declare_stack), (void **) &declarables);
+	zend_declarables *declarables = zend_stack_top(&CG(declare_stack));
 	/* We should restore if there was more than (current - start) - (ticks?1:0) opcodes */
 	if ((get_next_op_number(CG(active_op_array)) - declare_token->u.op.opline_num) - ((Z_LVAL(CG(declarables).ticks))?1:0)) {
 		CG(declarables) = *declarables;
