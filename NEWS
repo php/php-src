@@ -24,6 +24,7 @@ PHP                                                                        NEWS
   . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
 
 - cURL:
+  . Fixed bug #64247 (CURLOPT_INFILE doesn't allow reset). (Mike)
   . Fixed bug #66562 (curl_exec returns differently than curl_multi_getcontent).
     (Freek Lijten)
 
