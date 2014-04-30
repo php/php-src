@@ -3764,10 +3764,8 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			zend_class_entry **pce = NULL, **cce = NULL;
 			
 			if (zend_lookup_class(child->common.return_hint->class_name, child->common.return_hint->class_name_len, &cce TSRMLS_CC) != SUCCESS) {
-				char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
 				zend_error(E_COMPILE_ERROR, "Declaration of %s::%s declares return type %s, which could not be found", 
 					ZEND_FN_SCOPE_NAME(child), child->common.function_name, child->common.return_hint->class_name);
-				efree(method_prototype);
 				return;
 			}
 			
