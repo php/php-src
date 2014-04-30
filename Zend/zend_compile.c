@@ -3778,10 +3778,16 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		
 		if (child->common.return_hint->type == IS_OBJECT) {
 			zend_class_entry **pce = NULL, **cce = NULL;
-			cce = fetch_return_hint_ce(child);
-			pce = fetch_return_hint_ce(parent);
-			if (cce == NULL || pce == NULL) {
-				// The error was already thrown.
+			
+			cce = fetch_return_hint_ce(child TSRMLS_CC);
+			
+			if (cce == NULL) {
+				return;
+			}
+			
+			pce = fetch_return_hint_ce(parent TSRMLS_CC);
+			
+			if (pce == NULL) {
 				return;
 			}
 			
