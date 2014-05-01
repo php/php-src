@@ -533,6 +533,69 @@ static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 	fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
 } /* }}} */
 
+/* copied from sapi/cli/php_cli.c cli_register_file_handles */
+static void phpdbg_register_file_handles(TSRMLS_D) /* {{{ */
+{
+	zval *zin, *zout, *zerr;
+	php_stream *s_in, *s_out, *s_err;
+	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
+	zend_constant ic, oc, ec;
+
+	MAKE_STD_ZVAL(zin);
+	MAKE_STD_ZVAL(zout);
+	MAKE_STD_ZVAL(zerr);
+
+	s_in  = php_stream_open_wrapper_ex("php://stdin",  "rb", 0, NULL, sc_in);
+	s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
+	s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
+
+	if (s_in==NULL || s_out==NULL || s_err==NULL) {
+		FREE_ZVAL(zin);
+		FREE_ZVAL(zout);
+		FREE_ZVAL(zerr);
+		if (s_in) php_stream_close(s_in);
+		if (s_out) php_stream_close(s_out);
+		if (s_err) php_stream_close(s_err);
+		return;
+	}
+
+#if PHP_DEBUG
+	/* do not close stdout and stderr */
+	s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+#endif
+
+	php_stream_to_zval(s_in,  zin);
+	php_stream_to_zval(s_out, zout);
+	php_stream_to_zval(s_err, zerr);
+
+	ic.value = *zin;
+	ic.flags = CONST_CS;
+	ic.name = zend_strndup(ZEND_STRL("STDIN"));
+	ic.name_len = sizeof("STDIN");
+	ic.module_number = 0;
+	zend_register_constant(&ic TSRMLS_CC);
+
+	oc.value = *zout;
+	oc.flags = CONST_CS;
+	oc.name = zend_strndup(ZEND_STRL("STDOUT"));
+	oc.name_len = sizeof("STDOUT");
+	oc.module_number = 0;
+	zend_register_constant(&oc TSRMLS_CC);
+
+	ec.value = *zerr;
+	ec.flags = CONST_CS;
+	ec.name = zend_strndup(ZEND_STRL("STDERR"));
+	ec.name_len = sizeof("STDERR");
+	ec.module_number = 0;
+	zend_register_constant(&ec TSRMLS_CC);
+
+	FREE_ZVAL(zin);
+	FREE_ZVAL(zout);
+	FREE_ZVAL(zerr);
+}
+/* }}} */
+
 /* {{{ sapi_module_struct phpdbg_sapi_module
 */
 static sapi_module_struct phpdbg_sapi_module = {
@@ -1261,6 +1324,9 @@ phpdbg_main:
 
 		/* set default prompt */
 		phpdbg_set_prompt(PROMPT TSRMLS_CC);
+
+		/* Make stdin, stdout and stderr accessible from PHP scripts */
+		phpdbg_register_file_handles(TSRMLS_C);
 
 		if (show_banner) {
 			/* print blurb */
