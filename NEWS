@@ -22,6 +22,7 @@ PHP                                                                        NEWS
   . Fixed bug #67064  (Countable interface prevents using 2nd parameter
     ($mode) of count() function). (Bob)
   . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
+  . Fixed bug #67033 (Remove reference to Windows 95). (Anatol)
 
 - cURL:
   . Fixed bug #64247 (CURLOPT_INFILE doesn't allow reset). (Mike)
