@@ -288,7 +288,7 @@ To use your new extension, you will have to execute the following steps:
 3.  $ ./buildconf
 4.  $ ./configure --[with|enable]-$extname
 5.  $ make
-6.  $ ./php -f ext/$extname/$extname.php
+6.  $ ./sapi/cli/php -f ext/$extname/$extname.php
 7.  $ vi ext/$extname/$extname.c
 8.  $ make
 
