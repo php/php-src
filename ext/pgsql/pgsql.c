@@ -5829,9 +5829,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Detected broken meta data. Missing 'is enum'");
 			err = 1;
 		}
-		if (!err && (Z_TYPE_PP(val) == IS_ARRAY ||
-			 Z_TYPE_PP(val) == IS_OBJECT ||
-			 Z_TYPE_PP(val) == IS_CONSTANT_ARRAY)) {
+		if (!err && (Z_TYPE_PP(val) == IS_ARRAY || Z_TYPE_PP(val) == IS_OBJECT)) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Expects scalar values as field values");
 			err = 1;
 		}

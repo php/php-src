@@ -109,6 +109,7 @@ echo "Done";
 --> http://[x:80]/   : string(1) "/"
 -->    : string(0) ""
 --> /   : string(1) "/"
+--> /rest/Users?filter={"id":"123"}   : string(11) "/rest/Users"
 --> http:///blah.com   : bool(false)
 --> http://:80   : bool(false)
 --> http://user@:80   : bool(false)

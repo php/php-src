@@ -85,15 +85,16 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 
 
 /* Connect */
-#define mysqlnd_init(persistent) _mysqlnd_init((persistent) TSRMLS_CC)
-PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC);
+#define mysqlnd_init(client_flags, persistent) _mysqlnd_init((client_flags), (persistent) TSRMLS_CC)
+PHPAPI MYSQLND * _mysqlnd_init(unsigned int client_flags, zend_bool persistent TSRMLS_DC);
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 						  const char * host, const char * user,
 						  const char * passwd, unsigned int passwd_len,
 						  const char * db, unsigned int db_len,
 						  unsigned int port,
 						  const char * socket_or_pipe,
-						  unsigned int mysql_flags
+						  unsigned int mysql_flags,
+						  unsigned int client_api_flags
 						  TSRMLS_DC);
 
 #define mysqlnd_change_user(conn, user, passwd, db, silent)		((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), strlen((passwd)) TSRMLS_CC)
@@ -282,6 +283,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	long			debug_calloc_fail_threshold;
 	long			debug_realloc_fail_threshold;
 	char *			sha256_server_public_key;
+	zend_bool		fetch_data_copy;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)

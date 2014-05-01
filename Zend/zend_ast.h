@@ -50,6 +50,9 @@ ZEND_API zend_ast *zend_ast_create_constant(zval *zv);
 ZEND_API zend_ast *zend_ast_create_unary(uint kind, zend_ast *op0);
 ZEND_API zend_ast *zend_ast_create_binary(uint kind, zend_ast *op0, zend_ast *op1);
 ZEND_API zend_ast *zend_ast_create_ternary(uint kind, zend_ast *op0, zend_ast *op1, zend_ast *op2);
+ZEND_API zend_ast* zend_ast_create_dynamic(uint kind);
+ZEND_API void zend_ast_dynamic_add(zend_ast **ast, zend_ast *op);
+ZEND_API void zend_ast_dynamic_shrink(zend_ast **ast);
 
 ZEND_API int zend_ast_is_ct_constant(zend_ast *ast);
 

@@ -2543,7 +2543,7 @@ diff -u libmagic.orig/print.c libmagic/print.c
  	}
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
 --- libmagic.orig/readcdf.c	Tue Jan  7 04:13:42 2014
-+++ libmagic/readcdf.c	Fri Feb 21 00:21:27 2014
++++ libmagic/readcdf.c	Thu Apr 24 20:07:51 2014
 @@ -30,7 +30,11 @@
  #endif
  
@@ -2567,7 +2567,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  private const char *
  cdf_app_to_mime(const char *vbuf, const struct nv *nv)
  {
-@@ -91,7 +99,7 @@
+@@ -91,12 +99,14 @@
  {
          size_t i;
          cdf_timestamp_t tp;
@@ -2576,7 +2576,14 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
          char buf[64];
          const char *str = NULL;
          const char *s;
-@@ -162,8 +170,12 @@
+         int len;
+ 
++	memset(&ts, 0, sizeof(ts));
++
+         for (i = 0; i < count; i++) {
+                 cdf_print_property_name(buf, sizeof(buf), info[i].pi_id);
+                 switch (info[i].pi_type) {
+@@ -162,8 +172,12 @@
                  case CDF_FILETIME:
                          tp = info[i].pi_tp;
                          if (tp != 0) {
@@ -2591,7 +2598,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
                                          cdf_print_elapsed_time(tbuf,
                                              sizeof(tbuf), tp);
                                          if (NOTMIME(ms) && file_printf(ms,
-@@ -171,8 +183,11 @@
+@@ -171,8 +185,11 @@
                                                  return -1;
                                  } else {
                                          char *c, *ec;
@@ -3279,3 +3286,4 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		break;
  	}
  	case FILE_INDIRECT:
+

@@ -733,7 +733,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			*zv = *precv->op2.zv;
 			zval_copy_ctor(zv);
 			INIT_PZVAL(zv);
-			zval_update_constant_ex(&zv, (void*)1, fptr->common.scope TSRMLS_CC);
+			zval_update_constant_ex(&zv, 1, fptr->common.scope TSRMLS_CC);
 			if (Z_TYPE_P(zv) == IS_BOOL) {
 				if (Z_LVAL_P(zv)) {
 					string_write(str, "true", sizeof("true")-1);
@@ -2599,7 +2599,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 	if (!IS_CONSTANT_TYPE(Z_TYPE_P(return_value))) {
 		zval_copy_ctor(return_value);
 	}
-	zval_update_constant_ex(&return_value, (void*)0, param->fptr->common.scope TSRMLS_CC);
+	zval_update_constant_ex(&return_value, 0, param->fptr->common.scope TSRMLS_CC);
 }
 /* }}} */
 
@@ -3411,7 +3411,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		/* this is necessary to make it able to work with default array
 		* properties, returned to user */
 		if (IS_CONSTANT_TYPE(Z_TYPE_P(prop_copy))) {
-			zval_update_constant(&prop_copy, (void *) 1 TSRMLS_CC);
+			zval_update_constant(&prop_copy, 1 TSRMLS_CC);
 		}
 
 		add_assoc_zval(return_value, key, prop_copy);

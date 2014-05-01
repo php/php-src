@@ -593,7 +593,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		Z_ADDREF_P(arr);
 		Z_ADDREF_P(argc);
 		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
-		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
+		zend_hash_update(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	} 
 	if (track_vars_array) {
 		Z_ADDREF_P(arr);
@@ -694,7 +694,7 @@ static zend_bool php_auto_globals_create_request(const char *name, uint name_len
 
 /* {{{ php_hash_environment
  */
-int php_hash_environment(TSRMLS_D)
+PHPAPI int php_hash_environment(TSRMLS_D)
 {
 	memset(PG(http_globals), 0, sizeof(PG(http_globals)));
 	zend_activate_auto_globals(TSRMLS_C);
