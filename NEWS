@@ -76,6 +76,7 @@ PHP                                                                        NEWS
 - phpdbg:
   . Added watchpoints (watch command). (Bob)
   . Renamed some commands (next => continue and how to step). (Joe)
+  . Fixed issue #85 (https://github.com/krakjoe/phpdbg/issues/85). (Bob)
 
 - PDO:
   . Fixed bug #66604 ('pdo/php_pdo_error.h' not copied to the include dir).
