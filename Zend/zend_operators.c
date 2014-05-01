@@ -596,9 +596,6 @@ ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
-	long lval;
-	double dval;
-
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 		case IS_FALSE: {
@@ -612,32 +609,23 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		case IS_STRING:
 			break;
 		case IS_RESOURCE: {
-			long tmp = Z_RES_HANDLE_P(op);
-			char *str;
-			int len;
-
-			zval_ptr_dtor(op);
-			len = zend_spprintf(&str, 0, "Resource id #%ld", tmp);
-			ZVAL_NEW_STR(op, STR_INIT(str, len, 0));
-			efree(str);
+			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
+			int len = snprintf(buf, sizeof(buf), "Resource id #%ld", Z_RES_HANDLE_P(op));
+			ZVAL_NEW_STR(op, STR_INIT(buf, len, 0));
 			break;
 		}
 		case IS_LONG: {
-			char *str;
-			int len;
-			lval = Z_LVAL_P(op);
-
-			len = zend_spprintf(&str, 0, "%ld", lval);
-			ZVAL_NEW_STR(op, STR_INIT(str, len, 0));
-			efree(str);
+			char buf[MAX_LENGTH_OF_LONG + 1];
+			int len = snprintf(buf, sizeof(buf), "%ld", Z_LVAL_P(op));
+			ZVAL_NEW_STR(op, STR_INIT(buf, len, 0));
 			break;
 		}
 		case IS_DOUBLE: {
 			char *str;
 			int len;
+			double dval = Z_DVAL_P(op);
 			TSRMLS_FETCH();
 
-			dval = Z_DVAL_P(op);
 			len = zend_spprintf(&str, 0, "%.*G", (int) EG(precision), dval);
 			/* %G already handles removing trailing zeros from the fractional part, yay */
 			ZVAL_NEW_STR(op, STR_INIT(str, len, 0));
