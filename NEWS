@@ -34,7 +34,7 @@ PHP                                                                        NEWS
   . Fix bug #64498 ($phar->buildFromDirectory can't compress file with an accent
     in its name). (PR #588)
 
-?? ??? 2014, PHP 5.5.12
+30 Apr 2014, PHP 5.5.12
 - Core:
   . Fixed bug #61019 (Out of memory on command stream_get_contents). (Mike)
   . Fixed bug #64330 (stream_socket_server() creates wrong Abstract Namespace 
