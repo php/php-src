@@ -72,6 +72,10 @@ PHP                                                                        NEWS
   . Fix bug #66840 (Fix broken build when extension built separately).
     (Daniel Lowrey)
 
+- phpdbg:
+  . Added watchpoints (watch command). (Bob)
+  . Renamed some commands (next => continue and how to step). (Joe)
+
 - PDO:
   . Fixed bug #66604 ('pdo/php_pdo_error.h' not copied to the include dir).
     (Matteo)
