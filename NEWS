@@ -44,6 +44,7 @@ PHP                                                                        NEWS
   . Fixed bug #67024 (getimagesize should recognize BMP files with negative
     height). (Gabor Buella)
   . Fixed bug #67043 (substr_compare broke by previous change) (Tjerk)
+  . Fixed bug #67033 (Remove reference to Windows 95). (Anatol)
 
 - cURL:
   . Fixed bug #66562 (curl_exec returns differently than curl_multi_getcontent).
