@@ -68,7 +68,7 @@ PHP                                                                        NEWS
 
 - litespeed
   . Fixed bug #63228 (-Werror=format-security error in lsapi code).
-    (George Wang)
+    (Elan Ruusamäe, George)
 
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
