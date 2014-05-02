@@ -1046,17 +1046,18 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 	zval *func;
 	zend_function *fbc;
 	zend_string *lc_method_name;
+	ALLOCA_FLAG(use_heap);
 
 	if (EXPECTED(key != NULL)) {
 		lc_method_name = Z_STR_P(key);
 	} else {
-		lc_method_name = STR_ALLOC(method_name->len, 0);
+		STR_ALLOCA_ALLOC(lc_method_name, method_name->len, use_heap);
 		zend_str_tolower_copy(lc_method_name->val, method_name->val, method_name->len);
 	}
 
 	if (UNEXPECTED((func = zend_hash_find(&zobj->ce->function_table, lc_method_name)) == NULL)) {
 		if (UNEXPECTED(!key)) {
-			STR_FREE(lc_method_name);
+			STR_ALLOCA_FREE(lc_method_name, use_heap);
 		}
 		if (zobj->ce->__call) {
 			return zend_get_user_call_function(zobj->ce, method_name);
@@ -1113,7 +1114,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 	}
 
 	if (UNEXPECTED(!key)) {
-		STR_FREE(lc_method_name);
+		STR_ALLOCA_FREE(lc_method_name, use_heap);
 	}
 	return fbc;
 }

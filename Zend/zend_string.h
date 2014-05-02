@@ -56,6 +56,20 @@ END_EXTERN_C()
 
 #define _STR_HEADER_SIZE XtOffsetOf(zend_string, val)
 
+#define STR_ALLOCA_ALLOC(str, _len, use_heap) do { \
+	(str) = do_alloca(_STR_HEADER_SIZE + (_len) + 1, (use_heap)); \
+	GC_REFCOUNT(str) = 1; \
+	(str)->h = 0; \
+	(str)->len = (_len); \
+} while (0)
+#define STR_ALLOCA_INIT(str, s, len, use_heap) do { \
+	STR_ALLOCA_ALLOC(str, len, use_heap); \
+	memcpy((str)->val, (s), (len)); \
+	(str)->val[(len)] = '\0'; \
+} while (0)
+
+#define STR_ALLOCA_FREE(str, use_heap) free_alloca(str, use_heap)
+
 static zend_always_inline zend_ulong zend_str_hash_val(zend_string *s)
 {
 	if (!s->h) {
