@@ -720,7 +720,8 @@ PHP                                                                        NEWS
   . Fixed bug #63999 (php with fpm fails to build on Solaris 10 or 11). (Adam)
 
 - Litespeed:
-  . Fixed bug #63228 (-Werror=format-security error in lsapi code). (George)
+  . Fixed bug #63228 (-Werror=format-security error in lsapi code).
+    (Elan Ruusamäe, George)
 
 - ext/sqlite3:
   . Fixed bug #63921 (sqlite3::bindvalue and relative PHP functions aren't
