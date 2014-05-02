@@ -70,6 +70,9 @@ PHP                                                                        NEWS
   . Fixed bug #63228 (-Werror=format-security error in lsapi code).
     (Elan Ruusamäe, George)
 
+- mysqli:
+  . Fixed building against an external libmysqlclient. (Adam)
+
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
 
