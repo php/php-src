@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.0 Beta 3
 
+- Core:
+  . Fixed bug #67169 (array_splice all elements, then []= gives wrong index).
+    (Nikita)
+
 01 May 2014, PHP 5.6.0 Beta 2
 
 - CLI server:
