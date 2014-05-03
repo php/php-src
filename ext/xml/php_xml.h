@@ -44,22 +44,22 @@ ZEND_BEGIN_MODULE_GLOBALS(xml)
 ZEND_END_MODULE_GLOBALS(xml)
 
 typedef struct {
-	int index;
 	int case_folding;
 	XML_Parser parser;
 	XML_Char *target_encoding;
 
-	zval *startElementHandler;
-	zval *endElementHandler;
-	zval *characterDataHandler;
-	zval *processingInstructionHandler;
-	zval *defaultHandler;
-	zval *unparsedEntityDeclHandler;
-	zval *notationDeclHandler;
-	zval *externalEntityRefHandler;
-	zval *unknownEncodingHandler;	
-	zval *startNamespaceDeclHandler;
-	zval *endNamespaceDeclHandler;
+	zval index;
+	zval startElementHandler;
+	zval endElementHandler;
+	zval characterDataHandler;
+	zval processingInstructionHandler;
+	zval defaultHandler;
+	zval unparsedEntityDeclHandler;
+	zval notationDeclHandler;
+	zval externalEntityRefHandler;
+	zval unknownEncodingHandler;	
+	zval startNamespaceDeclHandler;
+	zval endNamespaceDeclHandler;
 
 	zend_function *startElementPtr;
 	zend_function *endElementPtr;
@@ -73,14 +73,14 @@ typedef struct {
 	zend_function *startNamespaceDeclPtr;
 	zend_function *endNamespaceDeclPtr;
 
-	zval *object;
+	zval object;
 
-	zval *data;
-	zval *info;
+	zval data;
+	zval info;
 	int level;
 	int toffset;
 	int curtag;
-	zval **ctag;
+	zval *ctag;
 	char **ltags;
 	int lastwasopen;
 	int skipwhite;
@@ -133,9 +133,9 @@ PHP_FUNCTION(utf8_encode);
 PHP_FUNCTION(utf8_decode);
 PHP_FUNCTION(xml_parse_into_struct);
 
-PHPAPI char *_xml_zval_strdup(zval *val);
-PHPAPI char *xml_utf8_decode(const XML_Char *, int, int *, const XML_Char *);
-PHPAPI char *xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char *encoding);
+PHPAPI char *_xml_zval_strdup(zval *);
+PHPAPI zend_string *xml_utf8_decode(const XML_Char *, int, const XML_Char *);
+PHPAPI zend_string *xml_utf8_encode(const char *, int, const XML_Char *);
 
 #endif /* HAVE_LIBEXPAT */
 
