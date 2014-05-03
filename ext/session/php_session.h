@@ -246,7 +246,7 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 #define PS_ADD_VAR(name) PS_ADD_VARL(name)
 
 #define PS_DEL_VARL(name) do {										\
-	if (!ZVAL_IS_NULL(&PS(http_session_vars))) {					\
+	if (!Z_ISNULL(PS(http_session_vars))) {							\
 		zend_hash_del(Z_ARRVAL(PS(http_session_vars)), name);		\
 	}																\
 } while (0)

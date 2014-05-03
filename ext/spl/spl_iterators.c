@@ -1560,7 +1560,7 @@ SPL_METHOD(dual_it, getInnerIterator)
 	
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
-	if (!ZVAL_IS_UNDEF(&intern->inner.zobject)) {
+	if (!Z_ISUNDEF(intern->inner.zobject)) {
 		RETVAL_ZVAL(&intern->inner.zobject, 1, 0);
 	} else {
 		RETURN_NULL();
@@ -2047,7 +2047,7 @@ SPL_METHOD(RegexIterator, accept)
 	if (use_copy) {
 		efree(subject);
 	}
-	if (!ZVAL_IS_UNDEF(&subject_copy)) {
+	if (!Z_ISUNDEF(subject_copy)) {
 		zval_ptr_dtor(&subject_copy);
 	}
 } /* }}} */
@@ -2221,7 +2221,7 @@ static void spl_dual_it_free_storage(zend_object *_object TSRMLS_DC)
 	spl_dual_it_object *object = spl_dual_it_from_obj(_object);
 
 
-	if (!ZVAL_IS_UNDEF(&object->inner.zobject)) {
+	if (!Z_ISUNDEF(object->inner.zobject)) {
 		zval_ptr_dtor(&object->inner.zobject);
 	}
 	
@@ -3226,7 +3226,7 @@ int spl_append_it_next_iterator(spl_dual_it_object *intern TSRMLS_DC) /* {{{*/
 {
 	spl_dual_it_free(intern TSRMLS_CC);
 
-	if (!ZVAL_IS_UNDEF(&intern->inner.zobject)) {
+	if (!Z_ISUNDEF(intern->inner.zobject)) {
 		zval_ptr_dtor(&intern->inner.zobject);
 		ZVAL_UNDEF(&intern->inner.zobject);
 		intern->inner.ce = NULL;

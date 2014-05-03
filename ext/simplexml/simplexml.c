@@ -113,7 +113,7 @@ static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node TS
 
 	if (sxe && sxe->iter.type != SXE_ITER_NONE) {
 		php_sxe_reset_iterator(sxe, 1 TSRMLS_CC);
-		if (!ZVAL_IS_UNDEF(&sxe->iter.data)) {
+		if (!Z_ISUNDEF(sxe->iter.data)) {
 			intern = Z_SXEOBJ_P(&sxe->iter.data);
 			GET_NODE(intern, retnode)
 		}
@@ -372,7 +372,7 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 		zval_dtor(&tmp_zv);
 	}
 
-	if (ZVAL_IS_UNDEF(rv)) {
+	if (Z_ISUNDEF_P(rv)) {
 		ZVAL_COPY_VALUE(rv, &EG(uninitialized_zval));
 	}
 
@@ -708,7 +708,7 @@ static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, ze
 	_node_as_zval(sxe, node, &ret, type, name, sxe->iter.nsprefix, sxe->iter.isprefix TSRMLS_CC);
 
 	sxe = Z_SXEOBJ_P(&ret);
-	if (!ZVAL_IS_UNDEF(&sxe->tmp)) {
+	if (!Z_ISUNDEF(sxe->tmp)) {
 		zval_ptr_dtor(&sxe->tmp);
 	}
 
@@ -1089,7 +1089,7 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{{
 				if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && match_ns(sxe, (xmlNodePtr)attr, sxe->iter.nsprefix, sxe->iter.isprefix)) {
 					ZVAL_STR(&value, sxe_xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1 TSRMLS_CC));
 					namelen = xmlStrlen(attr->name);
-					if (ZVAL_IS_UNDEF(&zattr)) {
+					if (Z_ISUNDEF(zattr)) {
 						array_init(&zattr);
 						sxe_properties_add(rv, "@attributes", sizeof("@attributes") - 1, &zattr TSRMLS_CC);
 					}
@@ -1165,7 +1165,7 @@ next_iter:
 	}
 
 	if (use_iter) {
-		if (!ZVAL_IS_UNDEF(&sxe->iter.data)) {
+		if (!Z_ISUNDEF(sxe->iter.data)) {
 			zval_ptr_dtor(&sxe->iter.data);
 		}
 		ZVAL_COPY_VALUE(&sxe->iter.data, &iter_data);
@@ -1859,7 +1859,7 @@ static int php_sxe_count_elements_helper(php_sxe_object *sxe, long *count TSRMLS
 		node = php_sxe_iterator_fetch(sxe, node->next, 0 TSRMLS_CC);
 	}
 
-	if (!ZVAL_IS_UNDEF(&sxe->iter.data)) {
+	if (!Z_ISUNDEF(sxe->iter.data)) {
 		zval_ptr_dtor(&sxe->iter.data);
 	}
 	ZVAL_COPY_VALUE(&sxe->iter.data, &data);
@@ -1875,8 +1875,8 @@ static int sxe_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
 	if (intern->fptr_count) {
 		zval rv;
 		zend_call_method_with_0_params(object, intern->zo.ce, &intern->fptr_count, "count", &rv);
-		if (!ZVAL_IS_UNDEF(&rv)) {
-			if (!ZVAL_IS_UNDEF(&intern->tmp)) {
+		if (!Z_ISUNDEF(rv)) {
+			if (!Z_ISUNDEF(intern->tmp)) {
 				zval_ptr_dtor(&intern->tmp);
 			}
 			ZVAL_ZVAL(&intern->tmp, &rv, 0, 0);
@@ -1991,7 +1991,7 @@ static void sxe_object_dtor(zend_object *object TSRMLS_DC)
 
 	sxe = php_sxe_fetch_object(object);
 
-	if (!ZVAL_IS_UNDEF(&sxe->iter.data)) {
+	if (!Z_ISUNDEF(sxe->iter.data)) {
 		zval_ptr_dtor(&sxe->iter.data);
 		ZVAL_UNDEF(&sxe->iter.data);
 	}
@@ -2004,7 +2004,7 @@ static void sxe_object_dtor(zend_object *object TSRMLS_DC)
 		xmlFree(sxe->iter.nsprefix);
 		sxe->iter.nsprefix = NULL;
 	}
-	if (!ZVAL_IS_UNDEF(&sxe->tmp)) {
+	if (!Z_ISUNDEF(sxe->tmp)) {
 		zval_ptr_dtor(&sxe->tmp);
 		ZVAL_UNDEF(&sxe->tmp);
 	}
@@ -2238,7 +2238,7 @@ static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data TSRML
 {
 	xmlNodePtr node;
 
-	if (!ZVAL_IS_UNDEF(&sxe->iter.data)) {
+	if (!Z_ISUNDEF(sxe->iter.data)) {
 		zval_ptr_dtor(&sxe->iter.data);
 		ZVAL_UNDEF(&sxe->iter.data);
 	}
@@ -2284,7 +2284,7 @@ static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ *
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
 	/* cleanup handled in sxe_object_dtor as we dont always have an iterator wrapper */
-	if (!ZVAL_IS_UNDEF(&iterator->intern.data)) {
+	if (!Z_ISUNDEF(iterator->intern.data)) {
 		zval_ptr_dtor(&iterator->intern.data);
 	}
 }
@@ -2294,7 +2294,7 @@ static int php_sxe_iterator_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ *
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
-	return ZVAL_IS_UNDEF(&iterator->sxe->iter.data) ? FAILURE : SUCCESS;
+	return Z_ISUNDEF(iterator->sxe->iter.data) ? FAILURE : SUCCESS;
 }
 /* }}} */
 
@@ -2330,7 +2330,7 @@ PHP_SXE_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC) /*
 	xmlNodePtr      node = NULL;
 	php_sxe_object  *intern;
 
-	if (!ZVAL_IS_UNDEF(&sxe->iter.data)) {
+	if (!Z_ISUNDEF(sxe->iter.data)) {
 		intern = Z_SXEOBJ_P(&sxe->iter.data);
 		GET_NODE(intern, node)
 		zval_ptr_dtor(&sxe->iter.data);

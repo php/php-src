@@ -500,7 +500,7 @@ PHP_FUNCTION(stream_get_meta_data)
 
 	array_init(return_value);
 
-	if (!ZVAL_IS_UNDEF(&stream->wrapperdata)) {
+	if (!Z_ISUNDEF(stream->wrapperdata)) {
 		Z_ADDREF_P(&stream->wrapperdata);
 		add_assoc_zval(return_value, "wrapper_data", &stream->wrapperdata);
 	}

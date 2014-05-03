@@ -53,7 +53,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval TSRML
 	if (call_user_function(EG(function_table), NULL, func, retval, argc, argv TSRMLS_CC) == FAILURE) {
 		zval_ptr_dtor(retval);
 		ZVAL_UNDEF(retval);
-	} else if (ZVAL_IS_UNDEF(retval)) {
+	} else if (Z_ISUNDEF_P(retval)) {
 		ZVAL_NULL(retval);
 	}
 	for (i = 0; i < argc; i++) {
@@ -68,7 +68,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval TSRML
 #define PSF(a) PS(mod_user_names).name.ps_##a
 
 #define FINISH								\
-	if (!ZVAL_IS_UNDEF(&retval)) {			\
+	if (!Z_ISUNDEF(retval)) {			\
 		convert_to_long(&retval);			\
 		ret = Z_LVAL(retval);				\
 		zval_ptr_dtor(&retval);				\
@@ -80,7 +80,7 @@ PS_OPEN_FUNC(user)
 	zval args[2];
 	STDVARS;
 	
-	if (ZVAL_IS_UNDEF(&PSF(open))) {
+	if (Z_ISUNDEF(PSF(open))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"user session functions not defined");
 			
@@ -115,7 +115,7 @@ PS_CLOSE_FUNC(user)
 	PS(mod_user_implemented) = 0;
 
 	if (bailout) {
-		if (!ZVAL_IS_UNDEF(&retval)) {
+		if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);
 		}
 		zend_bailout();
@@ -133,7 +133,7 @@ PS_READ_FUNC(user)
 
 	ps_call_handler(&PSF(read), 1, args, &retval TSRMLS_CC);
 
-	if (!ZVAL_IS_UNDEF(&retval)) {
+	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) == IS_STRING) {
 			*val = STR_COPY(Z_STR(retval));
 			ret = SUCCESS;
@@ -184,13 +184,13 @@ PS_GC_FUNC(user)
 PS_CREATE_SID_FUNC(user)
 {
 	/* maintain backwards compatibility */
-	if (!ZVAL_IS_UNDEF(&PSF(create_sid))) {
+	if (!Z_ISUNDEF(PSF(create_sid))) {
 		zend_string *id = NULL;
 		zval retval;
 
 		ps_call_handler(&PSF(create_sid), 0, NULL, &retval TSRMLS_CC);
 
-		if (!ZVAL_IS_UNDEF(&retval)) {
+		if (!Z_ISUNDEF(retval)) {
 			if (Z_TYPE(retval) == IS_STRING) {
 				id = STR_COPY(Z_STR(retval));
 			}

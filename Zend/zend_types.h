@@ -371,6 +371,12 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_ISREF(zval)				(Z_TYPE(zval) == IS_REFERENCE)
 #define Z_ISREF_P(zval_p)			Z_ISREF(*(zval_p))
 
+#define Z_ISUNDEF(zval)				(Z_TYPE(zval) == IS_UNDEF)
+#define Z_ISUNDEF_P(zval_p)			Z_ISUNDEF(*(zval_p))
+
+#define Z_ISNULL(zval)				(Z_TYPE(zval) == IS_NULL)
+#define Z_ISNULL_P(zval_p)			Z_ISNULL(*(zval_p))
+
 #define Z_LVAL(zval)				(zval).value.lval
 #define Z_LVAL_P(zval_p)			Z_LVAL(*(zval_p))
 

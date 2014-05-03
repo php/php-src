@@ -157,14 +157,14 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{
 		zend_update_property_string(def_ex, &ex, "message", sizeof("message") - 1, message TSRMLS_CC);
 		zend_update_property_string(def_ex, &ex, "code", sizeof("code") - 1, *pdo_err TSRMLS_CC);
 		
-		if (!ZVAL_IS_UNDEF(&info)) {
+		if (!Z_ISUNDEF(info)) {
 			zend_update_property(pdo_ex, &ex, "errorInfo", sizeof("errorInfo") - 1, &info TSRMLS_CC);
 		}
 
 		zend_throw_exception_object(&ex TSRMLS_CC);
 	}
 
-	if (!ZVAL_IS_UNDEF(&info)) {
+	if (!Z_ISUNDEF(info)) {
 		zval_ptr_dtor(&info);
 	}
 
@@ -425,7 +425,7 @@ options:
 
 static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
 {
-	if (!ZVAL_IS_UNDEF(ctor_args)) {
+	if (!Z_ISUNDEF_P(ctor_args)) {
 		if (Z_TYPE_P(ctor_args) != IS_ARRAY) {
 			pdo_raise_impl_error(dbh, NULL, "HY000", "constructor arguments must be passed as an array" TSRMLS_CC);
 			return NULL;
@@ -480,7 +480,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			Z_OBJ_P(object) = NULL;
 			object = NULL; /* marks failure */
-		} else if (!ZVAL_IS_UNDEF(&retval)) {
+		} else if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);
 		}
 			
@@ -803,7 +803,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_D
 				return FAILURE;
 			}
 			dbh->def_stmt_ce = pce;
-			if (!ZVAL_IS_UNDEF(&dbh->def_stmt_ctor_args)) {
+			if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
 				zval_ptr_dtor(&dbh->def_stmt_ctor_args);
 				ZVAL_UNDEF(&dbh->def_stmt_ctor_args);
 			}
@@ -902,7 +902,7 @@ static PHP_METHOD(PDO, getAttribute)
 		case PDO_ATTR_STATEMENT_CLASS:
 			array_init(return_value);
 			add_next_index_str(return_value, STR_COPY(dbh->def_stmt_ce->name));
-			if (!ZVAL_IS_UNDEF(&dbh->def_stmt_ctor_args)) {
+			if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
 				Z_ADDREF(dbh->def_stmt_ctor_args);
 				add_next_index_zval(return_value, &dbh->def_stmt_ctor_args);
 			}
@@ -1518,7 +1518,7 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 		pefree((char *)dbh->persistent_id, dbh->is_persistent);
 	}
 
-	if (!ZVAL_IS_UNDEF(&dbh->def_stmt_ctor_args)) {
+	if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
 		zval_ptr_dtor(&dbh->def_stmt_ctor_args);
 	}
 	

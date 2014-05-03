@@ -66,7 +66,7 @@ static void spl_filesystem_file_free_line(spl_filesystem_object *intern TSRMLS_D
 		efree(intern->u.file.current_line);
 		intern->u.file.current_line = NULL;
 	}
-	if (!ZVAL_IS_UNDEF(&intern->u.file.current_zval)) {
+	if (!Z_ISUNDEF(intern->u.file.current_zval)) {
 		zval_ptr_dtor(&intern->u.file.current_zval);
 		ZVAL_UNDEF(&intern->u.file.current_zval);
 	}
@@ -828,7 +828,7 @@ SPL_METHOD(DirectoryIterator, seek)
 	while (intern->u.dir.index < pos) {
 		int valid = 0;
 		zend_call_method_with_0_params(&EG(This), Z_OBJCE(EG(This)), &intern->u.dir.func_valid, "valid", &retval);
-		if (!ZVAL_IS_UNDEF(&retval)) {
+		if (!Z_ISUNDEF(retval)) {
 			valid = zend_is_true(&retval TSRMLS_CC);
 			zval_ptr_dtor(&retval);
 		}
@@ -1652,7 +1652,7 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 
-	if (!ZVAL_IS_UNDEF(&iterator->intern.data)) {
+	if (!Z_ISUNDEF(iterator->intern.data)) {
 		zval *object = &iterator->intern.data;
 		zval_ptr_dtor(object);
 	}
@@ -1723,11 +1723,11 @@ static void spl_filesystem_tree_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 
-	if (!ZVAL_IS_UNDEF(&iterator->intern.data)) {
+	if (!Z_ISUNDEF(iterator->intern.data)) {
 		zval *object = &iterator->intern.data;
 		zval_ptr_dtor(object);
 	} else {
-		if (!ZVAL_IS_UNDEF(&iterator->current)) {
+		if (!Z_ISUNDEF(iterator->current)) {
 			zval_ptr_dtor(&iterator->current);
 			ZVAL_UNDEF(&iterator->current);
 		}
@@ -1742,13 +1742,13 @@ static zval *spl_filesystem_tree_it_current_data(zend_object_iterator *iter TSRM
 	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator TSRMLS_CC);
 
 	if (SPL_FILE_DIR_CURRENT(object, SPL_FILE_DIR_CURRENT_AS_PATHNAME)) {
-		if (ZVAL_IS_UNDEF(&iterator->current)) {
+		if (Z_ISUNDEF(iterator->current)) {
 			spl_filesystem_object_get_file_name(object TSRMLS_CC);
 			ZVAL_STRINGL(&iterator->current, object->file_name, object->file_name_len);
 		}
 		return &iterator->current;
 	} else if (SPL_FILE_DIR_CURRENT(object, SPL_FILE_DIR_CURRENT_AS_FILEINFO)) {
-		if (ZVAL_IS_UNDEF(&iterator->current)) {
+		if (Z_ISUNDEF(iterator->current)) {
 			spl_filesystem_object_get_file_name(object TSRMLS_CC);
 			spl_filesystem_object_create_type(0, object, SPL_FS_INFO, NULL, &iterator->current TSRMLS_CC);
 		}
@@ -1787,7 +1787,7 @@ static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRML
 		efree(object->file_name);
 		object->file_name = NULL;
 	}
-	if (!ZVAL_IS_UNDEF(&iterator->current)) {
+	if (!Z_ISUNDEF(iterator->current)) {
 		zval_ptr_dtor(&iterator->current);
 		ZVAL_UNDEF(&iterator->current);
 	}
@@ -1807,7 +1807,7 @@ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 	do {
 		spl_filesystem_dir_read(object TSRMLS_CC);
 	} while (spl_filesystem_is_dot(object->u.dir.entry.d_name));
-	if (!ZVAL_IS_UNDEF(&iterator->current)) {
+	if (!Z_ISUNDEF(iterator->current)) {
 		zval_ptr_dtor(&iterator->current);
 		ZVAL_UNDEF(&iterator->current);
 	}
@@ -2023,7 +2023,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 {
 	char *buf;
 	size_t line_len = 0;
-	long line_add = (intern->u.file.current_line || !ZVAL_IS_UNDEF(&intern->u.file.current_zval)) ? 1 : 0;
+	long line_add = (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) ? 1 : 0;
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
 	
@@ -2099,7 +2099,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 
 	result = zend_call_function(&fci, &fcic TSRMLS_CC);
 	
-	if (result == FAILURE || ZVAL_IS_UNDEF(&retval)) {
+	if (result == FAILURE || Z_ISUNDEF(retval)) {
 		RETVAL_FALSE;
 	} else {
 		ZVAL_ZVAL(return_value, &retval, 0, 0);
@@ -2132,7 +2132,7 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 		size_t buf_len = intern->u.file.current_line_len;
 		char *buf = estrndup(intern->u.file.current_line, buf_len);
 
-		if (!ZVAL_IS_UNDEF(&intern->u.file.current_zval)) {
+		if (!Z_ISUNDEF(intern->u.file.current_zval)) {
 			zval_ptr_dtor(&intern->u.file.current_zval);
 			ZVAL_UNDEF(&intern->u.file.current_zval);
 		}
@@ -2167,8 +2167,8 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 		} else {
 			zend_call_method_with_0_params(this_ptr, Z_OBJCE_P(getThis()), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
 		}
-		if (!ZVAL_IS_UNDEF(&retval)) {
-			if (intern->u.file.current_line || !ZVAL_IS_UNDEF(&intern->u.file.current_zval)) {
+		if (!Z_ISUNDEF(retval)) {
+			if (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) {
 				intern->u.file.current_line_num++;
 			}
 			spl_filesystem_file_free_line(intern TSRMLS_CC);
@@ -2192,7 +2192,7 @@ static int spl_filesystem_file_is_empty_line(spl_filesystem_object *intern TSRML
 {
 	if (intern->u.file.current_line) {
 		return intern->u.file.current_line_len == 0;
-	} else if (!ZVAL_IS_UNDEF(&intern->u.file.current_zval)) {
+	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
 		switch(Z_TYPE(intern->u.file.current_zval)) {
 			case IS_STRING:
 				return Z_STRLEN(intern->u.file.current_zval) == 0;
@@ -2202,7 +2202,7 @@ static int spl_filesystem_file_is_empty_line(spl_filesystem_object *intern TSRML
 					uint idx = 0;
 					zval *first;
 
-					while (ZVAL_IS_UNDEF(&Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val)) {
+					while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val)) {
 						idx++;
 					}
 					first = &Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val;
@@ -2380,7 +2380,7 @@ SPL_METHOD(SplFileObject, valid)
 	}
 
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
-		RETURN_BOOL(intern->u.file.current_line || !ZVAL_IS_UNDEF(&intern->u.file.current_zval));
+		RETURN_BOOL(intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval));
 	} else {
 		RETVAL_BOOL(!php_stream_eof(intern->u.file.stream));
 	}
@@ -2412,12 +2412,12 @@ SPL_METHOD(SplFileObject, current)
 		return;
 	}
 
-	if (!intern->u.file.current_line && ZVAL_IS_UNDEF(&intern->u.file.current_zval)) {
+	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
 		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
 	}
-	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || ZVAL_IS_UNDEF(&intern->u.file.current_zval))) {
+	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || Z_ISUNDEF(intern->u.file.current_zval))) {
 		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
-	} else if (!ZVAL_IS_UNDEF(&intern->u.file.current_zval)) {
+	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
 		RETURN_ZVAL(&intern->u.file.current_zval, 1, 0);
 	}
 	RETURN_FALSE;

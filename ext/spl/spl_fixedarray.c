@@ -171,7 +171,7 @@ static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {
 		int j = zend_hash_num_elements(ht);
 
 		for (i = 0; i < intern->array->size; i++) {
-			if (!ZVAL_IS_UNDEF(&intern->array->elements[i])) {
+			if (!Z_ISUNDEF(intern->array->elements[i])) {
 				zend_hash_index_update(ht, i, &intern->array->elements[i]);
 				if (Z_REFCOUNTED(intern->array->elements[i])){
 					Z_ADDREF(intern->array->elements[i]);
@@ -346,7 +346,7 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0 TSRMLS_CC);
 		return NULL;
-	} else if (ZVAL_IS_UNDEF(&intern->array->elements[index])) {
+	} else if (Z_ISUNDEF(intern->array->elements[index])) {
 		return NULL;
 	} else {
 		return &intern->array->elements[index];
@@ -370,7 +370,7 @@ static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, in
 		}
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_get, "offsetGet", &rv, offset);
 		zval_ptr_dtor(offset);
-		if (!ZVAL_IS_UNDEF(&rv)) {
+		if (!Z_ISUNDEF(rv)) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 			return &intern->retval;
@@ -402,7 +402,7 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0 TSRMLS_CC);
 		return;
 	} else {
-		if (!ZVAL_IS_UNDEF(&intern->array->elements[index])) {
+		if (!Z_ISUNDEF(intern->array->elements[index])) {
 			zval_ptr_dtor(&(intern->array->elements[index]));
 		}
 		SEPARATE_ARG_IF_REF(value);
@@ -488,7 +488,7 @@ static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_obje
 	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
 		retval = 0;
 	} else {
-		if (ZVAL_IS_UNDEF(&intern->array->elements[index])) {
+		if (Z_ISUNDEF(intern->array->elements[index])) {
 			retval = 0;
 		} else if (check_empty) {
 			if (zend_is_true(&intern->array->elements[index] TSRMLS_CC)) {
@@ -516,7 +516,7 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(offset);
-		if (!ZVAL_IS_UNDEF(&rv)) {
+		if (!Z_ISUNDEF(rv)) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 			return zend_is_true(&intern->retval TSRMLS_CC);
@@ -536,7 +536,7 @@ static int spl_fixedarray_object_count_elements(zval *object, long *count TSRMLS
 	if (intern->fptr_count) {
 		zval rv;
 		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
-		if (!ZVAL_IS_UNDEF(&rv)) {
+		if (!Z_ISUNDEF(rv)) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 			convert_to_long(&intern->retval);
@@ -651,7 +651,7 @@ SPL_METHOD(SplFixedArray, toArray)
 	if (intern->array) {
 		int i = 0;
 		for (; i < intern->array->size; i++) {
-			if (!ZVAL_IS_UNDEF(&intern->array->elements[i])) {
+			if (!Z_ISUNDEF(intern->array->elements[i])) {
 				zend_hash_index_update(Z_ARRVAL_P(return_value), i, &intern->array->elements[i]);
 				if (Z_REFCOUNTED(intern->array->elements[i])) {
 					Z_ADDREF(intern->array->elements[i]);

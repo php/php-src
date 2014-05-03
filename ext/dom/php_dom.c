@@ -1142,7 +1142,7 @@ static void dom_nnodemap_object_dtor(zend_object *object TSRMLS_DC) /* {{{ */
 		if (objmap->ns) {
 			xmlFree(objmap->ns);
 		}
-		if (!ZVAL_IS_UNDEF(&objmap->baseobj_zv)) {
+		if (!Z_ISUNDEF(objmap->baseobj_zv)) {
 			zval_ptr_dtor(&objmap->baseobj_zv);
 		}
 		efree(objmap);

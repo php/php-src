@@ -282,7 +282,7 @@ static void _php_libxml_destroy_fci(zend_fcall_info *fci, zval *object)
 		zval_ptr_dtor(&fci->function_name);
 		fci->size = 0;
 	}
-	if (!ZVAL_IS_UNDEF(object)) {
+	if (!Z_ISUNDEF_P(object)) {
 		zval_ptr_dtor(object);
 		ZVAL_UNDEF(object);
 	}
@@ -337,7 +337,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		}
 	}
 
-	context = php_stream_context_from_zval(ZVAL_IS_UNDEF(&LIBXML(stream_context))? NULL : &LIBXML(stream_context), 0);
+	context = php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context))? NULL : &LIBXML(stream_context), 0);
 	
 	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
 	if (isescaped) {
@@ -606,7 +606,7 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 	fci->no_separation	= 1;
 	
 	status = zend_call_function(fci, &LIBXML(entity_loader).fcc TSRMLS_CC);
-	if (status != SUCCESS || ZVAL_IS_UNDEF(&retval)) {
+	if (status != SUCCESS || Z_ISUNDEF(retval)) {
 		php_libxml_ctx_error(context,
 				"Call to user entity loader callback '%s' has failed",
 				Z_STRVAL(fci->function_name));
@@ -929,7 +929,7 @@ static PHP_FUNCTION(libxml_set_streams_context)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg) == FAILURE) {
 		return;
 	}
-	if (!ZVAL_IS_UNDEF(&LIBXML(stream_context))) {
+	if (!Z_ISUNDEF(LIBXML(stream_context))) {
 		zval_ptr_dtor(&LIBXML(stream_context));
 		ZVAL_UNDEF(&LIBXML(stream_context));
 	}

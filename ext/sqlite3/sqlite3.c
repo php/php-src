@@ -699,7 +699,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 		/* summon the aggregation context */
 		agg_context = (php_sqlite3_agg_context *)sqlite3_aggregate_context(context, sizeof(php_sqlite3_agg_context));
 
-		if (ZVAL_IS_UNDEF(&agg_context->zval_context)) {
+		if (Z_ISUNDEF(agg_context->zval_context)) {
 			ZVAL_NULL(&agg_context->zval_context);
 		}
 		ZVAL_COPY_VALUE(&zargs[0], &agg_context->zval_context);
@@ -752,7 +752,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 	if (!is_agg || !argv) {
 		/* only set the sqlite return value if we are a scalar function,
 		 * or if we are finalizing an aggregate */
-		if (!ZVAL_IS_UNDEF(&retval)) {
+		if (!Z_ISUNDEF(retval)) {
 			switch (Z_TYPE(retval)) {
 				case IS_LONG:
 #if LONG_MAX > 2147483647
@@ -779,20 +779,20 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 			sqlite3_result_error(context, "failed to invoke callback", 0);
 		}
 
-		if (agg_context && !ZVAL_IS_UNDEF(&agg_context->zval_context)) {
+		if (agg_context && !Z_ISUNDEF(agg_context->zval_context)) {
 			zval_ptr_dtor(&agg_context->zval_context);
 		}
 	} else {
 		/* we're stepping in an aggregate; the return value goes into
 		 * the context */
-		if (agg_context && !ZVAL_IS_UNDEF(&agg_context->zval_context)) {
+		if (agg_context && !Z_ISUNDEF(agg_context->zval_context)) {
 			zval_ptr_dtor(&agg_context->zval_context);
 		}
 		ZVAL_COPY_VALUE(&agg_context->zval_context, &retval);
 		ZVAL_UNDEF(&retval);
 	}
 
-	if (!ZVAL_IS_UNDEF(&retval)) {
+	if (!Z_ISUNDEF(retval)) {
 		zval_ptr_dtor(&retval);
 	}
 	return ret;
@@ -1393,7 +1393,7 @@ PHP_METHOD(sqlite3stmt, bindParam)
 	ZVAL_COPY(&param.parameter, parameter);
 
 	if (!register_bound_parameter_to_sqlite(&param, stmt_obj TSRMLS_CC)) {
-		if (!ZVAL_IS_UNDEF(&param.parameter)) {
+		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
 			ZVAL_UNDEF(&param.parameter);
 		}
@@ -1425,7 +1425,7 @@ PHP_METHOD(sqlite3stmt, bindValue)
 	ZVAL_COPY(&param.parameter, parameter);
 
 	if (!register_bound_parameter_to_sqlite(&param, stmt_obj TSRMLS_CC)) {
-		if (!ZVAL_IS_UNDEF(&param.parameter)) {
+		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
 			ZVAL_UNDEF(&param.parameter);
 		}
@@ -2010,13 +2010,13 @@ static void php_sqlite3_object_free_storage(zend_object *object TSRMLS_DC) /* {{
 
 		efree((char*)func->func_name);
 
-		if (!ZVAL_IS_UNDEF(&func->func)) {
+		if (!Z_ISUNDEF(func->func)) {
 			zval_ptr_dtor(&func->func);
 		}
-		if (!ZVAL_IS_UNDEF(&func->step)) {
+		if (!Z_ISUNDEF(func->step)) {
 			zval_ptr_dtor(&func->step);
 		}
-		if (!ZVAL_IS_UNDEF(&func->fini)) {
+		if (!Z_ISUNDEF(func->fini)) {
 			zval_ptr_dtor(&func->fini);
 		}
 		efree(func);
@@ -2029,7 +2029,7 @@ static void php_sqlite3_object_free_storage(zend_object *object TSRMLS_DC) /* {{
 			sqlite3_create_collation(intern->db, collation->collation_name, SQLITE_UTF8, NULL, NULL);
 		}
 		efree((char*)collation->collation_name);
-		if (!ZVAL_IS_UNDEF(&collation->cmp_func)) {
+		if (!Z_ISUNDEF(collation->cmp_func)) {
 			zval_ptr_dtor(&collation->cmp_func);
 		}
 		efree(collation);
@@ -2063,7 +2063,7 @@ static void php_sqlite3_stmt_object_free_storage(zend_object *object TSRMLS_DC) 
 			(int (*)(void *, void *)) php_sqlite3_compare_stmt_free);
 	}
 
-	if (!ZVAL_IS_UNDEF(&intern->db_obj_zval)) {
+	if (!Z_ISUNDEF(intern->db_obj_zval)) {
 		zval_ptr_dtor(&intern->db_obj_zval);
 	}
 
@@ -2079,7 +2079,7 @@ static void php_sqlite3_result_object_free_storage(zend_object *object TSRMLS_DC
 		return;
 	}
 
-	if (!ZVAL_IS_NULL(&intern->stmt_obj_zval)) {
+	if (!Z_ISNULL(intern->stmt_obj_zval)) {
 		if (intern->stmt_obj->initialised) {
 			sqlite3_reset(intern->stmt_obj->stmt);
 		}
@@ -2150,7 +2150,7 @@ static void sqlite3_param_dtor(zval *data) /* {{{ */
 		STR_RELEASE(param->name);
 	}
 
-	if (!ZVAL_IS_NULL(&param->parameter)) {
+	if (!Z_ISNULL(param->parameter)) {
 		zval_ptr_dtor(&(param->parameter));
 		ZVAL_UNDEF(&param->parameter);
 	}

@@ -118,13 +118,13 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H TSRMLS_DC)
 		}
 
 		efree((char*)func->funcname);
-		if (!ZVAL_IS_UNDEF(&func->func)) {
+		if (!Z_ISUNDEF(func->func)) {
 			zval_ptr_dtor(&func->func);
 		}
-		if (!ZVAL_IS_UNDEF(&func->step)) {
+		if (!Z_ISUNDEF(func->step)) {
 			zval_ptr_dtor(&func->step);
 		}
-		if (!ZVAL_IS_UNDEF(&func->fini)) {
+		if (!Z_ISUNDEF(func->fini)) {
 			zval_ptr_dtor(&func->fini);
 		}
 		efree(func);
@@ -145,7 +145,7 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H TSRMLS_DC)
 		}
 
 		efree((char*)collation->name);
-		if (!ZVAL_IS_UNDEF(&collation->callback)) {
+		if (!Z_ISUNDEF(collation->callback)) {
 			zval_ptr_dtor(&collation->callback);
 		}
 		efree(collation);
@@ -344,7 +344,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		if (!agg_context) {
 			ZVAL_NULL(&zargs[0]);
 		} else {
-			if (ZVAL_IS_UNDEF(&agg_context->val)) {
+			if (Z_ISUNDEF(agg_context->val)) {
 				GC_REFCOUNT(agg_context) = 1;
 				GC_TYPE_INFO(agg_context) = IS_REFERENCE;
 				ZVAL_NULL(&agg_context->val);
@@ -397,7 +397,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	if (!is_agg || !argv) {
 		/* only set the sqlite return value if we are a scalar function,
 		 * or if we are finalizing an aggregate */
-		if (!ZVAL_IS_UNDEF(&retval)) {
+		if (!Z_ISUNDEF(retval)) {
 			switch (Z_TYPE(retval)) {
 				case IS_LONG:
 					sqlite3_result_int(context, Z_LVAL(retval));
@@ -429,7 +429,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		if (agg_context) {
 			zval_ptr_dtor(&agg_context->val);
 		}
-		if (!ZVAL_IS_UNDEF(&retval)) {
+		if (!Z_ISUNDEF(retval)) {
 			ZVAL_COPY_VALUE(&agg_context->val, &retval);
 			ZVAL_UNDEF(&retval);
 		} else {
@@ -437,7 +437,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		}
 	}
 
-	if (!ZVAL_IS_UNDEF(&retval)) {
+	if (!Z_ISUNDEF(retval)) {
 		zval_ptr_dtor(&retval);
 	}
 
@@ -495,7 +495,7 @@ static int php_sqlite3_collation_callback(void *context,
 
 	if ((ret = zend_call_function(&collation->fc.fci, &collation->fc.fcc TSRMLS_CC)) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the callback");
-	} else if (!ZVAL_IS_UNDEF(&retval)) {
+	} else if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
 			convert_to_long_ex(&retval);
 		}

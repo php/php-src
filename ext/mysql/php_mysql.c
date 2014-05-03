@@ -2209,7 +2209,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 			if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name->val, ce->constructor->common.function_name->val);
 			} else {
-				if (!ZVAL_IS_UNDEF(&retval)) {
+				if (!Z_ISUNDEF(retval)) {
 					zval_ptr_dtor(&retval);
 				}
 			}

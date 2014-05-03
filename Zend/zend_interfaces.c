@@ -138,7 +138,7 @@ ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 
-	if (!ZVAL_IS_UNDEF(&iter->value)) {
+	if (!Z_ISUNDEF(iter->value)) {
 		zval_ptr_dtor(&iter->value);
 		ZVAL_UNDEF(&iter->value);
 	}
@@ -182,7 +182,7 @@ ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter TSRMLS_
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = &iter->it.data;
 
-	if (ZVAL_IS_UNDEF(&iter->value)) {
+	if (Z_ISUNDEF(iter->value)) {
 		zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_current, "current", &iter->value);
 	}	
 	return &iter->value;

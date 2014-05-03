@@ -400,10 +400,10 @@ typedef struct {
 static void autoload_func_info_dtor(zval *element)
 {
 	autoload_func_info *alfi = (autoload_func_info*)Z_PTR_P(element);
-	if (!ZVAL_IS_UNDEF(&alfi->obj)) {
+	if (!Z_ISUNDEF(alfi->obj)) {
 		zval_ptr_dtor(&alfi->obj);
 	}
-	if (!ZVAL_IS_UNDEF(&alfi->closure)) {
+	if (!Z_ISUNDEF(alfi->closure)) {
 		zval_ptr_dtor(&alfi->closure);
 	}
 	efree(alfi);
@@ -432,7 +432,7 @@ PHP_FUNCTION(spl_autoload_call)
 		while (zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
 			zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &dummy, 0, &function_pos);
 			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &function_pos);
-			zend_call_method(ZVAL_IS_UNDEF(&alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, func_name->val, func_name->len, retval, 1, class_name, NULL TSRMLS_CC);
+			zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, func_name->val, func_name->len, retval, 1, class_name, NULL TSRMLS_CC);
 			zend_exception_save(TSRMLS_C);
 			if (retval) {
 				zval_ptr_dtor(retval);
@@ -568,7 +568,7 @@ PHP_FUNCTION(spl_autoload_register)
 		STR_RELEASE(func_name);
 
 		if (SPL_G(autoload_functions) && zend_hash_exists(SPL_G(autoload_functions), lc_name)) {
-			if (!ZVAL_IS_UNDEF(&alfi.closure)) {
+			if (!Z_ISUNDEF(alfi.closure)) {
 				Z_DELREF_P(&alfi.closure);
 			}
 			goto skip;
@@ -611,7 +611,7 @@ PHP_FUNCTION(spl_autoload_register)
 			if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 				Z_DELREF(alfi.obj);
 			}				
-			if (!ZVAL_IS_UNDEF(&alfi.closure)) {
+			if (!Z_ISUNDEF(alfi.closure)) {
 				Z_DELREF(alfi.closure);
 			}
 		}
@@ -735,14 +735,14 @@ PHP_FUNCTION(spl_autoload_functions)
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
 		while (zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
 			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &function_pos);
-			if (!ZVAL_IS_UNDEF(&alfi->closure)) {
+			if (!Z_ISUNDEF(alfi->closure)) {
 				Z_ADDREF(alfi->closure);
 				add_next_index_zval(return_value, &alfi->closure);
 			} else if (alfi->func_ptr->common.scope) {
 				zval tmp;
 
 				array_init(&tmp);
-				if (!ZVAL_IS_UNDEF(&alfi->obj)) {
+				if (!Z_ISUNDEF(alfi->obj)) {
 					Z_ADDREF(alfi->obj);
 					add_next_index_zval(&tmp, &alfi->obj);
 				} else {

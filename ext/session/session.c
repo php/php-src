@@ -103,7 +103,7 @@ static inline void php_rinit_session_globals(TSRMLS_D) /* {{{ */
 /* Dispatched by RSHUTDOWN and by php_session_destroy */
 static inline void php_rshutdown_session_globals(TSRMLS_D) /* {{{ */
 {
-	if (!ZVAL_IS_UNDEF(&PS(http_session_vars))) {
+	if (!Z_ISUNDEF(PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
 		ZVAL_UNDEF(&PS(http_session_vars));
 	}
@@ -184,7 +184,7 @@ static void php_session_track_init(TSRMLS_D) /* {{{ */
 	/* Unconditionally destroy existing array -- possible dirty data */
 	zend_delete_global_variable(var_name TSRMLS_CC);
 
-	if (!ZVAL_IS_UNDEF(&PS(http_session_vars))) {
+	if (!Z_ISUNDEF(PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
 	}
 
@@ -850,7 +850,7 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	php_var_unserialize(&session_vars, (const unsigned char**)&val, endptr, &var_hash TSRMLS_CC);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	if (!ZVAL_IS_UNDEF(&PS(http_session_vars))) {
+	if (!Z_ISUNDEF(PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
 	}
 	if (Z_TYPE(session_vars) == IS_NULL) {
@@ -1538,7 +1538,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 	 * '<session-name>=<session-id>' to allow URLs of the form
 	 * http://yoursite/<session-name>=<session-id>/script.php */
 
-	if (!PS(use_only_cookies) && !PS(id) && !ZVAL_IS_UNDEF(&PG(http_globals)[TRACK_VARS_SERVER]) &&
+	if (!PS(use_only_cookies) && !PS(id) && !Z_ISUNDEF(PG(http_globals)[TRACK_VARS_SERVER]) &&
 			(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
 			Z_TYPE_P(data) == IS_STRING &&
 			(p = strstr(Z_STRVAL_P(data), PS(session_name))) &&
@@ -1558,7 +1558,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 
 	if (PS(id) &&
 			PS(extern_referer_chk)[0] != '\0' &&
-			!ZVAL_IS_UNDEF(&PG(http_globals)[TRACK_VARS_SERVER]) &&
+			!Z_ISUNDEF(PG(http_globals)[TRACK_VARS_SERVER]) &&
 			(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER") - 1)) &&
 			Z_TYPE_P(data) == IS_STRING &&
 			Z_STRLEN_P(data) != 0 &&
@@ -1795,7 +1795,7 @@ static PHP_FUNCTION(session_set_save_handler)
 			zend_hash_get_current_key_ex(&php_session_iface_entry->function_table, &func_name, &func_index, 0, &pos);
 
 			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
-				if (!ZVAL_IS_UNDEF(&PS(mod_user_names).names[i])) {
+				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
 					zval_ptr_dtor(&PS(mod_user_names).names[i]);
 				}
 
@@ -1818,7 +1818,7 @@ static PHP_FUNCTION(session_set_save_handler)
 			zend_hash_get_current_key_ex(&php_session_id_iface_entry->function_table, &func_name, &func_index, 0, &pos);
 
 			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
-				if (!ZVAL_IS_UNDEF(&PS(mod_user_names).names[i])) {
+				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
 					zval_ptr_dtor(&PS(mod_user_names).names[i]);
 				}
 
@@ -1888,7 +1888,7 @@ static PHP_FUNCTION(session_set_save_handler)
 	}
 
 	for (i = 0; i < argc; i++) {
-		if (!ZVAL_IS_UNDEF(&PS(mod_user_names).names[i])) {
+		if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
 			zval_ptr_dtor(&PS(mod_user_names).names[i]);
 		}
 		ZVAL_COPY(&PS(mod_user_names).names[i], &args[i]);
@@ -2398,7 +2398,7 @@ static PHP_RSHUTDOWN_FUNCTION(session) /* {{{ */
 
 	/* this should NOT be done in php_rshutdown_session_globals() */
 	for (i = 0; i < 7; i++) {
-		if (!ZVAL_IS_UNDEF(&PS(mod_user_names).names[i])) {
+		if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
 			zval_ptr_dtor(&PS(mod_user_names).names[i]);
 			ZVAL_UNDEF(&PS(mod_user_names).names[i]);
 		}
@@ -2554,7 +2554,7 @@ static zend_bool early_find_sid_in(zval *dest, int where, php_session_rfc1867_pr
 {
 	zval *ppid;
 
-	if (ZVAL_IS_UNDEF(&PG(http_globals)[where])) {
+	if (Z_ISUNDEF(PG(http_globals)[where])) {
 		return 0;
 	}
 
@@ -2708,7 +2708,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			}
 			
 			/* First FILE_START event, initializing data */
-			if (ZVAL_IS_UNDEF(&progress->data)) {
+			if (Z_ISUNDEF(progress->data)) {
 
 				if (PS(rfc1867_freq) >= 0) {
 					progress->update_step = PS(rfc1867_freq);
@@ -2801,7 +2801,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				php_rshutdown_session_globals(TSRMLS_C);
 			}
 
-			if (!ZVAL_IS_UNDEF(&progress->data)) {
+			if (!Z_ISUNDEF(progress->data)) {
 				zval_ptr_dtor(&progress->data);
 			}
 			zval_ptr_dtor(&progress->sid);

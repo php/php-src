@@ -120,7 +120,7 @@ static zend_string *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zv
 	if (intern->fptr_get_hash) {
 		zval rv;
 		zend_call_method_with_1_params(this, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, obj);
-		if (!ZVAL_IS_UNDEF(&rv)) {
+		if (!Z_ISUNDEF(rv)) {
 			if (Z_TYPE(rv) == IS_STRING) {
 				return Z_STR(rv);
 			} else {
@@ -879,10 +879,10 @@ SPL_METHOD(SplObjectStorage, unserialize)
 		pelement = spl_object_storage_get(intern, hash TSRMLS_CC);
 		spl_object_storage_free_hash(intern, hash);
 		if (pelement) {
-			if (!ZVAL_IS_UNDEF(&pelement->inf)) {
+			if (!Z_ISUNDEF(pelement->inf)) {
 				var_push_dtor(&var_hash, &pelement->inf);
 			}
-			if (!ZVAL_IS_UNDEF(&pelement->obj)) {
+			if (!Z_ISUNDEF(pelement->obj)) {
 				var_push_dtor(&var_hash, &pelement->obj);
 			}
 		} 
@@ -1148,7 +1148,7 @@ SPL_METHOD(MultipleIterator, valid)
 		it = &element->obj;
 		zend_call_method_with_0_params(it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_valid, "valid", &retval);
 
-		if (!ZVAL_IS_UNDEF(&retval)) {
+		if (!Z_ISUNDEF(retval)) {
 			valid = (Z_TYPE(retval) == IS_TRUE);
 			zval_ptr_dtor(&retval);
 		} else {
@@ -1184,7 +1184,7 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 		it = &element->obj;
 		zend_call_method_with_0_params(it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_valid, "valid", &retval);
 
-		if (!ZVAL_IS_UNDEF(&retval)) {
+		if (!Z_ISUNDEF(retval)) {
 			valid = Z_TYPE(retval) == IS_TRUE;
 			zval_ptr_dtor(&retval);
 		} else {
@@ -1197,7 +1197,7 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 			} else {
 				zend_call_method_with_0_params(it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_key, "key", &retval);
 			}
-			if (ZVAL_IS_UNDEF(&retval)) {
+			if (Z_ISUNDEF(retval)) {
 				zend_throw_exception(spl_ce_RuntimeException, "Failed to call sub iterator method", 0 TSRMLS_CC);
 				return;
 			}

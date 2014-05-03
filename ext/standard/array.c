@@ -4210,7 +4210,7 @@ PHP_FUNCTION(array_filter)
 				if (use_type == ARRAY_FILTER_USE_BOTH) {
 					zval_ptr_dtor(&args[1]);						
 				}
-				if (!ZVAL_IS_UNDEF(&retval)) {
+				if (!Z_ISUNDEF(retval)) {
 					int retval_true = zend_is_true(&retval TSRMLS_CC);
 
 					zval_ptr_dtor(&retval);

@@ -61,7 +61,7 @@ PHP_METHOD(ce_SimpleXMLIterator, valid)
 		return;
 	}
 
-	RETURN_BOOL(!ZVAL_IS_UNDEF(&sxe->iter.data));
+	RETURN_BOOL(!Z_ISUNDEF(sxe->iter.data));
 }
 /* }}} */
 
@@ -75,7 +75,7 @@ PHP_METHOD(ce_SimpleXMLIterator, current)
 		return;
 	}
 
-	if (ZVAL_IS_UNDEF(&sxe->iter.data)) {
+	if (Z_ISUNDEF(sxe->iter.data)) {
 		return; /* return NULL */
 	}
 
@@ -95,7 +95,7 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
 		return;
 	}
 
-	if (ZVAL_IS_UNDEF(&sxe->iter.data)) {
+	if (Z_ISUNDEF(sxe->iter.data)) {
 		RETURN_FALSE;
 	}
 
@@ -136,7 +136,7 @@ PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
 		return;
 	}
 
-	if (ZVAL_IS_UNDEF(&sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
+	if (Z_ISUNDEF(sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
 		RETURN_FALSE;
 	}
 	child = Z_SXEOBJ_P(&sxe->iter.data);
@@ -162,7 +162,7 @@ PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 		return;
 	}
 
-	if (ZVAL_IS_UNDEF(&sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
+	if (Z_ISUNDEF(sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
 		return; /* return NULL */
 	}
 	RETURN_ZVAL(&sxe->iter.data, 1, 0);

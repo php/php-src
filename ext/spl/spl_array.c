@@ -305,7 +305,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 
-	if (!offset || ZVAL_IS_UNDEF(offset)) {
+	if (!offset || Z_ISUNDEF_P(offset)) {
 		return &EG(uninitialized_zval);
 	}
 
@@ -416,7 +416,7 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 			}
 			zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_get, "offsetGet", &rv, offset);
 			zval_ptr_dtor(offset);
-			if (!ZVAL_IS_UNDEF(&rv)) {
+			if (!Z_ISUNDEF(rv)) {
 				zval_ptr_dtor(&intern->retval);
 				ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 				return &intern->retval;
@@ -636,7 +636,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(offset);
 
-		if (!ZVAL_IS_UNDEF(&rv) && zend_is_true(&rv TSRMLS_CC)) {
+		if (!Z_ISUNDEF(rv) && zend_is_true(&rv TSRMLS_CC)) {
 			zval_ptr_dtor(&rv);
 			if (check_empty == 2) {
 				return 1;
@@ -792,7 +792,7 @@ void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{
 
 	spl_array_write_dimension(object, NULL, append_value TSRMLS_CC);
 	if (intern->pos == INVALID_IDX) {
-		if (aht->nNumUsed && !ZVAL_IS_UNDEF(&aht->arData[aht->nNumUsed-1].val)) {
+		if (aht->nNumUsed && !Z_ISUNDEF(aht->arData[aht->nNumUsed-1].val)) {
 			spl_array_set_pos(intern, aht, aht->nNumUsed - 1);
 		}
 	}
@@ -1519,7 +1519,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		efree(Z_ARR_P(Z_REFVAL(tmp)));
 		efree(Z_REF(tmp));
 	}
-	if (!ZVAL_IS_UNDEF(&retval)) {
+	if (!Z_ISUNDEF(retval)) {
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 } /* }}} */

@@ -138,7 +138,7 @@ PHP_RSHUTDOWN_FUNCTION(mb_regex)
 {
 	MBREX(current_mbctype) = MBREX(default_mbctype);
 
-	if (!ZVAL_IS_UNDEF(&MBREX(search_str))) {
+	if (!Z_ISUNDEF(MBREX(search_str))) {
 		zval_ptr_dtor(&MBREX(search_str));
 		ZVAL_UNDEF(&MBREX(search_str));
 	}
@@ -970,7 +970,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				arg_replace_fci.params = args;
 				arg_replace_fci.retval = &retval;
 				if (zend_call_function(&arg_replace_fci, &arg_replace_fci_cache TSRMLS_CC) == SUCCESS &&
-						!ZVAL_IS_UNDEF(&retval)) {
+						!Z_ISUNDEF(retval)) {
 					convert_to_string_ex(&retval);
 					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
 					if (eval_buf.s) {
@@ -1208,7 +1208,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	pos = MBREX(search_pos);
 	str = NULL;
 	len = 0;
-	if (!ZVAL_IS_UNDEF(&MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING){
+	if (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING){
 		str = (OnigUChar *)Z_STRVAL(MBREX(search_str));
 		len = Z_STRLEN(MBREX(search_str));
 	}
@@ -1340,7 +1340,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 		}
 	}
 
-	if (!ZVAL_IS_NULL(&MBREX(search_str))) {
+	if (!Z_ISNULL(MBREX(search_str))) {
 		zval_ptr_dtor(&MBREX(search_str));
 	}
 
@@ -1404,7 +1404,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 		return;
 	}
 
-	if (position < 0 || (!ZVAL_IS_UNDEF(&MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && position >= Z_STRLEN(MBREX(search_str)))) {
+	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && position >= Z_STRLEN(MBREX(search_str)))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;
 		RETURN_FALSE;

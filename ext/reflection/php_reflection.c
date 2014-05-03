@@ -1686,9 +1686,9 @@ ZEND_METHOD(reflection_function, getClosureThis)
 		return;
 	}
 	GET_REFLECTION_OBJECT();
-	if (!ZVAL_IS_UNDEF(&intern->obj)) {
+	if (!Z_ISUNDEF(intern->obj)) {
 		closure_this = zend_get_closure_this_ptr(&intern->obj TSRMLS_CC);
-		if (!ZVAL_IS_UNDEF(closure_this)) {
+		if (!Z_ISUNDEF_P(closure_this)) {
 			RETURN_ZVAL(closure_this, 1, 0);
 		}
 	}
@@ -1706,7 +1706,7 @@ ZEND_METHOD(reflection_function, getClosureScopeClass)
 		return;
 	}
 	GET_REFLECTION_OBJECT();
-	if (!ZVAL_IS_UNDEF(&intern->obj)) {
+	if (!Z_ISUNDEF(intern->obj)) {
 		closure_func = zend_get_closure_method_def(&intern->obj TSRMLS_CC);
 		if (closure_func && closure_func->common.scope) {
 			zend_reflection_class_factory(closure_func->common.scope, return_value TSRMLS_CC);
@@ -2047,7 +2047,7 @@ ZEND_METHOD(reflection_function, getParameters)
 	for (i = 0; i < fptr->common.num_args; i++) {
 		zval parameter;
 
-		reflection_parameter_factory(_copy_function(fptr TSRMLS_CC), ZVAL_IS_UNDEF(&intern->obj)? NULL : &intern->obj, arg_info, i, fptr->common.required_num_args, &parameter TSRMLS_CC);
+		reflection_parameter_factory(_copy_function(fptr TSRMLS_CC), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, arg_info, i, fptr->common.required_num_args, &parameter TSRMLS_CC);
 		add_next_index_zval(return_value, &parameter);
 
 		arg_info++;
@@ -2326,9 +2326,9 @@ ZEND_METHOD(reflection_parameter, getDeclaringFunction)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (!param->fptr->common.scope) {
-		reflection_function_factory(_copy_function(param->fptr TSRMLS_CC), ZVAL_IS_UNDEF(&intern->obj)? NULL : &intern->obj, return_value TSRMLS_CC);
+		reflection_function_factory(_copy_function(param->fptr TSRMLS_CC), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, return_value TSRMLS_CC);
 	} else {
-		reflection_method_factory(param->fptr->common.scope, _copy_function(param->fptr TSRMLS_CC), ZVAL_IS_UNDEF(&intern->obj)? NULL : &intern->obj, return_value TSRMLS_CC);
+		reflection_method_factory(param->fptr->common.scope, _copy_function(param->fptr TSRMLS_CC), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -3681,7 +3681,7 @@ ZEND_METHOD(reflection_class, getMethod)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	lc_name = zend_str_tolower_dup(name, name_len);
-	if (ce == zend_ce_closure && !ZVAL_IS_UNDEF(&intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
+	if (ce == zend_ce_closure && !Z_ISUNDEF(intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 		&& (mptr = zend_get_closure_invoke_method(Z_OBJ(intern->obj) TSRMLS_CC)) != NULL)
 	{
@@ -3689,7 +3689,7 @@ ZEND_METHOD(reflection_class, getMethod)
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value TSRMLS_CC);
 		efree(lc_name);
-	} else if (ce == zend_ce_closure && ZVAL_IS_UNDEF(&intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
+	} else if (ce == zend_ce_closure && Z_ISUNDEF(intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(Z_OBJ(obj_tmp) TSRMLS_CC)) != NULL) {
 		/* don't assign closure_object since we only reflect the invoke handler
@@ -4082,7 +4082,7 @@ ZEND_METHOD(reflection_class, isCloneable)
 	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS)) {
 		RETURN_FALSE;
 	}
-	if (!ZVAL_IS_UNDEF(&intern->obj)) {
+	if (!Z_ISUNDEF(intern->obj)) {
 		if (ce->clone) {
 			RETURN_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
 		} else {

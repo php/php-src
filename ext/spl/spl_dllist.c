@@ -117,7 +117,7 @@ static inline spl_dllist_object *spl_dllist_from_obj(zend_object *obj) /* {{{ */
 
 /* {{{  spl_ptr_llist */
 static void spl_ptr_llist_zval_dtor(spl_ptr_llist_element *elem TSRMLS_DC) { /* {{{ */
-	if (!ZVAL_IS_UNDEF(&elem->data)) {
+	if (!Z_ISUNDEF(elem->data)) {
 		zval_ptr_dtor(&elem->data);
 		ZVAL_UNDEF(&elem->data);
 	}
@@ -483,7 +483,7 @@ static int spl_dllist_object_count_elements(zval *object, long *count TSRMLS_DC)
 	if (intern->fptr_count) {
 		zval rv;
 		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
-		if (!ZVAL_IS_UNDEF(&rv)) {
+		if (!Z_ISUNDEF(rv)) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 			convert_to_long(&intern->retval);
@@ -602,7 +602,7 @@ SPL_METHOD(SplDoublyLinkedList, pop)
 	intern = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_pop(intern->llist, return_value TSRMLS_CC);
 
-	if (ZVAL_IS_UNDEF(return_value)) {
+	if (Z_ISUNDEF_P(return_value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't pop from an empty datastructure", 0 TSRMLS_CC);
 		RETURN_NULL();
 	}
@@ -622,7 +622,7 @@ SPL_METHOD(SplDoublyLinkedList, shift)
 	intern = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_shift(intern->llist, return_value TSRMLS_CC);
 
-	if (ZVAL_IS_UNDEF(return_value)) {
+	if (Z_ISUNDEF_P(return_value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't shift from an empty datastructure", 0 TSRMLS_CC);
 		RETURN_NULL();
 	}
@@ -643,7 +643,7 @@ SPL_METHOD(SplDoublyLinkedList, top)
 	intern = Z_SPLDLLIST_P(getThis());
 	value = spl_ptr_llist_last(intern->llist);
 
-	if (value == NULL || ZVAL_IS_UNDEF(value)) {
+	if (value == NULL || Z_ISUNDEF_P(value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty datastructure", 0 TSRMLS_CC);
 		return;
 	}
@@ -666,7 +666,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 	intern = Z_SPLDLLIST_P(getThis());
 	value  = spl_ptr_llist_first(intern->llist);
 
-	if (value == NULL || ZVAL_IS_UNDEF(value)) {
+	if (value == NULL || Z_ISUNDEF_P(value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty datastructure", 0 TSRMLS_CC);
 		return;
 	}
@@ -997,7 +997,7 @@ static zval *spl_dllist_it_get_current_data(zend_object_iterator *iter TSRMLS_DC
 	spl_dllist_it         *iterator = (spl_dllist_it *)iter;
 	spl_ptr_llist_element *element  = iterator->traverse_pointer;
 
-	if (element == NULL || ZVAL_IS_UNDEF(&element->data)) {
+	if (element == NULL || Z_ISUNDEF(element->data)) {
 		return NULL;
 	}
 
@@ -1105,7 +1105,7 @@ SPL_METHOD(SplDoublyLinkedList, current)
 		return;
 	}
 
-	if (element == NULL || ZVAL_IS_UNDEF(&element->data)) {
+	if (element == NULL || Z_ISUNDEF(element->data)) {
 		RETURN_NULL();
 	} else {
 		RETURN_ZVAL(&element->data, 1, 0);

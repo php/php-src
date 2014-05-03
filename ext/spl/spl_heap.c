@@ -92,7 +92,7 @@ static inline spl_heap_object *spl_heap_from_obj(zend_object *obj) /* {{{ */ {
 #define Z_SPLHEAP_P(zv)  spl_heap_from_obj(Z_OBJ_P((zv)))
 
 static void spl_ptr_heap_zval_dtor(zval *elem TSRMLS_DC) { /* {{{ */
-	if (!ZVAL_IS_UNDEF(elem)) {
+	if (!Z_ISUNDEF_P(elem)) {
 		zval_ptr_dtor(elem);
 	}
 }
@@ -271,7 +271,7 @@ static zval *spl_ptr_heap_top(spl_ptr_heap *heap) { /* {{{ */
 		return NULL;
 	}
 
-	return ZVAL_IS_UNDEF(&heap->elements[0])? NULL : &heap->elements[0];
+	return Z_ISUNDEF(heap->elements[0])? NULL : &heap->elements[0];
 }
 /* }}} */
 
@@ -364,7 +364,7 @@ static void spl_heap_object_free_storage(zend_object *object TSRMLS_DC) /* {{{ *
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
 	for (i = 0; i < intern->heap->count; ++i) {
-		if (!ZVAL_IS_UNDEF(&intern->heap->elements[i])) {
+		if (!Z_ISUNDEF(intern->heap->elements[i])) {
 			zval_ptr_dtor(&intern->heap->elements[i]);
 		}
 	}
@@ -490,7 +490,7 @@ static int spl_heap_object_count_elements(zval *object, long *count TSRMLS_DC) /
 	if (intern->fptr_count) {
 		zval rv;
 		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
-		if (!ZVAL_IS_UNDEF(&rv)) {
+		if (!Z_ISUNDEF(rv)) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 			convert_to_long(&intern->retval);
@@ -643,7 +643,7 @@ SPL_METHOD(SplHeap, extract)
 
 	spl_ptr_heap_delete_top(intern->heap, &value, getThis() TSRMLS_CC);
 
-	if (ZVAL_IS_UNDEF(&value)) {
+	if (Z_ISUNDEF(value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0 TSRMLS_CC);
 		return;
 	}
@@ -703,7 +703,7 @@ SPL_METHOD(SplPriorityQueue, extract)
 
 	spl_ptr_heap_delete_top(intern->heap, &value, getThis() TSRMLS_CC);
 
-	if (ZVAL_IS_UNDEF(&value)) {
+	if (Z_ISUNDEF(value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0 TSRMLS_CC);
 		return;
 	}
@@ -900,7 +900,7 @@ static zval *spl_heap_it_get_current_data(zend_object_iterator *iter TSRMLS_DC) 
 		return NULL;
 	}
 
-	if (object->heap->count == 0 || ZVAL_IS_UNDEF(element)) {
+	if (object->heap->count == 0 || Z_ISUNDEF_P(element)) {
 		return NULL;
 	} else {
 		return element;
@@ -918,7 +918,7 @@ static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter TSRMLS_DC
 		return NULL;
 	}
 
-	if (object->heap->count == 0 || ZVAL_IS_UNDEF(element)) {
+	if (object->heap->count == 0 || Z_ISUNDEF_P(element)) {
 		return NULL;
 	} else {
 		zval *data = spl_pqueue_extract_helper(element, object->flags);
@@ -1022,7 +1022,7 @@ SPL_METHOD(SplHeap, current)
 		return;
 	}
 
-	if (!intern->heap->count || ZVAL_IS_UNDEF(element)) {
+	if (!intern->heap->count || Z_ISUNDEF_P(element)) {
 		RETURN_NULL();
 	} else {
 		RETURN_ZVAL(element, 1, 0);
@@ -1041,7 +1041,7 @@ SPL_METHOD(SplPriorityQueue, current)
 		return;
 	}
 
-	if (!intern->heap->count || ZVAL_IS_UNDEF(element)) {
+	if (!intern->heap->count || Z_ISUNDEF_P(element)) {
 		RETURN_NULL();
 	} else {
 		zval *data = spl_pqueue_extract_helper(element, intern->flags);
