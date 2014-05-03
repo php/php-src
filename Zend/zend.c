@@ -247,9 +247,6 @@ again:
 			{
 				TSRMLS_FETCH();
 
-				if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-					break;
-				}
 				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
 					zval val;
 

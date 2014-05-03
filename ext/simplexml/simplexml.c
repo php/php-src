@@ -1774,7 +1774,7 @@ static int cast_object(zval *object, int type, char *contents TSRMLS_DC)
 
 /* {{{ sxe_object_cast()
  */
-static int sxe_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+static int sxe_object_cast_ex(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
 	php_sxe_object *sxe;
 	xmlChar        *contents = NULL;
@@ -1826,13 +1826,25 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 }
 /* }}} */
 
+/* Variant of sxe_object_cast_ex that handles overwritten __toString() method */
+static int sxe_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+{
+	if (type == IS_STRING
+		&& zend_std_cast_object_tostring(readobj, writeobj, IS_STRING TSRMLS_CC) == SUCCESS
+	) {
+		return SUCCESS;
+	}
+
+	return sxe_object_cast_ex(readobj, writeobj, type TSRMLS_CC);
+}
+
 /* {{{ proto object SimpleXMLElement::__toString() U
    Returns the string content */
 SXE_METHOD(__toString)
 {
 	zval           result;
 
-	if (sxe_object_cast(getThis(), &result, IS_STRING TSRMLS_CC) == SUCCESS) {
+	if (sxe_object_cast_ex(getThis(), &result, IS_STRING TSRMLS_CC) == SUCCESS) {
 		RETURN_ZVAL(&result, 0, 0);
 	} else {
 		zval_ptr_dtor(&result);
@@ -1909,7 +1921,7 @@ SXE_METHOD(count)
 
 static zval *sxe_get_value(zval *z, zval *rv TSRMLS_DC) /* {{{ */
 {
-	if (sxe_object_cast(z, rv, IS_STRING TSRMLS_CC) == FAILURE) {
+	if (sxe_object_cast_ex(z, rv, IS_STRING TSRMLS_CC) == FAILURE) {
 		zend_error(E_ERROR, "Unable to cast node to string");
 		/* FIXME: Should not be fatal */
 	}

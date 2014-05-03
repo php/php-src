@@ -921,9 +921,6 @@ try_again:
 			return STR_INIT("Array", sizeof("Array")-1, 0);
 		case IS_OBJECT: {
 			zval tmp;
-			//???if (zend_std_cast_object_tostring(op, &tmp, IS_STRING TSRMLS_CC) == SUCCESS) {
-			//???	return Z_STR(tmp);
-			//???}
 			if (Z_OBJ_HT_P(op)->cast_object) {
 				if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_STRING TSRMLS_CC) == SUCCESS) {
 					return Z_STR(tmp);
