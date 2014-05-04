@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.0 Beta 2
+?? ??? 2014, PHP 5.6.0 Beta 3
+
+- Core:
+  . Fixed bug #67169 (array_splice all elements, then []= gives wrong index).
+    (Nikita)
+
+01 May 2014, PHP 5.6.0 Beta 2
 
 - CLI server:
   . Fixed bug #67079 (Missing MIME types for XML/XSL files). (Anatol)
@@ -22,8 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug #67064  (Countable interface prevents using 2nd parameter
     ($mode) of count() function). (Bob)
   . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
+  . Fixed bug #67033 (Remove reference to Windows 95). (Anatol)
 
 - cURL:
+  . Fixed bug #64247 (CURLOPT_INFILE doesn't allow reset). (Mike)
   . Fixed bug #66562 (curl_exec returns differently than curl_multi_getcontent).
     (Freek Lijten)
 
@@ -58,12 +66,27 @@ PHP                                                                        NEWS
 - LDAP:
   . Fixed issue with null bytes in LDAP bindings. (Matthew Daley)
 
+- litespeed
+  . Fixed bug #63228 (-Werror=format-security error in lsapi code).
+    (Elan Ruusamäe, George)
+
+- mysqli:
+  . Fixed building against an external libmysqlclient. (Adam)
+
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
 
 - OpenSSL:
   . Fix bug #66942 (memory leak in openssl_seal()). (Chuan Ma)
   . Fix bug #66952 (memory leak in openssl_open()). (Chuan Ma)
+  . Fix bug #66840 (Fix broken build when extension built separately).
+    (Daniel Lowrey)
+
+- phpdbg:
+  . Added watchpoints (watch command). (Bob)
+  . Renamed some commands (next => continue and how to step). (Joe)
+  . Fixed issue #85 (https://github.com/krakjoe/phpdbg/issues/85)
+    (Added stdin/stdout/stderr constants and their php:// wrappers). (Bob)
 
 - PDO:
   . Fixed bug #66604 ('pdo/php_pdo_error.h' not copied to the include dir).
@@ -219,7 +242,6 @@ PHP                                                                        NEWS
   . Fixed bug #53965 (<xsl:include> cannot find files with relative paths
     when loaded with "file://"). (Anatol)
 
-|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 27 Feb 2014, PHP 5.6.0 Alpha 3
 
 - Core

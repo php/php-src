@@ -4,16 +4,16 @@ PHP 5.6 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
-2. Changes in SAPI modules
-3. Deprecated Functionality
-4. Changed Functions
-5. New Functions
-6. New Classes and Interfaces
-7. Removed Extensions
-8. Other Changes to Extensions
-9. New Global Constants
-10. Changes to INI File Handling
-11. Other Changes
+3. Changes in SAPI modules
+4. Deprecated Functionality
+5. Changed Functions
+6. New Functions
+7. New Classes and Interfaces
+8. Removed Extensions
+9. Other Changes to Extensions
+10. New Global Constants
+11. Changes to INI File Handling
+12. Other Changes
 
 
 ========================================
@@ -152,7 +152,7 @@ PHP 5.6 UPGRADE NOTES
   operations using the ext/pgsql extension.
 
 ========================================
-2. Changes in SAPI modules
+3. Changes in SAPI modules
 ========================================
 
 - Added phpdbg SAPI.
@@ -166,7 +166,7 @@ PHP 5.6 UPGRADE NOTES
   application/xml is now sent automatically.
 
 ========================================
-3. Deprecated Functionality
+4. Deprecated Functionality
 ========================================
 
 - Incompatible context calls:
@@ -195,7 +195,7 @@ PHP 5.6 UPGRADE NOTES
     mbstring.internal_encoding
 
 ========================================
-4. Changed Functions
+5. Changed Functions
 ========================================
 
 - cURL:
@@ -240,7 +240,7 @@ PHP 5.6 UPGRADE NOTES
   replacing "C:" with "O:" at the start will now produce an error.
 
 ========================================
-5. New Functions
+6. New Functions
 ========================================
 
 - GMP:
@@ -279,17 +279,17 @@ PHP 5.6 UPGRADE NOTES
   Added SplFileObject::fread($length) to complement fwrite() method (>= 5.5.11)
 
 ========================================
-6. New Classes and Interfaces
+7. New Classes and Interfaces
 ========================================
 
 
 ========================================
-7. Removed Extensions
+8. Removed Extensions
 ========================================
 
 
 ========================================
-8. Other Changes to Extensions
+9. Other Changes to Extensions
 ========================================
 
 - cURL:
@@ -353,7 +353,7 @@ PHP 5.6 UPGRADE NOTES
     as described in https://bugs.php.net/bug.php?id=42614.
 
 ========================================
-9. New Global Constants
+10. New Global Constants
 ========================================
 
 - LDAP:
@@ -387,7 +387,7 @@ PHP 5.6 UPGRADE NOTES
   OPENSSL_DEFAULT_STREAM_CIPHERS        string
 
 ========================================
-10. Changes to INI File Handling
+11. Changes to INI File Handling
 ========================================
 
 - Core:
@@ -412,7 +412,7 @@ PHP 5.6 UPGRADE NOTES
   global CA default specification as necessary.
 
 ========================================
-11. Other Changes
+12. Other Changes
 ========================================
 
 - File upload:

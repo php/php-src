@@ -1,6 +1,18 @@
 #!/bin/bash
+if [[ "$ENABLE_MAINTAINER_ZTS" == 1 ]]; then
+	TS="--enable-maintainer-zts";
+else
+	TS="";
+fi
+if [[ "$ENABLE_DEBUG" == 1 ]]; then
+	DEBUG="--enable-debug";
+else
+	DEBUG="";
+fi
 ./buildconf
 ./configure --quiet \
+$DEBUG \
+$TS \
 --with-pdo-mysql=mysqlnd \
 --with-mysql=mysqlnd \
 --with-mysqli=mysqlnd \

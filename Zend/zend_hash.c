@@ -487,6 +487,7 @@ ZEND_API void zend_hash_reindex(HashTable *ht, zend_bool only_integer_keys) {
 
 	IS_CONSISTENT(ht);
 	if (UNEXPECTED(ht->nNumOfElements == 0)) {
+		ht->nNextFreeElement = 0;
 		return;
 	}
 
