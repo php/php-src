@@ -2420,7 +2420,7 @@ static int _php_curl_setopt(php_curl *ch, php_int_t option, zval **zvalue TSRMLS
 						}
 						Z_ADDREF_PP(zvalue);
 						ch->handlers->read->fp = fp;
-						ch->handlers->read->fd = Z_LVAL_PP(zvalue);
+						ch->handlers->read->fd = Z_IVAL_PP(zvalue);
 						ch->handlers->read->stream = *zvalue;
 					}
 					break;
