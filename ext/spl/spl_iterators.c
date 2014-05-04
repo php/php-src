@@ -2301,6 +2301,90 @@ static zend_object_value spl_dual_it_new(zend_class_entry *class_type TSRMLS_DC)
 }
 /* }}} */
 
+
+/* {{{ spl_dual_it_clone */
+static zend_object_value spl_dual_it_clone(zval *zobject TSRMLS_DC) {
+	spl_dual_it_object *old_object = zend_object_store_get_object(zobject TSRMLS_CC);
+
+	zend_object_value new_object_val = spl_dual_it_new(old_object->std.ce TSRMLS_CC);
+	spl_dual_it_object *new_object = zend_object_store_get_object_by_handle(new_object_val.handle TSRMLS_CC);
+
+	zend_objects_clone_members(
+		&new_object->std, new_object_val,
+		&old_object->std, Z_OBJ_HANDLE_P(zobject) TSRMLS_CC);
+
+	new_object->dit_type = old_object->dit_type;
+
+	/* clone inner iterator */
+	new_object->inner.ce = old_object->inner.ce;
+	zend_object_value new_object_inner_object_val = Z_OBJ_HT_P(old_object->inner.zobject)->clone_obj(old_object->inner.zobject TSRMLS_CC);
+	MAKE_STD_ZVAL(new_object->inner.zobject);
+	Z_TYPE_P(new_object->inner.zobject) = IS_OBJECT;
+	Z_OBJVAL_P(new_object->inner.zobject) = new_object_inner_object_val;
+	new_object->inner.object = zend_object_store_get_object(new_object->inner.zobject TSRMLS_CC);
+	new_object->inner.iterator = new_object->inner.ce->get_iterator(new_object->inner.ce, new_object->inner.zobject, 0 TSRMLS_CC);
+
+	/* current value and key */
+	new_object->current.data=NULL;
+	new_object->current.key=NULL;
+	spl_dual_it_fetch(new_object, 0 TSRMLS_CC);
+
+	/* type specific stuff */
+	new_object->u = old_object->u;
+	switch(new_object->dit_type) {
+	case DIT_CachingIterator:
+	case DIT_RecursiveCachingIterator:
+		new_object->u.caching.zstr=NULL;
+		new_object->u.caching.zcache=NULL;
+		new_object->u.caching.zchildren=NULL;
+		break;
+
+	case DIT_AppendIterator:
+		if (old_object->u.append.zarrayit) {
+			zval *arraycopy;
+			spl_instantiate(spl_ce_ArrayIterator, &new_object->u.append.zarrayit, 1 TSRMLS_CC);
+			zend_call_method_with_0_params(&old_object->u.append.zarrayit, spl_ce_ArrayIterator, NULL, "getarraycopy", &arraycopy);
+			zend_call_method_with_1_params(&new_object->u.append.zarrayit, spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL, arraycopy);
+			zval_ptr_dtor(&arraycopy);
+		}
+	
+		new_object->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, new_object->u.append.zarrayit, 0 TSRMLS_CC);
+		break;
+
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+	case DIT_RegexIterator:
+	case DIT_RecursiveRegexIterator:
+		if (new_object->u.regex.pce) 
+			new_object->u.regex.pce->refcount++;
+
+		if (new_object->u.regex.regex) 
+			new_object->u.regex.regex = estrndup(old_object->u.regex.regex, old_object->u.regex.regex_len);
+		break;
+#endif
+
+	case DIT_CallbackFilterIterator:
+	case DIT_RecursiveCallbackFilterIterator:
+		new_object->u.cbfilter = emalloc(sizeof(*old_object->u.cbfilter));
+		memcpy(new_object->u.cbfilter, old_object->u.cbfilter, sizeof(*old_object->u.cbfilter));	
+
+		if (new_object->u.cbfilter) {
+			if (new_object->u.cbfilter->fci.function_name) 
+				Z_ADDREF_P(new_object->u.cbfilter->fci.function_name);
+		
+			if (new_object->u.cbfilter->fci.object_ptr) 
+				Z_ADDREF_P(new_object->u.cbfilter->fci.object_ptr);
+		}
+		break;
+	default:
+		break;
+	}
+
+
+	return new_object_val;
+}
+/* }}} */
+
+
 ZEND_BEGIN_ARG_INFO(arginfo_filter_it___construct, 0) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 ZEND_END_ARG_INFO();
@@ -3631,7 +3715,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	memcpy(&spl_handlers_dual_it, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	spl_handlers_dual_it.get_method = spl_dual_it_get_method;
 	/*spl_handlers_dual_it.call_method = spl_dual_it_call_method;*/
-	spl_handlers_dual_it.clone_obj = NULL;
+	spl_handlers_dual_it.clone_obj = spl_dual_it_clone;
 	
 	spl_ce_RecursiveIteratorIterator->get_iterator = spl_recursive_it_get_iterator;
 	spl_ce_RecursiveIteratorIterator->iterator_funcs.funcs = &spl_recursive_it_iterator_funcs;
