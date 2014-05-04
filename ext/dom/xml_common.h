@@ -66,7 +66,7 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
     (const xmlChar *) "http://www.w3.org/2000/xmlns/"
 
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
-	__intern = (php_libxml_node_object *)zend_object_store_get_object(__id TSRMLS_CC); \
+	__intern = Z_LIBXML_NODE_P(__id); \
 	if (__intern->node == NULL || !(__ptr = (__prtype)__intern->node->node)) { \
   		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
   		RETURN_NULL();\
@@ -74,7 +74,7 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 }
 
 #define DOC_GET_OBJ(__ptr, __id, __prtype, __intern) { \
-	__intern = (php_libxml_node_object *)zend_object_store_get_object(__id TSRMLS_CC); \
+	__intern = Z_LIBXML_NODE_P(__id); \
 	if (__intern->document != NULL) { \
 		if (!(__ptr = (__prtype)__intern->document->ptr)) { \
   			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\

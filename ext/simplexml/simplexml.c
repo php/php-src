@@ -2398,7 +2398,7 @@ PHP_FUNCTION(simplexml_import_dom)
 		return;
 	}
 
-	object = (php_libxml_node_object *) ((char *) Z_OBJ_P(node) - Z_OBJ_HT_P(node)->offset);
+	object = Z_LIBXML_NODE_P(node);
 
 	nodep = php_libxml_import_node(node TSRMLS_CC);
 

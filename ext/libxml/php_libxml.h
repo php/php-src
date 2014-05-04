@@ -81,6 +81,13 @@ typedef struct _php_libxml_node_object {
 	zend_object  std;
 } php_libxml_node_object;
 
+
+static inline php_libxml_node_object *php_libxml_node_fetch_object(zend_object *obj) {
+	return (php_libxml_node_object *)((char*)(obj) - XtOffsetOf(php_libxml_node_object, std));
+}
+
+#define Z_LIBXML_NODE_P(zv) php_libxml_node_fetch_object(Z_OBJ_P((zv)))
+
 typedef void * (*php_libxml_export_node) (zval *object TSRMLS_DC);
 
 PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data TSRMLS_DC);
