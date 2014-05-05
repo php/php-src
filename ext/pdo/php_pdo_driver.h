@@ -605,19 +605,18 @@ struct _pdo_stmt_t {
 	union {
 		int column;
 		struct {
-			zend_class_entry *ce;	
-			void *_reserved;
 			zval ctor_args;            /* freed */
-			zval retval; 
 			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
+			zval retval; 
+			zend_class_entry *ce;	
 		} cls;
 		struct {
-			zval function;
 			zval fetch_args;           /* freed */
-			zval object;
 			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
+			zval object;
+			zval function;
 			zval *values;              /* freed */
 		} func;
 		zval into;
