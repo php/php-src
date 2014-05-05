@@ -2891,6 +2891,10 @@ static const zend_function_entry zip_class_functions[] = {
 };
 /* }}} */
 
+static void php_zip_free_prop_handler(zval *el) /* {{{ */ {
+	pefree(Z_PTR_P(el), 1);
+} /* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(zip)
 {
@@ -2910,7 +2914,7 @@ static PHP_MINIT_FUNCTION(zip)
 	ce.create_object = php_zip_object_new;
 	zip_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
-	zend_hash_init(&zip_prop_handlers, 0, NULL, NULL, 1);
+	zend_hash_init(&zip_prop_handlers, 0, NULL, php_zip_free_prop_handler, 1);
 	php_zip_register_prop_handler(&zip_prop_handlers, "status",    php_zip_status, NULL, NULL, IS_LONG TSRMLS_CC);
 	php_zip_register_prop_handler(&zip_prop_handlers, "statusSys", php_zip_status_sys, NULL, NULL, IS_LONG TSRMLS_CC);
 	php_zip_register_prop_handler(&zip_prop_handlers, "numFiles",  php_zip_get_num_files, NULL, NULL, IS_LONG TSRMLS_CC);

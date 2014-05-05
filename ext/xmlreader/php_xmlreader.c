@@ -448,6 +448,10 @@ static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_in
 }
 /* }}} */
 
+static void php_xmlreader_free_prop_handler(zval *el) /* {{{ */ {
+	pefree(Z_PTR_P(el), 1);
+} /* }}} */
+
 #if LIBXML_VERSION >= 20620
 /* {{{ php_xmlreader_no_arg_string */
 static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_char_t internal_function) {
@@ -1154,6 +1158,7 @@ PHP_METHOD(xmlreader, expand)
 #endif
 }
 /* }}} */
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_close, 0)
 ZEND_END_ARG_INFO()
@@ -1253,7 +1258,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_expand, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-static const zend_function_entry xmlreader_functions[] = {
+static const zend_function_entry xmlreader_functions[] /* {{{ */ =  {
 	PHP_ME(xmlreader, close, arginfo_xmlreader_close, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, getAttribute, arginfo_xmlreader_getAttribute, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, getAttributeNo, arginfo_xmlreader_getAttributeNo, ZEND_ACC_PUBLIC)
@@ -1285,7 +1290,7 @@ static const zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, XML, arginfo_xmlreader_XML, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	PHP_ME(xmlreader, expand, arginfo_xmlreader_expand, ZEND_ACC_PUBLIC)
 	PHP_FE_END
-};
+}; /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
@@ -1307,7 +1312,7 @@ PHP_MINIT_FUNCTION(xmlreader)
 	ce.create_object = xmlreader_objects_new;
 	xmlreader_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
-	zend_hash_init(&xmlreader_prop_handlers, 0, NULL, NULL, 1);
+	zend_hash_init(&xmlreader_prop_handlers, 0, NULL, php_xmlreader_free_prop_handler, 1);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "attributeCount", xmlTextReaderAttributeCount, NULL, IS_LONG TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "baseURI", NULL, xmlTextReaderConstBaseUri, IS_STRING TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "depth", xmlTextReaderDepth, NULL, IS_LONG TSRMLS_CC);
