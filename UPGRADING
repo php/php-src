@@ -4,16 +4,16 @@ PHP X.Y UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
-2. Changes in SAPI modules
-3. Deprecated Functionality
-4. Changed Functions
-5. New Functions
-6. New Classes and Interfaces
-7. Removed Extensions
-8. Other Changes to Extensions
-9. New Global Constants
-10. Changes to INI File Handling
-11. Other Changes
+3. Changes in SAPI modules
+4. Deprecated Functionality
+5. Changed Functions
+6. New Functions
+7. New Classes and Interfaces
+8. Removed Extensions
+9. Other Changes to Extensions
+10. New Global Constants
+11. Changes to INI File Handling
+12. Other Changes
 
 
 ========================================
@@ -30,52 +30,52 @@ PHP X.Y UPGRADE NOTES
 
 
 ========================================
-2. Changes in SAPI modules
+3. Changes in SAPI modules
 ========================================
 
 
 ========================================
-3. Deprecated Functionality
+4. Deprecated Functionality
 ========================================
 
 
 ========================================
-4. Changed Functions
+5. Changed Functions
 ========================================
 
 
 ========================================
-5. New Functions
+6. New Functions
 ========================================
 
 
 ========================================
-6. New Classes and Interfaces
+7. New Classes and Interfaces
 ========================================
 
 
 ========================================
-7. Removed Extensions
+8. Removed Extensions
 ========================================
 
 
 ========================================
-8. Other Changes to Extensions
+9. Other Changes to Extensions
 ========================================
 
 
 ========================================
-9. New Global Constants
+10. New Global Constants
 ========================================
 
 
 ========================================
-10. Changes to INI File Handling
+11. Changes to INI File Handling
 ========================================
 
 
 ========================================
-11. Other Changes
+12. Other Changes
 ========================================
 
 - Standard

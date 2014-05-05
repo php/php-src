@@ -6,15 +6,14 @@ PHPDBG_DLL='php' + PHP_VERSION + 'phpdbg.dll';
 PHPDBG_EXE='phpdbg.exe';
 
 if (PHP_PHPDBG == "yes") {
-    SAPI('phpdbg', PHPDBG_SOURCES, PHPDBG_EXE);
-    ADD_FLAG("LIBS_PHPDBG", "ws2_32.lib user32.lib");
-	DEFINE("CFLAGS", configure_subst.item("CFLAGS") + " /EHa");
+	SAPI('phpdbg', PHPDBG_SOURCES, PHPDBG_EXE);
+	ADD_FLAG("LIBS_PHPDBG", "ws2_32.lib user32.lib");
 	ADD_FLAG("CFLAGS_PHPDBG", "/D YY_NO_UNISTD_H");
 }
 
 if (PHP_PHPDBGS == "yes") {
 	SAPI('phpdbgs', PHPDBG_SOURCES, PHPDBG_DLL, '/D PHP_PHPDBG_EXPORTS /I win32');
 	ADD_FLAG("LIBS_PHPDBGS", "ws2_32.lib user32.lib");
-	DEFINE("CFLAGS", configure_subst.item("CFLAGS") + " /EHa");
-	ADD_FLAG("CFLAGS_PHPDBG", "/D YY_NO_UNISTD_H");
+	ADD_FLAG("CFLAGS_PHPDBGS", "/D YY_NO_UNISTD_H");
 }
+

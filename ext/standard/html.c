@@ -901,7 +901,7 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 #if 0
 		return php_mb2_int_to_char(buf, code);
 #else
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 		assert(code <= 0xFFU);
 #endif
 		*buf = code;
@@ -912,7 +912,7 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 #if 0 /* idem */
 		return php_mb2_int_to_char(buf, code);
 #else
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 		assert(code <= 0xFFU);
 #endif
 		*buf = code;

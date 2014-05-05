@@ -3286,4 +3286,16 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		break;
  	}
  	case FILE_INDIRECT:
+diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
+--- libmagic.orig/strcasestr.c	Thu Dec  5 17:57:50 2013
++++ libmagic/strcasestr.c	Sun May  4 21:29:20 2014
+@@ -37,6 +37,8 @@
+ __RCSID("$NetBSD: strncasecmp.c,v 1.2 2007/06/04 18:19:27 christos Exp $");
+ #endif /* LIBC_SCCS and not lint */
+ 
++#include "php_stdint.h"
++
+ #include <assert.h>
+ #include <ctype.h>
+ #include <string.h>
 
