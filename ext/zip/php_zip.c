@@ -51,8 +51,6 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_close);
 #endif
 #endif
 
-#define ARG_PATH "P"
-
 /* {{{ Resource le */
 static int le_zip_dir;
 #define le_zip_dir_name "Zip Directory"
@@ -1120,7 +1118,7 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 	int err = 0;
 	zend_string *filename;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH, &filename) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &filename) == FAILURE) {
 		return;
 	}
 
@@ -1402,7 +1400,7 @@ static ZIPARCHIVE_METHOD(open)
 	zval *self = getThis();
 	ze_zip_object *ze_obj = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|l", &filename, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|l", &filename, &flags) == FAILURE) {
 		return;
 	}
 
@@ -1607,12 +1605,12 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	ZIP_FROM_OBJECT(intern, self);
 	/* 1 == glob, 2 == pcre */
 	if (type == 1) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|la",
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|la",
 					&pattern, &flags, &options) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|sa",
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|sa",
 					&pattern, &path, &path_len, &options) == FAILURE) {
 			return;
 		}
@@ -1724,7 +1722,7 @@ static ZIPARCHIVE_METHOD(addFile)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|sll",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|sll",
 			&filename, &entry_name, &entry_name_len, &offset_start, &offset_len) == FAILURE) {
 		return;
 	}
@@ -1824,7 +1822,7 @@ static ZIPARCHIVE_METHOD(statName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|l", &name, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|l", &name, &flags) == FAILURE) {
 		return;
 	}
 
@@ -1878,7 +1876,7 @@ static ZIPARCHIVE_METHOD(locateName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|l", &name, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|l", &name, &flags) == FAILURE) {
 		return;
 	}
 
@@ -2608,7 +2606,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (type == 1) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|ll", &filename, &len, &flags) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|ll", &filename, &len, &flags) == FAILURE) {
 			return;
 		}
 		PHP_ZIP_STAT_PATH(intern, filename->val, filename->len, flags, sb);
@@ -2684,7 +2682,7 @@ static ZIPARCHIVE_METHOD(getStream)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH, &filename) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &filename) == FAILURE) {
 		return;
 	}
 
