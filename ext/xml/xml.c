@@ -1534,6 +1534,7 @@ PHP_FUNCTION(xml_parser_free)
 {
 	zval *pind;
 	xml_parser *parser;
+	zend_resource *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &pind) == FAILURE) {
 		return;
@@ -1546,8 +1547,9 @@ PHP_FUNCTION(xml_parser_free)
 		RETURN_FALSE;
 	}
 
-	zend_list_close(Z_RES(parser->index));
+	res = Z_RES(parser->index);
 	ZVAL_UNDEF(&parser->index);
+	zend_list_close(res);
 	RETURN_TRUE;
 }
 /* }}} */
