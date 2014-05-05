@@ -1399,16 +1399,16 @@ static ZIPARCHIVE_METHOD(open)
 	long flags = 0;
 	char *resolved_path;
 	zend_string *filename;
-	zval *this = getThis();
+	zval *self = getThis();
 	ze_zip_object *ze_obj = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|l", &filename, &flags) == FAILURE) {
 		return;
 	}
 
-	if (this) {
+	if (self) {
 		/* We do not use ZIP_FROM_OBJECT, zip init function here */
-		ze_obj = Z_ZIP_P(this);
+		ze_obj = Z_ZIP_P(self);
 	}
 
 	if (filename->len == 0) {
@@ -1455,15 +1455,15 @@ Set the password for the active archive */
 static ZIPARCHIVE_METHOD(setPassword)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	char *password;
 	int	password_len;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &password, &password_len) == FAILURE) {
 		return;
@@ -1487,16 +1487,16 @@ close the zip archive */
 static ZIPARCHIVE_METHOD(close)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	ze_zip_object *ze_obj;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
-	ze_obj = Z_ZIP_P(this);
+	ze_obj = Z_ZIP_P(self);
 
 	if (zip_close(intern)) {
 		zip_discard(intern);
@@ -1516,15 +1516,15 @@ static ZIPARCHIVE_METHOD(close)
 static ZIPARCHIVE_METHOD(getStatusString)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	int zep, syp, len;
 	char error_string[128];
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	zip_error_get(intern, &zep, &syp);
 
@@ -1538,18 +1538,18 @@ Returns the index of the entry named filename in the archive */
 static ZIPARCHIVE_METHOD(addEmptyDir)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	char *dirname;
 	int   dirname_len;
 	int idx;
 	struct zip_stat sb;
 	char *s;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 				&dirname, &dirname_len) == FAILURE) {
@@ -1589,7 +1589,7 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	char *path = NULL;
 	char *remove_path = NULL;
 	char *add_path = NULL;
@@ -1600,11 +1600,11 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	int found;
 	zend_string *pattern;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 	/* 1 == glob, 2 == pcre */
 	if (type == 1) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|la",
@@ -1712,17 +1712,17 @@ Add a file in a Zip archive using its path and the name to use. */
 static ZIPARCHIVE_METHOD(addFile)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	char *entry_name = NULL;
 	int entry_name_len = 0;
 	long offset_start = 0, offset_len = 0;
 	zend_string *filename;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|sll",
 			&filename, &entry_name, &entry_name_len, &offset_start, &offset_len) == FAILURE) {
@@ -1752,7 +1752,7 @@ Add a file using content and the entry name */
 static ZIPARCHIVE_METHOD(addFromString)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	char *buffer, *name;
 	int buffer_len, name_len;
 	ze_zip_object *ze_obj;
@@ -1760,18 +1760,18 @@ static ZIPARCHIVE_METHOD(addFromString)
 	int pos = 0;
 	int cur_idx;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
 			&name, &name_len, &buffer, &buffer_len) == FAILURE) {
 		return;
 	}
 
-	ze_obj = Z_ZIP_P(this);
+	ze_obj = Z_ZIP_P(self);
 	if (ze_obj->buffers_cnt) {
 		ze_obj->buffers = (char **)erealloc(ze_obj->buffers, sizeof(char *) * (ze_obj->buffers_cnt+1));
 		pos = ze_obj->buffers_cnt++;
@@ -1813,16 +1813,16 @@ Returns the information about a the zip entry filename */
 static ZIPARCHIVE_METHOD(statName)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	long flags = 0;
 	struct zip_stat sb;
 	zend_string *name;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|l", &name, &flags) == FAILURE) {
 		return;
@@ -1839,16 +1839,16 @@ Returns the zip entry informations using its index */
 static ZIPARCHIVE_METHOD(statIndex)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	long index, flags = 0;
 
 	struct zip_stat sb;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l",
 			&index, &flags) == FAILURE) {
@@ -1867,16 +1867,16 @@ Returns the index of the entry named filename in the archive */
 static ZIPARCHIVE_METHOD(locateName)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	long flags = 0;
 	long idx = -1;
 	zend_string *name;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|l", &name, &flags) == FAILURE) {
 		return;
@@ -1901,15 +1901,15 @@ Returns the name of the file at position index */
 static ZIPARCHIVE_METHOD(getNameIndex)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	const char *name;
 	long flags = 0, index = 0;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l",
 			&index, &flags) == FAILURE) {
@@ -1931,15 +1931,15 @@ Set or remove (NULL/'') the comment of the archive */
 static ZIPARCHIVE_METHOD(setArchiveComment)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	int comment_len;
 	char * comment;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &comment, &comment_len) == FAILURE) {
 		return;
@@ -1957,16 +1957,16 @@ Returns the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(getArchiveComment)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	long flags = 0;
 	const char * comment;
 	int comment_len = 0;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flags) == FAILURE) {
 		return;
@@ -1985,16 +1985,16 @@ Set or remove (NULL/'') the comment of an entry using its Name */
 static ZIPARCHIVE_METHOD(setCommentName)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	int comment_len, name_len;
 	char * comment, *name;
 	int idx;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
 			&name, &name_len, &comment, &comment_len) == FAILURE) {
@@ -2018,17 +2018,17 @@ Set or remove (NULL/'') the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(setCommentIndex)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	long index;
 	int comment_len;
 	char * comment;
 	struct zip_stat sb;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls",
 			&index, &comment, &comment_len) == FAILURE) {
@@ -2048,17 +2048,17 @@ Set external attributes for file in zip, using its name */
 static ZIPARCHIVE_METHOD(setExternalAttributesName)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	int name_len;
 	char *name;
 	long flags=0, opsys, attr;
 	zip_int64_t idx;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll|l",
 			&name, &name_len, &opsys, &attr, &flags) == FAILURE) {
@@ -2086,15 +2086,15 @@ Set external attributes for file in zip, using its index */
 static ZIPARCHIVE_METHOD(setExternalAttributesIndex)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	long index, flags=0, opsys, attr;
 	struct zip_stat sb;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll|l",
 			&index, &opsys, &attr, &flags) == FAILURE) {
@@ -2115,7 +2115,7 @@ Get external attributes for file in zip, using its name */
 static ZIPARCHIVE_METHOD(getExternalAttributesName)
 {
 	struct zip *intern;
-	zval *this = getThis(), *z_opsys, *z_attr;
+	zval *self = getThis(), *z_opsys, *z_attr;
 	int name_len;
 	char *name;
 	long flags=0;
@@ -2123,11 +2123,11 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 	zip_uint32_t attr;
 	zip_int64_t idx;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l",
 			&name, &name_len, &z_opsys, &z_attr, &flags) == FAILURE) {
@@ -2159,17 +2159,17 @@ Get external attributes for file in zip, using its index */
 static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 {
 	struct zip *intern;
-	zval *this = getThis(), *z_opsys, *z_attr;
+	zval *self = getThis(), *z_opsys, *z_attr;
 	long index, flags=0;
 	zip_uint8_t opsys;
 	zip_uint32_t attr;
 	struct zip_stat sb;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lzz|l",
 			&index, &z_opsys, &z_attr, &flags) == FAILURE) {
@@ -2195,18 +2195,18 @@ Returns the comment of an entry using its name */
 static ZIPARCHIVE_METHOD(getCommentName)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	int name_len, idx;
 	long flags = 0;
 	int comment_len = 0;
 	const char * comment;
 	char *name;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
 			&name, &name_len, &flags) == FAILURE) {
@@ -2232,17 +2232,17 @@ Returns the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(getCommentIndex)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	long index, flags = 0;
 	const char * comment;
 	int comment_len = 0;
 	struct zip_stat sb;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l",
 				&index, &flags) == FAILURE) {
@@ -2260,14 +2260,14 @@ Delete a file using its index */
 static ZIPARCHIVE_METHOD(deleteIndex)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	long index;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &index) == FAILURE) {
 		return;
@@ -2290,16 +2290,16 @@ Delete a file using its index */
 static ZIPARCHIVE_METHOD(deleteName)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	int name_len;
 	char *name;
 	struct zip_stat sb;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
@@ -2321,17 +2321,17 @@ Rename an entry selected by its index to new_name */
 static ZIPARCHIVE_METHOD(renameIndex)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 
 	char *new_name;
 	int new_name_len;
 	long index;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &index, &new_name, &new_name_len) == FAILURE) {
 		return;
@@ -2357,16 +2357,16 @@ Rename an entry selected by its name to new_name */
 static ZIPARCHIVE_METHOD(renameName)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	struct zip_stat sb;
 	char *name, *new_name;
 	int name_len, new_name_len;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &new_name, &new_name_len) == FAILURE) {
 		return;
@@ -2391,14 +2391,14 @@ Changes to the file at position index are reverted */
 static ZIPARCHIVE_METHOD(unchangeIndex)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	long index;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &index) == FAILURE) {
 		return;
@@ -2421,16 +2421,16 @@ Changes to the file named 'name' are reverted */
 static ZIPARCHIVE_METHOD(unchangeName)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	struct zip_stat sb;
 	char *name;
 	int name_len;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
@@ -2455,13 +2455,13 @@ All changes to files and global information in archive are reverted */
 static ZIPARCHIVE_METHOD(unchangeAll)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zip_unchange_all(intern) != 0) {
 		RETURN_FALSE;
@@ -2476,13 +2476,13 @@ Revert all global changes to the archive archive.  For now, this only reverts ar
 static ZIPARCHIVE_METHOD(unchangeArchive)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zip_unchange_archive(intern) != 0) {
 		RETURN_FALSE;
@@ -2503,7 +2503,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 {
 	struct zip *intern;
 
-	zval *this = getThis();
+	zval *self = getThis();
 	zval *zval_files = NULL;
 	zval *zval_file = NULL;
 	php_stream_statbuf ssb;
@@ -2513,7 +2513,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 
 	int nelems;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
@@ -2532,7 +2532,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 			}
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 	if (zval_files && (Z_TYPE_P(zval_files) != IS_NULL)) {
 		switch (Z_TYPE_P(zval_files)) {
 			case IS_STRING:
@@ -2587,7 +2587,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 
 	struct zip_stat sb;
 	struct zip_file *zf;
@@ -2601,11 +2601,11 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	int n = 0;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (type == 1) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|ll", &filename, &len, &flags) == FAILURE) {
@@ -2671,18 +2671,18 @@ get a stream for an entry using its name */
 static ZIPARCHIVE_METHOD(getStream)
 {
 	struct zip *intern;
-	zval *this = getThis();
+	zval *self = getThis();
 	struct zip_stat sb;
 	char *mode = "rb";
 	zend_string *filename;
 	php_stream *stream;
 	ze_zip_object *obj;
 
-	if (!this) {
+	if (!self) {
 		RETURN_FALSE;
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH, &filename) == FAILURE) {
 		return;
@@ -2692,7 +2692,7 @@ static ZIPARCHIVE_METHOD(getStream)
 		RETURN_FALSE;
 	}
 
-	obj = Z_ZIP_P(this);
+	obj = Z_ZIP_P(self);
 
 	stream = php_stream_zip_open(obj->filename, filename->val, mode STREAMS_CC TSRMLS_CC);
 	if (stream) {
