@@ -45,7 +45,9 @@
 
 #ifdef SMART_STR_USE_REALLOC
 #define SMART_STR_DO_REALLOC(b, w) do {								\
+	int oldlen = (b)->s->len;										\
 	(b)->s = erealloc((buf)->s, _STR_HEADER_SIZE + (b)->a + 1);		\
+	(b)->s->len = oldlen;											\
 } while (0)
 #else
 #define SMART_STR_DO_REALLOC(b, w) do {								\
