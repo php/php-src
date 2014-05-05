@@ -1632,7 +1632,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 
 			if ((zval_file = zend_hash_index_find(Z_ARRVAL_P(return_value), i)) != NULL) {
 				if (remove_all_path) {
-					basename = php_basename(Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), NULL, 0);
+					basename = php_basename(Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), NULL, 0 TSRMLS_CC);
 					file_stripped = basename->val;
 					file_stripped_len = basename->len;
 				} else if (remove_path && strstr(Z_STRVAL_P(zval_file), remove_path) != NULL) {
