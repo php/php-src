@@ -378,6 +378,7 @@ static void _xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encodi
 {
 	if (s == NULL) {
 		ZVAL_FALSE(ret);
+		return;
 	}
 	if (len == 0) {
 		len = _xml_xmlcharlen(s);
@@ -1195,7 +1196,7 @@ PHP_FUNCTION(xml_set_object)
 	zval_add_ref(&parser->object); 
 #endif */
 
-	ZVAL_COPY(&parser->object, mythis);
+	ZVAL_DUP_DEREF(&parser->object, mythis);
 
 	RETVAL_TRUE;
 }
