@@ -402,7 +402,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 	if (op_array->doc_comment) {
 		if (ZCG(accel_directives).save_comments) {
-			zend_accel_store_string(op_array->doc_comment);
+			if (already_stored) {
+				op_array->doc_comment = zend_shared_alloc_get_xlat_entry(op_array->doc_comment);
+				ZEND_ASSERT(op_array->doc_comment != NULL);
+			} else {
+				zend_accel_store_string(op_array->doc_comment);
+			}
 		} else {
 			if (!already_stored) {
 				STR_RELEASE(op_array->doc_comment);
