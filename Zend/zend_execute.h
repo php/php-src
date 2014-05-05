@@ -253,7 +253,7 @@ static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC
 
 	while (p != end) {
 		p--;
-		i_zval_ptr_dtor(p ZEND_FILE_LINE_CC TSRMLS_CC);
+		i_zval_ptr_dtor_nogc(p ZEND_FILE_LINE_CC TSRMLS_CC);
 	}
 	if (nested) {
 		EG(argument_stack)->top = p;
