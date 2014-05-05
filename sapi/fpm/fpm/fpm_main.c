@@ -216,8 +216,9 @@ static php_cgi_globals_struct php_cgi_globals;
 #define TRANSLATE_SLASHES(path)
 #endif
 
-static int print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
+static int print_module_info(zval *zv TSRMLS_DC)
 {
+	zend_module_entry *module = Z_PTR_P(zv);
 	php_printf("%s\n", module->name);
 	return 0;
 }
@@ -227,19 +228,18 @@ static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
 
-	return strcasecmp(	((zend_module_entry *)f->xData)->name,
-						((zend_module_entry *)s->xData)->name);
+	return strcasecmp(	((zend_module_entry *) Z_PTR(f->val))->name,
+						((zend_module_entry *) Z_PTR(s->val))->name);
 }
 
 static void print_modules(TSRMLS_D)
 {
 	HashTable sorted_registry;
-	zend_module_entry tmp;
 
 	zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
-	zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
+	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
-	zend_hash_apply_with_argument(&sorted_registry, (apply_func_arg_t) print_module_info, NULL TSRMLS_CC);
+	zend_hash_apply(&sorted_registry, print_module_info TSRMLS_CC);
 	zend_hash_destroy(&sorted_registry);
 }
 
@@ -568,32 +568,23 @@ static char *sapi_cgi_read_cookies(TSRMLS_D)
 void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	fcgi_request *request;
-	HashPosition pos;
-	char *var, **val;
-	uint var_len;
-	ulong idx;
+	zend_string *var;
+	char *val;
 	int filter_arg;
 
-
-	if (PG(http_globals)[TRACK_VARS_ENV] &&
-		array_ptr != PG(http_globals)[TRACK_VARS_ENV] &&
-		Z_TYPE_P(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
-		zend_hash_num_elements(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV])) > 0
+	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
+		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
+		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
 	) {
 		zval_dtor(array_ptr);
-		*array_ptr = *PG(http_globals)[TRACK_VARS_ENV];
-		INIT_PZVAL(array_ptr);
-		zval_copy_ctor(array_ptr);
+		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
 		return;
-	} else if (PG(http_globals)[TRACK_VARS_SERVER] &&
-		array_ptr != PG(http_globals)[TRACK_VARS_SERVER] &&
-		Z_TYPE_P(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
-		zend_hash_num_elements(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER])) > 0
+	} else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
+		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
+		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
 	) {
 		zval_dtor(array_ptr);
-		*array_ptr = *PG(http_globals)[TRACK_VARS_SERVER];
-		INIT_PZVAL(array_ptr);
-		zval_copy_ctor(array_ptr);
+		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_SERVER]);
 		return;
 	}
 
@@ -601,19 +592,16 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	php_php_import_environment_variables(array_ptr TSRMLS_CC);
 
 	request = (fcgi_request*) SG(server_context);
-	filter_arg = (array_ptr == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
+	filter_arg = Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV])
+		? PARSE_ENV : PARSE_SERVER;
 
-	for (zend_hash_internal_pointer_reset_ex(request->env, &pos);
-	     zend_hash_get_current_key_ex(request->env, &var, &var_len, &idx, 0, &pos) == HASH_KEY_IS_STRING &&
-	     zend_hash_get_current_data_ex(request->env, (void **) &val, &pos) == SUCCESS;
-	     zend_hash_move_forward_ex(request->env, &pos)
-	) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(request->env, var, val) {
 		unsigned int new_val_len;
 
-		if (sapi_module.input_filter(filter_arg, var, val, strlen(*val), &new_val_len TSRMLS_CC)) {
-			php_register_variable_safe(var, *val, new_val_len, array_ptr TSRMLS_CC);
+		if (var && sapi_module.input_filter(filter_arg, var->val, &val, strlen(val), &new_val_len TSRMLS_CC)) {
+			php_register_variable_safe(var->val, val, new_val_len, array_ptr TSRMLS_CC);
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
@@ -695,17 +683,16 @@ static void sapi_cgi_log_message(char *message)
 static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len, int start TSRMLS_DC)
 {
 	char *ptr;
-	user_config_cache_entry *new_entry, *entry;
 	time_t request_time = sapi_get_request_time(TSRMLS_C);
+	user_config_cache_entry *entry = zend_hash_str_find_ptr(&CGIG(user_config_cache), path, path_len);
 
 	/* Find cached config entry: If not found, create one */
-	if (zend_hash_find(&CGIG(user_config_cache), path, path_len + 1, (void **) &entry) == FAILURE) {
-		new_entry = pemalloc(sizeof(user_config_cache_entry), 1);
-		new_entry->expires = 0;
-		new_entry->user_config = (HashTable *) pemalloc(sizeof(HashTable), 1);
-		zend_hash_init(new_entry->user_config, 0, NULL, (dtor_func_t) config_zval_dtor, 1);
-		zend_hash_update(&CGIG(user_config_cache), path, path_len + 1, new_entry, sizeof(user_config_cache_entry), (void **) &entry);
-		free(new_entry);
+	if (!entry) {
+		entry = pemalloc(sizeof(user_config_cache_entry), 1);
+		entry->expires = 0;
+		entry->user_config = (HashTable *) pemalloc(sizeof(HashTable), 1);
+		zend_hash_init(entry->user_config, 0, NULL, (dtor_func_t) config_zval_dtor, 1);
+		zend_hash_str_update_ptr(&CGIG(user_config_cache), path, path_len, entry);
 	}
 
 	/* Check whether cache entry has expired and rescan if it is */
@@ -1966,7 +1953,7 @@ fastcgi_request_done:
 			fpm_request_end(TSRMLS_C);
 			fpm_log_write(NULL TSRMLS_CC);
 
-			STR_FREE(SG(request_info).path_translated);
+			efree(SG(request_info).path_translated);
 			SG(request_info).path_translated = NULL;
 
 			php_request_shutdown((void *) 0);
