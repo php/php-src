@@ -230,9 +230,7 @@ PHP_FUNCTION(bcadd)
 		result->n_scale = scale;
 	}
 	
-	Z_STRVAL_P(return_value) = bc_num2str(result);
-	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-	Z_TYPE_P(return_value) = IS_STRING;
+	RETVAL_STR(bc_num2str(result));
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
@@ -269,9 +267,7 @@ PHP_FUNCTION(bcsub)
 		result->n_scale = scale;
 	}
 
-	Z_STRVAL_P(return_value) = bc_num2str(result);
-	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-	Z_TYPE_P(return_value) = IS_STRING;
+	RETVAL_STR(bc_num2str(result));
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
@@ -308,9 +304,7 @@ PHP_FUNCTION(bcmul)
 		result->n_scale = scale;
 	}
 
-	Z_STRVAL_P(return_value) = bc_num2str(result);
-	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-	Z_TYPE_P(return_value) = IS_STRING;
+	RETVAL_STR(bc_num2str(result));
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
@@ -347,9 +341,7 @@ PHP_FUNCTION(bcdiv)
 			if (result->n_scale > scale) {
 				result->n_scale = scale;
 			}
-			Z_STRVAL_P(return_value) = bc_num2str(result);
-			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-			Z_TYPE_P(return_value) = IS_STRING;
+			RETVAL_STR(bc_num2str(result));
 			break;
 		case -1: /* division by zero */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
@@ -383,9 +375,7 @@ PHP_FUNCTION(bcmod)
 	
 	switch (bc_modulo(first, second, &result, 0 TSRMLS_CC)) {
 		case 0:
-			Z_STRVAL_P(return_value) = bc_num2str(result);
-			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-			Z_TYPE_P(return_value) = IS_STRING;
+			RETVAL_STR(bc_num2str(result));
 			break;
 		case -1:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
@@ -427,9 +417,7 @@ PHP_FUNCTION(bcpowmod)
 		if (result->n_scale > scale) {
 			result->n_scale = scale;
 		}
-		Z_STRVAL_P(return_value) = bc_num2str(result);
-		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-		Z_TYPE_P(return_value) = IS_STRING;
+		RETVAL_STR(bc_num2str(result));
 	} else {
 		RETVAL_FALSE;
 	}
@@ -471,9 +459,7 @@ PHP_FUNCTION(bcpow)
 		result->n_scale = scale;
 	}
 
-	Z_STRVAL_P(return_value) = bc_num2str(result);
-	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-	Z_TYPE_P(return_value) = IS_STRING;
+	RETVAL_STR(bc_num2str(result));
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
@@ -506,9 +492,7 @@ PHP_FUNCTION(bcsqrt)
 		if (result->n_scale > scale) {
 			result->n_scale = scale;
 		}
-		Z_STRVAL_P(return_value) = bc_num2str(result);
-		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-		Z_TYPE_P(return_value) = IS_STRING;
+		RETVAL_STR(bc_num2str(result));
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Square root of negative number");
 	}
@@ -541,8 +525,7 @@ PHP_FUNCTION(bccomp)
 
 	bc_str2num(&first, left, scale TSRMLS_CC);
 	bc_str2num(&second, right, scale TSRMLS_CC);
-	Z_LVAL_P(return_value) = bc_compare(first, second);
-	Z_TYPE_P(return_value) = IS_LONG;
+	RETVAL_LONG(bc_compare(first, second));
 
 	bc_free_num(&first);
 	bc_free_num(&second);
