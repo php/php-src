@@ -195,18 +195,6 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 	/* let see if the path already exists */
 	if (php_stream_stat_path_ex(file_dirname_fullpath, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL) < 0) {
-
-#if defined(PHP_WIN32) && (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1)
-		char *e;
-		e = file_dirname_fullpath;
-		while (*e) {
-			   if (*e == '/') {
-					   *e = DEFAULT_SLASH;
-			   }
-			   e++;
-		}
-#endif
-
 		ret = php_stream_mkdir(file_dirname_fullpath, 0777,  PHP_STREAM_MKDIR_RECURSIVE|REPORT_ERRORS, NULL);
 		if (!ret) {
 			efree(file_dirname_fullpath);
@@ -251,11 +239,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		return 0;
 	}
 
-#if PHP_API_VERSION < 20100412
-	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
-#else
 	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
-#endif
 
 	if (stream == NULL) {
 		n = -1;
