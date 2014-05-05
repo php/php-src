@@ -92,7 +92,7 @@
 		zend_class_entry ce; \
 		INIT_CLASS_ENTRY(ce, # classname, tidy_funcs_ ## name); \
 		ce.create_object = tidy_object_new_ ## name; \
-		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent, NULL TSRMLS_CC); \
+		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent TSRMLS_CC); \
 		tidy_ce_ ## name->ce_flags |= __flags;  \
 		memcpy(&tidy_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
 		tidy_object_handlers_ ## name.clone_obj = NULL; \
@@ -890,7 +890,7 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 					name = (char *)tidyAttrName(tempattr);
 					val = (char *)tidyAttrValue(tempattr);
 					if (name && val) {
-						add_assoc_string(attribute, name, val, TRUE);
+						add_assoc_string(attribute, name, val);
 					}
 				} while((tempattr = tidyAttrNext(tempattr)));
 			} else {
@@ -1425,7 +1425,9 @@ static PHP_FUNCTION(tidy_get_config)
 		opt_value = php_tidy_get_opt_val(obj->ptdoc, opt, &optt TSRMLS_CC);
 		switch (optt) {
 			case TidyString:
-				add_assoc_string(return_value, opt_name, (char*)opt_value, 0);
+				// TODO: avoid reallocation ???
+				add_assoc_string(return_value, opt_name, (char*)opt_value);
+				efree(opt_value);
 				break;
 
 			case TidyInteger:

@@ -44,9 +44,9 @@ static int phar_dir_close(php_stream *stream, int close_handle TSRMLS_DC)  /* {{
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
-	if (data && data->arBuckets) {
+	if (data && data->arHash) {
 		zend_hash_destroy(data);
-		data->arBuckets = 0;
+		data->arHash = 0;
 		FREE_HASHTABLE(data);
 		stream->abstract = NULL;
 	}
@@ -158,8 +158,8 @@ static int phar_compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{
 	Bucket *s;
 	int result;
 
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
+	f = (Bucket *) a;
+	s = (Bucket *) b;
 	result = zend_binary_strcmp(f->arKey, f->nKeyLength, s->arKey, s->nKeyLength);
 
 	if (result < 0) {
@@ -359,7 +359,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return ret;
 	}
 
-	if (!phar->manifest.arBuckets) {
+	if (!phar->manifest.arHash) {
 		php_url_free(resource);
 		return NULL;
 	}

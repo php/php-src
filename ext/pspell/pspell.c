@@ -534,7 +534,7 @@ static PHP_FUNCTION(pspell_suggest)
 	if (wl) {
 		PspellStringEmulation *els = pspell_word_list_elements(wl);
 		while ((sug = pspell_string_emulation_next(els)) != 0) {
-			add_next_index_string(return_value,(char *)sug,1);
+			add_next_index_string(return_value,(char *)sug);
 		}
 		delete_pspell_string_emulation(els);
 	} else {

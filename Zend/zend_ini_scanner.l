@@ -131,11 +131,9 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 /* Eat trailing whitespace */
 #define EAT_TRAILING_WHITESPACE()	EAT_TRAILING_WHITESPACE_EX('X')
 
-#define zend_ini_copy_value(retval, str, len) {  \
-	Z_STRVAL_P(retval) = zend_strndup(str, len); \
-	Z_STRLEN_P(retval) = len;                    \
-	Z_TYPE_P(retval) = IS_STRING;                \
-}
+#define zend_ini_copy_value(retval, str, len)	\
+	ZVAL_NEW_STR(retval, STR_INIT(str, len, 1))
+
 
 #define RETURN_TOKEN(type, str, len) {           \
 	zend_ini_copy_value(ini_lval, str, len);     \
@@ -144,7 +142,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 
 static void _yy_push_state(int new_state TSRMLS_DC)
 {
-	zend_stack_push(&SCNG(state_stack), (void *) &YYGETCONDITION(), sizeof(int));
+	zend_stack_push(&SCNG(state_stack), (void *) &YYGETCONDITION());
 	YYSETCONDITION(new_state);
 }
 
@@ -152,8 +150,7 @@ static void _yy_push_state(int new_state TSRMLS_DC)
 
 static void yy_pop_state(TSRMLS_D)
 {
-	int *stack_state;
-	zend_stack_top(&SCNG(state_stack), (void **) &stack_state);
+	int *stack_state = zend_stack_top(&SCNG(state_stack));
 	YYSETCONDITION(*stack_state);
 	zend_stack_del_top(&SCNG(state_stack));
 }
@@ -187,7 +184,7 @@ static int init_ini_scanner(int scanner_mode, zend_file_handle *fh TSRMLS_DC)
 		ini_filename = NULL;
 	}
 
-	zend_stack_init(&SCNG(state_stack));
+	zend_stack_init(&SCNG(state_stack), sizeof(int));
 	BEGIN(INITIAL);
 
 	return SUCCESS;

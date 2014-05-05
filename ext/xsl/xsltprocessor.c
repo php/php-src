@@ -794,7 +794,8 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 			
 			ALLOC_ZVAL(new_string);
 			Z_ADDREF_PP(entry);
-			COPY_PZVAL_TO_ZVAL(*new_string, *entry);
+			ZVAL_COPY_VALUE(new_string, *entry);
+//???			COPY_PZVAL_TO_ZVAL(*new_string, *entry);
 			
 			zend_hash_update(intern->parameter, string_key, string_key_len, &new_string, sizeof(zval*), NULL);
 			zend_hash_move_forward(Z_ARRVAL_P(array_value));

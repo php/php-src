@@ -2,11 +2,11 @@
 Error case: class constant as an array
 --FILE--
 <?php
-class myclass
-{
-	const myConst = array();
-}
+  class myclass
+  {
+      const myConst = array();
+  }
 ?>
-===DONE===
 --EXPECTF--
-===DONE===
+
+Fatal error: Arrays are not allowed in class constants in %s on line 4

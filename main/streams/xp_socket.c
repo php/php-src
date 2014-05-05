@@ -619,7 +619,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	int portno, bindport = 0;
 	int err = 0;
 	int ret;
-	zval **tmpzval = NULL;
+	zval *tmpzval = NULL;
 
 #ifdef AF_UNIX
 	if (stream->ops == &php_stream_unix_socket_ops || stream->ops == &php_stream_unixdg_socket_ops) {
@@ -654,15 +654,15 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		return -1;
 	}
 
-	if (stream->context && php_stream_context_get_option(stream->context, "socket", "bindto", &tmpzval) == SUCCESS) {
-		if (Z_TYPE_PP(tmpzval) != IS_STRING) {
+	if (stream->context && (tmpzval = php_stream_context_get_option(stream->context, "socket", "bindto")) != NULL) {
+		if (Z_TYPE_P(tmpzval) != IS_STRING) {
 			if (xparam->want_errortext) {
 				spprintf(&xparam->outputs.error_text, 0, "local_addr context option is not a string.");
 			}
 			efree(host);
 			return -1;
 		}
-		bindto = parse_ip_address_ex(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), &bindport, xparam->want_errortext, &xparam->outputs.error_text TSRMLS_CC);
+		bindto = parse_ip_address_ex(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval), &bindport, xparam->want_errortext, &xparam->outputs.error_text TSRMLS_CC);
 	}
 
 	/* Note: the test here for php_stream_udp_socket_ops is important, because we
@@ -734,7 +734,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 			if (xparam->outputs.client) {
 				xparam->outputs.client->context = stream->context;
 				if (stream->context) {
-					zend_list_addref(stream->context->rsrc_id);
+					GC_REFCOUNT(stream->context->res)++;
 				}
 			}
 		}

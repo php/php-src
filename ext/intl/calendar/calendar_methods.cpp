@@ -210,7 +210,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_available_locales)
 	array_init(return_value);
 	for (int i = 0; i < count; i++) {
 		Locale locale = availLocales[i];
-		add_next_index_string(return_value, locale.getName(), 1);
+		add_next_index_string(return_value, locale.getName());
 	}
 }
 

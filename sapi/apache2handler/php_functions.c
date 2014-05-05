@@ -113,7 +113,7 @@ PHP_FUNCTION(virtual)
 #define ADD_TIME(name) \
 		add_property_long(return_value, #name, apr_time_sec(rr->name));
 #define ADD_STRING(name) \
-		if (rr->name) add_property_string(return_value, #name, (char *) rr->name, 1)
+		if (rr->name) add_property_string(return_value, #name, (char *) rr->name)
 
 PHP_FUNCTION(apache_lookup_uri)
 {
@@ -187,7 +187,7 @@ PHP_FUNCTION(apache_request_headers)
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) val = "";
-		add_assoc_string(return_value, key, val, 1);
+		add_assoc_string(return_value, key, val);
 	APR_ARRAY_FOREACH_CLOSE()
 }
 /* }}} */
@@ -211,7 +211,7 @@ PHP_FUNCTION(apache_response_headers)
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) val = "";
-		add_assoc_string(return_value, key, val, 1);
+		add_assoc_string(return_value, key, val);
 	APR_ARRAY_FOREACH_CLOSE()
 }
 /* }}} */
@@ -355,9 +355,9 @@ PHP_FUNCTION(apache_get_modules)
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
-			add_next_index_stringl(return_value, s, (p - s), 1);
+			add_next_index_stringl(return_value, s, (p - s));
 		} else {
-			add_next_index_string(return_value, s, 1);
+			add_next_index_string(return_value, s);
 		}
 	}
 }

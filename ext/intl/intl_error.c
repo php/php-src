@@ -240,7 +240,7 @@ void intl_register_IntlException_class( TSRMLS_D )
 	/* Create and register 'IntlException' class. */
 	INIT_CLASS_ENTRY_EX( ce, "IntlException", sizeof( "IntlException" ) - 1, NULL );
 	IntlException_ce_ptr = zend_register_internal_class_ex( &ce,
-		default_exception_ce, NULL TSRMLS_CC );
+		default_exception_ce TSRMLS_CC );
 	IntlException_ce_ptr->create_object = default_exception_ce->create_object;
 }
 

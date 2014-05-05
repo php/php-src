@@ -404,7 +404,7 @@ PHP_FUNCTION(apache_request_headers)
 		if (!tenv[i].key) {
 			continue;
 		}
-		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
+		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val)==FAILURE) {
 			RETURN_FALSE;
 		}
     }
@@ -424,7 +424,7 @@ PHP_FUNCTION(apache_response_headers)
 	tenv = (table_entry *)env_arr->elts;
 	for (i = 0; i < env_arr->nelts; ++i) {
 		if (!tenv[i].key) continue;
-		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
+		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val)==FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -475,34 +475,34 @@ PHP_FUNCTION(apache_lookup_uri)
 	add_property_long(return_value,"status", rr->status);
 
 	if (rr->the_request) {
-		add_property_string(return_value,"the_request", rr->the_request, 1);
+		add_property_string(return_value,"the_request", rr->the_request);
 	}
 	if (rr->status_line) {
-		add_property_string(return_value,"status_line", (char *)rr->status_line, 1);		
+		add_property_string(return_value,"status_line", (char *)rr->status_line);
 	}
 	if (rr->method) {
-		add_property_string(return_value,"method", (char *)rr->method, 1);		
+		add_property_string(return_value,"method", (char *)rr->method);
 	}
 	if (rr->content_type) {
-		add_property_string(return_value,"content_type", (char *)rr->content_type, 1);
+		add_property_string(return_value,"content_type", (char *)rr->content_type);
 	}
 	if (rr->handler) {
-		add_property_string(return_value,"handler", (char *)rr->handler, 1);		
+		add_property_string(return_value,"handler", (char *)rr->handler);
 	}
 	if (rr->uri) {
-		add_property_string(return_value,"uri", rr->uri, 1);
+		add_property_string(return_value,"uri", rr->uri);
 	}
 	if (rr->filename) {
-		add_property_string(return_value,"filename", rr->filename, 1);
+		add_property_string(return_value,"filename", rr->filename);
 	}
 	if (rr->path_info) {
-		add_property_string(return_value,"path_info", rr->path_info, 1);
+		add_property_string(return_value,"path_info", rr->path_info);
 	}
 	if (rr->args) {
-		add_property_string(return_value,"args", rr->args, 1);
+		add_property_string(return_value,"args", rr->args);
 	}
 	if (rr->boundary) {
-		add_property_string(return_value,"boundary", rr->boundary, 1);
+		add_property_string(return_value,"boundary", rr->boundary);
 	}
 
 	add_property_long(return_value,"no_cache", rr->no_cache);
@@ -515,7 +515,7 @@ PHP_FUNCTION(apache_lookup_uri)
 
 #if MODULE_MAGIC_NUMBER >= 19980324
 	if (rr->unparsed_uri) {
-		add_property_string(return_value,"unparsed_uri", rr->unparsed_uri, 1);
+		add_property_string(return_value,"unparsed_uri", rr->unparsed_uri);
 	}
 	if(rr->mtime) {
 		add_property_long(return_value,"mtime", rr->mtime);
@@ -580,9 +580,9 @@ PHP_FUNCTION(apache_get_modules)
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
-			add_next_index_stringl(return_value, s, (p - s), 1);
+			add_next_index_stringl(return_value, s, (p - s));
 		} else {
-			add_next_index_string(return_value, s, 1);
+			add_next_index_string(return_value, s);
 		}	
 	}
 }

@@ -536,7 +536,7 @@ carry_on:
 		}
 
 		return;
-	} else if (PHAR_GLOBALS->phar_fname_map.arBuckets && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void **)&pphar)) {
+	} else if (PHAR_GLOBALS->phar_fname_map.arHash && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void **)&pphar)) {
 		goto carry_on;
 	} else if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_find(&cached_phars, fname, fname_len, (void **)&pphar)) {
 		if (SUCCESS == phar_copy_on_write(pphar TSRMLS_CC)) {
@@ -1278,17 +1278,17 @@ PHP_METHOD(Phar, getSupportedSignatures)
 	
 	array_init(return_value);
 
-	add_next_index_stringl(return_value, "MD5", 3, 1);
-	add_next_index_stringl(return_value, "SHA-1", 5, 1);
+	add_next_index_stringl(return_value, "MD5", 3);
+	add_next_index_stringl(return_value, "SHA-1", 5);
 #ifdef PHAR_HASH_OK
-	add_next_index_stringl(return_value, "SHA-256", 7, 1);
-	add_next_index_stringl(return_value, "SHA-512", 7, 1);
+	add_next_index_stringl(return_value, "SHA-256", 7);
+	add_next_index_stringl(return_value, "SHA-512", 7);
 #endif
 #if PHAR_HAVE_OPENSSL
-	add_next_index_stringl(return_value, "OpenSSL", 7, 1);
+	add_next_index_stringl(return_value, "OpenSSL", 7);
 #else
 	if (zend_hash_exists(&module_registry, "openssl", sizeof("openssl"))) {
-		add_next_index_stringl(return_value, "OpenSSL", 7, 1);
+		add_next_index_stringl(return_value, "OpenSSL", 7);
 	}
 #endif
 }
@@ -1307,11 +1307,11 @@ PHP_METHOD(Phar, getSupportedCompression)
 	phar_request_initialize(TSRMLS_C);
 
 	if (PHAR_G(has_zlib)) {
-		add_next_index_stringl(return_value, "GZ", 2, 1);
+		add_next_index_stringl(return_value, "GZ", 2);
 	}
 
 	if (PHAR_G(has_bz2)) {
-		add_next_index_stringl(return_value, "BZIP2", 5, 1);
+		add_next_index_stringl(return_value, "BZIP2", 5);
 	}
 }
 /* }}} */
@@ -1716,7 +1716,9 @@ after_open_fp:
 		php_stream_close(fp);
 	}
 
-	add_assoc_string(p_obj->ret, str_key, opened, 0);
+	// TODO: avoid reallocation ???
+	add_assoc_string(p_obj->ret, str_key, opened);
+	efree(opened);
 
 	if (save) {
 		efree(save);
@@ -3087,26 +3089,28 @@ PHP_METHOD(Phar, getSignature)
 		int unknown_len;
 
 		array_init(return_value);
-		add_assoc_stringl(return_value, "hash", phar_obj->arc.archive->signature, phar_obj->arc.archive->sig_len, 1);
+		add_assoc_stringl(return_value, "hash", phar_obj->arc.archive->signature, phar_obj->arc.archive->sig_len);
 		switch(phar_obj->arc.archive->sig_flags) {
 			case PHAR_SIG_MD5:
-				add_assoc_stringl(return_value, "hash_type", "MD5", 3, 1);
+				add_assoc_stringl(return_value, "hash_type", "MD5", 3);
 				break;
 			case PHAR_SIG_SHA1:
-				add_assoc_stringl(return_value, "hash_type", "SHA-1", 5, 1);
+				add_assoc_stringl(return_value, "hash_type", "SHA-1", 5);
 				break;
 			case PHAR_SIG_SHA256:
-				add_assoc_stringl(return_value, "hash_type", "SHA-256", 7, 1);
+				add_assoc_stringl(return_value, "hash_type", "SHA-256", 7);
 				break;
 			case PHAR_SIG_SHA512:
-				add_assoc_stringl(return_value, "hash_type", "SHA-512", 7, 1);
+				add_assoc_stringl(return_value, "hash_type", "SHA-512", 7);
 				break;
 			case PHAR_SIG_OPENSSL:
-				add_assoc_stringl(return_value, "hash_type", "OpenSSL", 7, 1);
+				add_assoc_stringl(return_value, "hash_type", "OpenSSL", 7);
 				break;
 			default:
 				unknown_len = spprintf(&unknown, 0, "Unknown (%u)", phar_obj->arc.archive->sig_flags);
-				add_assoc_stringl(return_value, "hash_type", unknown, unknown_len, 0);
+				// TODO: avoid reallocation ???
+				add_assoc_stringl(return_value, "hash_type", unknown, unknown_len);
+				efree(unknown);
 				break;
 		}
 	} else {
@@ -3608,7 +3612,7 @@ PHP_METHOD(Phar, offsetGet)
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
 		MAKE_STD_ZVAL(zfname);
 		ZVAL_STRINGL(zfname, fname, fname_len, 0);
-		spl_instantiate_arg_ex1(phar_obj->spl.info_class, &return_value, 0, zfname TSRMLS_CC);
+		spl_instantiate_arg_ex1(phar_obj->spl.info_class, return_value, zfname TSRMLS_CC);
 		zval_ptr_dtor(&zfname);
 	}
 }
@@ -5351,21 +5355,21 @@ void phar_object_init(TSRMLS_D) /* {{{ */
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "PharException", phar_exception_methods);
-	phar_ce_PharException = zend_register_internal_class_ex(&ce, phar_exception_get_default(), NULL  TSRMLS_CC);
+	phar_ce_PharException = zend_register_internal_class_ex(&ce, phar_exception_get_default() TSRMLS_CC);
 
 #if HAVE_SPL
 	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
-	phar_ce_archive = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator, NULL  TSRMLS_CC);
+	phar_ce_archive = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC);
 
 	zend_class_implements(phar_ce_archive TSRMLS_CC, 2, spl_ce_Countable, zend_ce_arrayaccess);
 
 	INIT_CLASS_ENTRY(ce, "PharData", php_archive_methods);
-	phar_ce_data = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator, NULL  TSRMLS_CC);
+	phar_ce_data = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC);
 
 	zend_class_implements(phar_ce_data TSRMLS_CC, 2, spl_ce_Countable, zend_ce_arrayaccess);
 
 	INIT_CLASS_ENTRY(ce, "PharFileInfo", php_entry_methods);
-	phar_ce_entry = zend_register_internal_class_ex(&ce, spl_ce_SplFileInfo, NULL  TSRMLS_CC);
+	phar_ce_entry = zend_register_internal_class_ex(&ce, spl_ce_SplFileInfo TSRMLS_CC);
 #else
 	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
 	phar_ce_archive = zend_register_internal_class(&ce TSRMLS_CC);

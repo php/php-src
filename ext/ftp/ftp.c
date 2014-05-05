@@ -479,7 +479,7 @@ ftp_raw(ftpbuf_t *ftp, const char *cmd, zval *return_value)
 	}
 	array_init(return_value);
 	while (ftp_readline(ftp)) {
-		add_next_index_string(return_value, ftp->inbuf, 1);
+		add_next_index_string(return_value, ftp->inbuf);
 		if (isdigit(ftp->inbuf[0]) && isdigit(ftp->inbuf[1]) && isdigit(ftp->inbuf[2]) && ftp->inbuf[3] == ' ') {
 			return;
 		}

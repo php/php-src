@@ -991,13 +991,13 @@ PHP_FUNCTION(ldap_get_entries)
 			array_init(tmp2);
 			add_assoc_long(tmp2, "count", num_values);
 			for (i = 0; i < num_values; i++) {
-				add_index_stringl(tmp2, i, ldap_value[i]->bv_val, ldap_value[i]->bv_len, 1);
+				add_index_stringl(tmp2, i, ldap_value[i]->bv_val, ldap_value[i]->bv_len);
 			}	
 			ldap_value_free_len(ldap_value);
 
 			attr_len = strlen(attribute);
 			zend_hash_update(Z_ARRVAL_P(tmp1), php_strtolower(attribute, attr_len), attr_len+1, (void *) &tmp2, sizeof(zval *), NULL);
-			add_index_string(tmp1, num_attrib, attribute, 1);
+			add_index_string(tmp1, num_attrib, attribute);
 
 			num_attrib++;
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP || WINDOWS
@@ -1013,7 +1013,7 @@ PHP_FUNCTION(ldap_get_entries)
 
 		add_assoc_long(tmp1, "count", num_attrib);
 		dn = ldap_get_dn(ldap, ldap_result_entry);
-		add_assoc_string(tmp1, "dn", dn, 1);
+		add_assoc_string(tmp1, "dn", dn);
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP || WINDOWS
 		ldap_memfree(dn);
 #else
@@ -1130,12 +1130,12 @@ PHP_FUNCTION(ldap_get_attributes)
 		array_init(tmp);
 		add_assoc_long(tmp, "count", num_values);
 		for (i = 0; i < num_values; i++) {
-			add_index_stringl(tmp, i, ldap_value[i]->bv_val, ldap_value[i]->bv_len, 1);
+			add_index_stringl(tmp, i, ldap_value[i]->bv_val, ldap_value[i]->bv_len);
 		}
 		ldap_value_free_len(ldap_value);
 
 		zend_hash_update(Z_ARRVAL_P(return_value), attribute, strlen(attribute)+1, (void *) &tmp, sizeof(zval *), NULL);
-		add_index_string(return_value, num_attrib, attribute, 1);
+		add_index_string(return_value, num_attrib, attribute);
 
 		num_attrib++;
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP || WINDOWS
@@ -1180,7 +1180,7 @@ PHP_FUNCTION(ldap_get_values_len)
 	array_init(return_value);
 	
 	for (i=0; i<num_values; i++) {
-		add_next_index_stringl(return_value, ldap_value_len[i]->bv_val, ldap_value_len[i]->bv_len, 1);
+		add_next_index_stringl(return_value, ldap_value_len[i]->bv_val, ldap_value_len[i]->bv_len);
 	}
 	
 	add_assoc_long(return_value, "count", num_values);
@@ -1244,7 +1244,7 @@ PHP_FUNCTION(ldap_explode_dn)
 
 	add_assoc_long(return_value, "count", count);
 	for (i = 0; i<count; i++) {
-		add_index_string(return_value, i, ldap_value[i], 1);
+		add_index_string(return_value, i, ldap_value[i]);
 	}
 
 	ldap_value_free(ldap_value);
@@ -2118,7 +2118,7 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			void *val;
 			convert_to_boolean_ex(newval);
-			val = Z_LVAL_PP(newval)
+			val = Z_TYPE_PP(newval) == IS_TRUE
 				? LDAP_OPT_ON : LDAP_OPT_OFF;
 			if (ldap_set_option(ldap, option, val)) {
 				RETURN_FALSE;
@@ -2165,7 +2165,7 @@ PHP_FUNCTION(ldap_set_option)
 				}
 				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "iscritical", sizeof("iscritical"), (void **) &val) == SUCCESS) {
 					convert_to_boolean_ex(val);
-					ctrl->ldctl_iscritical = Z_BVAL_PP(val);
+					ctrl->ldctl_iscritical = Z_TYPE_PP(val) == IS_TRUE;
 				} else {
 					ctrl->ldctl_iscritical = 0;
 				}
@@ -2235,7 +2235,7 @@ PHP_FUNCTION(ldap_parse_result)
 			if (lreferrals != NULL) {
 				refp = lreferrals;
 				while (*refp) {
-					add_next_index_string(referrals, *refp, 1);
+					add_next_index_string(referrals, *refp);
 					refp++;
 				}
 				ldap_value_free(lreferrals);
@@ -2346,7 +2346,7 @@ PHP_FUNCTION(ldap_parse_reference)
 	if (lreferrals != NULL) {
 		refp = lreferrals;
 		while (*refp) {
-			add_next_index_string(referrals, *refp, 1);
+			add_next_index_string(referrals, *refp);
 			refp++;
 		}
 		ldap_value_free(lreferrals);
@@ -2713,9 +2713,9 @@ PHP_FUNCTION(ldap_control_paged_result)
 		/* return a PHP control object */
 		array_init(return_value);
 
-		add_assoc_string(return_value, "oid", ctrl.ldctl_oid, 1);
+		add_assoc_string(return_value, "oid", ctrl.ldctl_oid);
 		if (ctrl.ldctl_value.bv_len) {
-			add_assoc_stringl(return_value, "value", ctrl.ldctl_value.bv_val, ctrl.ldctl_value.bv_len, 1);
+			add_assoc_stringl(return_value, "value", ctrl.ldctl_value.bv_val, ctrl.ldctl_value.bv_len);
 		}
 		if (ctrl.ldctl_iscritical) {
 			add_assoc_bool(return_value, "iscritical", ctrl.ldctl_iscritical);

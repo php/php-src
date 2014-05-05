@@ -1660,9 +1660,11 @@ go_out:
 	if (errcode) {
 		array_init(return_value);
 		add_assoc_long(return_value, "code", errcode);
-		add_assoc_string(return_value, "message", (char*) errbuf, 0);
+		// TODO: avoid reallocation ???
+		add_assoc_string(return_value, "message", (char*) errbuf);
+		efree(errbuf);
 		add_assoc_long(return_value, "offset", error_offset);
-		add_assoc_string(return_value, "sqltext", sqltext ? (char *) sqltext : "", 1);
+		add_assoc_string(return_value, "sqltext", sqltext ? (char *) sqltext : "");
 	} else {
 		RETURN_FALSE;
 	}

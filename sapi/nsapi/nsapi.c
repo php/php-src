@@ -414,7 +414,7 @@ PHP_FUNCTION(nsapi_request_headers)
 	for (i=0; i < rc->rq->headers->hsize; i++) {
 		entry=rc->rq->headers->ht[i];
 		while (entry) {
-			add_assoc_string(return_value, entry->param->name, entry->param->value, 1);
+			add_assoc_string(return_value, entry->param->name, entry->param->value);
 			entry=entry->next;
 		}
   	}
@@ -438,7 +438,7 @@ PHP_FUNCTION(nsapi_response_headers)
 	for (i=0; i < rc->rq->srvhdrs->hsize; i++) {
 		entry=rc->rq->srvhdrs->ht[i];
 		while (entry) {
-			add_assoc_string(return_value, entry->param->name, entry->param->value, 1);
+			add_assoc_string(return_value, entry->param->name, entry->param->value);
 			entry=entry->next;
 		}
   	}

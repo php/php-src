@@ -168,7 +168,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	add_assoc_bool_ex(&zv, "valid", sizeof("valid"), 1);
 
 	add_assoc_string_ex(&zv, "type", sizeof("type"),
-		const_cast<char*>(cal->getType()), 1);
+		const_cast<char*>(cal->getType()));
 
 	{
 		zval		   ztz = zval_used_for_init,
@@ -191,10 +191,10 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		Locale		locale	= cal->getLocale(ULOC_VALID_LOCALE, uec);
 		if (U_SUCCESS(uec)) {
 			add_assoc_string_ex(&zv, "locale", sizeof("locale"),
-				const_cast<char*>(locale.getName()), 1);
+				const_cast<char*>(locale.getName()));
 		} else {
 			add_assoc_string_ex(&zv, "locale", sizeof("locale"),
-				const_cast<char*>(u_errorName(uec)), 1);
+				const_cast<char*>(u_errorName(uec)));
 		}
 	}
 
@@ -210,7 +210,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		if (U_SUCCESS(uec)) {
 			add_assoc_long(zfields, name, (long)res);
 		} else {
-			add_assoc_string(zfields, name, const_cast<char*>(u_errorName(uec)), 1);
+			add_assoc_string(zfields, name, const_cast<char*>(u_errorName(uec)));
 		}
 	}
 
@@ -490,7 +490,7 @@ void calendar_register_IntlCalendar_class(TSRMLS_D)
 	/* Create and register 'IntlGregorianCalendar' class. */
 	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", GregorianCalendar_class_functions);
 	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
-		Calendar_ce_ptr, NULL TSRMLS_CC);
+		Calendar_ce_ptr TSRMLS_CC);
 	if (!GregorianCalendar_ce_ptr) {
 		//can't happen know without bigger problems before
 		php_error_docref0(NULL TSRMLS_CC, E_ERROR,

@@ -25,14 +25,14 @@
 #include "php.h"
 #include "php_metaphone.h"
 
-static int metaphone(unsigned char *word, int word_len, long max_phonemes, char **phoned_word, int traditional);
+static int metaphone(unsigned char *word, int word_len, long max_phonemes, zend_string **phoned_word, int traditional);
 
 /* {{{ proto string metaphone(string text[, int phones])
    Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
 {
 	char *str;
-	char *result = 0;
+	zend_string *result = NULL;
 	int str_len;
 	long phones = 0;
 
@@ -42,10 +42,10 @@ PHP_FUNCTION(metaphone)
 	}
 
 	if (metaphone((unsigned char *)str, str_len, phones, &result, 1) == 0) {
-		RETVAL_STRING(result, 0);
+		RETVAL_STR(result);
 	} else {
 		if (result) {
-			efree(result);
+			STR_FREE(result);
 		}
 		RETURN_FALSE;
 	}
@@ -144,17 +144,20 @@ static char Lookahead(char *word, int how_far)
  * could be one though; or more too). */
 #define Phonize(c)	{ \
 						if (p_idx >= max_buffer_len) { \
-							*phoned_word = safe_erealloc(*phoned_word, 2, sizeof(char), max_buffer_len); \
+							*phoned_word = STR_REALLOC(*phoned_word, 2 * sizeof(char) + max_buffer_len, 0); \
 							max_buffer_len += 2; \
 						} \
-						(*phoned_word)[p_idx++] = c; \
+						(*phoned_word)->val[p_idx++] = c; \
+						(*phoned_word)->len = p_idx; \
 					}
 /* Slap a null character on the end of the phoned word */
 #define End_Phoned_Word	{ \
 							if (p_idx == max_buffer_len) { \
-								*phoned_word = safe_erealloc(*phoned_word, 1, sizeof(char), max_buffer_len); \
+								*phoned_word = STR_REALLOC(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
+								max_buffer_len += 1; \
 							} \
-							(*phoned_word)[p_idx] = '\0'; \
+							(*phoned_word)->val[p_idx] = '\0'; \
+							(*phoned_word)->len = p_idx; \
 						}
 /* How long is the phoned word? */
 #define Phone_Len	(p_idx)
@@ -164,7 +167,7 @@ static char Lookahead(char *word, int how_far)
 
 /* {{{ metaphone
  */
-static int metaphone(unsigned char *word, int word_len, long max_phonemes, char **phoned_word, int traditional)
+static int metaphone(unsigned char *word, int word_len, long max_phonemes, zend_string **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
 	int p_idx = 0;				/* end of the phoned phrase */
@@ -186,10 +189,10 @@ static int metaphone(unsigned char *word, int word_len, long max_phonemes, char 
 /*-- Allocate memory for our phoned_phrase --*/
 	if (max_phonemes == 0) {	/* Assume largest possible */
 		max_buffer_len = word_len;
-		*phoned_word = safe_emalloc(sizeof(char), word_len, 1);
+		*phoned_word = STR_ALLOC(sizeof(char) * word_len + 1, 0);
 	} else {
 		max_buffer_len = max_phonemes;
-		*phoned_word = safe_emalloc(sizeof(char), max_phonemes, 1);
+		*phoned_word = STR_ALLOC(sizeof(char) * max_phonemes + 1, 0);
 	}
 
 

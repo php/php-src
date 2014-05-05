@@ -323,7 +323,7 @@ U_CFUNC void breakiterator_register_IntlPartsIterator_class(TSRMLS_D)
 	/* Create and register 'BreakIterator' class. */
 	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", IntlPartsIterator_class_functions);
 	IntlPartsIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-			IntlIterator_ce_ptr, NULL TSRMLS_CC);
+			IntlIterator_ce_ptr TSRMLS_CC);
 	IntlPartsIterator_ce_ptr->create_object = IntlPartsIterator_object_create;
 
 	memcpy(&IntlPartsIterator_handlers, &IntlIterator_handlers,

@@ -671,7 +671,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 		if (fd != -1) {
 			char *tmp;
 			int len;
-			char *error_time_str;
+			zend_string *error_time_str;
 
 			time(&error_time);
 #ifdef ZTS
@@ -683,13 +683,13 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 #else
 			error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 1 TSRMLS_CC);
 #endif
-			len = spprintf(&tmp, 0, "[%s] %s%s", error_time_str, log_message, PHP_EOL);
+			len = spprintf(&tmp, 0, "[%s] %s%s", error_time_str->val, log_message, PHP_EOL);
 #ifdef PHP_WIN32
 			php_flock(fd, 2);
 #endif
 			php_ignore_value(write(fd, tmp, len));
 			efree(tmp);
-			efree(error_time_str);
+			STR_FREE(error_time_str);
 			close(fd);
 			PG(in_error_log) = 0;
 			return;
@@ -741,6 +741,7 @@ PHPAPI int php_printf(const char *format, ...)
  */
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC)
 {
+	zend_string *replace_buffer = NULL, *replace_origin = NULL;
 	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
 	char *docref_target = "", *docref_root = "";
 	char *p;
@@ -757,11 +758,10 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	buffer_len = vspprintf(&buffer, 0, format, args);
 
 	if (PG(html_errors)) {
-		size_t len;
-		char *replace = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+		replace_buffer = php_escape_html_entities(buffer, buffer_len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 		efree(buffer);
-		buffer = replace;
-		buffer_len = len;
+		buffer = replace_buffer->val;
+		buffer_len = replace_buffer->len;
 	}
 
 	/* which function caused the problem if any at all */
@@ -815,10 +815,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	}
 
 	if (PG(html_errors)) {
-		size_t len;
-		char *replace = php_escape_html_entities(origin, origin_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+		replace_origin = php_escape_html_entities(origin, origin_len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 		efree(origin);
-		origin = replace;
+		origin = replace_origin->val;
 	}
 
 	/* origin and buffer available, so lets come up with the error message */
@@ -889,24 +888,28 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	} else {
 		spprintf(&message, 0, "%s: %s", origin, buffer);
 	}
-	efree(origin);
+	if (replace_origin) {
+		STR_FREE(replace_origin);
+	} else {
+		efree(origin);
+	}
 	if (docref_buf) {
 		efree(docref_buf);
 	}
 
 	if (PG(track_errors) && module_initialized &&
-			(!EG(user_error_handler) || !(EG(user_error_handler_error_reporting) & type))) {
-		if (!EG(active_symbol_table)) {
-			zend_rebuild_symbol_table(TSRMLS_C);
-		}
-		if (EG(active_symbol_table)) {
-			zval *tmp;
-			ALLOC_INIT_ZVAL(tmp);
-			ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
-			zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(zval *), NULL);
+			(Z_TYPE(EG(user_error_handler)) == IS_UNDEF || !(EG(user_error_handler_error_reporting) & type))) {
+		zval tmp;
+		ZVAL_STRINGL(&tmp, buffer, buffer_len);
+		if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0 TSRMLS_CC) == FAILURE) {
+			zval_ptr_dtor(&tmp);
 		}
 	}
-	efree(buffer);
+	if (replace_buffer) {
+		STR_FREE(replace_buffer);
+	} else {
+		efree(buffer);
+	}
 
 	php_error(type, "%s", message);
 	efree(message);
@@ -1125,10 +1128,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 				if (PG(html_errors)) {
 					if (type == E_ERROR || type == E_PARSE) {
-						size_t len;
-						char *buf = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf, error_filename, error_lineno, STR_PRINT(append_string));
-						efree(buf);
+						zend_string *buf = php_escape_html_entities(buffer, buffer_len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf->val, error_filename, error_lineno, STR_PRINT(append_string));
+						STR_FREE(buf);
 					} else {
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 					}
@@ -1230,10 +1232,11 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
 		if (EG(active_symbol_table)) {
-			zval *tmp;
-			ALLOC_INIT_ZVAL(tmp);
-			ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
-			zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
+			zval tmp;
+			ZVAL_STRINGL(&tmp, buffer, buffer_len);
+			if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0 TSRMLS_CC) == FAILURE) {
+				zval_ptr_dtor(&tmp);
+			}
 		}
 	}
 
@@ -1311,6 +1314,7 @@ PHP_FUNCTION(set_time_limit)
 	long new_timeout;
 	char *new_timeout_str;
 	int new_timeout_strlen;
+	zend_string *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_timeout) == FAILURE) {
 		return;
@@ -1318,11 +1322,13 @@ PHP_FUNCTION(set_time_limit)
 
 	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, "%ld", new_timeout);
 
-	if (zend_alter_ini_entry_ex("max_execution_time", sizeof("max_execution_time"), new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
+	key = STR_INIT("max_execution_time", sizeof("max_execution_time")-1, 0);
+	if (zend_alter_ini_entry_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
+	STR_RELEASE(key);
 	efree(new_timeout_str);
 }
 /* }}} */
@@ -1618,11 +1624,10 @@ int php_request_startup(TSRMLS_D)
 		}
 
 		if (PG(output_handler) && PG(output_handler)[0]) {
-			zval *oh;
+			zval oh;
 
-			MAKE_STD_ZVAL(oh);
-			ZVAL_STRING(oh, PG(output_handler), 1);
-			php_output_start_user(oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
+			ZVAL_STRING(&oh, PG(output_handler));
+			php_output_start_user(&oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 			zval_ptr_dtor(&oh);
 		} else if (PG(output_buffering)) {
 			php_output_start_user(NULL, PG(output_buffering) > 1 ? PG(output_buffering) : 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
@@ -1733,9 +1738,7 @@ void php_request_shutdown_for_hook(void *dummy)
 		int i;
 
 		for (i = 0; i < NUM_TRACK_VARS; i++) {
-			if (PG(http_globals)[i]) {
-				zval_ptr_dtor(&PG(http_globals)[i]);
-			}
+			zval_ptr_dtor(&PG(http_globals)[i]);
 		}
 	} zend_end_try();
 
@@ -1829,9 +1832,7 @@ void php_request_shutdown(void *dummy)
 		int i;
 
 		for (i=0; i<NUM_TRACK_VARS; i++) {
-			if (PG(http_globals)[i]) {
-				zval_ptr_dtor(&PG(http_globals)[i]);
-			}
+			zval_ptr_dtor(&PG(http_globals)[i]);
 		}
 	} zend_end_try();
 
@@ -1867,10 +1868,10 @@ void php_request_shutdown(void *dummy)
 	} zend_end_try();
 
 	/* 14. Free Willy (here be crashes) */
+	zend_interned_strings_restore(TSRMLS_C);
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0 TSRMLS_CC);
 	} zend_end_try();
-	zend_interned_strings_restore(TSRMLS_C);
 
 	/* 15. Reset max_execution_time */
 	zend_try {
@@ -2279,7 +2280,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	/* register additional functions */
 	if (sapi_module.additional_functions) {
-		if (zend_hash_find(&module_registry, "standard", sizeof("standard"), (void**)&module)==SUCCESS) {
+		if ((module = zend_hash_str_find_ptr(&module_registry, "standard", sizeof("standard")-1)) != NULL) {
 			EG(current_module) = module;
 			zend_register_functions(NULL, sapi_module.additional_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
 			EG(current_module) = NULL;
@@ -2291,7 +2292,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	php_disable_classes(TSRMLS_C);
 
 	/* make core report what it should */
-	if (zend_hash_find(&module_registry, "core", sizeof("core"), (void**)&module)==SUCCESS) {
+	if ((module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core")-1)) != NULL) {
 		module->version = PHP_VERSION;
 		module->info_func = PHP_MINFO(php_core);
 	}
@@ -2512,11 +2513,10 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
 			int realfile_len;
-			int dummy = 1;
 
 			if (expand_filepath(primary_file->filename, realfile TSRMLS_CC)) {
 				realfile_len =  strlen(realfile);
-				zend_hash_add(&EG(included_files), realfile, realfile_len+1, (void *)&dummy, sizeof(int), NULL);
+				zend_hash_str_add_empty_element(&EG(included_files), realfile, realfile_len);
 				primary_file->opened_path = estrndup(realfile, realfile_len);
 			}
 		}
@@ -2567,7 +2567,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 
 /* {{{ php_execute_simple_script
  */
-PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret TSRMLS_DC)
+PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret TSRMLS_DC)
 {
 	char *old_cwd;
 	ALLOCA_FLAG(use_heap)
@@ -2625,19 +2625,18 @@ PHPAPI int php_handle_auth_data(const char *auth TSRMLS_DC)
 
 	if (auth && auth[0] != '\0' && strncmp(auth, "Basic ", 6) == 0) {
 		char *pass;
-		char *user;
+		zend_string *user;
 
-		user = php_base64_decode(auth + 6, strlen(auth) - 6, NULL);
+		user = php_base64_decode(auth + 6, strlen(auth) - 6);
 		if (user) {
-			pass = strchr(user, ':');
+			pass = strchr(user->val, ':');
 			if (pass) {
 				*pass++ = '\0';
-				SG(request_info).auth_user = user;
+				SG(request_info).auth_user = estrndup(user->val, user->len);
 				SG(request_info).auth_password = estrdup(pass);
 				ret = 0;
-			} else {
-				efree(user);
-			}
+			} 
+			STR_FREE(user);
 		}
 	}
 

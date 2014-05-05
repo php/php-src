@@ -425,7 +425,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 				zval *value = mysqli_read_property(object, member, BP_VAR_IS, key TSRMLS_CC);
 				if (value != EG(uninitialized_zval_ptr)) {
 					convert_to_boolean(value);
-					ret = Z_BVAL_P(value)? 1:0;
+					ret = Z_TYPE_P(value) == IS_TRUE ? 1 : 0;
 					/* refcount is 0 */
 					Z_ADDREF_P(value);
 					zval_ptr_dtor(&value);
@@ -639,9 +639,9 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	INIT_CLASS_ENTRY(cex, "mysqli_sql_exception", mysqli_exception_methods);
 #ifdef HAVE_SPL
-	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException, NULL TSRMLS_CC);
+	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException TSRMLS_CC);
 #else
-	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
 #endif
 	mysqli_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(mysqli_exception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);

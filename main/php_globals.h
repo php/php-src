@@ -113,7 +113,7 @@ struct _php_core_globals {
 
 	zend_llist tick_functions;
 
-	zval *http_globals[6];
+	zval http_globals[6];
 
 	zend_bool expose_php;
 

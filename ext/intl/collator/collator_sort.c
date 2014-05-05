@@ -215,8 +215,8 @@ static int collator_compare_func( const void* a, const void* b TSRMLS_DC )
 	zval *first;
 	zval *second;
 
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
+	f = (Bucket *) a;
+	s = (Bucket *) b;
 
 	first = *((zval **) f->pData);
 	second = *((zval **) s->pData);

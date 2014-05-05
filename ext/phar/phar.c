@@ -82,7 +82,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 
 	if (entry->name_length == 14) {
 		PHAR_G(readonly) = ini;
-		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arBuckets) {
+		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arHash) {
 			zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_fname_map), phar_set_writeable_bit, (void *)&ini TSRMLS_CC);
 		}
 	} else {
@@ -147,9 +147,9 @@ finish_error:
 				PHAR_GLOBALS->manifest_cached = 0;
 				efree(tmp);
 				zend_hash_destroy(&(PHAR_G(phar_fname_map)));
-				PHAR_GLOBALS->phar_fname_map.arBuckets = 0;
+				PHAR_GLOBALS->phar_fname_map.arHash = 0;
 				zend_hash_destroy(&(PHAR_G(phar_alias_map)));
-				PHAR_GLOBALS->phar_alias_map.arBuckets = 0;
+				PHAR_GLOBALS->phar_alias_map.arHash = 0;
 				zend_hash_destroy(&cached_phars);
 				zend_hash_destroy(&cached_alias);
 				zend_hash_graceful_reverse_destroy(&EG(regular_list));
@@ -174,8 +174,8 @@ finish_error:
 	zend_hash_destroy(&cached_alias);
 	cached_phars = PHAR_GLOBALS->phar_fname_map;
 	cached_alias = PHAR_GLOBALS->phar_alias_map;
-	PHAR_GLOBALS->phar_fname_map.arBuckets = 0;
-	PHAR_GLOBALS->phar_alias_map.arBuckets = 0;
+	PHAR_GLOBALS->phar_fname_map.arHash = 0;
+	PHAR_GLOBALS->phar_alias_map.arHash = 0;
 	zend_hash_graceful_reverse_destroy(&EG(regular_list));
 	memset(&EG(regular_list), 0, sizeof(HashTable));
 	efree(tmp);
@@ -221,19 +221,19 @@ void phar_destroy_phar_data(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 		phar->signature = NULL;
 	}
 
-	if (phar->manifest.arBuckets) {
+	if (phar->manifest.arHash) {
 		zend_hash_destroy(&phar->manifest);
-		phar->manifest.arBuckets = NULL;
+		phar->manifest.arHash = NULL;
 	}
 
-	if (phar->mounted_dirs.arBuckets) {
+	if (phar->mounted_dirs.arHash) {
 		zend_hash_destroy(&phar->mounted_dirs);
-		phar->mounted_dirs.arBuckets = NULL;
+		phar->mounted_dirs.arHash = NULL;
 	}
 
-	if (phar->virtual_dirs.arBuckets) {
+	if (phar->virtual_dirs.arHash) {
 		zend_hash_destroy(&phar->virtual_dirs);
-		phar->virtual_dirs.arBuckets = NULL;
+		phar->virtual_dirs.arHash = NULL;
 	}
 
 	if (phar->metadata) {
@@ -2604,6 +2604,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 	}
 
 	if (user_stub) {
+		zend_string *suser_stub;
 		if (len < 0) {
 			/* resource passed in */
 			if (!(php_stream_from_zval_no_verify(stubfile, (zval **)user_stub))) {
@@ -2623,7 +2624,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			}
 			user_stub = 0;
 
-			if (!(len = php_stream_copy_to_mem(stubfile, &user_stub, len, 0)) || !user_stub) {
+			if (!(suser_stub = php_stream_copy_to_mem(stubfile, len, 0))) {
 				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
@@ -2634,6 +2635,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 				return EOF;
 			}
 			free_user_stub = 1;
+			user_stub = suser_stub->val;
+			len = suser_stub->len;
 		} else {
 			free_user_stub = 0;
 		}
@@ -2648,7 +2651,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 				spprintf(error, 0, "illegal stub for phar \"%s\"", phar->fname);
 			}
 			if (free_user_stub) {
-				efree(user_stub);
+				STR_FREE(suser_stub);
 			}
 			return EOF;
 		}
@@ -2665,13 +2668,13 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 				spprintf(error, 0, "unable to create stub from string in new phar \"%s\"", phar->fname);
 			}
 			if (free_user_stub) {
-				efree(user_stub);
+				STR_FREE(suser_stub);
 			}
 			return EOF;
 		}
 		phar->halt_offset = len + 5;
 		if (free_user_stub) {
-			efree(user_stub);
+			STR_FREE(suser_stub);
 		}
 	} else {
 		size_t written;
@@ -3527,11 +3530,11 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 	{
 		phar_release_functions(TSRMLS_C);
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
-		PHAR_GLOBALS->phar_alias_map.arBuckets = NULL;
+		PHAR_GLOBALS->phar_alias_map.arHash = NULL;
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
-		PHAR_GLOBALS->phar_fname_map.arBuckets = NULL;
+		PHAR_GLOBALS->phar_fname_map.arHash = NULL;
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_persist_map));
-		PHAR_GLOBALS->phar_persist_map.arBuckets = NULL;
+		PHAR_GLOBALS->phar_persist_map.arHash = NULL;
 		PHAR_GLOBALS->phar_SERVER_mung_list = 0;
 
 		if (PHAR_GLOBALS->cached_fp) {

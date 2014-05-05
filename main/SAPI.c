@@ -57,10 +57,15 @@ SAPI_API int sapi_globals_id;
 sapi_globals_struct sapi_globals;
 #endif
 
+static void _type_dtor(zval *zv)
+{
+	free(Z_PTR_P(zv));
+}
+
 static void sapi_globals_ctor(sapi_globals_struct *sapi_globals TSRMLS_DC)
 {
 	memset(sapi_globals, 0, sizeof(*sapi_globals));
-	zend_hash_init_ex(&sapi_globals->known_post_content_types, 5, NULL, NULL, 1, 0);
+	zend_hash_init_ex(&sapi_globals->known_post_content_types, 8, NULL, _type_dtor, 1, 0);
 	php_setup_sapi_content_types(TSRMLS_C);
 }
 
@@ -124,26 +129,21 @@ SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 PHP_FUNCTION(header_register_callback)
 {
 	zval *callback_func;
-	char *callback_name;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &callback_func) == FAILURE) {
 		return;
 	}
 	
-	if (!zend_is_callable(callback_func, 0, &callback_name TSRMLS_CC)) {
-		efree(callback_name);
+	if (!zend_is_callable(callback_func, 0, NULL TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	efree(callback_name);
-
-	if (SG(callback_func)) {
+	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {
 		zval_ptr_dtor(&SG(callback_func));
 		SG(fci_cache) = empty_fcall_info_cache;
 	}
 
-	SG(callback_func) = callback_func;
-
-	Z_ADDREF_P(SG(callback_func));
+	ZVAL_COPY(&SG(callback_func), callback_func);
 
 	RETURN_TRUE;
 }
@@ -153,27 +153,23 @@ static void sapi_run_header_callback(TSRMLS_D)
 {
 	int   error;
 	zend_fcall_info fci;
-	char *callback_name = NULL;
 	char *callback_error = NULL;
-	zval *retval_ptr = NULL;
+	zval retval;
 	
-	if (zend_fcall_info_init(SG(callback_func), 0, &fci, &SG(fci_cache), &callback_name, &callback_error TSRMLS_CC) == SUCCESS) {
-		fci.retval_ptr_ptr = &retval_ptr;
+	if (zend_fcall_info_init(&SG(callback_func), 0, &fci, &SG(fci_cache), NULL, &callback_error TSRMLS_CC) == SUCCESS) {
+		fci.retval = &retval;
 		
 		error = zend_call_function(&fci, &SG(fci_cache) TSRMLS_CC);
 		if (error == FAILURE) {
 			goto callback_failed;
-		} else if (retval_ptr) {
-			zval_ptr_dtor(&retval_ptr);
+		} else {
+			zval_ptr_dtor(&retval);
 		}
 	} else {
 callback_failed:
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the sapi_header_callback");
 	}
 	
-	if (callback_name) {
-		efree(callback_name);
-	}
 	if (callback_error) {
 		efree(callback_error);
 	}	
@@ -218,8 +214,8 @@ static void sapi_read_post_data(TSRMLS_D)
 	}
 
 	/* now try to find an appropriate POST content handler */
-	if (zend_hash_find(&SG(known_post_content_types), content_type,
-			content_type_length+1, (void **) &post_entry) == SUCCESS) {
+	if ((post_entry = zend_hash_str_find_ptr(&SG(known_post_content_types), content_type,
+			content_type_length)) != NULL) {
 		/* found one, register it for use */
 		SG(request_info).post_entry = post_entry;
 		post_reader_func = post_entry->post_reader;
@@ -453,7 +449,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(sapi_headers).mimetype = NULL;
 	SG(headers_sent) = 0;
 	SG(callback_run) = 0;
-	SG(callback_func) = NULL;
+	ZVAL_UNDEF(&SG(callback_func));
 	SG(read_post_bytes) = 0;
 	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
@@ -550,9 +546,7 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 	SG(sapi_started) = 0;
 	SG(headers_sent) = 0;
 	SG(callback_run) = 0;
-	if (SG(callback_func)) {
-		zval_ptr_dtor(&SG(callback_func));
-	}
+	zval_ptr_dtor(&SG(callback_func));
 	SG(request_info).headers_read = 0;
 	SG(global_request_time) = 0;
 }
@@ -795,7 +789,9 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 
 				/* Disable possible output compression for images */
 				if (!strncmp(ptr, "image/", sizeof("image/")-1)) {
-					zend_alter_ini_entry("zlib.output_compression", sizeof("zlib.output_compression"), "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+					zend_string *key = STR_INIT("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
+					zend_alter_ini_entry(key, "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+					STR_RELEASE(key);
 				}
 
 				mimetype = estrdup(ptr);
@@ -821,8 +817,10 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				 * do disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
-				zend_alter_ini_entry("zlib.output_compression", sizeof("zlib.output_compression"),
+				zend_string *key = STR_INIT("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
+				zend_alter_ini_entry(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+				STR_RELEASE(key);
 			} else if (!STRCASECMP(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
 					SG(sapi_headers).http_response_code > 307) &&
@@ -880,7 +878,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 		SG(sapi_headers).send_default_content_type = 0;
 	}
 
-	if (SG(callback_func) && !SG(callback_run)) {
+	if (Z_TYPE(SG(callback_func)) != IS_UNDEF && !SG(callback_run)) {
 		SG(callback_run) = 1;
 		sapi_run_header_callback(TSRMLS_C);
 	}
@@ -952,9 +950,9 @@ SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 	if (SG(sapi_started) && EG(in_execution)) {
 		return FAILURE;
 	}
-	return zend_hash_add(&SG(known_post_content_types),
-			post_entry->content_type, post_entry->content_type_len+1,
-			(void *) post_entry, sizeof(sapi_post_entry), NULL);
+	return zend_hash_str_add_mem(&SG(known_post_content_types),
+			post_entry->content_type, post_entry->content_type_len,
+			(void *) post_entry, sizeof(sapi_post_entry)) ? SUCCESS : FAILURE;
 }
 
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
@@ -962,8 +960,8 @@ SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 	if (SG(sapi_started) && EG(in_execution)) {
 		return;
 	}
-	zend_hash_del(&SG(known_post_content_types), post_entry->content_type,
-			post_entry->content_type_len+1);
+	zend_hash_str_del(&SG(known_post_content_types), post_entry->content_type,
+			post_entry->content_type_len);
 }
 
 

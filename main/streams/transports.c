@@ -31,12 +31,12 @@ PHPAPI HashTable *php_stream_xport_get_hash(void)
 
 PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory TSRMLS_DC)
 {
-	return zend_hash_update(&xport_hash, protocol, strlen(protocol) + 1, &factory, sizeof(factory), NULL);
+	return zend_hash_str_update_ptr(&xport_hash, protocol, strlen(protocol), factory) ? SUCCESS : FAILURE;
 }
 
 PHPAPI int php_stream_xport_unregister(const char *protocol TSRMLS_DC)
 {
-	return zend_hash_del(&xport_hash, protocol, strlen(protocol) + 1);
+	return zend_hash_str_del(&xport_hash, protocol, strlen(protocol));
 }
 
 #define ERR_REPORT(out_err, fmt, arg) \
@@ -58,7 +58,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 		STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
-	php_stream_transport_factory *factory = NULL;
+	php_stream_transport_factory factory;
 	const char *p, *protocol = NULL;
 	int n = 0, failed = 0;
 	char *error_text = NULL;
@@ -107,7 +107,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 
 	if (protocol) {
 		char *tmp = estrndup(protocol, n);
-		if (FAILURE == zend_hash_find(&xport_hash, (char*)tmp, n + 1, (void**)&factory)) {
+		if (NULL == (factory = zend_hash_str_find_ptr(&xport_hash, tmp, n))) {
 			char wrapper_name[32];
 
 			if (n >= sizeof(wrapper_name))
@@ -129,7 +129,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 		return NULL;
 	}
 
-	stream = (*factory)(protocol, n,
+	stream = (factory)(protocol, n,
 			(char*)name, namelen, persistent_id, options, flags, timeout,
 			context STREAMS_REL_CC TSRMLS_CC);
 
@@ -157,16 +157,16 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 					ERR_RETURN(error_string, error_text, "bind() failed: %s");
 					failed = 1;
 				} else if (flags & STREAM_XPORT_LISTEN) {
-					zval **zbacklog = NULL;
+					zval *zbacklog = NULL;
 					int backlog = 32;
 					
-					if (stream->context && php_stream_context_get_option(stream->context, "socket", "backlog", &zbacklog) == SUCCESS) {
-						zval *ztmp = *zbacklog;
+					if (stream->context && (zbacklog = php_stream_context_get_option(stream->context, "socket", "backlog")) != NULL) {
+						zval *ztmp = zbacklog;
 						
-						convert_to_long_ex(&ztmp);
+						convert_to_long_ex(ztmp);
 						backlog = Z_LVAL_P(ztmp);
-						if (ztmp != *zbacklog) {
-							zval_ptr_dtor(&ztmp);
+						if (ztmp != zbacklog) {
+							zval_ptr_dtor(ztmp);
 						}
 					}
 					

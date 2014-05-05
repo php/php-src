@@ -827,26 +827,26 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	F = S->fields + colno;
 
 	if (F->def) {
-		add_assoc_string(return_value, "mysql:def", F->def, 1);
+		add_assoc_string(return_value, "mysql:def", F->def);
 	}
 	if (IS_NOT_NULL(F->flags)) {
-		add_next_index_string(flags, "not_null", 1);
+		add_next_index_string(flags, "not_null");
 	}
 	if (IS_PRI_KEY(F->flags)) {
-		add_next_index_string(flags, "primary_key", 1);
+		add_next_index_string(flags, "primary_key");
 	}
 	if (F->flags & MULTIPLE_KEY_FLAG) {
-		add_next_index_string(flags, "multiple_key", 1);
+		add_next_index_string(flags, "multiple_key");
 	}
 	if (F->flags & UNIQUE_KEY_FLAG) {
-		add_next_index_string(flags, "unique_key", 1);
+		add_next_index_string(flags, "unique_key");
 	}
 	if (IS_BLOB(F->flags)) {
-		add_next_index_string(flags, "blob", 1);
+		add_next_index_string(flags, "blob");
 	}
 	str = type_to_name_native(F->type);
 	if (str) {
-		add_assoc_string(return_value, "native_type", str, 1);
+		add_assoc_string(return_value, "native_type", str);
 	}
 
 #ifdef PDO_USE_MYSQLND
@@ -869,7 +869,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 #endif
 
 	add_assoc_zval(return_value, "flags", flags);
-	add_assoc_string(return_value, "table", (char *) (F->table?F->table:""), 1);
+	add_assoc_string(return_value, "table", (char *) (F->table?F->table:""));
 	PDO_DBG_RETURN(SUCCESS);
 } /* }}} */
 

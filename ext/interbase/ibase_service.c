@@ -351,7 +351,7 @@ query_loop:
 
 						case isc_spb_dbname:
 							len = isc_vax_integer(result,2);
-							add_next_index_stringl(return_value, result +2, len, 1);
+							add_next_index_stringl(return_value, result +2, len);
 							result += len+2;
 					}
 				} while (*result != isc_info_flag_end);
@@ -373,25 +373,25 @@ query_loop:
 							add_next_index_zval(return_value, user);
 
 							len = isc_vax_integer(result,2);
-							add_assoc_stringl(user, "user_name", result +2, len, 1);
+							add_assoc_stringl(user, "user_name", result +2, len);
 							result += len+2;
 							break;
 
 						case isc_spb_sec_firstname:
 							len = isc_vax_integer(result,2);
-							add_assoc_stringl(user, "first_name", result +2, len, 1);
+							add_assoc_stringl(user, "first_name", result +2, len);
 							result += len+2;
 							break;
 
 						case isc_spb_sec_middlename:
 							len = isc_vax_integer(result,2);
-							add_assoc_stringl(user, "middle_name", result +2, len, 1);
+							add_assoc_stringl(user, "middle_name", result +2, len);
 							result += len+2;
 							break;
 
 						case isc_spb_sec_lastname:
 							len = isc_vax_integer(result,2);
-							add_assoc_stringl(user, "last_name", result +2, len, 1);
+							add_assoc_stringl(user, "last_name", result +2, len);
 							result += len+2;
 							break;
 

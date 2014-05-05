@@ -152,6 +152,6 @@ Warning: mysql_field_flags(): Field -1 is invalid for MySQL result index %d in %
 
 Warning: mysql_field_flags(): Field 2 is invalid for MySQL result index %d in %s on line %d
 
-Warning: mysql_field_flags(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_field_flags(): supplied resource is not a valid MySQL result resource in %s on line %d
 bool(false)
 done!

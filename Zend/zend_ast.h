@@ -22,8 +22,6 @@
 #ifndef ZEND_AST_H
 #define ZEND_AST_H
 
-typedef struct _zend_ast zend_ast;
-
 #include "zend.h"
 
 typedef enum _zend_ast_kind {
@@ -40,7 +38,7 @@ struct _zend_ast {
 	unsigned short kind;
 	unsigned short children;
 	union {
-		zval     *val;
+		zval      val;
 		zend_ast *child;
 	} u;
 };
@@ -50,9 +48,6 @@ ZEND_API zend_ast *zend_ast_create_constant(zval *zv);
 ZEND_API zend_ast *zend_ast_create_unary(uint kind, zend_ast *op0);
 ZEND_API zend_ast *zend_ast_create_binary(uint kind, zend_ast *op0, zend_ast *op1);
 ZEND_API zend_ast *zend_ast_create_ternary(uint kind, zend_ast *op0, zend_ast *op1, zend_ast *op2);
-ZEND_API zend_ast* zend_ast_create_dynamic(uint kind);
-ZEND_API void zend_ast_dynamic_add(zend_ast **ast, zend_ast *op);
-ZEND_API void zend_ast_dynamic_shrink(zend_ast **ast);
 
 ZEND_API int zend_ast_is_ct_constant(zend_ast *ast);
 

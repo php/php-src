@@ -81,7 +81,9 @@ PHP_FUNCTION(uniqid)
 		spprintf(&uniqid, 0, "%s%08x%05x", prefix, sec, usec);
 	}
 
-	RETURN_STRING(uniqid, 0);
+	// TODO: avoid reallocation ???
+	RETVAL_STRING(uniqid);
+	efree(uniqid);
 }
 #endif
 /* }}} */

@@ -67,15 +67,18 @@ static int php_zlib_output_conflict_check(const char *handler_name, size_t handl
 /* {{{ php_zlib_output_encoding() */
 static int php_zlib_output_encoding(TSRMLS_D)
 {
-	zval **enc;
+	zval *enc;
 
 	if (!ZLIBG(compression_coding)) {
-		zend_is_auto_global(ZEND_STRL("_SERVER") TSRMLS_CC);
-		if (PG(http_globals)[TRACK_VARS_SERVER] && SUCCESS == zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING"), (void *) &enc)) {
-			convert_to_string(*enc);
-			if (strstr(Z_STRVAL_PP(enc), "gzip")) {
+		zend_string *name = STR_INIT("_SERVER", sizeof("_SERVER") - 1, 0);
+		zend_is_auto_global(name TSRMLS_CC);
+		STR_RELEASE(name);
+		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
+			(enc = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING") - 1))) {
+			convert_to_string(enc);
+			if (strstr(Z_STRVAL_P(enc), "gzip")) {
 				ZLIBG(compression_coding) = PHP_ZLIB_ENCODING_GZIP;
-			} else if (strstr(Z_STRVAL_PP(enc), "deflate")) {
+			} else if (strstr(Z_STRVAL_P(enc), "deflate")) {
 				ZLIBG(compression_coding) = PHP_ZLIB_ENCODING_DEFLATE;
 			}
 		}
@@ -276,7 +279,7 @@ static php_output_handler *php_zlib_output_handler_init(const char *handler_name
 /* {{{ php_zlib_output_compression_start() */
 static void php_zlib_output_compression_start(TSRMLS_D)
 {
-	zval *zoh;
+	zval zoh;
 	php_output_handler *h;
 
 	switch (ZLIBG(output_compression)) {
@@ -290,9 +293,8 @@ static void php_zlib_output_compression_start(TSRMLS_D)
 					(h = php_zlib_output_handler_init(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME), ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC)) &&
 					(SUCCESS == php_output_handler_start(h TSRMLS_CC))) {
 				if (ZLIBG(output_handler) && *ZLIBG(output_handler)) {
-					MAKE_STD_ZVAL(zoh);
-					ZVAL_STRING(zoh, ZLIBG(output_handler), 1);
-					php_output_start_user(zoh, ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
+					ZVAL_STRING(&zoh, ZLIBG(output_handler));
+					php_output_start_user(&zoh, ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 					zval_ptr_dtor(&zoh);
 				}
 			}
@@ -302,42 +304,39 @@ static void php_zlib_output_compression_start(TSRMLS_D)
 /* }}} */
 
 /* {{{ php_zlib_encode() */
-static int php_zlib_encode(const char *in_buf, size_t in_len, char **out_buf, size_t *out_len, int encoding, int level TSRMLS_DC)
+static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encoding, int level TSRMLS_DC)
 {
 	int status;
 	z_stream Z;
+	zend_string *out;
 
 	memset(&Z, 0, sizeof(z_stream));
 	Z.zalloc = php_zlib_alloc;
 	Z.zfree = php_zlib_free;
 
 	if (Z_OK == (status = deflateInit2(&Z, level, Z_DEFLATED, encoding, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY))) {
-		*out_len = PHP_ZLIB_BUFFER_SIZE_GUESS(in_len);
-		*out_buf = emalloc(*out_len);
+		out = STR_ALLOC(PHP_ZLIB_BUFFER_SIZE_GUESS(in_len), 0);
 
 		Z.next_in = (Bytef *) in_buf;
-		Z.next_out = (Bytef *) *out_buf;
+		Z.next_out = (Bytef *) out->val;
 		Z.avail_in = in_len;
-		Z.avail_out = *out_len;
+		Z.avail_out = out->len;
 
 		status = deflate(&Z, Z_FINISH);
 		deflateEnd(&Z);
 
 		if (Z_STREAM_END == status) {
 			/* size buffer down to actual length */
-			*out_buf = erealloc(*out_buf, Z.total_out + 1);
-			(*out_buf)[*out_len = Z.total_out] = '\0';
-			return SUCCESS;
+			out = STR_REALLOC(out, Z.total_out, 0);
+			out->val[out->len] = '\0';
+			return out;
 		} else {
-			efree(*out_buf);
+			STR_FREE(out);
 		}
 	}
 
-	*out_buf = NULL;
-	*out_len = 0;
-
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
-	return FAILURE;
+	return NULL;
 }
 /* }}} */
 
@@ -501,7 +500,7 @@ static PHP_FUNCTION(ob_gzhandler)
 	}
 
 	if (ctx.out.data) {
-		RETVAL_STRINGL(ctx.out.data, ctx.out.used, 1);
+		RETVAL_STRINGL(ctx.out.data, ctx.out.used);
 		if (ctx.out.free) {
 			efree(ctx.out.data);
 		}
@@ -520,9 +519,9 @@ static PHP_FUNCTION(zlib_get_coding_type)
 	}
 	switch (ZLIBG(compression_coding)) {
 		case PHP_ZLIB_ENCODING_GZIP:
-			RETURN_STRINGL("gzip", sizeof("gzip") - 1, 1);
+			RETURN_STRINGL("gzip", sizeof("gzip") - 1);
 		case PHP_ZLIB_ENCODING_DEFLATE:
-			RETURN_STRINGL("deflate", sizeof("deflate") - 1, 1);
+			RETURN_STRINGL("deflate", sizeof("deflate") - 1);
 		default:
 			RETURN_FALSE;
 	}
@@ -564,7 +563,7 @@ static PHP_FUNCTION(gzfile)
 	memset(buf, 0, sizeof(buf));
 	    
 	while (php_stream_gets(stream, buf, sizeof(buf) - 1) != NULL) {
-		add_index_string(return_value, i++, buf, 1);
+		add_index_string(return_value, i++, buf);
 	}
 	php_stream_close(stream);
 }
@@ -631,17 +630,15 @@ static PHP_FUNCTION(readgzfile)
 #define PHP_ZLIB_ENCODE_FUNC(name, default_encoding) \
 static PHP_FUNCTION(name) \
 { \
-	char *in_buf, *out_buf; \
-	int in_len; \
-	size_t out_len; \
+	zend_string *in, *out; \
 	long level = -1; \
 	long encoding = default_encoding; \
 	if (default_encoding) { \
-		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &in_buf, &in_len, &level, &encoding)) { \
+		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|ll", &in, &level, &encoding)) { \
 			return; \
 		} \
 	} else { \
-		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|l", &in_buf, &in_len, &encoding, &level)) { \
+		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|l", &in, &encoding, &level)) { \
 			return; \
 		} \
 	} \
@@ -658,10 +655,10 @@ static PHP_FUNCTION(name) \
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE"); \
 			RETURN_FALSE; \
 	} \
-	if (SUCCESS != php_zlib_encode(in_buf, in_len, &out_buf, &out_len, encoding, level TSRMLS_CC)) { \
+	if ((out = php_zlib_encode(in->val, in->len, encoding, level TSRMLS_CC)) == NULL) { \
 		RETURN_FALSE; \
 	} \
-	RETURN_STRINGL(out_buf, out_len, 0); \
+	RETURN_STR(out); \
 }
 
 #define PHP_ZLIB_DECODE_FUNC(name, encoding) \
@@ -681,7 +678,8 @@ static PHP_FUNCTION(name) \
 	if (SUCCESS != php_zlib_decode(in_buf, in_len, &out_buf, &out_len, encoding, max_len TSRMLS_CC)) { \
 		RETURN_FALSE; \
 	} \
-	RETURN_STRINGL(out_buf, out_len, 0); \
+	RETVAL_STRINGL(out_buf, out_len); \
+	efree(out_buf); \
 }
 
 /* {{{ proto binary zlib_encode(binary data, int encoding[, int level = -1])

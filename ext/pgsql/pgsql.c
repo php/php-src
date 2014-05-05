@@ -1639,34 +1639,34 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			break;
 		case PHP_PG_VERSION:
 			array_init(return_value);
-			add_assoc_string(return_value, "client", PG_VERSION, 1);
+			add_assoc_string(return_value, "client", PG_VERSION);
 #if HAVE_PQPROTOCOLVERSION
 			add_assoc_long(return_value, "protocol", PQprotocolVersion(pgsql));
 #if HAVE_PQPARAMETERSTATUS
 			if (PQprotocolVersion(pgsql) >= 3) {
 				/* 8.0 or grater supports protorol version 3 */
 				char *tmp;
-				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"), 1);
+				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"));
 				tmp = (char*)PQparameterStatus(pgsql, "server_encoding");
-				add_assoc_string(return_value, "server_encoding", tmp, 1);
+				add_assoc_string(return_value, "server_encoding", tmp);
 				tmp = (char*)PQparameterStatus(pgsql, "client_encoding");
-				add_assoc_string(return_value, "client_encoding", tmp, 1);
+				add_assoc_string(return_value, "client_encoding", tmp);
 				tmp = (char*)PQparameterStatus(pgsql, "is_superuser");
-				add_assoc_string(return_value, "is_superuser", tmp, 1);
+				add_assoc_string(return_value, "is_superuser", tmp);
 				tmp = (char*)PQparameterStatus(pgsql, "session_authorization");
-				add_assoc_string(return_value, "session_authorization", tmp, 1);
+				add_assoc_string(return_value, "session_authorization", tmp);
 				tmp = (char*)PQparameterStatus(pgsql, "DateStyle");
-				add_assoc_string(return_value, "DateStyle", tmp, 1);
+				add_assoc_string(return_value, "DateStyle", tmp);
 				tmp = (char*)PQparameterStatus(pgsql, "IntervalStyle");
-				add_assoc_string(return_value, "IntervalStyle", tmp ? tmp : "", 1);
+				add_assoc_string(return_value, "IntervalStyle", tmp ? tmp : "");
 				tmp = (char*)PQparameterStatus(pgsql, "TimeZone");
-				add_assoc_string(return_value, "TimeZone", tmp ? tmp : "", 1);
+				add_assoc_string(return_value, "TimeZone", tmp ? tmp : "");
 				tmp = (char*)PQparameterStatus(pgsql, "integer_datetimes");
-				add_assoc_string(return_value, "integer_datetimes", tmp ? tmp : "", 1);
+				add_assoc_string(return_value, "integer_datetimes", tmp ? tmp : "");
 				tmp = (char*)PQparameterStatus(pgsql, "standard_conforming_strings");
-				add_assoc_string(return_value, "standard_conforming_strings", tmp ? tmp : "", 1);
+				add_assoc_string(return_value, "standard_conforming_strings", tmp ? tmp : "");
 				tmp = (char*)PQparameterStatus(pgsql, "application_name");
-				add_assoc_string(return_value, "application_name", tmp ? tmp : "", 1);
+				add_assoc_string(return_value, "application_name", tmp ? tmp : "");
 			}
 #endif
 #endif
@@ -2756,22 +2756,18 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 		} else {
 			char *element = PQgetvalue(pgsql_result, pgsql_row, i);
 			if (element) {
-				char *data;
-				int data_len;
-				int should_copy=0;
 				const uint element_len = strlen(element);
 
 				data = safe_estrndup(element, element_len);
 				data_len = element_len;
 
 				if (result_type & PGSQL_NUM) {
-					add_index_stringl(return_value, i, data, data_len, should_copy);
-					should_copy=1;
+					add_index_stringl(return_value, i, element, element_len);
 				}
 
 				if (result_type & PGSQL_ASSOC) {
 					field_name = PQfname(pgsql_result, i);
-					add_assoc_stringl(return_value, field_name, data, data_len, should_copy);
+					add_assoc_stringl(return_value, field_name, element, element_len);
 				}
 			}
 		}
@@ -2929,7 +2925,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 		if (PQgetisnull(pgsql_result, pg_row, colno)) {
 			add_next_index_null(return_value);
 		} else {
-			add_next_index_string(return_value, PQgetvalue(pgsql_result, pg_row, colno), 1); 
+			add_next_index_string(return_value, PQgetvalue(pgsql_result, pg_row, colno)); 
 		}
 	}
 }
@@ -4088,7 +4084,7 @@ PHP_FUNCTION(pg_copy_to)
 							RETURN_FALSE;
 							break;
 						default:
-							add_next_index_string(return_value, csv, 1);
+							add_next_index_string(return_value, csv);
 							PQfreemem(csv);
 							break;
 					}
@@ -4121,7 +4117,7 @@ PHP_FUNCTION(pg_copy_to)
 							case EOF:
 								copydone = 1;
 							case 0:
-								add_next_index_string(return_value, csv, 1);
+								add_next_index_string(return_value, csv);
 								efree(csv);
 								csv = (char *)NULL;
 								break;
@@ -5258,7 +5254,7 @@ PHP_FUNCTION(pg_get_notify)
 	}
 	array_init(return_value);
 	if (result_type & PGSQL_NUM) {
-		add_index_string(return_value, 0, pgsql_notify->relname, 1);
+		add_index_string(return_value, 0, pgsql_notify->relname);
 		add_index_long(return_value, 1, pgsql_notify->be_pid);
 #if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS 
 		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
@@ -5266,12 +5262,12 @@ PHP_FUNCTION(pg_get_notify)
 		if (atof(PG_VERSION) >= 9.0) {
 #endif 
 #if HAVE_PQPARAMETERSTATUS
-			add_index_string(return_value, 2, pgsql_notify->extra, 1);
+			add_index_string(return_value, 2, pgsql_notify->extra);
 #endif
 		}
 	}
 	if (result_type & PGSQL_ASSOC) {
-		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);
+		add_assoc_string(return_value, "message", pgsql_notify->relname);
 		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
 #if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS 
 		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
@@ -5279,7 +5275,7 @@ PHP_FUNCTION(pg_get_notify)
 		if (atof(PG_VERSION) >= 9.0) {
 #endif 
 #if HAVE_PQPARAMETERSTATUS
-			add_assoc_string(return_value, "payload", pgsql_notify->extra, 1);
+			add_assoc_string(return_value, "payload", pgsql_notify->extra);
 #endif
 		}
 	}
@@ -5522,7 +5518,7 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 		/* pg_attribute.attnum */
 		add_assoc_long(elem, "num", atoi(PQgetvalue(pg_result,i,1)));
 		/* pg_type.typname */
-		add_assoc_string(elem, "type", PQgetvalue(pg_result,i,2), 1);
+		add_assoc_string(elem, "type", PQgetvalue(pg_result,i,2));
 		/* pg_attribute.attlen */
 		add_assoc_long(elem, "len", atoi(PQgetvalue(pg_result,i,3)));
 		/* pg_attribute.attnonull */
@@ -7007,15 +7003,10 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TS
 			} else {
 				char *element = PQgetvalue(pg_result, pg_row, i);
 				if (element) {
-					char *data;
-					size_t data_len;
 					const size_t element_len = strlen(element);
 
-					data = safe_estrndup(element, element_len);
-					data_len = element_len;
-					
 					field_name = PQfname(pg_result, i);
-					add_assoc_stringl(row, field_name, data, data_len, 0);
+					add_assoc_stringl(row, field_name, element, element_len);
 				}
 			}
 		}

@@ -87,7 +87,7 @@ bool(false)
 Warning: ftell() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 -- Testing ftell with closed/unset file handle --
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: ftell() expects parameter 1 to be resource, null given in %s on line %d

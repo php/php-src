@@ -183,9 +183,7 @@ typedef enum _zend_accel_restart_reason {
 } zend_accel_restart_reason;
 
 typedef struct _zend_persistent_script {
-	ulong          hash_value;
-	char          *full_path;              /* full real path with resolved symlinks */
-	unsigned int   full_path_len;
+	zend_string   *full_path;              /* full real path with resolved symlinks */
 	zend_op_array  main_op_array;
 	HashTable      function_table;
 	HashTable      class_table;
@@ -304,13 +302,8 @@ typedef struct _zend_accel_shared_globals {
 	char           *interned_strings_start;
 	char           *interned_strings_top;
 	char           *interned_strings_end;
+	char           *interned_strings_saved_top;
 	HashTable       interned_strings;
-	struct {
-		Bucket **arBuckets;
-		Bucket  *pListHead;
-		Bucket  *pListTail;
-		char    *top;
-	} interned_strings_saved_state;
 #endif
 } zend_accel_shared_globals;
 
@@ -347,32 +340,23 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 
 #define ZEND_DECLARE_INHERITED_CLASS_DELAYED_FLAG 0x80
 
+#define IS_ACCEL_INTERNED(str) \
+	((char*)(str) >= ZCSG(interned_strings_start) && (char*)(str) < ZCSG(interned_strings_end))
+
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 
-const char *accel_new_interned_string(const char *arKey, int nKeyLength, int free_src TSRMLS_DC);
+zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC);
 
-# define interned_free(s) do { \
-		if (!IS_INTERNED(s)) { \
-			free(s); \
-		} \
-	} while (0)
-# define interned_efree(s) do { \
-		if (!IS_INTERNED(s)) { \
-			efree(s); \
-		} \
-	} while (0)
-# define interned_estrndup(s, n) \
-	(IS_INTERNED(s) ? (s) : estrndup(s, n))
 # define ZEND_RESULT_TYPE(opline)	(opline)->result_type
 # define ZEND_RESULT(opline)		(opline)->result
 # define ZEND_OP1_TYPE(opline)		(opline)->op1_type
 # define ZEND_OP1(opline)			(opline)->op1
 # define ZEND_OP1_CONST(opline)		(*(opline)->op1.zv)
-# define ZEND_OP1_LITERAL(opline)	(op_array)->literals[(opline)->op1.constant].constant
+# define ZEND_OP1_LITERAL(opline)	(op_array)->literals[(opline)->op1.constant]
 # define ZEND_OP2_TYPE(opline)		(opline)->op2_type
 # define ZEND_OP2(opline)			(opline)->op2
 # define ZEND_OP2_CONST(opline)		(*(opline)->op2.zv)
-# define ZEND_OP2_LITERAL(opline)	(op_array)->literals[(opline)->op2.constant].constant
+# define ZEND_OP2_LITERAL(opline)	(op_array)->literals[(opline)->op2.constant]
 # define ZEND_DONE_PASS_TWO(op_array)	(((op_array)->fn_flags & ZEND_ACC_DONE_PASS_TWO) != 0)
 # define ZEND_CE_FILENAME(ce)			(ce)->info.user.filename
 # define ZEND_CE_DOC_COMMENT(ce)        (ce)->info.user.doc_comment

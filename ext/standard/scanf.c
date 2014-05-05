@@ -118,7 +118,7 @@ typedef struct CharSet {
 static char *BuildCharSet(CharSet *cset, char *format);
 static int	CharInSet(CharSet *cset, int ch);
 static void	ReleaseCharSet(CharSet *cset);
-static inline void scan_set_error_return(int numVars, zval **return_value);
+static inline void scan_set_error_return(int numVars, zval *return_value);
 
 
 /* {{{ BuildCharSet
@@ -577,15 +577,15 @@ error:
  */
 
 PHPAPI int php_sscanf_internal( char *string, char *format,
-				int argCount, zval ***args,
-				int varStart, zval **return_value TSRMLS_DC)
+				int argCount, zval *args,
+				int varStart, zval *return_value TSRMLS_DC)
 {
 	int  numVars, nconversions, totalVars = -1;
 	int  i, result;
 	long value;
 	int  objIndex;
 	char *end, *baseString;
-	zval **current;
+	zval *current;
 	char op   = 0;
 	int  base = 0;
 	int  underflow = 0;
@@ -624,7 +624,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	 */
 	if (numVars) {
 		for (i = varStart;i < argCount;i++){
-			if ( ! PZVAL_IS_REF( *args[ i ] ) ) {
+			if ( ! Z_ISREF(args[ i ] ) ) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter %d must be passed by reference", i);
 				scan_set_error_return(numVars, return_value);
 				return SCAN_ERROR_VAR_PASSED_BYVAL;
@@ -637,15 +637,14 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	 * are specified
 	 */
 	if (!numVars) {
-		zval *tmp;
+		zval tmp;
 
 		/* allocate an array for return */
-		array_init(*return_value);
+		array_init(return_value);
 
 		for (i = 0; i < totalVars; i++) {
-			MAKE_STD_ZVAL(tmp);
-			ZVAL_NULL(tmp);
-			if (add_next_index_zval(*return_value, tmp) == FAILURE) {
+			ZVAL_NULL(&tmp);
+			if (add_next_index_zval(return_value, &tmp) == FAILURE) {
 				scan_set_error_return(0, return_value);
 				return FAILURE;
 			}
@@ -743,16 +742,13 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						zend_uint refcount;
-
-						current = args[objIndex++];
-						refcount = Z_REFCOUNT_PP(current);
-						zval_dtor( *current );
-						ZVAL_LONG( *current, (long)(string - baseString) );
-						Z_SET_REFCOUNT_PP(current, refcount);
-						Z_SET_ISREF_PP(current);
+						current = &args[objIndex++];
+						zval_dtor(Z_REFVAL_P(current));
+						ZVAL_LONG(Z_REFVAL_P(current), (long)(string - baseString) );
+//						Z_SET_REFCOUNT_P(current, refcount);
+//???					Z_SET_ISREF_P(current);
 					} else {
-						add_index_long(*return_value, objIndex++, string - baseString);
+						add_index_long(return_value, objIndex++, string - baseString);
 					}
 				}
 				nconversions++;
@@ -867,16 +863,13 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						zend_uint refcount;
-
-						current = args[objIndex++];
-						refcount = Z_REFCOUNT_PP(current);
-						zval_dtor( *current );
-						ZVAL_STRINGL( *current, string, end-string, 1);
-						Z_SET_REFCOUNT_PP(current, refcount);
-						Z_SET_ISREF_PP(current);
+						current = &args[objIndex++];
+						zval_dtor(Z_REFVAL_P(current));
+						ZVAL_STRINGL(Z_REFVAL_P(current), string, end-string);
+//???						Z_SET_REFCOUNT_P(current, refcount);
+//???						Z_SET_ISREF_PP(current);
 					} else {
-						add_index_stringl( *return_value, objIndex++, string, end-string, 1);
+						add_index_stringl(return_value, objIndex++, string, end-string);
 					}
 				}
 				string = end;
@@ -913,11 +906,11 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = args[objIndex++];
-						zval_dtor( *current );
-						ZVAL_STRINGL( *current, string, end-string, 1);
+						current = &args[objIndex++];
+						zval_dtor(Z_REFVAL_P(current));
+						ZVAL_STRINGL(Z_REFVAL_P(current), string, end-string);
 					} else {
-						add_index_stringl(*return_value, objIndex++, string, end-string, 1);
+						add_index_stringl(return_value, objIndex++, string, end-string);
 					}
 				}
 				string = end;
@@ -938,7 +931,7 @@ literal:
 						zval_dtor(*current);
 						ZVAL_STRINGL( *current, __buf, 1, 1);
 					} else {
-						add_index_stringl(*return_value, objIndex++, &sch, 1, 1);
+						add_index_stringl(return_value, objIndex++, &sch, 1);
 					}
 				}
 				break;
@@ -1067,21 +1060,21 @@ addToInt:
 							break;
 						} else if (numVars) {
 						  /* change passed value type to string */
-							current = args[objIndex++];
-							zval_dtor(*current);
-							ZVAL_STRING( *current, buf, 1 );
+							current = &args[objIndex++];
+							zval_dtor(Z_REFVAL_P(current));
+							ZVAL_STRING(Z_REFVAL_P(current), buf);
 						} else {
-							add_index_string(*return_value, objIndex++, buf, 1);
+							add_index_string(return_value, objIndex++, buf);
 						}
 					} else {
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {
-							current = args[objIndex++];
-							zval_dtor(*current);
-							ZVAL_LONG(*current, value);
+							current = &args[objIndex++];
+							zval_dtor(Z_REFVAL_P(current));
+							ZVAL_LONG(Z_REFVAL_P(current), value);
 						} else {
-							add_index_long(*return_value, objIndex++, value);
+							add_index_long(return_value, objIndex++, value);
 						}
 					}
 				}
@@ -1182,11 +1175,11 @@ addToFloat:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = args[objIndex++];
-						zval_dtor(*current);
-						ZVAL_DOUBLE(*current, dvalue);
+						current = &args[objIndex++];
+						zval_dtor(Z_REFVAL_P(current));
+						ZVAL_DOUBLE(Z_REFVAL_P(current), dvalue);
 					} else {
-						add_index_double( *return_value, objIndex++, dvalue );
+						add_index_double(return_value, objIndex++, dvalue );
 					}
 				}
 				break;
@@ -1201,8 +1194,8 @@ done:
 		scan_set_error_return( numVars, return_value );
 		result = SCAN_ERROR_EOF;
 	} else if (numVars) {
-		convert_to_long( *return_value );
-		Z_LVAL_PP(return_value) = nconversions;
+		convert_to_long(return_value );
+		Z_LVAL_P(return_value) = nconversions;
 	} else if (nconversions < totalVars) {
 		/* TODO: not all elements converted. we need to prune the list - cc */
 	}
@@ -1211,14 +1204,13 @@ done:
 /* }}} */
 
 /* the compiler choked when i tried to make this a macro    */
-static inline void scan_set_error_return(int numVars, zval **return_value) /* {{{ */
+static inline void scan_set_error_return(int numVars, zval *return_value) /* {{{ */
 {
 	if (numVars) {
-		Z_TYPE_PP(return_value) = IS_LONG;
-		Z_LVAL_PP(return_value) = SCAN_ERROR_EOF;  /* EOF marker */
+		ZVAL_LONG(return_value, SCAN_ERROR_EOF);  /* EOF marker */
 	} else {
 		/* convert_to_null calls destructor */
-		convert_to_null( *return_value );
+		convert_to_null(return_value);
 	}
 }
 /* }}} */

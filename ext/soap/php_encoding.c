@@ -2271,8 +2271,11 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 
 static inline int array_num_elements(HashTable* ht)
 {
-	if (ht->pListTail && ht->pListTail->nKeyLength == 0) {
-		return ht->pListTail->h-1;
+	if (ht->nNumUsed &&
+	    ht->arData[ht->nNumUsed-1].xData &&
+	    ht->arData[ht->nNumUsed-1].nKeyLength == 0) {
+
+	    return ht->arData[ht->nNumUsed-1].h - 1;
 	}
 	return 0;
 }
@@ -2957,9 +2960,9 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data TSRMLS_DC)
 		add_property_zval(soapvar, "enc_value", ret);
 		parse_namespace(type_name, &cptype, &ns);
 		nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns));
-		add_property_string(soapvar, "enc_stype", cptype, 1);
+		add_property_string(soapvar, "enc_stype", cptype);
 		if (nsptr) {
-			add_property_string(soapvar, "enc_ns", (char*)nsptr->href, 1);
+			add_property_string(soapvar, "enc_ns", (char*)nsptr->href);
 		}
 		efree(cptype);
 		if (ns) {efree(ns);}

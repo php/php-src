@@ -173,19 +173,20 @@ define ____printzv_contents
 	set $zvalue = $arg0
 	set $type = $zvalue->type
 
-	printf "(refcount=%d", $zvalue->refcount__gc
-	if $zvalue->is_ref__gc
-		printf ",is_ref"
-	end
-	printf ") "
+	if $type >= 7
+		printf "(refcount=%d", $zvalue->value.counted->refcount
+		printf ") "
+    else 
+		printf "(refcount=NaN)"
+    end
 	if $type == 0
-		printf "NULL"
+		printf "UNDEF"
 	end
 	if $type == 1
-		printf "long: %ld", $zvalue->value.lval
+        printf "NULL"
 	end
 	if $type == 2
-		printf "double: %f", $zvalue->value.dval
+		printf "indirect: %p", (void*)$zvalue->value.zv
 	end
 	if $type == 3
 		printf "bool: "
@@ -195,10 +196,20 @@ define ____printzv_contents
 			printf "false"
 		end
 	end
-	if $type == 4
-		printf "array(%d): ", $zvalue->value.ht->nNumOfElements
+    if $type == 4
+		printf "long: %ld", $zvalue->value.lval
+    end
+    if $type == 5
+        printf "double: %f", $zvalue->value.dval
+    end
+    if $type == 6
+    end
+    if $type == 7
+       printf "string: %s", $zvalue->value.str->val
+    end
+	if $type == 8 
+		printf "array: ", $zvalue->value.arr->ht.nNumUsed
 		if ! $arg1
-			printf "{\n"
 			set $ind = $ind + 1
 			____print_ht $zvalue->value.ht 1
 			set $ind = $ind - 1
@@ -207,32 +218,21 @@ define ____printzv_contents
 				printf "  "
 				set $i = $i - 1
 			end
-			printf "}"
 		end
 		set $type = 0
 	end
-	if $type == 5
+	if $type == 9
 		printf "object"
 		____executor_globals
 		set $handle = $zvalue->value.obj.handle
 		set $handlers = $zvalue->value.obj.handlers
-		if basic_functions_module.zts
-			set $zobj = zend_objects_get_address($zvalue, $tsrm_ls)
-		else
-			set $zobj = zend_objects_get_address($zvalue)
-		end
-		if $handlers->get_class_entry == &zend_std_object_get_class
-			set $cname = $zobj->ce.name
-		else
-			set $cname = "Unknown"
-		end
+        set $zobj = $zvalue->value.obj
+        set $cname = $zobj->ce->name->val
 		printf "(%s) #%d", $cname, $handle
 		if ! $arg1
 			if $handlers->get_properties == &zend_std_get_properties
 				set $ht = $zobj->properties
 				if $ht
-					printf "(%d): ", $ht->nNumOfElements
-					printf "{\n"
 					set $ind = $ind + 1
 					____print_ht $ht 1
 					set $ind = $ind - 1
@@ -241,7 +241,6 @@ define ____printzv_contents
 						printf "  "
 						set $i = $i - 1
 					end
-					printf "}"
 				else
 					echo "no properties found"
 				end
@@ -249,20 +248,31 @@ define ____printzv_contents
 		end
 		set $type = 0
 	end
-	if $type == 6
-		printf "string(%d): ", $zvalue->value.str.len
-		____print_str $zvalue->value.str.val $zvalue->value.str.len
+	if $type == 10
+		printf "resource: #%d", $zvalue->value.res->handle
 	end
-	if $type == 7
-		printf "resource: #%d", $zvalue->value.lval
+	if $type == 11
+		printf "reference: %p", $zvalue->value.ref
 	end
-	if $type == 8 
-		printf "constant"
+	if $type == 12
+		printf "const: %s", $zvalue->value.str->val
 	end
-	if $type == 9
+	if $type == 13
 		printf "const_array"
 	end
-	if $type > 9
+	if $type == 14
+		printf "const_ast"
+	end
+	if $type == 15
+		printf "callable"
+	end
+	if $type == 16
+		printf "string_offset"
+	end
+	if $type == 17
+		printf "pointer: %p", $zvalue->value.ptr
+	end
+	if $type > 17
 		printf "unknown type %d", $type
 	end
 	printf "\n"
@@ -273,10 +283,6 @@ define ____printzv
 	set $zvalue = $arg0
 
 	printf "[%p] ", $zvalue
-
-	if $zvalue == $eg.uninitialized_zval_ptr
-		printf "*uninitialized* "
-	end
 
 	set $zcontents = (zval*) $zvalue
 	if $arg1
@@ -320,42 +326,92 @@ end
 
 define ____print_ht
 	set $ht = (HashTable*)$arg0
-	set $p = $ht->pListHead
-
-	while $p != 0
-		set $i = $ind
-		while $i > 0
-			printf "  "
-			set $i = $i - 1
-		end
-
-		if $p->nKeyLength > 0
-			____print_str $p->arKey $p->nKeyLength
-			printf " => "
-		else
-			printf "%d => ", $p->h
-		end
-		
-		if $arg1 == 0
-			printf "%p\n", (void*)$p->pData
-		end
-		if $arg1 == 1
-			set $zval = *(zval **)$p->pData
-			____printzv $zval 1
-		end
-		if $arg1 == 2
-			printf "%s\n", (char*)$p->pData
-		end
-
-		set $p = $p->pListNext
+	set $n = $ind
+	while $n > 0
+		printf "  "
+		set $n = $n - 1
 	end
+    if $ht->flags & 4
+        set $num = $ht->nNumUsed
+        set $i = 0
+    	printf "Packed(%d)[%p]: {\n", $ht->nNumOfElements, $ht
+		set $ind = $ind + 1
+        while $i < $num
+	    	set $p = (Bucket*)($ht->arData + $i)
+			set $n = $ind
+            if $p->val.type > 0
+				while $n > 0
+					printf "  "
+					set $n = $n - 1
+				end
+				printf "[%d]", $i
+				printf "%d => ", $p->h
+				if $arg1 == 0
+					printf "%p\n", (zval *)&$p->val
+				end
+				if $arg1 == 1
+					set $zval = (zval *)&$p->val
+					____printzv $zval 1
+				end
+				if $arg1 == 2
+					printf "%s\n", (char*)$p->val.value.ptr
+				end
+				if $arg1 == 3
+					set $func = (zend_function*)$p->val.value.ptr
+					printf "\"%s\"\n", $func->common.function_name->val
+				end
+			end
+			set $i = $i + 1
+        end
+		set $ind = $ind - 1
+		printf "}\n"
+    else
+		set $num = $ht->nTableSize
+        set $i = 0
+    	printf "Hash(%d)[%p]: {\n", $ht->nNumOfElements, $ht
+		set $ind = $ind + 1
+        while $i < $num
+	    	set $hash = $ht->arHash[$i]
+			if $hash != -1
+				set $p = (Bucket*)($ht->arData + $hash)
+				if $p->val.type > 0
+					set $n = $ind
+					while $n > 0
+						printf "  "
+						set $n = $n - 1
+					end
+					printf "[%d]", $i
+					if $p->key 
+						printf "%s => ", $p->key->val
+					else
+						printf "%d => ", $p->h
+					end
+					if $arg1 == 0
+						printf "%p\n", (zval *)&$p->val
+					end
+					if $arg1 == 1
+						set $zval = (zval *)&$p->val
+						____printzv $zval 1
+					end
+					if $arg1 == 2
+						printf "%s\n", (char*)$p->val.value.ptr
+					end
+					if $arg1 == 3
+						set $func = (zend_function*)$p->val.value.ptr
+						printf "\"%s\"\n", $func->common.function_name->val
+					end
+				end
+			end
+			set $i = $i + 1
+        end
+		set $ind = $ind - 1
+		printf "}\n"
+    end
 end
 
 define print_ht
-	set $ind = 1
-	printf "[%p] {\n", $arg0
+	set $ind = 0
 	____print_ht $arg0 1
-	printf "}\n"
 end
 
 document print_ht
@@ -363,10 +419,8 @@ document print_ht
 end
 
 define print_htptr
-	set $ind = 1
-	printf "[%p] {\n", $arg0
+	set $ind = 0
 	____print_ht $arg0 0
-	printf "}\n"
 end
 
 document print_htptr
@@ -374,46 +428,17 @@ document print_htptr
 end
 
 define print_htstr
-	set $ind = 1
-	printf "[%p] {\n", $arg0
+	set $ind = 0 
 	____print_ht $arg0 2
-	printf "}\n"
 end
 
 document print_htstr
 	dumps elements of HashTable made of strings
 end
 
-define ____print_ft
-	set $ht = $arg0
-	set $p = $ht->pListHead
-
-	while $p != 0
-		set $func = (zend_function*)$p->pData
-
-		set $i = $ind
-		while $i > 0
-			printf "  "
-			set $i = $i - 1
-		end
-
-		if $p->nKeyLength > 0
-			____print_str $p->arKey $p->nKeyLength
-			printf " => "
-		else
-			printf "%d => ", $p->h
-		end
-
-		printf "\"%s\"\n", $func->common.function_name
-		set $p = $p->pListNext
-	end
-end
-
 define print_ft
-	set $ind = 1
-	printf "[%p] {\n", $arg0
-	____print_ft $arg0
-	printf "}\n"
+	set $ind = 0
+	____print_ht $arg0 3
 end
 
 document print_ft
@@ -429,15 +454,15 @@ define ____print_inh_class
 			printf "final "
 		end
 	end
-	printf "class %s", $ce->name
+	printf "class %s", $ce->name->val
 	if $ce->parent != 0
-		printf " extends %s", $ce->parent->name
+		printf " extends %s", $ce->parent->name->val
 	end
 	if $ce->num_interfaces != 0
 		printf " implements"
 		set $tmp = 0
 		while $tmp < $ce->num_interfaces
-			printf " %s", $ce->interfaces[$tmp]->name
+			printf " %s", $ce->interfaces[$tmp]->name->val
 			set $tmp = $tmp + 1
 			if $tmp < $ce->num_interfaces
 				printf ","
@@ -449,10 +474,10 @@ end
 
 define ____print_inh_iface
 	set $ce = $arg0
-	printf "interface %s", $ce->name
+	printf "interface %s", $ce->name->val
 	if $ce->num_interfaces != 0
 		set $ce = $ce->interfaces[0]
-		printf " extends %s", $ce->name
+		printf " extends %s", $ce->name->val
 	else
 		set $ce = 0
 	end
@@ -618,9 +643,9 @@ define zmemcheck
 			if $p->magic == 0xfb8277dc
 				set $stat = "CACHED"
 			end
-			set $filename = strrchr($p->filename, '/')
+			set $filename = strrchr($p->filename->val, '/')
 			if !$filename
-				set $filename = $p->filename
+				set $filename = $p->filename->val
 			else
 				set $filename = $filename + 1
 			end

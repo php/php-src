@@ -145,13 +145,13 @@
  * Macro that does padding. The padding is done by printing
  * the character ch.
  */
-#define PAD(xbuf, count, ch) do {					\
-	if ((count) > 0) {                  			\
-		size_t newlen;								\
-		smart_str_alloc(xbuf, (count), 0); 			\
-		memset(xbuf->c + xbuf->len, ch, (count));	\
-		xbuf->len += (count);				\
-	}												\
+#define PAD(xbuf, count, ch) do {							\
+	if ((count) > 0) {                  					\
+		size_t newlen;										\
+		smart_str_alloc(xbuf, (count), 0); 					\
+		memset(xbuf->s->val + xbuf->s->len, ch, (count));	\
+		xbuf->s->len += (count);							\
+	}														\
 } while (0)
 
 #define NUM(c) (c - '0')
@@ -700,7 +700,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 
 
 				case 'n':
-					*(va_arg(ap, int *)) = xbuf->len;
+					*(va_arg(ap, int *)) = xbuf->s->len;
 					goto skip_output;
 
 					/*
@@ -795,17 +795,20 @@ skip_output:
 PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_str xbuf = {0};
+	int result;
 
 	xbuf_format_converter(&xbuf, format, ap);
 
-	if (max_len && xbuf.len > max_len) {
-		xbuf.len = max_len;
+	if (max_len && xbuf.s->len > max_len) {
+		xbuf.s->len = max_len;
 	}
 	smart_str_0(&xbuf);
 
-	*pbuf = xbuf.c;
+	*pbuf = estrndup(xbuf.s->val, xbuf.s->len);
+	result = xbuf.s->len;
+	smart_str_free(&xbuf);
 
-	return xbuf.len;
+	return result;
 }
 /* }}} */
 

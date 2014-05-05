@@ -68,12 +68,14 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	tv.tv_usec = conv % 1000000;
 
 	if (zerrno)	{
+		zerrno = Z_REFVAL_P(zerrno);
 		zval_dtor(zerrno);
 		ZVAL_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
+		zerrstr = Z_REFVAL_P(zerrstr);
 		zval_dtor(zerrstr);
-		ZVAL_STRING(zerrstr, "", 1);
+		ZVAL_EMPTY_STRING(zerrstr);
 	}
 
 	stream = php_stream_xport_create(hostname, hostname_len, REPORT_ERRORS,
@@ -98,9 +100,10 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-			ZVAL_STRING(zerrstr, errstr, 0);
-		}
-		else if (!zerrstr && errstr) {
+			// TODO: avoid reallocation ???
+			ZVAL_STRING(zerrstr, errstr);
+			efree(errstr);
+		} else if (!zerrstr && errstr) {
 			efree(errstr);
 		} 
 

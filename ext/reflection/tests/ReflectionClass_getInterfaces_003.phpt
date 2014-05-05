@@ -52,7 +52,7 @@ The result is an array in which each element is an object (an instance of Reflec
 Var_dumping this array shows that the elements are referenced. By what?
 array(1) {
   ["I"]=>
-  &object(ReflectionClass)#%d (1) {
+  object(ReflectionClass)#%d (1) {
     ["name"]=>
     string(1) "I"
   }

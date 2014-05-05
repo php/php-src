@@ -173,16 +173,18 @@ PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, voi
 	 * zend_hash_apply_with_argument nor zend_hash_internal_pointer_reset and
 	 * friends
 	 */
+	uint idx;
 	Bucket *p;
+	int result;
 
-	p = mysqlnd_registered_plugins.pListHead;
-	while (p != NULL) {
-		int result = apply_func(p->pData, argument TSRMLS_CC);
+	for (idx = 0; idx < mysqlnd_registered_plugins.nNumUsed; idx++) {
+		p = mysqlnd_registered_plugins.arData + idx;
+		if (!p->xData) continue;
+		result = apply_func(HASH_DATA(&mysqlnd_registered_plugins, p), argument TSRMLS_CC);
 
 		if (result & ZEND_HASH_APPLY_REMOVE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mysqlnd_plugin_apply_with_argument must not remove table entries");
 		}
-		p = p->pListNext;
 		if (result & ZEND_HASH_APPLY_STOP) {
 			break;
 		}

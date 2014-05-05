@@ -282,6 +282,7 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 
 	case IP_MULTICAST_LOOP:
 		convert_to_boolean_ex(arg4);
+		ipv4_mcast_ttl_lback = (unsigned char) (Z_TYPE_PP(arg4) == IS_TRUE);
 		goto ipv4_loop_ttl;
 
 	case IP_MULTICAST_TTL:
@@ -291,8 +292,8 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 					"Expected a value between 0 and 255");
 			return FAILURE;
 		}
-ipv4_loop_ttl:
 		ipv4_mcast_ttl_lback = (unsigned char) Z_LVAL_PP(arg4);
+ipv4_loop_ttl:
 		opt_ptr = &ipv4_mcast_ttl_lback;
 		optlen	= sizeof(ipv4_mcast_ttl_lback);
 		goto dosockopt;
@@ -347,6 +348,7 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 
 	case IPV6_MULTICAST_LOOP:
 		convert_to_boolean_ex(arg4);
+		ov = (int) Z_TYPE_PP(arg4) == IS_TRUE;
 		goto ipv6_loop_hops;
 	case IPV6_MULTICAST_HOPS:
 		convert_to_long_ex(arg4);
@@ -355,8 +357,8 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 					"Expected a value between -1 and 255");
 			return FAILURE;
 		}
-ipv6_loop_hops:
 		ov = (int) Z_LVAL_PP(arg4);
+ipv6_loop_hops:
 		opt_ptr = &ov;
 		optlen	= sizeof(ov);
 		goto dosockopt;

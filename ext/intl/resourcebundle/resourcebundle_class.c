@@ -340,7 +340,7 @@ PHP_FUNCTION( resourcebundle_locales )
 
 	array_init( return_value );
 	while ((entry = uenum_next( icuenum, &entry_len, &icuerror ))) {
-		add_next_index_stringl( return_value, (char *) entry, entry_len, 1 );
+		add_next_index_stringl( return_value, (char *) entry, entry_len);
 	}
 	uenum_close( icuenum );
 }

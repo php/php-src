@@ -29,7 +29,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC);
 	strlcpy(dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE)); \
 	if (dbh->query_stmt) { \
 		dbh->query_stmt = NULL; \
-		zend_objects_store_del_ref(&dbh->query_stmt_zval TSRMLS_CC); \
+		zval_ptr_dtor(&dbh->query_stmt_zval); \
 	} \
 } while (0)
 #define PDO_STMT_CLEAR_ERR()    strcpy(stmt->error_code, PDO_ERR_NONE)

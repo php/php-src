@@ -64,5 +64,5 @@ Warning: mysql_db_name(): Unable to jump to row -1 on MySQL result index %d in %
 
 Warning: mysql_db_name(): Unable to jump to row %d on MySQL result index %d in %s on line %d
 
-Warning: mysql_db_name(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_db_name(): supplied resource is not a valid MySQL result resource in %s on line %d
 done!

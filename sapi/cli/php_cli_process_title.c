@@ -66,7 +66,7 @@ PHP_FUNCTION(cli_get_process_title)
                 RETURN_NULL();
         }
 
-        RETURN_STRINGL(title, length, 1);
+        RETURN_STRINGL(title, length);
 }
 /* }}} */
 

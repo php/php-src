@@ -103,7 +103,7 @@ PHP_FUNCTION(array_key_exists);
 PHP_FUNCTION(array_chunk);
 PHP_FUNCTION(array_combine);
 
-PHPAPI void php_splice(HashTable *ht, zend_uint offset, zend_uint length, zval ***list, zend_uint list_count, HashTable *removed TSRMLS_DC);
+PHPAPI HashTable* php_splice(HashTable *, int, int, zval *, int, HashTable *);
 PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC);
 PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC);
 PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC);

@@ -32,11 +32,11 @@ PHP_FUNCTION(unserialize);
 PHP_FUNCTION(memory_get_usage);
 PHP_FUNCTION(memory_get_peak_usage);
 
-PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC);
-PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC);
-PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC);
+PHPAPI void php_var_dump(zval *struc, int level TSRMLS_DC);
+PHPAPI void php_var_export(zval *struc, int level TSRMLS_DC);
+PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC);
 
-PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC);
+PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC);
 
 typedef HashTable* php_serialize_data_t;
 
@@ -49,15 +49,17 @@ struct php_unserialize_data {
 
 typedef struct php_unserialize_data* php_unserialize_data_t;
 
-PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash TSRMLS_DC);
-PHPAPI int php_var_unserialize(zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
+PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t *var_hash TSRMLS_DC);
+PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
+PHPAPI int php_var_unserialize_ref(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
+PHPAPI int php_var_unserialize_intern(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
 
 #define PHP_VAR_SERIALIZE_INIT(var_hash_ptr) \
 do  { \
 	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */ \
 	if (BG(serialize_lock) || !BG(serialize).level) { \
 		ALLOC_HASHTABLE(var_hash_ptr); \
-		zend_hash_init((var_hash_ptr), 10, NULL, NULL, 0); \
+		zend_hash_init((var_hash_ptr), 16, NULL, NULL, 0); \
 		if (!BG(serialize_lock)) { \
 			BG(serialize).var_hash = (void *)(var_hash_ptr); \
 			BG(serialize).level = 1; \
@@ -113,13 +115,10 @@ do { \
 	} \
 } while (0)
 
-PHPAPI void var_replace(php_unserialize_data_t *var_hash, zval *ozval, zval **nzval);
-PHPAPI void var_push_dtor(php_unserialize_data_t *var_hash, zval **val);
-PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval **rval);
+PHPAPI void var_replace(php_unserialize_data_t *var_hash, zval *ozval, zval *nzval);
+PHPAPI void var_push_dtor(php_unserialize_data_t *var_hash, zval *val);
+PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval *rval);
 PHPAPI void var_destroy(php_unserialize_data_t *var_hash);
-
-#define PHP_VAR_UNSERIALIZE_ZVAL_CHANGED(var_hash, ozval, nzval) \
-	var_replace((var_hash), (ozval), &(nzval))
 	
 PHPAPI zend_class_entry *php_create_empty_class(char *class_name, int len);
 

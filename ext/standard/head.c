@@ -75,11 +75,12 @@ PHPAPI int php_header(TSRMLS_D)
 
 PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
 {
-	char *cookie, *encoded_value = NULL;
+	char *cookie;
 	int len=sizeof("Set-Cookie: ");
-	char *dt;
+	zend_string *dt;
 	sapi_header_line ctr = {0};
 	int result;
+	zend_string *encoded_value = NULL;
 
 	if (name && strpbrk(name, "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
 		zend_error( E_WARNING, "Cookie names cannot contain any of the following '=,; \\t\\r\\n\\013\\014'" );
@@ -93,14 +94,13 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 
 	len += name_len;
 	if (value && url_encode) {
-		int encoded_value_len;
-
-		encoded_value = php_url_encode(value, value_len, &encoded_value_len);
-		len += encoded_value_len;
-	} else if ( value ) {
-		encoded_value = estrdup(value);
-		len += value_len;
+		encoded_value = php_url_encode(value, value_len);
+		len += encoded_value->len;
+	} else if (value) {
+		encoded_value = STR_INIT(value, value_len, 0);
+		len += encoded_value->len;
 	}
+
 	if (path) {
 		len += path_len;
 	}
@@ -117,26 +117,26 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		 * pick an expiry date in the past
 		 */
 		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0 TSRMLS_CC);
-		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s; Max-Age=0", name, dt);
-		efree(dt);
+		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s; Max-Age=0", name, dt->val);
+		STR_FREE(dt);
 	} else {
-		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
+		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value->val : "");
 		if (expires > 0) {
 			const char *p;
 			char tsdelta[13];
 			strlcat(cookie, "; expires=", len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
 			/* check to make sure that the year does not exceed 4 digits in length */
-			p = zend_memrchr(dt, '-', strlen(dt));
+			p = zend_memrchr(dt->val, '-', dt->len);
 			if (!p || *(p + 5) != ' ') {
-				efree(dt);
+				STR_FREE(dt);
 				efree(cookie);
-				efree(encoded_value);
+				STR_FREE(encoded_value);
 				zend_error(E_WARNING, "Expiry date cannot have a year greater than 9999");
 				return FAILURE;
 			}
-			strlcat(cookie, dt, len + 100);
-			efree(dt);
+			strlcat(cookie, dt->val, len + 100);
+			STR_FREE(dt);
 
 			snprintf(tsdelta, sizeof(tsdelta), "%li", (long) difftime(expires, time(NULL)));
 			strlcat(cookie, "; Max-Age=", len + 100);
@@ -145,7 +145,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	}
 
 	if (encoded_value) {
-		efree(encoded_value);
+		STR_FREE(encoded_value);
 	}
 
 	if (path && path_len > 0) {
@@ -243,9 +243,9 @@ PHP_FUNCTION(headers_sent)
 	case 1:
 		zval_dtor(arg1);
 		if (file) {
-			ZVAL_STRING(arg1, file, 1);
+			ZVAL_STRING(arg1, file);
 		} else {
-			ZVAL_STRING(arg1, "", 1);
+			ZVAL_EMPTY_STRING(arg1);
 		}
 		break;
 	}
@@ -265,7 +265,7 @@ static void php_head_apply_header_list_to_hash(void *data, void *arg TSRMLS_DC)
 	sapi_header_struct *sapi_header = (sapi_header_struct *)data;
 
 	if (arg && sapi_header) {
-		add_next_index_string((zval *)arg, (char *)(sapi_header->header), 1);
+		add_next_index_string((zval *)arg, (char *)(sapi_header->header));
 	}
 }
 

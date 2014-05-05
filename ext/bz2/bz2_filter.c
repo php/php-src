@@ -358,7 +358,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					zval_copy_ctor(&tmp);
 					tmp2 = &tmp;
 					convert_to_boolean_ex(&tmp2);
-					data->expect_concatenated = Z_LVAL(tmp);
+					data->expect_concatenated = Z_TMP(tmp) == IS_TRUE;
 					tmpzval = NULL;
 				}
 
@@ -374,7 +374,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 				zval_copy_ctor(&tmp);
 				tmp2 = &tmp;
 				convert_to_boolean_ex(&tmp2);
-				data->small_footprint = Z_LVAL(tmp);
+				data->small_footprint = Z_TYPE(tmp) == IS_TRUE;
 			}
 		}
 

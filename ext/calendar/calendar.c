@@ -275,14 +275,14 @@ static void _php_cal_info(int cal, zval **ret)
 	array_init(smonths);
 
 	for (i = 1; i <= calendar->num_months; i++) {
-		add_index_string(months, i, calendar->month_name_long[i], 1);
-		add_index_string(smonths, i, calendar->month_name_short[i], 1);
+		add_index_string(months, i, calendar->month_name_long[i]);
+		add_index_string(smonths, i, calendar->month_name_short[i]);
 	}
 	add_assoc_zval(*ret, "months", months);
 	add_assoc_zval(*ret, "abbrevmonths", smonths);
 	add_assoc_long(*ret, "maxdaysinmonth", calendar->max_days_in_month);
-	add_assoc_string(*ret, "calname", calendar->name, 1);
-	add_assoc_string(*ret, "calsymbol", calendar->symbol, 1);
+	add_assoc_string(*ret, "calname", calendar->name);
+	add_assoc_string(*ret, "calsymbol", calendar->symbol);
 	
 }
 
@@ -409,7 +409,7 @@ PHP_FUNCTION(cal_from_jd)
 	calendar->from_jd(jd, &year, &month, &day);
 
 	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
-	add_assoc_string(return_value, "date", date, 1);
+	add_assoc_string(return_value, "date", date);
 
 	add_assoc_long(return_value, "month", month);
 	add_assoc_long(return_value, "day", day);
@@ -418,16 +418,16 @@ PHP_FUNCTION(cal_from_jd)
 /* day of week */
 	dow = DayOfWeek(jd);
 	add_assoc_long(return_value, "dow", dow);
-	add_assoc_string(return_value, "abbrevdayname", DayNameShort[dow], 1);
-	add_assoc_string(return_value, "dayname", DayNameLong[dow], 1);
+	add_assoc_string(return_value, "abbrevdayname", DayNameShort[dow]);
+	add_assoc_string(return_value, "dayname", DayNameLong[dow]);
 /* month name */
 	if(cal == CAL_JEWISH) {
 		/* special case for Jewish calendar */
-		add_assoc_string(return_value, "abbrevmonth", JEWISH_MONTH_NAME(year)[month], 1);
-		add_assoc_string(return_value, "monthname", JEWISH_MONTH_NAME(year)[month], 1);
+		add_assoc_string(return_value, "abbrevmonth", JEWISH_MONTH_NAME(year)[month]);
+		add_assoc_string(return_value, "monthname", JEWISH_MONTH_NAME(year)[month]);
 	} else {
-		add_assoc_string(return_value, "abbrevmonth", calendar->month_name_short[month], 1);
-		add_assoc_string(return_value, "monthname", calendar->month_name_long[month], 1);
+		add_assoc_string(return_value, "abbrevmonth", calendar->month_name_short[month]);
+		add_assoc_string(return_value, "monthname", calendar->month_name_long[month]);
 	}
 }
 /* }}} */

@@ -66,6 +66,7 @@
 /* all HAVE_XXX test have to be after the include of zend_config above */
 
 #include <stdio.h>
+#include <assert.h>
 
 #ifdef HAVE_UNIX_H
 # include <unix.h>
@@ -252,7 +253,6 @@ char *alloca ();
 #include "zend_alloc.h"
 
 #include "zend_types.h"
-#include "zend_string.h"
 
 #ifdef HAVE_LIMITS_H
 # include <limits.h>
@@ -284,11 +284,15 @@ typedef enum {
 } ZEND_RESULT_CODE;
 
 #include "zend_hash.h"
-#include "zend_ts_hash.h"
 #include "zend_llist.h"
 
-#define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, zval **return_value_ptr, zval *this_ptr, int return_value_used TSRMLS_DC
-#define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, return_value_ptr, this_ptr, return_value_used TSRMLS_CC
+#define INTERNAL_FUNCTION_PARAMETERS zend_uint param_count, zval *return_value TSRMLS_DC
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU param_count, return_value TSRMLS_CC
+
+#define USED_RET() \
+	(!EG(current_execute_data) || \
+	 !EG(current_execute_data)->opline || \
+	 !(EG(current_execute_data)->opline->result_type & EXT_TYPE_UNUSED))
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
@@ -296,75 +300,23 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #  define zend_error_noreturn zend_error
 #endif
 
-/*
- * zval
- */
-typedef struct _zend_class_entry zend_class_entry;
-
-typedef struct _zend_guard {
-	zend_bool in_get;
-	zend_bool in_set;
-	zend_bool in_unset;
-	zend_bool in_isset;
-	zend_bool dummy; /* sizeof(zend_guard) must not be equal to sizeof(void*) */
-} zend_guard;
-
-typedef struct _zend_object {
-	zend_class_entry *ce;
-	HashTable *properties;
-	zval **properties_table;
-	HashTable *guards; /* protects from __get/__set ... recursion */
-} zend_object;
-
 #include "zend_object_handlers.h"
 #include "zend_ast.h"
 
-typedef union _zvalue_value {
-	long lval;					/* long value */
-	double dval;				/* double value */
-	struct {
-		char *val;
-		int len;
-	} str;
-	HashTable *ht;				/* hash table value */
-	zend_object_value obj;
-	zend_ast *ast;
-} zvalue_value;
+/* overloaded elements data types */
+#define OE_IS_ARRAY					(1<<0)
+#define OE_IS_OBJECT				(1<<1)
+#define OE_IS_METHOD				(1<<2)
 
-struct _zval_struct {
-	/* Variable information */
-	zvalue_value value;		/* value */
-	zend_uint refcount__gc;
-	zend_uchar type;	/* active type */
-	zend_uchar is_ref__gc;
-};
-
-#define Z_REFCOUNT_PP(ppz)		Z_REFCOUNT_P(*(ppz))
-#define Z_SET_REFCOUNT_PP(ppz, rc)	Z_SET_REFCOUNT_P(*(ppz), rc)
-#define Z_ADDREF_PP(ppz)		Z_ADDREF_P(*(ppz))
-#define Z_DELREF_PP(ppz)		Z_DELREF_P(*(ppz))
-#define Z_ISREF_PP(ppz)			Z_ISREF_P(*(ppz))
-#define Z_SET_ISREF_PP(ppz)		Z_SET_ISREF_P(*(ppz))
-#define Z_UNSET_ISREF_PP(ppz)		Z_UNSET_ISREF_P(*(ppz))
-#define Z_SET_ISREF_TO_PP(ppz, isref)	Z_SET_ISREF_TO_P(*(ppz), isref)
-
-#define Z_REFCOUNT_P(pz)		zval_refcount_p(pz)
+#define Z_REFCOUNT_P(pz)			zval_refcount_p(pz)
 #define Z_SET_REFCOUNT_P(pz, rc)	zval_set_refcount_p(pz, rc)
-#define Z_ADDREF_P(pz)			zval_addref_p(pz)
-#define Z_DELREF_P(pz)			zval_delref_p(pz)
-#define Z_ISREF_P(pz)			zval_isref_p(pz)
-#define Z_SET_ISREF_P(pz)		zval_set_isref_p(pz)
-#define Z_UNSET_ISREF_P(pz)		zval_unset_isref_p(pz)
-#define Z_SET_ISREF_TO_P(pz, isref)	zval_set_isref_to_p(pz, isref)
+#define Z_ADDREF_P(pz)				zval_addref_p(pz)
+#define Z_DELREF_P(pz)				zval_delref_p(pz)
 
-#define Z_REFCOUNT(z)			Z_REFCOUNT_P(&(z))
+#define Z_REFCOUNT(z)				Z_REFCOUNT_P(&(z))
 #define Z_SET_REFCOUNT(z, rc)		Z_SET_REFCOUNT_P(&(z), rc)
-#define Z_ADDREF(z)			Z_ADDREF_P(&(z))
-#define Z_DELREF(z)			Z_DELREF_P(&(z))
-#define Z_ISREF(z)			Z_ISREF_P(&(z))
-#define Z_SET_ISREF(z)			Z_SET_ISREF_P(&(z))
-#define Z_UNSET_ISREF(z)		Z_UNSET_ISREF_P(&(z))
-#define Z_SET_ISREF_TO(z, isref)	Z_SET_ISREF_TO_P(&(z), isref)
+#define Z_ADDREF(z)					Z_ADDREF_P(&(z))
+#define Z_DELREF(z)					Z_DELREF_P(&(z))
 
 #if ZEND_DEBUG
 #define zend_always_inline inline
@@ -395,36 +347,56 @@ struct _zval_struct {
 # define UNEXPECTED(condition) (condition)
 #endif
 
+#ifndef XtOffsetOf
+# if defined(CRAY) || (defined(__ARMCC_VERSION) && !defined(LINUX))
+# ifdef __STDC__
+# define XtOffset(p_type, field) _Offsetof(p_type, field)
+# else
+# ifdef CRAY2
+# define XtOffset(p_type, field) \
+    (sizeof(int)*((unsigned int)&(((p_type)NULL)->field)))
+
+# else /* !CRAY2 */
+
+# define XtOffset(p_type, field) ((unsigned int)&(((p_type)NULL)->field))
+
+# endif /* !CRAY2 */
+# endif /* __STDC__ */
+# else /* ! (CRAY || __arm) */
+
+# define XtOffset(p_type, field) \
+    ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
+
+# endif /* !CRAY */
+
+# ifdef offsetof
+# define XtOffsetOf(s_type, field) offsetof(s_type, field)
+# else
+# define XtOffsetOf(s_type, field) XtOffset(s_type*, field)
+# endif
+
+#endif
+
+#include "zend_string.h"
+
 static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
-	return pz->refcount__gc;
+	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
+	return GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
 static zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
-	return pz->refcount__gc = rc;
+	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
+	return GC_REFCOUNT(Z_COUNTED_P(pz)) = rc;
 }
 
 static zend_always_inline zend_uint zval_addref_p(zval* pz) {
-	return ++pz->refcount__gc;
+	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
+	return ++GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
 static zend_always_inline zend_uint zval_delref_p(zval* pz) {
-	return --pz->refcount__gc;
-}
-
-static zend_always_inline zend_bool zval_isref_p(zval* pz) {
-	return pz->is_ref__gc;
-}
-
-static zend_always_inline zend_bool zval_set_isref_p(zval* pz) {
-	return pz->is_ref__gc = 1;
-}
-
-static zend_always_inline zend_bool zval_unset_isref_p(zval* pz) {
-	return pz->is_ref__gc = 0;
-}
-
-static zend_always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
-	return pz->is_ref__gc = isref;
+	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
+	return --GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
@@ -442,20 +414,18 @@ typedef struct _zend_serialize_data zend_serialize_data;
 typedef struct _zend_unserialize_data zend_unserialize_data;
 
 struct _zend_trait_method_reference {
-	const char* method_name;
-	unsigned int mname_len;
-	
+	zend_string *method_name;	
 	zend_class_entry *ce;
-	
-	const char* class_name;
-	unsigned int cname_len;
+	zend_string *class_name;
 };
 typedef struct _zend_trait_method_reference	zend_trait_method_reference;
 
 struct _zend_trait_precedence {
-	zend_trait_method_reference *trait_method;
-	
-	zend_class_entry** exclude_from_classes;
+	zend_trait_method_reference *trait_method;	
+	union {
+		zend_class_entry  *ce;
+		zend_string       *class_name;
+	} *exclude_from_classes;
 };
 typedef struct _zend_trait_precedence zend_trait_precedence;
 
@@ -465,8 +435,7 @@ struct _zend_trait_alias {
 	/**
 	* name for method to be added
 	*/
-	const char* alias;
-	unsigned int alias_len;
+	zend_string *alias;
 	
 	/**
 	* modifiers to be set on trait method
@@ -477,17 +446,16 @@ typedef struct _zend_trait_alias zend_trait_alias;
 
 struct _zend_class_entry {
 	char type;
-	const char *name;
-	zend_uint name_length;
+	zend_string *name;
 	struct _zend_class_entry *parent;
 	int refcount;
 	zend_uint ce_flags;
 
 	HashTable function_table;
 	HashTable properties_info;
-	zval **default_properties_table;
-	zval **default_static_members_table;
-	zval **static_members_table;
+	zval *default_properties_table;
+	zval *default_static_members_table;
+	zval *static_members_table;
 	HashTable constants_table;
 	int default_properties_count;
 	int default_static_members_count;
@@ -509,14 +477,14 @@ struct _zend_class_entry {
 	zend_class_iterator_funcs iterator_funcs;
 
 	/* handlers */
-	zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
+	zend_object* (*create_object)(zend_class_entry *class_type TSRMLS_DC);
 	zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 	int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type TSRMLS_DC); /* a class implements this interface */
-	union _zend_function *(*get_static_method)(zend_class_entry *ce, char* method, int method_len TSRMLS_DC);
+	union _zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method TSRMLS_DC);
 
 	/* serializer callbacks */
 	int (*serialize)(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
-	int (*unserialize)(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
+	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
 
 	zend_class_entry **interfaces;
 	zend_uint num_interfaces;
@@ -528,11 +496,10 @@ struct _zend_class_entry {
 
 	union {
 		struct {
-			const char *filename;
+			zend_string *filename;
 			zend_uint line_start;
 			zend_uint line_end;
-			const char *doc_comment;
-			zend_uint doc_comment_len;
+			zend_string *doc_comment;
 		} user;
 		struct {
 			const struct _zend_function_entry *builtin_functions;
@@ -578,33 +545,6 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
 #define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
 
-/* data types */
-/* All data types <= IS_BOOL have their constructor/destructors skipped */
-#define IS_NULL		0
-#define IS_LONG		1
-#define IS_DOUBLE	2
-#define IS_BOOL		3
-#define IS_ARRAY	4
-#define IS_OBJECT	5
-#define IS_STRING	6
-#define IS_RESOURCE	7
-#define IS_CONSTANT	8
-#define IS_CONSTANT_AST	9
-#define IS_CALLABLE	10
-
-#define IS_CONSTANT_TYPE_MASK		0x00f
-#define IS_CONSTANT_UNQUALIFIED		0x010
-#define IS_LEXICAL_VAR				0x020
-#define IS_LEXICAL_REF				0x040
-#define IS_CONSTANT_IN_NAMESPACE	0x100
-
-#define IS_CONSTANT_TYPE(type) (((type) & IS_CONSTANT_TYPE_MASK) >= IS_CONSTANT && ((type) & IS_CONSTANT_TYPE_MASK) <= IS_CONSTANT_AST)
-
-/* overloaded elements data types */
-#define OE_IS_ARRAY		(1<<0)
-#define OE_IS_OBJECT	(1<<1)
-#define OE_IS_METHOD	(1<<2)
-
 int zend_startup(zend_utility_functions *utility_functions, char **extensions TSRMLS_DC);
 void zend_shutdown(TSRMLS_D);
 void zend_register_standard_ini_entries(TSRMLS_D);
@@ -646,8 +586,8 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 ZEND_API char *get_zend_version(void);
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
-ZEND_API int zend_print_zval(zval *expr, int indent);
-ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent);
+ZEND_API int zend_print_zval(zval *expr, int indent TSRMLS_DC);
+ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC);
 ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC);
 ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC);
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC);
@@ -671,21 +611,8 @@ END_EXTERN_C()
 
 BEGIN_EXTERN_C()
 ZEND_API void free_estring(char **str_p);
+ZEND_API void free_string_zval(zval *zv);
 END_EXTERN_C()
-
-/* FIXME: Check if we can save if (ptr) too */
-
-#define STR_FREE(ptr) if (ptr) { str_efree(ptr); }
-#define STR_FREE_REL(ptr) if (ptr) { str_efree_rel(ptr); }
-
-#ifndef ZTS
-#define STR_EMPTY_ALLOC() CG(interned_empty_string)? CG(interned_empty_string) : estrndup("", sizeof("")-1)
-#else
-#define STR_EMPTY_ALLOC() estrndup("", sizeof("")-1)
-#endif
-
-#define STR_REALLOC(ptr, size) \
-			ptr = (char *) erealloc(ptr, size);
 
 /* output support */
 #define ZEND_WRITE(str, str_len)		zend_write((str), (str_len))
@@ -747,101 +674,120 @@ END_EXTERN_C()
 #define ZMSG_LOG_SCRIPT_NAME			6L
 #define ZMSG_MEMORY_LEAKS_GRAND_TOTAL	7L
 
-#define INIT_PZVAL(z)		\
-	(z)->refcount__gc = 1;	\
-	(z)->is_ref__gc = 0;
-
-#define INIT_ZVAL(z) z = zval_used_for_init;
-
-#define ALLOC_INIT_ZVAL(zp)						\
-	ALLOC_ZVAL(zp);		\
-	INIT_ZVAL(*zp);
-
-#define MAKE_STD_ZVAL(zv)				 \
-	ALLOC_ZVAL(zv); \
-	INIT_PZVAL(zv);
-
-#define PZVAL_IS_REF(z)		Z_ISREF_P(z)
-
-#define ZVAL_COPY_VALUE(z, v)					\
-	do {										\
-		(z)->value = (v)->value;				\
-		Z_TYPE_P(z) = Z_TYPE_P(v);				\
+#define ZVAL_COPY_VALUE(z, v)							\
+	do {												\
+		zval *_z1 = (z);								\
+		zval *_z2 = (v);								\
+		(_z1)->value = (_z2)->value;					\
+		Z_TYPE_INFO_P(_z1) = Z_TYPE_INFO_P(_z2);		\
 	} while (0)
 
-#define INIT_PZVAL_COPY(z, v)					\
-	do {										\
-		ZVAL_COPY_VALUE(z, v);					\
-		Z_SET_REFCOUNT_P(z, 1);					\
-		Z_UNSET_ISREF_P(z);						\
+#define ZVAL_COPY(z, v)									\
+	do {												\
+		zval *__z1 = (z);								\
+		zval *__z2 = (v);								\
+		ZVAL_COPY_VALUE(__z1, __z2);					\
+		if (Z_OPT_REFCOUNTED_P(__z1)) {					\
+			Z_ADDREF_P(__z1);							\
+		}												\
 	} while (0)
 
-#define SEPARATE_ZVAL(ppzv)						\
-	do {										\
-		if (Z_REFCOUNT_PP((ppzv)) > 1) {		\
-			zval *new_zv;						\
-			Z_DELREF_PP(ppzv);					\
-			ALLOC_ZVAL(new_zv);					\
-			INIT_PZVAL_COPY(new_zv, *(ppzv));	\
-			*(ppzv) = new_zv;					\
-			zval_copy_ctor(new_zv);				\
-		}										\
+#define ZVAL_DUP(z, v)									\
+	do {												\
+		zval *__z1 = (z);								\
+		zval *__z2 = (v);								\
+		ZVAL_COPY_VALUE(__z1, __z2);					\
+		zval_opt_copy_ctor(__z1);						\
 	} while (0)
 
-#define SEPARATE_ZVAL_IF_NOT_REF(ppzv)		\
-	if (!PZVAL_IS_REF(*ppzv)) {				\
-		SEPARATE_ZVAL(ppzv);				\
-	}
+#define ZVAL_DEREF(z) do {								\
+		if (UNEXPECTED(Z_ISREF_P(z))) {					\
+			(z) = Z_REFVAL_P(z);						\
+		}												\
+	} while (0)
 
-#define SEPARATE_ZVAL_TO_MAKE_IS_REF(ppzv)	\
-	if (!PZVAL_IS_REF(*ppzv)) {				\
-		SEPARATE_ZVAL(ppzv);				\
-		Z_SET_ISREF_PP((ppzv));				\
-	}
+#define ZVAL_DUP_DEREF(z, v)							\
+	do {												\
+		zval *__z1 = (z);								\
+		zval *__z2 = (v);								\
+		ZVAL_DEREF(__z2);								\
+		ZVAL_COPY_VALUE(__z1, __z2);					\
+		zval_opt_copy_ctor(__z1);						\
+	} while (0)
 
-#define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
-	(zv) = *(pzv);							\
-	if (Z_REFCOUNT_P(pzv)>1) {				\
-		zval_copy_ctor(&(zv));				\
-		Z_DELREF_P((pzv));					\
-	} else {								\
-		FREE_ZVAL(pzv);						\
-	}										\
-	INIT_PZVAL(&(zv));
-	
-#define MAKE_COPY_ZVAL(ppzv, pzv) 	\
-	INIT_PZVAL_COPY(pzv, *(ppzv));	\
-	zval_copy_ctor((pzv));
+#define ZVAL_UNREF(z) do {								\
+		zval *_z = (z);									\
+		zend_reference *ref;							\
+		ZEND_ASSERT(Z_ISREF_P(_z));						\
+		ref = Z_REF_P(_z);								\
+		ZVAL_COPY_VALUE(_z, &ref->val);					\
+		efree(ref);										\
+	} while (0)
 
-#define REPLACE_ZVAL_VALUE(ppzv_dest, pzv_src, copy) {	\
-	int is_ref, refcount;						\
-												\
-	SEPARATE_ZVAL_IF_NOT_REF(ppzv_dest);		\
-	is_ref = Z_ISREF_PP(ppzv_dest);				\
-	refcount = Z_REFCOUNT_PP(ppzv_dest);		\
-	zval_dtor(*ppzv_dest);						\
-	ZVAL_COPY_VALUE(*ppzv_dest, pzv_src);		\
-	if (copy) {                                 \
-		zval_copy_ctor(*ppzv_dest);				\
-    }		                                    \
-	Z_SET_ISREF_TO_PP(ppzv_dest, is_ref);		\
-	Z_SET_REFCOUNT_PP(ppzv_dest, refcount);		\
-}
+#define SEPARATE_ZVAL(zv) do {							\
+		zval *_zv = (zv);								\
+		if (Z_REFCOUNTED_P(_zv)) {						\
+			if (Z_REFCOUNT_P(_zv) > 1) {				\
+				if (Z_ISREF_P(_zv)) {					\
+					Z_DELREF_P(_zv);					\
+					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));		\
+				} else if (Z_COPYABLE_P(_zv)) {			\
+					Z_DELREF_P(_zv);					\
+					zval_copy_ctor_func(_zv);			\
+				}										\
+			}											\
+		}												\
+	} while (0)
 
-#define SEPARATE_ARG_IF_REF(varptr) \
-	if (PZVAL_IS_REF(varptr)) { \
-		zval *original_var = varptr; \
-		ALLOC_ZVAL(varptr); \
-		INIT_PZVAL_COPY(varptr, original_var); \
-		zval_copy_ctor(varptr); \
-	} else { \
-		Z_ADDREF_P(varptr); \
-	}
+#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
+		zval *_zv = (zv);								\
+		if (!Z_ISREF_P(_zv) &&							\
+		    Z_COPYABLE_P(_zv) &&						\
+		    Z_REFCOUNT_P(_zv) > 1) {					\
+			Z_DELREF_P(_zv);							\
+			zval_copy_ctor_func(_zv);					\
+		}      											\
+	} while (0)
+
+#define SEPARATE_ZVAL_IF_REF(zv) do {					\
+		zval *__zv = (zv);								\
+		if (Z_ISREF_P(__zv)) {							\
+			if (Z_REFCOUNT_P(__zv) == 1) {				\
+				ZVAL_UNREF(__zv);						\
+			} else {									\
+				Z_DELREF_P(__zv);						\
+				ZVAL_DUP(__zv, Z_REFVAL_P(__zv));		\
+			}											\
+		}												\
+	} while (0)
+
+#define SEPARATE_ZVAL_TO_MAKE_IS_REF(zv) do {			\
+		zval *__zv = (zv);								\
+		if (!Z_ISREF_P(__zv)) {							\
+		    if (!Z_COPYABLE_P(__zv) ||					\
+			    Z_REFCOUNT_P(__zv) == 1) {				\
+				ZVAL_NEW_REF(__zv, __zv);				\
+			} else {									\
+				Z_DELREF_P(__zv);						\
+				ZVAL_NEW_REF(__zv, __zv);				\
+				zval_copy_ctor_func(Z_REFVAL_P(__zv));	\
+			}											\
+		}												\
+	} while (0)
+
+#define SEPARATE_ARG_IF_REF(varptr) do { 				\
+		zval *_varptr = (varptr);						\
+		if (Z_ISREF_P(_varptr)) { 						\
+			zval tmp;									\
+			ZVAL_DUP(&tmp, Z_REFVAL_P(_varptr));		\
+			varptr = &tmp;								\
+		} else if (Z_REFCOUNTED_P(_varptr)) { 			\
+			Z_ADDREF_P(_varptr); 						\
+		}												\
+	} while (0)
 
 #define READY_TO_DESTROY(zv) \
-	(Z_REFCOUNT_P(zv) == 1 && \
-	 (Z_TYPE_P(zv) != IS_OBJECT || \
-	  zend_objects_store_get_refcount(zv TSRMLS_CC) == 1))
+	(Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
 #define ZEND_MAX_RESERVED_RESOURCES	4
 
@@ -858,7 +804,7 @@ typedef enum {
 typedef struct {
 	zend_error_handling_t  handling;
 	zend_class_entry       *exception;
-	zval                   *user_handler;
+	zval                   user_handler;
 } zend_error_handling;
 
 ZEND_API void zend_save_error_handling(zend_error_handling *current TSRMLS_DC);
