@@ -679,7 +679,7 @@ static void _xml_add_to_info(xml_parser *parser,char *name)
 		return;
 	}
 
-	if ((element = zend_hash_str_find(Z_ARRVAL(parser->info),name, strlen(name))) == NULL) {
+	if ((element = zend_hash_str_find(Z_ARRVAL(parser->info), name, strlen(name))) == NULL) {
 		zval values;
 		array_init(&values);
 		element = zend_hash_str_update(Z_ARRVAL(parser->info), name, strlen(name), &values);
@@ -1407,8 +1407,9 @@ PHP_FUNCTION(xml_parse_into_struct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz|z", &pind, &data, &data_len, &xdata, &info) == FAILURE) {
 		return;
 	}
-	
+
 	if (info) {	
+		ZVAL_DEREF(info);
 		zval_ptr_dtor(info);
 		array_init(info);
 	}

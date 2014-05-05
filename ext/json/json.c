@@ -380,7 +380,6 @@ static int json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{
 }
 /* }}} */
 
-
 static void json_escape_string(smart_str *buf, char *s, int len, int options TSRMLS_DC) /* {{{ */
 {
 	int pos = 0, ulen = 0;
@@ -537,7 +536,6 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 	}
 }
 /* }}} */
-
 
 static void json_encode_serializable_object(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
 {
@@ -753,7 +751,6 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 	free_JSON_parser(jp);
 }
 /* }}} */
-
 
 /* {{{ proto string json_encode(mixed data [, int options[, int depth]])
    Returns the JSON representation of a value */
