@@ -57,15 +57,15 @@ void zend_interned_strings_init(TSRMLS_D)
 	str = STR_ALLOC(sizeof("")-1, 1);
 	str->val[0] = '\000';
 	CG(empty_string) = zend_new_interned_string_int(str TSRMLS_CC);
-
-	/* one char strings (the actual interned strings are going to be created by ext/opcache) */
-	memset(CG(one_char_string), 0, sizeof(CG(one_char_string)));
 #else
 	str = STR_ALLOC(sizeof("")-1, 1);
 	str->val[0] = '\000';
 	str->gc.u.v.flags |= IS_STR_INTERNED;
 	CG(empty_string) = str;
 #endif
+
+	/* one char strings (the actual interned strings are going to be created by ext/opcache) */
+	memset(CG(one_char_string), 0, sizeof(CG(one_char_string)));
 
 	zend_new_interned_string = zend_new_interned_string_int;
 	zend_interned_strings_snapshot = zend_interned_strings_snapshot_int;

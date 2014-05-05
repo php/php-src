@@ -1544,7 +1544,7 @@ static void pdo_dbh_free_storage(zend_object *std TSRMLS_DC)
 		dbh->methods->persistent_shutdown(dbh TSRMLS_CC);
 	}
 	zend_object_std_dtor(std TSRMLS_CC);
-	dbh_free(dbh);
+	dbh_free(dbh TSRMLS_CC);
 }
 
 zend_object *pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
