@@ -202,11 +202,12 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 	long bits;
 	unsigned char a[64];
 	unsigned long len=64, szlength;
-	int factor=1,maxfactor=16;
-	int slength, status=0;
-	char *b, *buf=NULL, *bufz=NULL;
+	int factor = 1,maxfactor = 16;
+	int status = 0;
+	char *b, *buf = NULL;
+	zend_string *bufz;
 
-	b = ecalloc (1, len + 1);
+	b = ecalloc(1, len + 1);
 
 	if (php_stream_seek(stream, 5, SEEK_CUR))
 		return NULL;
@@ -219,7 +220,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 		if (php_stream_seek(stream, 8, SEEK_SET))
 			return NULL;
 
-		slength = php_stream_copy_to_mem(stream, &bufz, PHP_STREAM_COPY_ALL, 0);
+		bufz = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 		
 		/*
 		 * zlib::uncompress() wants to know the output data length
@@ -230,13 +231,13 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 		*/
 		
 		do {
-			szlength=slength*(1<<factor++);
-			buf = (char *) erealloc(buf,szlength);
-			status = uncompress(buf, &szlength, bufz, slength);
+			szlength = bufz->len * (1<<factor++);
+			buf = (char *) erealloc(buf, szlength);
+			status = uncompress(buf, &szlength, bufz->val, bufz->len);
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 		
 		if (bufz) {
-			pefree(bufz, 0);
+			STR_RELEASE(bufz);
 		}	
 		
 		if (status == Z_OK) {
