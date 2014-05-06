@@ -955,6 +955,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	}
 
 	if (user_oldset != NULL) {
+		ZVAL_DEREF(user_oldset);
 		if (Z_TYPE_P(user_oldset) != IS_ARRAY) {
 			zval_dtor(user_oldset);
 			array_init(user_oldset);
@@ -1037,40 +1038,41 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	}
 
 	if (signo > 0 && user_siginfo) {
+		ZVAL_DEREF(user_siginfo);
 		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
 			zval_dtor(user_siginfo);
 			array_init(user_siginfo);
 		} else {
 			zend_hash_clean(Z_ARRVAL_P(user_siginfo));
 		}
-		add_assoc_long_ex(user_siginfo, "signo", sizeof("signo"), siginfo.si_signo);
-		add_assoc_long_ex(user_siginfo, "errno", sizeof("errno"), siginfo.si_errno);
-		add_assoc_long_ex(user_siginfo, "code",  sizeof("code"),  siginfo.si_code);
+		add_assoc_long_ex(user_siginfo, "signo", sizeof("signo")-1, siginfo.si_signo);
+		add_assoc_long_ex(user_siginfo, "errno", sizeof("errno")-1, siginfo.si_errno);
+		add_assoc_long_ex(user_siginfo, "code",  sizeof("code")-1,  siginfo.si_code);
 		switch(signo) {
 #ifdef SIGCHLD
 			case SIGCHLD:
-				add_assoc_long_ex(user_siginfo,   "status", sizeof("status"), siginfo.si_status);
+				add_assoc_long_ex(user_siginfo,   "status", sizeof("status")-1, siginfo.si_status);
 # ifdef si_utime
-				add_assoc_double_ex(user_siginfo, "utime",  sizeof("utime"),  siginfo.si_utime);
+				add_assoc_double_ex(user_siginfo, "utime",  sizeof("utime")-1,  siginfo.si_utime);
 # endif
 # ifdef si_stime
-				add_assoc_double_ex(user_siginfo, "stime",  sizeof("stime"),  siginfo.si_stime);
+				add_assoc_double_ex(user_siginfo, "stime",  sizeof("stime")-1,  siginfo.si_stime);
 # endif
-				add_assoc_long_ex(user_siginfo,   "pid",    sizeof("pid"),    siginfo.si_pid);
-				add_assoc_long_ex(user_siginfo,   "uid",    sizeof("uid"),    siginfo.si_uid);
+				add_assoc_long_ex(user_siginfo,   "pid",    sizeof("pid")-1,    siginfo.si_pid);
+				add_assoc_long_ex(user_siginfo,   "uid",    sizeof("uid")-1,    siginfo.si_uid);
 				break;
 #endif
 			case SIGILL:
 			case SIGFPE:
 			case SIGSEGV:
 			case SIGBUS:
-				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr"), (long)siginfo.si_addr);
+				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr")-1, (long)siginfo.si_addr);
 				break;
 #ifdef SIGPOLL
 			case SIGPOLL:
-				add_assoc_long_ex(user_siginfo, "band", sizeof("band"), siginfo.si_band);
+				add_assoc_long_ex(user_siginfo, "band", sizeof("band")-1, siginfo.si_band);
 # ifdef si_fd
-				add_assoc_long_ex(user_siginfo, "fd",   sizeof("fd"),   siginfo.si_fd);
+				add_assoc_long_ex(user_siginfo, "fd",   sizeof("fd")-1,   siginfo.si_fd);
 # endif
 				break;
 #endif
