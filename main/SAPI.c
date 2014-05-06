@@ -462,7 +462,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(request_info).post_entry = NULL;
 	SG(request_info).proto_num = 1000; /* Default to HTTP 1.0 */
 	SG(global_request_time) = 0;
-
+	SG(post_read) = 0;
 	/* It's possible to override this general case in the activate() callback, if necessary. */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
