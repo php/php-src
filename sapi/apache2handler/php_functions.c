@@ -238,7 +238,7 @@ PHP_FUNCTION(apache_note)
 	}
 
 	if (old_note_val) {
-		RETURN_STRING(old_note_val, 1);
+		RETURN_STRING(old_note_val);
 	}
 
 	RETURN_FALSE;
@@ -313,7 +313,7 @@ PHP_FUNCTION(apache_getenv)
 	env_val = (char*) apr_table_get(r->subprocess_env, variable);
 
 	if (env_val != NULL) {
-		RETURN_STRING(env_val, 1);
+		RETURN_STRING(env_val);
 	}
 
 	RETURN_FALSE;
@@ -336,7 +336,7 @@ PHP_FUNCTION(apache_get_version)
 	char *apv = php_apache_get_version();
 
 	if (apv && *apv) {
-		RETURN_STRING(apv, 1);
+		RETURN_STRING(apv);
 	} else {
 		RETURN_FALSE;
 	}
@@ -388,8 +388,8 @@ PHP_MINFO_FUNCTION(apache)
 		}
 		smart_str_appendc(&tmp1, ' ');
 	}
-	if ((tmp1.len - 1) >= 0) {
-		tmp1.c[tmp1.len - 1] = '\0';
+	if (tmp1.s && (tmp1.s->len - 1) >= 0) {
+		tmp1.s->val[tmp1.s->len - 1] = '\0';
 	}
             
 	php_info_print_table_start();
@@ -426,7 +426,7 @@ PHP_MINFO_FUNCTION(apache)
 	
 	php_info_print_table_row(2, "Virtual Server", (serv->is_virtual ? "Yes" : "No"));
 	php_info_print_table_row(2, "Server Root", ap_server_root);
-	php_info_print_table_row(2, "Loaded Modules", tmp1.c);
+	php_info_print_table_row(2, "Loaded Modules", tmp1.s->val);
 
 	smart_str_free(&tmp1);
 	php_info_print_table_end();

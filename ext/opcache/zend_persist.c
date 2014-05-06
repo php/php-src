@@ -43,6 +43,7 @@
 	    	new_str = _zend_shared_memdup((void*)str, _STR_HEADER_SIZE + (str)->len + 1, 0 TSRMLS_CC); \
 			STR_RELEASE(str); \
 	    	str = new_str; \
+	    	GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
 		} \
     } while (0)
 # define zend_accel_memdup_string(str) \
