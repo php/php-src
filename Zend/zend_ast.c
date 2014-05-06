@@ -62,27 +62,6 @@ ZEND_API zend_ast* zend_ast_create_ternary(uint kind, zend_ast *op0, zend_ast *o
 	return ast;
 }
 
-ZEND_API zend_ast* zend_ast_create_dynamic(uint kind)
-{
-	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zend_ast*) * 3); /* use 4 children as deafult */
-	ast->kind = kind;
-	ast->children = 0;
-	return ast;
-}
-
-ZEND_API void zend_ast_dynamic_add(zend_ast **ast, zend_ast *op)
-{
-	if ((*ast)->children >= 4 && (*ast)->children == ((*ast)->children & -(*ast)->children)) {
-		*ast = erealloc(*ast, sizeof(zend_ast) + sizeof(zend_ast*) * ((*ast)->children * 2 + 1));
-	}
-	(&(*ast)->u.child)[(*ast)->children++] = op;
-}
-
-ZEND_API void zend_ast_dynamic_shrink(zend_ast **ast)
-{
-	*ast = erealloc(*ast, sizeof(zend_ast) + sizeof(zend_ast*) * ((*ast)->children - 1));
-}
-
 ZEND_API int zend_ast_is_ct_constant(zend_ast *ast)
 {
 	int i;
@@ -303,21 +282,6 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			sub_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op2);
 			break;
-		case ZEND_INIT_ARRAY:
-			array_init(result);
-			{
-				int i;
-				for (i = 0; i < ast->children; i+=2) {
-					if ((&ast->u.child)[i]) {
-						zend_ast_evaluate(&op1, (&ast->u.child)[i], scope TSRMLS_CC);
-					} else {
-						Z_TYPE_INFO(op1) = IS_UNDEF;
-					}
-					zend_ast_evaluate(&op2, (&ast->u.child)[i+1], scope TSRMLS_CC);
-					zend_do_add_static_array_element(*result, op1, op2 TSRMLS_CC);
-				}
-			}
-			break;
 		default:
 			zend_error(E_ERROR, "Unsupported constant expression");
 	}
@@ -341,7 +305,7 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 		}
 		return new;
 	}
-	return zend_ast_create_dynamic(ast->kind);
+	return NULL;
 }
 
 ZEND_API void zend_ast_destroy(zend_ast *ast)

@@ -140,9 +140,7 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 			Z_GC_FLAGS_P(z) |= flags;
 			break;
 		case IS_ARRAY:
-#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
 		case IS_CONSTANT_ARRAY:
-#endif
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;

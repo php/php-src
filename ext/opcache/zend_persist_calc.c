@@ -127,9 +127,7 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 			Z_GC_FLAGS_P(z) |= flags;
 			break;
 		case IS_ARRAY:
-#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
 		case IS_CONSTANT_ARRAY:
-#endif
 			size = zend_shared_memdup_size(Z_ARR_P(z), sizeof(zend_array));
 			if (size) {
 				ADD_SIZE(size);

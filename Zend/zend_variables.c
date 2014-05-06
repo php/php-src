@@ -37,9 +37,10 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 				STR_RELEASE(str);
 				break;
 			}
-		case IS_ARRAY: {
+		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY: {
+				zend_array *arr =(zend_array*)p;
 				TSRMLS_FETCH();
-				zend_array *arr = (zend_array*)p;
 
 				if (arr != &EG(symbol_table)) {
 					/* break possible cycles */
@@ -51,7 +52,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 				break;
 			}
 		case IS_CONSTANT_AST: {
-				zend_ast_ref *ast = (zend_ast_ref*)p;
+				zend_ast_ref *ast =(zend_ast_ref*)p;
 		
 				zend_ast_destroy(ast->ast);
 				efree(ast);
@@ -97,7 +98,8 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 				STR_FREE(str);
 				break;
 			}
-		case IS_ARRAY: {
+		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY: {
 				zend_array *arr =(zend_array*)p;
 				TSRMLS_FETCH();
 
@@ -153,6 +155,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			STR_RELEASE(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY:
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
@@ -184,6 +187,7 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 			STR_FREE(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY:
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
@@ -236,7 +240,8 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 			Z_STR_P(zvalue) = STR_DUP(Z_STR_P(zvalue), 0);
 			break;
-		case IS_ARRAY: {
+		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY: {
 				HashTable *ht;
 				TSRMLS_FETCH();
 

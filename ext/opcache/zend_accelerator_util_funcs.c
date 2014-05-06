@@ -273,7 +273,6 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 			Z_STR_P(src) = zend_clone_str(Z_STR_P(src) TSRMLS_CC);
 			break;
 		case IS_ARRAY:
-#if ZEND_EXTENSION_API_NO <= PHP_5_5_X_API_NO
 	    case IS_CONSTANT_ARRAY:
 			if (Z_ARR_P(src) != &EG(symbol_table)) {
 		    	if (bind && Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_ARR_P(src))) != NULL) {
@@ -290,7 +289,6 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 				}
 			}
 			break;
-#endif
 	    case IS_REFERENCE:
 	    	if (bind && Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_REF_P(src))) != NULL) {
 	    		Z_REF_P(src) = ptr;
@@ -304,7 +302,6 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 				zend_clone_zval(Z_REFVAL_P(src), bind TSRMLS_CC);
 			}
 	    	break;
-#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 	    case IS_CONSTANT_AST:
 	    	if (bind && Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_AST_P(src))) != NULL) {
 	    		Z_AST_P(src) = ptr;
@@ -319,7 +316,6 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 		    	Z_ASTVAL_P(src) = zend_ast_clone(Z_ASTVAL_P(src) TSRMLS_CC);
 			}
 	    	break;
-#endif
 	}
 }
 
