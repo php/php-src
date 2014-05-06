@@ -885,7 +885,22 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		zval *param;
 
 		if (ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i + 1)) {
+			// TODO: Scalar values don't have reference counters anymore.
+			// They are assumed to be 1, and they may be easily passed by
+			// reference now. However, previously scalars with refcount==1
+			// might be passed and with refcount>1 might not. We can support
+			// only single behavior ???
+#if 0
+			if (Z_REFCOUNTED(fci->params[i]) &&
+				// This solution breaks the following test (omit warning message) ???
+				// Zend/tests/bug61273.phpt
+				// ext/reflection/tests/bug42976.phpt
+				// ext/standard/tests/general_functions/call_user_func_array_variation_001.phpt
+#else
 			if (!Z_REFCOUNTED(fci->params[i]) ||
+				// This solution breaks the following test (emit warning message) ???
+				// ext/pdo_sqlite/tests/pdo_005.phpt
+#endif
 			    (!Z_ISREF(fci->params[i]) && Z_REFCOUNT(fci->params[i]) > 1)) {
 
 				if (fci->no_separation &&
