@@ -314,7 +314,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 						Z_TYPE_INFO(op1) = IS_UNDEF;
 					}
 					zend_ast_evaluate(&op2, (&ast->u.child)[i+1], scope TSRMLS_CC);
-					zend_do_add_static_array_element(*result, op1, op2);
+					zend_do_add_static_array_element(*result, op1, op2 TSRMLS_CC);
 				}
 			}
 			break;
