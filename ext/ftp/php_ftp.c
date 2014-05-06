@@ -1398,7 +1398,7 @@ PHP_FUNCTION(ftp_set_option)
 					zend_zval_type_name(z_value));
 				RETURN_FALSE;
 			}
-			ftp->autoseek = Z_LVAL_P(z_value);
+			ftp->autoseek = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
 			RETURN_TRUE;
 			break;
 		default:
