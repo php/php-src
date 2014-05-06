@@ -21,6 +21,14 @@
 #ifndef HEAD_H
 #define HEAD_H
 
+#define COOKIE_SET_COOKIE "Set-Cookie: "
+#define COOKIE_EXPIRES    "; expires="
+#define COOKIE_MAX_AGE    "; Max-Age="
+#define COOKIE_DOMAIN     "; domain="
+#define COOKIE_PATH       "; path="
+#define COOKIE_SECURE     "; secure"
+#define COOKIE_HTTPONLY   "; HttpOnly"
+
 extern PHP_RINIT_FUNCTION(head);
 PHP_FUNCTION(header);
 PHP_FUNCTION(header_remove);

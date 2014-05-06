@@ -51,6 +51,7 @@
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/url.h"
 #include "ext/standard/basic_functions.h"
+#include "ext/standard/head.h"
 
 #include "mod_files.h"
 #include "mod_user.h"
@@ -1288,14 +1289,6 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 /* *********************
    * Cookie Management *
    ********************* */
-
-#define COOKIE_SET_COOKIE "Set-Cookie: "
-#define COOKIE_EXPIRES	"; expires="
-#define COOKIE_MAX_AGE	"; Max-Age="
-#define COOKIE_PATH		"; path="
-#define COOKIE_DOMAIN	"; domain="
-#define COOKIE_SECURE	"; secure"
-#define COOKIE_HTTPONLY	"; HttpOnly"
 
 /*
  * Remove already sent session ID cookie.
