@@ -1030,7 +1030,7 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 
 		if (ce && !instanceof_function(Z_OBJCE_P(this_ptr), ce TSRMLS_CC)) {
 			zend_error(E_CORE_ERROR, "%s::%s() must be derived from %s::%s",
-				ce->name->val, get_active_function_name(TSRMLS_C), Z_OBJCE_P(this_ptr)->name->val, get_active_function_name(TSRMLS_C));
+				Z_OBJCE_P(this_ptr)->name->val, get_active_function_name(TSRMLS_C), ce->name->val, get_active_function_name(TSRMLS_C));
 		}
 
 		retval = zend_parse_va_args(num_args, p, &va, 0 TSRMLS_CC);
