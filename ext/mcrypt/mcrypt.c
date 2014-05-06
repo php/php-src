@@ -495,6 +495,7 @@ PHP_MINFO_FUNCTION(mcrypt) /* {{{ */
 	php_info_print_table_row(2, "Supported modes", tmp2.s->val);
 	smart_str_free(&tmp1);
 	smart_str_free(&tmp2);
+
 	php_info_print_table_end();
 	
 	DISPLAY_INI_ENTRIES();
@@ -1139,7 +1140,8 @@ static char *php_mcrypt_get_key_size_str(
 		int i;
 		smart_str str = {0};
 		smart_str_appends(&str, "Only keys of sizes ");
-
+		char *result = NULL;
+		
 		for (i = 0; i < key_size_count; ++i) {
 			if (i == key_size_count - 1) {
 				smart_str_appends(&str, " or ");
@@ -1152,7 +1154,10 @@ static char *php_mcrypt_get_key_size_str(
 
 		smart_str_appends(&str, " supported");
 		smart_str_0(&str);
-		return str.s->val;
+		result = estrndup(str.s->val, str.s->len);
+		smart_str_free(&str);
+
+		return result;
 	}
 }
 /* }}} */
@@ -1285,8 +1290,10 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 	}
 	
 	data_s[data_size] = 0;
+	
 	RETVAL_STRINGL(data_s, data_size);
-
+	efree(data_s);
+	
 	/* freeing vars */
 	mcrypt_generic_end(td);
 }
@@ -1296,7 +1303,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
    OFB crypt/decrypt data using key key with cipher cipher starting with iv */
 PHP_FUNCTION(mcrypt_encrypt)
 {
-	char *cipher, *key, *data, *mode, *iv = NULL;
+	char *cipher, *key = NULL, *data, *mode, *iv = NULL;
 	int cipher_len, key_len, data_len, mode_len, iv_len = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|s", &cipher, &cipher_len,
@@ -1449,7 +1456,8 @@ PHP_FUNCTION(mcrypt_create_iv)
 			iv[--size] = (char) (255.0 * php_rand(TSRMLS_C) / RAND_MAX);
 		}
 	}
-	RETURN_STRINGL(iv, n);
+	RETVAL_STRINGL(iv, n);
+	efree(iv);
 }
 /* }}} */
 
