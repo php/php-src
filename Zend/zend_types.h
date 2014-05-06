@@ -212,21 +212,20 @@ struct _zend_ast_ref {
 #define IS_ARRAY					7
 #define IS_OBJECT					8
 #define IS_RESOURCE					9
-#define IS_REFERENCE				10
+#define IS_REFERENCE					10
 
 /* constant expressions */
 #define IS_CONSTANT					11
-#define IS_CONSTANT_ARRAY			12
-#define IS_CONSTANT_AST				13
+#define IS_CONSTANT_AST					12
 
 /* fake types */
-#define _IS_BOOL					14
-#define IS_CALLABLE					15
+#define _IS_BOOL					13
+#define IS_CALLABLE					14
 
 /* internal types */
-#define IS_INDIRECT             	16
-#define IS_STR_OFFSET				17
-#define IS_PTR						18
+#define IS_INDIRECT             			15
+#define IS_STR_OFFSET					16
+#define IS_PTR						17
 
 static inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;

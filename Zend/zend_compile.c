@@ -1910,7 +1910,7 @@ void zend_do_receive_param(zend_uchar op, znode *varname, znode *initialization,
 				if (op == ZEND_RECV_INIT) {
 					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST) {
 						cur_arg_info->allow_null = 1;
-					} else if (Z_TYPE(initialization->u.constant) != IS_ARRAY && Z_TYPE(initialization->u.constant) != IS_CONSTANT_ARRAY) {
+					} else if (Z_TYPE(initialization->u.constant) != IS_ARRAY) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
 					}
 				}
@@ -5462,10 +5462,6 @@ void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC) /* 
 {
 	zval property;
 
-	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
-		return;
-	}
 	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
 		return;
@@ -5914,54 +5910,34 @@ void zend_do_end_array(znode *result, const znode *array_node TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
-void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr TSRMLS_DC) /* {{{ */
+void zend_do_add_static_array_element(zval result, zval offset, zval expr TSRMLS_DC) /* {{{ */
 {
-	zval element;
-
-	ZVAL_COPY_VALUE(&element, &expr->u.constant);
-	if (offset) {
-		switch (Z_TYPE(offset->u.constant)) {
-			case IS_CONSTANT:
-				Z_GC_FLAGS(offset->u.constant) |= IS_STR_CONSTANT;
-				if (Z_CONST_FLAGS(offset->u.constant) & IS_CONSTANT_UNQUALIFIED) {
-					Z_GC_FLAGS(offset->u.constant) |= IS_STR_CONSTANT_UNQUALIFIED;
-				}
-				zend_symtable_update(Z_ARRVAL(result->u.constant), Z_STR(offset->u.constant), &element);
-				zval_dtor(&offset->u.constant);
-				break;
-			case IS_CONSTANT_AST: {
-				zend_string *key;
-				key = STR_INIT((char*)&Z_AST(offset->u.constant), sizeof(zend_ast*), 0);
-				GC_FLAGS(key) |= IS_STR_AST;
-				zend_symtable_update(Z_ARRVAL(result->u.constant), key, &element);
-				STR_RELEASE(key);
-				break;
-			}
-			case IS_STRING:
-				zend_symtable_update(Z_ARRVAL(result->u.constant), Z_STR(offset->u.constant), &element);
-				zval_dtor(&offset->u.constant);
-				break;
-			case IS_NULL:
-				zend_symtable_update(Z_ARRVAL(result->u.constant), STR_EMPTY_ALLOC(), &element);
-				break;
-			case IS_LONG:
-				zend_hash_index_update(Z_ARRVAL(result->u.constant), Z_LVAL(offset->u.constant), &element);
-				break;
-			case IS_FALSE:
-				zend_hash_index_update(Z_ARRVAL(result->u.constant), 0, &element);
-				break;
-			case IS_TRUE:
-				zend_hash_index_update(Z_ARRVAL(result->u.constant), 1, &element);
-				break;
-			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL(result->u.constant), zend_dval_to_lval(Z_DVAL(offset->u.constant)), &element);
-				break;
-			case IS_CONSTANT_ARRAY:
-				zend_error(E_ERROR, "Illegal offset type");
-				break;
-		}
-	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(result->u.constant), &element);
+	switch (Z_TYPE(offset)) {
+		case IS_UNDEF:
+			zend_hash_next_index_insert(Z_ARRVAL(result), &expr);
+			break;
+		case IS_STRING:
+			zend_symtable_update(Z_ARRVAL(result), Z_STR(offset), &expr);
+			zval_dtor(&offset);
+			break;
+		case IS_NULL:
+			zend_symtable_update(Z_ARRVAL(result), STR_EMPTY_ALLOC(), &expr);
+			break;
+		case IS_LONG:
+			zend_hash_index_update(Z_ARRVAL(result), Z_LVAL(offset), &expr);
+			break;
+		case IS_FALSE:
+			zend_hash_index_update(Z_ARRVAL(result), 0, &expr);
+			break;
+		case IS_TRUE:
+			zend_hash_index_update(Z_ARRVAL(result), 1, &expr);
+			break;
+		case IS_DOUBLE:
+			zend_hash_index_update(Z_ARRVAL(result), zend_dval_to_lval(Z_DVAL(offset)), &expr);
+			break;
+		case IS_ARRAY:
+			zend_error(E_ERROR, "Illegal offset type");
+			break;
 	}
 }
 /* }}} */
@@ -7322,10 +7298,6 @@ void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	zval *ns_name;
-
-	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed as constants");
-	}
 
 	if (zend_get_ct_const(&name->u.constant, 0 TSRMLS_CC)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", Z_STRVAL(name->u.constant));
