@@ -2913,7 +2913,6 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
 	zval *value;
-	zval exception;
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
@@ -2927,10 +2926,7 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 	}
 
 	zend_exception_save(TSRMLS_C);
-	if (OP1_TYPE == IS_CONST) {
-		ZVAL_DUP(&exception, value);
-		value = &exception;
-	} else if (OP1_TYPE != IS_TMP_VAR) {
+	if (OP1_TYPE != IS_TMP_VAR) {
 		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 

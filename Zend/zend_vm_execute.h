@@ -2663,7 +2663,6 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	USE_OPLINE
 	zval *value;
-	zval exception;
 
 
 	SAVE_OPLINE();
@@ -2677,10 +2676,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	zend_exception_save(TSRMLS_C);
-	if (IS_CONST == IS_CONST) {
-		ZVAL_DUP(&exception, value);
-		value = &exception;
-	} else if (IS_CONST != IS_TMP_VAR) {
+	if (IS_CONST != IS_TMP_VAR) {
 		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 
@@ -7774,7 +7770,6 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *value;
-	zval exception;
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
@@ -7788,10 +7783,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_exception_save(TSRMLS_C);
-	if (IS_TMP_VAR == IS_CONST) {
-		ZVAL_DUP(&exception, value);
-		value = &exception;
-	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+	if (IS_TMP_VAR != IS_TMP_VAR) {
 		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 
@@ -12842,7 +12834,6 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *value;
-	zval exception;
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
@@ -12856,10 +12847,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_exception_save(TSRMLS_C);
-	if (IS_VAR == IS_CONST) {
-		ZVAL_DUP(&exception, value);
-		value = &exception;
-	} else if (IS_VAR != IS_TMP_VAR) {
+	if (IS_VAR != IS_TMP_VAR) {
 		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 
@@ -29905,7 +29893,6 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *value;
-	zval exception;
 
 
 	SAVE_OPLINE();
@@ -29919,10 +29906,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_exception_save(TSRMLS_C);
-	if (IS_CV == IS_CONST) {
-		ZVAL_DUP(&exception, value);
-		value = &exception;
-	} else if (IS_CV != IS_TMP_VAR) {
+	if (IS_CV != IS_TMP_VAR) {
 		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 
