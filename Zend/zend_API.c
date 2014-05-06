@@ -1012,7 +1012,12 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 	zval **object;
 	zend_class_entry *ce;
 
-	if (!this_ptr || Z_TYPE_P(this_ptr) != IS_OBJECT) {
+	/* Just checking this_ptr is not enough, because fcall_common_helper does not set
+	 * Z_OBJ(EG(This)) to NULL when calling an internal function with common.scope == NULL.
+	 * In that case EG(This) would still be the $this from the calling code and we'd take the
+	 * wrong branch here. */
+	zend_bool is_method = EG(current_execute_data)->function_state.function->common.scope != NULL;
+	if (!is_method || !this_ptr || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		RETURN_IF_ZERO_ARGS(num_args, p, 0);
 
 		va_start(va, type_spec);
