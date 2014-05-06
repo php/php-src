@@ -553,7 +553,8 @@ PHP_FUNCTION(ftp_mkdir)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	char		*dir, *tmp;
+	char		*dir;
+	zend_string *tmp;
 	int		dir_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
@@ -568,7 +569,7 @@ PHP_FUNCTION(ftp_mkdir)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(tmp);
+	RETURN_STR(tmp);
 }
 /* }}} */
 
@@ -629,7 +630,7 @@ PHP_FUNCTION(ftp_alloc)
 	zval		*z_ftp, *zresponse = NULL;
 	ftpbuf_t	*ftp;
 	long		size, ret;
-	char		*response = NULL;
+	zend_string	*response = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &z_ftp, &size, &zresponse) == FAILURE) {
 		RETURN_FALSE;
@@ -639,8 +640,9 @@ PHP_FUNCTION(ftp_alloc)
 
 	ret = ftp_alloc(ftp, size, zresponse ? &response : NULL);
 	if (response) {
+		ZVAL_DEREF(zresponse);
 		zval_dtor(zresponse);
-		ZVAL_STRING(zresponse, response);
+		ZVAL_STR(zresponse, response);
 	}
 
 	if (!ret) {

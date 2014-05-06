@@ -133,7 +133,7 @@ int		ftp_cdup(ftpbuf_t *ftp);
 /* creates a directory, return the directory name on success, NULL on error.
  * the return value must be freed
  */
-char*		ftp_mkdir(ftpbuf_t *ftp, const char *dir);
+zend_string* ftp_mkdir(ftpbuf_t *ftp, const char *dir);
 
 /* removes a directory, return true on success, false on error */
 int		ftp_rmdir(ftpbuf_t *ftp, const char *dir);
@@ -146,7 +146,7 @@ int		ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int fi
  * however some servers will not accept STOR or APPE until ALLO is confirmed. 
  * If response is passed, it is estrdup()ed from ftp->inbuf and must be freed
  * or assigned to a zval returned to the user */
-int		ftp_alloc(ftpbuf_t *ftp, const long size, char **response);
+int		ftp_alloc(ftpbuf_t *ftp, const long size, zend_string **response);
 
 /* returns a NULL-terminated array of filenames in the given path
  * or NULL on error.  the return array must be freed (but don't
