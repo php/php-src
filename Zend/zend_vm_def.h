@@ -2917,7 +2917,7 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 
 	if (OP1_TYPE == IS_CONST || UNEXPECTED(Z_TYPE_P(value) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
