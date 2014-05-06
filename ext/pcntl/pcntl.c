@@ -577,7 +577,8 @@ PHP_FUNCTION(pcntl_waitpid)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|l", &pid, &z_status, &options) == FAILURE)
 		return;
 	
-	convert_to_long_ex(&z_status);
+	ZVAL_DEREF(z_status);
+	convert_to_long_ex(z_status);
 
 	status = Z_LVAL_P(z_status);
 
@@ -605,7 +606,8 @@ PHP_FUNCTION(pcntl_wait)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &z_status, &options) == FAILURE)
 		return;
 	
-	convert_to_long_ex(&z_status);
+	ZVAL_DEREF(z_status);
+	convert_to_long_ex(z_status);
 
 	status = Z_LVAL_P(z_status);
 #ifdef HAVE_WAIT3
@@ -741,7 +743,7 @@ PHP_FUNCTION(pcntl_wstopsig)
 PHP_FUNCTION(pcntl_exec)
 {
 	zval *args = NULL, *envs = NULL;
-	zval **element;
+	zval *element;
 	HashTable *args_hash, *envs_hash;
 	int argc = 0, argi = 0;
 	int envc = 0, envi = 0;
@@ -749,8 +751,7 @@ PHP_FUNCTION(pcntl_exec)
 	char **argv = NULL, **envp = NULL;
 	char **current_arg, **pair;
 	int pair_length;
-	char *key;
-	uint key_length;
+	zend_string *key;
 	char *path;
 	int path_len;
 	ulong key_num;
@@ -767,11 +768,11 @@ PHP_FUNCTION(pcntl_exec)
 		argv = safe_emalloc((argc + 2), sizeof(char *), 0);
 		*argv = path;
 		for ( zend_hash_internal_pointer_reset(args_hash), current_arg = argv+1; 
-			(argi < argc && (zend_hash_get_current_data(args_hash, (void **) &element) == SUCCESS));
+			(argi < argc && ((element = zend_hash_get_current_data(args_hash)) != NULL));
 			(argi++, current_arg++, zend_hash_move_forward(args_hash)) ) {
 
 			convert_to_string_ex(element);
-			*current_arg = Z_STRVAL_PP(element);
+			*current_arg = Z_STRVAL_P(element);
 		}
 		*(current_arg) = NULL;
 	} else {
@@ -787,13 +788,13 @@ PHP_FUNCTION(pcntl_exec)
 		
 		envp = safe_emalloc((envc + 1), sizeof(char *), 0);
 		for ( zend_hash_internal_pointer_reset(envs_hash), pair = envp; 
-			(envi < envc && (zend_hash_get_current_data(envs_hash, (void **) &element) == SUCCESS));
+			(envi < envc && ((element = zend_hash_get_current_data(envs_hash)) != NULL));
 			(envi++, pair++, zend_hash_move_forward(envs_hash)) ) {
-			switch (return_val = zend_hash_get_current_key_ex(envs_hash, &key, &key_length, &key_num, 0, NULL)) {
+			switch (return_val = zend_hash_get_current_key_ex(envs_hash, &key, &key_num, 0, &envs_hash->nInternalPointer)) {
 				case HASH_KEY_IS_LONG:
-					key = emalloc(101);
-					snprintf(key, 100, "%ld", key_num);
-					key_length = strlen(key);
+					key = STR_ALLOC(101, 0);
+					snprintf(key->val, 100, "%ld", key_num);
+					key->len = strlen(key->val);
 					break;
 				case HASH_KEY_NON_EXISTENT:
 					pair--;
@@ -803,14 +804,14 @@ PHP_FUNCTION(pcntl_exec)
 			convert_to_string_ex(element);
 
 			/* Length of element + equal sign + length of key + null */ 
-			pair_length = Z_STRLEN_PP(element) + key_length + 2;
+			pair_length = Z_STRLEN_P(element) + key->len + 2;
 			*pair = emalloc(pair_length);
-			strlcpy(*pair, key, key_length); 
+			strlcpy(*pair, key->val, key->len + 1); 
 			strlcat(*pair, "=", pair_length);
-			strlcat(*pair, Z_STRVAL_PP(element), pair_length);
+			strlcat(*pair, Z_STRVAL_P(element), pair_length);
 			
 			/* Cleanup */
-			if (return_val == HASH_KEY_IS_LONG) efree(key);
+			if (return_val == HASH_KEY_IS_LONG) STR_RELEASE(key);
 		}
 		*(pair) = NULL;
 
@@ -840,8 +841,8 @@ PHP_FUNCTION(pcntl_exec)
    Assigns a system signal handler to a PHP function */
 PHP_FUNCTION(pcntl_signal)
 {
-	zval *handle, **dest_handle = NULL;
-	char *func_name;
+	zval *handle;
+	zend_string *func_name;
 	long signo;
 	zend_bool restart_syscalls = 1;
 
@@ -883,15 +884,16 @@ PHP_FUNCTION(pcntl_signal)
 	
 	if (!zend_is_callable(handle, 0, &func_name TSRMLS_CC)) {
 		PCNTL_G(last_error) = EINVAL;
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a callable function name error", func_name);
-		efree(func_name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a callable function name error", func_name->val);
+		STR_RELEASE(func_name);
 		RETURN_FALSE;
 	}
-	efree(func_name);
+	STR_RELEASE(func_name);
 	
 	/* Add the function name to our signal table */
-	zend_hash_index_update(&PCNTL_G(php_signal_table), signo, (void **) &handle, sizeof(zval *), (void **) &dest_handle);
-	if (dest_handle) zval_add_ref(dest_handle);
+	if (zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle)) {
+		if (Z_REFCOUNTED_P(handle)) Z_ADDREF_P(handle);
+	}
 	
 	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == SIG_ERR) {
 		PCNTL_G(last_error) = errno;
@@ -917,7 +919,7 @@ PHP_FUNCTION(pcntl_signal_dispatch)
 PHP_FUNCTION(pcntl_sigprocmask)
 {
 	long          how, signo;
-	zval         *user_set, *user_oldset = NULL, **user_signo;
+	zval         *user_set, *user_oldset = NULL, *user_signo;
 	sigset_t      set, oldset;
 	HashPosition  pos;
 
@@ -932,13 +934,12 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	}
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(user_set), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(user_set), (void **)&user_signo, &pos) == SUCCESS)
-	{
-		if (Z_TYPE_PP(user_signo) != IS_LONG) {
+	while ((user_signo = zend_hash_get_current_data_ex(Z_ARRVAL_P(user_set), &pos)) != NULL) {
+		if (Z_TYPE_P(user_signo) != IS_LONG) {
 			SEPARATE_ZVAL(user_signo);
 			convert_to_long_ex(user_signo);
 		}
-		signo = Z_LVAL_PP(user_signo);
+		signo = Z_LVAL_P(user_signo);
 		if (sigaddset(&set, signo) != 0) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
@@ -976,7 +977,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 #if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
 static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{{ */
 {
-	zval            *user_set, **user_signo, *user_siginfo = NULL;
+	zval            *user_set, *user_signo, *user_siginfo = NULL;
 	long             tv_sec = 0, tv_nsec = 0;
 	sigset_t         set;
 	HashPosition     pos;
@@ -1001,13 +1002,12 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	}
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(user_set), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(user_set), (void **)&user_signo, &pos) == SUCCESS)
-	{
-		if (Z_TYPE_PP(user_signo) != IS_LONG) {
+	while ((user_signo = zend_hash_get_current_data_ex(Z_ARRVAL_P(user_set), &pos)) != NULL) {
+		if (Z_TYPE_P(user_signo) != IS_LONG) {
 			SEPARATE_ZVAL(user_signo);
 			convert_to_long_ex(user_signo);
 		}
-		signo = Z_LVAL_PP(user_signo);
+		signo = Z_LVAL_P(user_signo);
 		if (sigaddset(&set, signo) != 0) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
@@ -1196,7 +1196,7 @@ PHP_FUNCTION(pcntl_strerror)
                 RETURN_FALSE;
         }
 
-        RETURN_STRING(strerror(error), 1);
+        RETURN_STRING(strerror(error));
 }
 /* }}} */
 
@@ -1228,7 +1228,7 @@ static void pcntl_signal_handler(int signo)
 
 void pcntl_signal_dispatch()
 {
-	zval *param, **handle, *retval;
+	zval param, *handle, retval;
 	struct php_pcntl_pending_signal *queue, *next;
 	sigset_t mask;
 	sigset_t old_mask;
@@ -1253,15 +1253,13 @@ void pcntl_signal_dispatch()
 	/* Allocate */
 
 	while (queue) {
-		if (zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo, (void **) &handle)==SUCCESS) {
-			MAKE_STD_ZVAL(retval);
-			MAKE_STD_ZVAL(param);
-			ZVAL_NULL(retval);
-			ZVAL_LONG(param, queue->signo);
+		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
+			ZVAL_NULL(&retval);
+			ZVAL_LONG(&param, queue->signo);
 
 			/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
 			/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
-			call_user_function(EG(function_table), NULL, *handle, retval, 1, &param TSRMLS_CC);
+			call_user_function(EG(function_table), NULL, handle, &retval, 1, &param TSRMLS_CC);
 			zval_ptr_dtor(&param);
 			zval_ptr_dtor(&retval);
 		}
