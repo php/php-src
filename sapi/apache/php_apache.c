@@ -327,7 +327,7 @@ PHP_FUNCTION(apache_note)
 	}
 
 	if (old_val) {
-		RETURN_STRING(old_val, 1);
+		RETURN_STRING(old_val);
 	}
 
 	RETURN_FALSE;
@@ -561,7 +561,7 @@ PHP_FUNCTION(apache_get_version)
 	char *apv = (char *) ap_get_server_version();
 
 	if (apv && *apv) {
-		RETURN_STRING(apv, 1);
+		RETURN_STRING(apv);
 	}
 
 	RETURN_FALSE;
