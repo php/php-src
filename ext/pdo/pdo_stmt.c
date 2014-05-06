@@ -811,7 +811,12 @@ static int do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs TSRMLS_DC) /
 {
 	/* fci.size is used to check if it is valid */
 	if (stmt->fetch.cls.fci.size && stmt->fetch.cls.fci.params) {
-		efree(stmt->fetch.cls.fci.params);
+		if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args)) {
+		    /* Added to free constructor arguments ??? */
+			zend_fcall_info_args_clear(&stmt->fetch.cls.fci, 1);
+		} else {
+			efree(stmt->fetch.cls.fci.params);
+		}
 		stmt->fetch.cls.fci.params = NULL;
 	}
 

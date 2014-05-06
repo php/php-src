@@ -548,8 +548,13 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 		if (fbc->common.scope) {
 			should_change_scope = 1;
 			Z_OBJ(EG(This)) = object;
-//???			EG(scope) = (object) ? NULL : fbc->common.scope;
+			/* TODO: we don't set scope if we call an object method ??? */
+			/* See: ext/pdo_sqlite/tests/pdo_fetch_func_001.phpt */
+#if 1
+			EG(scope) = (object) ? NULL : fbc->common.scope;
+#else
 			EG(scope) = fbc->common.scope;
+#endif
 			EG(called_scope) = EX(call)->called_scope;
 		}
 
