@@ -1303,7 +1303,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
    OFB crypt/decrypt data using key key with cipher cipher starting with iv */
 PHP_FUNCTION(mcrypt_encrypt)
 {
-	char *cipher, *key = NULL, *data, *mode, *iv = NULL;
+	char *cipher, *key, *data, *mode, *iv = NULL;
 	int cipher_len, key_len, data_len, mode_len, iv_len = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|s", &cipher, &cipher_len,
