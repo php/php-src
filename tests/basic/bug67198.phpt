@@ -37,8 +37,6 @@ php_cli_server_start("exit(file_get_contents('php://input'));", false, "-d enabl
 
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS, false, $context));
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS, false, $context));
---XFAIL--
-67198 is open
 --EXPECT--
 string(4) "PASS"
 string(4) "PASS"
