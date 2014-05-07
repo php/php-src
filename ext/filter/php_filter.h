@@ -53,14 +53,14 @@ PHP_FUNCTION(filter_has_var);
 PHP_FUNCTION(filter_id);
 
 ZEND_BEGIN_MODULE_GLOBALS(filter)
-	zval *post_array;
-	zval *get_array;
-	zval *cookie_array;
-	zval *env_array;
-	zval *server_array;
-	zval *session_array;
-	long  default_filter;
-	long  default_filter_flags;
+	zval post_array;
+	zval get_array;
+	zval cookie_array;
+	zval env_array;
+	zval server_array;
+	zval session_array;
+	long default_filter;
+	long default_filter_flags;
 ZEND_END_MODULE_GLOBALS(filter)
 
 #ifdef ZTS
