@@ -222,7 +222,7 @@ static PHP_GINIT_FUNCTION(exif)
 PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
-	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring"))) {
+	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) {
 		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 1, CONST_CS | CONST_PERSISTENT); 
 	} else {
 		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 0, CONST_CS | CONST_PERSISTENT); 
@@ -1950,7 +1950,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 		if (sub_array) {
 			array_init(&tmpi);
 		} else {
-			tmpi = *value;
+			ZVAL_COPY_VALUE(&tmpi, value);
 		}
 
 		for(i=0; i<image_info->info_list[section_index].count; i++) {
