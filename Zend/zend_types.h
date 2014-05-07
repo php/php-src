@@ -216,17 +216,16 @@ struct _zend_ast_ref {
 
 /* constant expressions */
 #define IS_CONSTANT					11
-#define IS_CONSTANT_ARRAY			12
-#define IS_CONSTANT_AST				13
+#define IS_CONSTANT_AST				12
 
 /* fake types */
-#define _IS_BOOL					14
-#define IS_CALLABLE					15
+#define _IS_BOOL					13
+#define IS_CALLABLE					14
 
 /* internal types */
-#define IS_INDIRECT             	16
-#define IS_STR_OFFSET				17
-#define IS_PTR						18
+#define IS_INDIRECT             	15
+#define IS_STR_OFFSET				16
+#define IS_PTR						17
 
 static inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
@@ -294,7 +293,6 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_REFERENCE_EX				(IS_REFERENCE      | ((                   IS_TYPE_REFCOUNTED                                         ) << Z_TYPE_FLAGS_SHIFT))
 
 #define IS_CONSTANT_EX				(IS_CONSTANT       | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
-#define IS_CONSTANT_ARRAY_EX		(IS_CONSTANT_ARRAY | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
 
 /* zval.u1.v.const_flags */
@@ -313,7 +311,6 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 
 #define IS_STR_CONSTANT             (1<<3) /* constant index */
 #define IS_STR_CONSTANT_UNQUALIFIED (1<<4) /* the same as IS_CONSTANT_UNQUALIFIED */
-#define IS_STR_AST                  (1<<5) /* constant expression index */
 
 /* object flags (zval.value->gc.u.flags) */
 #define IS_OBJ_APPLY_COUNT			0x07
