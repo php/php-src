@@ -62,7 +62,6 @@ PHPAPI const char * mysqlnd_debug_std_no_trace_funcs[] =
 	NULL /* must be always last */
 };
 
-
 #if ZEND_DEBUG
 #else
 #define __zend_orig_filename "/unknown/unknown"
@@ -112,7 +111,6 @@ void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
 }
 /* }}} */
 
-
 /* {{{ _mysqlnd_pemalloc */
 void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 {
@@ -155,7 +153,6 @@ void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 }
 /* }}} */
 
-
 /* {{{ _mysqlnd_ecalloc */
 void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 {
@@ -195,7 +192,6 @@ void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 	TRACE_ALLOC_RETURN(FAKE_PTR(ret));
 }
 /* }}} */
-
 
 /* {{{ _mysqlnd_pecalloc */
 void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D)
@@ -238,7 +234,6 @@ void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent M
 }
 /* }}} */
 
-
 /* {{{ _mysqlnd_erealloc */
 void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 {
@@ -278,7 +273,6 @@ void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 	TRACE_ALLOC_RETURN(FAKE_PTR(ret));
 }
 /* }}} */
-
 
 /* {{{ _mysqlnd_perealloc */
 void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D)
@@ -323,7 +317,6 @@ void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQL
 }
 /* }}} */
 
-
 /* {{{ _mysqlnd_efree */
 void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
 {
@@ -353,7 +346,6 @@ void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
 	TRACE_ALLOC_VOID_RETURN;
 }
 /* }}} */
-
 
 /* {{{ _mysqlnd_pefree */
 void _mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D)
@@ -385,7 +377,6 @@ void _mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D)
 	TRACE_ALLOC_VOID_RETURN;
 }
 /* }}} */
-
 
 /* {{{ _mysqlnd_malloc */
 void * _mysqlnd_malloc(size_t size MYSQLND_MEM_D)
@@ -425,7 +416,6 @@ void * _mysqlnd_malloc(size_t size MYSQLND_MEM_D)
 }
 /* }}} */
 
-
 /* {{{ _mysqlnd_calloc */
 void * _mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 {
@@ -463,7 +453,6 @@ void * _mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 	TRACE_ALLOC_RETURN(FAKE_PTR(ret));
 }
 /* }}} */
-
 
 /* {{{ _mysqlnd_realloc */
 void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)
@@ -506,7 +495,6 @@ void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 }
 /* }}} */
 
-
 /* {{{ _mysqlnd_free */
 void _mysqlnd_free(void *ptr MYSQLND_MEM_D)
 {
@@ -540,7 +528,6 @@ void _mysqlnd_free(void *ptr MYSQLND_MEM_D)
 #define SMART_STR_START_SIZE 2048
 #define SMART_STR_PREALLOC 512
 #include "ext/standard/php_smart_str.h"
-
 
 /* {{{ _mysqlnd_pestrndup */
 char * _mysqlnd_pestrndup(const char * const ptr, size_t length, zend_bool persistent MYSQLND_MEM_D)
@@ -577,12 +564,11 @@ char * _mysqlnd_pestrndup(const char * const ptr, size_t length, zend_bool persi
 }
 /* }}} */
 
-
 /* {{{ _mysqlnd_pestrdup */
 char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_MEM_D)
 {
 	char * ret;
-	smart_str tmp_str = {0, 0, 0};
+	smart_str tmp_str = {0};
 	const char * p = ptr;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 	TRACE_ALLOC_ENTER(mysqlnd_pestrdup_name);
@@ -597,11 +583,11 @@ char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_ME
 		smart_str_appendc(&tmp_str, *p);
 	} while (*p++);
 
-	ret = (persistent) ? __zend_malloc(tmp_str.len + sizeof(size_t)) : _emalloc(REAL_SIZE(tmp_str.len + sizeof(size_t)) ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-	memcpy(FAKE_PTR(ret), tmp_str.c, tmp_str.len);
+	ret = (persistent) ? __zend_malloc(tmp_str.s->len + sizeof(size_t)) : _emalloc(REAL_SIZE(tmp_str.s->len + sizeof(size_t)) ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	memcpy(FAKE_PTR(ret), tmp_str.s->val, tmp_str.s->len);
 
 	if (ret && collect_memory_statistics) {
-		*(size_t *) ret = tmp_str.len;
+		*(size_t *) ret = tmp_str.s->len;
 		MYSQLND_INC_GLOBAL_STATISTIC(persistent? STAT_MEM_STRDUP_COUNT : STAT_MEM_ESTRDUP_COUNT);
 	}
 	smart_str_free(&tmp_str);
@@ -609,7 +595,6 @@ char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_ME
 	TRACE_ALLOC_RETURN(FAKE_PTR(ret));
 }
 /* }}} */
-
 
 /* {{{ _mysqlnd_sprintf */
 PHPAPI int _mysqlnd_sprintf(char ** pbuf, size_t max_len, const char *format, ...)
@@ -622,7 +607,6 @@ PHPAPI int _mysqlnd_sprintf(char ** pbuf, size_t max_len, const char *format, ..
 	return len;
 }
 /* }}} */
-
 
 /* {{{ _mysqlnd_sprintf_free */
 PHPAPI void _mysqlnd_sprintf_free(char * p)
@@ -638,7 +622,6 @@ PHPAPI int _mysqlnd_vsprintf(char ** pbuf, size_t max_len, const char * format, 
 }
 /* }}} */
 
-
 #define MYSQLND_DEBUG_MEMORY 1
 
 #if MYSQLND_DEBUG_MEMORY == 0
@@ -650,14 +633,12 @@ static void * mysqlnd_zend_mm_emalloc(size_t size MYSQLND_MEM_D)
 }
 /* }}} */
 
-
 /* {{{ mysqlnd_zend_mm_pemalloc */
 static void * mysqlnd_zend_mm_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 {
 	return pemalloc(size, persistent);
 }
 /* }}} */
-
 
 /* {{{ mysqlnd_zend_mm_ecalloc */
 static void * mysqlnd_zend_mm_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
@@ -666,14 +647,12 @@ static void * mysqlnd_zend_mm_ecalloc(unsigned int nmemb, size_t size MYSQLND_ME
 }
 /* }}} */
 
-
 /* {{{ mysqlnd_zend_mm_pecalloc */
 static void * mysqlnd_zend_mm_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D)
 {
 	return pecalloc(nmemb, size, persistent);
 }
 /* }}} */
-
 
 /* {{{ mysqlnd_zend_mm_erealloc */
 static void * mysqlnd_zend_mm_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
@@ -682,14 +661,12 @@ static void * mysqlnd_zend_mm_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 }
 /* }}} */
 
-
 /* {{{ mysqlnd_zend_mm_perealloc */
 static void * mysqlnd_zend_mm_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D)
 {
 	return perealloc(ptr, new_size, persistent);
 }
 /* }}} */
-
 
 /* {{{ mysqlnd_zend_mm_efree */
 static void mysqlnd_zend_mm_efree(void * ptr MYSQLND_MEM_D)
@@ -698,14 +675,12 @@ static void mysqlnd_zend_mm_efree(void * ptr MYSQLND_MEM_D)
 }
 /* }}} */
 
-
 /* {{{ mysqlnd_zend_mm_pefree */
 static void mysqlnd_zend_mm_pefree(void * ptr, zend_bool persistent MYSQLND_MEM_D)
 {
 	pefree(ptr, persistent);
 }
 /* }}} */
-
 
 /* {{{ mysqlnd_zend_mm_malloc */
 static void * mysqlnd_zend_mm_malloc(size_t size MYSQLND_MEM_D)
@@ -714,14 +689,12 @@ static void * mysqlnd_zend_mm_malloc(size_t size MYSQLND_MEM_D)
 }
 /* }}} */
 
-
 /* {{{ mysqlnd_zend_mm_calloc */
 static void * mysqlnd_zend_mm_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 {
 	return calloc(nmemb, size);
 }
 /* }}} */
-
 
 /* {{{ mysqlnd_zend_mm_realloc */
 static void * mysqlnd_zend_mm_realloc(void * ptr, size_t new_size MYSQLND_MEM_D)
@@ -730,7 +703,6 @@ static void * mysqlnd_zend_mm_realloc(void * ptr, size_t new_size MYSQLND_MEM_D)
 }
 /* }}} */
 
-
 /* {{{ mysqlnd_zend_mm_free */
 static void mysqlnd_zend_mm_free(void * ptr MYSQLND_MEM_D)
 {
@@ -738,14 +710,12 @@ static void mysqlnd_zend_mm_free(void * ptr MYSQLND_MEM_D)
 }
 /* }}} */
 
-
 /* {{{ mysqlnd_zend_mm_pestrndup */
 static char * mysqlnd_zend_mm_pestrndup(const char * const ptr, size_t length, zend_bool persistent MYSQLND_MEM_D)
 {
 	return pestrndup(ptr, length, persistent);
 }
 /* }}} */
-
 
 /* {{{ mysqlnd_zend_mm_pestrdup */
 static char * mysqlnd_zend_mm_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_MEM_D)
@@ -755,7 +725,6 @@ static char * mysqlnd_zend_mm_pestrdup(const char * const ptr, zend_bool persist
 /* }}} */
 
 #endif
-
 
 PHPAPI struct st_mysqlnd_allocator_methods mysqlnd_allocator = 
 {
@@ -796,7 +765,6 @@ PHPAPI struct st_mysqlnd_allocator_methods mysqlnd_allocator =
 	mysqlnd_zend_mm_efree,
 #endif
 };
-
 
 /*
  * Local variables:

@@ -42,15 +42,14 @@
 	TRACE_APPEND_STRL(val, sizeof(val)-1)
 
 #define TRACE_APPEND_KEY(key)                                            \
-	if (zend_hash_find(ht, key, sizeof(key), (void**)&tmp) == SUCCESS) { \
-	    TRACE_APPEND_STRL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));           \
+	if ((tmp = zend_hash_str_find(ht, key, sizeof(key) - 1)) != NULL) {	 \
+	    TRACE_APPEND_STRL(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));             \
 	}
 
 /* }}} */
 
-
 static int
-mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+mysqlnd_build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char **str;
 	int *len;
@@ -64,20 +63,20 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 	 * but that could cause some E_NOTICE and also damn long lines.
 	 */
 
-	switch (Z_TYPE_PP(arg)) {
+	switch (Z_TYPE_P(arg)) {
 		case IS_NULL:
 			TRACE_APPEND_STR("NULL, ");
 			break;
 		case IS_STRING: {
 			int l_added;
 			TRACE_APPEND_CHR('\'');
-			if (Z_STRLEN_PP(arg) > 15) {
-				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), 15);
+			if (Z_STRLEN_P(arg) > 15) {
+				TRACE_APPEND_STRL(Z_STRVAL_P(arg), 15);
 				TRACE_APPEND_STR("...', ");
 				l_added = 15 + 6 + 1; /* +1 because of while (--l_added) */
 			} else {
-				l_added = Z_STRLEN_PP(arg);
-				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), l_added);
+				l_added = Z_STRLEN_P(arg);
+				TRACE_APPEND_STRL(Z_STRVAL_P(arg), l_added);
 				TRACE_APPEND_STR("', ");
 				l_added += 3 + 1;
 			}
@@ -88,18 +87,17 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 			}
 			break;
 		}
-		case IS_BOOL:
-			if (Z_LVAL_PP(arg)) {
-				TRACE_APPEND_STR("true, ");
-			} else {
-				TRACE_APPEND_STR("false, ");
-			}
+		case IS_FALSE:
+			TRACE_APPEND_STR("false, ");
+			break;
+		case IS_TRUE:
+			TRACE_APPEND_STR("true, ");
 			break;
 		case IS_RESOURCE:
 			TRACE_APPEND_STR("Resource id #");
 			/* break; */
 		case IS_LONG: {
-			long lval = Z_LVAL_PP(arg);
+			long lval = Z_LVAL_P(arg);
 			char s_tmp[MAX_LENGTH_OF_LONG + 1];
 			int l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
@@ -107,7 +105,7 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 			break;
 		}
 		case IS_DOUBLE: {
-			double dval = Z_DVAL_PP(arg);
+			double dval = Z_DVAL_P(arg);
 			char *s_tmp;
 			int l_tmp;
 
@@ -123,18 +121,13 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 			TRACE_APPEND_STR("Array, ");
 			break;
 		case IS_OBJECT: {
-			char *class_name;
-			zend_uint class_name_len;
-			int dupl;
+			zend_string *class_name;
 
 			TRACE_APPEND_STR("Object(");
 
-			dupl = zend_get_object_classname(*arg, (const char **)&class_name, &class_name_len TSRMLS_CC);
+			class_name = zend_get_object_classname(Z_OBJ_P(arg) TSRMLS_CC);
 
-			TRACE_APPEND_STRL(class_name, class_name_len);
-			if (!dupl) {
-				efree(class_name);
-			}
+			TRACE_APPEND_STRL(class_name->val, class_name->len);
 
 			TRACE_APPEND_STR("), ");
 			break;
@@ -147,13 +140,13 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 /* }}} */
 
 static int
-mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+mysqlnd_build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char *s_tmp, **str;
 	int *len, *num;
 	long line;
-	HashTable *ht = Z_ARRVAL_PP(frame);
-	zval **file, **tmp;
+	HashTable *ht = Z_ARRVAL_P(frame);
+	zval *file, *tmp;
 	uint * level;
 
 	level = va_arg(args, uint *);
@@ -170,14 +163,14 @@ mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, z
 	sprintf(s_tmp, "#%d ", (*num)++);
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
-	if (zend_hash_find(ht, "file", sizeof("file"), (void**)&file) == SUCCESS) {
-		if (zend_hash_find(ht, "line", sizeof("line"), (void**)&tmp) == SUCCESS) {
-			line = Z_LVAL_PP(tmp);
+	if ((file = zend_hash_str_find(ht, "file", sizeof("file") - 1)) != NULL) {
+		if ((tmp = zend_hash_str_find(ht, "line", sizeof("line") - 1)) != NULL) {
+			line = Z_LVAL_P(tmp);
 		} else {
 			line = 0;
 		}
-		s_tmp = emalloc(Z_STRLEN_PP(file) + MAX_LENGTH_OF_LONG + 4 + 1);
-		sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_PP(file), line);
+		s_tmp = emalloc(Z_STRLEN_P(file) + MAX_LENGTH_OF_LONG + 4 + 1);
+		sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_P(file), line);
 		TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 		efree(s_tmp);
 	} else {
@@ -187,9 +180,9 @@ mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, z
 	TRACE_APPEND_KEY("type");
 	TRACE_APPEND_KEY("function");
 	TRACE_APPEND_CHR('(');
-	if (zend_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
+	if ((tmp = zend_hash_str_find(ht, "args", sizeof("args") - 1)) != NULL) {
 		int last_len = *len;
-		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_args, 2, str, len);
+		zend_hash_apply_with_arguments(Z_ARRVAL_P(tmp) TSRMLS_CC, mysqlnd_build_trace_args, 2, str, len);
 		if (last_len != *len) {
 			*len -= 2; /* remove last ', ' */
 		}
@@ -199,21 +192,19 @@ mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, z
 }
 /* }}} */
 
-
 PHPAPI char *
-mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC)
+mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC) /* {{{ */
 {
-	zval *trace;
+	zval trace;
 	char *res = estrdup(""), **str = &res, *s_tmp;
 	int res_len = 0, *len = &res_len, num = 0;
 	if (max_levels == 0) {
 		max_levels = 99999;
 	}
 
-	MAKE_STD_ZVAL(trace);
-	zend_fetch_debug_backtrace(trace, 0, 0, 0 TSRMLS_CC);
+	zend_fetch_debug_backtrace(&trace, 0, 0, 0 TSRMLS_CC);
 
-	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_string, 4, &max_levels, str, len, &num);
+	zend_hash_apply_with_arguments(Z_ARRVAL(trace) TSRMLS_CC, mysqlnd_build_trace_string, 4, &max_levels, str, len, &num);
 	zval_ptr_dtor(&trace);
 
 	if (max_levels) {
@@ -228,7 +219,7 @@ mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC)
 
 	return res;
 }
-
+/* }}} */
 
 /*
  * Local variables:
