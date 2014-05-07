@@ -128,27 +128,27 @@ bool(false)
 
 Arg value Array 
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, array given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, array given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, array given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, array given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, array given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 Arg value  
@@ -179,27 +179,27 @@ bool(false)
 
 Arg value  
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, string given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, string given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, string given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, string given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 Arg value Some Ascii Data 
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, object given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 Arg value  

@@ -45,7 +45,7 @@ float(1.361727836)
 float(1.370142847)
 float(1.370142847)
 
-Warning: log10() expects parameter 1 to be double, string given in %s on line %d
+Warning: log10() expects parameter 1 to be float, string given in %s on line %d
 NULL
 float(3)
 

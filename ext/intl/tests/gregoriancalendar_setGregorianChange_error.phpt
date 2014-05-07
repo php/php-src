@@ -29,7 +29,7 @@ Warning: IntlGregorianCalendar::setGregorianChange() expects exactly 1 parameter
 Warning: IntlGregorianCalendar::setGregorianChange(): intlgregcal_set_gregorian_change: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlGregorianCalendar::setGregorianChange() expects parameter 1 to be double, string given in %s on line %d
+Warning: IntlGregorianCalendar::setGregorianChange() expects parameter 1 to be float, string given in %s on line %d
 
 Warning: IntlGregorianCalendar::setGregorianChange(): intlgregcal_set_gregorian_change: bad arguments in %s on line %d
 bool(false)

@@ -413,32 +413,32 @@ array(9) {
 
 -- Iteration 16 --
 
-Warning: date_sun_info() expects parameter 2 to be double, string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: date_sun_info() expects parameter 2 to be double, string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: date_sun_info() expects parameter 2 to be double, array given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float, array given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: date_sun_info() expects parameter 2 to be double, string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: date_sun_info() expects parameter 2 to be double, string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
 
-Warning: date_sun_info() expects parameter 2 to be double, string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float, string given in %s on line %d
 bool(false)
 
 -- Iteration 22 --
@@ -487,6 +487,6 @@ array(9) {
 
 -- Iteration 24 --
 
-Warning: date_sun_info() expects parameter 2 to be double, resource given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float, resource given in %s on line %d
 bool(false)
 ===Done===

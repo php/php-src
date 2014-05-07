@@ -15,8 +15,8 @@ imagecolorallocatealpha($img, array(), 255, 255, 50);
 imagecolorallocatealpha($img, tmpfile(), 255, 255, 50);
 ?>
 --EXPECTF--
-Warning: imagecolorallocatealpha() expects parameter 2 to be long, %s given in %s on line %d
+Warning: imagecolorallocatealpha() expects parameter 2 to be integer, %s given in %s on line %d
 
-Warning: imagecolorallocatealpha() expects parameter 2 to be long, array given in %s on line %d
+Warning: imagecolorallocatealpha() expects parameter 2 to be integer, array given in %s on line %d
 
-Warning: imagecolorallocatealpha() expects parameter 2 to be long, resource given in %s on line %d
+Warning: imagecolorallocatealpha() expects parameter 2 to be integer, resource given in %s on line %d

@@ -100,35 +100,35 @@ Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
 Arg value Array 
 
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+Warning: posix_strerror() expects parameter 1 to be integer, array given in %s on line %d
 boolean
 
 Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
 Arg value Array 
 
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+Warning: posix_strerror() expects parameter 1 to be integer, array given in %s on line %d
 boolean
 
 Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
 Arg value Array 
 
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+Warning: posix_strerror() expects parameter 1 to be integer, array given in %s on line %d
 boolean
 
 Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
 Arg value Array 
 
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+Warning: posix_strerror() expects parameter 1 to be integer, array given in %s on line %d
 boolean
 
 Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
 Arg value Array 
 
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+Warning: posix_strerror() expects parameter 1 to be integer, array given in %s on line %d
 boolean
 
 Arg value  
@@ -151,22 +151,22 @@ string
 
 Arg value  
 
-Warning: posix_strerror() expects parameter 1 to be long, string given in %s on line %d
+Warning: posix_strerror() expects parameter 1 to be integer, string given in %s on line %d
 boolean
 
 Arg value  
 
-Warning: posix_strerror() expects parameter 1 to be long, string given in %s on line %d
+Warning: posix_strerror() expects parameter 1 to be integer, string given in %s on line %d
 boolean
 
 Arg value string 
 
-Warning: posix_strerror() expects parameter 1 to be long, string given in %s on line %d
+Warning: posix_strerror() expects parameter 1 to be integer, string given in %s on line %d
 boolean
 
 Arg value string 
 
-Warning: posix_strerror() expects parameter 1 to be long, string given in %s on line %d
+Warning: posix_strerror() expects parameter 1 to be integer, string given in %s on line %d
 boolean
 
 Arg value  

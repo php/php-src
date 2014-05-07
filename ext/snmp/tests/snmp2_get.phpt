@@ -49,10 +49,10 @@ var_dump(snmp2_get($hostname, $community, array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.
 --EXPECTF--
 Checking error handling
 
-Warning: snmp2_get() expects parameter 4 to be long,%s given in %s on line %d
+Warning: snmp2_get() expects parameter 4 to be integer,%s given in %s on line %d
 bool(false)
 
-Warning: snmp2_get() expects parameter 5 to be long,%s given in %s on line %d
+Warning: snmp2_get() expects parameter 5 to be integer,%s given in %s on line %d
 bool(false)
 Empty OID array
 

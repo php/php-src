@@ -36,7 +36,7 @@ Warning: IntlCalendar::getDayOfWeekType() expects exactly 1 parameter, 0 given i
 Warning: IntlCalendar::getDayOfWeekType(): intlcal_get_day_of_week_type: bad arguments in %s on line %d
 bool(false)
 
-Warning: intlcal_get_day_of_week_type() expects parameter 2 to be long, string given in %s on line %d
+Warning: intlcal_get_day_of_week_type() expects parameter 2 to be integer, string given in %s on line %d
 
 Warning: intlcal_get_day_of_week_type(): intlcal_get_day_of_week_type: bad arguments in %s on line %d
 bool(false)

@@ -60,6 +60,6 @@ echo $e->getMessage(),"\n";
 bool(true)
 bool(true)
 
-Warning: Phar::isFileFormat() expects parameter 1 to be long, array given in %sphar_bz2.php on line %d
+Warning: Phar::isFileFormat() expects parameter 1 to be integer, array given in %sphar_bz2.php on line %d
 Unknown file format specified
 ===DONE===

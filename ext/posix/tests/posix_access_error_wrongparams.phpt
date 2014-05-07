@@ -37,7 +37,7 @@ bool(false)
 Warning: posix_access() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: posix_access() expects parameter 2 to be long, array given in %s on line %d
+Warning: posix_access() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 bool(false)
 bool(false)
