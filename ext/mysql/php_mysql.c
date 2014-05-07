@@ -427,9 +427,7 @@ static void _free_mysql_result(zend_resource *rsrc TSRMLS_DC)
 static void php_mysql_set_default_link(zend_resource *link TSRMLS_DC)
 {
 	if (MySG(default_link) != NULL) {
-		if (--GC_REFCOUNT((MySG(default_link))) == 0) {
-			zend_list_delete(MySG(default_link));
-		}
+		zend_list_delete(MySG(default_link));
 	}
 	++GC_REFCOUNT(link);
 	MySG(default_link) = link;

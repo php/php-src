@@ -70,7 +70,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 
 				if (--GC_REFCOUNT(res) == 0) {
 					/* destroy resource */
-					zend_list_delete(res);
+					zend_list_free(res);
 				}
 				break;
 			}
@@ -129,7 +129,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 				TSRMLS_FETCH();
 
 				/* destroy resource */
-				zend_list_delete(res);
+				zend_list_free(res);
 				break;
 			}
 		case IS_REFERENCE: {
