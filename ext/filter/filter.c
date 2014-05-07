@@ -776,7 +776,7 @@ PHP_FUNCTION(filter_var)
 		RETURN_FALSE;
 	}
 
-	ZVAL_COPY(return_value, data);
+	ZVAL_DUP(return_value, data);
 
 	php_filter_call(return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR TSRMLS_CC);
 }
