@@ -338,7 +338,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 							int type;
 
 							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), p, &d, -1)) == 0) {
-								return "long";
+								return "integer";
 							} else if (type == IS_DOUBLE) {
 								if (c == 'L') {
 									if (d > LONG_MAX) {
@@ -376,7 +376,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 					case IS_OBJECT:
 					case IS_RESOURCE:
 					default:
-						return "long";
+						return "integer";
 				}
 			}
 			break;
@@ -397,7 +397,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 							int type;
 
 							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &l, p, -1)) == 0) {
-								return "double";
+								return "float";
 							} else if (type == IS_LONG) {
 								*p = (double) l;
 							}
@@ -416,7 +416,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 					case IS_OBJECT:
 					case IS_RESOURCE:
 					default:
-						return "double";
+						return "float";
 				}
 			}
 			break;
