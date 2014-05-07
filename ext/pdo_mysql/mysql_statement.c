@@ -342,7 +342,9 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
+#if PDO_USE_MYSQLND
 	long row_count;
+#endif
 	PDO_DBG_ENTER("pdo_mysql_stmt_next_rowset");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
@@ -493,7 +495,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 				b = (PDO_MYSQL_PARAM_BIND*)param->driver_data;
 				*b->is_null = 0;
 				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
-						Z_TYPE_P(param->parameter) == IS_NULL) {
+						Z_TYPE(param->parameter) == IS_NULL) {
 					*b->is_null = 1;
 					b->buffer_type = MYSQL_TYPE_STRING;
 					b->buffer = NULL;
@@ -508,14 +510,12 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 						PDO_DBG_RETURN(0);
 					case PDO_PARAM_LOB:
 						PDO_DBG_INF("PDO_PARAM_LOB");
-						if (Z_TYPE_P(param->parameter) == IS_RESOURCE) {
+						if (Z_TYPE(param->parameter) == IS_RESOURCE) {
 							php_stream *stm;
 							php_stream_from_zval_no_verify(stm, &param->parameter);
 							if (stm) {
 								SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
-								Z_TYPE_P(param->parameter) = IS_STRING;
-								Z_STRLEN_P(param->parameter) = php_stream_copy_to_mem(stm,
-									&Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0);
+								ZVAL_STR(&param->parameter, php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0));
 							} else {
 								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
 								return 0;
@@ -529,20 +529,20 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 #if PDO_USE_MYSQLND
 				/* Is it really correct to check the zval's type? - But well, that's what the old code below does, too */
-				PDO_DBG_INF_FMT("param->parameter->type=%d", Z_TYPE_P(param->parameter));
-				switch (Z_TYPE_P(param->parameter)) {
+				PDO_DBG_INF_FMT("param->parameter->type=%d", Z_TYPE(param->parameter));
+				switch (Z_TYPE(param->parameter)) {
 					case IS_STRING:
-						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, param->parameter, MYSQL_TYPE_VAR_STRING);
+						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, &param->parameter, MYSQL_TYPE_VAR_STRING);
 						break;
 					case IS_LONG:
 #if SIZEOF_LONG==8
-						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, param->parameter, MYSQL_TYPE_LONGLONG);
+						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, &param->parameter, MYSQL_TYPE_LONGLONG);
 #elif SIZEOF_LONG==4
-						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, param->parameter, MYSQL_TYPE_LONG);
+						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, &param->parameter, MYSQL_TYPE_LONG);
 #endif /* SIZEOF_LONG */
 						break;
 					case IS_DOUBLE:
-						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, param->parameter, MYSQL_TYPE_DOUBLE);
+						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, &param->parameter, MYSQL_TYPE_DOUBLE);
 						break;
 					default:
 						PDO_DBG_RETURN(0);
@@ -550,23 +550,23 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 				PDO_DBG_RETURN(1);
 #else
-				PDO_DBG_INF_FMT("param->parameter->type=%d", Z_TYPE_P(param->parameter));
-				switch (Z_TYPE_P(param->parameter)) {
+				PDO_DBG_INF_FMT("param->parameter->type=%d", Z_TYPE(param->parameter));
+				switch (Z_TYPE(param->parameter)) {
 					case IS_STRING:
 						b->buffer_type = MYSQL_TYPE_STRING;
-						b->buffer = Z_STRVAL_P(param->parameter);
-						b->buffer_length = Z_STRLEN_P(param->parameter);
-						*b->length = Z_STRLEN_P(param->parameter);
+						b->buffer = Z_STRVAL(param->parameter);
+						b->buffer_length = Z_STRLEN(param->parameter);
+						*b->length = Z_STRLEN(param->parameter);
 						PDO_DBG_RETURN(1);
 
 					case IS_LONG:
 						b->buffer_type = MYSQL_TYPE_LONG;
-						b->buffer = &Z_LVAL_P(param->parameter);
+						b->buffer = &Z_LVAL(param->parameter);
 						PDO_DBG_RETURN(1);
 
 					case IS_DOUBLE:
 						b->buffer_type = MYSQL_TYPE_DOUBLE;
-						b->buffer = &Z_DVAL_P(param->parameter);
+						b->buffer = &Z_DVAL(param->parameter);
 						PDO_DBG_RETURN(1);
 
 					default:
@@ -807,7 +807,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	const MYSQL_FIELD *F;
-	zval *flags;
+	zval flags;
 	char *str;
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_col_meta");
@@ -821,8 +821,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	}
 
 	array_init(return_value);
-	MAKE_STD_ZVAL(flags);
-	array_init(flags);
+	array_init(&flags);
 
 	F = S->fields + colno;
 
@@ -830,19 +829,19 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 		add_assoc_string(return_value, "mysql:def", F->def);
 	}
 	if (IS_NOT_NULL(F->flags)) {
-		add_next_index_string(flags, "not_null");
+		add_next_index_string(&flags, "not_null");
 	}
 	if (IS_PRI_KEY(F->flags)) {
-		add_next_index_string(flags, "primary_key");
+		add_next_index_string(&flags, "primary_key");
 	}
 	if (F->flags & MULTIPLE_KEY_FLAG) {
-		add_next_index_string(flags, "multiple_key");
+		add_next_index_string(&flags, "multiple_key");
 	}
 	if (F->flags & UNIQUE_KEY_FLAG) {
-		add_next_index_string(flags, "unique_key");
+		add_next_index_string(&flags, "unique_key");
 	}
 	if (IS_BLOB(F->flags)) {
-		add_next_index_string(flags, "blob");
+		add_next_index_string(&flags, "blob");
 	}
 	str = type_to_name_native(F->type);
 	if (str) {
@@ -868,8 +867,9 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	}
 #endif
 
-	add_assoc_zval(return_value, "flags", flags);
-	add_assoc_string(return_value, "table", (char *) (F->table?F->table:""));
+	add_assoc_zval(return_value, "flags", &flags);
+	add_assoc_string(return_value, "table", (char *) (F->table?F->table : ""));
+
 	PDO_DBG_RETURN(SUCCESS);
 } /* }}} */
 

@@ -118,31 +118,31 @@ typedef struct {
 
 typedef struct {
 	pdo_mysql_db_handle 	*H;
-	MYSQL_RES		*result;
-	const MYSQL_FIELD	*fields;
-	MYSQL_ROW		current_data;
+	MYSQL_RES				*result;
+	const MYSQL_FIELD		*fields;
+	MYSQL_ROW				current_data;
 #if PDO_USE_MYSQLND
-	unsigned long		*current_lengths;
+	unsigned long			*current_lengths;
 #else
-	long			*current_lengths;
+	long					*current_lengths;
 #endif
-	pdo_mysql_error_info einfo;
+	pdo_mysql_error_info 	einfo;
 #if PDO_USE_MYSQLND
-	MYSQLND_STMT 		*stmt;
+	MYSQLND_STMT 			*stmt;
 #else
-	MYSQL_STMT		*stmt;
+	MYSQL_STMT				*stmt;
 #endif	
-	int num_params;
+	int 					num_params;
 	PDO_MYSQL_PARAM_BIND	*params;
 #ifndef PDO_USE_MYSQLND
-	my_bool			*in_null;
-	unsigned long		*in_length;
+	my_bool					*in_null;
+	unsigned long			*in_length;
 #endif
 	PDO_MYSQL_PARAM_BIND	*bound_result;
-	my_bool			*out_null;
-	unsigned long		*out_length;
-	unsigned int		params_given;
-	unsigned		max_length:1;
+	my_bool					*out_null;
+	unsigned long			*out_length;
+	unsigned int			params_given;
+	unsigned				max_length:1;
 } pdo_mysql_stmt;
 
 extern pdo_driver_t pdo_mysql_driver;

@@ -404,13 +404,9 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 
 	/* allocate storage for the parameter, keyed by its "canonical" name */
 	if (param->name) {
-		zval *zv;
-		zv = zend_hash_update_mem(hash, param->name, param, sizeof(struct pdo_bound_param_data));
-		pparam = Z_PTR_P(zv);
+		pparam = zend_hash_update_mem(hash, param->name, param, sizeof(struct pdo_bound_param_data));
 	} else {
-		zval *zv;
-		zv = zend_hash_index_update_mem(hash, param->paramno, param, sizeof(struct pdo_bound_param_data));
-		pparam = Z_PTR_P(zv);
+		pparam = zend_hash_index_update_mem(hash, param->paramno, param, sizeof(struct pdo_bound_param_data));
 	}
 
 	/* tell the driver we just created a parameter */
