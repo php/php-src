@@ -222,6 +222,12 @@ PHP 5.6 UPGRADE NOTES
   The $source parameter of mcrypt_create_iv() now defaults to
   MCRYPT_DEV_URANDOM instead of MCRYPT_DEV_RANDOM.
 
+- OpenSSL:
+  The $crypto_type parameter is now optional in stream_socket_enable_crypto()
+  if the stream's SSL context specifies the new "crypto_type" option. The
+  crypto method from the context is used as a fallback if no crypto method is
+  specified at call-time.
+
 - XMLReader:
   XMLReader::getAttributeNs and XMLReader::getAttributeNo now return NULL if
   the attribute could not be found, just like XMLReader::getAttribute.

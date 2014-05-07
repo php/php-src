@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #67198 (php://input regression). (Mike)
 
+- OpenSSL:
+  . Fixed bug #67224 (Fall back to crypto_type from context if not specified
+    explicitly in stream_socket_enable_crypto). (Chris Wright)
+
 01 May 2014, PHP 5.6.0 Beta 2
 
 - CLI server:
