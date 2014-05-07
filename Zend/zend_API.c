@@ -207,7 +207,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 		case IS_LONG:
 			return "integer";
 		case IS_DOUBLE:
-			return "double";
+			return "float";
 		case IS_STRING:
 			return "string";
 		case IS_OBJECT:
