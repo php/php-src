@@ -804,9 +804,14 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 	}
 	smart_str_0(&xbuf);
 
-	*pbuf = estrndup(xbuf.s->val, xbuf.s->len);
-	result = xbuf.s->len;
-	smart_str_free(&xbuf);
+	if (xbuf.s) {
+		*pbuf = estrndup(xbuf.s->val, xbuf.s->len);
+		result = xbuf.s->len;
+		smart_str_free(&xbuf);
+	} else {
+		*pbuf = NULL;
+		result = 0;
+	}
 
 	return result;
 }
