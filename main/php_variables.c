@@ -635,13 +635,14 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 		if (Z_TYPE_P(src_entry) != IS_ARRAY
 			|| (key_type == HASH_KEY_IS_STRING && (dest_entry = zend_hash_find(dest, string_key)) == NULL)
 			|| (key_type == HASH_KEY_IS_LONG && (dest_entry = zend_hash_index_find(dest, num_key)) == NULL)
-			|| Z_TYPE_P(dest_entry) != IS_ARRAY
-			) {
-			Z_ADDREF_P(src_entry);
+			|| Z_TYPE_P(dest_entry) != IS_ARRAY) {
+			if (Z_REFCOUNTED_P(src_entry)) {
+				Z_ADDREF_P(src_entry);
+			}
 			if (key_type == HASH_KEY_IS_STRING) {
 				if (!globals_check || string_key->len != sizeof("GLOBALS") || memcmp(string_key->val, "GLOBALS", sizeof("GLOBALS") - 1)) {
 					zend_hash_update(dest, string_key, src_entry);
-				} else {
+				} else if (Z_REFCOUNTED_P(src_entry)) {
 					Z_DELREF_P(src_entry);
 				}
 			} else {
