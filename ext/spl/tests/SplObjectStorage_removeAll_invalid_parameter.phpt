@@ -35,7 +35,7 @@ NULL
 Warning: SplObjectStorage::removeAll() expects parameter 1 to be SplObjectStorage, integer given in %s on line %d
 NULL
 
-Warning: SplObjectStorage::removeAll() expects parameter 1 to be SplObjectStorage, double given in %s on line %d
+Warning: SplObjectStorage::removeAll() expects parameter 1 to be SplObjectStorage, float given in %s on line %d
 NULL
 
 Warning: SplObjectStorage::removeAll() expects parameter 1 to be SplObjectStorage, null given in %s on line %d

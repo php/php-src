@@ -132,17 +132,17 @@ bool(false)
 
 -- float 10.5 --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, double given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTime, float given in %s on line %d
 bool(false)
 
 -- float -10.5 --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, double given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTime, float given in %s on line %d
 bool(false)
 
 -- float .5 --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, double given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTime, float given in %s on line %d
 bool(false)
 
 -- empty array --

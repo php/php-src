@@ -111,27 +111,27 @@ NULL
 
 -- Iteration 5 --
 
-Warning: rewinddir() expects parameter 1 to be resource, double given in %s on line %d
+Warning: rewinddir() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 6 --
 
-Warning: rewinddir() expects parameter 1 to be resource, double given in %s on line %d
+Warning: rewinddir() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: rewinddir() expects parameter 1 to be resource, double given in %s on line %d
+Warning: rewinddir() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: rewinddir() expects parameter 1 to be resource, double given in %s on line %d
+Warning: rewinddir() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: rewinddir() expects parameter 1 to be resource, double given in %s on line %d
+Warning: rewinddir() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 10 --

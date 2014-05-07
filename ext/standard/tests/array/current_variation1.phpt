@@ -119,27 +119,27 @@ NULL
 
 -- Iteration 5 --
 
-Warning: current() expects parameter 1 to be array, double given in %s on line %d
+Warning: current() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 6 --
 
-Warning: current() expects parameter 1 to be array, double given in %s on line %d
+Warning: current() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: current() expects parameter 1 to be array, double given in %s on line %d
+Warning: current() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: current() expects parameter 1 to be array, double given in %s on line %d
+Warning: current() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: current() expects parameter 1 to be array, double given in %s on line %d
+Warning: current() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 10 --
