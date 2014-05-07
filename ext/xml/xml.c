@@ -897,7 +897,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					zval tag;
 					zval *curtag, *mytype, *myval;
 
-					ZEND_HASH_FOREACH_VAL(Z_ARRVAL(parser->data), curtag) {
+					ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL(parser->data), curtag) {
 						if ((mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
 							if (!strcmp(Z_STRVAL_P(mytype), "cdata")) {
 								if ((myval = zend_hash_str_find(Z_ARRVAL_P(curtag), "value", sizeof("value") - 1))) {
@@ -910,6 +910,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 								}
 							}
 						}
+						break;
 					} ZEND_HASH_FOREACH_END();
 
 					if (parser->level <= XML_MAXLEVEL) {
