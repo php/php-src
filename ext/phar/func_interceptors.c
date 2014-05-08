@@ -95,10 +95,9 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 {
 	char *filename;
 	int filename_len;
-	char *contents;
+	zend_string *contents;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
-	int len;
 	long offset = -1;
 	long maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
@@ -160,7 +159,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 			} else {
 				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
 				if (entry[0] == '/') {
-					if (!zend_hash_exists(&(phar->manifest), entry + 1, entry_len - 1)) {
+					if (!zend_hash_str_exists(&(phar->manifest), entry + 1, entry_len - 1)) {
 						/* this file is not in the phar, use the original path */
 notfound:
 						efree(arch);
@@ -168,7 +167,7 @@ notfound:
 						goto skip_phar;
 					}
 				} else {
-					if (!zend_hash_exists(&(phar->manifest), entry, entry_len)) {
+					if (!zend_hash_str_exists(&(phar->manifest), entry, entry_len)) {
 						goto notfound;
 					}
 				}
@@ -202,10 +201,11 @@ phar_it:
 			}
 
 			/* uses mmap if possible */
-			if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
-				RETVAL_STRINGL(contents, len, 0);
-				efree(contents);
-			} else if (len == 0) {
+			contents = php_stream_copy_to_mem(stream, maxlen, 0);
+			if (contents && contents->len > 0) {
+				RETVAL_STR(contents);
+			} else if (contents) {
+				STR_RELEASE(contents);
 				RETVAL_EMPTY_STRING();
 			} else {
 				RETVAL_FALSE;
@@ -277,7 +277,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		} else {
 			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
 			if (entry[0] == '/') {
-				if (!zend_hash_exists(&(phar->manifest), entry + 1, entry_len - 1)) {
+				if (!zend_hash_str_exists(&(phar->manifest), entry + 1, entry_len - 1)) {
 					/* this file is not in the phar, use the original path */
 notfound:
 					efree(entry);
@@ -285,7 +285,7 @@ notfound:
 					goto skip_phar;
 				}
 			} else {
-				if (!zend_hash_exists(&(phar->manifest), entry, entry_len)) {
+				if (!zend_hash_str_exists(&(phar->manifest), entry, entry_len)) {
 					goto notfound;
 				}
 			}
@@ -373,7 +373,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		} else {
 			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
 			if (entry[0] == '/') {
-				if (!zend_hash_exists(&(phar->manifest), entry + 1, entry_len - 1)) {
+				if (!zend_hash_str_exists(&(phar->manifest), entry + 1, entry_len - 1)) {
 					/* this file is not in the phar, use the original path */
 notfound:
 					efree(entry);
@@ -381,7 +381,7 @@ notfound:
 					goto skip_phar;
 				}
 			} else {
-				if (!zend_hash_exists(&(phar->manifest), entry, entry_len)) {
+				if (!zend_hash_str_exists(&(phar->manifest), entry, entry_len)) {
 					/* this file is not in the phar, use the original path */
 					goto notfound;
 				}
@@ -404,7 +404,7 @@ notfound:
 		}
 		php_stream_to_zval(stream, return_value);
 		if (zcontext) {
-			zend_list_addref(Z_RESVAL_P(zcontext));
+			Z_ADDREF_P(zcontext);
 		}
 		return;
 	}
@@ -435,8 +435,8 @@ skip_phar:
  */
 static void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value TSRMLS_DC)
 {
-	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
-		 *stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
+	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
+		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
 	int rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13] = {
 		"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
@@ -506,14 +506,14 @@ static void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value T
 #endif
 	case FS_TYPE:
 		if (S_ISLNK(stat_sb->st_mode)) {
-			RETURN_STRING("link", 1);
+			RETURN_STRING("link");
 		}
 		switch(stat_sb->st_mode & S_IFMT) {
-		case S_IFDIR: RETURN_STRING("dir", 1);
-		case S_IFREG: RETURN_STRING("file", 1);
+		case S_IFDIR: RETURN_STRING("dir");
+		case S_IFREG: RETURN_STRING("file");
 		}
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%u)", stat_sb->st_mode & S_IFMT);
-		RETURN_STRING("unknown", 1);
+		RETURN_STRING("unknown");
 	case FS_IS_W:
 		RETURN_BOOL((stat_sb->st_mode & wmask) != 0);
 	case FS_IS_R:
@@ -533,67 +533,67 @@ static void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value T
 	case FS_STAT:
 		array_init(return_value);
 
-		MAKE_LONG_ZVAL_INCREF(stat_dev, stat_sb->st_dev);
-		MAKE_LONG_ZVAL_INCREF(stat_ino, stat_sb->st_ino);
-		MAKE_LONG_ZVAL_INCREF(stat_mode, stat_sb->st_mode);
-		MAKE_LONG_ZVAL_INCREF(stat_nlink, stat_sb->st_nlink);
-		MAKE_LONG_ZVAL_INCREF(stat_uid, stat_sb->st_uid);
-		MAKE_LONG_ZVAL_INCREF(stat_gid, stat_sb->st_gid);
+		ZVAL_LONG(&stat_dev, stat_sb->st_dev);
+		ZVAL_LONG(&stat_ino, stat_sb->st_ino);
+		ZVAL_LONG(&stat_mode, stat_sb->st_mode);
+		ZVAL_LONG(&stat_nlink, stat_sb->st_nlink);
+		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
+		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
 #ifdef HAVE_ST_RDEV
-		MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_sb->st_rdev);
+		ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
 #else
-		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
+		ZVAL_LONG(&stat_rdev, -1);
 #endif
-		MAKE_LONG_ZVAL_INCREF(stat_size, stat_sb->st_size);
+		ZVAL_LONG(&stat_size, stat_sb->st_size);
 #ifdef NETWARE
-		MAKE_LONG_ZVAL_INCREF(stat_atime, (stat_sb->st_atime).tv_sec);
-		MAKE_LONG_ZVAL_INCREF(stat_mtime, (stat_sb->st_mtime).tv_sec);
-		MAKE_LONG_ZVAL_INCREF(stat_ctime, (stat_sb->st_ctime).tv_sec);
+		ZVAL_LONG(&stat_atime, (stat_sb->st_atime).tv_sec);
+		ZVAL_LONG(&stat_mtime, (stat_sb->st_mtime).tv_sec);
+		ZVAL_LONG(&stat_ctime, (stat_sb->st_ctime).tv_sec);
 #else
-		MAKE_LONG_ZVAL_INCREF(stat_atime, stat_sb->st_atime);
-		MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_sb->st_mtime);
-		MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_sb->st_ctime);
+		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
+		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
+		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
 #endif
 #ifdef HAVE_ST_BLKSIZE
-		MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_sb->st_blksize);
+		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
 #else
-		MAKE_LONG_ZVAL_INCREF(stat_blksize,-1);
+		ZVAL_LONG(&stat_blksize,-1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-		MAKE_LONG_ZVAL_INCREF(stat_blocks, stat_sb->st_blocks);
+		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
 #else
-		MAKE_LONG_ZVAL_INCREF(stat_blocks,-1);
+		ZVAL_LONG(&stat_blocks,-1);
 #endif
 		/* Store numeric indexes in propper order */
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_dev, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_ino, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_mode, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_nlink, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_uid, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_gid, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_ino);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_mode);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_nlink);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_uid);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_gid);
 
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_rdev, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_size, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_atime, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_mtime, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_ctime, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_blksize, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_blocks, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_rdev);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_size);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_atime);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_mtime);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_ctime);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_blksize);
+		zend_hash_next_index_insert(HASH_OF(return_value), &stat_blocks);
 
 		/* Store string indexes referencing the same zval*/
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0])+1, (void *) &stat_dev, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1])+1, (void *) &stat_ino, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2])+1, (void *) &stat_mode, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3])+1, (void *) &stat_nlink, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4])+1, (void *) &stat_uid, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5])+1, (void *) &stat_gid, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6])+1, (void *) &stat_rdev, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7])+1, (void *) &stat_size, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8])+1, (void *) &stat_atime, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9])+1, (void *) &stat_mtime, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10])+1, (void *) &stat_ctime, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11])+1, (void *) &stat_blksize, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12])+1, (void *) &stat_blocks, sizeof(zval *), NULL);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
+		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
 
 		return;
 	}
@@ -647,17 +647,17 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 splitted:
 			entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
 			if (entry[0] == '/') {
-				if (SUCCESS == zend_hash_find(&(phar->manifest), entry + 1, entry_len - 1, (void **) &data)) {
+				if (NULL != (data = zend_hash_str_find_ptr(&(phar->manifest), entry + 1, entry_len - 1))) {
 					efree(entry);
 					goto stat_entry;
 				}
 				goto notfound;
 			}
-			if (SUCCESS == zend_hash_find(&(phar->manifest), entry, entry_len, (void **) &data)) {
+			if (NULL != (data = zend_hash_str_find_ptr(&(phar->manifest), entry, entry_len))) {
 				efree(entry);
 				goto stat_entry;
 			}
-			if (zend_hash_exists(&(phar->virtual_dirs), entry, entry_len)) {
+			if (zend_hash_str_exists(&(phar->virtual_dirs), entry, entry_len)) {
 				efree(entry);
 				efree(arch);
 				if (IS_EXISTS_CHECK(type)) {
@@ -691,7 +691,7 @@ notfound:
 				PHAR_G(cwd_len) = 0;
 				/* clean path without cwd */
 				entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
-				if (SUCCESS == zend_hash_find(&(phar->manifest), entry + 1, entry_len - 1, (void **) &data)) {
+				if (NULL != (data = zend_hash_str_find_ptr(&(phar->manifest), entry + 1, entry_len - 1))) {
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
 					efree(entry);
@@ -701,7 +701,7 @@ notfound:
 					}
 					goto stat_entry;
 				}
-				if (zend_hash_exists(&(phar->virtual_dirs), entry + 1, entry_len - 1)) {
+				if (zend_hash_str_exists(&(phar->virtual_dirs), entry + 1, entry_len - 1)) {
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
 					efree(entry);
@@ -927,7 +927,7 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 
 				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
 				if (entry[0] == '/') {
-					if (SUCCESS == zend_hash_find(&(phar->manifest), entry + 1, entry_len - 1, (void **) &etemp)) {
+					if (NULL != (etemp = zend_hash_str_find_ptr(&(phar->manifest), entry + 1, entry_len - 1))) {
 						/* this file is not in the current directory, use the original path */
 found_it:
 						efree(entry);
@@ -935,7 +935,7 @@ found_it:
 						RETURN_BOOL(!etemp->is_dir);
 					}
 				} else {
-					if (SUCCESS == zend_hash_find(&(phar->manifest), entry, entry_len, (void **) &etemp)) {
+					if (NULL != (etemp = zend_hash_str_find_ptr(&(phar->manifest), entry, entry_len))) {
 						goto found_it;
 					}
 				}
@@ -994,7 +994,7 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 
 				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
 				if (entry[0] == '/') {
-					if (SUCCESS == zend_hash_find(&(phar->manifest), entry + 1, entry_len - 1, (void **) &etemp)) {
+					if (NULL != (etemp = zend_hash_str_find_ptr(&(phar->manifest), entry + 1, entry_len - 1))) {
 						/* this file is not in the current directory, use the original path */
 found_it:
 						efree(entry);
@@ -1002,7 +1002,7 @@ found_it:
 						RETURN_BOOL(etemp->link);
 					}
 				} else {
-					if (SUCCESS == zend_hash_find(&(phar->manifest), entry, entry_len, (void **) &etemp)) {
+					if (NULL != (etemp = zend_hash_str_find_ptr(&(phar->manifest), entry, entry_len))) {
 						goto found_it;
 					}
 				}
@@ -1049,7 +1049,7 @@ void phar_release_functions(TSRMLS_D)
 /* {{{ void phar_intercept_functions_init(TSRMLS_D) */
 #define PHAR_INTERCEPT(func) \
 	PHAR_G(orig_##func) = NULL; \
-	if (SUCCESS == zend_hash_find(CG(function_table), #func, sizeof(#func), (void **)&orig)) { \
+	if (NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \
 		PHAR_G(orig_##func) = orig->internal_function.handler; \
 		orig->internal_function.handler = phar_##func; \
 	}
@@ -1086,7 +1086,7 @@ void phar_intercept_functions_init(TSRMLS_D)
 
 /* {{{ void phar_intercept_functions_shutdown(TSRMLS_D) */
 #define PHAR_RELEASE(func) \
-	if (PHAR_G(orig_##func) && SUCCESS == zend_hash_find(CG(function_table), #func, sizeof(#func), (void **)&orig)) { \
+	if (PHAR_G(orig_##func) && NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \
 		orig->internal_function.handler = PHAR_G(orig_##func); \
 	} \
 	PHAR_G(orig_##func) = NULL;
