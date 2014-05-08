@@ -137,7 +137,7 @@ struct php_bz2_stream_data_t {
 
 static size_t php_bz2iop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
-	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *) stream->abstract;
+	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 	size_t ret;
 	
 	ret = BZ2_bzread(self->bz_file, buf, count);
@@ -151,7 +151,7 @@ static size_t php_bz2iop_read(php_stream *stream, char *buf, size_t count TSRMLS
 
 static size_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
-	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *) stream->abstract;
+	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 
 	return BZ2_bzwrite(self->bz_file, (char*)buf, count); 
 }
@@ -226,7 +226,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 #ifdef VIRTUAL_DIR
 	virtual_filepath_ex(path, &path_copy, NULL TSRMLS_CC);
 #else
-	path_copy = path;
+	path_copy = estrdup(path);
 #endif
 
 	if (php_check_open_basedir(path_copy TSRMLS_CC)) {
@@ -238,9 +238,12 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 
 	if (opened_path && bz_file) {
 		*opened_path = estrdup(path_copy);
+		path_copy = NULL;
 	}
-	if (path_copy) 
+
+	if (path_copy) {
 		efree(path_copy);
+	}
 	
 	if (bz_file == NULL) {
 		/* that didn't work, so try and get something from the network/wrapper */
@@ -332,7 +335,7 @@ static PHP_FUNCTION(bzread)
 	zval *bz;
 	long len = 1024;
 	php_stream *stream;
-	char *data;
+	zend_string *data;
 	size_t dlen;
 	
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &bz, &len)) {
@@ -346,17 +349,17 @@ static PHP_FUNCTION(bzread)
 		RETURN_FALSE;
 	}
 
-	data = emalloc(len + 1);
-	dlen = php_stream_read(stream, data, len);
+	data = STR_ALLOC(len, 0);
+	data->len = php_stream_read(stream, data->val, data->len);
 	
 	if (dlen < 0) {
-		efree(data);
+		STR_FREE(data);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not read valid bz2 data from stream");
 		RETURN_FALSE;		
 	}
+	data->val[data->len] = '\0';
 
-	ZVAL_NEW_STR(return_value, STR_INIT(data, dlen, 0));
-	efree(data);
+	RETURN_STR(data);
 }
 /* }}} */
 
@@ -391,11 +394,7 @@ static PHP_FUNCTION(bzopen)
 			RETURN_FALSE;
 		}
 
-		stream = php_stream_bz2open(NULL,
-									Z_STRVAL_P(file), 
-									mode, 
-									REPORT_ERRORS, 
-									NULL);
+		stream = php_stream_bz2open(NULL, Z_STRVAL_P(file), mode, REPORT_ERRORS, NULL);
 	} else if (Z_TYPE_P(file) == IS_RESOURCE) {
 		/* If it is a resource, than its a stream resource */
 		php_socket_t fd;
@@ -485,7 +484,7 @@ static PHP_FUNCTION(bzcompress)
 	char             *source;          /* Source data to compress */
 	long              zblock_size = 0; /* Optional block size to use */
 	long              zwork_factor = 0;/* Optional work factor to use */
-	char             *dest = NULL;     /* Destination to place the compressed data into */
+	zend_string      *dest = NULL;     /* Destination to place the compressed data into */
 	int               error,           /* Error Container */
 					  block_size  = 4, /* Block size for compression algorithm */
 					  work_factor = 0, /* Work factor for compression algorithm */
@@ -503,10 +502,10 @@ static PHP_FUNCTION(bzcompress)
 	   + .01 x length of data + 600 which is the largest size the results of the compression 
 	   could possibly be, at least that's what the libbz2 docs say (thanks to jeremy@nirvani.net 
 	   for pointing this out).  */
-	dest_len   = (unsigned int) (source_len + (0.01 * source_len) + 600);
+	dest_len = (unsigned int) (source_len + (0.01 * source_len) + 600);
 	
 	/* Allocate the destination buffer */
-	dest = emalloc(dest_len + 1);
+	dest = STR_ALLOC(dest_len, 0);
 	
 	/* Handle the optional arguments */
 	if (argc > 1) {
@@ -517,15 +516,16 @@ static PHP_FUNCTION(bzcompress)
 		work_factor = zwork_factor;
 	}
 
-	error = BZ2_bzBuffToBuffCompress(dest, &dest_len, source, source_len, block_size, 0, work_factor);
+	error = BZ2_bzBuffToBuffCompress(dest->val, &dest_len, source, source_len, block_size, 0, work_factor);
 	if (error != BZ_OK) {
-		efree(dest);
+		STR_FREE(dest);
 		RETURN_LONG(error);
 	} else {
 		/* Copy the buffer, we have perhaps allocate a lot more than we need,
 		   so we erealloc() the buffer to the proper size */
-		RETVAL_STRINGL(dest, dest_len);
-		efree(dest);
+		dest->len = dest_len;
+		dest->val[dest->len] = '\0';
+		RETURN_STR(dest);
 	}
 }
 /* }}} */

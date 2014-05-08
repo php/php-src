@@ -379,8 +379,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					/* How much memory to allocate (1 - 9) x 100kb */
 					zval tmp;
 	
-					tmp = *tmpzval;
-					zval_copy_ctor(&tmp);
+					ZVAL_DUP(&tmp, tmpzval);
 					convert_to_long(&tmp);
 					if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > 9) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%ld)", Z_LVAL_P(tmpzval));
@@ -393,8 +392,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					/* Work Factor (0 - 250) */
 					zval tmp;
 	
-					tmp = *tmpzval;
-					zval_copy_ctor(&tmp);
+					ZVAL_DUP(&tmp, tmpzval);
 					convert_to_long(&tmp);
 
 					if (Z_LVAL(tmp) < 0 || Z_LVAL(tmp) > 250) {
