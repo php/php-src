@@ -21,8 +21,23 @@ class Bar extends Foo {
 var_dump(Bar::test());
 var_dump(Foo::test());
 --EXPECTF--
-object(ArrayIterator)#%d (0) {
+object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
 }
-object(ArrayObject)#%d (0) {
+object(ArrayIterator)#%d (1) {
+  ["storage":"ArrayIterator":private]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
 }
+
 
