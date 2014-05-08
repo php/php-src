@@ -1,5 +1,5 @@
 --TEST--
-Inheritance Hinting Compile Checking Failure
+Inheritance Hinting Compile Checking Failure Same Class
 --SKIPIF--
 <?php if (!extension_loaded("Zend OPcache")) die("Skip: opcache required"); ?>
 --FILE--
