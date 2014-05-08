@@ -29,8 +29,6 @@ if (PHP_PDO_OCI != "no") {
 
 	if (pdo_oci_header && CHECK_LIB("oci.lib", "pdo_oci", pdo_oci_lib_paths)) {
 
-		pdo_oci_inc_dir = FSO.GetParentFolderName(pdo_oci_header);
-
 		EXTENSION('pdo_oci', 'pdo_oci.c oci_driver.c oci_statement.c');
 
 		/* probe for some functions not present in older versions */
