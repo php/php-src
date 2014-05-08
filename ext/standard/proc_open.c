@@ -222,7 +222,8 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc TSRMLS_DC)
 	/* Close all handles to avoid a deadlock */
 	for (i = 0; i < proc->npipes; i++) {
 		if (proc->pipes[i] != 0) {
-			zend_list_delete(proc->pipes[i]);
+			GC_REFCOUNT(proc->pipes[i])--;
+			zend_list_close(proc->pipes[i]);
 			proc->pipes[i] = 0;
 		}
 	}
@@ -318,7 +319,7 @@ PHP_FUNCTION(proc_close)
 	ZEND_FETCH_RESOURCE(proc, struct php_process_handle *, zproc, -1, "process", le_proc_open);
 
 	FG(pclose_wait) = 1;
-	zend_list_delete(Z_RES_P(zproc));
+	zend_list_close(Z_RES_P(zproc));
 	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }
