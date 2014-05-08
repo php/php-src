@@ -2102,12 +2102,17 @@ magiccheck(struct magic_set *ms, struct magic *m)
 				zval *pzval;
 				HashTable *ht = Z_ARRVAL(subpats);
 				zval *pattern_match = NULL, *pattern_offset = NULL;
+				int first = 1, inner_first;
 
 				ZEND_HASH_FOREACH_VAL(ht, pzval) {
 					HashTable *inner_ht;
 					zval *match, *offset;
 					zval tmpcopy, matchcopy, offsetcopy;
 
+					if (first) {
+						first = 0;
+						continue;
+					}
 					ZVAL_DUP(&tmpcopy, pzval);
 
 					inner_ht = Z_ARRVAL(tmpcopy);
@@ -2116,34 +2121,44 @@ magiccheck(struct magic_set *ms, struct magic *m)
 					   tmpcopy now contains two elements:
 					   0 = the match
 					   1 = starting position of the match */
+					inner_first = 1;
 					ZEND_HASH_FOREACH_VAL(inner_ht, match) {
+						if (inner_first) {
+							inner_first = 0;
+							continue;
+						}
 						ZVAL_DUP(&matchcopy, match);
 						convert_to_string(&matchcopy); 
 						pattern_match = &matchcopy;
 					} ZEND_HASH_FOREACH_END();
 
+					inner_first = 1;
 					ZEND_HASH_FOREACH_VAL(inner_ht, offset) {
+						if (inner_first) {
+							inner_first = 0;
+							continue;
+						}
 						ZVAL_DUP(&offsetcopy, offset);
 						convert_to_long(&offsetcopy); 
 						pattern_offset = &offsetcopy;
 					} ZEND_HASH_FOREACH_END();
 
 					zval_dtor(&tmpcopy); 	
+
+					if ((pattern_match != NULL) && (pattern_offset != NULL)) {
+						ms->search.s += Z_LVAL_P(pattern_offset); /* this is where the match starts */
+						ms->search.offset += Z_LVAL_P(pattern_offset); /* this is where the match starts as size_t */
+						ms->search.rm_len = Z_STRLEN_P(pattern_match) /* This is the length of the matched pattern */;
+						v = 0;
+
+						zval_ptr_dtor(pattern_match);
+						zval_ptr_dtor(pattern_offset);
+					} else {
+						zval_ptr_dtor(&subpats);
+						zval_ptr_dtor(&pattern);
+						return -1;
+					}
 				} ZEND_HASH_FOREACH_END();
-
-				if ((pattern_match != NULL) && (pattern_offset != NULL)) {
-					ms->search.s += Z_LVAL_P(pattern_offset); /* this is where the match starts */
-					ms->search.offset += Z_LVAL_P(pattern_offset); /* this is where the match starts as size_t */
-					ms->search.rm_len = Z_STRLEN_P(pattern_match) /* This is the length of the matched pattern */;
-					v = 0;
-
-					zval_ptr_dtor(pattern_match);
-					zval_ptr_dtor(pattern_offset);
-				} else {
-					zval_ptr_dtor(&subpats);
-					zval_ptr_dtor(&pattern);
-					return -1;
-				}
 			} else {
 				v = 1;
 			}

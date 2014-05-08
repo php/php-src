@@ -76,6 +76,10 @@ struct placeholder {
 	struct placeholder *next;
 };
 
+static void free_param_name(zval *el) {
+	efree(Z_PTR_P(el));
+}
+
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
 	char **outquery, int *outquery_len TSRMLS_DC)
 {
@@ -165,7 +169,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 		if (query_type != PDO_PLACEHOLDER_POSITIONAL && bindno > zend_hash_num_elements(params)) {
 			int ok = 1;
 			for (plc = placeholders; plc; plc = plc->next) {
-				if ((params = zend_hash_str_find_ptr(params, plc->pos, plc->len)) == NULL) {
+				if ((param = zend_hash_str_find_ptr(params, plc->pos, plc->len)) == NULL) {
 					ok = 0;
 					break;
 				}
@@ -199,10 +203,16 @@ safe:
 				goto clean_up;
 			}
 			if (stmt->dbh->methods->quoter) {
-				if (param->param_type == PDO_PARAM_LOB && Z_TYPE(param->parameter) == IS_RESOURCE) {
+				zval *parameter;
+				if (Z_ISREF(param->parameter)) {
+					parameter = Z_REFVAL(param->parameter);
+				} else {
+					parameter = &param->parameter;
+				}
+				if (param->param_type == PDO_PARAM_LOB && Z_TYPE_P(parameter) == IS_RESOURCE) {
 					php_stream *stm;
 
-					php_stream_from_zval_no_verify(stm, &param->parameter);
+					php_stream_from_zval_no_verify(stm, parameter);
 					if (stm) {
 						zend_string *buf;
 					
@@ -228,7 +238,7 @@ safe:
 					plc->freeq = 1;
 				} else {
 					zval tmp_param;
-				   	ZVAL_DUP(&tmp_param, &param->parameter);
+				   	ZVAL_DUP(&tmp_param, parameter);
 					switch (Z_TYPE(tmp_param)) {
 						case IS_NULL:
 							plc->quoted = "NULL";
@@ -263,8 +273,14 @@ safe:
 					zval_dtor(&tmp_param);
 				}
 			} else {
-				plc->quoted = Z_STRVAL(param->parameter);
-				plc->qlen = Z_STRLEN(param->parameter);
+				zval *parameter;
+				if (Z_ISREF(param->parameter)) {
+					parameter = Z_REFVAL(param->parameter);
+				} else {
+					parameter = &param->parameter;
+				}
+				plc->quoted = Z_STRVAL_P(parameter);
+				plc->qlen = Z_STRLEN_P(parameter);
 			}
 			newbuffer_len += plc->qlen;
 		}
@@ -312,7 +328,7 @@ rewrite:
 
 		if (stmt->bound_param_map == NULL) {
 			ALLOC_HASHTABLE(stmt->bound_param_map);
-			zend_hash_init(stmt->bound_param_map, 13, NULL, NULL, 0);
+			zend_hash_init(stmt->bound_param_map, 13, NULL, free_param_name, 0);
 		}
 
 		for (plc = placeholders; plc; plc = plc->next) {
@@ -353,12 +369,11 @@ rewrite:
 	
 		if (stmt->bound_param_map == NULL) {
 			ALLOC_HASHTABLE(stmt->bound_param_map);
-			zend_hash_init(stmt->bound_param_map, 13, NULL, NULL, 0);
+			zend_hash_init(stmt->bound_param_map, 13, NULL, free_param_name, 0);
 		}
 		
 		for (plc = placeholders; plc; plc = plc->next) {
 			char *name;
-			
 			name = estrndup(plc->pos, plc->len);
 			zend_hash_index_update_mem(stmt->bound_param_map, plc->bindno, name, plc->len + 1);
 			efree(name);

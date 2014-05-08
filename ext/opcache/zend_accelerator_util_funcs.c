@@ -273,7 +273,9 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 			Z_STR_P(src) = zend_clone_str(Z_STR_P(src) TSRMLS_CC);
 			break;
 		case IS_ARRAY:
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
 	    case IS_CONSTANT_ARRAY:
+#endif
 			if (Z_ARR_P(src) != &EG(symbol_table)) {
 		    	if (bind && Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_ARR_P(src))) != NULL) {
 		    		Z_ARR_P(src) = ptr;

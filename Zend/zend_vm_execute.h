@@ -4221,9 +4221,6 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 
 	ZVAL_COPY_VALUE(&c.value, val);
 	if (Z_OPT_CONSTANT(c.value)) {
-		if (Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
-			zval_opt_copy_ctor(&c.value);
-		}
 		zval_update_constant(&c.value, 0 TSRMLS_CC);
 	} else {
 		/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */

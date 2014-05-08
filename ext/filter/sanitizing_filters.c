@@ -184,6 +184,10 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	size_t new_len;
 	unsigned char enc[256] = {0};
 
+	if (IS_INTERNED(Z_STR_P(value))) {
+		ZVAL_STRINGL(value, Z_STRVAL_P(value), Z_STRLEN_P(value));
+	}
+
 	/* strip high/strip low ( see flags )*/
 	php_filter_strip(value, flags);
 
