@@ -76,6 +76,10 @@ struct placeholder {
 	struct placeholder *next;
 };
 
+static void free_param_name(zval *el) {
+	efree(Z_PTR_P(el));
+}
+
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
 	char **outquery, int *outquery_len TSRMLS_DC)
 {
@@ -312,7 +316,7 @@ rewrite:
 
 		if (stmt->bound_param_map == NULL) {
 			ALLOC_HASHTABLE(stmt->bound_param_map);
-			zend_hash_init(stmt->bound_param_map, 13, NULL, NULL, 0);
+			zend_hash_init(stmt->bound_param_map, 13, NULL, free_param_name, 0);
 		}
 
 		for (plc = placeholders; plc; plc = plc->next) {
@@ -353,12 +357,11 @@ rewrite:
 	
 		if (stmt->bound_param_map == NULL) {
 			ALLOC_HASHTABLE(stmt->bound_param_map);
-			zend_hash_init(stmt->bound_param_map, 13, NULL, NULL, 0);
+			zend_hash_init(stmt->bound_param_map, 13, NULL, free_param_name, 0);
 		}
 		
 		for (plc = placeholders; plc; plc = plc->next) {
 			char *name;
-			
 			name = estrndup(plc->pos, plc->len);
 			zend_hash_index_update_mem(stmt->bound_param_map, plc->bindno, name, plc->len + 1);
 			efree(name);

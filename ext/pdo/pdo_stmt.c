@@ -128,7 +128,7 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 		 * we will raise an error, as we can't be sure that it is safe
 		 * to bind multiple parameters onto the same zval in the underlying
 		 * driver */
-		zval *name;
+		char *name;
 		int position = 0;
 
 		if (stmt->named_rewrite_template) {
@@ -137,16 +137,16 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 		}
 		if (!param->name) {
 			/* do the reverse; map the parameter number to the name */
-			if ((name = zend_hash_index_find(stmt->bound_param_map, param->paramno)) != NULL) {
-				param->name = STR_COPY(Z_STR_P(name));
+			if ((name = zend_hash_index_find_ptr(stmt->bound_param_map, param->paramno)) != NULL) {
+				param->name = STR_INIT(name, strlen(name), 0);
 				return 1;
 			}
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined" TSRMLS_CC);
 			return 0;
 		}
     
-		ZEND_HASH_FOREACH_VAL(stmt->bound_param_map, name) {
-			if (strncmp(Z_STRVAL_P(name), param->name->val, param->name->len + 1)) {
+		ZEND_HASH_FOREACH_PTR(stmt->bound_param_map, name) {
+			if (strncmp(name, param->name->val, param->name->len + 1)) {
 				position++;
 				continue;
 			}
@@ -460,7 +460,7 @@ static PHP_METHOD(PDOStatement, execute)
 
 			if (key) {
 				/* yes this is correct.  we don't want to count the null byte.  ask wez */
-				param.name = STR_COPY(key);
+				param.name = key;
 				param.paramno = -1;
 			} else {
 				/* we're okay to be zero based here */
