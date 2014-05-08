@@ -101,12 +101,12 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 		}
 #endif
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
-		phar_archive_data **pphar = NULL, *phar;
+		phar_archive_data *pphar = NULL, *phar;
 
-		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arHash && FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
+		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arHash && NULL == (pphar = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len))) {
 			pphar = NULL;
 		}
-		if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
+		if (PHAR_G(readonly) && (!pphar || !pphar->is_data)) {
 			if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by the php.ini setting phar.readonly");
 			}
@@ -164,7 +164,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	HashTable *pharcontext;
 	php_url *resource = NULL;
 	php_stream *fpf;
-	zval **pzoption, *metadata;
+	zval *pzoption, *metadata;
 	uint host_len;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
@@ -208,26 +208,25 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 		php_url_free(resource);
 		efree(internal_file);
 
-		if (context && context->options && zend_hash_find(HASH_OF(context->options), "phar", sizeof("phar"), (void**)&pzoption) == SUCCESS) {
-			pharcontext = HASH_OF(*pzoption);
+		if (context && Z_TYPE(context->options) != IS_UNDEF && (pzoption = zend_hash_str_find(HASH_OF(&context->options), "phar", sizeof("phar")-1)) != NULL) {
+			pharcontext = HASH_OF(pzoption);
 			if (idata->internal_file->uncompressed_filesize == 0
 				&& idata->internal_file->compressed_filesize == 0
-				&& zend_hash_find(pharcontext, "compress", sizeof("compress"), (void**)&pzoption) == SUCCESS
-				&& Z_TYPE_PP(pzoption) == IS_LONG
-				&& (Z_LVAL_PP(pzoption) & ~PHAR_ENT_COMPRESSION_MASK) == 0
+				&& (pzoption = zend_hash_str_find(pharcontext, "compress", sizeof("compress")-1)) != NULL
+				&& Z_TYPE_P(pzoption) == IS_LONG
+				&& (Z_LVAL_P(pzoption) & ~PHAR_ENT_COMPRESSION_MASK) == 0
 			) {
 				idata->internal_file->flags &= ~PHAR_ENT_COMPRESSION_MASK;
-				idata->internal_file->flags |= Z_LVAL_PP(pzoption);
+				idata->internal_file->flags |= Z_LVAL_P(pzoption);
 			}
-			if (zend_hash_find(pharcontext, "metadata", sizeof("metadata"), (void**)&pzoption) == SUCCESS) {
-				if (idata->internal_file->metadata) {
+			if ((pzoption = zend_hash_str_find(pharcontext, "metadata", sizeof("metadata")-1)) != NULL) {
+				if (Z_TYPE(idata->internal_file->metadata) != IS_UNDEF) {
 					zval_ptr_dtor(&idata->internal_file->metadata);
-					idata->internal_file->metadata = NULL;
+					ZVAL_UNDEF(&idata->internal_file->metadata);
 				}
 
-				MAKE_STD_ZVAL(idata->internal_file->metadata);
-				metadata = *pzoption;
-				ZVAL_ZVAL(idata->internal_file->metadata, metadata, 1, 0);
+				metadata = pzoption;
+				ZVAL_ZVAL(&idata->internal_file->metadata, metadata, 1, 0);
 				idata->phar->is_modified = 1;
 			}
 		}
@@ -615,41 +614,35 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	}
 	internal_file_len = strlen(internal_file);
 	/* search through the manifest of files, and if we have an exact match, it's a file */
-	if (SUCCESS == zend_hash_find(&phar->manifest, internal_file, internal_file_len, (void**)&entry)) {
+	if (NULL != (entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len))) {
 		phar_dostat(phar, entry, ssb, 0 TSRMLS_CC);
 		php_url_free(resource);
 		return SUCCESS;
 	}
-	if (zend_hash_exists(&(phar->virtual_dirs), internal_file, internal_file_len)) {
+	if (zend_hash_str_exists(&(phar->virtual_dirs), internal_file, internal_file_len)) {
 		phar_dostat(phar, NULL, ssb, 1 TSRMLS_CC);
 		php_url_free(resource);
 		return SUCCESS;
 	}
 	/* check for mounted directories */
 	if (phar->mounted_dirs.arHash && zend_hash_num_elements(&phar->mounted_dirs)) {
-		char *str_key;
-		ulong unused;
-		uint keylen;
-		HashPosition pos;
+		zend_string *str_key;
 
-		for (zend_hash_internal_pointer_reset_ex(&phar->mounted_dirs, &pos);
-			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&phar->mounted_dirs, &str_key, &keylen, &unused, 0, &pos);
-			zend_hash_move_forward_ex(&phar->mounted_dirs, &pos)
-		) {
-			if ((int)keylen >= internal_file_len || strncmp(str_key, internal_file, keylen)) {
+		ZEND_HASH_FOREACH_STR_KEY(&phar->mounted_dirs, str_key) {
+			if ((int)str_key->len >= internal_file_len || strncmp(str_key->val, internal_file, str_key->len)) {
 				continue;
 			} else {
 				char *test;
 				int test_len;
 				php_stream_statbuf ssbi;
 
-				if (SUCCESS != zend_hash_find(&phar->manifest, str_key, keylen, (void **) &entry)) {
+				if (NULL == (entry = zend_hash_find_ptr(&phar->manifest, str_key))) {
 					goto free_resource;
 				}
 				if (!entry->tmp || !entry->is_mounted) {
 					goto free_resource;
 				}
-				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, internal_file + keylen);
+				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, internal_file + str_key->len);
 				if (SUCCESS != php_stream_stat_path(test, &ssbi)) {
 					efree(test);
 					continue;
@@ -660,14 +653,14 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 					goto free_resource;
 				}
 				efree(test);
-				if (SUCCESS != zend_hash_find(&phar->manifest, internal_file, internal_file_len, (void**)&entry)) {
+				if (NULL == (entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len))) {
 					goto free_resource;
 				}
 				phar_dostat(phar, entry, ssb, 0 TSRMLS_CC);
 				php_url_free(resource);
 				return SUCCESS;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 free_resource:
 	php_url_free(resource);
@@ -708,9 +701,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	host_len = strlen(resource->host);
 	phar_request_initialize(TSRMLS_C);
 
-	if (FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), resource->host, host_len, (void **) &pphar)) {
-		pphar = NULL;
-	}
+	pphar = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_fname_map), resource->host, host_len);
 	if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by the php.ini setting phar.readonly");
@@ -852,7 +843,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		return 0;
 	}
 
-	if (SUCCESS == zend_hash_find(&(phar->manifest), resource_from->path+1, strlen(resource_from->path)-1, (void **)&entry)) {
+	if (NULL != (entry = zend_hash_str_find_ptr(&(phar->manifest), resource_from->path+1, strlen(resource_from->path)-1))) {
 		phar_entry_info new, *source;
 
 		/* perform rename magic */
@@ -867,12 +858,12 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		/* mark the old one for deletion */
 		entry->is_deleted = 1;
 		entry->fp = NULL;
-		entry->metadata = 0;
+		ZVAL_UNDEF(&entry->metadata);
 		entry->link = entry->tmp = NULL;
 		source = entry;
 
 		/* add to the manifest, and then store the pointer to the new guy in entry */
-		zend_hash_add(&(phar->manifest), resource_to->path+1, strlen(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info), (void **) &entry);
+		entry = zend_hash_str_add_mem(&(phar->manifest), resource_to->path+1, strlen(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info));
 
 		entry->filename = estrdup(resource_to->path+1);
 		if (FAILURE == phar_copy_entry_fp(source, entry, &error TSRMLS_CC)) {
@@ -880,7 +871,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 			php_url_free(resource_to);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
 			efree(error);
-			zend_hash_del(&(phar->manifest), entry->filename, strlen(entry->filename));
+			zend_hash_str_del(&(phar->manifest), entry->filename, strlen(entry->filename));
 			return 0;
 		}
 		is_modified = 1;
@@ -888,7 +879,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		entry->filename_len = strlen(entry->filename);
 		is_dir = entry->is_dir;
 	} else {
-		is_dir = zend_hash_exists(&(phar->virtual_dirs), resource_from->path+1, strlen(resource_from->path)-1);
+		is_dir = zend_hash_str_exists(&(phar->virtual_dirs), resource_from->path+1, strlen(resource_from->path)-1);
 		if (!is_dir) {
 			/* file does not exist */
 			php_url_free(resource_from);
@@ -902,74 +893,73 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	/* Rename directory. Update all nested paths */
 	if (is_dir) {
 		int key_type;
-		char *str_key, *new_str_key;
-		uint key_len, new_key_len;
+		zend_string *str_key;
+		zend_string *new_str_key;
 		ulong unused;
 		uint from_len = strlen(resource_from->path+1);
 		uint to_len = strlen(resource_to->path+1);
 
 		for (zend_hash_internal_pointer_reset(&phar->manifest);
-			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->manifest, &str_key, &key_len, &unused, 0, NULL)) &&
-			SUCCESS == zend_hash_get_current_data(&phar->manifest, (void **) &entry);
+			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->manifest, &str_key, &unused, 0, &phar->manifest.nInternalPointer)) &&
+			NULL != (entry = zend_hash_get_current_data_ptr(&phar->manifest));
 			zend_hash_move_forward(&phar->manifest)
 		) {
 			if (!entry->is_deleted &&
-				key_len > from_len &&
-				memcmp(str_key, resource_from->path+1, from_len) == 0 &&
-				IS_SLASH(str_key[from_len])) {
+				str_key->len > from_len &&
+				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
+				IS_SLASH(str_key->val[from_len])) {
 
-				new_key_len = key_len + to_len - from_len;
-				new_str_key = emalloc(new_key_len+1);
-				memcpy(new_str_key, resource_to->path + 1, to_len);
-				memcpy(new_str_key + to_len, str_key + from_len, key_len - from_len);
-				new_str_key[new_key_len] = 0;
+				new_str_key = STR_ALLOC(str_key->len + to_len - from_len, 0);
+				memcpy(new_str_key->val, resource_to->path + 1, to_len);
+				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
+				new_str_key->val[new_str_key->len] = 0;
 
 				is_modified = 1;
 				entry->is_modified = 1;
 				efree(entry->filename);
-				entry->filename = new_str_key;
-				entry->filename_len = new_key_len;
+				// TODO: avoid reallocation (make entry->filename zend_string*)
+				entry->filename = estrndup(new_str_key->val, new_str_key->len);
+				entry->filename_len = new_str_key->len;
 
-				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_str_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
+				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_str_key, 0, HASH_UPDATE_KEY_ANYWAY);
+				STR_RELEASE(new_str_key);
 			}
 		}
 
 		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
-			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->virtual_dirs, &str_key, &key_len, &unused, 0, NULL));
+			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->virtual_dirs, &str_key, &unused, 0, &phar->virtual_dirs.nInternalPointer));
 			zend_hash_move_forward(&phar->virtual_dirs)
 		) {
-			if (key_len >= from_len &&
-				memcmp(str_key, resource_from->path+1, from_len) == 0 &&
-				(key_len == from_len || IS_SLASH(str_key[from_len]))) {
+			if (str_key->len >= from_len &&
+				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
+				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
 
-				new_key_len = key_len + to_len - from_len;
-				new_str_key = emalloc(new_key_len+1);
-				memcpy(new_str_key, resource_to->path + 1, to_len);
-				memcpy(new_str_key + to_len, str_key + from_len, key_len - from_len);
-				new_str_key[new_key_len] = 0;
+				new_str_key = STR_ALLOC(str_key->len + to_len - from_len, 0);
+				memcpy(new_str_key->val, resource_to->path + 1, to_len);
+				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
+				new_str_key->val[new_str_key->len] = 0;
 
-				zend_hash_update_current_key_ex(&phar->virtual_dirs, key_type, new_str_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
-				efree(new_str_key);
+				zend_hash_update_current_key_ex(&phar->virtual_dirs, key_type, new_str_key, 0, HASH_UPDATE_KEY_ANYWAY);
+				STR_RELEASE(new_str_key);
 			}
 		}
 
 		for (zend_hash_internal_pointer_reset(&phar->mounted_dirs);
-			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->mounted_dirs, &str_key, &key_len, &unused, 0, NULL)) &&
-			SUCCESS == zend_hash_get_current_data(&phar->mounted_dirs, (void **) &entry);
+			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->mounted_dirs, &str_key, &unused, 0, &phar->mounted_dirs.nInternalPointer)) &&
+			NULL != (entry = zend_hash_get_current_data_ptr(&phar->mounted_dirs));
 			zend_hash_move_forward(&phar->mounted_dirs)
 		) {
-			if (key_len >= from_len &&
-				memcmp(str_key, resource_from->path+1, from_len) == 0 &&
-				(key_len == from_len || IS_SLASH(str_key[from_len]))) {
+			if (str_key->len >= from_len &&
+				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
+				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
 
-				new_key_len = key_len + to_len - from_len;
-				new_str_key = emalloc(new_key_len+1);
-				memcpy(new_str_key, resource_to->path + 1, to_len);
-				memcpy(new_str_key + to_len, str_key + from_len, key_len - from_len);
-				new_str_key[new_key_len] = 0;
+				new_str_key = STR_ALLOC(str_key->len + to_len - from_len, 0);
+				memcpy(new_str_key->val, resource_to->path + 1, to_len);
+				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
+				new_str_key->val[new_str_key->len] = 0;
 
-				zend_hash_update_current_key_ex(&phar->mounted_dirs, key_type, new_str_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
-				efree(new_str_key);
+				zend_hash_update_current_key_ex(&phar->mounted_dirs, key_type, new_str_key, 0, HASH_UPDATE_KEY_ANYWAY);
+				STR_RELEASE(new_str_key);
 			}
 		}
 	}
