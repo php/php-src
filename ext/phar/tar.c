@@ -200,7 +200,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 	size_t pos = 0, read, totalsize;
 	tar_header *hdr;
 	php_uint32 sum1, sum2, size, old;
-	phar_archive_data *myphar, **actual;
+	phar_archive_data *myphar, *actual;
 	int last_was_longlink = 0;
 
 	if (error) {
@@ -618,7 +618,7 @@ bail:
 		return FAILURE;
 	}
 
-	myphar = *actual;
+	myphar = actual;
 
 	if (actual_alias) {
 		phar_archive_data *fd_ptr;
@@ -676,11 +676,10 @@ struct _phar_pass_tar_info {
 	char **error;
 };
 
-static int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ */
+static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument TSRMLS_DC) /* {{{ */
 {
 	tar_header header;
 	size_t pos;
-	phar_entry_info *entry = (phar_entry_info *) pDest;
 	struct _phar_pass_tar_info *fp = (struct _phar_pass_tar_info *)argument;
 	char padding[512];
 
@@ -825,6 +824,12 @@ static int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
+static int phar_tar_writeheaders(zval *zv, void *argument TSRMLS_DC) /* {{{ */
+{
+	return phar_tar_writeheaders_int(Z_PTR_P(zv), argument TSRMLS_CC);
+}
+/* }}} */
+
 int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error TSRMLS_DC) /* {{{ */
 {
 	php_serialize_data_t metadata_hash;
@@ -861,12 +866,12 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error TS
 }
 /* }}} */
 
-static int phar_tar_setupmetadata(void *pDest, void *argument TSRMLS_DC) /* {{{ */
+static int phar_tar_setupmetadata(zval *zv, void *argument TSRMLS_DC) /* {{{ */
 {
 	int lookfor_len;
 	struct _phar_pass_tar_info *i = (struct _phar_pass_tar_info *)argument;
 	char *lookfor, **error = i->error;
-	phar_entry_info *entry = (phar_entry_info *)pDest, *metadata, newentry = {0};
+	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv), *metadata, newentry = {0};
 
 	if (entry->filename_len >= sizeof(".phar/.metadata") && !memcmp(entry->filename, ".phar/.metadata", sizeof(".phar/.metadata")-1)) {
 		if (entry->filename_len == sizeof(".phar/.metadata.bin")-1 && !memcmp(entry->filename, ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1)) {
@@ -1167,7 +1172,7 @@ nostub:
 		}
 	}
 
-	zend_hash_apply_with_argument(&phar->manifest, (apply_func_arg_t) phar_tar_setupmetadata, (void *) &pass TSRMLS_CC);
+	zend_hash_apply_with_argument(&phar->manifest, phar_tar_setupmetadata, (void *) &pass TSRMLS_CC);
 
 	if (error && *error) {
 		if (closeoldfile) {
@@ -1179,7 +1184,7 @@ nostub:
 		return EOF;
 	}
 
-	zend_hash_apply_with_argument(&phar->manifest, (apply_func_arg_t) phar_tar_writeheaders, (void *) &pass TSRMLS_CC);
+	zend_hash_apply_with_argument(&phar->manifest, phar_tar_writeheaders, (void *) &pass TSRMLS_CC);
 
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {
@@ -1233,7 +1238,7 @@ nostub:
 		efree(signature);
 		entry.uncompressed_filesize = entry.compressed_filesize = signature_length + 8;
 		/* throw out return value and write the signature */
-		entry.filename_len = phar_tar_writeheaders((void *)&entry, (void *)&pass TSRMLS_CC);
+		entry.filename_len = phar_tar_writeheaders_int(&entry, (void *)&pass TSRMLS_CC);
 
 		if (error && *error) {
 			if (closeoldfile) {

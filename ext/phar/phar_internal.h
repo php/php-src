@@ -478,24 +478,16 @@ typedef struct _phar_entry_data {
 #if HAVE_SPL
 /* archive php object */
 union _phar_archive_object {
-	zend_object              std;
 	spl_filesystem_object    spl;
-	struct {
-		zend_object          std;
-		phar_archive_data    *archive;
-	} arc;
+	phar_archive_data        *archive;
 };
 #endif
 
 #if HAVE_SPL
 /* entry php object */
 union _phar_entry_object {
-	zend_object              std;
 	spl_filesystem_object    spl;
-	struct {
-		zend_object          std;
-		phar_entry_info      *entry;
-	} ent;
+	phar_entry_info          *entry;
 };
 #endif
 

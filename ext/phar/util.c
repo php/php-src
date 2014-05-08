@@ -2001,7 +2001,7 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 		zend_get_hash_value, destroy_phar_manifest_entry, 0);
 //???	zend_hash_copy(&newmanifest, &(*pphar)->manifest, NULL, NULL, sizeof(phar_entry_info));
 	zend_hash_copy(&newmanifest, &(*pphar)->manifest, NULL);
-	zend_hash_apply_with_argument(&newmanifest, (apply_func_arg_t) phar_update_cached_entry, (void *)phar TSRMLS_CC);
+	zend_hash_apply_with_argument(&newmanifest, phar_update_cached_entry, (void *)phar TSRMLS_CC);
 	phar->manifest = newmanifest;
 	zend_hash_init(&phar->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
@@ -2012,8 +2012,8 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 
 	/* now, scan the list of persistent Phar objects referencing this phar and update the pointers */
 	ZEND_HASH_FOREACH_PTR(&PHAR_GLOBALS->phar_persist_map, objphar) {
-		if (objphar->arc.archive->fname_len == phar->fname_len && !memcmp(objphar->arc.archive->fname, phar->fname, phar->fname_len)) {
-			objphar->arc.archive = phar;
+		if (objphar->archive->fname_len == phar->fname_len && !memcmp(objphar->archive->fname, phar->fname, phar->fname_len)) {
+			objphar->archive = phar;
 		}
 	} ZEND_HASH_FOREACH_END();
 }

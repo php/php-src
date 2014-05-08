@@ -783,9 +783,8 @@ struct _phar_zip_pass {
 	char **error;
 };
 /* perform final modification of zip contents for each file in the manifest before saving */
-static int phar_zip_changed_apply(zval *zv, void *arg TSRMLS_DC) /* {{{ */
+static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg TSRMLS_DC) /* {{{ */
 {
-	phar_entry_info *entry;
 	phar_zip_file_header local;
 	phar_zip_unix3 perms;
 	phar_zip_central_dir_file central;
@@ -793,7 +792,6 @@ static int phar_zip_changed_apply(zval *zv, void *arg TSRMLS_DC) /* {{{ */
 	php_uint32 newcrc32;
 	off_t offset;
 	int not_really_modified = 0;
-	entry = (phar_entry_info *)Z_PTR_P(zv);
 	p = (struct _phar_zip_pass*) arg;
 
 	if (entry->is_mounted) {
@@ -1095,6 +1093,12 @@ continue_dir:
 }
 /* }}} */
 
+static int phar_zip_changed_apply(zval *zv, void *arg TSRMLS_DC) /* {{{ */
+{
+	return phar_zip_changed_apply_int(Z_PTR_P(zv), arg TSRMLS_CC);
+}
+/* }}} */
+
 static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pass *pass,
 				   smart_str *metadata TSRMLS_DC) /* {{{ */
 {
@@ -1160,7 +1164,7 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		entry.uncompressed_filesize = entry.compressed_filesize = signature_length + 8;
 		entry.phar = phar;
 		/* throw out return value and write the signature */
-		phar_zip_changed_apply((void *)&entry, (void *)pass TSRMLS_CC);
+		phar_zip_changed_apply_int(&entry, (void *)pass TSRMLS_CC);
 		php_stream_close(newfile);
 
 		if (pass->error && *(pass->error)) {

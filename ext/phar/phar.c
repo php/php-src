@@ -71,7 +71,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 
 	/* do not allow unsetting in runtime */
 	if (stage == ZEND_INI_STAGE_STARTUP) {
-		if (entry->name_length == 14) {
+		if (entry->name_length == sizeof("phar.readonly")-1) {
 			PHAR_G(readonly_orig) = ini;
 		} else {
 			PHAR_G(require_hash_orig) = ini;
@@ -80,7 +80,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 		return FAILURE;
 	}
 
-	if (entry->name_length == 14) {
+	if (entry->name_length == sizeof("phar.readonly")-1) {
 		PHAR_G(readonly) = ini;
 		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arHash) {
 			zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_fname_map), phar_set_writeable_bit, (void *)&ini TSRMLS_CC);
@@ -3015,6 +3015,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		phar_set_32(entry_buffer+20, entry->metadata_str.s ? entry->metadata_str.s->len : 0);
 
 		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))
+		|| !entry->metadata_str.s
 		|| entry->metadata_str.s->len != php_stream_write(newfile, entry->metadata_str.s->val, entry->metadata_str.s->len)) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
