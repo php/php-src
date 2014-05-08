@@ -188,10 +188,12 @@ typedef struct _user_config_cache_entry {
 	HashTable *user_config;
 } user_config_cache_entry;
 
-static void user_config_cache_entry_dtor(user_config_cache_entry *entry)
+static void user_config_cache_entry_dtor(zval *el)
 {
+	user_config_cache_entry *entry = (user_config_cache_entry *)Z_PTR_P(el);
 	zend_hash_destroy(entry->user_config);
 	free(entry->user_config);
+	free(entry);
 }
 /* }}} */
 
@@ -691,7 +693,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 		entry = pemalloc(sizeof(user_config_cache_entry), 1);
 		entry->expires = 0;
 		entry->user_config = (HashTable *) pemalloc(sizeof(HashTable), 1);
-		zend_hash_init(entry->user_config, 0, NULL, (dtor_func_t) config_zval_dtor, 1);
+		zend_hash_init(entry->user_config, 0, NULL, config_zval_dtor, 1);
 		zend_hash_str_update_ptr(&CGIG(user_config_cache), path, path_len, entry);
 	}
 
@@ -1455,7 +1457,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals TSRMLS_
 	php_cgi_globals->fix_pathinfo = 1;
 	php_cgi_globals->discard_path = 0;
 	php_cgi_globals->fcgi_logging = 1;
-	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, (dtor_func_t) user_config_cache_entry_dtor, 1);
+	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, user_config_cache_entry_dtor, 1);
 	php_cgi_globals->error_header = NULL;
 	php_cgi_globals->fpm_config = NULL;
 }
