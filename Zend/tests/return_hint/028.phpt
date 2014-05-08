@@ -1,7 +1,9 @@
 --TEST--
-Inheritance Hinting Compile Checking Failure Internal Classes
+Inheritance Hinting Compile Checking Failure Internal Classes With OpCache
 --SKIPIF--
 <?php if (!extension_loaded("Zend OPcache")) die("Skip: opcache required"); ?>
+--INI--
+opcache.enable_cli=1
 --FILE--
 <?php
 class Foo {
