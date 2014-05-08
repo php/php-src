@@ -4,6 +4,10 @@ php:
     # We only specify one version so we only get one worker
     - 5.4
 
+branches:
+    except:
+        - phpng
+
 notifications:
     email: false
 
