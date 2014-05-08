@@ -230,7 +230,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 
 	if (php_check_open_basedir(path_copy TSRMLS_CC)) {
 #ifdef VIRTUAL_DIR
-        efree(path_copy);
+		free(path_copy);
 #endif
 		return NULL;
 	}
@@ -242,7 +242,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		*opened_path = estrdup(path_copy);
 	}
 #ifdef VIRTUAL_DIR
-    efree(path_copy);
+	free(path_copy);
 #endif
 	path_copy = NULL;
 	
