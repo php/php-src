@@ -1516,9 +1516,9 @@ static PHP_METHOD(PDOStatement, fetchAll)
 			while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
 		} else {
 			array_init(return_value);
-			do {
+			while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, 0 TSRMLS_CC)) {
 				add_next_index_zval(return_value, &data);
-			} while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, 0 TSRMLS_CC));
+			}
 		}
 	}
 	
