@@ -64,6 +64,7 @@ PHPAPI const char * const mysqlnd_out_of_memory = "Out of memory";
 
 PHPAPI MYSQLND_STATS *mysqlnd_global_stats = NULL;
 
+
 /* {{{ mysqlnd_conn_data::free_options */
 static void
 MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
@@ -102,6 +103,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn TSRMLS_
 	}
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::free_contents */
 static void
@@ -176,6 +178,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn TSRMLS
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::dtor */
 static void
 MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
@@ -205,6 +208,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn TSRMLS_
 	DBG_VOID_RETURN;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::simple_command_handle_response */
 static enum_func_status
@@ -305,6 +309,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command_handle_response)(MYSQLND_CONN_D
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::simple_command_send_request */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
@@ -362,6 +367,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request)(MYSQLND_CONN_DATA
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::simple_command */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, simple_command)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
@@ -380,6 +386,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command)(MYSQLND_CONN_DATA * conn, enum
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::set_server_option */
 static enum_func_status
@@ -400,6 +407,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_server_option)(MYSQLND_CONN_DATA * const c
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::restart_psession */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, restart_psession)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
@@ -415,6 +423,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, restart_psession)(MYSQLND_CONN_DATA * conn TSR
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::end_psession */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, end_psession)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
@@ -423,6 +432,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, end_psession)(MYSQLND_CONN_DATA * conn TSRMLS_
 	DBG_RETURN(PASS);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_switch_to_ssl_if_needed */
 static enum_func_status
@@ -478,6 +488,7 @@ end:
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::fetch_auth_plugin_by_name */
 static struct st_mysqlnd_authentication_plugin *
 MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name)(const char * const requested_protocol TSRMLS_DC)
@@ -494,6 +505,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name)(const char * const 
 	DBG_RETURN(auth_plugin);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_run_authentication */
 static enum_func_status
@@ -629,6 +641,7 @@ end:
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_connect_run_authentication */
 static enum_func_status
 mysqlnd_connect_run_authentication(
@@ -655,6 +668,7 @@ mysqlnd_connect_run_authentication(
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::execute_init_commands */
 static enum_func_status
@@ -686,6 +700,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * con
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::get_updated_connect_flags */
 static unsigned int
@@ -727,6 +742,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 	DBG_RETURN(mysql_flags);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::connect_handshake */
 static enum_func_status
@@ -807,6 +823,7 @@ err:
 	DBG_RETURN(FAIL);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::connect */
 static enum_func_status
@@ -1058,6 +1075,7 @@ err:
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn::connect */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
@@ -1084,6 +1102,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_connect */
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
@@ -1126,6 +1145,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::query */
 /*
   If conn->error_info->error_no is not zero, then we had an error.
@@ -1154,6 +1174,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * 
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::send_query */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const char * query, unsigned int query_len TSRMLS_DC)
@@ -1177,6 +1198,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const ch
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::reap_query */
 static enum_func_status
@@ -1203,6 +1225,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn TSRMLS_DC
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 #include "php_network.h"
 
@@ -1239,6 +1262,7 @@ MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array TSRMLS
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_stream_array_to_fd_set */
 static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, php_socket_t * max_fd TSRMLS_DC)
 {
@@ -1271,6 +1295,7 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 	DBG_RETURN(cnt ? 1 : 0);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_stream_array_from_fd_set */
 static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds TSRMLS_DC)
@@ -1306,11 +1331,13 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds 
 }
 /* }}} */
 
+
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 #else
 #include "win32/select.h"
 #endif
+
 
 /* {{{ _mysqlnd_poll */
 PHPAPI enum_func_status
@@ -1389,6 +1416,7 @@ _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long s
 }
 /* }}} */
 
+
 /*
   COM_FIELD_LIST is special, different from a SHOW FIELDS FROM :
   - There is no result set header - status from the command, which
@@ -1466,6 +1494,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_fields)(MYSQLND_CONN_DATA * conn, const c
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::list_method */
 MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_conn_data, list_method)(MYSQLND_CONN_DATA * conn, const char * query, const char *achtung_wild, char *par1 TSRMLS_DC)
@@ -1505,6 +1534,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_method)(MYSQLND_CONN_DATA * conn, const c
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::errno */
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, errno)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -1512,6 +1542,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, errno)(const MYSQLND_CONN_DATA * const conn TS
 	return conn->error_info->error_no;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::error */
 static const char *
@@ -1521,6 +1552,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, error)(const MYSQLND_CONN_DATA * const conn TS
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::sqlstate */
 static const char *
 MYSQLND_METHOD(mysqlnd_conn_data, sqlstate)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -1528,6 +1560,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, sqlstate)(const MYSQLND_CONN_DATA * const conn
 	return conn->error_info->sqlstate[0] ? conn->error_info->sqlstate:MYSQLND_SQLSTATE_NULL;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_old_escape_string */
 PHPAPI ulong 
@@ -1537,6 +1570,7 @@ mysqlnd_old_escape_string(char * newstr, const char * escapestr, size_t escapest
 	DBG_RETURN(mysqlnd_cset_escape_slashes(mysqlnd_find_charset_name("latin1"), newstr, escapestr, escapestr_len TSRMLS_CC));
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::ssl_set */
 static enum_func_status
@@ -1561,6 +1595,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ssl_set)(MYSQLND_CONN_DATA * const conn, const
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::escape_string */
 static ulong
 MYSQLND_METHOD(mysqlnd_conn_data, escape_string)(MYSQLND_CONN_DATA * const conn, char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC)
@@ -1583,6 +1618,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, escape_string)(MYSQLND_CONN_DATA * const conn,
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::dump_debug_info */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, dump_debug_info)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -1600,6 +1636,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, dump_debug_info)(MYSQLND_CONN_DATA * const con
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::select_db */
 static enum_func_status
@@ -1636,6 +1673,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, con
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::ping */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -1660,6 +1698,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn TSRMLS_DC
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::statistic */
 static enum_func_status
@@ -1699,6 +1738,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, char **me
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::kill */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int pid TSRMLS_DC)
@@ -1731,6 +1771,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::set_charset */
 static enum_func_status
@@ -1770,6 +1811,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_charset)(MYSQLND_CONN_DATA * const conn, c
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::refresh */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8_t options TSRMLS_DC)
@@ -1791,6 +1833,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::shutdown */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint8_t level TSRMLS_DC)
@@ -1811,6 +1854,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint
 	DBG_RETURN(ret);	
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_send_close */
 static enum_func_status
@@ -1872,6 +1916,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::get_reference */
 static MYSQLND_CONN_DATA *
 MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_reference)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -1882,6 +1927,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_reference)(MYSQLND_CONN_DATA * con
 	DBG_RETURN(conn);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::free_reference */
 static enum_func_status
@@ -1903,6 +1949,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, free_reference)(MYSQLND_CONN_DATA * co
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::get_state */
 static enum mysqlnd_connection_state
 MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_state)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -1911,6 +1958,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_state)(const MYSQLND_CONN_DATA * c
 	DBG_RETURN(conn->state);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::set_state */
 static void
@@ -1923,6 +1971,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, set_state)(MYSQLND_CONN_DATA * const c
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::field_count */
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, field_count)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -1930,6 +1979,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, field_count)(const MYSQLND_CONN_DATA * const c
 	return conn->field_count;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::server_status */
 static unsigned int
@@ -1939,6 +1989,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, server_status)(const MYSQLND_CONN_DATA * const
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::insert_id */
 static uint64_t
 MYSQLND_METHOD(mysqlnd_conn_data, insert_id)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -1946,6 +1997,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, insert_id)(const MYSQLND_CONN_DATA * const con
 	return conn->upsert_status->last_insert_id;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::affected_rows */
 static uint64_t
@@ -1955,6 +2007,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, affected_rows)(const MYSQLND_CONN_DATA * const
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::warning_count */
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, warning_count)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -1962,6 +2015,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, warning_count)(const MYSQLND_CONN_DATA * const
 	return conn->upsert_status->warning_count;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::info */
 static const char *
@@ -1978,12 +2032,14 @@ PHPAPI const char * mysqlnd_get_client_info()
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_get_client_version */
 PHPAPI unsigned int mysqlnd_get_client_version()
 {
 	return MYSQLND_VERSION_ID;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::get_server_info */
 static const char *
@@ -1993,6 +2049,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_server_info)(const MYSQLND_CONN_DATA * con
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::get_host_info */
 static const char *
 MYSQLND_METHOD(mysqlnd_conn_data, get_host_info)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -2000,6 +2057,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_host_info)(const MYSQLND_CONN_DATA * const
 	return conn->host_info;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::get_proto_info */
 static unsigned int
@@ -2009,6 +2067,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_proto_info)(const MYSQLND_CONN_DATA * cons
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::charset_name */
 static const char *
 MYSQLND_METHOD(mysqlnd_conn_data, charset_name)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -2017,6 +2076,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, charset_name)(const MYSQLND_CONN_DATA * const 
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::thread_id */
 static uint64_t
 MYSQLND_METHOD(mysqlnd_conn_data, thread_id)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -2024,6 +2084,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, thread_id)(const MYSQLND_CONN_DATA * const con
 	return conn->thread_id;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::get_server_version */
 static unsigned long
@@ -2046,6 +2107,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_server_version)(const MYSQLND_CONN_DATA * 
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::more_results */
 static zend_bool
 MYSQLND_METHOD(mysqlnd_conn_data, more_results)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -2055,6 +2117,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, more_results)(const MYSQLND_CONN_DATA * const 
 	DBG_RETURN(conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS? TRUE:FALSE);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::next_result */
 static enum_func_status
@@ -2103,6 +2166,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn TS
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_field_type_name */
 PHPAPI const char *mysqlnd_field_type_name(enum mysqlnd_field_types field_type)
@@ -2154,6 +2218,7 @@ PHPAPI const char *mysqlnd_field_type_name(enum mysqlnd_field_types field_type)
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::change_user */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
@@ -2203,6 +2268,7 @@ end:
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::set_client_option */
 static enum_func_status
@@ -2350,7 +2416,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQL_OPT_CONNECT_ATTR_DELETE:
 			if (conn->options->connect_attr && value) {
 				DBG_INF_FMT("Before delete %d attribute(s)", zend_hash_num_elements(conn->options->connect_attr));
-				zend_hash_str_del(conn->options->connect_attr, value, strlen(value));
+				zend_hash_del(conn->options->connect_attr, value, strlen(value));
 				DBG_INF_FMT("%d left", zend_hash_num_elements(conn->options->connect_attr));
 			}
 			break;
@@ -2373,31 +2439,34 @@ end:
 }
 /* }}} */
 
+
 /* {{{ connect_attr_item_edtor */
 static void
-connect_attr_item_edtor(zval *pDest)
+connect_attr_item_edtor(void * pDest)
 {
 #ifdef ZTS
 	TSRMLS_FETCH();
 #endif
 	DBG_ENTER("connect_attr_item_edtor");
-	mnd_efree(Z_PTR_P(pDest));
+	mnd_efree(*(char **) pDest);
 	DBG_VOID_RETURN;
 }
 /* }}} */
 
+
 /* {{{ connect_attr_item_pdtor */
 static void
-connect_attr_item_pdtor(zval * pDest)
+connect_attr_item_pdtor(void * pDest)
 {
 #ifdef ZTS
 	TSRMLS_FETCH();
 #endif
 	DBG_ENTER("connect_attr_item_pdtor");
-	mnd_pefree(Z_PTR_P(pDest), 1);
+	mnd_pefree(*(char **) pDest, 1);
 	DBG_VOID_RETURN;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::set_client_option_2d */
 static enum_func_status
@@ -2427,11 +2496,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 			}
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
-				char * copyv = mnd_pestrdup(value, conn->persistent);
+				const char * copyv = mnd_pestrdup(value, conn->persistent);
 				if (!copyv) {
 					goto oom;
 				}
-				zend_hash_str_update_ptr(conn->options->connect_attr, key, strlen(key), copyv);
+				zend_hash_update(conn->options->connect_attr, key, strlen(key), &copyv, sizeof(char *), NULL);
 			}
 			break;
 		default:
@@ -2446,6 +2515,7 @@ end:
 	DBG_RETURN(FAIL);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::use_result */
 static MYSQLND_RES *
@@ -2487,6 +2557,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, use_result)(MYSQLND_CONN_DATA * const conn, co
 	DBG_RETURN(result);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::store_result */
 static MYSQLND_RES *
@@ -2544,6 +2615,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, 
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::get_connection_stats */
 static void
 MYSQLND_METHOD(mysqlnd_conn_data, get_connection_stats)(const MYSQLND_CONN_DATA * const conn,
@@ -2554,6 +2626,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_connection_stats)(const MYSQLND_CONN_DATA 
 	DBG_VOID_RETURN;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::set_autocommit */
 static enum_func_status
@@ -2572,6 +2645,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_autocommit)(MYSQLND_CONN_DATA * conn, unsi
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::tx_commit */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, tx_commit)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
@@ -2579,6 +2653,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	return conn->m->tx_commit_or_rollback(conn, TRUE, TRANS_COR_NO_OPT, NULL TSRMLS_CC);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::tx_rollback */
 static enum_func_status
@@ -2588,29 +2663,30 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_rollback)(MYSQLND_CONN_DATA * conn TSRMLS_D
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_tx_cor_options_to_string */
 static void
 MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * str, const unsigned int mode TSRMLS_DC)
 {
 	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
-		if (str->s && str->s->len) {
+		if (str->len) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
 	} else if (mode & TRANS_COR_AND_NO_CHAIN && !(mode & TRANS_COR_AND_CHAIN)) {
-		if (str->s && str->s->len) {
+		if (str->len) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
 	}
 
 	if (mode & TRANS_COR_RELEASE && !(mode & TRANS_COR_NO_RELEASE)) {
-		if (str->s && str->s->len) {
+		if (str->len) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
 	} else if (mode & TRANS_COR_NO_RELEASE && !(mode & TRANS_COR_RELEASE)) {
-		if (str->s && str->s->len) {
+		if (str->len) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "NO RELEASE", sizeof("NO RELEASE") - 1);
@@ -2618,6 +2694,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_D
 	smart_str_0(str);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_escape_string_for_tx_name_in_comment */
 static char *
@@ -2661,6 +2738,7 @@ mysqlnd_escape_string_for_tx_name_in_comment(const char * const name TSRMLS_DC)
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::tx_commit_ex */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const unsigned int flags, const char * const name TSRMLS_DC)
@@ -2671,9 +2749,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		do {
-			smart_str tmp_str = {0};
+			smart_str tmp_str = {0, 0, 0};
 			conn->m->tx_cor_options_to_string(conn, &tmp_str, flags TSRMLS_CC);
 			smart_str_0(&tmp_str);
+
 
 			{
 				char * query;
@@ -2681,7 +2760,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 				char * name_esc = mysqlnd_escape_string_for_tx_name_in_comment(name TSRMLS_CC);
 				
 				query_len = mnd_sprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
-										name_esc? name_esc:"", tmp_str.s? tmp_str.s->val:"");
+										name_esc? name_esc:"", tmp_str.c? tmp_str.c:"");
 				smart_str_free(&tmp_str);
 				if (name_esc) {
 					mnd_efree(name_esc);
@@ -2702,6 +2781,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::tx_begin */
 static enum_func_status
@@ -2713,9 +2793,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		do {
-			smart_str tmp_str = {0};
+			smart_str tmp_str = {0, 0, 0};
 			if (mode & TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
-				if (tmp_str.s && tmp_str.s->len) {
+				if (tmp_str.len) {
 					smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 				}
 				smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
@@ -2727,12 +2807,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 					smart_str_free(&tmp_str);
 					break;
 				} else if (mode & TRANS_START_READ_WRITE) {
-					if (tmp_str.s && tmp_str.s->len) {
+					if (tmp_str.len) {
 						smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 					}
 					smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
 				} else if (mode & TRANS_START_READ_ONLY) {
-					if (tmp_str.s && tmp_str.s->len) {
+					if (tmp_str.len) {
 						smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 					}
 					smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
@@ -2743,7 +2823,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 			{
 				char * name_esc = mysqlnd_escape_string_for_tx_name_in_comment(name TSRMLS_CC);
 				char * query;
-				unsigned int query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", name_esc? name_esc:"", tmp_str.s? tmp_str.s->val:"");
+				unsigned int query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", name_esc? name_esc:"", tmp_str.c? tmp_str.c:"");
 				smart_str_free(&tmp_str);
 				if (name_esc) {
 					mnd_efree(name_esc);
@@ -2763,6 +2843,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::tx_savepoint */
 static enum_func_status
@@ -2795,6 +2876,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint)(MYSQLND_CONN_DATA * conn, const 
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::tx_savepoint_release */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint_release)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC)
@@ -2826,6 +2908,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint_release)(MYSQLND_CONN_DATA * conn
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::negotiate_client_api_capabilities */
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, negotiate_client_api_capabilities)(MYSQLND_CONN_DATA * const conn, const unsigned int flags TSRMLS_DC)
@@ -2841,6 +2924,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, negotiate_client_api_capabilities)(MYSQLND_CON
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::get_client_api_capabilities */
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, get_client_api_capabilities)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
@@ -2849,6 +2933,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_client_api_capabilities)(const MYSQLND_CON
 	DBG_RETURN(conn? conn->client_api_capabilities : 0);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::local_tx_start */
 static enum_func_status
@@ -2860,6 +2945,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, local_tx_start)(MYSQLND_CONN_DATA * conn, size
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_data::local_tx_end */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end)(MYSQLND_CONN_DATA * conn, size_t this_func, enum_func_status status TSRMLS_DC)
@@ -2868,6 +2954,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end)(MYSQLND_CONN_DATA * conn, size_t
 	DBG_RETURN(status);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::init */
 static enum_func_status
@@ -2884,7 +2971,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, init)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
 }
 /* }}} */
 
+
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND_CONN_DATA * const conn TSRMLS_DC);
+
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, init),
@@ -2980,6 +3069,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, get_client_api_capabilities)
 MYSQLND_CLASS_METHODS_END;
 
+
 /* {{{ mysqlnd_conn::get_reference */
 static MYSQLND *
 MYSQLND_METHOD(mysqlnd_conn, clone_object)(MYSQLND * const conn TSRMLS_DC)
@@ -2990,6 +3080,7 @@ MYSQLND_METHOD(mysqlnd_conn, clone_object)(MYSQLND * const conn TSRMLS_DC)
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::dtor */
 static void
@@ -3005,6 +3096,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND * conn TSRMLS_DC)
 	DBG_VOID_RETURN;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_data::close */
 static enum_func_status
@@ -3042,12 +3134,14 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn_handle, enum_connection_close
 }
 /* }}} */
 
+
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, connect),
 	MYSQLND_METHOD(mysqlnd_conn, clone_object),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor),
 	MYSQLND_METHOD(mysqlnd_conn, close)
 MYSQLND_CLASS_METHODS_END;
+
 
 /* {{{ _mysqlnd_init */
 PHPAPI MYSQLND *
