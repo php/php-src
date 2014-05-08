@@ -1,5 +1,5 @@
 --TEST--
-filter_var(null,FILTER_VALIDATE_BOOLEAN,FILTER_NULL_ON_FAILURE) returns false
+filter_var(null,FILTER_VALIDATE_BOOLEAN,FILTER_NULL_ON_FAILURE) returns null
 
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
@@ -12,6 +12,9 @@ var_dump(filter_var(
     FILTER_NULL_ON_FAILURE
 ));
 
+--XFAIL--
+Requires php_zval_filter to not use convert_to_string for all filters.
+
 --EXPECTF--
-bool(false)
+NULL
 
