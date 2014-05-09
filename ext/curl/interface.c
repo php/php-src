@@ -1349,10 +1349,6 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 			zend_fcall_info fci;
 			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
-			MAKE_STD_ZVAL(zhandle);
-			MAKE_STD_ZVAL(zpattern);
-			MAKE_STD_ZVAL(zstring);
-
 			ZVAL_RES(&argv[0], ch->res);
 			Z_ADDREF(argv[0]);
 			ZVAL_STRING(&argv[1], pattern);
@@ -1649,7 +1645,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
  */
 static void curl_free_string(void **string)
 {
-	efree(*string);
+	efree((char *)*string);
 }
 /* }}} */
 
@@ -1657,7 +1653,7 @@ static void curl_free_string(void **string)
  */
 static void curl_free_post(void **post)
 {
-	curl_formfree((struct HttpPost *) *post);
+	curl_formfree((struct HttpPost *)*post);
 }
 /* }}} */
 
@@ -1713,29 +1709,31 @@ PHP_FUNCTION(curl_version)
 
 /* {{{ alloc_curl_handle
  */
-static void alloc_curl_handle(php_curl **ch)
+static php_curl *alloc_curl_handle()
 {
-	*ch                           = ecalloc(1, sizeof(php_curl));
-	(*ch)->to_free                = ecalloc(1, sizeof(struct _php_curl_free));
-	(*ch)->handlers               = ecalloc(1, sizeof(php_curl_handlers));
-	(*ch)->handlers->write        = ecalloc(1, sizeof(php_curl_write));
-	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
-	(*ch)->handlers->read         = ecalloc(1, sizeof(php_curl_read));
-	(*ch)->handlers->progress     = NULL;
+	php_curl *ch               = ecalloc(1, sizeof(php_curl));
+	ch->to_free                = ecalloc(1, sizeof(struct _php_curl_free));
+	ch->handlers               = ecalloc(1, sizeof(php_curl_handlers));
+	ch->handlers->write        = ecalloc(1, sizeof(php_curl_write));
+	ch->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
+	ch->handlers->read         = ecalloc(1, sizeof(php_curl_read));
+	ch->handlers->progress     = NULL;
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
-	(*ch)->handlers->fnmatch      = NULL;
+	ch->handlers->fnmatch      = NULL;
 #endif
 
-	(*ch)->header.str_len = 0;
+	ch->header.str_len = 0;
 
-	memset(&(*ch)->err, 0, sizeof(struct _php_curl_error));
+	memset(&ch->err, 0, sizeof(struct _php_curl_error));
 
-	zend_llist_init(&(*ch)->to_free->str,   sizeof(char *),            (llist_dtor_func_t) curl_free_string, 0);
-	zend_llist_init(&(*ch)->to_free->post,  sizeof(struct HttpPost),   (llist_dtor_func_t) curl_free_post,   0);
-	(*ch)->safe_upload = 1; /* for now, for BC reason we allow unsafe API */
+	zend_llist_init(&ch->to_free->str,   sizeof(char *),          curl_free_string, 0);
+	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost), curl_free_post,   0);
+	ch->safe_upload = 1; /* for now, for BC reason we allow unsafe API */
 
-	(*ch)->to_free->slist = emalloc(sizeof(HashTable));
-	zend_hash_init((*ch)->to_free->slist, 4, NULL, curl_free_slist, 0);
+	ch->to_free->slist = emalloc(sizeof(HashTable));
+	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
+
+	return ch;
 }
 /* }}} */
 
@@ -1867,7 +1865,7 @@ PHP_FUNCTION(curl_init)
 		RETURN_FALSE;
 	}
 
-	alloc_curl_handle(&ch);
+	ch = alloc_curl_handle();
 	TSRMLS_SET_CTX(ch->thread_ctx);
 
 	ch->cp = cp;
@@ -1910,7 +1908,7 @@ PHP_FUNCTION(curl_copy_handle)
 		RETURN_FALSE;
 	}
 
-	alloc_curl_handle(&dupch);
+	dupch = alloc_curl_handle();
 	TSRMLS_SET_CTX(dupch->thread_ctx);
 
 	dupch->cp = cp;
@@ -1970,7 +1968,7 @@ PHP_FUNCTION(curl_copy_handle)
 	if (ch->handlers->fnmatch) {
 		dupch->handlers->fnmatch = ecalloc(1, sizeof(php_curl_fnmatch));
 		if (!Z_ISUNDEF(ch->handlers->fnmatch->func_name)) {
-			ZVAL_COPY(&dupch->handlers->fnmatch->func_name, ch->handlers->fnmatch->func_name);
+			ZVAL_COPY(&dupch->handlers->fnmatch->func_name, &ch->handlers->fnmatch->func_name);
 		}
 		dupch->handlers->fnmatch->method = ch->handlers->fnmatch->method;
 		curl_easy_setopt(dupch->cp, CURLOPT_FNMATCH_DATA, (void *) dupch);
@@ -2660,7 +2658,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /
 #if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
 		case CURLOPT_POSTREDIR:
 			convert_to_long_ex(zvalue);
-			error = curl_easy_setopt(ch->cp, CURLOPT_POSTREDIR, Z_LVAL_PP(zvalue) & CURL_REDIR_POST_ALL);
+			error = curl_easy_setopt(ch->cp, CURLOPT_POSTREDIR, Z_LVAL_P(zvalue) & CURL_REDIR_POST_ALL);
 			break;
 #endif
 
@@ -3169,7 +3167,7 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	curl_easy_cleanup(ch->cp);
 
 	/* cURL destructors should be invoked only by last curl handle */
-	if (Z_REFCOUNTED(ch->clone) && Z_REFCOUNT(ch->clone) <= 1) {
+	if (Z_ISUNDEF(ch->clone)) {
 		zend_llist_clean(&ch->to_free->str);
 		zend_llist_clean(&ch->to_free->post);
 		zend_hash_destroy(ch->to_free->slist);

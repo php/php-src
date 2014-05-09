@@ -204,6 +204,7 @@ PHP_FUNCTION(curl_multi_exec)
 	}
 
 	ZEND_FETCH_RESOURCE(mh, php_curlm *, z_mh, -1, le_curl_multi_handle_name, le_curl_multi_handle);
+	ZVAL_DEREF(z_still_running);
 
 	{
 		zend_llist_position pos;
