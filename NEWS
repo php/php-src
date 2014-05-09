@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed bug #66908 (php-fpm reload leaks epoll_create() file descriptor).
     (Julio Pintos)
 
+- PCRE:
+  . Fixed bug #67238 (Ungreedy and min/max quantifier bug, applied patch
+    from the upstream). (Anatol)
+
 - Phar:
   . Fix bug #64498 ($phar->buildFromDirectory can't compress file with an accent
     in its name). (PR #588)
