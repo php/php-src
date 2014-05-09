@@ -161,8 +161,7 @@ struct _php_curl_error  {
 };
 
 struct _php_curl_send_headers {
-	char *str;
-	size_t str_len;
+	zend_string *str;
 };
 
 struct _php_curl_free {

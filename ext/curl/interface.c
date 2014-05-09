@@ -157,6 +157,7 @@ static void _php_curl_close(zend_resource *rsrc TSRMLS_DC);
 #define CAAL(s, v) add_assoc_long_ex(return_value, s, sizeof(s) - 1, (long) v);
 #define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s) - 1, (double) v);
 #define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s) - 1, (char *) (v ? v : ""));
+#define CAASTR(s, v) add_assoc_str_ex(return_value, s, sizeof(s) - 1, v? v : "");
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s) -1 , (zval *) v);
 
 #if defined(PHP_WIN32) || defined(__GNUC__)
@@ -1587,12 +1588,11 @@ static int curl_debug(CURL *cp, curl_infotype type, char *buf, size_t buf_len, v
 	php_curl *ch = (php_curl *)ctx;
 
 	if (type == CURLINFO_HEADER_OUT) {
-		if (ch->header.str_len) {
-			efree(ch->header.str);
+		if (ch->header.str) {
+			STR_RELEASE(ch->header.str);
 		}
 		if (buf_len > 0) {
-			ch->header.str = estrndup(buf, buf_len);
-			ch->header.str_len = buf_len;
+			ch->header.str = STR_INIT(buf, buf_len, 0);
 		}
 	}
 
@@ -1722,12 +1722,10 @@ static php_curl *alloc_curl_handle()
 	ch->handlers->fnmatch      = NULL;
 #endif
 
-	ch->header.str_len = 0;
-
 	memset(&ch->err, 0, sizeof(struct _php_curl_error));
 
-	zend_llist_init(&ch->to_free->str,   sizeof(char *),          curl_free_string, 0);
-	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost), curl_free_post,   0);
+	zend_llist_init(&ch->to_free->str,   sizeof(char *),          (llist_dtor_func_t)curl_free_string, 0);
+	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost), (llist_dtor_func_t)curl_free_post,   0);
 	ch->safe_upload = 1; /* for now, for BC reason we allow unsafe API */
 
 	ch->to_free->slist = emalloc(sizeof(HashTable));
@@ -2814,9 +2812,9 @@ PHP_FUNCTION(curl_setopt_array)
 void _php_curl_cleanup_handle(php_curl *ch)
 {
 	smart_str_free(&ch->handlers->write->buf);
-	if (ch->header.str_len) {
-		efree(ch->header.str);
-		ch->header.str_len = 0;
+	if (ch->header.str) {
+		STR_RELEASE(ch->header.str);
+		ch->header.str = NULL;
 	}
 
 	memset(ch->err.str, 0, CURL_ERROR_SIZE + 1);
@@ -2998,14 +2996,14 @@ PHP_FUNCTION(curl_getinfo)
 			CAAL("local_port", l_code);
 		}
 #endif
-		if (ch->header.str_len > 0) {
-			CAAS("request_header", ch->header.str);
+		if (ch->header.str) {
+			CAASTR("request_header", ch->header.str);
 		}
 	} else {
 		switch (option) {
 			case CURLINFO_HEADER_OUT:
-				if (ch->header.str_len > 0) {
-					RETURN_STRINGL(ch->header.str, ch->header.str_len);
+				if (ch->header.str) {
+					RETURN_STR(STR_COPY(ch->header.str));
 				} else {
 					RETURN_FALSE;
 				}
@@ -3187,8 +3185,8 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	zval_ptr_dtor(&ch->handlers->passwd);
 #endif
 	zval_ptr_dtor(&ch->handlers->std_err);
-	if (ch->header.str_len > 0) {
-		efree(ch->header.str);
+	if (ch->header.str) {
+		STR_RELEASE(ch->header.str);
 	}
 
 	zval_ptr_dtor(&ch->handlers->write_header->stream);
