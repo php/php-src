@@ -621,15 +621,13 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		}
 		case IS_DOUBLE: {
-			char *str;
-			int len;
+			zend_string *str;
 			double dval = Z_DVAL_P(op);
 			TSRMLS_FETCH();
 
-			len = zend_spprintf(&str, 0, "%.*G", (int) EG(precision), dval);
+			str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
 			/* %G already handles removing trailing zeros from the fractional part, yay */
-			ZVAL_NEW_STR(op, STR_INIT(str, len, 0));
-			efree(str);
+			ZVAL_NEW_STR(op, str);
 			break;
 		}
 		case IS_ARRAY:
@@ -910,11 +908,7 @@ try_again:
 			return STR_INIT(buf, len, 0);
 		}
 		case IS_DOUBLE: {
-			char *str;
-			int len = zend_spprintf(&str, 0, "%.*G", (int) EG(precision), Z_DVAL_P(op));
-			zend_string *retval = STR_INIT(str, len, 0);
-			efree(str);
-			return retval;
+			return zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(op));
 		}
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
@@ -2529,12 +2523,10 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC) /
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
 	TSRMLS_FETCH();
-	char *str;
-	int len;
+	zend_string *str;
 
-	len = zend_spprintf(&str, 0, "%.*G", (int) EG(precision), (double)Z_DVAL_P(op));
-	ZVAL_NEW_STR(op, STR_INIT(str, len, 0));
-	efree(str);
+	str = zend_strpprintf(0, "%.*G", (int) EG(precision), (double)Z_DVAL_P(op));
+	ZVAL_NEW_STR(op, str);
 }
 /* }}} */
 

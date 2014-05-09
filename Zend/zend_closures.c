@@ -313,23 +313,20 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 			array_init(&val);
 
 			for (i = 0; i < closure->func.common.num_args; i++) {
-				char *name, *info;
-				int name_len, info_len;
+				zend_string *name;
+				zval info;
 				if (arg_info->name) {
-					name_len = zend_spprintf(&name, 0, "%s$%s",
-									arg_info->pass_by_reference ? "&" : "",
-									arg_info->name);
+					name = zend_strpprintf(0, "%s$%s",
+							arg_info->pass_by_reference ? "&" : "",
+							arg_info->name);
 				} else {
-					name_len = zend_spprintf(&name, 0, "%s$param%d",
-									arg_info->pass_by_reference ? "&" : "",
-									i + 1);
+					name = zend_strpprintf(0, "%s$param%d",
+							arg_info->pass_by_reference ? "&" : "",
+							i + 1);
 				}
-				info_len = zend_spprintf(&info, 0, "%s",
-								i >= required ? "<optional>" : "<required>");				
-				// TODO: avoid reallocation ???
-				add_assoc_stringl_ex(&val, name, name_len, info, info_len);
-				efree(info);
-				efree(name);
+				ZVAL_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
+				zend_hash_update(Z_ARRVAL(val), name, &info);
+				STR_RELEASE(name);
 				arg_info++;
 			}
 			zend_hash_str_update(closure->debug_info, "parameter", sizeof("parameter")-1, &val);

@@ -2095,6 +2095,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.on_timeout = php_on_timeout;
 	zuf.stream_open_function = php_stream_open_for_zend;
 	zuf.vspprintf_function = vspprintf;
+	zuf.vstrpprintf_function = vstrpprintf;
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
 	zend_startup(&zuf, NULL TSRMLS_CC);

@@ -799,7 +799,7 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 
 	xbuf_format_converter(&xbuf, format, ap);
 
-	if (max_len && xbuf.s->len > max_len) {
+	if (max_len && xbuf.s && xbuf.s->len > max_len) {
 		xbuf.s->len = max_len;
 	}
 	smart_str_0(&xbuf);
@@ -826,6 +826,33 @@ PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...) /* {{{
 	cc = vspprintf(pbuf, max_len, format, ap);
 	va_end(ap);
 	return (cc);
+}
+/* }}} */
+
+PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) /* {{{ */
+{
+	smart_str xbuf = {0};
+
+	xbuf_format_converter(&xbuf, format, ap);
+
+	if (max_len && xbuf.s && xbuf.s->len > max_len) {
+		xbuf.s->len = max_len;
+	}
+	smart_str_0(&xbuf);
+
+	return xbuf.s;
+}
+/* }}} */
+
+PHPAPI zend_string *strpprintf(size_t max_len, const char *format, ...) /* {{{ */
+{
+	va_list ap;
+	zend_string *str;
+
+	va_start(ap, format);
+	str = vstrpprintf(max_len, format, ap);
+	va_end(ap);
+	return str;
 }
 /* }}} */
 

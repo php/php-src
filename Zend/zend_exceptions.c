@@ -618,7 +618,7 @@ ZEND_METHOD(exception, getPrevious)
 
 	previous = zend_read_property(default_exception_ce, getThis(), "previous", sizeof("previous")-1, 1 TSRMLS_CC);
 	RETURN_ZVAL(previous, 1, 0);
-}
+} /* }}} */
 
 int zend_spprintf(char **message, int max_len, const char *format, ...) /* {{{ */
 {
@@ -632,19 +632,30 @@ int zend_spprintf(char **message, int max_len, const char *format, ...) /* {{{ *
 }
 /* }}} */
 
+zend_string *zend_strpprintf(int max_len, const char *format, ...) /* {{{ */
+{
+	va_list arg;
+	zend_string *str;
+
+	va_start(arg, format);
+	str = zend_vstrpprintf(max_len, format, arg);
+	va_end(arg);
+	return str;
+}
+/* }}} */
+
 /* {{{ proto string Exception::__toString()
    Obtain the string representation of the Exception object */
 ZEND_METHOD(exception, __toString)
 {
 	zval message, file, line, trace, *exception;
-	char *str, *prev_str;
-	int len = 0;
+	zend_string *str, *prev_str;
 	zend_fcall_info fci;
 	zval fname;
 	
 	DEFAULT_0_PARAMS;
 	
-	str = estrndup("", 0);
+	str = STR_EMPTY_ALLOC();
 
 	exception = getThis();
 	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1);
@@ -677,17 +688,17 @@ ZEND_METHOD(exception, __toString)
 		}
 
 		if (Z_STRLEN(message) > 0) {
-			len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s%s%s",
-								Z_OBJCE_P(exception)->name->val, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
-								(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
-								len ? "\n\nNext " : "", prev_str);
+			str = zend_strpprintf(0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s%s%s",
+					Z_OBJCE_P(exception)->name->val, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
+					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
+					prev_str->len ? "\n\nNext " : "", prev_str->val);
 		} else {
-			len = zend_spprintf(&str, 0, "exception '%s' in %s:%ld\nStack trace:\n%s%s%s",
-								Z_OBJCE_P(exception)->name->val, Z_STRVAL(file), Z_LVAL(line),
-								(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
-								len ? "\n\nNext " : "", prev_str);
+			str = zend_strpprintf(0, "exception '%s' in %s:%ld\nStack trace:\n%s%s%s",
+					Z_OBJCE_P(exception)->name->val, Z_STRVAL(file), Z_LVAL(line),
+					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
+					prev_str->len ? "\n\nNext " : "", prev_str->val);
 		}
-		efree(prev_str);
+		STR_RELEASE(prev_str);
 		zval_dtor(&message);
 		zval_dtor(&file);
 		zval_dtor(&line);
@@ -701,11 +712,9 @@ ZEND_METHOD(exception, __toString)
 
 	/* We store the result in the private property string so we can access
 	 * the result in uncaught exception handlers without memleaks. */
-	zend_update_property_string(default_exception_ce, getThis(), "string", sizeof("string")-1, str TSRMLS_CC);
+	zend_update_property_str(default_exception_ce, getThis(), "string", sizeof("string")-1, str TSRMLS_CC);
 
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(str, len);
-	efree(str);
+	RETURN_STR(str);
 }
 /* }}} */
 
