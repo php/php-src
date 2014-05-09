@@ -1721,6 +1721,7 @@ static php_curl *alloc_curl_handle()
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
 	ch->handlers->fnmatch      = NULL;
 #endif
+	ch->clone 				   = 1;
 
 	memset(&ch->err, 0, sizeof(struct _php_curl_error));
 
@@ -2462,8 +2463,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /
 				HashTable *postfields;
 				zend_string *string_key;
 				ulong  num_key;
-				struct HttpPost  *first = NULL;
-				struct HttpPost  *last  = NULL;
+				struct HttpPost *first = NULL;
+				struct HttpPost *last  = NULL;
 
 				postfields = HASH_OF(zvalue);
 				if (!postfields) {
@@ -2565,15 +2566,16 @@ static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /
 					} else {
 						error = curl_formadd(&first, &last,
 											 CURLFORM_COPYNAME, string_key->val,
-											 CURLFORM_NAMELENGTH, string_key->len,
+											 CURLFORM_NAMELENGTH, (long)string_key->len,
 											 CURLFORM_COPYCONTENTS, postval,
-											 CURLFORM_CONTENTSLENGTH, Z_STRLEN_P(current),
+											 CURLFORM_CONTENTSLENGTH, (long)Z_STRLEN_P(current),
 											 CURLFORM_END);
 					}
 
 					if (numeric_key) {
 						STR_RELEASE(string_key);
 					}
+
 				} ZEND_HASH_FOREACH_END();
 
 				SAVE_CURL_ERROR(ch, error);
@@ -2583,9 +2585,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /
 
 				if (ch->clone == 0) {
 					zend_llist_clean(&ch->to_free->post);
-				} else {
-					--ch->clone;
-				}
+				} 
 				zend_llist_add_element(&ch->to_free->post, &first);
 				error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, first);
 			} else {
@@ -3136,7 +3136,7 @@ PHP_FUNCTION(curl_close)
 		return;
 	}
 
-	zend_list_close(Z_RES_P(zid));
+	zend_list_delete(Z_RES_P(zid));
 }
 /* }}} */
 
@@ -3167,14 +3167,12 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	curl_easy_cleanup(ch->cp);
 
 	/* cURL destructors should be invoked only by last curl handle */
-	if (ch->clone == 0) {
+	if (--ch->clone == 0) {
 		zend_llist_clean(&ch->to_free->str);
 		zend_llist_clean(&ch->to_free->post);
 		zend_hash_destroy(ch->to_free->slist);
 		efree(ch->to_free->slist);
 		efree(ch->to_free);
-	} else {
-		--ch->clone;
 	}
 
 	smart_str_free(&ch->handlers->write->buf);
