@@ -104,7 +104,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{
 	const char *msg = "<<Unknown>>";
 	char *supp = NULL;
 	long native_code = 0;
-	char *message = NULL;
+	zend_string *message = NULL;
 	zval info;
 
 	if (dbh == NULL || dbh->error_mode == PDO_ERRMODE_SILENT) {
@@ -141,20 +141,20 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{
 	}
 
 	if (supp) {
-		spprintf(&message, 0, "SQLSTATE[%s]: %s: %ld %s", *pdo_err, msg, native_code, supp);
+		message = strpprintf(0, "SQLSTATE[%s]: %s: %ld %s", *pdo_err, msg, native_code, supp);
 	} else {
-		spprintf(&message, 0, "SQLSTATE[%s]: %s", *pdo_err, msg);
+		message = strpprintf(0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}
 
 	if (dbh->error_mode == PDO_ERRMODE_WARNING) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", message);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", message->val);
 	} else if (EG(exception) == NULL) {
 		zval ex;
 		zend_class_entry *def_ex = php_pdo_get_exception_base(1 TSRMLS_CC), *pdo_ex = php_pdo_get_exception();
 
 		object_init_ex(&ex, pdo_ex);
 
-		zend_update_property_string(def_ex, &ex, "message", sizeof("message") - 1, message TSRMLS_CC);
+		zend_update_property_str(def_ex, &ex, "message", sizeof("message") - 1, message TSRMLS_CC);
 		zend_update_property_string(def_ex, &ex, "code", sizeof("code") - 1, *pdo_err TSRMLS_CC);
 		
 		if (!Z_ISUNDEF(info)) {
@@ -169,7 +169,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{
 	}
 
 	if (message) {
-		efree(message);
+		STR_RELEASE(message);
 	}
 
 	if (supp) {

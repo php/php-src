@@ -1063,11 +1063,11 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
 {
 	zend_string *res;
-	char *tmpbuf;
+	zend_string *tmpbuf;
 	char *s, *t;  /* source, target */
 	char *dp;
 	int integral;
-	int tmplen, reslen = 0;
+	int reslen = 0;
 	int count = 0;
 	int is_negative=0;
 
@@ -1078,28 +1078,26 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 
 	dec = MAX(0, dec);
 	d = _php_math_round(d, dec, PHP_ROUND_HALF_UP);
-	tmplen = spprintf(&tmpbuf, 0, "%.*F", dec, d);
+	tmpbuf = strpprintf(0, "%.*F", dec, d);
 	if (tmpbuf == NULL) {
 		return NULL;
-	} else if (!isdigit((int)tmpbuf[0])) {
-		res = STR_INIT(tmpbuf, tmplen, 0);
-		efree(tmpbuf);
-		return res;
+	} else if (!isdigit((int)tmpbuf->val[0])) {
+		return tmpbuf;
 	}
 
 	/* find decimal point, if expected */
 	if (dec) {
-		dp = strpbrk(tmpbuf, ".,");
+		dp = strpbrk(tmpbuf->val, ".,");
 	} else {
 		dp = NULL;
 	}
 
 	/* calculate the length of the return buffer */
 	if (dp) {
-		integral = dp - tmpbuf;
+		integral = dp - tmpbuf->val;
 	} else {
 		/* no decimal point was found */
-		integral = tmplen;
+		integral = tmpbuf->len;
 	}
 
 	/* allow for thousand separators */
@@ -1123,7 +1121,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	}
 	res = STR_ALLOC(reslen, 0);
 
-	s = tmpbuf + tmplen - 1;
+	s = tmpbuf->val + tmpbuf->len - 1;
 	t = res->val + reslen;
 	*t-- = '\0';
 
@@ -1156,9 +1154,9 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 
 	/* copy the numbers before the decimal point, adding thousand
 	 * separator every three digits */
-	while(s >= tmpbuf) {
+	while (s >= tmpbuf->val) {
 		*t-- = *s--;
-		if (thousand_sep && (++count%3)==0 && s>=tmpbuf) {
+		if (thousand_sep && (++count%3)==0 && s>=tmpbuf->val) {
 			t -= thousand_sep_len;
 			memcpy(t + 1, thousand_sep, thousand_sep_len);
 		}
@@ -1170,7 +1168,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	}
 
 	res->len = reslen;
-	efree(tmpbuf);
+	STR_RELEASE(tmpbuf);
 	return res;
 }
 
