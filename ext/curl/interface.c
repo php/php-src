@@ -1980,7 +1980,7 @@ PHP_FUNCTION(curl_copy_handle)
 	dupch->to_free = ch->to_free;
 
 	/* Keep track of cloned copies to avoid invoking curl destructors for every clone */
-	ZVAL_COPY(&dupch->clone, &ch->clone);
+	ch->clone++;
 
 	ZEND_REGISTER_RESOURCE(return_value, dupch, le_curl);
 	dupch->res = Z_RES_P(return_value);
@@ -2583,8 +2583,10 @@ static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /
 					return FAILURE;
 				}
 
-				if (Z_REFCOUNTED(ch->clone) && Z_REFCOUNT(ch->clone) <= 1) {
+				if (ch->clone == 0) {
 					zend_llist_clean(&ch->to_free->post);
+				} else {
+					--ch->clone;
 				}
 				zend_llist_add_element(&ch->to_free->post, &first);
 				error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, first);
@@ -3167,14 +3169,14 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	curl_easy_cleanup(ch->cp);
 
 	/* cURL destructors should be invoked only by last curl handle */
-	if (Z_ISUNDEF(ch->clone)) {
+	if (ch->clone == 0) {
 		zend_llist_clean(&ch->to_free->str);
 		zend_llist_clean(&ch->to_free->post);
 		zend_hash_destroy(ch->to_free->slist);
 		efree(ch->to_free->slist);
 		efree(ch->to_free);
 	} else {
-		//??? Z_DELREF(ch->clone);
+		--ch->clone;
 	}
 
 	smart_str_free(&ch->handlers->write->buf);

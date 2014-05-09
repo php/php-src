@@ -180,7 +180,7 @@ typedef struct {
 	php_curl_handlers       *handlers;
 	zend_resource           *res;
 	zend_bool                in_callback;
-	zval                     clone;
+	zend_uint				 clone;
 	zend_bool                safe_upload;
 } php_curl;
 
