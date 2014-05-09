@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #67224 (Fall back to crypto_type from context if not specified
     explicitly in stream_socket_enable_crypto). (Chris Wright)
 
+- PCRE:
+  . Fixed bug #67238 (Ungreedy and min/max quantifier bug, applied patch
+    from the upstream). (Anatol)
+
 01 May 2014, PHP 5.6.0 Beta 2
 
 - CLI server:
