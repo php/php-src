@@ -489,6 +489,10 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		if (this_ptr && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {
 			closure->this_ptr = this_ptr;
 			Z_ADDREF_P(this_ptr);
+		} else if(closure->func.common.fn_flags & ZEND_ACC_STATIC) {
+			closure->func.common.scope = EG(called_scope);
+			closure->func.common.fn_flags |= ZEND_ACC_STATIC;
+			closure->this_ptr = NULL;
 		} else {
 			closure->func.common.fn_flags |= ZEND_ACC_STATIC;
 			closure->this_ptr = NULL;
