@@ -1269,9 +1269,9 @@ SXE_METHOD(xpath)
 	}
 	if (!sxe->node) {
 		php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement((xmlDocPtr) sxe->document->ptr), NULL TSRMLS_CC);
-	}
-	if (!sxe->node) {
-		RETURN_FALSE;
+		if (!sxe->node) {
+			RETURN_FALSE;
+		}
 	}
 
 	nodeptr = php_sxe_get_first_node(sxe, sxe->node->node TSRMLS_CC);
