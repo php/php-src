@@ -1533,15 +1533,18 @@ SXE_METHOD(getDocNamespaces)
 		return;
 	}
 
-	array_init(return_value);
-
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 	if(from_root){
 		node = xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr);
 	}else{
 		GET_NODE(sxe, node);
 	}
-
+	
+	if (node == NULL) {
+		RETURN_FALSE;
+	}
+	
+	array_init(return_value);
 	sxe_add_registered_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
 }
 /* }}} */
