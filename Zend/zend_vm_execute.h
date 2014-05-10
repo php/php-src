@@ -6789,7 +6789,13 @@ static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER
 		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
 	}
 
-	zend_create_closure(&EX_T(opline->result.var).tmp_var, (zend_function *) op_array, EG(scope), EG(This) TSRMLS_CC);
+	int defined_function_is_static = op_array->common.fn_flags & ZEND_ACC_STATIC;
+	int function_is_being_defined_inside_static_context = EX(prev_execute_data) && EX(prev_execute_data)->function_state.function->common.fn_flags & ZEND_ACC_STATIC;
+	if (defined_function_is_static || function_is_being_defined_inside_static_context) {
+		zend_create_closure(&EX_T(opline->result.var).tmp_var, (zend_function *) op_array,  EG(called_scope), NULL TSRMLS_CC);
+	} else {
+		zend_create_closure(&EX_T(opline->result.var).tmp_var, (zend_function *) op_array,  EG(scope), EG(This) TSRMLS_CC);
+	}
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
