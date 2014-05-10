@@ -22,10 +22,10 @@ var_dump($y, $x);
 
 ?>
 --EXPECTF--
-Notice: Only variable references should be returned by reference in %sclosure_018.php on line 7
+Notice: Only variable references should be returned by reference in %s on line 7
 int(4)
 
-Notice: Only variable references should be returned by reference in %sclosure_018.php on line 7
+Notice: Only variable references should be returned by reference in %s on line 7
 int(16)
 int(16)
 int(16)

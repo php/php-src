@@ -25,4 +25,4 @@ $o->func();
 --EXPECTF--
 Test::{closure}()
 
-Fatal error: Call to private method Test::func() from context '' in %sclosure_033.php on line %d
+Fatal error: Call to private method Test::func() from context '' in %s on line %d
