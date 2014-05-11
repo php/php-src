@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #65701 (copy() doesn't work when destination filename is created
     by tempnam()). (Boro Sitnikovski)
   . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
+  . Fixed bug #67245 (usage of memcpy() with overlapping src and dst in
+    zend_exceptions.c) (backported fix from PHP 5.6; initially committed
+    to wrong branch). (Bob)
 
 - Curl:
   . Fixed bug #64247 (CURLOPT_INFILE doesn't allow reset). (Mike)
