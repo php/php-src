@@ -38,10 +38,10 @@ Warning: shm_detach() expects exactly 1 parameter, 2 given in %s003.php on line 
 NULL
 bool(true)
 
-Warning: shm_detach(): %d is not a valid sysvshm resource in %s003.php on line %d
+Warning: shm_detach(): supplied resource is not a valid sysvshm resource in %s003.php on line %d
 bool(false)
 
-Warning: shm_remove(): %d is not a valid sysvshm resource in %s003.php on line %d
+Warning: shm_remove(): supplied resource is not a valid sysvshm resource in %s003.php on line %d
 
 Warning: shm_detach() expects parameter 1 to be resource, integer given in %s003.php on line %d
 NULL

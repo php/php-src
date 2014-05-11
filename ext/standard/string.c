@@ -2855,17 +2855,11 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 				if (len > slen - pos) continue;
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
-					if (UNEXPECTED(Z_TYPE_P(entry) != IS_STRING)) {
-						ZVAL_DUP(&tmp, entry);
-						convert_to_string(&tmp);
-						entry = &tmp;
-					}
-					smart_str_appendl(&result, Z_STRVAL_P(entry), Z_STRLEN_P(entry));
+					zend_string *str = zval_get_string(entry);
+					smart_str_appendl(&result, str->val, str->len);
 					pos += len;
-					if (entry == &tmp) {
-						zval_dtor(&tmp);
-					}
 					found = 1;
+					STR_RELEASE(str);
 					break;
 				} 
 			} ZEND_HASH_FOREACH_END();
@@ -2886,17 +2880,11 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 			for (len = maxlen; len >= minlen; len--) {
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
-					if (UNEXPECTED(Z_TYPE_P(entry) != IS_STRING)) {
-						ZVAL_DUP(&tmp, entry);
-						convert_to_string(&tmp);
-						entry = &tmp;
-					}
-					smart_str_appendl(&result, Z_STRVAL_P(entry), Z_STRLEN_P(entry));
+					zend_string *str = zval_get_string(entry);
+					smart_str_appendl(&result, str->val, str->len);
 					pos += len;
-					if (entry == &tmp) {
-						zval_dtor(&tmp);
-					}
 					found = 1;
+					STR_RELEASE(str);
 					break;
 				} 
 			}

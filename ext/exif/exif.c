@@ -222,7 +222,7 @@ static PHP_GINIT_FUNCTION(exif)
 PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
-	if (zend_hash_exists(&module_registry, "mbstring", sizeof("mbstring"))) {
+	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) {
 		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 1, CONST_CS | CONST_PERSISTENT); 
 	} else {
 		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 0, CONST_CS | CONST_PERSISTENT); 
@@ -1941,17 +1941,16 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 #endif
 	image_info_value *info_value;
 	image_info_data  *info_data;
-	zval 			 *tmpi, *array = NULL;
+	zval 			 tmpi, array;
 
 #ifdef EXIF_DEBUG
 /*		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Adding %d infos from section %s", image_info->info_list[section_index].count, exif_get_sectionname(section_index));*/
 #endif
 	if (image_info->info_list[section_index].count) {
 		if (sub_array) {
-			MAKE_STD_ZVAL(tmpi);
-			array_init(tmpi);
+			array_init(&tmpi);
 		} else {
-			tmpi = value;
+			ZVAL_COPY_VALUE(&tmpi, value);
 		}
 
 		for(i=0; i<image_info->info_list[section_index].count; i++) {
@@ -1968,7 +1967,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 /*		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Adding infos: tag(0x%04X,%12s,L=0x%04X): %s", info_tag, exif_get_tagname(info_tag, buffer, -12, exif_get_tag_table(section_index) TSRMLS_CC), info_data->length, info_data->format==TAG_FMT_STRING?(info_value&&info_value->s?info_value->s:"<no data>"):exif_get_tagformat(info_data->format));*/
 #endif
 			if (info_data->length==0) {
-				add_assoc_null(tmpi, name);
+				add_assoc_null(&tmpi, name);
 			} else {
 				switch (info_data->format) {
 					default:
@@ -1981,9 +1980,9 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 					case TAG_FMT_SBYTE:
 					case TAG_FMT_UNDEFINED:
 						if (!info_value->s) {
-							add_assoc_stringl(tmpi, name, "", 0);
+							add_assoc_stringl(&tmpi, name, "", 0);
 						} else {
-							add_assoc_stringl(tmpi, name, info_value->s, info_data->length);
+							add_assoc_stringl(&tmpi, name, info_value->s, info_data->length);
 						}
 						break;
 
@@ -1992,9 +1991,9 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 							val = "";
 						}
 						if (section_index==SECTION_COMMENT) {
-							add_index_string(tmpi, idx++, val);
+							add_index_string(&tmpi, idx++, val);
 						} else {
-							add_assoc_string(tmpi, name, val);
+							add_assoc_string(&tmpi, name, val);
 						}
 						break;
 
@@ -2010,9 +2009,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 					case TAG_FMT_SLONG:
 						/* now the rest, first see if it becomes an array */
 						if ((l = info_data->length) > 1) {
-							array = NULL;
-							MAKE_STD_ZVAL(array);
-							array_init(array);
+							array_init(&array);
 						}
 						for(ap=0; ap<l; ap++) {
 							if (l>1) {
@@ -2023,25 +2020,25 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									if (l>1) {
 										info_value = &info_data->value;
 										for (b=0;b<l;b++) {
-											add_index_long(array, b, (int)(info_value->s[b]));
+											add_index_long(&array, b, (int)(info_value->s[b]));
 										}
 										break;
 									}
 								case TAG_FMT_USHORT:
 								case TAG_FMT_ULONG:
 									if (l==1) {
-										add_assoc_long(tmpi, name, (int)info_value->u);
+										add_assoc_long(&tmpi, name, (int)info_value->u);
 									} else {
-										add_index_long(array, ap, (int)info_value->u);
+										add_index_long(&array, ap, (int)info_value->u);
 									}
 									break;
 
 								case TAG_FMT_URATIONAL:
 									snprintf(buffer, sizeof(buffer), "%i/%i", info_value->ur.num, info_value->ur.den);
 									if (l==1) {
-										add_assoc_string(tmpi, name, buffer);
+										add_assoc_string(&tmpi, name, buffer);
 									} else {
-										add_index_string(array, ap, buffer);
+										add_index_string(&array, ap, buffer);
 									}
 									break;
 
@@ -2049,55 +2046,55 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									if (l>1) {
 										info_value = &info_data->value;
 										for (b=0;b<l;b++) {
-											add_index_long(array, ap, (int)info_value->s[b]);
+											add_index_long(&array, ap, (int)info_value->s[b]);
 										}
 										break;
 									}
 								case TAG_FMT_SSHORT:
 								case TAG_FMT_SLONG:
 									if (l==1) {
-										add_assoc_long(tmpi, name, info_value->i);
+										add_assoc_long(&tmpi, name, info_value->i);
 									} else {
-										add_index_long(array, ap, info_value->i);
+										add_index_long(&array, ap, info_value->i);
 									}
 									break;
 
 								case TAG_FMT_SRATIONAL:
 									snprintf(buffer, sizeof(buffer), "%i/%i", info_value->sr.num, info_value->sr.den);
 									if (l==1) {
-										add_assoc_string(tmpi, name, buffer);
+										add_assoc_string(&tmpi, name, buffer);
 									} else {
-										add_index_string(array, ap, buffer);
+										add_index_string(&array, ap, buffer);
 									}
 									break;
 
 								case TAG_FMT_SINGLE:
 									if (l==1) {
-										add_assoc_double(tmpi, name, info_value->f);
+										add_assoc_double(&tmpi, name, info_value->f);
 									} else {
-										add_index_double(array, ap, info_value->f);
+										add_index_double(&array, ap, info_value->f);
 									}
 									break;
 
 								case TAG_FMT_DOUBLE:
 									if (l==1) {
-										add_assoc_double(tmpi, name, info_value->d);
+										add_assoc_double(&tmpi, name, info_value->d);
 									} else {
-										add_index_double(array, ap, info_value->d);
+										add_index_double(&array, ap, info_value->d);
 									}
 									break;
 							}
 							info_value = &info_data->value.list[ap];
 						}
 						if (l>1) {
-							add_assoc_zval(tmpi, name, array);
+							add_assoc_zval(&tmpi, name, &array);
 						}
 						break;
 				}
 			}
 		}
 		if (sub_array) {
-			add_assoc_zval(value, exif_get_sectionname(section_index), tmpi);
+			add_assoc_zval(value, exif_get_sectionname(section_index), &tmpi);
 		}
 	}
 }
@@ -2350,7 +2347,7 @@ PHP_FUNCTION(exif_tagname)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(szTemp, 1)
+	RETURN_STRING(szTemp)
 }
 /* }}} */
 
@@ -3851,7 +3848,8 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 {
 	int ret;
 	struct stat st;
-
+	zend_string *base;
+	
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
 
@@ -3884,17 +3882,19 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 		}
 	}
 
-	php_basename(FileName, strlen(FileName), NULL, 0, &(ImageInfo->FileName), NULL TSRMLS_CC);
+	base = php_basename(FileName, strlen(FileName), NULL, 0 TSRMLS_CC);
+	ImageInfo->FileName          = estrndup(base->val, base->len);
+	STR_RELEASE(base);
 	ImageInfo->read_thumbnail = read_thumbnail;
 	ImageInfo->read_all = read_all;
 	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
 
-	ImageInfo->encode_unicode    = safe_estrdup(EXIF_G(encode_unicode));
-	ImageInfo->decode_unicode_be = safe_estrdup(EXIF_G(decode_unicode_be));
-	ImageInfo->decode_unicode_le = safe_estrdup(EXIF_G(decode_unicode_le));
-	ImageInfo->encode_jis        = safe_estrdup(EXIF_G(encode_jis));
-	ImageInfo->decode_jis_be     = safe_estrdup(EXIF_G(decode_jis_be));
-	ImageInfo->decode_jis_le     = safe_estrdup(EXIF_G(decode_jis_le));
+	ImageInfo->encode_unicode    = estrdup(EXIF_G(encode_unicode));
+	ImageInfo->decode_unicode_be = estrdup(EXIF_G(decode_unicode_be));
+	ImageInfo->decode_unicode_le = estrdup(EXIF_G(decode_unicode_le));
+	ImageInfo->encode_jis        = estrdup(EXIF_G(encode_jis));
+	ImageInfo->decode_jis_be     = estrdup(EXIF_G(decode_jis_be));
+	ImageInfo->decode_jis_le     = estrdup(EXIF_G(decode_jis_le));
 
 
 	ImageInfo->ifd_nesting_level = 0;
@@ -4122,7 +4122,7 @@ PHP_FUNCTION(exif_thumbnail)
 	exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_NOTICE, "Returning thumbnail(%d)", ImageInfo.Thumbnail.size);
 #endif
 
-	ZVAL_STRINGL(return_value, ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size, 1);
+	ZVAL_STRINGL(return_value, ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size);
 	if (arg_c >= 3) {
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo TSRMLS_CC);

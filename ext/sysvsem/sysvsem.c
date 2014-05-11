@@ -132,7 +132,7 @@ THREAD_LS sysvsem_module php_sysvsem_module;
 
 /* {{{ release_sysvsem_sem
  */
-static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void release_sysvsem_sem(zend_resource *rsrc TSRMLS_DC)
 {
 	sysvsem_sem *sem_ptr = (sysvsem_sem *)rsrc->ptr;
 	struct sembuf sop[2];
@@ -289,7 +289,8 @@ PHP_FUNCTION(sem_get)
 	sem_ptr->count = 0;
 	sem_ptr->auto_release = auto_release;
 
-	sem_ptr->id = ZEND_REGISTER_RESOURCE(return_value, sem_ptr, php_sysvsem_module.le_sem);
+	ZEND_REGISTER_RESOURCE(return_value, sem_ptr, php_sysvsem_module.le_sem);
+	sem_ptr->id = Z_RES_HANDLE_P(return_value);
 }
 /* }}} */
 
@@ -305,7 +306,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, &arg_id, -1, "SysV semaphore", php_sysvsem_module.le_sem);
+	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, arg_id, -1, "SysV semaphore", php_sysvsem_module.le_sem);
 
 	if (!acquire && sem_ptr->count == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %ld (key 0x%x) is not currently acquired", Z_LVAL_P(arg_id), sem_ptr->key);
@@ -365,7 +366,7 @@ PHP_FUNCTION(sem_remove)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, &arg_id, -1, "SysV semaphore", php_sysvsem_module.le_sem);
+	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, arg_id, -1, "SysV semaphore", php_sysvsem_module.le_sem);
 
 #if HAVE_SEMUN
 	un.buf = &buf;

@@ -78,13 +78,11 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	zval *element;
 	php_process_env_t env;
 	zend_string *string_key;
-	char *data;
 #ifndef PHP_WIN32
 	char **ep;
 #endif
 	char *p;
-	uint cnt, l, sizeenv=0, el_len;
-	ulong num_key;
+	uint cnt, l, sizeenv=0;
 	HashTable *target_hash;
 
 	memset(&env, 0, sizeof(env));
@@ -109,22 +107,16 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	}
 
 	/* first, we have to get the size of all the elements in the hash */
-	ZEND_HASH_FOREACH_KEY_VAL(target_hash, num_key, string_key, element) {
-		zval tmp;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
+		zend_string *str = zval_get_string(element);
+		uint el_len = str->len;
+		STR_RELEASE(str);
 
-		if (Z_TYPE_P(element) != IS_STRING) {
-			ZVAL_DUP(&tmp, element);
-			convert_to_string(&tmp);
-			el_len = Z_STRLEN(tmp);
-			zval_dtor(&tmp);
-		} else {
-			el_len = Z_STRLEN_P(element);
-		}
 		if (el_len == 0) {
 			continue;
 		}
 
-		sizeenv += el_len+1;
+		sizeenv += el_len + 1;
 
 		if (string_key) {
 			if (string_key->len == 0) {
@@ -139,33 +131,22 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 	p = env.envp = (char *) pecalloc(sizeenv + 4, 1, is_persistent);
 
-	ZEND_HASH_FOREACH_KEY_VAL(target_hash, num_key, string_key, element) {
-		zval tmp;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
+		zend_string *str = zval_get_string(element);
 
-		if (Z_TYPE_P(element) != IS_STRING) {
-			ZVAL_DUP(&tmp, element);
-			convert_to_string(&tmp);
-		} else {
-			ZVAL_COPY_VALUE(&tmp, element);
-		}
-
-		el_len = Z_STRLEN(tmp);
-
-		if (el_len == 0) {
+		if (str->len == 0) {
 			goto next_element;
 		}
-
-		data = Z_STRVAL(tmp);
 
 		if (string_key) {
 			if (string_key->len == 0) {
 				goto next_element;
 			}
 
-			l = string_key->len + el_len + 2;
+			l = string_key->len + str->len + 2;
 			memcpy(p, string_key->val, string_key->len);
 			strncat(p, "=", 1);
-			strncat(p, data, el_len);
+			strncat(p, str->val, str->len);
 
 #ifndef PHP_WIN32
 			*ep = p;
@@ -173,17 +154,15 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 			p += l;
 		} else {
-			memcpy(p,data,el_len);
+			memcpy(p, str->val, str->len);
 #ifndef PHP_WIN32
 			*ep = p;
 			++ep;
 #endif
-			p += el_len + 1;
+			p += str->len + 1;
 		}
 next_element:
-		if (Z_TYPE_P(element) != IS_STRING) {
-			zval_dtor(&tmp);
-		}
+		STR_RELEASE(str);
 	} ZEND_HASH_FOREACH_END();
 
 	assert((uint)(p - env.envp) <= sizeenv);
@@ -222,9 +201,8 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc TSRMLS_DC)
 	/* Close all handles to avoid a deadlock */
 	for (i = 0; i < proc->npipes; i++) {
 		if (proc->pipes[i] != 0) {
-			if (--GC_REFCOUNT(proc->pipes[i]) <= 0) {
-				zend_list_delete(proc->pipes[i]);
-			}
+			GC_REFCOUNT(proc->pipes[i])--;
+			zend_list_close(proc->pipes[i]);
 			proc->pipes[i] = 0;
 		}
 	}
@@ -320,7 +298,7 @@ PHP_FUNCTION(proc_close)
 	ZEND_FETCH_RESOURCE(proc, struct php_process_handle *, zproc, -1, "process", le_proc_open);
 
 	FG(pclose_wait) = 1;
-	zend_list_delete(Z_RES_P(zproc));
+	zend_list_close(Z_RES_P(zproc));
 	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }

@@ -213,33 +213,37 @@ zend_module_entry pspell_module_entry = {
 ZEND_GET_MODULE(pspell)
 #endif
 
-static void php_pspell_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void php_pspell_close(zend_resource *rsrc TSRMLS_DC)
 {
 	PspellManager *manager = (PspellManager *)rsrc->ptr;
 
 	delete_pspell_manager(manager);
 }
 
-static void php_pspell_close_config(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void php_pspell_close_config(zend_resource *rsrc TSRMLS_DC)
 {
 	PspellConfig *config = (PspellConfig *)rsrc->ptr;
 
 	delete_pspell_config(config);
 }
 
-#define PSPELL_FETCH_CONFIG \
-	config = (PspellConfig *) zend_list_find(conf, &type);	\
-	if (config == NULL || type != le_pspell_config) {	\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a PSPELL config index", conf);	\
-		RETURN_FALSE;	\
-	}	\
+#define PSPELL_FETCH_CONFIG  do { \
+	zval *res = zend_hash_index_find(&EG(regular_list), conf); \
+	if (res == NULL || Z_RES_P(res)->type != le_pspell_config) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a PSPELL config index", conf); \
+		RETURN_FALSE; \
+	} \
+	config = (PspellConfig *)Z_RES_P(res)->ptr; \
+} while (0)
 
-#define PSPELL_FETCH_MANAGER \
-	manager = (PspellManager *) zend_list_find(scin, &type);	\
-	if (!manager || type != le_pspell) {	\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a PSPELL result index", scin);	\
-		RETURN_FALSE;	\
-	}	\
+#define PSPELL_FETCH_MANAGER do { \
+	zval *res = zend_hash_index_find(&EG(regular_list), scin); \
+	if (res == NULL || Z_RES_P(res)->type != le_pspell) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a PSPELL result index", scin); \
+		RETURN_FALSE; \
+	} \
+	manager = (PspellManager *)Z_RES_P(res)->ptr; \
+} while (0);
 
 /* {{{ PHP_MINIT_FUNCTION
  */
@@ -263,7 +267,7 @@ static PHP_FUNCTION(pspell_new)
 	int language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
 	long mode = 0L,  speed = 0L;
 	int argc = ZEND_NUM_ARGS();
-	int ind;
+	zval *ind;
 
 #ifdef PHP_WIN32
 	TCHAR aspell_dir[200];
@@ -348,7 +352,7 @@ static PHP_FUNCTION(pspell_new)
 	
 	manager = to_pspell_manager(ret);
 	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
-	RETURN_LONG(ind);
+	RETURN_LONG(Z_RES_HANDLE_P(ind));
 }
 /* }}} */
 
@@ -360,7 +364,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	int personal_len, language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
 	long mode = 0L,  speed = 0L;
 	int argc = ZEND_NUM_ARGS();
-	int ind;
+	zval *ind;
 
 #ifdef PHP_WIN32
 	TCHAR aspell_dir[200];
@@ -453,7 +457,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	
 	manager = to_pspell_manager(ret);
 	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
-	RETURN_LONG(ind);
+	RETURN_LONG(Z_RES_HANDLE_P(ind));
 }
 /* }}} */
 
@@ -461,8 +465,9 @@ static PHP_FUNCTION(pspell_new_personal)
    Load a dictionary based on the given config */
 static PHP_FUNCTION(pspell_new_config)
 {
-	int type, ind;
+	int type;
 	long conf;	
+	zval *ind;
 	PspellCanHaveError *ret;
 	PspellManager *manager;
 	PspellConfig *config;
@@ -483,7 +488,7 @@ static PHP_FUNCTION(pspell_new_config)
 	
 	manager = to_pspell_manager(ret);
 	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
-	RETURN_LONG(ind);
+	RETURN_LONG(Z_RES_HANDLE_P(ind));
 }
 /* }}} */
 
@@ -685,7 +690,7 @@ static PHP_FUNCTION(pspell_config_create)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	int language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
-	int ind;
+	zval *ind;
 	PspellConfig *config;
 
 #ifdef PHP_WIN32
@@ -743,7 +748,7 @@ static PHP_FUNCTION(pspell_config_create)
 	pspell_config_replace(config, "save-repl", "false");
 
 	ind = zend_list_insert(config, le_pspell_config TSRMLS_CC);
-	RETURN_LONG(ind);
+	RETURN_LONG(Z_RES_HANDLE_P(ind));
 }
 /* }}} */
 

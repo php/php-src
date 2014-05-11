@@ -243,7 +243,7 @@ typedef struct _phar_entry_info {
 	/* remainder */
 	/* when changing compression, save old flags in case fp is NULL */
 	php_uint32               old_flags;
-	zval                     *metadata;
+	zval                     metadata;
 	int                      metadata_len; /* only used for cached manifests */
 	php_uint32               filename_len;
 	char                     *filename;
@@ -311,7 +311,7 @@ struct _phar_archive_data {
 	php_uint32               sig_flags;
 	int                      sig_len;
 	char                     *signature;
-	zval                     *metadata;
+	zval                     metadata;
 	int                      metadata_len; /* only used for cached manifests */
 	uint                     phar_pos;
 	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
@@ -478,24 +478,16 @@ typedef struct _phar_entry_data {
 #if HAVE_SPL
 /* archive php object */
 union _phar_archive_object {
-	zend_object              std;
 	spl_filesystem_object    spl;
-	struct {
-		zend_object          std;
-		phar_archive_data    *archive;
-	} arc;
+	phar_archive_data        *archive;
 };
 #endif
 
 #if HAVE_SPL
 /* entry php object */
 union _phar_entry_object {
-	zend_object              std;
 	spl_filesystem_object    spl;
-	struct {
-		zend_object          std;
-		phar_entry_info      *entry;
-	} ent;
+	phar_entry_info          *entry;
 };
 #endif
 
@@ -538,7 +530,7 @@ static inline void phar_set_inode(phar_entry_info *entry TSRMLS_DC) /* {{{ */
 	tmp_len = entry->filename_len + entry->phar->fname_len;
 	memcpy(tmp, entry->phar->fname, entry->phar->fname_len);
 	memcpy(tmp + entry->phar->fname_len, entry->filename, entry->filename_len);
-	entry->inode = (unsigned short)zend_get_hash_value(tmp, tmp_len);
+	entry->inode = (unsigned short)zend_hash_func(tmp, tmp_len);
 }
 /* }}} */
 
@@ -570,8 +562,8 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 char *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar TSRMLS_DC);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC);
-int phar_parse_metadata(char **buffer, zval **metadata, int zip_metadata_len TSRMLS_DC);
-void destroy_phar_manifest_entry(void *pDest);
+int phar_parse_metadata(char **buffer, zval *metadata, int zip_metadata_len TSRMLS_DC);
+void destroy_phar_manifest_entry(zval *zv);
 int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position, int follow_links TSRMLS_DC);
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links TSRMLS_DC);
 int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error TSRMLS_DC);

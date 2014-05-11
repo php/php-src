@@ -218,7 +218,6 @@ typedef struct _zend_property_info {
 	zend_class_entry *ce;
 } zend_property_info;
 
-
 typedef struct _zend_arg_info {
 	const char *name;			// TODO: convert into zend_string ???
 	zend_uint name_len;
@@ -587,7 +586,6 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC);
 void zend_do_init_array(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC);
 void zend_do_add_array_element(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC);
 void zend_do_end_array(znode *result, const znode *array_node TSRMLS_DC);
-void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr TSRMLS_DC);
 void zend_do_list_init(TSRMLS_D);
 void zend_do_list_end(znode *result, znode *expr TSRMLS_DC);
 void zend_do_add_list_element(const znode *element TSRMLS_DC);

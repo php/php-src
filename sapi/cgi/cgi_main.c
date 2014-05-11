@@ -187,10 +187,12 @@ typedef struct _user_config_cache_entry {
 	HashTable *user_config;
 } user_config_cache_entry;
 
-static void user_config_cache_entry_dtor(user_config_cache_entry *entry)
+static void user_config_cache_entry_dtor(zval *el)
 {
+	user_config_cache_entry *entry = (user_config_cache_entry *)Z_PTR_P(el);
 	zend_hash_destroy(entry->user_config);
 	free(entry->user_config);
+	free(entry);
 }
 /* }}} */
 
@@ -1476,7 +1478,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals TSRMLS_
 #ifdef PHP_WIN32
 	php_cgi_globals->impersonate = 0;
 #endif
-	zend_hash_init(&php_cgi_globals->user_config_cache, 8, NULL, (dtor_func_t) user_config_cache_entry_dtor, 1);
+	zend_hash_init(&php_cgi_globals->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
 }
 /* }}} */
 

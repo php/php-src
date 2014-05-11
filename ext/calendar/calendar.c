@@ -260,29 +260,28 @@ PHP_MINFO_FUNCTION(calendar)
 	php_info_print_table_end();
 }
 
-static void _php_cal_info(int cal, zval **ret)
+static void _php_cal_info(int cal, zval *ret)
 {
-	zval *months, *smonths;
+	zval months, smonths;
 	int i;
 	struct cal_entry_t *calendar;
 
 	calendar = &cal_conversion_table[cal];
-	array_init(*ret);
+	array_init(ret);
 
-	MAKE_STD_ZVAL(months);
-	MAKE_STD_ZVAL(smonths);
-	array_init(months);
-	array_init(smonths);
+	array_init(&months);
+	array_init(&smonths);
 
 	for (i = 1; i <= calendar->num_months; i++) {
-		add_index_string(months, i, calendar->month_name_long[i]);
-		add_index_string(smonths, i, calendar->month_name_short[i]);
+		add_index_string(&months, i, calendar->month_name_long[i]);
+		add_index_string(&smonths, i, calendar->month_name_short[i]);
 	}
-	add_assoc_zval(*ret, "months", months);
-	add_assoc_zval(*ret, "abbrevmonths", smonths);
-	add_assoc_long(*ret, "maxdaysinmonth", calendar->max_days_in_month);
-	add_assoc_string(*ret, "calname", calendar->name);
-	add_assoc_string(*ret, "calsymbol", calendar->symbol);
+	
+	add_assoc_zval(ret, "months", &months);
+	add_assoc_zval(ret, "abbrevmonths", &smonths);
+	add_assoc_long(ret, "maxdaysinmonth", calendar->max_days_in_month);
+	add_assoc_string(ret, "calname", calendar->name);
+	add_assoc_string(ret, "calsymbol", calendar->symbol);
 	
 }
 
@@ -299,14 +298,13 @@ PHP_FUNCTION(cal_info)
 
 	if (cal == -1) {
 		int i;
-		zval *val;
+		zval val;
 
 		array_init(return_value);
 
 		for (i = 0; i < CAL_NUM_CALS; i++) {
-			MAKE_STD_ZVAL(val);
 			_php_cal_info(i, &val);
-			add_index_zval(return_value, i, val);
+			add_index_zval(return_value, i, &val);
 		}
 		return;
 	}
@@ -317,7 +315,7 @@ PHP_FUNCTION(cal_info)
 		RETURN_FALSE;
 	}
 
-	_php_cal_info(cal, &return_value);
+	_php_cal_info(cal, return_value);
 
 }
 /* }}} */
@@ -447,7 +445,7 @@ PHP_FUNCTION(jdtogregorian)
 	SdnToGregorian(julday, &year, &month, &day);
 	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 
-	RETURN_STRING(date, 1);
+	RETURN_STRING(date);
 }
 /* }}} */
 
@@ -480,7 +478,7 @@ PHP_FUNCTION(jdtojulian)
 	SdnToJulian(julday, &year, &month, &day);
 	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 
-	RETURN_STRING(date, 1);
+	RETURN_STRING(date);
 }
 /* }}} */
 
@@ -610,7 +608,7 @@ PHP_FUNCTION(jdtojewish)
 	SdnToJewish(julday, &year, &month, &day);
 	if (!heb) {
 		snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
-		RETURN_STRING(date, 1);
+		RETURN_STRING(date);
 	} else {
 		if (year <= 0 || year > 9999) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Year out of range (0-9999).");
@@ -626,7 +624,7 @@ PHP_FUNCTION(jdtojewish)
 			efree(yearp);
 		}
 
-		RETURN_STRING(hebdate, 1);
+		RETURN_STRING(hebdate);
 
 	}
 }
@@ -661,7 +659,7 @@ PHP_FUNCTION(jdtofrench)
 	SdnToFrench(julday, &year, &month, &day);
 	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 
-	RETURN_STRING(date, 1);
+	RETURN_STRING(date);
 }
 /* }}} */
 
@@ -697,10 +695,10 @@ PHP_FUNCTION(jddayofweek)
 
 	switch (mode) {
 	case CAL_DOW_SHORT:
-		RETURN_STRING(daynamel, 1);
+		RETURN_STRING(daynamel);
 		break;
 	case CAL_DOW_LONG:
-		RETURN_STRING(daynames, 1);
+		RETURN_STRING(daynames);
 		break;
 	case CAL_DOW_DAYNO:
 	default:
@@ -750,7 +748,7 @@ PHP_FUNCTION(jdmonthname)
 		break;
 	}
 
-	RETURN_STRING(monthname, 1);
+	RETURN_STRING(monthname);
 }
 /* }}} */
 
