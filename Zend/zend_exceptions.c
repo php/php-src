@@ -363,7 +363,7 @@ ZEND_METHOD(error_exception, getSeverity)
 
 #define TRACE_ARG_APPEND(vallen)								\
 	*str = (char*)erealloc(*str, *len + 1 + vallen);					\
-	memcpy((*str) + *len - l_added + 1 + vallen, (*str) + *len - l_added + 1, l_added);
+	memmove((*str) + *len - l_added + 1 + vallen, (*str) + *len - l_added + 1, l_added);
 
 /* }}} */
 
