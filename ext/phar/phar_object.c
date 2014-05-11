@@ -1513,7 +1513,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 			}
 
 			close_fp = 0;
-			opened = (char *) estrndup(str, sizeof("[stream]") + 1);
+			opened = (char *) estrndup(str, sizeof("[stream]") - 1);
 			goto after_open_fp;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_PP(value), spl_ce_SplFileInfo TSRMLS_CC)) {
