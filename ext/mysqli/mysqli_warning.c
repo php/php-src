@@ -132,7 +132,7 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
 	result = mysql->m->use_result(mysql, 0 TSRMLS_CC);
 
 	for (;;) {
-		zval **entry;
+		zval *entry;
 		int errno;
 
 		MAKE_STD_ZVAL(row);
@@ -146,15 +146,15 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
 		zend_hash_move_forward(Z_ARRVAL_P(row));
 
 		/* 1. Here comes the error no */
-		zend_hash_get_current_data(Z_ARRVAL_P(row), (void **)&entry);
+		entry = zend_hash_get_current_data(Z_ARRVAL_P(row));
 		convert_to_long_ex(entry);
-		errno = Z_LVAL_PP(entry);
+		errno = Z_LVAL_P(entry);
 		zend_hash_move_forward(Z_ARRVAL_P(row));
 
 		/* 2. Here comes the reason */
-		zend_hash_get_current_data(Z_ARRVAL_P(row), (void **)&entry);
+		entry = zend_hash_get_current_data(Z_ARRVAL_P(row));
 
-		w = php_new_warning(*entry, errno TSRMLS_CC);
+		w = php_new_warning(entry, errno TSRMLS_CC);
 		/*
 		  Don't destroy entry, because the row destroy will decrease
 		  the refcounter. Decreased twice then mysqlnd_free_result()
@@ -245,7 +245,7 @@ zval *mysqli_warning_errno(mysqli_object *obj, zval *retval TSRMLS_DC)
 	}
 	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	ZVAL_LONG(retval, w->errorno);
-	return SUCCESS;
+	return retval;
 }
 /* }}} */
 

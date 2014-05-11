@@ -438,9 +438,6 @@ HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		ZVAL_STR(&member, entry->name);
 		value = mysqli_read_property(object, &member, BP_VAR_IS, 0, &rv TSRMLS_CC);
 		if (value != &EG(uninitialized_zval)) {
-			if (Z_REFCOUNTED_P(value)) {
-				Z_ADDREF_P(value);
-			}
 			zend_hash_add(retval, Z_STR(member), value);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -484,7 +481,7 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type
 		handlers = &mysqli_object_handlers;
 	}
 
-	intern->zo.handlers = &mysqli_object_handlers;
+	intern->zo.handlers = handlers;
 
 	return &intern->zo;
 }

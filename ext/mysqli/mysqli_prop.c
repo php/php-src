@@ -35,7 +35,7 @@
 	if (!obj->ptr || ((MYSQLI_RESOURCE *)obj->ptr)->status < value ) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Property access is not allowed yet"); \
 		ZVAL_NULL(retval); \
-		return SUCCESS; \
+		return retval; \
 	} \
 
 #define MYSQLI_GET_MYSQL(statusval) \
@@ -43,7 +43,7 @@ MYSQL *p; \
 if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name->val);\
 	ZVAL_NULL(retval);\
-	return SUCCESS; \
+	return retval; \
 } else { \
 	CHECK_STATUS(statusval);\
     p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;\
@@ -54,7 +54,7 @@ MYSQL_RES *p; \
 if (!obj->ptr) { \
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name->val);\
 	ZVAL_NULL(retval);\
-	return SUCCESS; \
+	return retval; \
 } else { \
 	CHECK_STATUS(statusval);\
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr; \
@@ -66,7 +66,7 @@ MYSQL_STMT *p; \
 if (!obj->ptr) { \
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name->val);\
 	ZVAL_NULL(retval);\
-	return SUCCESS; \
+	return retval; \
 } else { \
 	CHECK_STATUS(statusval);\
 	p = (MYSQL_STMT *)((MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->stmt;\
