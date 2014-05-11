@@ -866,24 +866,6 @@ PHP_FUNCTION(mysqli_error)
 }
 /* }}} */
 
-#if 0
-#ifndef MYSQLI_USE_MYSQLND
-/* {{{ php_mysqli_stmt_copy_it */
-static void
-php_mysqli_stmt_copy_it(zval *copies, zval *original, uint param_count, uint current)
-{
-	if (!*copies) {
-		*copies = ecalloc(param_count, sizeof(zval *));
-	}
-	MAKE_STD_ZVAL((*copies)[current]);
-	*(*copies)[current] = *original;
-	Z_SET_REFCOUNT_P((*copies)[current], 1);
-	zval_copy_ctor((*copies)[current]);
-}
-/* }}} */
-#endif
-#endif
-
 /* {{{ proto bool mysqli_stmt_execute(object stmt)
    Execute a prepared statement */
 PHP_FUNCTION(mysqli_stmt_execute)
@@ -900,6 +882,22 @@ PHP_FUNCTION(mysqli_stmt_execute)
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 #ifndef MYSQLI_USE_MYSQLND
+	if (stmt->param.var_cnt) {
+		int j;
+		for (i = 0; i < stmt->param.var_cnt; i++) {
+			if (!Z_ISREF(stmt->param.vars[i])) {
+				continue;
+			}
+			for (j = i + 1; j < stmt->param.var_cnt; j++) {
+				/* Oops, someone binding the same variable - clone */
+				if (Z_TYPE(stmt->param.vars[j]) == Z_TYPE(stmt->param.vars[i]) &&
+					   	Z_REFVAL(stmt->param.vars[j]) == Z_REFVAL(stmt->param.vars[i])) {
+					SEPARATE_ZVAL(&stmt->param.vars[j]);
+					break;
+				}
+			}
+		}
+	}
 	for (i = 0; i < stmt->param.var_cnt; i++) {
 		if (!Z_ISUNDEF(stmt->param.vars[i])) {
 			zval *param;
