@@ -257,24 +257,19 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 	ulong num_key;													\
 	zval *struc;
 
-#define PS_ENCODE_LOOP(code) do {										\
-		HashTable *_ht = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));	\
-		int key_type;													\
-																		\
-		for (zend_hash_internal_pointer_reset(_ht);						\
-				(key_type = zend_hash_get_current_key(_ht, &key,		\
-						&num_key, 0)) != HASH_KEY_NON_EXISTENT; 	\
-					zend_hash_move_forward(_ht)) {						\
-			if (key_type == HASH_KEY_IS_LONG) {							\
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE,				\
-						"Skipping numeric key %ld", num_key);			\
-				continue;												\
-			}															\
-			if ((struc = php_get_session_var(key TSRMLS_CC))) {			\
-				code;		 											\
-			} 															\
-		}																\
-	} while(0)
+#define PS_ENCODE_LOOP(code) do {									\
+	HashTable *_ht = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));	\
+	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
+		if (key == NULL) {											\
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE,				\
+					"Skipping numeric key %ld", num_key);			\
+			continue;												\
+		}															\
+		if ((struc = php_get_session_var(key TSRMLS_CC))) {			\
+			code;		 											\
+		} 															\
+	} ZEND_HASH_FOREACH_END();										\
+} while(0)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 
