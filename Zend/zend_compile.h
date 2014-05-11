@@ -218,7 +218,6 @@ typedef struct _zend_property_info {
 	zend_class_entry *ce;
 } zend_property_info;
 
-
 typedef struct _zend_arg_info {
 	const char *name;			// TODO: convert into zend_string ???
 	zend_uint name_len;
