@@ -2547,6 +2547,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_cookie_params, 0, 0, 1)
 	ZEND_ARG_INFO(0, httponly)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_gc, 0, 0, 0)
+	ZEND_ARG_INFO(0, max_life_time)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_session_class_open, 0)
 	ZEND_ARG_INFO(0, save_path)
 	ZEND_ARG_INFO(0, session_name)
@@ -2608,6 +2612,7 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_abort,             arginfo_session_void)
 	PHP_FE(session_reset,             arginfo_session_void)
 	PHP_FE(session_status,            arginfo_session_void)
+	PHP_FE(session_gc,                arginfo_session_void)
 	PHP_FE(session_register_shutdown, arginfo_session_void)
 	PHP_FALIAS(session_commit, session_write_close, arginfo_session_void)
 	PHP_FE_END

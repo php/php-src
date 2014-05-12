@@ -41,9 +41,9 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_start() : variation ***
 bool(true)
-string(26) "%s"
+string(26) %s
 NULL
-string(26) "%s"
+string(26) %s
 bool(true)
 array(1) {
   ["abc"]=>
