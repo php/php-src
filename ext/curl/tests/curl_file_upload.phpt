@@ -1,5 +1,6 @@
 --TEST--
 CURL file uploading
+--INI--
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--
