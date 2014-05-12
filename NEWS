@@ -20,6 +20,9 @@ PHP                                                                        NEWS
   . Fixed bug #67238 (Ungreedy and min/max quantifier bug, applied patch
     from the upstream). (Anatol)
 
+- mbstring
+  . Fixed bug #67199 (mb_regex_encoding mismatch). (Yasuo)
+
 01 May 2014, PHP 5.6.0 Beta 2
 
 - CLI server:
