@@ -2938,7 +2938,7 @@ get_function_via_handler:
 			} else if (!fcc->object_ptr && !IS_STATIC_METHOD(fcc->function_handler)) {
 				int severity;
 				char *verb;
-				if (IS_PROTECTED_METHOD(fcc->function_handler)) {
+				if (fcc->function_handler->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 					severity = E_STRICT;
 					verb = "should not";
 				} else {
