@@ -877,7 +877,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #ifndef MYSQL_USE_MYSQLND
 			mysql->conn = mysql_init(NULL);
 #else
-			mysql->conn = mysql_init(persistent);
+			mysql->conn = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, persistent);
 #endif
 
 			if (connect_timeout != -1) {
@@ -886,7 +886,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #ifndef MYSQL_USE_MYSQLND
 			if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
 #else
-			if (mysqlnd_connect(mysql->conn, host, user, passwd, passwd_len, NULL, 0, port, socket, client_flags TSRMLS_CC) == NULL)
+			if (mysqlnd_connect(mysql->conn, host, user, passwd, passwd_len, NULL, 0, port, socket, client_flags, MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA TSRMLS_CC) == NULL)
 #endif
 			{
 				/* Populate connect error globals so that the error functions can read them */
@@ -934,7 +934,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #ifndef MYSQL_USE_MYSQLND
 					if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
 #else
-					if (mysqlnd_connect(mysql->conn, host, user, passwd, passwd_len, NULL, 0, port, socket, client_flags TSRMLS_CC) == NULL)
+					if (mysqlnd_connect(mysql->conn, host, user, passwd, passwd_len, NULL, 0, port, socket, client_flags, MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA TSRMLS_CC) == NULL)
 #endif
 					{
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Link to server lost, unable to reconnect");
@@ -996,7 +996,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #ifndef MYSQL_USE_MYSQLND
 		mysql->conn = mysql_init(NULL);
 #else
-		mysql->conn = mysql_init(persistent);
+		mysql->conn = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, persistent);
 #endif
 		if (!mysql->conn) {
 			MySG(connect_error) = estrdup("OOM");
@@ -1013,7 +1013,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #ifndef MYSQL_USE_MYSQLND
 		if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
 #else
-		if (mysqlnd_connect(mysql->conn, host, user, passwd, passwd_len, NULL, 0, port, socket, client_flags TSRMLS_CC) == NULL)
+		if (mysqlnd_connect(mysql->conn, host, user, passwd, passwd_len, NULL, 0, port, socket, client_flags, MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA TSRMLS_CC) == NULL)
 #endif
 		{
 			/* Populate connect error globals so that the error functions can read them */
@@ -2173,19 +2173,12 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 			fci.symbol_table = NULL;
 			fci.object_ptr = return_value;
 			fci.retval_ptr_ptr = &retval_ptr;
-			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
-				if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
-					HashTable *htl = Z_ARRVAL_P(ctor_params);
-					Bucket *p;
+			fci.params = NULL;
+			fci.param_count = 0;
+			fci.no_separation = 1;
 
-					fci.param_count = 0;
-					fci.params = safe_emalloc(sizeof(zval*), htl->nNumOfElements, 0);
-					p = htl->pListHead;
-					while (p != NULL) {
-						fci.params[fci.param_count++] = (zval**)p->pData;
-						p = p->pListNext;
-					}
-				} else {
+			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
+				if (zend_fcall_info_args(&fci, ctor_params TSRMLS_CC) == FAILURE) {
 					/* Two problems why we throw exceptions here: PHP is typeless
 					 * and hence passing one argument that's not an array could be
 					 * by mistake and the other way round is possible, too. The
@@ -2195,11 +2188,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 					zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Parameter ctor_params must be an array", 0 TSRMLS_CC);
 					return;
 				}
-			} else {
-				fci.param_count = 0;
-				fci.params = NULL;
 			}
-			fci.no_separation = 1;
 
 			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;

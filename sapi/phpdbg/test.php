@@ -6,11 +6,16 @@ if (isset($include)) {
 $stdout = fopen("php://stdout", "w+");
 
 class phpdbg {
-    public function isGreat($greeting = null) {
-        printf(
-            "%s: %s\n", __METHOD__, $greeting);
-        return $this;
-    }
+	private $sprintf = "%s: %s\n";
+
+	public function isGreat($greeting = null) {
+		printf($this->sprintf, __METHOD__, $greeting);
+		return $this;
+	}
+}
+
+function mine() {
+	var_dump(func_get_args());
 }
 
 function test($x, $y = 0) {
@@ -49,3 +54,34 @@ function phpdbg_test_ob()
 	echo 'End';
 	echo $b;
 }
+
+$array = [
+	1,
+	2,
+	[3, 4],
+	[5, 6],
+];
+
+$array[] = 7;
+
+array_walk($array, function (&$item) {
+	if (is_array($item))
+		$item[0] += 2;
+	else
+		$item -= 1;
+});
+
+class testClass {
+	public $a = 2;
+	protected  $b = [1, 3];
+	private $c = 7;
+}
+
+$obj = new testClass;
+
+$test = $obj->a;
+
+$obj->a += 2;
+$test -= 2;
+
+unset($obj);

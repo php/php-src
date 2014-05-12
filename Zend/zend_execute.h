@@ -158,10 +158,10 @@ static zend_always_inline int i_zend_is_true(zval *op)
 	return result;
 }
 
-ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC);
-ZEND_API int zval_update_constant_inline_change(zval **pp, void *arg TSRMLS_DC);
-ZEND_API int zval_update_constant_no_inline_change(zval **pp, void *arg TSRMLS_DC);
-ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC);
+ZEND_API int zval_update_constant(zval **pp, zend_bool inline_change TSRMLS_DC);
+ZEND_API int zval_update_constant_inline_change(zval **pp, zend_class_entry *scope TSRMLS_DC);
+ZEND_API int zval_update_constant_no_inline_change(zval **pp, zend_class_entry *scope TSRMLS_DC);
+ZEND_API int zval_update_constant_ex(zval **pp, zend_bool inline_change, zend_class_entry *scope TSRMLS_DC);
 
 /* dedicated Zend executor functions - do not use! */
 #define ZEND_VM_STACK_PAGE_SIZE ((16 * 1024) - 16)
@@ -361,6 +361,8 @@ ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, int fetch_type TSRMLS_DC);
 ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
+
+ZEND_API void zend_fetch_dimension_by_zval(zval **result, zval *container, zval *dim TSRMLS_DC);
 
 #ifdef ZEND_WIN32
 void zend_init_timeout_thread(void);

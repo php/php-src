@@ -183,6 +183,7 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
 
 const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 {
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
 #define CASE(s) case s: return #s
 	switch (opcode) {
 		CASE(ZEND_NOP);
@@ -360,4 +361,8 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 		default:
 			return "UNKNOWN";
 	}
+#else
+	const char *ret = zend_get_opcode_name(opcode);
+	return ret?ret:"UNKNOWN";
+#endif
 } /* }}} */

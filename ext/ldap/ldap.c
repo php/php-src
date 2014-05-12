@@ -405,6 +405,16 @@ PHP_FUNCTION(ldap_bind)
 		RETURN_FALSE;
 	}
 
+	if (ldap_bind_dn != NULL && memchr(ldap_bind_dn, '\0', ldap_bind_dnlen) != NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "DN contains a null byte");
+		RETURN_FALSE;
+	}
+
+	if (ldap_bind_pw != NULL && memchr(ldap_bind_pw, '\0', ldap_bind_pwlen) != NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Password contains a null byte");
+		RETURN_FALSE;
+	}
+
 	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
 
 	if ((rc = ldap_bind_s(ld->link, ldap_bind_dn, ldap_bind_pw, LDAP_AUTH_SIMPLE)) != LDAP_SUCCESS) {

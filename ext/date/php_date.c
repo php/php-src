@@ -2729,7 +2729,9 @@ PHP_METHOD(DateTime, __construct)
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
-		php_date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 1 TSRMLS_CC);
+		if (!php_date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 1 TSRMLS_CC)) {
+			ZVAL_NULL(getThis());
+		}
 	}
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
@@ -2813,6 +2815,10 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 						convert_to_string(*z_timezone);
 
 						tzi = php_date_parse_tzfile(Z_STRVAL_PP(z_timezone), DATE_TIMEZONEDB TSRMLS_CC);
+
+						if (tzi == NULL) {
+							return 0;
+						}
 
 						ALLOC_INIT_ZVAL(tmp_obj);
 						tzobj = zend_object_store_get_object(php_date_instantiate(date_ce_timezone, tmp_obj TSRMLS_CC) TSRMLS_CC);

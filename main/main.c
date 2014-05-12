@@ -419,7 +419,7 @@ static PHP_INI_DISP(display_errors_mode)
  */
 static PHP_INI_MH(OnUpdateInternalEncoding)
 {
-	if (new_value_length) {
+	if (new_value) {
 		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
 		OnUpdateString(entry, SG(default_charset), strlen(SG(default_charset))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
@@ -432,7 +432,7 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
  */
 static PHP_INI_MH(OnUpdateInputEncoding)
 {
-	if (new_value_length) {
+	if (new_value) {
 		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
 		OnUpdateString(entry, SG(default_charset), strlen(SG(default_charset))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
@@ -445,7 +445,7 @@ static PHP_INI_MH(OnUpdateInputEncoding)
  */
 static PHP_INI_MH(OnUpdateOutputEncoding)
 {
-	if (new_value_length) {
+	if (new_value) {
 		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
 		OnUpdateString(entry, SG(default_charset), strlen(SG(default_charset))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
@@ -597,9 +597,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("default_charset",		PHP_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateString,			default_charset,		sapi_globals_struct, sapi_globals)
 	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct, sapi_globals)
-	STD_PHP_INI_ENTRY("internal_encoding",		"",			PHP_INI_ALL,	OnUpdateInternalEncoding,	internal_encoding,	php_core_globals, core_globals)
-	STD_PHP_INI_ENTRY("input_encoding",			"",			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
-	STD_PHP_INI_ENTRY("output_encoding",		"",			PHP_INI_ALL,	OnUpdateOutputEncoding,				output_encoding,	php_core_globals, core_globals)
+	STD_PHP_INI_ENTRY("internal_encoding",		NULL,			PHP_INI_ALL,	OnUpdateInternalEncoding,	internal_encoding,	php_core_globals, core_globals)
+	STD_PHP_INI_ENTRY("input_encoding",			NULL,			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
+	STD_PHP_INI_ENTRY("output_encoding",		NULL,			PHP_INI_ALL,	OnUpdateOutputEncoding,				output_encoding,	php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("error_log",				NULL,		PHP_INI_ALL,		OnUpdateErrorLog,			error_log,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("sys_temp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	sys_temp_dir,			php_core_globals,	core_globals)

@@ -18,8 +18,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef PHP_IBASE_INCLUDES_H
 #define PHP_IBASE_INCLUDES_H
 
@@ -37,6 +35,7 @@
 
 #define IB_STATUS (IBG(status))
 
+/* XXX ZEND_DEBUG_ is misleading, it should be something like IBASE_DEBUG. */
 #ifdef ZEND_DEBUG_
 #define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
 #endif

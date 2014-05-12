@@ -400,7 +400,15 @@ static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	(*p) += 2;
 	
-	object_init_ex(*rval, ce);
+	if (ce->serialize == NULL) {
+		object_init_ex(*rval, ce);
+	} else {
+		/* If this class implements Serializable, it should not land here but in object_custom(). The passed string
+		obviously doesn't descend from the regular serializer. */
+		zend_error(E_WARNING, "Erroneous data format for unserializing '%s'", ce->name);
+		return 0;
+	}
+
 	return elements;
 }
 
@@ -411,6 +419,10 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 {
 	zval *retval_ptr = NULL;
 	zval fname;
+
+	if (Z_TYPE_PP(rval) != IS_OBJECT) {
+		return 0;
+	}
 
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_OBJPROP_PP(rval), elements, 1)) {
 		return 0;

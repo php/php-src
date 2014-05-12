@@ -1,9 +1,8 @@
 ARG_ENABLE("opcache", "whether to enable Zend OPcache support", "yes");
 
-if (PHP_OPCACHE != "no") {
+var PHP_OPCACHE_PGO = false;
 
-	PHP_PGI = "no"; // workaround
-	PHP_PGO = "no"; // workaround
+if (PHP_OPCACHE != "no") {
 
 	EXTENSION('opcache', "\
 		ZendAccelerator.c \

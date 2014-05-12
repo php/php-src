@@ -217,7 +217,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 #if !defined(MYSQLI_USE_MYSQLND)
 		if (!(mysql->mysql = mysql_init(NULL))) {
 #else
-		if (!(mysql->mysql = mysqlnd_init(persistent))) {
+		if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, persistent))) {
 #endif
 			goto err;
 		}
@@ -240,7 +240,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, flags) == NULL)
 #else
 	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
-						port, socket, flags TSRMLS_CC) == NULL)
+						port, socket, flags, MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA TSRMLS_CC) == NULL)
 #endif
 	{
 		/* Save error messages - for mysqli_connect_error() & mysqli_connect_errno() */
@@ -575,7 +575,11 @@ PHP_FUNCTION(mysqli_query)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty query");
 		RETURN_FALSE;
 	}
+#ifdef MYSQLI_USE_MYSQLND
+	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT && (resultmode & ~(MYSQLI_ASYNC | MYSQLI_STORE_RESULT_COPY_DATA)) != MYSQLI_STORE_RESULT) {
+#else
 	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT && (resultmode & ~MYSQLI_ASYNC) != MYSQLI_STORE_RESULT) {
+#endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for resultmode");
 		RETURN_FALSE;
 	}
@@ -609,9 +613,18 @@ PHP_FUNCTION(mysqli_query)
 		RETURN_TRUE;
 	}
 
-	switch (resultmode) {
+#ifdef MYSQLI_USE_MYSQLND
+	switch (resultmode & ~(MYSQLI_ASYNC | MYSQLI_STORE_RESULT_COPY_DATA)) {
+#else
+	switch (resultmode & ~MYSQLI_ASYNC) {
+#endif
 		case MYSQLI_STORE_RESULT:
-			result = mysql_store_result(mysql->mysql);
+#ifdef MYSQLI_USE_MYSQLND
+			if (resultmode & MYSQLI_STORE_RESULT_COPY_DATA) {
+				result = mysqlnd_store_result_ofs(mysql->mysql);
+			} else
+#endif
+				result = mysql_store_result(mysql->mysql);
 			break;
 		case MYSQLI_USE_RESULT:
 			result = mysql_use_result(mysql->mysql);
@@ -1046,12 +1059,14 @@ PHP_FUNCTION(mysqli_get_charset)
 /* }}} */
 #endif
 
-
 #if !defined(MYSQLI_USE_MYSQLND)
+extern char * mysqli_escape_string_for_tx_name_in_comment(const char * const name TSRMLS_DC);
+
 /* {{{ proto bool mysqli_begin_transaction_libmysql */
-static int mysqli_begin_transaction_libmysql(MYSQL * conn, const unsigned int mode, const char * const name)
+static int mysqli_begin_transaction_libmysql(MYSQL * conn, const unsigned int mode, const char * const name TSRMLS_DC)
 {
 	int ret;
+	zend_bool err = FALSE;
 	smart_str tmp_str = {0, 0, 0};
 	if (mode & TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
 		if (tmp_str.len) {
@@ -1059,33 +1074,37 @@ static int mysqli_begin_transaction_libmysql(MYSQL * conn, const unsigned int mo
 		}
 		smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
 	}
-	if (mode & TRANS_START_READ_WRITE) {
-		if (tmp_str.len) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+	if (mode & (TRANS_START_READ_WRITE | TRANS_START_READ_ONLY)) {
+		if (mysql_get_server_version(conn) < 50605L) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
+			err = TRUE;
+		} else if (mode & TRANS_START_READ_WRITE) {
+			if (tmp_str.len) {
+				smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			}
+			smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
+		} else if (mode & TRANS_START_READ_ONLY) {
+			if (tmp_str.len) {
+				smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			}
+			smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
 		}
-		smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
-	}
-	if (mode & TRANS_START_READ_ONLY) {
-		if (tmp_str.len) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
-		}
-		smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
 	}
 	smart_str_0(&tmp_str);
 
-	{
-		char * commented_name = NULL;
-		unsigned int commented_name_len = name? spprintf(&commented_name, 0, " /*%s*/", name):0;
+	if (err == FALSE){
+		char * name_esc = mysqli_escape_string_for_tx_name_in_comment(name TSRMLS_CC);
 		char * query;
 		unsigned int query_len = spprintf(&query, 0, "START TRANSACTION%s %s",
-										  commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
+										  name_esc? name_esc:"", tmp_str.c? tmp_str.c:"");
+
 		smart_str_free(&tmp_str);
+		if (name_esc) {
+			efree(name_esc);
+		}
 
 		ret = mysql_real_query(conn, query, query_len);
 		efree(query);
-		if (commented_name) {
-			efree(commented_name);
-		}
 	}
 	return ret;
 }
@@ -1120,7 +1139,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 	}
 	
 #if !defined(MYSQLI_USE_MYSQLND)
-	if (mysqli_begin_transaction_libmysql(mysql->mysql, flags, name)) {
+	if (mysqli_begin_transaction_libmysql(mysql->mysql, flags, name TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 #else

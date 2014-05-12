@@ -1129,7 +1129,7 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 			node = NULL;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
 
-			if ( !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
+			if ( !node->children || !node->parent || !node->next || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
 				node = node->children;
 			} else {
 				iter_data = sxe->iter.data;
@@ -1269,6 +1269,9 @@ SXE_METHOD(xpath)
 	}
 	if (!sxe->node) {
 		php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement((xmlDocPtr) sxe->document->ptr), NULL TSRMLS_CC);
+		if (!sxe->node) {
+			RETURN_FALSE;
+		}
 	}
 
 	nodeptr = php_sxe_get_first_node(sxe, sxe->node->node TSRMLS_CC);
@@ -1533,15 +1536,18 @@ SXE_METHOD(getDocNamespaces)
 		return;
 	}
 
-	array_init(return_value);
-
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 	if(from_root){
 		node = xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr);
 	}else{
 		GET_NODE(sxe, node);
 	}
-
+	
+	if (node == NULL) {
+		RETURN_FALSE;
+	}
+	
+	array_init(return_value);
 	sxe_add_registered_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
 }
 /* }}} */

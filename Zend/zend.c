@@ -954,7 +954,7 @@ ZEND_API void zend_deactivate(TSRMLS_D) /* {{{ */
 
 	zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
 
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 	if (GC_G(gc_enabled) && !CG(unclean_shutdown)) {
 		gc_collect_cycles(TSRMLS_C);
 	}

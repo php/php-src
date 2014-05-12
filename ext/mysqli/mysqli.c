@@ -721,6 +721,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_USE_RESULT", MYSQLI_USE_RESULT, CONST_CS | CONST_PERSISTENT);
 #if defined (MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_ASYNC", MYSQLI_ASYNC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_STORE_RESULT_COPY_DATA", MYSQLI_STORE_RESULT_COPY_DATA, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* for mysqli_fetch_assoc */
@@ -1296,19 +1297,12 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fci.symbol_table = NULL;
 			fci.object_ptr = return_value;
 			fci.retval_ptr_ptr = &retval_ptr;
-			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
-				if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
-					HashTable *params_ht = Z_ARRVAL_P(ctor_params);
-					Bucket *p;
+			fci.params = NULL;
+			fci.param_count = 0;
+			fci.no_separation = 1;
 
-					fci.param_count = 0;
-					fci.params = safe_emalloc(sizeof(zval*), params_ht->nNumOfElements, 0);
-					p = params_ht->pListHead;
-					while (p != NULL) {
-						fci.params[fci.param_count++] = (zval**)p->pData;
-						p = p->pListNext;
-					}
-				} else {
+			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
+				if (zend_fcall_info_args(&fci, ctor_params TSRMLS_CC) == FAILURE) {
 					/* Two problems why we throw exceptions here: PHP is typeless
 					 * and hence passing one argument that's not an array could be
 					 * by mistake and the other way round is possible, too. The
@@ -1318,11 +1312,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Parameter ctor_params must be an array", 0 TSRMLS_CC);
 					return;
 				}
-			} else {
-				fci.param_count = 0;
-				fci.params = NULL;
 			}
-			fci.no_separation = 1;
 
 			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;

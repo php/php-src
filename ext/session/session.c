@@ -1881,31 +1881,6 @@ static PHP_FUNCTION(session_module_name)
 }
 /* }}} */
 
-/* {{{ proto mixed session_serializer_name([string newname])
-   Return the current serializer name used for encode/decode session data. If newname is given, the serialzer name is replaced with newname and return bool */
-static PHP_FUNCTION(session_serializer_name)
-{
-	char *name = NULL;
-	int name_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
-		return;
-	}
-
-	/* Return serializer name */
-	if (!name) {
-		RETURN_STRING(zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler"), 0), 1);
-	}
-
-	/* Set serializer name */
-	if (zend_alter_ini_entry("session.serialize_handler", sizeof("session.serialize_handler"), name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == SUCCESS) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
 /* {{{ proto void session_set_save_handler(string open, string close, string read, string write, string destroy, string gc, string create_sid)
    Sets user-level functions */
 static PHP_FUNCTION(session_set_save_handler)
@@ -2521,10 +2496,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_module_name, 0, 0, 0)
 	ZEND_ARG_INFO(0, module)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_serializer_name, 0, 0, 0)
-	ZEND_ARG_INFO(0, module)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_session_save_path, 0, 0, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
@@ -2576,10 +2547,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_cookie_params, 0, 0, 1)
 	ZEND_ARG_INFO(0, httponly)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_session_gc, 0)
-	ZEND_ARG_INFO(0, maxlifetime)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_session_class_open, 0)
 	ZEND_ARG_INFO(0, save_path)
 	ZEND_ARG_INFO(0, session_name)
@@ -2623,7 +2590,6 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry session_functions[] = {
 	PHP_FE(session_name,              arginfo_session_name)
 	PHP_FE(session_module_name,       arginfo_session_module_name)
-	PHP_FE(session_serializer_name,   arginfo_session_serializer_name)
 	PHP_FE(session_save_path,         arginfo_session_save_path)
 	PHP_FE(session_id,                arginfo_session_id)
 	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
@@ -2642,7 +2608,6 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_abort,             arginfo_session_void)
 	PHP_FE(session_reset,             arginfo_session_void)
 	PHP_FE(session_status,            arginfo_session_void)
-	PHP_FE(session_gc,                arginfo_session_gc)
 	PHP_FE(session_register_shutdown, arginfo_session_void)
 	PHP_FALIAS(session_commit, session_write_close, arginfo_session_void)
 	PHP_FE_END

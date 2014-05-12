@@ -8,6 +8,15 @@ $(BUILD_SHARED): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
 $(BUILD_BINARY): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
 	$(BUILD_PHPDBG)
 
+$(builddir)/sapi/phpdbg/phpdbg_lexer.lo: $(srcdir)/sapi/phpdbg/phpdbg_parser.h
+
+$(srcdir)/sapi/phpdbg/phpdbg_lexer.c: $(srcdir)/sapi/phpdbg/phpdbg_lexer.l
+	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l)
+
+$(srcdir)/sapi/phpdbg/phpdbg_parser.h: $(srcdir)/sapi/phpdbg/phpdbg_parser.c
+$(srcdir)/sapi/phpdbg/phpdbg_parser.c: $(srcdir)/sapi/phpdbg/phpdbg_parser.y
+	@$(YACC) -p phpdbg_ -v -d $(srcdir)/sapi/phpdbg/phpdbg_parser.y -o $@
+
 install-phpdbg: $(BUILD_BINARY)
 	@echo "Installing phpdbg binary:         $(INSTALL_ROOT)$(bindir)/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
@@ -24,5 +33,4 @@ test-phpdbg:
 	@$(top_builddir)/sapi/cli/php sapi/phpdbg/tests/run-tests.php --phpdbg sapi/phpdbg/phpdbg
 
 .PHONY: clean-phpdbg test-phpdbg
-
 

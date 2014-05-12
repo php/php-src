@@ -129,7 +129,9 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 			ADD_INTERNED_STRING(Z_STRVAL_P(z), Z_STRLEN_P(z) + 1);
 			break;
 		case IS_ARRAY:
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
 		case IS_CONSTANT_ARRAY:
+#endif
 			ADD_DUP_SIZE(z->value.ht, sizeof(HashTable));
 			ADD_SIZE(zend_hash_persist_calc(z->value.ht, (int (*)(void* TSRMLS_DC)) zend_persist_zval_ptr_calc, sizeof(zval**) TSRMLS_CC));
 			break;
