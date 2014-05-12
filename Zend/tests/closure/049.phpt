@@ -1,5 +1,5 @@
 --TEST--
-Closure 049: static closure in non-static method.
+Closure 049: static::class in static closure in non-static method.
 
 --FILE--
 <?php
@@ -9,16 +9,13 @@ class A {
         $f = static function() {
             return static::class;
         };
-        return [static::class, $f()];
+        return $f();
     }
 }
 
 class B extends A {}
 
 $b = new B;
-list($method, $closure) = $b->foo();
-var_dump($method);
-var_dump($closure);
+var_dump($b->foo());
 --EXPECT--
-string(1) "B"
 string(1) "B"

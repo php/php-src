@@ -1,5 +1,5 @@
 --TEST--
-Closure 050: static::class in non-static closure in non-static method.
+Closure 054: self::class in non-static closure in non-static method.
 
 --FILE--
 <?php
@@ -7,7 +7,7 @@ Closure 050: static::class in non-static closure in non-static method.
 class A {
     function foo() {
         $f = function() {
-            return static::class;
+            return self::class;
         };
         return $f();
     }
@@ -19,4 +19,4 @@ $b = new B;
 var_dump($b->foo());
 
 --EXPECT--
-string(1) "B"
+string(1) "A"
