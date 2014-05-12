@@ -31,6 +31,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   
   curl_exec($ch);
   curl_close($ch);
+  ob_end_flush();
 ?>
 ===DONE===
 --EXPECTF--
