@@ -2883,11 +2883,11 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 
 		/* Skip leading \ */
 		if (Z_STRVAL_P(callable)[0] == '\\') {
-			lmname = do_alloca(Z_STRLEN_P(callable) - 1, use_heap);
+			lmname = do_alloca(Z_STRLEN_P(callable), use_heap);
 			lmname_len = Z_STRLEN_P(callable) - 1;
 			zend_str_tolower_copy(lmname, Z_STRVAL_P(callable) + 1, lmname_len);
 		} else {
-			lmname = do_alloca(Z_STRLEN_P(callable), use_heap);
+			lmname = do_alloca(Z_STRLEN_P(callable) + 1, use_heap);
 			lmname_len = Z_STRLEN_P(callable);
 			zend_str_tolower_copy(lmname, Z_STRVAL_P(callable), lmname_len);
 		}
