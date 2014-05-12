@@ -680,6 +680,7 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 				target_hash->u.v.nApplyCount++;
 			}
 
+			ZVAL_DEREF(val);
 			php_wddx_add_var(packet, val);
 
 			if (is_array) {
@@ -906,6 +907,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						zend_bool incomplete_class = 0;
 
 						zend_str_tolower(Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+						STR_FORGET_HASH_VAL(Z_STR(ent1->data));
 						if ((pce = zend_hash_find(EG(class_table), Z_STR(ent1->data))) == NULL) {
 							incomplete_class = 1;
 							pce = PHP_IC_ENTRY;
@@ -1101,14 +1103,21 @@ PHP_FUNCTION(wddx_serialize_vars)
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 	
 	for (i=0; i<num_args; i++) {
-		if (Z_TYPE(args[i]) != IS_ARRAY && Z_TYPE(args[i]) != IS_OBJECT) {
-			convert_to_string_ex(&args[i]);
+		zval *arg;
+		if (!Z_ISREF(args[i])) {
+			arg = &args[i];
+		} else {
+			arg = Z_REFVAL(args[i]);
 		}
-		php_wddx_add_var(packet, &args[i]);
+		if (Z_TYPE_P(arg) != IS_ARRAY && Z_TYPE_P(arg) != IS_OBJECT) {
+			convert_to_string_ex(arg);
+		}
+		php_wddx_add_var(packet, arg);
 	}	
 	
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 	php_wddx_packet_end(packet);
+	smart_str_0(packet);
 
 	RETVAL_STR(STR_COPY(packet->s));
 	php_wddx_destructor(packet);
@@ -1204,10 +1213,16 @@ PHP_FUNCTION(wddx_add_vars)
 	}
 		
 	for (i=0; i<num_args; i++) {
-		if (Z_TYPE(args[i]) != IS_ARRAY && Z_TYPE(args[i]) != IS_OBJECT) {
-			convert_to_string_ex(&args[i]);
+		zval *arg;
+		if (!Z_ISREF(args[i])) {
+			arg = &args[i];
+		} else {
+			arg = Z_REFVAL(args[i]);
 		}
-		php_wddx_add_var(packet, &args[i]);
+		if (Z_TYPE_P(arg) != IS_ARRAY && Z_TYPE_P(arg) != IS_OBJECT) {
+			convert_to_string_ex(arg);
+		}
+		php_wddx_add_var(packet, arg);
 	}
 
 	RETURN_TRUE;
