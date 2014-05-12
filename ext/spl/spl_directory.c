@@ -1881,6 +1881,9 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type TS
 			}
 			return SUCCESS;
 		}
+	} else if (type == _IS_BOOL) {
+		ZVAL_TRUE(writeobj);
+		return SUCCESS;
 	}
 	if (readobj == writeobj) {
 		zval_dtor(readobj);
