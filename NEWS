@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
   . Fixed bug #67245 (usage of memcpy() with overlapping src and dst in
     zend_exceptions.c). (Bob)
+  . Fixed bug #67247 (spl_fixedarray_resize integer overflow). (Stas)
 
 - Date:
   . Fixed bug #67118 (DateTime constructor crash with invalid data). (Anatol)
