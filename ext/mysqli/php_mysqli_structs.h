@@ -259,7 +259,7 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = Z_MYSQLI_P(__id); \
 	if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {\
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
+  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);\
   		RETURN_NULL();\
   	}\
 	__ptr = (__type)my_res->ptr; \
@@ -298,7 +298,7 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), "mysqli_stmt", (__check)); \
 	if (!(__ptr)->stmt) { \
 		mysqli_object *intern = Z_MYSQLI_P(__id); \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
 		RETURN_NULL();\
 	} \
 }

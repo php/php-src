@@ -81,6 +81,9 @@ typedef struct _mysqli_prop_handler {
 
 static int le_pmysqli;
 
+static void free_prop_handler(zval *el) {
+	pefree(Z_PTR_P(el), 1);
+}
 
 /* Destructor for mysqli entries in free_links/used_links */
 void php_mysqli_dtor_p_elements(void *data)
@@ -424,7 +427,6 @@ HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 {
 	mysqli_object *obj = Z_MYSQLI_P(object);
 	HashTable *retval, *props = obj->prop_handler;
-	HashPosition pos;
 	mysqli_prop_handler *entry;
 
 	ALLOC_HASHTABLE(retval);
@@ -436,9 +438,6 @@ HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		ZVAL_STR(&member, entry->name);
 		value = mysqli_read_property(object, &member, BP_VAR_IS, 0, &rv TSRMLS_CC);
 		if (value != &EG(uninitialized_zval)) {
-			if (Z_REFCOUNTED_P(value)) {
-				Z_ADDREF_P(value);
-			}
 			zend_hash_add(retval, Z_STR(member), value);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -482,7 +481,7 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type
 		handlers = &mysqli_object_handlers;
 	}
 
-	intern->zo.handlers = &mysqli_object_handlers;
+	intern->zo.handlers = handlers;
 
 	return &intern->zo;
 }
@@ -618,7 +617,7 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_driver", mysqli_driver_class_entry, mysqli_driver_methods);
 	ce = mysqli_driver_class_entry;
-	zend_hash_init(&mysqli_driver_properties, 0, NULL, NULL, 1);
+	zend_hash_init(&mysqli_driver_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_driver_properties, mysqli_driver_property_entries);
 	zend_declare_property_null(ce, "client_info", 		sizeof("client_info") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(ce, "client_version", 	sizeof("client_version") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
@@ -631,7 +630,7 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli", mysqli_link_class_entry, mysqli_link_methods);
 	ce = mysqli_link_class_entry;
-	zend_hash_init(&mysqli_link_properties, 0, NULL, NULL, 1);
+	zend_hash_init(&mysqli_link_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_link_properties, mysqli_link_property_entries);
 	zend_declare_property_null(ce, "affected_rows",		sizeof("affected_rows") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(ce, "client_info", 		sizeof("client_info") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
@@ -657,7 +656,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_warning", mysqli_warning_class_entry, mysqli_warning_methods);
 	ce = mysqli_warning_class_entry;
 	ce->ce_flags |= ZEND_ACC_FINAL_CLASS | ZEND_ACC_PROTECTED;
-	zend_hash_init(&mysqli_warning_properties, 0, NULL, NULL, 1);
+	zend_hash_init(&mysqli_warning_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_warning_properties, mysqli_warning_property_entries);
 	zend_declare_property_null(ce, "message", 	sizeof("message") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(ce, "sqlstate", 	sizeof("sqlstate") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
@@ -666,7 +665,7 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_result", mysqli_result_class_entry, mysqli_result_methods);
 	ce = mysqli_result_class_entry;
-	zend_hash_init(&mysqli_result_properties, 0, NULL, NULL, 1);
+	zend_hash_init(&mysqli_result_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_result_properties, mysqli_result_property_entries);
 	zend_declare_property_null(ce, "current_field",	sizeof("current_field") - 1,ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(ce, "field_count",	sizeof("field_count") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
@@ -680,7 +679,7 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_stmt", mysqli_stmt_class_entry, mysqli_stmt_methods);
 	ce = mysqli_stmt_class_entry;
-	zend_hash_init(&mysqli_stmt_properties, 0, NULL, NULL, 1);
+	zend_hash_init(&mysqli_stmt_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_stmt_properties, mysqli_stmt_property_entries);
 	zend_declare_property_null(ce, "affected_rows", sizeof("affected_rows") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(ce, "insert_id",		sizeof("insert_id") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
@@ -1248,13 +1247,13 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|Sz", &mysql_result, mysqli_result_class_entry, &class_name, &ctor_params) == FAILURE) {
 			return;
 		}
-		if (class_name) {
+		if (class_name == NULL) {
 			ce = zend_standard_class_def;
 		} else {
 			ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		}
 		if (!ce) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not find class '%s'", class_name);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not find class '%s'", class_name->val);
 			return;
 		}
 		fetchtype = MYSQLI_ASSOC;
@@ -1288,7 +1287,8 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		ZVAL_COPY_VALUE(&dataset, return_value);
 
 		object_and_properties_init(return_value, ce, NULL);
-		zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
+		zend_merge_properties(return_value, Z_ARRVAL(dataset), 0 TSRMLS_CC);
+		zval_ptr_dtor(&dataset);
 
 		if (ce->constructor) {
 			fci.size = sizeof(fci);

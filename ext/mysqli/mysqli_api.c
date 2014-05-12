@@ -198,12 +198,17 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 
 	ofs = 0;
 	for (i = start; i < argc; i++) {
-
+		zval *param;
+		if (Z_ISREF(args[i])) {
+			param = Z_REFVAL(args[i]);
+		} else {
+			param = &args[i];
+		}
 		/* set specified type */
 		switch (types[ofs]) {
 			case 'd': /* Double */
 				bind[ofs].buffer_type = MYSQL_TYPE_DOUBLE;
-				bind[ofs].buffer = &Z_DVAL(args[i]);
+				bind[ofs].buffer = &Z_DVAL_P(param);
 				bind[ofs].is_null = &stmt->param.is_null[ofs];
 				break;
 
@@ -213,7 +218,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 #elif SIZEOF_LONG==4
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
 #endif
-				bind[ofs].buffer = &Z_LVAL(args[i]);
+				bind[ofs].buffer = &Z_LVAL_P(param);
 				bind[ofs].is_null = &stmt->param.is_null[ofs];
 				break;
 
@@ -397,7 +402,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 	bind = (MYSQL_BIND *)ecalloc(var_cnt, sizeof(MYSQL_BIND));
 	{
 		int size;
-		char *p= emalloc(size= var_cnt * (sizeof(char) + sizeof(VAR_BUFFER)));
+		char *p = emalloc(size= var_cnt * (sizeof(char) + sizeof(VAR_BUFFER)));
 		stmt->result.buf = (VAR_BUFFER *) p;
 		stmt->result.is_null = p + var_cnt * sizeof(VAR_BUFFER);
 		memset(p, 0, size);
@@ -410,7 +415,6 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 		switch (col_type) {
 			case MYSQL_TYPE_DOUBLE:
 			case MYSQL_TYPE_FLOAT:
-				convert_to_double_ex(&args[i]);
 				stmt->result.buf[ofs].type = IS_DOUBLE;
 				stmt->result.buf[ofs].buflen = sizeof(double);
 
@@ -439,7 +443,6 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 			case MYSQL_TYPE_LONG:
 			case MYSQL_TYPE_INT24:
 			case MYSQL_TYPE_YEAR:
-				convert_to_long_ex(&args[i]);
 				stmt->result.buf[ofs].type = IS_LONG;
 				/* don't set stmt->result.buf[ofs].buflen to 0, we used ecalloc */
 				stmt->result.buf[ofs].val = (char *)emalloc(sizeof(int));
@@ -863,22 +866,6 @@ PHP_FUNCTION(mysqli_error)
 }
 /* }}} */
 
-#ifndef MYSQLI_USE_MYSQLND
-/* {{{ php_mysqli_stmt_copy_it */
-static void
-php_mysqli_stmt_copy_it(zval *** copies, zval *original, uint param_count, uint current)
-{
-	if (!*copies) {
-		*copies = ecalloc(param_count, sizeof(zval *));
-	}
-	MAKE_STD_ZVAL((*copies)[current]);
-	*(*copies)[current] = *original;
-	Z_SET_REFCOUNT_P((*copies)[current], 1);
-	zval_copy_ctor((*copies)[current]);
-}
-/* }}} */
-#endif
-
 /* {{{ proto bool mysqli_stmt_execute(object stmt)
    Execute a prepared statement */
 PHP_FUNCTION(mysqli_stmt_execute)
@@ -895,24 +882,45 @@ PHP_FUNCTION(mysqli_stmt_execute)
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 #ifndef MYSQLI_USE_MYSQLND
+	if (stmt->param.var_cnt) {
+		int j;
+		for (i = 0; i < stmt->param.var_cnt; i++) {
+			if (!Z_ISREF(stmt->param.vars[i])) {
+				continue;
+			}
+			for (j = i + 1; j < stmt->param.var_cnt; j++) {
+				/* Oops, someone binding the same variable - clone */
+				if (Z_TYPE(stmt->param.vars[j]) == Z_TYPE(stmt->param.vars[i]) &&
+					   	Z_REFVAL(stmt->param.vars[j]) == Z_REFVAL(stmt->param.vars[i])) {
+					SEPARATE_ZVAL(&stmt->param.vars[j]);
+					break;
+				}
+			}
+		}
+	}
 	for (i = 0; i < stmt->param.var_cnt; i++) {
 		if (!Z_ISUNDEF(stmt->param.vars[i])) {
-			if (!(stmt->param.is_null[i] = (Z_ISNULL(stmt->param.vars[i])))) {
-				zval *the_var = &stmt->param.vars[i];
+			zval *param;
+			if (Z_ISREF(stmt->param.vars[i])) {
+				param = Z_REFVAL(stmt->param.vars[i]);
+			} else {
+				param = &stmt->param.vars[i];
+			}
+			if (!(stmt->param.is_null[i] = (Z_ISNULL_P(param)))) {
 				switch (stmt->stmt->params[i].buffer_type) {
 					case MYSQL_TYPE_VAR_STRING:
-						convert_to_string_ex(the_var);
-						stmt->stmt->params[i].buffer = Z_STRVAL_P(the_var);
-						stmt->stmt->params[i].buffer_length = Z_STRLEN_P(the_var);
+						convert_to_string_ex(param);
+						stmt->stmt->params[i].buffer = Z_STRVAL_P(param);
+						stmt->stmt->params[i].buffer_length = Z_STRLEN_P(param);
 						break;
 					case MYSQL_TYPE_DOUBLE:
-						convert_to_double_ex(the_var);
-						stmt->stmt->params[i].buffer = &Z_DVAL_P(the_var);
+						convert_to_double_ex(param);
+						stmt->stmt->params[i].buffer = &Z_DVAL_P(param);
 						break;
 					case MYSQL_TYPE_LONGLONG:
 					case MYSQL_TYPE_LONG:
-						convert_to_long_ex(the_var);
-						stmt->stmt->params[i].buffer = &Z_LVAL_P(the_var);
+						convert_to_long_ex(param);
+						stmt->stmt->params[i].buffer = &Z_LVAL_P(param);
 						break;
 					default:
 						break;
@@ -966,15 +974,20 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 	if (!ret) {
 #endif
 		for (i = 0; i < stmt->result.var_cnt; i++) {
+			zval *result;
+			/* it must be a reference, isn't it? */
+			if (Z_ISREF(stmt->result.vars[i])) {
+				result = Z_REFVAL(stmt->result.vars[i]);
+			} else {
+				result = &stmt->result.vars[i];
+			}
 			/*
 			  QQ: Isn't it quite better to call zval_dtor(). What if the user has
 			  assigned a resource, or an array to the bound variable? We are going
 			  to leak probably. zval_dtor() will handle also Unicode/Non-unicode mode.
 			*/
 			/* Even if the string is of length zero there is one byte alloced so efree() in all cases */
-			if (Z_TYPE(stmt->result.vars[i]) == IS_STRING) {
-				zval_ptr_dtor(&stmt->result.vars[i]);
-			}
+			zval_ptr_dtor(result);
 			if (!stmt->result.is_null[i]) {
 				switch (stmt->result.buf[i].type) {
 					case IS_LONG:
@@ -986,7 +999,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 #if SIZEOF_LONG==4
 							if (uval > INT_MAX) {
 								char *tmp, *p;
-								int j=10;
+								int j = 10;
 								tmp = emalloc(11);
 								p= &tmp[9];
 								do {
@@ -995,20 +1008,20 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 								} while (--j > 0);
 								tmp[10]= '\0';
 								/* unsigned int > INT_MAX is 10 digits - ALWAYS */
-								ZVAL_STRINGL(&stmt->result.vars[i], tmp, 10);
+								ZVAL_STRINGL(result, tmp, 10);
 								efree(tmp);
 								break;
 							}
 #endif
 						}
 						if (stmt->stmt->fields[i].flags & UNSIGNED_FLAG) {
-							ZVAL_LONG(&stmt->result.vars[i], *(unsigned int *)stmt->result.buf[i].val);
+							ZVAL_LONG(result, *(unsigned int *)stmt->result.buf[i].val);
 						} else {
-							ZVAL_LONG(&stmt->result.vars[i], *(int *)stmt->result.buf[i].val);
+							ZVAL_LONG(result, *(int *)stmt->result.buf[i].val);
 						}
 						break;
 					case IS_DOUBLE:
-						ZVAL_DOUBLE(&stmt->result.vars[i], *(double *)stmt->result.buf[i].val);
+						ZVAL_DOUBLE(result, *(double *)stmt->result.buf[i].val);
 						break;
 					case IS_STRING:
 						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG
@@ -1016,7 +1029,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						 || stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT
 #endif
 						 ) {
-							my_bool uns= (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? 1:0;
+							my_bool uns = (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? 1:0;
 #if MYSQL_VERSION_ID > 50002
 							if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT) {
 								switch (stmt->result.buf[i].output_len) {
@@ -1048,22 +1061,20 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 								 * use MYSQLI_LL_SPEC.
 								 */
 								snprintf(tmp, sizeof(tmp), (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
-								ZVAL_STRING(&stmt->result.vars[i], tmp);
+								ZVAL_STRING(result, tmp);
 							} else {
-								ZVAL_LONG(&stmt->result.vars[i], llval);
+								ZVAL_LONG(result, llval);
 							}
 						} else {
 #if defined(MYSQL_DATA_TRUNCATED) && MYSQL_VERSION_ID > 50002
 							if (ret == MYSQL_DATA_TRUNCATED && *(stmt->stmt->bind[i].error) != 0) {
 								/* result was truncated */
-								ZVAL_STRINGL(&stmt->result.vars[i], stmt->result.buf[i].val,
-											 stmt->stmt->bind[i].buffer_length);
+								ZVAL_STRINGL(result, stmt->result.buf[i].val, stmt->stmt->bind[i].buffer_length);
 							} else {
 #else
 							{
 #endif
-								ZVAL_STRINGL(&stmt->result.vars[i], stmt->result.buf[i].val,
-											 stmt->result.buf[i].output_len);
+								ZVAL_STRINGL(result, stmt->result.buf[i].val, stmt->result.buf[i].output_len);
 							}
 						}
 						break;
@@ -1071,7 +1082,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						break;
 				}
 			} else {
-				ZVAL_NULL(&stmt->result.vars[i]);
+				ZVAL_NULL(result);
 			}
 		}
 	} else {
