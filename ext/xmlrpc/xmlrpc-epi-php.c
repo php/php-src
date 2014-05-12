@@ -578,7 +578,6 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 							if (ht) {
 								ht->u.v.nApplyCount--;
 							}
-							break;
 						} ZEND_HASH_FOREACH_END();	
 						zval_ptr_dtor(&val_arr);
 					}
