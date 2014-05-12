@@ -208,7 +208,7 @@ typedef struct _zend_try_catch_element {
 	(f).common.fn_flags & ZEND_ACC_STATIC	\
 )
 #define IS_FINAL_FUNCTION(f) ( \
-	(f).common.fn_flags & ZEND_ACC_STATIC	\
+	(f).common.fn_flags & ZEND_ACC_FINAL	\
 )
 #define IS_ABSTRACT_FUNCTION(f) ( \
 	(f).common.fn_flags & ZEND_ACC_ABSTRACT	\
