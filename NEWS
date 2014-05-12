@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Fixed bug #67245 (usage of memcpy() with overlapping src and dst in
     zend_exceptions.c). (Bob)
   . Fixed bug #67247 (spl_fixedarray_resize integer overflow). (Stas)
+  . Fixed bug #67250 (iptcparse out-of-bounds read). (Stas)
 
 - Date:
   . Fixed bug #67118 (DateTime constructor crash with invalid data). (Anatol)
