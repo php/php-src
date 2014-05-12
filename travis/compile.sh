@@ -9,7 +9,7 @@ if [[ "$ENABLE_DEBUG" == 1 ]]; then
 else
 	DEBUG="";
 fi
-./buildconf
+./buildconf --force
 ./configure --quiet \
 $DEBUG \
 $TS \

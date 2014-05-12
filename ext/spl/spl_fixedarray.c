@@ -116,7 +116,7 @@ static void spl_fixedarray_resize(spl_fixedarray *array, php_int_t size TSRMLS_D
 			array->elements = NULL;
 		}
 	} else if (size > array->size) {
-		array->elements = erealloc(array->elements, sizeof(zval *) * size);
+		array->elements = safe_erealloc(array->elements, size, sizeof(zval *), 0);
 		memset(array->elements + array->size, '\0', sizeof(zval *) * (size - array->size));
 	} else { /* size < array->size */
 		php_int_t i;
