@@ -50,7 +50,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 {
 	zend_bool old, ini;
 
-	if (entry->name_length == 14) {
+	if (entry->name_length == sizeof("phar.readonly")-1) {
 		old = PHAR_G(readonly_orig);
 	} else {
 		old = PHAR_G(require_hash_orig);
@@ -421,14 +421,14 @@ void destroy_phar_manifest_entry_int(phar_entry_info *entry) /* {{{ */
 		pefree(entry->tmp, entry->is_persistent);
 		entry->tmp = 0;
 	}
-
-	pefree(entry, entry->is_persistent);
 }
 /* }}} */
 
 void destroy_phar_manifest_entry(zval *zv) /* {{{ */
 {
-	destroy_phar_manifest_entry_int(Z_PTR_P(zv));
+	phar_entry_info *entry = Z_PTR_P(zv);
+	destroy_phar_manifest_entry_int(entry);
+	pefree(entry, entry->is_persistent);
 }
 /* }}} */
 
@@ -447,7 +447,7 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 		/* if phar_get_or_create_entry_data returns a sub-directory, we have to free it */
 		if (idata->internal_file->is_temp_dir) {
 			destroy_phar_manifest_entry_int(idata->internal_file);
-//???			efree(idata->internal_file);
+			efree(idata->internal_file);
 		}
 	}
 
@@ -2301,7 +2301,6 @@ int phar_split_fname(const char *filename, int filename_len, char **arch, int *a
 int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_DC) /* {{{ */
 {
 	char *fname;
-//???	zval *halt_constant;
 	php_stream *fp;
 	int fname_len;
 	char *actual = NULL;

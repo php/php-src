@@ -227,7 +227,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 
 	if (ssb.sb.st_mode & S_IFDIR) {
 		entry.is_dir = 1;
-		if (NULL != zend_hash_str_add_ptr(&phar->mounted_dirs, entry.filename, path_len, entry.filename)) {
+		if (NULL == zend_hash_str_add_ptr(&phar->mounted_dirs, entry.filename, path_len, entry.filename)) {
 			/* directory already mounted */
 			efree(entry.tmp);
 			efree(entry.filename);
@@ -1393,11 +1393,17 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zval retval, zp[3], openssl;
+	zend_string *str;
 
 	ZVAL_STRINGL(&openssl, is_sign ? "openssl_sign" : "openssl_verify", is_sign ? sizeof("openssl_sign")-1 : sizeof("openssl_verify")-1);
 	ZVAL_STRINGL(&zp[1], *signature, *signature_len);
 	ZVAL_STRINGL(&zp[2], key, key_len);
-	ZVAL_STR(&zp[0], php_stream_copy_to_mem(fp, (size_t) end, 0));
+	str = php_stream_copy_to_mem(fp, (size_t) end, 0);
+	if (str) {
+		ZVAL_STR(&zp[0], str);
+	} else {
+		ZVAL_EMPTY_STRING(&zp[0]);
+	}
 
 	if (end != Z_STRLEN(zp[0])) {
 		zval_dtor(&zp[0]);
