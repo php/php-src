@@ -660,6 +660,9 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
 		if ((val = zend_hash_find(&EG(active_symbol_table)->ht, Z_STR_P(name_var))) != NULL) {
+			if (Z_TYPE_P(val) == IS_INDIRECT) {
+				val = Z_INDIRECT_P(val);
+			}
 			php_wddx_serialize_var(packet, val, Z_STR_P(name_var) TSRMLS_CC);
 		}		
 	} else if (Z_TYPE_P(name_var) == IS_ARRAY || Z_TYPE_P(name_var) == IS_OBJECT)	{
