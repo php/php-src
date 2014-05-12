@@ -19,7 +19,10 @@ bin2hex(mcrypt_encrypt('cast-128', "\x01\x23\x45\x67\x12", $plaintext, 'ecb')),
 "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 128-bit: 238b4fe5847e44b2
-80-bit: eb6a711a2c02271b
-40-bit: 7ac816d16e9b302e
+80-bit: 
+Warning: mcrypt_encrypt(): Key of size 10 not supported by this algorithm. Only keys of size 16 supported in %s on line %d
+
+40-bit: 
+Warning: mcrypt_encrypt(): Key of size 5 not supported by this algorithm. Only keys of size 16 supported in %s on line %d
