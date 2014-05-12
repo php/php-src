@@ -6,6 +6,11 @@ PHP                                                                        NEWS
   . Fixed bug #67169 (array_splice all elements, then []= gives wrong index).
     (Nikita)
   . Fixed bug #67198 (php://input regression). (Mike)
+  . Fixed bug #67247 (spl_fixedarray_resize integer overflow). (Stas)
+
+- GD:
+  . Fixed bug #67248 (imageaffinematrixget missing check of parameters). (Stas)
+
 
 - OpenSSL:
   . Fixed bug #67224 (Fall back to crypto_type from context if not specified
