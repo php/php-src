@@ -376,9 +376,8 @@ static void destroy_phar_data(zval *zv) /* {{{ */
 /**
  * destructor for the manifest hash, frees each file's entry
  */
-void destroy_phar_manifest_entry(zval *zv) /* {{{ */
+void destroy_phar_manifest_entry_int(phar_entry_info *entry) /* {{{ */
 {
-	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv);
 	TSRMLS_FETCH();
 
 	if (entry->cfp) {
@@ -427,6 +426,12 @@ void destroy_phar_manifest_entry(zval *zv) /* {{{ */
 }
 /* }}} */
 
+void destroy_phar_manifest_entry(zval *zv) /* {{{ */
+{
+	destroy_phar_manifest_entry_int(Z_PTR_P(zv));
+}
+/* }}} */
+
 int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 {
 	int ret = 0;
@@ -441,8 +446,8 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 		}
 		/* if phar_get_or_create_entry_data returns a sub-directory, we have to free it */
 		if (idata->internal_file->is_temp_dir) {
-			destroy_phar_manifest_entry((void *)idata->internal_file);
-			efree(idata->internal_file);
+			destroy_phar_manifest_entry_int(idata->internal_file);
+//???			efree(idata->internal_file);
 		}
 	}
 
@@ -3015,8 +3020,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		phar_set_32(entry_buffer+20, entry->metadata_str.s ? entry->metadata_str.s->len : 0);
 
 		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))
-		|| !entry->metadata_str.s
-		|| entry->metadata_str.s->len != php_stream_write(newfile, entry->metadata_str.s->val, entry->metadata_str.s->len)) {
+		|| (entry->metadata_str.s &&
+		    entry->metadata_str.s->len != php_stream_write(newfile, entry->metadata_str.s->val, entry->metadata_str.s->len))) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
