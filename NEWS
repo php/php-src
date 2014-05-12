@@ -10,8 +10,7 @@ PHP                                                                        NEWS
     by tempnam()). (Boro Sitnikovski)
   . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
   . Fixed bug #67245 (usage of memcpy() with overlapping src and dst in
-    zend_exceptions.c) (backported fix from PHP 5.6; initially committed
-    to wrong branch). (Bob)
+    zend_exceptions.c). (Bob)
 
 - Date:
   . Fixed bug #67118 (DateTime constructor crash with invalid data). (Anatol)
