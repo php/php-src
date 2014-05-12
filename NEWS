@@ -33,6 +33,9 @@ PHP                                                                        NEWS
   . Fixed bug #66908 (php-fpm reload leaks epoll_create() file descriptor).
     (Julio Pintos)
 
+- GD:
+  . Fixed bug #67248 (imageaffinematrixget missing check of parameters). (Stas)
+
 - PCRE:
   . Fixed bug #67238 (Ungreedy and min/max quantifier bug, applied patch
     from the upstream). (Anatol)
