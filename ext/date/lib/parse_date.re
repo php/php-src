@@ -401,9 +401,12 @@ static timelib_sll timelib_meridian_with_check(char **ptr, timelib_sll h)
 {
 	timelib_sll retval = 0;
 
-	while (!strchr("AaPp", **ptr)) {
+	while (**ptr && !strchr("AaPp", **ptr)) {
 		++*ptr;
 	}
+    if(!**ptr) {
+        return TIMELIB_UNSET;
+    }
 	if (**ptr == 'a' || **ptr == 'A') {
 		if (h == 12) {
 			retval = -12;
