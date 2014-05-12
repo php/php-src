@@ -4,11 +4,12 @@ curl_setopt() call with CURLOPT_HTTPHEADER
 Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
-<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER')) print "skip need PHP_CURL_HTTP_REMOTE_SERVER environment variable"; ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 
-$host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+include 'server.inc';
+$host = curl_cli_server_start();
 
 // start testing
 echo "*** curl_setopt() call with CURLOPT_HTTPHEADER\n";
