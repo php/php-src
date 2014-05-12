@@ -791,14 +791,14 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 				while ((p2 = php_memnstr(p1, ",", sizeof(",")-1, endp)) != NULL) {
 					key = estrndup(p1, p2 - p1);
 					array_init(&tmp);
-					add_assoc_zval_ex(&ent.data, key, p2 - p1 + 1, &tmp);
+					add_assoc_zval_ex(&ent.data, key, p2 - p1, &tmp);
 					p1 = p2 + sizeof(",")-1;
 					efree(key);
 				}
 
 				if (p1 <= endp) {
 					array_init(&tmp);
-					add_assoc_zval_ex(&ent.data, p1, endp - p1 + 1, &tmp);
+					add_assoc_zval_ex(&ent.data, p1, endp - p1, &tmp);
 				}
 
 				break;
