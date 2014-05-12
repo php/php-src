@@ -335,6 +335,9 @@ PHP_FUNCTION(iptcparse)
 		recnum = buffer[ inx++ ];
 
 		if (buffer[ inx ] & (unsigned char) 0x80) { /* long tag */
+            if((inx+6) >= str_len) {
+                break;
+            }
 			len = (((long) buffer[ inx + 2 ]) << 24) + (((long) buffer[ inx + 3 ]) << 16) + 
 				  (((long) buffer[ inx + 4 ]) <<  8) + (((long) buffer[ inx + 5 ]));
 			inx += 6;
