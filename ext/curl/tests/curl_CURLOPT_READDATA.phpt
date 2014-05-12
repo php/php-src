@@ -4,12 +4,14 @@ Test CURLOPT_READDATA without a callback function
 Mattijs Hoitink mattijshoitink@gmail.com
 #Testfest Utrecht 2009
 --SKIPIF--
-<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER')) print "skip need PHP_CURL_HTTP_REMOTE_SERVER environment variable"; ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 
+include 'server.inc';
+$host = curl_cli_server_start();
 // The URL to POST to
-$url = getenv('PHP_CURL_HTTP_REMOTE_SERVER') . '/get.php?test=post';
+$url = $host . '/get.php?test=post';
 
 // Create a temporary file to read the data from
 $tempname = tempnam(sys_get_temp_dir(), 'CURL_DATA');
