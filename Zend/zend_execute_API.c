@@ -709,10 +709,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	if (EX(function_state).function->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
-		if (EX(function_state).function->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		if (IS_ABSTRACT_FUNCTION(*EX(function_state).function)) {
 			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
 		}
-		if (EX(function_state).function->common.fn_flags & ZEND_ACC_DEPRECATED) {
+		if (IS_DEPRECATED_FUNCTION(*EX(function_state).function)) {
  			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
 				EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : "",
 				EX(function_state).function->common.scope ? "::" : "",
@@ -789,7 +789,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	if (fci->object_ptr) {
-		if ((EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (IS_STATIC_FUNCTION(*(EX(function_state).function))) {
 			EG(This) = NULL;
 		} else {
 			EG(This) = fci->object_ptr;
@@ -1521,11 +1521,11 @@ typedef struct _zend_abstract_info {
 
 static int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai TSRMLS_DC) /* {{{ */
 {
-	if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+	if (IS_ABSTRACT_FUNCTION(*fn)) {
 		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
 			ai->afn[ai->cnt] = fn;
 		}
-		if (fn->common.fn_flags & ZEND_ACC_CTOR) {
+		if (IS_CONSTRUCTOR(*fn)) {
 			if (!ai->ctor) {
 				ai->cnt++;
 				ai->ctor = 1;
