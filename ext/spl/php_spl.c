@@ -497,7 +497,7 @@ PHP_FUNCTION(spl_autoload_register)
 			alfi.func_ptr = fcc.function_handler;
 			obj_ptr = fcc.object_ptr;
 			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
-				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+				if (!obj_ptr && alfi.func_ptr && !IS_STATIC_METHOD(alfi.func_ptr)) {
 					if (do_throw) {
 						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array specifies a non static method but no object (%s)", error);
 					}
@@ -565,7 +565,7 @@ PHP_FUNCTION(spl_autoload_register)
 			goto skip;
 		}
 
-		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (obj_ptr && !IS_STATIC_METHOD(alfi.func_ptr)) {
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
 			lc_name = erealloc(lc_name, func_name_len + 2 + sizeof(zend_object_handle));
 			memcpy(lc_name + func_name_len, &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_object_handle));
@@ -599,7 +599,7 @@ PHP_FUNCTION(spl_autoload_register)
 		}
 
 		if (zend_hash_add(SPL_G(autoload_functions), lc_name, func_name_len+1, &alfi.func_ptr, sizeof(autoload_func_info), NULL) == FAILURE) {
-			if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+			if (obj_ptr && !IS_STATIC_METHOD(alfi.func_ptr)) {
 				Z_DELREF_P(alfi.obj);
 			}				
 			if (alfi.closure) {

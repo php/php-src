@@ -500,8 +500,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
-				if (mptr->common.fn_flags & ZEND_ACC_STATIC
-					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
+				if (IS_STATIC_METHOD(mptr) && (!IS_PRIVATE_METHOD(mptr) || mptr->common.scope == ce))
 				{
 					count_static_funcs++;
 				}
@@ -518,8 +517,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
-				if (mptr->common.fn_flags & ZEND_ACC_STATIC
-					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
+				if (IS_STATIC_METHOD(mptr) && (!IS_PRIVATE_METHOD(mptr) || mptr->common.scope == ce))
 				{
 					string_printf(str, "\n");
 					_function_string(str, mptr, ce, sub_indent.string TSRMLS_CC);
@@ -601,16 +599,14 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
-				if ((mptr->common.fn_flags & ZEND_ACC_STATIC) == 0
-					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
-				{
+				if (!IS_STATIC_METHOD(mptr) && (!IS_PRIVATE_METHOD(mptr) || mptr->common.scope == ce)) {
 					char *key;
 					uint key_len;
 					ulong num_index;
 					uint len = strlen(mptr->common.function_name);
 
 					/* Do not display old-style inherited constructors */
-					if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0
+					if (!IS_CONSTRUCTOR(mptr)
 						|| mptr->common.scope == ce
 						|| zend_hash_get_current_key_ex(&ce->function_table, &key, &key_len, &num_index, 0, &pos) != HASH_KEY_IS_STRING
 						|| zend_binary_strcasecmp(key, key_len-1, mptr->common.function_name, len) == 0)
@@ -838,9 +834,9 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	}
 
 	string_write(str, indent, strlen(indent));
-	string_printf(str, fptr->common.fn_flags & ZEND_ACC_CLOSURE ? "Closure [ " : (fptr->common.scope ? "Method [ " : "Function [ "));
+	string_printf(str, IS_CLOSURE(fptr) ? "Closure [ " : (fptr->common.scope ? "Method [ " : "Function [ "));
 	string_printf(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user" : "<internal");
-	if (fptr->common.fn_flags & ZEND_ACC_DEPRECATED) {
+	if (IS_DEPRECATED_FUNCTION(fptr)) {
 		string_printf(str, ", deprecated");
 	}
 	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function*)fptr)->module) {
@@ -864,21 +860,21 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	if (fptr->common.prototype && fptr->common.prototype->common.scope) {
 		string_printf(str, ", prototype %s", fptr->common.prototype->common.scope->name);
 	}
-	if (fptr->common.fn_flags & ZEND_ACC_CTOR) {
+	if (IS_CONSTRUCTOR(fptr)) {
 		string_printf(str, ", ctor");
 	}
-	if (fptr->common.fn_flags & ZEND_ACC_DTOR) {
+	if (IS_DESTRUCTOR(fptr)) {
 		string_printf(str, ", dtor");
 	}
 	string_printf(str, "> ");
 
-	if (fptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
+	if (IS_ABSTRACT_METHOD(fptr)) {
 		string_printf(str, "abstract ");
 	}
-	if (fptr->common.fn_flags & ZEND_ACC_FINAL) {
+	if (IS_FINAL_METHOD(fptr)) {
 		string_printf(str, "final ");
 	}
-	if (fptr->common.fn_flags & ZEND_ACC_STATIC) {
+	if (IS_STATIC_METHOD(fptr)) {
 		string_printf(str, "static ");
 	}
 
@@ -916,7 +912,7 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	}
 	string_init(&param_indent);
 	string_printf(&param_indent, "%s  ", indent);
-	if (fptr->common.fn_flags & ZEND_ACC_CLOSURE) {
+	if (IS_CLOSURE(fptr)) {
 		_function_closure_string(str, fptr, param_indent.string TSRMLS_CC);
 	}
 	_function_parameter_string(str, fptr, param_indent.string TSRMLS_CC);
@@ -1691,7 +1687,7 @@ ZEND_METHOD(reflection_function, isClosure)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
-	RETURN_BOOL(fptr->common.fn_flags & ZEND_ACC_CLOSURE);
+	RETURN_BOOL(IS_CLOSURE(fptr));
 }
 /* }}} */
 
@@ -2804,7 +2800,7 @@ ZEND_METHOD(reflection_method, getClosure)
 	METHOD_NOTSTATIC(reflection_method_ptr);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
+	if (IS_STATIC_METHOD(mptr))  {
 		zend_create_closure(return_value, mptr, mptr->common.scope, NULL TSRMLS_CC);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
@@ -2846,18 +2842,15 @@ ZEND_METHOD(reflection_method, invoke)
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	if ((!(mptr->common.fn_flags & ZEND_ACC_PUBLIC)
-		 || (mptr->common.fn_flags & ZEND_ACC_ABSTRACT))
-		 && intern->ignore_visibility == 0)
-	{
-		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
+	if ((!IS_PUBLIC_METHOD(mptr) || IS_ABSTRACT_METHOD(mptr)) && intern->ignore_visibility == 0) {
+		if (IS_ABSTRACT_METHOD(mptr)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 				"Trying to invoke abstract method %s::%s()",
 				mptr->common.scope->name, mptr->common.function_name);
 		} else {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 				"Trying to invoke %s method %s::%s() from scope %s",
-				mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
+				IS_PROTECTED_METHOD(mptr) ? "protected" : "private",
 				mptr->common.scope->name, mptr->common.function_name,
 				Z_OBJCE_P(getThis())->name);
 		}
@@ -2868,13 +2861,13 @@ ZEND_METHOD(reflection_method, invoke)
 		return;
 	}
 
-	/* In case this is a static method, we should'nt pass an object_ptr
+	/* In case this is a static method, we shouldn't pass an object_ptr
 	 * (which is used as calling context aka $this). We can thus ignore the
 	 * first parameter.
 	 *
 	 * Else, we verify that the given object is an instance of the class.
 	 */
-	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
+	if (IS_STATIC_METHOD(mptr)) {
 		object_ptr = NULL;
 		obj_ce = mptr->common.scope;
 	} else {
@@ -2955,18 +2948,15 @@ ZEND_METHOD(reflection_method, invokeArgs)
 		return;
 	}
 
-	if ((!(mptr->common.fn_flags & ZEND_ACC_PUBLIC)
-		 || (mptr->common.fn_flags & ZEND_ACC_ABSTRACT))
-		 && intern->ignore_visibility == 0)
-	{
-		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
+	if ((!IS_PUBLIC_METHOD(mptr) || IS_ABSTRACT_METHOD(mptr)) && intern->ignore_visibility == 0) {
+		if (IS_ABSTRACT_METHOD(mptr)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 				"Trying to invoke abstract method %s::%s()",
 				mptr->common.scope->name, mptr->common.function_name);
 		} else {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 				"Trying to invoke %s method %s::%s() from scope %s",
-				mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
+				IS_PROTECTED_METHOD(mptr) ? "protected" : "private",
 				mptr->common.scope->name, mptr->common.function_name,
 				Z_OBJCE_P(getThis())->name);
 		}
@@ -2985,7 +2975,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	 *
 	 * Else, we verify that the given object is an instance of the class.
 	 */
-	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
+	if (IS_STATIC_METHOD(mptr)) {
 		object = NULL;
 		obj_ce = mptr->common.scope;
 	} else {
@@ -3201,7 +3191,7 @@ ZEND_METHOD(reflection_method, isConstructor)
 	/* we need to check if the ctor is the ctor of the class level we we
 	 * looking at since we might be looking at an inherited old style ctor
 	 * defined in base class. */
-	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_CTOR && intern->ce->constructor && intern->ce->constructor->common.scope == mptr->common.scope);
+	RETURN_BOOL(IS_CONSTRUCTOR(mptr) && intern->ce->constructor && intern->ce->constructor->common.scope == mptr->common.scope);
 }
 /* }}} */
 
@@ -3216,7 +3206,7 @@ ZEND_METHOD(reflection_method, isDestructor)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
-	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_DTOR);
+	RETURN_BOOL(IS_DESTRUCTOR(mptr));
 }
 /* }}} */
 
@@ -4108,7 +4098,7 @@ ZEND_METHOD(reflection_class, isInstantiable)
 		RETURN_TRUE;
 	}
 
-	RETURN_BOOL(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC);
+	RETURN_BOOL(IS_PUBLIC_METHOD(ce->constructor));
 }
 /* }}} */
 
@@ -4129,13 +4119,13 @@ ZEND_METHOD(reflection_class, isCloneable)
 	}
 	if (intern->obj) {
 		if (ce->clone) {
-			RETURN_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
+			RETURN_BOOL(IS_PUBLIC_METHOD(ce->clone));
 		} else {
 			RETURN_BOOL(Z_OBJ_HANDLER_P(intern->obj, clone_obj) != NULL);
 		}
 	} else {
 		if (ce->clone) {
-			RETURN_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
+			RETURN_BOOL(IS_PUBLIC_METHOD(ce->clone));
 		} else {
 			object_init_ex(&obj, ce);
 			RETVAL_BOOL(Z_OBJ_HANDLER(obj, clone_obj) != NULL);
@@ -4236,7 +4226,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 
-		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		if (!IS_PUBLIC_METHOD(constructor)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %s", ce->name);
 			zval_dtor(return_value);
 			RETURN_NULL();
@@ -4343,7 +4333,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 
-		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		if (!IS_PUBLIC_METHOD(constructor)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %s", ce->name);
 			zval_dtor(return_value);
 			RETURN_NULL();
