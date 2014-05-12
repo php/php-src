@@ -204,38 +204,38 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_GENERATOR            0x800000
 
 /* method flag helpers */
-#define IS_STATIC_METHOD(f) ( \
-	f->common.fn_flags & ZEND_ACC_STATIC	\
+#define IS_STATIC_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_STATIC	\
 )
-#define IS_FINAL_METHOD(f) ( \
-	f->common.fn_flags & ZEND_ACC_STATIC	\
+#define IS_FINAL_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_STATIC	\
 )
-#define IS_ABSTRACT_METHOD(f) ( \
-	f->common.fn_flags & ZEND_ACC_ABSTRACT	\
+#define IS_ABSTRACT_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_ABSTRACT	\
 )
-#define IS_PRIVATE_METHOD(f) ( \
-	f->common.fn_flags & ZEND_ACC_PRIVATE	\
+#define IS_PRIVATE_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_PRIVATE	\
 )
-#define IS_PROTECTED_METHOD(f) ( \
-	f->common.fn_flags & ZEND_ACC_PROTECTED	\
+#define IS_PROTECTED_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_PROTECTED	\
 )
-#define IS_PUBLIC_METHOD(f) ( \
-	f->common.fn_flags & ZEND_ACC_PUBLIC	\
+#define IS_PUBLIC_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_PUBLIC	\
 )
-#define IS_PUBLIC_METHOD(f) ( \
-	f->common.fn_flags & ZEND_ACC_PUBLIC	\
+#define IS_PUBLIC_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_PUBLIC	\
 )
 #define IS_CONSTRUCTOR(f) ( \
-	f->common.fn_flags & ZEND_ACC_CTOR	\
+	(f).common.fn_flags & ZEND_ACC_CTOR	\
 )
 #define IS_DESTRUCTOR(f) ( \
-	f->common.fn_flags & ZEND_ACC_DTOR	\
+	(f).common.fn_flags & ZEND_ACC_DTOR	\
 )
 #define IS_DEPRECATED_FUNCTION(f) ( \
-	f->common.fn_flags & ZEND_ACC_DEPRECATED	\
+	(f).common.fn_flags & ZEND_ACC_DEPRECATED	\
 )
 #define IS_CLOSURE(f) ( \
-	f->common.fn_flags & ZEND_ACC_CLOSURE	\
+	(f).common.fn_flags & ZEND_ACC_CLOSURE	\
 )
 
 /* function flag for internal user call handlers __call, __callstatic */
