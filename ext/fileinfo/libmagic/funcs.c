@@ -49,6 +49,9 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.67 2014/02/12 23:20:53 christos Exp $")
 # define SIZE_MAX ((size_t) -1) 
 #endif
 
+#include "php.h"
+#include "main/php_network.h"
+
 #ifndef PREG_OFFSET_CAPTURE
 # define PREG_OFFSET_CAPTURE                 (1<<8)
 #endif
@@ -218,7 +221,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 
 	/* Check if we have a CDF file */
 	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
-		int fd;
+		php_socket_t fd;
 		TSRMLS_FETCH();
 		if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
 			if ((m = file_trycdf(ms, fd, ubuf, nb)) != 0) {

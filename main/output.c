@@ -234,6 +234,13 @@ PHPAPI int php_output_get_status(TSRMLS_D)
  * Unbuffered write */
 PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
 {
+#if PHP_DEBUG
+	if (len > UINT_MAX) {
+		php_error(E_WARNING, "Attempt to output more than UINT_MAX bytes at once; "
+				"output will be truncated %lu => %lu",
+				(unsigned long) len, (unsigned long) (len % UINT_MAX));
+	}
+#endif
 	if (OG(flags) & PHP_OUTPUT_DISABLED) {
 		return 0;
 	}
@@ -248,6 +255,13 @@ PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
  * Buffered write */
 PHPAPI int php_output_write(const char *str, size_t len TSRMLS_DC)
 {
+#if PHP_DEBUG
+	if (len > UINT_MAX) {
+		php_error(E_WARNING, "Attempt to output more than UINT_MAX bytes at once; "
+				"output will be truncated %lu => %lu",
+				(unsigned long) len, (unsigned long) (len % UINT_MAX));
+	}
+#endif
 	if (OG(flags) & PHP_OUTPUT_DISABLED) {
 		return 0;
 	}

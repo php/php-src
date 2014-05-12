@@ -462,7 +462,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(request_info).post_entry = NULL;
 	SG(request_info).proto_num = 1000; /* Default to HTTP 1.0 */
 	SG(global_request_time) = 0;
-
+	SG(post_read) = 0;
 	/* It's possible to override this general case in the activate() callback, if necessary. */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
@@ -721,7 +721,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 
 	header_line = estrndup(header_line, header_line_len);
 
-	/* cut of trailing spaces, linefeeds and carriage-returns */
+	/* cut off trailing spaces, linefeeds and carriage-returns */
 	if (header_line_len && isspace(header_line[header_line_len-1])) {
 		do {
 			header_line_len--;

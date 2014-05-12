@@ -359,40 +359,40 @@ Formatted DateTime is : 20091231 03:02 PM
 ------------
 Date is: DateTime::__set_state(array(
    'date' => '2000-12-30 19:04:05',
-   'timezone_type' => 3,
-   'timezone' => 'America/Los_Angeles',
+   'timezone_type' => 2,
+   'timezone' => 'PDT',
 ))
 ------------
 Formatted DateTime is : Saturday, December 30, 2000 5:04:05 PM GMT-10:00
 ------------
 Date is: DateTime::__set_state(array(
    'date' => '2000-12-30 19:04:05',
-   'timezone_type' => 3,
-   'timezone' => 'America/Los_Angeles',
+   'timezone_type' => 2,
+   'timezone' => 'PDT',
 ))
 ------------
 Formatted DateTime is : December 30, 2000 5:04:05 PM GMT-10:00
 ------------
 Date is: DateTime::__set_state(array(
    'date' => '2000-12-30 19:04:05',
-   'timezone_type' => 3,
-   'timezone' => 'America/Los_Angeles',
+   'timezone_type' => 2,
+   'timezone' => 'PDT',
 ))
 ------------
 Formatted DateTime is : Dec 30, 2000 5:04:05 PM
 ------------
 Date is: DateTime::__set_state(array(
    'date' => '2000-12-30 19:04:05',
-   'timezone_type' => 3,
-   'timezone' => 'America/Los_Angeles',
+   'timezone_type' => 2,
+   'timezone' => 'PDT',
 ))
 ------------
 Formatted DateTime is : 12/30/00 5:04 PM
 ------------
 Date is: DateTime::__set_state(array(
    'date' => '2000-12-30 19:04:05',
-   'timezone_type' => 3,
-   'timezone' => 'America/Los_Angeles',
+   'timezone_type' => 2,
+   'timezone' => 'PDT',
 ))
 ------------
 Formatted DateTime is : 20001230 05:04 PM

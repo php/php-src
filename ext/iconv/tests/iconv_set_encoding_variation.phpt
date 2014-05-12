@@ -5,6 +5,8 @@ Test iconv_set_encoding() function : error functionality
 extension_loaded('iconv') or die('skip');
 function_exists('iconv_set_encoding') or die("skip iconv_set_encoding() is not available in this build");
 ?>
+--INI--
+error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
 /* Prototype  : bool iconv_set_encoding(string type, string charset)

@@ -85,12 +85,17 @@ PHPDBG_API int phpdbg_rlog(FILE *stream, const char *fmt, ...);
 	{color, sizeof(color)-1, code}
 #define PHPDBG_COLOR_END \
 	{NULL, 0L, {0}}
+#define PHPDBG_ELEMENT_LEN 3
+#define PHPDBG_ELEMENT_D(name, id) \
+	{name, sizeof(name)-1, id}
+#define PHPDBG_ELEMENT_END \
+	{NULL, 0L, 0}
 
 #define PHPDBG_COLOR_INVALID	-1
-#define PHPDBG_COLOR_PROMPT  	0
-#define PHPDBG_COLOR_ERROR		1
-#define PHPDBG_COLOR_NOTICE		2
-#define PHPDBG_COLORS			3
+#define PHPDBG_COLOR_PROMPT 	 0
+#define PHPDBG_COLOR_ERROR		 1
+#define PHPDBG_COLOR_NOTICE		 2
+#define PHPDBG_COLORS			 3
 
 typedef struct _phpdbg_color_t {
 	char       *name;
@@ -98,13 +103,25 @@ typedef struct _phpdbg_color_t {
 	const char  code[PHPDBG_COLOR_LEN];
 } phpdbg_color_t;
 
+typedef struct _phpdbg_element_t {
+	char		*name;
+	size_t		name_length;
+	int			id;
+} phpdbg_element_t;
+
 PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_length TSRMLS_DC);
 PHPDBG_API void phpdbg_set_color(int element, const phpdbg_color_t *color TSRMLS_DC);
 PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length TSRMLS_DC);
-PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(TSRMLS_D); /* }}} */
+PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(TSRMLS_D); 
+PHPDBG_API int phpdbg_get_element(const char *name, size_t len TSRMLS_DC); /* }}} */
 
 /* {{{ Prompt Management */
 PHPDBG_API void phpdbg_set_prompt(const char* TSRMLS_DC);
 PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D); /* }}} */
+
+/* {{{ Console Width */
+PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D); /* }}} */
+
+int phpdbg_rebuild_symtable(TSRMLS_D);
 
 #endif /* PHPDBG_UTILS_H */

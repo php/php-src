@@ -1140,8 +1140,15 @@ isInternal: yes
 isUserDefined: no
 returnsReference: no
 Modifiers: 256
-Number of Parameters: 0
+Number of Parameters: 1
 Number of Required Parameters: 0
+
+Inspecting parameter 'flags' of method 'store_result'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: yes
+isDefaultValueAvailable: no
 
 Inspecting method 'thread_safe'
 isFinal: no

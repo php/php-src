@@ -61,14 +61,14 @@ PHPAPI void
 mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext TSRMLS_DC)
 {
 	zend_hash_add(&mysqlnd_api_ext_ht, apiext->module->name, strlen(apiext->module->name) + 1, &apiext,
-				  sizeof(MYSQLND_REVERSE_API), NULL);
+				  sizeof(MYSQLND_REVERSE_API *), NULL);
 }
 /* }}} */
 
 
 /* {{{ zval_to_mysqlnd */
 PHPAPI MYSQLND *
-zval_to_mysqlnd(zval * zv TSRMLS_DC)
+zval_to_mysqlnd(zval * zv, const unsigned int client_api_capabilities, unsigned int * save_client_api_capabilities TSRMLS_DC)
 {
 	MYSQLND * retval;
 	MYSQLND_REVERSE_API ** elem;
@@ -80,6 +80,9 @@ zval_to_mysqlnd(zval * zv TSRMLS_DC)
 		if ((*elem)->conversion_cb) {
 			retval = (*elem)->conversion_cb(zv TSRMLS_CC);
 			if (retval) {
+				if (retval->data) {
+					*save_client_api_capabilities = retval->data->m->negotiate_client_api_capabilities(retval->data, client_api_capabilities TSRMLS_CC);
+				}
 				return retval;
 			}
 		}

@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -37,21 +35,15 @@ const zend_function_entry pdo_firebird_functions[] = { /* {{{ */
 
 /* {{{ pdo_firebird_deps
  */
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_firebird_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 /* }}} */
 
 zend_module_entry pdo_firebird_module_entry = { /* {{{ */
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_firebird_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 	"PDO_Firebird",
 	pdo_firebird_functions,
 	PHP_MINIT(pdo_firebird),
@@ -91,7 +83,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_firebird) /* {{{ */
 PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO Driver for Firebird/InterBase", "enabled");
+	php_info_print_table_header(2, "PDO Driver for Firebird", "enabled");
 	php_info_print_table_end();
 }
 /* }}} */

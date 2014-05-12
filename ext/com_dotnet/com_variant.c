@@ -154,13 +154,17 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 		case IS_STRING:
 			V_VT(v) = VT_BSTR;
 			olestring = php_com_string_to_olestring(Z_STRVAL_P(z), Z_STRLEN_P(z), codepage TSRMLS_CC);
-			V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRLEN_P(z) * sizeof(OLECHAR));
+			if (CP_UTF8 == codepage) {
+				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, wcslen(olestring) * sizeof(OLECHAR));
+			} else {
+				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRLEN_P(z) * sizeof(OLECHAR));
+			}
 			efree(olestring);
 			break;
 
 		case IS_RESOURCE:
 		case IS_CONSTANT:
-		case IS_CONSTANT_ARRAY:
+		case IS_CONSTANT_AST:
 		default:
 			V_VT(v) = VT_NULL;
 			break;

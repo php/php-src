@@ -30,7 +30,6 @@
 #include "php.h"
 #include "php_math.h"
 #include "php_rand.h"
-#include "php_lcg.h"
 
 #include "basic_functions.h"
 

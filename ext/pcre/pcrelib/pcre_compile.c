@@ -3623,7 +3623,7 @@ for (;;)
         break;
 
         case OP_MINUPTO:
-        *code += OP_MINUPTO - OP_UPTO;
+        *code += OP_POSUPTO - OP_MINUPTO;
         break;
         }
       }

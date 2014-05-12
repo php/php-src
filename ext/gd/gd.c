@@ -5109,40 +5109,24 @@ PHP_FUNCTION(imagescale)
 {
 	zval *IM;
 	gdImagePtr im;
-	gdImagePtr im_scaled;
-	int new_width, new_height = -1;
-	gdInterpolationMethod method = GD_BILINEAR_FIXED;
+	gdImagePtr im_scaled = NULL;
+	int new_width, new_height;
+	long tmp_w, tmp_h=-1, tmp_m = GD_BILINEAR_FIXED;
+	gdInterpolationMethod method;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|ll", &IM, &new_width, &new_height, &method) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|ll", &IM, &tmp_w, &tmp_h, &tmp_m) == FAILURE)  {
 		return;
 	}
+	method = tmp_m;
+	new_width = tmp_w;
+	new_height = tmp_h;
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-	im_scaled = gdImageScale(im, new_width, new_height);
-	goto finish;
-	switch (method) {
-		case GD_NEAREST_NEIGHBOUR:
-			im_scaled = gdImageScaleNearestNeighbour(im, new_width, new_height);
-			break;
 
-		case GD_BILINEAR_FIXED:
-			im_scaled = gdImageScaleBilinear(im, new_width, new_height);
-			break;
-
-		case GD_BICUBIC:
-			im_scaled = gdImageScaleBicubicFixed(im, new_width, new_height);
-			break;
-
-		case GD_BICUBIC_FIXED:
-			im_scaled = gdImageScaleBicubicFixed(im, new_width, new_height);
-			break;
-
-		default:
-			im_scaled = gdImageScaleTwoPass(im, im->sx, im->sy, new_width, new_height);
-			break;
-
+	if (gdImageSetInterpolationMethod(im, method)) {
+		im_scaled = gdImageScale(im, new_width, new_height);
 	}
-finish:
+
 	if (im_scaled == NULL) {
 		RETURN_FALSE;
 	} else {
@@ -5290,7 +5274,7 @@ PHP_FUNCTION(imageaffinematrixget)
 {
 	double affine[6];
 	long type;
-	zval *options;
+	zval *options = NULL;
 	zval **tmp;
 	int res = GD_FALSE, i;
 
@@ -5302,7 +5286,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_TRANSLATE:
 		case GD_AFFINE_SCALE: {
 			double x, y;
-			if (Z_TYPE_P(options) != IS_ARRAY) {
+			if (!options || Z_TYPE_P(options) != IS_ARRAY) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array expected as options");
 				RETURN_FALSE;
 			}
@@ -5349,6 +5333,10 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SHEAR_VERTICAL: {
 			double angle;
 
+			if (!options) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number is expected as option");
+				RETURN_FALSE;
+			}
 			convert_to_double_ex(&options);
 			angle = Z_DVAL_P(options);
 

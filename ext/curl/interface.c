@@ -2345,25 +2345,34 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 		case CURLOPT_WRITEHEADER: {
 			FILE *fp = NULL;
 			int type;
-			void * what;
+			void *what = NULL;
 
-			what = zend_fetch_resource(zvalue TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream(), php_file_le_pstream());
-			if (!what) {
-				return FAILURE;
-			}
+			if (Z_TYPE_PP(zvalue) != IS_NULL) {
+				what = zend_fetch_resource(zvalue TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream(), php_file_le_pstream());
+				if (!what) {
+					return FAILURE;
+				}
 
-			if (FAILURE == php_stream_cast((php_stream *) what, PHP_STREAM_AS_STDIO, (void *) &fp, REPORT_ERRORS)) {
-				return FAILURE;
-			}
+				if (FAILURE == php_stream_cast((php_stream *) what, PHP_STREAM_AS_STDIO, (void *) &fp, REPORT_ERRORS)) {
+					return FAILURE;
+				}
 
-			if (!fp) {
-				return FAILURE;
+				if (!fp) {
+					return FAILURE;
+				}
 			}
 
 			error = CURLE_OK;
 			switch (option) {
 				case CURLOPT_FILE:
-					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
+					if (!what) {
+						if (ch->handlers->write->stream) {
+							Z_DELREF_P(ch->handlers->write->stream);
+							ch->handlers->write->stream = NULL;
+						}
+						ch->handlers->write->fp = NULL;
+						ch->handlers->write->method = PHP_CURL_STDOUT;
+					} else if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
 						if (ch->handlers->write->stream) {
 							Z_DELREF_P(ch->handlers->write->stream);
 						}
@@ -2377,7 +2386,14 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 					}
 					break;
 				case CURLOPT_WRITEHEADER:
-					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
+					if (!what) {
+						if (ch->handlers->write_header->stream) {
+							Z_DELREF_P(ch->handlers->write_header->stream);
+							ch->handlers->write_header->stream = NULL;
+						}
+						ch->handlers->write_header->fp = NULL;
+						ch->handlers->write_header->method = PHP_CURL_IGNORE;
+					} else if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
 						if (ch->handlers->write_header->stream) {
 							Z_DELREF_P(ch->handlers->write_header->stream);
 						}
@@ -2391,16 +2407,30 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 					}
 					break;
 				case CURLOPT_INFILE:
-					if (ch->handlers->read->stream) {
-						Z_DELREF_P(ch->handlers->read->stream);
+					if (!what) {
+						if (ch->handlers->read->stream) {
+							Z_DELREF_P(ch->handlers->read->stream);
+							ch->handlers->read->stream = NULL;
+						}
+						ch->handlers->read->fp = NULL;
+						ch->handlers->read->fd = 0;
+					} else {
+						if (ch->handlers->read->stream) {
+							Z_DELREF_P(ch->handlers->read->stream);
+						}
+						Z_ADDREF_PP(zvalue);
+						ch->handlers->read->fp = fp;
+						ch->handlers->read->fd = Z_LVAL_PP(zvalue);
+						ch->handlers->read->stream = *zvalue;
 					}
-					Z_ADDREF_PP(zvalue);
-					ch->handlers->read->fp = fp;
-					ch->handlers->read->fd = Z_LVAL_PP(zvalue);
-					ch->handlers->read->stream = *zvalue;
 					break;
 				case CURLOPT_STDERR:
-					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
+					if (!what) {
+						if (ch->handlers->std_err) {
+							zval_ptr_dtor(&ch->handlers->std_err);
+							ch->handlers->std_err = NULL;
+						}
+					} else if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
 						if (ch->handlers->std_err) {
 							zval_ptr_dtor(&ch->handlers->std_err);
 						}

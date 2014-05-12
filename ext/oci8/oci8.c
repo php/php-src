@@ -290,7 +290,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_name, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number)
+	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_size, 0, 0, 2)
@@ -300,22 +300,22 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_scale, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number)
+	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_precision, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number)
+	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_type, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number)
+	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_type_raw, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(0, column_number)
+	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_is_null, 0, 0, 2)

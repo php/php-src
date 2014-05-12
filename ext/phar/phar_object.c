@@ -1477,7 +1477,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 			}
 
 			close_fp = 0;
-			opened = (char *) estrndup(str, sizeof("[stream]") + 1);
+			opened = (char *) estrndup(str, sizeof("[stream]") - 1);
 			goto after_open_fp;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_PP(value), spl_ce_SplFileInfo TSRMLS_CC)) {
@@ -1934,10 +1934,12 @@ PHP_METHOD(Phar, buildFromIterator)
  */
 PHP_METHOD(Phar, count)
 {
+	/* mode can be ignored, maximum depth is 1 */
+	long mode;
 	PHAR_ARCHIVE_OBJECT();
 	
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &mode) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	RETURN_LONG(zend_hash_num_elements(&phar_obj->arc.archive->manifest));

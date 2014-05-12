@@ -23,8 +23,24 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_info.h"
 #include "phpdbg_bp.h"
+#include "phpdbg_prompt.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+
+#define PHPDBG_INFO_COMMAND_D(f, h, a, m, l, s) \
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[14])
+
+const phpdbg_command_t phpdbg_info_commands[] = {
+	PHPDBG_INFO_COMMAND_D(break,    "show breakpoints",              'b', info_break,   NULL, 0),
+	PHPDBG_INFO_COMMAND_D(files,    "show included files",           'F', info_files,   NULL, 0),
+	PHPDBG_INFO_COMMAND_D(classes,  "show loaded classes",           'c', info_classes, NULL, 0),
+	PHPDBG_INFO_COMMAND_D(funcs,    "show loaded classes",           'f', info_funcs,   NULL, 0),
+	PHPDBG_INFO_COMMAND_D(error,    "show last error",               'e', info_error,   NULL, 0),
+	PHPDBG_INFO_COMMAND_D(vars,     "show active variables",         'v', info_vars,    NULL, 0),
+	PHPDBG_INFO_COMMAND_D(literal,  "show active literal constants", 'l', info_literal, NULL, 0),
+	PHPDBG_INFO_COMMAND_D(memory,   "show memory manager stats",     'm', info_memory,  NULL, 0),
+	PHPDBG_END_COMMAND
+};
 
 PHPDBG_INFO(break) /* {{{ */
 {

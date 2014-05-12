@@ -108,6 +108,10 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants['MYSQLI_OPT_INT_AND_FLOAT_NATIVE'] = true;
 	}
 
+	if ($IS_MYSQLND && defined('MYSQLI_STORE_RESULT_COPY_DATA')) {
+		$expected_constants['MYSQLI_STORE_RESULT_COPY_DATA'] = true;
+	}
+
 	if ($IS_MYSQLND || defined('MYSQLI_REFRESH_BACKUP_LOG')) {
 		$expected_constants['MYSQLI_REFRESH_BACKUP_LOG'] = true;
 	}

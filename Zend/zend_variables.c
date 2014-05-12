@@ -36,8 +36,7 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			CHECK_ZVAL_STRING_REL(zvalue);
 			str_efree_rel(zvalue->value.str.val);
 			break;
-		case IS_ARRAY:
-		case IS_CONSTANT_ARRAY: {
+		case IS_ARRAY: {
 				TSRMLS_FETCH();
 
 				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
@@ -86,7 +85,6 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			str_free(zvalue->value.str.val);
 			break;
 		case IS_ARRAY:
-		case IS_CONSTANT_ARRAY:
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
@@ -128,8 +126,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				zvalue->value.str.val = (char *) estrndup_rel(zvalue->value.str.val, zvalue->value.str.len);
 			}
 			break;
-		case IS_ARRAY:
-		case IS_CONSTANT_ARRAY: {
+		case IS_ARRAY: {
 				zval *tmp;
 				HashTable *original_ht = zvalue->value.ht;
 				HashTable *tmp_ht = NULL;

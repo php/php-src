@@ -255,13 +255,11 @@ if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 // CFLAGS, LDFLAGS and BUILD_DIR are defined
 // Add compiler and link flags if PGO options are selected
 if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
-	ADD_FLAG('CFLAGS', "/GL /O2");
-	ADD_FLAG('LDFLAGS', "/LTCG:PGINSTRUMENT");
+	ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
 	DEFINE("PGOPGD_DIR", "$(BUILD_DIR)");
 }
 else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
-	ADD_FLAG('CFLAGS', "/GL /O2");
-	ADD_FLAG('LDFLAGS', "/LTCG:PGUPDATE");
+	ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
 	DEFINE("PGOPGD_DIR", ((PHP_PGO.length == 0 || PHP_PGO == "yes") ? "$(BUILD_DIR)" : PHP_PGO));
 }
 

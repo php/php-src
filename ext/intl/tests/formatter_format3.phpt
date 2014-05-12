@@ -1,8 +1,9 @@
 --TEST--
-numfmt_format() icu >= 52.1
+numfmt_format() icu >= 52.1 && icu < 53.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '52.1') < 0) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '52.1') < 0) print 'skip for ICU >= 52.1'; ?>
+<?php if (version_compare(INTL_ICU_VERSION, '53.1') >=  0) die('skip for ICU < 53.1'); ?>
 --FILE--
 <?php
 

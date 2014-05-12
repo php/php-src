@@ -15,8 +15,10 @@ env:
       - PDO_MYSQL_TEST_USER=travis
       - PDO_MYSQL_TEST_PASS=
       - PDO_MYSQL_TEST_HOST=127.0.0.1
-    matrix:
       - REPORT_EXIT_STATUS=1
+    matrix:
+      - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
+      - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
 
 before_script:
     # Compile PHP
