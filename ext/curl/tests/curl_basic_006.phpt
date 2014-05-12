@@ -23,16 +23,18 @@ if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  exit("skip PHP_CURL_HTTP_R
 
   $url = "{$host}/get.php?test=get";
   $ch = curl_init();
-
+  $alldata = '';
   ob_start(); // start output buffering
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
   curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) {
-    echo 'Data: '.$data;
+    $GLOBALS['alldata'] .= $data;
     return strlen ($data);
   });
-  
+   
   curl_exec($ch);
   curl_close($ch);
+  ob_end_flush();
+  echo "Data: $alldata";
 ?>
 ===DONE===
 --EXPECTF--
