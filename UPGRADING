@@ -476,3 +476,5 @@ PHP 5.6 UPGRADE NOTES
     input_encoding
     output_encoding
 
+  The mb_regex_encoding() default setting is changed from EUC-JP to UTF-8.
+
