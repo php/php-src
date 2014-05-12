@@ -754,6 +754,7 @@ void decode_request_worker(char *xml_in, int xml_in_len, char *encoding_in, zval
 					ZVAL_STRING(method_name_out, method_name);
 				} else {
 					zval_ptr_dtor(retval);
+					ZVAL_NULL(retval);
 				}
 			}
 		}
@@ -889,7 +890,6 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
 	pData->php_executed = 1;
 
 	zval_ptr_dtor(&xmlrpc_params);
-	zval_ptr_dtor(&pData->xmlrpc_method);
 
 	return PHP_to_XMLRPC(&pData->return_data TSRMLS_CC);
 }
