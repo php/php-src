@@ -551,24 +551,26 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 
 #define ZVAL_NEW_RES(z, h, p, t) do {							\
 		zend_resource *_res = emalloc(sizeof(zend_resource));	\
+		zval *__z;										\
 		GC_REFCOUNT(_res) = 1;									\
 		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
 		_res->handle = (h);										\
 		_res->type = (t);										\
 		_res->ptr = (p);										\
-		zval *__z = (z);										\
+		__z = (z);										\
 		Z_RES_P(__z) = _res;									\
 		Z_TYPE_INFO_P(__z) = IS_RESOURCE_EX;					\
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_RES(z, h, p, t) do {				\
 		zend_resource *_res = malloc(sizeof(zend_resource));	\
+		zval *__z;										\
 		GC_REFCOUNT(_res) = 1;									\
 		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
 		_res->handle = (h);										\
 		_res->type = (t);										\
 		_res->ptr = (p);										\
-		zval *__z = (z);										\
+		__z = (z);										\
 		Z_RES_P(__z) = _res;									\
 		Z_TYPE_INFO_P(__z) = IS_RESOURCE_EX;					\
 	} while (0)
