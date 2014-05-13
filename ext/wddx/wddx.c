@@ -296,14 +296,20 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 		return SUCCESS;
 	}
 	
+	ZVAL_UNDEF(&retval);
 	if ((ret = php_wddx_deserialize_ex(val, vallen, &retval)) == SUCCESS) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(retval), idx, key, ent) {
 			if (key == NULL) {
 				key = STR_ALLOC(MAX_LENGTH_OF_LONG, 0);
 				key->len = snprintf(key->val, key->len + 1, "%ld", idx);
+			} else {
+				STR_ADDREF(key);
 			}
-			php_set_session_var(key, ent, NULL TSRMLS_CC);
+			if (php_set_session_var(key, ent, NULL TSRMLS_CC)) {
+				if (Z_REFCOUNTED_P(ent)) Z_ADDREF_P(ent);
+			}
 			PS_ADD_VAR(key);
+			STR_RELEASE(key);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -600,6 +606,10 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name TS
 		STR_RELEASE(name_esc);
 	}
 	
+	if (Z_TYPE_P(var) == IS_INDIRECT) {
+		var = Z_INDIRECT_P(var);
+	}
+	ZVAL_DEREF(var);
 	switch (Z_TYPE_P(var)) {
 		case IS_STRING:
 			php_wddx_serialize_string(packet, var TSRMLS_CC);
@@ -938,8 +948,8 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						zend_class_entry *old_scope = EG(scope);
 	
 						EG(scope) = Z_OBJCE(ent2->data);
-						zval_ptr_dtor(&ent1->data);
 						add_property_zval(&ent2->data, ent1->varname, &ent1->data);
+						if Z_REFCOUNTED(ent1->data) Z_DELREF(ent1->data);
 						EG(scope) = old_scope;
 					} else {
 						zend_symtable_str_update(target_hash, ent1->varname, strlen(ent1->varname), &ent1->data);
