@@ -154,9 +154,6 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 		return;
 	}
 
-/*	ALLOC_INIT_ZVAL(*subarray);
-	array_init(*subarray);
-*/
 	ZVAL_NEW_ARR(*subarray);
 	add_assoc_string(*subarray, "host", pRec->pName);
 	add_assoc_string(*subarray, "class", "IN");
@@ -215,9 +212,8 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 				add_assoc_string(*subarray, "type", "TXT");
 				
-				ALLOC_INIT_ZVAL(entries);
-				array_init(entries);
-				
+				ZVAL_NEW_ARR(entries);
+
 				for (i = 0; i < count; i++) {
 					txt_len += strlen(data_txt->pStringArray[i]) + 1;
 				}
