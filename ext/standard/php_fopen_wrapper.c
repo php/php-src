@@ -64,7 +64,7 @@ php_stream_ops php_stream_output_ops = {
 };
 
 typedef struct php_stream_input { /* {{{ */
-	php_stream **body_ptr;
+	php_stream *body;
 	off_t position;
 } php_stream_input_t;
 /* }}} */
@@ -85,13 +85,13 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 		int read_bytes = sapi_read_post_block(buf, count TSRMLS_CC);
 
 		if (read_bytes > 0) {
-			php_stream_seek(*input->body_ptr, 0, SEEK_END);
-			php_stream_write(*input->body_ptr, buf, read_bytes);
+			php_stream_seek(input->body, 0, SEEK_END);
+			php_stream_write(input->body, buf, read_bytes);
 		}
 	}
 
-	php_stream_seek(*input->body_ptr, input->position, SEEK_SET);
-	read = php_stream_read(*input->body_ptr, buf, count);
+	php_stream_seek(input->body, input->position, SEEK_SET);
+	read = php_stream_read(input->body, buf, count);
 
 	if (!read || read == (size_t) -1) {
 		stream->eof = 1;
@@ -122,9 +122,9 @@ static int php_stream_input_seek(php_stream *stream, off_t offset, int whence, o
 {
 	php_stream_input_t *input = stream->abstract;
 
-	if (*input->body_ptr) {
-		int sought = php_stream_seek(*input->body_ptr, offset, whence);
-		*newoffset = (*input->body_ptr)->position;
+	if (input->body) {
+		int sought = php_stream_seek(input->body, offset, whence);
+		*newoffset = (input->body)->position;
 		return sought;
 	}
 
@@ -228,10 +228,11 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		}
 
 		input = ecalloc(1, sizeof(*input));
-		if (*(input->body_ptr = &SG(request_info).request_body)) {
-			php_stream_rewind(*input->body_ptr);
+		if ((input->body = SG(request_info).request_body)) {
+			php_stream_rewind(input->body);
 		} else {
-			*input->body_ptr = php_stream_temp_create(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE);
+			input->body = php_stream_temp_create(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE);
+			SG(request_info).request_body = input->body;
 		}
 
 		return php_stream_alloc(&php_stream_input_ops, input, 0, "rb");

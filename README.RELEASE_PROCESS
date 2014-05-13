@@ -11,17 +11,27 @@ because the sysadmins can not upgrade stuff then.
 2. Package two days before a release. So if the release is to be on Thursday,
 package on Tuesday. Think about timezones as well.
 
-3. Ensure that Windows builds will work before packaging
+3. Ensure that the tests on Travis CI are green.
+See: https://travis-ci.org/php/php-src/builds
+It is recommended to do so a couple of days before the packaging day, to
+have enough time to investigate failures, communicate with the authors and
+commit the fixes.
+The RM for the branch is also responsible for keeping the CI green on
+ongoing bases between the releases. Check the CI status for your branch
+periodically and resolve the failures ASAP. See more in:
+https://wiki.php.net/rfc/travis_ci
 
-4. Follow all steps to the letter. When unclear ask previous RM's (David/Julien/
+4. Ensure that Windows builds will work before packaging
+
+5. Follow all steps to the letter. When unclear ask previous RM's (David/Julien/
 Johannes/Stas/Derick/Ilia) before proceeding. Ideally make sure that for the
 first releases one of the previous RM's is around to answer questions. For the
 steps related to the php/QA/bug websites try to have someone from the webmaster
 team (Bjori) on hand.
 
-5. Verify the tags to be extra sure everything was tagged properly.
+6. Verify the tags to be extra sure everything was tagged properly.
 
-6. Moving extensions from/to PECL requires write acces to the destination.
+7. Moving extensions from/to PECL requires write acces to the destination.
 Most developers should have this. 
 
 Moving extensions from php-src to PECL
@@ -48,47 +58,49 @@ Rolling a non stable release (alpha/beta/RC)
 
 1. Check windows snapshot builder logs (http://windows.php.net/downloads/snaps/ the last revision)
 
-2. run the "scripts/dev/credits" script in php-src and commit the changes in the
+2. Check the tests at https://travis-ci.org/php/php-src/builds
+
+3. run the "scripts/dev/credits" script in php-src and commit the changes in the
 credits files in ext/standard.
 
-3. Checkout the release branch for this release (e.g., PHP-5.4.2) from the main branch.
+4. Checkout the release branch for this release (e.g., PHP-5.4.2) from the main branch.
 
-4. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
+5. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
 Do not use abbreviations for alpha and beta. Do not use dashes, you should
 ``#define PHP_VERSION "5.4.22RC1"`` and not ``#define PHP_VERSION "5.4.22-RC1"``
 
-5. Compile and make test, with and without ZTS, using the right Bison version
+6. Compile and make test, with and without ZTS, using the right Bison version
 (for example, for 5.5, Bison 2.4.1 is used)
 
-6. Check ./sapi/cli/php -v output for version matching.
+7. Check ./sapi/cli/php -v output for version matching.
 
-7. If all is right, commit the changes to the release branch with ``git commit -a``.
+8. If all is right, commit the changes to the release branch with ``git commit -a``.
 
-8. Tag the repository release branch with the version, e.g.: 
+9. Tag the repository release branch with the version, e.g.:
 ``git tag -u YOURKEYID php-5.4.2RC2``
 
-9. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and ``NEWS``
+10. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and ``NEWS``
 in the *main* branch (PHP-5.4 for example) to prepare for the **next** version.
 F.e. if the RC is "5.4.1RC1" then the new one should be "5.4.2-dev" - regardless if we get
 a new RC or not. This is to make sure ``version_compare()`` can correctly work.
 Commit the changes to the main branch.
 
-10. Push the changes to the main repo, the tag, the main branch and the release branch :
+11. Push the changes to the main repo, the tag, the main branch and the release branch :
 ``git push --tags origin HEAD``
 ``git push origin {main branch}``
 ``git push origin {release branch}``
 
-11. run: ``PHPROOT=. ./makedist 5.4.2RC2``, this will export the tree, create configure
+12. run: ``PHPROOT=. ./makedist 5.4.2RC2``, this will export the tree, create configure
 and build three tarballs (gz, bz2 and xz).
 
-12. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there should be a
+13. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there should be a
 directory "downloads/". Copy them into there, so that the system can generate
 MD5 sums. If you do not have this directory, talk to Derick or Dan.
 
-13. Now the RC can be found on http://downloads.php.net/yourname,
+14. Now the RC can be found on http://downloads.php.net/yourname,
 f.e. http://downloads.php.net/derick/
 
-14. Once the release has been tagged, contact the PHP Windows development team
+15. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
 those are made, they should be placed into the same directory as the source snapshots.
 
@@ -144,7 +156,8 @@ the base branches and merged upwards as usual (f.e commit the CVE fix to 5.3,
 merge to 5.4, 5.5 etc...). Then you can cherry-pick it in your release branch.
 Don't forget to update NEWS manually in an extra commit then.
 
-3. Commit those changes
+3. Commit those changes. Ensure the tests at https://travis-ci.org/php/php-src/builds are
+still passing.
 
 4. run the "scripts/dev/credits" script in php-src and commit the changes in the
 credits files in ext/standard.
@@ -154,7 +167,7 @@ credits files in ext/standard.
 
 6. Check ./sapi/cli/php -v output for version matching.
 
-7. tag the repository with the version f.e. "``git tag -s php-5.4.1``"
+7. tag the repository with the version f.e. "``git tag -u YOURKEYID -s php-5.4.1``"
 
 8. Push the tag f.e. "``git push origin php-5.4.1``"
 

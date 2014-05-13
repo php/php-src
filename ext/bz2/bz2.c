@@ -226,10 +226,13 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 #ifdef VIRTUAL_DIR
 	virtual_filepath_ex(path, &path_copy, NULL TSRMLS_CC);
 #else
-	path_copy = estrdup(path);
+	path_copy = path;
 #endif
 
 	if (php_check_open_basedir(path_copy TSRMLS_CC)) {
+#ifdef VIRTUAL_DIR
+		efree(path_copy);
+#endif
 		return NULL;
 	}
 	
@@ -237,13 +240,20 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	bz_file = BZ2_bzopen(path_copy, mode);
 
 	if (opened_path && bz_file) {
-		*opened_path = estrdup(path_copy);
+#ifdef VIRTUAL_DIR
+		*opened_path = path_copy;
 		path_copy = NULL;
+#else
+		*opened_path = estrdup(path_copy);
+#endif
 	}
 
+#ifdef VIRTUAL_DIR
 	if (path_copy) {
 		efree(path_copy);
 	}
+#endif
+	path_copy = NULL;
 	
 	if (bz_file == NULL) {
 		/* that didn't work, so try and get something from the network/wrapper */
