@@ -3136,7 +3136,7 @@ PHP_FUNCTION(curl_close)
 		return;
 	}
 
-	zend_list_delete(Z_RES_P(zid));
+	zend_list_close(Z_RES_P(zid));
 }
 /* }}} */
 

@@ -4011,7 +4011,7 @@ PHP_FUNCTION(imagepsfreefont)
 	}
 
 	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
-	zend_list_delete(Z_LVAL_P(fnt));
+	zend_list_close(Z_RES_P(fnt));
 	RETURN_TRUE;
 }
 /* }}} */

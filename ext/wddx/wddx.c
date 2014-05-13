@@ -1187,7 +1187,7 @@ PHP_FUNCTION(wddx_packet_end)
 
 	RETVAL_STR(STR_COPY(packet->s));
 
-	zend_list_delete(Z_RES_P(packet_id));
+	zend_list_close(Z_RES_P(packet_id));
 }
 /* }}} */
 

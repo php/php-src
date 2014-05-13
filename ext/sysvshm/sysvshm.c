@@ -212,7 +212,7 @@ PHP_FUNCTION(shm_detach)
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
-	RETURN_BOOL(SUCCESS == zend_list_delete(Z_RES_P(shm_id)));
+	RETURN_BOOL(SUCCESS == zend_list_close(Z_RES_P(shm_id)));
 }
 /* }}} */
 
