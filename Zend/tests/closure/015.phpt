@@ -14,6 +14,6 @@ print $x;
 print "\n";
 ?>
 --EXPECTF--
-Error: Object of class Closure could not be converted to string at %sclosure_015.php(8)
+Error: Object of class Closure could not be converted to string at %s(8)
 
-Error: Object of class Closure could not be converted to string at %sclosure_015.php(10)
+Error: Object of class Closure could not be converted to string at %s(10)

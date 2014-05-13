@@ -71,4 +71,4 @@ echo "Done\n";
 7
 Destroyed
 
-Fatal error: Using $this when not in object context in %sclosure_005.php on line 28
+Fatal error: Using $this when not in object context in %s on line 28
