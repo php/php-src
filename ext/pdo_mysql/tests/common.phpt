@@ -20,7 +20,7 @@ if (false !== getenv('PDO_MYSQL_TEST_DSN')) {
 		$config['ENV']['PDOTEST_ATTR'] = getenv('PDO_MYSQL_TEST_ATTR');
 	}
 } else {
-	$config['ENV']['PDOTEST_DSN'] = 'mysql:host=127.0.0.1;port=3308;dbname=test';
+	$config['ENV']['PDOTEST_DSN'] = 'mysql:host=localhost;dbname=test';
 	$config['ENV']['PDOTEST_USER'] = 'root';
 	$config['ENV']['PDOTEST_PASS'] = '';
 }
