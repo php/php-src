@@ -708,7 +708,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 	char * thestr;
 	long gmadjust = 0;
 
-	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME) {
+	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME && ASN1_STRING_type(timestr) != V_ASN1_GENERALIZEDTIME) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "illegal ASN1 data type for timestamp");
 		return (time_t)-1;
 	}
@@ -744,13 +744,20 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 	*thestr = '\0';
 	thestr -= 2;
 	thetime.tm_mon = atoi(thestr)-1;
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_year = atoi(thestr);
 
-	if (thetime.tm_year < 68) {
-		thetime.tm_year += 100;
+	*thestr = '\0';
+	if( ASN1_STRING_type(timestr) == V_ASN1_UTCTIME ) {
+		thestr -= 2;
+		thetime.tm_year = atoi(thestr);
+
+		if (thetime.tm_year < 68) {
+			thetime.tm_year += 100;
+		}
+	} else if( ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME ) {
+		thestr -= 4;
+		thetime.tm_year = atoi(thestr) - 1900;
 	}
+
 
 	thetime.tm_isdst = -1;
 	ret = mktime(&thetime);
