@@ -405,7 +405,6 @@ ZEND_FUNCTION(func_num_args)
 }
 /* }}} */
 
-
 /* {{{ proto mixed func_get_arg(int arg_num)
    Get the $arg_num'th argument that was passed to the function */
 ZEND_FUNCTION(func_get_arg)
@@ -443,7 +442,6 @@ ZEND_FUNCTION(func_get_arg)
 }
 /* }}} */
 
-
 /* {{{ proto array func_get_args()
    Get an array of the arguments that were passed to the function */
 ZEND_FUNCTION(func_get_args)
@@ -478,19 +476,17 @@ ZEND_FUNCTION(func_get_args)
 }
 /* }}} */
 
-
 /* {{{ proto int strlen(string str)
    Get string length */
 ZEND_FUNCTION(strlen)
 {
-	char *s1;
-	int s1_len;
+	zend_string *s;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &s1, &s1_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &s) == FAILURE) {
 		return;
 	}
 
-	RETVAL_LONG(s1_len);
+	RETVAL_LONG(s->len);
 }
 /* }}} */
 
