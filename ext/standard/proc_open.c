@@ -469,14 +469,14 @@ PHP_FUNCTION(proc_open)
 
 #ifdef PHP_WIN32
 	if (other_options) {
-		zval *item = zend_hash_str_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"));
+		zval *item = zend_hash_str_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors") - 1);
 		if (item != NULL) {
 			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
 				suppress_errors = 1;
 			}
 		}
 
-		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell"));
+		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell") - 1);
 		if (item != NULL) {
 			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
 				bypass_shell = 1;
