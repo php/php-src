@@ -227,7 +227,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 
 	if (ssb.sb.st_mode & S_IFDIR) {
 		entry.is_dir = 1;
-		if (NULL != zend_hash_str_add_ptr(&phar->mounted_dirs, entry.filename, path_len, entry.filename)) {
+		if (NULL == zend_hash_str_add_ptr(&phar->mounted_dirs, entry.filename, path_len, entry.filename)) {
 			/* directory already mounted */
 			efree(entry.tmp);
 			efree(entry.filename);
@@ -1393,11 +1393,18 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zval retval, zp[3], openssl;
+	zend_string *str;
 
 	ZVAL_STRINGL(&openssl, is_sign ? "openssl_sign" : "openssl_verify", is_sign ? sizeof("openssl_sign")-1 : sizeof("openssl_verify")-1);
 	ZVAL_STRINGL(&zp[1], *signature, *signature_len);
 	ZVAL_STRINGL(&zp[2], key, key_len);
-	ZVAL_STR(&zp[0], php_stream_copy_to_mem(fp, (size_t) end, 0));
+	php_stream_rewind(fp);
+	str = php_stream_copy_to_mem(fp, (size_t) end, 0);
+	if (str) {
+		ZVAL_STR(&zp[0], str);
+	} else {
+		ZVAL_EMPTY_STRING(&zp[0]);
+	}
 
 	if (end != Z_STRLEN(zp[0])) {
 		zval_dtor(&zp[0]);
@@ -1446,7 +1453,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 	Z_DELREF(zp[2]);
 
 	zval_dtor(&zp[0]);
-	zval_dtor(&zp[1]);
+	zval_dtor(&zp[2]);
 
 	switch (Z_TYPE(retval)) {
 		default:
@@ -1964,6 +1971,14 @@ static int phar_update_cached_entry(zval *data, void *argument) /* {{{ */
 }
 /* }}} */
 
+static void phar_manifest_copy_ctor(zval *zv) /* {{{ */
+{
+	phar_entry_info *info = emalloc(sizeof(phar_entry_info));
+	memcpy(info, Z_PTR_P(zv), sizeof(phar_entry_info));
+	Z_PTR_P(zv) = info;
+}
+/* }}} */
+
 static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
@@ -1999,8 +2014,7 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 
 	zend_hash_init(&newmanifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest_entry, 0);
-//???	zend_hash_copy(&newmanifest, &(*pphar)->manifest, NULL, NULL, sizeof(phar_entry_info));
-	zend_hash_copy(&newmanifest, &(*pphar)->manifest, NULL);
+	zend_hash_copy(&newmanifest, &(*pphar)->manifest, phar_manifest_copy_ctor);
 	zend_hash_apply_with_argument(&newmanifest, phar_update_cached_entry, (void *)phar TSRMLS_CC);
 	phar->manifest = newmanifest;
 	zend_hash_init(&phar->mounted_dirs, sizeof(char *),
@@ -2021,13 +2035,16 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 
 int phar_copy_on_write(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 {
+	zval zv, *pzv;
 	phar_archive_data *newpphar;
 
-	if (NULL == (newpphar = zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_fname_map), (*pphar)->fname, (*pphar)->fname_len, *pphar))) {
+	ZVAL_PTR(&zv, *pphar);
+	if (NULL == (pzv = zend_hash_str_add(&(PHAR_GLOBALS->phar_fname_map), (*pphar)->fname, (*pphar)->fname_len, &zv))) {
 		return FAILURE;
 	}
 
-	phar_copy_cached_phar(&newpphar TSRMLS_CC);
+	phar_copy_cached_phar(&Z_PTR_P(pzv) TSRMLS_CC);
+	newpphar = Z_PTR_P(pzv);
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
 	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;

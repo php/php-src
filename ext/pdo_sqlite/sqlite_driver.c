@@ -533,7 +533,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 		RETURN_FALSE;
 	}
 	
-	dbh = Z_PDO_DBH_P(getThis() TSRMLS_CC);
+	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(callback, 0, &cbname TSRMLS_CC)) {
@@ -603,7 +603,7 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 		RETURN_FALSE;
 	}
 	
-	dbh = Z_PDO_DBH_P(getThis() TSRMLS_CC);
+	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(step_callback, 0, &cbname TSRMLS_CC)) {

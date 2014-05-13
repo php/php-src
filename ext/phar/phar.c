@@ -50,7 +50,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 {
 	zend_bool old, ini;
 
-	if (entry->name_length == 14) {
+	if (entry->name_length == sizeof("phar.readonly")-1) {
 		old = PHAR_G(readonly_orig);
 	} else {
 		old = PHAR_G(require_hash_orig);
@@ -376,9 +376,8 @@ static void destroy_phar_data(zval *zv) /* {{{ */
 /**
  * destructor for the manifest hash, frees each file's entry
  */
-void destroy_phar_manifest_entry(zval *zv) /* {{{ */
+void destroy_phar_manifest_entry_int(phar_entry_info *entry) /* {{{ */
 {
-	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv);
 	TSRMLS_FETCH();
 
 	if (entry->cfp) {
@@ -422,7 +421,13 @@ void destroy_phar_manifest_entry(zval *zv) /* {{{ */
 		pefree(entry->tmp, entry->is_persistent);
 		entry->tmp = 0;
 	}
+}
+/* }}} */
 
+void destroy_phar_manifest_entry(zval *zv) /* {{{ */
+{
+	phar_entry_info *entry = Z_PTR_P(zv);
+	destroy_phar_manifest_entry_int(entry);
 	pefree(entry, entry->is_persistent);
 }
 /* }}} */
@@ -441,7 +446,7 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 		}
 		/* if phar_get_or_create_entry_data returns a sub-directory, we have to free it */
 		if (idata->internal_file->is_temp_dir) {
-			destroy_phar_manifest_entry((void *)idata->internal_file);
+			destroy_phar_manifest_entry_int(idata->internal_file);
 			efree(idata->internal_file);
 		}
 	}
@@ -2296,7 +2301,6 @@ int phar_split_fname(const char *filename, int filename_len, char **arch, int *a
 int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_DC) /* {{{ */
 {
 	char *fname;
-//???	zval *halt_constant;
 	php_stream *fp;
 	int fname_len;
 	char *actual = NULL;
@@ -3015,8 +3019,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		phar_set_32(entry_buffer+20, entry->metadata_str.s ? entry->metadata_str.s->len : 0);
 
 		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))
-		|| !entry->metadata_str.s
-		|| entry->metadata_str.s->len != php_stream_write(newfile, entry->metadata_str.s->val, entry->metadata_str.s->len)) {
+		|| (entry->metadata_str.s &&
+		    entry->metadata_str.s->len != php_stream_write(newfile, entry->metadata_str.s->val, entry->metadata_str.s->len))) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}

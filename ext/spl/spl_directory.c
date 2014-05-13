@@ -386,7 +386,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	intern->file_name = use_copy ? estrndup(path, len) : path;
 	intern->file_name_len = len;
 
-	while (IS_SLASH_AT(intern->file_name, intern->file_name_len-1) && intern->file_name_len > 1) {
+	while (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
 		intern->file_name[intern->file_name_len-1] = 0;
 		intern->file_name_len--;
 	}
@@ -1881,6 +1881,9 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type TS
 			}
 			return SUCCESS;
 		}
+	} else if (type == _IS_BOOL) {
+		ZVAL_TRUE(writeobj);
+		return SUCCESS;
 	}
 	if (readobj == writeobj) {
 		zval_dtor(readobj);

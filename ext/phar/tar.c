@@ -180,7 +180,6 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRM
 	if (entry->filename_len == sizeof(".phar/.metadata.bin")-1 && !memcmp(entry->filename, ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1)) {
 		entry->phar->metadata = entry->metadata;
 		ZVAL_UNDEF(&entry->metadata);
-// ??? len ???
 	} else if (entry->filename_len >= sizeof(".phar/.metadata/") + sizeof("/.metadata.bin") - 1 && NULL != (mentry = zend_hash_str_find_ptr(&(entry->phar->manifest), entry->filename + sizeof(".phar/.metadata/") - 1, entry->filename_len - (sizeof("/.metadata.bin") - 1 + sizeof(".phar/.metadata/") - 1)))) {
 		/* transfer this metadata to the entry it refers */
 		mentry->metadata = entry->metadata;
@@ -878,7 +877,6 @@ static int phar_tar_setupmetadata(zval *zv, void *argument TSRMLS_DC) /* {{{ */
 			return phar_tar_setmetadata(&entry->phar->metadata, entry, error TSRMLS_CC);
 		}
 		/* search for the file this metadata entry references */
-//??? len ???
 		if (entry->filename_len >= sizeof(".phar/.metadata/") + sizeof("/.metadata.bin") - 1 && !zend_hash_str_exists(&(entry->phar->manifest), entry->filename + sizeof(".phar/.metadata/") - 1, entry->filename_len - (sizeof("/.metadata.bin") - 1 + sizeof(".phar/.metadata/") - 1))) {
 			/* this is orphaned metadata, erase it */
 			return ZEND_HASH_APPLY_REMOVE;
