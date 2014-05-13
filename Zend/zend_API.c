@@ -480,12 +480,12 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 						}
 						/* break omitted intentionally */
 
-					case IS_STRING:
 					case IS_LONG:
 					case IS_DOUBLE:
 					case IS_FALSE:
 					case IS_TRUE:
 						convert_to_string_ex(arg);
+					case IS_STRING:
 						if (UNEXPECTED(Z_ISREF_P(arg))) {
 							/* it's dangerous to return pointers to string
 							   buffer of referenced variable, because it can
@@ -527,12 +527,12 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 						}
 						/* break omitted intentionally */
 
-					case IS_STRING:
 					case IS_LONG:
 					case IS_DOUBLE:
 					case IS_FALSE:
 					case IS_TRUE:
 						convert_to_string_ex(arg);
+					case IS_STRING:
 						if (UNEXPECTED(Z_ISREF_P(arg))) {
 							/* it's dangerous to return pointers to string
 							   buffer of referenced variable, because it can
