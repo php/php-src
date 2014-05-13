@@ -1360,7 +1360,7 @@ PHP_FUNCTION(ftp_close)
 
 	ftp_quit(ftp);
 
-	RETURN_BOOL(zend_list_delete(Z_RES_P(z_ftp)) == SUCCESS);
+	RETURN_BOOL(zend_list_close(Z_RES_P(z_ftp)) == SUCCESS);
 }
 /* }}} */
 
