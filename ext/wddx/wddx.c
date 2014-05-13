@@ -274,6 +274,7 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 	php_wddx_packet_end(packet);
+	smart_str_0(packet);
 	str = STR_COPY(packet->s);
 	php_wddx_destructor(packet);
 
@@ -908,7 +909,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 
 						zend_str_tolower(Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
 						STR_FORGET_HASH_VAL(Z_STR(ent1->data));
-						if ((pce = zend_hash_find(EG(class_table), Z_STR(ent1->data))) == NULL) {
+						if ((pce = zend_hash_find_ptr(EG(class_table), Z_STR(ent1->data))) == NULL) {
 							incomplete_class = 1;
 							pce = PHP_IC_ENTRY;
 						}
@@ -1079,7 +1080,8 @@ PHP_FUNCTION(wddx_serialize_value)
 	php_wddx_packet_start(packet, comment, comment_len);
 	php_wddx_serialize_var(packet, var, NULL TSRMLS_CC);
 	php_wddx_packet_end(packet);
-					
+	smart_str_0(packet);
+
 	RETVAL_STR(STR_COPY(packet->s));
 	php_wddx_destructor(packet);
 }
@@ -1184,6 +1186,7 @@ PHP_FUNCTION(wddx_packet_end)
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);	
 	
 	php_wddx_packet_end(packet);
+	smart_str_0(packet);
 
 	RETVAL_STR(STR_COPY(packet->s));
 
