@@ -449,7 +449,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 	if (output_context->in.used) {
 		zend_string *out;
 		output_context->out.free = 1;
-		_php_iconv_show_error(php_iconv_string(output_context->in.data, output_context->in.used, &out, get_output_encoding(TSRMLS_C), get_internal_encoding(TSRMLS_C)), get_output_encoding(TSRMLS_C), get_internal_encoding(TSRMLS_C));
+		_php_iconv_show_error(php_iconv_string(output_context->in.data, output_context->in.used, &out, get_output_encoding(TSRMLS_C), get_internal_encoding(TSRMLS_C)), get_output_encoding(TSRMLS_C), get_internal_encoding(TSRMLS_C) TSRMLS_CC);
 		if (out) {
 			output_context->out.data = estrndup(out->val, out->len);
 			output_context->out.used = out->len;
