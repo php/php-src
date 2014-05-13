@@ -2134,6 +2134,10 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				break;
 
 			case '\\': /* escaped char */
+				if(!fptr[1]) {
+					add_pbf_error(s, "Escaped character expected", string, begin);
+					break;
+				}
 				fptr++;
 				if (*ptr == *fptr) {
 					++ptr;
