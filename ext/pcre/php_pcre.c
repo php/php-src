@@ -1058,10 +1058,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 	}
 	extra->match_limit = PCRE_G(backtrack_limit);
 	extra->match_limit_recursion = PCRE_G(recursion_limit);
-#ifdef PCRE_EXTRA_MARK
-	extra->mark = &mark;
-	extra->flags |= PCRE_EXTRA_MARK;
-#endif
 
 	eval = pce->preg_options & PREG_REPLACE_EVAL;
 	if (is_callable_replace) {
@@ -1110,6 +1106,10 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 	
 	while (1) {
+#ifdef PCRE_EXTRA_MARK
+		extra->mark = &mark;
+		extra->flags |= PCRE_EXTRA_MARK;
+#endif
 		/* Execute the regular expression. */
 		count = pcre_exec(pce->re, extra, subject, subject_len, start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
