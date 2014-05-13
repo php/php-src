@@ -14,7 +14,14 @@ PHP                                                                        NEWS
     (Remi)
 
 - Fileinfo:
-  . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary check).
+  . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary 
+    check). 
+
+- OpenSSL:
+  . Fixed bug #65698 (certificates validity parsing does not work past 2050). 
+    (Paul Oehler)
+  . Fixed bug #66636 (openssl_x509_parse warning with V_ASN1_GENERALIZEDTIME). 
+    (Paul Oehler)
 
 - SPL:
   . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
