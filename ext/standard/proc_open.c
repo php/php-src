@@ -469,16 +469,16 @@ PHP_FUNCTION(proc_open)
 
 #ifdef PHP_WIN32
 	if (other_options) {
-		zval **item;
-		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"), (void**)&item)) {
-			if ((Z_TYPE_PP(item) == IS_BOOL || Z_TYPE_PP(item) == IS_LONG) &&
-			    Z_LVAL_PP(item)) {
+		zval *item = zend_hash_str_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"));
+		if (item != NULL) {
+			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
 				suppress_errors = 1;
 			}
 		}
-		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell"), (void**)&item)) {
-			if ((Z_TYPE_PP(item) == IS_BOOL || Z_TYPE_PP(item) == IS_LONG) &&
-			    Z_LVAL_PP(item)) {
+
+		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell"));
+		if (item != NULL) {
+			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
 				bypass_shell = 1;
 			}
 		}
@@ -626,7 +626,7 @@ PHP_FUNCTION(proc_open)
 
 				/* simulate the append mode by fseeking to the end of the file
 				this introduces a potential race-condition, but it is the best we can do, though */
-				if (strchr(Z_STRVAL_PP(zmode), 'a')) {
+				if (strchr(Z_STRVAL_P(zmode), 'a')) {
 					SetFilePointer(descriptors[ndesc].childend, 0, NULL, FILE_END);
 				}
 #else
