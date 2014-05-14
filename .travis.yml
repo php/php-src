@@ -5,7 +5,8 @@ php:
     - 5.4
 
 notifications:
-    email: false
+    email: 
+       on_failure: change
 
 env:
     global:
@@ -18,8 +19,6 @@ env:
       - REPORT_EXIT_STATUS=1
     matrix:
       - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
-      - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=0
-      - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=1
       - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
 
 before_script:

@@ -1,5 +1,33 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+15 May 2014, PHP 5.6.0 Beta 3
+
+- Core:
+  . Fixed bug #67169 (array_splice all elements, then []= gives wrong index).
+    (Nikita)
+  . Fixed bug #67198 (php://input regression). (Mike)
+  . Fixed bug #67247 (spl_fixedarray_resize integer overflow). (Stas)
+  . Fixed bug #67250 (iptcparse out-of-bounds read). (Stas)
+  . Fixed bug #67252 (convert_uudecode out-of-bounds read). (Stas)
+
+- Date:
+  . Fixed bug #67251 (date_parse_from_format out-of-bounds read). (Stas)
+  . Fixed bug #67253 (timelib_meridian_with_check out-of-bounds read). (Stas)
+
+- GD:
+  . Fixed bug #67248 (imageaffinematrixget missing check of parameters). (Stas)
+
+- OpenSSL:
+  . Fixed bug #67224 (Fall back to crypto_type from context if not specified
+    explicitly in stream_socket_enable_crypto). (Chris Wright)
+
+- PCRE:
+  . Fixed bug #67238 (Ungreedy and min/max quantifier bug, applied patch
+    from the upstream). (Anatol)
+
+- mbstring
+  . Fixed bug #67199 (mb_regex_encoding mismatch). (Yasuo)
+
 01 May 2014, PHP 5.6.0 Beta 2
 
 - CLI server:
@@ -62,7 +90,10 @@ PHP                                                                        NEWS
 
 - litespeed
   . Fixed bug #63228 (-Werror=format-security error in lsapi code).
-    (George Wang)
+    (Elan Ruusamäe, George)
+
+- mysqli:
+  . Fixed building against an external libmysqlclient. (Adam)
 
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
@@ -76,7 +107,8 @@ PHP                                                                        NEWS
 - phpdbg:
   . Added watchpoints (watch command). (Bob)
   . Renamed some commands (next => continue and how to step). (Joe)
-  . Fixed issue #85 (https://github.com/krakjoe/phpdbg/issues/85). (Bob)
+  . Fixed issue #85 (https://github.com/krakjoe/phpdbg/issues/85)
+    (Added stdin/stdout/stderr constants and their php:// wrappers). (Bob)
 
 - PDO:
   . Fixed bug #66604 ('pdo/php_pdo_error.h' not copied to the include dir).
