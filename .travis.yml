@@ -5,7 +5,8 @@ php:
     - 5.4
 
 notifications:
-    email: false
+    email: 
+       on_failure: change
 
 env:
     global:
