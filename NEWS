@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.5.13
+15 May 2014, PHP 5.5.13RC1
 
 - CLI server:
   . Fixed bug #67079 (Missing MIME types for XML/XSL files). (Anatol)
