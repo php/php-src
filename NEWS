@@ -6,10 +6,27 @@ PHP                                                                        NEWS
   . Fixed bug #67169 (array_splice all elements, then []= gives wrong index).
     (Nikita)
   . Fixed bug #67198 (php://input regression). (Mike)
+  . Fixed bug #67247 (spl_fixedarray_resize integer overflow). (Stas)
+  . Fixed bug #67250 (iptcparse out-of-bounds read). (Stas)
+  . Fixed bug #67252 (convert_uudecode out-of-bounds read). (Stas)
+
+- Date:
+  . Fixed bug #67251 (date_parse_from_format out-of-bounds read). (Stas)
+  . Fixed bug #67253 (timelib_meridian_with_check out-of-bounds read). (Stas)
+
+- GD:
+  . Fixed bug #67248 (imageaffinematrixget missing check of parameters). (Stas)
 
 - OpenSSL:
   . Fixed bug #67224 (Fall back to crypto_type from context if not specified
     explicitly in stream_socket_enable_crypto). (Chris Wright)
+
+- PCRE:
+  . Fixed bug #67238 (Ungreedy and min/max quantifier bug, applied patch
+    from the upstream). (Anatol)
+
+- mbstring
+  . Fixed bug #67199 (mb_regex_encoding mismatch). (Yasuo)
 
 01 May 2014, PHP 5.6.0 Beta 2
 

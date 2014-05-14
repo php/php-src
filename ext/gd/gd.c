@@ -3976,7 +3976,7 @@ PHP_FUNCTION(imagepscopyfont)
 	gd_ps_font *nf_ind, *of_ind;
 	long fnt;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &fnt) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &fnt) == FAILURE) {
 		return;
 	}
 
@@ -5122,7 +5122,7 @@ PHP_FUNCTION(imagescale)
 	php_int_t tmp_w, tmp_h=-1, tmp_m = GD_BILINEAR_FIXED;
 	gdInterpolationMethod method;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|ll", &IM, &tmp_w, &tmp_h, &tmp_m) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|ii", &IM, &tmp_w, &tmp_h, &tmp_m) == FAILURE)  {
 		return;
 	}
 	method = tmp_m;
@@ -5282,7 +5282,7 @@ PHP_FUNCTION(imageaffinematrixget)
 {
 	double affine[6];
 	php_int_t type;
-	zval *options;
+	zval *options = NULL;
 	zval **tmp;
 	int res = GD_FALSE, i;
 
@@ -5294,7 +5294,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_TRANSLATE:
 		case GD_AFFINE_SCALE: {
 			double x, y;
-			if (Z_TYPE_P(options) != IS_ARRAY) {
+			if (!options || Z_TYPE_P(options) != IS_ARRAY) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array expected as options");
 				RETURN_FALSE;
 			}
@@ -5341,6 +5341,10 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SHEAR_VERTICAL: {
 			double angle;
 
+			if (!options) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number is expected as option");
+				RETURN_FALSE;
+			}
 			convert_to_double_ex(&options);
 			angle = Z_DVAL_P(options);
 
