@@ -13,9 +13,12 @@ PHP                                                                        NEWS
     zend_exceptions.c). (Bob)
   . Fixed bug #67247 (spl_fixedarray_resize integer overflow). (Stas)
   . Fixed bug #67250 (iptcparse out-of-bounds read). (Stas)
+  . Fixed bug #67252 (convert_uudecode out-of-bounds read). (Stas)
 
 - Date:
   . Fixed bug #67118 (DateTime constructor crash with invalid data). (Anatol)
+  . Fixed bug #67251 (date_parse_from_format out-of-bounds read). (Stas)
+  . Fixed bug #67253 (timelib_meridian_with_check out-of-bounds read). (Stas)
 
 - DOM:
   . Fixed bug #67081 (DOMDocumentType->internalSubset returns entire DOCTYPE tag,
