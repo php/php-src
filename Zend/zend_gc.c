@@ -307,9 +307,10 @@ tail_call:
 				int i, n;
 				zval *table;
 				zval tmp;
+				HashTable *props;
 
 				ZVAL_OBJ(&tmp, obj);
-				HashTable *props = get_gc(&tmp, &table, &n TSRMLS_CC);
+				props = get_gc(&tmp, &table, &n TSRMLS_CC);
 
 				while (n > 0 && !Z_REFCOUNTED(table[n-1])) n--;
 				for (i = 0; i < n; i++) {

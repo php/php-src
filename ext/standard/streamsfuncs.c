@@ -40,6 +40,8 @@ typedef unsigned long long php_timeout_ull;
 typedef unsigned __int64 php_timeout_ull;
 #endif
 
+#define GET_CTX_OPT(stream, wrapper, name, val) (stream->context && NULL != (val = php_stream_context_get_option(stream->context, wrapper, name)))
+
 static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC);
 
 /* Streams based network functions */
@@ -1444,16 +1446,27 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 	long cryptokind = 0;
 	zval *zstream, *zsessstream = NULL;
 	php_stream *stream, *sessstream = NULL;
-	zend_bool enable;
+	zend_bool enable, cryptokindnull;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb|lr", &zstream, &enable, &cryptokind, &zsessstream) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb|l!r", &zstream, &enable, &cryptokind, &cryptokindnull, &zsessstream) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	php_stream_from_zval(stream, zstream);
 
-	if (ZEND_NUM_ARGS() >= 3) {
+	if (enable) {
+		if (ZEND_NUM_ARGS() < 3 || cryptokindnull) {
+			zval *val;
+
+			if (!GET_CTX_OPT(stream, "ssl", "crypto_method", val)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "When enabling encryption you must specify the crypto type");
+				RETURN_FALSE;
+			}
+
+			cryptokind = Z_LVAL_P(val);
+		}
+
 		if (zsessstream) {
 			php_stream_from_zval(sessstream, zsessstream);
 		}
@@ -1461,9 +1474,6 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 		if (php_stream_xport_crypto_setup(stream, cryptokind, sessstream TSRMLS_CC) < 0) {
 			RETURN_FALSE;
 		}
-	} else if (enable) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "When enabling encryption you must specify the crypto type");
-		RETURN_FALSE;
 	}
 
 	ret = php_stream_xport_crypto_enable(stream, enable TSRMLS_CC);

@@ -115,6 +115,8 @@ again:
 						break;
 					}
 
+					// TODO: do we really need this warning ???
+					// Nikita, add your comments here.
 					zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to boolean", Z_OBJ_P(op)->ce->name->val);
 				} else if (Z_OBJ_HT_P(op)->get) {
 					zval rv;

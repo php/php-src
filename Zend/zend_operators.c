@@ -2522,8 +2522,8 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC) /
 
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
-	TSRMLS_FETCH();
 	zend_string *str;
+	TSRMLS_FETCH();
 
 	str = zend_strpprintf(0, "%.*G", (int) EG(precision), (double)Z_DVAL_P(op));
 	ZVAL_NEW_STR(op, str);

@@ -565,6 +565,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 	int retval = FAILURE;
 	php_unserialize_data_t unserialize_data = (php_unserialize_data_t) data;
 
+	ZVAL_UNDEF(&zv);
 	PHP_VAR_UNSERIALIZE_INIT(unserialize_data);
 	gmp_create(object, &gmpnum TSRMLS_CC);
 
@@ -579,6 +580,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 		goto exit;
 	}
 	zval_dtor(&zv);
+	ZVAL_UNDEF(&zv);
 
 	if (!php_var_unserialize(&zv, &p, max, &unserialize_data TSRMLS_CC)
 		|| Z_TYPE(zv) != IS_ARRAY

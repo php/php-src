@@ -2,16 +2,11 @@
 Variation of bug #48203 with curl_multi_exec (Crash when file pointers passed to curl are closed before calling curl_multi_exec)
 --SKIPIF--
 <?php
-if (!extension_loaded("curl")) {
-	exit("skip curl extension not loaded");
-}
-if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  {
-	exit("skip PHP_CURL_HTTP_REMOTE_SERVER env variable is not defined");
-}
+include 'skipif.inc';
 ?>
 --FILE--
 <?php
-
+include 'server.inc';
 function checkForClosedFilePointer($curl_option, $description) {
 	$fp = fopen(dirname(__FILE__) . '/bug48203.tmp', 'w');
 
@@ -21,7 +16,7 @@ function checkForClosedFilePointer($curl_option, $description) {
 	$options = array(
 		CURLOPT_RETURNTRANSFER => 1,
 		$curl_option => $fp,
-		CURLOPT_URL => getenv("PHP_CURL_HTTP_REMOTE_SERVER")
+		CURLOPT_URL => curl_cli_server_start()
 	);
 
 	// we also need to set CURLOPT_VERBOSE to test CURLOPT_STDERR properly

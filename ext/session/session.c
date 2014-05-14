@@ -1572,7 +1572,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 		}
 	}
 
-	/* Finally check session id for dangarous characters
+	/* Finally check session id for dangerous characters
 	 * Security note: session id may be embedded in HTML pages.*/
 	if (PS(id) && strpbrk(PS(id)->val, "\r\n\t <>'\"\\")) {
 		STR_RELEASE(PS(id));

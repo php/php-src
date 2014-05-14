@@ -4011,7 +4011,7 @@ PHP_FUNCTION(imagepsfreefont)
 	}
 
 	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
-	zend_list_delete(Z_LVAL_P(fnt));
+	zend_list_close(Z_RES_P(fnt));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -5251,7 +5251,7 @@ PHP_FUNCTION(imageaffinematrixget)
 {
 	double affine[6];
 	long type;
-	zval *options;
+	zval *options = NULL;
 	zval *tmp;
 	int res = GD_FALSE, i;
 
@@ -5263,7 +5263,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_TRANSLATE:
 		case GD_AFFINE_SCALE: {
 			double x, y;
-			if (Z_TYPE_P(options) != IS_ARRAY) {
+			if (!options || Z_TYPE_P(options) != IS_ARRAY) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array expected as options");
 				RETURN_FALSE;
 			}
@@ -5308,6 +5308,10 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SHEAR_VERTICAL: {
 			double angle;
 
+			if (!options) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number is expected as option");
+				RETURN_FALSE;
+			}
 			convert_to_double_ex(options);
 			angle = Z_DVAL_P(options);
 

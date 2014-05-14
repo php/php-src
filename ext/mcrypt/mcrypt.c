@@ -588,7 +588,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	/* If this function fails, close the mcrypt module to prevent crashes
 	 * when further functions want to access this resource */
 	if (result < 0) {
-		zend_list_delete(Z_RES_P(mcryptind));
+		zend_list_close(Z_RES_P(mcryptind));
 		switch (result) {
 			case -3:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Key length incorrect");
@@ -733,7 +733,7 @@ PHP_FUNCTION(mcrypt_enc_self_test)
 PHP_FUNCTION(mcrypt_module_close)
 {
 	MCRYPT_GET_TD_ARG
-	zend_list_delete(Z_RES_P(mcryptind));
+	zend_list_close(Z_RES_P(mcryptind));
 	RETURN_TRUE;
 }
 /* }}} */

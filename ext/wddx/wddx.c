@@ -274,6 +274,7 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 	php_wddx_packet_end(packet);
+	smart_str_0(packet);
 	str = STR_COPY(packet->s);
 	php_wddx_destructor(packet);
 
@@ -295,14 +296,20 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 		return SUCCESS;
 	}
 	
+	ZVAL_UNDEF(&retval);
 	if ((ret = php_wddx_deserialize_ex(val, vallen, &retval)) == SUCCESS) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(retval), idx, key, ent) {
 			if (key == NULL) {
 				key = STR_ALLOC(MAX_LENGTH_OF_LONG, 0);
 				key->len = snprintf(key->val, key->len + 1, "%ld", idx);
+			} else {
+				STR_ADDREF(key);
 			}
-			php_set_session_var(key, ent, NULL TSRMLS_CC);
+			if (php_set_session_var(key, ent, NULL TSRMLS_CC)) {
+				if (Z_REFCOUNTED_P(ent)) Z_ADDREF_P(ent);
+			}
 			PS_ADD_VAR(key);
+			STR_RELEASE(key);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -599,6 +606,10 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name TS
 		STR_RELEASE(name_esc);
 	}
 	
+	if (Z_TYPE_P(var) == IS_INDIRECT) {
+		var = Z_INDIRECT_P(var);
+	}
+	ZVAL_DEREF(var);
 	switch (Z_TYPE_P(var)) {
 		case IS_STRING:
 			php_wddx_serialize_string(packet, var TSRMLS_CC);
@@ -908,7 +919,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 
 						zend_str_tolower(Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
 						STR_FORGET_HASH_VAL(Z_STR(ent1->data));
-						if ((pce = zend_hash_find(EG(class_table), Z_STR(ent1->data))) == NULL) {
+						if ((pce = zend_hash_find_ptr(EG(class_table), Z_STR(ent1->data))) == NULL) {
 							incomplete_class = 1;
 							pce = PHP_IC_ENTRY;
 						}
@@ -937,8 +948,8 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						zend_class_entry *old_scope = EG(scope);
 	
 						EG(scope) = Z_OBJCE(ent2->data);
-						zval_ptr_dtor(&ent1->data);
 						add_property_zval(&ent2->data, ent1->varname, &ent1->data);
+						if Z_REFCOUNTED(ent1->data) Z_DELREF(ent1->data);
 						EG(scope) = old_scope;
 					} else {
 						zend_symtable_str_update(target_hash, ent1->varname, strlen(ent1->varname), &ent1->data);
@@ -1079,7 +1090,8 @@ PHP_FUNCTION(wddx_serialize_value)
 	php_wddx_packet_start(packet, comment, comment_len);
 	php_wddx_serialize_var(packet, var, NULL TSRMLS_CC);
 	php_wddx_packet_end(packet);
-					
+	smart_str_0(packet);
+
 	RETVAL_STR(STR_COPY(packet->s));
 	php_wddx_destructor(packet);
 }
@@ -1184,10 +1196,11 @@ PHP_FUNCTION(wddx_packet_end)
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);	
 	
 	php_wddx_packet_end(packet);
+	smart_str_0(packet);
 
 	RETVAL_STR(STR_COPY(packet->s));
 
-	zend_list_delete(Z_RES_P(packet_id));
+	zend_list_close(Z_RES_P(packet_id));
 }
 /* }}} */
 
