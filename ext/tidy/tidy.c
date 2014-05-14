@@ -592,20 +592,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	TIDY_SET_DEFAULT_CONFIG(doc);
 	
 	if (config) {
-        if(Z_TYPE_P(config) == IS_ARRAY) { 
-            _php_tidy_apply_config_array(doc, HASH_OF(config) TSRMLS_CC); 
-        } else { 
-            convert_to_string_ex(config); 
-            TIDY_OPEN_BASE_DIR_CHECK(Z_STRVAL_P(config)); 
-            switch (tidyLoadConfig(doc, Z_STRVAL_P(config))) { 
-              case -1: 
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(config)); 
-                break; 
-              case 1: 
-                php_error_docref(NULL TSRMLS_CC, E_NOTICE, "There were errors while parsing the configuration file '%s'", Z_STRVAL_P(config)); 
-                break; 
-            } 
-        } 
+		TIDY_APPLY_CONFIG_ZVAL(doc, config);
 	}
 
 	if(enc_len) {
