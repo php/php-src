@@ -36,7 +36,7 @@ object(tidyNode)#2 (8) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidyNode)#3 (9) {
+    object(tidyNode)#3 (9) {
       ["value"]=>
       string(94) "<html>
 <head>
@@ -62,7 +62,7 @@ object(tidyNode)#2 (8) {
       ["child"]=>
       array(2) {
         [0]=>
-        &object(tidyNode)#4 (9) {
+        object(tidyNode)#4 (9) {
           ["value"]=>
           string(31) "<head>
 <title></title>
@@ -85,7 +85,7 @@ object(tidyNode)#2 (8) {
           ["child"]=>
           array(1) {
             [0]=>
-            &object(tidyNode)#5 (9) {
+            object(tidyNode)#5 (9) {
               ["value"]=>
               string(16) "<title></title>
 "
@@ -109,7 +109,7 @@ object(tidyNode)#2 (8) {
           }
         }
         [1]=>
-        &object(tidyNode)#6 (9) {
+        object(tidyNode)#6 (9) {
           ["value"]=>
           string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
@@ -193,7 +193,7 @@ object(tidyNode)#2 (9) {
   ["child"]=>
   array(2) {
     [0]=>
-    &object(tidyNode)#3 (9) {
+    object(tidyNode)#3 (9) {
       ["value"]=>
       string(31) "<head>
 <title></title>
@@ -216,7 +216,7 @@ object(tidyNode)#2 (9) {
       ["child"]=>
       array(1) {
         [0]=>
-        &object(tidyNode)#6 (9) {
+        object(tidyNode)#6 (9) {
           ["value"]=>
           string(16) "<title></title>
 "
@@ -240,7 +240,7 @@ object(tidyNode)#2 (9) {
       }
     }
     [1]=>
-    &object(tidyNode)#4 (9) {
+    object(tidyNode)#4 (9) {
       ["value"]=>
       string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
@@ -292,7 +292,7 @@ object(tidyNode)#2 (9) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidyNode)#4 (9) {
+    object(tidyNode)#4 (9) {
       ["value"]=>
       string(16) "<title></title>
 "
