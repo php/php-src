@@ -213,7 +213,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 				add_assoc_string(subarray, "type", "TXT");
 				
-				array_init(entries);
+				array_init(&entries);
 				
 				for (i = 0; i < count; i++) {
 					txt_len += strlen(data_txt->pStringArray[i]) + 1;
@@ -227,7 +227,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 					add_next_index_stringl(&entries, data_txt->pStringArray[i], len);
 					txt_dst += len;
 				}
-				tct->len = txt_dst - txt->val;
+				txt->len = txt_dst - txt->val;
 				add_assoc_str(subarray, "txt", txt);
 				add_assoc_zval(subarray, "entries", &entries);
 			}
