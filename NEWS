@@ -7,10 +7,15 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #67198 (php://input regression). (Mike)
   . Fixed bug #67247 (spl_fixedarray_resize integer overflow). (Stas)
+  . Fixed bug #67250 (iptcparse out-of-bounds read). (Stas)
+  . Fixed bug #67252 (convert_uudecode out-of-bounds read). (Stas)
+
+- Date:
+  . Fixed bug #67251 (date_parse_from_format out-of-bounds read). (Stas)
+  . Fixed bug #67253 (timelib_meridian_with_check out-of-bounds read). (Stas)
 
 - GD:
   . Fixed bug #67248 (imageaffinematrixget missing check of parameters). (Stas)
-
 
 - OpenSSL:
   . Fixed bug #67224 (Fall back to crypto_type from context if not specified
