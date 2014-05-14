@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.4.29
+15 May 2014, PHP 5.4.29 RC1
 
 - COM:
   . Fixed bug #66431 (Special Character via COM Interface (CP_UTF8)). (Anatol)
