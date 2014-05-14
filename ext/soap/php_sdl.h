@@ -77,7 +77,7 @@ typedef struct sdlCtx {
 	HashTable *attributes;       /* array of sdlAttributePtr */
 	HashTable *attributeGroups;  /* array of sdlTypesPtr */
 	php_stream_context *context;
-	zval               *old_header;
+	zval               old_header;
 } sdlCtx;
 
 struct _sdlBinding {

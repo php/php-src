@@ -74,8 +74,8 @@ typedef struct _soapService soapService, *soapServicePtr;
 #include "php_packet_soap.h"
 
 struct _soapMapping {
-	zval *to_xml;
-	zval *to_zval;
+	zval to_xml;
+	zval to_zval;
 };
 
 struct _soapHeader;
@@ -90,12 +90,12 @@ struct _soapService {
 
 	struct _soap_class {
 		zend_class_entry *ce;
-		zval **argv;
+		zval *argv;
 		int argc;
 		int persistance;
 	} soap_class;
 
-	zval *soap_object;
+	zval soap_object;
 
 	HashTable *typemap;
 	int        version;
