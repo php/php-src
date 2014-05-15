@@ -4019,7 +4019,7 @@ PHP_FUNCTION(getenv)
 				efree(ptr);
 				RETURN_EMPTY_STRING();
 		} else {
-			RETURN_STRING(ptr, 0);
+			RETURN_STRING(ptr);
 		}
 	}
 #else
