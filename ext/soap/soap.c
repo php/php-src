@@ -556,13 +556,12 @@ static void php_soap_prepare_globals()
 	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
 
 	/* hash by namespace */
-//??? change _mem into _ptr
-	zend_hash_str_add_mem(&defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE)-1, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX));
-	zend_hash_str_add_mem(&defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX));
-	zend_hash_str_add_mem(&defEncNs, XSI_NAMESPACE, sizeof(XSI_NAMESPACE)-1, XSI_NS_PREFIX, sizeof(XSI_NS_PREFIX));
-	zend_hash_str_add_mem(&defEncNs, XML_NAMESPACE, sizeof(XML_NAMESPACE)-1, XML_NS_PREFIX, sizeof(XML_NS_PREFIX));
-	zend_hash_str_add_mem(&defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1, SOAP_1_1_ENC_NS_PREFIX, sizeof(SOAP_1_1_ENC_NS_PREFIX));
-	zend_hash_str_add_mem(&defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1, SOAP_1_2_ENC_NS_PREFIX, sizeof(SOAP_1_2_ENC_NS_PREFIX));
+	zend_hash_str_add_ptr(&defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE)-1, XSD_NS_PREFIX);
+	zend_hash_str_add_ptr(&defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1, XSD_NS_PREFIX);
+	zend_hash_str_add_ptr(&defEncNs, XSI_NAMESPACE, sizeof(XSI_NAMESPACE)-1, XSI_NS_PREFIX);
+	zend_hash_str_add_ptr(&defEncNs, XML_NAMESPACE, sizeof(XML_NAMESPACE)-1, XML_NS_PREFIX);
+	zend_hash_str_add_ptr(&defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1, SOAP_1_1_ENC_NS_PREFIX);
+	zend_hash_str_add_ptr(&defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1, SOAP_1_2_ENC_NS_PREFIX);
 }
 
 static void php_soap_init_globals(zend_soap_globals *soap_globals TSRMLS_DC)
@@ -609,22 +608,22 @@ PHP_RINIT_FUNCTION(soap)
 	return SUCCESS;
 }
 
-static void delete_sdl_res(zend_resource *res)
+static void delete_sdl_res(zend_resource *res TSRMLS_CC)
 {
 	delete_sdl(res->ptr);
 }
 
-static void delete_url_res(zend_resource *res)
+static void delete_url_res(zend_resource *res TSRMLS_CC)
 {
 	delete_url(res->ptr);
 }
 
-static void delete_service_res(zend_resource *res)
+static void delete_service_res(zend_resource *res TSRMLS_CC)
 {
 	delete_service(res->ptr);
 }
 
-static void delete_hashtable_res(zend_resource *res)
+static void delete_hashtable_res(zend_resource *res TSRMLS_CC)
 {
 	delete_hashtable(res->ptr);
 }
@@ -677,10 +676,10 @@ PHP_MINIT_FUNCTION(soap)
 	INIT_CLASS_ENTRY(ce, PHP_SOAP_HEADER_CLASSNAME, soap_header_functions);
 	soap_header_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
-	le_sdl = register_list_destructors(delete_sdl_res, NULL);
-	le_url = register_list_destructors(delete_url_res, NULL);
-	le_service = register_list_destructors(delete_service_res, NULL);
-	le_typemap = register_list_destructors(delete_hashtable_res, NULL);
+	le_sdl = zend_register_list_destructors_ex(delete_sdl_res, NULL, "SOAP SDL", module_number);
+	le_url = zend_register_list_destructors_ex(delete_url_res, NULL, "SOAP URL", module_number);
+	le_service = zend_register_list_destructors_ex(delete_service_res, NULL, "SOAP service", module_number);
+	le_typemap = zend_register_list_destructors_ex(delete_hashtable_res, NULL, "SOAP table", module_number);
 
 	REGISTER_LONG_CONSTANT("SOAP_1_1", SOAP_1_1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_1_2", SOAP_1_2, CONST_CS | CONST_PERSISTENT);
@@ -3336,7 +3335,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 		    strcmp((char *)params->name, function->functionName) == 0) {
 			num_of_params = 0;
 		} else if (num_of_params > 0) {
-			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval *), 0);
+			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval), 0);
 
 			trav = params;
 			while (trav != 0 && cur_param < num_of_params) {
