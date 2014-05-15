@@ -645,15 +645,15 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 		return FAILURE;
 	}
 
-	if (SUCCESS == (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
+	if (NULL != (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
 		return zend_hash_next_index_insert_ptr(rev_ptr, check_func) ? SUCCESS : FAILURE;
 	} else {
 		zend_hash_init(&rev, 8, NULL, NULL, 1);
-		if (SUCCESS != zend_hash_next_index_insert_ptr(&rev, check_func)) {
+		if (NULL == zend_hash_next_index_insert_ptr(&rev, check_func)) {
 			zend_hash_destroy(&rev);
 			return FAILURE;
 		}
-		if (SUCCESS != zend_hash_str_update_mem(&php_output_handler_reverse_conflicts, name, name_len+1, &rev, sizeof(HashTable))) {
+		if (NULL == zend_hash_str_update_mem(&php_output_handler_reverse_conflicts, name, name_len+1, &rev, sizeof(HashTable))) {
 			zend_hash_destroy(&rev);
 			return FAILURE;
 		}
