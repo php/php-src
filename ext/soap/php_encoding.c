@@ -355,7 +355,7 @@ static zval* soap_find_xml_ref(xmlNodePtr node TSRMLS_DC)
 	zval *data_ptr;
 
 	if (SOAP_GLOBAL(ref_map) && 
-	    (data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
+	    (data_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
 //???		Z_SET_ISREF_PP(data_ptr);
 	    SEPARATE_ZVAL_TO_MAKE_IS_REF(data_ptr);
 		Z_ADDREF_P(data_ptr);
@@ -369,7 +369,7 @@ static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 	zval *data_ptr;
 
 	if (SOAP_GLOBAL(ref_map)) {
-		if ((data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
+		if ((data_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
 			if (data != data_ptr) {
 				zval_ptr_dtor(data);
 				ZVAL_COPY_VALUE(data, data_ptr);
@@ -379,7 +379,7 @@ static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 				return 1;
 			}
 		} else {
-			zend_hash_index_update(SOAP_GLOBAL(ref_map), (ulong)node, data);
+			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (ulong)node, data);
 		}
 	}
 	return 0;
@@ -1484,8 +1484,11 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
 
+			    zval *ref;
+
 				CHECK_XML_NULL(data);
-				if ((ret = soap_find_xml_ref(data TSRMLS_CC)) != NULL) {
+				if ((ref = soap_find_xml_ref(data TSRMLS_CC)) != NULL) {
+					ZVAL_COPY_VALUE(ret, ref);
 					return ret;
 				}
 
