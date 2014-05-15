@@ -95,7 +95,7 @@ enum {
 };
 
 struct pdo_pgsql_lob_self {
-	pdo_dbh_t *dbh;
+	zval dbh;
 	PGconn *conn;
 	int lfd;
 	Oid oid;
@@ -109,7 +109,7 @@ enum pdo_pgsql_specific_constants {
 	PGSQL_TRANSACTION_UNKNOWN = PQTRANS_UNKNOWN
 };
 
-php_stream *pdo_pgsql_create_lob_stream(pdo_dbh_t *stmt, int lfd, Oid oid TSRMLS_DC);
+php_stream *pdo_pgsql_create_lob_stream(zval *pdh, int lfd, Oid oid TSRMLS_DC);
 extern php_stream_ops pdo_pgsql_lob_stream_ops;
 
 #endif /* PHP_PDO_PGSQL_INT_H */

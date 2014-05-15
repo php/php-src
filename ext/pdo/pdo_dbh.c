@@ -1529,18 +1529,6 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 	//???pefree(dbh, dbh->is_persistent);
 }
 
-PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
-{
-	dbh->refcount++;
-}
-/* }}} */
-
-PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
-{
-	dbh_free(dbh TSRMLS_CC);
-}
-/* }}} */
-
 static void pdo_dbh_free_storage(zend_object *std TSRMLS_DC)
 {
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_object(std);

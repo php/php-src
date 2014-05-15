@@ -137,13 +137,12 @@ static size_t pgsql_lob_read(php_stream *stream, char *buf, size_t count TSRMLS_
 static int pgsql_lob_close(php_stream *stream, int close_handle TSRMLS_DC)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
-	pdo_dbh_t *dbh = self->dbh;
 
 	if (close_handle) {
 		lo_close(self->conn, self->lfd);
 	}
+	zval_ptr_dtor(&self->dbh);
 	efree(self);
-	php_pdo_dbh_delref(dbh TSRMLS_CC);
 	return 0;
 }
 
@@ -173,13 +172,13 @@ php_stream_ops pdo_pgsql_lob_stream_ops = {
 	NULL
 };
 
-php_stream *pdo_pgsql_create_lob_stream(pdo_dbh_t *dbh, int lfd, Oid oid TSRMLS_DC)
+php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid TSRMLS_DC)
 {
 	php_stream *stm;
 	struct pdo_pgsql_lob_self *self = ecalloc(1, sizeof(*self));
-	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)(Z_PDO_DBH_P(dbh))->driver_data;
 
-	self->dbh = dbh;
+	ZVAL_COPY_VALUE(&self->dbh, dbh);
 	self->lfd = lfd;
 	self->oid = oid;
 	self->conn = H->server;
@@ -187,7 +186,7 @@ php_stream *pdo_pgsql_create_lob_stream(pdo_dbh_t *dbh, int lfd, Oid oid TSRMLS_
 	stm = php_stream_alloc(&pdo_pgsql_lob_stream_ops, self, 0, "r+b");
 
 	if (stm) {
-		php_pdo_dbh_addref(dbh TSRMLS_CC);
+		Z_ADDREF_P(dbh);
 		return stm;
 	}
 
@@ -568,11 +567,9 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 		int command_failed = 0;
 		int buffer_len = 0;
 		zval *tmp;
-		HashPosition pos;
 
 		PQclear(pgsql_result);
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(pg_rows), &pos);
-		while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(pg_rows), &pos)) != NULL) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), tmp) {
 			int query_len;
 			convert_to_string_ex(tmp);
 
@@ -592,8 +589,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 				PDO_HANDLE_DBH_ERR();
 				RETURN_FALSE;
 			}
-			zend_hash_move_forward_ex(Z_ARRVAL_P(pg_rows), &pos);
-		}
+		} ZEND_HASH_FOREACH_END();
 		if (query) {
 			efree(query);
 		}
@@ -959,7 +955,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 	lfd = lo_open(H->server, oid, mode);
 
 	if (lfd >= 0) {
-		php_stream *stream = pdo_pgsql_create_lob_stream(dbh, lfd, oid TSRMLS_CC);
+		php_stream *stream = pdo_pgsql_create_lob_stream(getThis(), lfd, oid TSRMLS_CC);
 		if (stream) {
 			php_stream_to_zval(stream, return_value);
 			return;

@@ -323,12 +323,11 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 								S->param_types[param->paramno] = OIDOID;
 								return 1;
 							} else {
-								int len;
-
-								SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
-								Z_TYPE_INFO(param->parameter) = IS_STRING;
-
-								if ((Z_STR(param->parameter) = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0)) == NULL) {
+								zend_string *str = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
+								if (str != NULL) {
+									SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
+									ZVAL_STR(&param->parameter, str);
+								} else {
 									ZVAL_EMPTY_STRING(&param->parameter);
 								}
 							}
@@ -449,8 +448,8 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		case OIDOID:
 			/* did the user bind the column as a LOB ? */
 			if (stmt->bound_columns && (
-					(param = zend_hash_index_find(stmt->bound_columns, colno)) != NULL ||
-					(param = zend_hash_str_find(stmt->bound_columns, cols[colno].name, cols[colno].namelen)) != NULL)) {
+					(param = zend_hash_index_find_ptr(stmt->bound_columns, colno)) != NULL ||
+					(param = zend_hash_str_find_ptr(stmt->bound_columns, cols[colno].name, cols[colno].namelen)) != NULL)) {
 
 				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
 					cols[colno].param_type = PDO_PARAM_LOB;
@@ -523,7 +522,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 					Oid oid = (Oid)strtoul(*ptr, &end_ptr, 10);
 					int loid = lo_open(S->H->server, oid, INV_READ);
 					if (loid >= 0) {
-						*ptr = (char*)pdo_pgsql_create_lob_stream(stmt->dbh, loid, oid TSRMLS_CC);
+						*ptr = (char*)pdo_pgsql_create_lob_stream(&stmt->database_object_handle, loid, oid TSRMLS_CC);
 						*len = 0;
 						return *ptr ? 1 : 0;
 					}

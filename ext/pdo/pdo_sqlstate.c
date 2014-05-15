@@ -319,7 +319,7 @@ int pdo_sqlstate_init_error_table(void)
 	for (i = 0; i < sizeof(err_initializer)/sizeof(err_initializer[0]); i++) {
 		info = &err_initializer[i];
 
-		zend_hash_str_add_ptr(&err_hash, info->state, sizeof(info->state), info);
+		zend_hash_str_add_ptr(&err_hash, info->state, sizeof(info->state), (void *)info);
 	}
 
 	return SUCCESS;
