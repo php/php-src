@@ -1310,10 +1310,6 @@ PHP_METHOD(SoapServer, setClass)
 		return;
 	}
 
-	if (argv) {
-		efree(argv);
-	}
-
 	SOAP_SERVER_END_CODE();
 }
 /* }}} */
