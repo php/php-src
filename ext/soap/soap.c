@@ -2954,7 +2954,8 @@ PHP_METHOD(SoapClient, __getFunctions)
 		array_init(return_value);
 		ZEND_HASH_FOREACH_PTR(&sdl->functions, function) {
 			function_to_string(function, &buf);
-			add_next_index_str(return_value, buf.s);
+			add_next_index_stringl(return_value, buf.s->val, buf.s->len);
+			smart_str_free(&buf);
 		} ZEND_HASH_FOREACH_END();
 	}
 }
