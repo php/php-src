@@ -642,11 +642,11 @@ zval *to_zval_user(zval *ret, encodeTypePtr type, xmlNodePtr node TSRMLS_DC)
 		ZVAL_STRING(&data, (char*)xmlBufferContent(buf));
 		xmlBufferFree(buf);
 		xmlFreeNode(copy);
-
-		ZVAL_NULL(ret);
 		
 		if (call_user_function(EG(function_table), NULL, &type->map->to_zval, ret, 1, &data TSRMLS_CC) == FAILURE) {
 			soap_error0(E_ERROR, "Encoding: Error calling from_xml callback");
+		} else if (EG(exception)) {
+			ZVAL_NULL(ret);
 		}
 		zval_ptr_dtor(&data);
 	} else {
