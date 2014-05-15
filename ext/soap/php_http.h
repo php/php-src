@@ -28,8 +28,7 @@ int make_http_soap_request(zval  *this_ptr,
                            char  *location, 
                            char  *soapaction, 
                            int    soap_version,
-                           char **response, 
-                           int   *response_len TSRMLS_DC);
+                           zval  *response TSRMLS_DC);
 
 int proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC);
 int basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC);
