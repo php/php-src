@@ -2981,7 +2981,8 @@ PHP_METHOD(SoapClient, __getTypes)
 		if (sdl->types) {
 			ZEND_HASH_FOREACH_PTR(sdl->types, type) {
 				type_to_string(type, &buf, 0);
-				add_next_index_str(return_value, buf.s);
+				add_next_index_stringl(return_value, buf.s->val, buf.s->len);
+				smart_str_free(&buf);
 			} ZEND_HASH_FOREACH_END();
 		}
 	}
