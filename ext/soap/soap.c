@@ -73,22 +73,22 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 #define SOAP_SERVER_BEGIN_CODE() \
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
 	char* _old_error_code = SOAP_GLOBAL(error_code);\
-	zval* _old_error_object = SOAP_GLOBAL(error_object);\
+	zend_object* _old_error_object = Z_OBJ(SOAP_GLOBAL(error_object));\
 	int _old_soap_version = SOAP_GLOBAL(soap_version);\
 	SOAP_GLOBAL(use_soap_error_handler) = 1;\
 	SOAP_GLOBAL(error_code) = "Server";\
-	SOAP_GLOBAL(error_object) = getThis();
+	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ(EG(This));
 
 #define SOAP_SERVER_END_CODE() \
 	SOAP_GLOBAL(use_soap_error_handler) = _old_handler;\
 	SOAP_GLOBAL(error_code) = _old_error_code;\
-	SOAP_GLOBAL(error_object) = _old_error_object;\
+	Z_OBJ(SOAP_GLOBAL(error_object)) = _old_error_object;\
 	SOAP_GLOBAL(soap_version) = _old_soap_version;
 
 #define SOAP_CLIENT_BEGIN_CODE() \
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
 	char* _old_error_code = SOAP_GLOBAL(error_code);\
-	zval* _old_error_object = SOAP_GLOBAL(error_object);\
+	zend_object* _old_error_object = Z_OBJ(SOAP_GLOBAL(error_object));\
 	int _old_soap_version = SOAP_GLOBAL(soap_version);\
 	zend_bool _old_in_compilation = CG(in_compilation); \
 	zend_bool _old_in_execution = EG(in_execution); \
@@ -97,7 +97,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	int _bailout = 0;\
 	SOAP_GLOBAL(use_soap_error_handler) = 1;\
 	SOAP_GLOBAL(error_code) = "Client";\
-	SOAP_GLOBAL(error_object) = getThis();\
+	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ(EG(This));\
 	zend_try {
 
 #define SOAP_CLIENT_END_CODE() \
@@ -122,7 +122,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	} zend_end_try();\
 	SOAP_GLOBAL(use_soap_error_handler) = _old_handler;\
 	SOAP_GLOBAL(error_code) = _old_error_code;\
-	SOAP_GLOBAL(error_object) = _old_error_object;\
+	Z_OBJ(SOAP_GLOBAL(error_object)) = _old_error_object;\
 	SOAP_GLOBAL(soap_version) = _old_soap_version;\
 	if (_bailout) {\
 		zend_bailout();\
@@ -556,13 +556,12 @@ static void php_soap_prepare_globals()
 	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
 
 	/* hash by namespace */
-//??? change _mem into _ptr
-	zend_hash_str_add_mem(&defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE)-1, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX));
-	zend_hash_str_add_mem(&defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX));
-	zend_hash_str_add_mem(&defEncNs, XSI_NAMESPACE, sizeof(XSI_NAMESPACE)-1, XSI_NS_PREFIX, sizeof(XSI_NS_PREFIX));
-	zend_hash_str_add_mem(&defEncNs, XML_NAMESPACE, sizeof(XML_NAMESPACE)-1, XML_NS_PREFIX, sizeof(XML_NS_PREFIX));
-	zend_hash_str_add_mem(&defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1, SOAP_1_1_ENC_NS_PREFIX, sizeof(SOAP_1_1_ENC_NS_PREFIX));
-	zend_hash_str_add_mem(&defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1, SOAP_1_2_ENC_NS_PREFIX, sizeof(SOAP_1_2_ENC_NS_PREFIX));
+	zend_hash_str_add_ptr(&defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE)-1, XSD_NS_PREFIX);
+	zend_hash_str_add_ptr(&defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1, XSD_NS_PREFIX);
+	zend_hash_str_add_ptr(&defEncNs, XSI_NAMESPACE, sizeof(XSI_NAMESPACE)-1, XSI_NS_PREFIX);
+	zend_hash_str_add_ptr(&defEncNs, XML_NAMESPACE, sizeof(XML_NAMESPACE)-1, XML_NS_PREFIX);
+	zend_hash_str_add_ptr(&defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1, SOAP_1_1_ENC_NS_PREFIX);
+	zend_hash_str_add_ptr(&defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1, SOAP_1_2_ENC_NS_PREFIX);
 }
 
 static void php_soap_init_globals(zend_soap_globals *soap_globals TSRMLS_DC)
@@ -573,7 +572,7 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals TSRMLS_DC)
 	soap_globals->typemap = NULL;
 	soap_globals->use_soap_error_handler = 0;
 	soap_globals->error_code = NULL;
-	soap_globals->error_object = NULL;
+	ZVAL_OBJ(&soap_globals->error_object, NULL);
 	soap_globals->sdl = NULL;
 	soap_globals->soap_version = SOAP_1_1;
 	soap_globals->mem_cache = NULL;
@@ -599,7 +598,7 @@ PHP_RINIT_FUNCTION(soap)
 	SOAP_GLOBAL(typemap) = NULL;
 	SOAP_GLOBAL(use_soap_error_handler) = 0;
 	SOAP_GLOBAL(error_code) = NULL;
-	SOAP_GLOBAL(error_object) = NULL;
+	ZVAL_OBJ(&SOAP_GLOBAL(error_object), NULL);
 	SOAP_GLOBAL(sdl) = NULL;
 	SOAP_GLOBAL(soap_version) = SOAP_1_1;
 	SOAP_GLOBAL(encoding) = NULL;
@@ -609,22 +608,22 @@ PHP_RINIT_FUNCTION(soap)
 	return SUCCESS;
 }
 
-static void delete_sdl_res(zend_resource *res)
+static void delete_sdl_res(zend_resource *res TSRMLS_CC)
 {
 	delete_sdl(res->ptr);
 }
 
-static void delete_url_res(zend_resource *res)
+static void delete_url_res(zend_resource *res TSRMLS_CC)
 {
 	delete_url(res->ptr);
 }
 
-static void delete_service_res(zend_resource *res)
+static void delete_service_res(zend_resource *res TSRMLS_CC)
 {
 	delete_service(res->ptr);
 }
 
-static void delete_hashtable_res(zend_resource *res)
+static void delete_hashtable_res(zend_resource *res TSRMLS_CC)
 {
 	delete_hashtable(res->ptr);
 }
@@ -677,10 +676,10 @@ PHP_MINIT_FUNCTION(soap)
 	INIT_CLASS_ENTRY(ce, PHP_SOAP_HEADER_CLASSNAME, soap_header_functions);
 	soap_header_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
-	le_sdl = register_list_destructors(delete_sdl_res, NULL);
-	le_url = register_list_destructors(delete_url_res, NULL);
-	le_service = register_list_destructors(delete_service_res, NULL);
-	le_typemap = register_list_destructors(delete_hashtable_res, NULL);
+	le_sdl = zend_register_list_destructors_ex(delete_sdl_res, NULL, "SOAP SDL", module_number);
+	le_url = zend_register_list_destructors_ex(delete_url_res, NULL, "SOAP URL", module_number);
+	le_service = zend_register_list_destructors_ex(delete_service_res, NULL, "SOAP service", module_number);
+	le_typemap = zend_register_list_destructors_ex(delete_hashtable_res, NULL, "SOAP table", module_number);
 
 	REGISTER_LONG_CONSTANT("SOAP_1_1", SOAP_1_1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_1_2", SOAP_1_2, CONST_CS | CONST_PERSISTENT);
@@ -1309,10 +1308,6 @@ PHP_METHOD(SoapServer, setClass)
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set a non existent class (%s)", classname->val);
 		return;
-	}
-
-	if (argv) {
-		efree(argv);
 	}
 
 	SOAP_SERVER_END_CODE();
@@ -2081,6 +2076,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 			use_http_error_status = 0;
 		}
 	}
+	STR_RELEASE(server);
 	/*
 	   Want to return HTTP 500 but apache wants to over write
 	   our fault code with their own handling... Figure this out later
@@ -2137,13 +2133,12 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		return;
 	}
 
-	if (SOAP_GLOBAL(error_object) &&
-	    Z_TYPE_P(SOAP_GLOBAL(error_object)) == IS_OBJECT &&
-	    instanceof_function(Z_OBJCE_P(SOAP_GLOBAL(error_object)), soap_class_entry TSRMLS_CC)) {
+	if (Z_OBJ(SOAP_GLOBAL(error_object)) &&
+	    instanceof_function(Z_OBJCE(SOAP_GLOBAL(error_object)), soap_class_entry TSRMLS_CC)) {
 		zval *tmp;
 		int use_exceptions = 0;
 
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(SOAP_GLOBAL(error_object)), "_exceptions", sizeof("_exceptions")-1)) == NULL ||
+		if ((tmp = zend_hash_str_find(Z_OBJPROP(SOAP_GLOBAL(error_object)), "_exceptions", sizeof("_exceptions")-1)) == NULL ||
 		     Z_TYPE_P(tmp) != IS_FALSE) {
 		     use_exceptions = 1;
 		}
@@ -2182,7 +2177,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			if (code == NULL) {
 				code = "Client";
 			}
-			fault = add_soap_fault(SOAP_GLOBAL(error_object), code, buffer, NULL, NULL TSRMLS_CC);
+			fault = add_soap_fault(&SOAP_GLOBAL(error_object), code, buffer, NULL, NULL TSRMLS_CC);
 			Z_ADDREF_P(fault);
 			zend_throw_exception_object(fault TSRMLS_CC);
 
@@ -2235,10 +2230,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			if (code == NULL) {
 				code = "Server";
 			}
-			if (SOAP_GLOBAL(error_object) &&
-			    Z_TYPE_P(SOAP_GLOBAL(error_object)) == IS_OBJECT &&
-			    instanceof_function(Z_OBJCE_P(SOAP_GLOBAL(error_object)), soap_server_class_entry TSRMLS_CC) &&
-		        (tmp = zend_hash_str_find(Z_OBJPROP_P(SOAP_GLOBAL(error_object)), "service", sizeof("service")-1)) != NULL &&
+			if (Z_OBJ(SOAP_GLOBAL(error_object)) &&
+			    instanceof_function(Z_OBJCE(SOAP_GLOBAL(error_object)), soap_server_class_entry TSRMLS_CC) &&
+		        (tmp = zend_hash_str_find(Z_OBJPROP(SOAP_GLOBAL(error_object)), "service", sizeof("service")-1)) != NULL &&
 				(service = (soapServicePtr)zend_fetch_resource(tmp TSRMLS_CC, -1, "service", NULL, 1, le_service)) &&
 				!service->send_errors) {
 				strcpy(buffer, "Internal Error");
@@ -2267,6 +2261,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				php_output_discard(TSRMLS_C);
 
 			}
+			ZVAL_NULL(&fault_obj);
 			set_soap_fault(&fault_obj, NULL, code, buffer, NULL, &outbuf, NULL TSRMLS_CC);
 			fault = 1;
 		}
@@ -3217,6 +3212,7 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 {
 	zval fault;
 
+	ZVAL_NULL(&fault);
 	set_soap_fault(&fault, NULL, fault_code, fault_string, fault_actor, fault_detail, NULL TSRMLS_CC);
 	add_property_zval(obj, "__soap_fault", &fault);
 	Z_DELREF(fault);
@@ -3270,7 +3266,7 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 	if (fault_actor != NULL) {
 		add_property_string(obj, "faultactor", fault_actor);
 	}
-	if (fault_detail != NULL) {
+	if (fault_detail != NULL && Z_TYPE_P(fault_detail) != IS_UNDEF) {
 		add_property_zval(obj, "detail", fault_detail);
 	}
 	if (name != NULL) {
@@ -3298,7 +3294,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 			}
 		} ZEND_HASH_FOREACH_END();
 		if (use_names) {
-			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval *), 0);
+			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval), 0);
 			ZEND_HASH_FOREACH_PTR(function->requestParameters, param) {
 				val = get_node(params, param->paramName);
 				if (!val) {
@@ -3336,7 +3332,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 		    strcmp((char *)params->name, function->functionName) == 0) {
 			num_of_params = 0;
 		} else if (num_of_params > 0) {
-			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval *), 0);
+			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval), 0);
 
 			trav = params;
 			while (trav != 0 && cur_param < num_of_params) {

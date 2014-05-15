@@ -68,18 +68,8 @@ static void zend_resource_dtor(zend_resource *res TSRMLS_DC)
 	
 	ld = zend_hash_index_find_ptr(&list_destructors, res->type);
 	if (ld) {
-		switch (ld->type) {
-			case ZEND_RESOURCE_LIST_TYPE_STD:
-				if (ld->list_dtor) {
-					(ld->list_dtor)(res->ptr);
-				}
-				break;
-			case ZEND_RESOURCE_LIST_TYPE_EX:
-				if (ld->list_dtor_ex) {
-					ld->list_dtor_ex(res TSRMLS_CC);
-				}
-				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+		if (ld->list_dtor_ex) {
+			ld->list_dtor_ex(res TSRMLS_CC);
 		}
 	} else {
 		zend_error(E_WARNING,"Unknown list entry type (%d)", res->type);
@@ -192,18 +182,8 @@ void plist_entry_destructor(zval *zv)
 	
 		ld = zend_hash_index_find_ptr(&list_destructors, res->type);
 		if (ld) {
-			switch (ld->type) {
-				case ZEND_RESOURCE_LIST_TYPE_STD:
-					if (ld->plist_dtor) {
-						(ld->plist_dtor)(res->ptr);
-					}
-					break;
-				case ZEND_RESOURCE_LIST_TYPE_EX:
-					if (ld->plist_dtor_ex) {
-						ld->plist_dtor_ex(res TSRMLS_CC);
-					}
-					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
+			if (ld->plist_dtor_ex) {
+				ld->plist_dtor_ex(res TSRMLS_CC);
 			}
 		} else {
 			zend_error(E_WARNING,"Unknown list entry type (%d)", res->type);
@@ -276,41 +256,16 @@ void zend_clean_module_rsrc_dtors(int module_number TSRMLS_DC)
 }
 
 
-ZEND_API int zend_register_list_destructors(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, int module_number)
-{
-	zend_rsrc_list_dtors_entry *lde;
-	zval zv;
-	
-	lde = malloc(sizeof(zend_rsrc_list_dtors_entry));
-	lde->list_dtor = ld;
-	lde->plist_dtor = pld;
-	lde->list_dtor_ex = lde->plist_dtor_ex = NULL;
-	lde->module_number = module_number;
-	lde->resource_id = list_destructors.nNextFreeElement;
-	lde->type = ZEND_RESOURCE_LIST_TYPE_STD;
-	lde->type_name = NULL;
-	ZVAL_PTR(&zv, lde);
-	
-	if (zend_hash_next_index_insert(&list_destructors, &zv) == NULL) {
-		return FAILURE;
-	}
-	return list_destructors.nNextFreeElement-1;
-}
-
-
 ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, const char *type_name, int module_number)
 {
 	zend_rsrc_list_dtors_entry *lde;
 	zval zv;
 	
 	lde = malloc(sizeof(zend_rsrc_list_dtors_entry));	
-	lde->list_dtor = NULL;
-	lde->plist_dtor = NULL;
 	lde->list_dtor_ex = ld;
 	lde->plist_dtor_ex = pld;
 	lde->module_number = module_number;
 	lde->resource_id = list_destructors.nNextFreeElement;
-	lde->type = ZEND_RESOURCE_LIST_TYPE_EX;
 	lde->type_name = type_name;
 	ZVAL_PTR(&zv, lde);
 	
