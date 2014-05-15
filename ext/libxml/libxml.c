@@ -765,8 +765,12 @@ PHP_LIBXML_API void php_libxml_shutdown(void)
 
 PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext TSRMLS_DC)
 {
-	ZVAL_COPY_VALUE(oldcontext, &LIBXML(stream_context));
-	ZVAL_COPY_VALUE(&LIBXML(stream_context), context);
+	if (oldcontext) {
+		ZVAL_COPY_VALUE(oldcontext, &LIBXML(stream_context));
+	}
+	if (context) {
+		ZVAL_COPY_VALUE(&LIBXML(stream_context), context);
+	}
 }
 
 static PHP_MINIT_FUNCTION(libxml)
