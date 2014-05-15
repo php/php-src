@@ -263,7 +263,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 
 						if (stmt->bound_param_map && (namevar = zend_hash_find(stmt->bound_param_map,
 								param->name)) != NULL) {
-							param->paramno = atoi(Z_PTR_P(namevar) + 1) - 1;
+							param->paramno = atoi(((zend_string*)Z_PTR_P(namevar))->val + 1) - 1;
 						} else {
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY093", param->name->val TSRMLS_CC);
 							return 0;
