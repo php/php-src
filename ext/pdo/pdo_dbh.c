@@ -402,7 +402,7 @@ options:
 			zval *attr_value;
 			ulong long_key;
 			zend_string *str_key = NULL;
-			
+
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), long_key, str_key, attr_value) {
 				if (str_key) {
 					continue;
@@ -1528,6 +1528,18 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 
 	//???pefree(dbh, dbh->is_persistent);
 }
+
+PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
+{
+	dbh->refcount++;
+}
+/* }}} */
+
+PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
+{
+	dbh_free(dbh TSRMLS_CC);
+}
+/* }}} */
 
 static void pdo_dbh_free_storage(zend_object *std TSRMLS_DC)
 {
