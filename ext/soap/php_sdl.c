@@ -446,7 +446,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include 
 static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xmlNodePtr header, char* wsdl_soap_namespace, int fault)
 {
 	xmlAttrPtr tmp;
-	xmlNodePtr *message, part;
+	xmlNodePtr message, part;
 	char *ctype;
 	sdlSoapBindingFunctionHeaderPtr h;
 
@@ -469,7 +469,7 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 	if (!tmp) {
 		soap_error0(E_ERROR, "Parsing WSDL: Missing part attribute for <header>");
 	}
-	part = get_node_with_attribute_ex((*message)->children, "part", WSDL_NAMESPACE, "name", (char*)tmp->children->content, NULL);
+	part = get_node_with_attribute_ex(message->children, "part", WSDL_NAMESPACE, "name", (char*)tmp->children->content, NULL);
 	if (!part) {
 		soap_error1(E_ERROR, "Parsing WSDL: Missing part '%s' in <message>", tmp->children->content);
 	}
