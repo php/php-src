@@ -90,7 +90,8 @@ static void optimizer_literal_class_info(literal_info   *info,
 static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline, *end;
-	int i, j, n, pos, *map, cache_slots;
+	int i, j, n, *map, cache_slots;
+	zval zv, *pos;
 	literal_info *info;
 	int l_null = -1;
 	int l_false = -1;
@@ -323,11 +324,12 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					map[i] = l_true;
 					break;
 				case IS_LONG:
-					if ((pos = (int)zend_hash_index_find_ptr(&hash, Z_LVAL(op_array->literals[i]))) != 0) {
-						map[i] = pos - 1;
+					if ((pos = zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i]))) != 0) {
+						map[i] = Z_LVAL_P(pos);
 					} else {
 						map[i] = j;
-						zend_hash_index_update_ptr(&hash, Z_LVAL(op_array->literals[i]), (void*)j + 1);
+						ZVAL_LONG(&zv, j);
+						zend_hash_index_update(&hash, Z_LVAL(op_array->literals[i]), &zv);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
@@ -336,11 +338,12 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					}
 					break;
 				case IS_DOUBLE:
-					if ((pos = (int)zend_hash_str_find_ptr(&hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double))) != 0) {
-						map[i] = pos - 1;
+					if ((pos = zend_hash_str_find(&hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double))) != 0) {
+						map[i] = Z_LVAL_P(pos);
 					} else {
 						map[i] = j;
-						zend_hash_str_add_ptr(&hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double), (void*)j + 1);
+						ZVAL_LONG(&zv, j);
+						zend_hash_str_add(&hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double), &zv);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
@@ -372,12 +375,12 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 						key->h += info[i].flags;
 					}
 					if ((info[i].flags & LITERAL_MAY_MERGE) &&
-						(pos = (int)zend_hash_find_ptr(&hash, key)) != 0 &&
-					   	Z_TYPE(op_array->literals[i]) == Z_TYPE(op_array->literals[pos-1]) &&
-						info[i].flags == info[pos-1].flags) {
+						(pos = zend_hash_find(&hash, key)) != 0 &&
+					   	Z_TYPE(op_array->literals[i]) == Z_TYPE(op_array->literals[Z_LVAL_P(pos)]) &&
+						info[i].flags == info[Z_LVAL_P(pos)].flags) {
 
 						STR_RELEASE(key);
-						map[i] = pos - 1;
+						map[i] = Z_LVAL_P(pos);
 						zval_dtor(&op_array->literals[i]);
 						n = LITERAL_NUM_RELATED(info[i].flags);
 						while (n > 1) {
@@ -388,7 +391,8 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					} else {
 						map[i] = j;
 						if (info[i].flags & LITERAL_MAY_MERGE) {
-							zend_hash_add_ptr(&hash, key, (void*)j + 1);
+							ZVAL_LONG(&zv, j);
+							zend_hash_add(&hash, key, &zv);
 							STR_RELEASE(key);
 						}
 						if (i != j) {
