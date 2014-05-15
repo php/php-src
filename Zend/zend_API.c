@@ -1765,7 +1765,7 @@ ZEND_API int add_property_str_ex(zval *arg, const char *key, uint key_len, zend_
 	ZVAL_STR(&tmp, str);
 	ZVAL_STRINGL(&z_key, key, key_len);
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
-//???	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }

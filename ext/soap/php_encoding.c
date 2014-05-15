@@ -3063,9 +3063,9 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 			  *next = '\0';
 			  next++;
 			}
-//???			ZVAL_STRING(&dummy_zval, start, 0);
 			ZVAL_STRING(&dummy_zval, start);
 			dummy = master_to_xml(list_enc, &dummy_zval, SOAP_LITERAL, ret TSRMLS_CC);
+			zval_ptr_dtor(&dummy_zval);
 			if (dummy && dummy->children && dummy->children->content) {
 				if (list.s && list.s->len != 0) {
 					smart_str_appendc(&list, ' ');
