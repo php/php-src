@@ -135,7 +135,7 @@ static php_win32_disable_functions(TSRMLS_D)
 
 	if (EG(windows_version_info).dwMajorVersion < 5) {
 		for (i = 0; i < function_name_cnt_5; i++) {
-			if (zend_hash_str_del(CG(function_table), function_name_5[i], strlen(function_name_5[i]) + 1)==FAILURE) {
+			if (zend_hash_str_del(CG(function_table), function_name_5[i], strlen(function_name_5[i]))==FAILURE) {
 				php_printf("Unable to disable function '%s'\n", function_name_5[i]);
 				return FAILURE;
 			}
@@ -144,7 +144,7 @@ static php_win32_disable_functions(TSRMLS_D)
 
 	if (EG(windows_version_info).dwMajorVersion < 6) {
 		for (i = 0; i < function_name_cnt_6; i++) {
-			if (zend_hash_str_del(CG(function_table), function_name_6[i], strlen(function_name_6[i]) + 1)==FAILURE) {
+			if (zend_hash_str_del(CG(function_table), function_name_6[i], strlen(function_name_6[i]))==FAILURE) {
 				php_printf("Unable to disable function '%s'\n", function_name_6[i]);
 				return FAILURE;
 			}
