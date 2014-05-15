@@ -708,7 +708,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 {
 	st_entry ent;
 	wddx_stack *stack = (wddx_stack *)user_data;
-	
+	TSRMLS_FETCH();
 	if (!strcmp((char *)name, EL_PACKET)) {
 		int i;
 		
