@@ -125,6 +125,8 @@ PHPAPI int php_count_recursive(zval *array, long mode TSRMLS_DC);
 #define ARRAY_FILTER_USE_BOTH	1
 #define ARRAY_FILTER_USE_KEY	2
 
+#define ARRAY_SEEK_KEY    3
+
 ZEND_BEGIN_MODULE_GLOBALS(array) 
 	int *multisort_flags[2];
 	int (*compare_func)(zval *result, zval *op1, zval *op2 TSRMLS_DC);

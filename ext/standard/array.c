@@ -127,6 +127,8 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_BOTH", ARRAY_FILTER_USE_BOTH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_KEY", ARRAY_FILTER_USE_KEY, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("SEEK_KEY", ARRAY_SEEK_KEY, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -823,11 +825,48 @@ PHP_FUNCTION(seek)
 {
 	HashTable *array;
 	HashPosition pos;
-	long offset = 0, whence = SEEK_CUR;
+	zval *zpos;
+	long whence = SEEK_CUR, offset;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Hl|l", &array, &offset, &whence) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Hz|l", &array, &zpos, &whence) == FAILURE) {
 		return;
 	}
+
+	if (whence == ARRAY_SEEK_KEY) {
+		ulong h = 0;
+		uint nIndex;
+		int nKeyLength;
+		const char *arKey;
+		int isNumeric = 0;
+
+		convert_to_string_ex(&zpos);
+
+		arKey = Z_STRVAL_P(zpos);
+		nKeyLength = Z_STRLEN_P(zpos) + 1;
+		ZEND_HANDLE_NUMERIC_EX(arKey, nKeyLength, h, isNumeric = 1);
+
+		if (isNumeric) {
+			nKeyLength = 0;
+		} else {
+			h = zend_hash_func(arKey, nKeyLength);
+		}
+		nIndex = h & array->nTableMask;
+
+		pos = array->arBuckets[nIndex];
+		while (pos != NULL) {
+			if (pos->h == h && pos->nKeyLength == nKeyLength) {
+				if (isNumeric || pos->arKey == arKey || memcmp(pos->arKey, arKey, nKeyLength) == 0) {
+					array->pInternalPointer = pos;
+					RETURN_TRUE;
+				}
+			}
+			pos = pos->pNext;
+		}
+		RETURN_FALSE;
+	}
+
+	convert_to_long_ex(&zpos);
+	offset = Z_LVAL_P(zpos);
 
 	if (whence == SEEK_SET) {
 		if (offset < 0 || offset >= zend_hash_num_elements(array)) {
@@ -860,11 +899,15 @@ PHP_FUNCTION(seek)
 		}
 	}
 
-	if (zend_hash_has_more_elements_ex(array, &pos) == SUCCESS) {
+	if (zend_hash_has_more_elements_ex(array, &pos) != SUCCESS) {
+		RETURN_FALSE;
+	}
+
+	if (pos == NULL || zend_hash_has_more_elements_ex(array, &pos) != SUCCESS) {
+		RETURN_FALSE;
+	} else {
 		array->pInternalPointer = pos;
 		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
 	}
 }
 

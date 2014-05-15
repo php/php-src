@@ -43,6 +43,12 @@ var_dump(seek($array, -count($array) - 1, SEEK_END));
 var_dump(seek($array, 1, SEEK_END));
 var_dump(current($array));
 
+echo "\n*** Testing seek() : using string keys ***\n";
+
+$array = array('zero', 'one' => 'foo', 'bar');
+var_dump(seek($array, 'one', SEEK_KEY));
+var_dump(current($array));
+
 ?>
 ===DONE===
 --EXPECTF--
@@ -74,4 +80,8 @@ string(%d) "two"
 bool(false)
 bool(false)
 string(%d) "two"
+
+*** Testing seek() : using string keys ***
+bool(true)
+string(3) "foo"
 ===DONE===
