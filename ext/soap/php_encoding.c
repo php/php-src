@@ -1199,14 +1199,14 @@ static void set_zval_property(zval* object, char* name, zval* val TSRMLS_DC)
 static zval* get_zval_property(zval* object, char* name, zval *rv TSRMLS_DC)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zval member, rv;
+		zval member;
 		zval *data;
 		zend_class_entry *old_scope;
 
 		ZVAL_STRING(&member, name);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
-		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, -1, &rv TSRMLS_CC);
+		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, -1, rv TSRMLS_CC);
 		if (data == &EG(uninitialized_zval)) {
 			/* Hack for bug #32455 */
 			zend_property_info *property_info;
@@ -1239,13 +1239,12 @@ static void unset_zval_property(zval* object, char* name TSRMLS_DC)
 		zval member;
 		zend_class_entry *old_scope;
 
-//???		INIT_PZVAL(&member);
-//???		ZVAL_STRING(&member, name, 0);
 		ZVAL_STRING(&member, name);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
 		Z_OBJ_HT_P(object)->unset_property(object, &member, 0 TSRMLS_CC);
 		EG(scope) = old_scope;
+		zval_ptr_dtor(&member);
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_hash_str_del(Z_ARRVAL_P(object), name, strlen(name));
 	}
@@ -1535,7 +1534,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 		}
 		if (sdlType->model) {
 			if (redo_any) {
-				Z_ADDREF_P(redo_any);
+				if (Z_REFCOUNTED_P(redo_any)) Z_ADDREF_P(redo_any);
 				unset_zval_property(ret, "any" TSRMLS_CC);
 			}
 			model_to_zval_object(ret, sdlType->model, data, sdl TSRMLS_CC);
@@ -1544,9 +1543,6 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 
 				if (tmp == NULL) {
 					model_to_zval_any(ret, data->children TSRMLS_CC);
-				} else if (Z_REFCOUNT_P(tmp) == 0) {
-					zval_dtor(tmp);
-					efree(tmp);
 				}
 				zval_ptr_dtor(redo_any);
 			}
