@@ -642,11 +642,11 @@ zval *to_zval_user(zval *ret, encodeTypePtr type, xmlNodePtr node TSRMLS_DC)
 		ZVAL_STRING(&data, (char*)xmlBufferContent(buf));
 		xmlBufferFree(buf);
 		xmlFreeNode(copy);
-
-		ZVAL_NULL(ret);
 		
 		if (call_user_function(EG(function_table), NULL, &type->map->to_zval, ret, 1, &data TSRMLS_CC) == FAILURE) {
 			soap_error0(E_ERROR, "Encoding: Error calling from_xml callback");
+		} else if (EG(exception)) {
+			ZVAL_NULL(ret);
 		}
 		zval_ptr_dtor(&data);
 	} else {
@@ -3063,9 +3063,9 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 			  *next = '\0';
 			  next++;
 			}
-//???			ZVAL_STRING(&dummy_zval, start, 0);
 			ZVAL_STRING(&dummy_zval, start);
 			dummy = master_to_xml(list_enc, &dummy_zval, SOAP_LITERAL, ret TSRMLS_CC);
+			zval_ptr_dtor(&dummy_zval);
 			if (dummy && dummy->children && dummy->children->content) {
 				if (list.s && list.s->len != 0) {
 					smart_str_appendc(&list, ' ');

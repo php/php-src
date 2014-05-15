@@ -1029,22 +1029,22 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht TSRMLS_DC)
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht2, name, tmp) {
 			if (name) {
-				if (name->len == sizeof("type_name") &&
+				if (name->len == sizeof("type_name")-1 &&
 				    strncmp(name->val, "type_name", sizeof("type_name")-1) == 0) {
 					if (Z_TYPE_P(tmp) == IS_STRING) {
 						type_name = Z_STRVAL_P(tmp);
 					} else if (Z_TYPE_P(tmp) != IS_NULL) {
 					}
-				} else if (name->len == sizeof("type_ns") &&
+				} else if (name->len == sizeof("type_ns")-1 &&
 				    strncmp(name->val, "type_ns", sizeof("type_ns")-1) == 0) {
 					if (Z_TYPE_P(tmp) == IS_STRING) {
 						type_ns = Z_STRVAL_P(tmp);
 					} else if (Z_TYPE_P(tmp) != IS_NULL) {
 					}
-				} else if (name->len == sizeof("to_xml") &&
+				} else if (name->len == sizeof("to_xml")-1 &&
 				    strncmp(name->val, "to_xml", sizeof("to_xml")-1) == 0) {
 					to_xml = tmp;
-				} else if (name->len == sizeof("from_xml") &&
+				} else if (name->len == sizeof("from_xml")-1 &&
 				    strncmp(name->val, "from_xml", sizeof("from_xml")-1) == 0) {
 					to_zval = tmp;
 				}
@@ -4382,16 +4382,15 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, 
 	encodePtr enc;
 	zval defval;
 
+	ZVAL_UNDEF(&defval);
 	if (param != NULL) {
 		enc = param->encode;
 		if (val == NULL) {
 			if (param->element) {
 				if (param->element->fixed) {
-					//??? val has to be freed
 					ZVAL_STRING(&defval, param->element->fixed);
 					val = &defval;
 				} else if (param->element->def && !param->element->nillable) {
-					//??? val has to be freed
 					ZVAL_STRING(&defval, param->element->def);
 					val = &defval;
 				}
@@ -4401,6 +4400,7 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, 
 		enc = NULL;
 	}
 	xmlParam = master_to_xml(enc, val, style, parent TSRMLS_CC);
+	zval_ptr_dtor(&defval);
 	if (!strcmp((char*)xmlParam->name, "BOGUS")) {
 		xmlNodeSetName(xmlParam, BAD_CAST(paramName));
 	}

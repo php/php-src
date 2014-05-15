@@ -402,7 +402,7 @@ options:
 			zval *attr_value;
 			ulong long_key;
 			zend_string *str_key = NULL;
-			
+
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), long_key, str_key, attr_value) {
 				if (str_key) {
 					continue;
