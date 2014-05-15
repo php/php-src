@@ -269,7 +269,6 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 	/* is this supposed to be a persistent connection ? */
 	if (options) {
-		zval *v;
 		int plen = 0;
 		char *hashkey = NULL;
 		zend_resource *le;
@@ -277,6 +276,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		//?? let's delay the persistent supports later
 #if 0
+		zval *v;
+
 		if ((v = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT)) != NULL) {
 			if (Z_TYPE_P(v) == IS_STRING &&
 				!is_numeric_string(Z_STRVAL_P(v), Z_STRLEN_P(v), NULL, NULL, 0) && Z_STRLEN_P(v) > 0) {
