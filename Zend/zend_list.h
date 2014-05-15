@@ -27,18 +27,10 @@
 
 BEGIN_EXTERN_C()
 
-#define ZEND_RESOURCE_LIST_TYPE_STD	1
-#define ZEND_RESOURCE_LIST_TYPE_EX	2
-
 typedef void (*rsrc_dtor_func_t)(zend_resource *res TSRMLS_DC);
 #define ZEND_RSRC_DTOR_FUNC(name) void name(zend_resource *res TSRMLS_DC)
 
 typedef struct _zend_rsrc_list_dtors_entry {
-	/* old style destructors */
-	void (*list_dtor)(zend_resource *);
-	void (*plist_dtor)(zend_resource *);
-
-	/* new style destructors */
 	rsrc_dtor_func_t list_dtor_ex;
 	rsrc_dtor_func_t plist_dtor_ex;
 
@@ -46,12 +38,9 @@ typedef struct _zend_rsrc_list_dtors_entry {
 
 	int module_number;
 	int resource_id;
-	unsigned char type;
 } zend_rsrc_list_dtors_entry;
 
 
-#define register_list_destructors(ld, pld) zend_register_list_destructors(ld, pld, module_number);
-ZEND_API int zend_register_list_destructors(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, int module_number);
 ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, const char *type_name, int module_number);
 
 void list_entry_destructor(zval *ptr);
