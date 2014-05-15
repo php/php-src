@@ -603,7 +603,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	char *algo, *salt, *pass = NULL;
 	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
 	long loops, i, j, algo_len, pass_len, iterations, length = 0, digest_length = 0;
-	int argc, salt_len = 0;
+	int salt_len = 0;
 	zend_bool raw_output = 0;
 	const php_hash_ops *ops;
 	void *context;
