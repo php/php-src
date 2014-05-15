@@ -381,7 +381,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(return_value));
 			tmp = zend_hash_get_current_data(Z_ARRVAL_P(return_value));
 			if (!Z_REFCOUNTED_P(return_value)) {
-				ZVAL_COPY_VALUE(return_value, tmp);
+				ZVAL_COPY(return_value, tmp);
 			} else {
 				zend_refcounted *garbage = Z_COUNTED_P(return_value);
 				ZVAL_COPY(return_value, tmp);
