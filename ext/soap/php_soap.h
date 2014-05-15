@@ -166,7 +166,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	sdlPtr     sdl;
 	zend_bool  use_soap_error_handler;
 	char*      error_code;
-	zval*      error_object;
+	zval       error_object;
 	char       cache;
 	char       cache_mode;
 	char       cache_enabled;
