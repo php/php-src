@@ -1206,17 +1206,18 @@ static zval* get_zval_property(zval* object, char* name, zval *rv TSRMLS_DC)
 		ZVAL_STRING(&member, name);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
-		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, 0, &rv TSRMLS_CC);
+		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, -1, &rv TSRMLS_CC);
 		if (data == &EG(uninitialized_zval)) {
 			/* Hack for bug #32455 */
 			zend_property_info *property_info;
 
 			property_info = zend_get_property_info(Z_OBJCE_P(object), &member, 1 TSRMLS_CC);
-			zval_ptr_dtor(&member);
 			EG(scope) = old_scope;
 			if (property_info && zend_hash_exists(Z_OBJPROP_P(object), property_info->name)) {
+				zval_ptr_dtor(&member);
 				return data;
 			}
+			zval_ptr_dtor(&member);
 			return NULL;
 		}
 		zval_ptr_dtor(&member);
