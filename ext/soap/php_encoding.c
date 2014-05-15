@@ -1191,8 +1191,8 @@ static void set_zval_property(zval* object, char* name, zval* val TSRMLS_DC)
 
 	old_scope = EG(scope);
 	EG(scope) = Z_OBJCE_P(object);
-	Z_DELREF_P(val);
 	add_property_zval(object, name, val);
+	if (Z_REFCOUNTED_P(val)) Z_DELREF_P(val);
 	EG(scope) = old_scope;
 }
 
@@ -1203,8 +1203,6 @@ static zval* get_zval_property(zval* object, char* name, zval *rv TSRMLS_DC)
 		zval *data;
 		zend_class_entry *old_scope;
 
-//???		INIT_PZVAL(&member);
-//???		ZVAL_STRING(&member, name, 0);
 		ZVAL_STRING(&member, name);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
@@ -1214,12 +1212,14 @@ static zval* get_zval_property(zval* object, char* name, zval *rv TSRMLS_DC)
 			zend_property_info *property_info;
 
 			property_info = zend_get_property_info(Z_OBJCE_P(object), &member, 1 TSRMLS_CC);
+			zval_ptr_dtor(&member);
 			EG(scope) = old_scope;
 			if (property_info && zend_hash_exists(Z_OBJPROP_P(object), property_info->name)) {
 				return data;
 			}
 			return NULL;
 		}
+		zval_ptr_dtor(&member);
 		EG(scope) = old_scope;
 		return data;
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
