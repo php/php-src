@@ -200,7 +200,7 @@ ZEND_EXTERN_MODULE_GLOBALS(soap)
 
 extern zend_class_entry* soap_var_class_entry;
 
-zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
+void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 
 #define soap_error0(severity, format) \
 	php_error(severity, "SOAP-ERROR: " format)

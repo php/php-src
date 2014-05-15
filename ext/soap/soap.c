@@ -51,6 +51,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level);
 
 static void clear_soap_fault(zval *obj TSRMLS_DC);
 static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail, char *name TSRMLS_DC);
+static void add_soap_fault_ex(zval *fault, zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 static void soap_server_fault(char* code, char* string, char *actor, zval* details, char *name TSRMLS_DC);
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader* hdr TSRMLS_DC);
 
@@ -2149,7 +2150,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		     error_num == E_ERROR || 
 		     error_num == E_PARSE) &&
 		    use_exceptions) {
-			zval *fault;
+			zval fault;
 			char* code = SOAP_GLOBAL(error_code);
 			char buffer[1024];
 			int buffer_len;
@@ -2177,9 +2178,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			if (code == NULL) {
 				code = "Client";
 			}
-			fault = add_soap_fault(&SOAP_GLOBAL(error_object), code, buffer, NULL, NULL TSRMLS_CC);
-			Z_ADDREF_P(fault);
-			zend_throw_exception_object(fault TSRMLS_CC);
+			add_soap_fault_ex(&fault, &SOAP_GLOBAL(error_object), code, buffer, NULL, NULL TSRMLS_CC);
+			Z_ADDREF(fault);
+			zend_throw_exception_object(&fault TSRMLS_CC);
 
 //???			old_objects = EG(objects_store).object_buckets;
 //???			EG(objects_store).object_buckets = NULL;
@@ -2777,7 +2778,7 @@ static void do_soap_call(zval* this_ptr,
 			if ((fault = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "__soap_fault", sizeof("__soap_fault")-1)) != NULL) {
 				ZVAL_COPY(return_value, fault);
 			} else {
-				ZVAL_COPY(return_value, add_soap_fault(this_ptr, "Client", "Unknown Error", NULL, NULL TSRMLS_CC));
+				add_soap_fault_ex(return_value, this_ptr, "Client", "Unknown Error", NULL, NULL TSRMLS_CC);
 			}
 		} else {
 			zval* fault;
@@ -2845,7 +2846,6 @@ PHP_METHOD(SoapClient, __call)
 	zval *tmp;
 	zend_bool free_soap_headers = 0;
 	zval *this_ptr;
-//???	HashPosition pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|a!zz",
 		&function, &function_len, &args, &options, &headers, &output_headers) == FAILURE) {
@@ -3208,7 +3208,15 @@ static void clear_soap_fault(zval *obj TSRMLS_DC)
 	}
 }
 
-zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC)
+static void add_soap_fault_ex(zval *fault, zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC)
+{
+	ZVAL_NULL(fault);
+	set_soap_fault(fault, NULL, fault_code, fault_string, fault_actor, fault_detail, NULL TSRMLS_CC);
+	add_property_zval(obj, "__soap_fault", fault);
+	Z_DELREF_P(fault);
+}
+
+void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC)
 {
 	zval fault;
 
@@ -3216,9 +3224,6 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 	set_soap_fault(&fault, NULL, fault_code, fault_string, fault_actor, fault_detail, NULL TSRMLS_CC);
 	add_property_zval(obj, "__soap_fault", &fault);
 	Z_DELREF(fault);
-//??? FIXME
-//	return &fault;
-	return NULL;
 }
 
 static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail, char *name TSRMLS_DC)
@@ -4612,8 +4617,9 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 	for (i = 0;i < level;i++) {
 		smart_str_appendc(&spaces, ' ');
 	}
-	smart_str_appendl(buf, spaces.s->val, spaces.s->len);
-
+	if (spaces.s) {
+		smart_str_appendl(buf, spaces.s->val, spaces.s->len);
+	}
 	switch (type->kind) {
 		case XSD_TYPEKIND_SIMPLE:
 			if (type->encode) {
@@ -4756,7 +4762,9 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 						smart_str_appendl(buf, ";\n", 2);
 					} ZEND_HASH_FOREACH_END();
 				}
-				smart_str_appendl(buf, spaces.s->val, spaces.s->len);
+				if (spaces.s) {
+					smart_str_appendl(buf, spaces.s->val, spaces.s->len);
+				}
 				smart_str_appendc(buf, '}');
 			}
 			break;
