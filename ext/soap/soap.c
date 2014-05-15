@@ -1572,7 +1572,7 @@ PHP_METHOD(SoapServer, handle)
 					zval filter_params;
 
 					array_init_size(&filter_params, 1);
-					add_assoc_long_ex(&filter_params, ZEND_STRS("window"), 0x2f); /* ANY WBITS */
+					add_assoc_long_ex(&filter_params, "window", sizeof("window")-1, 0x2f); /* ANY WBITS */
 
 					zf = php_stream_filter_create("zlib.inflate", &filter_params, 0 TSRMLS_CC);
 					zval_dtor(&filter_params);
