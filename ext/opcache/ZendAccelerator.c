@@ -1691,7 +1691,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
  			     (*EG(opline_ptr))->op2.u.constant.value.lval != ZEND_REQUIRE_ONCE)) {
 #endif
 
-				if (zend_hash_add_empty_element(&EG(included_files), persistent_script->full_path) == SUCCESS) {
+				if (zend_hash_add_empty_element(&EG(included_files), persistent_script->full_path) != NULL) {
 					/* ext/phar has to load phar's metadata into memory */
 					if (strstr(persistent_script->full_path->val, ".phar") && !strstr(persistent_script->full_path->val, "://")) {
 						php_stream_statbuf ssb;
