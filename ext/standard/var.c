@@ -72,7 +72,7 @@ static int php_array_element_dump(zval *zv TSRMLS_DC, int num_args, va_list args
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(hash_key->key->val, hash_key->key->len);
 		php_printf("\"]=>\n");
-	}
+		}
 	php_var_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
 }
@@ -722,7 +722,6 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		zend_string *key;
 		zval *d, *name;
 		ulong index;
-		int i;
 		zval nval, *nvalp;
 		HashTable *propers, *ht;
 
