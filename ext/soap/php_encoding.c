@@ -1992,6 +1992,13 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 
 				key_type = zend_hash_get_current_key_ex(prop, &str_key, &index, FALSE, &prop->nInternalPointer);
 				zprop = zend_hash_get_current_data(prop);
+				if (Z_TYPE_P(zprop) == IS_INDIRECT) {
+					zprop = Z_INDIRECT_P(zprop);
+					if (Z_TYPE_P(zprop) == IS_UNDEF) {
+						zend_hash_move_forward(prop);
+						continue;
+					}
+				}
 
 				property = master_to_xml(get_conversion(Z_TYPE_P(zprop)), zprop, style, xmlParam TSRMLS_CC);
 
