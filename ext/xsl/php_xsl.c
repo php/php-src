@@ -115,6 +115,7 @@ zend_object *xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	xsl_object *intern;
 
 	intern = ecalloc(1, sizeof(xsl_object) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern->securityPrefs = XSL_SECPREF_DEFAULT;
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
