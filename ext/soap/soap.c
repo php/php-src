@@ -609,17 +609,17 @@ PHP_RINIT_FUNCTION(soap)
 	return SUCCESS;
 }
 
-static void delete_sdl_res(zend_resource *res TSRMLS_CC)
+static void delete_sdl_res(zend_resource *res TSRMLS_DC)
 {
 	delete_sdl(res->ptr);
 }
 
-static void delete_url_res(zend_resource *res TSRMLS_CC)
+static void delete_url_res(zend_resource *res TSRMLS_DC)
 {
 	delete_url(res->ptr);
 }
 
-static void delete_service_res(zend_resource *res TSRMLS_CC)
+static void delete_service_res(zend_resource *res TSRMLS_DC)
 {
 	delete_service(res->ptr);
 }
