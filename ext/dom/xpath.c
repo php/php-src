@@ -212,7 +212,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 				}
 				GC_REFCOUNT(&retval)++;
 				zend_hash_next_index_insert(intern->node_list, &retval);
-				obj = Z_XPATHOBJ_P(&retval);
+				obj = Z_DOMOBJ_P(&retval);
 				nodep = dom_object_get_node(obj);
 				valuePush(ctxt, xmlXPathNewNodeSet(nodep));
 			} else if (Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE) {
