@@ -2168,7 +2168,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 #ifdef va_copy
 			va_list argcopy;
 #endif
-//???			zend_object_store_bucket *old_objects;
+			zend_object **old_objects;
 			int old = PG(display_errors);
 
 //???			INIT_ZVAL(outbuf);
@@ -2192,8 +2192,8 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			Z_ADDREF(fault);
 			zend_throw_exception_object(&fault TSRMLS_CC);
 
-//???			old_objects = EG(objects_store).object_buckets;
-//???			EG(objects_store).object_buckets = NULL;
+			old_objects = EG(objects_store).object_buckets;
+			EG(objects_store).object_buckets = NULL;
 			PG(display_errors) = 0;
 			SG(sapi_headers).http_status_line = NULL;
 			zend_try {
@@ -2208,7 +2208,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				SG(sapi_headers).http_status_line = _old_http_status_line;
 				SG(sapi_headers).http_response_code = _old_http_response_code;
 			} zend_end_try();
-//???			EG(objects_store).object_buckets = old_objects;
+			EG(objects_store).object_buckets = old_objects;
 			PG(display_errors) = old;
 			zend_bailout();
 		} else if (!use_exceptions ||
