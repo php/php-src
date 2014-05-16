@@ -677,7 +677,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	char *internal_file, *error;
 	int internal_file_len;
 	phar_entry_data *idata;
-	phar_archive_data **pphar;
+	phar_archive_data *pphar;
 	uint host_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "rb", options TSRMLS_CC)) == NULL) {
@@ -702,7 +702,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	phar_request_initialize(TSRMLS_C);
 
 	pphar = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_fname_map), resource->host, host_len);
-	if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
+	if (PHAR_G(readonly) && (!pphar || !pphar->is_data)) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by the php.ini setting phar.readonly");
 		return 0;
