@@ -378,26 +378,28 @@ int make_http_soap_request(zval  *this_ptr,
 			zval params[3];
 			int n;
 
-			//???ZVAL_STRINGL(params[0], buf, buf_size, 0);
 			ZVAL_STRINGL(&params[0], buf, buf_size);
 			ZVAL_LONG(&params[1], level);
-	    if (kind == SOAP_COMPRESSION_DEFLATE) {
-	    	n = 2;
-				//???ZVAL_STRING(&func, "gzcompress", 0);
+			if (kind == SOAP_COMPRESSION_DEFLATE) {
+				n = 2;
 				ZVAL_STRING(&func, "gzcompress");
 				smart_str_append_const(&soap_headers_z,"Content-Encoding: deflate\r\n");
-	    } else {
-	      n = 3;
-				//???ZVAL_STRING(&func, "gzencode", 0);
+			} else {
+				n = 3;
 				ZVAL_STRING(&func, "gzencode");
 				smart_str_append_const(&soap_headers_z,"Content-Encoding: gzip\r\n");
 				ZVAL_LONG(&params[2], 0x1f);
-	    }
+			}
 			if (call_user_function(CG(function_table), (zval*)NULL, &func, &retval, n, params TSRMLS_CC) == SUCCESS &&
 			    Z_TYPE(retval) == IS_STRING) {
+				zval_ptr_dtor(&params[0]);
+				zval_ptr_dtor(&func);
+// TODO: free retval ???
 				request = Z_STRVAL(retval);
 				request_size = Z_STRLEN(retval);
 			} else {
+				zval_ptr_dtor(&params[0]);
+				zval_ptr_dtor(&func);
 				if (request != buf) {efree(request);}
 				smart_str_free(&soap_headers_z);
 				return FALSE;
@@ -1234,14 +1236,10 @@ try_again:
 		if ((strcmp(content_encoding,"gzip") == 0 ||
 		     strcmp(content_encoding,"x-gzip") == 0) &&
 		     zend_hash_str_exists(EG(function_table), "gzinflate", sizeof("gzinflate")-1)) {
-			//???ZVAL_STRING(&func, "gzinflate", 0);
-			//???ZVAL_STRINGL(params[0], http_body+10, http_body_size-10, 0);
 			ZVAL_STRING(&func, "gzinflate");
 			ZVAL_STRINGL(&params[0], http_body+10, http_body_size-10);
 		} else if (strcmp(content_encoding,"deflate") == 0 &&
 		           zend_hash_str_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress")-1)) {
-			//???ZVAL_STRING(&func, "gzuncompress", 0);
-			//???ZVAL_STRINGL(params[0], http_body, http_body_size, 0);
 			ZVAL_STRING(&func, "gzuncompress");
 			ZVAL_STRINGL(&params[0], http_body, http_body_size);
 		} else {
@@ -1256,9 +1254,13 @@ try_again:
 		}
 		if (call_user_function(CG(function_table), (zval*)NULL, &func, &retval, 1, params TSRMLS_CC) == SUCCESS &&
 		    Z_TYPE(retval) == IS_STRING) {
+			zval_ptr_dtor(&params[0]);
+			zval_ptr_dtor(&func);
 			efree(http_body);
 			ZVAL_COPY_VALUE(return_value, &retval);
 		} else {
+			zval_ptr_dtor(&params[0]);
+			zval_ptr_dtor(&func);
 			efree(content_encoding);
 			efree(http_headers);
 			efree(http_body);
