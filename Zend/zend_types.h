@@ -269,7 +269,7 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
 
 #define Z_GC_FLAGS(zval)			GC_FLAGS(Z_COUNTED(zval))
-#define Z_GC_FLAGS_P(zval_p)		Z_GC_TYPE(*(zval_p))
+#define Z_GC_FLAGS_P(zval_p)		Z_GC_FLAGS(*(zval_p))
 
 #define Z_GC_INFO(zval)				GC_INFO(Z_COUNTED(zval))
 #define Z_GC_INFO_P(zval_p)			Z_GC_INFO(*(zval_p))
