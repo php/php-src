@@ -1092,8 +1092,8 @@ static const zend_function_entry dbh_methods[] = {
 	PHP_ME(PDO, pgsqlCopyFromFile, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, pgsqlCopyToArray, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, pgsqlCopyToFile, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PDO, pgsqlGetNotify, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PDO, pgsqlGetPid, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(PDO, pgsqlGetNotify, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(PDO, pgsqlGetPid, NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
