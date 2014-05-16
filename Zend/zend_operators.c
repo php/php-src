@@ -431,11 +431,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 				}
 				return;
 			}
-		default:
-			zend_error(E_WARNING, "Cannot convert to ordinal value");
-			zval_dtor(op);
-			ZVAL_LONG(op, 0);
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
@@ -493,11 +489,7 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 				}
 				break;
 			}
-		default:
-			zend_error(E_WARNING, "Cannot convert to real value (type=%d)", Z_TYPE_P(op));
-			zval_dtor(op);
-			ZVAL_DOUBLE(op, 0);
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
@@ -580,10 +572,7 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 				}
 				break;
 			}
-		default:
-			zval_dtor(op);
-			ZVAL_BOOL(op, 0);
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
@@ -650,10 +639,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			}
 			break;
 		}
-		default:
-			zval_dtor(op);
-			ZVAL_BOOL(op, 0);
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
@@ -833,9 +819,7 @@ try_again:
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
 			goto try_again;
-		default:
-			zend_error(E_WARNING, "Cannot convert to ordinal value");
-			return 0;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
@@ -875,9 +859,7 @@ try_again:
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
 			goto try_again;
-		default:
-			zend_error(E_WARNING, "Cannot convert to real value (type=%d)", Z_TYPE_P(op));
-			return 0.0;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
@@ -934,9 +916,7 @@ try_again:
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
 			goto try_again;
-		default:
-			//??? original code returns bool(0)
-			return STR_EMPTY_ALLOC();
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */

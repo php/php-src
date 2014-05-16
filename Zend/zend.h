@@ -52,15 +52,14 @@
 # define ZEND_PATHS_SEPARATOR		':'
 #endif
 
-#ifdef ZEND_WIN32
 /* Only use this macro if you know for sure that all of the switches values
    are covered by its case statements */
-#define EMPTY_SWITCH_DEFAULT_CASE() \
-			default:				\
-				__assume(0);		\
-				break;
+#if ZEND_DEBUG
+# define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_ASSERT(0); break;
+#elif defined(ZEND_WIN32)
+# define EMPTY_SWITCH_DEFAULT_CASE() default: __assume(0); break;
 #else
-#define EMPTY_SWITCH_DEFAULT_CASE()
+# define EMPTY_SWITCH_DEFAULT_CASE()
 #endif
 
 /* all HAVE_XXX test have to be after the include of zend_config above */
