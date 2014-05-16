@@ -1494,11 +1494,10 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 			    } else {
 					master_to_zval_int(ret, sdlType->encode, data TSRMLS_CC);
 				}
-				if (soap_check_xml_ref(ret, data TSRMLS_CC)) {
-					return ret;
-				}
-				redo_any = get_zval_property(ret, "any", &rv TSRMLS_CC);
+				
 				soap_add_xml_ref(ret, data TSRMLS_CC);
+
+				redo_any = get_zval_property(ret, "any", &rv TSRMLS_CC);
 				if (Z_TYPE_P(ret) == IS_OBJECT && ce != ZEND_STANDARD_CLASS_DEF_PTR) {
 					zend_object *zobj = Z_OBJ_P(ret);
 					zobj->ce = ce;
@@ -1526,18 +1525,14 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 			soap_add_xml_ref(ret, data TSRMLS_CC);
 		}
 		if (sdlType->model) {
-			if (redo_any) {
-				if (Z_REFCOUNTED_P(redo_any)) Z_ADDREF_P(redo_any);
-				unset_zval_property(ret, "any" TSRMLS_CC);
-			}
 			model_to_zval_object(ret, sdlType->model, data, sdl TSRMLS_CC);
 			if (redo_any) {
-				zval *tmp = get_zval_property(ret, "any", &rv TSRMLS_CC);
-
-				if (tmp == NULL) {
+				if (!get_zval_property(ret, "any", &rv TSRMLS_CC)) {
 					model_to_zval_any(ret, data->children TSRMLS_CC);
+					soap_add_xml_ref(ret, data TSRMLS_CC);
+				} else {
+					unset_zval_property(ret, "any" TSRMLS_CC);
 				}
-				zval_ptr_dtor(redo_any);
 			}
 		}
 		if (sdlType->attributes) {
