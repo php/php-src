@@ -350,39 +350,30 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node TSRMLS_DC) {
 	return 0;
 }
 
-static zval* soap_find_xml_ref(xmlNodePtr node TSRMLS_DC)
-{
-	zval *data_ptr;
-
-	if (SOAP_GLOBAL(ref_map) && 
-	    (data_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
-//???		Z_SET_ISREF_PP(data_ptr);
-	    SEPARATE_ZVAL_TO_MAKE_IS_REF(data_ptr);
-		Z_ADDREF_P(data_ptr);
-		return data_ptr;
-	}
-	return NULL;
-}
-
 static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 {
 	zval *data_ptr;
 
 	if (SOAP_GLOBAL(ref_map)) {
-		if ((data_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
-			if (data != data_ptr) {
+		if ((data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
+			if (!Z_REFCOUNTED_P(data) ||
+			    !Z_REFCOUNTED_P(data_ptr) ||
+			    Z_COUNTED_P(data) != Z_COUNTED_P(data_ptr)) {
 				zval_ptr_dtor(data);
-				ZVAL_COPY_VALUE(data, data_ptr);
-//???				Z_SET_ISREF_PP(data);
-			    SEPARATE_ZVAL_TO_MAKE_IS_REF(data);
-				Z_ADDREF_P(data);
+//???			    SEPARATE_ZVAL_TO_MAKE_IS_REF(data_ptr);
+				ZVAL_COPY(data, data_ptr);
 				return 1;
 			}
-		} else {
-			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (ulong)node, data);
 		}
 	}
 	return 0;
+}
+
+static zend_bool soap_add_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
+{
+	if (SOAP_GLOBAL(ref_map)) {
+		zend_hash_index_update(SOAP_GLOBAL(ref_map), (ulong)node, data);
+	}
 }
 
 static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xmlNodePtr parent, int check_class_map TSRMLS_DC)
@@ -1475,6 +1466,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 					return ret;
 				}
 				object_init_ex(ret, ce);
+				soap_add_xml_ref(ret, data TSRMLS_CC);
 			}
 		} else if (sdlType->kind == XSD_TYPEKIND_EXTENSION &&
 		           sdlType->encode &&
@@ -1484,11 +1476,8 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
 
-			    zval *ref;
-
 				CHECK_XML_NULL(data);
-				if ((ref = soap_find_xml_ref(data TSRMLS_CC)) != NULL) {
-					ZVAL_COPY_VALUE(ret, ref);
+				if (soap_check_xml_ref(ret, data TSRMLS_CC)) {
 					return ret;
 				}
 
@@ -1509,6 +1498,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 					return ret;
 				}
 				redo_any = get_zval_property(ret, "any", &rv TSRMLS_CC);
+				soap_add_xml_ref(ret, data TSRMLS_CC);
 				if (Z_TYPE_P(ret) == IS_OBJECT && ce != ZEND_STANDARD_CLASS_DEF_PTR) {
 					zend_object *zobj = Z_OBJ_P(ret);
 					zobj->ce = ce;
@@ -1522,6 +1512,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 				}
 
 				object_init_ex(ret, ce);
+				soap_add_xml_ref(ret, data TSRMLS_CC);
 				master_to_zval_int(&base, sdlType->encode, data TSRMLS_CC);
 				set_zval_property(ret, "_", &base TSRMLS_CC);
 			}
@@ -1532,6 +1523,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 				return ret;
 			}
 			object_init_ex(ret, ce);
+			soap_add_xml_ref(ret, data TSRMLS_CC);
 		}
 		if (sdlType->model) {
 			if (redo_any) {
@@ -1588,6 +1580,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 		}
 
 		object_init_ex(ret, ce);
+		soap_add_xml_ref(ret, data TSRMLS_CC);
 		trav = data->children;
 
 		while (trav != NULL) {
