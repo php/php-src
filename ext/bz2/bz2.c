@@ -346,26 +346,24 @@ static PHP_FUNCTION(bzread)
 	long len = 1024;
 	php_stream *stream;
 	zend_string *data;
-	size_t dlen;
-	
+
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &bz, &len)) {
 		RETURN_FALSE;
 	}
-	
+
 	php_stream_from_zval(stream, bz);
 
 	if ((len + 1) < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length may not be negative");
 		RETURN_FALSE;
 	}
-
 	data = STR_ALLOC(len, 0);
 	data->len = php_stream_read(stream, data->val, data->len);
-	
-	if (dlen < 0) {
+
+	if (data->len < 0) {
 		STR_FREE(data);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not read valid bz2 data from stream");
-		RETURN_FALSE;		
+		RETURN_FALSE;
 	}
 	data->val[data->len] = '\0';
 
