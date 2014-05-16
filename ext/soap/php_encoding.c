@@ -2301,7 +2301,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 			}
 		}
 iterator_done:
-		iter->funcs->dtor(iter TSRMLS_CC);
+		OBJ_RELEASE(&iter->std);
 		if (EG(exception)) {
 			zval_ptr_dtor(&array_copy);
 			ZVAL_UNDEF(&array_copy);
