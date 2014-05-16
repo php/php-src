@@ -75,14 +75,13 @@ var_dump($object->offsetexists('qux'), isset($object['qux']), empty($object['qux
 echo "==== class with offsetGet() and offsetSet() ====\n";
 $object = new ArrayObjectGetSet;
 $object['foo'] = 42;
-var_dump($object->offsetExists('foo'), $object->offsetExists('sbb'), isset($object['foo']), isset($object['sbb']));
+var_dump($object->offsetExists('foo'), $object->offsetExists('sbb'), isset($object['foo']), isset($object['sbb']), empty($object['sbb']));
 
 ?>
 --EXPECTF--
 ==== class with offsetExists() and offsetGet() ====
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(37) "Called: ArrayObjectBoth::offsetExists"
-string(34) "Called: ArrayObjectBoth::offsetGet"
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(34) "Called: ArrayObjectBoth::offsetGet"
 bool(true)
@@ -90,15 +89,13 @@ bool(true)
 bool(true)
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(37) "Called: ArrayObjectBoth::offsetExists"
-string(34) "Called: ArrayObjectBoth::offsetGet"
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(34) "Called: ArrayObjectBoth::offsetGet"
 bool(true)
-bool(false)
+bool(true)
 bool(true)
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(37) "Called: ArrayObjectBoth::offsetExists"
-string(34) "Called: ArrayObjectBoth::offsetGet"
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(34) "Called: ArrayObjectBoth::offsetGet"
 bool(true)
@@ -121,7 +118,7 @@ string(39) "Called: ArrayObjectExists::offsetExists"
 string(39) "Called: ArrayObjectExists::offsetExists"
 string(39) "Called: ArrayObjectExists::offsetExists"
 bool(true)
-bool(false)
+bool(true)
 bool(true)
 string(39) "Called: ArrayObjectExists::offsetExists"
 string(39) "Called: ArrayObjectExists::offsetExists"
@@ -137,16 +134,13 @@ bool(false)
 bool(true)
 ==== class with offsetGet() ====
 string(33) "Called: ArrayObjectGet::offsetGet"
-string(33) "Called: ArrayObjectGet::offsetGet"
 bool(true)
 bool(true)
 bool(true)
-string(33) "Called: ArrayObjectGet::offsetGet"
 string(33) "Called: ArrayObjectGet::offsetGet"
 bool(true)
 bool(false)
 bool(true)
-string(33) "Called: ArrayObjectGet::offsetGet"
 string(33) "Called: ArrayObjectGet::offsetGet"
 bool(true)
 bool(true)
@@ -160,4 +154,5 @@ Notice: Undefined index: foo in %s on line %d
 bool(false)
 bool(true)
 bool(false)
-bool(false)
+bool(true)
+bool(true)
