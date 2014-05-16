@@ -1252,13 +1252,14 @@ static void unset_zval_property(zval* object, char* name TSRMLS_DC)
 
 static void model_to_zval_any(zval *ret, xmlNodePtr node TSRMLS_DC)
 {
-	zval rv, arr;
+	zval rv, arr, val;
 	zval* any = NULL;
 	char* name = NULL;
 
 	while (node != NULL) {
 		if (get_zval_property(ret, (char*)node->name, &rv TSRMLS_CC) == NULL) {
-			zval* val = master_to_zval(ret, get_conversion(XSD_ANYXML), node TSRMLS_CC);
+			
+			master_to_zval(&val, get_conversion(XSD_ANYXML), node TSRMLS_CC);
 			
 			if (any && Z_TYPE_P(any) != IS_ARRAY) {
 				/* Convert into array */
@@ -1271,16 +1272,16 @@ static void model_to_zval_any(zval *ret, xmlNodePtr node TSRMLS_DC)
 				any = &arr;
 			}
 
-			if (Z_TYPE_P(val) == IS_STRING && *Z_STRVAL_P(val) == '<') {
+			if (Z_TYPE(val) == IS_STRING && *Z_STRVAL(val) == '<') {
 				name = NULL;
 				while (node->next != NULL) {
 					zval val2;
 
 					master_to_zval(&val2, get_conversion(XSD_ANYXML), node->next TSRMLS_CC);
-					if (Z_TYPE(val2) != IS_STRING ||  *Z_STRVAL_P(val) != '<') {
+					if (Z_TYPE(val2) != IS_STRING ||  *Z_STRVAL(val) != '<') {
 						break;
 					}
-					add_string_to_string(val, val, &val2);
+					add_string_to_string(&val, &val, &val2);
 					zval_ptr_dtor(&val2);
 					node = node->next;
 				}
@@ -1292,11 +1293,11 @@ static void model_to_zval_any(zval *ret, xmlNodePtr node TSRMLS_DC)
 				if (name) {
 					/* Convert into array */
 					array_init(&arr);
-					add_assoc_zval(&arr, name, val);
+					add_assoc_zval(&arr, name, &val);
 					any = &arr;
 					name = NULL;
 				} else {
-					any = val;
+					any = &val;
 				}
 			} else {
 				/* Add array element */
@@ -1309,12 +1310,12 @@ static void model_to_zval_any(zval *ret, xmlNodePtr node TSRMLS_DC)
 							add_next_index_zval(&arr, el);
 							el = &arr;
 						}
-						add_next_index_zval(el, val);
+						add_next_index_zval(el, &val);
 					} else {
-						add_assoc_zval(any, name, val);
+						add_assoc_zval(any, name, &val);
 					}
 				} else {
-					add_next_index_zval(any, val);
+					add_next_index_zval(any, &val);
 				}
 				name = NULL;
 			}
@@ -2301,7 +2302,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 			}
 		}
 iterator_done:
-		iter->funcs->dtor(iter TSRMLS_CC);
+		OBJ_RELEASE(&iter->std);
 		if (EG(exception)) {
 			zval_ptr_dtor(&array_copy);
 			ZVAL_UNDEF(&array_copy);

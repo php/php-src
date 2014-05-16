@@ -2426,7 +2426,7 @@ static void make_persistent_sdl_encoder_ref(encodePtr *enc, HashTable *ptr_map, 
 	if ((tmp = zend_hash_str_find_ptr(ptr_map, (char *)enc, sizeof(encodePtr))) != NULL) {
 		*enc = tmp;
 	} else {
-		zend_hash_next_index_insert_ptr(bp_encoders, *enc);
+		zend_hash_next_index_insert_ptr(bp_encoders, enc);
 	}
 }
 
@@ -2472,7 +2472,8 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 		}
 
 		if (key) {
-			zend_hash_add_ptr(pheaders, key, pheader);
+			/* We have to duplicate key emalloc->malloc */
+			zend_hash_str_add_ptr(pheaders, key->val, key->len, pheader);
 		} else {
 			zend_hash_next_index_insert_ptr(pheaders, pheader);
 		}
@@ -2528,7 +2529,8 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 		}
 
 		if (key) {
-			zend_hash_add_ptr(pparams, key, pparam);
+			/* We have to duplicate key emalloc->malloc */
+			zend_hash_str_add_ptr(pparams, key->val, key->len, pparam);
 		} else {
 			zend_hash_next_index_insert_ptr(pparams, pparam);
 		}
@@ -2571,7 +2573,8 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 		}
 
 		if (key) {
-			zend_hash_add_ptr(pfaults, key, pfault);
+			/* We have to duplicate key emalloc->malloc */
+			zend_hash_str_add_ptr(pfaults, key->val, key->len, pfault);
 		} else {
 			zend_hash_next_index_insert_ptr(pfaults, pfault);
 		}
@@ -2631,7 +2634,8 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 					pextra->val = strdup(tmp->val);
 				}
 			
-				zend_hash_add_ptr(pattr->extraAttributes, key, pextra);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(pattr->extraAttributes, key->val, key->len, pextra);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -2774,7 +2778,8 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(type->elements, key, tmp) {
 			pelem = make_persistent_sdl_type(tmp, ptr_map, bp_types, bp_encoders);
 			if (key) {
-				zend_hash_add_ptr(ptype->elements, key, pelem);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(ptype->elements, key->val, key->len, pelem);
 			} else {
 				zend_hash_next_index_insert_ptr(ptype->elements, pelem);
 			}
@@ -2791,7 +2796,8 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(type->attributes, key, tmp) {
 			pattr = make_persistent_sdl_attribute(tmp, ptr_map, bp_types, bp_encoders);
 			if (key) {
-				zend_hash_add_ptr(ptype->attributes, key, pattr);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(ptype->attributes, key->val, key->len, pattr);
 			} else {
 				zend_hash_next_index_insert_ptr(ptype->attributes, pattr);
 			}
@@ -2942,7 +2948,8 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->groups, key, tmp) {
 			ptype = make_persistent_sdl_type(tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (key) {
-				zend_hash_add_ptr(psdl->groups, key, ptype);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(psdl->groups, key->val, key->len, ptype);
 			} else {
 				zend_hash_next_index_insert_ptr(psdl->groups, ptype);
 			}
@@ -2960,7 +2967,8 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->types, key, tmp) {
 			ptype = make_persistent_sdl_type(tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (key) {
-				zend_hash_add_ptr(psdl->types, key, ptype);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(psdl->types, key->val, key->len, ptype);
 			} else {
 				zend_hash_next_index_insert_ptr(psdl->types, ptype);
 			}
@@ -2978,7 +2986,8 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->elements, key, tmp) {
 			ptype = make_persistent_sdl_type(tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (key) {
-				zend_hash_add_ptr(psdl->elements, key, ptype);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(psdl->elements, key->val, key->len, ptype);
 			} else {
 				zend_hash_next_index_insert_ptr(psdl->elements, ptype);
 			}
@@ -2996,7 +3005,8 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->encoders, key, tmp) {
 			penc = make_persistent_sdl_encoder(tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (key) {
-				zend_hash_add_ptr(psdl->encoders, key, penc);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(psdl->encoders, key->val, key->len, penc);
 			} else {
 				zend_hash_next_index_insert_ptr(psdl->encoders, penc);
 			}
@@ -3037,7 +3047,8 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->bindings, key, tmp) {
 			pbind = make_persistent_sdl_binding(tmp, &ptr_map);
 			if (key) {
-				zend_hash_add_ptr(psdl->bindings, key, pbind);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(psdl->bindings, key->val, key->len, pbind);
 			} else {
 				zend_hash_next_index_insert_ptr(psdl->bindings, pbind);
 			}
@@ -3053,7 +3064,8 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&sdl->functions, key, tmp) {
 			pfunc = make_persistent_sdl_function(tmp, &ptr_map);
 			if (key) {
-				zend_hash_add_ptr(&psdl->functions, key, pfunc);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(&psdl->functions, key->val, key->len, pfunc);
 			} else {
 				zend_hash_next_index_insert_ptr(&psdl->functions, pfunc);
 			}
@@ -3077,7 +3089,8 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 			//???
 			Z_PTR_P(zv) = preq;
 			if (key) {
-				zend_hash_add_ptr(psdl->requests, key, preq);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(psdl->requests, key->val, key->len, preq);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -3135,6 +3148,7 @@ static void delete_psdl_int(sdl_cache_bucket *p)
 static void delete_psdl(zval *zv)
 {
 	delete_psdl_int(Z_PTR_P(zv));
+	free(Z_PTR_P(zv));
 }
 
 sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
