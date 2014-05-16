@@ -355,7 +355,7 @@ static zval* soap_find_xml_ref(xmlNodePtr node TSRMLS_DC)
 	zval *data_ptr;
 
 	if (SOAP_GLOBAL(ref_map) && 
-	    (data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
+	    (data_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
 //???		Z_SET_ISREF_PP(data_ptr);
 	    SEPARATE_ZVAL_TO_MAKE_IS_REF(data_ptr);
 		Z_ADDREF_P(data_ptr);
@@ -369,7 +369,7 @@ static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 	zval *data_ptr;
 
 	if (SOAP_GLOBAL(ref_map)) {
-		if ((data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
+		if ((data_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
 			if (data != data_ptr) {
 				zval_ptr_dtor(data);
 				ZVAL_COPY_VALUE(data, data_ptr);
@@ -379,7 +379,7 @@ static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 				return 1;
 			}
 		} else {
-			zend_hash_index_update(SOAP_GLOBAL(ref_map), (ulong)node, data);
+			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (ulong)node, data);
 		}
 	}
 	return 0;
@@ -1199,14 +1199,14 @@ static void set_zval_property(zval* object, char* name, zval* val TSRMLS_DC)
 static zval* get_zval_property(zval* object, char* name, zval *rv TSRMLS_DC)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zval member, rv;
+		zval member;
 		zval *data;
 		zend_class_entry *old_scope;
 
 		ZVAL_STRING(&member, name);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
-		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, -1, &rv TSRMLS_CC);
+		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, -1, rv TSRMLS_CC);
 		if (data == &EG(uninitialized_zval)) {
 			/* Hack for bug #32455 */
 			zend_property_info *property_info;
@@ -1239,13 +1239,12 @@ static void unset_zval_property(zval* object, char* name TSRMLS_DC)
 		zval member;
 		zend_class_entry *old_scope;
 
-//???		INIT_PZVAL(&member);
-//???		ZVAL_STRING(&member, name, 0);
 		ZVAL_STRING(&member, name);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
 		Z_OBJ_HT_P(object)->unset_property(object, &member, 0 TSRMLS_CC);
 		EG(scope) = old_scope;
+		zval_ptr_dtor(&member);
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_hash_str_del(Z_ARRVAL_P(object), name, strlen(name));
 	}
@@ -1484,8 +1483,11 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
 
+			    zval *ref;
+
 				CHECK_XML_NULL(data);
-				if ((ret = soap_find_xml_ref(data TSRMLS_CC)) != NULL) {
+				if ((ref = soap_find_xml_ref(data TSRMLS_CC)) != NULL) {
+					ZVAL_COPY_VALUE(ret, ref);
 					return ret;
 				}
 
@@ -1532,7 +1534,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 		}
 		if (sdlType->model) {
 			if (redo_any) {
-				Z_ADDREF_P(redo_any);
+				if (Z_REFCOUNTED_P(redo_any)) Z_ADDREF_P(redo_any);
 				unset_zval_property(ret, "any" TSRMLS_CC);
 			}
 			model_to_zval_object(ret, sdlType->model, data, sdl TSRMLS_CC);
@@ -1541,9 +1543,6 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 
 				if (tmp == NULL) {
 					model_to_zval_any(ret, data->children TSRMLS_CC);
-				} else if (Z_REFCOUNT_P(tmp) == 0) {
-					zval_dtor(tmp);
-					efree(tmp);
 				}
 				zval_ptr_dtor(redo_any);
 			}
@@ -1992,6 +1991,13 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 
 				key_type = zend_hash_get_current_key_ex(prop, &str_key, &index, FALSE, &prop->nInternalPointer);
 				zprop = zend_hash_get_current_data(prop);
+				if (Z_TYPE_P(zprop) == IS_INDIRECT) {
+					zprop = Z_INDIRECT_P(zprop);
+					if (Z_TYPE_P(zprop) == IS_UNDEF) {
+						zend_hash_move_forward(prop);
+						continue;
+					}
+				}
 
 				property = master_to_xml(get_conversion(Z_TYPE_P(zprop)), zprop, style, xmlParam TSRMLS_CC);
 

@@ -1572,7 +1572,7 @@ PHP_METHOD(SoapServer, handle)
 					zval filter_params;
 
 					array_init_size(&filter_params, 1);
-					add_assoc_long_ex(&filter_params, ZEND_STRS("window"), 0x2f); /* ANY WBITS */
+					add_assoc_long_ex(&filter_params, "window", sizeof("window")-1, 0x2f); /* ANY WBITS */
 
 					zf = php_stream_filter_create("zlib.inflate", &filter_params, 0 TSRMLS_CC);
 					zval_dtor(&filter_params);
@@ -1657,6 +1657,7 @@ PHP_METHOD(SoapServer, handle)
 		/* If persistent then set soap_obj from from the previous created session (if available) */
 		if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
 			zval *tmp_soap;
+			zval *session_vars;
 
 			if (PS(session_status) != php_session_active &&
 			    PS(session_status) != php_session_disabled) {
@@ -1664,7 +1665,10 @@ PHP_METHOD(SoapServer, handle)
 			}
 
 			/* Find the soap object and assign */
-			if ((tmp_soap = zend_hash_str_find(Z_ARRVAL(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name")-1)) != NULL &&
+			session_vars = &PS(http_session_vars);
+			ZVAL_DEREF(session_vars);
+			if (Z_TYPE_P(session_vars) == IS_ARRAY &&
+			    (tmp_soap = zend_hash_str_find(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1)) != NULL &&
 			    Z_TYPE_P(tmp_soap) == IS_OBJECT &&
 			    Z_OBJCE_P(tmp_soap) == service->soap_class.ce) {
 				soap_obj = tmp_soap;
@@ -1737,8 +1741,14 @@ PHP_METHOD(SoapServer, handle)
 			/* If session then update session hash with new object */
 			if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
 				zval *tmp_soap_pp;
-				if ((tmp_soap_pp = zend_hash_str_update(Z_ARRVAL(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name")-1, &tmp_soap)) != NULL) {
+				zval *session_vars = &PS(http_session_vars);
+
+				ZVAL_DEREF(session_vars);
+				if (Z_TYPE_P(session_vars) == IS_ARRAY &&
+				    (tmp_soap_pp = zend_hash_str_update(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1, &tmp_soap)) != NULL) {
 					soap_obj = tmp_soap_pp;
+				} else {
+					soap_obj = &tmp_soap;
 				}
 			} else {
 				soap_obj = &tmp_soap;
@@ -2954,7 +2964,8 @@ PHP_METHOD(SoapClient, __getFunctions)
 		array_init(return_value);
 		ZEND_HASH_FOREACH_PTR(&sdl->functions, function) {
 			function_to_string(function, &buf);
-			add_next_index_str(return_value, buf.s);
+			add_next_index_stringl(return_value, buf.s->val, buf.s->len);
+			smart_str_free(&buf);
 		} ZEND_HASH_FOREACH_END();
 	}
 }
@@ -2981,7 +2992,8 @@ PHP_METHOD(SoapClient, __getTypes)
 		if (sdl->types) {
 			ZEND_HASH_FOREACH_PTR(sdl->types, type) {
 				type_to_string(type, &buf, 0);
-				add_next_index_str(return_value, buf.s);
+				add_next_index_stringl(return_value, buf.s->val, buf.s->len);
+				smart_str_free(&buf);
 			} ZEND_HASH_FOREACH_END();
 		}
 	}

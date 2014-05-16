@@ -234,7 +234,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				master_to_zval(&details, NULL, tmp TSRMLS_CC);
 			}
 		}
-		add_soap_fault(this_ptr, faultcode, faultstring->val, faultactor->val, &details TSRMLS_CC);
+		add_soap_fault(this_ptr, faultcode, faultstring ? faultstring->val : NULL, faultactor ? faultactor->val : NULL, &details TSRMLS_CC);
 		if (faultstring) {
 			STR_RELEASE(faultstring);
 		}

@@ -2165,7 +2165,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 							}
 
 							zend_hash_get_current_key_ex(tmp->attributes, &_key, NULL, 0, &tmp->attributes->nInternalPointer);
-							zend_hash_add_ptr(ht, _key, &newAttr);
+							zend_hash_add_ptr(ht, _key, newAttr);
 
 							zend_hash_move_forward(tmp->attributes);
 						} else {
@@ -2273,7 +2273,6 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 		ZEND_HASH_FOREACH_KEY_PTR(type->attributes, index, str_key, attr) {
 			if (str_key) {
 				schema_attribute_fixup(ctx, attr);
-				zend_hash_move_forward(type->attributes);
 			} else {
 				schema_attributegroup_fixup(ctx, attr, type->attributes);
 				zend_hash_index_del(type->attributes, index);
