@@ -355,10 +355,10 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 						S->param_lengths[param->paramno] = 1;
 						S->param_formats[param->paramno] = 0;
 					} else {
-						//???SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
+						//SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
 						convert_to_string_ex(parameter);
-						S->param_values[param->paramno] = Z_STRVAL(param->parameter);
-						S->param_lengths[param->paramno] = Z_STRLEN(param->parameter);
+						S->param_values[param->paramno] = Z_STRVAL_P(parameter);
+						S->param_lengths[param->paramno] = Z_STRLEN_P(parameter);
 						S->param_formats[param->paramno] = 0;
 					}
 
@@ -381,7 +381,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 			} else {
 				parameter = &param->parameter;
 			}
-			//????SEPARATE_ZVAL(&param->parameter);
+			SEPARATE_ZVAL(&param->parameter);
 			param->param_type = PDO_PARAM_STR;
 			ZVAL_STRINGL(parameter, Z_TYPE_P(parameter) == IS_TRUE ? "t" : "f", 1);
 		}
