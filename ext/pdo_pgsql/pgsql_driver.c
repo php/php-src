@@ -1113,13 +1113,16 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 
 	switch (attr) {
 		case PDO_ATTR_EMULATE_PREPARES:
+			convert_to_long(val);
 			H->emulate_prepares = Z_LVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT:
+			convert_to_long(val);
 			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
 			H->disable_native_prepares = Z_LVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
+			convert_to_long(val);
 			H->disable_prepares = Z_LVAL_P(val);
 			return 1;
 		default:
