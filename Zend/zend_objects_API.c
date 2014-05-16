@@ -79,7 +79,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 	zend_uint i;
 
 	/* Free object properties but don't free object their selves */
-	for (i = 1; i < objects->top ; i++) {
+	for (i = objects->top - 1; i > 0 ; i--) {
 		zend_object *obj = objects->object_buckets[i];
 
 		if (IS_OBJ_VALID(obj)) {

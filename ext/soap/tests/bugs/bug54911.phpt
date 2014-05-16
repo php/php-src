@@ -15,7 +15,7 @@ Bug #54911 (Access to a undefined member in inherit SoapClient may cause Segment
 --EXPECTF--
 Fatal error: Uncaught SoapFault exception: [Client] Access to undeclared static property: XSoapClient::$crash in %sbug54911.php:4
 Stack trace:
-#0 %sbug54911.php(4): XSoapClient::__doRequest()
+#0 %sbug54911.php(4): XSoapClient->__doRequest()
 #1 [internal function]: XSoapClient->__doRequest('<?xml version="...', '', '#', 1, 0)
 #2 %sbug54911.php(8): SoapClient->__soapCall('', Array)
 #3 {main}
