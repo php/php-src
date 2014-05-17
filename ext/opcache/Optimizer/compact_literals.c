@@ -324,7 +324,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					map[i] = l_true;
 					break;
 				case IS_LONG:
-					if ((pos = zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i]))) != 0) {
+					if ((pos = zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i]))) != NULL) {
 						map[i] = Z_LVAL_P(pos);
 					} else {
 						map[i] = j;
@@ -338,7 +338,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					}
 					break;
 				case IS_DOUBLE:
-					if ((pos = zend_hash_str_find(&hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double))) != 0) {
+					if ((pos = zend_hash_str_find(&hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double))) != NULL) {
 						map[i] = Z_LVAL_P(pos);
 					} else {
 						map[i] = j;
@@ -375,7 +375,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 						key->h += info[i].flags;
 					}
 					if ((info[i].flags & LITERAL_MAY_MERGE) &&
-						(pos = zend_hash_find(&hash, key)) != 0 &&
+						(pos = zend_hash_find(&hash, key)) != NULL &&
 					   	Z_TYPE(op_array->literals[i]) == Z_TYPE(op_array->literals[Z_LVAL_P(pos)]) &&
 						info[i].flags == info[Z_LVAL_P(pos)].flags) {
 
