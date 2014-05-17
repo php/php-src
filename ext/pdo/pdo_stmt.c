@@ -464,10 +464,12 @@ static PHP_METHOD(PDOStatement, execute)
 				param.paramno = -1;
 			} else {
 				/* we're okay to be zero based here */
+				/* num_index is unsignend
 				if (num_index < 0) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY093", NULL TSRMLS_CC);
 					RETURN_FALSE;
 				}
+				*/
 				param.paramno = num_index;
 			}
 

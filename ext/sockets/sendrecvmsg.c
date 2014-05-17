@@ -83,6 +83,10 @@ static struct {
 } ancillary_registry;
 
 
+static void ancillary_registery_free_elem(zval *el) {
+	pefree(Z_PTR_P(el), 1);
+}
+
 #ifdef ZTS
 static MUTEX_T ancillary_mutex;
 #endif
@@ -92,7 +96,7 @@ static void init_ancillary_registry(void)
 	anc_reg_key key;
 	ancillary_registry.initialized = 1;
 
-	zend_hash_init(&ancillary_registry.ht, 32, NULL, NULL, 1);
+	zend_hash_init(&ancillary_registry.ht, 32, NULL, ancillary_registery_free_elem, 1);
 
 #define PUT_ENTRY(sizev, var_size, calc, from, to, level, type) \
 	entry.size			= sizev; \
@@ -102,8 +106,7 @@ static void init_ancillary_registry(void)
 	entry.to_array		= to; \
 	key.cmsg_level		= level; \
 	key.cmsg_type		= type; \
-	zend_hash_update(&ancillary_registry.ht, (char*)&key, sizeof(key), \
-			(void*)&entry, sizeof(entry), NULL)
+	zend_hash_str_update_mem(&ancillary_registry.ht, (char*)&key, sizeof(key) - 1, (void*)&entry, sizeof(entry))
 
 #if defined(IPV6_PKTINFO) && HAVE_IPV6
 	PUT_ENTRY(sizeof(struct in6_pktinfo), 0, 0, from_zval_write_in6_pktinfo,
@@ -153,8 +156,7 @@ ancillary_reg_entry *get_ancillary_reg_entry(int cmsg_level, int msg_type)
 	tsrm_mutex_unlock(ancillary_mutex);
 #endif
 
-	if (zend_hash_find(&ancillary_registry.ht, (char*)&key, sizeof(key),
-			(void**)&entry) == SUCCESS) {
+	if ((entry = zend_hash_str_find_ptr(&ancillary_registry.ht, (char*)&key, sizeof(key) - 1)) != NULL) {
 		return entry;
 	} else {
 		return NULL;
@@ -179,7 +181,7 @@ PHP_FUNCTION(socket_sendmsg)
 
 	LONG_CHECK_VALID_INT(flags);
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &zsocket, -1,
+	ZEND_FETCH_RESOURCE(php_sock, php_socket *, zsocket, -1,
 			php_sockets_le_socket_name, php_sockets_le_socket());
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_send,
@@ -222,7 +224,7 @@ PHP_FUNCTION(socket_recvmsg)
 
 	LONG_CHECK_VALID_INT(flags);
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &zsocket, -1,
+	ZEND_FETCH_RESOURCE(php_sock, php_socket *, zsocket, -1,
 			php_sockets_le_socket_name, php_sockets_le_socket());
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_recv,
@@ -236,7 +238,7 @@ PHP_FUNCTION(socket_recvmsg)
 	res = recvmsg(php_sock->bsd_socket, msghdr, (int)flags);
 
 	if (res != -1) {
-		zval *zres;
+		zval *zres, tmp;
 		struct key_value kv[] = {
 				{KEY_RECVMSG_RET, sizeof(KEY_RECVMSG_RET), &res},
 				{0}
@@ -244,7 +246,7 @@ PHP_FUNCTION(socket_recvmsg)
 
 
 		zres = to_zval_run_conversions((char *)msghdr, to_zval_read_msghdr,
-				"msghdr", kv, &err);
+				"msghdr", kv, &err, &tmp);
 
 		/* we don;t need msghdr anymore; free it */
 		msghdr = NULL;
@@ -253,7 +255,6 @@ PHP_FUNCTION(socket_recvmsg)
 		zval_dtor(zmsg);
 		if (!err.has_error) {
 			ZVAL_COPY_VALUE(zmsg, zres);
-			efree(zres); /* only shallow destruction */
 		} else {
 			err_msg_dispose(&err TSRMLS_CC);
 			ZVAL_FALSE(zmsg);
@@ -311,7 +312,7 @@ PHP_FUNCTION(socket_cmsg_space)
 }
 
 #if HAVE_IPV6
-int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval **arg4 TSRMLS_DC)
+int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval *arg4 TSRMLS_DC)
 {
 	struct err_s	err = {0};
 	zend_llist		*allocations = NULL;
@@ -336,7 +337,7 @@ int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 			return 1;
 		}
 #endif
-		opt_ptr = from_zval_run_conversions(*arg4, php_sock, from_zval_write_in6_pktinfo,
+		opt_ptr = from_zval_run_conversions(arg4, php_sock, from_zval_write_in6_pktinfo,
 				sizeof(struct in6_pktinfo),	"in6_pktinfo", &allocations, &err);
 		if (err.has_error) {
 			err_msg_dispose(&err TSRMLS_CC);
@@ -388,14 +389,14 @@ int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 	if (res != 0) {
 		PHP_SOCKET_ERROR(php_sock, "unable to get socket option", errno);
 	} else {
+		zval tmp;
 		zval *zv = to_zval_run_conversions(buffer, reader, "in6_pktinfo",
-				empty_key_value_list, &err);
+				empty_key_value_list, &err, &tmp);
 		if (err.has_error) {
 			err_msg_dispose(&err TSRMLS_CC);
 			res = -1;
 		} else {
 			ZVAL_COPY_VALUE(result, zv);
-			efree(zv);
 		}
 	}
 	efree(buffer);
