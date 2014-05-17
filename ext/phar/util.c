@@ -1937,10 +1937,9 @@ void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename
 }
 /* }}} */
 
-static int phar_update_cached_entry(zval *data, void *argument) /* {{{ */
+static int phar_update_cached_entry(zval *data, void *argument TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(data);
-	TSRMLS_FETCH();
 
 	entry->phar = (phar_archive_data *)argument;
 
