@@ -1089,12 +1089,12 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 			zend_function *priv_fbc;
 
 			if (zend_hash_quick_find(&EG(scope)->function_table, lc_method_name, method_len+1, hash_value, (void **) &priv_fbc)==SUCCESS
-				&& IS_PRIVATE_FUNCTION(*priv_fbc)
+				&& ZEND_IS_PRIVATE_FUNCTION(*priv_fbc)
 				&& priv_fbc->common.scope == EG(scope)) {
 				fbc = priv_fbc;
 			}
 		}
-		if (IS_PROTECTED_FUNCTION(*fbc)) {
+		if (ZEND_IS_PROTECTED_FUNCTION(*fbc)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 * If we're not and __call() handler exists, invoke it, otherwise error out.
 			 */
@@ -1222,7 +1222,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 #if MBO_0
 	/* right now this function is used for non static method lookup too */
 	/* Is the function static */
-	if (UNEXPECTED(!IS_STATIC_FUNCTION(*fbc))) {
+	if (UNEXPECTED(!ZEND_IS_STATIC_FUNCTION(*fbc))) {
 		zend_error_noreturn(E_ERROR, "Cannot call non static method %s::%s() without object", ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name);
 	}
 #endif
@@ -1243,7 +1243,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 				zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name_strval, EG(scope) ? EG(scope)->name : "");
 			}
 		}
-	} else if (IS_PROTECTED_FUNCTION(*fbc)) {
+	} else if (ZEND_IS_PROTECTED_FUNCTION(*fbc)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
 		if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), EG(scope)))) {
@@ -1345,7 +1345,7 @@ ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC) 
 					zend_error_noreturn(E_ERROR, "Call to private %s::%s() from invalid context", constructor->common.scope->name, constructor->common.function_name);
 				}
 			}
-		} else if (IS_PROTECTED_FUNCTION(*constructor)) {
+		} else if (ZEND_IS_PROTECTED_FUNCTION(*constructor)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 * Constructors only have prototype if they are defined by an interface but
 			 * it is the compilers responsibility to take care of the prototype.
@@ -1633,7 +1633,7 @@ int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **f
 	}
 
 	*ce_ptr = ce;
-	if (IS_STATIC_FUNCTION(*(*fptr_ptr))) {
+	if (ZEND_IS_STATIC_FUNCTION(*(*fptr_ptr))) {
 		if (zobj_ptr) {
 			*zobj_ptr = NULL;
 		}

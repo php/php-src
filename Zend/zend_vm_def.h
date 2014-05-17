@@ -1906,10 +1906,10 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	SAVE_OPLINE();
 	EX(object) = EX(call)->object;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
-		if (UNEXPECTED(IS_ABSTRACT_FUNCTION(*fbc))) {
+		if (UNEXPECTED(ZEND_IS_ABSTRACT_FUNCTION(*fbc))) {
 			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name, fbc->common.function_name);
 		}
-		if (UNEXPECTED(IS_DEPRECATED_FUNCTION(*fbc))) {
+		if (UNEXPECTED(ZEND_IS_DEPRECATED_FUNCTION(*fbc))) {
 			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
 				fbc->common.scope ? fbc->common.scope->name : "",
 				fbc->common.scope ? "::" : "",
@@ -1920,7 +1920,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		}
 	}
 	if (fbc->common.scope &&
-		!IS_STATIC_FUNCTION(*fbc) &&
+		!ZEND_IS_STATIC_FUNCTION(*fbc) &&
 		!EX(object)) {
 
 		if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -2466,7 +2466,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (IS_STATIC_FUNCTION(*call->fbc)) {
+	if (ZEND_IS_STATIC_FUNCTION(*call->fbc)) {
 		call->object = NULL;
 	} else {
 		if (!PZVAL_IS_REF(call->object)) {
@@ -2581,13 +2581,13 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && IS_PRIVATE_FUNCTION(*ce->constructor)) {
+		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && ZEND_IS_PRIVATE_FUNCTION(*ce->constructor)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name);
 		}
 		call->fbc = ce->constructor;
 	}
 
-	if (IS_STATIC_FUNCTION(*call->fbc)) {
+	if (ZEND_IS_STATIC_FUNCTION(*call->fbc)) {
 		call->object = NULL;
 	} else {
 		if (EG(This) &&
@@ -2679,7 +2679,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}
-			if (OP2_TYPE == IS_VAR && OP2_FREE && Z_REFCOUNT_P(function_name) == 1 && IS_CLOSURE(*call->fbc)) {
+			if (OP2_TYPE == IS_VAR && OP2_FREE && Z_REFCOUNT_P(function_name) == 1 && ZEND_IS_CLOSURE(*call->fbc)) {
 				/* Delay closure destruction until its invocation */
 				call->fbc->common.prototype = (zend_function*)function_name;
 			} else {
@@ -2737,7 +2737,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_PP(method));
 				}
 
-				if (IS_STATIC_FUNCTION(*call->fbc)) {
+				if (ZEND_IS_STATIC_FUNCTION(*call->fbc)) {
 					call->object = NULL;
 				} else {
 					if (!PZVAL_IS_REF(call->object)) {
@@ -3648,7 +3648,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 			if (UNEXPECTED(ce != EG(scope))) {
 				zend_error_noreturn(E_ERROR, "Call to private %s::__clone() from context '%s'", ce->name, EG(scope) ? EG(scope)->name : "");
 			}
-		} else if (IS_PROTECTED_FUNCTION(*clone)) {
+		} else if (ZEND_IS_PROTECTED_FUNCTION(*clone)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), EG(scope)))) {

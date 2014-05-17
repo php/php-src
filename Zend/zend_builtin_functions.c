@@ -1077,11 +1077,11 @@ ZEND_FUNCTION(get_class_methods)
 	zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
 	while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
-		if (IS_PUBLIC_FUNCTION(*mptr) 
+		if (ZEND_IS_PUBLIC_FUNCTION(*mptr) 
 		 || (EG(scope) &&
-		     ((IS_PROTECTED_FUNCTION(*mptr) &&
+		     ((ZEND_IS_PROTECTED_FUNCTION(*mptr) &&
 		       zend_check_protected(mptr->common.scope, EG(scope)))
-		   || (IS_PRIVATE_FUNCTION(*mptr) &&
+		   || (ZEND_IS_PRIVATE_FUNCTION(*mptr) &&
 		       EG(scope) == mptr->common.scope)))) {
 			char *key;
 			uint key_len;
@@ -1093,7 +1093,7 @@ ZEND_FUNCTION(get_class_methods)
 				MAKE_STD_ZVAL(method_name);
 				ZVAL_STRINGL(method_name, mptr->common.function_name, len, 1);
 				zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
-			} else if (!IS_CONSTRUCTOR(*mptr) ||
+			} else if (!ZEND_IS_CONSTRUCTOR(*mptr) ||
 			    mptr->common.scope == ce ||
 			    zend_binary_strcasecmp(key, key_len-1, mptr->common.function_name, len) == 0) {
 

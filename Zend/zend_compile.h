@@ -204,37 +204,34 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_GENERATOR            0x800000
 
 /* method flag helpers */
-#define IS_STATIC_FUNCTION(f) ( \
+#define ZEND_IS_STATIC_FUNCTION(f) ( \
 	(f).common.fn_flags & ZEND_ACC_STATIC	\
 )
-#define IS_FINAL_FUNCTION(f) ( \
+#define ZEND_IS_FINAL_FUNCTION(f) ( \
 	(f).common.fn_flags & ZEND_ACC_FINAL	\
 )
-#define IS_ABSTRACT_FUNCTION(f) ( \
+#define ZEND_IS_ABSTRACT_FUNCTION(f) ( \
 	(f).common.fn_flags & ZEND_ACC_ABSTRACT	\
 )
-#define IS_PRIVATE_FUNCTION(f) ( \
+#define ZEND_IS_PRIVATE_FUNCTION(f) ( \
 	(f).common.fn_flags & ZEND_ACC_PRIVATE	\
 )
-#define IS_PROTECTED_FUNCTION(f) ( \
+#define ZEND_IS_PROTECTED_FUNCTION(f) ( \
 	(f).common.fn_flags & ZEND_ACC_PROTECTED	\
 )
-#define IS_PUBLIC_FUNCTION(f) ( \
+#define ZEND_IS_PUBLIC_FUNCTION(f) ( \
 	(f).common.fn_flags & ZEND_ACC_PUBLIC	\
 )
-#define IS_PUBLIC_FUNCTION(f) ( \
-	(f).common.fn_flags & ZEND_ACC_PUBLIC	\
-)
-#define IS_CONSTRUCTOR(f) ( \
+#define ZEND_IS_CONSTRUCTOR(f) ( \
 	(f).common.fn_flags & ZEND_ACC_CTOR	\
 )
-#define IS_DESTRUCTOR(f) ( \
+#define ZEND_IS_DESTRUCTOR(f) ( \
 	(f).common.fn_flags & ZEND_ACC_DTOR	\
 )
-#define IS_DEPRECATED_FUNCTION(f) ( \
+#define ZEND_IS_DEPRECATED_FUNCTION(f) ( \
 	(f).common.fn_flags & ZEND_ACC_DEPRECATED	\
 )
-#define IS_CLOSURE(f) ( \
+#define ZEND_IS_CLOSURE(f) ( \
 	(f).common.fn_flags & ZEND_ACC_CLOSURE	\
 )
 
