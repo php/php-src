@@ -17,6 +17,9 @@ env:
       - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
       - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
 
+before_install:
+    - ./travis/install.sh
+
 before_script:
     # Compile PHP
     - ./travis/compile.sh
