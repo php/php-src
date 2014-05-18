@@ -308,6 +308,7 @@ static long from_zval_integer_common(const zval *arr_value, ser_context *ctx)
 	long ret = 0;
 	zval lzval;
 
+	ZVAL_NULL(&lzval);
 	if (Z_TYPE_P(arr_value) != IS_LONG) {
 		ZVAL_COPY(&lzval, arr_value);
 		arr_value = &lzval;
@@ -926,7 +927,7 @@ static void from_zval_write_control_array(const zval *arr, char *msghdr_c, ser_c
 	char				buf[sizeof("element #4294967295")];
 	char				*bufp = buf;
 	zval				*elem;
-	uint32_t			i;
+	uint32_t			i = 0;
 	int					num_elems;
 	void				*control_buf;
 	zend_llist_element	*alloc;

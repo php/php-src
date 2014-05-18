@@ -456,9 +456,9 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 			}
 			/* lookup bind first via hash and then index */
 			/* stupid keys need to be null-terminated, even though we know their length */
-			if((NULL != zend_hash_find(params, s.tok, s.cur-s.tok,(void **)&param))  
+			if((NULL != (param = zend_hash_str_find_ptr(params, s.tok, s.cur-s.tok))  
 			    ||
-			   (NULL != zend_hash_index_find(params, bindno, (void **)&param))) 
+			   NULL != (params = zend_hash_index_find_ptr(params, bindno))) 
 			{
 				char *quotedstr;
 				int quotedstrlen;
