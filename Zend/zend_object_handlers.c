@@ -1091,7 +1091,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 		if (EG(scope) &&
 		    is_derived_class(fbc->common.scope, EG(scope)) &&
 		    fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
-			if ((func = zend_hash_find(&EG(scope)->function_table, lc_method_name)) == NULL) {
+			if ((func = zend_hash_find(&EG(scope)->function_table, lc_method_name)) != NULL) {
 				zend_function *priv_fbc = Z_FUNC_P(func);
 				if (priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
 					&& priv_fbc->common.scope == EG(scope)) {
