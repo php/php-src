@@ -41,16 +41,17 @@
 #define TRACE_APPEND_STR(val)                                            \
 	TRACE_APPEND_STRL(val, sizeof(val)-1)
 
-#define TRACE_APPEND_KEY(key)                                            \
-	if (zend_hash_find(ht, key, sizeof(key), (void**)&tmp) == SUCCESS) { \
-	    TRACE_APPEND_STRL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));           \
-	}
+inline void trace_append_key(HashTable *ht, const char *key) {
+		zval *ztmp;
+		if ((ztmp = zend_hash_str_find(ht, key, sizeof(key))) != NULL) {
+			TRACE_APPEND_STRL(Z_STRVAL_P(ztmp)->val, Z_STRVAL_P(ztmp)->len);
+		}
+}
 
 /* }}} */
 
-
 static int
-mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+mysqlnd_build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char **str;
 	int *len;
@@ -64,20 +65,20 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 	 * but that could cause some E_NOTICE and also damn long lines.
 	 */
 
-	switch (Z_TYPE_PP(arg)) {
+	switch (Z_TYPE_P(arg)) {
 		case IS_NULL:
 			TRACE_APPEND_STR("NULL, ");
 			break;
 		case IS_STRING: {
 			int l_added;
 			TRACE_APPEND_CHR('\'');
-			if (Z_STRLEN_PP(arg) > 15) {
-				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), 15);
+			if (Z_STRLEN_P(arg) > 15) {
+				TRACE_APPEND_STRL(Z_STRVAL_P(arg), 15);
 				TRACE_APPEND_STR("...', ");
 				l_added = 15 + 6 + 1; /* +1 because of while (--l_added) */
 			} else {
-				l_added = Z_STRLEN_PP(arg);
-				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), l_added);
+				l_added = Z_STRLEN_P(arg);
+				TRACE_APPEND_STRL(Z_STRVAL_P(arg), l_added);
 				TRACE_APPEND_STR("', ");
 				l_added += 3 + 1;
 			}
@@ -88,18 +89,17 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 			}
 			break;
 		}
-		case IS_BOOL:
-			if (Z_LVAL_PP(arg)) {
+		case IS_TRUE:
 				TRACE_APPEND_STR("true, ");
-			} else {
+			break;
+		case IS_FALSE:
 				TRACE_APPEND_STR("false, ");
-			}
 			break;
 		case IS_RESOURCE:
 			TRACE_APPEND_STR("Resource id #");
 			/* break; */
 		case IS_LONG: {
-			long lval = Z_LVAL_PP(arg);
+			long lval = Z_LVAL_P(arg);
 			char s_tmp[MAX_LENGTH_OF_LONG + 1];
 			int l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
@@ -107,7 +107,7 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 			break;
 		}
 		case IS_DOUBLE: {
-			double dval = Z_DVAL_PP(arg);
+			double dval = Z_DVAL_P(arg);
 			char *s_tmp;
 			int l_tmp;
 
@@ -123,15 +123,15 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 			TRACE_APPEND_STR("Array, ");
 			break;
 		case IS_OBJECT: {
-			char *class_name;
-			zend_uint class_name_len;
-			int dupl;
+			zend_string *class_name;
+			/* see #67299, may be removed now */
+			int dupl = 0;
 
 			TRACE_APPEND_STR("Object(");
 
-			dupl = zend_get_object_classname(*arg, (const char **)&class_name, &class_name_len TSRMLS_CC);
+			class_name = zend_get_object_classname(Z_OBJ_P(arg) TSRMLS_CC);
 
-			TRACE_APPEND_STRL(class_name, class_name_len);
+			TRACE_APPEND_STRL(class_name->val, class_name->len);
 			if (!dupl) {
 				efree(class_name);
 			}
@@ -147,13 +147,13 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 /* }}} */
 
 static int
-mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+mysqlnd_build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char *s_tmp, **str;
 	int *len, *num;
 	long line;
-	HashTable *ht = Z_ARRVAL_PP(frame);
-	zval **file, **tmp;
+	HashTable *ht = Z_ARRVAL_P(frame);
+	zval *zfile, *tmp, *zline;
 	uint * level;
 
 	level = va_arg(args, uint *);
@@ -170,26 +170,27 @@ mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, z
 	sprintf(s_tmp, "#%d ", (*num)++);
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
-	if (zend_hash_find(ht, "file", sizeof("file"), (void**)&file) == SUCCESS) {
-		if (zend_hash_find(ht, "line", sizeof("line"), (void**)&tmp) == SUCCESS) {
-			line = Z_LVAL_PP(tmp);
+
+	if ((zfile = zend_hash_str_find(ht, "file", sizeof("file"))) != NULL) {
+		if ((zline = zend_hash_str_find(ht, "line", sizeof("line"))) != NULL) {
+			line = Z_LVAL_P(zline);
 		} else {
 			line = 0;
 		}
-		s_tmp = emalloc(Z_STRLEN_PP(file) + MAX_LENGTH_OF_LONG + 4 + 1);
-		sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_PP(file), line);
+		s_tmp = emalloc(Z_STRLEN_P(zfile) + MAX_LENGTH_OF_LONG + 4 + 1);
+		sprintf(s_tmp, "%s(%ld): ", Z_STR_P(zfile)->val, line);
 		TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 		efree(s_tmp);
 	} else {
 		TRACE_APPEND_STR("[internal function]: ");
 	}
-	TRACE_APPEND_KEY("class");
-	TRACE_APPEND_KEY("type");
-	TRACE_APPEND_KEY("function");
+	trace_append_key(ht, "class");
+	trace_append_key(ht, "type");
+	trace_append_key(ht, "function");
 	TRACE_APPEND_CHR('(');
 	if (zend_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
 		int last_len = *len;
-		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_args, 2, str, len);
+		zend_hash_apply_with_arguments(Z_ARRVAL_P(tmp) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_args, 2, str, len);
 		if (last_len != *len) {
 			*len -= 2; /* remove last ', ' */
 		}
