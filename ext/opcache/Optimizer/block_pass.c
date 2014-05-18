@@ -751,7 +751,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 						  (flen == sizeof("is_callable")-1 && zend_binary_strcasecmp(fname, flen, "is_callable", sizeof("is_callable")-1) == 0)
 						  ) {
 					zend_function *function;
-					if(zend_hash_find(EG(function_table), Z_STRVAL_P(arg), Z_STRLEN_P(arg)+1, (void **)&function) != NULL) {
+					if((function = zend_hash_find_ptr(EG(function_table), Z_STR_P(arg))) != NULL) {
 						literal_dtor(arg);
 						MAKE_NOP(sv);
 						MAKE_NOP(fcall);
@@ -769,7 +769,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 						ZEND_OP1_TYPE(opline) = IS_CONST;
 					}
 				} else if(flen == sizeof("extension_loaded")-1 && zend_binary_strcasecmp(fname, flen, "extension_loaded", sizeof("extension_loaded")-1) == 0) {
-					if(zend_hash_exists(&module_registry, Z_STRVAL_P(arg), Z_STRLEN_P(arg)+1)) {
+					if(zend_hash_exists(&module_registry, Z_STR_P(arg))) {
 						literal_dtor(arg);
 						MAKE_NOP(sv);
 						MAKE_NOP(fcall);
