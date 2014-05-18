@@ -762,8 +762,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 						if ((d = zend_hash_find(propers, priv_name)) != NULL) {
 							if (Z_TYPE_P(d) == IS_INDIRECT) {
 								d = Z_INDIRECT_P(d);
-								if (Z_TYPE_P(d) == IS_UNDEF) {
-									STR_FREE(prot_name);
+								if (Z_ISUNDEF_P(d)) {
 									break;
 								}
 							}
