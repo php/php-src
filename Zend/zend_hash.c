@@ -486,12 +486,12 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 	uint nIndex, i, j;
 
 	IS_CONSISTENT(ht);
-	memset(ht->arHash, INVALID_IDX, ht->nTableSize * sizeof(zend_uint));
 
 	if (UNEXPECTED(ht->nNumOfElements == 0)) {
 		return SUCCESS;
 	}
 
+	memset(ht->arHash, INVALID_IDX, ht->nTableSize * sizeof(zend_uint));
 	for (i = 0, j = 0; i < ht->nNumUsed; i++) {
 		p = ht->arData + i;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;

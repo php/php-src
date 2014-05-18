@@ -892,18 +892,15 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 	/* Rename directory. Update all nested paths */
 	if (is_dir) {
-		int key_type;
+		Bucket *b;
 		zend_string *str_key;
 		zend_string *new_str_key;
-		ulong unused;
 		uint from_len = strlen(resource_from->path+1);
 		uint to_len = strlen(resource_to->path+1);
 
-		for (zend_hash_internal_pointer_reset(&phar->manifest);
-			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->manifest, &str_key, &unused, 0, &phar->manifest.nInternalPointer)) &&
-			NULL != (entry = zend_hash_get_current_data_ptr(&phar->manifest));
-			zend_hash_move_forward(&phar->manifest)
-		) {
+		ZEND_HASH_FOREACH_BUCKET(&phar->manifest, b) {
+			str_key = b->key;
+			entry = Z_PTR(b->val);
 			if (!entry->is_deleted &&
 				str_key->len > from_len &&
 				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
@@ -921,15 +918,15 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				entry->filename = estrndup(new_str_key->val, new_str_key->len);
 				entry->filename_len = new_str_key->len;
 
-				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_str_key, 0, HASH_UPDATE_KEY_ANYWAY);
-				STR_RELEASE(new_str_key);
+				STR_RELEASE(str_key);
+				b->h = STR_HASH_VAL(new_str_key);
+				b->key = new_str_key;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
+		zend_hash_rehash(&phar->manifest);
 
-		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
-			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->virtual_dirs, &str_key, &unused, 0, &phar->virtual_dirs.nInternalPointer));
-			zend_hash_move_forward(&phar->virtual_dirs)
-		) {
+		ZEND_HASH_FOREACH_BUCKET(&phar->virtual_dirs, b) {
+			str_key = b->key;
 			if (str_key->len >= from_len &&
 				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
 				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
@@ -939,16 +936,15 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
 				new_str_key->val[new_str_key->len] = 0;
 
-				zend_hash_update_current_key_ex(&phar->virtual_dirs, key_type, new_str_key, 0, HASH_UPDATE_KEY_ANYWAY);
-				STR_RELEASE(new_str_key);
+				STR_RELEASE(str_key);
+				b->h = STR_HASH_VAL(new_str_key);
+				b->key = new_str_key;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
+		zend_hash_rehash(&phar->virtual_dirs);
 
-		for (zend_hash_internal_pointer_reset(&phar->mounted_dirs);
-			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->mounted_dirs, &str_key, &unused, 0, &phar->mounted_dirs.nInternalPointer)) &&
-			NULL != (entry = zend_hash_get_current_data_ptr(&phar->mounted_dirs));
-			zend_hash_move_forward(&phar->mounted_dirs)
-		) {
+		ZEND_HASH_FOREACH_BUCKET(&phar->mounted_dirs, b) {
+			str_key = b->key;
 			if (str_key->len >= from_len &&
 				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
 				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
@@ -958,10 +954,12 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
 				new_str_key->val[new_str_key->len] = 0;
 
-				zend_hash_update_current_key_ex(&phar->mounted_dirs, key_type, new_str_key, 0, HASH_UPDATE_KEY_ANYWAY);
-				STR_RELEASE(new_str_key);
+				STR_RELEASE(str_key);
+				b->h = STR_HASH_VAL(new_str_key);
+				b->key = new_str_key;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
+		zend_hash_rehash(&phar->mounted_dirs);
 	}
 
 	if (is_modified) {

@@ -558,6 +558,10 @@ static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPositio
 		} \
 	} while (0)
 	
+#define ZEND_HASH_FOREACH_BUCKET(ht, _bucket) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_bucket = _p;
+
 #define ZEND_HASH_FOREACH_VAL(ht, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_val = _z;
