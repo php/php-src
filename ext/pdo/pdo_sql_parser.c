@@ -853,7 +853,7 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 				return (int) (s.cur - inquery);
 			}
 			/* lookup bind by index */
-			if(NULL != zend_hash_index_find(params, bindno, (void **)&param)) 
+			if(NULL != (params = zend_hash_index_find_ptr(params, bindno))) 
 			{
 				char *quotedstr;
 				int quotedstrlen;
