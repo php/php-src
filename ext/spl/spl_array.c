@@ -638,7 +638,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 
 		if (!Z_ISUNDEF(rv) && zend_is_true(&rv TSRMLS_CC)) {
 			zval_ptr_dtor(&rv);
-			if (check_empty == 2) {
+			if (check_empty != 1) {
 				return 1;
 			} else if (intern->fptr_offset_get) {
 				value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R, &rv TSRMLS_CC);
@@ -662,6 +662,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 					return 0;
 				}
 				break;
+
 			case IS_DOUBLE:
 				index = (long)Z_DVAL_P(offset);
 				goto num_index;
@@ -685,28 +686,20 @@ num_index:
 					return 0;
 				}
 				break;
+
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
 				return 0;
 		}
 
-		if (check_inherited && intern->fptr_offset_get) {
+		if (check_empty && check_inherited && intern->fptr_offset_get) {
 			value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R, &rv TSRMLS_CC);
 		} else {
 			value = tmp;
 		}
 	}
 
-	switch (check_empty) {
-		case 0:
-			return Z_TYPE_P(value) != IS_NULL;
-		case 2:
-			return 1;
-		case 1:
-			return zend_is_true(value TSRMLS_CC);
-	}
-
-	return 0;
+	return check_empty ? zend_is_true(value TSRMLS_CC) : Z_TYPE_P(value) != IS_NULL;
 } /* }}} */
 
 static int spl_array_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC) /* {{{ */
