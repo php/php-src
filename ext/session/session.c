@@ -1355,7 +1355,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)), NULL);
 	e_id = php_url_encode(PS(id), strlen(PS(id)), NULL);
 
-	smart_str_appends(&ncookie, COOKIE_SET_COOKIE);
+	smart_str_appends(&ncookie, "Set-Cookie: ");
 	smart_str_appends(&ncookie, e_session_name);
 	smart_str_appendc(&ncookie, '=');
 	smart_str_appends(&ncookie, e_id);

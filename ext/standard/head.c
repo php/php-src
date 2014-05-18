@@ -117,10 +117,10 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		 * pick an expiry date in the past
 		 */
 		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0 TSRMLS_CC);
-		snprintf(cookie, len + 100, "%s%s=deleted; expires=%s; Max-Age=0", COOKIE_SET_COOKIE, name, dt);
+		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s; Max-Age=0", name, dt);
 		efree(dt);
 	} else {
-		snprintf(cookie, len + 100, "%s%s=%s", COOKIE_SET_COOKIE, name, value ? encoded_value : "");
+		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
 			const char *p;
 			char tsdelta[13];
