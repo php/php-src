@@ -780,8 +780,9 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 		padding = 3;
 	}
 	if(params) {
+		HashPosition *param_pos;
 		zend_hash_internal_pointer_reset(params);
-		while (SUCCESS == zend_hash_get_current_data(params, (void**)&param)) {
+		while ((param == zend_hash_get_current_data_ptr_ex(params, &param_pos)) != NULL) {
 			if(param->parameter) {
 				convert_to_string(param->parameter);
 				/* accommodate a string that needs to be fully quoted
@@ -813,9 +814,9 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 			}
 			/* lookup bind first via hash and then index */
 			/* stupid keys need to be null-terminated, even though we know their length */
-			if((SUCCESS == zend_hash_find(params, s.tok, s.cur-s.tok,(void **)&param))  
+			if((NULL != (param = zend_hash_str_find_ptr(params, s.tok, s.cur-s.tok))  
 			    ||
-			   (SUCCESS == zend_hash_index_find(params, bindno, (void **)&param))) 
+			   NULL != (params = zend_hash_index_find_ptr(params, bindno))) 
 			{
 				char *quotedstr;
 				int quotedstrlen;
@@ -852,7 +853,7 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 				return (int) (s.cur - inquery);
 			}
 			/* lookup bind by index */
-			if(SUCCESS == zend_hash_index_find(params, bindno, (void **)&param)) 
+			if(NULL != zend_hash_index_find(params, bindno, (void **)&param)) 
 			{
 				char *quotedstr;
 				int quotedstrlen;
