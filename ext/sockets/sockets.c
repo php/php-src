@@ -1192,6 +1192,11 @@ PHP_FUNCTION(socket_getsockname)
 		RETURN_FALSE;
 	}
 
+	ZVAL_DEREF(addr);
+	if (port != NULL) {
+		ZVAL_DEREF(port);
+	}
+
 	switch (sa->sa_family) {
 #if HAVE_IPV6
 		case AF_INET6:
@@ -2099,6 +2104,7 @@ PHP_FUNCTION(socket_create_pair)
 	php_sock[0] = php_create_socket();
 	php_sock[1] = php_create_socket();
 
+	ZVAL_DEREF(fds_array_zval);
 	if (domain != AF_INET
 #if HAVE_IPV6
 		&& domain != AF_INET6
