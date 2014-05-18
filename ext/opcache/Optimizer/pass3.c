@@ -45,6 +45,9 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 			case ZEND_MUL:
 			case ZEND_DIV:
 			case ZEND_MOD:
+#if ZEND_EXTENSION_API_NO >= PHP_5_6_X_API_NO
+			case ZEND_POW:
+#endif
 			case ZEND_CONCAT:
 			case ZEND_SL:
 			case ZEND_SR:
@@ -104,6 +107,11 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 							case ZEND_MOD:
 								opline->opcode = ZEND_ASSIGN_MOD;
 								break;
+#if ZEND_EXTENSION_API_NO >= PHP_5_6_X_API_NO
+							case ZEND_POW:
+								opline->opcode = ZEND_ASSIGN_POW;
+								break;
+#endif
 							case ZEND_CONCAT:
 								opline->opcode = ZEND_ASSIGN_CONCAT;
 								break;
