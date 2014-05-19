@@ -1357,7 +1357,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* hash it up */
 			new_le.type = le_plink;
 			new_le.ptr = pgsql;
-			if (zend_hash_update_mem(&EG(persistent_list), str.s, &new_le, sizeof(zend_resource)) == NULL) {
+			if (zend_hash_str_update_mem(&EG(persistent_list), str.s->val, str.s->len, &new_le, sizeof(zend_resource)) == NULL) {
 				goto err;
 			}
 			PGG(num_links)++;
