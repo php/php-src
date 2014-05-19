@@ -630,8 +630,6 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
 						stmt->state = MYSQLND_STMT_INITTED;
 					}
 				} else {
-					unsigned int to_log = MYSQLND_G(log_mask);
-					to_log &= fields_eof->server_status;
 					DBG_INF_FMT("warnings=%u server_status=%u", fields_eof->warning_count, fields_eof->server_status);
 					conn->upsert_status->warning_count = fields_eof->warning_count;
 					/*
@@ -648,13 +646,6 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
 						statistic = STAT_NO_INDEX_USED;
 					} else if (fields_eof->server_status & SERVER_QUERY_WAS_SLOW) {
 						statistic = STAT_QUERY_WAS_SLOW;
-					}
-					if (to_log) {
-#if A0
-						char *backtrace = mysqlnd_get_backtrace(TSRMLS_C);
-						php_log_err(backtrace TSRMLS_CC);
-						efree(backtrace);
-#endif
 					}
 					MYSQLND_INC_CONN_STATISTIC(conn->stats, statistic);
 				}

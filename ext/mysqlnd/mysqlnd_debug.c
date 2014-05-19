@@ -792,7 +792,6 @@ static struct st_mysqlnd_plugin_trace_log mysqlnd_plugin_trace_log_plugin =
 	},
 	{/* methods */
 		mysqlnd_debug_init,
-		mysqlnd_get_backtrace
 	}
 };
 
