@@ -10,7 +10,6 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_alloc.c " +
 			"mysqlnd_auth.c " +
 			"mysqlnd_block_alloc.c " +
-			"mysqlnd_bt.c " +
 			"mysqlnd_charset.c " +
 			"mysqlnd_debug.c " +
 			"mysqlnd_driver.c " +
