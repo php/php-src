@@ -404,7 +404,9 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 /* ensure that we free any previous unfetched results */
 #ifndef PDO_USE_MYSQLND
 	if (S->stmt) {
-		stmt->column_count = (int)mysql_num_fields(S->result);
+		if (S->result) {
+			stmt->column_count = (int)mysql_num_fields(S->result);
+		}
 		mysql_stmt_free_result(S->stmt);
 	}
 #endif
