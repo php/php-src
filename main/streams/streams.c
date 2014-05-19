@@ -74,9 +74,10 @@ static int _php_stream_release_context(zval *zv, void *pContext TSRMLS_DC)
 	return 0;
 }
 
-static int forget_persistent_resource_id_numbers(zend_resource *rsrc TSRMLS_DC)
+static int forget_persistent_resource_id_numbers(zval *el TSRMLS_DC)
 {
 	php_stream *stream;
+	zend_resource *rsrc = Z_RES_P(el);
 
 	if (rsrc->type != le_pstream) {
 		return 0;

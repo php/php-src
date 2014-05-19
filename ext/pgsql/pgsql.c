@@ -989,11 +989,12 @@ static void _php_pgsql_notice_ptr_dtor(zval *el)
 
 /* {{{ _rollback_transactions
  */
-static int _rollback_transactions(zend_resource *rsrc TSRMLS_DC)
+static int _rollback_transactions(zval *el TSRMLS_DC)
 {
 	PGconn *link;
 	PGresult *res;
 	int orig;
+	zend_resource *rsrc = Z_RES_P(el);
 
 	if (rsrc->type != le_plink) 
 		return 0;
