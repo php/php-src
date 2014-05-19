@@ -3036,7 +3036,7 @@ PHP_FUNCTION(pg_free_result)
 	}
 
 	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, result, -1, "PostgreSQL result", le_result);
-	if (Z_LVAL_P(result) == 0) {
+	if (Z_RES_P(result) == NULL) {
 		RETURN_FALSE;
 	}
 	zend_list_close(Z_RES_P(result));
@@ -5787,7 +5787,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		}
 
 		convert_to_boolean(is_enum);
-		if (Z_LVAL_P(is_enum)) {
+		if (Z_TYPE_P(is_enum) == IS_TRUE) {
 			/* enums need to be treated like strings */
 			data_type = PG_TEXT;
 		} else {
