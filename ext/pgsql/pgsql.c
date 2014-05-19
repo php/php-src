@@ -2764,7 +2764,8 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 		object_and_properties_init(return_value, ce, NULL);
-		zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
+		zend_merge_properties(return_value, Z_ARRVAL(dataset), 0 TSRMLS_CC);
+		zval_ptr_dtor(&dataset);
 
 		if (ce->constructor) {
 			fci.size = sizeof(fci);
