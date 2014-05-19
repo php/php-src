@@ -121,7 +121,7 @@ static void ps_files_close(ps_files *data)
 static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
-#ifdef O_NOFOLLOW
+#if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
     struct stat sbuf;
 #endif
 
