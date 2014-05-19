@@ -983,7 +983,6 @@ static void _php_pgsql_notice_ptr_dtor(zval *el)
 	if (notice) {
 		efree(notice->message);
 		efree(notice);
-		notice = NULL;
 	}
 }
 /* }}} */
@@ -1273,8 +1272,10 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int i, connect_type = 0;
 	PGresult *pg_result;
 
+	args = (zval *)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval), 0);
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 5
 			|| zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+		efree(args);
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1318,6 +1319,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			break;
 		}
 	}
+	efree(args);
 
 	if (persistent && PGG(allow_persistent)) {
 		zend_resource *le;
