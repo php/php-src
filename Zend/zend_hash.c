@@ -486,12 +486,12 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 	uint nIndex, i, j;
 
 	IS_CONSISTENT(ht);
-	memset(ht->arHash, INVALID_IDX, ht->nTableSize * sizeof(zend_uint));
 
 	if (UNEXPECTED(ht->nNumOfElements == 0)) {
 		return SUCCESS;
 	}
 
+	memset(ht->arHash, INVALID_IDX, ht->nTableSize * sizeof(zend_uint));
 	for (i = 0, j = 0; i < ht->nNumUsed; i++) {
 		p = ht->arData + i;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
@@ -1463,112 +1463,6 @@ ZEND_API zval *zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos)
 		return &p->val;
 	} else {
 		return NULL;
-	}
-}
-
-/* This function changes key of current element without changing elements'
- * order. If element with target key already exists, it will be deleted first.
- */
-ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zend_string *str_index, ulong num_index, int mode)
-{
-	uint idx1 = ht->nInternalPointer;
-	uint idx2;
-	Bucket *p, *q;
-	ulong h;
-#ifdef ZEND_SIGNALS
-	TSRMLS_FETCH();
-#endif
-
-	IS_CONSISTENT(ht);
-	if (idx1 != INVALID_IDX) {
-		p = ht->arData + idx1;
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (p->h == num_index && p->key == NULL) {
-				return SUCCESS;
-			}
-
-			idx2 = ht->arHash[num_index & ht->nTableMask];
-			while (idx2 != INVALID_IDX) {
-				q = ht->arData + idx2;
-				if (q->h == num_index && q->key == NULL) {
-					break;
-				}
-				idx2 = Z_NEXT(q->val);
-			}
-		} else if (key_type == HASH_KEY_IS_STRING) {
-			h = STR_HASH_VAL(str_index);
-			if (p->key == str_index ||
-			    (p->h == h &&
-			     p->key &&
-			     p->key->len == str_index->len &&
-			     memcmp(p->key->val, str_index->val, str_index->len) == 0)) {
-				return SUCCESS;
-			}
-
-			idx2 = ht->arHash[h & ht->nTableMask];
-			while (idx2 != INVALID_IDX) {
-				q = ht->arData + idx2;
-				if (q->key == str_index ||
-				    (q->h == h && q->key && q->key->len == str_index->len &&
-				     memcmp(q->key->val, str_index->val, str_index->len) == 0)) {
-					break;
-				}
-				idx2 = Z_NEXT(q->val);
-			}
-		} else {
-			return FAILURE;
-		}
-
-		HANDLE_BLOCK_INTERRUPTIONS();
-
-		if (idx2 != INVALID_IDX) {
-			/* we have another bucket with the key equal to new one */
-			if (mode != HASH_UPDATE_KEY_ANYWAY) {
-				int found = (idx1 < idx2) ? HASH_UPDATE_KEY_IF_BEFORE : HASH_UPDATE_KEY_IF_AFTER;
-
-				if (mode & found) {
-					/* delete current bucket */
-					_zend_hash_del_el(ht, idx1, p);
-					HANDLE_UNBLOCK_INTERRUPTIONS();
-					return FAILURE;
-				}
-			}
-			/* delete another bucket with the same key */
-			_zend_hash_del_el(ht, idx2, q);
-		}
-
-		/* remove old key from hash */
-		if (ht->arHash[p->h & ht->nTableMask] == idx1) {
-			ht->arHash[p->h & ht->nTableMask] = Z_NEXT(p->val);
- 		} else {
-			uint idx3 = ht->arHash[p->h & ht->nTableMask];
-			while (Z_NEXT(ht->arData[idx3].val) != idx1) {
-				idx3 = Z_NEXT(ht->arData[idx3].val);
-			} 
-			Z_NEXT(ht->arData[idx3].val) = Z_NEXT(p->val);
- 		}
-
-		/* update key */
- 		if (p->key) {
- 			STR_RELEASE(p->key);
- 		}
-		if (key_type == HASH_KEY_IS_LONG) {
-			p->h = num_index;
-			p->key = NULL;
-		} else {
-			p->h = h;
-			p->key = str_index;
-			STR_ADDREF(str_index);
-		}
-
-		/* insert new key into hash */
-		Z_NEXT(p->val) = ht->arHash[p->h & ht->nTableMask];
-		ht->arHash[p->h & ht->nTableMask] = idx1;
-		HANDLE_UNBLOCK_INTERRUPTIONS();
-
-		return SUCCESS;
-	} else {
-		return FAILURE;
 	}
 }
 

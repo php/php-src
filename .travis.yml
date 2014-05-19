@@ -9,7 +9,8 @@ branches:
         - phpng
 
 notifications:
-    email: false
+    email: 
+       on_failure: change
 
 env:
     global:
