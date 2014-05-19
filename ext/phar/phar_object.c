@@ -3832,7 +3832,6 @@ PHP_METHOD(Phar, addFile)
 	php_stream_to_zval(resource, &zresource);
 	phar_add_file(&(phar_obj->archive), fname, fname_len, NULL, 0, &zresource TSRMLS_CC);
 	zval_ptr_dtor(&zresource);
-	php_stream_close(resource);
 }
 /* }}} */
 
