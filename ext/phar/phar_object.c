@@ -712,15 +712,8 @@ PHP_METHOD(Phar, webPhar)
 		switch (Z_TYPE(retval)) {
 			case IS_STRING:
 				efree(entry);
-
-				if (fci.retval != &retval) {
-					entry = estrndup(Z_STRVAL_P(fci.retval), Z_STRLEN_P(fci.retval));
-					entry_len = Z_STRLEN_P(fci.retval);
-				} else {
-					entry = Z_STRVAL(retval);
-					entry_len = Z_STRLEN(retval);
-				}
-
+				entry = estrndup(Z_STRVAL_P(fci.retval), Z_STRLEN_P(fci.retval));
+				entry_len = Z_STRLEN_P(fci.retval);
 				break;
 			case IS_TRUE:
 			case IS_FALSE:
