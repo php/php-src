@@ -202,10 +202,8 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 	key = STR_INIT(name, name_length, 0);
 	zend_is_auto_global(key TSRMLS_CC);
 
-	if ((data = zend_hash_find(&EG(symbol_table).ht, key)) != NULL
-		&& (Z_TYPE_P(data)==IS_ARRAY)) {
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(data));
-		while ((tmp = zend_hash_get_current_data(Z_ARRVAL_P(data))) != NULL) {
+	if ((data = zend_hash_find(&EG(symbol_table).ht, key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("<tr>");
 				php_info_print("<td class=\"e\">");
@@ -214,17 +212,14 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			php_info_print(name);
 			php_info_print("[\"");
 
-			switch (zend_hash_get_current_key(Z_ARRVAL_P(data), &string_key, &num_key, 0)) {
-				case HASH_KEY_IS_STRING:
-					if (!sapi_module.phpinfo_as_text) {
-						php_info_print_html_esc(string_key->val, string_key->len);
-					} else {
-						php_info_print(string_key->val);
-					}
-					break;
-				case HASH_KEY_IS_LONG:
-					php_info_printf("%ld", num_key);
-					break;
+			if (string_key != NULL) {
+				if (!sapi_module.phpinfo_as_text) {
+					php_info_print_html_esc(string_key->val, string_key->len);
+				} else {
+					php_info_print(string_key->val);
+				}
+			} else {
+				php_info_printf("%ld", num_key);
 			}
 			php_info_print("\"]");
 			if (!sapi_module.phpinfo_as_text) {
@@ -267,8 +262,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			} else {
 				php_info_print("\n");
 			}
-			zend_hash_move_forward(Z_ARRVAL_P(data));
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 	STR_FREE(key);
 }

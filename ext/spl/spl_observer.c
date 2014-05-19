@@ -242,16 +242,12 @@ int spl_object_storage_detach(spl_SplObjectStorage *intern, zval *this, zval *ob
 } /* }}}*/
 
 void spl_object_storage_addall(spl_SplObjectStorage *intern, zval *this, spl_SplObjectStorage *other TSRMLS_DC) { /* {{{ */
-	HashPosition pos;
 	spl_SplObjectStorageElement *element;
 
-	zend_hash_internal_pointer_reset_ex(&other->storage, &pos);
-	while ((element = zend_hash_get_current_data_ptr_ex(&other->storage, &pos)) != NULL) {
+	ZEND_HASH_FOREACH_PTR(&other->storage, element) {
 		spl_object_storage_attach(intern, this, &element->obj, &element->inf TSRMLS_CC);
-		zend_hash_move_forward_ex(&other->storage, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 
-	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	intern->index = 0;
 } /* }}} */
 
@@ -314,7 +310,6 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(obj);
 	spl_SplObjectStorageElement *element;
 	HashTable *props;
-	HashPosition pos;
 	zval tmp, storage;
 	char md5str[33];
 	zend_string *zname;
@@ -334,18 +329,16 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 
 		array_init(&storage);
 
-		zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
-		while ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &pos)) != NULL) {
-				php_spl_object_hash(&element->obj, md5str TSRMLS_CC);
-				array_init(&tmp);
-				/* Incrementing the refcount of obj and inf would confuse the garbage collector.
-				 * Prefer to null the destructor */
-				Z_ARRVAL_P(&tmp)->pDestructor = NULL;
-				add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &element->obj);
-				add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
-				add_assoc_zval_ex(&storage, md5str, 32, &tmp);
-				zend_hash_move_forward_ex(&intern->storage, &pos);
-		}
+		ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
+			php_spl_object_hash(&element->obj, md5str TSRMLS_CC);
+			array_init(&tmp);
+			/* Incrementing the refcount of obj and inf would confuse the garbage collector.
+			 * Prefer to null the destructor */
+			Z_ARRVAL_P(&tmp)->pDestructor = NULL;
+			add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &element->obj);
+			add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
+			add_assoc_zval_ex(&storage, md5str, 32, &tmp);
+		} ZEND_HASH_FOREACH_END();
 
 		zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1 TSRMLS_CC);
 		zend_symtable_update(intern->debug_info, zname, &storage);
@@ -363,7 +356,6 @@ static HashTable *spl_object_storage_get_gc(zval *obj, zval **table, int *n TSRM
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(obj);
 	spl_SplObjectStorageElement *element;
 	HashTable *props;
-	HashPosition pos;
 	zval *gcdata_arr, tmp;
 
 	props = std_object_handlers.get_properties(obj TSRMLS_CC);
@@ -386,12 +378,10 @@ static HashTable *spl_object_storage_get_gc(zval *obj, zval **table, int *n TSRM
 		gcdata_arr = &tmp;
 	}
 
-	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
-	while ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &pos)) != NULL) {
+	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
 		add_next_index_zval(gcdata_arr, &element->obj);
 		add_next_index_zval(gcdata_arr, &element->inf);
-		zend_hash_move_forward_ex(&intern->storage, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	return props;
 }
@@ -582,13 +572,11 @@ SPL_METHOD(SplObjectStorage, removeAllExcept)
 
 	other = Z_SPLOBJSTORAGE_P(obj);
 
-	zend_hash_internal_pointer_reset(&intern->storage);
-	while ((element = zend_hash_get_current_data_ptr(&intern->storage)) != NULL) {
+	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
 		if (!spl_object_storage_contains(other, getThis(), &element->obj TSRMLS_CC)) {
 			spl_object_storage_detach(intern, getThis(), &element->obj TSRMLS_CC);
 		}
-		zend_hash_move_forward(&intern->storage);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	intern->index = 0;

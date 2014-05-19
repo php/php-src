@@ -587,7 +587,6 @@ SPL_METHOD(SplFixedArray, __construct)
 SPL_METHOD(SplFixedArray, __wakeup)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
-	HashPosition ptr;
 	HashTable *intern_ht = zend_std_get_properties(getThis() TSRMLS_CC);
 	zval *data;
 
@@ -602,12 +601,13 @@ SPL_METHOD(SplFixedArray, __wakeup)
 		intern->array = emalloc(sizeof(spl_fixedarray));
 		spl_fixedarray_init(intern->array, size TSRMLS_CC);
 
-		for (zend_hash_internal_pointer_reset_ex(intern_ht, &ptr); (data = zend_hash_get_current_data_ex(intern_ht, &ptr)) != NULL; zend_hash_move_forward_ex(intern_ht, &ptr)) {
+		ZEND_HASH_FOREACH_VAL(intern_ht, data) {
 			if (Z_REFCOUNTED_P(data)) {
 				Z_ADDREF_P(data);
 			}
-			ZVAL_COPY_VALUE(&intern->array->elements[index++], data);
-		}
+			ZVAL_COPY_VALUE(&intern->array->elements[index], data);
+			index++;
+		} ZEND_HASH_FOREACH_END();
 
 		/* Remove the unserialised properties, since we now have the elements
 		 * within the spl_fixedarray_object structure. */
@@ -687,11 +687,8 @@ SPL_METHOD(SplFixedArray, fromArray)
 		ulong num_index, max_index = 0;
 		long tmp;
 
-		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(data));
-			(element = zend_hash_get_current_data(Z_ARRVAL_P(data))) != NULL;
-			zend_hash_move_forward(Z_ARRVAL_P(data))
-			) {
-			if (zend_hash_get_current_key(Z_ARRVAL_P(data), &str_index, &num_index, 0) != HASH_KEY_IS_LONG || (long)num_index < 0) {
+		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(data), num_index, str_index) {
+			if (str_index != NULL || (long)num_index < 0) {
 				efree(array);
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "array must contain only positive integer keys");
 				return;
@@ -700,7 +697,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 			if (num_index > max_index) {
 				max_index = num_index;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 
 		tmp = max_index + 1;
 		if (tmp <= 0) {
@@ -710,16 +707,10 @@ SPL_METHOD(SplFixedArray, fromArray)
 		}
 		spl_fixedarray_init(array, tmp TSRMLS_CC);
 
-		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(data));
-			(element = zend_hash_get_current_data(Z_ARRVAL_P(data))) != NULL;
-			zend_hash_move_forward(Z_ARRVAL_P(data))
-			) {
-			
-			zend_hash_get_current_key(Z_ARRVAL_P(data), &str_index, &num_index, 0);
-
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_index, str_index, element) {
 			SEPARATE_ARG_IF_REF(element);
 			ZVAL_COPY_VALUE(&array->elements[num_index], element);
-		}
+		} ZEND_HASH_FOREACH_END();
 
 	} else if (num > 0 && !save_indexes) {
 		zval *element;
@@ -727,15 +718,11 @@ SPL_METHOD(SplFixedArray, fromArray)
 		
 		spl_fixedarray_init(array, num TSRMLS_CC);
 		
-		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(data));
-			(element = zend_hash_get_current_data(Z_ARRVAL_P(data))) != NULL;
-			zend_hash_move_forward(Z_ARRVAL_P(data))
-			) {
-			
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), element) {
 			SEPARATE_ARG_IF_REF(element);
 			ZVAL_COPY_VALUE(&array->elements[i], element);
 			i++;
-		}
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		spl_fixedarray_init(array, 0 TSRMLS_CC);
 	}
