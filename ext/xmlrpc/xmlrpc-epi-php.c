@@ -281,7 +281,9 @@ static void destroy_server_data(xmlrpc_server_data *server TSRMLS_DC)
 static void xmlrpc_server_destructor(zend_resource *rsrc TSRMLS_DC)
 {
 	if (rsrc && rsrc->ptr) {
+		rsrc->gc.refcount++;
 		destroy_server_data((xmlrpc_server_data*) rsrc->ptr TSRMLS_CC);
+		rsrc->gc.refcount--;
 	}
 }
 
