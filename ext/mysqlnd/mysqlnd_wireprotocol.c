@@ -561,9 +561,10 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 		}
 
 		if (packet->connect_attr && zend_hash_num_elements(packet->connect_attr)) {
+			size_t ca_payload_len = 0;
+#ifdef OLD_CODE
 			HashPosition pos_value;
 			const char ** entry_value;
-			size_t ca_payload_len = 0;
 			zend_hash_internal_pointer_reset_ex(packet->connect_attr, &pos_value);
 			while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
 				char *s_key;
@@ -579,10 +580,28 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 				}
 				zend_hash_move_forward_ex(conn->options->connect_attr, &pos_value);
 			}
+#else
 
+			{
+				zend_string * key;
+				unsigned long unused_num_key;
+				zval * entry_value;
+				ZEND_HASH_FOREACH_KEY_VAL(packet->connect_attr, unused_num_key, key, entry_value) {
+					if (key) { /* HASH_KEY_IS_STRING */
+						size_t value_len = Z_STRLEN_P(entry_value);
+
+						ca_payload_len += php_mysqlnd_net_store_length_size(key->len);
+						ca_payload_len += key->len;
+						ca_payload_len += php_mysqlnd_net_store_length_size(value_len);
+						ca_payload_len += value_len;
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+#endif
 			if ((sizeof(buffer) - (p - buffer)) >= (ca_payload_len + php_mysqlnd_net_store_length_size(ca_payload_len))) {
 				p = php_mysqlnd_net_store_length(p, ca_payload_len);
 
+#ifdef OLD_CODE
 				zend_hash_internal_pointer_reset_ex(packet->connect_attr, &pos_value);
 				while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
 					char *s_key;
@@ -601,6 +620,27 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 					}
 					zend_hash_move_forward_ex(conn->options->connect_attr, &pos_value);
 				}
+#else
+				{
+					zend_string * key;
+					unsigned long unused_num_key;
+					zval * entry_value;
+					ZEND_HASH_FOREACH_KEY_VAL(packet->connect_attr, unused_num_key, key, entry_value) {
+						if (key) { /* HASH_KEY_IS_STRING */
+							size_t value_len = Z_STRLEN_P(entry_value);
+
+							/* copy key */
+							p = php_mysqlnd_net_store_length(p, key->len);
+							memcpy(p, key->val, key->len);
+							p+= key->len;
+							/* copy value */
+							p = php_mysqlnd_net_store_length(p, value_len);
+							memcpy(p, Z_STRVAL_P(entry_value), value_len);
+							p+= value_len;
+						}
+					} ZEND_HASH_FOREACH_END();
+				}
+#endif
 			} else {
 				/* cannot put the data - skip */
 			}
@@ -1578,7 +1618,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, zend_bool copy_data, MYSQLND_STATS * stats TSRMLS_DC)
 {
-	
 	unsigned int i;
 	zend_bool last_field_was_string = FALSE;
 	zval **current_field, **end_field, **start_field;

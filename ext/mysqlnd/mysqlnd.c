@@ -113,7 +113,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn TSRMLS
 
 	DBG_ENTER("mysqlnd_conn_data::free_contents");
 
-	mysqlnd_local_infile_default(conn);
 	if (conn->current_result) {
 		conn->current_result->m.free_result(conn->current_result, TRUE TSRMLS_CC);
 		conn->current_result = NULL;
@@ -2440,34 +2439,6 @@ end:
 /* }}} */
 
 
-/* {{{ connect_attr_item_edtor */
-static void
-connect_attr_item_edtor(void * pDest)
-{
-#ifdef ZTS
-	TSRMLS_FETCH();
-#endif
-	DBG_ENTER("connect_attr_item_edtor");
-	mnd_efree(*(char **) pDest);
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
-/* {{{ connect_attr_item_pdtor */
-static void
-connect_attr_item_pdtor(void * pDest)
-{
-#ifdef ZTS
-	TSRMLS_FETCH();
-#endif
-	DBG_ENTER("connect_attr_item_pdtor");
-	mnd_pefree(*(char **) pDest, 1);
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_conn_data::set_client_option_2d */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * const conn,
@@ -2492,15 +2463,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 				if (!conn->options->connect_attr) {
 					goto oom;
 				}
-				zend_hash_init(conn->options->connect_attr, 0, NULL, conn->persistent? connect_attr_item_pdtor:connect_attr_item_edtor, conn->persistent);
+				zend_hash_init(conn->options->connect_attr, 0, NULL, ZVAL_PTR_DTOR, conn->persistent);
 			}
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
-				const char * copyv = mnd_pestrdup(value, conn->persistent);
-				if (!copyv) {
-					goto oom;
-				}
-				zend_hash_str_update_ptr(conn->options->connect_attr, key, strlen(key), (void*)&copyv);
+				zval attrz;
+				ZVAL_STRING(&attrz, value);
+				zend_hash_str_update(conn->options->connect_attr, key, strlen(key), &attrz);
 			}
 			break;
 		default:

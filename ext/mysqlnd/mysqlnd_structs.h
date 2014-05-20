@@ -149,12 +149,10 @@ typedef struct st_mysqlnd_charset
 /* local infile handler */
 typedef struct st_mysqlnd_infile
 {
-	int		(*local_infile_init)(void **ptr, char *filename, void **userdata TSRMLS_DC);
+	int		(*local_infile_init)(void **ptr, const char * const filename TSRMLS_DC);
 	int		(*local_infile_read)(void *ptr, zend_uchar * buf, unsigned int buf_len TSRMLS_DC);
-	int		(*local_infile_error)(void *ptr, char *error_msg, unsigned int error_msg_len TSRMLS_DC);
+	int		(*local_infile_error)(void *ptr, char * error_msg, unsigned int error_msg_len TSRMLS_DC);
 	void	(*local_infile_end)(void *ptr TSRMLS_DC);
-	zval	*callback;
-	void	*userdata;
 } MYSQLND_INFILE;
 
 typedef struct st_mysqlnd_options
