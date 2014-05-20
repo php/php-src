@@ -46,7 +46,7 @@ $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestBase'));
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestDerived', array("")));
+var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestDerived', array(0)));
 
 ?>
 --EXPECTF--
