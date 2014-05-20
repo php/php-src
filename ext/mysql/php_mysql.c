@@ -1125,15 +1125,15 @@ PHP_FUNCTION(mysql_close)
 			mysqlnd_end_psession(mysql->conn);
 		}
 #endif
-		if (!mysql_link) {
-			--GC_REFCOUNT(res);
+		if (res == MySG(default_link)) {
+			zend_list_delete(res);
 			MySG(default_link) = NULL;
-		} else if (mysql_link && Z_RES_P(mysql_link) == MySG(default_link)) {
-			--GC_REFCOUNT(res);
-			MySG(default_link) = NULL;
-			zend_list_close(res);
-		} else {
-			zend_list_close(res);
+		}
+		if (mysql_link) {
+			/* we have at least 3 additional references to this resource ??? */
+			if (GC_REFCOUNT(res) <= 3) {
+				zend_list_close(res);
+			}
 		}
 	}
 
