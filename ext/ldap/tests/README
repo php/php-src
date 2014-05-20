@@ -10,7 +10,7 @@ Notes:
     It is used for testing ldap_start_tls(), which also requires "TLS_REQCERT never" in client configuration
 2.  An empty LDAP structure is required for the tests to be PASSed
 
-(/etc/openldap/)slapd.conf:
+	(/etc/openldap/)slapd.conf:
 -----------------------------------------------------------
 TLSCACertificateFile /etc/openldap/ssl/server.pem
 TLSCertificateFile /etc/openldap/ssl/server.pem
