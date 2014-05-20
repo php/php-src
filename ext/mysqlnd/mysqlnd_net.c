@@ -133,7 +133,7 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 	  unregistered yntil the script ends. So, we need to take care of that.
 	*/
 	net_stream->in_free = 1;
-	zend_hash_index_del(&EG(regular_list), net_stream->rsrc_id);
+	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
 	net_stream->in_free = 0;
 
 
@@ -198,16 +198,16 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 		  This is unwanted. ext/mysql or ext/mysqli are responsible to clean,
 		  whatever they have to.
 		*/
-		zend_rsrc_list_entry *le;
+		zend_resource *le;
 
-		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_len + 1, (void*) &le) == SUCCESS) {
+		if ((le = zend_hash_str_find(&EG(persistent_list), hashed_details, hashed_details_len))) {
 			/*
 			  in_free will let streams code skip destructing - big HACK,
 			  but STREAMS suck big time regarding persistent streams.
 			  Just not compatible for extensions that need persistency.
 			*/
 			net_stream->in_free = 1;
-			zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_len + 1);
+			zend_hash_str_del(&EG(persistent_list), hashed_details, hashed_details_len);
 			net_stream->in_free = 0;
 		}
 #if ZEND_DEBUG
@@ -223,7 +223,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	  unregistered yntil the script ends. So, we need to take care of that.
 	*/
 	net_stream->in_free = 1;
-	zend_hash_index_del(&EG(regular_list), net_stream->rsrc_id);
+	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
 	net_stream->in_free = 0;
 
 	DBG_RETURN(net_stream);
@@ -864,7 +864,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 
 	if (net->data->options.ssl_key) {
 		zval key_zval;
-		ZVAL_STRING(&key_zval, net->data->options.ssl_key, 0);
+		ZVAL_STRING(&key_zval, net->data->options.ssl_key);
 		php_stream_context_set_option(context, "ssl", "local_pk", &key_zval);
 	}
 	if (net->data->options.ssl_verify_peer) {
@@ -874,7 +874,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	}
 	if (net->data->options.ssl_cert) {
 		zval cert_zval;
-		ZVAL_STRING(&cert_zval, net->data->options.ssl_cert, 0);
+		ZVAL_STRING(&cert_zval, net->data->options.ssl_cert);
 		php_stream_context_set_option(context, "ssl", "local_cert", &cert_zval);
 		if (!net->data->options.ssl_key) {
 			php_stream_context_set_option(context, "ssl", "local_pk", &cert_zval);
@@ -882,22 +882,22 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	}
 	if (net->data->options.ssl_ca) {
 		zval cafile_zval;
-		ZVAL_STRING(&cafile_zval, net->data->options.ssl_ca, 0);
+		ZVAL_STRING(&cafile_zval, net->data->options.ssl_ca);
 		php_stream_context_set_option(context, "ssl", "cafile", &cafile_zval);
 	}
 	if (net->data->options.ssl_capath) {
 		zval capath_zval;
-		ZVAL_STRING(&capath_zval, net->data->options.ssl_capath, 0);
+		ZVAL_STRING(&capath_zval, net->data->options.ssl_capath);
 		php_stream_context_set_option(context, "ssl", "cafile", &capath_zval);
 	}
 	if (net->data->options.ssl_passphrase) {
 		zval passphrase_zval;
-		ZVAL_STRING(&passphrase_zval, net->data->options.ssl_passphrase, 0);
+		ZVAL_STRING(&passphrase_zval, net->data->options.ssl_passphrase);
 		php_stream_context_set_option(context, "ssl", "passphrase", &passphrase_zval);
 	}
 	if (net->data->options.ssl_cipher) {
 		zval cipher_zval;
-		ZVAL_STRING(&cipher_zval, net->data->options.ssl_cipher, 0);
+		ZVAL_STRING(&cipher_zval, net->data->options.ssl_cipher);
 		php_stream_context_set_option(context, "ssl", "ciphers", &cipher_zval);
 	}
 #if PHP_API_VERSION >= 20131106
