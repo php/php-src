@@ -417,14 +417,14 @@ static void dba_close(dba_info *info TSRMLS_DC)
 		pefree(info->path, info->flags&DBA_PERSISTENT);
 	}
 	if (info->fp && info->fp != info->lock.fp) {
-		if(info->flags&DBA_PERSISTENT) {
+		if (info->flags & DBA_PERSISTENT) {
 			php_stream_pclose(info->fp);
 		} else {
 			php_stream_close(info->fp);
 		}
 	}
 	if (info->lock.fp) {
-		if(info->flags & DBA_PERSISTENT) {
+		if (info->flags & DBA_PERSISTENT) {
 			php_stream_pclose(info->lock.fp);
 		} else {
 			php_stream_close(info->lock.fp);
@@ -443,16 +443,14 @@ static void dba_close_rsrc(zend_resource *rsrc TSRMLS_DC)
 {
 	dba_info *info = (dba_info *)rsrc->ptr; 
 
-	if (info) {
-		dba_close(info TSRMLS_CC);
-	}
+	dba_close(info TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ dba_close_pe_rsrc_deleter */
 int dba_close_pe_rsrc_deleter(zval *el, void *pDba TSRMLS_DC)
 {
-	return ((zend_resource *)Z_PTR_P(el))->ptr == pDba;
+	return ((zend_resource *)Z_PTR_P(el))->ptr == pDba ? ZEND_HASH_APPLY_REMOVE: ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -674,7 +672,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		
 			info = (dba_info *)le->ptr;
 
-			ZEND_REGISTER_RESOURCE(return_value, info, le_pdb);
+			GC_REFCOUNT(le)++;
+			RETURN_RES(le);
 			return;
 		}
 	}
@@ -987,7 +986,11 @@ PHP_FUNCTION(dba_close)
 
 	DBA_FETCH_RESOURCE(info, id);
 
-	zend_list_close(Z_RES_P(id));
+	if (info->flags & DBA_PERSISTENT) {
+		zend_list_delete(Z_RES_P(id));
+	} else {
+		zend_list_close(Z_RES_P(id));
+	}
 }
 /* }}} */
 
