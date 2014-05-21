@@ -20,7 +20,7 @@ echo "Done\n";
 --EXPECTF-- 
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2006-12-12 00:00:00"
+  string(26) "2006-12-12 00:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

@@ -25,7 +25,7 @@ var_dump( date_create("2005-07-14 22:30:41 GMT") );
 *** Testing date_create() : basic functionality ***
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -33,7 +33,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
@@ -41,7 +41,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2005-07-14 22:30:41"
+  string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -49,7 +49,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2005-07-14 22:30:41"
+  string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
