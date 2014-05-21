@@ -120,19 +120,19 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 
 /* {{{ php_oci_spool */
 typedef struct {
-	int			  id;					/* resource id */
+	zend_resource *id;					/* resource id */
 	OCIEnv		 *env;					/* env of this session pool */
 	OCIError	 *err;					/* pool's error handle	*/
 	OCISPool	 *poolh;				/* pool handle */
 	void		 *poolname;				/* session pool name */
 	unsigned int  poolname_len;			/* length of session pool name */
-	char		 *spool_hash_key;		/* Hash key for session pool in plist */
+	zend_string	 *spool_hash_key;		/* Hash key for session pool in plist */
 } php_oci_spool;
 /* }}} */
 
 /* {{{ php_oci_connection */
 typedef struct { 
-	int				id;							/* resource ID */
+	zend_resource  *id;							/* resource ID */
 	OCIEnv		   *env;						/* private env handle */
 	ub2				charset;					/* charset ID */
 	OCIServer	   *server;						/* private server handle */
@@ -155,7 +155,7 @@ typedef struct {
 	unsigned		using_spool:1;				/* Is this connection from session pool? */
 	time_t			idle_expiry;				/* time when the connection will be considered as expired */
 	time_t		   *next_pingp;					/* (pointer to) time of the next ping */
-	char		   *hash_key;					/* hashed details of the connection */
+	zend_string	   *hash_key;					/* hashed details of the connection */
 #ifdef HAVE_OCI8_DTRACE
 	char		   *client_id;					/* The oci_set_client_identifier() value */
 #endif
@@ -164,7 +164,7 @@ typedef struct {
 
 /* {{{ php_oci_descriptor */
 typedef struct { 
-	int					 id;
+	zend_resource		*id;
 	ulong				 index;		            /* descriptors hash table index */
 	php_oci_connection	*connection;			/* parent connection handle */
 	dvoid				*descriptor;			/* OCI descriptor handle */
@@ -189,7 +189,7 @@ typedef struct {
 
 /* {{{ php_oci_collection */
 typedef struct { 
-	int					 id;
+	zend_resource		*id;
 	php_oci_connection	*connection;			/* parent connection handle */
 	OCIType				*tdo;					/* collection's type handle */
 	OCITypeCode			 coll_typecode;			/* collection's typecode handle */
@@ -202,7 +202,7 @@ typedef struct {
 
 /* {{{ php_oci_define */
 typedef struct { 
-	zval		*zval;			/* zval used in define */
+	zval		 zval;			/* zval used in define */
 	text		*name;			/* placeholder's name */
 	ub4			 name_len;		/* placeholder's name length */
 	ub4			 type;			/* define type */
@@ -211,8 +211,8 @@ typedef struct {
 
 /* {{{ php_oci_statement */
 typedef struct { 
-	int					 id;
-	int					 parent_stmtid;			/* parent statement id */
+	zend_resource		*id;
+	zend_resource	 	*parent_stmtid;			/* parent statement id */
 	struct php_oci_statement *impres_child_stmt;/* child of current Implicit Result Set statement handle */
 	ub4                  impres_count;          /* count of remaining Implicit Result children on parent statement handle */
 	php_oci_connection	*connection;			/* parent connection handle */
@@ -237,7 +237,7 @@ typedef struct {
 /* {{{ php_oci_bind */
 typedef struct { 
 	OCIBind				*bind;					/* bind handle */
-	zval				*zval;					/* value */
+	zval				 zval;					/* value */
 	dvoid				*descriptor;			/* used for binding of LOBS etc */
 	OCIStmt				*statement;				/* used for binding REFCURSORs */
 	php_oci_statement	*parent_statement;		/* pointer to the parent statement */
@@ -273,8 +273,8 @@ typedef struct {
 	ub4					 retlen4;
 	ub2					 is_descr;				/* column contains a descriptor */
 	ub2					 is_cursor;				/* column contains a cursor */
-	int					 stmtid;				/* statement id for cursors */
-	int					 descid;				/* descriptor id for descriptors */
+	zend_resource		*stmtid;				/* statement id for cursors */
+	zend_resource		*descid;				/* descriptor id for descriptors */
 	void				*data;
 	php_oci_define		*define;				/* define handle */
 	int					 piecewise;				/* column is fetched piece-by-piece */
@@ -364,7 +364,7 @@ typedef struct {
 	ZEND_FETCH_RESOURCE2(connection, php_oci_connection *, &zval, -1, "oci8 connection", le_connection, le_pconnection)
 
 #define PHP_OCI_ZVAL_TO_STATEMENT(zval, statement) \
-	ZEND_FETCH_RESOURCE(statement, php_oci_statement *, &zval, -1, "oci8 statement", le_statement)
+	ZEND_FETCH_RESOURCE(statement, php_oci_statement *, zval, -1, "oci8 statement", le_statement)
 
 #define PHP_OCI_ZVAL_TO_DESCRIPTOR(zval, descriptor) \
 	ZEND_FETCH_RESOURCE(descriptor, php_oci_descriptor *, &zval, -1, "oci8 descriptor", le_descriptor)
