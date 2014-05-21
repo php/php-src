@@ -133,7 +133,7 @@ bool(false)
 -- float 10.5 --
 object(DateTime)#3 (3) {
   ["date"]=>
-  string(19) "2009-01-31 10:05:00"
+  string(26) "2009-01-31 10:05:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -148,7 +148,7 @@ bool(false)
 -- float .5 --
 object(DateTime)#3 (3) {
   ["date"]=>
-  string(19) "2009-01-31 00:05:00"
+  string(26) "2009-01-31 00:05:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

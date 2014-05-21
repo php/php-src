@@ -15,7 +15,7 @@ var_dump( $i );
 --EXPECTF--
 object(DateTimeImmutable)#%d (3) {
   ["date"]=>
-  string(19) "2014-03-02 16:24:08"
+  string(26) "2014-03-02 16:24:08.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
