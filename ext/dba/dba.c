@@ -986,11 +986,7 @@ PHP_FUNCTION(dba_close)
 
 	DBA_FETCH_RESOURCE(info, id);
 
-	if (info->flags & DBA_PERSISTENT) {
-		zend_list_delete(Z_RES_P(id));
-	} else {
-		zend_list_close(Z_RES_P(id));
-	}
+	zend_list_close(Z_RES_P(id));
 }
 /* }}} */
 
