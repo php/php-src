@@ -892,7 +892,12 @@ void zend_do_abstract_method(const znode *function_name, znode *modifiers, const
 
 	if (Z_LVAL(modifiers->u.constant) & ZEND_ACC_ABSTRACT) {
 		if(Z_LVAL(modifiers->u.constant) & ZEND_ACC_PRIVATE) {
-			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private", method_type, CG(active_class_entry)->name, Z_STRVAL(function_name->u.constant));
+			/* We don't want to error for traits, since an abstract private
+			 * method can be used there to require that a class using the trait
+			 * must implement a particular private method. */
+			if ((CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != ZEND_ACC_TRAIT) {
+				zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private", method_type, CG(active_class_entry)->name, Z_STRVAL(function_name->u.constant));
+			}
 		}
 		if (Z_LVAL(body->u.constant) == ZEND_ACC_ABSTRACT) {
 			zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
