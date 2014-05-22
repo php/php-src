@@ -308,7 +308,7 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 }
 /* }}} */
 
-int ini_lex(zval *ini_lval TSRMLS_DC)
+int ini_lex(zval *ini_lval, TSRMLS_DN)
 {
 restart:
 	SCNG(yy_text) = YYCURSOR;

@@ -701,7 +701,7 @@ extern ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_le
 
 ZEND_API void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
-void zenderror(const char *error);
+void zenderror(TSRMLS_DN, const char *error);
 
 /* The following #define is used for code duality in PHP for Engine 1 & 2 */
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def
