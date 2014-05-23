@@ -1076,7 +1076,6 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 # endif
 				break;
 #endif
-			EMPTY_SWITCH_DEFAULT_CASE();
 		}
 	}
 	
