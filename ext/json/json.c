@@ -32,11 +32,11 @@
 #include <zend_exceptions.h>
 
 /*
- * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
+ * This number is an approximated number from 3 + DBL_MANT_DIG - DBL_MIN_EXP (constants are from float.h)
  *
- * This is the same constant used on spprintf.c for arithmetic operations
+ * The constants can very between operation systems, so using the highest number found so far.
  */
-#define NUM_BUF_SIZE		2048
+#define NUM_BUF_SIZE		1090
 
 
 static PHP_MINFO_FUNCTION(json);
