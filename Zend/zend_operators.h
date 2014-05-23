@@ -979,10 +979,7 @@ static zend_always_inline void fast_is_not_identical_function(zval *result, zval
 /* buf points to the END of the buffer */
 #define _zend_print_signed_to_buf(buf, num, vartype, result) do { \
 	if (num < 0) { \
-		/* this might cause problems when dealing with LONG_MIN
-		   and machines which don't support long long. Works
-		   flawlessly on 32bit x86 */ \
-		_zend_print_unsigned_to_buf((buf), -(num), vartype, (result)); \
+		_zend_print_unsigned_to_buf((buf), -(vartype)(num), vartype, (result)); \
 		*--(result) = '-'; \
 	} else { \
 		_zend_print_unsigned_to_buf((buf), (num), vartype, (result)); \
