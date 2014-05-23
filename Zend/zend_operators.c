@@ -604,9 +604,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		}
 		case IS_LONG: {
-			char buf[MAX_LENGTH_OF_LONG + 1];
-			int len = snprintf(buf, sizeof(buf), "%ld", Z_LVAL_P(op));
-			ZVAL_NEW_STR(op, STR_INIT(buf, len, 0));
+			ZVAL_NEW_STR(op, zend_long_to_str(Z_LVAL_P(op)));
 			break;
 		}
 		case IS_DOUBLE: {
@@ -883,11 +881,7 @@ try_again:
 			return STR_INIT(buf, len, 0);
 		}
 		case IS_LONG: {
-			char buf[MAX_LENGTH_OF_LONG + 1];
-			int len;
-
-			len = snprintf(buf, sizeof(buf), "%ld", Z_LVAL_P(op));
-			return STR_INIT(buf, len, 0);
+			return zend_long_to_str(Z_LVAL_P(op));
 		}
 		case IS_DOUBLE: {
 			return zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(op));
@@ -2509,6 +2503,16 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 	ZVAL_NEW_STR(op, str);
 }
 /* }}} */
+
+ZEND_API zend_string *zend_long_to_str(long num) /* {{{ */
+{
+	char buf[MAX_LENGTH_OF_LONG + 1];
+	char *res;
+	_zend_print_signed_to_buf(buf + sizeof(buf)-1, num, unsigned long, res);
+	return STR_INIT(res, buf + sizeof(buf)-1 - res, 0);
+}
+/* }}} */
+
 
 /*
  * Local variables:

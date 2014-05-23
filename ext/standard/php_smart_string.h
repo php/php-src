@@ -119,54 +119,22 @@
 	__dest->len = __nl;												\
 } while (0)
 
-/* input: buf points to the END of the buffer */
-#define smart_string_print_unsigned4(buf, num, vartype, result) do {	\
-	char *__p = (buf);												\
-	vartype __num = (num);											\
-	*__p = '\0';													\
-	do {															\
-		*--__p = (char) (__num % 10) + '0';							\
-		__num /= 10;												\
-	} while (__num > 0);											\
-	result = __p;													\
-} while (0)
-
-/* buf points to the END of the buffer */
-#define smart_string_print_long4(buf, num, vartype, result) do {	\
-	if (num < 0) {													\
-		/* this might cause problems when dealing with LONG_MIN		\
-		   and machines which don't support long long.  Works		\
-		   flawlessly on 32bit x86 */								\
-		smart_string_print_unsigned4((buf), -(num), vartype, (result));	\
-		*--(result) = '-';											\
-	} else {														\
-		smart_string_print_unsigned4((buf), (num), vartype, (result));	\
-	}																\
-} while (0)
-
-/*
- * these could be replaced using a braced-group inside an expression
- * for GCC compatible compilers, e.g.
- *
- * #define f(..) ({char *r;..;__r;})
- */  
- 
 static inline char *smart_string_print_long(char *buf, long num) {
 	char *r; 
-	smart_string_print_long4(buf, num, unsigned long, r); 
+	_zend_print_signed_to_buf(buf, num, unsigned long, r); 
 	return r;
 }
 
 static inline char *smart_string_print_unsigned(char *buf, long num) {
 	char *r; 
-	smart_string_print_unsigned4(buf, num, unsigned long, r); 
+	_zend_print_unsigned_to_buf(buf, num, unsigned long, r); 
 	return r;
 }
 
 #define smart_string_append_generic_ex(dest, num, type, vartype, func) do {	\
 	char __b[32];															\
 	char *__t;																\
-   	smart_string_print##func##4 (__b + sizeof(__b) - 1, (num), vartype, __t);	\
+   	_zend_print##func##_to_buf(__b + sizeof(__b) - 1, (num), vartype, __t);	\
 	smart_string_appendl_ex((dest), __t, __b + sizeof(__b) - 1 - __t, (type));	\
 } while (0)
 	
@@ -174,10 +142,10 @@ static inline char *smart_string_print_unsigned(char *buf, long num) {
 	smart_string_append_generic_ex((dest), (num), (type), unsigned long, _unsigned)
 
 #define smart_string_append_long_ex(dest, num, type) \
-	smart_string_append_generic_ex((dest), (num), (type), unsigned long, _long)
+	smart_string_append_generic_ex((dest), (num), (type), unsigned long, _signed)
 
 #define smart_string_append_off_t_ex(dest, num, type) \
-	smart_string_append_generic_ex((dest), (num), (type), off_t, _long)
+	smart_string_append_generic_ex((dest), (num), (type), off_t, _signed)
 
 #define smart_string_append_ex(dest, src, what) \
 	smart_string_appendl_ex((dest), ((smart_string *)(src))->c, \
