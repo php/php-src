@@ -198,8 +198,8 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 		if (clone_orig) {
 			intern->array = other->array;
 			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayObject) {
-				array_init(&intern->array);
-				zend_hash_copy(HASH_OF(&intern->array), HASH_OF(&other->array), (copy_ctor_func_t) zval_add_ref);
+				ZVAL_NEW_ARR(&intern->array);
+				zend_array_dup(Z_ARRVAL(intern->array), HASH_OF(&other->array));
 			}
 			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayIterator) {
 				Z_ADDREF_P(&other->array);
@@ -824,8 +824,8 @@ SPL_METHOD(Array, getArrayCopy)
 	zval *object = getThis();
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-    array_init(return_value);
-	zend_hash_copy(Z_ARRVAL_P(return_value), spl_array_get_hash_table(intern, 0 TSRMLS_CC), (copy_ctor_func_t) zval_add_ref);
+	ZVAL_NEW_ARR(return_value);
+	zend_array_dup(Z_ARRVAL_P(return_value), spl_array_get_hash_table(intern, 0 TSRMLS_CC));
 } /* }}} */
 
 static HashTable *spl_array_get_properties(zval *object TSRMLS_DC) /* {{{ */
@@ -1323,8 +1323,8 @@ SPL_METHOD(Array, exchangeArray)
 	zval *object = getThis(), *array;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	array_init(return_value);
-	zend_hash_copy(HASH_OF(return_value), spl_array_get_hash_table(intern, 0 TSRMLS_CC), (copy_ctor_func_t)zval_add_ref);
+	ZVAL_NEW_ARR(return_value);
+	zend_array_dup(Z_ARRVAL_P(return_value), spl_array_get_hash_table(intern, 0 TSRMLS_CC));
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &array) == FAILURE) {
 		return;
 	}
@@ -1745,8 +1745,8 @@ SPL_METHOD(Array, serialize)
 		rebuild_object_properties(&intern->std);
 	}
 
-	array_init(&members);
-	zend_hash_copy(Z_ARRVAL(members), intern->std.properties, (copy_ctor_func_t)zval_add_ref);
+	ZVAL_NEW_ARR(&members);
+	zend_array_dup(Z_ARRVAL(members), intern->std.properties);
 
 	php_var_serialize(&buf, &members, &var_hash TSRMLS_CC); /* finishes the string */
 

@@ -245,8 +245,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				}
 				ht = Z_ARRVAL_P(zvalue);
 				ZVAL_NEW_ARR(zvalue);
-				zend_hash_init(Z_ARRVAL_P(zvalue), zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
-				zend_hash_copy(Z_ARRVAL_P(zvalue), ht, zval_add_ref);
+				zend_array_dup(Z_ARRVAL_P(zvalue), ht);
 			}
 			break;
 		case IS_CONSTANT_AST: {

@@ -1070,6 +1070,131 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 }
 
 
+ZEND_API void zend_array_dup(HashTable *target, HashTable *source)
+{
+    uint idx, target_idx;
+	uint nIndex;
+	Bucket *p, *q;
+	zval *data;
+
+	IS_CONSISTENT(source);
+	
+	target->nTableMask = source->nTableMask;
+	target->nTableSize = source->nTableSize;
+	target->pDestructor = source->pDestructor;
+	target->nInternalPointer = INVALID_IDX;
+	target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT);
+
+	target_idx = 0;
+	if (target->nTableMask) {
+		if (target->u.flags & HASH_FLAG_PACKED) {
+			target->nNumUsed = source->nNumUsed;
+			target->nNumOfElements = source->nNumOfElements;
+			target->nNextFreeElement = source->nNextFreeElement;
+			target->arData = (Bucket *) safe_pemalloc(target->nTableSize, sizeof(Bucket), 0, 0);
+			target->arHash = (zend_uint*)&uninitialized_bucket;
+			target->nInternalPointer = source->nInternalPointer;
+
+			for (idx = 0; idx < source->nNumUsed; idx++) {		
+				p = source->arData + idx;
+				q = target->arData + idx;
+				if (Z_TYPE(p->val) == IS_UNDEF) {
+					q->h = 0;
+					q->key = NULL;
+					ZVAL_UNDEF(&q->val);
+					continue;
+				}
+				/* INDIRECT element may point to UNDEF-ined slots */
+				data = &p->val;
+				if (Z_TYPE_P(data) == IS_INDIRECT) {
+					data = Z_INDIRECT_P(data);
+					if (Z_TYPE_P(data) == IS_UNDEF) {
+						q->h = 0;
+						q->key = NULL;
+						ZVAL_UNDEF(&q->val);
+						continue;
+					}
+				}
+
+				q->h = p->h;
+				q->key = NULL;
+				if (Z_OPT_REFCOUNTED_P(data)) {
+					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
+						ZVAL_DUP(&q->val, Z_REFVAL_P(data));
+					} else {
+						ZVAL_COPY(&q->val, data);
+					}
+				} else {
+					ZVAL_COPY_VALUE(&q->val, data);
+				}
+			}
+			if (target->nNumOfElements > 0 &&
+			    target->nInternalPointer == INVALID_IDX) {
+				idx = 0;
+				while (Z_TYPE(target->arData[idx].val) == IS_UNDEF) {
+					idx++;
+				}
+				target->nInternalPointer = idx;
+			}
+		} else {
+			target->nNextFreeElement = source->nNextFreeElement;
+			target->arData = (Bucket *) safe_pemalloc(target->nTableSize, sizeof(Bucket) + sizeof(zend_uint), 0, 0);
+			target->arHash = (zend_uint*)(target->arData + target->nTableSize);
+			memset(target->arHash, INVALID_IDX, target->nTableSize * sizeof(zend_uint));
+
+			for (idx = 0; idx < source->nNumUsed; idx++) {		
+				p = source->arData + idx;
+				if (Z_TYPE(p->val) == IS_UNDEF) continue;
+				/* INDIRECT element may point to UNDEF-ined slots */
+				data = &p->val;
+				if (Z_TYPE_P(data) == IS_INDIRECT) {
+					data = Z_INDIRECT_P(data);
+					if (Z_TYPE_P(data) == IS_UNDEF) {
+						continue;
+					}
+				}
+
+				if (source->nInternalPointer == idx) {
+					target->nInternalPointer = target_idx;
+				}
+
+				q = target->arData + target_idx;
+				q->h = p->h;
+				q->key = p->key;
+				if (q->key) {
+					STR_ADDREF(q->key);
+				}
+				nIndex = q->h & target->nTableMask;
+				Z_NEXT(q->val) = target->arHash[nIndex];
+				target->arHash[nIndex] = target_idx;
+				if (Z_OPT_REFCOUNTED_P(data)) {
+					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
+						ZVAL_DUP(&q->val, Z_REFVAL_P(data));
+					} else {
+						ZVAL_COPY(&q->val, data);
+					}
+				} else {
+					ZVAL_COPY_VALUE(&q->val, data);
+				}
+				target_idx++;
+			}
+			target->nNumUsed = target_idx;
+			target->nNumOfElements = target_idx;
+			if (target->nNumOfElements > 0 &&
+			    target->nInternalPointer == INVALID_IDX) {
+				target->nInternalPointer = 0;
+			}
+		}
+	} else {
+		target->nNumUsed = 0;
+		target->nNumOfElements = 0;
+		target->nNextFreeElement = 0;
+		target->arData = NULL;
+		target->arHash = (zend_uint*)&uninitialized_bucket;
+	}
+}
+
+
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, int overwrite ZEND_FILE_LINE_DC)
 {
     uint idx;
@@ -1248,14 +1373,6 @@ ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h)
 
 	p = zend_hash_index_find_bucket(ht, h);
 	return p ? 1 : 0;
-}
-
-
-ZEND_API int zend_hash_num_elements(const HashTable *ht)
-{
-	IS_CONSISTENT(ht);
-
-	return ht->nNumOfElements;
 }
 
 
@@ -1671,14 +1788,6 @@ ZEND_API zval *zend_hash_minmax(const HashTable *ht, compare_func_t compar, int 
 		}
 	}
 	return &res->val;
-}
-
-ZEND_API ulong zend_hash_next_free_element(const HashTable *ht)
-{
-	IS_CONSISTENT(ht);
-
-	return ht->nNextFreeElement;
-
 }
 
 /*

@@ -494,8 +494,8 @@ PHP_FUNCTION(get_browser)
 	}
 
 	if (return_array) {
-		array_init(return_value);
-		zend_hash_copy(Z_ARRVAL_P(return_value), Z_ARRVAL_P(agent), (copy_ctor_func_t) browscap_zval_copy_ctor);
+		ZVAL_NEW_ARR(return_value);
+		zend_array_dup(Z_ARRVAL_P(return_value), Z_ARRVAL_P(agent));
 	}
 	else {
 		object_init(return_value);

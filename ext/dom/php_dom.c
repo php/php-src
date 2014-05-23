@@ -425,10 +425,9 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp TSRMLS_DC
 	*is_temp = 1;
 
 	ALLOC_HASHTABLE(debug_info);
-	ZEND_INIT_SYMTABLE_EX(debug_info, 32, 0);
 
 	std_props = zend_std_get_properties(object TSRMLS_CC);
-	zend_hash_copy(debug_info, std_props, (copy_ctor_func_t) zval_add_ref);
+	zend_array_dup(debug_info, std_props);
 
 	if (!prop_handlers) {
 		return debug_info;

@@ -429,8 +429,7 @@ static HashTable *gmp_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{ *
 
 	*is_temp = 1;
 	ALLOC_HASHTABLE(ht);
-	ZEND_INIT_SYMTABLE_EX(ht, zend_hash_num_elements(props) + 1, 0);
-	zend_hash_copy(ht, props, (copy_ctor_func_t) zval_add_ref);
+	zend_array_dup(ht, props);
 
 	gmp_strval(&zv, gmpnum, 10);
 	zend_hash_str_update(ht, "num", sizeof("num")-1, &zv);

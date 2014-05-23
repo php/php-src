@@ -589,9 +589,8 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_tem
 	}
 
 	ALLOC_HASHTABLE(rv);
-	ZEND_INIT_SYMTABLE_EX(rv, zend_hash_num_elements(intern->std.properties) + 3, 0);
 
-	zend_hash_copy(rv, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
+	zend_array_dup(rv, intern->std.properties);
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "pathName", sizeof("pathName")-1 TSRMLS_CC);
 	path = spl_filesystem_object_get_pathname(intern, &path_len TSRMLS_CC);

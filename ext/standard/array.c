@@ -2811,8 +2811,8 @@ PHP_FUNCTION(array_unique)
 
 	php_set_compare_func(sort_type TSRMLS_CC);
 
-	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(array)));
-	zend_hash_copy(Z_ARRVAL_P(return_value), Z_ARRVAL_P(array), zval_add_ref);
+	ZVAL_NEW_ARR(return_value);
+	zend_array_dup(Z_ARRVAL_P(return_value), Z_ARRVAL_P(array));
 
 	if (Z_ARRVAL_P(array)->nNumOfElements <= 1) {	/* nothing to do */
 		return;
@@ -3164,8 +3164,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		HashTable *old_ht = Z_ARRVAL_P(return_value);
 
 		ZVAL_NEW_ARR(return_value);
-		zend_hash_init(Z_ARRVAL_P(return_value), zend_hash_num_elements(old_ht), NULL, ZVAL_PTR_DTOR, 0);
-		zend_hash_copy(Z_ARRVAL_P(return_value), old_ht, zval_add_ref);
+		zend_array_dup(Z_ARRVAL_P(return_value), old_ht);
 	}
 
 	/* go through the lists and look for common values */
@@ -3584,8 +3583,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		HashTable *old_ht = Z_ARRVAL_P(return_value);
 
 		ZVAL_NEW_ARR(return_value);
-		zend_hash_init(Z_ARRVAL_P(return_value), zend_hash_num_elements(old_ht), NULL, ZVAL_PTR_DTOR, 0);
-		zend_hash_copy(Z_ARRVAL_P(return_value), old_ht, zval_add_ref);
+		zend_array_dup(Z_ARRVAL_P(return_value), old_ht);
 	}
 
 	/* go through the lists and look for values of ptr[0] that are not in the others */
@@ -3942,17 +3940,23 @@ PHP_FUNCTION(array_multisort)
 	/* Restructure the arrays based on sorted indirect - this is mostly taken from zend_hash_sort() function. */
 	HANDLE_BLOCK_INTERRUPTIONS();
 	for (i = 0; i < num_arrays; i++) {
+		int repack;
+
 		hash = Z_ARRVAL_P(arrays[i]);
 		hash->nNumUsed = array_size;
 		hash->nInternalPointer = 0;
+		repack = !(hash->u.flags & HASH_FLAG_PACKED);
 
 		for (n = 0, k = 0; k < array_size; k++) {
 			hash->arData[k] = indirect[k][i];
-			if (hash->arData[k].key == NULL)
+			if (hash->arData[k].key == NULL) {
 				hash->arData[k].h = n++;
+			} else {
+				repack = 0;
+			}
 		}
 		hash->nNextFreeElement = array_size;
-		if (!(hash->u.flags & HASH_FLAG_PACKED)) {
+		if (repack) {
 			zend_hash_to_packed(hash);
 		}
 	}

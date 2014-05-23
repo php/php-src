@@ -671,8 +671,7 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 					if (obj_ht) {
 						zval arr;
 						ZVAL_NEW_ARR(&arr);
-						zend_hash_init(Z_ARRVAL(arr), zend_hash_num_elements(obj_ht), NULL, ZVAL_PTR_DTOR, 0);
-						zend_hash_copy(Z_ARRVAL(arr), obj_ht, zval_add_ref);
+						zend_array_dup(Z_ARRVAL(arr), obj_ht);
 						zval_dtor(op);
 						ZVAL_COPY_VALUE(op, &arr);
 						return;

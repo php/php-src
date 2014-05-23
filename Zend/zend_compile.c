@@ -3076,8 +3076,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 			HashTable *static_variables = op_array->static_variables;
 
 			ALLOC_HASHTABLE(op_array->static_variables);
-			zend_hash_init(op_array->static_variables, zend_hash_num_elements(static_variables), NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_copy(op_array->static_variables, static_variables, zval_add_ref);
+			zend_array_dup(op_array->static_variables, static_variables);
 		}
 		op_array->run_time_cache = NULL;
 	} else if (function->type == ZEND_INTERNAL_FUNCTION) {

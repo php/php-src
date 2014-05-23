@@ -1178,8 +1178,7 @@ PHP_METHOD(SoapServer, SoapServer)
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
 			ALLOC_HASHTABLE(service->class_map);
-			zend_hash_init(service->class_map, zend_hash_num_elements(Z_ARRVAL_P(tmp)), NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_copy(service->class_map, Z_ARRVAL_P(tmp), zval_add_ref);
+			zend_array_dup(service->class_map, Z_ARRVAL_P(tmp));
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "typemap", sizeof("typemap")-1)) != NULL &&
@@ -2904,8 +2903,7 @@ PHP_METHOD(SoapClient, __call)
 		if (soap_headers) {
 			if (!free_soap_headers) {
 				HashTable *t =  emalloc(sizeof(HashTable));
-				zend_hash_init(t, 0, NULL, ZVAL_PTR_DTOR, 0);
-				zend_hash_copy(t, soap_headers, zval_add_ref);
+				zend_array_dup(t, soap_headers);
 				soap_headers = t;
 				free_soap_headers = 1;
 			}

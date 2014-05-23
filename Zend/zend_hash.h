@@ -134,7 +134,6 @@ ZEND_API zval *zend_hash_index_find(const HashTable *ht, ulong h);
 ZEND_API int zend_hash_exists(const HashTable *ht, zend_string *key);
 ZEND_API int zend_hash_str_exists(const HashTable *ht, const char *str, int len);
 ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h);
-ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);
 
 /* traversing */
 #define zend_hash_has_more_elements_ex(ht, pos) \
@@ -187,9 +186,15 @@ ZEND_API zval *zend_hash_minmax(const HashTable *ht, compare_func_t compar, int 
 #define zend_hash_merge(target, source, pCopyConstructor, overwrite)					\
 	_zend_hash_merge(target, source, pCopyConstructor, overwrite ZEND_FILE_LINE_CC)
 
-ZEND_API int zend_hash_num_elements(const HashTable *ht);
+#define zend_hash_num_elements(ht) \
+	(ht)->nNumOfElements
+
+#define zend_hash_next_free_element(ht) \
+	(ht)->nNextFreeElement
 
 ZEND_API int zend_hash_rehash(HashTable *ht);
+
+ZEND_API void zend_array_dup(HashTable *target, HashTable *source);
 
 #if ZEND_DEBUG
 /* debug */

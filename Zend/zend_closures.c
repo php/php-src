@@ -297,8 +297,8 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 	if (closure->debug_info->u.v.nApplyCount == 0) {
 		if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
 			HashTable *static_variables = closure->func.op_array.static_variables;
-			array_init(&val);
-			zend_hash_copy(Z_ARRVAL(val), static_variables, zval_add_ref);
+			ZVAL_NEW_ARR(&val);
+			zend_array_dup(Z_ARRVAL(val), static_variables);
 			zend_hash_str_update(closure->debug_info, "static", sizeof("static")-1, &val);
 		}
 
