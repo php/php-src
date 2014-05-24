@@ -1078,7 +1078,7 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;
 	int converted = 0;
@@ -1160,6 +1160,7 @@ ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		}
 	}
 }
+/* }}} */
 
 ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
@@ -2507,11 +2508,10 @@ ZEND_API zend_string *zend_long_to_str(long num) /* {{{ */
 {
 	char buf[MAX_LENGTH_OF_LONG + 1];
 	char *res;
-	_zend_print_signed_to_buf(buf + sizeof(buf)-1, num, unsigned long, res);
-	return STR_INIT(res, buf + sizeof(buf)-1 - res, 0);
+	_zend_print_signed_to_buf(buf + sizeof(buf) - 1, num, unsigned long, res);
+	return STR_INIT(res, buf + sizeof(buf) - 1 - res, 0);
 }
 /* }}} */
-
 
 /*
  * Local variables:
