@@ -1352,6 +1352,7 @@ TEST $file
 			} else {
 				show_result('SKIP', $tested, $tested_file, "reason: CGI not available");
 
+				junit_init_suite(junit_get_suitename_for($shortname));
 				junit_mark_test_as('SKIP', $shortname, $tested, 0, 'CGI not available');
 				return 'SKIPPED';
 			}
