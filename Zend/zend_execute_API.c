@@ -885,7 +885,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			because it can break proper ones (Bug #34045)
 		if (!EX(function_state).function->common.return_reference)
 		{
-			INIT_PZVAL(*f);
+			INIT_PZVAL(f->retval);
 		}*/
 		if (EG(exception)) {
 			zval_ptr_dtor(fci->retval);
