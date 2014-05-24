@@ -857,10 +857,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 		original_opline_ptr = EG(opline_ptr);
 
-		if (EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
-			zend_generator_create_zval(EG(active_op_array), fci->retval TSRMLS_CC);
-		} else {
+		if (EXPECTED((EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) == 0)) {
 			zend_execute(EG(active_op_array), fci->retval TSRMLS_CC);
+		} else {
+			zend_generator_create_zval(EG(active_op_array), fci->retval TSRMLS_CC);
 		}
 
 		EG(active_op_array) = original_op_array;
@@ -885,9 +885,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			because it can break proper ones (Bug #34045)
 		if (!EX(function_state).function->common.return_reference)
 		{
-			INIT_PZVAL(*fci->retval_ptr_ptr);
+			INIT_PZVAL(*f);
 		}*/
-		if (EG(exception) && fci->retval) {
+		if (EG(exception)) {
 			zval_ptr_dtor(fci->retval);
 			ZVAL_UNDEF(fci->retval);
 		}
@@ -911,7 +911,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 		efree(EX(function_state).function);
 
-		if (EG(exception) && fci->retval) {
+		if (EG(exception)) {
 			zval_ptr_dtor(fci->retval);
 			ZVAL_UNDEF(fci->retval);
 		}
