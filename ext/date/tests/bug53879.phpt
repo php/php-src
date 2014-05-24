@@ -10,7 +10,7 @@ print_r($date);
 --EXPECTF--
 DateTime Object
 (
-    [date] => 2041-01-21 15:24:52
+    [date] => 2041-01-21 15:24:52.000000
     [timezone_type] => 2
     [timezone] => GMT
 )

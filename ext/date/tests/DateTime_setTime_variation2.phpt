@@ -115,7 +115,7 @@ fclose( $file_handle );
 -- int 0 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-31 10:00:45"
+  string(26) "2009-01-31 10:00:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -125,7 +125,7 @@ object(DateTime)#%d (3) {
 -- int 1 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-31 10:01:45"
+  string(26) "2009-01-31 10:01:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -135,7 +135,7 @@ object(DateTime)#%d (3) {
 -- int 12345 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-02-08 23:45:45"
+  string(26) "2009-02-08 23:45:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -145,7 +145,7 @@ object(DateTime)#%d (3) {
 -- int -12345 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 20:15:45"
+  string(26) "2009-01-30 20:15:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -155,7 +155,7 @@ object(DateTime)#%d (3) {
 -- float 10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:10:45"
+  string(26) "2009-01-30 10:10:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -165,7 +165,7 @@ object(DateTime)#%d (3) {
 -- float -10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 09:50:45"
+  string(26) "2009-01-30 09:50:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -175,7 +175,7 @@ object(DateTime)#%d (3) {
 -- float .5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:00:45"
+  string(26) "2009-01-30 10:00:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -205,7 +205,7 @@ bool(false)
 -- uppercase NULL --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:00:45"
+  string(26) "2009-01-30 10:00:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -215,7 +215,7 @@ object(DateTime)#%d (3) {
 -- lowercase null --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:00:45"
+  string(26) "2009-01-30 10:00:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -225,7 +225,7 @@ object(DateTime)#%d (3) {
 -- lowercase true --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:01:45"
+  string(26) "2009-01-30 10:01:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -235,7 +235,7 @@ object(DateTime)#%d (3) {
 -- lowercase false --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:00:45"
+  string(26) "2009-01-30 10:00:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -245,7 +245,7 @@ object(DateTime)#%d (3) {
 -- uppercase TRUE --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:01:45"
+  string(26) "2009-01-30 10:01:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -255,7 +255,7 @@ object(DateTime)#%d (3) {
 -- uppercase FALSE --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:00:45"
+  string(26) "2009-01-30 10:00:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -305,7 +305,7 @@ bool(false)
 -- undefined var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:00:45"
+  string(26) "2009-01-30 10:00:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -315,7 +315,7 @@ object(DateTime)#%d (3) {
 -- unset var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:00:45"
+  string(26) "2009-01-30 10:00:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
