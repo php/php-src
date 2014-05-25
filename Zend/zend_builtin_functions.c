@@ -1873,7 +1873,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 	if (zendext) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t)add_zendext_info, return_value TSRMLS_CC);
 	} else {
-		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t)add_extension_info, return_value TSRMLS_CC);
+		zend_hash_apply_with_argument(&module_registry, add_extension_info, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -1939,7 +1939,7 @@ ZEND_FUNCTION(get_defined_constants)
 		efree(module_names);
 		efree(modules);
 	} else {
-		zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t)add_constant_info, return_value TSRMLS_CC);
+		zend_hash_apply_with_argument(EG(zend_constants), add_constant_info, return_value TSRMLS_CC);
 	}
 }
 /* }}} */

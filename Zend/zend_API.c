@@ -1095,7 +1095,7 @@ ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC) /* {{{ */
 }
 /* }}} */
 
-static int zend_merge_property(zval *value TSRMLS_DC, int num_args, va_list args, const zend_hash_key *hash_key) /* {{{ */
+static int zend_merge_property(zval *value TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	/* which name should a numeric property have ? */
 	if (hash_key->key) {
@@ -1119,7 +1119,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 	zend_class_entry *old_scope = EG(scope);
 
 	EG(scope) = Z_OBJCE_P(obj);
-	zend_hash_apply_with_arguments(properties TSRMLS_CC, (apply_func_args_t)zend_merge_property, 2, obj, obj_ht);
+	zend_hash_apply_with_arguments(properties TSRMLS_CC, zend_merge_property, 2, obj, obj_ht);
 	EG(scope) = old_scope;
 
 	if (destroy_ht) {
@@ -2453,9 +2453,11 @@ ZEND_API int zend_get_module_started(const char *module_name) /* {{{ */
 }
 /* }}} */
 
-static int clean_module_class(const zend_class_entry **ce, int *module_number TSRMLS_DC) /* {{{ */
+static int clean_module_class(zval *el, void *arg TSRMLS_DC) /* {{{ */
 {
-	if ((*ce)->type == ZEND_INTERNAL_CLASS && (*ce)->info.internal.module->module_number == *module_number) {
+	zend_class_entry *ce = (zend_class_entry *)Z_PTR_P(el);
+	int module_number = *(int *)arg;
+	if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module->module_number == module_number) {
 		return ZEND_HASH_APPLY_REMOVE;
 	} else {
 		return ZEND_HASH_APPLY_KEEP;
@@ -2465,7 +2467,7 @@ static int clean_module_class(const zend_class_entry **ce, int *module_number TS
 
 static void clean_module_classes(int module_number TSRMLS_DC) /* {{{ */
 {
-	zend_hash_apply_with_argument(EG(class_table), (apply_func_arg_t) clean_module_class, (void *) &module_number TSRMLS_CC);
+	zend_hash_apply_with_argument(EG(class_table), clean_module_class, (void *) &module_number TSRMLS_CC);
 }
 /* }}} */
 

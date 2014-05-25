@@ -4101,9 +4101,10 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 }
 /* }}} */
 
-static int zend_fixup_trait_method(zval *zv, zend_class_entry *ce TSRMLS_DC) /* {{{ */
+static int zend_fixup_trait_method(zval *zv, void *arg TSRMLS_DC) /* {{{ */
 {
 	zend_function *fn = Z_PTR_P(zv);
+	zend_class_entry *ce = (zend_class_entry *)arg;
 		
 	if ((fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 
@@ -4368,15 +4369,15 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 			zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
 
 			/* copies functions, applies defined aliasing, and excludes unused trait methods */
-			zend_hash_apply_with_arguments(&ce->traits[i]->function_table TSRMLS_CC, (apply_func_args_t)zend_traits_copy_functions, 3, ce, &overriden, &exclude_table);
+			zend_hash_apply_with_arguments(&ce->traits[i]->function_table TSRMLS_CC, zend_traits_copy_functions, 3, ce, &overriden, &exclude_table);
 
 			zend_hash_destroy(&exclude_table);
 		} else {
-			zend_hash_apply_with_arguments(&ce->traits[i]->function_table TSRMLS_CC, (apply_func_args_t)zend_traits_copy_functions, 3, ce, &overriden, NULL);
+			zend_hash_apply_with_arguments(&ce->traits[i]->function_table TSRMLS_CC, zend_traits_copy_functions, 3, ce, &overriden, NULL);
 		}
 	}
 
-    zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t)zend_fixup_trait_method, ce TSRMLS_CC);
+    zend_hash_apply_with_argument(&ce->function_table, zend_fixup_trait_method, ce TSRMLS_CC);
 
 	if (overriden) {
 		zend_hash_destroy(overriden);

@@ -34,8 +34,9 @@ static HashTable *registered_zend_ini_directives;
 /*
  * hash_apply functions
  */
-static int zend_remove_ini_entries(zend_ini_entry *ini_entry, int *module_number TSRMLS_DC) /* {{{ */
+static int zend_remove_ini_entries(zval *el, int *module_number TSRMLS_DC) /* {{{ */
 {
+	zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
 	if (ini_entry->module_number == *module_number) {
 		return 1;
 	} else {
@@ -224,13 +225,14 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
 
 ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC) /* {{{ */
 {
-	zend_hash_apply_with_argument(registered_zend_ini_directives, (apply_func_arg_t) zend_remove_ini_entries, (void *) &module_number TSRMLS_CC);
+	zend_hash_apply_with_argument(registered_zend_ini_directives, zend_remove_ini_entries, (void *) &module_number TSRMLS_CC);
 }
 /* }}} */
 
 #ifdef ZTS
-static int zend_ini_refresh_cache(zend_ini_entry *p, int stage TSRMLS_DC) /* {{{ */
+static int zend_ini_refresh_cache(zval *el, int stage TSRMLS_DC) /* {{{ */
 {
+	zend_ini_entry *p = (zend_ini_entry *)Z_PTR_P(el);
 	if (p->on_modify) {
 		p->on_modify(p, p->value, p->value_length, p->mh_arg1, p->mh_arg2, p->mh_arg3, stage TSRMLS_CC);
 	}
@@ -240,7 +242,7 @@ static int zend_ini_refresh_cache(zend_ini_entry *p, int stage TSRMLS_DC) /* {{{
 
 ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC) /* {{{ */
 {
-	zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) zend_ini_refresh_cache, (void *)(zend_intptr_t) stage TSRMLS_CC);
+	zend_hash_apply_with_argument(EG(ini_directives), zend_ini_refresh_cache, (void *)(zend_intptr_t) stage TSRMLS_CC);
 }
 /* }}} */
 #endif
