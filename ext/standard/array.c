@@ -1165,6 +1165,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ 
 
 	if (strict) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZVAL_DEREF(entry);
 			is_identical_function(&res, value, entry TSRMLS_CC);
 			if (Z_TYPE(res) == IS_TRUE) {
 				if (behavior == 0) {
