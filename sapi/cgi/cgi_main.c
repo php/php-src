@@ -241,7 +241,7 @@ static void print_modules(TSRMLS_D)
 //???	zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
-	zend_hash_apply(&sorted_registry, (apply_func_t) print_module_info TSRMLS_CC);
+	zend_hash_apply(&sorted_registry, print_module_info TSRMLS_CC);
 	zend_hash_destroy(&sorted_registry);
 }
 

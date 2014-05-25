@@ -76,9 +76,10 @@ static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage TSRMLS
 }
 /* }}} */
 
-static int zend_restore_ini_entry_wrapper(zend_ini_entry **ini_entry TSRMLS_DC) /* {{{ */
+static int zend_restore_ini_entry_wrapper(zval *el TSRMLS_DC) /* {{{ */
 {
-	zend_restore_ini_entry_cb(*ini_entry, ZEND_INI_STAGE_DEACTIVATE TSRMLS_CC);
+	zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
+	zend_restore_ini_entry_cb(ini_entry, ZEND_INI_STAGE_DEACTIVATE TSRMLS_CC);
 	return 1;
 }
 /* }}} */
@@ -123,7 +124,7 @@ ZEND_API int zend_ini_global_shutdown(TSRMLS_D) /* {{{ */
 ZEND_API int zend_ini_deactivate(TSRMLS_D) /* {{{ */
 {
 	if (EG(modified_ini_directives)) {
-		zend_hash_apply(EG(modified_ini_directives), (apply_func_t) zend_restore_ini_entry_wrapper TSRMLS_CC);
+		zend_hash_apply(EG(modified_ini_directives), zend_restore_ini_entry_wrapper TSRMLS_CC);
 		zend_hash_destroy(EG(modified_ini_directives));
 		FREE_HASHTABLE(EG(modified_ini_directives));
 		EG(modified_ini_directives) = NULL;

@@ -1452,26 +1452,28 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 
 #if ZEND_INTENSIVE_DEBUGGING
 
-#define CHECK_SYMBOL_TABLES()														\
-	zend_hash_apply(&EG(symbol_table), (apply_func_t) zend_check_symbol TSRMLS_CC);	\
-	if (&EG(symbol_table)!=EG(active_symbol_table)) {								\
-		zend_hash_apply(EG(active_symbol_table), (apply_func_t) zend_check_symbol TSRMLS_CC);	\
+#define CHECK_SYMBOL_TABLES()													\
+	zend_hash_apply(&EG(symbol_table), zend_check_symbol TSRMLS_CC);			\
+	if (&EG(symbol_table)!=EG(active_symbol_table)) {							\
+		zend_hash_apply(EG(active_symbol_table), zend_check_symbol TSRMLS_CC);	\
 	}
 
-static int zend_check_symbol(zval **pz TSRMLS_DC)
+static int zend_check_symbol(zval *pz TSRMLS_DC)
 {
-	if (Z_TYPE_PP(pz) > 9) {
+	if (Z_TYPE_P(pz) == IS_INDIRECT) {
+		pz = Z_INDIRECT_P(pz);
+	}
+	if (Z_TYPE_P(pz) > 10) {
 		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
 /* See http://support.microsoft.com/kb/190351 */
 #ifdef PHP_WIN32
 		fflush(stderr);
 #endif
-	} else if (Z_TYPE_PP(pz) == IS_ARRAY) {
-		zend_hash_apply(Z_ARRVAL_PP(pz), (apply_func_t) zend_check_symbol TSRMLS_CC);
-	} else if (Z_TYPE_PP(pz) == IS_OBJECT) {
-
+	} else if (Z_TYPE_P(pz) == IS_ARRAY) {
+		zend_hash_apply(Z_ARRVAL_P(pz), zend_check_symbol TSRMLS_CC);
+	} else if (Z_TYPE_P(pz) == IS_OBJECT) {
 		/* OBJ-TBI - doesn't support new object model! */
-		zend_hash_apply(Z_OBJPROP_PP(pz), (apply_func_t) zend_check_symbol TSRMLS_CC);
+		zend_hash_apply(Z_OBJPROP_P(pz), zend_check_symbol TSRMLS_CC);
 	}
 
 	return 0;
