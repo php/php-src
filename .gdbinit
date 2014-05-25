@@ -54,11 +54,11 @@ define dump_bt
 		set $fst = $t->function_state
 		if $fst.function->common.function_name
 			if $fst.arguments
-				set $count = (int)*($fst.arguments)
+				set $count = $fst.arguments->value.lval
 
 				if $t->object
 					if $fst.function.common.scope
-						printf "%s->", $fst.function.common.scope->name
+						printf "%s->", $fst.function.common.scope->name->val
 					else
 						if !$eg
 							____executor_globals
@@ -66,9 +66,7 @@ define dump_bt
 
 						set $known_class = 0
 						if $eg
-							set $handle = $t->object.value.obj.handle
-							set $handlers = $t->object.value.obj.handlers
-							set $zobj = (zend_object *)$eg.objects_store.object_buckets[$handle].bucket.obj.object
+							set $handlers = $t->object->handlers
 
 							if $handlers->get_class_entry == &zend_std_object_get_class
 								set $known_class = 1
@@ -80,7 +78,7 @@ define dump_bt
 								end
 
 								if $known_class
-									printf "%s->", $zobj->ce.name
+									printf "%s->", $t->object->ce.name->val
 								end
 							end
 						end
@@ -91,49 +89,45 @@ define dump_bt
 					end
 				else
 					if $fst.function.common.scope
-						printf "%s::", $fst.function.common.scope->name
+						printf "%s::", $fst.function.common.scope->name->val
 					end
 				end
 
-				printf "%s(", $fst.function->common.function_name
+				printf "%s(", $fst.function->common.function_name->val
 				while $count > 0
-					set $zvalue = *(zval **)($fst.arguments - $count)
-					set $type = $zvalue->type
-					if $type == 0
+					set $zvalue = $fst.arguments - $count
+					set $type = $zvalue->u1.v.type
+					if $type == 1
 						printf "NULL"
 					end
-					if $type == 1
-						printf "%ld", $zvalue->value.lval
-					end
 					if $type == 2
-						printf "%f", $zvalue->value.dval
+						printf "false"
 					end
 					if $type == 3
-						if $zvalue->value.lval
-							printf "true"
-						else
-							printf "false"
-						end
+						printf "true"
 					end
 					if $type == 4
-						printf "array(%d)[%p]", $zvalue->value.ht->nNumOfElements, $zvalue
+						printf "%ld", $zvalue->value.lval
 					end
 					if $type == 5
-						printf "object[%p]", $zvalue
+						printf "%f", $zvalue->value.dval
 					end
 					if $type == 6
-						____print_str $zvalue->value.str.val $zvalue->value.str.len
+						____print_str $zvalue->value.str->val $zvalue->value.str->len
 					end
 					if $type == 7
-						printf "resource(#%d)", $zvalue->value.lval
+						printf "array(%d)[%p]", $zvalue->value.arr->ht->nNumOfElements, $zvalue
 					end
 					if $type == 8
-						printf "constant"
+						printf "object[%p]", $zvalue
 					end
 					if $type == 9
-						printf "const_array"
+						printf "resource(#%d)", $zvalue->value.lval
 					end
-					if $type > 9
+					if $type == 10
+						printf "reference"
+					end
+					if $type > 10
 						printf "unknown type %d", $type
 					end
 					set $count = $count -1
@@ -143,13 +137,13 @@ define dump_bt
 				end
 				printf ") "
 			else
-				printf "%s() ", $fst.function->common.function_name
+				printf "%s() ", $fst.function->common.function_name->val
 			end
 		else
 			printf "??? "
 		end
 		if $t->op_array != 0
-			printf "%s:%d ", $t->op_array->filename, $t->opline->lineno
+			printf "%s:%d ", $t->op_array->filename->val, $t->opline->lineno
 		end
 		set $t = $t->prev_execute_data
 		printf "\n"
@@ -171,13 +165,13 @@ end
 
 define ____printzv_contents
 	set $zvalue = $arg0
-	set $type = $zvalue->type
+	set $type = $zvalue->u1.v.type
 
 	if $type >= 7
 		printf "(refcount=%d", $zvalue->value.counted->refcount
 		printf ") "
     else 
-		printf "(refcount=NaN)"
+		printf "(refcount=NaN) "
     end
 	if $type == 0
 		printf "UNDEF"
@@ -186,15 +180,10 @@ define ____printzv_contents
         printf "NULL"
 	end
 	if $type == 2
-		printf "indirect: %p", (void*)$zvalue->value.zv
+		printf "bool: false"
 	end
 	if $type == 3
-		printf "bool: "
-		if $zvalue->value.lval
-			printf "true"
-		else
-			printf "false"
-		end
+		printf "bool: true"
 	end
     if $type == 4
 		printf "long: %ld", $zvalue->value.lval
@@ -203,11 +192,9 @@ define ____printzv_contents
         printf "double: %f", $zvalue->value.dval
     end
     if $type == 6
-    end
-    if $type == 7
        printf "string: %s", $zvalue->value.str->val
     end
-	if $type == 8 
+	if $type == 7 
 		printf "array: ", $zvalue->value.arr->ht.nNumUsed
 		if ! $arg1
 			set $ind = $ind + 1
@@ -221,7 +208,7 @@ define ____printzv_contents
 		end
 		set $type = 0
 	end
-	if $type == 9
+	if $type == 8
 		printf "object"
 		____executor_globals
 		set $handle = $zvalue->value.obj.handle
@@ -248,23 +235,26 @@ define ____printzv_contents
 		end
 		set $type = 0
 	end
-	if $type == 10
+	if $type == 9
 		printf "resource: #%d", $zvalue->value.res->handle
 	end
-	if $type == 11
+	if $type == 10
 		printf "reference: %p", $zvalue->value.ref
 	end
-	if $type == 12
+	if $type == 11
 		printf "const: %s", $zvalue->value.str->val
 	end
-	if $type == 13
-		printf "const_array"
-	end
-	if $type == 14
+	if $type == 12
 		printf "const_ast"
 	end
+	if $type == 13
+		printf "_IS_BOOL"
+	end
+	if $type == 14
+		printf "IS_CALLABLE"
+	end
 	if $type == 15
-		printf "callable"
+		printf "indirect: %p", (void *) $zvalue->value.zv
 	end
 	if $type == 16
 		printf "string_offset"
