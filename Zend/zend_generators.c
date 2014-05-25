@@ -235,13 +235,14 @@ static zend_object *zend_generator_create(zend_class_entry *class_type TSRMLS_DC
 }
 /* }}} */
 
-static void copy_closure_static_var(zval *var TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+static int copy_closure_static_var(zval *var TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
 	HashTable *target = va_arg(args, HashTable *);
 
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(var);
 	Z_ADDREF_P(var);
 	zend_hash_update(target, key->key, var);
+	return 0;
 }
 /* }}} */
 
@@ -272,8 +273,8 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 			);
 			zend_hash_apply_with_arguments(
 				op_array->static_variables TSRMLS_CC,
-				(apply_func_args_t) copy_closure_static_var,
-				1, op_array_copy->static_variables
+				copy_closure_static_var, 1, 
+				op_array_copy->static_variables
 			);
 		}
 

@@ -1577,13 +1577,13 @@ ZEND_FUNCTION(restore_exception_handler)
 }
 /* }}} */
 
-static int copy_class_or_interface_name(zend_class_entry **pce TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int copy_class_or_interface_name(zval *el TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
+	zend_class_entry *ce = (zend_class_entry *)Z_PTR_P(el);
 	zval *array = va_arg(args, zval *);
 	zend_uint mask = va_arg(args, zend_uint);
 	zend_uint comply = va_arg(args, zend_uint);
 	zend_uint comply_mask = (comply)? mask:0;
-	zend_class_entry *ce  = *pce;
 
 	if ((hash_key->key && hash_key->key->val[0] != 0)
 		&& (comply_mask == (ce->ce_flags & mask))) {
@@ -1610,7 +1610,7 @@ ZEND_FUNCTION(get_declared_traits)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
+	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, copy_class_or_interface_name, 3, return_value, mask, comply);
 }
 /* }}} */
 
@@ -1627,7 +1627,7 @@ ZEND_FUNCTION(get_declared_classes)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
+	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, copy_class_or_interface_name, 3, return_value, mask, comply);
 }
 /* }}} */
 
@@ -1643,7 +1643,7 @@ ZEND_FUNCTION(get_declared_interfaces)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
+	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, copy_class_or_interface_name, 3, return_value, mask, comply);
 }
 /* }}} */
 
@@ -1682,7 +1682,7 @@ ZEND_FUNCTION(get_defined_functions)
 	array_init(&user);
 	array_init(return_value);
 
-	zend_hash_apply_with_arguments(EG(function_table) TSRMLS_CC, (apply_func_args_t) copy_function_name, 2, &internal, &user);
+	zend_hash_apply_with_arguments(EG(function_table) TSRMLS_CC, copy_function_name, 2, &internal, &user);
 
 	ret = zend_hash_str_add(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
 

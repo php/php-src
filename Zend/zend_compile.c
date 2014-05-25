@@ -3727,7 +3727,7 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_
 	zval_add_ref
 #endif
 
-static int do_inherit_class_constant(zval *zv TSRMLS_DC, int num_args, va_list args, const zend_hash_key *hash_key) /* {{{ */
+static int do_inherit_class_constant(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zend_class_entry *ce = va_arg(args, zend_class_entry *);
 	zend_class_entry *parent_ce = va_arg(args, zend_class_entry *);
@@ -3849,7 +3849,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal_zval : zend_duplicate_property_info_zval), (merge_checker_func_t) do_inherit_property_access_check, ce);
 
-	zend_hash_apply_with_arguments(&parent_ce->constants_table TSRMLS_CC, (apply_func_args_t)do_inherit_class_constant, 2, ce, parent_ce);
+	zend_hash_apply_with_arguments(&parent_ce->constants_table TSRMLS_CC, do_inherit_class_constant, 2, ce, parent_ce);
 	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, do_inherit_method, (merge_checker_func_t) do_inherit_method_check, ce);
 	do_inherit_parent_constructor(ce);
 
@@ -3879,7 +3879,7 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zva
 }
 /* }}} */
 
-static int do_interface_constant_check(zval *val TSRMLS_DC, int num_args, va_list args, const zend_hash_key *key) /* {{{ */
+static int do_interface_constant_check(zval *val TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
 	zend_class_entry **iface = va_arg(args, zend_class_entry**);
 
@@ -3889,7 +3889,7 @@ static int do_interface_constant_check(zval *val TSRMLS_DC, int num_args, va_lis
 }
 /* }}} */
 
-static int do_inherit_iface_constant(zval *zv TSRMLS_DC, int num_args, va_list args, const zend_hash_key *hash_key) /* {{{ */
+static int do_inherit_iface_constant(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zend_class_entry *ce = va_arg(args, zend_class_entry *);
 	zend_class_entry *iface = va_arg(args, zend_class_entry *);
@@ -3925,7 +3925,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	}
 	if (ignore) {
 		/* Check for attempt to redeclare interface constants */
-		zend_hash_apply_with_arguments(&ce->constants_table TSRMLS_CC, (apply_func_args_t) do_interface_constant_check, 1, &iface);
+		zend_hash_apply_with_arguments(&ce->constants_table TSRMLS_CC, do_interface_constant_check, 1, &iface);
 	} else {
 		if (ce->num_interfaces >= current_iface_num) {
 			if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -3936,7 +3936,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		}
 		ce->interfaces[ce->num_interfaces++] = iface;
 
-		zend_hash_apply_with_arguments(&iface->constants_table TSRMLS_CC, (apply_func_args_t)do_inherit_iface_constant, 2, ce, iface);
+		zend_hash_apply_with_arguments(&iface->constants_table TSRMLS_CC, do_inherit_iface_constant, 2, ce, iface);
 		zend_hash_merge_ex(&ce->function_table, &iface->function_table, do_inherit_method, (merge_checker_func_t) do_inherit_method_check, ce);
 
 		do_implement_interface(ce, iface TSRMLS_CC);
