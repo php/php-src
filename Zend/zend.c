@@ -196,7 +196,7 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 	ulong num_key;
 	int i = 0;
 
-	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, string_key, tmp) {
+	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, string_key, tmp) {
 		if (i++ > 0) {
 			ZEND_PUTS(",");
 		}
