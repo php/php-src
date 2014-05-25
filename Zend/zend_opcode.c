@@ -717,7 +717,7 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 
 int pass_two_wrapper(zval *el TSRMLS_DC)
 {
-	return pass_two((zend_op_array*)Z_PTR_P(el));
+	return pass_two((zend_op_array *) Z_PTR_P(el) TSRMLS_CC);
 }
 
 int print_class(zend_class_entry *class_entry TSRMLS_DC)
