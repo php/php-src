@@ -35,6 +35,11 @@
 
 static zend_class_entry *spl_ce_RuntimeException;
 
+zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
+
+/* for exceptional circumstances */
+zend_class_entry *pdo_exception_ce;
+
 ZEND_DECLARE_MODULE_GLOBALS(pdo)
 static PHP_GINIT_FUNCTION(pdo);
 
@@ -46,32 +51,33 @@ HashTable pdo_driver_hash;
 /* we use persistent resources for the driver connection stuff */
 static int le_ppdo;
 
-int php_pdo_list_entry(void)
+int php_pdo_list_entry(void) /* {{{ */
 {
 	return le_ppdo;
 }
+/* }}} */
 
-/* for exceptional circumstances */
-zend_class_entry *pdo_exception_ce;
-
-PDO_API zend_class_entry *php_pdo_get_dbh_ce(void)
+PDO_API zend_class_entry *php_pdo_get_dbh_ce(void) /* {{{ */
 {
 	return pdo_dbh_ce;
 }
+/* }}} */
 
-PDO_API zend_class_entry *php_pdo_get_exception(void)
+PDO_API zend_class_entry *php_pdo_get_exception(void) /* {{{ */
 {
 	return pdo_exception_ce;
 }
+/* }}} */
 
-PDO_API char *php_pdo_str_tolower_dup(const char *src, int len)
+PDO_API char *php_pdo_str_tolower_dup(const char *src, int len) /* {{{ */
 {
 	char *dest = emalloc(len + 1);
 	zend_str_tolower_copy(dest, src, len);
 	return dest;
 }
+/* }}} */
 
-PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
+PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC) /* {{{ */
 {
 #if defined(HAVE_SPL)
 	if (!root) {
@@ -89,8 +95,7 @@ PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
 #endif
 	return zend_exception_get_default(TSRMLS_C);
 }
-
-zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
+/* }}} */
 
 /* {{{ proto array pdo_drivers()
  Return array of available PDO drivers */
@@ -171,7 +176,7 @@ static PHP_GINIT_FUNCTION(pdo)
 }
 /* }}} */
 
-PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
+PDO_API int php_pdo_register_driver(pdo_driver_t *driver) /* {{{ */
 {
 	if (driver->api_version != PDO_DRIVER_API) {
 		zend_error(E_ERROR, "PDO: driver %s requires PDO API version %ld; this is PDO version %d",
@@ -185,8 +190,9 @@ PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
 
 	return zend_hash_str_add_ptr(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len, driver) != NULL;
 }
+/* }}} */
 
-PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver)
+PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver) /* {{{ */
 {
 	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
 		return;
@@ -194,15 +200,15 @@ PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver)
 
 	zend_hash_str_del(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len);
 }
+/* }}} */
 
-pdo_driver_t *pdo_find_driver(const char *name, int namelen)
+pdo_driver_t *pdo_find_driver(const char *name, int namelen) /* {{{ */
 {
 	return zend_hash_str_find_ptr(&pdo_driver_hash, (char*)name, namelen);
 }
+/* }}} */
 
-PDO_API int php_pdo_parse_data_source(const char *data_source,
-		unsigned long data_source_len, struct pdo_data_src_parser *parsed,
-		int nparams)
+PDO_API int php_pdo_parse_data_source(const char *data_source, unsigned long data_source_len, struct pdo_data_src_parser *parsed, int nparams) /* {{{ */
 {
 	int i, j;
 	int valstart = -1;
@@ -300,9 +306,10 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 
 	return n_matches;
 }
+/* }}} */
 
 static const char digit_vec[] = "0123456789";
-PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC)
+PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC) /* {{{ */
 {
 	char buffer[65];
 	char outbuf[65] = "";
@@ -341,6 +348,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC)
 	*dst = '\0';
 	return estrdup(outbuf);
 }
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo)

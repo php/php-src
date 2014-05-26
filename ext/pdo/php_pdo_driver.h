@@ -24,9 +24,10 @@
 #include "php_pdo.h"
 
 /* forward declarations */
-typedef struct _pdo_dbh_t 	pdo_dbh_t;
-typedef struct _pdo_stmt_t	pdo_stmt_t;
-typedef struct _pdo_row_t	pdo_row_t;
+typedef struct _pdo_dbh_t 		 pdo_dbh_t;
+typedef struct _pdo_dbh_object_t pdo_dbh_object_t;
+typedef struct _pdo_stmt_t		 pdo_stmt_t;
+typedef struct _pdo_row_t		 pdo_row_t;
 struct pdo_bound_param_data;
 
 #ifdef PHP_WIN32
@@ -425,7 +426,6 @@ enum pdo_placeholder_support {
 	PDO_PLACEHOLDER_POSITIONAL=2
 };
 
-/* represents a connection to a database */
 struct _pdo_dbh_t {
 	/* driver specific methods */
 	struct pdo_dbh_methods *methods;
@@ -501,7 +501,11 @@ struct _pdo_dbh_t {
 
 	/* defaults for fetches */
 	enum pdo_fetch_type default_fetch_type;
+};
 
+/* represents a connection to a database */
+struct _pdo_dbh_object_t {
+	pdo_dbh_t *inner;
 	/* these items must appear in this order at the beginning of the
        struct so that this can be cast as a zend_object.  we need this
        to allow the extending class to escape all the custom handlers
@@ -510,11 +514,16 @@ struct _pdo_dbh_t {
 	zend_object std;
 };
 
-static inline pdo_dbh_t *php_pdo_dbh_fetch_object(zend_object *obj) {
-	return (pdo_dbh_t *)((char*)(obj) - XtOffsetOf(pdo_dbh_t, std));
+static inline pdo_dbh_t *php_pdo_dbh_fetch_inner(zend_object *obj) {
+	return (pdo_dbh_t *)(((pdo_dbh_object_t *)((char*)(obj) - XtOffsetOf(pdo_dbh_object_t, std)))->inner);
 }
 
-#define Z_PDO_DBH_P(zv) php_pdo_dbh_fetch_object(Z_OBJ_P((zv)))
+static inline pdo_dbh_object_t *php_pdo_dbh_fetch_object(zend_object *obj) {
+	return (pdo_dbh_object_t *)((char*)(obj) - XtOffsetOf(pdo_dbh_object_t, std));
+}
+
+#define Z_PDO_DBH_P(zv) php_pdo_dbh_fetch_inner(Z_OBJ_P((zv)))
+#define Z_PDO_OBJECT_P(zv) php_pdo_dbh_fetch_object(Z_OBJ_P((zv)))
 
 /* describes a column */
 struct pdo_column_data {
