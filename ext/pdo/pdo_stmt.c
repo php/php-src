@@ -2229,7 +2229,7 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 		/* not a pre-defined method, nor a user-defined method; check
 		 * the driver specific methods */
 		if (!stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT]) {
-			if (!pdo_hash_methods(stmt->dbh, 
+			if (!pdo_hash_methods(Z_PDO_OBJECT_P(&stmt->database_object_handle), 
 				PDO_DBH_DRIVER_METHOD_KIND_STMT TSRMLS_CC)
 				|| !stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT]) {
 				goto out;
