@@ -1920,8 +1920,8 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 	if (EXPECTED(EX(call)->num_additional_args == 0)) {
 		num_args = opline->extended_value;
-		EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
-		ZVAL_LONG(zend_vm_stack_top_inc(TSRMLS_C), num_args);
+		EX(function_state).arguments = zend_vm_stack_top_inc(TSRMLS_C);
+		ZVAL_LONG(EX(function_state).arguments, num_args);
 	} else {
 		num_args = opline->extended_value + EX(call)->num_additional_args;
 		EX(function_state).arguments = zend_vm_stack_push_args(num_args TSRMLS_CC);
