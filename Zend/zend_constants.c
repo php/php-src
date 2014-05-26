@@ -82,9 +82,12 @@ static int clean_non_persistent_constant_full(zval *zv TSRMLS_DC)
 }
 
 
-static int clean_module_constant(const zend_constant *c, int *module_number TSRMLS_DC)
+static int clean_module_constant(zval *el, void *arg TSRMLS_DC)
 {
-	if (c->module_number == *module_number) {
+	zend_constant *c = (zend_constant *)Z_PTR_P(el);
+	int module_number = *(int *)arg;
+
+	if (c->module_number == module_number) {
 		return 1;
 	} else {
 		return 0;
@@ -94,7 +97,7 @@ static int clean_module_constant(const zend_constant *c, int *module_number TSRM
 
 void clean_module_constants(int module_number TSRMLS_DC)
 {
-	zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t) clean_module_constant, (void *) &module_number TSRMLS_CC);
+	zend_hash_apply_with_argument(EG(zend_constants), clean_module_constant, (void *) &module_number TSRMLS_CC);
 }
 
 

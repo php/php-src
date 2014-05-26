@@ -34,10 +34,11 @@ static HashTable *registered_zend_ini_directives;
 /*
  * hash_apply functions
  */
-static int zend_remove_ini_entries(zval *el, int *module_number TSRMLS_DC) /* {{{ */
+static int zend_remove_ini_entries(zval *el, void *arg TSRMLS_DC) /* {{{ */
 {
 	zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
-	if (ini_entry->module_number == *module_number) {
+	int module_number = *(int *)arg;
+	if (ini_entry->module_number == module_number) {
 		return 1;
 	} else {
 		return 0;

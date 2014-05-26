@@ -483,7 +483,7 @@ PHP_FUNCTION(get_browser)
 
 	if ((agent = zend_hash_str_find(bdata->htab, lookup_browser_name, agent_name_len)) == NULL) {
 		ZVAL_UNDEF(&found_browser_entry);
-		zend_hash_apply_with_arguments(bdata->htab TSRMLS_CC, (apply_func_args_t) browser_reg_compare, 3, lookup_browser_name, agent_name_len, &found_browser_entry);
+		zend_hash_apply_with_arguments(bdata->htab TSRMLS_CC, browser_reg_compare, 3, lookup_browser_name, agent_name_len, &found_browser_entry);
 
 		if (Z_TYPE(found_browser_entry) != IS_UNDEF) {
 			agent = &found_browser_entry;

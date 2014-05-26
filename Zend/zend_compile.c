@@ -6831,7 +6831,7 @@ static int zend_auto_global_init(zval *zv TSRMLS_DC) /* {{{ */
 
 ZEND_API void zend_activate_auto_globals(TSRMLS_D) /* {{{ */
 {
-	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_init TSRMLS_CC);
+	zend_hash_apply(CG(auto_globals), zend_auto_global_init TSRMLS_CC);
 }
 /* }}} */
 

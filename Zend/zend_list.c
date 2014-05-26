@@ -228,9 +228,10 @@ void zend_destroy_rsrc_list(HashTable *ht TSRMLS_DC)
 	zend_hash_graceful_reverse_destroy(ht);
 }
 
-static int clean_module_resource(zval *zv, int *resource_id TSRMLS_DC)
+static int clean_module_resource(zval *zv, void *arg TSRMLS_DC)
 {
-	if (Z_RES_TYPE_P(zv) == *resource_id) {
+	int resource_id = *(int *)arg;
+	if (Z_RES_TYPE_P(zv) == resource_id) {
 		return 1;
 	} else {
 		return 0;
@@ -238,10 +239,11 @@ static int clean_module_resource(zval *zv, int *resource_id TSRMLS_DC)
 }
 
 
-static int zend_clean_module_rsrc_dtors_cb(zval *zv, int *module_number TSRMLS_DC)
+static int zend_clean_module_rsrc_dtors_cb(zval *zv, void *arg TSRMLS_DC)
 {
-	zend_rsrc_list_dtors_entry *ld = Z_PTR_P(zv);	
-	if (ld->module_number == *module_number) {
+	zend_rsrc_list_dtors_entry *ld = (zend_rsrc_list_dtors_entry *)Z_PTR_P(zv);	
+	int module_number = *(int *)arg;
+	if (ld->module_number == module_number) {
 		zend_hash_apply_with_argument(&EG(persistent_list), clean_module_resource, (void *) &(ld->resource_id) TSRMLS_CC);
 		return 1;
 	} else {

@@ -4526,7 +4526,7 @@ static int add_config_entry_cb(zval *entry TSRMLS_DC, int num_args, va_list args
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		array_init(&tmp);
-		zend_hash_apply_with_arguments(Z_ARRVAL_P(entry) TSRMLS_CC, (apply_func_args_t) add_config_entry_cb, 1, tmp);
+		zend_hash_apply_with_arguments(Z_ARRVAL_P(entry) TSRMLS_CC, add_config_entry_cb, 1, tmp);
 		zend_hash_update(Z_ARRVAL_P(retval), hash_key->key, &tmp);
 	}
 	return 0;
@@ -4550,7 +4550,7 @@ PHP_FUNCTION(get_cfg_var)
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_ARRAY) {
 			array_init(return_value);
-			zend_hash_apply_with_arguments(Z_ARRVAL_P(retval) TSRMLS_CC, (apply_func_args_t) add_config_entry_cb, 1, return_value);
+			zend_hash_apply_with_arguments(Z_ARRVAL_P(retval) TSRMLS_CC, add_config_entry_cb, 1, return_value);
 			return;
 		} else {
 			RETURN_STRING(Z_STRVAL_P(retval));
@@ -4939,7 +4939,7 @@ void php_call_shutdown_functions(TSRMLS_D) /* {{{ */
 {
 	if (BG(user_shutdown_function_names)) {
 		zend_try {
-			zend_hash_apply(BG(user_shutdown_function_names), (apply_func_t) user_shutdown_function_call TSRMLS_CC);
+			zend_hash_apply(BG(user_shutdown_function_names), user_shutdown_function_call TSRMLS_CC);
 		}
 		zend_end_try();
 		php_free_shutdown_functions(TSRMLS_C);
@@ -5262,7 +5262,7 @@ PHP_FUNCTION(ini_get_all)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(ini_directives) TSRMLS_CC, (apply_func_args_t) php_ini_get_option, 2, return_value, extnumber, details);
+	zend_hash_apply_with_arguments(EG(ini_directives) TSRMLS_CC, php_ini_get_option, 2, return_value, extnumber, details);
 }
 /* }}} */
 
@@ -5902,7 +5902,7 @@ PHP_FUNCTION(config_get_hash) /* {{{ */
 	HashTable *hash = php_ini_get_configuration_hash();
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(hash TSRMLS_CC, (apply_func_args_t) add_config_entry_cb, 1, return_value);
+	zend_hash_apply_with_arguments(hash TSRMLS_CC, add_config_entry_cb, 1, return_value);
 }
 /* }}} */
 #endif

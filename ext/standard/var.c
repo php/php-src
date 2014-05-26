@@ -119,7 +119,7 @@ PHPAPI void php_var_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht;
 	zend_string *class_name;
-	int (*php_element_dump_func)(zval* TSRMLS_DC, int, va_list, zend_hash_key*);
+	apply_func_args_t php_element_dump_func;
 	int is_temp;
 	int is_ref = 0;
 
@@ -178,7 +178,7 @@ again:
 			php_element_dump_func = php_object_property_dump;
 	head_done:
 			if (myht) {
-				zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_element_dump_func, 1, level);
+				zend_hash_apply_with_arguments(myht TSRMLS_CC, php_element_dump_func, 1, level);
 				--myht->u.v.nApplyCount;
 				if (is_temp) {
 					zend_hash_destroy(myht);
@@ -297,7 +297,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht = NULL;
 	zend_string *class_name;
-	int (*zval_element_dump_func)(zval* TSRMLS_DC, int, va_list, zend_hash_key*);
+	apply_func_args_t zval_element_dump_func;
 	int is_temp = 0;
 	int is_ref = 0;
 
@@ -348,7 +348,7 @@ again:
 		zval_element_dump_func = zval_object_property_dump;
 head_done:
 		if (myht) {
-			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) zval_element_dump_func, 1, level, (Z_TYPE_P(struc) == IS_ARRAY ? 0 : 1));
+			zend_hash_apply_with_arguments(myht TSRMLS_CC, zval_element_dump_func, 1, level, (Z_TYPE_P(struc) == IS_ARRAY ? 0 : 1));
 			if (is_temp) {
 				zend_hash_destroy(myht);
 				efree(myht);
@@ -537,7 +537,7 @@ again:
 				buffer_append_spaces(buf, level - 1);
 			}
 			smart_str_appendl(buf, "array (\n", 8);
-			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_array_element_export, 2, level, buf);
+			zend_hash_apply_with_arguments(myht TSRMLS_CC, php_array_element_export, 2, level, buf);
 
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
@@ -564,7 +564,7 @@ again:
 
 			STR_RELEASE(class_name);
 			if (myht) {
-				zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_object_element_export, 1, level, buf);
+				zend_hash_apply_with_arguments(myht TSRMLS_CC, php_object_element_export, 1, level, buf);
 			}
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
