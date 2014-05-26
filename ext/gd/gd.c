@@ -3976,7 +3976,7 @@ PHP_FUNCTION(imagepscopyfont)
 	gd_ps_font *nf_ind, *of_ind;
 	long fnt;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &fnt) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &fnt) == FAILURE) {
 		return;
 	}
 
@@ -5122,7 +5122,7 @@ PHP_FUNCTION(imagescale)
 	php_int_t tmp_w, tmp_h=-1, tmp_m = GD_BILINEAR_FIXED;
 	gdInterpolationMethod method;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|ll", &IM, &tmp_w, &tmp_h, &tmp_m) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|ii", &IM, &tmp_w, &tmp_h, &tmp_m) == FAILURE)  {
 		return;
 	}
 	method = tmp_m;

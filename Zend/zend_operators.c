@@ -962,7 +962,7 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;
 	int converted = 0;
@@ -1044,6 +1044,7 @@ ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		}
 	}
 }
+/* }}} */
 
 ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {

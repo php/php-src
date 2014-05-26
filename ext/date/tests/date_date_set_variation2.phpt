@@ -125,7 +125,7 @@ object(DateTime)#%d (3) {
 -- int 1 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "0001-07-02 08:34:10"
+  string(26) "0001-07-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -135,7 +135,7 @@ object(DateTime)#%d (3) {
 -- int 12345 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(20) "12345-07-02 08:34:10"
+  string(27) "12345-07-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -145,7 +145,7 @@ object(DateTime)#%d (3) {
 -- int -12345 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(21) "-12345-07-02 08:34:10"
+  string(28) "-12345-07-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -155,7 +155,7 @@ object(DateTime)#%d (3) {
 -- float 10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "0010-07-02 08:34:10"
+  string(26) "0010-07-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -165,7 +165,7 @@ object(DateTime)#%d (3) {
 -- float -10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(20) "-0010-07-02 08:34:10"
+  string(27) "-0010-07-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -225,7 +225,7 @@ object(DateTime)#%d (3) {
 -- lowercase true --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "0001-07-02 08:34:10"
+  string(26) "0001-07-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -245,7 +245,7 @@ object(DateTime)#%d (3) {
 -- uppercase TRUE --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "0001-07-02 08:34:10"
+  string(26) "0001-07-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
