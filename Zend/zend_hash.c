@@ -1099,8 +1099,6 @@ ZEND_API void zend_array_dup(HashTable *target, HashTable *source)
 				p = source->arData + idx;
 				q = target->arData + idx;
 				if (Z_TYPE(p->val) == IS_UNDEF) {
-					q->h = 0;
-					q->key = NULL;
 					ZVAL_UNDEF(&q->val);
 					continue;
 				}
@@ -1109,8 +1107,6 @@ ZEND_API void zend_array_dup(HashTable *target, HashTable *source)
 				if (Z_TYPE_P(data) == IS_INDIRECT) {
 					data = Z_INDIRECT_P(data);
 					if (Z_TYPE_P(data) == IS_UNDEF) {
-						q->h = 0;
-						q->key = NULL;
 						ZVAL_UNDEF(&q->val);
 						continue;
 					}
