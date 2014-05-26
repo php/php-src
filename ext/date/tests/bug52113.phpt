@@ -117,7 +117,7 @@ object(DatePeriod)#6 (6) {
   ["start"]=>
   object(DateTime)#4 (3) {
     ["date"]=>
-    string(19) "2003-01-02 08:00:00"
+    string(26) "2003-01-02 08:00:00.000000"
     ["timezone_type"]=>
     int(3)
     ["timezone"]=>
@@ -201,7 +201,7 @@ object(DatePeriod)#9 (6) {
   ["start"]=>
   object(DateTime)#6 (3) {
     ["date"]=>
-    string(19) "2003-01-02 08:00:00"
+    string(26) "2003-01-02 08:00:00.000000"
     ["timezone_type"]=>
     int(3)
     ["timezone"]=>

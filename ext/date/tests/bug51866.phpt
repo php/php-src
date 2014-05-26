@@ -46,7 +46,7 @@ string(6) "Y-m-d+"
 string(19) "2001-11-29 13:20:01"
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2001-11-29 %d:%d:%d"
+  string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -72,7 +72,7 @@ string(7) "Y-m-d +"
 string(19) "2001-11-29 13:20:01"
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2001-11-29 %d:%d:%d"
+  string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -98,7 +98,7 @@ string(6) "Y-m-d+"
 string(10) "2001-11-29"
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2001-11-29 %d:%d:%d"
+  string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -141,7 +141,7 @@ string(7) "Y-m-d +"
 string(11) "2001-11-29 "
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2001-11-29 %d:%d:%d"
+  string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

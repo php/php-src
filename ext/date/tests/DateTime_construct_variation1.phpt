@@ -142,7 +142,7 @@ FAILED: DateTime::__construct(): Failed to parse time string (-12345) at positio
 -- float 10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -150,7 +150,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -164,7 +164,7 @@ FAILED: DateTime::__construct(): Failed to parse time string (-10.5) at position
 -- float .5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -172,7 +172,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -198,7 +198,7 @@ FAILED: DateTime::__construct() expects parameter 1 to be string, array given
 -- uppercase NULL --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -206,7 +206,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -216,7 +216,7 @@ object(DateTime)#%d (3) {
 -- lowercase null --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -224,7 +224,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -238,7 +238,7 @@ FAILED: DateTime::__construct(): Failed to parse time string (1) at position 0 (
 -- lowercase false --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -246,7 +246,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -260,7 +260,7 @@ FAILED: DateTime::__construct(): Failed to parse time string (1) at position 0 (
 -- uppercase FALSE --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -268,7 +268,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -278,7 +278,7 @@ object(DateTime)#%d (3) {
 -- empty string DQ --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -286,7 +286,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -296,7 +296,7 @@ object(DateTime)#%d (3) {
 -- empty string SQ --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -304,7 +304,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -338,7 +338,7 @@ FAILED: DateTime::__construct() expects parameter 1 to be string, object given
 -- undefined var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -346,7 +346,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -356,7 +356,7 @@ object(DateTime)#%d (3) {
 -- unset var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -364,7 +364,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

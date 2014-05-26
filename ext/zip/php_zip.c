@@ -328,7 +328,7 @@ static int php_zip_parse_options(zval *options, long *remove_all_path, char **re
 	}
 
 	/* If I add more options, it would make sense to create a nice static struct and loop over it. */
-	if ((options = zend_hash_str_find(HASH_OF(options), "remove_path", sizeof("remove_path") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(HASH_OF(options), "remove_path", sizeof("remove_path") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_STRING) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "remove_path option expected to be a string");
 			return -1;
