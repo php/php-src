@@ -104,36 +104,24 @@ static void zend_push_function_call_entry(zend_function *fbc TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-static void zend_duplicate_property_info(zend_property_info *property_info) /* {{{ */
+static zend_property_info *zend_duplicate_property_info(zend_property_info *property_info) /* {{{ */
 {
-	STR_ADDREF(property_info->name);
-	if (property_info->doc_comment) {
-		STR_ADDREF(property_info->doc_comment);
+	zend_property_info* new_property_info = emalloc(sizeof(zend_property_info));
+	memcpy(new_property_info, property_info, sizeof(zend_property_info));
+	STR_ADDREF(new_property_info->name);
+	if (new_property_info->doc_comment) {
+		STR_ADDREF(new_property_info->doc_comment);
 	}
+	return new_property_info;
 }
 /* }}} */
 
-static void zend_duplicate_property_info_zval(zval *zv) /* {{{ */
+static zend_property_info *zend_duplicate_property_info_internal(zend_property_info *property_info) /* {{{ */
 {
-	zend_property_info* property_info = emalloc(sizeof(zend_property_info));
-	memcpy(property_info, Z_PTR_P(zv), sizeof(zend_property_info));
-	Z_PTR_P(zv) = property_info;
-	zend_duplicate_property_info(property_info);
-}
-/* }}} */
-
-static void zend_duplicate_property_info_internal(zend_property_info *property_info) /* {{{ */
-{
-	STR_ADDREF(property_info->name);
-}
-/* }}} */
-
-static void zend_duplicate_property_info_internal_zval(zval *zv) /* {{{ */
-{
-	zend_property_info* property_info = pemalloc(sizeof(zend_property_info), 1);
-	memcpy(property_info, Z_PTR_P(zv), sizeof(zend_property_info));
-	Z_PTR_P(zv) = property_info;
-	zend_duplicate_property_info_internal(property_info);
+	zend_property_info* new_property_info = pemalloc(sizeof(zend_property_info), 1);
+	memcpy(new_property_info, property_info, sizeof(zend_property_info));
+	STR_ADDREF(new_property_info->name);
+	return new_property_info;
 }
 /* }}} */
 
@@ -3205,9 +3193,8 @@ char *zend_visibility_string(zend_uint fn_flags) /* {{{ */
 }
 /* }}} */
 
-static void do_inherit_method(zval *zv) /* {{{ */
+static zend_function *do_inherit_method(zend_function *old_function) /* {{{ */
 {
-	zend_function *old_function = Z_PTR_P(zv);
 	zend_function *new_function;
 
 	if (old_function->type == ZEND_INTERNAL_FUNCTION) {
@@ -3222,7 +3209,7 @@ static void do_inherit_method(zval *zv) /* {{{ */
 	 * we're running, and handle private method calls properly.
 	 */
 	function_add_ref(new_function);
-	Z_PTR_P(zv) = new_function;
+	return new_function;
 }
 /* }}} */
 
@@ -3602,14 +3589,13 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 }
 /* }}} */
 
-static zend_bool do_inherit_method_check(HashTable *child_function_table, zval *zv, const zend_hash_key *hash_key, zend_class_entry *child_ce) /* {{{ */
+static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, zend_string *key, zend_class_entry *child_ce) /* {{{ */
 {
-	zend_function *parent = Z_PTR_P(zv);
 	zend_uint parent_flags = parent->common.fn_flags;
 	zend_function *child;
 	TSRMLS_FETCH();
 
-	if ((child = zend_hash_find_ptr(child_function_table, hash_key->key)) == NULL) {
+	if ((child = zend_hash_find_ptr(child_function_table, key)) == NULL) {
 		if (parent_flags & (ZEND_ACC_ABSTRACT)) {
 			child_ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
@@ -3622,33 +3608,32 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zval *
 }
 /* }}} */
 
-static zend_bool do_inherit_property_access_check(HashTable *target_ht, zval *zv, const zend_hash_key *hash_key, zend_class_entry *ce) /* {{{ */
+static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
-    zend_property_info *parent_info = Z_PTR_P(zv);
 	zend_property_info *child_info;
 	zend_class_entry *parent_ce = ce->parent;
 
 	if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
-		if ((child_info = zend_hash_find_ptr(&ce->properties_info, hash_key->key)) != NULL) {
+		if ((child_info = zend_hash_find_ptr(&ce->properties_info, key)) != NULL) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		} else {
-			child_info = zend_hash_update_mem(&ce->properties_info, hash_key->key, parent_info, sizeof(zend_property_info));
 			if(ce->type & ZEND_INTERNAL_CLASS) {
-				zend_duplicate_property_info_internal(child_info);
+				child_info = zend_duplicate_property_info_internal(parent_info);
 			} else {
-				zend_duplicate_property_info(child_info);
+				child_info = zend_duplicate_property_info(parent_info);
 			}
+			zend_hash_update_ptr(&ce->properties_info, key, child_info);
 			child_info->flags &= ~ZEND_ACC_PRIVATE; /* it's not private anymore */
 			child_info->flags |= ZEND_ACC_SHADOW; /* but it's a shadow of private */
 		}
 		return 0; /* don't copy access information to child */
 	}
 
-	if ((child_info = zend_hash_find_ptr(&ce->properties_info, hash_key->key)) != NULL) {
+	if ((child_info = zend_hash_find_ptr(&ce->properties_info, key)) != NULL) {
 		if ((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s%s::$%s as %s%s::$%s",
-				(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", parent_ce->name->val, hash_key->key->val,
-				(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ce->name->val, hash_key->key->val);
+				(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", parent_ce->name->val, key->val,
+				(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ce->name->val, key->val);
 
 		}
 
@@ -3657,7 +3642,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zval *zv
 		}
 
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name->val, hash_key->key->val, zend_visibility_string(parent_info->flags), parent_ce->name->val, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name->val, key->val, zend_visibility_string(parent_info->flags), parent_ce->name->val, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
 			zval_ptr_dtor(&(ce->default_properties_table[parent_info->offset]));
 			ce->default_properties_table[parent_info->offset] = ce->default_properties_table[child_info->offset];
@@ -3751,6 +3736,8 @@ static int do_inherit_class_constant(zval *zv TSRMLS_DC, int num_args, va_list a
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
+	zend_function *func;
+	zend_string *key;
 
 	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
 		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
@@ -3847,10 +3834,26 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal_zval : zend_duplicate_property_info_zval), (merge_checker_func_t) do_inherit_property_access_check, ce);
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->properties_info, key, property_info) {
+		if (do_inherit_property_access_check(&ce->properties_info, property_info, key, ce)) {
+			if (ce->type & ZEND_INTERNAL_CLASS) {
+				property_info = zend_duplicate_property_info_internal(property_info);
+			} else {
+				property_info = zend_duplicate_property_info(property_info);
+			}
+			zend_hash_add_new_ptr(&ce->properties_info, key, property_info);
+		}
+	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_apply_with_arguments(&parent_ce->constants_table TSRMLS_CC, do_inherit_class_constant, 2, ce, parent_ce);
-	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, do_inherit_method, (merge_checker_func_t) do_inherit_method_check, ce);
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
+		if (do_inherit_method_check(&ce->function_table, func, key, ce)) {
+			zend_function *new_func = do_inherit_method(func);
+			zend_hash_add_new_ptr(&ce->function_table, key, new_func);
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	do_inherit_parent_constructor(ce);
 
 	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS && ce->type == ZEND_INTERNAL_CLASS) {
@@ -3910,6 +3913,8 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	zend_uint i, ignore = 0;
 	zend_uint current_iface_num = ce->num_interfaces;
 	zend_uint parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
+	zend_function *func;
+	zend_string *key;
 
 	for (i = 0; i < ce->num_interfaces; i++) {
 		if (ce->interfaces[i] == NULL) {
@@ -3937,7 +3942,13 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		ce->interfaces[ce->num_interfaces++] = iface;
 
 		zend_hash_apply_with_arguments(&iface->constants_table TSRMLS_CC, do_inherit_iface_constant, 2, ce, iface);
-		zend_hash_merge_ex(&ce->function_table, &iface->function_table, do_inherit_method, (merge_checker_func_t) do_inherit_method_check, ce);
+
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
+			if (do_inherit_method_check(&ce->function_table, func, key, ce)) {
+				zend_function *new_func = do_inherit_method(func);
+				zend_hash_add_new_ptr(&ce->function_table, key, new_func);
+			}
+		} ZEND_HASH_FOREACH_END();
 
 		do_implement_interface(ce, iface TSRMLS_CC);
 		zend_do_inherit_interfaces(ce, iface TSRMLS_CC);

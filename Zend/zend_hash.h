@@ -404,6 +404,15 @@ static inline void *zend_hash_add_ptr(HashTable *ht, zend_string *key, void *pDa
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
+static inline void *zend_hash_add_new_ptr(HashTable *ht, zend_string *key, void *pData)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, pData);
+	zv = zend_hash_add_new(ht, key, &tmp);
+	return zv ? Z_PTR_P(zv) : NULL;
+}
+
 static inline void *zend_hash_str_add_ptr(HashTable *ht, const char *str, int len, void *pData)
 {
 	zval tmp, *zv;
