@@ -650,7 +650,7 @@ static void convert_scalar_to_array(zval *op TSRMLS_DC) /* {{{ */
 
 	ZVAL_NEW_ARR(op);
 	zend_hash_init(Z_ARRVAL_P(op), 8, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_index_update(Z_ARRVAL_P(op), 0, &entry);
+	zend_hash_index_add_new(Z_ARRVAL_P(op), 0, &entry);
 }
 /* }}} */
 

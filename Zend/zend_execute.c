@@ -1035,7 +1035,7 @@ num_index:
 					zend_error(E_NOTICE,"Undefined offset: %ld", hval);
 					/* break missing intentionally */
 				case BP_VAR_W:
-					retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
+					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
 					break;
 			}
 		}

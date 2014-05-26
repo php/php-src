@@ -582,7 +582,6 @@ ZEND_FUNCTION(each)
 {
 	zval *array, *entry, tmp;
 	ulong num_key;
-	zval *inserted_pointer;
 	HashTable *target_hash;
 	zend_string *key;
 
@@ -609,7 +608,8 @@ ZEND_FUNCTION(each)
 		}
 		break;
 	}
-	array_init(return_value);
+	array_init_size(return_value, 4);
+	zend_hash_real_init(Z_ARRVAL_P(return_value), 0);
 
 	/* add value elements */
 	if (Z_ISREF_P(entry)) {
@@ -620,17 +620,18 @@ ZEND_FUNCTION(each)
 		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 	}
-	zend_hash_index_update(Z_ARRVAL_P(return_value), 1, entry);
+	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 1, entry);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "value", sizeof("value")-1, entry);
 
 	/* add the key elements */
 	if (zend_hash_get_current_key(target_hash, &key, &num_key, 0) == HASH_KEY_IS_STRING) {
-		inserted_pointer = add_get_index_str(return_value, 0, STR_COPY(key));
+		ZVAL_STR(&tmp, STR_COPY(key));
+		if (Z_REFCOUNTED(tmp)) Z_ADDREF(tmp);
 	} else {
-		inserted_pointer = add_get_index_long(return_value, 0, num_key);
+		ZVAL_LONG(&tmp, num_key);
 	}
-	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "key", sizeof("key")-1, inserted_pointer);
-	if (Z_REFCOUNTED_P(inserted_pointer)) Z_ADDREF_P(inserted_pointer);
+	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 0, &tmp);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "key", sizeof("key")-1, &tmp);
 	zend_hash_move_forward(target_hash);
 }
 /* }}} */

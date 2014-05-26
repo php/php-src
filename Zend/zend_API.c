@@ -1095,31 +1095,25 @@ ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC) /* {{{ */
 }
 /* }}} */
 
-static int zend_merge_property(zval *value TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
-{
-	/* which name should a numeric property have ? */
-	if (hash_key->key) {
-		zval *obj = va_arg(args, zval *);
-		zend_object_handlers *obj_ht = va_arg(args, zend_object_handlers *);
-		zval member;
-
-		ZVAL_STR(&member, STR_COPY(hash_key->key));
-		obj_ht->write_property(obj, &member, value, -1 TSRMLS_CC);
-		zval_ptr_dtor(&member);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
 /* This function should be called after the constructor has been called
  * because it may call __set from the uninitialized object otherwise. */
 ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destroy_ht TSRMLS_DC) /* {{{ */
 {
 	const zend_object_handlers *obj_ht = Z_OBJ_HT_P(obj);
 	zend_class_entry *old_scope = EG(scope);
+	zend_string *key;
+	zval *value;
 
 	EG(scope) = Z_OBJCE_P(obj);
-	zend_hash_apply_with_arguments(properties TSRMLS_CC, zend_merge_property, 2, obj, obj_ht);
+	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, value) {
+		if (key) {
+			zval member;
+
+			ZVAL_STR(&member, STR_COPY(key));
+			obj_ht->write_property(obj, &member, value, -1 TSRMLS_CC);
+			zval_ptr_dtor(&member);
+		}
+	} ZEND_HASH_FOREACH_END();
 	EG(scope) = old_scope;
 
 	if (destroy_ht) {

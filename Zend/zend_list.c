@@ -41,7 +41,7 @@ ZEND_API zval *zend_list_insert(void *ptr, int type TSRMLS_DC)
 		index = 1;
 	}
 	ZVAL_NEW_RES(&zv, index, ptr, type);
-	return zend_hash_index_update(&EG(regular_list), index, &zv);
+	return zend_hash_index_add_new(&EG(regular_list), index, &zv);
 }
 
 ZEND_API int _zend_list_delete(zend_resource *res TSRMLS_DC)
