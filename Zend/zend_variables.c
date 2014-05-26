@@ -321,7 +321,7 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 			ZVAL_NULL(&tmp);
 			if (is_ref) {
 				ZVAL_NEW_REF(&tmp, &tmp);
-				zend_hash_add(&EG(active_symbol_table)->ht, key->key, &tmp);
+				zend_hash_add_new(&EG(active_symbol_table)->ht, key->key, &tmp);
 				Z_ADDREF_P(p);
 			} else {
 				zend_error(E_NOTICE,"Undefined variable: %s", key->key->val);

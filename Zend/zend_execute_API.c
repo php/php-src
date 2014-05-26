@@ -1607,7 +1607,7 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 				zval zv;
 					
 				ZVAL_INDIRECT(&zv, EX_VAR_NUM_2(ex, i));
-				zend_hash_update(&EG(active_symbol_table)->ht,
+				zend_hash_add_new(&EG(active_symbol_table)->ht,
 					ex->op_array->vars[i], &zv);
 			}
 		}

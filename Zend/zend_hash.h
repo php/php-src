@@ -34,6 +34,7 @@
 #define HASH_ADD				(1<<1)
 #define HASH_NEXT_INSERT		(1<<2)
 #define HASH_UPDATE_INDIRECT	(1<<3)
+#define HASH_ADD_NEW			(1<<4)
 
 #define INVALID_IDX ((uint)-1)
 
@@ -68,28 +69,52 @@ ZEND_API void zend_hash_to_packed(HashTable *ht);
 
 /* additions/updates/changes */
 ZEND_API zval *_zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *pData, int flag ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_update(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_update_ind(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_add(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_add_new(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
+
 #define zend_hash_update(ht, key, pData) \
-		_zend_hash_add_or_update(ht, key, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
+		_zend_hash_update(ht, key, pData ZEND_FILE_LINE_CC)
 #define zend_hash_update_ind(ht, key, pData) \
-		_zend_hash_add_or_update(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_CC)
+		_zend_hash_update_ind(ht, key, pData ZEND_FILE_LINE_CC)
 #define zend_hash_add(ht, key, pData) \
-		_zend_hash_add_or_update(ht, key, pData, HASH_ADD ZEND_FILE_LINE_CC)
+		_zend_hash_add(ht, key, pData ZEND_FILE_LINE_CC)
+#define zend_hash_add_new(ht, key, pData) \
+		_zend_hash_add_new(ht, key, pData ZEND_FILE_LINE_CC)
 
 ZEND_API zval *_zend_hash_str_add_or_update(HashTable *ht, const char *key, int len, zval *pData, int flag ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_str_update(HashTable *ht, const char *key, int len, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_str_update_ind(HashTable *ht, const char *key, int len, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_str_add(HashTable *ht, const char *key, int len, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_str_add_new(HashTable *ht, const char *key, int len, zval *pData ZEND_FILE_LINE_DC);
+
 #define zend_hash_str_update(ht, key, len, pData) \
-		_zend_hash_str_add_or_update(ht, key, len, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
+		_zend_hash_str_update(ht, key, len, pData ZEND_FILE_LINE_CC)
 #define zend_hash_str_update_ind(ht, key, len, pData) \
-		_zend_hash_str_add_or_update(ht, key, len, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_CC)
+		_zend_hash_str_update_ind(ht, key, len, pData ZEND_FILE_LINE_CC)
 #define zend_hash_str_add(ht, key, len, pData) \
-		_zend_hash_str_add_or_update(ht, key, len, pData, HASH_ADD ZEND_FILE_LINE_CC)
+		_zend_hash_str_add(ht, key, len, pData ZEND_FILE_LINE_CC)
+#define zend_hash_str_add_new(ht, key, len, pData) \
+		_zend_hash_str_add_new(ht, key, len, pData ZEND_FILE_LINE_CC)
 
 ZEND_API zval *_zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zval *pData, int flag ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_index_add(HashTable *ht, ulong h, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_index_add_new(HashTable *ht, ulong h, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_index_update(HashTable *ht, ulong h, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_next_index_insert(HashTable *ht, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_next_index_insert_new(HashTable *ht, zval *pData ZEND_FILE_LINE_DC);
+
 #define zend_hash_index_add(ht, h, pData) \
-		_zend_hash_index_update_or_next_insert(ht, h, pData, HASH_ADD ZEND_FILE_LINE_CC)
+		_zend_hash_index_add(ht, h, pData ZEND_FILE_LINE_CC)
+#define zend_hash_index_add_new(ht, h, pData) \
+		_zend_hash_index_add_new(ht, h, pData ZEND_FILE_LINE_CC)
 #define zend_hash_index_update(ht, h, pData) \
-		_zend_hash_index_update_or_next_insert(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
+		_zend_hash_index_update(ht, h, pData ZEND_FILE_LINE_CC)
 #define zend_hash_next_index_insert(ht, pData) \
-		_zend_hash_index_update_or_next_insert(ht, 0, pData, HASH_NEXT_INSERT ZEND_FILE_LINE_CC)
+		_zend_hash_next_index_insert(ht, pData ZEND_FILE_LINE_CC)
+#define zend_hash_next_index_insert_new(ht, pData) \
+		_zend_hash_next_index_insert_new(ht, pData ZEND_FILE_LINE_CC)
 
 ZEND_API zval *zend_hash_index_add_empty_element(HashTable *ht, ulong h);
 ZEND_API zval *zend_hash_add_empty_element(HashTable *ht, zend_string *key);

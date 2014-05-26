@@ -621,7 +621,7 @@ ZEND_FUNCTION(each)
 		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 	}
 	zend_hash_index_update(Z_ARRVAL_P(return_value), 1, entry);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), "value", sizeof("value")-1, entry);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "value", sizeof("value")-1, entry);
 
 	/* add the key elements */
 	if (zend_hash_get_current_key(target_hash, &key, &num_key, 0) == HASH_KEY_IS_STRING) {
@@ -629,7 +629,7 @@ ZEND_FUNCTION(each)
 	} else {
 		inserted_pointer = add_get_index_long(return_value, 0, num_key);
 	}
-	zend_hash_str_update(Z_ARRVAL_P(return_value), "key", sizeof("key")-1, inserted_pointer);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "key", sizeof("key")-1, inserted_pointer);
 	if (Z_REFCOUNTED_P(inserted_pointer)) Z_ADDREF_P(inserted_pointer);
 	zend_hash_move_forward(target_hash);
 }
@@ -934,7 +934,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 			zval_update_constant(&prop_copy, 0 TSRMLS_CC);
 		}
 
-		zend_hash_update(Z_ARRVAL_P(return_value), key, &prop_copy);
+		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &prop_copy);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -1001,9 +1001,9 @@ ZEND_FUNCTION(get_object_vars)
 				if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 				if (key->val[0] == 0) {
 					zend_unmangle_property_name_ex(key->val, key->len, &class_name, &prop_name, (int*) &prop_len);
-					zend_hash_str_update(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
+					zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
 				} else {
-					zend_hash_update(Z_ARRVAL_P(return_value), key, value);
+					zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
 				}
 			}
 		}
@@ -1063,7 +1063,7 @@ ZEND_FUNCTION(get_class_methods)
 			if (!key) {
 // TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
 				ZVAL_STR(&method_name, STR_DUP(mptr->common.function_name, 0));
-				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &method_name);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 			} else if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0 ||
 			    mptr->common.scope == ce ||
 			    zend_binary_strcasecmp(key->val, key->len, mptr->common.function_name->val, len) == 0) {
@@ -1073,11 +1073,11 @@ ZEND_FUNCTION(get_class_methods)
 			    	(len != key->len ||
 			    	 !same_name(key->val, mptr->common.function_name->val, len))) {
 					ZVAL_STR(&method_name, STR_COPY(zend_find_alias_name(mptr->common.scope, key)));
-					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &method_name);
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 				} else {
 // TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
 					ZVAL_STR(&method_name, STR_DUP(mptr->common.function_name, 0));
-					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &method_name);
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 				}
 			}
 		}
@@ -1693,7 +1693,7 @@ ZEND_FUNCTION(get_defined_functions)
 
 	zend_hash_apply_with_arguments(EG(function_table) TSRMLS_CC, copy_function_name, 2, &internal, &user);
 
-	ret = zend_hash_str_add(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
+	ret = zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
 
 	if (!ret) {
 		zval_ptr_dtor(&internal);
@@ -1703,7 +1703,7 @@ ZEND_FUNCTION(get_defined_functions)
 		RETURN_FALSE;
 	}
 
-	ret = zend_hash_str_add(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);
+	ret = zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);
 	if (!ret) {		
 		zval_ptr_dtor(&user);
 		zval_dtor(return_value);
@@ -1862,7 +1862,7 @@ static int add_constant_info(zval *item, void *arg TSRMLS_DC)
 	}
 
 	ZVAL_DUP(&const_val, &constant->value);
-	zend_hash_update(Z_ARRVAL_P(name_array), constant->name, &const_val);
+	zend_hash_add_new(Z_ARRVAL_P(name_array), constant->name, &const_val);
 	return 0;
 }
 
@@ -1942,7 +1942,7 @@ ZEND_FUNCTION(get_defined_constants)
 
 			ZVAL_DUP_DEREF(&const_val, &val->value);
 
-			zend_hash_update(Z_ARRVAL(modules[module_number]), val->name, &const_val);
+			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
 		} ZEND_HASH_FOREACH_END();
 
 		efree(module_names);

@@ -1165,7 +1165,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_W:
-					retval = zend_hash_update(target_symbol_table, Z_STR_P(varname), &EG(uninitialized_zval));
+					retval = zend_hash_add_new(target_symbol_table, Z_STR_P(varname), &EG(uninitialized_zval));
 					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
@@ -3360,13 +3360,13 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 		if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 			do {
 				zend_verify_arg_type((zend_function *) EX(op_array), arg_num, param, opline->extended_value TSRMLS_CC);
-				zend_hash_next_index_insert(Z_ARRVAL_P(params), param);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(params), param);
 				if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
 				param++;
 			} while (++arg_num <= arg_count);
 		} else {
 			do {
-				zend_hash_next_index_insert(Z_ARRVAL_P(params), param);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(params), param);
 				if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
 				param++;
 			} while (++arg_num <= arg_count);

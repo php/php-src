@@ -1081,7 +1081,7 @@ str_index:
 					zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
 					/* break missing intentionally */
 				case BP_VAR_W:
-					retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
+					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 					break;
 			}
 		}

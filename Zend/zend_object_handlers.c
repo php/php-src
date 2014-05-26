@@ -450,7 +450,7 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 	}
 
 	ZVAL_LONG(&stub, 0);
-	guard = zend_hash_add(zobj->guards, property_info->name, &stub);
+	guard = zend_hash_add_new(zobj->guards, property_info->name, &stub);
 	if (str) {
 		STR_RELEASE(str);
 	}
