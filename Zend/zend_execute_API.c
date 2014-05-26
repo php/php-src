@@ -626,24 +626,7 @@ ZEND_API int zval_update_constant(zval *pp, zend_bool inline_change TSRMLS_DC) /
 
 int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, zend_uint param_count, zval params[] TSRMLS_DC) /* {{{ */
 {
-	zval *params_array;
-	zend_uint i;
-	int ex_retval;
-
-	if (param_count) {
-		params_array = (zval *) emalloc(sizeof(zval) * param_count);
-		for (i=0; i<param_count; i++) {
-			ZVAL_COPY_VALUE(&params_array[i], &params[i]);
-		}
-	} else {
-		params_array = NULL;
-	}
-	ZVAL_UNDEF(retval_ptr);
-	ex_retval = call_user_function_ex(function_table, object, function_name, retval_ptr, param_count, params_array, 1, NULL TSRMLS_CC);
-	if (params_array) {
-		efree(params_array);
-	}
-	return ex_retval;
+	return call_user_function_ex(function_table, object, function_name, retval_ptr, param_count, params, 1, NULL TSRMLS_CC);
 }
 /* }}} */
 
