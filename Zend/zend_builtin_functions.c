@@ -460,18 +460,27 @@ ZEND_FUNCTION(func_get_args)
 	arg_count = Z_LVAL_P(p);		/* this is the amount of arguments passed to func_get_args(); */
 
 	array_init_size(return_value, arg_count);
-	for (i=0; i<arg_count; i++) {
-		zval *element, *arg, tmp;
+	if (arg_count) {
+		Bucket *q;		
 
-		arg = p-(arg_count-i);
-		if (!Z_ISREF_P(arg)) {
-			element = arg;
-			if (Z_REFCOUNTED_P(element)) Z_ADDREF_P(element);
-		} else {
-			ZVAL_DUP(&tmp, Z_REFVAL_P(arg));
-			element = &tmp;
-	    }
-		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), element);
+		p -= arg_count;
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+		q = Z_ARRVAL_P(return_value)->arData;
+		for (i=0; i<arg_count; i++) {
+			q->h = i;
+			q->key = NULL;
+			if (!Z_ISREF_P(p)) {
+				ZVAL_COPY(&q->val, p);
+			} else {
+				ZVAL_DUP(&q->val, Z_REFVAL_P(p));
+		    }
+			p++;
+			q++;
+		}
+		Z_ARRVAL_P(return_value)->nNumUsed = i;
+		Z_ARRVAL_P(return_value)->nNumOfElements = i;
+		Z_ARRVAL_P(return_value)->nNextFreeElement = i + 1;
+		Z_ARRVAL_P(return_value)->nInternalPointer = 0;
 	}
 }
 /* }}} */
