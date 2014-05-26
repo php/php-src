@@ -133,7 +133,6 @@ static int clean_non_persistent_class_full(zval *zv TSRMLS_DC) /* {{{ */
 
 void init_executor(TSRMLS_D) /* {{{ */
 {
-	zval tmp;
 	zend_init_fpu(TSRMLS_C);
 
 	ZVAL_NULL(&EG(uninitialized_zval));
@@ -157,8 +156,7 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(error_handling) = EH_NORMAL;
 
 	zend_vm_stack_init(TSRMLS_C);
-	ZVAL_LONG(&tmp, 0);
-	zend_vm_stack_push(&tmp TSRMLS_CC);
+	ZVAL_LONG(zend_vm_stack_top_inc(TSRMLS_C), 0);
 
 	zend_hash_init(&EG(symbol_table).ht, 64, NULL, ZVAL_PTR_DTOR, 0);
 	EG(active_symbol_table) = &EG(symbol_table);
@@ -507,7 +505,7 @@ ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
 
 ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
-	zval *const_value, tmp;
+	zval *const_value;
 	char *colon;
 
 	if (IS_CONSTANT_VISITED(p)) {
@@ -593,6 +591,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 
 		if (Z_REFCOUNTED_P(p)) Z_SET_REFCOUNT_P(p, refcount);
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
+		zval tmp;
 		SEPARATE_ZVAL_IF_NOT_REF(p);
 
 		zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope TSRMLS_CC);
@@ -810,9 +809,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		zend_vm_stack_push(param TSRMLS_CC);
 	}
 
-	EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
-	ZVAL_LONG(&tmp, fci->param_count);
-	zend_vm_stack_push(&tmp TSRMLS_CC);
+	EX(function_state).arguments = zend_vm_stack_top_inc(TSRMLS_C);
+	ZVAL_LONG(EX(function_state).arguments, fci->param_count);
 
 	EG(scope) = calling_scope;
 	EG(called_scope) = called_scope;
