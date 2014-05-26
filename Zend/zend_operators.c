@@ -2086,6 +2086,7 @@ static void increment_string(zval *str) /* {{{ */
 
 ZEND_API int increment_function(zval *op1) /* {{{ */
 {
+try_again:
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			if (Z_LVAL_P(op1) == LONG_MAX) {
@@ -2141,6 +2142,9 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 				return res;
 			}
 			return FAILURE;
+		case IS_REFERENCE:
+			op1 = Z_REFVAL_P(op1);
+			goto try_again;
 		default:
 			return FAILURE;
 	}
@@ -2153,6 +2157,7 @@ ZEND_API int decrement_function(zval *op1) /* {{{ */
 	long lval;
 	double dval;
 
+try_again:
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			if (Z_LVAL_P(op1) == LONG_MIN) {
@@ -2200,6 +2205,9 @@ ZEND_API int decrement_function(zval *op1) /* {{{ */
 				return res;
 			}
 			return FAILURE;
+		case IS_REFERENCE:
+			op1 = Z_REFVAL_P(op1);
+			goto try_again;
 		default:
 			return FAILURE;
 	}
