@@ -1137,7 +1137,11 @@ ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				return SUCCESS;
 
 			default:
-				if (!converted) {
+				if (Z_ISREF_P(op1)) {
+					op1 = Z_REFVAL_P(op1);
+				} else if (Z_ISREF_P(op2)) {
+					op2 = Z_REFVAL_P(op2);
+				} else if (!converted) {
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW);
 
 					if (Z_TYPE_P(op1) == IS_ARRAY) {
