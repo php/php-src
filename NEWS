@@ -41,6 +41,9 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #66307 (Fileinfo crashes with powerpoint files). (Anatol)
+  . Fixed bug #67327 (fileinfo: CDF infinite loop in nelements DoS).
+  . Fixed bug #67328 (fileinfo: fileinfo: numerous file_printf calls resulting in
+    performance degradation).
 
 - FPM:
   . Fixed bug #66908 (php-fpm reload leaks epoll_create() file descriptor).
