@@ -1940,10 +1940,10 @@ PHP_METHOD(Phar, buildFromIterator)
 PHP_METHOD(Phar, count)
 {
 	/* mode can be ignored, maximum depth is 1 */
-	long mode;
+	php_int_t mode;
 	PHAR_ARCHIVE_OBJECT();
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &mode) == FAILURE) {
 		RETURN_FALSE;
 	}
 
