@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   . Fixed bug #67245 (usage of memcpy() with overlapping src and dst in
     zend_exceptions.c). (Bob)
   . Fixed bug #67247 (spl_fixedarray_resize integer overflow). (Stas)
+  . Fixed bug #67249 (printf out-of-bounds read). (Stas)
   . Fixed bug #67250 (iptcparse out-of-bounds read). (Stas)
   . Fixed bug #67252 (convert_uudecode out-of-bounds read). (Stas)
 
