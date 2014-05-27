@@ -182,10 +182,8 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval TSRMLS
 
 	   it should return whether the call was successfull or not
 	*/
-
 	SEPARATE_ARG_IF_REF(member);
 
-	ZVAL_UNDEF(retval);
 	zend_call_method_with_1_params(object, ce, &ce->__get, ZEND_GET_FUNC_NAME, retval, member);
 
 	zval_ptr_dtor(member);
@@ -207,7 +205,6 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 
 	   it should return whether the call was successfull or not
 	*/
-	ZVAL_UNDEF(&retval);
 	zend_call_method_with_2_params(object, ce, &ce->__set, ZEND_SET_FUNC_NAME, &retval, member, value);
 
 	zval_ptr_dtor(member);
@@ -251,7 +248,6 @@ static void zend_std_call_issetter(zval *object, zval *member, zval *retval TSRM
 
 	SEPARATE_ARG_IF_REF(member);
 
-	ZVAL_UNDEF(retval);
 	zend_call_method_with_1_params(object, ce, &ce->__isset, ZEND_ISSET_FUNC_NAME, retval, member);
 
 	zval_ptr_dtor(member);
@@ -923,7 +919,6 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 	   array of method parameters
 
 	*/
-	ZVAL_UNDEF(&method_result);
 	zend_call_method_with_2_params(getThis(), ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result, &method_name, &method_args);
 
 	if (Z_TYPE(method_result) != IS_UNDEF) {
@@ -1141,7 +1136,6 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 	   method name
 	   array of method parameters
 	*/
-	ZVAL_UNDEF(&method_result);
 	zend_call_method_with_2_params(NULL, ce, &ce->__callstatic, ZEND_CALLSTATIC_FUNC_NAME, &method_result, &method_name, &method_args);
 
 	if (Z_TYPE(method_result) != IS_UNDEF) {
@@ -1479,7 +1473,6 @@ found:
 			/* have issetter - try with it! */
 			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_ISSET; /* prevent circular getting */
-			ZVAL_UNDEF(&rv);
 			zend_std_call_issetter(&tmp_object, member, &rv TSRMLS_CC);
 			if (Z_TYPE(rv) != IS_UNDEF) {
 				result = zend_is_true(&rv TSRMLS_CC);
@@ -1487,7 +1480,6 @@ found:
 				if (has_set_exists && result) {
 					if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
 						(*guard) |= IN_GET;
-						ZVAL_UNDEF(&rv);
 						zend_std_call_getter(&tmp_object, member, &rv TSRMLS_CC);
 						(*guard) &= ~IN_GET;
 						if (Z_TYPE(rv) != IS_UNDEF) {
@@ -1544,7 +1536,6 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 
 	switch (type) {
 		case IS_STRING:
-			ZVAL_UNDEF(&retval);
 			ce = Z_OBJCE_P(readobj);
 			if (ce->__tostring &&
 				(zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval) || EG(exception))) {
