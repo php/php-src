@@ -12,7 +12,7 @@ PHP                                                                        NEWS
 - PDO-ODBC:
   . Fixed bug #50444 (PDO-ODBC changes for 64-bit).
 
-?? ??? 2014, PHP 5.5.13
+29 May 2014, PHP 5.5.13
 
 - CLI server:
   . Fixed bug #67079 (Missing MIME types for XML/XSL files). (Anatol)
