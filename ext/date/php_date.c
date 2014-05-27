@@ -4107,8 +4107,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 	do { \
 		zval *z_arg = zend_hash_str_find(myht, element, sizeof(element) - 1); \
 		if (z_arg) { \
-			convert_to_long(z_arg); \
-			(*intobj)->diff->member = (itype)Z_LVAL_P(z_arg); \
+			(*intobj)->diff->member = (itype)zval_get_long(z_arg); \
 		} else { \
 			(*intobj)->diff->member = (itype)def; \
 		} \
@@ -4118,8 +4117,9 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 	do { \
 		zval *z_arg = zend_hash_str_find(myht, element, sizeof(element) - 1); \
 		if (z_arg) { \
-			convert_to_string(z_arg); \
-			DATE_A64I((*intobj)->diff->member, Z_STRVAL_P(z_arg)); \
+			zend_string *str = zval_get_string(z_arg); \
+			DATE_A64I((*intobj)->diff->member, str->val); \
+			STR_RELEASE(str); \
 		} else { \
 			(*intobj)->diff->member = -1LL; \
 		} \
