@@ -398,7 +398,7 @@ PHP_FUNCTION(msg_send)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz|bbz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riz|bbz",
 				&queue, &msgtype, &message, &do_serialize, &blocking, &zerror) == FAILURE) {
 		return;
 	}
