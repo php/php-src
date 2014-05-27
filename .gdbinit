@@ -531,13 +531,16 @@ define ____print_str
 	set $tmp = 0
 	set $str = $arg0
 	printf "\""
-	while $tmp < $arg1
+	while $tmp < $arg1 && $tmp < 256
 		if $str[$tmp] > 32 && $str[$tmp] < 127
 			printf "%c", $str[$tmp]
 		else
 			printf "\\%o", $str[$tmp]
 		end
 		set $tmp = $tmp + 1
+	end
+	if $tmp != $arg1
+		printf "..."
 	end
 	printf "\""
 end
