@@ -2704,6 +2704,9 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	junit_suite_record($suite, 'execution_time', $time);
 
 	$escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
+	$escaped_details = preg_replace_callback('/[\0-\x08\x0B\x0C\x0E-\x1F]/', function ($c) {
+		return sprintf('[[0x%02x]]', ord($c[0]));
+	}, $escaped_details);
 	$escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
 
     $escaped_test_name = basename($file_name) . ' - ' . htmlspecialchars($test_name, ENT_QUOTES);
