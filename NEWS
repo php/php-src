@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Fixed bug #67245 (usage of memcpy() with overlapping src and dst in
     zend_exceptions.c). (Bob)
   . Fixed bug #67247 (spl_fixedarray_resize integer overflow). (Stas)
+  . Fixed bug #67249 (printf out-of-bounds read). (Stas)
   . Fixed bug #67250 (iptcparse out-of-bounds read). (Stas)
   . Fixed bug #67252 (convert_uudecode out-of-bounds read). (Stas)
 
@@ -31,6 +32,7 @@ PHP                                                                        NEWS
     not only the subset). (Anatol)
 
 - Fileinfo:
+  . Fixed bug #66307 (Fileinfo crashes with powerpoint files). (Anatol)
   . Fixed bug #67327 (fileinfo: CDF infinite loop in nelements DoS). 
   . Fixed bug #67328 (fileinfo: fileinfo: numerous file_printf calls resulting in
     performance degradation).
