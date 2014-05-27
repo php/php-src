@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed bug #67081 (DOMDocumentType->internalSubset returns entire DOCTYPE tag,
     not only the subset). (Anatol)
 
+- Fileinfo:
+  . Fixed bug #67327 (fileinfo: CDF infinite loop in nelements DoS). 
+    (CVE-2014-0238).
+
 - FPM:
   . Fixed bug #66908 (php-fpm reload leaks epoll_create() file descriptor). 
     (Julio Pintos)
