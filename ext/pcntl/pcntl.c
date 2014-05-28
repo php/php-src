@@ -790,9 +790,7 @@ PHP_FUNCTION(pcntl_exec)
 		ZEND_HASH_FOREACH_KEY_VAL(envs_hash, key_num, key, element) {
 			if (envi >= envc) break;
 			if (!key) {
-				key = STR_ALLOC(101, 0);
-				snprintf(key->val, 100, "%ld", key_num);
-				key->len = strlen(key->val);
+				key = zend_long_to_str(key_num);
 			} else {
 				STR_ADDREF(key);
 			}
