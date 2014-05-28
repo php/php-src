@@ -2122,8 +2122,7 @@ PHP_FUNCTION(ldap_set_option)
 			ctrls = safe_emalloc((1 + ncontrols), sizeof(*ctrls), 0);
 			*ctrls = NULL;
 			ctrlp = ctrls;
-			zend_hash_internal_pointer_reset(Z_ARRVAL_P(newval));
-			while ((ctrlval = zend_hash_get_current_data(Z_ARRVAL_P(newval))) != NULL) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(newval), ctrlval) {
 				if (Z_TYPE_P(ctrlval) != IS_ARRAY) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "The array value must contain only arrays, where each array is a control");
 					error = 1;
@@ -2154,8 +2153,7 @@ PHP_FUNCTION(ldap_set_option)
 				
 				++ctrlp;
 				*ctrlp = NULL;
-				zend_hash_move_forward(Z_ARRVAL_P(newval));
-			}
+			} ZEND_HASH_FOREACH_END();
 			if (!error) {
 				error = ldap_set_option(ldap, option, ctrls);
 			}
