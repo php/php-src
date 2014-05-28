@@ -369,12 +369,9 @@ ZEND_METHOD(error_exception, getSeverity)
 
 /* }}} */
 
-static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{ */
 {
-	zend_string *str, **str_ptr;
-
-	str_ptr = va_arg(args, zend_string**);
-	str = *str_ptr;
+	zend_string *str = *str_ptr;
 
 	/* the trivial way would be to do:
 	 * convert_to_string_ex(arg);
@@ -510,28 +507,24 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 			break;
 	}
 	*str_ptr = str;
-	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
-static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static void _build_trace_string(zval *frame, ulong index, zend_string **str_ptr, int *num TSRMLS_DC) /* {{{ */
 {
 	char *s_tmp;
-	int len, *num;
+	int len;
 	long line;
-	HashTable *ht = Z_ARRVAL_P(frame);
+	HashTable *ht;
 	zval *file, *tmp;
-	zend_string *str, **str_ptr;
+	zend_string *str = *str_ptr;
 
 	if (Z_TYPE_P(frame) != IS_ARRAY) {
-		zend_error(E_WARNING, "Expected array for frame %lu", hash_key->h);
-		return ZEND_HASH_APPLY_KEEP;
+		zend_error(E_WARNING, "Expected array for frame %lu", index);
+		return;
 	}
 
-	str_ptr = va_arg(args, zend_string**);
-	str = *str_ptr;
-	num = va_arg(args, int*);
-
+	ht = Z_ARRVAL_P(frame);
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
 	len = sprintf(s_tmp, "#%d ", (*num)++);
 	TRACE_APPEND_STRL(s_tmp, len);
@@ -569,7 +562,12 @@ static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			int last_len = str->len;
-			zend_hash_apply_with_arguments(Z_ARRVAL_P(tmp) TSRMLS_CC, _build_trace_args, 1, &str);
+			zval *arg;
+			
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmp), arg) {
+				_build_trace_args(arg, &str TSRMLS_CC);
+			} ZEND_HASH_FOREACH_END();
+
 			if (last_len != str->len) {
 				str->len -= 2; /* remove last ', ' */
 			}
@@ -579,7 +577,6 @@ static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args
 	}
 	TRACE_APPEND_STR(")\n");
 	*str_ptr = str;
-	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -587,8 +584,9 @@ static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args
    Obtain the backtrace for the exception as a string (instead of an array) */
 ZEND_METHOD(exception, getTraceAsString)
 {
-	zval *trace;
-	zend_string *str;
+	zval *trace, *frame;
+	ulong index;
+	zend_string *str, *key;
 	int num = 0, len;
 	char s_tmp[MAX_LENGTH_OF_LONG + 7 + 1 + 1];
 
@@ -597,7 +595,9 @@ ZEND_METHOD(exception, getTraceAsString)
 	str = STR_ALLOC(0, 0);
 
 	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
-	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, _build_trace_string, 2, &str, &num);
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(trace), index, key, frame) {
+		_build_trace_string(frame, index, &str, &num TSRMLS_CC);
+	} ZEND_HASH_FOREACH_END();
 
 	len = sprintf(s_tmp, "#%d {main}", num);
 	TRACE_APPEND_STRL(s_tmp, len);
