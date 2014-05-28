@@ -1139,11 +1139,8 @@ again:
 				smart_str_appendl(&implstr, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 				break;
 
-			case IS_LONG: {
-				char stmp[MAX_LENGTH_OF_LONG + 1];
-				str_len = slprintf(stmp, sizeof(stmp), "%ld", Z_LVAL_P(tmp));
-				smart_str_appendl(&implstr, stmp, str_len);
-			}
+			case IS_LONG:
+				smart_str_append_long(&implstr, Z_LVAL_P(tmp));
 				break;
 
 			case IS_TRUE:
