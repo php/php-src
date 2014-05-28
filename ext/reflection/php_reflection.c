@@ -1918,19 +1918,12 @@ ZEND_METHOD(reflection_function, invoke)
 }
 /* }}} */
 
-static int _zval_array_to_c_array(zval *arg, zval **params TSRMLS_DC) /* {{{ */
-{
-	ZVAL_COPY((*params), arg);
-	(*params)++;
-	return ZEND_HASH_APPLY_KEEP;
-} /* }}} */
-
 /* {{{ proto public mixed ReflectionFunction::invokeArgs(array args)
    Invokes the function and pass its arguments as array. */
 ZEND_METHOD(reflection_function, invokeArgs)
 {
 	zval retval;
-	zval *params;
+	zval *params, *val;
 	int result;
 	int i, argc;
 	zend_fcall_info fci;
@@ -1949,8 +1942,11 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	argc = zend_hash_num_elements(Z_ARRVAL_P(param_array));
 
 	params = safe_emalloc(sizeof(zval), argc, 0);
-	zend_hash_apply_with_argument(Z_ARRVAL_P(param_array), (apply_func_arg_t)_zval_array_to_c_array, &params TSRMLS_CC);
-	params -= argc;
+	argc = 0;
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(param_array), val) {
+		ZVAL_COPY(&params[argc], val);
+		argc++;
+	} ZEND_HASH_FOREACH_END();
 
 	fci.size = sizeof(fci);
 	fci.function_table = NULL;
@@ -2900,8 +2896,7 @@ ZEND_METHOD(reflection_method, invoke)
 ZEND_METHOD(reflection_method, invokeArgs)
 {
 	zval retval;
-	zval *params;
-	zval *object;
+	zval *params, *val, *object;
 	reflection_object *intern;
 	zend_function *mptr;
 	int i, argc;
@@ -2940,8 +2935,11 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	argc = zend_hash_num_elements(Z_ARRVAL_P(param_array));
 
 	params = safe_emalloc(sizeof(zval), argc, 0);
-	zend_hash_apply_with_argument(Z_ARRVAL_P(param_array), (apply_func_arg_t)_zval_array_to_c_array, &params TSRMLS_CC);
-	params -= argc;
+	argc = 0;
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(param_array), val) {
+		ZVAL_COPY(&params[argc], val);
+		argc++;
+	} ZEND_HASH_FOREACH_END();
 
 	/* In case this is a static method, we should'nt pass an object_ptr
 	 * (which is used as calling context aka $this). We can thus ignore the
@@ -4260,7 +4258,7 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstanceArgs)
 {
-	zval retval;
+	zval retval, *val;
 	reflection_object *intern;
 	zend_class_entry *ce, *old_scope;
 	int ret, i, argc = 0;
@@ -4300,8 +4298,11 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 
 		if (argc) {
 			params = safe_emalloc(sizeof(zval), argc, 0);
-			zend_hash_apply_with_argument(args, (apply_func_arg_t)_zval_array_to_c_array, &params TSRMLS_CC);
-			params -= argc;
+			argc = 0;
+			ZEND_HASH_FOREACH_VAL(args, val) {
+				ZVAL_COPY(&params[argc], val);
+				argc++;
+			} ZEND_HASH_FOREACH_END();
 		}
 
 		fci.size = sizeof(fci);
