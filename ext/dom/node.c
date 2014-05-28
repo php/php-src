@@ -1724,18 +1724,15 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		tmp = zend_hash_str_find(ht, "namespaces", sizeof("namespaces")-1);
 		if (tmp && Z_TYPE_P(tmp) == IS_ARRAY) {
 			zval *tmpns;
-			while ((tmpns = zend_hash_get_current_data(Z_ARRVAL_P(tmp)))) {
-				if (Z_TYPE_P(tmpns) == IS_STRING) {
-					zend_string *prefix;
-					ulong idx;
+			zend_string *prefix;
 
-					if (zend_hash_get_current_key(Z_ARRVAL_P(tmp), 
-						&prefix, &idx, 0) == HASH_KEY_IS_STRING) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), prefix, tmpns) {
+				if (Z_TYPE_P(tmpns) == IS_STRING) {
+					if (prefix) {
 						xmlXPathRegisterNs(ctxp, prefix->val, Z_STRVAL_P(tmpns));
 					}
 				}
-				zend_hash_move_forward(Z_ARRVAL_P(tmp));
-			}
+			} ZEND_HASH_FOREACH_END();
 		}
 
 		xpathobjp = xmlXPathEvalExpression(xquery, ctxp);
@@ -1759,12 +1756,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 
 			inclusive_ns_prefixes = safe_emalloc(zend_hash_num_elements(Z_ARRVAL_P(ns_prefixes)) + 1,
 				sizeof(xmlChar *), 0);
-			while ((tmpns = zend_hash_get_current_data(Z_ARRVAL_P(ns_prefixes)))) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(ns_prefixes), tmpns) {
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
 					inclusive_ns_prefixes[nscount++] = Z_STRVAL_P(tmpns);
 				}
-				zend_hash_move_forward(Z_ARRVAL_P(ns_prefixes));
-			}
+			} ZEND_HASH_FOREACH_END();
 			inclusive_ns_prefixes[nscount] = NULL;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, 
