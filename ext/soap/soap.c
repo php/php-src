@@ -2350,7 +2350,7 @@ PHP_METHOD(SoapClient, SoapClient)
 
 	if (options != NULL) {
 		HashTable *ht = Z_ARRVAL_P(options);
-		zval *tmp;
+		zval *tmp, tmp2;
 
 		if (Z_TYPE_P(wsdl) == IS_NULL) {
 			/* Fetching non-WSDL mode options */
@@ -2410,7 +2410,10 @@ PHP_METHOD(SoapClient, SoapClient)
 		    Z_TYPE_P(tmp) == IS_STRING) {
 			add_property_str(this_ptr, "_proxy_host", STR_COPY(Z_STR_P(tmp)));
 			if ((tmp = zend_hash_str_find(ht, "proxy_port", sizeof("proxy_port")-1)) != NULL) {
-				convert_to_long(tmp);
+				if (Z_TYPE_P(tmp) != IS_LONG) {
+					ZVAL_LONG(&tmp2, zval_get_long(tmp));
+					tmp = &tmp2;
+				}
 				add_property_long(this_ptr, "_proxy_port", Z_LVAL_P(tmp));
 			}
 			if ((tmp = zend_hash_str_find(ht, "proxy_login", sizeof("proxy_login")-1)) != NULL &&
@@ -2489,7 +2492,10 @@ PHP_METHOD(SoapClient, SoapClient)
 	    }
 
 		if ((tmp = zend_hash_str_find(ht, "connection_timeout", sizeof("connection_timeout")-1)) != NULL) {
-			convert_to_long(tmp);
+			if (Z_TYPE_P(tmp) != IS_LONG) {
+				ZVAL_LONG(&tmp2, zval_get_long(tmp));
+				tmp = &tmp2;
+			}
 			if (Z_LVAL_P(tmp) > 0) {
 				add_property_long(this_ptr, "_connection_timeout", Z_LVAL_P(tmp));
 			}
