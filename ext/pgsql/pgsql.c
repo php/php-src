@@ -1955,18 +1955,12 @@ PHP_FUNCTION(pg_query_params)
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
 	}
 
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(pv_param_arr));
 	num_params = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr));
 	if (num_params > 0) {
 		int i = 0;
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
-		for(i = 0; i < num_params; i++) {
-			if ((tmp = zend_hash_get_current_data(Z_ARRVAL_P(pv_param_arr))) == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error getting parameter");
-				_php_pgsql_free_params(params, num_params);
-				RETURN_FALSE;
-			}
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
@@ -1984,9 +1978,8 @@ PHP_FUNCTION(pg_query_params)
 				params[i] = estrndup(Z_STRVAL(tmp_val), Z_STRLEN(tmp_val));
 				zval_ptr_dtor(&tmp_val);
 			}
-
-			zend_hash_move_forward(Z_ARRVAL_P(pv_param_arr));
-		}
+			i++;
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	pgsql_result = PQexecParams(pgsql, query, num_params, 
@@ -2163,18 +2156,12 @@ PHP_FUNCTION(pg_execute)
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
 	}
 
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(pv_param_arr));
 	num_params = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr));
 	if (num_params > 0) {
 		int i = 0;
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
-		for(i = 0; i < num_params; i++) {
-			if ((tmp = zend_hash_get_current_data(Z_ARRVAL_P(pv_param_arr))) == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error getting parameter");
-				_php_pgsql_free_params(params, num_params);
-				RETURN_FALSE;
-			}
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
@@ -2193,8 +2180,8 @@ PHP_FUNCTION(pg_execute)
 				zval_ptr_dtor(&tmp_val);
 			}
 
-			zend_hash_move_forward(Z_ARRVAL_P(pv_param_arr));
-		}
+			i++;
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	pgsql_result = PQexecPrepared(pgsql, stmtname, num_params, 
@@ -4865,18 +4852,12 @@ PHP_FUNCTION(pg_send_query_params)
 			"There are results on this connection. Call pg_get_result() until it returns FALSE");
 	}
 
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(pv_param_arr));
 	num_params = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr));
 	if (num_params > 0) {
 		int i = 0;
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 		
-		for(i = 0; i < num_params; i++) {
-			if ((tmp = zend_hash_get_current_data(Z_ARRVAL_P(pv_param_arr))) == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error getting parameter");
-				_php_pgsql_free_params(params, num_params);
-				RETURN_FALSE;
-			}
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
@@ -4894,8 +4875,8 @@ PHP_FUNCTION(pg_send_query_params)
 				zval_ptr_dtor(&tmp_val);
 			}
 
-			zend_hash_move_forward(Z_ARRVAL_P(pv_param_arr));
-		}
+			i++;
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (PQsendQueryParams(pgsql, query, num_params, NULL, (const char * const *)params, NULL, NULL, 0)) {
@@ -5052,18 +5033,12 @@ PHP_FUNCTION(pg_send_execute)
 			"There are results on this connection. Call pg_get_result() until it returns FALSE");
 	}
 
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(pv_param_arr));
 	num_params = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr));
 	if (num_params > 0) {
 		int i = 0;
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
-		for (i = 0; i < num_params; i++) {
-			if ((tmp = zend_hash_get_current_data(Z_ARRVAL_P(pv_param_arr))) == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error getting parameter");
-				_php_pgsql_free_params(params, num_params);
-				RETURN_FALSE;
-			}
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
@@ -5081,8 +5056,8 @@ PHP_FUNCTION(pg_send_execute)
 				zval_ptr_dtor(&tmp_val);
 			}
 
-			zend_hash_move_forward(Z_ARRVAL_P(pv_param_arr));
-		}
+			i++;
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (PQsendQueryPrepared(pgsql, stmtname, num_params, (const char * const *)params, NULL, NULL, 0)) {
