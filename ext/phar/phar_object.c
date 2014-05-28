@@ -861,7 +861,7 @@ PHP_METHOD(Phar, webPhar)
  */
 PHP_METHOD(Phar, mungServer)
 {
-	zval *mungvalues;
+	zval *mungvalues, *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &mungvalues) == FAILURE) {
 		return;
@@ -879,13 +879,7 @@ PHP_METHOD(Phar, mungServer)
 
 	phar_request_initialize(TSRMLS_C);
 
-	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(mungvalues)); SUCCESS == zend_hash_has_more_elements(Z_ARRVAL_P(mungvalues)); zend_hash_move_forward(Z_ARRVAL_P(mungvalues))) {
-		zval *data = NULL;
-
-		if (NULL == (data = zend_hash_get_current_data(Z_ARRVAL_P(mungvalues)))) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "unable to retrieve array value in Phar::mungServer()");
-			return;
-		}
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(mungvalues), data) {
 
 		if (Z_TYPE_P(data) != IS_STRING) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
@@ -908,7 +902,7 @@ PHP_METHOD(Phar, mungServer)
 		if (Z_STRLEN_P(data) == sizeof("SCRIPT_FILENAME")-1 && !strncmp(Z_STRVAL_P(data), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
 			PHAR_GLOBALS->phar_SERVER_mung_list |= PHAR_MUNG_SCRIPT_FILENAME;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -2244,16 +2238,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	}
 
 	/* first copy each file's uncompressed contents to a temporary file and set per-file flags */
-	for (zend_hash_internal_pointer_reset(&source->manifest); SUCCESS == zend_hash_has_more_elements(&source->manifest); zend_hash_move_forward(&source->manifest)) {
-
-		if (NULL == (entry = zend_hash_get_current_data_ptr(&source->manifest))) {
-			zend_hash_destroy(&(phar->manifest));
-			php_stream_close(phar->fp);
-			efree(phar);
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-				"Cannot convert phar archive \"%s\"", source->fname);
-			return NULL;
-		}
+	ZEND_HASH_FOREACH_PTR(&source->manifest, entry) {
 
 		newentry = *entry;
 
@@ -2297,7 +2282,7 @@ no_copy:
 		phar_set_inode(&newentry TSRMLS_CC);
 		zend_hash_str_add_mem(&(phar->manifest), newentry.filename, newentry.filename_len, (void*)&newentry, sizeof(phar_entry_info));
 		phar_add_virtual_dirs(phar, newentry.filename, newentry.filename_len TSRMLS_CC);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	if ((ret = phar_rename_archive(phar, ext, 0 TSRMLS_CC))) {
 		return ret;
@@ -4330,21 +4315,14 @@ all_files:
 			RETURN_TRUE;
 		}
 
-		for (zend_hash_internal_pointer_reset(&phar->manifest);
-		zend_hash_has_more_elements(&phar->manifest) == SUCCESS;
-		zend_hash_move_forward(&phar->manifest)) {
-
-			if ((entry = zend_hash_get_current_data_ptr(&phar->manifest)) == NULL) {
-				continue;
-			}
-
+		ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, &error TSRMLS_CC)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC,
 					"Extraction from phar \"%s\" failed: %s", phar->fname, error);
 				efree(error);
 				return;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 	RETURN_TRUE;
 }
