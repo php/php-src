@@ -1123,8 +1123,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
 	zval          *tmp;
 	smart_str      implstr = {0};
 	int            numelems, i = 0;
-	zval tmp_val;
-	int str_len;
+	zend_string *str;
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
 
@@ -1153,30 +1152,20 @@ again:
 
 			case IS_DOUBLE: {
 				char *stmp;
-				str_len = spprintf(&stmp, 0, "%.*G", (int) EG(precision), Z_DVAL_P(tmp));
+				int str_len = spprintf(&stmp, 0, "%.*G", (int) EG(precision), Z_DVAL_P(tmp));
 				smart_str_appendl(&implstr, stmp, str_len);
 				efree(stmp);
 			}
 				break;
 
-			case IS_OBJECT: {
-				int copy;
-				zval expr;
-				zend_make_printable_zval(tmp, &expr, &copy);
-				smart_str_appendl(&implstr, Z_STRVAL(expr), Z_STRLEN(expr));
-				if (copy) {
-					zval_dtor(&expr);
-				}
-			}
-				break;
 			case IS_REFERENCE:
 				tmp = Z_REFVAL_P(tmp);
 				goto again;
+
 			default:
-				ZVAL_DUP(&tmp_val, tmp);
-				convert_to_string(&tmp_val);
-				smart_str_appendl(&implstr, Z_STRVAL(tmp_val), Z_STRLEN(tmp_val));
-				zval_dtor(&tmp_val);
+				str = zval_get_string(tmp);
+				smart_str_appendl(&implstr, str->val, str->len);
+				STR_RELEASE(str);
 				break;
 
 		}
