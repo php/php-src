@@ -818,7 +818,6 @@ php_mb_parse_encoding_array(zval *array, const mbfl_encoding ***return_list, siz
 	list = NULL;
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		target_hash = Z_ARRVAL_P(array);
-		zend_hash_internal_pointer_reset(target_hash);
 		i = zend_hash_num_elements(target_hash);
 		size = i + MBSTRG(default_detect_order_list_size);
 		list = (const mbfl_encoding **)pecalloc(size, sizeof(mbfl_encoding*), persistent);
@@ -826,10 +825,7 @@ php_mb_parse_encoding_array(zval *array, const mbfl_encoding ***return_list, siz
 			entry = list;
 			bauto = 0;
 			n = 0;
-			while (i > 0) {
-				if ((hash_entry = zend_hash_get_current_data(target_hash)) == NULL) {
-					break;
-				}
+			ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
 				convert_to_string_ex(hash_entry);
 				if (strcasecmp(Z_STRVAL_P(hash_entry), "auto") == 0) {
 					if (!bauto) {
@@ -852,9 +848,8 @@ php_mb_parse_encoding_array(zval *array, const mbfl_encoding ***return_list, siz
 						ret = FAILURE;
 					}
 				}
-				zend_hash_move_forward(target_hash);
 				i--;
-			}
+			} ZEND_HASH_FOREACH_END();
 			if (n > 0) {
 				if (return_list) {
 					*return_list = list;
@@ -3100,14 +3095,9 @@ PHP_FUNCTION(mb_convert_encoding)
 		switch (Z_TYPE_P(arg_old)) {
 			case IS_ARRAY:
 				target_hash = Z_ARRVAL_P(arg_old);
-				zend_hash_internal_pointer_reset(target_hash);
-				i = zend_hash_num_elements(target_hash);
 				_from_encodings = NULL;
 
-				while (i > 0) {
-					if ((hash_entry = zend_hash_get_current_data(target_hash)) == NULL) {
-						break;
-					}
+				ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
 
 					convert_to_string_ex(hash_entry);
 
@@ -3120,10 +3110,7 @@ PHP_FUNCTION(mb_convert_encoding)
 					} else {
 						_from_encodings = estrdup(Z_STRVAL_P(hash_entry));
 					}
-
-					zend_hash_move_forward(target_hash);
-					i--;
-				}
+				} ZEND_HASH_FOREACH_END();
 
 				if (_from_encodings != NULL && !strlen(_from_encodings)) {
 					efree(_from_encodings);
@@ -3819,22 +3806,16 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	convmap = NULL;
 	if (Z_TYPE_P(zconvmap) == IS_ARRAY) {
 		target_hash = Z_ARRVAL_P(zconvmap);
-		zend_hash_internal_pointer_reset(target_hash);
 		i = zend_hash_num_elements(target_hash);
 		if (i > 0) {
 			convmap = (int *)safe_emalloc(i, sizeof(int), 0);
 			mapelm = convmap;
 			mapsize = 0;
-			while (i > 0) {
-				if ((hash_entry = zend_hash_get_current_data(target_hash)) == NULL) {
-					break;
-				}
+			ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
 				convert_to_long_ex(hash_entry);
 				*mapelm++ = Z_LVAL_P(hash_entry);
 				mapsize++;
-				i--;
-				zend_hash_move_forward(target_hash);
-			}
+			} ZEND_HASH_FOREACH_END();
 		}
 	}
 	if (convmap == NULL) {
