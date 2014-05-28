@@ -2532,37 +2532,34 @@ static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /
 					 * must be explicitly cast to long in curl_formadd
 					 * use since curl needs a long not an int. */
 					if (!ch->safe_upload && *postval == '@') {
-						char *type, *filename;
+						char *name, *type, *filename;
 						++postval;
 
 						php_error_docref("curl.curlfile" TSRMLS_CC, E_DEPRECATED,
 								"The usage of the @filename API for file uploading is deprecated. Please use the CURLFile class instead");
 
-						if ((type = php_memnstr(postval, ";type=", sizeof(";type=") - 1,
-										postval + Z_STRLEN_P(current)))) {
+						name = estrndup(postval, Z_STRLEN_P(current));
+						if ((type = php_memnstr(name, ";type=", sizeof(";type=") - 1,
+										name + Z_STRLEN_P(current)))) {
 							*type = '\0';
 						}
-						if ((filename = php_memnstr(postval, ";filename=", sizeof(";filename=") - 1,
-										postval + Z_STRLEN_P(current)))) {
+						if ((filename = php_memnstr(name, ";filename=", sizeof(";filename=") - 1,
+										name + Z_STRLEN_P(current)))) {
 							*filename = '\0';
 						}
 						/* open_basedir check */
-						if (php_check_open_basedir(postval TSRMLS_CC)) {
+						if (php_check_open_basedir(name TSRMLS_CC)) {
+							efree(name);
 							return FAILURE;
 						}
 						error = curl_formadd(&first, &last,
 										CURLFORM_COPYNAME, string_key->val,
 										CURLFORM_NAMELENGTH, string_key->len,
-										CURLFORM_FILENAME, filename ? filename + sizeof(";filename=") - 1 : postval,
+										CURLFORM_FILENAME, filename ? filename + sizeof(";filename=") - 1 : name,
 										CURLFORM_CONTENTTYPE, type ? type + sizeof(";type=") - 1 : "application/octet-stream",
-										CURLFORM_FILE, postval,
+										CURLFORM_FILE, name,
 										CURLFORM_END);
-						if (type) {
-							*type = ';';
-						}
-						if (filename) {
-							*filename = ';';
-						}
+						efree(name);
 					} else {
 						error = curl_formadd(&first, &last,
 											 CURLFORM_COPYNAME, string_key->val,
