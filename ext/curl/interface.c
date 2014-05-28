@@ -2473,15 +2473,12 @@ static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /
 				}
 
 				ZEND_HASH_FOREACH_KEY_VAL(postfields, num_key, string_key, current) {
-					char  *postval;
-					int    numeric_key;
+					char *postval;
 					/* Pretend we have a string_key here */
 					if (!string_key) {
-						string_key = STR_ALLOC(MAX_LENGTH_OF_LONG, 0);
-						string_key->len = snprintf(string_key->val, string_key->len, "%ld", num_key);
-						numeric_key = 1;
+						string_key = zend_long_to_str(num_key);
 					} else {
-						numeric_key = 0;
+						STR_ADDREF(string_key);
 					}
 
 					if (Z_TYPE_P(current) == IS_OBJECT &&
@@ -2517,9 +2514,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /
 											CURLFORM_END);
 						}
 
-						if (numeric_key) {
-							STR_RELEASE(string_key);
-						}
+						STR_RELEASE(string_key);
 						continue;
 					}
 
@@ -2569,10 +2564,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /
 											 CURLFORM_END);
 					}
 
-					if (numeric_key) {
-						STR_RELEASE(string_key);
-					}
-
+					STR_RELEASE(string_key);
 				} ZEND_HASH_FOREACH_END();
 
 				SAVE_CURL_ERROR(ch, error);
