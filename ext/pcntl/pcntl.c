@@ -747,7 +747,6 @@ PHP_FUNCTION(pcntl_exec)
 	HashTable *args_hash, *envs_hash;
 	int argc = 0, argi = 0;
 	int envc = 0, envi = 0;
-	int return_val = 0;
 	char **argv = NULL, **envp = NULL;
 	char **current_arg, **pair;
 	int pair_length;
@@ -767,13 +766,14 @@ PHP_FUNCTION(pcntl_exec)
 		
 		argv = safe_emalloc((argc + 2), sizeof(char *), 0);
 		*argv = path;
-		for ( zend_hash_internal_pointer_reset(args_hash), current_arg = argv+1; 
-			(argi < argc && ((element = zend_hash_get_current_data(args_hash)) != NULL));
-			(argi++, current_arg++, zend_hash_move_forward(args_hash)) ) {
-
+		current_arg = argv+1;
+		ZEND_HASH_FOREACH_VAL(args_hash, element) {
+			if (argi >= argc) break;
 			convert_to_string_ex(element);
 			*current_arg = Z_STRVAL_P(element);
-		}
+			argi++;
+			current_arg++;
+		} ZEND_HASH_FOREACH_END();
 		*(current_arg) = NULL;
 	} else {
 		argv = emalloc(2 * sizeof(char *));
@@ -786,19 +786,15 @@ PHP_FUNCTION(pcntl_exec)
 		envs_hash = HASH_OF(envs);
 		envc = zend_hash_num_elements(envs_hash);
 		
-		envp = safe_emalloc((envc + 1), sizeof(char *), 0);
-		for ( zend_hash_internal_pointer_reset(envs_hash), pair = envp; 
-			(envi < envc && ((element = zend_hash_get_current_data(envs_hash)) != NULL));
-			(envi++, pair++, zend_hash_move_forward(envs_hash)) ) {
-			switch (return_val = zend_hash_get_current_key_ex(envs_hash, &key, &key_num, 0, &envs_hash->nInternalPointer)) {
-				case HASH_KEY_IS_LONG:
-					key = STR_ALLOC(101, 0);
-					snprintf(key->val, 100, "%ld", key_num);
-					key->len = strlen(key->val);
-					break;
-				case HASH_KEY_NON_EXISTENT:
-					pair--;
-					continue;
+		pair = envp = safe_emalloc((envc + 1), sizeof(char *), 0);		
+		ZEND_HASH_FOREACH_KEY_VAL(envs_hash, key_num, key, element) {
+			if (envi >= envc) break;
+			if (!key) {
+				key = STR_ALLOC(101, 0);
+				snprintf(key->val, 100, "%ld", key_num);
+				key->len = strlen(key->val);
+			} else {
+				STR_ADDREF(key);
 			}
 
 			convert_to_string_ex(element);
@@ -811,8 +807,10 @@ PHP_FUNCTION(pcntl_exec)
 			strlcat(*pair, Z_STRVAL_P(element), pair_length);
 			
 			/* Cleanup */
-			if (return_val == HASH_KEY_IS_LONG) STR_RELEASE(key);
-		}
+			STR_RELEASE(key);
+			envi++;
+			pair++;
+		} ZEND_HASH_FOREACH_END();
 		*(pair) = NULL;
 
 		if (execve(path, argv, envp) == -1) {
@@ -921,7 +919,6 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	long          how, signo;
 	zval         *user_set, *user_oldset = NULL, *user_signo;
 	sigset_t      set, oldset;
-	HashPosition  pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la|z", &how, &user_set, &user_oldset) == FAILURE) {
 		return;
@@ -933,8 +930,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 		RETURN_FALSE;
 	}
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(user_set), &pos);
-	while ((user_signo = zend_hash_get_current_data_ex(Z_ARRVAL_P(user_set), &pos)) != NULL) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
 		if (Z_TYPE_P(user_signo) != IS_LONG) {
 			SEPARATE_ZVAL(user_signo);
 			convert_to_long_ex(user_signo);
@@ -945,8 +941,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 			RETURN_FALSE;
 		}
-		zend_hash_move_forward_ex(Z_ARRVAL_P(user_set), &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	if (sigprocmask(how, &set, &oldset) != 0) {
 		PCNTL_G(last_error) = errno;
@@ -981,7 +976,6 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	zval            *user_set, *user_signo, *user_siginfo = NULL;
 	long             tv_sec = 0, tv_nsec = 0;
 	sigset_t         set;
-	HashPosition     pos;
 	int              signo;
 	siginfo_t        siginfo;
 	struct timespec  timeout;
@@ -1002,8 +996,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 		RETURN_FALSE;
 	}
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(user_set), &pos);
-	while ((user_signo = zend_hash_get_current_data_ex(Z_ARRVAL_P(user_set), &pos)) != NULL) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
 		if (Z_TYPE_P(user_signo) != IS_LONG) {
 			SEPARATE_ZVAL(user_signo);
 			convert_to_long_ex(user_signo);
@@ -1014,8 +1007,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 			RETURN_FALSE;
 		}
-		zend_hash_move_forward_ex(Z_ARRVAL_P(user_set), &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	if (timedwait) {
 		timeout.tv_sec  = (time_t) tv_sec;
