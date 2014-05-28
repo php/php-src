@@ -3621,6 +3621,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 				 tmp_subject;
 	char		*replace_value = NULL;
 	int			 replace_len = 0;
+	HashPosition pos;
 
 	/* Make sure we're dealing with strings. */
 	if (Z_ISREF_P(subject)) {
@@ -3645,7 +3646,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 		ZVAL_DUP(result, subject);
 
 		if (Z_TYPE_P(replace) == IS_ARRAY) {
-			zend_hash_internal_pointer_reset(Z_ARRVAL_P(replace));
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(replace), &pos);
 		} else {
 			/* Set replacement value to the passed one */
 			replace_value = Z_STRVAL_P(replace);
@@ -3659,7 +3660,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 			convert_to_string(search_entry);
 			if (Z_STRLEN_P(search_entry) == 0) {
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
-					zend_hash_move_forward(Z_ARRVAL_P(replace));
+					zend_hash_move_forward_ex(Z_ARRVAL_P(replace), &pos);
 				}
 				continue;
 			}
@@ -3667,7 +3668,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 			/* If replace is an array. */
 			if (Z_TYPE_P(replace) == IS_ARRAY) {
 				/* Get current entry */
-				if ((replace_entry = zend_hash_get_current_data(Z_ARRVAL_P(replace))) != NULL) {
+				if ((replace_entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(replace), &pos)) != NULL) {
 					/* Make sure we're dealing with strings. */
 					convert_to_string_ex(replace_entry);
 
@@ -3675,7 +3676,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 					replace_value = Z_STRVAL_P(replace_entry);
 					replace_len = Z_STRLEN_P(replace_entry);
 
-					zend_hash_move_forward(Z_ARRVAL_P(replace));
+					zend_hash_move_forward_ex(Z_ARRVAL_P(replace), &pos);
 				} else {
 					/* We've run out of replacement strings, so use an empty one. */
 					replace_value = "";
@@ -4117,6 +4118,7 @@ PHP_FUNCTION(setlocale)
 	zval *pcategory, *plocale;
 	int num_args, cat, i = 0;
 	char *loc, *retval;
+	HashPosition pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z+", &pcategory, &args, &num_args) == FAILURE) {
 		return;
@@ -4162,7 +4164,7 @@ PHP_FUNCTION(setlocale)
 	}
 
 	if (Z_TYPE(args[0]) == IS_ARRAY) {
-		zend_hash_internal_pointer_reset(Z_ARRVAL(args[0]));
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL(args[0]), &pos);
 	}
 
 	while (1) {
@@ -4171,7 +4173,7 @@ PHP_FUNCTION(setlocale)
 			if (!zend_hash_num_elements(Z_ARRVAL(args[0]))) {
 				break;
 			}
-			if ((plocale = zend_hash_get_current_data(Z_ARRVAL(args[0]))) == NULL) {
+			if ((plocale = zend_hash_get_current_data_ex(Z_ARRVAL(args[0]), &pos)) == NULL) {
 				break;
 			}
 		} else {
@@ -4210,7 +4212,7 @@ PHP_FUNCTION(setlocale)
 		zval_dtor(&tmp);
 
 		if (Z_TYPE(args[0]) == IS_ARRAY) {
-			if (zend_hash_move_forward(Z_ARRVAL(args[0])) == FAILURE) break;
+			if (zend_hash_move_forward_ex(Z_ARRVAL(args[0]), &pos) == FAILURE) break;
 		} else {
 			if (++i >= num_args) break;
 		}
