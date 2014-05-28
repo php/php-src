@@ -3903,15 +3903,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op1.var));
 			if ((value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(opline->op2.zv), ce)) != NULL) {
+				ZVAL_DEREF(value);
 				ZVAL_DUP(EX_VAR(opline->result.var), value);
 				goto constant_fetch_end;
 			}
 		}
 
 		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(opline->op2.zv))) != NULL)) {
-			if (Z_ISREF_P(value)) {
-				value = Z_REFVAL_P(value);
-			}
+			ZVAL_DEREF(value);
 			if (Z_CONSTANT_P(value)) {
 				zend_class_entry *old_scope = EG(scope);
 
@@ -15346,15 +15345,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op1.var));
 			if ((value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(opline->op2.zv), ce)) != NULL) {
+				ZVAL_DEREF(value);
 				ZVAL_DUP(EX_VAR(opline->result.var), value);
 				goto constant_fetch_end;
 			}
 		}
 
 		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(opline->op2.zv))) != NULL)) {
-			if (Z_ISREF_P(value)) {
-				value = Z_REFVAL_P(value);
-			}
+			ZVAL_DEREF(value);
 			if (Z_CONSTANT_P(value)) {
 				zend_class_entry *old_scope = EG(scope);
 
@@ -24557,15 +24555,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op1.var));
 			if ((value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(opline->op2.zv), ce)) != NULL) {
+				ZVAL_DEREF(value);
 				ZVAL_DUP(EX_VAR(opline->result.var), value);
 				goto constant_fetch_end;
 			}
 		}
 
 		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(opline->op2.zv))) != NULL)) {
-			if (Z_ISREF_P(value)) {
-				value = Z_REFVAL_P(value);
-			}
+			ZVAL_DEREF(value);
 			if (Z_CONSTANT_P(value)) {
 				zend_class_entry *old_scope = EG(scope);
 

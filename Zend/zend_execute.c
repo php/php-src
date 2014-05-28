@@ -724,7 +724,7 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 
 	/* separate our value if necessary */
 	if (value_type == IS_TMP_VAR) {
-		ZVAL_DEREF(value);
+		ZEND_ASSERT(Z_TYPE_P(value) != IS_REFERENCE);
 		ZVAL_COPY_VALUE(&tmp, value);
 		value = &tmp;
 	} else if (value_type == IS_CONST) {
