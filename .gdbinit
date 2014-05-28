@@ -168,8 +168,7 @@ define ____printzv_contents
 	set $type = $zvalue->u1.v.type
 
 	if $type >= 7
-		printf "(refcount=%d", $zvalue->value.counted->refcount
-		printf ") "
+		printf "(refcount=%d) ", $zvalue->value.counted->refcount
     else 
 		printf "(refcount=NaN) "
     end
@@ -239,7 +238,8 @@ define ____printzv_contents
 		printf "resource: #%d", $zvalue->value.res->handle
 	end
 	if $type == 10
-		printf "reference: %p", $zvalue->value.ref
+		printf "reference: "
+		____printzv &$zvalue->value.ref->val $arg1
 	end
 	if $type == 11
 		printf "const: %s", $zvalue->value.str->val
@@ -254,7 +254,8 @@ define ____printzv_contents
 		printf "IS_CALLABLE"
 	end
 	if $type == 15
-		printf "indirect: %p", (void *) $zvalue->value.zv
+		printf "indirect: "
+		____printzv $zvalue->value.zv $arg1
 	end
 	if $type == 16
 		printf "string_offset"
@@ -321,7 +322,7 @@ define ____print_ht
 		printf "  "
 		set $n = $n - 1
 	end
-    if $ht->flags & 4
+    if $ht->u.v.flags & 4
         set $num = $ht->nNumUsed
         set $i = 0
     	printf "Packed(%d)[%p]: {\n", $ht->nNumOfElements, $ht
@@ -329,7 +330,7 @@ define ____print_ht
         while $i < $num
 	    	set $p = (Bucket*)($ht->arData + $i)
 			set $n = $ind
-            if $p->val.type > 0
+            if $p->val.u1.v.type > 0
 				while $n > 0
 					printf "  "
 					set $n = $n - 1
@@ -364,7 +365,7 @@ define ____print_ht
 	    	set $hash = $ht->arHash[$i]
 			if $hash != -1
 				set $p = (Bucket*)($ht->arData + $hash)
-				if $p->val.type > 0
+				if $p->val.u1.v.type > 0
 					set $n = $ind
 					while $n > 0
 						printf "  "
