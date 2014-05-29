@@ -147,8 +147,10 @@ ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute
 static zend_always_inline zval *_get_zval_ptr_tmp(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
 {
 	zval *ret = EX_VAR(var);
-
 	should_free->var = ret;
+
+	ZEND_ASSERT(Z_TYPE_P(ret) != IS_REFERENCE);
+
 	return ret;
 }
 
@@ -724,7 +726,6 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 
 	/* separate our value if necessary */
 	if (value_type == IS_TMP_VAR) {
-		ZEND_ASSERT(Z_TYPE_P(value) != IS_REFERENCE);
 		ZVAL_COPY_VALUE(&tmp, value);
 		value = &tmp;
 	} else if (value_type == IS_CONST) {

@@ -3886,6 +3886,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		if (IS_CONST == IS_CONST) {
 			if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
+				ZVAL_DEREF(value);
 				ZVAL_DUP(EX_VAR(opline->result.var), value);
 				goto constant_fetch_end;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
@@ -15328,6 +15329,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 		if (IS_VAR == IS_CONST) {
 			if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
+				ZVAL_DEREF(value);
 				ZVAL_DUP(EX_VAR(opline->result.var), value);
 				goto constant_fetch_end;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
@@ -24538,6 +24540,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 		if (IS_UNUSED == IS_CONST) {
 			if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
+				ZVAL_DEREF(value);
 				ZVAL_DUP(EX_VAR(opline->result.var), value);
 				goto constant_fetch_end;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {

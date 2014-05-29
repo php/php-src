@@ -3614,6 +3614,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 		if (OP1_TYPE == IS_CONST) {
 			if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
+				ZVAL_DEREF(value);
 				ZVAL_DUP(EX_VAR(opline->result.var), value);
 				goto constant_fetch_end;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
