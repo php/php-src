@@ -167,11 +167,11 @@ define ____printzv_contents
 	set $zvalue = $arg0
 	set $type = $zvalue->u1.v.type
 
-	if $type >= 7
+	# 15 == IS_INDIRECT
+	if $type >= 5 && $type != 15
 		printf "(refcount=%d) ", $zvalue->value.counted->refcount
-    else 
-		printf "(refcount=NaN) "
-    end
+	end
+
 	if $type == 0
 		printf "UNDEF"
 	end
@@ -194,7 +194,7 @@ define ____printzv_contents
        printf "string: %s", $zvalue->value.str->val
     end
 	if $type == 7 
-		printf "array: ", $zvalue->value.arr->ht.nNumUsed
+		printf "array: "
 		if ! $arg1
 			set $ind = $ind + 1
 			____print_ht $zvalue->value.ht 1
@@ -322,82 +322,50 @@ define ____print_ht
 		printf "  "
 		set $n = $n - 1
 	end
-    if $ht->u.v.flags & 4
-        set $num = $ht->nNumUsed
-        set $i = 0
-    	printf "Packed(%d)[%p]: {\n", $ht->nNumOfElements, $ht
-		set $ind = $ind + 1
-        while $i < $num
-	    	set $p = (Bucket*)($ht->arData + $i)
-			set $n = $ind
-            if $p->val.u1.v.type > 0
-				while $n > 0
-					printf "  "
-					set $n = $n - 1
-				end
-				printf "[%d]", $i
+
+	if $ht->u.v.flags & 4
+		printf "Packed"
+	else
+		printf "Hash"
+	end
+	printf "(%d)[%p]: {\n", $ht->nNumOfElements, $ht
+
+	set $num = $ht->nNumUsed
+	set $i = 0
+	set $ind = $ind + 1
+	while $i < $num
+		set $p = (Bucket*)($ht->arData + $i)
+		set $n = $ind
+		if $p->val.u1.v.type > 0
+			while $n > 0
+				printf "  "
+				set $n = $n - 1
+			end
+			printf "[%d] ", $i
+			if $p->key 
+				printf "%s => ", $p->key->val
+			else
 				printf "%d => ", $p->h
-				if $arg1 == 0
-					printf "%p\n", (zval *)&$p->val
-				end
-				if $arg1 == 1
-					set $zval = (zval *)&$p->val
-					____printzv $zval 1
-				end
-				if $arg1 == 2
-					printf "%s\n", (char*)$p->val.value.ptr
-				end
-				if $arg1 == 3
-					set $func = (zend_function*)$p->val.value.ptr
-					printf "\"%s\"\n", $func->common.function_name->val
-				end
 			end
-			set $i = $i + 1
-        end
-		set $ind = $ind - 1
-		printf "}\n"
-    else
-		set $num = $ht->nTableSize
-        set $i = 0
-    	printf "Hash(%d)[%p]: {\n", $ht->nNumOfElements, $ht
-		set $ind = $ind + 1
-        while $i < $num
-	    	set $hash = $ht->arHash[$i]
-			if $hash != -1
-				set $p = (Bucket*)($ht->arData + $hash)
-				if $p->val.u1.v.type > 0
-					set $n = $ind
-					while $n > 0
-						printf "  "
-						set $n = $n - 1
-					end
-					printf "[%d]", $i
-					if $p->key 
-						printf "%s => ", $p->key->val
-					else
-						printf "%d => ", $p->h
-					end
-					if $arg1 == 0
-						printf "%p\n", (zval *)&$p->val
-					end
-					if $arg1 == 1
-						set $zval = (zval *)&$p->val
-						____printzv $zval 1
-					end
-					if $arg1 == 2
-						printf "%s\n", (char*)$p->val.value.ptr
-					end
-					if $arg1 == 3
-						set $func = (zend_function*)$p->val.value.ptr
-						printf "\"%s\"\n", $func->common.function_name->val
-					end
-				end
+			if $arg1 == 0
+				printf "%p\n", (zval *)&$p->val
 			end
-			set $i = $i + 1
-        end
-		set $ind = $ind - 1
-		printf "}\n"
-    end
+			if $arg1 == 1
+				set $zval = (zval *)&$p->val
+				____printzv $zval 1
+			end
+			if $arg1 == 2
+				printf "%s\n", (char*)$p->val.value.ptr
+			end
+			if $arg1 == 3
+				set $func = (zend_function*)$p->val.value.ptr
+				printf "\"%s\"\n", $func->common.function_name->val
+			end
+		end
+		set $i = $i + 1
+	end
+	set $ind = $ind - 1
+	printf "}\n"
 end
 
 define print_ht
