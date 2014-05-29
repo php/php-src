@@ -712,7 +712,7 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, 
                         jp->error_code = PHP_JSON_ERROR_SYNTAX;
                         return false;
                 }
-                buf.s->len = 0;
+                if (buf.s) { buf.s->len = 0; }
                 JSON_RESET_TYPE();
             }
             break;
