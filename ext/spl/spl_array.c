@@ -1146,6 +1146,9 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		SEPARATE_ZVAL_IF_NOT_REF(array);
 	}
+	if (Z_IMMUTABLE_P(array)) {
+		zval_copy_ctor(array);
+	}
 
 	if (Z_TYPE_P(array) == IS_OBJECT && (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator)) {
 		zval_ptr_dtor(&intern->array);
