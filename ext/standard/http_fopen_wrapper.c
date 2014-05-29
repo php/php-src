@@ -644,7 +644,7 @@ finish:
 		zend_set_local_var_str("http_response_header", sizeof("http_response_header")-1, &ztmp, 0 TSRMLS_CC);
 	}
 
-	response_header = zend_hash_str_find(&EG(active_symbol_table)->ht, "http_response_header", sizeof("http_response_header")-1);
+	response_header = zend_hash_str_find_ind(&EG(active_symbol_table)->ht, "http_response_header", sizeof("http_response_header")-1);
 
 	if (!php_stream_eof(stream)) {
 		size_t tmp_line_len;
