@@ -2333,7 +2333,6 @@ static int accel_clean_non_persistent_constant(zval *zv TSRMLS_DC)
 	if (c->flags & CONST_PERSISTENT) {
 		return ZEND_HASH_APPLY_STOP;
 	} else {
-		STR_RELEASE(c->name);
 		return ZEND_HASH_APPLY_REMOVE;
 	}
 }

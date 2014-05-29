@@ -42,8 +42,8 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
 
 static zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	if (Z_REFCOUNTED_P(zvalue)) {
-		if (Z_COPYABLE_P(zvalue)) {
+	if (Z_REFCOUNTED_P(zvalue) || Z_IMMUTABLE_P(zvalue)) {
+		if (Z_COPYABLE_P(zvalue) || Z_IMMUTABLE_P(zvalue)) {
 			_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
 		} else {
 			Z_ADDREF_P(zvalue);
@@ -53,8 +53,8 @@ static zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 
 static zend_always_inline void _zval_opt_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	if (Z_OPT_REFCOUNTED_P(zvalue)) {
-		if (Z_OPT_COPYABLE_P(zvalue)) {
+	if (Z_OPT_REFCOUNTED_P(zvalue) || Z_OPT_IMMUTABLE_P(zvalue)) {
+		if (Z_OPT_COPYABLE_P(zvalue) || Z_OPT_IMMUTABLE_P(zvalue)) {
 			_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
 		} else {
 			Z_ADDREF_P(zvalue);

@@ -632,9 +632,13 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name TS
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "WDDX doesn't support circular references");
 				return;
 			}
-			ht->u.v.nApplyCount++;															
+			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
+				ht->u.v.nApplyCount++;
+			}
 			php_wddx_serialize_array(packet, var);
-			ht->u.v.nApplyCount--;
+			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
+				ht->u.v.nApplyCount--;
+			}
 			break;
 
 		case IS_OBJECT:
@@ -683,18 +687,24 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 			return;
 		}
 
-		ZEND_HASH_FOREACH_VAL(target_hash, val) {
-			if (is_array) {
-				target_hash->u.v.nApplyCount++;
-			}
+		if (Z_IMMUTABLE_P(name_var)) {
+			ZEND_HASH_FOREACH_VAL(target_hash, val) {
+				php_wddx_add_var(packet, val);
+			} ZEND_HASH_FOREACH_END();
+		} else {
+			ZEND_HASH_FOREACH_VAL(target_hash, val) {
+				if (is_array) {
+					target_hash->u.v.nApplyCount++;
+				}
 
-			ZVAL_DEREF(val);
-			php_wddx_add_var(packet, val);
+				ZVAL_DEREF(val);
+				php_wddx_add_var(packet, val);
 
-			if (is_array) {
-				target_hash->u.v.nApplyCount--;
-			}
-		} ZEND_HASH_FOREACH_END();
+				if (is_array) {
+					target_hash->u.v.nApplyCount--;
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 }
 /* }}} */

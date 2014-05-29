@@ -282,6 +282,7 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_TYPE_REFCOUNTED			(1<<1)
 #define IS_TYPE_COLLECTABLE			(1<<2)
 #define IS_TYPE_COPYABLE			(1<<3)
+#define IS_TYPE_IMMUTABLE			(1<<4)
 
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING
@@ -349,6 +350,9 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_COPYABLE(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_COPYABLE) != 0)
 #define Z_COPYABLE_P(zval_p)		Z_COPYABLE(*(zval_p))
 
+#define Z_IMMUTABLE(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_IMMUTABLE) != 0)
+#define Z_IMMUTABLE_P(zval_p)		Z_IMMUTABLE(*(zval_p))
+
 /* the following Z_OPT_* macros make better code when Z_TYPE_INFO accessed before */
 #define Z_OPT_TYPE(zval)			(Z_TYPE_INFO(zval) & 0xff)
 #define Z_OPT_TYPE_P(zval_p)		Z_OPT_TYPE(*(zval_p))
@@ -364,6 +368,9 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_OPT_COPYABLE(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_COPYABLE << Z_TYPE_FLAGS_SHIFT)) != 0)
 #define Z_OPT_COPYABLE_P(zval_p)	Z_OPT_COPYABLE(*(zval_p))
+
+#define Z_OPT_IMMUTABLE(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_IMMUTABLE << Z_TYPE_FLAGS_SHIFT)) != 0)
+#define Z_OPT_IMMUTABLE_P(zval_p)	Z_OPT_IMMUTABLE(*(zval_p))
 
 #define Z_ISREF(zval)				(Z_TYPE(zval) == IS_REFERENCE)
 #define Z_ISREF_P(zval_p)			Z_ISREF(*(zval_p))

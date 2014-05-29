@@ -754,6 +754,23 @@ send_again:
 
 			ZEND_VM_STACK_GROW_IF_NEEDED(zend_hash_num_elements(ht));
 
+			if (opline->op1_type != IS_CONST && opline->op1_type != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
+				int i;
+				int separate = 0;
+
+				/* check if any of arguments are going to be passed by reference */
+				for (i = 0; i < zend_hash_num_elements(ht); i++) {
+					if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num + i)) {
+						separate = 1;
+						break;
+					}
+				}
+				if (separate) {
+					zval_copy_ctor(args);
+					ht = Z_ARRVAL_P(args);
+				}
+			}
+
 			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
 				if (name) {
 					zend_error(E_RECOVERABLE_ERROR, "Cannot unpack array with string keys");
@@ -764,9 +781,13 @@ send_again:
 
 				top = zend_vm_stack_top_inc(TSRMLS_C);
 				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
-					SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
-					Z_ADDREF_P(arg);
-					ZVAL_COPY_VALUE(top, arg);
+					if (!Z_IMMUTABLE_P(args)) {
+						SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
+						Z_ADDREF_P(arg);
+						ZVAL_COPY_VALUE(top, arg);
+					} else {
+						ZVAL_DUP(top, arg);
+					}
 				} else if (Z_ISREF_P(arg)) {
 					ZVAL_DUP(top, Z_REFVAL_P(arg));
 				} else {
@@ -2700,7 +2721,11 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	top = zend_vm_stack_top_inc(TSRMLS_C);
 	ZVAL_COPY_VALUE(top, value);
 	if (IS_CONST == IS_CONST) {
-		zval_opt_copy_ctor(top);
+		/* Immutable arrays may be passed without copying ??? */
+		/* some internal functions may try to modify them !!! */
+		if (!Z_OPT_IMMUTABLE_P(top)) {
+			zval_opt_copy_ctor(top);
+		}
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -2981,7 +3006,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 {
 	USE_OPLINE
 
-	zval *array_ptr, *array_ref, iterator;
+	zval *array_ptr, *array_ref, iterator, tmp;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
@@ -3002,6 +3027,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 					array_ref = array_ptr;
 					array_ptr = Z_REFVAL_P(array_ptr);
 				}
+			} else if (Z_IMMUTABLE_P(array_ptr)) {
+				zval_copy_ctor(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -3025,8 +3052,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		array_ptr = array_ref = opline->op1.zv;
 		ZVAL_DEREF(array_ptr);
 		if (0) { /* IS_TMP_VAR */
-			zval tmp;
-
 			ZVAL_COPY_VALUE(&tmp, array_ptr);
 			array_ptr = &tmp;
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -3042,6 +3067,14 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 					Z_ADDREF_P(array_ref);
 				}
 			}
+		} else if (Z_IMMUTABLE_P(array_ref)) {
+			if (IS_CONST == IS_CV) {
+				zval_copy_ctor(array_ref);
+				Z_ADDREF_P(array_ref);
+			} else {
+				ZVAL_DUP(&tmp, array_ref);
+				array_ptr = array_ref = &tmp;
+			}
 		} else if (Z_REFCOUNTED_P(array_ref)) {
 			if (IS_CONST == IS_CONST ||
 			           (IS_CONST == IS_CV &&
@@ -3050,8 +3083,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 			           (IS_CONST == IS_VAR &&
 			            !Z_ISREF_P(array_ref) &&
 			            Z_REFCOUNT_P(array_ref) > 2)) {
-				zval tmp;
-
 				if (IS_CONST == IS_VAR) {
 					Z_DELREF_P(array_ref);
 				}
@@ -3061,6 +3092,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				if (Z_ISREF_P(array_ref) && Z_REFCOUNT_P(array_ref) == 1) {
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
+				}
+				if (Z_IMMUTABLE_P(array_ptr)) {
+					zval_copy_ctor(array_ptr);
 				}
 				Z_ADDREF_P(array_ref);
 			}
@@ -7807,7 +7841,11 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	top = zend_vm_stack_top_inc(TSRMLS_C);
 	ZVAL_COPY_VALUE(top, value);
 	if (IS_TMP_VAR == IS_CONST) {
-		zval_opt_copy_ctor(top);
+		/* Immutable arrays may be passed without copying ??? */
+		/* some internal functions may try to modify them !!! */
+		if (!Z_OPT_IMMUTABLE_P(top)) {
+			zval_opt_copy_ctor(top);
+		}
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -8089,7 +8127,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *array_ptr, *array_ref, iterator;
+	zval *array_ptr, *array_ref, iterator, tmp;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
@@ -8110,6 +8148,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					array_ref = array_ptr;
 					array_ptr = Z_REFVAL_P(array_ptr);
 				}
+			} else if (Z_IMMUTABLE_P(array_ptr)) {
+				zval_copy_ctor(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -8133,8 +8173,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		array_ptr = array_ref = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		ZVAL_DEREF(array_ptr);
 		if (1) { /* IS_TMP_VAR */
-			zval tmp;
-
 			ZVAL_COPY_VALUE(&tmp, array_ptr);
 			array_ptr = &tmp;
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -8150,6 +8188,14 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					Z_ADDREF_P(array_ref);
 				}
 			}
+		} else if (Z_IMMUTABLE_P(array_ref)) {
+			if (IS_TMP_VAR == IS_CV) {
+				zval_copy_ctor(array_ref);
+				Z_ADDREF_P(array_ref);
+			} else {
+				ZVAL_DUP(&tmp, array_ref);
+				array_ptr = array_ref = &tmp;
+			}
 		} else if (Z_REFCOUNTED_P(array_ref)) {
 			if (IS_TMP_VAR == IS_CONST ||
 			           (IS_TMP_VAR == IS_CV &&
@@ -8158,8 +8204,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			           (IS_TMP_VAR == IS_VAR &&
 			            !Z_ISREF_P(array_ref) &&
 			            Z_REFCOUNT_P(array_ref) > 2)) {
-				zval tmp;
-
 				if (IS_TMP_VAR == IS_VAR) {
 					Z_DELREF_P(array_ref);
 				}
@@ -8169,6 +8213,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				if (Z_ISREF_P(array_ref) && Z_REFCOUNT_P(array_ref) == 1) {
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
+				}
+				if (Z_IMMUTABLE_P(array_ptr)) {
+					zval_copy_ctor(array_ptr);
 				}
 				Z_ADDREF_P(array_ref);
 			}
@@ -12863,7 +12910,12 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_AR
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (Z_ISREF_P(varptr)) {
-		ZVAL_DUP(top, Z_REFVAL_P(varptr));
+		ZVAL_COPY_VALUE(top, Z_REFVAL_P(varptr));
+		/* Immutable arrays may be passed without copying ??? */
+		/* some internal functions may try to modify them !!! */
+		if (!Z_OPT_IMMUTABLE_P(top)) {
+			zval_opt_copy_ctor(top);
+		}
 		zval_ptr_dtor_nogc(free_op1.var);
 	} else {
 		ZVAL_COPY_VALUE(top, varptr);
@@ -12902,6 +12954,10 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 		if (!Z_ISREF_P(varptr)) {
 			ZVAL_NEW_REF(varptr, varptr);
 		}
+		// TODO: Try to avoid copying of immutable arrays ???
+		if (Z_OPT_IMMUTABLE_P(Z_REFVAL_P(varptr))) {
+			zval_opt_copy_ctor(Z_REFVAL_P(varptr));
+		}
 		if (IS_VAR == IS_CV) {
 			Z_ADDREF_P(varptr);
 		}
@@ -12913,8 +12969,8 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 			zend_error(E_STRICT, "Only variables should be passed by reference");
 		}
 		top = zend_vm_stack_top_inc(TSRMLS_C);
-		ZVAL_COPY_VALUE(top, varptr);
-		zval_opt_copy_ctor(top);
+		// TODO: Try to avoid copying of immutable arrays ???
+		ZVAL_DUP(top, varptr);
 		zval_ptr_dtor_nogc(free_op1.var);
 	}
 	CHECK_EXCEPTION();
@@ -12941,6 +12997,10 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	}
 
 	if (Z_ISREF_P(varptr)) {
+		// TODO: Try to avoid copying of immutable arrays ???
+		if (Z_OPT_IMMUTABLE_P(Z_REFVAL_P(varptr))) {
+			zval_opt_copy_ctor(Z_REFVAL_P(varptr));
+		}
 		Z_ADDREF_P(varptr);
 		ZVAL_COPY_VALUE(top, varptr);
 	} else if (IS_VAR == IS_VAR &&
@@ -12948,6 +13008,10 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		ZVAL_COPY_VALUE(top, varptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(top);
 	} else {
+		// TODO: Try to avoid copying of immutable arrays ???
+		if (Z_OPT_IMMUTABLE_P(varptr)) {
+			zval_opt_copy_ctor(varptr);
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
 		Z_ADDREF_P(varptr);
 		ZVAL_COPY_VALUE(top, varptr);
@@ -12972,7 +13036,12 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (Z_ISREF_P(varptr)) {
-		ZVAL_DUP(top, Z_REFVAL_P(varptr));
+		ZVAL_COPY_VALUE(top, Z_REFVAL_P(varptr));
+		/* Immutable arrays may be passed without copying ??? */
+		/* some internal functions may try to modify them !!! */
+		if (!Z_OPT_IMMUTABLE_P(top)) {
+			zval_opt_copy_ctor(top);
+		}
 		zval_ptr_dtor_nogc(free_op1.var);
 	} else {
 		ZVAL_COPY_VALUE(top, varptr);
@@ -13271,7 +13340,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *array_ptr, *array_ref, iterator;
+	zval *array_ptr, *array_ref, iterator, tmp;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
@@ -13292,6 +13361,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					array_ref = array_ptr;
 					array_ptr = Z_REFVAL_P(array_ptr);
 				}
+			} else if (Z_IMMUTABLE_P(array_ptr)) {
+				zval_copy_ctor(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -13315,8 +13386,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		array_ptr = array_ref = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		ZVAL_DEREF(array_ptr);
 		if (0) { /* IS_TMP_VAR */
-			zval tmp;
-
 			ZVAL_COPY_VALUE(&tmp, array_ptr);
 			array_ptr = &tmp;
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -13332,6 +13401,14 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					Z_ADDREF_P(array_ref);
 				}
 			}
+		} else if (Z_IMMUTABLE_P(array_ref)) {
+			if (IS_VAR == IS_CV) {
+				zval_copy_ctor(array_ref);
+				Z_ADDREF_P(array_ref);
+			} else {
+				ZVAL_DUP(&tmp, array_ref);
+				array_ptr = array_ref = &tmp;
+			}
 		} else if (Z_REFCOUNTED_P(array_ref)) {
 			if (IS_VAR == IS_CONST ||
 			           (IS_VAR == IS_CV &&
@@ -13340,8 +13417,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			           (IS_VAR == IS_VAR &&
 			            !Z_ISREF_P(array_ref) &&
 			            Z_REFCOUNT_P(array_ref) > 2)) {
-				zval tmp;
-
 				if (IS_VAR == IS_VAR) {
 					Z_DELREF_P(array_ref);
 				}
@@ -13351,6 +13426,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				if (Z_ISREF_P(array_ref) && Z_REFCOUNT_P(array_ref) == 1) {
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
+				}
+				if (Z_IMMUTABLE_P(array_ptr)) {
+					zval_copy_ctor(array_ptr);
 				}
 				Z_ADDREF_P(array_ref);
 			}
@@ -29922,7 +30000,12 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARG
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (Z_ISREF_P(varptr)) {
-		ZVAL_DUP(top, Z_REFVAL_P(varptr));
+		ZVAL_COPY_VALUE(top, Z_REFVAL_P(varptr));
+		/* Immutable arrays may be passed without copying ??? */
+		/* some internal functions may try to modify them !!! */
+		if (!Z_OPT_IMMUTABLE_P(top)) {
+			zval_opt_copy_ctor(top);
+		}
 
 	} else {
 		ZVAL_COPY_VALUE(top, varptr);
@@ -29961,6 +30044,10 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 		if (!Z_ISREF_P(varptr)) {
 			ZVAL_NEW_REF(varptr, varptr);
 		}
+		// TODO: Try to avoid copying of immutable arrays ???
+		if (Z_OPT_IMMUTABLE_P(Z_REFVAL_P(varptr))) {
+			zval_opt_copy_ctor(Z_REFVAL_P(varptr));
+		}
 		if (IS_CV == IS_CV) {
 			Z_ADDREF_P(varptr);
 		}
@@ -29972,8 +30059,8 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 			zend_error(E_STRICT, "Only variables should be passed by reference");
 		}
 		top = zend_vm_stack_top_inc(TSRMLS_C);
-		ZVAL_COPY_VALUE(top, varptr);
-		zval_opt_copy_ctor(top);
+		// TODO: Try to avoid copying of immutable arrays ???
+		ZVAL_DUP(top, varptr);
 
 	}
 	CHECK_EXCEPTION();
@@ -30000,6 +30087,10 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	if (Z_ISREF_P(varptr)) {
+		// TODO: Try to avoid copying of immutable arrays ???
+		if (Z_OPT_IMMUTABLE_P(Z_REFVAL_P(varptr))) {
+			zval_opt_copy_ctor(Z_REFVAL_P(varptr));
+		}
 		Z_ADDREF_P(varptr);
 		ZVAL_COPY_VALUE(top, varptr);
 	} else if (IS_CV == IS_VAR &&
@@ -30007,6 +30098,10 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		ZVAL_COPY_VALUE(top, varptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(top);
 	} else {
+		// TODO: Try to avoid copying of immutable arrays ???
+		if (Z_OPT_IMMUTABLE_P(varptr)) {
+			zval_opt_copy_ctor(varptr);
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
 		Z_ADDREF_P(varptr);
 		ZVAL_COPY_VALUE(top, varptr);
@@ -30030,7 +30125,12 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (Z_ISREF_P(varptr)) {
-		ZVAL_DUP(top, Z_REFVAL_P(varptr));
+		ZVAL_COPY_VALUE(top, Z_REFVAL_P(varptr));
+		/* Immutable arrays may be passed without copying ??? */
+		/* some internal functions may try to modify them !!! */
+		if (!Z_OPT_IMMUTABLE_P(top)) {
+			zval_opt_copy_ctor(top);
+		}
 
 	} else {
 		ZVAL_COPY_VALUE(top, varptr);
@@ -30317,7 +30417,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	USE_OPLINE
 
-	zval *array_ptr, *array_ref, iterator;
+	zval *array_ptr, *array_ref, iterator, tmp;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
@@ -30338,6 +30438,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 					array_ref = array_ptr;
 					array_ptr = Z_REFVAL_P(array_ptr);
 				}
+			} else if (Z_IMMUTABLE_P(array_ptr)) {
+				zval_copy_ctor(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -30361,8 +30463,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		array_ptr = array_ref = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		ZVAL_DEREF(array_ptr);
 		if (0) { /* IS_TMP_VAR */
-			zval tmp;
-
 			ZVAL_COPY_VALUE(&tmp, array_ptr);
 			array_ptr = &tmp;
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -30378,6 +30478,14 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 					Z_ADDREF_P(array_ref);
 				}
 			}
+		} else if (Z_IMMUTABLE_P(array_ref)) {
+			if (IS_CV == IS_CV) {
+				zval_copy_ctor(array_ref);
+				Z_ADDREF_P(array_ref);
+			} else {
+				ZVAL_DUP(&tmp, array_ref);
+				array_ptr = array_ref = &tmp;
+			}
 		} else if (Z_REFCOUNTED_P(array_ref)) {
 			if (IS_CV == IS_CONST ||
 			           (IS_CV == IS_CV &&
@@ -30386,8 +30494,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			           (IS_CV == IS_VAR &&
 			            !Z_ISREF_P(array_ref) &&
 			            Z_REFCOUNT_P(array_ref) > 2)) {
-				zval tmp;
-
 				if (IS_CV == IS_VAR) {
 					Z_DELREF_P(array_ref);
 				}
@@ -30397,6 +30503,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				if (Z_ISREF_P(array_ref) && Z_REFCOUNT_P(array_ref) == 1) {
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
+				}
+				if (Z_IMMUTABLE_P(array_ptr)) {
+					zval_copy_ctor(array_ptr);
 				}
 				Z_ADDREF_P(array_ref);
 			}

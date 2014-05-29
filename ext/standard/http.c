@@ -135,9 +135,13 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				*(p++) = 'B';
 				*p = '\0';
 			}
-			ht->u.v.nApplyCount++;
+			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
+				ht->u.v.nApplyCount++;
+			}
 			php_url_encode_hash_ex(HASH_OF(zdata), formstr, NULL, 0, newprefix, newprefix_len, "%5D", 3, (Z_TYPE_P(zdata) == IS_OBJECT ? zdata : NULL), arg_sep, enc_type TSRMLS_CC);
-			ht->u.v.nApplyCount--;
+			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
+				ht->u.v.nApplyCount--;
+			}
 			efree(newprefix);
 		} else if (Z_TYPE_P(zdata) == IS_NULL || Z_TYPE_P(zdata) == IS_RESOURCE) {
 			/* Skip these types */

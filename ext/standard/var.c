@@ -132,7 +132,7 @@ again:
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
-			if (++myht->u.v.nApplyCount > 1) {
+			if (ZEND_HASH_APPLY_PROTECTION(myht) && ++myht->u.v.nApplyCount > 1) {
 				PUTS("*RECURSION*\n");
 				--myht->u.v.nApplyCount;
 				return;
@@ -143,7 +143,9 @@ again:
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 				php_array_element_dump(val, num, key, level TSRMLS_CC);
 			} ZEND_HASH_FOREACH_END();
-			--myht->u.v.nApplyCount;
+			if (ZEND_HASH_APPLY_PROTECTION(myht)) {
+				--myht->u.v.nApplyCount;
+			}
 			if (is_temp) {
 				zend_hash_destroy(myht);
 				efree(myht);
@@ -301,7 +303,7 @@ again:
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_P(struc);
-		if (myht->u.v.nApplyCount++ > 1) {
+		if (ZEND_HASH_APPLY_PROTECTION(myht) && myht->u.v.nApplyCount++ > 1) {
 			myht->u.v.nApplyCount--;
 			PUTS("*RECURSION*\n");
 			return;
@@ -310,7 +312,9 @@ again:
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level TSRMLS_CC);
 		} ZEND_HASH_FOREACH_END();
-		myht->u.v.nApplyCount--;
+		if (ZEND_HASH_APPLY_PROTECTION(myht)) {
+			myht->u.v.nApplyCount--;
+		}
 		if (is_temp) {
 			zend_hash_destroy(myht);
 			efree(myht);
@@ -491,7 +495,7 @@ again:
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
-			if (myht->u.v.nApplyCount++ > 0) {
+			if (ZEND_HASH_APPLY_PROTECTION(myht) && myht->u.v.nApplyCount++ > 0) {
 				myht->u.v.nApplyCount--;
 				smart_str_appendl(buf, "NULL", 4);
 				zend_error(E_WARNING, "var_export does not handle circular references");
@@ -505,7 +509,9 @@ again:
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 				php_array_element_export(val, index, key, level, buf TSRMLS_CC);
 			} ZEND_HASH_FOREACH_END();
-			myht->u.v.nApplyCount--;
+			if (ZEND_HASH_APPLY_PROTECTION(myht)) {
+				myht->u.v.nApplyCount--;
+			}
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
 			}
@@ -943,11 +949,11 @@ again:
 					) {
 						smart_str_appendl(buf, "N;", 2);
 					} else {
-						if (Z_TYPE_P(data) == IS_ARRAY) {
+						if (Z_TYPE_P(data) == IS_ARRAY && ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(data))) {
 							Z_ARRVAL_P(data)->u.v.nApplyCount++;
 						}
 						php_var_serialize_intern(buf, data, var_hash TSRMLS_CC);
-						if (Z_TYPE_P(data) == IS_ARRAY) {
+						if (Z_TYPE_P(data) == IS_ARRAY && ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(data))) {
 							Z_ARRVAL_P(data)->u.v.nApplyCount--;
 						}
 					}

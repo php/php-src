@@ -326,14 +326,17 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC) /* {{{ */
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			ZEND_PUTS("Array (");
-			if (++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
+			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr)) &&
+			    ++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
 				ZEND_PUTS(" *RECURSION*");
 				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
 				return;
 			}
 			print_flat_hash(Z_ARRVAL_P(expr) TSRMLS_CC);
 			ZEND_PUTS(")");
-			Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr))) {
+				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+			}
 			break;
 		case IS_OBJECT:
 		{
@@ -385,13 +388,16 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			ZEND_PUTS_EX("Array\n");
-			if (++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
+			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr)) &&
+			    ++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
 				ZEND_PUTS_EX(" *RECURSION*");
 				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
 				return;
 			}
 			print_hash(write_func, Z_ARRVAL_P(expr), indent, 0 TSRMLS_CC);
-			Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr))) {
+				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+			}
 			break;
 		case IS_OBJECT:
 			{

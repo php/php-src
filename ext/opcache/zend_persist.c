@@ -101,6 +101,36 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	}
 }
 
+static void zend_hash_persist_immutable(HashTable *ht, zend_persist_func_t pPersistElement TSRMLS_DC)
+{
+	uint idx;
+	Bucket *p;
+
+	if (!ht->nTableMask) {
+		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		return;
+	}
+	if (ht->u.flags & HASH_FLAG_PACKED) {
+		ht->arData = zend_accel_memdup(ht->arData, sizeof(Bucket) * ht->nTableSize);
+		ht->arHash = (zend_uint*)&uninitialized_bucket;
+	} else {
+		ht->arData = zend_accel_memdup(ht->arData, (sizeof(Bucket) + sizeof(zend_uint)) * ht->nTableSize);
+		ht->arHash = (zend_uint*)(ht->arData + ht->nTableSize);
+	}
+	for (idx = 0; idx < ht->nNumUsed; idx++) {
+		p = ht->arData + idx;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+
+		/* persist bucket and key */
+		if (p->key) {
+			zend_accel_store_interned_string(p->key);
+		}
+
+		/* persist the data itself */
+		pPersistElement(&p->val TSRMLS_CC);
+	}
+}
+
 #if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 static zend_ast *zend_persist_ast(zend_ast *ast TSRMLS_DC)
 {
@@ -147,8 +177,13 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;
 			} else {
-				zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
-				zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
+				if (Z_IMMUTABLE_P(z)) {
+					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
+					zend_hash_persist_immutable(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
+				} else {
+					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
+					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
+				}
 			}
 			break;
 #if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO

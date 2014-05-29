@@ -1120,7 +1120,9 @@ static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *
 
 	ZVAL_DEREF(container);
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-		if (container == container_ptr) {
+		if (Z_IMMUTABLE_P(container)) {
+			zval_copy_ctor(container);
+		} else if (container == container_ptr) {
 			SEPARATE_ZVAL(container);
 		}
 fetch_from_array:

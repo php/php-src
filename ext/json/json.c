@@ -258,7 +258,7 @@ static void json_encode_array(smart_str *buf, zval *val, int options TSRMLS_DC) 
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
 			ZVAL_DEREF(data);
 			tmp_ht = HASH_OF(data);
-			if (tmp_ht) {
+			if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
 				ZEND_HASH_INC_APPLY_COUNT(tmp_ht);
 			}
 
@@ -318,7 +318,7 @@ static void json_encode_array(smart_str *buf, zval *val, int options TSRMLS_DC) 
 				}
 			}
 
-			if (tmp_ht) {
+			if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
 				ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);
 			}
 		} ZEND_HASH_FOREACH_END();

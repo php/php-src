@@ -263,6 +263,10 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 {
 	void *ptr;
 
+	if (Z_IMMUTABLE_P(src)) {
+		return;
+	}
+
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	switch (Z_TYPE_P(src)) {
 #else

@@ -266,10 +266,14 @@ PHPAPI int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 		cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
 		if (mode == COUNT_RECURSIVE) {
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), element) {
-				Z_ARRVAL_P(array)->u.v.nApplyCount++;
+			    if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(array))) {
+					Z_ARRVAL_P(array)->u.v.nApplyCount++;
+				}
 				ZVAL_DEREF(element);
 				cnt += php_count_recursive(element, COUNT_RECURSIVE TSRMLS_CC);
-				Z_ARRVAL_P(array)->u.v.nApplyCount--;
+			    if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(array))) {
+					Z_ARRVAL_P(array)->u.v.nApplyCount--;
+				}
 			} ZEND_HASH_FOREACH_END();
 		}
 	}
@@ -1435,12 +1439,15 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			return;
 		}
 
-		Z_ARRVAL_P(entry)->u.v.nApplyCount++;
-
+	    if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(entry))) {
+			Z_ARRVAL_P(entry)->u.v.nApplyCount++;
+		}
 		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(entry), value_ptr) {
 			php_compact_var(eg_active_symbol_table, return_value, value_ptr TSRMLS_CC);
 		} ZEND_HASH_FOREACH_END();
-		Z_ARRVAL_P(entry)->u.v.nApplyCount--;
+	    if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(entry))) {
+			Z_ARRVAL_P(entry)->u.v.nApplyCount--;
+		}
 	}
 }
 /* }}} */
@@ -2207,6 +2214,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 					zval *dest_zval = dest_entry;
 					HashTable *thash;
 					zval tmp;
+					int ret;
 					
 					ZVAL_DEREF(src_zval);
 					ZVAL_DEREF(dest_zval);
@@ -2241,17 +2249,15 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 						src_zval = &tmp;
 					}
 					if (Z_TYPE_P(src_zval) == IS_ARRAY) {
-						if (thash) {
+						if (thash && ZEND_HASH_APPLY_PROTECTION(thash)) {
 							thash->u.v.nApplyCount++;
 						}
-						if (!php_array_merge(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval), 1 TSRMLS_CC)) {
-							if (thash) {
-								thash->u.v.nApplyCount--;
-							}
-							return 0;
-						}
-						if (thash) {
+						ret = php_array_merge(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval), 1 TSRMLS_CC);
+						if (thash && ZEND_HASH_APPLY_PROTECTION(thash)) {
 							thash->u.v.nApplyCount--;
+						}
+						if (!ret) {
+							return 0;
 						}
 					} else {
 						if (Z_REFCOUNTED_P(src_entry)) {
@@ -2264,7 +2270,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 					if (Z_REFCOUNTED_P(src_entry)) {
 						Z_ADDREF_P(src_entry);
 					}
-					zend_hash_update(dest, string_key, src_entry);
+					zend_hash_add_new(dest, string_key, src_entry);
 				}
 			} else {
 				if (Z_REFCOUNTED_P(src_entry)) {
@@ -2297,6 +2303,7 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 	zval *src_entry, *dest_entry, *src_zval, *dest_zval;
 	zend_string *string_key;
 	ulong num_key;
+	int ret;
 
 	ZEND_HASH_FOREACH_KEY_VAL(src, num_key, string_key, src_entry) {
 		src_zval = src_entry;
@@ -2338,17 +2345,26 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 			return 0;
 		}
 		SEPARATE_ZVAL(dest_zval);
-		Z_ARRVAL_P(dest_zval)->u.v.nApplyCount++;
-		Z_ARRVAL_P(src_zval)->u.v.nApplyCount++;
-		
 
-		if (!php_array_replace_recursive(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval) TSRMLS_CC)) {
+		if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(dest_zval))) {
+			Z_ARRVAL_P(dest_zval)->u.v.nApplyCount++;
+		}
+		if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(src_zval))) {
+			Z_ARRVAL_P(src_zval)->u.v.nApplyCount++;
+		}		
+
+		ret = php_array_replace_recursive(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval) TSRMLS_CC);
+
+		if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(dest_zval))) {
 			Z_ARRVAL_P(dest_zval)->u.v.nApplyCount--;
+		}
+		if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(src_zval))) {
 			Z_ARRVAL_P(src_zval)->u.v.nApplyCount--;
+		}
+
+		if (!ret) {
 			return 0;
 		}
-		Z_ARRVAL_P(dest_zval)->u.v.nApplyCount--;
-		Z_ARRVAL_P(src_zval)->u.v.nApplyCount--;
 	} ZEND_HASH_FOREACH_END();
 
 	return 1;
@@ -3850,6 +3866,9 @@ PHP_FUNCTION(array_multisort)
 
 		ZVAL_DEREF(arg);
 		if (Z_TYPE_P(arg) == IS_ARRAY) {
+			if (Z_IMMUTABLE_P(arg)) {
+				zval_copy_ctor(arg);
+			}
 			/* We see the next array, so we update the sort flags of
 			 * the previous array and reset the sort flags. */
 			if (i > 0) {

@@ -1174,7 +1174,7 @@ ZEND_API void zend_array_dup(HashTable *target, HashTable *source)
 	target->nTableSize = source->nTableSize;
 	target->pDestructor = source->pDestructor;
 	target->nInternalPointer = INVALID_IDX;
-	target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT);
+	target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT) | HASH_FLAG_APPLY_PROTECTION;
 
 	target_idx = 0;
 	if (target->nTableMask) {
