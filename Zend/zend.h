@@ -727,8 +727,11 @@ END_EXTERN_C()
 
 #define SEPARATE_ZVAL(zv) do {							\
 		zval *_zv = (zv);								\
-		if (Z_REFCOUNTED_P(_zv)) {						\
-			if (Z_REFCOUNT_P(_zv) > 1) {				\
+		if (Z_REFCOUNTED_P(_zv) ||						\
+		    Z_IMMUTABLE_P(_zv)) {						\
+			if (Z_IMMUTABLE_P(_zv)) {					\
+				zval_copy_ctor_func(_zv);				\
+			} else if (Z_REFCOUNT_P(_zv) > 1) {			\
 				if (Z_ISREF_P(_zv)) {					\
 					Z_DELREF_P(_zv);					\
 					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));		\
@@ -737,20 +740,20 @@ END_EXTERN_C()
 					zval_copy_ctor_func(_zv);			\
 				}										\
 			}											\
-		} else if (Z_IMMUTABLE_P(_zv)) {				\
-			zval_copy_ctor_func(_zv);					\
 		}												\
 	} while (0)
 
 #define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
 		zval *_zv = (zv);								\
 		if (!Z_ISREF_P(_zv)) {							\
-			if (Z_COPYABLE_P(_zv) &&					\
-			    Z_REFCOUNT_P(_zv) > 1) {				\
-				Z_DELREF_P(_zv);						\
-				zval_copy_ctor_func(_zv);				\
-			} else if (Z_IMMUTABLE_P(_zv)) {			\
-				zval_copy_ctor_func(_zv);				\
+			if (Z_COPYABLE_P(_zv) ||                    \
+			    Z_IMMUTABLE_P(_zv)) {					\
+				if (Z_IMMUTABLE_P(_zv)) {				\
+					zval_copy_ctor_func(_zv);			\
+				} else if (Z_REFCOUNT_P(_zv) > 1) {		\
+					Z_DELREF_P(_zv);					\
+					zval_copy_ctor_func(_zv);			\
+				}										\
 			}											\
 		}												\
 	} while (0)
