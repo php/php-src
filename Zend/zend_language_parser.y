@@ -1081,10 +1081,6 @@ rw_variable:
 				  zend_check_writable_variable(&$1); }
 ;
 
-variable:
-		reference_variable { $$ = $1; }
-;
-
 variable_property:
 		T_OBJECT_OPERATOR object_property { zend_do_push_object(&$2 TSRMLS_CC); } method_or_not { $$.EA = $4.EA; }
 ;
@@ -1106,7 +1102,7 @@ method_or_not:
 ;
 
 variable_without_objects:
-		reference_variable { $$ = $1; }
+		variable { $$ = $1; }
 ;
 
 static_member:
@@ -1116,7 +1112,7 @@ static_member:
 ;
 
 variable_class_name:
-		reference_variable { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); $$=$1;; }
+		variable { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); $$=$1;; }
 ;
 
 array_function_dereference:
@@ -1126,9 +1122,9 @@ array_function_dereference:
 ;
 
 directly_callable_variable:
-		reference_variable '[' dim_offset ']'
+		variable '[' dim_offset ']'
 			{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
-	|	reference_variable '{' expr '}'
+	|	variable '{' expr '}'
 			{ fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
 	|	simple_variable
 			{ zend_do_begin_variable_parse(TSRMLS_C);
@@ -1146,7 +1142,7 @@ directly_callable_variable:
 			  $$ = $1; $$.EA = ZEND_PARSED_FUNCTION_CALL; }
 ;
 
-reference_variable:
+variable:
 		directly_callable_variable { $$ = $1; }
 	|	static_member { $$ = $1; $$.EA = ZEND_PARSED_STATIC_MEMBER; }
 	|	variable T_OBJECT_OPERATOR object_member
