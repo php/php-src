@@ -1059,7 +1059,7 @@ rw_variable:
 ;
 
 variable_class_name:
-		variable { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); $$=$1;; }
+		variable { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); $$ = $1; }
 ;
 
 dereferencable:
@@ -1068,14 +1068,14 @@ dereferencable:
 ;
 
 directly_callable_variable:
-		dereferencable '[' dim_offset ']'
-			{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
-	|	dereferencable '{' expr '}'
-			{ fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
-	|	simple_variable
+		simple_variable
 			{ zend_do_begin_variable_parse(TSRMLS_C);
 			  fetch_simple_variable(&$$, &$1, 1 TSRMLS_CC);
 			  $$.EA = ZEND_PARSED_VARIABLE; }
+	|	dereferencable '[' dim_offset ']'
+			{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
+	|	dereferencable '{' expr '}'
+			{ fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
 	|	dereferencable T_OBJECT_OPERATOR object_member
 			{ zend_do_fetch_property(&$$, &$1, &$3 TSRMLS_CC);
 			  zend_do_begin_method_call(&$$ TSRMLS_CC); }
