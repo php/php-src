@@ -7499,7 +7499,7 @@ ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC) /* {{{ */
 	Z_TYPE_FLAGS_P(zv) = IS_TYPE_IMMUTABLE;
 	Z_ARRVAL_P(zv)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 
-	/* store as an anounimus constant */
+	/* store as an anonymous constant */
 	c = emalloc(sizeof(zend_constant));
 	ZVAL_COPY_VALUE(&c->value, zv);
 	c->flags = 0;
