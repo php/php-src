@@ -464,7 +464,7 @@ void zend_do_fetch_global_variable(znode *varname, const znode *static_assignmen
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC);
 void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC);
 void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC);
-void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC);
+void zend_do_fetch_static_member(znode *result, znode *class_name, znode *member_name TSRMLS_DC);
 void zend_do_print(znode *result, znode *arg TSRMLS_DC);
 void zend_do_echo(znode *arg TSRMLS_DC);
 typedef int (*unary_op_type)(zval *, zval * TSRMLS_DC);

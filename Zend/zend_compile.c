@@ -703,7 +703,7 @@ void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC) /* {
 }
 /* }}} */
 
-void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
+void zend_do_fetch_static_member(znode *result, znode *class_name, znode *member_name TSRMLS_DC) /* {{{ */
 {
 	znode class_node;
 	zend_llist *fetch_list_ptr;
@@ -718,65 +718,29 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 	} else {
 		zend_do_fetch_class(&class_node, class_name TSRMLS_CC);
 	}
+
+	zend_do_begin_variable_parse(TSRMLS_C);
 	fetch_list_ptr = zend_stack_top(&CG(bp_stack));
-	if (result->op_type == IS_CV) {
-		init_op(&opline TSRMLS_CC);
+	init_op(&opline TSRMLS_CC);
 
-		opline.opcode = ZEND_FETCH_W;
-		opline.result_type = IS_VAR;
-		opline.result.var = get_temporary_variable(CG(active_op_array));
-		opline.op1_type = IS_CONST;
-		LITERAL_STR(opline.op1, STR_COPY(CG(active_op_array)->vars[EX_VAR_TO_NUM(result->u.op.var)]));
+	opline.opcode = ZEND_FETCH_W;
+	opline.result_type = IS_VAR;
+	opline.result.var = get_temporary_variable(CG(active_op_array));
+	SET_NODE(opline.op1, member_name);
+	if (opline.op1_type == IS_CONST) {
 		GET_POLYMORPHIC_CACHE_SLOT(opline.op1.constant);
-		if (class_node.op_type == IS_CONST) {
-			opline.op2_type = IS_CONST;
-			opline.op2.constant =
-				zend_add_class_name_literal(CG(active_op_array), &class_node.u.constant TSRMLS_CC);
-		} else {
-			SET_NODE(opline.op2, &class_node);
-		}
-		GET_NODE(result,opline.result);
-		opline.extended_value |= ZEND_FETCH_STATIC_MEMBER;
-		opline_ptr = &opline;
-
-		zend_llist_add_element(fetch_list_ptr, &opline);
-	} else {
-		le = fetch_list_ptr->head;
-
-		opline_ptr = (zend_op *)le->data;
-		if (opline_ptr->opcode != ZEND_FETCH_W && opline_ptr->op1_type == IS_CV) {
-			init_op(&opline TSRMLS_CC);
-			opline.opcode = ZEND_FETCH_W;
-			opline.result_type = IS_VAR;
-			opline.result.var = get_temporary_variable(CG(active_op_array));
-			opline.op1_type = IS_CONST;
-			LITERAL_STR(opline.op1, STR_COPY(CG(active_op_array)->vars[EX_VAR_TO_NUM(opline_ptr->op1.var)]));
-			GET_POLYMORPHIC_CACHE_SLOT(opline.op1.constant);
-			if (class_node.op_type == IS_CONST) {
-				opline.op2_type = IS_CONST;
-				opline.op2.constant =
-					zend_add_class_name_literal(CG(active_op_array), &class_node.u.constant TSRMLS_CC);
-			} else {
-				SET_NODE(opline.op2, &class_node);
-			}
-			opline.extended_value |= ZEND_FETCH_STATIC_MEMBER;
-			COPY_NODE(opline_ptr->op1, opline.result);
-
-			zend_llist_prepend_element(fetch_list_ptr, &opline);
-		} else {
-			if (opline_ptr->op1_type == IS_CONST) {
-				GET_POLYMORPHIC_CACHE_SLOT(opline_ptr->op1.constant);
-			}
-			if (class_node.op_type == IS_CONST) {
-				opline_ptr->op2_type = IS_CONST;
-				opline_ptr->op2.constant =
-					zend_add_class_name_literal(CG(active_op_array), &class_node.u.constant TSRMLS_CC);
-			} else {
-				SET_NODE(opline_ptr->op2, &class_node);
-			}
-			opline_ptr->extended_value |= ZEND_FETCH_STATIC_MEMBER;
-		}
 	}
+	if (class_node.op_type == IS_CONST) {
+		opline.op2_type = IS_CONST;
+		opline.op2.constant =
+			zend_add_class_name_literal(CG(active_op_array), &class_node.u.constant TSRMLS_CC);
+	} else {
+		SET_NODE(opline.op2, &class_node);
+	}
+	GET_NODE(result,opline.result);
+	opline.extended_value |= ZEND_FETCH_STATIC_MEMBER;
+
+	zend_llist_add_element(fetch_list_ptr, &opline);
 }
 /* }}} */
 
