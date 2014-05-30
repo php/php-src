@@ -1083,8 +1083,6 @@ rw_variable:
 
 variable:
 		reference_variable { $$ = $1; }
-	|	array_function_dereference	{ $$ = $1; }
-	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $$ = $1; $$.EA = ZEND_PARSED_FUNCTION_CALL; }
 ;
 
 variable_property:
@@ -1143,6 +1141,9 @@ directly_callable_variable:
 			{ zend_do_end_function_call(&$4, &$$, 1, 1 TSRMLS_CC);
 			  zend_do_extended_fcall_end(TSRMLS_C);
 			  $$.EA = ZEND_PARSED_METHOD_CALL; }
+	|	function_call
+			{ zend_do_begin_variable_parse(TSRMLS_C);
+			  $$ = $1; $$.EA = ZEND_PARSED_FUNCTION_CALL; }
 ;
 
 reference_variable:
