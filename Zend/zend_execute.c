@@ -729,8 +729,10 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 		ZVAL_COPY_VALUE(&tmp, value);
 		value = &tmp;
 	} else if (value_type == IS_CONST) {
-		ZVAL_DUP(&tmp, value);
-		value = &tmp;
+		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
+			ZVAL_DUP(&tmp, value);
+			value = &tmp;
+		}
 	} else if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
 	}
