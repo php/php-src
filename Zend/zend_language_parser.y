@@ -930,21 +930,7 @@ class_name_reference:
 
 
 dynamic_class_name_reference:
-		base_variable T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); }
-			object_property { zend_do_push_object(&$4 TSRMLS_CC); } dynamic_class_name_variable_properties
-			{ zend_do_pop_object(&$$ TSRMLS_CC); $$.EA = ZEND_PARSED_MEMBER; }
-	|	base_variable { $$ = $1; }
-;
-
-
-dynamic_class_name_variable_properties:
-		dynamic_class_name_variable_properties dynamic_class_name_variable_property
-	|	/* empty */
-;
-
-
-dynamic_class_name_variable_property:
-		T_OBJECT_OPERATOR object_property { zend_do_push_object(&$2 TSRMLS_CC); }
+		simple_variable			{ zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable(&$$, &$1, 1 TSRMLS_CC); }
 ;
 
 exit_expr:
