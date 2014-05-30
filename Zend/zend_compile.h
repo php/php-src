@@ -457,7 +457,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC);
 void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC);
 void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC);
 void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar op TSRMLS_DC);
-void zend_do_indirect_references(znode *result, const znode *num_references, znode *variable TSRMLS_DC);
+void zend_do_indirect_reference(znode *result, znode *variable TSRMLS_DC);
 void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC);
 void zend_do_fetch_global_variable(znode *varname, const znode *static_assignment, int fetch_type TSRMLS_DC);
 

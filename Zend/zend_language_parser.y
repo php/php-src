@@ -1130,7 +1130,6 @@ method_or_not:
 
 variable_without_objects:
 		reference_variable { $$ = $1; }
-	|	simple_indirect_reference reference_variable { zend_do_indirect_references(&$$, &$1, &$2 TSRMLS_CC); }
 ;
 
 static_member:
@@ -1158,20 +1157,19 @@ base_variable_with_function_calls:
 
 base_variable:
 		reference_variable { $$ = $1; $$.EA = ZEND_PARSED_VARIABLE; }
-	|	simple_indirect_reference reference_variable { zend_do_indirect_references(&$$, &$1, &$2 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
 	|	static_member { $$ = $1; $$.EA = ZEND_PARSED_STATIC_MEMBER; }
 ;
 
 reference_variable:
 		reference_variable '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
 	|	reference_variable '{' expr '}'		{ fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); }
-	|	compound_variable			{ zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable(&$$, &$1, 1 TSRMLS_CC); }
+	|	simple_variable			{ zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable(&$$, &$1, 1 TSRMLS_CC); }
 ;
 
-
-compound_variable:
+simple_variable:
 		T_VARIABLE			{ $$ = $1; }
 	|	'$' '{' expr '}'	{ $$ = $3; }
+	|	'$' simple_variable	{ zend_do_indirect_reference(&$$, &$2 TSRMLS_CC); }
 ;
 
 dim_offset:
@@ -1194,11 +1192,6 @@ object_dim_list:
 variable_name:
 		T_STRING		{ $$ = $1; }
 	|	'{' expr '}'	{ $$ = $2; }
-;
-
-simple_indirect_reference:
-		'$' { Z_LVAL($$.u.constant) = 1; }
-	|	simple_indirect_reference '$' { Z_LVAL($$.u.constant)++; }
 ;
 
 assignment_list:

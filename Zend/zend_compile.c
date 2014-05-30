@@ -6315,17 +6315,10 @@ void zend_do_include_or_eval(int type, znode *result, znode *op1 TSRMLS_DC) /* {
 }
 /* }}} */
 
-void zend_do_indirect_references(znode *result, const znode *num_references, znode *variable TSRMLS_DC) /* {{{ */
+void zend_do_indirect_reference(znode *result, znode *variable TSRMLS_DC) /* {{{ */
 {
-	int i;
+	fetch_simple_variable_ex(result, variable, 0, ZEND_FETCH_R TSRMLS_CC);
 
-	zend_do_end_variable_parse(variable, BP_VAR_R, 0 TSRMLS_CC);
-	for (i=1; i<Z_LVAL(num_references->u.constant); i++) {
-		fetch_simple_variable_ex(result, variable, 0, ZEND_FETCH_R TSRMLS_CC);
-		*variable = *result;
-	}
-	zend_do_begin_variable_parse(TSRMLS_C);
-	fetch_simple_variable(result, variable, 1 TSRMLS_CC);
 	/* there is a chance someone is accessing $this */
 	if (CG(active_op_array)->scope && CG(active_op_array)->this_var == -1) {
 		zend_string *key = STR_INIT("this", sizeof("this")-1, 0);
