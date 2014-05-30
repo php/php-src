@@ -707,8 +707,6 @@ void zend_do_fetch_static_member(znode *result, znode *class_name, znode *member
 {
 	znode class_node;
 	zend_llist *fetch_list_ptr;
-	zend_llist_element *le;
-	zend_op *opline_ptr;
 	zend_op opline;
 
 	if (class_name->op_type == IS_CONST &&

@@ -747,28 +747,6 @@ non_empty_for_expr:
 	|	expr					{ $$ = $1; }
 ;
 
-chaining_method_or_property:
-		chaining_method_or_property variable_property 	{ $$.EA = $2.EA; }
-	|	variable_property 								{ $$.EA = $1.EA; }
-;
-
-chaining_dereference:
-		chaining_dereference '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
-	|	'[' dim_offset ']'		{ zend_do_pop_object(&$1 TSRMLS_CC); fetch_array_dim(&$$, &$1, &$2 TSRMLS_CC); }
-;
-
-chaining_instance_call:
-		chaining_dereference 		{ zend_do_push_object(&$1 TSRMLS_CC); } chaining_method_or_property { $$ = $3; }
-	|	chaining_dereference 		{ zend_do_push_object(&$1 TSRMLS_CC); $$ = $1; }
-	|	chaining_method_or_property { $$ = $1; }
-;
-
-instance_call:
-		/* empty */ 		{ $$ = $0; }
-/*	|	{ zend_do_push_object(&$0 TSRMLS_CC); zend_do_begin_variable_parse(TSRMLS_C); }
-		chaining_instance_call	{ zend_do_pop_object(&$$ TSRMLS_CC); zend_do_end_variable_parse(&$2, BP_VAR_R, 0 TSRMLS_CC); }*/
-;
-
 new_expr:
 		T_NEW class_name_reference { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 ;
@@ -827,7 +805,6 @@ expr_without_variable:
 	|	expr T_INSTANCEOF class_name_reference { zend_do_instanceof(&$$, &$1, &$3, 0 TSRMLS_CC); }
 	|	parenthesis_expr 	{ $$ = $1; }
 	|	new_expr		{ $$ = $1; }
-	|	'(' new_expr ')' { $$ = $2; } instance_call { $$ = $5; }
 	|	expr '?' { zend_do_begin_qm_op(&$1, &$2 TSRMLS_CC); }
 		expr ':' { zend_do_qm_true(&$4, &$2, &$5 TSRMLS_CC); }
 		expr	 { zend_do_qm_false(&$$, &$7, &$2, &$5 TSRMLS_CC); }
@@ -1081,38 +1058,8 @@ rw_variable:
 				  zend_check_writable_variable(&$1); }
 ;
 
-variable_property:
-		T_OBJECT_OPERATOR object_property { zend_do_push_object(&$2 TSRMLS_CC); } method_or_not { $$.EA = $4.EA; }
-;
-
-array_method_dereference:
-		array_method_dereference '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
-	|	method '[' dim_offset ']' { $1.EA = ZEND_PARSED_METHOD_CALL; fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
-;
-
-method:
-		{ zend_do_pop_object(&$$ TSRMLS_CC); zend_do_begin_method_call(&$$ TSRMLS_CC); }
-		function_call_parameter_list { zend_do_end_function_call(&$1, &$$, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); }
-;
-
-method_or_not:
-		method						{ $$ = $1; $$.EA = ZEND_PARSED_METHOD_CALL; zend_do_push_object(&$$ TSRMLS_CC); }
-	|	array_method_dereference	{ $$ = $1; zend_do_push_object(&$$ TSRMLS_CC); }
-	|	/* empty */ { $$.EA = ZEND_PARSED_MEMBER; }
-;
-
-variable_without_objects:
-		variable { $$ = $1; }
-;
-
 variable_class_name:
 		variable { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); $$=$1;; }
-;
-
-array_function_dereference:
-		array_function_dereference '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
-	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $1.EA = ZEND_PARSED_FUNCTION_CALL; }
-		'[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$4 TSRMLS_CC); }
 ;
 
 dereferencable:
@@ -1169,17 +1116,6 @@ dim_offset:
 object_member:
 		variable_name	{ $$ = $1; }
 	|	simple_variable { fetch_simple_variable_ex(&$$, &$1, 0, ZEND_FETCH_R TSRMLS_CC); }
-;
-
-object_property:
-		object_dim_list { $$ = $1; }
-	|	variable_without_objects { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); } { znode tmp_znode;  zend_do_pop_object(&tmp_znode TSRMLS_CC);  zend_do_fetch_property(&$$, &tmp_znode, &$1 TSRMLS_CC);}
-;
-
-object_dim_list:
-		object_dim_list '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
-	|	object_dim_list '{' expr '}'		{ fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); }
-	|	variable_name { znode tmp_znode;  zend_do_pop_object(&tmp_znode TSRMLS_CC);  zend_do_fetch_property(&$$, &tmp_znode, &$1 TSRMLS_CC);}
 ;
 
 variable_name:
