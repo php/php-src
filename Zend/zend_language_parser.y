@@ -765,8 +765,8 @@ chaining_instance_call:
 
 instance_call:
 		/* empty */ 		{ $$ = $0; }
-	|	{ zend_do_push_object(&$0 TSRMLS_CC); zend_do_begin_variable_parse(TSRMLS_C); }
-		chaining_instance_call	{ zend_do_pop_object(&$$ TSRMLS_CC); zend_do_end_variable_parse(&$2, BP_VAR_R, 0 TSRMLS_CC); }
+/*	|	{ zend_do_push_object(&$0 TSRMLS_CC); zend_do_begin_variable_parse(TSRMLS_C); }
+		chaining_instance_call	{ zend_do_pop_object(&$$ TSRMLS_CC); zend_do_end_variable_parse(&$2, BP_VAR_R, 0 TSRMLS_CC); }*/
 ;
 
 new_expr:
@@ -1082,10 +1082,7 @@ rw_variable:
 ;
 
 variable:
-		variable T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); }
-			object_property { zend_do_push_object(&$4 TSRMLS_CC); } method_or_not
-			{ zend_do_pop_object(&$$ TSRMLS_CC); $$.EA = $6.EA; }
-	|	reference_variable { $$ = $1; $$.EA = ZEND_PARSED_VARIABLE; }
+		reference_variable { $$ = $1; }
 	|	array_function_dereference	{ $$ = $1; }
 	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $$ = $1; $$.EA = ZEND_PARSED_FUNCTION_CALL; }
 ;
@@ -1131,14 +1128,28 @@ array_function_dereference:
 ;
 
 directly_callable_variable:
-		reference_variable '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
-	|	reference_variable '{' expr '}'		{ fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); }
-	|	simple_variable			{ zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable(&$$, &$1, 1 TSRMLS_CC); }
+		reference_variable '[' dim_offset ']'
+			{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
+	|	reference_variable '{' expr '}'
+			{ fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
+	|	simple_variable
+			{ zend_do_begin_variable_parse(TSRMLS_C);
+			  fetch_simple_variable(&$$, &$1, 1 TSRMLS_CC);
+			  $$.EA = ZEND_PARSED_VARIABLE; }
+	|	variable T_OBJECT_OPERATOR object_member
+			{ zend_do_fetch_property(&$$, &$1, &$3 TSRMLS_CC);
+			  zend_do_begin_method_call(&$$ TSRMLS_CC); }
+		function_call_parameter_list
+			{ zend_do_end_function_call(&$4, &$$, 1, 1 TSRMLS_CC);
+			  zend_do_extended_fcall_end(TSRMLS_C);
+			  $$.EA = ZEND_PARSED_METHOD_CALL; }
 ;
 
 reference_variable:
 		directly_callable_variable { $$ = $1; }
-	|	static_member { $$ = $1; }
+	|	static_member { $$ = $1; $$.EA = ZEND_PARSED_STATIC_MEMBER; }
+	|	variable T_OBJECT_OPERATOR object_member
+			{ zend_do_fetch_property(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_MEMBER; }
 ;
 
 simple_variable:
@@ -1152,6 +1163,10 @@ dim_offset:
 	|	expr			{ $$ = $1; }
 ;
 
+object_member:
+		variable_name	{ $$ = $1; }
+	|	simple_variable { fetch_simple_variable_ex(&$$, &$1, 0, ZEND_FETCH_R TSRMLS_CC); }
+;
 
 object_property:
 		object_dim_list { $$ = $1; }
