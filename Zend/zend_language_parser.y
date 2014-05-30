@@ -45,7 +45,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %}
 
 %pure_parser
-%expect 3
+%expect 2
 
 %code requires {
 #ifdef ZTS
@@ -1063,8 +1063,8 @@ variable_class_name:
 ;
 
 dereferencable:
-		variable			{ $$ = $1; }
-	|	'(' new_expr ')'	{ $$ = $2; zend_do_begin_variable_parse(TSRMLS_C); }
+		variable		{ $$ = $1; }
+	|	'(' expr ')'	{ $$ = $2; zend_do_begin_variable_parse(TSRMLS_C); }
 ;
 
 directly_callable_variable:
