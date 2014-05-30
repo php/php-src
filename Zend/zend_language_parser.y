@@ -902,7 +902,7 @@ class_name_reference:
 
 
 dynamic_class_name_reference:
-		simple_variable			{ zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable(&$$, &$1, 1 TSRMLS_CC); }
+		new_variable { $$ = $1; }
 ;
 
 exit_expr:
@@ -1104,6 +1104,15 @@ static_member:
 
 ;
 
+new_variable:
+		simple_variable
+			{ zend_do_begin_variable_parse(TSRMLS_C);
+			  fetch_simple_variable(&$$, &$1, 1 TSRMLS_CC); }
+	|	new_variable '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
+	|	new_variable '{' expr '}' { fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); }
+	|	new_variable T_OBJECT_OPERATOR object_member
+			{ zend_do_fetch_property(&$$, &$1, &$3 TSRMLS_CC); }
+;
 
 dim_offset:
 		/* empty */		{ $$.op_type = IS_UNUSED; }
