@@ -1105,12 +1105,6 @@ variable_without_objects:
 		variable { $$ = $1; }
 ;
 
-static_member:
-		class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable { zend_do_fetch_static_member(&$$, &$1, &$3 TSRMLS_CC); }
-	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable { zend_do_fetch_static_member(&$$, &$1, &$3 TSRMLS_CC); }
-
-;
-
 variable_class_name:
 		variable { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); $$=$1;; }
 ;
@@ -1121,16 +1115,21 @@ array_function_dereference:
 		'[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$4 TSRMLS_CC); }
 ;
 
+dereferencable:
+		variable			{ $$ = $1; }
+	|	'(' new_expr ')'	{ $$ = $2; zend_do_begin_variable_parse(TSRMLS_C); }
+;
+
 directly_callable_variable:
-		variable '[' dim_offset ']'
+		dereferencable '[' dim_offset ']'
 			{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
-	|	variable '{' expr '}'
+	|	dereferencable '{' expr '}'
 			{ fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_VARIABLE; }
 	|	simple_variable
 			{ zend_do_begin_variable_parse(TSRMLS_C);
 			  fetch_simple_variable(&$$, &$1, 1 TSRMLS_CC);
 			  $$.EA = ZEND_PARSED_VARIABLE; }
-	|	variable T_OBJECT_OPERATOR object_member
+	|	dereferencable T_OBJECT_OPERATOR object_member
 			{ zend_do_fetch_property(&$$, &$1, &$3 TSRMLS_CC);
 			  zend_do_begin_method_call(&$$ TSRMLS_CC); }
 		function_call_parameter_list
@@ -1145,7 +1144,7 @@ directly_callable_variable:
 variable:
 		directly_callable_variable { $$ = $1; }
 	|	static_member { $$ = $1; $$.EA = ZEND_PARSED_STATIC_MEMBER; }
-	|	variable T_OBJECT_OPERATOR object_member
+	|	dereferencable T_OBJECT_OPERATOR object_member
 			{ zend_do_fetch_property(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_MEMBER; }
 ;
 
@@ -1154,6 +1153,13 @@ simple_variable:
 	|	'$' '{' expr '}'	{ $$ = $3; }
 	|	'$' simple_variable	{ zend_do_indirect_reference(&$$, &$2 TSRMLS_CC); }
 ;
+
+static_member:
+		class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable { zend_do_fetch_static_member(&$$, &$1, &$3 TSRMLS_CC); }
+	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable { zend_do_fetch_static_member(&$$, &$1, &$3 TSRMLS_CC); }
+
+;
+
 
 dim_offset:
 		/* empty */		{ $$.op_type = IS_UNUSED; }
