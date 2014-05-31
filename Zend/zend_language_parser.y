@@ -870,7 +870,7 @@ function_call:
 		function_call_parameter_list { zend_do_end_function_call(NULL, &$$, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable { fetch_simple_variable_ex(&$$, &$3, 0, ZEND_FETCH_R TSRMLS_CC); zend_do_begin_class_member_function_call(&$1, &$$ TSRMLS_CC); }
 		function_call_parameter_list { zend_do_end_function_call(NULL, &$$, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
-	|	directly_callable_variable { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); zend_do_begin_dynamic_function_call(&$1, 0 TSRMLS_CC); }
+	|	callable_expr { zend_do_begin_dynamic_function_call(&$1, 0 TSRMLS_CC); }
 		function_call_parameter_list { zend_do_end_function_call(&$1, &$$, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 ;
 
@@ -1068,7 +1068,13 @@ dereferencable:
 	|	dereferencable_scalar	{ $$ = $1; zend_do_begin_variable_parse(TSRMLS_C); }
 ;
 
-directly_callable_variable:
+callable_expr:
+		callable_variable		{ zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); $$ = $1; }
+	|	'(' expr ')'			{ $$ = $2; }
+	|	dereferencable_scalar	{ $$ = $1; }
+;
+
+callable_variable:
 		simple_variable
 			{ zend_do_begin_variable_parse(TSRMLS_C);
 			  fetch_simple_variable(&$$, &$1, 1 TSRMLS_CC);
@@ -1090,7 +1096,7 @@ directly_callable_variable:
 ;
 
 variable:
-		directly_callable_variable { $$ = $1; }
+		callable_variable { $$ = $1; }
 	|	static_member { $$ = $1; $$.EA = ZEND_PARSED_STATIC_MEMBER; }
 	|	dereferencable T_OBJECT_OPERATOR object_member
 			{ zend_do_fetch_property(&$$, &$1, &$3 TSRMLS_CC); $$.EA = ZEND_PARSED_MEMBER; }
