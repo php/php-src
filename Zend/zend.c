@@ -1036,7 +1036,6 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	zend_stack function_call_stack;
 	zend_stack switch_cond_stack;
 	zend_stack foreach_copy_stack;
-	zend_stack object_stack;
 	zend_stack declare_stack;
 	zend_stack list_stack;
 	zend_stack context_stack;
@@ -1192,7 +1191,6 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				SAVE_STACK(function_call_stack);
 				SAVE_STACK(switch_cond_stack);
 				SAVE_STACK(foreach_copy_stack);
-				SAVE_STACK(object_stack);
 				SAVE_STACK(declare_stack);
 				SAVE_STACK(list_stack);
 				SAVE_STACK(context_stack);
@@ -1218,7 +1216,6 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				RESTORE_STACK(function_call_stack);
 				RESTORE_STACK(switch_cond_stack);
 				RESTORE_STACK(foreach_copy_stack);
-				RESTORE_STACK(object_stack);
 				RESTORE_STACK(declare_stack);
 				RESTORE_STACK(list_stack);
 				RESTORE_STACK(context_stack);

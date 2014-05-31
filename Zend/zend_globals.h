@@ -73,7 +73,7 @@ struct _zend_compiler_globals {
 	zend_stack bp_stack;
 	zend_stack switch_cond_stack;
 	zend_stack foreach_copy_stack;
-	zend_stack object_stack;
+	zend_stack object_stack; /* TODO: remove */
 	zend_stack declare_stack;
 
 	zend_class_entry *active_class_entry;

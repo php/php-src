@@ -194,7 +194,6 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	zend_stack_init(&CG(function_call_stack), sizeof(zend_function_call_entry));
 	zend_stack_init(&CG(switch_cond_stack), sizeof(zend_switch_entry));
 	zend_stack_init(&CG(foreach_copy_stack), sizeof(zend_op));
-	zend_stack_init(&CG(object_stack), sizeof(znode));
 	zend_stack_init(&CG(declare_stack), sizeof(zend_declarables));
 	CG(active_class_entry) = NULL;
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
@@ -242,7 +241,6 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 	zend_stack_destroy(&CG(function_call_stack));
 	zend_stack_destroy(&CG(switch_cond_stack));
 	zend_stack_destroy(&CG(foreach_copy_stack));
-	zend_stack_destroy(&CG(object_stack));
 	zend_stack_destroy(&CG(declare_stack));
 	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
@@ -5553,22 +5551,6 @@ void zend_do_halt_compiler_register(TSRMLS_D) /* {{{ */
 	if (CG(in_namespace)) {
 		zend_do_end_namespace(TSRMLS_C);
 	}
-}
-/* }}} */
-
-void zend_do_push_object(const znode *object TSRMLS_DC) /* {{{ */
-{
-	zend_stack_push(&CG(object_stack), object);
-}
-/* }}} */
-
-void zend_do_pop_object(znode *object TSRMLS_DC) /* {{{ */
-{
-	if (object) {
-		znode *tmp = zend_stack_top(&CG(object_stack));
-		*object = *tmp;
-	}
-	zend_stack_del_top(&CG(object_stack));
 }
 /* }}} */
 
