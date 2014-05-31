@@ -3740,6 +3740,41 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_IS_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		container = NULL;
+		if (IS_CONST == IS_VAR && UNEXPECTED(container == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+		}
+		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, opline->op2.zv, IS_CONST TSRMLS_CC);
+		if (IS_CONST == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+
+	} else {
+		if (IS_CONST == IS_UNUSED) {
+			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+		}
+		container = opline->op1.zv;
+		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, opline->op2.zv, IS_CONST TSRMLS_CC);
+
+
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_CONST_CONST(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -3806,6 +3841,39 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+		/* Behave like FETCH_OBJ_W */
+		zend_free_op free_op1;
+		zval *property;
+
+		SAVE_OPLINE();
+		property = opline->op2.zv;
+		container = NULL;
+
+        if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		if (IS_CONST == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+		}
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, property, ((IS_CONST == IS_CONST) ? Z_CACHE_SLOT_P(property) : -1), BP_VAR_W, 0 TSRMLS_CC);
+
+		if (IS_CONST == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		return zend_fetch_property_address_read_helper_SPEC_CONST_CONST(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -4942,6 +5010,41 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_IS_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_H
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zend_free_op free_op1, free_op2;
+
+	SAVE_OPLINE();
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		container = NULL;
+		if (IS_CONST == IS_VAR && UNEXPECTED(container == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+		}
+		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_TMP_VAR TSRMLS_CC);
+		if (IS_CONST == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+		zval_dtor(free_op2.var);
+
+	} else {
+		if (IS_TMP_VAR == IS_UNUSED) {
+			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+		}
+		container = opline->op1.zv;
+		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_TMP_VAR TSRMLS_CC);
+		zval_dtor(free_op2.var);
+
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_CONST_TMP(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -5010,6 +5113,39 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_H
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+		/* Behave like FETCH_OBJ_W */
+		zend_free_op free_op1, free_op2;
+		zval *property;
+
+		SAVE_OPLINE();
+		property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		container = NULL;
+
+        if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		if (IS_CONST == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+		}
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, property, ((IS_TMP_VAR == IS_CONST) ? Z_CACHE_SLOT_P(property) : -1), BP_VAR_W, 0 TSRMLS_CC);
+		zval_dtor(free_op2.var);
+		if (IS_CONST == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		return zend_fetch_property_address_read_helper_SPEC_CONST_TMP(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -5997,6 +6133,41 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_IS_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_H
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zend_free_op free_op1, free_op2;
+
+	SAVE_OPLINE();
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		container = NULL;
+		if (IS_CONST == IS_VAR && UNEXPECTED(container == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+		}
+		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_VAR TSRMLS_CC);
+		if (IS_CONST == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+		zval_ptr_dtor_nogc(free_op2.var);
+
+	} else {
+		if (IS_VAR == IS_UNUSED) {
+			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+		}
+		container = opline->op1.zv;
+		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_VAR TSRMLS_CC);
+		zval_ptr_dtor_nogc(free_op2.var);
+
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_CONST_VAR(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -6065,6 +6236,39 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_H
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+		/* Behave like FETCH_OBJ_W */
+		zend_free_op free_op1, free_op2;
+		zval *property;
+
+		SAVE_OPLINE();
+		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		container = NULL;
+
+        if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		if (IS_CONST == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+		}
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, property, ((IS_VAR == IS_CONST) ? Z_CACHE_SLOT_P(property) : -1), BP_VAR_W, 0 TSRMLS_CC);
+		zval_ptr_dtor_nogc(free_op2.var);
+		if (IS_CONST == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		return zend_fetch_property_address_read_helper_SPEC_CONST_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -6894,6 +7098,41 @@ static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE
 static int ZEND_FASTCALL  ZEND_FETCH_IS_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return zend_fetch_var_address_helper_SPEC_CONST_UNUSED(BP_VAR_IS, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		container = NULL;
+		if (IS_CONST == IS_VAR && UNEXPECTED(container == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+		}
+		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, NULL, IS_UNUSED TSRMLS_CC);
+		if (IS_CONST == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+
+	} else {
+		if (IS_UNUSED == IS_UNUSED) {
+			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+		}
+		container = opline->op1.zv;
+		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, NULL, IS_UNUSED TSRMLS_CC);
+
+
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -7731,6 +7970,41 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_IS_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HA
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		container = NULL;
+		if (IS_CONST == IS_VAR && UNEXPECTED(container == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+		}
+		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC), IS_CV TSRMLS_CC);
+		if (IS_CONST == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+
+	} else {
+		if (IS_CV == IS_UNUSED) {
+			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+		}
+		container = opline->op1.zv;
+		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC), IS_CV TSRMLS_CC);
+
+
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_CONST_CV(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -7797,6 +8071,39 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HA
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+		/* Behave like FETCH_OBJ_W */
+		zend_free_op free_op1;
+		zval *property;
+
+		SAVE_OPLINE();
+		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		container = NULL;
+
+        if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		if (IS_CONST == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+		}
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, property, ((IS_CV == IS_CONST) ? Z_CACHE_SLOT_P(property) : -1), BP_VAR_W, 0 TSRMLS_CC);
+
+		if (IS_CONST == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		return zend_fetch_property_address_read_helper_SPEC_CONST_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -9811,6 +10118,41 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_IS_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_H
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		container = NULL;
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+		}
+		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, opline->op2.zv, IS_CONST TSRMLS_CC);
+		if (IS_TMP_VAR == IS_VAR && 1 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+
+	} else {
+		if (IS_CONST == IS_UNUSED) {
+			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+		}
+		container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, opline->op2.zv, IS_CONST TSRMLS_CC);
+
+		zval_dtor(free_op1.var);
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_TMP_CONST(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -9877,6 +10219,39 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_H
 	zval_dtor(free_op1.var);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+		/* Behave like FETCH_OBJ_W */
+		zend_free_op free_op1;
+		zval *property;
+
+		SAVE_OPLINE();
+		property = opline->op2.zv;
+		container = NULL;
+
+        if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+		}
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, property, ((IS_CONST == IS_CONST) ? Z_CACHE_SLOT_P(property) : -1), BP_VAR_W, 0 TSRMLS_CC);
+
+		if (IS_TMP_VAR == IS_VAR && 1 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		return zend_fetch_property_address_read_helper_SPEC_TMP_CONST(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -10881,6 +11256,41 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_IS_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HAN
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zend_free_op free_op1, free_op2;
+
+	SAVE_OPLINE();
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		container = NULL;
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+		}
+		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_TMP_VAR TSRMLS_CC);
+		if (IS_TMP_VAR == IS_VAR && 1 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+		zval_dtor(free_op2.var);
+
+	} else {
+		if (IS_TMP_VAR == IS_UNUSED) {
+			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+		}
+		container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_TMP_VAR TSRMLS_CC);
+		zval_dtor(free_op2.var);
+		zval_dtor(free_op1.var);
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_TMP_TMP(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -10949,6 +11359,39 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HAN
 	zval_dtor(free_op1.var);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+		/* Behave like FETCH_OBJ_W */
+		zend_free_op free_op1, free_op2;
+		zval *property;
+
+		SAVE_OPLINE();
+		property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		container = NULL;
+
+        if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+		}
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, property, ((IS_TMP_VAR == IS_CONST) ? Z_CACHE_SLOT_P(property) : -1), BP_VAR_W, 0 TSRMLS_CC);
+		zval_dtor(free_op2.var);
+		if (IS_TMP_VAR == IS_VAR && 1 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		return zend_fetch_property_address_read_helper_SPEC_TMP_TMP(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -11936,6 +12379,41 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_IS_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HAN
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zend_free_op free_op1, free_op2;
+
+	SAVE_OPLINE();
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		container = NULL;
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+		}
+		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_VAR TSRMLS_CC);
+		if (IS_TMP_VAR == IS_VAR && 1 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+		zval_ptr_dtor_nogc(free_op2.var);
+
+	} else {
+		if (IS_VAR == IS_UNUSED) {
+			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+		}
+		container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_VAR TSRMLS_CC);
+		zval_ptr_dtor_nogc(free_op2.var);
+		zval_dtor(free_op1.var);
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_TMP_VAR(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -12004,6 +12482,39 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HAN
 	zval_dtor(free_op1.var);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+		/* Behave like FETCH_OBJ_W */
+		zend_free_op free_op1, free_op2;
+		zval *property;
+
+		SAVE_OPLINE();
+		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		container = NULL;
+
+        if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+		}
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, property, ((IS_VAR == IS_CONST) ? Z_CACHE_SLOT_P(property) : -1), BP_VAR_W, 0 TSRMLS_CC);
+		zval_ptr_dtor_nogc(free_op2.var);
+		if (IS_TMP_VAR == IS_VAR && 1 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		return zend_fetch_property_address_read_helper_SPEC_TMP_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -12835,6 +13346,41 @@ static int ZEND_FASTCALL  ZEND_FETCH_IS_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HAND
 	return zend_fetch_var_address_helper_SPEC_TMP_UNUSED(BP_VAR_IS, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		container = NULL;
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+		}
+		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, NULL, IS_UNUSED TSRMLS_CC);
+		if (IS_TMP_VAR == IS_VAR && 1 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+
+	} else {
+		if (IS_UNUSED == IS_UNUSED) {
+			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+		}
+		container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, NULL, IS_UNUSED TSRMLS_CC);
+
+		zval_dtor(free_op1.var);
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -13538,6 +14084,41 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_IS_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HAND
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		container = NULL;
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+		}
+		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC), IS_CV TSRMLS_CC);
+		if (IS_TMP_VAR == IS_VAR && 1 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+
+	} else {
+		if (IS_CV == IS_UNUSED) {
+			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+		}
+		container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC), IS_CV TSRMLS_CC);
+
+		zval_dtor(free_op1.var);
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_TMP_CV(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -13604,6 +14185,39 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HAND
 	zval_dtor(free_op1.var);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+		/* Behave like FETCH_OBJ_W */
+		zend_free_op free_op1;
+		zval *property;
+
+		SAVE_OPLINE();
+		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		container = NULL;
+
+        if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+		}
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, property, ((IS_CV == IS_CONST) ? Z_CACHE_SLOT_P(property) : -1), BP_VAR_W, 0 TSRMLS_CC);
+
+		if (IS_TMP_VAR == IS_VAR && 1 && READY_TO_DESTROY(free_op1.var)) {
+			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		return zend_fetch_property_address_read_helper_SPEC_TMP_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -16623,6 +17237,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CONST_HANDLER(ZEND_OP
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (IS_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -16799,6 +17416,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CONST_HANDLER(ZEND_OP
 		property = opline->op2.zv;
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
+        if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -18838,6 +19458,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TMP_HANDLER(ZEND_OPCO
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (IS_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -19016,6 +19639,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TMP_HANDLER(ZEND_OPCO
 		property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
+        if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -20963,6 +21589,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_VAR_HANDLER(ZEND_OPCO
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (IS_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -21141,6 +21770,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_VAR_HANDLER(ZEND_OPCO
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
+        if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -22815,6 +23447,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_UNUSED_HANDLER(ZEND_O
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (IS_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -24328,6 +24963,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CV_HANDLER(ZEND_OPCOD
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (IS_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -24504,6 +25142,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV_HANDLER(ZEND_OPCOD
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
+        if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -26205,6 +26846,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_CONST_HANDLER(ZEND
 		property = opline->op2.zv;
 		container = _get_obj_zval_ptr_unused(TSRMLS_C);
 
+        if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -27566,6 +28210,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_TMP_HANDLER(ZEND_O
 		property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		container = _get_obj_zval_ptr_unused(TSRMLS_C);
 
+        if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -28844,6 +29491,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_VAR_HANDLER(ZEND_O
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		container = _get_obj_zval_ptr_unused(TSRMLS_C);
 
+        if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -30633,6 +31283,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_CV_HANDLER(ZEND_OP
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		container = _get_obj_zval_ptr_unused(TSRMLS_C);
 
+        if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -33557,6 +34210,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CONST_HANDLER(ZEND_OPC
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 		if (IS_CV == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -33733,6 +34389,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CONST_HANDLER(ZEND_OPC
 		property = opline->op2.zv;
 		container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
+        if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -35563,6 +36222,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_TMP_HANDLER(ZEND_OPCOD
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 		if (IS_CV == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -35741,6 +36403,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP_HANDLER(ZEND_OPCOD
 		property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
+        if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -37571,6 +38236,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_VAR_HANDLER(ZEND_OPCOD
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 		if (IS_CV == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -37749,6 +38417,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_VAR_HANDLER(ZEND_OPCOD
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
+        if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -39305,6 +39976,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_UNUSED_HANDLER(ZEND_OP
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 		if (IS_CV == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -40684,6 +41358,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CV_HANDLER(ZEND_OPCODE
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 		if (IS_CV == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -40860,6 +41537,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_HANDLER(ZEND_OPCODE
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
+        if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -44040,16 +44720,16 @@ void zend_init_opcodes_handlers(void)
   	ZEND_FETCH_FUNC_ARG_SPEC_CV_VAR_HANDLER,
   	ZEND_FETCH_FUNC_ARG_SPEC_CV_UNUSED_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_CONST_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_TMP_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_VAR_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_UNUSED_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_CV_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CONST_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_TMP_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_VAR_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UNUSED_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CV_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CONST_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TMP_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_VAR_HANDLER,
@@ -44065,16 +44745,16 @@ void zend_init_opcodes_handlers(void)
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_VAR_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_UNUSED_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CV_HANDLER,
+  	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CONST_HANDLER,
+  	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_TMP_HANDLER,
+  	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CV_HANDLER,
+  	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CONST_HANDLER,
+  	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TMP_HANDLER,
+  	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV_HANDLER,
   	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CONST_HANDLER,
   	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TMP_HANDLER,
   	ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_VAR_HANDLER,
