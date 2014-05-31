@@ -1234,6 +1234,22 @@ void zend_do_begin_variable_parse(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+static zend_bool zend_can_parse_variable_for_write(znode *variable TSRMLS_DC) /* {{{ */
+{
+	zend_llist *fetch_list_ptr = zend_stack_top(&CG(bp_stack));
+	zend_llist_element *le = fetch_list_ptr->head;
+	for (le = fetch_list_ptr->head; le; le = le->next) {
+		zend_op *opline = (zend_op *) le->data;
+		if ((opline->opcode != ZEND_SEPARATE && opline->opcode != ZEND_FETCH_W)
+			&& (opline->op1_type == IS_TMP_VAR || opline->op1_type == IS_CONST)
+		) {
+			return 0;
+		}
+	}
+	return 1;
+}
+/* }}} */
+
 void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS_DC) /* {{{ */
 {
 	zend_llist *fetch_list_ptr = zend_stack_top(&CG(bp_stack));
@@ -1285,6 +1301,13 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 			    opline->op1.var == this_var) {
 				opline->op1_type = IS_CV;
 				opline->op1.var = CG(active_op_array)->this_var;
+			}
+			if (opline->opcode != ZEND_FETCH_W
+				&& (opline->op1_type == IS_TMP_VAR || opline->op1_type == IS_CONST)
+				&& (type != BP_VAR_R && type != BP_VAR_IS && type != BP_VAR_FUNC_ARG)
+			) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use temporary expression in write context");
 			}
 			switch (type) {
 				case BP_VAR_R:
@@ -6373,18 +6396,19 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 	zend_bool is_variable;
 	zend_op dummy_opline;
 
+	open_brackets_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
 	if (variable) {
-		if (zend_is_function_or_method_call(array)) {
+		if (zend_is_function_or_method_call(array)
+			|| !zend_can_parse_variable_for_write(array TSRMLS_CC)
+		) {
 			is_variable = 0;
+			zend_do_end_variable_parse(array, BP_VAR_R, 0 TSRMLS_CC);
 		} else {
 			is_variable = 1;
+			zend_do_end_variable_parse(array, BP_VAR_W, 0 TSRMLS_CC);
 		}
-		/* save the location of FETCH_W instruction(s) */
-		open_brackets_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
-		zend_do_end_variable_parse(array, BP_VAR_W, 0 TSRMLS_CC);
 	} else {
 		is_variable = 0;
-		open_brackets_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
 	}
 
 	/* save the location of FE_RESET */
@@ -6464,19 +6488,21 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 		CG(active_op_array)->opcodes[foreach_token->u.op.opline_num].extended_value |= ZEND_FE_RESET_REFERENCE;
 	} else {
 		zend_op *fetch = &CG(active_op_array)->opcodes[foreach_token->u.op.opline_num];
-		zend_op	*end = &CG(active_op_array)->opcodes[open_brackets_token->u.op.opline_num];
+		if (fetch->extended_value == ZEND_FE_RESET_VARIABLE) {
+			zend_op	*end = &CG(active_op_array)->opcodes[open_brackets_token->u.op.opline_num];
 
-		/* Change "write context" into "read context" */
-		fetch->extended_value = 0;  /* reset ZEND_FE_RESET_VARIABLE */
-		while (fetch != end) {
-			--fetch;
-			if (fetch->opcode == ZEND_FETCH_DIM_W && fetch->op2_type == IS_UNUSED) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
-			}
-			if (fetch->opcode == ZEND_SEPARATE) {
-				MAKE_NOP(fetch);
-			} else {
-				fetch->opcode -= 3; /* FETCH_W -> FETCH_R */
+			/* Change "write context" into "read context" */
+			fetch->extended_value = 0;  /* reset ZEND_FE_RESET_VARIABLE */
+			while (fetch != end) {
+				--fetch;
+				if (fetch->opcode == ZEND_FETCH_DIM_W && fetch->op2_type == IS_UNUSED) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
+				}
+				if (fetch->opcode == ZEND_SEPARATE) {
+					MAKE_NOP(fetch);
+				} else {
+					fetch->opcode -= 3; /* FETCH_W -> FETCH_R */
+				}
 			}
 		}
 	}

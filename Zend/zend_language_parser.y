@@ -1064,8 +1064,8 @@ variable_class_name:
 
 dereferencable:
 		variable				{ $$ = $1; }
-	|	'(' expr ')'			{ $$ = $2; zend_do_begin_variable_parse(TSRMLS_C); }
-	|	dereferencable_scalar	{ $$ = $1; zend_do_begin_variable_parse(TSRMLS_C); }
+	|	'(' expr ')'			{ $$ = $2; zend_do_begin_variable_parse(TSRMLS_C); $$.EA = 0; }
+	|	dereferencable_scalar	{ $$ = $1; zend_do_begin_variable_parse(TSRMLS_C); $$.EA = 0; }
 ;
 
 callable_expr:
