@@ -1961,35 +1961,22 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot call __clone() method on objects - use 'clone $obj' instead");
 	}
 
-	if (last_op->opcode == ZEND_FETCH_OBJ_R) {
-		if (last_op->op2_type == IS_CONST) {
-			zval name;
-			name = CONSTANT(last_op->op2.constant);
-			if (Z_TYPE(name) != IS_STRING) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Method name must be a string");
-			}
-			Z_STR(name) = STR_COPY(Z_STR(name));
-			FREE_POLYMORPHIC_CACHE_SLOT(last_op->op2.constant);
-			last_op->op2.constant =
-				zend_add_func_name_literal(CG(active_op_array), &name TSRMLS_CC);
-			GET_POLYMORPHIC_CACHE_SLOT(last_op->op2.constant);
+	/* Convert ZEND_FETCH_OBJ_R to ZEND_INIT_METHOD_CALL */
+	last_op->opcode = ZEND_INIT_METHOD_CALL;
+	last_op->result_type = IS_UNUSED;
+	last_op->result.num = CG(context).nested_calls;
+	Z_LVAL(left_bracket->u.constant) = ZEND_INIT_FCALL_BY_NAME;
+	if (last_op->op2_type == IS_CONST) {
+		zval name;
+		name = CONSTANT(last_op->op2.constant);
+		if (Z_TYPE(name) != IS_STRING) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Method name must be a string");
 		}
-		last_op->opcode = ZEND_INIT_METHOD_CALL;
-		last_op->result_type = IS_UNUSED;
-		last_op->result.num = CG(context).nested_calls;
-		Z_LVAL(left_bracket->u.constant) = ZEND_INIT_FCALL_BY_NAME;
-	} else {
-		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-		opline->result.num = CG(context).nested_calls;
-		SET_UNUSED(opline->op1);
-		if (left_bracket->op_type == IS_CONST) {
-			opline->op2_type = IS_CONST;
-			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), &left_bracket->u.constant TSRMLS_CC);
-			GET_CACHE_SLOT(opline->op2.constant);
-		} else {
-			SET_NODE(opline->op2, left_bracket);
-		}
+		Z_STR(name) = STR_COPY(Z_STR(name));
+		FREE_POLYMORPHIC_CACHE_SLOT(last_op->op2.constant);
+		last_op->op2.constant =
+			zend_add_func_name_literal(CG(active_op_array), &name TSRMLS_CC);
+		GET_POLYMORPHIC_CACHE_SLOT(last_op->op2.constant);
 	}
 
 	zend_push_function_call_entry(NULL TSRMLS_CC);
