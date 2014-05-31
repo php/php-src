@@ -25,6 +25,16 @@ $id($id)('var_dump')(7);
     return $x ?: $f;
 })()()()('var_dump')(9);
 
+class Test {
+    public static function id($x = [__CLASS__, 'id']) { return $x; }
+}
+
+$obj = new Test;
+[$obj, 'id']()('id')($id)('var_dump')(10);
+['Test', 'id']()()('var_dump')(11);
+'id'()('id')('var_dump')(12);
+('i' . 'd')()('var_dump')(13);
+
 ?>
 --EXPECT--
 int(0)
@@ -37,3 +47,7 @@ int(6)
 int(7)
 int(8)
 int(9)
+int(10)
+int(11)
+int(12)
+int(13)

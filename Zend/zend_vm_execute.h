@@ -1465,7 +1465,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 	zval *function_name_ptr, *function_name, *func;
 	call_slot *call = EX(call_slots) + opline->result.num;
 
-	if (IS_CONST == IS_CONST) {
+	if (IS_CONST == IS_CONST && Z_TYPE_P(opline->op2.zv) == IS_STRING) {
 		function_name_ptr = function_name = (zval*)(opline->op2.zv+1);
 		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 			call->fbc = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
@@ -1536,8 +1536,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
-		} else if (IS_CONST != IS_CONST &&
-				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
+		} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 			zval *obj;
 			zval *method;
@@ -1795,7 +1794,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 	zval *function_name_ptr, *function_name, *func;
 	call_slot *call = EX(call_slots) + opline->result.num;
 
-	if (IS_TMP_VAR == IS_CONST) {
+	if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(opline->op2.zv) == IS_STRING) {
 		function_name_ptr = function_name = (zval*)(opline->op2.zv+1);
 		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 			call->fbc = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
@@ -1867,8 +1866,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
-		} else if (IS_TMP_VAR != IS_CONST &&
-				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
+		} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 			zval *obj;
 			zval *method;
@@ -1984,7 +1982,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 	zval *function_name_ptr, *function_name, *func;
 	call_slot *call = EX(call_slots) + opline->result.num;
 
-	if (IS_VAR == IS_CONST) {
+	if (IS_VAR == IS_CONST && Z_TYPE_P(opline->op2.zv) == IS_STRING) {
 		function_name_ptr = function_name = (zval*)(opline->op2.zv+1);
 		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 			call->fbc = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
@@ -2056,8 +2054,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
-		} else if (IS_VAR != IS_CONST &&
-				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
+		} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 			zval *obj;
 			zval *method;
@@ -2211,7 +2208,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 	zval *function_name_ptr, *function_name, *func;
 	call_slot *call = EX(call_slots) + opline->result.num;
 
-	if (IS_CV == IS_CONST) {
+	if (IS_CV == IS_CONST && Z_TYPE_P(opline->op2.zv) == IS_STRING) {
 		function_name_ptr = function_name = (zval*)(opline->op2.zv+1);
 		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 			call->fbc = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
@@ -2282,8 +2279,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
-		} else if (IS_CV != IS_CONST &&
-				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
+		} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 			zval *obj;
 			zval *method;

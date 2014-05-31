@@ -2595,7 +2595,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 	zval *function_name_ptr, *function_name, *func;
 	call_slot *call = EX(call_slots) + opline->result.num;
 
-	if (OP2_TYPE == IS_CONST) {
+	if (OP2_TYPE == IS_CONST && Z_TYPE_P(opline->op2.zv) == IS_STRING) {
 		function_name_ptr = function_name = (zval*)(opline->op2.zv+1);
 		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 			call->fbc = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
@@ -2667,8 +2667,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
-		} else if (OP2_TYPE != IS_CONST &&
-				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
+		} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 			zval *obj;
 			zval *method;

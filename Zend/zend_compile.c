@@ -2018,7 +2018,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->result.num = CG(context).nested_calls;
 		SET_UNUSED(opline->op1);
-		if (function_name->op_type == IS_CONST) {
+		if (function_name->op_type == IS_CONST && Z_TYPE(function_name->u.constant) == IS_STRING) {
 			opline->op2_type = IS_CONST;
 			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), &function_name->u.constant TSRMLS_CC);
 			GET_CACHE_SLOT(opline->op2.constant);
