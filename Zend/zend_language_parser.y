@@ -1054,7 +1054,7 @@ rw_variable:
 ;
 
 variable_class_name:
-		variable { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); $$ = $1; }
+		dereferencable { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); $$ = $1; }
 ;
 
 dereferencable:
