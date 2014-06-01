@@ -847,6 +847,8 @@ static union _zend_function *spl_recursive_it_get_method(zend_object **zobject, 
 				*zobject = Z_OBJ_P(zobj);
 				function_handler = (*zobject)->handlers->get_method(zobject, method, key TSRMLS_CC);
 			}
+		} else {
+			*zobject = Z_OBJ_P(zobj);
 		}
 	}
 	return function_handler;

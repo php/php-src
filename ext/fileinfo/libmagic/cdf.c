@@ -823,6 +823,10 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
 		    i, inp[i].pi_id, inp[i].pi_type, q - p, offs));
 		if (inp[i].pi_type & CDF_VECTOR) {
 			nelements = CDF_GETUINT32(q, 1);
+			if (nelements == 0) {
+				DPRINTF(("CDF_VECTOR with nelements == 0\n"));
+				goto out;
+			}
 			o = 2;
 		} else {
 			nelements = 1;
@@ -897,7 +901,9 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
 			}
 			DPRINTF(("nelements = %" SIZE_T_FORMAT "u\n",
 			    nelements));
-			for (j = 0; j < nelements; j++, i++) {
+			for (j = 0; j < nelements && i < sh.sh_properties; 
+			    j++, i++) 
+			{
 				uint32_t l = CDF_GETUINT32(q, o);
 				inp[i].pi_str.s_len = l;
 				inp[i].pi_str.s_buf = (const char *)
@@ -942,7 +948,7 @@ int
 cdf_unpack_summary_info(const cdf_stream_t *sst, const cdf_header_t *h,
     cdf_summary_info_header_t *ssi, cdf_property_info_t **info, size_t *count)
 {
-	size_t i, maxcount;
+	size_t maxcount;
 	const cdf_summary_info_header_t *si =
 	    CAST(const cdf_summary_info_header_t *, sst->sst_tab);
 	const cdf_section_declaration_t *sd =
@@ -957,21 +963,13 @@ cdf_unpack_summary_info(const cdf_stream_t *sst, const cdf_header_t *h,
 	ssi->si_os = CDF_TOLE2(si->si_os);
 	ssi->si_class = si->si_class;
 	cdf_swap_class(&ssi->si_class);
-	ssi->si_count = CDF_TOLE2(si->si_count);
+	ssi->si_count = CDF_TOLE4(si->si_count);
 	*count = 0;
 	maxcount = 0;
 	*info = NULL;
-	for (i = 0; i < CDF_TOLE4(si->si_count); i++) {
-		if (i >= CDF_LOOP_LIMIT) {
-			DPRINTF(("Unpack summary info loop limit"));
-			errno = EFTYPE;
+	if (cdf_read_property_info(sst, h, CDF_TOLE4(sd->sd_offset), info,
+		count, &maxcount) == -1) 
 			return -1;
-		}
-		if (cdf_read_property_info(sst, h, CDF_TOLE4(sd->sd_offset),
-		    info, count, &maxcount) == -1) {
-			return -1;
-		}
-	}
 	return 0;
 }
 
