@@ -858,6 +858,8 @@ static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char
 				*object_ptr = zobj;
 				function_handler = Z_OBJ_HT_P(*object_ptr)->get_method(object_ptr, method, method_len TSRMLS_CC);
 			}
+		} else {
+			*object_ptr = zobj;
 		}
 	}
 	return function_handler;
