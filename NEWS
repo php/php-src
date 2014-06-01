@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #67328 (fileinfo: fileinfo: numerous file_printf calls resulting in
     performance degradation).
 
+- SPL:
+  . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
+
 15 May 2014, PHP 5.6.0 Beta 3
 
 - Core:
