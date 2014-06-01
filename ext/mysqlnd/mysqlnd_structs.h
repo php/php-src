@@ -23,7 +23,7 @@
 #ifndef MYSQLND_STRUCTS_H
 #define MYSQLND_STRUCTS_H
 
-#include "ext/standard/php_smart_str.h"
+#include "ext/standard/php_smart_str_public.h"
 
 #define MYSQLND_TYPEDEFED_METHODS
 

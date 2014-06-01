@@ -157,11 +157,17 @@ _zip_cdir_write(struct zip_cdir *cd, FILE *fp, struct zip_error *error)
 void
 _zip_dirent_finalize(struct zip_dirent *zde)
 {
-    free(zde->filename);
+    if (zde->filename_len > 0) {
+        free(zde->filename);
+    }
     zde->filename = NULL;
-    free(zde->extrafield);
+    if (zde->extrafield_len > 0) {
+        free(zde->extrafield);
+    }
     zde->extrafield = NULL;
-    free(zde->comment);
+    if (zde->comment_len > 0) {
+        free(zde->comment);
+    }
     zde->comment = NULL;
 }
 

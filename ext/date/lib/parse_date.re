@@ -168,8 +168,6 @@ typedef struct _timelib_relunit {
 	int         multiplier;
 } timelib_relunit;
 
-#define HOUR(a) (int)(a * 60)
-
 /* The timezone table. */
 const static timelib_tz_lookup_table timelib_timezone_lookup[] = {
 #include "timezonemap.h"
@@ -528,39 +526,6 @@ static timelib_ull timelib_get_unsigned_nr(char **ptr, int max_length)
 		++*ptr;
 	}
 	return dir * timelib_get_nr(ptr, max_length);
-}
-
-static long timelib_parse_tz_cor(char **ptr)
-{
-	char *begin = *ptr, *end;
-	long  tmp;
-
-	while (isdigit(**ptr) || **ptr == ':') {
-		++*ptr;
-	}
-	end = *ptr;
-	switch (end - begin) {
-		case 1:
-		case 2:
-			return HOUR(strtol(begin, NULL, 10));
-			break;
-		case 3:
-		case 4:
-			if (begin[1] == ':') {
-				tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 2, NULL, 10);
-				return tmp;
-			} else if (begin[2] == ':') {
-				tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
-				return tmp;
-			} else {
-				tmp = strtol(begin, NULL, 10);
-				return HOUR(tmp / 100) + tmp % 100;
-			}
-		case 5:
-			tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
-			return tmp;
-	}
-	return 0;
 }
 
 static timelib_sll timelib_lookup_relative_text(char **ptr, int *behavior)
@@ -1831,6 +1796,7 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 	in.tzdb = tzdb;
 	in.time->is_localtime = 0;
 	in.time->zone_type = 0;
+	in.time->relative.days = TIMELIB_UNSET;
 
 	do {
 		t = scan(&in, tz_get_wrapper);
@@ -2130,7 +2096,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				break;
 
 			case '\\': /* escaped char */
-				*fptr++;
+				++fptr;
 				if (*ptr == *fptr) {
 					++ptr;
 				} else {

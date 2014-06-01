@@ -889,6 +889,10 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 	dest->offset = 0;
 	dest->is_modified = 1;
 	dest->fp = php_stream_fopen_tmpfile();
+	if (dest->fp == NULL) {
+		spprintf(error, 0, "phar error: unable to create temporary file");
+		return EOF;
+	}
 	phar_seek_efp(source, 0, SEEK_SET, 0, 1 TSRMLS_CC);
 	link = phar_get_link_source(source TSRMLS_CC);
 
@@ -1129,6 +1133,10 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{
 	}
 
 	fp = php_stream_fopen_tmpfile();
+	if (fp == NULL) {
+		spprintf(error, 0, "phar error: unable to create temporary file");
+		return FAILURE;
+	}
 	phar_seek_efp(entry, 0, SEEK_SET, 0, 1 TSRMLS_CC);
 	link = phar_get_link_source(entry TSRMLS_CC);
 

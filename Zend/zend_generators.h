@@ -22,8 +22,8 @@
 #define ZEND_GENERATORS_H
 
 BEGIN_EXTERN_C()
+
 extern ZEND_API zend_class_entry *zend_ce_generator;
-END_EXTERN_C()
 
 typedef struct _zend_generator_iterator {
 	zend_object_iterator intern;
@@ -65,6 +65,8 @@ void zend_register_generator_ce(TSRMLS_D);
 ZEND_API zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC);
 ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC);
+
+END_EXTERN_C()
 
 #endif
 

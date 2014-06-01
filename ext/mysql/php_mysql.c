@@ -720,7 +720,7 @@ PHP_MINFO_FUNCTION(mysql)
 static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *user=NULL, *passwd=NULL, *host_and_port=NULL, *socket=NULL, *tmp=NULL, *host=NULL;
-	int  user_len, passwd_len, host_len;
+	int  user_len = 0, passwd_len = 0, host_len = 0;
 	char *hashed_details=NULL;
 	int hashed_details_length, port = MYSQL_PORT;
 	long client_flags = 0;

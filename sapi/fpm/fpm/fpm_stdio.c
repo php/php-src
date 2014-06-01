@@ -34,6 +34,7 @@ int fpm_stdio_init_main() /* {{{ */
 
 	if (0 > dup2(fd, STDIN_FILENO) || 0 > dup2(fd, STDOUT_FILENO)) {
 		zlog(ZLOG_SYSERROR, "failed to init stdio: dup2()");
+		close(fd);
 		return -1;
 	}
 	close(fd);
@@ -290,11 +291,17 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 		fd = fpm_globals.error_log_fd; /* for FD_CLOSEXEC to work */
 	} else {
 		fpm_globals.error_log_fd = fd;
+#if HAVE_UNISTD_H
+		if (fpm_global_config.daemonize || !isatty(STDERR_FILENO)) {
+#else
 		if (fpm_global_config.daemonize) {
+#endif
 			zlog_set_fd(fpm_globals.error_log_fd);
 		}
 	}
-	fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
+	if (0 > fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC)) {
+		zlog(ZLOG_WARNING, "failed to change attribute of error_log");
+	}
 	return 0;
 }
 /* }}} */

@@ -200,38 +200,6 @@ void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
 int  _php_curl_verify_handlers(php_curl *ch, int reporterror TSRMLS_DC);
 
-/* streams support */
-
-extern php_stream_ops php_curl_stream_ops;
-#define PHP_STREAM_IS_CURL	&php_curl_stream_ops
-
-php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, char *mode,
-		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-
-extern php_stream_wrapper php_curl_wrapper;
-
-struct php_curl_buffer {
-	off_t readpos, writepos;
-	php_stream *buf;
-};
-
-typedef struct {
-	CURL	*curl;
-	CURLM	*multi;
-	char *url;
-	struct php_curl_buffer readbuffer; /* holds downloaded data */
-	struct php_curl_buffer writebuffer; /* holds data to upload */
-
-	fd_set readfds, writefds, excfds;
-	int maxfd;
-
-	char errstr[CURL_ERROR_SIZE + 1];
-	CURLMcode mcode;
-	int pending;
-	zval *headers;
-	struct curl_slist *headers_slist; /* holds custom headers sent out in the request */
-} php_curl_stream;
-
 void curlfile_register_class(TSRMLS_D);
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
 

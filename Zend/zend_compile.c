@@ -288,7 +288,7 @@ ZEND_API zend_bool zend_is_compiling(TSRMLS_D) /* {{{ */
 
 static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
 {
-	return (zend_uint)EX_TMP_VAR_NUM(0, (op_array->T)++);
+	return (zend_uint)(zend_uintptr_t)EX_TMP_VAR_NUM(0, (op_array->T)++);
 }
 /* }}} */
 
@@ -1809,7 +1809,7 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 	zend_do_return(NULL, 0 TSRMLS_CC);
 
 	pass_two(CG(active_op_array) TSRMLS_CC);
-	zend_release_labels(TSRMLS_C);
+	zend_release_labels(0 TSRMLS_CC);
 
 	if (CG(active_class_entry)) {
 		zend_check_magic_method_implementation(CG(active_class_entry), (zend_function*)CG(active_op_array), E_COMPILE_ERROR TSRMLS_CC);
@@ -2391,13 +2391,14 @@ void zend_do_goto(const znode *label TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_release_labels(TSRMLS_D) /* {{{ */
+void zend_release_labels(int temporary TSRMLS_DC) /* {{{ */
 {
 	if (CG(context).labels) {
 		zend_hash_destroy(CG(context).labels);
 		FREE_HASHTABLE(CG(context).labels);
+		CG(context).labels = NULL;
 	}
-	if (!zend_stack_is_empty(&CG(context_stack))) {
+	if (!temporary && !zend_stack_is_empty(&CG(context_stack))) {
 		zend_compiler_context *ctx;
 
 		zend_stack_top(&CG(context_stack), (void**)&ctx);
@@ -3831,7 +3832,7 @@ static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_
 	zend_uint other_flags = other_fn->common.scope->ce_flags;
 
 	return zend_do_perform_implementation_check(fn, other_fn TSRMLS_CC)
-		&& zend_do_perform_implementation_check(other_fn, fn TSRMLS_CC)
+		&& ((other_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) || zend_do_perform_implementation_check(other_fn, fn TSRMLS_CC))
 		&& ((fn_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC)) ==
 		    (other_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC))); /* equal final and static qualifier */
 }
@@ -5686,7 +5687,7 @@ void zend_do_shell_exec(znode *result, const znode *cmd TSRMLS_DC) /* {{{ */
 			break;
 	}
 	SET_NODE(opline->op1, cmd);
-	opline->op2.opline_num = 0;
+	opline->op2.opline_num = 1;
 	opline->extended_value = ZEND_DO_FCALL;
 	SET_UNUSED(opline->op2);
 
@@ -5701,6 +5702,7 @@ void zend_do_shell_exec(znode *result, const znode *cmd TSRMLS_DC) /* {{{ */
 	GET_CACHE_SLOT(opline->op1.constant);
 	opline->extended_value = 1;
 	SET_UNUSED(opline->op2);
+	opline->op2.num = CG(context).nested_calls;
 	GET_NODE(result, opline->result);
 
 	if (CG(context).nested_calls + 1 > CG(active_op_array)->nested_calls) {

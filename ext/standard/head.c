@@ -132,7 +132,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 				efree(dt);
 				efree(cookie);
 				efree(encoded_value);
-				zend_error(E_WARNING, "Expiry date cannot have a year greater then 9999");
+				zend_error(E_WARNING, "Expiry date cannot have a year greater than 9999");
 				return FAILURE;
 			}
 			strlcat(cookie, dt, len + 100);

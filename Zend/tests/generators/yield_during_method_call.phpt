@@ -22,14 +22,6 @@ $gen = gen();
 $gen->rewind();
 unset($gen);
 
-// test cloning
-$g1 = gen();
-$g1->rewind();
-$g2 = clone $g1;
-unset($g1);
-$g2->send('bar');
-
 ?>
 --EXPECT--
 foo
-bar

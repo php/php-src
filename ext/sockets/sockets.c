@@ -1663,8 +1663,8 @@ PHP_FUNCTION(socket_recvfrom)
 			retval = recvfrom(php_sock->bsd_socket, recv_buf, arg3, arg4, (struct sockaddr *)&s_un, (socklen_t *)&slen);
 
 			if (retval < 0) {
-				efree(recv_buf);
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
+				efree(recv_buf);
 				RETURN_FALSE;
 			}
 
@@ -1688,8 +1688,8 @@ PHP_FUNCTION(socket_recvfrom)
 			retval = recvfrom(php_sock->bsd_socket, recv_buf, arg3, arg4, (struct sockaddr *)&sin, (socklen_t *)&slen);
 
 			if (retval < 0) {
-				efree(recv_buf);
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
+				efree(recv_buf);
 				RETURN_FALSE;
 			}
 
@@ -1717,8 +1717,8 @@ PHP_FUNCTION(socket_recvfrom)
 			retval = recvfrom(php_sock->bsd_socket, recv_buf, arg3, arg4, (struct sockaddr *)&sin6, (socklen_t *)&slen);
 
 			if (retval < 0) {
-				efree(recv_buf);
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
+				efree(recv_buf);
 				RETURN_FALSE;
 			}
 
@@ -1858,7 +1858,9 @@ PHP_FUNCTION(socket_get_option)
 			}
 		}
 		}
-	} else if (level == IPPROTO_IPV6) {
+	}
+#if HAVE_IPV6
+	else if (level == IPPROTO_IPV6) {
 		int ret = php_do_getsockopt_ipv6_rfc3542(php_sock, level, optname, return_value TSRMLS_CC);
 		if (ret == SUCCESS) {
 			return;
@@ -1866,6 +1868,7 @@ PHP_FUNCTION(socket_get_option)
 			RETURN_FALSE;
 		} /* else continue */
 	}
+#endif
 
 	/* sol_socket options and general case */
 	switch(optname) {

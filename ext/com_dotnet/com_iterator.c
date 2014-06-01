@@ -74,16 +74,15 @@ static void com_iter_get_data(zend_object_iterator *iter, zval ***data TSRMLS_DC
 	*data = &I->zdata;
 }
 
-static int com_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
-	ulong *int_key TSRMLS_DC)
+static void com_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 {
 	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
 
 	if (I->key == (ulong)-1) {
-		return HASH_KEY_NON_EXISTANT;
+		ZVAL_NULL(key);
+	} else {
+		ZVAL_LONG(key, I->key);
 	}
-	*int_key = I->key;
-	return HASH_KEY_IS_LONG;
 }
 
 static int com_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)

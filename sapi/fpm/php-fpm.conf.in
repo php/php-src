@@ -105,7 +105,15 @@
 ; - /dev/poll  (Solaris >= 7)
 ; - port       (Solaris >= 10)
 ; Default Value: not set (auto detection)
-; events.mechanism = epoll
+;events.mechanism = epoll
+
+; When FPM is build with systemd integration, specify the interval,
+; in second, between health report notification to systemd.
+; Set to 0 to disable.
+; Available Units: s(econds), m(inutes), h(ours)
+; Default Unit: seconds
+; Default value: 10
+;systemd_interval = 10
 
 ;;;;;;;;;;;;;;;;;;;;
 ; Pool Definitions ; 

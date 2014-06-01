@@ -38,8 +38,6 @@ Stack trace:
 #1 %s(%d): unserialize('O:9:"Generator"...')
 #2 {main}
 
-
-Notice: unserialize(): Error at offset 19 of 20 bytes in %s on line %d
 exception 'Exception' with message 'Unserialization of 'Generator' is not allowed' in %s:%d
 Stack trace:
 #0 %s(%d): unserialize('C:9:"Generator"...')

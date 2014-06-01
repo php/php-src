@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf_time.c,v 1.11 2011/12/13 13:48:41 christos Exp $")
+FILE_RCSID("@(#)$File: cdf_time.c,v 1.12 2012/05/15 17:14:36 christos Exp $")
 #endif
 
 #include <time.h>
@@ -104,6 +104,7 @@ cdf_timestamp_to_timespec(struct timeval *ts, cdf_timestamp_t t)
 #endif
 	int rdays;
 
+	/* XXX 5.14 at least introdced 100 ns intervals, this is to do */
 	/* Time interval, in microseconds */
 	ts->tv_usec = (t % CDF_TIME_PREC) * CDF_TIME_PREC;
 
@@ -166,15 +167,13 @@ cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timeval *ts)
 }
 
 char *
-cdf_ctime(const time_t *sec)
+cdf_ctime(const time_t *sec, char *buf)
 {
-	static char ctbuf[26];
-	char *ptr = ctime(sec);
+	char *ptr = ctime_r(sec, buf);
 	if (ptr != NULL)
-		return ptr;
-	(void)snprintf(ctbuf, sizeof(ctbuf), "*Bad* 0x%16.16llx\n",
-	    (long long)*sec);
-	return ctbuf;
+		return buf;
+	(void)snprintf(buf, 26, "*Bad* 0x%16.16llx\n", (long long)*sec);
+	return buf;
 }
 
 
@@ -183,12 +182,13 @@ int
 main(int argc, char *argv[])
 {
 	struct timeval ts;
+	char buf[25];
 	static const cdf_timestamp_t tst = 0x01A5E403C2D59C00ULL;
 	static const char *ref = "Sat Apr 23 01:30:00 1977";
 	char *p, *q;
 
 	cdf_timestamp_to_timespec(&ts, tst);
-	p = cdf_ctime(&ts.tv_sec);
+	p = cdf_ctime(&ts.tv_sec, buf);
 	if ((q = strchr(p, '\n')) != NULL)
 		*q = '\0';
 	if (strcmp(ref, p) != 0)

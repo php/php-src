@@ -127,11 +127,11 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 ?>
 --EXPECTF--
 
-Warning: mysqli_real_connect(): (HY000/1820): %s in %s on line %d
-[001] Cannot connect [1820] %s
+Warning: mysqli_real_connect(): (HY000/1862): %s in %s on line %d
+[001] Cannot connect [1862] %s
 
-Warning: mysqli_real_connect(): (HY000/1820): %s in %s on line %d
-[003] Cannot connect [1820] %s
+Warning: mysqli_real_connect(): (HY000/1862): %s in %s on line %d
+[003] Cannot connect [1862] %s
 [006] Connect allowed, query fail, [1820] %s
 [008] Connect allowed, pw set, [0%A
 array(1) {

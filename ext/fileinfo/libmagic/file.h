@@ -27,7 +27,7 @@
  */
 /*
  * file.h - definitions for file(1) program
- * @(#)$File: file.h,v 1.135 2011/09/20 15:30:14 christos Exp $
+ * @(#)$File: file.h,v 1.144 2013/02/18 15:40:59 christos Exp $
  */
 
 #ifndef __file_h__
@@ -90,10 +90,18 @@
 #endif
 
 #define private static
+
+#if HAVE_VISIBILITY
+#define public  __attribute__ ((__visibility__("default")))
+#ifndef protected
+#define protected __attribute__ ((__visibility__("hidden")))
+#endif
+#else
+#define public
 #ifndef protected
 #define protected
 #endif
-#define public
+#endif
 
 #ifndef __arraycount
 #define __arraycount(a) (sizeof(a) / sizeof(a[0]))
@@ -122,12 +130,13 @@
 #endif
 #define MAXMAGIS 8192		/* max entries in any one magic file
 				   or directory */
-#define MAXDESC	64		/* max leng of text description/MIME type */
-#define MAXstring 64		/* max leng of "string" types */
+#define MAXDESC	64		/* max len of text description/MIME type */
+#define MAXMIME	80		/* max len of text MIME type */
+#define MAXstring 64		/* max len of "string" types */
 
 #define MAGICNO		0xF11E041C
-#define VERSIONNO	8
-#define FILE_MAGICSIZE	232
+#define VERSIONNO	10
+#define FILE_MAGICSIZE	248
 
 #define	FILE_LOAD	0
 #define FILE_CHECK	1
@@ -210,7 +219,12 @@ struct magic {
 #define				FILE_BEID3	39
 #define				FILE_LEID3	40
 #define				FILE_INDIRECT	41
-#define				FILE_NAMES_SIZE	42/* size of array to contain all names */
+#define				FILE_QWDATE	42
+#define				FILE_LEQWDATE	43
+#define				FILE_BEQWDATE	44
+#define				FILE_NAME	45
+#define				FILE_USE	46
+#define				FILE_NAMES_SIZE	47 /* size of array to contain all names */
 
 #define IS_LIBMAGIC_STRING(t) \
 	((t) == FILE_STRING || \
@@ -219,6 +233,8 @@ struct magic {
 	 (t) == FILE_LESTRING16 || \
 	 (t) == FILE_REGEX || \
 	 (t) == FILE_SEARCH || \
+	 (t) == FILE_NAME || \
+	 (t) == FILE_USE || \
 	 (t) == FILE_DEFAULT)
 
 #define FILE_FMT_NONE 0
@@ -287,9 +303,9 @@ struct magic {
 	union VALUETYPE value;	/* either number or string */
 	/* Words 17-32 */
 	char desc[MAXDESC];	/* description */
-	/* Words 33-48 */
-	char mimetype[MAXDESC]; /* MIME type */
-	/* Words 49-50 */
+	/* Words 33-52 */
+	char mimetype[MAXMIME]; /* MIME type */
+	/* Words 53-54 */
 	char apple[8];
 };
 
@@ -310,12 +326,14 @@ struct magic {
 #define PSTRING_LEN	\
     (PSTRING_1_BE|PSTRING_2_LE|PSTRING_2_BE|PSTRING_4_LE|PSTRING_4_BE)
 #define PSTRING_LENGTH_INCLUDES_ITSELF		BIT(12)
+#define	STRING_TRIM				BIT(13)
 #define CHAR_COMPACT_WHITESPACE			'W'
 #define CHAR_COMPACT_OPTIONAL_WHITESPACE	'w'
 #define CHAR_IGNORE_LOWERCASE			'c'
 #define CHAR_IGNORE_UPPERCASE			'C'
 #define CHAR_REGEX_OFFSET_START			's'
 #define CHAR_TEXTTEST				't'
+#define	CHAR_TRIM				'T'
 #define CHAR_BINTEST				'b'
 #define CHAR_PSTRING_1_BE			'B'
 #define CHAR_PSTRING_1_LE			'B'
@@ -332,9 +350,7 @@ struct magic {
 struct mlist {
 	struct magic *magic;		/* array of magic entries */
 	uint32_t nmagic;			/* number of entries in array */
-	int mapped;  /* allocation type: 0 => apprentice_file
-		      *                  1 => apprentice_map + malloc
-		      *                  2 => apprentice_map + mmap */
+	void *map;			/* internal resources used by entry */
 	struct mlist *next, *prev;
 };
 
@@ -354,8 +370,11 @@ struct level_info {
 	int last_cond;	/* used for error checking by parse() */
 #endif
 };
+
+#define MAGIC_SETS	2
+
 struct magic_set {
-	struct mlist *mlist;
+	struct mlist *mlist[MAGIC_SETS];	/* list of regular entries */
 	struct cont {
 		size_t len;
 		struct level_info *li;
@@ -389,10 +408,14 @@ struct magic_set {
 typedef unsigned long unichar;
 
 struct stat;
-protected const char *file_fmttime(uint32_t, int);
+#define FILE_T_LOCAL	1
+#define FILE_T_WINDOWS	2
+protected const char *file_fmttime(uint64_t, int, char *);
+protected struct magic_set *file_ms_alloc(int);
+protected void file_ms_free(struct magic_set *);
 protected int file_buffer(struct magic_set *, php_stream *, const char *, const void *,
     size_t);
-protected int file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *stream);
+protected int file_fsmagic(struct magic_set *, const char *, struct stat *, php_stream *);
 protected int file_pipe2file(struct magic_set *, int, const void *, size_t);
 protected int file_replace(struct magic_set *, const char *, const char *);
 protected int file_printf(struct magic_set *, const char *, ...);
@@ -415,7 +438,8 @@ protected int file_encoding(struct magic_set *, const unsigned char *, size_t,
 protected int file_is_tar(struct magic_set *, const unsigned char *, size_t);
 protected int file_softmagic(struct magic_set *, const unsigned char *, size_t,
     int, int);
-protected struct mlist *file_apprentice(struct magic_set *, const char *, int);
+protected int file_apprentice(struct magic_set *, const char *, int);
+protected int file_magicfind(struct magic_set *, const char *, struct mlist *);
 protected uint64_t file_signextend(struct magic_set *, struct magic *,
     uint64_t);
 protected void file_delmagic(struct magic *, int type, size_t entries);

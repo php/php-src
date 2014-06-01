@@ -133,10 +133,7 @@ typedef struct _spl_dual_it_object {
 	} inner;
 	struct {
 		zval                 *data;
-		char                 *str_key;
-		uint                 str_key_len;
-		ulong                int_key;
-		int                  key_type; /* HASH_KEY_IS_STRING or HASH_KEY_IS_LONG */
+		zval                 *key;
 		int                  pos;
 	} current;
 	dual_it_type             dit_type;

@@ -171,6 +171,11 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 	}
 
 	if (!get_module) {
+		if (DL_FETCH_SYMBOL(handle, "zend_extension_entry") || DL_FETCH_SYMBOL(handle, "_zend_extension_entry")) {
+			DL_UNLOAD(handle);
+			php_error_docref(NULL TSRMLS_CC, error_type, "Invalid library (appears to be a Zend Extension, try loading using zend_extension=%s from php.ini)", filename);
+			return FAILURE;
+		}
 		DL_UNLOAD(handle);
 		php_error_docref(NULL TSRMLS_CC, error_type, "Invalid library (maybe not a PHP library) '%s'", filename);
 		return FAILURE;

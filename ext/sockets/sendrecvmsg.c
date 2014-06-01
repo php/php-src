@@ -43,7 +43,7 @@ inline ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags)
 {
 	DWORD	recvd = 0,
 			bytesReturned;
-	
+
 	if (WSARecvMsg == NULL)	{
 		int res = WSAIoctl((SOCKET) sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER,
 			&WSARecvMsg_GUID, sizeof(WSARecvMsg_GUID),
@@ -105,17 +105,17 @@ static void init_ancillary_registry(void)
 	zend_hash_update(&ancillary_registry.ht, (char*)&key, sizeof(key), \
 			(void*)&entry, sizeof(entry), NULL)
 
-#ifdef IPV6_PKTINFO
+#if defined(IPV6_PKTINFO) && HAVE_IPV6
 	PUT_ENTRY(sizeof(struct in6_pktinfo), 0, 0, from_zval_write_in6_pktinfo,
 			to_zval_read_in6_pktinfo, IPPROTO_IPV6, IPV6_PKTINFO);
 #endif
 
-#ifdef IPV6_HOPLIMIT
+#if defined(IPV6_HOPLIMIT) && HAVE_IPV6
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_HOPLIMIT);
 #endif
 
-#ifdef IPV6_TCLASS
+#if defined(IPV6_TCLASS) && HAVE_IPV6
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_TCLASS);
 #endif
@@ -310,6 +310,7 @@ PHP_FUNCTION(socket_cmsg_space)
 	RETURN_LONG((long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
+#if HAVE_IPV6
 int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval **arg4 TSRMLS_DC)
 {
 	struct err_s	err = {0};
@@ -401,15 +402,16 @@ int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 
 	return res == 0 ? SUCCESS : FAILURE;
 }
+#endif /* HAVE_IPV6 */
 
 void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 {
 	/* IPv6 ancillary data */
-#ifdef IPV6_RECVPKTINFO
+#if defined(IPV6_RECVPKTINFO) && HAVE_IPV6
 	REGISTER_LONG_CONSTANT("IPV6_RECVPKTINFO",		IPV6_RECVPKTINFO,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_PKTINFO",          IPV6_PKTINFO,       CONST_CS | CONST_PERSISTENT);
 #endif
-#ifdef IPV6_RECVHOPLIMIT
+#if defined(IPV6_RECVHOPLIMIT) && HAVE_IPV6
 	REGISTER_LONG_CONSTANT("IPV6_RECVHOPLIMIT",		IPV6_RECVHOPLIMIT,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_HOPLIMIT",         IPV6_HOPLIMIT,      CONST_CS | CONST_PERSISTENT);
 #endif
@@ -418,7 +420,7 @@ void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("IPV6_RECVHOPOPTS",		IPV6_RECVHOPOPTS,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_RECVDSTOPTS",		IPV6_RECVDSTOPTS,	CONST_CS | CONST_PERSISTENT);
 	*/
-#ifdef IPV6_RECVTCLASS
+#if defined(IPV6_RECVTCLASS) && HAVE_IPV6
 	REGISTER_LONG_CONSTANT("IPV6_RECVTCLASS",		IPV6_RECVTCLASS,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_TCLASS",			IPV6_TCLASS,		CONST_CS | CONST_PERSISTENT);
 #endif

@@ -39,6 +39,8 @@
 #include <winsock2.h>
 #define timespec timeval
 #define tv_nsec tv_usec
+#define asctime_r php_asctime_r
+#define ctime_r php_ctime_r
 #endif
 #ifdef __DJGPP__
 #define timespec timeval
@@ -312,7 +314,7 @@ int cdf_print_elapsed_time(char *, size_t, cdf_timestamp_t);
 uint16_t cdf_tole2(uint16_t);
 uint32_t cdf_tole4(uint32_t);
 uint64_t cdf_tole8(uint64_t);
-char *cdf_ctime(const time_t *);
+char *cdf_ctime(const time_t *, char *);
 
 #ifdef CDF_DEBUG
 void cdf_dump_header(const cdf_header_t *);

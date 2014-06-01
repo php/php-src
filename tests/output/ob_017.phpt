@@ -1,5 +1,7 @@
 --TEST--
 output buffering - stati
+--INI--
+opcache.optimization_level=0
 --FILE--
 <?php
 $stati = array();

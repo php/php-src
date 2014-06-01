@@ -26,7 +26,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readcdf.c,v 1.29 2012/02/20 20:04:58 christos Exp $")
+FILE_RCSID("@(#)$File: readcdf.c,v 1.33 2012/06/20 21:52:36 christos Exp $")
 #endif
 
 #include <stdlib.h>
@@ -129,12 +129,12 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
                 case CDF_FILETIME:
                         tp = info[i].pi_tp;
                         if (tp != 0) {
+							char tbuf[64];
 #if defined(PHP_WIN32) && _MSC_VER <= 1500
 							if (tp < 1000000000000000i64) {
 #else
 							if (tp < 1000000000000000LL) {
 #endif
-                                        char tbuf[64];
                                         cdf_print_elapsed_time(tbuf,
                                             sizeof(tbuf), tp);
                                         if (NOTMIME(ms) && file_printf(ms,
@@ -145,7 +145,7 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
                                         if (cdf_timestamp_to_timespec(&ts, tp) == -1) {
 											return -1;
 										}
-                                        c = cdf_ctime(&ts.tv_sec);
+                                        c = cdf_ctime(&ts.tv_sec, tbuf);
                                         if ((ec = strchr(c, '\n')) != NULL)
                                                 *ec = '\0';
 
@@ -295,8 +295,12 @@ file_trycdf(struct magic_set *ms, int fd, const unsigned char *buf,
 		    d = &dir.dir_tab[j];
 		    for (k = 0; k < sizeof(name); k++)
 			name[k] = (char)cdf_tole2(d->d_name[k]);
-		    if (strstr(name, "WordDocument") == 0) {
+		    if (strstr(name, "WordDocument") != 0) {
 			str = "msword";
+			break;
+		    }
+		    if (strstr(name, "PowerPoint") != 0) {
+			str = "vnd.ms-powerpoint";
 			break;
 		    }
 		}
@@ -315,13 +319,19 @@ out1:
         free(sat.sat_tab);
 out0:
         if (i != 1) {
-		if (i == -1)
-		    if (file_printf(ms, "Composite Document File V2 Document")
-			== -1)
+		if (i == -1) {
+		    if (NOTMIME(ms)) {
+			if (file_printf(ms,
+			    "Composite Document File V2 Document") == -1)
 			    return -1;
                 if (*expn)
                         if (file_printf(ms, ", %s%s", corrupt, expn) == -1)
                                 return -1;
+		    } else {
+			if (file_printf(ms, "application/CDFV2-corrupt") == -1)
+			    return -1;
+		    }
+		}
                 i = 1;
         }
         return i;

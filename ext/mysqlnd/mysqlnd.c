@@ -27,6 +27,7 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
+#include "ext/standard/php_smart_str.h"
 
 /*
   TODO :

@@ -1,5 +1,7 @@
 --TEST--
 026: Name ambiguity (class name & namespace name)
+--INI--
+opcache.optimization_level=0
 --FILE--
 <?php
 namespace Foo;

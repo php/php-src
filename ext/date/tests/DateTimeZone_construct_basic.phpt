@@ -21,10 +21,22 @@ var_dump( new DateTimeZone("America/Los_Angeles") );
 ===DONE===
 --EXPECTF--
 *** Testing new DateTimeZone() : basic functionality ***
-object(DateTimeZone)#%d (0) {
+object(DateTimeZone)#%d (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "UTC"
 }
-object(DateTimeZone)#%d (0) {
+object(DateTimeZone)#%d (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
-object(DateTimeZone)#%d (0) {
+object(DateTimeZone)#%d (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(19) "America/Los_Angeles"
 }
 ===DONE===

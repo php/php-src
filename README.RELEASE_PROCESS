@@ -64,7 +64,8 @@ Do not use abbreviations for alpha and beta.
 ``git push --tags origin HEAD``
 
 8. run: ``./makedist 5.4.2RC2``, this will export the tree, create configure
-and build three tarballs (gz,bz2 and xz).
+and build three tarballs (gz,bz2 and xz). Make sure you use the same GNU Bison
+version as snaps. Recent bison version are known to break ZTS.
 
 9. Copy those three tarballs to www.php.net, in your homedir there should be a
 directory "downloads/". Copy them into there, so that the system can generate
@@ -154,7 +155,15 @@ origin <branch>``".
 11. run: ``./makedist php 5.4.1``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
 
-12. Commit those two tarballs to Git (php-distributions.git)
+12. Commit those two tarballs to web/php-distributions.git, then update the git
+    submodule reference in web/php.git: 
+    git submodule init;
+    git submodule update;
+    cd distributions;
+    git pull origin master;
+    cd ..;
+    git commit distributions;
+    git push;
 
 13. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once

@@ -6,8 +6,7 @@ icu-49.1.2
 icu-50.1.2
 jpeglib-8
 jpeglib-9
-libcurl-7.27.0
-libcurl-7.29.0
+libcurl-7.30.0
 libiconv-1.14
 libmcrypt-2.5.8
 libmpir-2.5.1
@@ -21,6 +20,6 @@ libtidy-20090325
 libtidy-20090406
 libxslt-1.1.27
 libxml-2.7.8
-libxml-2.9.0
+libxml-2.9.1
 openssl-0.9.8y
 openssl-1.0.1e

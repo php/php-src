@@ -538,7 +538,6 @@ PHP_MINFO_FUNCTION(dba)
  */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	char *v;
 	int val_len;
 	zval *id;
 	dba_info *info = NULL;

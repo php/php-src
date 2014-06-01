@@ -1,4 +1,4 @@
-.TH PHP 1 "2010" "The PHP Group" "Scripting Language"
+.TH PHP 1 "2013" "The PHP Group" "Scripting Language"
 .SH NAME
 php \- PHP Command Line Interface 'CLI'
 .SH SYNOPSIS
@@ -42,6 +42,12 @@ php \- PHP Command Line Interface 'CLI'
 .LP
 \fBphp \fP[options] \fB\-a\fP
 .LP
+.B php
+[options] \-S
+.IR addr:port
+[\-t
+.IR docroot ]
+.LP
 .SH DESCRIPTION
 \fBPHP\fP is a widely\-used general\-purpose scripting language that is especially suited for 
 Web development and can be embedded into HTML. This is the command line interface
@@ -78,7 +84,13 @@ and therefore reading from
 .B STDIN 
 explicitly changes the next input line or skips input lines.
 .LP
-If none of \-r \-f \-B \-R \-F or \-E is present but a single parameter is given 
+PHP also contains an embedded web server for application development purpose. By using the \-S option where
+.B addr:port
+point to a local address and port PHP will listen to HTTP requests on that address and port and serve files from the current working directory or the
+.B docroot
+passed by the \-t option.
+.LP
+If none of \-r \-f \-B \-R \-F \-E or \-S is present but a single parameter is given 
 then this parameter is taken as the filename to parse and execute (same as 
 with \-f). If no parameter is present then the standard input is read and 
 executed.
@@ -263,6 +275,20 @@ after processing all input lines
 Output HTML syntax highlighted source
 .TP
 .PD 0
+.B \-\-server \fIaddr:port\fP
+.TP
+.PD 1
+.B \-S \fIaddr:port\fP
+Start embedded Webserver on the given local address and port
+.TP
+.PD 0
+.B \-\-docroot \fIdocroot\fP
+.TP
+.PD 1
+.B \-t \fIdocroot\fP
+Specify the document root to be used by the embedded web server
+.TP
+.PD 0
 .B \-\-version
 .TP
 .PD 1
@@ -435,7 +461,7 @@ contributors all around the world.
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2010 The PHP Group
+Copyright \(co 1997\-2013 The PHP Group
 .LP
 This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is

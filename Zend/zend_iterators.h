@@ -38,8 +38,11 @@ typedef struct _zend_object_iterator_funcs {
 	/* fetch the item data for the current element */
 	void (*get_current_data)(zend_object_iterator *iter, zval ***data TSRMLS_DC);
 
-	/* fetch the key for the current element (return HASH_KEY_IS_STRING or HASH_KEY_IS_LONG) (optional, may be NULL) */
-	int (*get_current_key)(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
+	/* fetch the key for the current element (optional, may be NULL). The key
+	 * should be written into the provided zval* using the ZVAL_* macros. If
+	 * this handler is not provided auto-incrementing integer keys will be
+	 * used. */
+	void (*get_current_key)(zend_object_iterator *iter, zval *key TSRMLS_DC);
 
 	/* step forwards to next element */
 	void (*move_forward)(zend_object_iterator *iter TSRMLS_DC);

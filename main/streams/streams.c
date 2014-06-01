@@ -1489,7 +1489,7 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 	char buf[CHUNK_SIZE];
 	size_t readchunk;
 	size_t haveread = 0;
-	size_t didread;
+	size_t didread, didwrite, towrite;
 	size_t dummy;
 	php_stream_statbuf ssbuf;
 
@@ -1524,16 +1524,16 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 		p = php_stream_mmap_range(src, php_stream_tell(src), maxlen, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
 		if (p) {
-			mapped = php_stream_write(dest, p, mapped);
+			didwrite = php_stream_write(dest, p, mapped);
 
 			php_stream_mmap_unmap_ex(src, mapped);
 
-			*len = mapped;
+			*len = didwrite;
 
-			/* we've got at least 1 byte to read.
-			 * less than 1 is an error */
-
-			if (mapped > 0) {
+			/* we've got at least 1 byte to read
+			 * less than 1 is an error
+			 * AND read bytes match written */
+			if (mapped > 0 && mapped == didwrite) {
 				return SUCCESS;
 			}
 			return FAILURE;
@@ -1551,7 +1551,6 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 
 		if (didread) {
 			/* extra paranoid */
-			size_t didwrite, towrite;
 			char *writeptr;
 
 			towrite = didread;

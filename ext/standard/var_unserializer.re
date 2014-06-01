@@ -400,8 +400,13 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 		BG(serialize_lock)--;
 	}
 
-	if (retval_ptr)
+	if (retval_ptr) {
 		zval_ptr_dtor(&retval_ptr);
+	}
+
+	if (EG(exception)) {
+		return 0;
+	}
 
 	return finish_nested_data(UNSERIALIZE_PASSTHRU);
 
@@ -681,10 +686,19 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock) = 1;
 		if (zend_lookup_class(class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
 			BG(serialize_lock) = 0;
+			if (EG(exception)) {
+				efree(class_name);
+				return 0;
+			}
 			ce = *pce;
 			break;
 		}
 		BG(serialize_lock) = 0;
+
+		if (EG(exception)) {
+			efree(class_name);
+			return 0;
+		}
 		
 		/* Check for unserialize callback */
 		if ((PG(unserialize_callback_func) == NULL) || (PG(unserialize_callback_func)[0] == '\0')) {
@@ -702,6 +716,12 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock) = 1;
 		if (call_user_function_ex(CG(function_table), NULL, user_func, &retval_ptr, 1, args, 0, NULL TSRMLS_CC) != SUCCESS) {
 			BG(serialize_lock) = 0;
+			if (EG(exception)) {
+				efree(class_name);
+				zval_ptr_dtor(&user_func);
+				zval_ptr_dtor(&arg_func_name);
+				return 0;
+			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "defined (%s) but not found", user_func->value.str.val);
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
@@ -712,6 +732,12 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock) = 0;
 		if (retval_ptr) {
 			zval_ptr_dtor(&retval_ptr);
+		}
+		if (EG(exception)) {
+			efree(class_name);
+			zval_ptr_dtor(&user_func);
+			zval_ptr_dtor(&arg_func_name);
+			return 0;
 		}
 		
 		/* The callback function may have defined the class */
