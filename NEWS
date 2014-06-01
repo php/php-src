@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     (Adam)
 
 - SPL:
+  . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
   . Fixed bug #67360 (Missing element after ArrayObject::getIterator). (Adam)
 
 ?? ??? 2014, PHP 5.4.29
