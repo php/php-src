@@ -414,6 +414,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 	}
 	
 	format = Z_STRVAL(args[format_offset]);
+	format_len = Z_STRLEN(args[format_offset]);
 	result = STR_ALLOC(size, 0);
 
 	currarg = 1;
