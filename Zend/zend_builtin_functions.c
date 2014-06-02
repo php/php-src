@@ -1908,7 +1908,7 @@ ZEND_FUNCTION(get_defined_constants)
 	if (categorize) {
 		zend_constant *val;
 		int module_number;
-		zval *modules, tmp, *const_val;
+		zval *modules, const_val;
 		char **module_names;
 		zend_module_entry *module;
 		int i = 1;
@@ -1943,14 +1943,8 @@ ZEND_FUNCTION(get_defined_constants)
 				add_assoc_zval(return_value, module_names[module_number], &modules[module_number]);
 			}
 
-			if (EXPECTED(!Z_COPYABLE(val->value))) {
-				const_val = &val->value;
-			} else {
-				ZVAL_DUP(&tmp, &val->value);
-				const_val = &tmp;
-			}
-
-			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, const_val);
+			ZVAL_DUP(&const_val, &val->value);
+			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
 		} ZEND_HASH_FOREACH_END();
 
 		efree(module_names);
