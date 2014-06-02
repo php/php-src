@@ -927,15 +927,19 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		}
 
 		/* copy: enforce read only access */
-		ZVAL_DUP_DEREF(&prop_copy, prop);
+		ZVAL_DEREF(prop);
+		if (UNEXPECTED(Z_COPYABLE_P(prop))) {
+			ZVAL_DUP(&prop_copy, prop);
+			prop = &prop_copy;
+		}
 
 		/* this is necessary to make it able to work with default array
 		 * properties, returned to user */
-		if (Z_OPT_CONSTANT(prop_copy)) {
-			zval_update_constant(&prop_copy, 0 TSRMLS_CC);
+		if (Z_OPT_CONSTANT_P(prop)) {
+			zval_update_constant(prop, 0 TSRMLS_CC);
 		}
 
-		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &prop_copy);
+		zend_hash_add_new(Z_ARRVAL_P(return_value), key, prop);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -1904,7 +1908,7 @@ ZEND_FUNCTION(get_defined_constants)
 	if (categorize) {
 		zend_constant *val;
 		int module_number;
-		zval *modules;
+		zval *modules, tmp, *const_val;
 		char **module_names;
 		zend_module_entry *module;
 		int i = 1;
@@ -1920,8 +1924,6 @@ ZEND_FUNCTION(get_defined_constants)
 		module_names[i] = "user";
 
 		ZEND_HASH_FOREACH_PTR(EG(zend_constants), val) {
-			zval const_val;
-
 			if (!val->name) {
 				/* skip special constants */
 				continue;
@@ -1941,9 +1943,14 @@ ZEND_FUNCTION(get_defined_constants)
 				add_assoc_zval(return_value, module_names[module_number], &modules[module_number]);
 			}
 
-			ZVAL_DUP_DEREF(&const_val, &val->value);
+			if (EXPECTED(!Z_COPYABLE(val->value))) {
+				const_val = &val->value;
+			} else {
+				ZVAL_DUP(&tmp, &val->value);
+				const_val = &tmp;
+			}
 
-			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
+			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, const_val);
 		} ZEND_HASH_FOREACH_END();
 
 		efree(module_names);

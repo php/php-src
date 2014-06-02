@@ -1180,7 +1180,7 @@ PHP_FUNCTION(xml_set_object)
 	zval_add_ref(&parser->object); 
 #endif */
 
-	ZVAL_DUP_DEREF(&parser->object, mythis);
+	ZVAL_COPY(&parser->object, mythis);
 
 	RETVAL_TRUE;
 }

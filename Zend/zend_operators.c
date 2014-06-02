@@ -1648,15 +1648,12 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 
 ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy, op2_copy;
+	double d1, d2;
 
-	ZVAL_DUP_DEREF(&op1_copy, op1);
-	ZVAL_DUP_DEREF(&op2_copy, op2);
+	d1 = zval_get_double(op1);
+	d2 = zval_get_double(op2);
 
-	convert_to_double(&op1_copy);
-	convert_to_double(&op2_copy);
-
-	ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL(op1_copy)-Z_DVAL(op2_copy)));
+	ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(d1 - d2));
 
 	return SUCCESS;
 }

@@ -693,7 +693,8 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 				}
 			} else {
 				zval nval;
-				ZVAL_DUP_DEREF(&nval, tmp);
+				ZVAL_DEREF(tmp);
+				ZVAL_DUP(&nval, tmp);
 				php_filter_call(&nval, -1, arg_elm, 0, FILTER_REQUIRE_SCALAR TSRMLS_CC);
 				zend_hash_update(Z_ARRVAL_P(return_value), arg_key, &nval);
 			}

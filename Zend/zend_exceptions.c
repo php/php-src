@@ -270,7 +270,11 @@ static void _default_exception_get_entry(zval *object, char *name, int name_len,
 
 	value = zend_read_property(default_exception_ce, object, name, name_len, 0 TSRMLS_CC);
 
-	ZVAL_DUP_DEREF(return_value, value);
+	if (UNEXPECTED(Z_ISREF_P(return_value))) {
+		ZVAL_DUP(return_value, Z_REFVAL_P(value));
+	} else {
+		ZVAL_COPY(return_value, value);
+	}
 }
 /* }}} */
 

@@ -249,14 +249,12 @@ again:
 				TSRMLS_FETCH();
 
 				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
-					zval val;
-
-					ZVAL_DUP_DEREF(&val, expr);
-					if (Z_OBJ_HANDLER_P(expr, cast_object)(&val, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-						zval_ptr_dtor(&val);
+					Z_ADDREF_P(expr);
+					if (Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+						zval_ptr_dtor(expr);
 						break;
 					}
-					zval_ptr_dtor(&val);
+					zval_ptr_dtor(expr);
 				}
 				if (!Z_OBJ_HANDLER_P(expr, cast_object) && Z_OBJ_HANDLER_P(expr, get)) {
 					zval rv;

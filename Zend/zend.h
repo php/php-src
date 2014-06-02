@@ -707,15 +707,6 @@ END_EXTERN_C()
 		}												\
 	} while (0)
 
-#define ZVAL_DUP_DEREF(z, v)							\
-	do {												\
-		zval *__z1 = (z);								\
-		zval *__z2 = (v);								\
-		ZVAL_DEREF(__z2);								\
-		ZVAL_COPY_VALUE(__z1, __z2);					\
-		zval_opt_copy_ctor(__z1);						\
-	} while (0)
-
 #define ZVAL_UNREF(z) do {								\
 		zval *_z = (z);									\
 		zend_reference *ref;							\
