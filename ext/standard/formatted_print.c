@@ -413,7 +413,7 @@ php_formatted_print(int ht, php_size_t *len, int use_array, int format_offset TS
 	
 	convert_to_string_ex(args[format_offset]);
 	format = Z_STRVAL_PP(args[format_offset]);
-	format_len = Z_STRLEN_PP(args[format_offset]);
+	format_len = Z_STRSIZE_PP(args[format_offset]);
 	result = emalloc(size);
 
 	currarg = 1;
