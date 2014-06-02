@@ -2823,8 +2823,8 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	} else {
 		if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {		    
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-			if (OP1_TYPE == IS_CONST && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
-				zval_opt_copy_ctor(EX(return_value));
+			if (OP1_TYPE == IS_CONST) {
+				zval_opt_copy_ctor_no_imm(EX(return_value));
 			}
 		} else if (Z_ISREF_P(retval_ptr)) {
 			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
@@ -2860,8 +2860,8 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 				}
 			} else {
 				ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-				if (OP1_TYPE != IS_TMP_VAR && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
-					zval_opt_copy_ctor(EX(return_value));
+				if (OP1_TYPE != IS_TMP_VAR) {
+					zval_opt_copy_ctor_no_imm(EX(return_value));
 				}
 			}
 			break;
@@ -3008,9 +3008,7 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 	if (OP1_TYPE == IS_CONST) {
 		/* Immutable arrays may be passed without copying ??? */
 		/* some internal functions may try to modify them !!! */
-		if (!Z_OPT_IMMUTABLE_P(top)) {
-			zval_opt_copy_ctor(top);
-		}
+		zval_opt_copy_ctor_no_imm(top);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -3027,9 +3025,7 @@ ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
 		ZVAL_COPY_VALUE(top, Z_REFVAL_P(varptr));
 		/* Immutable arrays may be passed without copying ??? */
 		/* some internal functions may try to modify them !!! */
-		if (!Z_OPT_IMMUTABLE_P(top)) {
-			zval_opt_copy_ctor(top);
-		} 
+		zval_opt_copy_ctor_no_imm(top);
 		FREE_OP1();
 	} else {
 		ZVAL_COPY_VALUE(top, varptr);
@@ -3153,9 +3149,7 @@ ZEND_VM_HANDLER(66, ZEND_SEND_VAR, VAR|CV, ANY)
 		ZVAL_COPY_VALUE(top, Z_REFVAL_P(varptr));
 		/* Immutable arrays may be passed without copying ??? */
 		/* some internal functions may try to modify them !!! */
-		if (!Z_OPT_IMMUTABLE_P(top)) {
-			zval_opt_copy_ctor(top);
-		}
+		zval_opt_copy_ctor_no_imm(top);
 		FREE_OP1();
 	} else {
 		ZVAL_COPY_VALUE(top, varptr);
@@ -4935,9 +4929,7 @@ ZEND_VM_HANDLER(22, ZEND_QM_ASSIGN, CONST|TMP|VAR|CV, ANY)
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 	if (!IS_OP1_TMP_FREE()) {
-		if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
-			zval_opt_copy_ctor(EX_VAR(opline->result.var));
-		}
+		zval_opt_copy_ctor_no_imm(EX_VAR(opline->result.var));
 	}
 	FREE_OP1_IF_VAR();
 	CHECK_EXCEPTION();
@@ -4958,9 +4950,7 @@ ZEND_VM_HANDLER(157, ZEND_QM_ASSIGN_VAR, CONST|TMP|VAR|CV, ANY)
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!IS_OP1_TMP_FREE()) {
-			if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
-				zval_opt_copy_ctor(EX_VAR(opline->result.var));
-			}
+			zval_opt_copy_ctor_no_imm(EX_VAR(opline->result.var));
 		}
 	}
 

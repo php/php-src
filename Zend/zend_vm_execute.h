@@ -2605,8 +2605,8 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	} else {
 		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-			if (IS_CONST == IS_CONST && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
-				zval_opt_copy_ctor(EX(return_value));
+			if (IS_CONST == IS_CONST) {
+				zval_opt_copy_ctor_no_imm(EX(return_value));
 			}
 		} else if (Z_ISREF_P(retval_ptr)) {
 			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
@@ -2642,8 +2642,8 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 				}
 			} else {
 				ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-				if (IS_CONST != IS_TMP_VAR && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
-					zval_opt_copy_ctor(EX(return_value));
+				if (IS_CONST != IS_TMP_VAR) {
+					zval_opt_copy_ctor_no_imm(EX(return_value));
 				}
 			}
 			break;
@@ -2724,9 +2724,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	if (IS_CONST == IS_CONST) {
 		/* Immutable arrays may be passed without copying ??? */
 		/* some internal functions may try to modify them !!! */
-		if (!Z_OPT_IMMUTABLE_P(top)) {
-			zval_opt_copy_ctor(top);
-		}
+		zval_opt_copy_ctor_no_imm(top);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -3263,9 +3261,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 	if (!0) {
-		if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
-			zval_opt_copy_ctor(EX_VAR(opline->result.var));
-		}
+		zval_opt_copy_ctor_no_imm(EX_VAR(opline->result.var));
 	}
 
 	CHECK_EXCEPTION();
@@ -3286,9 +3282,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!0) {
-			if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
-				zval_opt_copy_ctor(EX_VAR(opline->result.var));
-			}
+			zval_opt_copy_ctor_no_imm(EX_VAR(opline->result.var));
 		}
 	}
 
@@ -7746,8 +7740,8 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-			if (IS_TMP_VAR == IS_CONST && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
-				zval_opt_copy_ctor(EX(return_value));
+			if (IS_TMP_VAR == IS_CONST) {
+				zval_opt_copy_ctor_no_imm(EX(return_value));
 			}
 		} else if (Z_ISREF_P(retval_ptr)) {
 			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
@@ -7783,8 +7777,8 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 				}
 			} else {
 				ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-				if (IS_TMP_VAR != IS_TMP_VAR && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
-					zval_opt_copy_ctor(EX(return_value));
+				if (IS_TMP_VAR != IS_TMP_VAR) {
+					zval_opt_copy_ctor_no_imm(EX(return_value));
 				}
 			}
 			break;
@@ -7865,9 +7859,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	if (IS_TMP_VAR == IS_CONST) {
 		/* Immutable arrays may be passed without copying ??? */
 		/* some internal functions may try to modify them !!! */
-		if (!Z_OPT_IMMUTABLE_P(top)) {
-			zval_opt_copy_ctor(top);
-		}
+		zval_opt_copy_ctor_no_imm(top);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -8434,9 +8426,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 	if (!1) {
-		if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
-			zval_opt_copy_ctor(EX_VAR(opline->result.var));
-		}
+		zval_opt_copy_ctor_no_imm(EX_VAR(opline->result.var));
 	}
 
 	CHECK_EXCEPTION();
@@ -8457,9 +8447,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!1) {
-			if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
-				zval_opt_copy_ctor(EX_VAR(opline->result.var));
-			}
+			zval_opt_copy_ctor_no_imm(EX_VAR(opline->result.var));
 		}
 	}
 
@@ -12843,8 +12831,8 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-			if (IS_VAR == IS_CONST && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
-				zval_opt_copy_ctor(EX(return_value));
+			if (IS_VAR == IS_CONST) {
+				zval_opt_copy_ctor_no_imm(EX(return_value));
 			}
 		} else if (Z_ISREF_P(retval_ptr)) {
 			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
@@ -12880,8 +12868,8 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 				}
 			} else {
 				ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-				if (IS_VAR != IS_TMP_VAR && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
-					zval_opt_copy_ctor(EX(return_value));
+				if (IS_VAR != IS_TMP_VAR) {
+					zval_opt_copy_ctor_no_imm(EX(return_value));
 				}
 			}
 			break;
@@ -12956,9 +12944,7 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_AR
 		ZVAL_COPY_VALUE(top, Z_REFVAL_P(varptr));
 		/* Immutable arrays may be passed without copying ??? */
 		/* some internal functions may try to modify them !!! */
-		if (!Z_OPT_IMMUTABLE_P(top)) {
-			zval_opt_copy_ctor(top);
-		}
+		zval_opt_copy_ctor_no_imm(top);
 		zval_ptr_dtor_nogc(free_op1.var);
 	} else {
 		ZVAL_COPY_VALUE(top, varptr);
@@ -13082,9 +13068,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		ZVAL_COPY_VALUE(top, Z_REFVAL_P(varptr));
 		/* Immutable arrays may be passed without copying ??? */
 		/* some internal functions may try to modify them !!! */
-		if (!Z_OPT_IMMUTABLE_P(top)) {
-			zval_opt_copy_ctor(top);
-		}
+		zval_opt_copy_ctor_no_imm(top);
 		zval_ptr_dtor_nogc(free_op1.var);
 	} else {
 		ZVAL_COPY_VALUE(top, varptr);
@@ -13780,9 +13764,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 	if (!0) {
-		if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
-			zval_opt_copy_ctor(EX_VAR(opline->result.var));
-		}
+		zval_opt_copy_ctor_no_imm(EX_VAR(opline->result.var));
 	}
 	zval_ptr_dtor_nogc(free_op1.var);
 	CHECK_EXCEPTION();
@@ -13803,9 +13785,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!0) {
-			if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
-				zval_opt_copy_ctor(EX_VAR(opline->result.var));
-			}
+			zval_opt_copy_ctor_no_imm(EX_VAR(opline->result.var));
 		}
 	}
 
@@ -29955,8 +29935,8 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-			if (IS_CV == IS_CONST && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
-				zval_opt_copy_ctor(EX(return_value));
+			if (IS_CV == IS_CONST) {
+				zval_opt_copy_ctor_no_imm(EX(return_value));
 			}
 		} else if (Z_ISREF_P(retval_ptr)) {
 			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
@@ -29992,8 +29972,8 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 				}
 			} else {
 				ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-				if (IS_CV != IS_TMP_VAR && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
-					zval_opt_copy_ctor(EX(return_value));
+				if (IS_CV != IS_TMP_VAR) {
+					zval_opt_copy_ctor_no_imm(EX(return_value));
 				}
 			}
 			break;
@@ -30067,9 +30047,7 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARG
 		ZVAL_COPY_VALUE(top, Z_REFVAL_P(varptr));
 		/* Immutable arrays may be passed without copying ??? */
 		/* some internal functions may try to modify them !!! */
-		if (!Z_OPT_IMMUTABLE_P(top)) {
-			zval_opt_copy_ctor(top);
-		}
+		zval_opt_copy_ctor_no_imm(top);
 
 	} else {
 		ZVAL_COPY_VALUE(top, varptr);
@@ -30192,9 +30170,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		ZVAL_COPY_VALUE(top, Z_REFVAL_P(varptr));
 		/* Immutable arrays may be passed without copying ??? */
 		/* some internal functions may try to modify them !!! */
-		if (!Z_OPT_IMMUTABLE_P(top)) {
-			zval_opt_copy_ctor(top);
-		}
+		zval_opt_copy_ctor_no_imm(top);
 
 	} else {
 		ZVAL_COPY_VALUE(top, varptr);
@@ -30737,9 +30713,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 	if (!0) {
-		if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
-			zval_opt_copy_ctor(EX_VAR(opline->result.var));
-		}
+		zval_opt_copy_ctor_no_imm(EX_VAR(opline->result.var));
 	}
 
 	CHECK_EXCEPTION();
@@ -30760,9 +30734,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!0) {
-			if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
-				zval_opt_copy_ctor(EX_VAR(opline->result.var));
-			}
+			zval_opt_copy_ctor_no_imm(EX_VAR(opline->result.var));
 		}
 	}
 
