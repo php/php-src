@@ -2823,7 +2823,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	} else {
 		if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {		    
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
-			if (OP1_TYPE != IS_TMP_VAR) {
+			if (OP1_TYPE == IS_CONST && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
 				zval_opt_copy_ctor(EX(return_value));
 			}
 		} else if (Z_ISREF_P(retval_ptr)) {
@@ -2858,10 +2858,11 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 				if (OP1_TYPE == IS_TMP_VAR) {
 					FREE_OP1();
 				}
-			} else if (!IS_OP1_TMP_FREE()) { /* Not a temp var */
-				ZVAL_DUP(EX(return_value), retval_ptr);
 			} else {
 				ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
+				if (OP1_TYPE != IS_TMP_VAR && !Z_OPT_IMMUTABLE_P(EX(return_value))) {
+					zval_opt_copy_ctor(EX(return_value));
+				}
 			}
 			break;
 		}
@@ -3737,8 +3738,10 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 			ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 		} else if (OP1_TYPE == IS_CONST) {
-			ZVAL_DUP(&new_expr, expr_ptr);
-			expr_ptr = &new_expr;
+			if (!Z_IMMUTABLE_P(expr_ptr)) {
+				ZVAL_DUP(&new_expr, expr_ptr);
+				expr_ptr = &new_expr;
+			}
 		} else if (Z_ISREF_P(expr_ptr)) {
 			ZVAL_DUP(&new_expr, Z_REFVAL_P(expr_ptr));
 			expr_ptr = &new_expr;
@@ -4932,7 +4935,9 @@ ZEND_VM_HANDLER(22, ZEND_QM_ASSIGN, CONST|TMP|VAR|CV, ANY)
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 	if (!IS_OP1_TMP_FREE()) {
-		zval_opt_copy_ctor(EX_VAR(opline->result.var));
+		if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
+			zval_opt_copy_ctor(EX_VAR(opline->result.var));
+		}
 	}
 	FREE_OP1_IF_VAR();
 	CHECK_EXCEPTION();
@@ -4953,7 +4958,9 @@ ZEND_VM_HANDLER(157, ZEND_QM_ASSIGN_VAR, CONST|TMP|VAR|CV, ANY)
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!IS_OP1_TMP_FREE()) {
-			zval_opt_copy_ctor(EX_VAR(opline->result.var));
+			if (!Z_OPT_IMMUTABLE_P(EX_VAR(opline->result.var))) {
+				zval_opt_copy_ctor(EX_VAR(opline->result.var));
+			}
 		}
 	}
 
