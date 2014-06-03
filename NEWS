@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #67308 (Serialize of DateTime truncates fractions of second).
     (Adam)
 
+- Fileinfo:
+  . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary check).
+
 - SPL:
   . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
   . Fixed bug #67360 (Missing element after ArrayObject::getIterator). (Adam)
