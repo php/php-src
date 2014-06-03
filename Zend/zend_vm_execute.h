@@ -14219,8 +14219,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(int (*b
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -14271,8 +14274,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binar
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -16582,8 +16588,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(int (*bin
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -16634,8 +16643,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -18563,8 +18575,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(int (*bin
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -18615,8 +18630,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -20631,8 +20649,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(int (*
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -20683,8 +20704,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*bina
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -22084,8 +22108,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_CV(int (*bina
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -22136,8 +22163,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_o
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -23921,8 +23951,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(int 
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -23973,8 +24006,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*bi
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -25278,8 +25314,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(int (*
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -25330,8 +25369,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*bina
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -26556,8 +26598,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(int (*
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -26608,8 +26653,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*bina
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -27833,8 +27881,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(int
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -27885,8 +27936,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*b
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -28349,8 +28403,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(int (*b
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -28401,8 +28458,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binar
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -31166,8 +31226,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_CONST(int (*bi
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -31218,8 +31281,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -33320,8 +33386,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_TMP(int (*bina
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -33372,8 +33441,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_o
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -35184,8 +35256,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_VAR(int (*bina
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -35236,8 +35311,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_o
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -37134,8 +37212,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(int (*b
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -37186,8 +37267,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binar
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -38453,8 +38537,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_CV(int (*binar
 		goto assign_op_dim_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -38505,8 +38592,11 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op
 		goto assign_op_exit;
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {

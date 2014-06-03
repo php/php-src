@@ -456,8 +456,11 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		ZEND_VM_C_GOTO(assign_op_dim_exit);
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -508,8 +511,11 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 		ZEND_VM_C_GOTO(assign_op_exit);
 	}
 
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-	ZVAL_DEREF(var_ptr);
+	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
+		SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	} else {
+		ZVAL_DEREF(var_ptr);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -3660,7 +3666,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 				value = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
 				ZVAL_DEREF(value);
 				ZVAL_DUP(EX_VAR(opline->result.var), value);
-				goto constant_fetch_end;
+				ZEND_VM_C_GOTO(constant_fetch_end);
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv));
 			} else {
@@ -3678,7 +3684,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 			if ((value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(opline->op2.zv), ce)) != NULL) {
 				ZVAL_DEREF(value);
 				ZVAL_DUP(EX_VAR(opline->result.var), value);
-				goto constant_fetch_end;
+				ZEND_VM_C_GOTO(constant_fetch_end);
 			}
 		}
 
@@ -3705,7 +3711,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(opline->op2.zv));
 		}
 	}
-constant_fetch_end:
+ZEND_VM_C_LABEL(constant_fetch_end):
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
