@@ -3770,7 +3770,9 @@ ZEND_VM_C_LABEL(num_index):
 			case IS_STRING:
 				str = Z_STR_P(offset);
 				if (OP2_TYPE != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, ZEND_VM_C_GOTO(num_index));
+					if (ZEND_HANDLE_NUMERIC(str, hval)) {
+						ZEND_VM_C_GOTO(num_index);
+					}
 				}
 ZEND_VM_C_LABEL(str_index):				
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
@@ -4141,7 +4143,9 @@ ZEND_VM_C_LABEL(num_index_dim):
 						if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 					}
 					if (OP2_TYPE != IS_CONST) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(numeric_index_dim));
+						if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), hval)) {
+							ZEND_VM_C_GOTO(numeric_index_dim);
+						}
 					}
 					if (ht == &EG(symbol_table).ht) {
 						zend_delete_global_variable(Z_STR_P(offset) TSRMLS_CC);
@@ -4664,7 +4668,9 @@ ZEND_VM_C_LABEL(num_index_prop):
 			case IS_STRING:
 				str = Z_STR_P(offset);
 				if (OP2_TYPE != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, ZEND_VM_C_GOTO(num_index_prop));
+					if (ZEND_HANDLE_NUMERIC(str, hval)) {
+						ZEND_VM_C_GOTO(num_index_prop);
+					}
 				}
 ZEND_VM_C_LABEL(str_index_prop):
 				value = zend_hash_find_ind(ht, str);

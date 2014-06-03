@@ -235,46 +235,61 @@ END_EXTERN_C()
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 
-#define ZEND_HANDLE_NUMERIC_EX(key, length, idx, func) do {					\
-	register const char *tmp = key;											\
-																			\
-	if (*tmp == '-') {														\
-		tmp++;																\
-	}																		\
-	if (*tmp >= '0' && *tmp <= '9') { /* possibly a numeric index */		\
-		const char *end = key + length - 1;									\
-																			\
-		if ((*end != '\0') /* not a null terminated string */				\
-		 || (*tmp == '0' && length > 2) /* numbers with leading zeros */	\
-		 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */		\
-		 || (SIZEOF_LONG == 4 &&											\
-		     end - tmp == MAX_LENGTH_OF_LONG - 1 &&							\
-		     *tmp > '2')) { /* overflow */									\
-			break;															\
-		}																	\
-		idx = (*tmp - '0');													\
-		while (++tmp != end && *tmp >= '0' && *tmp <= '9') {				\
-			idx = (idx * 10) + (*tmp - '0');								\
-		}																	\
-		if (tmp == end) {													\
-			if (*key == '-') {												\
-				if (idx-1 > LONG_MAX) { /* overflow */						\
-					break;													\
-				}															\
-				idx = 0 - idx;               									\
-			} else if (idx > LONG_MAX) { /* overflow */						\
-				break;														\
-			}																\
-			func;															\
-		}																	\
-	}																		\
-} while (0)
+static inline int _zend_handle_numeric_str(const char *key, int length, ulong *idx)
+{
+	register const char *tmp = key;
+	const char *end;
 
-#define ZEND_HANDLE_NUMERIC(key, length, func) do {							\
-	ulong idx;																\
-																			\
-	ZEND_HANDLE_NUMERIC_EX(key, length, idx, return func);					\
-} while (0)
+	if (*tmp > '9') {
+		return 0;
+	} else if (*tmp < '0') {
+		if (*tmp != '-') {
+			return 0;
+		}
+		tmp++;
+		if (*tmp > '9' || *tmp < '0') {
+			return 0;
+		}
+	}
+
+	/* possibly a numeric index */
+	end = key + length;
+
+	if ((*end != '\0') /* not a null terminated string */
+	 || (*tmp == '0' && length > 1) /* numbers with leading zeros */
+	 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */
+	 || (SIZEOF_LONG == 4 &&
+	     end - tmp == MAX_LENGTH_OF_LONG - 1 &&
+	     *tmp > '2')) { /* overflow */
+		return 0;
+	}
+	*idx = (*tmp - '0');
+	while (1) {
+		++tmp;
+		if (tmp == end) {
+			if (*key == '-') {
+				if (*idx-1 > LONG_MAX) { /* overflow */
+					return 0;
+				}
+				*idx = 0 - *idx;
+			} else if (*idx > LONG_MAX) { /* overflow */
+				return 0;
+			}
+			return 1;
+		}
+		if (*tmp <= '9' && *tmp >= '0') {
+			*idx = (*idx * 10) + (*tmp - '0');
+		} else {
+			return 0;
+		}
+	}
+}
+
+#define ZEND_HANDLE_NUMERIC_STR(key, length, idx) \
+	_zend_handle_numeric_str(key, length, &idx)
+
+#define ZEND_HANDLE_NUMERIC(key, idx) \
+	_zend_handle_numeric_str((key)->val, (key)->len, &idx)
 
 
 static inline zval *zend_hash_find_ind(const HashTable *ht, zend_string *key)
@@ -307,92 +322,157 @@ static inline zval *zend_hash_str_find_ind(const HashTable *ht, const char *str,
 
 static inline zval *zend_symtable_update(HashTable *ht, zend_string *key, zval *pData)
 {
-	ZEND_HANDLE_NUMERIC(key->val, key->len+1, zend_hash_index_update(ht, idx, pData));
-	return zend_hash_update(ht, key, pData);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_update(ht, idx, pData);
+	} else {
+		return zend_hash_update(ht, key, pData);
+	}
 }
 
 
 static inline zval *zend_symtable_update_ind(HashTable *ht, zend_string *key, zval *pData)
 {
-	ZEND_HANDLE_NUMERIC(key->val, key->len+1, zend_hash_index_update(ht, idx, pData));
-	return zend_hash_update_ind(ht, key, pData);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_update(ht, idx, pData);
+	} else {
+		return zend_hash_update_ind(ht, key, pData);
+	}
 }
 
 
 static inline int zend_symtable_del(HashTable *ht, zend_string *key)
 {
-	ZEND_HANDLE_NUMERIC(key->val, key->len+1, zend_hash_index_del(ht, idx));
-	return zend_hash_del(ht, key);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_del(ht, idx);
+	} else {
+		return zend_hash_del(ht, key);
+	}
 }
 
 
 static inline int zend_symtable_del_ind(HashTable *ht, zend_string *key)
 {
-	ZEND_HANDLE_NUMERIC(key->val, key->len+1, zend_hash_index_del(ht, idx));
-	return zend_hash_del_ind(ht, key);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_del(ht, idx);
+	} else {
+		return zend_hash_del_ind(ht, key);
+	}
 }
 
 
 static inline zval *zend_symtable_find(const HashTable *ht, zend_string *key)
 {
-	ZEND_HANDLE_NUMERIC(key->val, key->len+1, zend_hash_index_find(ht, idx));
-	return zend_hash_find(ht, key);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_find(ht, idx);
+	} else {
+		return zend_hash_find(ht, key);
+	}
 }
 
 
 static inline zval *zend_symtable_find_ind(const HashTable *ht, zend_string *key)
 {
-	ZEND_HANDLE_NUMERIC(key->val, key->len+1, zend_hash_index_find(ht, idx));
-	return zend_hash_find_ind(ht, key);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_find(ht, idx);
+	} else {
+		return zend_hash_find_ind(ht, key);
+	}
 }
 
 
 static inline int zend_symtable_exists(HashTable *ht, zend_string *key)
 {
-	ZEND_HANDLE_NUMERIC(key->val, key->len+1, zend_hash_index_exists(ht, idx));
-	return zend_hash_exists(ht, key);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_exists(ht, idx);
+	} else {
+		return zend_hash_exists(ht, key);
+	}
 }
 
 
 static inline zval *zend_symtable_str_update(HashTable *ht, const char *str, int len, zval *pData)
 {
-	ZEND_HANDLE_NUMERIC(str, len+1, zend_hash_index_update(ht, idx, pData));
-	return zend_hash_str_update(ht, str, len, pData);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
+		return zend_hash_index_update(ht, idx, pData);
+	} else {
+		return zend_hash_str_update(ht, str, len, pData);
+	}
 }
 
 
 static inline zval *zend_symtable_str_update_ind(HashTable *ht, const char *str, int len, zval *pData)
 {
-	ZEND_HANDLE_NUMERIC(str, len+1, zend_hash_index_update(ht, idx, pData));
-	return zend_hash_str_update_ind(ht, str, len, pData);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
+		return zend_hash_index_update(ht, idx, pData);
+	} else {
+		return zend_hash_str_update_ind(ht, str, len, pData);
+	}
 }
 
 
 static inline int zend_symtable_str_del(HashTable *ht, const char *str, int len)
 {
-	ZEND_HANDLE_NUMERIC(str, len+1, zend_hash_index_del(ht, idx));
-	return zend_hash_str_del(ht, str, len);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
+		return zend_hash_index_del(ht, idx);
+	} else {
+		return zend_hash_str_del(ht, str, len);
+	}
 }
 
 
 static inline int zend_symtable_str_del_ind(HashTable *ht, const char *str, int len)
 {
-	ZEND_HANDLE_NUMERIC(str, len+1, zend_hash_index_del(ht, idx));
-	return zend_hash_str_del_ind(ht, str, len);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
+		return zend_hash_index_del(ht, idx);
+	} else {
+		return zend_hash_str_del_ind(ht, str, len);
+	}
 }
 
 
 static inline zval *zend_symtable_str_find(HashTable *ht, const char *str, int len)
 {
-	ZEND_HANDLE_NUMERIC(str, len+1, zend_hash_index_find(ht, idx));
-	return zend_hash_str_find(ht, str, len);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
+		return zend_hash_index_find(ht, idx);
+	} else {
+		return zend_hash_str_find(ht, str, len);
+	}
 }
 
 
 static inline int zend_symtable_str_exists(HashTable *ht, const char *str, int len)
 {
-	ZEND_HANDLE_NUMERIC(str, len+1, zend_hash_index_exists(ht, idx));
-	return zend_hash_str_exists(ht, str, len);
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
+		return zend_hash_index_exists(ht, idx);
+	} else {
+		return zend_hash_str_exists(ht, str, len);
+	}
 }
 
 static inline void *zend_hash_add_ptr(HashTable *ht, zend_string *key, void *pData)

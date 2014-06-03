@@ -297,10 +297,8 @@ static void update_op2_const(zend_op_array *op_array,
 check_numeric:
 				{
 					ulong index;
-					int numeric = 0;
 
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(val), Z_STRLEN_P(val)+1, index, numeric = 1);
-					if (numeric) {
+					if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
 						zval_dtor(val);
 						ZVAL_LONG(val, index);
 						op_array->literals[opline->op2.constant] = *val;
