@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.0 Beta 4
+?? ??? 2014, PHP 5.6.0 Release Candidate 1
+
+05 Jun 2014, PHP 5.6.0 Beta 4
 
 - Core:
   . Fixed bug #67249 (printf out-of-bounds read). (Stas)
