@@ -400,7 +400,11 @@ static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	(*p) += 2;
 	
-	if (ce->serialize == NULL) {
+	/* The internal class check here is a BC fix only, userspace classes implementing the
+	Serializable interface have eventually an inconsistent behavior at this place when
+	unserialized from a manipulated string. Additionaly the interal classes can possibly
+	crash PHP so they're still disabled here. */
+	if (ce->serialize == NULL || ZEND_INTERNAL_CLASS != ce->type) {
 		object_init_ex(*rval, ce);
 	} else {
 		/* If this class implements Serializable, it should not land here but in object_custom(). The passed string
