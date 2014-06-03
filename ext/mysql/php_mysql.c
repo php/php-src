@@ -2171,8 +2171,14 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 		object_and_properties_init(return_value, ce, NULL);
-		zend_merge_properties(return_value, Z_ARRVAL(dataset), 0 TSRMLS_CC);
-		zval_dtor(&dataset);
+		if (!ce->default_properties_count && !ce->__set) {
+			ALLOC_HASHTABLE(Z_OBJ_P(return_value)->properties);
+			*Z_OBJ_P(return_value)->properties = *Z_ARRVAL(dataset);
+			efree(Z_ARR(dataset));
+		} else {
+			zend_merge_properties(return_value, Z_ARRVAL(dataset) TSRMLS_CC);
+			zval_dtor(&dataset);
+		}
 
 		if (ce->constructor) {
 			fci.size = sizeof(fci);

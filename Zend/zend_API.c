@@ -1097,7 +1097,7 @@ ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC) /* {{{ */
 
 /* This function should be called after the constructor has been called
  * because it may call __set from the uninitialized object otherwise. */
-ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destroy_ht TSRMLS_DC) /* {{{ */
+ZEND_API void zend_merge_properties(zval *obj, HashTable *properties TSRMLS_DC) /* {{{ */
 {
 	const zend_object_handlers *obj_ht = Z_OBJ_HT_P(obj);
 	zend_class_entry *old_scope = EG(scope);
@@ -1115,11 +1115,6 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 		}
 	} ZEND_HASH_FOREACH_END();
 	EG(scope) = old_scope;
-
-	if (destroy_ht) {
-		zend_hash_destroy(properties);
-		FREE_HASHTABLE(properties);
-	}
 }
 /* }}} */
 

@@ -370,7 +370,7 @@ ZEND_API void object_properties_init(zend_object *object, zend_class_entry *clas
 ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties TSRMLS_DC);
 ZEND_API void object_properties_load(zend_object *object, HashTable *properties TSRMLS_DC);
 
-ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destroy_ht TSRMLS_DC);
+ZEND_API void zend_merge_properties(zval *obj, HashTable *properties TSRMLS_DC);
 
 /* no longer supported */
 ZEND_API int add_assoc_function(zval *arg, const char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
