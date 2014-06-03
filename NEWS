@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . Fixed bug #67327 (fileinfo: CDF infinite loop in nelements DoS).
   . Fixed bug #67328 (fileinfo: fileinfo: numerous file_printf calls resulting in
     performance degradation).
+  . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary check).
 
 - SPL:
   . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
