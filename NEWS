@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.4.30
 
+- Core:
+  . Fixed BC break introduced by patch for bug #67072. (Anatol)
+
 - Date:
   . Fixed bug #67308 (Serialize of DateTime truncates fractions of second).
     (Adam)
@@ -13,7 +16,7 @@ PHP                                                                        NEWS
   . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
   . Fixed bug #67360 (Missing element after ArrayObject::getIterator). (Adam)
 
-?? ??? 2014, PHP 5.4.29
+29 May 2014, PHP 5.4.29
 
 - COM:
   . Fixed bug #66431 (Special Character via COM Interface (CP_UTF8)). (Anatol)
