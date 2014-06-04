@@ -11,7 +11,7 @@ PHP                                                                        NEWS
   . Fixed bug #67399 (putenv with empty variable may lead to crash). (Stas)
 
 - CLI server:
-  . Fixed Bug #67406i (built-in web-server segfaults on startup). (Remi)
+  . Fixed Bug #67406 (built-in web-server segfaults on startup). (Remi)
 
 - Date:
   . Fixed bug #67308 (Serialize of DateTime truncates fractions of second).
@@ -30,6 +30,9 @@ PHP                                                                        NEWS
     (CVE-2014-3480) (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
     check). (CVE-2014-3487) (Francisco Alonso, Jan Kaluza, Remi)
+
+- Intl:
+  . Fixed bug #67349 (Locale::parseLocale Double Free). (Stas)
 
 - Network:
   . Fixed bug #67432 (Fix potential segfault in dns_get_record()). 
