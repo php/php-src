@@ -603,7 +603,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 
 		if (rv && zend_is_true(rv)) {
 			zval_ptr_dtor(&rv);
-			if (check_empty == 2) {
+			if (check_empty != 1) {
 				return 1;
 			} else if (intern->fptr_offset_get) {
 				value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R TSRMLS_CC);
@@ -629,6 +629,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 					return 0;
 				}
 				break;
+
 			case IS_DOUBLE:
 			case IS_RESOURCE:
 			case IS_BOOL: 
@@ -646,28 +647,20 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 					return 0;
 				}
 				break;
+
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
 				return 0;
 		}
 
-		if (check_inherited && intern->fptr_offset_get) {
+		if (check_empty && check_inherited && intern->fptr_offset_get) {
 			value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R TSRMLS_CC);
 		} else {
 			value = *tmp;
 		}
 	}
 
-	switch (check_empty) {
-		case 0:
-			return Z_TYPE_P(value) != IS_NULL;
-		case 2:
-			return 1;
-		case 1:
-			return zend_is_true(value);
-	}
-
-	return 0;
+	return check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
 } /* }}} */
 
 static int spl_array_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC) /* {{{ */
@@ -938,7 +931,14 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht TSR
 	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
 		do {
 			if (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 0, &intern->pos) == HASH_KEY_IS_STRING) {
-				if (!string_length || string_key[0]) {
+				/* zend_hash_get_current_key_ex() should never set
+				 * string_length to 0 when returning HASH_KEY_IS_STRING, but we
+				 * may as well be defensive and consider that successful.
+				 * Beyond that, we're looking for protected keys (which will
+				 * have a null byte at string_key[0]), but want to avoid
+				 * skipping completely empty keys (which will also have the
+				 * null byte, but a string_length of 1). */
+				if (!string_length || string_key[0] || string_length == 1) {
 					return SUCCESS;
 				}
 			} else {
