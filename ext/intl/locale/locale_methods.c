@@ -269,8 +269,7 @@ static char* get_icu_value_internal( char* loc_name , char* tag_name, int* resul
 		grOffset =  findOffset( LOC_GRANDFATHERED , loc_name );
 		if( grOffset >= 0 ){
 			if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
-				tag_value = estrdup(loc_name);
-				return tag_value;
+				return estrdup(loc_name);
 			} else {
 				/* Since Grandfathered , no value , do nothing , retutn NULL */
 				return NULL;
@@ -280,8 +279,8 @@ static char* get_icu_value_internal( char* loc_name , char* tag_name, int* resul
 	if( fromParseLocale==1 ){
 		/* Handle singletons */
 		if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
-			if( strlen(loc_name)>1 && (isIDPrefix(loc_name) ==1 ) ){
-				return loc_name;
+			if( strlen(loc_name)>1 && isIDPrefix(loc_name) ){
+				return estrdup(loc_name);
 			}
 		}
 
