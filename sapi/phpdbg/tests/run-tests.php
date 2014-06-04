@@ -284,6 +284,8 @@ namespace phpdbg\testing {
 				$test->purpose, 
 				$result ? "PASS" : "FAIL",
 				PHP_EOL);
+
+			return $result;
 		}
 		
 		protected $config;
@@ -426,7 +428,7 @@ namespace phpdbg\testing {
 		*/
 		public function getResult() {
 			$options = sprintf(
-				'-i%s -qb', $this->file);
+				'-i%s -nqb', $this->file);
 			
 			if ($this->options) {
 				$options = sprintf(
@@ -492,13 +494,18 @@ namespace phpdbg\testing {
 		*
 		*/
 		protected function writeDiff() {
-			$diff = sprintf(
-				'%s/%s.diff',
-				dirname($this->file), basename($this->file));
-				
 			if (count($this->diff['wants'])) {
-				if (!in_array('nodiff', $this->config['flags'])) {
-					if (($diff = fopen($diff, 'w+'))) {
+				if (!$this->config->hasFlag('nodiff')) {
+					if ($this->config->hasFlag('diff2stdout')) {
+						$difffile = "php://stdout";
+						file_put_contents($difffile, "====DIFF====\n");
+					} else {
+						$difffile = sprintf(
+							'%s/%s.diff',
+							dirname($this->file), basename($this->file));
+					}
+				
+					if (($diff = fopen($difffile, 'w+'))) {
 
 						foreach ($this->diff['wants'] as $line => $want) {
 							$got = $this->diff['gets'][$line];
@@ -552,6 +559,9 @@ namespace {
 
 	$cwd = dirname(__FILE__);
 	$cmd = $_SERVER['argv'];
+
+	$retval = 0;
+
 	{
 		$config = new TestsConfiguration(array(
 			'exec' => realpath(array_shift($cmd)),
@@ -571,7 +581,7 @@ namespace {
 			$tests->logPath($path);
 
 			foreach ($tests->findTests($path) as $test) {
-				$tests->logTest($path, $test);
+				$retval |= !$tests->logTest($path, $test);
 			}
 		
 			$tests->logPathStats($path);
@@ -579,5 +589,7 @@ namespace {
 		
 		$tests->logStats();
 	}
+
+	die($retval);
 }
 ?>
