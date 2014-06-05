@@ -188,7 +188,7 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval TSRMLS
 
 	   it should return whether the call was successfull or not
 	*/
-	SEPARATE_ARG_IF_REF(member);
+	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
 
 	zend_call_method_with_1_params(object, ce, &ce->__get, ZEND_GET_FUNC_NAME, retval, member);
 
@@ -202,7 +202,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	int result;
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
-	SEPARATE_ARG_IF_REF(member);
+	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
 	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 
 	/* __set handler is called with two arguments:
@@ -234,7 +234,7 @@ static void zend_std_call_unsetter(zval *object, zval *member TSRMLS_DC) /* {{{ 
 	      property name
 	*/
 
-	SEPARATE_ARG_IF_REF(member);
+	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
 
 	zend_call_method_with_1_params(object, ce, &ce->__unset, ZEND_UNSET_FUNC_NAME, NULL, member);
 
@@ -252,7 +252,7 @@ static void zend_std_call_issetter(zval *object, zval *member, zval *retval TSRM
 	   it should return whether the property is set or not
 	*/
 
-	SEPARATE_ARG_IF_REF(member);
+	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
 
 	zend_call_method_with_1_params(object, ce, &ce->__isset, ZEND_ISSET_FUNC_NAME, retval, member);
 

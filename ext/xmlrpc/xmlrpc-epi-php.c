@@ -775,11 +775,9 @@ PHP_FUNCTION(xmlrpc_decode_request)
 	zval *method;
 	int xml_len, encoding_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|s", &xml, &xml_len, &method, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|s", &xml, &xml_len, &method, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
-
-	ZVAL_DEREF(method);
 
 	if (USED_RET()) {
 		decode_request_worker(xml, xml_len, encoding_len ? encoding : NULL, method, return_value);
@@ -1377,11 +1375,9 @@ PHP_FUNCTION(xmlrpc_set_type)
 	int type_len;
 	XMLRPC_VALUE_TYPE vtype;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &arg, &type, &type_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/s", &arg, &type, &type_len) == FAILURE) {
 		return;
 	}
-
-	ZVAL_DEREF(arg);
 
 	vtype = xmlrpc_str_as_type(type);
 	if (vtype != xmlrpc_none) {

@@ -2059,13 +2059,12 @@ PHP_FUNCTION(mb_parse_str)
 	const mbfl_encoding *detected;
 
 	track_vars_array = NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
 		return;
 	}
 
 	if (track_vars_array != NULL) {
 		/* Clear out the array */
-		ZVAL_DEREF(track_vars_array);
 		zval_dtor(track_vars_array);
 		array_init(track_vars_array);
 	}
@@ -3600,6 +3599,7 @@ PHP_FUNCTION(mb_convert_variables)
 				if (stack_level <= 0) {
 					var = &args[n++];
 					ZVAL_DEREF(var);
+					SEPARATE_ZVAL_NOREF(var);
 					if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 						target_hash = HASH_OF(var);
 						if (target_hash != NULL) {
@@ -3686,6 +3686,7 @@ detect_end:
 			if (stack_level <= 0) {
 				var = &args[n++];
 				ZVAL_DEREF(var);
+				SEPARATE_ZVAL_NOREF(var);
 				if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 					target_hash = HASH_OF(var);
 					if (target_hash != NULL) {

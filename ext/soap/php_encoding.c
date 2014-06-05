@@ -360,7 +360,6 @@ static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 			    !Z_REFCOUNTED_P(data_ptr) ||
 			    Z_COUNTED_P(data) != Z_COUNTED_P(data_ptr)) {
 				zval_ptr_dtor(data);
-//???			    SEPARATE_ZVAL_TO_MAKE_IS_REF(data_ptr);
 				ZVAL_COPY(data, data_ptr);
 				return 1;
 			}

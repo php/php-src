@@ -132,7 +132,7 @@ again:
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
-			if (ZEND_HASH_APPLY_PROTECTION(myht) && ++myht->u.v.nApplyCount > 1) {
+			if (level > 1 && ZEND_HASH_APPLY_PROTECTION(myht) && ++myht->u.v.nApplyCount > 1) {
 				PUTS("*RECURSION*\n");
 				--myht->u.v.nApplyCount;
 				return;
@@ -143,7 +143,7 @@ again:
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 				php_array_element_dump(val, num, key, level TSRMLS_CC);
 			} ZEND_HASH_FOREACH_END();
-			if (ZEND_HASH_APPLY_PROTECTION(myht)) {
+			if (level > 1 && ZEND_HASH_APPLY_PROTECTION(myht)) {
 				--myht->u.v.nApplyCount;
 			}
 			if (is_temp) {
@@ -303,7 +303,7 @@ again:
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_P(struc);
-		if (ZEND_HASH_APPLY_PROTECTION(myht) && myht->u.v.nApplyCount++ > 1) {
+		if (level > 1 && ZEND_HASH_APPLY_PROTECTION(myht) && myht->u.v.nApplyCount++ > 1) {
 			myht->u.v.nApplyCount--;
 			PUTS("*RECURSION*\n");
 			return;
@@ -312,7 +312,7 @@ again:
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level TSRMLS_CC);
 		} ZEND_HASH_FOREACH_END();
-		if (ZEND_HASH_APPLY_PROTECTION(myht)) {
+		if (level > 1 && ZEND_HASH_APPLY_PROTECTION(myht)) {
 			myht->u.v.nApplyCount--;
 		}
 		if (is_temp) {
@@ -1018,7 +1018,7 @@ PHP_FUNCTION(unserialize)
 	php_unserialize_data_t var_hash;
 	zval *consumed = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &buf, &buf_len, &consumed) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &buf, &buf_len, &consumed) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1038,9 +1038,9 @@ PHP_FUNCTION(unserialize)
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
-	if (consumed && Z_ISREF_P(consumed)) {
-		zval_dtor(Z_REFVAL_P(consumed));
-		ZVAL_LONG(Z_REFVAL_P(consumed), ((char*)p) - buf);
+	if (consumed) {
+		zval_dtor(consumed);
+		ZVAL_LONG(consumed, ((char*)p) - buf);
 	}
 }
 /* }}} */

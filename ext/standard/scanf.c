@@ -742,11 +742,9 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = &args[objIndex++];
-						zval_dtor(Z_REFVAL_P(current));
-						ZVAL_LONG(Z_REFVAL_P(current), (long)(string - baseString) );
-//						Z_SET_REFCOUNT_P(current, refcount);
-//???					Z_SET_ISREF_P(current);
+						current = Z_REFVAL(args[objIndex++]);
+						zval_ptr_dtor(current);
+						ZVAL_LONG(current, (long)(string - baseString) );
 					} else {
 						add_index_long(return_value, objIndex++, string - baseString);
 					}
@@ -863,11 +861,9 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = &args[objIndex++];
-						zval_dtor(Z_REFVAL_P(current));
-						ZVAL_STRINGL(Z_REFVAL_P(current), string, end-string);
-//???						Z_SET_REFCOUNT_P(current, refcount);
-//???						Z_SET_ISREF_PP(current);
+						current = Z_REFVAL(args[objIndex++]);
+						zval_ptr_dtor(current);
+						ZVAL_STRINGL(current, string, end-string);
 					} else {
 						add_index_stringl(return_value, objIndex++, string, end-string);
 					}
@@ -906,9 +902,9 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = &args[objIndex++];
-						zval_dtor(Z_REFVAL_P(current));
-						ZVAL_STRINGL(Z_REFVAL_P(current), string, end-string);
+						current = Z_REFVAL(args[objIndex++]);
+						zval_ptr_dtor(current);
+						ZVAL_STRINGL(current, string, end-string);
 					} else {
 						add_index_stringl(return_value, objIndex++, string, end-string);
 					}
@@ -1060,9 +1056,9 @@ addToInt:
 							break;
 						} else if (numVars) {
 						  /* change passed value type to string */
-							current = &args[objIndex++];
-							zval_dtor(Z_REFVAL_P(current));
-							ZVAL_STRING(Z_REFVAL_P(current), buf);
+							current = Z_REFVAL(args[objIndex++]);
+							zval_ptr_dtor(current);
+							ZVAL_STRING(current, buf);
 						} else {
 							add_index_string(return_value, objIndex++, buf);
 						}
@@ -1070,9 +1066,9 @@ addToInt:
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {
-							current = &args[objIndex++];
-							zval_dtor(Z_REFVAL_P(current));
-							ZVAL_LONG(Z_REFVAL_P(current), value);
+							current = Z_REFVAL(args[objIndex++]);
+							zval_ptr_dtor(current);
+							ZVAL_LONG(current, value);
 						} else {
 							add_index_long(return_value, objIndex++, value);
 						}
@@ -1175,9 +1171,9 @@ addToFloat:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = &args[objIndex++];
-						zval_dtor(Z_REFVAL_P(current));
-						ZVAL_DOUBLE(Z_REFVAL_P(current), dvalue);
+						current = Z_REFVAL(args[objIndex++]);
+						zval_ptr_dtor(current);
+						ZVAL_DOUBLE(current, dvalue);
 					} else {
 						add_index_double(return_value, objIndex++, dvalue );
 					}

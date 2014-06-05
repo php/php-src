@@ -2264,25 +2264,21 @@ PHP_FUNCTION(substr_replace)
 	HashPosition pos_from, pos_repl, pos_len;
 	zval *tmp_str = NULL, *tmp_from = NULL, *tmp_repl = NULL, *tmp_len= NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|z", &str, &repl, &from, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|z/", &str, &repl, &from, &len) == FAILURE) {
 		return;
 	}
 
 	if (Z_TYPE_P(str) != IS_ARRAY) {
-		SEPARATE_ZVAL_IF_REF(str);
 		convert_to_string_ex(str);
 	}
 	if (Z_TYPE_P(repl) != IS_ARRAY) {
-		SEPARATE_ZVAL_IF_REF(repl);
 		convert_to_string_ex(repl);
 	}
 	if (Z_TYPE_P(from) != IS_ARRAY) {
-		SEPARATE_ZVAL_IF_REF(from);
 		convert_to_long_ex(from);
 	}
 
 	if (argc > 3) {
-		SEPARATE_ZVAL(len);
 		if (Z_TYPE_P(len) != IS_ARRAY) {
 			l = zval_get_long(len);
 		}
@@ -3014,12 +3010,11 @@ PHP_FUNCTION(similar_text)
 	int sim;
 	int t1_len, t2_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|z", &t1, &t1_len, &t2, &t2_len, &percent) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|z/", &t1, &t1_len, &t2, &t2_len, &percent) == FAILURE) {
 		return;
 	}
 
 	if (ac > 2) {
-		percent = Z_REFVAL_P(percent);
 		convert_to_double_ex(percent);
 	}
 
@@ -3727,7 +3722,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	int count = 0;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|z", &search, &replace, &subject, &zcount) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|z/", &search, &replace, &subject, &zcount) == FAILURE) {
 		return;
 	}
 
@@ -3767,8 +3762,8 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		php_str_replace_in_subject(search, replace, subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL TSRMLS_CC);
 	}
 	if (argc > 3) {
-		zval_dtor(Z_REFVAL_P(zcount));
-		ZVAL_LONG(Z_REFVAL_P(zcount), count);
+		zval_dtor(zcount);
+		ZVAL_LONG(zcount, count);
 	}
 }
 /* }}} */
@@ -4218,7 +4213,7 @@ PHP_FUNCTION(parse_str)
 	char *res = NULL;
 	int arglen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &arg, &arglen, &arrayArg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &arg, &arglen, &arrayArg) == FAILURE) {
 		return;
 	}
 
@@ -4235,11 +4230,10 @@ PHP_FUNCTION(parse_str)
 	} else 	{
 		zval ret;
 
+		/* Clear out the array that was passed in. */
+		zval_dtor(arrayArg);
 		array_init(&ret);
 		sapi_module.treat_data(PARSE_STRING, res, &ret TSRMLS_CC);
-		/* Clear out the array that was passed in. */
-		ZVAL_DEREF(arrayArg);
-		zval_dtor(arrayArg);
 		ZVAL_COPY_VALUE(arrayArg, &ret);
 	}
 }

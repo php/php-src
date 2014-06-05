@@ -2862,7 +2862,7 @@ PHP_METHOD(SoapClient, __call)
 	zend_bool free_soap_headers = 0;
 	zval *this_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|a!zz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|a!zz/",
 		&function, &function_len, &args, &options, &headers, &output_headers) == FAILURE) {
 		return;
 	}

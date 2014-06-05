@@ -398,8 +398,10 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 
 		z_format = &args[format_offset];
 		array = &args[1 + format_offset];
-		SEPARATE_ZVAL(array);
-		convert_to_array_ex(array);
+		if (Z_TYPE_P(array) != IS_ARRAY) {
+			SEPARATE_ZVAL(array);
+			convert_to_array(array);
+		}
 		
 		argc = 1 + zend_hash_num_elements(Z_ARRVAL_P(array));
 		newargs = (zval *)safe_emalloc(argc, sizeof(zval), 0);
@@ -421,7 +423,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 
 	while (inpos < Z_STRLEN(args[format_offset])) {
 		int expprec = 0;
-		zval tmp;
+		zval *tmp;
 
 		PRINTF_DEBUG(("sprintf: format[%d]='%c'\n", inpos, format[inpos]));
 		PRINTF_DEBUG(("sprintf: outpos=%d\n", outpos));
@@ -551,17 +553,10 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 			}
 			PRINTF_DEBUG(("sprintf: format character='%c'\n", format[inpos]));
 			/* now we expect to find a type specifier */
-			//???? We don't hold zval** in args anymore
-			//if (multiuse) {
-				ZVAL_DUP(&tmp, &args[argnum]);
-			//} else {
-			//	SEPARATE_ZVAL(&args[argnum]);
-			//	ZVAL_COPY_VALUE(&tmp, &args[argnum]);
-			//}
-
+			tmp = &args[argnum];
 			switch (format[inpos]) {
 				case 's': {
-					zend_string *str = zval_get_string(&tmp);
+					zend_string *str = zval_get_string(tmp);
 					php_sprintf_appendstring(&result, &outpos,
 											 str->val,
 											 width, precision, padding,
@@ -573,17 +568,15 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 				}
 
 				case 'd':
-					convert_to_long(&tmp);
 					php_sprintf_appendint(&result, &outpos,
-										  Z_LVAL(tmp),
+										  zval_get_long(tmp),
 										  width, padding, alignment,
 										  always_sign);
 					break;
 
 				case 'u':
-					convert_to_long(&tmp);
 					php_sprintf_appenduint(&result, &outpos,
-										  Z_LVAL(tmp),
+										  zval_get_long(tmp),
 										  width, padding, alignment);
 					break;
 
@@ -593,9 +586,8 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 				case 'E':
 				case 'f':
 				case 'F':
-					convert_to_double(&tmp);
 					php_sprintf_appenddouble(&result, &outpos,
-											 Z_DVAL(tmp),
+											 zval_get_double(tmp),
 											 width, padding, alignment,
 											 precision, adjusting,
 											 format[inpos], always_sign
@@ -603,39 +595,34 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 					break;
 					
 				case 'c':
-					convert_to_long(&tmp);
 					php_sprintf_appendchar(&result, &outpos,
-										(char) Z_LVAL(tmp) TSRMLS_CC);
+										(char) zval_get_long(tmp) TSRMLS_CC);
 					break;
 
 				case 'o':
-					convert_to_long(&tmp);
 					php_sprintf_append2n(&result, &outpos,
-										 Z_LVAL(tmp),
+										 zval_get_long(tmp),
 										 width, padding, alignment, 3,
 										 hexchars, expprec);
 					break;
 
 				case 'x':
-					convert_to_long(&tmp);
 					php_sprintf_append2n(&result, &outpos,
-										 Z_LVAL(tmp),
+										 zval_get_long(tmp),
 										 width, padding, alignment, 4,
 										 hexchars, expprec);
 					break;
 
 				case 'X':
-					convert_to_long(&tmp);
 					php_sprintf_append2n(&result, &outpos,
-										 Z_LVAL(tmp),
+										 zval_get_long(tmp),
 										 width, padding, alignment, 4,
 										 HEXCHARS, expprec);
 					break;
 
 				case 'b':
-					convert_to_long(&tmp);
 					php_sprintf_append2n(&result, &outpos,
-										 Z_LVAL(tmp),
+										 zval_get_long(tmp),
 										 width, padding, alignment, 1,
 										 hexchars, expprec);
 					break;
@@ -647,7 +634,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 				default:
 					break;
 			}
-			zval_ptr_dtor(&tmp);
 			inpos++;
 		}
 	}

@@ -3793,7 +3793,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 				}
 			}
 			for (i = 0; i < parent_ce->default_static_members_count; i++) {
-				SEPARATE_ZVAL_TO_MAKE_IS_REF(&CE_STATIC_MEMBERS(parent_ce)[i]);
+				ZVAL_MAKE_REF(&CE_STATIC_MEMBERS(parent_ce)[i]);
 				ce->default_static_members_table[i] = CE_STATIC_MEMBERS(parent_ce)[i];
 				Z_ADDREF(ce->default_static_members_table[i]);
 			}
@@ -3811,7 +3811,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 				}
 			}
 			for (i = 0; i < parent_ce->default_static_members_count; i++) {
-				SEPARATE_ZVAL_TO_MAKE_IS_REF(&parent_ce->default_static_members_table[i]);
+				ZVAL_MAKE_REF(&parent_ce->default_static_members_table[i]);
 				ce->default_static_members_table[i] = parent_ce->default_static_members_table[i];
 				Z_ADDREF(ce->default_static_members_table[i]);
 			}
@@ -3896,9 +3896,7 @@ static int do_inherit_iface_constant(zval *zv TSRMLS_DC, int num_args, va_list a
 	zend_class_entry *iface = va_arg(args, zend_class_entry *);
 
 	if (hash_key->key && do_inherit_constant_check(&ce->constants_table, zv, hash_key, iface)) {
-		if (!Z_ISREF_P(zv)) {
-			ZVAL_NEW_REF(zv, zv);
-		}
+		ZVAL_MAKE_REF(zv);
 		Z_ADDREF_P(zv);
 		zend_hash_update(&ce->constants_table, hash_key->key, zv);
 	}
@@ -7524,6 +7522,9 @@ void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ 
 	if (ast->kind == ZEND_CONST) {
 		ZVAL_COPY_VALUE(&result->u.constant, &ast->u.val);
 		efree(ast);
+		if (Z_TYPE(result->u.constant) == IS_ARRAY) {
+			zend_make_immutable_array_r(&result->u.constant TSRMLS_CC);			
+		}
 	} else if (zend_ast_is_ct_constant(ast)) {
 		zend_ast_evaluate(&result->u.constant, ast, NULL TSRMLS_CC);
 		zend_ast_destroy(ast);

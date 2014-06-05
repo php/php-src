@@ -542,7 +542,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 	long			  flags = 0;		/* Match control flags */
 	long			  start_offset = 0;	/* Where the new search starts */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ss|zll", &regex,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ss|z/ll", &regex,
 							  &subject, &subject_len, &subpats, &flags, &start_offset) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -552,9 +552,6 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
-	if (subpats) {
-		ZVAL_DEREF(subpats);
-	}
 	php_pcre_match_impl(pce, subject, subject_len, return_value, subpats, 
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset TSRMLS_CC);
 }
@@ -1355,7 +1352,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	int				 replace_count=0, old_replace_count;
 	
 	/* Get function parameters and do error-checking. */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|lz", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|lz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
 		return;
 	}
 	
@@ -1419,7 +1416,6 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		}
 	}
 	if (ZEND_NUM_ARGS() > 4) {
-		ZVAL_DEREF(zcount);
 		zval_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}

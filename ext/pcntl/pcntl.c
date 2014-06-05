@@ -574,10 +574,9 @@ PHP_FUNCTION(pcntl_waitpid)
 	int status;
 	pid_t child_id;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|l", &pid, &z_status, &options) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz/|l", &pid, &z_status, &options) == FAILURE)
 		return;
 	
-	ZVAL_DEREF(z_status);
 	convert_to_long_ex(z_status);
 
 	status = Z_LVAL_P(z_status);
@@ -603,10 +602,9 @@ PHP_FUNCTION(pcntl_wait)
 	int status;
 	pid_t child_id;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &z_status, &options) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/|l", &z_status, &options) == FAILURE)
 		return;
 	
-	ZVAL_DEREF(z_status);
 	convert_to_long_ex(z_status);
 
 	status = Z_LVAL_P(z_status);
@@ -918,7 +916,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	zval         *user_set, *user_oldset = NULL, *user_signo;
 	sigset_t      set, oldset;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la|z", &how, &user_set, &user_oldset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la|z/", &how, &user_set, &user_oldset) == FAILURE) {
 		return;
 	}
 
@@ -948,7 +946,6 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	}
 
 	if (user_oldset != NULL) {
-		ZVAL_DEREF(user_oldset);
 		if (Z_TYPE_P(user_oldset) != IS_ARRAY) {
 			zval_dtor(user_oldset);
 			array_init(user_oldset);
@@ -979,11 +976,11 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	struct timespec  timeout;
 
 	if (timedwait) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|zll", &user_set, &user_siginfo, &tv_sec, &tv_nsec) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|z/ll", &user_set, &user_siginfo, &tv_sec, &tv_nsec) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|z", &user_set, &user_siginfo) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|z/", &user_set, &user_siginfo) == FAILURE) {
 			return;
 		}
 	}
@@ -1028,7 +1025,6 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	}
 
 	if (signo > 0 && user_siginfo) {
-		ZVAL_DEREF(user_siginfo);
 		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
 			zval_dtor(user_siginfo);
 			array_init(user_siginfo);

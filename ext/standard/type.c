@@ -100,6 +100,7 @@ PHP_FUNCTION(settype)
 	}
 
 	ZVAL_DEREF(var);
+	SEPARATE_ZVAL_NOREF(var);
 	if (!strcasecmp(type, "integer")) {
 		convert_to_long(var);
 	} else if (!strcasecmp(type, "int")) {
@@ -378,7 +379,7 @@ PHP_FUNCTION(is_callable)
 	zend_bool syntax_only = 0;
 	int check_flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|bz", &var,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|bz/", &var,
 							  &syntax_only, &callable_name) == FAILURE) {
 		return;
 	}
@@ -387,7 +388,6 @@ PHP_FUNCTION(is_callable)
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
 	if (ZEND_NUM_ARGS() > 2) {
-		ZVAL_DEREF(callable_name);
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error TSRMLS_CC);
 		zval_dtor(callable_name);
 		//??? is it necessary to be consistent with old PHP ("\0" support)

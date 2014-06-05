@@ -217,7 +217,7 @@ PHP_FUNCTION(socket_recvmsg)
 	struct err_s	err = {0};
 
 	//ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra/|l",
 			&zsocket, &zmsg, &flags) == FAILURE) {
 		return;
 	}

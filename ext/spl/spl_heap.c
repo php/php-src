@@ -616,7 +616,7 @@ SPL_METHOD(SplHeap, insert)
 		return;
 	}
 
-	SEPARATE_ARG_IF_REF(value);
+	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	spl_ptr_heap_insert(intern->heap, value, getThis() TSRMLS_CC);
 
 	RETURN_TRUE;
@@ -670,8 +670,8 @@ SPL_METHOD(SplPriorityQueue, insert)
 		return;
 	}
 
-	SEPARATE_ARG_IF_REF(data);
-	SEPARATE_ARG_IF_REF(priority);
+	if (Z_REFCOUNTED_P(data)) Z_ADDREF_P(data);
+	if (Z_REFCOUNTED_P(priority)) Z_ADDREF_P(priority);
 
 	array_init(&elem);
 	add_assoc_zval_ex(&elem, "data", sizeof("data") - 1, data);

@@ -305,7 +305,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *string = NULL;
 	int   argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "zs|z", &regex, &findin, &findin_len, &array) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "zs|z/", &regex, &findin, &findin_len, &array) == FAILURE) {
 		return;
 	}
 
@@ -350,10 +350,6 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		RETURN_FALSE;
 	}
 	match_len = 1;
-
-	if (array) {
-		ZVAL_DEREF(array);
-	}
 
 	if (array && err != REG_NOMATCH) {
 		match_len = (int) (subs[0].rm_eo - subs[0].rm_so);

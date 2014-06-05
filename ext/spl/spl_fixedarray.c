@@ -405,8 +405,8 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 		if (!Z_ISUNDEF(intern->array->elements[index])) {
 			zval_ptr_dtor(&(intern->array->elements[index]));
 		}
-		SEPARATE_ARG_IF_REF(value);
-		ZVAL_COPY_VALUE(&intern->array->elements[index], value);
+		ZVAL_DEREF(value);
+		ZVAL_COPY(&intern->array->elements[index], value);
 	}
 }
 /* }}} */
@@ -708,8 +708,8 @@ SPL_METHOD(SplFixedArray, fromArray)
 		spl_fixedarray_init(array, tmp TSRMLS_CC);
 
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_index, str_index, element) {
-			SEPARATE_ARG_IF_REF(element);
-			ZVAL_COPY_VALUE(&array->elements[num_index], element);
+			ZVAL_DEREF(element);
+			ZVAL_COPY(&array->elements[num_index], element);
 		} ZEND_HASH_FOREACH_END();
 
 	} else if (num > 0 && !save_indexes) {
@@ -719,8 +719,8 @@ SPL_METHOD(SplFixedArray, fromArray)
 		spl_fixedarray_init(array, num TSRMLS_CC);
 		
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), element) {
-			SEPARATE_ARG_IF_REF(element);
-			ZVAL_COPY_VALUE(&array->elements[i], element);
+			ZVAL_DEREF(element);
+			ZVAL_COPY(&array->elements[i], element);
 			i++;
 		} ZEND_HASH_FOREACH_END();
 	} else {

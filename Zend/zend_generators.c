@@ -239,7 +239,7 @@ static int copy_closure_static_var(zval *var TSRMLS_DC, int num_args, va_list ar
 {
 	HashTable *target = va_arg(args, HashTable *);
 
-	SEPARATE_ZVAL_TO_MAKE_IS_REF(var);
+	ZVAL_MAKE_REF(var);
 	Z_ADDREF_P(var);
 	zend_hash_update(target, key->key, var);
 	return 0;

@@ -707,6 +707,13 @@ END_EXTERN_C()
 		}												\
 	} while (0)
 
+#define ZVAL_MAKE_REF(zv) do {							\
+		zval *__zv = (zv);								\
+		if (!Z_ISREF_P(__zv)) {							\
+			ZVAL_NEW_REF(__zv, __zv);					\
+		}												\
+	} while (0)
+
 #define ZVAL_UNREF(z) do {								\
 		zval *_z = (z);									\
 		zend_reference *ref;							\
@@ -714,6 +721,38 @@ END_EXTERN_C()
 		ref = Z_REF_P(_z);								\
 		ZVAL_COPY_VALUE(_z, &ref->val);					\
 		efree(ref);										\
+	} while (0)
+
+#define SEPARATE_STRING(zv) do {						\
+		zval *_zv = (zv);								\
+		if (Z_REFCOUNTED_P(_zv) &&						\
+		    Z_REFCOUNT_P(_zv) > 1) {					\
+			Z_DELREF_P(_zv);							\
+			zval_copy_ctor_func(_zv);					\
+		}												\
+	} while (0)
+
+#define SEPARATE_ARRAY(zv) do {							\
+		zval *_zv = (zv);								\
+		if (Z_IMMUTABLE_P(_zv)) {						\
+			zval_copy_ctor_func(_zv);					\
+		} else if (Z_REFCOUNT_P(_zv) > 1) {				\
+			Z_DELREF_P(_zv);							\
+			zval_copy_ctor_func(_zv);					\
+		}												\
+	} while (0)
+
+#define SEPARATE_ZVAL_NOREF(zv) do {					\
+		zval *_zv = (zv);								\
+		if (Z_COPYABLE_P(_zv) ||						\
+		    Z_IMMUTABLE_P(_zv)) {						\
+			if (Z_IMMUTABLE_P(_zv)) {					\
+				zval_copy_ctor_func(_zv);				\
+			} else if (Z_REFCOUNT_P(_zv) > 1) {			\
+				Z_DELREF_P(_zv);						\
+				zval_copy_ctor_func(_zv);				\
+			}											\
+		}												\
 	} while (0)
 
 #define SEPARATE_ZVAL(zv) do {							\
@@ -749,38 +788,10 @@ END_EXTERN_C()
 		}												\
 	} while (0)
 
-#define SEPARATE_ZVAL_IF_REF(zv) do {					\
-		zval *__zv = (zv);								\
-		if (Z_ISREF_P(__zv)) {							\
-			if (Z_REFCOUNT_P(__zv) == 1) {				\
-				ZVAL_UNREF(__zv);						\
-			} else {									\
-				Z_DELREF_P(__zv);						\
-				ZVAL_DUP(__zv, Z_REFVAL_P(__zv));		\
-			}											\
-		}												\
-	} while (0)
-
-#define SEPARATE_ZVAL_TO_MAKE_IS_REF(zv) do {			\
-		zval *__zv = (zv);								\
-		if (!Z_ISREF_P(__zv)) {							\
-		    if (Z_COPYABLE_P(__zv) &&					\
-			    Z_REFCOUNT_P(__zv) > 1) {				\
-				Z_DELREF_P(__zv);						\
-				zval_copy_ctor_func(__zv);				\
-			}											\
-			ZVAL_NEW_REF(__zv, __zv);					\
-		}												\
-	} while (0)
-
 #define SEPARATE_ARG_IF_REF(varptr) do { 				\
-		zval *_varptr = (varptr);						\
-		if (Z_ISREF_P(_varptr)) { 						\
-			zval tmp;									\
-			ZVAL_DUP(&tmp, Z_REFVAL_P(_varptr));		\
-			varptr = &tmp;								\
-		} else if (Z_REFCOUNTED_P(_varptr)) { 			\
-			Z_ADDREF_P(_varptr); 						\
+		ZVAL_DEREF(varptr);								\
+		if (Z_REFCOUNTED_P(varptr)) { 					\
+			Z_ADDREF_P(varptr); 						\
 		}												\
 	} while (0)
 

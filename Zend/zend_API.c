@@ -273,7 +273,7 @@ static int parse_arg_object_to_string(zval *arg, char **p, int *pl, int type TSR
 	}
 	/* Standard PHP objects */
 	if (Z_OBJ_HT_P(arg) == &std_object_handlers || !Z_OBJ_HANDLER_P(arg, cast_object)) {
-		SEPARATE_ZVAL_IF_NOT_REF(arg);
+		SEPARATE_ZVAL_NOREF(arg);
 		if (zend_std_cast_object_tostring(arg, arg, type TSRMLS_CC) == SUCCESS) {
 			*pl = Z_STRLEN_P(arg);
 			*p = Z_STRVAL_P(arg);
@@ -315,7 +315,7 @@ static int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS
 	}
 	/* Standard PHP objects */
 	if (Z_OBJ_HT_P(arg) == &std_object_handlers || !Z_OBJ_HANDLER_P(arg, cast_object)) {
-		SEPARATE_ZVAL_IF_NOT_REF(arg);
+		SEPARATE_ZVAL_NOREF(arg);
 		if (zend_std_cast_object_tostring(arg, arg, type TSRMLS_CC) == SUCCESS) {
 			*str = Z_STR_P(arg);
 			return SUCCESS;
@@ -350,9 +350,11 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 	zval *real_arg = arg;
 
 	/* scan through modifiers */
+	ZVAL_DEREF(arg);
 	while (1) {
 		if (*spec_walk == '/') {
-			SEPARATE_ZVAL_IF_NOT_REF(arg);
+			SEPARATE_ZVAL(arg);
+			real_arg = arg;
 		} else if (*spec_walk == '!') {
 			check_null = 1;
 		} else {
@@ -360,8 +362,6 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		}
 		spec_walk++;
 	}
-
-	ZVAL_DEREF(arg);
 
 	switch (c) {
 		case 'l':
@@ -486,12 +486,6 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_TRUE:
 						convert_to_string_ex(arg);
 					case IS_STRING:
-						if (UNEXPECTED(Z_ISREF_P(arg))) {
-							/* it's dangerous to return pointers to string
-							   buffer of referenced variable, because it can
-							   be clobbered throug magic callbacks */
-							SEPARATE_ZVAL(arg);
-						}
 						*p = Z_STRVAL_P(arg);
 						*pl = Z_STRLEN_P(arg);
 						if (c == 'p' && CHECK_ZVAL_NULL_PATH(arg)) {
@@ -533,12 +527,6 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_TRUE:
 						convert_to_string_ex(arg);
 					case IS_STRING:
-						if (UNEXPECTED(Z_ISREF_P(arg))) {
-							/* it's dangerous to return pointers to string
-							   buffer of referenced variable, because it can
-							   be clobbered throug magic callbacks */
-							SEPARATE_ZVAL(arg);
-						}
 						*str = Z_STR_P(arg);
 						if (c == 'P' && CHECK_ZVAL_NULL_PATH(arg)) {
 							return "a valid path";
@@ -2714,8 +2702,8 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_lengt
 
 	if (num_symbol_tables <= 0) return FAILURE;
 
-	if (is_ref && !Z_ISREF_P(symbol)) {
-		ZVAL_NEW_REF(symbol, symbol);
+	if (is_ref) {
+		ZVAL_MAKE_REF(symbol);
 	}
 
 	va_start(symbol_table_list, num_symbol_tables);

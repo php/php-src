@@ -344,7 +344,7 @@ PHP_FUNCTION(flock)
 	php_stream *stream;
 	long operation = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &arg1, &operation, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z/", &arg1, &operation, &arg3) == FAILURE) {
 		return;
 	}
 
@@ -356,16 +356,16 @@ PHP_FUNCTION(flock)
 		RETURN_FALSE;
 	}
 
-	if (arg3 && Z_ISREF_P(arg3)) {
-		convert_to_long_ex(Z_REFVAL_P(arg3));
-		Z_LVAL_P(Z_REFVAL_P(arg3)) = 0;
+	if (arg3) {
+		zval_dtor(arg3);
+		ZVAL_LONG(arg3, 0);
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
-		if (operation && errno == EWOULDBLOCK && arg3 && Z_ISREF_P(arg3)) {
-			Z_LVAL_P(Z_REFVAL_P(arg3)) = 1;
+		if (operation && errno == EWOULDBLOCK && arg3) {
+			ZVAL_LONG(arg3, 1);
 		}
 		RETURN_FALSE;
 	}

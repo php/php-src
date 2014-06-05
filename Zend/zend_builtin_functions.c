@@ -585,11 +585,10 @@ ZEND_FUNCTION(each)
 	HashTable *target_hash;
 	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/", &array) == FAILURE) {
 		return;
 	}
 
-	ZVAL_DEREF(array);
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
 		zend_error(E_WARNING,"Variable passed to each() is not an array or object");

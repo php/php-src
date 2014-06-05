@@ -210,7 +210,7 @@ ZEND_API void zval_add_ref(zval *p)
 {
 	if (Z_REFCOUNTED_P(p)) {
 		if (Z_ISREF_P(p) && Z_REFCOUNT_P(p) == 1) {
-			ZVAL_DUP(p, Z_REFVAL_P(p));
+			ZVAL_COPY(p, Z_REFVAL_P(p));
 		} else {
 			Z_ADDREF_P(p);
 		}
@@ -340,7 +340,7 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 				}
 			}
 			if (is_ref) {
-				SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
+				ZVAL_MAKE_REF(p);
 				Z_ADDREF_P(p);
 			} else if (Z_ISREF_P(p)) {
 				ZVAL_DUP(&tmp, Z_REFVAL_P(p));
