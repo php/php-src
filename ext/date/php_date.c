@@ -2582,6 +2582,8 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 	}
 	if (err && err->error_count) {
+		timelib_time_dtor(dateobj->time);
+		dateobj->time = 0;
 		return 0;
 	}
 
@@ -2729,9 +2731,7 @@ PHP_METHOD(DateTime, __construct)
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
-		if (!php_date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 1 TSRMLS_CC)) {
-			ZVAL_NULL(getThis());
-		}
+		php_date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 1 TSRMLS_CC);
 	}
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
