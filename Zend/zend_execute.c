@@ -579,22 +579,19 @@ static void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zval *arg
 			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "" TSRMLS_CC);
 		}
 	} else if (cur_arg_info->type_hint) {
-		switch(cur_arg_info->type_hint) {
-			case IS_ARRAY:
-				ZVAL_DEREF(arg);
-				if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
-					zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "" TSRMLS_CC);
-				}
-				break;
-
-			case IS_CALLABLE:
-				if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC) && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
-					zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "" TSRMLS_CC);
-				}
-				break;
-
-			default:
-				zend_error(E_ERROR, "Unknown typehint");
+		if (cur_arg_info->type_hint == IS_ARRAY) {
+			ZVAL_DEREF(arg);
+			if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
+				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "" TSRMLS_CC);
+			}
+		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
+			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC) && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
+				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "" TSRMLS_CC);
+			}
+#if ZEND_DEBUG
+		} else {
+			zend_error(E_ERROR, "Unknown typehint");
+#endif
 		}
 	}
 }
@@ -623,17 +620,14 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, zend_uint arg_
 		need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
 		zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "none", "" TSRMLS_CC);
 	} else if (cur_arg_info->type_hint) {
-		switch(cur_arg_info->type_hint) {
-			case IS_ARRAY:
-				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "" TSRMLS_CC);
-				break;
-
-			case IS_CALLABLE:
-				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", "none", "" TSRMLS_CC);
-				break;
-
-			default:
-				zend_error(E_ERROR, "Unknown typehint");
+		if (cur_arg_info->type_hint == IS_ARRAY) {
+			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "" TSRMLS_CC);
+		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
+			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", "none", "" TSRMLS_CC);
+#if ZEND_DEBUG
+		} else {
+			zend_error(E_ERROR, "Unknown typehint");
+#endif
 		}
 	}
 	return 0;
@@ -1407,17 +1401,14 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 		if (nest_levels>1) {
 			zend_op *brk_opline = &op_array->opcodes[jmp_to->brk];
 
-			switch (brk_opline->opcode) {
-				case ZEND_SWITCH_FREE:
-					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-						zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
-					}
-					break;
-				case ZEND_FREE:
-					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-						zval_dtor(EX_VAR(brk_opline->op1.var));
-					}
-					break;
+			if (brk_opline->opcode == ZEND_SWITCH_FREE) {
+				if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+					zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
+				}
+			} else if (brk_opline->opcode == ZEND_FREE) {
+				if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+					zval_dtor(EX_VAR(brk_opline->op1.var));
+				}
 			}
 		}
 		array_offset = jmp_to->parent;

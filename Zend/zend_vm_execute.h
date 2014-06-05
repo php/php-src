@@ -1265,17 +1265,14 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 			    catch_op_num >= EX(op_array)->brk_cont_array[i].brk) {
 				zend_op *brk_opline = &EX(op_array)->opcodes[EX(op_array)->brk_cont_array[i].brk];
 
-				switch (brk_opline->opcode) {
-					case ZEND_SWITCH_FREE:
-						if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-							zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
-						}
-						break;
-					case ZEND_FREE:
-						if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-							zval_dtor(EX_VAR(brk_opline->op1.var));
-						}
-						break;
+				if (brk_opline->opcode == ZEND_SWITCH_FREE) {
+					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+						zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
+					}
+				} else if (brk_opline->opcode == ZEND_FREE) {
+					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+						zval_dtor(EX_VAR(brk_opline->op1.var));
+					}
 				}
 			}
 		}
@@ -1707,17 +1704,14 @@ static int ZEND_FASTCALL  ZEND_GOTO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	brk_opline = EX(op_array)->opcodes + el->brk;
 
-	switch (brk_opline->opcode) {
-		case ZEND_SWITCH_FREE:
-			if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-				zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
-			}
-			break;
-		case ZEND_FREE:
-			if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-				zval_dtor(EX_VAR(brk_opline->op1.var));
-			}
-			break;
+	if (brk_opline->opcode == ZEND_SWITCH_FREE) {
+		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+			zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
+		}
+	} else if (brk_opline->opcode == ZEND_FREE) {
+		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+			zval_dtor(EX_VAR(brk_opline->op1.var));
+		}
 	}
 	ZEND_VM_JMP(opline->op1.jmp_addr);
 }
@@ -16042,49 +16036,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_VAR_CONST_HANDLER(ZEND
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_CONST != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_CONST != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -18033,49 +18026,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_VAR_TMP_HANDLER(ZEND_O
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_TMP_VAR != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_TMP_VAR != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -20389,49 +20381,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_VAR_VAR_HANDLER(ZEND_O
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_VAR != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_VAR != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -23622,49 +23613,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_VAR_CV_HANDLER(ZEND_OP
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_CV != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_CV != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -25091,49 +25081,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_UNUSED_CONST_HANDLER(Z
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_CONST != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_CONST != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -26377,49 +26366,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_UNUSED_TMP_HANDLER(ZEN
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_TMP_VAR != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_TMP_VAR != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -27665,49 +27653,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_UNUSED_VAR_HANDLER(ZEN
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_VAR != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_VAR != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -29468,49 +29455,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_CV != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_CV != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -32906,49 +32892,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_CONST_HANDLER(ZEND_
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_CONST != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_CONST != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -34780,49 +34765,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_TMP_HANDLER(ZEND_OP
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_TMP_VAR != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_TMP_VAR != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -37018,49 +37002,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_VAR_HANDLER(ZEND_OP
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_VAR != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_VAR != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -39999,49 +39982,48 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPC
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 isset_again:
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				goto num_index_prop;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-num_index_prop:
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (IS_CV != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						goto num_index_prop;
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (IS_CV != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index_prop;
 				}
+			}
 str_index_prop:
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				goto str_index_prop;
-				break;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_TRUE:
-				hval = 0;
-				goto num_index_prop;
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				goto num_index_prop;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				goto isset_again;
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_prop:
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					goto num_index_prop;
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					goto str_index_prop;
+				case IS_FALSE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_TRUE:
+					hval = 0;
+					goto num_index_prop;
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					goto num_index_prop;
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					goto isset_again;
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {

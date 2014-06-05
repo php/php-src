@@ -3460,17 +3460,14 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 
 	brk_opline = EX(op_array)->opcodes + el->brk;
 
-	switch (brk_opline->opcode) {
-		case ZEND_SWITCH_FREE:
-			if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-				zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
-			}
-			break;
-		case ZEND_FREE:
-			if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-				zval_dtor(EX_VAR(brk_opline->op1.var));
-			}
-			break;
+	if (brk_opline->opcode == ZEND_SWITCH_FREE) {
+		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+			zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
+		}
+	} else if (brk_opline->opcode == ZEND_FREE) {
+		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+			zval_dtor(EX_VAR(brk_opline->op1.var));
+		}
 	}
 	ZEND_VM_JMP(opline->op1.jmp_addr);
 }
@@ -4682,49 +4679,48 @@ ZEND_VM_HANDLER(115, ZEND_ISSET_ISEMPTY_DIM_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV
 
 	if (Z_TYPE_P(container) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(container);
-		zval *value = NULL;
+		zval *value;
 		zend_string *str;
 
 ZEND_VM_C_LABEL(isset_again):
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				ZEND_VM_C_GOTO(num_index_prop);
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-ZEND_VM_C_LABEL(num_index_prop):
-				value = zend_hash_index_find(ht, hval);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (OP2_TYPE != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						ZEND_VM_C_GOTO(num_index_prop);
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (OP2_TYPE != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					ZEND_VM_C_GOTO(num_index_prop);
 				}
+			}
 ZEND_VM_C_LABEL(str_index_prop):
-				value = zend_hash_find_ind(ht, str);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				ZEND_VM_C_GOTO(str_index_prop);
-				break;
-			case IS_FALSE:
-				hval = 0;
-				ZEND_VM_C_GOTO(num_index_prop);
-			case IS_TRUE:
-				hval = 0;
-				ZEND_VM_C_GOTO(num_index_prop);
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				ZEND_VM_C_GOTO(num_index_prop);
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				ZEND_VM_C_GOTO(isset_again);
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type in isset or empty");
-				break;
+			value = zend_hash_find_ind(ht, str);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+ZEND_VM_C_LABEL(num_index_prop):
+			value = zend_hash_index_find(ht, hval);
+		} else {
+			switch (Z_TYPE_P(offset)) {
+				case IS_DOUBLE:
+					hval = zend_dval_to_lval(Z_DVAL_P(offset));
+					ZEND_VM_C_GOTO(num_index_prop);
+				case IS_NULL:
+					str = STR_EMPTY_ALLOC();
+					ZEND_VM_C_GOTO(str_index_prop);
+				case IS_FALSE:
+					hval = 0;
+					ZEND_VM_C_GOTO(num_index_prop);
+				case IS_TRUE:
+					hval = 0;
+					ZEND_VM_C_GOTO(num_index_prop);
+				case IS_RESOURCE:
+					hval = Z_RES_HANDLE_P(offset);
+					ZEND_VM_C_GOTO(num_index_prop);
+				case IS_REFERENCE:
+					offset = Z_REFVAL_P(offset);
+					ZEND_VM_C_GOTO(isset_again);
+				default:
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
+					value = NULL;
+					break;
+			}
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -5255,17 +5251,14 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			    catch_op_num >= EX(op_array)->brk_cont_array[i].brk) {
 				zend_op *brk_opline = &EX(op_array)->opcodes[EX(op_array)->brk_cont_array[i].brk];
 
-				switch (brk_opline->opcode) {
-					case ZEND_SWITCH_FREE:
-						if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-							zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
-						}
-						break;
-					case ZEND_FREE:
-						if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-							zval_dtor(EX_VAR(brk_opline->op1.var));
-						}
-						break;
+				if (brk_opline->opcode == ZEND_SWITCH_FREE) {
+					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+						zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
+					}
+				} else if (brk_opline->opcode == ZEND_FREE) {
+					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+						zval_dtor(EX_VAR(brk_opline->op1.var));
+					}
 				}
 			}
 		}
