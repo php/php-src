@@ -1,5 +1,5 @@
 --TEST--
-Bug #67118 php-cgi crashes regularly on IIS 7
+Bug #67118 crashes in DateTime when this used after failed __construct
 --INI--
 date.timezone=Europe/Berlin
 --FILE--
@@ -11,17 +11,16 @@ class mydt extends datetime
 		if (!empty($tz) && !is_object($tz)) {
 			$tz = new DateTimeZone($tz);
 		}
-
-		@parent::__construct($time, $tz);
+		try {
+			@parent::__construct($time, $tz);
+		} catch (Exception $e) {
+			echo "Bad date" . $this->format("Y") . "\n";
+		}
 	}
 
 };
 
 new mydt("Funktionsansvarig rådgivning och juridik", "UTC");
+?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'DateTime::__construct(): Failed to parse time string (Funktionsansvarig rådgivning och juridik) at position 0 (F): The timezone could not be found in the database' in %sbug67118.php:%d
-Stack trace:
-#0 %sbug67118.php(%d): DateTime->__construct('Funktionsansvar...', Object(DateTimeZone))
-#1 %sbug67118.php(%d): mydt->__construct('Funktionsansvar...', 'UTC')
-#2 {main}
-  thrown in %sbug67118.php on line %d
+Fatal error: Call to a member function format() on a non-object in %sbug67118.php on line %d

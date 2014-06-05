@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf.c,v 1.53 2013/02/26 16:20:42 christos Exp $")
+FILE_RCSID("@(#)$File: cdf.c,v 1.55 2014/02/27 23:26:17 christos Exp $")
 #endif
 
 #include <assert.h>
@@ -365,10 +365,10 @@ cdf_read_short_sector(const cdf_stream_t *sst, void *buf, size_t offs,
 	size_t ss = CDF_SHORT_SEC_SIZE(h);
 	size_t pos = CDF_SHORT_SEC_POS(h, id);
 	assert(ss == len);
-	if (pos > CDF_SEC_SIZE(h) * sst->sst_len) {
+	if (pos + len > CDF_SEC_SIZE(h) * sst->sst_len) {
 		DPRINTF(("Out of bounds read %" SIZE_T_FORMAT "u > %"
 		    SIZE_T_FORMAT "u\n",
-		    pos, CDF_SEC_SIZE(h) * sst->sst_len));
+		    pos + len, CDF_SEC_SIZE(h) * sst->sst_len));
 		return -1;
 	}
 	(void)memcpy(((char *)buf) + offs,
@@ -688,11 +688,13 @@ out:
 
 int
 cdf_read_short_stream(const cdf_info_t *info, const cdf_header_t *h,
-    const cdf_sat_t *sat, const cdf_dir_t *dir, cdf_stream_t *scn)
+    const cdf_sat_t *sat, const cdf_dir_t *dir, cdf_stream_t *scn,
+    const cdf_directory_t **root)
 {
 	size_t i;
 	const cdf_directory_t *d;
 
+	*root = NULL;
 	for (i = 0; i < dir->dir_len; i++)
 		if (dir->dir_tab[i].d_type == CDF_DIR_TYPE_ROOT_STORAGE)
 			break;
@@ -701,6 +703,7 @@ cdf_read_short_stream(const cdf_info_t *info, const cdf_header_t *h,
 	if (i == dir->dir_len)
 		goto out;
 	d = &dir->dir_tab[i];
+	*root = d;
 
 	/* If the it is not there, just fake it; some docs don't have it */
 	if (d->d_stream_first_sector < 0)
