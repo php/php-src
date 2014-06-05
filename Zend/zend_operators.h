@@ -830,6 +830,21 @@ static zend_always_inline int fast_equal_check_function(zval *result, zval *op1,
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			return Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2));
 		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				return 1;
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					return 0;
+				} else {
+					return memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0;
+				}
+			} else {
+				zendi_smart_strcmp(result, op1, op2);
+				return Z_LVAL_P(result) == 0;
+			}
+		}
 	}
 	compare_function(result, op1, op2 TSRMLS_CC);
 	return Z_LVAL_P(result) == 0;
@@ -853,6 +868,25 @@ static zend_always_inline void fast_equal_function(zval *result, zval *op1, zval
 			ZVAL_BOOL(result, Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
 			return;
 		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(result);
+				return;
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(result);
+					return;
+				} else {
+					ZVAL_BOOL(result, memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+					return;
+				}
+			} else {
+				zendi_smart_strcmp(result, op1, op2);
+				ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
+				return;
+			}
+		}
 	}
 	compare_function(result, op1, op2 TSRMLS_CC);
 	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
@@ -875,6 +909,25 @@ static zend_always_inline void fast_not_equal_function(zval *result, zval *op1, 
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			ZVAL_BOOL(result, Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
 			return;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_FALSE(result);
+				return;
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_TRUE(result);
+					return;
+				} else {
+					ZVAL_BOOL(result, memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
+					return;
+				}
+			} else {
+				zendi_smart_strcmp(result, op1, op2);
+				ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
+				return;
+			}
 		}
 	}
 	compare_function(result, op1, op2 TSRMLS_CC);

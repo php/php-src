@@ -1724,15 +1724,19 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_STRING, IS_STRING):
+				if (Z_STR_P(op1) == Z_STR_P(op2)) {
+					ZVAL_LONG(result, 0);
+					return SUCCESS;
+				}
 				zendi_smart_strcmp(result, op1, op2);
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_NULL, IS_STRING):
-				ZVAL_LONG(result, zend_binary_strcmp("", 0, Z_STRVAL_P(op2), Z_STRLEN_P(op2)));
+				ZVAL_LONG(result, Z_STRLEN_P(op2) == 0 ? 0 : -1);
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_STRING, IS_NULL):
-				ZVAL_LONG(result, zend_binary_strcmp(Z_STRVAL_P(op1), Z_STRLEN_P(op1), "", 0));
+				ZVAL_LONG(result, Z_STRLEN_P(op1) == 0 ? 0 : 1);
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
