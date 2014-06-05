@@ -1287,7 +1287,7 @@ PHP_FUNCTION(extract)
 {
 	zval *var_array, *prefix = NULL;
 	long extract_type = EXTR_OVERWRITE;
-	zval *entry, data;
+	zval *entry;
 	zend_string *var_name;
 	ulong num_key;
 	int var_exists, count = 0;
@@ -1594,8 +1594,8 @@ PHP_FUNCTION(range)
 			goto long_str;
 		}
 
-		low = (unsigned char *)Z_STRVAL_P(zlow)[0];
-		high = (unsigned char *)Z_STRVAL_P(zhigh)[0];
+		low = (unsigned char)Z_STRVAL_P(zlow)[0];
+		high = (unsigned char)Z_STRVAL_P(zhigh)[0];
 
 		if (low > high) {		/* Negative Steps */
 			if (lstep <= 0) {
@@ -1606,7 +1606,7 @@ PHP_FUNCTION(range)
 				if (CG(one_char_string)[low]) {
 					ZVAL_INT_STR(&tmp, CG(one_char_string)[low]);
 				} else {
-					ZVAL_STRINGL(&tmp, &low, 1);
+					ZVAL_STRINGL(&tmp, (char*)&low, 1);
 				}
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 				if (((signed int)low - lstep) < 0) {
@@ -1622,7 +1622,7 @@ PHP_FUNCTION(range)
 				if (CG(one_char_string)[low]) {
 					ZVAL_INT_STR(&tmp, CG(one_char_string)[low]);
 				} else {
-					ZVAL_STRINGL(&tmp, &low, 1);
+					ZVAL_STRINGL(&tmp, (char*)&low, 1);
 				}
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 				if (((signed int)low + lstep) > 255) {
