@@ -26,7 +26,7 @@ First try
 Second try
 object(Foo)#1 (3) {
   ["date"]=>
-  string(26) "2007-09-12 15:49:12.000000"
+  string(%d) "2007-09-12 15:49:%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
