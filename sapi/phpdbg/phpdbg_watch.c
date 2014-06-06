@@ -580,7 +580,7 @@ void phpdbg_setup_watchpoints(TSRMLS_D) {
 	zend_llist_init(&PHPDBG_G(watchlist_mem), sizeof(void *), phpdbg_watch_mem_dtor, 1);
 	phpdbg_btree_init(&PHPDBG_G(watchpoint_tree), sizeof(void *) * 8);
 	phpdbg_btree_init(&PHPDBG_G(watch_HashTables), sizeof(void *) * 8);
-	_zend_hash_init(&PHPDBG_G(watchpoints), 8, phpdbg_watch_dtor, 0 ZEND_FILE_LINE_CC);
+	zend_hash_init(&PHPDBG_G(watchpoints), 8, NULL, phpdbg_watch_dtor, 0 ZEND_FILE_LINE_CC);
 }
 
 static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {

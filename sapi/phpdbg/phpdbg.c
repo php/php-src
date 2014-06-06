@@ -159,8 +159,6 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], 8, NULL, NULL, 0);
 
-	phpdbg_setup_watchpoints(TSRMLS_C);
-
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
 	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
 
@@ -879,6 +877,32 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) {
 }
 #endif
 
+static inline zend_mm_heap *phpdbg_mm_get_heap() {
+	zend_mm_heap *mm_heap;
+
+	TSRMLS_FETCH();
+
+	mm_heap = zend_mm_set_heap(NULL TSRMLS_CC);
+	zend_mm_set_heap(mm_heap TSRMLS_CC);
+
+	return mm_heap;
+}
+
+void *phpdbg_malloc_wrapper(size_t size)
+{
+	return zend_mm_alloc(phpdbg_mm_get_heap(), size);
+}
+
+void phpdbg_free_wrapper(void *p)
+{
+	zend_mm_free(phpdbg_mm_get_heap(), p);
+}
+
+void *phpdbg_realloc_wrapper(void *ptr, size_t size)
+{
+	return zend_mm_realloc(phpdbg_mm_get_heap(), ptr, size);
+}
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
@@ -1221,22 +1245,21 @@ phpdbg_main:
     EXCEPTION_POINTERS *xp;
     __try {
 #endif
-		zend_mm_heap *mm_heap = zend_mm_set_heap(NULL TSRMLS_CC);
-#if ZEND_DEBUG
-		if (!mm_heap->use_zend_alloc) {
-			mm_heap->_malloc = malloc;
-			mm_heap->_realloc = realloc;
-			mm_heap->_free = free;
-#endif
-			PHPDBG_G(original_free_function) = mm_heap->_free;
-			mm_heap->_free = phpdbg_watch_efree;
+		zend_mm_heap *mm_heap = phpdbg_mm_get_heap();
+
+		if (mm_heap->use_zend_alloc) {
+			mm_heap->_malloc = phpdbg_malloc_wrapper;
+			mm_heap->_realloc = phpdbg_realloc_wrapper;
+			mm_heap->_free = phpdbg_free_wrapper;
 			mm_heap->use_zend_alloc = 0;
-#if ZEND_DEBUG
 		}
-#endif
-		zend_mm_set_heap(mm_heap TSRMLS_CC);
 
 		zend_activate(TSRMLS_C);
+
+		PHPDBG_G(original_free_function) = mm_heap->_free;
+		mm_heap->_free = phpdbg_watch_efree;
+
+		phpdbg_setup_watchpoints(TSRMLS_C);
 
 #if defined(ZEND_SIGNALS) && !defined(_WIN32)
 		zend_try {
