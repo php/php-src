@@ -5624,4 +5624,34 @@ ZEND_VM_HANDLER(167, ZEND_ASSIGN_POW, VAR|UNUSED|CV, CONST|TMP|VAR|UNUSED|CV)
 	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_helper, binary_op,pow_function);
 }
 
+ZEND_VM_HANDLER(168, ZEND_BIND_GLOBAL, CV, CONST)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *varname;
+	zval *value;
+	zval *variable_ptr;
+	zend_string *name;
+
+	SAVE_OPLINE();
+	varname = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	name = Z_STR_P(varname);
+	value = zend_hash_find(&EG(symbol_table).ht, name);
+	if (value == NULL) {
+		value = zend_hash_add_new(&EG(symbol_table).ht, name, &EG(uninitialized_zval));
+		/* GLOBAL variable may be an INDIRECT pointer to CV */
+	} else if (Z_TYPE_P(value) == IS_INDIRECT) {
+		value = Z_INDIRECT_P(value);
+		if (Z_TYPE_P(value) == IS_UNDEF) {
+			ZVAL_NULL(value);
+		}
+	}
+
+	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+	zend_assign_to_variable_reference(variable_ptr, value TSRMLS_CC);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)

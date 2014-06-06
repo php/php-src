@@ -6257,21 +6257,33 @@ void zend_do_fetch_global_variable(znode *varname, const znode *static_assignmen
 	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
-	opline->result_type = IS_VAR;
-	opline->result.var = get_temporary_variable(CG(active_op_array));
-	SET_NODE(opline->op1, varname);
-	SET_UNUSED(opline->op2);
-	opline->extended_value = fetch_type;
-	GET_NODE(&result, opline->result);
 
-	if (varname->op_type == IS_CONST) {
+	if (varname->op_type == IS_CONST &&
+	   !zend_is_auto_global(Z_STR(varname->u.constant) TSRMLS_CC) &&
+	    !(Z_STRLEN(varname->u.constant) == (sizeof("this")-1) &&
+	      !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this") - 1))) {
+		opline->opcode = ZEND_BIND_GLOBAL;
+		SET_NODE(opline->op2, varname);
+		opline->op1_type = IS_CV;
 		zval_copy_ctor(&varname->u.constant);
-	}
-	fetch_simple_variable(&lval, varname, 0 TSRMLS_CC); /* Relies on the fact that the default fetch is BP_VAR_W */
+		opline->op1.var = lookup_cv(CG(active_op_array), Z_STR(varname->u.constant) TSRMLS_CC);
+	} else {
+		opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
+		opline->result_type = IS_VAR;
+		opline->result.var = get_temporary_variable(CG(active_op_array));
+		SET_NODE(opline->op1, varname);
+		SET_UNUSED(opline->op2);
+		opline->extended_value = fetch_type;
+		GET_NODE(&result, opline->result);
 
-	zend_do_assign_ref(NULL, &lval, &result TSRMLS_CC);
-	CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result_type |= EXT_TYPE_UNUSED;
+		if (varname->op_type == IS_CONST) {
+			zval_copy_ctor(&varname->u.constant);
+		}
+		fetch_simple_variable(&lval, varname, 0 TSRMLS_CC); /* Relies on the fact that the default fetch is BP_VAR_W */
+
+		zend_do_assign_ref(NULL, &lval, &result TSRMLS_CC);
+		CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result_type |= EXT_TYPE_UNUSED;
+	}
 }
 /* }}} */
 

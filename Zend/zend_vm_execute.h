@@ -33168,6 +33168,36 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_POW_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 	return zend_binary_assign_op_helper_SPEC_CV_CONST(pow_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_BIND_GLOBAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *varname;
+	zval *value;
+	zval *variable_ptr;
+	zend_string *name;
+
+	SAVE_OPLINE();
+	varname = opline->op2.zv;
+	name = Z_STR_P(varname);
+	value = zend_hash_find(&EG(symbol_table).ht, name);
+	if (value == NULL) {
+		value = zend_hash_add_new(&EG(symbol_table).ht, name, &EG(uninitialized_zval));
+		/* GLOBAL variable may be an INDIRECT pointer to CV */
+	} else if (Z_TYPE_P(value) == IS_INDIRECT) {
+		value = Z_INDIRECT_P(value);
+		if (Z_TYPE_P(value) == IS_UNDEF) {
+			ZVAL_NULL(value);
+		}
+	}
+
+	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
+	zend_assign_to_variable_reference(variable_ptr, value TSRMLS_CC);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -44468,6 +44498,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_ASSIGN_POW_SPEC_CV_VAR_HANDLER,
   	ZEND_ASSIGN_POW_SPEC_CV_UNUSED_HANDLER,
   	ZEND_ASSIGN_POW_SPEC_CV_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_BIND_GLOBAL_SPEC_CV_CONST_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;
