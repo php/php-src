@@ -37,11 +37,18 @@ typedef enum _zend_ast_kind {
 struct _zend_ast {
 	unsigned short kind;
 	unsigned short children;
-	union {
-		zval      val;
-		zend_ast *child;
-	} u;
+	zend_ast *child[1];
 };
+
+typedef struct _zend_ast_zval {
+	unsigned short kind;
+	unsigned short children;
+	zval val;
+} zend_ast_zval;
+
+static inline zval *zend_ast_get_zval(zend_ast *ast) {
+	return &((zend_ast_zval *) ast)->val;
+}
 
 ZEND_API zend_ast *zend_ast_create_constant(zval *zv);
 

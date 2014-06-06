@@ -7478,7 +7478,7 @@ void zend_make_immutable_array_r(zval *zv TSRMLS_DC) /* {{{ */
 void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 {
 	if (ast->kind == ZEND_CONST) {
-		ZVAL_COPY_VALUE(&result->u.constant, &ast->u.val);
+		ZVAL_COPY_VALUE(&result->u.constant, zend_ast_get_zval(ast));
 		efree(ast);
 	} else if (zend_ast_is_ct_constant(ast)) {
 		zend_ast_evaluate(&result->u.constant, ast, NULL TSRMLS_CC);
