@@ -985,6 +985,7 @@ static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht
 	zval *retval;
 	zend_string *offset_key;
 	ulong hval;
+	zend_bool key_needs_release = 0;
 
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
 		hval = Z_LVAL_P(dim);
@@ -1055,6 +1056,10 @@ str_index:
 					break;
 			}
 		}
+		if (key_needs_release)
+		{
+			STR_RELEASE(offset_key);
+		}
 	} else {
 		switch (Z_TYPE_P(dim)) {
 			case IS_NULL:
@@ -1063,6 +1068,10 @@ str_index:
 			case IS_DOUBLE:
 				hval = zend_dval_to_lval(Z_DVAL_P(dim));
 				goto num_index;
+			case IS_BIGINT:
+				offset_key = zend_bigint_to_zend_string(Z_BIG_P(dim), 0);
+				key_needs_release = 1;
+				goto str_index;
 			case IS_RESOURCE:
 				zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
 				hval = Z_RES_HANDLE_P(dim);

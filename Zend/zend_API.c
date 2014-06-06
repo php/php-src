@@ -27,6 +27,7 @@
 #include "zend_constants.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_bigint.h"
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
@@ -205,6 +206,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 		case IS_TRUE:
 			return "boolean";
 		case IS_LONG:
+		case IS_BIGINT:
 			return "integer";
 		case IS_DOUBLE:
 			return "double";
@@ -408,10 +410,12 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 								break;
 							}
 						}
+					
 					case IS_NULL:
 					case IS_FALSE:
 					case IS_TRUE:
 					case IS_LONG:
+					case IS_BIGINT:
 						convert_to_long_ex(arg);
 						*p = Z_LVAL_P(arg);
 						break;
@@ -453,6 +457,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_TRUE:
 					case IS_LONG:
 					case IS_DOUBLE:
+					case IS_BIGINT:
 						convert_to_double_ex(arg);
 						*p = Z_DVAL_P(arg);
 						break;
@@ -482,6 +487,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 
 					case IS_LONG:
 					case IS_DOUBLE:
+					case IS_BIGINT:
 					case IS_FALSE:
 					case IS_TRUE:
 						convert_to_string_ex(arg);
@@ -523,6 +529,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 
 					case IS_LONG:
 					case IS_DOUBLE:
+					case IS_BIGINT:
 					case IS_FALSE:
 					case IS_TRUE:
 						convert_to_string_ex(arg);
@@ -563,6 +570,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_STRING:
 					case IS_LONG:
 					case IS_DOUBLE:
+					case IS_BIGINT:
 					case IS_FALSE:
 					case IS_TRUE:
 						convert_to_boolean_ex(arg);
@@ -1631,6 +1639,13 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value TSRMLS_DC)
 			break;
 		case IS_NULL:
 			result = zend_symtable_update(ht, STR_EMPTY_ALLOC(), value);
+			break;
+		case IS_BIGINT:
+			{
+				char *temp = zend_bigint_to_string(Z_BIG_P(key));
+				zend_symtable_str_update(ht, temp, strlen(temp), value);
+				efree(temp);
+			}
 			break;
 		case IS_RESOURCE:
 			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
@@ -3984,6 +3999,7 @@ static int same_zval(zval *zv1, zval *zv2)  /* {{{ */
 			return Z_LVAL_P(zv1) == Z_LVAL_P(zv2);
 		case IS_DOUBLE:
 			return Z_LVAL_P(zv1) == Z_LVAL_P(zv2);
+		case IS_BIGINT:
 		case IS_STRING:
 		case IS_ARRAY:
 		case IS_OBJECT:

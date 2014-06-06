@@ -36,6 +36,7 @@
 
 #include "zend_strtod.h"
 #include "zend_multiply.h"
+#include "zend_bigint.h"
 
 #if 0&&HAVE_BCMATH
 #include "ext/bcmath/libbcmath/src/bcmath.h"
@@ -330,6 +331,10 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void convert_to_long(zval *op);
 ZEND_API void convert_to_double(zval *op);
 ZEND_API void convert_to_long_base(zval *op, int base);
+ZEND_API void convert_to_bigint(zval *op);
+ZEND_API void convert_to_bigint_base(zval *op, int base);
+ZEND_API void convert_to_bigint_or_long(zval *op);
+ZEND_API void convert_to_bigint_or_long_base(zval *op, int base);
 ZEND_API void convert_to_null(zval *op);
 ZEND_API void convert_to_boolean(zval *op);
 ZEND_API void convert_to_array(zval *op);
@@ -417,6 +422,9 @@ END_EXTERN_C()
 			case IS_DOUBLE:						\
 				convert_to_double(pzv);			\
 				break;							\
+			case IS_BIGINT_OR_LONG:				\
+				convert_to_bigint_or_long(pzv); \
+				break;							\
 			case _IS_BOOL:						\
 				convert_to_boolean(pzv);		\
 				break;							\
@@ -441,13 +449,15 @@ END_EXTERN_C()
 		convert_to_explicit_type(pzv, str_type);	\
 	}
 
-#define convert_to_boolean_ex(pzv)	convert_to_ex_master(pzv, boolean, _IS_BOOL)
-#define convert_to_long_ex(pzv)		convert_to_ex_master(pzv, long, IS_LONG)
-#define convert_to_double_ex(pzv)	convert_to_ex_master(pzv, double, IS_DOUBLE)
-#define convert_to_string_ex(pzv)	convert_to_ex_master(pzv, string, IS_STRING)
-#define convert_to_array_ex(pzv)	convert_to_ex_master(pzv, array, IS_ARRAY)
-#define convert_to_object_ex(pzv)	convert_to_ex_master(pzv, object, IS_OBJECT)
-#define convert_to_null_ex(pzv)		convert_to_ex_master(pzv, null, IS_NULL)
+#define convert_to_boolean_ex(pzv)			convert_to_ex_master(pzv, boolean, _IS_BOOL)
+#define convert_to_long_ex(pzv)				convert_to_ex_master(pzv, long, IS_LONG)
+#define convert_to_double_ex(pzv)			convert_to_ex_master(pzv, double, IS_DOUBLE)
+#define convert_to_bigint_ex(pzv)			convert_to_ex_master(pzv, bigint, IS_LONG)
+#define convert_to_bigint_or_long_ex(pzv)	convert_to_ex_master(pzv, bigint_or_long, IS_BIGINT_OR_LONG)
+#define convert_to_string_ex(pzv)			convert_to_ex_master(pzv, string, IS_STRING)
+#define convert_to_array_ex(pzv)			convert_to_ex_master(pzv, array, IS_ARRAY)
+#define convert_to_object_ex(pzv)			convert_to_ex_master(pzv, object, IS_OBJECT)
+#define convert_to_null_ex(pzv)				convert_to_ex_master(pzv, null, IS_NULL)
 
 #define convert_scalar_to_number_ex(pzv)							\
 	if (Z_TYPE_P(pzv)!=IS_LONG && Z_TYPE_P(pzv)!=IS_DOUBLE) {		\
@@ -560,7 +570,9 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-#if defined(__GNUC__) && defined(__i386__)
+/* assembly commented-out as it uses the old float overflow behaviour
+ * however, now longs overflow to bigints, so we can't use it */
+/*#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"movl	(%1), %%eax\n\t"
 			"addl   (%2), %%eax\n\t"
@@ -606,7 +618,7 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "rax","cc");
-#else
+#else*/
 			/*
 			 * 'result' may alias with op1 or op2, so we need to
 			 * ensure that 'result' is not updated until after we
@@ -615,11 +627,13 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 
 			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
 				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != ((Z_LVAL_P(op1) + Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
-				ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+				zend_bigint *out = zend_bigint_init_alloc();
+				zend_bigint_long_add_long(out, Z_LVAL_P(op1), Z_LVAL_P(op2));
+				ZVAL_BIGINT(result, out);
 			} else {
 				ZVAL_LONG(result, Z_LVAL_P(op1) + Z_LVAL_P(op2));
 			}
-#endif
+/*#endif*/
 			return SUCCESS;
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
@@ -641,7 +655,9 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-#if defined(__GNUC__) && defined(__i386__)
+/* assembly commented-out as it uses the old float overflow behaviour
+* however, now longs overflow to bigints, so we can't use it */
+/*#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"movl	(%1), %%eax\n\t"
 			"subl   (%2), %%eax\n\t"
@@ -654,7 +670,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			"fildl	(%1)\n\t"
 #if defined(__clang__) && (__clang_major__ < 2 || (__clang_major__ == 2 && __clang_minor__ < 10))
 			"fsubp  %%st(1), %%st\n\t"  /* LLVM bug #9164 */
-#else
+/*#else
 			"fsubp	%%st, %%st(1)\n\t"
 #endif
 			"movl   %4, %c5(%0)\n\t"
@@ -681,7 +697,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			"fildq	(%1)\n\t"
 #if defined(__clang__) && (__clang_major__ < 2 || (__clang_major__ == 2 && __clang_minor__ < 10))
 			"fsubp  %%st(1), %%st\n\t"  /* LLVM bug #9164 */
-#else
+/*#else
 			"fsubp	%%st, %%st(1)\n\t"
 #endif
 			"movl   %4, %c5(%0)\n\t"
@@ -695,14 +711,16 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "rax","cc");
-#else
+#else*/
 			ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 
 			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
 				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
-				ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+				zend_bigint *out = zend_bigint_init_alloc();
+				zend_bigint_long_subtract_long(out, Z_LVAL_P(op1), Z_LVAL_P(op2));
+				ZVAL_BIGINT(result, out);
 			}
-#endif
+/*#endif*/
 			return SUCCESS;
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
@@ -726,8 +744,8 @@ static zend_always_inline int fast_mul_function(zval *result, zval *op1, zval *o
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			long overflow;
 
-			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_BIG_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_BIGINT_EX : IS_LONG;
 			return SUCCESS;
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));

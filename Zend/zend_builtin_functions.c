@@ -27,6 +27,7 @@
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
 #include "zend_closures.h"
+#include "zend_bigint.h"
 
 #undef ZEND_TEST_EXCEPTIONS
 
@@ -690,6 +691,7 @@ repeat:
 	switch (Z_TYPE_P(val)) {
 		case IS_LONG:
 		case IS_DOUBLE:
+		case IS_BIGINT:
 		case IS_STRING:
 		case IS_FALSE:
 		case IS_TRUE:

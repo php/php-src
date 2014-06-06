@@ -3220,6 +3220,8 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
+		} else if (Z_TYPE_P(ptr) == IS_BIGINT) {
+			EG(exit_status) = zend_bigint_to_long(Z_BIG_P(ptr));
 		} else {
 			zend_print_variable(ptr TSRMLS_CC);
 		}
@@ -4070,6 +4072,17 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -4941,6 +4954,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -5775,6 +5799,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -6451,6 +6486,17 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -7343,6 +7389,17 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -8410,6 +8467,8 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
+		} else if (Z_TYPE_P(ptr) == IS_BIGINT) {
+			EG(exit_status) = zend_bigint_to_long(Z_BIG_P(ptr));
 		} else {
 			zend_print_variable(ptr TSRMLS_CC);
 		}
@@ -9203,6 +9262,17 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -10041,6 +10111,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -10875,6 +10956,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -11437,6 +11529,17 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -12256,6 +12359,17 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -13809,6 +13923,8 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
+		} else if (Z_TYPE_P(ptr) == IS_BIGINT) {
+			EG(exit_status) = zend_bigint_to_long(Z_BIG_P(ptr));
 		} else {
 			zend_print_variable(ptr TSRMLS_CC);
 		}
@@ -15679,6 +15795,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -15855,6 +15982,21 @@ num_index_dim:
 					}
 					if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 						zval_ptr_dtor(offset);
+					}
+					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
 					}
 					break;
 numeric_index_dim:
@@ -16057,6 +16199,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -16105,6 +16258,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -17820,6 +17976,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -17924,6 +18091,21 @@ num_index_dim:
 					}
 					if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 						zval_ptr_dtor(offset);
+					}
+					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
 					}
 					break;
 numeric_index_dim:
@@ -18047,6 +18229,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -18095,6 +18288,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -20024,6 +20220,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -20200,6 +20407,21 @@ num_index_dim:
 					}
 					if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 						zval_ptr_dtor(offset);
+					}
+					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
 					}
 					break;
 numeric_index_dim:
@@ -20402,6 +20624,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -20450,6 +20683,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -21481,6 +21717,17 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -23407,6 +23654,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -23511,6 +23769,21 @@ num_index_dim:
 					}
 					if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 						zval_ptr_dtor(offset);
+					}
+					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
 					}
 					break;
 numeric_index_dim:
@@ -23634,6 +23907,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -23682,6 +23966,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -23959,6 +24246,8 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
+		} else if (Z_TYPE_P(ptr) == IS_BIGINT) {
+			EG(exit_status) = zend_bigint_to_long(Z_BIG_P(ptr));
 		} else {
 			zend_print_variable(ptr TSRMLS_CC);
 		}
@@ -24981,6 +25270,21 @@ num_index_dim:
 						zval_ptr_dtor(offset);
 					}
 					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
+					}
+					break;
 numeric_index_dim:
 					zend_hash_index_del(ht, hval);
 					if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
@@ -25102,6 +25406,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -25150,6 +25465,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -26266,6 +26584,21 @@ num_index_dim:
 						zval_ptr_dtor(offset);
 					}
 					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
+					}
+					break;
 numeric_index_dim:
 					zend_hash_index_del(ht, hval);
 					if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
@@ -26387,6 +26720,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -26435,6 +26779,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -27553,6 +27900,21 @@ num_index_dim:
 						zval_ptr_dtor(offset);
 					}
 					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
+					}
+					break;
 numeric_index_dim:
 					zend_hash_index_del(ht, hval);
 					if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
@@ -27674,6 +28036,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -27722,6 +28095,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -29355,6 +29731,21 @@ num_index_dim:
 						zval_ptr_dtor(offset);
 					}
 					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
+					}
+					break;
 numeric_index_dim:
 					zend_hash_index_del(ht, hval);
 					if (IS_CV == IS_CV || IS_CV == IS_VAR) {
@@ -29476,6 +29867,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -29524,6 +29926,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -30882,6 +31287,8 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
+		} else if (Z_TYPE_P(ptr) == IS_BIGINT) {
+			EG(exit_status) = zend_bigint_to_long(Z_BIG_P(ptr));
 		} else {
 			zend_print_variable(ptr TSRMLS_CC);
 		}
@@ -32535,6 +32942,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -32711,6 +33129,21 @@ num_index_dim:
 					}
 					if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 						zval_ptr_dtor(offset);
+					}
+					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
 					}
 					break;
 numeric_index_dim:
@@ -32913,6 +33346,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -32961,6 +33405,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -34589,6 +35036,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -34693,6 +35151,21 @@ num_index_dim:
 					}
 					if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 						zval_ptr_dtor(offset);
+					}
+					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
 					}
 					break;
 numeric_index_dim:
@@ -34816,6 +35289,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -34864,6 +35348,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -36675,6 +37162,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -36851,6 +37349,21 @@ num_index_dim:
 					}
 					if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 						zval_ptr_dtor(offset);
+					}
+					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
 					}
 					break;
 numeric_index_dim:
@@ -37053,6 +37566,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -37101,6 +37625,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -38016,6 +38543,17 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -39806,6 +40344,17 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					} else {
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+					}
+					efree(temp_str);
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -39910,6 +40459,21 @@ num_index_dim:
 					}
 					if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 						zval_ptr_dtor(offset);
+					}
+					break;
+				case IS_BIGINT:
+					{
+						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
+							zend_hash_index_del(ht, hval);
+						} else {
+							if (ht == &EG(symbol_table).ht) {
+								zend_delete_global_variable(temp_str TSRMLS_CC);
+							} else {
+								zend_hash_del(ht, temp_str);
+							}
+						}
+						STR_RELEASE(temp_str);
 					}
 					break;
 numeric_index_dim:
@@ -40033,6 +40597,17 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
+							value = zend_hash_index_find(ht, hval);
+						} else {
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+						}
+						efree(temp_str);
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -40081,6 +40656,9 @@ num_index_prop:
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}

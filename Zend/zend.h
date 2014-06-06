@@ -301,6 +301,7 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 
 #include "zend_object_handlers.h"
 #include "zend_ast.h"
+#include "zend_bigint.h"
 
 /* overloaded elements data types */
 #define OE_IS_ARRAY					(1<<0)

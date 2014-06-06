@@ -26,6 +26,7 @@
 #include "zend_hash.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
+#include "zend_bigint.h"
 
 BEGIN_EXTERN_C()
 struct _zend_fcall_info;
@@ -94,6 +95,9 @@ again:
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op) ? 1 : 0);
+			break;
+		case IS_BIGINT:
+			result = zend_bigint_to_bool(Z_BIG_P(op));
 			break;
 		case IS_STRING:
 			if (Z_STRLEN_P(op) == 0

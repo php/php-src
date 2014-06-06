@@ -42,6 +42,7 @@ PHP_FUNCTION(gettype)
 			break;
 
 		case IS_LONG:
+		case IS_BIGINT:
 			RETVAL_STRING("integer");
 			break;
 
@@ -324,6 +325,7 @@ PHP_FUNCTION(is_numeric)
 	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:
 		case IS_DOUBLE:
+		case IS_BIGINT:
 			RETURN_TRUE;
 			break;
 
@@ -357,6 +359,7 @@ PHP_FUNCTION(is_scalar)
 		case IS_TRUE:
 		case IS_DOUBLE:
 		case IS_LONG:
+		case IS_BIGINT:
 		case IS_STRING:
 			RETURN_TRUE;
 			break;

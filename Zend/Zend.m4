@@ -433,3 +433,27 @@ else
     AC_MSG_RESULT(no) 
   fi 
 fi 
+
+for i in $PHP_GMP /usr/local /usr; do
+  test -f $i/include/gmp.h && GMP_DIR=$i && break
+done
+
+if test -z "$GMP_DIR"; then
+  AC_MSG_ERROR(Unable to locate gmp.h)
+fi
+
+PHP_CHECK_LIBRARY(gmp, __gmp_randinit_lc_2exp_size,
+[],[
+  PHP_CHECK_LIBRARY(gmp, gmp_randinit_lc_2exp_size,
+  [],[
+    AC_MSG_ERROR([GNU MP Library version 4.1.2 or greater required.])
+  ],[
+    -L$GMP_DIR/$PHP_LIBDIR
+  ])
+],[
+  -L$GMP_DIR/$PHP_LIBDIR
+])
+
+PHP_ADD_LIBRARY_WITH_PATH(gmp, $GMP_DIR/$PHP_LIBDIR, GMP_SHARED_LIBADD)
+PHP_ADD_INCLUDE($GMP_DIR/include)
+AC_DEFINE(HAVE_GMP, 1, [ ])
