@@ -2445,4 +2445,16 @@ No match
     \x{37e} 
 No match
 
+/[RST]+/8iW
+    Ss\x{17f}
+ 0: Ss\x{17f}
+    
+/[R-T]+/8iW 
+    Ss\x{17f}
+ 0: Ss\x{17f}
+
+/[q-u]+/8iW 
+    Ss\x{17f}
+ 0: Ss\x{17f}
+
 /-- End of testinput6 --/

@@ -5,7 +5,7 @@
 /* This is the public header file for the PCRE library, to be #included by
 applications that call the PCRE functions.
 
-           Copyright (c) 1997-2013 University of Cambridge
+           Copyright (c) 1997-2014 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The current PCRE version information. */
 
 #define PCRE_MAJOR          8
-#define PCRE_MINOR          34
+#define PCRE_MINOR          35
 #define PCRE_PRERELEASE     
-#define PCRE_DATE           2013-12-15
+#define PCRE_DATE           2014-04-04
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE, the appropriate
@@ -491,36 +491,42 @@ PCRE_EXP_DECL void  (*pcre_free)(void *);
 PCRE_EXP_DECL void *(*pcre_stack_malloc)(size_t);
 PCRE_EXP_DECL void  (*pcre_stack_free)(void *);
 PCRE_EXP_DECL int   (*pcre_callout)(pcre_callout_block *);
+PCRE_EXP_DECL int   (*pcre_stack_guard)(void);
 
 PCRE_EXP_DECL void *(*pcre16_malloc)(size_t);
 PCRE_EXP_DECL void  (*pcre16_free)(void *);
 PCRE_EXP_DECL void *(*pcre16_stack_malloc)(size_t);
 PCRE_EXP_DECL void  (*pcre16_stack_free)(void *);
 PCRE_EXP_DECL int   (*pcre16_callout)(pcre16_callout_block *);
+PCRE_EXP_DECL int   (*pcre16_stack_guard)(void);
 
 PCRE_EXP_DECL void *(*pcre32_malloc)(size_t);
 PCRE_EXP_DECL void  (*pcre32_free)(void *);
 PCRE_EXP_DECL void *(*pcre32_stack_malloc)(size_t);
 PCRE_EXP_DECL void  (*pcre32_stack_free)(void *);
 PCRE_EXP_DECL int   (*pcre32_callout)(pcre32_callout_block *);
+PCRE_EXP_DECL int   (*pcre32_stack_guard)(void);
 #else   /* VPCOMPAT */
 PCRE_EXP_DECL void *pcre_malloc(size_t);
 PCRE_EXP_DECL void  pcre_free(void *);
 PCRE_EXP_DECL void *pcre_stack_malloc(size_t);
 PCRE_EXP_DECL void  pcre_stack_free(void *);
 PCRE_EXP_DECL int   pcre_callout(pcre_callout_block *);
+PCRE_EXP_DECL int   pcre_stack_guard(void);
 
 PCRE_EXP_DECL void *pcre16_malloc(size_t);
 PCRE_EXP_DECL void  pcre16_free(void *);
 PCRE_EXP_DECL void *pcre16_stack_malloc(size_t);
 PCRE_EXP_DECL void  pcre16_stack_free(void *);
 PCRE_EXP_DECL int   pcre16_callout(pcre16_callout_block *);
+PCRE_EXP_DECL int   pcre16_stack_guard(void);
 
 PCRE_EXP_DECL void *pcre32_malloc(size_t);
 PCRE_EXP_DECL void  pcre32_free(void *);
 PCRE_EXP_DECL void *pcre32_stack_malloc(size_t);
 PCRE_EXP_DECL void  pcre32_stack_free(void *);
 PCRE_EXP_DECL int   pcre32_callout(pcre32_callout_block *);
+PCRE_EXP_DECL int   pcre32_stack_guard(void);
 #endif  /* VPCOMPAT */
 
 /* User defined callback which provides a stack just before the match starts. */
