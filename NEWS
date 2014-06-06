@@ -3,14 +3,14 @@ PHP                                                                        NEWS
 ?? ??? 2014, PHP 5.6.0 Release Candidate 1
 
 - Core:
+  . Fixed bug #67390 (insecure temporary file use in the configure script).
+    (Remi) (CVE-2014-3981)
   . Fixed bug #67392 (dtrace breaks argument unpack). (Nikita)
 
 05 Jun 2014, PHP 5.6.0 Beta 4
 
 - Core:
   . Fixed bug #67249 (printf out-of-bounds read). (Stas)
-  . Fixed bug #67390 (insecure temporary file use in the configure script).
-    (Remi) (CVE-2014-3981)
 
 - Date:
   . Fixed bug #67308 (Serialize of DateTime truncates fractions of second).
