@@ -883,13 +883,8 @@ fully_qualified_class_name:
 
 
 class_name_reference:
-		class_name						{ zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
-	|	dynamic_class_name_reference	{ zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
-;
-
-
-dynamic_class_name_reference:
-		new_variable { $$ = $1; }
+		class_name		{ zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
+	|	new_variable	{ zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
 ;
 
 exit_expr:
@@ -1115,6 +1110,11 @@ new_variable:
 	|	new_variable '{' expr '}' { fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); }
 	|	new_variable T_OBJECT_OPERATOR member_name
 			{ zend_do_fetch_property(&$$, &$1, &$3 TSRMLS_CC); }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
+			{ zend_do_fetch_static_member(&$$, &$1, &$3 TSRMLS_CC); }
+	|	new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
+			{ zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC);
+			  zend_do_fetch_static_member(&$$, &$1, &$3 TSRMLS_CC); }
 ;
 
 dim_offset:
