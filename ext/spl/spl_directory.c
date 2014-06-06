@@ -830,6 +830,7 @@ SPL_METHOD(DirectoryIterator, seek)
 		zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.dir.func_rewind, "rewind", &retval);
 		if (retval) {
 			zval_ptr_dtor(&retval);
+			retval = NULL;
 		}
 	}
 
@@ -839,6 +840,7 @@ SPL_METHOD(DirectoryIterator, seek)
 		if (retval) {
 			valid = zend_is_true(retval TSRMLS_CC);
 			zval_ptr_dtor(&retval);
+			retval = NULL;
 		}
 		if (!valid) {
 			break;

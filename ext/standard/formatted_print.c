@@ -374,6 +374,7 @@ php_formatted_print(int ht, php_size_t *len, int use_array, int format_offset TS
 	int alignment, currarg, adjusting, argnum, width, precision;
 	char *format, *result, padding;
 	int always_sign;
+	int format_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
 		return NULL;
@@ -412,11 +413,12 @@ php_formatted_print(int ht, php_size_t *len, int use_array, int format_offset TS
 	
 	convert_to_string_ex(args[format_offset]);
 	format = Z_STRVAL_PP(args[format_offset]);
+	format_len = Z_STRSIZE_PP(args[format_offset]);
 	result = emalloc(size);
 
 	currarg = 1;
 
-	while (inpos<Z_STRSIZE_PP(args[format_offset])) {
+	while (inpos<format_len) {
 		int expprec = 0, multiuse = 0;
 		zval *tmp;
 
@@ -471,7 +473,7 @@ php_formatted_print(int ht, php_size_t *len, int use_array, int format_offset TS
 						/* space padding, the default */
 					} else if (format[inpos] == '+') {
 						always_sign = 1;
-					} else if (format[inpos] == '\'') {
+					} else if (format[inpos] == '\'' && inpos+1<format_len) {
 						padding = format[++inpos];
 					} else {
 						PRINTF_DEBUG(("sprintf: end of modifiers\n"));
