@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     (Remi) (CVE-2014-3981)
   . Fixed bug #67392 (dtrace breaks argument unpack). (Nikita)
 
+- Tokenizer:
+  . Fixed bug #67395 (token_name() does not return name for T_POW and T_POW_EQUAL
+    token). (Ferenc)
+
 05 Jun 2014, PHP 5.6.0 Beta 4
 
 - Core:
