@@ -32,6 +32,15 @@ ZEND_API zend_ast *zend_ast_create_constant(zval *zv)
 	return (zend_ast *) ast;
 }
 
+ZEND_API zend_ast *zend_ast_create_znode(znode *node)
+{
+	zend_ast_znode *ast = emalloc(sizeof(zend_ast_znode));
+	ast->kind = ZEND_AST_ZNODE;
+	ast->children = 0;
+	ast->node = *node;
+	return (zend_ast *) ast;
+}
+
 ZEND_API zend_ast* zend_ast_create_unary(uint kind, zend_ast *op0)
 {
 	zend_ast *ast = emalloc(sizeof(zend_ast));
@@ -62,7 +71,7 @@ ZEND_API zend_ast* zend_ast_create_ternary(uint kind, zend_ast *op0, zend_ast *o
 	return ast;
 }
 
-ZEND_API zend_ast* zend_ast_create_dynamic(uint kind)
+ZEND_API zend_ast *zend_ast_create_dynamic(uint kind)
 {
 	/* use 4 children as default */
 	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * 3);

@@ -87,6 +87,22 @@ typedef struct _znode { /* used only during compilation */
 	zend_uint EA;      /* extended attributes */
 } znode;
 
+/* Temporarily defined here, to avoid header ordering issues */
+typedef struct _zend_ast_znode {
+	unsigned short kind;
+	unsigned short children;
+	znode node;
+} zend_ast_znode;
+ZEND_API zend_ast *zend_ast_create_znode(znode *node);
+
+static inline znode *zend_ast_get_znode(zend_ast *ast) {
+	return &((zend_ast_znode *) ast)->node;
+}
+
+void zend_compile_stmt(zend_ast *ast TSRMLS_DC);
+void zend_compile_expr(znode *node, zend_ast *ast TSRMLS_DC);
+void zend_compile_var(znode *node, zend_ast *ast, int type TSRMLS_DC);
+
 typedef struct _zend_execute_data zend_execute_data;
 
 #define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data TSRMLS_DC
@@ -759,9 +775,13 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define BP_VAR_W			1
 #define BP_VAR_RW			2
 #define BP_VAR_IS			3
-#define BP_VAR_NA			4	/* if not applicable */
-#define BP_VAR_FUNC_ARG		5
-#define BP_VAR_UNSET		6
+#define BP_VAR_FUNC_ARG		4
+#define BP_VAR_UNSET		5
+#define BP_VAR_REF          6   /* right-hand side of by-ref assignment */
+
+/* Bottom 3 bits are the type, top bits are arg num for BP_VAR_FUNC_ARG */
+#define BP_VAR_SHIFT 3
+#define BP_VAR_MASK  7
 
 
 #define ZEND_INTERNAL_FUNCTION				1

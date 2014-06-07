@@ -26,12 +26,35 @@
 
 typedef enum _zend_ast_kind {
 	/* first 256 kinds are reserved for opcodes */
-	ZEND_CONST = 256,
+	ZEND_CONST = 256, /* TODO.AST: Split in constant lookup and literal zval */
 	ZEND_BOOL_AND,
 	ZEND_BOOL_OR,
 	ZEND_SELECT,
 	ZEND_UNARY_PLUS,
 	ZEND_UNARY_MINUS,
+
+	ZEND_AST_ZNODE,
+
+	ZEND_AST_VAR,
+	ZEND_AST_DIM,
+	ZEND_AST_PROP,
+	ZEND_AST_STATIC_PROP,
+
+	ZEND_AST_CALL,
+	ZEND_AST_METHOD_CALL,
+	ZEND_AST_STATIC_CALL,
+
+	ZEND_AST_ASSIGN,
+	ZEND_AST_ASSIGN_REF,
+	ZEND_AST_LIST,
+	ZEND_AST_GLOBAL,
+	ZEND_AST_UNSET,
+
+	ZEND_AST_PARAMS,
+	ZEND_AST_UNPACK,
+
+	ZEND_AST_NAME,
+	ZEND_AST_NAME_FQ,
 } zend_ast_kind;
 
 struct _zend_ast {
@@ -65,5 +88,29 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 
 ZEND_API zend_ast *zend_ast_copy(zend_ast *ast);
 ZEND_API void zend_ast_destroy(zend_ast *ast);
+
+static inline zend_ast *zend_ast_create_var(zval *name) {
+	return zend_ast_create_unary(ZEND_AST_VAR, zend_ast_create_constant(name));
+}
+
+/* Temporary, for porting */
+#define AST_COMPILE(res, ast) do { \
+	zend_ast *_ast = (ast); \
+	zend_compile_expr((res), _ast TSRMLS_CC); \
+	zend_ast_destroy(_ast); \
+} while (0)
+#define AST_COMPILE_VAR(res, ast, type) do { \
+	zend_ast *_ast = (ast); \
+	zend_compile_var((res), _ast, type TSRMLS_CC); \
+	zend_ast_destroy(_ast); \
+} while (0)
+#define AST_COMPILE_STMT(ast) do { \
+	zend_ast *_ast = (ast); \
+	zend_compile_stmt(_ast TSRMLS_CC); \
+	zend_ast_destroy(_ast); \
+} while (0)
+
+#define AST_ZNODE(znode) zend_ast_create_znode((znode))
+#define AST_ZVAL(znode) zend_ast_create_constant(&(znode)->u.constant)
 
 #endif
