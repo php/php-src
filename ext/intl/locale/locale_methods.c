@@ -497,6 +497,14 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 		RETURN_FALSE;
 	}
 
+    if(loc_name_len > ULOC_FULLNAME_CAPACITY) {
+        /* See bug 67397: overlong locale names cause trouble in uloc_getDisplayName */
+		spprintf(&msg , 0, "locale_get_display_%s : name too long", tag_name );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,  msg , 1 TSRMLS_CC );
+		efree(msg);
+		RETURN_FALSE;
+    }
+
 	if(loc_name_len == 0) {
 		loc_name = intl_locale_get_default(TSRMLS_C);
 	}
