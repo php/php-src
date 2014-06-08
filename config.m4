@@ -28,7 +28,7 @@ if test "$PHP_PHPDBG" != "no"; then
   PHP_SUBST(PHP_PHPDBG_FILES)
   PHP_SUBST(PHPDBG_EXTRA_LIBS)
   
-  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag])
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag], [$abs_srcdir/sapi/phpdbg], [$abs_builddir/sapi/phpdbg])
   PHP_SELECT_SAPI(phpdbg, program, $PHP_PHPDBG_FILES, $PHP_PHPDBG_CFLAGS, [$(SAPI_PHPDBG_PATH)])
 
   BUILD_BINARY="sapi/phpdbg/phpdbg"
