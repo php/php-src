@@ -61,11 +61,11 @@ DIGITS      [0-9\.]+
 ID          [^ \r\n\t:#]+
 ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+
-INPUT       [^\n]+
+INPUT       [^\n\000]+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
-<*>"\n" {
+<*>[\n\000] {
 	return 0;
 }
 
