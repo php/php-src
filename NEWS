@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fixed bug #67349 (Locale::parseLocale Double Free). (Stas)
+  . Fixed bug #67397 (Buffer overflow in locale_get_display_name and
+    uloc_getDisplayName (libicu 4.8.1)). (Stas)
 
 - Network:
   . Fixed bug #67432 (Fix potential segfault in dns_get_record()). 
