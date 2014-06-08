@@ -7,6 +7,12 @@ PHP                                                                        NEWS
     (Remi) (CVE-2014-3981)
   . Fixed bug #67392 (dtrace breaks argument unpack). (Nikita)
 
+- OpenSSL:
+  . Fixed bug #65698 (certificates validity parsing does not work past 2050).
+    (Paul Oehler)
+  . Fixed bug #66636 (openssl_x509_parse warning with V_ASN1_GENERALIZEDTIME).
+    (Paul Oehler)
+
 - Tokenizer:
   . Fixed bug #67395 (token_name() does not return name for T_POW and T_POW_EQUAL
     token). (Ferenc)
