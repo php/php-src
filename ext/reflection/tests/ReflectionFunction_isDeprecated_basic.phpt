@@ -10,6 +10,6 @@ if (!extension_loaded('reflection') || !defined('PHP_VERSION_ID') || PHP_VERSION
 --FILE-- 
 <?php
 $rc = new ReflectionFunction('ereg');
-echo var_dump($rc->isDeprecated());
+var_dump($rc->isDeprecated());
 --EXPECTF--
 bool(true)
