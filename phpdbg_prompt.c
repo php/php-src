@@ -38,8 +38,6 @@
 #include "phpdbg_lexer.h"
 #include "phpdbg_parser.h"
 
-int yyparse(phpdbg_param_t *stack, yyscan_t scanner);
-
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, "s"),
@@ -251,7 +249,7 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 
 						phpdbg_init_param(&stack, STACK_PARAM);
 
-						if (phpdbg_do_parse(&stack, input) <= 0) {
+						if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
 							switch (phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
 								case FAILURE:
 //									if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -1003,7 +1001,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		do {
 			phpdbg_init_param(&stack, STACK_PARAM);
 
-			if (phpdbg_do_parse(&stack, input) <= 0) {
+			if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
 				switch (ret = phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
 					case FAILURE:
 						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
