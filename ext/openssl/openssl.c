@@ -1973,11 +1973,10 @@ PHP_FUNCTION(openssl_x509_parse)
 	if (tmpstr) {
 		add_assoc_string(return_value, "alias", tmpstr, 1);
 	}
-/*
-	add_assoc_long(return_value, "signaturetypeLONG", X509_get_signature_type(cert));
-	add_assoc_string(return_value, "signaturetype", OBJ_nid2sn(X509_get_signature_type(cert)), 1);
-	add_assoc_string(return_value, "signaturetypeLN", OBJ_nid2ln(X509_get_signature_type(cert)), 1);
-*/
+
+	i2t_ASN1_OBJECT(buf, sizeof(buf)-1, (cert)->sig_alg->algorithm);
+	add_assoc_string(return_value, "signatureType", buf, 1);
+
 	MAKE_STD_ZVAL(subitem);
 	array_init(subitem);
 
