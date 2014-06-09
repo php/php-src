@@ -30,6 +30,9 @@ PHP                                                                        NEWS
 - PDO-ODBC:
   . Fixed bug #50444 (PDO-ODBC changes for 64-bit).
 
+- SOAP:
+  . Implemented FR #49898 (Add SoapClient::__getCookies()). (Boro Sitnikovski)
+
 - SPL:
   . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
   . Fixed bug #67360 (Missing element after ArrayObject::getIterator). (Adam)

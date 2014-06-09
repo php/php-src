@@ -309,6 +309,9 @@ PHP 5.5 UPGRADE NOTES
 - LDAP:
   - ldap_modify_batch() (5.5.10)
 
+- SOAP:
+  - SoapClient::__getCookies() (5.5.14)
+
 - Sockets:
   - socket_sendmsg()
   - socket_recvmsg()
