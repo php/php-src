@@ -1111,9 +1111,10 @@ fetch_from_array:
 		long offset;
 
 		if (type != BP_VAR_UNSET && UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-convert_to_array:
 			zval_dtor(container);
-			array_init(container);
+convert_to_array:
+			ZVAL_NEW_ARR(container);
+			zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
 			goto fetch_from_array;
 		}
 		if (dim == NULL) {
