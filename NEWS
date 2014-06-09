@@ -3,18 +3,22 @@ PHP                                                                        NEWS
 ?? ??? 2014, PHP 5.6.0 Release Candidate 1
 
 - Core:
+  . Implemented FR #64744 (Differentiate between member function call on a null 
+    and non-null, non-objects). (Boro Sitnikovski)
   . Fixed bug #66622 (Closures do not correctly capture the late bound class
     (static::) in some cases). (Levi Morrison)
   . Fixed bug #67390 (insecure temporary file use in the configure script).
     (Remi) (CVE-2014-3981)
   . Fixed bug #67392 (dtrace breaks argument unpack). (Nikita)
 
-
 - OpenSSL:
   . Fixed bug #65698 (certificates validity parsing does not work past 2050).
     (Paul Oehler)
   . Fixed bug #66636 (openssl_x509_parse warning with V_ASN1_GENERALIZEDTIME).
     (Paul Oehler)
+
+- SOAP:
+  . Implemented FR #49898 (Add SoapClient::__getCookies()). (Boro Sitnikovski)
 
 - Tokenizer:
   . Fixed bug #67395 (token_name() does not return name for T_POW and T_POW_EQUAL
