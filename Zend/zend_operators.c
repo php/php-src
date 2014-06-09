@@ -1621,13 +1621,45 @@ ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend
 
 ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	return string_compare_function_ex(result, op1, op2, 0 TSRMLS_CC);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING) &&
+	    EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+		if (Z_STR_P(op1) == Z_STR_P(op2)) {
+			ZVAL_LONG(result, 0);
+		} else {
+			ZVAL_LONG(result, zend_binary_strcmp(Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2)));
+		}
+	} else {
+		zend_string *str1 = zval_get_string(op1);
+		zend_string *str2 = zval_get_string(op2);
+
+		ZVAL_LONG(result, zend_binary_strcmp(str1->val, str1->len, str2->val, str2->len));
+
+		STR_RELEASE(str1);
+		STR_RELEASE(str2);
+	}
+	return SUCCESS;
 }
 /* }}} */
 
 ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	return string_compare_function_ex(result, op1, op2, 1 TSRMLS_CC);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING) &&
+	    EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+		if (Z_STR_P(op1) == Z_STR_P(op2)) {
+			ZVAL_LONG(result, 0);
+		} else {
+			ZVAL_LONG(result, zend_binary_strcasecmp_l(Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2)));
+		}
+	} else {
+		zend_string *str1 = zval_get_string(op1);
+		zend_string *str2 = zval_get_string(op2);
+
+		ZVAL_LONG(result, zend_binary_strcasecmp_l(str1->val, str1->len, str2->val, str1->len));
+
+		STR_RELEASE(str1);
+		STR_RELEASE(str2);
+	}
+	return SUCCESS;
 }
 /* }}} */
 
