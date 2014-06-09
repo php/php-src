@@ -4,10 +4,10 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed BC break introduced by patch for bug #67072. (Anatol)
-  . Fixed bug #67390 (insecure temporary file use in the configure script).
-    (Remi) (CVE-2014-3981)
   . Fixed bug #66622 (Closures do not correctly capture the late bound class 
     (static::) in some cases). (Levi Morrison)
+  . Fixed bug #67390 (insecure temporary file use in the configure script).
+    (Remi) (CVE-2014-3981)
 
 - Date:
   . Fixed bug #67308 (Serialize of DateTime truncates fractions of second).
