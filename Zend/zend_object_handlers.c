@@ -299,9 +299,9 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 	zend_property_info *scope_property_info;
 	zend_bool denied_access = 0;
 
-	if (cache_slot != -1 && ce == CACHED_PTR_EX(EG(active_op_array), cache_slot)) {
+	if (cache_slot != -1 && EXPECTED(ce == CACHED_PTR_EX(EG(active_op_array), cache_slot))) {
 		property_info = CACHED_PTR_EX(EG(active_op_array), cache_slot + 1);
-		if (!property_info) {
+		if (UNEXPECTED(!property_info)) {
 			EG(std_property_info).flags = ZEND_ACC_PUBLIC;
 			EG(std_property_info).name = member;
 			EG(std_property_info).ce = ce;
