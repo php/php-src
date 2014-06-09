@@ -243,6 +243,7 @@ namespace phpdbg\testing {
 			printf("\t--options\toptions to pass to phpdbg%s", PHP_EOL);
 			printf("\t--phpdbg\tpath to phpdbg binary%s", PHP_EOL);
 			printf('[flags]:%s', PHP_EOL);
+			printf("\t-diff2stdout\t\twrite diff to stdout instead of files%s", PHP_EOL);
 			printf("\t-nodiff\t\tdo not write diffs on failure%s", PHP_EOL);
 			printf("\t-nolog\t\tdo not write logs on failure%s", PHP_EOL);
 			printf('[examples]:%s', PHP_EOL);
