@@ -1281,7 +1281,8 @@ static void zend_accel_set_auto_globals(int mask TSRMLS_DC)
 	int n = 1;
 
 	for (i = 0; i < ag_size ; i++) {
-		if (mask & n) {
+		if ((mask & n) && !(ZCG(auto_globals_mask) & n)) {
+			ZCG(auto_globals_mask) |= n;
 			zend_is_auto_global(jit_auto_globals_str[i] TSRMLS_CC);
 		}
 		n += n;
@@ -2110,6 +2111,7 @@ static void accel_activate(void)
 
 	SHM_UNPROTECT();
 	/* PHP-5.4 and above return "double", but we use 1 sec precision */
+	ZCG(auto_globals_mask) = 0;
 	ZCG(request_time) = (time_t)sapi_get_request_time(TSRMLS_C);
 	ZCG(cache_opline) = NULL;
 	ZCG(cache_persistent_script) = NULL;

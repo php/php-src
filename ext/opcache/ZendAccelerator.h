@@ -261,6 +261,7 @@ typedef struct _zend_accel_globals {
 	char                   *include_path;     /* current section of "include_path" directive */
 	int                     include_path_len; /* "include_path" string length */
 	int                     include_path_check;
+	int                     auto_globals_mask;
 	time_t                  request_time;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
