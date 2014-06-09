@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     (static::) in some cases). (Levi Morrison)
   . Fixed bug #67390 (insecure temporary file use in the configure script).
     (Remi) (CVE-2014-3981)
+  . Fixed bug #67399 (putenv with empty variable may lead to crash). (Stas)
 
 - Date:
   . Fixed bug #67308 (Serialize of DateTime truncates fractions of second).
