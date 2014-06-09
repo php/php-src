@@ -40,25 +40,29 @@
 			STR_RELEASE(str); \
 			str = new_str; \
 		} else { \
-	    	new_str = _zend_shared_memdup((void*)str, _STR_HEADER_SIZE + (str)->len + 1, 0 TSRMLS_CC); \
+	    	new_str = zend_accel_memdup((void*)str, _STR_HEADER_SIZE + (str)->len + 1); \
 			STR_RELEASE(str); \
 	    	str = new_str; \
+	    	STR_HASH_VAL(str); \
 	    	GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
 		} \
     } while (0)
-# define zend_accel_memdup_string(str) \
-	zend_accel_memdup(str, _STR_HEADER_SIZE + (str)->len + 1)
+# define zend_accel_memdup_string(str) do { \
+		str = zend_accel_memdup(str, _STR_HEADER_SIZE + (str)->len + 1); \
+    	STR_HASH_VAL(str); \
+		GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
+	} while (0)
 # define zend_accel_store_interned_string(str) do { \
 		if (!IS_ACCEL_INTERNED(str)) { \
 			zend_accel_store_string(str); \
 		} \
 	} while (0)
-# define zend_accel_memdup_interned_string(str) \
-	(IS_ACCEL_INTERNED(str) ? str : zend_accel_memdup_string(str))
+# define zend_accel_memdup_interned_string(str) do { \
+		if (!IS_ACCEL_INTERNED(str)) { \
+			zend_accel_memdup_string(str); \
+		} \
+	} while (0)
 #else
-# define zend_accel_memdup_interned_string(str, len) \
-	zend_accel_memdup(str, len)
-
 # define zend_accel_store_interned_string(str, len) \
 	zend_accel_store(str, len)
 #endif
@@ -66,6 +70,7 @@
 typedef void (*zend_persist_func_t)(zval* TSRMLS_DC);
 
 static void zend_persist_zval(zval *z TSRMLS_DC);
+static void zend_persist_zval_const(zval *z TSRMLS_DC);
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 static const zend_uint uninitialized_bucket = {INVALID_IDX};
@@ -101,7 +106,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	}
 }
 
-static void zend_hash_persist_immutable(HashTable *ht, zend_persist_func_t pPersistElement TSRMLS_DC)
+static void zend_hash_persist_immutable(HashTable *ht TSRMLS_DC)
 {
 	uint idx;
 	Bucket *p;
@@ -123,11 +128,11 @@ static void zend_hash_persist_immutable(HashTable *ht, zend_persist_func_t pPers
 
 		/* persist bucket and key */
 		if (p->key) {
-			zend_accel_store_interned_string(p->key);
+			zend_accel_memdup_interned_string(p->key);
 		}
 
 		/* persist the data itself */
-		pPersistElement(&p->val TSRMLS_CC);
+		zend_persist_zval_const(&p->val TSRMLS_CC);
 	}
 }
 
@@ -168,6 +173,7 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			zend_accel_store_interned_string(Z_STR_P(z));
 			Z_GC_FLAGS_P(z) |= flags;
+			Z_TYPE_FLAGS_P(z) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 			break;
 		case IS_ARRAY:
 #if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
@@ -179,7 +185,64 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 			} else {
 				if (Z_IMMUTABLE_P(z)) {
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
-					zend_hash_persist_immutable(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
+					zend_hash_persist_immutable(Z_ARRVAL_P(z) TSRMLS_CC);
+				} else {
+					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
+					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
+				}
+			}
+			break;
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		case IS_REFERENCE:
+			new_ptr = zend_shared_alloc_get_xlat_entry(Z_REF_P(z));
+			if (new_ptr) {
+				Z_REF_P(z) = new_ptr;
+			} else {
+				zend_accel_store(Z_REF_P(z), sizeof(zend_reference));
+				zend_persist_zval(Z_REFVAL_P(z) TSRMLS_CC);
+			}
+			break;
+		case IS_CONSTANT_AST:
+			new_ptr = zend_shared_alloc_get_xlat_entry(Z_AST_P(z));
+			if (new_ptr) {
+				Z_AST_P(z) = new_ptr;
+			} else {
+				zend_accel_store(Z_AST_P(z), sizeof(zend_ast_ref));
+				Z_ASTVAL_P(z) = zend_persist_ast(Z_ASTVAL_P(z) TSRMLS_CC);
+			}
+			break;
+#endif
+	}
+}
+
+static void zend_persist_zval_const(zval *z TSRMLS_DC)
+{
+	zend_uchar flags;
+	void *new_ptr;
+
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
+	switch (Z_TYPE_P(z)) {
+#else
+	switch (Z_TYPE_P(z)) {
+#endif
+		case IS_STRING:
+		case IS_CONSTANT:
+			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
+			zend_accel_memdup_interned_string(Z_STR_P(z));
+			Z_GC_FLAGS_P(z) |= flags;
+			Z_TYPE_FLAGS_P(z) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+			break;
+		case IS_ARRAY:
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
+		case IS_CONSTANT_ARRAY:
+#endif
+			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
+			if (new_ptr) {
+				Z_ARR_P(z) = new_ptr;
+			} else {
+				if (Z_IMMUTABLE_P(z)) {
+					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
+					zend_hash_persist_immutable(Z_ARRVAL_P(z) TSRMLS_CC);
 				} else {
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
@@ -405,7 +468,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 	if (op_array->filename) {
 		/* do not free! PHP has centralized filename storage, compiler will free it */
-		op_array->filename = zend_accel_memdup_string(op_array->filename);
+		zend_accel_memdup_string(op_array->filename);
 	}
 
 	if (op_array->arg_info) {
@@ -545,7 +608,7 @@ static void zend_persist_class_entry(zval *zv TSRMLS_DC)
 
 		if (ZEND_CE_FILENAME(ce)) {
 			/* do not free! PHP has centralized filename storage, compiler will free it */
-			ZEND_CE_FILENAME(ce) = zend_accel_memdup_string(ZEND_CE_FILENAME(ce));
+			zend_accel_memdup_string(ZEND_CE_FILENAME(ce));
 		}
 		if (ZEND_CE_DOC_COMMENT(ce)) {
 			if (ZCG(accel_directives).save_comments) {

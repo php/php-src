@@ -60,6 +60,7 @@ void zend_interned_strings_init(TSRMLS_D)
 #else
 	str = STR_ALLOC(sizeof("")-1, 1);
 	str->val[0] = '\000';
+	STR_HASH_VAL(str);
 	str->gc.u.v.flags |= IS_STR_INTERNED;
 	CG(empty_string) = str;
 #endif

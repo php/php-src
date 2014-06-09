@@ -159,6 +159,7 @@ void init_executor(TSRMLS_D) /* {{{ */
 	ZVAL_LONG(zend_vm_stack_top_inc(TSRMLS_C), 0);
 
 	zend_hash_init(&EG(symbol_table).ht, 64, NULL, ZVAL_PTR_DTOR, 0);
+	GC_REFCOUNT(&EG(symbol_table)) = 1;
 	GC_TYPE_INFO(&EG(symbol_table)) = IS_ARRAY;
 	EG(active_symbol_table) = &EG(symbol_table);
 
