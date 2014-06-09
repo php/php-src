@@ -373,6 +373,8 @@ PHP 5.4 UPGRADE NOTES
 
 - Added iterator support in MySQLi. mysqli_result implements Traversable.
 
+- Since 5.4.30, SOAPClient has __getCookies() method. 
+
 ==============================
 6. Changes to existing methods
 ==============================
