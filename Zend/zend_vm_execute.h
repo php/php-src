@@ -8423,22 +8423,21 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_END_SILENCE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval restored_error_reporting;
+	char buf[MAX_LENGTH_OF_LONG + 1];
+	char *res;
 
 	SAVE_OPLINE();
 	if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(opline->op1.var)) != 0) {
-		ZVAL_LONG(&restored_error_reporting, Z_LVAL_P(EX_VAR(opline->op1.var)));
-		EG(error_reporting) = Z_LVAL(restored_error_reporting);
-		convert_to_string(&restored_error_reporting);
+		EG(error_reporting) = Z_LVAL_P(EX_VAR(opline->op1.var));
+		_zend_print_signed_to_buf(buf + sizeof(buf) - 1, EG(error_reporting), unsigned long, res);
 		if (EXPECTED(EG(error_reporting_ini_entry) != NULL)) {
 			if (EXPECTED(EG(error_reporting_ini_entry)->modified &&
 			    EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value)) {
 				efree(EG(error_reporting_ini_entry)->value);
 			}
-			EG(error_reporting_ini_entry)->value = estrndup(Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting));
-			EG(error_reporting_ini_entry)->value_length = Z_STRLEN(restored_error_reporting);
+			EG(error_reporting_ini_entry)->value_length = buf + sizeof(buf) - 1 - res;
+			EG(error_reporting_ini_entry)->value = estrndup(res, EG(error_reporting_ini_entry)->value_length);
 		}
-		zval_dtor(&restored_error_reporting);
 	}
 //???	if (EX(old_error_reporting) == EX_VAR(opline->op1.var)) {
 //???		EX(old_error_reporting) = NULL;
