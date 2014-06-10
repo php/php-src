@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
     check). (Francisco Alonso, Jan Kaluza, Remi)
 
+- Network:
+  . Fixed bug #67432 (Fix potential segfault in dns_get_record()). 
+    (CVE-2014-4049). (Sara)
+
 - OpenSSL:
   . Fixed bug #65698 (certificates validity parsing does not work past 2050). 
     (Paul Oehler)
