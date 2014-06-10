@@ -10,6 +10,9 @@ PHP                                                                        NEWS
     (Remi) (CVE-2014-3981)
   . Fixed bug #67399 (putenv with empty variable may lead to crash). (Stas)
 
+- CLI server:
+  . Fixed Bug #67406i (built-in web-server segfaults on startup). (Remi)
+
 - Date:
   . Fixed bug #67308 (Serialize of DateTime truncates fractions of second).
     (Adam)
