@@ -23,9 +23,11 @@ PHP                                                                        NEWS
   . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary 
     check). 
   . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
-    string size). (Francisco Alonso, Remi)
+    string size). (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67411 (fileinfo: cdf_check_stream_offset insufficient boundary
-    check). (Francisco Alonso, Remi)
+    check). (Francisco Alonso, Jan Kaluza, Remi)
+  . Fixed bug #67412 (fileinfo: cdf_count_chain insufficient boundary check).
+    ((Francisco Alonso, Jan Kaluza, Remi)
 
 - OpenSSL:
   . Fixed bug #65698 (certificates validity parsing does not work past 2050). 
