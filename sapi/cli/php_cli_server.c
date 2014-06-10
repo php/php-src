@@ -194,6 +194,7 @@ typedef struct php_cli_server {
 	size_t router_len;
 	socklen_t socklen;
 	HashTable clients;
+	HashTable extension_mime_types;
 } php_cli_server;
 
 typedef struct php_cli_server_http_response_status_code_pair {
@@ -463,15 +464,14 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	smart_str_appendl_ex(buffer, "Connection: close\r\n", sizeof("Connection: close\r\n") - 1, persistent);
 } /* }}} */
 
-static const char *get_mime_type(const char *ext, size_t ext_len) /* {{{ */
+static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
 {
-	php_cli_server_ext_mime_type_pair *pair;
-	for (pair = mime_type_map; pair->ext; pair++) {
-		size_t len = strlen(pair->ext);
-		if (len == ext_len && memcmp(pair->ext, ext, len) == 0) {
-			return pair->mime_type;
-		}
+	char *mime_type = NULL;
+
+	if (zend_hash_find(&server->extension_mime_types, ext, ext_len + 1, (void **) &mime_type) == SUCCESS) {
+		return mime_type;
 	}
+
 	return NULL;
 } /* }}} */
 
@@ -2042,7 +2042,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 	{
 		php_cli_server_chunk *chunk;
 		smart_str buffer = { 0 };
-		const char *mime_type = get_mime_type(client->request.ext, client->request.ext_len);
+		const char *mime_type = get_mime_type(server, client->request.ext, client->request.ext_len);
 		if (!mime_type) {
 			mime_type = "application/octet-stream";
 		}
@@ -2202,9 +2202,30 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 }
 /* }}} */
 
+static int php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
+{
+	const php_cli_server_ext_mime_type_pair *pair;
+
+	if (zend_hash_init(&server->extension_mime_types, 0, NULL, NULL, 1) != SUCCESS) {
+		return FAILURE;
+	}
+
+	for (pair = mime_type_map; pair->ext; pair++) {
+		size_t ext_len = 0, mime_type_len = 0;
+
+		ext_len = strlen(pair->ext);
+		mime_type_len = strlen(pair->mime_type);
+
+		zend_hash_add(&server->extension_mime_types, pair->ext, ext_len + 1, (void *) pair->mime_type, mime_type_len + 1, NULL);
+	}
+
+	return SUCCESS;
+} /* }}} */
+
 static void php_cli_server_dtor(php_cli_server *server TSRMLS_DC) /* {{{ */
 {
 	zend_hash_destroy(&server->clients);
+	zend_hash_destroy(&server->extension_mime_types);
 	if (server->server_sock >= 0) {
 		closesocket(server->server_sock);
 	}
@@ -2320,6 +2341,11 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 	} else {
 		server->router = NULL;
 		server->router_len = 0;
+	}
+
+	if (php_cli_server_mime_type_ctor(server, mime_type_map) == FAILURE) {
+		retval = FAILURE;
+		goto out;
 	}
 
 	server->is_running = 1;
