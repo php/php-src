@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary check).
+  . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
+    string size). (Francisco Alonso, Remi)
 
 - OPCache:
   . Fixed issue #183 (TMP_VAR is not only used once). (Dmitry, Laruence)
