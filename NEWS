@@ -17,7 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug #67411 (fileinfo: cdf_check_stream_offset insufficient boundary
     check). (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67412 (fileinfo: cdf_count_chain insufficient boundary check).
-    ((Francisco Alonso, Jan Kaluza, Remi)
+    (Francisco Alonso, Jan Kaluza, Remi)
+  . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
+    check). (Francisco Alonso, Jan Kaluza, Remi)
 
 - OpenSSL:
   . Fixed bug #65698 (certificates validity parsing does not work past 2050).
