@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     check). 
   . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
     string size). (Francisco Alonso, Remi)
+  . Fixed bug #67411 (fileinfo: cdf_check_stream_offset insufficient boundary
+    check). (Francisco Alonso, Remi)
 
 - OpenSSL:
   . Fixed bug #65698 (certificates validity parsing does not work past 2050). 
