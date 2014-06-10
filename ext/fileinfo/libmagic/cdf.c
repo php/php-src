@@ -470,7 +470,8 @@ size_t
 cdf_count_chain(const cdf_sat_t *sat, cdf_secid_t sid, size_t size)
 {
 	size_t i, j;
-	cdf_secid_t maxsector = (cdf_secid_t)(sat->sat_len * size);
+	cdf_secid_t maxsector = (cdf_secid_t)((sat->sat_len * size)
+	    / sizeof(maxsector));
 
 	DPRINTF(("Chain:"));
 	for (j = i = 0; sid >= 0; i++, j++) {
@@ -480,8 +481,8 @@ cdf_count_chain(const cdf_sat_t *sat, cdf_secid_t sid, size_t size)
 			errno = EFTYPE;
 			return (size_t)-1;
 		}
-		if (sid > maxsector) {
-			DPRINTF(("Sector %d > %d\n", sid, maxsector));
+		if (sid >= maxsector) {
+			DPRINTF(("Sector %d >= %d\n", sid, maxsector));
 			errno = EFTYPE;
 			return (size_t)-1;
 		}
