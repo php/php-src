@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     (Remi) (CVE-2014-3981)
   . Fixed bug #67392 (dtrace breaks argument unpack). (Nikita)
 
+- Fileinfo:
+  . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
+    string size). (Francisco Alonso, Remi)
+
 - OpenSSL:
   . Fixed bug #65698 (certificates validity parsing does not work past 2050).
     (Paul Oehler)
