@@ -812,7 +812,11 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
 	if (cdf_check_stream_offset(sst, h, e, 0, __LINE__) == -1)
 		goto out;
 	for (i = 0; i < sh.sh_properties; i++) {
-		size_t ofs = CDF_GETUINT32(p, (i << 1) + 1);
+		size_t ofs, tail = (i << 1) + 1;
+		if (cdf_check_stream_offset(sst, h, p, tail * sizeof(uint32_t),
+		    __LINE__) == -1)
+			goto out;
+		ofs = CDF_GETUINT32(p, tail);
 		q = (const uint8_t *)(const void *)
 		    ((const char *)(const void *)p + ofs
 		    - 2 * sizeof(uint32_t));
