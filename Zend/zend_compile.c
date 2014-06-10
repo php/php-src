@@ -7501,6 +7501,7 @@ ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC) /* {{{ */
 	}
 
 	Z_TYPE_FLAGS_P(zv) = IS_TYPE_IMMUTABLE;
+	GC_REFCOUNT(Z_COUNTED_P(zv)) = 2;
 	Z_ARRVAL_P(zv)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 
 	/* store as an anonymous constant */
