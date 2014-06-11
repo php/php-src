@@ -3523,7 +3523,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 		} else {
 			zval_ptr_dtor(&object_zval);
 		}
-		ZEND_VM_JMP(EX(op_array)->opcodes + opline->op2.opline_num);
+		ZEND_VM_JMP(opline->op2.jmp_addr);
 	} else {
 		call_slot *call = EX(call_slots) + opline->extended_value;
 
@@ -4290,7 +4290,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_P(array_ptr)->get_class_entry == NULL) {
 				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 
 			ce = Z_OBJCE_P(array_ptr);
@@ -4430,7 +4430,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		FREE_OP1_VAR_PTR();
 	}
 	if (is_empty) {
-		ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+		ZEND_VM_JMP(opline->op2.jmp_addr);
 	} else {
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -4465,7 +4465,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 		default:
 		case ZEND_ITER_INVALID:
 			zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-			ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+			ZEND_VM_JMP(opline->op2.jmp_addr);
 
 		case ZEND_ITER_PLAIN_OBJECT: {
 			zend_object *zobj = Z_OBJ_P(array);
@@ -4478,7 +4478,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			while (1) {
 				if ((value = zend_hash_get_current_data(fe_ht)) == NULL) {
 					/* reached end of iteration */
-					ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+					ZEND_VM_JMP(opline->op2.jmp_addr);
 				}
 
 				if (Z_TYPE_P(value) == IS_INDIRECT) {
@@ -4520,7 +4520,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			zend_hash_set_pointer(fe_ht, (HashPointer*)EX_VAR((opline+1)->op1.var));
 			if ((value = zend_hash_get_current_data(fe_ht)) == NULL) {
 				/* reached end of iteration */
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 			if (key) {
 				zend_hash_get_current_key_zval(fe_ht, key);
@@ -4547,7 +4547,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 					zval_ptr_dtor(array_ref);
 					HANDLE_EXCEPTION();
 				}
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 			value = iter->funcs->get_current_data(iter TSRMLS_CC);
 			if (UNEXPECTED(EG(exception) != NULL)) {
@@ -4556,7 +4556,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			}
 			if (!value) {
 				/* failure in get_current_data */
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 			if (key) {
 				if (iter->funcs->get_current_key) {

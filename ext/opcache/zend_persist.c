@@ -437,6 +437,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 					case ZEND_JMP_SET_VAR:
 #endif
+					case ZEND_NEW:
+					case ZEND_FE_RESET:
+					case ZEND_FE_FETCH:
 						ZEND_OP2(opline).jmp_addr = &new_opcodes[ZEND_OP2(opline).jmp_addr - op_array->opcodes];
 						break;
 				}

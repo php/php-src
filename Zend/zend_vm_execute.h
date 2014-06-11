@@ -988,7 +988,7 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			zval_ptr_dtor(&object_zval);
 		}
-		ZEND_VM_JMP(EX(op_array)->opcodes + opline->op2.opline_num);
+		ZEND_VM_JMP(opline->op2.jmp_addr);
 	} else {
 		call_slot *call = EX(call_slots) + opline->extended_value;
 
@@ -3061,7 +3061,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_P(array_ptr)->get_class_entry == NULL) {
 				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 
 			ce = Z_OBJCE_P(array_ptr);
@@ -3201,7 +3201,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	}
 	if (is_empty) {
-		ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+		ZEND_VM_JMP(opline->op2.jmp_addr);
 	} else {
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -8251,7 +8251,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_P(array_ptr)->get_class_entry == NULL) {
 				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 
 			ce = Z_OBJCE_P(array_ptr);
@@ -8391,7 +8391,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	}
 	if (is_empty) {
-		ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+		ZEND_VM_JMP(opline->op2.jmp_addr);
 	} else {
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -13502,7 +13502,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_P(array_ptr)->get_class_entry == NULL) {
 				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 
 			ce = Z_OBJCE_P(array_ptr);
@@ -13642,7 +13642,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 	}
 	if (is_empty) {
-		ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+		ZEND_VM_JMP(opline->op2.jmp_addr);
 	} else {
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -13677,7 +13677,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		default:
 		case ZEND_ITER_INVALID:
 			zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-			ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+			ZEND_VM_JMP(opline->op2.jmp_addr);
 
 		case ZEND_ITER_PLAIN_OBJECT: {
 			zend_object *zobj = Z_OBJ_P(array);
@@ -13690,7 +13690,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			while (1) {
 				if ((value = zend_hash_get_current_data(fe_ht)) == NULL) {
 					/* reached end of iteration */
-					ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+					ZEND_VM_JMP(opline->op2.jmp_addr);
 				}
 
 				if (Z_TYPE_P(value) == IS_INDIRECT) {
@@ -13732,7 +13732,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zend_hash_set_pointer(fe_ht, (HashPointer*)EX_VAR((opline+1)->op1.var));
 			if ((value = zend_hash_get_current_data(fe_ht)) == NULL) {
 				/* reached end of iteration */
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 			if (key) {
 				zend_hash_get_current_key_zval(fe_ht, key);
@@ -13759,7 +13759,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					zval_ptr_dtor(array_ref);
 					HANDLE_EXCEPTION();
 				}
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 			value = iter->funcs->get_current_data(iter TSRMLS_CC);
 			if (UNEXPECTED(EG(exception) != NULL)) {
@@ -13768,7 +13768,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			}
 			if (!value) {
 				/* failure in get_current_data */
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 			if (key) {
 				if (iter->funcs->get_current_key) {
@@ -30723,7 +30723,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_P(array_ptr)->get_class_entry == NULL) {
 				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 
 			ce = Z_OBJCE_P(array_ptr);
@@ -30863,7 +30863,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	}
 	if (is_empty) {
-		ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+		ZEND_VM_JMP(opline->op2.jmp_addr);
 	} else {
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
