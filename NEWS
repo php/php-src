@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
     check). (Francisco Alonso, Jan Kaluza, Remi)
 
+- Network:
+  . Fix potential segfault in dns_get_record(). (Sara)
+
 - OPCache:
   . Fixed issue #183 (TMP_VAR is not only used once). (Dmitry, Laruence)
 
