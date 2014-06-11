@@ -364,14 +364,14 @@ ZEND_API void zend_bigint_long_divide(zend_bigint *out, long num, const zend_big
 /* Finds the remainder of the division of a bigint by a bigint and stores result in out */
 ZEND_API void zend_bigint_modulus(zend_bigint *out, const zend_bigint *num, const zend_bigint *divisor)
 {
-	mpz_fdiv_r(out->mpz, num->mpz, divisor->mpz);
+	mpz_tdiv_r(out->mpz, num->mpz, divisor->mpz);
 }
 
 /* Finds the remainder of the division of a bigint by a long and stores result in out */
 ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num, long divisor)
 {
 	WITH_TEMP_MPZ_FROM_LONG(divisor, divisor_mpz, {
-		mpz_fdiv_r(out->mpz, num->mpz, divisor_mpz);
+		mpz_tdiv_r(out->mpz, num->mpz, divisor_mpz);
 	)}
 }
 
@@ -379,7 +379,7 @@ ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num,
 ZEND_API void zend_bigint_long_modulus(zend_bigint *out, long num, const zend_bigint *divisor)
 {
 	WITH_TEMP_MPZ_FROM_LONG(num, num_mpz, {
-		mpz_fdiv_r(out->mpz, num_mpz, divisor->mpz);
+		mpz_tdiv_r(out->mpz, num_mpz, divisor->mpz);
 	)}
 }
 
