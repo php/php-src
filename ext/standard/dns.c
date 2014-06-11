@@ -517,6 +517,10 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				
 				while (ll < dlen) {
 					n = cp[ll];
+					if ((n + ll) > dlen) {
+						// bad record, don't set anything
+						break;
+					}
 					memcpy(tp + ll , cp + ll + 1, n);
 					add_next_index_stringl(entries, cp + ll + 1, n, 1);
 					ll = ll + n + 1;
