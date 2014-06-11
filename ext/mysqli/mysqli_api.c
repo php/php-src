@@ -1475,7 +1475,14 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS)
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql;
 
-	if (getThis() && (Z_MYSQLI_P(getThis()))->ptr) {
+// TODO: We can't properly check if this was to mysql_init() in a class method 
+//       or a call to mysqli->init().
+//       To solve the problem, we added instanceof check for the class of $this
+//       ???
+	if (getThis() &&
+	    instanceof_function(Z_OBJCE_P(getThis()), mysqli_link_class_entry TSRMLS_CC) &&
+	    (Z_MYSQLI_P(getThis()))->ptr) {
+//???	if (getThis() && (Z_MYSQLI_P(getThis()))->ptr) {
 		return;
 	}
 
