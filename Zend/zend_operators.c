@@ -1220,8 +1220,9 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				/* check for overflow by comparing sign bits */
 				if ((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
 					&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (lval & LONG_SIGN_MASK)) {
-
-					ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+					zend_bigint *out = zend_bigint_init_alloc();
+					zend_bigint_long_add_long(out, Z_LVAL_P(op1), Z_LVAL_P(op2));
+					ZVAL_BIGINT(result, out);
 				} else {
 					ZVAL_LONG(result, lval);
 				}
@@ -1332,8 +1333,9 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				/* check for overflow by comparing sign bits */
 				if ((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
 					&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (lval & LONG_SIGN_MASK)) {
-
-					ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+					zend_bigint *out = zend_bigint_init_alloc();
+					zend_bigint_long_subtract_long(out, Z_LVAL_P(op1), Z_LVAL_P(op2));
+					ZVAL_BIGINT(result, out);
 				} else {
 					ZVAL_LONG(result, lval);
 				}
@@ -3008,11 +3010,12 @@ try_again:
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			if (Z_LVAL_P(op1) == LONG_MAX) {
-				/* switch to double */
-				double d = (double)Z_LVAL_P(op1);
-				ZVAL_DOUBLE(op1, d+1);
+				/* switch to bigint */
+				zend_bigint *out = zend_bigint_init_alloc();
+				zend_bigint_long_add_long(out, Z_LVAL_P(op1), 1);
+				ZVAL_BIGINT(op1, out);
 			} else {
-			Z_LVAL_P(op1)++;
+				Z_LVAL_P(op1)++;
 			}
 			break;
 		case IS_DOUBLE:
@@ -3087,10 +3090,12 @@ try_again:
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			if (Z_LVAL_P(op1) == LONG_MIN) {
-				double d = (double)Z_LVAL_P(op1);
-				ZVAL_DOUBLE(op1, d-1);
+				/* switch to bigint */
+				zend_bigint *out = zend_bigint_init_alloc();
+				zend_bigint_long_subtract_long(out, Z_LVAL_P(op1), 1);
+				ZVAL_BIGINT(op1, out);
 			} else {
-			Z_LVAL_P(op1)--;
+				Z_LVAL_P(op1)--;
 			}
 			break;
 		case IS_DOUBLE:

@@ -485,7 +485,9 @@ ZEND_API void zend_update_current_locale(void);
 static zend_always_inline int fast_increment_function(zval *op1)
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-#if defined(__GNUC__) && defined(__i386__)
+/* assembly commented-out as it uses the old float overflow behaviour
+ * however, now longs overflow to bigints, so we can't use it */
+/*#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"incl (%0)\n\t"
 			"jno  0f\n\t"
@@ -511,14 +513,15 @@ static zend_always_inline int fast_increment_function(zval *op1)
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
-#else
+#else*/
 		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MAX)) {
-			/* switch to double */
-			ZVAL_DOUBLE(op1, (double)LONG_MAX + 1.0);
+			zend_bigint *out = zend_bigint_init_alloc();
+			zend_bigint_long_add_long(out, Z_LVAL_P(op1), 1);
+			ZVAL_BIGINT(op1, out);
 		} else {
 			Z_LVAL_P(op1)++;
 		}
-#endif
+/*#endif*/
 		return SUCCESS;
 	}
 	return increment_function(op1);
@@ -527,7 +530,9 @@ static zend_always_inline int fast_increment_function(zval *op1)
 static zend_always_inline int fast_decrement_function(zval *op1)
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-#if defined(__GNUC__) && defined(__i386__)
+/* assembly commented-out as it uses the old float overflow behaviour
+* however, now longs overflow to bigints, so we can't use it */
+/*#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"decl (%0)\n\t"
 			"jno  0f\n\t"
@@ -553,14 +558,16 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
-#else
+#else*/
 		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MIN)) {
-			/* switch to double */
-			ZVAL_DOUBLE(op1, (double)LONG_MIN - 1.0);
+			/* switch to bigint */
+			zend_bigint *out = zend_bigint_init_alloc();
+			zend_bigint_long_subtract_long(out, Z_LVAL_P(op1), 1);
+			ZVAL_BIGINT(op1, out);
 		} else {
 			Z_LVAL_P(op1)--;
 		}
-#endif
+/*#endif*/
 		return SUCCESS;
 	}
 	return decrement_function(op1);
