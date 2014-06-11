@@ -2325,6 +2325,11 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 				ZVAL_BOOL(result, 0);
 				return FAILURE;
 			}
+			/* prevent wrapping quirkiness where >> 64 + x == >> x */
+			if (Z_LVAL_P(op2) >= SIZEOF_LONG * 8) {
+				ZVAL_LONG(result, (Z_LVAL_P(op1) < 0) ? -1 : 0);
+				return SUCCESS;
+			}
 			ZVAL_LONG(result, Z_LVAL_P(op1) >> Z_LVAL_P(op2));
 			return SUCCESS;
 		case TYPE_PAIR(IS_BIGINT, IS_LONG):
@@ -2334,6 +2339,14 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 					zend_error(E_WARNING, "Bit shift by negative number");
 					ZVAL_BOOL(result, 0);
 					return FAILURE;
+				}
+				/* prevent wrapping quirkiness where >> 64 + x == >> x */
+				if (Z_LVAL_P(op2) >= SIZEOF_LONG * 8) {
+					if (op1 == result) {
+						zval_dtor(op1);
+					}
+					ZVAL_LONG(result, (zend_bigint_sign(Z_BIG_P(op1)) < 0) ? -1 : 0);
+					return SUCCESS;
 				}
 				out = zend_bigint_init_alloc();
 				zend_bigint_shift_right_ulong(out, Z_BIG_P(op1), Z_LVAL_P(op2));
