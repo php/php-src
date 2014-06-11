@@ -41,6 +41,7 @@ PHP                                                                        NEWS
   . Implemented FR #49898 (Add SoapClient::__getCookies()). (Boro Sitnikovski)
 
 - SPL:
+  . Fixed bug #66127 (Segmentation fault with ArrayObject unset). (Stas)
   . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
   . Fixed bug #67360 (Missing element after ArrayObject::getIterator). (Adam)
 
