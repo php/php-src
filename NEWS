@@ -30,6 +30,9 @@ PHP                                                                        NEWS
 - SOAP:
   . Implemented FR #49898 (Add SoapClient::__getCookies()). (Boro Sitnikovski)
 
+- SPL:
+  . Fixed bug #66127 (Segmentation fault with ArrayObject unset). (Stas)
+
 - Tokenizer:
   . Fixed bug #67395 (token_name() does not return name for T_POW and T_POW_EQUAL
     token). (Ferenc)
