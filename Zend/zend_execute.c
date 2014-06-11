@@ -896,40 +896,52 @@ static inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value TSRM
 		variable_ptr = Z_REFVAL_P(variable_ptr);
 		if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
 			goto assign_simple;
+		} else if (UNEXPECTED(variable_ptr == value)) {
+			return variable_ptr;
 		}
 	}
 
 	if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(variable_ptr, set) != NULL)) {
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr, value TSRMLS_CC);
-	} else if (EXPECTED(variable_ptr != value)) {
+	} else {
 		if (Z_REFCOUNT_P(variable_ptr)==1) {
 			garbage = Z_COUNTED_P(variable_ptr);
-			if (EXPECTED(!Z_ISREF_P(value))) {
-				ZVAL_COPY(variable_ptr, value);
-			} else {
-				if (Z_REFCOUNT_P(value) == 1) {
-					ZVAL_UNREF(value);
-					ZVAL_COPY(variable_ptr, value);
+			if (UNEXPECTED(Z_REFCOUNTED_P(value))) {
+				if (EXPECTED(!Z_ISREF_P(value))) {
+					Z_ADDREF_P(value);
 				} else {
-					ZVAL_COPY(variable_ptr, Z_REFVAL_P(value));
+					if (Z_REFCOUNT_P(value) == 1) {
+						ZVAL_UNREF(value);
+					} else {
+						value = Z_REFVAL_P(value);
+					}
+					if (Z_REFCOUNTED_P(value)) {
+						Z_ADDREF_P(value);
+					}
 				}
-			}				
+			}
+			ZVAL_COPY_VALUE(variable_ptr, value);
 			_zval_dtor_func(garbage ZEND_FILE_LINE_CC);
 		} else { /* we need to split */
 			Z_DELREF_P(variable_ptr);
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
 assign_simple:
-			if (EXPECTED(!Z_ISREF_P(value))) {
-				ZVAL_COPY(variable_ptr, value);
-			} else {
-				if (Z_REFCOUNT_P(value) == 1) {
-					ZVAL_UNREF(value);
-					ZVAL_COPY(variable_ptr, value);
+			if (UNEXPECTED(Z_REFCOUNTED_P(value))) {
+				if (EXPECTED(!Z_ISREF_P(value))) {
+					Z_ADDREF_P(value);
 				} else {
-					ZVAL_COPY(variable_ptr, Z_REFVAL_P(value));
+					if (Z_REFCOUNT_P(value) == 1) {
+						ZVAL_UNREF(value);
+					} else {
+						value = Z_REFVAL_P(value);
+					}
+					if (Z_REFCOUNTED_P(value)) {
+						Z_ADDREF_P(value);
+					}
 				}
 			}
+			ZVAL_COPY_VALUE(variable_ptr, value);
 		}
 	}
 	return variable_ptr;
