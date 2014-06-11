@@ -456,11 +456,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		ZEND_VM_C_GOTO(assign_op_dim_exit);
 	}
 
-	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
-		SEPARATE_ZVAL_NOREF(var_ptr);
-	} else {
-		ZVAL_DEREF(var_ptr);
-	}
+	ZVAL_DEREF(var_ptr);
+	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -511,11 +508,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 		ZEND_VM_C_GOTO(assign_op_exit);
 	}
 
-	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
-		SEPARATE_ZVAL_NOREF(var_ptr);
-	} else {
-		ZVAL_DEREF(var_ptr);
-	}
+	ZVAL_DEREF(var_ptr);
+	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -893,11 +887,8 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	if (UNEXPECTED(Z_ISREF_P(var_ptr))) {
-		var_ptr = Z_REFVAL_P(var_ptr);
-	} else {
-		SEPARATE_ZVAL_NOREF(var_ptr);
-	}
+	ZVAL_DEREF(var_ptr);
+	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
@@ -951,11 +942,8 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	if (UNEXPECTED(Z_ISREF_P(var_ptr))) {
-		var_ptr = Z_REFVAL_P(var_ptr);
-	} else {
-		SEPARATE_ZVAL_NOREF(var_ptr);
-	}
+	ZVAL_DEREF(var_ptr);
+	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
