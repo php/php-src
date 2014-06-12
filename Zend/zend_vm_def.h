@@ -4125,11 +4125,11 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	if (OP1_TYPE != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-ZEND_VM_C_LABEL(container_again):
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -4205,10 +4205,6 @@ ZEND_VM_C_LABEL(numeric_index_dim):
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			ZEND_VM_C_GOTO(container_again);
-			break;
 		default:
 			FREE_OP2();
 			break;

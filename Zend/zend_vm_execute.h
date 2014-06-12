@@ -15815,11 +15815,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	if (IS_VAR != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = opline->op2.zv;
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -15895,10 +15895,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 
 			break;
@@ -17878,11 +17874,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	if (IS_VAR != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -17958,10 +17954,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 			zval_dtor(free_op2.var);
 			break;
@@ -20148,11 +20140,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	if (IS_VAR != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -20228,10 +20220,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 			zval_ptr_dtor_nogc(free_op2.var);
 			break;
@@ -23447,11 +23435,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	if (IS_VAR != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -23527,10 +23515,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 
 			break;
@@ -24909,11 +24893,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 	if (IS_UNUSED != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = opline->op2.zv;
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -24989,10 +24973,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 
 			break;
@@ -26188,11 +26168,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 	if (IS_UNUSED != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -26268,10 +26248,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 			zval_dtor(free_op2.var);
 			break;
@@ -27469,11 +27445,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 	if (IS_UNUSED != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -27549,10 +27525,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 			zval_ptr_dtor_nogc(free_op2.var);
 			break;
@@ -29259,11 +29231,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 	if (IS_UNUSED != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -29339,10 +29311,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 
 			break;
@@ -32605,11 +32573,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var TSRMLS_CC);
 	if (IS_CV != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = opline->op2.zv;
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -32685,10 +32653,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 
 			break;
@@ -34581,11 +34545,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var TSRMLS_CC);
 	if (IS_CV != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -34661,10 +34625,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 			zval_dtor(free_op2.var);
 			break;
@@ -36733,11 +36693,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var TSRMLS_CC);
 	if (IS_CV != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -36813,10 +36773,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 			zval_ptr_dtor_nogc(free_op2.var);
 			break;
@@ -39780,11 +39736,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var TSRMLS_CC);
 	if (IS_CV != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-container_again:
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -39860,10 +39816,6 @@ numeric_index_dim:
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			goto container_again;
-			break;
 		default:
 
 			break;
