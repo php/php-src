@@ -900,7 +900,9 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		}
 		case IS_BIGINT: {
-			ZVAL_NEW_STR(op, zend_bigint_to_zend_string(Z_BIG_P(op), 0));
+			zend_string *str = zend_bigint_to_zend_string(Z_BIG_P(op), 0);
+			zval_dtor(op);
+			ZVAL_NEW_STR(op, str);
 			break;
 		}
 		case IS_ARRAY:
