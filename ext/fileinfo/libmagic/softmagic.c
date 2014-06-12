@@ -918,10 +918,18 @@ mconvert(struct magic_set *ms, struct magic *m, int flip)
 		return 1;
 	}
 	case FILE_PSTRING: {
-		char *ptr1 = p->s, *ptr2 = ptr1 + file_pstring_length_size(m);
+		size_t sz = file_pstring_length_size(m);
+		char *ptr1 = p->s, *ptr2 = ptr1 + sz;
 		size_t len = file_pstring_get_length(m, ptr1);
-		if (len >= sizeof(p->s))
-			len = sizeof(p->s) - 1;
+		if (len >= sizeof(p->s)) {
+			/*
+			 * The size of the pascal string length (sz)
+			 * is 1, 2, or 4. We need at least 1 byte for NUL
+			 * termination, but we've already truncated the
+			 * string by p->s, so we need to deduct sz.
+			 */ 
+			len = sizeof(p->s) - sz;
+		}
 		while (len--)
 			*ptr1++ = *ptr2++;
 		*ptr1 = '\0';

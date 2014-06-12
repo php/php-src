@@ -38,8 +38,6 @@
 #include "phpdbg_lexer.h"
 #include "phpdbg_parser.h"
 
-int yyparse(phpdbg_param_t *stack, yyscan_t scanner);
-
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, "s"),
@@ -248,20 +246,10 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 						char *why = NULL;
 						char *input = phpdbg_read_input(cmd TSRMLS_CC);
 						phpdbg_param_t stack;
-						yyscan_t scanner;
-						YY_BUFFER_STATE state;
 
 						phpdbg_init_param(&stack, STACK_PARAM);
-	
-						if (yylex_init(&scanner)) {
-							phpdbg_error(
-								"could not initialize scanner");
-							break;
-						}
 
-						state = yy_scan_string(input, scanner);
-				 		
-						if (yyparse(&stack, scanner) <= 0) {
+						if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
 							switch (phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
 								case FAILURE:
 //									if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -274,15 +262,12 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 								break;
 							}
 						}
-						
+
 						if (why) {
 							free(why);
 							why = NULL;
 						}
-			
-						yy_delete_buffer(state, scanner);
-						yylex_destroy(scanner);
-	
+
 						phpdbg_stack_free(&stack);
 						phpdbg_destroy_input(&input TSRMLS_CC);
 					}
@@ -1014,20 +999,9 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 
 	if (input) {
 		do {
-			yyscan_t scanner;
-			YY_BUFFER_STATE state;
-
 			phpdbg_init_param(&stack, STACK_PARAM);
 
-			if (yylex_init(&scanner)) {
-				phpdbg_error(
-					"could not initialize scanner");
-				return FAILURE;
-			}
-
-			state = yy_scan_string(input, scanner);
-
-			if (yyparse(&stack, scanner) <= 0) {
+			if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
 				switch (ret = phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
 					case FAILURE:
 						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -1060,9 +1034,6 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 				free(why);
 				why = NULL;
 			}
-
-			yy_delete_buffer(state, scanner);
-			yylex_destroy(scanner);
 
 			phpdbg_stack_free(&stack);
 			phpdbg_destroy_input(&input TSRMLS_CC);

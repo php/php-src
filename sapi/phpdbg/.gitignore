@@ -2,4 +2,5 @@
 phpdbg
 *.lo
 *.o
+*.output
 build

@@ -2451,7 +2451,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", Z_STRVAL_P(function_name));
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -3813,7 +3813,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *expr, tmp;
+	zval *expr;
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
@@ -5374,6 +5374,7 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 {
 	USE_OPLINE
 	zval *zfunc;
+	int closure_is_static, closure_is_being_defined_inside_static_context;
 
 	SAVE_OPLINE();
 
@@ -5382,7 +5383,13 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
 	}
 
-	zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), Z_OBJ(EG(This)) ? &EG(This) : NULL TSRMLS_CC);
+	closure_is_static = Z_FUNC_P(zfunc)->common.fn_flags & ZEND_ACC_STATIC;
+	closure_is_being_defined_inside_static_context = EX(prev_execute_data) && EX(prev_execute_data)->function_state.function->common.fn_flags & ZEND_ACC_STATIC;
+	if (closure_is_static || closure_is_being_defined_inside_static_context) {
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(called_scope), NULL TSRMLS_CC);
+	} else {
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), Z_OBJ(EG(This)) ? &EG(This) : NULL TSRMLS_CC);
+	}
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();

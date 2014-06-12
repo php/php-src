@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 2.7.  */
+/* A Bison parser, made by GNU Bison 2.6.2.  */
 
 /* Bison interface for Yacc-like parsers in C
    
@@ -30,18 +30,18 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
-# define YY_YY_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
+#ifndef PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H
+# define PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H
 /* Enabling traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
 #if YYDEBUG
-extern int yydebug;
+extern int phpdbg_debug;
 #endif
 /* "%code requires" blocks.  */
-/* Line 2058 of yacc.c  */
-#line 40 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 2055 of yacc.c  */
+#line 31 "/var/root/php-src/sapi/phpdbg/phpdbg_parser.y"
 
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -50,7 +50,7 @@ typedef void* yyscan_t;
 #endif
 
 
-/* Line 2058 of yacc.c  */
+/* Line 2055 of yacc.c  */
 #line 55 "sapi/phpdbg/phpdbg_parser.h"
 
 /* Tokens.  */
@@ -111,16 +111,16 @@ typedef int YYSTYPE;
 
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
-int yyparse (void *YYPARSE_PARAM);
+int phpdbg_parse (void *YYPARSE_PARAM);
 #else
-int yyparse ();
+int phpdbg_parse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (phpdbg_param_t *stack, yyscan_t scanner);
+int phpdbg_parse (void *tsrm_ls);
 #else
-int yyparse ();
+int phpdbg_parse ();
 #endif
 #endif /* ! YYPARSE_PARAM */
 
-#endif /* !YY_YY_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED  */
+#endif /* !PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H  */
