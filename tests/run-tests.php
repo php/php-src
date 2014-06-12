@@ -267,9 +267,11 @@ namespace phpdbg\testing {
 				$test = sprintf('%s/%s', $path, $file);
 
 				if (preg_match('~\.test$~', $test)) {
-					yield new Test($this->config, $test);
+					$tests[] = new Test($this->config, $test);
 				}
 			}
+			
+			return $tests;
 		}
 		
 		/**
@@ -428,8 +430,7 @@ namespace phpdbg\testing {
 		* 
 		*/
 		public function getResult() {
-			$options = sprintf(
-				'-i%s -nqb', $this->file);
+			$options = sprintf('-i%s -nqb', $this->file);
 			
 			if ($this->options) {
 				$options = sprintf(
