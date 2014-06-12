@@ -440,9 +440,9 @@ PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D) /* {{{ */
 #elif defined(HAVE_SYS_IOCTL_H) 
 	struct winsize w;
 
-	columns = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_col : 100;
+	columns = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_col : 80;
 #else
-	columns = 100;
+	columns = 80;
 #endif
 	return columns;
 } /* }}} */
