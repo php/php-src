@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #67390 (insecure temporary file use in the configure script).
     (Remi) (CVE-2014-3981)
   . Fixed bug #67392 (dtrace breaks argument unpack). (Nikita)
+  . Fixed bug #67428 (header('Location: foo') will override a 308-399 response
+    code). (Adam)
 
 - Fileinfo:
   . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
