@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #67428 (header('Location: foo') will override a 308-399 response
     code). (Adam)
 
+- CLI server:
+  . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
+    (Adam)
+
 ?? ??? 2014, PHP 5.4.30
 
 - Core:
