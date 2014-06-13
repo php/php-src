@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.15
 
+- Core:
+  . Fixed bug #67428 (header('Location: foo') will override a 308-399 response
+    code). (Adam)
+
 ?? ??? 2014, PHP 5.5.14
 
 - Core:
