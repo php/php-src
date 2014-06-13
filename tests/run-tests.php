@@ -135,8 +135,8 @@ namespace phpdbg\testing {
 		* @param array basic configuration 
 		* @param array command line
 		*/
-		public function __construct(TestsConfiguration &$config) {
-			$this->config = &$config;
+		public function __construct(TestsConfiguration $config) {
+			$this->config = $config;
 			
 			if ($this->config->hasFlag('help') ||
 				$this->config->hasFlag('h')) {
@@ -153,7 +153,7 @@ namespace phpdbg\testing {
 			$paths = array();
 			$where = ($in != null) ? array($in) : $this->config['path'];
 			
-			foreach ($where as &$path) {
+			foreach ($where as $path) {
 				if ($path) {
 					if (is_dir($path)) {
 						$paths[] = $path;
@@ -357,7 +357,7 @@ namespace phpdbg\testing {
 		* @param array configuration
 		* @param string file
 		*/
-		public function __construct(TestsConfiguration &$config, &$file) {
+		public function __construct(TestsConfiguration $config, $file) {
 			if (($handle = fopen($file, 'r'))) {
 				while (($line = fgets($handle))) {
 					$trim = trim($line);
@@ -420,8 +420,8 @@ namespace phpdbg\testing {
 				}
 				fclose($handle);
 				
-				$this->config = &$config;
-				$this->file = &$file;
+				$this->config = $config;
+				$this->file = $file;
 			}
 		}
 		
@@ -528,7 +528,7 @@ namespace phpdbg\testing {
 		* Write log to disk if configuration allows it
 		*
 		*/
-		protected function writeLog(&$result = null) {
+		protected function writeLog($result = null) {
 			$log = sprintf(
 				'%s/%s.log',
 				dirname($this->file), basename($this->file));
