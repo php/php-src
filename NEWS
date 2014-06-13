@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug #67392 (dtrace breaks argument unpack). (Nikita)
   . Fixed bug #67428 (header('Location: foo') will override a 308-399 response
     code). (Adam)
+  . Fixed bug #67433 (SIGSEGV when using count() on an object implementing
+    Countable). (Matteo)
 
 - CLI server:
   . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
