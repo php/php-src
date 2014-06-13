@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #67428 (header('Location: foo') will override a 308-399 response
     code). (Adam)
 
+- CLI server:
+  . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
+    (Adam)
+
 - Fileinfo:
   . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
     string size). (Francisco Alonso, Jan Kaluza, Remi)
