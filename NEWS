@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
     (Adam)
 
+- Streams:
+  . Fixed bug #67430 (http:// wrapper doesn't follow 308 redirects). (Adam)
+
 ?? ??? 2014, PHP 5.4.30
 
 - Core:
