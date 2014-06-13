@@ -35,7 +35,7 @@ $expected = array(
 $headers = headers_list();
 if (($i = count($expected)) > count($headers))
 {
-	echo "Less headers are being sent than expected - aborting";
+	echo "Fewer headers are being sent than expected - aborting";
 	return;
 }
 

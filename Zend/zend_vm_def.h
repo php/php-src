@@ -456,11 +456,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		ZEND_VM_C_GOTO(assign_op_dim_exit);
 	}
 
-	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
-		SEPARATE_ZVAL_NOREF(var_ptr);
-	} else {
-		ZVAL_DEREF(var_ptr);
-	}
+	ZVAL_DEREF(var_ptr);
+	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -511,11 +508,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 		ZEND_VM_C_GOTO(assign_op_exit);
 	}
 
-	if (EXPECTED(!Z_ISREF_P(var_ptr))) {
-		SEPARATE_ZVAL_NOREF(var_ptr);
-	} else {
-		ZVAL_DEREF(var_ptr);
-	}
+	ZVAL_DEREF(var_ptr);
+	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
@@ -893,11 +887,8 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	if (UNEXPECTED(Z_ISREF_P(var_ptr))) {
-		var_ptr = Z_REFVAL_P(var_ptr);
-	} else {
-		SEPARATE_ZVAL_NOREF(var_ptr);
-	}
+	ZVAL_DEREF(var_ptr);
+	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
@@ -951,11 +942,8 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	if (UNEXPECTED(Z_ISREF_P(var_ptr))) {
-		var_ptr = Z_REFVAL_P(var_ptr);
-	} else {
-		SEPARATE_ZVAL_NOREF(var_ptr);
-	}
+	ZVAL_DEREF(var_ptr);
+	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
@@ -2463,7 +2451,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", Z_STRVAL_P(function_name));
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -3523,7 +3511,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 		} else {
 			zval_ptr_dtor(&object_zval);
 		}
-		ZEND_VM_JMP(EX(op_array)->opcodes + opline->op2.opline_num);
+		ZEND_VM_JMP(opline->op2.jmp_addr);
 	} else {
 		call_slot *call = EX(call_slots) + opline->extended_value;
 
@@ -3836,7 +3824,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *expr, tmp;
+	zval *expr;
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
@@ -4148,11 +4136,11 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	if (OP1_TYPE != IS_UNUSED) {
-		SEPARATE_ZVAL_IF_NOT_REF(container);
+		ZVAL_DEREF(container);
+		SEPARATE_ZVAL_NOREF(container);
 	}
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-ZEND_VM_C_LABEL(container_again):
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(container);
@@ -4243,10 +4231,6 @@ ZEND_VM_C_LABEL(numeric_index_dim):
 		case IS_STR_OFFSET:
 			zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 			ZEND_VM_CONTINUE(); /* bailed out before */
-		case IS_REFERENCE:
-			container = Z_REFVAL_P(container);
-			ZEND_VM_C_GOTO(container_again);
-			break;
 		default:
 			FREE_OP2();
 			break;
@@ -4316,7 +4300,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_P(array_ptr)->get_class_entry == NULL) {
 				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 
 			ce = Z_OBJCE_P(array_ptr);
@@ -4456,7 +4440,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		FREE_OP1_VAR_PTR();
 	}
 	if (is_empty) {
-		ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+		ZEND_VM_JMP(opline->op2.jmp_addr);
 	} else {
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -4491,7 +4475,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 		default:
 		case ZEND_ITER_INVALID:
 			zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-			ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+			ZEND_VM_JMP(opline->op2.jmp_addr);
 
 		case ZEND_ITER_PLAIN_OBJECT: {
 			zend_object *zobj = Z_OBJ_P(array);
@@ -4504,7 +4488,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			while (1) {
 				if ((value = zend_hash_get_current_data(fe_ht)) == NULL) {
 					/* reached end of iteration */
-					ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+					ZEND_VM_JMP(opline->op2.jmp_addr);
 				}
 
 				if (Z_TYPE_P(value) == IS_INDIRECT) {
@@ -4546,7 +4530,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			zend_hash_set_pointer(fe_ht, (HashPointer*)EX_VAR((opline+1)->op1.var));
 			if ((value = zend_hash_get_current_data(fe_ht)) == NULL) {
 				/* reached end of iteration */
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 			if (key) {
 				zend_hash_get_current_key_zval(fe_ht, key);
@@ -4573,7 +4557,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 					zval_ptr_dtor(array_ref);
 					HANDLE_EXCEPTION();
 				}
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 			value = iter->funcs->get_current_data(iter TSRMLS_CC);
 			if (UNEXPECTED(EG(exception) != NULL)) {
@@ -4582,7 +4566,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			}
 			if (!value) {
 				/* failure in get_current_data */
-				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
+				ZEND_VM_JMP(opline->op2.jmp_addr);
 			}
 			if (key) {
 				if (iter->funcs->get_current_key) {
@@ -5428,6 +5412,7 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 {
 	USE_OPLINE
 	zval *zfunc;
+	int closure_is_static, closure_is_being_defined_inside_static_context;
 
 	SAVE_OPLINE();
 
@@ -5436,7 +5421,13 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
 	}
 
-	zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), Z_OBJ(EG(This)) ? &EG(This) : NULL TSRMLS_CC);
+	closure_is_static = Z_FUNC_P(zfunc)->common.fn_flags & ZEND_ACC_STATIC;
+	closure_is_being_defined_inside_static_context = EX(prev_execute_data) && EX(prev_execute_data)->function_state.function->common.fn_flags & ZEND_ACC_STATIC;
+	if (closure_is_static || closure_is_being_defined_inside_static_context) {
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(called_scope), NULL TSRMLS_CC);
+	} else {
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), Z_OBJ(EG(This)) ? &EG(This) : NULL TSRMLS_CC);
+	}
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();

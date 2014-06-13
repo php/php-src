@@ -533,6 +533,9 @@ static void zend_accel_optimize(zend_op_array           *op_array,
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 			case ZEND_JMP_SET_VAR:
 #endif
+			case ZEND_NEW:
+			case ZEND_FE_RESET:
+			case ZEND_FE_FETCH:
 				ZEND_OP2(opline).opline_num = ZEND_OP2(opline).jmp_addr - op_array->opcodes;
 				break;
 		}
@@ -578,6 +581,9 @@ static void zend_accel_optimize(zend_op_array           *op_array,
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 			case ZEND_JMP_SET_VAR:
 #endif
+			case ZEND_NEW:
+			case ZEND_FE_RESET:
+			case ZEND_FE_FETCH:
 				ZEND_OP2(opline).jmp_addr = &op_array->opcodes[ZEND_OP2(opline).opline_num];
 				break;
 		}

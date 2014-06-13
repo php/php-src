@@ -1014,7 +1014,7 @@ PHP_FUNCTION(serialize)
 }
 /* }}} */
 
-/* {{{ proto mixed unserialize(string variable_representation[, int &consumed])
+/* {{{ proto mixed unserialize(string variable_representation)
    Takes a string representation of variable and recreates it */
 PHP_FUNCTION(unserialize)
 {
@@ -1022,9 +1022,8 @@ PHP_FUNCTION(unserialize)
 	int buf_len;
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
-	zval *consumed = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &buf, &buf_len, &consumed) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1043,11 +1042,6 @@ PHP_FUNCTION(unserialize)
 		RETURN_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-
-	if (consumed) {
-		zval_dtor(consumed);
-		ZVAL_LONG(consumed, ((char*)p) - buf);
-	}
 }
 /* }}} */
 

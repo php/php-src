@@ -12,6 +12,6 @@ disable_functions=is_file
 --FILE-- 
 <?php
 $rc = new ReflectionFunction('is_file');
-echo var_dump($rc->isDisabled());
+var_dump($rc->isDisabled());
 --EXPECTF--
 bool(true)
