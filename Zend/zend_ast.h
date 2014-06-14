@@ -55,6 +55,22 @@ typedef enum _zend_ast_kind {
 
 	ZEND_AST_NAME,
 	ZEND_AST_NAME_FQ,
+
+	ZEND_AST_AND,
+	ZEND_AST_OR,
+
+	ZEND_AST_GREATER,
+	ZEND_AST_GREATER_EQUAL,
+
+	ZEND_AST_CAST_NULL,
+	ZEND_AST_CAST_BOOL,
+	ZEND_AST_CAST_INT,
+	ZEND_AST_CAST_DOUBLE,
+	ZEND_AST_CAST_STRING,
+	ZEND_AST_CAST_ARRAY,
+	ZEND_AST_CAST_OBJECT,
+
+	ZEND_AST_CONDITIONAL,
 } zend_ast_kind;
 
 struct _zend_ast {
@@ -112,5 +128,8 @@ static inline zend_ast *zend_ast_create_var(zval *name) {
 
 #define AST_ZNODE(znode) zend_ast_create_znode((znode))
 #define AST_ZVAL(znode) zend_ast_create_constant(&(znode)->u.constant)
+
+#define AC(znode) AST_COMPILE(&znode, znode.u.ast)
+#define AZ(znode) ((znode).u.ast = AST_ZNODE(&znode))
 
 #endif

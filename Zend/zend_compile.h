@@ -99,6 +99,7 @@ static inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
 }
 
+void zend_ensure_writable_variable(const zend_ast *ast);
 void zend_compile_stmt(zend_ast *ast TSRMLS_DC);
 void zend_compile_expr(znode *node, zend_ast *ast TSRMLS_DC);
 void zend_compile_var(znode *node, zend_ast *ast, int type TSRMLS_DC);
