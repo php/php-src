@@ -253,6 +253,16 @@ ZEND_API char* zend_bigint_to_string_base(const zend_bigint *big, int base)
 
 /*** OPERATIONS **/
 
+/* By the way, in case you're wondering, you can indeed use something as both
+ * output and operand. For example, zend_bigint_add_long(foo, foo, 1) is
+ * perfectly valid for incrementing foo. This is because gmp supports it, and
+ * zend_bigint is (at the time of writing, at least) merely a thin wrapper
+ * around gmp. This is not advisable, however, because bigints are reference-
+ * counted and should be copy-on-write so far as userland PHP code cares. Do
+ * it sparingly, and never to bigints which have been exposed to userland. With
+ * great power comes great responsibility.
+ */
+
 /* Adds two bigints and stores result in out */
 ZEND_API void zend_bigint_add(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
 {
