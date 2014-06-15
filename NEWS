@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #67428 (header('Location: foo') will override a 308-399 response
     code). (Adam)
+  . Fixed bug #67436 (Autoloader isn't called if two method definitions don't
+    match). (Bob)
 
 - CLI server:
   . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
