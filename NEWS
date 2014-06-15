@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Implemented FR #64744 (Differentiate between member function call on a null 
     and non-null, non-objects). (Boro Sitnikovski)
+  . Fixed bug #67436 (Autoloader isn't called if two method definitions don't
+    match). (Bob)
   . Fixed bug #66622 (Closures do not correctly capture the late bound class
     (static::) in some cases). (Levi Morrison)
   . Fixed bug #67390 (insecure temporary file use in the configure script).
