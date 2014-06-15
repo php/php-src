@@ -44,7 +44,8 @@ PHP                                                                        NEWS
     check). (Francisco Alonso, Jan Kaluza, Remi)
 
 - Network:
-  . Fix potential segfault in dns_get_record(). (Sara)
+  . Fixed bug #67432 (Fix potential segfault in dns_get_record()).
+    (CVE-2014-4049). (Sara)
 
 - OPCache:
   . Fixed issue #183 (TMP_VAR is not only used once). (Dmitry, Laruence)
