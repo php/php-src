@@ -39,6 +39,9 @@ PHP                                                                        NEWS
   . Fixed bug #66636 (openssl_x509_parse warning with V_ASN1_GENERALIZEDTIME).
     (Paul Oehler)
 
+- phpdbg:
+  . Fixed bug #67212 (phpdbg uses non-standard TIOCGWINSZ). (Ferenc)
+
 - SOAP:
   . Implemented FR #49898 (Add SoapClient::__getCookies()). (Boro Sitnikovski)
 
