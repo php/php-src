@@ -9,6 +9,7 @@ PHP_ARG_ENABLE(phpdbg-debug, for phpdbg debug build,
 [  --enable-phpdbg-debug   Build phpdbg in debug mode], no, no)
 
 if test "$PHP_PHPDBG" != "no"; then
+  AC_HEADER_TIOCGWINSZ
   AC_DEFINE(HAVE_PHPDBG, 1, [ ])
 
   if test "$PHP_PHPDBG_DEBUG" != "no"; then
