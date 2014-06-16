@@ -253,11 +253,14 @@ static zend_always_inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
 static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC)
 {
 	zval *p = EG(argument_stack)->top - 1;
- 	zval *end = p - Z_LVAL_P(p);
 
-	while (p != end) {
-		p--;
-		i_zval_ptr_dtor_nogc(p ZEND_FILE_LINE_CC TSRMLS_CC);
+	if (EXPECTED(Z_LVAL_P(p) > 0)) {
+	 	zval *end = p - Z_LVAL_P(p);
+
+		do {
+			p--;
+			i_zval_ptr_dtor_nogc(p ZEND_FILE_LINE_CC TSRMLS_CC);
+		} while (p != end);
 	}
 	if (nested) {
 		EG(argument_stack)->top = p;

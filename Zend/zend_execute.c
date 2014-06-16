@@ -1495,12 +1495,14 @@ void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC) /* {{
 
 static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
-	zval *cv = EX_VAR_NUM(0);
-	zval *end = cv + EX(op_array)->last_var;
-	while (cv != end) {
-		zval_ptr_dtor(cv);
-		cv++;
- 	}
+	if (EXPECTED(EX(op_array)->last_var > 0)) {
+		zval *cv = EX_VAR_NUM(0);
+		zval *end = cv + EX(op_array)->last_var;
+		do {
+			zval_ptr_dtor(cv);
+			cv++;
+	 	} while (cv != end);
+	}
 }
 /* }}} */
 
