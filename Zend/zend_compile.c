@@ -3150,7 +3150,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 						*zv = *precv->op2.zv;
 						zval_copy_ctor(zv);
 						INIT_PZVAL(zv);
-						if (Z_TYPE_P(zv) == IS_CONSTANT) {
+						if ((Z_TYPE_P(zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 							REALLOC_BUF_IF_EXCEED(buf, offset, length, Z_STRLEN_P(zv));
 							memcpy(offset, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
 							offset += Z_STRLEN_P(zv);
@@ -3176,7 +3176,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 								*(offset++) = '.';
 							}
 							*(offset++) = '\'';
-						} else if (Z_TYPE_P(zv) == IS_ARRAY || Z_TYPE_P(zv) == IS_CONSTANT_ARRAY) {
+						} else if (Z_TYPE_P(zv) == IS_ARRAY || (Z_TYPE_P(zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT_ARRAY) {
 							memcpy(offset, "Array", 5);
 							offset += 5;
 						} else {
