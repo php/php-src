@@ -4142,7 +4142,7 @@ ZEND_METHOD(reflection_class, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_LONG(ce->ce_flags);
+	RETURN_LONG(ce->ce_flags & ~ZEND_ACC_CONSTANTS_UPDATED);
 }
 /* }}} */
 

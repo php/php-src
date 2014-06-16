@@ -1189,7 +1189,9 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 			}
 		}
 		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
-			zval_update_constant(retval, 1 TSRMLS_CC);
+			if (Z_CONSTANT_P(retval)) {
+				zval_update_constant(retval, 1 TSRMLS_CC);
+			}
 		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 			FREE_OP1();
 		}

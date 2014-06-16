@@ -3719,6 +3719,9 @@ static void do_inherit_class_constant(zend_string *name, zval *zv, zend_class_en
 			ZVAL_NEW_REF(zv, zv);
 		}
 	}
+	if (Z_CONSTANT_P(Z_REFVAL_P(zv))) {
+		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+	}
 	if (zend_hash_add(&ce->constants_table, name, zv)) {
 		Z_ADDREF_P(zv);
 	}
@@ -3766,11 +3769,17 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 #ifdef ZTS
 			if (parent_ce->type != ce->type) {
 				ZVAL_DUP(&ce->default_properties_table[i], &parent_ce->default_properties_table[i]);
+				if (Z_OPT_CONSTANT(ce->default_properties_table[i])) {
+					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+				}
 				continue;
 			}
 #endif
 
 			ZVAL_COPY(&ce->default_properties_table[i], &parent_ce->default_properties_table[i]);
+			if (Z_OPT_CONSTANT(ce->default_properties_table[i])) {
+				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+			}
 		}
 		ce->default_properties_count += parent_ce->default_properties_count;
 	}
@@ -3791,6 +3800,9 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 				ZVAL_MAKE_REF(&CE_STATIC_MEMBERS(parent_ce)[i]);
 				ce->default_static_members_table[i] = CE_STATIC_MEMBERS(parent_ce)[i];
 				Z_ADDREF(ce->default_static_members_table[i]);
+				if (Z_CONSTANT_P(Z_REFVAL(ce->default_static_members_table[i]))) {
+					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+				}
 			}
 			ce->default_static_members_count += parent_ce->default_static_members_count;
 			ce->static_members_table = ce->default_static_members_table;
@@ -3809,6 +3821,9 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 				ZVAL_MAKE_REF(&parent_ce->default_static_members_table[i]);
 				ce->default_static_members_table[i] = parent_ce->default_static_members_table[i];
 				Z_ADDREF(ce->default_static_members_table[i]);
+				if (Z_CONSTANT_P(Z_REFVAL(ce->default_static_members_table[i]))) {
+					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+				}
 			}
 			ce->default_static_members_count += parent_ce->default_static_members_count;
 			if (ce->type == ZEND_USER_CLASS) {
@@ -5446,8 +5461,6 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 
 void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC) /* {{{ */
 {
-	zval property;
-
 	if ((Z_TYPE(value->u.constant) == IS_ARRAY) ||
 	    (Z_TYPE(value->u.constant) == IS_CONSTANT_AST &&
 	     Z_ASTVAL(value->u.constant)->kind == ZEND_INIT_ARRAY)) {
@@ -5459,13 +5472,14 @@ void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC) /* 
 		return;
 	}
 
-	ZVAL_COPY_VALUE(&property, &value->u.constant);
-
 	Z_STR(var_name->u.constant) = zend_new_interned_string(Z_STR(var_name->u.constant) TSRMLS_CC);
 	if (IS_INTERNED(Z_STR(var_name->u.constant))) {
 		Z_TYPE_FLAGS(var_name->u.constant) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 	}
-	if (zend_hash_add(&CG(active_class_entry)->constants_table, Z_STR(var_name->u.constant), &property) == NULL) {
+	if (Z_CONSTANT(value->u.constant)) {
+		CG(active_class_entry)->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+	}
+	if (zend_hash_add(&CG(active_class_entry)->constants_table, Z_STR(var_name->u.constant), &value->u.constant) == NULL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s", CG(active_class_entry)->name->val, Z_STRVAL(var_name->u.constant));
 	}
 	FREE_PNODE(var_name);
@@ -6987,7 +7001,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	dtor_func_t zval_ptr_dtor_func = ((persistent_hashes) ? ZVAL_INTERNAL_PTR_DTOR : ZVAL_PTR_DTOR);
 
 	ce->refcount = 1;
-	ce->ce_flags = 0;
+	ce->ce_flags = ZEND_ACC_CONSTANTS_UPDATED;
 
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;

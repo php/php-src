@@ -1140,10 +1140,42 @@ static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS
 
 ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
-	if ((class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) == 0 || (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count)) {
+	int i;
+
+	/* initialize static members of internal class */
+	if (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count) {
+		zval *p;
+
+		if (class_type->parent) {
+			zend_update_class_constants(class_type->parent TSRMLS_CC);
+		}
+#if ZTS
+		CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval*) * class_type->default_static_members_count);
+#else
+		class_type->static_members_table = emalloc(sizeof(zval*) * class_type->default_static_members_count);
+#endif
+		for (i = 0; i < class_type->default_static_members_count; i++) {
+			p = &class_type->default_static_members_table[i];
+			if (Z_ISREF_P(p) &&
+				class_type->parent &&
+				i < class_type->parent->default_static_members_count &&
+				p == &class_type->parent->default_static_members_table[i] &&
+				Z_TYPE(CE_STATIC_MEMBERS(class_type->parent)[i]) != IS_UNDEF
+			) {
+				zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];
+
+				ZVAL_NEW_REF(q, q);
+				ZVAL_COPY_VALUE(&CE_STATIC_MEMBERS(class_type)[i], q);
+				Z_ADDREF_P(q);
+			} else {
+				ZVAL_DUP(&CE_STATIC_MEMBERS(class_type)[i], p);
+			}
+		}
+	}
+
+	if ((class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) == 0) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 		zend_class_entry *old_scope = *scope;
-		int i;
 		zval *val;
 
 		*scope = class_type;
@@ -1155,36 +1187,6 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 		for (i = 0; i < class_type->default_properties_count; i++) {
 			if (Z_TYPE(class_type->default_properties_table[i]) != IS_UNDEF) {
 				zval_update_class_constant(&class_type->default_properties_table[i], 0, i TSRMLS_CC);
-			}
-		}
-
-		if (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count) {
-			zval *p;
-
-			if (class_type->parent) {
-				zend_update_class_constants(class_type->parent TSRMLS_CC);
-			}
-#if ZTS
-			CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval*) * class_type->default_static_members_count);
-#else
-			class_type->static_members_table = emalloc(sizeof(zval*) * class_type->default_static_members_count);
-#endif
-			for (i = 0; i < class_type->default_static_members_count; i++) {
-				p = &class_type->default_static_members_table[i];
-				if (Z_ISREF_P(p) &&
-					class_type->parent &&
-					i < class_type->parent->default_static_members_count &&
-					p == &class_type->parent->default_static_members_table[i] &&
-					Z_TYPE(CE_STATIC_MEMBERS(class_type->parent)[i]) != IS_UNDEF
-				) {
-					zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];
-
-					ZVAL_NEW_REF(q, q);
-					ZVAL_COPY_VALUE(&CE_STATIC_MEMBERS(class_type)[i], q);
-					Z_ADDREF_P(q);
-				} else {
-					ZVAL_DUP(&CE_STATIC_MEMBERS(class_type)[i], p);
-				}
 			}
 		}
 
@@ -2616,7 +2618,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
 	zend_initialize_class_data(class_entry, 0 TSRMLS_CC);
-	class_entry->ce_flags = ce_flags;
+	class_entry->ce_flags = ce_flags | ZEND_ACC_CONSTANTS_UPDATED;
 	class_entry->info.internal.module = EG(current_module);
 
 	if (class_entry->info.internal.builtin_functions) {
@@ -3548,6 +3550,9 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 {
 	zend_property_info property_info, *property_info_ptr;
 
+	if (Z_CONSTANT_P(property)) {
+		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+	}
 	if (!(access_type & ZEND_ACC_PPP_MASK)) {
 		access_type |= ZEND_ACC_PUBLIC;
 	}
@@ -3681,6 +3686,9 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *nam
 
 ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value TSRMLS_DC) /* {{{ */
 {
+	if (Z_CONSTANT_P(value)) {
+		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+	}
 	return zend_hash_str_update(&ce->constants_table, name, name_length, value) ?
 		SUCCESS : FAILURE;
 }
