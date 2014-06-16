@@ -17,9 +17,7 @@ $ksize = array('1024'=>1024,
 			   '4096'=>4096);
 
 /* array of available hashings to test */
-$algo = array('md4'=>OPENSSL_ALGO_MD4,
-              'md5'=>OPENSSL_ALGO_MD5,
-              'sha1'=>OPENSSL_ALGO_SHA1,
+$algo = array('sha1'=>OPENSSL_ALGO_SHA1,
 			  'sha224'=>OPENSSL_ALGO_SHA224,
               'sha256'=>OPENSSL_ALGO_SHA256,
               'sha384'=>OPENSSL_ALGO_SHA384,
@@ -55,18 +53,6 @@ function _uuid()
 
 ?>
 --EXPECT--
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
 bool(true)
 bool(false)
 bool(true)
