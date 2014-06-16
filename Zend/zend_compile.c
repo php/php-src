@@ -3897,6 +3897,9 @@ static void do_inherit_iface_constant(zend_string *name, zval *zv, zend_class_en
 	if (do_inherit_constant_check(&ce->constants_table, zv, name, iface)) {
 		ZVAL_MAKE_REF(zv);
 		Z_ADDREF_P(zv);
+		if (Z_CONSTANT_P(Z_REFVAL_P(zv))) {
+			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+		}
 		zend_hash_update(&ce->constants_table, name, zv);
 	}
 }
