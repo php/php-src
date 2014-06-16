@@ -3710,24 +3710,18 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_
 	zval_add_ref
 #endif
 
-static int do_inherit_class_constant(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static void do_inherit_class_constant(zend_string *name, zval *zv, zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC) /* {{{ */
 {
-	zend_class_entry *ce = va_arg(args, zend_class_entry *);
-	zend_class_entry *parent_ce = va_arg(args, zend_class_entry *);
-
-	if (hash_key->key) {
-		if (!Z_ISREF_P(zv)) {
-			if (parent_ce->type == ZEND_INTERNAL_CLASS) {
-				ZVAL_NEW_PERSISTENT_REF(zv, zv);
-			} else {
-				ZVAL_NEW_REF(zv, zv);
-			}
-		}
-		if (zend_hash_add(&ce->constants_table, hash_key->key, zv)) {
-			Z_ADDREF_P(zv);
+	if (!Z_ISREF_P(zv)) {
+		if (parent_ce->type == ZEND_INTERNAL_CLASS) {
+			ZVAL_NEW_PERSISTENT_REF(zv, zv);
+		} else {
+			ZVAL_NEW_REF(zv, zv);
 		}
 	}
-	return ZEND_HASH_APPLY_KEEP;
+	if (zend_hash_add(&ce->constants_table, name, zv)) {
+		Z_ADDREF_P(zv);
+	}
 }
 /* }}} */
 
@@ -3736,6 +3730,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	zend_property_info *property_info;
 	zend_function *func;
 	zend_string *key;
+	zval *zv;
 
 	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
 		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
@@ -3843,7 +3838,9 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	zend_hash_apply_with_arguments(&parent_ce->constants_table TSRMLS_CC, do_inherit_class_constant, 2, ce, parent_ce);
+	ZEND_HASH_FOREACH_STR_KEY_VAL(&parent_ce->constants_table, key, zv) {
+		do_inherit_class_constant(key, zv, ce, parent_ce TSRMLS_CC);
+	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
 		if (do_inherit_method_check(&ce->function_table, func, key, ce)) {
@@ -3864,15 +3861,15 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 }
 /* }}} */
 
-static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval *parent_constant, const zend_hash_key *hash_key, const zend_class_entry *iface) /* {{{ */
+static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval *parent_constant, zend_string *name, const zend_class_entry *iface) /* {{{ */
 {
 	zval *old_constant;
 
-	if ((old_constant = zend_hash_find(child_constants_table, hash_key->key)) != NULL) {
+	if ((old_constant = zend_hash_find(child_constants_table, name)) != NULL) {
 		if (!Z_ISREF_P(old_constant) ||
 		    !Z_ISREF_P(parent_constant) ||
 		    Z_REFVAL_P(old_constant) != Z_REFVAL_P(parent_constant)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", hash_key->key->val, iface->name->val);
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", name->val, iface->name->val);
 		}
 		return 0;
 	}
@@ -3880,27 +3877,13 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zva
 }
 /* }}} */
 
-static int do_interface_constant_check(zval *val TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+static void do_inherit_iface_constant(zend_string *name, zval *zv, zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC) /* {{{ */
 {
-	zend_class_entry **iface = va_arg(args, zend_class_entry**);
-
-	do_inherit_constant_check(&(*iface)->constants_table, val, key, *iface);
-
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
-static int do_inherit_iface_constant(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
-{
-	zend_class_entry *ce = va_arg(args, zend_class_entry *);
-	zend_class_entry *iface = va_arg(args, zend_class_entry *);
-
-	if (hash_key->key && do_inherit_constant_check(&ce->constants_table, zv, hash_key, iface)) {
+	if (do_inherit_constant_check(&ce->constants_table, zv, name, iface)) {
 		ZVAL_MAKE_REF(zv);
 		Z_ADDREF_P(zv);
-		zend_hash_update(&ce->constants_table, hash_key->key, zv);
+		zend_hash_update(&ce->constants_table, name, zv);
 	}
-	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -3911,6 +3894,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	zend_uint parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
 	zend_function *func;
 	zend_string *key;
+	zval *zv;
 
 	for (i = 0; i < ce->num_interfaces; i++) {
 		if (ce->interfaces[i] == NULL) {
@@ -3926,7 +3910,9 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	}
 	if (ignore) {
 		/* Check for attempt to redeclare interface constants */
-		zend_hash_apply_with_arguments(&ce->constants_table TSRMLS_CC, do_interface_constant_check, 1, &iface);
+		ZEND_HASH_FOREACH_STR_KEY_VAL(&ce->constants_table, key, zv) {
+			do_inherit_constant_check(&iface->constants_table, zv, key, iface);
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		if (ce->num_interfaces >= current_iface_num) {
 			if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -3937,7 +3923,9 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		}
 		ce->interfaces[ce->num_interfaces++] = iface;
 
-		zend_hash_apply_with_arguments(&iface->constants_table TSRMLS_CC, do_inherit_iface_constant, 2, ce, iface);
+		ZEND_HASH_FOREACH_STR_KEY_VAL(&iface->constants_table, key, zv) {
+			do_inherit_iface_constant(key, zv, ce, iface TSRMLS_CC);
+		} ZEND_HASH_FOREACH_END();
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
 			if (do_inherit_method_check(&ce->function_table, func, key, ce)) {
@@ -4108,11 +4096,8 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 }
 /* }}} */
 
-static int zend_fixup_trait_method(zval *zv, void *arg TSRMLS_DC) /* {{{ */
+static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* {{{ */
 {
-	zend_function *fn = Z_PTR_P(zv);
-	zend_class_entry *ce = (zend_class_entry *)arg;
-		
 	if ((fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 
 		fn->common.scope = ce;
@@ -4124,26 +4109,14 @@ static int zend_fixup_trait_method(zval *zv, void *arg TSRMLS_DC) /* {{{ */
 			ce->ce_flags |= ZEND_HAS_STATIC_IN_METHODS;
 		}
 	}
-	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
-static int zend_traits_copy_functions(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable **overriden, HashTable *exclude_table TSRMLS_DC) /* {{{ */
 {
-	zend_function     *fn = Z_PTR_P(zv);
-	zend_class_entry  *ce;
-	HashTable         **overriden;
 	zend_trait_alias  *alias, **alias_ptr;
-	HashTable         *exclude_table;
 	zend_string       *lcname;
-	unsigned int       fnname_len;
 	zend_function      fn_copy;
-
-	ce            = va_arg(args, zend_class_entry*);
-	overriden     = va_arg(args, HashTable**);
-	exclude_table = va_arg(args, HashTable*);
-
-	fnname_len = hash_key->key->len;
 
 	/* apply aliases which are qualified with a class name, there should not be any ambiguity */
 	if (ce->trait_aliases) {
@@ -4153,8 +4126,8 @@ static int zend_traits_copy_functions(zval *zv TSRMLS_DC, int num_args, va_list 
 			/* Scope unset or equal to the function we compare to, and the alias applies to fn */
 			if (alias->alias != NULL
 				&& (!alias->trait_method->ce || fn->common.scope == alias->trait_method->ce)
-				&& alias->trait_method->method_name->len == fnname_len
-				&& (zend_binary_strcasecmp(alias->trait_method->method_name->val, alias->trait_method->method_name->len, hash_key->key->val, fnname_len) == 0)) {
+				&& alias->trait_method->method_name->len == fnname->len
+				&& (zend_binary_strcasecmp(alias->trait_method->method_name->val, alias->trait_method->method_name->len, fnname->val, fnname->len) == 0)) {
 				fn_copy = *fn;
 
 				/* if it is 0, no modifieres has been changed */
@@ -4177,9 +4150,7 @@ static int zend_traits_copy_functions(zval *zv TSRMLS_DC, int num_args, va_list 
 		}
 	}
 
-	lcname = hash_key->key;
-
-	if (exclude_table == NULL || zend_hash_find(exclude_table, lcname) == NULL) {
+	if (exclude_table == NULL || zend_hash_find(exclude_table, fnname) == NULL) {
 		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
 
@@ -4191,8 +4162,8 @@ static int zend_traits_copy_functions(zval *zv TSRMLS_DC, int num_args, va_list 
 				/* Scope unset or equal to the function we compare to, and the alias applies to fn */
 				if (alias->alias == NULL && alias->modifiers != 0
 					&& (!alias->trait_method->ce || fn->common.scope == alias->trait_method->ce)
-					&& (alias->trait_method->method_name->len == fnname_len)
-					&& (zend_binary_strcasecmp(alias->trait_method->method_name->val, alias->trait_method->method_name->len, lcname->val, fnname_len) == 0)) {
+					&& (alias->trait_method->method_name->len == fnname->len)
+					&& (zend_binary_strcasecmp(alias->trait_method->method_name->val, alias->trait_method->method_name->len, fnname->val, fnname->len) == 0)) {
 
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK));
 
@@ -4206,7 +4177,7 @@ static int zend_traits_copy_functions(zval *zv TSRMLS_DC, int num_args, va_list 
 			}
 		}
 
-		zend_add_trait_method(ce, fn->common.function_name->val, lcname, &fn_copy, overriden TSRMLS_CC);
+		zend_add_trait_method(ce, fn->common.function_name->val, fnname, &fn_copy, overriden TSRMLS_CC);
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
@@ -4365,6 +4336,8 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 {
 	zend_uint i;
 	HashTable *overriden = NULL;
+	zend_string *key;
+	zend_function *fn;
 
 	for (i = 0; i < ce->num_traits; i++) {
 		if (ce->trait_precedences) {
@@ -4376,15 +4349,21 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 			zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
 
 			/* copies functions, applies defined aliasing, and excludes unused trait methods */
-			zend_hash_apply_with_arguments(&ce->traits[i]->function_table TSRMLS_CC, zend_traits_copy_functions, 3, ce, &overriden, &exclude_table);
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->traits[i]->function_table, key, fn) {
+				zend_traits_copy_functions(key, fn, ce, &overriden, &exclude_table TSRMLS_CC);
+			} ZEND_HASH_FOREACH_END();
 
 			zend_hash_destroy(&exclude_table);
 		} else {
-			zend_hash_apply_with_arguments(&ce->traits[i]->function_table TSRMLS_CC, zend_traits_copy_functions, 3, ce, &overriden, NULL);
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->traits[i]->function_table, key, fn) {
+				zend_traits_copy_functions(key, fn, ce, &overriden, NULL TSRMLS_CC);
+			} ZEND_HASH_FOREACH_END();
 		}
 	}
 
-    zend_hash_apply_with_argument(&ce->function_table, zend_fixup_trait_method, ce TSRMLS_CC);
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
+		zend_fixup_trait_method(fn, ce);
+	} ZEND_HASH_FOREACH_END();
 
 	if (overriden) {
 		zend_hash_destroy(overriden);
@@ -5920,7 +5899,6 @@ void zend_do_end_array(znode *result, const znode *array_node TSRMLS_DC) /* {{{ 
 	int i;
 	int constant_array = 0;
 	zval array;
-	zend_constant *c;
 
 	/* check if constructed array consists only from constants */
 	if ((init_opline->op1_type & (IS_UNUSED | IS_CONST)) &&
@@ -6949,24 +6927,19 @@ int zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global
 }
 /* }}} */
 
-static int zend_auto_global_init(zval *zv TSRMLS_DC) /* {{{ */
-{
-	zend_auto_global *auto_global = Z_PTR_P(zv);
-
-	if (auto_global->jit) {
-		auto_global->armed = 1;
-	} else if (auto_global->auto_global_callback) {
-		auto_global->armed = auto_global->auto_global_callback(auto_global->name TSRMLS_CC);
-	} else {
-		auto_global->armed = 0;
-	}
-	return 0;
-}
-/* }}} */
-
 ZEND_API void zend_activate_auto_globals(TSRMLS_D) /* {{{ */
 {
-	zend_hash_apply(CG(auto_globals), zend_auto_global_init TSRMLS_CC);
+	zend_auto_global *auto_global;
+
+	ZEND_HASH_FOREACH_PTR(CG(auto_globals), auto_global) {
+		if (auto_global->jit) {
+			auto_global->armed = 1;
+		} else if (auto_global->auto_global_callback) {
+			auto_global->armed = auto_global->auto_global_callback(auto_global->name TSRMLS_CC);
+		} else {
+			auto_global->armed = 0;
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

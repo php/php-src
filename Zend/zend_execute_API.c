@@ -1524,11 +1524,8 @@ typedef struct _zend_abstract_info {
 	int ctor;
 } zend_abstract_info;
 
-static int zend_verify_abstract_class_function(zval *zv, void *arg TSRMLS_DC) /* {{{ */
+static void zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai TSRMLS_DC) /* {{{ */
 {
-	zend_function *fn = (zend_function *)Z_PTR_P(zv);
-	zend_abstract_info *ai = (zend_abstract_info *)arg;
-
 	if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
 			ai->afn[ai->cnt] = fn;
@@ -1544,18 +1541,20 @@ static int zend_verify_abstract_class_function(zval *zv, void *arg TSRMLS_DC) /*
 			ai->cnt++;
 		}
 	}
-	return 0;
 }
 /* }}} */
 
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
+	zend_function *func;
 	zend_abstract_info ai;
 
 	if ((ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) && !(ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 		memset(&ai, 0, sizeof(ai));
 
-		zend_hash_apply_with_argument(&ce->function_table, zend_verify_abstract_class_function, &ai TSRMLS_CC);
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
+			zend_verify_abstract_class_function(func, &ai TSRMLS_CC);
+		} ZEND_HASH_FOREACH_END();
 
 		if (ai.cnt) {
 			zend_error(E_ERROR, "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",

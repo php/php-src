@@ -1144,9 +1144,13 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 		zend_class_entry *old_scope = *scope;
 		int i;
+		zval *val;
 
 		*scope = class_type;
-		zend_hash_apply_with_argument(&class_type->constants_table, (apply_func_arg_t) zval_update_constant, (void *)1 TSRMLS_CC);
+
+		ZEND_HASH_FOREACH_VAL(&class_type->constants_table, val) {
+			zval_update_constant(val, 1 TSRMLS_CC);
+		} ZEND_HASH_FOREACH_END();
 
 		for (i = 0; i < class_type->default_properties_count; i++) {
 			if (Z_TYPE(class_type->default_properties_table[i]) != IS_UNDEF) {
