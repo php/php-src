@@ -448,7 +448,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
-	ht->u.flags = HASH_FLAG_APPLY_PROTECTION;
+	ht->u.flags = 0;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
@@ -527,7 +527,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = zend_destroy_property_info;
-	ht->u.flags = HASH_FLAG_APPLY_PROTECTION;
+	ht->u.flags = 0;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
@@ -667,6 +667,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 
 	/* constants table */
 	zend_hash_clone_zval(&ce->constants_table, &old_ce->constants_table, 1);
+	ce->constants_table.u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 
 	ce->name = zend_clone_str(ce->name TSRMLS_CC);
 
