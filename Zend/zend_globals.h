@@ -36,6 +36,7 @@
 #include "zend_modules.h"
 #include "zend_float.h"
 #include "zend_multibyte.h"
+#include "zend_arena.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -140,6 +141,8 @@ struct _zend_compiler_globals {
 	zend_compiler_context context;
 	zend_stack context_stack;
 
+	zend_arena *arena;
+	
 	zend_string *empty_string;
 	zend_string *one_char_string[256];
 

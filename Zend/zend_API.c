@@ -3548,7 +3548,13 @@ ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment TSRMLS_DC) /* {{{ */
 {
-	zend_property_info property_info, *property_info_ptr;
+	zend_property_info *property_info, *property_info_ptr;
+
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		property_info = pemalloc(sizeof(zend_property_info), 1);
+	} else {
+		property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
+	}
 
 	if (Z_CONSTANT_P(property)) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
@@ -3559,28 +3565,28 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 	if (access_type & ZEND_ACC_STATIC) {
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
 		    (property_info_ptr->flags & ZEND_ACC_STATIC) != 0) {
-			property_info.offset = property_info_ptr->offset;
-			zval_ptr_dtor(&ce->default_static_members_table[property_info.offset]);
+			property_info->offset = property_info_ptr->offset;
+			zval_ptr_dtor(&ce->default_static_members_table[property_info->offset]);
 			zend_hash_del(&ce->properties_info, name);
 		} else {
-			property_info.offset = ce->default_static_members_count++;
+			property_info->offset = ce->default_static_members_count++;
 			ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count, ce->type == ZEND_INTERNAL_CLASS);
 		}
-		ZVAL_COPY_VALUE(&ce->default_static_members_table[property_info.offset], property);
+		ZVAL_COPY_VALUE(&ce->default_static_members_table[property_info->offset], property);
 		if (ce->type == ZEND_USER_CLASS) {
 			ce->static_members_table = ce->default_static_members_table;
 		}
 	} else {
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
 		    (property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
-			property_info.offset = property_info_ptr->offset;
-			zval_ptr_dtor(&ce->default_properties_table[property_info.offset]);
+			property_info->offset = property_info_ptr->offset;
+			zval_ptr_dtor(&ce->default_properties_table[property_info->offset]);
 			zend_hash_del(&ce->properties_info, name);
 		} else {
-			property_info.offset = ce->default_properties_count++;
+			property_info->offset = ce->default_properties_count++;
 			ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
 		}
-		ZVAL_COPY_VALUE(&ce->default_properties_table[property_info.offset], property);
+		ZVAL_COPY_VALUE(&ce->default_properties_table[property_info->offset], property);
 	}
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		switch(Z_TYPE_P(property)) {
@@ -3595,27 +3601,23 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 	}
 	switch (access_type & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PRIVATE: {
-				property_info.name = zend_mangle_property_name(ce->name->val, ce->name->len, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
+				property_info->name = zend_mangle_property_name(ce->name->val, ce->name->len, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
 			}
 			break;
 		case ZEND_ACC_PROTECTED: {
-				property_info.name = zend_mangle_property_name("*", 1, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
+				property_info->name = zend_mangle_property_name("*", 1, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
 			}
 			break;
 		case ZEND_ACC_PUBLIC:
-			property_info.name = STR_COPY(name);
+			property_info->name = STR_COPY(name);
 			break;
 	}
 
-	property_info.name = zend_new_interned_string(property_info.name TSRMLS_CC);
-
-	property_info.flags = access_type;
-
-	property_info.doc_comment = doc_comment;
-
-	property_info.ce = ce;
-
-	zend_hash_update_mem(&ce->properties_info, name, &property_info, sizeof(zend_property_info));
+	property_info->name = zend_new_interned_string(property_info->name TSRMLS_CC);
+	property_info->flags = access_type;
+	property_info->doc_comment = doc_comment;
+	property_info->ce = ce;
+	zend_hash_update_ptr(&ce->properties_info, name, property_info);
 
 	return SUCCESS;
 }
