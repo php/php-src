@@ -1749,7 +1749,6 @@ SPL_METHOD(Array, unserialize)
 	}
 
 	if (buf_len == 0) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
 		return;
 	}
 
