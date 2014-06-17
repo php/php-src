@@ -121,20 +121,22 @@ static zend_always_inline long zend_dval_to_lval(double d)
  * just its prefix. Leading whitespace is allowed.
  *
  * The function returns 0 if the string did not contain a valid number; IS_LONG
- * if it contained a number that fits within the range of a long; or IS_DOUBLE
- * if the number was out of long range or contained a decimal point/exponent.
- * The number's value is returned into the respective pointer, *lval or *dval,
- * if that pointer is not NULL.
+ * if it contained a number that fits within the range of a long; IS_BIGINT
+ * if the number was out of long range; or IS_DOUBLE if it contained a decimal
+ * point/exponent. The number's value is returned into the respective pointer,
+ * *lval, *dval or **big if that pointer is not NULL.
  *
  * This variant also gives information if a string that represents an integer
- * could not be represented as such due to overflow. It writes 1 to oflow_info
- * if the integer is larger than LONG_MAX and -1 if it's smaller than LONG_MIN.
+ * could not be represented as a long due to overflow. It writes 1 to
+ * oflow_info if the integer is larger than LONG_MAX and -1 if it's smaller
+ * than LONG_MIN.
  */
-static inline zend_uchar is_numeric_string_ex(const char *str, int length, long *lval, double *dval, int allow_errors, int *oflow_info)
+static inline zend_uchar is_numeric_string_ex(const char *str, int length, long *lval, double *dval, zend_bigint **big, int allow_errors, int *oflow_info)
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
 	double local_dval = 0.0;
+	zend_bigint *local_bigint = NULL;
 	zend_uchar type;
 
 	if (!length) {
@@ -171,10 +173,8 @@ static inline zend_uchar is_numeric_string_ex(const char *str, int length, long 
 		}
 
 		/* Count the number of digits. If a decimal point/exponent is found,
-		 * it's a double. Otherwise, if there's a dval or no need to check for
-		 * a full match, stop when there are too many digits for a long */
-		for (type = IS_LONG; !(digits >= MAX_LENGTH_OF_LONG && (dval || allow_errors == 1)); digits++, ptr++) {
-check_digits:
+		 * it's a double. */
+		for (type = IS_LONG;; digits++, ptr++) {
 			if (ZEND_IS_DIGIT(*ptr) || (base == 16 && ZEND_IS_XDIGIT(*ptr))) {
 				continue;
 			} else if (base == 10) {
@@ -201,28 +201,33 @@ check_digits:
 					*oflow_info = *str == '-' ? -1 : 1;
 				}
 				dp_or_e = -1;
-				goto process_double;
+
+				type = IS_BIGINT;
+
+				if (big) {
+					local_bigint = emalloc(sizeof(zend_bigint));
+					zend_bigint_init_strtol(local_bigint, str, &ptr, 10);
+				}
 			}
 		} else if (!(digits < SIZEOF_LONG * 2 || (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
-			if (dval) {
-				local_dval = zend_hex_strtod(str, &ptr);
+			if (big) {
+				local_bigint = emalloc(sizeof(zend_bigint));
+				zend_bigint_init_strtol(local_bigint, str, &ptr, 16);
 			}
 			if (oflow_info != NULL) {
 				*oflow_info = 1;
 			}
-			type = IS_DOUBLE;
+			type = IS_BIGINT;
 		}
 	} else if (*ptr == '.' && ZEND_IS_DIGIT(ptr[1])) {
 process_double:
 		type = IS_DOUBLE;
 
-		/* If there's a dval, do the conversion; else continue checking
-		 * the digits if we need to check for a full match */
+		/* If there's a dval, do the conversion */
 		if (dval) {
 			local_dval = zend_strtod(str, &ptr);
 		} else if (allow_errors != 1 && dp_or_e != -1) {
 			dp_or_e = (*ptr++ == '.') ? 1 : 2;
-			goto check_digits;
 		}
 	} else {
 		return 0;
@@ -242,14 +247,15 @@ process_double:
 			int cmp = strcmp(&ptr[-digits], long_min_digits);
 
 			if (!(cmp < 0 || (cmp == 0 && *str == '-'))) {
-				if (dval) {
-					*dval = zend_strtod(str, NULL);
+				if (big) {
+					*big = emalloc(sizeof(zend_bigint));
+					zend_bigint_init_strtol(*big, str, NULL, 10);
 				}
 				if (oflow_info != NULL) {
 					*oflow_info = *str == '-' ? -1 : 1;
 				}
 
-				return IS_DOUBLE;
+				return IS_BIGINT;
 			}
 		}
 
@@ -258,17 +264,23 @@ process_double:
 		}
 
 		return IS_LONG;
-	} else {
+	} else if (type == IS_DOUBLE) {
 		if (dval) {
 			*dval = local_dval;
 		}
 
 		return IS_DOUBLE;
+	} else {
+		if (big) {
+			*big = local_bigint;
+		}
+
+		return IS_BIGINT;
 	}
 }
 
-static inline zend_uchar is_numeric_string(const char *str, int length, long *lval, double *dval, int allow_errors) {
-    return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
+static inline zend_uchar is_numeric_string(const char *str, int length, long *lval, double *dval, zend_bigint **big, int allow_errors) {
+    return is_numeric_string_ex(str, length, lval, dval, big, allow_errors, NULL);
 }
 
 static inline const char *

@@ -1149,7 +1149,7 @@ convert_to_array:
 		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 			switch(Z_TYPE_P(dim)) {
 				case IS_STRING:
-					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, NULL, -1)) {
 						break;
 					}
 					if (type != BP_VAR_UNSET) {
@@ -1272,7 +1272,7 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 			switch(Z_TYPE_P(dim)) {
 				/* case IS_LONG: */
 				case IS_STRING:
-					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, NULL, -1)) {
 						break;
 					}
 					if (type != BP_VAR_IS) {

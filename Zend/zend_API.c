@@ -380,9 +380,10 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_STRING:
 						{
 							double d;
+							zend_bigint *big;
 							int type;
 
-							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), p, &d, -1)) == 0) {
+							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), p, &d, &big, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
 								if (c == 'L') {
@@ -396,6 +397,9 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 								}
 
 								*p = zend_dval_to_lval(d);
+							} else if (type == IS_BIGINT) {
+								*p = zend_bigint_to_long(big);
+								zend_bigint_release(big);
 							}
 						}
 						break;
@@ -442,12 +446,16 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_STRING:
 						{
 							long l;
+							zend_bigint *big;
 							int type;
 
-							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &l, p, -1)) == 0) {
+							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &l, p, &big, -1)) == 0) {
 								return "double";
 							} else if (type == IS_LONG) {
 								*p = (double) l;
+							} else if (type == IS_BIGINT) {
+								*p = zend_bigint_to_double(big);
+								zend_bigint_release(big);
 							}
 						}
 						break;

@@ -46,13 +46,21 @@ ZEND_API zend_bigint* zend_bigint_init_alloc(void);
  * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
 ZEND_API int zend_bigint_init_from_string(zend_bigint *big, const char *str, int base);
 
-/* Intialises a bigint from a string with the specified base (in range 2-36)
- * If base is zero, it shall be detected from the prefix (0 for octal, 0x/X for hex, 0b/B for binary)
- * Leading whitespace is ignored, will take as many valid characters as possible
- * Stops at first non-valid character, or end of string
- * This behaviour is supposed to mostly match that of strtol but is not exactly the same
+/* Initialises a bigint from a string with the specified base (in range 2-36)
+ * Takes a length - due to an extra memory allocation, this function is slower
+ * Returns FAILURE on failure, else SUCCESS
  * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
-ZEND_API void zend_bigint_init_from_string_tolerant(zend_bigint *big, const char *str, int base);
+ZEND_API int zend_bigint_init_from_string_length(zend_bigint *big, const char *str, size_t length, int base);
+
+/* Intialises a bigint from a C-string with the specified base (10 or 16)
+ * If endptr is not NULL, it it set to point to first character after number
+ * If base is zero, it shall be detected from the prefix: 0x/0X for 16, else 10
+ * Leading whitespace is ignored, will take as many valid characters as possible
+ * Stops at first non-valid character, else null byte
+ * If there are no valid characters, the bigint is initialised to zero
+ * This behaviour is supposed to match that of strtol but is not exactly the same
+ * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
+ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** endptr, int base);
 
 /* Initialises a bigint from a long
  * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
@@ -66,8 +74,11 @@ ZEND_API void zend_bigint_init_from_double(zend_bigint *big, double value);
  * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
 ZEND_API void zend_bigint_init_dup(zend_bigint *big, const zend_bigint *source);
 
-/* Destroys a bigint */
+/* Destroys a bigint (does NOT deallocate) */
 ZEND_API void zend_bigint_dtor(zend_bigint *big);
+
+/* Decreases the refcount of a bigint and, if <= 0, destroys and frees it */
+ZEND_API void zend_bigint_release(zend_bigint *big);
 
 /*** INFORMATION ***/
 

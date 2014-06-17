@@ -197,10 +197,13 @@ try_again:
 		case IS_STRING:
 			{
 				zend_string *str;
+				zend_uchar type;
 
 				str = Z_STR_P(op);
-				if ((Z_TYPE_INFO_P(op)=is_numeric_string(str->val, str->len, &Z_LVAL_P(op), &Z_DVAL_P(op), 1)) == 0) {
+				if ((type = (Z_TYPE_INFO_P(op)=is_numeric_string(str->val, str->len, &Z_LVAL_P(op), &Z_DVAL_P(op), &Z_BIG_P(op), 1))) == 0) {
 					ZVAL_LONG(op, 0);
+				} else if (type == IS_BIGINT) {
+					ZVAL_BIGINT(op, Z_BIG_P(op));
 				}
 				STR_RELEASE(str);
 				break;
@@ -236,8 +239,11 @@ try_again:
 		switch (Z_TYPE_P(op)) {										\
 			case IS_STRING:											\
 				{													\
-					if ((Z_TYPE_INFO(holder)=is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &Z_LVAL(holder), &Z_DVAL(holder), 1)) == 0) {	\
+					zend_uchar type;								\
+					if ((type = (Z_TYPE_INFO(holder)=is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &Z_LVAL(holder), &Z_DVAL(holder), &Z_BIG(holder), 1))) == 0) {	\
 						ZVAL_LONG(&(holder), 0);							\
+					} else if (type == IS_BIGINT) {							\
+						ZVAL_BIGINT(&(holder), Z_BIG(holder));				\
 					}														\
 					(op) = &(holder);										\
 					break;													\
@@ -334,7 +340,7 @@ try_again:
 				break;												\
 			case IS_STRING:											\
 				ZVAL_NEW_BIGINT(&holder);							\
-				zend_bigint_init_from_string_tolerant(Z_BIG(holder), Z_STRVAL(op), 10);\
+				zend_bigint_init_strtol(Z_BIG(holder), Z_STRVAL(op), NULL, 10);\
 				break;												\
 			case IS_ARRAY:											\
 				ZVAL_NEW_BIGINT(&holder);							\
@@ -379,7 +385,7 @@ try_again:
 				ZVAL_LONG(&holder, strtol(Z_STRVAL_P(op), NULL, 10));\
 				if (errno == ERANGE) { /* Overflow */				\
 					ZVAL_NEW_BIGINT(&holder);						\
-					zend_bigint_init_from_string_tolerant(Z_BIG(holder), Z_STRVAL_P(op), 10);\
+					zend_bigint_init_strtol(Z_BIG(holder), Z_STRVAL_P(op), NULL, 10);\
 				}													\
 				break;												\
 			case IS_ARRAY:											\
@@ -601,7 +607,7 @@ ZEND_API void convert_to_bigint_base(zval *op, int base) /* {{{ */
 			{
 				zend_string *str = Z_STR_P(op);
 				ZVAL_NEW_BIGINT(op);
-				zend_bigint_init_from_string_tolerant(Z_BIG_P(op), str->val, base);
+				zend_bigint_init_strtol(Z_BIG_P(op), str->val, NULL, base);
 				STR_RELEASE(str);
 			}
 			break;
@@ -671,7 +677,7 @@ ZEND_API void convert_to_bigint_or_long_base(zval *op, int base) /* {{{ */
 				ZVAL_LONG(op, strtol(str->val, NULL, 10));
 				if (errno == ERANGE) { /* Overflow */
 					ZVAL_NEW_BIGINT(op);
-					zend_bigint_init_from_string_tolerant(Z_BIG_P(op), str->val, base);
+					zend_bigint_init_strtol(Z_BIG_P(op), str->val, NULL, base);
 				}
 				STR_RELEASE(str);
 			}
@@ -3037,14 +3043,16 @@ try_again:
 		case IS_STRING: {
 				long lval;
 				double dval;
+				zend_bigint *big;
 
-				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
+				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, &big, 0)) {
 					case IS_LONG:
 						STR_RELEASE(Z_STR_P(op1));
 						if (lval == LONG_MAX) {
-							/* switch to double */
-							double d = (double)lval;
-							ZVAL_DOUBLE(op1, d+1);
+							/* switch to bigint */
+							big = zend_bigint_init_alloc();
+							zend_bigint_long_add_long(big, lval, 1);
+							ZVAL_BIGINT(op1, big);
 						} else {
 							ZVAL_LONG(op1, lval+1);
 						}
@@ -3052,6 +3060,11 @@ try_again:
 					case IS_DOUBLE:
 						STR_RELEASE(Z_STR_P(op1));
 						ZVAL_DOUBLE(op1, dval+1);
+						break;
+					case IS_BIGINT:
+						STR_RELEASE(Z_STR_P(op1));
+						zend_bigint_add_long(big, big, 1);
+						ZVAL_BIGINT(op1, big);
 						break;
 					default:
 						/* Perl style string increment */
@@ -3087,6 +3100,7 @@ ZEND_API int decrement_function(zval *op1) /* {{{ */
 {
 	long lval;
 	double dval;
+	zend_bigint *big;
 
 try_again:
 	switch (Z_TYPE_P(op1)) {
@@ -3117,12 +3131,14 @@ try_again:
 				ZVAL_LONG(op1, -1);
 				break;
 			}
-			switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
+			switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, &big, 0)) {
 				case IS_LONG:
 					STR_RELEASE(Z_STR_P(op1));
 					if (lval == LONG_MIN) {
-						double d = (double)lval;
-						ZVAL_DOUBLE(op1, d-1);
+						/* switch to bigint */
+						big = zend_bigint_init_alloc();
+						zend_bigint_long_subtract_long(big, lval, 1);
+						ZVAL_BIGINT(op1, big);
 					} else {
 						ZVAL_LONG(op1, lval-1);
 					}
@@ -3130,6 +3146,11 @@ try_again:
 				case IS_DOUBLE:
 					STR_RELEASE(Z_STR_P(op1));
 					ZVAL_DOUBLE(op1, dval - 1);
+					break;
+				case IS_BIGINT:
+					STR_RELEASE(Z_STR_P(op1));
+					zend_bigint_subtract_long(big, big, 1);
+					ZVAL_BIGINT(op1, big);
 					break;
 			}
 			break;
@@ -3354,9 +3375,13 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 	long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
 
-	if ((ret1=is_numeric_string_ex(Z_STRVAL_P(s1), Z_STRLEN_P(s1), &lval1, &dval1, 0, &oflow1)) &&
-		(ret2=is_numeric_string_ex(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, 0, &oflow2))) {
+	if ((ret1=is_numeric_string_ex(Z_STRVAL_P(s1), Z_STRLEN_P(s1), &lval1, &dval1, NULL, 0, &oflow1)) &&
+		(ret2=is_numeric_string_ex(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, NULL, 0, &oflow2))) {
 #if ULONG_MAX == 0xFFFFFFFF
+		/* bigints shall be handled as strings for the purposes of this */
+		if (ret1 == IS_BIGINT || ret2 == IS_BIGINT) {
+			goto string_cmp;
+		}
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
 			|| (oflow1 == -1 && dval1 < -9007199254740991.))) {
