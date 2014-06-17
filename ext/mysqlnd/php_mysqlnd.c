@@ -43,31 +43,22 @@ static zend_function_entry mysqlnd_functions[] = {
 PHPAPI void
 mysqlnd_minfo_print_hash(zval *values)
 {
-	zval **values_entry;
-	HashPosition pos_values;
+	zval *values_entry;
+	zend_string	*string_key;
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos_values);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&values_entry, &pos_values) == SUCCESS) {
-		char	*string_key;
-		uint	string_key_len;
-		ulong	num_key;
-
-		zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &string_key, &string_key_len, &num_key, 0, &pos_values);
-
-		convert_to_string(*values_entry);
-		php_info_print_table_row(2, string_key, Z_STRVAL_PP(values_entry));
-
-		zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos_values);
-	}
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), string_key, values_entry) {
+		convert_to_string(values_entry);
+		php_info_print_table_row(2, string_key->val, Z_STRVAL_P(values_entry));
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_minfo_dump_plugin_stats */
 static int
-mysqlnd_minfo_dump_plugin_stats(void *pDest, void * argument TSRMLS_DC)
+mysqlnd_minfo_dump_plugin_stats(zval *el, void * argument TSRMLS_DC)
 {
-	struct st_mysqlnd_plugin_header * plugin_header = *(struct st_mysqlnd_plugin_header **) pDest;
+	struct st_mysqlnd_plugin_header * plugin_header = *(struct st_mysqlnd_plugin_header **)Z_PTR_P(el);
 	if (plugin_header->plugin_stats.values) {
 		char buf[64];
 		zval values;
@@ -88,12 +79,12 @@ mysqlnd_minfo_dump_plugin_stats(void *pDest, void * argument TSRMLS_DC)
 
 /* {{{ mysqlnd_minfo_dump_loaded_plugins */
 static int 
-mysqlnd_minfo_dump_loaded_plugins(void *pDest, void * buf TSRMLS_DC)
+mysqlnd_minfo_dump_loaded_plugins(zval *el, void * buf TSRMLS_DC)
 {
 	smart_str * buffer = (smart_str *) buf;
-	struct st_mysqlnd_plugin_header * plugin_header = *(struct st_mysqlnd_plugin_header **) pDest;
+	struct st_mysqlnd_plugin_header * plugin_header = *(struct st_mysqlnd_plugin_header **)Z_PTR_P(el);
 	if (plugin_header->plugin_name) {
-		if (buffer->len) {
+		if (buffer->s) {
 			smart_str_appendc(buffer, ',');
 		}
 		smart_str_appends(buffer, plugin_header->plugin_name);
@@ -102,23 +93,20 @@ mysqlnd_minfo_dump_loaded_plugins(void *pDest, void * buf TSRMLS_DC)
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_minfo_dump_api_plugins */
 static void
 mysqlnd_minfo_dump_api_plugins(smart_str * buffer TSRMLS_DC)
 {
 	HashTable *ht = mysqlnd_reverse_api_get_api_list(TSRMLS_C);
-	HashPosition pos;
 	MYSQLND_REVERSE_API **ext;
 
-	for (zend_hash_internal_pointer_reset_ex(ht, &pos);
-	     zend_hash_get_current_data_ex(ht, (void **) &ext, &pos) == SUCCESS;
-	     zend_hash_move_forward_ex(ht, &pos)
-	) {
-		if (buffer->len) {
+	ZEND_HASH_FOREACH_PTR(ht, ext) {
+		if (buffer->s) {
 			smart_str_appendc(buffer, ',');
 		}
 		smart_str_appends(buffer, (*ext)->module->name);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -163,15 +151,15 @@ PHP_MINFO_FUNCTION(mysqlnd)
 
 	/* loaded plugins */
 	{
-		smart_str tmp_str = {0, 0, 0};
+		smart_str tmp_str = {0};
 		mysqlnd_plugin_apply_with_argument(mysqlnd_minfo_dump_loaded_plugins, &tmp_str);
 		smart_str_0(&tmp_str);
-		php_info_print_table_row(2, "Loaded plugins", tmp_str.c);
+		php_info_print_table_row(2, "Loaded plugins", tmp_str.s->val);
 		smart_str_free(&tmp_str);
 
 		mysqlnd_minfo_dump_api_plugins(&tmp_str TSRMLS_CC);
 		smart_str_0(&tmp_str);
-		php_info_print_table_row(2, "API Extensions", tmp_str.c);
+		php_info_print_table_row(2, "API Extensions", tmp_str.s->val);
 		smart_str_free(&tmp_str);
 	}
 
@@ -214,6 +202,8 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 /* }}} */
 
 
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 {
 	long long_value = atol(new_value);
@@ -224,6 +214,8 @@ static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 
 	return SUCCESS;
 }
+/* }}} */
+
 
 /* {{{ PHP_INI_BEGIN
 */
@@ -324,7 +316,6 @@ static PHP_RSHUTDOWN_FUNCTION(mysqlnd)
 }
 /* }}} */
 #endif
-
 
 
 static const zend_module_dep mysqlnd_deps[] = {

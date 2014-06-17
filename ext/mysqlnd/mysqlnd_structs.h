@@ -616,7 +616,7 @@ struct st_mysqlnd_conn_methods
 };
 
 	/* for decoding - binary or text protocol */
-typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC);
 
@@ -1035,8 +1035,8 @@ struct st_mysqlnd_buffered_result_zval
 {
 	def_mysqlnd_buffered_result_parent;
 
-	zval	**data;
-	zval	**data_cursor;
+	zval	*data;
+	zval	*data_cursor;
 };
 
 
@@ -1053,7 +1053,7 @@ struct st_mysqlnd_unbuffered_result
 {
 
 	/* For unbuffered (both normal and PS) */
-	zval				**last_row_data;
+	zval				*last_row_data;
 	MYSQLND_MEMORY_POOL_CHUNK *last_row_buffer;
 
 	/*
@@ -1098,14 +1098,14 @@ struct st_mysqlnd_res
 
 struct st_mysqlnd_param_bind
 {
-	zval		*zv;
+	zval		zv;
 	zend_uchar	type;
 	enum_param_bind_flags	flags;
 };
 
 struct st_mysqlnd_result_bind
 {
-	zval		*zv;
+	zval		zv;
 	zend_bool	bound;
 };
 

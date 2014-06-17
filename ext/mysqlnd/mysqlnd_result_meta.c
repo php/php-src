@@ -182,14 +182,9 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 		if ((meta->zend_hash_keys[i].is_numeric =
 					mysqlnd_is_key_numeric(field_packet->metadata->name,
 										   field_packet->metadata->name_length + 1,
-										   &idx)))
-		{
+										   &idx))) {
 			meta->zend_hash_keys[i].key = idx;
-		} else {
-			meta->zend_hash_keys[i].key =
-					zend_get_hash_value(field_packet->metadata->name,
-										field_packet->metadata->name_length + 1);
-		}
+		} 
 	}
 	PACKET_FREE(field_packet);
 

@@ -1226,7 +1226,7 @@ static enum_func_status
 php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	/* Should be enough for the metadata of a single row */
-	MYSQLND_PACKET_RES_FIELD *packet= (MYSQLND_PACKET_RES_FIELD *) _packet;
+	MYSQLND_PACKET_RES_FIELD *packet = (MYSQLND_PACKET_RES_FIELD *) _packet;
 	size_t buf_len = conn->net->cmd_buffer.length, total_len = 0;
 	zend_uchar *buf = (zend_uchar *) conn->net->cmd_buffer.buffer;
 	zend_uchar *p = buf;
@@ -1517,14 +1517,14 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 
 /* {{{ php_mysqlnd_rowp_read_binary_protocol */
 enum_func_status
-php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 									  unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 									  zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
 {
 	unsigned int i;
-	zend_uchar * p = row_buffer->ptr;
-	zend_uchar * null_ptr, bit;
-	zval **current_field, **end_field, **start_field;
+	zend_uchar *p = row_buffer->ptr;
+	zend_uchar *null_ptr, bit;
+	zval *current_field, *end_field, *start_field;
 
 	DBG_ENTER("php_mysqlnd_rowp_read_binary_protocol");
 
@@ -1541,28 +1541,20 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 	bit	= 4;					/* first 2 bits are reserved */
 
 	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
-		DBG_INF("Directly creating zval");
-		MAKE_STD_ZVAL(*current_field);
-		if (!*current_field) {
-			DBG_RETURN(FAIL);
-		}
-	}
-
-	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
 		enum_mysqlnd_collected_stats statistic;
 		zend_uchar * orig_p = p;
 
 		DBG_INF_FMT("Into zval=%p decoding column %u [%s.%s.%s] type=%u field->flags&unsigned=%u flags=%u is_bit=%u",
-			*current_field, i,
+			current_field, i,
 			fields_metadata[i].db, fields_metadata[i].table, fields_metadata[i].name, fields_metadata[i].type,
 			fields_metadata[i].flags & UNSIGNED_FLAG, fields_metadata[i].flags, fields_metadata[i].type == MYSQL_TYPE_BIT);
 		if (*null_ptr & bit) {
 			DBG_INF("It's null");
-			ZVAL_NULL(*current_field);
+			ZVAL_NULL(current_field);
 			statistic = STAT_BINARY_TYPE_FETCHED_NULL;
 		} else {
 			enum_mysqlnd_field_types type = fields_metadata[i].type;
-			mysqlnd_ps_fetch_functions[type].func(*current_field, &fields_metadata[i], 0, &p TSRMLS_CC);
+			mysqlnd_ps_fetch_functions[type].func(current_field, &fields_metadata[i], 0, &p TSRMLS_CC);
 
 			if (MYSQLND_G(collect_statistics)) {
 				switch (fields_metadata[i].type) {
@@ -1599,8 +1591,8 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 		}
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1,
 										STAT_BYTES_RECEIVED_PURE_DATA_PS,
-										(Z_TYPE_PP(current_field) == IS_STRING)?
-											Z_STRLEN_PP(current_field) : (p - orig_p));
+										(Z_TYPE_P(current_field) == IS_STRING)?
+											Z_STRLEN_P(current_field) : (p - orig_p));
 
 		if (!((bit<<=1) & 255)) {
 			bit = 1;	/* to the following byte */
@@ -1612,15 +1604,16 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 }
 /* }}} */
 
+
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
 enum_func_status
-php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, zend_bool copy_data, MYSQLND_STATS * stats TSRMLS_DC)
 {
 	unsigned int i;
 	zend_bool last_field_was_string = FALSE;
-	zval **current_field, **end_field, **start_field;
+	zval *current_field, *end_field, *start_field;
 	zend_uchar * p = row_buffer->ptr;
 	size_t data_size = row_buffer->app;
 	zend_uchar * bit_area = (zend_uchar*) row_buffer->ptr + data_size + 1; /* we allocate from here */
@@ -1632,14 +1625,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 	}
 
 	end_field = (start_field = fields) + field_count;
-
-	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
-		DBG_INF("Directly creating zval");
-		MAKE_STD_ZVAL(*current_field);
-		if (!*current_field) {
-			DBG_RETURN(FAIL);
-		}
-	}
 
 	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
 		/* Don't reverse the order. It is significant!*/
@@ -1665,7 +1650,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 
 		/* NULL or NOT NULL, this is the question! */
 		if (len == MYSQLND_NULL_LENGTH) {
-			ZVAL_NULL(*current_field);
+			ZVAL_NULL(current_field);
 			last_field_was_string = FALSE;
 		} else {
 #if defined(MYSQLND_STRING_TO_INT_CONVERSION)
@@ -1719,7 +1704,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 #else
 						_atoi64((char *) p);
 #endif
-					ZVAL_LONG(*current_field, (long) v); /* the cast is safe */
+					ZVAL_LONG(current_field, (long) v); /* the cast is safe */
 				} else {
 					uint64_t v =
 #ifndef PHP_WIN32
@@ -1739,9 +1724,10 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 #error Need fix for this architecture
 #endif /* SIZEOF */
 					{
-						ZVAL_STRINGL(*current_field, (char *)p, len, 0);
+						//????  ZVAL_STRINGL(current_field, (char *)p, len, 0);
+						ZVAL_STRINGL(current_field, (char *)p, len);
 					} else {
-						ZVAL_LONG(*current_field, (long) v); /* the cast is safe */
+						ZVAL_LONG(current_field, (long) v); /* the cast is safe */
 					}
 				}
 				*(p + len) = save;
@@ -1749,7 +1735,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
-				ZVAL_DOUBLE(*current_field, atof((char *) p));
+				ZVAL_DOUBLE(current_field, atof((char *) p));
 				*(p + len) = save;
 			} else
 #endif /* MYSQLND_STRING_TO_INT_CONVERSION */
@@ -1764,24 +1750,34 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				  Definitely not nice, _hackish_ :(, but works.
 				*/
 				zend_uchar *start = bit_area;
-				ps_fetch_from_1_to_8_bytes(*current_field, &(fields_metadata[i]), 0, &p, len TSRMLS_CC);
+				ps_fetch_from_1_to_8_bytes(current_field, &(fields_metadata[i]), 0, &p, len TSRMLS_CC);
 				/*
 				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
 				  later in this function there will be an advancement.
 				*/
 				p -= len;
-				if (Z_TYPE_PP(current_field) == IS_LONG) {
-					bit_area += 1 + sprintf((char *)start, "%ld", Z_LVAL_PP(current_field));
-					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, copy_data);
-				} else if (Z_TYPE_PP(current_field) == IS_STRING){
-					memcpy(bit_area, Z_STRVAL_PP(current_field), Z_STRLEN_PP(current_field));
-					bit_area += Z_STRLEN_PP(current_field);
+				if (Z_TYPE_P(current_field) == IS_LONG) {
+					bit_area += 1 + sprintf((char *)start, "%ld", Z_LVAL_P(current_field));
+					//????  ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1, copy_data);
+					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
+					if (!copy_data) {
+						efree(start);
+					}
+				} else if (Z_TYPE_P(current_field) == IS_STRING){
+					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRLEN_P(current_field));
+					bit_area += Z_STRLEN_P(current_field);
 					*bit_area++ = '\0';
-					zval_dtor(*current_field);
-					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, copy_data);
+					zval_dtor(current_field);
+					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
+					if (!copy_data) {
+						efree(start);
+					}
 				}
 			} else {
-				ZVAL_STRINGL(*current_field, (char *)p, len, copy_data);
+				ZVAL_STRINGL(current_field, (char *)p, len);
+				if (!copy_data) {
+					efree(p);
+				}
 			}
 			p += len;
 			last_field_was_string = TRUE;
@@ -1799,7 +1795,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 
 /* {{{ php_mysqlnd_rowp_read_text_protocol_zval */
 enum_func_status
-php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
 {
@@ -1813,7 +1809,7 @@ php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 
 /* {{{ php_mysqlnd_rowp_read_text_protocol_c */
 enum_func_status
-php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
 {
@@ -1823,8 +1819,6 @@ php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 	DBG_RETURN(ret);
 }
 /* }}} */
-
-
 
 
 /* {{{ php_mysqlnd_rowp_read */
@@ -1907,7 +1901,7 @@ php_mysqlnd_rowp_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 				  but mostly like old-API unbuffered and thus will populate this array with
 				  value.
 				*/
-				packet->fields = (zval **) mnd_pecalloc(packet->field_count, sizeof(zval *),
+				packet->fields = mnd_pecalloc(packet->field_count, sizeof(zval),
 														packet->persistent_alloc);
 			}
 		} else {

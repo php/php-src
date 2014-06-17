@@ -317,6 +317,21 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #define Z_ADDREF(z)					Z_ADDREF_P(&(z))
 #define Z_DELREF(z)					Z_DELREF_P(&(z))
 
+#define Z_TRY_ADDREF_P(pz) do {		\
+	if (Z_REFCOUNT_P((pz))) {		\
+		Z_ADDREF_P((pz));			\
+	}								\
+} while (0)
+
+#define Z_TRY_DELREF_P(pz) do {		\
+	if (Z_REFCOUNT_P((pz))) {		\
+		Z_DELREF_P((pz));			\
+	}								\
+} while (0)
+
+#define Z_TRY_ADDREF(z)				Z_TRY_ADDREF_P(&(z))
+#define Z_TRY_DELREF(z)				Z_TRY_DELREF_P(&(z))
+
 #if ZEND_DEBUG
 #define zend_always_inline inline
 #define zend_never_inline
