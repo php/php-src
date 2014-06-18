@@ -318,13 +318,13 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #define Z_DELREF(z)					Z_DELREF_P(&(z))
 
 #define Z_TRY_ADDREF_P(pz) do {		\
-	if (Z_REFCOUNT_P((pz))) {		\
+	if (Z_REFCOUNTED_P((pz))) {		\
 		Z_ADDREF_P((pz));			\
 	}								\
 } while (0)
 
 #define Z_TRY_DELREF_P(pz) do {		\
-	if (Z_REFCOUNT_P((pz))) {		\
+	if (Z_REFCOUNTED_P((pz))) {		\
 		Z_DELREF_P((pz));			\
 	}								\
 } while (0)
