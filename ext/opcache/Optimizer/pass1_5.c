@@ -16,7 +16,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 	int i = 0;
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
-	zend_bool collect_constants = (op_array == &script->main_op_array);
+	zend_bool collect_constants = (op_array == &ctx->script->main_op_array);
 
 	while (opline < end) {
 		switch (opline->opcode) {
@@ -245,7 +245,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				zval c;
 
 				if (!zend_get_persistent_constant(Z_STR(ZEND_OP2_LITERAL(opline)), &c, 1 TSRMLS_CC)) {
-					if (!*constants || !zend_optimizer_get_collected_constant(*constants, &ZEND_OP2_LITERAL(opline), &c)) {
+					if (!ctx->constants || !zend_optimizer_get_collected_constant(ctx->constants, &ZEND_OP2_LITERAL(opline), &c)) {
 						break;
 					}
 				}
@@ -334,7 +334,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			    (opline-2)->opcode == ZEND_SEND_VAL &&
 			    ZEND_OP1_TYPE(opline-2) == IS_CONST &&
 			    Z_TYPE(ZEND_OP1_LITERAL(opline-2)) == IS_STRING) {
-				zend_optimizer_collect_constant(constants, &ZEND_OP1_LITERAL(opline-2), &ZEND_OP1_LITERAL(opline-1));
+				zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(opline-2), &ZEND_OP1_LITERAL(opline-1));
 				break;
 			} else {
 				/* don't colllect constants after any other function call */
@@ -452,7 +452,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			if (collect_constants &&
 			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
 			    Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_STRING) {
-				zend_optimizer_collect_constant(constants, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline));
+				zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline));
 			}
 			break;
 #endif

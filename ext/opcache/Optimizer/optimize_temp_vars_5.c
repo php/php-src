@@ -70,7 +70,7 @@ static const char op_const_means_class[256]  = {
 		max = i;				\
 	}
 
-static void optimize_temporary_variables(zend_op_array *op_array)
+static void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	int T = op_array->T;
 	int offset = op_array->last_var;
@@ -83,11 +83,12 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 	int i;
 	int max = -1;
 	int var_to_free = -1;
+	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
-	taken_T = (char *) emalloc(T);
-	start_of_T = (zend_op **) emalloc(T * sizeof(zend_op *));
-	valid_T = (char *) emalloc(T);
-	map_T = (int *) emalloc(T * sizeof(int));
+	taken_T = (char *) zend_arena_alloc(&ctx->arena, T);
+	start_of_T = (zend_op **) zend_arena_alloc(&ctx->arena, T * sizeof(zend_op *));
+	valid_T = (char *) zend_arena_alloc(&ctx->arena, T);
+	map_T = (int *) zend_arena_alloc(&ctx->arena, T * sizeof(int));
 
     end = op_array->opcodes;
     opline = &op_array->opcodes[op_array->last - 1];
@@ -238,9 +239,6 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 		opline--;
 	}
 
-	efree(taken_T);
-	efree(start_of_T);
-	efree(valid_T);
-	efree(map_T);
+	zend_arena_release(&ctx->arena, checkpoint);
 	op_array->T = max + 1;
 }

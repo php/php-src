@@ -55,6 +55,12 @@
 # define SAME_VAR(op1, op2) 	(((op1.op_type == IS_VAR && op2.op_type == IS_VAR) || (op1.op_type == IS_TMP_VAR && op2.op_type == IS_TMP_VAR)) && op1.u.var == op2.u.var)
 #endif
 
+typedef struct _zend_optimizer_ctx {
+	zend_arena             *arena;
+	zend_persistent_script *script;
+	HashTable              *constants;
+} zend_optimizer_ctx;
+
 typedef struct _zend_code_block zend_code_block;
 typedef struct _zend_block_source zend_block_source;
 
@@ -79,6 +85,8 @@ typedef struct _zend_cfg {
 	zend_code_block   **loop_start;
 	zend_code_block   **loop_cont;
 	zend_code_block   **loop_brk;
+	zend_op           **Tsource;
+	char               *same_t;
 } zend_cfg;
 
 struct _zend_block_source {
