@@ -1,9 +1,5 @@
 --TEST--
 decrementing different variables
---SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
---INI--
-precision=14
 --FILE--
 <?php
 
@@ -51,10 +47,10 @@ float(1.5)
 NULL
 bool(true)
 bool(false)
-object(stdClass)#%d (0) {
+object(stdClass)#1 (0) {
 }
 array(0) {
 }
-float(-9.2233720368548E+18)
-float(-9.2233720368548E+18)
+int(-9223372036854775809)
+int(-9223372036854775809)
 Done
