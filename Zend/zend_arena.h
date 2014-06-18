@@ -78,15 +78,33 @@ static zend_always_inline void* zend_arena_alloc(zend_arena **arena_ptr, size_t 
 	return (void*) ptr;
 }
 
-static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t unit_size, size_t count)
+static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t count, size_t unit_size)
 {
-	size_t size = ZEND_MM_ALIGNED_SIZE(unit_size) * count;
+	size_t size = unit_size * count;
 	void *ret;
 
-	ZEND_ASSERT(size > ZEND_MM_ALIGNED_SIZE(unit_size) && size > count);
+	ZEND_ASSERT(size >= unit_size && size >= count);
 	ret = zend_arena_alloc(arena_ptr, size);
 	memset(ret, 0, size);
 	return ret;
+}
+
+static zend_always_inline void* zend_arena_checkpoint(zend_arena *arena)
+{
+	return arena->ptr;
+}
+
+static zend_always_inline void zend_arena_release(zend_arena **arena_ptr, void *checkpoint)
+{
+	zend_arena *arena = *arena_ptr;
+
+	while (UNEXPECTED((char*)checkpoint > arena->end) ||
+	       UNEXPECTED((char*)checkpoint < (char*)arena)) {
+		zend_arena *prev = arena->prev;
+		efree(arena);
+		*arena_ptr = arena = prev;
+	}
+	arena->ptr = (char*)checkpoint;
 }
 
 #endif /* _ZEND_ARENA_H_ */

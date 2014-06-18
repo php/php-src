@@ -1168,7 +1168,6 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	}
 
 	if (buf_len == 0) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Serialized string cannot be empty");
 		return;
 	}
 
