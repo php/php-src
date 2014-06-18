@@ -207,6 +207,8 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 			return "boolean";
 		case IS_LONG:
 		case IS_BIGINT:
+		/* this is a fake type, but it's used in some places */
+		case IS_BIGINT_OR_LONG:
 			return "integer";
 		case IS_DOUBLE:
 			return "double";
