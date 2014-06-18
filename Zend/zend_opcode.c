@@ -129,7 +129,11 @@ ZEND_API void zend_function_dtor(zval *zv)
 	TSRMLS_FETCH();
 
 	destroy_zend_function(function TSRMLS_CC);
-	pefree(function, function->type == ZEND_INTERNAL_FUNCTION);
+	if (function->type == ZEND_INTERNAL_FUNCTION) {
+		pefree(function, 1);
+	} else if (!function->common.function_name) {
+		efree(function);
+	}
 }
 
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
@@ -277,7 +281,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 			
 			_destroy_zend_class_traits_info(ce);
 			
-			efree(ce);
 			break;
 		case ZEND_INTERNAL_CLASS:
 			if (ce->default_properties_table) {
@@ -328,7 +331,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		FREE_HASHTABLE(op_array->static_variables);
 	}
 
-	if (op_array->run_time_cache) {
+	if (op_array->run_time_cache && !op_array->function_name) {
 		efree(op_array->run_time_cache);
 	}
 

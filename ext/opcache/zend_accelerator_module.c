@@ -318,7 +318,7 @@ static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
 	handle.type = ZEND_HANDLE_FILENAME;
 
 	if (IS_ABSOLUTE_PATH(filename, filename_len)) {
-		persistent_script = zend_accel_hash_find(&ZCSG(hash), filename, filename_len + 1);
+		persistent_script = zend_accel_hash_find(&ZCSG(hash), filename, filename_len);
 		if (persistent_script) {
 			return !persistent_script->corrupted &&
 				validate_timestamp_and_record(persistent_script, &handle TSRMLS_CC) == SUCCESS;
@@ -326,7 +326,7 @@ static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
 	}
 
 	if ((key = accel_make_persistent_key_ex(&handle, filename_len, &key_length TSRMLS_CC)) != NULL) {
-		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length + 1);
+		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length);
 		return persistent_script && !persistent_script->corrupted &&
 			validate_timestamp_and_record(persistent_script, &handle TSRMLS_CC) == SUCCESS;
 	}

@@ -18,7 +18,7 @@ class Test {
 	}
 
 	function __get($name) {
-		echo '__get ' . $name . "\n";
+		echo '__get ' . $name;
 		return $this->$name;
 	}
 
@@ -52,16 +52,12 @@ $test->privateProperty   = 'value';
 
 --EXPECTF--
 __get nonExisting
-
 Notice: Undefined property: Test::$nonExisting in %sbug63462.php on line %d
 __get publicProperty
-
 Notice: Undefined property: Test::$publicProperty in %sbug63462.php on line %d
 __get protectedProperty
-
 Notice: Undefined property: Test::$protectedProperty in %sbug63462.php on line %d
 __get privateProperty
-
 Notice: Undefined property: Test::$privateProperty in %sbug63462.php on line %d
 __isset nonExisting
 __isset publicProperty

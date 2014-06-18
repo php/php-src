@@ -552,7 +552,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 static void zend_persist_op_array(zval *zv TSRMLS_DC)
 {
-	zend_accel_store(Z_PTR_P(zv), sizeof(zend_op_array));
+	Z_PTR_P(zv) = zend_accel_memdup(Z_PTR_P(zv), sizeof(zend_op_array));
 	zend_persist_op_array_ex(Z_PTR_P(zv), NULL TSRMLS_CC);
 }
 
@@ -560,8 +560,7 @@ static void zend_persist_property_info(zval *zv TSRMLS_DC)
 {
 	zend_property_info *prop;
 
-	zend_accel_store(Z_PTR_P(zv), sizeof(zend_property_info));
-	prop = Z_PTR_P(zv);
+	prop = Z_PTR_P(zv) = zend_accel_memdup(Z_PTR_P(zv), sizeof(zend_property_info));
 	zend_accel_store_interned_string(prop->name);
 	if (prop->doc_comment) {
 		if (ZCG(accel_directives).save_comments) {
@@ -581,7 +580,7 @@ static void zend_persist_class_entry(zval *zv TSRMLS_DC)
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->type == ZEND_USER_CLASS) {
-		Z_PTR_P(zv) = zend_accel_store(ce, sizeof(zend_class_entry));
+		ce = Z_PTR_P(zv) = zend_accel_memdup(ce, sizeof(zend_class_entry));
 		zend_accel_store_interned_string(ce->name);
 		zend_hash_persist(&ce->function_table, zend_persist_op_array TSRMLS_CC);
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO

@@ -1504,12 +1504,14 @@ void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC) /* {{
 
 static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
-	zval *cv = EX_VAR_NUM(0);
-	zval *end = cv + EX(op_array)->last_var;
-	while (cv != end) {
-		zval_ptr_dtor(cv);
-		cv++;
- 	}
+	if (EXPECTED(EX(op_array)->last_var > 0)) {
+		zval *cv = EX_VAR_NUM(0);
+		zval *end = cv + EX(op_array)->last_var;
+		do {
+			zval_ptr_dtor(cv);
+			cv++;
+	 	} while (cv != end);
+	}
 }
 /* }}} */
 
@@ -1660,7 +1662,11 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	}
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
-		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+		if (op_array->function_name) {
+			op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
+		} else {
+			op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+		}
 	}
 	EX(run_time_cache) = op_array->run_time_cache;
 

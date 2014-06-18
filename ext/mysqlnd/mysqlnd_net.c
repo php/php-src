@@ -200,7 +200,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 		*/
 		zend_resource *le;
 
-		if ((le = zend_hash_str_find(&EG(persistent_list), hashed_details, hashed_details_len))) {
+		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashed_details, hashed_details_len))) {
 			/*
 			  in_free will let streams code skip destructing - big HACK,
 			  but STREAMS suck big time regarding persistent streams.
@@ -223,7 +223,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	  unregistered yntil the script ends. So, we need to take care of that.
 	*/
 	net_stream->in_free = 1;
-	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
+	//????zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
 	net_stream->in_free = 0;
 
 	DBG_RETURN(net_stream);

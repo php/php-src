@@ -8,16 +8,12 @@ typedef struct _optimizer_call_info {
 	zend_op       *opline;
 } optimizer_call_info;
 
-static void optimize_func_calls(zend_op_array *op_array, zend_persistent_script *script TSRMLS_DC) {
+static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC) {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
 	int call = 0;
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
-	optimizer_call_info *call_stack = ecalloc(op_array->nested_calls + 1, sizeof(optimizer_call_info));
-#else
-	int stack_size = 4;
-	optimizer_call_info *call_stack = ecalloc(stack_size, sizeof(optimizer_call_info));
-#endif
+	void *checkpoint = zend_arena_checkpoint(ctx->arena); 
+	optimizer_call_info *call_stack = zend_arena_calloc(&ctx->arena, op_array->nested_calls + 1, sizeof(optimizer_call_info));
 
 	while (opline < end) {
 		switch (opline->opcode) {
@@ -26,7 +22,7 @@ static void optimize_func_calls(zend_op_array *op_array, zend_persistent_script 
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 					zend_function *func;
 					zval *function_name = &op_array->literals[opline->op2.constant + 1];
-					if ((func = zend_hash_find_ptr(&script->function_table,
+					if ((func = zend_hash_find_ptr(&ctx->script->function_table,
 							Z_STR_P(function_name))) != NULL) {
 						call_stack[call].func = func;
 					}
@@ -37,13 +33,6 @@ static void optimize_func_calls(zend_op_array *op_array, zend_persistent_script 
 			case ZEND_INIT_STATIC_METHOD_CALL:
 				call_stack[call].opline = opline;
 				call++;
-#if ZEND_EXTENSION_API_NO < PHP_5_5_X_API_NO
-				if (call == stack_size) {
-					stack_size += 4;
-					call_stack = erealloc(call_stack, sizeof(optimizer_call_info) * stack_size);
-					memset(call_stack + 4, 0, 4 * sizeof(optimizer_call_info));
-				}
-#endif
 				break;
 			case ZEND_DO_FCALL_BY_NAME:
 				call--;
@@ -137,6 +126,6 @@ static void optimize_func_calls(zend_op_array *op_array, zend_persistent_script 
 		opline++;
 	}
 
-	efree(call_stack);
+	zend_arena_release(&ctx->arena, checkpoint);
 }
 #endif
