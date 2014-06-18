@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.0 Release Candidate 1
+?? ??? 2014, PHP 5.6.0 Release Candidate 2
+
+19 Jun 2014, PHP 5.6.0 Release Candidate 1
 
 - Core:
   . Implemented FR #64744 (Differentiate between member function call on a null 
