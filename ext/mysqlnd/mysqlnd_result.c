@@ -143,6 +143,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 /* }}} */
 
 
+#if 0
 /* {{{ mysqlnd_rset_zval_ptr_dtor */
 static void
 mysqlnd_rset_zval_ptr_dtor(zval *zv, enum_mysqlnd_res_type type, zend_bool * copy_ctor_called TSRMLS_DC)
@@ -188,6 +189,7 @@ mysqlnd_rset_zval_ptr_dtor(zval *zv, enum_mysqlnd_res_type type, zend_bool * cop
 	DBG_VOID_RETURN;
 }
 /* }}} */
+#endif
 
 
 /* {{{ mysqlnd_result_unbuffered::free_last_data */
@@ -203,22 +205,11 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED
 	DBG_INF_FMT("field_count=%u", unbuf->field_count);
 	if (unbuf->last_row_data) {
 		unsigned int i, ctor_called_count = 0;
-		zend_bool copy_ctor_called;
-
 		for (i = 0; i < unbuf->field_count; i++) {
-			mysqlnd_rset_zval_ptr_dtor(&(unbuf->last_row_data[i]), unbuf->ps ? MYSQLND_RES_PS_UNBUF : MYSQLND_RES_NORMAL, &copy_ctor_called TSRMLS_CC);
-			if (copy_ctor_called) {
-				++ctor_called_count;
-			}
+			//???mysqlnd_rset_zval_ptr_dtor(&(unbuf->last_row_data[i]), unbuf->ps ? MYSQLND_RES_PS_UNBUF : MYSQLND_RES_NORMAL, &copy_ctor_called TSRMLS_CC);
+			zval_ptr_dtor(&(unbuf->last_row_data[i]));
 		}
 
-		DBG_INF_FMT("copy_ctor_called_count=%u", ctor_called_count);
-		/* By using value3 macros we hold a mutex only once, there is no value2 */
-		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(global_stats,
-											STAT_COPY_ON_WRITE_PERFORMED,
-											ctor_called_count,
-											STAT_COPY_ON_WRITE_SAVED,
-											unbuf->field_count - ctor_called_count);
 		/* Free last row's zvals */
 		mnd_efree(unbuf->last_row_data);
 		unbuf->last_row_data = NULL;
@@ -275,8 +266,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, free_result)(MYSQLND_RES_BUFFERED_Z
 
 	set->data = NULL; /* prevent double free if following loop is interrupted */
 	if (data) {
-		unsigned int copy_on_write_performed = 0;
-		unsigned int copy_on_write_saved = 0;
 		unsigned int field_count = set->field_count;
 		int64_t row;
 	
@@ -286,20 +275,10 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, free_result)(MYSQLND_RES_BUFFERED_Z
 
 			if (current_row != NULL) {
 				for (col = field_count - 1; col >= 0; --col) {
-					if (!Z_ISUNDEF(current_row[col])) {
-						zend_bool copy_ctor_called;
-						mysqlnd_rset_zval_ptr_dtor(&(current_row[col]), set->ps? MYSQLND_RES_PS_BUF : MYSQLND_RES_NORMAL, &copy_ctor_called TSRMLS_CC);
-						if (copy_ctor_called) {
-							++copy_on_write_performed;
-						} else {
-							++copy_on_write_saved;
-						}
-					}
+					zval_ptr_dtor(&(current_row[col]));
 				}
 			}
 		}
-		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_COPY_ON_WRITE_PERFORMED, copy_on_write_performed,
-											  STAT_COPY_ON_WRITE_SAVED, copy_on_write_saved);
 		mnd_efree(data);
 	}
 	set->data_cursor = NULL;
@@ -1182,8 +1161,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 			set->lengths[i] = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
 
 			if (flags & MYSQLND_FETCH_NUM) {
+				Z_TRY_ADDREF_P(data);
 				zend_hash_next_index_insert(Z_ARRVAL_P(row), data);
-				ZVAL_NULL(data);
 			}
 			if (flags & MYSQLND_FETCH_ASSOC) {
 				/* zend_hash_quick_update needs length + trailing zero */
@@ -1193,14 +1172,13 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 				  the index is a numeric and convert it to it. This however means constant
 				  hashing of the column name, which is not needed as it can be precomputed.
 				*/
+				Z_TRY_ADDREF_P(data);
 				if (meta->zend_hash_keys[i].is_numeric == FALSE) {
 					zend_hash_str_update(Z_ARRVAL_P(row), meta->fields[i].name, meta->fields[i].name_length, data);
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row), meta->zend_hash_keys[i].key, data);
 				}
-				ZVAL_NULL(data);
 			}
-			zval_ptr_dtor(data);
 		}
 		set->data_cursor += field_count;
 		MYSQLND_INC_GLOBAL_STATISTIC(STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_BUF);
