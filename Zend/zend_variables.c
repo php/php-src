@@ -277,7 +277,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			}
 			break;
 		case IS_BIGINT: {
-				zend_bigint *bigint = emalloc(sizeof(zend_bigint));
+				zend_bigint *bigint = zend_bigint_alloc();
 				zend_bigint_init_dup(bigint, Z_BIG_P(zvalue));
 				Z_BIG_P(zvalue) = bigint;
 			}

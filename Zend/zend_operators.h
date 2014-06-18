@@ -205,13 +205,13 @@ static inline zend_uchar is_numeric_string_ex(const char *str, int length, long 
 				type = IS_BIGINT;
 
 				if (big) {
-					local_bigint = emalloc(sizeof(zend_bigint));
+					local_bigint = zend_bigint_alloc();
 					zend_bigint_init_strtol(local_bigint, str, &ptr, 10);
 				}
 			}
 		} else if (!(digits < SIZEOF_LONG * 2 || (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
 			if (big) {
-				local_bigint = emalloc(sizeof(zend_bigint));
+				local_bigint = zend_bigint_alloc();
 				zend_bigint_init_strtol(local_bigint, str, &ptr, 16);
 			}
 			if (oflow_info != NULL) {
@@ -248,7 +248,7 @@ process_double:
 
 			if (!(cmp < 0 || (cmp == 0 && *str == '-'))) {
 				if (big) {
-					*big = emalloc(sizeof(zend_bigint));
+					*big = zend_bigint_alloc();
 					zend_bigint_init_strtol(*big, str, NULL, 10);
 				}
 				if (oflow_info != NULL) {

@@ -519,7 +519,7 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 
 #define ZVAL_NEW_BIGINT(z) do {									\
 		zval *__z = (z);										\
-		zend_bigint *_big = emalloc(sizeof(zend_bigint));		\
+		zend_bigint *_big = zend_bigint_alloc();				\
 		GC_REFCOUNT(_big) = 1;									\
 		GC_TYPE_INFO(_big) = IS_BIGINT;							\
 		Z_BIG_P(__z) = _big;									\

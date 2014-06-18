@@ -1179,7 +1179,7 @@ ZEND_API zend_uchar _zval_get_bigint_or_long_func(zval *op, long *lval, zend_big
 				*lval = Z_LVAL_P(op);
 				return IS_LONG;
 			case IS_DOUBLE:
-				*big = emalloc(sizeof(zend_bigint));
+				*big = zend_bigint_alloc();
 				zend_bigint_init_from_double(*big, Z_DVAL_P(op));
 				return IS_BIGINT;
 			case IS_BIGINT:
@@ -1189,7 +1189,7 @@ ZEND_API zend_uchar _zval_get_bigint_or_long_func(zval *op, long *lval, zend_big
 				errno = 0;
 				*lval = strtol(Z_STRVAL_P(op), NULL, 10);
 				if (errno == ERANGE) {
-					*big = emalloc(sizeof(zend_bigint));
+					*big = zend_bigint_alloc();
 					zend_bigint_init_strtol(*big, Z_STRVAL_P(op), NULL, 10);
 					return IS_BIGINT;
 				} else {

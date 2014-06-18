@@ -61,6 +61,13 @@ void zend_startup_bigint(void)
 
 /*** INITIALISERS ***/
 
+/* Allocates a bigint and returns pointer, does NOT initialise
+ * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
+ZEND_API zend_bigint* zend_bigint_alloc(void)
+{
+	return emalloc(sizeof(zend_bigint));
+}
+
 /* Initialises a bigint
  * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
 ZEND_API void zend_bigint_init(zend_bigint *big)
@@ -70,12 +77,12 @@ ZEND_API void zend_bigint_init(zend_bigint *big)
 	mpz_init(big->mpz);
 }
 
-/* Convenience function: Allocates non-persistently and initialises a bigint
+/* Convenience function: Allocates and initialises a bigint, returns pointer
  * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
 ZEND_API zend_bigint* zend_bigint_init_alloc(void)
 {
 	zend_bigint *return_value;
-	return_value = emalloc(sizeof(zend_bigint));
+	return_value = zend_bigint_alloc();
 	zend_bigint_init(return_value);
 	return return_value;
 }
