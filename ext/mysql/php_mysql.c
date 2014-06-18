@@ -377,7 +377,7 @@ void timeout(int sig);
 				if (mysql_result_is_unbuffered(_mysql_result) &&		\
 						!mysql_eof(_mysql_result)) { 					\
 					php_error_docref(NULL TSRMLS_CC, E_NOTICE,			\
-						"Function called without first fetching all"	\
+						"Function called without first fetching all "	\
 					   	"rows from a previous unbuffered query");		\
 				}														\
 				zend_list_close(mysql->active_result_res);				\
