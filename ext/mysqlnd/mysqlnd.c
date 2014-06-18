@@ -998,7 +998,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 					SET_OOM_ERROR(*conn->error_info);
 					goto err; /* OOM */
 				}
-				conn->host_info =  mnd_pestrdup(p, conn->persistent);
+				conn->host_info = mnd_pestrdup(p, conn->persistent);
 				mnd_sprintf_free(p);
 				if (!conn->host_info) {
 					SET_OOM_ERROR(*conn->error_info);

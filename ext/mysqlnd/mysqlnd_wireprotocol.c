@@ -1760,24 +1760,30 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 					bit_area += 1 + sprintf((char *)start, "%ld", Z_LVAL_P(current_field));
 					//????  ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1, copy_data);
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
+					/*
 					if (!copy_data) {
 						efree(start);
 					}
+					*/
 				} else if (Z_TYPE_P(current_field) == IS_STRING){
 					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRLEN_P(current_field));
 					bit_area += Z_STRLEN_P(current_field);
 					*bit_area++ = '\0';
 					zval_dtor(current_field);
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
+					/*
 					if (!copy_data) {
 						efree(start);
 					}
+					*/
 				}
 			} else {
 				ZVAL_STRINGL(current_field, (char *)p, len);
+				/*
 				if (!copy_data) {
 					efree(p);
 				}
+				*/
 			}
 			p += len;
 			last_field_was_string = TRUE;

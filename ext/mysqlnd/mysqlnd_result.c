@@ -1800,7 +1800,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 	  Hint Zend how many elements we will have in the hash. Thus it won't
 	  extend and rehash the hash constantly.
 	*/
-	ZVAL_NEW_ARR(return_value);
 	array_init_size(return_value, mysqlnd_num_fields(result) * 2);
 	if (FAIL == result->m.fetch_row(result, (void *)return_value, flags, &fetched_anything TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading a row");
@@ -1868,7 +1867,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int 
 	}
 
 	/* 4 is a magic value. The cast is safe, if larger then the array will be later extended - no big deal :) */
-	ZVAL_NEW_ARR(return_value);
 	array_init_size(return_value, set? (unsigned int) set->row_count : 4);
 
 	do {
