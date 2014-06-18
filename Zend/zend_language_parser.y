@@ -188,6 +188,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_EXTENDS    "extends (T_EXTENDS)"
 %token T_IMPLEMENTS "implements (T_IMPLEMENTS)"
 %token T_OBJECT_OPERATOR "-> (T_OBJECT_OPERATOR)"
+%right T_DOUBLE_ARROW
 %token T_DOUBLE_ARROW    "=> (T_DOUBLE_ARROW)"
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
@@ -332,7 +333,6 @@ unticked_statement:
 	|	T_RETURN ';'						{ zend_do_return(NULL, 0 TSRMLS_CC); }
 	|	T_RETURN expr_without_variable ';'	{ AC($2); zend_do_return(&$2, 0 TSRMLS_CC); }
 	|	T_RETURN variable ';'				{ zend_do_return(&$2, 1 TSRMLS_CC); }
-	|	yield_expr ';' { AC($1); zend_do_free(&$1 TSRMLS_CC); }
 	|	T_GLOBAL global_var_list ';'
 	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'
@@ -580,9 +580,6 @@ optional_class_type:
 function_call_parameter_list:
 		'(' ')'	{ $$.u.ast = zend_ast_create_dynamic(ZEND_AST_PARAMS); }
 	|	'(' non_empty_function_call_parameter_list ')' { $$.u.ast = $2.u.ast; }
-	|	'(' yield_expr ')'
-			{ $$.u.ast = zend_ast_create_dynamic(ZEND_AST_PARAMS);
-			  zend_ast_dynamic_add(&$$.u.ast, $2.u.ast); }
 ;
 
 non_empty_function_call_parameter_list:
@@ -859,18 +856,15 @@ expr_without_variable:
 	|	'`' backticks_expr '`' { zend_do_shell_exec(&$$, &$2 TSRMLS_CC); AZ($$); }
 	|	T_PRINT expr { $$.u.ast = zend_ast_create_unary(ZEND_PRINT, $2.u.ast); }
 	|	T_YIELD { $$.u.ast = zend_ast_create_binary(ZEND_YIELD, NULL, NULL); }
+	|	T_YIELD expr { $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $2.u.ast, NULL); }
+	|	T_YIELD expr T_DOUBLE_ARROW expr
+			{ $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $4.u.ast, $2.u.ast); }
 	|	function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, 0 TSRMLS_CC); }
 		'(' parameter_list ')' lexical_vars
 		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $3; AZ($$); }
 	|	T_STATIC function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
 		'(' parameter_list ')' lexical_vars
 		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); $$ = $4; AZ($$); }
-;
-
-yield_expr:
-		T_YIELD expr { $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $2.u.ast, NULL); }
-	|	T_YIELD expr T_DOUBLE_ARROW expr
-			{ $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $4.u.ast, $2.u.ast); }
 ;
 
 function:
@@ -1071,7 +1065,6 @@ expr:
 
 parenthesis_expr:
 		'(' expr ')'		{ AST_COMPILE(&$$, $2.u.ast); }
-	|	'(' yield_expr ')'	{ AST_COMPILE(&$$, $2.u.ast); }
 ;
 
 w_variable:
