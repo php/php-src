@@ -1182,8 +1182,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 			set->lengths[i] = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
 
 			if (flags & MYSQLND_FETCH_NUM) {
-				Z_TRY_ADDREF_P(data);
 				zend_hash_next_index_insert(Z_ARRVAL_P(row), data);
+				ZVAL_NULL(data);
 			}
 			if (flags & MYSQLND_FETCH_ASSOC) {
 				/* zend_hash_quick_update needs length + trailing zero */
@@ -1193,13 +1193,14 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 				  the index is a numeric and convert it to it. This however means constant
 				  hashing of the column name, which is not needed as it can be precomputed.
 				*/
-				Z_TRY_ADDREF_P(data);
 				if (meta->zend_hash_keys[i].is_numeric == FALSE) {
 					zend_hash_str_update(Z_ARRVAL_P(row), meta->fields[i].name, meta->fields[i].name_length, data);
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row), meta->zend_hash_keys[i].key, data);
 				}
+				ZVAL_NULL(data);
 			}
+			zval_ptr_dtor(data);
 		}
 		set->data_cursor += field_count;
 		MYSQLND_INC_GLOBAL_STATISTIC(STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_BUF);

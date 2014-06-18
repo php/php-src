@@ -1609,10 +1609,9 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, zend_bool copy_data, MYSQLND_STATS * stats TSRMLS_DC)
+									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
 {
 	unsigned int i;
-	zend_bool last_field_was_string = FALSE;
 	zval *current_field, *end_field, *start_field;
 	zend_uchar * p = row_buffer->ptr;
 	size_t data_size = row_buffer->app;
@@ -1632,28 +1631,9 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
 		unsigned long len = php_mysqlnd_net_field_length(&p);
 
-#if 0
-		if (copy_data == FALSE && current_field > start_field && last_field_was_string) {
-			/*
-			  Normal queries:
-			  We have to put \0 now to the end of the previous field, if it was
-			  a string. IS_NULL doesn't matter. Because we have already read our
-			  length, then we can overwrite it in the row buffer.
-			  This statement terminates the previous field, not the current one.
-
-			  NULL_LENGTH is encoded in one byte, so we can stick a \0 there.
-			  Any string's length is encoded in at least one byte, so we can stick
-			  a \0 there.
-			*/
-
-			*this_field_len_pos = '\0';
-		}
-#endif
-
 		/* NULL or NOT NULL, this is the question! */
 		if (len == MYSQLND_NULL_LENGTH) {
 			ZVAL_NULL(current_field);
-			last_field_was_string = FALSE;
 		} else {
 #if defined(MYSQLND_STRING_TO_INT_CONVERSION)
 			struct st_mysqlnd_perm_bind perm_bind =
@@ -1762,42 +1742,19 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 					bit_area += 1 + sprintf((char *)start, "%ld", Z_LVAL_P(current_field));
 					//????  ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1, copy_data);
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
-					/*
-					if (!copy_data) {
-						efree(start);
-					}
-					*/
 				} else if (Z_TYPE_P(current_field) == IS_STRING){
 					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRLEN_P(current_field));
 					bit_area += Z_STRLEN_P(current_field);
 					*bit_area++ = '\0';
 					zval_dtor(current_field);
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
-					/*
-					if (!copy_data) {
-						efree(start);
-					}
-					*/
 				}
 			} else {
 				ZVAL_STRINGL(current_field, (char *)p, len);
-				/*
-				if (!copy_data) {
-					efree(p);
-				}
-				*/
 			}
 			p += len;
-			last_field_was_string = TRUE;
 		}
 	}
-
-#if 0
-	if (copy_data == FALSE && last_field_was_string) {
-		/* Normal queries: The buffer has one more byte at the end, because we need it */
-		row_buffer->ptr[data_size] = '\0';
-	}
-#endif
 
 	DBG_RETURN(PASS);
 }
@@ -1812,7 +1769,7 @@ php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 {
 	enum_func_status ret;
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_zval");
-	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, FALSE, stats TSRMLS_CC);
+	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats TSRMLS_CC);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1826,7 +1783,7 @@ php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 {
 	enum_func_status ret;
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_c");
-	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, TRUE, stats TSRMLS_CC);
+	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats TSRMLS_CC);
 	DBG_RETURN(ret);
 }
 /* }}} */
