@@ -1422,7 +1422,7 @@ premature_end:
 static
 void php_mysqlnd_rset_field_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
 {
-	MYSQLND_PACKET_RES_FIELD *p= (MYSQLND_PACKET_RES_FIELD *) _packet;
+	MYSQLND_PACKET_RES_FIELD *p = (MYSQLND_PACKET_RES_FIELD *) _packet;
 	/* p->metadata was passed to us as temporal buffer */
 	if (!stack_allocation) {
 		mnd_pefree(p, p->header.persistent);
@@ -1632,6 +1632,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
 		unsigned long len = php_mysqlnd_net_field_length(&p);
 
+#if 0
 		if (copy_data == FALSE && current_field > start_field && last_field_was_string) {
 			/*
 			  Normal queries:
@@ -1647,6 +1648,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 
 			*this_field_len_pos = '\0';
 		}
+#endif
 
 		/* NULL or NOT NULL, this is the question! */
 		if (len == MYSQLND_NULL_LENGTH) {
@@ -1789,10 +1791,13 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 			last_field_was_string = TRUE;
 		}
 	}
+
+#if 0
 	if (copy_data == FALSE && last_field_was_string) {
 		/* Normal queries: The buffer has one more byte at the end, because we need it */
 		row_buffer->ptr[data_size] = '\0';
 	}
+#endif
 
 	DBG_RETURN(PASS);
 }
