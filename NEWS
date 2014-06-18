@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
     check). (Francisco Alonso, Jan Kaluza, Remi)
 
+- mysqlnd:
+  . Added support for gb18030 from MySQL 5.7. (Andrey)
+
 - Network:
   . Fixed bug #67432 (Fix potential segfault in dns_get_record()).
     (CVE-2014-4049). (Sara)
