@@ -2829,8 +2829,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case _IS_BOOL:
 			ZVAL_BOOL(result, zend_is_true(expr TSRMLS_CC));
 			break;
-		case IS_LONG:
-			ZVAL_LONG(result, zval_get_long(expr));
+		case IS_BIGINT_OR_LONG:
+			{
+				zend_uchar type;
+				if ((type = zval_get_bigint_or_long(expr, &Z_LVAL_P(result), &Z_BIG_P(result))) == IS_LONG) {
+					ZVAL_LONG(result, Z_LVAL_P(result));
+				} else if (type == IS_BIGINT) {
+					ZVAL_BIGINT(result, Z_BIG_P(result));
+				}
+			}
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -8082,8 +8089,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case _IS_BOOL:
 			ZVAL_BOOL(result, zend_is_true(expr TSRMLS_CC));
 			break;
-		case IS_LONG:
-			ZVAL_LONG(result, zval_get_long(expr));
+		case IS_BIGINT_OR_LONG:
+			{
+				zend_uchar type;
+				if ((type = zval_get_bigint_or_long(expr, &Z_LVAL_P(result), &Z_BIG_P(result))) == IS_LONG) {
+					ZVAL_LONG(result, Z_LVAL_P(result));
+				} else if (type == IS_BIGINT) {
+					ZVAL_BIGINT(result, Z_BIG_P(result));
+				}
+			}
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -13383,8 +13397,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case _IS_BOOL:
 			ZVAL_BOOL(result, zend_is_true(expr TSRMLS_CC));
 			break;
-		case IS_LONG:
-			ZVAL_LONG(result, zval_get_long(expr));
+		case IS_BIGINT_OR_LONG:
+			{
+				zend_uchar type;
+				if ((type = zval_get_bigint_or_long(expr, &Z_LVAL_P(result), &Z_BIG_P(result))) == IS_LONG) {
+					ZVAL_LONG(result, Z_LVAL_P(result));
+				} else if (type == IS_BIGINT) {
+					ZVAL_BIGINT(result, Z_BIG_P(result));
+				}
+			}
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -30799,8 +30820,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case _IS_BOOL:
 			ZVAL_BOOL(result, zend_is_true(expr TSRMLS_CC));
 			break;
-		case IS_LONG:
-			ZVAL_LONG(result, zval_get_long(expr));
+		case IS_BIGINT_OR_LONG:
+			{
+				zend_uchar type;
+				if ((type = zval_get_bigint_or_long(expr, &Z_LVAL_P(result), &Z_BIG_P(result))) == IS_LONG) {
+					ZVAL_LONG(result, Z_LVAL_P(result));
+				} else if (type == IS_BIGINT) {
+					ZVAL_BIGINT(result, Z_BIG_P(result));
+				}
+			}
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));

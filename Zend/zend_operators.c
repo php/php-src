@@ -382,6 +382,7 @@ try_again:
 				zend_bigint_init_from_double(Z_BIG(holder), Z_DVAL_P(op));\
 				break;												\
 			case IS_STRING:											\
+				errno = 0;											\
 				ZVAL_LONG(&holder, strtol(Z_STRVAL_P(op), NULL, 10));\
 				if (errno == ERANGE) { /* Overflow */				\
 					ZVAL_NEW_BIGINT(&holder);						\
@@ -674,6 +675,7 @@ ZEND_API void convert_to_bigint_or_long_base(zval *op, int base) /* {{{ */
 		case IS_STRING:
 			{
 				zend_string *str = Z_STR_P(op);
+				errno = 0;
 				ZVAL_LONG(op, strtol(str->val, NULL, 10));
 				if (errno == ERANGE) { /* Overflow */
 					ZVAL_NEW_BIGINT(op);
@@ -1156,6 +1158,66 @@ try_again:
 			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+}
+/* }}} */
+
+ZEND_API zend_uchar _zval_get_bigint_or_long_func(zval *op, long *lval, zend_bigint **big TSRMLS_DC) /* {{{ */
+{
+	try_again:
+		switch (Z_TYPE_P(op)) {
+			case IS_NULL:
+			case IS_FALSE:
+				*lval = 0;
+				return IS_LONG;
+			case IS_TRUE:
+				*lval = 1;
+				return IS_LONG;
+			case IS_RESOURCE:
+				*lval = Z_RES_HANDLE_P(op);
+				return IS_LONG;
+			case IS_LONG:
+				*lval = Z_LVAL_P(op);
+				return IS_LONG;
+			case IS_DOUBLE:
+				*big = emalloc(sizeof(zend_bigint));
+				zend_bigint_init_from_double(*big, Z_DVAL_P(op));
+				return IS_BIGINT;
+			case IS_BIGINT:
+				*big = Z_BIG_P(op);
+				return IS_BIGINT;
+			case IS_STRING:
+				errno = 0;
+				*lval = strtol(Z_STRVAL_P(op), NULL, 10);
+				if (errno == ERANGE) {
+					*big = emalloc(sizeof(zend_bigint));
+					zend_bigint_init_strtol(*big, Z_STRVAL_P(op), NULL, 10);
+					return IS_BIGINT;
+				} else {
+					return IS_LONG;
+				}
+			case IS_ARRAY:
+				*lval = zend_hash_num_elements(Z_ARRVAL_P(op)) ? 1 : 0;
+				return IS_LONG;
+			case IS_OBJECT:
+				{
+					zval dst;
+					convert_object_to_type(op, &dst, IS_BIGINT_OR_LONG, convert_to_bigint_or_long);
+					if (Z_TYPE(dst) == IS_LONG) {
+						*lval = Z_LVAL(dst);
+						return IS_LONG;
+					} else if (Z_TYPE(dst) == IS_BIGINT) {
+						*big = Z_BIG(dst);
+						return IS_BIGINT;
+					} else {
+						zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name->val);
+						return 1;
+					}
+				}
+			case IS_REFERENCE:
+				op = Z_REFVAL_P(op);
+				goto try_again;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
 }
 /* }}} */
 
