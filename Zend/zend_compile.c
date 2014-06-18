@@ -106,7 +106,9 @@ static void zend_push_function_call_entry(zend_function *fbc TSRMLS_DC) /* {{{ *
 
 static zend_property_info *zend_duplicate_property_info(zend_property_info *property_info) /* {{{ */
 {
-	zend_property_info* new_property_info = emalloc(sizeof(zend_property_info));
+	zend_property_info* new_property_info;
+	
+	new_property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
 	memcpy(new_property_info, property_info, sizeof(zend_property_info));
 	STR_ADDREF(new_property_info->name);
 	if (new_property_info->doc_comment) {
@@ -133,7 +135,6 @@ static void zend_destroy_property_info(zval *zv) /* {{{ */
 	if (property_info->doc_comment) {
 		STR_RELEASE(property_info->doc_comment);
 	}
-	efree(property_info);
 }
 /* }}} */
 
@@ -226,6 +227,7 @@ ZEND_API void file_handle_dtor(zend_file_handle *fh) /* {{{ */
 
 void init_compiler(TSRMLS_D) /* {{{ */
 {
+	CG(arena) = zend_arena_create(64 * 1024);
 	CG(active_op_array) = NULL;
 	memset(&CG(context), 0, sizeof(CG(context)));
 	zend_init_compiler_data_structures(TSRMLS_C);
@@ -248,6 +250,7 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 	zend_hash_destroy(&CG(filenames_table));
 	zend_hash_destroy(&CG(const_filenames));
 	zend_stack_destroy(&CG(context_stack));
+	zend_arena_destroy(CG(arena));
 }
 /* }}} */
 
@@ -1544,7 +1547,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		lcname = STR_ALLOC(name->len, 0);
 		zend_str_tolower_copy(lcname->val, name->val, name->len);
 		lcname = zend_new_interned_string(lcname TSRMLS_CC);
-		CG(active_op_array) = emalloc(sizeof(zend_op_array));
+		CG(active_op_array) = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(CG(active_op_array), &op_array, sizeof(zend_op_array));
 		if (zend_hash_add_ptr(&CG(active_class_entry)->function_table, lcname, CG(active_op_array)) == NULL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", CG(active_class_entry)->name->val, name->val);
@@ -1710,7 +1713,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		opline->op2_type = IS_CONST;
 		LITERAL_STR(opline->op2, STR_COPY(lcname));
 		opline->extended_value = ZEND_DECLARE_FUNCTION;
-		CG(active_op_array) = emalloc(sizeof(zend_op_array));
+		CG(active_op_array) = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(CG(active_op_array), &op_array, sizeof(zend_op_array));
 		zend_hash_update_ptr(CG(function_table), Z_STR(key), CG(active_op_array));
 		zend_stack_push(&CG(context_stack), (void *) &CG(context));
@@ -3143,7 +3146,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 			new_function = pemalloc(sizeof(zend_internal_function), 1);
 			memcpy(new_function, function, sizeof(zend_internal_function));
 		} else {
-			new_function = emalloc(sizeof(zend_op_array));
+			new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 			memcpy(new_function, function, sizeof(zend_op_array));
 		}
 		zend_hash_str_update_ptr(&ce->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1, new_function);
@@ -3199,7 +3202,7 @@ static zend_function *do_inherit_method(zend_function *old_function) /* {{{ */
 		new_function = pemalloc(sizeof(zend_internal_function), 1);
 		memcpy(new_function, old_function, sizeof(zend_internal_function));
 	} else {
-		new_function = emalloc(sizeof(zend_op_array));
+		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_function, old_function, sizeof(zend_op_array));
 	}
 	/* The class entry of the derived function intentionally remains the same
@@ -4045,6 +4048,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_string *key, zend_function *fn, HashTable **overriden TSRMLS_DC) /* {{{ */
 {
 	zend_function *existing_fn = NULL;
+	zend_function *new_fn;
 
 	if ((existing_fn = zend_hash_find_ptr(&ce->function_table, key)) != NULL) {
 		if (existing_fn->common.scope == ce) {
@@ -4109,7 +4113,9 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	}
 
 	function_add_ref(fn);
-	fn = zend_hash_update_mem(&ce->function_table, key, fn, sizeof(zend_function));
+	new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+	memcpy(new_fn, fn, sizeof(zend_op_array));
+	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_methods(ce, key, fn TSRMLS_CC);
 }
 /* }}} */
@@ -4601,7 +4607,7 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, Ha
 	}
 
 	function = zend_hash_find_ptr(function_table, Z_STR_P(op1));
-	new_function = emalloc(sizeof(zend_op_array));
+	new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	memcpy(new_function, function, sizeof(zend_op_array));
 	if (zend_hash_add_ptr(function_table, Z_STR_P(op2), new_function) == NULL) {
 		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
@@ -5160,7 +5166,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 		efree(tmp);
 	}
 
-	new_class_entry = emalloc(sizeof(zend_class_entry));
+	new_class_entry = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->name = zend_new_interned_string(Z_STR(class_name->u.constant) TSRMLS_CC);
 

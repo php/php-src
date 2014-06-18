@@ -1653,7 +1653,11 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	}
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
-		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+		if (op_array->function_name) {
+			op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
+		} else {
+			op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+		}
 	}
 	EX(run_time_cache) = op_array->run_time_cache;
 

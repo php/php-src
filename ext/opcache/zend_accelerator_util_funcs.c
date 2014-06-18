@@ -237,7 +237,6 @@ static void zend_destroy_property_info(zval *zv)
 	if (property_info->doc_comment) {
 		STR_RELEASE(property_info->doc_comment);
 	}
-	efree(property_info);
 }
 
 static inline zend_string *zend_clone_str(zend_string *str TSRMLS_DC)
@@ -448,7 +447,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
-	ht->u.flags = HASH_FLAG_APPLY_PROTECTION;
+	ht->u.flags = 0;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
@@ -480,7 +479,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		q->key = zend_clone_str(p->key TSRMLS_CC);
 
 		/* Copy data */
-		ZVAL_PTR(&q->val, (void *) emalloc(sizeof(zend_op_array)));
+		ZVAL_PTR(&q->val, (void *) zend_arena_alloc(&CG(arena), sizeof(zend_op_array)));
 		new_entry = (zend_op_array*)Z_PTR(q->val);
 		*new_entry = *(zend_op_array*)Z_PTR(p->val);
 
@@ -527,7 +526,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = zend_destroy_property_info;
-	ht->u.flags = HASH_FLAG_APPLY_PROTECTION;
+	ht->u.flags = 0;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
@@ -559,7 +558,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		q->key = zend_clone_str(p->key TSRMLS_CC);
 
 		/* Copy data */
-		ZVAL_PTR(&q->val, (void *) emalloc(sizeof(zend_property_info)));
+		ZVAL_PTR(&q->val, (void *) zend_arena_alloc(&CG(arena), sizeof(zend_property_info)));
 		prop_info = Z_PTR(q->val);
 		*prop_info = *(zend_property_info*)Z_PTR(p->val);
 
@@ -620,7 +619,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_function *new_func;
 	TSRMLS_FETCH();
 
-	*pce = ce = emalloc(sizeof(zend_class_entry));
+	*pce = ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	*ce = *old_ce;
 	ce->refcount = 1;
 
@@ -667,6 +666,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 
 	/* constants table */
 	zend_hash_clone_zval(&ce->constants_table, &old_ce->constants_table, 1);
+	ce->constants_table.u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 
 	ce->name = zend_clone_str(ce->name TSRMLS_CC);
 
@@ -835,8 +835,8 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, 
 			}
 		}
 		if (pCopyConstructor) {
-			Z_PTR_P(t) = emalloc(sizeof(zend_function));
-			memcpy(Z_PTR_P(t), Z_PTR(p->val), sizeof(zend_function));
+			Z_PTR_P(t) = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+			memcpy(Z_PTR_P(t), Z_PTR(p->val), sizeof(zend_op_array));			
 			pCopyConstructor(Z_PTR_P(t));
 		}
 	}
