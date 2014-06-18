@@ -1565,7 +1565,7 @@ PHP_FUNCTION(range)
 
 	if (zstep) {
 		if (Z_TYPE_P(zstep) == IS_DOUBLE ||
-			(Z_TYPE_P(zstep) == IS_STRING && is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE)
+			(Z_TYPE_P(zstep) == IS_STRING && is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, NULL, 0) == IS_DOUBLE)
 		) {
 			is_step_double = 1;
 		}
@@ -1587,8 +1587,8 @@ PHP_FUNCTION(range)
 		unsigned char low, high;
 		long lstep = (long) step;
 
-		type1 = is_numeric_string(Z_STRVAL_P(zlow), Z_STRLEN_P(zlow), NULL, NULL, 0);
-		type2 = is_numeric_string(Z_STRVAL_P(zhigh), Z_STRLEN_P(zhigh), NULL, NULL, 0);
+		type1 = is_numeric_string(Z_STRVAL_P(zlow), Z_STRLEN_P(zlow), NULL, NULL, NULL, 0);
+		type2 = is_numeric_string(Z_STRVAL_P(zhigh), Z_STRLEN_P(zhigh), NULL, NULL, NULL, 0);
 
 		if (type1 == IS_DOUBLE || type2 == IS_DOUBLE || is_step_double) {
 			goto double_str;
