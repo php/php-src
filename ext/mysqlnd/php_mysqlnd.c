@@ -58,7 +58,7 @@ mysqlnd_minfo_print_hash(zval *values)
 static int
 mysqlnd_minfo_dump_plugin_stats(zval *el, void * argument TSRMLS_DC)
 {
-	struct st_mysqlnd_plugin_header * plugin_header = *(struct st_mysqlnd_plugin_header **)Z_PTR_P(el);
+	struct st_mysqlnd_plugin_header * plugin_header = (struct st_mysqlnd_plugin_header *)Z_PTR_P(el);
 	if (plugin_header->plugin_stats.values) {
 		char buf[64];
 		zval values;
@@ -82,7 +82,7 @@ static int
 mysqlnd_minfo_dump_loaded_plugins(zval *el, void * buf TSRMLS_DC)
 {
 	smart_str * buffer = (smart_str *) buf;
-	struct st_mysqlnd_plugin_header * plugin_header = *(struct st_mysqlnd_plugin_header **)Z_PTR_P(el);
+	struct st_mysqlnd_plugin_header * plugin_header = (struct st_mysqlnd_plugin_header *)Z_PTR_P(el);
 	if (plugin_header->plugin_name) {
 		if (buffer->s) {
 			smart_str_appendc(buffer, ',');
@@ -99,13 +99,13 @@ static void
 mysqlnd_minfo_dump_api_plugins(smart_str * buffer TSRMLS_DC)
 {
 	HashTable *ht = mysqlnd_reverse_api_get_api_list(TSRMLS_C);
-	MYSQLND_REVERSE_API **ext;
+	MYSQLND_REVERSE_API *ext;
 
 	ZEND_HASH_FOREACH_PTR(ht, ext) {
 		if (buffer->s) {
 			smart_str_appendc(buffer, ',');
 		}
-		smart_str_appends(buffer, (*ext)->module->name);
+		smart_str_appends(buffer, ext->module->name);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
