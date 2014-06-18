@@ -51,6 +51,7 @@
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/url.h"
 #include "ext/standard/basic_functions.h"
+#include "ext/standard/head.h"
 
 #include "mod_files.h"
 #include "mod_user.h"
@@ -1254,14 +1255,6 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
    * Cookie Management *
    ********************* */
 
-#define COOKIE_SET_COOKIE "Set-Cookie: "
-#define COOKIE_EXPIRES	"; expires="
-#define COOKIE_MAX_AGE	"; Max-Age="
-#define COOKIE_PATH		"; path="
-#define COOKIE_DOMAIN	"; domain="
-#define COOKIE_SECURE	"; secure"
-#define COOKIE_HTTPONLY	"; HttpOnly"
-
 /*
  * Remove already sent session ID cookie.
  * It must be directly removed from SG(sapi_header) because sapi_add_header_ex()
@@ -1327,7 +1320,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
 	e_id = php_url_encode(PS(id)->val, PS(id)->len);
 
-	smart_str_appends(&ncookie, COOKIE_SET_COOKIE);
+	smart_str_appendl(&ncookie, "Set-Cookie: ", sizeof("Set-Cookie: ")-1);
 	smart_str_appendl(&ncookie, e_session_name->val, e_session_name->len);
 	smart_str_appendc(&ncookie, '=');
 	smart_str_appendl(&ncookie, e_id->val, e_id->len);

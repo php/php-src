@@ -3461,41 +3461,45 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 						}
 					}
 					if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
-						zval zv;
+						zval *zv = precv->op2.zv;
 
-						ZVAL_DUP(&zv, precv->op2.zv);
-						zval_update_constant_ex(&zv, 1, fptr->common.scope TSRMLS_CC);
-						if (Z_TYPE(zv) == IS_FALSE) {
+						if (Z_TYPE_P(zv) == IS_CONSTANT) {
+							REALLOC_BUF_IF_EXCEED(buf, offset, length, Z_STRLEN_P(zv));
+							memcpy(offset, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
+							offset += Z_STRLEN_P(zv);
+						} else if (Z_TYPE_P(zv) == IS_FALSE) {
 							memcpy(offset, "false", 5);
 							offset += 5;
-						} else if (Z_TYPE(zv) == IS_TRUE) {
+						} else if (Z_TYPE_P(zv) == IS_TRUE) {
 							memcpy(offset, "true", 4);
 							offset += 4;
-						} else if (Z_TYPE(zv) == IS_NULL) {
+						} else if (Z_TYPE_P(zv) == IS_NULL) {
 							memcpy(offset, "NULL", 4);
 							offset += 4;
-						} else if (Z_TYPE(zv) == IS_STRING) {
+						} else if (Z_TYPE_P(zv) == IS_STRING) {
 							*(offset++) = '\'';
-							REALLOC_BUF_IF_EXCEED(buf, offset, length, MIN(Z_STRLEN(zv), 10));
-							memcpy(offset, Z_STRVAL(zv), MIN(Z_STRLEN(zv), 10));
-							offset += MIN(Z_STRLEN(zv), 10);
-							if (Z_STRLEN(zv) > 10) {
+							REALLOC_BUF_IF_EXCEED(buf, offset, length, MIN(Z_STRLEN_P(zv), 10));
+							memcpy(offset, Z_STRVAL_P(zv), MIN(Z_STRLEN_P(zv), 10));
+							offset += MIN(Z_STRLEN_P(zv), 10);
+							if (Z_STRLEN_P(zv) > 10) {
 								*(offset++) = '.';
 								*(offset++) = '.';
 								*(offset++) = '.';
 							}
 							*(offset++) = '\'';
-						} else if (Z_TYPE(zv) == IS_ARRAY) {
+						} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 							memcpy(offset, "Array", 5);
 							offset += 5;
+						} else if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
+							memcpy(offset, "<expression>", 12);
+							offset += 12;
 						} else {
-							zend_string *str = zval_get_string(&zv);
+							zend_string *str = zval_get_string(zv);
 							REALLOC_BUF_IF_EXCEED(buf, offset, length, str->len);
 							memcpy(offset, str->val, str->len);
 							offset += str->len;
 							STR_RELEASE(str);
 						}
-						zval_ptr_dtor(&zv);
 					}
 				} else {
 					memcpy(offset, "NULL", 4);
