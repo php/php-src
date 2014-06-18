@@ -3869,7 +3869,8 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 			break;
 		default:
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == opline->extended_value
+				|| (opline->extended_value == IS_BIGINT_OR_LONG && (Z_TYPE_P(expr) == IS_BIGINT || Z_TYPE_P(expr) == IS_LONG))) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (OP1_TYPE == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(result))) {

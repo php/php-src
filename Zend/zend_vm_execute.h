@@ -2847,7 +2847,8 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			break;
 		default:
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == opline->extended_value
+				|| (opline->extended_value == IS_BIGINT_OR_LONG && (Z_TYPE_P(expr) == IS_BIGINT || Z_TYPE_P(expr) == IS_LONG))) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(result))) {
@@ -8107,7 +8108,8 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			break;
 		default:
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == opline->extended_value
+				|| (opline->extended_value == IS_BIGINT_OR_LONG && (Z_TYPE_P(expr) == IS_BIGINT || Z_TYPE_P(expr) == IS_LONG))) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(result))) {
@@ -13415,7 +13417,8 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			break;
 		default:
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == opline->extended_value
+				|| (opline->extended_value == IS_BIGINT_OR_LONG && (Z_TYPE_P(expr) == IS_BIGINT || Z_TYPE_P(expr) == IS_LONG))) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(result))) {
@@ -30838,7 +30841,8 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			break;
 		default:
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == opline->extended_value
+				|| (opline->extended_value == IS_BIGINT_OR_LONG && (Z_TYPE_P(expr) == IS_BIGINT || Z_TYPE_P(expr) == IS_LONG))) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(result))) {
