@@ -158,7 +158,7 @@ PHPAPI void * _mysqlnd_plugin_find(const char * const name TSRMLS_DC)
 {
 	void * plugin;
 	if ((plugin = zend_hash_str_find_ptr(&mysqlnd_registered_plugins, name, strlen(name))) != NULL) {
-		return (void *)*(char **) plugin;
+		return plugin;
 	}
 	return NULL;
 
