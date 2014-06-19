@@ -746,7 +746,7 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 	}
 #if PDO_USE_MYSQLND
 	if (S->stmt) {
-		Z_ADDREF_P(S->stmt->data->result_bind[colno].zv);
+		Z_TRY_ADDREF(S->stmt->data->result_bind[colno].zv);
 		*ptr = (char*)&S->stmt->data->result_bind[colno].zv;
 		*len = sizeof(zval);
 		PDO_DBG_RETURN(1);

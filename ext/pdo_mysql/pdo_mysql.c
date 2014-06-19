@@ -62,7 +62,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
 {
 	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce() TSRMLS_CC)) {
-		pdo_dbh_t * dbh = zend_object_store_get_object(zv TSRMLS_CC);
+		pdo_dbh_t * dbh = Z_PDO_DBH_P(zv);
 
 		if (!dbh) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to retrieve handle from object store");

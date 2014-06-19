@@ -444,7 +444,8 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 			unsigned int tmp_len;
 
 			if (mysqlnd_stat(H->server, &tmp, &tmp_len) == PASS) {
-				ZVAL_STRINGL(return_value, tmp, tmp_len, 0);
+				ZVAL_STRINGL(return_value, tmp, tmp_len);
+				efree(tmp);
 #else
 			if ((tmp = (char *)mysql_stat(H->server))) {
 				ZVAL_STRING(return_value, tmp);
