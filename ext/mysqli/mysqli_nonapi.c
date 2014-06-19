@@ -195,7 +195,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 				le.ptr = plist = calloc(1, sizeof(mysqli_plist_entry));
 
 				zend_ptr_stack_init_ex(&plist->free_links, 1);
-				zend_hash_update_mem(&EG(persistent_list), hash_key, &le, sizeof(le));
+				zend_hash_str_update_mem(&EG(persistent_list), hash_key->val, hash_key->len, &le, sizeof(le));
 			}
 		}
 	}
