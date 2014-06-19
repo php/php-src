@@ -505,6 +505,7 @@ mysqlnd_stmt_copy_it(zval ** copies, zval * original, unsigned int param_count, 
 		*copies = mnd_ecalloc(param_count, sizeof(zval));
 	}
 	if (*copies) {
+		ZVAL_DEREF(original);
 		ZVAL_COPY(&(*copies)[current], original);
 		//????Z_SET_REFCOUNT_P((*copies)[current], 1);
 		//zval_copy_ctor((*copies)[current]);
@@ -587,6 +588,7 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 				  value is too big for a long. As said, precision could be lost.
 				*/
 				zval tmp_data_copy;
+				ZVAL_DEREF(tmp_data);
 				ZVAL_COPY(&tmp_data_copy, tmp_data);
 				convert_to_double_ex(&tmp_data_copy);
 
