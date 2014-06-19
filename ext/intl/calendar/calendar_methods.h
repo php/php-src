@@ -91,6 +91,8 @@ PHP_FUNCTION(intlcal_set_first_day_of_week);
 
 PHP_FUNCTION(intlcal_set_lenient);
 
+PHP_FUNCTION(intlcal_set_minimal_days_in_first_week);
+
 PHP_FUNCTION(intlcal_equals);
 
 PHP_FUNCTION(intlcal_get_repeated_wall_time_option);

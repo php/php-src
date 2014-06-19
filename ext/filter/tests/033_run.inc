@@ -16,7 +16,8 @@ $data = array(
 	"123",
 	"123abc<>()",
 	"O'Henry",
-	"하퍼"
+	"하퍼",
+	"aa:bb:cc:dd:ee:ff",
 );
 
 
@@ -35,6 +36,7 @@ foreach(filter_list() as $filter) {
 	printf("%-5s",$result[5]);
 	printf("%-20s",$result[6]);
 	printf("%-15s",$result[7]);
-	printf("%-10s\n",$result[8]);
+	printf("%-10s",$result[8]);
+	printf("%-10s\n",$result[9]);
 }
 ?>

@@ -23,6 +23,6 @@ string(3) "::1"
 bool(false)
 bool(false)
 string(9) "128.0.0.1"
-bool(false)
+string(9) "128.0.0.1"
 string(11) "191.255.0.0"
-bool(false)
+string(11) "191.255.0.0"

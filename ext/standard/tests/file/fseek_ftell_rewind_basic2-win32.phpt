@@ -52,7 +52,7 @@ foreach($file_content_types as $file_content_type){
     fwrite($file_handle,(binary)$data_to_be_written);
 
     // set file pointer to 0
-    var_dump( rewind($file_handle) ); // set to begining of file 
+    var_dump( rewind($file_handle) ); // set to beginning of file 
     var_dump( ftell($file_handle) );
 
     foreach($whence_set as $whence){

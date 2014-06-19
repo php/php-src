@@ -2,9 +2,6 @@
 Test finfo_open() function : error functionality 
 --SKIPIF--
 <?php require_once(dirname(__FILE__) . '/skipif.inc'); 
-if(substr(PHP_OS, 0, 3) == 'WIN' )
-  die("skip Not Valid for Windows");
-?>
 --FILE--
 <?php
 /* Prototype  : resource finfo_open([int options [, string arg]])
@@ -30,25 +27,25 @@ var_dump( new finfo('foobar') );
 --EXPECTF--
 *** Testing finfo_open() : error functionality ***
 
-Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or directory in %sfinfo_open_error.php on line 12
 
-Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or directory in %sfinfo_open_error.php on line 12
 
-Warning: finfo_open(): Failed to load magic database at '%sfoobarfile'. in %s on line %d
+Warning: finfo_open(): Failed to load magic database at '%sfoobarfile'. in %sfinfo_open_error.php on line 12
 bool(false)
 
-Warning: finfo_open() expects parameter 1 to be long, array given in %s on line %d
+Warning: finfo_open() expects parameter 1 to be long, array given in %sfinfo_open_error.php on line 13
 bool(false)
 
-Warning: finfo_open() expects at most 2 parameters, 3 given in %s on line %d
+Warning: finfo_open() expects at most 2 parameters, 3 given in %sfinfo_open_error.php on line 14
 bool(false)
 
-Notice: finfo_open(): Warning: using regular magic file `%s' in %s on line %d
-resource(%d) of type (file_info)
+Notice: finfo_open(): Warning: using regular magic file `%smagic' in %sfinfo_open_error.php on line 15
+resource(6) of type (file_info)
 
-Warning: finfo_open() expects parameter 1 to be long, string given in %s on line %d
+Warning: finfo_open() expects parameter 1 to be long, string given in %sfinfo_open_error.php on line 16
 bool(false)
 
-Warning: finfo::finfo() expects parameter 1 to be long, string given in %s on line %d
+Warning: finfo::finfo() expects parameter 1 to be long, string given in %sfinfo_open_error.php on line 18
 NULL
 ===DONE===

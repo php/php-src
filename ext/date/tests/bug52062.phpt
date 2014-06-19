@@ -4,8 +4,6 @@ Bug #52062 (large timestamps with DateTime::getTimestamp and DateTime::setTimest
 <?php
 if (PHP_INT_SIZE == 8) die('skip 32-bit only');
 ?>
---XFAIL--
-Waiting for resolution of the 32-bit case.
 --INI--
 date.timezone=UTC
 --FILE--

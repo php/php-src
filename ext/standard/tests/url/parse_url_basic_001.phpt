@@ -743,6 +743,13 @@ echo "Done";
   string(1) ":"
 }
 
+--> http://::#: array(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(1) ":"
+}
+
 --> x://::6.5: array(3) {
   ["scheme"]=>
   string(1) "x"
@@ -838,6 +845,13 @@ echo "Done";
   string(1) "/"
 }
 
+--> /rest/Users?filter={"id":"123"}: array(2) {
+  ["path"]=>
+  string(11) "/rest/Users"
+  ["query"]=>
+  string(19) "filter={"id":"123"}"
+}
+
 --> http:///blah.com: bool(false)
 
 --> http://:80: bool(false)
@@ -855,6 +869,8 @@ echo "Done";
 --> http://:/: bool(false)
 
 --> http://?: bool(false)
+
+--> http://#: bool(false)
 
 --> http://?:: bool(false)
 

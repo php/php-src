@@ -232,11 +232,11 @@ int(0)
 string(7) "integer"
 -- Iteration 12 --
 bool(true)
-int(5)
+int(%d)
 string(7) "integer"
 -- Iteration 13 --
 bool(true)
-int(6)
+int(%d)
 string(7) "integer"
 -- Iteration 14 --
 8: Object of class point could not be converted to int
@@ -291,11 +291,11 @@ int(0)
 string(7) "integer"
 -- Iteration 12 --
 bool(true)
-int(5)
+int(%d)
 string(7) "integer"
 -- Iteration 13 --
 bool(true)
-int(6)
+int(%d)
 string(7) "integer"
 -- Iteration 14 --
 8: Object of class point could not be converted to int
@@ -350,11 +350,11 @@ float(0)
 string(6) "double"
 -- Iteration 12 --
 bool(true)
-float(5)
+float(%d)
 string(6) "double"
 -- Iteration 13 --
 bool(true)
-float(6)
+float(%d)
 string(6) "double"
 -- Iteration 14 --
 8: Object of class point could not be converted to double
@@ -409,11 +409,11 @@ float(0)
 string(6) "double"
 -- Iteration 12 --
 bool(true)
-float(5)
+float(%d)
 string(6) "double"
 -- Iteration 13 --
 bool(true)
-float(6)
+float(%d)
 string(6) "double"
 -- Iteration 14 --
 8: Object of class point could not be converted to double
@@ -610,12 +610,12 @@ string(6) "string"
 -- Iteration 12 --
 2: settype(): Cannot convert to resource type
 bool(false)
-resource(5) of type (stream)
+resource(%d) of type (stream)
 string(8) "resource"
 -- Iteration 13 --
 2: settype(): Cannot convert to resource type
 bool(false)
-resource(6) of type (stream)
+resource(%d) of type (stream)
 string(8) "resource"
 -- Iteration 14 --
 2: settype(): Cannot convert to resource type
@@ -716,14 +716,14 @@ string(5) "array"
 bool(true)
 array(1) {
   [0]=>
-  resource(5) of type (stream)
+  resource(%d) of type (stream)
 }
 string(5) "array"
 -- Iteration 13 --
 bool(true)
 array(1) {
   [0]=>
-  resource(6) of type (stream)
+  resource(%d) of type (stream)
 }
 string(5) "array"
 -- Iteration 14 --
@@ -824,14 +824,14 @@ string(6) "object"
 bool(true)
 object(stdClass)#2 (1) {
   ["scalar"]=>
-  resource(5) of type (stream)
+  resource(%d) of type (stream)
 }
 string(6) "object"
 -- Iteration 13 --
 bool(true)
 object(stdClass)#2 (1) {
   ["scalar"]=>
-  resource(6) of type (stream)
+  resource(%d) of type (stream)
 }
 string(6) "object"
 -- Iteration 14 --
@@ -893,11 +893,11 @@ string(6) "string"
 string(6) "string"
 -- Iteration 12 --
 bool(true)
-string(14) "Resource id #5"
+string(14) "Resource id #%d"
 string(6) "string"
 -- Iteration 13 --
 bool(true)
-string(14) "Resource id #6"
+string(14) "Resource id #%d"
 string(6) "string"
 -- Iteration 14 --
 bool(true)

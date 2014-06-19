@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,7 +53,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 
 		if (HASH_KEY_IS_STRING == keytype) {
 			goto bogus;
-		} else if (HASH_KEY_NON_EXISTANT == keytype) {
+		} else if (HASH_KEY_NON_EXISTENT == keytype) {
 			break;
 		}
 		if (intindex > max_index) {
@@ -102,8 +102,9 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 {
 	OLECHAR *olestring;
 	php_com_dotnet_object *obj;
+	zend_uchar ztype = (z == NULL ? IS_NULL : Z_TYPE_P(z));
 	
-	switch (Z_TYPE_P(z)) {
+	switch (ztype) {
 		case IS_NULL:
 			V_VT(v) = VT_NULL;
 			break;
@@ -153,13 +154,17 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 		case IS_STRING:
 			V_VT(v) = VT_BSTR;
 			olestring = php_com_string_to_olestring(Z_STRVAL_P(z), Z_STRLEN_P(z), codepage TSRMLS_CC);
-			V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRLEN_P(z) * sizeof(OLECHAR));
+			if (CP_UTF8 == codepage) {
+				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, wcslen(olestring) * sizeof(OLECHAR));
+			} else {
+				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRLEN_P(z) * sizeof(OLECHAR));
+			}
 			efree(olestring);
 			break;
 
 		case IS_RESOURCE:
 		case IS_CONSTANT:
-		case IS_CONSTANT_ARRAY:
+		case IS_CONSTANT_AST:
 		default:
 			V_VT(v) = VT_NULL;
 			break;
@@ -429,7 +434,7 @@ PHP_FUNCTION(com_variant_create_instance)
 		/* If already an array and VT_ARRAY is passed then:
 			- if only VT_ARRAY passed then do not perform a conversion
 			- if VT_ARRAY plus other type passed then perform conversion 
-			  but will probably fail (origional behavior)
+			  but will probably fail (original behavior)
 		*/
 		if ((vt & VT_ARRAY) && (V_VT(&obj->v) & VT_ARRAY)) {
 			long orig_vt = vt;

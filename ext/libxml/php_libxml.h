@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,6 +47,7 @@ ZEND_BEGIN_MODULE_GLOBALS(libxml)
 		zend_fcall_info			fci;
 		zend_fcall_info_cache	fcc;
 	} entity_loader;
+	zend_bool entity_loader_disabled;
 ZEND_END_MODULE_GLOBALS(libxml)
 
 typedef struct _libxml_doc_props {
@@ -97,6 +98,7 @@ PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
 PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC);
 PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg TSRMLS_DC);
+PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable TSRMLS_DC);
 
 /* Init/shutdown functions*/
 PHP_LIBXML_API void php_libxml_initialize(void);

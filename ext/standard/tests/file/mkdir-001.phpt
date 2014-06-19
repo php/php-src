@@ -3,20 +3,20 @@ mkdir() tests
 --FILE--
 <?php
 
-var_dump(mkdir("testdir"));
-var_dump(mkdir("testdir/subdir"));
-var_dump(rmdir("testdir/subdir"));
-var_dump(rmdir("testdir"));
+var_dump(mkdir("mkdir-001"));
+var_dump(mkdir("mkdir-001/subdir"));
+var_dump(rmdir("mkdir-001/subdir"));
+var_dump(rmdir("mkdir-001"));
 
-var_dump(mkdir("./testdir"));
-var_dump(mkdir("./testdir/subdir"));
-var_dump(rmdir("./testdir/subdir"));
-var_dump(rmdir("./testdir"));
+var_dump(mkdir("./mkdir-001"));
+var_dump(mkdir("./mkdir-001/subdir"));
+var_dump(rmdir("./mkdir-001/subdir"));
+var_dump(rmdir("./mkdir-001"));
 
-var_dump(mkdir(dirname(__FILE__)."/testdir"));
-var_dump(mkdir(dirname(__FILE__)."/testdir/subdir"));
-var_dump(rmdir(dirname(__FILE__)."/testdir/subdir"));
-var_dump(rmdir(dirname(__FILE__)."/testdir"));
+var_dump(mkdir(dirname(__FILE__)."/mkdir-001"));
+var_dump(mkdir(dirname(__FILE__)."/mkdir-001/subdir"));
+var_dump(rmdir(dirname(__FILE__)."/mkdir-001/subdir"));
+var_dump(rmdir(dirname(__FILE__)."/mkdir-001"));
 
 echo "Done\n";
 ?>

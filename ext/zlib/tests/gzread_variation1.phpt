@@ -9,7 +9,7 @@ if (!extension_loaded("zlib")) {
 --FILE--
 <?php
 
-$filename = "temp.txt.gz";
+$filename = "gzread_variation1.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 var_dump(gzread($h, 100));

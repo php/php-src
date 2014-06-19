@@ -35,7 +35,7 @@ names.
 Older names will become aliases of new functions for backward
 compatibility.
 
-Manual will be updated when this change is commited to CVS source.
+Manual will be updated when this change is committed to CVS source.
 
 ==== Configure Option Notes ====
 You cannot specify PostgreSQL source directly to build PostgreSQL

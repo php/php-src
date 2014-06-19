@@ -3,11 +3,11 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(libedit,for libedit readline replacement, 
-[  --with-libedit[=DIR]    Include libedit readline replacement (CLI/CGI only)])
+[  --with-libedit[=DIR]      Include libedit readline replacement (CLI/CGI only)])
 
 if test "$PHP_LIBEDIT" = "no"; then
   PHP_ARG_WITH(readline,for readline support,
-  [  --with-readline[=DIR]   Include readline support (CLI/CGI only)])
+  [  --with-readline[=DIR]     Include readline support (CLI/CGI only)])
 else
   dnl "register" the --with-readline option to preven invalid "unknown configure option" warning
   php_with_readline=no

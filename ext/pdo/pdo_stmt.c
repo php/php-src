@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -757,22 +757,10 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		fci->function_name = NULL;
 		fci->symbol_table = NULL;
 		fci->retval_ptr_ptr = &stmt->fetch.cls.retval_ptr;
-		if (stmt->fetch.cls.ctor_args) {
-			HashTable *ht = Z_ARRVAL_P(stmt->fetch.cls.ctor_args);
-			Bucket *p;
-
-			fci->param_count = 0;
-			fci->params = safe_emalloc(sizeof(zval**), ht->nNumOfElements, 0);
-			p = ht->pListHead;
-			while (p != NULL) {
-				fci->params[fci->param_count++] = (zval**)p->pData;
-				p = p->pListNext;
-			}
-		} else {
-			fci->param_count = 0;
-			fci->params = NULL;
-		}
+		fci->params = NULL;
 		fci->no_separation = 1;
+
+		zend_fcall_info_args(fci, stmt->fetch.cls.ctor_args TSRMLS_CC);
 
 		fcc->initialized = 1;
 		fcc->function_handler = ce->constructor;
@@ -1146,7 +1134,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 							zval_ptr_dtor(&val);
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
 							return 0;
-						} else if (ce->unserialize(&return_value, ce, Z_TYPE_P(val) == IS_STRING ? Z_STRVAL_P(val) : "", Z_TYPE_P(val) == IS_STRING ? Z_STRLEN_P(val) : 0, NULL TSRMLS_CC) == FAILURE) {
+						} else if (ce->unserialize(&return_value, ce, (unsigned char *)(Z_TYPE_P(val) == IS_STRING ? Z_STRVAL_P(val) : ""), Z_TYPE_P(val) == IS_STRING ? Z_STRLEN_P(val) : 0, NULL TSRMLS_CC) == FAILURE) {
 							zval_ptr_dtor(&val);
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
 							zval_dtor(return_value);
@@ -1876,7 +1864,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip)
 {
 	long mode = PDO_FETCH_BOTH;
-	int flags, argc = ZEND_NUM_ARGS() - skip;
+	int flags = 0, argc = ZEND_NUM_ARGS() - skip;
 	zval ***args;
 	zend_class_entry **cep;
 	int retval;
@@ -2499,16 +2487,15 @@ static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data TSRM
 	*data = &I->fetch_ahead;
 }
 
-static int pdo_stmt_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
-	ulong *int_key TSRMLS_DC)
+static void pdo_stmt_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 {
 	struct php_pdo_iterator *I = (struct php_pdo_iterator*)iter->data;
 
 	if (I->key == (ulong)-1) {
-		return HASH_KEY_NON_EXISTANT;
+		ZVAL_NULL(key);
+	} else {
+		ZVAL_LONG(key, I->key);
 	}
-	*int_key = I->key;
-	return HASH_KEY_IS_LONG;
 }
 
 static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
@@ -2733,6 +2720,7 @@ static union _zend_function *row_get_ctor(zval *object TSRMLS_DC)
 	ctor.function_name = "__construct";
 	ctor.scope = pdo_row_ce;
 	ctor.handler = ZEND_FN(dbstmt_constructor);
+	ctor.fn_flags = ZEND_ACC_PUBLIC;
 
 	return (union _zend_function*)&ctor;
 }

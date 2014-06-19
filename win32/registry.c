@@ -91,6 +91,7 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 						INIT_PZVAL(data);
 						Z_STRVAL_P(data) = zend_strndup(value, value_len-1);
 						Z_STRLEN_P(data) = value_len-1;
+						Z_TYPE_P(data) = IS_STRING;
 						zend_hash_update(ht, name, name_len+1, &data, sizeof(zval*), NULL);
 					}
 				}

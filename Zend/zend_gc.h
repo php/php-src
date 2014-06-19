@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -106,7 +106,7 @@ typedef struct _zend_gc_globals {
 	gc_root_buffer   *first_unused;		/* pointer to first unused buffer   */
 	gc_root_buffer   *last_unused;		/* pointer to last unused buffer    */
 
-	zval_gc_info     *zval_to_free;		/* temporaryt list of zvals to free */
+	zval_gc_info     *zval_to_free;		/* temporary list of zvals to free */
 	zval_gc_info     *free_list;
 	zval_gc_info     *next_to_free;
 
@@ -199,7 +199,7 @@ static zend_always_inline void gc_remove_from_buffer(gc_root_buffer *root TSRMLS
 		GC_ZVAL_INIT(z);								\
 	} while (0)
 
-/* The following macroses override macroses from zend_alloc.h */
+/* The following macros override macros from zend_alloc.h */
 #undef  ALLOC_ZVAL
 #define ALLOC_ZVAL(z) 									\
 	do {												\

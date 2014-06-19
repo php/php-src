@@ -95,7 +95,7 @@ AC_DEFUN([PHP_IMAP_SSL_CHK], [
 
 
 PHP_ARG_WITH(imap,for IMAP support,
-[  --with-imap[=DIR]       Include IMAP support. DIR is the c-client install prefix])
+[  --with-imap[=DIR]         Include IMAP support. DIR is the c-client install prefix])
 
 PHP_ARG_WITH(kerberos,for IMAP Kerberos support,
 [  --with-kerberos[=DIR]     IMAP: Include Kerberos support. DIR is the Kerberos install prefix], no, no)
@@ -198,9 +198,9 @@ if test "$PHP_IMAP" != "no"; then
       AC_MSG_ERROR(Cannot find rfc822.h. Please check your c-client installation.)
     fi
 
-    if test -r "$IMAP_DIR/c-client/c-client.a"; then
+    if test ! -r "$IMAP_DIR/c-client/libc-client.a" && test -r "$IMAP_DIR/c-client/c-client.a" ; then
       ln -s "$IMAP_DIR/c-client/c-client.a" "$IMAP_DIR/c-client/libc-client.a" >/dev/null 2>&1
-    elif test -r "$IMAP_DIR/$PHP_LIBDIR/c-client.a"; then
+    elif test ! -r "$IMAP_DIR/$PHP_LIBDIR/libc-client.a" && test -r "$IMAP_DIR/$PHP_LIBDIR/c-client.a"; then
       ln -s "$IMAP_DIR/$PHP_LIBDIR/c-client.a" "$IMAP_DIR/$PHP_LIBDIR/libc-client.a" >/dev/null 2>&1
     fi
 

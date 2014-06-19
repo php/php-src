@@ -3,11 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(curl, for cURL support,
-[  --with-curl[=DIR]       Include cURL support])
-
-dnl Temporary option while we develop this aspect of the extension
-PHP_ARG_WITH(curlwrappers, if we should use cURL for url streams,
-[  --with-curlwrappers     EXPERIMENTAL: Use cURL for url streams], no, no)
+[  --with-curl[=DIR]         Include cURL support])
 
 if test "$PHP_CURL" != "no"; then
   if test -r $PHP_CURL/include/curl/easy.h; then
@@ -145,10 +141,6 @@ int main(int argc, char *argv[])
     $CURL_LIBS -L$CURL_DIR/$PHP_LIBDIR
   ])
 
-  if test "$PHP_CURLWRAPPERS" != "no" ; then
-    AC_DEFINE(PHP_CURL_URL_WRAPPERS,1,[ ])
-  fi
-
-  PHP_NEW_EXTENSION(curl, interface.c multi.c share.c streams.c, $ext_shared)
+  PHP_NEW_EXTENSION(curl, interface.c multi.c share.c curl_file.c, $ext_shared)
   PHP_SUBST(CURL_SHARED_LIBADD)
 fi

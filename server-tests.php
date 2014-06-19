@@ -138,7 +138,7 @@ function generate_diff($wanted,$output)
 }
 
 function mkpath($path,$mode = 0777) {
-	$dirs = split('[\\/]',$path);
+	$dirs = preg_split('/[\\/]/',$path);
 	$path = $dirs[0];
 	for($i = 1;$i < count($dirs);$i++) {
 		$path .= '/'.$dirs[$i];
@@ -358,7 +358,7 @@ class HTTPRequest
         return $this->outgoing_payload;
     }
     
-    function &_sendHTTP()
+    function _sendHTTP()
     {
         $this->_getRequest();
         $host = $this->urlparts['host'];
@@ -413,7 +413,7 @@ class testHarness {
 	public $xargs = array(
 		#arg         env var                value        default   description
 		'c' => array(''                    ,'file'       ,NULL    ,'configuration file, see server-tests-config.php for example'),
-		'd' => array('TEST_PATHS'          ,'paths'      ,NULL    ,'colon seperate path list'),
+		'd' => array('TEST_PATHS'          ,'paths'      ,NULL    ,'colon separate path list'),
 		'e' => array('TEST_PHP_ERROR_STYLE','EMACS|MSVC' ,'EMACS' ,'editor error style'),
 		'h' => array(''                    ,''           ,NULL    ,'this help'),
 		'i' => array('PHPRC'               ,'path|file'  ,NULL    ,'ini file to use for tests (sets PHPRC)'),
@@ -555,7 +555,7 @@ class testHarness {
 	{
 		// get the list of installed extensions
 		$out = $this->runscript(PHP_EXTENSIONS_SCRIPT,true);
-		$this->exts_to_test = split(":",$out);
+		$this->exts_to_test = explode(":",$out);
 		sort($this->exts_to_test);
 		$this->exts_tested = count($this->exts_to_test);
 	}
@@ -716,9 +716,9 @@ class testHarness {
 		if (@$this->conf['TEST_PATHS']) {
 			$this->test_dirs = array();
 			if ($this->iswin32) {
-				$paths = split(';',$this->conf['TEST_PATHS']);
+				$paths = explode(';',$this->conf['TEST_PATHS']);
 			} else {
-				$paths = split(':|;',$this->conf['TEST_PATHS']);
+				$paths = explode(':|;',$this->conf['TEST_PATHS']);
 			}
 			foreach($paths as $path) {
 				$this->test_dirs[] = realpath($path);
@@ -1152,7 +1152,7 @@ class testHarness {
 		while (!feof($fp)) {
 			$line = fgets($fp);
 			// Match the beginning of a section.
-			if (ereg('^--([A-Z]+)--',$line,$r)) {
+			if (preg_match('/^--([A-Z]+)--/',$line,$r)) {
 				$section = $r[1];
 				$section_text[$section] = '';
 				continue;
@@ -1211,14 +1211,14 @@ class testHarness {
 			if (!$output) return NULL;
 			if ($this->conf['TEST_PHP_DETAILED'] > 2)
 				print "SKIPIF: [$output]\n";
-			if (eregi("^skip", $output)){
+			if (preg_match("/^skip/i", $output)){
 			
-				$reason = (ereg("^skip[[:space:]]*(.+)\$", $output)) ? ereg_replace("^skip[[:space:]]*(.+)\$", "\\1", $output) : FALSE;
+				$reason = (preg_match("/^skip\s*(.+)\$/", $output)) ? preg_replace("/^skip\s*(.+)\$/", "\\1", $output) : FALSE;
 				$this->showstatus($section_text['TEST'], 'SKIPPED', $reason);
 				return 'SKIPPED';
 			}
-			if (eregi("^info", $output)) {
-				$reason = (ereg("^info[[:space:]]*(.+)\$", $output)) ? ereg_replace("^info[[:space:]]*(.+)\$", "\\1", $output) : FALSE;
+			if (preg_match("/^info/i", $output)) {
+				$reason = (preg_match("/^info\s*(.+)\$/", $output)) ? preg_replace("/^info\s*(.+)\$/", "\\1", $output) : FALSE;
 				if ($reason) {
 					$tested .= " (info: $reason)";
 				}
@@ -1244,19 +1244,19 @@ class testHarness {
 		$tested = $section_text['TEST']." [$shortname]";
 	
 		if ($this->conf['TEST_WEB']) {
-			$tmp_file   = ereg_replace('\.phpt$','.'.$this->conf['TEST_WEB_EXT'],$file);
+			$tmp_file   = preg_replace('/\.phpt$/','.'.$this->conf['TEST_WEB_EXT'],$file);
 			$uri = $this->conf['TEST_BASE_SCRIPT_NAME'].str_replace($this->conf['TEST_BASE_PATH'], '', $tmp_file);
 			$uri = str_replace('\\', '/', $uri);
 		} else {
-			$tmp_file   = ereg_replace('\.phpt$','.php',$file);
+			$tmp_file   = preg_replace('/\.phpt$/','.php',$file);
 		}
 		@unlink($tmp_file);
 	
 		// unlink old test results	
-		@unlink(ereg_replace('\.phpt$','.diff',$file));
-		@unlink(ereg_replace('\.phpt$','.log',$file));
-		@unlink(ereg_replace('\.phpt$','.exp',$file));
-		@unlink(ereg_replace('\.phpt$','.out',$file));
+		@unlink(preg_replace('/\.phpt$/','.diff',$file));
+		@unlink(preg_replace('/\.phpt$/','.log',$file));
+		@unlink(preg_replace('/\.phpt$/','.exp',$file));
+		@unlink(preg_replace('/\.phpt$/','.out',$file));
 	
 		if (!$this->conf['TEST_WEB']) {
 			// Reset environment from any previous test.
@@ -1425,15 +1425,68 @@ class testHarness {
 			}
 			$wanted_re = preg_replace('/\r\n/',"\n",$wanted);
 			if (isset($section_text['EXPECTF'])) {
-				$wanted_re = preg_quote($wanted_re, '/');
+				// do preg_quote, but miss out any %r delimited sections
+				$temp = "";
+				$r = "%r";
+				$startOffset = 0;
+				$length = strlen($wanted_re);
+				while($startOffset < $length) {
+					$start = strpos($wanted_re, $r, $startOffset);
+					if ($start !== false) {
+						// we have found a start tag
+						$end = strpos($wanted_re, $r, $start+2);
+						if ($end === false) {
+							// unbalanced tag, ignore it.
+							$end = $start = $length;
+						}
+					} else {
+						// no more %r sections
+						$start = $end = $length;
+					}
+					// quote a non re portion of the string
+					$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  '/');
+					// add the re unquoted.
+					if ($end > $start) {
+						$temp = $temp . '(' . substr($wanted_re, $start+2, ($end - $start-2)). ')';
+					}
+					$startOffset = $end + 2;
+				}
+				$wanted_re = $temp;
+
+				$wanted_re = str_replace(
+					array('%binary_string_optional%'),
+					'string',
+					$wanted_re
+				);
+				$wanted_re = str_replace(
+					array('%unicode_string_optional%'),
+					'string',
+					$wanted_re
+				);
+				$wanted_re = str_replace(
+					array('%unicode\|string%', '%string\|unicode%'),
+					'string',
+					$wanted_re
+				);
+				$wanted_re = str_replace(
+					array('%u\|b%', '%b\|u%'),
+					'',
+					$wanted_re
+				);
 				// Stick to basics
-				$wanted_re = str_replace("%s", ".+?", $wanted_re); //not greedy
-				$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
-				$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
-				$wanted_re = str_replace("%x", "[0-9a-fA-F]+", $wanted_re);
-				$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*(E-?[0-9]+)?", $wanted_re);
-				$wanted_re = str_replace("%c", ".", $wanted_re);
+				$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
+				$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
+				$wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
+				$wanted_re = str_replace('%a', '.+', $wanted_re);
+				$wanted_re = str_replace('%A', '.*', $wanted_re);
+				$wanted_re = str_replace('%w', '\s*', $wanted_re);
+				$wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
+				$wanted_re = str_replace('%d', '\d+', $wanted_re);
+				$wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
+				$wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
+				$wanted_re = str_replace('%c', '.', $wanted_re);
 				// %f allows two points "-.0.0" but that is the best *simple* expression
+				
 			}
 	/* DEBUG YOUR REGEX HERE
 			var_dump($wanted_re);
@@ -1489,8 +1542,8 @@ class testHarness {
 		$this->failed_tests[] = array(
 							'name' => $file,
 							'test_name' => $tested,
-							'output' => ereg_replace('\.phpt$','.log', $file),
-							'diff'   => ereg_replace('\.phpt$','.diff', $file)
+							'output' => preg_replace('/\.phpt$/','.log', $file),
+							'diff'   => preg_replace('/\.phpt$/','.diff', $file)
 							);
 	
 		if ($this->conf['TEST_PHP_DETAILED'])
@@ -1498,25 +1551,25 @@ class testHarness {
 			
 		// write .exp
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'E') !== FALSE) {
-			$logname = ereg_replace('\.phpt$','.exp',$file);
+			$logname = preg_replace('/\.phpt$/','.exp',$file);
 			file_put_contents($logname,$wanted);
 		}
 	
 		// write .out
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'O') !== FALSE) {
-			$logname = ereg_replace('\.phpt$','.out',$file);
+			$logname = preg_replace('/\.phpt$/','.out',$file);
 			file_put_contents($logname,$output);
 		}
 	
 		// write .diff
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'D') !== FALSE) {
-			$logname = ereg_replace('\.phpt$','.diff',$file);
+			$logname = preg_replace('/\.phpt$/','.diff',$file);
 			file_put_contents($logname,generate_diff($wanted,$output));
 		}
 	
 		// write .log
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'L') !== FALSE) {
-			$logname = ereg_replace('\.phpt$','.log',$file);
+			$logname = preg_replace('/\.phpt$/','.log',$file);
 			file_put_contents($logname,
 						"\n---- EXPECTED OUTPUT\n$wanted\n".
 						"---- ACTUAL OUTPUT\n$output\n".

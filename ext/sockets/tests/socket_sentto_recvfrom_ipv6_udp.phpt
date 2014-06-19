@@ -5,6 +5,9 @@ Test if socket_recvfrom() receives data sent by socket_sendto() via IPv6 UDP
 if (!extension_loaded('sockets')) {
     die('SKIP The sockets extension is not loaded.');
 }
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+	die('skip Not valid for Windows');
+}
 require 'ipv6_skipif.inc';
 --FILE--
 <?php
@@ -15,7 +18,7 @@ require 'ipv6_skipif.inc';
     if (!socket_set_nonblock($socket)) {
         die('Unable to set nonblocking mode for socket');
     }
-    socket_recvfrom($socket, $buf, 12, 0, $from, $port); // cause warning
+    var_dump(socket_recvfrom($socket, $buf, 12, 0, $from, $port)); // false (EAGAIN, no warning)
     $address = '::1';
     socket_sendto($socket, '', 1, 0, $address); // cause warning
     if (!socket_bind($socket, $address, 1223)) {
@@ -45,7 +48,7 @@ require 'ipv6_skipif.inc';
 
     socket_close($socket);
 --EXPECTF--
-Warning: socket_recvfrom(): unable to recvfrom [11]: Resource temporarily unavailable in %s on line %d
+bool(false)
 
 Warning: Wrong parameter count for socket_sendto() in %s on line %d
 

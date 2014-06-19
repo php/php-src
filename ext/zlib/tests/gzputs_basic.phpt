@@ -9,7 +9,7 @@ if (!extension_loaded("zlib")) {
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/temp.txt.gz";
+$filename = dirname(__FILE__)."/gzputs_basic.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 $length = 10;

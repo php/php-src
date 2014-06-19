@@ -32,14 +32,11 @@ Stack trace:
 #0 %s(%d): serialize(Object(Generator))
 #1 {main}
 
-exception 'Exception' with message 'Unserialization of 'Generator' is not allowed' in %s:%d
-Stack trace:
-#0 [internal function]: Generator->__wakeup()
-#1 %s(%d): unserialize('O:9:"Generator"...')
-#2 {main}
 
+Warning: Erroneous data format for unserializing 'Generator' in %sserialize_unserialize_error.php on line %d
 
-Notice: unserialize(): Error at offset 19 of 20 bytes in %s on line %d
+Notice: unserialize(): Error at offset 19 of 20 bytes in %sserialize_unserialize_error.php on line %s
+bool(false)
 exception 'Exception' with message 'Unserialization of 'Generator' is not allowed' in %s:%d
 Stack trace:
 #0 %s(%d): unserialize('C:9:"Generator"...')

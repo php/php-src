@@ -104,7 +104,7 @@ abstract class gtTestCase {
 
 
   /**
-   * Add contructor argument initialisation to test case
+   * Add constructor argument initialisation to test case
    *
    */
   public function constructorArgInit() {

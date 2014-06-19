@@ -53,7 +53,7 @@ require_once('skipifconnectfailure.inc');
 	} catch (mysqli_sql_exception $e) {
 		$ok = true;
 		if ('' == $e->getMessage())
-			printf("[008] getMessage() has returned an emptry string.\n");
+			printf("[008] getMessage() has returned an empty string.\n");
 		if ('' == $e->getCode())
 			printf("[009] getCode() has returned an empty string.\n");
 		if ('' == $e->getFile())

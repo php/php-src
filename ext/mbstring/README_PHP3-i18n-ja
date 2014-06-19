@@ -408,7 +408,7 @@ o i18n.script_encoding - script encoding
     entering the script parser.
 
     Be aware that auto detection may fail under some conditions.
-    For best auto detection, add multibyte charactor at begining of
+    For best auto detection, add multibyte charactor at beginning of
     script.
 
 

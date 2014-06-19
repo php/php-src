@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@ sprintf  offers the ability to make a lot of failures since it does not know
          the size of the buffer it uses. Therefore usage of sprintf often
          results in possible entries for buffer overrun attacks. So please
          use this version only if you are sure the call is safe. sprintf
-         allways terminstes the buffer it writes to.
+         always terminstes the buffer it writes to.
 
 snprintf knows the buffers size and will not write behind it. But you will
          have to use either a static buffer or allocate a dynamic buffer
@@ -48,7 +48,7 @@ spprintf is the dynamical version of snprintf. It allocates the buffer in size
          snprintf and offers possible memory leakes if you miss freeing the
          buffer allocated by the function. Therfore this function should be
          used where either no maximum is known or the maximum is much bigger
-         than normal size required. spprintf allways terminates the buffer.
+         than normal size required. spprintf always terminates the buffer.
 
 Example:
 
@@ -60,7 +60,7 @@ Example:
  sprintf(buffer, "test");      | snprintf(buffer, MAX, "test"); | spprintf(&buffer, MAX, "text");
                                |                                | if (!buffer)
                                |                                |   return OUT_OF_MEMORY
- // sprintf allways terminates | // manual termination of       | // spprintf allays terminates buffer
+ // sprintf always terminates | // manual termination of       | // spprintf allays terminates buffer
  // buffer                     | // buffer *IS* required        |
                                | buffer[MAX-1] = 0;             |
  action_with_buffer(buffer);   | action_with_buffer(buffer);    | action_with_buffer(buffer);

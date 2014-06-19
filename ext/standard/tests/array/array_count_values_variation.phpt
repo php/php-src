@@ -1,5 +1,5 @@
 --TEST--
-Test array_count_values() function : Test all normal paramter variations 
+Test array_count_values() function : Test all normal parameter variations 
 --FILE--
 <?php
 /* Prototype  : proto array array_count_values(array input)
@@ -9,7 +9,7 @@ Test array_count_values() function : Test all normal paramter variations
  */
 
 /*
- * Test behaviour with paramter variations
+ * Test behaviour with parameter variations
  */
 
 echo "*** Testing array_count_values() : parameter variations ***\n";

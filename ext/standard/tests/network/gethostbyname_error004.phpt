@@ -5,6 +5,7 @@ gethostbyname() function - basic return valid ip address test
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (getenv("SKIP_ONLINE_TESTS")) die("skip test requiring internet connection");
 ?>
 --FILE--
 <?php

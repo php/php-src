@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -85,15 +85,16 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 
 
 /* Connect */
-#define mysqlnd_init(persistent) _mysqlnd_init((persistent) TSRMLS_CC)
-PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC);
+#define mysqlnd_init(client_flags, persistent) _mysqlnd_init((client_flags), (persistent) TSRMLS_CC)
+PHPAPI MYSQLND * _mysqlnd_init(unsigned int client_flags, zend_bool persistent TSRMLS_DC);
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 						  const char * host, const char * user,
 						  const char * passwd, unsigned int passwd_len,
 						  const char * db, unsigned int db_len,
 						  unsigned int port,
 						  const char * socket_or_pipe,
-						  unsigned int mysql_flags
+						  unsigned int mysql_flags,
+						  unsigned int client_api_flags
 						  TSRMLS_DC);
 
 #define mysqlnd_change_user(conn, user, passwd, db, silent)		((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), strlen((passwd)) TSRMLS_CC)
@@ -117,10 +118,11 @@ PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);
 #define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data TSRMLS_CC)
 #define mysqlnd_unbuffered_skip_result(result)			(result)->m.skip_result((result) TSRMLS_CC)
 
-PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, uint * desc_num TSRMLS_DC);
+PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num TSRMLS_DC);
 
-#define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data TSRMLS_CC)
-#define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data TSRMLS_CC)
+#define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data, 0 TSRMLS_CC)
+#define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_NO_COPY TSRMLS_CC)
+#define mysqlnd_store_result_ofs(conn)	((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_COPY TSRMLS_CC)
 #define mysqlnd_next_result(conn)		((conn)->data)->m->next_result((conn)->data TSRMLS_CC)
 #define mysqlnd_more_results(conn)		((conn)->data)->m->more_results((conn)->data TSRMLS_CC)
 #define mysqlnd_free_result(r,e_or_i)	((MYSQLND_RES*)r)->m.free_result(((MYSQLND_RES*)(r)), (e_or_i) TSRMLS_CC)
@@ -150,8 +152,7 @@ PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQ
 #define mysqlnd_num_rows(result)		(result)->m.num_rows((result) TSRMLS_CC)
 #define mysqlnd_num_fields(result)		(result)->m.num_fields((result) TSRMLS_CC)
 
-#define mysqlnd_fetch_lengths(result)	_mysqlnd_fetch_lengths((result) TSRMLS_CC)
-PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result  TSRMLS_DC);
+#define mysqlnd_fetch_lengths(result)	(result)->m.fetch_lengths((result) TSRMLS_CC)
 
 #define mysqlnd_field_seek(result, ofs)			(result)->m.seek_field((result), (ofs) TSRMLS_CC)
 #define mysqlnd_field_tell(result)				(result)->m.field_tell((result) TSRMLS_CC)
@@ -192,8 +193,11 @@ PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, con
 
 /* Simple commands */
 #define mysqlnd_autocommit(conn, mode)		((conn)->data)->m->set_autocommit((conn)->data, (mode) TSRMLS_CC)
-#define mysqlnd_commit(conn)				((conn)->data)->m->tx_commit((conn)->data TSRMLS_CC)
-#define mysqlnd_rollback(conn)				((conn)->data)->m->tx_rollback((conn)->data TSRMLS_CC)
+#define mysqlnd_begin_transaction(conn,flags,name) ((conn)->data)->m->tx_begin((conn)->data, (flags), (name) TSRMLS_CC)
+#define mysqlnd_commit(conn, flags, name)	((conn)->data)->m->tx_commit_or_rollback((conn)->data, TRUE, (flags), (name) TSRMLS_CC)
+#define mysqlnd_rollback(conn, flags, name)	((conn)->data)->m->tx_commit_or_rollback((conn)->data, FALSE, (flags), (name) TSRMLS_CC)
+#define mysqlnd_savepoint(conn, name)		((conn)->data)->m->tx_savepoint((conn)->data, (name) TSRMLS_CC)
+#define mysqlnd_release_savepoint(conn, name) ((conn)->data)->m->tx_savepoint_release((conn)->data, (name) TSRMLS_CC)
 #define mysqlnd_list_dbs(conn, wild)		((conn)->data)->m->list_method((conn)->data, wild? "SHOW DATABASES LIKE %s":"SHOW DATABASES", (wild), NULL TSRMLS_CC)
 #define mysqlnd_list_fields(conn, tab,wild)	((conn)->data)->m->list_fields((conn)->data, (tab), (wild) TSRMLS_CC)
 #define mysqlnd_list_processes(conn)		((conn)->data)->m->list_method((conn)->data, "SHOW PROCESSLIST", NULL, NULL TSRMLS_CC)
@@ -207,6 +211,7 @@ PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, con
 #define mysqlnd_set_character_set(conn, cs)	((conn)->data)->m->set_charset((conn)->data, (cs) TSRMLS_CC)
 #define mysqlnd_stat(conn, msg, msg_len)	((conn)->data)->m->get_server_statistics(((conn)->data), (msg), (msg_len) TSRMLS_CC)
 #define mysqlnd_options(conn, opt, value)	((conn)->data)->m->set_client_option((conn)->data, (opt), (value) TSRMLS_CC)
+#define mysqlnd_options4(conn, opt, k, v)	((conn)->data)->m->set_client_option_2d((conn)->data, (opt), (k), (v) TSRMLS_CC)
 #define mysqlnd_set_server_option(conn, op)	((conn)->data)->m->set_server_option((conn)->data, (op) TSRMLS_CC)
 
 /* Escaping */
@@ -278,6 +283,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	long			debug_calloc_fail_threshold;
 	long			debug_realloc_fail_threshold;
 	char *			sha256_server_public_key;
+	zend_bool		fetch_data_copy;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)

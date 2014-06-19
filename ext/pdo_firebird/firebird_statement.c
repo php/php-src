@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Ard Biesheuvel <abies@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -344,7 +342,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 			if (n >= 0) {
 				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d", 
 					n / f, -var->sqlscale, n % f);
-			} else if (n < -f) {
+			} else if (n <= -f) {
 				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
 					n / f, -var->sqlscale, -n % f);				
 			 } else {
@@ -535,12 +533,14 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				int force_null;
 				
 				case IS_LONG:
-					var->sqltype = sizeof(long) == 8 ? SQL_INT64 : SQL_LONG;
+					/* keep the allow-NULL flag */
+					var->sqltype = (sizeof(long) == 8 ? SQL_INT64 : SQL_LONG) | (var->sqltype & 1);
 					var->sqldata = (void*)&Z_LVAL_P(param->parameter);
 					var->sqllen = sizeof(long);
 					break;
 				case IS_DOUBLE:
-					var->sqltype = SQL_DOUBLE;
+					/* keep the allow-NULL flag */
+					var->sqltype = SQL_DOUBLE | (var->sqltype & 1);
 					var->sqldata = (void*)&Z_DVAL_P(param->parameter);
 					var->sqllen = sizeof(double);
 					break;
@@ -560,7 +560,8 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							force_null = (Z_STRLEN_P(param->parameter) == 0);
 					}
 					if (!force_null) {
-						var->sqltype = SQL_TEXT;
+						/* keep the allow-NULL flag */
+						var->sqltype = SQL_TEXT | (var->sqltype & 1);
 						var->sqldata = Z_STRVAL_P(param->parameter);
 						var->sqllen	 = Z_STRLEN_P(param->parameter);
 						break;

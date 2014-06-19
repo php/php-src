@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -115,6 +115,7 @@ do { \
 
 PHPAPI void var_replace(php_unserialize_data_t *var_hash, zval *ozval, zval **nzval);
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hash, zval **val);
+PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval **rval);
 PHPAPI void var_destroy(php_unserialize_data_t *var_hash);
 
 #define PHP_VAR_UNSERIALIZE_ZVAL_CHANGED(var_hash, ozval, nzval) \

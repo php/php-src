@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -72,11 +72,11 @@ enum pdo_param_type {
 	/* get_col ptr should point to a zval*
 	   and the driver is responsible for adding correct type information to get_column_meta()
 	 */
-	PDO_PARAM_ZVAL
-};
+	PDO_PARAM_ZVAL,
 
-/* magic flag to denote a parameter as being input/output */
-#define	PDO_PARAM_INPUT_OUTPUT 	0x80000000	
+	/* magic flag to denote a parameter as being input/output */
+	PDO_PARAM_INPUT_OUTPUT = 0x80000000
+};
 
 #define PDO_PARAM_FLAGS			0xFFFF0000
 
@@ -469,7 +469,7 @@ struct _pdo_dbh_t {
 	/* when set, convert int/floats to strings */
 	unsigned stringify:1;
 
-	/* the sum of the number of bits here and the bit fields preceeding should
+	/* the sum of the number of bits here and the bit fields preceding should
 	 * equal 32 */
 	unsigned _reserved_flags:21;
 

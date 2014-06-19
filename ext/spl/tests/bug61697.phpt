@@ -1,7 +1,5 @@
 --TEST--
 Bug #61697 (spl_autoload_functions returns lambda functions incorrectly)
---XFAIL--
-Bug #61697 not fixed yet
 --FILE--
 <?php
 

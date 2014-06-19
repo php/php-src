@@ -50,25 +50,27 @@
    On error, fills in za->error and returns 0.
 */
 
-unsigned int
-_zip_file_get_offset(struct zip *za, int idx)
+zip_uint64_t
+_zip_file_get_offset(const struct zip *za, zip_uint64_t idx, struct zip_error *error)
 {
-    struct zip_dirent de;
-    unsigned int offset;
+    zip_uint64_t offset;
+    zip_int32_t size;
 
-    offset = za->cdir->entry[idx].offset;
+    offset = za->entry[idx].orig->offset;
 
-    if (fseeko(za->zp, offset, SEEK_SET) != 0) {
-	_zip_error_set(&za->error, ZIP_ER_SEEK, errno);
+    if (fseeko(za->zp, (off_t)offset, SEEK_SET) != 0) {
+	_zip_error_set(error, ZIP_ER_SEEK, errno);
 	return 0;
     }
 
-    if (_zip_dirent_read(&de, za->zp, NULL, NULL, 1, &za->error) != 0)
+    /* TODO: cache? */
+    if ((size=_zip_dirent_size(za->zp, ZIP_EF_LOCAL, error)) < 0)
 	return 0;
 
-    offset += LENTRYSIZE + de.filename_len + de.extrafield_len;
-
-    _zip_dirent_finalize(&de);
-
-    return offset;
+    if (offset+(zip_uint32_t)size > ZIP_OFF_MAX) {
+        _zip_error_set(error, ZIP_ER_SEEK, EFBIG);
+        return 0;
+    }
+    
+    return offset + (zip_uint32_t)size;
 }

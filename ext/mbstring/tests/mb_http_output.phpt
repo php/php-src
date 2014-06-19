@@ -4,7 +4,7 @@ mb_http_output()
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
-//TODO: Add more encoding. Wrong paramter type test.
+//TODO: Add more encoding. Wrong parameter type test.
 //$debug = true;
 ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');

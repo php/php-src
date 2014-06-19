@@ -143,10 +143,6 @@ SOURCE=.\tsrm_strtok_r.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\tsrm_virtual_cwd.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\tsrm_win32.c
 # End Source File
 # End Group
@@ -172,10 +168,6 @@ SOURCE=.\tsrm_config_common.h
 # Begin Source File
 
 SOURCE=.\tsrm_strtok_r.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\tsrm_virtual_cwd.h
 # End Source File
 # Begin Source File
 

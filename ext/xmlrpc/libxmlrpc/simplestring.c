@@ -66,7 +66,7 @@ static const char rcsid[] = "#(@) $Id$";
  *
  *   simplestring is, as the name implies, a simple API for dealing with C strings.
  *   Why would I write yet another string API?  Because I couldn't find any that were
- *   a) free / GPL, b) simple/lightweight, c) fast, not doing unneccesary strlens all
+ *   a) free / GPL, b) simple/lightweight, c) fast, not doing unnecessary strlens all
  *   over the place.  So.  It is simple, and it seems to work, and it is pretty fast.
  *
  *   Oh, and it is also binary safe, ie it can handle strings with embedded NULLs,

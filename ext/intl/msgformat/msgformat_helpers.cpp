@@ -209,6 +209,9 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 					continue;
 				}
 			}
+		} else {
+			intl_errors_set(&err, U_INVALID_FORMAT_ERROR, "Invalid part type encountered", 0 TSRMLS_CC);
+			continue;
 		}
 
 		UMessagePatternArgType argType = p.getArgType();
@@ -487,7 +490,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 				}
 			case Formattable::kLong:
 				{
-					int32_t tInt32;
+					int32_t tInt32 = 0;
 retry_klong:
 					if (Z_TYPE_PP(elem) == IS_DOUBLE) {
 						if (Z_DVAL_PP(elem) > (double)INT32_MAX ||
@@ -517,7 +520,7 @@ retry_klong:
 				}
 			case Formattable::kInt64:
 				{
-					int64_t tInt64;
+					int64_t tInt64 = 0;
 retry_kint64:
 					if (Z_TYPE_PP(elem) == IS_DOUBLE) {
 						if (Z_DVAL_PP(elem) > (double)U_INT64_MAX ||

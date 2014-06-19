@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,7 @@ typedef void (*zend_objects_store_clone_t)(void *object, void **object_clone TSR
 typedef struct _zend_object_store_bucket {
 	zend_bool destructor_called;
 	zend_bool valid;
+	zend_uchar apply_count;
 	union _store_bucket {
 		struct _store_object {
 			void *object;

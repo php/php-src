@@ -10,7 +10,7 @@ set_error_handler(function($errno, $errstr, $errfile, $errline){
 
 require 'notfound.php';
 --EXPECTF--
-error(require(notfound.php): failed to open stream: No such file or directory)
+error(require(notfound.php): failed to open stream: %s)
 Warning: Uncaught exception 'Exception' with message 'Foo' in %sbug60909_1.php:5
 Stack trace:
 #0 %sbug60909_1.php(8): {closure}(2, 'require(notfoun...', '%s', 8, Array)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,11 +29,23 @@
 #include "zend_interfaces.h"
 #include "zend_closures.h"
 #include "zend_compile.h"
+#include "zend_hash.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
 #define Z_OBJ_P(zval_p) \
 	((zend_object*)(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].bucket.obj.object))
+
+#define Z_OBJ_PROTECT_RECURSION(zval_p) \
+	do { \
+		if (EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].apply_count++ >= 3) { \
+			zend_error(E_ERROR, "Nesting level too deep - recursive dependency?"); \
+		} \
+	} while (0)
+
+
+#define Z_OBJ_UNPROTECT_RECURSION(zval_p) \
+	EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].apply_count--
 
 /*
   __X accessors explanation:
@@ -126,8 +138,40 @@ ZEND_API HashTable *zend_std_get_gc(zval *object, zval ***table, int *n TSRMLS_D
 
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
 {
-	*is_temp = 0;
-	return zend_std_get_properties(object TSRMLS_CC);
+	zend_class_entry *ce = Z_OBJCE_P(object);
+	zval *retval = NULL;
+
+	if (!ce->__debugInfo) {
+		*is_temp = 0;
+		return Z_OBJ_HANDLER_P(object, get_properties)
+			? Z_OBJ_HANDLER_P(object, get_properties)(object TSRMLS_CC)
+			: NULL;
+	}
+
+	zend_call_method_with_0_params(&object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
+	if (retval && Z_TYPE_P(retval) == IS_ARRAY) {
+		HashTable *ht = Z_ARRVAL_P(retval);
+		if (Z_REFCOUNT_P(retval) <= 1) {
+			*is_temp = 1;
+			efree(retval);
+			return ht;
+		} else {
+			*is_temp = 0;
+			zval_ptr_dtor(&retval);
+		}
+		return ht;
+	}
+	if (retval && Z_TYPE_P(retval) == IS_NULL) {
+		zval ret;
+		array_init(&ret);
+		*is_temp = 1;
+		zval_ptr_dtor(&retval);
+		return Z_ARRVAL(ret);
+	}
+
+	zend_error_noreturn(E_ERROR, ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
+
+	return NULL; /* Compilers are dumb and don't understand that noreturn means that the function does NOT need a return value... */
 }
 /* }}} */
 
@@ -177,7 +221,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	zval_ptr_dtor(&value);
 
 	if (retval) {
-		result = i_zend_is_true(retval) ? SUCCESS : FAILURE;
+		result = i_zend_is_true(retval TSRMLS_CC) ? SUCCESS : FAILURE;
 		zval_ptr_dtor(&retval);
 		return result;
 	} else {
@@ -352,9 +396,10 @@ ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info
 	zend_property_info *property_info;
 	const char *class_name, *prop_name;
 	zval member;
+	int prop_name_len;
 
-	zend_unmangle_property_name(prop_info_name, prop_info_name_len, &class_name, &prop_name);
-	ZVAL_STRING(&member, prop_name, 0);
+	zend_unmangle_property_name_ex(prop_info_name, prop_info_name_len, &class_name, &prop_name, &prop_name_len);
+	ZVAL_STRINGL(&member, prop_name, prop_name_len, 0);
 	property_info = zend_get_property_info_quick(zobj->ce, &member, 1, NULL TSRMLS_CC);
 	if (!property_info) {
 		return FAILURE;
@@ -382,6 +427,16 @@ static int zend_get_property_guard(zend_object *zobj, zend_property_info *proper
 		info.name = Z_STRVAL_P(member);
 		info.name_length = Z_STRLEN_P(member);
 		info.h = zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+	} else if(property_info->name[0] == '\0'){
+		const char *class_name = NULL, *prop_name = NULL;
+		zend_unmangle_property_name(property_info->name, property_info->name_length, &class_name, &prop_name);
+		if(class_name) {
+			/* use unmangled name for protected properties */
+			info.name = prop_name;
+			info.name_length = strlen(prop_name);
+			info.h = zend_get_hash_value(info.name, info.name_length+1);
+			property_info = &info;
+		}
 	}
 	if (!zobj->guards) {
 		ALLOC_HASHTABLE(zobj->guards);
@@ -424,7 +479,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 #endif
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
-	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__get != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, member, silent || (zobj->ce->__get != NULL), key TSRMLS_CC);
 
 	if (UNEXPECTED(!property_info) ||
 	    ((EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -539,6 +594,8 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 				(*variable_ptr)->value = value->value;
 				if (Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(*variable_ptr);
+				} else {
+					efree(value);
 				}
 				zval_dtor(&garbage);
 			} else {
@@ -669,12 +726,12 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetexists", &retval, offset);
 		if (EXPECTED(retval != NULL)) {
-			result = i_zend_is_true(retval);
+			result = i_zend_is_true(retval TSRMLS_CC);
 			zval_ptr_dtor(&retval);
 			if (check_empty && result && EXPECTED(!EG(exception))) {
 				zend_call_method_with_1_params(&object, ce, NULL, "offsetget", &retval, offset);
 				if (retval) {
-					result = i_zend_is_true(retval);
+					result = i_zend_is_true(retval TSRMLS_CC);
 					zval_ptr_dtor(&retval);
 				}
 			}
@@ -690,7 +747,7 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 }
 /* }}} */
 
-static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zval tmp_member;
@@ -730,7 +787,9 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const ze
 			/* we don't have access controls - will just add it */
 			new_zval = &EG(uninitialized_zval);
 
-/* 			zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member)); */
+			if(UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+				zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name, Z_STRVAL_P(member));
+			}
 			Z_ADDREF_P(new_zval);
 			if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 			    property_info->offset >= 0) {
@@ -870,11 +929,8 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 	zend_call_method_with_2_params(&this_ptr, ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		if (Z_ISREF_P(method_result_ptr) || Z_REFCOUNT_P(method_result_ptr) > 1) {
-			RETVAL_ZVAL(method_result_ptr, 1, 1);
-		} else {
-			RETVAL_ZVAL(method_result_ptr, 0, 1);
-		}
+		RETVAL_ZVAL_FAST(method_result_ptr);
+		zval_ptr_dtor(&method_result_ptr);
 	}
 
 	/* now destruct all auxiliaries */
@@ -1087,11 +1143,8 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 	zend_call_method_with_2_params(NULL, ce, &ce->__callstatic, ZEND_CALLSTATIC_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		if (Z_ISREF_P(method_result_ptr) || Z_REFCOUNT_P(method_result_ptr) > 1) {
-			RETVAL_ZVAL(method_result_ptr, 1, 1);
-		} else {
-			RETVAL_ZVAL(method_result_ptr, 0, 1);
-		}
+		RETVAL_ZVAL_FAST(method_result_ptr);
+		zval_ptr_dtor(&method_result_ptr);
 	}
 
 	/* now destruct all auxiliaries */
@@ -1255,6 +1308,14 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *p
 		}
 	}
 
+	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL) ||
+	    UNEXPECTED(CE_STATIC_MEMBERS(ce)[property_info->offset] == NULL)) {
+		if (!silent) {
+			zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name, property_name);
+		}
+		return NULL;
+	}
+	
 	return &CE_STATIC_MEMBERS(ce)[property_info->offset];
 }
 /* }}} */
@@ -1317,28 +1378,39 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
 		int i;
+
+		Z_OBJ_PROTECT_RECURSION(o1);
+		Z_OBJ_PROTECT_RECURSION(o2);
 		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
 			if (zobj1->properties_table[i]) {
 				if (zobj2->properties_table[i]) {
 					zval result;
 
 					if (compare_function(&result, zobj1->properties_table[i], zobj2->properties_table[i] TSRMLS_CC)==FAILURE) {
+						Z_OBJ_UNPROTECT_RECURSION(o1);
+						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return 1;
 					}
 					if (Z_LVAL(result) != 0) {
+						Z_OBJ_UNPROTECT_RECURSION(o1);
+						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return Z_LVAL(result);
 					}
 				} else {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
 				}
 			} else {
 				if (zobj2->properties_table[i]) {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
-				} else {
-					return 0;
 				}
 			}
 		}
+		Z_OBJ_UNPROTECT_RECURSION(o1);
+		Z_OBJ_UNPROTECT_RECURSION(o2);
 		return 0;
 	} else {
 		if (!zobj1->properties) {
@@ -1403,7 +1475,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 			guard->in_isset = 1; /* prevent circular getting */
 			rv = zend_std_call_issetter(object, member TSRMLS_CC);
 			if (rv) {
-				result = zend_is_true(rv);
+				result = zend_is_true(rv TSRMLS_CC);
 				zval_ptr_dtor(&rv);
 				if (has_set_exists && result) {
 					if (EXPECTED(!EG(exception)) && zobj->ce->__get && !guard->in_get) {
@@ -1412,7 +1484,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 						guard->in_get = 0;
 						if (rv) {
 							Z_ADDREF_P(rv);
-							result = i_zend_is_true(rv);
+							result = i_zend_is_true(rv TSRMLS_CC);
 							zval_ptr_dtor(&rv);
 						} else {
 							result = 0;
@@ -1431,7 +1503,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 			result = (Z_TYPE_PP(value) != IS_NULL);
 			break;
 		default:
-			result = zend_is_true(*value);
+			result = zend_is_true(*value TSRMLS_CC);
 			break;
 		case 2:
 			result = 1;
@@ -1599,9 +1671,11 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
-	NULL,									/* get_debug_info */
+	zend_std_get_debug_info,				/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
+	NULL,									/* do_operation */
+	NULL,									/* compare */
 };
 
 /*

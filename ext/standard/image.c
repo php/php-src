@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,6 +30,9 @@
 #include <unistd.h>
 #endif
 #include "php_image.h"
+#ifdef PHP_WIN32
+#include "win32/php_stdint.h"
+#endif
 
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 #include "zlib.h"
@@ -112,7 +115,7 @@ static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 	result->width    = (unsigned int)dim[0] | (((unsigned int)dim[1])<<8);
 	result->height   = (unsigned int)dim[2] | (((unsigned int)dim[3])<<8);
 	result->bits     = dim[4]&0x80 ? ((((unsigned int)dim[4])&0x07) + 1) : 0;
-	result->channels = 3; /* allways */
+	result->channels = 3; /* always */
 
 	return result;
 }
@@ -159,10 +162,11 @@ static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
 		result->width    =  (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[ 7]) << 8) + ((unsigned int) dim[ 6]);
 		result->bits     =  ((unsigned int)dim[11]);
-	} else if (size > 12 && (size <= 64 || size == 108)) {
+	} else if (size > 12 && (size <= 64 || size == 108 || size == 124)) {
 		result = (struct gfxinfo *) ecalloc (1, sizeof(struct gfxinfo));
 		result->width    =  (((unsigned int)dim[ 7]) << 24) + (((unsigned int)dim[ 6]) << 16) + (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[11]) << 24) + (((unsigned int)dim[10]) << 16) + (((unsigned int)dim[ 9]) << 8) + ((unsigned int) dim[ 8]);
+		result->height   =  abs((int32_t)result->height);
 		result->bits     =  (((unsigned int)dim[15]) <<  8) +  ((unsigned int)dim[14]);
 	} else {
 		return NULL;
@@ -606,7 +610,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 
 	/* JPEG 2000 components can be vastly different from one another.
 	   Each component can be sampled at a different resolution, use
-	   a different colour space, have a seperate colour depth, and
+	   a different colour space, have a separate colour depth, and
 	   be compressed totally differently! This makes giving a single
 	   "bit depth" answer somewhat problematic. For this implementation
 	   we'll use the highest depth encountered. */

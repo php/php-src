@@ -16,7 +16,7 @@ class DbConnection {
 		var_dump($link);
 
 		$link = mysqli_init();
-		/* @ is to supress 'Property access is not allowed yet' */
+		/* @ is to suppress 'Property access is not allowed yet' */
 		@var_dump($link);
 
 		$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);

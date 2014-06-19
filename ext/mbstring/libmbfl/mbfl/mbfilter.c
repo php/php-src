@@ -985,7 +985,7 @@ mbfl_strpos(
 {
 	int result;
 	mbfl_string _haystack_u8, _needle_u8;
-	const mbfl_string *haystack_u8, *needle_u8;
+	const mbfl_string *haystack_u8, *needle_u8 = NULL;
 	const unsigned char *u8_tbl;
 
 	if (haystack == NULL || haystack->val == NULL || needle == NULL || needle->val == NULL) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@
 
 #include <sqlite3.h>
 
-/* for backwards compatability reasons */
+/* for backwards compatibility reasons */
 #ifndef SQLITE_OPEN_READONLY
 #define SQLITE_OPEN_READONLY 0x00000001
 #endif

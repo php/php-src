@@ -33,7 +33,7 @@ var_dump($count);
 echo "\n-- Testing objects --\n";
 /* we get "Catchable fatal error: saying Object of class could not be converted
         to string" by default, when an object is passed instead of string:
-The error can be  avoided by chosing the __toString magix method as follows: */
+The error can be  avoided by choosing the __toString magix method as follows: */
 
 class subject 
 {

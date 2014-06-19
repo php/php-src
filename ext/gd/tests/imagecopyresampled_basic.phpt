@@ -35,9 +35,9 @@ imagefilledellipse($image_lge, 200, 150, 300, 200, $col_ellipse);
 imagepng($image_lge, $dest_lge);
 
 // Get new dimensions
-$percent = 0.5; // new image 50% of orginal
+$percent = 0.5; // new image 50% of original
 list($width, $height) = getimagesize($dest_lge);
-echo "Size of orginal: width=". $width . " height=" . $height . "\n";
+echo "Size of original: width=". $width . " height=" . $height . "\n";
 
 $new_width = $width * $percent;
 $new_height = $height * $percent;
@@ -66,6 +66,6 @@ echo "Done\n";
 ?>
 --EXPECT--
 Simple test of imagecopyresampled() function
-Size of orginal: width=400 height=300
+Size of original: width=400 height=300
 Size of copy: width=200 height=150
 Done

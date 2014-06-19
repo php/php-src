@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -90,7 +90,8 @@ const char * const mysqlnd_command_to_text[COM_END] =
   "TIME", "DELAYED_INSERT", "CHANGE_USER", "BINLOG_DUMP",
   "TABLE_DUMP", "CONNECT_OUT", "REGISTER_SLAVE",
   "STMT_PREPARE", "STMT_EXECUTE", "STMT_SEND_LONG_DATA", "STMT_CLOSE",
-  "STMT_RESET", "SET_OPTION", "STMT_FETCH", "DAEMON"
+  "STMT_RESET", "SET_OPTION", "STMT_FETCH", "DAEMON", "BINLOG_DUMP_GTID",
+  "RESET_CONNECTION"
 };
 /* }}} */
 
@@ -208,6 +209,24 @@ php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length)
 	*packet++ = 254;
 	int8store(packet, length);
 	return packet + 8;
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_net_store_length_size */
+size_t 
+php_mysqlnd_net_store_length_size(uint64_t length)
+{
+	if (length < (uint64_t) L64(251)) {
+		return 1;
+	}
+	if (length < (uint64_t) L64(65536)) {
+		return 3;
+	}
+	if (length < (uint64_t) L64(16777216)) {
+		return 4;
+	}
+	return 8;
 }
 /* }}} */
 
@@ -459,7 +478,7 @@ void php_mysqlnd_greet_free_mem(void * _packet, zend_bool stack_allocation TSRML
 /* }}} */
 
 
-#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 1024)
+#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 4096)
 
 /* {{{ php_mysqlnd_auth_write */
 static
@@ -539,6 +558,52 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 			memcpy(p, packet->auth_plugin_name, len);
 			p+= len;
 			*p++= '\0';
+		}
+
+		if (packet->connect_attr && zend_hash_num_elements(packet->connect_attr)) {
+			HashPosition pos_value;
+			const char ** entry_value;
+			size_t ca_payload_len = 0;
+			zend_hash_internal_pointer_reset_ex(packet->connect_attr, &pos_value);
+			while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
+				char *s_key;
+				unsigned int s_len;
+				unsigned long num_key;
+				size_t value_len = strlen(*entry_value);
+				
+				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, 0, &pos_value)) {
+					ca_payload_len += php_mysqlnd_net_store_length_size(s_len);
+					ca_payload_len += s_len;
+					ca_payload_len += php_mysqlnd_net_store_length_size(value_len);
+					ca_payload_len += value_len;
+				}
+				zend_hash_move_forward_ex(conn->options->connect_attr, &pos_value);
+			}
+
+			if ((sizeof(buffer) - (p - buffer)) >= (ca_payload_len + php_mysqlnd_net_store_length_size(ca_payload_len))) {
+				p = php_mysqlnd_net_store_length(p, ca_payload_len);
+
+				zend_hash_internal_pointer_reset_ex(packet->connect_attr, &pos_value);
+				while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
+					char *s_key;
+					unsigned int s_len;
+					unsigned long num_key;
+					size_t value_len = strlen(*entry_value);
+					if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, 0, &pos_value)) {
+						/* copy key */
+						p = php_mysqlnd_net_store_length(p, s_len);
+						memcpy(p, s_key, s_len);
+						p+= s_len;
+						/* copy value */
+						p = php_mysqlnd_net_store_length(p, value_len);
+						memcpy(p, *entry_value, value_len);
+						p+= value_len;
+					}
+					zend_hash_move_forward_ex(conn->options->connect_attr, &pos_value);
+				}
+			} else {
+				/* cannot put the data - skip */
+			}
 		}
 	}
 	if (packet->is_change_user_packet) {
@@ -763,6 +828,7 @@ php_mysqlnd_ok_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
 										 TSRMLS_CC);
+		DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 		DBG_RETURN(PASS);
 	}
 	/* Everything was fine! */
@@ -1005,6 +1071,7 @@ php_mysqlnd_rset_header_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 										 packet->error_info.error, sizeof(packet->error_info.error),
 										 &packet->error_info.error_no, packet->error_info.sqlstate
 										 TSRMLS_CC);
+		DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 		DBG_RETURN(PASS);
 	}
 
@@ -1201,7 +1268,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	p += 2;
 	BAIL_IF_NO_MORE_DATA;
 
-	meta->decimals = uint2korr(p);
+	meta->decimals = uint1korr(p);
 	p += 1;
 	BAIL_IF_NO_MORE_DATA;
 
@@ -1505,13 +1572,13 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 }
 /* }}} */
 
-
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
 enum_func_status
-php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
+									zend_bool as_int_or_float, zend_bool copy_data, MYSQLND_STATS * stats TSRMLS_DC)
 {
+	
 	unsigned int i;
 	zend_bool last_field_was_string = FALSE;
 	zval **current_field, **end_field, **start_field;
@@ -1519,7 +1586,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 	size_t data_size = row_buffer->app;
 	zend_uchar * bit_area = (zend_uchar*) row_buffer->ptr + data_size + 1; /* we allocate from here */
 
-	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol");
+	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
 
 	if (!fields) {
 		DBG_RETURN(FAIL);
@@ -1541,7 +1608,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
 		unsigned long len = php_mysqlnd_net_field_length(&p);
 
-		if (current_field > start_field && last_field_was_string) {
+		if (copy_data == FALSE && current_field > start_field && last_field_was_string) {
 			/*
 			  Normal queries:
 			  We have to put \0 now to the end of the previous field, if it was
@@ -1666,21 +1733,22 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 				p -= len;
 				if (Z_TYPE_PP(current_field) == IS_LONG) {
 					bit_area += 1 + sprintf((char *)start, "%ld", Z_LVAL_PP(current_field));
-					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, 0);
+					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, copy_data);
 				} else if (Z_TYPE_PP(current_field) == IS_STRING){
 					memcpy(bit_area, Z_STRVAL_PP(current_field), Z_STRLEN_PP(current_field));
 					bit_area += Z_STRLEN_PP(current_field);
 					*bit_area++ = '\0';
 					zval_dtor(*current_field);
-					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, 0);
+					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, copy_data);
 				}
-			} else
-			ZVAL_STRINGL(*current_field, (char *)p, len, 0);
+			} else {
+				ZVAL_STRINGL(*current_field, (char *)p, len, copy_data);
+			}
 			p += len;
 			last_field_was_string = TRUE;
 		}
 	}
-	if (last_field_was_string) {
+	if (copy_data == FALSE && last_field_was_string) {
 		/* Normal queries: The buffer has one more byte at the end, because we need it */
 		row_buffer->ptr[data_size] = '\0';
 	}
@@ -1688,6 +1756,36 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 	DBG_RETURN(PASS);
 }
 /* }}} */
+
+
+/* {{{ php_mysqlnd_rowp_read_text_protocol_zval */
+enum_func_status
+php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
+{
+	enum_func_status ret;
+	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_zval");
+	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, FALSE, stats TSRMLS_CC);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_rowp_read_text_protocol_c */
+enum_func_status
+php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
+{
+	enum_func_status ret;
+	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_c");
+	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, TRUE, stats TSRMLS_CC);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
 
 
 /* {{{ php_mysqlnd_rowp_read */

@@ -84,7 +84,7 @@ $values =  array (
 
 
 // loop through each element of the array and check the working of join()
-// when $glue arugment is supplied with different values
+// when $glue argument is supplied with different values
 echo "\n--- Testing join() by supplying different values for 'glue' argument ---\n";
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {

@@ -34,7 +34,7 @@ if ((!is_string($stat_def = mysql_stat())) || ('' === $stat_def))
 	printf("[003] Expecting non empty string, got %s/'%s', [%d] %s\n",
 		gettype($stat_def), $stat_def, mysql_errno(), mysql_error());
 
-assert($stat === $stat_def);
+assert(soundex($stat) === soundex($stat_def));
 
 mysql_close($link);
 
@@ -44,5 +44,7 @@ if (false !== ($tmp = mysql_stat($link)))
 print "done!";
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
 Warning: mysql_stat(): %d is not a valid MySQL-Link resource in %s on line %d
 done!

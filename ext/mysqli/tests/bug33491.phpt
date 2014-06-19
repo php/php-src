@@ -26,4 +26,4 @@ $DB->query_single('SELECT DATE()');
 
 ?>
 --EXPECTF--
-Fatal error: Call to a member function fetch_row() on a non-object in %sbug33491.php on line %d
+Fatal error: Call to a member function fetch_row() on boolean in %sbug33491.php on line %d

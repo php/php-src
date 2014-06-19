@@ -52,8 +52,8 @@ array(2) {
     string(1) "2"
   }
 }
-DELETE FROM test_47199 WHERE null_field IS NULL AND not_null_field=2;
-UPDATE test_47199 SET null_field=NULL,not_null_field=0 WHERE not_null_field=1 AND null_field IS NULL;
+DELETE FROM "test_47199" WHERE "null_field" IS NULL AND "not_null_field"=2;
+UPDATE "test_47199" SET "null_field"=NULL,"not_null_field"=0 WHERE "not_null_field"=1 AND "null_field" IS NULL;
 array(1) {
   [0]=>
   array(2) {

@@ -49,7 +49,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
     echo "Error: failed to open file $filename!\n";
     exit();
   }
-  // rewind the file pointer to begining of the file
+  // rewind the file pointer to beginning of the file
   var_dump( filesize($filename) );
   var_dump( rewind($file_handle) );
   var_dump( ftell($file_handle) );

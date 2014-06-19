@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -188,8 +188,7 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval **retval TSRMLS_
 {
 
 	xmlDtdPtr dtdptr;
-	xmlDtd *intsubset;
-	xmlOutputBuffer *buff = NULL;
+	xmlDtdPtr intsubset;
 
 	dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
 
@@ -200,22 +199,37 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval **retval TSRMLS_
 
 	ALLOC_ZVAL(*retval);
 
-	if (dtdptr->doc != NULL && ((intsubset = dtdptr->doc->intSubset) != NULL)) {
-		buff = xmlAllocOutputBuffer(NULL);
-		if (buff != NULL) {
-			xmlNodeDumpOutput (buff, NULL, (xmlNodePtr) intsubset, 0, 0, NULL);
-			xmlOutputBufferFlush(buff);
+	if (dtdptr->doc != NULL && ((intsubset = xmlGetIntSubset(dtdptr->doc)) != NULL) && intsubset->children != NULL) {
+		smart_str ret_buf = {0};
+		xmlNodePtr cur = intsubset->children;
+
+		while (cur != NULL) {
+			xmlOutputBuffer *buff = xmlAllocOutputBuffer(NULL);
+
+			if (buff != NULL) {
+				xmlNodeDumpOutput (buff, NULL, cur, 0, 0, NULL);
+				xmlOutputBufferFlush(buff);
+
 #ifdef LIBXML2_NEW_BUFFER
-			ZVAL_STRINGL(*retval, xmlOutputBufferGetContent(buff), xmlOutputBufferGetSize(buff), 1);
+				smart_str_appendl(&ret_buf, xmlOutputBufferGetContent(buff), xmlOutputBufferGetSize(buff));
 #else
-			ZVAL_STRINGL(*retval, buff->buffer->content, buff->buffer->use, 1);
+				smart_str_appendl(&ret_buf, buff->buffer->content, buff->buffer->use);
 #endif
-			(void)xmlOutputBufferClose(buff);
+
+				(void)xmlOutputBufferClose(buff);
+			}
+
+			cur = cur->next;
+		}
+
+		if (ret_buf.len) {
+			ZVAL_STRINGL(*retval, ret_buf.c, ret_buf.len, 1);
+			smart_str_free(&ret_buf);
 			return SUCCESS;
 		}
 	}
 
-	ZVAL_EMPTY_STRING(*retval);
+	ZVAL_NULL(*retval);
 
 	return SUCCESS;
 

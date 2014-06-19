@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,11 @@
    |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
+
+#ifndef ZEND_VM_OPCODES_H
+#define ZEND_VM_OPCODES_H
+
+ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 
 #define ZEND_NOP                               0
 #define ZEND_ADD                               1
@@ -159,6 +164,14 @@
 #define ZEND_SEPARATE                        156
 #define ZEND_QM_ASSIGN_VAR                   157
 #define ZEND_JMP_SET_VAR                     158
-#define ZEND_LEAVE                           159
+#define ZEND_DISCARD_EXCEPTION               159
 #define ZEND_YIELD                           160
 #define ZEND_GENERATOR_RETURN                161
+#define ZEND_FAST_CALL                       162
+#define ZEND_FAST_RET                        163
+#define ZEND_RECV_VARIADIC                   164
+#define ZEND_SEND_UNPACK                     165
+#define ZEND_POW                             166
+#define ZEND_ASSIGN_POW                      167
+
+#endif

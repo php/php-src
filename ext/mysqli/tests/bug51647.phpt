@@ -24,12 +24,12 @@ if ($res = $link->query('SHOW VARIABLES LIKE "have_ssl"')) {
 		die(sprintf("skip Failed to test for MySQL SSL support, [%d] %s", $link->errno, $link->error));
 	}
 }
-	
+
 
 if (empty($row))
 	die(sprintf("skip Failed to test for MySQL SSL support, [%d] %s", $link->errno, $link->error));
 
-if ($row[1] == 'NO')
+if (($row[1] == 'NO') || ($row[1] == 'DISABLED'))
 	die(sprintf("skip MySQL has no SSL support, [%d] %s", $link->errno, $link->error));
 
 $link->close();

@@ -796,7 +796,7 @@ BOOL WINAPI ServerSupportFunction(HCONN hConn, DWORD dwHSERequest,
 
 	switch(dwHSERequest) {
 		case (HSE_REQ_SEND_RESPONSE_HEADER) :
-			lpszRespBuf = (char *)xmalloc(*lpdwSize);//+ 80);//accomodate our header
+			lpszRespBuf = (char *)xmalloc(*lpdwSize);//+ 80);//accommodate our header
 			if (!lpszRespBuf)
 				return FALSE;
 			wsprintf(lpszRespBuf,"%s",

@@ -9,7 +9,7 @@ Installing PHP
         Windows Installer
         Manual Installation Steps
         ActiveScript
-        Microsoft IIS / PWS
+        Microsoft IIS
         Apache 1.3.x on Microsoft Windows
         Apache 2.0.x on Microsoft Windows
         Sun, iPlanet and Netscape servers on Microsoft Windows
@@ -211,7 +211,7 @@ Windows Installer (PHP 5.1.0 and earlier)
 
    The Windows PHP installer is available from the downloads page at
    http://www.php.net/downloads.php. This installs the CGI version of PHP
-   and for IIS, PWS, and Xitami, it configures the web server as well. The
+   and for IIS and Xitami, it configures the web server as well. The
    installer does not include any extra external PHP extensions
    (php_*.dll) as you'll only find those in the Windows Zip Package and
    PECL downloads.
@@ -355,7 +355,7 @@ c:\php
    packages have the server modules in the sapi folder, PHP 5
    distributions have no such directory and instead they're in the PHP
    folder root. The supporting DLLs for the PHP 5 extensions are also not
-   in a seperate directory.
+   in a separate directory.
 
      Note: In PHP 4, you should move all files located in the dll and
      sapi folders to the main folder (e.g. C:\php).
@@ -433,7 +433,7 @@ c:\php
        follow the next step. Set the doc_root to point to your web servers
        document_root. For example:
 
-doc_root = c:\inetpub\wwwroot // for IIS/PWS
+doc_root = c:\inetpub\wwwroot // for IIS
 
 doc_root = c:\apache\htdocs // for Apache
 
@@ -442,11 +442,6 @@ doc_root = c:\apache\htdocs // for Apache
        what is already built in. Note that on a new installation it is
        advisable to first get PHP working and tested without any
        extensions before enabling them in php.ini.
-     * On PWS and IIS, you can set the browscap configuration setting to
-       point to: c:\windows\system\inetsrv\browscap.ini on Windows 9x/Me,
-       c:\winnt\system32\inetsrv\browscap.ini on NT/2000, and
-       c:\windows\system32\inetsrv\browscap.ini on XP. For an up-to-date
-       browscap.ini, read the following FAQ.
 
    PHP is now setup on your system. The next step is to choose a web
    server, and enable it to run PHP. Choose a web server from the table of
@@ -499,7 +494,7 @@ ActiveScript
      folder, if you wish to load extensions, etc.
      __________________________________________________________________
 
-Microsoft IIS / PWS
+Microsoft IIS
 
    This section contains notes and hints specific to IIS (Microsoft
    Internet Information Server).
@@ -511,7 +506,7 @@ Microsoft IIS / PWS
    yourself from those attacks.
      __________________________________________________________________
 
-General considerations for all installations of PHP with IIS or PWS
+General considerations for all installations of PHP with IIS
 
      * First, read the Manual Installation Instructions. Do not skip this
        step as it provides crucial information for installing PHP on
@@ -543,7 +538,7 @@ General considerations for all installations of PHP with IIS or PWS
        downloaded in the "Collection of PECL modules" package. Files such
        as php_zip.dll and php_ssh2.dll. Download PHP files here.
      * When defining the executable, the 'check that file exists' box may
-       also be checked. For a small performance penalty, the IIS (or PWS)
+       also be checked. For a small performance penalty, the IIS
        will check that the script file exists and sort out authentication
        before firing up PHP. This means that the web server will provide
        sensible 404 style error messages instead of CGI errors complaining
@@ -1579,7 +1574,7 @@ cgi error:
    11. Windows: I've followed all the instructions, but still can't get
           PHP and IIS to work together!
 
-   12. When running PHP as CGI with IIS, PWS, OmniHTTPD or Xitami, I get
+   12. When running PHP as CGI with IIS, OmniHTTPD or Xitami, I get
           the following error: Security Alert! PHP CGI cannot be accessed
           directly..
 
@@ -1824,7 +1819,7 @@ cgi error:
    tell it that PHP is a script engine. Also, you will want to read this
    faq.
 
-   12. When running PHP as CGI with IIS, PWS, OmniHTTPD or Xitami, I get
+   12. When running PHP as CGI with IIS, OmniHTTPD or Xitami, I get
    the following error: Security Alert! PHP CGI cannot be accessed
    directly..
 

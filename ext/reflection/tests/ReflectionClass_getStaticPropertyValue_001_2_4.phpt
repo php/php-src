@@ -56,6 +56,6 @@ string(13) "default value"
 
 Fatal error: Uncaught exception 'ReflectionException' with message 'Class A does not have a property named ' in %sReflectionClass_getStaticPropertyValue_001_2_4.php:%d
 Stack trace:
-#0 %sReflectionClass_getStaticPropertyValue_001_2_4.php(%d): ReflectionClass->getStaticPropertyValue('?A?privateOverr...')
+#0 %sReflectionClass_getStaticPropertyValue_001_2_4.php(%d): ReflectionClass->getStaticPropertyValue('\x00A\x00privateOverr...')
 #1 {main}
   thrown in %sReflectionClass_getStaticPropertyValue_001_2_4.php on line %d

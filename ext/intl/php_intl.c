@@ -34,6 +34,8 @@
 #include "collator/collator_create.h"
 #include "collator/collator_error.h"
 
+#include "converter/converter.h"
+
 #include "formatter/formatter.h"
 #include "formatter/formatter_class.h"
 #include "formatter/formatter_attr.h"
@@ -588,6 +590,11 @@ ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_set_lenient, 0, 0, 2 )
 	ZEND_ARG_INFO( 0, isLenient )
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_set_minimal_days_in_first_week, 0, 0, 2 )
+	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
+	ZEND_ARG_INFO( 0, numberOfDays )
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_from_date_time, 0, 0, 1)
 	ZEND_ARG_INFO(0, dateTime)
 ZEND_END_ARG_INFO()
@@ -826,6 +833,7 @@ zend_function_entry intl_functions[] = {
 #endif
 	PHP_FE( intlcal_set_first_day_of_week, ainfo_cal_dow )
 	PHP_FE( intlcal_set_lenient, ainfo_cal_set_lenient )
+	PHP_FE( intlcal_set_minimal_days_in_first_week, ainfo_cal_set_minimal_days_in_first_week )
 	PHP_FE( intlcal_equals, ainfo_cal_other_cal )
 	PHP_FE( intlcal_from_date_time, ainfo_cal_from_date_time )
 	PHP_FE( intlcal_to_date_time, ainfo_cal_only_cal )
@@ -985,6 +993,9 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );
+
+	/* 'Converter' class for codepage conversions */
+	php_converter_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }

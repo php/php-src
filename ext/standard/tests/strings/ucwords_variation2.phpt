@@ -29,7 +29,7 @@ multiline string using
 heredoc
 EOT;
 
-// here doc with diferent whitespaces
+// here doc with different whitespaces
 $diff_whitespaces = <<<EOT
 testing\rucword(str)\twith
 multiline   string\t\tusing

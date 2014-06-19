@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -170,7 +170,10 @@ ZEND_GET_MODULE(readline)
 
 PHP_MINIT_FUNCTION(readline)
 {
-    	using_history();
+#if HAVE_LIBREADLINE
+		/* libedit don't need this call which set the tty in cooked mode */
+		using_history();
+#endif
     	return PHP_MINIT(cli_readline)(INIT_FUNC_ARGS_PASSTHRU);
 }
 
@@ -259,6 +262,7 @@ PHP_FUNCTION(readline_info)
 #endif
 		add_assoc_string(return_value,"library_version",(char *)SAFE_STRING(rl_library_version),1);
 		add_assoc_string(return_value,"readline_name",(char *)SAFE_STRING(rl_readline_name),1);
+		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
 		if (!strcasecmp(what,"line_buffer")) {
 			oldstr = rl_line_buffer;
@@ -313,7 +317,14 @@ PHP_FUNCTION(readline_info)
 				rl_readline_name = strdup(Z_STRVAL_PP(value));;
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr),1);
-		} 
+		} else if (!strcasecmp(what, "attempted_completion_over")) {
+			oldval = rl_attempted_completion_over;
+			if (value) {
+				convert_to_long_ex(value);
+				rl_attempted_completion_over = Z_LVAL_PP(value);
+			}
+			RETVAL_LONG(oldval);
+		}
 	}
 }
 
@@ -343,6 +354,11 @@ PHP_FUNCTION(readline_clear_history)
 		return;
 	}
 
+#if HAVE_LIBEDIT
+	/* clear_history is the only function where rl_initialize
+	   is not call to ensure correct allocation */
+	using_history();
+#endif
 	clear_history();
 
 	RETURN_TRUE;

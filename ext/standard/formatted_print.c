@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -376,6 +376,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 	int alignment, currarg, adjusting, argnum, width, precision;
 	char *format, *result, padding;
 	int always_sign;
+	int format_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
 		return NULL;
@@ -414,11 +415,12 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 	
 	convert_to_string_ex(args[format_offset]);
 	format = Z_STRVAL_PP(args[format_offset]);
+	format_len = Z_STRLEN_PP(args[format_offset]);
 	result = emalloc(size);
 
 	currarg = 1;
 
-	while (inpos<Z_STRLEN_PP(args[format_offset])) {
+	while (inpos<format_len) {
 		int expprec = 0, multiuse = 0;
 		zval *tmp;
 
@@ -473,7 +475,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 						/* space padding, the default */
 					} else if (format[inpos] == '+') {
 						always_sign = 1;
-					} else if (format[inpos] == '\'') {
+					} else if (format[inpos] == '\'' && inpos+1<format_len) {
 						padding = format[++inpos];
 					} else {
 						PRINTF_DEBUG(("sprintf: end of modifiers\n"));

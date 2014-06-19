@@ -76,7 +76,7 @@ bool(false)
 Warning: fopen() expects at least 2 parameters, 0 given in %s on line %d
 bool(false)
 
-Warning: fclose(): 5 is not a valid stream resource in %s on line %d
+Warning: fclose(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fclose() expects parameter 1 to be resource, string given in %s on line %d
@@ -85,7 +85,7 @@ bool(false)
 Warning: fclose() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: feof(): 5 is not a valid stream resource in %s on line %d
+Warning: feof(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: feof() expects parameter 1 to be resource, string given in %s on line %d

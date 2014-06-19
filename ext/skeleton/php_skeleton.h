@@ -6,6 +6,8 @@
 extern zend_module_entry extname_module_entry;
 #define phpext_extname_ptr &extname_module_entry
 
+#define PHP_EXTNAME_VERSION "0.1.0" /* Replace with version number for your extension */
+
 #ifdef PHP_WIN32
 #	define PHP_EXTNAME_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
@@ -17,15 +19,6 @@ extern zend_module_entry extname_module_entry;
 #ifdef ZTS
 #include "TSRM.h"
 #endif
-
-PHP_MINIT_FUNCTION(extname);
-PHP_MSHUTDOWN_FUNCTION(extname);
-PHP_RINIT_FUNCTION(extname);
-PHP_RSHUTDOWN_FUNCTION(extname);
-PHP_MINFO_FUNCTION(extname);
-
-PHP_FUNCTION(confirm_extname_compiled);	/* For testing, remove later. */
-/* __function_declarations_here__ */
 
 /* 
   	Declare any global variables you may need between the BEGIN

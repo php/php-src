@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -784,8 +784,8 @@ PHP_FUNCTION(ftp_nb_fget)
 	ftptype_t	xtype;
 	php_stream	*stream;
 	char		*file;
-	int		file_len, ret;
-	long		mode, resumepos=0;
+	int		file_len;
+	long		mode, resumepos=0, ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrsl|l", &z_ftp, &z_file, &file, &file_len, &mode, &resumepos) == FAILURE) {
 		return;
@@ -963,13 +963,15 @@ PHP_FUNCTION(ftp_nb_get)
 
 	if ((ret = ftp_nb_get(ftp, outstream, remote, xtype, resumepos TSRMLS_CC)) == PHP_FTP_FAILED) {
 		php_stream_close(outstream);
+		ftp->stream = NULL;
 		VCWD_UNLINK(local);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
 
-	if (ret == PHP_FTP_FINISHED) {
+	if (ret == PHP_FTP_FINISHED){
 		php_stream_close(outstream);
+		ftp->stream = NULL;
 	}
 
 	RETURN_LONG(ret);
@@ -982,7 +984,7 @@ PHP_FUNCTION(ftp_nb_continue)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	int		ret;
+	long		ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_ftp) == FAILURE) {
 		return;
@@ -1003,6 +1005,7 @@ PHP_FUNCTION(ftp_nb_continue)
 
 	if (ret != PHP_FTP_MOREDATA && ftp->closestream) {
 		php_stream_close(ftp->stream);
+		ftp->stream = NULL;
 	}
 
 	if (ret == PHP_FTP_FAILED) {
@@ -1120,7 +1123,7 @@ PHP_FUNCTION(ftp_put)
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	char		*remote, *local;
-	int		remote_len, local_len;
+	long		remote_len, local_len;
 	long		mode, startpos=0;
 	php_stream 	*instream;
 
@@ -1173,8 +1176,8 @@ PHP_FUNCTION(ftp_nb_put)
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	char		*remote, *local;
-	int		remote_len, local_len, ret;
-	long		mode, startpos=0;
+	int		remote_len, local_len;
+	long		mode, startpos=0, ret;
 	php_stream 	*instream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rppl|l", &z_ftp, &remote, &remote_len, &local, &local_len, &mode, &startpos) == FAILURE) {
@@ -1214,6 +1217,7 @@ PHP_FUNCTION(ftp_nb_put)
 
 	if (ret != PHP_FTP_MOREDATA) {
 		php_stream_close(instream);
+		ftp->stream = NULL;
 	}
 
 	if (ret == PHP_FTP_FAILED) {

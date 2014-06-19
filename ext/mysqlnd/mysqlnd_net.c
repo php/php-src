@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -527,7 +527,7 @@ MYSQLND_METHOD(mysqlnd_net, read_compressed_packet_from_stream_and_fill_read_buf
 	enum_func_status retval = PASS;
 	zend_uchar * compressed_data = NULL;
 	zend_uchar comp_header[COMPRESSED_HEADER_SIZE];
-	DBG_ENTER("mysqlnd_net::read_compressed_packet_from_stream_and_fill_read_buffe");
+	DBG_ENTER("mysqlnd_net::read_compressed_packet_from_stream_and_fill_read_buffer");
 
 	/* Read the compressed header */
 	if (FAIL == net->data->m.network_read_ex(net, comp_header, COMPRESSED_HEADER_SIZE, conn_stats, error_info TSRMLS_CC)) {
@@ -631,13 +631,13 @@ MYSQLND_METHOD(mysqlnd_net, receive_ex)(MYSQLND_NET * const net, zend_uchar * co
 	if (net->data->compressed) {
 		if (net->uncompressed_data) {
 			size_t to_read_from_buffer = MIN(net->uncompressed_data->bytes_left(net->uncompressed_data), to_read);
-			DBG_INF_FMT("reading %u from uncompressed_data buffer", to_read_from_buffer);
+			DBG_INF_FMT("reading "MYSQLND_SZ_T_SPEC" from uncompressed_data buffer", to_read_from_buffer);
 			if (to_read_from_buffer) {
 				net->uncompressed_data->read(net->uncompressed_data, to_read_from_buffer, (zend_uchar *) p);
 				p += to_read_from_buffer;
 				to_read -= to_read_from_buffer;
 			}
-			DBG_INF_FMT("left %u to read", to_read);
+			DBG_INF_FMT("left "MYSQLND_SZ_T_SPEC" to read", to_read);
 			if (TRUE == net->uncompressed_data->is_empty(net->uncompressed_data)) {
 				/* Everything was consumed. This should never happen here, but for security */
 				net->uncompressed_data->free_buffer(&net->uncompressed_data TSRMLS_CC);
@@ -697,7 +697,7 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 				DBG_RETURN(FAIL);
 			}
 			net->cmd_buffer.length = *(unsigned int*) value;
-			DBG_INF_FMT("new_length=%u", net->cmd_buffer.length);
+			DBG_INF_FMT("new_length="MYSQLND_SZ_T_SPEC, net->cmd_buffer.length);
 			if (!net->cmd_buffer.buffer) {
 				net->cmd_buffer.buffer = mnd_pemalloc(net->cmd_buffer.length, net->persistent);
 			} else {
@@ -707,7 +707,7 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			DBG_INF("MYSQLND_OPT_NET_READ_BUFFER_SIZE");
 			net->data->options.net_read_buffer_size = *(unsigned int*) value;
-			DBG_INF_FMT("new_length=%u", net->data->options.net_read_buffer_size);
+			DBG_INF_FMT("new_length="MYSQLND_SZ_T_SPEC, net->data->options.net_read_buffer_size);
 			break;
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 			DBG_INF("MYSQL_OPT_CONNECT_TIMEOUT");
@@ -805,7 +805,7 @@ MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum 
 	/*
 	  Switch to non-blocking mode and try to consume something from
 	  the line, if possible, then continue. This saves us from looking for
-	  the actuall place where out-of-order packets have been sent.
+	  the actual place where out-of-order packets have been sent.
 	  If someone is completely sure that everything is fine, he can switch it
 	  off.
 	*/
@@ -900,7 +900,11 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 		ZVAL_STRING(&cipher_zval, net->data->options.ssl_cipher, 0);
 		php_stream_context_set_option(context, "ssl", "ciphers", &cipher_zval);
 	}
+#if PHP_API_VERSION >= 20131106
+	php_stream_context_set(net_stream, context TSRMLS_CC);
+#else
 	php_stream_context_set(net_stream, context);
+#endif
 	if (php_stream_xport_crypto_setup(net_stream, STREAM_CRYPTO_METHOD_TLS_CLIENT, NULL TSRMLS_CC) < 0 ||
 	    php_stream_xport_crypto_enable(net_stream, 1 TSRMLS_CC) < 0)
 	{
@@ -908,6 +912,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot connect to MySQL by using SSL");
 		DBG_RETURN(FAIL);
 	}
+	net->data->ssl = TRUE;
 	/*
 	  get rid of the context. we are persistent and if this is a real pconn used by mysql/mysqli,
 	  then the context would not survive cleaning of EG(regular_list), where it is registered, as a
@@ -915,7 +920,11 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	  of the context, which means usage of already freed memory, bad. Actually we don't need this
 	  context anymore after we have enabled SSL on the connection. Thus it is very simple, we remove it.
 	*/
+#if PHP_API_VERSION >= 20131106
+	php_stream_context_set(net_stream, NULL TSRMLS_CC);
+#else
 	php_stream_context_set(net_stream, NULL);
+#endif
 
 	if (net->data->options.timeout_read) {
 		struct timeval tv;
@@ -976,6 +985,10 @@ MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net TSRMLS_DC)
 	if (net->data->options.ssl_cipher) {
 		mnd_pefree(net->data->options.ssl_cipher, pers);
 		net->data->options.ssl_cipher = NULL;
+	}
+	if (net->data->options.sha256_server_public_key) {
+		mnd_pefree(net->data->options.sha256_server_public_key, pers);
+		net->data->options.sha256_server_public_key = NULL;
 	}
 
 	DBG_VOID_RETURN;

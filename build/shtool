@@ -376,11 +376,11 @@ while [ $# -gt 0 ]; do
             eval "opt_${opt_OPT}=yes"
             ;;
         ':' )
-            #   option with argument (multiple occurances override)
+            #   option with argument (multiple occurrences override)
             eval "opt_${opt_OPT}=\"\$opt_ARG\""
             ;;
         '+' )
-            #   option with argument (multiple occurances append)
+            #   option with argument (multiple occurrences append)
             eval "opt_${opt_OPT}=\"\$opt_${opt_OPT}\${ASC_NL}\$opt_ARG\""
             ;;
         * )
@@ -1003,7 +1003,14 @@ mkdir )
                     if [ ".$opt_t" = .yes ]; then
                         echo "mkdir $pathcomp" 1>&2
                     fi
-                    mkdir $pathcomp || errstatus=$?
+					# See https://bugs.php.net/51076
+					# The fix is from Debian who have sent it
+					# upstream, too; but upstream seems dead.
+                    mkdir $pathcomp || {
+                        _errstatus=$?
+                        [ -d "$pathcomp" ] || errstatus=${_errstatus}
+                        unset _errstatus
+                    }
                     if [ ".$opt_o" != . ]; then
                         if [ ".$opt_t" = .yes ]; then
                             echo "chown $opt_o $pathcomp" 1>&2

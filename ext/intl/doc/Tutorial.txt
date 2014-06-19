@@ -7,7 +7,7 @@ Examle of locales format: 'en_US', 'ru_UA', 'ua_UA' (see http://demo.icu-project
 
 
 2. Collator::getDisplayName( $obj_locale, $disp_locale ).
-Get name of the object for the desired Locale, in the desired langauge. Both arguments 
+Get name of the object for the desired Locale, in the desired language. Both arguments 
 must be from getAvailableLocales method.
 
      @param  string  $obj_locale   Locale to get display name for.

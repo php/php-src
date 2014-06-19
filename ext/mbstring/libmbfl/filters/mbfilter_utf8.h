@@ -37,5 +37,6 @@ extern const struct mbfl_convert_vtbl vtbl_wchar_utf8;
 
 int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter);
+int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_UTF8_H */

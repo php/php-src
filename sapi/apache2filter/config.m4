@@ -62,7 +62,7 @@ if test "$PHP_APXS2FILTER" != "no"; then
   # Test that we're trying to configure with apache 2.x
   PHP_AP_EXTRACT_VERSION($APXS_HTTPD)
   if test "$APACHE_VERSION" -le 2000000; then
-    AC_MSG_ERROR([You have enabled Apache 2 support while your server is Apache 1.3.  Please use the appropiate switch --with-apxs (without the 2)])
+    AC_MSG_ERROR([You have enabled Apache 2 support while your server is Apache 1.3.  Please use the appropriate switch --with-apxs (without the 2)])
   elif test "$APACHE_VERSION" -lt 2000040; then
     AC_MSG_ERROR([Please note that Apache version >= 2.0.40 is required])
   fi

@@ -20,38 +20,41 @@ require_once('skipifconnectfailure.inc');
 	$methods = get_class_methods($mysqli);
 	$expected_methods = array(
 		'autocommit'			=> true,
+		'begin_transaction'		=> true,
 		'change_user'			=> true,
-		'character_set_name'		=> true,
-		'close'				=> true,
-		'commit'	=> true,
-		'connect'			=> true,
+		'character_set_name'	=> true,
+		'close'					=> true,
+		'commit'				=> true,
+		'connect'				=> true,
 		'dump_debug_info'		=> true,
 		'escape_string'			=> true,
 		'get_charset'			=> true,
 		'get_client_info'		=> true,
 		'get_server_info'		=> true,
 		'get_warnings'			=> true,
-		'init'				=> true,
-		'kill'				=> true,
+		'init'					=> true,
+		'kill'					=> true,
 		'more_results'			=> true,
 		'multi_query'			=> true,
-		'mysqli'			=> true,
+		'mysqli'				=> true,
 		'next_result'			=> true,
-		'options'			=> true,
-		'ping'				=> true,
-		'prepare'			=> true,
-		'query'				=> true,
+		'options'				=> true,
+		'ping'					=> true,
+		'prepare'				=> true,
+		'query'					=> true,
 		'real_connect'			=> true,
-		'real_escape_string'		=> true,
+		'real_escape_string'	=> true,
 		'real_query'			=> true,
-		'refresh'			=> true,
-		'rollback'			=> true,
-		'select_db'			=> true,
+		'refresh'				=> true,
+		'rollback'				=> true,
+		'release_savepoint'		=> true,
+		'savepoint'				=> true,
+		'select_db'				=> true,
 		'set_charset'			=> true,
-		'set_opt'			=> true,
-		'ssl_set'			=> true,
-		'stat'				=> true,
-		'stmt_init'			=> true,
+		'set_opt'				=> true,
+		'ssl_set'				=> true,
+		'stat'					=> true,
+		'stmt_init'				=> true,
 		'store_result'			=> true,
 		'thread_safe'			=> true,
 		'use_result'			=> true,
@@ -205,7 +208,7 @@ require_once('skipifconnectfailure.inc');
 		$mysqli->sqlstate, gettype($mysqli->sqlstate),
 		mysqli_sqlstate($link), gettype(mysqli_sqlstate($link)));
 
-	assert(mysqli_stat($link) === $mysqli->stat);
+	assert(soundex(mysqli_stat($link)) == soundex($mysqli->stat));
 	printf("mysqli->stat = '%s'/%s ('%s'/%s)\n",
 		$mysqli->stat, gettype($mysqli->stat),
 		mysqli_stat($link), gettype(mysqli_stat($link)));
@@ -295,7 +298,7 @@ mysqli->insert_id = '0'/integer ('0'/integer)
 mysqli->sqlstate = '00000'/%unicode|string% ('00000'/%unicode|string%)
 mysqli->stat = 'Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string ('Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string)
 mysqli->host_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
-mysqli->info = ''/NULL (''/%unicode|string%)
+mysqli->info = ''/NULL (''/NULL)
 mysqli->thread_id = '%d'/integer ('%d'/integer)
 mysqli->protocol_version = '%d'/integer ('%d'/integer)
 mysqli->server_info = '%s'/%unicode|string% ('%s'/%unicode|string%)

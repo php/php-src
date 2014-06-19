@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1443,7 +1443,7 @@ static PHP_FUNCTION(tidy_get_config)
 /* }}} */
 
 /* {{{ proto int tidy_get_status()
-   Get status of specfied document. */
+   Get status of specified document. */
 static PHP_FUNCTION(tidy_get_status)
 {
 	TIDY_FETCH_OBJECT;

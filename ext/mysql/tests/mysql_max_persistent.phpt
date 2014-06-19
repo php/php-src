@@ -90,8 +90,14 @@ if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket)) {
 mysql_close($link);
 ?>
 --EXPECTF--
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
 Warning: mysql_pconnect(): Too many open persistent links (1) in %s on line %d
 [020] Cannot connect using host '%s', user '%s', password '****', [0] 0
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 array(1) {
   [0]=>
   resource(%d) of type (mysql link persistent)

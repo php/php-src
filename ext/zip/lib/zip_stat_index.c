@@ -37,16 +37,15 @@
 
 
 
-ZIP_EXTERN(int)
-zip_stat_index(struct zip *za, zip_uint64_t index, int flags,
+ZIP_EXTERN int
+zip_stat_index(struct zip *za, zip_uint64_t index, zip_flags_t flags,
 	       struct zip_stat *st)
 {
     const char *name;
-    
-    if (index >= za->nentry) {
-	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+    struct zip_dirent *de;
+
+    if ((de=_zip_get_dirent(za, index, flags, NULL)) == NULL)
 	return -1;
-    }
 
     if ((name=zip_get_name(za, index, flags)) == NULL)
 	return -1;
@@ -60,21 +59,16 @@ zip_stat_index(struct zip *za, zip_uint64_t index, int flags,
 	}
     }
     else {
-	if (za->cdir == NULL || index >= za->cdir->nentry) {
-	    _zip_error_set(&za->error, ZIP_ER_INVAL, 0);
-	    return -1;
-	}
-
 	zip_stat_init(st);
 
-	st->crc = za->cdir->entry[index].crc;
-	st->size = za->cdir->entry[index].uncomp_size;
-	st->mtime = za->cdir->entry[index].last_mod;
-	st->comp_size = za->cdir->entry[index].comp_size;
-	st->comp_method = za->cdir->entry[index].comp_method;
-	if (za->cdir->entry[index].bitflags & ZIP_GPBF_ENCRYPTED) {
-	    if (za->cdir->entry[index].bitflags & ZIP_GPBF_STRONG_ENCRYPTION) {
-		/* XXX */
+	st->crc = de->crc;
+	st->size = de->uncomp_size;
+	st->mtime = de->last_mod;
+	st->comp_size = de->comp_size;
+	st->comp_method = (zip_uint16_t)de->comp_method;
+	if (de->bitflags & ZIP_GPBF_ENCRYPTED) {
+	    if (de->bitflags & ZIP_GPBF_STRONG_ENCRYPTION) {
+		/* TODO */
 		st->encryption_method = ZIP_EM_UNKNOWN;
 	    }
 	    else

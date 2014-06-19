@@ -2,30 +2,28 @@
 
 require(dirname(__FILE__)."/connect.inc");
 
-$sv = oci_server_version($c);
-$sv = preg_match('/Release (11\.2|12)\./', $sv, $matches);
-if ($sv == 1) {
+preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
+if ((isset($matches[1]) && $matches[1] >= 11)) {
     // Server is Oracle 11.2+
     $stmtarray = array(
-        "drop user testuser cascade",
-        "create user testuser identified by testuser",
-        "grant connect,resource,dba to testuser",
-        "alter user testuser enable editions",
-        "drop edition myedition1",
-        "drop edition myedition",
-        "grant create any edition to testuser",
+        "drop user $testuser cascade",
+        "create user $testuser identified by $testpassword",  // $testuser should be set by the file that includes conn_attr.inc
+        "grant connect,resource,dba to $testuser",
+        "alter user $testuser enable editions",
+        "drop edition myedition1 cascade",
+        "drop edition myedition cascade",
+        "grant create any edition to $testuser",
         "create edition myedition",
         "create edition myedition1 as child of myedition",
-        "grant use on edition myedition to testuser",
-        "grant use on edition myedition1 to testuser",
+        "grant use on edition myedition to $testuser",
+        "grant use on edition myedition1 to $testuser",
     );
-}
-else {
+} else {
     // Server is Pre 11.2 
     $stmtarray = array(
-        "drop user testuser cascade",
-        "create user testuser identified by testuser",
-        "grant connect,resource,dba to testuser",
+        "drop user $testuser cascade",
+        "create user $testuser identified by $testpassword",
+        "grant connect,resource,dba to $testuser",
     );
 }
 
@@ -68,8 +66,8 @@ function get_attr($conn,$attr)
 
 function get_conn($conn_type)
 {
-	$user = 'testuser';
-	$password = 'testuser';
+	$user = $GLOBALS['testuser'];
+	$password = $GLOBALS['testpassword'];
 	$dbase = $GLOBALS['dbase'];
 	switch($conn_type) {
         case 1:
@@ -98,7 +96,7 @@ function set_attr($conn,$attr,$sufix)
 	else if (!strcmp($attr,'CLIENT_IDENTIFIER')) 
         $r = oci_set_client_identifier($conn,'ID00'.$sufix);
 	else
-		echo "Pass one of the above four attibutes!!!\n";
+		echo "Pass one of the above four attributes!!!\n";
 	if ($r) {
 		echo "Value of $attr has been set successfully\n";
     }
@@ -139,9 +137,9 @@ function get_sys_attr($conn,$attr)
 
 function clean_up($c) {
 	$stmtarray = array(
-        "drop user testuser cascade",
-        "drop edition myedition1",
-        "drop edition myedition",
+        "drop edition myedition1 cascade",
+        "drop edition myedition cascade",
+        "drop user " . $GLOBALS['testuser'] . " cascade",
 	);
     
 	foreach ($stmtarray as $stmt) {

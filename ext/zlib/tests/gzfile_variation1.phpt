@@ -1,5 +1,5 @@
 --TEST--
-Test function gzfile() by substituting agument 1 with array values.
+Test function gzfile() by substituting argument 1 with array values.
 --SKIPIF--
 <?php
 if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');

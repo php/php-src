@@ -156,16 +156,12 @@ array(1) {
 }
 
 -- Iteration 10 --
-
-Warning: mb_split(): Empty regular expression in %s on line %d
 array(1) {
   [0]=>
   string(13) "a b c d e f g"
 }
 
 -- Iteration 11 --
-
-Warning: mb_split(): Empty regular expression in %s on line %d
 array(1) {
   [0]=>
   string(13) "a b c d e f g"
@@ -178,8 +174,6 @@ array(1) {
 }
 
 -- Iteration 13 --
-
-Warning: mb_split(): Empty regular expression in %s on line %d
 array(1) {
   [0]=>
   string(13) "a b c d e f g"
@@ -192,24 +186,18 @@ array(1) {
 }
 
 -- Iteration 15 --
-
-Warning: mb_split(): Empty regular expression in %s on line %d
 array(1) {
   [0]=>
   string(13) "a b c d e f g"
 }
 
 -- Iteration 16 --
-
-Warning: mb_split(): Empty regular expression in %s on line %d
 array(1) {
   [0]=>
   string(13) "a b c d e f g"
 }
 
 -- Iteration 17 --
-
-Warning: mb_split(): Empty regular expression in %s on line %d
 array(1) {
   [0]=>
   string(13) "a b c d e f g"
@@ -240,16 +228,12 @@ array(1) {
 }
 
 -- Iteration 22 --
-
-Warning: mb_split(): Empty regular expression in %s on line %d
 array(1) {
   [0]=>
   string(13) "a b c d e f g"
 }
 
 -- Iteration 23 --
-
-Warning: mb_split(): Empty regular expression in %s on line %d
 array(1) {
   [0]=>
   string(13) "a b c d e f g"

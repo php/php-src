@@ -11,9 +11,9 @@ error_reporting(E_ALL&~E_NOTICE);
 * Testing how preg_match reacts to being passed the wrong type of regex argument
 */
 echo "*** Testing preg_match() : error conditions ***\n";
-$regex_array = array('abcdef', //Regex without delimeter
-'/[a-zA-Z]', //Regex without closing delimeter
-'[a-zA-Z]/', //Regex without opening delimeter
+$regex_array = array('abcdef', //Regex without delimiter
+'/[a-zA-Z]', //Regex without closing delimiter
+'[a-zA-Z]/', //Regex without opening delimiter
 '/[a-zA-Z]/F', array('[a-z]', //Array of Regexes
 '[A-Z]', '[0-9]'), '/[a-zA-Z]/', //Regex string
 );

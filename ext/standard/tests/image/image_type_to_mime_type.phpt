@@ -1,8 +1,8 @@
 --TEST--
 image_type_to_mime_type()
 --SKIPIF--
-<?php 
-	if (!function_exists('image_type_to_mime_type')) die('skip image_type_to_mime_type() not available'); 
+<?php
+	if (!function_exists('image_type_to_mime_type')) die('skip image_type_to_mime_type() not available');
 	require_once('skipif_imagetype.inc');
 ?>
 --FILE--
@@ -25,7 +25,11 @@ image_type_to_mime_type()
 	var_dump($result);
 ?>
 --EXPECT--
-array(11) {
+array(13) {
+  ["test-1pix.bmp"]=>
+  string(14) "image/x-ms-bmp"
+  ["test1bpix.bmp"]=>
+  string(14) "image/x-ms-bmp"
   ["test1pix.bmp"]=>
   string(14) "image/x-ms-bmp"
   ["test1pix.jp2"]=>

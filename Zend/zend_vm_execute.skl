@@ -1,78 +1,5 @@
 {%DEFINES%}
 
-zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) {
-	zend_execute_data *execute_data;
-
-	/*
-	 * When allocating the execute_data, memory for compiled variables and
-	 * temporary variables is also allocated after the actual zend_execute_data
-	 * struct. op_array->last_var specifies the number of compiled variables and
-	 * op_array->T is the number of temporary variables. If there is no symbol
-	 * table, then twice as much memory is allocated for compiled variables.
-	 * In that case the first half contains zval**s and the second half the
-	 * actual zval*s (which would otherwise be in the symbol table).
-	 */
-	size_t execute_data_size = ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data));
-	size_t CVs_size = ZEND_MM_ALIGNED_SIZE(sizeof(zval **) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2));
-	size_t Ts_size = ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T;
-	size_t total_size = execute_data_size + CVs_size + Ts_size;
-
-	/*
-	 * Normally the execute_data is allocated on the VM stack (because it does
-	 * not actually do any allocation and thus is faster). For generators
-	 * though this behavior would be suboptimal, because the (rather large)
-	 * structure would have to be copied back and forth every time execution is
-	 * suspended or resumed. That's why for generators the execution context
-	 * is allocated using emalloc, thus allowing to save and restore it simply
-	 * by replacing a pointer.
-	 */
-	if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-		execute_data = emalloc(total_size);
-	} else {
-		execute_data = zend_vm_stack_alloc(total_size TSRMLS_CC);
-	}
-
-	EX(CVs) = (zval ***) ((char *) execute_data + execute_data_size);
-	memset(EX(CVs), 0, sizeof(zval **) * op_array->last_var);
-
-	EX(Ts) = (temp_variable *) ((char *) EX(CVs) + CVs_size);
-
-	EX(fbc) = NULL;
-	EX(called_scope) = NULL;
-	EX(object) = NULL;
-	EX(old_error_reporting) = NULL;
-	EX(op_array) = op_array;
-	EX(symbol_table) = EG(active_symbol_table);
-	EX(prev_execute_data) = EG(current_execute_data);
-	EG(current_execute_data) = execute_data;
-	EX(nested) = nested;
-    EX(leaving) = 0;
-
-	if (!op_array->run_time_cache && op_array->last_cache_slot) {
-		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
-	}
-
-	if (op_array->this_var != -1 && EG(This)) {
- 		Z_ADDREF_P(EG(This)); /* For $this pointer */
-		if (!EG(active_symbol_table)) {
-			EX(CVs)[op_array->this_var] = (zval **) EX(CVs) + op_array->last_var + op_array->this_var;
-			*EX(CVs)[op_array->this_var] = EG(This);
-		} else {
-			if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), (void **) &EX(CVs)[op_array->this_var])==FAILURE) {
-				Z_DELREF_P(EG(This));
-			}
-		}
-	}
-
-	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
-	EG(opline_ptr) = &EX(opline);
-
-	EX(function_state).function = (zend_function *) op_array;
-	EX(function_state).arguments = NULL;
-
-	return execute_data;
-}
-
 ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data TSRMLS_DC)
 {
 	DCL_OPLINE
@@ -82,12 +9,13 @@ ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	{%INTERNAL_LABELS%}
 
-	if (EG(exception)) {
-		return;
-	}
-
 	original_in_execution = EG(in_execution);
 	EG(in_execution) = 1;
+
+	if (0) {
+zend_vm_enter:
+		execute_data = i_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);
+	}
 
 	LOAD_REGS();
 	LOAD_OPLINE();
@@ -108,11 +36,12 @@ ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data TSRMLS_DC)
 	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
 }
 
-ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
+ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_execute_data *execute_data = zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC);
-
-	{%EXECUTOR_NAME%}_ex(execute_data TSRMLS_CC);
+	if (EG(exception)) {
+		return;
+	} 
+	zend_{%EXECUTOR_NAME%}_ex(i_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC) TSRMLS_CC);
 }
 
 {%EXTERNAL_EXECUTOR%}

@@ -1,5 +1,7 @@
 --TEST--
 Test tan function : 64bit long tests
+--INI--
+precision=5
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
@@ -28,33 +30,34 @@ foreach ($longVals as $longVal) {
 ===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 ---
-float(84.739312968756)
+float(84.739)
 --- testing: -9223372036854775808 ---
-float(-84.739312968756)
+float(-84.739)
 --- testing: 2147483647 ---
-float(1.0523779637351)
+float(1.0524)
 --- testing: -2147483648 ---
-float(4.0842894552986)
+float(4.0843)
 --- testing: 9223372034707292160 ---
-float(-0.25738520049439)
+float(-0.25739)
 --- testing: -9223372034707292160 ---
-float(0.25738520049439)
+float(0.25739)
 --- testing: 2147483648 ---
-float(-4.0842894552986)
+float(-4.0843)
 --- testing: -2147483649 ---
-float(0.34328416030117)
+float(0.34328)
 --- testing: 4294967294 ---
-float(-19.579238091943)
+float(-19.579)
 --- testing: 4294967295 ---
-float(-0.57225137018055)
+float(-0.57225)
 --- testing: 4294967293 ---
-float(0.71667000824652)
+float(0.71667)
 --- testing: 9223372036854775806 ---
-float(84.739312968756)
---- testing: 9.2233720368548E+18 ---
-float(84.739312968756)
+float(84.739)
+--- testing: 9.2234E+18 ---
+float(84.739)
 --- testing: -9223372036854775807 ---
-float(-84.739312968756)
---- testing: -9.2233720368548E+18 ---
-float(-84.739312968756)
+float(-84.739)
+--- testing: -9.2234E+18 ---
+float(-84.739)
 ===DONE===
+

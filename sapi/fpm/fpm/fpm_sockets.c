@@ -167,7 +167,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 {
 	int flags = 1;
 	int sock;
-	mode_t saved_umask;
+	mode_t saved_umask = 0;
 
 	sock = socket(sa->sa_family, SOCK_STREAM, 0);
 
@@ -176,11 +176,14 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		return -1;
 	}
 
-	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags));
+	if (0 > setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags))) {
+		zlog(ZLOG_WARNING, "failed to change socket attribute");
+	}
 
 	if (wp->listen_address_domain == FPM_AF_UNIX) {
 		if (fpm_socket_unix_test_connect((struct sockaddr_un *)sa, socklen) == 0) {
 			zlog(ZLOG_ERROR, "An another FPM instance seems to already listen on %s", ((struct sockaddr_un *) sa)->sun_path);
+			close(sock);
 			return -1;
 		}
 		unlink( ((struct sockaddr_un *) sa)->sun_path);
@@ -192,6 +195,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		if (wp->listen_address_domain == FPM_AF_UNIX) {
 			umask(saved_umask);
 		}
+		close(sock);
 		return -1;
 	}
 
@@ -203,6 +207,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		if (wp->socket_uid != -1 || wp->socket_gid != -1) {
 			if (0 > chown(path, wp->socket_uid, wp->socket_gid)) {
 				zlog(ZLOG_SYSERROR, "failed to chown() the socket '%s'", wp->config->listen_address);
+				close(sock);
 				return -1;
 			}
 		}
@@ -210,6 +215,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 	if (0 > listen(sock, wp->config->listen_backlog)) {
 		zlog(ZLOG_SYSERROR, "failed to listen to address '%s'", wp->config->listen_address);
+		close(sock);
 		return -1;
 	}
 
@@ -399,7 +405,19 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 		zlog(ZLOG_SYSERROR, "failed to retrieve TCP_INFO for socket");
 		return -1;
 	}
+#if defined(__FreeBSD__)
+	if (info.__tcpi_sacked == 0) {
+		return -1;
+	}
 
+	if (cur_lq) {
+		*cur_lq = info.__tcpi_unacked;
+	}
+
+	if (max_lq) {
+		*max_lq = info.__tcpi_sacked;
+	}
+#else
 	/* kernel >= 2.6.24 return non-zero here, that means operation is supported */
 	if (info.tcpi_sacked == 0) {
 		return -1;
@@ -412,6 +430,7 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 	if (max_lq) {
 		*max_lq = info.tcpi_sacked;
 	}
+#endif
 
 	return 0;
 }
@@ -468,6 +487,7 @@ int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen) /* {{
 	}
 
 	if (connect(fd, (struct sockaddr *)sock, socklen) == -1) {
+		close(fd);
 		return -1;
 	}
 

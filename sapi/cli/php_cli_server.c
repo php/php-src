@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,15 +20,17 @@
 /* $Id: php_cli.c 306938 2011-01-01 02:17:06Z felipe $ */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <assert.h>
 
 #ifdef PHP_WIN32
-#include <process.h>
-#include <io.h>
-#include "win32/time.h"
-#include "win32/signal.h"
-#include "win32/php_registry.h"
+# include <process.h>
+# include <io.h>
+# include "win32/time.h"
+# include "win32/signal.h"
+# include "win32/php_registry.h"
+# include <sys/timeb.h>
 #else
 # include "php_config.h"
 #endif
@@ -102,6 +104,9 @@
 
 #include "php_http_parser.h"
 #include "php_cli_server.h"
+#include "mime_type_map.h"
+
+#include "php_cli_process_title.h"
 
 #define OUTPUT_NOT_CHECKED -1
 #define OUTPUT_IS_TTY 1
@@ -129,6 +134,7 @@ typedef struct php_cli_server_request {
 	char *query_string;
 	size_t query_string_len;
 	HashTable headers;
+	HashTable headers_original_case;
 	char *content;
 	size_t content_len;
 	const char *ext;
@@ -189,19 +195,15 @@ typedef struct php_cli_server {
 	size_t router_len;
 	socklen_t socklen;
 	HashTable clients;
+	HashTable extension_mime_types;
 } php_cli_server;
 
-typedef struct php_cli_server_http_reponse_status_code_pair {
+typedef struct php_cli_server_http_response_status_code_pair {
 	int code;
 	const char *str;
-} php_cli_server_http_reponse_status_code_pair;
+} php_cli_server_http_response_status_code_pair;
 
-typedef struct php_cli_server_ext_mime_type_pair {
-	const char *ext;
-	const char *mime_type;
-} php_cli_server_ext_mime_type_pair;
-
-static php_cli_server_http_reponse_status_code_pair status_map[] = {
+static php_cli_server_http_response_status_code_pair status_map[] = {
 	{ 100, "Continue" },
 	{ 101, "Switching Protocols" },
 	{ 200, "OK" },
@@ -218,6 +220,7 @@ static php_cli_server_http_reponse_status_code_pair status_map[] = {
 	{ 304, "Not Modified" },
 	{ 305, "Use Proxy" },
 	{ 307, "Temporary Redirect" },
+	{ 308, "Permanent Redirect" },
 	{ 400, "Bad Request" },
 	{ 401, "Unauthorized" },
 	{ 402, "Payment Required" },
@@ -236,34 +239,24 @@ static php_cli_server_http_reponse_status_code_pair status_map[] = {
 	{ 415, "Unsupported Media Type" },
 	{ 416, "Requested Range Not Satisfiable" },
 	{ 417, "Expectation Failed" },
+	{ 426, "Upgrade Required" },
+	{ 428, "Precondition Required" },
+	{ 429, "Too Many Requests" },
+	{ 431, "Request Header Fields Too Large" },
 	{ 500, "Internal Server Error" },
 	{ 501, "Not Implemented" },
 	{ 502, "Bad Gateway" },
 	{ 503, "Service Unavailable" },
 	{ 504, "Gateway Timeout" },
 	{ 505, "HTTP Version Not Supported" },
+	{ 511, "Network Authentication Required" },
 };
 
-static php_cli_server_http_reponse_status_code_pair template_map[] = {
-	{ 400, "<h1 class=\"h\">%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
-	{ 404, "<h1 class=\"h\">%s</h1><p>The requested resource %s was not found on this server.</p>" },
-	{ 500, "<h1 class=\"h\">%s</h1><p>The server is temporarily unavailable.</p>" },
-	{ 501, "<h1 class=\"h\">%s</h1><p>Request method not supported.</p>" }
-};
-
-static php_cli_server_ext_mime_type_pair mime_type_map[] = {
-	{ "html", "text/html" },
-	{ "htm", "text/html" },
-	{ "js", "text/javascript" },
-	{ "css", "text/css" },
-	{ "gif", "image/gif" },
-	{ "jpg", "image/jpeg" },
-	{ "jpeg", "image/jpeg" },
-	{ "png", "image/png" },
-	{ "jpe", "image/jpeg" },
-	{ "svg", "image/svg+xml" },
-	{ "txt", "text/plain" },
-	{ NULL, NULL }
+static php_cli_server_http_response_status_code_pair template_map[] = {
+	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
+	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
+	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
+	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
 
 static int php_cli_output_is_tty = OUTPUT_NOT_CHECKED;
@@ -279,23 +272,43 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_server);
 /* {{{ static char php_cli_server_css[]
  * copied from ext/standard/info.c
  */
-static const char php_cli_server_css[] = "<style type=\"text/css\">\n" \
-								   "body {background-color: #ffffff; color: #000000;}\n" \
-								   "body, td, th, h1, h2 {font-family: sans-serif;}\n" \
-								   ".center {text-align: center;}\n" \
-								   ".center table { margin-left: auto; margin-right: auto; text-align: left;}\n" \
-								   ".center th { text-align: center !important; }\n" \
-								   "h1 {font-size: 150%;}\n" \
-								   "h2 {font-size: 125%;}\n" \
-								   ".p {text-align: left;}\n" \
-								   ".e {background-color: #ccccff; font-weight: bold; color: #000000;}\n" \
-								   ".h {background-color: #9999cc; font-weight: bold; color: #000000;}\n" \
-								   ".v {background-color: #cccccc; color: #000000;}\n" \
-								   ".vr {background-color: #cccccc; text-align: right; color: #000000;}\n" \
-								   "img {float: right; border: 0px;}\n" \
-								   "hr {width: 600px; background-color: #cccccc; border: 0px; height: 1px; color: #000000;}\n" \
-								   "</style>\n";
+static const char php_cli_server_css[] = "<style>\n" \
+										"body { background-color: #fcfcfc; color: #333333; margin: 0; padding:0; }\n" \
+										"h1 { font-size: 1.5em; font-weight: normal; background-color: #9999cc; min-height:2em; line-height:2em; border-bottom: 1px inset black; margin: 0; }\n" \
+										"h1, p { padding-left: 10px; }\n" \
+										"code.url { background-color: #eeeeee; font-family:monospace; padding:0 2px;}\n" \
+										"</style>\n";
 /* }}} */
+
+#ifdef PHP_WIN32
+int php_cli_server_get_system_time(char *buf) {
+	struct _timeb system_time;
+	errno_t err;
+
+	if (buf == NULL) {
+		return -1;
+	}
+
+	_ftime(&system_time);
+	err = ctime_s(buf, 52, &(system_time.time) );
+	if (err) {
+		return -1;
+	}
+	return 0;
+}
+#else
+int php_cli_server_get_system_time(char *buf) {
+	struct timeval tv;
+	struct tm tm;
+
+	gettimeofday(&tv, NULL);
+
+	/* TODO: should be checked for NULL tm/return vaue */
+	php_localtime_r(&tv.tv_sec, &tm);
+	php_asctime_r(&tm, buf);
+	return 0;
+}
+#endif
 
 static void char_ptr_dtor_p(char **p) /* {{{ */
 {
@@ -307,28 +320,43 @@ static char *get_last_error() /* {{{ */
 	return pestrdup(strerror(errno), 1);
 } /* }}} */
 
+static int status_comp(const void *a, const void *b) /* {{{ */
+{
+	const php_cli_server_http_response_status_code_pair *pa = (const php_cli_server_http_response_status_code_pair *) a;
+	const php_cli_server_http_response_status_code_pair *pb = (const php_cli_server_http_response_status_code_pair *) b;
+
+	if (pa->code < pb->code) {
+		return -1;
+	} else if (pa->code > pb->code) {
+		return 1;
+	}
+
+	return 0;
+} /* }}} */
+
 static const char *get_status_string(int code) /* {{{ */
 {
-	size_t e = (sizeof(status_map) / sizeof(php_cli_server_http_reponse_status_code_pair));
-	size_t s = 0;
+	php_cli_server_http_response_status_code_pair needle, *result = NULL;
 
-	while (e != s) {
-		size_t c = MIN((e + s + 1) / 2, e - 1);
-		int d = status_map[c].code;
-		if (d > code) {
-			e = c;
-		} else if (d < code) {
-			s = c;
-		} else {
-			return status_map[c].str;
-		}
+	needle.code = code;
+	needle.str = NULL;
+
+	result = bsearch(&needle, status_map, sizeof(status_map) / sizeof(needle), sizeof(needle), status_comp);
+
+	if (result) {
+		return result->str;
 	}
-	return NULL;
+
+	/* Returning NULL would require complicating append_http_status_line() to
+	 * not segfault in that case, so let's just return a placeholder, since RFC
+	 * 2616 requires a reason phrase. This is basically what a lot of other Web
+	 * servers do in this case anyway. */
+	return "Unknown Status Code";
 } /* }}} */
 
 static const char *get_template_string(int code) /* {{{ */
 {
-	size_t e = (sizeof(template_map) / sizeof(php_cli_server_http_reponse_status_code_pair));
+	size_t e = (sizeof(template_map) / sizeof(php_cli_server_http_response_status_code_pair));
 	size_t s = 0;
 
 	while (e != s) {
@@ -366,7 +394,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 {
 	{
 		char **val;
-		if (SUCCESS == zend_hash_find(&client->request.headers, "Host", sizeof("Host"), (void**)&val)) {
+		if (SUCCESS == zend_hash_find(&client->request.headers, "host", sizeof("host"), (void**)&val)) {
 			smart_str_appendl_ex(buffer, "Host", sizeof("Host") - 1, persistent);
 			smart_str_appendl_ex(buffer, ": ", sizeof(": ") - 1, persistent);
 			smart_str_appends_ex(buffer, *val, persistent);
@@ -376,17 +404,85 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	smart_str_appendl_ex(buffer, "Connection: close\r\n", sizeof("Connection: close\r\n") - 1, persistent);
 } /* }}} */
 
-static const char *get_mime_type(const char *ext, size_t ext_len) /* {{{ */
+static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
 {
-	php_cli_server_ext_mime_type_pair *pair;
-	for (pair = mime_type_map; pair->ext; pair++) {
-		size_t len = strlen(pair->ext);
-		if (len == ext_len && memcmp(pair->ext, ext, len) == 0) {
-			return pair->mime_type;
-		}
+	char *mime_type = NULL;
+
+	if (zend_hash_find(&server->extension_mime_types, ext, ext_len + 1, (void **) &mime_type) == SUCCESS) {
+		return mime_type;
 	}
+
 	return NULL;
 } /* }}} */
+
+PHP_FUNCTION(apache_request_headers) /* {{{ */
+{
+	php_cli_server_client *client;
+	HashTable *headers;
+	char *key;
+	uint key_len;
+	char **value_pointer;
+	HashPosition pos;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	client = SG(server_context);
+	headers = &client->request.headers_original_case;
+
+	array_init_size(return_value, zend_hash_num_elements(headers));
+
+	zend_hash_internal_pointer_reset_ex(headers, &pos);
+	while (zend_hash_get_current_data_ex(headers, (void **)&value_pointer, &pos) == SUCCESS) {
+		zend_hash_get_current_key_ex(headers, &key, &key_len, NULL, 0, &pos);
+		add_assoc_string_ex(return_value, key, key_len, *value_pointer, 1);
+		zend_hash_move_forward_ex(headers, &pos);
+	}
+}
+/* }}} */
+
+static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS_DC) /* {{{ */
+{
+	char *s, *p;
+	int  len;
+	ALLOCA_FLAG(use_heap)
+
+	if (h->header_len > 0) {
+		p = strchr(h->header, ':');
+		len = p - h->header;
+		if (p && (len > 0)) {
+			while (len > 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t')) {
+				len--;
+			}
+			if (len) {
+				s = do_alloca(len + 1, use_heap);
+				memcpy(s, h->header, len);
+				s[len] = 0;
+				do {
+					p++;
+				} while (*p == ' ' || *p == '\t');
+				add_assoc_stringl_ex(return_value, s, len+1, p, h->header_len - (p - h->header), 1);
+				free_alloca(s, use_heap);
+			}
+		}
+	}
+}
+/* }}} */
+
+PHP_FUNCTION(apache_response_headers) /* {{{ */
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if (!&SG(sapi_headers).headers) {
+		RETURN_FALSE;
+	}
+	array_init(return_value);
+	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value TSRMLS_CC);
+}
+/* }}} */
 
 /* {{{ cli_server module
  */
@@ -432,6 +528,18 @@ zend_module_entry cli_server_module_entry = {
 };
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO(arginfo_no_args, 0)
+ZEND_END_ARG_INFO()
+
+const zend_function_entry server_additional_functions[] = {
+	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
+	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
+	PHP_FE(apache_request_headers, arginfo_no_args)
+	PHP_FE(apache_response_headers, arginfo_no_args)
+	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_no_args)
+	{NULL, NULL, NULL}
+};
+
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
 	if (php_module_startup(sapi_module, &cli_server_module_entry, 1) == FAILURE) {
@@ -449,10 +557,9 @@ static int sapi_cli_server_ub_write(const char *str, uint str_length TSRMLS_DC) 
 	return php_cli_server_client_send_through(client, str, str_length);
 } /* }}} */
 
-static void sapi_cli_server_flush(void *server_context) /* {{{ */
+static void sapi_cli_server_flush(void *server_context TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = server_context;
-	TSRMLS_FETCH();
 
 	if (!client) {
 		return;
@@ -516,7 +623,7 @@ static char *sapi_cli_server_read_cookies(TSRMLS_D) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	char **val;
-	if (FAILURE == zend_hash_find(&client->request.headers, "Cookie", sizeof("Cookie"), (void**)&val)) {
+	if (FAILURE == zend_hash_find(&client->request.headers, "cookie", sizeof("cookie"), (void**)&val)) {
 		return NULL;
 	}
 	return *val;
@@ -635,13 +742,11 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static void sapi_cli_server_log_message(char *msg TSRMLS_DC) /* {{{ */
 {
-	struct timeval tv;
-	struct tm tm;
 	char buf[52];
-	gettimeofday(&tv, NULL);
-	php_localtime_r(&tv.tv_sec, &tm);
-	php_asctime_r(&tm, buf);
-	{
+
+	if (php_cli_server_get_system_time(buf) != 0) {
+		memmove(buf, "unknown time, can't be fetched", sizeof("unknown time, can't be fetched"));
+	} else {
 		size_t l = strlen(buf);
 		if (l > 0) {
 			buf[l - 1] = '\0';
@@ -719,21 +824,20 @@ static void php_cli_server_poller_remove(php_cli_server_poller *poller, int mode
 	if (fd == poller->max_fd) {
 		while (fd > 0) {
 			fd--;
-			if (((unsigned int *)&poller->rfds)[fd / (8 * sizeof(unsigned int))] || ((unsigned int *)&poller->wfds)[fd / (8 * sizeof(unsigned int))]) {
+			if (PHP_SAFE_FD_ISSET(fd, &poller->rfds) || PHP_SAFE_FD_ISSET(fd, &poller->wfds)) {
 				break;
 			}
-			fd -= fd % (8 * sizeof(unsigned int));
 		}
 		poller->max_fd = fd;
 	}
 #endif
 } /* }}} */
 
-static int php_cli_server_poller_poll(php_cli_server_poller *poller, const struct timeval *tv) /* {{{ */
+static int php_cli_server_poller_poll(php_cli_server_poller *poller, struct timeval *tv) /* {{{ */
 {
 	memmove(&poller->active.rfds, &poller->rfds, sizeof(poller->rfds));
 	memmove(&poller->active.wfds, &poller->wfds, sizeof(poller->wfds));
-	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, (struct timeval *)tv);
+	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, tv);
 } /* }}} */
 
 static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, int(*callback)(void *, int fd, int events)) /* {{{ */
@@ -781,23 +885,20 @@ static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, v
 	}
 
 #else
-	php_socket_t fd = 0;
+	php_socket_t fd;
 	const php_socket_t max_fd = poller->max_fd;
-	const unsigned int *pr = (unsigned int *)&poller->active.rfds,
-	                   *pw = (unsigned int *)&poller->active.wfds,
-	                   *e = pr + (max_fd + (8 * sizeof(unsigned int)) - 1) / (8 * sizeof(unsigned int));
-	unsigned int mask;
-	while (pr < e && fd <= max_fd) {
-		for (mask = 1; mask; mask <<= 1, fd++) {
-			int events = (*pr & mask ? POLLIN: 0) | (*pw & mask ? POLLOUT: 0);
-			if (events) {
-				if (SUCCESS != callback(opaque, fd, events)) {
-					retval = FAILURE;
-				}
-			}
+
+	for (fd=0 ; fd<=max_fd ; fd++)  {
+		if (PHP_SAFE_FD_ISSET(fd, &poller->active.rfds)) {
+                if (SUCCESS != callback(opaque, fd, POLLIN)) {
+                    retval = FAILURE;
+                }
 		}
-		pr++;
-		pw++;
+		if (PHP_SAFE_FD_ISSET(fd, &poller->active.wfds)) {
+                if (SUCCESS != callback(opaque, fd, POLLOUT)) {
+                    retval = FAILURE;
+                }
+		}
 	}
 #endif
 	return retval;
@@ -983,7 +1084,7 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 	return 0;
 } /* }}} */
 
-static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read) /* {{{ */
+static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read TSRMLS_DC) /* {{{ */
 {
 	ssize_t _nbytes_read;
 	php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(131072);
@@ -991,7 +1092,6 @@ static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sen
 	_nbytes_read = read(fd, chunk->data.heap.p, chunk->data.heap.len);
 	if (_nbytes_read < 0) {
 		char *errstr = get_last_error();
-		TSRMLS_FETCH();
 		php_cli_server_logf("%s" TSRMLS_CC, errstr);
 		pefree(errstr, 1);
 		php_cli_server_chunk_dtor(chunk);
@@ -1253,6 +1353,7 @@ static int php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 	req->query_string = NULL;
 	req->query_string_len = 0;
 	zend_hash_init(&req->headers, 0, NULL, (void(*)(void*))char_ptr_dtor_p, 1);
+	zend_hash_init(&req->headers_original_case, 0, NULL, NULL, 1);
 	req->content = NULL;
 	req->content_len = 0;
 	req->ext = NULL;
@@ -1278,6 +1379,7 @@ static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 		pefree(req->query_string, 1);
 	}
 	zend_hash_destroy(&req->headers);
+	zend_hash_destroy(&req->headers_original_case);
 	if (req->content) {
 		pefree(req->content, 1);
 	}
@@ -1289,7 +1391,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	static const char *index_files[] = { "index.php", "index.html", NULL };
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
-	size_t prev_path_len;
+	size_t prev_path_len = 0;
 	int  is_static_file = 0;
 
 	if (!buf) {
@@ -1520,12 +1622,10 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 		return 1;
 	}
 	{
-		char *header_name = client->current_header_name;
-		size_t header_name_len = client->current_header_name_len;
-		char c = header_name[header_name_len];
-		header_name[header_name_len] = '\0';
-		zend_hash_add(&client->request.headers, header_name, header_name_len + 1, &value, sizeof(char *), NULL);
-		header_name[header_name_len] = c;
+		char *header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
+		zend_hash_add(&client->request.headers, header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
+		zend_hash_add(&client->request.headers_original_case, client->current_header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
+		efree(header_name);
 	}
 
 	if (client->current_header_name_allocated) {
@@ -1556,6 +1656,7 @@ static int php_cli_server_client_read_request_on_body(php_http_parser *parser, c
 		}
 		client->request.content_len = 0;
 	}
+	client->request.content = perealloc(client->request.content, client->request.content_len + length, 1);
 	memmove(client->request.content + client->request.content_len, at, length);
 	client->request.content_len += length;
 	return 0;
@@ -1680,10 +1781,9 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->request_uri = client->request.request_uri;
 	request_info->path_translated = client->request.path_translated;
 	request_info->query_string = client->request.query_string;
-	request_info->post_data = client->request.content;
-	request_info->content_length = request_info->post_data_length = client->request.content_len;
+	request_info->content_length = client->request.content_len;
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
-	if (SUCCESS == zend_hash_find(&client->request.headers, "Content-Type", sizeof("Content-Type"), (void**)&val)) {
+	if (SUCCESS == zend_hash_find(&client->request.headers, "content-type", sizeof("content-type"), (void**)&val)) {
 		request_info->content_type = *val;
 	}
 } /* }}} */
@@ -1757,7 +1857,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 	escaped_request_uri = php_escape_html_entities_ex((unsigned char *)client->request.request_uri, client->request.request_uri_len, &escaped_request_uri_len, 0, ENT_QUOTES, NULL, 0 TSRMLS_CC);
 
 	{
-		static const char prologue_template[] = "<html><head><title>%d %s</title>";
+		static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
 		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(prologue_template) + 3 + strlen(status_string) + 1);
 		if (!chunk) {
 			goto fail;
@@ -1882,7 +1982,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 	{
 		php_cli_server_chunk *chunk;
 		smart_str buffer = { 0 };
-		const char *mime_type = get_mime_type(client->request.ext, client->request.ext_len);
+		const char *mime_type = get_mime_type(server, client->request.ext, client->request.ext_len);
 		if (!mime_type) {
 			mime_type = "application/octet-stream";
 		}
@@ -1921,7 +2021,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 static int php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) { /* {{{ */
 	char **auth;
 	php_cli_server_client_populate_request_info(client, &SG(request_info));
-	if (SUCCESS == zend_hash_find(&client->request.headers, "Authorization", sizeof("Authorization"), (void**)&auth)) {
+	if (SUCCESS == zend_hash_find(&client->request.headers, "authorization", sizeof("authorization"), (void**)&auth)) {
 		php_handle_auth_data(*auth TSRMLS_CC);
 	}
 	SG(sapi_headers).http_response_code = 200;
@@ -2042,9 +2142,30 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 }
 /* }}} */
 
+static int php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
+{
+	const php_cli_server_ext_mime_type_pair *pair;
+
+	if (zend_hash_init(&server->extension_mime_types, 0, NULL, NULL, 1) != SUCCESS) {
+		return FAILURE;
+	}
+
+	for (pair = mime_type_map; pair->ext; pair++) {
+		size_t ext_len = 0, mime_type_len = 0;
+
+		ext_len = strlen(pair->ext);
+		mime_type_len = strlen(pair->mime_type);
+
+		zend_hash_add(&server->extension_mime_types, pair->ext, ext_len + 1, (void *) pair->mime_type, mime_type_len + 1, NULL);
+	}
+
+	return SUCCESS;
+} /* }}} */
+
 static void php_cli_server_dtor(php_cli_server *server TSRMLS_DC) /* {{{ */
 {
 	zend_hash_destroy(&server->clients);
+	zend_hash_destroy(&server->extension_mime_types);
 	if (server->server_sock >= 0) {
 		closesocket(server->server_sock);
 	}
@@ -2162,6 +2283,11 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 		server->router_len = 0;
 	}
 
+	if (php_cli_server_mime_type_ctor(server, mime_type_map) == FAILURE) {
+		retval = FAILURE;
+		goto out;
+	}
+
 	server->is_running = 1;
 out:
 	if (retval != SUCCESS) {
@@ -2207,7 +2333,7 @@ static int php_cli_server_send_event(php_cli_server *server, php_cli_server_clie
 	if (client->content_sender_initialized) {
 		if (client->file_fd >= 0 && !client->content_sender.buffer.first) {
 			size_t nbytes_read;
-			if (php_cli_server_content_sender_pull(&client->content_sender, client->file_fd, &nbytes_read)) {
+			if (php_cli_server_content_sender_pull(&client->content_sender, client->file_fd, &nbytes_read TSRMLS_CC)) {
 				php_cli_server_close_connection(server, client TSRMLS_CC);
 				return FAILURE;
 			}
@@ -2313,7 +2439,7 @@ static int php_cli_server_do_event_loop(php_cli_server *server TSRMLS_DC) /* {{{
 {
 	int retval = SUCCESS;
 	while (server->is_running) {
-		static const struct timeval tv = { 1, 0 };
+		struct timeval tv = { 1, 0 };
 		int n = php_cli_server_poller_poll(&server->poller, &tv);
 		if (n > 0) {
 			php_cli_server_do_event_for_each_fd(server,
@@ -2401,12 +2527,12 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 	sapi_module.phpinfo_as_text = 0;
 
 	{
-		struct timeval tv;
-		struct tm tm;
 		char buf[52];
-		gettimeofday(&tv, NULL);
-		php_localtime_r(&tv.tv_sec, &tm);
-		php_asctime_r(&tm, buf);
+
+		if (php_cli_server_get_system_time(buf) != 0) {
+			memmove(buf, "unknown time, can't be fetched", sizeof("unknown time, can't be fetched"));
+		}
+
 		printf("PHP %s Development Server started at %s"
 				"Listening on http://%s\n"
 				"Document root is %s\n"

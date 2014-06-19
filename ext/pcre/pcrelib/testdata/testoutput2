@@ -3,14 +3,16 @@
     It also checks the non-Perl syntax the PCRE supports (Python, .NET, 
     Oniguruma). Finally, there are some tests where PCRE and Perl differ, 
     either because PCRE can't be compatible, or there is a possible Perl 
-    bug. --/  
+    bug.
+    
+    NOTE: This is a non-UTF set of tests. When UTF support is needed, use
+    test 5, and if Unicode Property Support is needed, use test 7. --/
+    
+< forbid 8W 
   
-/-- Originally, the Perl >= 5.10 things were in here too, but now I have 
-    separated many (most?) of them out into test 11. However, there may still 
-    be some that were overlooked. --/   
-
 /(a)b|/I
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
@@ -229,7 +231,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: \x09 \x0a \x0c \x0d \x20 a b 
+Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20 a b 
 
 /(ab\2)/
 Failed: reference to non-existent subpattern at offset 6
@@ -377,61 +379,6 @@ No need char
  2: <unset>
  3: def
 
-/abc/P
-    abc
- 0: abc
-    *** Failers
-No match: POSIX code 17: match failed
-
-/^abc|def/P
-    abcdef
- 0: abc
-    abcdef\B
- 0: def
-
-/.*((abc)$|(def))/P
-    defabc
- 0: defabc
- 1: abc
- 2: abc
-    \Zdefabc
- 0: def
- 1: def
- 3: def
-
-/the quick brown fox/P
-    the quick brown fox
- 0: the quick brown fox
-    *** Failers
-No match: POSIX code 17: match failed
-    The Quick Brown Fox
-No match: POSIX code 17: match failed
-
-/the quick brown fox/Pi
-    the quick brown fox
- 0: the quick brown fox
-    The Quick Brown Fox
- 0: The Quick Brown Fox
-
-/abc.def/P
-    *** Failers
-No match: POSIX code 17: match failed
-    abc\ndef
-No match: POSIX code 17: match failed
-
-/abc$/P
-    abc
- 0: abc
-    abc\n
- 0: abc
-
-/(abc)\2/P
-Failed: POSIX code 15: bad back reference at offset 7     
-
-/(abc\1)/P
-    abc
-No match: POSIX code 17: match failed
-
 /)/
 Failed: unmatched parentheses at offset 0
 
@@ -504,6 +451,7 @@ Need char = '='
 
 /(?<!bar|cattle)foo/I
 Capturing subpattern count = 0
+Max lookbehind = 6
 No options
 First char = 'f'
 Need char = 'o'
@@ -553,6 +501,7 @@ No need char
 
 /(?s).*/I
 Capturing subpattern count = 0
+May match empty string
 Options: anchored dotall
 No first char
 No need char
@@ -600,10 +549,10 @@ Failed: conditional group contains more than two branches at offset 13
 Failed: conditional group contains more than two branches at offset 12
 
 /(?(1a)/
-Failed: missing ) at offset 6
+Failed: malformed number or name after (?( at offset 4
 
 /(?(1a))/
-Failed: reference to non-existent subpattern at offset 6
+Failed: malformed number or name after (?( at offset 4
 
 /(?(?i))/
 Failed: assertion expected after (?( at offset 3
@@ -632,10 +581,8 @@ Need char = 'h' (caseless)
 ------------------------------------------------------------------
         Bra
         CBra 1
-     01 Opt
-     NC b
+     /i b
         Ket
-     00 Opt
         Ket
         End
 ------------------------------------------------------------------
@@ -688,6 +635,7 @@ No match
 
 /\Aabc/Im
 Capturing subpattern count = 0
+Max lookbehind = 1
 Options: anchored multiline
 No first char
 No need char
@@ -713,6 +661,7 @@ No need char
 
 /(?<=foo)[ab]/IS
 Capturing subpattern count = 0
+Max lookbehind = 3
 No options
 No first char
 No need char
@@ -721,6 +670,7 @@ Starting byte set: a b
 
 /(?<!foo)(alpha|omega)/IS
 Capturing subpattern count = 1
+Max lookbehind = 3
 No options
 No first char
 Need char = 'a'
@@ -737,6 +687,7 @@ Starting byte set: a b
 
 /(?<=foo\n)^bar/Im
 Capturing subpattern count = 0
+Max lookbehind = 4
 Contains explicit CR or LF match
 Options: multiline
 No first char
@@ -754,6 +705,7 @@ No match
 
 /^(?<=foo\n)bar/Im
 Capturing subpattern count = 0
+Max lookbehind = 4
 Contains explicit CR or LF match
 Options: multiline
 First char at start or follows newline
@@ -796,6 +748,7 @@ Failed: lookbehind assertion is not fixed length at offset 13
 
 /(?<=bullock|donkey)-cart/I
 Capturing subpattern count = 0
+Max lookbehind = 7
 No options
 First char = '-'
 Need char = 't'
@@ -812,14 +765,18 @@ No match
 
 /(?<=ab(?i)x|y|z)/I
 Capturing subpattern count = 0
+Max lookbehind = 3
+May match empty string
 No options
 No first char
 No need char
 
 /(?>.*)(?<=(abcd)|(xyz))/I
 Capturing subpattern count = 2
+Max lookbehind = 4
+May match empty string
 No options
-First char at start or follows newline
+No first char
 No need char
     alphabetabcd
  0: alphabetabcd
@@ -831,6 +788,7 @@ No need char
 
 /(?<=ab(?i)x(?-i)y|(?i)z|b)ZZ/I
 Capturing subpattern count = 0
+Max lookbehind = 4
 No options
 First char = 'Z'
 Need char = 'Z'
@@ -859,6 +817,7 @@ No match
 
 /(?<!(foo)a)bar/I
 Capturing subpattern count = 1
+Max lookbehind = 4
 No options
 First char = 'b'
 Need char = 'r'
@@ -869,22 +828,6 @@ Need char = 'r'
     *** Failers
 No match
     fooabar
-No match
-
-/This one is here because Perl 5.005_02 doesn't fail it/I
-Capturing subpattern count = 0
-No options
-First char = 'T'
-Need char = 't'
-
-/^(a)?(?(1)a|b)+$/I
-Capturing subpattern count = 1
-Options: anchored
-No first char
-No need char
-    *** Failers
-No match
-    a
 No match
 
 /This one is here because Perl behaves differently; see also the following/I
@@ -1033,9 +976,6 @@ Failed: numbers out of order in {} quantifier at offset 7
 /abc/\
 Failed: \ at end of pattern at offset 4
 
-/abc/\P
-Failed: POSIX code 9: bad escape sequence at offset 4     
-
 /abc/\i
 Failed: \ at end of pattern at offset 4
 
@@ -1151,7 +1091,7 @@ No first char
 No need char
     abc\00def\L\C0
  0: abc\x00def
- 0C abc (7)
+ 0C abc\x00def (7)
  0L abc
 
 /word ((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+
@@ -1247,15 +1187,12 @@ No need char
 ------------------------------------------------------------------
         Bra
         Bra
-     04 Opt
         AllAny*
         X
         Alt
-     04 Opt
         ^
         B
         Ket
-     00 Opt
         Ket
         End
 ------------------------------------------------------------------
@@ -1266,14 +1203,10 @@ No need char
 
 /\Biss\B/I+
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 'i'
 Need char = 's'
-    Mississippi
- 0: iss
- 0+ issippi
-
-/\Biss\B/I+P
     Mississippi
  0: iss
  0+ issippi
@@ -1291,6 +1224,7 @@ Need char = 's'
 
 /\Biss\B/IG+
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 'i'
 Need char = 's'
@@ -1300,6 +1234,7 @@ Need char = 's'
 
 /\Biss\B/Ig+
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 'i'
 Need char = 's'
@@ -1315,6 +1250,7 @@ No match
 
 /(?<=[Ms])iss/Ig+
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 'i'
 Need char = 's'
@@ -1326,6 +1262,7 @@ Need char = 's'
 
 /(?<=[Ms])iss/IG+
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 'i'
 Need char = 's'
@@ -1407,7 +1344,7 @@ Capturing subpattern count = 0
 Contains explicit CR or LF match
 Options: multiline
 First char at start or follows newline
-Need char = 10
+Need char = \x0a
     ab\nab\ncd
  0: ab\x0a
  0+ ab\x0acd
@@ -1446,6 +1383,7 @@ Need char = 'c'
 
 /a*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -1464,6 +1402,7 @@ Need char = 'a'
 
 /a{0,3}/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -1506,6 +1445,7 @@ Need char = 'r'
 
 /...(?<=abc)/I
 Capturing subpattern count = 0
+Max lookbehind = 3
 No options
 No first char
 No need char
@@ -1662,6 +1602,7 @@ Need char = 'e'
 
 /a?b?/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -1680,6 +1621,7 @@ No match
 
 /|-/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -1693,33 +1635,6 @@ No need char
  0: 
     \Nabc
 No match
-
-/a*(b+)(z)(z)/P
-    aaaabbbbzzzz
- 0: aaaabbbbzz
- 1: bbbb
- 2: z
- 3: z
-    aaaabbbbzzzz\O0
-    aaaabbbbzzzz\O1
- 0: aaaabbbbzz
-    aaaabbbbzzzz\O2
- 0: aaaabbbbzz
- 1: bbbb
-    aaaabbbbzzzz\O3
- 0: aaaabbbbzz
- 1: bbbb
- 2: z
-    aaaabbbbzzzz\O4
- 0: aaaabbbbzz
- 1: bbbb
- 2: z
- 3: z
-    aaaabbbbzzzz\O5
- 0: aaaabbbbzz
- 1: bbbb
- 2: z
- 3: z
 
 /^.?abcd/IS
 Capturing subpattern count = 0
@@ -2720,6 +2635,7 @@ Need char = '-'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+May match empty string
 Options: extended
 No first char
 No need char
@@ -2739,7 +2655,7 @@ No need char
 /[\s]/DZ
 ------------------------------------------------------------------
         Bra
-        [\x09\x0a\x0c\x0d ]
+        [\x09-\x0d ]
         Ket
         End
 ------------------------------------------------------------------
@@ -2751,7 +2667,7 @@ No need char
 /[\S]/DZ
 ------------------------------------------------------------------
         Bra
-        [\x00-\x08\x0b\x0e-\x1f!-\xff] (neg)
+        [\x00-\x08\x0e-\x1f!-\xff] (neg)
         Ket
         End
 ------------------------------------------------------------------
@@ -2764,8 +2680,7 @@ No need char
 ------------------------------------------------------------------
         Bra
         a
-     01 Opt
-     NC b
+     /i b
         Ket
         End
 ------------------------------------------------------------------
@@ -2787,10 +2702,8 @@ No match
         Bra
         CBra 1
         a
-     01 Opt
-     NC b
+     /i b
         Ket
-     00 Opt
         Ket
         End
 ------------------------------------------------------------------
@@ -2812,7 +2725,7 @@ No match
 /   (?i)abc/IxDZ
 ------------------------------------------------------------------
         Bra
-     NC abc
+     /i abc
         Ket
         End
 ------------------------------------------------------------------
@@ -2825,7 +2738,7 @@ Need char = 'c' (caseless)
   (?i)abc/IxDZ
 ------------------------------------------------------------------
         Bra
-     NC abc
+     /i abc
         Ket
         End
 ------------------------------------------------------------------
@@ -2865,6 +2778,7 @@ Need char = '0'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -2964,6 +2878,7 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -2980,40 +2895,61 @@ No options
 First char = 'x'
 No need char
 
-/x{1,3}+/DZ
+/x{1,3}+/BZO
 ------------------------------------------------------------------
         Bra
-        Once
         x
-        x{0,2}
-        Ket
+        x{0,2}+
         Ket
         End
 ------------------------------------------------------------------
-Capturing subpattern count = 0
-No options
-First char = 'x'
-No need char
+
+/x{1,3}+/BZOi
+------------------------------------------------------------------
+        Bra
+     /i x
+     /i x{0,2}+
+        Ket
+        End
+------------------------------------------------------------------
+
+/[^x]{1,3}+/BZO
+------------------------------------------------------------------
+        Bra
+        [^x]
+        [^x]{0,2}+
+        Ket
+        End
+------------------------------------------------------------------
+
+/[^x]{1,3}+/BZOi
+------------------------------------------------------------------
+        Bra
+     /i [^x]
+     /i [^x]{0,2}+
+        Ket
+        End
+------------------------------------------------------------------
 
 /(x)*+/DZ
 ------------------------------------------------------------------
         Bra
-        Once
-        Brazero
-        CBra 1
+        Braposzero
+        CBraPos 1
         x
-        KetRmax
-        Ket
+        KetRpos
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
 
 /^(\w++|\s++)*$/I
 Capturing subpattern count = 1
+May match empty string
 Options: anchored
 No first char
 No need char
@@ -3175,7 +3111,7 @@ Need char = 'b'
         [bc]+
         Ket
         CBra 5
-        \w*
+        \w*+
         Ket
         Ket
         Ket
@@ -3254,7 +3190,7 @@ Failed: missing terminating ] for character class at offset 10
 /[\s]/IDZ
 ------------------------------------------------------------------
         Bra
-        [\x09\x0a\x0c\x0d ]
+        [\x09-\x0d ]
         Ket
         End
 ------------------------------------------------------------------
@@ -3318,6 +3254,7 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = '8'
 Need char = 'X'
@@ -3331,6 +3268,7 @@ Need char = 'X'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = '$'
 Need char = 'X'
@@ -3387,6 +3325,7 @@ Need char = 'b'
 
 /(?=a).*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 First char = 'a'
 No need char
@@ -3405,6 +3344,7 @@ Need char = 'z' (caseless)
 
 /(?=a)(?=b)/I
 Capturing subpattern count = 0
+May match empty string
 No options
 First char = 'a'
 No need char
@@ -3471,6 +3411,7 @@ Need char = 'a'
 
 /(a)*/I
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
@@ -3590,7 +3531,27 @@ Need char = 'f'
   1    ^    ^     f
  0: abcdef
 
-/(?C1)\dabc(?C2)def/I
+/(?C1)\dabc(?C2)def/IS
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'f'
+Subject length lower bound = 7
+Starting byte set: 0 1 2 3 4 5 6 7 8 9 
+    1234abcdef
+--->1234abcdef
+  1 ^              \d
+  1  ^             \d
+  1   ^            \d
+  1    ^           \d
+  2    ^   ^       d
+ 0: 4abcdef
+    *** Failers
+No match
+    abcdef
+No match
+
+/(?C1)\dabc(?C2)def/ISS
 Capturing subpattern count = 0
 No options
 No first char
@@ -3679,6 +3640,7 @@ No match
 
 /(?C0)(abc(?C1))*/I
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
@@ -3712,6 +3674,7 @@ No need char
 
 /(\d{3}(?C))*/I
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
@@ -3826,6 +3789,7 @@ Callout 2: last capture = -1
 
 /(?<=(abc)(?C))xyz/I
 Capturing subpattern count = 1
+Max lookbehind = 3
 No options
 First char = 'x'
 Need char = 'z'
@@ -3846,20 +3810,6 @@ Need char = 'b'
     abbbbbccc\C*1
 --->abbbbbccc
   1 ^        ^    
-Callout data = 1
-  1 ^       ^     
-Callout data = 1
-  1 ^      ^      
-Callout data = 1
-  1 ^     ^       
-Callout data = 1
-  1 ^    ^        
-Callout data = 1
-  1 ^   ^         
-Callout data = 1
-  1 ^  ^          
-Callout data = 1
-  1 ^ ^           
 Callout data = 1
 No match
 
@@ -3957,6 +3907,7 @@ Failed: recursive call could loop indefinitely at offset 16
 
 /^([^()]|\((?1)*\))*$/I
 Capturing subpattern count = 1
+May match empty string
 Options: anchored
 No first char
 No need char
@@ -3994,9 +3945,7 @@ Need char = '<'
         Bra
         CBra 1
         a
-        Once
         Recurse
-        Ket
         b
         Ket
         Ket
@@ -4217,9 +4166,7 @@ Need char = 'a'
         Any
         \1
         bbb
-        Once
         Recurse
-        Ket
         d
         Ket
         End
@@ -4240,6 +4187,7 @@ Named capturing subpatterns:
   one     1
   three   3
   two     2
+May match empty string
 Options: anchored caseless
 No first char
 No need char
@@ -4339,6 +4287,7 @@ Need char = 'z'
 
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a/Is
 Capturing subpattern count = 31
+May match empty string
 Options: anchored dotall
 No first char
 No need char
@@ -4346,6 +4295,7 @@ No need char
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\31/Is
 Capturing subpattern count = 31
 Max back reference = 31
+May match empty string
 Options: dotall
 No first char
 No need char
@@ -4353,6 +4303,7 @@ No need char
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\32/Is
 Capturing subpattern count = 32
 Max back reference = 32
+May match empty string
 Options: dotall
 No first char
 No need char
@@ -4429,7 +4380,7 @@ Minimum match() recursion limit = 6
  1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   aaaaaaaaaaaaaz\M
 Minimum match() limit = 32768
-Minimum match() recursion limit = 42
+Minimum match() recursion limit = 29
 No match
 
 /(aaa(?C1)bbb|ab)/I
@@ -4504,6 +4455,7 @@ Capturing subpattern count = 2
 Named capturing subpatterns:
   Tes    1
   Test   2
+May match empty string
 No options
 No first char
 No need char
@@ -4522,6 +4474,7 @@ Capturing subpattern count = 2
 Named capturing subpatterns:
   Tes    2
   Test   1
+May match empty string
 No options
 No first char
 No need char
@@ -4591,9 +4544,7 @@ Need char = ']'
         a
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -4601,6 +4552,7 @@ Need char = ']'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 No options
 No first char
 No need char
@@ -4613,9 +4565,7 @@ No need char
         a
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         KetRmax
@@ -4623,6 +4573,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 No options
 No first char
 No need char
@@ -4636,9 +4587,7 @@ No need char
         a
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -4647,9 +4596,7 @@ No need char
         a
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -4658,6 +4605,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 No options
 No first char
 No need char
@@ -4665,9 +4613,7 @@ No need char
 /[ab]{1}+/DZ
 ------------------------------------------------------------------
         Bra
-        Once
-        [ab]{1,1}
-        Ket
+        [ab]{1,1}+
         Ket
         End
 ------------------------------------------------------------------
@@ -4788,7 +4734,51 @@ Need char = 'e'
  +4 ^   ^      e
 No match
 
-/a*b/ICDZ
+/a*b/ICDZS
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 2
+        a*+
+        Callout 255 2 1
+        b
+        Callout 255 3 0
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options:
+No first char
+Need char = 'b'
+Subject length lower bound = 1
+Starting byte set: a b 
+  ab
+--->ab
+ +0 ^      a*
+ +2 ^^     b
+ +3 ^ ^    
+ 0: ab
+  aaaab
+--->aaaab
+ +0 ^         a*
+ +2 ^   ^     b
+ +3 ^    ^    
+ 0: aaaab
+  aaaacb
+--->aaaacb
+ +0 ^          a*
+ +2 ^   ^      b
+ +0  ^         a*
+ +2  ^  ^      b
+ +0   ^        a*
+ +2   ^ ^      b
+ +0    ^       a*
+ +2    ^^      b
+ +0      ^     a*
+ +2      ^     b
+ +3      ^^    
+ 0: b
+
+/a*b/ICDZSS
 ------------------------------------------------------------------
         Bra
         Callout 255 0 2
@@ -4871,7 +4861,83 @@ Need char = 'b'
  +2    ^^      b
 No match
 
-/(abc|def)x/ICDZ
+/(abc|def)x/ICDZS
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 9
+        CBra 1
+        Callout 255 1 1
+        a
+        Callout 255 2 1
+        b
+        Callout 255 3 1
+        c
+        Callout 255 4 0
+        Alt
+        Callout 255 5 1
+        d
+        Callout 255 6 1
+        e
+        Callout 255 7 1
+        f
+        Callout 255 8 0
+        Ket
+        Callout 255 9 1
+        x
+        Callout 255 10 0
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Options:
+No first char
+Need char = 'x'
+Subject length lower bound = 4
+Starting byte set: a d 
+  abcx
+--->abcx
+ +0 ^        (abc|def)
+ +1 ^        a
+ +2 ^^       b
+ +3 ^ ^      c
+ +4 ^  ^     |
+ +9 ^  ^     x
++10 ^   ^    
+ 0: abcx
+ 1: abc
+  defx
+--->defx
+ +0 ^        (abc|def)
+ +1 ^        a
+ +5 ^        d
+ +6 ^^       e
+ +7 ^ ^      f
+ +8 ^  ^     )
+ +9 ^  ^     x
++10 ^   ^    
+ 0: defx
+ 1: def
+  ** Failers 
+No match
+  abcdefzx
+--->abcdefzx
+ +0 ^            (abc|def)
+ +1 ^            a
+ +2 ^^           b
+ +3 ^ ^          c
+ +4 ^  ^         |
+ +9 ^  ^         x
+ +5 ^            d
+ +0    ^         (abc|def)
+ +1    ^         a
+ +5    ^         d
+ +6    ^^        e
+ +7    ^ ^       f
+ +8    ^  ^      )
+ +9    ^  ^      x
+No match
+
+/(abc|def)x/ICDZSS
 ------------------------------------------------------------------
         Bra
         Callout 255 0 9
@@ -4925,6 +4991,8 @@ Need char = 'x'
 +10 ^   ^    
  0: defx
  1: def
+  ** Failers 
+No match
   abcdefzx
 --->abcdefzx
  +0 ^            (abc|def)
@@ -5025,7 +5093,58 @@ No need char
  0: abcdcdcd
  1: cd
 
-/([ab]{,4}c|xy)/ICDZ
+/([ab]{,4}c|xy)/ICDZS
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 14
+        CBra 1
+        Callout 255 1 4
+        [ab]
+        Callout 255 5 1
+        {
+        Callout 255 6 1
+        ,
+        Callout 255 7 1
+        4
+        Callout 255 8 1
+        }
+        Callout 255 9 1
+        c
+        Callout 255 10 0
+        Alt
+        Callout 255 11 1
+        x
+        Callout 255 12 1
+        y
+        Callout 255 13 0
+        Ket
+        Callout 255 14 0
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Options:
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b x 
+    Note: that { does NOT introduce a quantifier
+--->Note: that { does NOT introduce a quantifier
+ +0         ^                                        ([ab]{,4}c|xy)
+ +1         ^                                        [ab]
+ +5         ^^                                       {
++11         ^                                        x
+ +0                                 ^                ([ab]{,4}c|xy)
+ +1                                 ^                [ab]
+ +5                                 ^^               {
++11                                 ^                x
+ +0                                     ^            ([ab]{,4}c|xy)
+ +1                                     ^            [ab]
+ +5                                     ^^           {
++11                                     ^            x
+No match
+
+/([ab]{,4}c|xy)/ICDZSS
 ------------------------------------------------------------------
         Bra
         Callout 255 0 14
@@ -5206,7 +5325,7 @@ No match
         Callout 255 0 21
         CBra 1
         Callout 255 1 9
-        [ab]{1,4}
+        [ab]{1,4}+
         Callout 255 10 1
         c
         Callout 255 11 0
@@ -5219,7 +5338,7 @@ No match
         Ket
         CBra 1
         Callout 255 1 9
-        [ab]{1,4}
+        [ab]{1,4}+
         Callout 255 10 1
         c
         Callout 255 11 0
@@ -5232,7 +5351,7 @@ No match
         Ket
         CBra 1
         Callout 255 1 9
-        [ab]{1,4}
+        [ab]{1,4}+
         Callout 255 10 1
         c
         Callout 255 11 0
@@ -5245,7 +5364,7 @@ No match
         Ket
         CBra 1
         Callout 255 1 9
-        [ab]{1,4}
+        [ab]{1,4}+
         Callout 255 10 1
         c
         Callout 255 11 0
@@ -5259,7 +5378,7 @@ No match
         Braminzero
         CBra 1
         Callout 255 1 9
-        [ab]{1,4}
+        [ab]{1,4}+
         Callout 255 10 1
         c
         Callout 255 11 0
@@ -5312,6 +5431,8 @@ Need char = '3'
 
 /\b.*/I
 Capturing subpattern count = 0
+Max lookbehind = 1
+May match empty string
 No options
 No first char
 No need char
@@ -5320,6 +5441,8 @@ No need char
 
 /\b.*/Is
 Capturing subpattern count = 0
+Max lookbehind = 1
+May match empty string
 Options: dotall
 No first char
 No need char
@@ -5328,6 +5451,7 @@ No need char
 
 /(?!.bcd).*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -5477,14 +5601,33 @@ No match
     123456\P
 No match
 
-/abc/I>testsavedregex
+/abc/IS>testsavedregex
 Capturing subpattern count = 0
 No options
 First char = 'a'
 Need char = 'c'
-Compiled regex written to testsavedregex
+Subject length lower bound = 3
+No set of starting bytes
+Compiled pattern written to testsavedregex
+Study data written to testsavedregex
 <testsavedregex
-Compiled regex loaded from testsavedregex
+Compiled pattern loaded from testsavedregex
+Study data loaded from testsavedregex
+    abc
+ 0: abc
+    ** Failers
+No match
+    bca
+No match
+
+/abc/ISS>testsavedregex
+Capturing subpattern count = 0
+No options
+First char = 'a'
+Need char = 'c'
+Compiled pattern written to testsavedregex
+<testsavedregex
+Compiled pattern loaded from testsavedregex
 No study data
     abc
  0: abc
@@ -5493,14 +5636,33 @@ No match
     bca
 No match
 
-/abc/IF>testsavedregex
+/abc/IFS>testsavedregex
 Capturing subpattern count = 0
 No options
 First char = 'a'
 Need char = 'c'
-Compiled regex written to testsavedregex
+Subject length lower bound = 3
+No set of starting bytes
+Compiled pattern written to testsavedregex
+Study data written to testsavedregex
 <testsavedregex
-Compiled regex (byte-inverted) loaded from testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
+Study data loaded from testsavedregex
+    abc
+ 0: abc
+    ** Failers
+No match
+    bca
+No match
+
+/abc/IFSS>testsavedregex
+Capturing subpattern count = 0
+No options
+First char = 'a'
+Need char = 'c'
+Compiled pattern written to testsavedregex
+<testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
 No study data
     abc
  0: abc
@@ -5516,11 +5678,29 @@ No first char
 No need char
 Subject length lower bound = 1
 Starting byte set: a b 
-Compiled regex written to testsavedregex
+Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
-Compiled regex loaded from testsavedregex
+Compiled pattern loaded from testsavedregex
 Study data loaded from testsavedregex
+    abc
+ 0: a
+ 1: a
+    ** Failers
+ 0: a
+ 1: a
+    def
+No match
+
+/(a|b)/ISS>testsavedregex
+Capturing subpattern count = 1
+No options
+No first char
+No need char
+Compiled pattern written to testsavedregex
+<testsavedregex
+Compiled pattern loaded from testsavedregex
+No study data
     abc
  0: a
  1: a
@@ -5537,11 +5717,29 @@ No first char
 No need char
 Subject length lower bound = 1
 Starting byte set: a b 
-Compiled regex written to testsavedregex
+Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
-Compiled regex (byte-inverted) loaded from testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
 Study data loaded from testsavedregex
+    abc
+ 0: a
+ 1: a
+    ** Failers
+ 0: a
+ 1: a
+    def
+No match
+
+/(a|b)/ISSF>testsavedregex
+Capturing subpattern count = 1
+No options
+No first char
+No need char
+Compiled pattern written to testsavedregex
+<testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
+No study data
     abc
  0: a
  1: a
@@ -5557,7 +5755,7 @@ Max back reference = 1
 Options: multiline dotall
 First char = '<'
 Need char = '>'
-    <!DOCTYPE seite SYSTEM "http://www.lco.lineas.de/xmlCms.dtd">\n<seite>\n<dokumenteninformation>\n<seitentitel>Partner der LCO</seitentitel>\n<sprache>de</sprache>\n<seitenbeschreibung>Partner der LINEAS Consulting\nGmbH</seitenbeschreibung>\n<schluesselworte>LINEAS Consulting GmbH Hamburg\nPartnerfirmen</schluesselworte>\n<revisit>30 days</revisit>\n<robots>index,follow</robots>\n<menueinformation>\n<aktiv>ja</aktiv>\n<menueposition>3</menueposition>\n<menuetext>Partner</menuetext>\n</menueinformation>\n<lastedited>\n<autor>LCO</autor>\n<firma>LINEAS Consulting</firma>\n<datum>15.10.2003</datum>\n</lastedited>\n</dokumenteninformation>\n<inhalt>\n\n<absatzueberschrift>Die Partnerfirmen der LINEAS Consulting\nGmbH</absatzueberschrift>\n\n<absatz><link ziel="http://www.ca.com/" zielfenster="_blank">\n<bild name="logo_ca.gif" rahmen="no"/></link> <link\nziel="http://www.ey.com/" zielfenster="_blank"><bild\nname="logo_euy.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><link ziel="http://www.cisco.de/" zielfenster="_blank">\n<bild name="logo_cisco.gif" rahmen="ja"/></link></absatz>\n\n<absatz><link ziel="http://www.atelion.de/"\nzielfenster="_blank"><bild\nname="logo_atelion.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><link ziel="http://www.line-information.de/"\nzielfenster="_blank">\n<bild name="logo_line_information.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><bild name="logo_aw.gif" rahmen="no"/></absatz>\n\n<absatz><link ziel="http://www.incognis.de/"\nzielfenster="_blank"><bild\nname="logo_incognis.gif" rahmen="no"/></link></absatz>\n\n<absatz><link ziel="http://www.addcraft.com/"\nzielfenster="_blank"><bild\nname="logo_addcraft.gif" rahmen="no"/></link></absatz>\n\n<absatz><link ziel="http://www.comendo.com/"\nzielfenster="_blank"><bild\nname="logo_comendo.gif" rahmen="no"/></link></absatz>\n\n</inhalt>\n</seite>
+    \J1024<!DOCTYPE seite SYSTEM "http://www.lco.lineas.de/xmlCms.dtd">\n<seite>\n<dokumenteninformation>\n<seitentitel>Partner der LCO</seitentitel>\n<sprache>de</sprache>\n<seitenbeschreibung>Partner der LINEAS Consulting\nGmbH</seitenbeschreibung>\n<schluesselworte>LINEAS Consulting GmbH Hamburg\nPartnerfirmen</schluesselworte>\n<revisit>30 days</revisit>\n<robots>index,follow</robots>\n<menueinformation>\n<aktiv>ja</aktiv>\n<menueposition>3</menueposition>\n<menuetext>Partner</menuetext>\n</menueinformation>\n<lastedited>\n<autor>LCO</autor>\n<firma>LINEAS Consulting</firma>\n<datum>15.10.2003</datum>\n</lastedited>\n</dokumenteninformation>\n<inhalt>\n\n<absatzueberschrift>Die Partnerfirmen der LINEAS Consulting\nGmbH</absatzueberschrift>\n\n<absatz><link ziel="http://www.ca.com/" zielfenster="_blank">\n<bild name="logo_ca.gif" rahmen="no"/></link> <link\nziel="http://www.ey.com/" zielfenster="_blank"><bild\nname="logo_euy.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><link ziel="http://www.cisco.de/" zielfenster="_blank">\n<bild name="logo_cisco.gif" rahmen="ja"/></link></absatz>\n\n<absatz><link ziel="http://www.atelion.de/"\nzielfenster="_blank"><bild\nname="logo_atelion.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><link ziel="http://www.line-information.de/"\nzielfenster="_blank">\n<bild name="logo_line_information.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><bild name="logo_aw.gif" rahmen="no"/></absatz>\n\n<absatz><link ziel="http://www.incognis.de/"\nzielfenster="_blank"><bild\nname="logo_incognis.gif" rahmen="no"/></link></absatz>\n\n<absatz><link ziel="http://www.addcraft.com/"\nzielfenster="_blank"><bild\nname="logo_addcraft.gif" rahmen="no"/></link></absatz>\n\n<absatz><link ziel="http://www.comendo.com/"\nzielfenster="_blank"><bild\nname="logo_comendo.gif" rahmen="no"/></link></absatz>\n\n</inhalt>\n</seite>
  0: <seite>\x0a<dokumenteninformation>\x0a<seitentitel>Partner der LCO</seitentitel>\x0a<sprache>de</sprache>\x0a<seitenbeschreibung>Partner der LINEAS Consulting\x0aGmbH</seitenbeschreibung>\x0a<schluesselworte>LINEAS Consulting GmbH Hamburg\x0aPartnerfirmen</schluesselworte>\x0a<revisit>30 days</revisit>\x0a<robots>index,follow</robots>\x0a<menueinformation>\x0a<aktiv>ja</aktiv>\x0a<menueposition>3</menueposition>\x0a<menuetext>Partner</menuetext>\x0a</menueinformation>\x0a<lastedited>\x0a<autor>LCO</autor>\x0a<firma>LINEAS Consulting</firma>\x0a<datum>15.10.2003</datum>\x0a</lastedited>\x0a</dokumenteninformation>\x0a<inhalt>\x0a\x0a<absatzueberschrift>Die Partnerfirmen der LINEAS Consulting\x0aGmbH</absatzueberschrift>\x0a\x0a<absatz><link ziel="http://www.ca.com/" zielfenster="_blank">\x0a<bild name="logo_ca.gif" rahmen="no"/></link> <link\x0aziel="http://www.ey.com/" zielfenster="_blank"><bild\x0aname="logo_euy.gif" rahmen="no"/></link>\x0a</absatz>\x0a\x0a<absatz><link ziel="http://www.cisco.de/" zielfenster="_blank">\x0a<bild name="logo_cisco.gif" rahmen="ja"/></link></absatz>\x0a\x0a<absatz><link ziel="http://www.atelion.de/"\x0azielfenster="_blank"><bild\x0aname="logo_atelion.gif" rahmen="no"/></link>\x0a</absatz>\x0a\x0a<absatz><link ziel="http://www.line-information.de/"\x0azielfenster="_blank">\x0a<bild name="logo_line_information.gif" rahmen="no"/></link>\x0a</absatz>\x0a\x0a<absatz><bild name="logo_aw.gif" rahmen="no"/></absatz>\x0a\x0a<absatz><link ziel="http://www.incognis.de/"\x0azielfenster="_blank"><bild\x0aname="logo_incognis.gif" rahmen="no"/></link></absatz>\x0a\x0a<absatz><link ziel="http://www.addcraft.com/"\x0azielfenster="_blank"><bild\x0aname="logo_addcraft.gif" rahmen="no"/></link></absatz>\x0a\x0a<absatz><link ziel="http://www.comendo.com/"\x0azielfenster="_blank"><bild\x0aname="logo_comendo.gif" rahmen="no"/></link></absatz>\x0a\x0a</inhalt>\x0a</seite>
  1: seite
  2: \x0a
@@ -5605,24 +5803,6 @@ Need char = 'k'
 No match
     line one\nthis is a line\nbreak in the second line
 No match
-
-/ab.cd/P
-    ab-cd
- 0: ab-cd
-    ab=cd
- 0: ab=cd
-    ** Failers
-No match: POSIX code 17: match failed
-    ab\ncd
-No match: POSIX code 17: match failed
-
-/ab.cd/Ps
-    ab-cd
- 0: ab-cd
-    ab=cd
- 0: ab=cd
-    ab\ncd
- 0: ab\x0acd
 
 /(?i)(?-i)AbCd/I
 Capturing subpattern count = 0
@@ -5860,6 +6040,7 @@ Matched, but too many substrings
 
 /[^()]*(?:\((?R)\)[^()]*)*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -5872,6 +6053,7 @@ No need char
 
 /[^()]*(?:\((?>(?R))\)[^()]*)*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -5882,6 +6064,7 @@ No need char
 
 /[^()]*(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -5892,6 +6075,7 @@ No need char
 
 /(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -5904,6 +6088,7 @@ No need char
 
 /(?:\((?R)\))|[^()]*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -5916,21 +6101,10 @@ No need char
     ((this))
  0: ((this))
 
-/a(b)c/PN
-    abc
-Matched with REG_NOSUB
-
-/a(?P<name>b)c/PN
-    abc
-Matched with REG_NOSUB
-
-/\x{100}/I
-Failed: character value in \x{...} sequence is too large at offset 6
-
 /\x{0000ff}/I
 Capturing subpattern count = 0
 No options
-First char = 255
+First char = \xff
 No need char
 
 /^((?P<A>a1)|(?P<A>a2)b)/I
@@ -5964,6 +6138,17 @@ no parentheses with name "Z"
  2: a1
 copy substring Z failed -7
   C a1 (2) A
+    
+/(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/IJ
+Capturing subpattern count = 3
+Named capturing subpatterns:
+  a   1
+  a   3
+  b   2
+May match empty string
+Options: dupnames
+No first char
+No need char
 
 /^(?P<A>a)(?P<A>b)/IJ
 Capturing subpattern count = 2
@@ -6040,7 +6225,7 @@ no parentheses with name "Z"
  0: a1
  1: a1
  2: a1
-copy substring Z failed -7
+get substring Z failed -7
   G a1 (2) A
 
 /^(?P<A>a)(?P<A>b)/IJ
@@ -6072,7 +6257,7 @@ No need char
   G a (1) A
     cd\GA
  0: cd
-copy substring A failed -7
+get substring A failed -7
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/IJ
 Capturing subpattern count = 4
@@ -6174,7 +6359,7 @@ Need char = 'X'
  1: X
 
 /(?:(?(2y)a|b)(X))+/I
-Failed: reference to non-existent subpattern at offset 9
+Failed: malformed number or name after (?( at offset 7
 
 /(?:(?(ZA)a|b)(?P<ZZ>X))+/I
 Failed: reference to non-existent subpattern at offset 9
@@ -6240,18 +6425,15 @@ No need char
  9: 
 10: Y
 
-/\777/I
-Failed: octal value is greater than \377 (not in UTF-8 mode) at offset 3
-
 /\s*,\s*/IS
 Capturing subpattern count = 0
 No options
 No first char
 Need char = ','
 Subject length lower bound = 1
-Starting byte set: \x09 \x0a \x0c \x0d \x20 , 
+Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20 , 
     \x0b,\x0b
- 0: ,
+ 0: \x0b,\x0b
     \x0c,\x0d
  0: \x0c,\x0d
 
@@ -6360,7 +6542,7 @@ No match
 No match
 
 /^abc/Im<bad>
-Unknown newline type at: <bad>
+Unknown modifier at: <bad>
 
 
 /abc/I
@@ -6369,12 +6551,13 @@ No options
 First char = 'a'
 Need char = 'c'
     xyz\rabc\<bad>
-Unknown newline type at: <bad>
+Unknown escape sequence at: <bad>
     abc
  0: abc
 
 /.*/I<lf>
 Capturing subpattern count = 0
+May match empty string
 Options:
 Forced newline sequence: LF
 First char at start or follows newline
@@ -6416,6 +6599,7 @@ Need char = 'f'
 
 +((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)+I
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
@@ -6674,8 +6858,8 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        a*
-     NC A
+     /i a*
+     /i A
         \d
         Ket
         End
@@ -7303,8 +7487,8 @@ Matched, but too many substrings
 /[^a]+a/BZi
 ------------------------------------------------------------------
         Bra
-        [^A]++
-     NC a
+     /i [^a]++
+     /i a
         Ket
         End
 ------------------------------------------------------------------
@@ -7312,8 +7496,8 @@ Matched, but too many substrings
 /[^a]+A/BZi
 ------------------------------------------------------------------
         Bra
-        [^A]++
-     NC A
+     /i [^a]++
+     /i A
         Ket
         End
 ------------------------------------------------------------------
@@ -7339,7 +7523,7 @@ Matched, but too many substrings
 /a*[^a]/BZ
 ------------------------------------------------------------------
         Bra
-        a*
+        a*+
         [^a]
         Ket
         End
@@ -7481,7 +7665,7 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        [a-z]+
+        [a-z]++
         Ket
         End
 ------------------------------------------------------------------
@@ -7508,9 +7692,7 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
         Recurse
-        Ket
         [()]
         CBra 1
         Ket
@@ -7524,7 +7706,7 @@ No match
         ^
         CBra 1
         Cond
-      2 Cond nref
+      2 Cond ref
         y
         Ket
         [()]
@@ -7544,9 +7726,7 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
         Recurse
-        Ket
         ()
         CBra 1
         Ket
@@ -7558,9 +7738,7 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
         Recurse
-        Ket
         [(\]a]
         CBra 1
         Ket
@@ -7573,9 +7751,7 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
         Recurse
-        Ket
         CBra 1
         Ket
         Ket
@@ -7590,6 +7766,7 @@ Named capturing subpatterns:
   one     1
   three   3
   two     2
+May match empty string
 Options: anchored caseless
 No first char
 No need char
@@ -7689,14 +7866,8 @@ Failed: reference to non-existent subpattern at offset 7
  1: abcabc1Xabc2XabcX
  2: abcabc1Xabc2XabcX
 
-/(?<A> (?'B' abc (?(R) (?(R&1)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
+/(?<A> (?'B' abc (?(R) (?(R&C)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
 Failed: reference to non-existent subpattern at offset 29
-
-/(?<1> (?'B' abc (?(R) (?(R&1)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
-    abcabc1Xabc2XabcXabcabc
- 0: abcabc1Xabc2XabcX
- 1: abcabc1Xabc2XabcX
- 2: abcabc1Xabc2XabcX
 
 /^(?(DEFINE) abc | xyz ) /x
 Failed: DEFINE group contains more than one branch at offset 22
@@ -7706,9 +7877,6 @@ Capturing subpattern count = 0
 Options: extended
 First char = 'x'
 Need char = 'z'
-
-/(?(DEFINE) abc){3} xyz/x
-Failed: repeating a DEFINE group is not allowed at offset 17
 
 /(a|)*\d/
   \O0aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -7924,7 +8092,7 @@ Failed: a numbered reference must not be zero at offset 8
 /^(a)\g{3/
 Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 8
 
-/^(a)\g{4a}/
+/^(a)\g{aa}/
 Failed: reference to non-existent subpattern at offset 9
 
 /^a.b/<lf>
@@ -8027,9 +8195,7 @@ No match
         Alt
         c
         Ket
-        Once
         Recurse
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -8041,9 +8207,7 @@ No match
 ------------------------------------------------------------------
         Bra
         xy
-        Once
         Recurse
-        Ket
         CBra 1
         abc
         Ket
@@ -8273,66 +8437,6 @@ Failed: syntax error in subpattern name (missing terminator) at offset 4
  3: <unset>
  4: x
 
-/[\h]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x09 \xa0]
-        Ket
-        End
-------------------------------------------------------------------
-    >\x09<
- 0: \x09
-
-/[\h]+/BZ
-------------------------------------------------------------------
-        Bra
-        [\x09 \xa0]+
-        Ket
-        End
-------------------------------------------------------------------
-    >\x09\x20\xa0<
- 0: \x09 \xa0
-
-/[\v]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x0a-\x0d\x85]
-        Ket
-        End
-------------------------------------------------------------------
-
-/[\H]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff]
-        Ket
-        End
-------------------------------------------------------------------
-
-/[^\h]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff] (neg)
-        Ket
-        End
-------------------------------------------------------------------
-
-/[\V]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x00-\x09\x0e-\x84\x86-\xff]
-        Ket
-        End
-------------------------------------------------------------------
-
-/[\x0a\V]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x00-\x0a\x0e-\x84\x86-\xff]
-        Ket
-        End
-------------------------------------------------------------------
-
 /\H++X/BZ
 ------------------------------------------------------------------
         Bra
@@ -8493,7 +8597,7 @@ No match
         \d
         \v++
         \w
-        \v+
+        \v++
         \S
         \v++
         \V
@@ -8524,7 +8628,7 @@ No match
 ------------------------------------------------------------------
 
 /\( (?: [^()]* | (?R) )* \)/x
-(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(00)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)
+\J1024(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(00)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)
  0: (0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(00)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)
 
 /[\E]AAA/
@@ -8591,27 +8695,18 @@ No match
  +6 ^      ^    (*FAIL)
  +6 ^     ^     (*FAIL)
  +6 ^    ^      (*FAIL)
- +4 ^  ^        c+
- +2 ^ ^         b?
- +4 ^ ^         c+
- +2 ^^          b?
- +4 ^^          c+
  +0  ^          a+
  +2  ^ ^        b?
  +4  ^  ^       c+
  +6  ^     ^    (*FAIL)
  +6  ^    ^     (*FAIL)
  +6  ^   ^      (*FAIL)
- +4  ^ ^        c+
- +2  ^^         b?
- +4  ^^         c+
  +0   ^         a+
  +2   ^^        b?
  +4   ^ ^       c+
  +6   ^    ^    (*FAIL)
  +6   ^   ^     (*FAIL)
  +6   ^  ^      (*FAIL)
- +4   ^^        c+
 No match
 
 /a+b?(*PRUNE)c+(*FAIL)/C
@@ -8706,8 +8801,13 @@ Failed: number is too big at offset 19
 /\g6666666666/
 Failed: number is too big at offset 11
 
-/[\g6666666666]/
-Failed: number is too big at offset 12
+/[\g6666666666]/BZ
+------------------------------------------------------------------
+        Bra
+        [6g]
+        Ket
+        End
+------------------------------------------------------------------
 
 /(?1)\c[/
 Failed: reference to non-existent subpattern at offset 3
@@ -8730,7 +8830,7 @@ No match
  1: \x0a
 
 /a(*CR)b/
-Failed: (*VERB) not recognized at offset 5
+Failed: (*VERB) not recognized or malformed at offset 5
 
 /(*CR)a.b/
     a\nb
@@ -9013,6 +9113,12 @@ Failed: subpattern name expected at offset 3
 /\k{}/
 Failed: subpattern name expected at offset 3
 
+/\k/
+Failed: \k is not followed by a braced, angle-bracketed, or quoted name at offset 2
+
+/\kabc/
+Failed: \k is not followed by a braced, angle-bracketed, or quoted name at offset 5
+
 /(?P=)/
 Failed: subpattern name expected at offset 4
 
@@ -9169,8 +9275,28 @@ No match
     ab  
 No match
 
-/a(?!)+b/
-Failed: nothing to repeat at offset 5
+/a(?!)b/BZ
+------------------------------------------------------------------
+        Bra
+        a
+        *FAIL
+        b
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?!)?a/BZ
+------------------------------------------------------------------
+        Bra
+        Brazero
+        Assert not
+        Ket
+        a
+        Ket
+        End
+------------------------------------------------------------------
+    ab
+ 0: a
 
 /a(*FAIL)+b/
 Failed: nothing to repeat at offset 8
@@ -9185,6 +9311,7 @@ Starting byte set: x y z
 
 /(?(?=.*b)b|^)/CI
 Capturing subpattern count = 0
+May match empty string
 Options:
 No first char
 No need char
@@ -9197,6 +9324,7 @@ No need char
  +7 ^ ^     b
  +7 ^^      b
  +7 ^       b
++11 ^       ^
 +12 ^       )
 +13 ^       
  0: 
@@ -9233,14 +9361,6 @@ Capturing subpattern count = 0
 No options
 First char at start or follows newline
 No need char
-
-/a?|b?/P
-    abc
- 0: a
-    ** Failers
- 0: 
-    ddd\N   
-No match: POSIX code 17: match failed
 
 /xyz/C
   xyz 
@@ -9296,7 +9416,7 @@ No match
 No match
   
 /(*NO_START_OPT)xyz/C
-  abcxyz 
+  abcxyz
 --->abcxyz
 +15 ^          x
 +15  ^         x
@@ -9306,6 +9426,15 @@ No match
 +17    ^ ^     z
 +18    ^  ^    
  0: xyz
+  
+/(*NO_AUTO_POSSESS)a+b/BZ  
+------------------------------------------------------------------
+        Bra
+        a+
+        b
+        Ket
+        End
+------------------------------------------------------------------
 
 /xyz/CY
   abcxyz 
@@ -9335,12 +9464,14 @@ No match
  +3 ^ ^      (?(?=[a])[^"])
  +5 ^ ^      (?=[a])
  +8 ^ ^      [a]
++17 ^ ^      |
 +21 ^ ^      "
 +18 ^ ^      b
 +19 ^  ^     )
  +3 ^  ^     (?(?=[a])[^"])
  +5 ^  ^     (?=[a])
  +8 ^  ^     [a]
++17 ^  ^     |
 +21 ^  ^     "
 +22 ^   ^    $
 +23 ^   ^    
@@ -9636,14 +9767,6 @@ Partial match: the cat
    abc\P\P
  0: abc
    
-/\w+A/P
-   CDAAAAB 
- 0: CDAAAA
-
-/\w+A/PU
-   CDAAAAB 
- 0: CDA
-
 /abc\K123/
     xyzabc123pqr
  0: 123
@@ -9656,27 +9779,23 @@ Partial match: abc12
     xyzabc123pqr 
  0: 123
     xyzabc12\P
-Partial match: abc12
+Partial match at offset 6: abc12
     xyzabc12\P\P
-Partial match: abc12
+Partial match at offset 6: abc12
 
 /\babc\b/
     +++abc+++
  0: abc
     +++ab\P
-Partial match: +ab
+Partial match at offset 3: +ab
     +++ab\P\P  
-Partial match: +ab
+Partial match at offset 3: +ab
 
 /(?&word)(?&element)(?(DEFINE)(?<element><[^m][^>]>[^<])(?<word>\w*+))/BZ
 ------------------------------------------------------------------
         Bra
-        Once
         Recurse
-        Ket
-        Once
         Recurse
-        Ket
         Cond
         Cond def
         CBra 1
@@ -9697,12 +9816,8 @@ Partial match: +ab
 /(?&word)(?&element)(?(DEFINE)(?<element><[^\d][^>]>[^<])(?<word>\w*+))/BZ
 ------------------------------------------------------------------
         Bra
-        Once
         Recurse
-        Ket
-        Once
         Recurse
-        Ket
         Cond
         Cond def
         CBra 1
@@ -10044,210 +10159,6 @@ Need char = ':'
 Subject length lower bound = 22
 No set of starting bytes
 
-/  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*                          # optional leading comment
-(?:    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)                    # initial word
-(?:  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)  )* # further okay, if led by a period
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-# address
-|                     #  or
-(?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)             # one word, optionally followed by....
-(?:
-[^()<>@,;:".\\\[\]\x80-\xff\000-\010\012-\037]  |  # atom and space parts, or...
-\(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)       |  # comments, or...
-
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-# quoted strings
-)*
-<  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*                     # leading <
-(?:  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-
-(?:  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  ,  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-)* # further okay, if led by comma
-:                                # closing colon
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  )? #       optional route
-(?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)                    # initial word
-(?:  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)  )* # further okay, if led by a period
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-#       address spec
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  > #                  trailing >
-# name and address
-)  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*                       # optional trailing comment
-/xSI
-Capturing subpattern count = 0
-Contains explicit CR or LF match
-Options: extended
-No first char
-No need char
-Subject length lower bound = 3
-Starting byte set: \x09 \x20 ! " # $ % & ' ( * + - / 0 1 2 3 4 5 6 7 8 
-  9 = ? A B C D E F G H I J K L M N O P Q R S T U V W X Y Z ^ _ ` a b c d e 
-  f g h i j k l m n o p q r s t u v w x y z { | } ~ \x7f 
-
 /<tr([\w\W\s\d][^<>]{0,})><TD([\w\W\s\d][^<>]{0,})>([\d]{0,}\.)(.*)((<BR>([\w\W\s\d][^<>]{0,})|[\s]{0,}))<\/a><\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><\/TR>/isIS
 Capturing subpattern count = 11
 Options: caseless dotall
@@ -10259,7 +10170,7 @@ No set of starting bytes
 "(?>.*/)foo"SI
 Capturing subpattern count = 0
 No options
-First char at start or follows newline
+No first char
 Need char = 'o'
 Subject length lower bound = 4
 No set of starting bytes
@@ -10320,7 +10231,6 @@ No set of starting bytes
 /(?|(?<a>A)|(?<a>B))/I
 Capturing subpattern count = 1
 Named capturing subpatterns:
-  a   1
   a   1
 No options
 No first char
@@ -10394,7 +10304,7 @@ No match
         Ket
         Ket
         Cond
-      4 Cond nref
+        Cond ref <D>2
         X
         Alt
         Y
@@ -10440,12 +10350,10 @@ No match
         CBra 4
         d
         Cond
-        Cond nrecurse 1
+        Cond recurse <A>2
         $
         Alt
-        Once
         Recurse
-        Ket
         Ket
         Ket
         Ket
@@ -10504,7 +10412,7 @@ Partial match: abca
     xxxxabcde\P\P
 Partial match: abcde
 
-/-- This is not in the Perl >= 5.10 test because Perl seems currently to be
+/-- This is not in the Perl-compatible test because Perl seems currently to be
     broken and not behaving as specified in that it *does* bumpalong after
     hitting (*COMMIT). --/
 
@@ -10586,11 +10494,9 @@ Starting byte set: i
 /(?i)a(?-i)b|c/BZ
 ------------------------------------------------------------------
         Bra
-     NC a
-     00 Opt
+     /i a
         b
         Alt
-     00 Opt
         c
         Ket
         End
@@ -10609,12 +10515,9 @@ No match
 /(?i)a(?s)b|c/BZ
 ------------------------------------------------------------------
         Bra
-     NC a
-     05 Opt
-     NC b
+     /i ab
         Alt
-     05 Opt
-     NC c
+     /i c
         Ket
         End
 ------------------------------------------------------------------
@@ -10622,11 +10525,9 @@ No match
 /(?i)a(?s-i)b|c/BZ
 ------------------------------------------------------------------
         Bra
-     NC a
-     04 Opt
+     /i a
         b
         Alt
-     04 Opt
         c
         Ket
         End
@@ -10673,12 +10574,10 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
-        Brazero
-        Once
+        Braposzero
+        SBraPos
         Recurse
-        KetRmax
-        Ket
+        KetRpos
         Cond
         Cond def
         CBra 1
@@ -10709,33 +10608,13 @@ No match
         End
 ------------------------------------------------------------------
 
-/ -- The first four of these are not in the Perl >= 5.10 test because Perl 
-     documents that the use of \K in assertions is "not well defined". The
-     last is here because Perl gives the match as "b" rather than "ab". I
+/ -- This one is here because Perl gives the match as "b" rather than "ab". I
      believe this to be a Perl bug. --/  
       
-/(?=a\Kb)ab/
-    ab 
- 0: b
-
-/(?!a\Kb)ac/
-    ac 
- 0: ac
-    
-/^abc(?<=b\Kc)d/
-    abcd
- 0: cd
-
-/^abc(?<!b\Kq)d/
-    abcd
- 0: abcd
-
 /(?>a\Kb)z|(ab)/
     ab 
  0: ab
  1: ab
-
-/----------------------/
 
 /(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
 Failed: recursive call could loop indefinitely at offset 31
@@ -10756,7 +10635,7 @@ Failed: an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT) at offse
     ACABX
 No match
 
-/--- These should be different, but in Perl 5.11 are not, which I think
+/--- These should be different, but in Perl they are not, which I think
      is a bug in Perl. ---/
 
 /A(*THEN)B|A(*THEN)C/K
@@ -10767,151 +10646,14 @@ No match
     AC
 No match
     
-/--- A whole lot of tests of verbs with arguments are here rather than in test
-     11 because Perl doesn't seem to follow its specification entirely 
-     correctly. ---/
+/--- Mark names can be duplicated. Perl doesn't give a mark for this one,
+though PCRE does. ---/
 
-/--- Perl 5.11 sets $REGERROR on the AC failure case here; PCRE does not. It is
-     not clear how Perl defines "involved in the failure of the match". ---/ 
-
-/^(A(*THEN:A)B|C(*THEN:B)D)/K
-    AB
- 0: AB
- 1: AB
-    CD
- 0: CD
- 1: CD
-    ** Failers
-No match
-    AC
-No match
-    CB    
-No match, mark = B
-    
-/--- Check the use of names for success and failure. PCRE doesn't show these 
-names for success, though Perl does, contrary to its spec. ---/
-
-/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/K
-    AB
- 0: AB
- 1: AB
-    CD
- 0: CD
- 1: CD
-    ** Failers
-No match
-    AC
-No match, mark = A
-    CB    
-No match, mark = B
-    
-/--- An empty name does not pass back an empty string. It is the same as if no
-name were given. ---/ 
-
-/^(A(*PRUNE:)B|C(*PRUNE:B)D)/K
-    AB
- 0: AB
- 1: AB
-    CD 
- 0: CD
- 1: CD
-
-/--- PRUNE goes to next bumpalong; COMMIT does not. ---/
-    
-/A(*PRUNE:A)B/K
-    ACAB
- 0: AB
-
-/(*MARK:A)(*PRUNE:B)(C|X)/K
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match, mark = B
-
-/(*MARK:A)(*THEN:B)(C|X)/K
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match, mark = B
-
-/--- This should fail, as the skip causes a bump to offset 3 (the skip) ---/
-
-/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
-No match
-
-/--- Same --/
-
-/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xK
-    AAAC
-No match
-
-/--- This should fail; the SKIP advances by one, but when we get to AC, the
-     PRUNE kills it. ---/ 
-    
-/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xK
-    AAAC
-No match
-
-/A(*:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
-No match
-
-/--- This should fail, as a null name is the same as no name ---/
-
-/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xK
-    AAAC
-No match
-
-/--- This fails in PCRE, and I think that is in accordance with Perl's 
-     documentation, though in Perl it succeeds. ---/
-    
-/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xK
-    AAAC
-No match
-
-/--- Mark names can be duplicated ---/
-
-/A(*:A)B|X(*:A)Y/K
-    AABC
- 0: AB
-MK: A
-    XXYZ 
- 0: XY
-MK: A
-    
 /^A(*:A)B|^X(*:A)Y/K
     ** Failers
 No match
     XAQQ
 No match, mark = A
-    
-/--- A check on what happens after hitting a mark and them bumping along to
-something that does not even start. Perl reports tags after the failures here, 
-though it does not when the individual letters are made into something 
-more complicated. ---/
-
-/A(*:A)B|XX(*:B)Y/K
-    AABC
- 0: AB
-MK: A
-    XXYZ 
- 0: XXY
-MK: B
-    ** Failers
-No match
-    XAQQ  
-No match
-    XAQQXZZ  
-No match
-    AXQQQ 
-No match
-    AXXQQQ 
-No match
     
 /--- COMMIT at the start of a pattern should be the same as an anchor. Perl 
 optimizations defeat this. So does the PCRE optimization unless we disable it 
@@ -10925,126 +10667,6 @@ No match
     DEFGABC\Y  
 No match
     
-/--- Repeat some tests with added studying. ---/
-
-/A(*COMMIT)B/+KS
-    ACABX
-No match
- 
-/A(*THEN)B|A(*THEN)C/KS
-    AC
- 0: AC
-
-/A(*PRUNE)B|A(*PRUNE)C/KS
-    AC
-No match
-
-/^(A(*THEN:A)B|C(*THEN:B)D)/KS
-    AB
- 0: AB
- 1: AB
-    CD
- 0: CD
- 1: CD
-    ** Failers
-No match
-    AC
-No match
-    CB    
-No match, mark = B
-
-/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/KS
-    AB
- 0: AB
- 1: AB
-    CD
- 0: CD
- 1: CD
-    ** Failers
-No match
-    AC
-No match, mark = A
-    CB    
-No match, mark = B
-
-/^(A(*PRUNE:)B|C(*PRUNE:B)D)/KS
-    AB
- 0: AB
- 1: AB
-    CD 
- 0: CD
- 1: CD
-
-/A(*PRUNE:A)B/KS
-    ACAB
- 0: AB
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KS
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match
-
-/(*MARK:A)(*THEN:B)(C|X)/KS
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match
-
-/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xKS
-    AAAC
-No match
-
-/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xKS
-    AAAC
-No match
-    
-/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xKS
-    AAAC
-No match
-
-/A(*:A)A+(*SKIP)(B|Z) | AC/xKS
-    AAAC
-No match
-
-/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xKS
-    AAAC
-No match
-
-/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xKS
-    AAAC
-No match
-
-/A(*:A)B|XX(*:B)Y/KS
-    AABC
- 0: AB
-MK: A
-    XXYZ 
- 0: XXY
-MK: B
-    ** Failers
-No match
-    XAQQ  
-No match
-    XAQQXZZ  
-No match
-    AXQQQ 
-No match
-    AXXQQQ 
-No match
-    
-/(*COMMIT)ABC/
-    ABCDEFG
- 0: ABC
-    ** Failers
-No match
-    DEFGABC\Y  
-No match
-
 /^(ab (c+(*THEN)cd) | xyz)/x
     abcccd  
 No match
@@ -11057,7 +10679,7 @@ No match
     abcccd  
 No match
     
-/--- Perl 5.11 gets some of these wrong ---/ 
+/--- Perl gets some of these wrong ---/ 
 
 /(?>.(*ACCEPT))*?5/
     abcde
@@ -11165,27 +10787,80 @@ No match
 /\s*\R/BZ
 ------------------------------------------------------------------
         Bra
-        \s*+
+        \s*
         \R
         Ket
         End
 ------------------------------------------------------------------
+    \x20\x0a
+ 0:  \x0a
+    \x20\x0d
+ 0:  \x0d
+    \x20\x0d\x0a
+ 0:  \x0d\x0a
 
-/-- Perl treats this one differently, not failing the second string. I believe
-    that is a bug in Perl. --/
+/\S*\R/BZ
+------------------------------------------------------------------
+        Bra
+        \S*+
+        \R
+        Ket
+        End
+------------------------------------------------------------------
+    a\x0a
+ 0: a\x0a
 
-/^((abc|abcx)(*THEN)y|abcd)/
-    abcd
- 0: abcd
- 1: abcd
-    *** Failers 
-No match
-    abcxy 
+/X\h*\R/BZ
+------------------------------------------------------------------
+        Bra
+        X
+        \h*+
+        \R
+        Ket
+        End
+------------------------------------------------------------------
+    X\x20\x0a
+ 0: X \x0a
+
+/X\H*\R/BZ
+------------------------------------------------------------------
+        Bra
+        X
+        \H*
+        \R
+        Ket
+        End
+------------------------------------------------------------------
+    X\x0d\x0a
+ 0: X\x0d\x0a
+
+/X\H+\R/BZ
+------------------------------------------------------------------
+        Bra
+        X
+        \H+
+        \R
+        Ket
+        End
+------------------------------------------------------------------
+    X\x0d\x0a
+ 0: X\x0d\x0a
+
+/X\H++\R/BZ
+------------------------------------------------------------------
+        Bra
+        X
+        \H++
+        \R
+        Ket
+        End
+------------------------------------------------------------------
+    X\x0d\x0a
 No match
 
 /(?<=abc)def/
     abc\P\P
-Partial match: abc
+Partial match at offset 3: abc
 
 /abc$/
     abc
@@ -11251,9 +10926,9 @@ Partial match: abc
     abc\>3
 No match
     abc\>4
-Error -24
+Error -24 (bad offset value)
     abc\>-4 
-Error -24
+Error -24 (bad offset value)
 
 /^\cģ/
 Failed: \c must be followed by an ASCII character at offset 3
@@ -11304,5 +10979,3150 @@ Failed: reference to non-existent subpattern at offset 15
         Ket
         End
 ------------------------------------------------------------------
+
+/-- These tests are here because Perl gets the first one wrong. --/
+
+/(\R*)(.)/s
+    \r\n
+ 0: \x0d
+ 1: 
+ 2: \x0d
+    \r\r\n\n\r 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0d\x0d\x0a\x0a
+ 2: \x0d
+    \r\r\n\n\r\n 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0d\x0d\x0a\x0a
+ 2: \x0d
+
+/(\R)*(.)/s
+    \r\n
+ 0: \x0d
+ 1: <unset>
+ 2: \x0d
+    \r\r\n\n\r 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0a
+ 2: \x0d
+    \r\r\n\n\r\n 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0a
+ 2: \x0d
+
+/((?>\r\n|\n|\x0b|\f|\r|\x85)*)(.)/s
+    \r\n
+ 0: \x0d
+ 1: 
+ 2: \x0d
+    \r\r\n\n\r 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0d\x0d\x0a\x0a
+ 2: \x0d
+    \r\r\n\n\r\n 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0d\x0d\x0a\x0a
+ 2: \x0d
+
+/-- --/
+
+/^abc$/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        abc
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/^abc$/BZm
+------------------------------------------------------------------
+        Bra
+     /m ^
+        abc
+     /m $
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(a)*+(\w)/S
+    aaaaX
+ 0: aaaaX
+ 1: a
+ 2: X
+    ** Failers 
+No match
+    aaaa
+No match
+
+/^(?:a)*+(\w)/S
+    aaaaX
+ 0: aaaaX
+ 1: X
+    ** Failers 
+No match
+    aaaa
+No match
+
+/(a)++1234/SDZ
+------------------------------------------------------------------
+        Bra
+        CBraPos 1
+        a
+        KetRpos
+        1234
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+No options
+First char = 'a'
+Need char = '4'
+Subject length lower bound = 5
+No set of starting bytes
+
+/([abc])++1234/SI
+Capturing subpattern count = 1
+No options
+No first char
+Need char = '4'
+Subject length lower bound = 5
+Starting byte set: a b c 
+
+/(?<=(abc)+)X/
+Failed: lookbehind assertion is not fixed length at offset 10
+
+/(^ab)/I
+Capturing subpattern count = 1
+Options: anchored
+No first char
+No need char
+
+/(^ab)++/I
+Capturing subpattern count = 1
+Options: anchored
+No first char
+No need char
+
+/(^ab|^)+/I
+Capturing subpattern count = 1
+May match empty string
+Options: anchored
+No first char
+No need char
+
+/(^ab|^)++/I
+Capturing subpattern count = 1
+May match empty string
+Options: anchored
+No first char
+No need char
+
+/(?:^ab)/I
+Capturing subpattern count = 0
+Options: anchored
+No first char
+No need char
+
+/(?:^ab)++/I
+Capturing subpattern count = 0
+Options: anchored
+No first char
+No need char
+
+/(?:^ab|^)+/I
+Capturing subpattern count = 0
+May match empty string
+Options: anchored
+No first char
+No need char
+
+/(?:^ab|^)++/I
+Capturing subpattern count = 0
+May match empty string
+Options: anchored
+No first char
+No need char
+
+/(.*ab)/I
+Capturing subpattern count = 1
+No options
+First char at start or follows newline
+Need char = 'b'
+
+/(.*ab)++/I
+Capturing subpattern count = 1
+No options
+First char at start or follows newline
+Need char = 'b'
+
+/(.*ab|.*)+/I
+Capturing subpattern count = 1
+May match empty string
+No options
+First char at start or follows newline
+No need char
+
+/(.*ab|.*)++/I
+Capturing subpattern count = 1
+May match empty string
+No options
+First char at start or follows newline
+No need char
+
+/(?:.*ab)/I
+Capturing subpattern count = 0
+No options
+First char at start or follows newline
+Need char = 'b'
+
+/(?:.*ab)++/I
+Capturing subpattern count = 0
+No options
+First char at start or follows newline
+Need char = 'b'
+
+/(?:.*ab|.*)+/I
+Capturing subpattern count = 0
+May match empty string
+No options
+First char at start or follows newline
+No need char
+
+/(?:.*ab|.*)++/I
+Capturing subpattern count = 0
+May match empty string
+No options
+First char at start or follows newline
+No need char
+
+/(?=a)[bcd]/I
+Capturing subpattern count = 0
+No options
+First char = 'a'
+No need char
+
+/((?=a))[bcd]/I
+Capturing subpattern count = 1
+No options
+First char = 'a'
+No need char
+
+/((?=a))+[bcd]/I
+Capturing subpattern count = 1
+No options
+First char = 'a'
+No need char
+
+/((?=a))++[bcd]/I
+Capturing subpattern count = 1
+No options
+First char = 'a'
+No need char
+
+/(?=a+)[bcd]/iI
+Capturing subpattern count = 0
+Options: caseless
+First char = 'a' (caseless)
+No need char
+
+/(?=a+?)[bcd]/iI
+Capturing subpattern count = 0
+Options: caseless
+First char = 'a' (caseless)
+No need char
+
+/(?=a++)[bcd]/iI
+Capturing subpattern count = 0
+Options: caseless
+First char = 'a' (caseless)
+No need char
+
+/(?=a{3})[bcd]/iI
+Capturing subpattern count = 0
+Options: caseless
+First char = 'a' (caseless)
+Need char = 'a' (caseless)
+
+/(abc)\1+/S
+
+/-- Perl doesn't get these right IMO (the 3rd is PCRE-specific) --/
+
+/(?1)(?:(b(*ACCEPT))){0}/
+    b
+ 0: b
+
+/(?1)(?:(b(*ACCEPT))){0}c/
+    bc
+ 0: bc
+    ** Failers 
+No match
+    b 
+No match
+
+/(?1)(?:((*ACCEPT))){0}c/
+    c
+ 0: c
+    c\N 
+ 0: c
+
+/^.*?(?(?=a)a|b(*THEN)c)/
+    ba
+No match
+
+/^.*?(?(?=a)a|bc)/
+    ba
+ 0: ba
+
+/^.*?(?(?=a)a(*THEN)b|c)/
+    ac
+No match
+
+/^.*?(?(?=a)a(*THEN)b)c/
+    ac
+No match
+
+/^.*?(a(*THEN)b)c/
+    aabc
+No match
+    
+/^.*? (?1) c (?(DEFINE)(a(*THEN)b))/x
+    aabc
+ 0: aabc
+
+/^.*?(a(*THEN)b|z)c/
+    aabc
+ 0: aabc
+ 1: ab
+
+/^.*?(z|a(*THEN)b)c/
+    aabc
+ 0: aabc
+ 1: ab
+
+/-- --/
+
+/-- These studied versions are here because they are not Perl-compatible; the
+    studying means the mark is not seen. --/
+
+/(*MARK:A)(*SKIP:B)(C|X)/KS
+    C
+ 0: C
+ 1: C
+MK: A
+    D
+No match, mark = A
+     
+/(*:A)A+(*SKIP:A)(B|Z)/KS
+    AAAC
+No match, mark = A
+
+/-- --/
+
+"(?=a*(*ACCEPT)b)c"
+    c
+ 0: c
+    c\N 
+ 0: c
+    
+/(?1)c(?(DEFINE)((*ACCEPT)b))/
+    c
+ 0: c
+    c\N  
+ 0: c
+    
+/(?>(*ACCEPT)b)c/
+    c
+ 0: 
+    c\N  
+No match
+
+/(?:(?>(a)))+a%/++
+    %aa%
+ 0: aa%
+ 0+ 
+ 1: a
+ 1+ a%
+
+/(a)b|ac/++SS
+    ac\O3
+ 0: ac
+ 0+ 
+    
+/(a)(b)x|abc/++
+     abc\O6
+ 0: abc
+ 0+ 
+
+/(a)bc|(a)(b)\2/
+    \O3abc
+Matched, but too many substrings
+ 0: abc
+    \O4abc 
+Matched, but too many substrings
+ 0: abc
+
+/(?(DEFINE)(a(?2)|b)(b(?1)|a))(?:(?1)|(?2))/SI
+Capturing subpattern count = 2
+No options
+No first char
+No need char
+Subject length lower bound = 1
+No set of starting bytes
+
+/(a(?2)|b)(b(?1)|a)(?:(?1)|(?2))/SI
+Capturing subpattern count = 2
+No options
+No first char
+No need char
+Subject length lower bound = 3
+Starting byte set: a b 
+
+/(a(?2)|b)(b(?1)|a)(?1)(?2)/SI
+Capturing subpattern count = 2
+No options
+No first char
+No need char
+Subject length lower bound = 4
+Starting byte set: a b 
+
+/(abc)(?1)/SI
+Capturing subpattern count = 1
+No options
+First char = 'a'
+Need char = 'c'
+Subject length lower bound = 6
+No set of starting bytes
+
+/^(?>a)++/
+    aa\M
+Minimum match() limit = 5
+Minimum match() recursion limit = 2
+ 0: aa
+    aaaaaaaaa\M 
+Minimum match() limit = 12
+Minimum match() recursion limit = 2
+ 0: aaaaaaaaa
+    
+/(a)(?1)++/
+    aa\M
+Minimum match() limit = 7
+Minimum match() recursion limit = 4
+ 0: aa
+ 1: a
+    aaaaaaaaa\M  
+Minimum match() limit = 21
+Minimum match() recursion limit = 4
+ 0: aaaaaaaaa
+ 1: a
+
+/(?:(foo)|(bar)|(baz))X/SS=
+    bazfooX
+ 0: fooX
+ 1: foo
+ 2: <unset>
+ 3: <unset>
+    foobazbarX
+ 0: barX
+ 1: <unset>
+ 2: bar
+ 3: <unset>
+    barfooX
+ 0: fooX
+ 1: foo
+ 2: <unset>
+ 3: <unset>
+    bazX
+ 0: bazX
+ 1: <unset>
+ 2: <unset>
+ 3: baz
+    foobarbazX    
+ 0: bazX
+ 1: <unset>
+ 2: <unset>
+ 3: baz
+    bazfooX\O0
+Matched, but too many substrings
+    bazfooX\O2
+Matched, but too many substrings
+ 0: fooX
+    bazfooX\O4
+Matched, but too many substrings
+ 0: fooX
+ 1: <unset>
+    bazfooX\O6
+Matched, but too many substrings
+ 0: fooX
+ 1: foo
+ 2: <unset>
+    bazfooX\O8
+Matched, but too many substrings
+ 0: fooX
+ 1: foo
+ 2: <unset>
+ 3: <unset>
+    bazfooX\O10
+ 0: fooX
+ 1: foo
+ 2: <unset>
+ 3: <unset>
+
+/(?=abc){3}abc/BZ
+------------------------------------------------------------------
+        Bra
+        Assert
+        abc
+        Ket
+        abc
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?=abc)+abc/BZ
+------------------------------------------------------------------
+        Bra
+        Assert
+        abc
+        Ket
+        abc
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?=abc)++abc/BZ
+------------------------------------------------------------------
+        Bra
+        Assert
+        abc
+        Ket
+        abc
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?=abc){0}xyz/BZ
+------------------------------------------------------------------
+        Bra
+        Skip zero
+        Assert
+        abc
+        Ket
+        xyz
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?=(a))?./BZ
+------------------------------------------------------------------
+        Bra
+        Brazero
+        Assert
+        CBra 1
+        a
+        Ket
+        Ket
+        Any
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?=(a))??./BZ
+------------------------------------------------------------------
+        Bra
+        Braminzero
+        Assert
+        CBra 1
+        a
+        Ket
+        Ket
+        Any
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(?=(a)){0}b(?1)/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Skip zero
+        Assert
+        CBra 1
+        a
+        Ket
+        Ket
+        b
+        Recurse
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?(DEFINE)(a))?b(?1)/BZ
+------------------------------------------------------------------
+        Bra
+        Cond
+        Cond def
+        CBra 1
+        a
+        Ket
+        Ket
+        b
+        Recurse
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(?=(?1))?[az]([abc])d/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Brazero
+        Assert
+        Recurse
+        Ket
+        [az]
+        CBra 1
+        [a-c]
+        Ket
+        d
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(?!a){0}\w+/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Skip zero
+        Assert not
+        a
+        Ket
+        \w++
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?<=(abc))?xyz/BZ
+------------------------------------------------------------------
+        Bra
+        Brazero
+        AssertB
+        Reverse
+        CBra 1
+        abc
+        Ket
+        Ket
+        xyz
+        Ket
+        End
+------------------------------------------------------------------
+
+/[:a[:abc]b:]/BZ
+------------------------------------------------------------------
+        Bra
+        [:[a-c]
+        b:]
+        Ket
+        End
+------------------------------------------------------------------
+
+/((?2))((?1))/SS
+    abc
+Error -26 (nested recursion at the same subject position)
+
+/((?(R2)a+|(?1)b))/SS
+    aaaabcde
+Error -26 (nested recursion at the same subject position)
+
+/(?(R)a*(?1)|((?R))b)/SS
+    aaaabcde
+Error -26 (nested recursion at the same subject position)
+
+/(a+|(?R)b)/
+Failed: recursive call could loop indefinitely at offset 7
+
+/^(a(*:A)(d|e(*:B))z|aeq)/C
+    adz
+--->adz
+ +0 ^       ^
+ +1 ^       (a(*:A)(d|e(*:B))z|aeq)
+ +2 ^       a
+ +3 ^^      (*:A)
+ +8 ^^      (d|e(*:B))
+Latest Mark: A
+ +9 ^^      d
++10 ^ ^     |
++18 ^ ^     z
++19 ^  ^    |
++24 ^  ^    
+ 0: adz
+ 1: adz
+ 2: d
+    aez
+--->aez
+ +0 ^       ^
+ +1 ^       (a(*:A)(d|e(*:B))z|aeq)
+ +2 ^       a
+ +3 ^^      (*:A)
+ +8 ^^      (d|e(*:B))
+Latest Mark: A
+ +9 ^^      d
++11 ^^      e
++12 ^ ^     (*:B)
++17 ^ ^     )
+Latest Mark: B
++18 ^ ^     z
++19 ^  ^    |
++24 ^  ^    
+ 0: aez
+ 1: aez
+ 2: e
+    aeqwerty
+--->aeqwerty
+ +0 ^            ^
+ +1 ^            (a(*:A)(d|e(*:B))z|aeq)
+ +2 ^            a
+ +3 ^^           (*:A)
+ +8 ^^           (d|e(*:B))
+Latest Mark: A
+ +9 ^^           d
++11 ^^           e
++12 ^ ^          (*:B)
++17 ^ ^          )
+Latest Mark: B
++18 ^ ^          z
++20 ^            a
++21 ^^           e
++22 ^ ^          q
++23 ^  ^         )
++24 ^  ^         
+ 0: aeq
+ 1: aeq
+
+/.(*F)/
+    \P\Pabc
+No match
+
+/\btype\b\W*?\btext\b\W*?\bjavascript\b/IS
+Capturing subpattern count = 0
+Max lookbehind = 1
+No options
+First char = 't'
+Need char = 't'
+Subject length lower bound = 18
+No set of starting bytes
+
+/\btype\b\W*?\btext\b\W*?\bjavascript\b|\burl\b\W*?\bshell:|<input\b.*?\btype\b\W*?\bimage\b|\bonkeyup\b\W*?\=/IS
+Capturing subpattern count = 0
+Max lookbehind = 1
+No options
+No first char
+No need char
+Subject length lower bound = 8
+Starting byte set: < o t u 
+
+/a(*SKIP)c|b(*ACCEPT)|/+S!I
+Capturing subpattern count = 0
+May match empty string
+No options
+No first char
+No need char
+Subject length lower bound = -1
+No set of starting bytes
+    a
+ 0: 
+ 0+ 
+
+/a(*SKIP)c|b(*ACCEPT)cd(*ACCEPT)|x/SI
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Subject length lower bound = -1
+Starting byte set: a b x 
+    ax
+ 0: x
+
+'a*(*ACCEPT)b'+
+    \N\N
+No match
+    abc\N\N
+ 0: a
+ 0+ bc
+    bbb\N\N 
+ 0: 
+ 0+ bb
+
+/(*ACCEPT)a/+I
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+    bax
+ 0: 
+ 0+ bax
+
+/z(*ACCEPT)a/+I
+Capturing subpattern count = 0
+No options
+First char = 'z'
+No need char
+    baxzbx
+ 0: z
+ 0+ bx
+
+/a(?:.)*?a/ims                                                                  
+    \Mabbbbbbbbbbbbbbbbbbbbba
+Minimum match() limit = 65
+Minimum match() recursion limit = 2
+ 0: abbbbbbbbbbbbbbbbbbbbba
+    
+/a(?:.(*THEN))*?a/ims
+    \Mabbbbbbbbbbbbbbbbbbbbba
+Minimum match() limit = 86
+Minimum match() recursion limit = 45
+ 0: abbbbbbbbbbbbbbbbbbbbba
+
+/a(?:.(*THEN:ABC))*?a/ims
+    \Mabbbbbbbbbbbbbbbbbbbbba
+Minimum match() limit = 86
+Minimum match() recursion limit = 45
+ 0: abbbbbbbbbbbbbbbbbbbbba
+
+/^(?>a+)(?>(z+))\w/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Once_NC
+        a++
+        Ket
+        Once
+        CBra 1
+        z++
+        Ket
+        Ket
+        \w
+        Ket
+        End
+------------------------------------------------------------------
+    aaaazzzzb
+ 0: aaaazzzzb
+ 1: zzzz
+    ** Failers
+No match
+    aazz  
+No match
+
+/(.)(\1|a(?2))/
+    bab
+ 0: bab
+ 1: b
+ 2: ab
+    
+/\1|(.)(?R)\1/
+    cbbbc
+ 0: cbbbc
+ 1: c
+    
+/(.)((?(1)c|a)|a(?2))/
+    baa  
+No match
+
+/(?P<abn>(?P=abn)xxx)/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        \1
+        xxx
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a\1z)/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        a
+        \1
+        z
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
+     \Maabbccddee
+Minimum match() limit = 7
+Minimum match() recursion limit = 2
+ 0: aabbccddee
+
+/^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
+     \Maabbccddee
+Minimum match() limit = 17
+Minimum match() recursion limit = 16
+ 0: aabbccddee
+ 1: aa
+ 2: bb
+ 3: cc
+ 4: dd
+ 5: ee
+
+/^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
+     \Maabbccddee
+Minimum match() limit = 13
+Minimum match() recursion limit = 10
+ 0: aabbccddee
+ 1: aa
+ 2: cc
+ 3: ee
+
+/^a\x41z/<JS>
+    aAz
+ 0: aAz
+    *** Failers
+No match
+    ax41z
+No match
+
+/^a[m\x41]z/<JS>
+    aAz
+ 0: aAz
+
+/^a\x1z/<JS>
+    ax1z
+ 0: ax1z
+
+/^a\u0041z/<JS>
+    aAz
+ 0: aAz
+    *** Failers
+No match
+    au0041z
+No match
+
+/^a[m\u0041]z/<JS>
+    aAz
+ 0: aAz
+
+/^a\u041z/<JS>
+    au041z
+ 0: au041z
+    *** Failers
+No match
+    aAz
+No match
+
+/^a\U0041z/<JS>
+    aU0041z
+ 0: aU0041z
+    *** Failers
+No match
+    aAz
+No match
+
+/(?(?=c)c|d)++Y/BZ
+------------------------------------------------------------------
+        Bra
+        BraPos
+        Cond
+        Assert
+        c
+        Ket
+        c
+        Alt
+        d
+        Ket
+        KetRpos
+        Y
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?(?=c)c|d)*+Y/BZ
+------------------------------------------------------------------
+        Bra
+        Braposzero
+        BraPos
+        Cond
+        Assert
+        c
+        Ket
+        c
+        Alt
+        d
+        Ket
+        KetRpos
+        Y
+        Ket
+        End
+------------------------------------------------------------------
+
+/a[\NB]c/
+Failed: \N is not supported in a class at offset 3
+
+/a[B-\Nc]/ 
+Failed: invalid range in character class at offset 5
+
+/a[B\Nc]/ 
+Failed: \N is not supported in a class at offset 4
+
+/(a)(?2){0,1999}?(b)/
+
+/(a)(?(DEFINE)(b))(?2){0,1999}?(?2)/
+
+/--- This test, with something more complicated than individual letters, causes
+different behaviour in Perl. Perhaps it disables some optimization; no tag is
+passed back for the failures, whereas in PCRE there is a tag. ---/
+    
+/(A|P)(*:A)(B|P) | (X|P)(X|P)(*:B)(Y|P)/xK
+    AABC
+ 0: AB
+ 1: A
+ 2: B
+MK: A
+    XXYZ 
+ 0: XXY
+ 1: <unset>
+ 2: <unset>
+ 3: X
+ 4: X
+ 5: Y
+MK: B
+    ** Failers
+No match
+    XAQQ  
+No match, mark = A
+    XAQQXZZ  
+No match, mark = A
+    AXQQQ 
+No match, mark = A
+    AXXQQQ 
+No match, mark = B
+
+/-- Perl doesn't give marks for these, though it does if the alternatives are
+replaced by single letters. --/
+    
+/(b|q)(*:m)f|a(*:n)w/K
+    aw 
+ 0: aw
+MK: n
+    ** Failers 
+No match, mark = n
+    abc
+No match, mark = m
+
+/(q|b)(*:m)f|a(*:n)w/K
+    aw 
+ 0: aw
+MK: n
+    ** Failers 
+No match, mark = n
+    abc
+No match, mark = m
+
+/-- After a partial match, the behaviour is as for a failure. --/
+
+/^a(*:X)bcde/K
+   abc\P
+Partial match, mark=X: abc
+   
+/-- These are here because Perl doesn't return a mark, except for the first --/
+
+/(?=(*:x))(q|)/K+
+    abc
+ 0: 
+ 0+ abc
+ 1: 
+MK: x
+
+/(?=(*:x))((*:y)q|)/K+
+    abc
+ 0: 
+ 0+ abc
+ 1: 
+MK: x
+
+/(?=(*:x))(?:(*:y)q|)/K+
+    abc
+ 0: 
+ 0+ abc
+MK: x
+
+/(?=(*:x))(?>(*:y)q|)/K+
+    abc
+ 0: 
+ 0+ abc
+MK: x
+
+/(?=a(*:x))(?!a(*:y)c)/K+
+    ab
+ 0: 
+ 0+ ab
+MK: x
+
+/(?=a(*:x))(?=a(*:y)c|)/K+
+    ab
+ 0: 
+ 0+ ab
+MK: x
+
+/(..)\1/
+    ab\P
+Partial match: ab
+    aba\P
+Partial match: aba
+    abab\P
+ 0: abab
+ 1: ab
+
+/(..)\1/i
+    ab\P
+Partial match: ab
+    abA\P
+Partial match: abA
+    aBAb\P
+ 0: aBAb
+ 1: aB
+
+/(..)\1{2,}/
+    ab\P
+Partial match: ab
+    aba\P
+Partial match: aba
+    abab\P
+Partial match: abab
+    ababa\P
+Partial match: ababa
+    ababab\P
+ 0: ababab
+ 1: ab
+    ababab\P\P
+Partial match: ababab
+    abababa\P
+ 0: ababab
+ 1: ab
+    abababa\P\P
+Partial match: abababa
+
+/(..)\1{2,}/i
+    ab\P
+Partial match: ab
+    aBa\P
+Partial match: aBa
+    aBAb\P
+Partial match: aBAb
+    AbaBA\P
+Partial match: AbaBA
+    abABAb\P
+ 0: abABAb
+ 1: ab
+    aBAbaB\P\P
+Partial match: aBAbaB
+    abABabA\P
+ 0: abABab
+ 1: ab
+    abaBABa\P\P
+Partial match: abaBABa
+
+/(..)\1{2,}?x/i
+    ab\P
+Partial match: ab
+    abA\P
+Partial match: abA
+    aBAb\P
+Partial match: aBAb
+    abaBA\P
+Partial match: abaBA
+    abAbaB\P
+Partial match: abAbaB
+    abaBabA\P
+Partial match: abaBabA
+    abAbABaBx\P
+ 0: abAbABaBx
+ 1: ab
+
+/^(..)\1/
+    aba\P
+Partial match: aba
+
+/^(..)\1{2,3}x/
+    aba\P
+Partial match: aba
+    ababa\P
+Partial match: ababa
+    ababa\P\P
+Partial match: ababa
+    abababx
+ 0: abababx
+ 1: ab
+    ababababx  
+ 0: ababababx
+ 1: ab
+
+/^(..)\1{2,3}?x/
+    aba\P
+Partial match: aba
+    ababa\P
+Partial match: ababa
+    ababa\P\P
+Partial match: ababa
+    abababx
+ 0: abababx
+ 1: ab
+    ababababx  
+ 0: ababababx
+ 1: ab
+    
+/^(..)(\1{2,3})ab/
+    abababab
+ 0: abababab
+ 1: ab
+ 2: abab
+
+/^\R/
+    \r\P
+ 0: \x0d
+    \r\P\P
+Partial match: \x0d
+    
+/^\R{2,3}x/
+    \r\P
+Partial match: \x0d
+    \r\P\P
+Partial match: \x0d
+    \r\r\P 
+Partial match: \x0d\x0d
+    \r\r\P\P
+Partial match: \x0d\x0d
+    \r\r\r\P  
+Partial match: \x0d\x0d\x0d
+    \r\r\r\P\P
+Partial match: \x0d\x0d\x0d
+    \r\rx
+ 0: \x0d\x0dx
+    \r\r\rx    
+ 0: \x0d\x0d\x0dx
+
+/^\R{2,3}?x/
+    \r\P
+Partial match: \x0d
+    \r\P\P
+Partial match: \x0d
+    \r\r\P 
+Partial match: \x0d\x0d
+    \r\r\P\P
+Partial match: \x0d\x0d
+    \r\r\r\P  
+Partial match: \x0d\x0d\x0d
+    \r\r\r\P\P
+Partial match: \x0d\x0d\x0d
+    \r\rx
+ 0: \x0d\x0dx
+    \r\r\rx    
+ 0: \x0d\x0d\x0dx
+    
+/^\R?x/
+    \r\P
+Partial match: \x0d
+    \r\P\P 
+Partial match: \x0d
+    x
+ 0: x
+    \rx  
+ 0: \x0dx
+
+/^\R+x/
+    \r\P
+Partial match: \x0d
+    \r\P\P 
+Partial match: \x0d
+    \r\n\P
+Partial match: \x0d\x0a
+    \r\n\P\P  
+Partial match: \x0d\x0a
+    \rx  
+ 0: \x0dx
+
+/^a$/<CRLF>
+    a\r\P
+Partial match: a\x0d
+    a\r\P\P 
+Partial match: a\x0d
+
+/^a$/m<CRLF>
+    a\r\P
+Partial match: a\x0d
+    a\r\P\P 
+Partial match: a\x0d
+
+/^(a$|a\r)/<CRLF>
+    a\r\P
+ 0: a\x0d
+ 1: a\x0d
+    a\r\P\P 
+Partial match: a\x0d
+
+/^(a$|a\r)/m<CRLF>
+    a\r\P
+ 0: a\x0d
+ 1: a\x0d
+    a\r\P\P 
+Partial match: a\x0d
+
+/./<CRLF>
+    \r\P
+ 0: \x0d
+    \r\P\P 
+Partial match: \x0d
+  
+/.{2,3}/<CRLF>
+    \r\P 
+Partial match: \x0d
+    \r\P\P
+Partial match: \x0d
+    \r\r\P
+ 0: \x0d\x0d
+    \r\r\P\P
+Partial match: \x0d\x0d
+    \r\r\r\P
+ 0: \x0d\x0d\x0d
+    \r\r\r\P\P     
+Partial match: \x0d\x0d\x0d
+
+/.{2,3}?/<CRLF>
+    \r\P 
+Partial match: \x0d
+    \r\P\P
+Partial match: \x0d
+    \r\r\P
+ 0: \x0d\x0d
+    \r\r\P\P
+Partial match: \x0d\x0d
+    \r\r\r\P
+ 0: \x0d\x0d
+    \r\r\r\P\P     
+ 0: \x0d\x0d
+
+"AB(C(D))(E(F))?(?(?=\2)(?=\4))"
+    ABCDGHI\O03
+Matched, but too many substrings
+ 0: ABCD
+    
+/-- These are all run as real matches in test 1; here we are just checking the
+settings of the anchored and startline bits. --/ 
+
+/(?>.*?a)(?<=ba)/I
+Capturing subpattern count = 0
+Max lookbehind = 2
+No options
+No first char
+Need char = 'a'
+
+/(?:.*?a)(?<=ba)/I
+Capturing subpattern count = 0
+Max lookbehind = 2
+No options
+First char at start or follows newline
+Need char = 'a'
+
+/.*?a(*PRUNE)b/I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'b'
+
+/.*?a(*PRUNE)b/sI
+Capturing subpattern count = 0
+Options: dotall
+No first char
+Need char = 'b'
+
+/^a(*PRUNE)b/sI
+Capturing subpattern count = 0
+Options: anchored dotall
+No first char
+No need char
+
+/.*?a(*SKIP)b/I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'b'
+
+/(?>.*?a)b/sI
+Capturing subpattern count = 0
+Options: dotall
+No first char
+Need char = 'b'
+
+/(?>.*?a)b/I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'b'
+
+/(?>^a)b/sI
+Capturing subpattern count = 0
+Options: anchored dotall
+No first char
+No need char
+
+/(?>.*?)(?<=(abcd)|(wxyz))/I
+Capturing subpattern count = 2
+Max lookbehind = 4
+May match empty string
+No options
+No first char
+No need char
+
+/(?>.*)(?<=(abcd)|(wxyz))/I
+Capturing subpattern count = 2
+Max lookbehind = 4
+May match empty string
+No options
+No first char
+No need char
+
+"(?>.*)foo"I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'o'
+
+"(?>.*?)foo"I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'o'
+
+/(?>^abc)/mI
+Capturing subpattern count = 0
+Options: multiline
+First char at start or follows newline
+Need char = 'c'
+
+/(?>.*abc)/mI
+Capturing subpattern count = 0
+Options: multiline
+No first char
+Need char = 'c'
+
+/(?:.*abc)/mI
+Capturing subpattern count = 0
+Options: multiline
+First char at start or follows newline
+Need char = 'c'
+
+/-- Check PCRE_STUDY_EXTRA_NEEDED --/
+
+/.?/S-I
+Capturing subpattern count = 0
+May match empty string
+No options
+No first char
+No need char
+Study returned NULL
+
+/.?/S!I
+Capturing subpattern count = 0
+May match empty string
+No options
+No first char
+No need char
+Subject length lower bound = -1
+No set of starting bytes
+
+/(?:(a)+(?C1)bb|aa(?C2)b)/
+    aab\C+
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^ ^     b
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^^      b
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+    ^ ^     b
+ 0: aab
+   
+/(?:(a)++(?C1)bb|aa(?C2)b)/
+    aab\C+ 
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^ ^     b
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+    ^ ^     b
+ 0: aab
+    
+/(?:(?>(a))(?C1)bb|aa(?C2)b)/
+    aab\C+ 
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^^      b
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+    ^ ^     b
+ 0: aab
+
+/(?:(?1)(?C1)x|ab(?C2))((a)){0}/                                                
+    aab\C+ 
+Callout 1: last capture = -1
+ 0: <unset>
+--->aab
+    ^^      x
+Callout 1: last capture = -1
+ 0: <unset>
+--->aab
+     ^^     x
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+     ^ ^    )
+ 0: ab
+
+/(?1)(?C1)((a)(?C2)){0}/   
+    aab\C+ 
+Callout 2: last capture = 2
+ 0: <unset>
+ 1: <unset>
+ 2: a
+--->aab
+    ^^      )
+Callout 1: last capture = -1
+ 0: <unset>
+--->aab
+    ^^      ((a)(?C2)){0}
+ 0: a
+
+/(?:(a)+(?C1)bb|aa(?C2)b)++/
+    aab\C+
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^ ^     b
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^^      b
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+    ^ ^     b
+ 0: aab
+    aab\C+\O2
+Callout 1: last capture = 1
+ 0: <unset>
+--->aab
+    ^ ^     b
+Callout 1: last capture = 1
+ 0: <unset>
+--->aab
+    ^^      b
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+    ^ ^     b
+ 0: aab
+
+/(ab)x|ab/
+    ab\O3
+ 0: ab
+    ab\O2 
+ 0: ab
+  
+/(ab)/
+    ab\O3
+Matched, but too many substrings
+ 0: ab
+    ab\O2 
+Matched, but too many substrings
+ 0: ab
+    
+/(?<=123)(*MARK:xx)abc/K
+    xxxx123a\P\P
+Partial match at offset 7, mark=xx: 123a
+    xxxx123a\P
+Partial match at offset 7, mark=xx: 123a
+    
+/123\Kabc/
+    xxxx123a\P\P
+Partial match: 123a
+    xxxx123a\P
+Partial match: 123a
+
+/^(?(?=a)aa|bb)/C
+    bb
+--->bb
+ +0 ^      ^
+ +1 ^      (?(?=a)aa|bb)
+ +3 ^      (?=a)
+ +6 ^      a
++11 ^      b
++12 ^^     b
++13 ^ ^    )
++14 ^ ^    
+ 0: bb
+
+/(?C1)^(?C2)(?(?C99)(?=(?C3)a(?C4))(?C5)a(?C6)a(?C7)|(?C8)b(?C9)b(?C10))(?C11)/
+    bb
+--->bb
+  1 ^      ^
+  2 ^      (?(?C99)(?=(?C3)a(?C4))(?C5)a(?C6)a(?C7)|(?C8)b(?C9)b(?C10))
+ 99 ^      (?=(?C3)a(?C4))
+  3 ^      a
+  8 ^      b
+  9 ^^     b
+ 10 ^ ^    )
+ 11 ^ ^    
+ 0: bb
+
+/-- Perl seems to have a bug with this one --/
+
+/aaaaa(*COMMIT)(*PRUNE)b|a+c/
+    aaaaaac
+ 0: aaaac
+    
+/-- Here are some that Perl treats differently because of the way it handles
+backtracking verbs. --/
+
+ /(?!a(*COMMIT)b)ac|ad/
+     ac
+ 0: ac
+     ad 
+ 0: ad
+
+/^(?!a(*THEN)b|ac)../
+     ac
+No match
+     ad 
+ 0: ad
+
+/^(?=a(*THEN)b|ac)/
+    ac
+ 0: 
+    
+/\A.*?(?:a|b(*THEN)c)/
+    ba
+ 0: ba
+
+/\A.*?(?:a|b(*THEN)c)++/
+    ba
+ 0: ba
+
+/\A.*?(?:a|b(*THEN)c|d)/
+    ba
+ 0: ba
+
+/(?:(a(*MARK:X)a+(*SKIP:X)b)){0}(?:(?1)|aac)/
+    aac 
+ 0: aac
+
+/\A.*?(a|b(*THEN)c)/
+    ba
+ 0: ba
+ 1: a
+
+/^(A(*THEN)B|A(*THEN)D)/
+    AD           
+ 0: AD
+ 1: AD
+    
+/(?!b(*THEN)a)bn|bnn/
+    bnn
+ 0: bn
+
+/(?(?=b(*SKIP)a)bn|bnn)/
+    bnn
+No match
+
+/(?=b(*THEN)a|)bn|bnn/
+    bnn
+ 0: bn
+
+/-------------------------/ 
+
+/(*LIMIT_MATCH=12bc)abc/
+Failed: (*VERB) not recognized or malformed at offset 7
+
+/(*LIMIT_MATCH=4294967290)abc/
+Failed: (*VERB) not recognized or malformed at offset 7
+
+/(*LIMIT_RECURSION=4294967280)abc/I
+Capturing subpattern count = 0
+Recursion limit = 4294967280
+No options
+First char = 'a'
+Need char = 'c'
+
+/(a+)*zz/
+    aaaaaaaaaaaaaz
+No match
+    aaaaaaaaaaaaaz\q3000
+Error -8 (match limit exceeded)
+
+/(a+)*zz/S-
+    aaaaaaaaaaaaaz\Q10 
+Error -21 (recursion limit exceeded)
+
+/(*LIMIT_MATCH=3000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 3000
+No options
+No first char
+Need char = 'z'
+    aaaaaaaaaaaaaz
+Error -8 (match limit exceeded)
+    aaaaaaaaaaaaaz\q60000
+Error -8 (match limit exceeded)
+
+/(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 3000
+No options
+No first char
+Need char = 'z'
+    aaaaaaaaaaaaaz
+Error -8 (match limit exceeded)
+
+/(*LIMIT_MATCH=60000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 60000
+No options
+No first char
+Need char = 'z'
+    aaaaaaaaaaaaaz
+No match
+    aaaaaaaaaaaaaz\q3000
+Error -8 (match limit exceeded)
+
+/(*LIMIT_RECURSION=10)(a+)*zz/IS-
+Capturing subpattern count = 1
+Recursion limit = 10
+No options
+No first char
+Need char = 'z'
+Subject length lower bound = 2
+Starting byte set: a z 
+    aaaaaaaaaaaaaz
+Error -21 (recursion limit exceeded)
+    aaaaaaaaaaaaaz\Q1000
+Error -21 (recursion limit exceeded)
+
+/(*LIMIT_RECURSION=10)(*LIMIT_RECURSION=1000)(a+)*zz/IS-
+Capturing subpattern count = 1
+Recursion limit = 10
+No options
+No first char
+Need char = 'z'
+Subject length lower bound = 2
+Starting byte set: a z 
+    aaaaaaaaaaaaaz
+Error -21 (recursion limit exceeded)
+
+/(*LIMIT_RECURSION=1000)(a+)*zz/IS-
+Capturing subpattern count = 1
+Recursion limit = 1000
+No options
+No first char
+Need char = 'z'
+Subject length lower bound = 2
+Starting byte set: a z 
+    aaaaaaaaaaaaaz
+No match
+    aaaaaaaaaaaaaz\Q10
+Error -21 (recursion limit exceeded)
+
+/-- This test causes a segfault with Perl 5.18.0 --/
+
+/^(?=(a)){0}b(?1)/
+    backgammon
+ 0: ba
+
+/(?|(?<n>f)|(?<n>b))/JI
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  n   1
+Options: dupnames
+No first char
+No need char
+
+/(?<a>abc)(?<a>z)\k<a>()/JDZS
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        abc
+        Ket
+        CBra 2
+        z
+        Ket
+        \k<a>2
+        CBra 3
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 3
+Max back reference = 2
+Named capturing subpatterns:
+  a   1
+  a   2
+Options: dupnames
+First char = 'a'
+Need char = 'z'
+Subject length lower bound = 5
+No set of starting bytes
+
+/a*[bcd]/BZ
+------------------------------------------------------------------
+        Bra
+        a*+
+        [b-d]
+        Ket
+        End
+------------------------------------------------------------------
+
+/[bcd]*a/BZ
+------------------------------------------------------------------
+        Bra
+        [b-d]*+
+        a
+        Ket
+        End
+------------------------------------------------------------------
+
+/-- A complete set of tests for auto-possessification of character types --/
+
+/\D+\D \D+\d \D+\S \D+\s \D+\W \D+\w \D+. \D+\C \D+\R \D+\H \D+\h \D+\V \D+\v \D+\Z \D+\z \D+$/BZx
+------------------------------------------------------------------
+        Bra
+        \D+
+        \D
+        \D++
+        \d
+        \D+
+        \S
+        \D+
+        \s
+        \D+
+        \W
+        \D+
+        \w
+        \D+
+        Any
+        \D+
+        AllAny
+        \D+
+        \R
+        \D+
+        \H
+        \D+
+        \h
+        \D+
+        \V
+        \D+
+        \v
+        \D+
+        \Z
+        \D++
+        \z
+        \D+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\d+\D \d+\d \d+\S \d+\s \d+\W \d+\w \d+. \d+\C \d+\R \d+\H \d+\h \d+\V \d+\v \d+\Z \d+\z \d+$/BZx
+------------------------------------------------------------------
+        Bra
+        \d++
+        \D
+        \d+
+        \d
+        \d+
+        \S
+        \d++
+        \s
+        \d++
+        \W
+        \d+
+        \w
+        \d+
+        Any
+        \d+
+        AllAny
+        \d++
+        \R
+        \d+
+        \H
+        \d++
+        \h
+        \d+
+        \V
+        \d++
+        \v
+        \d++
+        \Z
+        \d++
+        \z
+        \d++
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\S+\D \S+\d \S+\S \S+\s \S+\W \S+\w \S+. \S+\C \S+\R \S+\H \S+\h \S+\V \S+\v \S+\Z \S+\z \S+$/BZx
+------------------------------------------------------------------
+        Bra
+        \S+
+        \D
+        \S+
+        \d
+        \S+
+        \S
+        \S++
+        \s
+        \S+
+        \W
+        \S+
+        \w
+        \S+
+        Any
+        \S+
+        AllAny
+        \S++
+        \R
+        \S+
+        \H
+        \S++
+        \h
+        \S+
+        \V
+        \S++
+        \v
+        \S++
+        \Z
+        \S++
+        \z
+        \S++
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\s+\D \s+\d \s+\S \s+\s \s+\W \s+\w \s+. \s+\C \s+\R \s+\H \s+\h \s+\V \s+\v \s+\Z \s+\z \s+$/BZx
+------------------------------------------------------------------
+        Bra
+        \s+
+        \D
+        \s++
+        \d
+        \s++
+        \S
+        \s+
+        \s
+        \s+
+        \W
+        \s++
+        \w
+        \s+
+        Any
+        \s+
+        AllAny
+        \s+
+        \R
+        \s+
+        \H
+        \s+
+        \h
+        \s+
+        \V
+        \s+
+        \v
+        \s+
+        \Z
+        \s++
+        \z
+        \s+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\W+\D \W+\d \W+\S \W+\s \W+\W \W+\w \W+. \W+\C \W+\R \W+\H \W+\h \W+\V \W+\v \W+\Z \W+\z \W+$/BZx
+------------------------------------------------------------------
+        Bra
+        \W+
+        \D
+        \W++
+        \d
+        \W+
+        \S
+        \W+
+        \s
+        \W+
+        \W
+        \W++
+        \w
+        \W+
+        Any
+        \W+
+        AllAny
+        \W+
+        \R
+        \W+
+        \H
+        \W+
+        \h
+        \W+
+        \V
+        \W+
+        \v
+        \W+
+        \Z
+        \W++
+        \z
+        \W+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\w+\D \w+\d \w+\S \w+\s \w+\W \w+\w \w+. \w+\C \w+\R \w+\H \w+\h \w+\V \w+\v \w+\Z \w+\z \w+$/BZx
+------------------------------------------------------------------
+        Bra
+        \w+
+        \D
+        \w+
+        \d
+        \w+
+        \S
+        \w++
+        \s
+        \w++
+        \W
+        \w+
+        \w
+        \w+
+        Any
+        \w+
+        AllAny
+        \w++
+        \R
+        \w+
+        \H
+        \w++
+        \h
+        \w+
+        \V
+        \w++
+        \v
+        \w++
+        \Z
+        \w++
+        \z
+        \w++
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\C+\D \C+\d \C+\S \C+\s \C+\W \C+\w \C+. \C+\C \C+\R \C+\H \C+\h \C+\V \C+\v \C+\Z \C+\z \C+$/BZx
+------------------------------------------------------------------
+        Bra
+        AllAny+
+        \D
+        AllAny+
+        \d
+        AllAny+
+        \S
+        AllAny+
+        \s
+        AllAny+
+        \W
+        AllAny+
+        \w
+        AllAny+
+        Any
+        AllAny+
+        AllAny
+        AllAny+
+        \R
+        AllAny+
+        \H
+        AllAny+
+        \h
+        AllAny+
+        \V
+        AllAny+
+        \v
+        AllAny+
+        \Z
+        AllAny++
+        \z
+        AllAny+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\R+\D \R+\d \R+\S \R+\s \R+\W \R+\w \R+. \R+\C \R+\R \R+\H \R+\h \R+\V \R+\v \R+\Z \R+\z \R+$/BZx
+------------------------------------------------------------------
+        Bra
+        \R+
+        \D
+        \R++
+        \d
+        \R+
+        \S
+        \R++
+        \s
+        \R+
+        \W
+        \R++
+        \w
+        \R++
+        Any
+        \R+
+        AllAny
+        \R+
+        \R
+        \R+
+        \H
+        \R++
+        \h
+        \R+
+        \V
+        \R+
+        \v
+        \R+
+        \Z
+        \R++
+        \z
+        \R+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\H+\D \H+\d \H+\S \H+\s \H+\W \H+\w \H+. \H+\C \H+\R \H+\H \H+\h \H+\V \H+\v \H+\Z \H+\z \H+$/BZx
+------------------------------------------------------------------
+        Bra
+        \H+
+        \D
+        \H+
+        \d
+        \H+
+        \S
+        \H+
+        \s
+        \H+
+        \W
+        \H+
+        \w
+        \H+
+        Any
+        \H+
+        AllAny
+        \H+
+        \R
+        \H+
+        \H
+        \H++
+        \h
+        \H+
+        \V
+        \H+
+        \v
+        \H+
+        \Z
+        \H++
+        \z
+        \H+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\h+\D \h+\d \h+\S \h+\s \h+\W \h+\w \h+. \h+\C \h+\R \h+\H \h+\h \h+\V \h+\v \h+\Z \h+\z \h+$/BZx
+------------------------------------------------------------------
+        Bra
+        \h+
+        \D
+        \h++
+        \d
+        \h++
+        \S
+        \h+
+        \s
+        \h+
+        \W
+        \h++
+        \w
+        \h+
+        Any
+        \h+
+        AllAny
+        \h++
+        \R
+        \h++
+        \H
+        \h+
+        \h
+        \h+
+        \V
+        \h++
+        \v
+        \h+
+        \Z
+        \h++
+        \z
+        \h+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\V+\D \V+\d \V+\S \V+\s \V+\W \V+\w \V+. \V+\C \V+\R \V+\H \V+\h \V+\V \V+\v \V+\Z \V+\z \V+$/BZx
+------------------------------------------------------------------
+        Bra
+        \V+
+        \D
+        \V+
+        \d
+        \V+
+        \S
+        \V+
+        \s
+        \V+
+        \W
+        \V+
+        \w
+        \V+
+        Any
+        \V+
+        AllAny
+        \V++
+        \R
+        \V+
+        \H
+        \V+
+        \h
+        \V+
+        \V
+        \V++
+        \v
+        \V+
+        \Z
+        \V++
+        \z
+        \V+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\v+\D \v+\d \v+\S \v+\s \v+\W \v+\w \v+. \v+\C \v+\R \v+\H \v+\h \v+\V \v+\v \v+\Z \v+\z \v+$/BZx
+------------------------------------------------------------------
+        Bra
+        \v+
+        \D
+        \v++
+        \d
+        \v++
+        \S
+        \v+
+        \s
+        \v+
+        \W
+        \v++
+        \w
+        \v+
+        Any
+        \v+
+        AllAny
+        \v+
+        \R
+        \v+
+        \H
+        \v++
+        \h
+        \v++
+        \V
+        \v+
+        \v
+        \v+
+        \Z
+        \v++
+        \z
+        \v+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/ a+\D  a+\d  a+\S  a+\s  a+\W  a+\w  a+.  a+\C  a+\R  a+\H  a+\h  a+\V  a+\v  a+\Z  a+\z  a+$/BZx
+------------------------------------------------------------------
+        Bra
+        a+
+        \D
+        a++
+        \d
+        a+
+        \S
+        a++
+        \s
+        a++
+        \W
+        a+
+        \w
+        a+
+        Any
+        a+
+        AllAny
+        a++
+        \R
+        a+
+        \H
+        a++
+        \h
+        a+
+        \V
+        a++
+        \v
+        a++
+        \Z
+        a++
+        \z
+        a++
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\n+\D \n+\d \n+\S \n+\s \n+\W \n+\w \n+. \n+\C \n+\R \n+\H \n+\h \n+\V \n+\v \n+\Z \n+\z \n+$/BZx
+------------------------------------------------------------------
+        Bra
+        \x0a+
+        \D
+        \x0a++
+        \d
+        \x0a++
+        \S
+        \x0a+
+        \s
+        \x0a+
+        \W
+        \x0a++
+        \w
+        \x0a+
+        Any
+        \x0a+
+        AllAny
+        \x0a+
+        \R
+        \x0a+
+        \H
+        \x0a++
+        \h
+        \x0a++
+        \V
+        \x0a+
+        \v
+        \x0a+
+        \Z
+        \x0a++
+        \z
+        \x0a+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/ .+\D  .+\d  .+\S  .+\s  .+\W  .+\w  .+.  .+\C  .+\R  .+\H  .+\h  .+\V  .+\v  .+\Z  .+\z  .+$/BZx
+------------------------------------------------------------------
+        Bra
+        Any+
+        \D
+        Any+
+        \d
+        Any+
+        \S
+        Any+
+        \s
+        Any+
+        \W
+        Any+
+        \w
+        Any+
+        Any
+        Any+
+        AllAny
+        Any++
+        \R
+        Any+
+        \H
+        Any+
+        \h
+        Any+
+        \V
+        Any+
+        \v
+        Any+
+        \Z
+        Any++
+        \z
+        Any+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/ .+\D  .+\d  .+\S  .+\s  .+\W  .+\w  .+.  .+\C  .+\R  .+\H  .+\h  .+\V  .+\v  .+\Z  .+\z  .+$/BZxs
+------------------------------------------------------------------
+        Bra
+        AllAny+
+        \D
+        AllAny+
+        \d
+        AllAny+
+        \S
+        AllAny+
+        \s
+        AllAny+
+        \W
+        AllAny+
+        \w
+        AllAny+
+        AllAny
+        AllAny+
+        AllAny
+        AllAny+
+        \R
+        AllAny+
+        \H
+        AllAny+
+        \h
+        AllAny+
+        \V
+        AllAny+
+        \v
+        AllAny+
+        \Z
+        AllAny++
+        \z
+        AllAny+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\D+$  \d+$  \S+$  \s+$  \W+$  \w+$  \C+$  \R+$  \H+$  \h+$  \V+$  \v+$   a+$  \n+$   .+$  .+$/BZxm
+------------------------------------------------------------------
+        Bra
+        \D+
+     /m $
+        \d++
+     /m $
+        \S++
+     /m $
+        \s+
+     /m $
+        \W+
+     /m $
+        \w++
+     /m $
+        AllAny+
+     /m $
+        \R+
+     /m $
+        \H+
+     /m $
+        \h+
+     /m $
+        \V+
+     /m $
+        \v+
+     /m $
+        a+
+     /m $
+        \x0a+
+     /m $
+        Any+
+     /m $
+        Any+
+     /m $
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?=a+)a(a+)++a/BZ
+------------------------------------------------------------------
+        Bra
+        Assert
+        a++
+        Ket
+        a
+        CBraPos 1
+        a++
+        KetRpos
+        a
+        Ket
+        End
+------------------------------------------------------------------
+
+/a+(bb|cc)a+(?:bb|cc)a+(?>bb|cc)a+(?:bb|cc)+a+(aa)a+(?:bb|aa)/BZ
+------------------------------------------------------------------
+        Bra
+        a++
+        CBra 1
+        bb
+        Alt
+        cc
+        Ket
+        a++
+        Bra
+        bb
+        Alt
+        cc
+        Ket
+        a++
+        Once_NC
+        bb
+        Alt
+        cc
+        Ket
+        a++
+        Bra
+        bb
+        Alt
+        cc
+        KetRmax
+        a+
+        CBra 2
+        aa
+        Ket
+        a+
+        Bra
+        bb
+        Alt
+        aa
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/a+(bb|cc)?#a+(?:bb|cc)??#a+(?:bb|cc)?+#a+(?:bb|cc)*#a+(bb|cc)?a#a+(?:aa)?/BZ
+------------------------------------------------------------------
+        Bra
+        a++
+        Brazero
+        CBra 1
+        bb
+        Alt
+        cc
+        Ket
+        #
+        a++
+        Braminzero
+        Bra
+        bb
+        Alt
+        cc
+        Ket
+        #
+        a++
+        Once
+        Brazero
+        Bra
+        bb
+        Alt
+        cc
+        Ket
+        Ket
+        #
+        a++
+        Brazero
+        Bra
+        bb
+        Alt
+        cc
+        KetRmax
+        #
+        a+
+        Brazero
+        CBra 2
+        bb
+        Alt
+        cc
+        Ket
+        a#
+        a+
+        Brazero
+        Bra
+        aa
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/a+(?:bb)?a#a+(?:|||)#a+(?:|b)a#a+(?:|||)?a/BZ
+------------------------------------------------------------------
+        Bra
+        a+
+        Brazero
+        Bra
+        bb
+        Ket
+        a#
+        a++
+        Bra
+        Alt
+        Alt
+        Alt
+        Ket
+        #
+        a+
+        Bra
+        Alt
+        b
+        Ket
+        a#
+        a+
+        Brazero
+        Bra
+        Alt
+        Alt
+        Alt
+        Ket
+        a
+        Ket
+        End
+------------------------------------------------------------------
+
+/[ab]*/BZ
+------------------------------------------------------------------
+        Bra
+        [ab]*+
+        Ket
+        End
+------------------------------------------------------------------
+    aaaa
+ 0: aaaa
+
+/[ab]*?/BZ
+------------------------------------------------------------------
+        Bra
+        [ab]*?
+        Ket
+        End
+------------------------------------------------------------------
+    aaaa
+ 0: 
+
+/[ab]?/BZ
+------------------------------------------------------------------
+        Bra
+        [ab]?+
+        Ket
+        End
+------------------------------------------------------------------
+    aaaa
+ 0: a
+
+/[ab]??/BZ
+------------------------------------------------------------------
+        Bra
+        [ab]??
+        Ket
+        End
+------------------------------------------------------------------
+    aaaa
+ 0: 
+
+/[ab]+/BZ
+------------------------------------------------------------------
+        Bra
+        [ab]++
+        Ket
+        End
+------------------------------------------------------------------
+    aaaa
+ 0: aaaa
+
+/[ab]+?/BZ
+------------------------------------------------------------------
+        Bra
+        [ab]+?
+        Ket
+        End
+------------------------------------------------------------------
+    aaaa
+ 0: a
+
+/[ab]{2,3}/BZ
+------------------------------------------------------------------
+        Bra
+        [ab]{2,3}+
+        Ket
+        End
+------------------------------------------------------------------
+    aaaa
+ 0: aaa
+
+/[ab]{2,3}?/BZ
+------------------------------------------------------------------
+        Bra
+        [ab]{2,3}?
+        Ket
+        End
+------------------------------------------------------------------
+    aaaa
+ 0: aa
+
+/[ab]{2,}/BZ
+------------------------------------------------------------------
+        Bra
+        [ab]{2,}+
+        Ket
+        End
+------------------------------------------------------------------
+    aaaa
+ 0: aaaa
+
+/[ab]{2,}?/BZ
+------------------------------------------------------------------
+        Bra
+        [ab]{2,}?
+        Ket
+        End
+------------------------------------------------------------------
+    aaaa
+ 0: aa
+
+/\d+\s{0,5}=\s*\S?=\w{0,4}\W*/BZ
+------------------------------------------------------------------
+        Bra
+        \d++
+        \s{0,5}+
+        =
+        \s*+
+        \S?
+        =
+        \w{0,4}+
+        \W*+
+        Ket
+        End
+------------------------------------------------------------------
+
+/[a-d]{5,12}[e-z0-9]*#[^a-z]+[b-y]*a[2-7]?[^0-9a-z]+/BZ
+------------------------------------------------------------------
+        Bra
+        [a-d]{5,12}+
+        [0-9e-z]*+
+        #
+        [\x00-`{-\xff] (neg)++
+        [b-y]*+
+        a
+        [2-7]?+
+        [\x00-/:-`{-\xff] (neg)++
+        Ket
+        End
+------------------------------------------------------------------
+
+/[a-z]*\s#[ \t]?\S#[a-c]*\S#[C-G]+?\d#[4-8]*\D#[4-9,]*\D#[!$]{0,5}\w#[M-Xf-l]+\W#[a-c,]?\W/BZ
+------------------------------------------------------------------
+        Bra
+        [a-z]*+
+        \s
+        #
+        [\x09 ]?+
+        \S
+        #
+        [a-c]*
+        \S
+        #
+        [C-G]++
+        \d
+        #
+        [4-8]*+
+        \D
+        #
+        [,4-9]*
+        \D
+        #
+        [!$]{0,5}+
+        \w
+        #
+        [M-Xf-l]++
+        \W
+        #
+        [,a-c]?
+        \W
+        Ket
+        End
+------------------------------------------------------------------
+
+/a+(aa|bb)*c#a*(bb|cc)*a#a?(bb|cc)*d#[a-f]*(g|hh)*f/BZ
+------------------------------------------------------------------
+        Bra
+        a+
+        Brazero
+        CBra 1
+        aa
+        Alt
+        bb
+        KetRmax
+        c#
+        a*
+        Brazero
+        CBra 2
+        bb
+        Alt
+        cc
+        KetRmax
+        a#
+        a?+
+        Brazero
+        CBra 3
+        bb
+        Alt
+        cc
+        KetRmax
+        d#
+        [a-f]*
+        Brazero
+        CBra 4
+        g
+        Alt
+        hh
+        KetRmax
+        f
+        Ket
+        End
+------------------------------------------------------------------
+
+/[a-f]*(g|hh|i)*i#[a-x]{4,}(y{0,6})*y#[a-k]+(ll|mm)+n/BZ
+------------------------------------------------------------------
+        Bra
+        [a-f]*+
+        Brazero
+        CBra 1
+        g
+        Alt
+        hh
+        Alt
+        i
+        KetRmax
+        i#
+        [a-x]{4,}
+        Brazero
+        SCBra 2
+        y{0,6}
+        KetRmax
+        y#
+        [a-k]++
+        CBra 3
+        ll
+        Alt
+        mm
+        KetRmax
+        n
+        Ket
+        End
+------------------------------------------------------------------
+
+/[a-f]*(?>gg|hh)+#[a-f]*(?>gg|hh)?#[a-f]*(?>gg|hh)*a#[a-f]*(?>gg|hh)*h/BZ
+------------------------------------------------------------------
+        Bra
+        [a-f]*+
+        Once_NC
+        gg
+        Alt
+        hh
+        KetRmax
+        #
+        [a-f]*+
+        Brazero
+        Once_NC
+        gg
+        Alt
+        hh
+        Ket
+        #
+        [a-f]*
+        Brazero
+        Once_NC
+        gg
+        Alt
+        hh
+        KetRmax
+        a#
+        [a-f]*+
+        Brazero
+        Once_NC
+        gg
+        Alt
+        hh
+        KetRmax
+        h
+        Ket
+        End
+------------------------------------------------------------------
+
+/[a-c]*d/DZS
+------------------------------------------------------------------
+        Bra
+        [a-c]*+
+        d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'd'
+Subject length lower bound = 1
+Starting byte set: a b c d 
+
+/[a-c]+d/DZS
+------------------------------------------------------------------
+        Bra
+        [a-c]++
+        d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'd'
+Subject length lower bound = 2
+Starting byte set: a b c 
+
+/[a-c]?d/DZS
+------------------------------------------------------------------
+        Bra
+        [a-c]?+
+        d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'd'
+Subject length lower bound = 1
+Starting byte set: a b c d 
+
+/[a-c]{4,6}d/DZS
+------------------------------------------------------------------
+        Bra
+        [a-c]{4,6}+
+        d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'd'
+Subject length lower bound = 5
+Starting byte set: a b c 
+
+/[a-c]{0,6}d/DZS
+------------------------------------------------------------------
+        Bra
+        [a-c]{0,6}+
+        d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'd'
+Subject length lower bound = 1
+Starting byte set: a b c d 
+
+/-- End of special auto-possessive tests --/
+
+/^A\o{1239}B/
+Failed: non-octal character in \o{} (closing brace missing?) at offset 8
+
+/^A\oB/
+Failed: missing opening brace after \o at offset 3
+
+/^A\x{zz}B/ 
+Failed: non-hex character in \x{} (closing brace missing?) at offset 5
+
+/^A\x{12Z/
+Failed: non-hex character in \x{} (closing brace missing?) at offset 7
+
+/^A\x{/
+Failed: non-hex character in \x{} (closing brace missing?) at offset 5
+
+/[ab]++/BZO
+------------------------------------------------------------------
+        Bra
+        [ab]++
+        Ket
+        End
+------------------------------------------------------------------
+
+/[^ab]*+/BZO
+------------------------------------------------------------------
+        Bra
+        [\x00-`c-\xff] (neg)*+
+        Ket
+        End
+------------------------------------------------------------------
+
+/a{4}+/BZO
+------------------------------------------------------------------
+        Bra
+        a{4}
+        Ket
+        End
+------------------------------------------------------------------
+
+/a{4}+/BZOi
+------------------------------------------------------------------
+        Bra
+     /i a{4}
+        Ket
+        End
+------------------------------------------------------------------
+
+/[a-[:digit:]]+/
+Failed: invalid range in character class at offset 3
+
+/[A-[:digit:]]+/
+Failed: invalid range in character class at offset 3
+
+/[a-[.xxx.]]+/
+Failed: invalid range in character class at offset 3
+
+/[a-[=xxx=]]+/
+Failed: invalid range in character class at offset 3
+
+/[a-[!xxx!]]+/
+Failed: range out of order in character class at offset 3
+
+/[A-[!xxx!]]+/
+    A]]]
+ 0: A]]]
+
+/[a-\d]+/
+Failed: invalid range in character class at offset 4
+
+/(?<0abc>xx)/
+Failed: group name must start with a non-digit at offset 3
+
+/(?&1abc)xx(?<1abc>y)/
+Failed: group name must start with a non-digit at offset 3
+
+/(?<ab-cd>xx)/
+Failed: syntax error in subpattern name (missing terminator) at offset 5
+
+/(?'0abc'xx)/
+Failed: group name must start with a non-digit at offset 3
+
+/(?P<0abc>xx)/
+Failed: group name must start with a non-digit at offset 4
+
+/\k<5ghj>/
+Failed: group name must start with a non-digit at offset 3
+
+/\k'5ghj'/
+Failed: group name must start with a non-digit at offset 3
+
+/\k{2fgh}/
+Failed: group name must start with a non-digit at offset 3
+
+/(?P=8yuki)/
+Failed: group name must start with a non-digit at offset 4
+
+/\g{4df}/
+Failed: group name must start with a non-digit at offset 3
+
+/(?&1abc)xx(?<1abc>y)/
+Failed: group name must start with a non-digit at offset 3
+
+/(?P>1abc)xx(?<1abc>y)/
+Failed: group name must start with a non-digit at offset 4
+
+/\g'3gh'/
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 7
+
+/\g<5fg>/
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 7
+
+/(?(<4gh>)abc)/
+Failed: group name must start with a non-digit at offset 4
+
+/(?('4gh')abc)/
+Failed: group name must start with a non-digit at offset 4
+
+/(?(4gh)abc)/
+Failed: malformed number or name after (?( at offset 4
+
+/(?(R&6yh)abc)/
+Failed: group name must start with a non-digit at offset 5
+
+/-- Test the ugly "start or end of word" compatibility syntax --/
+
+/[[:<:]]red[[:>:]]/BZ
+------------------------------------------------------------------
+        Bra
+        \b
+        Assert
+        \w
+        Ket
+        red
+        \b
+        AssertB
+        Reverse
+        \w
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    little red riding hood
+ 0: red
+    a /red/ thing 
+ 0: red
+    red is a colour
+ 0: red
+    put it all on red  
+ 0: red
+    ** Failers
+No match
+    no reduction
+No match
+    Alfred Winifred
+No match
+    
+/[a[:<:]] should give error/ 
+Failed: unknown POSIX class name at offset 4
 
 /-- End of testinput2 --/

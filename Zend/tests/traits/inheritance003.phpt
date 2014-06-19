@@ -35,4 +35,4 @@ $o->sayHello(array());
 --EXPECTF--	
 World!
 
-Fatal error: Declaration of MyHelloWorld::sayHello() must be compatible with Base::sayHello(array $a) in %s on line %d
+Fatal error: Declaration of SayWorld::sayHello(Base $d) must be compatible with Base::sayHello(array $a) in %s on line %d

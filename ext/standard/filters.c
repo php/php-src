@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -771,7 +771,7 @@ static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst)
 }
 
 #define NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, lbchars) \
-	((lb_ptr) < (lb_cnt) ? (lbchars)[(lb_ptr)] : *(ps)) 
+	((lb_ptr) < (lb_cnt) ? (lbchars)[(lb_ptr)] : *(ps))
 
 #define CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt) \
 	if ((lb_ptr) < (lb_cnt)) { \
@@ -791,6 +791,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	unsigned int line_ccnt;
 	unsigned int lb_ptr;
 	unsigned int lb_cnt;
+	unsigned int trail_ws;
 	int opts;
 	static char qp_digits[] = "0123456789ABCDEF";
 
@@ -807,6 +808,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	icnt = *in_left_p;
 	pd = (unsigned char *)(*out_pp);
 	ocnt = *out_left_p;
+	trail_ws = 0;
 
 	for (;;) {
 		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) && inst->lbchars != NULL && inst->lbchars_len > 0) {
@@ -839,11 +841,13 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 
 		if (lb_ptr >= lb_cnt && icnt <= 0) {
 			break;
-		} 
+		}
 
 		c = NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, inst->lbchars);
 
-		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) && (c == '\t' || c == ' ')) {
+		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) &&
+			(trail_ws == 0) &&
+			(c == '\t' || c == ' ')) {
 			if (line_ccnt < 2 && inst->lbchars != NULL) {
 				if (ocnt < inst->lbchars_len + 1) {
 					err = PHP_CONV_ERR_TOO_BIG;
@@ -863,12 +867,44 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 					err = PHP_CONV_ERR_TOO_BIG;
 					break;
 				}
-				*(pd++) = c;
-				ocnt--;
-				line_ccnt--;
-				CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
+
+				/* Check to see if this is EOL whitespace. */
+				if (inst->lbchars != NULL) {
+					unsigned char *ps2;
+					unsigned int j, lb_cnt2;
+
+					lb_cnt2 = 0;
+					ps2 = ps;
+					trail_ws = 1;
+
+					for (j = icnt - 1; j > 0; j--, ps2++) {
+						if (*ps2 == inst->lbchars[lb_cnt2]) {
+							lb_cnt2++;
+							if (lb_cnt2 >= inst->lbchars_len) {
+								/* Found trailing ws. Reset to top of main
+								 * for loop to allow for code to do necessary
+								 * wrapping/encoding. */
+								break;
+							}
+						} else if (lb_cnt2 != 0 || (*ps2 != '\t' && *ps2 != ' ')) {
+							/* At least one non-EOL character following, so
+							 * don't need to encode ws. */
+							trail_ws = 0;
+							break;
+						} else {
+							trail_ws++;
+						}
+					}
+				}
+
+				if (trail_ws == 0) {
+					*(pd++) = c;
+					ocnt--;
+					line_ccnt--;
+					CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
+				}
 			}
-		} else if ((!(opts & PHP_CONV_QPRINT_OPT_FORCE_ENCODE_FIRST) || line_ccnt < inst->line_len) && ((c >= 33 && c <= 60) || (c >= 62 && c <= 126))) { 
+		} else if ((!(opts & PHP_CONV_QPRINT_OPT_FORCE_ENCODE_FIRST) || line_ccnt < inst->line_len) && ((c >= 33 && c <= 60) || (c >= 62 && c <= 126))) {
 			if (line_ccnt < 2 && inst->lbchars != NULL) {
 				if (ocnt < inst->lbchars_len + 1) {
 					err = PHP_CONV_ERR_TOO_BIG;
@@ -912,9 +948,12 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 			}
 			*(pd++) = '=';
 			*(pd++) = qp_digits[(c >> 4)];
-			*(pd++) = qp_digits[(c & 0x0f)]; 
+			*(pd++) = qp_digits[(c & 0x0f)];
 			ocnt -= 3;
 			line_ccnt -= 3;
+			if (trail_ws > 0) {
+				trail_ws--;
+			}
 			CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
 		}
 	}
@@ -922,7 +961,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	*in_pp = (const char *)ps;
 	*in_left_p = icnt;
 	*out_pp = (char *)pd;
-	*out_left_p = ocnt; 
+	*out_left_p = ocnt;
 	inst->line_ccnt = line_ccnt;
 	inst->lb_ptr = lb_ptr;
 	inst->lb_cnt = lb_cnt;

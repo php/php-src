@@ -46,7 +46,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing get_html_translation_table() : basic functionality/HTML 5 ***
 -- with table = HTML_ENTITIES, ENT_COMPAT --
-int(1509)
+int(1510)
 Array
 (
     [Æ] => &AElig;
@@ -1108,6 +1108,7 @@ Array
     [⋾] => &notnivb;
     [⋽] => &notnivc;
     [∦] => &nparallel;
+    [⫽⃥] => &nparsl
     [∂̸] => &npart
     [⨔] => &npolint;
     [⊀] => &npr;
@@ -1196,6 +1197,7 @@ Array
     [⌽] => &ovbar;
     [¶] => &para;
     [⫳] => &parsim;
+    [⫽] => &parsl;
     [∂] => &part;
     [п] => &pcy;
     [%] => &percnt;
@@ -1500,7 +1502,6 @@ Array
     [⦜] => &vangrt;
     [ϰ] => &varkappa;
     [⫌︀] => &varsupsetneqq
-    [⫽︀] => &varsupsetneqq
     [⊲] => &vartriangleleft;
     [в] => &vcy;
     [⊢] => &vdash;
@@ -1561,9 +1562,9 @@ Array
     [‌] => &zwnj;
 )
 -- with table = HTML_ENTITIES, ENT_QUOTES --
-int(1510)
+int(1511)
 -- with table = HTML_ENTITIES, ENT_NOQUOTES --
-int(1508)
+int(1509)
 -- with table = HTML_SPECIALCHARS, ENT_COMPAT --
 int(4)
 Array
