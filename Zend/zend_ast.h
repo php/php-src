@@ -75,13 +75,14 @@ typedef enum _zend_ast_kind {
 
 struct _zend_ast {
 	unsigned short kind;
-	unsigned short children;
+	unsigned short EA;
+	zend_uint children;
 	zend_ast *child[1];
 };
 
 typedef struct _zend_ast_zval {
 	unsigned short kind;
-	unsigned short children;
+	unsigned short EA;
 	zval val;
 } zend_ast_zval;
 

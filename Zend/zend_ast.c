@@ -27,7 +27,7 @@ ZEND_API zend_ast *zend_ast_create_constant(zval *zv)
 {
 	zend_ast_zval *ast = emalloc(sizeof(zend_ast_zval));
 	ast->kind = ZEND_CONST;
-	ast->children = 0;
+	ast->EA = 0;
 	ZVAL_COPY_VALUE(&ast->val, zv);
 	return (zend_ast *) ast;
 }
@@ -36,7 +36,7 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node)
 {
 	zend_ast_znode *ast = emalloc(sizeof(zend_ast_znode));
 	ast->kind = ZEND_AST_ZNODE;
-	ast->children = 0;
+	ast->EA = 0;
 	ast->node = *node;
 	return (zend_ast *) ast;
 }
@@ -45,6 +45,7 @@ ZEND_API zend_ast* zend_ast_create_unary(uint kind, zend_ast *op0)
 {
 	zend_ast *ast = emalloc(sizeof(zend_ast));
 	ast->kind = kind;
+	ast->EA = 0;
 	ast->children = 1;
 	ast->child[0] = op0;
 	return ast;
@@ -54,6 +55,7 @@ ZEND_API zend_ast* zend_ast_create_binary(uint kind, zend_ast *op0, zend_ast *op
 {
 	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zend_ast *));
 	ast->kind = kind;
+	ast->EA = 0;
 	ast->children = 2;
 	ast->child[0] = op0;
 	ast->child[1] = op1;
@@ -64,6 +66,7 @@ ZEND_API zend_ast* zend_ast_create_ternary(uint kind, zend_ast *op0, zend_ast *o
 {
 	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * 2);
 	ast->kind = kind;
+	ast->EA = 0;
 	ast->children = 3;
 	ast->child[0] = op0;
 	ast->child[1] = op1;
@@ -76,6 +79,7 @@ ZEND_API zend_ast *zend_ast_create_dynamic(uint kind)
 	/* use 4 children as default */
 	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * 3);
 	ast->kind = kind;
+	ast->EA = 0;
 	ast->children = 0;
 	return ast;
 }
@@ -396,7 +400,7 @@ ZEND_API void zend_ast_destroy(zend_ast *ast)
 
 	if (ast->kind == ZEND_CONST) {
 		zval_dtor(zend_ast_get_zval(ast));
-	} else {
+	} else if (ast->kind != ZEND_AST_ZNODE) {
 		for (i = 0; i < ast->children; i++) {
 			if (ast->child[i]) {
 				zend_ast_destroy(ast->child[i]);
