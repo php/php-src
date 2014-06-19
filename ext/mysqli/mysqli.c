@@ -185,7 +185,7 @@ void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC)
 /* {{{ php_clear_mysql */
 void php_clear_mysql(MY_MYSQL *mysql) {
 	if (mysql->hash_key) {
-		efree(mysql->hash_key);
+		STR_RELEASE(mysql->hash_key);
 		mysql->hash_key = NULL;
 	}
 	if (!Z_ISUNDEF(mysql->li_read)) {
