@@ -53,8 +53,8 @@ enum _zend_ast_kind {
 	ZEND_AST_PARAMS,
 	ZEND_AST_UNPACK,
 
-	ZEND_AST_NAME,
-	ZEND_AST_NAME_FQ,
+	ZEND_AST_ASSIGN_OP,
+	ZEND_AST_BINARY_OP,
 
 	ZEND_AST_AND,
 	ZEND_AST_OR,
@@ -62,15 +62,21 @@ enum _zend_ast_kind {
 	ZEND_AST_GREATER,
 	ZEND_AST_GREATER_EQUAL,
 
-	ZEND_AST_CAST_NULL,
-	ZEND_AST_CAST_BOOL,
-	ZEND_AST_CAST_INT,
-	ZEND_AST_CAST_DOUBLE,
-	ZEND_AST_CAST_STRING,
-	ZEND_AST_CAST_ARRAY,
-	ZEND_AST_CAST_OBJECT,
+	ZEND_AST_CAST,
 
 	ZEND_AST_CONDITIONAL,
+
+	ZEND_AST_EMPTY,
+	ZEND_AST_ISSET,
+
+	ZEND_AST_SILENCE,
+	ZEND_AST_SHELL_EXEC,
+	ZEND_AST_ARRAY,
+	ZEND_AST_ARRAY_ELEM,
+
+	ZEND_AST_CONST,
+	ZEND_AST_CLASS_CONST,
+	ZEND_AST_RESOLVE_CLASS_NAME,
 };
 
 typedef unsigned short zend_ast_kind;
@@ -95,6 +101,8 @@ static inline zval *zend_ast_get_zval(zend_ast *ast) {
 
 ZEND_API zend_ast *zend_ast_create_constant(zval *zv);
 
+ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr);
+
 ZEND_API zend_ast *zend_ast_create_unary_ex(
 	zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0);
 ZEND_API zend_ast *zend_ast_create_binary_ex(
@@ -113,6 +121,9 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 ZEND_API zend_ast *zend_ast_copy(zend_ast *ast);
 ZEND_API void zend_ast_destroy(zend_ast *ast);
 
+static inline zend_ast *zend_ast_create_zval(zval *zv) {
+	return zend_ast_create_zval_ex(zv, 0);
+}
 static inline zend_ast *zend_ast_create_unary(zend_ast_kind kind, zend_ast *op0) {
 	return zend_ast_create_unary_ex(kind, 0, op0);
 }
@@ -127,6 +138,12 @@ static inline zend_ast *zend_ast_create_ternary(
 
 static inline zend_ast *zend_ast_create_var(zval *name) {
 	return zend_ast_create_unary(ZEND_AST_VAR, zend_ast_create_constant(name));
+}
+static inline zend_ast *zend_ast_create_binary_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
+	return zend_ast_create_binary_ex(ZEND_AST_BINARY_OP, opcode, op0, op1);
+}
+static inline zend_ast *zend_ast_create_assign_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
+	return zend_ast_create_binary_ex(ZEND_AST_ASSIGN_OP, opcode, op0, op1);
 }
 
 /* Temporary, for porting */

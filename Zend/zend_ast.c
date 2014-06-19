@@ -41,6 +41,15 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node)
 	return (zend_ast *) ast;
 }
 
+ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
+{
+	zend_ast_zval *ast = emalloc(sizeof(zend_ast_zval));
+	ast->kind = ZEND_CONST;
+	ast->attr = attr;
+	ZVAL_COPY_VALUE(&ast->val, zv);
+	return (zend_ast *) ast;
+}
+
 ZEND_API zend_ast* zend_ast_create_unary_ex(zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0)
 {
 	zend_ast *ast = emalloc(sizeof(zend_ast));

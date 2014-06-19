@@ -733,13 +733,10 @@ ZEND_API unary_op_type get_unary_op(int opcode)
 	switch (opcode) {
 		case ZEND_BW_NOT:
 			return (unary_op_type) bitwise_not_function;
-			break;
 		case ZEND_BOOL_NOT:
 			return (unary_op_type) boolean_not_function;
-			break;
 		default:
 			return (unary_op_type) NULL;
-			break;
 	}
 }
 
@@ -749,74 +746,54 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_ADD:
 		case ZEND_ASSIGN_ADD:
 			return (binary_op_type) add_function;
-			break;
 		case ZEND_SUB:
 		case ZEND_ASSIGN_SUB:
 			return (binary_op_type) sub_function;
-			break;
 		case ZEND_MUL:
 		case ZEND_ASSIGN_MUL:
 			return (binary_op_type) mul_function;
-			break;
 		case ZEND_POW:
 			return (binary_op_type) pow_function;
-			break;
 		case ZEND_DIV:
 		case ZEND_ASSIGN_DIV:
 			return (binary_op_type) div_function;
-			break;
 		case ZEND_MOD:
 		case ZEND_ASSIGN_MOD:
 			return (binary_op_type) mod_function;
-			break;
 		case ZEND_SL:
 		case ZEND_ASSIGN_SL:
 			return (binary_op_type) shift_left_function;
-			break;
 		case ZEND_SR:
 		case ZEND_ASSIGN_SR:
 			return (binary_op_type) shift_right_function;
-			break;
 		case ZEND_CONCAT:
 		case ZEND_ASSIGN_CONCAT:
 			return (binary_op_type) concat_function;
-			break;
 		case ZEND_IS_IDENTICAL:
 			return (binary_op_type) is_identical_function;
-			break;
 		case ZEND_IS_NOT_IDENTICAL:
 			return (binary_op_type) is_not_identical_function;
-			break;
 		case ZEND_IS_EQUAL:
 			return (binary_op_type) is_equal_function;
-			break;
 		case ZEND_IS_NOT_EQUAL:
 			return (binary_op_type) is_not_equal_function;
-			break;
 		case ZEND_IS_SMALLER:
 			return (binary_op_type) is_smaller_function;
-			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
 			return (binary_op_type) is_smaller_or_equal_function;
-			break;
 		case ZEND_BW_OR:
 		case ZEND_ASSIGN_BW_OR:
 			return (binary_op_type) bitwise_or_function;
-			break;
 		case ZEND_BW_AND:
 		case ZEND_ASSIGN_BW_AND:
 			return (binary_op_type) bitwise_and_function;
-			break;
 		case ZEND_BW_XOR:
 		case ZEND_ASSIGN_BW_XOR:
 			return (binary_op_type) bitwise_xor_function;
-			break;
 		case ZEND_BOOL_XOR:
 			return (binary_op_type) boolean_xor_function;
-			break;
 		default:
 			return (binary_op_type) NULL;
-			break;
 	}
 }
 
