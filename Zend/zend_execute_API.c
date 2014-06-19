@@ -449,8 +449,6 @@ ZEND_API int zend_is_true(zval *op) /* {{{ */
 }
 /* }}} */
 
-#include "../TSRM/tsrm_strtok_r.h"
-
 #define IS_VISITED_CONSTANT			0x80
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)
 #define Z_REAL_TYPE_P(p)			(Z_TYPE_P(p) & ~IS_VISITED_CONSTANT)

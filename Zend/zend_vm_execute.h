@@ -6781,6 +6781,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER
 {
 	USE_OPLINE
 	zend_function *op_array;
+	int closure_is_static, closure_is_being_defined_inside_static_context;
 
 	SAVE_OPLINE();
 
@@ -6789,7 +6790,13 @@ static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER
 		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
 	}
 
-	zend_create_closure(&EX_T(opline->result.var).tmp_var, (zend_function *) op_array, EG(scope), EG(This) TSRMLS_CC);
+	closure_is_static = op_array->common.fn_flags & ZEND_ACC_STATIC;
+	closure_is_being_defined_inside_static_context = EX(prev_execute_data) && EX(prev_execute_data)->function_state.function->common.fn_flags & ZEND_ACC_STATIC;
+	if (closure_is_static || closure_is_being_defined_inside_static_context) {
+		zend_create_closure(&EX_T(opline->result.var).tmp_var, (zend_function *) op_array,  EG(called_scope), NULL TSRMLS_CC);
+	} else {
+		zend_create_closure(&EX_T(opline->result.var).tmp_var, (zend_function *) op_array,  EG(scope), EG(This) TSRMLS_CC);
+	}
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -9306,7 +9313,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -10171,7 +10178,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -11037,7 +11044,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 			zval_ptr_dtor_nogc(&free_op2.var);
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -12483,7 +12490,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -15721,7 +15728,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -18067,7 +18074,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -20374,7 +20381,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 			zval_ptr_dtor_nogc(&free_op2.var);
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -23831,7 +23838,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -25473,7 +25480,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -26881,7 +26888,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -28195,7 +28202,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 			zval_ptr_dtor_nogc(&free_op2.var);
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -29937,7 +29944,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -33176,7 +33183,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -35288,7 +35295,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -37455,7 +37462,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 			zval_ptr_dtor_nogc(&free_op2.var);
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -40623,7 +40630,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {

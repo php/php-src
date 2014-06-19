@@ -1490,7 +1490,8 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_i
 	} else {
 		zval **return_value_ptr = &EX_TMP_VAR(execute_data_ptr, execute_data_ptr->opline->result.var)->var.ptr;
 		execute_data_ptr->function_state.function->internal_function.handler(
-			execute_data_ptr->opline->extended_value, *return_value_ptr, return_value_ptr,
+			execute_data_ptr->opline->extended_value + execute_data_ptr->call->num_additional_args,
+			*return_value_ptr, return_value_ptr,
 			execute_data_ptr->object, return_value_used TSRMLS_CC
 		);
 	}

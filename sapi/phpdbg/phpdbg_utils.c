@@ -32,6 +32,9 @@
 #	include "win32/time.h"
 #elif defined(HAVE_SYS_IOCTL_H) 
 #	include "sys/ioctl.h"
+#	ifndef GWINSZ_IN_SYS_IOCTL
+#		include <termios.h>
+#	endif
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -437,12 +440,12 @@ PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D) /* {{{ */
 
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-#elif defined(HAVE_SYS_IOCTL_H) 
+#elif defined(HAVE_SYS_IOCTL_H) && defined (TIOCGWINSZ)
 	struct winsize w;
 
-	columns = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_col : 100;
+	columns = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_col : 80;
 #else
-	columns = 100;
+	columns = 80;
 #endif
 	return columns;
 } /* }}} */
