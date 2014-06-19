@@ -1190,9 +1190,9 @@ PHP_FUNCTION(mysqli_get_links_stats)
 		return;	
 	}
 	array_init(return_value);
-	add_assoc_long_ex(return_value, "total", sizeof("total"), MyG(num_links));
-	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks"), MyG(num_active_persistent));
-	add_assoc_long_ex(return_value, "cached_plinks", sizeof("cached_plinks"), MyG(num_inactive_persistent));
+	add_assoc_long_ex(return_value, "total", sizeof("total") - 1, MyG(num_links));
+	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks") - 1, MyG(num_active_persistent));
+	add_assoc_long_ex(return_value, "cached_plinks", sizeof("cached_plinks") - 1, MyG(num_inactive_persistent));
 }
 /* }}} */
 
