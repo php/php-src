@@ -744,6 +744,27 @@ ZEND_API void convert_to_object(zval *op) /* {{{ */
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
 			{
+				zval key_value;
+				int key_type;
+				HashTable *arr_hash;
+				HashPosition pointer;
+
+				arr_hash = Z_ARRVAL_P(op);
+				for(
+					zend_hash_internal_pointer_reset_ex(arr_hash, &pointer);
+					(key_type = zend_hash_get_current_key_type_ex(arr_hash, &pointer)) != HASH_KEY_NON_EXISTENT;
+					zend_hash_move_forward_ex(arr_hash, &pointer)
+				   ) {
+					zend_hash_get_current_key_zval_ex(arr_hash, &key_value, &pointer);
+					if (key_type == HASH_KEY_IS_STRING && UNEXPECTED(Z_STRVAL(key_value)[0] == '\0')) {
+						if (Z_STRLEN(key_value) == 0) {
+							zend_error_noreturn(E_ERROR, "Cannot access empty property");
+						} else {
+							zend_error_noreturn(E_ERROR, "Cannot access property started with '\\0'");
+						}
+						return;
+					}
+				}
 				object_and_properties_init(op, zend_standard_class_def, Z_ARRVAL_P(op));
 				break;
 			}
