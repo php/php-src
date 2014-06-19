@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     code). (Adam)
   . Fixed bug #67433 (SIGSEGV when using count() on an object implementing
     Countable). (Matteo)
+  . Fixed bug #67399 (putenv with empty variable may lead to crash). (Stas)
 
 - CLI server:
   . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
