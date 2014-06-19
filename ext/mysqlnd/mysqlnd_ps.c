@@ -1183,8 +1183,8 @@ MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, zend_bool * const fe
 		*/
 		for (i = 0; i < stmt->result->field_count; i++) {
 			if (stmt->result_bind[i].bound == TRUE) {
-				zval_dtor(&stmt->result_bind[i].zv);
-				ZVAL_NULL(&stmt->result_bind[i].zv);
+				zval_dtor(Z_REFVAL(stmt->result_bind[i].zv));
+				ZVAL_NULL(Z_REFVAL(stmt->result_bind[i].zv));
 			}
 		}
 		stmt->result_zvals_separated_once = TRUE;
