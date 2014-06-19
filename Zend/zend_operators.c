@@ -651,6 +651,22 @@ try_again:
 }
 /* }}} */
 
+static void check_array_has_valid_object_keys(HashTable *ht) /* {{{ */
+{
+	HashPosition pointer;
+	int key_type;
+	zval key_value;
+	for (zend_hash_internal_pointer_reset_ex(ht, &pointer);
+		 (key_type = zend_hash_get_current_key_type_ex(ht, &pointer)) != HASH_KEY_NON_EXISTENT;
+		 zend_hash_move_forward_ex(ht, &pointer)) {
+		zend_hash_get_current_key_zval_ex(ht, &key_value, &pointer);
+		if (key_type == HASH_KEY_IS_STRING && UNEXPECTED(Z_STRVAL(key_value)[0] == '\0')) {
+			zend_error_noreturn(E_ERROR, "Cannot convert an array with empty keys into an object");
+		}
+	}
+}
+/* }}} */
+
 ZEND_API void ZEND_FASTCALL convert_to_object(zval *op) /* {{{ */
 {
 try_again:
@@ -662,6 +678,7 @@ try_again:
 					/* TODO: try not to duplicate immutable arrays as well ??? */
 					ht = zend_array_dup(ht);
 				}
+				check_array_has_valid_object_keys(ht);
 				object_and_properties_init(op, zend_standard_class_def, ht);
 				break;
 			}
