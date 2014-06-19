@@ -2764,7 +2764,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 		do {
 			smart_str tmp_str = {0, 0};
 			if (mode & TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
-				if (tmp_str.s->len) {
+				if (tmp_str.s) {
 					smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 				}
 				smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
@@ -2792,7 +2792,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 			{
 				char * name_esc = mysqlnd_escape_string_for_tx_name_in_comment(name TSRMLS_CC);
 				char * query;
-				unsigned int query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", name_esc? name_esc:"", tmp_str.s->val? tmp_str.s->val:"");
+				unsigned int query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", name_esc? name_esc:"", tmp_str.s? tmp_str.s->val:"");
 				smart_str_free(&tmp_str);
 				if (name_esc) {
 					mnd_efree(name_esc);

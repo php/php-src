@@ -111,12 +111,12 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
 					DBG_RETURN(NULL);
 				}
 				/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
-				set->data = mnd_emalloc((size_t)(result->stored_data->row_count * result->meta->field_count * sizeof(zval *)));
+				set->data = mnd_emalloc((size_t)(result->stored_data->row_count * result->meta->field_count * sizeof(zval)));
 				if (!set->data) {
 					SET_OOM_ERROR(*conn->error_info);
 					DBG_RETURN(NULL);
 				}
-				memset(set->data, 0, (size_t)(result->stored_data->row_count * result->meta->field_count * sizeof(zval *)));
+				memset(set->data, 0, (size_t)(result->stored_data->row_count * result->meta->field_count * sizeof(zval)));;
 			}
 			/* Position at the first row */
 			set->data_cursor = set->data;
