@@ -204,7 +204,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED
 
 	DBG_INF_FMT("field_count=%u", unbuf->field_count);
 	if (unbuf->last_row_data) {
-		unsigned int i, ctor_called_count = 0;
+		unsigned int i;
 		for (i = 0; i < unbuf->field_count; i++) {
 			//???mysqlnd_rset_zval_ptr_dtor(&(unbuf->last_row_data[i]), unbuf->ps ? MYSQLND_RES_PS_UNBUF : MYSQLND_RES_NORMAL, &copy_ctor_called TSRMLS_CC);
 			zval_ptr_dtor(&(unbuf->last_row_data[i]));
