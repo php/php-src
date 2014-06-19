@@ -505,7 +505,6 @@ mysqlnd_stmt_copy_it(zval ** copies, zval * original, unsigned int param_count, 
 		*copies = mnd_ecalloc(param_count, sizeof(zval));
 	}
 	if (*copies) {
-		ZVAL_DEREF(original);
 		ZVAL_COPY(&(*copies)[current], original);
 		//????Z_SET_REFCOUNT_P((*copies)[current], 1);
 		//zval_copy_ctor((*copies)[current]);
@@ -567,11 +566,13 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 	DBG_ENTER("mysqlnd_stmt_execute_prepare_param_types");
 	for (i = 0; i < stmt->param_count; i++) {
 		short current_type = stmt->param_bind[i].type;
+		zval *parameter = &stmt->param_bind[i].zv;
 
-		if (Z_TYPE(stmt->param_bind[i].zv) != IS_NULL && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
+		ZVAL_DEREF(parameter);
+		if (!Z_ISNULL_P(parameter) && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
 			/* always copy the var, because we do many conversions */
-			if (Z_TYPE(stmt->param_bind[i].zv) != IS_LONG &&
-				PASS != mysqlnd_stmt_copy_it(copies_param, &stmt->param_bind[i].zv, stmt->param_count, i TSRMLS_CC))
+			if (Z_TYPE_P(parameter) != IS_LONG &&
+				PASS != mysqlnd_stmt_copy_it(copies_param, parameter, stmt->param_count, i TSRMLS_CC))
 			{
 				SET_OOM_ERROR(*stmt->error_info);
 				goto end;
@@ -580,15 +581,14 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 			  if it doesn't fit in a long send it as a string.
 			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 			*/
-			if (Z_TYPE(stmt->param_bind[i].zv) != IS_LONG) {
-				zval *tmp_data = (*copies_param && !Z_ISUNDEF((*copies_param)[i]))? &(*copies_param)[i]: &stmt->param_bind[i].zv;
+			if (Z_TYPE_P(parameter) != IS_LONG) {
+				zval *tmp_data = (*copies_param && !Z_ISUNDEF((*copies_param)[i]))? &(*copies_param)[i]: parameter;
 				/*
 				  Because converting to double and back to long can lead
 				  to losing precision we need second variable. Conversion to double is to see if 
 				  value is too big for a long. As said, precision could be lost.
 				*/
 				zval tmp_data_copy;
-				ZVAL_DEREF(tmp_data);
 				ZVAL_COPY(&tmp_data_copy, tmp_data);
 				convert_to_double_ex(&tmp_data_copy);
 
@@ -622,19 +622,21 @@ mysqlnd_stmt_execute_store_types(MYSQLND_STMT_DATA * stmt, zval * copies, zend_u
 	unsigned int i;
 	for (i = 0; i < stmt->param_count; i++) {
 		short current_type = stmt->param_bind[i].type;
+		zval *parameter = &stmt->param_bind[i].zv;
 		/* our types are not unsigned */
 #if SIZEOF_LONG==8  
 		if (current_type == MYSQL_TYPE_LONG) {
 			current_type = MYSQL_TYPE_LONGLONG;
 		}
 #endif
-		if (!Z_ISNULL(stmt->param_bind[i].zv) && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
+		ZVAL_DEREF(parameter);
+		if (!Z_ISNULL_P(parameter) && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
 			/*
 			  if it doesn't fit in a long send it as a string.
 			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 			*/
-			if (Z_TYPE(stmt->param_bind[i].zv) != IS_LONG) {
-				const zval *tmp_data = (copies && !Z_ISUNDEF(copies[i]))? &copies[i]: &stmt->param_bind[i].zv;
+			if (Z_TYPE_P(parameter) != IS_LONG) {
+				const zval *tmp_data = (copies && !Z_ISUNDEF(copies[i]))? &copies[i] : parameter;
 				/*
 				  In case of IS_LONG we do nothing, it is ok, in case of string, we just need to set current_type.
 				  The actual transformation has been performed several dozens line above.
@@ -666,21 +668,26 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 	for (i = 0; i < stmt->param_count; i++) {
 		unsigned short is_longlong = 0;
 		unsigned int j;
-		zval *the_var = &stmt->param_bind[i].zv;
+		zval *bind_var, *the_var = &stmt->param_bind[i].zv;
 
-		if (!the_var || (stmt->param_bind[i].type != MYSQL_TYPE_LONG_BLOB && Z_TYPE_P(the_var) == IS_NULL)) {
+		bind_var = the_var;
+		ZVAL_DEREF(the_var);
+		if ((stmt->param_bind[i].type != MYSQL_TYPE_LONG_BLOB && Z_TYPE_P(the_var) == IS_NULL)) {
 			continue;
 		}
-		for (j = i + 1; j < stmt->param_count; j++) {
-			if (&stmt->param_bind[j].zv == the_var) {
-				/* Double binding of the same zval, make a copy */
-				if (!*copies_param || Z_ISUNDEF((*copies_param)[i])) {
-					if (PASS != mysqlnd_stmt_copy_it(copies_param, the_var, stmt->param_count, i TSRMLS_CC)) {
-						SET_OOM_ERROR(*stmt->error_info);
-						goto end;
+
+		if (Z_ISREF_P(bind_var)) {
+			for (j = i + 1; j < stmt->param_count; j++) {
+				if (Z_ISREF(stmt->param_bind[j].zv) && Z_REFVAL(stmt->param_bind[j].zv) == the_var) {
+					/* Double binding of the same zval, make a copy */
+					if (!*copies_param || Z_ISUNDEF((*copies_param)[i])) {
+						if (PASS != mysqlnd_stmt_copy_it(copies_param, the_var, stmt->param_count, i TSRMLS_CC)) {
+							SET_OOM_ERROR(*stmt->error_info);
+							goto end;
+						}
 					}
+					break;
 				}
-				break;
 			}
 		}
 
@@ -701,7 +708,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 				/* fall-through */
 			case MYSQL_TYPE_LONG:
 				{
-					zval *tmp_data = (*copies_param && !Z_ISUNDEF((*copies_param)[i]))? &(*copies_param)[i]: &stmt->param_bind[i].zv;
+					zval *tmp_data = (*copies_param && !Z_ISUNDEF((*copies_param)[i]))? &(*copies_param)[i]: the_var;
 					if (Z_TYPE_P(tmp_data) == IS_STRING) {
 						goto use_string;
 					}
@@ -749,9 +756,12 @@ mysqlnd_stmt_execute_store_param_values(MYSQLND_STMT_DATA * stmt, zval * copies,
 {
 	unsigned int i;
 	for (i = 0; i < stmt->param_count; i++) {
-		zval * data = (copies && !Z_ISUNDEF(copies[i]))? &copies[i]: &stmt->param_bind[i].zv;
+		zval *data, *parameter = &stmt->param_bind[i].zv;
+
+		ZVAL_DEREF(parameter);
+		data = (copies && !Z_ISUNDEF(copies[i]))? &copies[i]: parameter;
 		/* Handle long data */
-		if (!Z_ISUNDEF(stmt->param_bind[i].zv) && Z_TYPE_P(data) == IS_NULL) {
+		if (!Z_ISUNDEF_P(parameter) && Z_TYPE_P(data) == IS_NULL) {
 			(buf + null_byte_offset)[i/8] |= (zend_uchar) (1 << (i & 7));
 		} else {
 			switch (stmt->param_bind[i].type) {
