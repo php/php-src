@@ -787,7 +787,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 
 					for (i = 0; i < field_count; i++, field++) {
 						zval * data = &result->unbuf->last_row_data[i];
-						unsigned int len = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
+						unsigned int len = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 /* BEGIN difference between normal normal fetch and _c */
 						if (Z_TYPE_P(data) != IS_NULL) {
@@ -905,7 +905,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 
 				for (i = 0; i < field_count; i++, field++) {
 					zval * data = &result->unbuf->last_row_data[i];
-					unsigned int len = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
+					unsigned int len = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 					if (flags & MYSQLND_FETCH_NUM) {
 						Z_TRY_ADDREF_P(data);
@@ -1070,7 +1070,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 				for (i = 0; i < field_count; i++) {
 					zval * data = &current_row[i];
 
-					set->lengths[i] = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
+					set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 					if (Z_TYPE_P(data) != IS_NULL) {
 						convert_to_string(data);
@@ -1158,7 +1158,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 		for (i = 0; i < field_count; i++) {
 			zval * data = &current_row[i];
 
-			set->lengths[i] = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
+			set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 			if (flags & MYSQLND_FETCH_NUM) {
 				Z_TRY_ADDREF_P(data);
@@ -1254,7 +1254,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 		for (i = 0; i < field_count; i++) {
 			zval * data = &current_row[i];
 
-			set->lengths[i] = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
+			set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 			
 			if (flags & MYSQLND_FETCH_NUM) {
 				Z_TRY_ADDREF_P(data);
