@@ -24,7 +24,7 @@
 
 #include "zend.h"
 
-typedef enum _zend_ast_kind {
+enum _zend_ast_kind {
 	/* first 256 kinds are reserved for opcodes */
 	ZEND_CONST = 256, /* TODO.AST: Split in constant lookup and literal zval */
 	ZEND_BOOL_AND,
@@ -71,18 +71,21 @@ typedef enum _zend_ast_kind {
 	ZEND_AST_CAST_OBJECT,
 
 	ZEND_AST_CONDITIONAL,
-} zend_ast_kind;
+};
+
+typedef unsigned short zend_ast_kind;
+typedef unsigned short zend_ast_attr;
 
 struct _zend_ast {
-	unsigned short kind;
-	unsigned short EA;
-	zend_uint children;
-	zend_ast *child[1];
+	zend_ast_kind kind; /* Type of the node (either opcode or ZEND_AST_* constant) */
+	zend_ast_attr attr; /* Additional attribute, use depending on node type */
+	zend_uint children; /* Number of children */
+	zend_ast *child[1]; /* Array of children (using struct hack) */
 };
 
 typedef struct _zend_ast_zval {
-	unsigned short kind;
-	unsigned short EA;
+	zend_ast_kind kind;
+	zend_ast_attr attr;
 	zval val;
 } zend_ast_zval;
 
@@ -92,10 +95,14 @@ static inline zval *zend_ast_get_zval(zend_ast *ast) {
 
 ZEND_API zend_ast *zend_ast_create_constant(zval *zv);
 
-ZEND_API zend_ast *zend_ast_create_unary(uint kind, zend_ast *op0);
-ZEND_API zend_ast *zend_ast_create_binary(uint kind, zend_ast *op0, zend_ast *op1);
-ZEND_API zend_ast *zend_ast_create_ternary(uint kind, zend_ast *op0, zend_ast *op1, zend_ast *op2);
-ZEND_API zend_ast* zend_ast_create_dynamic(uint kind);
+ZEND_API zend_ast *zend_ast_create_unary_ex(
+	zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0);
+ZEND_API zend_ast *zend_ast_create_binary_ex(
+	zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0, zend_ast *op1);
+ZEND_API zend_ast *zend_ast_create_ternary_ex(
+	zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0, zend_ast *op1, zend_ast *op2);
+
+ZEND_API zend_ast* zend_ast_create_dynamic(zend_ast_kind kind);
 ZEND_API void zend_ast_dynamic_add(zend_ast **ast, zend_ast *op);
 ZEND_API void zend_ast_dynamic_shrink(zend_ast **ast);
 
@@ -105,6 +112,18 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 
 ZEND_API zend_ast *zend_ast_copy(zend_ast *ast);
 ZEND_API void zend_ast_destroy(zend_ast *ast);
+
+static inline zend_ast *zend_ast_create_unary(zend_ast_kind kind, zend_ast *op0) {
+	return zend_ast_create_unary_ex(kind, 0, op0);
+}
+static inline zend_ast *zend_ast_create_binary(zend_ast_kind kind, zend_ast *op0, zend_ast *op1) {
+	return zend_ast_create_binary_ex(kind, 0, op0, op1);
+}
+static inline zend_ast *zend_ast_create_ternary(
+	zend_ast_kind kind, zend_ast *op0, zend_ast *op1, zend_ast *op2
+) {
+	return zend_ast_create_ternary_ex(kind, 0, op0, op1, op2);
+}
 
 static inline zend_ast *zend_ast_create_var(zval *name) {
 	return zend_ast_create_unary(ZEND_AST_VAR, zend_ast_create_constant(name));

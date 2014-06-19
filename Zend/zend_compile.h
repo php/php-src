@@ -89,8 +89,8 @@ typedef struct _znode { /* used only during compilation */
 
 /* Temporarily defined here, to avoid header ordering issues */
 typedef struct _zend_ast_znode {
-	unsigned short kind;
-	unsigned short EA;
+	zend_ast_kind kind;
+	zend_ast_attr attr;
 	znode node;
 } zend_ast_znode;
 ZEND_API zend_ast *zend_ast_create_znode(znode *node);
