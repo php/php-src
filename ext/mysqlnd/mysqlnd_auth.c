@@ -485,7 +485,6 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 						   TSRMLS_DC)
 {
 	RSA * ret = NULL;
-	int len;
 	const char * fname = (net_options->sha256_server_public_key && net_options->sha256_server_public_key[0] != '\0')? 
 								net_options->sha256_server_public_key:
 								MYSQLND_G(sha256_server_public_key);
