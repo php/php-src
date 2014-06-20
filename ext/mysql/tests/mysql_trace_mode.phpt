@@ -31,7 +31,7 @@ require_once("clean_table.inc");
 --EXPECTF--
 Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 I don\'t mind character sets, do I?\n
-Warning: mysql_query(): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'BOGUS_SQL' at line 1 in %s on line %d
+Warning: mysql_query(): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'BOGUS_SQL' at line 1 in %s on line %d
 done!
 
 Warning: Unknown: 1 result set(s) not freed. Use mysql_free_result to free result sets which were requested using mysql_query() in %s on line %d
