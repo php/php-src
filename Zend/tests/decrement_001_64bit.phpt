@@ -1,5 +1,7 @@
 --TEST--
 decrementing different variables
+--INI--
+precision=14
 --FILE--
 <?php
 

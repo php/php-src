@@ -1,5 +1,7 @@
 --TEST--
 double/bigint to string conversion tests (64bit)
+--INI--
+precision=14
 --FILE--
 <?php
 

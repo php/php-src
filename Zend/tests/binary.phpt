@@ -1,5 +1,7 @@
 --TEST--
 testing binary literals
+--INI--
+precision=32
 --FILE--
 <?php
 var_dump(0b1);
