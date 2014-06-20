@@ -44,6 +44,13 @@
 #include <sys/resource.h>
 #endif
 
+#ifdef HAVE_SCHED_SETAFFINITY
+#ifndef __USE_GNU
+#define __USE_GNU
+#endif
+#include <sched.h>
+#endif
+
 #include <errno.h>
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
@@ -137,6 +144,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_setpriority, 0, 0, 1)
 ZEND_END_ARG_INFO()
 #endif
 
+#ifdef HAVE_DAEMON
+	ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_daemonize, 0, 0, 0)
+	ZEND_ARG_INFO(0, nochdir)
+	ZEND_ARG_INFO(0, noclose)
+	ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_SCHED_SETAFFINITY
+	ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_setaffinity, 0, 0, 2)
+	ZEND_ARG_INFO(0, pid)
+	ZEND_ARG_INFO(0, cpu_id)
+	ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_strerror, 0, 0, 1)
         ZEND_ARG_INFO(0, errno)
 ZEND_END_ARG_INFO()
@@ -172,6 +193,12 @@ const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_sigwaitinfo,	arginfo_pcntl_sigwaitinfo)
 	PHP_FE(pcntl_sigtimedwait,	arginfo_pcntl_sigtimedwait)
 #endif
+#ifdef HAVE_DAEMON
+	PHP_FE(pcntl_daemonize,	arginfo_pcntl_daemonize)
+#endif
+#ifdef HAVE_SCHED_SETAFFINITY
+	PHP_FE(pcntl_setaffinity, arginfo_pcntl_setaffinity)
+#endif
 	PHP_FE_END
 };
 
@@ -201,6 +228,11 @@ static void pcntl_signal_dispatch();
   
 void php_register_signal_constants(INIT_FUNC_ARGS)
 {
+
+#ifdef HAVE_SCHED_SETAFFINITY
+	/* cpu affinity*/
+	REGISTER_LONG_CONSTANT("PCNTL_CPU_NUM",  (long) sysconf(_SC_NPROCESSORS_ONLN), CONST_CS | CONST_PERSISTENT);
+#endif
 
 	/* Wait Constants */
 #ifdef WNOHANG
@@ -1177,6 +1209,55 @@ PHP_FUNCTION(pcntl_setpriority)
 }
 /* }}} */
 #endif
+
+#ifdef HAVE_SCHED_SETAFFINITY
+/* {{{ proto bool pcntl_setaffinity(int pid, int cpu_id)
+   set the cpu affinity of any process */
+PHP_FUNCTION(pcntl_setaffinity)
+{
+	long pid, cpu;
+	cpu_set_t cpu_set;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &pid, &cpu) == FAILURE) {
+		return;
+	}
+	int cpu_num = sysconf(_SC_NPROCESSORS_ONLN);
+	if (cpu >= cpu_num)	{
+		zend_error(E_WARNING, "cpu[%ld] not exists.", cpu);
+		RETURN_FALSE;
+	}
+	CPU_ZERO(&cpu_set);
+	CPU_SET(cpu, &cpu_set);
+
+	if (sched_setaffinity(pid, sizeof(cpu_set), &cpu_set) < 0) {
+		zend_error(E_WARNING, "set cpu affinity fail. errno=%d", errno);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
+#ifdef HAVE_DAEMON
+/* {{{ proto bool pcntl_daemonize(int nochdir, int noclose)
+   run in the background */
+PHP_FUNCTION(pcntl_daemonize)
+{
+	long nochdir = 0, noclose = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &nochdir, &noclose) == FAILURE)	{
+		return;
+	}
+
+	if (daemon(nochdir, noclose) < 0) {
+		zend_error(E_WARNING, "daemonize fail. errno=%d", errno);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
 
 /* {{{ proto int pcntl_get_last_error(void)
    Retrieve the error number set by the last pcntl function which failed. */

@@ -10,5 +10,7 @@ if test "$PHP_PCNTL" != "no"; then
   AC_CHECK_FUNCS(waitpid, [ AC_DEFINE(HAVE_WAITPID,1,[ ]) ], [ AC_MSG_ERROR(pcntl: waitpid() not supported by this platform) ])
   AC_CHECK_FUNCS(sigaction, [ AC_DEFINE(HAVE_SIGACTION,1,[ ]) ], [ AC_MSG_ERROR(pcntl: sigaction() not supported by this platform) ])
   AC_CHECK_FUNCS([getpriority setpriority wait3 sigprocmask sigwaitinfo sigtimedwait])
+  AC_CHECK_FUNCS(daemon, [ AC_DEFINE(HAVE_DAEMON,1,[ ]) ], [ AC_MSG_ERROR(pcntl: daemon() not supported by this platform) ])
+  AC_CHECK_FUNCS(sched_setaffinity, [ AC_DEFINE(HAVE_SCHED_SETAFFINITY,1,[ ]) ], [ AC_MSG_ERROR(pcntl: sched_setaffinity() not supported by this platform) ])
   PHP_NEW_EXTENSION(pcntl, pcntl.c php_signal.c, $ext_shared, cli)
 fi
