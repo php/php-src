@@ -103,9 +103,9 @@ PHP_FUNCTION(settype)
 	ZVAL_DEREF(var);
 	SEPARATE_ZVAL_NOREF(var);
 	if (!strcasecmp(type, "integer")) {
-		convert_to_long(var);
+		convert_to_bigint_or_long(var);
 	} else if (!strcasecmp(type, "int")) {
-		convert_to_long(var);
+		convert_to_bigint_or_long(var);
 	} else if (!strcasecmp(type, "float")) {
 		convert_to_double(var);
 	} else if (!strcasecmp(type, "double")) { /* deprecated */

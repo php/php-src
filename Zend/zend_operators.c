@@ -694,10 +694,10 @@ ZEND_API void convert_to_bigint_or_long_base(zval *op, int base) /* {{{ */
 				zval dst;
 				TSRMLS_FETCH();
 
-				convert_object_to_type(op, &dst, IS_BIGINT, convert_to_bigint_or_long);
+				convert_object_to_type(op, &dst, IS_BIGINT_OR_LONG, convert_to_bigint_or_long);
 				zval_dtor(op);
 
-				if (Z_TYPE(dst) == IS_BIGINT) {
+				if (Z_TYPE(dst) == IS_BIGINT || Z_TYPE(dst) == IS_LONG) {
 					ZVAL_COPY_VALUE(op, &dst);
 				} else {
 					zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name->val);
