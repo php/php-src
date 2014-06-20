@@ -237,7 +237,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex TSRMLS
 	char				*pattern;
 	int					 do_study = 0;
 	int					 poptions = 0;
-	int				count = 0;
 	unsigned const char *tables = NULL;
 #if HAVE_SETLOCALE
 	char				*locale;
@@ -261,6 +260,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex TSRMLS
 		 * We use a quick pcre_fullinfo() check to see whether cache is corrupted, and if it
 		 * is, we flush it and compile the pattern from scratch.
 		 */
+//???		int	count = 0;
+//???
 //???		if (pcre_fullinfo(pce->re, NULL, PCRE_INFO_CAPTURECOUNT, &count) == PCRE_ERROR_BADMAGIC) {
 //???			zend_hash_clean(&PCRE_G(pcre_cache));
 //???		} else {
@@ -581,7 +582,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 	int				 g_notempty = 0;	/* If the match should not be empty */
 	const char	   **stringlist;		/* Holds list of subpatterns */
 	char 		   **subpat_names;		/* Array for named subpatterns */
-	int				 i, rc;
+	int				 i;
 	int				 subpats_order;		/* Order of subpattern matches */
 	int				 offset_capture;    /* Capture match offsets: yes/no */
 	unsigned char   *mark = NULL;       /* Target for MARK name */
@@ -1109,8 +1110,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 					*piece,				/* The current piece of subject */
 					*replace_end=NULL,	/* End of replacement string */
 					 walk_last;			/* Last walked character */
-	int				 rc,
-					 result_len; 		/* Length of result */
+	int				 result_len; 		/* Length of result */
 	unsigned char   *mark = NULL;       /* Target for MARK name */
 	zend_string		*result;			/* Result of replacement */
 	zend_string     *eval_result=NULL;  /* Result of eval or custom function */
@@ -1570,7 +1570,6 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	int				 next_offset;		/* End of the last delimiter match + 1 */
 	int				 g_notempty = 0;	/* If the match should not be empty */
 	char			*last_match;		/* Location of last match */
-	int				 rc;
 	int				 no_empty;			/* If NO_EMPTY flag is set */
 	int				 delim_capture; 	/* If delimiters should be captured */
 	int				 offset_capture;	/* If offsets should be captured */
@@ -1855,7 +1854,6 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	ulong			 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
 										   entries */
-	int				 rc;
 	ALLOCA_FLAG(use_heap);
 	
 	invert = flags & PREG_GREP_INVERT ? 1 : 0;
