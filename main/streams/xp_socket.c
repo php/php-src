@@ -57,7 +57,7 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 	int didwrite;
 	struct timeval *ptimeout;
 
-	if (sock->socket == -1) {
+	if (!sock || sock->socket == -1) {
 		return 0;
 	}
 
@@ -116,7 +116,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 	int retval;
 	struct timeval *ptimeout;
 
-	if (sock->socket == -1) {
+	if (!sock || sock->socket == -1) {
 		return;
 	}
 	
@@ -146,7 +146,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	int nr_bytes = 0;
 
-	if (sock->socket == -1) {
+	if (!sock || sock->socket == -1) {
 		return 0;
 	}
 
@@ -178,6 +178,10 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 #ifdef PHP_WIN32
 	int n;
 #endif
+
+	if (!sock) {
+		return 0;
+	}
 
 	if (close_handle) {
 
@@ -271,6 +275,10 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	php_stream_xport_param *xparam;
 	
+	if (!sock) {
+		return PHP_STREAM_OPTION_RETURN_NOTIMPL;
+	}
+
 	switch(option) {
 		case PHP_STREAM_OPTION_CHECK_LIVENESS:
 			{
@@ -412,6 +420,10 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+
+	if (!sock) {
+		return FAILURE;
+	}
 
 	switch(castas)	{
 		case PHP_STREAM_AS_STDIO:

@@ -185,7 +185,7 @@ void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC)
 /* {{{ php_clear_mysql */
 void php_clear_mysql(MY_MYSQL *mysql) {
 	if (mysql->hash_key) {
-		efree(mysql->hash_key);
+		STR_RELEASE(mysql->hash_key);
 		mysql->hash_key = NULL;
 	}
 	if (!Z_ISUNDEF(mysql->li_read)) {
@@ -497,7 +497,7 @@ static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
 		mysqli_object *intern = Z_MYSQLI_P(zv);
 		if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
 			/* We know that we have a mysqli object, so this failure should be emitted */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);
 			return NULL;
 		}
 		mysql = (MY_MYSQL *)(my_res->ptr);

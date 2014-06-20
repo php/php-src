@@ -561,7 +561,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 		case PDO_PARAM_ZVAL:
 			if (value && value_len == sizeof(zval)) {
 				int need_copy = (new_type != PDO_PARAM_ZVAL || stmt->dbh->stringify) ? 1 : 0;
-				zval *zv = *(zval**)value;
+				zval *zv = (zval**)value;
 				ZVAL_ZVAL(dest, zv, need_copy, 1);
 			} else {
 				ZVAL_NULL(dest);
