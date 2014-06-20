@@ -543,20 +543,18 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 		DBG_ERR("server_public_key is not set");
 		DBG_RETURN(NULL);
 	} else {
-		char * key_str = NULL;
+		zend_string * key_str;
 		DBG_INF_FMT("Key in a file. [%s]", fname);
 		stream = php_stream_open_wrapper((char *) fname, "rb", REPORT_ERRORS, NULL);
 
 		if (stream) {
-			if ((len = php_stream_copy_to_mem(stream, &key_str, PHP_STREAM_COPY_ALL, 0)) >= 0 ) {
-				BIO * bio = BIO_new_mem_buf(key_str, len);
+			if ((key_str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
+				BIO * bio = BIO_new_mem_buf(key_str->val, key_str->len);
 				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 				BIO_free(bio);
 				DBG_INF("Successfully loaded");
-			}
-			if (key_str) {
-				DBG_INF_FMT("Public key:%*.s", len, key_str);
-				efree(key_str);
+				DBG_INF_FMT("Public key:%*.s", key_str->len, key_str->val);
+				STR_RELEASE(key_str);
 			}
 			php_stream_free(stream, PHP_STREAM_FREE_CLOSE);
 		}
