@@ -524,20 +524,22 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			/* it leaked: Lets deliberately NOT pefree it so that the memory manager shows it
 			 * as leaked; it will log a warning, but lets help it out and display what kind
 			 * of stream it was. */
-			char *leakinfo;
-			spprintf(&leakinfo, 0, __FILE__ "(%d) : Stream of type '%s' %p (path:%s) was not closed\n", __LINE__, stream->ops->label, stream, stream->orig_path);
+			if (!CG(unclean_shutdown)) {
+				char *leakinfo;
+				spprintf(&leakinfo, 0, __FILE__ "(%d) : Stream of type '%s' %p (path:%s) was not closed\n", __LINE__, stream->ops->label, stream, stream->orig_path);
 
-			if (stream->orig_path) {
-				pefree(stream->orig_path, stream->is_persistent);
-				stream->orig_path = NULL;
-			}
+				if (stream->orig_path) {
+					pefree(stream->orig_path, stream->is_persistent);
+					stream->orig_path = NULL;
+				}
 
 # if defined(PHP_WIN32)
-			OutputDebugString(leakinfo);
+				OutputDebugString(leakinfo);
 # else
-			fprintf(stderr, "%s", leakinfo);
+				fprintf(stderr, "%s", leakinfo);
 # endif
-			efree(leakinfo);
+				efree(leakinfo);
+			}
 		} else {
 			if (stream->orig_path) {
 				pefree(stream->orig_path, stream->is_persistent);
