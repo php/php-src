@@ -650,7 +650,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 				if (stmt->result_bind[i].bound == TRUE) {
 					zval *result = &stmt->result_bind[i].zv;
 					ZVAL_DEREF(result);
-					zval_copy_ctor(result);
+					Z_TRY_ADDREF_P(result);
 				}
 			}
 		}
@@ -809,7 +809,7 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int
 
 							ZVAL_COPY_VALUE(result, &current_row[i]);
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-							zval_copy_ctor(result);
+							Z_TRY_ADDREF_P(result);
 #endif
 						} else {
 							ZVAL_NULL(result);
@@ -2031,7 +2031,7 @@ mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s TSRMLS_DC)
 			*/
 			if (Z_REFCOUNTED(stmt->result_bind[i].zv) && Z_REFCOUNT(stmt->result_bind[i].zv) > 1) {
 #ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-				zval_copy_ctor(&stmt->result_bind[i].zv);
+				Z_TRY_ADDREF_P(&stmt->result_bind[i].zv);
 #endif
 				zval_ptr_dtor(&stmt->result_bind[i].zv);
 			} else {
@@ -2041,7 +2041,7 @@ mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s TSRMLS_DC)
 				  which the user has lost reference.
 				*/
 #ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-				ZVAL_NULL(&stmt->result_bind[i].zv);
+			//???		ZVAL_NULL(&stmt->result_bind[i].zv);
 #endif
 				zval_ptr_dtor(&stmt->result_bind[i].zv);
 			}
@@ -2086,7 +2086,7 @@ mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param
 		*/
 		if (Z_REFCOUNTED(stmt->result_bind[param_no].zv) && Z_REFCOUNT(stmt->result_bind[param_no].zv) > 1) {
 #ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-			zval_copy_ctor(&stmt->result_bind[param_no].zv);
+			Z_TRY_ADDREF_P(&stmt->result_bind[param_no].zv);
 #endif
 			zval_ptr_dtor(&stmt->result_bind[param_no].zv);
 		} else {
@@ -2096,7 +2096,7 @@ mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param
 			  which the user has lost reference.
 			*/
 #ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-			ZVAL_NULL(&stmt->result_bind[param_no].zv);
+			//???ZVAL_NULL(&stmt->result_bind[param_no].zv);
 #endif
 			zval_ptr_dtor(&stmt->result_bind[param_no].zv);
 		}
