@@ -193,6 +193,7 @@ static inline zend_uchar is_numeric_string_ex(const char *str, int length, long 
 		/* Count the number of digits. If a decimal point/exponent is found,
 		 * it's a double. */
 		for (type = IS_LONG;; digits++, ptr++) {
+check_digits:
 			if (ZEND_IS_DIGIT(*ptr) || (base == 16 && ZEND_IS_XDIGIT(*ptr))) {
 				continue;
 			} else if (base == 10) {
@@ -246,6 +247,8 @@ process_double:
 			local_dval = zend_strtod(str, &ptr);
 		} else if (allow_errors != 1 && dp_or_e != -1) {
 			dp_or_e = (*ptr++ == '.') ? 1 : 2;
+			/* continue checking digits to ensure string is well-formed */
+			goto check_digits;
 		}
 	} else {
 		return 0;
