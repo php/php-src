@@ -1156,6 +1156,9 @@ convert_to_array:
 						zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
 					}
 					break;
+				/* Bigints are ints so far as the user cares, so don't error */
+				case IS_BIGINT:
+					break;
 				case IS_DOUBLE:
 				case IS_NULL:
 				case IS_FALSE:
@@ -1278,6 +1281,9 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 					if (type != BP_VAR_IS) {
 						zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
 					}
+					break;
+				/* Bigints are ints so far as the user cares, so don't error */
+				case IS_BIGINT:
 					break;
 				case IS_DOUBLE:
 				case IS_NULL:
