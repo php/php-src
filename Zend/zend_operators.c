@@ -3439,14 +3439,45 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 	int oflow1, oflow2;
 	long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
+	zend_bigint *big1 = NULL, *big2 = NULL;
 
-	if ((ret1=is_numeric_string_ex(Z_STRVAL_P(s1), Z_STRLEN_P(s1), &lval1, &dval1, NULL, 0, &oflow1)) &&
-		(ret2=is_numeric_string_ex(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, NULL, 0, &oflow2))) {
-#if ULONG_MAX == 0xFFFFFFFF
-		/* bigints shall be handled as strings for the purposes of this */
-		if (ret1 == IS_BIGINT || ret2 == IS_BIGINT) {
-			goto string_cmp;
+	if ((ret1=is_numeric_string_ex(Z_STRVAL_P(s1), Z_STRLEN_P(s1), &lval1, &dval1, &big1, 0, &oflow1)) &&
+		(ret2=is_numeric_string_ex(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, &big2, 0, &oflow2))) {
+		if (ret1 == IS_BIGINT) {
+			switch (ret2) {
+				case IS_BIGINT:
+					ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(zend_bigint_cmp(big1, big2)));
+					zend_bigint_release(big2);
+					break;
+				case IS_LONG:
+					ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(zend_bigint_cmp_long(big1, lval2)));
+					break;
+				case IS_DOUBLE:
+					ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(zend_bigint_cmp_double(big1, dval2)));
+					break;
+				case IS_STRING:
+					zend_bigint_release(big1);
+					goto string_cmp;
+			}
+			zend_bigint_release(big1);
+			return;
+		} else if (ret2 == IS_BIGINT) {
+			switch (ret1) {
+				/* IS_BIGINT isn't handled as the if() earlier would have caught it */
+				case IS_LONG:
+					ZVAL_LONG(result, -ZEND_NORMALIZE_BOOL(zend_bigint_cmp_long(big2, lval1)));
+					break;
+				case IS_DOUBLE:
+					ZVAL_LONG(result, -ZEND_NORMALIZE_BOOL(zend_bigint_cmp_double(big2, dval1)));
+					break;
+				case IS_STRING:
+					zend_bigint_release(big2);
+					goto string_cmp;
+			}
+			zend_bigint_release(big2);
+			return;
 		}
+#if ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
 			|| (oflow1 == -1 && dval1 < -9007199254740991.))) {
@@ -3482,6 +3513,12 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 			ZVAL_LONG(result, lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0));
 		}
 	} else {
+		if (ret1 == IS_BIGINT) {
+			zend_bigint_release(big1);
+		}
+		if (ret2 == IS_BIGINT) {
+			zend_bigint_release(big2);
+		}
 string_cmp:
 		Z_LVAL_P(result) = zend_binary_strcmp(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2));
 		ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_LVAL_P(result)));

@@ -168,7 +168,7 @@ ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** 
 	}
 
 	if (endptr) {
-		*endptr = str[len + 1];
+		*endptr = str + len;
 	}
 }
 
