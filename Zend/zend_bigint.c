@@ -445,7 +445,7 @@ ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num,
 {
 	WITH_TEMP_MPZ_FROM_LONG(divisor, divisor_mpz, {
 		mpz_tdiv_r(out->mpz, num->mpz, divisor_mpz);
-	)}
+	})
 }
 
 /* Finds the remainder of the division of a long by a bigint and stores result in out */
@@ -453,7 +453,7 @@ ZEND_API void zend_bigint_long_modulus(zend_bigint *out, long num, const zend_bi
 {
 	WITH_TEMP_MPZ_FROM_LONG(num, num_mpz, {
 		mpz_tdiv_r(out->mpz, num_mpz, divisor->mpz);
-	)}
+	})
 }
 
 /* Finds the one's complement of a bigint and stores result in out */
