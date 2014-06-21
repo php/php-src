@@ -2343,7 +2343,7 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 					return FAILURE;
 				}
 				/* find how many bits are used in op1 - not fast, but portable */
-				/* TODO: optimise to use bsr (x86)/clz (ASM) in assembly where available */
+				/* TODO: optimise to use bsr (x86)/clz (ARM) in assembly where available */
 				frexp((double) Z_LVAL_P(op1), &bits_occupied);
 				/* checks for overflow */
 				if (bits_occupied + (unsigned long)Z_LVAL_P(op2) >= SIZEOF_LONG * 8) {
