@@ -1035,8 +1035,7 @@ static_operation:
 
 
 scalar:
-		T_STRING_VARNAME		{ $$ = $1; AZ($$); }
-	|	class_name_scalar	{ $$.u.ast = $1.u.ast; }
+		class_name_scalar	{ $$.u.ast = $1.u.ast; }
 	|	class_constant		{ $$.u.ast = $1.u.ast; }
 	|	namespace_name
 			{ $$.u.ast = zend_ast_create_unary(
@@ -1225,9 +1224,11 @@ encaps_var:
 			      zend_ast_create_var(&$1.u.constant), $3.u.ast); }
 	|	T_VARIABLE T_OBJECT_OPERATOR T_STRING
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_PROP,
-			      zend_ast_create_var(&$1.u.constant), AST_ZNODE(&$3)); }
+			      zend_ast_create_var(&$1.u.constant), AST_ZVAL(&$3)); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES expr '}'
 			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_VAR, $2.u.ast); }
+	|	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '}'
+			{ $$.u.ast = zend_ast_create_var(&$2.u.constant); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expr ']' '}'
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_DIM,
 			      zend_ast_create_var(&$2.u.constant), $4.u.ast); }
