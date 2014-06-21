@@ -1155,58 +1155,6 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 }
 /* }}} */
 
-void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline;
-
-	if (Z_STRLEN(op2->u.constant) > 1) {
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->opcode = ZEND_ADD_STRING;
-	} else if (Z_STRLEN(op2->u.constant) == 1) {
-		int ch = *Z_STRVAL(op2->u.constant);
-
-		/* Free memory and use ZEND_ADD_CHAR in case of 1 character strings */
-		STR_FREE(Z_STR(op2->u.constant));
-		ZVAL_LONG(&op2->u.constant, ch);
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->opcode = ZEND_ADD_CHAR;
-	} else { /* String can be empty after a variable at the end of a heredoc */
-		STR_FREE(Z_STR(op2->u.constant));
-		return;
-	}
-
-	if (op1) {
-		SET_NODE(opline->op1, op1);
-		SET_NODE(opline->result, op1);
-	} else {
-		SET_UNUSED(opline->op1);
-		opline->result_type = IS_TMP_VAR;
-		opline->result.var = get_temporary_variable(CG(active_op_array));
-	}
-	SET_NODE(opline->op2, op2);
-	GET_NODE(result, opline->result);
-}
-/* }}} */
-
-void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_ADD_VAR;
-
-	if (op1) {
-		SET_NODE(opline->op1, op1);
-		SET_NODE(opline->result, op1);
-	} else {
-		SET_UNUSED(opline->op1);
-		opline->result_type = IS_TMP_VAR;
-		opline->result.var = get_temporary_variable(CG(active_op_array));
-	}
-	SET_NODE(opline->op2, op2);
-	GET_NODE(result, opline->result);
-}
-/* }}} */
-
 void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 {
 	if (op1->op_type==IS_TMP_VAR) {
@@ -7877,6 +7825,56 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast TSRMLS_DC) {
 	}
 }
 
+void zend_compile_encaps_list(znode *result, zend_ast *ast TSRMLS_DC) {
+	zend_uint i;
+
+	ZEND_ASSERT(ast->children > 0);
+
+	result->op_type = IS_TMP_VAR;
+	result->u.op.var = get_temporary_variable(CG(active_op_array));
+
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *elem_ast = ast->child[i];
+		znode elem_node;
+		zend_op *opline;
+
+		zend_compile_expr(&elem_node, elem_ast TSRMLS_CC);
+
+		if (elem_ast->kind == ZEND_CONST) {
+			zval *zv = &elem_node.u.constant;
+			ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+
+			if (Z_STRLEN_P(zv) > 1) {
+				opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+				opline->opcode = ZEND_ADD_STRING;
+			} else if (Z_STRLEN_P(zv) == 1) {
+				char ch = *Z_STRVAL_P(zv);
+				STR_RELEASE(Z_STR_P(zv));
+				ZVAL_LONG(zv, ch);
+
+				opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+				opline->opcode = ZEND_ADD_CHAR;
+			} else {
+				/* String can be empty after a variable at the end of a heredoc */
+				STR_RELEASE(Z_STR_P(zv));
+				continue;
+			}
+		} else {
+			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+			opline->opcode = ZEND_ADD_VAR;
+			ZEND_ASSERT(elem_node.op_type != IS_CONST);
+		}
+
+		if (i == 0) {
+			SET_UNUSED(opline->op1);
+		} else {
+			SET_NODE(opline->op1, result);
+		}
+		SET_NODE(opline->op2, &elem_node);
+		SET_NODE(opline->result, result);
+	}
+}
+
 void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 	switch (ast->kind) {
 		case ZEND_AST_GLOBAL:
@@ -7991,6 +7989,9 @@ void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
 			return;
 		case ZEND_AST_RESOLVE_CLASS_NAME:
 			zend_compile_resolve_class_name(result, ast TSRMLS_CC);
+			return;
+		case ZEND_AST_ENCAPS_LIST:
+			zend_compile_encaps_list(result, ast TSRMLS_CC);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);

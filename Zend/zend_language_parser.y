@@ -940,7 +940,7 @@ backticks_expr:
 			{ zval empty_str; ZVAL_EMPTY_STRING(&empty_str);
 			  $$.u.ast = zend_ast_create_constant(&empty_str); }
 	|	T_ENCAPSED_AND_WHITESPACE { $$.u.ast = AST_ZVAL(&$1); }
-	|	encaps_list { $$.u.ast = AST_ZNODE(&$1); }
+	|	encaps_list { $$.u.ast = $1.u.ast; }
 ;
 
 
@@ -1051,8 +1051,8 @@ scalar:
 			  Z_STR($2.u.constant) = Z_STR(tmp);
 			  $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST, AST_ZVAL(&$2)); }
 	|	common_scalar			{ $$.u.ast = $1.u.ast; }
-	|	'"' encaps_list '"' 	{ $$ = $2; AZ($$); }
-	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; AZ($$); }
+	|	'"' encaps_list '"' 	{ $$.u.ast = $2.u.ast; }
+	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$.u.ast = $2.u.ast; }
 	|	T_CLASS_C				{ if (Z_TYPE($1.u.constant) == IS_CONSTANT) {zend_do_fetch_constant(&$$, NULL, &$1, ZEND_RT, 1 TSRMLS_CC); AZ($$); } else { $$.u.ast = AST_ZVAL(&$1); } }
 	|	dereferencable_scalar	{ $$.u.ast = $1.u.ast; }
 ;
@@ -1207,12 +1207,14 @@ array_pair:
 
 encaps_list:
 		encaps_list encaps_var
-			{ AST_COMPILE(&$2, $2.u.ast); zend_do_add_variable(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_list T_ENCAPSED_AND_WHITESPACE	{ zend_do_add_string(&$$, &$1, &$2 TSRMLS_CC); }
-	|	encaps_var { AST_COMPILE(&$1, $1.u.ast); zend_do_add_variable(&$$, NULL, &$1 TSRMLS_CC); }
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, $2.u.ast); }
+	|	encaps_list T_ENCAPSED_AND_WHITESPACE
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, AST_ZVAL(&$2)); }
+	|	encaps_var
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_ENCAPS_LIST, $1.u.ast); }
 	|	T_ENCAPSED_AND_WHITESPACE encaps_var
-			{ zend_do_add_string(&$$, NULL, &$1 TSRMLS_CC);
-			  AST_COMPILE(&$2, $2.u.ast); zend_do_add_variable(&$$, &$$, &$2 TSRMLS_CC); }
+			{ $$.u.ast = zend_ast_dynamic_add(zend_ast_create_dynamic_and_add(
+			      ZEND_AST_ENCAPS_LIST, AST_ZVAL(&$1)), $2.u.ast); }
 ;
 
 encaps_var:

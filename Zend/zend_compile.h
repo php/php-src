@@ -506,9 +506,6 @@ void zend_check_writable_variable(const znode *variable);
 
 void zend_do_free(znode *op1 TSRMLS_DC);
 
-void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC);
-void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC);
-
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);

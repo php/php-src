@@ -77,6 +77,8 @@ enum _zend_ast_kind {
 	ZEND_AST_CONST,
 	ZEND_AST_CLASS_CONST,
 	ZEND_AST_RESOLVE_CLASS_NAME,
+
+	ZEND_AST_ENCAPS_LIST,
 };
 
 typedef unsigned short zend_ast_kind;
