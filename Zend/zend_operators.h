@@ -253,6 +253,9 @@ process_double:
 
 	if (ptr != str + length) {
 		if (!allow_errors) {
+			if (local_bigint) {
+				zend_bigint_release(local_bigint);
+			}
 			return 0;
 		}
 		if (allow_errors == -1) {
