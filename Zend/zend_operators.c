@@ -367,7 +367,7 @@ try_again:
 /* {{{ zendi_convert_to_bigint_or_long */
 #define zendi_convert_to_bigint_or_long(op, holder, result)			\
 	if (op == result) {												\
-		convert_to_bigint(op);										\
+		convert_to_bigint_or_long(op);								\
 	} else if (!(Z_TYPE_P(op) == IS_LONG || Z_TYPE_P(op) == IS_BIGINT)) {\
 		switch (Z_TYPE_P(op)) {										\
 			case IS_NULL:											\
@@ -378,8 +378,11 @@ try_again:
 				ZVAL_LONG(&holder, 1);								\
 				break;												\
 			case IS_DOUBLE:											\
-				ZVAL_NEW_BIGINT(&holder);							\
-				zend_bigint_init_from_double(Z_BIG(holder), Z_DVAL_P(op));\
+				if (zend_dval_to_big_or_lval(Z_DVAL_P(op), &Z_LVAL(holder), &Z_BIG(holder)) == IS_BIGINT) {\
+					ZVAL_BIGINT(&holder, Z_BIG(holder));			\
+				} else {											\
+					ZVAL_LONG(&holder, Z_LVAL(holder));				\
+				}													\
 				break;												\
 			case IS_STRING:											\
 				errno = 0;											\
@@ -665,9 +668,11 @@ ZEND_API void convert_to_bigint_or_long_base(zval *op, int base) /* {{{ */
 			break;
 		case IS_DOUBLE:
 			{
-				double d = Z_DVAL_P(op);
-				ZVAL_NEW_BIGINT(op);
-				zend_bigint_init_from_double(Z_BIG_P(op), d);
+				if (zend_dval_to_big_or_lval(Z_DVAL_P(op), &Z_LVAL_P(op), &Z_BIG_P(op)) == IS_BIGINT) {
+					ZVAL_BIGINT(op, Z_BIG_P(op));
+				} else {
+					ZVAL_LONG(op, Z_LVAL_P(op));
+				}
 			}
 			break;
 		case IS_BIGINT:
@@ -1179,9 +1184,7 @@ ZEND_API zend_uchar _zval_get_bigint_or_long_func(zval *op, long *lval, zend_big
 				*lval = Z_LVAL_P(op);
 				return IS_LONG;
 			case IS_DOUBLE:
-				*big = zend_bigint_alloc();
-				zend_bigint_init_from_double(*big, Z_DVAL_P(op));
-				return IS_BIGINT;
+				return zend_dval_to_big_or_lval(Z_DVAL_P(op), lval, big);
 			case IS_BIGINT:
 				*big = Z_BIG_P(op);
 				return IS_BIGINT;

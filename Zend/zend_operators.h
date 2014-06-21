@@ -112,6 +112,24 @@ static zend_always_inline long zend_dval_to_lval(double d)
 #endif
 /* }}} */
 
+static zend_always_inline zend_uchar zend_dval_to_big_or_lval(double d, long *lval, zend_bigint **big)
+{
+#if SIZEOF_LONG == 4
+	if (d > LONG_MAX || d < LONG_MIN) {
+#else
+	/* >= as (double)LONG_MAX is outside signed range */
+	if (d >= LONG_MAX || d < LONG_MIN) {
+#endif
+		*big = zend_bigint_alloc();
+		zend_bigint_init_from_double(*big, d);
+		return IS_BIGINT;
+	} else {
+		*lval = (long)d;
+		return IS_LONG;
+	}
+}
+/* }}} */
+
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
 
