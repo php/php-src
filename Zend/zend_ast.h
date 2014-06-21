@@ -110,8 +110,8 @@ ZEND_API zend_ast *zend_ast_create_binary_ex(
 ZEND_API zend_ast *zend_ast_create_ternary_ex(
 	zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0, zend_ast *op1, zend_ast *op2);
 
-ZEND_API zend_ast* zend_ast_create_dynamic(zend_ast_kind kind);
-ZEND_API void zend_ast_dynamic_add(zend_ast **ast, zend_ast *op);
+ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind);
+ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op);
 ZEND_API void zend_ast_dynamic_shrink(zend_ast **ast);
 
 ZEND_API int zend_ast_is_ct_constant(zend_ast *ast);
@@ -134,6 +134,10 @@ static inline zend_ast *zend_ast_create_ternary(
 	zend_ast_kind kind, zend_ast *op0, zend_ast *op1, zend_ast *op2
 ) {
 	return zend_ast_create_ternary_ex(kind, 0, op0, op1, op2);
+}
+
+static inline zend_ast *zend_ast_create_dynamic_and_add(zend_ast_kind kind, zend_ast *op) {
+	return zend_ast_dynamic_add(zend_ast_create_dynamic(kind), op);
 }
 
 static inline zend_ast *zend_ast_create_var(zval *name) {

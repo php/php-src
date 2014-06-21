@@ -584,10 +584,9 @@ function_call_parameter_list:
 
 non_empty_function_call_parameter_list:
 		function_call_parameter
-			{ $$.u.ast = zend_ast_create_dynamic(ZEND_AST_PARAMS);
-			  zend_ast_dynamic_add(&$$.u.ast, $1.u.ast); }
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_PARAMS, $1.u.ast); }
 	|	non_empty_function_call_parameter_list ',' function_call_parameter
-			{ zend_ast_dynamic_add(&$1.u.ast, $3.u.ast); $$.u.ast = $1.u.ast; }
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
 ;
 
 function_call_parameter:
@@ -1070,10 +1069,16 @@ possible_comma:
 ;
 
 non_empty_static_array_pair_list:
-		non_empty_static_array_pair_list ',' static_scalar_value T_DOUBLE_ARROW static_scalar_value { zend_ast_dynamic_add(&$$.u.ast, $3.u.ast); zend_ast_dynamic_add(&$$.u.ast, $5.u.ast); }
-	|	non_empty_static_array_pair_list ',' static_scalar_value { zend_ast_dynamic_add(&$$.u.ast, NULL); zend_ast_dynamic_add(&$$.u.ast, $3.u.ast); }
-	|	static_scalar_value T_DOUBLE_ARROW static_scalar_value { $$.u.ast = zend_ast_create_dynamic(ZEND_INIT_ARRAY); zend_ast_dynamic_add(&$$.u.ast, $1.u.ast); zend_ast_dynamic_add(&$$.u.ast, $3.u.ast); }
-	|	static_scalar_value { $$.u.ast = zend_ast_create_dynamic(ZEND_INIT_ARRAY); zend_ast_dynamic_add(&$$.u.ast, NULL); zend_ast_dynamic_add(&$$.u.ast, $1.u.ast); }
+		non_empty_static_array_pair_list ',' static_scalar_value T_DOUBLE_ARROW static_scalar_value
+			{ $$.u.ast = zend_ast_dynamic_add(zend_ast_dynamic_add($1.u.ast, $3.u.ast), $5.u.ast); }
+	|	non_empty_static_array_pair_list ',' static_scalar_value
+			{ $$.u.ast = zend_ast_dynamic_add(zend_ast_dynamic_add($1.u.ast, NULL), $3.u.ast); }
+	|	static_scalar_value T_DOUBLE_ARROW static_scalar_value
+			{ $$.u.ast = zend_ast_dynamic_add(zend_ast_create_dynamic_and_add(
+			      ZEND_INIT_ARRAY, $1.u.ast), $3.u.ast); }
+	|	static_scalar_value
+			{ $$.u.ast = zend_ast_dynamic_add(zend_ast_create_dynamic_and_add(
+			      ZEND_INIT_ARRAY, NULL), $1.u.ast); }
 ;
 
 expr:
@@ -1166,10 +1171,9 @@ member_name:
 
 assignment_list:
 		assignment_list ',' assignment_list_element
-			{ zend_ast_dynamic_add(&$1.u.ast, $3.u.ast); $$.u.ast = $1.u.ast; }
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
 	|	assignment_list_element
-			{ $$.u.ast = zend_ast_create_dynamic(ZEND_AST_LIST);
-			  zend_ast_dynamic_add(&$$.u.ast, $1.u.ast); }
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_LIST, $1.u.ast); }
 ;
 
 assignment_list_element:
@@ -1186,10 +1190,9 @@ array_pair_list:
 
 non_empty_array_pair_list:
 		non_empty_array_pair_list ',' array_pair
-			{ zend_ast_dynamic_add(&$1.u.ast, $3.u.ast); $$.u.ast = $1.u.ast; }
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
 	|	array_pair
-			{ $$.u.ast = zend_ast_create_dynamic(ZEND_AST_ARRAY);
-			  zend_ast_dynamic_add(&$$.u.ast, $1.u.ast); }
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_ARRAY, $1.u.ast); }
 ;
 
 array_pair:

@@ -99,12 +99,13 @@ static inline zend_bool is_power_of_two(unsigned short n) {
 	return n == (n & -n);
 }
 
-ZEND_API void zend_ast_dynamic_add(zend_ast **ast, zend_ast *op)
+ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op)
 {
-	if ((*ast)->children >= 4 && is_power_of_two((*ast)->children)) {
-		*ast = erealloc(*ast, sizeof(zend_ast) + sizeof(zend_ast *) * ((*ast)->children * 2 - 1));
+	if (ast->children >= 4 && is_power_of_two(ast->children)) {
+		ast = erealloc(ast, sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children * 2 - 1));
 	}
-	(*ast)->child[(*ast)->children++] = op;
+	ast->child[ast->children++] = op;
+	return ast;
 }
 
 ZEND_API void zend_ast_dynamic_shrink(zend_ast **ast)
