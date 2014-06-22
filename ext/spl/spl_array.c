@@ -1816,7 +1816,7 @@ void spl_array_unserialize_helper(spl_array_object *intern, const unsigned char 
 	++p;
 
 	ALLOC_INIT_ZVAL(pmembers);
-	if (!php_var_unserialize(&pmembers, &p, s + buf_len, var_hash_p TSRMLS_CC)) {
+	if (!php_var_unserialize(&pmembers, &p, s + buf_len, var_hash_p TSRMLS_CC) || Z_TYPE_P(pmembers) != IS_ARRAY) {
 		zval_ptr_dtor(&pmembers);
 		goto outexcept;
 	}
