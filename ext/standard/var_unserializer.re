@@ -21,6 +21,7 @@
 #include "php.h"
 #include "ext/standard/php_var.h"
 #include "php_incomplete_class.h"
+#include "Zend/zend_interfaces.h"
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1024
@@ -404,7 +405,7 @@ static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	Serializable interface have eventually an inconsistent behavior at this place when
 	unserialized from a manipulated string. Additionaly the interal classes can possibly
 	crash PHP so they're still disabled here. */
-	if (ce->serialize == NULL || ZEND_INTERNAL_CLASS != ce->type) {
+	if (ce->serialize == NULL || ce->unserialize == zend_user_unserialize || (ZEND_INTERNAL_CLASS != ce->type && ce->create_object == NULL)) {
 		object_init_ex(*rval, ce);
 	} else {
 		/* If this class implements Serializable, it should not land here but in object_custom(). The passed string
