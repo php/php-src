@@ -18,7 +18,7 @@ PHP                                                                        NEWS
 ?? ??? 2014, PHP 5.4.30
 
 - Core:
-  . Fixed BC break introduced by patch for bug #67072. (Anatol)
+  . Fixed BC break introduced by patch for bug #67072. (Anatol, Stas)
   . Fixed bug #66622 (Closures do not correctly capture the late bound class 
     (static::) in some cases). (Levi Morrison)
   . Fixed bug #67390 (insecure temporary file use in the configure script).
