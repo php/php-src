@@ -5186,7 +5186,6 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 
 	open_brackets_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
 	if (variable) {
-		// TODO.AST or !zend_can_parse_variable_for_write(array TSRMLS_CC)
 		if (zend_is_call(array->u.ast) || !zend_can_write_to_variable(array->u.ast)) {
 			is_variable = 0;
 			AST_COMPILE_VAR(array, array->u.ast, BP_VAR_R);
@@ -7183,16 +7182,31 @@ void zend_compile_unset(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
-void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
+int zend_compile_binary_op_maybe_ct(znode *result, zend_ast *ast, zend_bool ct_required TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
 	zend_uint opcode = ast->attr;
 
 	znode left_node, right_node;
-	zend_compile_expr(&left_node, left_ast TSRMLS_CC);
-	zend_compile_expr(&right_node, right_ast TSRMLS_CC);
+
+	int ct_left = zend_compile_expr_maybe_ct(&left_node, left_ast, ct_required TSRMLS_CC);
+	int ct_right = zend_compile_expr_maybe_ct(&right_node, right_ast, ct_required TSRMLS_CC);
+	if (ct_left == SUCCESS && ct_right == SUCCESS) {
+		binary_op_type op = get_binary_op(opcode);
+		op(&result->u.constant, &left_node.u.constant, &right_node.u.constant TSRMLS_CC);
+		zval_ptr_dtor(&left_node.u.constant);
+		zval_ptr_dtor(&right_node.u.constant);
+		result->op_type = IS_CONST;
+		return SUCCESS;
+	} else if (ct_required) {
+		if (ct_left == SUCCESS) zval_ptr_dtor(&left_node.u.constant);
+		if (ct_right == SUCCESS) zval_ptr_dtor(&right_node.u.constant);
+		return FAILURE;
+	}
 
 	emit_op_tmp(result, opcode, &left_node, &right_node TSRMLS_CC);
+
+	return FAILURE;
 }
 
 /* We do not use zend_compile_binary_op for this because we want to retain the left-to-right
@@ -7921,7 +7935,7 @@ void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
 			zend_compile_compound_assign(result, ast TSRMLS_CC);
 			return;
 		case ZEND_AST_BINARY_OP:
-			zend_compile_binary_op(result, ast TSRMLS_CC);
+			zend_compile_binary_op_maybe_ct(result, ast, 0 TSRMLS_CC);
 			return;
 		case ZEND_AST_GREATER:
 		case ZEND_AST_GREATER_EQUAL:
@@ -8004,6 +8018,8 @@ int zend_compile_expr_maybe_ct(znode *result, zend_ast *ast, zend_bool ct_requir
 			ZVAL_COPY(&result->u.constant, zend_ast_get_zval(ast));
 			result->op_type = IS_CONST;
 			return SUCCESS;
+		case ZEND_AST_BINARY_OP:
+			return zend_compile_binary_op_maybe_ct(result, ast, ct_required TSRMLS_CC);
 		case ZEND_AST_ARRAY:
 			return zend_compile_array_maybe_ct(result, ast, ct_required TSRMLS_CC);
 		default:
