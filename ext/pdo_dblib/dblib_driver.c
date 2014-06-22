@@ -144,27 +144,49 @@ static long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
-	char *q;
-	int l = 1;
+	char *q, hex[3];
+	int l = 0;
 
 	*quoted = q = safe_emalloc(2, unquotedlen, 3);
-	*q++ = '\'';
 
-	while (unquotedlen--) {
-		if (*unquoted == '\'') {
-			*q++ = '\'';
-			*q++ = '\'';
+	switch( PDO_PARAM_TYPE(paramtype) ) {
+		case PDO_PARAM_LOB:
+			*q++ = '0';
+			*q++ = 'x';
 			l += 2;
-		} else {
-			*q++ = *unquoted;
+
+			while (unquotedlen--) {
+				sprintf(hex, "%02X", *unquoted);
+				*q++ = hex[0];
+				*q++ = hex[1];
+				l += 2;
+				unquoted++;
+			}
+
+			break;
+		case PDO_PARAM_STR:
+			*q++ = 'N';
 			++l;
-		}
-		unquoted++;
+		default:
+			*q++ = '\'';
+			++l;
+			while (unquotedlen--) {
+				if (*unquoted == '\'') {
+					*q++ = '\'';
+					*q++ = '\'';
+					l += 2;
+				} else {
+					*q++ = *unquoted;
+					++l;
+				}
+				unquoted++;
+			}
+			*q++ = '\'';
+			++l;
 	}
 
-	*q++ = '\'';
 	*q++ = '\0';
-	*quotedlen = l+1;
+	*quotedlen = l;
 	
 	return 1;
 }
