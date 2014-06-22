@@ -21,15 +21,15 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary 
-    check). 
+    check). (CVE-2014-0207) 
   . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
-    string size). (Francisco Alonso, Jan Kaluza, Remi)
+    string size). (CVE-2014-3478) (Francisco Alonso, Jan Kaluza, Remi) 
   . Fixed bug #67411 (fileinfo: cdf_check_stream_offset insufficient boundary
-    check). (Francisco Alonso, Jan Kaluza, Remi)
+    check). (CVE-2014-3479) (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67412 (fileinfo: cdf_count_chain insufficient boundary check).
-    (Francisco Alonso, Jan Kaluza, Remi)
+    (CVE-2014-3480) (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
-    check). (Francisco Alonso, Jan Kaluza, Remi)
+    check). (CVE-2014-3487) (Francisco Alonso, Jan Kaluza, Remi)
 
 - Network:
   . Fixed bug #67432 (Fix potential segfault in dns_get_record()). 
