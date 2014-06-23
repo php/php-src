@@ -302,6 +302,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 					/* is the connection still alive ? */
 					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh TSRMLS_CC)) {
 						/* nope... need to kill it */
+						zend_list_close(le);
 						pdbh = NULL;
 					}
 				}
