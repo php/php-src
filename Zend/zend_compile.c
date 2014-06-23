@@ -7182,31 +7182,16 @@ void zend_compile_unset(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
-int zend_compile_binary_op_maybe_ct(znode *result, zend_ast *ast, zend_bool ct_required TSRMLS_DC) {
+void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
 	zend_uint opcode = ast->attr;
 
 	znode left_node, right_node;
-
-	int ct_left = zend_compile_expr_maybe_ct(&left_node, left_ast, ct_required TSRMLS_CC);
-	int ct_right = zend_compile_expr_maybe_ct(&right_node, right_ast, ct_required TSRMLS_CC);
-	if (ct_left == SUCCESS && ct_right == SUCCESS) {
-		binary_op_type op = get_binary_op(opcode);
-		op(&result->u.constant, &left_node.u.constant, &right_node.u.constant TSRMLS_CC);
-		zval_ptr_dtor(&left_node.u.constant);
-		zval_ptr_dtor(&right_node.u.constant);
-		result->op_type = IS_CONST;
-		return SUCCESS;
-	} else if (ct_required) {
-		if (ct_left == SUCCESS) zval_ptr_dtor(&left_node.u.constant);
-		if (ct_right == SUCCESS) zval_ptr_dtor(&right_node.u.constant);
-		return FAILURE;
-	}
+	zend_compile_expr(&left_node, left_ast TSRMLS_CC);
+	zend_compile_expr(&right_node, right_ast TSRMLS_CC);
 
 	emit_op_tmp(result, opcode, &left_node, &right_node TSRMLS_CC);
-
-	return FAILURE;
 }
 
 /* We do not use zend_compile_binary_op for this because we want to retain the left-to-right
@@ -7590,95 +7575,10 @@ void zend_compile_shell_exec(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast_destroy(name_ast);
 }
 
-int zend_try_ct_compile_array(zval *array, zend_ast *ast TSRMLS_DC) {
-	zend_uint i;
-
-	ZVAL_UNDEF(array);
-	for (i = 0; i < ast->children; ++i) {
-		zend_ast *elem_ast = ast->child[i];
-		zend_ast *value_ast = elem_ast->child[0];
-		zend_ast *key_ast = elem_ast->child[1];
-		zend_bool by_ref = elem_ast->attr;
-
-		znode key_node, value_node;
-		zval *key = &key_node.u.constant, *value = &value_node.u.constant;
-
-		if (by_ref) {
-			goto failure;
-		}
-
-		if (FAILURE == zend_compile_expr_maybe_ct(&value_node, value_ast, 1 TSRMLS_CC)) {
-			goto failure;
-		}
-
-		if (key_ast) {
-			if (FAILURE == zend_compile_expr_maybe_ct(&key_node, key_ast, 1 TSRMLS_CC)) {
-				zval_ptr_dtor(value);
-				goto failure;
-			}
-		}
-
-		if (Z_TYPE_P(array) == IS_UNDEF) {
-			array_init_size(array, ast->children);
-		}
-
-		if (key_ast) {
-			switch (Z_TYPE_P(key)) {
-				case IS_LONG:
-					zend_hash_index_update(Z_ARRVAL_P(array), Z_LVAL_P(key), value);
-					break;
-				case IS_STRING:
-					zend_symtable_update(Z_ARRVAL_P(array), Z_STR_P(key), value);
-					break;
-				case IS_DOUBLE:
-					zend_hash_index_update(Z_ARRVAL_P(array),
-						zend_dval_to_lval(Z_DVAL_P(key)), value);
-					break;
-				case IS_FALSE:
-					zend_hash_index_update(Z_ARRVAL_P(array), 0, value);
-					break;
-				case IS_TRUE:
-					zend_hash_index_update(Z_ARRVAL_P(array), 1, value);
-					break;
-				case IS_NULL:
-					zend_hash_update(Z_ARRVAL_P(array), STR_EMPTY_ALLOC(), value);
-					break;
-				default:
-					zend_error(E_COMPILE_ERROR, "Illegal offset type");
-					break;
-			}
-			zval_ptr_dtor(key);
-		} else {
-			zend_hash_next_index_insert(Z_ARRVAL_P(array), value);
-		}
-	}
-
-	if (!ast->children) {
-		array_init(array);
-	}
-
-	zend_make_immutable_array(array TSRMLS_CC);
-	return SUCCESS;
-
-failure:
-	zval_dtor(array);
-	return FAILURE;
-}
-
-int zend_compile_array_maybe_ct(znode *result, zend_ast *ast, zend_bool ct_required TSRMLS_DC) {
+void zend_compile_array(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_op *opline;
 	zend_uint i, opnum_init;
 	zend_bool packed = 1;
-
-	zval array;
-
-	if (SUCCESS == zend_try_ct_compile_array(&array, ast TSRMLS_CC)) {
-		result->op_type = IS_CONST;
-		ZVAL_COPY_VALUE(&result->u.constant, &array);
-		return SUCCESS;
-	} else if (ct_required) {
-		return FAILURE;
-	}
 
 	opnum_init = get_next_op_number(CG(active_op_array));
 
@@ -7729,8 +7629,6 @@ int zend_compile_array_maybe_ct(znode *result, zend_ast *ast, zend_bool ct_requi
 		opline = &CG(active_op_array)->opcodes[opnum_init];
 		opline->extended_value |= ZEND_ARRAY_NOT_PACKED;
 	}
-
-	return FAILURE;
 }
 
 void zend_compile_const(znode *result, zend_ast *ast TSRMLS_DC) {
@@ -7935,7 +7833,7 @@ void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
 			zend_compile_compound_assign(result, ast TSRMLS_CC);
 			return;
 		case ZEND_AST_BINARY_OP:
-			zend_compile_binary_op_maybe_ct(result, ast, 0 TSRMLS_CC);
+			zend_compile_binary_op(result, ast TSRMLS_CC);
 			return;
 		case ZEND_AST_GREATER:
 		case ZEND_AST_GREATER_EQUAL:
@@ -7993,7 +7891,7 @@ void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
 			zend_compile_shell_exec(result, ast TSRMLS_CC);
 			return;
 		case ZEND_AST_ARRAY:
-			zend_compile_array_maybe_ct(result, ast, 0 TSRMLS_CC);
+			zend_compile_array(result, ast TSRMLS_CC);
 			return;
 		case ZEND_AST_CONST:
 			zend_compile_const(result, ast TSRMLS_CC);
@@ -8009,24 +7907,6 @@ void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
-	}
-}
-
-int zend_compile_expr_maybe_ct(znode *result, zend_ast *ast, zend_bool ct_required TSRMLS_DC) {
-	switch (ast->kind) {
-		case ZEND_CONST:
-			ZVAL_COPY(&result->u.constant, zend_ast_get_zval(ast));
-			result->op_type = IS_CONST;
-			return SUCCESS;
-		case ZEND_AST_BINARY_OP:
-			return zend_compile_binary_op_maybe_ct(result, ast, ct_required TSRMLS_CC);
-		case ZEND_AST_ARRAY:
-			return zend_compile_array_maybe_ct(result, ast, ct_required TSRMLS_CC);
-		default:
-			if (!ct_required) {
-				zend_compile_expr(result, ast TSRMLS_CC);
-			}
-			return FAILURE;
 	}
 }
 
@@ -8066,6 +7946,106 @@ void zend_compile_var(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 
 			zend_compile_expr(result, ast TSRMLS_CC);
 			return;
+	}
+}
+
+void zend_eval_const_binary_op(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	zend_ast *left_ast = ast->child[0];
+	zend_ast *right_ast = ast->child[1];
+	zend_uchar opcode = ast->attr;
+
+	if (left_ast->kind == ZEND_CONST && right_ast->kind == ZEND_CONST) {
+		binary_op_type op = get_binary_op(opcode);
+		zval result;
+		op(&result, zend_ast_get_zval(left_ast), zend_ast_get_zval(right_ast) TSRMLS_CC);
+		zend_ast_destroy(ast);
+		*ast_ptr = zend_ast_create_constant(&result);
+	}
+}
+
+void zend_eval_const_array(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	zend_uint i;
+	zval array;
+
+	/* First ensure that *all* child nodes are constant */
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *elem_ast = ast->child[i];
+		zend_ast *value_ast = elem_ast->child[0];
+		zend_ast *key_ast = elem_ast->child[1];
+		zend_bool by_ref = elem_ast->attr;
+
+		if (by_ref || (key_ast && key_ast->kind != ZEND_CONST) || value_ast->kind != ZEND_CONST) {
+			return;
+		}
+	}
+
+	array_init_size(&array, ast->children);
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *elem_ast = ast->child[i];
+		zend_ast *value_ast = elem_ast->child[0];
+		zend_ast *key_ast = elem_ast->child[1];
+
+		zval *value = zend_ast_get_zval(value_ast);
+		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+
+		if (key_ast) {
+			zval *key = zend_ast_get_zval(key_ast);
+			switch (Z_TYPE_P(key)) {
+				case IS_LONG:
+					zend_hash_index_update(Z_ARRVAL(array), Z_LVAL_P(key), value);
+					break;
+				case IS_STRING:
+					zend_symtable_update(Z_ARRVAL(array), Z_STR_P(key), value);
+					break;
+				case IS_DOUBLE:
+					zend_hash_index_update(Z_ARRVAL(array),
+						zend_dval_to_lval(Z_DVAL_P(key)), value);
+					break;
+				case IS_FALSE:
+					zend_hash_index_update(Z_ARRVAL(array), 0, value);
+					break;
+				case IS_TRUE:
+					zend_hash_index_update(Z_ARRVAL(array), 1, value);
+					break;
+				case IS_NULL:
+					zend_hash_update(Z_ARRVAL(array), STR_EMPTY_ALLOC(), value);
+					break;
+				default:
+					zend_error(E_COMPILE_ERROR, "Illegal offset type");
+					break;
+			}
+		} else {
+			zend_hash_next_index_insert(Z_ARRVAL(array), value);
+		}
+	}
+
+	zend_ast_destroy(ast);
+	zend_make_immutable_array(&array TSRMLS_CC);
+	*ast_ptr = zend_ast_create_constant(&array);
+}
+
+void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	if (!ast || ast->kind == ZEND_CONST || ast->kind == ZEND_AST_ZNODE) {
+		return;
+	}
+
+	{
+		zend_uint i;
+		for (i = 0; i < ast->children; ++i) {
+			zend_eval_const_expr(&ast->child[i] TSRMLS_CC);
+		}
+	}
+
+	switch (ast->kind) {
+		case ZEND_AST_BINARY_OP:
+			zend_eval_const_binary_op(ast_ptr TSRMLS_CC);
+			break;
+		case ZEND_AST_ARRAY:
+			zend_eval_const_array(ast_ptr TSRMLS_CC);
+			break;
 	}
 }
 

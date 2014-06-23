@@ -104,6 +104,7 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC);
 void zend_compile_expr(znode *node, zend_ast *ast TSRMLS_DC);
 int zend_compile_expr_maybe_ct(znode *node, zend_ast *ast, zend_bool ct_required TSRMLS_DC);
 void zend_compile_var(znode *node, zend_ast *ast, int type TSRMLS_DC);
+void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC);
 
 typedef struct _zend_execute_data zend_execute_data;
 

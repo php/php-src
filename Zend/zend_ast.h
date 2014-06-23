@@ -155,6 +155,7 @@ static inline zend_ast *zend_ast_create_assign_op(zend_uint opcode, zend_ast *op
 /* Temporary, for porting */
 #define AST_COMPILE(res, ast) do { \
 	zend_ast *_ast = (ast); \
+	zend_eval_const_expr(&_ast TSRMLS_CC); \
 	zend_compile_expr((res), _ast TSRMLS_CC); \
 	zend_ast_destroy(_ast); \
 } while (0)

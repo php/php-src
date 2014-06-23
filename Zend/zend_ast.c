@@ -411,7 +411,7 @@ ZEND_API void zend_ast_destroy(zend_ast *ast)
 	int i;
 
 	if (ast->kind == ZEND_CONST) {
-		zval_dtor(zend_ast_get_zval(ast));
+		zval_ptr_dtor(zend_ast_get_zval(ast));
 	} else if (ast->kind != ZEND_AST_ZNODE) {
 		for (i = 0; i < ast->children; i++) {
 			if (ast->child[i]) {
