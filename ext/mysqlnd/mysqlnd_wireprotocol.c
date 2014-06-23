@@ -1397,11 +1397,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 
 		if (first_iteration) {
 			first_iteration = FALSE;
-			/*
-			  We need a trailing \0 for the last string, in case of text-mode,
-			  to be able to implement read-only variables. Thus, we add + 1.
-			*/
-			*buffer = result_set_memory_pool->get_chunk(result_set_memory_pool, *data_size + 1 TSRMLS_CC);
+			*buffer = result_set_memory_pool->get_chunk(result_set_memory_pool, *data_size TSRMLS_CC);
 			if (!*buffer) {
 				ret = FAIL;
 				break;
@@ -1415,11 +1411,8 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 
 			/*
 			  We have to realloc the buffer.
-
-			  We need a trailing \0 for the last string, in case of text-mode,
-			  to be able to implement read-only variables.
 			*/
-			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size + 1 TSRMLS_CC)) {
+			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size TSRMLS_CC)) {
 				SET_OOM_ERROR(*conn->error_info);
 				ret = FAIL;
 				break;
