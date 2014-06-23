@@ -1,7 +1,5 @@
 --TEST--
 Bug #35014 (array_product() always returns 0) (64bit)
---SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --INI--
 precision=14
 --FILE--
@@ -23,7 +21,7 @@ foreach ($tests as $v) {
 }
 ?>
 --EXPECTF--	
-Warning: array_product() expects parameter 1 to be array, string given in %s on line %d
+Warning: array_product() expects parameter 1 to be array, string given in /Users/ajf/Projects/2014/PHP/php-src/ext/standard/tests/array/bug35014_64bit.php on line 15
 NULL
 int(1)
 int(0)
@@ -32,4 +30,4 @@ int(9)
 float(1)
 int(9999999800000001)
 float(1.219953680145E+30)
-float(3.6893488147419E+19)
+int(36893488147419103230)

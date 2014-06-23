@@ -227,6 +227,9 @@ ZEND_API void zend_bigint_long_xor(zend_bigint *out, long op1, const zend_bigint
 /* Shifts a bigint left by an unsigned long and stores result in out */
 ZEND_API void zend_bigint_shift_left_ulong(zend_bigint *out, const zend_bigint *num, unsigned long shift);
 
+/* Shifts a long left by an unsigned long and stores result in out */
+ZEND_API void zend_bigint_long_shift_left_ulong(zend_bigint *out, long num, unsigned long shift);
+
 /* Shifts a bigint right by an unsigned long and stores result in out */
 ZEND_API void zend_bigint_shift_right_ulong(zend_bigint *out, const zend_bigint *num, unsigned long shift);
 
