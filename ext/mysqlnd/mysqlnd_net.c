@@ -104,6 +104,7 @@ MYSQLND_METHOD(mysqlnd_net, network_write_ex)(MYSQLND_NET * const net, const zen
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_net::open_pipe */
 static php_stream *
 MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len,
@@ -115,6 +116,7 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 #else
 	unsigned int streams_options = 0;
 #endif
+	dtor_func_t origin_dtor;
 	php_stream * net_stream = NULL;
 
 	DBG_ENTER("mysqlnd_net::open_pipe");
@@ -132,10 +134,11 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
 	  unregistered yntil the script ends. So, we need to take care of that.
 	*/
-	net_stream->in_free = 1;
+	origin_dtor = EG(regular_list).pDestructor;
+	EG(regular_list).pDestructor = NULL;
 	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
-	net_stream->in_free = 0;
-
+	EG(regular_list).pDestructor = origin_dtor;
+	net_stream->res = NULL;
 
 	DBG_RETURN(net_stream);
 }
@@ -159,6 +162,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	char * errstr = NULL;
 	int errcode = 0;
 	struct timeval tv;
+	dtor_func_t origin_dtor;
 	php_stream * net_stream = NULL;
 
 	DBG_ENTER("mysqlnd_net::open_tcp_or_unix");
@@ -201,14 +205,16 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 		zend_resource *le;
 
 		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashed_details, hashed_details_len))) {
+			origin_dtor = EG(persistent_list).pDestructor;
 			/*
 			  in_free will let streams code skip destructing - big HACK,
 			  but STREAMS suck big time regarding persistent streams.
 			  Just not compatible for extensions that need persistency.
 			*/
-			net_stream->in_free = 1;
+			EG(persistent_list).pDestructor = NULL;
 			zend_hash_str_del(&EG(persistent_list), hashed_details, hashed_details_len);
-			net_stream->in_free = 0;
+			EG(persistent_list).pDestructor = origin_dtor;
+			pefree(le, 1);
 		}
 #if ZEND_DEBUG
 		/* Shut-up the streams, they don't know what they are doing */
@@ -222,10 +228,12 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
 	  unregistered yntil the script ends. So, we need to take care of that.
 	*/
-	net_stream->in_free = 1;
-	//????zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
-	net_stream->in_free = 0;
-
+	origin_dtor = EG(regular_list).pDestructor;
+	EG(regular_list).pDestructor = NULL;
+	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
+	efree(net_stream->res);
+	net_stream->res = NULL;
+	EG(regular_list).pDestructor = origin_dtor;
 	DBG_RETURN(net_stream);
 }
 /* }}} */
