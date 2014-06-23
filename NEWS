@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #67390 (insecure temporary file use in the configure script).
     (CVE-2014-3981) (Remi)
   . Fixed bug #67399 (putenv with empty variable may lead to crash). (Stas)
+  . Fixed bug #67498 (phpinfo() Type Confusion Information Leak Vulnerability). 
+    (Stefan Esser)
 
 - CLI server:
   . Fixed Bug #67406 (built-in web-server segfaults on startup). (Remi)
