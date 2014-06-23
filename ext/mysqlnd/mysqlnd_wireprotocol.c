@@ -1630,7 +1630,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 #error Need fix for this architecture
 #endif /* SIZEOF */
 					{
-						//????  ZVAL_STRINGL(current_field, (char *)p, len, 0);
 						ZVAL_STRINGL(current_field, (char *)p, len);
 					} else {
 						ZVAL_LONG(current_field, (long) v); /* the cast is safe */
@@ -1664,7 +1663,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				p -= len;
 				if (Z_TYPE_P(current_field) == IS_LONG) {
 					bit_area += 1 + sprintf((char *)start, "%ld", Z_LVAL_P(current_field));
-					//????  ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1, copy_data);
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
 				} else if (Z_TYPE_P(current_field) == IS_STRING){
 					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRLEN_P(current_field));

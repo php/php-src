@@ -506,8 +506,6 @@ mysqlnd_stmt_copy_it(zval ** copies, zval * original, unsigned int param_count, 
 	}
 	if (*copies) {
 		ZVAL_COPY(&(*copies)[current], original);
-		//????Z_SET_REFCOUNT_P((*copies)[current], 1);
-		//zval_copy_ctor((*copies)[current]);
 		return PASS;
 	}
 	return FAIL;
