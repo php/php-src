@@ -64,9 +64,12 @@
 # include "TSRM.h"
 #endif
 
-#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
+#ifdef LIBREADLINE
 #   include <readline/readline.h>
 #   include <readline/history.h>
+#endif
+#ifdef HAVE_LIBEDIT
+#   include <editline/readline.h>
 #endif
 
 #include "phpdbg_lexer.h"

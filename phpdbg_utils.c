@@ -400,7 +400,7 @@ PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
 	}
 
 	/* create cached prompt */
-#ifdef HAVE_LIBREADLINE
+#ifndef HAVE_LIBEDIT
 	/* TODO: libedit doesn't seems to support coloured prompt */
 	if ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED)) {
 		asprintf(
