@@ -70,8 +70,6 @@
 
 static const char *unknown_sqlstate= "HY000";
 
-const char * const mysqlnd_empty_string = "";
-
 /* Used in mysqlnd_debug.c */
 const char mysqlnd_read_header_name[]	= "mysqlnd_read_header";
 const char mysqlnd_read_body_name[]		= "mysqlnd_read_body";
@@ -1207,17 +1205,11 @@ void php_mysqlnd_rset_header_free_mem(void * _packet, zend_bool stack_allocation
 static size_t rset_field_offsets[] =
 {
 	STRUCT_OFFSET(MYSQLND_FIELD, catalog),
-	STRUCT_OFFSET(MYSQLND_FIELD, catalog_length),
 	STRUCT_OFFSET(MYSQLND_FIELD, db),
-	STRUCT_OFFSET(MYSQLND_FIELD, db_length),
 	STRUCT_OFFSET(MYSQLND_FIELD, table),
-	STRUCT_OFFSET(MYSQLND_FIELD, table_length),
 	STRUCT_OFFSET(MYSQLND_FIELD, org_table),
-	STRUCT_OFFSET(MYSQLND_FIELD, org_table_length),
 	STRUCT_OFFSET(MYSQLND_FIELD, name),
-	STRUCT_OFFSET(MYSQLND_FIELD, name_length),
 	STRUCT_OFFSET(MYSQLND_FIELD, org_name),
-	STRUCT_OFFSET(MYSQLND_FIELD, org_name_length)
 };
 
 
@@ -1231,7 +1223,6 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	zend_uchar *buf = (zend_uchar *) conn->net->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
-	char *root_ptr;
 	unsigned long len;
 	MYSQLND_FIELD *meta;
 	unsigned int i, field_count = sizeof(rset_field_offsets)/sizeof(size_t);
@@ -1264,19 +1255,17 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 
 	meta = packet->metadata;
 
-	for (i = 0; i < field_count; i += 2) {
+	for (i = 0; i < field_count; i++) {
 		len = php_mysqlnd_net_field_length(&p);
 		BAIL_IF_NO_MORE_DATA;
 		switch ((len)) {
 			case 0:
-				*(const char **)(((char*)meta) + rset_field_offsets[i]) = mysqlnd_empty_string;
-				*(unsigned int *)(((char*)meta) + rset_field_offsets[i+1]) = 0;
+				*(zend_string **)(((char*)meta) + rset_field_offsets[i]) = STR_EMPTY_ALLOC();
 				break;
 			case MYSQLND_NULL_LENGTH:
 				goto faulty_or_fake;
 			default:
-				*(const char **)(((char *)meta) + rset_field_offsets[i]) = (const char *)p;
-				*(unsigned int *)(((char*)meta) + rset_field_offsets[i+1]) = len;
+				*(zend_string **)(((char *)meta) + rset_field_offsets[i]) = STR_INIT((char *)p, len, packet->persistent_alloc);
 				p += len;
 				total_len += len + 1;
 				break;
@@ -1337,70 +1326,16 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	{
 		BAIL_IF_NO_MORE_DATA;
 		DBG_INF_FMT("Def found, length %lu, persistent=%u", len, packet->persistent_alloc);
-		meta->def = mnd_pemalloc(len + 1, packet->persistent_alloc);
-		if (!meta->def) {
-			SET_OOM_ERROR(*conn->error_info);
-			DBG_RETURN(FAIL);		
-		}
-		memcpy(meta->def, p, len);
-		meta->def[len] = '\0';
-		meta->def_length = len;
+		meta->def = STR_INIT((char *)p, len, packet->persistent_alloc);
 		p += len;
+	} else {
+		meta->def = STR_EMPTY_ALLOC();
 	}
 
 	DBG_INF_FMT("allocing root. persistent=%u", packet->persistent_alloc);
-	root_ptr = meta->root = mnd_pemalloc(total_len, packet->persistent_alloc);
-	if (!root_ptr) {
-		SET_OOM_ERROR(*conn->error_info);
-		DBG_RETURN(FAIL);	
-	}
-	
-	meta->root_len = total_len;
-	/* Now do allocs */
-	if (meta->catalog && meta->catalog != mysqlnd_empty_string) {
-		len = meta->catalog_length;
-		meta->catalog = memcpy(root_ptr, meta->catalog, len);
-		*(root_ptr +=len) = '\0';
-		root_ptr++;
-	}
 
-	if (meta->db && meta->db != mysqlnd_empty_string) {
-		len = meta->db_length;
-		meta->db = memcpy(root_ptr, meta->db, len);
-		*(root_ptr +=len) = '\0';
-		root_ptr++;
-	}
-
-	if (meta->table && meta->table != mysqlnd_empty_string) {
-		len = meta->table_length;
-		meta->table = memcpy(root_ptr, meta->table, len);
-		*(root_ptr +=len) = '\0';
-		root_ptr++;
-	}
-
-	if (meta->org_table && meta->org_table != mysqlnd_empty_string) {
-		len = meta->org_table_length;
-		meta->org_table = memcpy(root_ptr, meta->org_table, len);
-		*(root_ptr +=len) = '\0';
-		root_ptr++;
-	}
-
-	if (meta->name && meta->name != mysqlnd_empty_string) {
-		len = meta->name_length;
-		meta->name = memcpy(root_ptr, meta->name, len);
-		*(root_ptr +=len) = '\0';
-		root_ptr++;
-	}
-
-	if (meta->org_name && meta->org_name != mysqlnd_empty_string) {
-		len = meta->org_name_length;
-		meta->org_name = memcpy(root_ptr, meta->org_name, len);
-		*(root_ptr +=len) = '\0';
-		root_ptr++;
-	}
-
-	DBG_INF_FMT("FIELD=[%s.%s.%s]", meta->db? meta->db:"*NA*", meta->table? meta->table:"*NA*",
-				meta->name? meta->name:"*NA*");
+	DBG_INF_FMT("FIELD=[%s.%s.%s]", meta->db? meta->db->val:"*NA*", meta->table? meta->table->val:"*NA*",
+				meta->name? meta->name->val:"*NA*");
 
 	DBG_RETURN(PASS);
 

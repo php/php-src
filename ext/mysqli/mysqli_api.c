@@ -1148,12 +1148,21 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 /* {{{  php_add_field_properties */
 static void php_add_field_properties(zval *value, const MYSQL_FIELD *field TSRMLS_DC)
 {
+#ifdef MYSQLI_USE_MYSQLND
+	add_property_str(value, "name", STR_COPY(field->name));
+	add_property_str(value, "orgname", STR_COPY(field->org_name));
+	add_property_str(value, "table", STR_COPY(field->table));
+	add_property_str(value, "orgtable", STR_COPY(field->org_table));
+	add_property_str(value, "def", STR_COPY(field->def));
+	add_property_str(value, "db", STR_COPY(field->db));
+#else
 	add_property_string(value, "name",(field->name ? field->name : ""));
 	add_property_string(value, "orgname",(field->org_name ? field->org_name : ""));
 	add_property_string(value, "table",(field->table ? field->table : ""));
 	add_property_string(value, "orgtable",(field->org_table ? field->org_table : ""));
 	add_property_string(value, "def",(field->def ? field->def : ""));
 	add_property_string(value, "db",(field->db ? field->db : ""));
+#endif
 
 	/* FIXME: manually set the catalog to "def" due to bug in
 	 * libmysqlclient which does not initialize field->catalog

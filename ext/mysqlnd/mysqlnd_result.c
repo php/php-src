@@ -921,7 +921,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 						*/
 						Z_TRY_ADDREF_P(data);
 						if (meta->zend_hash_keys[i].is_numeric == FALSE) {
-							zend_hash_str_update(Z_ARRVAL_P(row), meta->fields[i].name, meta->fields[i].name_length, data);
+							zend_hash_update(Z_ARRVAL_P(row), meta->fields[i].name, data);
 						} else {
 							zend_hash_index_update(Z_ARRVAL_P(row), meta->zend_hash_keys[i].key, data);
 						}
@@ -1174,7 +1174,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 				*/
 				Z_TRY_ADDREF_P(data);
 				if (meta->zend_hash_keys[i].is_numeric == FALSE) {
-					zend_hash_str_update(Z_ARRVAL_P(row), meta->fields[i].name, meta->fields[i].name_length, data);
+					zend_hash_update(Z_ARRVAL_P(row), meta->fields[i].name, data);
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row), meta->zend_hash_keys[i].key, data);
 				}
@@ -1270,7 +1270,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 				*/
 				Z_TRY_ADDREF_P(data);
 				if (meta->zend_hash_keys[i].is_numeric == FALSE) {
-					zend_hash_str_update(Z_ARRVAL_P(row), meta->fields[i].name, meta->fields[i].name_length, data);
+					zend_hash_update(Z_ARRVAL_P(row), meta->fields[i].name, data);
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row), meta->zend_hash_keys[i].key, data);
 				}

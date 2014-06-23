@@ -33,14 +33,13 @@ static void
 php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS_DC)
 {
 	if (meta) {
-		if (meta->root) {
-			mnd_pefree(meta->root, persistent);
-			meta->root = NULL;
-		}
-		if (meta->def) {
-			mnd_pefree(meta->def, persistent);
-			meta->def = NULL;
-		}
+		STR_RELEASE(meta->def);
+		STR_RELEASE(meta->name);
+		STR_RELEASE(meta->org_name);
+		STR_RELEASE(meta->table);
+		STR_RELEASE(meta->org_table);
+		STR_RELEASE(meta->db);
+		STR_RELEASE(meta->catalog);
 	}
 }
 /* }}} */
@@ -110,12 +109,6 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 	for (;i < meta->field_count; i++) {
 		long idx;
 
-		if (meta->fields[i].root) {
-			/* We re-read metadata for PS */
-			mnd_pefree(meta->fields[i].root, meta->persistent);
-			meta->fields[i].root = NULL;
-		}
-
 		field_packet->metadata = &(meta->fields[i]);
 		if (FAIL == PACKET_READ(field_packet, conn)) {
 			PACKET_FREE(field_packet);
@@ -180,8 +173,8 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 
 		/* For BC we have to check whether the key is numeric and use it like this */
 		if ((meta->zend_hash_keys[i].is_numeric =
-					mysqlnd_is_key_numeric(field_packet->metadata->name,
-										   field_packet->metadata->name_length + 1,
+					mysqlnd_is_key_numeric(field_packet->metadata->name->val,
+										   field_packet->metadata->name->len + 1,
 										   &idx))) {
 			meta->zend_hash_keys[i].key = idx;
 		} 
@@ -263,44 +256,13 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 	*/
 	memcpy(new_fields, orig_fields, (meta->field_count) * sizeof(MYSQLND_FIELD));
 	for (i = 0; i < meta->field_count; i++) {
-		/* First copy the root, then field by field adjust the pointers */
-		new_fields[i].root = mnd_pemalloc(orig_fields[i].root_len, persistent);
-		if (!new_fields[i].root) {
-			goto oom;
-		}
-		memcpy(new_fields[i].root, orig_fields[i].root, new_fields[i].root_len);
-
-		if (orig_fields[i].name && orig_fields[i].name != mysqlnd_empty_string) {
-			new_fields[i].name = new_fields[i].root +
-								 (orig_fields[i].name - orig_fields[i].root);
-		}
-		if (orig_fields[i].org_name && orig_fields[i].org_name != mysqlnd_empty_string) {
-			new_fields[i].org_name = new_fields[i].root +
-									 (orig_fields[i].org_name - orig_fields[i].root);
-		}
-		if (orig_fields[i].table && orig_fields[i].table != mysqlnd_empty_string) {
-			new_fields[i].table	= new_fields[i].root +
-								  (orig_fields[i].table - orig_fields[i].root);
-		}
-		if (orig_fields[i].org_table && orig_fields[i].org_table != mysqlnd_empty_string) {
-			new_fields[i].org_table	= new_fields[i].root +
-									  (orig_fields[i].org_table - orig_fields[i].root);
-		}
-		if (orig_fields[i].db && orig_fields[i].db != mysqlnd_empty_string) {
-			new_fields[i].db = new_fields[i].root + (orig_fields[i].db - orig_fields[i].root);
-		}
-		if (orig_fields[i].catalog && orig_fields[i].catalog != mysqlnd_empty_string) {
-			new_fields[i].catalog = new_fields[i].root + (orig_fields[i].catalog - orig_fields[i].root);
-		}
-		/* def is not on the root, if allocated at all */
-		if (orig_fields[i].def) {
-			new_fields[i].def = mnd_pemalloc(orig_fields[i].def_length + 1, persistent);
-			if (!new_fields[i].def) {
-				goto oom;
-			}
-			/* copy the trailing \0 too */
-			memcpy(new_fields[i].def, orig_fields[i].def, orig_fields[i].def_length + 1);
-		}
+		new_fields[i].name = STR_DUP(orig_fields[i].name, persistent);
+		new_fields[i].org_name = STR_DUP(orig_fields[i].org_name, persistent);
+		new_fields[i].table	= STR_DUP(orig_fields[i].table, persistent);
+		new_fields[i].org_table	= STR_DUP(orig_fields[i].org_table, persistent);
+		new_fields[i].db = STR_DUP(orig_fields[i].db, persistent);
+		new_fields[i].catalog = STR_DUP(orig_fields[i].catalog, persistent);
+		new_fields[i].def = STR_DUP(orig_fields[i].def, persistent);
 	}
 	new_meta->current_field = 0;
 	new_meta->field_count = meta->field_count;
@@ -317,6 +279,7 @@ oom:
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_res_meta::fetch_field */
 static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta TSRMLS_DC)
@@ -327,7 +290,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta 
 		DBG_RETURN(NULL);
 	}
 	DBG_INF_FMT("name=%s max_length=%u",
-		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name:"",
+		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name->val:"",
 		meta->fields[meta->current_field].max_length);
 	DBG_RETURN(&meta->fields[meta->current_field++]);
 }
@@ -341,7 +304,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA 
 	DBG_ENTER("mysqlnd_res_meta::fetch_field_direct");
 	DBG_INF_FMT("fieldnr=%u", fieldnr);
 	DBG_INF_FMT("name=%s max_length=%u",
-		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name:"",
+		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name->val:"",
 		meta->fields[meta->current_field].max_length);
 	DBG_RETURN(&meta->fields[fieldnr]);
 }
@@ -365,6 +328,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const 
 	return meta->current_field;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_res_meta::field_seek */
 static MYSQLND_FIELD_OFFSET
