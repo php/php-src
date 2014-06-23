@@ -42,21 +42,21 @@
  * We need to do this because GMP will print an error and abort() otherwise 
  * We don't actually calculate the actual number of limbs, just maximum that
  * could be produced */
-#define assert_limbs_within_limits(_new_limbs) { \
-	mp_size_t new_limbs = (_new_limbs);					\
+#define assert_limbs_within_limits(_new_limbs) { 					\
+	mp_size_t new_limbs = (_new_limbs);								\
 	/* This logic is based on logic for gmp overflow error in gmp's source
-	 * See /mpz/realloc.c there */ 						\
-	if (sizeof(mp_size_t) == sizeof (int))	{			\
-		if (new_limbs > ULONG_MAX / GMP_NUMB_BITS) {	\
+	 * See /mpz/realloc.c there */ 									\
+	if (sizeof(mp_size_t) == sizeof (int))	{						\
+		if (UNEXPECTED(new_limbs > ULONG_MAX / GMP_NUMB_BITS)) {	\
 			zend_error(E_ERROR, "Result of integer operation would be too large to represent"); \
-			return;										\
-		}												\
-	} else {											\
-		if (new_limbs > INT_MAX) {						\
+			return;													\
+		}															\
+	} else {														\
+		if (UNEXPECTED(new_limbs > INT_MAX)) {						\
 			zend_error(E_ERROR, "Result of integer operation would be too large to represent"); \
-			return;										\
-		}												\
-	}													\
+			return;													\
+		}															\
+	}																\
 }
 
 /* Sign functions */
