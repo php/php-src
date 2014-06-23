@@ -33,7 +33,9 @@ static void
 php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS_DC)
 {
 	if (meta) {
-		STR_RELEASE(meta->def);
+		if (meta->def) {
+			STR_RELEASE(meta->def);
+		}
 		STR_RELEASE(meta->name);
 		STR_RELEASE(meta->org_name);
 		STR_RELEASE(meta->table);
@@ -262,7 +264,9 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 		new_fields[i].org_table	= STR_DUP(orig_fields[i].org_table, persistent);
 		new_fields[i].db = STR_DUP(orig_fields[i].db, persistent);
 		new_fields[i].catalog = STR_DUP(orig_fields[i].catalog, persistent);
-		new_fields[i].def = STR_DUP(orig_fields[i].def, persistent);
+		if (orig_fields[i].def) {
+			new_fields[i].def = STR_DUP(orig_fields[i].def, persistent);
+		}
 	}
 	new_meta->current_field = 0;
 	new_meta->field_count = meta->field_count;

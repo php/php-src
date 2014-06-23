@@ -1328,9 +1328,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 		DBG_INF_FMT("Def found, length %lu, persistent=%u", len, packet->persistent_alloc);
 		meta->def = STR_INIT((char *)p, len, packet->persistent_alloc);
 		p += len;
-	} else {
-		meta->def = STR_EMPTY_ALLOC();
-	}
+	} 
 
 	DBG_INF_FMT("allocing root. persistent=%u", packet->persistent_alloc);
 

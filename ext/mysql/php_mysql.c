@@ -2426,7 +2426,7 @@ PHP_FUNCTION(mysql_fetch_field)
 #if MYSQL_USE_MYSQLND
 	add_property_str(return_value, "name", STR_COPY(mysql_field->name));
 	add_property_str(return_value, "table", STR_COPY(mysql_field->table));
-	add_property_str(return_value, "def", STR_COPY(mysql_field->def));
+	add_property_str(return_value, "def", mysql_field->def? STR_COPY(mysql_field->def) : STR_EMPTY_ALLOC());
 #else
 	add_property_string(return_value, "name", (mysql_field->name?mysql_field->name:""));
 	add_property_string(return_value, "table", (mysql_field->table?mysql_field->table:""));

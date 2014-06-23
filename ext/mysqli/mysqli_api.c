@@ -1153,7 +1153,7 @@ static void php_add_field_properties(zval *value, const MYSQL_FIELD *field TSRML
 	add_property_str(value, "orgname", STR_COPY(field->org_name));
 	add_property_str(value, "table", STR_COPY(field->table));
 	add_property_str(value, "orgtable", STR_COPY(field->org_table));
-	add_property_str(value, "def", STR_COPY(field->def));
+	add_property_str(value, "def", field->def? STR_COPY(field->def) : STR_EMPTY_ALLOC());
 	add_property_str(value, "db", STR_COPY(field->db));
 #else
 	add_property_string(value, "name",(field->name ? field->name : ""));
