@@ -36,12 +36,24 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS
 		if (meta->def) {
 			STR_RELEASE(meta->def);
 		}
-		STR_RELEASE(meta->name);
-		STR_RELEASE(meta->org_name);
-		STR_RELEASE(meta->table);
-		STR_RELEASE(meta->org_table);
-		STR_RELEASE(meta->db);
-		STR_RELEASE(meta->catalog);
+		if (meta->name) {
+			STR_RELEASE(meta->name);
+		}
+		if (meta->org_name) {
+			STR_RELEASE(meta->org_name);
+		}
+		if (meta->table) {
+			STR_RELEASE(meta->table);
+		}
+		if (meta->org_table) {
+			STR_RELEASE(meta->org_table);
+		}
+		if (meta->db) {
+			STR_RELEASE(meta->db);
+		}
+		if (meta->catalog) {
+			STR_RELEASE(meta->catalog);
+		}
 	}
 }
 /* }}} */
