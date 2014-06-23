@@ -221,6 +221,19 @@ static zend_always_inline zval *zend_vm_stack_pop(TSRMLS_D)
 	return --EG(argument_stack)->top;
 }
 
+static zend_always_inline zend_call_frame *zend_vm_stack_push_call_frame(zend_function *func, zend_uint num_args, zend_uint flags, zend_class_entry *called_scope, zend_object *object, zend_call_frame *prev TSRMLS_DC)
+{
+	zend_call_frame * call = (zend_call_frame*)EG(argument_stack)->top;
+	call->func = func;
+	call->num_args = num_args;
+	call->flags = flags;
+	call->called_scope = called_scope;
+	call->object = object;
+	call->prev = prev;
+	EG(argument_stack)->top += ZEND_CALL_FRAME_SLOT;
+	return call;
+}
+
 static zend_always_inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 {
 	zval *ret;
@@ -234,8 +247,7 @@ static zend_always_inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 
 static zend_always_inline zval* zend_vm_stack_frame_base(zend_execute_data *ex)
 {
-	return (zval*)((char*)ex->call_slots +
-		ZEND_MM_ALIGNED_SIZE(sizeof(call_slot)) * ex->op_array->nested_calls);
+	return EX_VAR_NUM_2(ex, ex->op_array->last_var + ex->op_array->T);
 }
 
 static zend_always_inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
@@ -250,12 +262,13 @@ static zend_always_inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
 	}
 }
 
-static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC)
+static zend_always_inline void zend_vm_stack_free_call_frame(zend_call_frame *call, int nested TSRMLS_DC)
 {
-	zval *p = EG(argument_stack)->top - 1;
+	zend_uint num_args = call->num_args;	
 
-	if (EXPECTED(Z_LVAL_P(p) > 0)) {
-	 	zval *end = p - Z_LVAL_P(p);
+	if (num_args > 0) {
+		zval *p = ZEND_CALL_ARG(call, num_args + 1);
+	 	zval *end = p - num_args;
 
 		do {
 			p--;
@@ -263,27 +276,25 @@ static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC
 		} while (p != end);
 	}
 	if (nested) {
-		EG(argument_stack)->top = p;
+		EG(argument_stack)->top = (zval*)call;
 	} else {
-		zend_vm_stack_free(p TSRMLS_CC);
+		zend_vm_stack_free((zval*)call TSRMLS_CC);
 	}
 }
 
 static zend_always_inline int zend_vm_stack_get_args_count_ex(zend_execute_data *ex)
 {
-	zval *p = ex->function_state.arguments;
-	return Z_LVAL_P(p);
+	return ex->call->num_args;
 }
 
 static zend_always_inline zval* zend_vm_stack_get_arg_ex(zend_execute_data *ex, int requested_arg)
 {
-	zval *p = ex->function_state.arguments;
-	int arg_count = Z_LVAL_P(p);
+	int arg_count = ex->call->num_args;
 
 	if (UNEXPECTED(requested_arg > arg_count)) {
 		return NULL;
 	}
-	return p - arg_count + requested_arg - 1;
+	return ZEND_CALL_ARG(ex->call, requested_arg);
 }
 
 static zend_always_inline int zend_vm_stack_get_args_count(TSRMLS_D)

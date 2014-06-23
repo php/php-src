@@ -87,11 +87,11 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 
 	/* If yield was used as a function argument there may be active
 	 * method calls those objects need to be freed */
-	while (execute_data->call >= execute_data->call_slots) {
+	while (execute_data->call) {
 		if (execute_data->call->object) {
 			OBJ_RELEASE(execute_data->call->object);
 		}
-		execute_data->call--;
+		execute_data->call = execute_data->call->prev;
 	}
 }
 /* }}} */
@@ -133,11 +133,10 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		 * generator (for func_get_args) so those have to be freed too. */
 		{
 			zend_execute_data *prev_execute_data = execute_data->prev_execute_data;
-			zval *arguments = prev_execute_data->function_state.arguments;
 
-			if (arguments) {
-				int arguments_count = Z_LVAL_P(arguments);
-				zval *arguments_start = arguments - arguments_count;
+			if (prev_execute_data->call) {
+				int arguments_count = prev_execute_data->call->num_args;
+				zval *arguments_start = ZEND_CALL_ARG(prev_execute_data->call, 1);
 				int i;
 
 				for (i = 0; i < arguments_count; ++i) {

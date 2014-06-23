@@ -74,9 +74,10 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC
 
 		fprintf(slowlog, "[0x%" PTR_FMT "lx] ", execute_data);
 
-		if (0 > fpm_trace_get_long(execute_data + offsetof(zend_execute_data, function_state.function), &l)) {
-			return -1;
-		}
+		// TODO: fpm_php_trace_dump() has be reimplemented ???
+//???		if (0 > fpm_trace_get_long(execute_data + offsetof(zend_execute_data, function_state.function), &l)) {
+//???			return -1;
+//???		}
 
 		function = l;
 

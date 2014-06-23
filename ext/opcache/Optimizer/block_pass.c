@@ -1958,7 +1958,6 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
 					case ZEND_DO_FCALL:
-					case ZEND_DO_FCALL_BY_NAME:
 						if (ZEND_RESULT_TYPE(opline) == IS_VAR) {
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 							ZEND_RESULT_TYPE(opline) |= EXT_TYPE_UNUSED;

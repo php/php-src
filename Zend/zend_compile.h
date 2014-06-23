@@ -59,7 +59,6 @@ typedef struct _zend_compiler_context {
 	int        literals_size;
 	int        current_brk_cont;
 	int        backpatch_count;
-	int        nested_calls;
 	int        used_stack;
 	int        in_finally;
 	HashTable *labels;
@@ -266,7 +265,6 @@ struct _zend_op_array {
 
 	zend_uint T;
 
-	zend_uint nested_calls;
 	zend_uint used_stack;
 
 	zend_brk_cont_element *brk_cont_array;
@@ -336,12 +334,6 @@ union _zend_function {
 	zend_internal_function internal_function;
 };
 
-
-typedef struct _zend_function_state {
-	zend_function *function;
-	zval *arguments;
-} zend_function_state;
-
 typedef struct _zend_function_call_entry {
 	zend_function *fbc;
 	zend_uint arg_num;
@@ -361,14 +353,26 @@ typedef struct _list_llist_element {
 	znode value;
 } list_llist_element;
 
-typedef struct _call_slot {
-	zend_function     *fbc;
-	zend_class_entry  *called_scope;
-	zend_object       *object;
-	zend_uint          num_additional_args;
-	zend_bool          is_ctor_call;
-	zend_bool          is_ctor_result_used;
-} call_slot;
+typedef struct _zend_call_frame zend_call_frame;
+
+struct _zend_call_frame {
+	zend_function         *func;
+	zend_uint              num_args;
+	zend_uint              flags;
+	zend_class_entry      *called_scope;
+	zend_object           *object;
+	zend_call_frame       *prev;
+};
+
+#define ZEND_CALL_CTOR               (1 << 0)
+#define ZEND_CALL_CTOR_RESULT_USED   (1 << 1)
+#define ZEND_CALL_DONE               (1 << 2)
+
+#define ZEND_CALL_FRAME_SLOT \
+	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_call_frame)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
+
+#define ZEND_CALL_ARG(call, n) \
+	(((zval*)(call)) + ((n) + (ZEND_CALL_FRAME_SLOT - 1)))
 
 typedef enum _vm_frame_kind {
 	VM_FRAME_NESTED_FUNCTION,	/* stackless VM call to function */
@@ -380,7 +384,7 @@ typedef enum _vm_frame_kind {
 struct _zend_execute_data {
 	struct _zend_op     *opline;           /* executed opline                */
 	zend_op_array       *op_array;         /* executed op_array              */
-	zend_function_state  function_state;   /* called function and arguments  */
+	zend_call_frame     *call;             /* current call                   */
 	zend_object         *object;           /* current $this                  */
 	zend_class_entry    *scope;            /* function scope (self)          */
 	zend_class_entry    *called_scope;     /* function called scope (static) */
@@ -393,8 +397,6 @@ struct _zend_execute_data {
 	zval old_error_reporting;
 	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 	zend_object *delayed_exception;
-	call_slot *call_slots;
-	call_slot *call;
 };
 
 #define EX(element) execute_data.element
@@ -877,7 +879,7 @@ END_EXTERN_C()
 /* call op_array handler of extendions */
 #define ZEND_COMPILE_HANDLE_OP_ARRAY            (1<<1)
 
-/* generate ZEND_DO_FCALL_BY_NAME for internal functions instead of ZEND_DO_FCALL */
+/* generate ZEND_INIT_FCALL_BY_NAME for internal functions instead of ZEND_INIT_FCALL */
 #define ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS	(1<<2)
 
 /* don't perform early binding for classes inherited form internal ones;

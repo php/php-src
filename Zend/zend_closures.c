@@ -47,7 +47,7 @@ static zend_object_handlers closure_handlers;
 
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
-	zend_function *func = EG(current_execute_data)->function_state.function;
+	zend_function *func = EG(current_execute_data)->call->func;
 	zval *arguments;
 
 	arguments = emalloc(sizeof(zval) * ZEND_NUM_ARGS());
