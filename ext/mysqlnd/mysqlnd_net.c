@@ -132,7 +132,7 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 	/*
 	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
 	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-	  unregistered yntil the script ends. So, we need to take care of that.
+	  unregistered until the script ends. So, we need to take care of that.
 	*/
 	origin_dtor = EG(regular_list).pDestructor;
 	EG(regular_list).pDestructor = NULL;
@@ -226,7 +226,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	/*
 	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
 	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-	  unregistered yntil the script ends. So, we need to take care of that.
+	  unregistered until the script ends. So, we need to take care of that.
 	*/
 	origin_dtor = EG(regular_list).pDestructor;
 	EG(regular_list).pDestructor = NULL;
