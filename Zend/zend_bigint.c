@@ -37,9 +37,58 @@
 	mpz_clear(temp);		\
 }
 
+/* Throws error if gmp "limbs" exceed maximum permissible
+ * We use this to catch GMP's "overflow" scenarios before GMP does
+ * We need to do this because GMP will print an error and abort() otherwise 
+ * We don't actually calculate the actual number of limbs, just maximum that
+ * could be produced */
+#define assert_limbs_within_limits(_new_limbs) { \
+	mp_size_t new_limbs = (_new_limbs);					\
+	/* This logic is based on logic for gmp overflow error in gmp's source
+	 * See /mpz/realloc.c there */ 						\
+	if (sizeof(mp_size_t) == sizeof (int))	{			\
+		if (new_limbs > ULONG_MAX / GMP_NUMB_BITS) {	\
+			zend_error(E_ERROR, "Result of integer operation would be too large to represent"); \
+			return;										\
+		}												\
+	} else {											\
+		if (new_limbs > INT_MAX) {						\
+			zend_error(E_ERROR, "Result of integer operation would be too large to represent"); \
+			return;										\
+		}												\
+	}													\
+}
+
+/* Sign functions */
+#define int_sgn(n) ((n) > 0 ? 1 : ((n) < 0 ? -1 : 0))
+#define big_sgn(n) (mpz_sgn((n)->mpz))
+
 /*** INTERNAL FUNCTIONS ***/
 
-/* emalloc/realloc/free are macros, not functions, so we make them functions */
+/* Gets number of gmp "limbs" a long would occupy were it a bigint
+ * i.e. ceil((ceil(log2(abs(lval)) + 1)) / GMP_NUMB_BITS)
+ * Ignores sign (as gmp does)
+ * TODO: Optimise to use bsr (x86 asm)/clz (ARM asm) */
+static zend_always_inline mp_size_t long_limbs(long lval) {
+	int used;
+	frexp((double)lval, &used);
+	return (mp_size_t)(used / GMP_NUMB_BITS + 1);
+}
+
+/* Gets number of gmp "limbs" pow(2, a ulong) would occupy were it a bigint
+ * i.e. ceil((ceil(log2(pow(2, ulval)) + 1)) / GMP_NUMB_BITS) */
+static zend_always_inline mp_size_t long_limbs_2exp(unsigned long ulval) {
+	return ulval / GMP_NUMB_BITS + 1;
+}
+
+/* Gets number of gmp "limbs" used in a bigint
+ * Ignores sign */
+static zend_always_inline mp_size_t bigint_limbs(const zend_bigint *big) {
+	return (mp_size_t)mpz_size(big->mpz);
+}
+
+/* emalloc/realloc/free are macros, not functions, so we need wrappers to pass
+   as our custom allocators */
 static void* gmp_emalloc(size_t size)
 {
 	return emalloc(size);
@@ -329,12 +378,18 @@ ZEND_API char* zend_bigint_to_string_base(const zend_bigint *big, int base)
 /* Adds two bigints and stores result in out */
 ZEND_API void zend_bigint_add(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
 {
+	assert_limbs_within_limits((big_sgn(op1) * big_sgn(op2) > 0)
+		? bigint_limbs(op1) + bigint_limbs(op2) + 1
+		: 0 ); /* if it's a subtraction, the result is guaranteed to be smaller */
 	mpz_add(out->mpz, op1->mpz, op2->mpz);
 }
 
 /* Adds a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_add_long(zend_bigint *out, const zend_bigint *op1, long op2)
 {
+	assert_limbs_within_limits((big_sgn(op1) * int_sgn(op2) > 0)
+		? bigint_limbs(op1) + long_limbs(op2) + 1
+		: 0 ); /* if it's a subtraction, the result is guaranteed to be smaller */
 	WITH_TEMP_MPZ_FROM_LONG(op2, op2_mpz, {
 		mpz_add(out->mpz, op1->mpz, op2_mpz);
 	})
@@ -343,6 +398,9 @@ ZEND_API void zend_bigint_add_long(zend_bigint *out, const zend_bigint *op1, lon
 /* Adds a long and a long and stores result in out */
 ZEND_API void zend_bigint_long_add_long(zend_bigint *out, long op1, long op2)
 {
+	assert_limbs_within_limits((int_sgn(op1) * int_sgn(op2) > 0)
+		? long_limbs(op1) + long_limbs(op2) + 1
+		: 0 ); /* if it's a subtraction, the result is guaranteed to be smaller */
 	WITH_TEMP_MPZ_FROM_LONG(op1, op1_mpz, WITH_TEMP_MPZ_FROM_LONG(op2, op2_mpz, {
 		mpz_add(out->mpz, op1_mpz, op2_mpz);		
 	}))
@@ -351,12 +409,18 @@ ZEND_API void zend_bigint_long_add_long(zend_bigint *out, long op1, long op2)
 /* Subtracts two bigints and stores result in out */
 ZEND_API void zend_bigint_subtract(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
 {
+	assert_limbs_within_limits((big_sgn(op1) * big_sgn(op2) < 0)
+		? bigint_limbs(op1) + bigint_limbs(op2) + 1
+		: 0 ); /* if it's a subtraction, the result is guaranteed to be smaller */
 	mpz_sub(out->mpz, op1->mpz, op2->mpz);
 }
 
 /* Subtracts a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_subtract_long(zend_bigint *out, const zend_bigint *op1, long op2)
 {
+	assert_limbs_within_limits((big_sgn(op1) * int_sgn(op2) < 0)
+		? bigint_limbs(op1) + long_limbs(op2) + 1
+		: 0 ); /* if it's a subtraction, the result is guaranteed to be smaller */
 	WITH_TEMP_MPZ_FROM_LONG(op2, op2_mpz, {
 		mpz_sub(out->mpz, op1->mpz, op2_mpz);
 	})
@@ -365,6 +429,9 @@ ZEND_API void zend_bigint_subtract_long(zend_bigint *out, const zend_bigint *op1
 /* Subtracts a long and a long and stores result in out */
 ZEND_API void zend_bigint_long_subtract_long(zend_bigint *out, long op1, long op2)
 {
+	assert_limbs_within_limits((int_sgn(op1) * int_sgn(op2) < 0)
+		? long_limbs(op1) + long_limbs(op2) + 1
+		: 0 ); /* if it's a subtraction, the result is guaranteed to be smaller */
 	WITH_TEMP_MPZ_FROM_LONG(op1, op1_mpz, WITH_TEMP_MPZ_FROM_LONG(op2, op2_mpz, {
 		mpz_sub(out->mpz, op1_mpz, op2_mpz);		
 	}))
@@ -373,6 +440,9 @@ ZEND_API void zend_bigint_long_subtract_long(zend_bigint *out, long op1, long op
 /* Subtracts a long and a bigint and stores result in out */
 ZEND_API void zend_bigint_long_subtract(zend_bigint *out, long op1, const zend_bigint *op2)
 {
+	assert_limbs_within_limits((int_sgn(op1) * big_sgn(op2) < 0)
+		? long_limbs(op1) + bigint_limbs(op2) + 1
+		: 0 ); /* if it's a subtraction, the result is guaranteed to be smaller */
 	WITH_TEMP_MPZ_FROM_LONG(op1, op1_mpz, {
 		mpz_sub(out->mpz, op1_mpz, op2->mpz);
 	})
@@ -381,18 +451,21 @@ ZEND_API void zend_bigint_long_subtract(zend_bigint *out, long op1, const zend_b
 /* Multiplies two bigints and stores result in out */
 ZEND_API void zend_bigint_multiply(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
 {
+	assert_limbs_within_limits(bigint_limbs(op1) + bigint_limbs(op2));
 	mpz_mul(out->mpz, op1->mpz, op2->mpz);
 }
 
 /* Multiplies a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_multiply_long(zend_bigint *out, const zend_bigint *op1, long op2)
 {
+	assert_limbs_within_limits(bigint_limbs(op1) + long_limbs(op2));
 	mpz_mul_si(out->mpz, op1->mpz, op2);
 }
 
 /* Multiplies a long and a long and stores result in out */
 ZEND_API void zend_bigint_long_multiply_long(zend_bigint *out, long op1, long op2)
 {
+	assert_limbs_within_limits(long_limbs(op1) + long_limbs(op2));
 	WITH_TEMP_MPZ_FROM_LONG(op1, op1_mpz, {
 		mpz_mul_si(out->mpz, op1_mpz, op2);		
 	})
@@ -401,12 +474,14 @@ ZEND_API void zend_bigint_long_multiply_long(zend_bigint *out, long op1, long op
 /* Raises a bigint base to an unsigned long power and stores result in out */
 ZEND_API void zend_bigint_pow_ulong(zend_bigint *out, const zend_bigint *base, unsigned long power)
 {
+	assert_limbs_within_limits(bigint_limbs(base) * power);
 	mpz_pow_ui(out->mpz, base->mpz, power);
 }
 
 /* Raises a long base to an unsigned long power and stores result in out */
 ZEND_API void zend_bigint_long_pow_ulong(zend_bigint *out, long base, unsigned long power)
 {
+	assert_limbs_within_limits(long_limbs(base) * power);
 	WITH_TEMP_MPZ_FROM_LONG(base, base_mpz, {
 		mpz_pow_ui(out->mpz, base_mpz, power);
 	})
@@ -415,12 +490,14 @@ ZEND_API void zend_bigint_long_pow_ulong(zend_bigint *out, long base, unsigned l
 /* Divides a bigint by a bigint and stores result in out */
 ZEND_API void zend_bigint_divide(zend_bigint *out, const zend_bigint *num, const zend_bigint *divisor)
 {
+	/* no need to assert as division will always return a smaller result */
 	mpz_fdiv_q(out->mpz, num->mpz, divisor->mpz);
 }
 
 /* Divides a bigint by a long and stores result in out */
 ZEND_API void zend_bigint_divide_long(zend_bigint *out, const zend_bigint *num, long divisor)
 {
+	/* no need to assert as division will always return a smaller result */
 	WITH_TEMP_MPZ_FROM_LONG(divisor, divisor_mpz, {
 		mpz_fdiv_q(out->mpz, num->mpz, divisor_mpz);
 	})
@@ -429,6 +506,7 @@ ZEND_API void zend_bigint_divide_long(zend_bigint *out, const zend_bigint *num, 
 /* Divides a long by a bigint and stores result in out */
 ZEND_API void zend_bigint_long_divide(zend_bigint *out, long num, const zend_bigint *divisor)
 {
+	/* no need to assert as division will always return a smaller result */
 	WITH_TEMP_MPZ_FROM_LONG(num, num_mpz, {
 		mpz_fdiv_q(out->mpz, num_mpz, divisor->mpz);
 	})
@@ -437,12 +515,14 @@ ZEND_API void zend_bigint_long_divide(zend_bigint *out, long num, const zend_big
 /* Finds the remainder of the division of a bigint by a bigint and stores result in out */
 ZEND_API void zend_bigint_modulus(zend_bigint *out, const zend_bigint *num, const zend_bigint *divisor)
 {
+	/* no need to assert as division will always return a smaller result */
 	mpz_tdiv_r(out->mpz, num->mpz, divisor->mpz);
 }
 
 /* Finds the remainder of the division of a bigint by a long and stores result in out */
 ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num, long divisor)
 {
+	/* no need to assert as division will always return a smaller result */
 	WITH_TEMP_MPZ_FROM_LONG(divisor, divisor_mpz, {
 		mpz_tdiv_r(out->mpz, num->mpz, divisor_mpz);
 	})
@@ -451,6 +531,7 @@ ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num,
 /* Finds the remainder of the division of a long by a bigint and stores result in out */
 ZEND_API void zend_bigint_long_modulus(zend_bigint *out, long num, const zend_bigint *divisor)
 {
+	/* no need to assert as division will always return a smaller result */
 	WITH_TEMP_MPZ_FROM_LONG(num, num_mpz, {
 		mpz_tdiv_r(out->mpz, num_mpz, divisor->mpz);
 	})
@@ -459,18 +540,24 @@ ZEND_API void zend_bigint_long_modulus(zend_bigint *out, long num, const zend_bi
 /* Finds the one's complement of a bigint and stores result in out */
 ZEND_API void zend_bigint_ones_complement(zend_bigint *out, const zend_bigint *op)
 {
+	/* The NOT of a positive value will be a bigger negative value but the reverse
+	   is not true. Of course this doesn't apply for some very small values, but
+	   they don't need asserting. */
+	assert_limbs_within_limits(bigint_limbs(op) + (big_sgn(op) > 0));
 	mpz_com(out->mpz, op->mpz);
 }
 
 /* Finds the bitwise OR of a bigint and a bigint and stores result in out */
 ZEND_API void zend_bigint_or(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
 {
+	/* no need to assert; these ops never give a bigger result than operand */
 	mpz_ior(out->mpz, op1->mpz, op2->mpz);
 }
 
 /* Finds the bitwise OR of a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, long op2)
 {
+	/* no need to assert; these ops never give a bigger result than operand */
 	WITH_TEMP_MPZ_FROM_LONG(op2, op2_mpz, {
 		mpz_ior(out->mpz, op1->mpz, op2_mpz);
 	})
@@ -479,6 +566,7 @@ ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, long
 /* Finds the bitwise OR of a long and a bigint and stores result in out */
 ZEND_API void zend_bigint_long_or(zend_bigint *out, long op1, const zend_bigint *op2)
 {
+	/* no need to assert; these ops never give a bigger result than operand */
 	WITH_TEMP_MPZ_FROM_LONG(op1, op1_mpz, {
 		mpz_ior(out->mpz, op1_mpz, op2->mpz);
 	})
@@ -487,12 +575,14 @@ ZEND_API void zend_bigint_long_or(zend_bigint *out, long op1, const zend_bigint 
 /* Finds the bitwise AND of a bigint and a bigint and stores result in out */
 ZEND_API void zend_bigint_and(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
 {
+	/* no need to assert; these ops never give a bigger result than operand */
 	mpz_and(out->mpz, op1->mpz, op2->mpz);
 }
 
 /* Finds the bitwise AND of a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, long op2)
 {
+	/* no need to assert; these ops never give a bigger result than operand */
 	WITH_TEMP_MPZ_FROM_LONG(op2, op2_mpz, {
 		mpz_and(out->mpz, op1->mpz, op2_mpz);
 	})
@@ -501,6 +591,7 @@ ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, lon
 /* Finds the bitwise AND of a long and a bigint and stores result in out */
 ZEND_API void zend_bigint_long_and(zend_bigint *out, long op1, const zend_bigint *op2)
 {
+	/* no need to assert; these ops never give a bigger result than operand */
 	WITH_TEMP_MPZ_FROM_LONG(op1, op1_mpz, {
 		mpz_and(out->mpz, op1_mpz, op2->mpz);
 	})
@@ -509,12 +600,14 @@ ZEND_API void zend_bigint_long_and(zend_bigint *out, long op1, const zend_bigint
 /* Finds the bitwise XOR of a bigint and a bigint and stores result in out */
 ZEND_API void zend_bigint_xor(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
 {
+	/* no need to assert; these ops never give a bigger result than operand */
 	mpz_xor(out->mpz, op1->mpz, op2->mpz);
 }
 
 /* Finds the bitwise XOR of a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, long op2)
 {
+	/* no need to assert; these ops never give a bigger result than operand */
 	WITH_TEMP_MPZ_FROM_LONG(op2, op2_mpz, {
 		mpz_xor(out->mpz, op1->mpz, op2_mpz);
 	})
@@ -523,6 +616,7 @@ ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, lon
 /* Finds the bitwise XOR of a long and a bigint and stores result in out */
 ZEND_API void zend_bigint_long_xor(zend_bigint *out, long op1, const zend_bigint *op2)
 {
+	/* no need to assert; these ops never give a bigger result than operand */
 	WITH_TEMP_MPZ_FROM_LONG(op1, op1_mpz, {
 		mpz_xor(out->mpz, op1_mpz, op2->mpz);
 	})
@@ -531,12 +625,14 @@ ZEND_API void zend_bigint_long_xor(zend_bigint *out, long op1, const zend_bigint
 /* Shifts a bigint left by an unsigned long and stores result in out */
 ZEND_API void zend_bigint_shift_left_ulong(zend_bigint *out, const zend_bigint *num, unsigned long shift)
 {
+	assert_limbs_within_limits(bigint_limbs(num) + long_limbs_2exp(shift));
 	mpz_mul_2exp(out->mpz, num->mpz, shift);
 }
 
 /* Shifts a long left by an unsigned long and stores result in out */
 ZEND_API void zend_bigint_long_shift_left_ulong(zend_bigint *out, long num, unsigned long shift)
 {
+	assert_limbs_within_limits(long_limbs(num) + long_limbs_2exp(shift));
 	WITH_TEMP_MPZ_FROM_LONG(num, num_mpz, {
 		mpz_mul_2exp(out->mpz, num_mpz, shift);
 	})
@@ -545,6 +641,7 @@ ZEND_API void zend_bigint_long_shift_left_ulong(zend_bigint *out, long num, unsi
 /* Shifts a bigint right by an unsigned long and stores result in out */
 ZEND_API void zend_bigint_shift_right_ulong(zend_bigint *out, const zend_bigint *num, unsigned long shift)
 {
+	/* no need to assert; shift right always gives smaller result */
 	mpz_fdiv_q_2exp(out->mpz, num->mpz, shift);
 }
 
