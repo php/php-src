@@ -64,7 +64,7 @@
 # include "TSRM.h"
 #endif
 
-#ifdef HAVE_LIBREADLINE
+#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
 #   include <readline/readline.h>
 #   include <readline/history.h>
 #endif
