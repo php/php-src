@@ -560,7 +560,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 	switch (type) {
 		case PDO_PARAM_ZVAL:
 			if (value && value_len == sizeof(zval)) {
-				ZVAL_COPY_VALUE(dest, value);
+				ZVAL_COPY_VALUE(dest, (zval *)value);
 			} else {
 				ZVAL_NULL(dest);
 			}
