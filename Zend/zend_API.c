@@ -78,40 +78,6 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval *argument_array TSRMLS_DC) /* {{{ */
-{
-	zval *p;
-	int arg_count;
-	zval *param_ptr;
-
-	p = zend_vm_stack_top(TSRMLS_C) - 1;
-	arg_count = Z_LVAL_P(p);
-
-	if (param_count>arg_count) {
-		return FAILURE;
-	}
-
-	while (param_count-->0) {
-		param_ptr = (p-arg_count);
-		if (Z_REFCOUNTED_P(param_ptr) && 
-		    !Z_ISREF_P(param_ptr) &&		    
-		    Z_REFCOUNT_P(param_ptr) > 1) {
-			zval new_tmp;
-
-			ZVAL_DUP(&new_tmp, param_ptr);
-			Z_DELREF_P(param_ptr);
-			ZVAL_COPY_VALUE(argument_array, &new_tmp);
-		} else {
-			ZVAL_COPY_VALUE(argument_array, param_ptr);
-		}
-		argument_array++;
-		arg_count--;
-	}
-
-	return SUCCESS;
-}
-/* }}} */
-
 /* Zend-optimized Extended functions */
 /* this function doesn't check for too many parameters */
 ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
