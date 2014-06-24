@@ -279,7 +279,7 @@ static char* get_icu_value_internal( const char* loc_name , char* tag_name, int*
 	if( fromParseLocale==1 ){
 		/* Handle singletons */
 		if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
-			if( strlen(loc_name)>1 && (isIDPrefix(loc_name) == 1)){
+			if( strlen(loc_name)>1 && (isIDPrefix(loc_name) == 1) ){
 				return estrdup(loc_name);
 			}
 		}
