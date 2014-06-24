@@ -242,4 +242,7 @@ ZEND_API int zend_bigint_cmp_long(const zend_bigint *op1, long op2);
 /* Compares a bigint and a double and returns result (negative if op1 > op2, zero if op1 == op2, positive if op1 < op2) */
 ZEND_API int zend_bigint_cmp_double(const zend_bigint *op1, double op2);
 
+/* Finds the absolute value of a bigint and stores result in out */
+ZEND_API void zend_bigint_abs(zend_bigint *out, const zend_bigint *big);
+
 #endif

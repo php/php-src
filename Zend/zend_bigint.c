@@ -662,3 +662,10 @@ ZEND_API int zend_bigint_cmp_double(const zend_bigint *op1, double op2)
 {
 	return mpz_cmp_d(op1->mpz, op2);
 }
+
+/* Finds the absolute value of a bigint and stores result in out */
+ZEND_API void zend_bigint_abs(zend_bigint *out, const zend_bigint *big)
+{
+	/* no need to assert; only sign can change */
+	mpz_abs(out->mpz, big->mpz);
+}

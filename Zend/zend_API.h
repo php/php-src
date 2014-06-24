@@ -600,6 +600,7 @@ END_EXTERN_C()
 #define RETVAL_NULL() 					ZVAL_NULL(return_value)
 #define RETVAL_LONG(l) 					ZVAL_LONG(return_value, l)
 #define RETVAL_DOUBLE(d) 				ZVAL_DOUBLE(return_value, d)
+#define RETVAL_BIGINT(b) 				ZVAL_BIGINT(return_value, b)
 #define RETVAL_STR(s)			 		ZVAL_STR(return_value, s)
 #define RETVAL_INT_STR(s)		 		ZVAL_INT_STR(return_value, s)
 #define RETVAL_NEW_STR(s)		 		ZVAL_NEW_STR(return_value, s)
@@ -616,6 +617,7 @@ END_EXTERN_C()
 #define RETURN_NULL() 					{ RETVAL_NULL(); return;}
 #define RETURN_LONG(l) 					{ RETVAL_LONG(l); return; }
 #define RETURN_DOUBLE(d) 				{ RETVAL_DOUBLE(d); return; }
+#define RETURN_BIGINT(b) 				{ RETVAL_BIGINT(b); return; }
 #define RETURN_STR(s) 					{ RETVAL_STR(s); return; }
 #define RETURN_INT_STR(s)				{ RETVAL_INT_STR(s); return; }
 #define RETURN_NEW_STR(s)				{ RETVAL_NEW_STR(s); return; }

@@ -24,6 +24,7 @@
 #include "php.h"
 #include "php_math.h"
 #include "zend_multiply.h"
+#include "zend_bigint.h"
 
 #include <math.h>
 #include <float.h>
@@ -287,10 +288,16 @@ PHP_FUNCTION(abs)
 		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
 		if (Z_LVAL_P(value) == LONG_MIN) {
-			RETURN_DOUBLE(-(double)LONG_MIN);
+			zend_bigint *out = zend_bigint_init_alloc();
+			zend_bigint_long_subtract_long(out, 0, LONG_MIN);
+			RETURN_BIGINT(out);
 		} else {
 			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
 		}
+	} else if (Z_TYPE_P(value) == IS_BIGINT) {
+		zend_bigint *out = zend_bigint_init_alloc();
+		zend_bigint_abs(out, Z_BIG_P(value));
+		RETURN_BIGINT(out);
 	}
 	RETURN_FALSE;
 }
