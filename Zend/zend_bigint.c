@@ -43,16 +43,16 @@
  * We don't actually calculate the actual number of limbs, just maximum that
  * could be produced */
 #define assert_limbs_within_limits(_new_limbs) { 					\
-	mp_size_t new_limbs = (_new_limbs);								\
+	size_t new_limbs = (_new_limbs);								\
 	/* This logic is based on logic for gmp overflow error in gmp's source
 	 * See /mpz/realloc.c there */ 									\
-	if (sizeof(mp_size_t) == sizeof (int))	{						\
+	if (sizeof(size_t) == sizeof (int))	{							\
 		if (UNEXPECTED(new_limbs > ULONG_MAX / GMP_NUMB_BITS)) {	\
 			zend_error(E_ERROR, "Result of integer operation would be too large to represent"); \
 			return;													\
 		}															\
 	} else {														\
-		if (UNEXPECTED(new_limbs > INT_MAX)) {						\
+		if (UNEXPECTED(new_limbs > (size_t)INT_MAX)) {				\
 			zend_error(E_ERROR, "Result of integer operation would be too large to represent"); \
 			return;													\
 		}															\
@@ -69,22 +69,22 @@
  * i.e. ceil((ceil(log2(abs(lval)) + 1)) / GMP_NUMB_BITS)
  * Ignores sign (as gmp does)
  * TODO: Optimise to use bsr (x86 asm)/clz (ARM asm) */
-static zend_always_inline mp_size_t long_limbs(long lval) {
+static zend_always_inline size_t long_limbs(long lval) {
 	int used;
 	frexp((double)lval, &used);
-	return (mp_size_t)(used / GMP_NUMB_BITS + 1);
+	return (size_t)(used / GMP_NUMB_BITS + 1);
 }
 
 /* Gets number of gmp "limbs" pow(2, a ulong) would occupy were it a bigint
  * i.e. ceil((ceil(log2(pow(2, ulval)) + 1)) / GMP_NUMB_BITS) */
-static zend_always_inline mp_size_t long_limbs_2exp(unsigned long ulval) {
+static zend_always_inline size_t long_limbs_2exp(unsigned long ulval) {
 	return ulval / GMP_NUMB_BITS + 1;
 }
 
 /* Gets number of gmp "limbs" used in a bigint
  * Ignores sign */
-static zend_always_inline mp_size_t bigint_limbs(const zend_bigint *big) {
-	return (mp_size_t)mpz_size(big->mpz);
+static zend_always_inline size_t bigint_limbs(const zend_bigint *big) {
+	return mpz_size(big->mpz);
 }
 
 /* emalloc/realloc/free are macros, not functions, so we need wrappers to pass
