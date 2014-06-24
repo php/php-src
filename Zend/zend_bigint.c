@@ -157,11 +157,11 @@ ZEND_API int zend_bigint_init_from_string_length(zend_bigint *big, const char *s
 {
 	char *temp_str = estrndup(str, length);
 	zend_bigint_init(big);
-    if (mpz_set_str(big->mpz, temp_str, base) < 0) {
-    	mpz_clear(big->mpz);
+	if (mpz_set_str(big->mpz, temp_str, base) < 0) {
+		mpz_clear(big->mpz);
 		efree(temp_str);
 		return FAILURE;
-    }
+	}
 	efree(temp_str);
 	return SUCCESS;
 }
