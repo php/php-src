@@ -1599,8 +1599,7 @@ ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 								big2 = zend_bigint_init_alloc();
 								zend_bigint_long_pow_ulong(big2, l2, i);
 								zend_bigint_multiply(big, big, big2);
-								zend_bigint_dtor(big2);
-								efree(big2);
+								zend_bigint_release(big2);
 								ZVAL_BIGINT(result, big);
 								return SUCCESS;
 							}
