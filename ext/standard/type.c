@@ -235,6 +235,8 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 			}
 		}
 		RETURN_TRUE;
+	} else if (type == IS_BIGINT_OR_LONG && (Z_TYPE_P(arg) == IS_BIGINT || Z_TYPE_P(arg) == IS_LONG)) {
+		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
@@ -276,7 +278,7 @@ PHP_FUNCTION(is_bool)
    Returns true if variable is a long (integer) */
 PHP_FUNCTION(is_long)
 {
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_BIGINT_OR_LONG);
 }
 /* }}} */
 
