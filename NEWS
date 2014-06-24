@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed bug #67390 (insecure temporary file use in the configure script).
     (Remi) (CVE-2014-3981)
   . Fixed bug #67399 (putenv with empty variable may lead to crash). (Stas)
+  . Fixed bug #67498 (phpinfo() Type Confusion Information Leak Vulnerability). 
+    (Stefan Esser)
 
 - CLI server:
   . Fixed Bug #67406 (built-in web-server segfaults on startup). (Remi)
@@ -36,15 +38,20 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary 
-    check). 
+    check). (CVE-2014-0207) 
   . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
-    string size). (Francisco Alonso, Jan Kaluza, Remi)
+    string size). (CVE-2014-3478) (Francisco Alonso, Jan Kaluza, Remi) 
   . Fixed bug #67411 (fileinfo: cdf_check_stream_offset insufficient boundary
-    check). (Francisco Alonso, Jan Kaluza, Remi)
+    check). (CVE-2014-3479) (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67412 (fileinfo: cdf_count_chain insufficient boundary check).
-    (Francisco Alonso, Jan Kaluza, Remi)
+    (CVE-2014-3480) (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
-    check). (Francisco Alonso, Jan Kaluza, Remi)
+    check). (CVE-2014-3487) (Francisco Alonso, Jan Kaluza, Remi)
+
+- Intl:
+  . Fixed bug #67349 (Locale::parseLocale Double Free). (Stas)
+  . Fixed bug #67397 (Buffer overflow in locale_get_display_name and
+    uloc_getDisplayName (libicu 4.8.1)). (Stas)
 
 - Network:
   . Fixed bug #67432 (Fix potential segfault in dns_get_record()). 
@@ -63,6 +70,8 @@ PHP                                                                        NEWS
   . Fixed bug #66127 (Segmentation fault with ArrayObject unset). (Stas)
   . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
   . Fixed bug #67360 (Missing element after ArrayObject::getIterator). (Adam)
+  . Fixed bug #67492 (unserialize() SPL ArrayObject / SPLObjectStorage Type 
+    Confusion) (CVE-2014-3515). (Stefan Esser)
 
 29 May 2014, PHP 5.4.29
 
