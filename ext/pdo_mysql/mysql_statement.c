@@ -699,21 +699,11 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 		int namelen;
 
 		if (S->H->fetch_table_names) {
-#ifdef PDO_USE_MYSQLND
-			namelen = spprintf(&cols[i].name, 0, "%s.%s", S->fields[i].table->val, S->fields[i].name->val);
-#else
 			namelen = spprintf(&cols[i].name, 0, "%s.%s", S->fields[i].table, S->fields[i].name);
-#endif
 			cols[i].namelen = namelen;
 		} else {
-#ifdef PDO_USE_MYSQLND
-			cols[i].namelen = S->fields[i].name->len;
-			cols[i].name = estrndup(S->fields[i].name->val, S->fields[i].name->len);
-#else
-			namelen = strlen(S->fields[i].name);
-			cols[i].namelen = namelen;
-			cols[i].name = estrndup(S->fields[i].name, namelen);
-#endif
+			cols[i].namelen = S->fields[i].name_length;
+			cols[i].name = estrndup(S->fields[i].name, S->fields[i].name_length);
 		}
 
 		cols[i].precision = S->fields[i].decimals;
@@ -856,11 +846,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	F = S->fields + colno;
 
 	if (F->def) {
-#ifdef PDO_USE_MYSQLND
-		add_assoc_str(return_value, "mysql:def", STR_COPY(F->def));
-#else
 		add_assoc_string(return_value, "mysql:def", F->def);
-#endif
 	}
 	if (IS_NOT_NULL(F->flags)) {
 		add_next_index_string(&flags, "not_null");
@@ -902,11 +888,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 #endif
 
 	add_assoc_zval(return_value, "flags", &flags);
-#ifdef PDO_USE_MYSQLND
-	add_assoc_str(return_value, "table", STR_COPY(F->table));
-#else
 	add_assoc_string(return_value, "table", (char *) (F->table?F->table : ""));
-#endif
 
 	PDO_DBG_RETURN(SUCCESS);
 } /* }}} */

@@ -1969,11 +1969,9 @@ Q: String or long first?
 					}
 					mysql_field_seek(mysql_result, 0);
 					while ((tmp_field = mysql_fetch_field(mysql_result))) {
-#ifdef MYSQL_USE_MYSQLND
-						if ((!table_name || !strncasecmp(tmp_field->table->val, table_name, tmp_field->table->len)) && !strncasecmp(tmp_field->name->val, field_name, tmp_field->name->len)) {
-#else
-						if ((!table_name || !strcasecmp(tmp_field->table, table_name)) && !strcasecmp(tmp_field->name, field_name)) {
-#endif
+						if ((!table_name ||
+									!strncasecmp(tmp_field->table, table_name, tmp_field->table_length)) &&
+								!strncasecmp(tmp_field->name, field_name, tmp_field->name_length)) {
 							field_offset = i;
 							break;
 						}
@@ -2424,14 +2422,12 @@ PHP_FUNCTION(mysql_fetch_field)
 	object_init(return_value);
 
 #if MYSQL_USE_MYSQLND
-	add_property_str(return_value, "name", STR_COPY(mysql_field->name));
-	add_property_str(return_value, "table", STR_COPY(mysql_field->table));
-	add_property_str(return_value, "def", mysql_field->def? STR_COPY(mysql_field->def) : STR_EMPTY_ALLOC());
+	add_property_str(return_value, "name", STR_COPY(mysql_field->sname));
 #else
-	add_property_string(return_value, "name", (mysql_field->name?mysql_field->name:""));
-	add_property_string(return_value, "table", (mysql_field->table?mysql_field->table:""));
-	add_property_string(return_value, "def", (mysql_field->def?mysql_field->def:""));
+	add_property_stringl(return_value, "name", (mysql_field->name?mysql_field->name:""), mysql_field->name_length);
 #endif
+	add_property_stringl(return_value, "table", (mysql_field->table?mysql_field->table:""), mysql_field->table_length);
+	add_property_stringl(return_value, "def", (mysql_field->def?mysql_field->def:""), mysql_field->def_length);
 	add_property_long(return_value, "max_length", mysql_field->max_length);
 	add_property_long(return_value, "not_null", IS_NOT_NULL(mysql_field->flags)?1:0);
 	add_property_long(return_value, "primary_key", IS_PRI_KEY(mysql_field->flags)?1:0);
@@ -2502,17 +2498,13 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	switch (entry_type) {
 		case PHP_MYSQL_FIELD_NAME:
 #ifdef MYSQL_USE_MYSQLND
-			RETVAL_STR(STR_COPY(mysql_field->name));
+			RETVAL_STR(STR_COPY(mysql_field->sname));
 #else
 			RETVAL_STRING(mysql_field->name);
 #endif
 			break;
 		case PHP_MYSQL_FIELD_TABLE:
-#ifdef MYSQL_USE_MYSQLND
-			RETVAL_STR(STR_COPY(mysql_field->table));
-#else
 			RETVAL_STRING(mysql_field->table);
-#endif
 			break;
 		case PHP_MYSQL_FIELD_LEN:
 			RETVAL_LONG(mysql_field->length);
