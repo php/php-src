@@ -49,7 +49,7 @@ float(1.5)
 NULL
 bool(true)
 bool(false)
-object(stdClass)#1 (0) {
+object(stdClass)#%d (0) {
 }
 array(0) {
 }

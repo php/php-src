@@ -21,7 +21,7 @@ foreach ($tests as $v) {
 }
 ?>
 --EXPECTF--	
-Warning: array_product() expects parameter 1 to be array, string given in /Users/ajf/Projects/2014/PHP/php-src/ext/standard/tests/array/bug35014_64bit.php on line 15
+Warning: array_product() expects parameter 1 to be array, string given in %s on line %d
 NULL
 int(1)
 int(0)
