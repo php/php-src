@@ -3,10 +3,10 @@ Various pow() tests
 --FILE--
 <?php // $Id$
 
-define('LONG_MAX', is_int(5000000000)? 9223372036854775807 : 0x7FFFFFFF);
-define('LONG_MIN', -LONG_MAX - 1);
-printf("%d,%d,%d,%d\n",is_int(LONG_MIN  ),is_int(LONG_MAX  ),
-					   is_int(LONG_MIN-1),is_int(LONG_MAX+1));
+define('LONG_MAX64', 9223372036854775807);
+define('LONG_MIN64', -LONG_MAX64 - 1);
+define('LONG_MAX32', 0x7FFFFFFF);
+define('LONG_MIN32', -LONG_MAX32 - 1);
 
 $tests = <<<TESTS
  0.25 === pow(-2,-2)
@@ -122,28 +122,43 @@ sqrt(2) ~== pow(2,1/2)
  3.0  === pow(27.0, 1/3)
  0.5  === pow(   4, -0.5)
  0.5  === pow( 4.0, -0.5)
-LONG_MAX-1 === pow(LONG_MAX-1,1)
-LONG_MIN+1 === pow(LONG_MIN+1,1)
-(LONG_MAX-1)*(LONG_MAX-1) ~== pow(LONG_MAX-1,2)
-(LONG_MIN+1)*(LONG_MIN+1) ~== pow(LONG_MIN+1,2)
-(float)(LONG_MAX-1) === pow(LONG_MAX-1,1.0)
-(float)(LONG_MIN+1) === pow(LONG_MIN+1,1.0)
-(LONG_MAX-1)*(LONG_MAX-1) ~== pow(LONG_MAX-1,2.0)
-(LONG_MIN+1)*(LONG_MIN+1) ~== pow(LONG_MIN+1,2.0)
-LONG_MAX === pow(LONG_MAX,1)
-LONG_MIN === pow(LONG_MIN,1)
-LONG_MAX*LONG_MAX ~== pow(LONG_MAX,2)
-LONG_MIN*LONG_MIN ~== pow(LONG_MIN,2)
-(float)LONG_MAX === pow(LONG_MAX,1.0)
-(float)LONG_MIN === pow(LONG_MIN,1.0)
-LONG_MAX*LONG_MAX ~== pow(LONG_MAX,2.0)
-LONG_MIN*LONG_MIN ~== pow(LONG_MIN,2.0)
+LONG_MAX64-1 === pow(LONG_MAX64-1,1)
+LONG_MIN64+1 === pow(LONG_MIN64+1,1)
+(LONG_MAX64-1)*(LONG_MAX64-1) ~== pow(LONG_MAX64-1,2)
+(LONG_MIN64+1)*(LONG_MIN64+1) ~== pow(LONG_MIN64+1,2)
+(float)(LONG_MAX64-1) === pow(LONG_MAX64-1,1.0)
+(float)(LONG_MIN64+1) === pow(LONG_MIN64+1,1.0)
+(LONG_MAX64-1)*(LONG_MAX64-1) ~== pow(LONG_MAX64-1,2.0)
+(LONG_MIN64+1)*(LONG_MIN64+1) ~== pow(LONG_MIN64+1,2.0)
+LONG_MAX64 === pow(LONG_MAX64,1)
+LONG_MIN64 === pow(LONG_MIN64,1)
+LONG_MAX64*LONG_MAX64 ~== pow(LONG_MAX64,2)
+LONG_MIN64*LONG_MIN64 ~== pow(LONG_MIN64,2)
+(float)LONG_MAX64 === pow(LONG_MAX64,1.0)
+(float)LONG_MIN64 === pow(LONG_MIN64,1.0)
+LONG_MAX64*LONG_MAX64 ~== pow(LONG_MAX64,2.0)
+LONG_MIN64*LONG_MIN64 ~== pow(LONG_MIN64,2.0)
+LONG_MAX32-1 === pow(LONG_MAX32-1,1)
+LONG_MIN32+1 === pow(LONG_MIN32+1,1)
+(LONG_MAX32-1)*(LONG_MAX32-1) ~== pow(LONG_MAX32-1,2)
+(LONG_MIN32+1)*(LONG_MIN32+1) ~== pow(LONG_MIN32+1,2)
+(float)(LONG_MAX32-1) === pow(LONG_MAX32-1,1.0)
+(float)(LONG_MIN32+1) === pow(LONG_MIN32+1,1.0)
+(LONG_MAX32-1)*(LONG_MAX32-1) ~== pow(LONG_MAX32-1,2.0)
+(LONG_MIN32+1)*(LONG_MIN32+1) ~== pow(LONG_MIN32+1,2.0)
+LONG_MAX32 === pow(LONG_MAX32,1)
+LONG_MIN32 === pow(LONG_MIN32,1)
+LONG_MAX32*LONG_MAX32 ~== pow(LONG_MAX32,2)
+LONG_MIN32*LONG_MIN32 ~== pow(LONG_MIN32,2)
+(float)LONG_MAX32 === pow(LONG_MAX32,1.0)
+(float)LONG_MIN32 === pow(LONG_MIN32,1.0)
+LONG_MAX32*LONG_MAX32 ~== pow(LONG_MAX32,2.0)
+LONG_MIN32*LONG_MIN32 ~== pow(LONG_MIN32,2.0)
 TESTS;
 
  echo "On failure, please mail result to php-dev@lists.php.net\n";
  include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
 
 --EXPECT--
-1,1,0,0
 On failure, please mail result to php-dev@lists.php.net
 OK

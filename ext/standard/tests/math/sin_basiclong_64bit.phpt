@@ -1,9 +1,5 @@
 --TEST--
-Test sin function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test sin function : 64bit long and bigint tests
 --FILE--
 <?php
  
@@ -51,10 +47,10 @@ float(0.49667719175329)
 float(0.58252073586971)
 --- testing: 9223372036854775806 ---
 float(0.99993037667344)
---- testing: 9.2233720368548E+18 ---
+--- testing: 9223372036854775808 ---
 float(0.99993037667344)
 --- testing: -9223372036854775807 ---
 float(-0.99993037667344)
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 float(-0.99993037667344)
 ===DONE===
