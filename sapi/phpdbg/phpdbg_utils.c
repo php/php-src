@@ -400,12 +400,16 @@ PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
 	}
 
 	/* create cached prompt */
+#ifndef HAVE_LIBEDIT
+	/* TODO: libedit doesn't seems to support coloured prompt */
 	if ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED)) {
 		asprintf(
 			&PHPDBG_G(prompt)[1], "\033[%sm%s\033[0m ",
 			PHPDBG_G(colors)[PHPDBG_COLOR_PROMPT]->code,
 			PHPDBG_G(prompt)[0]);
-	} else {
+	} else
+#endif
+	{
 		asprintf(
 			&PHPDBG_G(prompt)[1], "%s ",
 			PHPDBG_G(prompt)[0]);
