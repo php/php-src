@@ -1529,10 +1529,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			ZVAL_LONG(zendlval, strtol(bin, NULL, 2));
 		}
 	} else {
-		char *temp_str = estrndup(bin, len);
 		ZVAL_NEW_BIGINT(zendlval);
-		zend_bigint_init_from_string(Z_BIG_P(zendlval), temp_str, 2);
-		efree(temp_str);
+		zend_bigint_init_from_string_length(Z_BIG_P(zendlval), bin, len, 2);
 	}
 	return T_LNUMBER;
 }
@@ -1544,15 +1542,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		errno = 0;
 		ZVAL_LONG(zendlval, strtol(yytext, NULL, 0));
 		if (errno == ERANGE) { /* Overflow */
-			char *temp_str = estrndup(yytext, yyleng);
 			if (yytext[0] == '0') { /* octal overflow */
 				ZVAL_NEW_BIGINT(zendlval);
-				zend_bigint_init_from_string(Z_BIG_P(zendlval), temp_str, 8);
+				zend_bigint_init_from_string_length(Z_BIG_P(zendlval), yytext, yyleng, 8);
 			} else {
 				ZVAL_NEW_BIGINT(zendlval);
-				zend_bigint_init_from_string(Z_BIG_P(zendlval), temp_str, 10);
+				zend_bigint_init_from_string_length(Z_BIG_P(zendlval), yytext, yyleng, 10);
 			}
-			efree(temp_str);
 		}
 	}
 	return T_LNUMBER;
