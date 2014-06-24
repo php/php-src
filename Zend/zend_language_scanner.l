@@ -1571,10 +1571,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			ZVAL_LONG(zendlval, strtol(hex, NULL, 16));
 		}
 	} else {
-		char *temp_str = estrndup(hex, len);
 		ZVAL_NEW_BIGINT(zendlval);
-		zend_bigint_init_from_string(Z_BIG_P(zendlval), temp_str, 16);
-		efree(temp_str);
+		zend_bigint_init_from_string_length(Z_BIG_P(zendlval), hex, len, 16);
 	}
 	return T_DNUMBER;
 }
