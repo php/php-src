@@ -108,10 +108,10 @@ string(5) "30071"
 string(22) "1777777777777777773327"
 
 -- Iteration 5 --
-string(1) "0"
+string(21) "777777777777777777777"
 
 -- Iteration 6 --
-string(1) "0"
+string(21) "777777777777777777777"
 
 -- Iteration 7 --
 string(2) "12"

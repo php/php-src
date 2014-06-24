@@ -1,9 +1,5 @@
 --TEST--
-Test dechex function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test dechex function : 64bit long and bigint tests
 --FILE--
 <?php
  
@@ -51,10 +47,10 @@ string(8) "ffffffff"
 string(8) "fffffffd"
 --- testing: 9223372036854775806 ---
 string(16) "7ffffffffffffffe"
---- testing: 9.2233720368548E+18 ---
-string(16) "8000000000000000"
+--- testing: 9223372036854775808 ---
+string(16) "7fffffffffffffff"
 --- testing: -9223372036854775807 ---
 string(16) "8000000000000001"
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 string(16) "8000000000000000"
 ===DONE===
