@@ -2340,12 +2340,6 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 					ZVAL_BOOL(result, 0);
 					return FAILURE;
 				}
-				/* prevent wrapping quirkiness where >> 64 + x == >> x */
-				if (Z_LVAL_P(op2) >= SIZEOF_LONG * 8) {
-					FREE_OP1_OP2();
-					ZVAL_LONG(result, (zend_bigint_sign(Z_BIG_P(op1)) < 0) ? -1 : 0);
-					return SUCCESS;
-				}
 				out = zend_bigint_init_alloc();
 				zend_bigint_shift_right_ulong(out, Z_BIG_P(op1), Z_LVAL_P(op2));
 				FREE_OP1_OP2();
