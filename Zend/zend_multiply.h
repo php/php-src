@@ -80,8 +80,9 @@
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
 	zend_long64 __result = (zend_long64) (a) * (zend_long64) (b);	\
 	if (__result > LONG_MAX || __result < LONG_MIN) {				\
-		(big) = zend_bigint_init_alloc();							\
-		zend_bigint_long_multiply_long(big, a, b);					\
+		zend_bigint *__out = zend_bigint_init_alloc();				\
+		zend_bigint_long_multiply_long(__out, a, b);				\
+		(big) = __out;												\
 		(usedval) = 1;												\
 	} else {														\
 		(lval) = (long) __result;									\
@@ -98,9 +99,11 @@
 	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
 		zend_bigint *__out = zend_bigint_init_alloc();				\
 		zend_bigint_long_multiply_long(__out, a, b);				\
-		big = __out;												\
+		(big) = __out;												\
+		(usedval) = 1;												\
 	} else {														\
 		(lval) = __lres;											\
+		(usedval) = 0;												\
 	}																\
 } while (0)
 
