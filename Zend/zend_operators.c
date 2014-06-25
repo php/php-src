@@ -1742,7 +1742,10 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 					return FAILURE;			/* division by zero */
 				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == LONG_MIN) {
 					/* Prevent overflow error/crash */
-					ZVAL_DOUBLE(result, (double) LONG_MIN / -1);
+					zend_bigint *out = zend_bigint_alloc();
+					zend_bigint_init_from_long(out, Z_LVAL_P(op1));
+					zend_bigint_divide_long(out, out, Z_LVAL_P(op2));
+					ZVAL_BIGINT(result, out);
 					return SUCCESS;
 				}
 				if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
