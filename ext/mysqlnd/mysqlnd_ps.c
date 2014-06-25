@@ -776,7 +776,6 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int
 							  String of zero size, definitely can't be the next max_length.
 							  Thus for NULL and zero-length we are quite efficient.
 							*/
-							//??? if (Z_TYPE(current_row[i]) >= IS_STRING) {
 							if (Z_TYPE(current_row[i]) == IS_STRING) {
 								unsigned long len = Z_STRLEN(current_row[i]);
 								if (meta->fields[i].max_length < len) {
@@ -2025,28 +2024,10 @@ mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s TSRMLS_DC)
 		if (stmt->result_bind[i].bound == TRUE) {
 			DBG_INF_FMT("%u has refcount=%u", i,
 					Z_REFCOUNTED(stmt->result_bind[i].zv)? Z_REFCOUNT(stmt->result_bind[i].zv) : 0);
-			/*
-			  We have to separate the actual zval value of the bound
-			  variable from our allocated zvals or we will face double-free
-			*/
-			if (Z_REFCOUNTED(stmt->result_bind[i].zv) && Z_REFCOUNT(stmt->result_bind[i].zv) > 1) {
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-				Z_TRY_ADDREF_P(&stmt->result_bind[i].zv);
-#endif
-				zval_ptr_dtor(&stmt->result_bind[i].zv);
-			} else {
-				/*
-				  If it is a string, what is pointed will be freed
-				  later in free_result(). We need to remove the variable to
-				  which the user has lost reference.
-				*/
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-			//???		ZVAL_NULL(&stmt->result_bind[i].zv);
-#endif
-				zval_ptr_dtor(&stmt->result_bind[i].zv);
-			}
+			zval_ptr_dtor(&stmt->result_bind[i].zv);
 		}
 	}
+
 	s->m->free_result_bind(s, stmt->result_bind TSRMLS_CC);
 	stmt->result_bind = NULL;
 
@@ -2080,26 +2061,7 @@ mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param
 		DBG_INF_FMT("%u has refcount=%u", param_no,
 				Z_REFCOUNTED(stmt->result_bind[param_no].zv)?
 				Z_REFCOUNT(stmt->result_bind[param_no].zv) : 0);
-		/*
-		  We have to separate the actual zval value of the bound
-		  variable from our allocated zvals or we will face double-free
-		*/
-		if (Z_REFCOUNTED(stmt->result_bind[param_no].zv) && Z_REFCOUNT(stmt->result_bind[param_no].zv) > 1) {
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-			Z_TRY_ADDREF_P(&stmt->result_bind[param_no].zv);
-#endif
-			zval_ptr_dtor(&stmt->result_bind[param_no].zv);
-		} else {
-			/*
-			  If it is a string, what is pointed will be freed
-			  later in free_result(). We need to remove the variable to
-			  which the user has lost reference.
-			*/
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-			//???ZVAL_NULL(&stmt->result_bind[param_no].zv);
-#endif
-			zval_ptr_dtor(&stmt->result_bind[param_no].zv);
-		}
+		zval_ptr_dtor(&stmt->result_bind[param_no].zv);
 	}
 
 	DBG_VOID_RETURN;

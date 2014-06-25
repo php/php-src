@@ -580,7 +580,6 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			if (inline_change) {
 				STR_RELEASE(Z_STR_P(p));
 			}
-//???!
 			ZVAL_COPY_VALUE(p, const_value);
 			if (Z_OPT_CONSTANT_P(p)) {
 				zval_update_constant_ex(p, 1, NULL TSRMLS_CC);
@@ -887,7 +886,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 
 		if (EX(function_state).function->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			efree((char*)EX(function_state).function->common.function_name);
+			STR_RELEASE(EX(function_state).function->common.function_name);
 		}
 		efree(EX(function_state).function);
 

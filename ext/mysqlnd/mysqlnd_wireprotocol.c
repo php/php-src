@@ -69,13 +69,11 @@
 
 
 static const char *unknown_sqlstate= "HY000";
-
 const char * const mysqlnd_empty_string = "";
 
 /* Used in mysqlnd_debug.c */
 const char mysqlnd_read_header_name[]	= "mysqlnd_read_header";
 const char mysqlnd_read_body_name[]		= "mysqlnd_read_body";
-
 
 #define ERROR_MARKER 0xFF
 #define EODATA_MARKER 0xFE
@@ -1217,7 +1215,7 @@ static size_t rset_field_offsets[] =
 	STRUCT_OFFSET(MYSQLND_FIELD, name),
 	STRUCT_OFFSET(MYSQLND_FIELD, name_length),
 	STRUCT_OFFSET(MYSQLND_FIELD, org_name),
-	STRUCT_OFFSET(MYSQLND_FIELD, org_name_length)
+	STRUCT_OFFSET(MYSQLND_FIELD, org_name_length),
 };
 
 
@@ -1289,6 +1287,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 		DBG_ERR_FMT("Protocol error. Server sent false length. Expected 12 got %d", (int) *p);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol error. Server sent false length. Expected 12");
 	}
+
 	p++;
 	BAIL_IF_NO_MORE_DATA;
 
@@ -1345,17 +1344,25 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 		memcpy(meta->def, p, len);
 		meta->def[len] = '\0';
 		meta->def_length = len;
-		p += len;
-	}
+		p += len;	
+	} 
 
-	DBG_INF_FMT("allocing root. persistent=%u", packet->persistent_alloc);
 	root_ptr = meta->root = mnd_pemalloc(total_len, packet->persistent_alloc);
 	if (!root_ptr) {
 		SET_OOM_ERROR(*conn->error_info);
 		DBG_RETURN(FAIL);	
 	}
-	
+
 	meta->root_len = total_len;
+
+	if (meta->name != mysqlnd_empty_string) {
+		meta->sname = STR_INIT(meta->name, meta->name_length, packet->persistent_alloc);
+	} else {
+		meta->sname = STR_EMPTY_ALLOC();
+	}
+	meta->name = meta->sname->val;
+	meta->name_length = meta->sname->len;
+
 	/* Now do allocs */
 	if (meta->catalog && meta->catalog != mysqlnd_empty_string) {
 		len = meta->catalog_length;
@@ -1385,19 +1392,14 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 		root_ptr++;
 	}
 
-	if (meta->name && meta->name != mysqlnd_empty_string) {
-		len = meta->name_length;
-		meta->name = memcpy(root_ptr, meta->name, len);
-		*(root_ptr +=len) = '\0';
-		root_ptr++;
-	}
-
 	if (meta->org_name && meta->org_name != mysqlnd_empty_string) {
 		len = meta->org_name_length;
 		meta->org_name = memcpy(root_ptr, meta->org_name, len);
 		*(root_ptr +=len) = '\0';
 		root_ptr++;
 	}
+
+	DBG_INF_FMT("allocing root. persistent=%u", packet->persistent_alloc);
 
 	DBG_INF_FMT("FIELD=[%s.%s.%s]", meta->db? meta->db:"*NA*", meta->table? meta->table:"*NA*",
 				meta->name? meta->name:"*NA*");
@@ -1464,11 +1466,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 
 		if (first_iteration) {
 			first_iteration = FALSE;
-			/*
-			  We need a trailing \0 for the last string, in case of text-mode,
-			  to be able to implement read-only variables. Thus, we add + 1.
-			*/
-			*buffer = result_set_memory_pool->get_chunk(result_set_memory_pool, *data_size + 1 TSRMLS_CC);
+			*buffer = result_set_memory_pool->get_chunk(result_set_memory_pool, *data_size TSRMLS_CC);
 			if (!*buffer) {
 				ret = FAIL;
 				break;
@@ -1482,11 +1480,8 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 
 			/*
 			  We have to realloc the buffer.
-
-			  We need a trailing \0 for the last string, in case of text-mode,
-			  to be able to implement read-only variables.
 			*/
-			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size + 1 TSRMLS_CC)) {
+			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size TSRMLS_CC)) {
 				SET_OOM_ERROR(*conn->error_info);
 				ret = FAIL;
 				break;
@@ -1704,7 +1699,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 #error Need fix for this architecture
 #endif /* SIZEOF */
 					{
-						//????  ZVAL_STRINGL(current_field, (char *)p, len, 0);
 						ZVAL_STRINGL(current_field, (char *)p, len);
 					} else {
 						ZVAL_LONG(current_field, (long) v); /* the cast is safe */
@@ -1738,7 +1732,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				p -= len;
 				if (Z_TYPE_P(current_field) == IS_LONG) {
 					bit_area += 1 + sprintf((char *)start, "%ld", Z_LVAL_P(current_field));
-					//????  ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1, copy_data);
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
 				} else if (Z_TYPE_P(current_field) == IS_STRING){
 					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRLEN_P(current_field));

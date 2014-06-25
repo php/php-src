@@ -284,8 +284,7 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 		j = 0; cache_slots = 0;
 		zend_hash_init(&hash, 16, NULL, NULL, 0);
 		map = (int*)zend_arena_alloc(&ctx->arena, op_array->last_literal * sizeof(int));
-//???A
-memset(map, 0, op_array->last_literal * sizeof(int));
+		memset(map, 0, op_array->last_literal * sizeof(int));
 		for (i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].flags) {
 				/* unsed literal */

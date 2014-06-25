@@ -397,7 +397,6 @@ static inline void del_source(zend_code_block *from, zend_code_block *to)
 			/* move 'to'`s references to 'from' */
 			to->start_opline = NULL;
 			to->access = 0;
-//???A			efree(to->sources);
 			to->sources = NULL;
 			from_block->follow_to = to->follow_to;
 			if (to->op1_to) {
@@ -487,17 +486,10 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 	/* Mark all blocks as unaccessible and destroy back references */
 	b = blocks;
 	while (b != NULL) {
-		zend_block_source *cs;
 		if (!start && b->access) {
 			start = b;
 		}
 		b->access = 0;
-//???A		cs = b->sources;
-//???A		while (cs) {
-//???A			zend_block_source *n = cs->next;
-//???A			efree(cs);
-//???A			cs = n;
-//???A		}
 		b->sources = NULL;
 		b = b->next;
 	}
@@ -2109,15 +2101,5 @@ static void zend_block_optimization(zend_op_array *op_array, zend_optimizer_ctx 
 	assemble_code_blocks(&cfg, op_array);
 
 	/* Destroy CFG */
-/* ???A
-	for (cur_block = cfg.blocks; cur_block; cur_block = cur_block->next) {
-		zend_block_source *cs = cur_block->sources;
-		while (cs) {
-			zend_block_source *n = cs->next;
-			efree(cs);
-			cs = n;
-		}
-	}
-*/
 	zend_arena_release(&ctx->arena, checkpoint);
 }

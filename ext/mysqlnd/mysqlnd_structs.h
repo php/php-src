@@ -72,13 +72,14 @@ typedef struct st_mysqlnd_cmd_buffer
 
 typedef struct st_mysqlnd_field
 {
-	const char *name;			/* Name of column */
-	const char *org_name;		/* Original column name, if an alias */
-	const char *table;			/* Table of column if column was a field */
-	const char *org_table;		/* Org table name, if table was an alias */
-	const char *db;				/* Database for table */
-	const char *catalog;		/* Catalog for table */
-	char *def;					/* Default value (set by mysql_list_fields) */
+	zend_string *sname;			/* Name of column */
+	const char  *name;          /* Name of column in C string */
+	const char  *org_name;		/* Original column name, if an alias */
+	const char  *table;			/* Table of column if column was a field */
+	const char  *org_table;		/* Org table name, if table was an alias */
+	const char  *db;			/* Database for table */
+	const char  *catalog;		/* Catalog for table */
+	char  *def;                 /* Default value (set by mysql_list_fields) */
 	unsigned long length;		/* Width of column (create length) */
 	unsigned long max_length;	/* Max width for selected set */
 	unsigned int name_length;
