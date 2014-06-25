@@ -26,6 +26,7 @@
 #include "mysqlnd_debug.h"
 
 static const char * const mysqlnd_debug_default_trace_file = "/tmp/mysqlnd.trace";
+static const char * const mysqlnd_debug_empty_string = "";
 
 #ifdef ZTS 
 #define MYSQLND_ZTS(self) TSRMLS_D = (self)->TSRMLS_C
@@ -269,7 +270,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 		const char ** p = self->skip_functions;
 		while (*p) {
 			if (*p == func_name) {
-				zend_stack_push(&self->call_stack, "");
+				zend_stack_push(&self->call_stack, &mysqlnd_debug_empty_string);
 #ifndef MYSQLND_PROFILING_DISABLED
 				if (self->flags & MYSQLND_DEBUG_PROFILE_CALLS) {
 					uint64_t some_time = 0;
@@ -282,7 +283,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 		}
 	}
 
-	zend_stack_push(&self->call_stack, func_name);
+	zend_stack_push(&self->call_stack, &func_name);
 #ifndef MYSQLND_PROFILING_DISABLED
 	if (self->flags & MYSQLND_DEBUG_PROFILE_CALLS) {
 		uint64_t some_time = 0;
@@ -324,7 +325,7 @@ struct st_mysqlnd_dbg_function_profile {
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int line, const char * const file, uint64_t call_time)
 {
-	char *func_name;
+	char **func_name;
 	uint64_t * parent_non_own_time_ptr = NULL, * mine_non_own_time_ptr = NULL;
 	uint64_t mine_non_own_time = 0;
 	zend_bool profile_calls = self->flags & MYSQLND_DEBUG_PROFILE_CALLS? TRUE:FALSE;
@@ -346,28 +347,28 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 	}
 #endif
 
-	if (func_name[0] == '\0') {
+	if ((*func_name)[0] == '\0') {
 		; /* don't log that function */
 	} else if (!zend_hash_num_elements(&self->not_filtered_functions) ||
-			   1 == zend_hash_str_exists(&self->not_filtered_functions, func_name, strlen(func_name)))
+			   1 == zend_hash_str_exists(&self->not_filtered_functions, (*func_name), strlen((*func_name))))
 	{
 #ifndef MYSQLND_PROFILING_DISABLED
 		if (FALSE == profile_calls) {
 #endif
-			self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, "<%s", func_name);
+			self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, "<%s", *func_name);
 
 #ifndef MYSQLND_PROFILING_DISABLED
 		} else {
 			struct st_mysqlnd_dbg_function_profile f_profile_stack = {0};
 			struct st_mysqlnd_dbg_function_profile * f_profile = NULL;
 			uint64_t own_time = call_time - mine_non_own_time;
-			uint func_name_len = strlen(func_name);
+			uint func_name_len = strlen(*func_name);
 
 			self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, "<%s (total=%u own=%u in_calls=%u)",
-						func_name, (unsigned int) call_time, (unsigned int) own_time, (unsigned int) mine_non_own_time
+						*func_name, (unsigned int) call_time, (unsigned int) own_time, (unsigned int) mine_non_own_time
 					);
 
-			if ((f_profile = zend_hash_str_find_ptr(&self->function_profiles, func_name, func_name_len)) != NULL) {
+			if ((f_profile = zend_hash_str_find_ptr(&self->function_profiles, *func_name, func_name_len)) != NULL) {
 				/* found */
 					if (f_profile) {
 					if (mine_non_own_time < f_profile->min_in_calls) {
@@ -411,7 +412,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 				f_profile->min_total = f_profile->max_total = f_profile->avg_total = call_time;
 				f_profile->min_own = f_profile->max_own = f_profile->avg_own = own_time;
 				f_profile->calls = 1;
-				zend_hash_str_add_mem(&self->function_profiles, func_name, func_name_len, f_profile, sizeof(struct st_mysqlnd_dbg_function_profile));
+				zend_hash_str_add_mem(&self->function_profiles, *func_name, func_name_len, f_profile, sizeof(struct st_mysqlnd_dbg_function_profile));
 			}
 			if ((uint) zend_stack_count(&self->call_time_stack)) {
 				uint64_t parent_non_own_time = 0;
