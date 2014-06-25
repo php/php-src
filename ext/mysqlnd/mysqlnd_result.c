@@ -70,7 +70,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, initialize_result_set_rest)(MYSQLND
 				  String of zero size, definitely can't be the next max_length.
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
-				//????  if (Z_TYPE_P(data_cursor[i]) >= IS_STRING) {
 				if (Z_TYPE(data_cursor[i]) == IS_STRING) {
 					unsigned long len = Z_STRLEN(data_cursor[i]);
 					if (meta->fields[i].max_length < len) {
@@ -126,7 +125,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 				  String of zero size, definitely can't be the next max_length.
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
-				//???  if (Z_TYPE(current_row[i]) >= IS_STRING) {
 				if (Z_TYPE(current_row[i]) == IS_STRING) {
 					unsigned long len = Z_STRLEN(current_row[i]);
 					if (meta->fields[i].max_length < len) {
@@ -143,55 +141,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 /* }}} */
 
 
-#if 0
-/* {{{ mysqlnd_rset_zval_ptr_dtor */
-static void
-mysqlnd_rset_zval_ptr_dtor(zval *zv, enum_mysqlnd_res_type type, zend_bool * copy_ctor_called TSRMLS_DC)
-{
-	DBG_ENTER("mysqlnd_rset_zval_ptr_dtor");
-	DBG_INF_FMT("type=%u", type);
-	if (!zv) {
-		*copy_ctor_called = FALSE;
-		DBG_ERR_FMT("zv was NULL");
-		DBG_VOID_RETURN;
-	}
-	/*
-	  This zval is not from the cache block.
-	  Thus the refcount is -1 than of a zval from the cache,
-	  because the zvals from the cache are owned by it.
-	*/
-	if (type == MYSQLND_RES_PS_BUF || type == MYSQLND_RES_PS_UNBUF) {
-		*copy_ctor_called = FALSE;
-		; /* do nothing, zval_ptr_dtor will do the job*/
-	} else if (Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) > 1) {
-		/*
-		  Not a prepared statement, then we have to
-		  call copy_ctor and then zval_ptr_dtor()
-		*/
-		if (Z_TYPE_P(zv) == IS_STRING) {
-			zval_copy_ctor(zv);
-		}
-		*copy_ctor_called = TRUE;
-	} else {
-		/*
-		  noone but us point to this, so we can safely ZVAL_NULL the zval,
-		  so Zend does not try to free what the zval points to - which is
-		  in result set buffers
-		*/
-		*copy_ctor_called = FALSE;
-		if (Z_TYPE_P(zv) == IS_STRING) {
-			ZVAL_NULL(zv);
-		}
-	}
-
-	DBG_INF_FMT("call the dtor on zval with refc %u", Z_REFCOUNTED_P(zv)? Z_REFCOUNT_P(zv) : 0);
-	zval_ptr_dtor(zv);
-	DBG_VOID_RETURN;
-}
-/* }}} */
-#endif
-
-
 /* {{{ mysqlnd_result_unbuffered::free_last_data */
 static void
 MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED * unbuf, MYSQLND_STATS * const global_stats TSRMLS_DC)
@@ -206,7 +155,6 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED
 	if (unbuf->last_row_data) {
 		unsigned int i;
 		for (i = 0; i < unbuf->field_count; i++) {
-			//???mysqlnd_rset_zval_ptr_dtor(&(unbuf->last_row_data[i]), unbuf->ps ? MYSQLND_RES_PS_UNBUF : MYSQLND_RES_NORMAL, &copy_ctor_called TSRMLS_CC);
 			zval_ptr_dtor(&(unbuf->last_row_data[i]));
 		}
 
@@ -921,7 +869,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 						*/
 						Z_TRY_ADDREF_P(data);
 						if (meta->zend_hash_keys[i].is_numeric == FALSE) {
-							zend_hash_update(Z_ARRVAL_P(row), meta->fields[i].name, data);
+							zend_hash_update(Z_ARRVAL_P(row), meta->fields[i].sname, data);
 						} else {
 							zend_hash_index_update(Z_ARRVAL_P(row), meta->zend_hash_keys[i].key, data);
 						}
@@ -1053,7 +1001,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 					  String of zero size, definitely can't be the next max_length.
 					  Thus for NULL and zero-length we are quite efficient.
 					*/
-					//???? if (Z_TYPE(current_row[i]) >= IS_STRING) {
 					if (Z_TYPE(current_row[i]) == IS_STRING) {
 						unsigned long len = Z_STRLEN(current_row[i]);
 						if (meta->fields[i].max_length < len) {
@@ -1145,7 +1092,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 				  String of zero size, definitely can't be the next max_length.
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
-				//???? if (Z_TYPE_P(current_row[i]) >= IS_STRING) {
 				if (Z_TYPE(current_row[i]) == IS_STRING) {
 					unsigned long len = Z_STRLEN(current_row[i]);
 					if (meta->fields[i].max_length < len) {
@@ -1174,7 +1120,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 				*/
 				Z_TRY_ADDREF_P(data);
 				if (meta->zend_hash_keys[i].is_numeric == FALSE) {
-					zend_hash_update(Z_ARRVAL_P(row), meta->fields[i].name, data);
+					zend_hash_update(Z_ARRVAL_P(row), meta->fields[i].sname, data);
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row), meta->zend_hash_keys[i].key, data);
 				}
@@ -1241,7 +1187,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 				  String of zero size, definitely can't be the next max_length.
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
-				//???? if (Z_TYPE(current_row[i]) >= IS_STRING) {
 				if (Z_TYPE(current_row[i]) == IS_STRING) {
 					unsigned long len = Z_STRLEN(current_row[i]);
 					if (meta->fields[i].max_length < len) {
@@ -1270,7 +1215,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 				*/
 				Z_TRY_ADDREF_P(data);
 				if (meta->zend_hash_keys[i].is_numeric == FALSE) {
-					zend_hash_update(Z_ARRVAL_P(row), meta->fields[i].name, data);
+					zend_hash_update(Z_ARRVAL_P(row), meta->fields[i].sname, data);
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row), meta->zend_hash_keys[i].key, data);
 				}
@@ -1886,7 +1831,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 	zend_hash_internal_pointer_reset(Z_ARRVAL(row));
 	while (i++ < offset) {
 		zend_hash_move_forward(Z_ARRVAL(row));
-		//???entry = zend_hash_get_current_data(Z_ARRVAL(row));
 	}
 
 	entry = zend_hash_get_current_data(Z_ARRVAL(row));

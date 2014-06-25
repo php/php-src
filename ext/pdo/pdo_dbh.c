@@ -302,6 +302,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 					/* is the connection still alive ? */
 					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh TSRMLS_CC)) {
 						/* nope... need to kill it */
+						/*??? memory leak */
 						zend_list_close(le);
 						pdbh = NULL;
 					}
@@ -372,6 +373,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 			le.type = php_pdo_list_entry();
 			le.ptr = dbh;
+			GC_REFCOUNT(&le) = 1;
 
 			if ((zend_hash_str_update_mem(&EG(persistent_list), 
 						(char*)dbh->persistent_id, dbh->persistent_id_len, &le, sizeof(le))) == NULL) {
