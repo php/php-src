@@ -3755,13 +3755,14 @@ ZEND_VM_C_LABEL(str_index):
 				break;
 			case IS_BIGINT:
 				{
-					char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
-					if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
-						zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						ZEND_VM_C_GOTO(num_index);
 					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
 						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
 					}
-					efree(temp_str);
 				}
 				break;
 			case IS_NULL:
@@ -4185,17 +4186,19 @@ ZEND_VM_C_LABEL(num_index_dim):
 					break;
 				case IS_BIGINT:
 					{
-						zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
-						if (ZEND_HANDLE_NUMERIC(temp_str, hval)) {
-							zend_hash_index_del(ht, hval);
+						
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							ZEND_VM_C_GOTO(num_index_dim);
 						} else {
+							zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
 							if (ht == &EG(symbol_table).ht) {
 								zend_delete_global_variable(temp_str TSRMLS_CC);
 							} else {
 								zend_hash_del(ht, temp_str);
 							}
+							STR_RELEASE(temp_str);
 						} 
-						STR_RELEASE(temp_str);
 					}
 					break;
 ZEND_VM_C_LABEL(numeric_index_dim):
@@ -4723,13 +4726,14 @@ ZEND_VM_C_LABEL(num_index_prop):
 					ZEND_VM_C_GOTO(num_index_prop);
 				case IS_BIGINT:
 					{
-						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
-						if (ZEND_HANDLE_NUMERIC_STR(temp_str, strlen(temp_str), hval)) {
-							value = zend_hash_index_find(ht, hval);
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							ZEND_VM_C_GOTO(num_index_prop);
 						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
 							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
 						}
-						efree(temp_str);
 					}
 					break;
 				case IS_NULL:

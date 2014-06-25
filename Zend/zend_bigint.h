@@ -89,6 +89,9 @@ ZEND_API void zend_bigint_release(zend_bigint *big);
 /* Returns true if bigint can fit into an unsigned long without truncation */
 ZEND_API zend_bool zend_bigint_can_fit_ulong(const zend_bigint *big);
 
+/* Returns true if bigint can fit into a long without truncation */
+ZEND_API zend_bool zend_bigint_can_fit_long(const zend_bigint *big);
+
 /* Returns sign of bigint (-1 for negative, 0 for zero or 1 for positive) */
 ZEND_API int zend_bigint_sign(const zend_bigint *big);
 

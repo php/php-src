@@ -267,6 +267,12 @@ ZEND_API zend_bool zend_bigint_can_fit_ulong(const zend_bigint *big)
 	return mpz_fits_ulong_p(big->mpz);
 }
 
+/* Returns true if bigint can fit into a long without truncation */
+ZEND_API zend_bool zend_bigint_can_fit_long(const zend_bigint *big)
+{
+	return mpz_fits_slong_p(big->mpz);
+}
+
 /* Returns sign of bigint (-1 for negative, 0 for zero or 1 for positive) */
 ZEND_API int zend_bigint_sign(const zend_bigint *big)
 {

@@ -115,9 +115,14 @@ static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr TS
 			break;
 		case IS_BIGINT:
 			{
-				char *temp = zend_bigint_to_string(Z_BIG_P(offset));
-				zend_symtable_str_update(Z_ARRVAL_P(result), temp, strlen(temp), expr);
-				efree(temp);
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					zend_hash_index_update(Z_ARRVAL_P(result), zend_bigint_to_long(Z_BIG_P(offset)), expr);
+				} else {
+					char *temp = zend_bigint_to_string(Z_BIG_P(offset));
+					zend_symtable_str_update(Z_ARRVAL_P(result), temp, strlen(temp), expr);
+					efree(temp);
+				}
+				zval_dtor(offset);
 			}
 			break;
 		case IS_NULL:
