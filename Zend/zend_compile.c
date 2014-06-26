@@ -7795,7 +7795,8 @@ zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) {
 		|| kind == ZEND_AST_UNARY_PLUS || kind == ZEND_AST_UNARY_MINUS
 		|| kind == ZEND_AST_CONDITIONAL
 		|| kind == ZEND_AST_ARRAY || kind == ZEND_AST_ARRAY_ELEM
-		|| kind == ZEND_AST_CONST || kind == ZEND_AST_CLASS_CONST;
+		|| kind == ZEND_AST_CONST || kind == ZEND_AST_CLASS_CONST
+		|| kind == ZEND_AST_RESOLVE_CLASS_NAME;
 }
 
 void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) {
@@ -7868,6 +7869,39 @@ void zend_compile_const_expr_const(zend_ast **ast_ptr TSRMLS_DC) {
 	*ast_ptr = zend_ast_create_constant(&result.u.constant);
 }
 
+void zend_compile_const_expr_resolve_class_name(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	zend_ast *name_ast = ast->child[0];
+	zval *name = zend_ast_get_zval(name_ast);
+	int fetch_type = zend_get_class_fetch_type(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	znode result;
+
+	switch (fetch_type) {
+		case ZEND_FETCH_CLASS_SELF:
+			if (!CG(active_class_entry)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot access self::class when no class scope is active");
+			}
+			ZVAL_STR(&result.u.constant, STR_COPY(CG(active_class_entry)->name));
+			break;
+        case ZEND_FETCH_CLASS_STATIC:
+        case ZEND_FETCH_CLASS_PARENT:
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"%s::class cannot be used for compile-time class name resolution",
+				fetch_type == ZEND_FETCH_CLASS_STATIC ? "static" : "parent"
+			);
+			break;
+		case ZEND_FETCH_CLASS_DEFAULT:
+			zend_compile_expr(&result, name_ast TSRMLS_CC);
+			zend_resolve_class_name(&result TSRMLS_CC);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+
+	zend_ast_destroy(ast);
+	*ast_ptr = zend_ast_create_constant(&result.u.constant);
+}
+
 void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 	zend_ast *ast = *ast_ptr;
 	if (ast == NULL || ast->kind == ZEND_CONST) {
@@ -7891,6 +7925,9 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 			break;
 		case ZEND_AST_CONST:
 			zend_compile_const_expr_const(ast_ptr TSRMLS_CC);
+			break;
+		case ZEND_AST_RESOLVE_CLASS_NAME:
+			zend_compile_const_expr_resolve_class_name(ast_ptr TSRMLS_CC);
 			break;
 	}
 }

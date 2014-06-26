@@ -978,7 +978,8 @@ static_scalar: /* compile-time evaluated scalars */
 
 static_scalar_value:
 		T_CONSTANT_ENCAPSED_STRING	{ $$.u.ast = AST_ZVAL(&$1); }
-	|	static_class_name_scalar	{ $$.u.ast = AST_ZVAL(&$1); }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_CLASS
+			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RESOLVE_CLASS_NAME, AST_ZVAL(&$1)); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
 			{ $$.u.ast = zend_ast_create_binary(
 			      ZEND_AST_CLASS_CONST, AST_ZVAL(&$1), AST_ZVAL(&$3)); }
@@ -1327,10 +1328,6 @@ class_constant:
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
 			{ $$.u.ast = zend_ast_create_binary(
 			      ZEND_AST_CLASS_CONST, $1.u.ast, AST_ZVAL(&$3)); }
-;
-
-static_class_name_scalar:
-	class_name T_PAAMAYIM_NEKUDOTAYIM T_CLASS { zend_do_resolve_class_name(&$$, &$1, 1 TSRMLS_CC); }
 ;
 
 class_name_scalar:
