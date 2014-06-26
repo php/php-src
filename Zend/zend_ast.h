@@ -27,9 +27,6 @@
 enum _zend_ast_kind {
 	/* first 256 kinds are reserved for opcodes */
 	ZEND_CONST = 256, /* TODO.AST: Split in constant lookup and literal zval */
-	ZEND_BOOL_AND,
-	ZEND_BOOL_OR,
-	ZEND_SELECT,
 
 	ZEND_AST_ZNODE,
 
