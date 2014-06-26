@@ -993,9 +993,9 @@ static_scalar_base:
 static_scalar_value:
 		static_scalar_base { $$.u.ast = zend_ast_create_constant(&$1.u.constant); }
 	|	common_scalar { $$.u.ast = $1.u.ast; }
-	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; }
-	|	'[' static_array_pair_list ']' { $$ = $2; }
-	|	static_operation { $$ = $1; }
+	|	T_ARRAY '(' static_array_pair_list ')' { $$.u.ast = $3.u.ast; }
+	|	'[' static_array_pair_list ']' { $$.u.ast = $2.u.ast; }
+	|	static_operation { $$.u.ast = $1.u.ast; }
 ;
 
 static_operation:
@@ -1088,8 +1088,10 @@ scalar:
 
 
 static_array_pair_list:
-		/* empty */ { $$.op_type = IS_CONST; array_init(&$$.u.constant); $$.u.ast = zend_ast_create_constant(&$$.u.constant); }
-	|	non_empty_static_array_pair_list possible_comma	{ zend_ast_dynamic_shrink(&$1.u.ast); $$ = $1; }
+		/* empty */
+			{ array_init(&$$.u.constant); $$.u.ast = zend_ast_create_constant(&$$.u.constant); }
+	|	non_empty_static_array_pair_list possible_comma
+			{ zend_ast_dynamic_shrink(&$1.u.ast); $$ = $1; }
 ;
 
 possible_comma:
@@ -1098,16 +1100,17 @@ possible_comma:
 ;
 
 non_empty_static_array_pair_list:
-		non_empty_static_array_pair_list ',' static_scalar_value T_DOUBLE_ARROW static_scalar_value
-			{ $$.u.ast = zend_ast_dynamic_add(zend_ast_dynamic_add($1.u.ast, $3.u.ast), $5.u.ast); }
-	|	non_empty_static_array_pair_list ',' static_scalar_value
-			{ $$.u.ast = zend_ast_dynamic_add(zend_ast_dynamic_add($1.u.ast, NULL), $3.u.ast); }
-	|	static_scalar_value T_DOUBLE_ARROW static_scalar_value
-			{ $$.u.ast = zend_ast_dynamic_add(zend_ast_create_dynamic_and_add(
-			      ZEND_INIT_ARRAY, $1.u.ast), $3.u.ast); }
+		non_empty_static_array_pair_list ',' static_array_pair
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
+	|	static_array_pair
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_ARRAY, $1.u.ast); }
+;
+
+static_array_pair:
+		static_scalar_value T_DOUBLE_ARROW static_scalar_value
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_ARRAY_ELEM, $3.u.ast, $1.u.ast); }
 	|	static_scalar_value
-			{ $$.u.ast = zend_ast_dynamic_add(zend_ast_create_dynamic_and_add(
-			      ZEND_INIT_ARRAY, NULL), $1.u.ast); }
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_ARRAY_ELEM, $1.u.ast, NULL); }
 ;
 
 expr:

@@ -242,17 +242,18 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			sub_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op2);
 			break;
-		case ZEND_INIT_ARRAY:
+		case ZEND_AST_ARRAY:
 			array_init(result);
 			{
-				int i;
-				for (i = 0; i < ast->children; i+=2) {
-					if (ast->child[i]) {
-						zend_ast_evaluate(&op1, ast->child[i], scope TSRMLS_CC);
+				zend_uint i;
+				for (i = 0; i < ast->children; i++) {
+					zend_ast *elem = ast->child[i];
+					if (elem->child[1]) {
+						zend_ast_evaluate(&op1, elem->child[1], scope TSRMLS_CC);
 					} else {
 						ZVAL_UNDEF(&op1);
 					}
-					zend_ast_evaluate(&op2, ast->child[i+1], scope TSRMLS_CC);
+					zend_ast_evaluate(&op2, elem->child[0], scope TSRMLS_CC);
 					zend_ast_add_array_element(result, &op1, &op2 TSRMLS_CC);
 				}
 			}
