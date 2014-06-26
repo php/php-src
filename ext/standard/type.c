@@ -218,16 +218,16 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce;
-			if(Z_OBJ_HT_P(arg)->get_class_entry == NULL) {
-			/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
+			if (Z_OBJ_HT_P(arg)->get_class_entry == NULL) {
+				/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
 				RETURN_TRUE;
 			}
 			ce = Z_OBJCE_P(arg);
-			if (!strcmp(ce->name->val, INCOMPLETE_CLASS)) {
+			if (ce->name->len == sizeof(INCOMPLETE_CLASS) - 1 
+					&& !strncmp(ce->name->val, INCOMPLETE_CLASS, ce->name->len)) {
 				RETURN_FALSE;
 			}
-		}
-		if (type == IS_RESOURCE) {
+		} else if (type == IS_RESOURCE) {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg) TSRMLS_CC);
 			if (!type_name) {
 				RETURN_FALSE;
