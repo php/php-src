@@ -799,7 +799,7 @@ expr_without_variable:
 	|	expr T_LOGICAL_AND expr
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_AND, $1.u.ast, $3.u.ast); }
 	|	expr T_LOGICAL_XOR expr
-			{ $$.u.ast = zend_ast_create_binary(ZEND_BOOL_XOR, $1.u.ast, $3.u.ast); }
+			{ $$.u.ast = zend_ast_create_binary_op(ZEND_BOOL_XOR, $1.u.ast, $3.u.ast); }
 	|	expr '|' expr	{ $$.u.ast = zend_ast_create_binary_op(ZEND_BW_OR, $1.u.ast, $3.u.ast); }
 	|	expr '&' expr	{ $$.u.ast = zend_ast_create_binary_op(ZEND_BW_AND, $1.u.ast, $3.u.ast); }
 	|	expr '^' expr	{ $$.u.ast = zend_ast_create_binary_op(ZEND_BW_XOR, $1.u.ast, $3.u.ast); }
@@ -973,7 +973,7 @@ common_scalar:
 ;
 
 static_scalar: /* compile-time evaluated scalars */
-	static_scalar_value { zend_do_constant_expression(&$$, $1.u.ast TSRMLS_CC); }
+	expr { zend_do_constant_expression(&$$, $1.u.ast TSRMLS_CC); }
 ;
 
 static_scalar_value:

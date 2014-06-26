@@ -7790,6 +7790,7 @@ void zend_compile_encaps_list(znode *result, zend_ast *ast TSRMLS_DC) {
 
 zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) {
 	return kind == ZEND_CONST || kind == ZEND_AST_BINARY_OP
+		|| kind == ZEND_AST_GREATER || kind == ZEND_AST_GREATER_EQUAL
 		|| kind == ZEND_AST_AND || kind == ZEND_AST_OR
 		|| kind == ZEND_BW_NOT || kind == ZEND_BOOL_NOT
 		|| kind == ZEND_AST_UNARY_PLUS || kind == ZEND_AST_UNARY_MINUS

@@ -178,6 +178,19 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			zval_dtor(&op2);
 			break;
 		}
+		case ZEND_AST_GREATER:
+		case ZEND_AST_GREATER_EQUAL:
+		{
+			/* op1 > op2 is the same as op2 < op1 */
+			binary_op_type op = ast->kind == ZEND_AST_GREATER
+				? is_smaller_function : is_smaller_or_equal_function;
+			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->child[1], scope TSRMLS_CC);
+			op(result, &op2, &op1 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		}
 		case ZEND_BW_NOT:
 			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
 			bitwise_not_function(result, &op1 TSRMLS_CC);
