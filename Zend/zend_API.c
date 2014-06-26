@@ -2852,29 +2852,36 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	fcc->function_handler = NULL;
 
 	if (!ce_org) {
-		zend_string *lmname;
+		zend_string *lmname = NULL;
 
 		/* Skip leading \ */
-		if (Z_STRVAL_P(callable)[0] == '\\') {
+		if (UNEXPECTED(Z_STRVAL_P(callable)[0] == '\\')) {
 			STR_ALLOCA_INIT(lmname, Z_STRVAL_P(callable) + 1, Z_STRLEN_P(callable) - 1, use_heap);
 		} else {
-			STR_ALLOCA_INIT(lmname, Z_STRVAL_P(callable), Z_STRLEN_P(callable), use_heap);
+			lmname = Z_STR_P(callable);
 		}
 		/* Check if function with given name exists.
 		 * This may be a compound name that includes namespace name */
-		fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname);
-		if (fcc->function_handler != NULL) {
-			STR_ALLOCA_FREE(lmname, use_heap);
+		if (EXPECTED((fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname)) != NULL)) {
+			if (lmname != Z_STR_P(callable)) {
+				STR_ALLOCA_FREE(lmname, use_heap);
+			}
 			return 1;
 		} else {
+			if (lmname == Z_STR_P(callable)) {
+				STR_ALLOCA_INIT(lmname, Z_STRVAL_P(callable), Z_STRLEN_P(callable), use_heap);
+			} else {
+				STR_FORGET_HASH_VAL(lmname);
+			}
 			zend_str_tolower(lmname->val, lmname->len);
-			STR_FORGET_HASH_VAL(lmname);
 			if ((fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname)) != NULL) {
 				STR_ALLOCA_FREE(lmname, use_heap);
 				return 1;
 			}
 		}
-		STR_ALLOCA_FREE(lmname, use_heap);
+		if (lmname != Z_STR_P(callable)) {
+			STR_ALLOCA_FREE(lmname, use_heap);
+		}
 	}
 
 	/* Split name into class/namespace and method/function names */
