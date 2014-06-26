@@ -363,9 +363,10 @@ PHP 5.4 UPGRADE NOTES
 
     Using O: for user classes not extending internal classes (including
     those implementing Serializable) is still supported in 5.4, though
-    it is deprecated and may not be supported in 5.6. Same for using O: for
-    internal classes implementing Serializable (like ArrayObject) and
-    classes that extend them.
+    it is deprecated and may not be supported in 5.6 for classes that do not 
+    originally serialize to O:. Same for using O: for internal classes 
+    implementing Serializable (like ArrayObject) and classes that extend 
+    them.
 
     The reason for that is that O: format is meant to be used with classes
     that do not define custom handlers, and was never intended for the use
