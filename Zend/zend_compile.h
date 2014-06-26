@@ -547,12 +547,6 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 void zend_do_early_binding(TSRMLS_D);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS_DC);
 
-
-void zend_do_boolean_or_begin(znode *expr1, znode *op_token TSRMLS_DC);
-void zend_do_boolean_or_end(znode *result, znode *expr1, znode *expr2, const znode *op_token TSRMLS_DC);
-void zend_do_boolean_and_begin(znode *expr1, znode *op_token TSRMLS_DC);
-void zend_do_boolean_and_end(znode *result, znode *expr1, znode *expr2, const znode *op_token TSRMLS_DC);
-
 void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC);
 
 void zend_do_switch_cond(const znode *cond TSRMLS_DC);
@@ -567,8 +561,6 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC);
 
 void zend_do_halt_compiler_register(TSRMLS_D);
-
-void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode, zend_bool check_namespace TSRMLS_DC);
 
 /* Functions for a null terminated pointer list, used for traits parsing and compilation */
 void zend_init_list(void *result, void *item TSRMLS_DC);
@@ -601,8 +593,6 @@ void zend_do_use_function(znode *name, znode *new_name, int is_global TSRMLS_DC)
 void zend_do_use_const(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
 void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC);
-
-void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static TSRMLS_DC);
 
 void zend_do_label(znode *label TSRMLS_DC);
 void zend_do_goto(znode *label TSRMLS_DC);
