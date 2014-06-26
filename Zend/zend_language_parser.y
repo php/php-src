@@ -982,7 +982,6 @@ static_scalar: /* compile-time evaluated scalars */
 
 static_scalar_base:
 		T_CONSTANT_ENCAPSED_STRING	{ $$ = $1; }
-	|	T_CLASS_C					{ $$ = $1; }
 	|	static_class_name_scalar	{ $$ = $1; }
 	|	static_class_constant		{ $$ = $1; }
 	|	namespace_name 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT, 1 TSRMLS_CC); }
@@ -996,6 +995,15 @@ static_scalar_value:
 	|	T_ARRAY '(' static_array_pair_list ')' { $$.u.ast = $3.u.ast; }
 	|	'[' static_array_pair_list ']' { $$.u.ast = $2.u.ast; }
 	|	static_operation { $$.u.ast = $1.u.ast; }
+	|	T_CLASS_C
+			{ if (Z_TYPE($1.u.constant) == IS_UNDEF) {
+			      zval class_const;
+			      ZVAL_STRING(&class_const, "__CLASS__");
+			      Z_TYPE_INFO(class_const) = IS_CONSTANT_EX;
+			      $$.u.ast = zend_ast_create_constant(&class_const);
+			  } else {
+			      $$.u.ast = AST_ZVAL(&$1);
+			  } }
 ;
 
 static_operation:
@@ -1082,7 +1090,14 @@ scalar:
 	|	common_scalar			{ $$.u.ast = $1.u.ast; }
 	|	'"' encaps_list '"' 	{ $$.u.ast = $2.u.ast; }
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$.u.ast = $2.u.ast; }
-	|	T_CLASS_C				{ if (Z_TYPE($1.u.constant) == IS_CONSTANT) {zend_do_fetch_constant(&$$, NULL, &$1, ZEND_RT, 1 TSRMLS_CC); AZ($$); } else { $$.u.ast = AST_ZVAL(&$1); } }
+	|	T_CLASS_C
+			{ if (Z_TYPE($1.u.constant) == IS_UNDEF) {
+			      zval class_const; ZVAL_STRING(&class_const, "__CLASS__");
+			      $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST,
+				      zend_ast_create_constant(&class_const));
+			  } else {
+			      $$.u.ast = AST_ZVAL(&$1);
+			  } }
 	|	dereferencable_scalar	{ $$.u.ast = $1.u.ast; }
 ;
 

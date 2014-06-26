@@ -1597,10 +1597,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>"__CLASS__" {
 	zend_class_entry *ce = CG(active_class_entry);
 	if (ce && ZEND_ACC_TRAIT == (ce->ce_flags & ZEND_ACC_TRAIT)) {
-		/* We create a special __CLASS__ constant that is going to be resolved
-		   at run-time */
-		ZVAL_STRINGL(zendlval, "__CLASS__", sizeof("__CLASS__") - 1);
-		Z_TYPE_INFO_P(zendlval) = IS_CONSTANT_EX;
+		/* Signal that the __CLASS__ needs to be resolved at runtime */
+		ZVAL_UNDEF(zendlval);
 	} else {
 		if (ce && ce->name) {
 			ZVAL_STR(zendlval, STR_COPY(ce->name));
