@@ -6106,18 +6106,19 @@ void zend_make_immutable_array_r(zval *zv TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC);
+
 void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 {
+	//zend_eval_const_expr(&ast TSRMLS_CC);
 	if (ast->kind == ZEND_CONST) {
 		ZVAL_COPY_VALUE(&result->u.constant, zend_ast_get_zval(ast));
-		efree(ast);
-	} else if (zend_ast_is_ct_constant(ast)) {
-		zend_ast_evaluate(&result->u.constant, ast, NULL TSRMLS_CC);
-		zend_ast_destroy(ast);
 		if (Z_TYPE(result->u.constant) == IS_ARRAY) {
 			zend_make_immutable_array_r(&result->u.constant TSRMLS_CC);			
 		}
+		efree(ast);
 	} else {
+		zend_compile_const_expr(&ast TSRMLS_CC);
 		ZVAL_NEW_AST(&result->u.constant, ast);
 	}
 }
@@ -7784,6 +7785,33 @@ void zend_compile_encaps_list(znode *result, zend_ast *ast TSRMLS_DC) {
 		}
 		SET_NODE(opline->op2, &elem_node);
 		SET_NODE(opline->result, result);
+	}
+}
+
+zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) {
+	return kind == ZEND_CONST || kind == ZEND_AST_BINARY_OP
+		|| kind == ZEND_AST_AND || kind == ZEND_AST_OR
+		|| kind == ZEND_BW_NOT || kind == ZEND_BOOL_NOT
+		|| kind == ZEND_AST_UNARY_PLUS || kind == ZEND_AST_UNARY_MINUS
+		|| kind == ZEND_AST_CONDITIONAL
+		|| kind == ZEND_AST_ARRAY || kind == ZEND_AST_ARRAY_ELEM;
+}
+
+void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	if (ast == NULL || ast->kind == ZEND_CONST) {
+		return;
+	}
+
+	if (!zend_is_allowed_in_const_expr(ast->kind)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
+	}
+
+	{
+		zend_uint i;
+		for (i = 0; i < ast->children; ++i) {
+			zend_compile_const_expr(&ast->child[i] TSRMLS_CC);
+		}
 	}
 }
 
