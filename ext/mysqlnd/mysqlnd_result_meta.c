@@ -48,53 +48,6 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS
 }
 /* }}} */
 
-
-/* {{{ mysqlnd_handle_numeric */
-/*
-  The following code is stolen from ZE - HANDLE_NUMERIC() macro from zend_hash.c
-  and modified for the needs of mysqlnd.
-*/
-static zend_bool
-mysqlnd_is_key_numeric(const char * key, size_t length, long *idx)
-{
-	register const char * tmp = key;
-
-	if (*tmp=='-') {
-		tmp++;
-	}
-	if ((*tmp>='0' && *tmp<='9')) {
-		do { /* possibly a numeric index */
-			const char *end=key+length-1;
-
-			if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */
-				break;
-			}
-			while (tmp<end) {
-				if (!(*tmp>='0' && *tmp<='9')) {
-					break;
-				}
-				tmp++;
-			}
-			if (tmp==end && *tmp=='\0') { /* a numeric index */
-				if (*key=='-') {
-					*idx = strtol(key, NULL, 10);
-					if (*idx!=LONG_MIN) {
-						return TRUE;
-					}
-				} else {
-					*idx = strtol(key, NULL, 10);
-					if (*idx!=LONG_MAX) {
-						return TRUE;
-					}
-				}
-			}
-		} while (0);
-	}
-	return FALSE;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_res_meta::read_metadata */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn TSRMLS_DC)
@@ -182,10 +135,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 		}
 
 		/* For BC we have to check whether the key is numeric and use it like this */
-		if ((meta->zend_hash_keys[i].is_numeric =
-					mysqlnd_is_key_numeric(field_packet->metadata->name,
-										   field_packet->metadata->name_length + 1,
-										   &idx))) {
+		if ((meta->zend_hash_keys[i].is_numeric = ZEND_HANDLE_NUMERIC(field_packet->metadata->sname, idx))) {
 			meta->zend_hash_keys[i].key = idx;
 		} 
 	}

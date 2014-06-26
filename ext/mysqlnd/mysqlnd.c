@@ -971,8 +971,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		*/
 		net->data->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
 
-		conn->user				= mnd_pestrdup(user, conn->persistent);
-		conn->user_len			= strlen(conn->user);
+		conn->user_len			= strlen(user);
+		conn->user				= mnd_pestrndup(user, conn->user_len, conn->persistent);
 		conn->passwd			= mnd_pestrndup(passwd, passwd_len, conn->persistent);
 		conn->passwd_len		= passwd_len;
 		conn->port				= port;
@@ -985,12 +985,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		}
 
 		if (!unix_socket && !named_pipe) {
-			conn->host = mnd_pestrdup(host, conn->persistent);
+			conn->host = mnd_pestrndup(host, host_len, conn->persistent);
 			if (!conn->host) {
 				SET_OOM_ERROR(*conn->error_info);
 				goto err; /* OOM */
 			}
-			conn->host_len = strlen(conn->host);
+			conn->host_len = host_len;
 			{
 				char *p;
 				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->host);
@@ -2253,7 +2253,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	}
 
 	/* XXX: passwords that have \0 inside work during auth, but in this case won't work with change user */
-	ret = mysqlnd_run_authentication(conn, user, passwd, strlen(passwd), db, strlen(db),
+	ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, strlen(db),
 									conn->auth_plugin_data, conn->auth_plugin_data_len, conn->options->auth_protocol,
 									0 /*charset not used*/, conn->options, conn->server_capabilities, silent, TRUE/*is_change*/ TSRMLS_CC);
 
