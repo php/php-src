@@ -1581,13 +1581,15 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 
 		Z_STR_P(result) = STR_REALLOC(Z_STR_P(result), res_len, 0 );
 		Z_TYPE_INFO_P(result) = IS_STRING_EX;
-		memcpy(Z_STRVAL_P(result) + op1_len, Z_STRVAL_P(op2), op2_len + 1);
+		memcpy(Z_STRVAL_P(result) + op1_len, Z_STRVAL_P(op2), op2_len);
+		Z_STRVAL_P(result)[res_len]=0;
 	} else {
 		int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
 		zend_string *buf = STR_ALLOC(length, 0);
 
 		memcpy(buf->val, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
-		memcpy(buf->val + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2) + 1);
+		memcpy(buf->val + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+		buf->val[length] = 0;
 		ZVAL_NEW_STR(result, buf);
 	}
 	if (use_copy1) {
