@@ -2763,9 +2763,10 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 	zend_class_entry *ce;
 	int name_len = name->len;
 	zend_string *lcname;
-	
-	lcname = STR_ALLOC(name_len, 0);	
-	zend_str_tolower_copy(lcname->val, name->val, name_len);
+	ALLOCA_FLAG(use_heap);
+
+	STR_ALLOCA_ALLOC(lcname, name_len, use_heap);	
+	zend_str_tolower_copy(lcname->val, name->val, name_len + 1);
 
 	*strict_class = 0;
 	if (name_len == sizeof("self") - 1 &&
@@ -2825,7 +2826,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 	} else {
 		if (error) zend_spprintf(error, 0, "class '%.*s' not found", name_len, name->val);
 	}
-	STR_FREE(lcname);
+	STR_ALLOCA_FREE(lcname, use_heap);
 	return ret;
 }
 /* }}} */
@@ -2851,27 +2852,29 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	fcc->function_handler = NULL;
 
 	if (!ce_org) {
-		char *lmname;
-		int lmname_len;
+		zend_string *lmname;
 
 		/* Skip leading \ */
 		if (Z_STRVAL_P(callable)[0] == '\\') {
-			lmname = do_alloca(Z_STRLEN_P(callable), use_heap);
-			lmname_len = Z_STRLEN_P(callable) - 1;
-			zend_str_tolower_copy(lmname, Z_STRVAL_P(callable) + 1, lmname_len);
+			STR_ALLOCA_INIT(lmname, Z_STRVAL_P(callable) + 1, Z_STRLEN_P(callable) - 1, use_heap);
 		} else {
-			lmname = do_alloca(Z_STRLEN_P(callable) + 1, use_heap);
-			lmname_len = Z_STRLEN_P(callable);
-			zend_str_tolower_copy(lmname, Z_STRVAL_P(callable), lmname_len);
+			STR_ALLOCA_INIT(lmname, Z_STRVAL_P(callable), Z_STRLEN_P(callable), use_heap);
 		}
 		/* Check if function with given name exists.
 		 * This may be a compound name that includes namespace name */
-		fcc->function_handler = zend_hash_str_find_ptr(EG(function_table), lmname, lmname_len);
+		fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname);
 		if (fcc->function_handler != NULL) {
-			free_alloca(lmname, use_heap);
+			STR_ALLOCA_FREE(lmname, use_heap);
 			return 1;
+		} else {
+			zend_str_tolower(lmname->val, lmname->len);
+			STR_FORGET_HASH_VAL(lmname);
+			if ((fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname)) != NULL) {
+				STR_ALLOCA_FREE(lmname, use_heap);
+				return 1;
+			}
 		}
-		free_alloca(lmname, use_heap);
+		STR_ALLOCA_FREE(lmname, use_heap);
 	}
 
 	/* Split name into class/namespace and method/function names */
