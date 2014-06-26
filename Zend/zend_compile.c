@@ -7795,7 +7795,7 @@ zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) {
 		|| kind == ZEND_AST_UNARY_PLUS || kind == ZEND_AST_UNARY_MINUS
 		|| kind == ZEND_AST_CONDITIONAL
 		|| kind == ZEND_AST_ARRAY || kind == ZEND_AST_ARRAY_ELEM
-		|| kind == ZEND_AST_CLASS_CONST;
+		|| kind == ZEND_AST_CONST || kind == ZEND_AST_CLASS_CONST;
 }
 
 void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) {
@@ -7836,6 +7836,38 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) {
 	*ast_ptr = zend_ast_create_constant(&result);
 }
 
+void zend_compile_const_expr_const(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	zend_ast *const_name_ast = ast->child[0];
+	zend_bool check_namespace = const_name_ast->attr;
+	zend_bool is_compound;
+
+	znode const_name, result;
+	zend_compile_expr(&const_name, const_name_ast TSRMLS_CC);
+
+	is_compound = zend_is_compound_name(&const_name.u.constant);
+
+	if (zend_constant_ct_subst(&result, &const_name.u.constant, 0 TSRMLS_CC)) {
+		zend_ast_destroy(ast);
+		*ast_ptr = zend_ast_create_constant(&result.u.constant);
+		return;
+	}
+
+	zend_resolve_const_name(&const_name, &check_namespace TSRMLS_CC);
+	result = const_name;
+
+	Z_TYPE_INFO(result.u.constant) = IS_CONSTANT_EX;
+	if (IS_INTERNED(Z_STR(result.u.constant))) {
+		Z_TYPE_FLAGS(result.u.constant) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+	}
+	if (!is_compound) {
+		Z_CONST_FLAGS(result.u.constant) = IS_CONSTANT_UNQUALIFIED;
+	}
+
+	zend_ast_destroy(ast);
+	*ast_ptr = zend_ast_create_constant(&result.u.constant);
+}
+
 void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 	zend_ast *ast = *ast_ptr;
 	if (ast == NULL || ast->kind == ZEND_CONST) {
@@ -7856,6 +7888,9 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 	switch (ast->kind) {
 		case ZEND_AST_CLASS_CONST:
 			zend_compile_const_expr_class_const(ast_ptr TSRMLS_CC);
+			break;
+		case ZEND_AST_CONST:
+			zend_compile_const_expr_const(ast_ptr TSRMLS_CC);
 			break;
 	}
 }
