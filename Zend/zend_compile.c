@@ -6110,7 +6110,7 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC);
 
 void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 {
-	//zend_eval_const_expr(&ast TSRMLS_CC);
+	zend_eval_const_expr(&ast TSRMLS_CC);
 	zend_compile_const_expr(&ast TSRMLS_CC);
 	if (ast->kind == ZEND_CONST) {
 		ZVAL_COPY_VALUE(&result->u.constant, zend_ast_get_zval(ast));

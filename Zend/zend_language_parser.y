@@ -956,7 +956,11 @@ dereferencable_scalar:
 	|	T_CONSTANT_ENCAPSED_STRING		{ $$.u.ast = AST_ZVAL(&$1); }
 ;
 
-common_scalar:
+static_scalar: /* compile-time evaluated scalars */
+	expr { zend_do_constant_expression(&$$, $1.u.ast TSRMLS_CC); }
+;
+
+scalar:
 		T_LNUMBER 					{ $$.u.ast = AST_ZVAL(&$1); }
 	|	T_DNUMBER 					{ $$.u.ast = AST_ZVAL(&$1); }
 	|	T_LINE 						{ $$.u.ast = AST_ZVAL(&$1); }
@@ -966,118 +970,22 @@ common_scalar:
 	|	T_METHOD_C					{ $$.u.ast = AST_ZVAL(&$1); }
 	|	T_FUNC_C					{ $$.u.ast = AST_ZVAL(&$1); }
 	|	T_NS_C						{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_CLASS_C
+			{ if (Z_TYPE($1.u.constant) == IS_UNDEF) {
+			      zval class_const; ZVAL_STRING(&class_const, "__CLASS__");
+			      $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST,
+				      zend_ast_create_constant(&class_const));
+			  } else {
+			      $$.u.ast = AST_ZVAL(&$1);
+			  } }
 	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$.u.ast = AST_ZVAL(&$2); }
 	|	T_START_HEREDOC T_END_HEREDOC
 			{ zval empty_str; ZVAL_EMPTY_STRING(&empty_str);
 			  $$.u.ast = zend_ast_create_constant(&empty_str); }
-;
-
-static_scalar: /* compile-time evaluated scalars */
-	expr { zend_do_constant_expression(&$$, $1.u.ast TSRMLS_CC); }
-;
-
-static_scalar_value:
-		T_CONSTANT_ENCAPSED_STRING	{ $$.u.ast = AST_ZVAL(&$1); }
-	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_CLASS
-			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RESOLVE_CLASS_NAME, AST_ZVAL(&$1)); }
-	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
-			{ $$.u.ast = zend_ast_create_binary(
-			      ZEND_AST_CLASS_CONST, AST_ZVAL(&$1), AST_ZVAL(&$3)); }
-	|	namespace_name
-			{ $$.u.ast = zend_ast_create_unary(
-			      ZEND_AST_CONST, zend_ast_create_zval_ex(&$1.u.constant, 1)); }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name
-			{ ZVAL_EMPTY_STRING(&$1.u.constant);
-			  zend_do_build_namespace_name(&$1, &$1, &$3 TSRMLS_CC);
-			  $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST, AST_ZVAL(&$1)); }
-	|	T_NS_SEPARATOR namespace_name
-			{ zval tmp; ZVAL_NEW_STR(&tmp, STR_ALLOC(Z_STRLEN($2.u.constant)+1, 0)); Z_STRVAL(tmp)[0] = '\\'; memcpy(Z_STRVAL(tmp) + 1, Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1);
-			  if (Z_DELREF($2.u.constant) == 0) { efree(Z_STR($2.u.constant)); }
-			  Z_STR($2.u.constant) = Z_STR(tmp);
-			  $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST, AST_ZVAL(&$2)); }
-	|	common_scalar { $$.u.ast = $1.u.ast; }
-	|	T_ARRAY '(' static_array_pair_list ')' { $$.u.ast = $3.u.ast; }
-	|	'[' static_array_pair_list ']' { $$.u.ast = $2.u.ast; }
-	|	static_operation { $$.u.ast = $1.u.ast; }
-	|	T_CLASS_C
-			{ if (Z_TYPE($1.u.constant) == IS_UNDEF) {
-			      zval class_const;
-			      ZVAL_STRING(&class_const, "__CLASS__");
-			      Z_TYPE_INFO(class_const) = IS_CONSTANT_EX;
-			      $$.u.ast = zend_ast_create_constant(&class_const);
-			  } else {
-			      $$.u.ast = AST_ZVAL(&$1);
-			  } }
-;
-
-static_operation:
-		'!' static_scalar_value { $$.u.ast = zend_ast_create_unary(ZEND_BOOL_NOT, $2.u.ast); }
-	|	'~' static_scalar_value { $$.u.ast = zend_ast_create_unary(ZEND_BW_NOT, $2.u.ast); }
-	|	static_scalar_value '+' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_ADD, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '-' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_SUB, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '*' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_MUL, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_POW static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_POW, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '/' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_DIV, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '%' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_MOD, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '|' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_BW_OR, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '&' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_BW_AND, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '^' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_BW_XOR, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_SL static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_SL, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_SR static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_SR, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '.' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_CONCAT, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_LOGICAL_XOR static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_BOOL_XOR, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_IS_IDENTICAL static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_IS_IDENTICAL, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_IS_NOT_IDENTICAL static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_IS_NOT_IDENTICAL, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_IS_EQUAL static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_IS_EQUAL, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_IS_NOT_EQUAL static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_IS_NOT_EQUAL, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '<' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_IS_SMALLER, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '>' static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_IS_SMALLER, $3.u.ast, $1.u.ast); }
-	|	static_scalar_value T_IS_SMALLER_OR_EQUAL static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_IS_SMALLER_OR_EQUAL, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_IS_GREATER_OR_EQUAL static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary_op(ZEND_IS_SMALLER_OR_EQUAL, $3.u.ast, $1.u.ast); }
-	|	static_scalar_value T_LOGICAL_AND static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_AND, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_LOGICAL_OR static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_OR, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_BOOLEAN_AND static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_AND, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value T_BOOLEAN_OR static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_OR, $1.u.ast, $3.u.ast); }
-	|	static_scalar_value '?' ':' static_scalar_value
-			{ $$.u.ast = zend_ast_create_ternary(ZEND_AST_CONDITIONAL, $1.u.ast, NULL, $4.u.ast); }
-	|	static_scalar_value '?' static_scalar_value ':' static_scalar_value
-			{ $$.u.ast = zend_ast_create_ternary(
-			      ZEND_AST_CONDITIONAL, $1.u.ast, $3.u.ast, $5.u.ast); }
-	|	'+' static_scalar_value
-			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_UNARY_PLUS, $2.u.ast); }
-	|	'-' static_scalar_value
-			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_UNARY_MINUS, $2.u.ast); }
-	|	'(' static_scalar_value ')' { $$.u.ast = $2.u.ast; }
-;
-
-
-scalar:
-		class_name_scalar	{ $$.u.ast = $1.u.ast; }
+	|	'"' encaps_list '"' 	{ $$.u.ast = $2.u.ast; }
+	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$.u.ast = $2.u.ast; }
+	|	dereferencable_scalar	{ $$.u.ast = $1.u.ast; }
+	|	class_name_scalar	{ $$.u.ast = $1.u.ast; }
 	|	class_constant		{ $$.u.ast = $1.u.ast; }
 	|	namespace_name
 			{ $$.u.ast = zend_ast_create_unary(
@@ -1091,45 +999,12 @@ scalar:
 			  if (Z_DELREF($2.u.constant) == 0) { efree(Z_STR($2.u.constant)); }
 			  Z_STR($2.u.constant) = Z_STR(tmp);
 			  $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST, AST_ZVAL(&$2)); }
-	|	common_scalar			{ $$.u.ast = $1.u.ast; }
-	|	'"' encaps_list '"' 	{ $$.u.ast = $2.u.ast; }
-	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$.u.ast = $2.u.ast; }
-	|	T_CLASS_C
-			{ if (Z_TYPE($1.u.constant) == IS_UNDEF) {
-			      zval class_const; ZVAL_STRING(&class_const, "__CLASS__");
-			      $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST,
-				      zend_ast_create_constant(&class_const));
-			  } else {
-			      $$.u.ast = AST_ZVAL(&$1);
-			  } }
-	|	dereferencable_scalar	{ $$.u.ast = $1.u.ast; }
 ;
 
-
-static_array_pair_list:
-		/* empty */
-			{ array_init(&$$.u.constant); $$.u.ast = zend_ast_create_constant(&$$.u.constant); }
-	|	non_empty_static_array_pair_list possible_comma
-			{ zend_ast_dynamic_shrink(&$1.u.ast); $$ = $1; }
-;
 
 possible_comma:
 		/* empty */
 	|	','
-;
-
-non_empty_static_array_pair_list:
-		non_empty_static_array_pair_list ',' static_array_pair
-			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
-	|	static_array_pair
-			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_ARRAY, $1.u.ast); }
-;
-
-static_array_pair:
-		static_scalar_value T_DOUBLE_ARROW static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_ARRAY_ELEM, $3.u.ast, $1.u.ast); }
-	|	static_scalar_value
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_ARRAY_ELEM, $1.u.ast, NULL); }
 ;
 
 expr:
