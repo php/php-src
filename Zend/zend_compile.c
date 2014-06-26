@@ -7223,14 +7223,14 @@ void zend_compile_unary_pm(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *expr_ast = ast->child[0];
 	znode zero_node, expr_node;
 
-	ZEND_ASSERT(ast->kind == ZEND_UNARY_PLUS || ast->kind == ZEND_UNARY_MINUS);
+	ZEND_ASSERT(ast->kind == ZEND_AST_UNARY_PLUS || ast->kind == ZEND_AST_UNARY_MINUS);
 
 	zero_node.op_type = IS_CONST;
 	ZVAL_LONG(&zero_node.u.constant, 0);
 
 	zend_compile_expr(&expr_node, expr_ast TSRMLS_CC);
 
-	emit_op_tmp(result, ast->kind == ZEND_UNARY_PLUS ? ZEND_ADD : ZEND_SUB,
+	emit_op_tmp(result, ast->kind == ZEND_AST_UNARY_PLUS ? ZEND_ADD : ZEND_SUB,
 		&zero_node, &expr_node TSRMLS_CC);
 }
 
@@ -7843,8 +7843,8 @@ void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
 		case ZEND_BW_NOT:
 			zend_compile_unary_op(result, ast TSRMLS_CC);
 			return;
-		case ZEND_UNARY_PLUS:
-		case ZEND_UNARY_MINUS:
+		case ZEND_AST_UNARY_PLUS:
+		case ZEND_AST_UNARY_MINUS:
 			zend_compile_unary_pm(result, ast TSRMLS_CC);
 			return;
 		case ZEND_AST_AND:
@@ -7964,6 +7964,42 @@ void zend_eval_const_binary_op(zend_ast **ast_ptr TSRMLS_DC) {
 	}
 }
 
+void zend_eval_const_unary_pm(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	zend_ast *expr_ast = ast->child[0];
+
+	ZEND_ASSERT(ast->kind == ZEND_AST_UNARY_PLUS || ast->kind == ZEND_AST_UNARY_MINUS);
+
+	if (expr_ast->kind == ZEND_CONST) {
+		binary_op_type op = ast->kind == ZEND_AST_UNARY_PLUS
+			? add_function : sub_function;
+
+		zval left, result;
+		ZVAL_LONG(&left, 0);
+		op(&result, &left, zend_ast_get_zval(expr_ast) TSRMLS_CC);
+		zend_ast_destroy(ast);
+		*ast_ptr = zend_ast_create_constant(&result);
+	}
+}
+
+void zend_eval_const_greater(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	zend_ast *left_ast = ast->child[0];
+	zend_ast *right_ast = ast->child[1];
+
+	ZEND_ASSERT(ast->kind == ZEND_AST_GREATER || ast->kind == ZEND_AST_GREATER_EQUAL);
+
+	if (left_ast->kind == ZEND_CONST && right_ast->kind == ZEND_CONST) {
+		binary_op_type op = ast->kind == ZEND_AST_GREATER
+			? is_smaller_function : is_smaller_or_equal_function;
+
+		zval result;
+		op(&result, zend_ast_get_zval(right_ast), zend_ast_get_zval(left_ast) TSRMLS_CC);
+		zend_ast_destroy(ast);
+		*ast_ptr = zend_ast_create_constant(&result);
+	}
+}
+
 void zend_eval_const_array(zend_ast **ast_ptr TSRMLS_DC) {
 	zend_ast *ast = *ast_ptr;
 	zend_uint i;
@@ -8042,6 +8078,14 @@ void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 	switch (ast->kind) {
 		case ZEND_AST_BINARY_OP:
 			zend_eval_const_binary_op(ast_ptr TSRMLS_CC);
+			break;
+		case ZEND_AST_GREATER:
+		case ZEND_AST_GREATER_EQUAL:
+			zend_eval_const_greater(ast_ptr TSRMLS_CC);
+			break;
+		case ZEND_AST_UNARY_PLUS:
+		case ZEND_AST_UNARY_MINUS:
+			zend_eval_const_unary_pm(ast_ptr TSRMLS_CC);
 			break;
 		case ZEND_AST_ARRAY:
 			zend_eval_const_array(ast_ptr TSRMLS_CC);

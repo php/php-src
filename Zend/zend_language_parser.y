@@ -812,8 +812,8 @@ expr_without_variable:
 	|	expr '%' expr 	{ $$.u.ast = zend_ast_create_binary_op(ZEND_MOD, $1.u.ast, $3.u.ast); }
 	| 	expr T_SL expr	{ $$.u.ast = zend_ast_create_binary_op(ZEND_SL, $1.u.ast, $3.u.ast); }
 	|	expr T_SR expr	{ $$.u.ast = zend_ast_create_binary_op(ZEND_SR, $1.u.ast, $3.u.ast); }
-	|	'+' expr %prec T_INC { $$.u.ast = zend_ast_create_unary(ZEND_UNARY_PLUS, $2.u.ast); }
-	|	'-' expr %prec T_INC { $$.u.ast = zend_ast_create_unary(ZEND_UNARY_MINUS, $2.u.ast); }
+	|	'+' expr %prec T_INC { $$.u.ast = zend_ast_create_unary(ZEND_AST_UNARY_PLUS, $2.u.ast); }
+	|	'-' expr %prec T_INC { $$.u.ast = zend_ast_create_unary(ZEND_AST_UNARY_MINUS, $2.u.ast); }
 	|	'!' expr { $$.u.ast = zend_ast_create_unary(ZEND_BOOL_NOT, $2.u.ast); }
 	|	'~' expr { $$.u.ast = zend_ast_create_unary(ZEND_BW_NOT, $2.u.ast); }
 	|	expr T_IS_IDENTICAL expr
@@ -1028,8 +1028,8 @@ static_operation:
 	|	static_scalar_value T_IS_GREATER_OR_EQUAL static_scalar_value { $$.u.ast = zend_ast_create_binary(ZEND_IS_SMALLER_OR_EQUAL, $3.u.ast, $1.u.ast); }
 	|	static_scalar_value '?' ':' static_scalar_value { $$.u.ast = zend_ast_create_ternary(ZEND_SELECT, $1.u.ast, NULL, $4.u.ast); }
 	|	static_scalar_value '?' static_scalar_value ':' static_scalar_value { $$.u.ast = zend_ast_create_ternary(ZEND_SELECT, $1.u.ast, $3.u.ast, $5.u.ast); }
-	|	'+' static_scalar_value { $$.u.ast = zend_ast_create_unary(ZEND_UNARY_PLUS, $2.u.ast); }
-	|	'-' static_scalar_value { $$.u.ast = zend_ast_create_unary(ZEND_UNARY_MINUS, $2.u.ast); }
+	|	'+' static_scalar_value { $$.u.ast = zend_ast_create_unary(ZEND_AST_UNARY_PLUS, $2.u.ast); }
+	|	'-' static_scalar_value { $$.u.ast = zend_ast_create_unary(ZEND_AST_UNARY_MINUS, $2.u.ast); }
 	|	'(' static_scalar_value ')' { $$ = $2; }
 ;
 

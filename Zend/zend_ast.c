@@ -353,13 +353,13 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 				zval_dtor(&op1);
 			}
 			break;
-		case ZEND_UNARY_PLUS:
+		case ZEND_AST_UNARY_PLUS:
 			ZVAL_LONG(&op1, 0);
 			zend_ast_evaluate(&op2, ast->child[0], scope TSRMLS_CC);
 			add_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op2);
 			break;
-		case ZEND_UNARY_MINUS:
+		case ZEND_AST_UNARY_MINUS:
 			ZVAL_LONG(&op1, 0);
 			zend_ast_evaluate(&op2, ast->child[0], scope TSRMLS_CC);
 			sub_function(result, &op1, &op2 TSRMLS_CC);
