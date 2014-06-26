@@ -2852,7 +2852,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	fcc->function_handler = NULL;
 
 	if (!ce_org) {
-		zend_string *lmname = NULL;
+		zend_string *lmname;
 
 		/* Skip leading \ */
 		if (UNEXPECTED(Z_STRVAL_P(callable)[0] == '\\')) {
