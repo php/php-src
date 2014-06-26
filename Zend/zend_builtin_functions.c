@@ -394,10 +394,10 @@ ZEND_FUNCTION(gc_disable)
    Get the number of arguments that were passed to the function */
 ZEND_FUNCTION(func_num_args)
 {
-	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
+	zend_execute_data *ex = EG(current_execute_data);
 
-	if (ex && ex->call) {
-		RETURN_LONG(ex->call->num_args);
+	if (ex->frame_kind == VM_FRAME_NESTED_FUNCTION || ex->frame_kind == VM_FRAME_TOP_FUNCTION) {
+		RETURN_LONG(ex->num_args);
 	} else {
 		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
 		RETURN_LONG(-1);
@@ -412,7 +412,7 @@ ZEND_FUNCTION(func_get_arg)
 	int arg_count;
 	zval *arg;
 	long requested_offset;
-	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
+	zend_execute_data *ex;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &requested_offset) == FAILURE) {
 		return;
@@ -423,19 +423,24 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_FALSE;
 	}
 
-	if (!ex || !ex->call) {
+	ex = EG(current_execute_data);
+	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
 
-	arg_count = ex->call->num_args;
+	arg_count = ex->num_args;
 
 	if (requested_offset >= arg_count) {
 		zend_error(E_WARNING, "func_get_arg():  Argument %ld not passed to function", requested_offset);
 		RETURN_FALSE;
 	}
 
-	arg = ZEND_CALL_ARG(ex->call, requested_offset + 1);
+	if (ex->extra_args && requested_offset >= ex->func->op_array.num_args) {
+		arg = ex->extra_args + (requested_offset - ex->func->op_array.num_args);
+	} else {
+		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
+	}
 	RETURN_ZVAL_FAST(arg);
 }
 /* }}} */
@@ -447,23 +452,39 @@ ZEND_FUNCTION(func_get_args)
 	zval *p;
 	int arg_count;
 	int i;
-	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
+	zend_execute_data *ex = EG(current_execute_data);
 
-	if (!ex || !ex->call) {
+	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
 
-	arg_count = ex->call->num_args;
+	arg_count = ex->num_args;
 
 	array_init_size(return_value, arg_count);
 	if (arg_count) {
 		Bucket *q;		
 
-		p = ZEND_CALL_ARG(ex->call, 1);
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+		i = 0;
 		q = Z_ARRVAL_P(return_value)->arData;
-		for (i=0; i<arg_count; i++) {
+		p = ZEND_CALL_ARG(ex, 1);
+		if (ex->extra_args) {
+			while (i < ex->func->op_array.num_args) {
+				q->h = i;
+				q->key = NULL;
+				if (!Z_ISREF_P(p)) {
+					ZVAL_COPY(&q->val, p);
+				} else {
+					ZVAL_DUP(&q->val, Z_REFVAL_P(p));
+			    }
+				p++;
+				q++;
+				i++;
+			}
+			p = ex->extra_args;
+		}
+		while (i < arg_count) {
 			q->h = i;
 			q->key = NULL;
 			if (!Z_ISREF_P(p)) {
@@ -473,6 +494,7 @@ ZEND_FUNCTION(func_get_args)
 		    }
 			p++;
 			q++;
+			i++;
 		}
 		Z_ARRVAL_P(return_value)->nNumUsed = i;
 		Z_ARRVAL_P(return_value)->nNumOfElements = i;
@@ -1954,24 +1976,30 @@ ZEND_FUNCTION(get_defined_constants)
 /* }}} */
 
 
-static void debug_backtrace_get_args(zend_call_frame *call, zval *arg_array TSRMLS_DC)
+static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array TSRMLS_DC)
 {
-	zval *p;
-	zval *arg;
-	int arg_count = call->num_args;
+	int num_args = call->num_args;
 
-	array_init_size(arg_array, arg_count);
-	if (arg_count > 0) {
-		p = ZEND_CALL_ARG(call, 1);
+	array_init_size(arg_array, num_args);
+	if (num_args) {
+		int i = 0;
+		zval *p = ZEND_CALL_ARG(call, 1);
 
-		while (--arg_count >= 0) {
-			arg = p++;
-			if (arg) {
-				if (Z_REFCOUNTED_P(arg)) Z_ADDREF_P(arg);
-				add_next_index_zval(arg_array, arg);
-			} else {
-				add_next_index_null(arg_array);
+		if (call->extra_args) {
+			while (i < call->func->op_array.num_args) {
+				if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
+				p++;
+				i++;
 			}
+			p = call->extra_args;
+		}
+
+		while (i < num_args) {
+			if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
+			p++;
+			i++;
 		}
 	}
 }
@@ -2025,7 +2053,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 		skip = ptr;
 		/* skip internal handler */
-		if (!skip->op_array &&
+		if ((!skip->func || (skip->func->common.type != ZEND_USER_FUNCTION && skip->func->common.type != ZEND_EVAL_CODE)) &&
 		    skip->prev_execute_data &&
 		    skip->prev_execute_data->opline &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
@@ -2033,8 +2061,8 @@ ZEND_FUNCTION(debug_print_backtrace)
 			skip = skip->prev_execute_data;
 		}
 
-		if (skip->op_array) {
-			filename = skip->op_array->filename->val;
+		if (skip->func && (skip->func->common.type == ZEND_USER_FUNCTION || skip->func->common.type == ZEND_EVAL_CODE)) {
+			filename = skip->func->op_array.filename->val;
 			lineno = skip->opline->lineno;
 		} else {
 			filename = NULL;
@@ -2060,7 +2088,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 				(func->common.function_name ? 
 					func->common.function_name->val : NULL);
 		} else {
-			func = (zend_function*)(ptr->op_array);
+			func = ptr->func;
 			function_name = func && func->common.function_name ? 
 				func->common.function_name->val : NULL;
 		}
@@ -2081,7 +2109,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 				class_name = NULL;
 				call_type = NULL;
 			}
-			if (!ptr->opline || ptr->opline->opcode == ZEND_DO_FCALL) {
+			if (func->type != ZEND_EVAL_CODE) {
 				if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0) {
 					debug_backtrace_get_args(ptr->call, &arg_array TSRMLS_CC);
 				}
@@ -2144,12 +2172,13 @@ ZEND_FUNCTION(debug_print_backtrace)
 			while (prev) {
 				if (prev->call &&
 				    prev->call->func &&
-					prev->call->func->common.type != ZEND_USER_FUNCTION) {
+					prev->call->func->common.type != ZEND_USER_FUNCTION &&
+					prev->call->func->common.type != ZEND_EVAL_CODE) {
 					prev = NULL;
 					break;
 				}				    
-				if (prev->op_array) {
-					zend_printf(") called at [%s:%d]\n", prev->op_array->filename->val, prev->opline->lineno);
+				if (prev->func && (prev->func->common.type == ZEND_USER_FUNCTION || prev->func->common.type == ZEND_EVAL_CODE)) {
+					zend_printf(") called at [%s:%d]\n", prev->func->op_array.filename->val, prev->opline->lineno);
 					break;
 				}
 				prev = prev->prev_execute_data;
@@ -2201,7 +2230,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		skip = ptr;
 		/* skip internal handler */
-		if (!skip->op_array &&
+		if ((!skip->func || (skip->func->common.type != ZEND_USER_FUNCTION && skip->func->common.type != ZEND_EVAL_CODE)) &&
 		    skip->prev_execute_data &&
 		    skip->prev_execute_data->opline &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
@@ -2209,8 +2238,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			skip = skip->prev_execute_data;
 		}
 
-		if (skip->op_array) {
-			filename = skip->op_array->filename->val;
+		if (skip->func && (skip->func->common.type == ZEND_USER_FUNCTION || skip->func->common.type == ZEND_EVAL_CODE)) {
+			filename = skip->func->op_array.filename->val;
 			lineno = skip->opline->lineno;
 			add_assoc_string_ex(&stack_frame, "file", sizeof("file")-1, (char*)filename);
 			add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, lineno);
@@ -2225,13 +2254,14 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				if (prev->call &&
 				    prev->call->func &&
 					prev->call->func->common.type != ZEND_USER_FUNCTION &&
+					prev->call->func->common.type != ZEND_EVAL_CODE &&
 					!(prev->call->func->common.type == ZEND_INTERNAL_FUNCTION &&
 						(prev->call->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER))) {
 					break;
 				}				    
-				if (prev->op_array) {
+				if (prev->func && (prev->func->common.type == ZEND_USER_FUNCTION || prev->func->common.type == ZEND_EVAL_CODE)) {
 // TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
-					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, STR_DUP(prev->op_array->filename, 0));
+					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, STR_DUP(prev->func->op_array.filename, 0));
 					add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, prev->opline->lineno);
 					break;
 				}
@@ -2259,7 +2289,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				(func->common.function_name ? 
 					func->common.function_name->val : NULL);
 		} else {
-			func = (zend_function*)(ptr->op_array);
+			func = ptr->func;
 			function_name = func && func->common.function_name ? 
 				func->common.function_name->val : NULL;
 		}
@@ -2289,7 +2319,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			}
 
 			if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0 && 
-				(!ptr->opline || ptr->opline->opcode == ZEND_DO_FCALL)) {
+				func->type != ZEND_EVAL_CODE) {
 				if (ptr->call) {
 					zval args;
 					debug_backtrace_get_args(ptr->call, &args TSRMLS_CC);
@@ -2346,7 +2376,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char*)function_name);
 		}
 
-		add_next_index_zval(return_value, &stack_frame);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stack_frame);
 
 		include_filename = filename; 
 

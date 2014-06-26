@@ -70,8 +70,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->T = 0;
 
-	op_array->used_stack = 0;
-
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
 	op_array->doc_comment = NULL;

@@ -142,7 +142,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 		if (Z_REFCOUNTED_P(param_ptr)) {
 			Z_ADDREF_P(param_ptr);
 		}
-		add_next_index_zval(argument_array, param_ptr);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(argument_array), param_ptr);
 		param_ptr++;
 	}
 

@@ -42,6 +42,8 @@
 
 static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC) /* {{{ */
 {
+// TODO: fpm_php_trace_dump() has to be reimplemented ???
+#if 0
 	int callers_limit = 20;
 	pid_t pid = child->pid;
 	struct timeval tv;
@@ -74,10 +76,9 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC
 
 		fprintf(slowlog, "[0x%" PTR_FMT "lx] ", execute_data);
 
-		// TODO: fpm_php_trace_dump() has be reimplemented ???
-//???		if (0 > fpm_trace_get_long(execute_data + offsetof(zend_execute_data, function_state.function), &l)) {
-//???			return -1;
-//???		}
+		if (0 > fpm_trace_get_long(execute_data + offsetof(zend_execute_data, function_state.function), &l)) {
+			return -1;
+		}
 
 		function = l;
 
@@ -132,6 +133,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC
 			break;
 		}
 	}
+#endif
 	return 0;
 }
 /* }}} */

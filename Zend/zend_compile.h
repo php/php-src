@@ -59,7 +59,6 @@ typedef struct _zend_compiler_context {
 	int        literals_size;
 	int        current_brk_cont;
 	int        backpatch_count;
-	int        used_stack;
 	int        in_finally;
 	HashTable *labels;
 } zend_compiler_context;
@@ -265,8 +264,6 @@ struct _zend_op_array {
 
 	zend_uint T;
 
-	zend_uint used_stack;
-
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
 
@@ -336,6 +333,7 @@ union _zend_function {
 
 typedef struct _zend_function_call_entry {
 	zend_function *fbc;
+	zend_uint op_number;
 	zend_uint arg_num;
 	zend_bool uses_argument_unpacking;
 } zend_function_call_entry;
@@ -353,27 +351,6 @@ typedef struct _list_llist_element {
 	znode value;
 } list_llist_element;
 
-typedef struct _zend_call_frame zend_call_frame;
-
-struct _zend_call_frame {
-	zend_function         *func;
-	zend_uint              num_args;
-	zend_uint              flags;
-	zend_class_entry      *called_scope;
-	zend_object           *object;
-	zend_call_frame       *prev;
-};
-
-#define ZEND_CALL_CTOR               (1 << 0)
-#define ZEND_CALL_CTOR_RESULT_USED   (1 << 1)
-#define ZEND_CALL_DONE               (1 << 2)
-
-#define ZEND_CALL_FRAME_SLOT \
-	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_call_frame)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
-
-#define ZEND_CALL_ARG(call, n) \
-	(((zval*)(call)) + ((n) + (ZEND_CALL_FRAME_SLOT - 1)))
-
 typedef enum _vm_frame_kind {
 	VM_FRAME_NESTED_FUNCTION,	/* stackless VM call to function */
 	VM_FRAME_NESTED_CODE,		/* stackless VM call to include/require/eval */
@@ -383,26 +360,39 @@ typedef enum _vm_frame_kind {
 
 struct _zend_execute_data {
 	struct _zend_op     *opline;           /* executed opline                */
-	zend_op_array       *op_array;         /* executed op_array              */
-	zend_call_frame     *call;             /* current call                   */
-	zend_object         *object;           /* current $this                  */
+	zend_function       *func;             /* executed op_array              */
+	zend_execute_data   *call;             /* current call                   */
+	zend_uint            num_args;
+	zend_uint            flags;
+	zend_class_entry    *called_scope;
+	zend_object         *object;
+	zend_execute_data   *prev_nested_call;
 	zend_class_entry    *scope;            /* function scope (self)          */
-	zend_class_entry    *called_scope;     /* function called scope (static) */
 	zend_array          *symbol_table;
 	void               **run_time_cache;
 	zend_execute_data   *prev_execute_data;
 	zval                *return_value;
+	zval                *extra_args;
 	vm_frame_kind        frame_kind;
-	// TODO: simplify call sequence and remove call_* ???
-	zval old_error_reporting;
-	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
-	zend_object *delayed_exception;
+	zval                 old_error_reporting;
+	struct _zend_op     *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
+	zend_object         *delayed_exception;
 };
+
+#define ZEND_CALL_CTOR               (1 << 0)
+#define ZEND_CALL_CTOR_RESULT_USED   (1 << 1)
+#define ZEND_CALL_DONE               (1 << 2)
+
+#define ZEND_CALL_FRAME_SLOT \
+	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
+
+#define ZEND_CALL_ARG(call, n) \
+	(((zval*)(call)) + ((n) + (ZEND_CALL_FRAME_SLOT - 1)))
 
 #define EX(element) execute_data.element
 
 #define EX_VAR_2(ex, n)			((zval*)(((char*)(ex)) + ((int)(n))))
-#define EX_VAR_NUM_2(ex, n)     (((zval*)(((char*)(ex))+ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data))))+(n))
+#define EX_VAR_NUM_2(ex, n)     (((zval*)(ex)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
 
 #define EX_VAR(n)				EX_VAR_2(execute_data, n)
 #define EX_VAR_NUM(n)			EX_VAR_NUM_2(execute_data, n)
@@ -732,8 +722,8 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
 #define ZEND_FETCH_CLASS_PARENT		2
-#define ZEND_FETCH_CLASS_MAIN		3	/* unused */
-#define ZEND_FETCH_CLASS_GLOBAL		4	/* unused */
+#define ZEND_FETCH_CLASS_MAIN		3	/* unused ??? */
+#define ZEND_FETCH_CLASS_GLOBAL		4	/* unused ??? */
 #define ZEND_FETCH_CLASS_AUTO		5
 #define ZEND_FETCH_CLASS_INTERFACE	6
 #define ZEND_FETCH_CLASS_STATIC		7

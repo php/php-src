@@ -32,7 +32,7 @@ static zend_object *zend_generator_create(zend_class_entry *class_type TSRMLS_DC
 static void zend_generator_cleanup_unfinished_execution(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *execute_data = generator->execute_data;
-	zend_op_array *op_array = execute_data->op_array;
+	zend_op_array *op_array = &execute_data->func->op_array;
 
 	if (generator->send_target) {
 		if (Z_REFCOUNTED_P(generator->send_target)) Z_DELREF_P(generator->send_target);
@@ -75,23 +75,13 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 		}
 	}
 
-	/* Clear any backed up stack arguments */
-	{
-		zval *ptr = generator->stack->top - 1;
-		zval *end = zend_vm_stack_frame_base(execute_data);
-
-		for (; ptr >= end; --ptr) {
-			zval_ptr_dtor((zval*) ptr);
-		}
-	}
-
 	/* If yield was used as a function argument there may be active
 	 * method calls those objects need to be freed */
 	while (execute_data->call) {
 		if (execute_data->call->object) {
 			OBJ_RELEASE(execute_data->call->object);
 		}
-		execute_data->call = execute_data->call->prev;
+		execute_data->call = execute_data->call->prev_nested_call;
 	}
 }
 /* }}} */
@@ -110,7 +100,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
-		zend_op_array *op_array = execute_data->op_array;
+		zend_op_array *op_array = &execute_data->func->op_array;
 
 		if (!execute_data->symbol_table) {
 			zend_free_compiled_variables(execute_data TSRMLS_CC);
@@ -128,22 +118,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			return;
 		}
 
-		/* We have added an additional stack frame in prev_execute_data, so we
-		 * have to free it. It also contains the arguments passed to the
-		 * generator (for func_get_args) so those have to be freed too. */
-		{
-			zend_execute_data *prev_execute_data = execute_data->prev_execute_data;
-
-			if (prev_execute_data->call) {
-				int arguments_count = prev_execute_data->call->num_args;
-				zval *arguments_start = ZEND_CALL_ARG(prev_execute_data->call, 1);
-				int i;
-
-				for (i = 0; i < arguments_count; ++i) {
-					zval_ptr_dtor(arguments_start + i);
-				}
-			}
-		}
+		zend_vm_stack_free_extra_args(generator->execute_data TSRMLS_CC);
 
 		/* Some cleanups are only necessary if the generator was closued
 		 * before it could finish execution (reach a return statement). */
@@ -155,6 +130,10 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 			destroy_op_array(op_array TSRMLS_CC);
 			efree(op_array);
+		}
+
+		if (generator->execute_data->prev_execute_data) {
+			generator->execute_data->prev_execute_data->call = generator->execute_data->prev_nested_call;
 		}
 
 		efree(generator->stack);
@@ -170,18 +149,18 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 	zend_uint op_num, finally_op_num;
 	int i;
 
-	if (!ex || !ex->op_array->has_finally_block) {
+	if (!ex || !ex->func->op_array.has_finally_block) {
 		return;
 	}
 
 	/* -1 required because we want the last run opcode, not the
 	 * next to-be-run one. */
-	op_num = ex->opline - ex->op_array->opcodes - 1;
+	op_num = ex->opline - ex->func->op_array.opcodes - 1;
 
 	/* Find next finally block */
 	finally_op_num = 0;
-	for (i = 0; i < ex->op_array->last_try_catch; i++) {
-		zend_try_catch_element *try_catch = &ex->op_array->try_catch_array[i];
+	for (i = 0; i < ex->func->op_array.last_try_catch; i++) {
+		zend_try_catch_element *try_catch = &ex->func->op_array.try_catch_array[i];
 
 		if (op_num < try_catch->try_op) {
 			break;
@@ -195,7 +174,7 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 	/* If a finally block was found we jump directly to it and
 	 * resume the generator. */
 	if (finally_op_num) {
-		ex->opline = &ex->op_array->opcodes[finally_op_num];
+		ex->opline = &ex->func->op_array.opcodes[finally_op_num];
 		ex->fast_ret = NULL;
 		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
 		zend_generator_resume(generator TSRMLS_CC);
@@ -287,7 +266,7 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	opline_ptr = EG(opline_ptr);
 	current_symbol_table = EG(active_symbol_table);
 	EG(active_symbol_table) = NULL;
-	execute_data = zend_create_execute_data_from_op_array(op_array, return_value, VM_FRAME_TOP_FUNCTION TSRMLS_CC);
+	execute_data = zend_create_generator_execute_data(op_array, return_value TSRMLS_CC);
 	EG(active_symbol_table) = current_symbol_table;
 	EG(current_execute_data) = current_execute_data;
 	EG(opline_ptr) = opline_ptr;
@@ -299,8 +278,8 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	}
 
 	/* Save execution context in generator object. */
-	execute_data->prev_execute_data->object = Z_OBJ_P(return_value);
 	generator = (zend_generator *) Z_OBJ_P(return_value);
+	execute_data->prev_execute_data = NULL;
 	generator->execute_data = execute_data;
 	generator->stack = EG(argument_stack);
 	EG(argument_stack) = current_stack;
@@ -342,13 +321,14 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		zend_class_entry *original_scope = EG(scope);
 		zend_class_entry *original_called_scope = EG(called_scope);
 		zend_vm_stack original_stack = EG(argument_stack);
+		zend_execute_data *prev_execute_data;
 
 		original_This = Z_OBJ(EG(This));
 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
 		EG(opline_ptr) = &generator->execute_data->opline;
-		EG(active_op_array) = generator->execute_data->op_array;
+		EG(active_op_array) = &generator->execute_data->func->op_array;
 		EG(active_symbol_table) = generator->execute_data->symbol_table;
 		Z_OBJ(EG(This)) = generator->execute_data->object;
 		EG(scope) = generator->execute_data->scope;
@@ -357,16 +337,31 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 
 		/* We want the backtrace to look as if the generator function was
 		 * called from whatever method we are current running (e.g. next()).
-		 * The first prev_execute_data contains an additional stack frame,
-		 * which makes the generator function show up in the backtrace and
-		 * makes the arguments available to func_get_args(). So we have to
-		 * set the prev_execute_data of that prev_execute_data :) */
-		generator->execute_data->prev_execute_data->prev_execute_data = original_execute_data;
+		 * So we have to link generator call frame with caller call frames */
+
+		prev_execute_data = original_execute_data;
+        if (prev_execute_data &&
+            prev_execute_data->call &&
+            (prev_execute_data->call->flags & ZEND_CALL_DONE)) {
+			prev_execute_data->call->prev_execute_data = prev_execute_data;
+			prev_execute_data = prev_execute_data->call;
+		}
+		generator->execute_data->prev_execute_data = prev_execute_data;
+		if (prev_execute_data) {
+			generator->execute_data->prev_nested_call = prev_execute_data->call;
+			prev_execute_data->call = generator->execute_data;
+		}
 
 		/* Resume execution */
 		generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
 		zend_execute_ex(generator->execute_data TSRMLS_CC);
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
+
+		/* Unlink generator call_frame from the caller */
+		if (generator->execute_data && generator->execute_data->prev_execute_data) {
+			generator->execute_data->prev_execute_data->call = generator->execute_data->prev_nested_call;
+			generator->execute_data->prev_execute_data = NULL;
+		}
 
 		/* Restore executor globals */
 		EG(current_execute_data) = original_execute_data;
@@ -669,7 +664,7 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 		return NULL;
 	}
 
-	if (by_ref && !(generator->execute_data->op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+	if (by_ref && !(generator->execute_data->func->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
 		zend_throw_exception(NULL, "You can only iterate a generator by-reference if it declared that it yields by-reference", 0 TSRMLS_CC);
 		return NULL;
 	}
