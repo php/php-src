@@ -159,7 +159,7 @@ php_mysqlnd_net_field_length(zend_uchar **packet)
 uint64_t
 php_mysqlnd_net_field_length_ll(zend_uchar **packet)
 {
-	register zend_uchar *p= (zend_uchar *)*packet;
+	register zend_uchar *p = (zend_uchar *)*packet;
 
 	if (*p < 251) {
 		(*packet)++;
