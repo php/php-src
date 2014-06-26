@@ -6111,6 +6111,7 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC);
 void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 {
 	//zend_eval_const_expr(&ast TSRMLS_CC);
+	zend_compile_const_expr(&ast TSRMLS_CC);
 	if (ast->kind == ZEND_CONST) {
 		ZVAL_COPY_VALUE(&result->u.constant, zend_ast_get_zval(ast));
 		if (Z_TYPE(result->u.constant) == IS_ARRAY) {
@@ -6118,7 +6119,6 @@ void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ 
 		}
 		efree(ast);
 	} else {
-		zend_compile_const_expr(&ast TSRMLS_CC);
 		ZVAL_NEW_AST(&result->u.constant, ast);
 	}
 }
@@ -7794,7 +7794,46 @@ zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) {
 		|| kind == ZEND_BW_NOT || kind == ZEND_BOOL_NOT
 		|| kind == ZEND_AST_UNARY_PLUS || kind == ZEND_AST_UNARY_MINUS
 		|| kind == ZEND_AST_CONDITIONAL
-		|| kind == ZEND_AST_ARRAY || kind == ZEND_AST_ARRAY_ELEM;
+		|| kind == ZEND_AST_ARRAY || kind == ZEND_AST_ARRAY_ELEM
+		|| kind == ZEND_AST_CLASS_CONST;
+}
+
+void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	zend_ast *class_ast = ast->child[0];
+	zend_ast *const_ast = ast->child[1];
+	znode class_name, const_name;
+	zval result;
+	int fetch_type;
+
+	if (class_ast->kind != ZEND_CONST) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Dynamic class names are not allowed in compile-time class constant references");
+	}
+
+	zend_compile_expr(&class_name, class_ast TSRMLS_CC);
+	zend_compile_expr(&const_name, const_ast TSRMLS_CC);
+	fetch_type = zend_get_class_fetch_type(
+		Z_STRVAL(class_name.u.constant), Z_STRLEN(class_name.u.constant));
+
+	if (ZEND_FETCH_CLASS_STATIC == fetch_type) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"\"static::\" is not allowed in compile-time constants");
+	} else if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
+		zend_resolve_class_name(&class_name TSRMLS_CC);
+	}
+
+	zend_do_build_full_name(NULL, &class_name, &const_name, 1 TSRMLS_CC);
+
+	ZVAL_COPY_VALUE(&result, &class_name.u.constant);
+	Z_TYPE_INFO(result) = IS_CONSTANT_EX;
+	if (IS_INTERNED(Z_STR(result))) {
+		Z_TYPE_FLAGS(result) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+	}
+	Z_CONST_FLAGS(result) = fetch_type;
+
+	zend_ast_destroy(ast);
+	*ast_ptr = zend_ast_create_constant(&result);
 }
 
 void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
@@ -7812,6 +7851,12 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 		for (i = 0; i < ast->children; ++i) {
 			zend_compile_const_expr(&ast->child[i] TSRMLS_CC);
 		}
+	}
+
+	switch (ast->kind) {
+		case ZEND_AST_CLASS_CONST:
+			zend_compile_const_expr_class_const(ast_ptr TSRMLS_CC);
+			break;
 	}
 }
 

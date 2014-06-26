@@ -972,10 +972,6 @@ common_scalar:
 			  $$.u.ast = zend_ast_create_constant(&empty_str); }
 ;
 
-static_class_constant:
-		class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_CT, 0 TSRMLS_CC); }
-;
-
 static_scalar: /* compile-time evaluated scalars */
 	static_scalar_value { zend_do_constant_expression(&$$, $1.u.ast TSRMLS_CC); }
 ;
@@ -983,7 +979,9 @@ static_scalar: /* compile-time evaluated scalars */
 static_scalar_value:
 		T_CONSTANT_ENCAPSED_STRING	{ $$.u.ast = AST_ZVAL(&$1); }
 	|	static_class_name_scalar	{ $$.u.ast = AST_ZVAL(&$1); }
-	|	static_class_constant		{ $$.u.ast = AST_ZVAL(&$1); }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
+			{ $$.u.ast = zend_ast_create_binary(
+			      ZEND_AST_CLASS_CONST, AST_ZVAL(&$1), AST_ZVAL(&$3)); }
 	|	namespace_name 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT, 1 TSRMLS_CC); $$.u.ast = AST_ZVAL(&$$); }
 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_CT, 0 TSRMLS_CC); $$.u.ast = AST_ZVAL(&$$); }
 	|	T_NS_SEPARATOR namespace_name { zval tmp; ZVAL_NEW_STR(&tmp, STR_ALLOC(Z_STRLEN($2.u.constant)+1, 0)); Z_STRVAL(tmp)[0] = '\\'; memcpy(Z_STRVAL(tmp) + 1, Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); if (Z_DELREF($2.u.constant) == 0) {efree(Z_STR($2.u.constant));} Z_STR($2.u.constant) = Z_STR(tmp); zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); $$.u.ast = AST_ZVAL(&$$); }
