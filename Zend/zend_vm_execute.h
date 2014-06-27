@@ -1508,9 +1508,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 			}
-			fbc = Z_FUNC_P(func);
 			STR_FREE(lcname);
 
+			fbc = Z_FUNC_P(func);
+			called_scope = NULL;
+			object = NULL;
 		} else if (IS_CONST != IS_CONST && IS_CONST != IS_TMP_VAR &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
@@ -1834,9 +1836,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 			}
-			fbc = Z_FUNC_P(func);
 			STR_FREE(lcname);
 			zval_dtor(free_op2.var);
+			fbc = Z_FUNC_P(func);
+			called_scope = NULL;
+			object = NULL;
 		} else if (IS_TMP_VAR != IS_CONST && IS_TMP_VAR != IS_TMP_VAR &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
@@ -2005,9 +2009,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 			}
-			fbc = Z_FUNC_P(func);
 			STR_FREE(lcname);
 			zval_ptr_dtor_nogc(free_op2.var);
+			fbc = Z_FUNC_P(func);
+			called_scope = NULL;
+			object = NULL;
 		} else if (IS_VAR != IS_CONST && IS_VAR != IS_TMP_VAR &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
@@ -2214,9 +2220,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 			}
-			fbc = Z_FUNC_P(func);
 			STR_FREE(lcname);
 
+			fbc = Z_FUNC_P(func);
+			called_scope = NULL;
+			object = NULL;
 		} else if (IS_CV != IS_CONST && IS_CV != IS_TMP_VAR &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&

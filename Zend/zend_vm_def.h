@@ -2427,9 +2427,11 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 			}
-			fbc = Z_FUNC_P(func);
 			STR_FREE(lcname);
 			FREE_OP2();
+			fbc = Z_FUNC_P(func);
+			called_scope = NULL;
+			object = NULL;
 		} else if (OP2_TYPE != IS_CONST && OP2_TYPE != IS_TMP_VAR &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
