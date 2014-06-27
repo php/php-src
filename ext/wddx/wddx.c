@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -109,8 +109,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_value, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_vars, 0, 0, 1)
-	ZEND_ARG_INFO(0, var_name)
-	ZEND_ARG_INFO(0, ...)
+	ZEND_ARG_VARIADIC_INFO(0, var_names)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_start, 0, 0, 0)
@@ -123,8 +122,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_add_vars, 0, 0, 2)
 	ZEND_ARG_INFO(0, packet_id)
-	ZEND_ARG_INFO(0, var_name)
-	ZEND_ARG_INFO(0, ...)
+	ZEND_ARG_VARIADIC_INFO(0, var_names)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_deserialize, 0, 0, 1)

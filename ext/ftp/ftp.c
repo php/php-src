@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -177,6 +177,10 @@ ftp_close(ftpbuf_t *ftp)
 	}
 	if (ftp->data) {
 		data_close(ftp, ftp->data);
+	}
+	if (ftp->stream && ftp->closestream) {
+		TSRMLS_FETCH();
+		php_stream_close(ftp->stream);
 	}
 	if (ftp->fd != -1) {
 #if HAVE_OPENSSL_EXT
@@ -630,7 +634,7 @@ ftp_alloc(ftpbuf_t *ftp, const long size, char **response)
 		return 0;
 	}
 
-	if (response && ftp->inbuf) {
+	if (response) {
 		*response = estrdup(ftp->inbuf);
 	}
 
@@ -1638,7 +1642,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 	if (ftp->resp == 226) {
 		ftp->data = data_close(ftp, data);
 		php_stream_close(tmpstream);
-		return ecalloc(1, sizeof(char**));
+		return ecalloc(1, sizeof(char*));
 	}
 
 	/* pull data buffer into tmpfile */
@@ -1666,11 +1670,11 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 		}
 	}
 
-	ftp->data = data = data_close(ftp, data);
+	ftp->data = data_close(ftp, data);
 
 	php_stream_rewind(tmpstream);
 
-	ret = safe_emalloc((lines + 1), sizeof(char**), size * sizeof(char*));
+	ret = safe_emalloc((lines + 1), sizeof(char*), size);
 
 	entry = ret;
 	text = (char*) (ret + lines + 1);

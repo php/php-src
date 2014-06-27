@@ -43,3 +43,4 @@ echo "um, hi\n";
 --EXPECTF--
 write: goodbye cruel world
 close: goodbye cruel world
+

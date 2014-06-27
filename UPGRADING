@@ -4,115 +4,79 @@ PHP X.Y UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
-2. Changes in SAPI modules
-3. Deprecated Functionality
-4. Changed Functions
-5. New Functions
-6. New Classes and Interfaces
-7. Removed Extensions
-8. Other Changes to Extensions
-9. New Global Constants
-10. Changes to INI File Handling
-11. Other Changes
+3. Changes in SAPI modules
+4. Deprecated Functionality
+5. Changed Functions
+6. New Functions
+7. New Classes and Interfaces
+8. Removed Extensions
+9. Other Changes to Extensions
+10. New Global Constants
+11. Changes to INI File Handling
+12. Other Changes
 
 
 ========================================
 1. Backward Incompatible Changes
 ========================================
 
-- Core:
-  Removed $HTTP_RAW_POST_DATA global variable. Restore backwards compatibility 
-  by:
-  <?php
-  global $HTTP_RAW_POST_DATA;
-  if (!isset($HTTP_RAW_POST_DATA)) {
-      $HTTP_ROW_POST_DATA = file_get_contents("php://input");
-  }
-  ?>
+- DBA
+  . dba_delete() now returns false if the key was not found for the inifile 
+    handler, too.
 
 ========================================
 2. New Features
 ========================================
 
-- Core:
-  The php://input stream is now re-usable and can be used concurrently with 
-  enable_post_data_reading=0.
 
 ========================================
-2. Changes in SAPI modules
+3. Changes in SAPI modules
 ========================================
 
 
 ========================================
-3. Deprecated Functionality
-========================================
-
-- Incompatible context calls:
-  Instance calls from an incompatible context are now deprecated and issue
-  E_DEPRECATED instead of E_STRICT. See https://wiki.php.net/rfc/incompat_ctx
-
-========================================
-4. Changed Functions
-========================================
-
-- cURL:
-  CURLOPT_SAFE_UPLOAD is now turned on by default and uploads with @file 
-  do not work unless it is explicitly set to false.
-
-========================================
-5. New Functions
+4. Deprecated Functionality
 ========================================
 
 
 ========================================
-6. New Classes and Interfaces
+5. Changed Functions
 ========================================
 
 
 ========================================
-7. Removed Extensions
+6. New Functions
 ========================================
 
 
 ========================================
-8. Other Changes to Extensions
-========================================
-
-- GMP:
-  The GMP extension now uses objects as the underlying data structure, rather
-  than resources. GMP instances now support dumping, serialization, cloning,
-  casts to primitive types and have overloaded operators.
-  (RFC: https://wiki.php.net/rfc/operator_overloading_gmp)
-
-- OCI8:
-  - Added Implicit Result Set support for Oracle Database 12c with a
-    new oci_get_implicit_resultset() function.
-  - Using 'oci_execute($s, OCI_NO_AUTO_COMMIT)' for a SELECT no longer
-    unnecessarily initiates an internal ROLLBACK during connection
-    close.
-  - Added DTrace probes enabled with PHP's generic --enable-dtrace
-  - The oci_internal_debug() function is now a no-op.
-  - The phpinfo() output format for OCI8 has changed.
-
-========================================
-9. New Global Constants
+7. New Classes and Interfaces
 ========================================
 
 
 ========================================
-10. Changes to INI File Handling
+8. Removed Extensions
 ========================================
 
-- Core:
-  Removed always_populate_raw_post_data.
 
 ========================================
-11. Other Changes
+9. Other Changes to Extensions
 ========================================
 
-- File upload:
-  Uploads equal or greater than 2GB in size are now accepted.
 
-- HTTP stream wrapper:
-  HTTP 1.1 requests now include a Connection: close header unless explicitly
-  overridden by setting a Connection header via the header context option.
+========================================
+10. New Global Constants
+========================================
+
+
+========================================
+11. Changes to INI File Handling
+========================================
+
+
+========================================
+12. Other Changes
+========================================
+
+- Standard
+  . call_user_method() and call_user_method_array() no longer exists.

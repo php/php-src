@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,8 +64,8 @@ static void php_mb_regex_free_cache(php_mb_regex_t **pre)
 /* {{{ _php_mb_regex_globals_ctor */
 static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals TSRMLS_DC)
 {
-	pglobals->default_mbctype = ONIG_ENCODING_EUC_JP;
-	pglobals->current_mbctype = ONIG_ENCODING_EUC_JP;
+	pglobals->default_mbctype = ONIG_ENCODING_UTF8;
+	pglobals->current_mbctype = ONIG_ENCODING_UTF8;
 	zend_hash_init(&(pglobals->ht_rc), 0, NULL, (void (*)(void *)) php_mb_regex_free_cache, 1);
 	pglobals->search_str = (zval*) NULL;
 	pglobals->search_re = (php_mb_regex_t*)NULL;

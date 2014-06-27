@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2013 The PHP Group                                |
+  | Copyright (c) 2005-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -3302,6 +3302,7 @@ static size_t phar_zend_stream_fsizer(void *handle TSRMLS_DC) /* {{{ */
 
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 #define phar_orig_zend_open zend_stream_open_function
+
 static char *phar_resolve_path(const char *filename, int filename_len TSRMLS_DC)
 {
 	return phar_find_in_include_path((char *) filename, filename_len, NULL TSRMLS_CC);

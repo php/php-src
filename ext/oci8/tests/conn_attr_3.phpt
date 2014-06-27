@@ -12,10 +12,6 @@ preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit
 if (!(isset($matches[0]) && $matches[1] >= 10)) {
 	die("skip expected output only valid when using Oracle 10g or greater database server");
 }
-preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
-if (isset($matches[0]) && $matches[0] < 10) {
-    die("skip test expected to work only with Oracle 10g or greater version of client");
-}
 ?>
 --FILE--
 <?php

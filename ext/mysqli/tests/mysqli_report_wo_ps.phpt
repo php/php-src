@@ -1,10 +1,17 @@
 --TEST--
-mysqli_report()
+mysqli_report(), MySQL < 5.6
 --SKIPIF--
 <?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
+
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+		$host, $user, $db, $port, $socket));
+
+if (mysqli_get_server_version($link) >= 50600)
+	die("SKIP For MySQL < 5.6.0");
 ?>
 --FILE--
 <?php
@@ -97,15 +104,15 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d
+Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d
 
-Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
+Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_change_user(): (%d/%d): Access denied for user '%s'@'%s' (using password: %s) in %s on line %d
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
 
-Warning: mysqli_real_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
+Warning: mysqli_real_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
 [011] Access denied for user '%s'@'%s' (using password: YES)

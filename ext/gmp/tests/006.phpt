@@ -28,6 +28,8 @@ NULL
 
 Warning: gmp_sub() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
+
+Warning: gmp_sub(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 bool(false)
 
 Warning: gmp_sub() expects exactly 2 parameters, 3 given in %s on line %d

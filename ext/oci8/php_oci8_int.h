@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -156,6 +156,9 @@ typedef struct {
 	time_t			idle_expiry;				/* time when the connection will be considered as expired */
 	time_t		   *next_pingp;					/* (pointer to) time of the next ping */
 	char		   *hash_key;					/* hashed details of the connection */
+#ifdef HAVE_OCI8_DTRACE
+	char		   *client_id;					/* The oci_set_client_identifier() value */
+#endif
 } php_oci_connection;
 /* }}} */
 
@@ -216,7 +219,7 @@ typedef struct {
 	sb4					 errcode;				/* last ORA- error number */
 	OCIError			*err;					/* private error handle */
 	OCIStmt				*stmt;					/* statement handle */
-	char				*last_query;			/* last query issued. also used to determine if this is a statement or a refcursor recieved from Oracle */
+	char				*last_query;			/* last query issued. also used to determine if this is a statement or a refcursor received from Oracle */
 	char                 impres_flag;           /* PHP_OCI_IMPRES_*_ */
 	long				 last_query_len;		/* last query length */
 	HashTable			*columns;				/* hash containing all the result columns */
@@ -280,6 +283,7 @@ typedef struct {
 	sb2					 precision;				/* column precision */
 	ub1					 charset_form;			/* charset form, required for NCLOBs */
 	ub2					 charset_id;			/* charset ID */
+	ub4					 chunk_size;			/* LOB chunk size */
 } php_oci_out_column;
 /* }}} */
 
@@ -435,11 +439,7 @@ int php_oci_lob_append(php_oci_descriptor *descriptor_dest, php_oci_descriptor *
 int php_oci_lob_truncate(php_oci_descriptor *descriptor, long new_lob_length TSRMLS_DC);
 int php_oci_lob_erase(php_oci_descriptor *descriptor, long offset, ub4 length, ub4 *bytes_erased TSRMLS_DC);
 int php_oci_lob_is_equal(php_oci_descriptor *descriptor_first, php_oci_descriptor *descriptor_second, boolean *result TSRMLS_DC);
-#if defined(HAVE_OCI_LOB_READ2)
 sb4 php_oci_lob_callback(dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece, dvoid **changed_bufpp, oraub8 *changed_lenp);
-#else
-sb4 php_oci_lob_callback(dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece);
-#endif
 /* }}} */
 
 /* {{{ collection related prototypes */

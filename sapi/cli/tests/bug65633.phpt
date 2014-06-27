@@ -39,7 +39,7 @@ fclose($fp);
 HTTP/1.1 200 OK
 Connection: close
 X-Powered-By: %s
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 array(1) {
   ["foo"]=>

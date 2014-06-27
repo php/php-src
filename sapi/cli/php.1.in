@@ -1,4 +1,4 @@
-.TH PHP 1 "2013" "The PHP Group" "Scripting Language"
+.TH PHP 1 "2014" "The PHP Group" "Scripting Language"
 .SH NAME
 php \- PHP Command Line Interface 'CLI'
 .P
@@ -178,15 +178,6 @@ Parse and execute
 .IR file
 .TP
 .PD 0
-.B \-\-global \fIname\fP
-.TP
-.PD 1
-.B \-g \fIname\fP
-Make variable
-.IR name
-global in script.
-.TP
-.PD 0
 .B \-\-help
 .TP
 .PD 1
@@ -298,7 +289,7 @@ Specify the document root to be used by the built-in web server
 Version number
 .TP
 .PD 0
-.B \-\-stripped
+.B \-\-strip
 .TP
 .PD 1
 .B \-w
@@ -463,7 +454,7 @@ contributors all around the world.
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2013 The PHP Group
+Copyright \(co 1997\-2014 The PHP Group
 .LP
 This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is

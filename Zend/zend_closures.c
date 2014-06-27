@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -480,6 +480,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		}
 	}
 
+	closure->this_ptr = NULL;
 	/* Invariants:
 	 * If the closure is unscoped, it has no bound object.
 	 * The the closure is scoped, it's either static or it's bound */
@@ -491,10 +492,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			Z_ADDREF_P(this_ptr);
 		} else {
 			closure->func.common.fn_flags |= ZEND_ACC_STATIC;
-			closure->this_ptr = NULL;
 		}
-	} else {
-		closure->this_ptr = NULL;
 	}
 }
 /* }}} */

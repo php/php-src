@@ -16,16 +16,16 @@ $file_path = dirname(__FILE__);
 echo "\n*** Testing rename() : renaming directory across directories ***\n";
 $src_dirs = array (
   /* Testing simple directory tree */
-  "$file_path/rename_variation/",
+  "$file_path/rename_variation1/",
 
   /* Testing a dir with trailing slash */
-  "$file_path/rename_variation/",
+  "$file_path/rename_variation1/",
 
   /* Testing dir with double trailing slashes */
-  "$file_path//rename_variation//",
+  "$file_path//rename_variation1//",
 );
 
-$dest_dir = "$file_path/rename_variation_dir";
+$dest_dir = "$file_path/rename_variation1_dir";
 // create the $dest_dir
 mkdir($dest_dir);
 
@@ -35,7 +35,7 @@ foreach($src_dirs as $src_dir) {
   echo "-- Iteration $counter --\n";
 
   // create the src dir
-  mkdir("$file_path/rename_variation/");
+  mkdir("$file_path/rename_variation1/");
   // rename the src dir to a new dir in dest dir
   var_dump( rename($src_dir, $dest_dir."/new_dir") );
   // ensure that dir was renamed 
@@ -52,7 +52,7 @@ echo "Done\n";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-rmdir($file_path."/rename_variation_dir");
+rmdir($file_path."/rename_variation1_dir");
 ?>
 --EXPECTF--
 *** Testing rename() : renaming directory across directories ***

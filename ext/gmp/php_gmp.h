@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,9 +45,11 @@ ZEND_FUNCTION(gmp_neg);
 ZEND_FUNCTION(gmp_abs);
 ZEND_FUNCTION(gmp_fact);
 ZEND_FUNCTION(gmp_sqrt);
+ZEND_FUNCTION(gmp_sqrtrem);
+ZEND_FUNCTION(gmp_root);
+ZEND_FUNCTION(gmp_rootrem);
 ZEND_FUNCTION(gmp_pow);
 ZEND_FUNCTION(gmp_powm);
-ZEND_FUNCTION(gmp_sqrtrem);
 ZEND_FUNCTION(gmp_perfect_square);
 ZEND_FUNCTION(gmp_prob_prime);
 ZEND_FUNCTION(gmp_gcd);

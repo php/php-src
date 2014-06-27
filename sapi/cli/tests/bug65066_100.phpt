@@ -36,4 +36,4 @@ HTTP/1.1 100 Continue
 Host: %s
 Connection: close
 X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html; charset=UTF-8

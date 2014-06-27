@@ -96,7 +96,7 @@ Specify alternative path to FastCGI process manager configuration file (the defa
 .PD 1
 .B \-t
 Test FPM configuration file and exit
-If called twice (-tt), the configuration is dumped before exiting.
+If called twice (\-tt), the configuration is dumped before exiting.
 .TP
 .PD 0
 .B \-\-daemonize

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -408,7 +408,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		efree(lcname);
 		if(found_const) {
 			*result = c->value;
-			zval_update_constant_ex(&result, (void*)1, NULL TSRMLS_CC);
+			zval_update_constant_ex(&result, 1, NULL TSRMLS_CC);
 			zval_copy_ctor(result);
 			Z_SET_REFCOUNT_P(result, 1);
 			Z_UNSET_ISREF_P(result);
@@ -423,7 +423,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		retval = 0;
 finish:
 		if (retval) {
-			zval_update_constant_ex(ret_constant, (void*)1, ce TSRMLS_CC);
+			zval_update_constant_ex(ret_constant, 1, ce TSRMLS_CC);
 			*result = **ret_constant;
 			zval_copy_ctor(result);
 			INIT_PZVAL(result);

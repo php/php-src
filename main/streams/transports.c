@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -134,7 +134,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 			context STREAMS_REL_CC TSRMLS_CC);
 
 	if (stream) {
-		php_stream_context_set(stream, context);
+		php_stream_context_set(stream, context TSRMLS_CC);
 
 		if ((flags & STREAM_XPORT_SERVER) == 0) {
 			/* client */

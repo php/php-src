@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,7 +70,7 @@ static int php_info_print_html_esc(const char *str, int len) /* {{{ */
 
 	new_str = php_escape_html_entities((unsigned char *) str, len, &new_len, 0, ENT_QUOTES, "utf-8" TSRMLS_CC);
 	written = php_output_write(new_str, new_len TSRMLS_CC);
-	efree(new_str);
+	str_efree(new_str);
 	return written;
 }
 /* }}} */
@@ -866,16 +866,16 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
-		if (zend_hash_find(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void **) &data) != FAILURE) {
+		if (zend_hash_find(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void **) &data) != FAILURE && Z_TYPE_PP(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_SELF", Z_STRVAL_PP(data));
 		}
-		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE"), (void **) &data) != FAILURE) {
+		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE"), (void **) &data) != FAILURE && Z_TYPE_PP(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_TYPE", Z_STRVAL_PP(data));
 		}
-		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_USER", sizeof("PHP_AUTH_USER"), (void **) &data) != FAILURE) {
+		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_USER", sizeof("PHP_AUTH_USER"), (void **) &data) != FAILURE && Z_TYPE_PP(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_USER", Z_STRVAL_PP(data));
 		}
-		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), (void **) &data) != FAILURE) {
+		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), (void **) &data) != FAILURE && Z_TYPE_PP(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", Z_STRVAL_PP(data));
 		}
 		php_print_gpcse_array(ZEND_STRL("_REQUEST") TSRMLS_CC);

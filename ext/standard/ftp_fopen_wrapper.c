@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -163,7 +163,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 		goto connect_errexit;
 	}
 
-	php_stream_context_set(stream, context);
+	php_stream_context_set(stream, context TSRMLS_CC);
 	php_stream_notify_info(context, PHP_STREAM_NOTIFY_CONNECT, NULL, 0);
 
 	/* Start talking to ftp server */
@@ -571,7 +571,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		goto errexit;	
 	}
 	
-	php_stream_context_set(datastream, context);
+	php_stream_context_set(datastream, context TSRMLS_CC);
 	php_stream_notify_progress_init(context, 0, file_size);
 
 	if (use_ssl_on_data && (php_stream_xport_crypto_setup(datastream,
@@ -745,7 +745,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 		goto opendir_errexit;	
 	}
 	
-	php_stream_context_set(datastream, context);
+	php_stream_context_set(datastream, context TSRMLS_CC);
 
 	if (use_ssl_on_data && (php_stream_xport_crypto_setup(stream,
 			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL TSRMLS_CC) < 0 ||

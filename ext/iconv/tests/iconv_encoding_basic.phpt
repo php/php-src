@@ -6,6 +6,7 @@ extension_loaded('iconv') or die('skip');
 function_exists('iconv_get_encoding') or die("skip iconv_get_encoding() is not available in this build");
 ?>
 --INI--
+error_reporting=E_ALL & ~E_DEPRECATED
 iconv.input_encoding=ISO-8859-1
 iconv.internal_encoding=ISO-8859-1
 iconv.output_encoding=ISO-8859-1

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,11 +78,7 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 			/* unknown mode */
 			return FAILURE;
 	}
-#if defined(O_NONBLOCK)
-	if (strchr(mode, 'n')) {
-		flags |= O_NONBLOCK;
-	}
-#endif
+
 	if (strchr(mode, '+')) {
 		flags |= O_RDWR;
 	} else if (flags) {
@@ -90,6 +86,12 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 	} else {
 		flags |= O_RDONLY;
 	}
+
+#if defined(O_NONBLOCK)
+	if (strchr(mode, 'n')) {
+		flags |= O_NONBLOCK;
+	}
+#endif
 
 #if defined(_O_TEXT) && defined(O_BINARY)
 	if (strchr(mode, 't')) {
@@ -480,7 +482,7 @@ static int php_stdiop_seek(php_stream *stream, off_t offset, int whence, off_t *
 
 static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 {
-	int fd;
+	php_socket_t fd;
 	php_stdio_stream_data *data = (php_stdio_stream_data*) stream->abstract;
 
 	assert(data != NULL);
@@ -504,31 +506,31 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 				}
 				
 				*(FILE**)ret = data->file;
-				data->fd = -1;
+				data->fd = SOCK_ERR;
 			}
 			return SUCCESS;
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			PHP_STDIOP_GET_FD(fd, data);
-			if (fd < 0) {
+			if (SOCK_ERR == fd) {
 				return FAILURE;
 			}
 			if (ret) {
-				*(int*)ret = fd;
+				*(php_socket_t *)ret = fd;
 			}
 			return SUCCESS;
 
 		case PHP_STREAM_AS_FD:
 			PHP_STDIOP_GET_FD(fd, data);
 
-			if (fd < 0) {
+			if (SOCK_ERR == fd) {
 				return FAILURE;
 			}
 			if (data->file) {
 				fflush(data->file);
 			}
 			if (ret) {
-				*(int*)ret = fd;
+				*(php_socket_t *)ret = fd;
 			}
 			return SUCCESS;
 		default:
@@ -1436,7 +1438,7 @@ not_relative_path:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s/%s path was truncated to %d", cwd, filename, MAXPATHLEN);
 		}
 		
-		free(cwd);
+		efree(cwd);
 		
 		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(trypath TSRMLS_CC)) {
 			return NULL;

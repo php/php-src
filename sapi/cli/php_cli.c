@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -320,7 +320,7 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
-static void sapi_cli_flush(void *server_context) /* {{{ */
+static void sapi_cli_flush(void *server_context TSRMLS_DC) /* {{{ */
 {
 	/* Ignore EBADF here, it's caused by the fact that STDIN/STDOUT/STDERR streams
 	 * are/could be closed before fflush() is called.
@@ -693,7 +693,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2013 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2014 The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #if ZEND_DEBUG && defined(HAVE_GCOV)
 					"(DEBUG GCOV)",
@@ -870,7 +870,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				break;
 
 			case 'z': /* load extension file */
-				zend_load_extension(php_optarg);
+				zend_load_extension(php_optarg TSRMLS_CC);
 				break;
 			case 'H':
 				hide_argv = 1;
@@ -1024,7 +1024,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 			/* Zeev might want to do something with this one day */
 		case PHP_MODE_INDENT:
 			open_file_for_scanning(&file_handle TSRMLS_CC);
-			zend_indent();
+			zend_indent(TSRMLS_C);
 			zend_file_handle_dtor(file_handle.handle TSRMLS_CC);
 			goto out;
 			break;

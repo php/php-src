@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -54,7 +54,7 @@
 #ifndef PHP_WIN32
 #include "TSRM/tsrm_strtok_r.h"
 #endif
-#include "TSRM/tsrm_virtual_cwd.h"
+#include "Zend/zend_virtual_cwd.h"
 #if HAVE_SPL
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"

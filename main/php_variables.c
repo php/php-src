@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,9 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "zend_globals.h"
+#ifdef PHP_WIN32
+# include "win32/php_inttypes.h"
+#endif
 
 /* for systems that need to override reading of environment variables */
 void _php_import_environment_variables(zval *array_ptr TSRMLS_DC);
@@ -590,7 +593,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		Z_ADDREF_P(arr);
 		Z_ADDREF_P(argc);
 		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
-		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
+		zend_hash_update(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	} 
 	if (track_vars_array) {
 		Z_ADDREF_P(arr);
@@ -691,7 +694,7 @@ static zend_bool php_auto_globals_create_request(const char *name, uint name_len
 
 /* {{{ php_hash_environment
  */
-int php_hash_environment(TSRMLS_D)
+PHPAPI int php_hash_environment(TSRMLS_D)
 {
 	memset(PG(http_globals), 0, sizeof(PG(http_globals)));
 	zend_activate_auto_globals(TSRMLS_C);

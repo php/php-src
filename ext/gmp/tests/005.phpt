@@ -36,6 +36,8 @@ echo "Done\n";
 --EXPECTF--	
 Warning: gmp_strval() expects at least 1 parameter, 0 given in %s on line %d
 NULL
+
+Warning: gmp_strval(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 bool(false)
 
 Warning: gmp_strval() expects parameter 2 to be long, string given in %s on line %d

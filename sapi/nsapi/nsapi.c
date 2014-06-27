@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -467,10 +467,9 @@ static int sapi_nsapi_ub_write(const char *str, unsigned int str_length TSRMLS_D
 }
 
 /* modified version of apache2 */
-static void sapi_nsapi_flush(void *server_context)
+static void sapi_nsapi_flush(void *server_context TSRMLS_DC)
 {
 	nsapi_request_context *rc = (nsapi_request_context *)server_context;
-	TSRMLS_FETCH();
 	
 	if (!rc) {
 		/* we have no context, so no flushing needed. This fixes a SIGSEGV on shutdown */

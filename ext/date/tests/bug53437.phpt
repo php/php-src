@@ -33,7 +33,7 @@ object(DatePeriod)#1 (6) {
   ["start"]=>
   object(DateTime)#2 (3) {
     ["date"]=>
-    string(19) "2010-01-01 00:00:00"
+    string(26) "2010-01-01 00:00:00.000000"
     ["timezone_type"]=>
     int(3)
     ["timezone"]=>
@@ -42,7 +42,7 @@ object(DatePeriod)#1 (6) {
   ["current"]=>
   object(DateTime)#4 (3) {
     ["date"]=>
-    string(19) "2010-01-04 00:00:00"
+    string(26) "2010-01-04 00:00:00.000000"
     ["timezone_type"]=>
     int(3)
     ["timezone"]=>
@@ -92,7 +92,7 @@ object(DatePeriod)#5 (6) {
   ["start"]=>
   object(DateTime)#10 (3) {
     ["date"]=>
-    string(19) "2010-01-01 00:00:00"
+    string(26) "2010-01-01 00:00:00.000000"
     ["timezone_type"]=>
     int(3)
     ["timezone"]=>
@@ -101,7 +101,7 @@ object(DatePeriod)#5 (6) {
   ["current"]=>
   object(DateTime)#7 (3) {
     ["date"]=>
-    string(19) "2010-01-04 00:00:00"
+    string(26) "2010-01-04 00:00:00.000000"
     ["timezone_type"]=>
     int(3)
     ["timezone"]=>

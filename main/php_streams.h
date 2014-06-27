@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -373,6 +373,7 @@ END_EXTERN_C()
 /* Flags for url_stat method in wrapper ops */
 #define PHP_STREAM_URL_STAT_LINK	1
 #define PHP_STREAM_URL_STAT_QUIET	2
+#define PHP_STREAM_URL_STAT_NOCACHE	4
 
 /* change the blocking mode of stream: value == 1 => blocking, value == 0 => non-blocking. */
 #define PHP_STREAM_OPTION_BLOCKING	1

@@ -25,5 +25,5 @@ curl_close($ch);
 
 ?>
 --EXPECTF--
-%unicode|string%(%d) "%r(Couldn't resolve host|Could not resolve host:)%r %Swww.%s"
+%s resolve%s
 int(6)

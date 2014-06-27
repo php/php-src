@@ -183,7 +183,6 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
 	     int full_scale TSRMLS_DC)
 { 
   bc_num u0, u1, v0, v1;
-  int u0len, v0len;
   bc_num m1, m2, m3, d1, d2;
   int n, prodlen, m1zero;
   int d1len, d2len;
@@ -216,10 +215,8 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
     }
   _bc_rm_leading_zeros (u1);
   _bc_rm_leading_zeros (u0);
-  u0len = u0->n_len;
   _bc_rm_leading_zeros (v1);
   _bc_rm_leading_zeros (v0);
-  v0len = v0->n_len;
 
   m1zero = bc_is_zero(u1 TSRMLS_CC) || bc_is_zero(v1 TSRMLS_CC);
 

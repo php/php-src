@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -361,7 +361,7 @@ static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 	int length = strlen(filename);
 
 	if (IS_ABSOLUTE_PATH(filename, length)) {
-		zend_load_extension(filename);
+		zend_load_extension(filename TSRMLS_CC);
 	} else {
 	    char *libpath;
 		char *extension_dir = INI_STR("extension_dir");
@@ -372,7 +372,7 @@ static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 		} else {
 			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename);
 		}
-		zend_load_extension(libpath);
+		zend_load_extension(libpath TSRMLS_CC);
 		efree(libpath);
 	}
 }
@@ -630,63 +630,81 @@ int php_init_config(TSRMLS_D)
 		zend_llist scanned_ini_list;
 		zend_llist_element *element;
 		int l, total_l = 0;
+		char *bufpath, *debpath, *endpath;
+		int lenpath;
 
-		if ((ndir = php_scandir(php_ini_scanned_path, &namelist, 0, php_alphasort)) > 0) {
-			zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
-			memset(&fh2, 0, sizeof(fh2));
+		zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
+		memset(&fh2, 0, sizeof(fh2));
 
-			for (i = 0; i < ndir; i++) {
+		bufpath = estrdup(php_ini_scanned_path);
+		for (debpath = bufpath ; debpath ; debpath=endpath) {
+			endpath = strchr(debpath, DEFAULT_DIR_SEPARATOR);
+			if (endpath) {
+				*(endpath++) = 0;
+			}
+			if (!debpath[0]) {
+				/* empty string means default builtin value
+				   to allow "/foo/phd.d:" or ":/foo/php.d" */
+				debpath = PHP_CONFIG_FILE_SCAN_DIR;
+			}
+			lenpath = strlen(debpath);
 
-				/* check for any file with .ini extension */
-				if (!(p = strrchr(namelist[i]->d_name, '.')) || (p && strcmp(p, ".ini"))) {
-					free(namelist[i]);
-					continue;
-				}
-				/* Reset active ini section */
-				RESET_ACTIVE_INI_HASH();
+			if (lenpath > 0 && (ndir = php_scandir(debpath, &namelist, 0, php_alphasort)) > 0) {
 
-				if (IS_SLASH(php_ini_scanned_path[php_ini_scanned_path_len - 1])) {
-					snprintf(ini_file, MAXPATHLEN, "%s%s", php_ini_scanned_path, namelist[i]->d_name);
-				} else {
-					snprintf(ini_file, MAXPATHLEN, "%s%c%s", php_ini_scanned_path, DEFAULT_SLASH, namelist[i]->d_name);
-				}
-				if (VCWD_STAT(ini_file, &sb) == 0) {
-					if (S_ISREG(sb.st_mode)) {
-						if ((fh2.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
-							fh2.filename = ini_file;
-							fh2.type = ZEND_HANDLE_FP;
+				for (i = 0; i < ndir; i++) {
 
-							if (zend_parse_ini_file(&fh2, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash TSRMLS_CC) == SUCCESS) {
-								/* Here, add it to the list of ini files read */
-								l = strlen(ini_file);
-								total_l += l + 2;
-								p = estrndup(ini_file, l);
-								zend_llist_add_element(&scanned_ini_list, &p);
+					/* check for any file with .ini extension */
+					if (!(p = strrchr(namelist[i]->d_name, '.')) || (p && strcmp(p, ".ini"))) {
+						free(namelist[i]);
+						continue;
+					}
+					/* Reset active ini section */
+					RESET_ACTIVE_INI_HASH();
+
+					if (IS_SLASH(debpath[lenpath - 1])) {
+						snprintf(ini_file, MAXPATHLEN, "%s%s", debpath, namelist[i]->d_name);
+					} else {
+						snprintf(ini_file, MAXPATHLEN, "%s%c%s", debpath, DEFAULT_SLASH, namelist[i]->d_name);
+					}
+					if (VCWD_STAT(ini_file, &sb) == 0) {
+						if (S_ISREG(sb.st_mode)) {
+							if ((fh2.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
+								fh2.filename = ini_file;
+								fh2.type = ZEND_HANDLE_FP;
+
+								if (zend_parse_ini_file(&fh2, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash TSRMLS_CC) == SUCCESS) {
+									/* Here, add it to the list of ini files read */
+									l = strlen(ini_file);
+									total_l += l + 2;
+									p = estrndup(ini_file, l);
+									zend_llist_add_element(&scanned_ini_list, &p);
+								}
 							}
 						}
 					}
+					free(namelist[i]);
 				}
-				free(namelist[i]);
+				free(namelist);
 			}
-			free(namelist);
-
-			if (total_l) {
-				int php_ini_scanned_files_len = (php_ini_scanned_files) ? strlen(php_ini_scanned_files) + 1 : 0;
-				php_ini_scanned_files = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
-				if (!php_ini_scanned_files_len) {
-					*php_ini_scanned_files = '\0';
-				}
-				total_l += php_ini_scanned_files_len;
-				for (element = scanned_ini_list.head; element; element = element->next) {
-					if (php_ini_scanned_files_len) {
-						strlcat(php_ini_scanned_files, ",\n", total_l);
-					}
-					strlcat(php_ini_scanned_files, *(char **)element->data, total_l);
-					strlcat(php_ini_scanned_files, element->next ? ",\n" : "\n", total_l);
-				}
-			}
-			zend_llist_destroy(&scanned_ini_list);
 		}
+		efree(bufpath);
+
+		if (total_l) {
+			int php_ini_scanned_files_len = (php_ini_scanned_files) ? strlen(php_ini_scanned_files) + 1 : 0;
+			php_ini_scanned_files = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
+			if (!php_ini_scanned_files_len) {
+				*php_ini_scanned_files = '\0';
+			}
+			total_l += php_ini_scanned_files_len;
+			for (element = scanned_ini_list.head; element; element = element->next) {
+				if (php_ini_scanned_files_len) {
+					strlcat(php_ini_scanned_files, ",\n", total_l);
+				}
+				strlcat(php_ini_scanned_files, *(char **)element->data, total_l);
+				strlcat(php_ini_scanned_files, element->next ? ",\n" : "\n", total_l);
+			}
+		}
+		zend_llist_destroy(&scanned_ini_list);
 	} else {
 		/* Make sure an empty php_ini_scanned_path ends up as NULL */
 		php_ini_scanned_path = NULL;

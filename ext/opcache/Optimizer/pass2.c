@@ -89,7 +89,11 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 				/* convert Ti = JMPZ_EX(C, L) => Ti = QM_ASSIGN(C)
 				   in case we know it wouldn't jump */
 				} else if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline) TSRMLS_CC);
+#else
 					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
+#endif
 					if (opline->opcode == ZEND_JMPZ_EX) {
 						should_jmp = !should_jmp;
 					}
@@ -103,7 +107,11 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline) TSRMLS_CC);
+#else
 					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
+#endif
 
 					if (opline->opcode == ZEND_JMPZ) {
 						should_jmp = !should_jmp;
@@ -139,8 +147,11 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_JMPZNZ:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					int opline_num;
-
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+					if (zend_is_true(&ZEND_OP1_LITERAL(opline) TSRMLS_CC)) {
+#else
 					if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
+#endif
 						opline_num = opline->extended_value; /* JMPNZ */
 					} else {
 						opline_num = ZEND_OP2(opline).opline_num; /* JMPZ */

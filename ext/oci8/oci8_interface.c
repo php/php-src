@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1139,7 +1139,7 @@ PHP_FUNCTION(oci_commit)
 }
 /* }}} */
 
-/* {{{ proto string oci_field_name(resource stmt, int col)
+/* {{{ proto string oci_field_name(resource stmt, mixed col)
    Tell the name of a column */
 PHP_FUNCTION(oci_field_name)
 {
@@ -1152,7 +1152,7 @@ PHP_FUNCTION(oci_field_name)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_size(resource stmt, int col)
+/* {{{ proto int oci_field_size(resource stmt, mixed col)
    Tell the maximum data size of a column */
 PHP_FUNCTION(oci_field_size)
 {
@@ -1169,7 +1169,7 @@ PHP_FUNCTION(oci_field_size)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_scale(resource stmt, int col)
+/* {{{ proto int oci_field_scale(resource stmt, mixed col)
    Tell the scale of a column */
 PHP_FUNCTION(oci_field_scale)
 {
@@ -1182,7 +1182,7 @@ PHP_FUNCTION(oci_field_scale)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_precision(resource stmt, int col)
+/* {{{ proto int oci_field_precision(resource stmt, mixed col)
    Tell the precision of a column */
 PHP_FUNCTION(oci_field_precision)
 {
@@ -1195,7 +1195,7 @@ PHP_FUNCTION(oci_field_precision)
 }
 /* }}} */
 
-/* {{{ proto mixed oci_field_type(resource stmt, int col)
+/* {{{ proto mixed oci_field_type(resource stmt, mixed col)
    Tell the data type of a column */
 PHP_FUNCTION(oci_field_type)
 {
@@ -1275,7 +1275,7 @@ PHP_FUNCTION(oci_field_type)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_type_raw(resource stmt, int col)
+/* {{{ proto int oci_field_type_raw(resource stmt, mixed col)
    Tell the raw oracle data type of a column */
 PHP_FUNCTION(oci_field_type_raw)
 {
@@ -1289,8 +1289,8 @@ PHP_FUNCTION(oci_field_type_raw)
 }
 /* }}} */
 
-/* {{{ proto bool oci_field_is_null(resource stmt, int col)
-   Tell whether a column is NULL */
+/* {{{ proto bool oci_field_is_null(resource stmt, mixed col)
+   Tell whether a field in the current row is NULL */
 PHP_FUNCTION(oci_field_is_null)
 {
 	php_oci_out_column *column;
@@ -1429,13 +1429,7 @@ PHP_FUNCTION(oci_fetch_all)
 				if (flags & PHP_OCI_NUM) {
 					zend_hash_next_index_insert(Z_ARRVAL_P(row), &element, sizeof(zval*), NULL);
 				} else { /* default to ASSOC */
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-					/* zend_symtable_update is only available in 5.2+ */
 					zend_symtable_update(Z_ARRVAL_P(row), columns[ i ]->name, columns[ i ]->name_len+1, &element, sizeof(zval*), NULL);
-#else
-					/* This code path means Bug #45458 will remain broken when OCI8 is built with PHP 4 */
-					zend_hash_update(Z_ARRVAL_P(row), columns[ i ]->name, columns[ i ]->name_len+1, &element, sizeof(zval*), NULL);
-#endif
 				}
 			}
 
@@ -1467,13 +1461,7 @@ PHP_FUNCTION(oci_fetch_all)
 				
 				MAKE_STD_ZVAL(tmp);
 				array_init(tmp);
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-				/* zend_symtable_update is only available in 5.2+ */
 				zend_symtable_update(Z_ARRVAL_P(array), columns[ i ]->name, columns[ i ]->name_len+1, (void *) &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
-#else
-				/* This code path means Bug #45458 will remain broken when OCI8 is built with PHP 4 */
-				zend_hash_update(Z_ARRVAL_P(array), columns[ i ]->name, columns[ i ]->name_len+1, (void *) &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
-#endif
 			}
 		}
 
@@ -1772,6 +1760,30 @@ PHP_FUNCTION(oci_set_client_identifier)
 		RETURN_FALSE;
 	}
 
+#ifdef HAVE_OCI8_DTRACE
+	/* The alternatives to storing client_id like done below are
+	   i) display it in a probe here in oci_set_client_identifier and
+	   let the user D script correlate the connection address probe
+	   argument and the client_id. This would likely require user D
+	   script variables, which would use kernel memory.
+	   ii) call OCIAttrGet for each probe definition that uses
+	   client_id. This would be slower than storing it.
+	*/
+
+	if (connection->client_id) {
+		pefree(connection->client_id, connection->is_persistent);
+	}
+
+	if (client_id) {
+		/* this long winded copy allows compatibility with older PHP versions */
+		connection->client_id = (char *)pemalloc(client_id_len+1, connection->is_persistent);
+		memcpy(connection->client_id, client_id, client_id_len);
+		connection->client_id[client_id_len] = '\0';
+	} else {
+		connection->client_id = NULL;
+	}
+#endif /* HAVE_OCI8_DTRACE */
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1790,13 +1802,14 @@ PHP_FUNCTION(oci_set_edition)
 
 	if (OCI_G(edition)) {
 		efree(OCI_G(edition));
-		OCI_G(edition) = NULL;
 	}
 
 	if (edition) {
-		OCI_G(edition) = (char *)safe_emalloc(edition_len+1, sizeof(text), 0);
+		OCI_G(edition) = (char *)safe_emalloc(edition_len+1, sizeof(char), 0);
 		memcpy(OCI_G(edition), edition, edition_len);
 		OCI_G(edition)[edition_len] = '\0';
+	} else {
+		OCI_G(edition) = NULL;
 	}
 
 	RETURN_TRUE;
@@ -1902,6 +1915,38 @@ PHP_FUNCTION(oci_set_client_info)
 #endif
 }
 /* }}} */
+
+#ifdef WAITIING_ORACLE_BUG_16695981_FIX
+/* {{{ proto bool oci_set_db_operation(resource connection, string value)
+   Sets the "DB operation" on the connection for Oracle end-to-end tracing */
+PHP_FUNCTION(oci_set_db_operation)
+{
+#if (OCI_MAJOR_VERSION > 11)
+	zval *z_connection;
+	php_oci_connection *connection;
+	char *dbop_name;
+	int dbop_name_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &dbop_name, &dbop_name_len) == FAILURE) {
+		return;
+	}
+
+	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) dbop_name, (ub4) dbop_name_len, (ub4) OCI_ATTR_DBOP, OCI_G(err)));
+
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+#else
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unsupported attribute type");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+#endif /* WAITIING_ORACLE_BUG_16695981_FIX */
 
 /* {{{ proto bool oci_password_change(resource connection, string username, string old_password, string new_password)
   Changes the password of an account */

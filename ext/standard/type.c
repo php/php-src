@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -186,7 +186,7 @@ PHP_FUNCTION(boolval)
 		return;
 	}
 
-	RETURN_BOOL(zend_is_true(*val));
+	RETURN_BOOL(zend_is_true(*val TSRMLS_CC));
 }
 /* }}} */
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -279,7 +279,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 								node->type = XML_NAMESPACE_DECL;
 								node->parent = nsparent;
 								node->ns = curns;
+							} else {
+								node = xmlDocCopyNodeList(domintern->document->ptr, node);
 							}
+
 							child = php_dom_create_object(node, &ret, child, domintern TSRMLS_CC);
 							add_next_index_zval(args[i], child);
 						}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -56,11 +56,11 @@ ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data_pt
 void init_executor(TSRMLS_D);
 void shutdown_executor(TSRMLS_D);
 void shutdown_destructors(TSRMLS_D);
-zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC);
+ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC);
 ZEND_API void zend_execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
-ZEND_API int zend_is_true(zval *op);
+ZEND_API int zend_is_true(zval *op TSRMLS_DC);
 ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
@@ -87,7 +87,21 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC 
 	}
 }
 
-static zend_always_inline int i_zend_is_true(zval *op)
+static zend_always_inline void i_zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
+{
+	if (!Z_DELREF_P(zval_ptr)) {
+		ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
+		GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
+		zval_dtor(zval_ptr);
+		efree_rel(zval_ptr);
+	} else {
+		if (Z_REFCOUNT_P(zval_ptr) == 1) {
+			Z_UNSET_ISREF_P(zval_ptr);
+		}
+	}
+}
+
+static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
 {
 	int result;
 
@@ -116,8 +130,6 @@ static zend_always_inline int i_zend_is_true(zval *op)
 			break;
 		case IS_OBJECT:
 			if(IS_ZEND_STD_OBJECT(*op)) {
-				TSRMLS_FETCH();
-
 				if (Z_OBJ_HT_P(op)->cast_object) {
 					zval tmp;
 					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_BOOL TSRMLS_CC) == SUCCESS) {
@@ -144,10 +156,10 @@ static zend_always_inline int i_zend_is_true(zval *op)
 	return result;
 }
 
-ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC);
-ZEND_API int zval_update_constant_inline_change(zval **pp, void *arg TSRMLS_DC);
-ZEND_API int zval_update_constant_no_inline_change(zval **pp, void *arg TSRMLS_DC);
-ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC);
+ZEND_API int zval_update_constant(zval **pp, zend_bool inline_change TSRMLS_DC);
+ZEND_API int zval_update_constant_inline_change(zval **pp, zend_class_entry *scope TSRMLS_DC);
+ZEND_API int zval_update_constant_no_inline_change(zval **pp, zend_class_entry *scope TSRMLS_DC);
+ZEND_API int zval_update_constant_ex(zval **pp, zend_bool inline_change, zend_class_entry *scope TSRMLS_DC);
 
 /* dedicated Zend executor functions - do not use! */
 #define ZEND_VM_STACK_PAGE_SIZE ((16 * 1024) - 16)
@@ -347,6 +359,8 @@ ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, int fetch_type TSRMLS_DC);
 ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
+
+ZEND_API void zend_fetch_dimension_by_zval(zval **result, zval *container, zval *dim TSRMLS_DC);
 
 #ifdef ZEND_WIN32
 void zend_init_timeout_thread(void);

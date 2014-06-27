@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@ static int month_tab[12]          = {   0,  31,  59,  90, 120, 151, 181, 212, 24
 static int days_in_month_leap[13] = {  31,  31,  29,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
 static int days_in_month[13]      = {  31,  31,  28,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
 
-static int do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, timelib_sll *a, timelib_sll *b)
+static void do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, timelib_sll *a, timelib_sll *b)
 {
 	if (*a < start) {
 		*b -= (start - *a - 1) / adj + 1;
@@ -38,7 +38,6 @@ static int do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, t
 		*b += *a / adj;
 		*a -= adj * (*a / adj);
 	}
-	return 0;
 }
 
 static void inc_month(timelib_sll *y, timelib_sll *m)
@@ -170,24 +169,24 @@ static void do_adjust_for_weekday(timelib_time* time)
 
 void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 {
-	do {} while (do_range_limit(0, 60, 60, &rt->s, &rt->i));
-	do {} while (do_range_limit(0, 60, 60, &rt->i, &rt->h));
-	do {} while (do_range_limit(0, 24, 24, &rt->h, &rt->d));
-	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
+	do_range_limit(0, 60, 60, &rt->s, &rt->i);
+	do_range_limit(0, 60, 60, &rt->i, &rt->h);
+	do_range_limit(0, 24, 24, &rt->h, &rt->d);
+	do_range_limit(0, 12, 12, &rt->m, &rt->y);
 
 	do_range_limit_days_relative(&base->y, &base->m, &rt->y, &rt->m, &rt->d, rt->invert);
-	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
+	do_range_limit(0, 12, 12, &rt->m, &rt->y);
 }
 
 void timelib_do_normalize(timelib_time* time)
 {
-	if (time->s != TIMELIB_UNSET) do {} while (do_range_limit(0, 60, 60, &time->s, &time->i));
-	if (time->s != TIMELIB_UNSET) do {} while (do_range_limit(0, 60, 60, &time->i, &time->h));
-	if (time->s != TIMELIB_UNSET) do {} while (do_range_limit(0, 24, 24, &time->h, &time->d));
-	do {} while (do_range_limit(1, 13, 12, &time->m, &time->y));
+	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->s, &time->i);
+	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->i, &time->h);
+	if (time->s != TIMELIB_UNSET) do_range_limit(0, 24, 24, &time->h, &time->d);
+	do_range_limit(1, 13, 12, &time->m, &time->y);
 
 	do {} while (do_range_limit_days(&time->y, &time->m, &time->d));
-	do {} while (do_range_limit(1, 13, 12, &time->m, &time->y));
+	do_range_limit(1, 13, 12, &time->m, &time->y);
 }
 
 static void do_adjust_relative(timelib_time* time)

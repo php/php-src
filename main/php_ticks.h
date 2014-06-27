@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,11 +24,11 @@
 int php_startup_ticks(TSRMLS_D);
 void php_deactivate_ticks(TSRMLS_D);
 void php_shutdown_ticks(TSRMLS_D);
-void php_run_ticks(int count);
+void php_run_ticks(int count TSRMLS_DC);
 
 BEGIN_EXTERN_C()
-PHPAPI void php_add_tick_function(void (*func)(int));
-PHPAPI void php_remove_tick_function(void (*func)(int));
+PHPAPI void php_add_tick_function(void (*func)(int) TSRMLS_DC);
+PHPAPI void php_remove_tick_function(void (*func)(int) TSRMLS_DC);
 END_EXTERN_C()
 
 #endif

@@ -37,7 +37,7 @@
 
 
 
-ZIP_EXTERN(int)
+ZIP_EXTERN int
 zip_delete(struct zip *za, zip_uint64_t idx)
 {
     if (idx >= za->nentry) {
@@ -55,7 +55,7 @@ zip_delete(struct zip *za, zip_uint64_t idx)
     if (_zip_unchange(za, idx, 1) != 0)
 	return -1;
 
-    za->entry[idx].state = ZIP_ST_DELETED;
+    za->entry[idx].deleted = 1;
 
     return 0;
 }

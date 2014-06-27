@@ -20,7 +20,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
 // no warnings/errors.
 
 $is_windows8 = false;
-$ps_output = shell_exec("PowerShell \"(Get-Host).UI.RawUI.WindowTitle\"");
+$ps_output = shell_exec("PowerShell -NoProfile \"(Get-Host).UI.RawUI.WindowTitle\"");
 if ($ps_output === null)
 {
   echo "Get-Host failed\n";
@@ -28,7 +28,8 @@ if ($ps_output === null)
 }
 
 $ps_output = trim($ps_output);
-if (($ps_output == "Windows PowerShell") || ($ps_output == "Administrator: Windows PowerShell"))
+$end_title_windows8 = ": Windows PowerShell";
+if (($ps_output == "Windows PowerShell") || (strlen($ps_output) > strlen($end_title_windows8) && substr($ps_output,-strlen($end_title_windows8)) === $end_title_windows8))
   $is_windows8 = true;
 
 echo "*** Testing setting the process title ***\n";
@@ -45,7 +46,7 @@ if ($is_windows8)
 }
 else
 {
-  $loaded_title = shell_exec("PowerShell \"get-process cmd*,powershell* | Select-Object mainWindowTitle | ft -hide\"");
+  $loaded_title = shell_exec("PowerShell -NoProfile \"get-process cmd*,powershell* | Select-Object mainWindowTitle | ft -hide\"");
 
   if ($loaded_title === null)
   {

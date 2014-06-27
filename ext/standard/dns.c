@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -517,6 +517,10 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				
 				while (ll < dlen) {
 					n = cp[ll];
+					if ((ll + n) >= dlen) {
+						// Invalid chunk length, truncate
+						n = dlen - (ll + 1);
+					}
 					memcpy(tp + ll , cp + ll + 1, n);
 					add_next_index_stringl(entries, cp + ll + 1, n, 1);
 					ll = ll + n + 1;

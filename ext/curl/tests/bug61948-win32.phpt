@@ -17,9 +17,7 @@ open_basedir="c:/tmp"
 ?>
 --EXPECTF--
 %a
-
-Warning: curl_setopt(): open_basedir restriction in effect. File(c:/tmp/foo) is not within the allowed path(s): (c:/tmp) in %sbug61948-win32.php on line %d
-bool(false)
+bool(true)
 
 Warning: curl_setopt(): open_basedir restriction in effect. File(c:/xxx/bar) is not within the allowed path(s): (c:/tmp) in %sbug61948-win32.php on line %d
 bool(false)

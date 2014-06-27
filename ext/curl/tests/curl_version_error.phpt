@@ -1,14 +1,7 @@
 --TEST--
 Test curl_version() function : error conditions
 --SKIPIF--
-<?php 
-if (!extension_loaded("curl")) {
-	die('skip - curl extension not available in this build'); 
-}
-if (!getenv('PHP_CURL_HTTP_REMOTE_SERVER')) {
-	echo "skip need PHP_CURL_HTTP_REMOTE_SERVER environment variable";
-}
-?>
+<?php if (!extension_loaded("curl")) exit("skip curl extension not loaded"); ?>
 --FILE--
 <?php
 

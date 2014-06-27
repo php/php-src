@@ -56,6 +56,10 @@ Notice: finfo_open(): Warning: offset ` Core' invalid in %sbug61964.php on line 
 
 Notice: finfo_open(): Warning: type `Core' invalid in %sbug61964.php on line %d
 
+Notice: finfo_open(): Warning: offset ` Me' invalid in %sbug61964.php on line %d
+
+Notice: finfo_open(): Warning: type `Me' invalid in %sbug61964.php on line %d
+
 Notice: finfo_open(): Warning: offset `a' invalid in %sbug61964.php on line %d
 
 Notice: finfo_open(): Warning: type `a' invalid in %sbug61964.php on line %d

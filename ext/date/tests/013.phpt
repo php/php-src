@@ -21,7 +21,7 @@ echo "Done\n";
 --EXPECTF--
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2006-12-12 00:00:00"
+  string(26) "2006-12-12 00:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -38,7 +38,7 @@ bool(false)
 string(19) "2006.12.12 00:00:00"
 object(DateTime)#1 (3) {
   ["date"]=>
-  string(19) "2006-02-15 00:00:00"
+  string(26) "2006-02-15 00:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -47,7 +47,7 @@ object(DateTime)#1 (3) {
 string(19) "2006.02.15 00:00:00"
 object(DateTime)#1 (3) {
   ["date"]=>
-  string(19) "2008-01-29 00:00:00"
+  string(26) "2008-01-29 00:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

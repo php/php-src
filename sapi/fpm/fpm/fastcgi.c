@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -426,8 +426,9 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 	char buf[128];
 	char *tmp = buf;
 	size_t buf_size = sizeof(buf);
-	int name_len, val_len;
-	uint eff_name_len;
+	int name_len = 0;
+	int val_len = 0;
+	uint eff_name_len = 0;
 	char *s;
 	int ret = 1;
 	size_t bytes_consumed;

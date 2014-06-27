@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -107,6 +107,10 @@ php_socket *socket_import_file_descriptor(PHP_SOCKET sock TSRMLS_DC);
 
 #else
 #define phpext_sockets_ptr NULL
+#endif
+
+#if defined(_AIX) && !defined(HAVE_SA_SS_FAMILY)
+# define ss_family __ss_family
 #endif
 
 #endif

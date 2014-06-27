@@ -471,7 +471,7 @@ typedef struct {
 	double linespacing;	/* fine tune line spacing for '\n' */
 	int flags;		/* Logical OR of gdFTEX_ values */
 	int charmap;		/* TBB: 2.0.12: may be gdFTEX_Unicode,
-				   gdFTEX_Shift_JIS, or gdFTEX_Big5;
+				   gdFTEX_Shift_JIS, gdFTEX_Big5 or gdFTEX_MacRoman;
 				   when not specified, maps are searched
 				   for in the above order. */
 	int hdpi;
@@ -487,6 +487,7 @@ typedef struct {
 #define gdFTEX_Unicode 0
 #define gdFTEX_Shift_JIS 1
 #define gdFTEX_Big5 2
+#define gdFTEX_MacRoman 3
 
 /* FreeType 2 text output with fine tuning */
 char *

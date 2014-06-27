@@ -1322,8 +1322,8 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 			gdFixed f_j = gd_itofx(j);
 			gdFixed f_a = gd_mulfx(f_i, f_dy);
 			gdFixed f_b = gd_mulfx(f_j, f_dx);
-			const long m = gd_fxtoi(f_a);
-			const long n = gd_fxtoi(f_b);
+			const gdFixed m = gd_fxtoi(f_a);
+			const gdFixed n = gd_fxtoi(f_b);
 			gdFixed f_f = f_a - gd_itofx(m);
 			gdFixed f_g = f_b - gd_itofx(n);
 
@@ -1363,10 +1363,10 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 			f_a3 = gd_itofx(gdTrueColorGetAlpha(pixel3));
 			f_a4 = gd_itofx(gdTrueColorGetAlpha(pixel4));
 			{
-				const char red = (char) gd_fxtoi(gd_mulfx(f_w1, f_r1) + gd_mulfx(f_w2, f_r2) + gd_mulfx(f_w3, f_r3) + gd_mulfx(f_w4, f_r4));
-				const char green = (char) gd_fxtoi(gd_mulfx(f_w1, f_g1) + gd_mulfx(f_w2, f_g2) + gd_mulfx(f_w3, f_g3) + gd_mulfx(f_w4, f_g4));
-				const char blue = (char) gd_fxtoi(gd_mulfx(f_w1, f_b1) + gd_mulfx(f_w2, f_b2) + gd_mulfx(f_w3, f_b3) + gd_mulfx(f_w4, f_b4));
-				const char alpha = (char) gd_fxtoi(gd_mulfx(f_w1, f_a1) + gd_mulfx(f_w2, f_a2) + gd_mulfx(f_w3, f_a3) + gd_mulfx(f_w4, f_a4));
+				const unsigned char red   = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_r1) + gd_mulfx(f_w2, f_r2) + gd_mulfx(f_w3, f_r3) + gd_mulfx(f_w4, f_r4));
+				const unsigned char green = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_g1) + gd_mulfx(f_w2, f_g2) + gd_mulfx(f_w3, f_g3) + gd_mulfx(f_w4, f_g4));
+				const unsigned char blue  = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_b1) + gd_mulfx(f_w2, f_b2) + gd_mulfx(f_w3, f_b3) + gd_mulfx(f_w4, f_b4));
+				const unsigned char alpha = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_a1) + gd_mulfx(f_w2, f_a2) + gd_mulfx(f_w3, f_a3) + gd_mulfx(f_w4, f_a4));
 
 				new_img->tpixels[dst_offset_v][dst_offset_h] = gdTrueColorAlpha(red, green, blue, alpha);
 			}
@@ -2475,10 +2475,7 @@ int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id)
 
 	switch (id) {
 		case GD_DEFAULT:
-			im->interpolation_id = GD_BILINEAR_FIXED;
-			im->interpolation = NULL;
-			break;
-
+			id = GD_BILINEAR_FIXED;
 		/* Optimized versions */
 		case GD_BILINEAR_FIXED:
 		case GD_BICUBIC_FIXED:

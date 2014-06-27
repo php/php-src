@@ -10,14 +10,22 @@ Streams Based IPv6 TCP Loopback test
 ?>
 --FILE--
 <?php
-	/* Setup socket server */
-	$server = stream_socket_server('tcp://[::1]:31337');
+
+  for ($i=0; $i<100; $i++) {
+    $port = rand(10000, 65000);
+    /* Setup socket server */
+    $server = @stream_socket_server("tcp://[::1]:$port");
+    if ($server) {
+      break;
+    }
+  }
+
 	if (!$server) {
 		die('Unable to create AF_INET6 socket [server]');
 	}
 
 	/* Connect to it */
-	$client = stream_socket_client('tcp://[::1]:31337');
+	$client = stream_socket_client("tcp://[::1]:$port");
 	if (!$client) {
 		die('Unable to create AF_INET6 socket [client]');
 	}

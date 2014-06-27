@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -198,7 +198,7 @@ typedef struct {
 
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
-int  _php_curl_verify_handlers(php_curl *ch, int reporterror TSRMLS_DC);
+void _php_curl_verify_handlers(php_curl *ch, int reporterror TSRMLS_DC);
 
 void curlfile_register_class(TSRMLS_D);
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;

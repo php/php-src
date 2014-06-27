@@ -48,11 +48,9 @@ $inputs = array(
       'int 0' => 0,
       'int 1' => 1,
       'int 12345' => 12345,
-      'int -12345' => -12345,
 
       // float data
       'float 10.5' => 10.5,
-      'float -10.5' => -10.5,
       'float .5' => .5,
 
       // array data
@@ -124,19 +122,9 @@ bool(false)
 Warning: timezone_open(): Unknown or bad timezone (12345) in %s on line %d
 bool(false)
 
--- int -12345 --
-
-Warning: timezone_open(): Unknown or bad timezone (-12345) in %s on line %d
-bool(false)
-
 -- float 10.5 --
 
 Warning: timezone_open(): Unknown or bad timezone (10.5) in %s on line %d
-bool(false)
-
--- float -10.5 --
-
-Warning: timezone_open(): Unknown or bad timezone (-10.5) in %s on line %d
 bool(false)
 
 -- float .5 --

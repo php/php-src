@@ -160,7 +160,7 @@ array(11) {
   ["ATOM"]=>
   string(13) "Y-m-d\TH:i:sP"
   ["COOKIE"]=>
-  string(16) "l, d-M-y H:i:s T"
+  string(16) "l, d-M-Y H:i:s T"
   ["ISO8601"]=>
   string(13) "Y-m-d\TH:i:sO"
   ["RFC822"]=>
