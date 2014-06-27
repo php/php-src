@@ -360,22 +360,22 @@ typedef enum _vm_frame_kind {
 
 struct _zend_execute_data {
 	struct _zend_op     *opline;           /* executed opline                */
-	zend_function       *func;             /* executed op_array              */
 	zend_execute_data   *call;             /* current call                   */
+	void               **run_time_cache;
+	zend_function       *func;             /* executed op_array              */
 	zend_uint            num_args;
-	zend_uint            flags;
+	zend_uchar           flags;
+	zend_uchar           frame_kind;
 	zend_class_entry    *called_scope;
 	zend_object         *object;
 	zend_execute_data   *prev_nested_call;
-	zend_class_entry    *scope;            /* function scope (self)          */
-	zend_array          *symbol_table;
-	void               **run_time_cache;
 	zend_execute_data   *prev_execute_data;
 	zval                *return_value;
-	vm_frame_kind        frame_kind;
-	zval                 old_error_reporting;
+	zend_class_entry    *scope;            /* function scope (self)          */
+	zend_array          *symbol_table;
 	struct _zend_op     *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 	zend_object         *delayed_exception;
+	zval                 old_error_reporting;
 };
 
 #define ZEND_CALL_CTOR               (1 << 0)
