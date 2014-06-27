@@ -481,7 +481,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			zend_detach_symbol_table(execute_data);
 			old_execute_data = EX(prev_execute_data);
 			while (old_execute_data) {
-				if (old_execute_data->func && (old_execute_data->func->op_array.type == ZEND_USER_FUNCTION || old_execute_data->func->op_array.type == ZEND_EVAL_CODE)) {
+				if (old_execute_data->func && ZEND_USER_CODE(old_execute_data->func->op_array.type)) {
 					if (old_execute_data->symbol_table == symbol_table) {
 						zend_attach_symbol_table(old_execute_data);
 					}
@@ -1216,16 +1216,16 @@ static int ZEND_FASTCALL  ZEND_BIND_TRAITS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_uint op_num = EG(opline_before_exception)-EG(active_op_array)->opcodes;
+	zend_uint op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
 	int i;
 	zend_uint catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
 
-	for (i=0; i<EG(active_op_array)->last_try_catch; i++) {
-		if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
+	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
+		if (EX(func)->op_array.try_catch_array[i].try_op > op_num) {
 			/* further blocks will not be relevant... */
 			break;
 		}
-		if (op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
+		if (op_num < EX(func)->op_array.try_catch_array[i].catch_op) {
 			catch_op_num = EX(func)->op_array.try_catch_array[i].catch_op;
 		}
 		if (op_num < EX(func)->op_array.try_catch_array[i].finally_op) {
@@ -1467,12 +1467,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 {
 	USE_OPLINE
 	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *object;
-	zval *function_name_ptr, *function_name, *func;
+	zval *function_name, *func;
 
 	if (IS_CONST == IS_CONST) {
-		function_name_ptr = function_name = (zval*)(opline->op2.zv+1);
+		function_name = (zval*)(opline->op2.zv+1);
 		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 			fbc = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
 		} else if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
@@ -1491,6 +1489,9 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 	} else {
 		zend_string *lcname;
 
+		zend_class_entry *called_scope;
+		zend_object *object;
+		zval *function_name_ptr;
 
 		SAVE_OPLINE();
 		function_name_ptr = function_name = opline->op2.zv;
@@ -1507,13 +1508,9 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 			}
+			fbc = Z_FUNC_P(func);
 			STR_FREE(lcname);
 
-			EX(call) = zend_vm_stack_push_call_frame(
-				Z_FUNC_P(func), opline->extended_value, 0, NULL, NULL, EX(call) TSRMLS_CC);
-
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_CONST != IS_CONST && IS_CONST != IS_TMP_VAR &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
@@ -1528,12 +1525,6 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			} else {
 
 			}
-
-			EX(call) = zend_vm_stack_push_call_frame(
-				fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
-
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_CONST != IS_CONST &&
 				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
@@ -1587,18 +1578,18 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 				}
 			}
 
-			EX(call) = zend_vm_stack_push_call_frame(
-				fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
-
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else {
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
-			ZEND_VM_NEXT_OPCODE(); /* Never reached */
+			ZEND_VM_CONTINUE(); /* Never reached */
 		}
+		EX(call) = zend_vm_stack_push_call_frame(
+			fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
 	}
 }
 
@@ -1802,12 +1793,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 {
 	USE_OPLINE
 	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *object;
-	zval *function_name_ptr, *function_name, *func;
+	zval *function_name, *func;
 
 	if (IS_TMP_VAR == IS_CONST) {
-		function_name_ptr = function_name = (zval*)(opline->op2.zv+1);
+		function_name = (zval*)(opline->op2.zv+1);
 		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 			fbc = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
 		} else if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
@@ -1826,6 +1815,9 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 	} else {
 		zend_string *lcname;
 		zend_free_op free_op2;
+		zend_class_entry *called_scope;
+		zend_object *object;
+		zval *function_name_ptr;
 
 		SAVE_OPLINE();
 		function_name_ptr = function_name = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
@@ -1842,14 +1834,9 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 			}
+			fbc = Z_FUNC_P(func);
 			STR_FREE(lcname);
 			zval_dtor(free_op2.var);
-
-			EX(call) = zend_vm_stack_push_call_frame(
-				Z_FUNC_P(func), opline->extended_value, 0, NULL, NULL, EX(call) TSRMLS_CC);
-
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_TMP_VAR != IS_CONST && IS_TMP_VAR != IS_TMP_VAR &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
@@ -1864,12 +1851,6 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			} else {
 				zval_dtor(free_op2.var);
 			}
-
-			EX(call) = zend_vm_stack_push_call_frame(
-				fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
-
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_TMP_VAR != IS_CONST &&
 				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
@@ -1922,20 +1903,19 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 					GC_REFCOUNT(object)++; /* For $this pointer */
 				}
 			}
-
-			EX(call) = zend_vm_stack_push_call_frame(
-				fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
-
 			zval_dtor(free_op2.var);
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else {
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
-			ZEND_VM_NEXT_OPCODE(); /* Never reached */
+			ZEND_VM_CONTINUE(); /* Never reached */
 		}
+		EX(call) = zend_vm_stack_push_call_frame(
+			fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
 	}
 }
 
@@ -1984,12 +1964,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 {
 	USE_OPLINE
 	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *object;
-	zval *function_name_ptr, *function_name, *func;
+	zval *function_name, *func;
 
 	if (IS_VAR == IS_CONST) {
-		function_name_ptr = function_name = (zval*)(opline->op2.zv+1);
+		function_name = (zval*)(opline->op2.zv+1);
 		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 			fbc = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
 		} else if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
@@ -2008,6 +1986,9 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 	} else {
 		zend_string *lcname;
 		zend_free_op free_op2;
+		zend_class_entry *called_scope;
+		zend_object *object;
+		zval *function_name_ptr;
 
 		SAVE_OPLINE();
 		function_name_ptr = function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
@@ -2024,14 +2005,9 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 			}
+			fbc = Z_FUNC_P(func);
 			STR_FREE(lcname);
 			zval_ptr_dtor_nogc(free_op2.var);
-
-			EX(call) = zend_vm_stack_push_call_frame(
-				Z_FUNC_P(func), opline->extended_value, 0, NULL, NULL, EX(call) TSRMLS_CC);
-
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_VAR != IS_CONST && IS_VAR != IS_TMP_VAR &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
@@ -2046,12 +2022,6 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			} else {
 				zval_ptr_dtor_nogc(free_op2.var);
 			}
-
-			EX(call) = zend_vm_stack_push_call_frame(
-				fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
-
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_VAR != IS_CONST &&
 				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
@@ -2104,20 +2074,19 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 					GC_REFCOUNT(object)++; /* For $this pointer */
 				}
 			}
-
-			EX(call) = zend_vm_stack_push_call_frame(
-				fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
-
 			zval_ptr_dtor_nogc(free_op2.var);
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else {
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
-			ZEND_VM_NEXT_OPCODE(); /* Never reached */
+			ZEND_VM_CONTINUE(); /* Never reached */
 		}
+		EX(call) = zend_vm_stack_push_call_frame(
+			fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
 	}
 }
 
@@ -2204,12 +2173,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 {
 	USE_OPLINE
 	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *object;
-	zval *function_name_ptr, *function_name, *func;
+	zval *function_name, *func;
 
 	if (IS_CV == IS_CONST) {
-		function_name_ptr = function_name = (zval*)(opline->op2.zv+1);
+		function_name = (zval*)(opline->op2.zv+1);
 		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 			fbc = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
 		} else if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
@@ -2228,6 +2195,9 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 	} else {
 		zend_string *lcname;
 
+		zend_class_entry *called_scope;
+		zend_object *object;
+		zval *function_name_ptr;
 
 		SAVE_OPLINE();
 		function_name_ptr = function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
@@ -2244,13 +2214,9 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 			}
+			fbc = Z_FUNC_P(func);
 			STR_FREE(lcname);
 
-			EX(call) = zend_vm_stack_push_call_frame(
-				Z_FUNC_P(func), opline->extended_value, 0, NULL, NULL, EX(call) TSRMLS_CC);
-
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_CV != IS_CONST && IS_CV != IS_TMP_VAR &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
@@ -2265,12 +2231,6 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			} else {
 
 			}
-
-			EX(call) = zend_vm_stack_push_call_frame(
-				fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
-
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_CV != IS_CONST &&
 				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
@@ -2324,18 +2284,18 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 				}
 			}
 
-			EX(call) = zend_vm_stack_push_call_frame(
-				fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
-
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
 		} else {
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
-			ZEND_VM_NEXT_OPCODE(); /* Never reached */
+			ZEND_VM_CONTINUE(); /* Never reached */
 		}
+		EX(call) = zend_vm_stack_push_call_frame(
+			fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
 	}
 }
 
@@ -3829,23 +3789,21 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		fbc = ce->constructor;
 	}
 
-	if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-	} else {
-		if (Z_OBJ(EG(This)) &&
-		    Z_OBJ_HT(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+	object = NULL;
+	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_OBJ(EG(This))) {
+			if (Z_OBJ_HT(EG(This))->get_class_entry &&
+			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    /* We are calling method of the other (incompatible) class,
+			       but passing $this. This is done for compatibility with php-4. */
+				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				}
 			}
-		}
-		object = Z_OBJ(EG(This));
-		if (object) {
+			object = Z_OBJ(EG(This));
 			GC_REFCOUNT(object)++;
 		}
 	}
@@ -4797,23 +4755,21 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 		fbc = ce->constructor;
 	}
 
-	if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-	} else {
-		if (Z_OBJ(EG(This)) &&
-		    Z_OBJ_HT(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+	object = NULL;
+	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_OBJ(EG(This))) {
+			if (Z_OBJ_HT(EG(This))->get_class_entry &&
+			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    /* We are calling method of the other (incompatible) class,
+			       but passing $this. This is done for compatibility with php-4. */
+				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				}
 			}
-		}
-		object = Z_OBJ(EG(This));
-		if (object) {
+			object = Z_OBJ(EG(This));
 			GC_REFCOUNT(object)++;
 		}
 	}
@@ -5633,23 +5589,21 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		fbc = ce->constructor;
 	}
 
-	if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-	} else {
-		if (Z_OBJ(EG(This)) &&
-		    Z_OBJ_HT(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+	object = NULL;
+	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_OBJ(EG(This))) {
+			if (Z_OBJ_HT(EG(This))->get_class_entry &&
+			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    /* We are calling method of the other (incompatible) class,
+			       but passing $this. This is done for compatibility with php-4. */
+				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				}
 			}
-		}
-		object = Z_OBJ(EG(This));
-		if (object) {
+			object = Z_OBJ(EG(This));
 			GC_REFCOUNT(object)++;
 		}
 	}
@@ -6328,23 +6282,21 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		fbc = ce->constructor;
 	}
 
-	if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-	} else {
-		if (Z_OBJ(EG(This)) &&
-		    Z_OBJ_HT(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+	object = NULL;
+	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_OBJ(EG(This))) {
+			if (Z_OBJ_HT(EG(This))->get_class_entry &&
+			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    /* We are calling method of the other (incompatible) class,
+			       but passing $this. This is done for compatibility with php-4. */
+				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				}
 			}
-		}
-		object = Z_OBJ(EG(This));
-		if (object) {
+			object = Z_OBJ(EG(This));
 			GC_REFCOUNT(object)++;
 		}
 	}
@@ -7159,23 +7111,21 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		fbc = ce->constructor;
 	}
 
-	if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-	} else {
-		if (Z_OBJ(EG(This)) &&
-		    Z_OBJ_HT(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+	object = NULL;
+	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_OBJ(EG(This))) {
+			if (Z_OBJ_HT(EG(This))->get_class_entry &&
+			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    /* We are calling method of the other (incompatible) class,
+			       but passing $this. This is done for compatibility with php-4. */
+				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				}
 			}
-		}
-		object = Z_OBJ(EG(This));
-		if (object) {
+			object = Z_OBJ(EG(This));
 			GC_REFCOUNT(object)++;
 		}
 	}
@@ -9063,37 +9013,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 	}
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_CONST != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_CONST == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_CONST != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_CONST == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -9899,37 +9849,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 	}
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_TMP_VAR != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_TMP_VAR != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_TMP_VAR == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -10736,37 +10686,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 	}
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_VAR != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_VAR == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_VAR != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_VAR == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -12123,37 +12073,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 	}
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_CV != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_CV == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_CV != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_CV == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -15323,37 +15273,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 	}
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_CONST != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_CONST == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_CONST != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_CONST == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -15450,23 +15400,21 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		fbc = ce->constructor;
 	}
 
-	if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-	} else {
-		if (Z_OBJ(EG(This)) &&
-		    Z_OBJ_HT(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+	object = NULL;
+	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_OBJ(EG(This))) {
+			if (Z_OBJ_HT(EG(This))->get_class_entry &&
+			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    /* We are calling method of the other (incompatible) class,
+			       but passing $this. This is done for compatibility with php-4. */
+				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				}
 			}
-		}
-		object = Z_OBJ(EG(This));
-		if (object) {
+			object = Z_OBJ(EG(This));
 			GC_REFCOUNT(object)++;
 		}
 	}
@@ -17552,37 +17500,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 	}
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_TMP_VAR != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_TMP_VAR != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_TMP_VAR == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -17680,23 +17628,21 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 		fbc = ce->constructor;
 	}
 
-	if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-	} else {
-		if (Z_OBJ(EG(This)) &&
-		    Z_OBJ_HT(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+	object = NULL;
+	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_OBJ(EG(This))) {
+			if (Z_OBJ_HT(EG(This))->get_class_entry &&
+			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    /* We are calling method of the other (incompatible) class,
+			       but passing $this. This is done for compatibility with php-4. */
+				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				}
 			}
-		}
-		object = Z_OBJ(EG(This));
-		if (object) {
+			object = Z_OBJ(EG(This));
 			GC_REFCOUNT(object)++;
 		}
 	}
@@ -19749,37 +19695,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 	}
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_VAR != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_VAR == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_VAR != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_VAR == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -19877,23 +19823,21 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 		fbc = ce->constructor;
 	}
 
-	if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-	} else {
-		if (Z_OBJ(EG(This)) &&
-		    Z_OBJ_HT(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+	object = NULL;
+	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_OBJ(EG(This))) {
+			if (Z_OBJ_HT(EG(This))->get_class_entry &&
+			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    /* We are calling method of the other (incompatible) class,
+			       but passing $this. This is done for compatibility with php-4. */
+				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				}
 			}
-		}
-		object = Z_OBJ(EG(This));
-		if (object) {
+			object = Z_OBJ(EG(This));
 			GC_REFCOUNT(object)++;
 		}
 	}
@@ -21343,23 +21287,21 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		fbc = ce->constructor;
 	}
 
-	if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-	} else {
-		if (Z_OBJ(EG(This)) &&
-		    Z_OBJ_HT(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+	object = NULL;
+	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_OBJ(EG(This))) {
+			if (Z_OBJ_HT(EG(This))->get_class_entry &&
+			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    /* We are calling method of the other (incompatible) class,
+			       but passing $this. This is done for compatibility with php-4. */
+				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				}
 			}
-		}
-		object = Z_OBJ(EG(This));
-		if (object) {
+			object = Z_OBJ(EG(This));
 			GC_REFCOUNT(object)++;
 		}
 	}
@@ -23121,37 +23063,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 	}
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_CV != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_CV == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_CV != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_CV == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -23248,23 +23190,21 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		fbc = ce->constructor;
 	}
 
-	if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-	} else {
-		if (Z_OBJ(EG(This)) &&
-		    Z_OBJ_HT(EG(This))->get_class_entry &&
-		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+	object = NULL;
+	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_OBJ(EG(This))) {
+			if (Z_OBJ_HT(EG(This))->get_class_entry &&
+			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    /* We are calling method of the other (incompatible) class,
+			       but passing $this. This is done for compatibility with php-4. */
+				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
+				}
 			}
-		}
-		object = Z_OBJ(EG(This));
-		if (object) {
+			object = Z_OBJ(EG(This));
 			GC_REFCOUNT(object)++;
 		}
 	}
@@ -24699,37 +24639,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 	}
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_CONST != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_CONST == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_CONST != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_CONST == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -26073,37 +26013,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 	}
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_TMP_VAR != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_TMP_VAR != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_TMP_VAR == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -27351,37 +27291,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 	}
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_VAR != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_VAR == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_VAR != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_VAR == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -29139,37 +29079,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 	}
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_CV != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_CV == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_CV != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_CV == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -32310,37 +32250,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 	}
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_CONST != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_CONST == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_CONST != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_CONST == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -34353,37 +34293,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 	}
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_TMP_VAR != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_TMP_VAR != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_TMP_VAR == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -36432,37 +36372,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 	}
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_VAR != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_VAR == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_VAR != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_VAR == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -39552,37 +39492,37 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 	}
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
-	obj = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(obj != NULL)) {
-		called_scope = zend_get_class_entry(obj TSRMLS_CC);
-
-		if (IS_CV != IS_CONST ||
-		    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
-		    zend_object *orig_obj = obj;
-
-			if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-				zend_error_noreturn(E_ERROR, "Object does not support method calls");
-			}
-
-			/* First, locate the function. */
-			fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
-			if (UNEXPECTED(fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
-			}
-			if (IS_CV == IS_CONST &&
-			    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-			    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(obj == orig_obj)) {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
-			}
-		}
-	} else {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
 		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = zend_get_class_entry(obj TSRMLS_CC);
+
+	if (IS_CV != IS_CONST ||
+	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error_noreturn(E_ERROR, "Object does not support method calls");
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.zv + 1) : NULL) TSRMLS_CC);
+		if (UNEXPECTED(fbc == NULL)) {
+			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(function_name));
+		}
+		if (IS_CV == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
 	}
 
 	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
