@@ -761,6 +761,9 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define	ZEND_EVAL_CODE						4
 #define ZEND_OVERLOADED_FUNCTION_TEMPORARY	5
 
+/* A quick check (type == ZEND_USER_FUNCTION || type == ZEND_EVAL_CODE) */
+#define ZEND_USER_CODE(type) ((type & 1) == 0)
+
 #define ZEND_INTERNAL_CLASS         1
 #define ZEND_USER_CLASS             2
 

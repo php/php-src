@@ -2053,7 +2053,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 		skip = ptr;
 		/* skip internal handler */
-		if ((!skip->func || (skip->func->common.type != ZEND_USER_FUNCTION && skip->func->common.type != ZEND_EVAL_CODE)) &&
+		if ((!skip->func || !ZEND_USER_CODE(skip->func->common.type)) &&
 		    skip->prev_execute_data &&
 		    skip->prev_execute_data->opline &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
@@ -2061,7 +2061,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			skip = skip->prev_execute_data;
 		}
 
-		if (skip->func && (skip->func->common.type == ZEND_USER_FUNCTION || skip->func->common.type == ZEND_EVAL_CODE)) {
+		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
 			filename = skip->func->op_array.filename->val;
 			lineno = skip->opline->lineno;
 		} else {
@@ -2172,12 +2172,11 @@ ZEND_FUNCTION(debug_print_backtrace)
 			while (prev) {
 				if (prev->call &&
 				    prev->call->func &&
-					prev->call->func->common.type != ZEND_USER_FUNCTION &&
-					prev->call->func->common.type != ZEND_EVAL_CODE) {
+					!ZEND_USER_CODE(prev->call->func->common.type)) {
 					prev = NULL;
 					break;
 				}				    
-				if (prev->func && (prev->func->common.type == ZEND_USER_FUNCTION || prev->func->common.type == ZEND_EVAL_CODE)) {
+				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
 					zend_printf(") called at [%s:%d]\n", prev->func->op_array.filename->val, prev->opline->lineno);
 					break;
 				}
@@ -2230,7 +2229,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		skip = ptr;
 		/* skip internal handler */
-		if ((!skip->func || (skip->func->common.type != ZEND_USER_FUNCTION && skip->func->common.type != ZEND_EVAL_CODE)) &&
+		if ((!skip->func || !ZEND_USER_CODE(skip->func->common.type)) &&
 		    skip->prev_execute_data &&
 		    skip->prev_execute_data->opline &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
@@ -2238,7 +2237,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			skip = skip->prev_execute_data;
 		}
 
-		if (skip->func && (skip->func->common.type == ZEND_USER_FUNCTION || skip->func->common.type == ZEND_EVAL_CODE)) {
+		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
 			filename = skip->func->op_array.filename->val;
 			lineno = skip->opline->lineno;
 			add_assoc_string_ex(&stack_frame, "file", sizeof("file")-1, (char*)filename);
@@ -2253,13 +2252,12 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			while (prev) {
 				if (prev->call &&
 				    prev->call->func &&
-					prev->call->func->common.type != ZEND_USER_FUNCTION &&
-					prev->call->func->common.type != ZEND_EVAL_CODE &&
+					!ZEND_USER_CODE(prev->call->func->common.type) &&
 					!(prev->call->func->common.type == ZEND_INTERNAL_FUNCTION &&
 						(prev->call->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER))) {
 					break;
 				}				    
-				if (prev->func && (prev->func->common.type == ZEND_USER_FUNCTION || prev->func->common.type == ZEND_EVAL_CODE)) {
+				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
 // TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
 					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, STR_DUP(prev->func->op_array.filename, 0));
 					add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, prev->opline->lineno);

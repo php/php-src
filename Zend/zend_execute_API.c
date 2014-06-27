@@ -1602,7 +1602,7 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 
 		/* Search for last called user function */
 		ex = EG(current_execute_data);
-		while (ex && (!ex->func || (ex->func->common.type != ZEND_USER_FUNCTION && ex->func->common.type != ZEND_EVAL_CODE))) {
+		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->common.type))) {
 			ex = ex->prev_execute_data;
 		}
 		if (!ex) {

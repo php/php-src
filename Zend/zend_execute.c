@@ -546,7 +546,7 @@ ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, zen
 		ZVAL_UNDEF(arg);
 	}
 
-	if (ptr && ptr->func && (ptr->func->common.type == ZEND_USER_FUNCTION || ptr->func->common.type == ZEND_EVAL_CODE)) {
+	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
 		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, ptr->func->op_array.filename->val, ptr->opline->lineno);
 	} else {
 		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
@@ -652,7 +652,7 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, zend_uint a
 		const char *func_name = EX(func)->common.function_name ? EX(func)->common.function_name->val : "main";
 		zend_execute_data *ptr = EX(prev_execute_data);
 
-		if (ptr && ptr->func && (ptr->func->common.type == ZEND_USER_FUNCTION || ptr->func->common.type == ZEND_EVAL_CODE)) {
+		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
 			zend_error(E_WARNING, "Missing argument %u for %s%s%s(), called in %s on line %d and defined", arg_num, class_name, space, func_name, ptr->func->op_array.filename->val, ptr->opline->lineno);
 		} else {
 			zend_error(E_WARNING, "Missing argument %u for %s%s%s()", arg_num, class_name, space, func_name);

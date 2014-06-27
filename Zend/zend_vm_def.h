@@ -1858,7 +1858,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			zend_detach_symbol_table(execute_data);
 			old_execute_data = EX(prev_execute_data);
 			while (old_execute_data) {
-				if (old_execute_data->func && (old_execute_data->func->op_array.type == ZEND_USER_FUNCTION || old_execute_data->func->op_array.type == ZEND_EVAL_CODE)) {
+				if (old_execute_data->func && ZEND_USER_CODE(old_execute_data->func->op_array.type)) {
 					if (old_execute_data->symbol_table == symbol_table) {
 						zend_attach_symbol_table(old_execute_data);
 					}

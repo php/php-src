@@ -213,7 +213,7 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_
 	int used_stack = ZEND_CALL_FRAME_SLOT + num_args;
 	zend_execute_data *call;
 	
-	if (func->type == ZEND_USER_FUNCTION || func->type == ZEND_EVAL_CODE) {
+	if (ZEND_USER_CODE(func->type)) {
 		used_stack += func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args);
 	}
 	ZEND_VM_STACK_GROW_IF_NEEDED(used_stack);
