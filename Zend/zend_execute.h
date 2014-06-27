@@ -164,12 +164,13 @@ struct _zend_vm_stack {
 #define ZEND_VM_STACK_ELEMETS(stack) \
 	(((zval*)(stack)) + ZEND_VM_STACK_HEADER_SLOT)
 
-#define ZEND_VM_STACK_GROW_IF_NEEDED(count)							\
-	do {															\
-		if (UNEXPECTED((count) >									\
-		    EG(argument_stack)->end - EG(argument_stack)->top)) {	\
-			zend_vm_stack_extend((count) TSRMLS_CC);				\
-		}															\
+#define ZEND_VM_STACK_GROW_IF_NEEDED(count)								\
+	do {																\
+		if (UNEXPECTED(((count) * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) >	\
+			((char*)EG(argument_stack)->end) -							\
+		    ((char*)EG(argument_stack)->top))) {						\
+			zend_vm_stack_extend((count) TSRMLS_CC);					\
+		}																\
 	} while (0)
 
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(int count) {
@@ -200,10 +201,12 @@ static zend_always_inline void zend_vm_stack_destroy(TSRMLS_D)
 
 static zend_always_inline void zend_vm_stack_extend(int count TSRMLS_DC)
 {
+	int size = count * ZEND_MM_ALIGNED_SIZE(sizeof(zval));
 	zend_vm_stack p = zend_vm_stack_new_page(
-		(count >= ZEND_VM_STACK_PAGE_SIZE - ZEND_VM_STACK_HEADER_SLOT) ? 
-			((count + ZEND_VM_STACK_HEADER_SLOT + ZEND_VM_STACK_PAGE_SIZE - 1) & ~(ZEND_VM_STACK_PAGE_SIZE-1)) : 
-			ZEND_VM_STACK_PAGE_SIZE);
+		(size >= (ZEND_VM_STACK_PAGE_SIZE - ZEND_VM_STACK_HEADER_SLOT) * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) ? 
+		(size + ((ZEND_VM_STACK_HEADER_SLOT + ZEND_VM_STACK_PAGE_SIZE) * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) - 1) & 
+			~((ZEND_VM_STACK_PAGE_SIZE * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) - 1) : 
+		ZEND_VM_STACK_PAGE_SIZE);
 	p->prev = EG(argument_stack);
 	EG(argument_stack) = p;
 }
@@ -218,13 +221,13 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_
 	}
 	ZEND_VM_STACK_GROW_IF_NEEDED(used_stack);
 	call = (zend_execute_data*)EG(argument_stack)->top;
+	EG(argument_stack)->top += used_stack;
 	call->func = func;
 	call->num_args = 0; //??? num_args;
 	call->flags = flags;
 	call->called_scope = called_scope;
 	call->object = object;
 	call->prev_nested_call = prev;
-	EG(argument_stack)->top += used_stack;
 	return call;
 }
 
