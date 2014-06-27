@@ -38,9 +38,9 @@ static inline GregorianCalendar *fetch_greg(Calendar_object *co) {
 
 static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval		**tz_object	= NULL;
-	zval		**args_a[6] = {0},
-				***args		= &args_a[0];
+	zval		*tz_object	= NULL;
+	zval		args_a[6] = {0},
+				*args		= &args_a[0];
 	char		*locale		= NULL;
 	int			locale_len;
 	long		largs[6];
@@ -56,7 +56,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_NULL();
 	}
 	for (variant = ZEND_NUM_ARGS();
-		variant > 0 && Z_TYPE_PP(args[variant - 1]) == IS_NULL;
+		variant > 0 && Z_TYPE(args[variant - 1]) == IS_NULL;
 		variant--) {}
 	if (variant == 4) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -68,7 +68,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	// argument parsing
 	if (variant <= 2) {
 		if (zend_parse_parameters(MIN(ZEND_NUM_ARGS(), 2) TSRMLS_CC,
-				"|Z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
+				"|z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intlgregcal_create_instance: bad arguments", 0 TSRMLS_CC);
 			RETURN_NULL();
@@ -158,8 +158,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		gcal->adoptTimeZone(tz);
 	}
     
-    Calendar_object *co = (Calendar_object*)zend_object_store_get_object(
-            return_value TSRMLS_CC);
+    Calendar_object *co = Z_INTL_CALENDAR_P(return_value);
     co->ucal = gcal;
 }
 
@@ -169,12 +168,12 @@ U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)
 	intl_error_reset(NULL TSRMLS_CC);
 
 	object_init_ex(return_value, GregorianCalendar_ce_ptr);
-	orig = *return_value;
+	ZVAL_COPY_VALUE(&orig, return_value);
 
 	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (Z_TYPE_P(return_value) == IS_NULL) {
-		zend_object_store_ctor_failed(&orig TSRMLS_CC);
+		zend_object_store_ctor_failed(Z_OBJ(orig) TSRMLS_CC);
 		zval_dtor(&orig);
 	}
 }
@@ -189,7 +188,7 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
 	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (Z_TYPE_P(return_value) == IS_NULL) {
-		zend_object_store_ctor_failed(&orig_this TSRMLS_CC);
+		zend_object_store_ctor_failed(Z_OBJ(orig_this) TSRMLS_CC);
 		zval_dtor(&orig_this);
 	}
 }

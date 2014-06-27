@@ -130,7 +130,7 @@ PHP_FUNCTION( msgfmt_get_error_code )
 		RETURN_FALSE;
 	}
 
-	mfo = (MessageFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
+	mfo = Z_INTL_MESSAGEFORMATTER_P( object );
 
 	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(mfo) );
@@ -144,7 +144,7 @@ PHP_FUNCTION( msgfmt_get_error_code )
  */
 PHP_FUNCTION( msgfmt_get_error_message )
 {
-	char*                    message = NULL;
+	zend_string*             message = NULL;
 	zval*                    object  = NULL;
 	MessageFormatter_object*  mfo     = NULL;
 
@@ -158,11 +158,11 @@ PHP_FUNCTION( msgfmt_get_error_message )
 		RETURN_FALSE;
 	}
 
-	mfo = (MessageFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
+	mfo = Z_INTL_MESSAGEFORMATTER_P( object );
 
 	/* Return last error message. */
 	message = intl_error_get_message( &mfo->mf_data.error TSRMLS_CC );
-	RETURN_STRING( message, 0);
+	RETURN_STR(message);
 }
 /* }}} */
 
