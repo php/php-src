@@ -372,7 +372,6 @@ struct _zend_execute_data {
 	void               **run_time_cache;
 	zend_execute_data   *prev_execute_data;
 	zval                *return_value;
-	zval                *extra_args;
 	vm_frame_kind        frame_kind;
 	zval                 old_error_reporting;
 	struct _zend_op     *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */

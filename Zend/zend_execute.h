@@ -210,13 +210,11 @@ static zend_always_inline void zend_vm_stack_extend(int count TSRMLS_DC)
 
 static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_function *func, zend_uint num_args, zend_uint flags, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
 {
-	int used_stack = ZEND_CALL_FRAME_SLOT;
+	int used_stack = ZEND_CALL_FRAME_SLOT + num_args;
 	zend_execute_data *call;
 	
-	if (func && (func->type == ZEND_USER_FUNCTION || func->type == ZEND_EVAL_CODE)) {
-		used_stack += MAX(func->op_array.last_var + func->op_array.T, num_args);
-	} else {
-		used_stack += num_args;
+	if (func->type == ZEND_USER_FUNCTION || func->type == ZEND_EVAL_CODE) {
+		used_stack += func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args);
 	}
 	ZEND_VM_STACK_GROW_IF_NEEDED(used_stack);
 	call = (zend_execute_data*)EG(argument_stack)->top;
@@ -226,21 +224,19 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_
 	call->called_scope = called_scope;
 	call->object = object;
 	call->prev_nested_call = prev;
-	call->extra_args = NULL;
 	EG(argument_stack)->top += used_stack;
 	return call;
 }
 
 static zend_always_inline void zend_vm_stack_free_extra_args(zend_execute_data *call TSRMLS_DC)
 {
- 	if (UNEXPECTED(call->extra_args != NULL)) {
- 		zval *p = call->extra_args + (call->num_args - call->func->op_array.num_args);
- 		zval *end = call->extra_args;
+ 	if (UNEXPECTED(call->num_args > call->func->op_array.num_args)) {
+ 		zval *end = EX_VAR_NUM_2(call, call->func->op_array.last_var + call->func->op_array.T);
+ 		zval *p = end + (call->num_args - call->func->op_array.num_args);
 		do {
 			p--;
 			i_zval_ptr_dtor_nogc(p ZEND_FILE_LINE_CC TSRMLS_CC);
 		} while (p != end);
- 		efree(end);
  	}
 }
 
@@ -249,22 +245,9 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call T
 	zend_uint num_args = call->num_args;	
 
 	if (num_args > 0) {
-		zval *p;
-	 	zval *end;
+		zval *p = ZEND_CALL_ARG(call, num_args + 1);
+	 	zval *end = p - num_args;;
 
-	 	if (UNEXPECTED(call->extra_args != NULL)) {
-	 		p = call->extra_args + (num_args - call->func->op_array.num_args);
-	 		end = call->extra_args;
-			do {
-				p--;
-				i_zval_ptr_dtor_nogc(p ZEND_FILE_LINE_CC TSRMLS_CC);
-			} while (p != end);
-	 		efree(end);
-	 		num_args = call->func->op_array.num_args;
-	 	}
-
-	 	p = ZEND_CALL_ARG(call, num_args + 1);
-	 	end = p - num_args;
 		do {
 			p--;
 			i_zval_ptr_dtor_nogc(p ZEND_FILE_LINE_CC TSRMLS_CC);

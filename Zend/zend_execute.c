@@ -1531,10 +1531,14 @@ void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* 
  *                             +----------------------------------------+
  *     EX_CV_NUM(0) ---------> | VAR[0] = ARG[1]                        |
  *                             | ...                                    |
+ *                             | VAR[op_array->num_args-1] = ARG[N]     |
+ *                             | ...                                    |
  *                             | VAR[op_array->last_var-1]              |
- *                             | VAR[op_array->last_var]                |
+ *                             | VAR[op_array->last_var] = TMP[0]       |
  *                             | ...                                    |
  *                             | VAR[op_array->last_var+op_array->T-1]  |
+ *                             | ARG[N+1] (extra_args)                  |
+ *                             | ...                                    |
  *                             +----------------------------------------+
  */
 
@@ -1561,9 +1565,9 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	} else {
 
 		if (UNEXPECTED(EX(num_args) > op_array->num_args)) {
-			/* move extra args into separate array */
-			EX(extra_args) = safe_emalloc(EX(num_args) - op_array->num_args, sizeof(zval), 0);
-			memcpy(EX(extra_args), EX_VAR_NUM(op_array->num_args), sizeof(zval) * (EX(num_args) - op_array->num_args));
+			/* move extra args into separate array after all CV and TMP vars */
+			zval *extra_args = EX_VAR_NUM(op_array->last_var + op_array->T);
+			memmove(extra_args, EX_VAR_NUM(op_array->num_args), sizeof(zval) * (EX(num_args) - op_array->num_args));
 		}
 
 		do {

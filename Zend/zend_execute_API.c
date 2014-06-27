@@ -911,7 +911,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			ZVAL_UNDEF(fci->retval);
 		}
 	}
-//???	zend_vm_stack_free_call_frame(EX(call), 0 TSRMLS_CC);
 
 	if (Z_OBJ(EG(This))) {
 		zval_ptr_dtor(&EG(This));

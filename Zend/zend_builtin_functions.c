@@ -436,8 +436,8 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_FALSE;
 	}
 
-	if (ex->extra_args && requested_offset >= ex->func->op_array.num_args) {
-		arg = ex->extra_args + (requested_offset - ex->func->op_array.num_args);
+	if (requested_offset >= ex->func->op_array.num_args && (ex->num_args > ex->func->op_array.num_args)) {
+		arg = EX_VAR_NUM_2(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - ex->func->op_array.num_args);
 	} else {
 		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
 	}
@@ -469,7 +469,7 @@ ZEND_FUNCTION(func_get_args)
 		i = 0;
 		q = Z_ARRVAL_P(return_value)->arData;
 		p = ZEND_CALL_ARG(ex, 1);
-		if (ex->extra_args) {
+		if (ex->num_args > ex->func->op_array.num_args) {
 			while (i < ex->func->op_array.num_args) {
 				q->h = i;
 				q->key = NULL;
@@ -482,7 +482,7 @@ ZEND_FUNCTION(func_get_args)
 				q++;
 				i++;
 			}
-			p = ex->extra_args;
+			p = EX_VAR_NUM_2(ex, ex->func->op_array.last_var + ex->func->op_array.T);
 		}
 		while (i < arg_count) {
 			q->h = i;
@@ -1985,14 +1985,14 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array TS
 		int i = 0;
 		zval *p = ZEND_CALL_ARG(call, 1);
 
-		if (call->extra_args) {
+		if (call->func->type == ZEND_USER_FUNCTION && (call->num_args > call->func->op_array.num_args)) {
 			while (i < call->func->op_array.num_args) {
 				if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
 				p++;
 				i++;
 			}
-			p = call->extra_args;
+			p = EX_VAR_NUM_2(call, call->func->op_array.last_var + call->func->op_array.T);
 		}
 
 		while (i < num_args) {

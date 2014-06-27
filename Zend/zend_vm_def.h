@@ -3358,7 +3358,7 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 
 		ZVAL_COPY_VALUE(&tmp, params);
 		array_init_size(params, arg_count - arg_num + 1);
-		param = EX(extra_args);
+		param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
 		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 			zend_verify_arg_type(EX(func), arg_num, &tmp, opline->extended_value TSRMLS_CC);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(params), &tmp);
