@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #67468 (Segfault in highlight_file()/highlight_string()).
     (Andreas Ferber)
 
+- FPM:
+  . Fix bug #67530 (error_log=syslog ignored). (Remi)
+  . Fix bug #67531 (syslog cannot be set in pool configuration). (Remi)
+
 - phpdbg:
   . Fix Bug #67499 (readline feature not enabled when build with libedit). (Remi)
 
