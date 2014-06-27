@@ -312,7 +312,7 @@ PHP 5.4 UPGRADE NOTES
   to limit the amount of stack frames returned.
 
 - Fixed crypt_blowfish handling of 8-bit characters. crypt() in Blowfish mode
-  now supports hashes marked $2a$, $2x$, $2y$ and $2z$.
+  now supports hashes marked $2a$, $2x$ and $2y$.
 
 - mbstring now supports following encodings: Shift_JIS/UTF-8 Emoji,
   JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004),
