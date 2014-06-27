@@ -227,7 +227,7 @@ static zend_always_inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 	int count = (size + (sizeof(zval) - 1)) / sizeof(zval);
 
 	ZEND_VM_STACK_GROW_IF_NEEDED(count);
-	ret = (void*)EG(argument_stack)->top;
+	ret = EG(argument_stack)->top;
 	EG(argument_stack)->top += count;
 	return ret;
 }
