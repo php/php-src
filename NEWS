@@ -15,7 +15,7 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #67430 (http:// wrapper doesn't follow 308 redirects). (Adam)
 
-?? ??? 2014, PHP 5.4.30
+26 Jun 2014, PHP 5.4.30
 
 - Core:
   . Fixed BC break introduced by patch for bug #67072. (Anatol, Stas)
