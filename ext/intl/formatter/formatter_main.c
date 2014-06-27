@@ -111,7 +111,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 		RETURN_FALSE;
 	}
 
-	nfo = (NumberFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
+	nfo = Z_INTL_NUMERFORMATTER_P(object);
 
 	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(nfo) );
@@ -125,7 +125,7 @@ PHP_FUNCTION( numfmt_get_error_code )
  */
 PHP_FUNCTION( numfmt_get_error_message )
 {
-	char*                    message = NULL;
+	zend_string *message = NULL;
 	FORMATTER_METHOD_INIT_VARS
 
 	/* Parse parameters. */
@@ -138,11 +138,11 @@ PHP_FUNCTION( numfmt_get_error_message )
 		RETURN_FALSE;
 	}
 
-	nfo = (NumberFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
+	nfo = Z_INTL_NUMERFORMATTER_P(object);
 
 	/* Return last error message. */
 	message = intl_error_get_message( INTL_DATA_ERROR_P(nfo) TSRMLS_CC );
-	RETURN_STRING( message, 0);
+	RETURN_STR(message);
 }
 /* }}} */
 

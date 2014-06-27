@@ -35,9 +35,9 @@ zend_class_entry *ResourceBundle_ce_ptr = NULL;
 static zend_object_handlers ResourceBundle_object_handlers;
 
 /* {{{ ResourceBundle_object_dtor */
-static void ResourceBundle_object_destroy( void *object, zend_object_handle handle TSRMLS_DC )
+static void ResourceBundle_object_destroy( zend_object *object TSRMLS_DC )
 {
-	ResourceBundle_object *rb = (ResourceBundle_object *) object;
+	ResourceBundle_object *rb = php_intl_resourcebundle_fetch_object(object);
 
 	// only free local errors
 	intl_error_reset( INTL_DATA_ERROR_P(rb) TSRMLS_CC );
@@ -50,29 +50,26 @@ static void ResourceBundle_object_destroy( void *object, zend_object_handle hand
 	}
 
 	zend_object_std_dtor( object TSRMLS_CC );
-	efree(object);
 }
 /* }}} */
 
 /* {{{ ResourceBundle_object_create */
-static zend_object_value ResourceBundle_object_create( zend_class_entry *ce TSRMLS_DC )
+static zend_object *ResourceBundle_object_create( zend_class_entry *ce TSRMLS_DC )
 {
-	zend_object_value     retval;
 	ResourceBundle_object *rb;
 
-	rb = ecalloc( 1, sizeof(ResourceBundle_object) );
+	rb = ecalloc( 1, sizeof(ResourceBundle_object) + sizeof(zval) * (ce->default_properties_count - 1) );
 
-	zend_object_std_init( (zend_object *) rb, ce TSRMLS_CC );
-	object_properties_init((zend_object *) rb, ce);
+	zend_object_std_init( &rb->zend, ce TSRMLS_CC );
+	object_properties_init( &rb->zend, ce);
 
 	intl_error_init( INTL_DATA_ERROR_P(rb) TSRMLS_CC );
 	rb->me = NULL;
 	rb->child = NULL;
 
-	retval.handlers = &ResourceBundle_object_handlers;
-	retval.handle = zend_objects_store_put(	rb, ResourceBundle_object_destroy, NULL, NULL TSRMLS_CC );
+	rb->zend.handlers = &ResourceBundle_object_handlers;
 
-	return retval;
+	return &rb->zend;
 }
 /* }}} */
 
@@ -86,7 +83,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zend_bool	fallback = 1;
 
 	zval                  *object = return_value;
-	ResourceBundle_object *rb = (ResourceBundle_object *) zend_object_store_get_object( object TSRMLS_CC);
+	ResourceBundle_object *rb = Z_INTL_RESOURCEBUNDLE_P( object );
 
 	intl_error_reset( NULL TSRMLS_CC );
 
@@ -367,7 +364,7 @@ PHP_FUNCTION( resourcebundle_get_error_code )
 		RETURN_FALSE;
 	}
 
-	rb = (ResourceBundle_object *) zend_object_store_get_object( object TSRMLS_CC );
+	rb = Z_INTL_RESOURCEBUNDLE_P( object );
 
 	RETURN_LONG(INTL_DATA_ERROR_CODE(rb));
 }
@@ -384,7 +381,7 @@ ZEND_END_ARG_INFO()
  */
 PHP_FUNCTION( resourcebundle_get_error_message )
 {
-	char* message = NULL;
+	zend_string* message = NULL;
 	RESOURCEBUNDLE_METHOD_INIT_VARS;
 
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
@@ -395,9 +392,9 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 		RETURN_FALSE;
 	}
 
-	rb = (ResourceBundle_object *) zend_object_store_get_object( object TSRMLS_CC );
-	message = (char *)intl_error_get_message(INTL_DATA_ERROR_P(rb) TSRMLS_CC);
-	RETURN_STRING(message, 0);
+	rb = Z_INTL_RESOURCEBUNDLE_P( object );
+	message = intl_error_get_message(INTL_DATA_ERROR_P(rb) TSRMLS_CC);
+	RETURN_STR(message);
 }
 /* }}} */
 
@@ -437,7 +434,9 @@ void resourcebundle_register_class( TSRMLS_D )
 	}
 
 	ResourceBundle_object_handlers = std_object_handlers;
+	ResourceBundle_object_handlers.offset = XtOffsetOf(ResourceBundle_object, zend);
 	ResourceBundle_object_handlers.clone_obj	  = NULL; /* ICU ResourceBundle has no clone implementation */
+	ResourceBundle_object_handlers.dtor_obj = ResourceBundle_object_destroy;
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;
 	ResourceBundle_object_handlers.count_elements = resourcebundle_array_count;
 

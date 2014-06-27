@@ -105,7 +105,7 @@ MYSQLI_WARNING *php_new_warning(const zval * reason, int errorno TSRMLS_DC)
 
 	w = (MYSQLI_WARNING *)ecalloc(1, sizeof(MYSQLI_WARNING));
 
-	ZVAL_DUP(&w->reason, reason);
+	ZVAL_DUP(&w->reason, (zval *)reason);
 	convert_to_string(&w->reason);
 
 	//????ZVAL_UTF8_STRINGL(&(w->reason),  Z_STRVAL(w->reason), Z_STRLEN(w->reason),  ZSTR_AUTOFREE);

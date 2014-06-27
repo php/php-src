@@ -49,7 +49,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	Calendar	*calendar		= NULL;
 	long		calendar_type;
 	bool		calendar_owned;
-	zval		**timezone_zv	= NULL;
+	zval		*timezone_zv	= NULL;
 	TimeZone	*timezone		= NULL;
 	bool		explicit_tz;
     char*       pattern_str		= NULL;
@@ -61,7 +61,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	intl_error_reset(NULL TSRMLS_CC);
 	object = return_value;
 	/* Parse parameters. */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll|Zzs",
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
@@ -93,7 +93,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	/* process timezone */
-	explicit_tz = timezone_zv != NULL && Z_TYPE_PP(timezone_zv) != IS_NULL;
+	explicit_tz = timezone_zv != NULL && Z_TYPE_P(timezone_zv) != IS_NULL;
 
 	if (explicit_tz || calendar_owned ) {
 		//we have an explicit time zone or a non-object calendar

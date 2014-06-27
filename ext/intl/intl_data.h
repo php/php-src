@@ -42,7 +42,7 @@ typedef struct _intl_data {
 #define INTL_DATA_ERROR_CODE(obj)			INTL_ERROR_CODE(INTL_DATA_ERROR((obj)))
 
 #define INTL_METHOD_FETCH_OBJECT(oclass, obj)									\
-	obj = (oclass##_object *) zend_object_store_get_object( object TSRMLS_CC );	\
+	obj = Z_##oclass##_P( object );												\
     intl_error_reset( INTL_DATA_ERROR_P(obj) TSRMLS_CC );						\
 
 /* Check status by error code, if error - exit */
@@ -82,7 +82,8 @@ typedef struct _intl_data {
 		efree(ustring);																			\
 	}																							\
 	INTL_METHOD_CHECK_STATUS((obj), "Error converting value to UTF-8");							\
-	RETVAL_STRINGL(u8value, u8len, 0);															\
+	RETVAL_STRINGL(u8value, u8len);																\
+	efree(u8value);																				\
 }
 
 #define INTL_MAX_LOCALE_LEN 80

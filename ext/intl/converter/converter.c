@@ -24,7 +24,6 @@
 #include "../intl_error.h"
 
 typedef struct _php_converter_object {
-	zend_object obj;
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
@@ -32,12 +31,19 @@ typedef struct _php_converter_object {
 	zend_fcall_info to_cb, from_cb;
 	zend_fcall_info_cache to_cache, from_cache;
 	intl_error error;
+	zend_object obj;
 } php_converter_object;
+
+
+static inline php_converter_object *php_converter_fetch_object(zend_object *obj) {
+	return (php_converter_object *)((char*)(obj) - XtOffsetOf(php_converter_object, obj));
+}
+#define Z_INTL_CONVERTER_P(zv) php_converter_fetch_object(Z_OBJ_P(zv))
 
 static zend_class_entry     *php_converter_ce;
 static zend_object_handlers  php_converter_object_handlers;
 
-#define CONV_GET(pzv)  ((php_converter_object*)zend_objects_get_address((pzv) TSRMLS_CC))
+#define CONV_GET(pzv)  (Z_INTL_CONVERTER_P((pzv)))
 #define THROW_UFAILURE(obj, fname, error) php_converter_throw_failure(obj, error TSRMLS_CC, \
                                           fname "() returned error %ld: %s", (long)error, u_errorName(error))
 
@@ -75,7 +81,7 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, long 
 				chars[1] = 0;
 				chars_len = 1;
                 ZVAL_LONG(error, U_INVALID_STATE_ERROR);
-                RETVAL_STRINGL(chars, chars_len, 1);
+                RETVAL_STRINGL(chars, chars_len);
                 return;
             }
 
@@ -94,7 +100,7 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, long 
 				chars_len = 1;
             	ZVAL_LONG(error, uerror);
 			}
-			RETVAL_STRINGL(chars, chars_len, 1);
+			RETVAL_STRINGL(chars, chars_len);
 		}
 	}
 }
@@ -199,14 +205,11 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 		case IS_ARRAY:
 		{
 			HashTable *ht = Z_ARRVAL_P(val);
-			HashPosition pos;
-			zval **tmpzval;
+			zval *tmpzval;
 
-			for(zend_hash_internal_pointer_reset_ex(ht, &pos);
-				zend_hash_get_current_data_ex(ht, (void**)&tmpzval, &pos) == SUCCESS;
-				zend_hash_move_forward_ex(ht, &pos)) {
-				php_converter_append_toUnicode_target(*tmpzval, args, objval TSRMLS_CC);
-			}
+			ZEND_HASH_FOREACH_VAL(ht, tmpzval) {
+				php_converter_append_toUnicode_target(tmpzval, args, objval TSRMLS_CC);
+			} ZEND_HASH_FOREACH_END();
 			return;
 		}
 		default:
@@ -223,48 +226,37 @@ static void php_converter_to_u_callback(const void *context,
                                         UConverterCallbackReason reason,
                                         UErrorCode *pErrorCode) {
 	php_converter_object *objval = (php_converter_object*)context;
-	zval *zreason, *zsource, *zcodeunits, *zerror, *retval = NULL;
-	zval **zargs[4];
+	zval retval;
+	zval zargs[4];
 #ifdef ZTS
 	TSRMLS_D = objval->tsrm_ls;
 #endif
 
-	MAKE_STD_ZVAL(zreason);
-	ZVAL_LONG(zreason, reason);
-	zargs[0] = &zreason;
-
-	MAKE_STD_ZVAL(zsource);
-	ZVAL_STRINGL(zsource, args->source, args->sourceLimit - args->source, 1);
-	zargs[1] = &zsource;
-
-	MAKE_STD_ZVAL(zcodeunits);
-	ZVAL_STRINGL(zcodeunits, codeUnits, length, 1);
-	zargs[2] = &zcodeunits;
-
-	MAKE_STD_ZVAL(zerror);
-	ZVAL_LONG(zerror, *pErrorCode);
-	zargs[3] = &zerror;
+	ZVAL_LONG(&zargs[0], reason);
+	ZVAL_STRINGL(&zargs[1], args->source, args->sourceLimit - args->source);
+	ZVAL_STRINGL(&zargs[2], codeUnits, length);
+	ZVAL_LONG(&zargs[3], *pErrorCode);
 
 	objval->to_cb.param_count    = 4;
-	objval->to_cb.params         = zargs;
-	objval->to_cb.retval_ptr_ptr = &retval;
+	objval->to_cb.params = zargs;
+	objval->to_cb.retval = &retval;
 	objval->to_cb.no_separation  = 0;
 	if (zend_call_function(&(objval->to_cb), &(objval->to_cache) TSRMLS_CC) == FAILURE) {
 		/* Unlikely */
 		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR TSRMLS_CC, "Unexpected failure calling toUCallback()");
-	} else if (retval) {
-		php_converter_append_toUnicode_target(retval, args, objval TSRMLS_CC);
+	} else if (!Z_ISUNDEF(retval)) {
+		php_converter_append_toUnicode_target(&retval, args, objval TSRMLS_CC);
 		zval_ptr_dtor(&retval);
 	}
 
-	if (Z_TYPE_P(zerror) == IS_LONG) {
-		*pErrorCode = Z_LVAL_P(zerror);
+	if (Z_TYPE(zargs[3]) == IS_LONG) {
+		*pErrorCode = Z_LVAL(zargs[3]);
 	}
 
-	zval_ptr_dtor(&zreason);
-	zval_ptr_dtor(&zsource);
-	zval_ptr_dtor(&zcodeunits);
-	zval_ptr_dtor(&zerror);
+	zval_ptr_dtor(&zargs[0]);
+	zval_ptr_dtor(&zargs[1]);
+	zval_ptr_dtor(&zargs[2]);
+	zval_ptr_dtor(&zargs[3]);
 }
 /* }}} */
 
@@ -291,13 +283,10 @@ static void php_converter_append_fromUnicode_target(zval *val, UConverterFromUni
 		case IS_ARRAY:
 		{
 			HashTable *ht = Z_ARRVAL_P(val);
-			HashPosition pos;
-			zval **tmpzval;
-			for(zend_hash_internal_pointer_reset_ex(ht, &pos);
-				zend_hash_get_current_data_ex(ht, (void**)&tmpzval, &pos) == SUCCESS;
-				zend_hash_move_forward_ex(ht, &pos)) {
-				php_converter_append_fromUnicode_target(*tmpzval, args, objval TSRMLS_CC);
-			}
+			zval *tmpzval;
+			ZEND_HASH_FOREACH_VAL(ht, tmpzval) {
+				php_converter_append_fromUnicode_target(tmpzval, args, objval TSRMLS_CC);
+			} ZEND_HASH_FOREACH_END();
 			return;
 		}
 		default:
@@ -313,55 +302,44 @@ static void php_converter_from_u_callback(const void *context,
                                           UConverterCallbackReason reason,
                                           UErrorCode *pErrorCode) {
 	php_converter_object *objval = (php_converter_object*)context;
-	zval *zreason, *zsource, *zcodepoint, *zerror, *retval = NULL;
-	zval **zargs[4];
+	zval retval;
+	zval zargs[4];
 	int i;
 #ifdef ZTS
 	TSRMLS_D = objval->tsrm_ls;
 #endif
 
-	MAKE_STD_ZVAL(zreason);
-	ZVAL_LONG(zreason, reason);
-	zargs[0] = &zreason;
-
-	MAKE_STD_ZVAL(zsource);
-	array_init(zsource);
+	ZVAL_LONG(&zargs[0], reason);
+	array_init(&zargs[1]);
 	i = 0;
 	while (i < length) {
 		UChar32 c;
 		U16_NEXT(codeUnits, i, length, c);
-		add_next_index_long(zsource, c);
+		add_next_index_long(&zargs[1], c);
 	}
-	zargs[1] = &zsource;
+	ZVAL_LONG(&zargs[2], codePoint);
+	ZVAL_LONG(&zargs[3], *pErrorCode);
 
-	MAKE_STD_ZVAL(zcodepoint);
-	ZVAL_LONG(zcodepoint, codePoint);
-	zargs[2] = &zcodepoint;
-
-	MAKE_STD_ZVAL(zerror);
-	ZVAL_LONG(zerror, *pErrorCode);
-	zargs[3] = &zerror;
-
-	objval->from_cb.param_count    = 4;
-	objval->from_cb.params         = zargs;
-	objval->from_cb.retval_ptr_ptr = &retval;
+	objval->from_cb.param_count = 4;
+	objval->from_cb.params = zargs;
+	objval->from_cb.retval = &retval;
 	objval->from_cb.no_separation  = 0;
 	if (zend_call_function(&(objval->from_cb), &(objval->from_cache) TSRMLS_CC) == FAILURE) {
 		/* Unlikely */
 		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR TSRMLS_CC, "Unexpected failure calling fromUCallback()");
-	} else if (retval) {
-		php_converter_append_fromUnicode_target(retval, args, objval TSRMLS_CC);
+	} else if (!Z_ISUNDEF(retval)) {
+		php_converter_append_fromUnicode_target(&retval, args, objval TSRMLS_CC);
 		zval_ptr_dtor(&retval);
 	}
 
-	if (Z_TYPE_P(zerror) == IS_LONG) {
-		*pErrorCode = Z_LVAL_P(zerror);
+	if (Z_TYPE(zargs[3]) == IS_LONG) {
+		*pErrorCode = Z_LVAL(zargs[3]);
 	}
 
-	zval_ptr_dtor(&zreason);
-	zval_ptr_dtor(&zsource);
-	zval_ptr_dtor(&zcodepoint);
-	zval_ptr_dtor(&zerror);
+	zval_ptr_dtor(&zargs[0]);
+	zval_ptr_dtor(&zargs[1]);
+	zval_ptr_dtor(&zargs[2]);
+	zval_ptr_dtor(&zargs[3]);
 }
 /* }}} */
 
@@ -489,7 +467,7 @@ static void php_converter_do_get_encoding(php_converter_object *objval, UConvert
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(name, 1);
+	RETURN_STRING(name);
 }
 /* }}} */
 
@@ -674,7 +652,7 @@ static PHP_METHOD(UConverter, getSubstChars) {
 		RETURN_FALSE;
 	}
 
-	RETURN_STRINGL(chars, chars_len, 1);
+	RETURN_STRINGL(chars, chars_len);
 }
 /* }}} */
 
@@ -742,7 +720,7 @@ static zend_bool php_converter_do_convert(UConverter *dest_cnv, char **pdest, in
 /* }}} */
 
 /* {{{ proto string UConverter::reasonText(long reason) */
-#define UCNV_REASON_CASE(v) case (UCNV_ ## v) : RETURN_STRINGL( "REASON_" #v , sizeof( "REASON_" #v ) - 1, 1);
+#define UCNV_REASON_CASE(v) case (UCNV_ ## v) : RETURN_STRINGL( "REASON_" #v , sizeof( "REASON_" #v ) - 1);
 ZEND_BEGIN_ARG_INFO_EX(php_converter_reasontext_arginfo, 0, ZEND_RETURN_VALUE, 0)
 	ZEND_ARG_INFO(0, reason)
 ZEND_END_ARG_INFO();
@@ -795,7 +773,9 @@ static PHP_METHOD(UConverter, convert) {
                                  reverse ? objval->dest : objval->src,
 	                             str,   str_len,
 	                             objval TSRMLS_CC)) {
-		RETURN_STRINGL(dest, dest_len, 0);
+		RETURN_STRINGL(dest, dest_len);
+		//???
+		efree(dest);
 	} else {
 		RETURN_FALSE;
 	}
@@ -831,25 +811,27 @@ static PHP_METHOD(UConverter, transcode) {
 		UErrorCode error = U_ZERO_ERROR;
 
 		if (options && zend_hash_num_elements(Z_ARRVAL_P(options))) {
-			zval **tmpzval;
+			zval *tmpzval;
 
 			if (U_SUCCESS(error) &&
-				zend_hash_find(Z_ARRVAL_P(options), "from_subst", sizeof("from_subst"), (void**)&tmpzval) == SUCCESS &&
-				Z_TYPE_PP(tmpzval) == IS_STRING) {
+				(tmpzval = zend_hash_str_find(Z_ARRVAL_P(options), "from_subst", sizeof("from_subst") - 1)) != NULL &&
+				Z_TYPE_P(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
-				ucnv_setSubstChars(src_cnv, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval) & 0x7F, &error);
+				ucnv_setSubstChars(src_cnv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) & 0x7F, &error);
 			}
 			if (U_SUCCESS(error) &&
-				zend_hash_find(Z_ARRVAL_P(options), "to_subst", sizeof("to_subst"), (void**)&tmpzval) == SUCCESS &&
-				Z_TYPE_PP(tmpzval) == IS_STRING) {
+				(tmpzval = zend_hash_str_find(Z_ARRVAL_P(options), "to_subst", sizeof("to_subst") - 1)) != NULL &&
+				Z_TYPE_P(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
-				ucnv_setSubstChars(dest_cnv, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval) & 0x7F, &error);
+				ucnv_setSubstChars(dest_cnv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) & 0x7F, &error);
 			}
 		}
 
 		if (U_SUCCESS(error) &&
 			php_converter_do_convert(dest_cnv, &out, &out_len, src_cnv, str, str_len, NULL TSRMLS_CC)) {
-			RETVAL_STRINGL(out, out_len, 0);
+			RETVAL_STRINGL(out, out_len);
+			//???
+			efree(out);
 		}
 
 		if (U_FAILURE(error)) {
@@ -890,7 +872,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_geterrormsg_arginfo, 0, ZEND_RETURN_VALUE, 
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, getErrorMessage) {
 	php_converter_object *objval = CONV_GET(getThis());
-	char *message = intl_error_get_message(&(objval->error) TSRMLS_CC);
+	zend_string *message = intl_error_get_message(&(objval->error) TSRMLS_CC);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -899,7 +881,7 @@ static PHP_METHOD(UConverter, getErrorMessage) {
 	}
 
 	if (message) {
-		RETURN_STRING(message, 1);
+		RETURN_STR(message);
 	} else {
 		RETURN_NULL();
 	}
@@ -1033,7 +1015,9 @@ static zend_function_entry php_converter_methods[] = {
 };
 
 /* {{{ Converter create/clone/destroy */
-static void php_converter_free_object(php_converter_object *objval TSRMLS_DC) {
+static void php_converter_free_object(zend_object *obj TSRMLS_DC) {
+	php_converter_object *objval = php_converter_fetch_object(obj);
+
 	if (objval->src) {
 		ucnv_close(objval->src);
 	}
@@ -1044,15 +1028,12 @@ static void php_converter_free_object(php_converter_object *objval TSRMLS_DC) {
 
 	intl_error_reset(&(objval->error) TSRMLS_CC);
 	zend_object_std_dtor(&(objval->obj) TSRMLS_CC);
-
-	efree(objval);
 }
 
-static zend_object_value php_converter_object_ctor(zend_class_entry *ce, php_converter_object **pobjval TSRMLS_DC) {
+static zend_object *php_converter_object_ctor(zend_class_entry *ce, php_converter_object **pobjval TSRMLS_DC) {
 	php_converter_object *objval;
-	zend_object_value retval;
 
-	objval = ecalloc(1, sizeof(php_converter_object));
+	objval = ecalloc(1, sizeof(php_converter_object) + sizeof(zval) * (ce->default_properties_count - 1));
 	objval->obj.ce = ce;
 
 #ifdef ZTS
@@ -1060,25 +1041,24 @@ static zend_object_value php_converter_object_ctor(zend_class_entry *ce, php_con
 #endif
 	intl_error_init(&(objval->error) TSRMLS_CC);
 
-	retval.handle = zend_objects_store_put(objval, NULL, (zend_objects_free_object_storage_t)php_converter_free_object, NULL TSRMLS_CC);
-	retval.handlers = &php_converter_object_handlers;
+	objval->obj.handlers = &php_converter_object_handlers;
 	*pobjval = objval;
 
-	return retval;
+	return &objval->obj;
 }
 
-static zend_object_value php_converter_create_object(zend_class_entry *ce TSRMLS_DC) {
+static zend_object *php_converter_create_object(zend_class_entry *ce TSRMLS_DC) {
 	php_converter_object *objval = NULL;
-	zend_object_value retval = php_converter_object_ctor(ce, &objval TSRMLS_CC);
+	zend_object *retval = php_converter_object_ctor(ce, &objval TSRMLS_CC);
 
 	object_properties_init(&(objval->obj), ce);
 
 	return retval;
 }
 
-static zend_object_value php_converter_clone_object(zval *object TSRMLS_DC) {
-	php_converter_object *objval, *oldobj = (php_converter_object*)zend_objects_get_address(object TSRMLS_CC);
-	zend_object_value retval = php_converter_object_ctor(Z_OBJCE_P(object), &objval TSRMLS_CC);
+static zend_object *php_converter_clone_object(zval *object TSRMLS_DC) {
+	php_converter_object *objval, *oldobj = Z_INTL_CONVERTER_P(object);
+	zend_object *retval = php_converter_object_ctor(Z_OBJCE_P(object), &objval TSRMLS_CC);
 	UErrorCode error = U_ZERO_ERROR;
 
 	intl_errors_reset(&oldobj->error TSRMLS_CC);
@@ -1089,12 +1069,12 @@ static zend_object_value php_converter_clone_object(zval *object TSRMLS_DC) {
 		objval->dest = ucnv_safeClone(oldobj->dest, NULL, NULL, &error);
 	}
 	if (U_FAILURE(error)) {
-		char *err_msg;
+		zend_string *err_msg;
 		THROW_UFAILURE(oldobj, "ucnv_safeClone", error);
 
 		err_msg = intl_error_get_message(&oldobj->error TSRMLS_CC);
-		zend_throw_exception(NULL, err_msg, 0 TSRMLS_CC);
-		efree(err_msg);
+		zend_throw_exception(NULL, err_msg->val, 0 TSRMLS_CC);
+		STR_RELEASE(err_msg);
 
 		return retval;
 	}
@@ -1103,7 +1083,7 @@ static zend_object_value php_converter_clone_object(zval *object TSRMLS_DC) {
 	php_converter_set_callbacks(objval, objval->src  TSRMLS_CC);
 	php_converter_set_callbacks(objval, objval->dest TSRMLS_CC);
 
-	zend_objects_clone_members(&(objval->obj), retval, &(oldobj->obj), Z_OBJ_HANDLE_P(object) TSRMLS_CC);
+	zend_objects_clone_members(&(objval->obj), &(oldobj->obj) TSRMLS_CC);
 
 	/* Newly cloned object deliberately does not inherit error state from original object */
 
@@ -1123,6 +1103,7 @@ int php_converter_minit(INIT_FUNC_ARGS) {
 	php_converter_ce->create_object = php_converter_create_object;
 	memcpy(&php_converter_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
+	php_converter_object_handlers.free_obj = php_converter_free_object;
 
 	/* enum UConverterCallbackReason */
 	CONV_REASON_CONST(UNASSIGNED);

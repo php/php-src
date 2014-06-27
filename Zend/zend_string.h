@@ -109,7 +109,7 @@ static zend_always_inline zend_uint zend_str_delref(zend_string *s)
 
 static zend_always_inline zend_string *zend_str_alloc(int len, int persistent)
 {
-	zend_string *ret = pemalloc(_STR_HEADER_SIZE + len + 1, persistent);
+	zend_string *ret = (zend_string *)pemalloc(_STR_HEADER_SIZE + len + 1, persistent);
 
 	GC_REFCOUNT(ret) = 1;
 #if 1
@@ -127,7 +127,7 @@ static zend_always_inline zend_string *zend_str_alloc(int len, int persistent)
 
 static zend_always_inline zend_string *zend_str_safe_alloc(size_t n, size_t m, size_t l, int persistent)
 {
-	zend_string *ret = safe_pemalloc(n, m, _STR_HEADER_SIZE + l + 1, persistent);
+	zend_string *ret = (zend_string *)safe_pemalloc(n, m, _STR_HEADER_SIZE + l + 1, persistent);
 
 	GC_REFCOUNT(ret) = 1;
 #if 1
@@ -177,7 +177,7 @@ static zend_always_inline zend_string *zend_str_realloc(zend_string *s, int len,
 		ret = STR_ALLOC(len, persistent);
 		memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
 	} else if (STR_REFCOUNT(s) == 1) {
-		ret = perealloc(s, _STR_HEADER_SIZE + len + 1, persistent);
+		ret = (zend_string *)perealloc(s, _STR_HEADER_SIZE + len + 1, persistent);
 		ret->len = len;
 		STR_FORGET_HASH_VAL(ret);
 	} else {
@@ -196,7 +196,7 @@ static zend_always_inline zend_string *zend_str_safe_realloc(zend_string *s, siz
 		ret = STR_SAFE_ALLOC(n, m, l, persistent);
 		memcpy(ret->val, s->val, ((n * m) + l > s->len ? s->len : ((n * m) + l)) + 1);
 	} else if (STR_REFCOUNT(s) == 1) {
-		ret = safe_perealloc(s, n, m, _STR_HEADER_SIZE + l + 1, persistent);
+		ret = (zend_string *)safe_perealloc(s, n, m, _STR_HEADER_SIZE + l + 1, persistent);
 		ret->len = (n * m) + l;
 		STR_FORGET_HASH_VAL(ret);
 	} else {

@@ -82,7 +82,7 @@ PHP_FUNCTION( datefmt_get_error_code )
 		RETURN_FALSE;
 	}
 
-	dfo = (IntlDateFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
+	dfo = Z_INTL_DATEFORMATTER_P( object TSRMLS_CC );
 
 	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(dfo) );
@@ -96,7 +96,7 @@ PHP_FUNCTION( datefmt_get_error_code )
  */
 PHP_FUNCTION( datefmt_get_error_message )
 {
-	char*                    message = NULL;
+	zend_string *message = NULL;
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -109,10 +109,10 @@ PHP_FUNCTION( datefmt_get_error_message )
 		RETURN_FALSE;
 	}
 
-	dfo = (IntlDateFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
+	dfo = Z_INTL_DATEFORMATTER_P( object TSRMLS_CC );
 
 	/* Return last error message. */
 	message = intl_error_get_message( INTL_DATA_ERROR_P(dfo) TSRMLS_CC );
-	RETURN_STRING( message, 0);
+	RETURN_STR( message);
 }
 /* }}} */

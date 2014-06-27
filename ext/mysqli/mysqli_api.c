@@ -1151,7 +1151,7 @@ static void php_add_field_properties(zval *value, const MYSQL_FIELD *field TSRML
 #ifdef MYSQLI_USE_MYSQLND
 	add_property_str(value, "name", STR_COPY(field->sname));
 #else
-	add_property_string(value, "name",(field->name ? field->name : ""), field->name_length);
+	add_property_stringl(value, "name",(field->name ? field->name : ""), field->name_length);
 #endif
 
 	add_property_stringl(value, "orgname", (field->org_name ? field->org_name : ""), field->org_name_length);
