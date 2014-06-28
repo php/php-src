@@ -344,7 +344,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		
 		if (used_tz == NULL) {
 			zval nullzv, *zvptr = &nullzv;
-			ZVAL_UNDEF(zvptr);
+			ZVAL_NULL(zvptr);
 			used_tz = timezone_process_timezone_argument(zvptr, &err, "msgfmt_format" TSRMLS_CC);
 			if (used_tz == NULL) {
 				continue;

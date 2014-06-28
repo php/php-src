@@ -141,7 +141,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		ZVAL_STRING(&local_zv_tz, tzinfo->name);
 		zv_timezone = &local_zv_tz;
 	} else {
-		ZVAL_UNDEF(&local_zv_tz);
+		ZVAL_NULL(&local_zv_tz);
 	}
 
 	if (Z_TYPE_P(zv_timezone) == IS_OBJECT &&
