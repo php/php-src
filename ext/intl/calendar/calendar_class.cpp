@@ -146,7 +146,7 @@ static const struct {
 /* {{{ get_debug_info handler for Calendar */
 static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 {
-	zval			zv = zval_used_for_init,
+	zval			zv,
 					zfields;
 	Calendar_object	*co;
 	const Calendar	*cal;
@@ -169,7 +169,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		const_cast<char*>(cal->getType()));
 
 	{
-		zval		   ztz = zval_used_for_init,
+		zval		   ztz,
 					   ztz_debug;
 		int			   is_tmp;
 		HashTable	   *debug_info;

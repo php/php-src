@@ -1032,8 +1032,8 @@ PHP_RINIT_FUNCTION( intl )
  */
 PHP_RSHUTDOWN_FUNCTION( intl )
 {
-	if(INTL_G(current_collator)) {
-		INTL_G(current_collator) = NULL;
+	if(!Z_ISUNDEF(INTL_G(current_collator))) {
+		ZVAL_UNDEF(&INTL_G(current_collator));
 	}
 	if (INTL_G(grapheme_iterator)) {
 		grapheme_close_global_iterator( TSRMLS_C );

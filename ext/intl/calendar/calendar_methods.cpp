@@ -1248,7 +1248,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	int64_t	ts;
 	char	ts_str[sizeof("@-9223372036854775808")];
 	int		ts_str_len;
-	zval	ts_tmp, ts_zval = zval_used_for_init;
+	zval	ts_tmp, ts_zval;
 
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 

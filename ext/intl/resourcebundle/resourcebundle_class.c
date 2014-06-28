@@ -210,18 +210,14 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
-zval *resourcebundle_array_get(zval *object, zval *offset, int type TSRMLS_DC) 
+zval *resourcebundle_array_get(zval *object, zval *offset, int type, zval *rv TSRMLS_DC) 
 {
-	zval *retval;
-
 	if(offset == NULL) {
 		php_error( E_ERROR, "Cannot apply [] to ResourceBundle object" );
 	}
-	MAKE_STD_ZVAL(retval);
-
-	resourcebundle_array_fetch(object, offset, retval, 1 TSRMLS_CC);
-	Z_DELREF_P(retval);
-	return retval;
+	ZVAL_NULL(rv);
+	resourcebundle_array_fetch(object, offset, rv, 1 TSRMLS_CC);
+	return rv;
 }
 /* }}} */
 

@@ -65,7 +65,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 	UnicodeString		id;
 	char				*message = NULL;
 	php_timezone_obj	*tzobj;
-	zval				arg = zval_used_for_init;
+	zval				arg;
 
 	timeZone->getID(id);
 	if (id.isBogus()) {
@@ -132,7 +132,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 													 intl_error *outside_error,
 													 const char *func TSRMLS_DC)
 {
-	zval		local_zv_tz		= zval_used_for_init;
+	zval		local_zv_tz;
 	char		*message = NULL;
 	TimeZone	*timeZone;
 
@@ -287,7 +287,7 @@ static int TimeZone_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 /* {{{ get_debug_info handler for TimeZone */
 static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 {
-	zval			zv = zval_used_for_init;
+	zval			zv;
 	TimeZone_object	*to;
 	const TimeZone	*tz;
 	UnicodeString	ustr;

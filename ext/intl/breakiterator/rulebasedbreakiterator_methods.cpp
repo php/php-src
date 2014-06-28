@@ -66,7 +66,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			smart_str parse_error_str;
 			parse_error_str = intl_parse_error_to_string(&parseError);
 			spprintf(&msg, 0, "rbbi_create_instance: unable to create "
-				"RuleBasedBreakIterator from rules (%s)", parse_error_str.c);
+				"RuleBasedBreakIterator from rules (%s)", parse_error_str.s? parse_error_str.s->val : "");
 			smart_str_free(&parse_error_str);
 			intl_error_set_custom_msg(NULL, msg, 1 TSRMLS_CC);
 			efree(msg);
@@ -101,7 +101,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 	_php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (Z_TYPE_P(return_value) == IS_NULL) {
-		zend_object_store_ctor_failed(&orig_this TSRMLS_CC);
+		zend_object_store_ctor_failed(Z_OBJ(orig_this) TSRMLS_CC);
 		zval_dtor(&orig_this);
 	}
 }
@@ -119,17 +119,20 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
+	char *str;
+	int str_len;
 	const UnicodeString rules = fetch_rbbi(bio)->getRules();
 
-	Z_TYPE_P(return_value) = IS_STRING;
-	if (intl_charFromString(rules, &Z_STRVAL_P(return_value),
-			&Z_STRLEN_P(return_value), BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
+	if (intl_charFromString(rules, &str, &str_len, BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
 	{
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_hash_code: Error converting result to UTF-8 string",
 				0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
+	RETVAL_STRINGL(str, str_len);
+	//???
+	efree(str);
 }
 
 U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)

@@ -135,7 +135,7 @@ static zend_object *BreakIterator_clone_obj(zval *object TSRMLS_DC)
 /* {{{ get_debug_info handler for BreakIterator */
 static HashTable *BreakIterator_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 {
-	zval					zv = zval_used_for_init;
+	zval					zv;
 	BreakIterator_object	*bio;
 	const BreakIterator		*biter;
 
