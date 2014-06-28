@@ -57,7 +57,7 @@ END_EXTERN_C()
 #define _STR_HEADER_SIZE XtOffsetOf(zend_string, val)
 
 #define STR_ALLOCA_ALLOC(str, _len, use_heap) do { \
-	(str) = do_alloca(_STR_HEADER_SIZE + (_len) + 1, (use_heap)); \
+	(str) = (zend_string *)do_alloca(_STR_HEADER_SIZE + (_len) + 1, (use_heap)); \
 	GC_REFCOUNT(str) = 1; \
 	(str)->h = 0; \
 	(str)->len = (_len); \
