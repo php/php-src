@@ -995,10 +995,7 @@ scalar:
 			  zend_do_build_namespace_name(&$1, &$1, &$3 TSRMLS_CC);
 			  $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST, AST_ZVAL(&$1)); }
 	|	T_NS_SEPARATOR namespace_name
-			{ zval tmp; ZVAL_NEW_STR(&tmp, STR_ALLOC(Z_STRLEN($2.u.constant)+1, 0)); Z_STRVAL(tmp)[0] = '\\'; memcpy(Z_STRVAL(tmp) + 1, Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1);
-			  if (Z_DELREF($2.u.constant) == 0) { efree(Z_STR($2.u.constant)); }
-			  Z_STR($2.u.constant) = Z_STR(tmp);
-			  $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST, AST_ZVAL(&$2)); }
+			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST, AST_ZVAL(&$2)); }
 ;
 
 
