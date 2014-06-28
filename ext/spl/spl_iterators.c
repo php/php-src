@@ -3460,7 +3460,7 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser T
 		array_set_zval_key(Z_ARRVAL_P(return_value), &key, data TSRMLS_CC);
 		zval_dtor(&key);
 	} else {
-		Z_ADDREF_P(data);
+		Z_TRY_ADDREF_P(data);
 		add_next_index_zval(return_value, data);
 	}
 	return ZEND_HASH_APPLY_KEEP;
