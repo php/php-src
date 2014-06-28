@@ -92,8 +92,8 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"resourcebundle_ctor: unable to parse input parameters", 0 TSRMLS_CC );
-		zval_dtor( return_value );
-		RETURN_NULL();
+		Z_OBJ_P(return_value) = NULL;
+		return;
 	}
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
@@ -152,6 +152,9 @@ PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
 	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+		RETURN_NULL();
+	}
 }
 /* }}} */
 

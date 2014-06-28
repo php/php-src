@@ -28,8 +28,8 @@
    for this to work! 
 */
 typedef struct _intl_data {
-	zend_object		zo;
 	intl_error		error;
+	zend_object		zo;
 } intl_object;
 
 #define INTL_METHOD_INIT_VARS(oclass, obj)		\

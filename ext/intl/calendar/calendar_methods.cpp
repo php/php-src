@@ -1220,7 +1220,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	calendar_object_create(return_value, cal TSRMLS_CC);
 
 error:
-	if (zv_datetime != zv_arg) {
+	if (zv_datetime && zv_datetime != zv_arg) {
 		zval_ptr_dtor(zv_datetime);
 	}
 	if (zv_timestamp) {
