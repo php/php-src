@@ -1264,8 +1264,6 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 
 	ts_str_len = slprintf(ts_str, sizeof(ts_str), "@%I64d", ts);
 	ZVAL_STRINGL(&ts_zval, ts_str, ts_str_len);
-	//???
-	efree(ts_str);
 
 	/* Now get the time zone */
 	const TimeZone& tz = co->ucal->getTimeZone();

@@ -74,9 +74,7 @@ static void resourcebundle_iterator_dtor( zend_object_iterator *iter TSRMLS_DC )
 
 	resourcebundle_iterator_invalidate( iter TSRMLS_CC );
 
-	Z_DELREF_P(object);
-
-	efree(iterator);
+	zval_ptr_dtor(object);
 }
 /* }}} */
 

@@ -217,22 +217,26 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	ii = Z_INTL_ITERATOR_P(object);
 
 	ii->iterator = (zend_object_iterator*)emalloc(sizeof(zoi_break_iter_parts));
-	zend_iterator_init(ii->iterator TSRMLS_CC);
+	//zend_iterator_init(ii->iterator TSRMLS_CC);
+
 	ZVAL_COPY(&ii->iterator->data, break_iter_zv);
 	ii->iterator->funcs = &breakiterator_parts_it_funcs;
 	ii->iterator->index = 0;
+
 	((zoi_with_current*)ii->iterator)->destroy_it = _breakiterator_parts_destroy_it;
 	ZVAL_COPY_VALUE(&((zoi_with_current*)ii->iterator)->wrapping_obj, object);
 	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
 
 	((zoi_break_iter_parts*)ii->iterator)->bio = Z_INTL_BREAKITERATOR_P(break_iter_zv);
+
 	assert(((zoi_break_iter_parts*)ii->iterator)->bio->biter != NULL);
+
 	((zoi_break_iter_parts*)ii->iterator)->key_type = key_type;
 }
 
 U_CFUNC zend_object *IntlPartsIterator_object_create(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_object* retval = IntlIterator_ce_ptr->create_object(ce TSRMLS_CC);
+	zend_object *retval = IntlIterator_ce_ptr->create_object(ce TSRMLS_CC);
 	retval->handlers = &IntlPartsIterator_handlers;
 
 	return retval;

@@ -54,7 +54,6 @@ void zoi_with_current_dtor(zend_object_iterator *iter TSRMLS_DC)
 		 * not finding the memory of this iterator allocated anymore. */
 		iter->funcs->invalidate_current(iter TSRMLS_CC);
 		zoiwc->destroy_it(iter TSRMLS_CC);
-		efree(iter);
 	}
 }
 
@@ -165,8 +164,6 @@ static void IntlIterator_objects_free(zend_object *object TSRMLS_DC)
 	intl_error_reset(INTLITERATOR_ERROR_P(ii) TSRMLS_CC);
 
 	zend_object_std_dtor(&ii->zo TSRMLS_CC);
-
-	efree(ii);
 }
 
 static zend_object_iterator *IntlIterator_get_iterator(
@@ -198,7 +195,7 @@ static zend_object *IntlIterator_object_create(zend_class_entry *ce TSRMLS_DC)
 	intern = (IntlIterator_object*)ecalloc(1, sizeof(IntlIterator_object) + sizeof(zval) * (ce->default_properties_count - 1));
 	
 	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
-    object_properties_init((zend_object*) intern, ce);
+    object_properties_init(&intern->zo, ce);
 	intl_error_init(INTLITERATOR_ERROR_P(intern) TSRMLS_CC);
 
 	intern->iterator = NULL;

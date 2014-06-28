@@ -121,8 +121,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 					rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)));
 		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(rb), pbuf, 1 TSRMLS_CC);
 		efree(pbuf);
-		zval_dtor(return_value);
-		RETURN_NULL();
+		Z_OBJ_P(return_value) = NULL;
 	}
 }
 /* }}} */
