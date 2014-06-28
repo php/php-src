@@ -938,7 +938,7 @@ exit_expr:
 backticks_expr:
 		/* empty */
 			{ zval empty_str; ZVAL_EMPTY_STRING(&empty_str);
-			  $$.u.ast = zend_ast_create_constant(&empty_str); }
+			  $$.u.ast = zend_ast_create_zval(&empty_str); }
 	|	T_ENCAPSED_AND_WHITESPACE { $$.u.ast = AST_ZVAL(&$1); }
 	|	encaps_list { $$.u.ast = $1.u.ast; }
 ;
@@ -974,14 +974,14 @@ scalar:
 			{ if (Z_TYPE($1.u.constant) == IS_UNDEF) {
 			      zval class_const; ZVAL_STRING(&class_const, "__CLASS__");
 			      $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST,
-				      zend_ast_create_constant(&class_const));
+				      zend_ast_create_zval(&class_const));
 			  } else {
 			      $$.u.ast = AST_ZVAL(&$1);
 			  } }
 	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$.u.ast = AST_ZVAL(&$2); }
 	|	T_START_HEREDOC T_END_HEREDOC
 			{ zval empty_str; ZVAL_EMPTY_STRING(&empty_str);
-			  $$.u.ast = zend_ast_create_constant(&empty_str); }
+			  $$.u.ast = zend_ast_create_zval(&empty_str); }
 	|	'"' encaps_list '"' 	{ $$.u.ast = $2.u.ast; }
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$.u.ast = $2.u.ast; }
 	|	dereferencable_scalar	{ $$.u.ast = $1.u.ast; }

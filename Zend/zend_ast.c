@@ -23,15 +23,6 @@
 #include "zend_API.h"
 #include "zend_operators.h"
 
-ZEND_API zend_ast *zend_ast_create_constant(zval *zv)
-{
-	zend_ast_zval *ast = emalloc(sizeof(zend_ast_zval));
-	ast->kind = ZEND_CONST;
-	ast->attr = 0;
-	ZVAL_COPY_VALUE(&ast->val, zv);
-	return (zend_ast *) ast;
-}
-
 ZEND_API zend_ast *zend_ast_create_znode(znode *node)
 {
 	zend_ast_znode *ast = emalloc(sizeof(zend_ast_znode));
@@ -44,7 +35,7 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node)
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 {
 	zend_ast_zval *ast = emalloc(sizeof(zend_ast_zval));
-	ast->kind = ZEND_CONST;
+	ast->kind = ZEND_AST_ZVAL;
 	ast->attr = attr;
 	ZVAL_COPY_VALUE(&ast->val, zv);
 	return (zend_ast *) ast;
@@ -117,7 +108,7 @@ ZEND_API int zend_ast_is_ct_constant(zend_ast *ast)
 {
 	int i;
 
-	if (ast->kind == ZEND_CONST) {
+	if (ast->kind == ZEND_AST_ZVAL) {
 		return !Z_CONSTANT_P(zend_ast_get_zval(ast));
 	} else {
 		for (i = 0; i < ast->children; i++) {
@@ -201,7 +192,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			boolean_not_function(result, &op1 TSRMLS_CC);
 			zval_dtor(&op1);
 			break;
-		case ZEND_CONST:
+		case ZEND_AST_ZVAL:
 			ZVAL_DUP(result, zend_ast_get_zval(ast));
 			if (Z_OPT_CONSTANT_P(result)) {
 				zval_update_constant_ex(result, 1, scope TSRMLS_CC);
@@ -280,14 +271,15 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 {
 	if (ast == NULL) {
 		return NULL;
-	} else if (ast->kind == ZEND_CONST) {
-		zend_ast *copy = zend_ast_create_constant(zend_ast_get_zval(ast));
+	} else if (ast->kind == ZEND_AST_ZVAL) {
+		zend_ast *copy = zend_ast_create_zval_ex(zend_ast_get_zval(ast), ast->attr);
 		zval_copy_ctor(zend_ast_get_zval(copy));
 		return copy;
 	} else if (ast->children) {
 		zend_ast *new = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children - 1));
 		int i;
 		new->kind = ast->kind;
+		new->attr = ast->attr;
 		new->children = ast->children;
 		for (i = 0; i < ast->children; i++) {
 			new->child[i] = zend_ast_copy(ast->child[i]);
@@ -301,7 +293,7 @@ ZEND_API void zend_ast_destroy(zend_ast *ast)
 {
 	int i;
 
-	if (ast->kind == ZEND_CONST) {
+	if (ast->kind == ZEND_AST_ZVAL) {
 		zval_ptr_dtor(zend_ast_get_zval(ast));
 	} else if (ast->kind != ZEND_AST_ZNODE) {
 		for (i = 0; i < ast->children; i++) {

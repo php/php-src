@@ -26,8 +26,7 @@
 
 enum _zend_ast_kind {
 	/* first 256 kinds are reserved for opcodes */
-	ZEND_CONST = 256, /* TODO.AST: Split in constant lookup and literal zval */
-
+	ZEND_AST_ZVAL = 256,
 	ZEND_AST_ZNODE,
 
 	ZEND_AST_VAR,
@@ -97,8 +96,6 @@ static inline zval *zend_ast_get_zval(zend_ast *ast) {
 	return &((zend_ast_zval *) ast)->val;
 }
 
-ZEND_API zend_ast *zend_ast_create_constant(zval *zv);
-
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr);
 
 ZEND_API zend_ast *zend_ast_create_unary_ex(
@@ -139,7 +136,7 @@ static inline zend_ast *zend_ast_create_dynamic_and_add(zend_ast_kind kind, zend
 }
 
 static inline zend_ast *zend_ast_create_var(zval *name) {
-	return zend_ast_create_unary(ZEND_AST_VAR, zend_ast_create_constant(name));
+	return zend_ast_create_unary(ZEND_AST_VAR, zend_ast_create_zval(name));
 }
 static inline zend_ast *zend_ast_create_binary_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_binary_ex(ZEND_AST_BINARY_OP, opcode, op0, op1);
@@ -167,7 +164,7 @@ static inline zend_ast *zend_ast_create_assign_op(zend_uint opcode, zend_ast *op
 } while (0)
 
 #define AST_ZNODE(znode) zend_ast_create_znode((znode))
-#define AST_ZVAL(znode) zend_ast_create_constant(&(znode)->u.constant)
+#define AST_ZVAL(znode) zend_ast_create_zval(&(znode)->u.constant)
 
 #define AC(znode) AST_COMPILE(&znode, znode.u.ast)
 #define AZ(znode) ((znode).u.ast = AST_ZNODE(&znode))
