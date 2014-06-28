@@ -235,7 +235,7 @@ static void Calendar_objects_dtor(zend_object *object TSRMLS_DC)
 /* {{{ Calendar_objects_free */
 static void Calendar_objects_free(zend_object *object TSRMLS_DC)
 {
-	Calendar_object* co = (Calendar_object*) object;
+	Calendar_object* co = php_intl_calendar_fetch_object(object);
 
 	if (co->ucal) {
 		delete co->ucal;
@@ -244,8 +244,6 @@ static void Calendar_objects_free(zend_object *object TSRMLS_DC)
 	intl_error_reset(CALENDAR_ERROR_P(co) TSRMLS_CC);
 
 	zend_object_std_dtor(&co->zo TSRMLS_CC);
-
-	efree(co);
 }
 /* }}} */
 
