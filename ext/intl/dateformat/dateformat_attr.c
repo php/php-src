@@ -189,7 +189,7 @@ PHP_FUNCTION( datefmt_get_locale )
 
 	loc = (char *)udat_getLocaleByType(DATE_FORMAT_OBJECT(dfo), loc_type,&INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS(dfo, "Error getting locale");
-	RETURN_STRING(loc, 1);
+	RETURN_STRING(loc);
 }
 /* }}} */
 

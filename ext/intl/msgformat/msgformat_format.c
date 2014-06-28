@@ -43,8 +43,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 
 	ALLOC_HASHTABLE(args_copy);
 	zend_hash_init(args_copy, count, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(args_copy, Z_ARRVAL_P(args), (copy_ctor_func_t)zval_add_ref,
-		NULL, sizeof(zval*));
+	zend_hash_copy(args_copy, Z_ARRVAL_P(args), (copy_ctor_func_t)zval_add_ref);
 
 	umsg_format_helper(mfo, args_copy, &formatted, &formatted_len TSRMLS_CC);
 

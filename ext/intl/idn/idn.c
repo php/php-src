@@ -256,7 +256,9 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	/* return the allocated string, not a duplicate */
-	RETURN_STRINGL(((char *)converted_utf8), converted_utf8_len, 0);
+	RETVAL_STRINGL(((char *)converted_utf8), converted_utf8_len);
+	//????
+	efree(converted_utf8);
 }
 
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)

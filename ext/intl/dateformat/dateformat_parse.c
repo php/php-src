@@ -145,6 +145,7 @@ PHP_FUNCTION(datefmt_parse)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	if (z_parse_pos) {
+		ZVAL_DEREF(z_parse_pos);
 		convert_to_long(z_parse_pos);
 		parse_pos = (int32_t)Z_LVAL_P(z_parse_pos);
 		if(parse_pos > text_len) {
@@ -182,7 +183,8 @@ PHP_FUNCTION(datefmt_localtime)
     /* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
-	if(z_parse_pos) {
+	if (z_parse_pos) {
+		ZVAL_DEREF(z_parse_pos);
 		convert_to_long(z_parse_pos);
 		parse_pos = (int32_t)Z_LVAL_P(z_parse_pos);
 		if(parse_pos > text_len) {
@@ -190,7 +192,7 @@ PHP_FUNCTION(datefmt_localtime)
 		}
 	}
 	internal_parse_to_localtime( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, return_value TSRMLS_CC);
-	if(z_parse_pos) {
+	if (z_parse_pos) {
 		zval_dtor(z_parse_pos);
 		ZVAL_LONG(z_parse_pos, parse_pos);
 	}

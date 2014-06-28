@@ -67,6 +67,7 @@ PHP_FUNCTION( numfmt_parse )
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
 
 	if(zposition) {
+		ZVAL_DEREF(zposition);
 		convert_to_long(zposition);
 		position = (int32_t)Z_LVAL_P( zposition );
 		position_p = &position;
@@ -152,6 +153,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
 
 	if(zposition) {
+		ZVAL_DEREF(zposition);
 		convert_to_long(zposition);
 		position = (int32_t)Z_LVAL_P( zposition );
 		position_p = &position;
@@ -171,7 +173,9 @@ PHP_FUNCTION( numfmt_parse_currency )
 	intl_convert_utf16_to_utf8(&currency_str, &currency_len, currency, u_strlen(currency), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-8 failed" );
 	zval_dtor( zcurrency );
-	ZVAL_STRINGL(zcurrency, currency_str, currency_len, 0);
+	ZVAL_STRINGL(zcurrency, currency_str, currency_len);
+	//????
+	efree(currency_str);
 
 	RETVAL_DOUBLE( number );
 }

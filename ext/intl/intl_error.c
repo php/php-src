@@ -129,24 +129,24 @@ void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_D
 /* {{{ const char* intl_error_get_message( intl_error* err )
  * Create output message in format "<intl_error_text>: <extra_user_error_text>".
  */
-char* intl_error_get_message( intl_error* err TSRMLS_DC )
+zend_string * intl_error_get_message( intl_error* err TSRMLS_DC )
 {
-	const char* uErrorName = NULL;
-	char*       errMessage = 0;
+	const char *uErrorName = NULL;
+	zend_string *errMessage = 0;
 
 	if( !err && !( err = intl_g_error_get( TSRMLS_C ) ) )
-		return estrdup( "" );
+		return STR_EMPTY_ALLOC();
 
 	uErrorName = u_errorName( err->code );
 
 	/* Format output string */
 	if( err->custom_error_message )
 	{
-		spprintf( &errMessage, 0, "%s: %s", err->custom_error_message, uErrorName );
+		errMessage = strpprintf(0, "%s: %s", err->custom_error_message, uErrorName );
 	}
 	else
 	{
-		spprintf( &errMessage, 0, "%s", uErrorName );
+		errMessage = strpprintf(0, "%s", uErrorName );
 	}
 
 	return errMessage;
