@@ -293,44 +293,50 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	UnicodeString	ustr;
 	char			*str;
 	int				str_len;
+	HashTable 		*debug_info;
 	UErrorCode		uec = U_ZERO_ERROR;
 
 	*is_temp = 1;
 	
-	array_init_size(&zv, 4);
+	ALLOC_HASHTABLE(debug_info);
+	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
 
 	to = Z_INTL_TIMEZONE_P(object);
 	tz = to->utimezone;
 
 	if (tz == NULL) {
-		add_assoc_bool_ex(&zv, "valid", sizeof("valid"), 0);
-		return Z_ARRVAL(zv);
+		ZVAL_FALSE(&zv);
+		zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
+		return debug_info;
 	}
 
-	add_assoc_bool_ex(&zv, "valid", sizeof("valid"), 1);
+	ZVAL_TRUE(&zv);
+	zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
 
 	tz->getID(ustr);
 	intl_convert_utf16_to_utf8(&str, &str_len,
 		ustr.getBuffer(), ustr.length(), &uec);
 	if (U_FAILURE(uec)) {
-		return Z_ARRVAL(zv);
+		return debug_info;
 	}
+	ZVAL_STRINGL(&zv, str, str_len);
+	zend_hash_str_update(debug_info, "id", sizeof("id") - 1, &zv);
 	// TODO: avoid reallocation ???
-	add_assoc_stringl_ex(&zv, "id", sizeof("id"), str, str_len);
 	efree(str);
 
 	int32_t rawOffset, dstOffset;
 	UDate now = Calendar::getNow();
 	tz->getOffset(now, FALSE, rawOffset, dstOffset, uec);
 	if (U_FAILURE(uec)) {
-		return Z_ARRVAL(zv);
+		return debug_info;
 	}
 	
-	add_assoc_long_ex(&zv, "rawOffset", sizeof("rawOffset"), (long)rawOffset);
-	add_assoc_long_ex(&zv, "currentOffset", sizeof("currentOffset"),
-		(long)(rawOffset + dstOffset));
+	ZVAL_LONG(&zv, (long)rawOffset);
+	zend_hash_str_update(debug_info,"rawOffset", sizeof("rawOffset") - 1, &zv); 
+	ZVAL_LONG(&zv, (long)(rawOffset + dstOffset));
+	zend_hash_str_update(debug_info,"currentOffset", sizeof("currentOffset") - 1, &zv); 
 
-	return Z_ARRVAL(zv);
+	return debug_info;
 }
 /* }}} */
 
