@@ -375,7 +375,7 @@ static zend_object *TimeZone_object_create(zend_class_entry *ce TSRMLS_DC)
 	intern = (TimeZone_object*)ecalloc(1, sizeof(TimeZone_object) + sizeof(zval) * (ce->default_properties_count - 1));
 	
 	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
-    object_properties_init((zend_object*) intern, ce);
+    object_properties_init(&intern->zo, ce);
 	TimeZone_object_init(intern TSRMLS_CC);
 
 	intern->zo.handlers = &TimeZone_handlers;
