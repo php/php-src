@@ -916,6 +916,21 @@ class_name:
 	|	T_NS_SEPARATOR namespace_name { zval tmp; ZVAL_NEW_STR(&tmp, STR_ALLOC(Z_STRLEN($2.u.constant)+1, 0)); Z_STRVAL(tmp)[0] = '\\'; memcpy(Z_STRVAL(tmp) + 1, Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); if (Z_DELREF($2.u.constant) == 0) {efree(Z_STR($2.u.constant));} Z_STR($2.u.constant) = Z_STR(tmp); $$ = $2; }
 ;
 
+/*
+class_name:
+		T_STATIC
+			{ ZVAL_STRING(&$1.u.constant, "static");
+			  $$.u.ast = AST_ZVAL(&$1); }
+	|	namespace_name { $$.u.ast = zend_ast_create_zval_ex(&$1.u.constant, 1); }
+	|	T_NAMESPACE T_NS_SEPARATOR namespace_name
+			{ ZVAL_EMPTY_STRING(&$1.u.constant);
+			  zend_do_build_namespace_name(&$1, &$1, &$3 TSRMLS_CC);
+			  $$.u.ast = AST_ZVAL(&$1); }
+	|	T_NS_SEPARATOR namespace_name
+			{ $$.u.ast = AST_ZVAL(&$2); }
+;
+*/
+
 fully_qualified_class_name:
 		namespace_name { $$ = $1; }
 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
