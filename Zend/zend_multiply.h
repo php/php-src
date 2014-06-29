@@ -23,7 +23,8 @@
 
 /* assembly commented-out as it uses the old float overflow behaviour
 * however, now longs overflow to bigints, so we can't use it */
-/*
+
+#if 0
 #if defined(__i386__) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
@@ -74,7 +75,8 @@
 } while (0)
 
 #elif SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
-*/
+#endif
+#endif
 #if SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\

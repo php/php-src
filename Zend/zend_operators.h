@@ -536,7 +536,8 @@ static zend_always_inline int fast_increment_function(zval *op1)
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 /* assembly commented-out as it uses the old float overflow behaviour
  * however, now longs overflow to bigints, so we can't use it */
-/*#if defined(__GNUC__) && defined(__i386__)
+#if 0
+#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"incl (%0)\n\t"
 			"jno  0f\n\t"
@@ -562,7 +563,9 @@ static zend_always_inline int fast_increment_function(zval *op1)
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
-#else*/
+#else
+#endif
+#endif
 		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MAX)) {
 			zend_bigint *out = zend_bigint_init_alloc();
 			zend_bigint_long_add_long(out, Z_LVAL_P(op1), 1);
@@ -570,7 +573,8 @@ static zend_always_inline int fast_increment_function(zval *op1)
 		} else {
 			Z_LVAL_P(op1)++;
 		}
-/*#endif*/
+#if 0
+#endif
 		return SUCCESS;
 	}
 	return increment_function(op1);
@@ -581,7 +585,8 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 /* assembly commented-out as it uses the old float overflow behaviour
 * however, now longs overflow to bigints, so we can't use it */
-/*#if defined(__GNUC__) && defined(__i386__)
+#if 0
+#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"decl (%0)\n\t"
 			"jno  0f\n\t"
@@ -607,7 +612,9 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
-#else*/
+#else
+#endif
+#endif
 		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MIN)) {
 			/* switch to bigint */
 			zend_bigint *out = zend_bigint_init_alloc();
@@ -616,7 +623,8 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 		} else {
 			Z_LVAL_P(op1)--;
 		}
-/*#endif*/
+#if 0
+#endif
 		return SUCCESS;
 	}
 	return decrement_function(op1);
@@ -628,7 +636,8 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 /* assembly commented-out as it uses the old float overflow behaviour
  * however, now longs overflow to bigints, so we can't use it */
-/*#if defined(__GNUC__) && defined(__i386__)
+#if 0
+#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"movl	(%1), %%eax\n\t"
 			"addl   (%2), %%eax\n\t"
@@ -674,7 +683,9 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "rax","cc");
-#else*/
+#else
+#endif
+#endif
 			/*
 			 * 'result' may alias with op1 or op2, so we need to
 			 * ensure that 'result' is not updated until after we
@@ -689,7 +700,8 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			} else {
 				ZVAL_LONG(result, Z_LVAL_P(op1) + Z_LVAL_P(op2));
 			}
-/*#endif*/
+#if 0
+#endif
 			return SUCCESS;
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
@@ -712,8 +724,9 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 /* assembly commented-out as it uses the old float overflow behaviour
-* however, now longs overflow to bigints, so we can't use it */
-/*#if defined(__GNUC__) && defined(__i386__)
+ * however, now longs overflow to bigints, so we can't use it */
+#if 0
+#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"movl	(%1), %%eax\n\t"
 			"subl   (%2), %%eax\n\t"
@@ -726,7 +739,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			"fildl	(%1)\n\t"
 #if defined(__clang__) && (__clang_major__ < 2 || (__clang_major__ == 2 && __clang_minor__ < 10))
 			"fsubp  %%st(1), %%st\n\t"  /* LLVM bug #9164 */
-/*#else
+#else
 			"fsubp	%%st, %%st(1)\n\t"
 #endif
 			"movl   %4, %c5(%0)\n\t"
@@ -753,7 +766,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			"fildq	(%1)\n\t"
 #if defined(__clang__) && (__clang_major__ < 2 || (__clang_major__ == 2 && __clang_minor__ < 10))
 			"fsubp  %%st(1), %%st\n\t"  /* LLVM bug #9164 */
-/*#else
+#else
 			"fsubp	%%st, %%st(1)\n\t"
 #endif
 			"movl   %4, %c5(%0)\n\t"
@@ -767,7 +780,9 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "rax","cc");
-#else*/
+#else
+#endif
+#endif
 			ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 
 			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
@@ -776,7 +791,8 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 				zend_bigint_long_subtract_long(out, Z_LVAL_P(op1), Z_LVAL_P(op2));
 				ZVAL_BIGINT(result, out);
 			}
-/*#endif*/
+#if 0
+#endif
 			return SUCCESS;
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
