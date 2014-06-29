@@ -1,7 +1,5 @@
 --TEST--
 incrementing different variables
---SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
 --INI--
 precision=14
 --FILE--
@@ -55,6 +53,6 @@ object(stdClass)#%d (0) {
 }
 array(0) {
 }
-float(2147483648)
-float(2147483648)
+int(2147483648)
+int(2147483648)
 Done
