@@ -143,7 +143,7 @@ U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *ob
 	object_init_ex(object, IntlIterator_ce_ptr);
 	ii = Z_INTL_ITERATOR_P(object);
 	ii->iterator = (zend_object_iterator*)emalloc(sizeof(zoi_with_current));
-	//????????? dtor zend_iterator_init(ii->iterator TSRMLS_CC);
+	zend_iterator_init(ii->iterator TSRMLS_CC);
 	ZVAL_PTR(&ii->iterator->data, se);
 	ii->iterator->funcs = &string_enum_object_iterator_funcs;
 	ii->iterator->index = 0;
@@ -159,7 +159,7 @@ static void IntlIterator_objects_free(zend_object *object TSRMLS_DC)
 	if (ii->iterator) {
 		zval *wrapping_objp = &((zoi_with_current*)ii->iterator)->wrapping_obj;
 		ZVAL_UNDEF(wrapping_objp);
-		ii->iterator->funcs->dtor(ii->iterator TSRMLS_CC);
+		zend_iterator_dtor(ii->iterator TSRMLS_CC);
 	}
 	intl_error_reset(INTLITERATOR_ERROR_P(ii) TSRMLS_CC);
 
@@ -183,7 +183,7 @@ static zend_object_iterator *IntlIterator_get_iterator(
 		return NULL;
 	}
 
-	zval_add_ref(object);
+	++GC_REFCOUNT(ii->iterator);
 
 	return ii->iterator;
 }
