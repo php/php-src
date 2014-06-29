@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     constant). (Laruence)
   . Fixed bug #67468 (Segfault in highlight_file()/highlight_string()).
     (Andreas Ferber)
+  . Fixed bug #67091 (make install fails to install libphp5.so on FreeBSD 10.0).
+    (Ferenc)
 
 - FPM:
   . Fix bug #67530 (error_log=syslog ignored). (Remi)
