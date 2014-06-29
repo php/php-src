@@ -121,6 +121,11 @@ parameter
 		$$.len = $1.len;
 		$$.num = $3.num; 
 	}
+	| T_IF T_INPUT {
+		$$.type = COND_PARAM; 
+		$$.str = $2.str;
+		$$.len = $2.len;
+	}
 	| T_OPCODE { $$ = $1; }
 	| T_ADDR { $$ = $1; }
 	| T_LITERAL { $$ = $1; }
@@ -131,12 +136,7 @@ parameter
 	;
 
 full_expression
-	: T_IF T_INPUT {
-		$$.type = COND_PARAM; 
-		$$.str = $2.str;
-		$$.len = $2.len;
-	}
-	| T_EVAL T_INPUT { 
+	: T_EVAL T_INPUT { 
 		$$.type = EVAL_PARAM; 
 		$$.str = $2.str;
 		$$.len = $2.len;
