@@ -629,7 +629,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "**Examples**" CR CR
 "    $P frame 2" CR
-"    $P E $count" CR
+"    $P ev $count" CR
 "    Go to frame 2 and print out variable **$count** in that frame" CR CR
 
 "Note that this frame scope is discarded when execution continues, with the execution frame "
