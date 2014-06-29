@@ -318,8 +318,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "**Information**" CR
 "  **list**     list PHP source" CR
 "  **info**     displays information on the debug session" CR
-"  **print**    show opcodes " CR
+"  **print**    show opcodes" CR
 "  **frame**    select a stack frame and print a stack frame summary" CR 
+"  **back**     shows the current backtrace" CR
 "  **help**     provide help on a topic" CR CR
 
 "**Starting and Stopping Execution**" CR
@@ -613,7 +614,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 {"finish",
 "The **finish** command causes control to be passed back to the vm, continuing execution.  Any "
 "breakpoints that are encountered within the current stack frame will be skipped.  Execution "
-"will then continue until the next breakpoint after leaving the stack frame or unitil "
+"will then continue until the next breakpoint after leaving the stack frame or until "
 "completion of the script" CR CR
 
 "Note when **step**ping is enabled, any opcode steps within the current stack frame are also "
@@ -629,7 +630,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "**Examples**" CR CR
 "    $P frame 2" CR
-"    $P E $count" CR
+"    $P ev $count" CR
 "    Go to frame 2 and print out variable **$count** in that frame" CR CR
 
 "Note that this frame scope is discarded when execution continues, with the execution frame "
