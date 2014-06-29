@@ -436,7 +436,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_id)
 		id_us.getBuffer(), id_us.length(), TIMEZONE_ERROR_CODE_P(to));
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_id: Could not convert id to UTF-8");
 
-	RETURN_STRINGL(id, id_len);
+	RETVAL_STRINGL(id, id_len);
 	//???
 	efree(id);
 }

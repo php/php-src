@@ -1141,7 +1141,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	zval			*zv_arg,
 					zv_tmp,
 					*zv_datetime  		= NULL,
-					*zv_timestamp		= NULL;
+					zv_timestamp;
 	php_date_obj	*datetime;
 	char			*locale_str			= NULL;
 	int				locale_str_len;
@@ -1178,11 +1178,12 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 		goto error;
 	}
 
-	zend_call_method_with_0_params(zv_datetime, php_date_get_date_ce(), NULL, "gettimestamp", zv_timestamp);
-	if (!zv_timestamp || Z_TYPE_P(zv_timestamp) != IS_LONG) {
+	zend_call_method_with_0_params(zv_datetime, php_date_get_date_ce(), NULL, "gettimestamp", &zv_timestamp);
+	if (Z_TYPE(zv_timestamp) != IS_LONG) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_from_date_time: bad DateTime; call to "
 			"DateTime::getTimestamp() failed", 0 TSRMLS_CC);
+		zval_ptr_dtor(&zv_timestamp);
 		goto error;
 	}
 
@@ -1208,7 +1209,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 				"error creating ICU Calendar object", 0 TSRMLS_CC);
 		goto error;
 	}
-	cal->setTime(((UDate)Z_LVAL_P(zv_timestamp)) * 1000., status);
+	cal->setTime(((UDate)Z_LVAL(zv_timestamp)) * 1000., status);
     if (U_FAILURE(status)) {
 		/* time zone was adopted by cal; should not be deleted here */
 		delete cal;
@@ -1222,9 +1223,6 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 error:
 	if (zv_datetime && zv_datetime != zv_arg) {
 		zval_ptr_dtor(zv_datetime);
-	}
-	if (zv_timestamp) {
-		zval_ptr_dtor(zv_timestamp);
 	}
 }
 
