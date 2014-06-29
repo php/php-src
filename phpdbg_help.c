@@ -318,8 +318,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "**Information**" CR
 "  **list**     list PHP source" CR
 "  **info**     displays information on the debug session" CR
-"  **print**    show opcodes " CR
+"  **print**    show opcodes" CR
 "  **frame**    select a stack frame and print a stack frame summary" CR 
+"  **back**     shows the current backtrace" CR
 "  **help**     provide help on a topic" CR CR
 
 "**Starting and Stopping Execution**" CR
