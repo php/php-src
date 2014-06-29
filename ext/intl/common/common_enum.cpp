@@ -141,9 +141,9 @@ U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *ob
 {
 	IntlIterator_object *ii;
 	object_init_ex(object, IntlIterator_ce_ptr);
-	ii = (IntlIterator_object*)Z_OBJ_P(object);
+	ii = Z_INTL_ITERATOR_P(object);
 	ii->iterator = (zend_object_iterator*)emalloc(sizeof(zoi_with_current));
-	zend_iterator_init(ii->iterator TSRMLS_CC);
+	//????????? dtor zend_iterator_init(ii->iterator TSRMLS_CC);
 	ZVAL_PTR(&ii->iterator->data, se);
 	ii->iterator->funcs = &string_enum_object_iterator_funcs;
 	ii->iterator->index = 0;
