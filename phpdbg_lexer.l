@@ -57,7 +57,7 @@ T_IF        'if'
 T_RUN       'run'
 T_RUN_SHORT "r"
 WS          [ \r\n\t]+
-DIGITS      [0-9\.]+
+DIGITS      [-]?[0-9\.]+
 ID          [^ \r\n\t:#\000]+
 ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+

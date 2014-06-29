@@ -137,7 +137,7 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 		phpdbg_error("Failed to stat file %s", filename);
 		return;
 	}
-	
+
 	stream = php_stream_open_wrapper(filename, "rb", USE_PATH, &opened);
 	
 	if (!stream) {
@@ -145,13 +145,17 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 		return;
 	}
 	
+	if (offset < 0) {
+		count += offset;
+		offset = 0;
+	}
+	
 	while (php_stream_gets(stream, buffer, sizeof(buffer)) != NULL) {
 		long linelen = strlen(buffer);
 
 		++line;
 		
-		if (!offset || offset <= line) {
-			/* Without offset, or offset reached */
+		if (offset <= line) {
 			if (!highlight) {
 				phpdbg_write("%05ld: %s", line, buffer);
 			} else {
@@ -167,8 +171,9 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 			}
 		}
 
-		if ((count + (offset - 1)) == line)
+		if (count > 0 && count + offset - 1 < line) {
 			break;
+		}
 	}
 	
 	php_stream_close(stream);
