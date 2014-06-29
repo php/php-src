@@ -47,7 +47,7 @@ zend_object_handlers BreakIterator_handlers;
 /* }}} */
 
 U_CFUNC	void breakiterator_object_create(zval *object,
-										 BreakIterator *biter TSRMLS_DC)
+										 BreakIterator *biter, int brand_new TSRMLS_DC)
 {
 	UClassID classId = biter->getDynamicClassID();
 	zend_class_entry *ce;
@@ -60,7 +60,9 @@ U_CFUNC	void breakiterator_object_create(zval *object,
 		ce = BreakIterator_ce_ptr;
 	}
 
-	object_init_ex(object, ce);
+	if (brand_new) {
+		object_init_ex(object, ce);
+	}
 	breakiterator_object_construct(object, biter TSRMLS_CC);
 }
 

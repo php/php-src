@@ -42,7 +42,8 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			&rules, &rules_len, &compiled) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"rbbi_create_instance: bad arguments", 0 TSRMLS_CC);
-		RETURN_NULL();
+		Z_OBJ_P(return_value) == NULL;
+		return;
 	}
 
 	// instantiation of ICU object
@@ -71,7 +72,8 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			intl_error_set_custom_msg(NULL, msg, 1 TSRMLS_CC);
 			efree(msg);
 			delete rbbi;
-			RETURN_NULL();
+			Z_OBJ_P(return_value) == NULL;
+			return;
 		}
 	} else { // compiled
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
@@ -79,17 +81,18 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
 				"create instance from compiled rules", 0 TSRMLS_CC);
-			delete rbbi;
-			RETURN_NULL();
+			Z_OBJ_P(return_value) == NULL;
+			return;
 		}
 #else
 		intl_error_set(NULL, U_UNSUPPORTED_ERROR, "rbbi_create_instance: "
 			"compiled rules require ICU >= 4.8", 0 TSRMLS_CC);
-		RETURN_NULL();
+		Z_OBJ_P(return_value) == NULL;
+		return;
 #endif
 	}
 
-	breakiterator_object_create(return_value, rbbi TSRMLS_CC);
+	breakiterator_object_create(return_value, rbbi, 0 TSRMLS_CC);
 }
 
 U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
@@ -97,10 +100,9 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 	zval	orig_this		= *getThis();
 
 	return_value = getThis();
-	//changes this to IS_NULL (without first destroying) if there's an error
 	_php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
-	if (Z_TYPE_P(return_value) == IS_NULL) {
+	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		zend_object_store_ctor_failed(Z_OBJ(orig_this) TSRMLS_CC);
 		zval_dtor(&orig_this);
 	}

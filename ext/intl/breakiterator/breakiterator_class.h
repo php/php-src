@@ -62,7 +62,7 @@ static inline BreakIterator_object *php_intl_breakiterator_fetch_object(zend_obj
 		RETURN_FALSE; \
 	}
 
-void breakiterator_object_create(zval *object, BreakIterator *break_iter TSRMLS_DC);
+void breakiterator_object_create(zval *object, BreakIterator *break_iter, int brand_new TSRMLS_DC);
 
 void breakiterator_object_construct(zval *object, BreakIterator *break_iter TSRMLS_DC);
 
