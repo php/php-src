@@ -55,7 +55,7 @@ int transliterator_object_construct( zval *object,
 		return FAILURE;
 	}
 
-	zend_update_property_stringl( Transliterator_ce_ptr, object,
+	zend_update_property_stringl(Transliterator_ce_ptr, object,
 		"id", sizeof( "id" ) - 1, str_id, str_id_len TSRMLS_CC );
 	efree( str_id );
 	return SUCCESS;
@@ -124,7 +124,7 @@ static zend_object *Transliterator_object_create(
 	intern = ecalloc( 1, sizeof( Transliterator_object ) + sizeof(zval) * (ce->default_properties_count - 1));
 
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
-    object_properties_init( (zend_object*) intern, ce );
+    object_properties_init( &intern->zo, ce );
 	transliterator_object_init( intern TSRMLS_CC );
 
 	intern->zo.handlers = &Transliterator_handlers;
