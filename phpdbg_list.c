@@ -130,7 +130,7 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 	char *opened = NULL;
 	char buffer[8096] = {0,};
 	long line = 0;
-	
+
 	php_stream *stream = NULL;
 	
 	if (VCWD_STAT(filename, &st) == FAILURE) {
@@ -146,6 +146,8 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 	}
 	
 	while (php_stream_gets(stream, buffer, sizeof(buffer)) != NULL) {
+		long linelen = strlen(buffer);
+
 		++line;
 		
 		if (!offset || offset <= line) {
@@ -159,9 +161,13 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 					phpdbg_write(">%05ld: %s", line, buffer);
 				}
 			}
+
+			if (buffer[linelen - 1] != '\n') {
+				phpdbg_write("\n");
+			}
 		}
-		
-		if ((count + (offset-1)) == line)
+
+		if ((count + (offset - 1)) == line)
 			break;
 	}
 	
