@@ -613,7 +613,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 {"finish",
 "The **finish** command causes control to be passed back to the vm, continuing execution.  Any "
 "breakpoints that are encountered within the current stack frame will be skipped.  Execution "
-"will then continue until the next breakpoint after leaving the stack frame or unitil "
+"will then continue until the next breakpoint after leaving the stack frame or until "
 "completion of the script" CR CR
 
 "Note when **step**ping is enabled, any opcode steps within the current stack frame are also "
