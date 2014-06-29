@@ -41,18 +41,14 @@
 
 /* {{{ collator_convert_hash_item_from_utf8_to_utf16 */
 static void collator_convert_hash_item_from_utf8_to_utf16(
-	HashTable* hash, zend_string *hashKey, ulong hashIndex,
+	HashTable* hash, zval *hashData, zend_string *hashKey, ulong hashIndex,
 	UErrorCode* status )
 {
 	const char* old_val;
 	int         old_val_len;
 	UChar*      new_val      = NULL;
 	int         new_val_len  = 0;
-	zval*      hashData     = NULL;
 	zval       znew_val;
-
-	/* Get current hash item. */
-	hashData = zend_hash_get_current_data( hash );
 
 	/* Process string values only. */
 	if( Z_TYPE_P( hashData ) != IS_STRING )
@@ -84,18 +80,14 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 
 /* {{{ collator_convert_hash_item_from_utf16_to_utf8 */
 static void collator_convert_hash_item_from_utf16_to_utf8(
-	HashTable* hash, zend_string* hashKey, ulong hashIndex,
+	HashTable* hash, zval * hashData, zend_string* hashKey, ulong hashIndex,
 	UErrorCode* status )
 {
 	const char* old_val;
 	int        old_val_len;
 	char*      new_val      = NULL;
 	int        new_val_len  = 0;
-	zval*      hashData     = NULL;
 	zval       znew_val;
-
-	/* Get current hash item. */
-	hashData = zend_hash_get_current_data( hash );
 
 	/* Process string values only. */
 	if( Z_TYPE_P( hashData ) != IS_STRING )
@@ -132,12 +124,13 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
 void collator_convert_hash_from_utf8_to_utf16( HashTable* hash, UErrorCode* status )
 {
 	ulong    hashIndex;
+	zval *hashData;
 	zend_string *hashKey;
 
-	ZEND_HASH_FOREACH_KEY(hash, hashIndex, hashKey) {
+	ZEND_HASH_FOREACH_KEY_VAL(hash, hashIndex, hashKey, hashData) {
 		/* Convert current hash item from UTF-8 to UTF-16LE. */
 		collator_convert_hash_item_from_utf8_to_utf16(
-			hash, hashKey, hashIndex, status );
+			hash, hashData, hashKey, hashIndex, status );
 		if( U_FAILURE( *status ) )
 			return;
 	} ZEND_HASH_FOREACH_END();
@@ -151,11 +144,12 @@ void collator_convert_hash_from_utf16_to_utf8( HashTable* hash, UErrorCode* stat
 {
 	ulong hashIndex;
 	zend_string *hashKey;
+	zval *hashData;
 
-	ZEND_HASH_FOREACH_KEY(hash, hashIndex, hashKey) {
+	ZEND_HASH_FOREACH_KEY_VAL(hash, hashIndex, hashKey, hashData) {
 		/* Convert current hash item from UTF-16LE to UTF-8. */
 		collator_convert_hash_item_from_utf16_to_utf8(
-			hash, hashKey, hashIndex, status );
+			hash, hashData, hashKey, hashIndex, status );
 		if( U_FAILURE( *status ) ) {
 			return;
 		}
