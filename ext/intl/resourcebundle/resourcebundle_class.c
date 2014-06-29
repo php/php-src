@@ -49,7 +49,7 @@ static void ResourceBundle_object_destroy( zend_object *object TSRMLS_DC )
 		ures_close( rb->child );
 	}
 
-	zend_object_std_dtor( object TSRMLS_CC );
+	//???zend_object_std_dtor( object TSRMLS_CC );
 }
 /* }}} */
 
