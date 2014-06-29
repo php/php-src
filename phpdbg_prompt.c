@@ -732,6 +732,11 @@ PHPDBG_COMMAND(print) /* {{{ */
 #else
 	phpdbg_writeln("Readline\tno");
 #endif
+#ifdef HAVE_LIBEDIT
+	phpdbg_writeln("Libedit\t\tyes");
+#else
+	phpdbg_writeln("Libedit\t\tno");
+#endif
 
 	phpdbg_writeln("Exec\t\t%s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
 	phpdbg_writeln("Compiled\t%s", PHPDBG_G(ops) ? "yes" : "no");
