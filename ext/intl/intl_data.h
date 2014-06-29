@@ -69,6 +69,11 @@ typedef struct _intl_data {
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
     {																				\
         intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 TSRMLS_CC );	\
+		/* yes, this is ugly, but it alreay is */									\
+		if (return_value != getThis()) {											\
+			zval_dtor(return_value);												\
+			RETURN_NULL();															\
+		}																			\
 		Z_OBJ_P(return_value) = NULL;												\
 		return;																		\
     }
