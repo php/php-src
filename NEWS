@@ -14,6 +14,14 @@ PHP                                                                        NEWS
 
 - phpdbg:
   . Fix Bug #67499 (readline feature not enabled when build with libedit). (Remi)
+  . Fix issue krakjoe/phpdbg#94 (List behavior is inconsistent). (Bob)
+  . Fix issue krakjoe/phpdbg#97 (The prompt should always ensure it is on a
+    newline). (Bob)
+  . Fix issue krakjoe/phpdbg#98 (break if does not seem to work). (Bob)
+  . Fix issue krakjoe/phpdbg#99 (register function has the same behavior as
+    run). (Bob)
+  . Fix issue krakjoe/phpdbg#100 (No way to list the current stack/frames)
+    (Help entry was missing). (Bob)
 
 19 Jun 2014, PHP 5.6.0 Release Candidate 1
 
