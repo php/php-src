@@ -70,9 +70,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->T = 0;
 
-	op_array->nested_calls = 0;
-	op_array->used_stack = 0;
-
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
 	op_array->doc_comment = NULL;
@@ -631,7 +628,7 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline, *end;
 
-	if (op_array->type!=ZEND_USER_FUNCTION && op_array->type!=ZEND_EVAL_CODE) {
+	if (!ZEND_USER_CODE(op_array->type)) {
 		return 0;
 	}
 	if (op_array->has_finally_block) {

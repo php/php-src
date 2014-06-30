@@ -108,8 +108,8 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 		end = opline + op_array->last;
 		while (opline < end) {
 			switch (opline->opcode) {
-				case ZEND_DO_FCALL:
-					LITERAL_INFO(opline->op1.constant, LITERAL_FUNC, 1, 1, 1);
+				case ZEND_INIT_FCALL:
+					LITERAL_INFO(opline->op2.constant, LITERAL_FUNC, 1, 1, 1);
 					break;
 				case ZEND_INIT_FCALL_BY_NAME:
 					if (ZEND_OP2_TYPE(opline) == IS_CONST) {

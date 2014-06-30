@@ -44,14 +44,13 @@ static zend_class_entry  **class_cleanup_handlers;
 /* this function doesn't check for too many parameters */
 ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 {
-	zval *p;
 	int arg_count;
 	va_list ptr;
 	zval **param, *param_ptr;
 	TSRMLS_FETCH();
 
-	p = zend_vm_stack_top(TSRMLS_C) - 1;
-	arg_count = Z_LVAL_P(p);
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data)->call, 1);
+	arg_count = EG(current_execute_data)->call->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -61,7 +60,6 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 
 	while (param_count-->0) {
 		param = va_arg(ptr, zval **);
-		param_ptr = (p-arg_count);
 		if (!Z_ISREF_P(param_ptr) && Z_REFCOUNT_P(param_ptr) > 1) {
 			zval new_tmp;
 
@@ -70,7 +68,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 			ZVAL_COPY_VALUE(param_ptr, &new_tmp);
 		}
 		*param = param_ptr;
-		arg_count--;
+		param_ptr++;
 	}
 	va_end(ptr);
 
@@ -82,14 +80,13 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 /* this function doesn't check for too many parameters */
 ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 {
-	zval *p;
 	int arg_count;
 	va_list ptr;
-	zval **param;
+	zval **param, *param_ptr;
 	TSRMLS_FETCH();
 
-	p = zend_vm_stack_top(TSRMLS_C) - 1;
-	arg_count = Z_LVAL_P(p);
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data)->call, 1);
+	arg_count = EG(current_execute_data)->call->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -98,7 +95,8 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 	va_start(ptr, param_count);
 	while (param_count-->0) {
 		param = va_arg(ptr, zval **);
-		*param = p-(arg_count--);
+		*param = param_ptr;
+		param_ptr++;
 	}
 	va_end(ptr);
 
@@ -108,22 +106,20 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array TSRMLS_DC) /* {{{ */
 {
-	zval *p;
+	zval *param_ptr;
 	int arg_count;
 
-	p = zend_vm_stack_top(TSRMLS_C) - 1;
-	arg_count = Z_LVAL_P(p);
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data)->call, 1);
+	arg_count = EG(current_execute_data)->call->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
 	}
 
 	while (param_count-->0) {
-		zval *value = (p-arg_count);
-
-		ZVAL_COPY_VALUE(argument_array, value);
+		ZVAL_COPY_VALUE(argument_array, param_ptr);
 		argument_array++;
-		arg_count--;
+		param_ptr++;
 	}
 
 	return SUCCESS;
@@ -132,22 +128,22 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array
 
 ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TSRMLS_DC) /* {{{ */
 {
-	zval *p;
+	zval *param_ptr;
 	int arg_count;
 
-	p = zend_vm_stack_top(TSRMLS_C) - 1;
-	arg_count = Z_LVAL_P(p);
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data)->call, 1);
+	arg_count = EG(current_execute_data)->call->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
 	}
 
 	while (param_count-->0) {
-		zval *param = p-(arg_count--);
-		if (Z_REFCOUNTED_P(param)) {
-			Z_ADDREF_P(param);
+		if (Z_REFCOUNTED_P(param_ptr)) {
+			Z_ADDREF_P(param_ptr);
 		}
-		add_next_index_zval(argument_array, param);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(argument_array), param_ptr);
+		param_ptr++;
 	}
 
 	return SUCCESS;
@@ -807,7 +803,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case '+':
 				if (have_varargs) {
 					if (!quiet) {
-						zend_function *active_function = EG(current_execute_data)->function_state.function;
+						zend_function *active_function = EG(current_execute_data)->call->func;
 						const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
 						zend_error(E_WARNING, "%s%s%s(): only one varargs specifier (* or +) is permitted",
 								class_name,
@@ -827,7 +823,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 			default:
 				if (!quiet) {
-					zend_function *active_function = EG(current_execute_data)->function_state.function;
+					zend_function *active_function = EG(current_execute_data)->call->func;
 					const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
 					zend_error(E_WARNING, "%s%s%s(): bad type specifier while parsing parameters",
 							class_name,
@@ -850,7 +846,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 	if (num_args < min_num_args || (num_args > max_num_args && max_num_args > 0)) {
 		if (!quiet) {
-			zend_function *active_function = EG(current_execute_data)->function_state.function;
+			zend_function *active_function = EG(current_execute_data)->call->func;
 			const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
 			zend_error(E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
 					class_name,
@@ -864,7 +860,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		return FAILURE;
 	}
 
-	arg_count = Z_LVAL_P(zend_vm_stack_top(TSRMLS_C) - 1);
+	arg_count = EG(current_execute_data)->call->num_args;
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
@@ -888,7 +884,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 			if (num_varargs > 0) {
 				*n_varargs = num_varargs;
-				*varargs = (zend_vm_stack_top(TSRMLS_C) - 1 - (arg_count - i));
+				*varargs = ZEND_CALL_ARG(EG(current_execute_data)->call, i + 1);
 				/* adjust how many args we have left and restart loop */
 				num_args += 1 - num_varargs;
 				i += num_varargs;
@@ -899,7 +895,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			}
 		}
 
-		arg = zend_vm_stack_top(TSRMLS_C) - 1 - (arg_count-i);
+		arg = ZEND_CALL_ARG(EG(current_execute_data)->call, i + 1);
 
 		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
 			/* clean up varargs array if it was used */
@@ -970,7 +966,7 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 	 * Z_OBJ(EG(This)) to NULL when calling an internal function with common.scope == NULL.
 	 * In that case EG(This) would still be the $this from the calling code and we'd take the
 	 * wrong branch here. */
-	zend_bool is_method = EG(current_execute_data)->function_state.function->common.scope != NULL;
+	zend_bool is_method = EG(current_execute_data)->call->func->common.scope != NULL;
 	if (!is_method || !this_ptr || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		RETURN_IF_ZERO_ARGS(num_args, p, 0);
 

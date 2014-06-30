@@ -97,9 +97,9 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
-static void zend_push_function_call_entry(zend_function *fbc TSRMLS_DC) /* {{{ */
+static void zend_push_function_call_entry(zend_function *fbc, zend_uint opline_num TSRMLS_DC) /* {{{ */
 {
-	zend_function_call_entry fcall = { fbc };
+	zend_function_call_entry fcall = { fbc, opline_num };
 	zend_stack_push(&CG(function_call_stack), &fcall);
 }
 /* }}} */
@@ -182,8 +182,6 @@ void zend_init_compiler_context(TSRMLS_D) /* {{{ */
 	CG(context).literals_size = 0;
 	CG(context).current_brk_cont = -1;
 	CG(context).backpatch_count = 0;
-	CG(context).nested_calls = 0;
-	CG(context).used_stack = 0;
 	CG(context).in_finally = 0;
 	CG(context).labels = NULL;
 }
@@ -1463,6 +1461,11 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 					&& opline->result.var == op1->u.op.var) {
 					if (opline->opcode == ZEND_NEW) {
 						opline->result_type |= EXT_TYPE_UNUSED;
+						opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
+						while (opline->opcode != ZEND_DO_FCALL || opline->op1.num != ZEND_CALL_CTOR) {
+							opline--;
+						}
+						opline->op1.num |= ZEND_CALL_CTOR_RESULT_UNUSED;
 					}
 					break;
 				}
@@ -1841,7 +1844,9 @@ void zend_do_receive_param(zend_uchar op, znode *varname, znode *initialization,
 		var.u.op.var = lookup_cv(CG(active_op_array), Z_STR(varname->u.constant) TSRMLS_CC);
 		Z_STR(varname->u.constant) = CG(active_op_array)->vars[EX_VAR_TO_NUM(var.u.op.var)];
 		var.EA = 0;
-		if (Z_STRHASH(varname->u.constant) == THIS_HASHVAL &&
+		if (EX_VAR_TO_NUM(var.u.op.var) != CG(active_op_array)->num_args) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Redefinition of parameter %s", Z_STRVAL(varname->u.constant));
+		} else if (Z_STRHASH(varname->u.constant) == THIS_HASHVAL &&
 			Z_STRLEN(varname->u.constant) == sizeof("this")-1 &&
 		    !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this")-1)) {
 			if (CG(active_op_array)->scope &&
@@ -1949,6 +1954,8 @@ void zend_do_receive_param(zend_uchar op, znode *varname, znode *initialization,
 
 int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
 {
+	zend_op *opline;
+	zend_uint op_number;
 	zend_function *function;
 	zend_string *lcname;
 	char *is_compound = memchr(Z_STRVAL(function_name->u.constant), '\\', Z_STRLEN(function_name->u.constant));
@@ -1977,10 +1984,14 @@ int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace 
 	STR_RELEASE(Z_STR(function_name->u.constant));
 	Z_STR(function_name->u.constant) = lcname;
 
-	zend_push_function_call_entry(function TSRMLS_CC);
-	if (CG(context).nested_calls + 1 > CG(active_op_array)->nested_calls) {
-		CG(active_op_array)->nested_calls = CG(context).nested_calls + 1;
-	}
+	op_number = get_next_op_number(CG(active_op_array));
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = ZEND_INIT_FCALL;
+	SET_UNUSED(opline->op1);
+	SET_NODE(opline->op2, function_name);
+	GET_CACHE_SLOT(opline->op2.constant);
+
+	zend_push_function_call_entry(function, op_number TSRMLS_CC);
 	zend_do_extended_fcall_begin(TSRMLS_C);
 	return 0;
 }
@@ -2017,12 +2028,10 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 		}
 		last_op->opcode = ZEND_INIT_METHOD_CALL;
 		last_op->result_type = IS_UNUSED;
-		last_op->result.num = CG(context).nested_calls;
 		Z_LVAL(left_bracket->u.constant) = ZEND_INIT_FCALL_BY_NAME;
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-		opline->result.num = CG(context).nested_calls;
 		SET_UNUSED(opline->op1);
 		if (left_bracket->op_type == IS_CONST) {
 			opline->op2_type = IS_CONST;
@@ -2033,10 +2042,7 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 		}
 	}
 
-	zend_push_function_call_entry(NULL TSRMLS_CC);
-	if (++CG(context).nested_calls > CG(active_op_array)->nested_calls) {
-		CG(active_op_array)->nested_calls = CG(context).nested_calls;
-	}
+	zend_push_function_call_entry(NULL, last_op_number TSRMLS_CC);
 	zend_do_extended_fcall_begin(TSRMLS_C);
 }
 /* }}} */
@@ -2056,21 +2062,21 @@ void zend_do_clone(znode *result, znode *expr TSRMLS_DC) /* {{{ */
 
 void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRMLS_DC) /* {{{ */
 {
+	zend_uint op_number;
 	zend_op *opline;
 
+	op_number = get_next_op_number(CG(active_op_array));
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	if (ns_call) {
 		/* In run-time PHP will check for function with full name and
 		   internal function with short name */
 		opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
-		opline->result.num = CG(context).nested_calls;
 		SET_UNUSED(opline->op1);
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_ns_func_name_literal(CG(active_op_array), &function_name->u.constant TSRMLS_CC);
 		GET_CACHE_SLOT(opline->op2.constant);
 	} else {
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-		opline->result.num = CG(context).nested_calls;
 		SET_UNUSED(opline->op1);
 		if (function_name->op_type == IS_CONST) {
 			opline->op2_type = IS_CONST;
@@ -2081,10 +2087,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 		}
 	}
 
-	zend_push_function_call_entry(NULL TSRMLS_CC);
-	if (++CG(context).nested_calls > CG(active_op_array)->nested_calls) {
-		CG(active_op_array)->nested_calls = CG(context).nested_calls;
-	}
+	zend_push_function_call_entry(NULL, op_number TSRMLS_CC);
 	zend_do_extended_fcall_begin(TSRMLS_C);
 }
 /* }}} */
@@ -2481,6 +2484,7 @@ void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_c
 int zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC) /* {{{ */
 {
 	znode class_node;
+	zend_uint op_number;
 	zend_op *opline;
 
 	if (method_name->op_type == IS_CONST) {
@@ -2501,14 +2505,14 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
 		zend_resolve_class_name(class_name TSRMLS_CC);
 		class_node = *class_name;
+		op_number = get_next_op_number(CG(active_op_array) TSRMLS_CC);
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	} else {
 		zend_do_fetch_class(&class_node, class_name TSRMLS_CC);
+		op_number = get_next_op_number(CG(active_op_array) TSRMLS_CC);
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->extended_value = class_node.EA	;
 	}
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
-	opline->result.num = CG(context).nested_calls;
 	if (class_node.op_type == IS_CONST) {
 		opline->op1_type = IS_CONST;
 		opline->op1.constant =
@@ -2529,10 +2533,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 		SET_NODE(opline->op2, method_name);
 	}
 
-	zend_push_function_call_entry(NULL TSRMLS_CC);
-	if (++CG(context).nested_calls > CG(active_op_array)->nested_calls) {
-		CG(active_op_array)->nested_calls = CG(context).nested_calls;
-	}
+	zend_push_function_call_entry(NULL, op_number TSRMLS_CC);
 	zend_do_extended_fcall_begin(TSRMLS_C);
 	return 1; /* Dynamic */
 }
@@ -2550,26 +2551,20 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 		}
 		opline = &CG(active_op_array)->opcodes[Z_LVAL(function_name->u.constant)];
 	} else {
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		if (fcall->fbc) {
-			opline->opcode = ZEND_DO_FCALL;
-			SET_NODE(opline->op1, function_name);
-			SET_UNUSED(opline->op2);
-			opline->op2.num = CG(context).nested_calls;
-			GET_CACHE_SLOT(opline->op1.constant);
-		} else {
-			opline->opcode = ZEND_DO_FCALL_BY_NAME;
-			SET_UNUSED(opline->op1);
-			SET_UNUSED(opline->op2);
-			opline->op2.num = --CG(context).nested_calls;
+		zend_uint call_flags = 0;
 
-			/* This would normally be a ZEND_DO_FCALL, but was forced to use
-			 * ZEND_DO_FCALL_BY_NAME due to a ... argument. In this case we need to
-			 * free the function_name */
-			if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
-				zval_dtor(&function_name->u.constant);
-			}
+		opline = &CG(active_op_array)->opcodes[fcall->op_number];
+		opline->extended_value = fcall->arg_num;
+
+		if (opline->opcode == ZEND_NEW) {
+			call_flags = ZEND_CALL_CTOR;
 		}
+
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_DO_FCALL;
+		SET_UNUSED(opline->op1);
+		SET_UNUSED(opline->op2);
+		opline->op1.num = call_flags;
 	}
 
 	opline->result.var = get_temporary_variable(CG(active_op_array));
@@ -2577,10 +2572,6 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 	GET_NODE(result, opline->result);
 	opline->extended_value = fcall->arg_num;
 
-	if (CG(context).used_stack + 1 > CG(active_op_array)->used_stack) {
-		CG(active_op_array)->used_stack = CG(context).used_stack + 1;
-	}
-	CG(context).used_stack -= fcall->arg_num;
 	zend_stack_del_top(&CG(function_call_stack));
 }
 /* }}} */
@@ -2682,19 +2673,13 @@ void zend_do_pass_param(znode *param, zend_uchar op TSRMLS_DC) /* {{{ */
 		}
 	} else {
 		if (function_ptr) {
-			opline->extended_value = ZEND_DO_FCALL;
-		} else {
-			opline->extended_value = ZEND_DO_FCALL_BY_NAME;
+			opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND;
 		}
 	}
 	opline->opcode = op;
 	SET_NODE(opline->op1, param);
 	opline->op2.opline_num = fcall->arg_num;
 	SET_UNUSED(opline->op2);
-
-	if (++CG(context).used_stack > CG(active_op_array)->used_stack) {
-		CG(active_op_array)->used_stack = CG(context).used_stack;
-	}
 }
 /* }}} */
 
@@ -2704,25 +2689,6 @@ void zend_do_unpack_params(znode *params TSRMLS_DC) /* {{{ */
 	zend_function_call_entry *fcall = zend_stack_top(&CG(function_call_stack));
 
 	fcall->uses_argument_unpacking = 1;
-
-	if (fcall->fbc) {
-		/* If argument unpacking is used argument numbers and sending modes can no longer be
-		 * computed at compile time, thus we need access to EX(call). In order to have it we
-		 * retroactively emit a ZEND_INIT_FCALL_BY_NAME opcode. */
-		zval func_name;
-		ZVAL_STR(&func_name, STR_COPY(fcall->fbc->common.function_name));
-
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-		opline->result.num = CG(context).nested_calls;
-		SET_UNUSED(opline->op1);
-		opline->op2_type = IS_CONST;
-		opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), &func_name TSRMLS_CC);
-		GET_CACHE_SLOT(opline->op2.constant);
-
-		++CG(context).nested_calls;
-		fcall->fbc = NULL;
-	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_SEND_UNPACK;
@@ -5619,16 +5585,12 @@ void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC) /* 
 	new_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_NEW;
-	opline->extended_value = CG(context).nested_calls;
 	opline->result_type = IS_VAR;
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	SET_NODE(opline->op1, class_type);
 	SET_UNUSED(opline->op2);
 
-	zend_push_function_call_entry(NULL TSRMLS_CC);
-	if (++CG(context).nested_calls > CG(active_op_array)->nested_calls) {
-		CG(active_op_array)->nested_calls = CG(context).nested_calls;
-	}
+	zend_push_function_call_entry(NULL, new_token->u.op.opline_num TSRMLS_CC);
 }
 /* }}} */
 
@@ -5819,6 +5781,14 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
+	opline->opcode = ZEND_INIT_FCALL;
+	opline->extended_value = 1;
+	SET_UNUSED(opline->op1);
+	opline->op2_type = IS_CONST;
+	LITERAL_STR(opline->op2, STR_INIT("shell_exec", sizeof("shell_exec")-1, 0));
+	GET_CACHE_SLOT(opline->op2.constant);
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	switch (cmd->op_type) {
 		case IS_CONST:
 		case IS_TMP_VAR:
@@ -5830,28 +5800,18 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC) /* {{{ */
 	}
 	SET_NODE(opline->op1, cmd);
 	opline->op2.opline_num = 1;
-	opline->extended_value = ZEND_DO_FCALL;
+	opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND;
 	SET_UNUSED(opline->op2);
 
 	/* FIXME: exception support not added to this op2 */
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_DO_FCALL;
+	opline->extended_value = 1;
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	opline->result_type = IS_VAR;
-	LITERAL_STR(opline->op1, STR_INIT("shell_exec", sizeof("shell_exec")-1, 0));
-	opline->op1_type = IS_CONST;
-	GET_CACHE_SLOT(opline->op1.constant);
-	opline->extended_value = 1;
+	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
-	opline->op2.num = CG(context).nested_calls;
 	GET_NODE(result, opline->result);
-
-	if (CG(context).nested_calls + 1 > CG(active_op_array)->nested_calls) {
-		CG(active_op_array)->nested_calls = CG(context).nested_calls + 1;
-	}
-	if (CG(context).used_stack + 2 > CG(active_op_array)->used_stack) {
-		CG(active_op_array)->used_stack = CG(context).used_stack + 2;
-	}
 }
 /* }}} */
 

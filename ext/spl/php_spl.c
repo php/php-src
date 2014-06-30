@@ -292,6 +292,10 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 			}
 
 			ZVAL_UNDEF(&result);
+			if (EG(current_execute_data)) {
+				EG(current_execute_data)->call = zend_vm_stack_push_call_frame(
+					(zend_function*)new_op_array, 0, 0, EG(called_scope), Z_OBJ(EG(This)), EG(current_execute_data)->call TSRMLS_CC);
+			}
 			zend_execute(new_op_array, &result TSRMLS_CC);
 	
 			destroy_op_array(new_op_array TSRMLS_CC);
