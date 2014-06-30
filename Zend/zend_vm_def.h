@@ -1315,7 +1315,7 @@ ZEND_VM_HANDLER(87, ZEND_FETCH_DIM_RW, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(90, ZEND_FETCH_DIM_IS, VAR|CV, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(90, ZEND_FETCH_DIM_IS, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -1330,7 +1330,7 @@ ZEND_VM_HANDLER(90, ZEND_FETCH_DIM_IS, VAR|CV, CONST|TMP|VAR|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
+ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 {
 	USE_OPLINE
 	zval *container;
@@ -1339,6 +1339,9 @@ ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+        if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
@@ -1384,7 +1387,7 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMP|VAR|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HELPER(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
+ZEND_VM_HELPER(zend_fetch_property_address_read_helper, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
@@ -1417,7 +1420,7 @@ ZEND_VM_HELPER(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|TMP
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_fetch_property_address_read_helper);
 }
@@ -1471,7 +1474,7 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(91, ZEND_FETCH_OBJ_IS, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
@@ -1503,7 +1506,7 @@ ZEND_VM_HANDLER(91, ZEND_FETCH_OBJ_IS, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zval *container;
@@ -1517,6 +1520,9 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
 
+        if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {
+            zend_error_noreturn(E_ERROR, "Cannot use temporary expression in write context");
+        }
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
@@ -2593,7 +2599,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 	zval *function_name_ptr, *function_name, *func;
 	call_slot *call = EX(call_slots) + opline->result.num;
 
-	if (OP2_TYPE == IS_CONST) {
+	if (OP2_TYPE == IS_CONST && Z_TYPE_P(opline->op2.zv) == IS_STRING) {
 		function_name_ptr = function_name = (zval*)(opline->op2.zv+1);
 		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 			call->fbc = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
@@ -2644,7 +2650,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
-		} else if (OP2_TYPE != IS_CONST && OP2_TYPE != IS_TMP_VAR &&
+		} else if (OP2_TYPE != IS_CONST &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
@@ -2655,7 +2661,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
 				call->fbc->common.prototype = (zend_function*)function_name_ptr;
-			} else {
+			} else if (OP2_TYPE == IS_CV) {
 				FREE_OP2();
 			}
 
@@ -2665,8 +2671,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
-		} else if (OP2_TYPE != IS_CONST &&
-				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
+		} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 			zval *obj;
 			zval *method;
@@ -4650,7 +4655,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(115, ZEND_ISSET_ISEMPTY_DIM_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(115, ZEND_ISSET_ISEMPTY_DIM_OBJ, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -4755,12 +4760,12 @@ ZEND_VM_C_LABEL(num_index_prop):
 
 	FREE_OP2();
 	ZVAL_BOOL(EX_VAR(opline->result.var), result);
-	FREE_OP1_IF_VAR();
+	FREE_OP1();
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -4788,7 +4793,7 @@ ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|C
 
 	FREE_OP2();
 	ZVAL_BOOL(EX_VAR(opline->result.var), result);
-	FREE_OP1_IF_VAR();
+	FREE_OP1();
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }

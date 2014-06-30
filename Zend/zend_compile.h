@@ -457,14 +457,14 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC);
 void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC);
 void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC);
 void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar op TSRMLS_DC);
-void zend_do_indirect_references(znode *result, const znode *num_references, znode *variable TSRMLS_DC);
+void zend_do_indirect_reference(znode *result, znode *variable TSRMLS_DC);
 void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC);
 void zend_do_fetch_global_variable(znode *varname, const znode *static_assignment, int fetch_type TSRMLS_DC);
 
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC);
 void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC);
 void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC);
-void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC);
+void zend_do_fetch_static_member(znode *result, znode *class_name, znode *member_name TSRMLS_DC);
 void zend_do_print(znode *result, znode *arg TSRMLS_DC);
 void zend_do_echo(znode *arg TSRMLS_DC);
 typedef int (*unary_op_type)(zval *, zval * TSRMLS_DC);
