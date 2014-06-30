@@ -1624,6 +1624,13 @@ static int ZEND_FASTCALL  ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 		if (IS_CONSTANT_TYPE(Z_TYPE_P(assignment_value))) {
 			Z_SET_REFCOUNT_P(assignment_value, 1);
 			zval_update_constant(&assignment_value, 0 TSRMLS_CC);
+		} else if (Z_TYPE_P(assignment_value) == IS_ARRAY) {
+			HashTable *ht;
+
+			ALLOC_HASHTABLE(ht);
+			zend_hash_init(ht, zend_hash_num_elements(Z_ARRVAL_P(assignment_value)), NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_copy(ht, Z_ARRVAL_P(assignment_value), (copy_ctor_func_t) zval_deep_copy, NULL, sizeof(zval *));
+			Z_ARRVAL_P(assignment_value) = ht;
 		} else {
 			zval_copy_ctor(assignment_value);
 		}
