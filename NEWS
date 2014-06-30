@@ -11,7 +11,6 @@ PHP                                                                        NEWS
     (Ferenc)
 
 - FPM:
-  . Fix bug #67530 (error_log=syslog ignored). (Remi)
   . Fix bug #67531 (syslog cannot be set in pool configuration). (Remi)
   . Fix bug #67541 (Fix Apache 2.4.10+ SetHandler proxy:fcgi://
     incompatibilities). (David Zuelke)
