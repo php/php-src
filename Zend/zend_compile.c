@@ -1844,7 +1844,9 @@ void zend_do_receive_param(zend_uchar op, znode *varname, znode *initialization,
 		var.u.op.var = lookup_cv(CG(active_op_array), Z_STR(varname->u.constant) TSRMLS_CC);
 		Z_STR(varname->u.constant) = CG(active_op_array)->vars[EX_VAR_TO_NUM(var.u.op.var)];
 		var.EA = 0;
-		if (Z_STRHASH(varname->u.constant) == THIS_HASHVAL &&
+		if (EX_VAR_TO_NUM(var.u.op.var) != CG(active_op_array)->num_args) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Redefinition of parameter %s", Z_STRVAL(varname->u.constant));
+		} else if (Z_STRHASH(varname->u.constant) == THIS_HASHVAL &&
 			Z_STRLEN(varname->u.constant) == sizeof("this")-1 &&
 		    !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this")-1)) {
 			if (CG(active_op_array)->scope &&
