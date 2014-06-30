@@ -73,9 +73,11 @@ zend_object *NumberFormatter_object_create(zend_class_entry *ce TSRMLS_DC)
 zend_object *NumberFormatter_object_clone(zval *object TSRMLS_DC)
 {
 	NumberFormatter_object *nfo, *new_nfo;
+	zend_object *new_obj;
 
 	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
-	new_nfo = NumberFormatter_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
+	new_obj = NumberFormatter_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
+	new_nfo = php_intl_number_format_fetch_object(new_obj);
 	/* clone standard parts */	
 	zend_objects_clone_members(&new_nfo->zo, &nfo->zo TSRMLS_CC);
 	/* clone formatter object. It may fail, the destruction code must handle this case */
@@ -91,7 +93,7 @@ zend_object *NumberFormatter_object_clone(zval *object TSRMLS_DC)
 	} else {
 		zend_throw_exception(NULL, "Cannot clone unconstructed NumberFormatter", 0 TSRMLS_CC);
 	}
-	return new_nfo;
+	return new_obj;
 }
 /* }}} */
 

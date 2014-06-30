@@ -146,51 +146,57 @@ static const struct {
 /* {{{ get_debug_info handler for Calendar */
 static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 {
-	zval			zv = zval_used_for_init,
+	zval			zv,
 					zfields;
 	Calendar_object	*co;
 	const Calendar	*cal;
+	HashTable		*debug_info;
 	
 	*is_temp = 1;
 
-	array_init_size(&zv, 8);
+	ALLOC_HASHTABLE(debug_info);
+	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
 
 	co  = Z_INTL_CALENDAR_P(object);
 	cal = co->ucal;
 
 	if (cal == NULL) {
-		add_assoc_bool_ex(&zv, "valid", sizeof("valid"), 0);
-		return Z_ARRVAL(zv);
+		ZVAL_FALSE(&zv);
+		zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
+		return debug_info;
 	}
+	ZVAL_TRUE(&zv);
+	zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
 
-	add_assoc_bool_ex(&zv, "valid", sizeof("valid"), 1);
-
-	add_assoc_string_ex(&zv, "type", sizeof("type"),
-		const_cast<char*>(cal->getType()));
-
+	ZVAL_STRING(&zv, const_cast<char*>(cal->getType()));
+	zend_hash_str_update(debug_info, "type", sizeof("type") - 1, &zv);
 	{
-		zval		   ztz = zval_used_for_init,
+		zval		   ztz,
 					   ztz_debug;
 		int			   is_tmp;
-		HashTable	   *debug_info;
+		HashTable	   *debug_info_tz;
 
 		timezone_object_construct(&cal->getTimeZone(), &ztz , 0 TSRMLS_CC);
 		debug_info = Z_OBJ_HANDLER(ztz, get_debug_info)(&ztz, &is_tmp TSRMLS_CC);
 		assert(is_tmp == 1);
 
-		zend_hash_copy(Z_ARRVAL(ztz_debug), debug_info, NULL);
-		add_assoc_zval_ex(&zv, "timeZone", sizeof("timeZone") - 1, &ztz_debug);
+		array_init(&ztz_debug);
+		zend_hash_copy(Z_ARRVAL(ztz_debug), debug_info_tz, zval_add_ref);
+		zend_hash_destroy(debug_info_tz);
+		FREE_HASHTABLE(debug_info_tz);
+
+		zend_hash_str_update(debug_info, "timeZone", sizeof("timeZone") - 1, &ztz_debug);
 	}
 
 	{
 		UErrorCode	uec		= U_ZERO_ERROR;
 		Locale		locale	= cal->getLocale(ULOC_VALID_LOCALE, uec);
 		if (U_SUCCESS(uec)) {
-			add_assoc_string_ex(&zv, "locale", sizeof("locale") - 1,
-				const_cast<char*>(locale.getName()));
+			ZVAL_STRING(&zv, const_cast<char*>(locale.getName()));
+			zend_hash_str_update(debug_info, "locale", sizeof("locale") - 1, &zv);
 		} else {
-			add_assoc_string_ex(&zv, "locale", sizeof("locale") - 1,
-				const_cast<char*>(u_errorName(uec)));
+			ZVAL_STRING(&zv, const_cast<char*>(u_errorName(uec)));
+			zend_hash_str_update(debug_info, "locale", sizeof("locale") - 1, &zv);
 		}
 	}
 
@@ -209,9 +215,9 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		}
 	}
 
-	add_assoc_zval_ex(&zv, "fields", sizeof("fields") - 1, &zfields);
+	zend_hash_str_update(debug_info, "fields", sizeof("fields") - 1, &zfields);
 
-	return Z_ARRVAL(zv);
+	return debug_info;
 }
 /* }}} */
 
@@ -235,7 +241,7 @@ static void Calendar_objects_dtor(zend_object *object TSRMLS_DC)
 /* {{{ Calendar_objects_free */
 static void Calendar_objects_free(zend_object *object TSRMLS_DC)
 {
-	Calendar_object* co = (Calendar_object*) object;
+	Calendar_object* co = php_intl_calendar_fetch_object(object);
 
 	if (co->ucal) {
 		delete co->ucal;
@@ -244,8 +250,6 @@ static void Calendar_objects_free(zend_object *object TSRMLS_DC)
 	intl_error_reset(CALENDAR_ERROR_P(co) TSRMLS_CC);
 
 	zend_object_std_dtor(&co->zo TSRMLS_CC);
-
-	efree(co);
 }
 /* }}} */
 

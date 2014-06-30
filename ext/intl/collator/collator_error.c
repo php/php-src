@@ -59,7 +59,7 @@ PHP_FUNCTION( collator_get_error_code )
  */
 PHP_FUNCTION( collator_get_error_message )
 {
-	const char* message = NULL;
+	zend_string* message = NULL;
 
 	COLLATOR_METHOD_INIT_VARS
 
@@ -80,9 +80,7 @@ PHP_FUNCTION( collator_get_error_message )
 
 	/* Return last error message. */
 	message = intl_error_get_message( COLLATOR_ERROR_P( co ) TSRMLS_CC );
-	RETVAL_STRING( (char*)message);
-	//???
-	efree((char *)message);
+	RETURN_STR(message);
 }
 /* }}} */
 

@@ -61,7 +61,7 @@ extern zend_class_entry *Collator_ce_ptr;
     Collator_object*  co      = NULL;   \
     intl_error_reset( NULL TSRMLS_CC ); \
 
-#define COLLATOR_METHOD_FETCH_OBJECT	INTL_METHOD_FETCH_OBJECT(INIL_COLLATOR, co)
+#define COLLATOR_METHOD_FETCH_OBJECT	INTL_METHOD_FETCH_OBJECT(INTL_COLLATOR, co)
 
 // Macro to check return value of a ucol_* function call.
 #define COLLATOR_CHECK_STATUS( co, msg )                                        \

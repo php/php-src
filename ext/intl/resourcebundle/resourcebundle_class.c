@@ -49,7 +49,7 @@ static void ResourceBundle_object_destroy( zend_object *object TSRMLS_DC )
 		ures_close( rb->child );
 	}
 
-	zend_object_std_dtor( object TSRMLS_CC );
+	//???zend_object_std_dtor( object TSRMLS_CC );
 }
 /* }}} */
 
@@ -92,8 +92,8 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"resourcebundle_ctor: unable to parse input parameters", 0 TSRMLS_CC );
-		zval_dtor( return_value );
-		RETURN_NULL();
+		Z_OBJ_P(return_value) = NULL;
+		return;
 	}
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
@@ -121,8 +121,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 					rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)));
 		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(rb), pbuf, 1 TSRMLS_CC);
 		efree(pbuf);
-		zval_dtor(return_value);
-		RETURN_NULL();
+		Z_OBJ_P(return_value) = NULL;
 	}
 }
 /* }}} */
@@ -152,6 +151,9 @@ PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
 	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+		RETURN_NULL();
+	}
 }
 /* }}} */
 
@@ -210,18 +212,14 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
-zval *resourcebundle_array_get(zval *object, zval *offset, int type TSRMLS_DC) 
+zval *resourcebundle_array_get(zval *object, zval *offset, int type, zval *rv TSRMLS_DC) 
 {
-	zval *retval;
-
 	if(offset == NULL) {
 		php_error( E_ERROR, "Cannot apply [] to ResourceBundle object" );
 	}
-	MAKE_STD_ZVAL(retval);
-
-	resourcebundle_array_fetch(object, offset, retval, 1 TSRMLS_CC);
-	Z_DELREF_P(retval);
-	return retval;
+	ZVAL_NULL(rv);
+	resourcebundle_array_fetch(object, offset, rv, 1 TSRMLS_CC);
+	return rv;
 }
 /* }}} */
 

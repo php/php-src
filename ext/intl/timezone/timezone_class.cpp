@@ -65,7 +65,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 	UnicodeString		id;
 	char				*message = NULL;
 	php_timezone_obj	*tzobj;
-	zval				arg = zval_used_for_init;
+	zval				arg;
 
 	timeZone->getID(id);
 	if (id.isBogus()) {
@@ -132,7 +132,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 													 intl_error *outside_error,
 													 const char *func TSRMLS_DC)
 {
-	zval		local_zv_tz		= zval_used_for_init;
+	zval		local_zv_tz;
 	char		*message = NULL;
 	TimeZone	*timeZone;
 
@@ -141,7 +141,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		ZVAL_STRING(&local_zv_tz, tzinfo->name);
 		zv_timezone = &local_zv_tz;
 	} else {
-		ZVAL_UNDEF(&local_zv_tz);
+		ZVAL_NULL(&local_zv_tz);
 	}
 
 	if (Z_TYPE_P(zv_timezone) == IS_OBJECT &&
@@ -287,50 +287,56 @@ static int TimeZone_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 /* {{{ get_debug_info handler for TimeZone */
 static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 {
-	zval			zv = zval_used_for_init;
+	zval			zv;
 	TimeZone_object	*to;
 	const TimeZone	*tz;
 	UnicodeString	ustr;
 	char			*str;
 	int				str_len;
+	HashTable 		*debug_info;
 	UErrorCode		uec = U_ZERO_ERROR;
 
 	*is_temp = 1;
 	
-	array_init_size(&zv, 4);
+	ALLOC_HASHTABLE(debug_info);
+	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
 
 	to = Z_INTL_TIMEZONE_P(object);
 	tz = to->utimezone;
 
 	if (tz == NULL) {
-		add_assoc_bool_ex(&zv, "valid", sizeof("valid"), 0);
-		return Z_ARRVAL(zv);
+		ZVAL_FALSE(&zv);
+		zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
+		return debug_info;
 	}
 
-	add_assoc_bool_ex(&zv, "valid", sizeof("valid"), 1);
+	ZVAL_TRUE(&zv);
+	zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
 
 	tz->getID(ustr);
 	intl_convert_utf16_to_utf8(&str, &str_len,
 		ustr.getBuffer(), ustr.length(), &uec);
 	if (U_FAILURE(uec)) {
-		return Z_ARRVAL(zv);
+		return debug_info;
 	}
+	ZVAL_STRINGL(&zv, str, str_len);
+	zend_hash_str_update(debug_info, "id", sizeof("id") - 1, &zv);
 	// TODO: avoid reallocation ???
-	add_assoc_stringl_ex(&zv, "id", sizeof("id"), str, str_len);
 	efree(str);
 
 	int32_t rawOffset, dstOffset;
 	UDate now = Calendar::getNow();
 	tz->getOffset(now, FALSE, rawOffset, dstOffset, uec);
 	if (U_FAILURE(uec)) {
-		return Z_ARRVAL(zv);
+		return debug_info;
 	}
 	
-	add_assoc_long_ex(&zv, "rawOffset", sizeof("rawOffset"), (long)rawOffset);
-	add_assoc_long_ex(&zv, "currentOffset", sizeof("currentOffset"),
-		(long)(rawOffset + dstOffset));
+	ZVAL_LONG(&zv, (long)rawOffset);
+	zend_hash_str_update(debug_info,"rawOffset", sizeof("rawOffset") - 1, &zv); 
+	ZVAL_LONG(&zv, (long)(rawOffset + dstOffset));
+	zend_hash_str_update(debug_info,"currentOffset", sizeof("currentOffset") - 1, &zv); 
 
-	return Z_ARRVAL(zv);
+	return debug_info;
 }
 /* }}} */
 
@@ -375,7 +381,7 @@ static zend_object *TimeZone_object_create(zend_class_entry *ce TSRMLS_DC)
 	intern = (TimeZone_object*)ecalloc(1, sizeof(TimeZone_object) + sizeof(zval) * (ce->default_properties_count - 1));
 	
 	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
-    object_properties_init((zend_object*) intern, ce);
+    object_properties_init(&intern->zo, ce);
 	TimeZone_object_init(intern TSRMLS_CC);
 
 	intern->zo.handlers = &TimeZone_handlers;

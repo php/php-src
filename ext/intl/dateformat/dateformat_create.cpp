@@ -66,8 +66,8 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
 				"unable to parse input parameters", 0 TSRMLS_CC);
-		zval_dtor(return_value);
-		RETURN_NULL();
+		Z_OBJ_P(return_value) = NULL;
+		return;
     }
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
@@ -162,8 +162,7 @@ error:
 	}
 	if (U_FAILURE(intl_error_get_code(NULL TSRMLS_CC))) {
 		/* free_object handles partially constructed instances fine */
-		zval_dtor(return_value);
-		RETVAL_NULL();
+		Z_OBJ_P(return_value) = NULL;
 	}
 }
 /* }}} */
@@ -177,6 +176,9 @@ U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
 	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+		RETURN_NULL();
+	}
 }
 /* }}} */
 

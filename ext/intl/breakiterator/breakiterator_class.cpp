@@ -47,7 +47,7 @@ zend_object_handlers BreakIterator_handlers;
 /* }}} */
 
 U_CFUNC	void breakiterator_object_create(zval *object,
-										 BreakIterator *biter TSRMLS_DC)
+										 BreakIterator *biter, int brand_new TSRMLS_DC)
 {
 	UClassID classId = biter->getDynamicClassID();
 	zend_class_entry *ce;
@@ -60,7 +60,9 @@ U_CFUNC	void breakiterator_object_create(zval *object,
 		ce = BreakIterator_ce_ptr;
 	}
 
-	object_init_ex(object, ce);
+	if (brand_new) {
+		object_init_ex(object, ce);
+	}
 	breakiterator_object_construct(object, biter TSRMLS_CC);
 }
 
@@ -135,34 +137,39 @@ static zend_object *BreakIterator_clone_obj(zval *object TSRMLS_DC)
 /* {{{ get_debug_info handler for BreakIterator */
 static HashTable *BreakIterator_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 {
-	zval					zv = zval_used_for_init;
+	zval val;
+	HashTable *debug_info;
 	BreakIterator_object	*bio;
 	const BreakIterator		*biter;
 
 	*is_temp = 1;
 
-	array_init_size(&zv, 8);
+	ALLOC_HASHTABLE(debug_info);
+	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
 
 	bio  = Z_INTL_BREAKITERATOR_P(object);
 	biter = bio->biter;
 
 	if (biter == NULL) {
-		add_assoc_bool_ex(&zv, "valid", sizeof("valid") - 1, 0);
-		return Z_ARRVAL(zv);
+		ZVAL_FALSE(&val);
+		zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &val);
+		return debug_info;
 	}
-	add_assoc_bool_ex(&zv, "valid", sizeof("valid") - 1, 1);
+	ZVAL_TRUE(&val);
+	zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &val);
 
 	if (Z_ISUNDEF(bio->text)) {
-		add_assoc_null_ex(&zv, "text", sizeof("text") - 1);
+		ZVAL_NULL(&val);
+		zend_hash_str_update(debug_info, "text", sizeof("text") - 1, &val);
 	} else {
 		Z_TRY_ADDREF(bio->text);
-		add_assoc_zval_ex(&zv, "text", sizeof("text") - 1, &bio->text);
+		zend_hash_str_update(debug_info, "text", sizeof("text") - 1, &bio->text);
 	}
 
-	add_assoc_string_ex(&zv, "type", sizeof("type") - 1,
-			const_cast<char*>(typeid(*biter).name()));
+	ZVAL_STRING(&val, const_cast<char*>(typeid(*biter).name()));
+	zend_hash_str_update(debug_info, "type", sizeof("type") - 1, &bio->text);
 
-	return Z_ARRVAL(zv);
+	return debug_info;
 }
 /* }}} */
 

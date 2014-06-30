@@ -30,7 +30,7 @@
 /* {{{ */
 static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, int src_len, zval *return_value TSRMLS_DC) 
 {
-	zval **fargs;
+	zval *fargs;
 	int count = 0;
 	int i;
 	UChar *usource = NULL;
@@ -47,7 +47,7 @@ static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, int src_
 
 	array_init(return_value);
 	for(i=0;i<count;i++) {
-		add_next_index_zval(return_value, fargs[i]);
+		add_next_index_zval(return_value, &fargs[i]);
 	}
 	efree(fargs);
 }

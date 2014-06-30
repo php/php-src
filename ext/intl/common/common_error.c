@@ -91,7 +91,7 @@ PHP_FUNCTION( intl_error_name )
  */
 void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 {
-	#define INTL_EXPOSE_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS)
+	#define INTL_EXPOSE_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_PERSISTENT | CONST_CS)
 
 	/* Warnings */
 	INTL_EXPOSE_CONST( U_USING_FALLBACK_WARNING );

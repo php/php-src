@@ -68,7 +68,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 		case URES_ARRAY:
 		case URES_TABLE:
 			object_init_ex( return_value, ResourceBundle_ce_ptr );
-			newrb = (ResourceBundle_object *) zend_object_store_get_object( return_value TSRMLS_CC );
+			newrb = Z_INTL_RESOURCEBUNDLE_P(return_value);
 			newrb->me = source->child;
 			source->child = NULL;
 			intl_errors_reset(INTL_DATA_ERROR_P(source) TSRMLS_CC);

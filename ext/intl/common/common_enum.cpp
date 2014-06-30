@@ -54,7 +54,6 @@ void zoi_with_current_dtor(zend_object_iterator *iter TSRMLS_DC)
 		 * not finding the memory of this iterator allocated anymore. */
 		iter->funcs->invalidate_current(iter TSRMLS_CC);
 		zoiwc->destroy_it(iter TSRMLS_CC);
-		efree(iter);
 	}
 }
 
@@ -142,7 +141,7 @@ U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *ob
 {
 	IntlIterator_object *ii;
 	object_init_ex(object, IntlIterator_ce_ptr);
-	ii = (IntlIterator_object*)Z_OBJ_P(object);
+	ii = Z_INTL_ITERATOR_P(object);
 	ii->iterator = (zend_object_iterator*)emalloc(sizeof(zoi_with_current));
 	zend_iterator_init(ii->iterator TSRMLS_CC);
 	ZVAL_PTR(&ii->iterator->data, se);
@@ -160,13 +159,11 @@ static void IntlIterator_objects_free(zend_object *object TSRMLS_DC)
 	if (ii->iterator) {
 		zval *wrapping_objp = &((zoi_with_current*)ii->iterator)->wrapping_obj;
 		ZVAL_UNDEF(wrapping_objp);
-		ii->iterator->funcs->dtor(ii->iterator TSRMLS_CC);
+		zend_iterator_dtor(ii->iterator TSRMLS_CC);
 	}
 	intl_error_reset(INTLITERATOR_ERROR_P(ii) TSRMLS_CC);
 
 	zend_object_std_dtor(&ii->zo TSRMLS_CC);
-
-	efree(ii);
 }
 
 static zend_object_iterator *IntlIterator_get_iterator(
@@ -186,7 +183,7 @@ static zend_object_iterator *IntlIterator_get_iterator(
 		return NULL;
 	}
 
-	zval_add_ref(object);
+	++GC_REFCOUNT(ii->iterator);
 
 	return ii->iterator;
 }
@@ -198,7 +195,7 @@ static zend_object *IntlIterator_object_create(zend_class_entry *ce TSRMLS_DC)
 	intern = (IntlIterator_object*)ecalloc(1, sizeof(IntlIterator_object) + sizeof(zval) * (ce->default_properties_count - 1));
 	
 	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
-    object_properties_init((zend_object*) intern, ce);
+    object_properties_init(&intern->zo, ce);
 	intl_error_init(INTLITERATOR_ERROR_P(intern) TSRMLS_CC);
 
 	intern->iterator = NULL;

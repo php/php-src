@@ -325,6 +325,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	efree(str);
 	
 	if (is_systemid) { /* by-ref argument passed */
+		ZVAL_DEREF(is_systemid);
 		zval_dtor(is_systemid);
 		ZVAL_BOOL(is_systemid, isSystemID);
 	}
@@ -436,7 +437,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_id)
 		id_us.getBuffer(), id_us.length(), TIMEZONE_ERROR_CODE_P(to));
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_id: Could not convert id to UTF-8");
 
-	RETURN_STRINGL(id, id_len);
+	RETVAL_STRINGL(id, id_len);
 	//???
 	efree(id);
 }
@@ -482,8 +483,10 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_offset: error obtaining offset");
 
+	ZVAL_DEREF(rawOffsetArg);
 	zval_dtor(rawOffsetArg);
 	ZVAL_LONG(rawOffsetArg, rawOffset);
+	ZVAL_DEREF(dstOffsetArg);
 	zval_dtor(dstOffsetArg);
 	ZVAL_LONG(dstOffsetArg, dstOffset);
 

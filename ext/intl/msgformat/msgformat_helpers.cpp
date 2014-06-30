@@ -83,6 +83,10 @@ U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
 	return fmt_count;
 }
 
+static void arg_types_dtor(zval *el TSRMLS_DC) {
+	efree(Z_PTR_P(el));
+}
+
 static HashTable *umsg_get_numeric_types(MessageFormatter_object *mfo,
 										 intl_error& err TSRMLS_DC)
 {
@@ -104,7 +108,7 @@ static HashTable *umsg_get_numeric_types(MessageFormatter_object *mfo,
 	/* Hash table will store Formattable::Type objects directly,
 	 * so no need for destructor */
 	ALLOC_HASHTABLE(ret);
-	zend_hash_init(ret, parts_count, NULL, NULL, 0);
+	zend_hash_init(ret, parts_count, NULL, arg_types_dtor, 0);
 
 	for (int i = 0; i < parts_count; i++) {
 		const Formattable::Type t = types[i];
@@ -151,7 +155,7 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 	/* Hash table will store Formattable::Type objects directly,
 	 * so no need for destructor */
 	ALLOC_HASHTABLE(ret);
-	zend_hash_init(ret, 32, NULL, NULL, 0);
+	zend_hash_init(ret, 32, NULL, arg_types_dtor, 0);
 
 	parts_count = mp.countParts();
 
@@ -179,12 +183,11 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 
 		if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NAME) {
 			UnicodeString argName = mp.getSubstring(name_part);
-			if (zend_hash_find(ret, (char*)argName.getBuffer(), argName.length(),
-					(void**)&storedType) == FAILURE) {
+			if ((storedType = zend_hash_str_find_ptr(ret, (char*)argName.getBuffer(), argName.length())) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				if (zend_hash_update(ret, (char*)argName.getBuffer(), argName.length(),
-						(void*)&bogusType, sizeof(bogusType), (void**)&storedType) == FAILURE) {
+				if ((storedType = zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length(),
+						(void*)&bogusType, sizeof(bogusType))) == NULL) {
 					intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
 						"Write to argument types hash table failed", 0 TSRMLS_CC);
 					continue;
@@ -197,12 +200,10 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 					"Found part with negative number", 0 TSRMLS_CC);
 				continue;
 			}
-			if (zend_hash_index_find(ret, (ulong)argNumber, (void**)&storedType)
-					== FAILURE) {
+			if ((storedType = zend_hash_index_find_ptr(ret, (ulong)argNumber)) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				if (zend_hash_index_update(ret, (ulong)argNumber, (void*)&bogusType,
-						sizeof(bogusType), (void**)&storedType) == FAILURE) {
+				if ((storedType = zend_hash_index_update_mem(ret, (ulong)argNumber, (void*)&bogusType, sizeof(bogusType))) == NULL) {
 					intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
 						"Write to argument types hash table failed", 0 TSRMLS_CC);
 					continue;
@@ -343,10 +344,9 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		}
 		
 		if (used_tz == NULL) {
-			zval nullzv = zval_used_for_init,
-				 *zvptr = &nullzv;
-			used_tz = timezone_process_timezone_argument(zvptr, &err,
-				"msgfmt_format" TSRMLS_CC);
+			zval nullzv, *zvptr = &nullzv;
+			ZVAL_NULL(zvptr);
+			used_tz = timezone_process_timezone_argument(zvptr, &err, "msgfmt_format" TSRMLS_CC);
 			if (used_tz == NULL) {
 				continue;
 			}

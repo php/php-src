@@ -45,7 +45,7 @@ static void Collator_objects_dtor(zend_object *object TSRMLS_DC )
 /* {{{ Collator_objects_free */
 void Collator_objects_free(zend_object *object TSRMLS_DC )
 {
-	Collator_object* co = php_collator_fetch_object(object);
+	Collator_object* co = php_intl_collator_fetch_object(object);
 
 	zend_object_std_dtor(&co->zo TSRMLS_CC );
 

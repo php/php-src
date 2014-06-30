@@ -835,13 +835,14 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( NULL != next ) {
-		if ( !PZVAL_IS_REF(next) ) {
+		if ( !Z_ISREF_P(next) ) {
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				 "grapheme_extract: 'next' was not passed by reference", 0 TSRMLS_CC );
 
 			RETURN_FALSE;
 		}
 		else {
+			ZVAL_DEREF(next);
 			/* initialize next */
 			zval_dtor(next);
             ZVAL_LONG(next, lstart);
