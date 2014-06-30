@@ -13,6 +13,7 @@ fi
 ./configure --quiet \
 $DEBUG \
 $TS \
+--enable-fpm \
 --with-pdo-mysql=mysqlnd \
 --with-mysql=mysqlnd \
 --with-mysqli=mysqlnd \
