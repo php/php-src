@@ -482,8 +482,10 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_offset: error obtaining offset");
 
+	ZVAL_DEREF(rawOffsetArg);
 	zval_dtor(rawOffsetArg);
 	ZVAL_LONG(rawOffsetArg, rawOffset);
+	ZVAL_DEREF(dstOffsetArg);
 	zval_dtor(dstOffsetArg);
 	ZVAL_LONG(dstOffsetArg, dstOffset);
 
