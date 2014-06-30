@@ -154,12 +154,12 @@ PHP_MINFO_FUNCTION(mysqlnd)
 		smart_str tmp_str = {0};
 		mysqlnd_plugin_apply_with_argument(mysqlnd_minfo_dump_loaded_plugins, &tmp_str);
 		smart_str_0(&tmp_str);
-		php_info_print_table_row(2, "Loaded plugins", tmp_str.s->val);
+		php_info_print_table_row(2, "Loaded plugins", tmp_str.s? tmp_str.s->val : "");
 		smart_str_free(&tmp_str);
 
 		mysqlnd_minfo_dump_api_plugins(&tmp_str TSRMLS_CC);
 		smart_str_0(&tmp_str);
-		php_info_print_table_row(2, "API Extensions", tmp_str.s->val);
+		php_info_print_table_row(2, "API Extensions", tmp_str.s? tmp_str.s->val : "");
 		smart_str_free(&tmp_str);
 	}
 
