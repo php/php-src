@@ -183,10 +183,10 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 
 		if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NAME) {
 			UnicodeString argName = mp.getSubstring(name_part);
-			if ((storedType = zend_hash_str_find_ptr(ret, (char*)argName.getBuffer(), argName.length())) == NULL) {
+			if ((storedType = (Formattable::Type*)zend_hash_str_find_ptr(ret, (char*)argName.getBuffer(), argName.length())) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				if ((storedType = zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length(),
+				if ((storedType = (Formattable::Type*)zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length(),
 						(void*)&bogusType, sizeof(bogusType))) == NULL) {
 					intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
 						"Write to argument types hash table failed", 0 TSRMLS_CC);
@@ -200,10 +200,10 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 					"Found part with negative number", 0 TSRMLS_CC);
 				continue;
 			}
-			if ((storedType = zend_hash_index_find_ptr(ret, (ulong)argNumber)) == NULL) {
+			if ((storedType = (Formattable::Type*)zend_hash_index_find_ptr(ret, (ulong)argNumber)) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				if ((storedType = zend_hash_index_update_mem(ret, (ulong)argNumber, (void*)&bogusType, sizeof(bogusType))) == NULL) {
+				if ((storedType = (Formattable::Type*)zend_hash_index_update_mem(ret, (ulong)argNumber, (void*)&bogusType, sizeof(bogusType))) == NULL) {
 					intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
 						"Write to argument types hash table failed", 0 TSRMLS_CC);
 					continue;
