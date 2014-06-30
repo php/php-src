@@ -325,6 +325,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	efree(str);
 	
 	if (is_systemid) { /* by-ref argument passed */
+		ZVAL_DEREF(is_systemid);
 		zval_dtor(is_systemid);
 		ZVAL_BOOL(is_systemid, isSystemID);
 	}
