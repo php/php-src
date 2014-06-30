@@ -409,7 +409,7 @@ ZEND_FUNCTION(func_num_args)
    Get the $arg_num'th argument that was passed to the function */
 ZEND_FUNCTION(func_get_arg)
 {
-	int arg_count;
+	int arg_count, first_extra_arg;
 	zval *arg;
 	long requested_offset;
 	zend_execute_data *ex;
@@ -436,8 +436,12 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_FALSE;
 	}
 
-	if (requested_offset >= ex->func->op_array.num_args && (ex->num_args > ex->func->op_array.num_args)) {
-		arg = EX_VAR_NUM_2(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - ex->func->op_array.num_args);
+	first_extra_arg = ex->func->op_array.num_args;
+	if (ex->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
+		first_extra_arg--;
+	}
+	if (requested_offset >= first_extra_arg && (ex->num_args > first_extra_arg)) {
+		arg = EX_VAR_NUM_2(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
 	} else {
 		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
 	}
@@ -450,7 +454,7 @@ ZEND_FUNCTION(func_get_arg)
 ZEND_FUNCTION(func_get_args)
 {
 	zval *p;
-	int arg_count;
+	int arg_count, first_extra_arg;
 	int i;
 	zend_execute_data *ex = EG(current_execute_data);
 
@@ -465,12 +469,16 @@ ZEND_FUNCTION(func_get_args)
 	if (arg_count) {
 		Bucket *q;		
 
+		first_extra_arg = ex->func->op_array.num_args;
+		if (ex->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
+			first_extra_arg--;
+		}
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		i = 0;
 		q = Z_ARRVAL_P(return_value)->arData;
 		p = ZEND_CALL_ARG(ex, 1);
-		if (ex->num_args > ex->func->op_array.num_args) {
-			while (i < ex->func->op_array.num_args) {
+		if (ex->num_args > first_extra_arg) {
+			while (i < first_extra_arg) {
 				q->h = i;
 				q->key = NULL;
 				if (!Z_ISREF_P(p)) {
@@ -1985,14 +1993,21 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array TS
 		int i = 0;
 		zval *p = ZEND_CALL_ARG(call, 1);
 
-		if (call->func->type == ZEND_USER_FUNCTION && (call->num_args > call->func->op_array.num_args)) {
-			while (i < call->func->op_array.num_args) {
-				if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
-				p++;
-				i++;
+		if (call->func->type == ZEND_USER_FUNCTION) {
+			int first_extra_arg = call->func->op_array.num_args;
+			
+			if (call->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
+			 	first_extra_arg--;
 			}
-			p = EX_VAR_NUM_2(call, call->func->op_array.last_var + call->func->op_array.T);
+			if (call->num_args > first_extra_arg) {
+				while (i < first_extra_arg) {
+					if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
+					p++;
+					i++;
+				}
+				p = EX_VAR_NUM_2(call, call->func->op_array.last_var + call->func->op_array.T);
+			}
 		}
 
 		while (i < num_args) {

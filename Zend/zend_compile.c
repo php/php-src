@@ -1461,6 +1461,11 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 					&& opline->result.var == op1->u.op.var) {
 					if (opline->opcode == ZEND_NEW) {
 						opline->result_type |= EXT_TYPE_UNUSED;
+						opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
+						while (opline->opcode != ZEND_DO_FCALL || opline->op1.num != ZEND_CALL_CTOR) {
+							opline--;
+						}
+						opline->op1.num |= ZEND_CALL_CTOR_RESULT_UNUSED;
 					}
 					break;
 				}
@@ -2544,13 +2549,20 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 		}
 		opline = &CG(active_op_array)->opcodes[Z_LVAL(function_name->u.constant)];
 	} else {
+		zend_uint call_flags = 0;
+
 		opline = &CG(active_op_array)->opcodes[fcall->op_number];
 		opline->extended_value = fcall->arg_num;
+
+		if (opline->opcode == ZEND_NEW) {
+			call_flags = ZEND_CALL_CTOR;
+		}
 
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_DO_FCALL;
 		SET_UNUSED(opline->op1);
 		SET_UNUSED(opline->op2);
+		opline->op1.num = call_flags;
 	}
 
 	opline->result.var = get_temporary_variable(CG(active_op_array));

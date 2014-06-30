@@ -379,7 +379,7 @@ struct _zend_execute_data {
 };
 
 #define ZEND_CALL_CTOR               (1 << 0)
-#define ZEND_CALL_CTOR_RESULT_USED   (1 << 1)
+#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 1)
 #define ZEND_CALL_DONE               (1 << 2)
 
 #define ZEND_CALL_FRAME_SLOT \
@@ -740,7 +740,6 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_PARSED_REFERENCE_VARIABLE	(1<<5)
 #define ZEND_PARSED_NEW					(1<<6)
 #define ZEND_PARSED_LIST_EXPR			(1<<7)
-
 
 /* unset types */
 #define ZEND_UNSET_REG 0

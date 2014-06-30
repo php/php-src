@@ -211,7 +211,7 @@ static zend_always_inline void zend_vm_stack_extend(int count TSRMLS_DC)
 	EG(argument_stack) = p;
 }
 
-static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_function *func, zend_uint num_args, zend_uint flags, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
+static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_function *func, zend_uint num_args, zend_uchar flags, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
 {
 	int used_stack = ZEND_CALL_FRAME_SLOT + num_args;
 	zend_execute_data *call;
@@ -223,7 +223,7 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_
 	call = (zend_execute_data*)EG(argument_stack)->top;
 	EG(argument_stack)->top += used_stack;
 	call->func = func;
-	call->num_args = 0; //??? num_args;
+	call->num_args = 0;
 	call->flags = flags;
 	call->called_scope = called_scope;
 	call->object = object;
@@ -233,9 +233,11 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_
 
 static zend_always_inline void zend_vm_stack_free_extra_args(zend_execute_data *call TSRMLS_DC)
 {
- 	if (UNEXPECTED(call->num_args > call->func->op_array.num_args)) {
+	zend_uint first_extra_arg = call->func->op_array.num_args - ((call->func->common.fn_flags & ZEND_ACC_VARIADIC) != 0);
+
+ 	if (UNEXPECTED(call->num_args > first_extra_arg)) {
  		zval *end = EX_VAR_NUM_2(call, call->func->op_array.last_var + call->func->op_array.T);
- 		zval *p = end + (call->num_args - call->func->op_array.num_args);
+ 		zval *p = end + (call->num_args - first_extra_arg);
 		do {
 			p--;
 			i_zval_ptr_dtor_nogc(p ZEND_FILE_LINE_CC TSRMLS_CC);

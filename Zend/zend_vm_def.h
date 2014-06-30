@@ -1773,7 +1773,6 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 {
 	vm_frame_kind frame_kind = EX(frame_kind);
 	zend_execute_data *prev_nested_call;
-	zend_uint call_flags;
 
 	EG(current_execute_data) = EX(prev_execute_data);
 
@@ -1785,7 +1784,6 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && EX(func)->op_array.prototype) {
 			zval_ptr_dtor((zval*)EX(func)->op_array.prototype);
 		}
-		call_flags = EX(flags);
 		prev_nested_call = EX(prev_nested_call);
 		zend_vm_stack_free_extra_args(execute_data TSRMLS_CC);
 		zend_vm_stack_free_call_frame(execute_data TSRMLS_CC);
@@ -1797,8 +1795,8 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		EG(active_symbol_table) = EX(symbol_table);
 
 		if (Z_OBJ(EG(This))) {
-			if (UNEXPECTED(EG(exception) != NULL) && (call_flags & ZEND_CALL_CTOR)) {
-				if (call_flags & ZEND_CALL_CTOR_RESULT_USED) {
+			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
+				if (!(EX(opline)->op1.num & ZEND_CALL_CTOR_RESULT_UNUSED)) {
 					Z_DELREF(EG(This));
 				}
 				if (Z_REFCOUNT(EG(This)) == 1) {
@@ -2576,10 +2574,9 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
 	zend_function *fbc = call->func;
-	zend_uint call_flags = call->flags;
 
 	SAVE_OPLINE();
-	call->flags |= ZEND_CALL_DONE;
+	call->flags = ZEND_CALL_DONE;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
 			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name->val, fbc->common.function_name->val);
@@ -2753,8 +2750,8 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 
 ZEND_VM_C_LABEL(fcall_end_change_scope):
 	if (Z_OBJ(EG(This))) {
-		if (UNEXPECTED(EG(exception) != NULL) && (call_flags & ZEND_CALL_CTOR)) {
-			if (call_flags & ZEND_CALL_CTOR_RESULT_USED) {
+		if (UNEXPECTED(EG(exception) != NULL) && (opline->op1.num & ZEND_CALL_CTOR)) {
+			if (!(opline->op1.num & ZEND_CALL_CTOR_RESULT_UNUSED)) {
 				Z_DELREF(EG(This));
 			}
 			if (Z_REFCOUNT(EG(This)) == 1) {
@@ -3343,31 +3340,23 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 	params = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
 
 	if (arg_num <= arg_count) {
-		zval *param, tmp;
+		zval *param;
 
-		ZVAL_COPY_VALUE(&tmp, params);
 		array_init_size(params, arg_count - arg_num + 1);
 		param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
 		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
-			zend_verify_arg_type(EX(func), arg_num, &tmp, opline->extended_value TSRMLS_CC);
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(params), &tmp);
-			if (param) {
-				while (++arg_num <= arg_count) {
-					zend_verify_arg_type(EX(func), arg_num, param, opline->extended_value TSRMLS_CC);
-					zend_hash_next_index_insert_new(Z_ARRVAL_P(params), param);
-					if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
-					param++;
-				}
-			}
+			do {			
+				zend_verify_arg_type(EX(func), arg_num, param, opline->extended_value TSRMLS_CC);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(params), param);
+				if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
+				param++;
+			} while (++arg_num <= arg_count);
 		} else {
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(params), &tmp);
-			if (param) {
-				while (++arg_num <= arg_count) {
-					zend_hash_next_index_insert_new(Z_ARRVAL_P(params), param);
-					if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
-					param++;
-				}
-			}
+			do {
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(params), param);
+				if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
+				param++;
+			} while (++arg_num <= arg_count);
 		}
 	} else {
 		array_init(params);
@@ -3495,7 +3484,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 		EX(call) = zend_vm_stack_push_call_frame(
 			constructor, opline->extended_value,
 			RETURN_VALUE_USED(opline) ?
-				(ZEND_CALL_CTOR | ZEND_CALL_CTOR_RESULT_USED) : ZEND_CALL_CTOR,
+				ZEND_CALL_CTOR : (ZEND_CALL_CTOR | ZEND_CALL_CTOR_RESULT_UNUSED),
 			Z_CE_P(EX_VAR(opline->op1.var)),
 			Z_OBJ(object_zval),
 			EX(call) TSRMLS_CC);
@@ -5177,7 +5166,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 
 			if (call->object) {
 				if (call->flags & ZEND_CALL_CTOR) {
-					if (call->flags & ZEND_CALL_CTOR_RESULT_USED) {
+					if (!(call->flags & ZEND_CALL_CTOR_RESULT_UNUSED)) {
 						GC_REFCOUNT(call->object)--;
 					}
 					if (GC_REFCOUNT(call->object) == 1) {

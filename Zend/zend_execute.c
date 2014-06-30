@@ -1556,18 +1556,22 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 
 	EG(opline_ptr) = &EX(opline);
 	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
-//???	EX(func) = (zend_function*)op_array;
 	EX(scope) = EG(scope);
 	EX(symbol_table) = EG(active_symbol_table);
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
 		zend_attach_symbol_table(execute_data);
 	} else {
-
-		if (UNEXPECTED(EX(num_args) > op_array->num_args)) {
+		zend_uint first_extra_arg = op_array->num_args;
+		
+		if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0)) {
+			first_extra_arg--;
+		}
+		if (UNEXPECTED(EX(num_args) > first_extra_arg)) {
 			/* move extra args into separate array after all CV and TMP vars */
 			zval *extra_args = EX_VAR_NUM(op_array->last_var + op_array->T);
-			memmove(extra_args, EX_VAR_NUM(op_array->num_args), sizeof(zval) * (EX(num_args) - op_array->num_args));
+
+			memmove(extra_args, EX_VAR_NUM(first_extra_arg), sizeof(zval) * (EX(num_args) - first_extra_arg));
 		}
 
 		do {
