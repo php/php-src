@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fix bug #67541 (Fix Apache 2.4.10+ SetHandler proxy:fcgi://
     incompatibilities). (David Zuelke)
 
+- pgsql:
+  . Fix bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
+    which affected builds against libpq < 7.3. (Adam)
+
 - phpdbg:
   . Fix Bug #67499 (readline feature not enabled when build with libedit). (Remi)
   . Fix issue krakjoe/phpdbg#94 (List behavior is inconsistent). (Bob)

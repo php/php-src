@@ -783,7 +783,7 @@ static int le_link, le_plink, le_result, le_lofp, le_string;
 #endif
 
 #if !HAVE_PQESCAPE_CONN
-#define PQescapeStringConn(conn, to, form, len, error) PQescapeString(to, from, len)
+#define PQescapeStringConn(conn, to, from, len, error) PQescapeString(to, from, len)
 #endif
 
 #if HAVE_PQESCAPELITERAL
