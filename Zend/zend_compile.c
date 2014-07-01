@@ -308,7 +308,7 @@ static int lookup_cv(zend_op_array *op_array, zend_string* name TSRMLS_DC) /* {{
 		     op_array->vars[i]->len == name->len &&
 		     memcmp(op_array->vars[i]->val, name->val, name->len) == 0)) {
 			STR_RELEASE(name);
-			return (int)EX_VAR_NUM_2(NULL, i);
+			return (int)(zend_intptr_t)EX_VAR_NUM_2(NULL, i);
 		}
 		i++;
 	}
@@ -320,7 +320,7 @@ static int lookup_cv(zend_op_array *op_array, zend_string* name TSRMLS_DC) /* {{
 	}
 
 	op_array->vars[i] = zend_new_interned_string(name TSRMLS_CC);
-	return (int)EX_VAR_NUM_2(NULL, i);
+	return (int)(zend_intptr_t)EX_VAR_NUM_2(NULL, i);
 }
 /* }}} */
 

@@ -1831,7 +1831,9 @@ SPL_METHOD(Array, unserialize)
 	}
 	++p;
 
-	if (!php_var_unserialize(&members, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+	ZVAL_UNDEF(&members);
+	if (!php_var_unserialize(&members, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE(members) != IS_ARRAY) {
+		zval_ptr_dtor(&members);
 		goto outexcept;
 	}
 

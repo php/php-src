@@ -245,9 +245,9 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	/* must come before zpp because zpp would convert the arg in the stack to 0 */
 	if (ZEND_NUM_ARGS() == 3) {
-		zval **dummy, **zvoffset;
+		zval *dummy, *zvoffset;
 		arg3isnull = zend_get_parameters_ex(3, &dummy, &dummy, &zvoffset)
-				!= FAILURE && Z_TYPE_PP(zvoffset) == IS_NULL;
+				!= FAILURE && Z_TYPE_P(zvoffset) == IS_NULL;
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|s!l",
