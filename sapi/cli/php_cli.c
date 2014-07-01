@@ -1102,7 +1102,6 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 					memset(&execute_data, 0, sizeof(zend_execute_data));
 					EG(current_execute_data) = &execute_data;
-					EX(function_state).function = pce->constructor;
 					zend_call_method_with_1_params(&ref, pce, &pce->constructor, "__construct", NULL, &arg);
 
 					if (EG(exception)) {

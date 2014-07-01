@@ -83,7 +83,7 @@ const char *zend_vm_opcodes_map[169] = {
 	"ZEND_END_SILENCE",
 	"ZEND_INIT_FCALL_BY_NAME",
 	"ZEND_DO_FCALL",
-	"ZEND_DO_FCALL_BY_NAME",
+	"ZEND_INIT_FCALL",
 	"ZEND_RETURN",
 	"ZEND_RECV",
 	"ZEND_RECV_INIT",

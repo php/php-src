@@ -43,21 +43,21 @@ restart:
 
 /*!re2c
 re2c:yyfill:check = 0;
-T_TRUE      "true"
-T_YES       "yes"
-T_ON        "on"
-T_ENABLED   "enabled"
-T_FALSE     "false"
-T_NO        "no"
-T_OFF       "off"
-T_DISABLED  "disabled"
-T_EVAL      "ev"
-T_SHELL     "sh"
-T_IF        "if"
-T_RUN       "run"
+T_TRUE      'true'
+T_YES       'yes'
+T_ON        'on'
+T_ENABLED   'enabled'
+T_FALSE     'false'
+T_NO        'no'
+T_OFF       'off'
+T_DISABLED  'disabled'
+T_EVAL      'ev'
+T_SHELL     'sh'
+T_IF        'if'
+T_RUN       'run'
 T_RUN_SHORT "r"
 WS          [ \r\n\t]+
-DIGITS      [0-9\.]+
+DIGITS      [-]?[0-9\.]+
 ID          [^ \r\n\t:#\000]+
 ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+
@@ -69,7 +69,7 @@ INPUT       [^\n\000]+
 	return 0;
 }
 
-<NORMAL>{T_IF} {
+<NORMAL>{T_IF}{WS} {
 	YYSETCONDITION(RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_IF;
@@ -91,13 +91,13 @@ INPUT       [^\n\000]+
 	return T_COLON;
 }
 
-<NORMAL>{T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE} {
+<NORMAL>({T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE}){WS} {
 	phpdbg_init_param(yylval, NUMERIC_PARAM);
 	yylval->num = 1;		
 	return T_TRUTHY;
 }
 
-<NORMAL>{T_NO}|{T_OFF}|{T_DISABLED}|{T_FALSE} {
+<NORMAL>({T_NO}|{T_OFF}|{T_DISABLED}|{T_FALSE}){WS} {
 	phpdbg_init_param(yylval, NUMERIC_PARAM);
 	yylval->num = 0;
 	return T_FALSY;
@@ -142,17 +142,17 @@ INPUT       [^\n\000]+
 	goto restart;
 }
 
-<INITIAL>{T_EVAL} {
+<INITIAL>{T_EVAL}{WS} {
 	YYSETCONDITION(RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_EVAL;
 }
-<INITIAL>{T_SHELL} {
+<INITIAL>{T_SHELL}{WS} {
 	YYSETCONDITION(RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_SHELL;
 }
-<INITIAL>{T_RUN}|{T_RUN_SHORT} {
+<INITIAL>({T_RUN}|{T_RUN_SHORT}){WS} {
 	YYSETCONDITION(RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_RUN;

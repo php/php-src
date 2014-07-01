@@ -84,7 +84,7 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_END_SILENCE                      58
 #define ZEND_INIT_FCALL_BY_NAME               59
 #define ZEND_DO_FCALL                         60
-#define ZEND_DO_FCALL_BY_NAME                 61
+#define ZEND_INIT_FCALL                       61
 #define ZEND_RETURN                           62
 #define ZEND_RECV                             63
 #define ZEND_RECV_INIT                        64

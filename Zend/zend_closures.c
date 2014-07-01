@@ -47,7 +47,7 @@ static zend_object_handlers closure_handlers;
 
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
-	zend_function *func = EG(current_execute_data)->function_state.function;
+	zend_function *func = EG(current_execute_data)->call->func;
 	zval *arguments;
 
 	arguments = emalloc(sizeof(zval) * ZEND_NUM_ARGS());
@@ -213,7 +213,7 @@ static void zend_closure_free_storage(zend_object *object TSRMLS_DC) /* {{{ */
 	if (closure->func.type == ZEND_USER_FUNCTION) {
 		zend_execute_data *ex = EG(current_execute_data);
 		while (ex) {
-			if (ex->op_array == &closure->func.op_array) {
+			if (ex->func == &closure->func) {
 				zend_error(E_ERROR, "Cannot destroy active lambda function");
 			}
 			ex = ex->prev_execute_data;

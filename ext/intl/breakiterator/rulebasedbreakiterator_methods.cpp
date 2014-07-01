@@ -217,10 +217,10 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 		RETURN_FALSE;
 	}
 
-	char *ret_rules = static_cast<char*>(emalloc(rules_len + 1));
-	memcpy(ret_rules, rules, rules_len);
-	ret_rules[rules_len] = '\0';
+	zend_string *ret_rules = STR_ALLOC(rules_len, 0);
+	memcpy(ret_rules->val, rules, rules_len);
+	ret_rules->val[rules_len] = '\0';
 
-	RETURN_STRINGL(ret_rules, rules_len, 0);
+	RETURN_STR(ret_rules);
 }
 #endif

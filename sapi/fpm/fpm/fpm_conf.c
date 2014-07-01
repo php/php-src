@@ -1075,6 +1075,9 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				}
 			}
 			for (kv = wp->config->php_admin_values; kv; kv = kv->next) {
+				if (!strcasecmp(kv->key, "error_log") && !strcasecmp(kv->value, "syslog")) {
+					continue;
+				}
 				for (p = options; *p; p++) {
 					if (!strcasecmp(kv->key, *p)) {
 						fpm_evaluate_full_path(&kv->value, wp, NULL, 0);
