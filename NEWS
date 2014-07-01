@@ -1,6 +1,93 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.0 Release Candidate 1
+?? ??? 2014, PHP 5.6.0 Release Candidate 2
+
+- Core:
+  . Fixed bug #67368 (Memory leak with immediately dereferenced array in class
+    constant). (Laruence)
+  . Fixed bug #67468 (Segfault in highlight_file()/highlight_string()).
+    (Andreas Ferber)
+  . Fixed bug #67091 (make install fails to install libphp5.so on FreeBSD 10.0).
+    (Ferenc)
+
+- FPM:
+  . Fix bug #67531 (syslog cannot be set in pool configuration). (Remi)
+  . Fix bug #67541 (Fix Apache 2.4.10+ SetHandler proxy:fcgi://
+    incompatibilities). (David Zuelke)
+
+- phpdbg:
+  . Fix Bug #67499 (readline feature not enabled when build with libedit). (Remi)
+  . Fix issue krakjoe/phpdbg#94 (List behavior is inconsistent). (Bob)
+  . Fix issue krakjoe/phpdbg#97 (The prompt should always ensure it is on a
+    newline). (Bob)
+  . Fix issue krakjoe/phpdbg#98 (break if does not seem to work). (Bob)
+  . Fix issue krakjoe/phpdbg#99 (register function has the same behavior as
+    run). (Bob)
+  . Fix issue krakjoe/phpdbg#100 (No way to list the current stack/frames)
+    (Help entry was missing). (Bob)
+
+19 Jun 2014, PHP 5.6.0 Release Candidate 1
+
+- Core:
+  . Implemented FR #64744 (Differentiate between member function call on a null 
+    and non-null, non-objects). (Boro Sitnikovski)
+  . Fixed bug #67436 (Autoloader isn't called if two method definitions don't
+    match). (Bob)
+  . Fixed bug #66622 (Closures do not correctly capture the late bound class
+    (static::) in some cases). (Levi Morrison)
+  . Fixed bug #67390 (insecure temporary file use in the configure script).
+    (Remi) (CVE-2014-3981)
+  . Fixed bug #67392 (dtrace breaks argument unpack). (Nikita)
+  . Fixed bug #67428 (header('Location: foo') will override a 308-399 response
+    code). (Adam)
+  . Fixed bug #67433 (SIGSEGV when using count() on an object implementing
+    Countable). (Matteo)
+  . Fixed bug #67399 (putenv with empty variable may lead to crash). (Stas)
+
+- CLI server:
+  . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
+    (Adam)
+  . Fixed Bug #67406 (built-in web-server segfaults on startup). (Remi)
+
+- Fileinfo:
+  . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
+    string size). (Francisco Alonso, Jan Kaluza, Remi)
+  . Fixed bug #67411 (fileinfo: cdf_check_stream_offset insufficient boundary
+    check). (Francisco Alonso, Jan Kaluza, Remi)
+  . Fixed bug #67412 (fileinfo: cdf_count_chain insufficient boundary check).
+    (Francisco Alonso, Jan Kaluza, Remi)
+  . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
+    check). (Francisco Alonso, Jan Kaluza, Remi)
+
+- mysqlnd:
+  . Added support for gb18030 from MySQL 5.7. (Andrey)
+
+- Network:
+  . Fixed bug #67432 (Fix potential segfault in dns_get_record()).
+    (CVE-2014-4049). (Sara)
+
+- OpenSSL:
+  . Fixed bug #65698 (certificates validity parsing does not work past 2050).
+    (Paul Oehler)
+  . Fixed bug #66636 (openssl_x509_parse warning with V_ASN1_GENERALIZEDTIME).
+    (Paul Oehler)
+
+- phpdbg:
+  . Fixed bug #67212 (phpdbg uses non-standard TIOCGWINSZ). (Ferenc)
+
+- SOAP:
+  . Implemented FR #49898 (Add SoapClient::__getCookies()). (Boro Sitnikovski)
+
+- SPL:
+  . Fixed bug #66127 (Segmentation fault with ArrayObject unset). (Stas)
+  . Fixed request #67453 (Allow to unserialize empty data). (Remi)
+
+- Streams:
+  . Fixed bug #67430 (http:// wrapper doesn't follow 308 redirects). (Adam)
+
+- Tokenizer:
+  . Fixed bug #67395 (token_name() does not return name for T_POW and T_POW_EQUAL
+    token). (Ferenc)
 
 05 Jun 2014, PHP 5.6.0 Beta 4
 

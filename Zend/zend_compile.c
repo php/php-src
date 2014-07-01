@@ -3461,8 +3461,11 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 						*zv = *precv->op2.zv;
 						zval_copy_ctor(zv);
 						INIT_PZVAL(zv);
-						zval_update_constant_ex(&zv, 1, fptr->common.scope TSRMLS_CC);
-						if (Z_TYPE_P(zv) == IS_BOOL) {
+						if ((Z_TYPE_P(zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
+							REALLOC_BUF_IF_EXCEED(buf, offset, length, Z_STRSIZE_P(zv));
+							memcpy(offset, Z_STRVAL_P(zv), Z_STRSIZE_P(zv));
+							offset += Z_STRSIZE_P(zv);
+						} else if (Z_TYPE_P(zv) == IS_BOOL) {
 							if (Z_IVAL_P(zv)) {
 								memcpy(offset, "true", 4);
 								offset += 4;
@@ -3487,6 +3490,9 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 						} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 							memcpy(offset, "Array", 5);
 							offset += 5;
+						} else if ((Z_TYPE_P(zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT_AST) {
+							memcpy(offset, "<expression>", 12);
+							offset += 12;
 						} else {
 							zend_make_printable_zval(zv, &zv_copy, &use_copy);
 							REALLOC_BUF_IF_EXCEED(buf, offset, length, Z_STRSIZE(zv_copy));

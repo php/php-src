@@ -130,14 +130,14 @@ void phpdbg_list_file(const char *filename, php_int_t count, php_int_t offset, p
 	char *opened = NULL;
 	char buffer[8096] = {0,};
 	php_int_t line = 0;
-	
+
 	php_stream *stream = NULL;
 	
 	if (VCWD_STAT(filename, &st) == FAILURE) {
 		phpdbg_error("Failed to stat file %s", filename);
 		return;
 	}
-	
+
 	stream = php_stream_open_wrapper(filename, "rb", USE_PATH, &opened);
 	
 	if (!stream) {
@@ -145,11 +145,17 @@ void phpdbg_list_file(const char *filename, php_int_t count, php_int_t offset, p
 		return;
 	}
 	
+	if (offset < 0) {
+		count += offset;
+		offset = 0;
+	}
+	
 	while (php_stream_gets(stream, buffer, sizeof(buffer)) != NULL) {
+		long linelen = strlen(buffer);
+
 		++line;
 		
-		if (!offset || offset <= line) {
-			/* Without offset, or offset reached */
+		if (offset <= line) {
 			if (!highlight) {
 				phpdbg_write("%05" ZEND_INT_FMT_SPEC ": %s", line, buffer);
 			} else {
@@ -159,10 +165,15 @@ void phpdbg_list_file(const char *filename, php_int_t count, php_int_t offset, p
 					phpdbg_write(">%05" ZEND_INT_FMT_SPEC ": %s", line, buffer);
 				}
 			}
+
+			if (buffer[linelen - 1] != '\n') {
+				phpdbg_write("\n");
+			}
 		}
-		
-		if ((count + (offset-1)) == line)
+
+		if (count > 0 && count + offset - 1 < line) {
 			break;
+		}
 	}
 	
 	php_stream_close(stream);

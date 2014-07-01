@@ -342,8 +342,7 @@ PHP_FUNCTION(count)
 					RETVAL_INT(Z_IVAL_P(retval));
 					zval_ptr_dtor(&retval);
 				}
-				zval_dtor(mode_zv);
-				efree(mode_zv);
+				zval_ptr_dtor(&mode_zv);
 				return;
 			}
 #endif

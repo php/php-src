@@ -792,7 +792,7 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC)
 PHPDBG_API char* phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 {
 	char *cmd = NULL;
-#ifndef HAVE_LIBREADLINE
+#if !defined(HAVE_LIBREADLINE) && !defined(HAVE_LIBEDIT)
 	char buf[PHPDBG_MAX_CMD];
 #endif
 	char *buffer = NULL;
@@ -811,7 +811,7 @@ disconnect:
 				return NULL;
 			}
 
-#ifndef HAVE_LIBREADLINE
+#if !defined(HAVE_LIBREADLINE) && !defined(HAVE_LIBEDIT)
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 				if (!phpdbg_write("%s", phpdbg_get_prompt(TSRMLS_C))) {
 					goto disconnect;
@@ -850,7 +850,7 @@ readline:
 		
 		buffer = estrdup(cmd);
 
-#ifdef HAVE_LIBREADLINE
+#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
 		if (!buffered && cmd &&
 			!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 			free(cmd);
