@@ -2494,7 +2494,7 @@ static int module_registry_cleanup(zval *zv TSRMLS_DC) /* {{{ */
 
 ZEND_API void zend_deactivate_modules(TSRMLS_D) /* {{{ */
 {
-	EG(opline_ptr) = NULL; /* we're no longer executing anything */
+	EG(current_execute_data) = NULL; /* we're no longer executing anything */
 
 	zend_try {
 		if (EG(full_tables_cleanup)) {

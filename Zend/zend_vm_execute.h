@@ -412,7 +412,6 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 
 		execute_data = EG(current_execute_data);
 		EX(call) = prev_nested_call;
-		EG(opline_ptr) = &EX(opline);
 		EG(active_symbol_table) = EX(symbol_table);
 
 		if (Z_OBJ(EG(This))) {
@@ -457,7 +456,6 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		execute_data = EG(current_execute_data);
 		EX(call) = prev_nested_call;
 		zend_attach_symbol_table(execute_data);
-		EG(opline_ptr) = &EX(opline);
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION_LEAVE();
@@ -496,7 +494,6 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		if (EG(current_execute_data)) {
 			EG(current_execute_data)->call = prev_nested_call;
 		}
-		EG(opline_ptr) = NULL;
 		ZEND_VM_RETURN();
 	}
 }
@@ -663,7 +660,6 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 		}
 
-		EG(opline_ptr) = &EX(opline);
 		if (UNEXPECTED(EG(active_symbol_table) != NULL)) {
 			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
 		}
@@ -2944,7 +2940,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 			execute_ex(EG(current_execute_data) TSRMLS_CC);
 		}
 
-		EG(opline_ptr) = &EX(opline);
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -8136,7 +8131,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 			execute_ex(EG(current_execute_data) TSRMLS_CC);
 		}
 
-		EG(opline_ptr) = &EX(opline);
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -13395,7 +13389,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 			execute_ex(EG(current_execute_data) TSRMLS_CC);
 		}
 
-		EG(opline_ptr) = &EX(opline);
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -30526,7 +30519,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 			execute_ex(EG(current_execute_data) TSRMLS_CC);
 		}
 
-		EG(opline_ptr) = &EX(opline);
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		if (UNEXPECTED(EG(exception) != NULL)) {

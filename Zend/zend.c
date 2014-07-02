@@ -938,7 +938,7 @@ void zend_call_destructors(TSRMLS_D) /* {{{ */
 ZEND_API void zend_deactivate(TSRMLS_D) /* {{{ */
 {
 	/* we're no longer executing anything */
-	EG(opline_ptr) = NULL;
+	EG(current_execute_data) = NULL;
 	EG(active_symbol_table) = NULL;
 
 	zend_try {
@@ -1042,6 +1042,9 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
+		zend_execute_data *ex;
+		zend_op *opline;
+
 		switch (type) {
 			case E_CORE_ERROR:
 			case E_ERROR:
@@ -1049,13 +1052,19 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			case E_PARSE:
 			case E_COMPILE_ERROR:
 			case E_USER_ERROR:
-				if (zend_is_executing(TSRMLS_C)) {
-					error_lineno = zend_get_executed_lineno(TSRMLS_C);
+				ex = EG(current_execute_data);
+				opline = NULL;
+				while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+					ex = ex->prev_execute_data;
+				}
+				if (ex && ex->opline && ex->opline->opcode == ZEND_HANDLE_EXCEPTION &&
+				    EG(opline_before_exception)) {
+					opline = EG(opline_before_exception);
 				}
 				zend_exception_error(EG(exception), E_WARNING TSRMLS_CC);
 				EG(exception) = NULL;
-				if (zend_is_executing(TSRMLS_C) && EG(opline_ptr)) {
-					active_opline->lineno = error_lineno;
+				if (opline) {
+					ex->opline = opline;
 				}
 				break;
 			default:

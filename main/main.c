@@ -1776,10 +1776,9 @@ void php_request_shutdown(void *dummy)
 
 	report_memleaks = PG(report_memleaks);
 
-	/* EG(opline_ptr) points into nirvana and therefore cannot be safely accessed
+	/* EG(current_execute_data) points into nirvana and therefore cannot be safely accessed
 	 * inside zend_executor callback functions.
 	 */
-	EG(opline_ptr) = NULL;
 	EG(current_execute_data) = NULL;
 
 	php_deactivate_ticks(TSRMLS_C);

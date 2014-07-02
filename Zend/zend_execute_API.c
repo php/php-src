@@ -163,7 +163,6 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(active_symbol_table) = &EG(symbol_table);
 
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator TSRMLS_CC);
-	EG(opline_ptr) = NULL;
 
 	zend_hash_init(&EG(included_files), 8, NULL, NULL, 0);
 
@@ -663,7 +662,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 {
 	zend_uint i;
 	zend_array *calling_symbol_table;
-	zend_op **original_opline_ptr;
 	zend_class_entry *calling_scope = NULL;
 	zend_class_entry *called_scope = NULL;
 	zend_execute_data *call, dummy_execute_data;
@@ -863,15 +861,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			EG(active_symbol_table) = NULL;
 		}
 
-		original_opline_ptr = EG(opline_ptr);
-
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
 			zend_execute(&func->op_array, fci->retval TSRMLS_CC);
 		} else {
 			zend_generator_create_zval(&func->op_array, fci->retval TSRMLS_CC);
 		}
 
-		EG(opline_ptr) = original_opline_ptr;
 		if (!fci->symbol_table && EG(active_symbol_table)) {
 			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
 		}
@@ -1114,7 +1109,6 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 
 	if (new_op_array) {
 		zval local_retval;
-		zend_op **original_opline_ptr = EG(opline_ptr);
 		int orig_interactive = CG(interactive);
 
 		EG(no_extensions)=1;
@@ -1150,7 +1144,6 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 		}
 
 		EG(no_extensions)=0;
-		EG(opline_ptr) = original_opline_ptr;
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		retval = SUCCESS;

@@ -170,8 +170,6 @@ struct _zend_executor_globals {
 	zend_array **symtable_cache_limit;
 	zend_array **symtable_cache_ptr;
 
-	zend_op **opline_ptr;
-
 	zend_array *active_symbol_table;
 	zend_array symbol_table;		/* main symbol table */
 

@@ -296,8 +296,6 @@ void zend_shutdown_timeout_thread(void);
 #define WM_UNREGISTER_ZEND_TIMEOUT		(WM_USER+2)
 #endif
 
-#define active_opline (*EG(opline_ptr))
-
 /* The following tries to resolve the classname of a zval of type object.
  * Since it is slow it should be only used in error messages.
  */

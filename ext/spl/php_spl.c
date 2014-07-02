@@ -318,7 +318,6 @@ PHP_FUNCTION(spl_autoload)
 	int found = 0, pos_len, pos1_len;
 	char *pos, *pos1;
 	zend_string *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
-	zend_op **original_opline_ptr = EG(opline_ptr);
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &class_name, &file_exts) == FAILURE) {
 		RETURN_FALSE;
@@ -335,7 +334,6 @@ PHP_FUNCTION(spl_autoload)
 	lc_name = STR_ALLOC(class_name->len, 0);
 	zend_str_tolower_copy(lc_name->val, class_name->val, class_name->len);
 	while (pos && *pos && !EG(exception)) {
-		EG(opline_ptr) = original_opline_ptr;
 		pos1 = strchr(pos, ',');
 		if (pos1) { 
 			pos1_len = pos1 - pos;
@@ -351,14 +349,17 @@ PHP_FUNCTION(spl_autoload)
 	}
 	STR_FREE(lc_name);
 
-	EG(opline_ptr) = original_opline_ptr;
-
 	if (!found && !SPL_G(autoload_running)) {
 		/* For internal errors, we generate E_ERROR, for direct calls an exception is thrown.
 		 * The "scope" is determined by an opcode, if it is ZEND_FETCH_CLASS we know function was called indirectly by
 		 * the Zend engine.
 		 */
-		if (active_opline->opcode != ZEND_FETCH_CLASS) {
+		zend_execute_data *ex = EG(current_execute_data);
+
+		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+			ex = ex->prev_execute_data;
+		}
+		if (ex && ex->opline && ex->opline->opcode != ZEND_FETCH_CLASS) {
 			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", class_name->val);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be loaded", class_name->val);

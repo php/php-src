@@ -733,7 +733,7 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 #endif
 
 	if (sapi_module.get_stat &&
-	    !EG(opline_ptr) &&
+	    !EG(current_execute_data) &&
 	    file_handle->filename == SG(request_info).path_translated) {
 
 		struct stat *tmpbuf = sapi_module.get_stat(TSRMLS_C);
@@ -1518,16 +1518,16 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 	/* In case this callback is called from include_once, require_once or it's
 	 * a main FastCGI request, the key must be already calculated, and cached
 	 * persistent script already found */
-	if ((EG(opline_ptr) == NULL &&
+	if ((EG(current_execute_data) == NULL &&
 	     ZCG(cache_opline) == NULL &&
 	     file_handle->filename == SG(request_info).path_translated &&
 	     ZCG(cache_persistent_script)) ||
-	    (EG(opline_ptr) && *EG(opline_ptr) &&
-	     *EG(opline_ptr) == ZCG(cache_opline) &&
-	     (*EG(opline_ptr))->opcode == ZEND_INCLUDE_OR_EVAL &&
+	    (EG(current_execute_data) && EG(current_execute_data)->opline &&
+	     EG(current_execute_data)->opline == ZCG(cache_opline) &&
+	     EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-	     ((*EG(opline_ptr))->extended_value == ZEND_INCLUDE_ONCE ||
-	      (*EG(opline_ptr))->extended_value == ZEND_REQUIRE_ONCE))) {
+	     (EG(current_execute_data)->opline->extended_value == ZEND_INCLUDE_ONCE ||
+	      EG(current_execute_data)->opline->extended_value == ZEND_REQUIRE_ONCE))) {
 #else
  	     ((*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_INCLUDE_ONCE ||
  	      (*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_REQUIRE_ONCE))) {
@@ -1682,11 +1682,11 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 
 		/* see bug #15471 (old BTS) */
 		if (persistent_script->full_path) {
-			if (!EG(opline_ptr) || !*EG(opline_ptr) ||
-			    (*EG(opline_ptr))->opcode != ZEND_INCLUDE_OR_EVAL ||
+			if (!EG(current_execute_data) || !EG(current_execute_data)->opline ||
+			    EG(current_execute_data)->opline->opcode != ZEND_INCLUDE_OR_EVAL ||
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-			    ((*EG(opline_ptr))->extended_value != ZEND_INCLUDE_ONCE &&
-			     (*EG(opline_ptr))->extended_value != ZEND_REQUIRE_ONCE)) {
+			    (EG(current_execute_data)->opline->extended_value != ZEND_INCLUDE_ONCE &&
+			     EG(current_execute_data)->opline->extended_value != ZEND_REQUIRE_ONCE)) {
 #else
  			    ((*EG(opline_ptr))->op2.u.constant.value.lval != ZEND_INCLUDE_ONCE &&
  			     (*EG(opline_ptr))->op2.u.constant.value.lval != ZEND_REQUIRE_ONCE)) {
@@ -1843,8 +1843,8 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 	    !CG(interactive) &&
 	    !ZCSG(restart_in_progress)) {
 
-		if (EG(opline_ptr) && *EG(opline_ptr)) {
-			zend_op *opline = *EG(opline_ptr);
+		if (EG(current_execute_data) && EG(current_execute_data)->opline) {
+			zend_op *opline = EG(current_execute_data)->opline;
 
             if (opline->opcode == ZEND_INCLUDE_OR_EVAL &&
                 (opline->op2.u.constant.value.lval == ZEND_INCLUDE_ONCE ||
@@ -1940,14 +1940,14 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 	    !ZCSG(restart_in_progress)) {
 
 		/* check if callback is called from include_once or it's a main request */
-		if ((!EG(opline_ptr) &&
+		if ((!EG(current_execute_data) &&
 		     filename == SG(request_info).path_translated) ||
-		    (EG(opline_ptr) &&
-		     *EG(opline_ptr) &&
-             (*EG(opline_ptr))->opcode == ZEND_INCLUDE_OR_EVAL &&
+		    (EG(current_execute_data) &&
+		     EG(current_execute_data)->opline &&
+             EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-             ((*EG(opline_ptr))->extended_value == ZEND_INCLUDE_ONCE ||
-              (*EG(opline_ptr))->extended_value == ZEND_REQUIRE_ONCE))) {
+             (EG(current_execute_data)->opline->extended_value == ZEND_INCLUDE_ONCE ||
+              EG(current_execute_data)->opline->extended_value == ZEND_REQUIRE_ONCE))) {
 #else
               ((*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_INCLUDE_ONCE ||
                (*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_REQUIRE_ONCE))) {
@@ -1960,11 +1960,11 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 			handle->free_filename = 0;
 
 			/* check if cached script was already found by resolve_path() */
-			if ((EG(opline_ptr) == NULL &&
+			if ((EG(current_execute_data) == NULL &&
 			     ZCG(cache_opline) == NULL &&
 			     ZCG(cache_persistent_script) != NULL) ||
-			    (EG(opline_ptr) &&
-			     (ZCG(cache_opline) == *EG(opline_ptr)))) {
+			    (EG(current_execute_data) &&
+			     (ZCG(cache_opline) == EG(current_execute_data)->opline))) {
 				persistent_script = ZCG(cache_persistent_script);
 				handle->opened_path = estrndup(persistent_script->full_path->val, persistent_script->full_path->len);
 				handle->type = ZEND_HANDLE_FILENAME;
@@ -1983,8 +1983,8 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 					handle->type = ZEND_HANDLE_FILENAME;
 					memcpy(ZCG(key), persistent_script->full_path, persistent_script->full_path_len + 1);
 					ZCG(key_len) = persistent_script->full_path_len;
-					ZCG(cache_opline) = EG(opline_ptr) ? *EG(opline_ptr) : NULL;
-					ZCG(cache_persistent_script) = EG(opline_ptr) ? persistent_script : NULL;
+					ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
+					ZCG(cache_persistent_script) = EG(current_execute_data) ? persistent_script : NULL;
 					return SUCCESS;
 			    }
 #endif
@@ -2005,14 +2005,14 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 	    !ZCSG(restart_in_progress)) {
 
 		/* check if callback is called from include_once or it's a main request */
-		if ((!EG(opline_ptr) &&
+		if ((!EG(current_execute_data) &&
 		     filename == SG(request_info).path_translated) ||
-		    (EG(opline_ptr) &&
-		     *EG(opline_ptr) &&
-             (*EG(opline_ptr))->opcode == ZEND_INCLUDE_OR_EVAL &&
+		    (EG(current_execute_data) &&
+		     EG(current_execute_data)->opline &&
+             EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-             ((*EG(opline_ptr))->extended_value == ZEND_INCLUDE_ONCE ||
-              (*EG(opline_ptr))->extended_value == ZEND_REQUIRE_ONCE))) {
+             (EG(current_execute_data)->opline->extended_value == ZEND_INCLUDE_ONCE ||
+              EG(current_execute_data)->opline->extended_value == ZEND_REQUIRE_ONCE))) {
 #else
               ((*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_INCLUDE_ONCE ||
                (*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_REQUIRE_ONCE))) {
@@ -2034,7 +2034,7 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 				if (persistent_script && !persistent_script->corrupted) {
 					memcpy(ZCG(key), persistent_script->full_path->val, persistent_script->full_path->len + 1);
 					ZCG(key_len) = persistent_script->full_path->len;
-					ZCG(cache_opline) = EG(opline_ptr) ? *EG(opline_ptr) : NULL;
+					ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 					ZCG(cache_persistent_script) = persistent_script;
 					return estrndup(persistent_script->full_path->val, persistent_script->full_path->len);
 				}
@@ -2051,7 +2051,7 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 			    !persistent_script->corrupted) {
 
 				/* we have persistent script */
-				ZCG(cache_opline) = EG(opline_ptr) ? *EG(opline_ptr) : NULL;
+				ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 				ZCG(cache_persistent_script) = persistent_script;
 				return estrndup(persistent_script->full_path->val, persistent_script->full_path->len);
 			}
@@ -2073,7 +2073,7 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 						zend_shared_alloc_unlock(TSRMLS_C);
 			    		SHM_PROTECT();
 					}
-					ZCG(cache_opline) = (EG(opline_ptr) && key) ? *EG(opline_ptr): NULL;
+					ZCG(cache_opline) = (EG(current_execute_data) && key) ? EG(current_execute_data)->opline : NULL;
 					ZCG(cache_persistent_script) = key ? persistent_script : NULL;
 					return resolved_path;
 				}
