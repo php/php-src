@@ -216,6 +216,11 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 	return NULL;
 }
 
+PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
+{
+	return php_stream_fopen_temporary_file(NULL, "php", NULL);
+}
+
 PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id);
