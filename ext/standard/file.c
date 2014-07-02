@@ -559,6 +559,10 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
+		if (len > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "content truncated from %ld to %d bytes", len, INT_MAX);
+			len = INT_MAX;
+		}
 		RETVAL_STRINGL(contents, len, 0);
 	} else if (len == 0) {
 		RETVAL_EMPTY_STRING();
@@ -633,6 +637,10 @@ PHP_FUNCTION(file_put_contents)
 			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
 				ret_ok = 0;
 			} else {
+				if (len > PHP_INT_MAX) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "content truncated from %zd to %pd bytes", len, PHP_INT_MAX);
+					len = PHP_INT_MAX;
+				}
 				numbytes = len;
 			}
 			break;
@@ -648,7 +656,7 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_STRSIZE_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRSIZE_P(data));
 				if (numbytes != Z_STRSIZE_P(data)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRSIZE_P(data));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRSIZE_P(data));
 					ret_ok = 0;
 				}
 			}
@@ -671,7 +679,7 @@ PHP_FUNCTION(file_put_contents)
 						numbytes += Z_STRSIZE_PP(tmp);
 						bytes_written = php_stream_write(stream, Z_STRVAL_PP(tmp), Z_STRSIZE_PP(tmp));
 						if (bytes_written != Z_STRSIZE_PP(tmp)) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s", Z_STRSIZE_PP(tmp), filename);
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %zd bytes to %s", Z_STRSIZE_PP(tmp), filename);
 							ret_ok = 0;
 							break;
 						}
@@ -688,7 +696,7 @@ PHP_FUNCTION(file_put_contents)
 				if (zend_std_cast_object_tostring(data, &out, IS_STRING TSRMLS_CC) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRSIZE(out));
 					if (numbytes != Z_STRSIZE(out)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRSIZE(out));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRSIZE(out));
 						ret_ok = 0;
 					}
 					zval_dtor(&out);

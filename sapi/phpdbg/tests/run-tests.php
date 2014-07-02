@@ -135,8 +135,8 @@ namespace phpdbg\testing {
 		* @param array basic configuration 
 		* @param array command line
 		*/
-		public function __construct(TestsConfiguration &$config) {
-			$this->config = &$config;
+		public function __construct(TestsConfiguration $config) {
+			$this->config = $config;
 			
 			if ($this->config->hasFlag('help') ||
 				$this->config->hasFlag('h')) {
@@ -153,7 +153,7 @@ namespace phpdbg\testing {
 			$paths = array();
 			$where = ($in != null) ? array($in) : $this->config['path'];
 			
-			foreach ($where as &$path) {
+			foreach ($where as $path) {
 				if ($path) {
 					if (is_dir($path)) {
 						$paths[] = $path;
@@ -243,6 +243,7 @@ namespace phpdbg\testing {
 			printf("\t--options\toptions to pass to phpdbg%s", PHP_EOL);
 			printf("\t--phpdbg\tpath to phpdbg binary%s", PHP_EOL);
 			printf('[flags]:%s', PHP_EOL);
+			printf("\t-diff2stdout\t\twrite diff to stdout instead of files%s", PHP_EOL);
 			printf("\t-nodiff\t\tdo not write diffs on failure%s", PHP_EOL);
 			printf("\t-nolog\t\tdo not write logs on failure%s", PHP_EOL);
 			printf('[examples]:%s', PHP_EOL);
@@ -266,9 +267,11 @@ namespace phpdbg\testing {
 				$test = sprintf('%s/%s', $path, $file);
 
 				if (preg_match('~\.test$~', $test)) {
-					yield new Test($this->config, $test);
+					$tests[] = new Test($this->config, $test);
 				}
 			}
+			
+			return $tests;
 		}
 		
 		/**
@@ -354,7 +357,7 @@ namespace phpdbg\testing {
 		* @param array configuration
 		* @param string file
 		*/
-		public function __construct(TestsConfiguration &$config, &$file) {
+		public function __construct(TestsConfiguration $config, $file) {
 			if (($handle = fopen($file, 'r'))) {
 				while (($line = fgets($handle))) {
 					$trim = trim($line);
@@ -417,8 +420,8 @@ namespace phpdbg\testing {
 				}
 				fclose($handle);
 				
-				$this->config = &$config;
-				$this->file = &$file;
+				$this->config = $config;
+				$this->file = $file;
 			}
 		}
 		
@@ -427,8 +430,7 @@ namespace phpdbg\testing {
 		* 
 		*/
 		public function getResult() {
-			$options = sprintf(
-				'-i%s -nqb', $this->file);
+			$options = sprintf('-i%s -nqb', $this->file);
 			
 			if ($this->options) {
 				$options = sprintf(
@@ -526,7 +528,7 @@ namespace phpdbg\testing {
 		* Write log to disk if configuration allows it
 		*
 		*/
-		protected function writeLog(&$result = null) {
+		protected function writeLog($result = null) {
 			$log = sprintf(
 				'%s/%s.log',
 				dirname($this->file), basename($this->file));
