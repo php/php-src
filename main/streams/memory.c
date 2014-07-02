@@ -357,6 +357,7 @@ typedef struct {
 
 
 /* {{{ */
+
 static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	php_stream_temp_data *ts = (php_stream_temp_data*)stream->abstract;
