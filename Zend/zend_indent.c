@@ -139,7 +139,7 @@ dflt_printout:
 			case T_WHITESPACE:
 				break;
 			default:
-				efree(token.value.str.val);
+				str_efree(token.value.str.val);
 				break;
 			}
 		}
