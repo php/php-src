@@ -1,6 +1,6 @@
----TEST---
+--TEST--
 Constant expressions with arrays
----FILE---
+--FILE--
 <?php
 const a = [1,2,[3,[4]]];
 const b = a[0];
@@ -25,7 +25,7 @@ var_dump(foo::bar);
 var_dump(a); // Eventually allow that later with array dereferencing of constants
 
 ?>
----EXPECTF---
+--EXPECTF--
 int(1)
 int(3)
 int(1)

@@ -1,6 +1,6 @@
----TEST---
+--TEST--
 Self-referencing constant expression (part of a constant AST)
----FILE---
+--FILE--
 <?php
 class A {
    const FOO = [self::BAR];
@@ -8,6 +8,6 @@ class A {
 }
 var_dump(A::FOO);
 ?>
----EXPECTF---
+--EXPECTF--
 Fatal error: Cannot declare self-referencing constant 'self::FOO' in %s on line %d
 
