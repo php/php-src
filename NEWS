@@ -30,6 +30,8 @@ PHP                                                                        NEWS
     (Andreas Ferber)
   . Fixed bug #67498 (phpinfo() Type Confusion Information Leak Vulnerability).
     (Stefan Esser)
+  . Fixed bug #67551 (php://input temp file will be located in sys_temp_dir
+    instead of upload_tmp_dir). (Mike)
 
 - FPM:
   . Fix bug #67531 (syslog cannot be set in pool configuration). (Remi)
