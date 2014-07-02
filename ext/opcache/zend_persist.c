@@ -297,7 +297,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	op_array->refcount = NULL;
 
 	if (main_persistent_script) {
-		zend_bool orig_in_execution = EG(in_execution);
 		zend_execute_data *orig_execute_data = EG(current_execute_data);
 		zend_execute_data fake_execute_data;
 		zval *offset;
@@ -305,7 +304,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
 		main_persistent_script->early_binding = -1;
 #endif
-		EG(in_execution) = 1;
 		memset(&fake_execute_data, 0, sizeof(fake_execute_data));
 		fake_execute_data.func = (zend_function*)op_array;
 		EG(current_execute_data) = &fake_execute_data;
@@ -313,7 +311,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			main_persistent_script->compiler_halt_offset = Z_LVAL_P(offset);
 		}
 		EG(current_execute_data) = orig_execute_data;
-		EG(in_execution) = orig_in_execution;
 	}
 
 	if (op_array->static_variables) {

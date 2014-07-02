@@ -1072,7 +1072,7 @@ static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS
 {
 	ZVAL_DEREF(pp);
 	if (Z_CONSTANT_P(pp)) {
-		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
+		zend_class_entry **scope = EG(current_execute_data) ? &EG(scope) : &CG(active_class_entry);
 
 		if ((*scope)->parent) {
 			zend_class_entry *ce = *scope;
@@ -1136,7 +1136,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 	}
 
 	if ((class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) == 0) {
-		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
+		zend_class_entry **scope = EG(current_execute_data) ? &EG(scope) : &CG(active_class_entry);
 		zend_class_entry *old_scope = *scope;
 		zval *val;
 

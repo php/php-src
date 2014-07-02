@@ -1761,7 +1761,7 @@ static void zend_mm_safe_error(zend_mm_heap *heap,
 			zend_string *str = zend_get_compiled_filename(TSRMLS_C);
 			error_filename = str ? str->val : NULL;
 			error_lineno = zend_get_compiled_lineno(TSRMLS_C);
-		} else if (EG(in_execution) && EG(current_execute_data)) {
+		} else if (EG(current_execute_data)) {
 			zend_execute_data *ex = EG(current_execute_data);
 
 			while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {

@@ -947,7 +947,7 @@ SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries TSRMLS_DC)
 
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 {
-	if (SG(sapi_started) && EG(in_execution)) {
+	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
 	}
 	return zend_hash_str_add_mem(&SG(known_post_content_types),
@@ -957,7 +957,7 @@ SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 {
-	if (SG(sapi_started) && EG(in_execution)) {
+	if (SG(sapi_started) && EG(current_execute_data)) {
 		return;
 	}
 	zend_hash_str_del(&SG(known_post_content_types), post_entry->content_type,
@@ -967,7 +967,7 @@ SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D) TSRMLS_DC)
 {
-	if (SG(sapi_started) && EG(in_execution)) {
+	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
 	}
 	sapi_module.default_post_reader = default_post_reader;
@@ -977,7 +977,7 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRML
 
 SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC) TSRMLS_DC)
 {
-	if (SG(sapi_started) && EG(in_execution)) {
+	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
 	}
 	sapi_module.treat_data = treat_data;
@@ -986,7 +986,7 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 
 SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC)
 {
-	if (SG(sapi_started) && EG(in_execution)) {
+	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
 	}
 	sapi_module.input_filter = input_filter;

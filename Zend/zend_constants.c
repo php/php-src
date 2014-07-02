@@ -231,7 +231,7 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 	zend_constant *c;
 	static char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
-	if (!EG(in_execution)) {
+	if (!EG(current_execute_data)) {
 		return NULL;
 	} else if (name_len == sizeof("__CLASS__")-1 &&
 	          !memcmp(name, "__CLASS__", sizeof("__CLASS__")-1)) {
@@ -354,7 +354,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		lcname = do_alloca(class_name_len + 1, use_heap);
 		zend_str_tolower_copy(lcname, name, class_name_len);
 		if (!scope) {
-			if (EG(in_execution)) {
+			if (EG(current_execute_data)) {
 				scope = EG(scope);
 			} else {
 				scope = CG(active_class_entry);

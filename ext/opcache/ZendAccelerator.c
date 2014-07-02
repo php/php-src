@@ -995,7 +995,7 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
            since fopen_wrappers from version 4.0.7 use current script's path
            in include path too.
         */
-        if (EG(in_execution) &&
+        if (EG(current_execute_data) &&
             (parent_script = zend_get_executed_filename(TSRMLS_C)) != NULL &&
 	        parent_script[0] != '[') {
 

@@ -150,7 +150,6 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(function_table) = CG(function_table);
 	EG(class_table) = CG(class_table);
 
-	EG(in_execution) = 0;
 	EG(in_autoload) = NULL;
 	EG(autoload_func) = NULL;
 	EG(error_handling) = EH_NORMAL;
@@ -483,7 +482,7 @@ ZEND_API uint zend_get_executed_lineno(TSRMLS_D) /* {{{ */
 
 ZEND_API zend_bool zend_is_executing(TSRMLS_D) /* {{{ */
 {
-	return EG(in_execution);
+	return EG(current_execute_data) != 0;
 }
 /* }}} */
 

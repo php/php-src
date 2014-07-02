@@ -559,7 +559,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	EG(lambda_count) = 0;
 	ZVAL_UNDEF(&EG(user_error_handler));
 	ZVAL_UNDEF(&EG(user_exception_handler));
-	EG(in_execution) = 0;
 	EG(in_autoload) = NULL;
 	EG(current_execute_data) = NULL;
 	EG(current_module) = NULL;
@@ -880,7 +879,7 @@ ZEND_API void _zend_bailout(char *filename, uint lineno) /* {{{ */
 	}
 	CG(unclean_shutdown) = 1;
 	CG(active_class_entry) = NULL;
-	CG(in_compilation) = EG(in_execution) = 0;
+	CG(in_compilation) = 0;
 	EG(current_execute_data) = NULL;
 	LONGJMP(*EG(bailout), FAILURE);
 }
@@ -1097,7 +1096,12 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				error_lineno = zend_get_compiled_lineno(TSRMLS_C);
 			} else if (zend_is_executing(TSRMLS_C)) {
 				error_filename = zend_get_executed_filename(TSRMLS_C);
-				error_lineno = zend_get_executed_lineno(TSRMLS_C);
+				if (error_filename[0] == '[') { /* [no active file] */
+					error_filename = NULL;
+					error_lineno = 0;
+				} else {
+					error_lineno = zend_get_executed_lineno(TSRMLS_C);
+				}
 			} else {
 				error_filename = NULL;
 				error_lineno = 0;

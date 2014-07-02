@@ -337,12 +337,8 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* o
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 {
 	DCL_OPLINE
-	zend_bool original_in_execution;
 
 
-
-	original_in_execution = EG(in_execution);
-	EG(in_execution) = 1;
 
 	LOAD_REGS();
 	LOAD_OPLINE();
@@ -358,7 +354,6 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		if ((ret = OPLINE->handler(execute_data TSRMLS_CC)) > 0) {
 			switch (ret) {
 				case 1:
-					EG(in_execution) = original_in_execution;
 					return;
 				case 2:
 				case 3:

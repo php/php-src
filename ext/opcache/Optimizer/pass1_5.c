@@ -219,12 +219,10 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				Z_STRLEN(ZEND_OP2_LITERAL(opline)) == sizeof("__COMPILER_HALT_OFFSET__") - 1 &&
 				memcmp(Z_STRVAL(ZEND_OP2_LITERAL(opline)), "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1) == 0) {
 				/* substitute __COMPILER_HALT_OFFSET__ constant */
-				zend_bool orig_in_execution = EG(in_execution);
 				zend_execute_data *orig_execute_data = EG(current_execute_data);
 				zend_execute_data fake_execute_data;
 				zval *offset;
 
-				EG(in_execution) = 1;
 				memset(&fake_execute_data, 0, sizeof(zend_execute_data));
 				fake_execute_data.func = (zend_function*)op_array;
 				EG(current_execute_data) = &fake_execute_data;
@@ -236,7 +234,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					replace_tmp_by_const(op_array, opline, tv, offset TSRMLS_CC);
 				}
 				EG(current_execute_data) = orig_execute_data;
-				EG(in_execution) = orig_in_execution;
 				break;
 			}
 
