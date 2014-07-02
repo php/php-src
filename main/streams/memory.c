@@ -357,7 +357,6 @@ typedef struct {
 
 
 /* {{{ */
-
 static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	php_stream_temp_data *ts = (php_stream_temp_data*)stream->abstract;
@@ -574,6 +573,12 @@ PHPAPI php_stream *_php_stream_temp_create_ex(int mode, size_t max_memory_usage,
 }
 /* }}} */
 
+/* {{{ _php_stream_temp_create */
+PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
+{
+	return php_stream_temp_create_ex(mode, max_memory_usage, NULL);
+}
+/* }}} */
 
 /* {{{ _php_stream_temp_open */
 PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC TSRMLS_DC)
