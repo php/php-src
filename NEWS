@@ -22,6 +22,8 @@ PHP                                                                        NEWS
     which affected builds against libpq < 7.3. (Adam)
 
 - SPL:
+  . Fixed bug #67539 (ArrayIterator use-after-free due to object change during 
+    sorting). (research at insighti dot org, Laruence)
   . Fixed bug #67538 (SPL Iterators use-after-free). (Laruence)
 
 - Streams:
