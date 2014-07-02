@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     match). (Bob)
   . Fixed bug #67091 (make install fails to install libphp5.so on FreeBSD 10.0).
     (Ferenc)
+  . Fixed bug #67151 (strtr with empty array crashes). (Nikita)
 
 - CLI server:
   . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
