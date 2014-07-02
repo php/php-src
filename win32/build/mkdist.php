@@ -248,7 +248,8 @@ foreach ($text_files as $src => $dest) {
 
 /* general other files */
 $general_files = array(
-	"php.gif"			=>	"php.gif",
+	"php.gif"				=>	"php.gif",
+	"$GLOBALS[build_dir]\\deplister.exe"	=>	"deplister.exe",
 );
 
 foreach ($general_files as $src => $dest) {
