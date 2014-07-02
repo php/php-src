@@ -11,11 +11,18 @@ PHP                                                                        NEWS
     (Andreas Ferber)
   . Fixed bug #67091 (make install fails to install libphp5.so on FreeBSD 10.0).
     (Ferenc)
+  . Fixed bug #67498 (phpinfo() Type Confusion Information Leak Vulnerability).
+    (Stefan Esser)
 
 - FPM:
   . Fix bug #67531 (syslog cannot be set in pool configuration). (Remi)
   . Fix bug #67541 (Fix Apache 2.4.10+ SetHandler proxy:fcgi://
     incompatibilities). (David Zuelke)
+
+- Intl:
+  . Fixed bug #67349 (Locale::parseLocale Double Free). (Stas)
+  . Fixed bug #67397 (Buffer overflow in locale_get_display_name and
+    uloc_getDisplayName (libicu 4.8.1)). (Stas)
 
 - pgsql:
   . Fix bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
@@ -31,6 +38,10 @@ PHP                                                                        NEWS
     run). (Bob)
   . Fix issue krakjoe/phpdbg#100 (No way to list the current stack/frames)
     (Help entry was missing). (Bob)
+
+- SPL:
+  . Fixed bug #67492 (unserialize() SPL ArrayObject / SPLObjectStorage Type
+    Confusion) (CVE-2014-3515). (Stefan Esser)
 
 19 Jun 2014, PHP 5.6.0 Release Candidate 1
 
