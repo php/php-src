@@ -23,4 +23,4 @@ class mydt extends datetime
 new mydt("Funktionsansvarig rådgivning och juridik", "UTC");
 ?>
 --EXPECTF--
-Fatal error: Call to a member function format() on a non-object in %sbug67118.php on line %d
+Fatal error: Call to a member function format() on null in %sbug67118.php on line %d
