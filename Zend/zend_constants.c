@@ -379,8 +379,8 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			}
 		} else if (class_name_len == sizeof("static")-1 &&
 		           !memcmp(lcname, "static", sizeof("static")-1)) {
-			if (EG(called_scope)) {
-				ce = EG(called_scope);
+			if (EG(current_execute_data) && EG(current_execute_data)->called_scope) {
+				ce = EG(current_execute_data)->called_scope;
 			} else {
 				zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
 			}

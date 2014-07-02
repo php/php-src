@@ -380,7 +380,7 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value TSRMLS_DC
 		execute_data = EG(current_execute_data)->call;
 	} else {
 		execute_data = zend_vm_stack_push_call_frame(
-			(zend_function*)op_array, 0, 0, EG(called_scope), Z_OBJ(EG(This)), NULL TSRMLS_CC);
+			(zend_function*)op_array, 0, 0, EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL, Z_OBJ(EG(This)), NULL TSRMLS_CC);
 	}
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_execute_data(execute_data, op_array, return_value, EG(active_symbol_table) ? VM_FRAME_TOP_CODE : VM_FRAME_TOP_FUNCTION TSRMLS_CC);
@@ -426,7 +426,6 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		Z_OBJ(EG(This)) = EX(object);
 		EG(scope) = EX(scope);
-		EG(called_scope) = EX(called_scope);
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_op *opline = EX(opline);
@@ -567,7 +566,8 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 #else
 			EG(scope) = fbc->common.scope;
 #endif
-			EG(called_scope) = call->called_scope;
+		} else {
+			call->called_scope = EX(called_scope);
 		}
 
 		call->opline = NULL;
@@ -628,7 +628,6 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		Z_OBJ(EG(This)) = call->object;
 		EG(scope) = fbc->common.scope;
-		EG(called_scope) = call->called_scope;
 		EG(active_symbol_table) = NULL;
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
@@ -663,7 +662,6 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		Z_OBJ(EG(This)) = call->object;
 //???		EG(scope) = NULL;
 		EG(scope) = fbc->common.scope;
-		EG(called_scope) = call->called_scope;
 
 		ZVAL_NULL(EX_VAR(opline->result.var));
 
@@ -716,7 +714,6 @@ fcall_end_change_scope:
 	}
 	Z_OBJ(EG(This)) = EX(object);
 	EG(scope) = EX(scope);
-	EG(called_scope) = EX(called_scope);
 
 fcall_end:
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -2921,7 +2918,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 		}
 
 		EX(call) = zend_vm_stack_push_call_frame(
-			(zend_function*)new_op_array, 0, 0, EG(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
+			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
 
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
@@ -3804,7 +3801,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 	if (IS_CONST != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -4770,7 +4767,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 	if (IS_CONST != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -5604,7 +5601,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 	if (IS_CONST != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -6297,7 +6294,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 	if (IS_CONST != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -6594,7 +6591,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER
 	closure_is_static = Z_FUNC_P(zfunc)->common.fn_flags & ZEND_ACC_STATIC;
 	closure_is_being_defined_inside_static_context = EX(prev_execute_data) && EX(prev_execute_data)->call->func->common.fn_flags & ZEND_ACC_STATIC;
 	if (closure_is_static || closure_is_being_defined_inside_static_context) {
-		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(called_scope), NULL TSRMLS_CC);
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EX(called_scope), NULL TSRMLS_CC);
 	} else {
 		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), Z_OBJ(EG(This)) ? &EG(This) : NULL TSRMLS_CC);
 	}
@@ -7126,7 +7123,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 	if (IS_CONST != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -8112,7 +8109,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 		}
 
 		EX(call) = zend_vm_stack_push_call_frame(
-			(zend_function*)new_op_array, 0, 0, EG(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
+			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
 
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
@@ -13370,7 +13367,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 		}
 
 		EX(call) = zend_vm_stack_push_call_frame(
-			(zend_function*)new_op_array, 0, 0, EG(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
+			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
 
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
@@ -15415,7 +15412,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 	if (IS_VAR != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -17643,7 +17640,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 	if (IS_VAR != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -19838,7 +19835,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 	if (IS_VAR != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -21302,7 +21299,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 	if (IS_VAR != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -23205,7 +23202,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 	if (IS_VAR != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -30500,7 +30497,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 		}
 
 		EX(call) = zend_vm_stack_push_call_frame(
-			(zend_function*)new_op_array, 0, 0, EG(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
+			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
 
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);

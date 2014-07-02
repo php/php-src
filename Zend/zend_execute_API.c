@@ -186,7 +186,6 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(prev_exception) = NULL;
 
 	EG(scope) = NULL;
-	EG(called_scope) = NULL;
 
 	ZVAL_OBJ(&EG(This), NULL);
 
@@ -662,12 +661,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_uint i;
 	zend_array *calling_symbol_table;
 	zend_class_entry *calling_scope = NULL;
-	zend_class_entry *called_scope = NULL;
 	zend_execute_data *call, dummy_execute_data;
 	zend_fcall_info_cache fci_cache_local;
 	zend_function *func;
 	zend_object *orig_object;
-	zend_class_entry *orig_scope, *orig_called_scope;
+	zend_class_entry *orig_scope;
 	zval tmp;
 
 	ZVAL_UNDEF(fci->retval);
@@ -690,7 +688,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 	orig_object = Z_OBJ(EG(This));
 	orig_scope = EG(scope);
-	orig_called_scope = EG(called_scope);
 
 	/* Initialize execute_data */
 	if (!EG(current_execute_data)) {
@@ -746,7 +743,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	func = fci_cache->function_handler;
 	call = zend_vm_stack_push_call_frame(func, fci->param_count, ZEND_CALL_DONE, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
 	calling_scope = fci_cache->calling_scope;
-	called_scope = fci_cache->called_scope;
 	fci->object = fci_cache->object;
 	if (fci->object &&
 	    (!EG(objects_store).object_buckets ||
@@ -839,7 +835,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	call->num_args = fci->param_count;
 
 	EG(scope) = calling_scope;
-	EG(called_scope) = called_scope;
 	if (!fci->object ||
 	    (func->common.fn_flags & ZEND_ACC_STATIC)) {
 		Z_OBJ(EG(This)) = call->object = NULL;
@@ -942,7 +937,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 	Z_OBJ(EG(This)) = orig_object;
 	EG(scope) = orig_scope;
-	EG(called_scope) = orig_called_scope;
 	if (EG(current_execute_data) == &dummy_execute_data) {
 		EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 	}
@@ -1120,7 +1114,7 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 			ZVAL_UNDEF(&local_retval);
 			if (EG(current_execute_data)) {
 				EG(current_execute_data)->call = zend_vm_stack_push_call_frame(
-					(zend_function*)new_op_array, 0, 0, EG(called_scope), Z_OBJ(EG(This)), EG(current_execute_data)->call TSRMLS_CC);
+					(zend_function*)new_op_array, 0, 0, EG(current_execute_data)->called_scope, Z_OBJ(EG(This)), EG(current_execute_data)->call TSRMLS_CC);
 			}
 			zend_execute(new_op_array, &local_retval TSRMLS_CC);
 		} zend_catch {
@@ -1494,10 +1488,10 @@ check_fetch_type:
 			}
 			return EG(scope)->parent;
 		case ZEND_FETCH_CLASS_STATIC:
-			if (!EG(called_scope)) {
+			if (!EG(current_execute_data) || !EG(current_execute_data)->called_scope) {
 				zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
 			}
-			return EG(called_scope);
+			return EG(current_execute_data)->called_scope;
 		case ZEND_FETCH_CLASS_AUTO: {
 				fetch_type = zend_get_class_fetch_type(class_name->val, class_name->len);
 				if (fetch_type!=ZEND_FETCH_CLASS_DEFAULT) {

@@ -1808,7 +1808,6 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		}
 		Z_OBJ(EG(This)) = EX(object);
 		EG(scope) = EX(scope);
-		EG(called_scope) = EX(called_scope);
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_op *opline = EX(opline);
@@ -2365,7 +2364,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 	if (OP1_TYPE != IS_CONST) {
 		/* previous opcode is ZEND_FETCH_CLASS */
 		if ((opline-1)->extended_value == ZEND_FETCH_CLASS_PARENT || (opline-1)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			ce = EG(called_scope);
+			ce = EX(called_scope);
 		}
 	}
 
@@ -2620,7 +2619,8 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 #else 
 			EG(scope) = fbc->common.scope;
 #endif
-			EG(called_scope) = call->called_scope;
+		} else {
+			call->called_scope = EX(called_scope);
 		}
 
 		call->opline = NULL;
@@ -2681,7 +2681,6 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 
 		Z_OBJ(EG(This)) = call->object;
 		EG(scope) = fbc->common.scope;
-		EG(called_scope) = call->called_scope;
 		EG(active_symbol_table) = NULL;
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
@@ -2716,7 +2715,6 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		Z_OBJ(EG(This)) = call->object;
 //???		EG(scope) = NULL;
 		EG(scope) = fbc->common.scope;
-		EG(called_scope) = call->called_scope;
 
 		ZVAL_NULL(EX_VAR(opline->result.var));
 
@@ -2769,7 +2767,6 @@ ZEND_VM_C_LABEL(fcall_end_change_scope):
 	}
 	Z_OBJ(EG(This)) = EX(object);
 	EG(scope) = EX(scope);
-	EG(called_scope) = EX(called_scope);
 
 ZEND_VM_C_LABEL(fcall_end):
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -3986,7 +3983,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		}
 
 		EX(call) = zend_vm_stack_push_call_frame(
-			(zend_function*)new_op_array, 0, 0, EG(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
+			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
 
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
@@ -5346,7 +5343,7 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 	closure_is_static = Z_FUNC_P(zfunc)->common.fn_flags & ZEND_ACC_STATIC;
 	closure_is_being_defined_inside_static_context = EX(prev_execute_data) && EX(prev_execute_data)->call->func->common.fn_flags & ZEND_ACC_STATIC;
 	if (closure_is_static || closure_is_being_defined_inside_static_context) {
-		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(called_scope), NULL TSRMLS_CC);
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EX(called_scope), NULL TSRMLS_CC);
 	} else {
 		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), Z_OBJ(EG(This)) ? &EG(This) : NULL TSRMLS_CC);
 	}

@@ -2770,7 +2770,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		if (!EG(scope)) {
 			if (error) *error = estrdup("cannot access self:: when no class scope is active");
 		} else {
-			fcc->called_scope = EG(called_scope);
+			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 			fcc->calling_scope = EG(scope);
 			if (!fcc->object && Z_OBJ(EG(This))) {
 				fcc->object = Z_OBJ(EG(This));
@@ -2784,7 +2784,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else if (!EG(scope)->parent) {
 			if (error) *error = estrdup("cannot access parent:: when current class scope has no parent");
 		} else {
-			fcc->called_scope = EG(called_scope);
+			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 			fcc->calling_scope = EG(scope)->parent;
 			if (!fcc->object && Z_OBJ(EG(This))) {
 				fcc->object = Z_OBJ(EG(This));
@@ -2794,11 +2794,11 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		}
 	} else if (name_len == sizeof("static") - 1 &&
 	           !memcmp(lcname->val, "static", sizeof("static") - 1)) {
-		if (!EG(called_scope)) {
+		if (!EG(current_execute_data) || !EG(current_execute_data)->called_scope) {
 			if (error) *error = estrdup("cannot access static:: when no class scope is active");
 		} else {
-			fcc->called_scope = EG(called_scope);
-			fcc->calling_scope = EG(called_scope);
+			fcc->called_scope = EG(current_execute_data)->called_scope;
+			fcc->calling_scope = EG(current_execute_data)->called_scope;
 			if (!fcc->object && Z_OBJ(EG(This))) {
 				fcc->object = Z_OBJ(EG(This));
 			}

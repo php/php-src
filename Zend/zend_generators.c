@@ -314,7 +314,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		zend_array *original_active_symbol_table = EG(active_symbol_table);
 		zend_object *original_This;
 		zend_class_entry *original_scope = EG(scope);
-		zend_class_entry *original_called_scope = EG(called_scope);
 		zend_vm_stack original_stack = EG(argument_stack);
 
 		original_This = Z_OBJ(EG(This));
@@ -324,7 +323,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		EG(active_symbol_table) = generator->execute_data->symbol_table;
 		Z_OBJ(EG(This)) = generator->execute_data->object;
 		EG(scope) = generator->execute_data->scope;
-		EG(called_scope) = generator->execute_data->called_scope;
 		EG(argument_stack) = generator->stack;
 
 		/* We want the backtrace to look as if the generator function was
@@ -353,7 +351,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		EG(active_symbol_table) = original_active_symbol_table;
 		Z_OBJ(EG(This)) = original_This;
 		EG(scope) = original_scope;
-		EG(called_scope) = original_called_scope;
 		EG(argument_stack) = original_stack;
 
 		/* If an exception was thrown in the generator we have to internally

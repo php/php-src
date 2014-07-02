@@ -1547,7 +1547,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 {
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
-	ZEND_ASSERT(EX(called_scope) == EG(called_scope));
 
 	EX(return_value) = return_value;
 	EX(frame_kind) = frame_kind;

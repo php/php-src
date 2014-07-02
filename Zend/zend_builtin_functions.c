@@ -809,8 +809,8 @@ ZEND_FUNCTION(get_called_class)
 		return;
 	}
 
-	if (EG(called_scope)) {
-		RETURN_STR(STR_COPY(EG(called_scope)->name));
+	if (EG(current_execute_data)->called_scope) {
+		RETURN_STR(STR_COPY(EG(current_execute_data)->called_scope->name));
 	} else if (!EG(scope))  {
 		zend_error(E_WARNING, "get_called_class() called from outside a class");
 	}

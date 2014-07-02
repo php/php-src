@@ -186,7 +186,6 @@ struct _zend_executor_globals {
 	HashTable *zend_constants;	/* constants table */
 
 	zend_class_entry *scope;
-	zend_class_entry *called_scope; /* Scope of the calling class */
 
 	zval This;
 
