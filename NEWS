@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fix bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
     which affected builds against libpq < 7.3. (Adam)
 
+- SPL:
+  . Fixed bug #67538 (SPL Iterators use-after-free). (Laruence)
+
 - Streams:
   . Fixed bug #67430 (http:// wrapper doesn't follow 308 redirects). (Adam)
 
