@@ -3101,6 +3101,10 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 	int			patterns_len;
 	zend_llist	*allocs;
 
+	if (zend_hash_num_elements(pats) == 0) {
+		RETURN_STRINGL(str, slen, 1);
+	}
+
 	S(&text) = str;
 	L(&text) = slen;
 
