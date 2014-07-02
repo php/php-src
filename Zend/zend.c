@@ -1287,7 +1287,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
 	va_list files;
 	int i;
 	zend_file_handle *file_handle;
-	zend_op_array *orig_op_array = EG(active_op_array);
+	zend_op_array *op_array;
     long orig_interactive = CG(interactive);
 
 	va_start(files, file_count);
@@ -1305,13 +1305,13 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
             }
         }
        
-		EG(active_op_array) = zend_compile_file(file_handle, type TSRMLS_CC);
+		op_array = zend_compile_file(file_handle, type TSRMLS_CC);
 		if (file_handle->opened_path) {
 			zend_hash_str_add_empty_element(&EG(included_files), file_handle->opened_path, strlen(file_handle->opened_path));
 		}
 		zend_destroy_file_handle(file_handle TSRMLS_CC);
-		if (EG(active_op_array)) {
-			zend_execute(EG(active_op_array), retval TSRMLS_CC);
+		if (op_array) {
+			zend_execute(op_array, retval TSRMLS_CC);
 			zend_exception_restore(TSRMLS_C);
 			if (EG(exception)) {
 				if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
@@ -1338,17 +1338,15 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
 					zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
 				}
 			}
-			destroy_op_array(EG(active_op_array) TSRMLS_CC);
-			efree(EG(active_op_array));
+			destroy_op_array(op_array TSRMLS_CC);
+			efree(op_array);
 		} else if (type==ZEND_REQUIRE) {
 			va_end(files);
-			EG(active_op_array) = orig_op_array;
             CG(interactive) = orig_interactive;
 			return FAILURE;
 		}
 	}
 	va_end(files);
-	EG(active_op_array) = orig_op_array;
     CG(interactive) = orig_interactive;
 
 	return SUCCESS;

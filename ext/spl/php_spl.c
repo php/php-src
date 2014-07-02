@@ -286,7 +286,6 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 		}
 		STR_RELEASE(opened_path);
 		if (new_op_array) {
-			EG(active_op_array) = new_op_array;
 			if (!EG(active_symbol_table)) {
 				zend_rebuild_symbol_table(TSRMLS_C);
 			}
@@ -320,7 +319,6 @@ PHP_FUNCTION(spl_autoload)
 	char *pos, *pos1;
 	zend_string *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
 	zend_op **original_opline_ptr = EG(opline_ptr);
-	zend_op_array *original_active_op_array = EG(active_op_array);
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &class_name, &file_exts) == FAILURE) {
 		RETURN_FALSE;
@@ -338,7 +336,6 @@ PHP_FUNCTION(spl_autoload)
 	zend_str_tolower_copy(lc_name->val, class_name->val, class_name->len);
 	while (pos && *pos && !EG(exception)) {
 		EG(opline_ptr) = original_opline_ptr;
-		EG(active_op_array) = original_active_op_array;
 		pos1 = strchr(pos, ',');
 		if (pos1) { 
 			pos1_len = pos1 - pos;
@@ -355,7 +352,6 @@ PHP_FUNCTION(spl_autoload)
 	STR_FREE(lc_name);
 
 	EG(opline_ptr) = original_opline_ptr;
-	EG(active_op_array) = original_active_op_array;
 
 	if (!found && !SPL_G(autoload_running)) {
 		/* For internal errors, we generate E_ERROR, for direct calls an exception is thrown.

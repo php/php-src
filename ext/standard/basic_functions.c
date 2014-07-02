@@ -4759,7 +4759,7 @@ PHP_FUNCTION(forward_static_call)
 		return;
 	}
 
-	if (!EG(active_op_array)->scope) {
+	if (!EG(current_execute_data)->prev_execute_data->func->common.scope) {
 		zend_error(E_ERROR, "Cannot call forward_static_call() when no class scope is active");
 	}
 

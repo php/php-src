@@ -1232,7 +1232,7 @@ static void unset_zval_property(zval* object, char* name TSRMLS_DC)
 		ZVAL_STRING(&member, name);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
-		Z_OBJ_HT_P(object)->unset_property(object, &member, 0 TSRMLS_CC);
+		Z_OBJ_HT_P(object)->unset_property(object, &member, -1 TSRMLS_CC);
 		EG(scope) = old_scope;
 		zval_ptr_dtor(&member);
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {

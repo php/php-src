@@ -315,7 +315,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		/* Backup executor globals */
 		zend_execute_data *original_execute_data = EG(current_execute_data);
 		zend_op **original_opline_ptr = EG(opline_ptr);
-		zend_op_array *original_active_op_array = EG(active_op_array);
 		zend_array *original_active_symbol_table = EG(active_symbol_table);
 		zend_object *original_This;
 		zend_class_entry *original_scope = EG(scope);
@@ -327,7 +326,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
 		EG(opline_ptr) = &generator->execute_data->opline;
-		EG(active_op_array) = &generator->execute_data->func->op_array;
 		EG(active_symbol_table) = generator->execute_data->symbol_table;
 		Z_OBJ(EG(This)) = generator->execute_data->object;
 		EG(scope) = generator->execute_data->scope;
@@ -358,7 +356,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		/* Restore executor globals */
 		EG(current_execute_data) = original_execute_data;
 		EG(opline_ptr) = original_opline_ptr;
-		EG(active_op_array) = original_active_op_array;
 		EG(active_symbol_table) = original_active_symbol_table;
 		Z_OBJ(EG(This)) = original_This;
 		EG(scope) = original_scope;

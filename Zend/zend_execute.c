@@ -116,7 +116,8 @@ static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *sho
 
 /* End of zend_execute_locks.h */
 
-#define CV_DEF_OF(i) (EG(active_op_array)->vars[i])
+// TODO: avoid global variable usage ??? 
+#define CV_DEF_OF(i) (EG(current_execute_data)->func->op_array.vars[i])
 
 #define CTOR_CALL_BIT    0x1
 #define CTOR_USED_BIT    0x2
@@ -982,7 +983,7 @@ static void zend_extension_fcall_end_handler(const zend_extension *extension, ze
 }
 
 
-static zend_always_inline HashTable *zend_get_target_symbol_table(int fetch_type TSRMLS_DC)
+static zend_always_inline HashTable *zend_get_target_symbol_table(zend_execute_data *execute_data, int fetch_type TSRMLS_DC)
 {
 	HashTable *ht;
 
@@ -990,8 +991,8 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(int fetch_type
 	    EXPECTED(fetch_type == ZEND_FETCH_GLOBAL)) {
 		ht = &EG(symbol_table).ht;
 	} else if (EXPECTED(fetch_type == ZEND_FETCH_STATIC)) {
-		ZEND_ASSERT(EG(active_op_array)->static_variables != NULL);
-		ht = EG(active_op_array)->static_variables;
+		ZEND_ASSERT(execute_data->func->op_array.static_variables != NULL);
+		ht = execute_data->func->op_array.static_variables;
 	} else {
 		ZEND_ASSERT(fetch_type == ZEND_FETCH_LOCAL);
 		if (!EG(active_symbol_table)) {

@@ -2806,8 +2806,13 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 			ret = 1;
 		}
 	} else if ((ce = zend_lookup_class_ex(name, NULL, 1 TSRMLS_CC)) != NULL) {
-		zend_class_entry *scope = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
+		zend_class_entry *scope;
+		zend_execute_data *ex = EG(current_execute_data);
 
+		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+			ex = ex->prev_execute_data;
+		}
+		scope = ex ? ex->func->common.scope : NULL;
 		fcc->calling_scope = ce;
 		if (scope && !fcc->object && Z_OBJ(EG(This)) &&
 		    instanceof_function(Z_OBJCE(EG(This)), scope TSRMLS_CC) &&

@@ -1780,7 +1780,7 @@ void php_request_shutdown(void *dummy)
 	 * inside zend_executor callback functions.
 	 */
 	EG(opline_ptr) = NULL;
-	EG(active_op_array) = NULL;
+	EG(current_execute_data) = NULL;
 
 	php_deactivate_ticks(TSRMLS_C);
 

@@ -283,7 +283,6 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 #endif
 			if (new_op_array) {
 				ZVAL_UNDEF(&result);
-				EG(active_op_array) = new_op_array;
 
 				zend_try {
 					if (EG(current_execute_data)) {

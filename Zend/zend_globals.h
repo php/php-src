@@ -183,8 +183,6 @@ struct _zend_executor_globals {
 	int orig_error_reporting;
 	int exit_status;
 
-	zend_op_array *active_op_array;
-
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
 	HashTable *zend_constants;	/* constants table */
