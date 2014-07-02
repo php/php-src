@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed buf #67497 (eval with parse error causes segmentation fault in
     generator). (Nikita)
 
+- pgsql:
+  . Fix bug #67555 (Cannot build against libpq 7.3). (Adam)
+
 
 03 Jul 2014, PHP 5.6.0 Release Candidate 2
 
