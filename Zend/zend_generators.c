@@ -321,7 +321,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		zend_class_entry *original_scope = EG(scope);
 		zend_class_entry *original_called_scope = EG(called_scope);
 		zend_vm_stack original_stack = EG(argument_stack);
-		zend_execute_data *prev_execute_data;
 
 		original_This = Z_OBJ(EG(This));
 
@@ -339,17 +338,10 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		 * called from whatever method we are current running (e.g. next()).
 		 * So we have to link generator call frame with caller call frames */
 
-		prev_execute_data = original_execute_data;
-        if (prev_execute_data &&
-            prev_execute_data->call &&
-            (prev_execute_data->call->flags & ZEND_CALL_DONE)) {
-			prev_execute_data->call->prev_execute_data = prev_execute_data;
-			prev_execute_data = prev_execute_data->call;
-		}
-		generator->execute_data->prev_execute_data = prev_execute_data;
-		if (prev_execute_data) {
-			generator->execute_data->prev_nested_call = prev_execute_data->call;
-			prev_execute_data->call = generator->execute_data;
+		generator->execute_data->prev_execute_data = original_execute_data;
+		if (original_execute_data) {
+			generator->execute_data->prev_nested_call = original_execute_data->call;
+			original_execute_data->call = generator->execute_data;
 		}
 
 		/* Resume execution */

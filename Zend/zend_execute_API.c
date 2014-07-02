@@ -401,11 +401,7 @@ ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC) /* {{{ 
 		return "";
 	}
 
-	if (EG(current_execute_data)->call && (EG(current_execute_data)->call->flags & ZEND_CALL_DONE)) {
-		func = EG(current_execute_data)->call->func;
-	} else {
-		func = EG(current_execute_data)->func;
-	}
+	func = EG(current_execute_data)->func;
 	switch (func->type) {
 		case ZEND_USER_FUNCTION:
 		case ZEND_INTERNAL_FUNCTION:
@@ -433,11 +429,7 @@ ZEND_API const char *get_active_function_name(TSRMLS_D) /* {{{ */
 	if (!zend_is_executing(TSRMLS_C)) {
 		return NULL;
 	}
-	if (EG(current_execute_data)->call && (EG(current_execute_data)->call->flags & ZEND_CALL_DONE)) {
-		func = EG(current_execute_data)->call->func;
-	} else {
-		func = EG(current_execute_data)->func;
-	}
+	func = EG(current_execute_data)->func;
 	switch (func->type) {
 		case ZEND_USER_FUNCTION: {
 				zend_string *function_name = func->common.function_name;
@@ -667,9 +659,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_op **original_opline_ptr;
 	zend_class_entry *calling_scope = NULL;
 	zend_class_entry *called_scope = NULL;
-	zend_execute_data execute_data;
+	zend_execute_data *call, dummy_execute_data;
 	zend_fcall_info_cache fci_cache_local;
 	zend_function *func;
+	zend_object *orig_object;
+	zend_class_entry *orig_scope, *orig_called_scope;
 	zval tmp;
 
 	ZVAL_UNDEF(fci->retval);
@@ -690,20 +684,28 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			break;
 	}
 
+	orig_object = Z_OBJ(EG(This));
+	orig_scope = EG(scope);
+	orig_called_scope = EG(called_scope);
+
 	/* Initialize execute_data */
-	if (EG(current_execute_data)) {
-		execute_data = *EG(current_execute_data);
-		EX(object) = Z_OBJ(EG(This));
-		EX(scope) = EG(scope);
-		EX(called_scope) = EG(called_scope);
-		EX(func) = NULL;
-		EX(opline) = NULL;
-	} else {
+	if (!EG(current_execute_data)) {
 		/* This only happens when we're called outside any execute()'s
 		 * It shouldn't be strictly necessary to NULL execute_data out,
 		 * but it may make bugs easier to spot
 		 */
-		memset(&execute_data, 0, sizeof(zend_execute_data));
+		memset(&dummy_execute_data, 0, sizeof(zend_execute_data));
+		EG(current_execute_data) = &dummy_execute_data;
+	} else if (EG(current_execute_data)->opline && 
+	           EG(current_execute_data)->opline->opcode != ZEND_DO_FCALL) {
+		/* Insert fake frame in case of include or magic calls */
+		dummy_execute_data = *EG(current_execute_data);
+		dummy_execute_data.prev_execute_data = EG(current_execute_data);
+		dummy_execute_data.call = NULL;
+		dummy_execute_data.prev_nested_call = NULL;
+		dummy_execute_data.opline = NULL;
+		dummy_execute_data.func = NULL;
+		EG(current_execute_data) = &dummy_execute_data;
 	}
 
 	if (!fci_cache || !fci_cache->initialized) {
@@ -722,6 +724,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			if (callable_name) {
 				STR_RELEASE(callable_name);
 			}
+			if (EG(current_execute_data) == &dummy_execute_data) {
+				EG(current_execute_data) = dummy_execute_data.prev_execute_data;
+			}
 			return FAILURE;
 		} else if (error) {
 			/* Capitalize the first latter of the error message */
@@ -735,13 +740,16 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	func = fci_cache->function_handler;
-	EX(call) = zend_vm_stack_push_call_frame(func, fci->param_count, ZEND_CALL_DONE, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
+	call = zend_vm_stack_push_call_frame(func, fci->param_count, ZEND_CALL_DONE, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
 	calling_scope = fci_cache->calling_scope;
 	called_scope = fci_cache->called_scope;
 	fci->object = fci_cache->object;
 	if (fci->object &&
 	    (!EG(objects_store).object_buckets ||
 	     !IS_OBJ_VALID(EG(objects_store).object_buckets[fci->object->handle]))) {
+		if (EG(current_execute_data) == &dummy_execute_data) {
+			EG(current_execute_data) = dummy_execute_data.prev_execute_data;
+		}
 		return FAILURE;
 	}
 
@@ -783,16 +791,19 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
 					if (i) {
 						/* hack to clean up the stack */
-						EX(call)->num_args = i;
-						zend_vm_stack_free_args(EX(call) TSRMLS_CC);
+						call->num_args = i;
+						zend_vm_stack_free_args(call TSRMLS_CC);
 					}
-					zend_vm_stack_free_call_frame(EX(call) TSRMLS_CC);
+					zend_vm_stack_free_call_frame(call TSRMLS_CC);
 
 					zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
 						i+1,
 						func->common.scope ? func->common.scope->name->val : "",
 						func->common.scope ? "::" : "",
 						func->common.function_name->val);
+					if (EG(current_execute_data) == &dummy_execute_data) {
+						EG(current_execute_data) = dummy_execute_data.prev_execute_data;
+					}
 					return FAILURE;
 				}
 
@@ -808,33 +819,33 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			} else if (Z_REFCOUNTED(fci->params[i])) {
 				Z_ADDREF(fci->params[i]);
 			}
-			param = ZEND_CALL_ARG(EX(call), i+1);
+			param = ZEND_CALL_ARG(call, i+1);
 			ZVAL_COPY_VALUE(param, &fci->params[i]);
 		} else if (Z_ISREF(fci->params[i]) &&
 		           /* don't separate references for __call */
 		           (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0 ) {
 			param = &tmp;
-			param = ZEND_CALL_ARG(EX(call), i+1);
+			param = ZEND_CALL_ARG(call, i+1);
 			ZVAL_DUP(param, Z_REFVAL(fci->params[i]));
 		} else {
-			param = ZEND_CALL_ARG(EX(call), i+1);
+			param = ZEND_CALL_ARG(call, i+1);
 			ZVAL_COPY(param, &fci->params[i]);
 		}
 	}
-	EX(call)->num_args = fci->param_count;
+	call->num_args = fci->param_count;
 
 	EG(scope) = calling_scope;
 	EG(called_scope) = called_scope;
 	if (!fci->object ||
 	    (func->common.fn_flags & ZEND_ACC_STATIC)) {
-		Z_OBJ(EG(This)) = EX(call)->object = NULL;
+		Z_OBJ(EG(This)) = call->object = NULL;
 	} else {
 		Z_OBJ(EG(This)) = fci->object;
 		Z_ADDREF(EG(This));
 	}
 
-	EX(prev_execute_data) = EG(current_execute_data);
-	EG(current_execute_data) = &execute_data;
+	call->prev_nested_call = EG(current_execute_data)->call;
+	EG(current_execute_data)->call = call;
 
 	if (func->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
@@ -867,14 +878,20 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (func->common.scope) {
 			EG(scope) = func->common.scope;
 		}
+		call->opline = NULL;
+		call->call = NULL;
+		call->prev_execute_data = EG(current_execute_data);
+		EG(current_execute_data) = call;
 		if (EXPECTED(zend_execute_internal == NULL)) {
 			/* saves one function call if zend_execute_internal is not used */
 			func->internal_function.handler(fci->param_count, fci->retval TSRMLS_CC);
 		} else {
-			zend_execute_internal(&execute_data, fci TSRMLS_CC);
+			zend_execute_internal(call->prev_execute_data, fci TSRMLS_CC);
 		}
-		zend_vm_stack_free_args(EX(call) TSRMLS_CC);
-		zend_vm_stack_free_call_frame(EX(call) TSRMLS_CC);
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_args(call TSRMLS_CC);
+		EG(current_execute_data)->call = call->prev_nested_call;
+		zend_vm_stack_free_call_frame(call TSRMLS_CC);
 
 		/*  We shouldn't fix bad extensions here,
 			because it can break proper ones (Bug #34045)
@@ -896,10 +913,19 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 		/* Not sure what should be done here if it's a static method */
 		if (fci->object) {
+			call->opline = NULL;
+			call->call = NULL;
+			call->prev_execute_data = EG(current_execute_data);
+			EG(current_execute_data) = call;
 			fci->object->handlers->call_method(func->common.function_name, fci->object, fci->param_count, fci->retval TSRMLS_CC);
+			EG(current_execute_data) = call->prev_execute_data;
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
 		}
+
+		zend_vm_stack_free_args(call TSRMLS_CC);
+		EG(current_execute_data)->call = call->prev_nested_call;
+		zend_vm_stack_free_call_frame(call TSRMLS_CC);
 
 		if (func->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
 			STR_RELEASE(func->common.function_name);
@@ -916,10 +942,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		zval_ptr_dtor(&EG(This));
 	}
 
-	Z_OBJ(EG(This)) = EX(object);
-	EG(scope) = EX(scope);
-	EG(called_scope) = EX(called_scope);
-	EG(current_execute_data) = EX(prev_execute_data);
+	Z_OBJ(EG(This)) = orig_object;
+	EG(scope) = orig_scope;
+	EG(called_scope) = orig_called_scope;
+	if (EG(current_execute_data) == &dummy_execute_data) {
+		EG(current_execute_data) = dummy_execute_data.prev_execute_data;
+	}
 
 	if (EG(exception)) {
 		zend_throw_exception_internal(NULL TSRMLS_CC);
@@ -1689,10 +1717,15 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force TSRMLS
 	if (!EG(active_symbol_table)) {
 		int i;
 		zend_execute_data *execute_data = EG(current_execute_data);
-		zend_op_array *op_array = &execute_data->func->op_array;
+		zend_op_array *op_array;
 		zend_ulong h = STR_HASH_VAL(name);
 
-		if (op_array) {
+		while (execute_data && (!execute_data->func || !ZEND_USER_CODE(execute_data->func->common.type))) {
+			execute_data = execute_data->prev_execute_data;
+		}
+
+		if (execute_data && execute_data->func) {
+			op_array = &execute_data->func->op_array;
 			for (i = 0; i < op_array->last_var; i++) {
 				if (op_array->vars[i]->h == h &&
 				    op_array->vars[i]->len == name->len &&
@@ -1722,10 +1755,15 @@ ZEND_API int zend_set_local_var_str(const char *name, int len, zval *value, int 
 	if (!EG(active_symbol_table)) {
 		int i;
 		zend_execute_data *execute_data = EG(current_execute_data);
-		zend_op_array *op_array = &execute_data->func->op_array;
+		zend_op_array *op_array;
 		zend_ulong h = zend_hash_func(name, len);
 
-		if (op_array) {
+		while (execute_data && (!execute_data->func || !ZEND_USER_CODE(execute_data->func->common.type))) {
+			execute_data = execute_data->prev_execute_data;
+		}
+
+		if (execute_data && execute_data->func) {
+			op_array = &execute_data->func->op_array;
 			for (i = 0; i < op_array->last_var; i++) {
 				if (op_array->vars[i]->h == h &&
 				    op_array->vars[i]->len == len &&

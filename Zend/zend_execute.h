@@ -272,35 +272,6 @@ static zend_always_inline void zend_vm_stack_free_call_frame(zend_execute_data *
 	}
 }
 
-static zend_always_inline int zend_vm_stack_get_args_count_ex(zend_execute_data *ex)
-{
-	return ex->call->num_args;
-}
-
-static zend_always_inline zval* zend_vm_stack_get_arg_ex(zend_execute_data *ex, int requested_arg)
-{
-	int arg_count = ex->call->num_args;
-
-	if (UNEXPECTED(requested_arg > arg_count)) {
-		return NULL;
-	}
-	return ZEND_CALL_ARG(ex->call, requested_arg);
-}
-
-static zend_always_inline int zend_vm_stack_get_args_count(TSRMLS_D)
-{
-	if (EG(current_execute_data)->prev_execute_data) {
-		return zend_vm_stack_get_args_count_ex(EG(current_execute_data)->prev_execute_data);
-	} else {
-		return 0;
-	}
-}
-
-static zend_always_inline zval* zend_vm_stack_get_arg(int requested_arg TSRMLS_DC)
-{
-	return zend_vm_stack_get_arg_ex(EG(current_execute_data)->prev_execute_data, requested_arg);
-}
-
 void execute_new_code(TSRMLS_D);
 
 

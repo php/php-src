@@ -397,8 +397,6 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	vm_frame_kind frame_kind = EX(frame_kind);
 	zend_execute_data *prev_nested_call;
 
-	EG(current_execute_data) = EX(prev_execute_data);
-
 	if (frame_kind == VM_FRAME_NESTED_FUNCTION) {
 		i_free_compiled_variables(execute_data TSRMLS_CC);
 		if (UNEXPECTED(EX(symbol_table) != NULL)) {
@@ -407,6 +405,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && EX(func)->op_array.prototype) {
 			zval_ptr_dtor((zval*)EX(func)->op_array.prototype);
 		}
+		EG(current_execute_data) = EX(prev_execute_data);
 		prev_nested_call = EX(prev_nested_call);
 		zend_vm_stack_free_extra_args(execute_data TSRMLS_CC);
 		zend_vm_stack_free_call_frame(execute_data TSRMLS_CC);
@@ -452,6 +451,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		zend_detach_symbol_table(execute_data);
 		destroy_op_array(&EX(func)->op_array TSRMLS_CC);
 		efree(EX(func));
+		EG(current_execute_data) = EX(prev_execute_data);
 		prev_nested_call = EX(prev_nested_call);
 		zend_vm_stack_free_call_frame(execute_data TSRMLS_CC);
 
@@ -491,6 +491,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		if ((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) && EX(func)->op_array.prototype) {
 			zval_ptr_dtor((zval*)EX(func)->op_array.prototype);
 		}
+		EG(current_execute_data) = EX(prev_execute_data);
 		prev_nested_call = EX(prev_nested_call);
 		zend_vm_stack_free_call_frame(execute_data TSRMLS_CC);
 
@@ -579,6 +580,11 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EG(called_scope) = call->called_scope;
 		}
 
+		call->opline = NULL;
+		call->call = NULL;
+		call->prev_execute_data = EG(current_execute_data);
+		EG(current_execute_data) = call;
+
 		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 			zend_uint i;
 			zval *p = ZEND_CALL_ARG(call, 1);
@@ -588,6 +594,10 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				p++;
 			}
 			if (UNEXPECTED(EG(exception) != NULL)) {
+				EG(current_execute_data) = call->prev_execute_data;
+				zend_vm_stack_free_args(call TSRMLS_CC);
+				EX(call) = call->prev_nested_call;
+				zend_vm_stack_free_call_frame(call TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 				}
@@ -609,9 +619,8 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			zend_execute_internal(execute_data, NULL TSRMLS_CC);
 		}
-
+		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call TSRMLS_CC);
-
 		EX(call) = call->prev_nested_call;
 		zend_vm_stack_free_call_frame(call TSRMLS_CC);
 
@@ -673,7 +682,12 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		/* Not sure what should be done here if it's a static method */
 		if (EXPECTED(call->object != NULL)) {
+			call->opline = NULL;
+			call->call = NULL;
+			call->prev_execute_data = EG(current_execute_data);
+			EG(current_execute_data) = call;
 			call->object->handlers->call_method(fbc->common.function_name, call->object, call->num_args, EX_VAR(opline->result.var) TSRMLS_CC);
+			EG(current_execute_data) = call->prev_execute_data;
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
 		}

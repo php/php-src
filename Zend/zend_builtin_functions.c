@@ -394,7 +394,7 @@ ZEND_FUNCTION(gc_disable)
    Get the number of arguments that were passed to the function */
 ZEND_FUNCTION(func_num_args)
 {
-	zend_execute_data *ex = EG(current_execute_data);
+	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
 
 	if (ex->frame_kind == VM_FRAME_NESTED_FUNCTION || ex->frame_kind == VM_FRAME_TOP_FUNCTION) {
 		RETURN_LONG(ex->num_args);
@@ -423,7 +423,7 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_FALSE;
 	}
 
-	ex = EG(current_execute_data);
+	ex = EG(current_execute_data)->prev_execute_data;
 	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
 		RETURN_FALSE;
@@ -456,7 +456,7 @@ ZEND_FUNCTION(func_get_args)
 	zval *p;
 	int arg_count, first_extra_arg;
 	int i;
-	zend_execute_data *ex = EG(current_execute_data);
+	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
 
 	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
@@ -2054,7 +2054,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	}
 
 	ZVAL_UNDEF(&arg_array);
-	ptr = EG(current_execute_data);
+	ptr = EG(current_execute_data)->prev_execute_data;
 
 	/* skip debug_backtrace() */
 	object = ptr->object;
@@ -2078,7 +2078,15 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
 			filename = skip->func->op_array.filename->val;
-			lineno = skip->opline->lineno;
+			if (skip->opline->opcode == ZEND_HANDLE_EXCEPTION) {
+				if (EG(opline_before_exception)) {
+					lineno = EG(opline_before_exception)->lineno;
+				} else {
+					lineno = skip->func->op_array.line_end;
+				}
+			} else {
+				lineno = skip->opline->lineno;
+			}
 		} else {
 			filename = NULL;
 			lineno = 0;
@@ -2223,17 +2231,22 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	zval stack_frame;
 
 	ptr = EG(current_execute_data);
-
-	/* skip "new Exception()" */
-	if (ptr && (skip_last == 0) && ptr->opline && (ptr->opline->opcode == ZEND_NEW)) {
-		object = ptr->object;
+	if (!ptr->opline) {
 		ptr = ptr->prev_execute_data;
 	}
 
-	/* skip debug_backtrace() */
-	if (skip_last-- && ptr) {
-		object = ptr->object;
-		ptr = ptr->prev_execute_data;
+	if (ptr) {
+		if (skip_last) {
+			/* skip debug_backtrace() */
+			object = ptr->object;
+			ptr = ptr->prev_execute_data;
+		} else {
+			/* skip "new Exception()" */
+			if (ptr->opline && (ptr->opline->opcode == ZEND_NEW)) {
+				object = ptr->object;
+				ptr = ptr->prev_execute_data;
+			}
+		}
 	}
 
 	array_init(return_value);
@@ -2254,7 +2267,15 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
 			filename = skip->func->op_array.filename->val;
-			lineno = skip->opline->lineno;
+			if (skip->opline->opcode == ZEND_HANDLE_EXCEPTION) {
+				if (EG(opline_before_exception)) {
+					lineno = EG(opline_before_exception)->lineno;
+				} else {
+					lineno = skip->func->op_array.line_end;
+				}
+			} else {
+				lineno = skip->opline->lineno;
+			}
 			add_assoc_string_ex(&stack_frame, "file", sizeof("file")-1, (char*)filename);
 			add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, lineno);
 

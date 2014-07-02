@@ -546,7 +546,7 @@ ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, zen
 		ZVAL_UNDEF(arg);
 	}
 
-	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+	if (zf->common.type == ZEND_USER_FUNCTION && ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
 		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, ptr->func->op_array.filename->val, ptr->opline->lineno);
 	} else {
 		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
