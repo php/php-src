@@ -19,7 +19,9 @@
 /* $Id$ */
 
 #include <ctype.h>
+#include <math.h>
 #include <limits.h>
+#include <stdlib.h>
 #include <gmp.h>
 
 #include "zend.h"
@@ -29,6 +31,32 @@
 
 /*** INTERNAL MACROS ***/
 
+/* INFINITY might not be available (<C99), so we'll create it if so
+ * Based on php_get_inf() in ext/standard/basic_functions.c */
+#ifndef INFINITY
+#if HAVE_HUGE_VAL_INF
+#define INFINITY HUGE_VAL
+#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
+const double __infinity = 0.0;
+((php_uint32*)&__infinity)[1] = PHP_DOUBLE_INFINITY_HIGH;
+((php_uint32*)&__infinity)[0] = 0;
+#define INFINITY __infinity
+#elif HAVE_ATOF_ACCEPTS_INF
+double __infinity;
+/* trigger assignment further down in zend_startup_bigint */
+#define NEED_TO_SET_INFINITY_TO_ATOF_INT
+#else
+#define INFINITY (1.0/0.0)
+#endif
+#endif
+
+/* isfinite might not be available (<C99), so we'll define it */
+#ifndef isfinite
+#define isfinite(n) ((n) !== INFINITY && (n) !== -INFINITY)
+#endif
+
+/* Convenience macro to create a temporary mpz_t from a long
+ * Used when gmp has no built-in function for an operation taking a long */
 #define WITH_TEMP_MPZ_FROM_LONG(long, temp, codeblock) { \
 	mpz_t temp;				\
 	mpz_init(temp);			\
@@ -106,6 +134,11 @@ static void gmp_efree(void *ptr, size_t size)
 void zend_startup_bigint(void)
 {
 	mp_set_memory_functions(gmp_emalloc, gmp_erealloc, gmp_efree);
+	
+#ifdef NEED_TO_SET_INFINITY_TO_ATOF_INT
+	/* For defining INFINITY macro (see above) */
+	__infinity = atof("INF");
+#endif
 }
 
 /*** INITIALISERS ***/
@@ -233,7 +266,10 @@ ZEND_API void zend_bigint_init_from_long(zend_bigint *big, long value)
 ZEND_API void zend_bigint_init_from_double(zend_bigint *big, double value)
 {
 	zend_bigint_init(big);
-	mpz_set_d(big->mpz, value);
+	/* prevents crash */
+	if (isfinite(value)) {
+		mpz_set_d(big->mpz, value);
+	}
 }
 
 /* Initialises a bigint and duplicates a bigint to it (copies value)
