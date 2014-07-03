@@ -16,7 +16,7 @@ foreach ($values as $value) {
     echo PHP_EOL;
 }
 ?>
---EXPECTF--
+--EXPECT--
 float(INF)
 int(0)
 
@@ -24,10 +24,10 @@ float(-INF)
 int(0)
 
 float(NAN)
-int(%s)
+int(0)
 
 float(NAN)
-int(%s)
+int(0)
 
 int(0)
 int(0)
