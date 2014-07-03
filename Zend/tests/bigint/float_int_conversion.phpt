@@ -24,10 +24,10 @@ float(-INF)
 int(0)
 
 float(NAN)
-int(-9223372036854775808)
+int(%s)
 
 float(NAN)
-int(-9223372036854775808)
+int(%s)
 
 int(0)
 int(0)
