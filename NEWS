@@ -10,6 +10,11 @@ PHP                                                                        NEWS
 - pgsql:
   . Fix bug #67555 (Cannot build against libpq 7.3). (Adam)
 
+- SPL:
+  . Fixed bug #67539 (ArrayIterator use-after-free due to object change during 
+    sorting). (research at insighti dot org, Laruence)
+  . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
+
 
 03 Jul 2014, PHP 5.6.0 Release Candidate 2
 
@@ -49,9 +54,6 @@ PHP                                                                        NEWS
     (Help entry was missing). (Bob)
 
 - SPL:
-  . Fixed bug #67539 (ArrayIterator use-after-free due to object change during 
-    sorting). (research at insighti dot org, Laruence)
-  . Fixed bug #67538 (SPL Iterators use-after-free). (Laruence)
   . Fixed bug #67492 (unserialize() SPL ArrayObject / SPLObjectStorage Type
     Confusion) (CVE-2014-3515). (Stefan Esser)
 
