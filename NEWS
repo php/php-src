@@ -18,7 +18,11 @@ PHP                                                                        NEWS
     (Adam)
 
 - FPM:
-  . Fix bug #67531 (syslog cannot be set in pool configuration). (Remi)
+  . Fixed bug #67531 (syslog cannot be set in pool configuration). (Remi)
+
+- OPCache:
+  . Fixed bug #67215 (php-cgi work with opcache, may be segmentation fault
+    happen) (Dmitry, Laruence)
 
 - pgsql:
   . Fix bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
