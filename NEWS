@@ -15,6 +15,9 @@ PHP                                                                        NEWS
     sorting). (research at insighti dot org, Laruence)
   . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
 
+- OPCache:
+  . Fixed bug #67215 (php-cgi work with opcache, may be segmentation fault
+    happen) (Dmitry, Laruence)
 
 03 Jul 2014, PHP 5.6.0 Release Candidate 2
 
