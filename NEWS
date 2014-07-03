@@ -27,7 +27,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #67539 (ArrayIterator use-after-free due to object change during 
     sorting). (research at insighti dot org, Laruence)
-  . Fixed bug #67538 (SPL Iterators use-after-free). (Laruence)
+  . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
 
 - Streams:
   . Fixed bug #67430 (http:// wrapper doesn't follow 308 redirects). (Adam)
