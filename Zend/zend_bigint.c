@@ -37,14 +37,15 @@
 #if HAVE_HUGE_VAL_INF
 #define INFINITY HUGE_VAL
 #elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
-const double __infinity = 0.0;
-((php_uint32*)&__infinity)[1] = PHP_DOUBLE_INFINITY_HIGH;
-((php_uint32*)&__infinity)[0] = 0;
+double __infinity;
+/* trigger assignment further down in zend_startup_bigint */
+#define NEED_TO_SET_INFINITY_BY_BITHACK
 #define INFINITY __infinity
 #elif HAVE_ATOF_ACCEPTS_INF
 double __infinity;
 /* trigger assignment further down in zend_startup_bigint */
 #define NEED_TO_SET_INFINITY_TO_ATOF_INT
+#define INFINITY __infinity
 #else
 #define INFINITY (1.0/0.0)
 #endif
@@ -138,6 +139,11 @@ void zend_startup_bigint(void)
 #ifdef NEED_TO_SET_INFINITY_TO_ATOF_INT
 	/* For defining INFINITY macro (see above) */
 	__infinity = atof("INF");
+#endif
+#ifdef NEED_TO_SET_IFINITY_BY_BITHACK
+	/* For defining INFINITY macro (see above) */
+	((php_uint32*)&__infinity)[1] = PHP_DOUBLE_INFINITY_HIGH;
+	((php_uint32*)&__infinity)[0] = 0;
 #endif
 }
 
