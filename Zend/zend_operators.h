@@ -124,7 +124,7 @@ static zend_always_inline zend_uchar zend_dval_to_big_or_lval(double d, long *lv
 		zend_bigint_init_from_double(*big, d);
 		return IS_BIGINT;
 	} else {
-		*lval = (long)d;
+		*lval = zend_dval_to_lval(d);
 		return IS_LONG;
 	}
 }
