@@ -34,21 +34,21 @@
 /* INFINITY might not be available (<C99), so we'll create it if so
  * Based on php_get_inf() in ext/standard/basic_functions.c */
 #ifndef INFINITY
-#if HAVE_HUGE_VAL_INF
-#define INFINITY HUGE_VAL
-#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
-double __infinity;
-/* trigger assignment further down in zend_startup_bigint */
-#define NEED_TO_SET_INFINITY_BY_BITHACK
-#define INFINITY __infinity
-#elif HAVE_ATOF_ACCEPTS_INF
-double __infinity;
-/* trigger assignment further down in zend_startup_bigint */
-#define NEED_TO_SET_INFINITY_TO_ATOF_INT
-#define INFINITY __infinity
-#else
-#define INFINITY (1.0/0.0)
-#endif
+#	if HAVE_HUGE_VAL_INF
+#		define INFINITY HUGE_VAL
+#	elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
+		double __infinity;
+		/* trigger assignment further down in zend_startup_bigint */
+#		define NEED_TO_SET_INFINITY_BY_BITHACK
+#		define INFINITY __infinity
+#	elif HAVE_ATOF_ACCEPTS_INF
+		double __infinity;
+		/* trigger assignment further down in zend_startup_bigint */
+#		define NEED_TO_SET_INFINITY_TO_ATOF_INT
+#		define INFINITY __infinity
+#	else
+#		define INFINITY (1.0/0.0)
+#	endif
 #endif
 
 /* isfinite might not be available (<C99), so we'll define it */
