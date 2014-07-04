@@ -6914,11 +6914,9 @@ void zend_compile_global_var(zend_ast *ast TSRMLS_DC) {
 	}
 
 	opline = emit_op(&result, ZEND_FETCH_W, &var_node, NULL TSRMLS_CC);
-	opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
 
-	if (var_node.op_type == IS_CONST) {
-		//zval_copy_ctor(&var_node.u.constant);
-	}
+	// TODO.AST Avoid double fetch
+	//opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
 
 	zend_ast *fetch_ast = zend_ast_create_unary(ZEND_AST_VAR, var_ast);
 	zend_compile_assign_ref_common(NULL, fetch_ast, &result TSRMLS_CC);
