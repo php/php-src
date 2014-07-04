@@ -1413,7 +1413,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		zval key;
-		zval *ns_name;
+		zend_string *ns_name;
 
 		if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
 			/* Prefix function name with current namespace name */
@@ -1431,11 +1431,11 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 		/* Function name must not conflict with import names */
 		if (CG(current_import_function) &&
-		    (ns_name = zend_hash_find(CG(current_import_function), lcname)) != NULL) {
+		    (ns_name = zend_hash_find_ptr(CG(current_import_function), lcname)) != NULL) {
 
-			char *tmp = zend_str_tolower_dup(Z_STRVAL_P(ns_name), Z_STRLEN_P(ns_name));
+			char *tmp = zend_str_tolower_dup(ns_name->val, ns_name->len);
 
-			if (Z_STRLEN_P(ns_name) != Z_STRLEN(function_name->u.constant) ||
+			if (ns_name->len != Z_STRLEN(function_name->u.constant) ||
 				memcmp(tmp, lcname->val, Z_STRLEN(function_name->u.constant))) {
 				zend_error(E_COMPILE_ERROR, "Cannot declare function %s because the name is already in use", Z_STRVAL(function_name->u.constant));
 			}
@@ -1694,17 +1694,24 @@ zend_string *zend_concat_names(char *name1, size_t name1_len, char *name2, size_
 
 	return res;
 }
-/* }}} */
+
+void *zend_hash_find_ptr_lc(HashTable *ht, char *str, size_t len) {
+	void *result;
+	zend_string *lcname = STR_ALLOC(len, 0);
+	zend_str_tolower_copy(lcname->val, str, len);
+	result = zend_hash_find_ptr(ht, lcname);
+	STR_FREE(lcname);
+	return result;
+}
 
 zend_string *zend_resolve_non_class_name(
 	zend_string *name, zend_bool *is_fully_qualified,
 	zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC
 ) {
 	char *compound;
-	zval *ns;
 
 	if (name->val[0] == '\\') {
-		/* Canonical form does not have a \ prefix */
+		/* Remove \ prefix (only relevant if this is a string rather than a label) */
 		return STR_INIT(name->val + 1, name->len - 1, 0);
 	}
 
@@ -1713,22 +1720,17 @@ zend_string *zend_resolve_non_class_name(
 	}
 
 	if (current_import_sub) {
-		zend_string *lookup_name;
-
+		/* If an unqualified name is a function/const alias, replace it. */
+		zend_string *import_name;
 		if (case_sensitive) {
-			lookup_name = STR_COPY(name);
+			import_name = zend_hash_find_ptr(current_import_sub, name);
 		} else {
-			lookup_name = STR_ALLOC(name->len, 0);
-			zend_str_tolower_copy(lookup_name->val, name->val, name->len);
+			import_name = zend_hash_find_ptr_lc(current_import_sub, name->val, name->len);
 		}
 
-		/* Check if function/const matches imported name */
-		ns = zend_hash_find(current_import_sub, lookup_name);
-		STR_RELEASE(lookup_name);
-
-		if (ns) {
+		if (import_name) {
 			*is_fully_qualified = 1;
-			return STR_COPY(Z_STR_P(ns));
+			return STR_COPY(import_name);
 		}
 	}
 
@@ -1738,19 +1740,13 @@ zend_string *zend_resolve_non_class_name(
 	}
 
 	if (compound && CG(current_import)) {
-		/* namespace is always lowercase */
+		/* If the first part of a qualified name is an alias, substitute it. */
 		size_t len = compound - name->val;
-		zend_string *lookup_name = STR_ALLOC(len, 0);
-		zend_str_tolower_copy(lookup_name->val, name->val, len);
+		zend_string *import_name = zend_hash_find_ptr_lc(CG(current_import), name->val, len);
 
-		/* Check if first part of compound name is an import name */
-		ns = zend_hash_find(CG(current_import), lookup_name);
-		STR_FREE(lookup_name);
-
-		if (ns) {
-			/* Substitute import name */
+		if (import_name) {
 			return zend_concat_names(
-				Z_STRVAL_P(ns), Z_STRLEN_P(ns), name->val + len + 1, name->len - len - 1);
+				import_name->val, import_name->len, name->val + len + 1, name->len - len - 1);
 		}
 	}
 
@@ -1781,7 +1777,6 @@ zend_string *zend_resolve_class_name(
 	zend_string *name, zend_bool is_fully_qualified TSRMLS_DC
 ) {
 	char *compound;
-	zval *ns;
 
 	if (is_fully_qualified || name->val[0] == '\\') {
 		/* Remove \ prefix (only relevant if this is a string rather than a label) */
@@ -1802,26 +1797,19 @@ zend_string *zend_resolve_class_name(
 		if (compound) {
 			/* If the first part of a qualified name is an alias, substitute it. */
 			size_t len = compound - name->val;
-			zend_string *lcname = STR_ALLOC(len, 0);
-			zend_str_tolower_copy(lcname->val, name->val, len);
+			zend_string *import_name = zend_hash_find_ptr_lc(CG(current_import), name->val, len);
 
-			ns = zend_hash_find(CG(current_import), lcname);
-			STR_FREE(lcname);
-
-			if (ns) {
+			if (import_name) {
 				return zend_concat_names(
-					Z_STRVAL_P(ns), Z_STRLEN_P(ns), name->val + len + 1, name->len - len - 1);
+					import_name->val, import_name->len, name->val + len + 1, name->len - len - 1);
 			}
 		} else {
 			/* If an unqualified name is an alias, replace it. */
-			zend_string *lcname = STR_ALLOC(name->len, 0);
-			zend_str_tolower_copy(lcname->val, name->val, name->len);
+			zend_string *import_name
+				= zend_hash_find_ptr_lc(CG(current_import), name->val, name->len);
 
-		    ns = zend_hash_find(CG(current_import), lcname);
-			STR_FREE(lcname);
-
-			if (ns) {
-				return STR_COPY(Z_STR_P(ns));
+			if (import_name) {
+				return STR_COPY(import_name);
 			}
 		}
 	}
@@ -4356,7 +4344,8 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	zend_class_entry *new_class_entry;
 	zend_string *lcname;
 	int error = 0;
-	zval *ns_name, key;
+	zend_string *ns_name;
+	zval key;
 
 	if (CG(active_class_entry)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
@@ -4373,7 +4362,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 
 	/* Class name must not conflict with import names */
 	if (CG(current_import) &&
-	    (ns_name = zend_hash_find(CG(current_import), lcname)) != NULL) {
+	    (ns_name = zend_hash_find_ptr(CG(current_import), lcname)) != NULL) {
 		error = 1;
 	}
 
@@ -4391,9 +4380,9 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	}
 
 	if (error) {
-		char *tmp = zend_str_tolower_dup(Z_STRVAL_P(ns_name), Z_STRLEN_P(ns_name));
+		char *tmp = zend_str_tolower_dup(ns_name->val, ns_name->len);
 
-		if (Z_STRLEN_P(ns_name) != Z_STRLEN(class_name->u.constant) ||
+		if (ns_name->len != Z_STRLEN(class_name->u.constant) ||
 			memcmp(tmp, lcname->val, Z_STRLEN(class_name->u.constant))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s because the name is already in use", Z_STRVAL(class_name->u.constant));
 		}
