@@ -1651,7 +1651,7 @@ void zend_do_receive_param(zend_uchar op, znode *varname, znode *initialization,
 			} else {
 				cur_arg_info->type_hint = IS_OBJECT;
 				if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
-					zend_resolve_class_name(class_type TSRMLS_CC);
+					zend_resolve_class_name_old(class_type TSRMLS_CC);
 				}
 				Z_STR(class_type->u.constant) = zend_new_interned_string(Z_STR(class_type->u.constant) TSRMLS_CC);
 				if (IS_INTERNED(Z_STR(class_type->u.constant))) {
@@ -1777,77 +1777,70 @@ zend_string *zend_resolve_const_name(
 		name, is_fully_qualified, 1, CG(current_import_const) TSRMLS_CC);
 }
 
-void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
-{
+zend_string *zend_resolve_class_name(
+	zend_string *name, zend_bool is_fully_qualified TSRMLS_DC
+) {
 	char *compound;
-	zend_string *lcname;
 	zval *ns;
-	znode tmp;
-	int len;
 
-	compound = memchr(Z_STRVAL(class_name->u.constant), '\\', Z_STRLEN(class_name->u.constant));
-	if (compound) {
-		/* This is a compound class name that contains namespace prefix */
-		if (Z_STRVAL(class_name->u.constant)[0] == '\\') {
-			/* The STRING name has "\" prefix */
-			memmove(Z_STRVAL(class_name->u.constant), Z_STRVAL(class_name->u.constant)+1, Z_STRLEN(class_name->u.constant));
-			Z_STR(class_name->u.constant) = STR_REALLOC(
-				Z_STR(class_name->u.constant),
-				Z_STRLEN(class_name->u.constant) - 1, 0);
-			Z_TYPE_FLAGS(class_name->u.constant) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
+	if (is_fully_qualified || name->val[0] == '\\') {
+		/* Remove \ prefix (only relevant if this is a string rather than a label) */
+		if (name->val[0] == '\\') {
+			name = STR_INIT(name->val + 1, name->len - 1, 0);
+		} else {
+			STR_ADDREF(name);
+		}
+		/* Ensure that \self, \parent and \static are not used */
+		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name->val, name->len)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "'\\%s' is an invalid class name", name->val);
+		}
+		return name;
+	}
 
-			if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
-				zend_error_noreturn(E_COMPILE_ERROR, "'\\%s' is an invalid class name", Z_STRVAL(class_name->u.constant));
+	if (CG(current_import)) {
+		compound = memchr(name->val, '\\', name->len);
+		if (compound) {
+			/* If the first part of a qualified name is an alias, substitute it. */
+			size_t len = compound - name->val;
+			zend_string *lcname = STR_ALLOC(len, 0);
+			zend_str_tolower_copy(lcname->val, name->val, len);
+
+			ns = zend_hash_find(CG(current_import), lcname);
+			STR_FREE(lcname);
+
+			if (ns) {
+				return zend_concat_names(
+					Z_STRVAL_P(ns), Z_STRLEN_P(ns), name->val + len + 1, name->len - len - 1);
 			}
 		} else {
-			if (CG(current_import)) {
-				len = compound - Z_STRVAL(class_name->u.constant);
-				lcname = STR_ALLOC(len, 0);
-				zend_str_tolower_copy(lcname->val, Z_STRVAL(class_name->u.constant), len);
-				/* Check if first part of compound name is an import name */
-				if ((ns = zend_hash_find(CG(current_import), lcname)) != NULL) {
-					/* Substitute import name */
-					tmp.op_type = IS_CONST;
-					ZVAL_DUP(&tmp.u.constant, ns);
-					len += 1;
-					Z_STRLEN(class_name->u.constant) -= len;
-					memmove(Z_STRVAL(class_name->u.constant), Z_STRVAL(class_name->u.constant)+len, Z_STRLEN(class_name->u.constant)+1);
-					zend_do_build_namespace_name(&tmp, &tmp, class_name TSRMLS_CC);
-					*class_name = tmp;
-					STR_FREE(lcname);
-					return;
-				}
-				STR_FREE(lcname);
-			}
-			/* Here name is not prefixed with \ and not imported */
-			if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-				tmp.op_type = IS_CONST;
-				ZVAL_DUP(&tmp.u.constant, &CG(current_namespace));
-				zend_do_build_namespace_name(&tmp, &tmp, class_name TSRMLS_CC);
-				*class_name = tmp;
-			}
-		}
-	} else if (CG(current_import) || Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		/* this is a plain name (without \) */
-		lcname = STR_ALLOC(Z_STRLEN(class_name->u.constant), 0);
-		zend_str_tolower_copy(lcname->val, Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
+			/* If an unqualified name is an alias, replace it. */
+			zend_string *lcname = STR_ALLOC(name->len, 0);
+			zend_str_tolower_copy(lcname->val, name->val, name->len);
 
-		if (CG(current_import) &&
-		    (ns = zend_hash_find(CG(current_import), lcname)) != NULL) {
-		    /* The given name is an import name. Substitute it. */
-			zval_dtor(&class_name->u.constant);
-			ZVAL_DUP(&class_name->u.constant, ns);
-		} else if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-			/* plain name, no import - prepend current namespace to it */
-			tmp.op_type = IS_CONST;
-			ZVAL_DUP(&tmp.u.constant, &CG(current_namespace));
-			zend_do_build_namespace_name(&tmp, &tmp, class_name TSRMLS_CC);
-			*class_name = tmp;
+		    ns = zend_hash_find(CG(current_import), lcname);
+			STR_FREE(lcname);
+
+			if (ns) {
+				return STR_COPY(Z_STR_P(ns));
+			}
 		}
-		STR_FREE(lcname);
 	}
+
+	/* If not fully qualified and not an alias, prepend the current namespace */
+	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+		return zend_concat_names(
+			Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)), name->val, name->len);
+	}
+
+	return STR_COPY(name);
 }
-/* }}} */
+
+void zend_resolve_class_name_old(znode *class_name TSRMLS_DC) {
+	zend_string *resolved_name = zend_resolve_class_name(
+		Z_STR(class_name->u.constant), 0 TSRMLS_CC);
+	zval_dtor(&class_name->u.constant);
+	ZVAL_STR(&class_name->u.constant, resolved_name);
+}
 
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 {
@@ -1874,7 +1867,7 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 				zval_dtor(&class_name->u.constant);
 				break;
 			default:
-				zend_resolve_class_name(class_name TSRMLS_CC);
+				zend_resolve_class_name_old(class_name TSRMLS_CC);
 				opline->op2_type = IS_CONST;
 				opline->op2.constant =
 					zend_add_class_name_literal(CG(active_op_array), &class_name->u.constant TSRMLS_CC);
@@ -2280,7 +2273,7 @@ void zend_do_begin_catch(znode *catch_token, znode *class_name, znode *catch_var
 
 	if (class_name->op_type == IS_CONST &&
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
-		zend_resolve_class_name(class_name TSRMLS_CC);
+		zend_resolve_class_name_old(class_name TSRMLS_CC);
 		catch_class = *class_name;
 	} else {
 		zend_error_noreturn(E_COMPILE_ERROR, "Bad class name in the catch statement");
@@ -3952,7 +3945,7 @@ void zend_prepare_reference(znode *result, znode *class_name, znode *method_name
 	/* REM: There should not be a need for copying,
 	   zend_do_begin_class_declaration is also just using that string */
 	if (class_name) {
-		zend_resolve_class_name(class_name TSRMLS_CC);
+		zend_resolve_class_name_old(class_name TSRMLS_CC);
 		method_ref->class_name = Z_STR(class_name->u.constant);
 	} else {
 		method_ref->class_name = NULL;
@@ -4564,7 +4557,7 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_ADD_INTERFACE;
 	SET_NODE(opline->op1, &CG(implementing_class));
-	zend_resolve_class_name(interface_name TSRMLS_CC);
+	zend_resolve_class_name_old(interface_name TSRMLS_CC);
 	opline->extended_value = (opline->extended_value & ~ZEND_FETCH_CLASS_MASK) | ZEND_FETCH_CLASS_INTERFACE;
 	opline->op2_type = IS_CONST;
 	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &interface_name->u.constant TSRMLS_CC);
@@ -4596,7 +4589,7 @@ void zend_do_use_trait(znode *trait_name TSRMLS_DC) /* {{{ */
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_ADD_TRAIT;
 	SET_NODE(opline->op1, &CG(implementing_class));
-	zend_resolve_class_name(trait_name TSRMLS_CC);
+	zend_resolve_class_name_old(trait_name TSRMLS_CC);
 	opline->extended_value = ZEND_FETCH_CLASS_TRAIT;
 	opline->op2_type = IS_CONST;
 	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &trait_name->u.constant TSRMLS_CC);
@@ -6147,7 +6140,7 @@ static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast TSRMLS_
 				zval_ptr_dtor(name);
 				break;
 			default:
-				zend_resolve_class_name(&name_node TSRMLS_CC);
+				zend_resolve_class_name_old(&name_node TSRMLS_CC);
 				opline->op2_type = IS_CONST;
 				opline->op2.constant =
 					zend_add_class_name_literal(CG(active_op_array), name TSRMLS_CC);
@@ -6307,7 +6300,7 @@ zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, int type 
 
 	if (zend_is_const_default_class_ref(class_ast)) {
 		zend_compile_expr(&class_node, class_ast TSRMLS_CC);
-		zend_resolve_class_name(&class_node TSRMLS_CC);
+		zend_resolve_class_name_old(&class_node TSRMLS_CC);
 	} else {
 		zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
 	}
@@ -6828,7 +6821,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, int type TSRMLS_DC) 
 
 	if (zend_is_const_default_class_ref(class_ast)) {
 		zend_compile_expr(&class_node, class_ast TSRMLS_CC);
-		zend_resolve_class_name(&class_node TSRMLS_CC);
+		zend_resolve_class_name_old(&class_node TSRMLS_CC);
 	} else {
 		opline = zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
 		extended_value = opline->extended_value;
@@ -7447,7 +7440,7 @@ void zend_compile_class_const(znode *result, zend_ast *ast TSRMLS_DC) {
 
 	if (zend_is_const_default_class_ref(class_ast)) {
 		zend_compile_expr(&class_node, class_ast TSRMLS_CC);
-		zend_resolve_class_name(&class_node TSRMLS_CC);
+		zend_resolve_class_name_old(&class_node TSRMLS_CC);
 	} else {
 		zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
 	}
@@ -7502,7 +7495,7 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_FETCH_CLASS_DEFAULT:
 			zend_compile_expr(result, name_ast TSRMLS_CC);
-			zend_resolve_class_name(result TSRMLS_CC);
+			zend_resolve_class_name_old(result TSRMLS_CC);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
@@ -7592,7 +7585,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"\"static::\" is not allowed in compile-time constants");
 	} else if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
-		zend_resolve_class_name(&class_name TSRMLS_CC);
+		zend_resolve_class_name_old(&class_name TSRMLS_CC);
 	}
 
 	zend_do_build_full_name(NULL, &class_name, &const_name, 1 TSRMLS_CC);
@@ -7659,7 +7652,7 @@ void zend_compile_const_expr_resolve_class_name(zend_ast **ast_ptr TSRMLS_DC) {
 			break;
 		case ZEND_FETCH_CLASS_DEFAULT:
 			zend_compile_expr(&result, name_ast TSRMLS_CC);
-			zend_resolve_class_name(&result TSRMLS_CC);
+			zend_resolve_class_name_old(&result TSRMLS_CC);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}

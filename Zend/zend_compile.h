@@ -459,8 +459,10 @@ ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 zend_string *zend_resolve_non_class_name(zend_string *name, zend_bool *is_fully_qualified, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC);
 zend_string *zend_resolve_function_name(zend_string *name, zend_bool *is_fully_qualified TSRMLS_DC);
 zend_string *zend_resolve_const_name(zend_string *name, zend_bool *is_fully_qualified TSRMLS_DC);
-void zend_resolve_class_name(znode *class_name TSRMLS_DC);
+zend_string *zend_resolve_class_name(zend_string *name, zend_bool is_fully_qualified TSRMLS_DC);
 ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var);
+
+void zend_resolve_class_name_old(znode *class_name TSRMLS_DC);
 
 #ifdef ZTS
 const char *zend_get_zendtext(TSRMLS_D);

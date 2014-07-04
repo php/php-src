@@ -676,8 +676,8 @@ trait_precedence:
 ;
 
 trait_reference_list:
-		fully_qualified_class_name									{ zend_resolve_class_name(&$1 TSRMLS_CC); zend_init_list(&$$.u.op.ptr, Z_STR($1.u.constant) TSRMLS_CC); }
-	|	trait_reference_list ',' fully_qualified_class_name			{ zend_resolve_class_name(&$3 TSRMLS_CC); zend_add_to_list(&$1.u.op.ptr, Z_STR($3.u.constant) TSRMLS_CC); $$ = $1; }
+		fully_qualified_class_name									{ zend_resolve_class_name_old(&$1 TSRMLS_CC); zend_init_list(&$$.u.op.ptr, Z_STR($1.u.constant) TSRMLS_CC); }
+	|	trait_reference_list ',' fully_qualified_class_name			{ zend_resolve_class_name_old(&$3 TSRMLS_CC); zend_add_to_list(&$1.u.op.ptr, Z_STR($3.u.constant) TSRMLS_CC); $$ = $1; }
 ;
 
 trait_method_reference:
