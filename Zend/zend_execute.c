@@ -1444,8 +1444,8 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 
 #define CHECK_SYMBOL_TABLES()													\
 	zend_hash_apply(&EG(symbol_table), zend_check_symbol TSRMLS_CC);			\
-	if (&EG(symbol_table)!=EG(active_symbol_table)) {							\
-		zend_hash_apply(EG(active_symbol_table), zend_check_symbol TSRMLS_CC);	\
+	if (&EG(symbol_table)!=EX(symbol_table)) {							\
+		zend_hash_apply(EX(symbol_table), zend_check_symbol TSRMLS_CC);	\
 	}
 
 static int zend_check_symbol(zval *pz TSRMLS_DC)
@@ -1543,6 +1543,93 @@ void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* 
  *                             +----------------------------------------+
  */
 
+static zend_always_inline void i_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+{
+	zend_uint first_extra_arg;
+	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
+	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
+
+	EX(return_value) = return_value;
+	EX(frame_kind) = frame_kind;
+	ZVAL_UNDEF(&EX(old_error_reporting));
+	EX(delayed_exception) = NULL;
+	EX(call) = NULL;
+
+	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
+	EX(scope) = EG(scope);
+
+	first_extra_arg = op_array->num_args;
+		
+	if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0)) {
+		first_extra_arg--;
+	}
+	if (UNEXPECTED(EX(num_args) > first_extra_arg)) {
+		/* move extra args into separate array after all CV and TMP vars */
+		zval *extra_args = EX_VAR_NUM(op_array->last_var + op_array->T);
+
+		memmove(extra_args, EX_VAR_NUM(first_extra_arg), sizeof(zval) * (EX(num_args) - first_extra_arg));
+	}
+
+	do {
+		/* Initialize CV variables (skip arguments) */
+		int num_args = MIN(op_array->num_args, EX(num_args));
+
+		if (EXPECTED(num_args < op_array->last_var)) {
+			zval *var = EX_VAR_NUM(num_args);
+			zval *end = EX_VAR_NUM(op_array->last_var);
+
+			do {
+				ZVAL_UNDEF(var);
+				var++;
+			} while (var != end);
+		}
+	} while (0);
+
+	if (op_array->this_var != -1 && Z_OBJ(EG(This))) {
+		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EG(This)));
+		Z_ADDREF(EG(This));
+	}
+
+	if (!op_array->run_time_cache && op_array->last_cache_slot) {
+		if (op_array->function_name) {
+			op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
+		} else {
+			op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+		}
+	}
+	EX(run_time_cache) = op_array->run_time_cache;
+
+	EG(current_execute_data) = execute_data;
+}
+
+static zend_always_inline void i_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+{
+	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
+	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
+
+	EX(return_value) = return_value;
+	EX(frame_kind) = frame_kind;
+	ZVAL_UNDEF(&EX(old_error_reporting));
+	EX(delayed_exception) = NULL;
+	EX(call) = NULL;
+
+	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
+	EX(scope) = EG(scope);
+
+	zend_attach_symbol_table(execute_data);
+
+	if (!op_array->run_time_cache && op_array->last_cache_slot) {
+		if (op_array->function_name) {
+			op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
+		} else {
+			op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+		}
+	}
+	EX(run_time_cache) = op_array->run_time_cache;
+
+	EG(current_execute_data) = execute_data;
+}
+
 static zend_always_inline void i_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
@@ -1556,7 +1643,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 
 	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
 	EX(scope) = EG(scope);
-	EX(symbol_table) = EG(active_symbol_table);
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
 		zend_attach_symbol_table(execute_data);

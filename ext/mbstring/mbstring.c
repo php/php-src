@@ -2084,10 +2084,9 @@ PHP_FUNCTION(mb_parse_str)
 		detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr TSRMLS_CC);
 	} else {
 		zval tmp;
-		if (!EG(active_symbol_table)) {
-			zend_rebuild_symbol_table(TSRMLS_C);
-		}
-		ZVAL_ARR(&tmp, EG(active_symbol_table));
+		zend_array *symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
+
+		ZVAL_ARR(&tmp, symbol_table);
 		detected = _php_mb_encoding_handler_ex(&info, &tmp, encstr TSRMLS_CC);		
 	}
 

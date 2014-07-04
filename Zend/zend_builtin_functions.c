@@ -1749,12 +1749,10 @@ ZEND_FUNCTION(get_defined_functions)
    Returns an associative array of names and values of all currently defined variable names (variables in the current scope) */
 ZEND_FUNCTION(get_defined_vars)
 {
-	if (!EG(active_symbol_table)) {
-		zend_rebuild_symbol_table(TSRMLS_C);
-	}
+	zend_array *symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 
 	ZVAL_NEW_ARR(return_value);
-	zend_array_dup(Z_ARRVAL_P(return_value), &EG(active_symbol_table)->ht);
+	zend_array_dup(Z_ARRVAL_P(return_value), &symbol_table->ht);
 }
 /* }}} */
 

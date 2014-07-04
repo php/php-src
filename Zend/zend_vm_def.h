@@ -1789,7 +1789,6 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 
 		execute_data = EG(current_execute_data);
 		EX(call) = prev_nested_call;
-		EG(active_symbol_table) = EX(symbol_table);
 
 		if (Z_OBJ(EG(This))) {
 			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
@@ -1843,6 +1842,9 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	} else {
 		if (frame_kind == VM_FRAME_TOP_FUNCTION) {
 			i_free_compiled_variables(execute_data TSRMLS_CC);
+			if (UNEXPECTED(EX(symbol_table) != NULL)) {
+				zend_clean_and_cache_symbol_table(EX(symbol_table) TSRMLS_CC);
+			}
 			zend_vm_stack_free_extra_args(execute_data TSRMLS_CC);
 		} else /* if (frame_kind == VM_FRAME_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
@@ -2681,7 +2683,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 
 		Z_OBJ(EG(This)) = call->object;
 		EG(scope) = fbc->common.scope;
-		EG(active_symbol_table) = NULL;
+		call->symbol_table = NULL;
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
 
@@ -2698,7 +2700,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			zend_vm_stack_free_call_frame(call TSRMLS_CC);
 		} else {
 			call->prev_execute_data = execute_data;
-			i_init_execute_data(call, &fbc->op_array, return_value, VM_FRAME_NESTED_FUNCTION TSRMLS_CC);
+			i_init_func_execute_data(call, &fbc->op_array, return_value, VM_FRAME_NESTED_FUNCTION TSRMLS_CC);
 
 			if (EXPECTED(zend_execute_ex == execute_ex)) {
 				ZEND_VM_ENTER();
@@ -2706,11 +2708,6 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 				execute_ex(call TSRMLS_CC);
 			}
 		}
-
-		if (UNEXPECTED(EG(active_symbol_table) != NULL)) {
-			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
-		}
-		EG(active_symbol_table) = EX(symbol_table);
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		Z_OBJ(EG(This)) = call->object;
 //???		EG(scope) = NULL;
@@ -3985,12 +3982,14 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		EX(call) = zend_vm_stack_push_call_frame(
 			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
 
-		if (!EX(symbol_table)) {
-			zend_rebuild_symbol_table(TSRMLS_C);
+		if (EX(symbol_table)) {
+			EX(call)->symbol_table = EX(symbol_table);
+		} else {
+			EX(call)->symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 		}
 
 		EX(call)->prev_execute_data = execute_data;
-	    i_init_execute_data(EX(call), new_op_array, return_value, VM_FRAME_NESTED_CODE TSRMLS_CC);
+	    i_init_code_execute_data(EX(call), new_op_array, return_value, VM_FRAME_NESTED_CODE TSRMLS_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {

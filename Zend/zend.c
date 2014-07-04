@@ -938,7 +938,6 @@ ZEND_API void zend_deactivate(TSRMLS_D) /* {{{ */
 {
 	/* we're no longer executing anything */
 	EG(current_execute_data) = NULL;
-	EG(active_symbol_table) = NULL;
 
 	zend_try {
 		shutdown_scanner(TSRMLS_C);
@@ -1037,6 +1036,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	zend_stack declare_stack;
 	zend_stack list_stack;
 	zend_stack context_stack;
+	zend_array *symbol_table;
 	TSRMLS_FETCH();
 
 	/* Report about uncaught exception in case of fatal errors */
@@ -1175,16 +1175,14 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 
 			ZVAL_LONG(&params[3], error_lineno);
 
-			if (!EG(active_symbol_table)) {
-				zend_rebuild_symbol_table(TSRMLS_C);
-			}
+			symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 
 			/* during shutdown the symbol table table can be still null */
-			if (!EG(active_symbol_table)) {
+			if (!symbol_table) {
 				ZVAL_NULL(&params[4]);
 			} else {
 				ZVAL_NEW_ARR(&params[4]);
-				zend_array_dup(Z_ARRVAL(params[4]), &EG(active_symbol_table)->ht);
+				zend_array_dup(Z_ARRVAL(params[4]), &symbol_table->ht);
 			}
 
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));

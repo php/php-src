@@ -286,14 +286,11 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 		}
 		STR_RELEASE(opened_path);
 		if (new_op_array) {
-			if (!EG(active_symbol_table)) {
-				zend_rebuild_symbol_table(TSRMLS_C);
-			}
-
 			ZVAL_UNDEF(&result);
 			if (EG(current_execute_data)) {
 				EG(current_execute_data)->call = zend_vm_stack_push_call_frame(
 					(zend_function*)new_op_array, 0, 0, EG(current_execute_data)->called_scope, Z_OBJ(EG(This)), EG(current_execute_data)->call TSRMLS_CC);
+				EG(current_execute_data)->call->symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 			}
 			zend_execute(new_op_array, &result TSRMLS_CC);
 	

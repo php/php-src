@@ -224,13 +224,11 @@ static int copy_closure_static_var(zval *var TSRMLS_DC, int num_args, va_list ar
 }
 /* }}} */
 
-/* Requires globals EG(scope), EG(current_scope), EG(This),
- * EG(active_symbol_table) and EG(current_execute_data). */
+/* Requires globals EG(scope), EG(This) and EG(current_execute_data). */
 ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	zend_generator *generator;
 	zend_execute_data *current_execute_data;
-	zend_array *current_symbol_table;
 	zend_execute_data *execute_data;
 	zend_vm_stack current_stack = EG(argument_stack);
 
@@ -259,13 +257,9 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	}
 	
 	/* Create new execution context. We have to back up and restore
-	 * EG(current_execute_data) and EG(active_symbol_table)
-	 * here because the function modifies or uses them  */
+	 * EG(current_execute_data) here. */
 	current_execute_data = EG(current_execute_data);
-	current_symbol_table = EG(active_symbol_table);
-	EG(active_symbol_table) = NULL;
 	execute_data = zend_create_generator_execute_data(op_array, return_value TSRMLS_CC);
-	EG(active_symbol_table) = current_symbol_table;
 	EG(current_execute_data) = current_execute_data;
 
 	object_init_ex(return_value, zend_ce_generator);
@@ -311,7 +305,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 	{
 		/* Backup executor globals */
 		zend_execute_data *original_execute_data = EG(current_execute_data);
-		zend_array *original_active_symbol_table = EG(active_symbol_table);
 		zend_object *original_This;
 		zend_class_entry *original_scope = EG(scope);
 		zend_vm_stack original_stack = EG(argument_stack);
@@ -320,7 +313,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
-		EG(active_symbol_table) = generator->execute_data->symbol_table;
 		Z_OBJ(EG(This)) = generator->execute_data->object;
 		EG(scope) = generator->execute_data->scope;
 		EG(argument_stack) = generator->stack;
@@ -348,7 +340,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 
 		/* Restore executor globals */
 		EG(current_execute_data) = original_execute_data;
-		EG(active_symbol_table) = original_active_symbol_table;
 		Z_OBJ(EG(This)) = original_This;
 		EG(scope) = original_scope;
 		EG(argument_stack) = original_stack;
