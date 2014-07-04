@@ -246,6 +246,8 @@ sapi/fpm/php-fpm.1
 sapi/fpm/init.d.php-fpm
 sapi/fpm/php-fpm.conf
 sapi/fpm/fpm/php-cgi
+sapi/phpdbg/phpdbg_parser.c
+sapi/phpdbg/phpdbg_parser.h
 sapi/phpdbg/phpdbg
 scripts/php-config
 scripts/phpize

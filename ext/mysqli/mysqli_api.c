@@ -109,7 +109,7 @@ mysqli_escape_string_for_tx_name_in_comment(const char * const name TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ proto bool mysqli_commit_or_rollback_libmysql */
+/* {{{ mysqli_commit_or_rollback_libmysql */
 static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, const unsigned int mode, const char * const name TSRMLS_DC)
 {
 	int ret;
@@ -704,10 +704,20 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRM
 #if defined(MYSQLI_USE_MYSQLND)
 				mysqlnd_end_psession(mysql->mysql);
 #endif
-				zend_ptr_stack_push(&plist->free_links, mysql->mysql);
 
+				if (MyG(rollback_on_cached_plink) &&
+#if !defined(MYSQLI_USE_MYSQLND)
+					mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, TRANS_COR_NO_OPT, NULL TSRMLS_CC))
+#else
+					FAIL == mysqlnd_rollback(mysql->mysql, TRANS_COR_NO_OPT, NULL))
+#endif
+				{
+					mysqli_close(mysql->mysql, close_type);			
+				} else {
+					zend_ptr_stack_push(&plist->free_links, mysql->mysql);
+					MyG(num_inactive_persistent)++;
+				}
 				MyG(num_active_persistent)--;
-				MyG(num_inactive_persistent)++;
 			}
 		}
 		mysql->persistent = FALSE;
@@ -740,8 +750,6 @@ PHP_FUNCTION(mysqli_close)
 	RETURN_TRUE;
 }
 /* }}} */
-
-
 
 
 /* {{{ proto bool mysqli_commit(object link[, int flags [, string name ]])
@@ -1517,7 +1525,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS)
 	  We create always persistent, as if the user want to connecto
 	  to p:somehost, we can't convert the handle then
 	*/
-	if (!(mysql->mysql = mysql_init(TRUE)))
+	if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, TRUE)))
 #endif
 	{
 		efree(mysql);
@@ -2597,7 +2605,7 @@ PHP_FUNCTION(mysqli_stmt_sqlstate)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_store_result(object link)
+/* {{{ proto object mysqli_store_result(object link [, flags])
    Buffer result set on client */
 PHP_FUNCTION(mysqli_store_result)
 {
@@ -2605,13 +2613,19 @@ PHP_FUNCTION(mysqli_store_result)
 	MYSQL_RES		*result;
 	zval			*mysql_link;
 	MYSQLI_RESOURCE	*mysqli_resource;
+	long flags = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_link, mysqli_link_class_entry, &flags) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
-
-	if (!(result = mysql_store_result(mysql->mysql))) {
+#if MYSQLI_USE_MYSQLND
+	result = flags & MYSQLI_STORE_RESULT_COPY_DATA? mysqlnd_store_result_ofs(mysql->mysql) : mysqlnd_store_result(mysql->mysql);
+#else
+	result = mysql_store_result(mysql->mysql);
+#endif
+	if (!result) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}

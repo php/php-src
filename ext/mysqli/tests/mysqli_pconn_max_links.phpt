@@ -42,6 +42,7 @@ Persistent connections and mysqli.max_links
 --INI--
 mysqli.allow_persistent=1
 mysqli.max_persistent=2
+mysqli.rollback_on_cached_plink=1
 --FILE--
 <?php
 	require_once("connect.inc");
@@ -58,9 +59,17 @@ mysqli.max_persistent=2
 			mysqli_errno($plink), mysqli_error($plink));
 	}
 
+	var_dump(mysqli_get_links_stats(1));
+
+	echo "Before pconnect:";
+	var_dump(mysqli_get_links_stats());
+
 	if (!$plink = my_mysqli_connect('p:' . $host, 'pcontest', 'pcontest', $db, $port, $socket))
 		printf("[001] Cannot connect using the second DB user created during SKIPIF, [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
+
+	echo "After pconnect:";
+	var_dump(mysqli_get_links_stats());
 
 	ob_start();
 	phpinfo();
@@ -110,10 +119,16 @@ mysqli.max_persistent=2
 	if (isset($running_threads[$pthread_id]))
 		printf("[009] Persistent connection has not been killed\n");
 
+	echo "Before second pconnect:";
+	var_dump(mysqli_get_links_stats());
+
 	// this fails and we have 0 (<= $num_plinks) connections
 	if ($plink = @my_mysqli_connect('p:' . $host, 'pcontest', 'pcontest', $db, $port, $socket))
 		printf("[010] Can connect using the old password, [%d] %s\n",
 			mysqli_connect_errno($link), mysqli_connect_error($link));
+
+	echo "After second pconnect:";
+	var_dump(mysqli_get_links_stats());
 
 	ob_start();
 	phpinfo();
@@ -123,7 +138,13 @@ mysqli.max_persistent=2
 	if (!preg_match('@Active Persistent Links\s+=>\s+(\d+)@ismU', $phpinfo, $matches))
 		printf("[010] Cannot get # of active persistent links from phpinfo()\n");
 
+	var_dump(mysqli_get_links_stats());
+
 	$num_plinks_kill = $matches[1];
+	$sstats = mysqli_get_links_stats();
+	if ($sstats['active_plinks'] != $num_plinks_kill) {
+		printf("[010.2] Num of active plinks differ %s %s\n", $sstats['active_plinks'], $num_plinks_kill);
+	}
 	if ($num_plinks_kill > $num_plinks)
 		printf("[011] Expecting Active Persistent Links < %d, got %d\n", $num_plinks, $num_plinks_kill);
 
@@ -141,9 +162,11 @@ mysqli.max_persistent=2
 	mysqli_free_result($res);
 	var_dump($row);
 
-	if ($plink2 = my_mysqli_connect('p:' . $host, 'pcontest', 'newpass', $db, $port, $socket))
+	if ($plink2 = my_mysqli_connect('p:' . $host, 'pcontest', 'newpass', $db, $port, $socket)) {
 		printf("[015] Can open more persistent connections than allowed, [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
+		var_dump(mysqli_get_links_stats());
+	}
 
 	ob_start();
 	phpinfo();
@@ -179,18 +202,71 @@ mysqli_query($link, 'DROP USER pcontest');
 mysqli_close($link);
 ?>
 --EXPECTF--
-array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+Warning: mysqli_get_links_stats(): no parameters expected in %s on line %d
+NULL
+Before pconnect:array(3) {
+  ["total"]=>
+  int(1)
+  ["active_plinks"]=>
+  int(0)
+  ["cached_plinks"]=>
+  int(0)
+}
+After pconnect:array(3) {
+  ["total"]=>
+  int(2)
+  ["active_plinks"]=>
+  int(1)
+  ["cached_plinks"]=>
+  int(0)
 }
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
+}
+Before second pconnect:array(3) {
+  ["total"]=>
+  int(2)
+  ["active_plinks"]=>
+  int(1)
+  ["cached_plinks"]=>
+  int(0)
 }
 
-Warning: %s: Too many open persistent links (%d) in %s on line %d
+Warning: main(): MySQL server has gone away in %s on line %d
+
+Warning: main(): Error reading result set's header in %s line %d
+After second pconnect:array(3) {
+  ["total"]=>
+  int(1)
+  ["active_plinks"]=>
+  int(0)
+  ["cached_plinks"]=>
+  int(0)
+}
+array(3) {
+  ["total"]=>
+  int(1)
+  ["active_plinks"]=>
+  int(0)
+  ["cached_plinks"]=>
+  int(0)
+}
+array(2) {
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
+}
+[015] Can open more persistent connections than allowed, [0] 
+array(3) {
+  ["total"]=>
+  int(3)
+  ["active_plinks"]=>
+  int(2)
+  ["cached_plinks"]=>
+  int(0)
+}
 done!

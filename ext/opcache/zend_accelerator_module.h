@@ -22,7 +22,12 @@
 #ifndef ZEND_ACCELERATOR_MODULE_H
 #define ZEND_ACCELERATOR_MODULE_H
 
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+int start_accel_module(TSRMLS_D);
+#else
 int start_accel_module(void);
+#endif
+
 void zend_accel_override_file_functions(TSRMLS_D);
 
 #endif /* _ZEND_ACCELERATOR_MODULE_H */

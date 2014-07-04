@@ -131,8 +131,12 @@ struct _zend_compiler_globals {
 
 	zval      *current_namespace;
 	HashTable *current_import;
+	HashTable *current_import_function;
+	HashTable *current_import_const;
 	zend_bool  in_namespace;
 	zend_bool  has_bracketed_namespaces;
+
+	HashTable const_filenames;
 
 	zend_compiler_context context;
 	zend_stack context_stack;
@@ -142,6 +146,9 @@ struct _zend_compiler_globals {
 	char *interned_strings_end;
 	char *interned_strings_top;
 	char *interned_strings_snapshot_top;
+#ifndef ZTS
+	char *interned_empty_string;
+#endif
 
 	HashTable interned_strings;
 

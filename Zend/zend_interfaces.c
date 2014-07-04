@@ -162,7 +162,7 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 
 		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_valid, "valid", &more);
 		if (more) {
-			result = i_zend_is_true(more);
+			result = i_zend_is_true(more TSRMLS_CC);
 			zval_ptr_dtor(&more);
 			return result ? SUCCESS : FAILURE;
 		}

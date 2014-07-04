@@ -253,7 +253,7 @@ static int sapi_apache_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 /* {{{ sapi_apache_flush
  */
-static void sapi_apache_flush(void *server_context)
+static void sapi_apache_flush(void *server_context TSRMLS_DC)
 {
 	if (server_context) {
 #if MODULE_MAGIC_NUMBER > 19970110

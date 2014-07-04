@@ -857,7 +857,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
-	char *local;
+	const char *local;
 	php_stream_wrapper *wrapper;
 
 	if (!filename_length) {

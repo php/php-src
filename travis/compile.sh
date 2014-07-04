@@ -48,5 +48,6 @@ $TS \
 --with-bz2 \
 --with-openssl \
 --with-gmp \
---enable-bcmath
+--enable-bcmath \
+--enable-phpdbg
 make --quiet

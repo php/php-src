@@ -44,7 +44,7 @@ Host: %s
 Connection: close
 X-Powered-By: %s
 Bar-Foo: Foo
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 array(2) {
   ["Host"]=>
@@ -64,5 +64,5 @@ array(3) {
   ["Bar-Foo"]=>
   string(3) "Foo"
   ["Content-type"]=>
-  string(9) "text/html"
+  string(24) "text/html; charset=UTF-8"
 }

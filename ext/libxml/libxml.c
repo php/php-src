@@ -293,7 +293,8 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	php_stream_statbuf ssbuf;
 	php_stream_context *context = NULL;
 	php_stream_wrapper *wrapper = NULL;
-	char *resolved_path, *path_to_open = NULL;
+	char *resolved_path;
+	const char *path_to_open = NULL;
 	void *ret_val = NULL;
 	int isescaped=0;
 	xmlURI *uri;

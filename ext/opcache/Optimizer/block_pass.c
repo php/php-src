@@ -1466,7 +1466,12 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 		case ZEND_JMPNZ:
 			/* constant conditional JMPs */
 			if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op) TSRMLS_CC);
+#else
 				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op));
+#endif
+
 				if (last_op->opcode == ZEND_JMPZ) {
 					should_jmp = !should_jmp;
 				}
@@ -1609,7 +1614,12 @@ next_target:
 		case ZEND_JMPZ_EX:
 			/* constant conditional JMPs */
 			if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op) TSRMLS_CC);
+#else
 				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op));
+#endif
+
 				if (last_op->opcode == ZEND_JMPZ_EX) {
 					should_jmp = !should_jmp;
 				}
@@ -1730,7 +1740,11 @@ next_target_ex:
 			}
 
 			if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+				if (!zend_is_true(&ZEND_OP1_LITERAL(last_op) TSRMLS_CC)) {
+#else
 				if (!zend_is_true(&ZEND_OP1_LITERAL(last_op))) {
+#endif
 					/* JMPZNZ(false,L1,L2) -> JMP(L1) */
 					zend_code_block *todel;
 
@@ -1863,7 +1877,7 @@ next_target_znz:
 #endif
 
 /* Find a set of variables which are used outside of the block where they are
- * defined. We won't apply some optimization patterns for sush variables. */
+ * defined. We won't apply some optimization patterns for such variables. */
 static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *used_ext)
 {
 	zend_code_block *next_block = block->next;
@@ -1895,6 +1909,9 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 			if (RESULT_USED(opline)) {
 				if (!defined_here[VAR_NUM(ZEND_RESULT(opline).var)] && !used_ext[VAR_NUM(ZEND_RESULT(opline).var)] &&
 				    (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT ||
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+				     opline->opcode == ZEND_RECV_VARIADIC ||
+#endif
 					(opline->opcode == ZEND_OP_DATA && ZEND_RESULT_TYPE(opline) == IS_TMP_VAR) ||
 					opline->opcode == ZEND_ADD_ARRAY_ELEMENT)) {
 					/* these opcodes use the result as argument */
@@ -1979,6 +1996,9 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 
 			if (opline->opcode == ZEND_RECV ||
                 opline->opcode == ZEND_RECV_INIT ||
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+                opline->opcode == ZEND_RECV_VARIADIC ||
+#endif
                 opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
 				if (ZEND_OP1_TYPE(opline) == IS_VAR || ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
 					usage[VAR_NUM(ZEND_RESULT(opline).var)] = 1;

@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf.c,v 1.53 2013/02/26 16:20:42 christos Exp $")
+FILE_RCSID("@(#)$File: cdf.c,v 1.55 2014/02/27 23:26:17 christos Exp $")
 #endif
 
 #include <assert.h>
@@ -691,11 +691,13 @@ out:
 
 int
 cdf_read_short_stream(const cdf_info_t *info, const cdf_header_t *h,
-    const cdf_sat_t *sat, const cdf_dir_t *dir, cdf_stream_t *scn)
+    const cdf_sat_t *sat, const cdf_dir_t *dir, cdf_stream_t *scn,
+    const cdf_directory_t **root)
 {
 	size_t i;
 	const cdf_directory_t *d;
 
+	*root = NULL;
 	for (i = 0; i < dir->dir_len; i++)
 		if (dir->dir_tab[i].d_type == CDF_DIR_TYPE_ROOT_STORAGE)
 			break;
@@ -704,6 +706,7 @@ cdf_read_short_stream(const cdf_info_t *info, const cdf_header_t *h,
 	if (i == dir->dir_len)
 		goto out;
 	d = &dir->dir_tab[i];
+	*root = d;
 
 	/* If the it is not there, just fake it; some docs don't have it */
 	if (d->d_stream_first_sector < 0)

@@ -385,7 +385,7 @@ MODULE_API DWORD PHP5_wrapper(LPCONTROL_BLOCK lpCB)
 			  }
 				if ( open_file_for_scanning( &file_handle TSRMLS_CC ) == SUCCESS )
 					{
-					zend_indent();
+					zend_indent(TSRMLS_C);
 					}
 				else
 					{

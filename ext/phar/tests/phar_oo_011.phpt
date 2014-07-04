@@ -26,7 +26,7 @@ echo "\n";
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/phar_oo_011.phar.php');
 __halt_compiler();
 ?>
 --EXPECT--

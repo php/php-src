@@ -1,8 +1,13 @@
 --TEST--
 setting hash_function to sha512 and hash_bits_per_character > 4 should not crash
 --SKIPIF--
-<?php include('skipif.inc'); ?>
-<?php if (!extension_loaded('hash')) die('skip hash extension not available'); ?>
+<?php
+include('skipif.inc');
+
+if (!function_exists("hash")) {
+    echo "skip hash extension not loaded";
+}
+?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=

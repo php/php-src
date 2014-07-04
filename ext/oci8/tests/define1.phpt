@@ -55,5 +55,5 @@ bool(false)
 
 Warning: oci_define_by_name() expects at least 3 parameters, 2 given in %s on line %d
 NULL
-%unicode|string%(4) "some"
+string(4) "some"
 Done

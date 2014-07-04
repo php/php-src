@@ -860,10 +860,6 @@ static int sapi_milter_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void sapi_milter_flush(void *server_context)
-{
-}
-
 static void sapi_milter_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	php_register_variable ("SERVER_SOFTWARE", "Sendmail Milter", track_vars_array TSRMLS_CC);
@@ -906,7 +902,7 @@ static sapi_module_struct milter_sapi_module = {
 	NULL,							/* deactivate */
 
 	sapi_milter_ub_write,			/* unbuffered write */
-	sapi_milter_flush,				/* flush */
+	NULL,							/* flush */
 	NULL,							/* get uid */
 	NULL,							/* getenv */
 
@@ -1119,7 +1115,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'z': /* load extension file */
-				zend_load_extension(ap_php_optarg);
+				zend_load_extension(ap_php_optarg TSRMLS_CC);
 				break;
 
 			default:

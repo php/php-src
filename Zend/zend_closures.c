@@ -59,14 +59,8 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	} else if (call_user_function_ex(CG(function_table), NULL, this_ptr, &closure_result_ptr, ZEND_NUM_ARGS(), arguments, 1, NULL TSRMLS_CC) == FAILURE) {
 		RETVAL_FALSE;
 	} else if (closure_result_ptr) {
-		if (Z_ISREF_P(closure_result_ptr) && return_value_ptr) {
-			if (return_value) {
-				zval_ptr_dtor(&return_value);
-			}
-			*return_value_ptr = closure_result_ptr;
-		} else {
-			RETVAL_ZVAL(closure_result_ptr, 1, 1);
-		}
+		zval_ptr_dtor(&return_value);
+		*return_value_ptr = closure_result_ptr;
 	}
 	efree(arguments);
 

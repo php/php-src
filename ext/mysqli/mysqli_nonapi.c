@@ -217,7 +217,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 #if !defined(MYSQLI_USE_MYSQLND)
 		if (!(mysql->mysql = mysql_init(NULL))) {
 #else
-		if (!(mysql->mysql = mysqlnd_init(persistent))) {
+		if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, persistent))) {
 #endif
 			goto err;
 		}
@@ -240,7 +240,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, flags) == NULL)
 #else
 	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
-						port, socket, flags TSRMLS_CC) == NULL)
+						port, socket, flags, MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA TSRMLS_CC) == NULL)
 #endif
 	{
 		/* Save error messages - for mysqli_connect_error() & mysqli_connect_errno() */
@@ -575,7 +575,11 @@ PHP_FUNCTION(mysqli_query)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty query");
 		RETURN_FALSE;
 	}
+#ifdef MYSQLI_USE_MYSQLND
+	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT && (resultmode & ~(MYSQLI_ASYNC | MYSQLI_STORE_RESULT_COPY_DATA)) != MYSQLI_STORE_RESULT) {
+#else
 	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT && (resultmode & ~MYSQLI_ASYNC) != MYSQLI_STORE_RESULT) {
+#endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for resultmode");
 		RETURN_FALSE;
 	}
@@ -609,9 +613,18 @@ PHP_FUNCTION(mysqli_query)
 		RETURN_TRUE;
 	}
 
-	switch (resultmode) {
+#ifdef MYSQLI_USE_MYSQLND
+	switch (resultmode & ~(MYSQLI_ASYNC | MYSQLI_STORE_RESULT_COPY_DATA)) {
+#else
+	switch (resultmode & ~MYSQLI_ASYNC) {
+#endif
 		case MYSQLI_STORE_RESULT:
-			result = mysql_store_result(mysql->mysql);
+#ifdef MYSQLI_USE_MYSQLND
+			if (resultmode & MYSQLI_STORE_RESULT_COPY_DATA) {
+				result = mysqlnd_store_result_ofs(mysql->mysql);
+			} else
+#endif
+				result = mysql_store_result(mysql->mysql);
 			break;
 		case MYSQLI_USE_RESULT:
 			result = mysql_use_result(mysql->mysql);
@@ -1211,6 +1224,23 @@ PHP_FUNCTION(mysqli_release_savepoint)
 	RETURN_TRUE;
 }
 /* }}} */
+
+
+/* {{{ proto bool mysqli_get_links_stats()
+   Returns information about open and cached links */
+PHP_FUNCTION(mysqli_get_links_stats)
+{
+	if (ZEND_NUM_ARGS()) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no parameters expected");
+		return;	
+	}
+	array_init(return_value);
+	add_assoc_long_ex(return_value, "total", sizeof("total"), MyG(num_links));
+	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks"), MyG(num_active_persistent));
+	add_assoc_long_ex(return_value, "cached_plinks", sizeof("cached_plinks"), MyG(num_inactive_persistent));
+}
+/* }}} */
+
 
 
 /*

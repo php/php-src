@@ -1890,7 +1890,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_bindvalue, 0, 0, 2)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_sqlite3stmt_construct, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, sqlite3)
 ZEND_END_ARG_INFO()
 

@@ -51,6 +51,7 @@
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/url.h"
 #include "ext/standard/basic_functions.h"
+#include "ext/standard/head.h"
 
 #include "mod_files.h"
 #include "mod_user.h"
@@ -513,8 +514,17 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 		PS(session_status) = php_session_active;
 	}
 	if (val) {
+		PHP_MD5_CTX context;
+
+		/* Store read data's MD5 hash */
+		PHP_MD5Init(&context);
+		PHP_MD5Update(&context, val, vallen);
+		PHP_MD5Final(PS(session_data_hash), &context);
+
 		php_session_decode(val, vallen TSRMLS_CC);
-		efree(val);
+		str_efree(val);
+	} else {
+		memset(PS(session_data_hash),'\0', 16);
 	}
 
 	if (!PS(use_cookies) && PS(send_cookie)) {
@@ -537,7 +547,19 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 
 			val = php_session_encode(&vallen TSRMLS_CC);
 			if (val) {
-				ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
+				PHP_MD5_CTX context;
+				unsigned char digest[16];
+
+				/* Generate data's MD5 hash */
+				PHP_MD5Init(&context);
+				PHP_MD5Update(&context, val, vallen);
+				PHP_MD5Final(digest, &context);
+				/* Write only when save is required */
+				if (memcmp(digest, PS(session_data_hash), 16)) {
+					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
+				} else {
+					ret = SUCCESS;
+				}
 				efree(val);
 			} else {
 				ret = PS(mod)->s_write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
@@ -734,6 +756,7 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 }
 #endif /* HAVE_HASH_EXT }}} */
 
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "session.configuration 'session.hash_function' must be existing hash function. %s does not exist.", new_value);
 	return FAILURE;
 }
 /* }}} */
@@ -1267,14 +1290,6 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
    * Cookie Management *
    ********************* */
 
-#define COOKIE_SET_COOKIE "Set-Cookie: "
-#define COOKIE_EXPIRES	"; expires="
-#define COOKIE_MAX_AGE	"; Max-Age="
-#define COOKIE_PATH		"; path="
-#define COOKIE_DOMAIN	"; domain="
-#define COOKIE_SECURE	"; secure"
-#define COOKIE_HTTPONLY	"; HttpOnly"
-
 /*
  * Remove already sent session ID cookie.
  * It must be directly removed from SG(sapi_header) because sapi_add_header_ex()
@@ -1340,7 +1355,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)), NULL);
 	e_id = php_url_encode(PS(id), strlen(PS(id)), NULL);
 
-	smart_str_appends(&ncookie, COOKIE_SET_COOKIE);
+	smart_str_appends(&ncookie, "Set-Cookie: ");
 	smart_str_appends(&ncookie, e_session_name);
 	smart_str_appendc(&ncookie, '=');
 	smart_str_appends(&ncookie, e_id);
@@ -1581,7 +1596,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 		}
 	}
 
-	/* Finally check session id for dangarous characters
+	/* Finally check session id for dangerous characters
 	 * Security note: session id may be embedded in HTML pages.*/
 	if (PS(id) && strpbrk(PS(id), "\r\n\t <>'\"\\")) {
 		efree(PS(id));
@@ -1615,6 +1630,26 @@ static void php_session_flush(TSRMLS_D) /* {{{ */
 	}
 }
 /* }}} */
+
+static void php_session_abort(TSRMLS_D) /* {{{ */
+{
+	if (PS(session_status) == php_session_active) {
+		PS(session_status) = php_session_none;
+		if (PS(mod_data) || PS(mod_user_implemented)) {
+			PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
+		}
+	}
+}
+/* }}} */
+
+static void php_session_reset(TSRMLS_D) /* {{{ */
+{
+	if (PS(session_status) == php_session_active) {
+		php_session_initialize(TSRMLS_C);
+	}
+}
+/* }}} */
+
 
 PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC) /* {{{ */
 {
@@ -2097,6 +2132,22 @@ static PHP_FUNCTION(session_write_close)
 }
 /* }}} */
 
+/* {{{ proto void session_abort(void)
+   Abort session and end session. Session data will not be written */
+static PHP_FUNCTION(session_abort)
+{
+	php_session_abort(TSRMLS_C);
+}
+/* }}} */
+
+/* {{{ proto void session_reset(void)
+   Reset session data from saved session data */
+static PHP_FUNCTION(session_reset)
+{
+	php_session_reset(TSRMLS_C);
+}
+/* }}} */
+
 /* {{{ proto int session_status(void)
    Returns the current session status */
 static PHP_FUNCTION(session_status)
@@ -2248,6 +2299,8 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_set_cookie_params, arginfo_session_set_cookie_params)
 	PHP_FE(session_get_cookie_params, arginfo_session_void)
 	PHP_FE(session_write_close,       arginfo_session_void)
+	PHP_FE(session_abort,             arginfo_session_void)
+	PHP_FE(session_reset,             arginfo_session_void)
 	PHP_FE(session_status,            arginfo_session_void)
 	PHP_FE(session_register_shutdown, arginfo_session_void)
 	PHP_FALIAS(session_commit, session_write_close, arginfo_session_void)

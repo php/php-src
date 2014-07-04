@@ -82,6 +82,7 @@ PHP_METHOD(DateTimeImmutable, setTime);
 PHP_METHOD(DateTimeImmutable, setDate);
 PHP_METHOD(DateTimeImmutable, setISODate);
 PHP_METHOD(DateTimeImmutable, setTimestamp);
+PHP_METHOD(DateTimeImmutable, createFromMutable);
 
 PHP_METHOD(DateTimeZone, __construct);
 PHP_METHOD(DateTimeZone, __wakeup);

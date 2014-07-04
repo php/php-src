@@ -349,11 +349,12 @@ static zend_module_entry php_thttpd_module = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-static int php_thttpd_startup(sapi_module_struct *sapi_module)
+static int php_thttpd_startup(sapi_module_struct *sapi_module TSRMLS_DC)
 {
 #if PHP_API_VERSION >= 20020918
 	if (php_module_startup(sapi_module, &php_thttpd_module, 1) == FAILURE) {
 #else
+	/* No TSRMLS_CC here to zend_startup_module() as 5.6 and older does not have that parameter */
 	if (php_module_startup(sapi_module) == FAILURE
 			|| zend_startup_module(&php_thttpd_module) == FAILURE) {
 #endif

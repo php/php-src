@@ -3,36 +3,40 @@ oci_password_change()
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on thes
-require(dirname(__FILE__).'/skipif.inc');
+require(dirname(__FILE__).'/connect.inc');
 if (empty($dbase)) die ("skip requires database connection string be set");
 if ($test_drcp) die("skip password change not supported in DRCP Mode");
 
-// This test is known to fail with Oracle 10.2.0.4 client libraries
-// connecting to Oracle Database 11 (Oracle bug 6277160, fixed 10.2.0.5)
-if (preg_match('/Release (11|12)\./', oci_server_version($c), $matches) === 1 &&
-    preg_match('/^10\.2\.0\.[1234]/', oci_client_version()) === 1) {
-    die ("skip test known to fail using Oracle 10.2.0.4 client libs connecting to Oracle 11 (6277160)");
+preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches_sv);
+preg_match('/([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/', oci_client_version(), $matches);
+if (!(isset($matches_sv[0]) && isset($matches[0])
+       && $matches_sv[1] == $matches[1]
+       && $matches_sv[2] == $matches[2]
+       && $matches_sv[3] == $matches[3]
+       && $matches_sv[4] == $matches[4])) {
+           // Avoid diffs due to cross version protocol changes (e.g. like 11.2.0.2-11.2.0.3) and bugs like Oracle bug: 6277160
+       	   die ("skip test only runs when database client libraries and database server are the same version");
+}
+
+// This test in Oracle 12c needs a non-CDB or the root container
+if (isset($matches_sv[0]) && $matches_sv[1] >= 12) {
+    $s = oci_parse($c, "select nvl(sys_context('userenv', 'con_name'), 'notacdb') as dbtype from dual");
+    $r = @oci_execute($s);
+    if (!$r)
+        die('skip could not identify container type');
+    $r = oci_fetch_array($s);
+    if ($r['DBTYPE'] !== 'CDB$ROOT')
+        die('skip cannot run test using a PDB');
 }
 ?>
 --FILE--
 <?php
 
-// This test will diff if either the client or the server is 11.2.0.3
-// (or greater) and the other is 11.2.0.2 (or earlier).  Both client
-// and server must be upgraded at the same time.
-
 require dirname(__FILE__)."/connect.inc";
 
 $new_password = "test";
 var_dump(oci_password_change($dbase, $user, $password, $new_password));
-
-if (!empty($dbase)) {
-	var_dump($new_c = ocilogon($user,$new_password,$dbase));
-}
-else {
-	var_dump($new_c = ocilogon($user,$new_password));
-}
-
+var_dump($new_c = ocilogon($user,$new_password,$dbase));
 var_dump(oci_password_change($dbase, $user, $new_password, $password));
 
 

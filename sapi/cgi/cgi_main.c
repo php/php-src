@@ -324,14 +324,14 @@ static int sapi_fcgi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void sapi_cgi_flush(void *server_context)
+static void sapi_cgi_flush(void *server_context TSRMLS_DC)
 {
 	if (fflush(stdout) == EOF) {
 		php_handle_aborted_connection();
 	}
 }
 
-static void sapi_fcgi_flush(void *server_context)
+static void sapi_fcgi_flush(void *server_context TSRMLS_DC)
 {
 	fcgi_request *request = (fcgi_request*) server_context;
 
@@ -508,7 +508,7 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	uint read_bytes = 0;
 	int tmp_read_bytes;
 
-	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
+	count_bytes = MIN(count_bytes, SG(request_info).content_length - SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
 		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
 		if (tmp_read_bytes <= 0) {
@@ -524,8 +524,11 @@ static int sapi_fcgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	uint read_bytes = 0;
 	int tmp_read_bytes;
 	fcgi_request *request = (fcgi_request*) SG(server_context);
+	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
 
-	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
+	if (remaining < count_bytes) {
+		count_bytes = remaining;
+	}
 	while (read_bytes < count_bytes) {
 		tmp_read_bytes = fcgi_read(request, buffer + read_bytes, count_bytes - read_bytes);
 		if (tmp_read_bytes <= 0) {
@@ -815,7 +818,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 		}
 
 		if (real_path) {
-			free(real_path);
+			efree(real_path);
 		}
 		entry->expires = request_time + PG(user_ini_cache_ttl);
 	}
@@ -925,7 +928,7 @@ static int sapi_cgi_deactivate(TSRMLS_D)
 				php_handle_aborted_connection();
 			}
 		} else {
-			sapi_cgi_flush(SG(server_context));
+			sapi_cgi_flush(SG(server_context) TSRMLS_CC);
 		}
 	}
 	return SUCCESS;
@@ -1396,7 +1399,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
-				free(real_path);
+				efree(real_path);
 			}
 		} else {
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
@@ -1821,7 +1824,7 @@ int main(int argc, char *argv[])
 		unsigned char *p;
 		decoded_query_string = strdup(query_string);
 		php_url_decode(decoded_query_string, strlen(decoded_query_string));
-		for (p = decoded_query_string; *p &&  *p <= ' '; p++) {
+		for (p = (unsigned char *)decoded_query_string; *p &&  *p <= ' '; p++) {
 			/* skip all leading spaces */
 		}
 		if(*p == '-') {
@@ -2237,7 +2240,7 @@ consult the installation file that came with this distribution, or visit \n\
 							break;
 
 						case 'z': /* load extension file */
-							zend_load_extension(php_optarg);
+							zend_load_extension(php_optarg TSRMLS_CC);
 							break;
 
 						default:
@@ -2490,7 +2493,7 @@ consult the installation file that came with this distribution, or visit \n\
 				/* Zeev might want to do something with this one day */
 				case PHP_MODE_INDENT:
 					open_file_for_scanning(&file_handle TSRMLS_CC);
-					zend_indent();
+					zend_indent(TSRMLS_C);
 					zend_file_handle_dtor(&file_handle TSRMLS_CC);
 					php_output_teardown();
 					return SUCCESS;

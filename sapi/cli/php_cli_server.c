@@ -104,6 +104,7 @@
 
 #include "php_http_parser.h"
 #include "php_cli_server.h"
+#include "mime_type_map.h"
 
 #include "php_cli_process_title.h"
 
@@ -194,17 +195,13 @@ typedef struct php_cli_server {
 	size_t router_len;
 	socklen_t socklen;
 	HashTable clients;
+	HashTable extension_mime_types;
 } php_cli_server;
 
 typedef struct php_cli_server_http_response_status_code_pair {
 	int code;
 	const char *str;
 } php_cli_server_http_response_status_code_pair;
-
-typedef struct php_cli_server_ext_mime_type_pair {
-	const char *ext;
-	const char *mime_type;
-} php_cli_server_ext_mime_type_pair;
 
 static php_cli_server_http_response_status_code_pair status_map[] = {
 	{ 100, "Continue" },
@@ -260,64 +257,6 @@ static php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
 	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
-};
-
-static php_cli_server_ext_mime_type_pair mime_type_map[] = {
-	{ "html", "text/html" },
-	{ "htm", "text/html" },
-	{ "js", "text/javascript" },
-	{ "css", "text/css" },
-	{ "gif", "image/gif" },
-	{ "jpg", "image/jpeg" },
-	{ "jpeg", "image/jpeg" },
-	{ "jpe", "image/jpeg" },
-	{ "pdf", "application/pdf" },
-	{ "png", "image/png" },
-	{ "svg", "image/svg+xml" },
-	{ "txt", "text/plain" },
-	{ "webm", "video/webm" },
-	{ "ogv", "video/ogg" },
-	{ "ogg", "audio/ogg" },
-	{ "3gp", "video/3gpp" },    /* This is standard video format used for MMS in phones */
-	{ "apk", "application/vnd.android.package-archive" },
-	{ "avi", "video/x-msvideo" },
-	{ "bmp", "image/x-ms-bmp" },
-	{ "csv", "text/comma-separated-values" },
-	{ "doc", "application/msword" },
-	{ "docx", "application/msword" },
-	{ "flac", "audio/flac" },
-	{ "gz",  "application/x-gzip" },
-	{ "gzip", "application/x-gzip" },
-	{ "ics", "text/calendar" },
-	{ "kml", "application/vnd.google-earth.kml+xml" },
-	{ "kmz", "application/vnd.google-earth.kmz" },
-	{ "m4a", "audio/mp4" },
-	{ "mp3", "audio/mpeg" },
-	{ "mp4", "video/mp4" },
-	{ "mpg", "video/mpeg" },
-	{ "mpeg", "video/mpeg" },
-	{ "mov", "video/quicktime" },
-	{ "odp", "application/vnd.oasis.opendocument.presentation" },
-	{ "ods", "application/vnd.oasis.opendocument.spreadsheet" },
-	{ "odt", "application/vnd.oasis.opendocument.text" },
-	{ "oga", "audio/ogg" },
-	{ "pdf", "application/pdf" },
-	{ "pptx", "application/vnd.ms-powerpoint" },
-	{ "pps", "application/vnd.ms-powerpoint" },
-	{ "qt", "video/quicktime" },
-	{ "swf", "application/x-shockwave-flash" },
-	{ "tar", "application/x-tar" },
-	{ "text", "text/plain" },
-	{ "tif", "image/tiff" },
-	{ "wav", "audio/wav" },
-	{ "wmv", "video/x-ms-wmv" },
-	{ "xls", "application/vnd.ms-excel" },
-	{ "xlsx", "application/vnd.ms-excel" },
-	{ "zip", "application/x-zip-compressed" },
-	{ "xml", "application/xml" },
-	{ "xsl", "application/xml" },
-	{ "xsd", "application/xml" },
-	{ NULL, NULL }
 };
 
 static int php_cli_output_is_tty = OUTPUT_NOT_CHECKED;
@@ -465,15 +404,14 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	smart_str_appendl_ex(buffer, "Connection: close\r\n", sizeof("Connection: close\r\n") - 1, persistent);
 } /* }}} */
 
-static const char *get_mime_type(const char *ext, size_t ext_len) /* {{{ */
+static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
 {
-	php_cli_server_ext_mime_type_pair *pair;
-	for (pair = mime_type_map; pair->ext; pair++) {
-		size_t len = strlen(pair->ext);
-		if (len == ext_len && memcmp(pair->ext, ext, len) == 0) {
-			return pair->mime_type;
-		}
+	char *mime_type = NULL;
+
+	if (zend_hash_find(&server->extension_mime_types, ext, ext_len + 1, (void **) &mime_type) == SUCCESS) {
+		return mime_type;
 	}
+
 	return NULL;
 } /* }}} */
 
@@ -619,10 +557,9 @@ static int sapi_cli_server_ub_write(const char *str, uint str_length TSRMLS_DC) 
 	return php_cli_server_client_send_through(client, str, str_length);
 } /* }}} */
 
-static void sapi_cli_server_flush(void *server_context) /* {{{ */
+static void sapi_cli_server_flush(void *server_context TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = server_context;
-	TSRMLS_FETCH();
 
 	if (!client) {
 		return;
@@ -1147,7 +1084,7 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 	return 0;
 } /* }}} */
 
-static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read) /* {{{ */
+static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read TSRMLS_DC) /* {{{ */
 {
 	ssize_t _nbytes_read;
 	php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(131072);
@@ -1155,7 +1092,6 @@ static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sen
 	_nbytes_read = read(fd, chunk->data.heap.p, chunk->data.heap.len);
 	if (_nbytes_read < 0) {
 		char *errstr = get_last_error();
-		TSRMLS_FETCH();
 		php_cli_server_logf("%s" TSRMLS_CC, errstr);
 		pefree(errstr, 1);
 		php_cli_server_chunk_dtor(chunk);
@@ -1845,8 +1781,7 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->request_uri = client->request.request_uri;
 	request_info->path_translated = client->request.path_translated;
 	request_info->query_string = client->request.query_string;
-	request_info->post_data = client->request.content;
-	request_info->content_length = request_info->post_data_length = client->request.content_len;
+	request_info->content_length = client->request.content_len;
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
 	if (SUCCESS == zend_hash_find(&client->request.headers, "content-type", sizeof("content-type"), (void**)&val)) {
 		request_info->content_type = *val;
@@ -2047,7 +1982,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 	{
 		php_cli_server_chunk *chunk;
 		smart_str buffer = { 0 };
-		const char *mime_type = get_mime_type(client->request.ext, client->request.ext_len);
+		const char *mime_type = get_mime_type(server, client->request.ext, client->request.ext_len);
 		if (!mime_type) {
 			mime_type = "application/octet-stream";
 		}
@@ -2207,9 +2142,30 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 }
 /* }}} */
 
+static int php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
+{
+	const php_cli_server_ext_mime_type_pair *pair;
+
+	if (zend_hash_init(&server->extension_mime_types, 0, NULL, NULL, 1) != SUCCESS) {
+		return FAILURE;
+	}
+
+	for (pair = mime_type_map; pair->ext; pair++) {
+		size_t ext_len = 0, mime_type_len = 0;
+
+		ext_len = strlen(pair->ext);
+		mime_type_len = strlen(pair->mime_type);
+
+		zend_hash_add(&server->extension_mime_types, pair->ext, ext_len + 1, (void *) pair->mime_type, mime_type_len + 1, NULL);
+	}
+
+	return SUCCESS;
+} /* }}} */
+
 static void php_cli_server_dtor(php_cli_server *server TSRMLS_DC) /* {{{ */
 {
 	zend_hash_destroy(&server->clients);
+	zend_hash_destroy(&server->extension_mime_types);
 	if (server->server_sock >= 0) {
 		closesocket(server->server_sock);
 	}
@@ -2327,6 +2283,11 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 		server->router_len = 0;
 	}
 
+	if (php_cli_server_mime_type_ctor(server, mime_type_map) == FAILURE) {
+		retval = FAILURE;
+		goto out;
+	}
+
 	server->is_running = 1;
 out:
 	if (retval != SUCCESS) {
@@ -2372,7 +2333,7 @@ static int php_cli_server_send_event(php_cli_server *server, php_cli_server_clie
 	if (client->content_sender_initialized) {
 		if (client->file_fd >= 0 && !client->content_sender.buffer.first) {
 			size_t nbytes_read;
-			if (php_cli_server_content_sender_pull(&client->content_sender, client->file_fd, &nbytes_read)) {
+			if (php_cli_server_content_sender_pull(&client->content_sender, client->file_fd, &nbytes_read TSRMLS_CC)) {
 				php_cli_server_close_connection(server, client TSRMLS_CC);
 				return FAILURE;
 			}

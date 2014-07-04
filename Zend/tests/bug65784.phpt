@@ -1,7 +1,5 @@
 --TEST--
 Fixed Bug #65784 (Segfault with finally)
---XFAIL--
-This bug is not fixed in 5.5 due to ABI BC
 --FILE--
 <?php
 function foo1() {

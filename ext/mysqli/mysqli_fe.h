@@ -60,6 +60,7 @@ PHP_FUNCTION(mysqli_get_charset);
 PHP_FUNCTION(mysqli_get_client_info);
 PHP_FUNCTION(mysqli_get_client_version);
 PHP_FUNCTION(mysqli_get_host_info);
+PHP_FUNCTION(mysqli_get_links_stats);
 PHP_FUNCTION(mysqli_get_proto_info);
 PHP_FUNCTION(mysqli_get_server_info);
 PHP_FUNCTION(mysqli_get_server_version);

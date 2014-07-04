@@ -190,10 +190,10 @@ static int json_determine_array_type(zval **val TSRMLS_DC) /* {{{ */
 			}
 
 			if (i == HASH_KEY_IS_STRING) {
-				return 1;
+				return PHP_JSON_OUTPUT_OBJECT;
 			} else {
 				if (index != idx) {
-					return 1;
+					return PHP_JSON_OUTPUT_OBJECT;
 				}
 			}
 			idx++;
@@ -714,14 +714,14 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 
 		RETVAL_NULL();
 		if (trim_len == 4) {
-			if (!strncasecmp(trim, "null", trim_len)) {
+			if (!strncmp(trim, "null", trim_len)) {
 				/* We need to explicitly clear the error because its an actual NULL and not an error */
 				jp->error_code = PHP_JSON_ERROR_NONE;
 				RETVAL_NULL();
-			} else if (!strncasecmp(trim, "true", trim_len)) {
+			} else if (!strncmp(trim, "true", trim_len)) {
 				RETVAL_BOOL(1);
 			}
-		} else if (trim_len == 5 && !strncasecmp(trim, "false", trim_len)) {
+		} else if (trim_len == 5 && !strncmp(trim, "false", trim_len)) {
 			RETVAL_BOOL(0);
 		}
 

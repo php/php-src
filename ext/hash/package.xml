@@ -42,7 +42,6 @@ Supported Algorithms:
    <file role="src" name="config.w32"/>
    <file role="src" name="hash.c"/>
    <file role="src" name="php_hash.h"/>
-   <file role="src" name="php_hash_types.h"/>
    <file role="src" name="hash_md.c"/>
    <file role="src" name="php_hash_md.h"/>
    <file role="src" name="hash_sha.c"/>
