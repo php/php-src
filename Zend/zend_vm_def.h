@@ -2625,7 +2625,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 
 		call->opline = NULL;
 		call->call = NULL;
-		call->prev_execute_data = EG(current_execute_data);
+		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
 		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
@@ -2697,7 +2697,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			EX(call) = call->prev_nested_call;
 			zend_vm_stack_free_call_frame(call TSRMLS_CC);
 		} else {
-			call->prev_execute_data = EG(current_execute_data);
+			call->prev_execute_data = execute_data;
 			i_init_execute_data(call, &fbc->op_array, return_value, VM_FRAME_NESTED_FUNCTION TSRMLS_CC);
 
 			if (EXPECTED(zend_execute_ex == execute_ex)) {
@@ -2722,7 +2722,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		if (EXPECTED(call->object != NULL)) {
 			call->opline = NULL;
 			call->call = NULL;
-			call->prev_execute_data = EG(current_execute_data);
+			call->prev_execute_data = execute_data;
 			EG(current_execute_data) = call;
 			call->object->handlers->call_method(fbc->common.function_name, call->object, call->num_args, EX_VAR(opline->result.var) TSRMLS_CC);
 			EG(current_execute_data) = call->prev_execute_data;
@@ -3539,14 +3539,14 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 		if (clone->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
-			if (UNEXPECTED(ce != EG(scope))) {
-				zend_error_noreturn(E_ERROR, "Call to private %s::__clone() from context '%s'", ce->name->val, EG(scope) ? EG(scope)->name->val : "");
+			if (UNEXPECTED(ce != EX(scope))) {
+				zend_error_noreturn(E_ERROR, "Call to private %s::__clone() from context '%s'", ce->name->val, EX(scope) ? EX(scope)->name->val : "");
 			}
 		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), EG(scope)))) {
-				zend_error_noreturn(E_ERROR, "Call to protected %s::__clone() from context '%s'", ce->name->val, EG(scope) ? EG(scope)->name->val : "");
+			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), EX(scope)))) {
+				zend_error_noreturn(E_ERROR, "Call to protected %s::__clone() from context '%s'", ce->name->val, EX(scope) ? EX(scope)->name->val : "");
 			}
 		}
 	}
@@ -3985,11 +3985,11 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		EX(call) = zend_vm_stack_push_call_frame(
 			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), EX(call) TSRMLS_CC);
 
-		if (!EG(active_symbol_table)) {
+		if (!EX(symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
 
-		EX(call)->prev_execute_data = EG(current_execute_data);
+		EX(call)->prev_execute_data = execute_data;
 	    i_init_execute_data(EX(call), new_op_array, return_value, VM_FRAME_NESTED_CODE TSRMLS_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
@@ -4827,7 +4827,7 @@ ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 ZEND_VM_HANDLER(142, ZEND_RAISE_ABSTRACT_ERROR, ANY, ANY)
 {
 	SAVE_OPLINE();
-	zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EG(scope)->name->val, EX(func)->op_array.function_name->val);
+	zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EX(scope)->name->val, EX(func)->op_array.function_name->val);
 	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
@@ -5345,7 +5345,7 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 	if (closure_is_static || closure_is_being_defined_inside_static_context) {
 		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EX(called_scope), NULL TSRMLS_CC);
 	} else {
-		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), Z_OBJ(EG(This)) ? &EG(This) : NULL TSRMLS_CC);
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EX(scope), Z_OBJ(EG(This)) ? &EG(This) : NULL TSRMLS_CC);
 	}
 
 	CHECK_EXCEPTION();

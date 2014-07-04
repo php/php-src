@@ -991,14 +991,14 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(zend_execute_d
 	    EXPECTED(fetch_type == ZEND_FETCH_GLOBAL)) {
 		ht = &EG(symbol_table).ht;
 	} else if (EXPECTED(fetch_type == ZEND_FETCH_STATIC)) {
-		ZEND_ASSERT(execute_data->func->op_array.static_variables != NULL);
-		ht = execute_data->func->op_array.static_variables;
+		ZEND_ASSERT(EX(func)->op_array.static_variables != NULL);
+		ht = EX(func)->op_array.static_variables;
 	} else {
 		ZEND_ASSERT(fetch_type == ZEND_FETCH_LOCAL);
-		if (!EG(active_symbol_table)) {
+		if (!EX(symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
-		ht = &EG(active_symbol_table)->ht;
+		ht = &EX(symbol_table)->ht;
 	}
 	return ht;
 }
@@ -1633,7 +1633,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_op_array *op
 		EG(current_execute_data)->call->called_scope,
 		EG(current_execute_data)->call->object,
 		NULL TSRMLS_CC);
-	execute_data->num_args = num_args;
+	EX(num_args) = num_args;
 
 	/* copy arguments */
 	if (num_args > 0) {
