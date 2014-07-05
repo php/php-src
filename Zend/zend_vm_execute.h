@@ -642,6 +642,8 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 			if (RETURN_VALUE_USED(opline)) {
 				zend_generator_create_zval(&fbc->op_array, EX_VAR(opline->result.var) TSRMLS_CC);
+			} else {
+				zend_vm_stack_free_args(call TSRMLS_CC);
 			}
 
 			EX(call) = call->prev_nested_call;
