@@ -1,7 +1,9 @@
 --TEST--
 readline_read_history() function - Error cases
+--CREDITS--
+Pedro Manoel Evangelista <pedro.evangelista at gmail dot com>
 --SKIPIF--
-<?php if (!extension_loaded("readline") || !function_exists('readline_read_history')) die("skip");
+<?php if (!extension_loaded("readline") || !function_exists('readline_read_history')) die("skip"); ?>
 --FILE--
 <?php
 var_dump(readline_read_history());
