@@ -104,7 +104,7 @@ static void zend_push_function_call_entry(zend_function *fbc, zend_uint opline_n
 }
 /* }}} */
 
-static zend_property_info *zend_duplicate_property_info(zend_property_info *property_info) /* {{{ */
+static zend_property_info *zend_duplicate_property_info(zend_property_info *property_info TSRMLS_DC) /* {{{ */
 {
 	zend_property_info* new_property_info;
 	
@@ -2505,11 +2505,11 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
 		zend_resolve_class_name(class_name TSRMLS_CC);
 		class_node = *class_name;
-		op_number = get_next_op_number(CG(active_op_array) TSRMLS_CC);
+		op_number = get_next_op_number(CG(active_op_array));
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	} else {
 		zend_do_fetch_class(&class_node, class_name TSRMLS_CC);
-		op_number = get_next_op_number(CG(active_op_array) TSRMLS_CC);
+		op_number = get_next_op_number(CG(active_op_array));
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	}
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
@@ -3042,7 +3042,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 }
 /* }}} */
 
-static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
+static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	zend_function *function, *new_function;
 
@@ -3160,7 +3160,7 @@ char *zend_visibility_string(zend_uint fn_flags) /* {{{ */
 }
 /* }}} */
 
-static zend_function *do_inherit_method(zend_function *old_function) /* {{{ */
+static zend_function *do_inherit_method(zend_function *old_function TSRMLS_DC) /* {{{ */
 {
 	zend_function *new_function;
 
@@ -3579,7 +3579,7 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 }
 /* }}} */
 
-static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
+static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_property_info *parent_info, zend_string *key, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *child_info;
 	zend_class_entry *parent_ce = ce->parent;
@@ -3591,7 +3591,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 			if(ce->type & ZEND_INTERNAL_CLASS) {
 				child_info = zend_duplicate_property_info_internal(parent_info);
 			} else {
-				child_info = zend_duplicate_property_info(parent_info);
+				child_info = zend_duplicate_property_info(parent_info TSRMLS_CC);
 			}
 			zend_hash_update_ptr(&ce->properties_info, key, child_info);
 			child_info->flags &= ~ZEND_ACC_PRIVATE; /* it's not private anymore */
@@ -3816,11 +3816,11 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->properties_info, key, property_info) {
-		if (do_inherit_property_access_check(&ce->properties_info, property_info, key, ce)) {
+		if (do_inherit_property_access_check(&ce->properties_info, property_info, key, ce TSRMLS_CC)) {
 			if (ce->type & ZEND_INTERNAL_CLASS) {
 				property_info = zend_duplicate_property_info_internal(property_info);
 			} else {
-				property_info = zend_duplicate_property_info(property_info);
+				property_info = zend_duplicate_property_info(property_info TSRMLS_CC);
 			}
 			zend_hash_add_new_ptr(&ce->properties_info, key, property_info);
 		}
@@ -3832,12 +3832,12 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
 		if (do_inherit_method_check(&ce->function_table, func, key, ce)) {
-			zend_function *new_func = do_inherit_method(func);
+			zend_function *new_func = do_inherit_method(func TSRMLS_CC);
 			zend_hash_add_new_ptr(&ce->function_table, key, new_func);
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	do_inherit_parent_constructor(ce);
+	do_inherit_parent_constructor(ce TSRMLS_CC);
 
 	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS && ce->type == ZEND_INTERNAL_CLASS) {
 		ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
@@ -3920,7 +3920,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
 			if (do_inherit_method_check(&ce->function_table, func, key, ce)) {
-				zend_function *new_func = do_inherit_method(func);
+				zend_function *new_func = do_inherit_method(func TSRMLS_CC);
 				zend_hash_add_new_ptr(&ce->function_table, key, new_func);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -4563,7 +4563,7 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time) /* {{{ */
+ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC) /* {{{ */
 {
 	zend_function *function, *new_function;
 	zval *op1, *op2;
@@ -4757,7 +4757,7 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 
 	switch (opline->opcode) {
 		case ZEND_DECLARE_FUNCTION:
-			if (do_bind_function(CG(active_op_array), opline, CG(function_table), 1) == FAILURE) {
+			if (do_bind_function(CG(active_op_array), opline, CG(function_table), 1 TSRMLS_CC) == FAILURE) {
 				return;
 			}
 			table = CG(function_table);

@@ -759,7 +759,7 @@ send_again:
 			zval *arg, *top;
 			zend_string *name;
 
-			zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, zend_hash_num_elements(ht) TSRMLS_DC);
+			zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, zend_hash_num_elements(ht) TSRMLS_CC);
 
 			if (opline->op1_type != IS_CONST && opline->op1_type != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
 				int i;
@@ -880,7 +880,7 @@ send_again:
 					if (Z_REFCOUNTED_P(arg)) Z_ADDREF_P(arg);
 				}
 
-				zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, 1 TSRMLS_DC);
+				zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, 1 TSRMLS_CC);
 				top = ZEND_CALL_ARG(EX(call), arg_num);
 				ZVAL_COPY_VALUE(top, arg);
 				EX(call)->num_args++;
@@ -1130,7 +1130,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_FUNCTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	do_bind_function(&EX(func)->op_array, opline, EG(function_table), 0);
+	do_bind_function(&EX(func)->op_array, opline, EG(function_table), 0 TSRMLS_CC);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
