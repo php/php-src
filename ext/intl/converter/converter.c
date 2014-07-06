@@ -1023,7 +1023,7 @@ static zend_function_entry php_converter_methods[] = {
 };
 
 /* {{{ Converter create/clone/destroy */
-static void php_converter_free_object(zend_object *obj TSRMLS_DC) {
+static void php_converter_dtor_object(zend_object *obj TSRMLS_DC) {
 	php_converter_object *objval = php_converter_fetch_object(obj);
 
 	if (objval->src) {
@@ -1035,7 +1035,6 @@ static void php_converter_free_object(zend_object *obj TSRMLS_DC) {
 	}
 
 	intl_error_reset(&(objval->error) TSRMLS_CC);
-	zend_object_std_dtor(&(objval->obj) TSRMLS_CC);
 }
 
 static zend_object *php_converter_object_ctor(zend_class_entry *ce, php_converter_object **pobjval TSRMLS_DC) {
@@ -1112,7 +1111,7 @@ int php_converter_minit(INIT_FUNC_ARGS) {
 	memcpy(&php_converter_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
-	php_converter_object_handlers.dtor_obj = php_converter_free_object;
+	php_converter_object_handlers.dtor_obj = php_converter_dtor_object;
 
 	/* enum UConverterCallbackReason */
 	CONV_REASON_CONST(UNASSIGNED);
