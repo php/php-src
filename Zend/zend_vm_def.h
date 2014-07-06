@@ -2459,6 +2459,8 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			FREE_OP2();
 			HANDLE_EXCEPTION();
@@ -2473,7 +2475,12 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);

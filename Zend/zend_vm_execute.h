@@ -9302,6 +9302,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
@@ -9316,7 +9318,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -10186,6 +10193,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
@@ -10200,7 +10209,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -11071,6 +11085,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(&free_op2.var);
 			HANDLE_EXCEPTION();
@@ -11085,7 +11101,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -12536,6 +12557,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
@@ -12550,7 +12573,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -15793,6 +15821,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
@@ -15807,7 +15837,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -18158,6 +18193,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
@@ -18172,7 +18209,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -20484,6 +20526,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(&free_op2.var);
 			HANDLE_EXCEPTION();
@@ -20498,7 +20542,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -23960,6 +24009,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
@@ -23974,7 +24025,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -25621,6 +25677,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
@@ -25635,7 +25693,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -27048,6 +27111,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
@@ -27062,7 +27127,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -28381,6 +28451,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(&free_op2.var);
 			HANDLE_EXCEPTION();
@@ -28395,7 +28467,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -30142,6 +30219,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
@@ -30156,7 +30235,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -33400,6 +33484,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
@@ -33414,7 +33500,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -35531,6 +35622,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
 			HANDLE_EXCEPTION();
@@ -35545,7 +35638,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -37717,6 +37815,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(&free_op2.var);
 			HANDLE_EXCEPTION();
@@ -37731,7 +37831,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
@@ -40904,6 +41009,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 			}
 		}
 	} else {
+		zend_uint nested = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
@@ -40918,7 +41025,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+				nested++;
+			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				nested--;
+			}
+		} while (nested);
 
 		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
 		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
