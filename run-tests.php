@@ -594,6 +594,9 @@ if (isset($argc) && $argc > 1) {
 					}
 					$pass_option_n = true;
 					break;
+				case 'e':
+					$pass_options .= ' -e';
+					break;
 				case '--no-clean':
 					$no_clean = true;
 					break;
