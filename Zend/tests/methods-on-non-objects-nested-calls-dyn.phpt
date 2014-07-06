@@ -21,6 +21,8 @@ var_dump($x->method($lambda()));
 $func= 'nested';
 var_dump($x->method($func()));
 
+var_dump($x->method(call_user_func('nested')));
+
 echo "Alive\n";
 ?>
 --EXPECTF--
@@ -29,5 +31,7 @@ NULL
 Called #2
 NULL
 Called #3
+NULL
+Called #4
 NULL
 Alive

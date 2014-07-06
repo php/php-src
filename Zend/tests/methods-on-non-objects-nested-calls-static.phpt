@@ -18,6 +18,7 @@ $method= 'nested';
 var_dump($x->method(Nesting::nested()));
 var_dump($x->method($class::nested()));
 var_dump($x->method($class::{$method}()));
+var_dump($x->method([Nesting::nested()]));
 echo "Alive\n";
 ?>
 --EXPECTF--
@@ -26,5 +27,7 @@ NULL
 Called #2
 NULL
 Called #3
+NULL
+Called #4
 NULL
 Alive

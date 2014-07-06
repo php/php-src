@@ -20,6 +20,7 @@ var_dump($x->method($x->nested(nested())));
 var_dump($x->method($x->nested($x->deep())));
 var_dump($x->method($x->nested(nested($x->deep()))));
 var_dump($x->method(nested(nested($x->nested()))));
+var_dump($x->method([nested()]));
 echo "Alive\n";
 ?>
 --EXPECTF--
@@ -40,5 +41,7 @@ NULL
 Called #8
 NULL
 Called #9
+NULL
+Called #10
 NULL
 Alive

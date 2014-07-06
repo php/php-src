@@ -13,11 +13,14 @@ set_error_handler(function($code, $message) {
 $x= null;
 var_dump($x->method(strlen('Test')));
 var_dump($x->method(strlen('Test'), strlen('Test')));
+var_dump($x->method([strlen('Test')]));
 echo "Alive\n";
 ?>
 --EXPECTF--
 Called #1
 NULL
 Called #2
+NULL
+Called #3
 NULL
 Alive
