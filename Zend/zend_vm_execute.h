@@ -9332,7 +9332,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -10223,7 +10222,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -11115,7 +11113,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -12587,7 +12584,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -15851,7 +15847,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -18223,7 +18218,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -20556,7 +20550,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -24039,7 +24032,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -25707,7 +25699,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -27141,7 +27132,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -28481,7 +28471,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -30249,7 +30238,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -33514,7 +33502,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -35652,7 +35639,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -37845,7 +37831,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
@@ -41039,7 +41024,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {

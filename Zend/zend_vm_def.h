@@ -2489,7 +2489,6 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		EX_T(opline->result.var).var.fcall_returned_reference = 0;
 		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		ZEND_VM_NEXT_OPCODE();
-		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
