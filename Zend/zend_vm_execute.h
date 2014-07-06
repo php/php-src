@@ -9316,7 +9316,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -9330,22 +9330,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -10219,7 +10209,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
@@ -10233,22 +10223,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -11123,7 +11103,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(&free_op2.var);
@@ -11137,22 +11117,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -12607,7 +12577,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -12621,22 +12591,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -15883,7 +15843,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -15898,22 +15858,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -18268,7 +18218,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
@@ -18283,22 +18233,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -20614,7 +20554,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(&free_op2.var);
@@ -20629,22 +20569,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -24110,7 +24040,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -24125,22 +24055,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -25791,7 +25711,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -25805,22 +25725,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -27237,7 +27147,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
@@ -27251,22 +27161,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -28589,7 +28489,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(&free_op2.var);
@@ -28603,22 +28503,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -30369,7 +30259,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -30383,22 +30273,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -33646,7 +33526,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -33660,22 +33540,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -35796,7 +35666,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_dtor(free_op2.var);
@@ -35810,22 +35680,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -38001,7 +37861,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(&free_op2.var);
@@ -38015,22 +37875,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
@@ -41207,7 +41057,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 			}
 		}
 	} else {
-		zend_uint nested = 1;
+		zend_uint nesting = opline->result.num;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -41221,22 +41071,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 			HANDLE_EXCEPTION();
 		}
 
-		/* No exception raised: Skip over arguments until fcall opcode, return NULL */
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-
-			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_NEW
-			) {
-				nested++;
-			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-				nested--;
-			}
-		} while (nested);
+		} while (opline->opcode == ZEND_DO_FCALL_BY_NAME ? opline->op2.num > nesting : 1);
 
 		if (RETURN_VALUE_USED(opline)) {
 			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
