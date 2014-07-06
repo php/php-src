@@ -1,5 +1,7 @@
 --TEST--
 Catch method calls on non-objects without using return value
+--INI--
+report_memleaks=1
 --FILE--
 <?php
 set_error_handler(function($code, $message) {
