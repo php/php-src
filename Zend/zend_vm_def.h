@@ -2482,9 +2482,11 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 			}
 		} while (nested);
 
-		ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
-		EX_T(opline->result.var).var.fcall_returned_reference = 0;
-		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
+		if (RETURN_VALUE_USED(opline)) {
+			ALLOC_INIT_ZVAL(EX_T(opline->result.var).var.ptr);
+			EX_T(opline->result.var).var.fcall_returned_reference = 0;
+			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
+		}
 		ZEND_VM_NEXT_OPCODE();
 	}
 
