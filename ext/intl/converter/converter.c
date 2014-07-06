@@ -63,6 +63,7 @@ static inline void php_converter_throw_failure(php_converter_object *objval, UEr
 
 /* {{{ php_converter_default_callback */
 static void php_converter_default_callback(zval *return_value, zval *zobj, long reason, zval *error TSRMLS_DC) {
+	ZVAL_DEREF(error);
 	zval_dtor(error);
 	ZVAL_LONG(error, U_ZERO_ERROR);
 	/* Basic functionality so children can call parent::toUCallback() */
@@ -251,6 +252,8 @@ static void php_converter_to_u_callback(const void *context,
 
 	if (Z_TYPE(zargs[3]) == IS_LONG) {
 		*pErrorCode = Z_LVAL(zargs[3]);
+	} else if (Z_ISREF(zargs[3]) && Z_TYPE_P(Z_REFVAL(zargs[3])) == IS_LONG) {
+		*pErrorCode = Z_LVAL_P(Z_REFVAL(zargs[3]));
 	}
 
 	zval_ptr_dtor(&zargs[0]);
@@ -334,6 +337,8 @@ static void php_converter_from_u_callback(const void *context,
 
 	if (Z_TYPE(zargs[3]) == IS_LONG) {
 		*pErrorCode = Z_LVAL(zargs[3]);
+	} else if (Z_ISREF(zargs[3]) && Z_TYPE_P(Z_REFVAL(zargs[3])) == IS_LONG) {
+		*pErrorCode = Z_LVAL_P(Z_REFVAL(zargs[3]));
 	}
 
 	zval_ptr_dtor(&zargs[0]);
@@ -1107,7 +1112,7 @@ int php_converter_minit(INIT_FUNC_ARGS) {
 	memcpy(&php_converter_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
-	php_converter_object_handlers.free_obj = php_converter_free_object;
+	php_converter_object_handlers.dtor_obj = php_converter_free_object;
 
 	/* enum UConverterCallbackReason */
 	CONV_REASON_CONST(UNASSIGNED);
