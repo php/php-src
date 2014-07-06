@@ -13,10 +13,18 @@ set_error_handler(function($code, $message) {
 });
 
 $x= null;
+$class= 'Nesting';
+$method= 'nested';
 var_dump($x->method(Nesting::nested()));
+var_dump($x->method($class::nested()));
+var_dump($x->method($class::{$method}()));
 echo "Alive\n";
 ?>
 --EXPECTF--
 Called #1
+NULL
+Called #2
+NULL
+Called #3
 NULL
 Alive
