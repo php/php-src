@@ -581,8 +581,8 @@ if (isset($argc) && $argc > 1) {
 					if (!$valgrind_header) {
 						error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
 					} else {
-						$valgrind_version = preg_replace("/valgrind-(\d)\.(\d)\.(\d+)([.\w_-]+)?(\s+)/", '$1$2$3', $valgrind_header, 1, $replace_count);
-						if ($replace_count != 1 || !is_numeric($valgrind_version)) {
+						$valgrind_version = preg_replace("/valgrind-(\d+)\.(\d+)\.(\d+)([.\w_-]+)?(\s+)/", '$1.$2.$3', $valgrind_header, 1, $replace_count);
+						if ($replace_count != 1) {
 							error("Valgrind returned invalid version info (\"$valgrind_header\"), cannot proceed.");
 						}
 						$valgrind_header = trim($valgrind_header);
@@ -1359,6 +1359,7 @@ TEST $file
 			} else {
 				show_result('SKIP', $tested, $tested_file, "reason: CGI not available");
 
+				junit_init_suite(junit_get_suitename_for($shortname));
 				junit_mark_test_as('SKIP', $shortname, $tested, 0, 'CGI not available');
 				return 'SKIPPED';
 			}
@@ -1538,7 +1539,7 @@ TEST $file
 				}
 
 				$message = !empty($m[1]) ? $m[1] : '';
-				junit_mark_test_as('SKIP', $shortname, $tested, null, "<![CDATA[\n$message\n]]>");
+				junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
 				return 'SKIPPED';
 			}
 
@@ -1563,7 +1564,7 @@ TEST $file
 	) {
 		$message = "ext/zlib required";
 		show_result('SKIP', $tested, $tested_file, "reason: $message", $temp_filenames);
-		junit_mark_test_as('SKIP', $shortname, $tested, null, "<![CDATA[\n$message\n]]>");
+		junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
 		return 'SKIPPED';
 	}
 
@@ -1787,7 +1788,7 @@ TEST $file
 		$env['USE_ZEND_ALLOC'] = '0';
 		$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
-		if ($valgrind_version >= 330) {
+		if (version_compare($valgrind_version, '3.3.0', '>=')) {
 			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
 			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file=$memcheck_filename $cmd";
 		} else {
@@ -2131,7 +2132,7 @@ $output
 		$php = $old_php;
 	}
 	
-	$diff = empty($diff) ? '' : "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>";
+	$diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
 
 	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
 
@@ -2710,6 +2711,10 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	junit_suite_record($suite, 'execution_time', $time);
 
 	$escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
+	$escaped_details = preg_replace_callback('/[\0-\x08\x0B\x0C\x0E-\x1F]/', function ($c) {
+		return sprintf('[[0x%02x]]', ord($c[0]));
+	}, $escaped_details);
+	$escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
 
     $escaped_test_name = basename($file_name) . ' - ' . htmlspecialchars($test_name, ENT_QUOTES);
     $JUNIT['files'][$file_name]['xml'] = "<testcase classname='$suite' name='$escaped_test_name' time='$time'>\n";
@@ -2726,16 +2731,16 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 		junit_suite_record($suite, 'test_pass');
 	} elseif ('BORK' == $type) {
 		junit_suite_record($suite, 'test_error');
-		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$message'/>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'/>\n";
 	} elseif ('SKIP' == $type) {
 		junit_suite_record($suite, 'test_skip');
-		$JUNIT['files'][$file_name]['xml'] .= "<skipped>$message</skipped>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<skipped>$escaped_message</skipped>\n";
 	} elseif('FAIL' == $type) {
 		junit_suite_record($suite, 'test_fail');
-		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$message'>$escaped_details</failure>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$escaped_message'>$escaped_details</failure>\n";
 	} else {
 		junit_suite_record($suite, 'test_error');
-		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$message'>$escaped_details</error>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'>$escaped_details</error>\n";
 	}
 
 	$JUNIT['files'][$file_name]['xml'] .= "</testcase>\n";

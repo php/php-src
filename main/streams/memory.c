@@ -352,6 +352,7 @@ typedef struct {
 	size_t      smax;
 	int			mode;
 	zval*       meta;
+	char*		tmpdir;
 } php_stream_temp_data;
 
 
@@ -369,7 +370,7 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 		char *membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
 
 		if (memsize + count >= ts->smax) {
-			php_stream *file = php_stream_fopen_tmpfile();
+			php_stream *file = php_stream_fopen_temporary_file(ts->tmpdir, "php", NULL);
 			php_stream_write(file, membuf, memsize);
 			php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE);
 			ts->innerstream = file;
@@ -418,6 +419,10 @@ static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC)
 	
 	if (ts->meta) {
 		zval_ptr_dtor(&ts->meta);
+	}
+
+	if (ts->tmpdir) {
+		efree(ts->tmpdir);
 	}
 
 	efree(ts);
@@ -547,8 +552,8 @@ PHPAPI php_stream_ops	php_stream_temp_ops = {
 
 /* }}} */
 
-/* {{{ _php_stream_temp_create */
-PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
+/* {{{ _php_stream_temp_create_ex */
+PHPAPI php_stream *_php_stream_temp_create_ex(int mode, size_t max_memory_usage, const char *tmpdir STREAMS_DC TSRMLS_DC)
 {
 	php_stream_temp_data *self;
 	php_stream *stream;
@@ -556,7 +561,9 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	self = ecalloc(1, sizeof(*self));
 	self->smax = max_memory_usage;
 	self->mode = mode;
-	self->meta = NULL;
+	if (tmpdir) {
+		self->tmpdir = estrdup(tmpdir);
+	}
 	stream = php_stream_alloc_rel(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	self->innerstream = php_stream_memory_create_rel(mode);
@@ -566,6 +573,12 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 }
 /* }}} */
 
+/* {{{ _php_stream_temp_create */
+PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
+{
+	return php_stream_temp_create_ex(mode, max_memory_usage, NULL);
+}
+/* }}} */
 
 /* {{{ _php_stream_temp_open */
 PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC TSRMLS_DC)

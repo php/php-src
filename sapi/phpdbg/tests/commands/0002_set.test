@@ -9,7 +9,6 @@
 # setting notice color
 # Failed to find breakpoint #0
 # oplog disabled
-# not enabled
 # opened oplog test.log
 # nothing
 #################################################
@@ -19,5 +18,4 @@ set color notice none
 set prompt promot>
 set break 0
 set oplog
-set oplog 0
 set oplog test.log

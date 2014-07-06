@@ -943,6 +943,26 @@ copy_value:
 	}
 }
 
+static void zval_deep_copy(zval **p)
+{
+	zval *value;
+
+	ALLOC_ZVAL(value);
+	*value = **p;
+	if (Z_TYPE_P(value) == IS_ARRAY) {
+		HashTable *ht;
+
+		ALLOC_HASHTABLE(ht);
+		zend_hash_init(ht, zend_hash_num_elements(Z_ARRVAL_P(value)), NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_copy(ht, Z_ARRVAL_P(value), (copy_ctor_func_t) zval_deep_copy, NULL, sizeof(zval *));
+		Z_ARRVAL_P(value) = ht;
+	} else {
+		zval_copy_ctor(value);
+	}
+	INIT_PZVAL(value);
+	*p = value;
+}
+
 /* Utility Functions for Extensions */
 static void zend_extension_statement_handler(const zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
@@ -1490,7 +1510,8 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_i
 	} else {
 		zval **return_value_ptr = &EX_TMP_VAR(execute_data_ptr, execute_data_ptr->opline->result.var)->var.ptr;
 		execute_data_ptr->function_state.function->internal_function.handler(
-			execute_data_ptr->opline->extended_value, *return_value_ptr, return_value_ptr,
+			execute_data_ptr->opline->extended_value + execute_data_ptr->call->num_additional_args,
+			*return_value_ptr, return_value_ptr,
 			execute_data_ptr->object, return_value_used TSRMLS_CC
 		);
 	}

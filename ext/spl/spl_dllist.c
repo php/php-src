@@ -43,12 +43,10 @@ PHPAPI zend_class_entry  *spl_ce_SplStack;
 
 #define SPL_LLIST_DELREF(elem) if(!--(elem)->rc) { \
 	efree(elem); \
-	elem = NULL; \
 }
 
 #define SPL_LLIST_CHECK_DELREF(elem) if((elem) && !--(elem)->rc) { \
 	efree(elem); \
-	elem = NULL; \
 }
 
 #define SPL_LLIST_ADDREF(elem) (elem)->rc++
@@ -916,6 +914,11 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 			llist->dtor(element TSRMLS_CC);
 		}
 
+		if (intern->traverse_pointer == element) {
+			SPL_LLIST_DELREF(element);
+			intern->traverse_pointer = NULL;
+		}
+
 		zval_ptr_dtor((zval **)&element->data);
 		element->data = NULL;
 
@@ -1192,7 +1195,6 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	}
 
 	if (buf_len == 0) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Serialized string cannot be empty");
 		return;
 	}
 

@@ -29,13 +29,13 @@ $expected = array(
 	'Set-Cookie: name=value; path=/path/',
 	'Set-Cookie: name=value; domain=domain.tld',
 	'Set-Cookie: name=value; secure',
-	'Set-Cookie: name=value; httponly'
+	'Set-Cookie: name=value; HttpOnly'
 );
 
 $headers = headers_list();
 if (($i = count($expected)) > count($headers))
 {
-	echo "Less headers are being sent than expected - aborting";
+	echo "Fewer headers are being sent than expected - aborting";
 	return;
 }
 

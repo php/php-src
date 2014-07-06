@@ -167,7 +167,7 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 	zval **tmp;
 	zval **file, **line;
 	HashPosition position;
-	int i = 1, limit = num;
+	int i = 0, limit = num;
 	int user_defined;
 
 	if (limit < 0) {
@@ -186,7 +186,7 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 
 		if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace),
 			(void**)&tmp, &position) == FAILURE) {
-			phpdbg_write("frame #0: {main} at %s:%ld", Z_STRVAL_PP(file), Z_LVAL_PP(line));
+			phpdbg_write("frame #%d: {main} at %s:%ld", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			break;
 		}
 

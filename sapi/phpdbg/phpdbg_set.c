@@ -23,58 +23,74 @@
 #include "phpdbg_set.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_bp.h"
+#include "phpdbg_prompt.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+#define PHPDBG_SET_COMMAND_D(f, h, a, m, l, s) \
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[18])
+
+const phpdbg_command_t phpdbg_set_commands[] = {
+	PHPDBG_SET_COMMAND_D(prompt,       "usage: set prompt [<string>]",            'p', set_prompt,       NULL, "|s"),
+#ifndef _WIN32
+	PHPDBG_SET_COMMAND_D(color,        "usage: set color  <element> <color>",     'c', set_color,        NULL, "ss"),
+	PHPDBG_SET_COMMAND_D(colors,       "usage: set colors [<on|off>]",            'C', set_colors,       NULL, "|b"),
+#endif
+	PHPDBG_SET_COMMAND_D(oplog,        "usage: set oplog  [<output>]",            'O', set_oplog,        NULL, "|s"),
+	PHPDBG_SET_COMMAND_D(break,        "usage: set break id [<on|off>]",          'b', set_break,        NULL, "l|b"),
+	PHPDBG_SET_COMMAND_D(breaks,       "usage: set breaks [<on|off>]",            'B', set_breaks,       NULL, "|b"),
+	PHPDBG_SET_COMMAND_D(quiet,        "usage: set quiet [<on|off>]",             'q', set_quiet,        NULL, "|b"),
+	PHPDBG_SET_COMMAND_D(stepping,     "usage: set stepping [<line|op>]",         's', set_stepping,     NULL, "|s"),
+	PHPDBG_SET_COMMAND_D(refcount,     "usage: set refcount [<on|off>]",          'r', set_refcount,     NULL, "|b"),
+	PHPDBG_END_COMMAND
+};
+
 PHPDBG_SET(prompt) /* {{{ */
 {
-	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_writeln("%s", phpdbg_get_prompt(TSRMLS_C));
-			break;
-
-		case STR_PARAM:
-			phpdbg_set_prompt(param->str TSRMLS_CC);
-			break;
-
-		phpdbg_default_switch_case();
-	}
-
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("%s", phpdbg_get_prompt(TSRMLS_C));
+	} else phpdbg_set_prompt(param->str TSRMLS_CC);
+	
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_SET(break) /* {{{ */
 {
 	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_writeln("%s",
-				PHPDBG_G(flags) & PHPDBG_IS_BP_ENABLED ? "on" : "off");
-			break;
-
-		case STR_PARAM:
-			if (strncasecmp(param->str, PHPDBG_STRL("on")) == 0) {
-				phpdbg_enable_breakpoints(TSRMLS_C);
-			} else if (strncasecmp(param->str, PHPDBG_STRL("off")) == 0) {
-				phpdbg_disable_breakpoints(TSRMLS_C);
-			}
-			break;
-			
 		case NUMERIC_PARAM: {
-			if (input->argc > 2) {
-					if (phpdbg_argv_is(2, "on")) {
-						phpdbg_enable_breakpoint(param->num TSRMLS_CC);
-					} else if (phpdbg_argv_is(2, "off")) {
-						phpdbg_disable_breakpoint(param->num TSRMLS_CC);
-					}
+			if (param->next) {
+				if (param->next->num) {
+					phpdbg_enable_breakpoint(param->num TSRMLS_CC);
+				} else phpdbg_disable_breakpoint(param->num TSRMLS_CC);
 			} else {
 				phpdbg_breakbase_t *brake = phpdbg_find_breakbase(param->num TSRMLS_CC);
 				if (brake) {
 					phpdbg_writeln(
 						"%s", brake->disabled ? "off" : "on");
 				} else {
-					phpdbg_error("Failed to find breakpoint #%lx", param->num);
+					phpdbg_error("Failed to find breakpoint #%ld", param->num);
 				}
 			}
+		} break;
+
+		default:
+			phpdbg_error(
+				"set break used incorrectly: set break [id] <on|off>");
+	}
+
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_SET(breaks) /* {{{ */
+{
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("%s",
+			PHPDBG_G(flags) & PHPDBG_IS_BP_ENABLED ? "on" : "off");
+	} else switch (param->type) {	
+		case NUMERIC_PARAM: {
+			if (param->num) {
+				phpdbg_enable_breakpoints(TSRMLS_C);
+			} else phpdbg_disable_breakpoints(TSRMLS_C);
 		} break;
 
 		default:
@@ -88,101 +104,73 @@ PHPDBG_SET(break) /* {{{ */
 #ifndef _WIN32
 PHPDBG_SET(color) /* {{{ */
 {
-	if ((param->type == STR_PARAM) && (input->argc == 3)) {
-		const phpdbg_color_t *color = phpdbg_get_color(
-			input->argv[2]->string, input->argv[2]->length TSRMLS_CC);
-		int element = PHPDBG_COLOR_INVALID;
-
-		/* @TODO(anyone) make this consistent with other set commands */
-		if (color) {
-			if (phpdbg_argv_is(1, "prompt")) {
-				phpdbg_notice(
-					"setting prompt color to %s (%s)", color->name, color->code);
-				element = PHPDBG_COLOR_PROMPT;
-				if (PHPDBG_G(prompt)[1]) {
-					free(PHPDBG_G(prompt)[1]);
-					PHPDBG_G(prompt)[1]=NULL;
-				}
-			} else if (phpdbg_argv_is(1, "error")) {
-				phpdbg_notice(
-					"setting error color to %s (%s)", color->name, color->code);
-				element = PHPDBG_COLOR_ERROR;
-
-			} else if (phpdbg_argv_is(1, "notice")) {
-				phpdbg_notice(
-					"setting notice color to %s (%s)", color->name, color->code);
-				element = PHPDBG_COLOR_NOTICE;
-
-			} else goto usage;
-
-			/* set color for element */
-			phpdbg_set_color(element, color TSRMLS_CC);
-		} else {
-			phpdbg_error(
-				"Failed to find the requested color (%s)", input->argv[2]->string);
-		}
-	} else {
-usage:
+	const phpdbg_color_t *color = phpdbg_get_color(
+			param->next->str, param->next->len TSRMLS_CC);
+	
+	if (!color) {
 		phpdbg_error(
-			"set color used incorrectly: set color <prompt|error|notice> <color>");
+			"Failed to find the requested color (%s)", param->next->str);
+		return SUCCESS;
 	}
+	
+	switch (phpdbg_get_element(param->str, param->len TSRMLS_CC)) {
+		case PHPDBG_COLOR_PROMPT:
+			phpdbg_notice(
+				"setting prompt color to %s (%s)", color->name, color->code);
+			if (PHPDBG_G(prompt)[1]) {
+				free(PHPDBG_G(prompt)[1]);
+				PHPDBG_G(prompt)[1]=NULL;
+			}
+			phpdbg_set_color(PHPDBG_COLOR_PROMPT, color TSRMLS_CC);
+		break;
+		
+		case PHPDBG_COLOR_ERROR:
+			phpdbg_notice(
+				"setting error color to %s (%s)", color->name, color->code);
+			phpdbg_set_color(PHPDBG_COLOR_ERROR, color TSRMLS_CC);
+		break;
+		
+		case PHPDBG_COLOR_NOTICE:
+			phpdbg_notice(
+				"setting notice color to %s (%s)", color->name, color->code);
+			phpdbg_set_color(PHPDBG_COLOR_NOTICE, color TSRMLS_CC);
+		break;
+		
+		default:
+			phpdbg_error(
+				"Failed to find the requested element (%s)", param->str);
+	}
+
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_SET(colors) /* {{{ */
 {
-	switch (param->type) {
-		case EMPTY_PARAM: {
-			phpdbg_writeln(
-				"%s", PHPDBG_G(flags) & PHPDBG_IS_COLOURED ? "on" : "off");
-			goto done;
-		}
-		
-		case STR_PARAM: {
-			if (strncasecmp(param->str, PHPDBG_STRL("on")) == 0) {
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("%s", PHPDBG_G(flags) & PHPDBG_IS_COLOURED ? "on" : "off");
+	} else switch (param->type) {
+		case NUMERIC_PARAM: {
+			if (param->num) {
 				PHPDBG_G(flags) |= PHPDBG_IS_COLOURED;
-				goto done;
-			} else if (strncasecmp(param->str, PHPDBG_STRL("off")) == 0) {
+			} else {
 				PHPDBG_G(flags) &= ~PHPDBG_IS_COLOURED;
-				goto done;
 			}
-		}
+		} break;
 		
 		default:
 			phpdbg_error(
 				"set colors used incorrectly: set colors <on|off>");
 	}
 
-done:
 	return SUCCESS;
 } /* }}} */
 #endif
 
 PHPDBG_SET(oplog) /* {{{ */
 {
-	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_notice(
-				"Oplog %s", PHPDBG_G(oplog) ? "enabled" : "disabled");
-		break;
-
-		case NUMERIC_PARAM: switch (param->num) {
-			case 1:
-				phpdbg_error(
-					"An output file must be provided to enable oplog");
-			break;
-
-			case 0: {
-				if (PHPDBG_G(oplog)) {
-					phpdbg_notice("Disabling oplog");
-					fclose(
-						PHPDBG_G(oplog));
-				} else {
-					phpdbg_error("Oplog is not enabled!");
-				}
-			} break;
-		} break;
-
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_notice("Oplog %s", PHPDBG_G(oplog) ? "enabled" : "disabled");
+	} else switch (param->type) {
 		case STR_PARAM: {
 			/* open oplog */
 			FILE *old = PHPDBG_G(oplog);
@@ -206,3 +194,65 @@ PHPDBG_SET(oplog) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_SET(quiet) /* {{{ */
+{
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("Quietness %s", 
+			PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
+	} else switch (param->type) {
+		case NUMERIC_PARAM: {
+			if (param->num) {
+				PHPDBG_G(flags) |= PHPDBG_IS_QUIET;
+			} else {
+				PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
+			}
+		} break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_SET(stepping) /* {{{ */
+{
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("Stepping %s",
+			PHPDBG_G(flags) & PHPDBG_STEP_OPCODE ? "opcode" : "line");
+	} else switch (param->type) {
+		case STR_PARAM: {	
+			if ((param->len == sizeof("opcode")-1) &&
+				(memcmp(param->str, "opcode", sizeof("opcode")) == SUCCESS)) {
+				PHPDBG_G(flags) |= PHPDBG_STEP_OPCODE;
+			} else if ((param->len == sizeof("line")-1) &&
+				(memcmp(param->str, "line", sizeof("line")) == SUCCESS)) {
+				PHPDBG_G(flags) &= ~PHPDBG_STEP_OPCODE;
+			} else {
+				phpdbg_error("usage set stepping [<opcode|line>]");
+			}
+		} break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_SET(refcount) /* {{{ */
+{
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("Refcount %s", PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
+	} else switch (param->type) {
+		case NUMERIC_PARAM: {
+			if (param->num) {
+				PHPDBG_G(flags) |= PHPDBG_SHOW_REFCOUNTS;
+			} else {
+				PHPDBG_G(flags) &= ~PHPDBG_SHOW_REFCOUNTS;
+			}
+		} break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */

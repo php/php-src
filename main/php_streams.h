@@ -373,6 +373,7 @@ END_EXTERN_C()
 /* Flags for url_stat method in wrapper ops */
 #define PHP_STREAM_URL_STAT_LINK	1
 #define PHP_STREAM_URL_STAT_QUIET	2
+#define PHP_STREAM_URL_STAT_NOCACHE	4
 
 /* change the blocking mode of stream: value == 1 => blocking, value == 0 => non-blocking. */
 #define PHP_STREAM_OPTION_BLOCKING	1

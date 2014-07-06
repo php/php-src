@@ -1,5 +1,6 @@
 .libs/
-./phpdbg
+phpdbg
 *.lo
 *.o
+*.output
 build

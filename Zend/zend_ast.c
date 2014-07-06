@@ -328,8 +328,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			{
 				zval *tmp;
 				zend_fetch_dimension_by_zval(&tmp, &op1, &op2 TSRMLS_CC);
-				*result = *tmp;
-				efree(tmp);
+				ZVAL_ZVAL(result, tmp, 1, 1);
 			}
 			zval_dtor(&op1);
 			zval_dtor(&op2);

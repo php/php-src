@@ -32,16 +32,11 @@ PHPDBG_SET(colors);
 #endif
 PHPDBG_SET(oplog);
 PHPDBG_SET(break);
+PHPDBG_SET(breaks);
+PHPDBG_SET(quiet);
+PHPDBG_SET(stepping);
+PHPDBG_SET(refcount);
 
-static const phpdbg_command_t phpdbg_set_commands[] = {
-	PHPDBG_COMMAND_D_EX(prompt,       "usage: set prompt <string>",          'p', set_prompt,       NULL, 0),
-#ifndef _WIN32
-	PHPDBG_COMMAND_D_EX(color,        "usage: set color  <element> <color>", 'c', set_color,        NULL, 1),
-	PHPDBG_COMMAND_D_EX(colors,       "usage: set colors <on|off>",			 'C', set_colors,       NULL, 1),
-#endif
-	PHPDBG_COMMAND_D_EX(oplog,        "usage: set oplog  <output>",          'O', set_oplog,        NULL, 0),
-	PHPDBG_COMMAND_D_EX(break,        "usage: set break [id] <on|off>",      'b', set_break,        NULL, 0),
-	PHPDBG_END_COMMAND
-};
+extern const phpdbg_command_t phpdbg_set_commands[];
 
 #endif /* PHPDBG_SET_H */

@@ -575,7 +575,11 @@ PHP_FUNCTION(mysqli_query)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty query");
 		RETURN_FALSE;
 	}
+#ifdef MYSQLI_USE_MYSQLND
 	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT && (resultmode & ~(MYSQLI_ASYNC | MYSQLI_STORE_RESULT_COPY_DATA)) != MYSQLI_STORE_RESULT) {
+#else
+	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT && (resultmode & ~MYSQLI_ASYNC) != MYSQLI_STORE_RESULT) {
+#endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for resultmode");
 		RETURN_FALSE;
 	}
@@ -609,7 +613,11 @@ PHP_FUNCTION(mysqli_query)
 		RETURN_TRUE;
 	}
 
+#ifdef MYSQLI_USE_MYSQLND
 	switch (resultmode & ~(MYSQLI_ASYNC | MYSQLI_STORE_RESULT_COPY_DATA)) {
+#else
+	switch (resultmode & ~MYSQLI_ASYNC) {
+#endif
 		case MYSQLI_STORE_RESULT:
 #ifdef MYSQLI_USE_MYSQLND
 			if (resultmode & MYSQLI_STORE_RESULT_COPY_DATA) {

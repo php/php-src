@@ -279,7 +279,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 	}
 
 
-	SG(request_info).request_body = php_stream_temp_create(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE);
+	SG(request_info).request_body = php_stream_temp_create_ex(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE, PG(upload_tmp_dir));
 
 	if (sapi_module.read_post) {
 		int read_bytes;
@@ -462,7 +462,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(request_info).post_entry = NULL;
 	SG(request_info).proto_num = 1000; /* Default to HTTP 1.0 */
 	SG(global_request_time) = 0;
-
+	SG(post_read) = 0;
 	/* It's possible to override this general case in the activate() callback, if necessary. */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
@@ -825,7 +825,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			} else if (!STRCASECMP(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
-					SG(sapi_headers).http_response_code > 307) &&
+					SG(sapi_headers).http_response_code > 399) &&
 					SG(sapi_headers).http_response_code != 201) {
 					/* Return a Found Redirect if one is not already specified */
 					if (http_response_code) { /* user specified redirect code */

@@ -2218,7 +2218,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 
 	/* first we add the date and time in ISO format */
 	MAKE_STD_ZVAL(zv);
-	ZVAL_STRING(zv, date_format("Y-m-d H:i:s", 12, dateobj->time, 1), 0);
+	ZVAL_STRING(zv, date_format("Y-m-d H:i:s.u", 14, dateobj->time, 1), 0);
 	zend_hash_update(props, "date", 5, &zv, sizeof(zv), NULL);
 
 	/* then we add the timezone name (or similar) */
@@ -2582,6 +2582,8 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 	}
 	if (err && err->error_count) {
+		timelib_time_dtor(dateobj->time);
+		dateobj->time = 0;
 		return 0;
 	}
 
@@ -2729,7 +2731,9 @@ PHP_METHOD(DateTime, __construct)
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
-		php_date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 1 TSRMLS_CC);
+		if (!php_date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 1 TSRMLS_CC)) {
+			ZVAL_NULL(getThis());
+		}
 	}
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }

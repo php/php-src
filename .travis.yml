@@ -5,7 +5,8 @@ php:
     - 5.4
 
 notifications:
-    email: false
+    email: 
+       on_failure: change
 
 env:
     global:
@@ -15,9 +16,14 @@ env:
       - PDO_MYSQL_TEST_USER=travis
       - PDO_MYSQL_TEST_PASS=
       - PDO_MYSQL_TEST_HOST=127.0.0.1
-    matrix:
       - REPORT_EXIT_STATUS=1
+    matrix:
+      - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
+      - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
 
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -y libenchant-dev libaspell-dev libpspell-dev librecode-dev
 before_script:
     # Compile PHP
     - ./travis/compile.sh
@@ -29,4 +35,6 @@ before_script:
     - . ./travis/ext/pdo_pgsql/setup.sh
 
 # Run PHPs run-tests.php 
-script: ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --show-diff --set-timeout 120
+script:
+    - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --show-diff --set-timeout 120
+    - ./sapi/cli/php sapi/phpdbg/tests/run-tests.php -diff2stdout --phpdbg sapi/phpdbg/phpdbg
