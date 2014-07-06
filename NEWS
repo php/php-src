@@ -20,8 +20,8 @@ PHP                                                                        NEWS
     happen) (Dmitry, Laruence)
 
 - phpdbg
-  . Fix issue krakjoe/phpdbg#104 (Fix phpdbg.1 man page installation when
-    build != src directory). (Andy Thompson)
+  . Fixed bug #67575 (Compilation fails for phpdbg when the
+    build directory != src directory). (Andy Thompson)
 
 03 Jul 2014, PHP 5.6.0 Release Candidate 2
 
