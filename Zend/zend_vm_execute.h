@@ -9318,7 +9318,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -10205,7 +10205,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -11093,7 +11093,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -12561,7 +12561,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -15821,7 +15821,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -18189,7 +18189,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -20518,7 +20518,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -23997,7 +23997,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -25661,7 +25661,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -27091,7 +27091,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -28427,7 +28427,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -30191,7 +30191,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -33452,7 +33452,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -35586,7 +35586,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -37775,7 +37775,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
@@ -40965,7 +40965,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 		do {
 			ZEND_VM_INC_OPCODE();
 			opline++;
-			if (opline->opcode == ZEND_INIT_METHOD_CALL) {
+			if (opline->opcode == ZEND_INIT_METHOD_CALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				nested--;
