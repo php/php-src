@@ -2482,7 +2482,8 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 			if (opline->opcode == ZEND_INIT_METHOD_CALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL
+				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
+				opline->opcode == ZEND_NEW
 			) {
 				nested++;
 			} else if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
