@@ -25,5 +25,5 @@ echo "Alive\n";
 --EXPECTF--
 Calling...
 Raising...
-Caught expected Call to a member function method() on a non-object!
+Caught expected Call to a member function method() on null!
 Alive

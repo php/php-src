@@ -13,10 +13,10 @@ echo "Alive\n";
 --EXPECTF--
 
 int(4096)
-string(%d) "Call to a member function method() on a non-object"
+string(%d) "Call to a member function method() on null"
 int(4096)
-string(%d) "Call to a member function chained() on a non-object"
+string(%d) "Call to a member function chained() on null"
 int(4096)
-string(%d) "Call to a member function invocations() on a non-object"
+string(%d) "Call to a member function invocations() on null"
 NULL
 Alive

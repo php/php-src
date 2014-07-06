@@ -1,5 +1,5 @@
 --TEST--
-usort() in combination with "Call to a member function method() on a non-object"
+usort() in combination with "Call to a member function method() on null"
 --FILE--
 <?php
 set_error_handler(function($code, $message) {
@@ -16,17 +16,17 @@ echo "Alive\n";
 ?>
 --EXPECTF--
 int(4096)
-string(51) "Call to a member function compare() on a non-object"
+string(43) "Call to a member function compare() on null"
 int(4096)
-string(51) "Call to a member function compare() on a non-object"
+string(43) "Call to a member function compare() on null"
 int(4096)
-string(51) "Call to a member function compare() on a non-object"
+string(43) "Call to a member function compare() on null"
 int(4096)
-string(51) "Call to a member function compare() on a non-object"
+string(43) "Call to a member function compare() on null"
 int(4096)
-string(51) "Call to a member function compare() on a non-object"
+string(43) "Call to a member function compare() on null"
 int(4096)
-string(51) "Call to a member function compare() on a non-object"
+string(43) "Call to a member function compare() on null"
 array(5) {
   [0]=>
   int(-1)
