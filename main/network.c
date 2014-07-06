@@ -25,7 +25,10 @@
 
 #include <stddef.h>
 
+
+
 #ifdef PHP_WIN32
+# include <Ws2tcpip.h>
 # include "win32/inet.h"
 # define O_RDONLY _O_RDONLY
 # include "win32/param.h"
@@ -869,7 +872,7 @@ skip_bind:
 					efree(local_address);
 				}
 			}
-			/* free error string recieved during previous iteration (if any) */
+			/* free error string received during previous iteration (if any) */
 			if (error_string && *error_string) {
 				efree(*error_string);
 				*error_string = NULL;

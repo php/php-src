@@ -27,7 +27,7 @@
 /* {{{ */
 static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
-	char*       locale;
+	const char* locale;
 	char*       pattern = NULL;
 	int         locale_len = 0, pattern_len = 0;
 	long        style;
@@ -56,7 +56,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if(locale_len == 0) {
-		locale = INTL_G(default_locale);
+		locale = intl_locale_get_default(TSRMLS_C);
 	}
 
 	/* Create an ICU number formatter. */

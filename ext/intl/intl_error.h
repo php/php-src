@@ -20,6 +20,8 @@
 #define INTL_ERROR_H
 
 #include <unicode/utypes.h>
+#include <unicode/parseerr.h>
+#include <ext/standard/php_smart_str.h>
 
 #define INTL_ERROR_CODE(e) (e).code
 
@@ -43,5 +45,11 @@ void        intl_errors_reset( intl_error* err TSRMLS_DC );
 void        intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_DC );
 void        intl_errors_set_code( intl_error* err, UErrorCode err_code TSRMLS_DC );
 void        intl_errors_set( intl_error* err, UErrorCode code, char* msg, int copyMsg TSRMLS_DC );
+
+// Other error helpers
+smart_str	intl_parse_error_to_string( UParseError* pe );
+
+// exported to be called on extension MINIT
+void		intl_register_IntlException_class( TSRMLS_D );
 
 #endif // INTL_ERROR_H

@@ -53,7 +53,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 
 		if (HASH_KEY_IS_STRING == keytype) {
 			goto bogus;
-		} else if (HASH_KEY_NON_EXISTANT == keytype) {
+		} else if (HASH_KEY_NON_EXISTENT == keytype) {
 			break;
 		}
 		if (intindex > max_index) {
@@ -164,7 +164,7 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 
 		case IS_RESOURCE:
 		case IS_CONSTANT:
-		case IS_CONSTANT_ARRAY:
+		case IS_CONSTANT_AST:
 		default:
 			V_VT(v) = VT_NULL;
 			break;

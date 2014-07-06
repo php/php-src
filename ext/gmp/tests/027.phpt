@@ -25,7 +25,11 @@ int(1)
 int(0)
 int(1)
 int(-1)
+
+Warning: gmp_sign(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 bool(false)
+
+Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 int(0)
 
 Warning: gmp_sign() expects exactly 1 parameter, 2 given in %s on line %d

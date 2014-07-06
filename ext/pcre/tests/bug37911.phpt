@@ -37,5 +37,5 @@ array(3) {
   string(4) "blub"
 }
 
-Warning: preg_replace_callback(): Numeric named subpatterns are not allowed in %sbug37911.php on line 14
+Warning: preg_replace_callback(): Compilation failed: group name must start with a non-digit at offset %d in %sbug37911.php on line %d
 NULL

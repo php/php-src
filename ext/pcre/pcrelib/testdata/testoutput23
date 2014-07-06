@@ -1,0 +1,46 @@
+/-- Tests for the 16-bit library only */
+
+< forbid 8W
+
+/-- Check maximum non-UTF character size --/
+
+/\x{ffff}/
+    A\x{ffff}B
+ 0: \x{ffff}
+
+/\x{10000}/
+Failed: character value in \x{} or \o{} is too large at offset 8
+
+/\o{20000}/
+
+/-- Check character ranges --/
+
+/[\H]/BZSI
+------------------------------------------------------------------
+        Bra
+        [\x00-\x08\x0a-\x1f!-\x9f\x{a1}-\x{167f}\x{1681}-\x{180d}\x{180f}-\x{1fff}\x{200b}-\x{202e}\x{2030}-\x{205e}\x{2060}-\x{2fff}\x{3001}-\x{ffff}]
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Subject length lower bound = 1
+No set of starting bytes
+
+/[\V]/BZSI
+------------------------------------------------------------------
+        Bra
+        [\x00-\x09\x0e-\x84\x{86}-\x{2027}\x{202a}-\x{ffff}]
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Subject length lower bound = 1
+No set of starting bytes
+
+/-- End of testinput23 --/

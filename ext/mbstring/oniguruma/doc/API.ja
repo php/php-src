@@ -1,4 +1,4 @@
-鬼車インターフェース Version 4.7.1   2007/07/04
+鬼車インターフェース Version 5.9.2   2008/02/19
 
 #include <oniguruma.h>
 
@@ -106,10 +106,10 @@
       ONIG_ENCODING_EUC_KR        EUC-KR
       ONIG_ENCODING_EUC_CN        EUC-CN
       ONIG_ENCODING_SJIS          Shift_JIS
-      ONIG_ENCODING_KOI8          KOI8
       ONIG_ENCODING_KOI8_R        KOI8-R
+      ONIG_ENCODING_CP1251        CP1251
       ONIG_ENCODING_BIG5          Big5
-      ONIG_ENCODING_GB18030       GB 18030
+      ONIG_ENCODING_GB18030       GB18030
 
       または、ユーザが定義したOnigEncodingTypeデータのアドレス
 
@@ -134,6 +134,19 @@
               onig_error_code_to_str()の三番目の引数として使用する
 
 
+
+# int onig_new_without_alloc(regex_t* reg, const UChar* pattern,
+            const UChar* pattern_end,
+            OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax,
+            OnigErrorInfo* err_info)
+
+  正規表現オブジェクト(regex)を作成する。
+  regの領域を内部で割り当てない。
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+
 # int onig_new_deluxe(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
                       OnigCompileInfo* ci, OnigErrorInfo* einfo)
 
@@ -153,15 +166,12 @@
     ci->target_enc:      対象文字列の文字エンコーディング
     ci->syntax:          正規表現パターン文法定義
     ci->option:          正規表現コンパイル時オプション
-    ci->ambig_flag:      ONIG_OPTION_IGNORECASEモードでの
+    ci->case_fold_flag:  ONIG_OPTION_IGNORECASEモードでの
                          文字曖昧マッチ指定ビットフラグ
 
-       ONIGENC_AMBIGUOUS_MATCH_NONE:          曖昧無し
-       ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE:    ASCIIの大文字小文字
-       ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE: ASCII以外の大文字小文字
-       ONIGENC_AMBIGUOUS_MATCH_FULL:          全ての曖昧フラグ有効
-       ONIGENC_AMBIGUOUS_MATCH_DEFAULT:       (ASCII | NONASCII)
-                                              onig_set_default_ambig_flag()
+       ONIGENC_CASE_FOLD_MIN:           最小
+       ONIGENC_CASE_FOLD_DEFAULT:       最小
+                                        onig_set_default_case_fold_flag()
 
   5 err_info:    エラー情報を返すためのアドレス
                  onig_error_code_to_str()の三番目の引数として使用する
@@ -187,6 +197,14 @@
   1 reg: 正規表現オブジェクト
 
 
+# void onig_free_body(regex_t* reg)
+
+  正規表現オブジェクトのメモリを解放する。(reg自身の領域を除いて)
+
+  引数
+  1 reg: 正規表現オブジェクト
+
+
 
 # int onig_search(regex_t* reg, const UChar* str, const UChar* end, const UChar* start,
                    const UChar* range, OnigRegion* region, OnigOptionType option)
@@ -200,10 +218,10 @@
   1 reg:    正規表現オブジェクト
   2 str:    検索対象文字列
   3 end:    検索対象文字列の終端アドレス
-  4 start:  検索対象文字列の検索先頭位置開始アドレス
-  5 range:  検索対象文字列の検索先頭位置終端アドレス
-    前方探索  (start <= 探索される文字列の先頭 < range)
-    後方探索  (range <= 探索される文字列の先頭 <= start)
+  4 start:  検索対象文字列の検索先頭位置アドレス
+  5 range:  検索対象文字列の検索終了位置アドレス
+    前方探索  (start <= 探索される文字列 < range)
+    後方探索  (range <= 探索される文字列 <= start)
   6 region: マッチ領域情報(region)  (NULLも許される)
   7 option: 検索時オプション
 
@@ -340,10 +358,10 @@
   1 reg:    正規表現オブジェクト
 
 
-# OnigEncoding    onig_get_encoding(regex_t* reg)
-# OnigOptionType  onig_get_options(regex_t* reg)
-# OnigAmbigType   onig_get_ambig_flag(regex_t* reg)
-# OnigSyntaxType* onig_get_syntax(regex_t* reg)
+# OnigEncoding     onig_get_encoding(regex_t* reg)
+# OnigOptionType   onig_get_options(regex_t* reg)
+# OnigCaseFoldType onig_get_case_fold_flag(regex_t* reg)
+# OnigSyntaxType*  onig_get_syntax(regex_t* reg)
 
   正規表現オブジェクトに対して、対応する値を返す。
 
@@ -524,7 +542,7 @@
   2 from: 元
 
 
-# int onig_set_meta_char(OnigEncoding enc, unsigned int what,
+# int onig_set_meta_char(OnigSyntaxType* syntax, unsigned int what,
                          OnigCodePoint code)
 
   メタ文字を指定したコードポイント値にセットする。
@@ -535,8 +553,8 @@
   正常終了戻り値: ONIG_NORMAL
 
   引数
-  1 enc:  対象文字エンコーディング
-  2 what: メタ文字機能の指定
+  1 syntax: 対象文法
+  2 what:   メタ文字機能の指定
 
           ONIG_META_CHAR_ESCAPE
           ONIG_META_CHAR_ANYCHAR
@@ -548,17 +566,17 @@
   3 code: メタ文字のコードポイント または ONIG_INEFFECTIVE_META_CHAR.
 
 
-# OnigAmbigType onig_get_default_ambig_flag()
+# OnigCaseFoldType onig_get_default_case_fold_flag()
 
-  デフォルトの曖昧マッチフラグを取得する。
+  デフォルトのcase foldフラグを取得する。
 
 
-# int onig_set_default_ambig_flag(OnigAmbigType ambig_flag)
+# int onig_set_default_case_fold_flag(OnigCaseFoldType case_fold_flag)
 
-  デフォルトの曖昧マッチフラグをセットする。
+  デフォルトのcase foldフラグをセットする。
 
   引数
-  1 ambig_flag: 曖昧マッチフラグ
+  1 case_fold_flag: case foldフラグ
 
 
 # unsigned int onig_get_match_stack_limit_size(void)
@@ -587,6 +605,6 @@
 
 # const char* onig_version(void)
 
-  バージョン文字列を返す。(例 "2.2.8")
+  バージョン文字列を返す。(例 "5.0.3")
 
 // END

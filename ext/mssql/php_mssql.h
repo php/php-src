@@ -166,7 +166,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mssql)
 	long min_error_severity, min_message_severity;
 	long cfg_min_error_severity, cfg_min_message_severity;
 	long connect_timeout, timeout;
-	zend_bool compatability_mode;
+	zend_bool compatibility_mode;
 	void (*get_column_content)(mssql_link *mssql_ptr,int offset,zval *result,int column_type  TSRMLS_DC);
 	long textsize, textlimit, batchsize;
 	zend_bool datetimeconvert;

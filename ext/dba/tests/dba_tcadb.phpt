@@ -16,12 +16,20 @@ DBA TCADB handler test
 	require_once dirname(__FILE__) .'/dba_handler.inc';
 ?>
 ===DONE===
+--CLEAN--
+<?php 
+$db_filename = $db_file = dirname(__FILE__) .'/test0.tch';
+@unlink($db_filename);
+@unlink($db_filename.'.lck');
+?>
 --EXPECT--
 database handler: tcadb
 3NYNYY
 Content String 2
 Content 2 replaced
 Read during write: not allowed
+"key number 6" written
+Failed to write "key number 6" 2nd time
 Content 2 replaced 2nd time
 The 6th value
 array(3) {
@@ -37,6 +45,8 @@ array(3) {
 Content String 2
 Content 2 replaced
 Read during write: not allowed
+"key number 6" written
+Failed to write "key number 6" 2nd time
 Content 2 replaced 2nd time
 The 6th value
 array(3) {

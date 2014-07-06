@@ -22,15 +22,13 @@
 #ifndef PHP_GD_H
 #define PHP_GD_H
 
-#define HAVE_GDIMAGECREATEFROMPNG 1
-
 #if HAVE_LIBFREETYPE
 # ifndef ENABLE_GD_TTF
 #  define ENABLE_GD_TTF
 # endif
 #endif
 
-#if HAVE_LIBGD
+#if defined(HAVE_LIBGD) || defined(HAVE_GD_BUNDLED)
 
 /* open_basedir and safe_mode checks */
 #define PHP_GD_CHECK_OPEN_BASEDIR(filename, errormsg)                       \
@@ -69,10 +67,10 @@ extern zend_module_entry gd_module_entry;
 /* gd.c functions */
 PHP_MINFO_FUNCTION(gd);
 PHP_MINIT_FUNCTION(gd);
-#if HAVE_LIBT1 || HAVE_GD_FONTMUTEX
+#if HAVE_LIBT1
 PHP_MSHUTDOWN_FUNCTION(gd);
 #endif
-#if HAVE_GD_STRINGFT
+#if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
 PHP_RSHUTDOWN_FUNCTION(gd);
 #endif
 
@@ -104,6 +102,7 @@ PHP_FUNCTION(imagefttext);
 
 PHP_FUNCTION(imagecreatetruecolor);
 PHP_FUNCTION(imagetruecolortopalette);
+PHP_FUNCTION(imagepalettetotruecolor);
 PHP_FUNCTION(imagesetthickness);
 PHP_FUNCTION(imagefilledellipse);
 PHP_FUNCTION(imagefilledarc);
@@ -122,9 +121,19 @@ PHP_FUNCTION(imagegrabscreen);
 
 PHP_FUNCTION(imagerotate);
 
+PHP_FUNCTION(imageflip);
+
 #ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imageantialias);
 #endif
+
+PHP_FUNCTION(imagecrop);
+PHP_FUNCTION(imagecropauto);
+PHP_FUNCTION(imagescale);
+PHP_FUNCTION(imageaffine);
+PHP_FUNCTION(imageaffinematrixget);
+PHP_FUNCTION(imageaffinematrixconcat);
+PHP_FUNCTION(imagesetinterpolation);
 
 PHP_FUNCTION(imagesetthickness);
 PHP_FUNCTION(imagecopymergegray);
@@ -142,7 +151,7 @@ PHP_FUNCTION(imagecreatefromwbmp);
 PHP_FUNCTION(imagecreatefromgd);
 PHP_FUNCTION(imagecreatefromgd2);
 PHP_FUNCTION(imagecreatefromgd2part);
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
+#if defined(HAVE_GD_XPM)
 PHP_FUNCTION(imagecreatefromxpm);
 #endif
 
@@ -193,10 +202,8 @@ PHP_FUNCTION(image2wbmp);
 
 PHP_FUNCTION(imagecolormatch);
 
-#if HAVE_GD_BUNDLED
 PHP_FUNCTION(imagelayereffect);
 PHP_FUNCTION(imagexbm);
-#endif
 
 PHP_FUNCTION(imagefilter);
 PHP_FUNCTION(imageconvolution);

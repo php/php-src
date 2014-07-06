@@ -46,7 +46,7 @@ Opening Streams
 ===============
 In most cases, you should use this API:
 
-PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode,
+PHPAPI php_stream *php_stream_open_wrapper(const char *path, const char *mode,
     int options, char **opened_path TSRMLS_DC);
 
 Where:

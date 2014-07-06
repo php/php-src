@@ -1,13 +1,20 @@
 The OCI8 Extension
 ------------------
 
-Use the OCI8 extension to access Oracle Database.  
+Use the OCI8 extension to access Oracle Database.
 
 Documentation is at http://php.net/oci8
 
-The extension can be built with PHP versions 4.3.9 to 5.x using Oracle
-9.2, 10, or 11 client libraries.  Oracle's standard cross-version
-connectivity applies.  For example PHP linked with Oracle 11.2 client
-libraries can connect to Oracle Database 9.2 onwards.  See Oracle's
-note "Oracle Client / Server Interoperability Support" (ID 207303.1)
-for details.
+The extension can be linked with Oracle client libraries from Oracle
+Database 10.2, 11, or 12.1.  These libraries are found in the database
+installation, or in the free Oracle Instant Client available from
+Oracle.
+
+Oracle's standard cross-version connectivity applies.  For example,
+PHP OCI8 linked with Instant Client 11.2 can connect to Oracle
+Database 9.2 onward.  See Oracle's note "Oracle Client / Server
+Interoperability Support" (ID 207303.1) for details.
+
+PHP OCI8 2.0 can be built with PHP 5.2 onward.  Use the older PHP OCI8
+1.4.10 when using PHP 4.3.9 through to PHP 5.1.x, or when only Oracle
+Database 9.2 client libraries are available.

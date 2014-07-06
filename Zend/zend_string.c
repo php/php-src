@@ -61,6 +61,8 @@ void zend_interned_strings_init(TSRMLS_D)
 	mprotect(CG(interned_strings_start), CG(interned_strings_end) - CG(interned_strings_start), PROT_READ);
 #endif
 
+    /* interned empty string */
+	CG(interned_empty_string) = zend_new_interned_string_int("", sizeof(""), 0 TSRMLS_CC);
 #endif
 
 	zend_new_interned_string = zend_new_interned_string_int;

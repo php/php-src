@@ -757,22 +757,10 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		fci->function_name = NULL;
 		fci->symbol_table = NULL;
 		fci->retval_ptr_ptr = &stmt->fetch.cls.retval_ptr;
-		if (stmt->fetch.cls.ctor_args) {
-			HashTable *ht = Z_ARRVAL_P(stmt->fetch.cls.ctor_args);
-			Bucket *p;
-
-			fci->param_count = 0;
-			fci->params = safe_emalloc(sizeof(zval**), ht->nNumOfElements, 0);
-			p = ht->pListHead;
-			while (p != NULL) {
-				fci->params[fci->param_count++] = (zval**)p->pData;
-				p = p->pListNext;
-			}
-		} else {
-			fci->param_count = 0;
-			fci->params = NULL;
-		}
+		fci->params = NULL;
 		fci->no_separation = 1;
+
+		zend_fcall_info_args(fci, stmt->fetch.cls.ctor_args TSRMLS_CC);
 
 		fcc->initialized = 1;
 		fcc->function_handler = ce->constructor;
@@ -2499,16 +2487,15 @@ static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data TSRM
 	*data = &I->fetch_ahead;
 }
 
-static int pdo_stmt_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
-	ulong *int_key TSRMLS_DC)
+static void pdo_stmt_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 {
 	struct php_pdo_iterator *I = (struct php_pdo_iterator*)iter->data;
 
 	if (I->key == (ulong)-1) {
-		return HASH_KEY_NON_EXISTANT;
+		ZVAL_NULL(key);
+	} else {
+		ZVAL_LONG(key, I->key);
 	}
-	*int_key = I->key;
-	return HASH_KEY_IS_LONG;
 }
 
 static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
@@ -2733,6 +2720,7 @@ static union _zend_function *row_get_ctor(zval *object TSRMLS_DC)
 	ctor.function_name = "__construct";
 	ctor.scope = pdo_row_ce;
 	ctor.handler = ZEND_FN(dbstmt_constructor);
+	ctor.fn_flags = ZEND_ACC_PUBLIC;
 
 	return (union _zend_function*)&ctor;
 }

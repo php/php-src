@@ -46,7 +46,7 @@ string(7) "1000000"
 string(7) "1000000"
 string(30) "238462734628347239571822592658"
 
-Warning: gmp_clrbit(): supplied argument is not a valid GMP integer resource in %s on line %d
+Warning: gmp_clrbit() expects parameter 1 to be GMP, array given in %s on line %d
 
 Warning: gmp_clrbit() expects exactly 2 parameters, 3 given in %s on line %d
 

@@ -90,9 +90,9 @@ if (!$IS_MYSQLND)
 		if (isset($functions_trace[$name]))
 			$found++;
 
-	if ($found < (count($memory_funcs) - 2))
+	if ($found < (count($memory_funcs) - 3))
 		printf("[016] Only %d memory functions have been found, expecting at least %d.\n",
-			$found, count($memory_funcs) - 2);
+			$found, count($memory_funcs) - 3);
 
 	$trace = try_control_string($link, 't:O,' . $trace_file, $trace_file, 20);
 	if (!strstr($trace, 'SELECT * FROM test') && !strstr($trace, 'mysql_real_query'))

@@ -31,6 +31,8 @@ string(5) "40994"
 string(3) "515"
 string(4) "3333"
 string(4) "4544"
+
+Warning: gmp_and(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 string(1) "0"
 string(4) "1536"
 string(15) "424703623692768"

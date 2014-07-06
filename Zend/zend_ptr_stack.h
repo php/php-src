@@ -111,6 +111,11 @@ static zend_always_inline void *zend_ptr_stack_pop(zend_ptr_stack *stack)
 	return *(--stack->top_element);
 }
 
+static inline void *zend_ptr_stack_top(zend_ptr_stack *stack)
+{
+    return stack->elements[stack->top - 1];
+}
+
 #endif /* ZEND_PTR_STACK_H */
 
 /*

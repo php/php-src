@@ -39,4 +39,3 @@ Warning: session_set_save_handler(): Argument 4 is not a valid callback in %s on
 Warning: session_set_save_handler(): Argument 5 is not a valid callback in %s on line %d
 
 Warning: session_set_save_handler(): Argument 6 is not a valid callback in %s on line %d
-

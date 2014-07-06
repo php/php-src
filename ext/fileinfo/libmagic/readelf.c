@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readelf.c,v 1.97 2013/03/06 03:35:30 christos Exp $")
+FILE_RCSID("@(#)$File: readelf.c,v 1.99 2013/11/05 15:44:01 christos Exp $")
 #endif
 
 #ifdef BUILTIN_ELF
@@ -136,8 +136,8 @@ getu64(int swap, uint64_t value)
 #endif
 
 #define xsh_addr	(clazz == ELFCLASS32			\
-			 ? (void *) &sh32			\
-			 : (void *) &sh64)
+			 ? (void *)&sh32			\
+			 : (void *)&sh64)
 #define xsh_sizeof	(clazz == ELFCLASS32			\
 			 ? sizeof(sh32)				\
 			 : sizeof(sh64))
@@ -174,8 +174,8 @@ getu64(int swap, uint64_t value)
 			 ? elf_getu32(swap, ph32.p_filesz)	\
 			 : elf_getu64(swap, ph64.p_filesz)))
 #define xnh_addr	(clazz == ELFCLASS32			\
-			 ? (void *) &nh32			\
-			 : (void *) &nh64)
+			 ? (void *)&nh32			\
+			 : (void *)&nh64)
 #define xph_memsz	(size_t)((clazz == ELFCLASS32		\
 			 ? elf_getu32(swap, ph32.p_memsz)	\
 			 : elf_getu64(swap, ph64.p_memsz)))
@@ -195,8 +195,8 @@ getu64(int swap, uint64_t value)
 			 ? prpsoffsets32[i]			\
 			 : prpsoffsets64[i])
 #define xcap_addr	(clazz == ELFCLASS32			\
-			 ? (void *) &cap32			\
-			 : (void *) &cap64)
+			 ? (void *)&cap32			\
+			 : (void *)&cap64)
 #define xcap_sizeof	(clazz == ELFCLASS32			\
 			 ? sizeof cap32				\
 			 : sizeof cap64)
@@ -359,6 +359,126 @@ dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 }
 #endif
 
+static void
+do_note_netbsd_version(struct magic_set *ms, int swap, void *v)
+{
+	uint32_t desc;
+	(void)memcpy(&desc, v, sizeof(desc));
+	desc = elf_getu32(swap, desc);
+
+	if (file_printf(ms, ", for NetBSD") == -1)
+		return;
+	/*
+	 * The version number used to be stuck as 199905, and was thus
+	 * basically content-free.  Newer versions of NetBSD have fixed
+	 * this and now use the encoding of __NetBSD_Version__:
+	 *
+	 *	MMmmrrpp00
+	 *
+	 * M = major version
+	 * m = minor version
+	 * r = release ["",A-Z,Z[A-Z] but numeric]
+	 * p = patchlevel
+	 */
+	if (desc > 100000000U) {
+		uint32_t ver_patch = (desc / 100) % 100;
+		uint32_t ver_rel = (desc / 10000) % 100;
+		uint32_t ver_min = (desc / 1000000) % 100;
+		uint32_t ver_maj = desc / 100000000;
+
+		if (file_printf(ms, " %u.%u", ver_maj, ver_min) == -1)
+			return;
+		if (ver_rel == 0 && ver_patch != 0) {
+			if (file_printf(ms, ".%u", ver_patch) == -1)
+				return;
+		} else if (ver_rel != 0) {
+			while (ver_rel > 26) {
+				if (file_printf(ms, "Z") == -1)
+					return;
+				ver_rel -= 26;
+			}
+			if (file_printf(ms, "%c", 'A' + ver_rel - 1)
+			    == -1)
+				return;
+		}
+	}
+}
+
+static void
+do_note_freebsd_version(struct magic_set *ms, int swap, void *v)
+{
+	uint32_t desc;
+
+	(void)memcpy(&desc, v, sizeof(desc));
+	desc = elf_getu32(swap, desc);
+	if (file_printf(ms, ", for FreeBSD") == -1)
+		return;
+
+	/*
+	 * Contents is __FreeBSD_version, whose relation to OS
+	 * versions is defined by a huge table in the Porter's
+	 * Handbook.  This is the general scheme:
+	 * 
+	 * Releases:
+	 * 	Mmp000 (before 4.10)
+	 * 	Mmi0p0 (before 5.0)
+	 * 	Mmm0p0
+	 * 
+	 * Development branches:
+	 * 	Mmpxxx (before 4.6)
+	 * 	Mmp1xx (before 4.10)
+	 * 	Mmi1xx (before 5.0)
+	 * 	M000xx (pre-M.0)
+	 * 	Mmm1xx
+	 * 
+	 * M = major version
+	 * m = minor version
+	 * i = minor version increment (491000 -> 4.10)
+	 * p = patchlevel
+	 * x = revision
+	 * 
+	 * The first release of FreeBSD to use ELF by default
+	 * was version 3.0.
+	 */
+	if (desc == 460002) {
+		if (file_printf(ms, " 4.6.2") == -1)
+			return;
+	} else if (desc < 460100) {
+		if (file_printf(ms, " %d.%d", desc / 100000,
+		    desc / 10000 % 10) == -1)
+			return;
+		if (desc / 1000 % 10 > 0)
+			if (file_printf(ms, ".%d", desc / 1000 % 10) == -1)
+				return;
+		if ((desc % 1000 > 0) || (desc % 100000 == 0))
+			if (file_printf(ms, " (%d)", desc) == -1)
+				return;
+	} else if (desc < 500000) {
+		if (file_printf(ms, " %d.%d", desc / 100000,
+		    desc / 10000 % 10 + desc / 1000 % 10) == -1)
+			return;
+		if (desc / 100 % 10 > 0) {
+			if (file_printf(ms, " (%d)", desc) == -1)
+				return;
+		} else if (desc / 10 % 10 > 0) {
+			if (file_printf(ms, ".%d", desc / 10 % 10) == -1)
+				return;
+		}
+	} else {
+		if (file_printf(ms, " %d.%d", desc / 100000,
+		    desc / 1000 % 100) == -1)
+			return;
+		if ((desc / 100 % 10 > 0) ||
+		    (desc % 100000 / 100 == 0)) {
+			if (file_printf(ms, " (%d)", desc) == -1)
+				return;
+		} else if (desc / 10 % 10 > 0) {
+			if (file_printf(ms, ".%d", desc / 10 % 10) == -1)
+				return;
+		}
+	}
+}
+
 private size_t
 donote(struct magic_set *ms, void *vbuf, size_t offset, size_t size,
     int clazz, int swap, size_t align, int *flags)
@@ -476,128 +596,68 @@ donote(struct magic_set *ms, void *vbuf, size_t offset, size_t size,
 	    *flags |= FLAGS_DID_BUILD_ID;
 	}
 
-	if (namesz == 7 && strcmp((char *)&nbuf[noff], "NetBSD") == 0 &&
-	    xnh_type == NT_NETBSD_VERSION && descsz == 4) {
+	if (namesz == 4 && strcmp((char *)&nbuf[noff], "PaX") == 0 &&
+	    xnh_type == NT_NETBSD_PAX && descsz == 4) {
+		static const char *pax[] = {
+		    "+mprotect",
+		    "-mprotect",
+		    "+segvguard",
+		    "-segvguard",
+		    "+ASLR",
+		    "-ASLR",
+		};
 		uint32_t desc;
+		size_t i;
+		int did = 0;
+
 		(void)memcpy(&desc, &nbuf[doff], sizeof(desc));
 		desc = elf_getu32(swap, desc);
 
-		if (file_printf(ms, ", for NetBSD") == -1)
+		if (desc && file_printf(ms, ", PaX: ") == -1)
 			return size;
-		/*
-		 * The version number used to be stuck as 199905, and was thus
-		 * basically content-free.  Newer versions of NetBSD have fixed
-		 * this and now use the encoding of __NetBSD_Version__:
-		 *
-		 *	MMmmrrpp00
-		 *
-		 * M = major version
-		 * m = minor version
-		 * r = release ["",A-Z,Z[A-Z] but numeric]
-		 * p = patchlevel
-		 */
-		if (desc > 100000000U) {
-			uint32_t ver_patch = (desc / 100) % 100;
-			uint32_t ver_rel = (desc / 10000) % 100;
-			uint32_t ver_min = (desc / 1000000) % 100;
-			uint32_t ver_maj = desc / 100000000;
 
-			if (file_printf(ms, " %u.%u", ver_maj, ver_min) == -1)
+		for (i = 0; i < __arraycount(pax); i++) {
+			if (((1 << i) & desc) == 0)
+				continue;
+			if (file_printf(ms, "%s%s", did++ ? "," : "",
+			    pax[i]) == -1)
 				return size;
-			if (ver_rel == 0 && ver_patch != 0) {
-				if (file_printf(ms, ".%u", ver_patch) == -1)
-					return size;
-			} else if (ver_rel != 0) {
-				while (ver_rel > 26) {
-					if (file_printf(ms, "Z") == -1)
-						return size;
-					ver_rel -= 26;
-				}
-				if (file_printf(ms, "%c", 'A' + ver_rel - 1)
-				    == -1)
-					return size;
-			}
 		}
-		*flags |= FLAGS_DID_NOTE;
+	}
+
+	if (namesz == 7 && strcmp((char *)&nbuf[noff], "NetBSD") == 0) {
+		switch (xnh_type) {
+		case NT_NETBSD_VERSION:
+			if (descsz == 4) {
+				do_note_netbsd_version(ms, swap, &nbuf[doff]);
+				*flags |= FLAGS_DID_NOTE;
+				return size;
+			}
+			break;
+		case NT_NETBSD_MARCH:
+			if (file_printf(ms, ", compiled for: %.*s", (int)descsz,
+			    (const char *)&nbuf[doff]) == -1)
+				return size;
+			break;
+		case NT_NETBSD_CMODEL:
+			if (file_printf(ms, ", compiler model: %.*s",
+			    (int)descsz, (const char *)&nbuf[doff]) == -1)
+				return size;
+			break;
+		default:
+			if (file_printf(ms, ", note=%u", xnh_type) == -1)
+				return size;
+			break;
+		}
 		return size;
 	}
 
-	if (namesz == 8 && strcmp((char *)&nbuf[noff], "FreeBSD") == 0 &&
-	    xnh_type == NT_FREEBSD_VERSION && descsz == 4) {
-		uint32_t desc;
-		(void)memcpy(&desc, &nbuf[doff], sizeof(desc));
-		desc = elf_getu32(swap, desc);
-		if (file_printf(ms, ", for FreeBSD") == -1)
+	if (namesz == 8 && strcmp((char *)&nbuf[noff], "FreeBSD") == 0) {
+	    	if (xnh_type == NT_FREEBSD_VERSION && descsz == 4) {
+			do_note_freebsd_version(ms, swap, &nbuf[doff]);
+			*flags |= FLAGS_DID_NOTE;
 			return size;
-
-		/*
-		 * Contents is __FreeBSD_version, whose relation to OS
-		 * versions is defined by a huge table in the Porter's
-		 * Handbook.  This is the general scheme:
-		 * 
-		 * Releases:
-		 * 	Mmp000 (before 4.10)
-		 * 	Mmi0p0 (before 5.0)
-		 * 	Mmm0p0
-		 * 
-		 * Development branches:
-		 * 	Mmpxxx (before 4.6)
-		 * 	Mmp1xx (before 4.10)
-		 * 	Mmi1xx (before 5.0)
-		 * 	M000xx (pre-M.0)
-		 * 	Mmm1xx
-		 * 
-		 * M = major version
-		 * m = minor version
-		 * i = minor version increment (491000 -> 4.10)
-		 * p = patchlevel
-		 * x = revision
-		 * 
-		 * The first release of FreeBSD to use ELF by default
-		 * was version 3.0.
-		 */
-		if (desc == 460002) {
-			if (file_printf(ms, " 4.6.2") == -1)
-				return size;
-		} else if (desc < 460100) {
-			if (file_printf(ms, " %d.%d", desc / 100000,
-			    desc / 10000 % 10) == -1)
-				return size;
-			if (desc / 1000 % 10 > 0)
-				if (file_printf(ms, ".%d", desc / 1000 % 10)
-				    == -1)
-					return size;
-			if ((desc % 1000 > 0) || (desc % 100000 == 0))
-				if (file_printf(ms, " (%d)", desc) == -1)
-					return size;
-		} else if (desc < 500000) {
-			if (file_printf(ms, " %d.%d", desc / 100000,
-			    desc / 10000 % 10 + desc / 1000 % 10) == -1)
-				return size;
-			if (desc / 100 % 10 > 0) {
-				if (file_printf(ms, " (%d)", desc) == -1)
-					return size;
-			} else if (desc / 10 % 10 > 0) {
-				if (file_printf(ms, ".%d", desc / 10 % 10)
-				    == -1)
-					return size;
-			}
-		} else {
-			if (file_printf(ms, " %d.%d", desc / 100000,
-			    desc / 1000 % 100) == -1)
-				return size;
-			if ((desc / 100 % 10 > 0) ||
-			    (desc % 100000 / 100 == 0)) {
-				if (file_printf(ms, " (%d)", desc) == -1)
-					return size;
-			} else if (desc / 10 % 10 > 0) {
-				if (file_printf(ms, ".%d", desc / 10 % 10)
-				    == -1)
-					return size;
-			}
 		}
-		*flags |= FLAGS_DID_NOTE;
-		return size;
 	}
 
 	if (namesz == 8 && strcmp((char *)&nbuf[noff], "OpenBSD") == 0 &&
@@ -692,6 +752,7 @@ core:
 
 	default:
 		if (xnh_type == NT_PRPSINFO && *flags & FLAGS_IS_CORE) {
+/*###709 [cc] warning: declaration of 'i' shadows previous non-variable%%%*/
 			size_t i, j;
 			unsigned char c;
 			/*
@@ -906,8 +967,8 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 			}
 			if (FINFO_READ_FUNC(fd, nbuf, (size_t)xsh_size) !=
 			    (ssize_t)xsh_size) {
-				efree(nbuf);
 				file_badread(ms);
+				efree(nbuf);
 				return -1;
 			}
 

@@ -77,4 +77,4 @@ Content-Type: %s
 Content-Length: %d
 
 <!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
-</head><body><h1>Not Found</h1><p>The requested resource /main/no-exists.php was not found on this server.</p></body></html>
+</head><body><h1>Not Found</h1><p>The requested resource <code class="url">/main/no-exists.php</code> was not found on this server.</p></body></html>

@@ -42,6 +42,18 @@
 #define mysqli_change_user_silent(c, u, p, d, p_len)   mysql_change_user((c), (u), (p), (d))
 
 
+#define TRANS_START_NO_OPT						0
+#define TRANS_START_WITH_CONSISTENT_SNAPSHOT	1
+#define TRANS_START_READ_WRITE					2
+#define TRANS_START_READ_ONLY					4
+
+#define TRANS_COR_NO_OPT		0
+#define TRANS_COR_AND_CHAIN		1
+#define TRANS_COR_AND_NO_CHAIN	2
+#define TRANS_COR_RELEASE		4
+#define TRANS_COR_NO_RELEASE	8
+
+
 /*
   These functions also reside in ext/mysqlnd/mysqlnd_portability.h but since it is only made
   available if one wants to build mysqli against mysqlnd and they are useful for libmysql as

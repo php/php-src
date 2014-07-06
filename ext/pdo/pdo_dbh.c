@@ -101,7 +101,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 }
 /* }}} */
 
-void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_error_type *pdo_err = &dbh->error_code;
 	const char *msg = "<<Unknown>>";
@@ -468,22 +468,10 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fci.object_ptr = object;
 		fci.symbol_table = NULL;
 		fci.retval_ptr_ptr = &retval;
-		if (ctor_args) {
-			HashTable *ht = Z_ARRVAL_P(ctor_args);
-			Bucket *p;
-
-			fci.param_count = 0;
-			fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
-			p = ht->pListHead;
-			while (p != NULL) {
-				fci.params[fci.param_count++] = (zval**)p->pData;
-				p = p->pListNext;
-			}
-		} else {
-			fci.param_count = 0;
-			fci.params = NULL;
-		}
+		fci.params = NULL;
 		fci.no_separation = 1;
+
+		zend_fcall_info_args(&fci, ctor_args TSRMLS_CC);
 
 		fcc.initialized = 1;
 		fcc.function_handler = dbstmt_ce->constructor;
@@ -1328,15 +1316,11 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 			} else {
 				ifunc->required_num_args = info->required_num_args;
 			}
-			if (info->pass_rest_by_reference) {
-				if (info->pass_rest_by_reference == ZEND_SEND_PREFER_REF) {
-					ifunc->fn_flags |= ZEND_ACC_PASS_REST_PREFER_REF;
-				} else {
-					ifunc->fn_flags |= ZEND_ACC_PASS_REST_BY_REFERENCE;
-				}
-			}
 			if (info->return_reference) {
 				ifunc->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+			}
+			if (funcs->arg_info[funcs->num_args].is_variadic) {
+				ifunc->fn_flags |= ZEND_ACC_VARIADIC;
 			}
 		} else {
 			ifunc->arg_info = NULL;

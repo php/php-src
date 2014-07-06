@@ -26,6 +26,8 @@ var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var MFO = null;
 var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
+var PROGRAM_FILESx86 = WshShell.Environment("Process").Item("ProgramFiles(x86)");
+var VCINSTALLDIR = WshShell.Environment("Process").Item("VCINSTALLDIR");
 var DSP_FLAGS = new Array();
 var PHP_SRC_DIR=FSO.GetParentFolderName(WScript.ScriptFullName);
 
@@ -1228,6 +1230,8 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	return true;
 }
 
+var static_pgo_enabled = false;
+
 function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 {
 	var objs = null;
@@ -1318,6 +1322,19 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		ADD_FLAG("STATIC_EXT_LIBS", "$(LIBS_" + EXT + ")");
 		ADD_FLAG("STATIC_EXT_LDFLAGS", "$(LDFLAGS_" + EXT + ")");
 		ADD_FLAG("STATIC_EXT_CFLAGS", "$(CFLAGS_" + EXT + ")");
+		if (is_pgo_desired(extname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
+			if (!static_pgo_enabled) {
+				if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+					ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:PGINSTRUMENT");
+				}
+				else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+					ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:PGUPDATE");
+				}
+
+				ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
+				static_pgo_enabled = true;
+			}
+		}
 
 		/* find the header that declares the module pointer,
 		 * so we can include it in internal_functions.c */
@@ -1423,6 +1440,11 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 			}
 		} else {
 			MFO.WriteLine(sub_build + obj + ": " + dir + "\\" + src);
+
+			if (PHP_ANALYZER == "pvs") {
+				MFO.WriteLine("\t@\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
+					+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
+			}
 			MFO.WriteLine("\t@$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + obj);
 		}
 	}
@@ -1583,6 +1605,20 @@ function write_summary()
 	ar[1] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
 	ar[2] = ['Compiler', VC_VERSIONS[VCVERS]];
 	ar[3] = ['Architecture', X64 ? 'x64' : 'x86'];
+	if (PHP_PGO == "yes") {
+		ar[4] = ['Optimization', "PGO"];
+	} else if (PHP_PGI == "yes") {
+		ar[4] = ['Optimization', "PGI"];
+	} else {
+		ar[4] = ['Optimization', PHP_DEBUG == "yes" ? "disabled" : "PGO disabled"];
+	}
+	if (PHP_ANALYZER == "vs") {
+		ar[5] = ['Static analyzer', 'Visual Studio'];
+	} else if (PHP_ANALYZER == "pvs") {
+		ar[5] = ['Static analyzer', 'PVS-Studio'];
+	} else {
+		ar[5] = ['Static analyzer', 'disabled'];
+	}
 
 	output_as_table(["",""], ar);
 	STDOUT.WriteBlankLines(2);

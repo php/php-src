@@ -37,7 +37,7 @@ if (PHP_MBSTRING != "no") {
 		mbfilter_uuencode.c mbfilter_armscii8.c mbfilter_cp850.c \
 		mbfilter_cp5022x.c mbfilter_sjis_open.c mbfilter_sjis_mobile.c \
 		mbfilter_sjis_mac.c \
-		mbfilter_iso2022jp_2004.c mbfilter_iso2022jp_mobile.c \
+		mbfilter_iso2022jp_2004.c  mbfilter_iso2022jp_mobile.c \
 		mbfilter_tl_jisx0201_jisx0208.c", "mbstring");
 
 	ADD_SOURCES("ext/mbstring/libmbfl/mbfl", "mbfilter.c mbfilter_8bit.c \

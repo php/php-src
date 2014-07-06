@@ -7,7 +7,7 @@ output_handler=
 
 	$php = getenv('TEST_PHP_EXECUTABLE');
 	$tmpfile = tempnam(__DIR__, 'phpt');
-	$args = ' -n ';
+	$args = ' -n -dsafe_mode=off ';
 	
 	/* Regular Data Test */
 	passthru($php . $args . ' -r " echo \"HELLO\"; "');

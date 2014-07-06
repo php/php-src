@@ -25,6 +25,8 @@
 #include "php_zlib.h"
 #include "fopen_wrappers.h"
 
+#include "main/php_network.h"
+
 struct php_gz_stream_data_t	{
 	gzFile gz_file;
 	php_stream *stream;
@@ -106,7 +108,7 @@ php_stream_ops php_stream_gzio_ops = {
 	NULL  /* set_option */
 };
 
-php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, 
+php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, 
 							  char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self;
@@ -129,7 +131,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 	innerstream = php_stream_open_wrapper_ex(path, mode, STREAM_MUST_SEEK | options | STREAM_WILL_CAST, opened_path, context);
 	
 	if (innerstream) {
-		int fd;
+		php_socket_t fd;
 
 		if (SUCCESS == php_stream_cast(innerstream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
 			self = emalloc(sizeof(*self));

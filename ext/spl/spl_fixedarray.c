@@ -511,7 +511,7 @@ static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_obje
 		if (!intern->array->elements[index]) {
 			retval = 0;
 		} else if (check_empty) {
-			if (zend_is_true(intern->array->elements[index])) {
+			if (zend_is_true(intern->array->elements[index] TSRMLS_CC)) {
 				retval = 1;
 			} else {
 				retval = 0;
@@ -540,7 +540,7 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 			zval_ptr_dtor(&intern->retval);
 			MAKE_STD_ZVAL(intern->retval);
 			ZVAL_ZVAL(intern->retval, rv, 1, 1);
-			return zend_is_true(intern->retval);
+			return zend_is_true(intern->retval TSRMLS_CC);
 		}
 		return 0;
 	}
@@ -583,7 +583,7 @@ SPL_METHOD(SplFixedArray, __construct)
 	spl_fixedarray_object *intern;
 	long size = 0;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &size)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &size) == FAILURE) {
 		return;
 	}
 
@@ -613,7 +613,7 @@ SPL_METHOD(SplFixedArray, __wakeup)
 	HashTable *intern_ht = zend_std_get_properties(getThis() TSRMLS_CC);
 	zval **data;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -643,7 +643,7 @@ SPL_METHOD(SplFixedArray, count)
 	zval *object = getThis();
 	spl_fixedarray_object *intern;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -661,7 +661,7 @@ SPL_METHOD(SplFixedArray, toArray)
 {
 	spl_fixedarray_object *intern;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -693,7 +693,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 	int num;
 	zend_bool save_indexes = 1;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &data, &save_indexes)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &data, &save_indexes) == FAILURE) {
 		return;
 	}
 
@@ -777,7 +777,7 @@ SPL_METHOD(SplFixedArray, getSize)
 	zval *object = getThis();
 	spl_fixedarray_object *intern;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -797,7 +797,7 @@ SPL_METHOD(SplFixedArray, setSize)
 	spl_fixedarray_object *intern;
 	long size;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &size)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &size) == FAILURE) {
 		return;
 	}
 
@@ -948,18 +948,16 @@ static void spl_fixedarray_it_get_current_data(zend_object_iterator *iter, zval 
 }
 /* }}} */
 
-static int spl_fixedarray_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static void spl_fixedarray_it_get_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC) /* {{{ */
 {
 	spl_fixedarray_it     *iterator = (spl_fixedarray_it *)iter;
 	spl_fixedarray_object *intern   = iterator->object;
 
 	if (intern->flags & SPL_FIXEDARRAY_OVERLOADED_KEY) {
-		return zend_user_it_get_current_key(iter, str_key, str_key_len, int_key TSRMLS_CC);
+		zend_user_it_get_current_key(iter, key TSRMLS_CC);
 	} else {
-		*int_key = (ulong) iterator->object->current;
-		return HASH_KEY_IS_LONG;
+		ZVAL_LONG(key, iterator->object->current);
 	}
-
 }
 /* }}} */
 

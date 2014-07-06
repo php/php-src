@@ -73,8 +73,6 @@ require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
---XFAIL--
-For some reason the exception gets thrown at the wrong place
 --EXPECTF--
 Native Prepared Statements
 ... SELECT has returned 1 row...

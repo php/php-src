@@ -46,6 +46,8 @@ print "done!";
 require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
 Warning: mysql_field_table() expects exactly 2 parameters, 1 given in %s on line %d
 
 Warning: mysql_field_table(): Field -1 is invalid for MySQL result index %d in %s on line %d

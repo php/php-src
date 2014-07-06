@@ -124,31 +124,40 @@ fclose($fp);
 *** Testing mcrypt_encrypt() : usage variation ***
 
 --int 0--
-string(32) "e469e6b066f9600e1eefd8f53365f96c"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --int 1--
-string(32) "e469e6b066f9600e1eefd8f53365f96c"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --int 12345--
-string(32) "d74e5f51d1199bcfa61f80168e913007"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --int -12345--
-string(32) "17fe485ed735abb34c1dd4455af7b79c"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --float 10.5--
-string(32) "cd735509aa4013a130e011686d66ae01"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --float -10.5--
-string(32) "a57d99d6d5813039abf50fc50d631e47"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --float 12.3456789000e10--
-string(32) "f17ede0bfdaa4408f545f7f4c8b040d2"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --float -12.3456789000e10--
-string(32) "326f64e3b9bd5a6beb0a9b52a09a5a48"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --float .5--
-string(32) "2aedf7661cd4d8c7593f44c58718e2b8"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --empty array--
 Error: 2 - mcrypt_encrypt() expects parameter 2 to be string, array given, %s(%d)
@@ -167,41 +176,52 @@ Error: 2 - mcrypt_encrypt() expects parameter 2 to be string, array given, %s(%d
 string(0) ""
 
 --uppercase NULL--
-string(32) "bfa2cb7240c8d2f6abeb34960c04f6d3"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --lowercase null--
-string(32) "bfa2cb7240c8d2f6abeb34960c04f6d3"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --lowercase true--
-string(32) "e469e6b066f9600e1eefd8f53365f96c"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --lowercase false--
-string(32) "bfa2cb7240c8d2f6abeb34960c04f6d3"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --uppercase TRUE--
-string(32) "e469e6b066f9600e1eefd8f53365f96c"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --uppercase FALSE--
-string(32) "bfa2cb7240c8d2f6abeb34960c04f6d3"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --empty string DQ--
-string(32) "bfa2cb7240c8d2f6abeb34960c04f6d3"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --empty string SQ--
-string(32) "bfa2cb7240c8d2f6abeb34960c04f6d3"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --instance of classWithToString--
-string(32) "1fd3514d8ced44d04d9dc7511fce33ef"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --instance of classWithoutToString--
 Error: 2 - mcrypt_encrypt() expects parameter 2 to be string, object given, %s(%d)
 string(0) ""
 
 --undefined var--
-string(32) "bfa2cb7240c8d2f6abeb34960c04f6d3"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --unset var--
-string(32) "bfa2cb7240c8d2f6abeb34960c04f6d3"
+Error: 2 - mcrypt_encrypt(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --resource--
 Error: 2 - mcrypt_encrypt() expects parameter 2 to be string, resource given, %s(%d)

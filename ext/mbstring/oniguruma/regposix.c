@@ -2,7 +2,7 @@
   regposix.c - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,7 +102,7 @@ onig2posix_error_code(int code)
     { ONIGERR_NUMBERED_BACKREF_OR_CALL_NOT_ALLOWED,       REG_BADPAT  },
     { ONIGERR_TOO_BIG_WIDE_CHAR_VALUE,                    REG_EONIG_BADWC },
     { ONIGERR_TOO_LONG_WIDE_CHAR_VALUE,                   REG_EONIG_BADWC },
-    { ONIGERR_INVALID_WIDE_CHAR_VALUE,                    REG_EONIG_BADWC },
+    { ONIGERR_INVALID_CODE_POINT_VALUE,                   REG_EONIG_BADWC },
     { ONIGERR_EMPTY_GROUP_NAME,                           REG_BADPAT },
     { ONIGERR_INVALID_GROUP_NAME,                         REG_BADPAT },
     { ONIGERR_INVALID_CHAR_IN_GROUP_NAME,                 REG_BADPAT },
@@ -122,7 +122,7 @@ onig2posix_error_code(int code)
 
   if (code >= 0) return 0;
 
-  for (i = 0; i < sizeof(o2p) / sizeof(o2p[0]); i++) {
+  for (i = 0; i < (int )(sizeof(o2p) / sizeof(o2p[0])); i++) {
     if (code == o2p[i].onig_err)
       return o2p[i].posix_err;
   }
@@ -273,9 +273,9 @@ typedef struct {
   void* arg;
 } i_wrap;
 
-static int i_wrapper(const unsigned char* name, const unsigned char* name_end,
-		     int ng, int* gs,
-		     onig_regex_t* reg, void* arg)
+static int
+i_wrapper(const UChar* name, const UChar* name_end, int ng, int* gs,
+	  onig_regex_t* reg ARG_UNUSED, void* arg)
 {
   i_wrap* warg = (i_wrap* )arg;
 

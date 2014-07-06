@@ -37,7 +37,7 @@
 #include "zend_exceptions.h"
 
 #if defined(PDO_USE_MYSQLND)
-#	define pdo_mysql_init(persistent) mysqlnd_init(persistent)
+#	define pdo_mysql_init(persistent) mysqlnd_init(MYSQLND_CLIENT_NO_FLAG, persistent)
 #else
 #	define pdo_mysql_init(persistent) mysql_init(NULL)
 #endif
@@ -709,6 +709,20 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 				efree(ssl_cipher);
 			}
 		}
+
+#if MYSQL_VERSION_ID > 50605 || defined(PDO_USE_MYSQLND)
+		{
+			char *public_key = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY, NULL TSRMLS_CC);
+			if (public_key) {
+				if (mysql_options(H->server, MYSQL_SERVER_PUBLIC_KEY, public_key)) {
+					pdo_mysql_error(dbh);
+					efree(public_key);
+					goto cleanup;
+				}
+				efree(public_key);
+			}
+		}
+#endif
 	}
 
 #ifdef PDO_MYSQL_HAS_CHARSET
@@ -738,7 +752,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	if (mysqlnd_connect(H->server, host, dbh->username, dbh->password, password_len, dbname, dbname_len,
-						port, unix_socket, connect_opts TSRMLS_CC) == NULL) {
+						port, unix_socket, connect_opts, MYSQLND_CLIENT_NO_FLAG TSRMLS_CC) == NULL) {
 #else
 	if (mysql_real_connect(H->server, host, dbh->username, dbh->password, dbname, port, unix_socket, connect_opts) == NULL) {
 #endif

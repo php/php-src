@@ -68,6 +68,8 @@ var_dump($link);
 ?>
 --EXPECTF--
 Explicit connection on close
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 Expect same thread id for $link and default conn: bool(true)
 resource(%d) of type (mysql link)
 resource(%d) of type (Unknown)
@@ -75,18 +77,24 @@ resource(%d) of type (Unknown)
 Warning: mysql_close(): no MySQL-Link resource supplied in %s on line %d
 
 Closing default link
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 Expect same thread id for $link and default conn but not the previous: bool(true)
 resource(%d) of type (mysql link)
 resource(%d) of type (mysql link)
 resource(%d) of type (Unknown)
 
 Explicit resource and pconnect
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 resource(%d) of type (mysql link persistent)
 resource(%d) of type (Unknown)
 
 Warning: mysql_close(): no MySQL-Link resource supplied in %s on line %d
 
 Default link and pconnect
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 resource(%d) of type (mysql link persistent)
 resource(%d) of type (mysql link persistent)
 resource(%d) of type (Unknown)

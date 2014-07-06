@@ -31,6 +31,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
+#include "main/php_network.h"
 
 /* for fileno() */
 #include <stdio.h>
@@ -192,7 +193,7 @@ php_stream_ops php_stream_bz2io_ops = {
 
 /* {{{ Bzip2 stream openers */
 PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, 
-														char *mode, php_stream *innerstream STREAMS_DC TSRMLS_DC)
+														const char *mode, php_stream *innerstream STREAMS_DC TSRMLS_DC)
 {
 	struct php_bz2_stream_data_t *self;
 	
@@ -205,8 +206,8 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 }
 
 PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
-											char *path,
-											char *mode,
+											const char *path,
+											const char *mode,
 											int options,
 											char **opened_path,
 											php_stream_context *context STREAMS_DC TSRMLS_DC)
@@ -230,7 +231,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 
 	if (php_check_open_basedir(path_copy TSRMLS_CC)) {
 #ifdef VIRTUAL_DIR
-		free(path_copy);
+		efree(path_copy);
 #endif
 		return NULL;
 	}
@@ -242,7 +243,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		*opened_path = estrdup(path_copy);
 	}
 #ifdef VIRTUAL_DIR
-	free(path_copy);
+	efree(path_copy);
 #endif
 	path_copy = NULL;
 	
@@ -251,7 +252,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		stream = php_stream_open_wrapper(path, mode, options | STREAM_WILL_CAST, opened_path);
 	
 		if (stream) {
-			int fd;
+			php_socket_t fd;
 			if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
 				bz_file = BZ2_bzdopen(fd, mode);
 			}
@@ -400,7 +401,7 @@ static PHP_FUNCTION(bzopen)
 									NULL);
 	} else if (Z_TYPE_PP(file) == IS_RESOURCE) {
 		/* If it is a resource, than its a stream resource */
-		int fd;
+		php_socket_t fd;
 		int stream_mode_len;
 
 		php_stream_from_zval(stream, file);

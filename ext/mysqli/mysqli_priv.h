@@ -76,7 +76,6 @@ extern void php_clear_warnings(MYSQLI_WARNING *w);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error TSRMLS_DC);
 extern void php_mysqli_report_index(const char *query, unsigned int status TSRMLS_DC);
-extern void php_set_local_infile_handler_default(MY_MYSQL *);
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
 
 #ifdef HAVE_SPL
@@ -115,9 +114,11 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_USE_RESULT 	1
 #ifdef MYSQLI_USE_MYSQLND
 #define MYSQLI_ASYNC	 	8
+#define MYSQLI_STORE_RESULT_COPY_DATA 16
 #else
 /* libmysql */
 #define MYSQLI_ASYNC	 	0
+#define MYSQLI_STORE_RESULT_COPY_DATA	0
 #endif
 
 /* for mysqli_fetch_assoc */

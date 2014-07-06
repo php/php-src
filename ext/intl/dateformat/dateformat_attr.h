@@ -21,11 +21,7 @@
 //PHP_FUNCTION( datefmt_get_timezone );
 PHP_FUNCTION( datefmt_get_datetype );
 PHP_FUNCTION( datefmt_get_timetype );
-PHP_FUNCTION( datefmt_get_calendar );
-PHP_FUNCTION( datefmt_set_calendar );
 PHP_FUNCTION( datefmt_get_locale );
-PHP_FUNCTION( datefmt_get_timezone_id );
-PHP_FUNCTION( datefmt_set_timezone_id );
 PHP_FUNCTION( datefmt_get_pattern );
 PHP_FUNCTION( datefmt_set_pattern );
 PHP_FUNCTION( datefmt_is_lenient );

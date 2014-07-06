@@ -4,7 +4,7 @@
   regint.h -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,64 +56,77 @@
 
 /* config */
 /* spec. config */
-/* #define USE_UNICODE_FULL_RANGE_CTYPE */ /* --> move to regenc.h */
 #define USE_NAMED_GROUP
 #define USE_SUBEXP_CALL
-#define USE_INFINITE_REPEAT_MONOMANIAC_MEM_STATUS_CHECK /* /(?:()|())*\2/ */
+#define USE_BACKREF_WITH_LEVEL        /* \k<name+n>, \k<name-n> */
+#define USE_MONOMANIAC_CHECK_CAPTURES_IN_ENDLESS_REPEAT  /* /(?:()|())*\2/ */
 #define USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE     /* /\n$/ =~ "\n" */
 #define USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
 /* #define USE_RECOMPILE_API */
-/* treat \r\n as line terminator.
-   !!! NO SUPPORT !!!
-   use this configuration on your own responsibility */
-/* #define USE_CRNL_AS_LINE_TERMINATOR */
+/* !!! moved to regenc.h. */ /* #define USE_CRNL_AS_LINE_TERMINATOR */
 
 /* internal config */
-#define USE_RECYCLE_NODE
+#define USE_PARSE_TREE_NODE_RECYCLE
 #define USE_OP_PUSH_OR_JUMP_EXACT
-#define USE_QUANTIFIER_PEEK_NEXT
-#define USE_ST_HASH_TABLE
+#define USE_QTFR_PEEK_NEXT
+#define USE_ST_LIBRARY
 #define USE_SHARED_CCLASS_TABLE
 
 #define INIT_MATCH_STACK_SIZE                     160
 #define DEFAULT_MATCH_STACK_LIMIT_SIZE              0 /* unlimited */
 
-/* interface to external system */
-#ifdef NOT_RUBY      /* given from Makefile */
+#if defined(__GNUC__)
+#  define ARG_UNUSED  __attribute__ ((unused))
+#else
+#  define ARG_UNUSED
+#endif
+
+/* */
+/* escape other system UChar definition */
 #include "config.h"
-#define USE_BACKREF_AT_LEVEL
+#ifdef ONIG_ESCAPE_UCHAR_COLLISION
+#undef ONIG_ESCAPE_UCHAR_COLLISION
+#endif
+
+#define USE_WORD_BEGIN_END        /* "\<", "\>" */
 #define USE_CAPTURE_HISTORY
 #define USE_VARIABLE_META_CHARS
-#define USE_WORD_BEGIN_END          /* "\<": word-begin, "\>": word-end */
-#define USE_POSIX_REGION_OPTION     /* needed for POSIX API support */
+#define USE_POSIX_API_REGION_OPTION
 #define USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE
 /* #define USE_COMBINATION_EXPLOSION_CHECK */     /* (X*)* */
+
 /* #define USE_MULTI_THREAD_SYSTEM */
-#define THREAD_SYSTEM_INIT          /* depend on thread system */
-#define THREAD_SYSTEM_END           /* depend on thread system */
-#define THREAD_ATOMIC_START         /* depend on thread system */
-#define THREAD_ATOMIC_END           /* depend on thread system */
-#define THREAD_PASS                 /* depend on thread system */
+#define THREAD_SYSTEM_INIT      /* depend on thread system */
+#define THREAD_SYSTEM_END       /* depend on thread system */
+#define THREAD_ATOMIC_START     /* depend on thread system */
+#define THREAD_ATOMIC_END       /* depend on thread system */
+#define THREAD_PASS             /* depend on thread system */
 #define xmalloc     malloc
 #define xrealloc    realloc
 #define xcalloc     calloc
 #define xfree       free
-#else
-#include "ruby.h"
-#include "rubysig.h"      /* for DEFER_INTS, ENABLE_INTS */
 
-#define USE_COMBINATION_EXPLOSION_CHECK        /* (X*)* */
-#define USE_MULTI_THREAD_SYSTEM
-#define THREAD_SYSTEM_INIT
-#define THREAD_SYSTEM_END
-#define THREAD_ATOMIC_START          DEFER_INTS
-#define THREAD_ATOMIC_END            ENABLE_INTS
-#define THREAD_PASS                  rb_thread_schedule()
+#define CHECK_INTERRUPT_IN_MATCH_AT
 
-#define DEFAULT_WARN_FUNCTION        onig_rb_warn
-#define DEFAULT_VERB_WARN_FUNCTION   onig_rb_warning
-
-#endif /* else NOT_RUBY */
+#define st_init_table                  onig_st_init_table
+#define st_init_table_with_size        onig_st_init_table_with_size
+#define st_init_numtable               onig_st_init_numtable
+#define st_init_numtable_with_size     onig_st_init_numtable_with_size
+#define st_init_strtable               onig_st_init_strtable
+#define st_init_strtable_with_size     onig_st_init_strtable_with_size
+#define st_delete                      onig_st_delete
+#define st_delete_safe                 onig_st_delete_safe
+#define st_insert                      onig_st_insert
+#define st_lookup                      onig_st_lookup
+#define st_foreach                     onig_st_foreach
+#define st_add_direct                  onig_st_add_direct
+#define st_free_table                  onig_st_free_table
+#define st_cleanup_safe                onig_st_cleanup_safe
+#define st_copy                        onig_st_copy
+#define st_nothing_key_clone           onig_st_nothing_key_clone
+#define st_nothing_key_free            onig_st_nothing_key_free
+/* */
+#define onig_st_is_member              st_is_member
 
 #define STATE_CHECK_STRING_THRESHOLD_LEN             7
 #define STATE_CHECK_BUFF_MAX_SIZE               0x4000
@@ -122,16 +135,15 @@
 #define xmemset     memset
 #define xmemcpy     memcpy
 #define xmemmove    memmove
+
 #if defined(_WIN32) && !defined(__GNUC__)
 #define xalloca     _alloca
-#if _MSC_VER < 1500
-#ifndef vsnprintf
-#define vsnprintf   _vsnprintf
-#endif
-#endif
+#define xvsnprintf  _vsnprintf
 #else
 #define xalloca     alloca
+#define xvsnprintf  vsnprintf
 #endif
+
 
 #if defined(USE_RECOMPILE_API) && defined(USE_MULTI_THREAD_SYSTEM)
 #define ONIG_STATE_INC(reg) (reg)->state++
@@ -153,60 +165,6 @@
 #define ONIG_STATE_INC_THREAD(reg)  /* Nothing */
 #define ONIG_STATE_DEC_THREAD(reg)  /* Nothing */
 #endif /* USE_RECOMPILE_API && USE_MULTI_THREAD_SYSTEM */
-
-
-#define onig_st_is_member              st_is_member
-
-#ifdef NOT_RUBY
-
-#define st_init_table                  onig_st_init_table
-#define st_init_table_with_size        onig_st_init_table_with_size
-#define st_init_numtable               onig_st_init_numtable
-#define st_init_numtable_with_size     onig_st_init_numtable_with_size
-#define st_init_strtable               onig_st_init_strtable
-#define st_init_strtable_with_size     onig_st_init_strtable_with_size
-#define st_init_strend_table_with_size onig_st_init_strend_table_with_size
-#define st_delete                      onig_st_delete
-#define st_delete_safe                 onig_st_delete_safe
-#define st_insert                      onig_st_insert
-#define st_insert_strend               onig_st_insert_strend
-#define st_lookup                      onig_st_lookup
-#define st_lookup_strend               onig_st_lookup_strend
-#define st_foreach                     onig_st_foreach
-#define st_add_direct                  onig_st_add_direct
-#define st_add_direct_strend           onig_st_add_direct_strend
-#define st_free_table                  onig_st_free_table
-#define st_cleanup_safe                onig_st_cleanup_safe
-#define st_copy                        onig_st_copy
-#define st_nothing_key_clone           onig_st_nothing_key_clone
-#define st_nothing_key_free            onig_st_nothing_key_free
-
-#else /* NOT_RUBY */
-
-#define onig_st_init_table                  st_init_table
-#define onig_st_init_table_with_size        st_init_table_with_size
-#define onig_st_init_numtable               st_init_numtable
-#define onig_st_init_numtable_with_size     st_init_numtable_with_size
-#define onig_st_init_strtable               st_init_strtable
-#define onig_st_init_strtable_with_size     st_init_strtable_with_size
-#define onig_st_init_strend_table_with_size st_init_strend_table_with_size
-#define onig_st_delete                      st_delete
-#define onig_st_delete_safe                 st_delete_safe
-#define onig_st_insert                      st_insert
-#define onig_st_insert_strend               st_insert_strend
-#define onig_st_lookup                      st_lookup
-#define onig_st_lookup_strend               st_lookup_strend
-#define onig_st_foreach                     st_foreach
-#define onig_st_add_direct                  st_add_direct
-#define onig_st_add_direct_strend           st_add_direct_strend
-#define onig_st_free_table                  st_free_table
-#define onig_st_cleanup_safe                st_cleanup_safe
-#define onig_st_copy                        st_copy
-#define onig_st_nothing_key_clone           st_nothing_key_clone
-#define onig_st_nothing_key_free            st_nothing_key_free
-
-#endif /* NOT_RUBY */
-
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -238,7 +196,6 @@
 #endif
 
 #include "regenc.h"
-#include "oniguruma.h"
 
 #ifdef MIN
 #undef MIN
@@ -252,10 +209,23 @@
 #define IS_NULL(p)                    (((void*)(p)) == (void*)0)
 #define IS_NOT_NULL(p)                (((void*)(p)) != (void*)0)
 #define CHECK_NULL_RETURN(p)          if (IS_NULL(p)) return NULL
-#define CHECK_NULL_RETURN_VAL(p,val)  if (IS_NULL(p)) return (val)
+#define CHECK_NULL_RETURN_MEMERR(p)   if (IS_NULL(p)) return ONIGERR_MEMORY
 #define NULL_UCHARP                   ((UChar* )0)
 
-#ifndef PLATFORM_UNALIGNED_WORD_ACCESS
+#ifdef PLATFORM_UNALIGNED_WORD_ACCESS
+
+#define PLATFORM_GET_INC(val,p,type) do{\
+  val  = *(type* )p;\
+  (p) += sizeof(type);\
+} while(0)
+
+#else
+
+#define PLATFORM_GET_INC(val,p,type) do{\
+  xmemcpy(&val, (p), sizeof(type));\
+  (p) += sizeof(type);\
+} while(0)
+
 /* sizeof(OnigCodePoint) */
 #define WORD_ALIGNMENT_SIZE     SIZEOF_LONG
 
@@ -269,86 +239,6 @@
   (addr) += (WORD_ALIGNMENT_SIZE - 1);\
   (addr) -= ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
 } while (0)
-
-
-#define B_SHIFT  8
-#define B_MASK   0xff
-
-#define SERIALIZE_2BYTE_INT(i,p) do {\
-  *(p)     = ((i) >> B_SHIFT) & B_MASK;\
-  *((p)+1) = (i) & B_MASK;\
-} while (0)
-
-#define SERIALIZE_4BYTE_INT(i,p) do {\
-  *(p)     = ((i) >> B_SHIFT*3) & B_MASK;\
-  *((p)+1) = ((i) >> B_SHIFT*2) & B_MASK;\
-  *((p)+2) = ((i) >> B_SHIFT  ) & B_MASK;\
-  *((p)+3) = (i) & B_MASK;\
-} while (0)
-
-#define SERIALIZE_8BYTE_INT(i,p) do {\
-  *(p)     = ((i) >> B_SHIFT*7) & B_MASK;\
-  *((p)+1) = ((i) >> B_SHIFT*6) & B_MASK;\
-  *((p)+2) = ((i) >> B_SHIFT*5) & B_MASK;\
-  *((p)+3) = ((i) >> B_SHIFT*4) & B_MASK;\
-  *((p)+4) = ((i) >> B_SHIFT*3) & B_MASK;\
-  *((p)+5) = ((i) >> B_SHIFT*2) & B_MASK;\
-  *((p)+6) = ((i) >> B_SHIFT  ) & B_MASK;\
-  *((p)+7) = (i) & B_MASK;\
-} while (0)
-
-#define GET_2BYTE_INT_INC(type,i,p) do {\
-  (i) = (type )(((unsigned int )(*(p)) << B_SHIFT) | (unsigned int )((p)[1]));\
-  (p) += 2;\
-} while (0)
-
-#define GET_4BYTE_INT_INC(type,i,p) do {\
-  (i) = (type )(((unsigned int )((p)[0]) << B_SHIFT*3) | \
-		((unsigned int )((p)[1]) << B_SHIFT*2) | \
-		((unsigned int )((p)[2]) << B_SHIFT  ) | \
-		((unsigned int )((p)[3])             )); \
-  (p) += 4;\
-} while (0)
-
-#define GET_8BYTE_INT_INC(type,i,p) do {\
-  (i) = (type )(((unsigned long )((p)[0]) << B_SHIFT*7) | \
-		((unsigned long )((p)[1]) << B_SHIFT*6) | \
-		((unsigned long )((p)[2]) << B_SHIFT*5) | \
-		((unsigned long )((p)[3]) << B_SHIFT*4) | \
-		((unsigned long )((p)[4]) << B_SHIFT*3) | \
-		((unsigned long )((p)[5]) << B_SHIFT*2) | \
-		((unsigned long )((p)[6]) << B_SHIFT  ) | \
-		((unsigned long )((p)[7])             )); \
-  (p) += 8;\
-} while (0)
-
-#if SIZEOF_SHORT == 2
-#define GET_SHORT_INC(i,p)     GET_2BYTE_INT_INC(short,i,p)
-#define SERIALIZE_SHORT(i,p)   SERIALIZE_2BYTE_INT(i,p)
-#elif SIZEOF_SHORT == 4
-#define GET_SHORT_INC(i,p)     GET_4BYTE_INT_INC(short,i,p)
-#define SERIALIZE_SHORT(i,p)   SERIALIZE_4BYTE_INT(i,p)
-#elif SIZEOF_SHORT == 8
-#define GET_SHORT_INC(i,p)     GET_8BYTE_INT_INC(short,i,p)
-#define SERIALIZE_SHORT(i,p)   SERIALIZE_8BYTE_INT(i,p)
-#endif
-
-#if SIZEOF_INT == 2
-#define GET_INT_INC(i,p)       GET_2BYTE_INT_INC(int,i,p)
-#define GET_UINT_INC(i,p)      GET_2BYTE_INT_INC(unsigned,i,p)
-#define SERIALIZE_INT(i,p)     SERIALIZE_2BYTE_INT(i,p)
-#define SERIALIZE_UINT(i,p)    SERIALIZE_2BYTE_INT(i,p)
-#elif SIZEOF_INT == 4
-#define GET_INT_INC(i,p)       GET_4BYTE_INT_INC(int,i,p)
-#define GET_UINT_INC(i,p)      GET_4BYTE_INT_INC(unsigned,i,p)
-#define SERIALIZE_INT(i,p)     SERIALIZE_4BYTE_INT(i,p)
-#define SERIALIZE_UINT(i,p)    SERIALIZE_4BYTE_INT(i,p)
-#elif SIZEOF_INT == 8
-#define GET_INT_INC(i,p)       GET_8BYTE_INT_INC(int,i,p)
-#define GET_UINT_INC(i,p)      GET_8BYTE_INT_INC(unsigned,i,p)
-#define SERIALIZE_INT(i,p)     SERIALIZE_8BYTE_INT(i,p)
-#define SERIALIZE_UINT(i,p)    SERIALIZE_8BYTE_INT(i,p)
-#endif
 
 #endif /* PLATFORM_UNALIGNED_WORD_ACCESS */
 
@@ -372,17 +262,17 @@ typedef unsigned int  BitStatusType;
 #define BIT_STATUS_CLEAR(stats)      (stats) = 0
 #define BIT_STATUS_ON_ALL(stats)     (stats) = ~((BitStatusType )0)
 #define BIT_STATUS_AT(stats,n) \
-  ((n) < BIT_STATUS_BITS_NUM  ?  ((stats) & (1 << n)) : ((stats) & 1))
+  ((n) < (int )BIT_STATUS_BITS_NUM  ?  ((stats) & (1 << n)) : ((stats) & 1))
 
 #define BIT_STATUS_ON_AT(stats,n) do {\
-  if ((n) < BIT_STATUS_BITS_NUM)\
+    if ((n) < (int )BIT_STATUS_BITS_NUM)	\
     (stats) |= (1 << (n));\
   else\
     (stats) |= 1;\
 } while (0)
 
 #define BIT_STATUS_ON_AT_SIMPLE(stats,n) do {\
-  if ((n) < BIT_STATUS_BITS_NUM)\
+    if ((n) < (int )BIT_STATUS_BITS_NUM)\
     (stats) |= (1 << (n));\
 } while (0)
 
@@ -401,7 +291,6 @@ typedef unsigned int  BitStatusType;
 #define IS_EXTEND(option)         ((option) & ONIG_OPTION_EXTEND)
 #define IS_FIND_LONGEST(option)   ((option) & ONIG_OPTION_FIND_LONGEST)
 #define IS_FIND_NOT_EMPTY(option) ((option) & ONIG_OPTION_FIND_NOT_EMPTY)
-#define IS_POSIXLINE(option)      (IS_SINGLELINE(option) && IS_MULTILINE(option))
 #define IS_FIND_CONDITION(option) ((option) & \
           (ONIG_OPTION_FIND_LONGEST | ONIG_OPTION_FIND_NOT_EMPTY))
 #define IS_NOTBOL(option)         ((option) & ONIG_OPTION_NOTBOL)
@@ -414,6 +303,9 @@ typedef unsigned int  BitStatusType;
 */
 /* ignore-case and multibyte status are included in compiled code. */
 #define IS_DYNAMIC_OPTION(option)  0
+
+#define DISABLE_CASE_FOLD_MULTI_CHAR(case_fold_flag) \
+  ((case_fold_flag) & ~INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR)
 
 #define REPEAT_INFINITE         -1
 #define IS_REPEAT_INFINITE(n)   ((n) == REPEAT_INFINITE)
@@ -436,7 +328,7 @@ typedef Bits*          BitSetRef;
 
 #define BITSET_CLEAR(bs) do {\
   int i;\
-  for (i = 0; i < BITSET_SIZE; i++) { (bs)[i] = 0; }\
+  for (i = 0; i < (int )BITSET_SIZE; i++) { (bs)[i] = 0; }	\
 } while (0)
 
 #define BS_ROOM(bs,pos)            (bs)[pos / BITS_IN_ROOM]
@@ -603,7 +495,7 @@ enum OpCode {
   OP_BACKREFN_IC,
   OP_BACKREF_MULTI,
   OP_BACKREF_MULTI_IC,
-  OP_BACKREF_AT_LEVEL,    /* \k<xxx+n>, \k<xxx-n> */
+  OP_BACKREF_WITH_LEVEL,    /* \k<xxx+n>, \k<xxx-n> */
 
   OP_MEMORY_START,
   OP_MEMORY_START_PUSH,   /* push back-tracker to stack */
@@ -611,9 +503,6 @@ enum OpCode {
   OP_MEMORY_END_PUSH_REC, /* push back-tracker to stack */
   OP_MEMORY_END,
   OP_MEMORY_END_REC,      /* push marker to stack */
-
-  OP_SET_OPTION_PUSH,    /* set option and push recover option */
-  OP_SET_OPTION,         /* set option */
 
   OP_FAIL,               /* pop stack and move */
   OP_JUMP,
@@ -649,7 +538,11 @@ enum OpCode {
   OP_STATE_CHECK_PUSH_OR_JUMP, /* check ok -> push, else jump  */
   OP_STATE_CHECK,              /* check only */
   OP_STATE_CHECK_ANYCHAR_STAR,
-  OP_STATE_CHECK_ANYCHAR_ML_STAR
+  OP_STATE_CHECK_ANYCHAR_ML_STAR,
+
+  /* no need: IS_DYNAMIC_OPTION() == 0 */
+  OP_SET_OPTION_PUSH,    /* set option and push recover option */
+  OP_SET_OPTION          /* set option */
 };
 
 typedef int RelAddrType;
@@ -671,22 +564,6 @@ typedef void* PointerType;
 #define SIZE_CODE_POINT       sizeof(OnigCodePoint)
 #define SIZE_POINTER          sizeof(PointerType)
 
-
-#ifdef PLATFORM_UNALIGNED_WORD_ACCESS
-
-#define PLATFORM_GET_INC(val,p,type) do{\
-  val  = *(type* )p;\
-  (p) += sizeof(type);\
-} while(0)
-
-#else
-
-#define PLATFORM_GET_INC(val,p,type) do{\
-  xmemcpy(&val, (p), sizeof(type));\
-  (p) += sizeof(type);\
-} while(0)
-
-#endif  /* PLATFORM_UNALIGNED_WORD_ACCESS */
 
 #define GET_RELADDR_INC(addr,p)    PLATFORM_GET_INC(addr,   p, RelAddrType)
 #define GET_ABSADDR_INC(addr,p)    PLATFORM_GET_INC(addr,   p, AbsAddrType)
@@ -745,15 +622,15 @@ typedef void* PointerType;
 #define SIZE_OP_STATE_CHECK_ANYCHAR_STAR (SIZE_OPCODE + SIZE_STATE_CHECK_NUM)
 #endif
 
-#define MC_ESC(enc)               (enc)->meta_char_table.esc
-#define MC_ANYCHAR(enc)           (enc)->meta_char_table.anychar
-#define MC_ANYTIME(enc)           (enc)->meta_char_table.anytime
-#define MC_ZERO_OR_ONE_TIME(enc)  (enc)->meta_char_table.zero_or_one_time
-#define MC_ONE_OR_MORE_TIME(enc)  (enc)->meta_char_table.one_or_more_time
-#define MC_ANYCHAR_ANYTIME(enc)   (enc)->meta_char_table.anychar_anytime
+#define MC_ESC(syn)               (syn)->meta_char_table.esc
+#define MC_ANYCHAR(syn)           (syn)->meta_char_table.anychar
+#define MC_ANYTIME(syn)           (syn)->meta_char_table.anytime
+#define MC_ZERO_OR_ONE_TIME(syn)  (syn)->meta_char_table.zero_or_one_time
+#define MC_ONE_OR_MORE_TIME(syn)  (syn)->meta_char_table.one_or_more_time
+#define MC_ANYCHAR_ANYTIME(syn)   (syn)->meta_char_table.anychar_anytime
 
-#define IS_MC_ESC_CODE(code, enc, syn) \
-  ((code) == MC_ESC(enc) && \
+#define IS_MC_ESC_CODE(code, syn) \
+  ((code) == MC_ESC(syn) && \
    !IS_SYNTAX_OP2((syn), ONIG_SYN_OP2_INEFFECTIVE_ESCAPE))
 
 
@@ -782,22 +659,96 @@ typedef void* PointerType;
     ONIG_SYN_CONTEXT_INVALID_REPEAT_OPS | ONIG_SYN_ALLOW_INVALID_INTERVAL | \
     ONIG_SYN_BACKSLASH_ESCAPE_IN_CC | ONIG_SYN_ALLOW_DOUBLE_RANGE_OP_IN_CC )
 
-/* cclass node */
-#define FLAG_CCLASS_NOT            1
-#define FLAG_CCLASS_SHARE         (1<<1)
 
-#define CCLASS_SET_NOT(cc)      (cc)->flags |= FLAG_CCLASS_NOT
-#define CCLASS_CLEAR_NOT(cc)    (cc)->flags &= ~FLAG_CCLASS_NOT
-#define CCLASS_SET_SHARE(cc)    (cc)->flags |= FLAG_CCLASS_SHARE
-#define IS_CCLASS_NOT(cc)     (((cc)->flags & FLAG_CCLASS_NOT) != 0)
-#define IS_CCLASS_SHARE(cc)   (((cc)->flags & FLAG_CCLASS_SHARE) != 0)
+#define NCCLASS_FLAGS(cc)           ((cc)->flags)
+#define NCCLASS_FLAG_SET(cc,flag)    (NCCLASS_FLAGS(cc) |= (flag))
+#define NCCLASS_FLAG_CLEAR(cc,flag)  (NCCLASS_FLAGS(cc) &= ~(flag))
+#define IS_NCCLASS_FLAG_ON(cc,flag) ((NCCLASS_FLAGS(cc) & (flag)) != 0)
+
+/* cclass node */
+#define FLAG_NCCLASS_NOT           (1<<0)
+#define FLAG_NCCLASS_SHARE         (1<<1)
+
+#define NCCLASS_SET_NOT(nd)     NCCLASS_FLAG_SET(nd, FLAG_NCCLASS_NOT)
+#define NCCLASS_SET_SHARE(nd)   NCCLASS_FLAG_SET(nd, FLAG_NCCLASS_SHARE)
+#define NCCLASS_CLEAR_NOT(nd)   NCCLASS_FLAG_CLEAR(nd, FLAG_NCCLASS_NOT)
+#define IS_NCCLASS_NOT(nd)      IS_NCCLASS_FLAG_ON(nd, FLAG_NCCLASS_NOT)
+#define IS_NCCLASS_SHARE(nd)    IS_NCCLASS_FLAG_ON(nd, FLAG_NCCLASS_SHARE)
 
 typedef struct {
-  int    flags;
+  int type;
+  /* struct _Node* next; */
+  /* unsigned int flags; */
+} NodeBase;
+
+typedef struct {
+  NodeBase base;
+  unsigned int flags;
   BitSet bs;
-  BBuf*  mbuf;     /* multi-byte info or NULL */
+  BBuf*  mbuf;   /* multi-byte info or NULL */
 } CClassNode;
 
+typedef long OnigStackIndex;
+
+typedef struct _OnigStackType {
+  unsigned int type;
+  union {
+    struct {
+      UChar *pcode;      /* byte code position */
+      UChar *pstr;       /* string position */
+      UChar *pstr_prev;  /* previous char position of pstr */
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+      unsigned int state_check;
+#endif
+    } state;
+    struct {
+      int   count;       /* for OP_REPEAT_INC, OP_REPEAT_INC_NG */
+      UChar *pcode;      /* byte code position (head of repeated target) */
+      int   num;         /* repeat id */
+    } repeat;
+    struct {
+      OnigStackIndex si;     /* index of stack */
+    } repeat_inc;
+    struct {
+      int num;           /* memory num */
+      UChar *pstr;       /* start/end position */
+      /* Following information is setted, if this stack type is MEM-START */
+      OnigStackIndex start;  /* prev. info (for backtrack  "(...)*" ) */
+      OnigStackIndex end;    /* prev. info (for backtrack  "(...)*" ) */
+    } mem;
+    struct {
+      int num;           /* null check id */
+      UChar *pstr;       /* start position */
+    } null_check;
+#ifdef USE_SUBEXP_CALL
+    struct {
+      UChar *ret_addr;   /* byte code position */
+      int    num;        /* null check id */
+      UChar *pstr;       /* string position */
+    } call_frame;
+#endif
+  } u;
+} OnigStackType;
+
+typedef struct {
+  void* stack_p;
+  int   stack_n;
+  OnigOptionType options;
+  OnigRegion*    region;
+  const UChar* start;   /* search start position (for \G: BEGIN_POSITION) */
+#ifdef USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE
+  int    best_len;      /* for ONIG_OPTION_FIND_LONGEST */
+  UChar* best_s;
+#endif
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+  void* state_check_buff;
+  int   state_check_buff_size;
+#endif
+} OnigMatchArg;
+
+
+#define IS_CODE_SB_WORD(enc,code) \
+  (ONIGENC_IS_CODE_ASCII(code) && ONIGENC_IS_CODE_WORD(enc,code))
 
 #ifdef ONIG_DEBUG
 
@@ -820,11 +771,38 @@ extern void onig_print_statistics P_((FILE* f));
 extern UChar* onig_error_code_to_format P_((int code));
 extern void  onig_snprintf_with_pattern PV_((UChar buf[], int bufsize, OnigEncoding enc, UChar* pat, UChar* pat_end, const UChar *fmt, ...));
 extern int  onig_bbuf_init P_((BBuf* buf, int size));
-extern int  onig_alloc_init P_((regex_t** reg, OnigOptionType option, OnigAmbigType ambig_flag, OnigEncoding enc, OnigSyntaxType* syntax));
 extern int  onig_compile P_((regex_t* reg, const UChar* pattern, const UChar* pattern_end, OnigErrorInfo* einfo));
 extern void onig_chain_reduce P_((regex_t* reg));
 extern void onig_chain_link_add P_((regex_t* to, regex_t* add));
 extern void onig_transfer P_((regex_t* to, regex_t* from));
 extern int  onig_is_code_in_cc P_((OnigEncoding enc, OnigCodePoint code, CClassNode* cc));
+extern int  onig_is_code_in_cc_len P_((int enclen, OnigCodePoint code, CClassNode* cc));
+
+/* strend hash */
+typedef void hash_table_type;
+typedef unsigned long hash_data_type;
+
+extern hash_table_type* onig_st_init_strend_table_with_size P_((int size));
+extern int onig_st_lookup_strend P_((hash_table_type* table, const UChar* str_key, const UChar* end_key, hash_data_type *value));
+extern int onig_st_insert_strend P_((hash_table_type* table, const UChar* str_key, const UChar* end_key, hash_data_type value));
+
+/* encoding property management */
+#define PROPERTY_LIST_ADD_PROP(Name, CR) \
+  r = onigenc_property_list_add_property((UChar* )Name, CR,\
+	      &PropertyNameTable, &PropertyList, &PropertyListNum,\
+	      &PropertyListSize);\
+  if (r != 0) goto end
+
+#define PROPERTY_LIST_INIT_CHECK \
+  if (PropertyInited == 0) {\
+    int r = onigenc_property_list_init(init_property_list);\
+    if (r != 0) return r;\
+  }
+
+extern int onigenc_property_list_add_property P_((UChar* name, const OnigCodePoint* prop, hash_table_type **table, const OnigCodePoint*** plist, int *pnum, int *psize));
+
+typedef int (*ONIGENC_INIT_PROPERTY_LIST_FUNC_TYPE)(void);
+
+extern int onigenc_property_list_init P_((ONIGENC_INIT_PROPERTY_LIST_FUNC_TYPE));
 
 #endif /* REGINT_H */

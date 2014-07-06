@@ -4,10 +4,7 @@ Test curl_opt() function with setting referer
 Sebastian Deutsch <sebastian.deutsch@9elements.com>
 TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
 --SKIPIF--
-<?php 
-if (!extension_loaded("curl")) exit("skip curl extension not loaded");
-if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  exit("skip PHP_CURL_HTTP_REMOTE_SERVER env variable is not defined");
-?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : bool curl_setopt(resource ch, int option, mixed value)
@@ -16,7 +13,8 @@ if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  exit("skip PHP_CURL_HTTP_R
  * Alias to functions:
  */
 
-  $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+  include 'server.inc';
+  $host = curl_cli_server_start();
 
   // start testing
   echo '*** Testing curl setting referer ***' . "\n";

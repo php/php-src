@@ -2,7 +2,7 @@
 SplFileObject::fgetcsv with alternative delimiter
 --FILE--
 <?php
-$fp = fopen('SplFileObject__fgetcsv.csv', 'w+');
+$fp = fopen('SplFileObject__fgetcsv2.csv', 'w+');
 fputcsv($fp, array(
 	'field1',
 	'field2',
@@ -11,12 +11,12 @@ fputcsv($fp, array(
 ), '|');
 fclose($fp);
 
-$fo = new SplFileObject('SplFileObject__fgetcsv.csv');
+$fo = new SplFileObject('SplFileObject__fgetcsv2.csv');
 var_dump($fo->fgetcsv('|'));
 ?>
 --CLEAN--
 <?php
-unlink('SplFileObject__fgetcsv.csv');
+unlink('SplFileObject__fgetcsv2.csv');
 ?>
 --EXPECTF--
 array(4) {

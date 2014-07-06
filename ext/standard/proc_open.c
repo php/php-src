@@ -34,6 +34,7 @@
 #include "exec.h"
 #include "php_globals.h"
 #include "SAPI.h"
+#include "main/php_network.h"
 
 #ifdef NETWARE
 #include <proc.h>
@@ -188,7 +189,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 				p += el_len + 1;
 				break;
-			case HASH_KEY_NON_EXISTANT:
+			case HASH_KEY_NON_EXISTENT:
 				break;
 		}
 
@@ -229,6 +230,7 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	DWORD wstatus;
 #elif HAVE_SYS_WAIT_H
 	int wstatus;
+	int waitpid_options = 0;
 	pid_t wait_pid;
 #endif
 
@@ -241,18 +243,27 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 
 #ifdef PHP_WIN32
-	WaitForSingleObject(proc->childHandle, INFINITE);
+	if (FG(pclose_wait)) {
+		WaitForSingleObject(proc->childHandle, INFINITE);
+	}
 	GetExitCodeProcess(proc->childHandle, &wstatus);
-	FG(pclose_ret) = wstatus;
+	if (wstatus == STILL_ACTIVE) {
+		FG(pclose_ret) = -1;
+	} else {
+		FG(pclose_ret) = wstatus;
+	}
 	CloseHandle(proc->childHandle);
 
 #elif HAVE_SYS_WAIT_H
 
+	if (!FG(pclose_wait)) {
+		waitpid_options = WNOHANG;
+	}
 	do {
-		wait_pid = waitpid(proc->child, &wstatus, 0);
+		wait_pid = waitpid(proc->child, &wstatus, waitpid_options);
 	} while (wait_pid == -1 && errno == EINTR);
 
-	if (wait_pid == -1) {
+	if (wait_pid <= 0) {
 		FG(pclose_ret) = -1;
 	} else {
 		if (WIFEXITED(wstatus))
@@ -321,7 +332,9 @@ PHP_FUNCTION(proc_close)
 
 	ZEND_FETCH_RESOURCE(proc, struct php_process_handle *, &zproc, -1, "process", le_proc_open);
 
+	FG(pclose_wait) = 1;
 	zend_list_delete(Z_LVAL_P(zproc));
+	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
@@ -459,6 +472,7 @@ PHP_FUNCTION(proc_open)
 	DWORD dwCreateFlags = 0;
 	char *command_with_cmd;
 	UINT old_error_mode;
+	char cur_cwd[MAXPATHLEN];
 #endif
 #ifdef NETWARE
 	char** child_argv = NULL;
@@ -543,7 +557,7 @@ PHP_FUNCTION(proc_open)
 		if (Z_TYPE_PP(descitem) == IS_RESOURCE) {
 			/* should be a stream - try and dup the descriptor */
 			php_stream *stream;
-			int fd;
+			php_socket_t fd;
 
 			php_stream_from_zval(stream, descitem);
 
@@ -616,7 +630,7 @@ PHP_FUNCTION(proc_open)
 
 			} else if (strcmp(Z_STRVAL_PP(ztype), "file") == 0) {
 				zval **zfile, **zmode;
-				int fd;
+				php_socket_t fd;
 				php_stream *stream;
 
 				descriptors[ndesc].mode = DESC_FILE;
@@ -697,13 +711,13 @@ PHP_FUNCTION(proc_open)
 
 #ifdef PHP_WIN32
 	if (cwd == NULL) {
-		char cur_cwd[MAXPATHLEN];
 		char *getcwd_result;
 		getcwd_result = VCWD_GETCWD(cur_cwd, MAXPATHLEN);
 		if (!getcwd_result) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot get current directory");
 			goto exit_fail;
 		}
+		cwd = cur_cwd;
 	}
 
 	memset(&si, 0, sizeof(si));

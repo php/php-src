@@ -79,7 +79,7 @@ static int php_embed_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void php_embed_flush(void *server_context)
+static void php_embed_flush(void *server_context TSRMLS_DC)
 {
 	if (fflush(stdout)==EOF) {
 		php_handle_aborted_connection();

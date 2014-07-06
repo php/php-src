@@ -58,6 +58,7 @@
 #include "php_versioning.h"
 #include "php_ftok.h"
 #include "php_type.h"
+#include "php_password.h"
 
 #define phpext_standard_ptr basic_functions_module_ptr
 PHP_MINIT_FUNCTION(standard_filters);

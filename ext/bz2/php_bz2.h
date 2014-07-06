@@ -47,8 +47,8 @@ extern zend_module_entry bz2_module_entry;
 #	define PHP_BZ2_API
 #endif
 
-PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, char *mode, php_stream *innerstream STREAMS_DC TSRMLS_DC);
+PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, const char *mode, php_stream *innerstream STREAMS_DC TSRMLS_DC);
 
 #define php_stream_bz2open_from_BZFILE(bz, mode, innerstream)	_php_stream_bz2open_from_BZFILE((bz), (mode), (innerstream) STREAMS_CC TSRMLS_CC)
 #define php_stream_bz2open(wrapper, path, mode, options, opened_path)	_php_stream_bz2open((wrapper), (path), (mode), (options), (opened_path), NULL STREAMS_CC TSRMLS_CC)

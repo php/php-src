@@ -88,7 +88,7 @@ Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
 <!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
-</head><body><h1>Not Found</h1><p>The requested resource / was not found on this server.</p></body></html>
+</head><body><h1>Not Found</h1><p>The requested resource <code class="url">/</code> was not found on this server.</p></body></html>
 HTTP/1.1 404 Not Found
 Host: %s
 Connection: close
@@ -96,7 +96,7 @@ Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
 <!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
-</head><body><h1>Not Found</h1><p>The requested resource /main/style.css was not found on this server.</p></body></html>
+</head><body><h1>Not Found</h1><p>The requested resource <code class="url">/main/style.css</code> was not found on this server.</p></body></html>
 HTTP/1.1 404 Not Found
 Host: %s
 Connection: close
@@ -104,5 +104,5 @@ Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
 <!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
-</head><body><h1>Not Found</h1><p>The requested resource /main/foo/bar was not found on this server.</p></body></html>
+</head><body><h1>Not Found</h1><p>The requested resource <code class="url">/main/foo/bar</code> was not found on this server.</p></body></html>
 

@@ -231,6 +231,6 @@ string(12) "Hello World!"
 -- Iteration 24 --
 
 Warning: session_name() expects parameter 1 to be string, resource given in %s on line %d
-resource(5) of type (stream)
+resource(%d) of type (stream)
 NULL
 Done

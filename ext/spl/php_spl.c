@@ -743,8 +743,17 @@ PHP_FUNCTION(spl_autoload_functions)
 				}
 				add_next_index_string(tmp, alfi->func_ptr->common.function_name, 1);
 				add_next_index_zval(return_value, tmp);
-			} else
-				add_next_index_string(return_value, alfi->func_ptr->common.function_name, 1);
+			} else {
+				if (strncmp(alfi->func_ptr->common.function_name, "__lambda_func", sizeof("__lambda_func") - 1)) {
+					add_next_index_string(return_value, alfi->func_ptr->common.function_name, 1);
+				} else {
+				   char *key;
+				   uint len;
+				   long dummy;
+				   zend_hash_get_current_key_ex(SPL_G(autoload_functions), &key, &len, &dummy, 0, &function_pos); 
+				   add_next_index_stringl(return_value, key, len - 1, 1);
+				}
+			}
 
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
 		}
@@ -791,7 +800,7 @@ PHPAPI void php_spl_object_hash(zval *obj, char *result TSRMLS_DC) /* {{{*/
 	hash_handle   = SPL_G(hash_mask_handle)^(intptr_t)Z_OBJ_HANDLE_P(obj);
 	hash_handlers = SPL_G(hash_mask_handlers)^(intptr_t)Z_OBJ_HT_P(obj);
 
-	spprintf(&hex, 32, "%016x%016x", hash_handle, hash_handlers);
+	spprintf(&hex, 32, "%016lx%016lx", hash_handle, hash_handlers);
 
 	strlcpy(result, hex, 33);
 	efree(hex);

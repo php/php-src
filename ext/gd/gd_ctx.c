@@ -189,11 +189,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			break;
 	}
 
-#if HAVE_LIBGD204
 	ctx->gd_free(ctx);
-#else
-	ctx->free(ctx);
-#endif
 
 	RETURN_TRUE;
 }

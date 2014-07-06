@@ -82,28 +82,28 @@ oci8_test_sql_execute($c, $stmtarray);
 --EXPECTF--
 Test 1
 object(stdClass)#1 (3) {
-  [%u|b%"caseSensitive"]=>
-  %unicode|string%(3) "123"
-  [%u|b%"SECONDCOL"]=>
-  %unicode|string%(19) "1st row col2 string"
-  [%u|b%"ANOTHERCOL"]=>
-  %unicode|string%(15) "1 more text    "
+  ["caseSensitive"]=>
+  string(3) "123"
+  ["SECONDCOL"]=>
+  string(19) "1st row col2 string"
+  ["ANOTHERCOL"]=>
+  string(15) "1 more text    "
 }
 object(stdClass)#2 (3) {
-  [%u|b%"caseSensitive"]=>
-  %unicode|string%(3) "456"
-  [%u|b%"SECONDCOL"]=>
-  %unicode|string%(19) "2nd row col2 string"
-  [%u|b%"ANOTHERCOL"]=>
-  %unicode|string%(15) "2 more text    "
+  ["caseSensitive"]=>
+  string(3) "456"
+  ["SECONDCOL"]=>
+  string(19) "2nd row col2 string"
+  ["ANOTHERCOL"]=>
+  string(15) "2 more text    "
 }
 object(stdClass)#1 (3) {
-  [%u|b%"caseSensitive"]=>
-  %unicode|string%(3) "789"
-  [%u|b%"SECONDCOL"]=>
-  %unicode|string%(19) "3rd row col2 string"
-  [%u|b%"ANOTHERCOL"]=>
-  %unicode|string%(15) "3 more text    "
+  ["caseSensitive"]=>
+  string(3) "789"
+  ["SECONDCOL"]=>
+  string(19) "3rd row col2 string"
+  ["ANOTHERCOL"]=>
+  string(15) "3 more text    "
 }
 Test 2
 123
