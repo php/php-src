@@ -1546,7 +1546,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	EX(delayed_exception) = NULL;
 	EX(call) = NULL;
 
-	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
+	EX(opline) = op_array->opcodes;
 	EX(scope) = EG(scope);
 
 	first_extra_arg = op_array->num_args;
