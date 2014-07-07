@@ -206,7 +206,7 @@ err:
 		zval_copy_ctor( &tmp_member );			\
 		convert_to_string( &tmp_member );		\
 		member = &tmp_member;					\
-		cache_slot = -1;						\
+		cache_slot = NULL;						\
     }
 
 #define TRANSLITERATOR_PROPERTY_HANDLER_EPILOG	\
@@ -216,7 +216,7 @@ err:
 	}
 
 /* {{{ get_property_ptr_ptr handler */
-static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC )
+static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, int type, void **cache_slot TSRMLS_DC )
 {
 	zval *retval;
 
@@ -239,7 +239,7 @@ static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, in
 /* }}} */
 
 /* {{{ read_property handler */
-static zval *Transliterator_read_property( zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC )
+static zval *Transliterator_read_property( zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC )
 {
 	zval *retval;
 
@@ -266,7 +266,7 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 
 /* {{{ write_property handler */
 static void Transliterator_write_property( zval *object, zval *member, zval *value,
-	zend_uint cache_slot TSRMLS_DC )
+	void **cache_slot TSRMLS_DC )
 {
 	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
 

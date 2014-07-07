@@ -169,27 +169,27 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 }
 /* }}} */
 
-static zval *zend_closure_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC) /* {{{ */
+static zval *zend_closure_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return &EG(uninitialized_zval);
 }
 /* }}} */
 
-static void zend_closure_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static void zend_closure_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }
 /* }}} */
 
-static zval *zend_closure_get_property_ptr_ptr(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static zval *zend_closure_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
 }
 /* }}} */
 
-static int zend_closure_has_property(zval *object, zval *member, int has_set_exists, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static int zend_closure_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	if (has_set_exists != 2) {
 		ZEND_CLOSURE_PROPERTY_ERROR();
@@ -198,7 +198,7 @@ static int zend_closure_has_property(zval *object, zval *member, int has_set_exi
 }
 /* }}} */
 
-static void zend_closure_unset_property(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static void zend_closure_unset_property(zval *object, zval *member, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }

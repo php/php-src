@@ -432,7 +432,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 
 	ZVAL_STRINGL(&query_string, stmt->query_string, stmt->query_stringlen);
 	ZVAL_STRINGL(&z_key, "queryString", sizeof("queryString") - 1);
-	std_object_handlers.write_property(object, &z_key, &query_string, -1 TSRMLS_CC);
+	std_object_handlers.write_property(object, &z_key, &query_string, NULL TSRMLS_CC);
 	zval_ptr_dtor(&query_string);
 	zval_ptr_dtor(&z_key);
 

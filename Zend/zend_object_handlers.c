@@ -293,14 +293,14 @@ static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_cla
 }
 /* }}} */
 
-static zend_always_inline struct _zend_property_info *zend_get_property_info_quick(zend_class_entry *ce, zend_string *member, int silent, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static zend_always_inline struct _zend_property_info *zend_get_property_info_quick(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
 	zend_property_info *scope_property_info;
 	zend_bool denied_access = 0;
 
-	if (cache_slot != -1 && EXPECTED(ce == CACHED_PTR_EX(&EG(current_execute_data)->func->op_array, cache_slot))) {
-		property_info = CACHED_PTR_EX(&EG(current_execute_data)->func->op_array, cache_slot + 1);
+	if (cache_slot && EXPECTED(ce == CACHED_PTR_EX(cache_slot))) {
+		property_info = CACHED_PTR_EX(cache_slot + 1);
 		if (UNEXPECTED(!property_info)) {
 			EG(std_property_info).flags = ZEND_ACC_PUBLIC;
 			EG(std_property_info).name = member;
@@ -338,8 +338,8 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 					if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0) && !silent) {
 						zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name->val, member->val);
 					}
-					if (cache_slot != -1) {
-						CACHE_POLYMORPHIC_PTR_EX(&EG(current_execute_data)->func->op_array, cache_slot, ce, property_info);
+					if (cache_slot) {
+						CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, property_info);
 					}
 					return property_info;
 				}
@@ -354,8 +354,8 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 		&& is_derived_class(ce, EG(scope))
 		&& (scope_property_info = zend_hash_find_ptr(&EG(scope)->properties_info, member)) != NULL
 		&& scope_property_info->flags & ZEND_ACC_PRIVATE) {
-		if (cache_slot != -1) {
-			CACHE_POLYMORPHIC_PTR_EX(&EG(current_execute_data)->func->op_array, cache_slot, ce, scope_property_info);
+		if (cache_slot) {
+			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, scope_property_info);
 		}
 		return scope_property_info;
 	} else if (property_info) {
@@ -367,13 +367,13 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 			return NULL;
 		} else {
 			/* fall through, return property_info... */
-			if (cache_slot != -1) {
-				CACHE_POLYMORPHIC_PTR_EX(&EG(current_execute_data)->func->op_array, cache_slot, ce, property_info);
+			if (cache_slot) {
+				CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, property_info);
 			}
 		}
 	} else {
-		if (cache_slot != -1) {
-			CACHE_POLYMORPHIC_PTR_EX(&EG(current_execute_data)->func->op_array, cache_slot, ce, NULL);
+		if (cache_slot) {
+			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, NULL);
 		}
 		EG(std_property_info).flags = ZEND_ACC_PUBLIC;
 		EG(std_property_info).name = member;
@@ -387,7 +387,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC) /* {{{ */
 {
-	return zend_get_property_info_quick(ce, Z_STR_P(member), silent, -1 TSRMLS_CC);
+	return zend_get_property_info_quick(ce, Z_STR_P(member), silent, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -405,7 +405,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 	} else {
 		member = STR_COPY(prop_info_name);
 	}
-	property_info = zend_get_property_info_quick(zobj->ce, member, 1, -1 TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, member, 1, NULL TSRMLS_CC);
 	STR_RELEASE(member);
 	if (!property_info) {
 		return FAILURE;
@@ -460,7 +460,7 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 }
 /* }}} */
 
-zval *zend_std_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC) /* {{{ */
+zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zval tmp_member;
@@ -476,7 +476,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, zend_uint cac
 		ZVAL_DUP(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
-		cache_slot = -1;
+		cache_slot = NULL;
 	}
 
 #if DEBUG_OBJECT_HANDLERS
@@ -554,7 +554,7 @@ exit:
 }
 /* }}} */
 
-ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zval tmp_member;
@@ -568,7 +568,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, z
 		ZVAL_DUP(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
-		cache_slot = -1;
+		cache_slot = NULL;
 	}
 
 	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), (zobj->ce->__set != NULL), cache_slot TSRMLS_CC);
@@ -758,7 +758,7 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 }
 /* }}} */
 
-static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zval tmp_member;
@@ -773,7 +773,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 		ZVAL_DUP(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
-		cache_slot = -1;
+		cache_slot = NULL;
 	}
 
 #if DEBUG_OBJECT_HANDLERS
@@ -827,7 +827,7 @@ exit:
 }
 /* }}} */
 
-static void zend_std_unset_property(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static void zend_std_unset_property(zval *object, zval *member, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zval tmp_member;
@@ -840,7 +840,7 @@ static void zend_std_unset_property(zval *object, zval *member, zend_uint cache_
 		ZVAL_DUP(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
-		cache_slot = -1;
+		cache_slot = NULL;
 	}
 
 	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), (zobj->ce->__unset != NULL), cache_slot TSRMLS_CC);
@@ -1271,12 +1271,12 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 }
 /* }}} */
 
-ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
 
-	if (UNEXPECTED(cache_slot == -1) ||
-	    (property_info = CACHED_POLYMORPHIC_PTR_EX(&EG(current_execute_data)->func->op_array, cache_slot, ce)) == NULL) {
+	if (UNEXPECTED(cache_slot == NULL) ||
+	    (property_info = CACHED_POLYMORPHIC_PTR_EX(cache_slot, ce)) == NULL) {
 
 		if (UNEXPECTED((property_info = zend_hash_find_ptr(&ce->properties_info, property_name)) == NULL)) {
 			if (!silent) {
@@ -1301,8 +1301,8 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 
 		zend_update_class_constants(ce TSRMLS_CC);
 
-		if (EXPECTED(cache_slot != -1)) {
-			CACHE_POLYMORPHIC_PTR_EX(&EG(current_execute_data)->func->op_array, cache_slot, ce, property_info);
+		if (EXPECTED(cache_slot != NULL)) {
+			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, property_info);
 		}
 	}
 
@@ -1318,7 +1318,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 }
 /* }}} */
 
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	zend_error_noreturn(E_ERROR, "Attempt to unset static property %s::$%s", ce->name->val, property_name->val);
 	return 0;
@@ -1423,7 +1423,7 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int zend_std_has_property(zval *object, zval *member, int has_set_exists, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static int zend_std_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	int result;
@@ -1438,7 +1438,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 		ZVAL_DUP(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
-		cache_slot = -1;
+		cache_slot = NULL;
 	}
 
 	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), 1, cache_slot TSRMLS_CC);

@@ -344,21 +344,19 @@ void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC);
 		EX(run_time_cache)[(num) + 1] = (ptr); \
 	} while (0)
 
-#define CACHED_PTR_EX(op_array, num) \
-	(op_array)->run_time_cache[(num)]
+#define CACHED_PTR_EX(slot) \
+	(slot)[0]
 
-#define CACHE_PTR_EX(op_array, num, ptr) do { \
-		(op_array)->run_time_cache[(num)] = (ptr); \
+#define CACHE_PTR_EX(slot, ptr) do { \
+		(slot)[0] = (ptr); \
 	} while (0)
 
-#define CACHED_POLYMORPHIC_PTR_EX(op_array, num, ce) \
-	(((op_array)->run_time_cache[(num)] == (ce)) ? \
-		(op_array)->run_time_cache[(num) + 1] : \
-		NULL)
+#define CACHED_POLYMORPHIC_PTR_EX(slot, ce) \
+	(((slot)[0] == (ce)) ? (slot)[1] : NULL)
 
-#define CACHE_POLYMORPHIC_PTR_EX(op_array, num, ce, ptr) do { \
-		(op_array)->run_time_cache[(num)] = (ce); \
-		(op_array)->run_time_cache[(num) + 1] = (ptr); \
+#define CACHE_POLYMORPHIC_PTR_EX(slot, ce, ptr) do { \
+		(slot)[0] = (ce); \
+		(slot)[1] = (ptr); \
 	} while (0)
 
 END_EXTERN_C()

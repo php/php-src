@@ -638,10 +638,10 @@ static HashTable *date_object_get_properties_period(zval *object TSRMLS_DC);
 static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC);
 static HashTable *date_object_get_gc_timezone(zval *object, zval **table, int *n TSRMLS_DC);
 
-zval *date_interval_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC);
-void date_interval_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC);
-static zval *date_period_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC);
-static void date_period_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC);
+zval *date_interval_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC);
+void date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC);
+static zval *date_period_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC);
+static void date_period_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC);
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
@@ -3961,7 +3961,7 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 } /* }}} */
 
 /* {{{ date_interval_read_property */
-zval *date_interval_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC)
+zval *date_interval_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC)
 {
 	php_interval_obj *obj;
 	zval *retval;
@@ -3973,7 +3973,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, zend_uin
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
-		cache_slot = -1;
+		cache_slot = NULL;
 	}
 
 	obj = Z_PHPINTERVAL_P(object);
@@ -4027,7 +4027,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, zend_uin
 /* }}} */
 
 /* {{{ date_interval_write_property */
-void date_interval_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
+void date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
 {
 	php_interval_obj *obj;
 	zval tmp_member;
@@ -4037,7 +4037,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, zend_
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
-		cache_slot = -1;
+		cache_slot = NULL;
 	}
 
 	obj = Z_PHPINTERVAL_P(object);
@@ -4944,7 +4944,7 @@ PHP_METHOD(DatePeriod, __wakeup)
 /* }}} */
 
 /* {{{ date_period_read_property */
-static zval *date_period_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC)
+static zval *date_period_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC)
 {
 	zval *zv;
 	if (type != BP_VAR_IS && type != BP_VAR_R) {
@@ -4964,7 +4964,7 @@ static zval *date_period_read_property(zval *object, zval *member, int type, zen
 /* }}} */
 
 /* {{{ date_period_write_property */
-static void date_period_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
+static void date_period_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Writing to DatePeriod properties is unsupported");
 }

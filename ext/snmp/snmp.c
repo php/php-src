@@ -1975,7 +1975,7 @@ void php_snmp_add_property(HashTable *h, const char *name, size_t name_length, p
 
 /* {{{ php_snmp_read_property(zval *object, zval *member, int type[, const zend_literal *key])
    Generic object property reader */
-zval *php_snmp_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC)
+zval *php_snmp_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC)
 {
 	zval tmp_member;
 	zval *retval;
@@ -2015,7 +2015,7 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, zend_uint cac
 
 /* {{{ php_snmp_write_property(zval *object, zval *member, zval *value[, const zend_literal *key])
    Generic object property writer */
-void php_snmp_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
+void php_snmp_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
 {
 	zval tmp_member;
 	php_snmp_object *obj;
@@ -2052,7 +2052,7 @@ void php_snmp_write_property(zval *object, zval *member, zval *value, zend_uint 
 
 /* {{{ php_snmp_has_property(zval *object, zval *member, int has_set_exists[, const zend_literal *key])
    Generic object property checker */
-static int php_snmp_has_property(zval *object, zval *member, int has_set_exists, zend_uint cache_slot TSRMLS_DC)
+static int php_snmp_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot TSRMLS_DC)
 {
 	zval rv;
 	php_snmp_prop_handler *hnd;

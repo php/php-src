@@ -382,7 +382,7 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 
 /* {{{ sxe_property_read()
  */
-static zval *sxe_property_read(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC)
+static zval *sxe_property_read(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC)
 {
 	return sxe_prop_dim_read(object, member, 1, 0, type, rv TSRMLS_CC);
 }
@@ -673,7 +673,7 @@ next_iter:
 
 /* {{{ sxe_property_write()
  */
-static void sxe_property_write(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
+static void sxe_property_write(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
 {
 	sxe_prop_dim_write(object, member, value, 1, 0, NULL TSRMLS_CC);
 }
@@ -687,7 +687,7 @@ static void sxe_dimension_write(zval *object, zval *offset, zval *value TSRMLS_D
 }
 /* }}} */
 
-static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
@@ -839,7 +839,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 
 /* {{{ sxe_property_exists()
  */
-static int sxe_property_exists(zval *object, zval *member, int check_empty, zend_uint cache_slot TSRMLS_DC)
+static int sxe_property_exists(zval *object, zval *member, int check_empty, void **cache_slot TSRMLS_DC)
 {
 	return sxe_prop_dim_exists(object, member, check_empty, 1, 0 TSRMLS_CC);
 }
@@ -964,7 +964,7 @@ next_iter:
 
 /* {{{ sxe_property_delete()
  */
-static void sxe_property_delete(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC)
+static void sxe_property_delete(zval *object, zval *member, void **cache_slot TSRMLS_DC)
 {
 	sxe_prop_dim_delete(object, member, 1, 0 TSRMLS_CC);
 }

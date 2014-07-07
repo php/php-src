@@ -661,7 +661,7 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, zend_uint a
 	}
 }
 
-static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *property_name, int value_type, znode_op *value_op, const zend_execute_data *execute_data, int opcode, zend_uint cache_slot TSRMLS_DC)
+static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *property_name, int value_type, znode_op *value_op, const zend_execute_data *execute_data, int opcode, void **cache_slot TSRMLS_DC)
 {
 	zend_free_op free_value;
  	zval *value = get_zval_ptr(value_type, value_op, execute_data, &free_value, BP_VAR_R);
@@ -1344,7 +1344,7 @@ static zend_never_inline void zend_fetch_dimension_address_read_IS(zval *result,
 	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS TSRMLS_CC);
 }
 
-static void zend_fetch_property_address(zval *result, zval *container_ptr, zval *prop_ptr, zend_uint cache_slot, int type, int is_ref TSRMLS_DC)
+static void zend_fetch_property_address(zval *result, zval *container_ptr, zval *prop_ptr, void **cache_slot, int type, int is_ref TSRMLS_DC)
 {
 	zval *container = container_ptr;
 

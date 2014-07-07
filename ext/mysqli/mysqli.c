@@ -297,7 +297,7 @@ static int mysqli_write_na(mysqli_object *obj, zval *newval TSRMLS_DC)
 /* }}} */
 
 /* {{{ mysqli_read_property */
-zval *mysqli_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC)
+zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC)
 {
 	zval tmp_member;
 	zval *retval;
@@ -335,7 +335,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, zend_uint cache
 /* }}} */
 
 /* {{{ mysqli_write_property */
-void mysqli_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
+void mysqli_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
 {
 	zval tmp_member;
 	mysqli_object *obj;
@@ -383,7 +383,7 @@ void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysq
 }
 /* }}} */
 
-static int mysqli_object_has_property(zval *object, zval *member, int has_set_exists, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static int mysqli_object_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	mysqli_object *obj = Z_MYSQLI_P(object);
 	mysqli_prop_handler	*p;

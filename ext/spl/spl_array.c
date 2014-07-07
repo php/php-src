@@ -882,7 +882,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 }
 /* }}} */
 
-static zval *spl_array_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC) /* {{{ */
+static zval *spl_array_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -893,7 +893,7 @@ static zval *spl_array_read_property(zval *object, zval *member, int type, zend_
 	return std_object_handlers.read_property(object, member, type, cache_slot, rv TSRMLS_CC);
 } /* }}} */
 
-static void spl_array_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static void spl_array_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -905,7 +905,7 @@ static void spl_array_write_property(zval *object, zval *member, zval *value, ze
 	std_object_handlers.write_property(object, member, value, cache_slot TSRMLS_CC);
 } /* }}} */
 
-static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -918,7 +918,7 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 	return NULL;
 } /* }}} */
 
-static int spl_array_has_property(zval *object, zval *member, int has_set_exists, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static int spl_array_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -929,7 +929,7 @@ static int spl_array_has_property(zval *object, zval *member, int has_set_exists
 	return std_object_handlers.has_property(object, member, has_set_exists, cache_slot TSRMLS_CC);
 } /* }}} */
 
-static void spl_array_unset_property(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static void spl_array_unset_property(zval *object, zval *member, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
