@@ -20,6 +20,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #67531 (syslog cannot be set in pool configuration). (Remi)
 
+- Intl:
+  . Fixed bug #67052 (NumberFormatter::parse() resets LC_NUMERIC setting).
+    (Stas)
+
 - OPCache:
   . Fixed bug #67215 (php-cgi work with opcache, may be segmentation fault
     happen) (Dmitry, Laruence)
