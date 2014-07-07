@@ -1189,7 +1189,7 @@ function gen_vm($def, $skel) {
 		fputs($f,"#define $op $code\n");
 	}
 
-	fputs($f, "\n#endif");
+	fputs($f, "\n#endif\n");
 	fclose($f);
 	echo "zend_vm_opcodes.h generated successfully.\n";
 
