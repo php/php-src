@@ -23,7 +23,7 @@ PHP                                                                        NEWS
     (Stas)
 
 - pgsql:
-  . Fix bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
+  . Fixed bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
     which affected builds against libpq < 7.3. (Adam)
 
 - Streams:
