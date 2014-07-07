@@ -183,31 +183,20 @@ static php_stream *_php_stream_fopen_from_file_int(FILE *file, const char *mode 
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 }
 
-PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path STREAMS_DC TSRMLS_DC)
-{
-	int fd = php_open_temporary_fd(dir, pfx, opened_path TSRMLS_CC);
-
-	if (fd != -1)	{
-		php_stream *stream = php_stream_fopen_from_fd_int_rel(fd, "r+b", NULL);
-		if (stream) {
-			return stream;
-		}
-		close(fd);
-
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to allocate stream");
-
-		return NULL;
-	}
-	return NULL;
-}
-
-PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
+PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path_ptr STREAMS_DC TSRMLS_DC)
 {
 	char *opened_path = NULL;
-	int fd = php_open_temporary_fd(NULL, "php", &opened_path TSRMLS_CC);
+	int fd;
 
+	fd = php_open_temporary_fd(dir, pfx, &opened_path TSRMLS_CC);
 	if (fd != -1)	{
-		php_stream *stream = php_stream_fopen_from_fd_int_rel(fd, "r+b", NULL);
+		php_stream *stream;
+
+		if (opened_path_ptr) {
+			*opened_path_ptr = opened_path;
+		}
+
+		stream = php_stream_fopen_from_fd_int_rel(fd, "r+b", NULL);
 		if (stream) {
 			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 			stream->wrapper = &php_plain_files_wrapper;
@@ -225,6 +214,11 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 		return NULL;
 	}
 	return NULL;
+}
+
+PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
+{
+	return php_stream_fopen_temporary_file(NULL, "php", NULL);
 }
 
 PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id STREAMS_DC TSRMLS_DC)

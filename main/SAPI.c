@@ -275,7 +275,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 	}
 
 
-	SG(request_info).request_body = php_stream_temp_create(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE);
+	SG(request_info).request_body = php_stream_temp_create_ex(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE, PG(upload_tmp_dir));
 
 	if (sapi_module.read_post) {
 		int read_bytes;

@@ -810,18 +810,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, 
 			if (UNEXPECTED(t == NULL)) {
 				if (p->key->len > 0 && p->key->val[0] == 0) {
 					/* Mangled key */
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-					if (((zend_function*)Z_PTR(p->val))->common.fn_flags & ZEND_ACC_CLOSURE) {
-						/* update closure */
-						t = zend_hash_update(target, p->key, &p->val);
-					} else {
-						/* ignore and wait for runtime */
-						continue;
-					} 
-#else
-					/* ignore and wait for runtime */
-					continue;
-#endif
+					t = zend_hash_update(target, p->key, &p->val);
 				} else {
 					t = zend_hash_find(target, p->key);
 					goto failure;
