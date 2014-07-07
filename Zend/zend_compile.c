@@ -627,16 +627,6 @@ void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC) /* {
 }
 /* }}} */
 
-void zend_do_echo(znode *arg TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_ECHO;
-	SET_NODE(opline->op1, arg);
-	SET_UNUSED(opline->op2);
-}
-/* }}} */
-
 void zend_do_abstract_method(const znode *function_name, znode *modifiers, const znode *body TSRMLS_DC) /* {{{ */
 {
 	char *method_type;
@@ -6987,6 +6977,15 @@ void zend_compile_return(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
+void zend_compile_echo(zend_ast *ast TSRMLS_DC) {
+	zend_ast *expr_ast = ast->child[0];
+
+	znode expr_node;
+	zend_compile_expr(&expr_node, expr_ast TSRMLS_CC);
+
+	emit_op(NULL, ZEND_ECHO, &expr_node, NULL TSRMLS_CC);
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7741,6 +7740,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			return;
 		case ZEND_AST_RETURN:
 			zend_compile_return(ast TSRMLS_CC);
+			return;
+		case ZEND_AST_ECHO:
+			zend_compile_echo(ast TSRMLS_CC);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}

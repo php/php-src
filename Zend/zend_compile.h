@@ -478,7 +478,6 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC);
 void zend_do_fetch_global_variable(znode *varname, const znode *static_assignment, int fetch_type TSRMLS_DC);
 
-void zend_do_echo(znode *arg TSRMLS_DC);
 typedef int (*unary_op_type)(zval *, zval * TSRMLS_DC);
 typedef int (*binary_op_type)(zval *, zval *, zval * TSRMLS_DC);
 ZEND_API unary_op_type get_unary_op(int opcode);

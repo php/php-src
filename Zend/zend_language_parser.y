@@ -348,7 +348,7 @@ unticked_statement:
 	|	T_GLOBAL global_var_list ';'
 	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'
-	|	T_INLINE_HTML			{ zend_do_echo(&$1 TSRMLS_CC); }
+	|	T_INLINE_HTML { $$.u.ast = zend_ast_create_unary(ZEND_AST_ECHO, AST_ZVAL(&$1)); AS($$); }
 	|	expr ';'				{ AC($1); zend_do_free(&$1 TSRMLS_CC); }
 	|	T_UNSET '(' unset_variables ')' ';'
 	|	T_FOREACH '(' variable T_AS
@@ -742,10 +742,12 @@ class_constant_declaration:
 ;
 
 echo_expr_list:
-		echo_expr_list ',' expr { AC($3); zend_do_echo(&$3 TSRMLS_CC); }
-	|	expr					{ AC($1); zend_do_echo(&$1 TSRMLS_CC); }
+		echo_expr_list ',' echo_expr
+	|	echo_expr
 ;
-
+echo_expr:
+	expr { $$.u.ast = zend_ast_create_unary(ZEND_AST_ECHO, $1.u.ast); AS($$); }
+;
 
 for_expr:
 		/* empty */			{ $$.op_type = IS_CONST;  ZVAL_BOOL(&$$.u.constant, 1); }

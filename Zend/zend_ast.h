@@ -72,6 +72,7 @@ enum _zend_ast_kind {
 	ZEND_AST_GLOBAL,
 	ZEND_AST_UNSET,
 	ZEND_AST_RETURN,
+	ZEND_AST_ECHO,
 };
 
 typedef unsigned short zend_ast_kind;
