@@ -73,7 +73,9 @@ PHP_FUNCTION( numfmt_parse )
 	}
 
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
-	oldlocale = setlocale(LC_NUMERIC, "C");
+	/* need to copy here since setlocale may change it later */
+	oldlocale = estrdup(setlocale(LC_NUMERIC, NULL));
+	setlocale(LC_NUMERIC, "C");
 #endif
 
 	switch(type) {
@@ -100,6 +102,7 @@ PHP_FUNCTION( numfmt_parse )
 	}
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
 	setlocale(LC_NUMERIC, oldlocale);
+	efree(oldlocale);
 #endif
 	if(zposition) {
 		zval_dtor(zposition);

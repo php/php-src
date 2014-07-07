@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     generator). (Nikita)
   . Fixed bug #67151 (strtr with empty array crashes). (Nikita)
 
+- Intl:
+  . Fixed bug #67052 (NumberFormatter::parse() resets LC_NUMERIC setting).
+    (Stas)
+
 - pgsql:
   . Fix bug #67555 (Cannot build against libpq 7.3). (Adam)
 
