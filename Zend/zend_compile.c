@@ -2672,8 +2672,15 @@ void zend_do_pass_param(znode *param, zend_uchar op TSRMLS_DC) /* {{{ */
 			opline->extended_value = send_function;
 		}
 	} else {
-		if (function_ptr) {
-			opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND;
+		if (!function_ptr) {
+			switch (op) {
+				case ZEND_SEND_VAL:
+					op = ZEND_SEND_VAL_EX;
+					break;
+				case ZEND_SEND_VAR:
+					op = ZEND_SEND_VAR_EX;
+					break;
+			}
 		}
 	}
 	opline->opcode = op;
@@ -5800,7 +5807,6 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC) /* {{{ */
 	}
 	SET_NODE(opline->op1, cmd);
 	opline->op2.opline_num = 1;
-	opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND;
 	SET_UNUSED(opline->op2);
 
 	/* FIXME: exception support not added to this op2 */

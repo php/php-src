@@ -2610,12 +2610,28 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 
 	SAVE_OPLINE();
-	if (opline->extended_value != ZEND_ARG_COMPILE_TIME_BOUND) {
-		if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.num);
+	value = opline->op1.zv;
+	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
+	EX(call)->num_args = opline->op2.num;
+	ZVAL_COPY_VALUE(arg, value);
+	if (IS_CONST == IS_CONST) {
+		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
+			zval_copy_ctor_func(arg);
 		}
 	}
+	ZEND_VM_NEXT_OPCODE();
+}
 
+static int ZEND_FASTCALL  ZEND_SEND_VAL_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value, *arg;
+
+
+	SAVE_OPLINE();
+	if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+		zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.num);
+	}
 	value = opline->op1.zv;
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
 	EX(call)->num_args = opline->op2.num;
@@ -7802,12 +7818,28 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	if (opline->extended_value != ZEND_ARG_COMPILE_TIME_BOUND) {
-		if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.num);
+	value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
+	EX(call)->num_args = opline->op2.num;
+	ZVAL_COPY_VALUE(arg, value);
+	if (IS_TMP_VAR == IS_CONST) {
+		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
+			zval_copy_ctor_func(arg);
 		}
 	}
+	ZEND_VM_NEXT_OPCODE();
+}
 
+static int ZEND_FASTCALL  ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value, *arg;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+		zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.num);
+	}
 	value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
 	EX(call)->num_args = opline->op2.num;
@@ -12938,7 +12970,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HANDLE_EXCEPTION();
 }
 
-static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *varptr, *arg;
@@ -12968,11 +13000,11 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
 		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
-			return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			return ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
 	} else {
 		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			return ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
 	}
 
@@ -13043,18 +13075,15 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL  ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *varptr, *arg;
 	zend_free_op free_op1;
 
-	if (opline->extended_value != ZEND_ARG_COMPILE_TIME_BOUND) {
-		if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			return ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-		}
+	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+		return ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
 	EX(call)->num_args = opline->op2.num;
@@ -30085,7 +30114,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HANDLE_EXCEPTION();
 }
 
-static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *varptr, *arg;
@@ -30115,11 +30144,11 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
 		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
-			return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			return ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
 	} else {
 		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			return ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
 	}
 
@@ -30189,18 +30218,15 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL  ZEND_SEND_VAR_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *varptr, *arg;
 
 
-	if (opline->extended_value != ZEND_ARG_COMPILE_TIME_BOUND) {
-		if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			return ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-		}
+	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+		return ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
 	EX(call)->num_args = opline->op2.num;
@@ -41749,21 +41775,21 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_SEND_VAR_SPEC_VAR_HANDLER,
-  	ZEND_SEND_VAR_SPEC_VAR_HANDLER,
-  	ZEND_SEND_VAR_SPEC_VAR_HANDLER,
-  	ZEND_SEND_VAR_SPEC_VAR_HANDLER,
-  	ZEND_SEND_VAR_SPEC_VAR_HANDLER,
+  	ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER,
+  	ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER,
+  	ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER,
+  	ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER,
+  	ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_SEND_VAR_SPEC_CV_HANDLER,
-  	ZEND_SEND_VAR_SPEC_CV_HANDLER,
-  	ZEND_SEND_VAR_SPEC_CV_HANDLER,
-  	ZEND_SEND_VAR_SPEC_CV_HANDLER,
-  	ZEND_SEND_VAR_SPEC_CV_HANDLER,
+  	ZEND_SEND_VAR_EX_SPEC_CV_HANDLER,
+  	ZEND_SEND_VAR_EX_SPEC_CV_HANDLER,
+  	ZEND_SEND_VAR_EX_SPEC_CV_HANDLER,
+  	ZEND_SEND_VAR_EX_SPEC_CV_HANDLER,
+  	ZEND_SEND_VAR_EX_SPEC_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -42989,6 +43015,16 @@ void zend_init_opcodes_handlers(void)
   	ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_CV_HANDLER,
+  	ZEND_SEND_VAL_EX_SPEC_CONST_HANDLER,
+  	ZEND_SEND_VAL_EX_SPEC_CONST_HANDLER,
+  	ZEND_SEND_VAL_EX_SPEC_CONST_HANDLER,
+  	ZEND_SEND_VAL_EX_SPEC_CONST_HANDLER,
+  	ZEND_SEND_VAL_EX_SPEC_CONST_HANDLER,
+  	ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER,
+  	ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER,
+  	ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER,
+  	ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER,
+  	ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -43014,31 +43050,21 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_SEND_VAR_SPEC_VAR_HANDLER,
+  	ZEND_SEND_VAR_SPEC_VAR_HANDLER,
+  	ZEND_SEND_VAR_SPEC_VAR_HANDLER,
+  	ZEND_SEND_VAR_SPEC_VAR_HANDLER,
+  	ZEND_SEND_VAR_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_SEND_VAR_SPEC_CV_HANDLER,
+  	ZEND_SEND_VAR_SPEC_CV_HANDLER,
+  	ZEND_SEND_VAR_SPEC_CV_HANDLER,
+  	ZEND_SEND_VAR_SPEC_CV_HANDLER,
+  	ZEND_SEND_VAR_SPEC_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,

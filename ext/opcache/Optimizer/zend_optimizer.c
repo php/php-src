@@ -341,11 +341,12 @@ static int replace_var_by_const(zend_op_array *op_array,
 						if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {
 							return 0;
 						}
-						opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND;
+						opline->extended_value = 0;
+						opline->opcode = ZEND_SEND_VAL_EX;
 					} else {
 						opline->extended_value = 0;
+						opline->opcode = ZEND_SEND_VAL;
 					}
-					opline->opcode = ZEND_SEND_VAL;
 					break;
 				default:
 					break;

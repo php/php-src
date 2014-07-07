@@ -2952,12 +2952,6 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	if (opline->extended_value != ZEND_ARG_COMPILE_TIME_BOUND) {
-		if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.num);
-		}
-	}
-
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
 	EX(call)->num_args = opline->op2.num;
@@ -2970,7 +2964,29 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
+ZEND_VM_HANDLER(116, ZEND_SEND_VAL_EX, CONST|TMP, ANY)
+{
+	USE_OPLINE
+	zval *value, *arg;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+		zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.num);
+	}
+	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
+	EX(call)->num_args = opline->op2.num;
+	ZVAL_COPY_VALUE(arg, value);
+	if (OP1_TYPE == IS_CONST) {
+		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
+			zval_copy_ctor_func(arg);
+		}
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(117, ZEND_SEND_VAR, VAR|CV, ANY)
 {
 	USE_OPLINE
 	zval *varptr, *arg;
@@ -3000,11 +3016,11 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
 		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_send_by_var_helper);
+			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_VAR);
 		}
 	} else {
 		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_send_by_var_helper);
+			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_VAR);
 		}
 	}
 
@@ -3075,18 +3091,15 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(66, ZEND_SEND_VAR, VAR|CV, ANY)
+ZEND_VM_HANDLER(66, ZEND_SEND_VAR_EX, VAR|CV, ANY)
 {
 	USE_OPLINE
 	zval *varptr, *arg;
 	zend_free_op free_op1;
 
-	if (opline->extended_value != ZEND_ARG_COMPILE_TIME_BOUND) {
-		if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_REF);
-		}
+	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_REF);
 	}
-
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
 	EX(call)->num_args = opline->op2.num;
