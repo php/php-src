@@ -6886,7 +6886,6 @@ void zend_compile_global_var(zend_ast *ast TSRMLS_DC) {
 	zend_ast *var_ast = ast->child[0];
 
 	znode var_node, result;
-	zend_op *opline;
 
 	zend_compile_expr(&var_node, var_ast TSRMLS_CC);
 	if (var_node.op_type == IS_CONST) {
@@ -6895,7 +6894,7 @@ void zend_compile_global_var(zend_ast *ast TSRMLS_DC) {
 		}
 	}
 
-	opline = emit_op(&result, ZEND_FETCH_W, &var_node, NULL TSRMLS_CC);
+	emit_op(&result, ZEND_FETCH_W, &var_node, NULL TSRMLS_CC);
 
 	// TODO.AST Avoid double fetch
 	//opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
@@ -6933,6 +6932,58 @@ void zend_compile_unset(zend_ast *ast TSRMLS_DC) {
 			opline->opcode = ZEND_UNSET_VAR;
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+static void zend_free_foreach_and_switch_variables(TSRMLS_D) {
+	zend_uint opnum_start, opnum_end, i;
+
+	opnum_start = get_next_op_number(CG(active_op_array));
+
+#ifdef ZTS
+	zend_stack_apply_with_argument(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_switch_expr TSRMLS_CC);
+	zend_stack_apply_with_argument(&CG(foreach_copy_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_foreach_copy TSRMLS_CC);
+#else
+	zend_stack_apply(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_switch_expr);
+	zend_stack_apply(&CG(foreach_copy_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_foreach_copy);
+#endif
+
+	opnum_end = get_next_op_number(CG(active_op_array));
+
+	for (i = opnum_start; i < opnum_end; ++i) {
+		CG(active_op_array)->opcodes[i].extended_value |= EXT_TYPE_FREE_ON_RETURN;
+	}
+}
+
+void zend_compile_return(zend_ast *ast TSRMLS_DC) {
+	zend_ast *expr_ast = ast->child[0];
+	zend_bool by_ref = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+
+	znode expr_node;
+	zend_op *opline;
+
+	if (!expr_ast) {
+		expr_node.op_type = IS_CONST;
+		ZVAL_NULL(&expr_node.u.constant);
+	} else if (by_ref && zend_is_variable(expr_ast) && !zend_is_call(expr_ast)) {
+		zend_compile_var(&expr_node, expr_ast, BP_VAR_REF TSRMLS_CC);
+	} else {
+		zend_compile_expr(&expr_node, expr_ast TSRMLS_CC);
+	}
+
+	zend_free_foreach_and_switch_variables(TSRMLS_C);
+
+	if (CG(context).in_finally) {
+		emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL TSRMLS_CC);
+	}
+
+	opline = emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN, &expr_node, NULL TSRMLS_CC);
+	if (expr_ast) {
+		if (zend_is_call(expr_ast)) {
+			opline->extended_value = ZEND_RETURNS_FUNCTION;
+		} else if (!zend_is_variable(expr_ast)) {
+			opline->extended_value = ZEND_RETURNS_VALUE;
+		}
 	}
 }
 
@@ -7687,6 +7738,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			return;
 		case ZEND_AST_UNSET:
 			zend_compile_unset(ast TSRMLS_CC);
+			return;
+		case ZEND_AST_RETURN:
+			zend_compile_return(ast TSRMLS_CC);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}

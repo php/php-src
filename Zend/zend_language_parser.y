@@ -341,9 +341,10 @@ unticked_statement:
 	|	T_BREAK expr ';'		{ AC($2); zend_do_brk_cont(ZEND_BRK, &$2 TSRMLS_CC); }
 	|	T_CONTINUE ';'			{ zend_do_brk_cont(ZEND_CONT, NULL TSRMLS_CC); }
 	|	T_CONTINUE expr ';'		{ AC($2); zend_do_brk_cont(ZEND_CONT, &$2 TSRMLS_CC); }
-	|	T_RETURN ';'						{ zend_do_return(NULL, 0 TSRMLS_CC); }
-	|	T_RETURN expr_without_variable ';'	{ AC($2); zend_do_return(&$2, 0 TSRMLS_CC); }
-	|	T_RETURN variable ';'				{ zend_do_return(&$2, 1 TSRMLS_CC); }
+	|	T_RETURN ';'
+			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RETURN, NULL); AS($$); }
+	|	T_RETURN expr ';'
+			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RETURN, $2.u.ast); AS($$); }
 	|	T_GLOBAL global_var_list ';'
 	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'

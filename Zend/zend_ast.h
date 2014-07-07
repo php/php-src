@@ -37,17 +37,25 @@ enum _zend_ast_kind {
 	ZEND_AST_CALL,
 	ZEND_AST_METHOD_CALL,
 	ZEND_AST_STATIC_CALL,
-
-	ZEND_AST_ASSIGN,
-	ZEND_AST_ASSIGN_REF,
-	ZEND_AST_LIST,
-	ZEND_AST_GLOBAL,
-	ZEND_AST_UNSET,
-
 	ZEND_AST_PARAMS,
 	ZEND_AST_UNPACK,
 
+	ZEND_AST_CONST,
+	ZEND_AST_CLASS_CONST,
+	ZEND_AST_RESOLVE_CLASS_NAME,
+
+	ZEND_AST_ASSIGN,
+	ZEND_AST_ASSIGN_REF,
 	ZEND_AST_ASSIGN_OP,
+	ZEND_AST_LIST,
+
+	ZEND_AST_UNARY_PLUS,
+	ZEND_AST_UNARY_MINUS,
+	ZEND_AST_CAST,
+	ZEND_AST_EMPTY,
+	ZEND_AST_ISSET,
+	ZEND_AST_SILENCE,
+	ZEND_AST_SHELL_EXEC,
 
 	ZEND_AST_BINARY_OP,
 	ZEND_AST_GREATER,
@@ -55,25 +63,15 @@ enum _zend_ast_kind {
 	ZEND_AST_AND,
 	ZEND_AST_OR,
 
-	ZEND_AST_UNARY_PLUS,
-	ZEND_AST_UNARY_MINUS,
-	ZEND_AST_CAST,
-
 	ZEND_AST_CONDITIONAL,
 
-	ZEND_AST_EMPTY,
-	ZEND_AST_ISSET,
-
-	ZEND_AST_SILENCE,
-	ZEND_AST_SHELL_EXEC,
 	ZEND_AST_ARRAY,
 	ZEND_AST_ARRAY_ELEM,
-
-	ZEND_AST_CONST,
-	ZEND_AST_CLASS_CONST,
-	ZEND_AST_RESOLVE_CLASS_NAME,
-
 	ZEND_AST_ENCAPS_LIST,
+
+	ZEND_AST_GLOBAL,
+	ZEND_AST_UNSET,
+	ZEND_AST_RETURN,
 };
 
 typedef unsigned short zend_ast_kind;
@@ -167,6 +165,7 @@ static inline zend_ast *zend_ast_create_assign_op(zend_uint opcode, zend_ast *op
 #define AST_ZVAL(znode) zend_ast_create_zval(&(znode)->u.constant)
 
 #define AC(znode) AST_COMPILE(&znode, znode.u.ast)
+#define AS(znode) AST_COMPILE_STMT(znode.u.ast)
 #define AZ(znode) ((znode).u.ast = AST_ZNODE(&znode))
 
 #endif
