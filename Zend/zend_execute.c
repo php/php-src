@@ -1547,10 +1547,14 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	EX(call) = NULL;
 
 	EX(opline) = op_array->opcodes;
+	if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
+		/* Skip useless ZEND_RECV opcodes */
+		EX(opline) += MIN(EX(num_args), op_array->required_num_args);
+	}
 	EX(scope) = EG(scope);
 
 	first_extra_arg = op_array->num_args;
-		
+
 	if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0)) {
 		first_extra_arg--;
 	}
