@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - CLI server:
   . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
     (Adam)
+  . Fixed bug #66830 (Empty header causes PHP built-in web server to hang).
+    (Adam)
 
 - FPM:
   . Fixed bug #67531 (syslog cannot be set in pool configuration). (Remi)
