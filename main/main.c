@@ -770,6 +770,8 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	} else if (php_during_module_shutdown()) {
 		function = "PHP Shutdown";
 	} else if (EG(current_execute_data) &&
+				EG(current_execute_data)->func &&
+				ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
 				EG(current_execute_data)->opline &&
 				EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL
 	) {

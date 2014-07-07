@@ -81,7 +81,7 @@ ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 }
 
-ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci TSRMLS_DC)
+ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data, zval *return_value TSRMLS_DC)
 {
 	int lineno;
 	const char *filename;
@@ -94,7 +94,7 @@ ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, zend_
 		DTRACE_EXECUTE_ENTRY((char *)filename, lineno);
 	}
 
-	execute_internal(execute_data_ptr, fci TSRMLS_CC);
+	execute_internal(execute_data, return_value TSRMLS_CC);
 
 	if (DTRACE_EXECUTE_RETURN_ENABLED()) {
 		DTRACE_EXECUTE_RETURN((char *)filename, lineno);

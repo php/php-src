@@ -39,7 +39,7 @@
 #endif
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
-ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci TSRMLS_DC);
+ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value TSRMLS_DC);
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, {{0},0}, NULL, NULL, 0, NULL, NULL, 0 };
@@ -468,7 +468,7 @@ ZEND_API uint zend_get_executed_lineno(TSRMLS_D) /* {{{ */
 	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
 		ex = ex->prev_execute_data;
 	}
-	if (ex && ex->opline) {
+	if (ex) {
 		if (EG(exception) && ex->opline->opcode == ZEND_HANDLE_EXCEPTION &&
 		    ex->opline->lineno == 0 && EG(opline_before_exception)) {
 			return EG(opline_before_exception)->lineno;
@@ -697,7 +697,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		 */
 		memset(&dummy_execute_data, 0, sizeof(zend_execute_data));
 		EG(current_execute_data) = &dummy_execute_data;
-	} else if (EG(current_execute_data)->opline && 
+	} else if (EG(current_execute_data)->func &&
+	           ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
 	           EG(current_execute_data)->opline->opcode != ZEND_DO_FCALL) {
 		/* Insert fake frame in case of include or magic calls */
 		dummy_execute_data = *EG(current_execute_data);
@@ -741,7 +742,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	func = fci_cache->function_handler;
-	call = zend_vm_stack_push_call_frame(func, fci->param_count, ZEND_CALL_DONE, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
+	call = zend_vm_stack_push_call_frame(func, fci->param_count, 0, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
 	calling_scope = fci_cache->calling_scope;
 	fci->object = fci_cache->object;
 	if (fci->object &&
@@ -843,16 +844,14 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		Z_ADDREF(EG(This));
 	}
 
-	call->prev_nested_call = EG(current_execute_data)->call;
-	EG(current_execute_data)->call = call;
-
 	if (func->type == ZEND_USER_FUNCTION) {
 		EG(scope) = func->common.scope;
 		call->symbol_table = fci->symbol_table;
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
-			zend_execute(&func->op_array, fci->retval TSRMLS_CC);
+			zend_init_execute_data(call, &func->op_array, fci->retval, call->symbol_table ? VM_FRAME_TOP_CODE : VM_FRAME_TOP_FUNCTION TSRMLS_CC);
+			zend_execute_ex(call TSRMLS_CC);
 		} else {
-			zend_generator_create_zval(&func->op_array, fci->retval TSRMLS_CC);
+			zend_generator_create_zval(call, &func->op_array, fci->retval TSRMLS_CC);
 		}
 	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
@@ -860,19 +859,16 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (func->common.scope) {
 			EG(scope) = func->common.scope;
 		}
-		call->opline = NULL;
-		call->call = NULL;
 		call->prev_execute_data = EG(current_execute_data);
 		EG(current_execute_data) = call;
 		if (EXPECTED(zend_execute_internal == NULL)) {
 			/* saves one function call if zend_execute_internal is not used */
 			func->internal_function.handler(fci->param_count, fci->retval TSRMLS_CC);
 		} else {
-			zend_execute_internal(call->prev_execute_data, fci TSRMLS_CC);
+			zend_execute_internal(call, fci->retval TSRMLS_CC);
 		}
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call TSRMLS_CC);
-		EG(current_execute_data)->call = call->prev_nested_call;
 		zend_vm_stack_free_call_frame(call TSRMLS_CC);
 
 		/*  We shouldn't fix bad extensions here,
@@ -895,8 +891,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 		/* Not sure what should be done here if it's a static method */
 		if (fci->object) {
-			call->opline = NULL;
-			call->call = NULL;
 			call->prev_execute_data = EG(current_execute_data);
 			EG(current_execute_data) = call;
 			fci->object->handlers->call_method(func->common.function_name, fci->object, fci->param_count, fci->retval TSRMLS_CC);
@@ -906,7 +900,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 
 		zend_vm_stack_free_args(call TSRMLS_CC);
-		EG(current_execute_data)->call = call->prev_nested_call;
 		zend_vm_stack_free_call_frame(call TSRMLS_CC);
 
 		if (func->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
@@ -1098,11 +1091,6 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 
 		zend_try {
 			ZVAL_UNDEF(&local_retval);
-			if (EG(current_execute_data)) {
-				EG(current_execute_data)->call = zend_vm_stack_push_call_frame(
-					(zend_function*)new_op_array, 0, 0, EG(current_execute_data)->called_scope, Z_OBJ(EG(This)), EG(current_execute_data)->call TSRMLS_CC);
-				EG(current_execute_data)->call->symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
-			}
 			zend_execute(new_op_array, &local_retval TSRMLS_CC);
 		} zend_catch {
 			destroy_op_array(new_op_array TSRMLS_CC);

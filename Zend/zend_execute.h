@@ -30,16 +30,16 @@
 BEGIN_EXTERN_C()
 struct _zend_fcall_info;
 ZEND_API extern void (*zend_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
-ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci TSRMLS_DC);
+ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value TSRMLS_DC);
 
 void init_executor(TSRMLS_D);
 void shutdown_executor(TSRMLS_D);
 void shutdown_destructors(TSRMLS_D);
-ZEND_API zend_execute_data *zend_create_execute_data(zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC);
-ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_op_array *op_array, zval *return_value TSRMLS_DC);
+ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC);
+ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data *call, zend_op_array *op_array, zval *return_value TSRMLS_DC);
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value TSRMLS_DC);
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
-ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci TSRMLS_DC);
+ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op TSRMLS_DC);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name TSRMLS_DC);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *key, int use_autoload TSRMLS_DC);
@@ -250,8 +250,8 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call T
 	zend_uint num_args = call->num_args;	
 
 	if (num_args > 0) {
-		zval *p = ZEND_CALL_ARG(call, num_args + 1);
-	 	zval *end = p - num_args;;
+		zval *end = ZEND_CALL_ARG(call, 1);
+		zval *p = end + num_args;
 
 		do {
 			p--;

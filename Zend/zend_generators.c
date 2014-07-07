@@ -132,10 +132,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			efree(op_array);
 		}
 
-		if (generator->execute_data->prev_execute_data) {
-			generator->execute_data->prev_execute_data->call = generator->execute_data->prev_nested_call;
-		}
-
 		efree(generator->stack);
 		generator->execute_data = NULL;
 	}
@@ -225,7 +221,7 @@ static int copy_closure_static_var(zval *var TSRMLS_DC, int num_args, va_list ar
 /* }}} */
 
 /* Requires globals EG(scope), EG(This) and EG(current_execute_data). */
-ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
+ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	zend_generator *generator;
 	zend_execute_data *current_execute_data;
@@ -259,7 +255,7 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	/* Create new execution context. We have to back up and restore
 	 * EG(current_execute_data) here. */
 	current_execute_data = EG(current_execute_data);
-	execute_data = zend_create_generator_execute_data(op_array, return_value TSRMLS_CC);
+	execute_data = zend_create_generator_execute_data(call, op_array, return_value TSRMLS_CC);
 	EG(current_execute_data) = current_execute_data;
 
 	object_init_ex(return_value, zend_ce_generator);
@@ -322,10 +318,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		 * So we have to link generator call frame with caller call frames */
 
 		generator->execute_data->prev_execute_data = original_execute_data;
-		if (original_execute_data) {
-			generator->execute_data->prev_nested_call = original_execute_data->call;
-			original_execute_data->call = generator->execute_data;
-		}
 
 		/* Resume execution */
 		generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
@@ -333,8 +325,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
 		/* Unlink generator call_frame from the caller */
-		if (generator->execute_data && generator->execute_data->prev_execute_data) {
-			generator->execute_data->prev_execute_data->call = generator->execute_data->prev_nested_call;
+		if (generator->execute_data) {
 			generator->execute_data->prev_execute_data = NULL;
 		}
 

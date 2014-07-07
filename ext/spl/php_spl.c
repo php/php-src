@@ -287,11 +287,6 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 		STR_RELEASE(opened_path);
 		if (new_op_array) {
 			ZVAL_UNDEF(&result);
-			if (EG(current_execute_data)) {
-				EG(current_execute_data)->call = zend_vm_stack_push_call_frame(
-					(zend_function*)new_op_array, 0, 0, EG(current_execute_data)->called_scope, Z_OBJ(EG(This)), EG(current_execute_data)->call TSRMLS_CC);
-				EG(current_execute_data)->call->symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
-			}
 			zend_execute(new_op_array, &result TSRMLS_CC);
 	
 			destroy_op_array(new_op_array TSRMLS_CC);
@@ -356,7 +351,7 @@ PHP_FUNCTION(spl_autoload)
 		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
 			ex = ex->prev_execute_data;
 		}
-		if (ex && ex->opline && ex->opline->opcode != ZEND_FETCH_CLASS) {
+		if (ex && ex->opline->opcode != ZEND_FETCH_CLASS) {
 			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", class_name->val);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be loaded", class_name->val);

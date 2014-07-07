@@ -291,7 +291,7 @@ typedef enum {
 #define USED_RET() \
 	(!EG(current_execute_data) || \
 	 !EG(current_execute_data)->prev_execute_data || \
-	 !EG(current_execute_data)->prev_execute_data->opline || \
+	 !ZEND_USER_CODE(EG(current_execute_data)->prev_execute_data->func->common.type) || \
 	 !(EG(current_execute_data)->prev_execute_data->opline->result_type & EXT_TYPE_UNUSED))
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)

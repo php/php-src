@@ -1522,7 +1522,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 	     ZCG(cache_opline) == NULL &&
 	     file_handle->filename == SG(request_info).path_translated &&
 	     ZCG(cache_persistent_script)) ||
-	    (EG(current_execute_data) && EG(current_execute_data)->opline &&
+	    (EG(current_execute_data) &&
+	     EG(current_execute_data)->func &&
+	     ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
 	     EG(current_execute_data)->opline == ZCG(cache_opline) &&
 	     EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
@@ -1683,6 +1685,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 		/* see bug #15471 (old BTS) */
 		if (persistent_script->full_path) {
 			if (!EG(current_execute_data) || !EG(current_execute_data)->opline ||
+			    !EG(current_execute_data)->func ||
+			    !ZEND_USER_CODE(EG(current_execute_data)->func->common.type) ||
 			    EG(current_execute_data)->opline->opcode != ZEND_INCLUDE_OR_EVAL ||
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 			    (EG(current_execute_data)->opline->extended_value != ZEND_INCLUDE_ONCE &&
@@ -1843,7 +1847,9 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 	    !CG(interactive) &&
 	    !ZCSG(restart_in_progress)) {
 
-		if (EG(current_execute_data) && EG(current_execute_data)->opline) {
+		if (EG(current_execute_data) &&
+		    EG(current_execute_data)->func &&
+		    ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
 			zend_op *opline = EG(current_execute_data)->opline;
 
             if (opline->opcode == ZEND_INCLUDE_OR_EVAL &&
@@ -1943,7 +1949,8 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 		if ((!EG(current_execute_data) &&
 		     filename == SG(request_info).path_translated) ||
 		    (EG(current_execute_data) &&
-		     EG(current_execute_data)->opline &&
+		     EG(current_execute_data)->func &&
+		     ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
              EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
              (EG(current_execute_data)->opline->extended_value == ZEND_INCLUDE_ONCE ||
@@ -2008,7 +2015,8 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 		if ((!EG(current_execute_data) &&
 		     filename == SG(request_info).path_translated) ||
 		    (EG(current_execute_data) &&
-		     EG(current_execute_data)->opline &&
+		     EG(current_execute_data)->func &&
+		     ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
              EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
              (EG(current_execute_data)->opline->extended_value == ZEND_INCLUDE_ONCE ||

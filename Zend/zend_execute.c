@@ -1476,18 +1476,9 @@ static int zend_check_symbol(zval *pz TSRMLS_DC)
 
 ZEND_API opcode_handler_t *zend_opcode_handlers;
 
-ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci TSRMLS_DC)
+ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value TSRMLS_DC)
 {
-	if (fci != NULL) {
-		execute_data_ptr->call->func->internal_function.handler(
-			fci->param_count, fci->retval TSRMLS_CC
-		);
-	} else {
-		zval *return_value = EX_VAR_2(execute_data_ptr, execute_data_ptr->opline->result.var);
-		execute_data_ptr->call->func->internal_function.handler(
-			execute_data_ptr->call->num_args, return_value TSRMLS_CC
-		);
-	}
+	execute_data->func->internal_function.handler(execute_data->num_args, return_value TSRMLS_CC);
 }
 
 void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC) /* {{{ */
@@ -1693,7 +1684,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 }
 /* }}} */
 
-ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
+ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data *call, zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	/*
 	 * Normally the execute_data is allocated on the VM stack (because it does
@@ -1705,7 +1696,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_op_array *op
 	 * restore it simply by replacing a pointer.
 	 */
 	zend_execute_data *execute_data;
-	zend_uint num_args = EG(current_execute_data)->call->num_args;
+	zend_uint num_args = call->num_args;
 
 	EG(argument_stack) = zend_vm_stack_new_page(
 		MAX(ZEND_VM_STACK_PAGE_SIZE, 
@@ -1715,15 +1706,15 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_op_array *op
 	execute_data = zend_vm_stack_push_call_frame(
 		(zend_function*)op_array,
 		num_args,
-		EG(current_execute_data)->call->flags,
-		EG(current_execute_data)->call->called_scope,
-		EG(current_execute_data)->call->object,
+		call->flags,
+		call->called_scope,
+		call->object,
 		NULL TSRMLS_CC);
 	EX(num_args) = num_args;
 
 	/* copy arguments */
 	if (num_args > 0) {
-		zval *arg_src = ZEND_CALL_ARG(EG(current_execute_data)->call, 1);
+		zval *arg_src = ZEND_CALL_ARG(call, 1);
 		zval *arg_dst = ZEND_CALL_ARG(execute_data, 1);
 		int i;
 
@@ -1738,15 +1729,10 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_op_array *op
 }
 /* }}} */
 
-ZEND_API zend_execute_data *zend_create_execute_data(zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
-	zend_execute_data *execute_data;
-	
-	execute_data = EG(current_execute_data)->call;
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_execute_data(execute_data, op_array, return_value, frame_kind TSRMLS_CC);
-
-	return execute_data;
 }
 /* }}} */
 

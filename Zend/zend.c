@@ -1056,7 +1056,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
 					ex = ex->prev_execute_data;
 				}
-				if (ex && ex->opline && ex->opline->opcode == ZEND_HANDLE_EXCEPTION &&
+				if (ex && ex->opline->opcode == ZEND_HANDLE_EXCEPTION &&
 				    EG(opline_before_exception)) {
 					opline = EG(opline_before_exception);
 				}
@@ -1253,7 +1253,8 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	if (type == E_PARSE) {
 		/* eval() errors do not affect exit_status */
 		if (!(EG(current_execute_data) &&
-			EG(current_execute_data)->opline &&
+			EG(current_execute_data)->func &&
+			ZEND_USER_CODE(EG(current_execute_data)->func->type) &&
 			EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 			EG(current_execute_data)->opline->extended_value == ZEND_EVAL)) {
 			EG(exit_status) = 255;

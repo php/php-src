@@ -1769,7 +1769,7 @@ static void zend_mm_safe_error(zend_mm_heap *heap,
 			}
 			if (ex) {
 				error_filename = ex->func->op_array.filename->val;
-				error_lineno = ex->opline ? ex->opline->lineno : 0;
+				error_lineno = ex->opline->lineno;
 			} else {
 				error_filename = NULL;
 				error_lineno = 0;
