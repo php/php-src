@@ -55,6 +55,6 @@ int(2)
 array(0) {
 }
 
-Warning: Unknown: Parent session handler is not open in Unknown on line 0
+Warning: SessionHandler::write(): Parent session handler is not open in Unknown on line 0
 
-Warning: Unknown: Parent session handler is not open in Unknown on line 0
+Warning: SessionHandler::close(): Parent session handler is not open in Unknown on line 0
