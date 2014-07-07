@@ -68,12 +68,22 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 
 #define PSF(a) PS(mod_user_names).name.ps_##a
 
-#define FINISH								\
-	if (retval) {							\
-		convert_to_long(retval);			\
-		ret = Z_LVAL_P(retval);				\
-		zval_ptr_dtor(&retval);				\
-	}										\
+#define FINISH \
+	if (retval) { \
+		if (Z_TYPE_P(retval) == IS_BOOL) { \
+			ret = Z_BVAL_P(retval) ? SUCCESS : FAILURE; \
+                }  else if ((Z_TYPE_P(retval) == IS_LONG) && (Z_LVAL_P(retval) == -1)) { \
+			/* BC for clever users - Deprecate me */ \
+			ret = FAILURE; \
+		} else if ((Z_TYPE_P(retval) == IS_LONG) && (Z_LVAL_P(retval) == 0)) { \
+			/* BC for clever users - Deprecate me */ \
+			ret = SUCCESS; \
+		} else { \
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session callback expects true/false return value"); \
+			ret = FAILURE; \
+		} \
+		zval_ptr_dtor(&retval); \
+	} \
 	return ret
 
 PS_OPEN_FUNC(user)

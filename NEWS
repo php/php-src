@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)
+  . Fix user session handlers (See rfc:session.user.return-value). (Sara)
 
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
