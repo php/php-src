@@ -132,10 +132,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			efree(op_array);
 		}
 
-		if (generator->execute_data->prev_execute_data) {
-			generator->execute_data->prev_execute_data->call = generator->execute_data->prev_nested_call;
-		}
-
 		efree(generator->stack);
 		generator->execute_data = NULL;
 	}
@@ -224,14 +220,11 @@ static int copy_closure_static_var(zval *var TSRMLS_DC, int num_args, va_list ar
 }
 /* }}} */
 
-/* Requires globals EG(scope), EG(current_scope), EG(This),
- * EG(active_symbol_table) and EG(current_execute_data). */
-ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
+/* Requires globals EG(scope), EG(This) and EG(current_execute_data). */
+ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	zend_generator *generator;
 	zend_execute_data *current_execute_data;
-	zend_op **opline_ptr;
-	zend_array *current_symbol_table;
 	zend_execute_data *execute_data;
 	zend_vm_stack current_stack = EG(argument_stack);
 
@@ -260,16 +253,10 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	}
 	
 	/* Create new execution context. We have to back up and restore
-	 * EG(current_execute_data), EG(opline_ptr) and EG(active_symbol_table)
-	 * here because the function modifies or uses them  */
+	 * EG(current_execute_data) here. */
 	current_execute_data = EG(current_execute_data);
-	opline_ptr = EG(opline_ptr);
-	current_symbol_table = EG(active_symbol_table);
-	EG(active_symbol_table) = NULL;
-	execute_data = zend_create_generator_execute_data(op_array, return_value TSRMLS_CC);
-	EG(active_symbol_table) = current_symbol_table;
+	execute_data = zend_create_generator_execute_data(call, op_array, return_value TSRMLS_CC);
 	EG(current_execute_data) = current_execute_data;
-	EG(opline_ptr) = opline_ptr;
 
 	object_init_ex(return_value, zend_ce_generator);
 
@@ -314,43 +301,23 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 	{
 		/* Backup executor globals */
 		zend_execute_data *original_execute_data = EG(current_execute_data);
-		zend_op **original_opline_ptr = EG(opline_ptr);
-		zend_op_array *original_active_op_array = EG(active_op_array);
-		zend_array *original_active_symbol_table = EG(active_symbol_table);
 		zend_object *original_This;
 		zend_class_entry *original_scope = EG(scope);
-		zend_class_entry *original_called_scope = EG(called_scope);
 		zend_vm_stack original_stack = EG(argument_stack);
-		zend_execute_data *prev_execute_data;
 
 		original_This = Z_OBJ(EG(This));
 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
-		EG(opline_ptr) = &generator->execute_data->opline;
-		EG(active_op_array) = &generator->execute_data->func->op_array;
-		EG(active_symbol_table) = generator->execute_data->symbol_table;
 		Z_OBJ(EG(This)) = generator->execute_data->object;
 		EG(scope) = generator->execute_data->scope;
-		EG(called_scope) = generator->execute_data->called_scope;
 		EG(argument_stack) = generator->stack;
 
 		/* We want the backtrace to look as if the generator function was
 		 * called from whatever method we are current running (e.g. next()).
 		 * So we have to link generator call frame with caller call frames */
 
-		prev_execute_data = original_execute_data;
-        if (prev_execute_data &&
-            prev_execute_data->call &&
-            (prev_execute_data->call->flags & ZEND_CALL_DONE)) {
-			prev_execute_data->call->prev_execute_data = prev_execute_data;
-			prev_execute_data = prev_execute_data->call;
-		}
-		generator->execute_data->prev_execute_data = prev_execute_data;
-		if (prev_execute_data) {
-			generator->execute_data->prev_nested_call = prev_execute_data->call;
-			prev_execute_data->call = generator->execute_data;
-		}
+		generator->execute_data->prev_execute_data = original_execute_data;
 
 		/* Resume execution */
 		generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
@@ -358,19 +325,14 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
 		/* Unlink generator call_frame from the caller */
-		if (generator->execute_data && generator->execute_data->prev_execute_data) {
-			generator->execute_data->prev_execute_data->call = generator->execute_data->prev_nested_call;
+		if (generator->execute_data) {
 			generator->execute_data->prev_execute_data = NULL;
 		}
 
 		/* Restore executor globals */
 		EG(current_execute_data) = original_execute_data;
-		EG(opline_ptr) = original_opline_ptr;
-		EG(active_op_array) = original_active_op_array;
-		EG(active_symbol_table) = original_active_symbol_table;
 		Z_OBJ(EG(This)) = original_This;
 		EG(scope) = original_scope;
-		EG(called_scope) = original_called_scope;
 		EG(argument_stack) = original_stack;
 
 		/* If an exception was thrown in the generator we have to internally

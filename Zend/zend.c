@@ -559,7 +559,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	EG(lambda_count) = 0;
 	ZVAL_UNDEF(&EG(user_error_handler));
 	ZVAL_UNDEF(&EG(user_exception_handler));
-	EG(in_execution) = 0;
 	EG(in_autoload) = NULL;
 	EG(current_execute_data) = NULL;
 	EG(current_module) = NULL;
@@ -880,7 +879,7 @@ ZEND_API void _zend_bailout(char *filename, uint lineno) /* {{{ */
 	}
 	CG(unclean_shutdown) = 1;
 	CG(active_class_entry) = NULL;
-	CG(in_compilation) = EG(in_execution) = 0;
+	CG(in_compilation) = 0;
 	EG(current_execute_data) = NULL;
 	LONGJMP(*EG(bailout), FAILURE);
 }
@@ -938,8 +937,7 @@ void zend_call_destructors(TSRMLS_D) /* {{{ */
 ZEND_API void zend_deactivate(TSRMLS_D) /* {{{ */
 {
 	/* we're no longer executing anything */
-	EG(opline_ptr) = NULL;
-	EG(active_symbol_table) = NULL;
+	EG(current_execute_data) = NULL;
 
 	zend_try {
 		shutdown_scanner(TSRMLS_C);
@@ -1038,10 +1036,14 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	zend_stack declare_stack;
 	zend_stack list_stack;
 	zend_stack context_stack;
+	zend_array *symbol_table;
 	TSRMLS_FETCH();
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
+		zend_execute_data *ex;
+		zend_op *opline;
+
 		switch (type) {
 			case E_CORE_ERROR:
 			case E_ERROR:
@@ -1049,13 +1051,19 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			case E_PARSE:
 			case E_COMPILE_ERROR:
 			case E_USER_ERROR:
-				if (zend_is_executing(TSRMLS_C)) {
-					error_lineno = zend_get_executed_lineno(TSRMLS_C);
+				ex = EG(current_execute_data);
+				opline = NULL;
+				while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+					ex = ex->prev_execute_data;
+				}
+				if (ex && ex->opline->opcode == ZEND_HANDLE_EXCEPTION &&
+				    EG(opline_before_exception)) {
+					opline = EG(opline_before_exception);
 				}
 				zend_exception_error(EG(exception), E_WARNING TSRMLS_CC);
 				EG(exception) = NULL;
-				if (zend_is_executing(TSRMLS_C) && EG(opline_ptr)) {
-					active_opline->lineno = error_lineno;
+				if (opline) {
+					ex->opline = opline;
 				}
 				break;
 			default:
@@ -1088,7 +1096,12 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				error_lineno = zend_get_compiled_lineno(TSRMLS_C);
 			} else if (zend_is_executing(TSRMLS_C)) {
 				error_filename = zend_get_executed_filename(TSRMLS_C);
-				error_lineno = zend_get_executed_lineno(TSRMLS_C);
+				if (error_filename[0] == '[') { /* [no active file] */
+					error_filename = NULL;
+					error_lineno = 0;
+				} else {
+					error_lineno = zend_get_executed_lineno(TSRMLS_C);
+				}
 			} else {
 				error_filename = NULL;
 				error_lineno = 0;
@@ -1162,16 +1175,14 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 
 			ZVAL_LONG(&params[3], error_lineno);
 
-			if (!EG(active_symbol_table)) {
-				zend_rebuild_symbol_table(TSRMLS_C);
-			}
+			symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 
 			/* during shutdown the symbol table table can be still null */
-			if (!EG(active_symbol_table)) {
+			if (!symbol_table) {
 				ZVAL_NULL(&params[4]);
 			} else {
 				ZVAL_NEW_ARR(&params[4]);
-				zend_array_dup(Z_ARRVAL(params[4]), &EG(active_symbol_table)->ht);
+				zend_array_dup(Z_ARRVAL(params[4]), &symbol_table->ht);
 			}
 
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
@@ -1242,7 +1253,8 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	if (type == E_PARSE) {
 		/* eval() errors do not affect exit_status */
 		if (!(EG(current_execute_data) &&
-			EG(current_execute_data)->opline &&
+			EG(current_execute_data)->func &&
+			ZEND_USER_CODE(EG(current_execute_data)->func->type) &&
 			EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 			EG(current_execute_data)->opline->extended_value == ZEND_EVAL)) {
 			EG(exit_status) = 255;
@@ -1287,7 +1299,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
 	va_list files;
 	int i;
 	zend_file_handle *file_handle;
-	zend_op_array *orig_op_array = EG(active_op_array);
+	zend_op_array *op_array;
     long orig_interactive = CG(interactive);
 
 	va_start(files, file_count);
@@ -1305,13 +1317,13 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
             }
         }
        
-		EG(active_op_array) = zend_compile_file(file_handle, type TSRMLS_CC);
+		op_array = zend_compile_file(file_handle, type TSRMLS_CC);
 		if (file_handle->opened_path) {
 			zend_hash_str_add_empty_element(&EG(included_files), file_handle->opened_path, strlen(file_handle->opened_path));
 		}
 		zend_destroy_file_handle(file_handle TSRMLS_CC);
-		if (EG(active_op_array)) {
-			zend_execute(EG(active_op_array), retval TSRMLS_CC);
+		if (op_array) {
+			zend_execute(op_array, retval TSRMLS_CC);
 			zend_exception_restore(TSRMLS_C);
 			if (EG(exception)) {
 				if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
@@ -1338,17 +1350,15 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
 					zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
 				}
 			}
-			destroy_op_array(EG(active_op_array) TSRMLS_CC);
-			efree(EG(active_op_array));
+			destroy_op_array(op_array TSRMLS_CC);
+			efree(op_array);
 		} else if (type==ZEND_REQUIRE) {
 			va_end(files);
-			EG(active_op_array) = orig_op_array;
             CG(interactive) = orig_interactive;
 			return FAILURE;
 		}
 	}
 	va_end(files);
-	EG(active_op_array) = orig_op_array;
     CG(interactive) = orig_interactive;
 
 	return SUCCESS;

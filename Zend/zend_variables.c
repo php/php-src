@@ -305,6 +305,7 @@ ZEND_API void _zval_internal_ptr_dtor_wrapper(zval *zval_ptr)
 
 ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
+	zend_array *symbol_table;
 	HashTable *target = va_arg(args, HashTable*);
 	zend_bool is_ref;
 	zval tmp;
@@ -312,16 +313,14 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 	if (Z_CONST_FLAGS_P(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
 		is_ref = Z_CONST_FLAGS_P(p) & IS_LEXICAL_REF;
     
-		if (!EG(active_symbol_table)) {
-			zend_rebuild_symbol_table(TSRMLS_C);
-		}
-		p = zend_hash_find(&EG(active_symbol_table)->ht, key->key);
+		symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
+		p = zend_hash_find(&symbol_table->ht, key->key);
 		if (!p) {
 			p = &tmp;
 			ZVAL_NULL(&tmp);
 			if (is_ref) {
 				ZVAL_NEW_REF(&tmp, &tmp);
-				zend_hash_add_new(&EG(active_symbol_table)->ht, key->key, &tmp);
+				zend_hash_add_new(&symbol_table->ht, key->key, &tmp);
 				Z_ADDREF_P(p);
 			} else {
 				zend_error(E_NOTICE,"Undefined variable: %s", key->key->val);

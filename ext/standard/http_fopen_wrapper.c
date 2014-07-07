@@ -141,6 +141,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	int follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
 	int response_code;
+	zend_array *symbol_table;
 
 	tmp_line[0] = '\0';
 
@@ -634,9 +635,7 @@ finish:
 
 	location[0] = '\0';
 
-	if (!EG(active_symbol_table)) {
-		zend_rebuild_symbol_table(TSRMLS_C);
-	}
+	symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 
 	if (header_init) {
 		zval ztmp;
@@ -644,7 +643,7 @@ finish:
 		zend_set_local_var_str("http_response_header", sizeof("http_response_header")-1, &ztmp, 0 TSRMLS_CC);
 	}
 
-	response_header = zend_hash_str_find_ind(&EG(active_symbol_table)->ht, "http_response_header", sizeof("http_response_header")-1);
+	response_header = zend_hash_str_find_ind(&symbol_table->ht, "http_response_header", sizeof("http_response_header")-1);
 
 	if (!php_stream_eof(stream)) {
 		size_t tmp_line_len;

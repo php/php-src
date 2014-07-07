@@ -1294,6 +1294,7 @@ PHP_FUNCTION(extract)
 	ulong num_key;
 	int var_exists, count = 0;
 	int extract_refs = 0;
+	zend_array *symbol_table;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
 		return;
@@ -1320,9 +1321,7 @@ PHP_FUNCTION(extract)
 		}
 	}
 
-	if (!EG(active_symbol_table)) {
-		zend_rebuild_symbol_table(TSRMLS_C);
-	}
+	symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 
 	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(var_array), num_key, var_name, entry) {
 		zval final_name;
@@ -1331,7 +1330,7 @@ PHP_FUNCTION(extract)
 		var_exists = 0;
 
 		if (var_name) {
-			var_exists = zend_hash_exists_ind(&EG(active_symbol_table)->ht, var_name);
+			var_exists = zend_hash_exists_ind(&symbol_table->ht, var_name);
 		} else if (extract_type == EXTR_PREFIX_ALL || extract_type == EXTR_PREFIX_INVALID) {
 			zval num;
 
@@ -1401,14 +1400,14 @@ PHP_FUNCTION(extract)
 				ZVAL_MAKE_REF(entry);
 				Z_ADDREF_P(entry);
 
-				if ((orig_var = zend_hash_find(&EG(active_symbol_table)->ht, Z_STR(final_name))) != NULL) {
+				if ((orig_var = zend_hash_find(&symbol_table->ht, Z_STR(final_name))) != NULL) {
 					if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 						orig_var = Z_INDIRECT_P(orig_var);
 					}
 					zval_ptr_dtor(orig_var);
 					ZVAL_COPY_VALUE(orig_var, entry);
 				} else {
-					zend_hash_update(&EG(active_symbol_table)->ht, Z_STR(final_name), entry);
+					zend_hash_update(&symbol_table->ht, Z_STR(final_name), entry);
 				}
 			} else {
 				if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
@@ -1458,14 +1457,13 @@ PHP_FUNCTION(compact)
 {
 	zval *args = NULL;	/* function arguments array */
 	int num_args, i;
+	zend_array *symbol_table;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
 		return;
 	}
 
-	if (!EG(active_symbol_table)) {
-		zend_rebuild_symbol_table(TSRMLS_C);
-	}
+	symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 
 	/* compact() is probably most used with a single array of var_names
 	   or multiple string names, rather than a combination of both.
@@ -1477,7 +1475,7 @@ PHP_FUNCTION(compact)
 	}
 
 	for (i=0; i<ZEND_NUM_ARGS(); i++) {
-		php_compact_var(&EG(active_symbol_table)->ht, return_value, &args[i] TSRMLS_CC);
+		php_compact_var(&symbol_table->ht, return_value, &args[i] TSRMLS_CC);
 	}
 }
 /* }}} */

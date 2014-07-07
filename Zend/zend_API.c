@@ -49,8 +49,8 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 	zval **param, *param_ptr;
 	TSRMLS_FETCH();
 
-	param_ptr = ZEND_CALL_ARG(EG(current_execute_data)->call, 1);
-	arg_count = EG(current_execute_data)->call->num_args;
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+	arg_count = EG(current_execute_data)->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -85,8 +85,8 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 	zval **param, *param_ptr;
 	TSRMLS_FETCH();
 
-	param_ptr = ZEND_CALL_ARG(EG(current_execute_data)->call, 1);
-	arg_count = EG(current_execute_data)->call->num_args;
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+	arg_count = EG(current_execute_data)->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -109,8 +109,8 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array
 	zval *param_ptr;
 	int arg_count;
 
-	param_ptr = ZEND_CALL_ARG(EG(current_execute_data)->call, 1);
-	arg_count = EG(current_execute_data)->call->num_args;
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+	arg_count = EG(current_execute_data)->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -131,8 +131,8 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 	zval *param_ptr;
 	int arg_count;
 
-	param_ptr = ZEND_CALL_ARG(EG(current_execute_data)->call, 1);
-	arg_count = EG(current_execute_data)->call->num_args;
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+	arg_count = EG(current_execute_data)->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -803,7 +803,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case '+':
 				if (have_varargs) {
 					if (!quiet) {
-						zend_function *active_function = EG(current_execute_data)->call->func;
+						zend_function *active_function = EG(current_execute_data)->func;
 						const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
 						zend_error(E_WARNING, "%s%s%s(): only one varargs specifier (* or +) is permitted",
 								class_name,
@@ -823,7 +823,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 			default:
 				if (!quiet) {
-					zend_function *active_function = EG(current_execute_data)->call->func;
+					zend_function *active_function = EG(current_execute_data)->func;
 					const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
 					zend_error(E_WARNING, "%s%s%s(): bad type specifier while parsing parameters",
 							class_name,
@@ -846,7 +846,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 	if (num_args < min_num_args || (num_args > max_num_args && max_num_args > 0)) {
 		if (!quiet) {
-			zend_function *active_function = EG(current_execute_data)->call->func;
+			zend_function *active_function = EG(current_execute_data)->func;
 			const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
 			zend_error(E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
 					class_name,
@@ -860,7 +860,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		return FAILURE;
 	}
 
-	arg_count = EG(current_execute_data)->call->num_args;
+	arg_count = EG(current_execute_data)->num_args;
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
@@ -884,7 +884,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 			if (num_varargs > 0) {
 				*n_varargs = num_varargs;
-				*varargs = ZEND_CALL_ARG(EG(current_execute_data)->call, i + 1);
+				*varargs = ZEND_CALL_ARG(EG(current_execute_data), i + 1);
 				/* adjust how many args we have left and restart loop */
 				num_args += 1 - num_varargs;
 				i += num_varargs;
@@ -895,7 +895,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			}
 		}
 
-		arg = ZEND_CALL_ARG(EG(current_execute_data)->call, i + 1);
+		arg = ZEND_CALL_ARG(EG(current_execute_data), i + 1);
 
 		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
 			/* clean up varargs array if it was used */
@@ -966,7 +966,7 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 	 * Z_OBJ(EG(This)) to NULL when calling an internal function with common.scope == NULL.
 	 * In that case EG(This) would still be the $this from the calling code and we'd take the
 	 * wrong branch here. */
-	zend_bool is_method = EG(current_execute_data)->call->func->common.scope != NULL;
+	zend_bool is_method = EG(current_execute_data)->func->common.scope != NULL;
 	if (!is_method || !this_ptr || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		RETURN_IF_ZERO_ARGS(num_args, p, 0);
 
@@ -1072,7 +1072,7 @@ static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS
 {
 	ZVAL_DEREF(pp);
 	if (Z_CONSTANT_P(pp)) {
-		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
+		zend_class_entry **scope = EG(current_execute_data) ? &EG(scope) : &CG(active_class_entry);
 
 		if ((*scope)->parent) {
 			zend_class_entry *ce = *scope;
@@ -1136,7 +1136,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 	}
 
 	if ((class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) == 0) {
-		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
+		zend_class_entry **scope = EG(current_execute_data) ? &EG(scope) : &CG(active_class_entry);
 		zend_class_entry *old_scope = *scope;
 		zval *val;
 
@@ -2494,7 +2494,7 @@ static int module_registry_cleanup(zval *zv TSRMLS_DC) /* {{{ */
 
 ZEND_API void zend_deactivate_modules(TSRMLS_D) /* {{{ */
 {
-	EG(opline_ptr) = NULL; /* we're no longer executing anything */
+	EG(current_execute_data) = NULL; /* we're no longer executing anything */
 
 	zend_try {
 		if (EG(full_tables_cleanup)) {
@@ -2770,7 +2770,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		if (!EG(scope)) {
 			if (error) *error = estrdup("cannot access self:: when no class scope is active");
 		} else {
-			fcc->called_scope = EG(called_scope);
+			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 			fcc->calling_scope = EG(scope);
 			if (!fcc->object && Z_OBJ(EG(This))) {
 				fcc->object = Z_OBJ(EG(This));
@@ -2784,7 +2784,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else if (!EG(scope)->parent) {
 			if (error) *error = estrdup("cannot access parent:: when current class scope has no parent");
 		} else {
-			fcc->called_scope = EG(called_scope);
+			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 			fcc->calling_scope = EG(scope)->parent;
 			if (!fcc->object && Z_OBJ(EG(This))) {
 				fcc->object = Z_OBJ(EG(This));
@@ -2794,11 +2794,11 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		}
 	} else if (name_len == sizeof("static") - 1 &&
 	           !memcmp(lcname->val, "static", sizeof("static") - 1)) {
-		if (!EG(called_scope)) {
+		if (!EG(current_execute_data) || !EG(current_execute_data)->called_scope) {
 			if (error) *error = estrdup("cannot access static:: when no class scope is active");
 		} else {
-			fcc->called_scope = EG(called_scope);
-			fcc->calling_scope = EG(called_scope);
+			fcc->called_scope = EG(current_execute_data)->called_scope;
+			fcc->calling_scope = EG(current_execute_data)->called_scope;
 			if (!fcc->object && Z_OBJ(EG(This))) {
 				fcc->object = Z_OBJ(EG(This));
 			}
@@ -2806,8 +2806,13 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 			ret = 1;
 		}
 	} else if ((ce = zend_lookup_class_ex(name, NULL, 1 TSRMLS_CC)) != NULL) {
-		zend_class_entry *scope = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
+		zend_class_entry *scope;
+		zend_execute_data *ex = EG(current_execute_data);
 
+		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+			ex = ex->prev_execute_data;
+		}
+		scope = ex ? ex->func->common.scope : NULL;
 		fcc->calling_scope = ce;
 		if (scope && !fcc->object && Z_OBJ(EG(This)) &&
 		    instanceof_function(Z_OBJCE(EG(This)), scope TSRMLS_CC) &&

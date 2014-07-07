@@ -92,7 +92,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	zend_object* _old_error_object = Z_OBJ(SOAP_GLOBAL(error_object));\
 	int _old_soap_version = SOAP_GLOBAL(soap_version);\
 	zend_bool _old_in_compilation = CG(in_compilation); \
-	zend_bool _old_in_execution = EG(in_execution); \
 	zend_execute_data *_old_current_execute_data = EG(current_execute_data); \
 	zval *_old_stack_top = EG(argument_stack)->top; \
 	int _bailout = 0;\
@@ -104,7 +103,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 #define SOAP_CLIENT_END_CODE() \
 	} zend_catch {\
 		CG(in_compilation) = _old_in_compilation; \
-		EG(in_execution) = _old_in_execution; \
 		EG(current_execute_data) = _old_current_execute_data; \
 		if (EG(exception) == NULL || \
 		    !instanceof_function(zend_get_class_entry(EG(exception) TSRMLS_CC), soap_fault_class_entry TSRMLS_CC)) {\
@@ -2131,14 +2129,13 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 
 static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
-	zend_bool _old_in_compilation, _old_in_execution;
+	zend_bool _old_in_compilation;
 	zend_execute_data *_old_current_execute_data;
 	int _old_http_response_code;
 	char *_old_http_status_line;
 	TSRMLS_FETCH();
 
 	_old_in_compilation = CG(in_compilation);
-	_old_in_execution = EG(in_execution);
 	_old_current_execute_data = EG(current_execute_data);
 	_old_http_response_code = SG(sapi_headers).http_response_code;
 	_old_http_status_line = SG(sapi_headers).http_status_line;
@@ -2204,7 +2201,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 			} zend_catch {
 				CG(in_compilation) = _old_in_compilation;
-				EG(in_execution) = _old_in_execution;
 				EG(current_execute_data) = _old_current_execute_data;
 				if (SG(sapi_headers).http_status_line) {
 					efree(SG(sapi_headers).http_status_line);
@@ -2287,7 +2283,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		} zend_catch {
 			CG(in_compilation) = _old_in_compilation;
-			EG(in_execution) = _old_in_execution;
 			EG(current_execute_data) = _old_current_execute_data;
 			if (SG(sapi_headers).http_status_line) {
 				efree(SG(sapi_headers).http_status_line);

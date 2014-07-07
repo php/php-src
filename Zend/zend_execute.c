@@ -116,7 +116,8 @@ static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *sho
 
 /* End of zend_execute_locks.h */
 
-#define CV_DEF_OF(i) (EG(active_op_array)->vars[i])
+// TODO: avoid global variable usage ??? 
+#define CV_DEF_OF(i) (EG(current_execute_data)->func->op_array.vars[i])
 
 #define CTOR_CALL_BIT    0x1
 #define CTOR_USED_BIT    0x2
@@ -546,7 +547,7 @@ ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, zen
 		ZVAL_UNDEF(arg);
 	}
 
-	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+	if (zf->common.type == ZEND_USER_FUNCTION && ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
 		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, ptr->func->op_array.filename->val, ptr->opline->lineno);
 	} else {
 		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
@@ -982,7 +983,7 @@ static void zend_extension_fcall_end_handler(const zend_extension *extension, ze
 }
 
 
-static zend_always_inline HashTable *zend_get_target_symbol_table(int fetch_type TSRMLS_DC)
+static zend_always_inline HashTable *zend_get_target_symbol_table(zend_execute_data *execute_data, int fetch_type TSRMLS_DC)
 {
 	HashTable *ht;
 
@@ -990,14 +991,14 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(int fetch_type
 	    EXPECTED(fetch_type == ZEND_FETCH_GLOBAL)) {
 		ht = &EG(symbol_table).ht;
 	} else if (EXPECTED(fetch_type == ZEND_FETCH_STATIC)) {
-		ZEND_ASSERT(EG(active_op_array)->static_variables != NULL);
-		ht = EG(active_op_array)->static_variables;
+		ZEND_ASSERT(EX(func)->op_array.static_variables != NULL);
+		ht = EX(func)->op_array.static_variables;
 	} else {
 		ZEND_ASSERT(fetch_type == ZEND_FETCH_LOCAL);
-		if (!EG(active_symbol_table)) {
+		if (!EX(symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
-		ht = &EG(active_symbol_table)->ht;
+		ht = &EX(symbol_table)->ht;
 	}
 	return ht;
 }
@@ -1443,8 +1444,8 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 
 #define CHECK_SYMBOL_TABLES()													\
 	zend_hash_apply(&EG(symbol_table), zend_check_symbol TSRMLS_CC);			\
-	if (&EG(symbol_table)!=EG(active_symbol_table)) {							\
-		zend_hash_apply(EG(active_symbol_table), zend_check_symbol TSRMLS_CC);	\
+	if (&EG(symbol_table)!=EX(symbol_table)) {							\
+		zend_hash_apply(EX(symbol_table), zend_check_symbol TSRMLS_CC);	\
 	}
 
 static int zend_check_symbol(zval *pz TSRMLS_DC)
@@ -1475,18 +1476,9 @@ static int zend_check_symbol(zval *pz TSRMLS_DC)
 
 ZEND_API opcode_handler_t *zend_opcode_handlers;
 
-ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci TSRMLS_DC)
+ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value TSRMLS_DC)
 {
-	if (fci != NULL) {
-		execute_data_ptr->call->func->internal_function.handler(
-			fci->param_count, fci->retval TSRMLS_CC
-		);
-	} else {
-		zval *return_value = EX_VAR_2(execute_data_ptr, execute_data_ptr->opline->result.var);
-		execute_data_ptr->call->func->internal_function.handler(
-			execute_data_ptr->call->num_args, return_value TSRMLS_CC
-		);
-	}
+	execute_data->func->internal_function.handler(execute_data->num_args, return_value TSRMLS_CC);
 }
 
 void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC) /* {{{ */
@@ -1542,11 +1534,11 @@ void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* 
  *                             +----------------------------------------+
  */
 
-static zend_always_inline void i_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+static zend_always_inline void i_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
+	zend_uint first_extra_arg;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
-	ZEND_ASSERT(EX(called_scope) == EG(called_scope));
 
 	EX(return_value) = return_value;
 	EX(frame_kind) = frame_kind;
@@ -1554,10 +1546,94 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(delayed_exception) = NULL;
 	EX(call) = NULL;
 
-	EG(opline_ptr) = &EX(opline);
 	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
 	EX(scope) = EG(scope);
-	EX(symbol_table) = EG(active_symbol_table);
+
+	first_extra_arg = op_array->num_args;
+		
+	if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0)) {
+		first_extra_arg--;
+	}
+	if (UNEXPECTED(EX(num_args) > first_extra_arg)) {
+		/* move extra args into separate array after all CV and TMP vars */
+		zval *extra_args = EX_VAR_NUM(op_array->last_var + op_array->T);
+
+		memmove(extra_args, EX_VAR_NUM(first_extra_arg), sizeof(zval) * (EX(num_args) - first_extra_arg));
+	}
+
+	do {
+		/* Initialize CV variables (skip arguments) */
+		int num_args = MIN(op_array->num_args, EX(num_args));
+
+		if (EXPECTED(num_args < op_array->last_var)) {
+			zval *var = EX_VAR_NUM(num_args);
+			zval *end = EX_VAR_NUM(op_array->last_var);
+
+			do {
+				ZVAL_UNDEF(var);
+				var++;
+			} while (var != end);
+		}
+	} while (0);
+
+	if (op_array->this_var != -1 && Z_OBJ(EG(This))) {
+		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EG(This)));
+		Z_ADDREF(EG(This));
+	}
+
+	if (!op_array->run_time_cache && op_array->last_cache_slot) {
+		if (op_array->function_name) {
+			op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
+		} else {
+			op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+		}
+	}
+	EX(run_time_cache) = op_array->run_time_cache;
+
+	EG(current_execute_data) = execute_data;
+}
+
+static zend_always_inline void i_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+{
+	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
+	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
+
+	EX(return_value) = return_value;
+	EX(frame_kind) = frame_kind;
+	ZVAL_UNDEF(&EX(old_error_reporting));
+	EX(delayed_exception) = NULL;
+	EX(call) = NULL;
+
+	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
+	EX(scope) = EG(scope);
+
+	zend_attach_symbol_table(execute_data);
+
+	if (!op_array->run_time_cache && op_array->last_cache_slot) {
+		if (op_array->function_name) {
+			op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
+		} else {
+			op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+		}
+	}
+	EX(run_time_cache) = op_array->run_time_cache;
+
+	EG(current_execute_data) = execute_data;
+}
+
+static zend_always_inline void i_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+{
+	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
+	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
+
+	EX(return_value) = return_value;
+	EX(frame_kind) = frame_kind;
+	ZVAL_UNDEF(&EX(old_error_reporting));
+	EX(delayed_exception) = NULL;
+	EX(call) = NULL;
+
+	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
+	EX(scope) = EG(scope);
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
 		zend_attach_symbol_table(execute_data);
@@ -1608,7 +1684,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 }
 /* }}} */
 
-ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
+ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data *call, zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	/*
 	 * Normally the execute_data is allocated on the VM stack (because it does
@@ -1620,7 +1696,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_op_array *op
 	 * restore it simply by replacing a pointer.
 	 */
 	zend_execute_data *execute_data;
-	zend_uint num_args = EG(current_execute_data)->call->num_args;
+	zend_uint num_args = call->num_args;
 
 	EG(argument_stack) = zend_vm_stack_new_page(
 		MAX(ZEND_VM_STACK_PAGE_SIZE, 
@@ -1630,15 +1706,15 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_op_array *op
 	execute_data = zend_vm_stack_push_call_frame(
 		(zend_function*)op_array,
 		num_args,
-		EG(current_execute_data)->call->flags,
-		EG(current_execute_data)->call->called_scope,
-		EG(current_execute_data)->call->object,
+		call->flags,
+		call->called_scope,
+		call->object,
 		NULL TSRMLS_CC);
-	execute_data->num_args = num_args;
+	EX(num_args) = num_args;
 
 	/* copy arguments */
 	if (num_args > 0) {
-		zval *arg_src = ZEND_CALL_ARG(EG(current_execute_data)->call, 1);
+		zval *arg_src = ZEND_CALL_ARG(call, 1);
 		zval *arg_dst = ZEND_CALL_ARG(execute_data, 1);
 		int i;
 
@@ -1653,15 +1729,10 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_op_array *op
 }
 /* }}} */
 
-ZEND_API zend_execute_data *zend_create_execute_data(zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
-	zend_execute_data *execute_data;
-	
-	execute_data = EG(current_execute_data)->call;
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_execute_data(execute_data, op_array, return_value, frame_kind TSRMLS_CC);
-
-	return execute_data;
 }
 /* }}} */
 

@@ -4221,11 +4221,9 @@ PHP_FUNCTION(parse_str)
 
 	if (arrayArg == NULL) {
 		zval tmp;
+		zend_array *symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 
-		if (!EG(active_symbol_table)) {
-			zend_rebuild_symbol_table(TSRMLS_C);
-		}
-		ZVAL_ARR(&tmp, EG(active_symbol_table));
+		ZVAL_ARR(&tmp, symbol_table);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp TSRMLS_CC);
 	} else 	{
 		zval ret;

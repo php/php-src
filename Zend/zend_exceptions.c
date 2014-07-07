@@ -119,7 +119,8 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 		zend_throw_exception_hook(exception TSRMLS_CC);
 	}
 
-	if (EG(current_execute_data)->opline == NULL ||
+	if (!EG(current_execute_data)->func ||
+	    !ZEND_USER_CODE(EG(current_execute_data)->func->common.type) ||
 	    (EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {
 		/* no need to rethrow the exception */
 		return;

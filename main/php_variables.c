@@ -110,8 +110,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	}
 
 	/* GLOBALS hijack attempt, reject parameter */
-	if (symtable1 && EG(active_symbol_table) &&
-		symtable1 == &EG(active_symbol_table)->ht &&
+	if (symtable1 == &EG(symbol_table).ht &&
 		var_len == sizeof("GLOBALS")-1 &&
 		!memcmp(var, "GLOBALS", sizeof("GLOBALS")-1)) {
 		zval_dtor(val);

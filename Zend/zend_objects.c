@@ -77,11 +77,11 @@ ZEND_API void zend_objects_destroy_object(zend_object *object TSRMLS_DC)
 				if (object->ce != EG(scope)) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(in_execution) ? E_ERROR : E_WARNING,
+					zend_error(EG(current_execute_data) ? E_ERROR : E_WARNING,
 						"Call to private %s::__destruct() from context '%s'%s",
 						ce->name->val,
 						EG(scope) ? EG(scope)->name->val : "",
-						EG(in_execution) ? "" : " during shutdown ignored");
+						EG(current_execute_data) ? "" : " during shutdown ignored");
 					return;
 				}
 			} else {
@@ -90,11 +90,11 @@ ZEND_API void zend_objects_destroy_object(zend_object *object TSRMLS_DC)
 				if (!zend_check_protected(zend_get_function_root_class(destructor), EG(scope))) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(in_execution) ? E_ERROR : E_WARNING,
+					zend_error(EG(current_execute_data) ? E_ERROR : E_WARNING,
 						"Call to protected %s::__destruct() from context '%s'%s",
 						ce->name->val,
 						EG(scope) ? EG(scope)->name->val : "",
-						EG(in_execution) ? "" : " during shutdown ignored");
+						EG(current_execute_data) ? "" : " during shutdown ignored");
 					return;
 				}
 			}

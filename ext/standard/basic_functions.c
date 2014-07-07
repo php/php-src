@@ -4759,15 +4759,15 @@ PHP_FUNCTION(forward_static_call)
 		return;
 	}
 
-	if (!EG(active_op_array)->scope) {
+	if (!EG(current_execute_data)->prev_execute_data->func->common.scope) {
 		zend_error(E_ERROR, "Cannot call forward_static_call() when no class scope is active");
 	}
 
 	fci.retval = &retval;
 
-	if (EG(called_scope) &&
-		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
-			fci_cache.called_scope = EG(called_scope);
+	if (EG(current_execute_data)->called_scope &&
+		instanceof_function(EG(current_execute_data)->called_scope, fci_cache.calling_scope TSRMLS_CC)) {
+			fci_cache.called_scope = EG(current_execute_data)->called_scope;
 	}
 	
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -4791,9 +4791,9 @@ PHP_FUNCTION(forward_static_call_array)
 	zend_fcall_info_args(&fci, params TSRMLS_CC);
 	fci.retval = &retval;
 
-	if (EG(called_scope) &&
-		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
-			fci_cache.called_scope = EG(called_scope);
+	if (EG(current_execute_data)->called_scope &&
+		instanceof_function(EG(current_execute_data)->called_scope, fci_cache.calling_scope TSRMLS_CC)) {
+			fci_cache.called_scope = EG(current_execute_data)->called_scope;
 	}
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {

@@ -941,7 +941,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
 							out($f,"#define LOAD_REGS()\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
-							out($f,"#define ZEND_VM_RETURN()   EG(in_execution) = original_in_execution; return\n");
+							out($f,"#define ZEND_VM_RETURN()   return\n");
 							out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) dispatch_handler = zend_vm_get_opcode_handler(opcode, opline); goto zend_vm_dispatch;\n\n");
@@ -973,7 +973,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							}
 							out($f,"#define LOAD_REGS()\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(OPLINE->handler)\n");
-							out($f,"#define ZEND_VM_RETURN()   EG(in_execution) = original_in_execution; return\n");
+							out($f,"#define ZEND_VM_RETURN()   return\n");
 							out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) goto *(void**)(zend_vm_get_opcode_handler(opcode, opline));\n\n");
@@ -1043,7 +1043,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 					  // Executor is defined as a set of functions
 						out($f, $m[1]."switch (ret) {\n" . 
 						        $m[1]."\tcase 1:\n" . 
-						        $m[1]."\t\tEG(in_execution) = original_in_execution;\n".
 						        $m[1]."\t\treturn;\n".
 						        $m[1]."\tcase 2:\n" . 
 						        $m[1]."\tcase 3:\n" . 

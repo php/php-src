@@ -54,7 +54,7 @@ static const zend_uchar ZEND_GENERATOR_FORCED_CLOSE      = 0x2;
 static const zend_uchar ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 
 void zend_register_generator_ce(TSRMLS_D);
-ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_value TSRMLS_DC);
+ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value TSRMLS_DC);
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC);
 ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC);
 

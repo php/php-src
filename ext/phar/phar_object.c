@@ -283,13 +283,8 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 #endif
 			if (new_op_array) {
 				ZVAL_UNDEF(&result);
-				EG(active_op_array) = new_op_array;
 
 				zend_try {
-					if (EG(current_execute_data)) {
-						EG(current_execute_data)->call = zend_vm_stack_push_call_frame(
-							(zend_function*)new_op_array, 0, 0, EG(called_scope), Z_OBJ(EG(This)), EG(current_execute_data)->call TSRMLS_CC);
-					}
 					zend_execute(new_op_array, &result TSRMLS_CC);
 					if (PHAR_G(cwd)) {
 						efree(PHAR_G(cwd));
