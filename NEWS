@@ -16,7 +16,11 @@ PHP                                                                        NEWS
     (Adam)
 
 - FPM:
-  . Fix bug #67531 (syslog cannot be set in pool configuration). (Remi)
+  . Fixed bug #67531 (syslog cannot be set in pool configuration). (Remi)
+
+- Intl:
+  . Fixed bug #67052 (NumberFormatter::parse() resets LC_NUMERIC setting). 
+    (Stas)
 
 - pgsql:
   . Fix bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
