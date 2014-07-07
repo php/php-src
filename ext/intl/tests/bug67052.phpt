@@ -7,7 +7,7 @@ Bug #67052 - NumberFormatter::parse() resets LC_NUMERIC setting
 
 function ut_main()
 {
-	setlocale(LC_ALL, 'sl_SI.UTF-8');
+	setlocale(LC_ALL, 'de_DE');
 
 	$fmt = new NumberFormatter( 'sl_SI.UTF-8', NumberFormatter::DECIMAL);
 	$num = "1.234.567,891";
@@ -22,4 +22,4 @@ ut_run();
 ?>
 --EXPECT--
 1234567,891
-sl_SI.UTF-8
+de_DE
