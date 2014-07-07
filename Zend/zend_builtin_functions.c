@@ -2253,6 +2253,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	}
 	if (!call) {
 		call = ptr;
+		ptr = ptr->prev_execute_data;
 	}
 
 	array_init(return_value);
