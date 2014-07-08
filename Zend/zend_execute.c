@@ -1727,7 +1727,9 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 		}
 	}
 
-	i_init_execute_data(execute_data, op_array, return_value, VM_FRAME_TOP_FUNCTION TSRMLS_CC);
+	EX(symbol_table) = NULL;
+
+	i_init_func_execute_data(execute_data, op_array, return_value, VM_FRAME_TOP_FUNCTION TSRMLS_CC);
 
 	return execute_data;
 }
