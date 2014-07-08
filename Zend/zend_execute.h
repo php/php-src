@@ -228,6 +228,7 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_
 	call->called_scope = called_scope;
 	call->object = object;
 	call->prev_nested_call = prev;
+	call->symbol_table = NULL;
 	return call;
 }
 
