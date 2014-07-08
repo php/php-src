@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     (Adam)
 
 - FPM:
+  . Fixed bug #67530 (error_log=syslog ignored). (Remi)
   . Fixed bug #67531 (syslog cannot be set in pool configuration). (Remi)
 
 - Intl:
