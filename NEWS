@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #66830 (Empty header causes PHP built-in web server to hang).
     (Adam)
 
+- FPM:
+  . Fixed bug #67530 (error_log=syslog ignored). (Remi)
+
 - Intl:
   . Fixed bug #66921 (Wrong argument type hint for function
     intltz_from_date_time_zone). (Stas)
