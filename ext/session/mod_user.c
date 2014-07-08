@@ -79,7 +79,10 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 			/* BC for clever users - Deprecate me */ \
 			ret = SUCCESS; \
 		} else { \
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session callback expects true/false return value"); \
+			if (!EG(exception)) { \
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, \
+				                 "Session callback expects true/false return value"); \
+			} \
 			ret = FAILURE; \
 		} \
 		zval_ptr_dtor(&retval); \

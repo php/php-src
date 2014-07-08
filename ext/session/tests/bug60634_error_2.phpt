@@ -16,6 +16,7 @@ function open($save_path, $session_name) {
 
 function close() {
 	echo "close: goodbye cruel world\n";
+	return true;
 }
 
 function read($id) {
