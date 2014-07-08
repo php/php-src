@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - pgsql:
   . Fixed bug #67555 (Cannot build against libpq 7.3). (Adam)
 
+- Phar:
+  . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
+
 - SPL:
   . Fixed bug #67539 (ArrayIterator use-after-free due to object change during 
     sorting). (research at insighti dot org, Laruence)
