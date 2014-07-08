@@ -39,6 +39,9 @@ PHP                                                                        NEWS
   . Fixed bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
     which affected builds against libpq < 7.3. (Adam)
 
+- Phar:
+  . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
+
 - SPL:
   . Fixed bug #67539 (ArrayIterator use-after-free due to object change during 
     sorting). (research at insighti dot org, Laruence)
