@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #67091 (make install fails to install libphp5.so on FreeBSD 10.0).
     (Ferenc)
   . Fixed bug #67151 (strtr with empty array crashes). (Nikita)
+  . Fixed bug #67407 (Windows 8.1/Server 2012 R2 reported as Windows 8/Server
+    2012). (Christian Wenz)
 
 - CLI server:
   . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
