@@ -1596,6 +1596,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 
 	EG(current_execute_data) = execute_data;
 }
+/* }}} */
 
 static zend_always_inline void i_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
@@ -1624,6 +1625,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 
 	EG(current_execute_data) = execute_data;
 }
+/* }}} */
 
 static zend_always_inline void i_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
