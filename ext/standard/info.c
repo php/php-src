@@ -335,11 +335,37 @@ char* php_get_windows_name()
 					major = "Windows Server 2008 R2";
 				}
 			} else if ( osvi.dwMinorVersion == 2 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION )  {
-					major = "Windows 8";
+				/* could be Windows 8/Windows Server 2012, could be Windows 8.1/Windows Server 2012 R2 */
+				OSVERSIONINFOEX osvi81;
+				DWORDLONG dwlConditionMask = 0;
+				int op = VER_GREATER_EQUAL;
+
+				ZeroMemory(&osvi81, sizeof(OSVERSIONINFOEX));
+				osvi81.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+				osvi81.dwMajorVersion = 6;
+				osvi81.dwMinorVersion = 3;
+				osvi81.wServicePackMajor = 0;
+
+				VER_SET_CONDITION(dwlConditionMask, VER_MAJORVERSION, op);
+				VER_SET_CONDITION(dwlConditionMask, VER_MINORVERSION, op);
+				VER_SET_CONDITION(dwlConditionMask, VER_SERVICEPACKMAJOR, op);
+
+				if (VerifyVersionInfo(&osvi81, 
+					VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR,
+					dwlConditionMask)) {
+					osvi.dwMinorVersion = 3; /* Windows 8.1/Windows Server 2012 R2 */
+					if( osvi.wProductType == VER_NT_WORKSTATION )  {
+						major = "Windows 8.1";
+					} else {
+						major = "Windows Server 2012 R2";
+					}
 				} else {
-					major = "Windows Server 2012";
-				}
+					if( osvi.wProductType == VER_NT_WORKSTATION )  {
+						major = "Windows 8";
+					} else {
+						major = "Windows Server 2012";
+					}
+				} 
 			} else {
 				major = "Unknown Windows version";
 			}
