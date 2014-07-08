@@ -400,8 +400,8 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && EX(func)->op_array.prototype) {
 			zval_ptr_dtor((zval*)EX(func)->op_array.prototype);
 		}
-		EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_extra_args(execute_data TSRMLS_CC);
+		EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame(execute_data TSRMLS_CC);
 
 		execute_data = EG(current_execute_data);
@@ -459,6 +459,9 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			if (UNEXPECTED(EX(symbol_table) != NULL)) {
 				zend_clean_and_cache_symbol_table(EX(symbol_table) TSRMLS_CC);
 			}
+			if ((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) && EX(func)->op_array.prototype) {
+				zval_ptr_dtor((zval*)EX(func)->op_array.prototype);
+			}
 			zend_vm_stack_free_extra_args(execute_data TSRMLS_CC);
 		} else /* if (frame_kind == VM_FRAME_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
@@ -475,9 +478,6 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				old_execute_data = old_execute_data->prev_execute_data;
 			}
-		}
-		if ((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) && EX(func)->op_array.prototype) {
-			zval_ptr_dtor((zval*)EX(func)->op_array.prototype);
 		}
 		EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame(execute_data TSRMLS_CC);
@@ -646,7 +646,6 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		Z_OBJ(EG(This)) = call->object;
-//???		EG(scope) = NULL;
 		EG(scope) = fbc->common.scope;
 
 		ZVAL_NULL(EX_VAR(opline->result.var));
@@ -777,8 +776,7 @@ send_again:
 						ZVAL_DUP(top, arg);
 					}
 				} else if (Z_ISREF_P(arg)) {
-//TODO: change into ZVAL_COPY()???
-					ZVAL_DUP(top, Z_REFVAL_P(arg));
+					ZVAL_COPY(top, Z_REFVAL_P(arg));
 				} else {
 					ZVAL_COPY(top, arg);
 				}
