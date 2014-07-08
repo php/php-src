@@ -556,7 +556,7 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 			}
 		}
 
-		if (ret == FAILURE) {
+		if ((ret == FAILURE) && !EG(exception)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write session data (%s). Please "
 					"verify that the current setting of session.save_path "
 					"is correct (%s)",

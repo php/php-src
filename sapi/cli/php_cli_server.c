@@ -597,11 +597,10 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers TSRMLS
 
 	h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 	while (h) {
-		if (!h->header_len) {
-			continue;
+		if (h->header_len) {
+			smart_str_appendl(&buffer, h->header, h->header_len);
+			smart_str_appendl(&buffer, "\r\n", 2);
 		}
-		smart_str_appendl(&buffer, h->header, h->header_len);
-		smart_str_appendl(&buffer, "\r\n", 2);
 		h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
 	smart_str_appendl(&buffer, "\r\n", 2);
