@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #67497 (eval with parse error causes segmentation fault in
     generator). (Nikita)
   . Fixed bug #67151 (strtr with empty array crashes). (Nikita)
+  . Fixed bug #67407 (Windows 8.1/Server 2012 R2 reported as Windows 8/Server
+    2012). (Christian Wenz)
 
 - CLI server:
   . Fixed bug #66830 (Empty header causes PHP built-in web server to hang).
