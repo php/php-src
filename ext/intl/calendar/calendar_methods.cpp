@@ -1246,7 +1246,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	int64_t	ts;
 	char	ts_str[sizeof("@-9223372036854775808")];
 	int		ts_str_len;
-	zval	ts_tmp, ts_zval;
+	zval	ts_tmp, ts_zval, tmp;
 
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
@@ -1266,7 +1266,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	/* Now get the time zone */
 	const TimeZone& tz = co->ucal->getTimeZone();
 	zval *timezone_zval = timezone_convert_to_datetimezone(
-		&tz, CALENDAR_ERROR_P(co), "intlcal_to_date_time", &ts_zval TSRMLS_CC);
+		&tz, CALENDAR_ERROR_P(co), "intlcal_to_date_time", &tmp TSRMLS_CC);
 	if (timezone_zval == NULL) {
 		RETURN_FALSE;
 	}
@@ -1282,10 +1282,12 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 			1 TSRMLS_CC);
 		zend_object_store_ctor_failed(Z_OBJ_P(return_value) TSRMLS_CC);
 		zval_ptr_dtor(return_value);
+		zval_ptr_dtor(&ts_zval);
 
 		RETVAL_FALSE;
 		goto error;
 	}
+	zval_ptr_dtor(&ts_zval);
 
 	/* due to bug #40743, we have to set the time zone again */
 	zend_call_method_with_1_params(return_value, NULL, NULL, "settimezone",
