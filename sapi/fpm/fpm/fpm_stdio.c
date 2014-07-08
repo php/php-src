@@ -268,7 +268,11 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	if (!strcasecmp(fpm_global_config.error_log, "syslog")) {
 		openlog(fpm_global_config.syslog_ident, LOG_PID | LOG_CONS, fpm_global_config.syslog_facility);
 		fpm_globals.error_log_fd = ZLOG_SYSLOG;
+#if HAVE_UNISTD_H
+		if (fpm_global_config.daemonize || !isatty(STDERR_FILENO)) {
+#else
 		if (fpm_global_config.daemonize) {
+#endif
 			zlog_set_fd(fpm_globals.error_log_fd);
 		}
 		return 0;
