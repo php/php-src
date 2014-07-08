@@ -48,104 +48,80 @@ define print_cvs
 end
 
 define dump_bt
-	set $t = $arg0
-	while $t
-		printf "[%p] ", $t
-		set $fst = $t->function_state
-		if $fst.function->common.function_name
-			if $fst.arguments
-				set $count = $fst.arguments->value.lval
-
-				if $t->object
-					if $fst.function.common.scope
-						printf "%s->", $fst.function.common.scope->name->val
-					else
-						if !$eg
-							____executor_globals
-						end
-
-						set $known_class = 0
-						if $eg
-							set $handlers = $t->object->handlers
-
-							if $handlers->get_class_entry == &zend_std_object_get_class
-								set $known_class = 1
-
-								if $handlers.get_class_name
-									if $handlers.get_class_name != &zend_std_object_get_class_name
-										set $known_class = 0
-									end
-								end
-
-								if $known_class
-									printf "%s->", $t->object->ce.name->val
-								end
-							end
-						end
-
-						if !$known_class
-							printf "(Unknown)->"
-						end
-					end
+	set $ex = $arg0->prev_execute_data
+	while $ex
+		printf "[%p] ", $ex
+		set $func = $ex->func
+		if $func
+			if $ex->object
+				if $func->common.scope
+					printf "%s->", $func->common.scope->name->val
 				else
-					if $fst.function.common.scope
-						printf "%s::", $fst.function.common.scope->name->val
-					end
+					printf "%s->", $ex->object->ce.name->val
+				end
+			else
+				if $func->common.scope
+					printf "%s::", $func->common.scope->name->val
+				end
+			end
+
+			printf "%s(", $func->common.function_name->val
+
+			set $callFrameSize = (sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval)
+
+			set $count = $ex->num_args
+			set $arg = 0
+			while $arg < $count
+				if $arg > 0
+					printf ", "
 				end
 
-				printf "%s(", $fst.function->common.function_name->val
-				while $count > 0
-					set $zvalue = $fst.arguments - $count
-					set $type = $zvalue->u1.v.type
-					if $type == 1
-						printf "NULL"
-					end
-					if $type == 2
-						printf "false"
-					end
-					if $type == 3
-						printf "true"
-					end
-					if $type == 4
-						printf "%ld", $zvalue->value.lval
-					end
-					if $type == 5
-						printf "%f", $zvalue->value.dval
-					end
-					if $type == 6
-						____print_str $zvalue->value.str->val $zvalue->value.str->len
-					end
-					if $type == 7
-						printf "array(%d)[%p]", $zvalue->value.arr->ht->nNumOfElements, $zvalue
-					end
-					if $type == 8
-						printf "object[%p]", $zvalue
-					end
-					if $type == 9
-						printf "resource(#%d)", $zvalue->value.lval
-					end
-					if $type == 10
-						printf "reference"
-					end
-					if $type > 10
-						printf "unknown type %d", $type
-					end
-					set $count = $count -1
-					if $count > 0
-						printf ", "
-					end
+				set $zvalue = (zval *) $ex + $callFrameSize + $arg
+				set $type = $zvalue->u1.v.type
+				if $type == 1
+					printf "NULL"
 				end
-				printf ") "
-			else
-				printf "%s() ", $fst.function->common.function_name->val
+				if $type == 2
+					printf "false"
+				end
+				if $type == 3
+					printf "true"
+				end
+				if $type == 4
+					printf "%ld", $zvalue->value.lval
+				end
+				if $type == 5
+					printf "%f", $zvalue->value.dval
+				end
+				if $type == 6
+					____print_str $zvalue->value.str->val $zvalue->value.str->len
+				end
+				if $type == 7
+					printf "array(%d)[%p]", $zvalue->value.arr->ht->nNumOfElements, $zvalue
+				end
+				if $type == 8
+					printf "object[%p]", $zvalue
+				end
+				if $type == 9
+					printf "resource(#%d)", $zvalue->value.lval
+				end
+				if $type == 10
+					printf "reference"
+				end
+				if $type > 10
+					printf "unknown type %d", $type
+				end
+				set $arg = $arg + 1
 			end
+
+			printf ") "
 		else
 			printf "??? "
 		end
-		if $t->op_array != 0
-			printf "%s:%d ", $t->op_array->filename->val, $t->opline->lineno
+		if $func != 0
+			printf "%s:%d ", $func->op_array.filename->val, $ex->opline->lineno
 		end
-		set $t = $t->prev_execute_data
+		set $ex = $ex->prev_execute_data
 		printf "\n"
 	end
 end
