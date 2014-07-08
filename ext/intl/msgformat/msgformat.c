@@ -44,7 +44,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"msgfmt_create: unable to parse input parameters", 0 TSRMLS_CC );
-		Z_OBJ_P(return_value) == NULL;
+		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
 
