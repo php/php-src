@@ -637,6 +637,27 @@ END_EXTERN_C()
 	}                                 \
 } while (0)
 
+/* May be used in internal constructors to make them return NULL */
+#if 1 // support for directly called constructors only ???
+#define ZEND_CTOR_MAKE_NULL() do {										\
+		if (EG(current_execute_data)->return_value) {					\
+			zval_ptr_dtor(EG(current_execute_data)->return_value);		\
+			ZVAL_NULL(EG(current_execute_data)->return_value);			\
+		} \
+	} while (0)
+#else // attempt to support calls to parent::__construct() ???
+#define ZEND_CTOR_MAKE_NULL() do {										\
+		if (EG(current_execute_data)->return_value) {					\
+			zval_ptr_dtor(EG(current_execute_data)->return_value);		\
+			ZVAL_NULL(EG(current_execute_data)->return_value);			\
+		} else if (EG(current_execute_data)->prev_execute_data &&		\
+			EG(current_execute_data)->prev_execute_data->object ==		\
+				EG(current_execute_data)->object) {						\
+			EG(current_execute_data)->prev_execute_data->object = NULL;	\
+		} \
+	} while (0)
+#endif
+
 #define RETURN_ZVAL_FAST(z) { RETVAL_ZVAL_FAST(z); return; }
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p) TSRMLS_CC) : NULL)))

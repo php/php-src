@@ -2683,7 +2683,7 @@ PHP_METHOD(DateTime, __construct)
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
 		if (!php_date_initialize(Z_PHPDATE_P(getThis()), time_str, time_str_len, NULL, timezone_object, 1 TSRMLS_CC)) {
-//???			ZVAL_NULL(getThis());
+			ZEND_CTOR_MAKE_NULL();
 		}
 	}
 	zend_restore_error_handling(&error_handling TSRMLS_CC);

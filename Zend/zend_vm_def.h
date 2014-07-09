@@ -2363,6 +2363,10 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 
 	EX(call) = zend_vm_stack_push_call_frame(
 		fbc, opline->extended_value, 0, ce, object, EX(call) TSRMLS_CC);
+	
+	if (OP2_TYPE == IS_UNUSED) {
+		EX(call)->return_value = NULL;
+	}
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -3490,6 +3494,9 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), &object_zval);
+			EX(call)->return_value = EX_VAR(opline->result.var);
+		} else {
+			EX(call)->return_value = NULL;
 		}
 
 		CHECK_EXCEPTION();
