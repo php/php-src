@@ -7853,7 +7853,12 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 		case ZEND_AST_LABEL:
 			zend_compile_label(ast TSRMLS_CC);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default:
+		{
+			znode result;
+			zend_compile_expr(&result, ast TSRMLS_CC);
+			zend_do_free(&result TSRMLS_CC);
+		}
 	}
 
 	if (Z_LVAL(CG(declarables).ticks) && !zend_is_unticked_stmt(ast)) {

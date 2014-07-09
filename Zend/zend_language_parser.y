@@ -349,7 +349,7 @@ unticked_statement:
 	|	T_STATIC static_var_list ';' { AN($$); }
 	|	T_ECHO echo_expr_list ';' { $$.u.ast = $2.u.ast; }
 	|	T_INLINE_HTML { $$.u.ast = zend_ast_create_unary(ZEND_ECHO, AST_ZVAL(&$1)); }
-	|	expr ';'				{ AC($1); zend_do_free(&$1 TSRMLS_CC); AN($$); }
+	|	expr ';' { $$.u.ast = $1.u.ast; }
 	|	T_UNSET '(' unset_variables ')' ';' { $$.u.ast = $3.u.ast; }
 	|	T_FOREACH '(' variable T_AS
 		{ zend_do_foreach_begin(&$1, &$2, &$3, &$4, 1 TSRMLS_CC); }
