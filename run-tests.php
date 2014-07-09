@@ -136,6 +136,13 @@ if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
   $environment["SystemRoot"] = getenv("SystemRoot");
 }
 
+if (is_readable("/proc/cpuinfo")) {
+	$concurrency = min(64, max(1, preg_match_all("/^processor/mi", file_get_contents("/proc/cpuinfo"))));
+} else {
+	$concurrency = 2;
+}
+$procs = array();
+
 // Don't ever guess at the PHP executable location.
 // Require the explicit specification.
 // Otherwise we could end up testing the wrong file!
@@ -246,7 +253,7 @@ $ini_overwrites = array(
 
 function write_information($show_html)
 {
-	global $cwd, $php, $php_cgi, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header;
+	global $cwd, $php, $php_cgi, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header, $concurrency;
 
 	// Get info from php
 	$info_file = __DIR__ . '/run-test-info.php';
@@ -306,6 +313,7 @@ Extra dirs  : ";
 	}
 	echo "
 VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
+CONCURRENCY : " . $concurrency . "
 =====================================================================
 ";
 }
@@ -664,6 +672,9 @@ if (isset($argc) && $argc > 1) {
 				case '--version':
 					echo '$Id$' . "\n";
 					exit(1);
+				case '--concurrency':
+					$concurrency = min(64, max(1, $argv[++$i]));
+					break;
 
 				default:
 					echo "Illegal switch '$switch' specified!\n";
@@ -1066,6 +1077,90 @@ function error_report($testname, $logname, $tested)
 	}
 }
 
+function system_loop_over_procs($timeout)
+{
+	global $procs;
+
+	$r = array();
+	$w = null;
+	$e = null;
+
+	$done = array();
+	$table = array();
+	foreach ($procs as &$proc) {
+		$table[(int) $proc["pipes"][1]] = &$proc;
+		$r[] = $proc["pipes"][1];
+	}
+
+	$ts = microtime(true);
+	$n = @stream_select($r, $w, $e, $timeout);
+	$ts -= microtime(true);
+
+	array_walk($procs, function(&$proc) use ($ts) {
+		$proc["timeout"] += $ts;
+	});
+
+	if ($n > 0) {
+		foreach ($r as $pipe) {
+			$proc = &$table[(int) $pipe];
+			$line = fread($pipe, 8192);
+			if (!strlen($line)) {
+				/* EOF */
+				$stat = proc_get_status($proc["proc"]);
+				if ($stat['signaled']) {
+					$proc["data"] .= "\nTermsig=" . $stat['stopsig'];
+				}
+				proc_close($proc["proc"]);
+				unset($procs[(int) $proc["proc"]]);
+				$done[] = $proc;
+			} else {
+				$proc["data"] .= $line;
+			}
+		}
+	}
+
+	foreach ($procs as $proc_id => &$proc_ar) {
+		if ($proc_ar["timeout"] < 0) {
+			/* timed out */
+			$proc_ar["data"] .= "\n ** ERROR: process timed out **\n";
+			proc_terminate($proc_id, 9);
+			unset($procs[$proc_id]);
+			$done[] = $proc_ar;
+		}
+	}
+
+	array_walk($done, function($proc) {
+		$proc["cb_result"]($proc["cb_end_test"]($proc["data"]));
+	});
+
+	show_test_active(array_map(function($proc) {
+		return $proc["test_idx"];
+	}, $procs));
+}
+
+function system_with_callback($commandline, $env, $stdin, $cb_result, $cb_end_test)
+{
+	global $cwd, $procs, $leak_check, $test_idx;
+
+	$proc = proc_open($commandline, array(
+		0 => array('pipe', 'r'),
+		1 => array('pipe', 'w'),
+		2 => array('pipe', 'w')
+		), $pipes, $cwd, (array) $env, array('suppress_errors' => true, 'binary_pipes' => true));
+
+	if (!$proc) {
+		return false;
+	}
+	if (!is_null($stdin)) {
+		fwrite($pipes[0], $stdin);
+	}
+	fclose($pipes[0]);
+
+	$data = "";
+	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
+	$procs[(int) $proc] = compact("proc", "pipes", "timeout", "data", "cb_end_test", "cb_result", "test_idx");
+}
+
 function system_with_timeout($commandline, $env = null, $stdin = null)
 {
 	global $leak_check, $cwd;
@@ -1132,7 +1227,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
-	global $test_results, $failed_tests_file, $php, $test_cnt, $test_idx;
+	global $test_results, $failed_tests_file, $php, $test_cnt, $test_idx, $concurrency, $procs;
 
 	foreach($test_files as $name) {
 
@@ -1148,14 +1243,26 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 			$index = $name;
 		}
 		$test_idx++;
-		$result = run_test($php, $name, $env);
 
-		if (!is_array($name) && $result != 'REDIR') {
-			$test_results[$index] = $result;
-			if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
-				fwrite($failed_tests_file, "$index\n");
+		if ($concurrency <= count($procs)) {
+			while ($concurrency <= count($procs)) {
+				system_loop_over_procs(1);
 			}
+		} else {
+			system_loop_over_procs(0);
 		}
+		run_test($php, $name, $env, function($result) use (&$test_results, $index, $name, $failed_tests_file) {
+			if (!is_array($name) && $result != 'REDIR') {
+				$test_results[$index] = $result;
+				if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
+					fwrite($failed_tests_file, "$index\n");
+				}
+			}
+		});
+	}
+
+	while (count($procs)) {
+		system_loop_over_procs(1);
 	}
 }
 
@@ -1178,13 +1285,15 @@ function show_file_block($file, $block, $section = null)
 	}
 }
 
+$test_map = array();
+
 //
 //  Run an individual test case.
 //
-function run_test($php, $file, $env)
+function run_test($php, $file, $env, $cb)
 {
 	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
-	global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
+	global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx, $test_map;
 	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
 	global $no_clean;
 	global $valgrind_version;
@@ -1554,7 +1663,7 @@ TEST $file
 			}
 		}
 	}
-	
+
 	if (!extension_loaded("zlib")
 	&& (	array_key_exists("GZIP_POST", $section_text) 
 		||	array_key_exists("DEFLATE_POST", $section_text))
@@ -1811,329 +1920,334 @@ COMMAND $cmd
 
 	junit_start_timer($shortname);
 
-	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null);
+	system_with_callback($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $cb,
+		function($out) use($php, &$old_php, $cmd, $env, $shortname, $info, $file, $tested, $tested_file, $section_text, $ini_overwrites, $memcheck_filename, $pass_options, $temp_clean, $test_clean, $tmp_post, $warn, $temp_filenames, $exp_filename, $output_filename, $diff_filename, $sh_filename, $log_filename, $test_file, $IN_REDIRECT) {
+			global $cfg, $cwd, $leak_check, $no_clean, $log_format, $PHP_FAILED_TESTS;
 
-	junit_finish_timer($shortname);
+			junit_finish_timer($shortname);
 
-	if (array_key_exists('CLEAN', $section_text) && (!$no_clean || $cfg['keep']['clean'])) {
+			if (array_key_exists('CLEAN', $section_text) && (!$no_clean || $cfg['keep']['clean'])) {
 
-		if (trim($section_text['CLEAN'])) {
-			show_file_block('clean', $section_text['CLEAN']);
-			save_text($test_clean, trim($section_text['CLEAN']), $temp_clean);
+				if (trim($section_text['CLEAN'])) {
+					show_file_block('clean', $section_text['CLEAN']);
+					save_text($test_clean, trim($section_text['CLEAN']), $temp_clean);
 
-			if (!$no_clean) {
-				$clean_params = array();
-				settings2array($ini_overwrites, $clean_params);
-				settings2params($clean_params);
-				$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
-					"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
-				system_with_timeout("$extra $php $pass_options -q $clean_params \"$test_clean\"", $env);
-			}
-
-			if (!$cfg['keep']['clean']) {
-				@unlink($test_clean);
-			}
-		}
-	}
-
-	@unlink($tmp_post);
-
-	$leaked = false;
-	$passed = false;
-
-	if ($leak_check) { // leak check
-		$leaked = filesize($memcheck_filename) > 0;
-
-		if (!$leaked) {
-			@unlink($memcheck_filename);
-		}
-	}
-
-	// Does the output match what is expected?
-	$output = preg_replace("/\r\n/", "\n", trim($out));
-
-	/* when using CGI, strip the headers from the output */
-	$headers = "";
-
-	if (isset($old_php) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
-		$output = trim($match[2]);
-		$rh = preg_split("/[\n\r]+/", $match[1]);
-		$headers = array();
-
-		foreach ($rh as $line) {
-			if (strpos($line, ':') !== false) {
-				$line = explode(':', $line, 2);
-				$headers[trim($line[0])] = trim($line[1]);
-			}
-		}
-	}
-
-	$failed_headers = false;
-
-	if (isset($section_text['EXPECTHEADERS'])) {
-		$want = array();
-		$wanted_headers = array();
-		$lines = preg_split("/[\n\r]+/", $section_text['EXPECTHEADERS']);
-
-		foreach($lines as $line) {
-			if (strpos($line, ':') !== false) {
-				$line = explode(':', $line, 2);
-				$want[trim($line[0])] = trim($line[1]);
-				$wanted_headers[] = trim($line[0]) . ': ' . trim($line[1]);
-			}
-		}
-
-		$org_headers = $headers;
-		$headers = array();
-		$output_headers = array();
-
-		foreach($want as $k => $v) {
-
-			if (isset($org_headers[$k])) {
-				$headers = $org_headers[$k];
-				$output_headers[] = $k . ': ' . $org_headers[$k];
-			}
-
-			if (!isset($org_headers[$k]) || $org_headers[$k] != $v) {
-				$failed_headers = true;
-			}
-		}
-
-		ksort($wanted_headers);
-		$wanted_headers = join("\n", $wanted_headers);
-		ksort($output_headers);
-		$output_headers = join("\n", $output_headers);
-	}
-
-	show_file_block('out', $output);
-
-	if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
-
-		if (isset($section_text['EXPECTF'])) {
-			$wanted = trim($section_text['EXPECTF']);
-		} else {
-			$wanted = trim($section_text['EXPECTREGEX']);
-		}
-
-		show_file_block('exp', $wanted);
-		$wanted_re = preg_replace('/\r\n/', "\n", $wanted);
-
-		if (isset($section_text['EXPECTF'])) {
-
-			// do preg_quote, but miss out any %r delimited sections
-			$temp = "";
-			$r = "%r";
-			$startOffset = 0;
-			$length = strlen($wanted_re);
-			while($startOffset < $length) {
-				$start = strpos($wanted_re, $r, $startOffset);
-				if ($start !== false) {
-					// we have found a start tag
-					$end = strpos($wanted_re, $r, $start+2);
-					if ($end === false) {
-						// unbalanced tag, ignore it.
-						$end = $start = $length;
+					if (!$no_clean) {
+						$clean_params = array();
+						settings2array($ini_overwrites, $clean_params);
+						settings2params($clean_params);
+						$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
+							"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
+						system_with_timeout("$extra $php $pass_options -q $clean_params \"$test_clean\"", $env);
 					}
+
+					if (!$cfg['keep']['clean']) {
+						@unlink($test_clean);
+					}
+				}
+			}
+
+			@unlink($tmp_post);
+
+			$leaked = false;
+			$passed = false;
+
+			if ($leak_check) { // leak check
+				$leaked = filesize($memcheck_filename) > 0;
+
+				if (!$leaked) {
+					@unlink($memcheck_filename);
+				}
+			}
+
+			// Does the output match what is expected?
+			$output = preg_replace("/\r\n/", "\n", trim($out));
+
+			/* when using CGI, strip the headers from the output */
+			$headers = "";
+
+			if (isset($old_php) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
+				$output = trim($match[2]);
+				$rh = preg_split("/[\n\r]+/", $match[1]);
+				$headers = array();
+
+				foreach ($rh as $line) {
+					if (strpos($line, ':') !== false) {
+						$line = explode(':', $line, 2);
+						$headers[trim($line[0])] = trim($line[1]);
+					}
+				}
+			}
+
+			$failed_headers = false;
+
+			if (isset($section_text['EXPECTHEADERS'])) {
+				$want = array();
+				$wanted_headers = array();
+				$lines = preg_split("/[\n\r]+/", $section_text['EXPECTHEADERS']);
+
+				foreach($lines as $line) {
+					if (strpos($line, ':') !== false) {
+						$line = explode(':', $line, 2);
+						$want[trim($line[0])] = trim($line[1]);
+						$wanted_headers[] = trim($line[0]) . ': ' . trim($line[1]);
+					}
+				}
+
+				$org_headers = $headers;
+				$headers = array();
+				$output_headers = array();
+
+				foreach($want as $k => $v) {
+
+					if (isset($org_headers[$k])) {
+						$headers = $org_headers[$k];
+						$output_headers[] = $k . ': ' . $org_headers[$k];
+					}
+
+					if (!isset($org_headers[$k]) || $org_headers[$k] != $v) {
+						$failed_headers = true;
+					}
+				}
+
+				ksort($wanted_headers);
+				$wanted_headers = join("\n", $wanted_headers);
+				ksort($output_headers);
+				$output_headers = join("\n", $output_headers);
+			}
+
+			show_file_block('out', $output);
+
+			if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
+
+				if (isset($section_text['EXPECTF'])) {
+					$wanted = trim($section_text['EXPECTF']);
 				} else {
-					// no more %r sections
-					$start = $end = $length;
+					$wanted = trim($section_text['EXPECTREGEX']);
 				}
-				// quote a non re portion of the string
-				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  '/');
-				// add the re unquoted.
-				if ($end > $start) {
-					$temp = $temp . '(' . substr($wanted_re, $start+2, ($end - $start-2)). ')';
+
+				show_file_block('exp', $wanted);
+				$wanted_re = preg_replace('/\r\n/', "\n", $wanted);
+
+				if (isset($section_text['EXPECTF'])) {
+
+					// do preg_quote, but miss out any %r delimited sections
+					$temp = "";
+					$r = "%r";
+					$startOffset = 0;
+					$length = strlen($wanted_re);
+					while($startOffset < $length) {
+						$start = strpos($wanted_re, $r, $startOffset);
+						if ($start !== false) {
+							// we have found a start tag
+							$end = strpos($wanted_re, $r, $start+2);
+							if ($end === false) {
+								// unbalanced tag, ignore it.
+								$end = $start = $length;
+							}
+						} else {
+							// no more %r sections
+							$start = $end = $length;
+						}
+						// quote a non re portion of the string
+						$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  '/');
+						// add the re unquoted.
+						if ($end > $start) {
+							$temp = $temp . '(' . substr($wanted_re, $start+2, ($end - $start-2)). ')';
+						}
+						$startOffset = $end + 2;
+					}
+					$wanted_re = $temp;
+
+					$wanted_re = str_replace(
+						array('%binary_string_optional%'),
+						'string',
+						$wanted_re
+					);
+					$wanted_re = str_replace(
+						array('%unicode_string_optional%'),
+						'string',
+						$wanted_re
+					);
+					$wanted_re = str_replace(
+						array('%unicode\|string%', '%string\|unicode%'),
+						'string',
+						$wanted_re
+					);
+					$wanted_re = str_replace(
+						array('%u\|b%', '%b\|u%'),
+						'',
+						$wanted_re
+					);
+					// Stick to basics
+					$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
+					$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
+					$wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
+					$wanted_re = str_replace('%a', '.+', $wanted_re);
+					$wanted_re = str_replace('%A', '.*', $wanted_re);
+					$wanted_re = str_replace('%w', '\s*', $wanted_re);
+					$wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
+					$wanted_re = str_replace('%d', '\d+', $wanted_re);
+					$wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
+					$wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
+					$wanted_re = str_replace('%c', '.', $wanted_re);
+					// %f allows two points "-.0.0" but that is the best *simple* expression
 				}
-				$startOffset = $end + 2;
-			}
-			$wanted_re = $temp;
+		/* DEBUG YOUR REGEX HERE
+				var_dump($wanted_re);
+				print(str_repeat('=', 80) . "\n");
+				var_dump($output);
+		*/
+				if (preg_match("/^$wanted_re\$/s", $output)) {
+					$passed = true;
+					if (!$cfg['keep']['php']) {
+						@unlink($test_file);
+					}
+					if (isset($old_php)) {
+						$php = $old_php;
+					}
 
-			$wanted_re = str_replace(
-				array('%binary_string_optional%'),
-				'string',
-				$wanted_re
-			);
-			$wanted_re = str_replace(
-				array('%unicode_string_optional%'),
-				'string',
-				$wanted_re
-			);
-			$wanted_re = str_replace(
-				array('%unicode\|string%', '%string\|unicode%'),
-				'string',
-				$wanted_re
-			);
-			$wanted_re = str_replace(
-				array('%u\|b%', '%b\|u%'),
-				'',
-				$wanted_re
-			);
-			// Stick to basics
-			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
-			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
-			$wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
-			$wanted_re = str_replace('%a', '.+', $wanted_re);
-			$wanted_re = str_replace('%A', '.*', $wanted_re);
-			$wanted_re = str_replace('%w', '\s*', $wanted_re);
-			$wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
-			$wanted_re = str_replace('%d', '\d+', $wanted_re);
-			$wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
-			$wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
-			$wanted_re = str_replace('%c', '.', $wanted_re);
-			// %f allows two points "-.0.0" but that is the best *simple* expression
-		}
-/* DEBUG YOUR REGEX HERE
-		var_dump($wanted_re);
-		print(str_repeat('=', 80) . "\n");
-		var_dump($output);
-*/
-		if (preg_match("/^$wanted_re\$/s", $output)) {
-			$passed = true;
-			if (!$cfg['keep']['php']) {
-				@unlink($test_file);
-			}
-			if (isset($old_php)) {
-				$php = $old_php;
+					if (!$leaked && !$failed_headers) {
+						if (isset($section_text['XFAIL'] )) {
+							$warn = true;
+							$info = " (warn: XFAIL section but test passes)";
+						}else {
+							show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+							junit_mark_test_as('PASS', $shortname, $tested);
+							return 'PASSED';
+						}
+					}
+				}
+
+			} else {
+
+				$wanted = trim($section_text['EXPECT']);
+				$wanted = preg_replace('/\r\n/',"\n", $wanted);
+				show_file_block('exp', $wanted);
+
+				// compare and leave on success
+				if (!strcmp($output, $wanted)) {
+					$passed = true;
+
+					if (!$cfg['keep']['php']) {
+						@unlink($test_file);
+					}
+
+					if (isset($old_php)) {
+						$php = $old_php;
+					}
+
+					if (!$leaked && !$failed_headers) {
+						if (isset($section_text['XFAIL'] )) {
+							$warn = true;
+							$info = " (warn: XFAIL section but test passes)";
+						}else {
+							show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+							junit_mark_test_as('PASS', $shortname, $tested);
+							return 'PASSED';
+						}
+					}
+				}
+
+				$wanted_re = null;
 			}
 
-			if (!$leaked && !$failed_headers) {
-				if (isset($section_text['XFAIL'] )) {
-					$warn = true;
-					$info = " (warn: XFAIL section but test passes)";
-				}else {
-					show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-					junit_mark_test_as('PASS', $shortname, $tested);
-					return 'PASSED';
+			// Test failed so we need to report details.
+			if ($failed_headers) {
+				$passed = false;
+				$wanted = $wanted_headers . "\n--HEADERS--\n" . $wanted;
+				$output = $output_headers . "\n--HEADERS--\n" . $output;
+
+				if (isset($wanted_re)) {
+					$wanted_re = preg_quote($wanted_headers . "\n--HEADERS--\n", '/') . $wanted_re;
 				}
 			}
-		}
 
-	} else {
-
-		$wanted = trim($section_text['EXPECT']);
-		$wanted = preg_replace('/\r\n/',"\n", $wanted);
-		show_file_block('exp', $wanted);
-
-		// compare and leave on success
-		if (!strcmp($output, $wanted)) {
-			$passed = true;
-
-			if (!$cfg['keep']['php']) {
-				@unlink($test_file);
+			if ($leaked) {
+				$restype[] = 'LEAK';
 			}
 
-			if (isset($old_php)) {
-				$php = $old_php;
+			if ($warn) {
+				$restype[] = 'WARN';
 			}
 
-			if (!$leaked && !$failed_headers) {
-				if (isset($section_text['XFAIL'] )) {
-					$warn = true;
-					$info = " (warn: XFAIL section but test passes)";
-				}else {
-					show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-					junit_mark_test_as('PASS', $shortname, $tested);
-					return 'PASSED';
+			if (!$passed) {
+				if (isset($section_text['XFAIL'])) {
+					$restype[] = 'XFAIL';
+					$info = '  XFAIL REASON: ' . rtrim($section_text['XFAIL']);
+				} else {
+					$restype[] = 'FAIL';
 				}
 			}
-		}
 
-		$wanted_re = null;
-	}
+			if (!$passed) {
 
-	// Test failed so we need to report details.
-	if ($failed_headers) {
-		$passed = false;
-		$wanted = $wanted_headers . "\n--HEADERS--\n" . $wanted;
-		$output = $output_headers . "\n--HEADERS--\n" . $output;
+				// write .exp
+				if (strpos($log_format, 'E') !== false && file_put_contents($exp_filename, $wanted, FILE_BINARY) === false) {
+					error("Cannot create expected test output - $exp_filename");
+				}
 
-		if (isset($wanted_re)) {
-			$wanted_re = preg_quote($wanted_headers . "\n--HEADERS--\n", '/') . $wanted_re;
-		}
-	}
+				// write .out
+				if (strpos($log_format, 'O') !== false && file_put_contents($output_filename, $output, FILE_BINARY) === false) {
+					error("Cannot create test output - $output_filename");
+				}
 
-	if ($leaked) {
-		$restype[] = 'LEAK';
-	}
+				// write .diff
+				$diff = generate_diff($wanted, $wanted_re, $output);
+				if (is_array($IN_REDIRECT)) {
+					$diff = "# original source file: $shortname\n" . $diff;
+				}
+				show_file_block('diff', $diff);
+				if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, $diff, FILE_BINARY) === false) {
+					error("Cannot create test diff - $diff_filename");
+				}
 
-	if ($warn) {
-		$restype[] = 'WARN';
-	}
-
-	if (!$passed) {
-		if (isset($section_text['XFAIL'])) {
-			$restype[] = 'XFAIL';
-			$info = '  XFAIL REASON: ' . rtrim($section_text['XFAIL']);
-		} else {
-			$restype[] = 'FAIL';
-		}
-	}
-
-	if (!$passed) {
-
-		// write .exp
-		if (strpos($log_format, 'E') !== false && file_put_contents($exp_filename, $wanted, FILE_BINARY) === false) {
-			error("Cannot create expected test output - $exp_filename");
-		}
-
-		// write .out
-		if (strpos($log_format, 'O') !== false && file_put_contents($output_filename, $output, FILE_BINARY) === false) {
-			error("Cannot create test output - $output_filename");
-		}
-
-		// write .diff
-		$diff = generate_diff($wanted, $wanted_re, $output);
-		if (is_array($IN_REDIRECT)) {
-			$diff = "# original source file: $shortname\n" . $diff;
-		}
-		show_file_block('diff', $diff);
-		if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, $diff, FILE_BINARY) === false) {
-			error("Cannot create test diff - $diff_filename");
-		}
-
-		// write .sh
-		if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, "#!/bin/sh
+				// write .sh
+				if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, "#!/bin/sh
 
 {$cmd}
 ", FILE_BINARY) === false) {
-			error("Cannot create test shell script - $sh_filename");
-		}
-		chmod($sh_filename, 0755);
+					error("Cannot create test shell script - $sh_filename");
+				}
+				chmod($sh_filename, 0755);
 
-		// write .log
-		if (strpos($log_format, 'L') !== false && file_put_contents($log_filename, "
+				// write .log
+				if (strpos($log_format, 'L') !== false && file_put_contents($log_filename, "
 ---- EXPECTED OUTPUT
 $wanted
 ---- ACTUAL OUTPUT
 $output
 ---- FAILED
 ", FILE_BINARY) === false) {
-			error("Cannot create test log - $log_filename");
-			error_report($file, $log_filename, $tested);
+					error("Cannot create test log - $log_filename");
+					error_report($file, $log_filename, $tested);
+				}
+			}
+
+			show_result(implode('&', $restype), $tested, $tested_file, $info, $temp_filenames);
+
+			foreach ($restype as $type) {
+				$PHP_FAILED_TESTS[$type.'ED'][] = array (
+					'name'      => $file,
+					'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
+					'output'    => $output_filename,
+					'diff'      => $diff_filename,
+					'info'      => $info,
+				);
+			}
+
+			if (isset($old_php)) {
+				$php = $old_php;
+			}
+
+			$diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
+			$diff = empty($diff) ? '' : "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>";
+
+			junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
+
+			return $restype[0] . 'ED';
 		}
-	}
-
-	show_result(implode('&', $restype), $tested, $tested_file, $info, $temp_filenames);
-
-	foreach ($restype as $type) {
-		$PHP_FAILED_TESTS[$type.'ED'][] = array (
-			'name'      => $file,
-			'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
-			'output'    => $output_filename,
-			'diff'      => $diff_filename,
-			'info'      => $info,
-		);
-	}
-
-	if (isset($old_php)) {
-		$php = $old_php;
-	}
-	
-	$diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
-
-	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
-
-	return $restype[0] . 'ED';
+	);
 }
 
 function comp_line($l1, $l2, $is_reg)
@@ -2556,8 +2670,20 @@ function show_test($test_idx, $shortname)
 {
 	global $test_cnt;
 	global $line_length;
+	global $test_map;
 
-	$str = "TEST $test_idx/$test_cnt [$shortname]\r";
+	$test_map[$shortname] = $test_idx;
+
+	$str = sprintf("%5d TEST $test_idx/$test_cnt [$shortname]\r", $test_idx);
+	$line_length = strlen($str);
+	echo $str;
+	flush();
+}
+
+function show_test_active($active) {
+	global $test_idx, $test_cnt, $line_length;
+
+	$str = sprintf("TEST %d/%d [no. %s still running]\r", $test_idx, $test_cnt, implode(", ", (array) $active));
 	$line_length = strlen($str);
 	echo $str;
 	flush();
@@ -2566,9 +2692,10 @@ function show_test($test_idx, $shortname)
 function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
 {
 	global $html_output, $html_file, $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
+	global $test_idx, $test_map;
 
 	if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
-		echo "$result $tested [$tested_file] $extra\n";
+		printf("%5d $result $tested [$tested_file] $extra\n", $test_map[$tested_file]);
 	} else {
 		// Write over the last line to avoid random trailing chars on next echo
 		echo str_repeat(" ", $line_length), "\r";
