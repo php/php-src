@@ -7036,6 +7036,25 @@ void zend_compile_goto(zend_ast *ast TSRMLS_DC) {
 	zend_resolve_goto_label(CG(active_op_array), opline, 0 TSRMLS_CC);
 }
 
+void zend_compile_label(zend_ast *ast TSRMLS_DC) {
+	zval *label = zend_ast_get_zval(ast->child[0]);
+	zend_label dest;
+
+	ZEND_ASSERT(Z_TYPE_P(label) == IS_STRING);
+
+	if (!CG(context).labels) {
+		ALLOC_HASHTABLE(CG(context).labels);
+		zend_hash_init(CG(context).labels, 8, NULL, ptr_dtor, 0);
+	}
+
+	dest.brk_cont = CG(context).current_brk_cont;
+	dest.opline_num = get_next_op_number(CG(active_op_array));
+
+	if (!zend_hash_add_mem(CG(context).labels, Z_STR_P(label), &dest, sizeof(zend_label))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Label '%s' already defined", Z_STRVAL_P(label));
+	}
+}
+
 void zend_compile_stmt_list(zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 	for (i = 0; i < ast->children; ++i) {
@@ -7817,6 +7836,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			return;
 		case ZEND_GOTO:
 			zend_compile_goto(ast TSRMLS_CC);
+			return;
+		case ZEND_AST_LABEL:
+			zend_compile_label(ast TSRMLS_CC);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}

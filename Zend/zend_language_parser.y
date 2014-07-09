@@ -318,7 +318,7 @@ inner_statement:
 
 statement:
 		unticked_statement { AS($$); DO_TICKS(); }
-	|	T_STRING ':' { zend_do_label(&$1 TSRMLS_CC); }
+	|	T_STRING ':' { $$.u.ast = zend_ast_create_unary(ZEND_AST_LABEL, AST_ZVAL(&$1)); AS($$); }
 ;
 
 unticked_statement:
