@@ -69,6 +69,8 @@ enum _zend_ast_kind {
 	ZEND_AST_ARRAY_ELEM,
 	ZEND_AST_ENCAPS_LIST,
 
+	ZEND_AST_STMT_LIST,
+
 	ZEND_AST_GLOBAL,
 	ZEND_AST_UNSET,
 	ZEND_AST_RETURN,
@@ -158,7 +160,7 @@ static inline zend_ast *zend_ast_create_assign_op(zend_uint opcode, zend_ast *op
 #define AST_COMPILE_STMT(ast) do { \
 	zend_ast *_ast = (ast); \
 	zend_compile_stmt(_ast TSRMLS_CC); \
-	zend_ast_destroy(_ast); \
+	if (_ast) zend_ast_destroy(_ast); \
 } while (0)
 
 #define AST_ZNODE(znode) zend_ast_create_znode((znode))
@@ -167,5 +169,6 @@ static inline zend_ast *zend_ast_create_assign_op(zend_uint opcode, zend_ast *op
 #define AC(znode) AST_COMPILE(&znode, znode.u.ast)
 #define AS(znode) AST_COMPILE_STMT(znode.u.ast)
 #define AZ(znode) ((znode).u.ast = AST_ZNODE(&znode))
+#define AN(znode) ((znode).u.ast = NULL)
 
 #endif

@@ -7036,6 +7036,13 @@ void zend_compile_goto(zend_ast *ast TSRMLS_DC) {
 	zend_resolve_goto_label(CG(active_op_array), opline, 0 TSRMLS_CC);
 }
 
+void zend_compile_stmt_list(zend_ast *ast TSRMLS_DC) {
+	zend_uint i;
+	for (i = 0; i < ast->children; ++i) {
+		zend_compile_stmt(ast->child[i] TSRMLS_CC);
+	}
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7781,7 +7788,14 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 }
 
 void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
+	if (!ast) {
+		return;
+	}
+
 	switch (ast->kind) {
+		case ZEND_AST_STMT_LIST:
+			zend_compile_stmt_list(ast TSRMLS_CC);
+			return;
 		case ZEND_AST_GLOBAL:
 			zend_compile_global_var(ast TSRMLS_CC);
 			return;

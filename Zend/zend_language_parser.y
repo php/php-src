@@ -317,16 +317,16 @@ inner_statement:
 
 
 statement:
-		unticked_statement { DO_TICKS(); }
+		unticked_statement { AS($$); DO_TICKS(); }
 	|	T_STRING ':' { zend_do_label(&$1 TSRMLS_CC); }
 ;
 
 unticked_statement:
-		'{' inner_statement_list '}'
-	|	T_IF parenthesis_expr { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } statement { zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); }
-	|	T_IF parenthesis_expr ':' { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } inner_statement_list { zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { zend_do_if_end(TSRMLS_C); }
-	|	T_WHILE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); } parenthesis_expr { AC($3); zend_do_while_cond(&$3, &$$ TSRMLS_CC); } while_statement { zend_do_while_end(&$1, &$4 TSRMLS_CC); }
-	|	T_DO { $1.u.op.opline_num = get_next_op_number(CG(active_op_array));  zend_do_do_while_begin(TSRMLS_C); } statement T_WHILE { $4.u.op.opline_num = get_next_op_number(CG(active_op_array)); } parenthesis_expr ';' { AC($6); zend_do_do_while_end(&$1, &$4, &$6 TSRMLS_CC); }
+		'{' inner_statement_list '}' { AN($$); }
+	|	T_IF parenthesis_expr { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } statement { zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); AN($$); }
+	|	T_IF parenthesis_expr ':' { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } inner_statement_list { zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { zend_do_if_end(TSRMLS_C); AN($$); }
+	|	T_WHILE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); } parenthesis_expr { AC($3); zend_do_while_cond(&$3, &$$ TSRMLS_CC); } while_statement { zend_do_while_end(&$1, &$4 TSRMLS_CC); AN($$); }
+	|	T_DO { $1.u.op.opline_num = get_next_op_number(CG(active_op_array));  zend_do_do_while_begin(TSRMLS_C); } statement T_WHILE { $4.u.op.opline_num = get_next_op_number(CG(active_op_array)); } parenthesis_expr ';' { AC($6); zend_do_do_while_end(&$1, &$4, &$6 TSRMLS_CC); AN($$); }
 	|	T_FOR
 			'('
 				for_expr
@@ -335,37 +335,37 @@ unticked_statement:
 			';' { zend_do_extended_info(TSRMLS_C); zend_do_for_cond(&$6, &$7 TSRMLS_CC); }
 				for_expr
 			')' { zend_do_free(&$9 TSRMLS_CC); zend_do_for_before_statement(&$4, &$7 TSRMLS_CC); }
-			for_statement { zend_do_for_end(&$7 TSRMLS_CC); }
-	|	T_SWITCH parenthesis_expr	{ AC($2); zend_do_switch_cond(&$2 TSRMLS_CC); } switch_case_list { zend_do_switch_end(&$4 TSRMLS_CC); }
-	|	T_BREAK ';'			{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, NULL); AS($$); }
-	|	T_BREAK expr ';'	{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, $2.u.ast); AS($$); }
-	|	T_CONTINUE ';'		{ $$.u.ast = zend_ast_create_unary(ZEND_CONT, NULL); AS($$); }
-	|	T_CONTINUE expr ';'	{ $$.u.ast = zend_ast_create_unary(ZEND_CONT, $2.u.ast); AS($$); }
+			for_statement { zend_do_for_end(&$7 TSRMLS_CC); AN($$); }
+	|	T_SWITCH parenthesis_expr	{ AC($2); zend_do_switch_cond(&$2 TSRMLS_CC); } switch_case_list { zend_do_switch_end(&$4 TSRMLS_CC); AN($$); }
+	|	T_BREAK ';'			{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, NULL); }
+	|	T_BREAK expr ';'	{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, $2.u.ast); }
+	|	T_CONTINUE ';'		{ $$.u.ast = zend_ast_create_unary(ZEND_CONT, NULL); }
+	|	T_CONTINUE expr ';'	{ $$.u.ast = zend_ast_create_unary(ZEND_CONT, $2.u.ast); }
 	|	T_RETURN ';'
-			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RETURN, NULL); AS($$); }
+			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RETURN, NULL); }
 	|	T_RETURN expr ';'
-			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RETURN, $2.u.ast); AS($$); }
-	|	T_GLOBAL global_var_list ';'
-	|	T_STATIC static_var_list ';'
-	|	T_ECHO echo_expr_list ';'
-	|	T_INLINE_HTML { $$.u.ast = zend_ast_create_unary(ZEND_ECHO, AST_ZVAL(&$1)); AS($$); }
-	|	expr ';'				{ AC($1); zend_do_free(&$1 TSRMLS_CC); }
-	|	T_UNSET '(' unset_variables ')' ';'
+			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RETURN, $2.u.ast); }
+	|	T_GLOBAL global_var_list ';' { $$.u.ast = $2.u.ast; }
+	|	T_STATIC static_var_list ';' { AN($$); }
+	|	T_ECHO echo_expr_list ';' { $$.u.ast = $2.u.ast; }
+	|	T_INLINE_HTML { $$.u.ast = zend_ast_create_unary(ZEND_ECHO, AST_ZVAL(&$1)); }
+	|	expr ';'				{ AC($1); zend_do_free(&$1 TSRMLS_CC); AN($$); }
+	|	T_UNSET '(' unset_variables ')' ';' { $$.u.ast = $3.u.ast; }
 	|	T_FOREACH '(' variable T_AS
 		{ zend_do_foreach_begin(&$1, &$2, &$3, &$4, 1 TSRMLS_CC); }
 		foreach_variable foreach_optional_arg ')' { zend_do_foreach_cont(&$1, &$2, &$4, &$6, &$7 TSRMLS_CC); }
-		foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); }
+		foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); AN($$); }
 	|	T_FOREACH '(' expr_without_variable T_AS
 		{ AC($3); zend_do_foreach_begin(&$1, &$2, &$3, &$4, 0 TSRMLS_CC); }
 		foreach_variable foreach_optional_arg ')' { zend_do_foreach_cont(&$1, &$2, &$4, &$6, &$7 TSRMLS_CC); }
-		foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); }
-	|	T_DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); }
-	|	';'		/* empty statement */
+		foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); AN($$); }
+	|	T_DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); AN($$); }
+	|	';'	/* empty statement */ { AN($$); }
 	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}'
 		catch_statement { zend_do_bind_catch(&$1, &$6 TSRMLS_CC); }
-		finally_statement { zend_do_end_finally(&$1, &$6, &$8 TSRMLS_CC); }
-	|	T_THROW expr ';' { $$.u.ast = zend_ast_create_unary(ZEND_THROW, $2.u.ast); AS($$); }
-	|	T_GOTO T_STRING ';' { $$.u.ast = zend_ast_create_unary(ZEND_GOTO, AST_ZVAL(&$2)); AS($$); }
+		finally_statement { zend_do_end_finally(&$1, &$6, &$8 TSRMLS_CC); AN($$); }
+	|	T_THROW expr ';' { $$.u.ast = zend_ast_create_unary(ZEND_THROW, $2.u.ast); }
+	|	T_GOTO T_STRING ';' { $$.u.ast = zend_ast_create_unary(ZEND_GOTO, AST_ZVAL(&$2)); }
 ;
 
 catch_statement:
@@ -396,13 +396,12 @@ additional_catch:
 ;
 
 unset_variables:
-		unset_variable
-	|	unset_variables ',' unset_variable
+		unset_variable { $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_STMT_LIST, $1.u.ast); }
+	|	unset_variables ',' unset_variable { $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
 ;
 
 unset_variable:
-		variable
-			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_UNSET, $1.u.ast); AST_COMPILE_STMT($$.u.ast); }
+		variable { $$.u.ast = zend_ast_create_unary(ZEND_AST_UNSET, $1.u.ast); }
 ;
 
 function_declaration_statement:
@@ -609,13 +608,13 @@ function_call_parameter:
 ;
 
 global_var_list:
-		global_var_list ',' global_var
-	|	global_var
+		global_var_list ',' global_var { $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
+	|	global_var { $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_STMT_LIST, $1.u.ast); }
 ;
 
 global_var:
 	simple_variable
-		{ $$.u.ast = zend_ast_create_unary(ZEND_AST_GLOBAL, $1.u.ast); AST_COMPILE_STMT($$.u.ast); }
+		{ $$.u.ast = zend_ast_create_unary(ZEND_AST_GLOBAL, $1.u.ast); }
 ;
 
 
@@ -742,11 +741,11 @@ class_constant_declaration:
 ;
 
 echo_expr_list:
-		echo_expr_list ',' echo_expr
-	|	echo_expr
+		echo_expr_list ',' echo_expr { $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
+	|	echo_expr { $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_STMT_LIST, $1.u.ast); }
 ;
 echo_expr:
-	expr { $$.u.ast = zend_ast_create_unary(ZEND_ECHO, $1.u.ast); AS($$); }
+	expr { $$.u.ast = zend_ast_create_unary(ZEND_ECHO, $1.u.ast); }
 ;
 
 for_expr:
