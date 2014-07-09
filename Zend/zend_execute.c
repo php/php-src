@@ -1583,9 +1583,9 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		}
 	} while (0);
 
-	if (op_array->this_var != -1 && Z_OBJ(EG(This))) {
-		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EG(This)));
-		Z_ADDREF(EG(This));
+	if (op_array->this_var != -1 && EX(object)) {
+		ZVAL_OBJ(EX_VAR(op_array->this_var), EX(object));
+		GC_REFCOUNT(EX(object))++;
 	}
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
@@ -1674,9 +1674,9 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 			}
 		} while (0);
 
-		if (op_array->this_var != -1 && Z_OBJ(EG(This))) {
-			ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EG(This)));
-			Z_ADDREF(EG(This));
+		if (op_array->this_var != -1 && EX(object)) {
+			ZVAL_OBJ(EX_VAR(op_array->this_var), EX(object));
+			GC_REFCOUNT(EX(object))++;
 		}
 	}
 

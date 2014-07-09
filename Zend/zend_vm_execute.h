@@ -2919,7 +2919,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 		}
 
 		call = zend_vm_stack_push_call_frame(
-			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), NULL TSRMLS_CC);
+			(zend_function*)new_op_array, 0, 0, EX(called_scope), EX(object), NULL TSRMLS_CC);
 
 		if (EX(symbol_table)) {
 			call->symbol_table = EX(symbol_table);
@@ -3776,7 +3776,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EX(object) && zend_get_class_entry(EX(object) TSRMLS_CC) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		fbc = ce->constructor;
@@ -3784,9 +3784,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EG(This))) {
-			if (Z_OBJ_HT(EG(This))->get_class_entry &&
-			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+		if (EX(object)) {
+			object = EX(object);
+			GC_REFCOUNT(object)++;
+			if (object->handlers->get_class_entry &&
+			    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 			    /* We are calling method of the other (incompatible) class,
 			       but passing $this. This is done for compatibility with php-4. */
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -3796,8 +3798,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
 				}
 			}
-			object = Z_OBJ(EG(This));
-			GC_REFCOUNT(object)++;
 		}
 	}
 
@@ -3908,11 +3908,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(opline->op2.zv))) != NULL)) {
 			ZVAL_DEREF(value);
 			if (Z_CONSTANT_P(value)) {
-				zend_class_entry *old_scope = EG(scope);
-
 				EG(scope) = ce;
 				zval_update_constant(value, 1 TSRMLS_CC);
-				EG(scope) = old_scope;
+				EG(scope) = EX(scope);
 			}
 			if (IS_CONST == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(opline->op2.zv), value);
@@ -4746,7 +4744,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EX(object) && zend_get_class_entry(EX(object) TSRMLS_CC) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		fbc = ce->constructor;
@@ -4754,9 +4752,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EG(This))) {
-			if (Z_OBJ_HT(EG(This))->get_class_entry &&
-			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+		if (EX(object)) {
+			object = EX(object);
+			GC_REFCOUNT(object)++;
+			if (object->handlers->get_class_entry &&
+			    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 			    /* We are calling method of the other (incompatible) class,
 			       but passing $this. This is done for compatibility with php-4. */
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -4766,8 +4766,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
 				}
 			}
-			object = Z_OBJ(EG(This));
-			GC_REFCOUNT(object)++;
 		}
 	}
 
@@ -5584,7 +5582,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EX(object) && zend_get_class_entry(EX(object) TSRMLS_CC) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		fbc = ce->constructor;
@@ -5592,9 +5590,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EG(This))) {
-			if (Z_OBJ_HT(EG(This))->get_class_entry &&
-			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+		if (EX(object)) {
+			object = EX(object);
+			GC_REFCOUNT(object)++;
+			if (object->handlers->get_class_entry &&
+			    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 			    /* We are calling method of the other (incompatible) class,
 			       but passing $this. This is done for compatibility with php-4. */
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -5604,8 +5604,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
 				}
 			}
-			object = Z_OBJ(EG(This));
-			GC_REFCOUNT(object)++;
 		}
 	}
 
@@ -6281,7 +6279,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EX(object) && zend_get_class_entry(EX(object) TSRMLS_CC) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		fbc = ce->constructor;
@@ -6289,9 +6287,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EG(This))) {
-			if (Z_OBJ_HT(EG(This))->get_class_entry &&
-			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+		if (EX(object)) {
+			object = EX(object);
+			GC_REFCOUNT(object)++;
+			if (object->handlers->get_class_entry &&
+			    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 			    /* We are calling method of the other (incompatible) class,
 			       but passing $this. This is done for compatibility with php-4. */
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -6301,8 +6301,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
 				}
 			}
-			object = Z_OBJ(EG(This));
-			GC_REFCOUNT(object)++;
 		}
 	}
 
@@ -7114,7 +7112,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EX(object) && zend_get_class_entry(EX(object) TSRMLS_CC) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		fbc = ce->constructor;
@@ -7122,9 +7120,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EG(This))) {
-			if (Z_OBJ_HT(EG(This))->get_class_entry &&
-			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+		if (EX(object)) {
+			object = EX(object);
+			GC_REFCOUNT(object)++;
+			if (object->handlers->get_class_entry &&
+			    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 			    /* We are calling method of the other (incompatible) class,
 			       but passing $this. This is done for compatibility with php-4. */
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -7134,8 +7134,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
 				}
 			}
-			object = Z_OBJ(EG(This));
-			GC_REFCOUNT(object)++;
 		}
 	}
 
@@ -8149,7 +8147,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 		}
 
 		call = zend_vm_stack_push_call_frame(
-			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), NULL TSRMLS_CC);
+			(zend_function*)new_op_array, 0, 0, EX(called_scope), EX(object), NULL TSRMLS_CC);
 
 		if (EX(symbol_table)) {
 			call->symbol_table = EX(symbol_table);
@@ -13407,7 +13405,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 		}
 
 		call = zend_vm_stack_push_call_frame(
-			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), NULL TSRMLS_CC);
+			(zend_function*)new_op_array, 0, 0, EX(called_scope), EX(object), NULL TSRMLS_CC);
 
 		if (EX(symbol_table)) {
 			call->symbol_table = EX(symbol_table);
@@ -15426,7 +15424,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EX(object) && zend_get_class_entry(EX(object) TSRMLS_CC) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		fbc = ce->constructor;
@@ -15434,9 +15432,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EG(This))) {
-			if (Z_OBJ_HT(EG(This))->get_class_entry &&
-			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+		if (EX(object)) {
+			object = EX(object);
+			GC_REFCOUNT(object)++;
+			if (object->handlers->get_class_entry &&
+			    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 			    /* We are calling method of the other (incompatible) class,
 			       but passing $this. This is done for compatibility with php-4. */
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -15446,8 +15446,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
 				}
 			}
-			object = Z_OBJ(EG(This));
-			GC_REFCOUNT(object)++;
 		}
 	}
 
@@ -15558,11 +15556,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(opline->op2.zv))) != NULL)) {
 			ZVAL_DEREF(value);
 			if (Z_CONSTANT_P(value)) {
-				zend_class_entry *old_scope = EG(scope);
-
 				EG(scope) = ce;
 				zval_update_constant(value, 1 TSRMLS_CC);
-				EG(scope) = old_scope;
+				EG(scope) = EX(scope);
 			}
 			if (IS_VAR == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(opline->op2.zv), value);
@@ -17658,7 +17654,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EX(object) && zend_get_class_entry(EX(object) TSRMLS_CC) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		fbc = ce->constructor;
@@ -17666,9 +17662,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EG(This))) {
-			if (Z_OBJ_HT(EG(This))->get_class_entry &&
-			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+		if (EX(object)) {
+			object = EX(object);
+			GC_REFCOUNT(object)++;
+			if (object->handlers->get_class_entry &&
+			    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 			    /* We are calling method of the other (incompatible) class,
 			       but passing $this. This is done for compatibility with php-4. */
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -17678,8 +17676,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
 				}
 			}
-			object = Z_OBJ(EG(This));
-			GC_REFCOUNT(object)++;
 		}
 	}
 
@@ -19857,7 +19853,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EX(object) && zend_get_class_entry(EX(object) TSRMLS_CC) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		fbc = ce->constructor;
@@ -19865,9 +19861,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EG(This))) {
-			if (Z_OBJ_HT(EG(This))->get_class_entry &&
-			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+		if (EX(object)) {
+			object = EX(object);
+			GC_REFCOUNT(object)++;
+			if (object->handlers->get_class_entry &&
+			    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 			    /* We are calling method of the other (incompatible) class,
 			       but passing $this. This is done for compatibility with php-4. */
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -19877,8 +19875,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
 				}
 			}
-			object = Z_OBJ(EG(This));
-			GC_REFCOUNT(object)++;
 		}
 	}
 
@@ -21325,7 +21321,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EX(object) && zend_get_class_entry(EX(object) TSRMLS_CC) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		fbc = ce->constructor;
@@ -21333,9 +21329,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EG(This))) {
-			if (Z_OBJ_HT(EG(This))->get_class_entry &&
-			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+		if (EX(object)) {
+			object = EX(object);
+			GC_REFCOUNT(object)++;
+			if (object->handlers->get_class_entry &&
+			    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 			    /* We are calling method of the other (incompatible) class,
 			       but passing $this. This is done for compatibility with php-4. */
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -21345,8 +21343,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
 				}
 			}
-			object = Z_OBJ(EG(This));
-			GC_REFCOUNT(object)++;
 		}
 	}
 
@@ -23232,7 +23228,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (EX(object) && zend_get_class_entry(EX(object) TSRMLS_CC) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		fbc = ce->constructor;
@@ -23240,9 +23236,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EG(This))) {
-			if (Z_OBJ_HT(EG(This))->get_class_entry &&
-			    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+		if (EX(object)) {
+			object = EX(object);
+			GC_REFCOUNT(object)++;
+			if (object->handlers->get_class_entry &&
+			    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 			    /* We are calling method of the other (incompatible) class,
 			       but passing $this. This is done for compatibility with php-4. */
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -23252,8 +23250,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 					zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", fbc->common.scope->name->val, fbc->common.function_name->val);
 				}
 			}
-			object = Z_OBJ(EG(This));
-			GC_REFCOUNT(object)++;
 		}
 	}
 
@@ -24812,11 +24808,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(opline->op2.zv))) != NULL)) {
 			ZVAL_DEREF(value);
 			if (Z_CONSTANT_P(value)) {
-				zend_class_entry *old_scope = EG(scope);
-
 				EG(scope) = ce;
 				zval_update_constant(value, 1 TSRMLS_CC);
-				EG(scope) = old_scope;
+				EG(scope) = EX(scope);
 			}
 			if (IS_UNUSED == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(opline->op2.zv), value);
@@ -30557,7 +30551,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 		}
 
 		call = zend_vm_stack_push_call_frame(
-			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EG(This)), NULL TSRMLS_CC);
+			(zend_function*)new_op_array, 0, 0, EX(called_scope), EX(object), NULL TSRMLS_CC);
 
 		if (EX(symbol_table)) {
 			call->symbol_table = EX(symbol_table);
