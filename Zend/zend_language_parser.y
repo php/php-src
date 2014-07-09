@@ -337,10 +337,10 @@ unticked_statement:
 			')' { zend_do_free(&$9 TSRMLS_CC); zend_do_for_before_statement(&$4, &$7 TSRMLS_CC); }
 			for_statement { zend_do_for_end(&$7 TSRMLS_CC); }
 	|	T_SWITCH parenthesis_expr	{ AC($2); zend_do_switch_cond(&$2 TSRMLS_CC); } switch_case_list { zend_do_switch_end(&$4 TSRMLS_CC); }
-	|	T_BREAK ';'				{ zend_do_brk_cont(ZEND_BRK, NULL TSRMLS_CC); }
-	|	T_BREAK expr ';'		{ AC($2); zend_do_brk_cont(ZEND_BRK, &$2 TSRMLS_CC); }
-	|	T_CONTINUE ';'			{ zend_do_brk_cont(ZEND_CONT, NULL TSRMLS_CC); }
-	|	T_CONTINUE expr ';'		{ AC($2); zend_do_brk_cont(ZEND_CONT, &$2 TSRMLS_CC); }
+	|	T_BREAK ';'			{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, NULL); AS($$); }
+	|	T_BREAK expr ';'	{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, $2.u.ast); AS($$); }
+	|	T_CONTINUE ';'		{ $$.u.ast = zend_ast_create_unary(ZEND_CONT, NULL); AS($$); }
+	|	T_CONTINUE expr ';'	{ $$.u.ast = zend_ast_create_unary(ZEND_CONT, $2.u.ast); AS($$); }
 	|	T_RETURN ';'
 			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RETURN, NULL); AS($$); }
 	|	T_RETURN expr ';'

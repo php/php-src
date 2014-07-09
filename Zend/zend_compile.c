@@ -6995,6 +6995,36 @@ void zend_compile_throw(zend_ast *ast TSRMLS_DC) {
 	emit_op(NULL, ZEND_THROW, &expr_node, NULL TSRMLS_CC);
 }
 
+void zend_compile_break_continue(zend_ast *ast TSRMLS_DC) {
+	zend_ast *depth_ast = ast->child[0];
+	zend_uint opcode = ast->kind;
+
+	znode depth_node;
+	zend_op *opline;
+
+	ZEND_ASSERT(opcode == ZEND_BRK || opcode == ZEND_CONT);
+
+	if (depth_ast) {
+		if (depth_ast->kind != ZEND_AST_ZVAL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator with non-constant operand "
+				"is no longer supported", opcode == ZEND_BRK ? "break" : "continue");
+		}
+
+		zend_compile_expr(&depth_node, depth_ast TSRMLS_CC);
+
+		if (Z_TYPE(depth_node.u.constant) != IS_LONG || Z_LVAL(depth_node.u.constant) < 1) {
+			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator accepts only positive numbers",
+				opcode == ZEND_BRK ? "break" : "continue");
+		}
+	} else {
+		depth_node.op_type = IS_CONST;
+		ZVAL_LONG(&depth_node.u.constant, 1);
+	}
+
+	opline = emit_op(NULL, opcode, NULL, &depth_node TSRMLS_CC);
+	opline->op1.opline_num = CG(context).current_brk_cont;
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7755,6 +7785,10 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			return;
 		case ZEND_THROW:
 			zend_compile_throw(ast TSRMLS_CC);
+			return;
+		case ZEND_BRK:
+		case ZEND_CONT:
+			zend_compile_break_continue(ast TSRMLS_CC);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
