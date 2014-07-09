@@ -348,7 +348,7 @@ unticked_statement:
 	|	T_GLOBAL global_var_list ';'
 	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'
-	|	T_INLINE_HTML { $$.u.ast = zend_ast_create_unary(ZEND_AST_ECHO, AST_ZVAL(&$1)); AS($$); }
+	|	T_INLINE_HTML { $$.u.ast = zend_ast_create_unary(ZEND_ECHO, AST_ZVAL(&$1)); AS($$); }
 	|	expr ';'				{ AC($1); zend_do_free(&$1 TSRMLS_CC); }
 	|	T_UNSET '(' unset_variables ')' ';'
 	|	T_FOREACH '(' variable T_AS
@@ -364,7 +364,7 @@ unticked_statement:
 	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}'
 		catch_statement { zend_do_bind_catch(&$1, &$6 TSRMLS_CC); }
 		finally_statement { zend_do_end_finally(&$1, &$6, &$8 TSRMLS_CC); }
-	|	T_THROW expr ';' { AC($2); zend_do_throw(&$2 TSRMLS_CC); }
+	|	T_THROW expr ';' { $$.u.ast = zend_ast_create_unary(ZEND_THROW, $2.u.ast); AS($$); }
 	|	T_GOTO T_STRING ';' { zend_do_goto(&$2 TSRMLS_CC); }
 ;
 
@@ -746,7 +746,7 @@ echo_expr_list:
 	|	echo_expr
 ;
 echo_expr:
-	expr { $$.u.ast = zend_ast_create_unary(ZEND_AST_ECHO, $1.u.ast); AS($$); }
+	expr { $$.u.ast = zend_ast_create_unary(ZEND_ECHO, $1.u.ast); AS($$); }
 ;
 
 for_expr:

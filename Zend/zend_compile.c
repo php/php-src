@@ -6986,6 +6986,15 @@ void zend_compile_echo(zend_ast *ast TSRMLS_DC) {
 	emit_op(NULL, ZEND_ECHO, &expr_node, NULL TSRMLS_CC);
 }
 
+void zend_compile_throw(zend_ast *ast TSRMLS_DC) {
+	zend_ast *expr_ast = ast->child[0];
+
+	znode expr_node;
+	zend_compile_expr(&expr_node, expr_ast TSRMLS_CC);
+
+	emit_op(NULL, ZEND_THROW, &expr_node, NULL TSRMLS_CC);
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7741,8 +7750,11 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 		case ZEND_AST_RETURN:
 			zend_compile_return(ast TSRMLS_CC);
 			return;
-		case ZEND_AST_ECHO:
+		case ZEND_ECHO:
 			zend_compile_echo(ast TSRMLS_CC);
+			return;
+		case ZEND_THROW:
+			zend_compile_throw(ast TSRMLS_CC);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
