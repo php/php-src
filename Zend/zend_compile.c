@@ -7025,6 +7025,17 @@ void zend_compile_break_continue(zend_ast *ast TSRMLS_DC) {
 	opline->op1.opline_num = CG(context).current_brk_cont;
 }
 
+void zend_compile_goto(zend_ast *ast TSRMLS_DC) {
+	zend_ast *label_ast = ast->child[0];
+	znode label_node;
+	zend_op *opline;
+
+	zend_compile_expr(&label_node, label_ast TSRMLS_CC);
+	opline = emit_op(NULL, ZEND_GOTO, NULL, &label_node TSRMLS_CC);
+	opline->extended_value = CG(context).current_brk_cont;
+	zend_resolve_goto_label(CG(active_op_array), opline, 0 TSRMLS_CC);
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7789,6 +7800,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 		case ZEND_BRK:
 		case ZEND_CONT:
 			zend_compile_break_continue(ast TSRMLS_CC);
+			return;
+		case ZEND_GOTO:
+			zend_compile_goto(ast TSRMLS_CC);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}

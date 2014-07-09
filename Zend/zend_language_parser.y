@@ -365,7 +365,7 @@ unticked_statement:
 		catch_statement { zend_do_bind_catch(&$1, &$6 TSRMLS_CC); }
 		finally_statement { zend_do_end_finally(&$1, &$6, &$8 TSRMLS_CC); }
 	|	T_THROW expr ';' { $$.u.ast = zend_ast_create_unary(ZEND_THROW, $2.u.ast); AS($$); }
-	|	T_GOTO T_STRING ';' { zend_do_goto(&$2 TSRMLS_CC); }
+	|	T_GOTO T_STRING ';' { $$.u.ast = zend_ast_create_unary(ZEND_GOTO, AST_ZVAL(&$2)); AS($$); }
 ;
 
 catch_statement:
