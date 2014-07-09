@@ -187,9 +187,17 @@ U_CFUNC PHP_FUNCTION( datefmt_create )
  */
 U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 {
+	zval orig_this = *getThis();
+
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
 	return_value = getThis();
 	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+		zend_object_store_ctor_failed(Z_OBJ(orig_this) TSRMLS_CC);
+		zval_dtor(&orig_this);
+		ZEND_CTOR_MAKE_NULL();
+	}
 }
 /* }}} */

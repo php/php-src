@@ -469,7 +469,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 	TIMEZONE_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-			"Odbzz", &object, TimeZone_ce_ptr, &date, &local, &rawOffsetArg,
+			"Odbz/z/", &object, TimeZone_ce_ptr, &date, &local, &rawOffsetArg,
 			&dstOffsetArg) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_get_offset: bad arguments", 0 TSRMLS_CC);

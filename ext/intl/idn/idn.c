@@ -271,7 +271,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llz/",
 			&domain, &domain_len, &option, &variant, &idna_info) == FAILURE) {
 		php_intl_bad_args("bad arguments", mode TSRMLS_CC);
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */

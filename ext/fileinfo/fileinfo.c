@@ -287,6 +287,7 @@ PHP_MINFO_FUNCTION(fileinfo)
 		if (object) {													\
 			zend_object_store_ctor_failed(Z_OBJ_P(object) TSRMLS_CC);	\
 			Z_OBJ_P(object) = NULL;										\
+			ZEND_CTOR_MAKE_NULL();										\
 		}																\
 	} while (0)
 

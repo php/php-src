@@ -844,6 +844,7 @@ PHP_FUNCTION(grapheme_extract)
 		else {
 			ZVAL_DEREF(next);
 			/* initialize next */
+			SEPARATE_ZVAL(next);
 			zval_dtor(next);
             ZVAL_LONG(next, lstart);
 		}
