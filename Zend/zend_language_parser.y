@@ -246,7 +246,7 @@ name:
 ;
 
 top_statement:
-		statement						{ zend_verify_namespace(TSRMLS_C); }
+		statement						{ AS($1); zend_verify_namespace(TSRMLS_C); }
 	|	function_declaration_statement	{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 	|	class_declaration_statement		{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 	|	T_HALT_COMPILER '(' ')' ';'		{ zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
@@ -309,7 +309,7 @@ inner_statement_list:
 
 
 inner_statement:
-		statement
+		statement { AS($1); }
 	|	function_declaration_statement
 	|	class_declaration_statement
 	|	T_HALT_COMPILER '(' ')' ';'   { zend_error_noreturn(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
@@ -317,16 +317,16 @@ inner_statement:
 
 
 statement:
-		unticked_statement { AS($$); DO_TICKS(); }
-	|	T_STRING ':' { $$.u.ast = zend_ast_create_unary(ZEND_AST_LABEL, AST_ZVAL(&$1)); AS($$); }
+		unticked_statement { $$.u.ast = $1.u.ast; }
+	|	T_STRING ':' { $$.u.ast = zend_ast_create_unary(ZEND_AST_LABEL, AST_ZVAL(&$1)); }
 ;
 
 unticked_statement:
 		'{' inner_statement_list '}' { AN($$); }
-	|	T_IF parenthesis_expr { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } statement { zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); AN($$); }
+	|	T_IF parenthesis_expr { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } statement { AS($4); zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); AN($$); }
 	|	T_IF parenthesis_expr ':' { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } inner_statement_list { zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { zend_do_if_end(TSRMLS_C); AN($$); }
 	|	T_WHILE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); } parenthesis_expr { AC($3); zend_do_while_cond(&$3, &$$ TSRMLS_CC); } while_statement { zend_do_while_end(&$1, &$4 TSRMLS_CC); AN($$); }
-	|	T_DO { $1.u.op.opline_num = get_next_op_number(CG(active_op_array));  zend_do_do_while_begin(TSRMLS_C); } statement T_WHILE { $4.u.op.opline_num = get_next_op_number(CG(active_op_array)); } parenthesis_expr ';' { AC($6); zend_do_do_while_end(&$1, &$4, &$6 TSRMLS_CC); AN($$); }
+	|	T_DO { $1.u.op.opline_num = get_next_op_number(CG(active_op_array));  zend_do_do_while_begin(TSRMLS_C); } statement T_WHILE { AS($3); $4.u.op.opline_num = get_next_op_number(CG(active_op_array)); } parenthesis_expr ';' { AC($6); zend_do_do_while_end(&$1, &$4, &$6 TSRMLS_CC); AN($$); }
 	|	T_FOR
 			'('
 				for_expr
@@ -487,19 +487,19 @@ foreach_variable:
 ;
 
 for_statement:
-		statement
+		statement { AS($1); }
 	|	':' inner_statement_list T_ENDFOR ';'
 ;
 
 
 foreach_statement:
-		statement
+		statement { AS($1); }
 	|	':' inner_statement_list T_ENDFOREACH ';'
 ;
 
 
 declare_statement:
-		statement
+		statement { AS($1); }
 	|	':' inner_statement_list T_ENDDECLARE ';'
 ;
 
@@ -532,7 +532,7 @@ case_separator:
 
 
 while_statement:
-		statement
+		statement { AS($1); }
 	|	':' inner_statement_list T_ENDWHILE ';'
 ;
 
@@ -540,7 +540,7 @@ while_statement:
 
 elseif_list:
 		/* empty */
-	|	elseif_list T_ELSEIF parenthesis_expr { AC($3); zend_do_if_cond(&$3, &$2 TSRMLS_CC); } statement { zend_do_if_after_statement(&$2, 0 TSRMLS_CC); }
+	|	elseif_list T_ELSEIF parenthesis_expr { AC($3); zend_do_if_cond(&$3, &$2 TSRMLS_CC); } statement { AS($5); zend_do_if_after_statement(&$2, 0 TSRMLS_CC); }
 ;
 
 
@@ -552,7 +552,7 @@ new_elseif_list:
 
 else_single:
 		/* empty */
-	|	T_ELSE statement
+	|	T_ELSE statement { AS($2); }
 ;
 
 

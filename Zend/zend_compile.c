@@ -6043,6 +6043,15 @@ static zend_op *emit_op_tmp(znode *result, zend_uchar opcode, znode *op1, znode 
 	return opline;
 }
 
+static void zend_emit_tick(TSRMLS_D) {
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_TICKS;
+	SET_UNUSED(opline->op1);
+	SET_UNUSED(opline->op2);
+	opline->extended_value = Z_LVAL(CG(declarables).ticks);
+}
+
 static zend_bool zend_is_variable(zend_ast *ast) {
 	return ast->kind == ZEND_AST_VAR || ast->kind == ZEND_AST_DIM
 		|| ast->kind == ZEND_AST_PROP || ast->kind == ZEND_AST_STATIC_PROP
@@ -6054,6 +6063,10 @@ static zend_bool zend_is_call(zend_ast *ast) {
 	return ast->kind == ZEND_AST_CALL
 		|| ast->kind == ZEND_AST_METHOD_CALL
 		|| ast->kind == ZEND_AST_STATIC_CALL;
+}
+
+static zend_bool zend_is_unticked_stmt(zend_ast *ast) {
+	return ast->kind == ZEND_AST_STMT_LIST || ast->kind == ZEND_AST_LABEL;
 }
 
 static zend_bool zend_can_write_to_variable(zend_ast *ast) {
@@ -7814,33 +7827,37 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 	switch (ast->kind) {
 		case ZEND_AST_STMT_LIST:
 			zend_compile_stmt_list(ast TSRMLS_CC);
-			return;
+			break;
 		case ZEND_AST_GLOBAL:
 			zend_compile_global_var(ast TSRMLS_CC);
-			return;
+			break;
 		case ZEND_AST_UNSET:
 			zend_compile_unset(ast TSRMLS_CC);
-			return;
+			break;
 		case ZEND_AST_RETURN:
 			zend_compile_return(ast TSRMLS_CC);
-			return;
+			break;
 		case ZEND_ECHO:
 			zend_compile_echo(ast TSRMLS_CC);
-			return;
+			break;
 		case ZEND_THROW:
 			zend_compile_throw(ast TSRMLS_CC);
-			return;
+			break;
 		case ZEND_BRK:
 		case ZEND_CONT:
 			zend_compile_break_continue(ast TSRMLS_CC);
-			return;
+			break;
 		case ZEND_GOTO:
 			zend_compile_goto(ast TSRMLS_CC);
-			return;
+			break;
 		case ZEND_AST_LABEL:
 			zend_compile_label(ast TSRMLS_CC);
-			return;
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+
+	if (Z_LVAL(CG(declarables).ticks) && !zend_is_unticked_stmt(ast)) {
+		zend_emit_tick(TSRMLS_C);
 	}
 }
 
