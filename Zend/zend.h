@@ -355,8 +355,8 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #endif /* ZEND_DEBUG */
 
 #if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
-# define EXPECTED(condition)   __builtin_expect(condition, 1)
-# define UNEXPECTED(condition) __builtin_expect(condition, 0)
+# define EXPECTED(condition)   __builtin_expect(!(!(condition)), 1)
+# define UNEXPECTED(condition) __builtin_expect(!(!(condition)), 0)
 #else
 # define EXPECTED(condition)   (condition)
 # define UNEXPECTED(condition) (condition)

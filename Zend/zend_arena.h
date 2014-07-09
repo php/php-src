@@ -63,7 +63,7 @@ static zend_always_inline void* zend_arena_alloc(zend_arena **arena_ptr, size_t 
 		arena->ptr = ptr + size;
 	} else {
 		size_t arena_size = 
-			(UNEXPECTED(size + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena))) > (arena->end - (char*) arena)) ?
+			UNEXPECTED((size + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena))) > (arena->end - (char*) arena)) ?
 				(size + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena))) :
 				(arena->end - (char*) arena);
 		zend_arena *new_arena = (zend_arena*)emalloc(arena_size);
