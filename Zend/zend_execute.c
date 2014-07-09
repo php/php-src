@@ -1183,7 +1183,10 @@ convert_to_array:
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result TSRMLS_CC);
 
 			if (UNEXPECTED(retval == &EG(uninitialized_zval))) {
+				zend_class_entry *ce = Z_OBJCE_P(container);
+
 				ZVAL_NULL(result);
+				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name->val);
 			} else if (retval && Z_TYPE_P(retval) != IS_UNDEF) {
 				if (!Z_ISREF_P(retval)) {
 					if (Z_REFCOUNTED_P(retval) &&
