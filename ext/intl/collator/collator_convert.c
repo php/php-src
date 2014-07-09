@@ -398,7 +398,7 @@ zval* collator_make_printable_zval( zval* arg, zval *rv )
 
 	if( Z_TYPE_P(arg) != IS_STRING )
 	{
-		zend_make_printable_zval(arg, &arg_copy, &use_copy);
+		use_copy = zend_make_printable_zval(arg, &arg_copy);
 
 		if( use_copy )
 		{

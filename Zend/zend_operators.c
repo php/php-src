@@ -1546,14 +1546,15 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 	zval op1_copy, op2_copy;
 	int use_copy1 = 0, use_copy2 = 0;
 
-	if (Z_TYPE_P(op1) != IS_STRING || Z_TYPE_P(op2) != IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(op1) != IS_STRING) ||
+	    UNEXPECTED(Z_TYPE_P(op2) != IS_STRING)) {
 		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_CONCAT);
 
 		if (Z_TYPE_P(op1) != IS_STRING) {
-			zend_make_printable_zval(op1, &op1_copy, &use_copy1);
+			use_copy1 = zend_make_printable_zval(op1, &op1_copy);
 		}
 		if (Z_TYPE_P(op2) != IS_STRING) {
-			zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+			use_copy2 = zend_make_printable_zval(op2, &op2_copy);
 		}
 	}
 
@@ -1569,6 +1570,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 	if (use_copy2) {
 		op2 = &op2_copy;
 	}
+
 	if (result==op1 && !IS_INTERNED(Z_STR_P(op1))) {	/* special case, perform operations on result */
 		uint op1_len = Z_STRLEN_P(op1);
 		uint op2_len = Z_STRLEN_P(op2);
@@ -1592,10 +1594,10 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 		buf->val[length] = 0;
 		ZVAL_NEW_STR(result, buf);
 	}
-	if (use_copy1) {
+	if (UNEXPECTED(use_copy1)) {
 		zval_dtor(op1);
 	}
-	if (use_copy2) {
+	if (UNEXPECTED(use_copy2)) {
 		zval_dtor(op2);
 	}
 	return SUCCESS;

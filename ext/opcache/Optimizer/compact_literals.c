@@ -270,7 +270,7 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 
 			for (i = 0; i < op_array->last_literal; i++) {
 				zval zv = op_array->literals[i].constant;
-				zend_make_printable_zval(&op_array->literals[i].constant, &zv, &use_copy);
+				use_copy = zend_make_printable_zval(&op_array->literals[i].constant, &zv);
 				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
 					zval_dtor(&zv);
@@ -451,7 +451,7 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 
 			for (i = 0; i < op_array->last_literal; i++) {
 				zval zv = op_array->literals[i].constant;
-				zend_make_printable_zval(&op_array->literals[i].constant, &zv, &use_copy);
+				use_copy = zend_make_printable_zval(&op_array->literals[i].constant, &zv);
 				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
 					zval_dtor(&zv);

@@ -212,11 +212,10 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy) /* {{{ */
+ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy) /* {{{ */
 {
 	if (Z_TYPE_P(expr) == IS_STRING) {
-		*use_copy = 0;
-		return;
+		return 0;
 	}
 
 again:
@@ -262,14 +261,12 @@ again:
 
 					Z_ADDREF_P(z);
 					if (Z_TYPE_P(z) != IS_OBJECT) {
-						zend_make_printable_zval(z, expr_copy, use_copy);
-						if (*use_copy) {
+						if (zend_make_printable_zval(z, expr_copy)) {
 							zval_ptr_dtor(z);
 						} else {
 							ZVAL_ZVAL(expr_copy, z, 0, 1);
-							*use_copy = 1;
 						}
-						return;
+						return 1;
 					}
 					zval_ptr_dtor(z);
 				}
@@ -285,8 +282,7 @@ again:
 			expr = Z_REFVAL_P(expr);
 			if (Z_TYPE_P(expr) == IS_STRING) {
 				ZVAL_STR(expr_copy, STR_COPY(Z_STR_P(expr)));
-				*use_copy = 1;
-				return;
+				return 1;
 			}
 			goto again;
 			break;
@@ -295,7 +291,7 @@ again:
 			convert_to_string(expr_copy);
 			break;
 	}
-	*use_copy = 1;
+	return 1;
 }
 /* }}} */
 

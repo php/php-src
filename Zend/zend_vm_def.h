@@ -2120,7 +2120,7 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP|UNUSED, TMP|VAR|CV)
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			zend_make_printable_zval(var, &var_copy, &use_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy);
 
 			if (use_copy) {
 				var = &var_copy;

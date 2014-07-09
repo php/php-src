@@ -391,7 +391,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 			switch (*fmt) {
 				case 'Z':
 					zvp = (zval*) va_arg(ap, zval*);
-					zend_make_printable_zval(zvp, &zcopy, &free_zcopy);
+					free_zcopy = zend_make_printable_zval(zvp, &zcopy);
 					if (free_zcopy) {
 						zvp = &zcopy;
 					}

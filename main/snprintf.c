@@ -783,7 +783,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			switch (*fmt) {
 				case 'Z':
 					zvp = (zval*) va_arg(ap, zval*);
-					zend_make_printable_zval(zvp, &zcopy, &free_zcopy);
+					free_zcopy = zend_make_printable_zval(zvp, &zcopy);
 					if (free_zcopy) {
 						zvp = &zcopy;
 					}
