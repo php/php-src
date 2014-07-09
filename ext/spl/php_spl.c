@@ -406,10 +406,8 @@ static void autoload_func_info_dtor(zval *element)
  Try all registerd autoload function to load the requested class */
 PHP_FUNCTION(spl_autoload_call)
 {
-	ulong dummy;
 	zval *class_name, *retval = NULL;
 	zend_string *lc_name, *func_name;
-	HashPosition function_pos;
 	autoload_func_info *alfi;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &class_name) == FAILURE || Z_TYPE_P(class_name) != IS_STRING) {
@@ -421,10 +419,7 @@ PHP_FUNCTION(spl_autoload_call)
 		SPL_G(autoload_running) = 1;
 		lc_name = STR_ALLOC(Z_STRLEN_P(class_name), 0);
 		zend_str_tolower_copy(lc_name->val, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
-		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
-		while (zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
-			zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &dummy, 0, &function_pos);
-			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &function_pos);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(SPL_G(autoload_functions), func_name, alfi) {
 			zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, func_name->val, func_name->len, retval, 1, class_name, NULL TSRMLS_CC);
 			zend_exception_save(TSRMLS_C);
 			if (retval) {
@@ -434,8 +429,7 @@ PHP_FUNCTION(spl_autoload_call)
 			if (zend_hash_exists(EG(class_table), lc_name)) {
 				break;
 			}
-			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
-		}
+		} ZEND_HASH_FOREACH_END();
 		zend_exception_restore(TSRMLS_C);
 		STR_FREE(lc_name);
 		SPL_G(autoload_running) = l_autoload_running;
@@ -705,7 +699,6 @@ PHP_FUNCTION(spl_autoload_unregister)
 PHP_FUNCTION(spl_autoload_functions)
 {
 	zend_function *fptr;
-	HashPosition function_pos;
 	autoload_func_info *alfi;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -724,10 +717,9 @@ PHP_FUNCTION(spl_autoload_functions)
 	fptr = zend_hash_str_find_ptr(EG(function_table), "spl_autoload_call", sizeof("spl_autoload_call") - 1);
 
 	if (EG(autoload_func) == fptr) {
+		zend_string *key;
 		array_init(return_value);
-		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
-		while (zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
-			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &function_pos);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(SPL_G(autoload_functions), key, alfi) {
 			if (!Z_ISUNDEF(alfi->closure)) {
 				Z_ADDREF(alfi->closure);
 				add_next_index_zval(return_value, &alfi->closure);
@@ -747,15 +739,10 @@ PHP_FUNCTION(spl_autoload_functions)
 				if (strncmp(alfi->func_ptr->common.function_name->val, "__lambda_func", sizeof("__lambda_func") - 1)) {
 					add_next_index_str(return_value, STR_COPY(alfi->func_ptr->common.function_name));
 				} else {
-					zend_string *key;
-					ulong dummy;
-					zend_hash_get_current_key_ex(SPL_G(autoload_functions), &key, &dummy, 0, &function_pos); 
 					add_next_index_str(return_value, STR_COPY(key));
 				}
 			}
-
-			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
-		}
+		} ZEND_HASH_FOREACH_END();
 		return;
 	}
 
