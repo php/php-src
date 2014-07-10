@@ -627,12 +627,13 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			TSRMLS_FETCH();
 
 			convert_object_to_type(op, &dst, IS_STRING, convert_to_string);
-			zval_dtor(op);
 
 			if (Z_TYPE(dst) == IS_STRING) {
+				zval_dtor(op);
 				ZVAL_COPY_VALUE(op, &dst);
 			} else {
 				zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name->val);
+				zval_dtor(op);
 				ZVAL_NEW_STR(op, STR_INIT("Object", sizeof("Object")-1, 0));
 			}
 			break;
