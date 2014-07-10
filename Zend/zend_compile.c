@@ -7094,6 +7094,28 @@ void zend_compile_while(zend_ast *ast TSRMLS_DC) {
 	do_end_loop(opnum_start, 0 TSRMLS_CC);
 }
 
+void zend_compile_do_while(zend_ast *ast TSRMLS_DC) {
+	zend_ast *stmt_ast = ast->child[0];
+	zend_ast *cond_ast = ast->child[1];
+
+	znode cond_node;
+	zend_op *opline;
+	zend_uint opnum_start, opnum_cond;
+
+	do_begin_loop(TSRMLS_C);
+
+	opnum_start = get_next_op_number(CG(active_op_array));
+	zend_compile_stmt(stmt_ast TSRMLS_CC);
+
+	opnum_cond = get_next_op_number(CG(active_op_array));
+	zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
+
+	opline = emit_op(NULL, ZEND_JMPNZ, &cond_node, NULL TSRMLS_CC);
+	opline->op2.opline_num = opnum_start;
+
+	do_end_loop(opnum_cond, 0 TSRMLS_CC);
+}
+
 void zend_compile_stmt_list(zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 	for (i = 0; i < ast->children; ++i) {
@@ -7881,6 +7903,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_WHILE:
 			zend_compile_while(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_DO_WHILE:
+			zend_compile_do_while(ast TSRMLS_CC);
 			break;
 		default:
 		{

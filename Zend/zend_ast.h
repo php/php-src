@@ -77,6 +77,7 @@ enum _zend_ast_kind {
 	ZEND_AST_LABEL,
 
 	ZEND_AST_WHILE,
+	ZEND_AST_DO_WHILE,
 };
 
 typedef unsigned short zend_ast_kind;
