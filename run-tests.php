@@ -805,7 +805,12 @@ HELP;
 		putenv('NO_INTERACTION=1');
 		verify_config();
 		write_information($html_output);
-		usort($test_files, "test_sort");
+		if ($concurrency > 2 ) {
+			shuffle($test_files);
+		} else {
+			usort($test_files, "test_sort");
+		}
+
 		$start_time = time();
 
 		if (!$html_output) {
@@ -862,6 +867,11 @@ $ignored_by_ext = 0;
 sort($exts_to_test);
 $test_dirs = array();
 $optionals = array('tests', 'ext', 'Zend', 'ZendEngine2', 'sapi/cli', 'sapi/cgi', 'sapi/fpm');
+/* file name to index */
+$test_map = array();
+/* test concurrency groups */
+$test_cgroups = array();
+
 
 foreach($optionals as $dir) {
 	if (@filetype($dir) == 'dir') {
@@ -945,7 +955,11 @@ function test_sort($a, $b)
 }
 
 $test_files = array_unique($test_files);
-usort($test_files, "test_sort");
+if ($concurrency > 2) {
+	shuffle($test_files);
+} else {
+	usort($test_files, "test_sort");
+}
 
 $start_time = time();
 show_start($start_time);
@@ -1229,7 +1243,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 {
 	global $test_results, $failed_tests_file, $php, $test_cnt, $test_idx, $concurrency, $procs;
 
-	foreach($test_files as $name) {
+	while ($name = array_shift($test_files)) {
 
 		if (is_array($name)) {
 			$index = "# $name[1]: $name[0]";
@@ -1251,7 +1265,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 		} else {
 			system_loop_over_procs(0);
 		}
-		run_test($php, $name, $env, function($result) use (&$test_results, $index, $name, $failed_tests_file) {
+		$result = run_test($php, $name, $env, function($result) use (&$test_results, $index, $name, $failed_tests_file) {
 			if (!is_array($name) && $result != 'REDIR') {
 				$test_results[$index] = $result;
 				if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
@@ -1259,6 +1273,10 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 				}
 			}
 		});
+		if ($result === "DEFERRED") {
+			$test_idx--;
+			array_splice($test_files, 10, 0, array($name));
+		}
 	}
 
 	while (count($procs)) {
@@ -1285,8 +1303,6 @@ function show_file_block($file, $block, $section = null)
 	}
 }
 
-$test_map = array();
-
 //
 //  Run an individual test case.
 //
@@ -1295,7 +1311,7 @@ function run_test($php, $file, $env, $cb)
 	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
 	global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx, $test_map;
 	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
-	global $no_clean;
+	global $no_clean, $test_cgroups;
 	global $valgrind_version;
 	global $JUNIT;
 	$temp_filenames = null;
@@ -1442,6 +1458,16 @@ TEST $file
 		return 'BORKED';
 	}
 
+	if (!empty($section_text["CONCURRENCY_GROUP"])) {
+		if (strlen($cgroup = trim($section_text["CONCURRENCY_GROUP"]))) {
+			if (isset($test_cgroups[$cgroup])) {
+				return "DEFERRED";
+			} else {
+				$test_cgroups[$cgroup] = true;
+			}
+		}
+	}
+
 	$tested = trim($section_text['TEST']);
 
 	/* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
@@ -1464,7 +1490,9 @@ TEST $file
 				$php = realpath(dirname($php) . "/php-cgi") . ' -C ';
 			} else {
 				show_result('SKIP', $tested, $tested_file, "reason: CGI not available");
-
+				if (isset($cgroup)) {
+					unset($test_cgroups[$cgroup]);
+				}
 				junit_init_suite(junit_get_suitename_for($shortname));
 				junit_mark_test_as('SKIP', $shortname, $tested, 0, 'CGI not available');
 				return 'SKIPPED';
@@ -1644,6 +1672,9 @@ TEST $file
 					@unlink($test_skipif);
 				}
 
+				if (isset($cgroup)) {
+					unset($test_cgroups[$cgroup]);
+				}
 				$message = !empty($m[1]) ? $m[1] : '';
 				junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
 				return 'SKIPPED';
@@ -1670,6 +1701,9 @@ TEST $file
 	) {
 		$message = "ext/zlib required";
 		show_result('SKIP', $tested, $tested_file, "reason: $message", $temp_filenames);
+		if (isset($cgroup)) {
+			unset($test_cgroups[$cgroup]);
+		}
 		junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
 		return 'SKIPPED';
 	}
@@ -1711,6 +1745,9 @@ TEST $file
 			// a redirected test never fails
 			$IN_REDIRECT = false;
 
+			if (isset($cgroup)) {
+				unset($test_cgroups[$cgroup]);
+			}
 			junit_mark_test_as('PASS', $shortname, $tested);
 			return 'REDIR';
 
@@ -1743,6 +1780,10 @@ TEST $file
 								'diff'   => '',
 								'info'   => "$bork_info [$file]",
 		);
+
+		if (isset($cgroup)) {
+			unset($test_cgroups[$cgroup]);
+		}
 
 		junit_mark_test_as('BORK', $shortname, $tested, null, $bork_info);
 
@@ -1799,6 +1840,9 @@ TEST $file
 		$env['REQUEST_METHOD'] = 'POST';
 
 		if (empty($request)) {
+			if (isset($cgroup)) {
+				unset($test_cgroups[$cgroup]);
+			}
 			junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
 			return 'BORKED';
 		}
@@ -1833,7 +1877,10 @@ TEST $file
 		$env['REQUEST_METHOD'] = 'PUT';
 
 		if (empty($request)) {
-            junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
+			if (isset($cgroup)) {
+				unset($test_cgroups[$cgroup]);
+			}
+			junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
 			return 'BORKED';
 		}
 
@@ -1921,8 +1968,8 @@ COMMAND $cmd
 	junit_start_timer($shortname);
 
 	system_with_callback($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $cb,
-		function($out) use($php, &$old_php, $cmd, $env, $shortname, $info, $file, $tested, $tested_file, $section_text, $ini_overwrites, $memcheck_filename, $pass_options, $temp_clean, $test_clean, $tmp_post, $warn, $temp_filenames, $exp_filename, $output_filename, $diff_filename, $sh_filename, $log_filename, $test_file, $IN_REDIRECT) {
-			global $cfg, $cwd, $leak_check, $no_clean, $log_format, $PHP_FAILED_TESTS;
+		function($out) use($php, &$old_php, $cmd, $env, $shortname, $info, $file, $tested, $tested_file, $section_text, $ini_overwrites, $memcheck_filename, $pass_options, $temp_clean, $test_clean, $tmp_post, $warn, $temp_filenames, $exp_filename, $output_filename, $diff_filename, $sh_filename, $log_filename, $test_file, $IN_REDIRECT, &$cgroup) {
+			global $cfg, $cwd, $leak_check, $no_clean, $log_format, $PHP_FAILED_TESTS, $test_cgroups;
 
 			junit_finish_timer($shortname);
 
@@ -1948,6 +1995,10 @@ COMMAND $cmd
 			}
 
 			@unlink($tmp_post);
+
+			if (isset($cgroup)) {
+				unset($test_cgroups[$cgroup]);
+			}
 
 			$leaked = false;
 			$passed = false;
