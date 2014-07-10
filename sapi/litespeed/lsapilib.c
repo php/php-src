@@ -2864,8 +2864,8 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer, LSAPI_Re
         }
     }
     sigaction( SIGUSR1, &old_usr1, 0 );
-    kill( -getpgrp(), SIGUSR1 );
-    lsapi_all_children_must_die();  /* Sorry, children ;-) */
+    //kill( -getpgrp(), SIGUSR1 );
+    //lsapi_all_children_must_die();  /* Sorry, children ;-) */
     return -1;
 
 }
