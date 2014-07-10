@@ -325,7 +325,9 @@ unticked_statement:
 		'{' inner_statement_list '}' { AN($$); }
 	|	T_IF parenthesis_expr { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } statement { AS($4); zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); AN($$); }
 	|	T_IF parenthesis_expr ':' { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } inner_statement_list { zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { zend_do_if_end(TSRMLS_C); AN($$); }
-	|	T_WHILE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); } parenthesis_expr { AC($3); zend_do_while_cond(&$3, &$$ TSRMLS_CC); } while_statement { zend_do_while_end(&$1, &$4 TSRMLS_CC); AN($$); }
+	|	T_WHILE parenthesis_expr while_statement
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_WHILE, $2.u.ast, $3.u.ast); }
+	/*|	T_WHILE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); } parenthesis_expr { AC($3); zend_do_while_cond(&$3, &$$ TSRMLS_CC); } while_statement { zend_do_while_end(&$1, &$4 TSRMLS_CC); AN($$); }*/
 	|	T_DO { $1.u.op.opline_num = get_next_op_number(CG(active_op_array));  zend_do_do_while_begin(TSRMLS_C); } statement T_WHILE { AS($3); $4.u.op.opline_num = get_next_op_number(CG(active_op_array)); } parenthesis_expr ';' { AC($6); zend_do_do_while_end(&$1, &$4, &$6 TSRMLS_CC); AN($$); }
 	|	T_FOR
 			'('
@@ -532,8 +534,8 @@ case_separator:
 
 
 while_statement:
-		statement { AS($1); }
-	|	':' inner_statement_list T_ENDWHILE ';'
+		statement { $$.u.ast = $1.u.ast; }
+	|	':' inner_statement_list T_ENDWHILE ';' { AN($$); }
 ;
 
 

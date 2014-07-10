@@ -7068,6 +7068,32 @@ void zend_compile_label(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
+void zend_compile_while(zend_ast *ast TSRMLS_DC) {
+	zend_ast *cond_ast = ast->child[0];
+	zend_ast *stmt_ast = ast->child[1];
+
+	znode cond_node;
+	zend_uint opnum_start, opnum_jmpz;
+	zend_op *opline;
+
+	opnum_start = get_next_op_number(CG(active_op_array));
+	zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
+
+	opnum_jmpz = get_next_op_number(CG(active_op_array));
+	emit_op(NULL, ZEND_JMPZ, &cond_node, NULL TSRMLS_CC);
+	do_begin_loop(TSRMLS_C);
+
+	zend_compile_stmt(stmt_ast TSRMLS_CC);
+
+	opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+	opline->op1.opline_num = opnum_start;
+
+	opline = &CG(active_op_array)->opcodes[opnum_jmpz];
+	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+
+	do_end_loop(opnum_start, 0 TSRMLS_CC);
+}
+
 void zend_compile_stmt_list(zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 	for (i = 0; i < ast->children; ++i) {
@@ -7852,6 +7878,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_LABEL:
 			zend_compile_label(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_WHILE:
+			zend_compile_while(ast TSRMLS_CC);
 			break;
 		default:
 		{
