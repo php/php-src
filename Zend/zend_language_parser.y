@@ -330,7 +330,7 @@ unticked_statement:
 	|	T_DO statement T_WHILE parenthesis_expr ';'
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_DO_WHILE, $2.u.ast, $4.u.ast); }
 	|	T_FOR '(' for_expr ';' for_expr ';' for_expr ')' for_statement
-			{ $$.u.ast = NULL; }
+			{ $$.u.ast = zend_ast_create(4, ZEND_AST_FOR, $3.u.ast, $5.u.ast, $7.u.ast, $9.u.ast); }
 	/*|	T_FOR
 			'('
 				for_expr
