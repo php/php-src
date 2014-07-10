@@ -80,6 +80,8 @@ enum _zend_ast_kind {
 	ZEND_AST_WHILE,
 	ZEND_AST_DO_WHILE,
 	ZEND_AST_FOR,
+	ZEND_AST_IF,
+	ZEND_AST_IF_ELEM,
 };
 
 typedef unsigned short zend_ast_kind;

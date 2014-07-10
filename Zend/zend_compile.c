@@ -7164,6 +7164,46 @@ void zend_compile_for(zend_ast *ast TSRMLS_DC) {
 	do_end_loop(opnum_loop, 0 TSRMLS_CC);
 }
 
+void zend_compile_if(zend_ast *ast TSRMLS_DC) {
+	zend_uint i;
+	zend_uint *jmp_opnums = safe_emalloc(sizeof(zend_uint), ast->children - 1, 0);
+	zend_uint opnum_last_jmpz = 0;
+		zend_op *opline;
+
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *elem_ast = ast->child[i];
+		zend_ast *cond_ast = elem_ast->child[0];
+		zend_ast *stmt_ast = elem_ast->child[1];
+
+		znode cond_node;
+		if (cond_ast) {
+			zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
+
+			opnum_last_jmpz = get_next_op_number(CG(active_op_array));
+			emit_op(NULL, ZEND_JMPZ, &cond_node, NULL TSRMLS_CC);
+		}
+
+		zend_compile_stmt(stmt_ast TSRMLS_CC);
+
+		if (i != ast->children - 1) {
+			jmp_opnums[i] = get_next_op_number(CG(active_op_array));
+			emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+		}
+
+		if (cond_ast) {
+			opline = &CG(active_op_array)->opcodes[opnum_last_jmpz];
+			opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+		}
+	}
+
+	for (i = 0; i < ast->children - 1; ++i) {
+		opline = &CG(active_op_array)->opcodes[jmp_opnums[i]];
+		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+	}
+
+	efree(jmp_opnums);
+}
+
 void zend_compile_stmt_list(zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 	for (i = 0; i < ast->children; ++i) {
@@ -7957,6 +7997,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_FOR:
 			zend_compile_for(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_IF:
+			zend_compile_if(ast TSRMLS_CC);
 			break;
 		default:
 		{

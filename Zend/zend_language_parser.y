@@ -323,7 +323,8 @@ statement:
 
 unticked_statement:
 		'{' inner_statement_list '}' { AN($$); }
-	|	T_IF parenthesis_expr { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } statement { AS($4); zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); AN($$); }
+	|	if_stmt
+	/*|	T_IF parenthesis_expr { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } statement { AS($4); zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); AN($$); }*/
 	|	T_IF parenthesis_expr ':' { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } inner_statement_list { zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { zend_do_if_end(TSRMLS_C); AN($$); }
 	|	T_WHILE parenthesis_expr while_statement
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_WHILE, $2.u.ast, $3.u.ast); }
@@ -331,15 +332,6 @@ unticked_statement:
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_DO_WHILE, $2.u.ast, $4.u.ast); }
 	|	T_FOR '(' for_expr ';' for_expr ';' for_expr ')' for_statement
 			{ $$.u.ast = zend_ast_create(4, ZEND_AST_FOR, $3.u.ast, $5.u.ast, $7.u.ast, $9.u.ast); }
-	/*|	T_FOR
-			'('
-				for_expr
-			';' { zend_do_free(&$3 TSRMLS_CC); $4.u.op.opline_num = get_next_op_number(CG(active_op_array)); }
-				for_expr
-			';' { zend_do_extended_info(TSRMLS_C); zend_do_for_cond(&$6, &$7 TSRMLS_CC); }
-				for_expr
-			')' { zend_do_free(&$9 TSRMLS_CC); zend_do_for_before_statement(&$4, &$7 TSRMLS_CC); }
-			for_statement { zend_do_for_end(&$7 TSRMLS_CC); AN($$); }*/
 	|	T_SWITCH parenthesis_expr	{ AC($2); zend_do_switch_cond(&$2 TSRMLS_CC); } switch_case_list { zend_do_switch_end(&$4 TSRMLS_CC); AN($$); }
 	|	T_BREAK ';'			{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, NULL); }
 	|	T_BREAK expr ';'	{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, $2.u.ast); }
@@ -541,22 +533,30 @@ while_statement:
 ;
 
 
-
-elseif_list:
-		/* empty */
-	|	elseif_list T_ELSEIF parenthesis_expr { AC($3); zend_do_if_cond(&$3, &$2 TSRMLS_CC); } statement { AS($5); zend_do_if_after_statement(&$2, 0 TSRMLS_CC); }
+if_stmt_without_else:
+		T_IF parenthesis_expr statement
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_IF,
+			      zend_ast_create_binary(ZEND_AST_IF_ELEM, $2.u.ast, $3.u.ast)); }
+	|	if_stmt_without_else T_ELSEIF parenthesis_expr statement
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast,
+			      zend_ast_create_binary(ZEND_AST_IF_ELEM, $3.u.ast, $4.u.ast)); }
 ;
+
+if_stmt:
+		if_stmt_without_else { $$.u.ast = $1.u.ast; }
+	|	if_stmt_without_else T_ELSE statement
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast,
+			      zend_ast_create_binary(ZEND_AST_IF_ELEM, NULL, $3.u.ast)); }
+;
+
+/*elseif_list:
+		elseif_list T_ELSEIF parenthesis_expr { AC($3); zend_do_if_cond(&$3, &$2 TSRMLS_CC); } statement { AS($5); zend_do_if_after_statement(&$2, 0 TSRMLS_CC); }
+;*/
 
 
 new_elseif_list:
 		/* empty */
 	|	new_elseif_list T_ELSEIF parenthesis_expr ':' { AC($3); zend_do_if_cond(&$3, &$2 TSRMLS_CC); } inner_statement_list { zend_do_if_after_statement(&$2, 0 TSRMLS_CC); }
-;
-
-
-else_single:
-		/* empty */
-	|	T_ELSE statement { AS($2); }
 ;
 
 
