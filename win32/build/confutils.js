@@ -1821,7 +1821,9 @@ function generate_makefile()
 
 	MFO.Close();
 	TF = FSO.OpenTextFile("Makefile.objects", 1);
-	MF.Write(TF.ReadAll());
+	if (!TF.AtEndOfStream) {
+		MF.Write(TF.ReadAll());
+	}
 	TF.Close();
 
 	MF.Close();	
