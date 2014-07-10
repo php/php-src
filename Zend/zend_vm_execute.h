@@ -397,11 +397,11 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		if (UNEXPECTED(EX(symbol_table) != NULL)) {
 			zend_clean_and_cache_symbol_table(EX(symbol_table) TSRMLS_CC);
 		}
-		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && EX(func)->op_array.prototype) {
-			zval_ptr_dtor((zval*)EX(func)->op_array.prototype);
-		}
 		zend_vm_stack_free_extra_args(execute_data TSRMLS_CC);
 		EG(current_execute_data) = EX(prev_execute_data);
+		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && EX(func)->op_array.prototype) {
+			OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
+		}
 		zend_vm_stack_free_call_frame(execute_data TSRMLS_CC);
 
 		execute_data = EG(current_execute_data);
@@ -459,10 +459,11 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			if (UNEXPECTED(EX(symbol_table) != NULL)) {
 				zend_clean_and_cache_symbol_table(EX(symbol_table) TSRMLS_CC);
 			}
-			if ((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) && EX(func)->op_array.prototype) {
-				zval_ptr_dtor((zval*)EX(func)->op_array.prototype);
-			}
 			zend_vm_stack_free_extra_args(execute_data TSRMLS_CC);
+			EG(current_execute_data) = EX(prev_execute_data);
+			if ((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) && EX(func)->op_array.prototype) {
+				OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
+			}
 		} else /* if (frame_kind == VM_FRAME_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
 			zend_execute_data *old_execute_data;
@@ -478,8 +479,8 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				old_execute_data = old_execute_data->prev_execute_data;
 			}
+			EG(current_execute_data) = EX(prev_execute_data);
 		}
-		EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame(execute_data TSRMLS_CC);
 
 		ZEND_VM_RETURN();
@@ -1491,7 +1492,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			if (IS_CONST == IS_VAR && 0 && Z_REFCOUNT_P(function_name) == 1 &&
 			    fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
-				fbc->common.prototype = (zend_function*)function_name_ptr;
+				fbc->common.prototype = (zend_function*)Z_OBJ_P(function_name_ptr);
 			} else {
 
 			}
@@ -1508,10 +1509,12 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 				zend_error_noreturn(E_ERROR, "Array callback has to contain indices 0 and 1");
 			}
 
+			ZVAL_DEREF(obj);
 			if (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
 			}
 
+			ZVAL_DEREF(method);
 			if (Z_TYPE_P(method) != IS_STRING) {
 				zend_error_noreturn(E_ERROR, "Second array member is not a valid method");
 			}
@@ -1819,7 +1822,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			if (IS_TMP_VAR == IS_VAR && 1 && Z_REFCOUNT_P(function_name) == 1 &&
 			    fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
-				fbc->common.prototype = (zend_function*)function_name_ptr;
+				fbc->common.prototype = (zend_function*)Z_OBJ_P(function_name_ptr);
 			} else {
 				zval_dtor(free_op2.var);
 			}
@@ -1836,10 +1839,12 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 				zend_error_noreturn(E_ERROR, "Array callback has to contain indices 0 and 1");
 			}
 
+			ZVAL_DEREF(obj);
 			if (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
 			}
 
+			ZVAL_DEREF(method);
 			if (Z_TYPE_P(method) != IS_STRING) {
 				zend_error_noreturn(E_ERROR, "Second array member is not a valid method");
 			}
@@ -1992,7 +1997,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			if (IS_VAR == IS_VAR && (free_op2.var != NULL) && Z_REFCOUNT_P(function_name) == 1 &&
 			    fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
-				fbc->common.prototype = (zend_function*)function_name_ptr;
+				fbc->common.prototype = (zend_function*)Z_OBJ_P(function_name_ptr);
 			} else {
 				zval_ptr_dtor_nogc(free_op2.var);
 			}
@@ -2009,10 +2014,12 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 				zend_error_noreturn(E_ERROR, "Array callback has to contain indices 0 and 1");
 			}
 
+			ZVAL_DEREF(obj);
 			if (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
 			}
 
+			ZVAL_DEREF(method);
 			if (Z_TYPE_P(method) != IS_STRING) {
 				zend_error_noreturn(E_ERROR, "Second array member is not a valid method");
 			}
@@ -2203,7 +2210,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			if (IS_CV == IS_VAR && 0 && Z_REFCOUNT_P(function_name) == 1 &&
 			    fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
-				fbc->common.prototype = (zend_function*)function_name_ptr;
+				fbc->common.prototype = (zend_function*)Z_OBJ_P(function_name_ptr);
 			} else {
 
 			}
@@ -2220,10 +2227,12 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 				zend_error_noreturn(E_ERROR, "Array callback has to contain indices 0 and 1");
 			}
 
+			ZVAL_DEREF(obj);
 			if (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
 			}
 
+			ZVAL_DEREF(method);
 			if (Z_TYPE_P(method) != IS_STRING) {
 				zend_error_noreturn(E_ERROR, "Second array member is not a valid method");
 			}
