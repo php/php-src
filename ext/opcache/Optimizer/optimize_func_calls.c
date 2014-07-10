@@ -38,6 +38,7 @@ static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_FCALL:
+			case ZEND_INIT_USER_CALL:
 				call_stack[call].opline = opline;
 				call++;
 				break;

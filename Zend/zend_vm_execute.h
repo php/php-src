@@ -888,6 +888,123 @@ unpack_iter_dtor:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *args;
+	SAVE_OPLINE();
+
+	args = get_zval_ptr_deref(opline->op1_type, &opline->op1, execute_data, &free_op1, BP_VAR_R);
+
+	if (Z_TYPE_P(args) != IS_ARRAY) {
+		zend_error(E_WARNING, "call_user_func_array() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(args)));
+		if (EX(call)->func->common.fn_flags & ZEND_ACC_CLOSURE) {
+			OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
+		}
+		if (EX(call)->object) {
+			OBJ_RELEASE(EX(call)->object);
+		}
+		EX(call)->func = (zend_function*)&zend_pass_function;
+		EX(call)->called_scope = NULL;
+		EX(call)->object = NULL;
+	} else {
+		zend_uint arg_num = 1;
+
+		HashTable *ht = Z_ARRVAL_P(args);
+		zval *arg, *param, tmp;
+
+		zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht) TSRMLS_CC);
+
+		if (opline->op1_type != IS_CONST && opline->op1_type != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
+			zend_uint i;
+			int separate = 0;
+
+			/* check if any of arguments are going to be passed by reference */
+			for (i = 0; i < zend_hash_num_elements(ht); i++) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num + i)) {
+					separate = 1;
+					break;
+				}
+			}
+			if (separate) {
+				zval_copy_ctor(args);
+				ht = Z_ARRVAL_P(args);
+			}
+		}
+
+		param = ZEND_CALL_ARG(EX(call), arg_num);
+		ZEND_HASH_FOREACH_VAL(ht, arg) {
+			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+				// TODO: Scalar values don't have reference counters anymore.
+				// They are assumed to be 1, and they may be easily passed by
+				// reference now. However, previously scalars with refcount==1
+				// might be passed and with refcount>1 might not. We can support
+				// only single behavior ???
+#if 0
+				if (Z_REFCOUNTED_P(arg) &&
+					// This solution breaks the following test (omit warning message) ???
+					// Zend/tests/bug61273.phpt
+					// ext/reflection/tests/bug42976.phpt
+					// ext/standard/tests/general_functions/call_user_func_array_variation_001.phpt
+#else
+				if (!Z_REFCOUNTED_P(arg) ||
+					// This solution breaks the following test (emit warning message) ???
+					// ext/pdo_sqlite/tests/pdo_005.phpt
+#endif
+				    (!Z_ISREF_P(arg) && Z_REFCOUNT_P(arg) > 1)) {
+
+					if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+
+						zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
+							arg_num,
+							EX(call)->func->common.scope ? EX(call)->func->common.scope->name->val : "",
+							EX(call)->func->common.scope ? "::" : "",
+							EX(call)->func->common.function_name->val);
+
+						if (EX(call)->func->common.fn_flags & ZEND_ACC_CLOSURE) {
+							OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
+						}
+						if (EX(call)->object) {
+							OBJ_RELEASE(EX(call)->object);
+						}
+						EX(call)->func = (zend_function*)&zend_pass_function;
+						EX(call)->called_scope = NULL;
+						EX(call)->object = NULL;
+
+						break;
+					}
+
+					if (Z_REFCOUNTED_P(arg)) {
+						Z_DELREF_P(arg);
+					}
+					ZVAL_DUP(&tmp, arg);
+					ZVAL_NEW_REF(arg, &tmp);
+					Z_ADDREF_P(arg);
+				} else if (!Z_ISREF_P(arg)) {
+					ZVAL_NEW_REF(arg, arg);
+					Z_ADDREF_P(arg);
+				} else if (Z_REFCOUNTED_P(arg)) {
+					Z_ADDREF_P(arg);
+				}
+				ZVAL_COPY_VALUE(param, arg);
+			} else if (Z_ISREF_P(arg) &&
+		           /* don't separate references for __call */
+		           (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0) {
+				ZVAL_DUP(param, Z_REFVAL_P(arg));
+			} else {
+				ZVAL_COPY(param, arg);
+			}
+			EX(call)->num_args++;
+			arg_num++;
+			param++;
+		} ZEND_HASH_FOREACH_END();
+	}
+	FREE_OP(free_op1);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -1566,7 +1683,6 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 	}
 }
 
-
 static int ZEND_FASTCALL  ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -1896,7 +2012,6 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 	}
 }
 
-
 static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -2070,7 +2185,6 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 		ZEND_VM_NEXT_OPCODE();
 	}
 }
-
 
 static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -2283,7 +2397,6 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 		ZEND_VM_NEXT_OPCODE();
 	}
 }
-
 
 static int ZEND_FASTCALL  ZEND_BW_NOT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -3828,6 +3941,47 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *function_name = opline->op2.zv;
+	zend_fcall_info_cache fcc;
+	char *error = NULL;
+	zend_function *func;
+	zend_class_entry *called_scope;
+	zend_object *object;
+
+	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error TSRMLS_CC)) {
+		if (error) {
+			efree(error);
+		}
+		func = fcc.function_handler;
+		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
+			/* Delay closure destruction until its invocation */
+			func->common.prototype = (zend_function*)Z_OBJ_P(function_name);
+			Z_ADDREF_P(function_name);
+		}
+		called_scope = fcc.called_scope;
+		object = fcc.object;
+		if (object) {
+			GC_REFCOUNT(object)++; /* For $this pointer */
+		}
+	} else {
+		zend_error(E_WARNING, "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(opline->op1.zv), error);
+		efree(error);
+		func = (zend_function*)&zend_pass_function;
+		called_scope = NULL;
+		object = NULL;
+	}
+
+	EX(call) = zend_vm_stack_push_call_frame(
+		func, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_CASE_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -4796,6 +4950,48 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *function_name = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+	zend_fcall_info_cache fcc;
+	char *error = NULL;
+	zend_function *func;
+	zend_class_entry *called_scope;
+	zend_object *object;
+
+	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error TSRMLS_CC)) {
+		if (error) {
+			efree(error);
+		}
+		func = fcc.function_handler;
+		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
+			/* Delay closure destruction until its invocation */
+			func->common.prototype = (zend_function*)Z_OBJ_P(function_name);
+			Z_ADDREF_P(function_name);
+		}
+		called_scope = fcc.called_scope;
+		object = fcc.object;
+		if (object) {
+			GC_REFCOUNT(object)++; /* For $this pointer */
+		}
+	} else {
+		zend_error(E_WARNING, "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(opline->op1.zv), error);
+		efree(error);
+		func = (zend_function*)&zend_pass_function;
+		called_scope = NULL;
+		object = NULL;
+	}
+
+	EX(call) = zend_vm_stack_push_call_frame(
+		func, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
+
+	zval_dtor(free_op2.var);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_CASE_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -5630,6 +5826,48 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		EX(call)->return_value = NULL;
 	}
 
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *function_name = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+	zend_fcall_info_cache fcc;
+	char *error = NULL;
+	zend_function *func;
+	zend_class_entry *called_scope;
+	zend_object *object;
+
+	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error TSRMLS_CC)) {
+		if (error) {
+			efree(error);
+		}
+		func = fcc.function_handler;
+		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
+			/* Delay closure destruction until its invocation */
+			func->common.prototype = (zend_function*)Z_OBJ_P(function_name);
+			Z_ADDREF_P(function_name);
+		}
+		called_scope = fcc.called_scope;
+		object = fcc.object;
+		if (object) {
+			GC_REFCOUNT(object)++; /* For $this pointer */
+		}
+	} else {
+		zend_error(E_WARNING, "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(opline->op1.zv), error);
+		efree(error);
+		func = (zend_function*)&zend_pass_function;
+		called_scope = NULL;
+		object = NULL;
+	}
+
+	EX(call) = zend_vm_stack_push_call_frame(
+		func, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
+
+	zval_ptr_dtor_nogc(free_op2.var);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -7159,6 +7397,47 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 	if (IS_CV == IS_UNUSED) {
 		EX(call)->return_value = NULL;
 	}
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *function_name = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+	zend_fcall_info_cache fcc;
+	char *error = NULL;
+	zend_function *func;
+	zend_class_entry *called_scope;
+	zend_object *object;
+
+	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error TSRMLS_CC)) {
+		if (error) {
+			efree(error);
+		}
+		func = fcc.function_handler;
+		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
+			/* Delay closure destruction until its invocation */
+			func->common.prototype = (zend_function*)Z_OBJ_P(function_name);
+			Z_ADDREF_P(function_name);
+		}
+		called_scope = fcc.called_scope;
+		object = fcc.object;
+		if (object) {
+			GC_REFCOUNT(object)++; /* For $this pointer */
+		}
+	} else {
+		zend_error(E_WARNING, "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(opline->op1.zv), error);
+		efree(error);
+		func = (zend_function*)&zend_pass_function;
+		called_scope = NULL;
+		object = NULL;
+	}
+
+	EX(call) = zend_vm_stack_push_call_frame(
+		func, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -13124,6 +13403,85 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 			if (Z_OPT_REFCOUNTED_P(arg)) Z_ADDREF_P(arg);
 		}
 	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *arg, *param, tmp;
+	zend_free_op free_op1;
+
+	arg = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	param = ZEND_CALL_ARG(EX(call), opline->op2.num);
+
+	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+		// TODO: Scalar values don't have reference counters anymore.
+		// They are assumed to be 1, and they may be easily passed by
+		// reference now. However, previously scalars with refcount==1
+		// might be passed and with refcount>1 might not. We can support
+		// only single behavior ???
+#if 0
+		if (Z_REFCOUNTED_P(arg) &&
+			// This solution breaks the following test (omit warning message) ???
+			// Zend/tests/bug61273.phpt
+			// ext/reflection/tests/bug42976.phpt
+			// ext/standard/tests/general_functions/call_user_func_array_variation_001.phpt
+#else
+		if (!Z_REFCOUNTED_P(arg) ||
+			// This solution breaks the following test (emit warning message) ???
+			// ext/pdo_sqlite/tests/pdo_005.phpt
+#endif
+		    (!Z_ISREF_P(arg) && Z_REFCOUNT_P(arg) > 1)) {
+
+			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+
+				zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
+					opline->op2.num,
+					EX(call)->func->common.scope ? EX(call)->func->common.scope->name->val : "",
+					EX(call)->func->common.scope ? "::" : "",
+					EX(call)->func->common.function_name->val);
+
+				if (EX(call)->func->common.fn_flags & ZEND_ACC_CLOSURE) {
+					OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
+				}
+				if (EX(call)->object) {
+					OBJ_RELEASE(EX(call)->object);
+				}
+				EX(call)->func = (zend_function*)&zend_pass_function;
+				EX(call)->called_scope = NULL;
+				EX(call)->object = NULL;
+
+				zval_ptr_dtor_nogc(free_op1.var);
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
+
+			if (Z_REFCOUNTED_P(arg)) {
+				Z_DELREF_P(arg);
+			}
+			ZVAL_DUP(&tmp, arg);
+			ZVAL_NEW_REF(arg, &tmp);
+			Z_ADDREF_P(arg);
+		} else if (!Z_ISREF_P(arg)) {
+			ZVAL_NEW_REF(arg, arg);
+			Z_ADDREF_P(arg);
+		} else if (Z_REFCOUNTED_P(arg)) {
+			Z_ADDREF_P(arg);
+		}
+		ZVAL_COPY_VALUE(param, arg);
+	} else if (Z_ISREF_P(arg) &&
+	           /* don't separate references for __call */
+	           (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0) {
+		ZVAL_DUP(param, Z_REFVAL_P(arg));
+	} else {
+		ZVAL_COPY(param, arg);
+	}
+
+	EX(call)->num_args = opline->op2.num;
+
+	zval_ptr_dtor_nogc(free_op1.var);
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -30286,6 +30644,83 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *arg, *param, tmp;
+
+
+	arg = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
+	param = ZEND_CALL_ARG(EX(call), opline->op2.num);
+
+	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+		// TODO: Scalar values don't have reference counters anymore.
+		// They are assumed to be 1, and they may be easily passed by
+		// reference now. However, previously scalars with refcount==1
+		// might be passed and with refcount>1 might not. We can support
+		// only single behavior ???
+#if 0
+		if (Z_REFCOUNTED_P(arg) &&
+			// This solution breaks the following test (omit warning message) ???
+			// Zend/tests/bug61273.phpt
+			// ext/reflection/tests/bug42976.phpt
+			// ext/standard/tests/general_functions/call_user_func_array_variation_001.phpt
+#else
+		if (!Z_REFCOUNTED_P(arg) ||
+			// This solution breaks the following test (emit warning message) ???
+			// ext/pdo_sqlite/tests/pdo_005.phpt
+#endif
+		    (!Z_ISREF_P(arg) && Z_REFCOUNT_P(arg) > 1)) {
+
+			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+
+				zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
+					opline->op2.num,
+					EX(call)->func->common.scope ? EX(call)->func->common.scope->name->val : "",
+					EX(call)->func->common.scope ? "::" : "",
+					EX(call)->func->common.function_name->val);
+
+				if (EX(call)->func->common.fn_flags & ZEND_ACC_CLOSURE) {
+					OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
+				}
+				if (EX(call)->object) {
+					OBJ_RELEASE(EX(call)->object);
+				}
+				EX(call)->func = (zend_function*)&zend_pass_function;
+				EX(call)->called_scope = NULL;
+				EX(call)->object = NULL;
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
+
+			if (Z_REFCOUNTED_P(arg)) {
+				Z_DELREF_P(arg);
+			}
+			ZVAL_DUP(&tmp, arg);
+			ZVAL_NEW_REF(arg, &tmp);
+			Z_ADDREF_P(arg);
+		} else if (!Z_ISREF_P(arg)) {
+			ZVAL_NEW_REF(arg, arg);
+			Z_ADDREF_P(arg);
+		} else if (Z_REFCOUNTED_P(arg)) {
+			Z_ADDREF_P(arg);
+		}
+		ZVAL_COPY_VALUE(param, arg);
+	} else if (Z_ISREF_P(arg) &&
+	           /* don't separate references for __call */
+	           (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0) {
+		ZVAL_DUP(param, Z_REFVAL_P(arg));
+	} else {
+		ZVAL_COPY(param, arg);
+	}
+
+	EX(call)->num_args = opline->op2.num;
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_BOOL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -43109,7 +43544,11 @@ void zend_init_opcodes_handlers(void)
   	ZEND_SEND_VAR_SPEC_CV_HANDLER,
   	ZEND_SEND_VAR_SPEC_CV_HANDLER,
   	ZEND_SEND_VAR_SPEC_CV_HANDLER,
+  	ZEND_INIT_USER_CALL_SPEC_CONST_CONST_HANDLER,
+  	ZEND_INIT_USER_CALL_SPEC_CONST_TMP_HANDLER,
+  	ZEND_INIT_USER_CALL_SPEC_CONST_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_INIT_USER_CALL_SPEC_CONST_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -43130,6 +43569,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
+  	ZEND_SEND_ARRAY_SPEC_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -43140,50 +43604,21 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_SEND_USER_SPEC_VAR_HANDLER,
+  	ZEND_SEND_USER_SPEC_VAR_HANDLER,
+  	ZEND_SEND_USER_SPEC_VAR_HANDLER,
+  	ZEND_SEND_USER_SPEC_VAR_HANDLER,
+  	ZEND_SEND_USER_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_SEND_USER_SPEC_CV_HANDLER,
+  	ZEND_SEND_USER_SPEC_CV_HANDLER,
+  	ZEND_SEND_USER_SPEC_CV_HANDLER,
+  	ZEND_SEND_USER_SPEC_CV_HANDLER,
+  	ZEND_SEND_USER_SPEC_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,

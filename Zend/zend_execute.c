@@ -76,6 +76,23 @@ static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *sho
 	}
 }
 
+static ZEND_FUNCTION(pass)
+{
+}
+
+static const zend_internal_function zend_pass_function = {
+	ZEND_INTERNAL_FUNCTION, /* type              */
+	NULL,                   /* name              */
+	NULL,                   /* scope             */
+	0,                      /* fn_flags          */
+	NULL,                   /* prototype         */
+	0,                      /* num_args          */
+	0,                      /* required_num_args */
+	NULL,                   /* arg_info          */
+	ZEND_FN(pass),          /* handler           */
+	NULL                    /* module            */
+};
+
 #undef zval_ptr_dtor
 #define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC TSRMLS_CC)
 #define zval_ptr_dtor_nogc(zv) i_zval_ptr_dtor_nogc(zv ZEND_FILE_LINE_CC TSRMLS_CC)

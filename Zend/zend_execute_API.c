@@ -825,7 +825,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		} else if (Z_ISREF(fci->params[i]) &&
 		           /* don't separate references for __call */
 		           (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0 ) {
-			param = &tmp;
 			param = ZEND_CALL_ARG(call, i+1);
 			ZVAL_DUP(param, Z_REFVAL(fci->params[i]));
 		} else {

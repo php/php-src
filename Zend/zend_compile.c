@@ -2539,6 +2539,170 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 }
 /* }}} */
 
+static int zend_do_convert_call(zend_op *init_opline, zend_op *opline, long num_args, zend_function **func_ptr TSRMLS_CC)  /* {{{ */
+{
+	zval *function_name;
+	zend_string *lcname;
+	zend_function *function;
+
+	*func_ptr = NULL;
+	if (opline->op1_type == IS_CONST && Z_TYPE(CONSTANT(opline->op1.constant)) == IS_STRING) {
+ 		function_name = &CONSTANT(opline->op1.constant);
+		lcname = STR_ALLOC(Z_STRLEN_P(function_name), 0);
+		zend_str_tolower_copy(lcname->val, Z_STRVAL_P(function_name), Z_STRLEN_P(function_name));
+		if (((function = zend_hash_find_ptr(CG(function_table), lcname)) == NULL) ||
+		 	((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS) &&
+		 	(function->type == ZEND_INTERNAL_FUNCTION))) {
+			function = NULL;
+			STR_RELEASE(lcname);
+			opline->opcode = ZEND_INIT_USER_CALL;
+			opline->extended_value = num_args;
+			opline->op2_type = opline->op1_type;
+			opline->op2 = opline->op1;
+			opline->op1_type = IS_CONST;
+			opline->op1 = init_opline->op2;
+			SET_UNUSED(opline->result);
+			MAKE_NOP(init_opline);
+			return 1;
+		} else {
+			STR_RELEASE(Z_STR_P(function_name));
+			Z_STR_P(function_name) = zend_new_interned_string(lcname TSRMLS_CC);
+			opline->opcode = ZEND_INIT_FCALL;
+			opline->extended_value = num_args;
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = opline->op1.constant;
+			GET_CACHE_SLOT(opline->op2.constant);
+			SET_UNUSED(opline->op1);
+			SET_UNUSED(opline->result);								
+			MAKE_NOP(init_opline);
+			*func_ptr = function;
+			return 1;
+		}
+	} else {
+		opline->opcode = ZEND_INIT_USER_CALL;
+		opline->extended_value = num_args;
+		opline->op2_type = opline->op1_type;
+		opline->op2 = opline->op1;
+		opline->op1_type = IS_CONST;
+		opline->op1 = init_opline->op2;
+		SET_UNUSED(opline->result);
+		MAKE_NOP(init_opline);
+		return 1;
+	}
+	return 0;
+}
+/* }}} */
+
+static int zend_do_convert_call_user_func(zend_op *init_opline, zend_uint num_args TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline = init_opline + 1;
+	int level = 0;
+	int converted = 0;
+	zend_uint arg_num = 0;
+	zend_function *func = NULL;
+
+	while (1) {
+		switch (opline->opcode) {
+			case ZEND_SEND_VAL:
+			case ZEND_SEND_VAL_EX:
+			case ZEND_SEND_VAR:
+			case ZEND_SEND_VAR_EX:
+			case ZEND_SEND_VAR_NO_REF:
+			case ZEND_SEND_REF:
+			case ZEND_SEND_UNPACK:
+				if (level == 0) {
+					if (!converted) {
+						if (opline->opcode == ZEND_SEND_UNPACK) {
+							return 0;
+						}
+						if (!zend_do_convert_call(init_opline, opline, init_opline->extended_value - 1, &func TSRMLS_CC)) {
+							return 0;
+						}
+						converted = 1;
+					} else {
+						/* Use ZEND_SEND_USER instruction for parameters that may pass by reference */
+						if (opline->opcode != ZEND_SEND_VAL &&
+						    (func == NULL || 
+						     ARG_SHOULD_BE_SENT_BY_REF(func, opline->op2.num-1))) {
+							opline->opcode = ZEND_SEND_USER;
+						}
+						opline->op2.num--;
+					}
+					if (++arg_num == num_args) {
+						return 1;
+					}
+				}
+				break;
+			case ZEND_INIT_FCALL_BY_NAME:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
+			case ZEND_NEW:
+			case ZEND_INIT_METHOD_CALL:
+			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_FCALL:
+				level++;
+				break;
+			case ZEND_DO_FCALL:
+				level--;
+				break;
+		}
+		opline++;
+	}
+}
+/* }}} */
+
+static int zend_do_convert_call_user_func_array(zend_op *init_opline TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline = init_opline + 1;
+	zend_op *send1 = NULL, *send2 = NULL;
+	int level = 0;
+	zend_function *func;
+
+	do {
+		switch (opline->opcode) {
+			case ZEND_SEND_VAL:
+			case ZEND_SEND_VAL_EX:
+			case ZEND_SEND_VAR:
+			case ZEND_SEND_VAR_EX:
+			case ZEND_SEND_VAR_NO_REF:
+			case ZEND_SEND_REF:
+			case ZEND_SEND_UNPACK:
+				if (level == 0) {
+					if (opline->opcode == ZEND_SEND_UNPACK) {
+						return 0;
+					}
+					if (send1 == NULL) {
+						send1 = opline;
+					} else {
+						send2 = opline;
+					}
+				}
+				break;
+			case ZEND_INIT_FCALL_BY_NAME:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
+			case ZEND_NEW:
+			case ZEND_INIT_METHOD_CALL:
+			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_FCALL:
+				level++;
+				break;
+			case ZEND_DO_FCALL:
+				level--;
+				break;
+		}
+		opline++;
+	} while (send2 == NULL);
+
+	if (!zend_do_convert_call(init_opline, send1, 0, &func TSRMLS_CC)) {
+		return 0;
+	}
+
+	send2->opcode = ZEND_SEND_ARRAY;
+	send2->extended_value = 0;
+	send2->op2.num--;
+	return 1;
+}
+/* }}} */
+
 void zend_do_end_function_call(znode *function_name, znode *result, int is_method, int is_dynamic_fcall TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
@@ -2558,6 +2722,26 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 
 		if (opline->opcode == ZEND_NEW) {
 			call_flags = ZEND_CALL_CTOR;
+		} else {
+			zend_function *func = fcall->fbc;
+			if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+				/* Convert calls to some internal functions into built-ins */
+				if (func->common.function_name->len == sizeof("call_user_func")-1 &&
+				    memcmp(func->common.function_name->val, "call_user_func", sizeof("call_user_func")-1) == 0) {
+					if (fcall->arg_num > 0) {
+						if (zend_do_convert_call_user_func(opline, fcall->arg_num TSRMLS_CC)) {
+							fcall->arg_num--;
+						}
+					}
+				} else if (func->common.function_name->len == sizeof("call_user_func_array")-1 &&
+				           memcmp(func->common.function_name->val, "call_user_func_array", sizeof("call_user_func_array")-1) == 0) {
+					if (fcall->arg_num == 2) {
+						if (zend_do_convert_call_user_func_array(opline TSRMLS_CC)) {
+							fcall->arg_num = 0;
+						}
+					}
+				}
+			}
 		}
 
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
