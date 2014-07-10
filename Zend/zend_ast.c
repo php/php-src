@@ -41,38 +41,46 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 	return (zend_ast *) ast;
 }
 
-ZEND_API zend_ast* zend_ast_create_unary_ex(zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0)
-{
-	zend_ast *ast = emalloc(sizeof(zend_ast));
+static zend_ast *zend_ast_create_from_va_list(
+	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, va_list va
+) {
+	zend_uint i;
+
+	zend_ast *ast = emalloc(sizeof(zend_ast) + (children - 1) * sizeof(zend_ast *));
 	ast->kind = kind;
 	ast->attr = attr;
-	ast->children = 1;
-	ast->child[0] = op0;
+	ast->children = children;
+
+	for (i = 0; i < children; ++i) {
+		ast->child[i] = va_arg(va, zend_ast *);
+	}
+
 	return ast;
 }
 
-ZEND_API zend_ast* zend_ast_create_binary_ex(
-	zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0, zend_ast *op1
+ZEND_API zend_ast *zend_ast_create_ex(
+	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, ...
 ) {
-	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zend_ast *));
-	ast->kind = kind;
-	ast->attr = attr;
-	ast->children = 2;
-	ast->child[0] = op0;
-	ast->child[1] = op1;
+	va_list va;
+	zend_ast *ast;
+
+	va_start(va, attr);
+	ast = zend_ast_create_from_va_list(children, kind, attr, va);
+	va_end(va);
+
 	return ast;
 }
 
-ZEND_API zend_ast* zend_ast_create_ternary_ex(
-	zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0, zend_ast *op1, zend_ast *op2
+ZEND_API zend_ast *zend_ast_create(
+	zend_uint children, zend_ast_kind kind, ...
 ) {
-	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * 2);
-	ast->kind = kind;
-	ast->attr = attr;
-	ast->children = 3;
-	ast->child[0] = op0;
-	ast->child[1] = op1;
-	ast->child[2] = op2;
+	va_list va;
+	zend_ast *ast;
+
+	va_start(va, kind);
+	ast = zend_ast_create_from_va_list(children, kind, 0, va);
+	va_end(va);
+
 	return ast;
 }
 

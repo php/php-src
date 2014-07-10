@@ -69,6 +69,7 @@ enum _zend_ast_kind {
 	ZEND_AST_ARRAY_ELEM,
 	ZEND_AST_ENCAPS_LIST,
 
+	ZEND_AST_EXPR_LIST,
 	ZEND_AST_STMT_LIST,
 
 	ZEND_AST_GLOBAL,
@@ -78,6 +79,7 @@ enum _zend_ast_kind {
 
 	ZEND_AST_WHILE,
 	ZEND_AST_DO_WHILE,
+	ZEND_AST_FOR,
 };
 
 typedef unsigned short zend_ast_kind;
@@ -102,12 +104,10 @@ static inline zval *zend_ast_get_zval(zend_ast *ast) {
 
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr);
 
-ZEND_API zend_ast *zend_ast_create_unary_ex(
-	zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0);
-ZEND_API zend_ast *zend_ast_create_binary_ex(
-	zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0, zend_ast *op1);
-ZEND_API zend_ast *zend_ast_create_ternary_ex(
-	zend_ast_kind kind, zend_ast_attr attr, zend_ast *op0, zend_ast *op1, zend_ast *op2);
+ZEND_API zend_ast *zend_ast_create_ex(
+	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, ...);
+ZEND_API zend_ast *zend_ast_create(
+	zend_uint children, zend_ast_kind kind, ...);
 
 ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind);
 ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op);
@@ -123,16 +123,17 @@ ZEND_API void zend_ast_destroy(zend_ast *ast);
 static inline zend_ast *zend_ast_create_zval(zval *zv) {
 	return zend_ast_create_zval_ex(zv, 0);
 }
+
 static inline zend_ast *zend_ast_create_unary(zend_ast_kind kind, zend_ast *op0) {
-	return zend_ast_create_unary_ex(kind, 0, op0);
+	return zend_ast_create(1, kind, op0);
 }
 static inline zend_ast *zend_ast_create_binary(zend_ast_kind kind, zend_ast *op0, zend_ast *op1) {
-	return zend_ast_create_binary_ex(kind, 0, op0, op1);
+	return zend_ast_create(2, kind, op0, op1);
 }
 static inline zend_ast *zend_ast_create_ternary(
 	zend_ast_kind kind, zend_ast *op0, zend_ast *op1, zend_ast *op2
 ) {
-	return zend_ast_create_ternary_ex(kind, 0, op0, op1, op2);
+	return zend_ast_create(3, kind, op0, op1, op2);
 }
 
 static inline zend_ast *zend_ast_create_dynamic_and_add(zend_ast_kind kind, zend_ast *op) {
@@ -143,10 +144,13 @@ static inline zend_ast *zend_ast_create_var(zval *name) {
 	return zend_ast_create_unary(ZEND_AST_VAR, zend_ast_create_zval(name));
 }
 static inline zend_ast *zend_ast_create_binary_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
-	return zend_ast_create_binary_ex(ZEND_AST_BINARY_OP, opcode, op0, op1);
+	return zend_ast_create_ex(2, ZEND_AST_BINARY_OP, opcode, op0, op1);
 }
 static inline zend_ast *zend_ast_create_assign_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
-	return zend_ast_create_binary_ex(ZEND_AST_ASSIGN_OP, opcode, op0, op1);
+	return zend_ast_create_ex(2, ZEND_AST_ASSIGN_OP, opcode, op0, op1);
+}
+static inline zend_ast *zend_ast_create_cast(zend_uint type, zend_ast *op0) {
+	return zend_ast_create_ex(1, ZEND_AST_CAST, type, op0);
 }
 
 /* Temporary, for porting */
