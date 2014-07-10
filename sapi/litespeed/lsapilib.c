@@ -48,14 +48,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
 
-/***************************************************************************
-                          lsapilib.c  -  description
-                             -------------------
-    begin                : Mon Feb 21 2005
-    copyright            : (C) 2005 by George Wang
-    email                : gwang@litespeedtech.com
- ***************************************************************************/
-
 
 #include <ctype.h>
 #include <dlfcn.h>
@@ -876,6 +868,190 @@ static int setUID_LVE(LSAPI_Request * pReq, uid_t uid, gid_t gid, const char * p
 #endif
     return 0;
 }
+#endif
+
+
+static int setUID_LVE(LSAPI_Request * pReq, uid_t uid, gid_t gid, const char * pChroot)
+{
+    int rv;
+    struct passwd * pw;
+    pw = getpwuid( uid );
+#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+    if ( s_lve )
+    { 
+        if( lsapi_enterLVE( pReq, uid ) == -1 )
+            return -1;
+        if ( pw && fp_lve_jail)
+        {
+            rv = lsapi_jailLVE( pReq, uid, pw );
+            if ( rv == -1 )
+                return -1;
+            if (( rv == 1 )&&(s_enable_lve == LSAPI_CAGEFS_NO_SUEXEC ))    //this mode only use cageFS, does not use suEXEC
+            {
+                uid = s_defaultUid;
+                gid = s_defaultGid;
+                pw = getpwuid( uid );
+            }
+        }
+    }
+#endif
+    //if ( !uid || !gid )  //do not allow root 
+    //{
+    //    return -1;
+    //}
+
+#if defined(__FreeBSD__ ) || defined(__NetBSD__) || defined(__OpenBSD__) \
+    || defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
+    if ( s_enable_core_dump )
+        lsapi_enable_core_dump();
+#endif
+
+    rv = setgid(gid);
+    if (rv == -1)
+    {
+        LSAPI_perror_r(pReq, "LSAPI: setgid()", NULL);
+        return -1;
+    }
+    if ( pw && (pw->pw_gid == gid ))
+    {
+        rv = initgroups( pw->pw_name, gid );
+        if (rv == -1)
+        {
+            LSAPI_perror_r(pReq, "LSAPI: initgroups()", NULL);
+            return -1;
+        }
+    }
+    else
+    {
+        rv = setgroups(1, &gid);
+        if (rv == -1)
+        {
+            LSAPI_perror_r(pReq, "LSAPI: setgroups()", NULL);
+        }
+    }
+    if ( pChroot )
+    {
+        rv = chroot( pChroot );
+        if ( rv == -1 )
+        {
+            LSAPI_perror_r(pReq, "LSAPI: chroot()", NULL);
+            return -1;
+        }
+    }
+    rv = setuid(uid);
+    if (rv == -1)
+    {
+        LSAPI_perror_r(pReq, "LSAPI: setuid()", NULL);
+        return -1;
+    }
+#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+    if ( s_enable_core_dump )
+        lsapi_enable_core_dump();
+#endif
+    return 0;
+}
+
+static int lsapi_suexec_auth( LSAPI_Request *pReq, 
+            char * pAuth, int len, char * pUgid, int ugidLen )
+{
+    lsapi_MD5_CTX md5ctx;
+    unsigned char achMD5[16];
+    if ( len < 32 )
+        return -1;
+    memmove( achMD5, pAuth + 16, 16 );
+    memmove( pAuth + 16, s_pSecret, 16 );
+    lsapi_MD5Init( &md5ctx );
+    lsapi_MD5Update( &md5ctx, (unsigned char *)pAuth, 32 );
+    lsapi_MD5Update( &md5ctx, (unsigned char *)pUgid, 8 );
+    lsapi_MD5Final( (unsigned char *)pAuth + 16, &md5ctx);
+    if ( memcmp( achMD5, pAuth + 16, 16 ) == 0 )
+        return 0;
+    return 1;
+}
+
+
+static int lsapi_changeUGid( LSAPI_Request * pReq )
+{
+    int uid = s_defaultUid;
+    int gid = s_defaultGid;
+    const char * pChroot = NULL;
+    struct LSAPI_key_value_pair * pEnv;
+    struct LSAPI_key_value_pair * pAuth;
+    int i;
+    if ( s_uid )
+        return 0;
+    //with special ID  0x00
+    //authenticate the suEXEC request;
+    //first one should be MD5( nonce + lscgid secret )
+    //remember to clear the secret after verification 
+    //it should be set at the end of special env
+    i = pReq->m_pHeader->m_cntSpecialEnv - 1;
+    if ( i >= 0 )
+    {
+        pEnv = pReq->m_pSpecialEnvList + i;
+        if (( *pEnv->pKey == '\000' )&&
+            ( strcmp( pEnv->pKey+1, "SUEXEC_AUTH" ) == 0 ))
+        {
+            --pReq->m_pHeader->m_cntSpecialEnv;
+            pAuth = pEnv--;
+            if (( *pEnv->pKey == '\000' )&&
+                ( strcmp( pEnv->pKey+1, "SUEXEC_UGID" ) == 0 ))
+            {
+                --pReq->m_pHeader->m_cntSpecialEnv;
+                uid = *(uint32_t *)pEnv->pValue;
+                gid = *(((uint32_t *)pEnv->pValue) + 1 ); 
+                //fprintf( stderr, "LSAPI: SUEXEC_UGID set UID: %d, GID: %d\n", uid, gid );
+            }
+            else
+            {
+                fprintf( stderr, "LSAPI: missing SUEXEC_UGID env, use default user!\n" );
+                pEnv = NULL;
+            }
+            if ( pEnv&& lsapi_suexec_auth( pReq, pAuth->pValue, pAuth->valLen, pEnv->pValue, pEnv->valLen ) == 0 )
+            {
+                //read UID, GID from specialEnv 
+                
+            }
+            else
+            {
+                //authentication error
+                fprintf( stderr, "LSAPI: SUEXEC_AUTH authentication failed, use default user!\n" );
+                uid = 0;
+            }
+        }
+        else
+        {
+            //fprintf( stderr, "LSAPI: no SUEXEC_AUTH env, use default user!\n" );
+        }
+    }
+
+
+    if ( !uid )
+    {
+        uid = s_defaultUid;
+        gid = s_defaultGid;
+    }
+
+    //change uid
+    if ( setUID_LVE( pReq, uid, gid, pChroot ) == -1 )
+    {
+        return -1;
+    }
+
+    s_uid = uid; 	
+
+    return 0;
+ 
+}
+
+static int parseContentLenFromHeader(LSAPI_Request * pReq)
+{
+    const char * pContentLen = LSAPI_GetHeader_r( pReq, H_CONTENT_LENGTH );
+    if ( pContentLen )
+        pReq->m_reqBodyLen = strtoll( pContentLen, NULL, 10 );
+    return 0;
+}
+
 
 static int lsapi_suexec_auth( LSAPI_Request *pReq, 
             char * pAuth, int len, char * pUgid, int ugidLen )
@@ -1229,6 +1405,7 @@ int LSAPI_IsRunning(void)
 
 int LSAPI_InitRequest( LSAPI_Request * pReq, int fd )
 {
+    int newfd;
     if ( !pReq )
         return -1;
     memset( pReq, 0, sizeof( LSAPI_Request ) );
@@ -1242,7 +1419,14 @@ int LSAPI_InitRequest( LSAPI_Request * pReq, int fd )
     pReq->m_respPktHeaderEnd = &pReq->m_respPktHeader[5];
     if ( allocateRespHeaderBuf( pReq, LSAPI_INIT_RESP_HEADER_LEN ) == -1 )
         return -1;
- 
+
+    if ( fd == STDIN_FILENO )
+    {
+        fd = dup( fd );
+        newfd = open( "/dev/null", O_RDWR );
+        dup2( newfd, STDIN_FILENO ); 
+    } 
+
     if ( isPipe( fd ) )
     {
         pReq->m_fdListen = -1;
@@ -2404,6 +2588,8 @@ typedef struct _lsapi_prefork_server
     int m_iAvoidFork;
     
     lsapi_child_status * m_pChildrenStatus;
+    lsapi_child_status * m_pChildrenStatusCur;
+    lsapi_child_status * m_pChildrenStatusEnd;
     
 }lsapi_prefork_server;
 
@@ -2492,10 +2678,13 @@ static void lsapi_cleanup(int signal)
 static lsapi_child_status * find_child_status( int pid )
 {
     lsapi_child_status * pStatus = g_prefork_server->m_pChildrenStatus;
-    lsapi_child_status * pEnd = g_prefork_server->m_pChildrenStatus + g_prefork_server->m_iMaxChildren * 2;
+    lsapi_child_status * pEnd = g_prefork_server->m_pChildrenStatusEnd;
     while( pStatus < pEnd )
     {
         if ( pStatus->m_pid == pid )
+        {
+            if ( pStatus + 1 > g_prefork_server->m_pChildrenStatusCur )
+                g_prefork_server->m_pChildrenStatusCur = pStatus + 1;
             return pStatus;
         ++pStatus;
     }
@@ -2531,8 +2720,12 @@ static void lsapi_sigchild( int signal )
         {
             child_status->m_pid = 0;
             --g_prefork_server->m_iCurChildren;
+
         }
     }
+    while(( g_prefork_server->m_pChildrenStatusCur > g_prefork_server->m_pChildrenStatus )
+            &&( g_prefork_server->m_pChildrenStatusCur[-1].m_pid == 0 ))
+        --g_prefork_server->m_pChildrenStatusCur;
 
 }
 
@@ -2541,7 +2734,7 @@ static int lsapi_init_children_status()
     int size = 4096;
     
     char * pBuf;
-    size = g_prefork_server->m_iMaxChildren * sizeof( lsapi_child_status ) * 2;
+    size = (g_prefork_server->m_iMaxChildren + g_prefork_server->m_iExtraChildren ) * sizeof( lsapi_child_status ) * 2;
     size = (size + 4095 ) / 4096 * 4096;
     pBuf =( char*) mmap( NULL, size, PROT_READ | PROT_WRITE,
         MAP_ANON | MAP_SHARED, -1, 0 );
@@ -2551,7 +2744,9 @@ static int lsapi_init_children_status()
         return -1;
     }
     memset( pBuf, 0, size );
-    g_prefork_server->m_pChildrenStatus = (lsapi_child_status *)pBuf;        
+    g_prefork_server->m_pChildrenStatus = (lsapi_child_status *)pBuf;
+    g_prefork_server->m_pChildrenStatusCur = (lsapi_child_status *)pBuf;
+    g_prefork_server->m_pChildrenStatusEnd = (lsapi_child_status *)pBuf + size / sizeof( lsapi_child_status );
     return 0;
 }
 
@@ -2581,7 +2776,7 @@ static void lsapi_check_child_status( long tmCur )
     int dying = 0;
     int count = 0;
     lsapi_child_status * pStatus = g_prefork_server->m_pChildrenStatus;
-    lsapi_child_status * pEnd = g_prefork_server->m_pChildrenStatus + g_prefork_server->m_iMaxChildren * 2;
+    lsapi_child_status * pEnd = g_prefork_server->m_pChildrenStatusCur;
     while( pStatus < pEnd )
     {
         tobekilled = 0;
@@ -2594,13 +2789,15 @@ static void lsapi_check_child_status( long tmCur )
                 if (( g_prefork_server->m_iCurChildren - dying > g_prefork_server->m_iMaxChildren)||
                     ( idle > g_prefork_server->m_iMaxIdleChildren ))
                 {
-                    tobekilled = SIGUSR1;
+                    ++pStatus->m_iKillSent;
+                    //tobekilled = SIGUSR1;
                 }
                 else
                 {
                     if (( s_max_idle_secs> 0)&&(tmCur - pStatus->m_tmWaitBegin > s_max_idle_secs + 5 ))
                     {
-                        tobekilled = SIGUSR1;
+                        ++pStatus->m_iKillSent;
+                        //tobekilled = SIGUSR1;
                     }
                 }
                 if ( !tobekilled )
@@ -2734,6 +2931,8 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer, LSAPI_Re
 
         if ( pServer->m_iCurChildren >= (pServer->m_iMaxChildren + pServer->m_iExtraChildren ) )
         {
+            fprintf( stderr, "Reached max children process limit: %d, extra: %d, current: %d, please increase LSAPI_CHILDREN.\n",
+                                pServer->m_iMaxChildren, pServer->m_iExtraChildren, pServer->m_iCurChildren );
             usleep( 100000 );
             continue;
         }
@@ -2840,8 +3039,8 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer, LSAPI_Re
         }
     }
     sigaction( SIGUSR1, &old_usr1, 0 );
-    kill( -getpgrp(), SIGUSR1 );
-    lsapi_all_children_must_die();  /* Sorry, children ;-) */
+    //kill( -getpgrp(), SIGUSR1 );
+    //lsapi_all_children_must_die();  /* Sorry, children ;-) */
     return -1;
 
 }
@@ -2894,7 +3093,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
         {
             if ( !g_running )
                 return -1;
-            if (( s_pChildStatus )&&( s_pChildStatus->m_iKillSent ))
+            if ((s_req_processed)&&( s_pChildStatus )&&( s_pChildStatus->m_iKillSent ))
                 return -1; 
             FD_ZERO( &readfds );
             FD_SET( fd, &readfds );
@@ -2922,7 +3121,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
             }
             else if ( ret >= 1 )
             {
-                if (( s_pChildStatus )&&( s_pChildStatus->m_iKillSent ))
+                if (s_req_processed && ( s_pChildStatus )&&( s_pChildStatus->m_iKillSent ))
                     return -1; 
                 if ( fd == pReq->m_fdListen )
                 {
@@ -3084,6 +3283,8 @@ static int lsapi_initSuEXEC()
         {
             if ( g_prefork_server->m_iMaxChildren < 100 )
                 g_prefork_server->m_iMaxChildren = 100;
+            if ( g_prefork_server->m_iExtraChildren < 1000 )
+                g_prefork_server->m_iExtraChildren = 1000;
         }
     }
     if ( !s_defaultUid || !s_defaultGid )

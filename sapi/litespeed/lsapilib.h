@@ -56,7 +56,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     email                : gwang@litespeedtech.com
  ***************************************************************************/
 
-
 #ifndef  _LSAPILIB_H_
 #define  _LSAPILIB_H_
 
