@@ -2686,6 +2686,7 @@ static lsapi_child_status * find_child_status( int pid )
             if ( pStatus + 1 > g_prefork_server->m_pChildrenStatusCur )
                 g_prefork_server->m_pChildrenStatusCur = pStatus + 1;
             return pStatus;
+        }
         ++pStatus;
     }
     return NULL;
