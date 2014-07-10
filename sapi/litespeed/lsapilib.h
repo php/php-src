@@ -48,14 +48,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
 
-/***************************************************************************
-                          lsapilib.h  -  description
-                             -------------------
-    begin                : Mon Feb 21 2005
-    copyright            : (C) 2005 by George Wang
-    email                : gwang@litespeedtech.com
- ***************************************************************************/
-
 
 #ifndef  _LSAPILIB_H_
 #define  _LSAPILIB_H_
