@@ -1024,6 +1024,11 @@ function is_pgo_desired(mod)
 {
 	var varname = "PHP_" + mod.toUpperCase() + "_PGO";
 
+	/* XXX enable PGO in phpize mode */
+	if (MODE_PHPIZE) {
+		return false;
+	}
+
 	/* don't disable if there's no mention of the varname */
 	if (eval("typeof " + varname + " == 'undefined'")) {
 		return true;
