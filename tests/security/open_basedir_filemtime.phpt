@@ -1,5 +1,7 @@
 --TEST--
 Test open_basedir configuration
+--CONCURRENCY_GROUP--
+open_basedir
 --INI--
 open_basedir=.
 --FILE--

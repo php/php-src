@@ -1,5 +1,7 @@
 --TEST--
 Bug #53226 (file_exists fails on big filenames)
+--CONCURRENCY_GROUP--
+open_basedir
 --INI--
 open_basedir=.
 --FILE--

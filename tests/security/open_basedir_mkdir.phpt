@@ -1,5 +1,7 @@
 --TEST--
 Test open_basedir configuration
+--CONCURRENCY_GROUP--
+open_basedir
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
