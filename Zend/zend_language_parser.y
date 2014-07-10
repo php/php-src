@@ -303,16 +303,19 @@ constant_declaration:
 ;
 
 inner_statement_list:
-		inner_statement_list  { zend_do_extended_info(TSRMLS_C); } inner_statement { HANDLE_INTERACTIVE(); }
+		inner_statement_list inner_statement
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, $2.u.ast); }
 	|	/* empty */
+			{ $$.u.ast = zend_ast_create_dynamic(ZEND_AST_STMT_LIST); }
 ;
 
 
 inner_statement:
-		statement { AS($1); }
-	|	function_declaration_statement
-	|	class_declaration_statement
-	|	T_HALT_COMPILER '(' ')' ';'   { zend_error_noreturn(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
+		statement { $$.u.ast = $1.u.ast; }
+	|	function_declaration_statement { AN($$); }
+	|	class_declaration_statement { AN($$); }
+	|	T_HALT_COMPILER '(' ')' ';'
+			{ zend_error_noreturn(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
 ;
 
 
@@ -322,10 +325,9 @@ statement:
 ;
 
 unticked_statement:
-		'{' inner_statement_list '}' { AN($$); }
-	|	if_stmt
-	/*|	T_IF parenthesis_expr { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } statement { AS($4); zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); AN($$); }*/
-	|	T_IF parenthesis_expr ':' { AC($2); zend_do_if_cond(&$2, &$1 TSRMLS_CC); } inner_statement_list { zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { zend_do_if_end(TSRMLS_C); AN($$); }
+		'{' inner_statement_list '}' { $$.u.ast = $2.u.ast; }
+	|	if_stmt { $$.u.ast = $1.u.ast; }
+	|	alt_if_stmt { $$.u.ast = $1.u.ast; }
 	|	T_WHILE parenthesis_expr while_statement
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_WHILE, $2.u.ast, $3.u.ast); }
 	|	T_DO statement T_WHILE parenthesis_expr ';'
@@ -357,8 +359,8 @@ unticked_statement:
 		foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); AN($$); }
 	|	T_DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); AN($$); }
 	|	';'	/* empty statement */ { AN($$); }
-	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}'
-		catch_statement { zend_do_bind_catch(&$1, &$6 TSRMLS_CC); }
+	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}' { AS($4); }
+		catch_statement { zend_do_bind_catch(&$1, &$7 TSRMLS_CC); }
 		finally_statement { zend_do_end_finally(&$1, &$6, &$8 TSRMLS_CC); AN($$); }
 	|	T_THROW expr ';' { $$.u.ast = zend_ast_create_unary(ZEND_THROW, $2.u.ast); }
 	|	T_GOTO T_STRING ';' { $$.u.ast = zend_ast_create_unary(ZEND_GOTO, AST_ZVAL(&$2)); }
@@ -369,12 +371,12 @@ catch_statement:
 	|	T_CATCH '(' { zend_initialize_try_catch_element(&$1 TSRMLS_CC); } 
 		fully_qualified_class_name { zend_do_first_catch(&$2 TSRMLS_CC); }
 		T_VARIABLE ')' { zend_do_begin_catch(&$1, &$4, &$6, &$2 TSRMLS_CC); }
-		'{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
+		'{' inner_statement_list '}' { AS($10); zend_do_end_catch(&$1 TSRMLS_CC); }
 		additional_catches { zend_do_mark_last_catch(&$2, &$13 TSRMLS_CC); $$ = $1;}
 
 finally_statement:
 					/* empty */ { $$.op_type = IS_UNUSED; }
-	|	T_FINALLY { zend_do_finally(&$1 TSRMLS_CC); } '{' inner_statement_list '}' { $$ = $1; }
+	|	T_FINALLY { zend_do_finally(&$1 TSRMLS_CC); } '{' inner_statement_list '}' { AS($4); $$ = $1; }
 ;
 
 additional_catches:
@@ -388,7 +390,7 @@ non_empty_additional_catches:
 ;
 
 additional_catch:
-	T_CATCH '(' fully_qualified_class_name { $$.u.op.opline_num = get_next_op_number(CG(active_op_array)); } T_VARIABLE ')' { zend_do_begin_catch(&$1, &$3, &$5, NULL TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
+	T_CATCH '(' fully_qualified_class_name { $$.u.op.opline_num = get_next_op_number(CG(active_op_array)); } T_VARIABLE ')' { zend_do_begin_catch(&$1, &$3, &$5, NULL TSRMLS_CC); } '{' inner_statement_list '}' { AS($9); zend_do_end_catch(&$1 TSRMLS_CC); }
 ;
 
 unset_variables:
@@ -421,7 +423,7 @@ is_variadic:
 unticked_function_declaration_statement:
 		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL TSRMLS_CC); }
 		'(' parameter_list ')'
-		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
+		'{' inner_statement_list '}' { AS($9); zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 ;
 
 unticked_class_declaration_statement:
@@ -484,19 +486,19 @@ foreach_variable:
 
 for_statement:
 		statement { $$.u.ast = $1.u.ast; }
-	|	':' inner_statement_list T_ENDFOR ';' { AN($$); }
+	|	':' inner_statement_list T_ENDFOR ';' { $$.u.ast = $2.u.ast; }
 ;
 
 
 foreach_statement:
 		statement { AS($1); }
-	|	':' inner_statement_list T_ENDFOREACH ';'
+	|	':' inner_statement_list T_ENDFOREACH ';' { AS($2); }
 ;
 
 
 declare_statement:
 		statement { AS($1); }
-	|	':' inner_statement_list T_ENDDECLARE ';'
+	|	':' inner_statement_list T_ENDDECLARE ';' { AS($2); }
 ;
 
 
@@ -516,8 +518,8 @@ switch_case_list:
 
 case_list:
 		/* empty */	{ $$.op_type = IS_UNUSED; }
-	|	case_list T_CASE expr case_separator { AC($3); zend_do_extended_info(TSRMLS_C);  zend_do_case_before_statement(&$1, &$2, &$3 TSRMLS_CC); } inner_statement_list { zend_do_case_after_statement(&$$, &$2 TSRMLS_CC); $$.op_type = IS_CONST; }
-	|	case_list T_DEFAULT case_separator { zend_do_extended_info(TSRMLS_C);  zend_do_default_before_statement(&$1, &$2 TSRMLS_CC); } inner_statement_list { zend_do_case_after_statement(&$$, &$2 TSRMLS_CC); $$.op_type = IS_CONST; }
+	|	case_list T_CASE expr case_separator { AC($3); zend_do_extended_info(TSRMLS_C);  zend_do_case_before_statement(&$1, &$2, &$3 TSRMLS_CC); } inner_statement_list { AS($6); zend_do_case_after_statement(&$$, &$2 TSRMLS_CC); $$.op_type = IS_CONST; }
+	|	case_list T_DEFAULT case_separator { zend_do_extended_info(TSRMLS_C);  zend_do_default_before_statement(&$1, &$2 TSRMLS_CC); } inner_statement_list { AS($5); zend_do_case_after_statement(&$$, &$2 TSRMLS_CC); $$.op_type = IS_CONST; }
 ;
 
 
@@ -529,7 +531,7 @@ case_separator:
 
 while_statement:
 		statement { $$.u.ast = $1.u.ast; }
-	|	':' inner_statement_list T_ENDWHILE ';' { AN($$); }
+	|	':' inner_statement_list T_ENDWHILE ';' { $$.u.ast = $2.u.ast; }
 ;
 
 
@@ -549,22 +551,21 @@ if_stmt:
 			      zend_ast_create_binary(ZEND_AST_IF_ELEM, NULL, $3.u.ast)); }
 ;
 
-/*elseif_list:
-		elseif_list T_ELSEIF parenthesis_expr { AC($3); zend_do_if_cond(&$3, &$2 TSRMLS_CC); } statement { AS($5); zend_do_if_after_statement(&$2, 0 TSRMLS_CC); }
-;*/
-
-
-new_elseif_list:
-		/* empty */
-	|	new_elseif_list T_ELSEIF parenthesis_expr ':' { AC($3); zend_do_if_cond(&$3, &$2 TSRMLS_CC); } inner_statement_list { zend_do_if_after_statement(&$2, 0 TSRMLS_CC); }
+alt_if_stmt_without_else:
+		T_IF parenthesis_expr ':' inner_statement_list
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_IF,
+			      zend_ast_create_binary(ZEND_AST_IF_ELEM, $2.u.ast, $4.u.ast)); }
+	|	alt_if_stmt_without_else T_ELSEIF parenthesis_expr ':' inner_statement_list
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast,
+			      zend_ast_create_binary(ZEND_AST_IF_ELEM, $3.u.ast, $5.u.ast)); }
 ;
 
-
-new_else_single:
-		/* empty */
-	|	T_ELSE ':' inner_statement_list
+alt_if_stmt:
+		alt_if_stmt_without_else T_ENDIF ';' { $$.u.ast = $1.u.ast; }
+	|	alt_if_stmt_without_else T_ELSE ':' inner_statement_list T_ENDIF ';'
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast,
+			      zend_ast_create_binary(ZEND_AST_IF_ELEM, NULL, $4.u.ast)); }
 ;
-
 
 parameter_list:
 		non_empty_parameter_list
@@ -705,7 +706,7 @@ trait_modifiers:
 
 method_body:
 		';' /* abstract method */		{ Z_LVAL($$.u.constant) = ZEND_ACC_ABSTRACT; }
-	|	'{' inner_statement_list '}'	{ Z_LVAL($$.u.constant) = 0;	}
+	|	'{' inner_statement_list '}'	{ AS($2); Z_LVAL($$.u.constant) = 0; }
 ;
 
 variable_modifiers:
@@ -884,10 +885,10 @@ expr_without_variable:
 			{ $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $4.u.ast, $2.u.ast); }
 	|	function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, 0 TSRMLS_CC); }
 		'(' parameter_list ')' lexical_vars
-		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$3); }
+		'{' inner_statement_list '}' { AS($9); zend_do_end_function_declaration(&$1 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$3); }
 	|	T_STATIC function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
 		'(' parameter_list ')' lexical_vars
-		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$4); }
+		'{' inner_statement_list '}' { AS($10); zend_do_end_function_declaration(&$2 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$4); }
 ;
 
 function:
