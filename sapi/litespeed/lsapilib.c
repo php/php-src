@@ -2129,6 +2129,7 @@ int LSAPI_ForeachOrgHeader_r( LSAPI_Request * pReq,
         {
             pKey = pReq->m_pHttpHeader + pCur->nameOff;
             keyLen = pCur->nameLen;
+            *(pKey + keyLen ) = 0;
 
             pValue = pReq->m_pHttpHeader + pCur->valueOff;
             *(pValue + pCur->valueLen ) = 0;
