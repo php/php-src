@@ -334,7 +334,9 @@ unticked_statement:
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_DO_WHILE, $2.u.ast, $4.u.ast); }
 	|	T_FOR '(' for_expr ';' for_expr ';' for_expr ')' for_statement
 			{ $$.u.ast = zend_ast_create(4, ZEND_AST_FOR, $3.u.ast, $5.u.ast, $7.u.ast, $9.u.ast); }
-	|	T_SWITCH parenthesis_expr	{ AC($2); zend_do_switch_cond(&$2 TSRMLS_CC); } switch_case_list { zend_do_switch_end(&$4 TSRMLS_CC); AN($$); }
+	|	T_SWITCH parenthesis_expr switch_case_list
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_SWITCH, $2.u.ast, $3.u.ast); }
+	/*|	T_SWITCH parenthesis_expr	{ AC($2); zend_do_switch_cond(&$2 TSRMLS_CC); } switch_case_list { zend_do_switch_end(&$4 TSRMLS_CC); AN($$); }*/
 	|	T_BREAK ';'			{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, NULL); }
 	|	T_BREAK expr ';'	{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, $2.u.ast); }
 	|	T_CONTINUE ';'		{ $$.u.ast = zend_ast_create_unary(ZEND_CONT, NULL); }
@@ -356,10 +358,6 @@ unticked_statement:
 		foreach_statement
 			{ $$.u.ast = zend_ast_create(4, ZEND_AST_FOREACH,
 			      $3.u.ast, $7.u.ast, $5.u.ast, $9.u.ast); }
-	/*|	T_FOREACH '(' expr_without_variable T_AS
-		{ AC($3); zend_do_foreach_begin(&$1, &$2, &$3, &$4, 0 TSRMLS_CC); }
-		foreach_variable foreach_optional_arg ')' { zend_do_foreach_cont(&$1, &$2, &$4, &$6, &$7 TSRMLS_CC); }
-		foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); AN($$); }*/
 	|	T_DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); AN($$); }
 	|	';'	/* empty statement */ { AN($$); }
 	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}' { AS($4); }
@@ -507,17 +505,22 @@ declare_list:
 
 
 switch_case_list:
-		'{' case_list '}'					{ $$ = $2; }
-	|	'{' ';' case_list '}'				{ $$ = $3; }
-	|	':' case_list T_ENDSWITCH ';'		{ $$ = $2; }
-	|	':' ';' case_list T_ENDSWITCH ';'	{ $$ = $3; }
+		'{' case_list '}'					{ $$.u.ast = $2.u.ast; }
+	|	'{' ';' case_list '}'				{ $$.u.ast = $3.u.ast; }
+	|	':' case_list T_ENDSWITCH ';'		{ $$.u.ast = $2.u.ast; }
+	|	':' ';' case_list T_ENDSWITCH ';'	{ $$.u.ast = $3.u.ast; }
 ;
 
 
 case_list:
-		/* empty */	{ $$.op_type = IS_UNUSED; }
-	|	case_list T_CASE expr case_separator { AC($3); zend_do_extended_info(TSRMLS_C);  zend_do_case_before_statement(&$1, &$2, &$3 TSRMLS_CC); } inner_statement_list { AS($6); zend_do_case_after_statement(&$$, &$2 TSRMLS_CC); $$.op_type = IS_CONST; }
-	|	case_list T_DEFAULT case_separator { zend_do_extended_info(TSRMLS_C);  zend_do_default_before_statement(&$1, &$2 TSRMLS_CC); } inner_statement_list { AS($5); zend_do_case_after_statement(&$$, &$2 TSRMLS_CC); $$.op_type = IS_CONST; }
+		/* empty */ { $$.u.ast = zend_ast_create_dynamic(ZEND_AST_SWITCH_LIST); }
+	|	case_list T_CASE expr case_separator inner_statement_list
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast,
+			      zend_ast_create_binary(ZEND_AST_SWITCH_CASE, $3.u.ast, $5.u.ast)); }
+	|	case_list T_DEFAULT case_separator inner_statement_list
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast,
+			      zend_ast_create_binary(ZEND_AST_SWITCH_CASE, NULL, $4.u.ast)); }
+	/*|	case_list T_CASE expr case_separator { AC($3); zend_do_extended_info(TSRMLS_C);  zend_do_case_before_statement(&$1, &$2, &$3 TSRMLS_CC); } inner_statement_list { AS($6); zend_do_case_after_statement(&$$, &$2 TSRMLS_CC); $$.op_type = IS_CONST; }*/
 ;
 
 

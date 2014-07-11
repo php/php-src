@@ -7316,6 +7316,89 @@ void zend_compile_if(zend_ast *ast TSRMLS_DC) {
 	efree(jmp_opnums);
 }
 
+void zend_compile_switch(zend_ast *ast TSRMLS_DC) {
+	zend_ast *expr_ast = ast->child[0];
+	zend_ast *cases_ast = ast->child[1];
+
+	zend_uint i;
+	zend_bool has_default_case = 0;
+	zend_switch_entry switch_entry;
+
+	znode expr_node, case_node;
+	zend_op *opline;
+	zend_uint *jmpnz_opnums = safe_emalloc(sizeof(zend_uint), cases_ast->children, 0);
+	zend_uint opnum_default_jmp;
+
+	zend_compile_expr(&expr_node, expr_ast TSRMLS_CC);
+
+	switch_entry.cond = expr_node;
+	switch_entry.default_case = -1;
+	switch_entry.control_var = -1;
+	zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry);
+
+	do_begin_loop(TSRMLS_C);
+
+	case_node.op_type = IS_TMP_VAR;
+	case_node.u.op.var = get_temporary_variable(CG(active_op_array));
+
+	for (i = 0; i < cases_ast->children; ++i) {
+		zend_ast *case_ast = cases_ast->child[i];
+		zend_ast *cond_ast = case_ast->child[0];
+		znode cond_node;
+
+		if (!cond_ast) {
+			has_default_case = 1;
+			continue;
+		}
+
+		zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
+
+		opline = emit_op(NULL, ZEND_CASE, &expr_node, &cond_node TSRMLS_CC);
+		SET_NODE(opline->result, &case_node);
+		if (opline->op1_type == IS_CONST) {
+			zval_copy_ctor(&CONSTANT(opline->op1.constant));
+		}
+
+		jmpnz_opnums[i] = get_next_op_number(CG(active_op_array));
+		emit_op(NULL, ZEND_JMPNZ, &case_node, NULL TSRMLS_CC);
+	}
+
+	opnum_default_jmp = get_next_op_number(CG(active_op_array));
+	emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+
+	for (i = 0; i < cases_ast->children; ++i) {
+		zend_ast *case_ast = cases_ast->child[i];
+		zend_ast *cond_ast = case_ast->child[0];
+		zend_ast *stmt_ast = case_ast->child[1];
+
+		if (cond_ast) {
+			opline = &CG(active_op_array)->opcodes[jmpnz_opnums[i]];
+			opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+		} else {
+			opline = &CG(active_op_array)->opcodes[opnum_default_jmp];
+			opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+		}
+
+		zend_compile_stmt(stmt_ast TSRMLS_CC);
+	}
+
+	if (!has_default_case) {
+		opline = &CG(active_op_array)->opcodes[opnum_default_jmp];
+		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+	}
+
+	do_end_loop(get_next_op_number(CG(active_op_array)), 1 TSRMLS_CC);
+
+	if (expr_node.op_type == IS_VAR || expr_node.op_type == IS_TMP_VAR) {
+		emit_op(NULL, expr_node.op_type == IS_TMP_VAR ? ZEND_FREE : ZEND_SWITCH_FREE,
+			&expr_node, NULL TSRMLS_CC);
+	} else if (expr_node.op_type == IS_CONST) {
+		zval_dtor(&expr_node.u.constant);
+	}
+
+	zend_stack_del_top(&CG(switch_cond_stack));
+}
+
 void zend_compile_stmt_list(zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 	for (i = 0; i < ast->children; ++i) {
@@ -8115,6 +8198,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_IF:
 			zend_compile_if(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_SWITCH:
+			zend_compile_switch(ast TSRMLS_CC);
 			break;
 		default:
 		{
