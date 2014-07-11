@@ -440,7 +440,8 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 							MAKE_NOP(opline + 2);
 						}
 					}
-				} else if (Z_STRLEN(ZEND_OP2_LITERAL(opline)) == sizeof("strlen")-1 &&
+				} else if ((CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN) == 0 &&
+					Z_STRLEN(ZEND_OP2_LITERAL(opline)) == sizeof("strlen")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(opline)),
 						"strlen", sizeof("strlen")-1)) {
 					zval t;
@@ -455,6 +456,17 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					}
 				}
 			}			
+			break;
+		case ZEND_STRLEN:
+			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
+				zval t;
+
+				ZVAL_LONG(&t, Z_STRLEN(ZEND_OP1_LITERAL(opline)));
+				replace_tmp_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC);
+				literal_dtor(&ZEND_OP1_LITERAL(opline));
+				MAKE_NOP(opline);
+			}
 			break;
 #if ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
 		case ZEND_DECLARE_CONST:

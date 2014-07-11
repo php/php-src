@@ -1619,6 +1619,7 @@ PHP_RINIT_FUNCTION(mbstring)
 	if (MBSTRG(func_overload)){
 		p = &(mb_ovld[0]);
 		
+		CG(compiler_options) |= ZEND_COMPILE_NO_BUILTIN_STRLEN;
 		while (p->type > 0) {
 			if ((MBSTRG(func_overload) & p->type) == p->type && 
 				(orig = zend_hash_str_find_ptr(EG(function_table), p->save_func,
@@ -1687,6 +1688,7 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 			}
 			p++;
 		}
+		CG(compiler_options) &= ~ZEND_COMPILE_NO_BUILTIN_STRLEN;
 	}
 
 #if HAVE_MBREGEX

@@ -2703,6 +2703,54 @@ static int zend_do_convert_call_user_func_array(zend_op *init_opline TSRMLS_DC) 
 }
 /* }}} */
 
+static int zend_do_convert_strlen(zend_op *init_opline, znode *result TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline = init_opline + 1;
+	zend_op *send = NULL;
+	int level = 0;
+
+	do {
+		switch (opline->opcode) {
+			case ZEND_SEND_VAL:
+			case ZEND_SEND_VAL_EX:
+			case ZEND_SEND_VAR:
+			case ZEND_SEND_VAR_EX:
+			case ZEND_SEND_VAR_NO_REF:
+			case ZEND_SEND_REF:
+			case ZEND_SEND_UNPACK:
+				if (level == 0) {
+					if (opline->opcode == ZEND_SEND_UNPACK) {
+						return 0;
+					}
+					send = opline;
+				}
+				break;
+			case ZEND_INIT_FCALL_BY_NAME:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
+			case ZEND_NEW:
+			case ZEND_INIT_METHOD_CALL:
+			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_FCALL:
+				level++;
+				break;
+			case ZEND_DO_FCALL:
+				level--;
+				break;
+		}
+		opline++;
+	} while (send == NULL);
+
+	MAKE_NOP(init_opline);
+	send->opcode = ZEND_STRLEN;
+	send->extended_value = 0;
+	SET_UNUSED(send->op2);
+	send->result.var = get_temporary_variable(CG(active_op_array));
+	send->result_type = IS_TMP_VAR;
+	GET_NODE(result, send->result);
+	return 1;
+}
+/* }}} */
+
 void zend_do_end_function_call(znode *function_name, znode *result, int is_method, int is_dynamic_fcall TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
@@ -2740,6 +2788,15 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 							fcall->arg_num = 0;
 						}
 					}
+				} else if ((CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN) == 0 &&
+				           func->common.function_name->len == sizeof("strlen")-1 &&
+				           memcmp(func->common.function_name->val, "strlen", sizeof("strlen")-1) == 0) {
+					if (fcall->arg_num == 1) {
+						if (zend_do_convert_strlen(opline, result TSRMLS_CC)) {
+							zend_stack_del_top(&CG(function_call_stack));
+							return;
+						}
+					}
 				}
 			}
 		}
@@ -2774,6 +2831,14 @@ void zend_do_pass_param(znode *param, zend_uchar op TSRMLS_DC) /* {{{ */
 	if (fcall->uses_argument_unpacking) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Cannot use positional argument after argument unpacking");
+	}
+
+	if (op == ZEND_SEND_VAR && (param->op_type & (IS_CONST|IS_TMP_VAR))) {
+		/* Function call was converted into builtin instruction */
+		zend_llist *fetch_list_ptr = zend_stack_top(&CG(bp_stack));
+		zend_llist_destroy(fetch_list_ptr);
+		zend_stack_del_top(&CG(bp_stack));
+		original_op = op = ZEND_SEND_VAL;
 	}
 
 	if (original_op == ZEND_SEND_REF) {

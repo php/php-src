@@ -5846,4 +5846,42 @@ ZEND_VM_HANDLER(168, ZEND_BIND_GLOBAL, CV, CONST)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(121, ZEND_STRLEN, CONST|TMP|VAR|CV, ANY)
+{
+	USE_OPLINE
+	zval *value;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+		ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
+	} else {
+		if (Z_TYPE_P(value) < IS_TRUE) {
+			ZVAL_LONG(EX_VAR(opline->result.var), 0);
+		} else if (Z_TYPE_P(value) == IS_TRUE) {
+			ZVAL_LONG(EX_VAR(opline->result.var), 1);
+		} else if (Z_TYPE_P(value) <= IS_DOUBLE) {
+			zend_string *str = zval_get_string(value);
+			ZVAL_LONG(EX_VAR(opline->result.var), str->len);
+			STR_RELEASE(str);
+		} else if (Z_TYPE_P(value) == IS_OBJECT) {
+			zend_string *str;
+
+			if (parse_arg_object_to_str(value, &str, IS_STRING TSRMLS_CC) == FAILURE) {
+				ZEND_VM_C_GOTO(strlen_error);
+			}
+			ZVAL_LONG(EX_VAR(opline->result.var), str->len);
+			STR_RELEASE(str);
+		} else {
+ZEND_VM_C_LABEL(strlen_error):
+			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+	}
+	FREE_OP1();
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_EXPORT_HANDLER(zend_do_fcall, ZEND_DO_FCALL)
