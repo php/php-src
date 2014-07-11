@@ -70,7 +70,7 @@ $unexpected_values = array(
 );
 
 // loop though each element of the array and check the working of asort()
-// when $flag arugment is supplied with different values from $unexpected_values
+// when $flag argument is supplied with different values from $unexpected_values
 echo "\n-- Testing asort() by supplying different unexpected values for 'sort_flags' argument --\n";
 
 $counter = 1;

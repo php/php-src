@@ -1,5 +1,11 @@
 --TEST--
 Bug #61115: Stream related segfault on fatal error in php_stream_context_del_link - variation 1
+--SKIPIF--
+<?php
+if (getenv("USE_ZEND_ALLOC") === "0") {
+    die("skip Zend MM disabled");
+}
+?> 
 --FILE--
 <?php
 

@@ -14,5 +14,6 @@ class B extends A
 }
 
 ?>
+==DONE==
 --EXPECTF--
-Strict Standards: Declaration of B::test() should be compatible with A::test($a) in %sbug61761.php on line %d
+==DONE==

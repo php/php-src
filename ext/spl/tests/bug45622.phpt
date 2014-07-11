@@ -42,7 +42,7 @@ bool(true)
 --> Remove the array element and try access again:
 bool(false)
 
-Notice: Undefined index:  p in %s on line %d
+Notice: Undefined index: p in %s on line %d
 NULL
 
 --> Re-add the real property:

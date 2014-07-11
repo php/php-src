@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -451,6 +451,19 @@ static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list a
 }
 /* }}} */
 
+static void browscap_zval_copy_ctor(zval **p) /* {{{ */
+{
+	zval *new;
+
+	ALLOC_ZVAL(new);
+	*new = **p;
+
+	zval_copy_ctor(new);
+
+	INIT_PZVAL(new);
+	*p = new;
+} /* }}} */
+
 /* {{{ proto mixed get_browser([string browser_name [, bool return_array]])
    Get information about the capabilities of a browser. If browser_name is omitted or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array is true, returns an array. */
 PHP_FUNCTION(get_browser)
@@ -511,11 +524,11 @@ PHP_FUNCTION(get_browser)
 
 	if (return_array) {
 		array_init(return_value);
-		zend_hash_copy(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
+		zend_hash_copy(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) browscap_zval_copy_ctor, (void *) &tmp_copy, sizeof(zval *));
 	}
 	else {
 		object_init(return_value);
-		zend_hash_copy(Z_OBJPROP_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
+		zend_hash_copy(Z_OBJPROP_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) browscap_zval_copy_ctor, (void *) &tmp_copy, sizeof(zval *));
 	}
 
 	while (zend_hash_find(Z_ARRVAL_PP(agent), "parent", sizeof("parent"), (void **) &z_agent_name) == SUCCESS) {
@@ -524,10 +537,10 @@ PHP_FUNCTION(get_browser)
 		}
 
 		if (return_array) {
-			zend_hash_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *), 0);
+			zend_hash_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) browscap_zval_copy_ctor, (void *) &tmp_copy, sizeof(zval *), 0);
 		}
 		else {
-			zend_hash_merge(Z_OBJPROP_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *), 0);
+			zend_hash_merge(Z_OBJPROP_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) browscap_zval_copy_ctor, (void *) &tmp_copy, sizeof(zval *), 0);
 		}
 	}
 

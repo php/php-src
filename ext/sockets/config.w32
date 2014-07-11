@@ -7,7 +7,7 @@ if (PHP_SOCKETS != "no") {
 	if (CHECK_LIB("ws2_32.lib", "sockets", PHP_SOCKETS)
 	&& CHECK_LIB("Iphlpapi.lib", "sockets", PHP_SOCKETS)
 	&& CHECK_HEADER_ADD_INCLUDE("winsock.h", "CFLAGS_SOCKETS")) {
-		EXTENSION('sockets', 'sockets.c multicast.c');
+		EXTENSION('sockets', 'sockets.c multicast.c conversions.c sockaddr_conv.c sendrecvmsg.c');
 		AC_DEFINE('HAVE_SOCKETS', 1);
 		PHP_INSTALL_HEADERS("ext/sockets", "php_sockets.h");
 	} else {

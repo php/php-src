@@ -1,5 +1,7 @@
 --TEST--
 Test var_export() function with valid arrays
+--INI--
+serialize_precision=17
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])
@@ -233,15 +235,15 @@ string(20) "array (
 --Iteration: array(10.5, 5.6) --
 array (
   0 => 10.5,
-  1 => 5.6,
+  1 => 5.5999999999999996,
 )
 array (
   0 => 10.5,
-  1 => 5.6,
+  1 => 5.5999999999999996,
 )
-string(34) "array (
+string(49) "array (
   0 => 10.5,
-  1 => 5.6,
+  1 => 5.5999999999999996,
 )"
 
 

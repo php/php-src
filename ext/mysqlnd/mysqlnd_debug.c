@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -516,8 +516,10 @@ enum mysqlnd_debug_parser_state
 static void
 MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const mode)
 {
-	unsigned int mode_len = strlen(mode), i;
+	unsigned int mode_len, i;
 	enum mysqlnd_debug_parser_state state = PARSER_WAIT_MODIFIER;
+
+	mode_len = mode? strlen(mode) : 0;
 
 	self->flags = 0;
 	self->nest_level_limit = 0;

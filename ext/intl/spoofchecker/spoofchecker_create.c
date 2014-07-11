@@ -35,7 +35,7 @@ PHP_METHOD(Spoofchecker, __construct)
 		return;
 	}
 	
-	SPOOFCHECKER_METHOD_FETCH_OBJECT;
+	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;
 	
 	co->uspoof = uspoof_open(SPOOFCHECKER_ERROR_CODE_P(co));
 	INTL_CTOR_CHECK_STATUS(co, "spoofchecker: unable to open ICU Spoof Checker");

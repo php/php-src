@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1191,7 +1191,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 							if (zend_hash_index_find(Z_ARRVAL_PP(disabled_auth_method), i, (void **) &z_auth_method) == SUCCESS) {
 								if (Z_TYPE_PP(z_auth_method) == IS_STRING) {
 									if (Z_STRLEN_PP(z_auth_method) > 1) {
-										mail_parameters (NIL, DISABLE_AUTHENTICATOR, (void *)Z_STRVAL_PP(disabled_auth_method));
+										mail_parameters (NIL, DISABLE_AUTHENTICATOR, (void *)Z_STRVAL_PP(z_auth_method));
 									}
 								} else {
 									php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument, expect string or array of strings");
@@ -1270,7 +1270,6 @@ PHP_FUNCTION(imap_reopen)
 	int mailbox_len;
 	long options = 0, retries = 0;
 	pils *imap_le_struct;
-	MAILSTREAM *imap_stream;
 	long flags=NIL;
 	long cl_flags=NIL;
 
@@ -1298,12 +1297,12 @@ PHP_FUNCTION(imap_reopen)
 		RETURN_FALSE;
 	}
 
-	imap_stream = mail_open(imap_le_struct->imap_stream, mailbox, flags);
-	if (imap_stream == NIL) {
+	imap_le_struct->imap_stream = mail_open(imap_le_struct->imap_stream, mailbox, flags);
+	if (imap_le_struct->imap_stream == NIL) {
+		zend_list_delete(Z_RESVAL_P(streamind));
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't re-open stream");
 		RETURN_FALSE;
 	}
-	imap_le_struct->imap_stream = imap_stream;
 	RETURN_TRUE;
 }
 /* }}} */

@@ -69,7 +69,7 @@ $unexpected_values = array(
 );
 
 // loop though each element of the array and check the working of sort()
-// when $flag arugment is supplied with different values
+// when $flag argument is supplied with different values
 echo "\n-- Testing sort() by supplying different unexpected values for 'flag' argument --\n";
 
 $counter = 1;

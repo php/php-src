@@ -8,6 +8,9 @@ fa@php.net
     if (!extension_loaded('sockets')) {
         die('skip - sockets extension not available.');
     }
+    if (getenv("SKIP_ONLINE_TESTS")) {
+        die("skip test requiring internet connection");
+    }
 ?>
 --FILE--
 <?php

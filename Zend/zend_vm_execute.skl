@@ -1,66 +1,24 @@
 {%DEFINES%}
 
-ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
+ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data TSRMLS_DC)
 {
 	DCL_OPLINE
-	zend_execute_data *execute_data;
-	zend_bool nested = 0;
-	zend_bool original_in_execution = EG(in_execution);
+	zend_bool original_in_execution;
+
 	{%HELPER_VARS%}
 
 	{%INTERNAL_LABELS%}
 
-	if (EG(exception)) {
-		return;
-	}
-
+	original_in_execution = EG(in_execution);
 	EG(in_execution) = 1;
 
+	if (0) {
 zend_vm_enter:
-	/* Initialize execute_data */
-	execute_data = (zend_execute_data *)zend_vm_stack_alloc(
-		ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) +
-		ZEND_MM_ALIGNED_SIZE(sizeof(zval**) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2)) +
-		ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T TSRMLS_CC);
-
-	EX(CVs) = (zval***)((char*)execute_data + ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)));
-	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
-	EX(Ts) = (temp_variable *)(((char*)EX(CVs)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval**) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2)));
-	EX(fbc) = NULL;
-	EX(called_scope) = NULL;
-	EX(object) = NULL;
-	EX(old_error_reporting) = NULL;
-	EX(op_array) = op_array;
-	EX(symbol_table) = EG(active_symbol_table);
-	EX(prev_execute_data) = EG(current_execute_data);
-	EG(current_execute_data) = execute_data;
-	EX(nested) = nested;
-	nested = 1;
+		execute_data = i_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);
+	}
 
 	LOAD_REGS();
-
-	if (!op_array->run_time_cache && op_array->last_cache_slot) {
-		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
-	}
-
-	if (op_array->this_var != -1 && EG(This)) {
- 		Z_ADDREF_P(EG(This)); /* For $this pointer */
-		if (!EG(active_symbol_table)) {
-			EX_CV(op_array->this_var) = (zval**)EX_CVs() + (op_array->last_var + op_array->this_var);
-			*EX_CV(op_array->this_var) = EG(This);
-		} else {
-			if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), (void**)&EX_CV(op_array->this_var))==FAILURE) {
-				Z_DELREF_P(EG(This));
-			}
-		}
-	}
-
-	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
-	EG(opline_ptr) = &EX(opline);
 	LOAD_OPLINE();
-
-	EX(function_state).function = (zend_function *) op_array;
-	EX(function_state).arguments = NULL;
 
 	while (1) {
     {%ZEND_VM_CONTINUE_LABEL%}
@@ -76,6 +34,14 @@ zend_vm_enter:
 
 	}
 	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
+}
+
+ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
+{
+	if (EG(exception)) {
+		return;
+	} 
+	zend_{%EXECUTOR_NAME%}_ex(i_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC) TSRMLS_CC);
 }
 
 {%EXTERNAL_EXECUTOR%}

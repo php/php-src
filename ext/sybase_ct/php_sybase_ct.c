@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1121,7 +1121,7 @@ static int php_sybase_finish_results(sybase_result *result TSRMLS_DC)
 				break;
 
 			case CS_CMD_FAIL:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Command failed, cancelling rest");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Command failed, canceling rest");
 				ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
 				fail = 1;
 				break;
@@ -1131,7 +1131,7 @@ static int php_sybase_finish_results(sybase_result *result TSRMLS_DC)
 			case CS_PARAM_RESULT:
 			case CS_ROW_RESULT:
 				/* Unexpected results, cancel them. */
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Unexpected results, cancelling current");
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Unexpected results, canceling current");
 				ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_CURRENT);
 				break;
 
@@ -1141,7 +1141,7 @@ static int php_sybase_finish_results(sybase_result *result TSRMLS_DC)
 				break;
 
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Unexpected results, cancelling all");
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Unexpected results, canceling all");
 				ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
 				break;
 		}
@@ -1696,7 +1696,7 @@ PHP_FUNCTION(sybase_free_result)
 	
 	/* Did we fetch up until the end? */
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS) {
-		/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cancelling the rest of the results"); */
+		/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  canceling the rest of the results"); */
 		ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
 		php_sybase_finish_results(result TSRMLS_CC);
 	}

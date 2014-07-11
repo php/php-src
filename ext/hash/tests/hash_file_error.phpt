@@ -15,7 +15,7 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 echo "*** Testing hash_file() : error conditions ***\n";
 
 // Set up file
-$filename = 'hash_file_example.txt';
+$filename = 'hash_file_error_example.txt';
 file_put_contents( $filename, 'The quick brown fox jumped over the lazy dog.' );
 
 
@@ -23,8 +23,8 @@ file_put_contents( $filename, 'The quick brown fox jumped over the lazy dog.' );
 echo "\n-- Testing hash_file() function with an unknown algorithm --\n";
 var_dump( hash_file( 'foobar', $filename ) );
 
-echo "\n-- Testing hash_file() function with a non-existant file --\n";
-var_dump( hash_file( 'md5', 'nonexistant.txt' ) );
+echo "\n-- Testing hash_file() function with a non-existent file --\n";
+var_dump( hash_file( 'md5', 'nonexistent.txt' ) );
 
 echo "\n-- Testing hash_file() function with less than expected no. of arguments --\n";
 var_dump( hash_file( 'md5' ) );
@@ -38,7 +38,7 @@ var_dump( hash_file( 'md5', $filename, false, $extra_arg ) );
 --CLEAN--
 <?php
 
-$filename = 'hash_file_example.txt';
+$filename = 'hash_file_error_example.txt';
 unlink( $filename );
 
 ?>
@@ -50,7 +50,7 @@ unlink( $filename );
 Warning: hash_file(): Unknown hashing algorithm: %s in %s on line %d
 bool(false)
 
--- Testing hash_file() function with a non-existant file --
+-- Testing hash_file() function with a non-existent file --
 
 Warning: hash_file(%s): failed to open stream: No such file or directory in %s on line %d
 bool(false)

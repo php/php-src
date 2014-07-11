@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(bz2, for BZip2 support,
-[  --with-bz2[=DIR]        Include BZip2 support])
+[  --with-bz2[=DIR]          Include BZip2 support])
 
 if test "$PHP_BZ2" != "no"; then
   if test -r $PHP_BZ2/include/bzlib.h; then

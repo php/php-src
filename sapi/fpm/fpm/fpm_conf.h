@@ -40,6 +40,10 @@ struct fpm_global_config_s {
 	int rlimit_files;
 	int rlimit_core;
 	char *events_mechanism;
+#ifdef HAVE_SYSTEMD
+	int systemd_watchdog;
+	int systemd_interval;
+#endif
 };
 
 extern struct fpm_global_config_s fpm_global_config;
@@ -79,10 +83,14 @@ struct fpm_worker_pool_config_s {
 	char *chroot;
 	char *chdir;
 	int catch_workers_output;
+	int clear_env;
 	char *security_limit_extensions;
 	struct key_value_s *env;
 	struct key_value_s *php_admin_values;
 	struct key_value_s *php_values;
+#ifdef HAVE_APPARMOR
+	char *apparmor_hat;
+#endif
 };
 
 struct ini_value_parser_s {
@@ -97,7 +105,7 @@ enum {
 	PM_STYLE_ONDEMAND = 3
 };
 
-int fpm_conf_init_main(int test_conf);
+int fpm_conf_init_main(int test_conf, int force_daemon);
 int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc);
 int fpm_conf_write_pid();
 int fpm_conf_unlink_pid();

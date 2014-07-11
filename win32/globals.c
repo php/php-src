@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,8 +65,6 @@ PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 		;
 
 	closelog();
-	wg->starttime.tv_sec = 0;
-	wg->lasttime = 0;
 
 	return SUCCESS;
 }

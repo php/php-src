@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -279,7 +279,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 								node->type = XML_NAMESPACE_DECL;
 								node->parent = nsparent;
 								node->ns = curns;
+							} else {
+								node = xmlDocCopyNodeList(domintern->document->ptr, node);
 							}
+
 							child = php_dom_create_object(node, &ret, child, domintern TSRMLS_CC);
 							add_next_index_zval(args[i], child);
 						}
@@ -336,7 +339,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
 				valuePush(ctxt, xmlXPathNewString(""));
 			}
-		/* retval is == NULL, when an exception occured, don't report anything, because PHP itself will handle that */
+		/* retval is == NULL, when an exception occurred, don't report anything, because PHP itself will handle that */
 		} else if (retval == NULL) {
 		} else {
 			if (retval->type == IS_OBJECT && instanceof_function( Z_OBJCE_P(retval), dom_node_class_entry TSRMLS_CC)) {
@@ -476,7 +479,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 
 static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStylesheetPtr style, zval *docp TSRMLS_DC) /* {{{ */
 {
-	xmlDocPtr newdocp;
+	xmlDocPtr newdocp = NULL;
 	xmlDocPtr doc = NULL;
 	xmlNodePtr node = NULL;
 	xsltTransformContextPtr ctxt;

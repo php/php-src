@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@
 #include "mod_user.h"
 
 ps_module ps_mod_user = {
-	PS_MOD(user)
+	PS_MOD_SID(user)
 };
 
 #define SESS_ZVAL_LONG(val, a)						\
@@ -63,17 +63,30 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 }
 
 #define STDVARS								\
-	zval *retval;							\
+	zval *retval = NULL;					\
 	int ret = FAILURE
 
 #define PSF(a) PS(mod_user_names).name.ps_##a
 
-#define FINISH								\
-	if (retval) {							\
-		convert_to_long(retval);			\
-		ret = Z_LVAL_P(retval);				\
-		zval_ptr_dtor(&retval);				\
-	}										\
+#define FINISH \
+	if (retval) { \
+		if (Z_TYPE_P(retval) == IS_BOOL) { \
+			ret = Z_BVAL_P(retval) ? SUCCESS : FAILURE; \
+                }  else if ((Z_TYPE_P(retval) == IS_LONG) && (Z_LVAL_P(retval) == -1)) { \
+			/* BC for clever users - Deprecate me */ \
+			ret = FAILURE; \
+		} else if ((Z_TYPE_P(retval) == IS_LONG) && (Z_LVAL_P(retval) == 0)) { \
+			/* BC for clever users - Deprecate me */ \
+			ret = SUCCESS; \
+		} else { \
+			if (!EG(exception)) { \
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, \
+				                 "Session callback expects true/false return value"); \
+			} \
+			ret = FAILURE; \
+		} \
+		zval_ptr_dtor(&retval); \
+	} \
 	return ret
 
 PS_OPEN_FUNC(user)
@@ -99,6 +112,7 @@ PS_OPEN_FUNC(user)
 
 PS_CLOSE_FUNC(user)
 {
+	zend_bool bailout = 0;
 	STDVARS;
 
 	if (!PS(mod_user_implemented)) {
@@ -106,8 +120,20 @@ PS_CLOSE_FUNC(user)
 		return SUCCESS;
 	}
 
-	retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
+	zend_try {
+		retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
+	} zend_catch {
+		bailout = 1;
+	} zend_end_try();
+
 	PS(mod_user_implemented) = 0;
+
+	if (bailout) {
+		if (retval) {
+			zval_ptr_dtor(&retval);
+		}
+		zend_bailout();
+	}
 
 	FINISH;
 }
@@ -168,6 +194,38 @@ PS_GC_FUNC(user)
 	retval = ps_call_handler(PSF(gc), 1, args TSRMLS_CC);
 
 	FINISH;
+}
+
+PS_CREATE_SID_FUNC(user)
+{
+	/* maintain backwards compatibility */
+	if (PSF(create_sid) != NULL) {
+		char *id = NULL;
+		zval *retval = NULL;
+
+		retval = ps_call_handler(PSF(create_sid), 0, NULL TSRMLS_CC);
+
+		if (retval) {
+			if (Z_TYPE_P(retval) == IS_STRING) {
+				id = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+			}
+			zval_ptr_dtor(&retval);
+		}
+		else {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "No session id returned by function");
+			return NULL;
+		}
+
+		if (!id) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Session id must be a string");
+			return NULL;
+		}
+
+		return id;
+	}
+
+	/* function as defined by PS_MOD */
+	return php_session_create_id(mod_data, newlen TSRMLS_CC);
 }
 
 /*

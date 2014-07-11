@@ -17,4 +17,4 @@ bool(true)
 
 
 
-Warning: date_timestamp_get() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_timestamp_get() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d

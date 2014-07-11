@@ -79,15 +79,15 @@ object(ArrayObject)#%d (1) {
 }
 int(0)
 
-Notice: Undefined offset:  6 in %sarray_001.php on line %d
+Notice: Undefined offset: 6 in %sarray_001.php on line %d
 NULL
 
-Notice: Undefined index:  b in %sarray_001.php on line %d
+Notice: Undefined index: b in %sarray_001.php on line %d
 NULL
 
-Notice: Undefined offset:  7 in %sarray_001.php on line %d
+Notice: Undefined offset: 7 in %sarray_001.php on line %d
 
-Notice: Undefined index:  c in %sarray_001.php on line %d
+Notice: Undefined index: c in %sarray_001.php on line %d
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {

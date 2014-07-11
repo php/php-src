@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -23,12 +23,14 @@
 
 #include "zend.h"
 
+BEGIN_EXTERN_C()
 ZEND_API extern const char *(*zend_new_interned_string)(const char *str, int len, int free_src TSRMLS_DC);
 ZEND_API extern void (*zend_interned_strings_snapshot)(TSRMLS_D);
 ZEND_API extern void (*zend_interned_strings_restore)(TSRMLS_D);
 
 void zend_interned_strings_init(TSRMLS_D);
 void zend_interned_strings_dtor(TSRMLS_D);
+END_EXTERN_C()
 
 #ifndef ZTS
 
@@ -54,11 +56,38 @@ void zend_interned_strings_dtor(TSRMLS_D);
 		} \
 	} while (0)
 
+#define str_efree_rel(s) do { \
+		if (!IS_INTERNED(s)) { \
+			efree_rel((char *)s); \
+		} \
+	} while (0)
+
 #define str_free(s) do { \
 		if (!IS_INTERNED(s)) { \
 			free((char*)s); \
 		} \
 	} while (0)
+
+#define str_erealloc(str, new_len) \
+	(IS_INTERNED(str) \
+	 ? _str_erealloc(str, new_len, INTERNED_LEN(str)) \
+	 : erealloc(str, new_len))
+
+static inline char *_str_erealloc(char *str, size_t new_len, size_t old_len) {
+	char *buf = (char *) emalloc(new_len);
+	memcpy(buf, str, old_len);
+	return buf;
+}
+
+#define str_estrndup(str, len) \
+	(IS_INTERNED(str) ? (str) : estrndup((str), (len)))
+
+#define str_strndup(str, len) \
+	(IS_INTERNED(str) ? (str) : zend_strndup((str), (len)));
+
+#define str_hash(str, len) \
+	(IS_INTERNED(str) ? INTERNED_HASH(str) : zend_hash_func((str), (len)+1))
+
 
 #endif /* ZEND_STRING_H */
 

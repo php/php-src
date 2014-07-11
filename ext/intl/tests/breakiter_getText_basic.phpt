@@ -1,6 +1,7 @@
 --TEST--
 IntlBreakIterator::getText(): basic test
 --SKIPIF--
+<?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--

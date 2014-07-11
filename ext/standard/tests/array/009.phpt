@@ -94,7 +94,7 @@ var_dump( current($temp_array, $temp_array) );
 var_dump( reset($temp_array, $temp_array) );
 var_dump( next($temp_array, $temp_array) );
 
-// invalid args type, valid arguement: array 
+// invalid args type, valid argument: array 
 $int_var = 1;
 $float_var = 1.5;
 $string = "string";

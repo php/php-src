@@ -317,7 +317,7 @@ class NumberFormatter {
 	/**
 	 * Get the error text from the last operation.
 	 *
-	 * @return string Description of the last occured error.
+	 * @return string Description of the last occurred error.
 	 */
 	public public function getErrorMessage() {}
 
@@ -495,6 +495,6 @@ function numfmt_get_error_code($formatter) {}
  * Get the error text from the last operation.
  *
  * @param NumberFormatter $formatter The formatter resource
- * @return string Description of the last occured error.
+ * @return string Description of the last occurred error.
  */
 function numfmt_get_error_message($formatter) {}

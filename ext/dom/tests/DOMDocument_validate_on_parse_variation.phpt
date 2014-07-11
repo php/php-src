@@ -13,7 +13,7 @@ require_once('skipif.inc');
 require_once('dom_test.inc');
 
 chdir(__DIR__);
-$XMLStringGood = file_get_contents('note.xml');
+$XMLStringGood = file_get_contents(dirname(__FILE__).'/note.xml');
 
 $dom = new DOMDocument;
 $dom->resolveExternals = TRUE;

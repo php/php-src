@@ -10,5 +10,9 @@ if (!extension_loaded('zlib')) {
 <?php
 
 gzopen('someFile', 'c');
+--CLEAN--
+<?php 
+	unlink('someFile'); 
+?>
 --EXPECTF--
 Warning: gzopen(): gzopen failed in %s on line %d

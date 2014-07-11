@@ -28,7 +28,7 @@
 /* {{{ */
 static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
-	char*       locale;
+	const char* locale;
 	char*       pattern;
 	int         locale_len = 0, pattern_len = 0;
 	UChar*      spattern     = NULL;
@@ -49,7 +49,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
-	MSG_FORMAT_METHOD_FETCH_OBJECT;
+	MSG_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {
@@ -61,7 +61,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if(locale_len == 0) {
-		locale = INTL_G(default_locale);
+		locale = intl_locale_get_default(TSRMLS_C);
 	}
 
 #ifdef MSG_FORMAT_QUOTE_APOS

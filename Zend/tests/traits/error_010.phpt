@@ -10,13 +10,9 @@ trait c {
 	public function test() { return 2; }
 }
 
-trait b {
-	public function test() { return 1; }
-}
-
 class bar {
-	use foo, c { c::test insteadof foo, b; }
-	use foo, c { c::test insteadof foo, b; }
+	use foo, c { c::test insteadof foo; }
+	use foo, c { c::test insteadof foo; }
 }
 
 $x = new bar;

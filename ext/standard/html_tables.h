@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1395,8 +1395,8 @@ static const entity_multicodepoint_row multi_cp_html5_02ACC[] = {
 	{ {0x0FE00,	"varsupsetneqq",      	13} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AFD[] = {
-	{ {01,		NULL                  ,	0} },
-	{ {0x0FE00,	"varsupsetneqq",      	13} },
+	{ {01,		"parsl",              	 5} },
+	{ {0x020E5,	"nparsl",             	 6} },
 };
 
 /* End of double code point tables }}} */

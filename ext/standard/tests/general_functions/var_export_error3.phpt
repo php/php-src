@@ -15,4 +15,5 @@ var_export($a, true);
 ===DONE===
 --EXPECTF--
 
-Fatal error: Nesting level too deep - recursive dependency? in %s on line 9
+Warning: var_export does not handle circular references in %s on line 9
+===DONE===

@@ -56,6 +56,6 @@ Set static values in A:
 
 Fatal error: Uncaught exception 'ReflectionException' with message 'Class A does not have a property named ' in %sReflectionClass_setStaticPropertyValue_001_2_4.php:%d
 Stack trace:
-#0 %sReflectionClass_setStaticPropertyValue_001_2_4.php(%d): ReflectionClass->setStaticPropertyValue('?A?privateOverr...', 'new value 1')
+#0 %sReflectionClass_setStaticPropertyValue_001_2_4.php(%d): ReflectionClass->setStaticPropertyValue('\x00A\x00privateOverr...', 'new value 1')
 #1 {main}
   thrown in %sReflectionClass_setStaticPropertyValue_001_2_4.php on line %d

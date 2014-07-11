@@ -300,7 +300,7 @@ class Interop_Client
 
     /**
     *  decodeSoapval
-    * decodes a soap value to php type, used for test result comparisions
+    * decodes a soap value to php type, used for test result comparisons
     *
     * @param SOAP_Value soapval
     * @return mixed result
@@ -398,7 +398,7 @@ class Interop_Client
             $namespace = $soapaction = 'http://soapinterop.org/';
             // hack to make tests work with MS SoapToolkit
             // it's the only one that uses this soapaction, and breaks if
-            // it isn't right.  Can't wait for soapaction to be fully depricated
+            // it isn't right.  Can't wait for soapaction to be fully deprecated
             if ($this->currentTest == 'base' &&
                 strstr($endpoint_info['endpointName'],'MS SOAP ToolKit 2.0')) {
                 $soapaction = 'urn:soapinterop';

@@ -68,7 +68,7 @@ $values =  array (
 
 
 // loop through each element of the array and check the working of get_html_translation_table()
-// when $quote_style arugment is supplied with different values
+// when $quote_style argument is supplied with different values
 echo "\n--- Testing get_html_translation_table() by supplying different values for 'quote_style' argument ---\n";
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {

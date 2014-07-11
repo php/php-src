@@ -33,7 +33,16 @@ typedef struct {
 } ResourceBundle_object;
 
 #define RESOURCEBUNDLE_METHOD_INIT_VARS		INTL_METHOD_INIT_VARS(ResourceBundle, rb)
-#define RESOURCEBUNDLE_METHOD_FETCH_OBJECT	INTL_METHOD_FETCH_OBJECT(ResourceBundle, rb)
+#define RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(ResourceBundle, rb)
+#define RESOURCEBUNDLE_METHOD_FETCH_OBJECT							\
+	INTL_METHOD_FETCH_OBJECT(ResourceBundle, rb);					\
+	if (RESOURCEBUNDLE_OBJECT(rb) == NULL) {						\
+		intl_errors_set(&rb->error, U_ILLEGAL_ARGUMENT_ERROR,		\
+				"Found unconstructed ResourceBundle", 0 TSRMLS_CC);	\
+		RETURN_FALSE;												\
+	}
+
+
 #define RESOURCEBUNDLE_OBJECT(rb)			(rb)->me
 
 void resourcebundle_register_class( TSRMLS_D );

@@ -52,13 +52,13 @@ string(12) "100008388608"
 string(12) "100000000000"
 string(12) "100000000008"
 
-Warning: gmp_setbit(): supplied argument is not a valid GMP integer resource in %s on line %d
+Warning: gmp_setbit() expects parameter 1 to be GMP, string given in %s on line %d
 
 Warning: gmp_setbit() expects at least 2 parameters, 1 given in %s on line %d
 
 Warning: gmp_setbit() expects at most 3 parameters, 4 given in %s on line %d
 
-Warning: gmp_setbit() expects parameter 2 to be long, array given in %s on line %d
+Warning: gmp_setbit() expects parameter 1 to be GMP, string given in %s on line %d
 
-Warning: gmp_setbit() expects parameter 2 to be long, array given in %s on line %d
+Warning: gmp_setbit() expects parameter 1 to be GMP, array given in %s on line %d
 Done

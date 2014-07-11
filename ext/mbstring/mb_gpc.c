@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -254,6 +254,12 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		n++;
 		var = php_strtok_r(NULL, info->separator, &strtok_buf);
 	} 
+
+	if (n > (PG(max_input_vars) * 2)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+		goto out;
+	}
+
 	num = n; /* make sure to process initilized vars only */
 	
 	/* initialize converter */
@@ -358,6 +364,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 {
 	const mbfl_encoding *detected;
 	php_mb_encoding_handler_info_t info;
+	char *post_data_str = NULL;
 
 	MBSTRG(http_input_identify_post) = NULL;
 
@@ -370,7 +377,10 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	info.num_from_encodings     = MBSTRG(http_input_list_size); 
 	info.from_language          = MBSTRG(language);
 
-	detected = _php_mb_encoding_handler_ex(&info, arg, SG(request_info).post_data TSRMLS_CC);
+	php_stream_rewind(SG(request_info).request_body);
+	php_stream_copy_to_mem(SG(request_info).request_body, &post_data_str, PHP_STREAM_COPY_ALL, 0);
+	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str TSRMLS_CC);
+	STR_FREE(post_data_str);
 
 	MBSTRG(http_input_identify) = detected;
 	if (detected) {

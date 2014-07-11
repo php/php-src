@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,33 +39,54 @@ PHPAPI int socketpair(int domain, int type, int protocol, SOCKET sock[2])
 		return -1;
 	}
 
+	sock[0] = sock[1] = redirect = INVALID_SOCKET;
 
-	sock[0]				= socket(domain, type, protocol);
-	address.sin_addr.s_addr		= INADDR_ANY;
-	address.sin_family		= AF_INET;
-	address.sin_port		= 0;
 
-	bind(sock[0], (struct sockaddr*)&address, sizeof(address));
-
-	if(getsockname(sock[0], (struct sockaddr *)&address, &size) != 0) {
+	sock[0]	= socket(domain, type, protocol);
+	if (INVALID_SOCKET == sock[0]) {
+		goto error;
 	}
 
-	listen(sock[0], 2);
-	sock[1] = socket(domain, type, protocol);	
-	address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	address.sin_addr.s_addr	= INADDR_ANY;
+	address.sin_family	= AF_INET;
+	address.sin_port	= 0;
 
-	connect(sock[1], (struct sockaddr*)&address, sizeof(address));
+	if (bind(sock[0], (struct sockaddr*)&address, sizeof(address)) != 0) {
+		goto error;
+	}
+
+	if(getsockname(sock[0], (struct sockaddr *)&address, &size) != 0) {
+		goto error;
+	}
+
+	if (listen(sock[0], 2) != 0) {
+		goto error;
+	}
+
+	sock[1] = socket(domain, type, protocol);
+	if (INVALID_SOCKET == sock[1]) {
+		goto error;
+	}
+
+	address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	if(connect(sock[1], (struct sockaddr*)&address, sizeof(address)) != 0) {
+		goto error;
+	}
+
 	redirect = accept(sock[0],(struct sockaddr*)&address, &size);
+	if (INVALID_SOCKET == redirect) {
+		goto error;
+	}
 
 	closesocket(sock[0]);
 	sock[0] = redirect;
 
-	if(sock[0] == INVALID_SOCKET ) {
-		closesocket(sock[0]);
-		closesocket(sock[1]);
-		WSASetLastError(WSAECONNABORTED);
-		return -1;
-	}
-	
 	return 0;
+
+error:
+	closesocket(redirect);
+	closesocket(sock[0]);
+	closesocket(sock[1]);
+	WSASetLastError(WSAECONNABORTED);
+	return -1;
 }

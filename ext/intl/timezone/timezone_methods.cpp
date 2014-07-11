@@ -24,6 +24,9 @@
 #include <unicode/timezone.h>
 #include <unicode/ustring.h>
 #include "intl_convertcpp.h"
+
+#include "../common/common_date.h"
+
 extern "C" {
 #include "../php_intl.h"
 #define USE_TIMEZONE_POINTER 1

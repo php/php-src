@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -151,7 +151,7 @@ PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t len
 	unsigned char c, *ret, *d;
 	char *hex = "0123456789ABCDEF";
 
-	ret = safe_emalloc(1, 3 * length + 3 * (((3 * length)/PHP_QPRINT_MAXL) + 1), 0);
+	ret = safe_emalloc(3, length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1), 1);
 	d = ret;
 
 	while (length--) {
@@ -162,7 +162,10 @@ PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t len
 			lp = 0;
 		} else {
 			if (iscntrl (c) || (c == 0x7f) || (c & 0x80) || (c == '=') || ((c == ' ') && (*str == '\015'))) {
-				if ((lp += 3) > PHP_QPRINT_MAXL) {
+				if ((((lp+= 3) > PHP_QPRINT_MAXL) && (c <= 0x7f)) 
+            || ((c > 0x7f) && (c <= 0xdf) && ((lp + 3) > PHP_QPRINT_MAXL)) 
+            || ((c > 0xdf) && (c <= 0xef) && ((lp + 6) > PHP_QPRINT_MAXL)) 
+            || ((c > 0xef) && (c <= 0xf4) && ((lp + 9) > PHP_QPRINT_MAXL))) {
 					*d++ = '=';
 					*d++ = '\015';
 					*d++ = '\012';

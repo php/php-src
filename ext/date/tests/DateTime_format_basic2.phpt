@@ -31,7 +31,7 @@ var_dump( $date->format( DateTime::W3C) ) ;
 --EXPECT--
 *** Testing date_format() : basic functionality - formatting coinstants ***
 string(25) "2005-07-14T22:30:41+01:00"
-string(32) "Thursday, 14-Jul-05 22:30:41 BST"
+string(34) "Thursday, 14-Jul-2005 22:30:41 BST"
 string(24) "2005-07-14T22:30:41+0100"
 string(29) "Thu, 14 Jul 05 22:30:41 +0100"
 string(32) "Thursday, 14-Jul-05 22:30:41 BST"

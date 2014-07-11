@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2013 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 information about a compiled pattern. */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "pcre_internal.h"
 
@@ -63,13 +65,21 @@ Arguments:
 Returns:           0 if data returned, negative on error
 */
 
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre_fullinfo(const pcre *argument_re, const pcre_extra *extra_data, int what,
-  void *where)
+pcre_fullinfo(const pcre *argument_re, const pcre_extra *extra_data,
+  int what, void *where)
+#elif defined COMPILE_PCRE16
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_fullinfo(const pcre16 *argument_re, const pcre16_extra *extra_data,
+  int what, void *where)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre32_fullinfo(const pcre32 *argument_re, const pcre32_extra *extra_data,
+  int what, void *where)
+#endif
 {
-real_pcre internal_re;
-pcre_study_data internal_study;
-const real_pcre *re = (const real_pcre *)argument_re;
+const REAL_PCRE *re = (const REAL_PCRE *)argument_re;
 const pcre_study_data *study = NULL;
 
 if (re == NULL || where == NULL) return PCRE_ERROR_NULL;
@@ -77,12 +87,18 @@ if (re == NULL || where == NULL) return PCRE_ERROR_NULL;
 if (extra_data != NULL && (extra_data->flags & PCRE_EXTRA_STUDY_DATA) != 0)
   study = (const pcre_study_data *)extra_data->study_data;
 
+/* Check that the first field in the block is the magic number. If it is not,
+return with PCRE_ERROR_BADMAGIC. However, if the magic number is equal to
+REVERSED_MAGIC_NUMBER we return with PCRE_ERROR_BADENDIANNESS, which
+means that the pattern is likely compiled with different endianness. */
+
 if (re->magic_number != MAGIC_NUMBER)
-  {
-  re = _pcre_try_flipped(re, &internal_re, study, &internal_study);
-  if (re == NULL) return PCRE_ERROR_BADMAGIC;
-  if (study != NULL) study = &internal_study;
-  }
+  return re->magic_number == REVERSED_MAGIC_NUMBER?
+    PCRE_ERROR_BADENDIANNESS:PCRE_ERROR_BADMAGIC;
+
+/* Check that this pattern was compiled in the correct bit mode */
+
+if ((re->flags & PCRE_MODE) == 0) return PCRE_ERROR_BADMODE;
 
 switch (what)
   {
@@ -98,6 +114,18 @@ switch (what)
   *((size_t *)where) = (study == NULL)? 0 : study->size;
   break;
 
+  case PCRE_INFO_JITSIZE:
+#ifdef SUPPORT_JIT
+  *((size_t *)where) =
+      (extra_data != NULL &&
+      (extra_data->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 &&
+      extra_data->executable_jit != NULL)?
+    PRIV(jit_get_size)(extra_data->executable_jit) : 0;
+#else
+  *((size_t *)where) = 0;
+#endif
+  break;
+
   case PCRE_INFO_CAPTURECOUNT:
   *((int *)where) = re->top_bracket;
   break;
@@ -108,15 +136,26 @@ switch (what)
 
   case PCRE_INFO_FIRSTBYTE:
   *((int *)where) =
-    ((re->flags & PCRE_FIRSTSET) != 0)? re->first_byte :
+    ((re->flags & PCRE_FIRSTSET) != 0)? (int)re->first_char :
     ((re->flags & PCRE_STARTLINE) != 0)? -1 : -2;
   break;
+
+  case PCRE_INFO_FIRSTCHARACTER:
+    *((pcre_uint32 *)where) =
+      (re->flags & PCRE_FIRSTSET) != 0 ? re->first_char : 0;
+    break;
+
+  case PCRE_INFO_FIRSTCHARACTERFLAGS:
+    *((int *)where) =
+      ((re->flags & PCRE_FIRSTSET) != 0) ? 1 :
+      ((re->flags & PCRE_STARTLINE) != 0) ? 2 : 0;
+    break;
 
   /* Make sure we pass back the pointer to the bit vector in the external
   block, not the internal copy (with flipped integer fields). */
 
   case PCRE_INFO_FIRSTTABLE:
-  *((const uschar **)where) =
+  *((const pcre_uint8 **)where) =
     (study != NULL && (study->flags & PCRE_STUDY_MAPPED) != 0)?
       ((const pcre_study_data *)extra_data->study_data)->start_bits : NULL;
   break;
@@ -124,13 +163,29 @@ switch (what)
   case PCRE_INFO_MINLENGTH:
   *((int *)where) =
     (study != NULL && (study->flags & PCRE_STUDY_MINLEN) != 0)?
-      study->minlength : -1;
+      (int)(study->minlength) : -1;
+  break;
+
+  case PCRE_INFO_JIT:
+  *((int *)where) = extra_data != NULL &&
+                    (extra_data->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 &&
+                    extra_data->executable_jit != NULL;
   break;
 
   case PCRE_INFO_LASTLITERAL:
   *((int *)where) =
-    ((re->flags & PCRE_REQCHSET) != 0)? re->req_byte : -1;
+    ((re->flags & PCRE_REQCHSET) != 0)? (int)re->req_char : -1;
   break;
+
+  case PCRE_INFO_REQUIREDCHAR:
+    *((pcre_uint32 *)where) =
+      ((re->flags & PCRE_REQCHSET) != 0) ? re->req_char : 0;
+    break;
+
+  case PCRE_INFO_REQUIREDCHARFLAGS:
+    *((int *)where) =
+      ((re->flags & PCRE_REQCHSET) != 0);
+    break;
 
   case PCRE_INFO_NAMEENTRYSIZE:
   *((int *)where) = re->name_entry_size;
@@ -141,11 +196,11 @@ switch (what)
   break;
 
   case PCRE_INFO_NAMETABLE:
-  *((const uschar **)where) = (const uschar *)re + re->name_table_offset;
+  *((const pcre_uchar **)where) = (const pcre_uchar *)re + re->name_table_offset;
   break;
 
   case PCRE_INFO_DEFAULT_TABLES:
-  *((const uschar **)where) = (const uschar *)(_pcre_default_tables);
+  *((const pcre_uint8 **)where) = (const pcre_uint8 *)(PRIV(default_tables));
   break;
 
   /* From release 8.00 this will always return TRUE because NOPARTIAL is
@@ -161,6 +216,24 @@ switch (what)
 
   case PCRE_INFO_HASCRORLF:
   *((int *)where) = (re->flags & PCRE_HASCRORLF) != 0;
+  break;
+
+  case PCRE_INFO_MAXLOOKBEHIND:
+  *((int *)where) = re->max_lookbehind;
+  break;
+
+  case PCRE_INFO_MATCHLIMIT:
+  if ((re->flags & PCRE_MLSET) == 0) return PCRE_ERROR_UNSET;
+  *((pcre_uint32 *)where) = re->limit_match;
+  break;
+
+  case PCRE_INFO_RECURSIONLIMIT:
+  if ((re->flags & PCRE_RLSET) == 0) return PCRE_ERROR_UNSET;
+  *((pcre_uint32 *)where) = re->limit_recursion;
+  break;
+
+  case PCRE_INFO_MATCH_EMPTY:
+  *((int *)where) = (re->flags & PCRE_MATCH_EMPTY) != 0;
   break;
 
   default: return PCRE_ERROR_BADOPTION;

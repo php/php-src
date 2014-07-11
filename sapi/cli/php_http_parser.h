@@ -29,11 +29,12 @@ extern "C" {
 #include <sys/types.h>
 #if defined(_WIN32) && !defined(__MINGW32__)
 # include <windows.h>
-# include "win32/php_stdint.h"
 # include "config.w32.h"
 #else
-# include <stdint.h>
+# include "php_config.h"
 #endif
+
+#include "php_stdint.h"
 
 /* Compile with -DPHP_HTTP_PARSER_STRICT=0 to make less checks, but run
  * faster
@@ -77,6 +78,7 @@ enum php_http_method
   , PHP_HTTP_HEAD
   , PHP_HTTP_POST
   , PHP_HTTP_PUT
+  , PHP_HTTP_PATCH
   /* pathological */
   , PHP_HTTP_CONNECT
   , PHP_HTTP_OPTIONS
@@ -99,6 +101,8 @@ enum php_http_method
   , PHP_HTTP_NOTIFY
   , PHP_HTTP_SUBSCRIBE
   , PHP_HTTP_UNSUBSCRIBE
+  /* unknown, not implemented */
+  , PHP_HTTP_NOT_IMPLEMENTED
   };
 
 

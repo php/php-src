@@ -41,7 +41,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 		case URES_STRING:
 			ufield = ures_getString( source->child, &ilen, &INTL_DATA_ERROR_CODE(source) );
 			INTL_METHOD_CHECK_STATUS(source, "Failed to retrieve string value");
-			INTL_METHOD_RETVAL_UTF8(source, ufield, ilen, 0);
+			INTL_METHOD_RETVAL_UTF8(source, (UChar *)ufield, ilen, 0);
 			break;
 
 		case URES_BINARY:

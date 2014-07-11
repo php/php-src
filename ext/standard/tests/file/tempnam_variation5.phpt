@@ -16,13 +16,13 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 $file_path = dirname(__FILE__);
 
 echo "*** Test tempnam() function: by passing an existing filename as prefix ***\n";
-$dir_name = $file_path."/tempnam_variation6";
+$dir_name = $file_path."/tempnam_variation5";
 mkdir($dir_name);
-$h = fopen($dir_name."/tempnam_variation6.tmp", "w");
+$h = fopen($dir_name."/tempnam_variation5.tmp", "w");
 
 for($i=1; $i<=3; $i++) {
   echo "-- Iteration $i --\n";
-  $created_file = tempnam("$dir_name", "tempnam_variation6.tmp");
+  $created_file = tempnam("$dir_name", "tempnam_variation5.tmp");
   
   if( file_exists($created_file) ) {
     echo "File name is => ";
@@ -35,7 +35,7 @@ for($i=1; $i<=3; $i++) {
   unlink($created_file);
 }
 fclose($h);
-unlink($dir_name."/tempnam_variation6.tmp");
+unlink($dir_name."/tempnam_variation5.tmp");
 rmdir($dir_name);
 
 echo "\n*** Done ***\n";
@@ -43,10 +43,10 @@ echo "\n*** Done ***\n";
 --EXPECTF--
 *** Test tempnam() function: by passing an existing filename as prefix ***
 -- Iteration 1 --
-File name is => %stempnam_variation6%etempnam_variation6.tmp%s
+File name is => %stempnam_variation5%etempnam_variation5.tmp%s
 -- Iteration 2 --
-File name is => %stempnam_variation6%etempnam_variation6.tmp%s
+File name is => %stempnam_variation5%etempnam_variation5.tmp%s
 -- Iteration 3 --
-File name is => %stempnam_variation6%etempnam_variation6.tmp%s
+File name is => %stempnam_variation5%etempnam_variation5.tmp%s
 
 *** Done ***

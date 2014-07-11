@@ -279,9 +279,9 @@ string(0) ""
 -- Iteration 1 --
 string(6) "Object"
 -- Iteration 2 --
-string(14) "Resource id #5"
+string(14) "Resource id #%d"
 -- Iteration 3 --
-string(14) "Resource id #6"
+string(14) "Resource id #%d"
 -- Iteration 4 --
 
 Notice: Array to string conversion in %sstrval.php on line %d

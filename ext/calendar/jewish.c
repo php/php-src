@@ -85,8 +85,8 @@
  *          3 Kislev    29   30   30         29   30   30 (variable)
  *          4 Tevet     29   29   29         29   29   29
  *          5 Shevat    30   30   30         30   30   30
- *          6 Adar I    29   29   29         30   30   30 (variable)
- *          7 Adar II   --   --   --         29   29   29 (optional)
+ *          6 Adar I    --   --   --         30   30   30 (optional)
+ *          7 Adar (II) 29   29   29         29   29   29
  *          8 Nisan     30   30   30         30   30   30
  *          9 Iyyar     29   29   29         29   29   29
  *         10 Sivan     30   30   30         30   30   30
@@ -100,8 +100,8 @@
  *     have multiple possible spellings in the Roman character set.  I have
  *     chosen to use the spellings found in the Encyclopedia Judaica.
  *
- *     Adar II, the month added for leap years, is sometimes referred to as
- *     the 13th month, but I have chosen to assign it the number 7 to keep
+ *     Adar I, the month added for leap years, is sometimes referred to as
+ *     the 13th month, but I have chosen to assign it the number 6 to keep
  *     the months in chronological order.  This may not be consistent with
  *     other numbering schemes.
  *
@@ -272,6 +272,7 @@
 #define HALAKIM_PER_METONIC_CYCLE (HALAKIM_PER_LUNAR_CYCLE * (12 * 19 + 7))
 
 #define JEWISH_SDN_OFFSET 347997
+#define JEWISH_SDN_MAX 324542846L /* 12/13/887605, greater value raises interger overflow */
 #define NEW_MOON_OF_CREATION 31524
 
 #define SUNDAY    0
@@ -286,7 +287,7 @@
 #define AM3_11_20 ((9 * HALAKIM_PER_HOUR) + 204)
 #define AM9_32_43 ((15 * HALAKIM_PER_HOUR) + 589)
 
-static int monthsPerYear[19] =
+int monthsPerYear[19] =
 {
 12, 12, 13, 12, 12, 13, 12, 13, 12, 12, 13, 12, 12, 13, 12, 12, 13, 12, 13
 };
@@ -297,16 +298,17 @@ static int yearOffset[19] =
 	136, 148, 160, 173, 185, 197, 210, 222
 };
 
-char *JewishMonthName[14] =
+/* names for leap (13-month) year */
+char *JewishMonthNameLeap[14] =
 {
-	"",
+	"", 
 	"Tishri",
 	"Heshvan",
 	"Kislev",
 	"Tevet",
 	"Shevat",
-	"AdarI",
-	"AdarII",
+	"Adar I",
+	"Adar II",
 	"Nisan",
 	"Iyyar",
 	"Sivan",
@@ -315,16 +317,55 @@ char *JewishMonthName[14] =
 	"Elul"
 };
 
-char *JewishMonthHebName[14] =
+/* names for regular year */
+char *JewishMonthName[14] =
 {
+	"", 
+	"Tishri",
+	"Heshvan",
+	"Kislev",
+	"Tevet",
+	"Shevat",
 	"",
+	"Adar",
+	"Nisan",
+	"Iyyar",
+	"Sivan",
+	"Tammuz",
+	"Av",
+	"Elul"
+};
+
+/* names for leap (13-month) year */
+char *JewishMonthHebNameLeap[14] =
+{
+	"", 
 	"תשרי",
 	"חשון",
 	"כסלו",
 	"טבת",
 	"שבט",
+	"אדר א'",
+	"אדר ב'",
+	"ניסן",
+	"אייר",
+	"סיון",
+	"תמוז",
+	"אב",
+	"אלול"
+};
+
+/* names for regular year */
+char *JewishMonthHebName[14] =
+{
+	"", 
+	"תשרי",
+	"חשון",
+	"כסלו",
+	"טבת",
+	"שבט",
+	"",
 	"אדר",
-	"'אדר ב",
 	"ניסן",
 	"אייר",
 	"סיון",
@@ -519,7 +560,7 @@ void SdnToJewish(
 	int tishri1After;
 	int yearLength;
 
-	if (sdn <= JEWISH_SDN_OFFSET) {
+	if (sdn <= JEWISH_SDN_OFFSET || sdn > JEWISH_SDN_MAX) {
 		*pYear = 0;
 		*pMonth = 0;
 		*pDay = 0;
@@ -587,11 +628,11 @@ void SdnToJewish(
 				(*pMonth)--;
 				(*pDay) += 30;
 			} else {
-				*pMonth = 6;
+				*pMonth = 7;
 				*pDay = inputDay - tishri1 + 207;
 				if (*pDay > 0)
 					return;
-				(*pMonth)--;
+				(*pMonth) -= 2;
 				(*pDay) += 30;
 			}
 			if (*pDay > 0)

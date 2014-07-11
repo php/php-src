@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,5 +49,15 @@ ZEND_END_MODULE_GLOBALS(ldap)
 #endif
 
 #define phpext_ldap_ptr ldap_module_ptr
+
+/* Constants for ldap_modify_batch */
+#define LDAP_MODIFY_BATCH_ADD        0x01
+#define LDAP_MODIFY_BATCH_REMOVE     0x02
+#define LDAP_MODIFY_BATCH_REMOVE_ALL 0x12
+#define LDAP_MODIFY_BATCH_REPLACE    0x03
+
+#define LDAP_MODIFY_BATCH_ATTRIB     "attrib"
+#define LDAP_MODIFY_BATCH_MODTYPE    "modtype"
+#define LDAP_MODIFY_BATCH_VALUES     "values"
 
 #endif /* PHP_LDAP_H */

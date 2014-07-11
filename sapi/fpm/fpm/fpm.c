@@ -39,10 +39,11 @@ struct fpm_globals_s fpm_globals = {
 	.test_successful = 0,
 	.heartbeat = 0,
 	.run_as_root = 0,
-	.send_config_signal = 0,
+	.force_stderr = 0,
+	.send_config_pipe = {0, 0},
 };
 
-int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root) /* {{{ */
+int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon, int force_stderr) /* {{{ */
 {
 	fpm_globals.argc = argc;
 	fpm_globals.argv = argv;
@@ -52,10 +53,11 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 	fpm_globals.prefix = prefix;
 	fpm_globals.pid = pid;
 	fpm_globals.run_as_root = run_as_root;
+	fpm_globals.force_stderr = force_stderr;
 
 	if (0 > fpm_php_init_main()           ||
 	    0 > fpm_stdio_init_main()         ||
-	    0 > fpm_conf_init_main(test_conf) ||
+	    0 > fpm_conf_init_main(test_conf, force_daemon) ||
 	    0 > fpm_unix_init_main()          ||
 	    0 > fpm_scoreboard_init_main()    ||
 	    0 > fpm_pctl_init_main()          ||

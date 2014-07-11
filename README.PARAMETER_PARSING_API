@@ -28,11 +28,22 @@ Both functions return SUCCESS or FAILURE depending on the result.
 The auto-conversions are performed as necessary. Arrays, objects, and
 resources cannot be auto-converted.
 
+PHP 5.5 includes a new function:
+
+int zend_parse_parameter(int flags, int arg_num TSRMLS_DC, zval **arg, const char *spec, ...);
+
+This function behaves like zend_parse_parameters_ex() except that instead of
+reading the arguments from the stack, it receives a single zval to convert
+(passed with double indirection). The passed zval may be changed in place as
+part of the conversion process.
+
+See also https://wiki.php.net/rfc/zpp_improv#expose_zend_parse_arg_as_zend_parse_parameter
+
 
 Type specifiers
 ---------------
  The following list shows the type specifier, its meaning and the parameter 
- types that need to be passed by address. All passed paramaters are set
+ types that need to be passed by address. All passed parameters are set
  if the PHP parameter is non optional and untouched if optional and the 
  parameter is not present. The only exception is O where the zend_class_entry*
  has to be provided on input and is used to verify the PHP parameter is an 
@@ -65,9 +76,13 @@ Type specifiers
         will not be touched by the parsing function if they are not
         passed to it.
     / - use SEPARATE_ZVAL_IF_NOT_REF() on the parameter it follows
-    ! - the parameter it follows can be of specified type or NULL (applies
-		to all specifiers except for 'b', 'l', and 'd'). If NULL is passed, the
-		results pointer is set to NULL as well.
+    ! - the parameter it follows can be of specified type or NULL. If NULL is
+		passed and the output for such type is a pointer, then the output
+		pointer is set to a native NULL pointer.
+		For 'b', 'l' and 'd', an extra argument of type zend_bool* must be
+		passed after the corresponding bool*, long* or double* arguments,
+		respectively. A non-zero value will be written to the zend_bool iif a
+		PHP NULL is passed.
 
 
 Note on 64bit compatibility

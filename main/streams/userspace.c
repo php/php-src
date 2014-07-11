@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,14 +45,14 @@ struct php_user_stream_wrapper {
 	php_stream_wrapper wrapper;
 };
 
-static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
-static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
-static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC);
-static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, int options, php_stream_context *context TSRMLS_DC);
-static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
-static int user_wrapper_metadata(php_stream_wrapper *wrapper, char *url, int option, void *value, php_stream_context *context TSRMLS_DC);
-static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
+static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int mode, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, int option, void *value, php_stream_context *context TSRMLS_DC);
+static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 
 static php_stream_wrapper_ops user_stream_wops = {
@@ -281,7 +281,59 @@ typedef struct _php_userstream_data php_userstream_data_t;
 
 	}}} **/
 
-static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+static zval *user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context TSRMLS_DC)
+{
+	zval *object;
+	/* create an instance of our class */
+	ALLOC_ZVAL(object);
+	object_init_ex(object, uwrap->ce);
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_SET_ISREF_P(object);
+
+	if (context) {
+		add_property_resource(object, "context", context->rsrc_id);
+		zend_list_addref(context->rsrc_id);
+	} else {
+		add_property_null(object, "context");
+	}
+
+	if (uwrap->ce->constructor) {
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval_ptr;
+
+		fci.size = sizeof(fci);
+		fci.function_table = &uwrap->ce->function_table;
+		fci.function_name = NULL;
+		fci.symbol_table = NULL;
+		fci.object_ptr = object;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+
+		fcc.initialized = 1;
+		fcc.function_handler = uwrap->ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.called_scope = Z_OBJCE_P(object);
+		fcc.object_ptr = object;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name, uwrap->ce->constructor->common.function_name);
+			zval_dtor(object);
+			FREE_ZVAL(object);
+			return NULL;
+		} else {
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
+		}
+	}
+	return object;
+}
+
+static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode,
+									   int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	php_userstream_data_t *us;
@@ -312,53 +364,12 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	us = emalloc(sizeof(*us));
 	us->wrapper = uwrap;
 
-	/* create an instance of our class */
-	ALLOC_ZVAL(us->object);
-	object_init_ex(us->object, uwrap->ce);
-	Z_SET_REFCOUNT_P(us->object, 1);
-	Z_SET_ISREF_P(us->object);
-
-	if (uwrap->ce->constructor) {
-		zend_fcall_info fci;
-		zend_fcall_info_cache fcc;
-		zval *retval_ptr;
-
-		fci.size = sizeof(fci);
-		fci.function_table = &uwrap->ce->function_table;
-		fci.function_name = NULL;
-		fci.symbol_table = NULL;
-		fci.object_ptr = us->object;
-		fci.retval_ptr_ptr = &retval_ptr;
-		fci.param_count = 0;
-		fci.params = NULL;
-		fci.no_separation = 1;
-
-		fcc.initialized = 1;
-		fcc.function_handler = uwrap->ce->constructor;
-		fcc.calling_scope = EG(scope);
-		fcc.called_scope = Z_OBJCE_P(us->object);
-		fcc.object_ptr = us->object;
-
-		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name, uwrap->ce->constructor->common.function_name);
-			zval_dtor(us->object);
-			FREE_ZVAL(us->object);
-			efree(us);
-			FG(user_stream_current_filename) = NULL;
-			PG(in_user_include) = old_in_user_include;
-			return NULL;
-		} else {
-			if (retval_ptr) {
-				zval_ptr_dtor(&retval_ptr);
-			}
-		}
-	}
-
-	if (context) {
-		add_property_resource(us->object, "context", context->rsrc_id);
-		zend_list_addref(context->rsrc_id);
-	} else {
-		add_property_null(us->object, "context");
+	us->object = user_stream_create_object(uwrap, context TSRMLS_CC);
+	if(us->object == NULL) {
+		FG(user_stream_current_filename) = NULL;
+		PG(in_user_include) = old_in_user_include;
+		efree(us);
+		return NULL;
 	}
 
 	/* call it's stream_open method - set up params first */
@@ -427,7 +438,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	return stream;
 }
 
-static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
+static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
@@ -447,17 +458,11 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filen
 	us = emalloc(sizeof(*us));
 	us->wrapper = uwrap;
 
-	/* create an instance of our class */
-	ALLOC_ZVAL(us->object);
-	object_init_ex(us->object, uwrap->ce);
-	Z_SET_REFCOUNT_P(us->object, 1);
-	Z_SET_ISREF_P(us->object);
-
-	if (context) {
-		add_property_resource(us->object, "context", context->rsrc_id);
-		zend_list_addref(context->rsrc_id);
-	} else {
-		add_property_null(us->object, "context");
+	us->object = user_stream_create_object(uwrap, context TSRMLS_CC);
+	if(us->object == NULL) {
+		FG(user_stream_current_filename) = NULL;
+		efree(us);
+		return NULL;
 	}
 
 	/* call it's dir_open method - set up params first */
@@ -1116,7 +1121,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_SET_OPTION " is not implemented!",
 					us->wrapper->classname);
 			ret = PHP_STREAM_OPTION_RETURN_ERR;
-		} else if (retval && zend_is_true(retval)) {
+		} else if (retval && zend_is_true(retval TSRMLS_CC)) {
 			ret = PHP_STREAM_OPTION_RETURN_OK;
 		} else {
 			ret = PHP_STREAM_OPTION_RETURN_ERR;
@@ -1147,7 +1152,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 }
 
 
-static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zfilename, *zfuncname, *zretval;
@@ -1157,16 +1162,9 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	int ret = 0;
 
 	/* create an instance of our class */
-	ALLOC_ZVAL(object);
-	object_init_ex(object, uwrap->ce);
-	Z_SET_REFCOUNT_P(object, 1);
-	Z_SET_ISREF_P(object);
-
-	if (context) {
-		add_property_resource(object, "context", context->rsrc_id);
-		zend_list_addref(context->rsrc_id);
-	} else {
-		add_property_null(object, "context");
+	object = user_stream_create_object(uwrap, context TSRMLS_CC);
+	if(object == NULL) {
+		return ret;
 	}
 
 	/* call the unlink method */
@@ -1201,7 +1199,8 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	return ret;
 }
 
-static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to,
+							   int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zold_name, *znew_name, *zfuncname, *zretval;
@@ -1211,16 +1210,9 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	int ret = 0;
 
 	/* create an instance of our class */
-	ALLOC_ZVAL(object);
-	object_init_ex(object, uwrap->ce);
-	Z_SET_REFCOUNT_P(object, 1);
-	Z_SET_ISREF_P(object);
-
-	if (context) {
-		add_property_resource(object, "context", context->rsrc_id);
-		zend_list_addref(context->rsrc_id);
-	} else {
-		add_property_null(object, "context");
+	object = user_stream_create_object(uwrap, context TSRMLS_CC);	
+	if(object == NULL) {
+		return ret;
 	}
 
 	/* call the rename method */
@@ -1260,7 +1252,8 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	return ret;
 }
 
-static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, int options, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int mode,
+							  int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zfilename, *zmode, *zoptions, *zfuncname, *zretval;
@@ -1270,16 +1263,9 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, 
 	int ret = 0;
 
 	/* create an instance of our class */
-	ALLOC_ZVAL(object);
-	object_init_ex(object, uwrap->ce);
-	Z_SET_REFCOUNT_P(object, 1);
-	Z_SET_ISREF_P(object);
-
-	if (context) {
-		add_property_resource(object, "context", context->rsrc_id);
-		zend_list_addref(context->rsrc_id);
-	} else {
-		add_property_null(object, "context");
+	object = user_stream_create_object(uwrap, context TSRMLS_CC);	
+	if(object == NULL) {
+		return ret;
 	}
 
 	/* call the mkdir method */
@@ -1325,7 +1311,8 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, 
 	return ret;
 }
 
-static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
+							  int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zfilename, *zoptions, *zfuncname, *zretval;
@@ -1335,16 +1322,9 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int option
 	int ret = 0;
 
 	/* create an instance of our class */
-	ALLOC_ZVAL(object);
-	object_init_ex(object, uwrap->ce);
-	Z_SET_REFCOUNT_P(object, 1);
-	Z_SET_ISREF_P(object);
-
-	if (context) {
-		add_property_resource(object, "context", context->rsrc_id);
-		zend_list_addref(context->rsrc_id);
-	} else {
-		add_property_null(object, "context");
+	object = user_stream_create_object(uwrap, context TSRMLS_CC);	
+	if(object == NULL) {
+		return ret;
 	}
 
 	/* call the rmdir method */
@@ -1385,7 +1365,8 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int option
 	return ret;
 }
 
-static int user_wrapper_metadata(php_stream_wrapper *wrapper, char *url, int option, void *value, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, int option,
+								 void *value, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zfilename, *zoption, *zvalue, *zfuncname, *zretval;
@@ -1420,16 +1401,10 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, char *url, int opt
 	}
 
 	/* create an instance of our class */
-	ALLOC_ZVAL(object);
-	object_init_ex(object, uwrap->ce);
-	Z_SET_REFCOUNT_P(object, 1);
-	Z_SET_ISREF_P(object);
-
-	if (context) {
-		add_property_resource(object, "context", context->rsrc_id);
-		zend_list_addref(context->rsrc_id);
-	} else {
-		add_property_null(object, "context");
+	object = user_stream_create_object(uwrap, context TSRMLS_CC);	
+	if(object == NULL) {
+		zval_ptr_dtor(&zvalue);
+		return ret;
 	}
 
 	/* call the mkdir method */
@@ -1474,7 +1449,8 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, char *url, int opt
 }
 
 
-static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, int flags,
+								 php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zfilename, *zfuncname, *zretval, *zflags;
@@ -1484,16 +1460,9 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int fla
 	int ret = -1;
 
 	/* create an instance of our class */
-	ALLOC_ZVAL(object);
-	object_init_ex(object, uwrap->ce);
-	Z_SET_REFCOUNT_P(object, 1);
-	Z_SET_ISREF_P(object);
-
-	if (context) {
-		add_property_resource(object, "context", context->rsrc_id);
-		zend_list_addref(context->rsrc_id);
-	} else {
-		add_property_null(object, "context");
+	object = user_stream_create_object(uwrap, context TSRMLS_CC);	
+	if(object == NULL) {
+		return ret;
 	}
 
 	/* call it's stat_url method - set up params first */
@@ -1660,7 +1629,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr T
 					us->wrapper->classname);
 			break;
 		}
-		if (retval == NULL || !zend_is_true(retval)) {
+		if (retval == NULL || !zend_is_true(retval TSRMLS_CC)) {
 			break;
 		}
 		php_stream_from_zval_no_verify(intstream, &retval);

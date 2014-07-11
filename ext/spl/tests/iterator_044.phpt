@@ -81,7 +81,7 @@ NULL
 int(0)
 bool(false)
 
-Notice: Undefined index:  0 in %siterator_044.php on line %d
+Notice: Undefined index: 0 in %siterator_044.php on line %d
 NULL
 ===1===
 object(stdClass)#%d (0) {
@@ -97,31 +97,31 @@ object(MyFoo)#%d (0) {
 }
 bool(false)
 
-Notice: Undefined index:  foo in %siterator_044.php on line %d
+Notice: Undefined index: foo in %siterator_044.php on line %d
 NULL
 ===3===
 NULL
 bool(false)
 
-Notice: Undefined index:   in %siterator_044.php on line %d
+Notice: Undefined index:  in %siterator_044.php on line %d
 NULL
 ===4===
 int(2)
 bool(false)
 
-Notice: Undefined index:  2 in %siterator_044.php on line %d
+Notice: Undefined index: 2 in %siterator_044.php on line %d
 NULL
 ===5===
 string(3) "foo"
 bool(false)
 
-Notice: Undefined index:  foo in %siterator_044.php on line %d
+Notice: Undefined index: foo in %siterator_044.php on line %d
 NULL
 ===6===
 int(3)
 bool(false)
 
-Notice: Undefined index:  3 in %siterator_044.php on line %d
+Notice: Undefined index: 3 in %siterator_044.php on line %d
 NULL
 ===FILL===
 ===0===
@@ -146,7 +146,7 @@ int(1)
 NULL
 bool(false)
 
-Notice: Undefined index:   in %siterator_044.php on line %d
+Notice: Undefined index:  in %siterator_044.php on line %d
 NULL
 ===4===
 int(2)
@@ -160,6 +160,6 @@ int(1)
 int(3)
 bool(false)
 
-Notice: Undefined index:  3 in %siterator_044.php on line %d
+Notice: Undefined index: 3 in %siterator_044.php on line %d
 NULL
 ===DONE===

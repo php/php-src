@@ -22,6 +22,7 @@ var_dump(gmp_abs(array()));
 echo "Done\n";
 ?>
 --EXPECTF--	
+Warning: gmp_abs(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 string(1) "0"
 string(1) "0"
 string(1) "0"
@@ -31,7 +32,11 @@ string(1) "0"
 string(21) "111111111111111111111"
 string(21) "111111111111111111111"
 string(1) "0"
+
+Warning: gmp_abs(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 string(1) "0"
+
+Warning: gmp_abs(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 string(1) "0"
 
 Warning: gmp_abs() expects exactly 1 parameter, 0 given in %s on line %d

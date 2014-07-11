@@ -158,7 +158,7 @@ class mystream
 }
 
 if (@stream_wrapper_register("bogus", "class_not_exist")) {
-	die("Registered a non-existant class!!!???");
+	die("Registered a non-existent class!!!???");
 }
 echo "Not Registered\n";
 

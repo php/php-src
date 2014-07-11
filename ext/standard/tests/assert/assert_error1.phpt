@@ -20,19 +20,19 @@ function handler($errno, $errstr) {
 
 //Wrong number of parameters for assert_options()
 assert_options(ASSERT_WARNING, 1);
-var_dump($rao=assert_options(ASSERT_CALLBACK,"f1",1));
+var_dump($rao = assert_options(ASSERT_CALLBACK, "f1", 1));
 
 
 //Unknown option for assert_options()
-var_dump($rao=assert_options("F1","f1"));
+var_dump($rao=assert_options("F1", "f1"));
 
 //Wrong number of parameters for  assert()
 $sa="0 != 0";
-var_dump($r2=assert($sa,1));
+var_dump($r2 = assert($sa, "message", 1));
 
 
 //Catch recoverable error with handler
-var_dump($rc=assert('aa=sd+as+safsafasfaçsafçsafç'));
+var_dump($rc = assert('aa=sd+as+safsafasfaçsafçsafç'));
 --EXPECTF--
 Warning: assert_options() expects at most 2 parameters, 3 given in %s on line %d
 NULL
@@ -40,5 +40,6 @@ NULL
 Warning: assert_options() expects parameter 1 to be long, string given in %s on line %d
 NULL
 
-Warning: assert() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: assert() expects at most 2 parameters, 3 given in %s on line %d
 NULL
+

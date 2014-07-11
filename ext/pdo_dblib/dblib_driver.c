@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,9 @@
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
+
+/* Cache of the server supported datatypes, initialized in handle_factory */
+zval* pdo_dblib_datatypes;
 
 static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
 {
@@ -262,17 +265,41 @@ static struct pdo_dbh_methods dblib_methods = {
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H;
-	int i, ret = 0;
-	struct pdo_data_src_parser vars[] = {
-		{ "charset",	NULL,	0 },
-		{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 },
-		{ "host",		"127.0.0.1", 0 },
-		{ "dbname",		NULL,	0 },
-		{ "secure",		NULL,	0 }, /* DBSETLSECURE */
-		/* TODO: DBSETLVERSION ? */
+	int i, nvars, nvers, ret = 0;
+	int *val;
+	
+	const pdo_dblib_keyval tdsver[] = {
+		 {"4.2",DBVERSION_42}
+		,{"4.6",DBVERSION_46}
+		,{"5.0",DBVERSION_70} /* FIXME: This does not work with Sybase, but environ will */
+		,{"6.0",DBVERSION_70}
+		,{"7.0",DBVERSION_70}
+#ifdef DBVERSION_71
+		,{"7.1",DBVERSION_71}
+#endif
+#ifdef DBVERSION_72
+		,{"7.2",DBVERSION_72}
+		,{"8.0",DBVERSION_72}
+#endif
+		,{"10.0",DBVERSION_100}
+		,{"auto",0} /* Only works with FreeTDS. Other drivers will bork */
+		
 	};
-
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 5);
+	
+	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
+	
+	struct pdo_data_src_parser vars[] = {
+		{ "charset",	NULL,	0 }
+		,{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 }
+		,{ "host",		"127.0.0.1", 0 }
+		,{ "dbname",	NULL,	0 }
+		,{ "secure",	NULL,	0 } /* DBSETLSECURE */
+		,{ "version",	NULL,	0 } /* DBSETLVERSION */
+	};
+	
+	nvars = sizeof(vars)/sizeof(vars[0]);
+	
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 	H->login = dblogin();
@@ -282,11 +309,37 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		goto cleanup;
 	}
 
-	if (dbh->username) {
-		DBSETLUSER(H->login, dbh->username);
+	DBERRHANDLE(H->login, (EHANDLEFUNC) error_handler);
+	DBMSGHANDLE(H->login, (MHANDLEFUNC) msg_handler);
+	
+	if(vars[5].optval) {
+		for(i=0;i<nvers;i++) {
+			if(strcmp(vars[5].optval,tdsver[i].key) == 0) {
+				if(FAIL==dbsetlversion(H->login, tdsver[i].value)) {
+					pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Failed to set version specified in connection string." TSRMLS_CC);		
+					goto cleanup;
+				}
+				break;
+			}
+		}
+		
+		if (i==nvers) {
+			printf("Invalid version '%s'\n", vars[5].optval);
+			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Invalid version specified in connection string." TSRMLS_CC);		
+			goto cleanup; /* unknown version specified */
+		}
 	}
+
+	if (dbh->username) {
+		if(FAIL == DBSETLUSER(H->login, dbh->username)) {
+			goto cleanup;
+		}
+	}
+
 	if (dbh->password) {
-		DBSETLPWD(H->login, dbh->password);
+		if(FAIL == DBSETLPWD(H->login, dbh->password)) {
+			goto cleanup;
+		}
 	}
 	
 #if !PHP_DBLIB_IS_MSSQL
@@ -297,36 +350,46 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	DBSETLAPP(H->login, vars[1].optval);
 
-#if PHP_DBLIB_IS_MSSQL
-	dbprocerrhandle(H->login, (EHANDLEFUNC) error_handler);
-	dbprocmsghandle(H->login, (MHANDLEFUNC) msg_handler);
+/* DBSETLDBNAME is only available in FreeTDS 0.92 or above */
+#ifdef DBSETLDBNAME
+	if (vars[3].optval) {
+		if(FAIL == DBSETLDBNAME(H->login, vars[3].optval)) goto cleanup;
+	}
 #endif
 
 	H->link = dbopen(H->login, vars[2].optval);
 
-	if (H->link == NULL) {
+	if (!H->link) {
 		goto cleanup;
 	}
 
+/*
+ * FreeTDS < 0.92 does not support the DBSETLDBNAME option
+ * Send use database here after login (Will not work with SQL Azure)
+ */
+#ifndef DBSETLDBNAME
+	if (vars[3].optval) {
+		if(FAIL == dbuse(H->link, vars[3].optval)) goto cleanup;
+	}
+#endif
+
+#if PHP_DBLIB_IS_MSSQL
 	/* dblib do not return more than this length from text/image */
 	DBSETOPT(H->link, DBTEXTLIMIT, "2147483647");
+#endif
 
 	/* limit text/image from network */
 	DBSETOPT(H->link, DBTEXTSIZE, "2147483647");
 
 	/* allow double quoted indentifiers */
-	DBSETOPT(H->link, DBQUOTEDIDENT, 1);
-
-	if (vars[3].optval && FAIL == dbuse(H->link, vars[3].optval)) {
-		goto cleanup;
-	}
+	DBSETOPT(H->link, DBQUOTEDIDENT, "1");
 
 	ret = 1;
 	dbh->max_escaped_char_length = 2;
 	dbh->alloc_own_columns = 1;
 
 cleanup:
-	for (i = 0; i < sizeof(vars)/sizeof(vars[0]); i++) {
+	for (i = 0; i < nvars; i++) {
 		if (vars[i].freeme) {
 			efree(vars[i].optval);
 		}

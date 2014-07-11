@@ -81,7 +81,7 @@ $values =  array (
 
 
 // loop through each element of the array and check the working of strtok()
-// when $str arugment is supplied with different values
+// when $str argument is supplied with different values
 
 echo "\n--- Testing strtok() by supplying different values for 'str' argument ---\n";
 $counter = 1;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -730,7 +730,11 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 
 		switch (sqlite3_value_type(argv[i])) {
 			case SQLITE_INTEGER:
+#if LONG_MAX > 2147483647
+				ZVAL_LONG(*zargs[i + is_agg], sqlite3_value_int64(argv[i]));
+#else
 				ZVAL_LONG(*zargs[i + is_agg], sqlite3_value_int(argv[i]));
+#endif
 				break;
 
 			case SQLITE_FLOAT:
@@ -774,7 +778,11 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 		if (retval) {
 			switch (Z_TYPE_P(retval)) {
 				case IS_LONG:
+#if LONG_MAX > 2147483647
+					sqlite3_result_int64(context, Z_LVAL_P(retval));
+#else
 					sqlite3_result_int(context, Z_LVAL_P(retval));
+#endif
 					break;
 
 				case IS_NULL:
@@ -1097,7 +1105,7 @@ static int php_sqlite3_stream_close(php_stream *stream, int close_handle TSRMLS_
 	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
 	
 	if (sqlite3_blob_close(sqlite3_stream->blob) != SQLITE_OK) {
-		/* Error occured, but it still closed */
+		/* Error occurred, but it still closed */
 	}
 
 	efree(sqlite3_stream);
@@ -1401,7 +1409,7 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 /* }}} */
 
 /* {{{ proto bool SQLite3Stmt::bindParam(int parameter_number, mixed parameter [, int type])
-   Bind Paramater to a stmt variable. */
+   Bind Parameter to a stmt variable. */
 PHP_METHOD(sqlite3stmt, bindParam)
 {
 	php_sqlite3_stmt *stmt_obj;
@@ -1493,7 +1501,11 @@ PHP_METHOD(sqlite3stmt, execute)
 			switch (param->type) {
 				case SQLITE_INTEGER:
 					convert_to_long(param->parameter);
+#if LONG_MAX > 2147483647
+					sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_LVAL_P(param->parameter));
+#else
 					sqlite3_bind_int(stmt_obj->stmt, param->param_number, Z_LVAL_P(param->parameter));
+#endif
 					break;
 
 				case SQLITE_FLOAT:
@@ -1878,7 +1890,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_bindvalue, 0, 0, 2)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_sqlite3stmt_construct, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, sqlite3)
 ZEND_END_ARG_INFO()
 

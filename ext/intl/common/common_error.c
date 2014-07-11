@@ -24,7 +24,7 @@
 #include "common_error.h"
 
 /* {{{ proto int intl_get_error_code()
- * Get code of the last occured error.
+ * Get code of the last occurred error.
  */
 PHP_FUNCTION( intl_get_error_code )
 {
@@ -33,7 +33,7 @@ PHP_FUNCTION( intl_get_error_code )
 /* }}} */
 
 /* {{{ proto string intl_get_error_message()
- * Get text description of the last occured error.
+ * Get text description of the last occurred error.
  */
 PHP_FUNCTION( intl_get_error_message )
 {

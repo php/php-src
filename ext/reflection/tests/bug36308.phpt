@@ -1,5 +1,8 @@
 --TEST--
 Reflection Bug #36308 (ReflectionProperty::getDocComment() does not reflect extended class commentary)
+--INI--
+opcache.save_comments=1
+opcache.load_comments=1
 --FILE--
 <?php
 class Base {

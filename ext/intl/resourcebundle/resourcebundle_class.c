@@ -63,6 +63,7 @@ static zend_object_value ResourceBundle_object_create( zend_class_entry *ce TSRM
 	rb = ecalloc( 1, sizeof(ResourceBundle_object) );
 
 	zend_object_std_init( (zend_object *) rb, ce TSRMLS_CC );
+	object_properties_init((zend_object *) rb, ce);
 
 	intl_error_init( INTL_DATA_ERROR_P(rb) TSRMLS_CC );
 	rb->me = NULL;
@@ -160,9 +161,8 @@ PHP_FUNCTION( resourcebundle_create )
 /* {{{ resourcebundle_array_fetch */
 static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_value, int fallback TSRMLS_DC) 
 {
-	int32_t     meindex;
-	char *      mekey;
-	long        mekeylen;
+	int32_t     meindex = 0;
+	char *      mekey = NULL;
     zend_bool    is_numeric = 0;
 	char         *pbuf;
 	ResourceBundle_object *rb;
@@ -176,7 +176,6 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 		rb->child = ures_getByIndex( rb->me, meindex, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else if(Z_TYPE_P(offset) == IS_STRING) {
 		mekey = Z_STRVAL_P(offset);
-		mekeylen = Z_STRLEN_P(offset);
 		rb->child = ures_getByKey(rb->me, mekey, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else {
 		intl_errors_set(INTL_DATA_ERROR_P(rb), U_ILLEGAL_ARGUMENT_ERROR,	
@@ -259,7 +258,14 @@ PHP_FUNCTION( resourcebundle_get )
 /* {{{ resourcebundle_array_count */
 int resourcebundle_array_count(zval *object, long *count TSRMLS_DC) 
 {
-	ResourceBundle_object *rb = (ResourceBundle_object *) zend_object_store_get_object( object TSRMLS_CC);
+	ResourceBundle_object *rb;
+	RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK;
+
+	if (rb->me == NULL) {
+		intl_errors_set(&rb->error, U_ILLEGAL_ARGUMENT_ERROR,
+				"Found unconstructed ResourceBundle", 0 TSRMLS_CC);
+		return 0;
+	}
 
 	*count = ures_getSize( rb->me );
 

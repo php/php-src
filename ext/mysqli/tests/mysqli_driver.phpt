@@ -53,7 +53,7 @@ require_once('skipifconnectfailure.inc');
 	} catch (mysqli_sql_exception $e) {
 		$ok = true;
 		if ('' == $e->getMessage())
-			printf("[008] getMessage() has returned an emptry string.\n");
+			printf("[008] getMessage() has returned an empty string.\n");
 		if ('' == $e->getCode())
 			printf("[009] getCode() has returned an empty string.\n");
 		if ('' == $e->getFile())
@@ -110,5 +110,5 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NO_SQL' at line 1 in %s on line %d
+Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'NO_SQL' at line 1 in %s on line %d
 done!

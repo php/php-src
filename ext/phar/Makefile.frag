@@ -1,5 +1,5 @@
 $(srcdir)/phar_path_check.c: $(srcdir)/phar_path_check.re
-	@(cd $(top_srcdir); $(RE2C) -b -o ext/phar/phar_path_check.c ext/phar/phar_path_check.re)
+	@(cd $(top_srcdir); $(RE2C) --no-generation-date -b -o ext/phar/phar_path_check.c ext/phar/phar_path_check.re)
 
 pharcmd: $(builddir)/phar.php $(builddir)/phar.phar
 
@@ -40,3 +40,7 @@ install-pharcmd: pharcmd
 	$(INSTALL) $(builddir)/phar.phar $(INSTALL_ROOT)$(bindir)
 	-@rm -f $(INSTALL_ROOT)$(bindir)/phar
 	$(LN_S) -f $(bindir)/phar.phar $(INSTALL_ROOT)$(bindir)/phar
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
+	@$(INSTALL_DATA) $(builddir)/phar.1 $(INSTALL_ROOT)$(mandir)/man1/phar.1
+	@$(INSTALL_DATA) $(builddir)/phar.phar.1 $(INSTALL_ROOT)$(mandir)/man1/phar.phar.1
+

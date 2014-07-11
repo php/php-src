@@ -82,7 +82,7 @@ $values =  array (
 
 
 // loop through each element of the array and check the working of chop()
-// when $charlist arugment is supplied with different values
+// when $charlist argument is supplied with different values
 
 echo "\n--- Testing chop() by supplying different values for 'charlist' argument ---\n";
 $counter = 1;

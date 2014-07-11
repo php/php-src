@@ -38,7 +38,15 @@ extern zend_class_entry *IntlDateFormatter_ce_ptr;
 /* Auxiliary macros */
 
 #define DATE_FORMAT_METHOD_INIT_VARS	INTL_METHOD_INIT_VARS(IntlDateFormatter, dfo)
-#define DATE_FORMAT_METHOD_FETCH_OBJECT	INTL_METHOD_FETCH_OBJECT(IntlDateFormatter, dfo)
+#define DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(IntlDateFormatter, dfo)
+#define DATE_FORMAT_METHOD_FETCH_OBJECT				\
+		DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;	\
+	if (dfo->datef_data.udatf == NULL)				\
+	{												\
+		intl_errors_set(&dfo->datef_data.error, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlDateFormatter", 0 TSRMLS_CC); \
+		RETURN_FALSE;								\
+	}
+
 #define DATE_FORMAT_OBJECT(dfo)		(dfo)->datef_data.udatf
 
 #endif // #ifndef DATE_FORMAT_CLASS_H

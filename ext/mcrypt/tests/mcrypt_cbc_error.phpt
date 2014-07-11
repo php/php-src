@@ -41,10 +41,14 @@ var_dump( mcrypt_cbc($cipher, $key, $data) );
 
 -- Testing mcrypt_cbc() function with more than expected no. of arguments --
 
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
+
 Warning: mcrypt_cbc() expects at most 5 parameters, 6 given in %s on line %d
 NULL
 
 -- Testing mcrypt_cbc() function with less than expected no. of arguments --
+
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
 Warning: mcrypt_cbc() expects at least 4 parameters, 3 given in %s on line %d
 NULL

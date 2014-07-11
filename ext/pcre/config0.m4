@@ -55,11 +55,12 @@ PHP_ARG_WITH(pcre-regex,,
     pcrelib_sources="pcrelib/pcre_chartables.c pcrelib/pcre_ucd.c \
     				 pcrelib/pcre_compile.c pcrelib/pcre_config.c pcrelib/pcre_exec.c \
     				 pcrelib/pcre_fullinfo.c pcrelib/pcre_get.c pcrelib/pcre_globals.c \
-    				 pcrelib/pcre_info.c pcrelib/pcre_maketables.c pcrelib/pcre_newline.c \
+    				 pcrelib/pcre_maketables.c pcrelib/pcre_newline.c \
     				 pcrelib/pcre_ord2utf8.c pcrelib/pcre_refcount.c pcrelib/pcre_study.c \
-    				 pcrelib/pcre_tables.c pcrelib/pcre_try_flipped.c pcrelib/pcre_valid_utf8.c \
+    				 pcrelib/pcre_tables.c pcrelib/pcre_valid_utf8.c \
     				 pcrelib/pcre_version.c pcrelib/pcre_xclass.c"
-    PHP_NEW_EXTENSION(pcre, $pcrelib_sources php_pcre.c, no,,-I@ext_srcdir@/pcrelib)
+    PHP_PCRE_CFLAGS="-DHAVE_CONFIG_H -I@ext_srcdir@/pcrelib"
+    PHP_NEW_EXTENSION(pcre, $pcrelib_sources php_pcre.c, no,,$PHP_PCRE_CFLAGS)
     PHP_ADD_BUILD_DIR($ext_builddir/pcrelib)
     PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcrelib/])
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])

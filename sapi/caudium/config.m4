@@ -4,7 +4,7 @@ dnl
 
 RESULT=no
 PHP_ARG_WITH(caudium,,
-[  --with-caudium[=DIR]    Build PHP as a Pike module for use with Caudium.
+[  --with-caudium[=DIR]      Build PHP as a Pike module for use with Caudium.
                           DIR is the Caudium server dir [/usr/local/caudium/server]], no, no)
 
 AC_MSG_CHECKING([for Caudium support])

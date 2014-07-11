@@ -10,7 +10,7 @@ RC=0
 7:PATTERN at the start of a line.
 8:In the middle of a line, PATTERN appears.
 10:This pattern is in lower case.
-608:Check up on PATTERN near the end.
+610:Check up on PATTERN near the end.
 RC=0
 ---------------------------- Test 4 ------------------------------
 4
@@ -19,7 +19,7 @@ RC=0
 ./testdata/grepinput:7:PATTERN at the start of a line.
 ./testdata/grepinput:8:In the middle of a line, PATTERN appears.
 ./testdata/grepinput:10:This pattern is in lower case.
-./testdata/grepinput:608:Check up on PATTERN near the end.
+./testdata/grepinput:610:Check up on PATTERN near the end.
 ./testdata/grepinputx:3:Here is the pattern again.
 ./testdata/grepinputx:5:Pattern
 ./testdata/grepinputx:42:This line contains pattern not on a line by itself.
@@ -28,7 +28,7 @@ RC=0
 7:PATTERN at the start of a line.
 8:In the middle of a line, PATTERN appears.
 10:This pattern is in lower case.
-608:Check up on PATTERN near the end.
+610:Check up on PATTERN near the end.
 3:Here is the pattern again.
 5:Pattern
 42:This line contains pattern not on a line by itself.
@@ -93,6 +93,7 @@ RC=0
 ---------------------------- Test 13 -----------------------------
 Here is the pattern again.
 That time it was on a line by itself.
+seventeen
 This line contains pattern not on a line by itself.
 RC=0
 ---------------------------- Test 14 -----------------------------
@@ -323,10 +324,10 @@ RC=0
 ./testdata/grepinput-9-
 ./testdata/grepinput:10:This pattern is in lower case.
 --
-./testdata/grepinput-605-PUT NEW DATA ABOVE THIS LINE.
-./testdata/grepinput-606-=============================
-./testdata/grepinput-607-
-./testdata/grepinput:608:Check up on PATTERN near the end.
+./testdata/grepinput-607-PUT NEW DATA ABOVE THIS LINE.
+./testdata/grepinput-608-=============================
+./testdata/grepinput-609-
+./testdata/grepinput:610:Check up on PATTERN near the end.
 --
 ./testdata/grepinputx-1-This is a second file of input for the pcregrep tests.
 ./testdata/grepinputx-2-
@@ -348,8 +349,8 @@ RC=0
 ./testdata/grepinput-12-Here follows a whole lot of stuff that makes the file over 24K long.
 ./testdata/grepinput-13-
 --
-./testdata/grepinput:608:Check up on PATTERN near the end.
-./testdata/grepinput-609-This is the last line of this file.
+./testdata/grepinput:610:Check up on PATTERN near the end.
+./testdata/grepinput-611-This is the last line of this file.
 --
 ./testdata/grepinputx:3:Here is the pattern again.
 ./testdata/grepinputx-4-
@@ -370,16 +371,17 @@ RC=2
 ---------------------------- Test 34 -----------------------------
 RC=2
 ---------------------------- Test 35 -----------------------------
+./testdata/grepinput8
 ./testdata/grepinputx
 RC=0
 ---------------------------- Test 36 -----------------------------
 ./testdata/grepinput3
-./testdata/grepinput8
 ./testdata/grepinputx
 RC=0
 ---------------------------- Test 37 -----------------------------
 aaaaa0
 aaaaa2
+010203040506
 RC=0
 ======== STDERR ========
 pcregrep: pcre_exec() gave error -8 while matching this text:
@@ -390,7 +392,7 @@ pcregrep: pcre_exec() gave error -8 while matching this text:
 
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
-pcregrep: Error -8 or -21 means that a resource limit was exceeded.
+pcregrep: Error -8, -21 or -27 means that a resource limit was exceeded.
 pcregrep: Check your regex for nested unlimited loops.
 ---------------------------- Test 38 ------------------------------
 This line contains a binary zero here > < for testing.
@@ -514,7 +516,7 @@ This is a file of miscellaneous text that is used as test data for checking
 that the pcregrep command is working correctly. The file must be more than 24K
 long so that it needs more than a single read
 
-pcregrep: Error -8 or -21 means that a resource limit was exceeded.
+pcregrep: Error -8, -21 or -27 means that a resource limit was exceeded.
 pcregrep: Check your regex for nested unlimited loops.
 RC=1
 ---------------------------- Test 63 -----------------------------
@@ -524,7 +526,7 @@ This is a file of miscellaneous text that is used as test data for checking
 that the pcregrep command is working correctly. The file must be more than 24K
 long so that it needs more than a single read
 
-pcregrep: Error -8 or -21 means that a resource limit was exceeded.
+pcregrep: Error -8, -21 or -27 means that a resource limit was exceeded.
 pcregrep: Check your regex for nested unlimited loops.
 RC=1
 ---------------------------- Test 64 ------------------------------
@@ -593,3 +595,151 @@ RC=0
 [00m[1;31mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
 
 [00mRC=0
+---------------------------- Test 71 -----------------------------
+01
+RC=0
+---------------------------- Test 72 -----------------------------
+[1;31m01[00m0203040506
+RC=0
+---------------------------- Test 73 -----------------------------
+[1;31m01[00m
+RC=0
+---------------------------- Test 74 -----------------------------
+01
+02
+RC=0
+---------------------------- Test 75 -----------------------------
+[1;31m01[00m[1;31m02[00m03040506
+RC=0
+---------------------------- Test 76 -----------------------------
+[1;31m01[00m
+[1;31m02[00m
+RC=0
+---------------------------- Test 77 -----------------------------
+01
+03
+RC=0
+---------------------------- Test 78 -----------------------------
+[1;31m01[00m02[1;31m03[00m040506
+RC=0
+---------------------------- Test 79 -----------------------------
+[1;31m01[00m
+[1;31m03[00m
+RC=0
+---------------------------- Test 80 -----------------------------
+01
+RC=0
+---------------------------- Test 81 -----------------------------
+[1;31m01[00m0203040506
+RC=0
+---------------------------- Test 82 -----------------------------
+[1;31m01[00m
+RC=0
+---------------------------- Test 83 -----------------------------
+pcregrep: line 4 of file ./testdata/grepinput3 is too long for the internal buffer
+pcregrep: check the --buffer-size option
+RC=2
+---------------------------- Test 84 -----------------------------
+testdata/grepinputv:fox jumps
+testdata/grepinputx:complete pair
+testdata/grepinputx:That was a complete pair
+testdata/grepinputx:complete pair
+testdata/grepinput3:triple:	t7_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+RC=0
+---------------------------- Test 85 -----------------------------
+./testdata/grepinput3:Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+RC=0
+---------------------------- Test 86 -----------------------------
+Binary file ./testdata/grepbinary matches
+RC=0
+---------------------------- Test 87 -----------------------------
+RC=1
+---------------------------- Test 88 -----------------------------
+Binary file ./testdata/grepbinary matches
+RC=0
+---------------------------- Test 89 -----------------------------
+RC=1
+---------------------------- Test 90 -----------------------------
+RC=1
+---------------------------- Test 91 -----------------------------
+The quick brown f x jumps over the lazy dog.
+RC=0
+---------------------------- Test 92 -----------------------------
+The quick brown f x jumps over the lazy dog.
+RC=0
+---------------------------- Test 93 -----------------------------
+The quick brown f x jumps over the lazy dog.
+RC=0
+---------------------------- Test 94 -----------------------------
+./testdata/grepinput8
+./testdata/grepinputx
+RC=0
+---------------------------- Test 95 -----------------------------
+testdata/grepinputx:complete pair
+testdata/grepinputx:That was a complete pair
+testdata/grepinputx:complete pair
+RC=0
+---------------------------- Test 96 -----------------------------
+./testdata/grepinput3
+./testdata/grepinput8
+./testdata/grepinputx
+RC=0
+---------------------------- Test 97 -----------------------------
+./testdata/grepinput3
+./testdata/grepinputx
+RC=0
+---------------------------- Test 98 -----------------------------
+./testdata/grepinputx
+RC=0
+---------------------------- Test 99 -----------------------------
+./testdata/grepinput3
+./testdata/grepinputx
+RC=0
+---------------------------- Test 100 ------------------------------
+./testdata/grepinput:zerothe.
+./testdata/grepinput:zeroa
+./testdata/grepinput:zerothe.
+RC=0
+---------------------------- Test 101 ------------------------------
+./testdata/grepinput:[1;31m.[00m|[1;31mzero[00m|[1;31mthe[00m|[1;31m.[00m
+./testdata/grepinput:[1;31mzero[00m|[1;31ma[00m
+./testdata/grepinput:[1;31m.[00m|[1;31mzero[00m|[1;31mthe[00m|[1;31m.[00m
+RC=0
+---------------------------- Test 102 -----------------------------
+2:
+5:
+7:
+9:
+12:
+14:
+RC=0
+---------------------------- Test 103 -----------------------------
+RC=0
+---------------------------- Test 104 -----------------------------
+2:
+5:
+7:
+9:
+12:
+14:
+RC=0
+---------------------------- Test 105 -----------------------------
+[1;31m[00mtriple:	t1_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t2_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	
+[1;31m[00mLorem [1;31mipsum[00m dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+[1;31m[00m
+[1;31m[00mtriple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t5_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	
+[1;31m[00mo_txt
+[1;31m[00m
+[1;31m[00mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t7_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+RC=0
+---------------------------- Test 106 -----------------------------
+a
+RC=0

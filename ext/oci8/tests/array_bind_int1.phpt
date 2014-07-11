@@ -19,15 +19,15 @@ $statement = oci_parse($c, $create);
 oci_execute($statement);
 
 $create_pkg = "
-CREATE OR REPLACE PACKAGE ARRAYBINDPKG1 AS 
+CREATE OR REPLACE PACKAGE ARRAY_BIND_INT1_PKG AS 
   TYPE ARRTYPE IS TABLE OF NUMBER INDEX BY BINARY_INTEGER; 
   PROCEDURE iobind(c1 IN OUT ARRTYPE); 
-END ARRAYBINDPKG1;";
+END ARRAY_BIND_INT1_PKG;";
 $statement = oci_parse($c, $create_pkg);
 oci_execute($statement);
 
 $create_pkg_body = "
-CREATE OR REPLACE PACKAGE BODY ARRAYBINDPKG1 AS 
+CREATE OR REPLACE PACKAGE BODY ARRAY_BIND_INT1_PKG AS 
   CURSOR CUR IS SELECT name FROM bind_test;
   PROCEDURE iobind(c1 IN OUT ARRTYPE) IS
     BEGIN
@@ -45,11 +45,11 @@ CREATE OR REPLACE PACKAGE BODY ARRAYBINDPKG1 AS
       END IF;
     END LOOP;
   END iobind;
-END ARRAYBINDPKG1;";
+END ARRAY_BIND_INT1_PKG;";
 $statement = oci_parse($c, $create_pkg_body);
 oci_execute($statement);
 
-$statement = oci_parse($c, "BEGIN ARRAYBINDPKG1.iobind(:c1); END;");
+$statement = oci_parse($c, "BEGIN array_bind_int1_pkg.iobind(:c1); END;");
 
 $array = Array(1,2,3,4,5);
 

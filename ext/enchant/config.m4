@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(enchant,for ENCHANT support,
-[  --with-enchant[=DIR]     Include enchant support.
+[  --with-enchant[=DIR]      Include enchant support.
                           GNU Aspell version 1.1.3 or higher required.])
 
 if test "$PHP_ENCHANT" != "no"; then

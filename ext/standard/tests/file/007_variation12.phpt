@@ -36,7 +36,7 @@ echo "*** Test fopen() & fclose() functions:  with 'w+t' mode ***\n";
 $file_handle = fopen($file, "w+t");  //opening the file "w+t" mode
 var_dump($file_handle);  //Check for the content of handle
 var_dump( get_resource_type($file_handle) );  //Check for the type of resource
-var_dump( ftell($file_handle) );  //Initial file pointer position, expected at the begining of the file
+var_dump( ftell($file_handle) );  //Initial file pointer position, expected at the beginning of the file
 var_dump( fwrite($file_handle, $string) );  //Check for write operation; passes; expected:size of the $string
 var_dump( ftell($file_handle) );  //File pointer position after write operation, expected at the end of the file
 rewind($file_handle);
@@ -53,7 +53,7 @@ clearstatcache();
 
 unlink($file);  //Deleting the file
 fclose( fopen($file, "w+t") );  //Opening the non-existing file in "w+t" mode, which will be created
-var_dump( file_exists($file) );  //Check for the existance of file
+var_dump( file_exists($file) );  //Check for the existence of file
 echo "*** Done ***\n"; 
 --CLEAN--
 <?php

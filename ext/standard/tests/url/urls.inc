@@ -75,6 +75,7 @@ $urls = array(
 'x:/blah.com',
 'x://::abc/?',
 'http://::?',
+'http://::#',
 'x://::6.5',
 'http://?:/',
 'http://@?:/',
@@ -88,6 +89,7 @@ $urls = array(
 'http://[x:80]/',
 '',
 '/',
+'/rest/Users?filter={"id":"123"}',
 
 // Severely malformed URLs that do not parse:
 'http:///blah.com',
@@ -99,6 +101,7 @@ $urls = array(
 'http://@:/',
 'http://:/',
 'http://?',
+'http://#',
 'http://?:',
 'http://:?',
 'http://blah.com:123456',

@@ -58,6 +58,8 @@ mysql_close($link);
 print "done!\n";
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
 Warning: mysql_db_name(): Unable to jump to row -1 on MySQL result index %d in %s on line %d
 
 Warning: mysql_db_name(): Unable to jump to row %d on MySQL result index %d in %s on line %d

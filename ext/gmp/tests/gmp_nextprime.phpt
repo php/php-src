@@ -2,9 +2,6 @@
 gmp_nextprime()
 --SKIPIF--
 <?php if (!extension_loaded("gmp")) print "skip";
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. only for Non Windows Systems');
-}
 ?>
 --FILE--
 <?php
@@ -37,6 +34,8 @@ string(6) "100003"
 
 Warning: gmp_nextprime(): Unable to convert variable to GMP - wrong type in %s on line %d
 string(1) "0"
+
+Warning: gmp_nextprime(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 string(1) "0"
 
 Warning: gmp_nextprime(): Unable to convert variable to GMP - wrong type in %s on line %d

@@ -124,87 +124,132 @@ fclose($fp);
 *** Testing mcrypt_cbc() : usage variation ***
 
 --int 0--
-string(32) "bc27b3a4e33b531d5983fc7df693cd09"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --int 1--
-string(32) "bc27b3a4e33b531d5983fc7df693cd09"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --int 12345--
-string(32) "d109b7973383127002474ae731c4b3a8"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --int -12345--
-string(32) "3e82a931cedb03a38b91a637ff8c9f9e"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --float 10.5--
-string(32) "de71833586c1d7132a289960ebeeca7a"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --float -10.5--
-string(32) "7d0489dd2e99ae910ecc015573f3dd16"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --float 12.3456789000e10--
-string(32) "978055b42c0506a8947e3c3c8d994baf"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --float -12.3456789000e10--
-string(32) "4aa84ba400c2b8ef467d4d98372b4f4e"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --float .5--
-string(32) "e731dc5059b84e0c8774ac490f77d6e6"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --empty array--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 2 to be string, array given, %s(%d)
 string(0) ""
 
 --int indexed array--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 2 to be string, array given, %s(%d)
 string(0) ""
 
 --associative array--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 2 to be string, array given, %s(%d)
 string(0) ""
 
 --nested arrays--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 2 to be string, array given, %s(%d)
 string(0) ""
 
 --uppercase NULL--
-string(32) "be722a5ffc361d721fbcab1eacc6acf5"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --lowercase null--
-string(32) "be722a5ffc361d721fbcab1eacc6acf5"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --lowercase true--
-string(32) "bc27b3a4e33b531d5983fc7df693cd09"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --lowercase false--
-string(32) "be722a5ffc361d721fbcab1eacc6acf5"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --uppercase TRUE--
-string(32) "bc27b3a4e33b531d5983fc7df693cd09"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --uppercase FALSE--
-string(32) "be722a5ffc361d721fbcab1eacc6acf5"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --empty string DQ--
-string(32) "be722a5ffc361d721fbcab1eacc6acf5"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --empty string SQ--
-string(32) "be722a5ffc361d721fbcab1eacc6acf5"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --instance of classWithToString--
-string(32) "19420fa26f561ee82ed84abbcd2d284b"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --instance of classWithoutToString--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 2 to be string, object given, %s(%d)
 string(0) ""
 
 --undefined var--
-string(32) "be722a5ffc361d721fbcab1eacc6acf5"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --unset var--
-string(32) "be722a5ffc361d721fbcab1eacc6acf5"
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
+string(0) ""
 
 --resource--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 2 to be string, resource given, %s(%d)
 string(0) ""
 ===DONE===
-

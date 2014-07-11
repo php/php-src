@@ -23,7 +23,10 @@
 #include <unicode/locid.h>
 #include <unicode/calendar.h>
 #include <unicode/ustring.h>
+
 #include "../intl_convertcpp.h"
+#include "../common/common_date.h"
+
 extern "C" {
 #include "../php_intl.h"
 #define USE_TIMEZONE_POINTER 1
@@ -181,7 +184,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 
 U_CFUNC PHP_FUNCTION(intlcal_get_now)
 {
-	UErrorCode	status			= U_ZERO_ERROR;
 	intl_error_reset(NULL TSRMLS_CC);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -779,7 +781,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_time_zone)
 
 	TimeZone *tz = co->ucal->getTimeZone().clone();
 	if (tz == NULL) {
-		intl_error_set(NULL, U_MEMORY_ALLOCATION_ERROR,
+		intl_errors_set(CALENDAR_ERROR_P(co), U_MEMORY_ALLOCATION_ERROR,
 			"intlcal_get_time_zone: could not clone TimeZone", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
@@ -990,6 +992,32 @@ U_CFUNC PHP_FUNCTION(intlcal_set_lenient)
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	co->ucal->setLenient((UBool) is_lenient);
+
+	RETURN_TRUE;
+}
+
+U_CFUNC PHP_FUNCTION(intlcal_set_minimal_days_in_first_week)
+{
+	long	num_days;
+	CALENDAR_METHOD_INIT_VARS;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
+			"Ol", &object, Calendar_ce_ptr, &num_days) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_set_minimal_days_in_first_week: bad arguments", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	if (num_days < 1 || num_days > 7) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_set_minimal_days_in_first_week: invalid number of days; "
+			"must be between 1 and 7", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	CALENDAR_METHOD_FETCH_OBJECT;
+
+	co->ucal->setMinimalDaysInFirstWeek((uint8_t)num_days);
 
 	RETURN_TRUE;
 }

@@ -20,7 +20,7 @@ var_dump(ldap_get_values_len($link));
 var_dump(ldap_get_values_len($link, $entry));
 var_dump(ldap_get_values_len($link, $entry, "weirdAttribute", "Additional data"));
 
-var_dump(ldap_get_values_len($link, $entry, "inexistantAttribute"));
+var_dump(ldap_get_values_len($link, $entry, "inexistentAttribute"));
 ?>
 ===DONE===
 --CLEAN--

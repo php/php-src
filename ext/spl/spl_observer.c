@@ -2,9 +2,9 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is SplSubject to version 3.01 of the PHP license,      |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.php.net/license/3_01.txt                                  |
@@ -26,6 +26,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_array.h"
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_smart_str.h"
 #include "zend_interfaces.h"
@@ -361,9 +362,8 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 /* }}} */
 
 /* overriden for garbage collection
- * This is very hacky, but unfortunately the garbage collector can only query objects for
- * dependencies through get_properties */
-static HashTable *spl_object_storage_get_properties(zval *obj TSRMLS_DC) /* {{{ */
+ * This is very hacky */
+static HashTable *spl_object_storage_get_gc(zval *obj, zval ***table, int *n TSRMLS_DC) /* {{{ */
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(obj TSRMLS_CC);
 	spl_SplObjectStorageElement *element;
@@ -374,14 +374,8 @@ static HashTable *spl_object_storage_get_properties(zval *obj TSRMLS_DC) /* {{{ 
 
 	props = std_object_handlers.get_properties(obj TSRMLS_CC);
 	
-	if (!GC_G(gc_active)) {
-		zend_hash_del(props, "\x00gcdata", sizeof("\x00gcdata"));
-		return props;
-	}
-
-	if (props->nApplyCount > 0) {
-		return props;
-	}
+	*table = NULL;
+	*n = 0;
 
 	/* clean \x00gcdata, as it may be out of date */
 	if (zend_hash_find(props, "\x00gcdata", sizeof("\x00gcdata"), (void**) &gcdata_arr_pp) == SUCCESS) {
@@ -628,11 +622,27 @@ SPL_METHOD(SplObjectStorage, contains)
 SPL_METHOD(SplObjectStorage, count)
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
-	if (zend_parse_parameters_none() == FAILURE) {
+	long mode = COUNT_NORMAL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &mode) == FAILURE) {
 		return;
 	}
-	
+
+	if (mode == COUNT_RECURSIVE) {
+		long ret = zend_hash_num_elements(&intern->storage);
+		HashPosition position;
+		zval *element;
+
+		for (zend_hash_internal_pointer_reset_ex(&intern->storage, &position);
+		     zend_hash_get_current_data_ex(&intern->storage, (void**) &element, &position) == SUCCESS;
+		     zend_hash_move_forward_ex(&intern->storage, &position)) {
+			ret += php_count_recursive(element, mode TSRMLS_CC);
+		}
+
+		RETURN_LONG(ret);
+		return;
+	}
+
 	RETURN_LONG(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
@@ -821,7 +831,6 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	}
 
 	if (buf_len == 0) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
 		return;
 	}
 
@@ -905,7 +914,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	++p;
 
 	ALLOC_INIT_ZVAL(pmembers);
-	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(pmembers) != IS_ARRAY) {
 		zval_ptr_dtor(&pmembers);
 		goto outexcept;
 	}
@@ -1316,10 +1325,10 @@ PHP_MINIT_FUNCTION(spl_observer)
 	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, spl_funcs_SplObjectStorage);
 	memcpy(&spl_handler_SplObjectStorage, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
-	spl_handler_SplObjectStorage.get_properties  = spl_object_storage_get_properties;
 	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;
 	spl_handler_SplObjectStorage.compare_objects = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
+	spl_handler_SplObjectStorage.get_gc          = spl_object_storage_get_gc;
 
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Countable);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Iterator);

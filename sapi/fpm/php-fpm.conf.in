@@ -3,14 +3,14 @@
 ;;;;;;;;;;;;;;;;;;;;;
 
 ; All relative paths in this configuration file are relative to PHP's install
-; prefix (@prefix@). This prefix can be dynamicaly changed by using the
+; prefix (@prefix@). This prefix can be dynamically changed by using the
 ; '-p' argument from the command line.
 
 ; Include one or more files. If glob(3) exists, it is used to include a bunch of
 ; files from a glob(3) pattern. This directive can be used everywhere in the
 ; file.
 ; Relative path can also be used. They will be prefixed by:
-;  - the global prefix if it's been set (-p arguement)
+;  - the global prefix if it's been set (-p argument)
 ;  - @prefix@ otherwise
 ;include=etc/fpm.d/*.conf
 
@@ -105,7 +105,15 @@
 ; - /dev/poll  (Solaris >= 7)
 ; - port       (Solaris >= 10)
 ; Default Value: not set (auto detection)
-; events.mechanism = epoll
+;events.mechanism = epoll
+
+; When FPM is build with systemd integration, specify the interval,
+; in second, between health report notification to systemd.
+; Set to 0 to disable.
+; Available Units: s(econds), m(inutes), h(ours)
+; Default Unit: seconds
+; Default value: 10
+;systemd_interval = 10
 
 ;;;;;;;;;;;;;;;;;;;;
 ; Pool Definitions ; 
@@ -151,17 +159,17 @@ group = @php_fpm_group@
 listen = 127.0.0.1:9000
 
 ; Set listen(2) backlog.
-; Default Value: 128 (-1 on FreeBSD and OpenBSD)
-;listen.backlog = 128
+; Default Value: 65535 (-1 on FreeBSD and OpenBSD)
+;listen.backlog = 65535
 
 ; Set permissions for unix socket, if one is used. In Linux, read/write
 ; permissions must be set in order to allow connections from a web server. Many
 ; BSD-derived systems allow connections regardless of permissions. 
 ; Default Values: user and group are set as the running user
-;                 mode is set to 0666
+;                 mode is set to 0660
 ;listen.owner = @php_fpm_user@
 ;listen.group = @php_fpm_group@
-;listen.mode = 0666
+;listen.mode = 0660
  
 ; List of ipv4 addresses of FastCGI clients which are allowed to connect.
 ; Equivalent to the FCGI_WEB_SERVER_ADDRS environment variable in the original
@@ -177,7 +185,7 @@ listen = 127.0.0.1:9000
 ;       - The pool processes will inherit the master process priority
 ;         unless it specified otherwise
 ; Default Value: no set
-; priority = -19
+; process.priority = -19
 
 ; Choose how the process manager will control the number of child processes.
 ; Possible Values:
@@ -393,7 +401,7 @@ pm.max_spare_servers = 3
 ;      - %{megabytes}M
 ;      - %{mega}M
 ;  %n: pool name
-;  %o: ouput header
+;  %o: output header
 ;      it must be associated with embraces to specify the name of the header:
 ;      - %{Content-Type}o
 ;      - %{X-Powered-By}o
@@ -466,6 +474,15 @@ pm.max_spare_servers = 3
 ; process time (several ms).
 ; Default Value: no
 ;catch_workers_output = yes
+
+; Clear environment in FPM workers
+; Prevents arbitrary environment variables from reaching FPM worker processes
+; by clearing the environment in workers before env vars specified in this
+; pool configuration are added.
+; Setting to "no" will make all environment variables available to PHP code
+; via getenv(), $_ENV and $_SERVER.
+; Default Value: yes
+;clear_env = no
 
 ; Limits the extensions of the main script FPM will allow to parse. This can
 ; prevent configuration mistakes on the web server side. You should only limit

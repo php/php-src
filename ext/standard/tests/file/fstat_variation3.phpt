@@ -1,5 +1,5 @@
 --TEST--
-Test function fstat() by substituting agument 1 with emptyUnsetUndefNull values.
+Test function fstat() by substituting argument 1 with emptyUnsetUndefNull values.
 --FILE--
 <?php
 $unset_var = 10;

@@ -13,5 +13,5 @@ unlink($file);
 Warning: pcntl_exec() expects at least 1 parameter, 0 given %s
 NULL
 
-Warning: pcntl_exec(): Error has occured: (errno %d) %s
+Warning: pcntl_exec(): Error has occurred: (errno %d) %s
 bool(false)

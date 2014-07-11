@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -89,9 +89,6 @@ struct _zend_compiler_globals {
 
 	int zend_lineno;
 
-	char *heredoc;
-	int heredoc_len;
-
 	zend_op_array *active_op_array;
 
 	HashTable *function_table;	/* function symbol table */
@@ -134,8 +131,12 @@ struct _zend_compiler_globals {
 
 	zval      *current_namespace;
 	HashTable *current_import;
+	HashTable *current_import_function;
+	HashTable *current_import_const;
 	zend_bool  in_namespace;
 	zend_bool  has_bracketed_namespaces;
+
+	HashTable const_filenames;
 
 	zend_compiler_context context;
 	zend_stack context_stack;
@@ -145,6 +146,9 @@ struct _zend_compiler_globals {
 	char *interned_strings_end;
 	char *interned_strings_top;
 	char *interned_strings_snapshot_top;
+#ifndef ZTS
+	char *interned_empty_string;
+#endif
 
 	HashTable interned_strings;
 
@@ -169,8 +173,6 @@ struct _zend_executor_globals {
 
 	zval error_zval;
 	zval *error_zval_ptr;
-
-	zend_ptr_stack arg_types_stack;
 
 	/* symbol table cache */
 	HashTable *symtable_cache[SYMTABLE_CACHE_SIZE];
@@ -297,6 +299,7 @@ struct _zend_php_scanner_globals {
 	unsigned char *yy_limit;
 	int yy_state;
 	zend_stack state_stack;
+	zend_ptr_stack heredoc_label_stack;
 	
 	/* original (unfiltered) script */
 	unsigned char *script_org;
@@ -306,7 +309,7 @@ struct _zend_php_scanner_globals {
 	unsigned char *script_filtered;
 	size_t script_filtered_size;
 
-	/* input/ouput filters */
+	/* input/output filters */
 	zend_encoding_filter input_filter;
 	zend_encoding_filter output_filter;
 	const zend_encoding *script_encoding;

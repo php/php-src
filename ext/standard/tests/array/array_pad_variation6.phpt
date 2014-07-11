@@ -31,7 +31,7 @@ the lazy dog
 This is a double quoted string
 EOT;
 
-// heredoc with diferent whitespaces
+// heredoc with different whitespaces
 $diff_whitespaces = <<<EOT
 hello\r world\t
 1111\t\t != 2222\v\v

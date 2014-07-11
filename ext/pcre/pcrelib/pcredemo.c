@@ -248,7 +248,7 @@ if (namecount <= 0) printf("No named substrings\n"); else
 * more than one byte.                                                    *
 *                                                                        *
 * However, there is a complication concerned with newlines. When the     *
-* newline convention is such that CRLF is a valid newline, we want must  *
+* newline convention is such that CRLF is a valid newline, we must       *
 * advance by two characters rather than one. The newline convention can  *
 * be set in the regex by (*CR), etc.; if not, we must find the default.  *
 *************************************************************************/

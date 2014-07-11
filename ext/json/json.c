@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,8 +25,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/html.h"
 #include "ext/standard/php_smart_str.h"
-#include "utf8_to_utf16.h"
 #include "JSON_parser.h"
 #include "php_json.h"
 #include <zend_exceptions.h>
@@ -39,7 +39,7 @@ static PHP_FUNCTION(json_last_error_msg);
 
 static const char digits[] = "0123456789abcdef";
 
-zend_class_entry *php_json_serializable_ce;
+PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(json)
 
@@ -47,6 +47,7 @@ ZEND_DECLARE_MODULE_GLOBALS(json)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_encode, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, depth)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_decode, 0, 0, 1)
@@ -126,6 +127,7 @@ static PHP_GINIT_FUNCTION(json)
 {
 	json_globals->encoder_depth = 0;
 	json_globals->error_code = 0;
+	json_globals->encode_max_depth = 0;
 }
 /* }}} */
 
@@ -183,15 +185,15 @@ static int json_determine_array_type(zval **val TSRMLS_DC) /* {{{ */
 		idx = 0;
 		for (;; zend_hash_move_forward_ex(myht, &pos)) {
 			i = zend_hash_get_current_key_ex(myht, &key, &key_len, &index, 0, &pos);
-			if (i == HASH_KEY_NON_EXISTANT) {
+			if (i == HASH_KEY_NON_EXISTENT) {
 				break;
 			}
 
 			if (i == HASH_KEY_IS_STRING) {
-				return 1;
+				return PHP_JSON_OUTPUT_OBJECT;
 			} else {
 				if (index != idx) {
-					return 1;
+					return PHP_JSON_OUTPUT_OBJECT;
 				}
 			}
 			idx++;
@@ -228,7 +230,7 @@ static inline void json_pretty_print_indent(smart_str *buf, int options TSRMLS_D
 
 static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC) /* {{{ */
 {
-	int i, r;
+	int i, r, need_comma = 0;
 	HashTable *myht;
 
 	if (Z_TYPE_PP(val) == IS_ARRAY) {
@@ -251,7 +253,6 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 		smart_str_appendc(buf, '{');
 	}
 
-	json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 	++JSON_G(encoder_depth);
 
 	i = myht ? zend_hash_num_elements(myht) : 0;
@@ -264,12 +265,11 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 		uint key_len;
 		HashPosition pos;
 		HashTable *tmp_ht;
-		int need_comma = 0;
 
 		zend_hash_internal_pointer_reset_ex(myht, &pos);
 		for (;; zend_hash_move_forward_ex(myht, &pos)) {
 			i = zend_hash_get_current_key_ex(myht, &key, &key_len, &index, 0, &pos);
-			if (i == HASH_KEY_NON_EXISTANT)
+			if (i == HASH_KEY_NON_EXISTENT)
 				break;
 
 			if (zend_hash_get_current_data_ex(myht, (void **) &data, &pos) == SUCCESS) {
@@ -281,11 +281,11 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 				if (r == PHP_JSON_OUTPUT_ARRAY) {
 					if (need_comma) {
 						smart_str_appendc(buf, ',');
-						json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 					} else {
 						need_comma = 1;
 					}
 
+					json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 					json_pretty_print_indent(buf, options TSRMLS_CC);
 					php_json_encode(buf, *data, options TSRMLS_CC);
 				} else if (r == PHP_JSON_OUTPUT_OBJECT) {
@@ -300,27 +300,27 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 
 						if (need_comma) {
 							smart_str_appendc(buf, ',');
-							json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 						} else {
 							need_comma = 1;
 						}
 
+						json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 						json_pretty_print_indent(buf, options TSRMLS_CC);
 
 						json_escape_string(buf, key, key_len - 1, options & ~PHP_JSON_NUMERIC_CHECK TSRMLS_CC);
 						smart_str_appendc(buf, ':');
 
 						json_pretty_print_char(buf, options, ' ' TSRMLS_CC);
- 
+
 						php_json_encode(buf, *data, options TSRMLS_CC);
 					} else {
 						if (need_comma) {
 							smart_str_appendc(buf, ',');
-							json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 						} else {
 							need_comma = 1;
 						}
 
+						json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 						json_pretty_print_indent(buf, options TSRMLS_CC);
 
 						smart_str_appendc(buf, '"');
@@ -329,7 +329,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 						smart_str_appendc(buf, ':');
 
 						json_pretty_print_char(buf, options, ' ' TSRMLS_CC);
- 
+
 						php_json_encode(buf, *data, options TSRMLS_CC);
 					}
 				}
@@ -340,10 +340,17 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 			}
 		}
 	}
-	
+
+	if (JSON_G(encoder_depth) > JSON_G(encode_max_depth)) {
+		JSON_G(error_code) = PHP_JSON_ERROR_DEPTH;
+	}
 	--JSON_G(encoder_depth);
-	json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
-	json_pretty_print_indent(buf, options TSRMLS_CC);
+
+	/* Only keep closing bracket on same line for empty arrays/objects */
+	if (need_comma) {
+		json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
+		json_pretty_print_indent(buf, options TSRMLS_CC);
+	}
 
 	if (r == PHP_JSON_OUTPUT_ARRAY) {
 		smart_str_appendc(buf, ']');
@@ -353,13 +360,50 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 }
 /* }}} */
 
-#define REVERSE16(us) (((us & 0xf) << 12) | (((us >> 4) & 0xf) << 8) | (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf))
+static int json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{{ */
+{
+	size_t pos = 0, us;
+	int j, status;
+
+	if (utf16) {
+		/* really convert the utf8 string */
+		for (j=0 ; pos < len ; j++) {
+			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
+			if (status != SUCCESS) {
+				return -1;
+			}
+			/* From http://en.wikipedia.org/wiki/UTF16 */
+			if (us >= 0x10000) {
+				us -= 0x10000;
+				utf16[j++] = (unsigned short)((us >> 10) | 0xd800);
+				utf16[j] = (unsigned short)((us & 0x3ff) | 0xdc00);
+			} else {
+				utf16[j] = (unsigned short)us;
+			}
+		}
+	} else {
+		/* Only check if utf8 string is valid, and compute utf16 lenght */
+		for (j=0 ; pos < len ; j++) {
+			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
+			if (status != SUCCESS) {
+				return -1;
+			}
+			if (us >= 0x10000) {
+				j++;
+			}
+		}
+	}
+	return j;
+}
+/* }}} */
+
 
 static void json_escape_string(smart_str *buf, char *s, int len, int options TSRMLS_DC) /* {{{ */
 {
 	int pos = 0, ulen = 0;
 	unsigned short us;
 	unsigned short *utf16;
+	size_t newlen;
 
 	if (len == 0) {
 		smart_str_appendl(buf, "\"\"", 2);
@@ -387,11 +431,11 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 			}
 			return;
 		}
-		
+
 	}
-	
+
 	utf16 = (options & PHP_JSON_UNESCAPED_UNICODE) ? NULL : (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
-	ulen = utf8_to_utf16(utf16, s, len);
+	ulen = json_utf8_to_utf16(utf16, s, len);
 	if (ulen <= 0) {
 		if (utf16) {
 			efree(utf16);
@@ -408,6 +452,8 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 		len = ulen;
 	}
 
+	/* pre-allocate for string length plus 2 quotes */
+	smart_str_alloc(buf, len+2, 0);
 	smart_str_appendc(buf, '"');
 
 	while (pos < len)
@@ -493,15 +539,10 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 					smart_str_appendc(buf, (unsigned char) us);
 				} else {
 					smart_str_appendl(buf, "\\u", 2);
-					us = REVERSE16(us);
-
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-					us >>= 4;
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-					us >>= 4;
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-					us >>= 4;
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
+					smart_str_appendc(buf, digits[(us & 0xf000) >> 12]);
+					smart_str_appendc(buf, digits[(us & 0xf00)  >> 8]);
+					smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);
+					smart_str_appendc(buf, digits[(us & 0xf)]);
 				}
 				break;
 		}
@@ -520,13 +561,13 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 	zend_class_entry *ce = Z_OBJCE_P(val);
 	zval *retval = NULL, fname;
 	HashTable* myht;
-	
+
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		myht = HASH_OF(val);
 	} else {
 		myht = Z_OBJPROP_P(val);
-	}	
-	
+	}
+
 	if (myht && myht->nApplyCount > 1) {
 		JSON_G(error_code) = PHP_JSON_ERROR_RECURSION;
 		smart_str_appendl(buf, "null", 4);
@@ -539,7 +580,7 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Failed calling %s::jsonSerialize()", ce->name);
 		smart_str_appendl(buf, "null", sizeof("null") - 1);
 		return;
-    }   
+    }
 
 	if (EG(exception)) {
 		/* Error already raised */
@@ -631,7 +672,7 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 
 	utf16 = (unsigned short *) safe_emalloc((str_len+1), sizeof(unsigned short), 1);
 
-	utf16_len = utf8_to_utf16(utf16, str, str_len);
+	utf16_len = json_utf8_to_utf16(utf16, str, str_len);
 	if (utf16_len <= 0) {
 		if (utf16) {
 			efree(utf16);
@@ -654,27 +695,66 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 	else
 	{
 		double d;
-		int type;
+		int type, overflow_info;
 		long p;
+		char *trim = str;
+		int trim_len = str_len;
+
+		/* Increment trimmed string pointer to strip leading whitespace */
+		/* JSON RFC says to consider as whitespace: space, tab, LF or CR */
+		while (trim_len && (*trim == ' ' || *trim == '\t' || *trim == '\n' || *trim == '\r')) {
+			trim++;
+			trim_len--;
+		}
+
+		/* Decrement trimmed string length to strip trailing whitespace */
+		while (trim_len && (trim[trim_len - 1] == ' ' || trim[trim_len - 1] == '\t' || trim[trim_len - 1] == '\n' || trim[trim_len - 1] == '\r')) {
+			trim_len--;
+		}
 
 		RETVAL_NULL();
-		if (str_len == 4) {
-			if (!strcasecmp(str, "null")) {
+		if (trim_len == 4) {
+			if (!strncmp(trim, "null", trim_len)) {
 				/* We need to explicitly clear the error because its an actual NULL and not an error */
 				jp->error_code = PHP_JSON_ERROR_NONE;
 				RETVAL_NULL();
-			} else if (!strcasecmp(str, "true")) {
+			} else if (!strncmp(trim, "true", trim_len)) {
 				RETVAL_BOOL(1);
 			}
-		} else if (str_len == 5 && !strcasecmp(str, "false")) {
+		} else if (trim_len == 5 && !strncmp(trim, "false", trim_len)) {
 			RETVAL_BOOL(0);
 		}
 
-		if ((type = is_numeric_string(str, str_len, &p, &d, 0)) != 0) {
+		if ((type = is_numeric_string_ex(trim, trim_len, &p, &d, 0, &overflow_info)) != 0) {
 			if (type == IS_LONG) {
 				RETVAL_LONG(p);
 			} else if (type == IS_DOUBLE) {
-				RETVAL_DOUBLE(d);
+				if (options & PHP_JSON_BIGINT_AS_STRING && overflow_info) {
+					/* Within an object or array, a numeric literal is assumed
+					 * to be an integer if and only if it's entirely made up of
+					 * digits (exponent notation will result in the number
+					 * being treated as a double). We'll match that behaviour
+					 * here. */
+					int i;
+					zend_bool is_float = 0;
+
+					for (i = (trim[0] == '-' ? 1 : 0); i < trim_len; i++) {
+						/* Not using isdigit() because it's locale specific,
+						 * but we expect JSON input to always be UTF-8. */
+						if (trim[i] < '0' || trim[i] > '9') {
+							is_float = 1;
+							break;
+						}
+					}
+
+					if (is_float) {
+						RETVAL_DOUBLE(d);
+					} else {
+						RETVAL_STRINGL(trim, trim_len, 1);
+					}
+				} else {
+					RETVAL_DOUBLE(d);
+				}
 			}
 		}
 
@@ -692,19 +772,22 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 /* }}} */
 
 
-/* {{{ proto string json_encode(mixed data [, int options])
+/* {{{ proto string json_encode(mixed data [, int options[, int depth]])
    Returns the JSON representation of a value */
 static PHP_FUNCTION(json_encode)
 {
 	zval *parameter;
 	smart_str buf = {0};
 	long options = 0;
+    long depth = JSON_PARSER_DEFAULT_DEPTH;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &parameter, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ll", &parameter, &options, &depth) == FAILURE) {
 		return;
 	}
 
 	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+
+	JSON_G(encode_max_depth) = depth;
 
 	php_json_encode(&buf, parameter, options TSRMLS_CC);
 

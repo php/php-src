@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -499,7 +499,7 @@ PHP_MINIT_FUNCTION(pcntl)
 {
 	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_pcntl_register_errno_constants(INIT_FUNC_ARGS_PASSTHRU);
-	php_add_tick_function(pcntl_signal_dispatch);
+	php_add_tick_function(pcntl_signal_dispatch TSRMLS_CC);
 
 	return SUCCESS;
 }
@@ -795,7 +795,7 @@ PHP_FUNCTION(pcntl_exec)
 					snprintf(key, 100, "%ld", key_num);
 					key_length = strlen(key);
 					break;
-				case HASH_KEY_NON_EXISTANT:
+				case HASH_KEY_NON_EXISTENT:
 					pair--;
 					continue;
 			}
@@ -816,7 +816,7 @@ PHP_FUNCTION(pcntl_exec)
 
 		if (execve(path, argv, envp) == -1) {
 			PCNTL_G(last_error) = errno;
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error has occured: (errno %d) %s", errno, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error has occurred: (errno %d) %s", errno, strerror(errno));
 		}
 	
 		/* Cleanup */
@@ -826,7 +826,7 @@ PHP_FUNCTION(pcntl_exec)
 
 		if (execv(path, argv) == -1) {
 			PCNTL_G(last_error) = errno;
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error has occured: (errno %d) %s", errno, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error has occurred: (errno %d) %s", errno, strerror(errno));
 		}
 	}
 
@@ -1127,7 +1127,7 @@ PHP_FUNCTION(pcntl_getpriority)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d: Invalid identifier flag", errno);
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error %d has occured", errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error %d has occurred", errno);
 				break;
 		}
 		RETURN_FALSE;
@@ -1167,7 +1167,7 @@ PHP_FUNCTION(pcntl_setpriority)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d: Only a super user may attempt to increase the process priority", errno);
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error %d has occured", errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error %d has occurred", errno);
 				break;
 		}
 		RETURN_FALSE;

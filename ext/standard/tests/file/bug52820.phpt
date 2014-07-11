@@ -1,5 +1,5 @@
 --TEST--
-Bug #52820 (writes to fopencookie FILE* not commited when seeking the stream)
+Bug #52820 (writes to fopencookie FILE* not committed when seeking the stream)
 --SKIPIF--
 <?php
 if (!function_exists('leak_variable'))
@@ -43,29 +43,29 @@ echo "\nDone.\n";
 temp stream (close after):
 About to rewind!
 * About to connect() to 127.0.0.1 port 37349%r.*%r
-*   Trying 127.0.0.1... * Connection refused
-* couldn't connect to host
+*   Trying 127.0.0.1...%A* Connection refused
+* couldn't connect to host%S
 * Closing connection #0
 
 memory stream (close after):
 About to rewind!
 * About to connect() to 127.0.0.1 port 37349%r.*%r
-*   Trying 127.0.0.1... * Connection refused
-* couldn't connect to host
+*   Trying 127.0.0.1...%A* Connection refused
+* couldn't connect to host%S
 * Closing connection #0
 
 temp stream (leak):
 About to rewind!
 * About to connect() to 127.0.0.1 port 37349%r.*%r
-*   Trying 127.0.0.1... * Connection refused
-* couldn't connect to host
+*   Trying 127.0.0.1...%A* Connection refused
+* couldn't connect to host%S
 * Closing connection #0
 
 memory stream (leak):
 About to rewind!
 * About to connect() to 127.0.0.1 port 37349%r.*%r
-*   Trying 127.0.0.1... * Connection refused
-* couldn't connect to host
+*   Trying 127.0.0.1...%A* Connection refused
+* couldn't connect to host%S
 * Closing connection #0
 
 Done.

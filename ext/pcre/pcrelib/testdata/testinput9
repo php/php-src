@@ -1,989 +1,719 @@
-/-- This set of tests check Unicode property support with the DFA matching 
-    functionality of pcre_dfa_exec(). The -dfa flag must be used with pcretest
-    when running it. --/
+/-- This set of tests checks UTF-8 support with the DFA matching functionality
+    of pcre_dfa_exec(), excluding Unicode property support. The -dfa flag must
+    be used with pcretest when running it. --/
+    
+< forbid W 
 
-/\pL\P{Nd}/8
-    AB
+/\x{100}ab/8
+  \x{100}ab
+  
+/a\x{100}*b/8
+    ab
+    a\x{100}b  
+    a\x{100}\x{100}b  
+    
+/a\x{100}+b/8
+    a\x{100}b  
+    a\x{100}\x{100}b  
+    *** Failers 
+    ab
+     
+/\bX/8
+    Xoanon
+    +Xoanon
+    \x{300}Xoanon 
+    *** Failers 
+    YXoanon  
+    
+/\BX/8
+    YXoanon
     *** Failers
-    A0
-    00   
+    Xoanon
+    +Xoanon    
+    \x{300}Xoanon 
 
-/\X./8
-    AB
-    A\x{300}BC 
-    A\x{300}\x{301}\x{302}BC 
+/X\b/8
+    X+oanon
+    ZX\x{300}oanon 
+    FAX 
+    *** Failers 
+    Xoanon  
+    
+/X\B/8
+    Xoanon  
     *** Failers
-    \x{300}  
-
-/\X\X/8
-    ABC
-    A\x{300}B\x{300}\x{301}C 
-    A\x{300}\x{301}\x{302}BC 
-    *** Failers
-    \x{300}  
-
-/^\pL+/8
+    X+oanon
+    ZX\x{300}oanon 
+    FAX 
+    
+/[^a]/8
     abcd
-    a 
-    *** Failers 
+    a\x{100}   
 
-/^\PL+/8
-    1234
-    = 
+/^[abc\x{123}\x{400}-\x{402}]{2,3}\d/8
+    ab99
+    \x{123}\x{123}45
+    \x{400}\x{401}\x{402}6  
+    *** Failers
+    d99
+    \x{123}\x{122}4   
+    \x{400}\x{403}6  
+    \x{400}\x{401}\x{402}\x{402}6  
+
+/a.b/8
+    acb
+    a\x7fb
+    a\x{100}b 
+    *** Failers
+    a\nb  
+
+/a(.{3})b/8
+    a\x{4000}xyb 
+    a\x{4000}\x7fyb 
+    a\x{4000}\x{100}yb 
+    *** Failers
+    a\x{4000}b 
+    ac\ncb 
+
+/a(.*?)(.)/
+    a\xc0\x88b
+
+/a(.*?)(.)/8
+    a\x{100}b
+
+/a(.*)(.)/
+    a\xc0\x88b
+
+/a(.*)(.)/8
+    a\x{100}b
+
+/a(.)(.)/
+    a\xc0\x92bcd
+
+/a(.)(.)/8
+    a\x{240}bcd
+
+/a(.?)(.)/
+    a\xc0\x92bcd
+
+/a(.?)(.)/8
+    a\x{240}bcd
+
+/a(.??)(.)/
+    a\xc0\x92bcd
+
+/a(.??)(.)/8
+    a\x{240}bcd
+
+/a(.{3})b/8
+    a\x{1234}xyb 
+    a\x{1234}\x{4321}yb 
+    a\x{1234}\x{4321}\x{3412}b 
+    *** Failers
+    a\x{1234}b 
+    ac\ncb 
+
+/a(.{3,})b/8
+    a\x{1234}xyb 
+    a\x{1234}\x{4321}yb 
+    a\x{1234}\x{4321}\x{3412}b 
+    axxxxbcdefghijb 
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
+    *** Failers
+    a\x{1234}b 
+
+/a(.{3,}?)b/8
+    a\x{1234}xyb 
+    a\x{1234}\x{4321}yb 
+    a\x{1234}\x{4321}\x{3412}b 
+    axxxxbcdefghijb 
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
+    *** Failers
+    a\x{1234}b 
+
+/a(.{3,5})b/8
+    a\x{1234}xyb 
+    a\x{1234}\x{4321}yb 
+    a\x{1234}\x{4321}\x{3412}b 
+    axxxxbcdefghijb 
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
+    axbxxbcdefghijb 
+    axxxxxbcdefghijb 
+    *** Failers
+    a\x{1234}b 
+    axxxxxxbcdefghijb 
+
+/a(.{3,5}?)b/8
+    a\x{1234}xyb 
+    a\x{1234}\x{4321}yb 
+    a\x{1234}\x{4321}\x{3412}b 
+    axxxxbcdefghijb 
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
+    axbxxbcdefghijb 
+    axxxxxbcdefghijb 
+    *** Failers
+    a\x{1234}b 
+    axxxxxxbcdefghijb 
+
+/^[a\x{c0}]/8
+    *** Failers
+    \x{100}
+
+/(?<=aXb)cd/8
+    aXbcd
+
+/(?<=a\x{100}b)cd/8
+    a\x{100}bcd
+
+/(?<=a\x{100000}b)cd/8
+    a\x{100000}bcd
+    
+/(?:\x{100}){3}b/8
+    \x{100}\x{100}\x{100}b
     *** Failers 
+    \x{100}\x{100}b
+
+/\x{ab}/8
+    \x{ab} 
+    \xc2\xab
+    *** Failers 
+    \x00{ab}
+
+/(?<=(.))X/8
+    WXYZ
+    \x{256}XYZ 
+    *** Failers
+    XYZ 
+
+/[^a]+/8g
+    bcd
+    \x{100}aY\x{256}Z 
+    
+/^[^a]{2}/8
+    \x{100}bc
+ 
+/^[^a]{2,}/8
+    \x{100}bcAa
+
+/^[^a]{2,}?/8
+    \x{100}bca
+
+/[^a]+/8ig
+    bcd
+    \x{100}aY\x{256}Z 
+    
+/^[^a]{2}/8i
+    \x{100}bc
+ 
+/^[^a]{2,}/8i
+    \x{100}bcAa
+
+/^[^a]{2,}?/8i
+    \x{100}bca
+
+/\x{100}{0,0}/8
+    abcd
+ 
+/\x{100}?/8
+    abcd
+    \x{100}\x{100} 
+
+/\x{100}{0,3}/8 
+    \x{100}\x{100} 
+    \x{100}\x{100}\x{100}\x{100} 
+    
+/\x{100}*/8
+    abce
+    \x{100}\x{100}\x{100}\x{100} 
+
+/\x{100}{1,1}/8
+    abcd\x{100}\x{100}\x{100}\x{100} 
+
+/\x{100}{1,3}/8
+    abcd\x{100}\x{100}\x{100}\x{100} 
+
+/\x{100}+/8
+    abcd\x{100}\x{100}\x{100}\x{100} 
+
+/\x{100}{3}/8
+    abcd\x{100}\x{100}\x{100}XX
+
+/\x{100}{3,5}/8
+    abcd\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}XX
+
+/\x{100}{3,}/8O
+    abcd\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}XX
+
+/(?<=a\x{100}{2}b)X/8
+    Xyyya\x{100}\x{100}bXzzz
+
+/\D*/8O
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+/\D*/8O
+  \x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}
+
+/\D/8
+    1X2
+    1\x{100}2 
+  
+/>\S/8
+    > >X Y
+    > >\x{100} Y
+  
+/\d/8
+    \x{100}3
+    
+/\s/8
+    \x{100} X
+    
+/\D+/8
+    12abcd34
+    *** Failers
+    1234  
+
+/\D{2,3}/8
+    12abcd34
+    12ab34
+    *** Failers  
+    1234
+    12a34  
+
+/\D{2,3}?/8
+    12abcd34
+    12ab34
+    *** Failers  
+    1234
+    12a34  
+
+/\d+/8
+    12abcd34
+    *** Failers
+
+/\d{2,3}/8
+    12abcd34
+    1234abcd
+    *** Failers  
+    1.4 
+
+/\d{2,3}?/8
+    12abcd34
+    1234abcd
+    *** Failers  
+    1.4 
+
+/\S+/8
+    12abcd34
+    *** Failers
+    \    \ 
+
+/\S{2,3}/8
+    12abcd34
+    1234abcd
+    *** Failers
+    \     \  
+
+/\S{2,3}?/8
+    12abcd34
+    1234abcd
+    *** Failers
+    \     \  
+
+/>\s+</8
+    12>      <34
+    *** Failers
+
+/>\s{2,3}</8
+    ab>  <cd
+    ab>   <ce
+    *** Failers
+    ab>    <cd 
+
+/>\s{2,3}?</8
+    ab>  <cd
+    ab>   <ce
+    *** Failers
+    ab>    <cd 
+
+/\w+/8
+    12      34
+    *** Failers
+    +++=*! 
+
+/\w{2,3}/8
+    ab  cd
+    abcd ce
+    *** Failers
+    a.b.c
+
+/\w{2,3}?/8
+    ab  cd
+    abcd ce
+    *** Failers
+    a.b.c
+
+/\W+/8
+    12====34
+    *** Failers
     abcd 
 
-/^\X+/8
-    abcdA\x{300}\x{301}\x{302}
-    A\x{300}\x{301}\x{302}
-    A\x{300}\x{301}\x{302}A\x{300}\x{301}\x{302}
-    a 
+/\W{2,3}/8
+    ab====cd
+    ab==cd
+    *** Failers
+    a.b.c
+
+/\W{2,3}?/8
+    ab====cd
+    ab==cd
+    *** Failers
+    a.b.c
+
+/[\x{100}]/8
+    \x{100}
+    Z\x{100}
+    \x{100}Z
     *** Failers 
-    \x{300}\x{301}\x{302}
 
-/\X?abc/8
-    abc
-    A\x{300}abc
-    A\x{300}\x{301}\x{302}A\x{300}A\x{300}A\x{300}abcxyz
-    \x{300}abc  
-    *** Failers
-
-/^\X?abc/8
-    abc
-    A\x{300}abc
-    *** Failers
-    A\x{300}\x{301}\x{302}A\x{300}A\x{300}A\x{300}abcxyz
-    \x{300}abc  
-
-/\X*abc/8
-    abc
-    A\x{300}abc
-    A\x{300}\x{301}\x{302}A\x{300}A\x{300}A\x{300}abcxyz
-    \x{300}abc  
-    *** Failers
-
-/^\X*abc/8
-    abc
-    A\x{300}abc
-    A\x{300}\x{301}\x{302}A\x{300}A\x{300}A\x{300}abcxyz
-    *** Failers
-    \x{300}abc  
-
-/^\pL?=./8
-    A=b
-    =c 
-    *** Failers
-    1=2 
-    AAAA=b  
-
-/^\pL*=./8
-    AAAA=b
-    =c 
-    *** Failers
-    1=2  
-
-/^\X{2,3}X/8
-    A\x{300}\x{301}\x{302}A\x{300}\x{301}\x{302}X
-    A\x{300}\x{301}\x{302}A\x{300}\x{301}\x{302}A\x{300}\x{301}\x{302}X 
-    *** Failers
-    X
-    A\x{300}\x{301}\x{302}X
-    A\x{300}\x{301}\x{302}A\x{300}\x{301}\x{302}A\x{300}\x{301}\x{302}A\x{300}\x{301}\x{302}X
-
-/^\pC\pL\pM\pN\pP\pS\pZ</8
-    \x7f\x{c0}\x{30f}\x{660}\x{66c}\x{f01}\x{1680}<
-    \np\x{300}9!\$ < 
-    ** Failers 
-    ap\x{300}9!\$ < 
-  
-/^\PC/8
-    X
-    ** Failers 
-    \x7f
-  
-/^\PL/8
-    9
-    ** Failers 
-    \x{c0}
-  
-/^\PM/8
-    X
-    ** Failers 
-    \x{30f}
-  
-/^\PN/8
-    X
-    ** Failers 
-    \x{660}
-  
-/^\PP/8
-    X
-    ** Failers 
-    \x{66c}
-  
-/^\PS/8
-    X
-    ** Failers 
-    \x{f01}
-  
-/^\PZ/8
-    X
-    ** Failers 
-    \x{1680}
-    
-/^\p{Cc}/8
-    \x{017}
-    \x{09f} 
-    ** Failers
-    \x{0600} 
-  
-/^\p{Cf}/8
-    \x{601}
-    ** Failers
-    \x{09f} 
-  
-/^\p{Cn}/8
-    ** Failers
-    \x{09f} 
-  
-/^\p{Co}/8
-    \x{f8ff}
-    ** Failers
-    \x{09f} 
-  
-/^\p{Cs}/8
-    \?\x{dfff}
-    ** Failers
-    \x{09f} 
-  
-/^\p{Ll}/8
-    a
-    ** Failers 
-    Z
-    \x{e000}  
-  
-/^\p{Lm}/8
-    \x{2b0}
-    ** Failers
-    a 
-  
-/^\p{Lo}/8
-    \x{1bb}
-    ** Failers
-    a 
-    \x{2b0}
-  
-/^\p{Lt}/8
-    \x{1c5}
-    ** Failers
-    a 
-    \x{2b0}
-  
-/^\p{Lu}/8
-    A
-    ** Failers
-    \x{2b0}
-  
-/^\p{Mc}/8
-    \x{903}
-    ** Failers
-    X
-    \x{300}
-       
-/^\p{Me}/8
-    \x{488}
-    ** Failers
-    X
-    \x{903}
-    \x{300}
-  
-/^\p{Mn}/8
-    \x{300}
-    ** Failers
-    X
-    \x{903}
-  
-/^\p{Nd}+/8
-    0123456789\x{660}\x{661}\x{662}\x{663}\x{664}\x{665}\x{666}\x{667}\x{668}\x{669}\x{66a}
-    \x{6f0}\x{6f1}\x{6f2}\x{6f3}\x{6f4}\x{6f5}\x{6f6}\x{6f7}\x{6f8}\x{6f9}\x{6fa}
-    \x{966}\x{967}\x{968}\x{969}\x{96a}\x{96b}\x{96c}\x{96d}\x{96e}\x{96f}\x{970}
-    ** Failers
-    X
-  
-/^\p{Nl}/8
-    \x{16ee}
-    ** Failers
-    X
-    \x{966}
-  
-/^\p{No}/8
-    \x{b2}
-    \x{b3}
-    ** Failers
-    X
-    \x{16ee}
-  
-/^\p{Pc}/8
-    \x5f
-    \x{203f}
-    ** Failers
-    X
-    -
-    \x{58a}
-  
-/^\p{Pd}/8
-    -
-    \x{58a}
-    ** Failers
-    X
-    \x{203f}
-  
-/^\p{Pe}/8
-    )
-    ]
-    }
-    \x{f3b}
-    ** Failers
-    X
-    \x{203f}
-    (
-    [
-    {
-    \x{f3c}
-  
-/^\p{Pf}/8
-    \x{bb}
-    \x{2019}
-    ** Failers
-    X
-    \x{203f}
-  
-/^\p{Pi}/8
-    \x{ab}
-    \x{2018}
-    ** Failers
-    X
-    \x{203f}
-  
-/^\p{Po}/8
-    !
-    \x{37e}
-    ** Failers
-    X
-    \x{203f}
-  
-/^\p{Ps}/8
-    (
-    [
-    {
-    \x{f3c}
-    ** Failers
-    X
-    )
-    ]
-    }
-    \x{f3b}
-  
-/^\p{Sc}+/8
-    $\x{a2}\x{a3}\x{a4}\x{a5}\x{a6}
-    \x{9f2}
-    ** Failers
-    X
-    \x{2c2}
-  
-/^\p{Sk}/8
-    \x{2c2}
-    ** Failers
-    X
-    \x{9f2}
-  
-/^\p{Sm}+/8
-    +<|~\x{ac}\x{2044}
-    ** Failers
-    X
-    \x{9f2}
-  
-/^\p{So}/8
-    \x{a6}
-    \x{482} 
-    ** Failers
-    X
-    \x{9f2}
-  
-/^\p{Zl}/8
-    \x{2028}
-    ** Failers
-    X
-    \x{2029}
-  
-/^\p{Zp}/8
-    \x{2029}
-    ** Failers
-    X
-    \x{2028}
-  
-/^\p{Zs}/8
-    \ \
-    \x{a0}
-    \x{1680}
-    \x{180e}
-    \x{2000}
-    \x{2001}     
-    ** Failers
-    \x{2028}
-    \x{200d} 
-  
-/\p{Nd}+(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}+?(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}{2,}(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}{2,}?(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}*(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}*?(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}{2}(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}{2,3}(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}{2,3}?(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}?(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}??(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}*+(..)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}*+(...)/8
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Nd}*+(....)/8
-      ** Failers
-      \x{660}\x{661}\x{662}ABC
-  
-/\p{Lu}/8i
-    A
-    a\x{10a0}B 
-    ** Failers 
-    a
-    \x{1d00}  
-
-/\p{^Lu}/8i
-    1234
-    ** Failers
-    ABC 
-
-/\P{Lu}/8i
-    1234
-    ** Failers
-    ABC 
-
-/(?<=A\p{Nd})XYZ/8
-    A2XYZ
-    123A5XYZPQR
-    ABA\x{660}XYZpqr
-    ** Failers
-    AXYZ
-    XYZ     
-    
-/(?<!\pL)XYZ/8
-    1XYZ
-    AB=XYZ.. 
-    XYZ 
-    ** Failers
-    WXYZ 
-
-/[\p{Nd}]/8
-    1234
-
-/[\p{Nd}+-]+/8
-    1234
-    12-34
-    12+\x{661}-34  
-    ** Failers
-    abcd  
-
-/[\P{Nd}]+/8
-    abcd
-    ** Failers
-    1234
-
-/\D+/8
-    11111111111111111111111111111111111111111111111111111111111111111111111
-    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-     
-/\P{Nd}+/8
-    11111111111111111111111111111111111111111111111111111111111111111111111
-    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-/[\D]+/8
-    11111111111111111111111111111111111111111111111111111111111111111111111
-    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-/[\P{Nd}]+/8
-    11111111111111111111111111111111111111111111111111111111111111111111111
-    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-/[\D\P{Nd}]+/8
-    11111111111111111111111111111111111111111111111111111111111111111111111
-    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-/\pL/8
-    a
-    A 
-
-/\pL/8i
-    a
-    A 
-    
-/\p{Lu}/8 
-    A
-    aZ
-    ** Failers
-    abc   
-
-/\p{Lu}/8i
-    A
-    aZ
-    ** Failers
-    abc   
-
-/\p{Ll}/8 
-    a
-    Az
-    ** Failers
-    ABC   
-
-/\p{Ll}/8i 
-    a
-    Az
-    ** Failers
-    ABC   
-
-/^\x{c0}$/8i
-    \x{c0}
-    \x{e0} 
-
-/^\x{e0}$/8i
-    \x{c0}
-    \x{e0} 
-
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8
-    A\x{391}\x{10427}\x{ff3a}\x{1fb0}
-    ** Failers
-    a\x{391}\x{10427}\x{ff3a}\x{1fb0}   
-    A\x{3b1}\x{10427}\x{ff3a}\x{1fb0}
-    A\x{391}\x{1044F}\x{ff3a}\x{1fb0}
-    A\x{391}\x{10427}\x{ff5a}\x{1fb0}
-    A\x{391}\x{10427}\x{ff3a}\x{1fb8}
-
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8i
-    A\x{391}\x{10427}\x{ff3a}\x{1fb0}
-    a\x{391}\x{10427}\x{ff3a}\x{1fb0}   
-    A\x{3b1}\x{10427}\x{ff3a}\x{1fb0}
-    A\x{391}\x{1044F}\x{ff3a}\x{1fb0}
-    A\x{391}\x{10427}\x{ff5a}\x{1fb0}
-    A\x{391}\x{10427}\x{ff3a}\x{1fb8}
-
-/\x{391}+/8i
-    \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}
-
-/\x{391}{3,5}(.)/8i
-    \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}X
-
-/\x{391}{3,5}?(.)/8i
-    \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}X
-
-/[\x{391}\x{ff3a}]/8i
-    \x{391}
-    \x{ff3a}
-    \x{3b1}
-    \x{ff5a}   
-    
-/[\x{c0}\x{391}]/8i
-    \x{c0}
-    \x{e0} 
-
-/[\x{105}-\x{109}]/8i
-    \x{104}
-    \x{105}
-    \x{109}  
-    ** Failers
+/[Z\x{100}]/8
+    Z\x{100}
     \x{100}
-    \x{10a} 
-    
-/[z-\x{100}]/8i 
-    Z
-    z
-    \x{39c}
-    \x{178}
-    |
-    \x{80}
-    \x{ff}
-    \x{100}
-    \x{101} 
-    ** Failers
-    \x{102}
-    Y
-    y           
+    \x{100}Z
+    *** Failers 
+
+/[\x{100}\x{200}]/8
+   ab\x{100}cd
+   ab\x{200}cd
+   *** Failers  
+
+/[\x{100}-\x{200}]/8
+   ab\x{100}cd
+   ab\x{200}cd
+   ab\x{111}cd 
+   *** Failers  
+
+/[z-\x{200}]/8
+   ab\x{100}cd
+   ab\x{200}cd
+   ab\x{111}cd 
+   abzcd
+   ab|cd  
+   *** Failers  
+
+/[Q\x{100}\x{200}]/8
+   ab\x{100}cd
+   ab\x{200}cd
+   Q? 
+   *** Failers  
+
+/[Q\x{100}-\x{200}]/8
+   ab\x{100}cd
+   ab\x{200}cd
+   ab\x{111}cd 
+   Q? 
+   *** Failers  
+
+/[Qz-\x{200}]/8
+   ab\x{100}cd
+   ab\x{200}cd
+   ab\x{111}cd 
+   abzcd
+   ab|cd  
+   Q? 
+   *** Failers  
+
+/[\x{100}\x{200}]{1,3}/8
+   ab\x{100}cd
+   ab\x{200}cd
+   ab\x{200}\x{100}\x{200}\x{100}cd
+   *** Failers  
+
+/[\x{100}\x{200}]{1,3}?/8
+   ab\x{100}cd
+   ab\x{200}cd
+   ab\x{200}\x{100}\x{200}\x{100}cd
+   *** Failers  
+
+/[Q\x{100}\x{200}]{1,3}/8
+   ab\x{100}cd
+   ab\x{200}cd
+   ab\x{200}\x{100}\x{200}\x{100}cd
+   *** Failers  
+
+/[Q\x{100}\x{200}]{1,3}?/8
+   ab\x{100}cd
+   ab\x{200}cd
+   ab\x{200}\x{100}\x{200}\x{100}cd
+   *** Failers  
+
+/(?<=[\x{100}\x{200}])X/8
+    abc\x{200}X
+    abc\x{100}X 
+    *** Failers
+    X  
+
+/(?<=[Q\x{100}\x{200}])X/8
+    abc\x{200}X
+    abc\x{100}X 
+    abQX 
+    *** Failers
+    X  
+
+/(?<=[\x{100}\x{200}]{3})X/8
+    abc\x{100}\x{200}\x{100}X
+    *** Failers
+    abc\x{200}X
+    X  
+
+/[^\x{100}\x{200}]X/8
+    AX
+    \x{150}X
+    \x{500}X 
+    *** Failers
+    \x{100}X
+    \x{200}X   
+
+/[^Q\x{100}\x{200}]X/8
+    AX
+    \x{150}X
+    \x{500}X 
+    *** Failers
+    \x{100}X
+    \x{200}X   
+    QX 
+
+/[^\x{100}-\x{200}]X/8
+    AX
+    \x{500}X 
+    *** Failers
+    \x{100}X
+    \x{150}X
+    \x{200}X   
 
 /[z-\x{100}]/8i
-
-/^\X/8
-    A
-    A\x{300}BC 
-    A\x{300}\x{301}\x{302}BC 
+    z
+    Z 
+    \x{100}
     *** Failers
-    \x{300}  
+    \x{102}
+    y    
 
-/^[\X]/8
-    X123
-    *** Failers
-    AXYZ
+/[\xFF]/
+    >\xff<
 
-/^(\X*)C/8
-    A\x{300}\x{301}\x{302}BCA\x{300}\x{301} 
-    A\x{300}\x{301}\x{302}BCA\x{300}\x{301}C 
+/[\xff]/8
+    >\x{ff}<
 
-/^(\X*?)C/8
-    A\x{300}\x{301}\x{302}BCA\x{300}\x{301} 
-    A\x{300}\x{301}\x{302}BCA\x{300}\x{301}C 
-
-/^(\X*)(.)/8
-    A\x{300}\x{301}\x{302}BCA\x{300}\x{301} 
-    A\x{300}\x{301}\x{302}BCA\x{300}\x{301}C 
-
-/^(\X*?)(.)/8
-    A\x{300}\x{301}\x{302}BCA\x{300}\x{301} 
-    A\x{300}\x{301}\x{302}BCA\x{300}\x{301}C 
-
-/^\X(.)/8
-    *** Failers
-    A\x{300}\x{301}\x{302}
-
-/^\X{2,3}(.)/8
-    A\x{300}\x{301}B\x{300}X
-    A\x{300}\x{301}B\x{300}C\x{300}\x{301}
-    A\x{300}\x{301}B\x{300}C\x{300}\x{301}X
-    A\x{300}\x{301}B\x{300}C\x{300}\x{301}DA\x{300}X
-    
-/^\X{2,3}?(.)/8
-    A\x{300}\x{301}B\x{300}X
-    A\x{300}\x{301}B\x{300}C\x{300}\x{301}
-    A\x{300}\x{301}B\x{300}C\x{300}\x{301}X
-    A\x{300}\x{301}B\x{300}C\x{300}\x{301}DA\x{300}X
-
-/^\pN{2,3}X/
-    12X
-    123X
-    *** Failers
-    X
-    1X
-    1234X     
-
-/\x{100}/i8
-    \x{100}   
-    \x{101} 
-    
-/^\p{Han}+/8
-    \x{2e81}\x{3007}\x{2f804}\x{31a0}
-    ** Failers
-    \x{2e7f}  
-
-/^\P{Katakana}+/8
-    \x{3105}
-    ** Failers
-    \x{30ff}  
-
-/^[\p{Arabic}]/8
-    \x{06e9}
-    \x{060b}
-    ** Failers
-    X\x{06e9}   
-
-/^[\P{Yi}]/8
-    \x{2f800}
-    ** Failers
-    \x{a014}
-    \x{a4c6}   
-
-/^\p{Any}X/8
-    AXYZ
-    \x{1234}XYZ 
-    ** Failers
-    X  
-    
-/^\P{Any}X/8
-    ** Failers
-    AX
-    
-/^\p{Any}?X/8
-    XYZ
-    AXYZ
-    \x{1234}XYZ 
-    ** Failers
-    ABXYZ   
-
-/^\P{Any}?X/8
-    XYZ
-    ** Failers
-    AXYZ
-    \x{1234}XYZ 
-    ABXYZ   
-
-/^\p{Any}+X/8
-    AXYZ
-    \x{1234}XYZ
-    A\x{1234}XYZ
-    ** Failers
+/[^\xFF]/
     XYZ
 
-/^\P{Any}+X/8
-    ** Failers
-    AXYZ
-    \x{1234}XYZ
-    A\x{1234}XYZ
+/[^\xff]/8
     XYZ
+    \x{123} 
 
-/^\p{Any}*X/8
-    XYZ
-    AXYZ
-    \x{1234}XYZ
-    A\x{1234}XYZ
-    ** Failers
+/^[ac]*b/8
+  xb
 
-/^\P{Any}*X/8
-    XYZ
-    ** Failers
-    AXYZ
-    \x{1234}XYZ
-    A\x{1234}XYZ
+/^[ac\x{100}]*b/8
+  xb
 
-/^[\p{Any}]X/8
-    AXYZ
-    \x{1234}XYZ 
-    ** Failers
-    X  
-    
-/^[\P{Any}]X/8
-    ** Failers
-    AX
-    
-/^[\p{Any}]?X/8
-    XYZ
-    AXYZ
-    \x{1234}XYZ 
-    ** Failers
-    ABXYZ   
+/^[^x]*b/8i
+  xb
 
-/^[\P{Any}]?X/8
-    XYZ
-    ** Failers
-    AXYZ
-    \x{1234}XYZ 
-    ABXYZ   
-
-/^[\p{Any}]+X/8
-    AXYZ
-    \x{1234}XYZ
-    A\x{1234}XYZ
-    ** Failers
-    XYZ
-
-/^[\P{Any}]+X/8
-    ** Failers
-    AXYZ
-    \x{1234}XYZ
-    A\x{1234}XYZ
-    XYZ
-
-/^[\p{Any}]*X/8
-    XYZ
-    AXYZ
-    \x{1234}XYZ
-    A\x{1234}XYZ
-    ** Failers
-
-/^[\P{Any}]*X/8
-    XYZ
-    ** Failers
-    AXYZ
-    \x{1234}XYZ
-    A\x{1234}XYZ
-
-/^\p{Any}{3,5}?/8
-    abcdefgh
-    \x{1234}\n\r\x{3456}xyz 
-
-/^\p{Any}{3,5}/8
-    abcdefgh
-    \x{1234}\n\r\x{3456}xyz 
-
-/^\P{Any}{3,5}?/8
-    ** Failers
-    abcdefgh
-    \x{1234}\n\r\x{3456}xyz 
-
-/^\p{L&}X/8
-     AXY
-     aXY
-     \x{1c5}XY
-     ** Failers
-     \x{1bb}XY
-     \x{2b0}XY
-     !XY      
-
-/^[\p{L&}]X/8
-     AXY
-     aXY
-     \x{1c5}XY
-     ** Failers
-     \x{1bb}XY
-     \x{2b0}XY
-     !XY      
-
-/^\p{L&}+X/8
-     AXY
-     aXY
-     AbcdeXyz 
-     \x{1c5}AbXY
-     abcDEXypqreXlmn 
-     ** Failers
-     \x{1bb}XY
-     \x{2b0}XY
-     !XY      
-
-/^[\p{L&}]+X/8
-     AXY
-     aXY
-     AbcdeXyz 
-     \x{1c5}AbXY
-     abcDEXypqreXlmn 
-     ** Failers
-     \x{1bb}XY
-     \x{2b0}XY
-     !XY      
-
-/^\p{L&}+?X/8
-     AXY
-     aXY
-     AbcdeXyz 
-     \x{1c5}AbXY
-     abcDEXypqreXlmn 
-     ** Failers
-     \x{1bb}XY
-     \x{2b0}XY
-     !XY      
-
-/^[\p{L&}]+?X/8
-     AXY
-     aXY
-     AbcdeXyz 
-     \x{1c5}AbXY
-     abcDEXypqreXlmn 
-     ** Failers
-     \x{1bb}XY
-     \x{2b0}XY
-     !XY      
-
-/^\P{L&}X/8
-     !XY
-     \x{1bb}XY
-     \x{2b0}XY
-     ** Failers
-     \x{1c5}XY
-     AXY      
-
-/^[\P{L&}]X/8
-     !XY
-     \x{1bb}XY
-     \x{2b0}XY
-     ** Failers
-     \x{1c5}XY
-     AXY      
-
-/^\x{023a}+?(\x{0130}+)/8i
-  \x{023a}\x{2c65}\x{0130}
+/^[^x]*b/8
+  xb
   
-/^\x{023a}+([^X])/8i
-  \x{023a}\x{2c65}X
- 
-/\x{c0}+\x{116}+/8i
-    \x{c0}\x{e0}\x{116}\x{117}
+/^\d*b/8
+  xb 
 
-/[\x{c0}\x{116}]+/8i
-    \x{c0}\x{e0}\x{116}\x{117}
+/(|a)/g8
+    catac
+    a\x{256}a 
 
-/Check property support in non-UTF-8 mode/
- 
-/\p{L}{4}/
-    123abcdefg
-    123abc\xc4\xc5zz
+/^\x{85}$/8i
+    \x{85}
 
-/\p{Carian}\p{Cham}\p{Kayah_Li}\p{Lepcha}\p{Lycian}\p{Lydian}\p{Ol_Chiki}\p{Rejang}\p{Saurashtra}\p{Sundanese}\p{Vai}/8
-    \x{102A4}\x{AA52}\x{A91D}\x{1C46}\x{10283}\x{1092E}\x{1C6B}\x{A93B}\x{A8BF}\x{1BA0}\x{A50A}====
+/^abc./mgx8<any>
+    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x{0085}abc7 \x{2028}abc8 \x{2029}abc9 JUNK
 
-/\x{a77d}\x{1d79}/8i
-    \x{a77d}\x{1d79}
-    \x{1d79}\x{a77d} 
+/abc.$/mgx8<any>
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x{0085} abc7\x{2028} abc8\x{2029} abc9
 
-/\x{a77d}\x{1d79}/8
-    \x{a77d}\x{1d79}
+/^a\Rb/8<bsr_unicode>
+    a\nb
+    a\rb
+    a\r\nb
+    a\x0bb
+    a\x0cb
+    a\x{85}b   
+    a\x{2028}b 
+    a\x{2029}b 
+    ** Failers
+    a\n\rb    
+
+/^a\R*b/8<bsr_unicode>
+    ab
+    a\nb
+    a\rb
+    a\r\nb
+    a\x0bb
+    a\x0c\x{2028}\x{2029}b
+    a\x{85}b   
+    a\n\rb    
+    a\n\r\x{85}\x0cb 
+
+/^a\R+b/8<bsr_unicode>
+    a\nb
+    a\rb
+    a\r\nb
+    a\x0bb
+    a\x0c\x{2028}\x{2029}b
+    a\x{85}b   
+    a\n\rb    
+    a\n\r\x{85}\x0cb 
+    ** Failers
+    ab  
+
+/^a\R{1,3}b/8<bsr_unicode>
+    a\nb
+    a\n\rb
+    a\n\r\x{85}b
+    a\r\n\r\nb 
+    a\r\n\r\n\r\nb 
+    a\n\r\n\rb
+    a\n\n\r\nb 
+    ** Failers
+    a\n\n\n\rb
+    a\r
+
+/\h+\V?\v{3,4}/8O
+    \x09\x20\x{a0}X\x0a\x0b\x0c\x0d\x0a
+
+/\V?\v{3,4}/8O 
+    \x20\x{a0}X\x0a\x0b\x0c\x0d\x0a
+
+/\h+\V?\v{3,4}/8O
+    >\x09\x20\x{a0}X\x0a\x0a\x0a<
+
+/\V?\v{3,4}/8O
+    >\x09\x20\x{a0}X\x0a\x0a\x0a<
+
+/\H\h\V\v/8
+    X X\x0a
+    X\x09X\x0b
+    ** Failers
+    \x{a0} X\x0a   
+    
+/\H*\h+\V?\v{3,4}/8O 
+    \x09\x20\x{a0}X\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\x{a0}\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\x{a0}\x0a\x0b\x0c
     ** Failers 
-    \x{1d79}\x{a77d} 
-
-/^\p{Xan}/8
-    ABCD
-    1234
-    \x{6ca}
-    \x{a6c}
-    \x{10a7}   
+    \x09\x20\x{a0}\x0a\x0b
+     
+/\H\h\V\v/8
+    \x{3001}\x{3000}\x{2030}\x{2028}
+    X\x{180e}X\x{85}
     ** Failers
-    _ABC   
-
-/^\p{Xan}+/8
-    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
-    ** Failers
-    _ABC   
-
-/^\p{Xan}*/8
-    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    \x{2009} X\x0a   
     
-/^\p{Xan}{2,9}/8
-    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
-    
-/^[\p{Xan}]/8
-    ABCD1234_
-    1234abcd_
-    \x{6ca}
-    \x{a6c}
-    \x{10a7}   
-    ** Failers
-    _ABC   
- 
-/^[\p{Xan}]+/8
-    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
-    ** Failers
-    _ABC   
-
-/^>\p{Xsp}/8
-    >\x{1680}\x{2028}\x{0b}
-    ** Failers
-    \x{0b} 
-
-/^>\p{Xsp}+/8
-    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
-
-/^>\p{Xsp}*/8
-    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
-    
-/^>\p{Xsp}{2,9}/8
-    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
-    
-/^>[\p{Xsp}]/8
-    >\x{2028}\x{0b}
- 
-/^>[\p{Xsp}]+/8
-    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
-
-/^>\p{Xps}/8
-    >\x{1680}\x{2028}\x{0b}
-    >\x{a0} 
-    ** Failers
-    \x{0b} 
-
-/^>\p{Xps}+/8
-    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
-
-/^>\p{Xps}+?/8
-    >\x{1680}\x{2028}\x{0b}
-
-/^>\p{Xps}*/8
-    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
-    
-/^>\p{Xps}{2,9}/8
-    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
-    
-/^>\p{Xps}{2,9}?/8
-    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
-    
-/^>[\p{Xps}]/8
-    >\x{2028}\x{0b}
- 
-/^>[\p{Xps}]+/8
-    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
-
-/^\p{Xwd}/8
-    ABCD
-    1234
-    \x{6ca}
-    \x{a6c}
-    \x{10a7}
-    _ABC    
-    ** Failers
-    [] 
-
-/^\p{Xwd}+/8
-    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
-
-/^\p{Xwd}*/8
-    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
-    
-/^\p{Xwd}{2,9}/8
-    A_12\x{6ca}\x{a6c}\x{10a7}
-    
-/^[\p{Xwd}]/8
-    ABCD1234_
-    1234abcd_
-    \x{6ca}
-    \x{a6c}
-    \x{10a7}   
-    _ABC 
-    ** Failers
-    []   
- 
-/^[\p{Xwd}]+/8
-    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
-
-/-- Unicode properties for \b abd \B --/
-
-/\b...\B/8W
-    abc_
-    \x{37e}abc\x{376} 
-    \x{37e}\x{376}\x{371}\x{393}\x{394} 
-    !\x{c0}++\x{c1}\x{c2} 
-    !\x{c0}+++++ 
-
-/-- Without PCRE_UCP, non-ASCII always fail, even if < 256  --/
-
-/\b...\B/8
-    abc_
+/\H*\h+\V?\v{3,4}/8O 
+    \x{1680}\x{180e}\x{2007}X\x{2028}\x{2029}\x0c\x0d\x0a
+    \x09\x{205f}\x{a0}\x0a\x{2029}\x0c\x{2028}\x0a
+    \x09\x20\x{202f}\x0a\x0b\x0c
     ** Failers 
-    \x{37e}abc\x{376} 
-    \x{37e}\x{376}\x{371}\x{393}\x{394} 
-    !\x{c0}++\x{c1}\x{c2} 
-    !\x{c0}+++++ 
+    \x09\x{200a}\x{a0}\x{2028}\x0b
+     
+/a\Rb/I8<bsr_anycrlf>
+    a\rb
+    a\nb
+    a\r\nb
+    ** Failers
+    a\x{85}b
+    a\x0bb     
 
-/-- With PCRE_UCP, non-UTF8 chars that are < 256 still check properties  --/
+/a\Rb/I8<bsr_unicode>
+    a\rb
+    a\nb
+    a\r\nb
+    a\x{85}b
+    a\x0bb     
+    ** Failers 
+    a\x{85}b\<bsr_anycrlf>
+    a\x0bb\<bsr_anycrlf>
+    
+/a\R?b/I8<bsr_anycrlf>
+    a\rb
+    a\nb
+    a\r\nb
+    ** Failers
+    a\x{85}b
+    a\x0bb     
 
-/\b...\B/W
-    abc_
-    !\x{c0}++\x{c1}\x{c2} 
-    !\x{c0}+++++ 
+/a\R?b/I8<bsr_unicode>
+    a\rb
+    a\nb
+    a\r\nb
+    a\x{85}b
+    a\x0bb     
+    ** Failers 
+    a\x{85}b\<bsr_anycrlf>
+    a\x0bb\<bsr_anycrlf>
+ 
+/X/8f<any> 
+    A\x{1ec5}ABCXYZ
+
+/abcd*/8
+    xxxxabcd\P
+    xxxxabcd\P\P
+
+/abcd*/i8
+    xxxxabcd\P
+    xxxxabcd\P\P
+    XXXXABCD\P
+    XXXXABCD\P\P
+
+/abc\d*/8
+    xxxxabc1\P
+    xxxxabc1\P\P
+
+/abc[de]*/8
+    xxxxabcde\P
+    xxxxabcde\P\P
+
+/\bthe cat\b/8
+    the cat\P
+    the cat\P\P
+
+/ab\Cde/8
+    abXde
+
+/(?<=ab\Cde)X/8
+
+/./8<CRLF>
+    \r\P
+    \r\P\P 
+  
+/.{2,3}/8<CRLF>
+    \r\P 
+    \r\P\P
+    \r\r\P
+    \r\r\P\P
+    \r\r\r\P
+    \r\r\r\P\P     
+
+/.{2,3}?/8<CRLF>
+    \r\P 
+    \r\P\P
+    \r\r\P
+    \r\r\P\P
+    \r\r\r\P
+    \r\r\r\P\P     
+
+/[^\x{100}]/8
+    \x{100}\x{101}X
+
+/[^\x{100}]+/8
+    \x{100}\x{101}X
 
 /-- End of testinput9 --/ 

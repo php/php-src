@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@
 #define ZEND_INI_ALL (ZEND_INI_USER|ZEND_INI_PERDIR|ZEND_INI_SYSTEM)
 
 #ifndef XtOffsetOf
-# if defined(CRAY) || (defined(__arm) && !defined(LINUX))
+# if defined(CRAY) || (defined(__ARMCC_VERSION) && !defined(LINUX))
 # ifdef __STDC__
 # define XtOffset(p_type, field) _Offsetof(p_type, field)
 # else

@@ -14,6 +14,11 @@ $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
+try {
+        @$db->query("SET bytea_output = 'escape'");
+} catch (Exception $e) {
+}
+
 $db->query('CREATE TABLE test_one_blob (id SERIAL NOT NULL, blob1 BYTEA)');
 
 $stmt = $db->prepare("INSERT INTO test_one_blob (blob1) VALUES (:foo)");

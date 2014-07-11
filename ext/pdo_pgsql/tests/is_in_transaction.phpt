@@ -57,10 +57,10 @@ var_dump($db->inTransaction());
 ?>
 --EXPECT--
 Test PDO::PGSQL_TRANSACTION_INTRANS
-int(2)
+bool(true)
 Test PDO::PGSQL_TRANSACTION_IDLE
-int(0)
+bool(false)
 Test PDO::PGSQL_TRANSACTION_INERROR
-int(3)
+bool(true)
 Test PDO::PGSQL_TRANSACTION_IDLE
-int(0)
+bool(false)

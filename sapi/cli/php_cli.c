@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,6 +85,9 @@
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
 #include "php_cli_server.h"
 #endif
+
+#include "ps_title.h"
+#include "php_cli_process_title.h"
 
 #ifndef PHP_WIN32
 # define php_select(m, r, w, e, t)	select(m, r, w, e, t)
@@ -317,7 +320,7 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
-static void sapi_cli_flush(void *server_context) /* {{{ */
+static void sapi_cli_flush(void *server_context TSRMLS_DC) /* {{{ */
 {
 	/* Ignore EBADF here, it's caused by the fact that STDIN/STDOUT/STDERR streams
 	 * are/could be closed before fflush() is called.
@@ -478,6 +481,8 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
+	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
+	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
 	{NULL, NULL, NULL}
 };
 
@@ -498,6 +503,7 @@ static void php_cli_usage(char *argv0)
 				"   %s [options] -r <code> [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -R <code> [-E <end_code>] [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -F <file> [-E <end_code>] [--] [args...]\n"
+				"   %s [options] -S <addr>:<port> [-t docroot]\n"
 				"   %s [options] -- [args...]\n"
 				"   %s [options] -a\n"
 				"\n"
@@ -539,7 +545,7 @@ static void php_cli_usage(char *argv0)
 				"  --rz <name>      Show information about Zend extension <name>.\n"
 				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
-				, prog, prog, prog, prog, prog, prog);
+				, prog, prog, prog, prog, prog, prog, prog);
 }
 /* }}} */
 
@@ -687,7 +693,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2012 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2014 The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #if ZEND_DEBUG && defined(HAVE_GCOV)
 					"(DEBUG GCOV)",
@@ -864,7 +870,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				break;
 
 			case 'z': /* load extension file */
-				zend_load_extension(php_optarg);
+				zend_load_extension(php_optarg TSRMLS_CC);
 				break;
 			case 'H':
 				hide_argv = 1;
@@ -1018,7 +1024,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 			/* Zeev might want to do something with this one day */
 		case PHP_MODE_INDENT:
 			open_file_for_scanning(&file_handle TSRMLS_CC);
-			zend_indent();
+			zend_indent(TSRMLS_C);
 			zend_file_handle_dtor(file_handle.handle TSRMLS_CC);
 			goto out;
 			break;
@@ -1167,14 +1173,14 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 	} zend_end_try();
 
 out:
-	if (exit_status == 0) {
-		exit_status = EG(exit_status);
-	}
 	if (request_started) {
 		php_request_shutdown((void *) 0);
 	}
 	if (translated_path) {
 		free(translated_path);
+	}
+	if (exit_status == 0) {
+		exit_status = EG(exit_status);
 	}
 	return exit_status;
 err:
@@ -1200,6 +1206,7 @@ int main(int argc, char *argv[])
 	int argc = __argc;
 	char **argv = __argv;
 #endif
+
 	int c;
 	int exit_status = SUCCESS;
 	int module_started = 0, sapi_started = 0;
@@ -1210,6 +1217,12 @@ int main(int argc, char *argv[])
 	int ini_entries_len = 0;
 	int ini_ignore = 0;
 	sapi_module_struct *sapi_module = &cli_sapi_module;
+
+	/*
+	 * Do not move this initialization. It needs to happen before argv is used
+	 * in any way.
+	 */
+	argv = save_ps_args(argc, argv);
 
 	cli_sapi_module.additional_functions = additional_functions;
 
@@ -1299,6 +1312,7 @@ int main(int argc, char *argv[])
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
 			case 'S':
 				sapi_module = &cli_server_sapi_module;
+				cli_server_sapi_module.additional_functions = server_additional_functions;
 				break;
 #endif
 			case 'h': /* help & quit */
@@ -1385,6 +1399,11 @@ out:
 	tsrm_shutdown();
 #endif
 
+	/*
+	 * Do not move this de-initialization. It needs to happen right before
+	 * exiting.
+	 */
+	cleanup_ps_args(argv);
 	exit(exit_status);
 }
 /* }}} */

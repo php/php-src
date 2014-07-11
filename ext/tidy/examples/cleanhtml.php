@@ -26,7 +26,7 @@
     if(tidy_warning_count() ||
        tidy_error_count()) {
         
-        echo "\n\nThe following errors or warnings occured:\n";
+        echo "\n\nThe following errors or warnings occurred:\n";
         echo tidy_get_error_buffer();
         echo "\n";
     }

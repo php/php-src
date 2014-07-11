@@ -93,7 +93,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 	int         spattern_len = 0;
 	char       *pattern = NULL;
 	int         pattern_len = 0;
-	char       *slocale = NULL;
+	const char *slocale = NULL;
 	int         slocale_len = 0;
 	char       *source = NULL;
 	int         src_len = 0;
@@ -126,7 +126,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 	}
 
 	if(slocale_len == 0) {
-		slocale = INTL_G(default_locale);
+		slocale = intl_locale_get_default(TSRMLS_C);
 	}
 
 #ifdef MSG_FORMAT_QUOTE_APOS

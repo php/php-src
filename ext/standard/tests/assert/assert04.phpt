@@ -15,7 +15,7 @@ assert(1);
  
 /* Wrong parameter count in assert */
 assert_options(ASSERT_ACTIVE, 1);
-assert(2,3);
+assert(2, "failure", 3);
  
 /* Wrong parameter count in assert_options */
 assert_options(ASSERT_ACTIVE, 0, 2);
@@ -36,7 +36,7 @@ echo "not reached\n";
  
 ?>
 --EXPECTF--
-Warning: assert() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: assert() expects at most 2 parameters, 3 given in %s on line %d
 
 Warning: assert_options() expects at most 2 parameters, 3 given in %s on line %d
 
@@ -45,3 +45,4 @@ Warning: assert_options() expects parameter 1 to be long, %unicode_string_option
 Warning: assert(): Assertion failed in %s on line %d
 
 Warning: assert(): Assertion failed in %s on line %d
+

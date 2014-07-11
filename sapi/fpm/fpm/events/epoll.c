@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,7 +46,7 @@ static struct fpm_event_module_s epoll_module = {
 
 static struct epoll_event *epollfds = NULL;
 static int nepollfds = 0;
-static int epollfd = 0;
+static int epollfd = -1;
 
 #endif /* HAVE_EPOLL */
 
@@ -102,6 +102,10 @@ static int fpm_event_epoll_clean() /* {{{ */
 	if (epollfds) {
 		free(epollfds);
 		epollfds = NULL;
+	}
+	if (epollfd != -1) {
+		close(epollfd);
+		epollfd = -1;
 	}
 
 	nepollfds = 0;

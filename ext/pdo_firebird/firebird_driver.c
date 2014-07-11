@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Ard Biesheuvel <abies@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -401,7 +399,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, long sql
 	long l, pindex = -1;
 		
 	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
-	if (sql_len > SHORT_MAX) {
+	if (sql_len > 65536) {
 		strcpy(dbh->error_code, "01004");
 		return 0;
 	}
@@ -569,7 +567,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 #else
 			HMODULE l = GetModuleHandle("fbclient");
 
-			if (!l && !(l = GetModuleHandle("gds32"))) {
+			if (!l) {
 				break;
 			}
 			info_func = (info_func_t)GetProcAddress(l, "isc_get_client_version");
@@ -577,9 +575,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 			if (info_func) {
 				info_func(tmp);
 				ZVAL_STRING(val,tmp,1);
-			} else {
-				ZVAL_STRING(val,"Firebird 1.0/Interbase 6",1);
-			}
+			} 
 #else
 			ZVAL_NULL(val);
 #endif
@@ -607,14 +603,14 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC) /* {{{ */
 {       
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
-	ISC_STATUS *s = H->isc_status;
+	const ISC_STATUS *s = H->isc_status;
 	char buf[400];
 	long i = 0, l, sqlcode = isc_sqlcode(s);
 
 	if (sqlcode) {
 		add_next_index_long(info, sqlcode);
 
-		while ((l = isc_interprete(&buf[i],&s))) {
+		while ((sizeof(buf)>(i+2))&&(l = fb_interpret(&buf[i],(sizeof(buf)-i-2),&s))) {
 			i += l;
 			strcpy(&buf[i++], " ");
 		}
@@ -697,8 +693,8 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 
 	if (!dbh->methods) {
 		char errmsg[512];
-		ISC_STATUS *s = H->isc_status;
-		isc_interprete(errmsg, &s);
+		const ISC_STATUS *s = H->isc_status;
+		fb_interpret(errmsg, sizeof(errmsg),&s);
 		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1] TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
 				"HY000", H->isc_status[1], errmsg);
 	}

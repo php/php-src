@@ -78,7 +78,7 @@ $values =  array (
 
 
 // loop through each element of the array and check the working of exif_tagname()
-// when $index arugment is supplied with different values
+// when $index argument is supplied with different values
 
 echo "\n--- Testing exif_tagname() by supplying different values for 'index' argument ---\n";
 $counter = 1;

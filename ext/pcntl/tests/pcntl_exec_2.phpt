@@ -14,7 +14,7 @@ if (getenv("PCNTL_EXEC_TEST_IS_CHILD")) {
 	exit;
 }
 echo "ok\n";
-pcntl_exec(getenv("TEST_PHP_EXECUTABLE"), array(__FILE__), array(
+pcntl_exec(getenv("TEST_PHP_EXECUTABLE"), array('-n', __FILE__), array(
 	b"PCNTL_EXEC_TEST_IS_CHILD" => b"1", 
 	b"FOO" => b"BAR",
 	1 => b"long")

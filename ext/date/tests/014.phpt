@@ -20,13 +20,17 @@ echo "Done\n";
 --EXPECTF-- 
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2006-12-12 00:00:00"
+  string(26) "2006-12-12 00:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
   string(3) "UTC"
 }
-object(DateTimeZone)#%d (0) {
+object(DateTimeZone)#%d (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "UTC"
 }
 
 Warning: timezone_offset_get() expects exactly 2 parameters, 0 given in %s on line %d

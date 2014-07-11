@@ -3,7 +3,10 @@ $Id$
 UPGRADE NOTES - PHP X.Y
 
 1. Internal API changes
-  a. Streams pooling API
+  a. Addition of do_operation and compare object handlers
+  b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
+  c. POST data handling
+  d. Arginfo changes
 
 2. Build system changes
   a. Unix build system changes
@@ -14,25 +17,11 @@ UPGRADE NOTES - PHP X.Y
 1. Internal API changes
 ========================
 
-	a. Streams pooling API
+  a. zend_set_memory_limit() now takes the TSRMLS_CC macro as its last argument
 
-The streams pooling API has been removed. The following functions no longer
-exist:
-
-PHPAPI int php_stream_context_get_link(php_stream_context *context,
-		const char *hostent, php_stream **stream);
-PHPAPI int php_stream_context_set_link(php_stream_context *context,
-		const char *hostent, php_stream *stream);
-PHPAPI int php_stream_context_del_link(php_stream_context *context,
-		php_stream *stream);
 
 ========================
 2. Build system changes
 ========================
 
-  a. Unix build system changes
-    - 
-
-  b. Windows build system changes
-    - 
   

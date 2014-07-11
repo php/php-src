@@ -31,7 +31,7 @@ class MessageFormatter {
 	/**
 	 * Format the message
 	 * @param   array   $args   arguments to insert into the pattern string
-	 * @return  string  the formatted string, or false if an error ocurred
+	 * @return  string  the formatted string, or false if an error occurred
 	 */
 	public function format($args) {}
 
@@ -54,7 +54,7 @@ class MessageFormatter {
 	 * @param string    $locale   the locale to use when formatting numbers and dates and suchlike
 	 * @param string    $pattern  the pattern string to insert things into
 	 * @param array     $args     the array of values to insert into $pattern
-	 * @return string             the formatted pattern string or false if an error occured
+	 * @return string             the formatted pattern string or false if an error occurred
 	 */
 	public static function formatMessage($locale, $pattern, $args) {}
 
@@ -124,7 +124,7 @@ class MessageFormatter {
 	 * Format the message
 	 * @param MessageFormatter $fmt The message formatter 
 	 * @param   array   $args   arguments to insert into the pattern string
-	 * @return  string  the formatted string, or false if an error ocurred
+	 * @return  string  the formatted string, or false if an error occurred
 	 */
 	function msgfmt_format($fmt, $args) {}
 
@@ -148,7 +148,7 @@ class MessageFormatter {
 	 * @param string    $locale   the locale to use when formatting numbers and dates and suchlike
 	 * @param string    $pattern  the pattern string to insert things into
 	 * @param array     $args     the array of values to insert into $pattern
-	 * @return string             the formatted pattern string or false if an error occured
+	 * @return string             the formatted pattern string or false if an error occurred
 	 */
 	function msgfmt_format_message($locale, $pattern, $args) {}
 

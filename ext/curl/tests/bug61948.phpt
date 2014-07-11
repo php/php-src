@@ -16,7 +16,7 @@ open_basedir="/tmp"
   curl_close($ch);
 ?>
 --EXPECTF--
-bool(false)
+bool(true)
 bool(true)
 
 Warning: curl_setopt(): open_basedir restriction in effect. File(/xxx/bar) is not within the allowed path(s): (/tmp) in %sbug61948.php on line %d

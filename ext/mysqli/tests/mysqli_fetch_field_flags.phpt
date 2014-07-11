@@ -84,6 +84,8 @@ mysqli_close($link);
 		'VARCHAR(2) NOT NULL PRIMARY KEY' => 'NOT_NULL PRI_KEY NO_DEFAULT_VALUE PART_KEY'
 	);
 
+
+
 	function checkFlags($reported_flags, $expected_flags, $flags) {
 		$found_flags = $unexpected_flags = '';
 		foreach ($flags as $code => $name) {
@@ -103,6 +105,10 @@ mysqli_close($link);
 
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+
+	if (mysqli_get_server_version($link) > 50600) {
+		$columns['TIMESTAMP NOT NULL'] = 'ON_UPDATE_NOW TIMESTAMP BINARY NOT_NULL';
+	}
 
 	foreach ($columns as $column_def => $expected_flags) {
 		if (!mysqli_query($link, 'DROP TABLE IF EXISTS test')) {

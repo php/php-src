@@ -39,13 +39,15 @@
 
 
 
-ZIP_EXTERN(int)
+ZIP_EXTERN int
 zip_unchange_archive(struct zip *za)
 {
-    free(za->ch_comment);
-    za->ch_comment = NULL;
-    za->ch_comment_len = -1;
-
+    if (za->comment_changed) {
+	_zip_string_free(za->comment_changes);
+	za->comment_changes = NULL;
+	za->comment_changed = 0;
+    }
+    
     za->ch_flags = za->flags;
 
     return 0;

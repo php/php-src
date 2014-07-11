@@ -15,6 +15,28 @@ AC_DEFUN([PHP_LDAP_CHECKS], [
     LDAP_DIR=$1
     LDAP_INCDIR=$1/ldap/public
     LDAP_LIBDIR=$1/$PHP_LIBDIR
+  else
+
+    dnl Find Oracle Instant Client RPM header location corresponding to the given lib path e.g. for --with-ldap=/usr/lib/oracle/12.1/client64/lib
+    AC_CHECK_SIZEOF(long int, 4)
+    if test "$ac_cv_sizeof_long_int" = "4"; then
+      PHP_OCI8_IC_LIBDIR_SUFFIX=""
+    else
+      PHP_OCI8_IC_LIBDIR_SUFFIX=64
+    fi
+    OCISDKRPMINC=`echo "$1" | $SED -e 's!^/usr/lib/oracle/\(.*\)/client\('${PHP_OCI8_IC_LIBDIR_SUFFIX}'\)*/lib[/]*$!/usr/include/oracle/\1/client\2!'`
+
+    dnl Check for Oracle Instant Client RPM install
+    if test -f $OCISDKRPMINC/ldap.h; then
+      LDAP_DIR=$1
+      LDAP_INCDIR=$OCISDKRPMINC
+      LDAP_LIBDIR=$1
+    dnl Check for Oracle Instant Client ZIP install
+    elif test -f $1/sdk/include/ldap.h; then
+      LDAP_DIR=$1
+      LDAP_INCDIR=$1/sdk/include
+      LDAP_LIBDIR=$1
+    fi
   fi
 ])
 
@@ -63,7 +85,7 @@ AC_DEFUN([PHP_LDAP_SASL_CHECKS], [
 ])
 
 PHP_ARG_WITH(ldap,for LDAP support,
-[  --with-ldap[=DIR]       Include LDAP support])
+[  --with-ldap[=DIR]         Include LDAP support])
 
 PHP_ARG_WITH(ldap-sasl,for LDAP Cyrus SASL support,
 [  --with-ldap-sasl[=DIR]    LDAP: Include Cyrus SASL support], no, no)
@@ -143,12 +165,21 @@ if test "$PHP_LDAP" != "no"; then
     PHP_ADD_LIBRARY_WITH_PATH(umich_lber, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY_WITH_PATH(umich_ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
 
-  elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME; then
+  elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.12.1; then
     PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
     AC_DEFINE(HAVE_ORALDAP,1,[ ])
-    if test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
-      AC_DEFINE(HAVE_ORALDAP_10,1,[ ])
-    fi
+    AC_DEFINE(HAVE_ORALDAP_12,1,[ ])
+
+  elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
+    PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
+    AC_DEFINE(HAVE_ORALDAP,1,[ ])
+    AC_DEFINE(HAVE_ORALDAP_11,1,[ ])
+
+  elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME; then
+     PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
+     AC_DEFINE(HAVE_ORALDAP,1,[ ])
+     AC_DEFINE(HAVE_ORALDAP_10,1,[ ])
+
   else
     AC_MSG_ERROR(Cannot find ldap libraries in $LDAP_LIBDIR.)
   fi

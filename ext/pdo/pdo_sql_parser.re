@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -50,14 +50,14 @@ static int scan(Scanner *s)
 	QUESTION	= [?];
 	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
 	SPECIALS	= [:?"'];
-	MULTICHAR	= [:?];
+	MULTICHAR	= ([:]{2,}|[?]{2,});
 	ANYNOEOF	= [\001-\377];
 	*/
 
 	/*!re2c
 		(["](([\\]ANYNOEOF)|ANYNOEOF\["\\])*["]) { RET(PDO_PARSER_TEXT); }
 		(['](([\\]ANYNOEOF)|ANYNOEOF\['\\])*[']) { RET(PDO_PARSER_TEXT); }
-		MULTICHAR{2,}							{ RET(PDO_PARSER_TEXT); }
+		MULTICHAR								{ RET(PDO_PARSER_TEXT); }
 		BINDCHR									{ RET(PDO_PARSER_BIND); }
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
 		SPECIALS								{ SKIP_ONE(PDO_PARSER_TEXT); }
@@ -228,7 +228,9 @@ safe:
 					}
 					plc->freeq = 1;
 				} else {
-					switch (Z_TYPE_P(param->parameter)) {
+					zval tmp_param = *param->parameter;
+					zval_copy_ctor(&tmp_param);
+					switch (Z_TYPE(tmp_param)) {
 						case IS_NULL:
 							plc->quoted = "NULL";
 							plc->qlen = sizeof("NULL")-1;
@@ -236,20 +238,20 @@ safe:
 							break;
 
 						case IS_BOOL:
-							convert_to_long(param->parameter);
-
+							convert_to_long(&tmp_param);
+							/* fall through */
 						case IS_LONG:
 						case IS_DOUBLE:
-							convert_to_string(param->parameter);
-							plc->qlen = Z_STRLEN_P(param->parameter);
-							plc->quoted = Z_STRVAL_P(param->parameter);
-							plc->freeq = 0;
+							convert_to_string(&tmp_param);
+							plc->qlen = Z_STRLEN(tmp_param);
+							plc->quoted = estrdup(Z_STRVAL(tmp_param));
+							plc->freeq = 1;
 							break;
 
 						default:
-							convert_to_string(param->parameter);
-							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
-									Z_STRLEN_P(param->parameter), &plc->quoted, &plc->qlen,
+							convert_to_string(&tmp_param);
+							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL(tmp_param),
+									Z_STRLEN(tmp_param), &plc->quoted, &plc->qlen,
 									param->param_type TSRMLS_CC)) {
 								/* bork */
 								ret = -1;
@@ -258,6 +260,7 @@ safe:
 							}
 							plc->freeq = 1;
 					}
+					zval_dtor(&tmp_param);
 				}
 			} else {
 				plc->quoted = Z_STRVAL_P(param->parameter);
@@ -408,9 +411,9 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 		while (SUCCESS == zend_hash_get_current_data(params, (void**)&param)) {
 			if(param->parameter) {
 				convert_to_string(param->parameter);
-				/* accomodate a string that needs to be fully quoted
+				/* accommodate a string that needs to be fully quoted
                    bind placeholders are at least 2 characters, so
-                   the accomodate their own "'s
+                   the accommodate their own "'s
                 */
 				newbuffer_len += padding * Z_STRLEN_P(param->parameter);
 			}

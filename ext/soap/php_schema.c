@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1081,6 +1081,14 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 			nsptr = xmlSearchNs(groupType->doc, groupType, BAD_CAST(ns));
 			if (nsptr != NULL) {
 				smart_str_appends(&key, (char*)nsptr->href);
+			} else {
+				xmlAttrPtr ns = get_attribute(groupType->properties, "targetNamespace");
+				if (ns == NULL) {
+					ns = tns;
+				}
+				if (ns) {
+					smart_str_appends(&key, (char*)ns->children->content);
+				}
 			}
 			smart_str_appendc(&key, ':');
 			smart_str_appends(&key, type);
@@ -1509,6 +1517,14 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			if (nsptr != NULL) {
 				smart_str_appends(&nscat, (char*)nsptr->href);
 				newType->namens = estrdup((char*)nsptr->href);
+			} else {
+				xmlAttrPtr ns = get_attribute(attrs, "targetNamespace");
+				if (ns == NULL) {
+					ns = tns;
+				}
+				if (ns) {
+					smart_str_appends(&nscat, (char*)ns->children->content);
+				}
 			} 
 			smart_str_appendc(&nscat, ':');
 			smart_str_appends(&nscat, type);
@@ -1735,6 +1751,14 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			if (nsptr != NULL) {
 				smart_str_appends(&key, (char*)nsptr->href);
 				newAttr->namens = estrdup((char*)nsptr->href);
+			} else {
+				xmlAttrPtr ns = get_attribute(attrType->properties, "targetNamespace");
+				if (ns == NULL) {
+					ns = tns;
+				}
+				if (ns) {
+					smart_str_appends(&key, (char*)ns->children->content);
+				}
 			}
 			smart_str_appendc(&key, ':');
 			smart_str_appends(&key, attr_name);
@@ -2036,13 +2060,31 @@ static void copy_extra_attribute(void *attribute)
 	}
 }
 
+static void* schema_find_by_ref(HashTable *ht, char *ref)
+{
+	void **tmp;
+
+	if (zend_hash_find(ht, ref, strlen(ref)+1, (void**)&tmp) == SUCCESS) {
+		return tmp;
+	} else {
+		ref = strrchr(ref, ':');
+		if (ref) {
+			if (zend_hash_find(ht, ref, strlen(ref)+1, (void**)&tmp) == SUCCESS) {
+				return tmp;
+			}
+		}
+	}
+	return NULL;
+}
+
 static void schema_attribute_fixup(sdlCtx *ctx, sdlAttributePtr attr)
 {
 	sdlAttributePtr *tmp;
 
 	if (attr->ref != NULL) {
 		if (ctx->attributes != NULL) {
-			if (zend_hash_find(ctx->attributes, attr->ref, strlen(attr->ref)+1, (void**)&tmp) == SUCCESS) {
+			tmp = (sdlAttributePtr*)schema_find_by_ref(ctx->attributes, attr->ref);
+			if (tmp) {
 				schema_attribute_fixup(ctx, *tmp);
 				if ((*tmp)->name != NULL && attr->name == NULL) {
 					attr->name = estrdup((*tmp)->name);
@@ -2092,7 +2134,8 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 
 	if (attr->ref != NULL) {
 		if (ctx->attributeGroups != NULL) {
-			if (zend_hash_find(ctx->attributeGroups, attr->ref, strlen(attr->ref)+1, (void**)&tmp) == SUCCESS) {
+			tmp = (sdlTypePtr*)schema_find_by_ref(ctx->attributeGroups, attr->ref);
+			if (tmp) {
 				if ((*tmp)->attributes) {
 					zend_hash_internal_pointer_reset((*tmp)->attributes);
 					while (zend_hash_get_current_data((*tmp)->attributes,(void**)&tmp_attr) == SUCCESS) {
@@ -2149,7 +2192,7 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 				model->kind = XSD_CONTENT_GROUP;
 				model->u.group = (*tmp);
 			} else {
-				soap_error0(E_ERROR, "Parsing Schema: unresolved group 'ref' attribute");
+				soap_error1(E_ERROR, "Parsing Schema: unresolved group 'ref' attribute '%s'", model->u.group_ref);
 			}
 			break;
 		}
@@ -2193,7 +2236,8 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 
 	if (type->ref != NULL) {
 		if (ctx->sdl->elements != NULL) {
-			if (zend_hash_find(ctx->sdl->elements, type->ref, strlen(type->ref)+1, (void**)&tmp) == SUCCESS) {
+			tmp = (sdlTypePtr*)schema_find_by_ref(ctx->sdl->elements, type->ref);
+			if (tmp) {
 				type->kind = (*tmp)->kind;
 				type->encode = (*tmp)->encode;
 				if ((*tmp)->nillable) {
@@ -2209,7 +2253,7 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 			} else if (strcmp(type->ref, SCHEMA_NAMESPACE ":schema") == 0) {
 				type->encode = get_conversion(XSD_ANYXML);
 			} else {
-				soap_error0(E_ERROR, "Parsing Schema: unresolved element 'ref' attribute");
+				soap_error1(E_ERROR, "Parsing Schema: unresolved element 'ref' attribute '%s'", type->ref);
 			}
 		}
 		efree(type->ref);

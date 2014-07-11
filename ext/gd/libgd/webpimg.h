@@ -84,7 +84,7 @@ WebPResult WebPDecode(const uint8* data,
  *                               height.
  *      6. y_stride: The width (in bytes) of one row of Y data. This may not
  *                   match width if there is end of row padding (e.g., for 32
- *                   bit row aligment).
+ *                   bit row alignment).
  *      7. QP: the quantization parameter. This parameter controls the
  *             compression vs quality tradeoff. Use smaller numbers for better
  *             quality (compression will be lesser) and vice versa. 20 is a

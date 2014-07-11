@@ -17,7 +17,7 @@
  * an Iterator. It is very important to understand that most classes that do 
  * not implement Iterator have their reasone to. Most likely they do not allow
  * the full Iterator feature set. If so you need to provide techniques to
- * prevent missuse. If you do not you must expect exceptions or fatal erros.
+ * prevent missuse. If you do not you must expect exceptions or fatal errors.
  *
  * It is also possible to derive the class and implement IteratorAggregate by
  * downcasting the instances returned in getIterator. See the following

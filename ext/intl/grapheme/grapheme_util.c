@@ -28,6 +28,7 @@
 #include <unicode/ucol.h>
 #include <unicode/ustring.h>
 #include <unicode/ubrk.h>
+#include <unicode/usearch.h>
 
 #include "ext/standard/php_string.h"
 
@@ -47,49 +48,8 @@ grapheme_close_global_iterator( TSRMLS_D )
 }
 /* }}} */
 
-/* {{{ grapheme_intl_case_fold: convert string to lowercase */
-void
-grapheme_intl_case_fold(UChar** ptr_to_free, UChar **str, int32_t *str_len, UErrorCode *pstatus )
-{
-    UChar *dest;
-    int32_t dest_len, size_required;
-
-    /* allocate a destination string that is a bit larger than the src, hoping that is enough */
-    dest_len = (*str_len) + ( *str_len / 10 );
-    dest = (UChar*) eumalloc(dest_len);
-
-    *pstatus = U_ZERO_ERROR;
-    size_required = u_strFoldCase(dest, dest_len, *str, *str_len, U_FOLD_CASE_DEFAULT, pstatus);
-
-    dest_len = size_required;
-
-    if ( U_BUFFER_OVERFLOW_ERROR == *pstatus ) {
-
-        dest = (UChar*) eurealloc(dest, dest_len);
-
-        *pstatus = U_ZERO_ERROR;
-        size_required = u_strFoldCase(dest, dest_len, *str, *str_len, U_FOLD_CASE_DEFAULT, pstatus);
-    }
-
-    if ( U_FAILURE(*pstatus) ) {
-        return;
-    }
-
-    if ( NULL != ptr_to_free) {
-        efree(*ptr_to_free);
-        *ptr_to_free = dest;
-    }
-
-    *str = dest;
-    *str_len = dest_len;
-
-    return;
-}
-/* }}} */
-
 /* {{{ grapheme_substr_ascii f='from' - starting point, l='length' */
-void
-grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char **sub_str, int *sub_str_len)
+void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char **sub_str, int *sub_str_len)
 {
     *sub_str = NULL;
 
@@ -147,224 +107,100 @@ grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char **sub
 }
 /* }}} */
 
-/* {{{ grapheme_strrpos_utf16 - strrpos using utf16 */
-int
-grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int f_ignore_case TSRMLS_DC)
-{
-    UChar *uhaystack, *puhaystack, *uhaystack_end, *uneedle;
-    int32_t uhaystack_len, uneedle_len;
-    UErrorCode status;
-    unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
-    UBreakIterator* bi = NULL;
-    int ret_pos, pos;
-
-    /* convert the strings to UTF-16. */
-    uhaystack = NULL;
-    uhaystack_len = 0;
-    status = U_ZERO_ERROR;
-    intl_convert_utf8_to_utf16(&uhaystack, &uhaystack_len, (char *) haystack, haystack_len, &status );
-
-    if ( U_FAILURE( status ) ) {
-        /* Set global error code. */
-        intl_error_set_code( NULL, status TSRMLS_CC );
-
-        /* Set error messages. */
-        intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-        if (uhaystack) {
-			efree( uhaystack );
-		}
-        return -1;
-    }
-
-    if ( f_ignore_case ) {
-        grapheme_intl_case_fold(&uhaystack, &uhaystack, &uhaystack_len, &status );
-    }
-
-    /* get a pointer to the haystack taking into account the offset */
-    bi = NULL;
-    status = U_ZERO_ERROR;
-    bi = grapheme_get_break_iterator(u_break_iterator_buffer, &status TSRMLS_CC );
-
-    puhaystack = grapheme_get_haystack_offset(bi, uhaystack, uhaystack_len, offset);
-
-    if ( NULL == puhaystack ) {
-        intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 TSRMLS_CC );
-        if (uhaystack) {
-			efree( uhaystack );
-		}
-        ubrk_close (bi);
-        return -1;
-    }
-
-    uneedle = NULL;
-    uneedle_len = 0;
-    status = U_ZERO_ERROR;
-    intl_convert_utf8_to_utf16(&uneedle, &uneedle_len, (char *) needle, needle_len, &status );
-
-    if ( U_FAILURE( status ) ) {
-        /* Set global error code. */
-        intl_error_set_code( NULL, status TSRMLS_CC );
-
-        /* Set error messages. */
-        intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-        if (uhaystack) {
-			efree( uhaystack );
-		}
-		if (uneedle) {
-			efree( uneedle );
-		}
-        ubrk_close (bi);
-        return -1;
-    }
-
-    if ( f_ignore_case ) {
-        grapheme_intl_case_fold(&uneedle, &uneedle, &uneedle_len, &status );
-    }
-
-    ret_pos = -1;   /* -1 represents 'not found' */
-
-    /* back up until there's needle_len characters to compare */
-
-    uhaystack_end = uhaystack + uhaystack_len;
-    pos = ubrk_last(bi);
-    puhaystack = uhaystack + pos;
-
-    while ( uhaystack_end - puhaystack < uneedle_len ) {
-
-        pos = ubrk_previous(bi);
-
-        if ( UBRK_DONE == pos ) {
-            break;
-        }
-
-        puhaystack = uhaystack + pos;
-    }
-
-    /* is there enough haystack left to hold the needle? */
-    if ( ( uhaystack_end - puhaystack ) < uneedle_len ) {
-        /* not enough, not found */
-        goto exit;
-    }
-
-    while ( UBRK_DONE != pos ) {
-
-        if (!u_memcmp(uneedle, puhaystack, uneedle_len)) {  /* needle_len - 1 in zend memnstr? */
-
-            /* does the grapheme in the haystack end at the same place as the last grapheme in the needle? */
-
-            if ( ubrk_isBoundary(bi, pos + uneedle_len) ) {
-
-                /* found it, get grapheme count offset */
-                ret_pos = grapheme_count_graphemes(bi, uhaystack, pos);
-                break;
-            }
-
-            /* set position back */
-            ubrk_isBoundary(bi, pos);
-        }
-
-        pos = ubrk_previous(bi);
-        puhaystack = uhaystack + pos;
-    }
-
-exit:
-	if (uhaystack) {
-		efree( uhaystack );
+#define STRPOS_CHECK_STATUS(status, error) 							\
+	if ( U_FAILURE( (status) ) ) { 									\
+		intl_error_set_code( NULL, (status) TSRMLS_CC ); 			\
+		intl_error_set_custom_msg( NULL, (error), 0 TSRMLS_CC ); 	\
+		if (uhaystack) { 											\
+			efree( uhaystack ); 									\
+		} 															\
+		if (uneedle) { 												\
+			efree( uneedle ); 										\
+		} 															\
+		if(bi) { 													\
+			ubrk_close (bi); 										\
+		} 															\
+		if(src) {													\
+			usearch_close(src);										\
+		}															\
+		return -1; 													\
 	}
-	if (uneedle) {
-		efree( uneedle );
-	}
-    ubrk_close (bi);
 
-    return ret_pos;
-}
-
-/* }}} */
 
 /* {{{ grapheme_strpos_utf16 - strrpos using utf16*/
-int
-grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case TSRMLS_DC)
+int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last TSRMLS_DC)
 {
-	UChar *uhaystack, *puhaystack, *uneedle;
-	int32_t uhaystack_len, uneedle_len;
-	int ret_pos;
+	UChar *uhaystack = NULL, *uneedle = NULL;
+	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0;
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
-	UBreakIterator* bi;
+	UBreakIterator* bi = NULL;
 	UErrorCode status;
+	UStringSearch* src = NULL;
+	UCollator *coll;
 
-	*puchar_pos = -1;
-
+	if(puchar_pos) {
+		*puchar_pos = -1;
+	}
 	/* convert the strings to UTF-16. */
 
-	uhaystack = NULL;
-	uhaystack_len = 0;
 	status = U_ZERO_ERROR;
 	intl_convert_utf8_to_utf16(&uhaystack, &uhaystack_len, (char *) haystack, haystack_len, &status );
+	STRPOS_CHECK_STATUS(status, "Error converting input string to UTF-16");
 
-	if ( U_FAILURE( status ) ) {
-		/* Set global error code. */
-		intl_error_set_code( NULL, status TSRMLS_CC );
-
-		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-		if (uhaystack) {
-			efree( uhaystack );
-		}
-		return -1;
-	}
-
-	/* get a pointer to the haystack taking into account the offset */
-	bi = NULL;
-	status = U_ZERO_ERROR;
-	bi = grapheme_get_break_iterator(u_break_iterator_buffer, &status TSRMLS_CC );
-	
-	puhaystack = grapheme_get_haystack_offset(bi, uhaystack, uhaystack_len, offset);
-	uhaystack_len = (uhaystack_len - ( puhaystack - uhaystack));
-
-	if ( NULL == puhaystack ) {
-	
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 TSRMLS_CC );
-		if (uhaystack) {
-			efree( uhaystack );
-		}
-		ubrk_close (bi);
-					
-		return -1;
-	}
-
-	if ( f_ignore_case ) {
-		grapheme_intl_case_fold(&uhaystack, &puhaystack, &uhaystack_len, &status );
-	}
-
-	uneedle = NULL;
-	uneedle_len = 0;
 	status = U_ZERO_ERROR;
 	intl_convert_utf8_to_utf16(&uneedle, &uneedle_len, (char *) needle, needle_len, &status );
+	STRPOS_CHECK_STATUS(status, "Error converting input string to UTF-16");
 
-	if ( U_FAILURE( status ) ) {
-		/* Set global error code. */
-		intl_error_set_code( NULL, status TSRMLS_CC );
+	/* get a pointer to the haystack taking into account the offset */
+	status = U_ZERO_ERROR;
+	bi = grapheme_get_break_iterator(u_break_iterator_buffer, &status TSRMLS_CC );
+	STRPOS_CHECK_STATUS(status, "Failed to get iterator");
+	status = U_ZERO_ERROR;
+	ubrk_setText(bi, uhaystack, uhaystack_len, &status);
+	STRPOS_CHECK_STATUS(status, "Failed to set up iterator");
 
-		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-		if (uhaystack) {
-			efree( uhaystack );
-		}
-		if (uneedle) {
-			efree( uneedle );
-		}
-		ubrk_close (bi);
-		
-		return -1;
+	status = U_ZERO_ERROR;
+	src = usearch_open(uneedle, uneedle_len, uhaystack, uhaystack_len, "", bi, &status);
+	STRPOS_CHECK_STATUS(status, "Error creating search object");
+
+	if(f_ignore_case) {
+		coll = usearch_getCollator(src);
+		status = U_ZERO_ERROR;
+		ucol_setAttribute(coll, UCOL_STRENGTH, UCOL_SECONDARY, &status);
+		STRPOS_CHECK_STATUS(status, "Error setting collation strength");
+		usearch_reset(src);
 	}
 
-	if ( f_ignore_case ) {
-		grapheme_intl_case_fold(&uneedle, &uneedle, &uneedle_len, &status );
+	if(offset != 0) {
+		offset_pos = grapheme_get_haystack_offset(bi, offset);
+		if(offset_pos == -1) {
+			status = U_ILLEGAL_ARGUMENT_ERROR;
+			STRPOS_CHECK_STATUS(status, "Invalid search offset");	
+		}
+		status = U_ZERO_ERROR;
+		usearch_setOffset(src, offset_pos, &status);	
+		STRPOS_CHECK_STATUS(status, "Invalid search offset");
 	}
 
-	ret_pos = grapheme_memnstr_grapheme(bi, puhaystack, uneedle, uneedle_len, puhaystack + uhaystack_len );
-	
-	*puchar_pos = ubrk_current(bi);
+
+	if(last) {
+		char_pos = usearch_last(src, &status);
+		if(char_pos < offset_pos) {
+			/* last one is beyound our start offset */
+			char_pos = USEARCH_DONE;
+		}
+	} else {
+		char_pos = usearch_next(src, &status);
+	}
+	STRPOS_CHECK_STATUS(status, "Error looking up string");
+	if(char_pos != USEARCH_DONE && ubrk_isBoundary(bi, char_pos)) {
+		ret_pos = grapheme_count_graphemes(bi, uhaystack,char_pos);
+		if(puchar_pos) {
+			*puchar_pos = char_pos;
+		}
+	} else {
+		ret_pos = -1;
+	}
 
 	if (uhaystack) {
 		efree( uhaystack );
@@ -373,6 +209,7 @@ grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned ch
 		efree( uneedle );
 	}
 	ubrk_close (bi);
+	usearch_close (src);
 
 	return ret_pos;
 }
@@ -432,8 +269,7 @@ int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_a
 /* }}} */
 
 /* {{{ grapheme_count_graphemes */
-int32_t
-grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len)
+int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len)
 {
 	int ret_len = 0;
 	int pos = 0;
@@ -455,85 +291,16 @@ grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len)
 }
 /* }}} */
 
-/* {{{ grapheme_memnstr_grapheme: find needle in haystack using grapheme boundaries */
-int32_t
-grapheme_memnstr_grapheme(UBreakIterator *bi, UChar *haystack, UChar *needle, int32_t needle_len, UChar *end)
-{
-	UChar *p = haystack;
-	UChar ne = needle[needle_len-1];
-	UErrorCode status;
-	int32_t grapheme_offset;
-	
-	end -= needle_len;
-
-	while (p <= end) {
-
-		if ((p = u_memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
-
-			if (!u_memcmp(needle, p, needle_len - 1)) {  /* needle_len - 1 works because if needle_len is 1, we've already tested the char */
-
-				/* does the grapheme end here? */
-
-				status = U_ZERO_ERROR;
-				ubrk_setText (bi, haystack, (end - haystack) + needle_len, &status);
-
-				if ( ubrk_isBoundary (bi, (p - haystack) + needle_len) ) {
-
-					/* found it, get grapheme count offset */
-					grapheme_offset = grapheme_count_graphemes(bi, haystack, (p - haystack));
-
-					return grapheme_offset;
-				}
-			}
-		}
-
-		if (p == NULL) {
-			return -1;
-		}
-
-		p++;
-	}
-
-	return -1;
-}
-
-/* }}} */
-
-/* {{{ grapheme_memrstr_grapheme: reverse find needle in haystack using grapheme boundaries */
-inline void *grapheme_memrchr_grapheme(const void *s, int c, int32_t n)
-{
-	register unsigned char *e;
-
-	if (n <= 0) {
-		return NULL;
-	}
-
-	for (e = (unsigned char *)s + n - 1; e >= (unsigned char *)s; e--) {
-		if (*e == (unsigned char)c) {
-			return (void *)e;
-		}
-	}
-
-	return NULL;
-}
-/* }}} */
 
 /* {{{ 	grapheme_get_haystack_offset - bump the haystack pointer based on the grapheme count offset */
-UChar *
-grapheme_get_haystack_offset(UBreakIterator* bi, UChar *uhaystack, int32_t uhaystack_len, int32_t offset)
+int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 {
-	UErrorCode		status;
 	int32_t pos;
 	int32_t (*iter_op)(UBreakIterator* bi);
 	int iter_incr;
 
-	if ( NULL != bi ) {
-		status = U_ZERO_ERROR;
-		ubrk_setText (bi, uhaystack, uhaystack_len, &status);
-	}
-
 	if ( 0 == offset ) {
-		return uhaystack;
+		return 0;
 	}
 	
 	if ( offset < 0 ) {
@@ -558,10 +325,10 @@ grapheme_get_haystack_offset(UBreakIterator* bi, UChar *uhaystack, int32_t uhays
 	}
 
 	if ( offset != 0 ) {
-		return NULL;
+		return -1;
 	}
 	
-	return uhaystack + pos;
+	return pos;
 }
 /* }}} */
 
@@ -607,8 +374,7 @@ grapheme_strrpos_ascii(unsigned char *haystack, int32_t haystack_len, unsigned c
 /* }}} */
 
 /* {{{ grapheme_get_break_iterator: get a clone of the global character break iterator */
-UBreakIterator* 
-grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status TSRMLS_DC )
+UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status TSRMLS_DC )
 {
 	int32_t buffer_size;
 

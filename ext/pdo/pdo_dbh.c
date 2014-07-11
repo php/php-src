@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -101,7 +101,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 }
 /* }}} */
 
-void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_error_type *pdo_err = &dbh->error_code;
 	const char *msg = "<<Unknown>>";
@@ -196,7 +196,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
-/* {{{ proto void PDO::__construct(string dsn, string username, string passwd [, array options])
+/* {{{ proto void PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
    */
 static PHP_METHOD(PDO, dbh_constructor)
 {
@@ -338,6 +338,9 @@ static PHP_METHOD(PDO, dbh_constructor)
 			if (pdbh->std.properties) {
 				zend_hash_destroy(dbh->std.properties);	
 				efree(dbh->std.properties);
+				if (dbh->std.properties_table) {
+					efree(dbh->std.properties_table);
+				}
 			} else {
 				pdbh->std.ce = dbh->std.ce;
 				pdbh->def_stmt_ce = dbh->def_stmt_ce;
@@ -457,7 +460,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 	if (dbstmt_ce->constructor) {
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
-		zval *retval;
+		zval *retval = NULL;
 
 		fci.size = sizeof(zend_fcall_info);
 		fci.function_table = &dbstmt_ce->function_table;
@@ -465,22 +468,10 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fci.object_ptr = object;
 		fci.symbol_table = NULL;
 		fci.retval_ptr_ptr = &retval;
-		if (ctor_args) {
-			HashTable *ht = Z_ARRVAL_P(ctor_args);
-			Bucket *p;
-
-			fci.param_count = 0;
-			fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
-			p = ht->pListHead;
-			while (p != NULL) {
-				fci.params[fci.param_count++] = (zval**)p->pData;
-				p = p->pListNext;
-			}
-		} else {
-			fci.param_count = 0;
-			fci.params = NULL;
-		}
+		fci.params = NULL;
 		fci.no_separation = 1;
+
+		zend_fcall_info_args(&fci, ctor_args TSRMLS_CC);
 
 		fcc.initialized = 1;
 		fcc.function_handler = dbstmt_ce->constructor;
@@ -492,7 +483,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 			zval_dtor(object);
 			ZVAL_NULL(object);
 			object = NULL; /* marks failure */
-		} else {
+		} else if (retval) {
 			zval_ptr_dtor(&retval);
 		}
 			
@@ -700,7 +691,7 @@ static PHP_METHOD(PDO, inTransaction)
 		RETURN_BOOL(dbh->in_txn);
 	}	
 
-	RETURN_LONG(dbh->methods->in_transaction(dbh TSRMLS_CC));
+	RETURN_BOOL(dbh->methods->in_transaction(dbh TSRMLS_CC));
 }
 /* }}} */
 
@@ -896,7 +887,7 @@ static PHP_METHOD(PDO, getAttribute)
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 
-	/* handle generic PDO-level atributes */
+	/* handle generic PDO-level attributes */
 	switch (attr) {
 		case PDO_ATTR_PERSISTENT:
 			RETURN_BOOL(dbh->is_persistent);
@@ -994,7 +985,7 @@ static PHP_METHOD(PDO, lastInsertId)
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support lastInsertId()" TSRMLS_CC);
 		RETURN_FALSE;
 	} else {
-		Z_STRVAL_P(return_value) = dbh->methods->last_id(dbh, name, &Z_STRLEN_P(return_value) TSRMLS_CC);
+		Z_STRVAL_P(return_value) = dbh->methods->last_id(dbh, name, (unsigned int *)&Z_STRLEN_P(return_value) TSRMLS_CC);
 		if (!Z_STRVAL_P(return_value)) {
 			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;
@@ -1223,7 +1214,7 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 /* }}} */
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, dsn)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, passwd)
@@ -1325,15 +1316,11 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 			} else {
 				ifunc->required_num_args = info->required_num_args;
 			}
-			if (info->pass_rest_by_reference) {
-				if (info->pass_rest_by_reference == ZEND_SEND_PREFER_REF) {
-					ifunc->fn_flags |= ZEND_ACC_PASS_REST_PREFER_REF;
-				} else {
-					ifunc->fn_flags |= ZEND_ACC_PASS_REST_BY_REFERENCE;
-				}
-			}
 			if (info->return_reference) {
 				ifunc->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+			}
+			if (funcs->arg_info[funcs->num_args].is_variadic) {
+				ifunc->fn_flags |= ZEND_ACC_VARIADIC;
 			}
 		} else {
 			ifunc->arg_info = NULL;
@@ -1575,6 +1562,7 @@ static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 	}
 	zend_object_std_dtor(&dbh->std TSRMLS_CC);
 	dbh->std.properties = NULL;
+	dbh->std.properties_table = NULL;
 	dbh_free(dbh TSRMLS_CC);
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,7 +46,13 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, uint strin
 
 	if (string_len > 0) {
 		olestring = (OLECHAR*)safe_emalloc(string_len, sizeof(OLECHAR), 0);
+		/* XXX if that's a real multibyte string, olestring is obviously allocated excessively.
+		This should be fixed by reallocating the olestring, but as emalloc is used, that doesn't
+		matter much. */
 		ok = MultiByteToWideChar(codepage, flags, string, string_len, olestring, string_len);
+		if (ok > 0 && ok < string_len) {
+			olestring[ok] = '\0';
+		}
 	} else {
 		ok = FALSE;
 		olestring = (OLECHAR*)emalloc(sizeof(OLECHAR));

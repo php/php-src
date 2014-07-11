@@ -2,6 +2,7 @@
 PDO_Firebird: bug 53280 segfaults if query column count is less than param count
 --SKIPIF--
 <?php extension_loaded("pdo_firebird") or die("skip"); ?>
+<?php function_exists("ibase_query") or die("skip"); ?>
 --FILE--
 <?php
 

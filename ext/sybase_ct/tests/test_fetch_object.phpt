@@ -40,7 +40,7 @@ Sybase-CT sybase_fetch_object
   // Test with object
   var_export(fetch_object($db, new article())); echo "\n";
 
-  // Test with non-existant class
+  // Test with non-existent class
   var_export(fetch_object($db, '***')); echo "\n";
     
   sybase_close($db);

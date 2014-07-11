@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | TAR archive support for Phar                                         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2012 The PHP Group                                |
+  | Copyright (c) 2005-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -783,7 +783,7 @@ static int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 			return ZEND_HASH_APPLY_STOP;
 		}
 
-		if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), fp->new, entry->uncompressed_filesize, NULL)) {
+		if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0 TSRMLS_CC), fp->new, entry->uncompressed_filesize, NULL)) {
 			if (fp->error) {
 				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written", entry->phar->fname, entry->filename);
 			}
@@ -847,7 +847,10 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error TS
 	entry->is_modified = 1;
 	entry->fp = php_stream_fopen_tmpfile();
 	entry->offset = entry->offset_abs = 0;
-
+	if (entry->fp == NULL) {
+		spprintf(error, 0, "phar error: unable to create temporary file");
+		return -1;
+	}
 	if (entry->metadata_str.len != php_stream_write(entry->fp, entry->metadata_str.c, entry->metadata_str.len)) {
 		spprintf(error, 0, "phar tar error: unable to write metadata to magic metadata file \"%s\"", entry->filename);
 		zend_hash_del(&(entry->phar->manifest), entry->filename, entry->filename_len);
@@ -949,7 +952,10 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 		entry.filename = estrndup(".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 		entry.filename_len = sizeof(".phar/alias.txt")-1;
 		entry.fp = php_stream_fopen_tmpfile();
-
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return -1;
+		}
 		if (phar->alias_len != (int)php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
@@ -986,11 +992,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 				len = -len;
 			}
 			user_stub = 0;
-#if PHP_MAJOR_VERSION >= 6
-			if (!(len = php_stream_copy_to_mem(stubfile, (void **) &user_stub, len, 0)) || !user_stub) {
-#else
+
 			if (!(len = php_stream_copy_to_mem(stubfile, &user_stub, len, 0)) || !user_stub) {
-#endif
 				if (error) {
 					spprintf(error, 0, "unable to read resource to copy stub to new tar-based phar \"%s\"", phar->fname);
 				}
@@ -1017,6 +1020,10 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 
 		len = pos - user_stub + 18;
 		entry.fp = php_stream_fopen_tmpfile();
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return EOF;
+		}
 		entry.uncompressed_filesize = len + 5;
 
 		if ((size_t)len != php_stream_write(entry.fp, user_stub, len)
@@ -1041,7 +1048,10 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	} else {
 		/* Either this is a brand new phar (add the stub), or the default stub is required (overwrite the stub) */
 		entry.fp = php_stream_fopen_tmpfile();
-
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return EOF;
+		}
 		if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
 			php_stream_close(entry.fp);
 			if (error) {
@@ -1090,7 +1100,6 @@ nostub:
 	}
 
 	newfile = php_stream_fopen_tmpfile();
-
 	if (!newfile) {
 		if (error) {
 			spprintf(error, 0, "unable to create temporary file");
@@ -1177,7 +1186,10 @@ nostub:
 		entry.filename = ".phar/signature.bin";
 		entry.filename_len = sizeof(".phar/signature.bin")-1;
 		entry.fp = php_stream_fopen_tmpfile();
-
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return EOF;
+		}
 #ifdef WORDS_BIGENDIAN
 # define PHAR_SET_32(var, buffer) \
 	*(php_uint32 *)(var) = (((((unsigned char*)&(buffer))[3]) << 24) \
@@ -1276,7 +1288,7 @@ nostub:
 
 			if (!filter) {
 				/* copy contents uncompressed rather than lose them */
-				phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+				php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 				php_stream_close(newfile);
 				if (error) {
 					spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using zlib, PHP versions older than 5.2.6 have a buggy zlib", phar->fname);
@@ -1285,7 +1297,7 @@ nostub:
 			}
 
 			php_stream_filter_append(&phar->fp->writefilters, filter);
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_close(phar->fp);
@@ -1296,14 +1308,14 @@ nostub:
 
 			filter = php_stream_filter_create("bzip2.compress", NULL, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			php_stream_filter_append(&phar->fp->writefilters, filter);
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_close(phar->fp);
 			/* use the temp stream as our base */
 			phar->fp = newfile;
 		} else {
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			/* we could also reopen the file in "rb" mode but there is no need for that */
 			php_stream_close(newfile);
 		}
