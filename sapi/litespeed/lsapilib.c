@@ -868,6 +868,190 @@ static int setUID_LVE(LSAPI_Request * pReq, uid_t uid, gid_t gid, const char * p
 #endif
     return 0;
 }
+#endif
+
+
+static int setUID_LVE(LSAPI_Request * pReq, uid_t uid, gid_t gid, const char * pChroot)
+{
+    int rv;
+    struct passwd * pw;
+    pw = getpwuid( uid );
+#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+    if ( s_lve )
+    { 
+        if( lsapi_enterLVE( pReq, uid ) == -1 )
+            return -1;
+        if ( pw && fp_lve_jail)
+        {
+            rv = lsapi_jailLVE( pReq, uid, pw );
+            if ( rv == -1 )
+                return -1;
+            if (( rv == 1 )&&(s_enable_lve == LSAPI_CAGEFS_NO_SUEXEC ))    //this mode only use cageFS, does not use suEXEC
+            {
+                uid = s_defaultUid;
+                gid = s_defaultGid;
+                pw = getpwuid( uid );
+            }
+        }
+    }
+#endif
+    //if ( !uid || !gid )  //do not allow root 
+    //{
+    //    return -1;
+    //}
+
+#if defined(__FreeBSD__ ) || defined(__NetBSD__) || defined(__OpenBSD__) \
+    || defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
+    if ( s_enable_core_dump )
+        lsapi_enable_core_dump();
+#endif
+
+    rv = setgid(gid);
+    if (rv == -1)
+    {
+        LSAPI_perror_r(pReq, "LSAPI: setgid()", NULL);
+        return -1;
+    }
+    if ( pw && (pw->pw_gid == gid ))
+    {
+        rv = initgroups( pw->pw_name, gid );
+        if (rv == -1)
+        {
+            LSAPI_perror_r(pReq, "LSAPI: initgroups()", NULL);
+            return -1;
+        }
+    }
+    else
+    {
+        rv = setgroups(1, &gid);
+        if (rv == -1)
+        {
+            LSAPI_perror_r(pReq, "LSAPI: setgroups()", NULL);
+        }
+    }
+    if ( pChroot )
+    {
+        rv = chroot( pChroot );
+        if ( rv == -1 )
+        {
+            LSAPI_perror_r(pReq, "LSAPI: chroot()", NULL);
+            return -1;
+        }
+    }
+    rv = setuid(uid);
+    if (rv == -1)
+    {
+        LSAPI_perror_r(pReq, "LSAPI: setuid()", NULL);
+        return -1;
+    }
+#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+    if ( s_enable_core_dump )
+        lsapi_enable_core_dump();
+#endif
+    return 0;
+}
+
+static int lsapi_suexec_auth( LSAPI_Request *pReq, 
+            char * pAuth, int len, char * pUgid, int ugidLen )
+{
+    lsapi_MD5_CTX md5ctx;
+    unsigned char achMD5[16];
+    if ( len < 32 )
+        return -1;
+    memmove( achMD5, pAuth + 16, 16 );
+    memmove( pAuth + 16, s_pSecret, 16 );
+    lsapi_MD5Init( &md5ctx );
+    lsapi_MD5Update( &md5ctx, (unsigned char *)pAuth, 32 );
+    lsapi_MD5Update( &md5ctx, (unsigned char *)pUgid, 8 );
+    lsapi_MD5Final( (unsigned char *)pAuth + 16, &md5ctx);
+    if ( memcmp( achMD5, pAuth + 16, 16 ) == 0 )
+        return 0;
+    return 1;
+}
+
+
+static int lsapi_changeUGid( LSAPI_Request * pReq )
+{
+    int uid = s_defaultUid;
+    int gid = s_defaultGid;
+    const char * pChroot = NULL;
+    struct LSAPI_key_value_pair * pEnv;
+    struct LSAPI_key_value_pair * pAuth;
+    int i;
+    if ( s_uid )
+        return 0;
+    //with special ID  0x00
+    //authenticate the suEXEC request;
+    //first one should be MD5( nonce + lscgid secret )
+    //remember to clear the secret after verification 
+    //it should be set at the end of special env
+    i = pReq->m_pHeader->m_cntSpecialEnv - 1;
+    if ( i >= 0 )
+    {
+        pEnv = pReq->m_pSpecialEnvList + i;
+        if (( *pEnv->pKey == '\000' )&&
+            ( strcmp( pEnv->pKey+1, "SUEXEC_AUTH" ) == 0 ))
+        {
+            --pReq->m_pHeader->m_cntSpecialEnv;
+            pAuth = pEnv--;
+            if (( *pEnv->pKey == '\000' )&&
+                ( strcmp( pEnv->pKey+1, "SUEXEC_UGID" ) == 0 ))
+            {
+                --pReq->m_pHeader->m_cntSpecialEnv;
+                uid = *(uint32_t *)pEnv->pValue;
+                gid = *(((uint32_t *)pEnv->pValue) + 1 ); 
+                //fprintf( stderr, "LSAPI: SUEXEC_UGID set UID: %d, GID: %d\n", uid, gid );
+            }
+            else
+            {
+                fprintf( stderr, "LSAPI: missing SUEXEC_UGID env, use default user!\n" );
+                pEnv = NULL;
+            }
+            if ( pEnv&& lsapi_suexec_auth( pReq, pAuth->pValue, pAuth->valLen, pEnv->pValue, pEnv->valLen ) == 0 )
+            {
+                //read UID, GID from specialEnv 
+                
+            }
+            else
+            {
+                //authentication error
+                fprintf( stderr, "LSAPI: SUEXEC_AUTH authentication failed, use default user!\n" );
+                uid = 0;
+            }
+        }
+        else
+        {
+            //fprintf( stderr, "LSAPI: no SUEXEC_AUTH env, use default user!\n" );
+        }
+    }
+
+
+    if ( !uid )
+    {
+        uid = s_defaultUid;
+        gid = s_defaultGid;
+    }
+
+    //change uid
+    if ( setUID_LVE( pReq, uid, gid, pChroot ) == -1 )
+    {
+        return -1;
+    }
+
+    s_uid = uid; 	
+
+    return 0;
+ 
+}
+
+static int parseContentLenFromHeader(LSAPI_Request * pReq)
+{
+    const char * pContentLen = LSAPI_GetHeader_r( pReq, H_CONTENT_LENGTH );
+    if ( pContentLen )
+        pReq->m_reqBodyLen = strtoll( pContentLen, NULL, 10 );
+    return 0;
+}
+
 
 static int lsapi_suexec_auth( LSAPI_Request *pReq, 
             char * pAuth, int len, char * pUgid, int ugidLen )
