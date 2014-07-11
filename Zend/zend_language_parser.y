@@ -336,7 +336,6 @@ unticked_statement:
 			{ $$.u.ast = zend_ast_create(4, ZEND_AST_FOR, $3.u.ast, $5.u.ast, $7.u.ast, $9.u.ast); }
 	|	T_SWITCH parenthesis_expr switch_case_list
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_SWITCH, $2.u.ast, $3.u.ast); }
-	/*|	T_SWITCH parenthesis_expr	{ AC($2); zend_do_switch_cond(&$2 TSRMLS_CC); } switch_case_list { zend_do_switch_end(&$4 TSRMLS_CC); AN($$); }*/
 	|	T_BREAK ';'			{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, NULL); }
 	|	T_BREAK expr ';'	{ $$.u.ast = zend_ast_create_unary(ZEND_BRK, $2.u.ast); }
 	|	T_CONTINUE ';'		{ $$.u.ast = zend_ast_create_unary(ZEND_CONT, NULL); }
@@ -511,7 +510,6 @@ switch_case_list:
 	|	':' ';' case_list T_ENDSWITCH ';'	{ $$.u.ast = $3.u.ast; }
 ;
 
-
 case_list:
 		/* empty */ { $$.u.ast = zend_ast_create_dynamic(ZEND_AST_SWITCH_LIST); }
 	|	case_list T_CASE expr case_separator inner_statement_list
@@ -520,9 +518,7 @@ case_list:
 	|	case_list T_DEFAULT case_separator inner_statement_list
 			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast,
 			      zend_ast_create_binary(ZEND_AST_SWITCH_CASE, NULL, $4.u.ast)); }
-	/*|	case_list T_CASE expr case_separator { AC($3); zend_do_extended_info(TSRMLS_C);  zend_do_case_before_statement(&$1, &$2, &$3 TSRMLS_CC); } inner_statement_list { AS($6); zend_do_case_after_statement(&$$, &$2 TSRMLS_CC); $$.op_type = IS_CONST; }*/
 ;
-
 
 case_separator:
 		':'

@@ -7397,6 +7397,7 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) {
 	}
 
 	zend_stack_del_top(&CG(switch_cond_stack));
+	efree(jmpnz_opnums);
 }
 
 void zend_compile_stmt_list(zend_ast *ast TSRMLS_DC) {
