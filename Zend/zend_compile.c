@@ -7164,6 +7164,118 @@ void zend_compile_for(zend_ast *ast TSRMLS_DC) {
 	do_end_loop(opnum_loop, 0 TSRMLS_CC);
 }
 
+void zend_compile_foreach(zend_ast *ast TSRMLS_DC) {
+	zend_ast *expr_ast = ast->child[0];
+	zend_ast *value_ast = ast->child[1];
+	zend_ast *key_ast = ast->child[2];
+	zend_ast *stmt_ast = ast->child[3];
+	zend_bool by_ref = value_ast->kind == ZEND_AST_REF;
+	zend_bool is_variable = zend_is_variable(expr_ast) && !zend_is_call(expr_ast)
+		&& zend_can_write_to_variable(expr_ast);
+
+	znode expr_node, reset_node, value_node, key_node, dummy_node;
+	zend_op *opline;
+	zend_uint opnum_reset, opnum_fetch;
+	zend_op foreach_stack_opline;
+
+	if (key_ast) {
+		if (key_ast->kind == ZEND_AST_REF) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Key element cannot be a reference");
+		}
+		if (key_ast->kind == ZEND_AST_LIST) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use list as key element");
+		}
+	}
+
+	if (by_ref) {
+		value_ast = value_ast->child[0];
+	}
+
+	if (by_ref && is_variable) {
+		zend_compile_var(&expr_node, expr_ast, BP_VAR_W TSRMLS_CC);
+	} else {
+		zend_compile_expr(&expr_node, expr_ast TSRMLS_CC);
+	}
+
+	opnum_reset = get_next_op_number(CG(active_op_array));
+	opline = emit_op(&reset_node, ZEND_FE_RESET, &expr_node, NULL TSRMLS_CC);
+	if (by_ref && is_variable) {
+		opline->extended_value = ZEND_FE_RESET_VARIABLE; // ???
+	}
+
+	SET_NODE(foreach_stack_opline.result, &reset_node);
+	zend_stack_push(&CG(foreach_copy_stack), &foreach_stack_opline);
+
+	opnum_fetch = get_next_op_number(CG(active_op_array));
+	opline = emit_op(&value_node, ZEND_FE_FETCH, &reset_node, NULL TSRMLS_CC);
+	if (by_ref) {
+		opline->extended_value |= ZEND_FE_FETCH_BYREF;
+	}
+	if (key_ast) {
+		opline->extended_value |= ZEND_FE_FETCH_WITH_KEY;
+	}
+
+	opline = emit_op(NULL, ZEND_OP_DATA, NULL, NULL TSRMLS_CC);
+
+	/* Allocate enough space to keep HashPointer on VM stack */
+	opline->op1_type = IS_TMP_VAR;
+	opline->op1.var = get_temporary_variable(CG(active_op_array));
+	if (sizeof(HashPointer) > sizeof(zval)) {
+		/* Make sure 1 zval is enough for HashPointer (2 must be enough) */
+		get_temporary_variable(CG(active_op_array));
+	}
+
+	if (key_ast) {
+		opline->result_type = IS_TMP_VAR;
+		opline->result.opline_num = get_temporary_variable(CG(active_op_array));
+		GET_NODE(&key_node, opline->result);
+	}
+
+	if (value_ast->attr == ZEND_AST_LIST) {
+		zend_compile_list_assign(&dummy_node, value_ast, &value_node TSRMLS_CC);
+		zend_do_free(&dummy_node TSRMLS_CC);
+	} else if (by_ref) {
+		zend_compile_assign_ref_common(NULL, value_ast, &value_node TSRMLS_CC);
+	} else {
+		zend_ast *znode_ast = zend_ast_create_znode(&value_node);
+		zend_ast *assign_ast = zend_ast_create_binary(ZEND_AST_ASSIGN, value_ast, znode_ast);
+		zend_compile_expr(&dummy_node, assign_ast TSRMLS_CC);
+		zend_do_free(&dummy_node TSRMLS_CC);
+		efree(znode_ast);
+		efree(assign_ast);
+	}
+
+	if (key_ast) {
+		zend_ast *znode_ast = zend_ast_create_znode(&key_node);
+		zend_ast *assign_ast = zend_ast_create_binary(ZEND_AST_ASSIGN, key_ast, znode_ast);
+		zend_compile_expr(&dummy_node, assign_ast TSRMLS_CC);
+		zend_do_free(&dummy_node TSRMLS_CC);
+		efree(znode_ast);
+		efree(assign_ast);
+	}
+
+	do_begin_loop(TSRMLS_C);
+
+	zend_compile_stmt(stmt_ast TSRMLS_CC);
+
+	opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+	opline->op1.opline_num = opnum_fetch;
+
+	opline = &CG(active_op_array)->opcodes[opnum_reset];
+	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+
+	opline = &CG(active_op_array)->opcodes[opnum_fetch];
+	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+
+	do_end_loop(opnum_fetch, 1 TSRMLS_CC);
+
+	{
+		zend_op *container_ptr = zend_stack_top(&CG(foreach_copy_stack));
+		generate_free_foreach_copy(container_ptr TSRMLS_CC);
+		zend_stack_del_top(&CG(foreach_copy_stack));
+	}
+}
+
 void zend_compile_if(zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 	zend_uint *jmp_opnums = safe_emalloc(sizeof(zend_uint), ast->children - 1, 0);
@@ -7997,6 +8109,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_FOR:
 			zend_compile_for(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_FOREACH:
+			zend_compile_foreach(ast TSRMLS_CC);
 			break;
 		case ZEND_AST_IF:
 			zend_compile_if(ast TSRMLS_CC);

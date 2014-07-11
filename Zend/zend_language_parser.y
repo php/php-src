@@ -349,14 +349,17 @@ unticked_statement:
 	|	T_INLINE_HTML { $$.u.ast = zend_ast_create_unary(ZEND_ECHO, AST_ZVAL(&$1)); }
 	|	expr ';' { $$.u.ast = $1.u.ast; }
 	|	T_UNSET '(' unset_variables ')' ';' { $$.u.ast = $3.u.ast; }
-	|	T_FOREACH '(' variable T_AS
-		{ zend_do_foreach_begin(&$1, &$2, &$3, &$4, 1 TSRMLS_CC); }
-		foreach_variable foreach_optional_arg ')' { zend_do_foreach_cont(&$1, &$2, &$4, &$6, &$7 TSRMLS_CC); }
-		foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); AN($$); }
-	|	T_FOREACH '(' expr_without_variable T_AS
+	|	T_FOREACH '(' expr T_AS foreach_variable ')' foreach_statement
+			{ $$.u.ast = zend_ast_create(4, ZEND_AST_FOREACH,
+			      $3.u.ast, $5.u.ast, NULL, $7.u.ast); }
+	|	T_FOREACH '(' expr T_AS foreach_variable T_DOUBLE_ARROW foreach_variable ')'
+		foreach_statement
+			{ $$.u.ast = zend_ast_create(4, ZEND_AST_FOREACH,
+			      $3.u.ast, $7.u.ast, $5.u.ast, $9.u.ast); }
+	/*|	T_FOREACH '(' expr_without_variable T_AS
 		{ AC($3); zend_do_foreach_begin(&$1, &$2, &$3, &$4, 0 TSRMLS_CC); }
 		foreach_variable foreach_optional_arg ')' { zend_do_foreach_cont(&$1, &$2, &$4, &$6, &$7 TSRMLS_CC); }
-		foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); AN($$); }
+		foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); AN($$); }*/
 	|	T_DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); AN($$); }
 	|	';'	/* empty statement */ { AN($$); }
 	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}' { AS($4); }
@@ -473,15 +476,10 @@ interface_list:
 	|	interface_list ',' fully_qualified_class_name { zend_do_implements_interface(&$3 TSRMLS_CC); }
 ;
 
-foreach_optional_arg:
-		/* empty */						{ $$.op_type = IS_UNUSED; }
-	|	T_DOUBLE_ARROW foreach_variable	{ $$ = $2; }
-;
-
 foreach_variable:
-		variable			{ $$.u.ast = $1.u.ast; $$.EA = 0; }
-	|	'&' variable		{ $$.u.ast = $2.u.ast; $$.EA = ZEND_PARSED_REFERENCE_VARIABLE; }
-	|	T_LIST '(' assignment_list ')' { $$.u.ast = $3.u.ast; $$.EA = ZEND_PARSED_LIST_EXPR; }
+		variable			{ $$.u.ast = $1.u.ast; }
+	|	'&' variable		{ $$.u.ast = zend_ast_create_unary(ZEND_AST_REF, $2.u.ast); }
+	|	T_LIST '(' assignment_list ')' { $$.u.ast = $3.u.ast; }
 ;
 
 for_statement:
@@ -491,8 +489,8 @@ for_statement:
 
 
 foreach_statement:
-		statement { AS($1); }
-	|	':' inner_statement_list T_ENDFOREACH ';' { AS($2); }
+		statement { $$.u.ast = $1.u.ast; }
+	|	':' inner_statement_list T_ENDFOREACH ';' { $$.u.ast = $2.u.ast; }
 ;
 
 
