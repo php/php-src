@@ -1946,22 +1946,22 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 						zend_error(E_COMPILE_ERROR, "Default value for parameters with callable type hint can only be NULL");
 					}
 				}
-			} else if (0 == strcmp(Z_STRVAL(class_type->u.constant), "string")) {
+			} else if (0 == strcasecmp(Z_STRVAL(class_type->u.constant), "string")) {
 				cur_arg_info->allow_null = 0;
 				cur_arg_info->type_hint = IS_STRING;
 				efree(class_type->u.constant.value.str.val);
 				class_type->u.constant.type = IS_NULL;
-			} else if (0 == strcmp(Z_STRVAL(class_type->u.constant), "int")) {
+			} else if (0 == strcasecmp(Z_STRVAL(class_type->u.constant), "int")) {
 				cur_arg_info->allow_null = 0;
 				cur_arg_info->type_hint = IS_LONG;
 				efree(class_type->u.constant.value.str.val);
 				class_type->u.constant.type = IS_NULL;
-			} else if (0 == strcmp(Z_STRVAL(class_type->u.constant), "float")) {
+			} else if (0 == strcasecmp(Z_STRVAL(class_type->u.constant), "float")) {
 				cur_arg_info->allow_null = 0;
 				cur_arg_info->type_hint = IS_DOUBLE;
 				efree(class_type->u.constant.value.str.val);
 				class_type->u.constant.type = IS_NULL;
-			} else if (0 == strcmp(Z_STRVAL(class_type->u.constant), "boolean")) {
+			} else if (0 == strcasecmp(Z_STRVAL(class_type->u.constant), "boolean")) {
 				cur_arg_info->allow_null = 0;
 				cur_arg_info->type_hint = IS_BOOL;
 				efree(class_type->u.constant.value.str.val);
