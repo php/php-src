@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.16
 
+- CLI server:
+  . Fixed bug #67594 (Unable to access to apache_request_headers() elements).
+    (Yasuo)
 
 ?? ??? 2014, PHP 5.5.15
 
