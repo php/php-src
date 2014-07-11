@@ -1448,9 +1448,19 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	zend_string *replaced;
 	zend_bool double_encode = 1;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls!b", &str, &str_len, &flags, &hint_charset, &hint_charset_len, &double_encode) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flags)
+		Z_PARAM_STRING_EX(hint_charset, hint_charset_len, 1, 0)
+		Z_PARAM_BOOL(double_encode);
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	if (!hint_charset) {
 		hint_charset = get_default_charset(TSRMLS_C);
@@ -1521,10 +1531,19 @@ PHP_FUNCTION(html_entity_decode)
 	long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len,
 							  &quote_style, &hint_charset, &hint_charset_len) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(quote_style)
+		Z_PARAM_STRING(hint_charset, hint_charset_len)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	if (!hint_charset) {
 		hint_charset = get_default_charset(TSRMLS_C);

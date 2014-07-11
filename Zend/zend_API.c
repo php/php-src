@@ -262,7 +262,7 @@ static int parse_arg_object_to_string(zval *arg, char **p, int *pl, int type TSR
 }
 /* }}} */
 
-static int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS_DC) /* {{{ */
+ZEND_API int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS_DC) /* {{{ */
 {
 	if (Z_OBJ_HANDLER_P(arg, cast_object)) {
 		zval obj;
@@ -299,6 +299,94 @@ static int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS
 	return FAILURE;
 }
 /* }}} */
+
+#ifdef FAST_ZPP
+ZEND_API void zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args TSRMLS_DC) /* {{{ */
+{
+	zend_function *active_function = EG(current_execute_data)->func;
+	const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
+
+	zend_error(E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
+		class_name, \
+		class_name[0] ? "::" : "", \
+		active_function->common.function_name->val,
+		min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
+		num_args < min_num_args ? min_num_args : max_num_args,
+		(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
+		num_args);
+}
+/* }}} */
+
+ZEND_API void zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg TSRMLS_DC) /* {{{ */
+{
+	const char *space;
+	const char *class_name = get_active_class_name(&space TSRMLS_CC);
+	static const char * const expected_error[] = {
+		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
+		NULL
+	};
+
+	zend_error(E_WARNING, "%s%s%s() expects parameter %d to be %s, %s given",
+		class_name, space, get_active_function_name(TSRMLS_C), num, expected_error[expected_type], zend_zval_type_name(arg));
+}
+/* }}} */
+
+ZEND_API void zend_wrong_paramer_class_error(int num, char *name, zval *arg TSRMLS_DC) /* {{{ */
+{
+	const char *space;
+	const char *class_name = get_active_class_name(&space TSRMLS_CC);
+
+	zend_error(E_WARNING, "%s%s%s() expects parameter %d to be %s, %s given",
+		class_name, space, get_active_function_name(TSRMLS_C), num, name, zend_zval_type_name(arg));
+}
+/* }}} */
+
+ZEND_API void zend_wrong_callback_error(int severity, int num, char *error TSRMLS_DC) /* {{{ */
+{
+	const char *space;
+	const char *class_name = get_active_class_name(&space TSRMLS_CC);
+
+	zend_error(severity, "%s%s%s() expects parameter %d to be a valid callback, %s",
+		class_name, space, get_active_function_name(TSRMLS_C), num, error);
+	efree(error);
+}
+/* }}} */
+
+ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int check_null TSRMLS_CC) /* {{{ */
+{
+	zend_class_entry *ce_base = *pce;
+
+	if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+		*pce = NULL;
+		return 1;
+	}
+	convert_to_string_ex(arg);
+	*pce = zend_lookup_class(Z_STR_P(arg) TSRMLS_CC);
+	if (ce_base) {
+		if ((!*pce || !instanceof_function(*pce, ce_base TSRMLS_CC))) {
+			const char *space;
+			const char *class_name = get_active_class_name(&space TSRMLS_CC);
+
+			zend_error(E_WARNING, "%s%s%s() expects parameter %d to be a class name derived from %s, '%s' given",
+				class_name, space, get_active_function_name(TSRMLS_C), num,
+				ce_base->name->val, Z_STRVAL_P(arg));
+			*pce = NULL;
+			return 0;
+		}
+	}
+	if (!*pce) {
+		const char *space;
+		const char *class_name = get_active_class_name(&space TSRMLS_CC);
+
+		zend_error(E_WARNING, "%s%s%s() expects parameter %d to be a valid class name, '%s' given",
+			class_name, space, get_active_function_name(TSRMLS_C), num,
+			Z_STRVAL_P(arg));
+		return 0;
+	}
+	return 1;
+}
+/* }}} */
+#endif
 
 static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, const char **spec, char **error, int *severity TSRMLS_DC) /* {{{ */
 {

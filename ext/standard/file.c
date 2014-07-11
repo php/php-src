@@ -893,9 +893,15 @@ PHPAPI PHP_FUNCTION(fclose)
 	zval *arg1;
 	php_stream *stream;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(arg1)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
@@ -2309,9 +2315,15 @@ PHP_FUNCTION(realpath)
 	int filename_len;
 	char resolved_path_buff[MAXPATHLEN];
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(filename, filename_len)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	if (VCWD_REALPATH(filename, resolved_path_buff)) {
 		if (php_check_open_basedir(resolved_path_buff TSRMLS_CC)) {

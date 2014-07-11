@@ -137,27 +137,22 @@ PHP_FUNCTION(settype)
 PHP_FUNCTION(intval)
 {
 	zval *num;
-	long arg_base;
-	int base;
+	long base = 10;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &num) == FAILURE) {
-				return;
-			}
-			base = 10;
-			break;
-
-		case 2:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &num, &arg_base) == FAILURE) {
-				return;
-			}
-			base = arg_base;
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
+		WRONG_PARAM_COUNT;
 	}
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &num, &base) == FAILURE) {
+		return;
+	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(num)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(base)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	RETVAL_ZVAL(num, 1, 0);
 	convert_to_long_base(return_value, base);
@@ -206,15 +201,21 @@ PHP_FUNCTION(strval)
 }
 /* }}} */
 
-static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
+static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	zval *arg;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		RETURN_FALSE;
 	}
-
 	ZVAL_DEREF(arg);
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF(arg)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
+
 	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce;
@@ -348,9 +349,15 @@ PHP_FUNCTION(is_scalar)
 {
 	zval *arg;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	switch (Z_TYPE_P(arg)) {
 		case IS_FALSE:

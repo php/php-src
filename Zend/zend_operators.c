@@ -2561,6 +2561,10 @@ ZEND_API zend_string *zend_long_to_str(long num) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, long *lval, double *dval) {
+    return is_numeric_string_ex(str->val, str->len, lval, dval, -1, NULL);
+}
+
 /*
  * Local variables:
  * tab-width: 4

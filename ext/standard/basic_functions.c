@@ -4712,9 +4712,16 @@ PHP_FUNCTION(call_user_func)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f*", &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_VARIADIC('*', fci.params, fci.param_count)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	fci.retval = &retval;
 
@@ -4732,9 +4739,16 @@ PHP_FUNCTION(call_user_func_array)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "fa/", &fci, &fci_cache, &params) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_ARRAY_EX(params, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	zend_fcall_info_args(&fci, params TSRMLS_CC);
 	fci.retval = &retval;

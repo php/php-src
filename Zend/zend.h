@@ -179,6 +179,14 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_DEPRECATED
 #endif
 
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
+# define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
+# define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((cold, unused));
+#else
+# define ZEND_ATTRIBUTE_UNUSED
+# define ZEND_ATTRIBUTE_UNUSED_LABEL
+#endif
+
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
 # define ZEND_FASTCALL __attribute__((fastcall))
 #elif defined(_MSC_VER) && defined(_M_IX86)
