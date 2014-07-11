@@ -2256,7 +2256,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 			*p++ = '\0';
 			if (*p == ':') {
 				port = strtol(p + 1, &p, 10);
-				if (port <= 0) {
+				if (port <= 0 || port > 65535) {
 					p = NULL;
 				}
 			} else if (*p != '\0') {
@@ -2272,7 +2272,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 		if (p) {
 			*p++ = '\0';
 			port = strtol(p, &p, 10);
-			if (port <= 0) {
+			if (port <= 0 || port > 65535) {
 				p = NULL;
 			}
 		}
