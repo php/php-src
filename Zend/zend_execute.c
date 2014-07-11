@@ -685,6 +685,14 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type int", "", type, "" TSRMLS_CC);
 				}
 				break;
+				
+			case IS_RESOURCE:
+				if (!arg) {
+					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type resource", "", "none", "" TSRMLS_CC);
+				} else if (Z_TYPE_PP(arg) != IS_RESOURCE) {
+					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type resource", "", type, "" TSRMLS_CC);
+				}
+				break;
 			case IS_ARRAY:
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "" TSRMLS_CC);
