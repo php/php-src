@@ -1168,11 +1168,6 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	var dep_present = false;
 	var dep_shared = false;
 
-	if (MODE_PHPIZE) {
-		ext_deps_js = file_get_contents(PHP_DIR + "\\script\\ext_deps.js");
-		eval(ext_deps_js);
-	}
-
 	try {
 		dep_present = eval("PHP_" + DEP);
 
@@ -1518,7 +1513,7 @@ function output_as_table(header, ar_out)
 	var min = new Array(l);
 	var max = new Array(l);
 
-	if (l != ar_out[0].length) {
+	if (!!ar_out[0] && l != ar_out[0].length) {
 		STDOUT.WriteLine("Invalid header argument, can't output the table " + l + " " + ar_out[0].length  );
 		return;
 	}
@@ -1826,7 +1821,9 @@ function generate_makefile()
 
 	MFO.Close();
 	TF = FSO.OpenTextFile("Makefile.objects", 1);
-	MF.Write(TF.ReadAll());
+	if (!TF.AtEndOfStream) {
+		MF.Write(TF.ReadAll());
+	}
 	TF.Close();
 
 	MF.Close();	
