@@ -1513,7 +1513,7 @@ function output_as_table(header, ar_out)
 	var min = new Array(l);
 	var max = new Array(l);
 
-	if (l != ar_out[0].length) {
+	if (!!ar_out[0] && l != ar_out[0].length) {
 		STDOUT.WriteLine("Invalid header argument, can't output the table " + l + " " + ar_out[0].length  );
 		return;
 	}
