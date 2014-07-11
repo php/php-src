@@ -1336,7 +1336,27 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"callable" {
- return T_CALLABLE;
+	return T_CALLABLE;
+}
+
+<ST_IN_SCRIPTING>"int" {
+	return T_INT;
+}
+
+<ST_IN_SCRIPTING>"float" {
+	return T_FLOAT;
+}
+
+<ST_IN_SCRIPTING>"string" {
+	return T_STRING_TYPE;
+}
+
+<ST_IN_SCRIPTING>"bool" {
+	return T_BOOL;
+}
+
+<ST_IN_SCRIPTING>"resource" {
+	return T_RESOURCE;
 }
 
 <ST_IN_SCRIPTING>"++" {
