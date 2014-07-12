@@ -25,18 +25,22 @@
 
 ZEND_API zend_ast *zend_ast_create_znode(znode *node)
 {
+	TSRMLS_FETCH();
 	zend_ast_znode *ast = emalloc(sizeof(zend_ast_znode));
 	ast->kind = ZEND_AST_ZNODE;
 	ast->attr = 0;
+	ast->lineno = CG(zend_lineno);
 	ast->node = *node;
 	return (zend_ast *) ast;
 }
 
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 {
+	TSRMLS_FETCH();
 	zend_ast_zval *ast = emalloc(sizeof(zend_ast_zval));
 	ast->kind = ZEND_AST_ZVAL;
 	ast->attr = attr;
+	ast->lineno = CG(zend_lineno);
 	ZVAL_COPY_VALUE(&ast->val, zv);
 	return (zend_ast *) ast;
 }
@@ -44,11 +48,13 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 static zend_ast *zend_ast_create_from_va_list(
 	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, va_list va
 ) {
+	TSRMLS_FETCH();
 	zend_uint i;
 
 	zend_ast *ast = emalloc(sizeof(zend_ast) + (children - 1) * sizeof(zend_ast *));
 	ast->kind = kind;
 	ast->attr = attr;
+	ast->lineno = CG(zend_lineno);
 	ast->children = children;
 
 	for (i = 0; i < children; ++i) {
@@ -87,9 +93,11 @@ ZEND_API zend_ast *zend_ast_create(
 ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind)
 {
 	/* use 4 children as default */
+	TSRMLS_FETCH();
 	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * 3);
 	ast->kind = kind;
 	ast->attr = 0;
+	ast->lineno = CG(zend_lineno);
 	ast->children = 0;
 	return ast;
 }

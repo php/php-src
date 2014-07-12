@@ -100,6 +100,7 @@ typedef unsigned short zend_ast_attr;
 struct _zend_ast {
 	zend_ast_kind kind; /* Type of the node (either opcode or ZEND_AST_* constant) */
 	zend_ast_attr attr; /* Additional attribute, use depending on node type */
+	zend_uint lineno;   /* Line number */
 	zend_uint children; /* Number of children */
 	zend_ast *child[1]; /* Array of children (using struct hack) */
 };
@@ -107,6 +108,7 @@ struct _zend_ast {
 typedef struct _zend_ast_zval {
 	zend_ast_kind kind;
 	zend_ast_attr attr;
+	zend_uint lineno;
 	zval val;
 } zend_ast_zval;
 

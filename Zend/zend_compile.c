@@ -8251,6 +8251,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 		return;
 	}
 
+	// TODO.AST
+	//CG(zend_lineno) = ast->lineno;
+
 	switch (ast->kind) {
 		case ZEND_AST_STMT_LIST:
 			zend_compile_stmt_list(ast TSRMLS_CC);
