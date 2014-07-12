@@ -48,18 +48,26 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 static zend_ast *zend_ast_create_from_va_list(
 	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, va_list va
 ) {
-	TSRMLS_FETCH();
+	/*TSRMLS_FETCH();*/
 	zend_uint i;
-
-	zend_ast *ast = emalloc(sizeof(zend_ast) + (children - 1) * sizeof(zend_ast *));
+	zend_ast *ast;
+	
+	ast = emalloc(sizeof(zend_ast) + (children - 1) * sizeof(zend_ast *));
 	ast->kind = kind;
 	ast->attr = attr;
-	ast->lineno = CG(zend_lineno);
+	ast->lineno = 0;
 	ast->children = children;
 
 	for (i = 0; i < children; ++i) {
 		ast->child[i] = va_arg(va, zend_ast *);
+		if (ast->lineno == 0 && ast->child[i] != NULL) {
+			ast->lineno = ast->child[i]->lineno;
+		}
 	}
+
+	/*if (ast->lineno == 0) {
+		ast->lineno = CG(zend_lineno);
+	}*/
 
 	return ast;
 }

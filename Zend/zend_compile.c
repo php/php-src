@@ -8310,7 +8310,8 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 	}
 
 	// TODO.AST
-	//CG(zend_lineno) = ast->lineno;
+	zend_uint orig_lineno = CG(zend_lineno);
+	CG(zend_lineno) = ast->lineno;
 
 	switch (ast->kind) {
 		case ZEND_AST_STMT_LIST:
@@ -8376,6 +8377,8 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 	if (Z_LVAL(CG(declarables).ticks) && !zend_is_unticked_stmt(ast)) {
 		zend_emit_tick(TSRMLS_C);
 	}
+
+	CG(zend_lineno) = orig_lineno;
 }
 
 void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
