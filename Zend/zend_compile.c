@@ -3805,27 +3805,6 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS
 }
 /* }}} */
 
-void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = op;
-	opline->op1.opline_num = CG(context).current_brk_cont;
-	SET_UNUSED(opline->op1);
-	if (expr) {
-		if (expr->op_type != IS_CONST) {
-			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator with non-constant operand is no longer supported", op == ZEND_BRK ? "break" : "continue");
-		} else if (Z_TYPE(expr->u.constant) != IS_LONG || Z_LVAL(expr->u.constant) < 1) {
-			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator accepts only positive numbers", op == ZEND_BRK ? "break" : "continue");
-		}
-		SET_NODE(opline->op2, expr);
-	} else {
-		LITERAL_LONG(opline->op2, 1);
-		opline->op2_type = IS_CONST;
-	}
-}
-/* }}} */
-
 void zend_do_begin_class_declaration(const znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
@@ -4389,37 +4368,6 @@ void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC) 
 	ZVAL_NULL(&value.u.constant);
 	Z_CONST_FLAGS(value.u.constant) = is_ref ? IS_LEXICAL_REF : IS_LEXICAL_VAR;
 	zend_do_fetch_static_variable(varname, &value, is_ref ? ZEND_FETCH_STATIC : ZEND_FETCH_LEXICAL TSRMLS_CC);
-}
-/* }}} */
-
-void zend_do_fetch_global_variable(znode *varname, const znode *static_assignment, int fetch_type TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline;
-	znode lval;
-	znode result;
-
-	if (varname->op_type == IS_CONST) {
-		if (Z_TYPE(varname->u.constant) != IS_STRING) {
-			convert_to_string(&varname->u.constant);
-		}
-	}
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
-	opline->result_type = IS_VAR;
-	opline->result.var = get_temporary_variable(CG(active_op_array));
-	SET_NODE(opline->op1, varname);
-	SET_UNUSED(opline->op2);
-	opline->extended_value = fetch_type; // ZEND_FETCH_GLOBAL_LOCK
-	GET_NODE(&result, opline->result);
-
-	if (varname->op_type == IS_CONST) {
-		zval_copy_ctor(&varname->u.constant);
-	}
-	fetch_simple_variable(&lval, varname, 0 TSRMLS_CC); /* Relies on the fact that the default fetch is BP_VAR_W */
-
-	zend_do_assign_ref(NULL, &lval, &result TSRMLS_CC);
-	CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result_type |= EXT_TYPE_UNUSED;
 }
 /* }}} */
 
