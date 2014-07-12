@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - pgsql:
   . Fixed bug #67555 (Cannot build against libpq 7.3). (Adam)
 
+- OpenSSL:
+  . Fixed bug #67609 (TLS connections fail behind HTTP proxy). (Daniel Lowrey)
+
 - Phar:
   . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
 
