@@ -84,9 +84,14 @@ enum _zend_ast_kind {
 	ZEND_AST_REF,
 	ZEND_AST_IF,
 	ZEND_AST_IF_ELEM,
+
 	ZEND_AST_SWITCH,
 	ZEND_AST_SWITCH_LIST,
 	ZEND_AST_SWITCH_CASE,
+
+	ZEND_AST_TRY,
+	ZEND_AST_CATCH_LIST,
+	ZEND_AST_CATCH,
 };
 
 typedef unsigned short zend_ast_kind;

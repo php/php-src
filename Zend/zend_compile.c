@@ -2153,20 +2153,26 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int zend_add_try_element(zend_uint try_op TSRMLS_DC) /* {{{ */
+static zend_uint zend_add_try_element(zend_uint try_op TSRMLS_DC) /* {{{ */
 {
-	int try_catch_offset = CG(active_op_array)->last_try_catch++;
+	zend_op_array *op_array = CG(active_op_array);
+	zend_uint try_catch_offset = op_array->last_try_catch++;
+	zend_try_catch_element *elem;
 
-	CG(active_op_array)->try_catch_array = erealloc(CG(active_op_array)->try_catch_array, sizeof(zend_try_catch_element)*CG(active_op_array)->last_try_catch);
-	CG(active_op_array)->try_catch_array[try_catch_offset].try_op = try_op;
-	CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = 0;
-	CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = 0;
-	CG(active_op_array)->try_catch_array[try_catch_offset].finally_end = 0;
+	op_array->try_catch_array = safe_erealloc(
+		op_array->try_catch_array, sizeof(zend_try_catch_element), op_array->last_try_catch, 0);
+
+	elem = &op_array->try_catch_array[try_catch_offset];
+	elem->try_op = try_op;
+	elem->catch_op = 0;
+	elem->finally_op = 0;
+	elem->finally_end = 0;
+
 	return try_catch_offset;
 }
 /* }}} */
 
-static void zend_add_catch_element(int offset, zend_uint catch_op TSRMLS_DC) /* {{{ */
+static void zend_add_catch_element(zend_uint offset, zend_uint catch_op TSRMLS_DC) /* {{{ */
 {
 	CG(active_op_array)->try_catch_array[offset].catch_op = catch_op;
 }
@@ -7400,6 +7406,95 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) {
 	efree(jmpnz_opnums);
 }
 
+void zend_compile_try(zend_ast *ast TSRMLS_DC) {
+	zend_ast *try_ast = ast->child[0];
+	zend_ast *catches_ast = ast->child[1];
+	zend_ast *finally_ast = ast->child[2];
+
+	zend_uint i;
+	zend_op *opline;
+	zend_uint try_catch_offset = zend_add_try_element(
+		get_next_op_number(CG(active_op_array)) TSRMLS_CC);
+	zend_uint *jmp_opnums = safe_emalloc(sizeof(zend_uint), catches_ast->children + 1, 0);
+
+	if (catches_ast->children == 0 && !finally_ast) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use try without catch or finally");
+	}
+
+	zend_compile_stmt(try_ast TSRMLS_CC);
+
+	jmp_opnums[0] = get_next_op_number(CG(active_op_array));
+	opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC); // TODO
+
+	for (i = 0; i < catches_ast->children; ++i) {
+		zend_ast *catch_ast = catches_ast->child[i];
+		zend_ast *class_ast = catch_ast->child[0];
+		zend_ast *var_ast = catch_ast->child[1];
+		zend_ast *stmt_ast = catch_ast->child[2];
+		zval *var_name = zend_ast_get_zval(var_ast);
+
+		znode class_node;
+		zend_uint opnum_catch;
+
+		if (zend_is_const_default_class_ref(class_ast)) {
+			zend_compile_expr(&class_node, class_ast TSRMLS_CC);
+			zend_resolve_class_name_old(&class_node TSRMLS_CC);
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR, "Bad class name in the catch statement");
+		}
+
+		opnum_catch = get_next_op_number(CG(active_op_array));
+		zend_add_catch_element(try_catch_offset, opnum_catch TSRMLS_CC);
+
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_CATCH;
+		opline->op1_type = IS_CONST;
+		opline->op1.constant = zend_add_class_name_literal(
+			CG(active_op_array), &class_node.u.constant TSRMLS_CC);
+		opline->op2_type = IS_CV;
+		opline->op2.var = lookup_cv(CG(active_op_array), Z_STR_P(var_name) TSRMLS_CC);
+		opline->result.num = (i == ast->children - 1); /* Whether this is the last catch */
+
+		zend_compile_stmt(stmt_ast TSRMLS_CC);
+
+		jmp_opnums[i + 1] = get_next_op_number(CG(active_op_array));
+		emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+
+		opline = &CG(active_op_array)->opcodes[opnum_catch];
+		opline->extended_value = get_next_op_number(CG(active_op_array));
+	}
+
+	for (i = 0; i < catches_ast->children + 1; ++i) {
+		opline = &CG(active_op_array)->opcodes[jmp_opnums[i]];
+		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+	}
+
+	if (finally_ast) {
+		zend_uint opnum_jmp = get_next_op_number(CG(active_op_array)) + 1;
+
+		opline = emit_op(NULL, ZEND_FAST_CALL, NULL, NULL TSRMLS_CC);
+		opline->op1.opline_num = opnum_jmp + 1;
+
+		emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+
+		CG(context).in_finally++;
+		zend_compile_stmt(finally_ast TSRMLS_CC);
+		CG(context).in_finally--;
+
+		CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = opnum_jmp + 1;
+		CG(active_op_array)->try_catch_array[try_catch_offset].finally_end
+			= get_next_op_number(CG(active_op_array));
+		CG(active_op_array)->has_finally_block = 1;
+
+		emit_op(NULL, ZEND_FAST_RET, NULL, NULL TSRMLS_CC);
+
+		opline = &CG(active_op_array)->opcodes[opnum_jmp];
+		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+	}
+
+	efree(jmp_opnums);
+}
+
 void zend_compile_stmt_list(zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 	for (i = 0; i < ast->children; ++i) {
@@ -8202,6 +8297,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_SWITCH:
 			zend_compile_switch(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_TRY:
+			zend_compile_try(ast TSRMLS_CC);
 			break;
 		default:
 		{
