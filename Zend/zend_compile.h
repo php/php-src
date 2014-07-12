@@ -521,13 +521,6 @@ void zend_do_handle_exception(TSRMLS_D);
 void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC);
 void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
 
-void zend_do_try(znode *try_token TSRMLS_DC);
-void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, znode *first_catch TSRMLS_DC);
-void zend_do_bind_catch(znode *try_token, znode *catch_token TSRMLS_DC);
-void zend_do_end_catch(znode *catch_token TSRMLS_DC);
-void zend_do_finally(znode *finally_token TSRMLS_DC);
-void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_token TSRMLS_DC);
-void zend_do_throw(znode *expr TSRMLS_DC);
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time);
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC);
