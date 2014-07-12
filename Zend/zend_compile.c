@@ -7206,7 +7206,7 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) {
 	opnum_reset = get_next_op_number(CG(active_op_array));
 	opline = emit_op(&reset_node, ZEND_FE_RESET, &expr_node, NULL TSRMLS_CC);
 	if (by_ref && is_variable) {
-		opline->extended_value = ZEND_FE_RESET_VARIABLE; // ???
+		opline->extended_value = ZEND_FE_RESET_VARIABLE | ZEND_FE_RESET_REFERENCE; // ???
 	}
 
 	SET_NODE(foreach_stack_opline.result, &reset_node);
@@ -7444,7 +7444,9 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 		}
 
 		opnum_catch = get_next_op_number(CG(active_op_array));
-		zend_add_catch_element(try_catch_offset, opnum_catch TSRMLS_CC);
+		if (i == 0) {
+			CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = opnum_catch;
+		}
 
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_CATCH;
@@ -7452,7 +7454,7 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 		opline->op1.constant = zend_add_class_name_literal(
 			CG(active_op_array), &class_node.u.constant TSRMLS_CC);
 		opline->op2_type = IS_CV;
-		opline->op2.var = lookup_cv(CG(active_op_array), Z_STR_P(var_name) TSRMLS_CC);
+		opline->op2.var = lookup_cv(CG(active_op_array), STR_COPY(Z_STR_P(var_name)) TSRMLS_CC);
 		opline->result.num = (i == ast->children - 1); /* Whether this is the last catch */
 
 		zend_compile_stmt(stmt_ast TSRMLS_CC);
