@@ -5878,6 +5878,22 @@ void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
+// TODO.AST Sort out the whole constant folding issue
+static void _tmp_compile_const_expr(zval *result, zend_ast *ast TSRMLS_DC) {
+	ast = zend_ast_copy(ast);
+	zend_eval_const_expr(&ast TSRMLS_CC);
+	zend_compile_const_expr(&ast TSRMLS_CC);
+	if (ast->kind == ZEND_AST_ZVAL) {
+		ZVAL_COPY_VALUE(result, zend_ast_get_zval(ast));
+		if (Z_TYPE_P(result) == IS_ARRAY) {
+			zend_make_immutable_array_r(result TSRMLS_CC);			
+		}
+		efree(ast);
+	} else {
+		ZVAL_NEW_AST(result, ast);
+	}
+}
+
 /* {{{ zend_dirname
    Returns directory name component of path */
 ZEND_API size_t zend_dirname(char *path, size_t len)
@@ -6907,6 +6923,46 @@ void zend_compile_global_var(zend_ast *ast TSRMLS_DC) {
 
 	// TODO.AST Avoid double fetch
 	//opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
+
+	zend_ast *fetch_ast = zend_ast_create_unary(ZEND_AST_VAR, var_ast);
+	zend_compile_assign_ref_common(NULL, fetch_ast, &result TSRMLS_CC);
+	efree(fetch_ast);
+}
+
+void zend_compile_static_var(zend_ast *ast TSRMLS_DC) {
+	zend_ast *var_ast = ast->child[0];
+	zend_ast *value_ast = ast->child[1];
+
+	znode var_node, result;
+	zval value_zv;
+	zend_op *opline;
+
+	zend_compile_expr(&var_node, var_ast TSRMLS_CC);
+	if (var_node.op_type == IS_CONST) {
+		if (Z_TYPE(var_node.u.constant) != IS_STRING) {
+			convert_to_string(&var_node.u.constant);
+		}
+	}
+
+	if (value_ast) {
+		_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
+	} else {
+		ZVAL_NULL(&value_zv);
+	}
+
+	if (!CG(active_op_array)->static_variables) {
+		if (CG(active_op_array)->scope) {
+			CG(active_op_array)->scope->ce_flags |= ZEND_HAS_STATIC_IN_METHODS;
+		}
+		ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
+		zend_hash_init(CG(active_op_array)->static_variables, 8, NULL, ZVAL_PTR_DTOR, 0);
+	}
+
+	zend_hash_update(CG(active_op_array)->static_variables,
+		Z_STR(var_node.u.constant), &value_zv);
+
+	opline = emit_op(&result, ZEND_FETCH_W, &var_node, NULL TSRMLS_CC);
+	opline->extended_value = ZEND_FETCH_STATIC;
 
 	zend_ast *fetch_ast = zend_ast_create_unary(ZEND_AST_VAR, var_ast);
 	zend_compile_assign_ref_common(NULL, fetch_ast, &result TSRMLS_CC);
@@ -8262,6 +8318,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_GLOBAL:
 			zend_compile_global_var(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_STATIC:
+			zend_compile_static_var(ast TSRMLS_CC);
 			break;
 		case ZEND_AST_UNSET:
 			zend_compile_unset(ast TSRMLS_CC);
