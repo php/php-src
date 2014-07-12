@@ -2178,33 +2178,6 @@ static void zend_add_catch_element(zend_uint offset, zend_uint catch_op TSRMLS_D
 }
 /* }}} */
 
-void zend_do_first_catch(znode *open_parentheses TSRMLS_DC) /* {{{ */
-{
-	open_parentheses->u.op.opline_num = get_next_op_number(CG(active_op_array));
-}
-/* }}} */
-
-void zend_initialize_try_catch_element(znode *catch_token TSRMLS_DC) /* {{{ */
-{
-	int jmp_op_number = get_next_op_number(CG(active_op_array));
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	zend_llist jmp_list;
-	zend_llist *jmp_list_ptr;
-
-	opline->opcode = ZEND_JMP;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
-	/* save for backpatching */
-
-	zend_llist_init(&jmp_list, sizeof(int), NULL, 0);
-	zend_stack_push(&CG(bp_stack), (void *) &jmp_list);
-	jmp_list_ptr = zend_stack_top(&CG(bp_stack));
-	zend_llist_add_element(jmp_list_ptr, &jmp_op_number);
-
-	catch_token->EA = get_next_op_number(CG(active_op_array));
-}
-/* }}} */
-
 void zend_do_mark_last_catch(const znode *first_catch, const znode *last_additional_catch TSRMLS_DC) /* {{{ */
 {
 	CG(active_op_array)->last--;
@@ -2217,13 +2190,6 @@ void zend_do_mark_last_catch(const znode *first_catch, const znode *last_additio
 		CG(active_op_array)->opcodes[last_additional_catch->u.op.opline_num].extended_value = get_next_op_number(CG(active_op_array));
 	}
 	DEC_BPC(CG(active_op_array));
-}
-/* }}} */
-
-void zend_do_try(znode *try_token TSRMLS_DC) /* {{{ */
-{
-	try_token->u.op.opline_num = zend_add_try_element(get_next_op_number(CG(active_op_array)) TSRMLS_CC);
-	INC_BPC(CG(active_op_array));
 }
 /* }}} */
 
@@ -7471,7 +7437,7 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 	zend_op *opline;
 	zend_uint try_catch_offset = zend_add_try_element(
 		get_next_op_number(CG(active_op_array)) TSRMLS_CC);
-	zend_uint *jmp_opnums = safe_emalloc(sizeof(zend_uint), catches_ast->children + 1, 0);
+	zend_uint *jmp_opnums = safe_emalloc(sizeof(zend_uint), catches_ast->children, 0);
 
 	if (catches_ast->children == 0 && !finally_ast) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use try without catch or finally");
@@ -7479,8 +7445,10 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 
 	zend_compile_stmt(try_ast TSRMLS_CC);
 
-	jmp_opnums[0] = get_next_op_number(CG(active_op_array));
-	opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC); // TODO
+	if (catches_ast->children != 0) {
+		jmp_opnums[0] = get_next_op_number(CG(active_op_array));
+		emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+	}
 
 	for (i = 0; i < catches_ast->children; ++i) {
 		zend_ast *catch_ast = catches_ast->child[i];
@@ -7488,6 +7456,7 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 		zend_ast *var_ast = catch_ast->child[1];
 		zend_ast *stmt_ast = catch_ast->child[2];
 		zval *var_name = zend_ast_get_zval(var_ast);
+		zend_bool is_last_catch = (i + 1 == catches_ast->children);
 
 		znode class_node;
 		zend_uint opnum_catch;
@@ -7511,18 +7480,20 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 			CG(active_op_array), &class_node.u.constant TSRMLS_CC);
 		opline->op2_type = IS_CV;
 		opline->op2.var = lookup_cv(CG(active_op_array), STR_COPY(Z_STR_P(var_name)) TSRMLS_CC);
-		opline->result.num = (i == ast->children - 1); /* Whether this is the last catch */
+		opline->result.num = is_last_catch;
 
 		zend_compile_stmt(stmt_ast TSRMLS_CC);
 
-		jmp_opnums[i + 1] = get_next_op_number(CG(active_op_array));
-		emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+		if (!is_last_catch) {
+			jmp_opnums[i + 1] = get_next_op_number(CG(active_op_array));
+			emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+		}
 
 		opline = &CG(active_op_array)->opcodes[opnum_catch];
 		opline->extended_value = get_next_op_number(CG(active_op_array));
 	}
 
-	for (i = 0; i < catches_ast->children + 1; ++i) {
+	for (i = 0; i < catches_ast->children; ++i) {
 		opline = &CG(active_op_array)->opcodes[jmp_opnums[i]];
 		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
 	}
