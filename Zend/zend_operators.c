@@ -673,7 +673,6 @@ ZEND_API int _convert_to_string_safe(zval **op_ptr, int separate)
 				return SUCCESS;
 			}
 		case IS_ARRAY:
-			zend_error(E_NOTICE, "Array to string conversion");
 			zval_dtor(op);
 			ZVAL_STRING(op, "Array", 1);
 			return FAILURE;
