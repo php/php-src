@@ -485,23 +485,6 @@ ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC);
 
-void zend_do_while_cond(znode *expr, znode *close_bracket_token TSRMLS_DC);
-void zend_do_while_end(const znode *while_token, const znode *close_bracket_token TSRMLS_DC);
-void zend_do_do_while_begin(TSRMLS_D);
-void zend_do_do_while_end(const znode *do_token, const znode *expr_open_bracket, znode *expr TSRMLS_DC);
-
-
-void zend_do_if_cond(znode *cond, znode *closing_bracket_token TSRMLS_DC);
-void zend_do_if_after_statement(const znode *closing_bracket_token, unsigned char initialize TSRMLS_DC);
-void zend_do_if_end(TSRMLS_D);
-
-void zend_do_for_cond(znode *expr, znode *second_semicolon_token TSRMLS_DC);
-void zend_do_for_before_statement(const znode *cond_start, const znode *second_semicolon_token TSRMLS_DC);
-void zend_do_for_end(const znode *second_semicolon_token TSRMLS_DC);
-
-void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC);
-void zend_do_post_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC);
-
 void zend_do_begin_variable_parse(TSRMLS_D);
 void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS_DC);
 
@@ -544,12 +527,6 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS
 
 void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC);
 
-void zend_do_switch_cond(const znode *cond TSRMLS_DC);
-void zend_do_switch_end(const znode *case_list TSRMLS_DC);
-void zend_do_case_before_statement(const znode *case_list, znode *case_token, znode *case_expr TSRMLS_DC);
-void zend_do_case_after_statement(znode *result, const znode *case_token TSRMLS_DC);
-void zend_do_default_before_statement(const znode *case_list, znode *default_token TSRMLS_DC);
-
 void zend_do_begin_class_declaration(const znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC);
 void zend_do_end_class_declaration(const znode *class_token, const znode *parent_token TSRMLS_DC);
 void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC);
@@ -560,10 +537,6 @@ void zend_do_halt_compiler_register(TSRMLS_D);
 /* Functions for a null terminated pointer list, used for traits parsing and compilation */
 void zend_init_list(void *result, void *item TSRMLS_DC);
 void zend_add_to_list(void *result, void *item TSRMLS_DC);
-
-void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, znode *array, znode *as_token, int variable TSRMLS_DC);
-void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token, const znode *as_token, znode *value, znode *key TSRMLS_DC);
-void zend_do_foreach_end(const znode *foreach_token, const znode *as_token TSRMLS_DC);
 
 void zend_do_declare_begin(TSRMLS_D);
 void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC);
