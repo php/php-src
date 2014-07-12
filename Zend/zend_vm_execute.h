@@ -916,7 +916,7 @@ static int ZEND_FASTCALL  ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	for (; arg_num <= arg_count; ++arg_num) {
 		zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
-		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, *param, opline->extended_value TSRMLS_CC);
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, param, opline->extended_value TSRMLS_CC);
 		zend_hash_next_index_insert(Z_ARRVAL_P(params), param, sizeof(zval *), NULL);
 		Z_ADDREF_PP(param);
 	}
