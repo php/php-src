@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     (Adam)
   . Fixed bug #66830 (Empty header causes PHP built-in web server to hang).
     (Adam)
+  . Fixed bug #67594 (Unable to access to apache_request_headers() elements).
+    (Tjerk)
 
 - FPM:
   . Fixed bug #67530 (error_log=syslog ignored). (Remi)
