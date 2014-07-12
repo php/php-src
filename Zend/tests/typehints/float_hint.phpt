@@ -2,15 +2,7 @@
 float typehint
 --FILE--
 <?php
-$errnames = [
-    E_NOTICE => 'E_NOTICE',
-    E_WARNING => 'E_WARNING',
-    E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR'
-];
-set_error_handler(function (int $errno, string $errmsg, string $file, int $line) use ($errnames) {
-    echo "$errnames[$errno]: $errmsg in $file on line $line\n";
-    return true;
-});
+require 'common.inc';
 
 function foo(float $a) {
     var_dump($a); 
@@ -29,14 +21,14 @@ foo(fopen("data:text/plain,foobar", "r")); // E_RECOVERABLE_ERROR
 float(1)
 float(1)
 float(1)
-E_NOTICE: A non well formed numeric value encountered in %s on line 12
+E_NOTICE: A non well formed numeric value encountered in %s on line 4
 float(1)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type float, string given, called in %s on line 19 and defined in %s on line 12
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type float, string given, called in %s on line 11 and defined in %s on line 4
 int(0)
 float(1.5)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type float, array given, called in %s on line 21 and defined in %s on line 12
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type float, array given, called in %s on line 13 and defined in %s on line 4
 float(0)
-E_NOTICE: Object of class stdClass could not be converted to double in %s on line 12
+E_NOTICE: Object of class stdClass could not be converted to double in %s on line 4
 float(1)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type float, resource given, called in %s on line 23 and defined in %s on line 12
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type float, resource given, called in %s on line 15 and defined in %s on line 4
 float(%d)

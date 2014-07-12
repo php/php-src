@@ -2,15 +2,7 @@
 bool typehint
 --FILE--
 <?php
-$errnames = [
-    E_NOTICE => 'E_NOTICE',
-    E_WARNING => 'E_WARNING',
-    E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR'
-];
-set_error_handler(function (int $errno, string $errmsg, string $file, int $line) use ($errnames) {
-    echo "$errnames[$errno]: $errmsg in $file on line $line\n";
-    return true;
-});
+require 'common.inc';
 
 function foo(bool $a) {
     var_dump($a); 
@@ -36,8 +28,8 @@ bool(false)
 bool(true)
 bool(true)
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, array given, called in %s on line 23 and defined in %s on line 12
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, array given, called in %s on line 15 and defined in %s on line 4
 bool(false)
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, resource given, called in %s on line 25 and defined in %s on line 12
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, resource given, called in %s on line 17 and defined in %s on line 4
 bool(true)
