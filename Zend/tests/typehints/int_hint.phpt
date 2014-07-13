@@ -10,7 +10,7 @@ function foo(int $a) {
 foo(1); // int(1)
 foo("1"); // int(1)
 foo(1.0); // int(1)
-foo("1a"); // Notice: A non well formed numeric value encountered int(1)
+foo("1a"); // E_RECOVERABLE_ERROR
 foo("a"); // E_RECOVERABLE_ERROR
 foo(999999999999999999999999999999999999); // E_RECOVERABLE_ERROR (since it's not exactly representable by an int)
 foo(1.5); // E_RECOVERABLE_ERROR
@@ -23,7 +23,7 @@ foo(fopen("data:text/plain,foobar", "r")); // E_RECOVERABLE_ERROR
 int(1)
 int(1)
 int(1)
-E_NOTICE: A non well formed numeric value encountered in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, string given, called in %s on line 10 and defined in %s on line 4
 int(1)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, string given, called in %s on line 11 and defined in %s on line 4
 int(0)

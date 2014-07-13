@@ -10,7 +10,7 @@ function foo(float $a) {
 foo(1); // float(1)
 foo("1"); // float(1)
 foo(1.0); // float(1)
-foo("1a"); // Notice: A non well formed numeric value encountered float(1)
+foo("1a"); // E_RECOVERABLE_ERROR
 foo("a"); // E_RECOVERABLE_ERROR
 foo(1.5); // float(1.5)
 foo(array()); // E_RECOVERABLE_ERROR
@@ -22,10 +22,10 @@ foo(fopen("data:text/plain,foobar", "r")); // E_RECOVERABLE_ERROR
 float(1)
 float(1)
 float(1)
-E_NOTICE: A non well formed numeric value encountered in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type float, string given, called in %s on line 10 and defined in %s on line 4
 float(1)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type float, string given, called in %s on line 11 and defined in %s on line 4
-int(0)
+float(0)
 float(1.5)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type float, array given, called in %s on line 13 and defined in %s on line 4
 float(0)

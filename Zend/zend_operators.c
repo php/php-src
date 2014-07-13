@@ -424,7 +424,7 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 				int type;
 				long lval;
 				double dval;
-				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, -1)) == 0) {
+				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, 0)) == 0) {
 					char *strval = Z_STRVAL_P(op);
 					ZVAL_LONG(op, strtol(strval, NULL, base));
 					STR_FREE(strval);
@@ -501,9 +501,9 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 				int type;
 				long lval;
 				double dval;
-				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, -1)) == 0) {
+				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, 0)) == 0) {
 					char *strval = Z_STRVAL_P(op);
-					ZVAL_LONG(op, strtod(strval, NULL));
+					ZVAL_DOUBLE(op, zend_strtod(strval, NULL));
 					STR_FREE(strval);
 					return FAILURE;
 				} else if (type == IS_DOUBLE) {
