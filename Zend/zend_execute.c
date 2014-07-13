@@ -714,6 +714,18 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 						if (!ce || !instanceof_function(Z_OBJCE_PP(arg), ce TSRMLS_CC)) {
 							return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_PP(arg)->name TSRMLS_CC);
 						}
+					/* there is no `boolean` typehint, only `bool` */
+					} else if (Z_TYPE_PP(arg) == IS_BOOL && strcasecmp(cur_arg_info->class_name, "boolean") == 0) {
+						need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
+						return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "boolean (did you mean to use the `bool` typehint?)", "" TSRMLS_CC);
+					/* there is no `integer` typehint, only `int` */
+					} else if (Z_TYPE_PP(arg) == IS_LONG && strcasecmp(cur_arg_info->class_name, "integer") == 0) {
+						need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
+						return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "integer (did you mean to use the `int` typehint?)", "" TSRMLS_CC);
+					/* there is no `double` typehint, only `float` */
+					} else if (Z_TYPE_PP(arg) == IS_DOUBLE && strcasecmp(cur_arg_info->class_name, "double") == 0) {
+						need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
+						return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "float (did you mean to use the `float` typehint?)", "" TSRMLS_CC);
 					} else if (Z_TYPE_PP(arg) != IS_NULL || !cur_arg_info->allow_null) {
 						need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
 						return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, type, "" TSRMLS_CC);
