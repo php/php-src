@@ -1355,10 +1355,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_BOOL;
 }
 
-<ST_IN_SCRIPTING>"resource" {
-	return T_RESOURCE;
-}
-
 <ST_IN_SCRIPTING>"++" {
 	return T_INC;
 }

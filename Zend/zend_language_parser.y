@@ -196,7 +196,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_FLOAT           "float (T_FLOAT)"
 %token T_STRING_TYPE     "string (T_STRING_TYPE)"
 %token T_BOOL            "bool (T_BOOL)"
-%token T_RESOURCE        "resource (T_RESOURCE)"
 %token T_CLASS_C         "__CLASS__ (T_CLASS_C)"
 %token T_TRAIT_C         "__TRAIT__ (T_TRAIT_C)"
 %token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
@@ -582,7 +581,6 @@ optional_class_type:
 	|	T_FLOAT						{ $$.op_type = IS_CONST; $$.EA = IS_DOUBLE; }
 	|	T_STRING_TYPE				{ $$.op_type = IS_CONST; $$.EA = IS_STRING; }
 	|	T_BOOL						{ $$.op_type = IS_CONST; $$.EA = IS_BOOL; }
-	|	T_RESOURCE					{ $$.op_type = IS_CONST; $$.EA = IS_RESOURCE; }
 	|	fully_qualified_class_name	{ $$ = $1; $$.EA = IS_OBJECT; }
 ;
 
