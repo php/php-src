@@ -575,19 +575,19 @@ optional_class_type:
 	|	fully_qualified_class_name			{ $$ = $1; }
 ;
 
-function_call_parameter_list:
-		'(' ')'	{ $$.u.ast = zend_ast_create_dynamic(ZEND_AST_PARAMS); }
-	|	'(' non_empty_function_call_parameter_list ')' { $$.u.ast = $2.u.ast; }
+argument_list:
+		'(' ')'	{ $$.u.ast = zend_ast_create_dynamic(ZEND_AST_ARG_LIST); }
+	|	'(' non_empty_argument_list ')' { $$.u.ast = $2.u.ast; }
 ;
 
-non_empty_function_call_parameter_list:
-		function_call_parameter
-			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_PARAMS, $1.u.ast); }
-	|	non_empty_function_call_parameter_list ',' function_call_parameter
+non_empty_argument_list:
+		argument
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_ARG_LIST, $1.u.ast); }
+	|	non_empty_argument_list ',' argument
 			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
 ;
 
-function_call_parameter:
+argument:
 		expr_without_variable	{ $$.u.ast = $1.u.ast; }
 	|	variable				{ $$.u.ast = $1.u.ast; }
 	/*|	'&' variable 			{ ZEND_ASSERT(0); } */
@@ -894,15 +894,15 @@ lexical_var_list:
 ;
 
 function_call:
-		name function_call_parameter_list
+		name argument_list
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_CALL, $1.u.ast, $2.u.ast); }
-	|	class_name T_PAAMAYIM_NEKUDOTAYIM member_name function_call_parameter_list
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 			{ $$.u.ast = zend_ast_create_ternary(ZEND_AST_STATIC_CALL,
 			      AST_ZVAL(&$1), $3.u.ast, $4.u.ast); }
-	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name function_call_parameter_list
+	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 			{ $$.u.ast = zend_ast_create_ternary(ZEND_AST_STATIC_CALL,
 			      $1.u.ast, $3.u.ast, $4.u.ast); }
-	|	callable_expr function_call_parameter_list
+	|	callable_expr argument_list
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_CALL, $1.u.ast, $2.u.ast); }
 ;
 
@@ -942,8 +942,8 @@ backticks_expr:
 
 
 ctor_arguments:
-		/* empty */	{ $$.u.ast = zend_ast_create_dynamic(ZEND_AST_PARAMS); }
-	|	function_call_parameter_list { $$.u.ast = $1.u.ast; }
+		/* empty */	{ $$.u.ast = zend_ast_create_dynamic(ZEND_AST_ARG_LIST); }
+	|	argument_list { $$.u.ast = $1.u.ast; }
 ;
 
 
@@ -1025,7 +1025,7 @@ callable_variable:
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_DIM, $1.u.ast, $3.u.ast); }
 	|	dereferencable '{' expr '}'
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_DIM, $1.u.ast, $3.u.ast); }
-	|	dereferencable T_OBJECT_OPERATOR member_name function_call_parameter_list
+	|	dereferencable T_OBJECT_OPERATOR member_name argument_list
 			{ $$.u.ast = zend_ast_create_ternary(ZEND_AST_METHOD_CALL, $1.u.ast, $3.u.ast, $4.u.ast); }
 	|	function_call { $$.u.ast = $1.u.ast; }
 ;

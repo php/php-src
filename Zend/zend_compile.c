@@ -5820,26 +5820,26 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast TSRMLS_DC) {
 	}
 }
 
-zend_uint zend_compile_params(zend_ast *params, zend_function *fbc TSRMLS_DC) {
+zend_uint zend_compile_args(zend_ast *args, zend_function *fbc TSRMLS_DC) {
 	// TODO.AST &var error
 	zend_uint i;
 	zend_bool uses_arg_unpack = 0;
 	zend_uint arg_count = 0; /* number of arguments not including unpacks */
 
-	for (i = 0; i < params->children; ++i) {
-		zend_ast *param = params->child[i];
+	for (i = 0; i < args->children; ++i) {
+		zend_ast *arg = args->child[i];
 		zend_uint arg_num = i + 1;
 
-		znode param_node;
+		znode arg_node;
 		zend_op *opline;
 		zend_uchar opcode;
 		zend_ulong flags = 0;
 
-		if (param->kind == ZEND_AST_UNPACK) {
+		if (arg->kind == ZEND_AST_UNPACK) {
 			uses_arg_unpack = 1;
 			
-			zend_compile_expr(&param_node, param->child[0] TSRMLS_CC);
-			opline = emit_op(NULL, ZEND_SEND_UNPACK, &param_node, NULL TSRMLS_CC);
+			zend_compile_expr(&arg_node, arg->child[0] TSRMLS_CC);
+			opline = emit_op(NULL, ZEND_SEND_UNPACK, &arg_node, NULL TSRMLS_CC);
 			opline->op2.num = arg_count;
 			continue;
 		}
@@ -5850,9 +5850,9 @@ zend_uint zend_compile_params(zend_ast *params, zend_function *fbc TSRMLS_DC) {
 		}
 
 		arg_count++;
-		if (zend_is_variable(param)) {
-			if (zend_is_call(param)) {
-				zend_compile_var(&param_node, param, BP_VAR_R TSRMLS_CC);
+		if (zend_is_variable(arg)) {
+			if (zend_is_call(arg)) {
+				zend_compile_var(&arg_node, arg, BP_VAR_R TSRMLS_CC);
 				opcode = ZEND_SEND_VAR_NO_REF;
 				flags |= ZEND_ARG_SEND_FUNCTION;
 				if (fbc && ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
@@ -5863,20 +5863,20 @@ zend_uint zend_compile_params(zend_ast *params, zend_function *fbc TSRMLS_DC) {
 				}
 			} else if (fbc) {
 				if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
-					zend_compile_var(&param_node, param, BP_VAR_W TSRMLS_CC);
+					zend_compile_var(&arg_node, arg, BP_VAR_W TSRMLS_CC);
 					opcode = ZEND_SEND_REF;
 				} else {
-					zend_compile_var(&param_node, param, BP_VAR_R TSRMLS_CC);
+					zend_compile_var(&arg_node, arg, BP_VAR_R TSRMLS_CC);
 					opcode = ZEND_SEND_VAR;
 				}
 			} else {
-				zend_compile_var(&param_node, param,
+				zend_compile_var(&arg_node, arg,
 					BP_VAR_FUNC_ARG | (arg_num << BP_VAR_SHIFT) TSRMLS_CC);
 				opcode = ZEND_SEND_VAR;
 			}
 		} else {
-			zend_compile_expr(&param_node, param TSRMLS_CC);
-			if (param_node.op_type & (IS_VAR|IS_CV)) {
+			zend_compile_expr(&arg_node, arg TSRMLS_CC);
+			if (arg_node.op_type & (IS_VAR|IS_CV)) {
 				opcode = ZEND_SEND_VAR_NO_REF;
 				if (fbc && ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
 					flags |= ZEND_ARG_SEND_BY_REF;
@@ -5891,7 +5891,7 @@ zend_uint zend_compile_params(zend_ast *params, zend_function *fbc TSRMLS_DC) {
 
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = opcode;
-		SET_NODE(opline->op1, &param_node);
+		SET_NODE(opline->op1, &arg_node);
 		SET_UNUSED(opline->op2);
 		opline->op2.opline_num = arg_num;
 
@@ -5912,7 +5912,7 @@ zend_uint zend_compile_params(zend_ast *params, zend_function *fbc TSRMLS_DC) {
 	return arg_count;
 }
 
-zend_op *zend_compile_call_common(znode *result, zend_ast *params_ast, zend_function *fbc TSRMLS_DC) {
+zend_op *zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc TSRMLS_DC) {
 	zend_op *opline;
 	zend_uint arg_count;
 
@@ -5922,7 +5922,7 @@ zend_op *zend_compile_call_common(znode *result, zend_ast *params_ast, zend_func
 		CG(context).nested_calls++;
 	}
 
-	arg_count = zend_compile_params(params_ast, fbc TSRMLS_CC);
+	arg_count = zend_compile_args(args_ast, fbc TSRMLS_CC);
 
 	opline = emit_op(result, fbc ? ZEND_DO_FCALL : ZEND_DO_FCALL_BY_NAME, NULL, NULL TSRMLS_CC);
 	opline->op2.num = CG(context).nested_calls;
@@ -5956,7 +5956,7 @@ zend_bool zend_compile_function_name(znode *name_node, zend_ast *name_ast TSRMLS
 	return !is_fully_qualified && Z_TYPE(CG(current_namespace)) != IS_UNDEF;
 }
 
-void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *params_ast TSRMLS_DC) {
+void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast TSRMLS_DC) {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
 	opline->result.num = CG(context).nested_calls;
@@ -5966,10 +5966,10 @@ void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *params_ast 
 		CG(active_op_array), &name_node->u.constant TSRMLS_CC);
 	GET_CACHE_SLOT(opline->op2.constant);
 
-	zend_compile_call_common(result, params_ast, NULL TSRMLS_CC);
+	zend_compile_call_common(result, args_ast, NULL TSRMLS_CC);
 }
 
-void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *params_ast TSRMLS_DC) {
+void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast TSRMLS_DC) {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 	opline->result.num = CG(context).nested_calls;
@@ -5983,13 +5983,13 @@ void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *params
 		SET_NODE(opline->op2, name_node);
 	}
 
-	zend_compile_call_common(result, params_ast, NULL TSRMLS_CC);
+	zend_compile_call_common(result, args_ast, NULL TSRMLS_CC);
 }
 
-zend_bool zend_params_contain_unpack(zend_ast *params) {
+zend_bool zend_args_contain_unpack(zend_ast *args) {
 	zend_uint i;
-	for (i = 0; i < params->children; ++i) {
-		if (params->child[i]->kind == ZEND_AST_UNPACK) {
+	for (i = 0; i < args->children; ++i) {
+		if (args->child[i]->kind == ZEND_AST_UNPACK) {
 			return 1;
 		}
 	}
@@ -5998,27 +5998,27 @@ zend_bool zend_params_contain_unpack(zend_ast *params) {
 
 void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 	zend_ast *name_ast = ast->child[0];
-	zend_ast *params_ast = ast->child[1];
+	zend_ast *args_ast = ast->child[1];
 
 	znode name_node;
 
 	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
 		zend_compile_expr(&name_node, name_ast TSRMLS_CC);
-		zend_compile_dynamic_call(result, &name_node, params_ast TSRMLS_CC);
+		zend_compile_dynamic_call(result, &name_node, args_ast TSRMLS_CC);
 		return;
 	}
 
 	{
 		zend_bool needs_runtime_resolution = zend_compile_function_name(&name_node, name_ast TSRMLS_CC);
 		if (needs_runtime_resolution) {
-			zend_compile_ns_call(result, &name_node, params_ast TSRMLS_CC);
+			zend_compile_ns_call(result, &name_node, args_ast TSRMLS_CC);
 			return;
 		}
 	}
 
 	/* Arg unpacking needs EX(call), so don't try to optimize it away */
-	if (zend_params_contain_unpack(params_ast)) {
-		zend_compile_dynamic_call(result, &name_node, params_ast TSRMLS_CC);
+	if (zend_args_contain_unpack(args_ast)) {
+		zend_compile_dynamic_call(result, &name_node, args_ast TSRMLS_CC);
 		return;
 	}
 
@@ -6034,14 +6034,14 @@ void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 			fbc->type == ZEND_INTERNAL_FUNCTION)
 		) {
 			STR_FREE(lcname);
-			zend_compile_dynamic_call(result, &name_node, params_ast TSRMLS_CC);
+			zend_compile_dynamic_call(result, &name_node, args_ast TSRMLS_CC);
 			return;
 		}
 
 		zval_ptr_dtor(&name_node.u.constant);
 		ZVAL_NEW_STR(&name_node.u.constant, lcname);
 
-		opline = zend_compile_call_common(result, params_ast, fbc TSRMLS_CC);
+		opline = zend_compile_call_common(result, args_ast, fbc TSRMLS_CC);
 		SET_NODE(opline->op1, &name_node);
 		GET_CACHE_SLOT(opline->op1.constant);
 	}
@@ -6050,7 +6050,7 @@ void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 void zend_compile_method_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 	//zend_ast *obj_ast = ast->child[0];
 	//zend_ast *method_ast = ast->child[1];
-	zend_ast *params_ast = ast->child[2];
+	zend_ast *args_ast = ast->child[2];
 
 	// TODO.AST __clone check - WTF is that done in here?!
 
@@ -6072,7 +6072,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, int type TSRMLS_DC) 
 		GET_POLYMORPHIC_CACHE_SLOT(opline->op2.constant);
 	}
 
-	zend_compile_call_common(result, params_ast, NULL TSRMLS_CC);
+	zend_compile_call_common(result, args_ast, NULL TSRMLS_CC);
 }
 
 zend_bool zend_is_constructor(zend_string *name) {
@@ -6086,7 +6086,7 @@ zend_bool zend_is_constructor(zend_string *name) {
 void zend_compile_static_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *method_ast = ast->child[1];
-	zend_ast *params_ast = ast->child[2];
+	zend_ast *args_ast = ast->child[2];
 
 	znode class_node, method_node;
 	zend_op *opline;
@@ -6132,12 +6132,12 @@ void zend_compile_static_call(znode *result, zend_ast *ast, int type TSRMLS_DC) 
 		SET_NODE(opline->op2, &method_node);
 	}
 
-	zend_compile_call_common(result, params_ast, NULL TSRMLS_CC);
+	zend_compile_call_common(result, args_ast, NULL TSRMLS_CC);
 }
 
 void zend_compile_new(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *class_ast = ast->child[0];
-	zend_ast *params_ast = ast->child[1];
+	zend_ast *args_ast = ast->child[1];
 
 	znode class_node, ctor_result;
 	zend_op *opline;
@@ -6149,7 +6149,7 @@ void zend_compile_new(znode *result, zend_ast *ast TSRMLS_DC) {
 	opline = emit_op(result, ZEND_NEW, &class_node, NULL TSRMLS_CC);
 	opline->extended_value = CG(context).nested_calls;
 
-	zend_compile_call_common(&ctor_result, params_ast, NULL TSRMLS_CC);
+	zend_compile_call_common(&ctor_result, args_ast, NULL TSRMLS_CC);
 	zend_do_free(&ctor_result TSRMLS_CC);
 
 	/* New jumps over ctor call if ctor does not exist */
@@ -7203,17 +7203,17 @@ void zend_compile_shell_exec(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *expr_ast = ast->child[0];
 
 	zval fn_name;
-	zend_ast *name_ast, *params_ast, *call_ast;
+	zend_ast *name_ast, *args_ast, *call_ast;
 
 	ZVAL_STRING(&fn_name, "shell_exec");
 	name_ast = zend_ast_create_zval(&fn_name);
-	params_ast = zend_ast_dynamic_add(zend_ast_create_dynamic(ZEND_AST_PARAMS), expr_ast);
-	call_ast = zend_ast_create_binary(ZEND_AST_CALL, name_ast, params_ast);
+	args_ast = zend_ast_dynamic_add(zend_ast_create_dynamic(ZEND_AST_ARG_LIST), expr_ast);
+	call_ast = zend_ast_create_binary(ZEND_AST_CALL, name_ast, args_ast);
 
 	zend_compile_expr(result, call_ast TSRMLS_CC);
 
 	efree(call_ast);
-	efree(params_ast);
+	efree(args_ast);
 	zend_ast_destroy(name_ast);
 }
 
