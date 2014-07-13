@@ -9,8 +9,7 @@ $functions = [
     'int $x' => function (int $x) {},
     'float $x' => function (float $x) {},
     'string $x' => function (string $x) {},
-    'bool $x' => function (bool $x) {},
-    'resource $x' => function (resource $x) {}
+    'bool $x' => function (bool $x) {}
 ];
 $methods = [
     'isCallable',
@@ -18,8 +17,7 @@ $methods = [
     'isInt',
     'isFloat',
     'isString',
-    'isBool',
-    'isResource'
+    'isBool'
 ];
 
 $colwidth = 14;
@@ -42,11 +40,10 @@ foreach ($functions as $name => $function) {
 
 ?>
 --EXPECTF--
-              isCallable    isArray       isInt         isFloat       isString      isBool        isResource    
-callable $x   1                                                                                                 
-array $x                    1                                                                                   
-int $x                                    1                                                                     
-float $x                                                1                                                       
-string $x                                                             1                                         
-bool $x                                                                             1                           
-resource $x                                                                                       1             
+              isCallable    isArray       isInt         isFloat       isString      isBool        
+callable $x   1                                                                                   
+array $x                    1                                                                     
+int $x                                    1                                                       
+float $x                                                1                                         
+string $x                                                             1                           
+bool $x                                                                             1             
