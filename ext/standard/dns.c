@@ -897,7 +897,13 @@ PHP_FUNCTION(dns_get_record)
 
 			if (n < 0) {
 				php_dns_free_handle(handle);
-				continue;
+				if (h_errno == NO_DATA) {
+					continue;
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dns Query failed");
+					zval_dtor(return_value);
+					RETURN_FALSE;
+				}
 			}
 
 			cp = answer.qb2 + HFIXEDSZ;
