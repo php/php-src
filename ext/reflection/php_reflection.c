@@ -2514,6 +2514,22 @@ ZEND_METHOD(reflection_parameter, isBoolean)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionParameter::isResource()
+   Returns whether parameter MUST be a resource */
+ZEND_METHOD(reflection_parameter, isResource)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_RESOURCE);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionParameter::isCallable()
    Returns whether parameter MUST be callable */
 ZEND_METHOD(reflection_parameter, isCallable)
@@ -6095,6 +6111,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, isFloat, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isBoolean, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isResource, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isCallable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, allowsNull, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getPosition, arginfo_reflection__void, 0)
