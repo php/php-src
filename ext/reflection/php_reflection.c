@@ -2498,9 +2498,9 @@ ZEND_METHOD(reflection_parameter, isString)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionParameter::isBoolean()
+/* {{{ proto public bool ReflectionParameter::isBool()
    Returns whether parameter MUST be an boolean */
-ZEND_METHOD(reflection_parameter, isBoolean)
+ZEND_METHOD(reflection_parameter, isBool)
 {
 	reflection_object *intern;
 	parameter_reference *param;
@@ -6110,7 +6110,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, isInt, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isFloat, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isString, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_parameter, isBoolean, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isBool, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isResource, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isCallable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, allowsNull, arginfo_reflection__void, 0)
