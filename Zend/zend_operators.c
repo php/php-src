@@ -678,11 +678,11 @@ ZEND_API int _convert_to_string_safe(zval **op_ptr, int separate)
 			return FAILURE;
 		case IS_OBJECT:
 			{
-				char **p;
-				int *pl;
-				if (SUCCESS == parse_object_to_string(op_ptr, p, pl, IS_STRING TSRMLS_CC)) {
+				char *p;
+				int l;
+				if (SUCCESS == parse_object_to_string(op_ptr, &p, &l, IS_STRING TSRMLS_CC)) {
 					zval_dtor(op);
-					ZVAL_STRINGL(op, *p, *pl, 0);
+					ZVAL_STRINGL(op, p, l, 0);
 					return SUCCESS;
 				}
 				zval_dtor(op);
