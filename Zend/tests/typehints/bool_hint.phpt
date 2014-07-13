@@ -17,6 +17,7 @@ foo("a"); // bool(true)
 foo(1.5); // bool(true)
 foo(array()); // E_RECOVERABLE_ERROR
 foo(new StdClass); // bool(true)
+foo(new AThree); // bool(true)
 foo(fopen("data:text/plain,foobar", "r")); // E_RECOVERABLE_ERROR
 ?>
 --EXPECTF--
@@ -31,5 +32,6 @@ bool(true)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, array given, called in %s on line 15 and defined in %s on line 4
 bool(false)
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, resource given, called in %s on line 17 and defined in %s on line 4
+bool(true)
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, resource given, called in %s on line 18 and defined in %s on line 4
 bool(true)

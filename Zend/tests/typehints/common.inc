@@ -9,3 +9,9 @@ set_error_handler(function (int $errno, string $errmsg, string $file, int $line)
     echo "$errnames[$errno]: $errmsg in $file on line $line\n";
     return true;
 });
+
+class AThree {
+    function __toString() {
+        return "a3";
+    }
+}
