@@ -5361,9 +5361,15 @@ static zend_bool zend_can_write_to_variable(zend_ast *ast) {
 static zend_bool zend_is_const_default_class_ref(zend_ast *name_ast) {
 	zval *name;
 	int fetch_type;
+
 	if (name_ast->kind != ZEND_AST_ZVAL) {
 		return 0;
 	}
+
+	/* Fully qualified names are always default refs */
+	/*if (!name_ast->attr) {
+		return 1;
+	}*/
 
 	name = zend_ast_get_zval(name_ast);
 	fetch_type = zend_get_class_fetch_type(Z_STRVAL_P(name), Z_STRLEN_P(name));
@@ -6822,6 +6828,136 @@ void zend_compile_stmt_list(zend_ast *ast TSRMLS_DC) {
 	for (i = 0; i < ast->children; ++i) {
 		zend_compile_stmt(ast->child[i] TSRMLS_CC);
 	}
+}
+
+void zend_compile_params(zend_ast *ast TSRMLS_DC) {
+	zend_uint i;
+	zend_op_array *op_array = CG(active_op_array);
+	zend_arg_info *arg_infos;
+
+	if (ast->children == 0) {
+		return;
+	}
+	
+	arg_infos = safe_emalloc(sizeof(zend_arg_info), ast->children, 0);
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *param_ast = ast->child[i];
+		zend_ast *type_ast = param_ast->child[0];
+		zend_ast *var_ast = param_ast->child[1];
+		zend_ast *default_ast = param_ast->child[2];
+		zend_string *name = Z_STR_P(zend_ast_get_zval(var_ast));
+		zend_bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
+		zend_bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
+
+		znode var_node, default_node;
+		zend_uchar opcode;
+		zend_op *opline;
+		zend_arg_info *arg_info;
+
+		if (zend_is_auto_global(name TSRMLS_CC)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s",
+				name->val);
+		}
+
+		var_node.op_type = IS_CV;
+		var_node.u.op.var = lookup_cv(CG(active_op_array), STR_COPY(name) TSRMLS_CC);
+
+		if (name->len == sizeof("this") - 1 && !memcmp(name->val, "this", sizeof("this") - 1)) {
+			if (op_array->scope && (op_array->fn_flags & ZEND_ACC_STATIC) == 0) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
+			}
+			op_array->this_var = var_node.u.op.var;
+		}
+
+		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Only the last parameter can be variadic");
+		}
+
+		if (is_variadic) {
+			opcode = ZEND_RECV_VARIADIC;
+			default_node.op_type = IS_UNUSED;
+			op_array->fn_flags |= ZEND_ACC_VARIADIC;
+
+			if (default_ast) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Variadic parameter cannot have a default value");
+			}
+		} else if (default_ast) {
+			opcode = ZEND_RECV_INIT;
+			default_node.op_type = IS_CONST;
+			_tmp_compile_const_expr(&default_node.u.constant, default_ast TSRMLS_CC);
+		} else {
+			opcode = ZEND_RECV;
+			default_node.op_type = IS_UNUSED;
+			op_array->required_num_args = i + 1;
+		}
+
+		opline = emit_op(NULL, opcode, NULL, &default_node TSRMLS_CC);
+		SET_NODE(opline->result, &var_node);
+		opline->op1.num = i + 1;
+
+		arg_info = &arg_infos[i];
+		arg_info->name = estrndup(name->val, name->len);
+		arg_info->name_len = name->len;
+		arg_info->pass_by_reference = is_ref;
+		arg_info->is_variadic = is_variadic;
+		arg_info->type_hint = 0;
+		arg_info->allow_null = 1;
+		arg_info->class_name = NULL;
+		arg_info->class_name_len = 0;
+
+		if (type_ast) {
+			zend_bool has_null_default = default_ast
+				&& (Z_TYPE(default_node.u.constant) == IS_NULL
+					|| (Z_TYPE(default_node.u.constant) == IS_CONSTANT
+						&& strcasecmp(Z_STRVAL(default_node.u.constant), "NULL"))
+					|| Z_TYPE(default_node.u.constant) == IS_CONSTANT_AST); // ???
+
+			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+			arg_info->allow_null = has_null_default;
+
+			if (type_ast->kind == ZEND_AST_TYPE) {
+				arg_info->type_hint = type_ast->attr;
+				if (arg_info->type_hint == IS_ARRAY) {
+					if (default_ast && !has_null_default
+						&& Z_TYPE(default_node.u.constant) != IS_ARRAY
+					) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+							"with array type hint can only be an array or NULL");
+					}
+				} else if (arg_info->type_hint == IS_CALLABLE && default_ast) {
+					if (default_ast && !has_null_default) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+							"with callable type hint can only be NULL");
+					}
+				}
+			} else {
+				zend_string *class_name = Z_STR_P(zend_ast_get_zval(type_ast));
+				zend_bool is_fully_qualified = !type_ast->attr;
+
+				if (zend_is_const_default_class_ref(type_ast)) {
+					class_name = zend_resolve_class_name(class_name, is_fully_qualified TSRMLS_CC);
+				} else {
+					STR_ADDREF(class_name);
+				}
+
+				arg_info->type_hint = IS_OBJECT;
+				arg_info->class_name = estrndup(class_name->val, class_name->len);
+				arg_info->class_name_len = class_name->len;
+
+				STR_RELEASE(class_name);
+
+				if (default_ast && !has_null_default) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+							"with a class type hint can only be NULL");
+				}
+			}
+		}
+	}
+
+	/* These are assigned at the end to avoid unitialized memory in case of an error */
+	op_array->num_args = ast->children;
+	op_array->arg_info = arg_infos;
 }
 
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {

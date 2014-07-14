@@ -661,6 +661,9 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_PARSED_NEW					(1<<6)
 #define ZEND_PARSED_LIST_EXPR			(1<<7)
 
+#define ZEND_PARAM_REF      (1<<0)
+#define ZEND_PARAM_VARIADIC (1<<1)
+
 
 /* unset types */
 #define ZEND_UNSET_REG 0

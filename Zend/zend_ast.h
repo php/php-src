@@ -93,6 +93,10 @@ enum _zend_ast_kind {
 	ZEND_AST_TRY,
 	ZEND_AST_CATCH_LIST,
 	ZEND_AST_CATCH,
+
+	ZEND_AST_PARAM_LIST,
+	ZEND_AST_PARAM,
+	ZEND_AST_TYPE,
 };
 
 typedef unsigned short zend_ast_kind;
