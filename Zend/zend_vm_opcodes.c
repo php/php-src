@@ -145,7 +145,7 @@ const char *zend_vm_opcodes_map[169] = {
 	"ZEND_SEND_USER",
 	"ZEND_STRLEN",
 	NULL,
-	NULL,
+	"ZEND_TYPE_CHECK",
 	NULL,
 	NULL,
 	NULL,

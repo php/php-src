@@ -5884,4 +5884,55 @@ ZEND_VM_C_LABEL(strlen_error):
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
+{
+	USE_OPLINE
+	zval *value;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	switch (opline->extended_value) {
+		case IS_NULL:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_STRING:
+		case IS_ARRAY:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == opline->extended_value);
+			break;
+		case _IS_BOOL:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_OBJECT:
+			if (Z_TYPE_P(value) == opline->extended_value) {
+				if (Z_OBJ_HT_P(value)->get_class_entry == NULL) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+				} else {
+					zend_class_entry *ce = Z_OBJCE_P(value);
+					if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1 
+							&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
+						ZVAL_FALSE(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_TRUE(EX_VAR(opline->result.var));
+					}
+				}
+			} else {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+			break;
+		case IS_RESOURCE:
+			if (Z_TYPE_P(value) == opline->extended_value) {
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(value) TSRMLS_CC);
+				ZVAL_BOOL(EX_VAR(opline->result.var), type_name != NULL);
+			} else {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+		EMPTY_SWITCH_DEFAULT_CASE()
+
+	}
+	FREE_OP1();
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_EXPORT_HANDLER(zend_do_fcall, ZEND_DO_FCALL)
