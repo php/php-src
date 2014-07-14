@@ -3399,6 +3399,57 @@ strlen_error:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+
+
+	SAVE_OPLINE();
+	value = opline->op1.zv;
+	switch (opline->extended_value) {
+		case IS_NULL:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_STRING:
+		case IS_ARRAY:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == opline->extended_value);
+			break;
+		case _IS_BOOL:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_OBJECT:
+			if (Z_TYPE_P(value) == opline->extended_value) {
+				if (Z_OBJ_HT_P(value)->get_class_entry == NULL) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+				} else {
+					zend_class_entry *ce = Z_OBJCE_P(value);
+					if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1
+							&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
+						ZVAL_FALSE(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_TRUE(EX_VAR(opline->result.var));
+					}
+				}
+			} else {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+			break;
+		case IS_RESOURCE:
+			if (Z_TYPE_P(value) == opline->extended_value) {
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(value) TSRMLS_CC);
+				ZVAL_BOOL(EX_VAR(opline->result.var), type_name != NULL);
+			} else {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+		EMPTY_SWITCH_DEFAULT_CASE()
+
+	}
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -8874,6 +8925,57 @@ strlen_error:
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
+	}
+	zval_dtor(free_op1.var);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	switch (opline->extended_value) {
+		case IS_NULL:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_STRING:
+		case IS_ARRAY:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == opline->extended_value);
+			break;
+		case _IS_BOOL:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_OBJECT:
+			if (Z_TYPE_P(value) == opline->extended_value) {
+				if (Z_OBJ_HT_P(value)->get_class_entry == NULL) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+				} else {
+					zend_class_entry *ce = Z_OBJCE_P(value);
+					if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1
+							&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
+						ZVAL_FALSE(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_TRUE(EX_VAR(opline->result.var));
+					}
+				}
+			} else {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+			break;
+		case IS_RESOURCE:
+			if (Z_TYPE_P(value) == opline->extended_value) {
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(value) TSRMLS_CC);
+				ZVAL_BOOL(EX_VAR(opline->result.var), type_name != NULL);
+			} else {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+		EMPTY_SWITCH_DEFAULT_CASE()
+
 	}
 	zval_dtor(free_op1.var);
 	CHECK_EXCEPTION();
@@ -14371,6 +14473,57 @@ strlen_error:
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
+	}
+	zval_ptr_dtor_nogc(free_op1.var);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	switch (opline->extended_value) {
+		case IS_NULL:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_STRING:
+		case IS_ARRAY:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == opline->extended_value);
+			break;
+		case _IS_BOOL:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_OBJECT:
+			if (Z_TYPE_P(value) == opline->extended_value) {
+				if (Z_OBJ_HT_P(value)->get_class_entry == NULL) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+				} else {
+					zend_class_entry *ce = Z_OBJCE_P(value);
+					if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1
+							&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
+						ZVAL_FALSE(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_TRUE(EX_VAR(opline->result.var));
+					}
+				}
+			} else {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+			break;
+		case IS_RESOURCE:
+			if (Z_TYPE_P(value) == opline->extended_value) {
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(value) TSRMLS_CC);
+				ZVAL_BOOL(EX_VAR(opline->result.var), type_name != NULL);
+			} else {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+		EMPTY_SWITCH_DEFAULT_CASE()
+
 	}
 	zval_ptr_dtor_nogc(free_op1.var);
 	CHECK_EXCEPTION();
@@ -31488,6 +31641,57 @@ strlen_error:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
+	switch (opline->extended_value) {
+		case IS_NULL:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_STRING:
+		case IS_ARRAY:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == opline->extended_value);
+			break;
+		case _IS_BOOL:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_OBJECT:
+			if (Z_TYPE_P(value) == opline->extended_value) {
+				if (Z_OBJ_HT_P(value)->get_class_entry == NULL) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+				} else {
+					zend_class_entry *ce = Z_OBJCE_P(value);
+					if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1
+							&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
+						ZVAL_FALSE(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_TRUE(EX_VAR(opline->result.var));
+					}
+				}
+			} else {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+			break;
+		case IS_RESOURCE:
+			if (Z_TYPE_P(value) == opline->extended_value) {
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(value) TSRMLS_CC);
+				ZVAL_BOOL(EX_VAR(opline->result.var), type_name != NULL);
+			} else {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+		EMPTY_SWITCH_DEFAULT_CASE()
+
+	}
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -43821,31 +44025,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_CONST_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_CONST_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_CONST_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_CONST_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_CONST_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_TMP_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_TMP_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_TMP_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_TMP_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_TMP_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_VAR_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_VAR_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_VAR_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_VAR_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_CV_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_CV_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_CV_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_CV_HANDLER,
+  	ZEND_TYPE_CHECK_SPEC_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,

@@ -2751,6 +2751,54 @@ static int zend_do_convert_strlen(zend_op *init_opline, znode *result TSRMLS_DC)
 }
 /* }}} */
 
+static int zend_do_convert_type_check(zend_op *init_opline, znode *result, zend_uint type TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline = init_opline + 1;
+	zend_op *send = NULL;
+	int level = 0;
+
+	do {
+		switch (opline->opcode) {
+			case ZEND_SEND_VAL:
+			case ZEND_SEND_VAL_EX:
+			case ZEND_SEND_VAR:
+			case ZEND_SEND_VAR_EX:
+			case ZEND_SEND_VAR_NO_REF:
+			case ZEND_SEND_REF:
+			case ZEND_SEND_UNPACK:
+				if (level == 0) {
+					if (opline->opcode == ZEND_SEND_UNPACK) {
+						return 0;
+					}
+					send = opline;
+				}
+				break;
+			case ZEND_INIT_FCALL_BY_NAME:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
+			case ZEND_NEW:
+			case ZEND_INIT_METHOD_CALL:
+			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_FCALL:
+				level++;
+				break;
+			case ZEND_DO_FCALL:
+				level--;
+				break;
+		}
+		opline++;
+	} while (send == NULL);
+
+	MAKE_NOP(init_opline);
+	send->opcode = ZEND_TYPE_CHECK;
+	send->extended_value = type;
+	SET_UNUSED(send->op2);
+	send->result.var = get_temporary_variable(CG(active_op_array));
+	send->result_type = IS_TMP_VAR;
+	GET_NODE(result, send->result);
+	return 1;
+}
+/* }}} */
+
 void zend_do_end_function_call(znode *function_name, znode *result, int is_method, int is_dynamic_fcall TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
@@ -2793,6 +2841,70 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 				           memcmp(func->common.function_name->val, "strlen", sizeof("strlen")-1) == 0) {
 					if (fcall->arg_num == 1) {
 						if (zend_do_convert_strlen(opline, result TSRMLS_CC)) {
+							zend_stack_del_top(&CG(function_call_stack));
+							return;
+						}
+					}
+				} else if (func->common.function_name->len == sizeof("is_null")-1 &&
+						memcmp(func->common.function_name->val, "is_null", sizeof("is_null")-1) == 0) {
+					if (fcall->arg_num == 1) {
+						if (zend_do_convert_type_check(opline, result, IS_NULL)) {
+							zend_stack_del_top(&CG(function_call_stack));
+							return;
+						}
+					}
+				} else if (func->common.function_name->len == sizeof("is_bool")-1 &&
+						memcmp(func->common.function_name->val, "is_bool", sizeof("is_bool")-1) == 0) {
+					if (fcall->arg_num == 1) {
+						if (zend_do_convert_type_check(opline, result, _IS_BOOL)) {
+							zend_stack_del_top(&CG(function_call_stack));
+							return;
+						}
+					}
+				} else if (func->common.function_name->len == sizeof("is_long")-1 &&
+						memcmp(func->common.function_name->val, "is_long", sizeof("is_long")-1) == 0) {
+					if (fcall->arg_num == 1) {
+						if (zend_do_convert_type_check(opline, result, IS_LONG)) {
+							zend_stack_del_top(&CG(function_call_stack));
+							return;
+						}
+					}
+				} else if (func->common.function_name->len == sizeof("is_float")-1 &&
+						memcmp(func->common.function_name->val, "is_float", sizeof("is_float")-1) == 0) {
+					if (fcall->arg_num == 1) {
+						if (zend_do_convert_type_check(opline, result, IS_DOUBLE)) {
+							zend_stack_del_top(&CG(function_call_stack));
+							return;
+						}
+					}
+				} else if (func->common.function_name->len == sizeof("is_string")-1 &&
+						memcmp(func->common.function_name->val, "is_string", sizeof("is_string")-1) == 0) {
+					if (fcall->arg_num == 1) {
+						if (zend_do_convert_type_check(opline, result, IS_STRING)) {
+							zend_stack_del_top(&CG(function_call_stack));
+							return;
+						}
+					}
+				} else if (func->common.function_name->len == sizeof("is_array")-1 &&
+						memcmp(func->common.function_name->val, "is_array", sizeof("is_array")-1) == 0) {
+					if (fcall->arg_num == 1) {
+						if (zend_do_convert_type_check(opline, result, IS_ARRAY)) {
+							zend_stack_del_top(&CG(function_call_stack));
+							return;
+						}
+					}
+				} else if (func->common.function_name->len == sizeof("is_object")-1 &&
+						memcmp(func->common.function_name->val, "is_object", sizeof("is_object")-1) == 0) {
+					if (fcall->arg_num == 1) {
+						if (zend_do_convert_type_check(opline, result, IS_OBJECT)) {
+							zend_stack_del_top(&CG(function_call_stack));
+							return;
+						}
+					}
+				} else if (func->common.function_name->len == sizeof("is_resouce")-1 &&
+						memcmp(func->common.function_name->val, "is_resource", sizeof("is_resource")-1) == 0) {
+					if (fcall->arg_num == 1) {
+						if (zend_do_convert_type_check(opline, result, IS_RESOURCE)) {
 							zend_stack_del_top(&CG(function_call_stack));
 							return;
 						}

@@ -145,6 +145,7 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_SEND_ARRAY                      119
 #define ZEND_SEND_USER                       120
 #define ZEND_STRLEN                          121
+#define ZEND_TYPE_CHECK                      123
 #define ZEND_PRE_INC_OBJ                     132
 #define ZEND_PRE_DEC_OBJ                     133
 #define ZEND_POST_INC_OBJ                    134
