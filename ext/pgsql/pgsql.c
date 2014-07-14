@@ -80,6 +80,16 @@
 #define PGSQL_RETURN_OID(oid) (RETURN_LONG((long)oid))
 #endif
 
+/* from postgresql/src/include/catalog/pg_type.h */
+
+#define PGSQL_OID_BOOL     16
+#define PGSQL_OID_BYTEA    17
+#define PGSQL_OID_INT8     20
+#define PGSQL_OID_INT2     21
+#define PGSQL_OID_INT4     23
+#define PGSQL_OID_TEXT     25
+#define PGSQL_OID_OID      26
+
 #if HAVE_PQSETNONBLOCKING
 #define PQ_SETNONBLOCKING(pg_link, flag) PQsetnonblocking(pg_link, flag)
 #else
@@ -271,6 +281,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_all, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_all_columns, 0, 0, 1)
@@ -1054,6 +1065,8 @@ STD_PHP_INI_ENTRY_EX("pgsql.max_links",            "-1",  PHP_INI_SYSTEM, OnUpda
 STD_PHP_INI_BOOLEAN( "pgsql.auto_reset_persistent", "0",  PHP_INI_SYSTEM, OnUpdateBool, auto_reset_persistent, zend_pgsql_globals, pgsql_globals)
 STD_PHP_INI_BOOLEAN( "pgsql.ignore_notice",         "0",  PHP_INI_ALL,    OnUpdateBool, ignore_notices,        zend_pgsql_globals, pgsql_globals)
 STD_PHP_INI_BOOLEAN( "pgsql.log_notice",            "0",  PHP_INI_ALL,    OnUpdateBool, log_notices,           zend_pgsql_globals, pgsql_globals)
+STD_PHP_INI_BOOLEAN( "pgsql.convert_boolean_type",  "0",  PHP_INI_ALL,    OnUpdateBool, convert_boolean_type,  zend_pgsql_globals, pgsql_globals)
+STD_PHP_INI_BOOLEAN( "pgsql.convert_integer_type",  "0",  PHP_INI_ALL,    OnUpdateBool, convert_integer_type,  zend_pgsql_globals, pgsql_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -2647,22 +2660,46 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 		} else {
 			char *element = PQgetvalue(pgsql_result, pgsql_row, i);
 			if (element) {
+				Oid oid = PQftype(pgsql_result, i);
 				char *data;
 				int data_len;
 				int should_copy=0;
 				const uint element_len = strlen(element);
 
-				data = safe_estrndup(element, element_len);
-				data_len = element_len;
+				if (oid == PGSQL_OID_BOOL && PGG(convert_boolean_type)){
+					int boolval = *element != 'f' ? 1 : 0;
+					if (result_type & PGSQL_NUM) {
+						add_index_bool(return_value, i, boolval);
+					}
 
-				if (result_type & PGSQL_NUM) {
-					add_index_stringl(return_value, i, data, data_len, should_copy);
-					should_copy=1;
-				}
+					if (result_type & PGSQL_ASSOC) {
+						field_name = PQfname(pgsql_result, i);
+						add_assoc_bool(return_value, field_name, boolval);
+					}
+				} else if ((oid == PGSQL_OID_INT2 || oid == PGSQL_OID_INT4 ||
+							(oid == PGSQL_OID_INT8 && sizeof(long)>=8)) && PGG(convert_integer_type)){
+					long int longval = atol(element);
+					if (result_type & PGSQL_NUM) {
+						add_index_long(return_value, i, longval);
+					}
 
-				if (result_type & PGSQL_ASSOC) {
-					field_name = PQfname(pgsql_result, i);
-					add_assoc_stringl(return_value, field_name, data, data_len, should_copy);
+					if (result_type & PGSQL_ASSOC) {
+						field_name = PQfname(pgsql_result, i);
+						add_assoc_long(return_value, field_name, longval);
+					}
+				} else {
+					data = safe_estrndup(element, element_len);
+					data_len = element_len;
+
+					if (result_type & PGSQL_NUM) {
+						add_index_stringl(return_value, i, data, data_len, should_copy);
+						should_copy=1;
+					}
+
+					if (result_type & PGSQL_ASSOC) {
+						field_name = PQfname(pgsql_result, i);
+						add_assoc_stringl(return_value, field_name, data, data_len, should_copy);
+					}
 				}
 			}
 		}
@@ -2773,15 +2810,17 @@ PHP_FUNCTION(pg_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto array pg_fetch_all(resource result)
+/* {{{ proto array pg_fetch_all(resource result, [, int result_type])
    Fetch all rows into array */
 PHP_FUNCTION(pg_fetch_all)
 {
 	zval *result;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
+	long result_type = PGSQL_ASSOC;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &result) == FAILURE) {
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &result, &result_type) == FAILURE) {
 		return;
 	}
 
@@ -2789,7 +2828,7 @@ PHP_FUNCTION(pg_fetch_all)
 
 	pgsql_result = pg_result->result;
 	array_init(return_value);
-	if (php_pgsql_result2array(pgsql_result, return_value TSRMLS_CC) == FAILURE) {
+	if (php_pgsql_result2array(pgsql_result, result_type, return_value TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -6534,10 +6573,11 @@ PHP_FUNCTION(pg_delete)
 
 /* {{{ php_pgsql_result2array
  */
-PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC)
+PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result,  long result_type,  zval *ret_array TSRMLS_DC)
 {
 	zval *row;
-	char *field_name;
+	char **field_names;
+	Oid *field_types;
 	size_t num_fields;
 	int pg_numrows, pg_row;
 	uint i;
@@ -6546,26 +6586,70 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TS
 	if ((pg_numrows = PQntuples(pg_result)) <= 0) {
 		return FAILURE;
 	}
+	num_fields = PQnfields(pg_result);
+	if (result_type & PGSQL_ASSOC){
+		field_names = ecalloc(num_fields, sizeof*field_names);
+		for(i = 0; i < num_fields; i++){
+			field_names[i] = PQfname(pg_result, i);
+		}
+	}
+	field_types = ecalloc(num_fields, sizeof field_types);
+	for (i = 0; i < num_fields; i++){
+		field_types[i] = PQftype(pg_result, i);
+	}
 	for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
 		MAKE_STD_ZVAL(row);
 		array_init(row);
 		add_index_zval(ret_array, pg_row, row);
-		for (i = 0, num_fields = PQnfields(pg_result); i < num_fields; i++) {
+		for (i = 0; i < num_fields; i++) {
 			if (PQgetisnull(pg_result, pg_row, i)) {
-				field_name = PQfname(pg_result, i);
-				add_assoc_null(row, field_name);
+				if (result_type & PGSQL_NUM) {
+					add_index_null(row, i);
+				}
+				if (result_type & PGSQL_ASSOC) {
+					add_assoc_null(row, field_names[i]);
+				}
 			} else {
 				char *element = PQgetvalue(pg_result, pg_row, i);
 				if (element) {
 					char *data;
 					size_t data_len;
+					int should_copy=0;
 					const size_t element_len = strlen(element);
 
-					data = safe_estrndup(element, element_len);
-					data_len = element_len;
+					if (field_types[i] == PGSQL_OID_BOOL && PGG(convert_boolean_type)){
+						int boolval = *element != 'f' ? 1 : 0;
+						if (result_type & PGSQL_NUM) {
+							add_index_bool(row, i, boolval);
+						}
 
-					field_name = PQfname(pg_result, i);
-					add_assoc_stringl(row, field_name, data, data_len, 0);
+						if (result_type & PGSQL_ASSOC) {
+							add_assoc_bool(row, field_names[i], boolval);
+						}
+					} else if ((field_types[i] == PGSQL_OID_INT2 || field_types[i] == PGSQL_OID_INT4 ||
+								(field_types[i] == PGSQL_OID_INT8 && sizeof(long)>=8)) && PGG(convert_integer_type)){
+						long int longval = atol(element);
+						if (result_type & PGSQL_NUM) {
+							add_index_long(row, i, longval);
+						}
+
+						if (result_type & PGSQL_ASSOC) {
+							add_assoc_long(row, field_names[i], longval);
+						}
+					} else {
+
+						data = safe_estrndup(element, element_len);
+						data_len = element_len;
+
+						if (result_type & PGSQL_NUM) {
+							add_index_stringl(row, i, data, data_len, should_copy);
+							should_copy=1;
+						}
+
+						if (result_type & PGSQL_ASSOC) {
+							add_assoc_stringl(row, field_names[i], data, data_len, should_copy);
+						}
+					}
 				}
 			}
 		}
@@ -6614,7 +6698,7 @@ PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids
 
 	pg_result = PQexec(pg_link, querystr.c);
 	if (PQresultStatus(pg_result) == PGRES_TUPLES_OK) {
-		ret = php_pgsql_result2array(pg_result, ret_array TSRMLS_CC);
+		ret = php_pgsql_result2array(pg_result, PGSQL_NUM, ret_array TSRMLS_CC);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to execute '%s'", querystr.c);
 	}
