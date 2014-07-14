@@ -657,7 +657,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			case IS_STRING:
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type string", "", "none", "" TSRMLS_CC);
-				} else if (FAILURE == convert_to_string_safe_ex(arg)) {
+				} else if (!(cur_arg_info->allow_null && Z_TYPE_PP(arg) == IS_NULL) && FAILURE == convert_to_string_safe_ex(arg)) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type string", "", type, "" TSRMLS_CC);
 				}
 				break;
@@ -665,7 +665,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			case IS_DOUBLE:
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type float", "", "none", "" TSRMLS_CC);
-				} else if (FAILURE == convert_to_double_safe_ex(arg)) {
+				} else if (!(cur_arg_info->allow_null && Z_TYPE_PP(arg) == IS_NULL) && FAILURE == convert_to_double_safe_ex(arg)) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type float", "", type, "" TSRMLS_CC);
 				}
 				break;
@@ -673,7 +673,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			case IS_BOOL:
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type boolean", "", "none", "" TSRMLS_CC);
-				} else if (FAILURE == convert_to_boolean_safe_ex(arg)) {
+				} else if (!(cur_arg_info->allow_null && Z_TYPE_PP(arg) == IS_NULL) && FAILURE == convert_to_boolean_safe_ex(arg)) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type boolean", "", type, "" TSRMLS_CC);
 				}
 				break;
@@ -681,7 +681,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			case IS_LONG:
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type int", "", "none", "" TSRMLS_CC);
-				} else if (FAILURE == convert_to_long_safe_ex(arg)) {
+				} else if (!(cur_arg_info->allow_null && Z_TYPE_PP(arg) == IS_NULL) && FAILURE == convert_to_long_safe_ex(arg)) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type int", "", type, "" TSRMLS_CC);
 				}
 				break;

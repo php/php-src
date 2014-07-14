@@ -1946,18 +1946,13 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 						zend_error(E_COMPILE_ERROR, "Default value for parameters with callable type hint can only be NULL");
 					}
 				}
-			} else if (class_type->EA == IS_STRING) {
-				cur_arg_info->allow_null = 0;
-				cur_arg_info->type_hint = IS_STRING;
-			} else if (class_type->EA == IS_LONG) {
-				cur_arg_info->allow_null = 0;
-				cur_arg_info->type_hint = IS_LONG;
-			} else if (class_type->EA == IS_DOUBLE) {
-				cur_arg_info->allow_null = 0;
-				cur_arg_info->type_hint = IS_DOUBLE;
-			} else if (class_type->EA == IS_BOOL) {
-				cur_arg_info->allow_null = 0;
-				cur_arg_info->type_hint = IS_BOOL;
+			} else if (class_type->EA == IS_STRING || class_type->EA == IS_LONG || class_type->EA == IS_DOUBLE || class_type->EA == IS_BOOL) {
+				if (op == ZEND_RECV_INIT) {
+					cur_arg_info->allow_null = Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"));
+				} else {
+					cur_arg_info->allow_null = 0;
+				}
+				cur_arg_info->type_hint = class_type->EA;
 			} else {
 				cur_arg_info->type_hint = IS_OBJECT;
 				if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
