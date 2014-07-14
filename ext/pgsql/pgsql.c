@@ -510,6 +510,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_wait_notify, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, tv_sec)
+	ZEND_ARG_INFO(0, tv_usec)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_get_notify, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, e)
@@ -635,6 +641,7 @@ const zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_field_table,  arginfo_pg_field_table)
 #endif
 	/* async message function */
+	PHP_FE(pg_wait_notify,   arginfo_pg_wait_notify)
 	PHP_FE(pg_get_notify,   arginfo_pg_get_notify)
 	PHP_FE(pg_get_pid,      arginfo_pg_get_pid)
 	/* error message functions */
@@ -5004,6 +5011,68 @@ PHP_FUNCTION(pg_result_status)
 }
 /* }}} */
 
+/* {{{ proto array pg_wait_notify([resource connection[, tv_sec[, tv_usec]]])
+   Wait for postgres activity */
+PHP_FUNCTION(pg_wait_notify)
+{
+	zval *pgsql_link, *sec = NULL;
+	struct timeval	tv;
+	struct timeval *tv_p = NULL;
+	fd_set			rfds;
+	int				retval, sock, id = -1;
+	long			usec = 0;
+	PGconn *pgsql;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r|z!l",
+								 &pgsql_link, &sec, &usec) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	sock = PQsocket(pgsql);
+	if (sock < 0)
+		RETURN_FALSE;
+
+	FD_ZERO(&rfds);
+	FD_SET(sock, &rfds);
+
+	if (sec != NULL) {
+		zval tmp;
+
+		if (Z_TYPE_P(sec) != IS_LONG) {
+			tmp = *sec;
+			zval_copy_ctor(&tmp);
+			convert_to_long(&tmp);
+			sec = &tmp;
+		}
+
+		/* Solaris + BSD do not like microsecond values which are >= 1 sec */
+		if (usec > 999999) {
+			tv.tv_sec = Z_LVAL_P(sec) + (usec / 1000000);
+			tv.tv_usec = usec % 1000000;
+		} else {
+			tv.tv_sec = Z_LVAL_P(sec);
+			tv.tv_usec = usec;
+		}
+
+		tv_p = &tv;
+
+		if (sec == &tmp) {
+			zval_dtor(&tmp);
+		}
+	}
+
+	retval = select(sock + 1, &rfds, NULL, NULL, tv_p);
+
+	if (retval == -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to select [%d]", errno);
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(retval);
+}
+/* }}} */
 
 /* {{{ proto array pg_get_notify([resource connection[, result_type]])
    Get asynchronous notification */
@@ -5064,7 +5133,7 @@ PHP_FUNCTION(pg_get_notify)
 }
 /* }}} */
 
-/* {{{ proto int pg_get_pid([resource connection)
+/* {{{ proto int pg_get_pid([resource connection])
    Get backend(server) pid */
 PHP_FUNCTION(pg_get_pid)
 {
