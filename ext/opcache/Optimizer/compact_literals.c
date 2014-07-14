@@ -147,6 +147,9 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 				case ZEND_CATCH:
 					LITERAL_INFO(opline->op1.constant, LITERAL_CLASS, 1, 1, 2);
 					break;
+				case ZEND_DEFINED:
+					LITERAL_INFO(opline->op1.constant, LITERAL_CONST, 1, 1, 2);
+					break;
 				case ZEND_FETCH_CONSTANT:
 					if (ZEND_OP1_TYPE(opline) == IS_UNUSED) {
 						if ((opline->extended_value & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {

@@ -468,6 +468,19 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				MAKE_NOP(opline);
 			}
 			break;
+		case ZEND_DEFINED:
+			{
+				zval c;
+				zend_uint tv = ZEND_RESULT(opline).var;
+				if (!zend_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline)), &c, 0 TSRMLS_CC)) {
+					break;
+				}
+				ZVAL_TRUE(&c);
+				replace_tmp_by_const(op_array, opline, tv, &c TSRMLS_CC);
+				literal_dtor(&ZEND_OP1_LITERAL(opline));
+				MAKE_NOP(opline);
+			}
+			break;
 #if ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
 		case ZEND_DECLARE_CONST:
 			if (collect_constants &&

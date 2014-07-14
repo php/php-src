@@ -171,6 +171,7 @@ static void update_op1_const(zend_op_array *op_array,
 				case ZEND_INIT_STATIC_METHOD_CALL:
 				case ZEND_CATCH:
 				case ZEND_FETCH_CONSTANT:
+				case ZEND_DEFINED:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
 					STR_HASH_VAL(Z_STR(ZEND_OP1_LITERAL(opline)));
 					Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->last_cache_slot++;

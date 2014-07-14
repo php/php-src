@@ -2799,6 +2799,36 @@ static int zend_do_convert_type_check(zend_op *init_opline, znode *result, zend_
 }
 /* }}} */
 
+static int zend_do_convert_defined(zend_op *init_opline, znode *result TSRMLS_DC) /* {{{ */
+{
+	zval c;
+	zend_string *lc_name;
+	zend_op *opline = init_opline + 1;
+
+	if (opline->opcode != ZEND_SEND_VAL ||
+		opline->op1_type != IS_CONST ||
+		Z_TYPE(CONSTANT(opline->op1.constant)) != IS_STRING
+		|| zend_memrchr(Z_STRVAL(CONSTANT(opline->op1.constant)), '\\', Z_STRLEN(CONSTANT(opline->op1.constant))) != NULL
+		|| zend_memrchr(Z_STRVAL(CONSTANT(opline->op1.constant)), ':', Z_STRLEN(CONSTANT(opline->op1.constant))) != NULL) {
+		return 0;
+	}
+
+	MAKE_NOP(init_opline);
+	opline->opcode = ZEND_DEFINED;
+	opline->extended_value = 0;
+	GET_CACHE_SLOT(opline->op1.constant);
+	/* lowcase constant name */
+	lc_name = STR_ALLOC(Z_STRLEN(CONSTANT(opline->op1.constant)), 0);
+	zend_str_tolower_copy(lc_name->val, Z_STRVAL(CONSTANT(opline->op1.constant)), Z_STRLEN(CONSTANT(opline->op1.constant)));
+	ZVAL_NEW_STR(&c, lc_name);
+	zend_add_literal(CG(active_op_array), &c);
+	opline->result.var = get_temporary_variable(CG(active_op_array));
+	opline->result_type = IS_TMP_VAR;
+	GET_NODE(result, opline->result);
+	return 1;
+}
+/* }}} */
+
 void zend_do_end_function_call(znode *function_name, znode *result, int is_method, int is_dynamic_fcall TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
@@ -2834,6 +2864,14 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 					if (fcall->arg_num == 2) {
 						if (zend_do_convert_call_user_func_array(opline TSRMLS_CC)) {
 							fcall->arg_num = 0;
+						}
+					}
+				} else if (func->common.function_name->len == sizeof("defined")-1 &&
+				           memcmp(func->common.function_name->val, "defined", sizeof("defined")-1) == 0) {
+					if (fcall->arg_num == 1) {
+						if (zend_do_convert_defined(opline, result TSRMLS_CC)) {
+							zend_stack_del_top(&CG(function_call_stack));
+							return;
 						}
 					}
 				} else if ((CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN) == 0 &&
