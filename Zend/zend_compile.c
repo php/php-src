@@ -2821,7 +2821,7 @@ static int zend_do_convert_defined(zend_op *init_opline, znode *result TSRMLS_DC
 	lc_name = STR_ALLOC(Z_STRLEN(CONSTANT(opline->op1.constant)), 0);
 	zend_str_tolower_copy(lc_name->val, Z_STRVAL(CONSTANT(opline->op1.constant)), Z_STRLEN(CONSTANT(opline->op1.constant)));
 	ZVAL_NEW_STR(&c, lc_name);
-	zend_add_literal(CG(active_op_array), &c);
+	zend_add_literal(CG(active_op_array), &c TSRMLS_CC);
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	opline->result_type = IS_TMP_VAR;
 	GET_NODE(result, opline->result);
