@@ -574,7 +574,7 @@ ZEND_API int _convert_to_boolean_safe(zval **op_ptr, int separate)
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			ZVAL_BOOL(op, 0);
-			return SUCCESS;
+			return FAILURE;
 		case IS_STRING:
 			{
 				char *strval = Z_STRVAL_P(op);
@@ -585,7 +585,7 @@ ZEND_API int _convert_to_boolean_safe(zval **op_ptr, int separate)
 					ZVAL_BOOL(op, 1);
 				}
 				STR_FREE(strval);
-				return SUCCESS;
+				return FAILURE;
 			}
 		case IS_BOOL:
 			return SUCCESS;
@@ -594,10 +594,10 @@ ZEND_API int _convert_to_boolean_safe(zval **op_ptr, int separate)
 			return FAILURE;
 		case IS_LONG:
 			ZVAL_BOOL(op, Z_LVAL_P(op) ? 1 : 0);
-			return SUCCESS;
+			return FAILURE;
 		case IS_DOUBLE:
 			ZVAL_BOOL(op, Z_DVAL_P(op) ? 1 : 0);
-			return SUCCESS;
+			return FAILURE;
 		case IS_ARRAY:
 			{
 				zend_bool temp;

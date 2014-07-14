@@ -2,6 +2,8 @@
 nullable scalar typehints
 --FILE--
 <?php
+require 'common.inc';
+
 function intable(int $foo) {
     var_dump($foo);
 }
@@ -50,5 +52,6 @@ float(0)
 NULL
 string(0) ""
 NULL
+E_RECOVERABLE_ERROR: Argument 1 passed to boolable() must be of the type boolean, null given, called in %s on line 41 and defined in %s on line 34
 bool(false)
 NULL
