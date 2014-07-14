@@ -1615,10 +1615,13 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 		return 1;
 	}
 	{
-		char *header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
-		zend_hash_str_add_ptr(&client->request.headers, header_name, client->current_header_name_len, value);
-		zend_hash_str_add_ptr(&client->request.headers_original_case, client->current_header_name, client->current_header_name_len, value);
-		efree(header_name);
+		/* strip off the colon */
+		zend_string *orig_header_name = STR_INIT(client->current_header_name, client->current_header_name_len, 1);
+		char *lc_header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
+		zend_hash_str_add_ptr(&client->request.headers, lc_header_name, client->current_header_name_len, value);
+		zend_hash_add_ptr(&client->request.headers_original_case, orig_header_name, value);
+		efree(lc_header_name);
+		STR_RELEASE(orig_header_name);
 	}
 
 	if (client->current_header_name_allocated) {
