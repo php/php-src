@@ -352,7 +352,7 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error TSRML
 }
 /* }}} */
 
-ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int check_null TSRMLS_CC) /* {{{ */
+ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int check_null TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce_base = *pce;
 

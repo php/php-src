@@ -83,7 +83,7 @@ U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
 	return fmt_count;
 }
 
-static void arg_types_dtor(zval *el TSRMLS_DC) {
+static void arg_types_dtor(zval *el) {
 	efree(Z_PTR_P(el));
 }
 

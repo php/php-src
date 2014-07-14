@@ -69,7 +69,7 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 		  str2_p == ( num2_p = collator_convert_string_to_number_if_possible( str2_p, &num2 ) ) ) )
 	{
 		/* Fetch collator object. */
-		co = Z_INTL_COLLATOR_P(&INTL_G(current_collator) TSRMLS_CC );
+		co = Z_INTL_COLLATOR_P(&INTL_G(current_collator));
 
 		if (!co || !co->ucoll) {
 			intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
@@ -187,7 +187,7 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2 TSRM
 	str2_p = collator_make_printable_zval( op2, &str2 );
 
 	/* Fetch collator object. */
-	co = Z_INTL_COLLATOR_P(&INTL_G(current_collator) TSRMLS_CC );
+	co = Z_INTL_COLLATOR_P(&INTL_G(current_collator));
 
 	/* Compare the strings using ICU. */
 	ZVAL_LONG(result, ucol_strcoll(

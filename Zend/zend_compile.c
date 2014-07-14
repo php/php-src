@@ -2539,7 +2539,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 }
 /* }}} */
 
-static int zend_do_convert_call(zend_op *init_opline, zend_op *opline, long num_args, zend_function **func_ptr TSRMLS_CC)  /* {{{ */
+static int zend_do_convert_call(zend_op *init_opline, zend_op *opline, long num_args, zend_function **func_ptr TSRMLS_DC)  /* {{{ */
 {
 	zval *function_name;
 	zend_string *lcname;
@@ -2848,7 +2848,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 				} else if (func->common.function_name->len == sizeof("is_null")-1 &&
 						memcmp(func->common.function_name->val, "is_null", sizeof("is_null")-1) == 0) {
 					if (fcall->arg_num == 1) {
-						if (zend_do_convert_type_check(opline, result, IS_NULL)) {
+						if (zend_do_convert_type_check(opline, result, IS_NULL TSRMLS_CC)) {
 							zend_stack_del_top(&CG(function_call_stack));
 							return;
 						}
@@ -2856,7 +2856,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 				} else if (func->common.function_name->len == sizeof("is_bool")-1 &&
 						memcmp(func->common.function_name->val, "is_bool", sizeof("is_bool")-1) == 0) {
 					if (fcall->arg_num == 1) {
-						if (zend_do_convert_type_check(opline, result, _IS_BOOL)) {
+						if (zend_do_convert_type_check(opline, result, _IS_BOOL TSRMLS_CC)) {
 							zend_stack_del_top(&CG(function_call_stack));
 							return;
 						}
@@ -2864,7 +2864,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 				} else if (func->common.function_name->len == sizeof("is_long")-1 &&
 						memcmp(func->common.function_name->val, "is_long", sizeof("is_long")-1) == 0) {
 					if (fcall->arg_num == 1) {
-						if (zend_do_convert_type_check(opline, result, IS_LONG)) {
+						if (zend_do_convert_type_check(opline, result, IS_LONG TSRMLS_CC)) {
 							zend_stack_del_top(&CG(function_call_stack));
 							return;
 						}
@@ -2872,7 +2872,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 				} else if (func->common.function_name->len == sizeof("is_float")-1 &&
 						memcmp(func->common.function_name->val, "is_float", sizeof("is_float")-1) == 0) {
 					if (fcall->arg_num == 1) {
-						if (zend_do_convert_type_check(opline, result, IS_DOUBLE)) {
+						if (zend_do_convert_type_check(opline, result, IS_DOUBLE TSRMLS_CC)) {
 							zend_stack_del_top(&CG(function_call_stack));
 							return;
 						}
@@ -2880,7 +2880,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 				} else if (func->common.function_name->len == sizeof("is_string")-1 &&
 						memcmp(func->common.function_name->val, "is_string", sizeof("is_string")-1) == 0) {
 					if (fcall->arg_num == 1) {
-						if (zend_do_convert_type_check(opline, result, IS_STRING)) {
+						if (zend_do_convert_type_check(opline, result, IS_STRING TSRMLS_CC)) {
 							zend_stack_del_top(&CG(function_call_stack));
 							return;
 						}
@@ -2888,7 +2888,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 				} else if (func->common.function_name->len == sizeof("is_array")-1 &&
 						memcmp(func->common.function_name->val, "is_array", sizeof("is_array")-1) == 0) {
 					if (fcall->arg_num == 1) {
-						if (zend_do_convert_type_check(opline, result, IS_ARRAY)) {
+						if (zend_do_convert_type_check(opline, result, IS_ARRAY TSRMLS_CC)) {
 							zend_stack_del_top(&CG(function_call_stack));
 							return;
 						}
@@ -2896,7 +2896,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 				} else if (func->common.function_name->len == sizeof("is_object")-1 &&
 						memcmp(func->common.function_name->val, "is_object", sizeof("is_object")-1) == 0) {
 					if (fcall->arg_num == 1) {
-						if (zend_do_convert_type_check(opline, result, IS_OBJECT)) {
+						if (zend_do_convert_type_check(opline, result, IS_OBJECT TSRMLS_CC)) {
 							zend_stack_del_top(&CG(function_call_stack));
 							return;
 						}
@@ -2904,7 +2904,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 				} else if (func->common.function_name->len == sizeof("is_resouce")-1 &&
 						memcmp(func->common.function_name->val, "is_resource", sizeof("is_resource")-1) == 0) {
 					if (fcall->arg_num == 1) {
-						if (zend_do_convert_type_check(opline, result, IS_RESOURCE)) {
+						if (zend_do_convert_type_check(opline, result, IS_RESOURCE TSRMLS_CC)) {
 							zend_stack_del_top(&CG(function_call_stack));
 							return;
 						}

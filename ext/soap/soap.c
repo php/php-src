@@ -627,7 +627,7 @@ static void delete_service_res(zend_resource *res TSRMLS_DC)
 	delete_service(res->ptr);
 }
 
-static void delete_hashtable_res(zend_resource *res TSRMLS_CC)
+static void delete_hashtable_res(zend_resource *res TSRMLS_DC)
 {
 	delete_hashtable(res->ptr);
 }

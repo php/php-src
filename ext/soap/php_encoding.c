@@ -2275,7 +2275,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 				if (EG(exception)) {
 					goto iterator_done;
 				}
-				array_set_zval_key(Z_ARRVAL(array_copy), &key, val);
+				array_set_zval_key(Z_ARRVAL(array_copy), &key, val TSRMLS_CC);
 				zval_ptr_dtor(val);
 				zval_dtor(&key);
 			} else {

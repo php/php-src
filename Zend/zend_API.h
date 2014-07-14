@@ -714,7 +714,7 @@ ZEND_API void zend_wrong_paramers_count_error(int num_args, int min_num_args, in
 ZEND_API void zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg TSRMLS_DC);
 ZEND_API void zend_wrong_paramer_class_error(int num, char *name, zval *arg TSRMLS_DC);
 ZEND_API void zend_wrong_callback_error(int severity, int num, char *error TSRMLS_DC);
-ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int check_null TSRMLS_CC);
+ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int check_null TSRMLS_DC);
 
 #define ZEND_PARSE_PARAMETERS_START_EX(flags, min_num_args, max_num_args) do { \
 		const int _flags = (flags); \
@@ -736,7 +736,7 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 		    (UNEXPECTED(_num_args > _max_num_args) && \
 		     EXPECTED(_max_num_args >= 0))) { \
 			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
-				zend_wrong_paramers_count_error(_num_args, _min_num_args, _max_num_args); \
+				zend_wrong_paramers_count_error(_num_args, _min_num_args, _max_num_args TSRMLS_CC); \
 			} \
 			goto zend_parse_params_failure; \
 		} \
@@ -750,17 +750,17 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 		if (0) { \
 zend_parse_params_wrong_callback: ZEND_ATTRIBUTE_UNUSED_LABEL \
 			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
-				zend_wrong_callback_error(E_WARNING, _i, _error TSRMLS_DC); \
+				zend_wrong_callback_error(E_WARNING, _i, _error TSRMLS_CC); \
 			} \
 			goto zend_parse_params_failure; \
 zend_parse_params_wrong_class: ZEND_ATTRIBUTE_UNUSED_LABEL \
 			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
-				zend_wrong_paramer_class_error(_i, _error, _arg TSRMLS_DC); \
+				zend_wrong_paramer_class_error(_i, _error, _arg TSRMLS_CC); \
 			} \
 			goto zend_parse_params_failure; \
 zend_parse_params_wrong_arg: ZEND_ATTRIBUTE_UNUSED_LABEL \
 			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
-				zend_wrong_paramer_type_error(_i, _expected_type, _arg TSRMLS_DC); \
+				zend_wrong_paramer_type_error(_i, _expected_type, _arg TSRMLS_CC); \
 			} \
 zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 			failure; \
@@ -809,7 +809,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 /* old "b" */
 #define Z_PARAM_BOOL_EX(dest, is_null, check_null, separate) do { \
 		Z_PARAM_PROLOGUE(separate); \
-		if (!_z_param_bool(_arg, &dest, &is_null, check_null)) { \
+		if (!_z_param_bool(_arg, &dest, &is_null, check_null TSRMLS_CC)) { \
 			_expected_type = Z_EXPECTED_BOOL; \
 			goto zend_parse_params_wrong_arg; \
 		} \
@@ -844,7 +844,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 /* old "f" */
 #define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, separate) do { \
 		Z_PARAM_PROLOGUE(separate); \
-		if (!_z_param_func(_arg, &dest_fci, &dest_fcc, check_null, &_error)) { \
+		if (!_z_param_func(_arg, &dest_fci, &dest_fcc, check_null, &_error TSRMLS_CC)) { \
 			if (!_error) { \
 				_expected_type = Z_EXPECTED_FUNC; \
 				goto zend_parse_params_wrong_arg; \
@@ -852,7 +852,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 				goto zend_parse_params_wrong_callback; \
 			} \
 		} else if (_error) { \
-			zend_wrong_callback_error(E_STRICT, _i, _error TSRMLS_DC); \
+			zend_wrong_callback_error(E_STRICT, _i, _error TSRMLS_CC); \
 		} \
 	} while (0);
 
@@ -862,7 +862,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 /* old "h" */
 #define Z_PARAM_ARRAY_HT_EX(dest, check_null, separate) do { \
 		Z_PARAM_PROLOGUE(separate); \
-		if (!_z_param_array_ht(_arg, &dest, check_null, 0)) { \
+		if (!_z_param_array_ht(_arg, &dest, check_null, 0 TSRMLS_CC)) { \
 			_expected_type = Z_EXPECTED_ARRAY; \
 			goto zend_parse_params_wrong_arg; \
 		} \
@@ -874,7 +874,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 /* old "H" */
 #define Z_PARAM_ARRAY_OR_OBJECT_HT_EX(dest, check_null, separate) do { \
 		Z_PARAM_PROLOGUE(separate); \
-		if (!_z_param_array_ht(_arg, &dest, check_null, 1)) { \
+		if (!_z_param_array_ht(_arg, &dest, check_null, 1 TSRMLS_CC)) { \
 			_expected_type = Z_EXPECTED_ARRAY; \
 			goto zend_parse_params_wrong_arg; \
 		} \
@@ -910,7 +910,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 /* old "o" */
 #define Z_PARAM_OBJECT_EX(dest, check_null, separate) do { \
 		Z_PARAM_PROLOGUE(separate); \
-		if (!_z_param_object(_arg, &dest, NULL, check_null)) { \
+		if (!_z_param_object(_arg, &dest, NULL, check_null TSRMLS_CC)) { \
 			_expected_type = Z_EXPECTED_OBJECT; \
 			goto zend_parse_params_wrong_arg; \
 		} \
@@ -922,7 +922,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 /* old "O" */
 #define Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, check_null, separate) do { \
 		Z_PARAM_PROLOGUE(separate); \
-		if (!_z_param_object(_arg, &dest, _ce, check_null)) { \
+		if (!_z_param_object(_arg, &dest, _ce, check_null TSRMLS_CC)) { \
 			if (_ce) { \
 				_error = (_ce)->name->val; \
 				goto zend_parse_params_wrong_class; \
@@ -939,7 +939,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 /* old "p" */
 #define Z_PARAM_PATH_EX(dest, dest_len, check_null, separate) do { \
 		Z_PARAM_PROLOGUE(separate); \
-		if (!_z_param_path(_arg, &dest, &dest_len, check_null)) { \
+		if (!_z_param_path(_arg, &dest, &dest_len, check_null TSRMLS_CC)) { \
 			_expected_type = Z_EXPECTED_PATH; \
 			goto zend_parse_params_wrong_arg; \
 		} \
@@ -951,7 +951,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 /* old "P" */
 #define Z_PARAM_PATH_STR_EX(dest, check_null, separate) do { \
 		Z_PARAM_PROLOGUE(separate); \
-		if (!_z_param_path_str(_arg, &dest, check_null)) { \
+		if (!_z_param_path_str(_arg, &dest, check_null TSRMLS_CC)) { \
 			_expected_type = Z_EXPECTED_PATH; \
 			goto zend_parse_params_wrong_arg; \
 		} \
@@ -975,7 +975,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 /* old "s" */
 #define Z_PARAM_STRING_EX(dest, dest_len, check_null, separate) do { \
 		Z_PARAM_PROLOGUE(separate); \
-		if (!_z_param_string(_arg, &dest, &dest_len, check_null)) { \
+		if (!_z_param_string(_arg, &dest, &dest_len, check_null TSRMLS_CC)) { \
 			_expected_type = Z_EXPECTED_STRING; \
 			goto zend_parse_params_wrong_arg; \
 		} \
@@ -987,7 +987,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 /* old "S" */
 #define Z_PARAM_STR_EX(dest, check_null, separate) do { \
 		Z_PARAM_PROLOGUE(separate); \
-		if (!_z_param_str(_arg, &dest, check_null)) { \
+		if (!_z_param_str(_arg, &dest, check_null TSRMLS_CC)) { \
 			_expected_type = Z_EXPECTED_STRING; \
 			goto zend_parse_params_wrong_arg; \
 		} \
@@ -1039,7 +1039,7 @@ zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
 
 /* Private part of new parameter parsing API */
 
-static zend_always_inline int _z_param_bool(zval *arg, zend_bool *dest, zend_bool *is_null, int check_null)
+static zend_always_inline int _z_param_bool(zval *arg, zend_bool *dest, zend_bool *is_null, int check_null TSRMLS_DC)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -1052,7 +1052,7 @@ static zend_always_inline int _z_param_bool(zval *arg, zend_bool *dest, zend_boo
 		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
-		*dest = zend_is_true(arg);
+		*dest = zend_is_true(arg TSRMLS_CC);
 	} else {
 		return 0;
 	}
@@ -1137,7 +1137,7 @@ static zend_always_inline int _z_param_double(zval *arg, double *dest, zend_bool
 	return 1;
 }
 
-static zend_always_inline int _z_param_str(zval *arg, zend_string **dest, int check_null)
+static zend_always_inline int _z_param_str(zval *arg, zend_string **dest, int check_null TSRMLS_DC)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		*dest = Z_STR_P(arg);
@@ -1159,11 +1159,11 @@ static zend_always_inline int _z_param_str(zval *arg, zend_string **dest, int ch
 	return 1;
 }
 
-static zend_always_inline int _z_param_string(zval *arg, char **dest, int *dest_len, int check_null)
+static zend_always_inline int _z_param_string(zval *arg, char **dest, int *dest_len, int check_null TSRMLS_DC)
 {
 	zend_string *str;
 
-	if (!_z_param_str(arg, &str, check_null)) {
+	if (!_z_param_str(arg, &str, check_null TSRMLS_CC)) {
 		return 0;
 	}
 	if (check_null && UNEXPECTED(!str)) {
@@ -1176,9 +1176,9 @@ static zend_always_inline int _z_param_string(zval *arg, char **dest, int *dest_
 	return 1;
 }
 
-static zend_always_inline int _z_param_path_str(zval *arg, zend_string **dest, int check_null)
+static zend_always_inline int _z_param_path_str(zval *arg, zend_string **dest, int check_null TSRMLS_DC)
 {
-	if (!_z_param_str(arg, dest, check_null) ||
+	if (!_z_param_str(arg, dest, check_null TSRMLS_CC) ||
 		(check_null && UNEXPECTED(!(*dest)->val)) ||
 	    UNEXPECTED(CHECK_NULL_PATH((*dest)->val, (*dest)->len))) {
 		return 0;
@@ -1186,11 +1186,11 @@ static zend_always_inline int _z_param_path_str(zval *arg, zend_string **dest, i
 	return 1;
 }
 
-static zend_always_inline int _z_param_path(zval *arg, char **dest, int *dest_len, int check_null)
+static zend_always_inline int _z_param_path(zval *arg, char **dest, int *dest_len, int check_null TSRMLS_DC)
 {
 	zend_string *str;
 
-	if (!_z_param_path_str(arg, &str, check_null)) {
+	if (!_z_param_path_str(arg, &str, check_null TSRMLS_CC)) {
 		return 0;
 	}
 	if (check_null && UNEXPECTED(!str)) {
@@ -1216,7 +1216,7 @@ static zend_always_inline int _z_param_array(zval *arg, zval **dest, int check_n
 	return 1;
 }
 
-static zend_always_inline int _z_param_array_ht(zval *arg, HashTable **dest, int check_null, int or_object)
+static zend_always_inline int _z_param_array_ht(zval *arg, HashTable **dest, int check_null, int or_object TSRMLS_DC)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
 		*dest = Z_ARRVAL_P(arg);
@@ -1230,7 +1230,7 @@ static zend_always_inline int _z_param_array_ht(zval *arg, HashTable **dest, int
 	return 1;
 }
 
-static zend_always_inline int _z_param_object(zval *arg, zval **dest, zend_class_entry *ce, int check_null)
+static zend_always_inline int _z_param_object(zval *arg, zval **dest, zend_class_entry *ce, int check_null TSRMLS_DC)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT) &&
 	    (!ce || EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC) != 0))) {
@@ -1255,7 +1255,7 @@ static zend_always_inline int _z_param_resource(zval *arg, zval **dest, int chec
 	return 1;
 }
 
-static zend_always_inline int _z_param_func(zval *arg, zend_fcall_info *dest_fci, zend_fcall_info_cache *dest_fcc, int check_null, char **error)
+static zend_always_inline int _z_param_func(zval *arg, zend_fcall_info *dest_fci, zend_fcall_info_cache *dest_fcc, int check_null, char **error TSRMLS_DC)
 {
 	if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		dest_fci->size = 0;
