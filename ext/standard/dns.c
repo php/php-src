@@ -897,13 +897,24 @@ PHP_FUNCTION(dns_get_record)
 
 			if (n < 0) {
 				php_dns_free_handle(handle);
-				if (h_errno == NO_DATA || h_errno == HOST_NOT_FOUND) {
-					continue;
-				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "DNS Query failed");
-					zval_dtor(return_value);
-					RETURN_FALSE;
+				switch (h_errno) {
+					case NO_DATA:
+					case HOST_NOT_FOUND:
+						continue;
+
+					case NO_RECOVERY:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unexpected server failure occurred.");
+						break;
+
+					case TRY_AGAIN:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "A temporary server error occurred.");
+						break;
+
+					default:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "DNS Query failed");
 				}
+				zval_dtor(return_value);
+				RETURN_FALSE;
 			}
 
 			cp = answer.qb2 + HFIXEDSZ;
