@@ -1260,6 +1260,10 @@ PHP_FUNCTION(intdiv)
 	if (divisor == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
 		RETURN_BOOL(0);
+	} else if (divisor == -1 && numerator == LONG_MIN) {
+		/* Prevent overflow error/crash 
+		   We don't return a float here as that violates function contract */
+		RETURN_LONG(0);
 	}
 	
 	RETURN_LONG(numerator/divisor);
