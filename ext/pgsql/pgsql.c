@@ -2828,7 +2828,7 @@ PHP_FUNCTION(pg_fetch_all)
 
 	pgsql_result = pg_result->result;
 	array_init(return_value);
-	if (php_pgsql_result2array(pgsql_result, result_type, return_value TSRMLS_CC) == FAILURE) {
+	if (php_pgsql_result2array_ex(pgsql_result, result_type, return_value TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -6573,7 +6573,15 @@ PHP_FUNCTION(pg_delete)
 
 /* {{{ php_pgsql_result2array
  */
-PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result,  long result_type,  zval *ret_array TSRMLS_DC)
+PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result,  zval *ret_array TSRMLS_DC)
+{
+  return php_pgsql_result2array_ex(pg_result, PGSQL_NUM, ret_array TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ php_pgsql_result2array_ex
+ */
+PHP_PGSQL_API int php_pgsql_result2array_ex(PGresult *pg_result,  long result_type,  zval *ret_array TSRMLS_DC)
 {
 	zval *row;
 	char **field_names;
@@ -6698,7 +6706,7 @@ PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids
 
 	pg_result = PQexec(pg_link, querystr.c);
 	if (PQresultStatus(pg_result) == PGRES_TUPLES_OK) {
-		ret = php_pgsql_result2array(pg_result, PGSQL_NUM, ret_array TSRMLS_CC);
+		ret = php_pgsql_result2array(pg_result,  ret_array TSRMLS_CC);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to execute '%s'", querystr.c);
 	}

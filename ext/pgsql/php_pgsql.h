@@ -204,7 +204,8 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *val
 PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, ulong opt , char **sql TSRMLS_DC);
 PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, ulong opt, char **sql TSRMLS_DC);
 PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, ulong opt, char **sql  TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, long result_type, zval *ret_array TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_result2array_ex(PGresult *pg_result, long result_type, zval *ret_array TSRMLS_DC);
 
 /* internal functions */
 static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
