@@ -260,8 +260,9 @@ PHP_FUNCTION(crypt)
 	char salt[PHP_MAX_SALT_LEN + 1];
 	char *str, *salt_in = NULL;
 	int str_len, salt_in_len = 0;
-	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 	zend_string *result;
+
+	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 
 	/* This will produce suitable results if people depend on DES-encryption
 	 * available (passing always 2-character salt). At least for glibc6.1 */

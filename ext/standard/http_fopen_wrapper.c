@@ -224,13 +224,13 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	efree(transport_string);
 
 	if (stream && use_proxy && use_ssl) {
+		smart_str header = {0};
+
 		/* Set peer_name or name verification will try to use the proxy server name */
 		if (!context || (tmpzval = php_stream_context_get_option(context, "ssl", "peer_name")) == NULL) {
 			ZVAL_STRING(&ssl_proxy_peer_name, resource->host);
 			php_stream_context_set_option(stream->context, "ssl", "peer_name", &ssl_proxy_peer_name);
 		}
-
-		smart_str header = {0};
 
 		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
 		smart_str_appends(&header, resource->host);

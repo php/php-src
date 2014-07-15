@@ -400,10 +400,12 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 	}
 
 	/* class table hash keys, class names, properties, methods, constants, etc */
-	for (idx = 0; idx < CG(class_table)->nNumUsed; idx++) {		
+	for (idx = 0; idx < CG(class_table)->nNumUsed; idx++) {
+		zend_class_entry *ce;
+
 		p = CG(class_table)->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		zend_class_entry *ce = (zend_class_entry*)Z_PTR(p->val);
+		ce = (zend_class_entry*)Z_PTR(p->val);
 
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key TSRMLS_CC);

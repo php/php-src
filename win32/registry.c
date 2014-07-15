@@ -146,8 +146,9 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 	return ret;
 }
 
-static void delete_internal_hashtable(void *data)
+static void delete_internal_hashtable(zval *zv)
 {
+	void *data = Z_PTR_P(zv);
 	zend_hash_destroy(*(HashTable**)data);
 	free(*(HashTable**)data);
 }
