@@ -607,6 +607,11 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 	zval_ptr_dtor(&func_name);
 
 	didwrite = 0;
+
+	if (EG(exception)) {
+		return 0;
+	}
+
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		convert_to_long(&retval);
 		didwrite = Z_LVAL(retval);
@@ -650,6 +655,13 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count)
 			1, args,
 			0, NULL);
 
+	zval_ptr_dtor(&args[0);
+	zval_ptr_dtor(&func_name);
+
+	if (EG(exception)) {
+		return -1;
+	}
+
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		convert_to_string(&retval);
 		didread = Z_STRLEN(retval);
@@ -664,11 +676,9 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count)
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_READ " is not implemented!",
 				us->wrapper->classname);
 	}
-	zval_ptr_dtor(&args[0]);
 
 	zval_ptr_dtor(&retval);
 	ZVAL_UNDEF(&retval);
-	zval_ptr_dtor(&func_name);
 
 	/* since the user stream has no way of setting the eof flag directly, we need to ask it if we hit eof */
 
