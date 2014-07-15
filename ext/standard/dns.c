@@ -896,10 +896,10 @@ PHP_FUNCTION(dns_get_record)
 
 			if (n < 0) {
 				php_dns_free_handle(handle);
-				if (h_errno == NO_DATA) {
+				if (h_errno == NO_DATA || h_errno == HOST_NOT_FOUND) {
 					continue;
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dns Query failed");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "DNS Query failed");
 					zval_dtor(return_value);
 					RETURN_FALSE;
 				}
