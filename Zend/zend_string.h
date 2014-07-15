@@ -194,14 +194,14 @@ static zend_always_inline zend_string *zend_str_safe_realloc(zend_string *s, siz
 
 	if (IS_INTERNED(s)) {
 		ret = STR_SAFE_ALLOC(n, m, l, persistent);
-		memcpy(ret->val, s->val, ((n * m) + l > s->len ? s->len : ((n * m) + l)) + 1);
+		memcpy(ret->val, s->val, ((n * m) + l > (size_t)s->len ? (size_t)s->len : ((n * m) + l)) + 1);
 	} else if (STR_REFCOUNT(s) == 1) {
 		ret = (zend_string *)safe_perealloc(s, n, m, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + l + 1), persistent);
 		ret->len = (n * m) + l;
 		STR_FORGET_HASH_VAL(ret);
 	} else {
 		ret = STR_SAFE_ALLOC(n, m, l, persistent);
-		memcpy(ret->val, s->val, ((n * m) + l > s->len ? s->len : ((n * m) + l)) + 1);
+		memcpy(ret->val, s->val, ((n * m) + l > (size_t)s->len ? (size_t)s->len : ((n * m) + l)) + 1);
 		STR_DELREF(s);
 	}
 	return ret;

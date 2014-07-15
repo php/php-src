@@ -167,8 +167,8 @@ struct _zend_vm_stack {
 #define ZEND_VM_STACK_GROW_IF_NEEDED(count)								\
 	do {																\
 		if (UNEXPECTED(((count) * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) >	\
-			((char*)EG(argument_stack)->end) -							\
-		    ((char*)EG(argument_stack)->top))) {						\
+			(size_t)(((char*)EG(argument_stack)->end) -					\
+		    ((char*)EG(argument_stack)->top)))) {						\
 			zend_vm_stack_extend((count) TSRMLS_CC);					\
 		}																\
 	} while (0)
