@@ -6960,6 +6960,120 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 	op_array->arg_info = arg_infos;
 }
 
+void zend_compile_func_decl(zend_ast *ast TSRMLS_DC) {
+	zend_ast *name_ast = ast->child[0];
+	zend_ast *params_ast = ast->child[1];
+	zend_ast *stmt_ast = ast->child[2];
+	zend_bool returns_ref = ast->attr;
+	zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
+
+	zend_op_array *orig_op_array = CG(active_op_array);
+	zend_op_array *op_array = emalloc(sizeof(zend_op_array));
+	zend_string *lcname;
+	zend_op *opline;
+
+	// TODO.AST interactive (not just here - also bpc etc!)
+	
+	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
+
+	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+		op_array->function_name = name = zend_concat_names(
+			Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)), name->val, name->len);
+	} else {
+		op_array->function_name = STR_COPY(name);
+	}
+
+	op_array->line_start = ast->lineno;
+	if (returns_ref) {
+		op_array->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+	}
+
+	lcname = STR_ALLOC(name->len, 0);
+	zend_str_tolower_copy(lcname->val, name->val, name->len);
+
+	if (CG(current_import_function)) {
+		zend_string *import_name = zend_hash_find_ptr(CG(current_import_function), lcname);
+		if (import_name) {
+			char *import_name_lc = zend_str_tolower_dup(import_name->val, import_name->len);
+
+			if (import_name->len != name->len
+				|| memcmp(import_name_lc, lcname->val, name->len)
+			) {
+				zend_error(E_COMPILE_ERROR, "Cannot declare function %s "
+					"because the name is already in use", name->val);
+			}
+
+			efree(import_name_lc);
+		}
+	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = ZEND_DECLARE_FUNCTION;
+	opline->extended_value = ZEND_DECLARE_FUNCTION;
+	opline->op2_type = IS_CONST;
+	LITERAL_STR(opline->op2, lcname);
+
+	{
+		zval key;
+		build_runtime_defined_function_key(&key, lcname->val, lcname->len TSRMLS_CC);
+
+		opline->op1_type = IS_CONST;
+		opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);
+
+		zend_hash_update_ptr(CG(function_table), Z_STR(key), op_array);
+	}
+
+	CG(active_op_array) = op_array;
+	zend_stack_push(&CG(context_stack), (void *) &CG(context));
+	zend_init_compiler_context(TSRMLS_C);
+
+	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
+		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+		opline = emit_op(NULL, ZEND_EXT_NOP, NULL, NULL TSRMLS_CC);
+		opline->lineno = ast->lineno;
+	}
+
+	{
+		/* Push a separator to the switch stack */
+		zend_switch_entry switch_entry;
+
+		switch_entry.cond.op_type = IS_UNUSED;
+		switch_entry.default_case = 0;
+		switch_entry.control_var = 0;
+
+		zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry);
+	}
+
+	{
+		/* Push a separator to the foreach stack */
+		zend_op dummy_opline;
+
+		dummy_opline.result_type = IS_UNUSED;
+
+		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline);
+	}
+
+	zend_compile_params(params_ast TSRMLS_CC);
+	zend_compile_stmt(stmt_ast TSRMLS_CC);
+
+	zend_do_extended_info(TSRMLS_C);
+	zend_do_return(NULL, 0 TSRMLS_CC);
+
+	pass_two(CG(active_op_array) TSRMLS_CC);
+	zend_release_labels(0 TSRMLS_CC);
+
+	// TODO.AST __autoload
+	// TODO.AST end line
+	// TODO.AST doc comment
+
+	CG(active_op_array) = orig_op_array;
+
+	/* Pop the switch and foreach separators */
+	zend_stack_del_top(&CG(switch_cond_stack));
+	zend_stack_del_top(&CG(foreach_copy_stack));
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7765,6 +7879,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_TRY:
 			zend_compile_try(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_FUNC_DECL:
+			zend_compile_func_decl(ast TSRMLS_CC);
 			break;
 		default:
 		{

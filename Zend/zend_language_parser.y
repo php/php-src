@@ -247,7 +247,7 @@ name:
 
 top_statement:
 		statement						{ AS($1); zend_verify_namespace(TSRMLS_C); }
-	|	function_declaration_statement	{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
+	|	function_declaration_statement	{ AS($1); zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 	|	class_declaration_statement		{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 	|	T_HALT_COMPILER '(' ')' ';'		{ zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
 	|	T_NAMESPACE namespace_name ';'	{ zend_do_begin_namespace(&$2, 0 TSRMLS_CC); }
@@ -312,7 +312,7 @@ inner_statement_list:
 
 inner_statement:
 		statement { $$.u.ast = $1.u.ast; }
-	|	function_declaration_statement { AN($$); }
+	|	function_declaration_statement { $$.u.ast = $1.u.ast; }
 	|	class_declaration_statement { AN($$); }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ zend_error_noreturn(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
@@ -388,7 +388,9 @@ unset_variable:
 ;
 
 function_declaration_statement:
-		unticked_function_declaration_statement	{ DO_TICKS(); }
+	function is_reference T_STRING '(' parameter_list ')' '{' inner_statement_list '}'
+		{ $$.u.ast = zend_ast_create_ex(3, ZEND_AST_FUNC_DECL,
+		      $2.op_type, AST_ZVAL(&$3), $5.u.ast, $8.u.ast); }
 ;
 
 class_declaration_statement:
@@ -403,12 +405,6 @@ is_reference:
 is_variadic:
 		/* empty */ { $$.op_type = 0; }
 	|	T_ELLIPSIS  { $$.op_type = ZEND_PARAM_VARIADIC; }
-;
-
-unticked_function_declaration_statement:
-		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL TSRMLS_CC); }
-		'(' parameter_list ')' { zend_compile_params($6.u.ast TSRMLS_CC); zend_ast_destroy($6.u.ast); }
-		'{' inner_statement_list '}' { AS($10); zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 ;
 
 unticked_class_declaration_statement:

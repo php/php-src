@@ -82,6 +82,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->required_num_args = 0;
 
 	op_array->scope = NULL;
+	op_array->prototype = NULL;
 
 	op_array->brk_cont_array = NULL;
 	op_array->try_catch_array = NULL;

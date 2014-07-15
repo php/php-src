@@ -55,17 +55,17 @@ static zend_ast *zend_ast_create_from_va_list(
 	ast = emalloc(sizeof(zend_ast) + (children - 1) * sizeof(zend_ast *));
 	ast->kind = kind;
 	ast->attr = attr;
-	ast->lineno = 0;
+	ast->lineno = UINT_MAX;
 	ast->children = children;
 
 	for (i = 0; i < children; ++i) {
 		ast->child[i] = va_arg(va, zend_ast *);
-		if (ast->lineno == 0 && ast->child[i] != NULL) {
+		if (ast->child[i] != NULL && ast->child[i]->lineno < ast->lineno) {
 			ast->lineno = ast->child[i]->lineno;
 		}
 	}
 
-	/*if (ast->lineno == 0) {
+	/*if (ast->lineno == UINT_MAX) {
 		ast->lineno = CG(zend_lineno);
 	}*/
 
