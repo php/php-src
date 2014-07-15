@@ -1258,7 +1258,7 @@ PHP_FUNCTION(intdiv)
 	}
 	
 	if (divisor == 0) {
-		php_error(E_WARNING, "Division by zero");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
 		RETURN_BOOL(0);
 	}
 	
