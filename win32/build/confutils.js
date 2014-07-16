@@ -1636,6 +1636,9 @@ function generate_files()
 		generate_internal_functions();
 		generate_config_h();
 		generate_phpize();
+	} else {
+		generate_config_pickle_h();
+		generate_ext_pickle();
 	}
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
@@ -1646,6 +1649,140 @@ function generate_files()
 	} else {
 		STDOUT.WriteLine("Type 'nmake' to build PHP");
 	}
+}
+
+function generate_ext_pickle()
+{
+	var content;
+	var DEPS = null;
+	var dest;
+	var deps_lines = new Array();
+
+	var build_var_name = function(name) {
+		return "PHP_" + name.toUpperCase();
+	}
+
+	STDOUT.WriteLine("Generating pickle deps");
+	dest = PHP_DIR + "/script/";
+
+	if (!FSO.FolderExists(dest)) {
+		FSO.CreateFolder(dest);
+	}
+
+	if (FSO.FileExists(dest + "/ext_pickle.js")) {
+		DEPS = FSO.OpenTextFile(dest + "/ext_pickle.js", 1);
+
+		while (!DEPS.AtEndOfStream) {
+			var ln = DEPS.ReadLine();
+			var found = false;
+
+			for (var i in extensions_enabled) {
+				var reg0 = new RegExp(build_var_name(extensions_enabled[i][0]) + "\s*=.+", "g");
+				var reg1 = new RegExp(build_var_name(extensions_enabled[i][0]) + "_SHARED" + "\s*=.+", "g");
+
+				if (ln.match(reg1) || ln.match(reg0)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				deps_lines.push(ln);
+			}
+		}
+	}
+
+	for (var i in extensions_enabled) {
+		deps_lines.push(build_var_name(extensions_enabled[i][0]) + "=true;");
+		deps_lines.push(build_var_name(extensions_enabled[i][0]) + "_SHARED=" + (extensions_enabled[i][1] == 'shared' ? 'true' : 'false') + ";");
+	}
+
+	if (!!DEPS) {
+		DEPS.Close();
+		DEPS = null;
+	}
+
+	/* Replace the ext_pickle.js with the new content */
+	DEPS = FSO.CreateTextFile(dest + "/ext_pickle.js", true);
+
+	for (var j in deps_lines) {
+		DEPS.WriteLine(deps_lines[j]);
+	}
+
+	DEPS.Close();
+}
+
+function generate_config_pickle_h()
+{
+	var outfile = null;
+	var lines = new Array();
+	var keys = (new VBArray(configure_hdr.Keys())).toArray();
+	dest = PHP_DIR + "/include/main";
+
+	var ignore_key = function(key) {
+		var ignores = [ "CONFIGURE_COMMAND", "PHP_COMPILER_ID", "COMPILER", "ARCHITECTURE", "HAVE_STRNLEN", "PHP_DIR" ];
+
+		for (var k in ignores) {
+			if (ignores[k] == key) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
+	STDOUT.WriteLine("Generating main/config.pickle.h");
+
+	if (FSO.FileExists(dest + "/config.pickle.h")) {
+		outfile = FSO.OpenTextFile(dest + "/config.pickle.h", 1);
+
+		while (!outfile.AtEndOfStream) {
+			var found = false;
+			var ln = outfile.ReadLine();
+
+			for (var i in keys) {
+				var reg = new RegExp("#define[\s ]+" + keys[i] + "[\s ]*.*", "g");
+
+				if (ln.match(reg)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				lines.push(ln);
+			}
+		}
+	}
+
+	for (var i in keys) {
+		var item = configure_hdr.Item(keys[i]);
+
+		if (ignore_key(keys[i])) {
+			continue;
+		}
+
+		/* XXX fix comment handling */
+		/*if (!lines[j].match(/^#define.+/g)) {
+			continue;
+		}*/
+
+		lines.push("#define " + keys[i] + " " + item[0]);
+	}
+
+	if (outfile) {
+		outfile.Close();
+		outfile = null;
+	}
+
+	outfile = FSO.CreateTextFile(dest + "/config.pickle.h", true);
+
+	for (var k in lines) {
+		outfile.WriteLine(lines[k]);
+	}
+
+	outfile.Close();
 }
 
 function generate_config_h()
