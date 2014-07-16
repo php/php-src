@@ -1490,16 +1490,22 @@ void zend_do_receive_param(zend_uchar op, znode *varname, znode *initialization,
 }
 /* }}} */
 
-zend_string *zend_concat_names(char *name1, size_t name1_len, char *name2, size_t name2_len) {
-	size_t len = name1_len + name2_len + 1; /* name1\name2 */
+zend_string *zend_concat3(
+	char *str1, size_t str1_len, char *str2, size_t str2_len, char *str3, size_t str3_len
+) {
+	size_t len = str1_len + str2_len + str3_len;
 	zend_string *res = STR_ALLOC(len, 0);
 
-	memcpy(res->val, name1, name1_len);
-	res->val[name1_len] = '\\';
-	memcpy(res->val + name1_len + 1, name2, name2_len);
+	memcpy(res->val, str1, str1_len);
+	memcpy(res->val + str1_len, str2, str2_len);
+	memcpy(res->val + str1_len + str2_len, str3, str3_len);
 	res->val[len] = '\0';
 
 	return res;
+}
+
+zend_string *zend_concat_names(char *name1, size_t name1_len, char *name2, size_t name2_len) {
+	return zend_concat3(name1, name1_len, "\\", 1, name2, name2_len);
 }
 
 void *zend_hash_find_ptr_lc(HashTable *ht, char *str, size_t len) {
@@ -7680,12 +7686,27 @@ void zend_compile_encaps_list(znode *result, zend_ast *ast TSRMLS_DC) {
 
 void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_op_array *op_array = CG(active_op_array);
+	zend_class_entry *ce = CG(active_class_entry);
 	zval *zv = &result->u.constant;
 	result->op_type = IS_CONST;
 
 	switch (ast->attr) {
 		case T_FUNC_C:
 			if (op_array && op_array->function_name) {
+				ZVAL_STR(zv, STR_COPY(op_array->function_name));
+			} else {
+				ZVAL_EMPTY_STRING(zv);
+			}
+			break;
+		case T_METHOD_C:
+			if (ce) {
+				if (op_array && op_array->function_name) {
+					ZVAL_STR(zv, zend_concat3(ce->name->val, ce->name->len, "::", 2,
+						op_array->function_name->val, op_array->function_name->len));
+				} else {
+					ZVAL_STR(zv, STR_COPY(ce->name));
+				}
+			} else if (op_array && op_array->function_name) {
 				ZVAL_STR(zv, STR_COPY(op_array->function_name));
 			} else {
 				ZVAL_EMPTY_STRING(zv);

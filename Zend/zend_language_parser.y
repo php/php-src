@@ -964,7 +964,7 @@ scalar:
 	|	T_FILE 		{ $$.u.ast = AST_ZVAL(&$1); }
 	|	T_DIR   	{ $$.u.ast = AST_ZVAL(&$1); }
 	|	T_TRAIT_C	{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_METHOD_C	{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_METHOD_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_METHOD_C); }
 	|	T_FUNC_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_FUNC_C); }
 	|	T_NS_C		{ $$.u.ast = AST_ZVAL(&$1); }
 	|	T_CLASS_C

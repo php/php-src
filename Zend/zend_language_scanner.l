@@ -1624,34 +1624,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__METHOD__" {
-	if (CG(active_class_entry)) {
-		int len = 0;
-
-		if (CG(active_class_entry)->name) {
-			len += CG(active_class_entry)->name->len;
-		}
-		if (CG(active_op_array) && CG(active_op_array)->function_name) {
-			len += sizeof("::")-1;
-			len += CG(active_op_array)->function_name->len;
-		}
-		ZVAL_NEW_STR(zendlval, STR_ALLOC(len, 0));
-		len = 0;
-		if (CG(active_class_entry)->name) {
-			memcpy(Z_STRVAL_P(zendlval), CG(active_class_entry)->name->val, CG(active_class_entry)->name->len);
-			len += CG(active_class_entry)->name->len;
-		}
-		if (CG(active_op_array) && CG(active_op_array)->function_name) {
-			memcpy(Z_STRVAL_P(zendlval) + len, "::", sizeof("::")-1);
-			len += sizeof("::")-1;
-			memcpy(Z_STRVAL_P(zendlval) + len, CG(active_op_array)->function_name->val, CG(active_op_array)->function_name->len);
-			len += CG(active_op_array)->function_name->len;
-		}
-		Z_STRVAL_P(zendlval)[len] = 0;
-	} else if (CG(active_op_array) && CG(active_op_array)->function_name) {
-		ZVAL_STR(zendlval, STR_COPY(CG(active_op_array)->function_name));
-	} else {
-		ZVAL_EMPTY_STRING(zendlval);
-	}
 	return T_METHOD_C;
 }
 
