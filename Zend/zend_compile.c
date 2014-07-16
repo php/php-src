@@ -6778,6 +6778,8 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 			CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = opnum_catch;
 		}
 
+		CG(zend_lineno) = catch_ast->lineno;
+
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_CATCH;
 		opline->op1_type = IS_CONST;

@@ -48,7 +48,7 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 static zend_ast *zend_ast_create_from_va_list(
 	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, va_list va
 ) {
-	/*TSRMLS_FETCH();*/
+	TSRMLS_FETCH();
 	zend_uint i;
 	zend_ast *ast;
 	
@@ -65,9 +65,9 @@ static zend_ast *zend_ast_create_from_va_list(
 		}
 	}
 
-	/*if (ast->lineno == UINT_MAX) {
+	if (ast->lineno == UINT_MAX) {
 		ast->lineno = CG(zend_lineno);
-	}*/
+	}
 
 	return ast;
 }
