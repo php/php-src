@@ -34,7 +34,7 @@
 /*
  * This number is an approximated number from 3 + DBL_MANT_DIG - DBL_MIN_EXP (constants are from float.h)
  *
- * The constants can very between operation systems, so using the highest number found so far.
+ * The constants can vary between operation systems, so using the highest number found so far.
  */
 #define NUM_BUF_SIZE		1090
 
