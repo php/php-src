@@ -49,6 +49,7 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+ZEND_API int intdiv_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int boolean_not_function(zval *result, zval *op1 TSRMLS_DC);

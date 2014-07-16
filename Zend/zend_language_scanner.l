@@ -1403,6 +1403,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_MOD_EQUAL;
 }
 
+<ST_IN_SCRIPTING>"%%" {
+	return T_INTDIV;
+}
+
+<ST_IN_SCRIPTING>"%%=" {
+	return T_INTDIV_EQUAL;
+}
+
 <ST_IN_SCRIPTING>"<<=" {
 	return T_SL_EQUAL;
 }
