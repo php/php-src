@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug #67609 (TLS connections fail behind HTTP proxy). (Daniel Lowrey)
+  . Fixed broken build against OpenSSL older than 0.9.8 where ECDH unavailable.
+    (Kaplan Lior)
 
 - Phar:
   . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
