@@ -7678,6 +7678,23 @@ void zend_compile_encaps_list(znode *result, zend_ast *ast TSRMLS_DC) {
 	}
 }
 
+void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) {
+	zend_op_array *op_array = CG(active_op_array);
+	zval *zv = &result->u.constant;
+	result->op_type = IS_CONST;
+
+	switch (ast->attr) {
+		case T_FUNC_C:
+			if (op_array && op_array->function_name) {
+				ZVAL_STR(zv, STR_COPY(op_array->function_name));
+			} else {
+				ZVAL_EMPTY_STRING(zv);
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
 zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) {
 	return kind == ZEND_AST_ZVAL || kind == ZEND_AST_BINARY_OP
 		|| kind == ZEND_AST_GREATER || kind == ZEND_AST_GREATER_EQUAL
@@ -7687,7 +7704,7 @@ zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) {
 		|| kind == ZEND_AST_CONDITIONAL
 		|| kind == ZEND_AST_ARRAY || kind == ZEND_AST_ARRAY_ELEM
 		|| kind == ZEND_AST_CONST || kind == ZEND_AST_CLASS_CONST
-		|| kind == ZEND_AST_RESOLVE_CLASS_NAME;
+		|| kind == ZEND_AST_RESOLVE_CLASS_NAME || kind == ZEND_AST_MAGIC_CONST;
 }
 
 void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) {
@@ -8003,6 +8020,9 @@ void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
 			return;
 		case ZEND_AST_ENCAPS_LIST:
 			zend_compile_encaps_list(result, ast TSRMLS_CC);
+			return;
+		case ZEND_AST_MAGIC_CONST:
+			zend_compile_magic_const(result, ast TSRMLS_CC);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);

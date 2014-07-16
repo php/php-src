@@ -1620,12 +1620,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__FUNCTION__" {
-	zend_op_array *op_array = CG(active_op_array);
-	if (op_array && op_array->function_name) {
-		ZVAL_STR(zendlval, STR_COPY(op_array->function_name));
-	} else {
-		ZVAL_EMPTY_STRING(zendlval);
-	}
 	return T_FUNC_C;
 }
 

@@ -958,15 +958,15 @@ static_scalar: /* compile-time evaluated scalars */
 ;
 
 scalar:
-		T_LNUMBER 					{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_DNUMBER 					{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_LINE 						{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_FILE 						{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_DIR   					{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_TRAIT_C					{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_METHOD_C					{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_FUNC_C					{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_NS_C						{ $$.u.ast = AST_ZVAL(&$1); }
+		T_LNUMBER 	{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_DNUMBER 	{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_LINE 		{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_FILE 		{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_DIR   	{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_TRAIT_C	{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_METHOD_C	{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_FUNC_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_FUNC_C); }
+	|	T_NS_C		{ $$.u.ast = AST_ZVAL(&$1); }
 	|	T_CLASS_C
 			{ if (Z_TYPE($1.u.constant) == IS_UNDEF) {
 			      zval class_const; ZVAL_STRING(&class_const, "__CLASS__");
