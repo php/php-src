@@ -775,6 +775,10 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_ASSIGN_DIV:
 			return (binary_op_type) div_function;
 			break;
+		case ZEND_INTDIV:
+		case ZEND_ASSIGN_INTDIV:
+			return (binary_op_type) intdiv_function;
+			break;
 		case ZEND_MOD:
 		case ZEND_ASSIGN_MOD:
 			return (binary_op_type) mod_function;
