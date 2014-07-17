@@ -326,10 +326,10 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* o
 #define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()
 #define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()
 #define LOAD_REGS()
-#define ZEND_VM_CONTINUE()         return 0
-#define ZEND_VM_RETURN()           return 1
-#define ZEND_VM_ENTER()            return 2
-#define ZEND_VM_LEAVE()            return 3
+#define ZEND_VM_CONTINUE()         return  0
+#define ZEND_VM_RETURN()           return -1
+#define ZEND_VM_ENTER()            return  1
+#define ZEND_VM_LEAVE()            return  2
 #define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 
 #define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC
@@ -351,16 +351,11 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		}
 #endif
 
-		if ((ret = OPLINE->handler(execute_data TSRMLS_CC)) > 0) {
-			switch (ret) {
-				case 1:
-					return;
-				case 2:
-				case 3:
-					execute_data = EG(current_execute_data);
-					break;
-				default:
-					break;
+		if (UNEXPECTED((ret = OPLINE->handler(execute_data TSRMLS_CC)) != 0)) {
+			if (EXPECTED(ret > 0)) {
+				execute_data = EG(current_execute_data);
+			} else {
+				return;
 			}
 		}
 
