@@ -210,6 +210,9 @@ C.WriteLine("var MODE_PHPIZE = true;");
 C.WriteLine("var PHP_DIR = " + '"' + PHP_DIR.replace(new RegExp('(["\\\\])', "g"), '\\$1') + '"');
 
 C.Write(file_get_contents(PHP_DIR + "//script//ext_deps.js"));
+if (FSO.FileExists(PHP_DIR + "/script/ext_pickle.js")) {
+	C.Write(file_get_contents(PHP_DIR + "//script//ext_pickle.js"));
+}
 
 C.Write(file_get_contents(PHP_DIR + "/script/confutils.js"));
 C.Write(file_get_contents(PHP_DIR + "/script/config.phpize.js"));
