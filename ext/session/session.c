@@ -1327,9 +1327,16 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-#define PPID2SID \
-		convert_to_string((*ppid)); \
-		PS(id) = estrndup(Z_STRVAL_PP(ppid), Z_STRLEN_PP(ppid))
+static void ppid2sid(zval **ppid TSRMLS_DC) {
+	if (Z_TYPE_PP(ppid) != IS_STRING) {
+		PS(id) = NULL;
+		PS(send_cookie) = 1;
+	} else {
+		convert_to_string((*ppid));
+		PS(id) = estrndup(Z_STRVAL_PP(ppid), Z_STRLEN_PP(ppid));
+		PS(send_cookie) = 0;
+	}
+}
 
 static void php_session_reset_id(TSRMLS_D) /* {{{ */
 {
@@ -1418,9 +1425,8 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
 		) {
-			PPID2SID;
+			ppid2sid(ppid TSRMLS_CC);
 			PS(apply_trans_sid) = 0;
-			PS(send_cookie) = 0;
 			PS(define_sid) = 0;
 		}
 
@@ -1429,8 +1435,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
 		) {
-			PPID2SID;
-			PS(send_cookie) = 0;
+			ppid2sid(ppid TSRMLS_CC);
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
@@ -1438,8 +1443,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
 		) {
-			PPID2SID;
-			PS(send_cookie) = 0;
+			ppid2sid(ppid TSRMLS_CC);
 		}
 	}
 
