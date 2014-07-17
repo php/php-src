@@ -21,6 +21,8 @@
 
 #include "php.h"
 
+#include <signal.h>
+
 #ifndef HAVE_RL_COMPLETION_MATCHES
 #define rl_completion_matches completion_matches
 #endif
