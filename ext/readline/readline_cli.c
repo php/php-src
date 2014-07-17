@@ -73,11 +73,22 @@
 #endif
 
 #define DEFAULT_PROMPT "\\b \\> "
+#define INTERACTIVE_SHELL_HISTORY_FILE "~/.php_history"
 
 ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
 
 static char php_last_char = '\0';
 static FILE *pager_pipe = NULL;
+
+static void readline_shell_signal_handler(int signo)
+{
+	if (signo == SIGINT) {
+		char * history_file = tilde_expand(INTERACTIVE_SHELL_HISTORY_FILE);
+		write_history(history_file);
+		free(history_file);
+		exit(0);
+	}
+}
 
 static size_t readline_shell_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
 {
@@ -601,10 +612,17 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 		zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, prepend_file_p);
 	}
 
-	history_file = tilde_expand("~/.php_history");
+	history_file = tilde_expand(INTERACTIVE_SHELL_HISTORY_FILE);
 	rl_attempted_completion_function = cli_code_completion;
 	rl_special_prefixes = "$";
 	read_history(history_file);
+
+	struct sigaction new_sa;
+
+	sigemptyset(&new_sa.sa_mask);
+	new_sa.sa_flags = 0;
+	new_sa.sa_handler = readline_shell_signal_handler;
+	sigaction(SIGINT, &new_sa, NULL);
 
 	EG(exit_status) = 0;
 	while ((line = readline(prompt)) != NULL) {
