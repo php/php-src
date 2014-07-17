@@ -1254,6 +1254,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 	smart_str_appends(&dcookie, date_fmt);
 	efree(date_fmt);
 
+
 	if (PS(cookie_path)[0]) {
 		smart_str_appends(&dcookie, COOKIE_PATH);
 		smart_str_appends(&dcookie, PS(cookie_path));
