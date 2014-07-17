@@ -17,12 +17,15 @@ PHP                                                                        NEWS
   . Fixed bug #67151 (strtr with empty array crashes). (Nikita)
   . Fixed bug #67407 (Windows 8.1/Server 2012 R2 reported as Windows 8/Server
     2012). (Christian Wenz)
+  . Implemented FR #34407 (ucwords and Title Case). (Tjerk)
 
 - CLI server:
   . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
     (Adam)
   . Fixed bug #66830 (Empty header causes PHP built-in web server to hang).
     (Adam)
+  . Fixed bug #67594 (Unable to access to apache_request_headers() elements).
+    (Tjerk)
 
 - FPM:
   . Fixed bug #67530 (error_log=syslog ignored). (Remi)
