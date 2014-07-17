@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     (Adam)
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
+- cURL:
+  . Fixed bug #67643 (curl_multi_getcontent returns '' when CURLOPT_RETURNTRANSFER isn't set). (Jille Timmermans)
+
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
 
