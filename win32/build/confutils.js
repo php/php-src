@@ -1354,6 +1354,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');
 	}
+	if (MODE_PHPIZE && FSO.FileExists(PHP_DIR + "/include/main/config.pickle.h")) {
+		cflags = "/FI main/config.pickle.h " + cflags;
+	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
 
 	if (PHP_DSP != "no") {
