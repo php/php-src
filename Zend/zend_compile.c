@@ -139,13 +139,13 @@ static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static void build_runtime_defined_function_key(zval *result, const char *name, int name_length TSRMLS_DC) /* {{{ */
+static void build_runtime_defined_function_key(zval *result, zend_string *name, unsigned char *lex_pos TSRMLS_DC) /* {{{ */
 {
 	char char_pos_buf[32];
 	uint char_pos_len;
 	const char *filename;
 
-	char_pos_len = zend_sprintf(char_pos_buf, "%p", LANG_SCNG(yy_text));
+	char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
 	if (CG(active_op_array)->filename) {
 		filename = CG(active_op_array)->filename->val;
 	} else {
@@ -153,11 +153,11 @@ static void build_runtime_defined_function_key(zval *result, const char *name, i
 	}
 
 	/* NULL, name length, filename length, last accepting char position length */
-	ZVAL_NEW_STR(result, STR_ALLOC(1+name_length+strlen(filename)+char_pos_len, 0));
+	ZVAL_NEW_STR(result, STR_ALLOC(1 + name->len + strlen(filename) + char_pos_len, 0));
 
  	/* must be binary safe */
  	Z_STRVAL_P(result)[0] = '\0';
- 	sprintf(Z_STRVAL_P(result)+1, "%s%s%s", name, filename, char_pos_buf);
+ 	sprintf(Z_STRVAL_P(result)+1, "%s%s%s", name->val, filename, char_pos_buf);
 }
 /* }}} */
 
@@ -1251,7 +1251,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 		opline->opcode = ZEND_DECLARE_FUNCTION;
 		opline->op1_type = IS_CONST;
-		build_runtime_defined_function_key(&key, lcname->val, lcname->len TSRMLS_CC);
+		build_runtime_defined_function_key(&key, lcname, LANG_SCNG(yy_text) TSRMLS_CC);
 		opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);
 		opline->op2_type = IS_CONST;
 		LITERAL_STR(opline->op2, STR_COPY(lcname));
@@ -3891,7 +3891,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->op1_type = IS_CONST;
-	build_runtime_defined_function_key(&key, lcname->val, lcname->len TSRMLS_CC);
+	build_runtime_defined_function_key(&key, lcname, LANG_SCNG(yy_text) TSRMLS_CC);
 	opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);
 
 	opline->op2_type = IS_CONST;
@@ -7063,7 +7063,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 
 	{
 		zval key;
-		build_runtime_defined_function_key(&key, lcname->val, lcname->len TSRMLS_CC);
+		build_runtime_defined_function_key(&key, lcname, fn->lex_pos TSRMLS_CC);
 
 		opline->op1_type = IS_CONST;
 		opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);

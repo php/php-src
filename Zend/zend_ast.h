@@ -128,6 +128,7 @@ typedef struct _zend_ast_func_decl {
 	zend_bool returns_ref;
 	zend_uint start_lineno;
 	zend_uint end_lineno;
+	unsigned char *lex_pos;
 	zend_string *name;
 	zend_ast *params;
 	zend_ast *uses;
@@ -147,7 +148,7 @@ ZEND_API zend_ast *zend_ast_create(
 
 ZEND_API zend_ast *zend_ast_create_func_decl(
 	zend_ast_kind kind, zend_bool by_ref, zend_uint start_lineno, zend_uint end_lineno,
-	zend_string *name, zend_ast *params, zend_ast *uses, zend_ast *stmt
+	unsigned char *lex_pos, zend_string *name, zend_ast *params, zend_ast *uses, zend_ast *stmt
 );
 
 ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind);

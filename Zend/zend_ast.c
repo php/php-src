@@ -47,7 +47,7 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 
 ZEND_API zend_ast *zend_ast_create_func_decl(
 	zend_ast_kind kind, zend_bool returns_ref, zend_uint start_lineno, zend_uint end_lineno,
-	zend_string *name, zend_ast *params, zend_ast *uses, zend_ast *stmt
+	unsigned char *lex_pos, zend_string *name, zend_ast *params, zend_ast *uses, zend_ast *stmt
 ) {
 	zend_ast_func_decl *ast = emalloc(sizeof(zend_ast_func_decl));
 
@@ -55,6 +55,7 @@ ZEND_API zend_ast *zend_ast_create_func_decl(
 	ast->returns_ref = returns_ref;
 	ast->start_lineno = start_lineno;
 	ast->end_lineno = end_lineno;
+	ast->lex_pos = lex_pos;
 	ast->name = name;
 	ast->params = params;
 	ast->uses = uses;

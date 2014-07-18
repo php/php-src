@@ -390,8 +390,8 @@ unset_variable:
 function_declaration_statement:
 	function is_reference T_STRING '(' parameter_list ')' '{' inner_statement_list '}'
 		{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_FUNC_DECL, $2.op_type,
-		      $1.u.op.opline_num, CG(zend_lineno), Z_STR($3.u.constant),
-			  $5.u.ast, NULL, $8.u.ast); }
+		      $1.u.op.opline_num, CG(zend_lineno), LANG_SCNG(yy_text),
+			  Z_STR($3.u.constant), $5.u.ast, NULL, $8.u.ast); }
 ;
 
 class_declaration_statement:
@@ -872,7 +872,7 @@ expr_without_variable:
 			{ $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $4.u.ast, $2.u.ast); }
 	|	function is_reference '(' parameter_list ')' lexical_vars '{' inner_statement_list '}'
 			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_CLOSURE, $2.op_type,
-			      $1.u.op.opline_num, CG(zend_lineno),
+			      $1.u.op.opline_num, CG(zend_lineno), LANG_SCNG(yy_text),
 				  STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
 				  $4.u.ast, $6.u.ast, $8.u.ast); }
 	|	T_STATIC function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
