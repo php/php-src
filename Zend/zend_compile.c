@@ -7004,13 +7004,13 @@ void zend_compile_closure_uses(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
-static void zend_begin_func_decl(
-	znode *result, zend_string *name, zend_uint start_lineno, zend_bool returns_ref TSRMLS_DC
-) {
+void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
+	zend_ast_func_decl *fn = (zend_ast_func_decl *) ast;
+	zend_op_array *orig_op_array = CG(active_op_array);
 	zend_op_array *op_array = emalloc(sizeof(zend_op_array));
-	zend_string *lcname;
+	zend_string *name = fn->name, *lcname;
 	zend_op *opline;
-	zend_bool is_closure = result != NULL;
+	zend_bool is_closure = ast->kind == ZEND_AST_CLOSURE;
 
 	// TODO.AST interactive (not just here - also bpc etc!)
 	
@@ -7023,8 +7023,9 @@ static void zend_begin_func_decl(
 		op_array->function_name = STR_COPY(name);
 	}
 
-	op_array->line_start = start_lineno;
-	if (returns_ref) {
+	op_array->line_start = fn->start_lineno;
+	op_array->line_end = fn->end_lineno;
+	if (fn->returns_ref) {
 		op_array->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 	}
 	if (is_closure) {
@@ -7078,7 +7079,7 @@ static void zend_begin_func_decl(
 
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
 		zend_op *opline_ext = emit_op(NULL, ZEND_EXT_NOP, NULL, NULL TSRMLS_CC);
-		opline_ext->lineno = start_lineno;
+		opline_ext->lineno = fn->start_lineno;
 	}
 
 	{
@@ -7100,9 +7101,11 @@ static void zend_begin_func_decl(
 
 		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline);
 	}
-}
 
-static void zend_end_func_decl(TSRMLS_D) {
+	zend_compile_params(fn->params TSRMLS_CC);
+	zend_compile_closure_uses(fn->uses TSRMLS_CC);
+	zend_compile_stmt(fn->stmt TSRMLS_CC);
+
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
 
@@ -7110,49 +7113,13 @@ static void zend_end_func_decl(TSRMLS_D) {
 	zend_release_labels(0 TSRMLS_CC);
 
 	// TODO.AST __autoload
-	// TODO.AST end line
 	// TODO.AST doc comment
 
 	/* Pop the switch and foreach separators */
 	zend_stack_del_top(&CG(switch_cond_stack));
 	zend_stack_del_top(&CG(foreach_copy_stack));
-}
 
-void zend_compile_func_decl(zend_ast *ast TSRMLS_DC) {
-	zend_ast *name_ast = ast->child[0];
-	zend_ast *params_ast = ast->child[1];
-	zend_ast *stmt_ast = ast->child[2];
-	zend_bool returns_ref = ast->attr;
-	zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
-
-	zend_op_array *orig_op_array = CG(active_op_array);
-	zend_begin_func_decl(NULL, name, ast->lineno, returns_ref TSRMLS_CC);
-
-	zend_compile_params(params_ast TSRMLS_CC);
-	zend_compile_stmt(stmt_ast TSRMLS_CC);
-
-	zend_end_func_decl(TSRMLS_C);
 	CG(active_op_array) = orig_op_array;
-}
-
-void zend_compile_closure(znode *result, zend_ast *ast TSRMLS_DC) {
-	zend_ast *params_ast = ast->child[0];
-	zend_ast *uses_ast = ast->child[1];
-	zend_ast *stmt_ast = ast->child[2];
-	zend_bool returns_ref = ast->attr;
-	zend_string *name = STR_INIT("{closure}", sizeof("{closure}") - 1, 0);
-
-	zend_op_array *orig_op_array = CG(active_op_array);
-	zend_begin_func_decl(result, name, ast->lineno, returns_ref TSRMLS_CC);
-
-	zend_compile_closure_uses(uses_ast TSRMLS_CC);
-	zend_compile_params(params_ast TSRMLS_CC);
-	zend_compile_stmt(stmt_ast TSRMLS_CC);
-
-	zend_end_func_decl(TSRMLS_C);
-	CG(active_op_array) = orig_op_array;
-
-	STR_RELEASE(name);
 }
 
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
@@ -7994,7 +7961,7 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			zend_compile_try(ast TSRMLS_CC);
 			break;
 		case ZEND_AST_FUNC_DECL:
-			zend_compile_func_decl(ast TSRMLS_CC);
+			zend_compile_func_decl(NULL, ast TSRMLS_CC);
 			break;
 		default:
 		{
@@ -8121,7 +8088,7 @@ void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
 			zend_compile_magic_const(result, ast TSRMLS_CC);
 			return;
 		case ZEND_AST_CLOSURE:
-			zend_compile_closure(result, ast TSRMLS_CC);
+			zend_compile_func_decl(result, ast TSRMLS_CC);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);

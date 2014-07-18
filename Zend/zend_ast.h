@@ -100,7 +100,6 @@ enum _zend_ast_kind {
 	ZEND_AST_TYPE,
 
 	ZEND_AST_FUNC_DECL,
-
 	ZEND_AST_CLOSURE,
 	ZEND_AST_CLOSURE_USES,
 };
@@ -123,6 +122,18 @@ typedef struct _zend_ast_zval {
 	zval val;
 } zend_ast_zval;
 
+/* Using a separate structure as it needs a bunch of extra information. */
+typedef struct _zend_ast_func_decl {
+	zend_ast_kind kind;
+	zend_bool returns_ref;
+	zend_uint start_lineno;
+	zend_uint end_lineno;
+	zend_string *name;
+	zend_ast *params;
+	zend_ast *uses;
+	zend_ast *stmt;
+} zend_ast_func_decl;
+
 static inline zval *zend_ast_get_zval(zend_ast *ast) {
 	return &((zend_ast_zval *) ast)->val;
 }
@@ -133,6 +144,11 @@ ZEND_API zend_ast *zend_ast_create_ex(
 	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, ...);
 ZEND_API zend_ast *zend_ast_create(
 	zend_uint children, zend_ast_kind kind, ...);
+
+ZEND_API zend_ast *zend_ast_create_func_decl(
+	zend_ast_kind kind, zend_bool by_ref, zend_uint start_lineno, zend_uint end_lineno,
+	zend_string *name, zend_ast *params, zend_ast *uses, zend_ast *stmt
+);
 
 ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind);
 ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op);

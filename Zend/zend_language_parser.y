@@ -389,8 +389,9 @@ unset_variable:
 
 function_declaration_statement:
 	function is_reference T_STRING '(' parameter_list ')' '{' inner_statement_list '}'
-		{ $$.u.ast = zend_ast_create_ex(3, ZEND_AST_FUNC_DECL,
-		      $2.op_type, AST_ZVAL(&$3), $5.u.ast, $8.u.ast); }
+		{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_FUNC_DECL, $2.op_type,
+		      $1.u.op.opline_num, CG(zend_lineno), Z_STR($3.u.constant),
+			  $5.u.ast, NULL, $8.u.ast); }
 ;
 
 class_declaration_statement:
@@ -870,8 +871,10 @@ expr_without_variable:
 	|	T_YIELD expr T_DOUBLE_ARROW expr
 			{ $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $4.u.ast, $2.u.ast); }
 	|	function is_reference '(' parameter_list ')' lexical_vars '{' inner_statement_list '}'
-			{ $$.u.ast = zend_ast_create_ex(3, ZEND_AST_CLOSURE,
-			      $2.op_type, $4.u.ast, $6.u.ast, $8.u.ast); }
+			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_CLOSURE, $2.op_type,
+			      $1.u.op.opline_num, CG(zend_lineno),
+				  STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
+				  $4.u.ast, $6.u.ast, $8.u.ast); }
 	|	T_STATIC function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
 		'(' parameter_list ')' { zend_compile_params($6.u.ast TSRMLS_CC); zend_ast_destroy($6.u.ast); } lexical_vars { zend_compile_closure_uses($9.u.ast TSRMLS_CC); if ($9.u.ast) zend_ast_destroy($9.u.ast); }
 		'{' inner_statement_list '}' { AS($12); zend_do_end_function_declaration(&$2 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$4); }

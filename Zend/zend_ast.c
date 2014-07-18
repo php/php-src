@@ -45,6 +45,24 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 	return (zend_ast *) ast;
 }
 
+ZEND_API zend_ast *zend_ast_create_func_decl(
+	zend_ast_kind kind, zend_bool returns_ref, zend_uint start_lineno, zend_uint end_lineno,
+	zend_string *name, zend_ast *params, zend_ast *uses, zend_ast *stmt
+) {
+	zend_ast_func_decl *ast = emalloc(sizeof(zend_ast_func_decl));
+
+	ast->kind = kind;
+	ast->returns_ref = returns_ref;
+	ast->start_lineno = start_lineno;
+	ast->end_lineno = end_lineno;
+	ast->name = name;
+	ast->params = params;
+	ast->uses = uses;
+	ast->stmt = stmt;
+
+	return (zend_ast *) ast;
+}
+
 static zend_ast *zend_ast_create_from_va_list(
 	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, va_list va
 ) {
@@ -315,16 +333,34 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 
 ZEND_API void zend_ast_destroy(zend_ast *ast)
 {
-	int i;
+	if (!ast) {
+		return;
+	}
 
-	if (ast->kind == ZEND_AST_ZVAL) {
-		zval_ptr_dtor(zend_ast_get_zval(ast));
-	} else if (ast->kind != ZEND_AST_ZNODE) {
-		for (i = 0; i < ast->children; i++) {
-			if (ast->child[i]) {
+	switch (ast->kind) {
+		case ZEND_AST_ZVAL:
+			zval_ptr_dtor(zend_ast_get_zval(ast));
+			break;
+		case ZEND_AST_ZNODE:
+			break;
+		case ZEND_AST_FUNC_DECL:
+		case ZEND_AST_CLOSURE:
+		{
+			zend_ast_func_decl *fn = (zend_ast_func_decl *) ast;
+			STR_RELEASE(fn->name);
+			zend_ast_destroy(fn->params);
+			zend_ast_destroy(fn->uses);
+			zend_ast_destroy(fn->stmt);
+			break;
+		}
+		default:
+		{
+			zend_uint i;
+			for (i = 0; i < ast->children; i++) {
 				zend_ast_destroy(ast->child[i]);
 			}
 		}
 	}
+
 	efree(ast);
 }
