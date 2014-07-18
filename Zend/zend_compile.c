@@ -7004,12 +7004,13 @@ void zend_compile_closure_uses(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
-static zend_op *zend_begin_func_decl(
-	zend_string *name, zend_bool returns_ref, zend_uint start_lineno TSRMLS_DC
+static void zend_begin_func_decl(
+	znode *result, zend_string *name, zend_uint start_lineno, zend_bool returns_ref TSRMLS_DC
 ) {
 	zend_op_array *op_array = emalloc(sizeof(zend_op_array));
 	zend_string *lcname;
 	zend_op *opline;
+	zend_bool is_closure = result != NULL;
 
 	// TODO.AST interactive (not just here - also bpc etc!)
 	
@@ -7025,6 +7026,9 @@ static zend_op *zend_begin_func_decl(
 	op_array->line_start = start_lineno;
 	if (returns_ref) {
 		op_array->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+	}
+	if (is_closure) {
+		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
 
 	lcname = STR_ALLOC(name->len, 0);
@@ -7046,11 +7050,15 @@ static zend_op *zend_begin_func_decl(
 		}
 	}
 
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_DECLARE_FUNCTION;
-	opline->extended_value = ZEND_DECLARE_FUNCTION;
-	opline->op2_type = IS_CONST;
-	LITERAL_STR(opline->op2, lcname);
+	if (is_closure) {
+		opline = emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL TSRMLS_CC);
+	} else {
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_DECLARE_FUNCTION;
+		opline->extended_value = ZEND_DECLARE_FUNCTION;
+		opline->op2_type = IS_CONST;
+		LITERAL_STR(opline->op2, STR_COPY(lcname));
+	}
 
 	{
 		zval key;
@@ -7061,6 +7069,8 @@ static zend_op *zend_begin_func_decl(
 
 		zend_hash_update_ptr(CG(function_table), Z_STR(key), op_array);
 	}
+
+	STR_RELEASE(lcname);
 
 	CG(active_op_array) = op_array;
 	zend_stack_push(&CG(context_stack), (void *) &CG(context));
@@ -7090,8 +7100,6 @@ static zend_op *zend_begin_func_decl(
 
 		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline);
 	}
-
-	return opline;
 }
 
 static void zend_end_func_decl(TSRMLS_D) {
@@ -7118,7 +7126,7 @@ void zend_compile_func_decl(zend_ast *ast TSRMLS_DC) {
 	zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
 
 	zend_op_array *orig_op_array = CG(active_op_array);
-	zend_begin_func_decl(name, returns_ref, ast->lineno TSRMLS_CC);
+	zend_begin_func_decl(NULL, name, ast->lineno, returns_ref TSRMLS_CC);
 
 	zend_compile_params(params_ast TSRMLS_CC);
 	zend_compile_stmt(stmt_ast TSRMLS_CC);
@@ -7135,16 +7143,7 @@ void zend_compile_closure(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_string *name = STR_INIT("{closure}", sizeof("{closure}") - 1, 0);
 
 	zend_op_array *orig_op_array = CG(active_op_array);
-	zend_op *opline = zend_begin_func_decl(name, returns_ref, ast->lineno TSRMLS_CC);
-
-	result->op_type = IS_TMP_VAR;
-	result->u.op.var = get_temporary_variable(orig_op_array);
-
-	opline->opcode = ZEND_DECLARE_LAMBDA_FUNCTION;
-	zend_del_literal(orig_op_array, opline->op2.constant);
-	SET_UNUSED(opline->op2);
-	SET_NODE(opline->result, result);
-	CG(active_op_array)->fn_flags |= ZEND_ACC_CLOSURE;
+	zend_begin_func_decl(result, name, ast->lineno, returns_ref TSRMLS_CC);
 
 	zend_compile_closure_uses(uses_ast TSRMLS_CC);
 	zend_compile_params(params_ast TSRMLS_CC);
