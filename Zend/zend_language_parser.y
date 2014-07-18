@@ -388,8 +388,8 @@ unset_variable:
 ;
 
 function_declaration_statement:
-	function is_reference T_STRING '(' parameter_list ')' '{' inner_statement_list '}'
-		{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_FUNC_DECL, $2.op_type,
+	function returns_ref T_STRING '(' parameter_list ')' '{' inner_statement_list '}'
+		{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_FUNC_DECL, $2.EA,
 		      $1.EA, CG(zend_lineno), LANG_SCNG(yy_text), $1.u.op.ptr,
 			  Z_STR($3.u.constant), $5.u.ast, NULL, $8.u.ast); }
 ;
@@ -870,19 +870,27 @@ expr_without_variable:
 	|	T_YIELD expr { $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $2.u.ast, NULL); }
 	|	T_YIELD expr T_DOUBLE_ARROW expr
 			{ $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $4.u.ast, $2.u.ast); }
-	|	function is_reference '(' parameter_list ')' lexical_vars '{' inner_statement_list '}'
-			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_CLOSURE, $2.op_type,
+	|	function returns_ref '(' parameter_list ')' lexical_vars '{' inner_statement_list '}'
+			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_CLOSURE, $2.EA,
 			      $1.EA, CG(zend_lineno), LANG_SCNG(yy_text), $1.u.op.ptr,
 				  STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
-				  $4.u.ast, $6.u.ast, $8.u.ast); }
-	|	T_STATIC function2 is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
-		'(' parameter_list ')' { zend_compile_params($6.u.ast TSRMLS_CC); zend_ast_destroy($6.u.ast); } lexical_vars { zend_compile_closure_uses($9.u.ast TSRMLS_CC); if ($9.u.ast) zend_ast_destroy($9.u.ast); }
-		'{' inner_statement_list '}' { AS($12); zend_do_end_function_declaration(&$2 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$4); }
+			      $4.u.ast, $6.u.ast, $8.u.ast); }
+	|	T_STATIC function returns_ref '(' parameter_list ')' lexical_vars
+		'{' inner_statement_list '}'
+			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_CLOSURE,
+			      $3.EA | ZEND_ACC_STATIC, $2.EA, CG(zend_lineno), LANG_SCNG(yy_text),
+			      $2.u.op.ptr, STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
+			      $5.u.ast, $7.u.ast, $9.u.ast); }
 ;
 
 function:
 	T_FUNCTION
 		{ $$.EA = CG(zend_lineno); $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }
+;
+
+returns_ref:
+		/* empty */	{ $$.EA = 0; }
+	|	'&'			{ $$.EA = ZEND_ACC_RETURN_REFERENCE; }
 ;
 
 function2:

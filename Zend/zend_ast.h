@@ -125,9 +125,10 @@ typedef struct _zend_ast_zval {
 /* Using a separate structure as it needs a bunch of extra information. */
 typedef struct _zend_ast_func_decl {
 	zend_ast_kind kind;
-	zend_bool returns_ref;
+	zend_ast_attr attr; /* Unused - for structure compatibility */
 	zend_uint start_lineno;
 	zend_uint end_lineno;
+	zend_uint flags;
 	unsigned char *lex_pos;
 	zend_string *doc_comment;
 	zend_string *name;
@@ -148,7 +149,7 @@ ZEND_API zend_ast *zend_ast_create(
 	zend_uint children, zend_ast_kind kind, ...);
 
 ZEND_API zend_ast *zend_ast_create_func_decl(
-	zend_ast_kind kind, zend_bool by_ref, zend_uint start_lineno, zend_uint end_lineno,
+	zend_ast_kind kind, zend_uint flags, zend_uint start_lineno, zend_uint end_lineno,
 	unsigned char *lex_pos, zend_string *doc_comment, zend_string *name,
 	zend_ast *params, zend_ast *uses, zend_ast *stmt
 );

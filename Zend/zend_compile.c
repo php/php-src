@@ -7023,13 +7023,11 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 		op_array->function_name = STR_COPY(name);
 	}
 
+	op_array->fn_flags |= fn->flags;
 	op_array->line_start = fn->start_lineno;
 	op_array->line_end = fn->end_lineno;
 	if (fn->doc_comment) {
 		op_array->doc_comment = STR_COPY(fn->doc_comment);
-	}
-	if (fn->returns_ref) {
-		op_array->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 	}
 	if (is_closure) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
@@ -7116,7 +7114,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_release_labels(0 TSRMLS_CC);
 
 	// TODO.AST __autoload
-	// TODO.AST doc comment
 
 	/* Pop the switch and foreach separators */
 	zend_stack_del_top(&CG(switch_cond_stack));
