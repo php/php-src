@@ -1201,9 +1201,14 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 			ERROR("static " + extname + " cannot depend on shared " + dependson);
 		}
 
-		ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)");
 		ADD_FLAG("LIBS_" + EXT, "php_" + dependson + ".lib");
-		ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR)\\php_" + dependson + ".lib");
+		if (MODE_PHPIZE) {
+			ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR_DEV)\\lib");
+			ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR_DEV)\\lib\\php_" + dependson + ".lib");
+		} else {
+			ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)");
+			ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR)\\php_" + dependson + ".lib");
+		}
 
 	} else {
 
@@ -1353,6 +1358,12 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		extension_module_ptrs += '\tphpext_' + extname + '_ptr,\r\n';
 	
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');
+	}
+	if (MODE_PHPIZE && FSO.FileExists(PHP_DIR + "/include/main/config.pickle.h")) {
+		cflags = "/FI main/config.pickle.h " + cflags;
+	}
+	if (MODE_PHPIZE && FSO.FileExists(PHP_DIR + "/include/main/config.pickle.h")) {
+		cflags = "/FI main/config.pickle.h " + cflags;
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
 
@@ -1952,6 +1963,16 @@ function generate_makefile()
 		}
 	}
 	MF.WriteLine("	@for %D in ($(INSTALL_HEADERS_DIR)) do @copy %D*.h $(BUILD_DIR_DEV)\\include\\%D /y >nul");
+	if (MODE_PHPIZE) {
+		MF.WriteBlankLines(1);
+		MF.WriteLine("build-bins:");
+		for (var i in extensions_enabled) {
+			var lib = "php_" + extensions_enabled[i][0] + ".lib";
+			var dll = "php_" + extensions_enabled[i][0] + ".dll";
+			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib\\" + lib);
+			//MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)\\" + dll);
+		}
+	}
 	TF.Close();
 
 	MF.WriteBlankLines(2);
