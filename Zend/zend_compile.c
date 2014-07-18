@@ -6200,26 +6200,13 @@ void zend_compile_global_var(zend_ast *ast TSRMLS_DC) {
 	efree(fetch_ast);
 }
 
-void zend_compile_static_var(zend_ast *ast TSRMLS_DC) {
-	zend_ast *var_ast = ast->child[0];
-	zend_ast *value_ast = ast->child[1];
-
+static void zend_compile_static_var_common(
+	zend_ast *var_ast, zval *value, zend_bool by_ref TSRMLS_DC
+) {
 	znode var_node, result;
-	zval value_zv;
 	zend_op *opline;
 
 	zend_compile_expr(&var_node, var_ast TSRMLS_CC);
-	if (var_node.op_type == IS_CONST) {
-		if (Z_TYPE(var_node.u.constant) != IS_STRING) {
-			convert_to_string(&var_node.u.constant);
-		}
-	}
-
-	if (value_ast) {
-		_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
-	} else {
-		ZVAL_NULL(&value_zv);
-	}
 
 	if (!CG(active_op_array)->static_variables) {
 		if (CG(active_op_array)->scope) {
@@ -6229,15 +6216,40 @@ void zend_compile_static_var(zend_ast *ast TSRMLS_DC) {
 		zend_hash_init(CG(active_op_array)->static_variables, 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	zend_hash_update(CG(active_op_array)->static_variables,
-		Z_STR(var_node.u.constant), &value_zv);
+	zend_hash_update(CG(active_op_array)->static_variables, Z_STR(var_node.u.constant), value);
 
-	opline = emit_op(&result, ZEND_FETCH_W, &var_node, NULL TSRMLS_CC);
+	opline = emit_op(&result, by_ref ? ZEND_FETCH_W : ZEND_FETCH_R, &var_node, NULL TSRMLS_CC);
 	opline->extended_value = ZEND_FETCH_STATIC;
 
-	zend_ast *fetch_ast = zend_ast_create_unary(ZEND_AST_VAR, var_ast);
-	zend_compile_assign_ref_common(NULL, fetch_ast, &result TSRMLS_CC);
-	efree(fetch_ast);
+	if (by_ref) {
+		zend_ast *fetch_ast = zend_ast_create_unary(ZEND_AST_VAR, var_ast);
+		zend_compile_assign_ref_common(NULL, fetch_ast, &result TSRMLS_CC);
+		efree(fetch_ast);
+	} else {
+		zend_ast *fetch_ast = zend_ast_create_unary(ZEND_AST_VAR, var_ast);
+		zend_ast *znode_ast = zend_ast_create_znode(&result);
+		zend_ast *assign_ast = zend_ast_create_binary(ZEND_AST_ASSIGN, fetch_ast, znode_ast);
+		znode dummy_node;
+		zend_compile_expr(&dummy_node, assign_ast TSRMLS_CC);
+		zend_do_free(&dummy_node TSRMLS_CC);
+		efree(znode_ast);
+		efree(assign_ast);
+		efree(fetch_ast);
+	}
+}
+
+void zend_compile_static_var(zend_ast *ast TSRMLS_DC) {
+	zend_ast *var_ast = ast->child[0];
+	zend_ast *value_ast = ast->child[1];
+	zval value_zv;
+
+	if (value_ast) {
+		_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
+	} else {
+		ZVAL_NULL(&value_zv);
+	}
+
+	zend_compile_static_var_common(var_ast, &value_zv, 1 TSRMLS_CC);
 }
 
 void zend_compile_unset(zend_ast *ast TSRMLS_DC) {
@@ -6966,6 +6978,30 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 	/* These are assigned at the end to avoid unitialized memory in case of an error */
 	op_array->num_args = ast->children;
 	op_array->arg_info = arg_infos;
+}
+
+void zend_compile_closure_uses(zend_ast *ast TSRMLS_DC) {
+	zend_uint i;
+
+	if (!ast) {
+		return;
+	}
+
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *var_ast = ast->child[i];
+		zend_string *name = Z_STR_P(zend_ast_get_zval(var_ast));
+		zend_bool by_ref = var_ast->attr;
+		zval zv;
+
+		if (name->len == sizeof("this") - 1 && !memcmp(name->val, "this", sizeof("this") - 1)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
+		}
+
+		ZVAL_NULL(&zv);
+		Z_CONST_FLAGS(zv) = by_ref ? IS_LEXICAL_REF : IS_LEXICAL_VAR;
+
+		zend_compile_static_var_common(var_ast, &zv, by_ref TSRMLS_CC);
+	}
 }
 
 void zend_compile_func_decl(zend_ast *ast TSRMLS_DC) {

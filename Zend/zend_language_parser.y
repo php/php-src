@@ -870,11 +870,11 @@ expr_without_variable:
 	|	T_YIELD expr T_DOUBLE_ARROW expr
 			{ $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $4.u.ast, $2.u.ast); }
 	|	function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, 0 TSRMLS_CC); }
-		'(' parameter_list ')' { zend_compile_params($5.u.ast TSRMLS_CC); zend_ast_destroy($5.u.ast); } lexical_vars
-		'{' inner_statement_list '}' { AS($10); zend_do_end_function_declaration(&$1 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$3); }
+		'(' parameter_list ')' { zend_compile_params($5.u.ast TSRMLS_CC); zend_ast_destroy($5.u.ast); } lexical_vars { zend_compile_closure_uses($8.u.ast TSRMLS_CC); if ($8.u.ast) zend_ast_destroy($8.u.ast); }
+		'{' inner_statement_list '}' { AS($11); zend_do_end_function_declaration(&$1 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$3); }
 	|	T_STATIC function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
-		'(' parameter_list ')' { zend_compile_params($6.u.ast TSRMLS_CC); zend_ast_destroy($6.u.ast); } lexical_vars
-		'{' inner_statement_list '}' { AS($11); zend_do_end_function_declaration(&$2 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$4); }
+		'(' parameter_list ')' { zend_compile_params($6.u.ast TSRMLS_CC); zend_ast_destroy($6.u.ast); } lexical_vars { zend_compile_closure_uses($9.u.ast TSRMLS_CC); if ($9.u.ast) zend_ast_destroy($9.u.ast); }
+		'{' inner_statement_list '}' { AS($12); zend_do_end_function_declaration(&$2 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$4); }
 ;
 
 function:
@@ -882,15 +882,18 @@ function:
 ;
 
 lexical_vars:
-		/* empty */
-	|	T_USE '(' lexical_var_list ')'
+		/* empty */ { $$.u.ast = NULL; }
+	|	T_USE '(' lexical_var_list ')' { $$.u.ast = $3.u.ast; }
 ;
 
 lexical_var_list:
-		lexical_var_list ',' T_VARIABLE			{ zend_do_fetch_lexical_variable(&$3, 0 TSRMLS_CC); }
-	|	lexical_var_list ',' '&' T_VARIABLE		{ zend_do_fetch_lexical_variable(&$4, 1 TSRMLS_CC); }
-	|	T_VARIABLE								{ zend_do_fetch_lexical_variable(&$1, 0 TSRMLS_CC); }
-	|	'&' T_VARIABLE							{ zend_do_fetch_lexical_variable(&$2, 1 TSRMLS_CC); }
+		lexical_var_list ',' lexical_var { $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
+	|	lexical_var { $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_CLOSURE_USES, $1.u.ast); }
+;
+
+lexical_var:
+		T_VARIABLE		{ $$.u.ast = AST_ZVAL(&$1); }
+	|	'&' T_VARIABLE	{ $$.u.ast = zend_ast_create_zval_ex(&$2.u.constant, 1); }
 ;
 
 function_call:

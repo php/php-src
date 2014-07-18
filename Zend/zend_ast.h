@@ -100,6 +100,8 @@ enum _zend_ast_kind {
 	ZEND_AST_TYPE,
 
 	ZEND_AST_FUNC_DECL,
+
+	ZEND_AST_CLOSURE_USES,
 };
 
 typedef unsigned short zend_ast_kind;
