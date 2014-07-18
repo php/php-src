@@ -1004,7 +1004,6 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 	CG(active_op_array)->line_end = zend_get_compiled_lineno(TSRMLS_C);
 	CG(active_op_array) = function_token->u.op_array;
 
-
 	/* Pop the switch and foreach separators */
 	zend_stack_del_top(&CG(switch_cond_stack));
 	zend_stack_del_top(&CG(foreach_copy_stack));
@@ -4788,6 +4787,26 @@ static void zend_emit_tick(TSRMLS_D) {
 	opline->extended_value = Z_LVAL(CG(declarables).ticks);
 }
 
+static void zend_update_jump_target(zend_uint opnum_jump, zend_uint opnum_target TSRMLS_DC) {
+	zend_op *opline = &CG(active_op_array)->opcodes[opnum_jump];
+	switch (opline->opcode) {
+		case ZEND_JMP:
+			opline->op1.opline_num = opnum_target;
+			break;
+		case ZEND_JMPZ:
+		case ZEND_JMPNZ:
+		case ZEND_JMPZ_EX:
+		case ZEND_JMPNZ_EX:
+			opline->op2.opline_num = opnum_target;
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+static void zend_update_jump_target_to_next(zend_uint opnum_jump TSRMLS_DC) {
+	zend_update_jump_target(opnum_jump, get_next_op_number(CG(active_op_array)) TSRMLS_CC);
+}
+
 static zend_bool zend_is_variable(zend_ast *ast) {
 	return ast->kind == ZEND_AST_VAR || ast->kind == ZEND_AST_DIM
 		|| ast->kind == ZEND_AST_PROP || ast->kind == ZEND_AST_STATIC_PROP
@@ -5882,8 +5901,7 @@ void zend_compile_while(zend_ast *ast TSRMLS_DC) {
 	opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
 	opline->op1.opline_num = opnum_start;
 
-	opline = &CG(active_op_array)->opcodes[opnum_jmpz];
-	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+	zend_update_jump_target_to_next(opnum_jmpz TSRMLS_CC);
 
 	do_end_loop(opnum_start, 0 TSRMLS_CC);
 }
@@ -5952,8 +5970,7 @@ void zend_compile_for(zend_ast *ast TSRMLS_DC) {
 	opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
 	opline->op1.opline_num = opnum_cond;
 
-	opline = &CG(active_op_array)->opcodes[opnum_jmpz];
-	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+	zend_update_jump_target_to_next(opnum_jmpz TSRMLS_CC);
 
 	do_end_loop(opnum_loop, 0 TSRMLS_CC);
 }
@@ -6074,7 +6091,6 @@ void zend_compile_if(zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 	zend_uint *jmp_opnums = safe_emalloc(sizeof(zend_uint), ast->children - 1, 0);
 	zend_uint opnum_last_jmpz = 0;
-		zend_op *opline;
 
 	for (i = 0; i < ast->children; ++i) {
 		zend_ast *elem_ast = ast->child[i];
@@ -6097,14 +6113,12 @@ void zend_compile_if(zend_ast *ast TSRMLS_DC) {
 		}
 
 		if (cond_ast) {
-			opline = &CG(active_op_array)->opcodes[opnum_last_jmpz];
-			opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+			zend_update_jump_target_to_next(opnum_last_jmpz TSRMLS_CC);
 		}
 	}
 
 	for (i = 0; i < ast->children - 1; ++i) {
-		opline = &CG(active_op_array)->opcodes[jmp_opnums[i]];
-		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+		zend_update_jump_target_to_next(jmp_opnums[i] TSRMLS_CC);
 	}
 
 	efree(jmp_opnums);
@@ -6166,19 +6180,16 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) {
 		zend_ast *stmt_ast = case_ast->child[1];
 
 		if (cond_ast) {
-			opline = &CG(active_op_array)->opcodes[jmpnz_opnums[i]];
-			opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+			zend_update_jump_target_to_next(jmpnz_opnums[i] TSRMLS_CC);
 		} else {
-			opline = &CG(active_op_array)->opcodes[opnum_default_jmp];
-			opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+			zend_update_jump_target_to_next(opnum_default_jmp TSRMLS_CC);
 		}
 
 		zend_compile_stmt(stmt_ast TSRMLS_CC);
 	}
 
 	if (!has_default_case) {
-		opline = &CG(active_op_array)->opcodes[opnum_default_jmp];
-		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+		zend_update_jump_target_to_next(opnum_default_jmp TSRMLS_CC);
 	}
 
 	do_end_loop(get_next_op_number(CG(active_op_array)), 1 TSRMLS_CC);
@@ -6262,8 +6273,7 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 	}
 
 	for (i = 0; i < catches_ast->children; ++i) {
-		opline = &CG(active_op_array)->opcodes[jmp_opnums[i]];
-		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+		zend_update_jump_target_to_next(jmp_opnums[i] TSRMLS_CC);
 	}
 
 	if (finally_ast) {
@@ -6285,8 +6295,7 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 
 		emit_op(NULL, ZEND_FAST_RET, NULL, NULL TSRMLS_CC);
 
-		opline = &CG(active_op_array)->opcodes[opnum_jmp];
-		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+		zend_update_jump_target_to_next(opnum_jmp TSRMLS_CC);
 	}
 
 	efree(jmp_opnums);
@@ -6652,8 +6661,7 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast TSRMLS_DC) {
 	opline_bool = emit_op(NULL, ZEND_BOOL, &right_node, NULL TSRMLS_CC);
 	SET_NODE(opline_bool->result, result);
 
-	opline_jmpz = &CG(active_op_array)->opcodes[opnum_jmpz];
-	opline_jmpz->op2.opline_num = get_next_op_number(CG(active_op_array));
+	zend_update_jump_target_to_next(opnum_jmpz TSRMLS_CC);
 }
 
 void zend_compile_post_incdec(znode *result, zend_ast *ast TSRMLS_DC) {
@@ -6743,7 +6751,7 @@ void zend_compile_conditional(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *false_ast = ast->child[2];
 
 	znode cond_node, true_node, false_node;
-	zend_op *opline_jmpz, *opline_jmp, *opline_qm_assign1, *opline_qm_assign2;
+	zend_op *opline_qm_assign1, *opline_qm_assign2;
 	zend_uint opnum_jmpz, opnum_jmp, opnum_qm_assign1;
 
 	if (!true_ast) {
@@ -6764,8 +6772,7 @@ void zend_compile_conditional(znode *result, zend_ast *ast TSRMLS_DC) {
 	opnum_jmp = get_next_op_number(CG(active_op_array));
 	emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
 
-	opline_jmpz = &CG(active_op_array)->opcodes[opnum_jmpz];
-	opline_jmpz->op2.opline_num = get_next_op_number(CG(active_op_array));
+	zend_update_jump_target_to_next(opnum_jmpz TSRMLS_CC);
 
 	zend_compile_expr(&false_node, false_ast TSRMLS_CC);
 
@@ -6781,8 +6788,7 @@ void zend_compile_conditional(znode *result, zend_ast *ast TSRMLS_DC) {
 	opline_qm_assign2 = emit_op(NULL, opline_qm_assign1->opcode, &false_node, NULL TSRMLS_CC);
 	SET_NODE(opline_qm_assign2->result, result);
 
-	opline_jmp = &CG(active_op_array)->opcodes[opnum_jmp];
-	opline_jmp->op1.opline_num = get_next_op_number(CG(active_op_array));
+	zend_update_jump_target_to_next(opnum_jmp TSRMLS_CC);
 }
 
 void zend_compile_print(znode *result, zend_ast *ast TSRMLS_DC) {
