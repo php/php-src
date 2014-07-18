@@ -471,38 +471,22 @@ int zend_get_zendleng(TSRMLS_D);
 #endif
 
 
-/* parser-driven code generators */
-void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC);
-void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC);
-void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC);
-void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar op TSRMLS_DC);
-void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC);
-
 typedef int (*unary_op_type)(zval *, zval * TSRMLS_DC);
 typedef int (*binary_op_type)(zval *, zval *, zval * TSRMLS_DC);
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC);
 
-void zend_do_begin_variable_parse(TSRMLS_D);
-void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS_DC);
-
-void zend_check_writable_variable(const znode *variable);
-
+/* parser-driven code generators */
 void zend_do_free(znode *op1 TSRMLS_DC);
 
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);
-void zend_do_receive_param(zend_uchar op, znode *varname, znode *initialization, znode *class_type, zend_bool pass_by_reference, zend_bool is_variadic TSRMLS_DC);
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC);
 void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_class_member TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
-
-void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC);
-void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
-
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time);
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC);
