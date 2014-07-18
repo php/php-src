@@ -4787,6 +4787,22 @@ static void zend_emit_tick(TSRMLS_D) {
 	opline->extended_value = Z_LVAL(CG(declarables).ticks);
 }
 
+static zend_uint zend_emit_jump(zend_uint opnum_target TSRMLS_DC) {
+	zend_uint opnum = get_next_op_number(CG(active_op_array));
+	zend_op *opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+	opline->op1.opline_num = opnum_target;
+	return opnum;
+}
+
+static zend_uint zend_emit_cond_jump(
+	zend_uchar opcode, znode *cond, zend_uint opnum_target TSRMLS_DC
+) {
+	zend_uint opnum = get_next_op_number(CG(active_op_array));
+	zend_op *opline = emit_op(NULL, opcode, cond, NULL TSRMLS_CC);
+	opline->op2.opline_num = opnum_target;
+	return opnum;
+}
+
 static void zend_update_jump_target(zend_uint opnum_jump, zend_uint opnum_target TSRMLS_DC) {
 	zend_op *opline = &CG(active_op_array)->opcodes[opnum_jump];
 	switch (opline->opcode) {
@@ -5887,19 +5903,16 @@ void zend_compile_while(zend_ast *ast TSRMLS_DC) {
 
 	znode cond_node;
 	zend_uint opnum_start, opnum_jmpz;
-	zend_op *opline;
 
 	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
 
-	opnum_jmpz = get_next_op_number(CG(active_op_array));
-	emit_op(NULL, ZEND_JMPZ, &cond_node, NULL TSRMLS_CC);
+	opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0 TSRMLS_CC);
 	do_begin_loop(TSRMLS_C);
 
 	zend_compile_stmt(stmt_ast TSRMLS_CC);
 
-	opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
-	opline->op1.opline_num = opnum_start;
+	zend_emit_jump(opnum_start TSRMLS_CC);
 
 	zend_update_jump_target_to_next(opnum_jmpz TSRMLS_CC);
 
@@ -5911,7 +5924,6 @@ void zend_compile_do_while(zend_ast *ast TSRMLS_DC) {
 	zend_ast *cond_ast = ast->child[1];
 
 	znode cond_node;
-	zend_op *opline;
 	zend_uint opnum_start, opnum_cond;
 
 	do_begin_loop(TSRMLS_C);
@@ -5922,8 +5934,7 @@ void zend_compile_do_while(zend_ast *ast TSRMLS_DC) {
 	opnum_cond = get_next_op_number(CG(active_op_array));
 	zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
 
-	opline = emit_op(NULL, ZEND_JMPNZ, &cond_node, NULL TSRMLS_CC);
-	opline->op2.opline_num = opnum_start;
+	zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, opnum_start TSRMLS_CC);
 
 	do_end_loop(opnum_cond, 0 TSRMLS_CC);
 }
@@ -5948,7 +5959,6 @@ void zend_compile_for(zend_ast *ast TSRMLS_DC) {
 
 	znode result;
 	zend_uint opnum_cond, opnum_jmpz, opnum_loop;
-	zend_op *opline;
 
 	zend_compile_expr_list(&result, init_ast TSRMLS_CC);
 	zend_do_free(&result TSRMLS_CC);
@@ -5957,8 +5967,7 @@ void zend_compile_for(zend_ast *ast TSRMLS_DC) {
 	zend_compile_expr_list(&result, cond_ast TSRMLS_CC);
 	zend_do_extended_info(TSRMLS_C);
 
-	opnum_jmpz = get_next_op_number(CG(active_op_array));
-	emit_op(NULL, ZEND_JMPZ, &result, NULL TSRMLS_CC);
+	opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &result, 0 TSRMLS_CC);
 	do_begin_loop(TSRMLS_C);
 
 	zend_compile_stmt(stmt_ast TSRMLS_CC);
@@ -5967,8 +5976,7 @@ void zend_compile_for(zend_ast *ast TSRMLS_DC) {
 	zend_compile_expr_list(&result, loop_ast TSRMLS_CC);
 	zend_do_free(&result TSRMLS_CC);
 
-	opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
-	opline->op1.opline_num = opnum_cond;
+	zend_emit_jump(opnum_cond TSRMLS_CC);
 
 	zend_update_jump_target_to_next(opnum_jmpz TSRMLS_CC);
 
@@ -6069,8 +6077,7 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) {
 
 	zend_compile_stmt(stmt_ast TSRMLS_CC);
 
-	opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
-	opline->op1.opline_num = opnum_fetch;
+	zend_emit_jump(opnum_fetch TSRMLS_CC);
 
 	opline = &CG(active_op_array)->opcodes[opnum_reset];
 	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
@@ -6100,16 +6107,13 @@ void zend_compile_if(zend_ast *ast TSRMLS_DC) {
 		znode cond_node;
 		if (cond_ast) {
 			zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
-
-			opnum_last_jmpz = get_next_op_number(CG(active_op_array));
-			emit_op(NULL, ZEND_JMPZ, &cond_node, NULL TSRMLS_CC);
+			opnum_last_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0 TSRMLS_CC);
 		}
 
 		zend_compile_stmt(stmt_ast TSRMLS_CC);
 
 		if (i != ast->children - 1) {
-			jmp_opnums[i] = get_next_op_number(CG(active_op_array));
-			emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+			jmp_opnums[i] = zend_emit_jump(0 TSRMLS_CC);
 		}
 
 		if (cond_ast) {
@@ -6167,12 +6171,10 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) {
 			zval_copy_ctor(&CONSTANT(opline->op1.constant));
 		}
 
-		jmpnz_opnums[i] = get_next_op_number(CG(active_op_array));
-		emit_op(NULL, ZEND_JMPNZ, &case_node, NULL TSRMLS_CC);
+		jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &case_node, 0 TSRMLS_CC);
 	}
 
-	opnum_default_jmp = get_next_op_number(CG(active_op_array));
-	emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+	opnum_default_jmp = zend_emit_jump(0 TSRMLS_CC);
 
 	for (i = 0; i < cases_ast->children; ++i) {
 		zend_ast *case_ast = cases_ast->child[i];
@@ -6223,8 +6225,7 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 	zend_compile_stmt(try_ast TSRMLS_CC);
 
 	if (catches_ast->children != 0) {
-		jmp_opnums[0] = get_next_op_number(CG(active_op_array));
-		emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+		jmp_opnums[0] = zend_emit_jump(0 TSRMLS_CC);
 	}
 
 	for (i = 0; i < catches_ast->children; ++i) {
@@ -6264,8 +6265,7 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 		zend_compile_stmt(stmt_ast TSRMLS_CC);
 
 		if (!is_last_catch) {
-			jmp_opnums[i + 1] = get_next_op_number(CG(active_op_array));
-			emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+			jmp_opnums[i + 1] = zend_emit_jump(0 TSRMLS_CC);
 		}
 
 		opline = &CG(active_op_array)->opcodes[opnum_catch];
@@ -6761,16 +6761,14 @@ void zend_compile_conditional(znode *result, zend_ast *ast TSRMLS_DC) {
 	
 	zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
 
-	opnum_jmpz = get_next_op_number(CG(active_op_array));
-	emit_op(NULL, ZEND_JMPZ, &cond_node, NULL TSRMLS_CC);
+	opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0 TSRMLS_CC);
 
 	zend_compile_expr(&true_node, true_ast TSRMLS_CC);
 
 	opnum_qm_assign1 = get_next_op_number(CG(active_op_array));
 	emit_op(result, ZEND_QM_ASSIGN, &true_node, NULL TSRMLS_CC);
 
-	opnum_jmp = get_next_op_number(CG(active_op_array));
-	emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
+	opnum_jmp = zend_emit_jump(0 TSRMLS_CC);
 
 	zend_update_jump_target_to_next(opnum_jmpz TSRMLS_CC);
 
