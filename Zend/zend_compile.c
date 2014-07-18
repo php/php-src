@@ -6046,7 +6046,7 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) {
 
 	if (key_ast) {
 		opline->result_type = IS_TMP_VAR;
-		opline->result.opline_num = get_temporary_variable(CG(active_op_array));
+		opline->result.var = get_temporary_variable(CG(active_op_array));
 		GET_NODE(&key_node, opline->result);
 	}
 
@@ -6515,7 +6515,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 	} else {
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_DECLARE_FUNCTION;
-		opline->extended_value = ZEND_DECLARE_FUNCTION;
 		opline->op2_type = IS_CONST;
 		LITERAL_STR(opline->op2, STR_COPY(lcname));
 	}
