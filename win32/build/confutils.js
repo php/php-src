@@ -1967,8 +1967,18 @@ function generate_makefile()
 		for (var i in extensions_enabled) {
 			var lib = "php_" + extensions_enabled[i][0] + ".lib";
 			var dll = "php_" + extensions_enabled[i][0] + ".dll";
-			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib\\" + lib);
-			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)\\" + dll);
+			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)");
+		}
+	} else {
+		MF.WriteBlankLines(1);
+		MF.WriteLine("build-ext-libs:");
+		for (var i in extensions_enabled) {
+			var lib = "php_" + extensions_enabled[i][0] + ".lib";
+
+			if ('shared' == extensions_enabled[i][1]) {
+				MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+			}
 		}
 	}
 	TF.Close();
