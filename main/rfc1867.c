@@ -903,7 +903,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
+#ifdef HAVE_ATOLL
 					max_file_size = atoll(value);
+#else
+					max_file_size = strtoll(value, NULL, 10);
+#endif
 				}
 
 				efree(param);

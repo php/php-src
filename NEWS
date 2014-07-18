@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #67151 (strtr with empty array crashes). (Nikita)
   . Fixed bug #67407 (Windows 8.1/Server 2012 R2 reported as Windows 8/Server
     2012). (Christian Wenz)
+  . Fixed bug #66608 (Incorrect behavior with nested "finally" blocks).
+    (Laruence, Dmitry)
   . Implemented FR #34407 (ucwords and Title Case). (Tjerk)
 
 - CLI server:
@@ -30,6 +32,8 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug #67609 (TLS connections fail behind HTTP proxy). (Daniel Lowrey)
+  . Fixed broken build against OpenSSL older than 0.9.8 where ECDH unavailable.
+    (Lior Kaplan)
 
 - Phar:
   . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
