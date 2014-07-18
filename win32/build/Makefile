@@ -183,7 +183,7 @@ msi-installer: dist
 # need to redirect, since INSTALL is a file in the root...
 install: really-install install-sdk
 
-build-lib:
+build-lib: build-ext-libs
 	@if not exist $(BUILD_DIR_DEV)\lib mkdir $(BUILD_DIR_DEV)\lib >nul
 	@copy $(BUILD_DIR)\$(PHPLIB) $(BUILD_DIR_DEV)\lib /y >nul
 
