@@ -303,10 +303,8 @@ typedef enum {
 	 !(EG(current_execute_data)->prev_execute_data->opline->result_type & EXT_TYPE_UNUSED))
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
-#  define ZEND_NORETURN __attribute__((noreturn))
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
 #else
-#  define ZEND_NORETURN
 #  define zend_error_noreturn zend_error
 #endif
 
@@ -746,7 +744,7 @@ END_EXTERN_C()
 		ZEND_ASSERT(Z_ISREF_P(_z));						\
 		ref = Z_REF_P(_z);								\
 		ZVAL_COPY_VALUE(_z, &ref->val);					\
-		efree_size(ref, sizeof(zend_reference));		\
+		efree(ref);										\
 	} while (0)
 
 #define SEPARATE_STRING(zv) do {						\
