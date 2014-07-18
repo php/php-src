@@ -390,7 +390,7 @@ unset_variable:
 function_declaration_statement:
 	function is_reference T_STRING '(' parameter_list ')' '{' inner_statement_list '}'
 		{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_FUNC_DECL, $2.op_type,
-		      $1.u.op.opline_num, CG(zend_lineno), LANG_SCNG(yy_text),
+		      $1.EA, CG(zend_lineno), LANG_SCNG(yy_text), $1.u.op.ptr,
 			  Z_STR($3.u.constant), $5.u.ast, NULL, $8.u.ast); }
 ;
 
@@ -629,7 +629,7 @@ class_statement:
 		variable_modifiers { CG(access_type) = Z_LVAL($1.u.constant); } class_variable_declaration ';'
 	|	class_constant_declaration ';'
 	|	trait_use_statement
-	|	method_modifiers function is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1 TSRMLS_CC); }
+	|	method_modifiers function2 is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1 TSRMLS_CC); }
 		'(' parameter_list ')' { zend_compile_params($7.u.ast TSRMLS_CC); zend_ast_destroy($7.u.ast); }
 		method_body { zend_do_abstract_method(&$4, &$1, &$10 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 ;
@@ -872,16 +872,21 @@ expr_without_variable:
 			{ $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $4.u.ast, $2.u.ast); }
 	|	function is_reference '(' parameter_list ')' lexical_vars '{' inner_statement_list '}'
 			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_CLOSURE, $2.op_type,
-			      $1.u.op.opline_num, CG(zend_lineno), LANG_SCNG(yy_text),
+			      $1.EA, CG(zend_lineno), LANG_SCNG(yy_text), $1.u.op.ptr,
 				  STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
 				  $4.u.ast, $6.u.ast, $8.u.ast); }
-	|	T_STATIC function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
+	|	T_STATIC function2 is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
 		'(' parameter_list ')' { zend_compile_params($6.u.ast TSRMLS_CC); zend_ast_destroy($6.u.ast); } lexical_vars { zend_compile_closure_uses($9.u.ast TSRMLS_CC); if ($9.u.ast) zend_ast_destroy($9.u.ast); }
 		'{' inner_statement_list '}' { AS($12); zend_do_end_function_declaration(&$2 TSRMLS_CC); $$.u.ast = AST_ZNODE(&$4); }
 ;
 
 function:
-	T_FUNCTION { $$.u.op.opline_num = CG(zend_lineno); }
+	T_FUNCTION
+		{ $$.EA = CG(zend_lineno); $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }
+;
+
+function2:
+	T_FUNCTION { $$.EA = CG(zend_lineno); }
 ;
 
 lexical_vars:

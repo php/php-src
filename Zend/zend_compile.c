@@ -1047,7 +1047,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 {
 	zend_op_array op_array;
 	zend_string *name = Z_STR(function_name->u.constant);
-	int function_begin_line = function_token->u.op.opline_num;
+	int function_begin_line = function_token->EA;
 	zend_uint fn_flags;
 	zend_string *lcname;
 	zend_bool orig_interactive;
@@ -7025,6 +7025,9 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 
 	op_array->line_start = fn->start_lineno;
 	op_array->line_end = fn->end_lineno;
+	if (fn->doc_comment) {
+		op_array->doc_comment = STR_COPY(fn->doc_comment);
+	}
 	if (fn->returns_ref) {
 		op_array->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 	}
