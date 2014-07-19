@@ -43,6 +43,10 @@ PHP                                                                        NEWS
     sorting). (research at insighti dot org, Laruence)
   . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
 
+- Session:
+  . Fixed bug #66827 (Session raises E_NOTICE when session name variable is array).
+    (Yasuo)
+
 - OPCache:
   . Fixed bug #67215 (php-cgi work with opcache, may be segmentation fault
     happen) (Dmitry, Laruence)
