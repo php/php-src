@@ -1961,7 +1961,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			void **p = EX(function_state).arguments - num_args;
 
 			for (i = 0; i < num_args; ++i, ++p) {
-				zend_verify_arg_type(fbc, i + 1, (zval *) *p, 0 TSRMLS_CC);
+				zend_verify_arg_type(fbc, i + 1, p, 0 TSRMLS_CC);
 			}
 		}
 

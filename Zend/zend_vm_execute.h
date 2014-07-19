@@ -541,7 +541,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 			void **p = EX(function_state).arguments - num_args;
 
 			for (i = 0; i < num_args; ++i, ++p) {
-				zend_verify_arg_type(fbc, i + 1, (zval *) *p, 0 TSRMLS_CC);
+				zend_verify_arg_type(fbc, i + 1, p, 0 TSRMLS_CC);
 			}
 		}
 
