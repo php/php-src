@@ -628,7 +628,10 @@ class_statement_list:
 class_statement:
 		variable_modifiers property_list ';'
 			{ $$.u.ast = $2.u.ast; $$.u.ast->attr = Z_LVAL($1.u.constant); AS($$); }
-	|	class_const_list ';' { $$.u.ast = $1.u.ast; AS($$); }
+	|	class_const_list ';'
+			{ $$.u.ast = $1.u.ast;
+			  if (CG(doc_comment)) { STR_RELEASE(CG(doc_comment)); CG(doc_comment) = NULL; }
+			  AS($$); }
 	|	trait_use_statement
 	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')' method_body
 			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_METHOD, $3.EA | Z_LVAL($1.u.constant),

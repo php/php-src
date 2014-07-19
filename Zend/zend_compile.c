@@ -6545,8 +6545,6 @@ void zend_compile_class_const_decl(zend_ast *ast TSRMLS_DC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s",
 				ce->name->val, name);
 		}
-
-		// TODO.AST doc comment
 	}
 }
 
