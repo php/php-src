@@ -58,6 +58,10 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #67430 (http:// wrapper doesn't follow 308 redirects). (Adam)
 
+- Session:
+  . Fixed bug #66827 (Session raises E_NOTICE when session name variable is array).
+    (Yasuo)
+
 27 Jun 2014, PHP 5.5.14
 
 - Core:

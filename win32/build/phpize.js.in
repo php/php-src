@@ -40,9 +40,13 @@ function ERROR(msg)
 
 function file_get_contents(filename)
 {
+	var t = "";
 	var F = FSO.OpenTextFile(filename, 1);
-	var t = F.ReadAll();
-	F.Close();
+
+	if (!F.AtEndOfStream) {
+		t = F.ReadAll();
+		F.Close();
+	}
 	return t;
 }
 
