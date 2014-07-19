@@ -1137,7 +1137,7 @@ static int ZEND_FASTCALL  ZEND_FAST_CALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
-	if ((opline->extended_value & ZEND_FAST_CALL_FOR_CATCH) &&
+	if ((opline->extended_value & ZEND_FAST_CALL_FROM_CATCH) &&
 	    UNEXPECTED(EG(prev_exception) != NULL)) {
 	    /* in case of unhandled exception jump to catch block instead of finally */
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
@@ -1152,7 +1152,7 @@ static int ZEND_FASTCALL  ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (EX(fast_ret)) {
 		ZEND_VM_SET_OPCODE(EX(fast_ret) + 1);
-		if ((EX(fast_ret)->extended_value & ZEND_FAST_CALL_FOR_FINALLY)) {
+		if ((EX(fast_ret)->extended_value & ZEND_FAST_CALL_FROM_FINALLY)) {
 			EX(fast_ret) = &EX(op_array)->opcodes[EX(fast_ret)->op2.opline_num];
 		}
 		ZEND_VM_CONTINUE();

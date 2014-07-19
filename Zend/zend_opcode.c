@@ -509,6 +509,49 @@ static void zend_check_finally_breakout(zend_op_array *op_array, zend_uint op_nu
 	} 
 }
 
+static void zend_adjust_fast_call(zend_op_array *op_array, zend_uint fast_call, zend_uint start, zend_uint end TSRMLS_DC)
+{
+	int i;
+	zend_uint op_num = 0;
+
+	for (i = 0; i < op_array->last_try_catch; i++) {
+		if (op_array->try_catch_array[i].finally_op > start 
+				&& op_array->try_catch_array[i].finally_end < end) {
+			op_num = op_array->try_catch_array[i].finally_op;
+			start = op_array->try_catch_array[i].finally_end;
+		}
+	}
+
+	if (op_num) {
+		/* Must be ZEND_FAST_CALL */
+		ZEND_ASSERT(op_array->opcodes[op_num - 2].opcode == ZEND_FAST_CALL);
+		op_array->opcodes[op_num - 2].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
+		op_array->opcodes[op_num - 2].op2.opline_num = fast_call;
+	}
+}
+
+static void zend_resolve_fast_call(zend_op_array *op_array, zend_uint fast_call, zend_uint op_num TSRMLS_DC)
+{
+	int i;
+	zend_uint finally_op_num = 0;
+
+	for (i = 0; i < op_array->last_try_catch; i++) {
+		if (op_num >= op_array->try_catch_array[i].finally_op
+				&& op_num < op_array->try_catch_array[i].finally_end) {
+			finally_op_num = op_array->try_catch_array[i].finally_op;
+		}
+	}
+
+	if (finally_op_num) {
+		/* Must be ZEND_FAST_CALL */
+		ZEND_ASSERT(op_array->opcodes[finally_op_num - 2].opcode == ZEND_FAST_CALL);
+		if (op_array->opcodes[fast_call].extended_value == 0) {
+			op_array->opcodes[fast_call].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
+			op_array->opcodes[fast_call].op2.opline_num = finally_op_num - 2;
+		}
+	} 
+}
+
 static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num, zend_uint dst_num TSRMLS_DC)
 {
 	zend_uint start_op;
@@ -536,11 +579,23 @@ static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num,
 			opline->opcode = ZEND_FAST_CALL;
 			SET_UNUSED(opline->op1);
 			SET_UNUSED(opline->op2);
-			opline->op1.opline_num = op_array->try_catch_array[i].finally_op;
+			zend_adjust_fast_call(op_array, start_op,
+					op_array->try_catch_array[i].finally_op,
+					op_array->try_catch_array[i].finally_end TSRMLS_CC);
 			if (op_array->try_catch_array[i].catch_op) {
-				opline->extended_value = ZEND_FAST_CALL_FOR_CATCH;
+				opline->extended_value = ZEND_FAST_CALL_FROM_CATCH;
 				opline->op2.opline_num = op_array->try_catch_array[i].catch_op;
+				opline->op1.opline_num = get_next_op_number(op_array);
+				/* generate a FAST_CALL to hole CALL_FROM_FINALLY */
+				opline = get_next_op(op_array TSRMLS_CC);
+				opline->opcode = ZEND_FAST_CALL;
+				SET_UNUSED(opline->op1);
+				SET_UNUSED(opline->op2);
+				zend_resolve_fast_call(op_array, start_op + 1, op_array->try_catch_array[i].finally_op - 2 TSRMLS_CC);
+			} else {
+				zend_resolve_fast_call(op_array, start_op, op_array->try_catch_array[i].finally_op - 2 TSRMLS_CC);
 			}
+			opline->op1.opline_num = op_array->try_catch_array[i].finally_op;
 
 			/* generate a sequence of FAST_CALL to upward finally block */
 			while (i > 0) {
@@ -603,26 +658,6 @@ static void zend_resolve_finally_ret(zend_op_array *op_array, zend_uint op_num T
 	}
 }
 
-static void zend_resolve_fast_call(zend_op_array *op_array, zend_uint op_num TSRMLS_DC)
-{
-	int i;
-	zend_uint finally_op_num = 0;
-
-	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_array->try_catch_array[i].finally_op > op_num) {
-			break;
-		}
-		if (op_num < op_array->try_catch_array[i].finally_end) {
-			finally_op_num = op_array->try_catch_array[i].finally_op;
-		}
-	}
-
-	if (finally_op_num) {
-		op_array->opcodes[op_num].extended_value = ZEND_FAST_CALL_FOR_FINALLY;
-		op_array->opcodes[op_num].op2.opline_num = finally_op_num - 2; /* it must be ZEND_FAST_CALL */
-	} 
-}
-
 static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_uint i, j;
@@ -666,7 +701,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 				zend_resolve_finally_call(op_array, i, opline->op1.opline_num TSRMLS_CC);
 				break;
 			case ZEND_FAST_CALL:
-				zend_resolve_fast_call(op_array, i TSRMLS_CC);
+				zend_resolve_fast_call(op_array, i, i TSRMLS_CC);
 				break;
 			case ZEND_FAST_RET:
 				zend_resolve_finally_ret(op_array, i TSRMLS_CC);
