@@ -7351,6 +7351,8 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 }
 
 void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
+	CG(zend_lineno) = ast->lineno;
+
 	switch (ast->kind) {
 		case ZEND_AST_ZVAL:
 			ZVAL_COPY(&result->u.constant, zend_ast_get_zval(ast));
