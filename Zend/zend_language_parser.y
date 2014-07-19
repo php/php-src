@@ -629,9 +629,10 @@ class_statement:
 		variable_modifiers { CG(access_type) = Z_LVAL($1.u.constant); } class_variable_declaration ';'
 	|	class_constant_declaration ';'
 	|	trait_use_statement
-	|	method_modifiers function2 is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1 TSRMLS_CC); }
-		'(' parameter_list ')' { zend_compile_params($7.u.ast TSRMLS_CC); zend_ast_destroy($7.u.ast); }
-		method_body { zend_do_abstract_method(&$4, &$1, &$10 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
+	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')' method_body
+			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_METHOD, $3.EA | Z_LVAL($1.u.constant),
+			      $2.EA, CG(zend_lineno), LANG_SCNG(yy_text), $2.u.op.ptr,
+				  Z_STR($4.u.constant), $6.u.ast, NULL, $8.u.ast); AS($$); }
 ;
 
 trait_use_statement:
@@ -692,8 +693,8 @@ trait_modifiers:
 ;
 
 method_body:
-		';' /* abstract method */		{ Z_LVAL($$.u.constant) = ZEND_ACC_ABSTRACT; }
-	|	'{' inner_statement_list '}'	{ AS($2); Z_LVAL($$.u.constant) = 0; }
+		';' /* abstract method */		{ $$.u.ast = NULL; }
+	|	'{' inner_statement_list '}'	{ $$.u.ast = $2.u.ast; }
 ;
 
 variable_modifiers:
@@ -702,8 +703,8 @@ variable_modifiers:
 ;
 
 method_modifiers:
-		/* empty */							{ Z_LVAL($$.u.constant) = ZEND_ACC_PUBLIC; }
-	|	non_empty_member_modifiers			{ $$ = $1;  if (!(Z_LVAL($$.u.constant) & ZEND_ACC_PPP_MASK)) { Z_LVAL($$.u.constant) |= ZEND_ACC_PUBLIC; } }
+		/* empty */						{ Z_LVAL($$.u.constant) = ZEND_ACC_PUBLIC; }
+	|	non_empty_member_modifiers		{ $$ = $1; if (!(Z_LVAL($$.u.constant) & ZEND_ACC_PPP_MASK)) { Z_LVAL($$.u.constant) |= ZEND_ACC_PUBLIC; } }
 ;
 
 non_empty_member_modifiers:
@@ -891,10 +892,6 @@ function:
 returns_ref:
 		/* empty */	{ $$.EA = 0; }
 	|	'&'			{ $$.EA = ZEND_ACC_RETURN_REFERENCE; }
-;
-
-function2:
-	T_FUNCTION { $$.EA = CG(zend_lineno); }
 ;
 
 lexical_vars:

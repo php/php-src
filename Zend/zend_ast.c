@@ -349,6 +349,7 @@ ZEND_API void zend_ast_destroy(zend_ast *ast)
 			break;
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_CLOSURE:
+		case ZEND_AST_METHOD:
 		{
 			zend_ast_func_decl *fn = (zend_ast_func_decl *) ast;
 			STR_RELEASE(fn->name);
