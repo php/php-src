@@ -4999,6 +4999,7 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast TSRMLS_DC) {
 
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
+		case ZEND_AST_STATIC_PROP:
 			zend_compile_var(&var_node, var_ast, BP_VAR_RW TSRMLS_CC);
 			emit_op(result, opcode, &var_node, &expr_node TSRMLS_CC);
 			return;
