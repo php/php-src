@@ -428,13 +428,8 @@ static int zend_add_class_name_literal(zend_op_array *op_array, zend_string *nam
 
 	ret = zend_add_literal(op_array, &zv TSRMLS_CC);
 
-	if (name->val[0] == '\\') {
-		lc_name = STR_ALLOC(name->len - 1, 0);
-		zend_str_tolower_copy(lc_name->val, name->val + 1, name->len - 1);
-	} else {
-		lc_name = STR_ALLOC(name->len, 0);
-		zend_str_tolower_copy(lc_name->val, name->val, name->len);
-	}
+	lc_name = STR_ALLOC(name->len, 0);
+	zend_str_tolower_copy(lc_name->val, name->val, name->len);
 
 	ZVAL_NEW_STR(&zv, lc_name);
 	zend_add_literal(CG(active_op_array), &zv TSRMLS_CC);
