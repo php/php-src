@@ -947,7 +947,6 @@ fully_qualified_class_name:
 ;
 
 
-
 class_name_reference:
 		class_name		{ $$.u.ast = $1.u.ast; }
 	|	new_variable	{ $$.u.ast = $1.u.ast; }

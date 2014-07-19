@@ -5990,10 +5990,9 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 				}
 			} else {
 				zend_string *class_name = Z_STR_P(zend_ast_get_zval(type_ast));
-				zend_bool is_fully_qualified = !type_ast->attr;
 
 				if (zend_is_const_default_class_ref(type_ast)) {
-					class_name = zend_resolve_class_name(class_name, is_fully_qualified TSRMLS_CC);
+					class_name = zend_resolve_class_name_ast(type_ast TSRMLS_CC);
 				} else {
 					STR_ADDREF(class_name);
 				}
@@ -6453,9 +6452,7 @@ static zend_trait_method_reference *zend_compile_method_ref(zend_ast *ast TSRMLS
 	method_ref->method_name = STR_COPY(Z_STR_P(zend_ast_get_zval(method_ast)));
 
 	if (class_ast) {
-		zend_string *name = Z_STR_P(zend_ast_get_zval(class_ast));
-		zend_bool is_fully_qualified = class_ast->attr;
-		method_ref->class_name = zend_resolve_class_name(name, is_fully_qualified TSRMLS_CC);
+		method_ref->class_name = zend_resolve_class_name_ast(class_ast TSRMLS_CC);
 	} else {
 		method_ref->class_name = NULL;
 	}
@@ -6469,9 +6466,7 @@ static zend_string **zend_compile_name_list(zend_ast *ast TSRMLS_DC) {
 
 	for (i = 0; i < ast->children; ++i) {
 		zend_ast *name_ast = ast->child[i];
-		zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
-		zend_bool is_fully_qualified = name_ast->attr;
-		names[i] = zend_resolve_class_name(name, is_fully_qualified TSRMLS_CC);
+		names[i] = zend_resolve_class_name_ast(name_ast TSRMLS_CC);
 	}
 
 	names[ast->children] = NULL;
