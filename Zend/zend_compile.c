@@ -5653,7 +5653,12 @@ void zend_compile_do_while(zend_ast *ast TSRMLS_DC) {
 void zend_compile_expr_list(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 
-	result->op_type = IS_UNUSED;
+	result->op_type = IS_CONST;
+	ZVAL_TRUE(&result->u.constant);
+
+	if (!ast) {
+		return;
+	}
 	for (i = 0; i < ast->children; ++i) {
 		zend_ast *expr_ast = ast->child[i];
 
