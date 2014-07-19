@@ -6470,6 +6470,48 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 	CG(active_op_array) = orig_op_array;
 }
 
+void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) {
+	zend_uint flags = ast->attr;
+	zend_class_entry *ce = CG(active_class_entry);
+	zend_uint i;
+
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include member variables");
+	}
+
+	if (flags & ZEND_ACC_ABSTRACT) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
+	}
+
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *prop_ast = ast->child[i];
+		zend_ast *name_ast = prop_ast->child[0];
+		zend_ast *value_ast = prop_ast->child[1];
+		zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
+		zval value_zv;
+
+		if (flags & ZEND_ACC_FINAL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, "
+				"the final modifier is allowed only for methods and classes",
+				ce->name->val, name->val);
+		}
+
+		if (zend_hash_exists(&ce->properties_info, name)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::$%s",
+				ce->name->val, name->val);
+		}
+
+		if (value_ast) {
+			_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
+		} else {
+			ZVAL_NULL(&value_zv);
+		}
+
+		name = zend_new_interned_string(name TSRMLS_CC);
+		zend_declare_property_ex(ce, name, &value_zv, flags, NULL /* TODO.AST doc comment */ TSRMLS_CC);
+	}
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7306,6 +7348,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_METHOD:
 			zend_compile_func_decl(NULL, ast TSRMLS_CC);
+			break;
+		case ZEND_AST_PROP_DECL:
+			zend_compile_prop_decl(ast TSRMLS_CC);
 			break;
 		default:
 		{

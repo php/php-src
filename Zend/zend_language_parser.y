@@ -626,7 +626,8 @@ class_statement_list:
 
 
 class_statement:
-		variable_modifiers { CG(access_type) = Z_LVAL($1.u.constant); } class_variable_declaration ';'
+		variable_modifiers property_list ';'
+			{ $$.u.ast = $2.u.ast; $$.u.ast->attr = Z_LVAL($1.u.constant); AS($$); }
 	|	class_constant_declaration ';'
 	|	trait_use_statement
 	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')' method_body
@@ -721,11 +722,15 @@ member_modifier:
 	|	T_FINAL					{ Z_LVAL($$.u.constant) = ZEND_ACC_FINAL; }
 ;
 
-class_variable_declaration:
-		class_variable_declaration ',' T_VARIABLE					{ zend_do_declare_property(&$3, NULL, CG(access_type) TSRMLS_CC); }
-	|	class_variable_declaration ',' T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$3, &$5, CG(access_type) TSRMLS_CC); }
-	|	T_VARIABLE						{ zend_do_declare_property(&$1, NULL, CG(access_type) TSRMLS_CC); }
-	|	T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$1, &$3, CG(access_type) TSRMLS_CC); }
+property_list:
+		property_list ',' property { $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
+	|	property { $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_PROP_DECL, $1.u.ast); }
+;
+
+property:
+		T_VARIABLE { $$.u.ast = zend_ast_create_binary(ZEND_AST_PROP_ELEM, AST_ZVAL(&$1), NULL); }
+	|	T_VARIABLE '=' expr
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_PROP_ELEM, AST_ZVAL(&$1), $3.u.ast); }
 ;
 
 class_constant_declaration:
