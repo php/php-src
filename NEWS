@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug #67530 (error_log=syslog ignored). (Remi)
+  . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
+    (pacho@gentoo.org, Remi)
 
 - Intl:
   . Fixed bug #66921 (Wrong argument type hint for function
