@@ -573,9 +573,12 @@ if test "$PHP_FPM" != "no"; then
     unset SYSTEMD_LIBS
     unset SYSTEMD_INCS
     if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd; then
+      AC_MSG_CHECKING([for libsystemd])
       SYSTEMD_LIBS=`$PKG_CONFIG --libs libsystemd`
       SYSTEMD_INCS=`$PKG_CONFIG --cflags-only-I libsystemd`
+      SYSTEMD_VERS=`$PKG_CONFIG --modversion libsystemd`
       HAVE_SD_DAEMON_H="yes"
+      AC_MSG_RESULT([version $SYSTEMD_VERS])
     else
       AC_CHECK_LIB(systemd-daemon, sd_notify, SYSTEMD_LIBS="-lsystemd-daemon")
       AC_CHECK_HEADERS(systemd/sd-daemon.h, [HAVE_SD_DAEMON_H="yes"], [HAVE_SD_DAEMON_H="no"])
