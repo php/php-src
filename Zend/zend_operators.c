@@ -706,30 +706,61 @@ ZEND_API void convert_to_long(zval *op) /* {{{ */
 
 ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 {
+	long tmp;
+
 	switch (Z_TYPE_P(op)) {
-		case IS_OBJECT: {
-				char *name;
-				name = estrdup(Z_OBJCE_P(op)->name);
-				if (_convert_to_long_base_safe(&op, base, 0) == FAILURE) {
-					zend_error(E_NOTICE, "Object of class %s could not be converted to int", name);
-				}
-				efree(name);
-			}
-			break;
 		case IS_NULL:
-		case IS_RESOURCE:
+			Z_LVAL_P(op) = 0;
+			break;
+		case IS_RESOURCE: {
+				TSRMLS_FETCH();
+
+				zend_list_delete(Z_LVAL_P(op));
+			}
+			/* break missing intentionally */
 		case IS_BOOL:
 		case IS_LONG:
-		case IS_DOUBLE:
-		case IS_STRING:
-		case IS_ARRAY:
-			_convert_to_long_base_safe(&op, base, 0);
 			break;
+		case IS_DOUBLE:
+			Z_LVAL_P(op) = zend_dval_to_lval(Z_DVAL_P(op));
+			break;
+		case IS_STRING:
+			{
+				char *strval = Z_STRVAL_P(op);
+
+				Z_LVAL_P(op) = strtol(strval, NULL, base);
+				str_efree(strval);
+			}
+			break;
+		case IS_ARRAY:
+			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
+			zval_dtor(op);
+			Z_LVAL_P(op) = tmp;
+			break;
+		case IS_OBJECT:
+			{
+				int retval = 1;
+				TSRMLS_FETCH();
+
+				convert_object_to_type(op, IS_LONG, convert_to_long);
+
+				if (Z_TYPE_P(op) == IS_LONG) {
+					return;
+				}
+				zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name);
+
+				zval_dtor(op);
+				ZVAL_LONG(op, retval);
+				return;
+			}
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
 			zval_dtor(op);
-			ZVAL_LONG(op, 0);
+			Z_LVAL_P(op) = 0;
+			break;
 	}
+
+	Z_TYPE_P(op) = IS_LONG;
 }
 /* }}} */
 
@@ -817,7 +848,65 @@ ZEND_API void convert_to_null(zval *op) /* {{{ */
 
 ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 {
-	_convert_to_boolean_safe(&op, 0);
+	int tmp;
+
+	switch (Z_TYPE_P(op)) {
+		case IS_BOOL:
+			break;
+		case IS_NULL:
+			Z_LVAL_P(op) = 0;
+			break;
+		case IS_RESOURCE: {
+				TSRMLS_FETCH();
+
+				zend_list_delete(Z_LVAL_P(op));
+			}
+			/* break missing intentionally */
+		case IS_LONG:
+			Z_LVAL_P(op) = (Z_LVAL_P(op) ? 1 : 0);
+			break;
+		case IS_DOUBLE:
+			Z_LVAL_P(op) = (Z_DVAL_P(op) ? 1 : 0);
+			break;
+		case IS_STRING:
+			{
+				char *strval = Z_STRVAL_P(op);
+
+				if (Z_STRLEN_P(op) == 0
+					|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
+					Z_LVAL_P(op) = 0;
+				} else {
+					Z_LVAL_P(op) = 1;
+				}
+				str_efree(strval);
+			}
+			break;
+		case IS_ARRAY:
+			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
+			zval_dtor(op);
+			Z_LVAL_P(op) = tmp;
+			break;
+		case IS_OBJECT:
+			{
+				zend_bool retval = 1;
+				TSRMLS_FETCH();
+
+				convert_object_to_type(op, IS_BOOL, convert_to_boolean);
+
+				if (Z_TYPE_P(op) == IS_BOOL) {
+					return;
+				}
+
+				zval_dtor(op);
+				ZVAL_BOOL(op, retval);
+				break;
+			}
+		default:
+			zval_dtor(op);
+			Z_LVAL_P(op) = 0;
+			break;
+	}
+	Z_TYPE_P(op) = IS_BOOL;
 }
 /* }}} */
 
@@ -841,23 +930,72 @@ ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
+	long lval;
+	double dval;
+
 	switch (Z_TYPE_P(op)) {
+		case IS_NULL:
+			Z_STRVAL_P(op) = STR_EMPTY_ALLOC();
+			Z_STRLEN_P(op) = 0;
+			break;
 		case IS_STRING:
-			return;
-		case IS_OBJECT: 
-			{
-				char *name;
-				name = estrdup(Z_OBJCE_P(op)->name);
-				if (_convert_to_string_safe(&op, 0) == FAILURE) {
-					zend_error(E_NOTICE, "Object of class %s to string conversion", name);
-				}
-				efree(name);
+			break;
+		case IS_BOOL:
+			if (Z_LVAL_P(op)) {
+				Z_STRVAL_P(op) = estrndup_rel("1", 1);
+				Z_STRLEN_P(op) = 1;
+			} else {
+				Z_STRVAL_P(op) = STR_EMPTY_ALLOC();
+				Z_STRLEN_P(op) = 0;
+			}
+			break;
+		case IS_RESOURCE: {
+			long tmp = Z_LVAL_P(op);
+			TSRMLS_FETCH();
+
+			zend_list_delete(Z_LVAL_P(op));
+			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "Resource id #%ld", tmp);
+			break;
+		}
+		case IS_LONG:
+			lval = Z_LVAL_P(op);
+
+			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%ld", lval);
+			break;
+		case IS_DOUBLE: {
+			TSRMLS_FETCH();
+			dval = Z_DVAL_P(op);
+			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%.*G", (int) EG(precision), dval);
+			/* %G already handles removing trailing zeros from the fractional part, yay */
+			break;
+		}
+		case IS_ARRAY:
+			zend_error(E_NOTICE, "Array to string conversion");
+			zval_dtor(op);
+			Z_STRVAL_P(op) = estrndup_rel("Array", sizeof("Array")-1);
+			Z_STRLEN_P(op) = sizeof("Array")-1;
+			break;
+		case IS_OBJECT: {
+			TSRMLS_FETCH();
+
+			convert_object_to_type(op, IS_STRING, convert_to_string);
+
+			if (Z_TYPE_P(op) == IS_STRING) {
 				return;
 			}
-		default:
-			_convert_to_string_safe(&op, 0);
 
+			zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name);
+			zval_dtor(op);
+			Z_STRVAL_P(op) = estrndup_rel("Object", sizeof("Object")-1);
+			Z_STRLEN_P(op) = sizeof("Object")-1;
+			break;
+		}
+		default:
+			zval_dtor(op);
+			ZVAL_BOOL(op, 0);
+			break;
 	}
+	Z_TYPE_P(op) = IS_STRING;
 }
 /* }}} */
 
