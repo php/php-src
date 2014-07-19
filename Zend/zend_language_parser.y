@@ -936,7 +936,7 @@ function_call:
 class_name:
 		T_STATIC
 			{ zval zv; ZVAL_STRINGL(&zv, "static", sizeof("static")-1);
-			  $$.u.ast = zend_ast_create_zval(&zv); }
+			  $$.u.ast = zend_ast_create_zval_ex(&zv, 1); }
 	|	name { $$.u.ast = $1.u.ast; }
 ;
 

@@ -4437,9 +4437,9 @@ static zend_bool zend_is_const_default_class_ref(zend_ast *name_ast) {
 	}
 
 	/* Fully qualified names are always default refs */
-	/*if (!name_ast->attr) {
+	if (!name_ast->attr) {
 		return 1;
-	}*/
+	}
 
 	name = zend_ast_get_zval(name_ast);
 	fetch_type = zend_get_class_fetch_type(Z_STRVAL_P(name), Z_STRLEN_P(name));
