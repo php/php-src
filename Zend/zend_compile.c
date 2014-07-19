@@ -6512,6 +6512,44 @@ void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
+void zend_compile_class_const_decl(zend_ast *ast TSRMLS_DC) {
+	zend_class_entry *ce = CG(active_class_entry);
+	zend_uint i;
+
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *const_ast = ast->child[i];
+		zend_ast *name_ast = const_ast->child[0];
+		zend_ast *value_ast = const_ast->child[1];
+		zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
+		zval value_zv;
+
+		if (ce->ce_flags & ZEND_ACC_TRAIT) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
+			return;
+		}
+
+		if (value_ast) {
+			_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
+		} else {
+			ZVAL_NULL(&value_zv);
+		}
+
+		if (Z_TYPE(value_zv) == IS_ARRAY
+			|| (Z_TYPE(value_zv) == IS_CONSTANT_AST && Z_ASTVAL(value_zv)->kind == ZEND_AST_ARRAY)
+		) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
+		}
+
+		name = zend_new_interned_string(name TSRMLS_CC);
+		if (zend_hash_add(&ce->constants_table, name, &value_zv) == NULL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s",
+				ce->name->val, name);
+		}
+
+		// TODO.AST doc comment
+	}
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7351,6 +7389,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_PROP_DECL:
 			zend_compile_prop_decl(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_CLASS_CONST_DECL:
+			zend_compile_class_const_decl(ast TSRMLS_CC);
 			break;
 		default:
 		{

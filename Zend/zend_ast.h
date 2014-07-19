@@ -106,6 +106,9 @@ enum _zend_ast_kind {
 
 	ZEND_AST_PROP_DECL,
 	ZEND_AST_PROP_ELEM,
+
+	ZEND_AST_CLASS_CONST_DECL,
+	ZEND_AST_CONST_ELEM,
 };
 
 typedef unsigned short zend_ast_kind;
