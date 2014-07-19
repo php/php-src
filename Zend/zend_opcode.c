@@ -643,15 +643,16 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 				zend_brk_cont_element *jmp_to;
 
 				nest_levels = Z_LVAL(op_array->literals[opline->op2.constant].constant);
-				array_offset = opline->op1.opline_num;
-				do {
-					jmp_to = &op_array->brk_cont_array[array_offset];
-					if (nest_levels > 1) {
-						array_offset = jmp_to->parent;
-					}
-				} while (--nest_levels > 0);
-				zend_resolve_finally_call(op_array, i, opline->opcode == ZEND_BRK ? jmp_to->brk : jmp_to->cont TSRMLS_CC);
-				break;
+				if ((array_offset = opline->op1.opline_num) != -1) {
+					do {
+						jmp_to = &op_array->brk_cont_array[array_offset];
+						if (nest_levels > 1) {
+							array_offset = jmp_to->parent;
+						}
+					} while (--nest_levels > 0);
+					zend_resolve_finally_call(op_array, i, opline->opcode == ZEND_BRK ? jmp_to->brk : jmp_to->cont TSRMLS_CC);
+					break;
+				}
 			}
 			case ZEND_GOTO:
 				if (Z_TYPE(op_array->literals[opline->op2.constant].constant) != IS_LONG) {
