@@ -625,10 +625,10 @@ static void zend_resolve_fast_call(zend_op_array *op_array, zend_uint op_num TSR
 
 static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_uint i;
+	zend_uint i, j;
 	zend_op *opline;
 
-	for (i = 0; i < op_array->last; i++) {
+	for (i = 0, j = op_array->last; i < j; i++) {
 		opline = op_array->opcodes + i;
 		switch (opline->opcode) {
 			case ZEND_RETURN:
