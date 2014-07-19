@@ -866,6 +866,12 @@ zend_string *zend_resolve_class_name(
 	return STR_COPY(name);
 }
 
+zend_string *zend_resolve_class_name_ast(zend_ast *ast TSRMLS_DC) {
+	zend_string *name = Z_STR_P(zend_ast_get_zval(ast));
+	zend_bool is_fully_qualified = ast->attr;
+	return zend_resolve_class_name(name, is_fully_qualified TSRMLS_CC);
+}
+
 void zend_resolve_class_name_old(znode *class_name TSRMLS_DC) {
 	zend_string *resolved_name = zend_resolve_class_name(
 		Z_STR(class_name->u.constant), 0 TSRMLS_CC);
@@ -2772,67 +2778,6 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, Ha
 }
 /* }}} */
 
-void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC) /* {{{ */
-{
-	zend_trait_method_reference *method_ref = emalloc(sizeof(zend_trait_method_reference));
-	method_ref->ce = NULL;
-
-	/* REM: There should not be a need for copying,
-	   zend_do_begin_class_declaration is also just using that string */
-	if (class_name) {
-		zend_resolve_class_name_old(class_name TSRMLS_CC);
-		method_ref->class_name = Z_STR(class_name->u.constant);
-	} else {
-		method_ref->class_name = NULL;
-	}
-
-	method_ref->method_name = Z_STR(method_name->u.constant);
-
-	result->u.op.ptr = method_ref;
-	result->op_type = IS_TMP_VAR;
-}
-/* }}} */
-
-void zend_add_trait_alias(znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC) /* {{{ */
-{
-	zend_class_entry *ce = CG(active_class_entry);
-	zend_trait_alias *trait_alias;
-
-	if (Z_LVAL(modifiers->u.constant) == ZEND_ACC_STATIC) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'static' as method modifier");
-		return;
-	} else if (Z_LVAL(modifiers->u.constant) == ZEND_ACC_ABSTRACT) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'abstract' as method modifier");
-		return;
-	} else if (Z_LVAL(modifiers->u.constant) == ZEND_ACC_FINAL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'final' as method modifier");
-		return;
-	}
-
-	trait_alias = emalloc(sizeof(zend_trait_alias));
-	trait_alias->trait_method = (zend_trait_method_reference*)method_reference->u.op.ptr;
-	trait_alias->modifiers = Z_LVAL(modifiers->u.constant);
-	if (alias) {
-		trait_alias->alias = Z_STR(alias->u.constant);
-	} else {
-		trait_alias->alias = NULL;
-	}
-	zend_add_to_list(&ce->trait_aliases, trait_alias TSRMLS_CC);
-}
-/* }}} */
-
-void zend_add_trait_precedence(znode *method_reference, znode *trait_list TSRMLS_DC) /* {{{ */
-{
-	zend_class_entry *ce = CG(active_class_entry);
-	zend_trait_precedence *trait_precedence = emalloc(sizeof(zend_trait_precedence));
-
-	trait_precedence->trait_method = (zend_trait_method_reference*)method_reference->u.op.ptr;
-	trait_precedence->exclude_from_classes = trait_list->u.op.ptr;
-
-	zend_add_to_list(&ce->trait_precedences, trait_precedence TSRMLS_CC);
-}
-/* }}} */
-
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce;
@@ -3222,38 +3167,6 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 	opline->op2_type = IS_CONST;
 	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &interface_name->u.constant TSRMLS_CC);
 	CG(active_class_entry)->num_interfaces++;
-}
-/* }}} */
-
-void zend_do_use_trait(znode *trait_name TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline;
-
-	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use traits inside of interfaces. %s is used in %s",
-				Z_STRVAL(trait_name->u.constant), CG(active_class_entry)->name->val);
-	}
-
-
-	switch (zend_get_class_fetch_type(Z_STRVAL(trait_name->u.constant), Z_STRLEN(trait_name->u.constant))) {
-		case ZEND_FETCH_CLASS_SELF:
-		case ZEND_FETCH_CLASS_PARENT:
-		case ZEND_FETCH_CLASS_STATIC:
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as trait name as it is reserved", Z_STRVAL(trait_name->u.constant));
-			break;
-		default:
-			break;
-	}
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_ADD_TRAIT;
-	SET_NODE(opline->op1, &CG(implementing_class));
-	zend_resolve_class_name_old(trait_name TSRMLS_CC);
-	opline->extended_value = ZEND_FETCH_CLASS_TRAIT;
-	opline->op2_type = IS_CONST;
-	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &trait_name->u.constant TSRMLS_CC);
-	CG(active_class_entry)->num_traits++;
 }
 /* }}} */
 

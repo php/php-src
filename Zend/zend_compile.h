@@ -493,12 +493,6 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC);
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
-/* Trait related functions */
-void zend_do_use_trait(znode *trait_znode TSRMLS_DC);
-void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
-void zend_add_trait_precedence(znode *method_reference, znode *trait_list TSRMLS_DC);
-void zend_add_trait_alias(znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
-
 ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC);
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
 
