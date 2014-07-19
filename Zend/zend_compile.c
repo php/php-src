@@ -920,27 +920,6 @@ static void ptr_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
-void zend_do_label(znode *label TSRMLS_DC) /* {{{ */
-{
-	zend_label dest;
-
-	if (!CG(context).labels) {
-		ALLOC_HASHTABLE(CG(context).labels);
-		zend_hash_init(CG(context).labels, 8, NULL, ptr_dtor, 0);
-	}
-
-	dest.brk_cont = CG(context).current_brk_cont;
-	dest.opline_num = get_next_op_number(CG(active_op_array));
-
-	if (zend_hash_add_mem(CG(context).labels, Z_STR(label->u.constant), &dest, sizeof(zend_label)) == NULL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Label '%s' already defined", Z_STRVAL(label->u.constant));
-	}
-
-	/* Done with label now */
-	zval_dtor(&label->u.constant);
-}
-/* }}} */
-
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC) /* {{{ */
 {
 	zend_label *dest;
@@ -998,18 +977,6 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 	if (pass2) {
 		DEC_BPC(op_array);
 	}
-}
-/* }}} */
-
-void zend_do_goto(znode *label TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_GOTO;
-	opline->extended_value = CG(context).current_brk_cont;
-	SET_UNUSED(opline->op1);
-	SET_NODE(opline->op2, label);
-	zend_resolve_goto_label(CG(active_op_array), opline, 0 TSRMLS_CC);
 }
 /* }}} */
 
