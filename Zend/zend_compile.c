@@ -6709,6 +6709,11 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 			}
 		}
 
+		if (zend_str_equals(lcname, ZEND_AUTOLOAD_FUNC_NAME) && fn->params->children != 1) {
+			zend_error_noreturn(E_COMPILE_ERROR, "%s() must take exactly 1 argument",
+				ZEND_AUTOLOAD_FUNC_NAME);
+		}
+
 		if (is_closure) {
 			opline = emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL TSRMLS_CC);
 		} else {
@@ -6774,8 +6779,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 
 	pass_two(CG(active_op_array) TSRMLS_CC);
 	zend_release_labels(0 TSRMLS_CC);
-
-	// TODO.AST __autoload
 
 	/* Pop the switch and foreach separators */
 	zend_stack_del_top(&CG(switch_cond_stack));
