@@ -846,14 +846,14 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			return;
 		case IS_OBJECT: 
 			{
-			        char *name;
-                                name = estrdup(Z_OBJCE_P(op)->name);
-                                if (_convert_to_string_safe(&op, 0) == FAILURE) {
+				char *name;
+				name = estrdup(Z_OBJCE_P(op)->name);
+				if (_convert_to_string_safe(&op, 0) == FAILURE) {
 					zend_error(E_NOTICE, "Object of class %s to string conversion", name);
-                                }
-                                efree(name);
+				}
+				efree(name);
 				return;
-                        }
+			}
 		default:
 			_convert_to_string_safe(&op, 0);
 
