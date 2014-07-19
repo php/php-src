@@ -481,8 +481,6 @@ ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC);
 void zend_do_free(znode *op1 TSRMLS_DC);
 
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
-void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC);
 void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_class_member TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
