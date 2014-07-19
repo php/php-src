@@ -632,68 +632,65 @@ class_statement:
 			{ $$.u.ast = $1.u.ast;
 			  if (CG(doc_comment)) { STR_RELEASE(CG(doc_comment)); CG(doc_comment) = NULL; }
 			  AS($$); }
-	|	trait_use_statement
+	|	T_USE name_list trait_adaptations
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_TRAIT, $2.u.ast, $3.u.ast); AS($$); }
 	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')' method_body
 			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_METHOD, $3.EA | Z_LVAL($1.u.constant),
 			      $2.EA, CG(zend_lineno), LANG_SCNG(yy_text), $2.u.op.ptr,
 				  Z_STR($4.u.constant), $6.u.ast, NULL, $8.u.ast); AS($$); }
 ;
 
-trait_use_statement:
-		T_USE trait_list trait_adaptations
-;
-
-trait_list:
-		fully_qualified_class_name						{ zend_do_use_trait(&$1 TSRMLS_CC); }
-	|	trait_list ',' fully_qualified_class_name		{ zend_do_use_trait(&$3 TSRMLS_CC); }
+name_list:
+		name { $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_NAME_LIST, $1.u.ast); }
+	|	name_list ',' name { $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
 ;
 
 trait_adaptations:
-		';'
-	|	'{' trait_adaptation_list '}'
+		';'								{ $$.u.ast = NULL; }
+	|	'{' '}'							{ $$.u.ast = NULL; }
+	|	'{' trait_adaptation_list '}'	{ $$.u.ast = $2.u.ast; }
 ;
 
 trait_adaptation_list:
-		/* empty */
-	|	non_empty_trait_adaptation_list
+		trait_adaptation
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_TRAIT_ADAPTATIONS, $1.u.ast); }
+	|	trait_adaptation_list trait_adaptation
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, $2.u.ast); }
 ;
 
-non_empty_trait_adaptation_list:
-		trait_adaptation_statement
-	|	non_empty_trait_adaptation_list trait_adaptation_statement
-;
-
-trait_adaptation_statement:
-		trait_precedence ';'
-	|	trait_alias ';'
+trait_adaptation:
+		trait_precedence ';'	{ $$.u.ast = $1.u.ast; }
+	|	trait_alias ';'			{ $$.u.ast = $1.u.ast; }
 ;
 
 trait_precedence:
-	trait_method_reference_fully_qualified T_INSTEADOF trait_reference_list	{ zend_add_trait_precedence(&$1, &$3 TSRMLS_CC); }
-;
-
-trait_reference_list:
-		fully_qualified_class_name									{ zend_resolve_class_name_old(&$1 TSRMLS_CC); zend_init_list(&$$.u.op.ptr, Z_STR($1.u.constant) TSRMLS_CC); }
-	|	trait_reference_list ',' fully_qualified_class_name			{ zend_resolve_class_name_old(&$3 TSRMLS_CC); zend_add_to_list(&$1.u.op.ptr, Z_STR($3.u.constant) TSRMLS_CC); $$ = $1; }
-;
-
-trait_method_reference:
-		T_STRING													{ zend_prepare_reference(&$$, NULL, &$1 TSRMLS_CC); }
-	|	trait_method_reference_fully_qualified						{ $$ = $1; }
-;
-
-trait_method_reference_fully_qualified:
-	fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING		{ zend_prepare_reference(&$$, &$1, &$3 TSRMLS_CC); }
+	absolute_trait_method_reference T_INSTEADOF name_list
+		{ $$.u.ast = zend_ast_create_binary(ZEND_AST_TRAIT_PRECEDENCE, $1.u.ast, $3.u.ast); }
 ;
 
 trait_alias:
-		trait_method_reference T_AS trait_modifiers T_STRING		{ zend_add_trait_alias(&$1, &$3, &$4 TSRMLS_CC); }
-	|	trait_method_reference T_AS member_modifier					{ zend_add_trait_alias(&$1, &$3, NULL TSRMLS_CC); }
+		trait_method_reference T_AS trait_modifiers T_STRING
+			{ $$.u.ast = zend_ast_create_ex(2, ZEND_AST_TRAIT_ALIAS,
+			      Z_LVAL($3.u.constant), $1.u.ast, AST_ZVAL(&$4)); }
+	|	trait_method_reference T_AS member_modifier
+			{ $$.u.ast = zend_ast_create_ex(2, ZEND_AST_TRAIT_ALIAS,
+			      Z_LVAL($3.u.constant), $1.u.ast, NULL); }
+;
+
+trait_method_reference:
+		T_STRING
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_METHOD_REFERENCE, NULL, AST_ZVAL(&$1)); }
+	|	absolute_trait_method_reference { $$.u.ast = $1.u.ast; }
+;
+
+absolute_trait_method_reference:
+	name T_PAAMAYIM_NEKUDOTAYIM T_STRING
+		{ $$.u.ast = zend_ast_create_binary(ZEND_AST_METHOD_REFERENCE, $1.u.ast, AST_ZVAL(&$3)); }
 ;
 
 trait_modifiers:
-		/* empty */					{ Z_LVAL($$.u.constant) = 0x0; } /* No change of methods visibility */
-	|	member_modifier	{ $$ = $1; } /* REM: Keep in mind, there are not only visibility modifiers */
+		/* empty */		{ Z_LVAL($$.u.constant) = 0; }
+	|	member_modifier	{ $$ = $1; }
 ;
 
 method_body:

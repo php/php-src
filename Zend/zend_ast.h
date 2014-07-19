@@ -109,6 +109,13 @@ enum _zend_ast_kind {
 
 	ZEND_AST_CLASS_CONST_DECL,
 	ZEND_AST_CONST_ELEM,
+
+	ZEND_AST_USE_TRAIT,
+	ZEND_AST_NAME_LIST,
+	ZEND_AST_TRAIT_ADAPTATIONS,
+	ZEND_AST_TRAIT_PRECEDENCE,
+	ZEND_AST_TRAIT_ALIAS,
+	ZEND_AST_METHOD_REFERENCE,
 };
 
 typedef unsigned short zend_ast_kind;
@@ -228,7 +235,6 @@ static inline zend_ast *zend_ast_create_cast(zend_uint type, zend_ast *op0) {
 
 #define AC(znode) AST_COMPILE(&znode, znode.u.ast)
 #define AS(znode) AST_COMPILE_STMT(znode.u.ast)
-#define AZ(znode) ((znode).u.ast = AST_ZNODE(&znode))
 #define AN(znode) ((znode).u.ast = NULL)
 
 #endif

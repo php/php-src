@@ -6548,6 +6548,138 @@ void zend_compile_class_const_decl(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
+static zend_trait_method_reference *zend_compile_method_ref(zend_ast *ast TSRMLS_DC) {
+	zend_ast *class_ast = ast->child[0];
+	zend_ast *method_ast = ast->child[1];
+
+	zend_trait_method_reference *method_ref = emalloc(sizeof(zend_trait_method_reference));
+	method_ref->ce = NULL;
+	method_ref->method_name = STR_COPY(Z_STR_P(zend_ast_get_zval(method_ast)));
+
+	if (class_ast) {
+		zend_string *name = Z_STR_P(zend_ast_get_zval(class_ast));
+		zend_bool is_fully_qualified = class_ast->attr;
+		method_ref->class_name = zend_resolve_class_name(name, is_fully_qualified TSRMLS_CC);
+	} else {
+		method_ref->class_name = NULL;
+	}
+
+	return method_ref;
+}
+
+static zend_string **zend_compile_name_list(zend_ast *ast TSRMLS_DC) {
+	zend_string **names = safe_emalloc(sizeof(zend_string *), ast->children + 1, 0);
+	zend_uint i;
+
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *name_ast = ast->child[i];
+		zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
+		zend_bool is_fully_qualified = name_ast->attr;
+		names[i] = zend_resolve_class_name(name, is_fully_qualified TSRMLS_CC);
+	}
+
+	names[ast->children] = NULL;
+
+	return names;
+}
+
+static void zend_compile_trait_precedence(zend_ast *ast TSRMLS_DC) {
+	zend_ast *method_ref_ast = ast->child[0];
+	zend_ast *insteadof_ast = ast->child[1];
+	
+	zend_trait_precedence *precedence = emalloc(sizeof(zend_trait_precedence));
+	precedence->trait_method = zend_compile_method_ref(method_ref_ast TSRMLS_CC);
+	precedence->exclude_from_classes
+		= (void *) zend_compile_name_list(insteadof_ast TSRMLS_CC);
+
+	zend_add_to_list(&CG(active_class_entry)->trait_precedences, precedence TSRMLS_CC);
+}
+
+static void zend_compile_trait_alias(zend_ast *ast TSRMLS_DC) {
+	zend_ast *method_ref_ast = ast->child[0];
+	zend_ast *alias_ast = ast->child[1];
+	zend_uint modifiers = ast->attr;
+
+	zend_trait_alias *alias;
+
+	if (modifiers == ZEND_ACC_STATIC) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'static' as method modifier");
+	} else if (modifiers == ZEND_ACC_ABSTRACT) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'abstract' as method modifier");
+	} else if (modifiers == ZEND_ACC_FINAL) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'final' as method modifier");
+	}
+
+	alias = emalloc(sizeof(zend_trait_alias));
+	alias->trait_method = zend_compile_method_ref(method_ref_ast TSRMLS_CC);
+	alias->modifiers = modifiers;
+
+	if (alias_ast) {
+		alias->alias = STR_COPY(Z_STR_P(zend_ast_get_zval(alias_ast)));
+	} else {
+		alias->alias = NULL;
+	}
+
+	zend_add_to_list(&CG(active_class_entry)->trait_aliases, alias TSRMLS_CC);
+}
+
+void zend_compile_use_trait(zend_ast *ast TSRMLS_DC) {
+	zend_ast *traits_ast = ast->child[0];
+	zend_ast *adaptations_ast = ast->child[1];
+	zend_class_entry *ce = CG(active_class_entry);
+	zend_op *opline;
+	zend_uint i;
+
+	for (i = 0; i < traits_ast->children; ++i) {
+		zend_ast *trait_ast = traits_ast->child[i];
+		zend_string *name = Z_STR_P(zend_ast_get_zval(trait_ast));
+
+		znode name_node;
+
+		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use traits inside of interfaces. "
+				"%s is used in %s", name->val, ce->name->val);
+		}
+
+		switch (zend_get_class_fetch_type(name->val, name->len)) {
+			case ZEND_FETCH_CLASS_SELF:
+			case ZEND_FETCH_CLASS_PARENT:
+			case ZEND_FETCH_CLASS_STATIC:
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as trait name "
+					"as it is reserved", name->val);
+				break;
+		}
+
+		zend_compile_expr(&name_node, trait_ast TSRMLS_CC);
+		zend_resolve_class_name_old(&name_node TSRMLS_CC);
+
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_ADD_TRAIT;
+		SET_NODE(opline->op1, &CG(implementing_class));
+		opline->extended_value = ZEND_FETCH_CLASS_TRAIT;
+		opline->op2_type = IS_CONST;
+		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &name_node.u.constant TSRMLS_CC);
+		ce->num_traits++;
+	}
+
+	if (!adaptations_ast) {
+		return;
+	}
+
+	for (i = 0; i < adaptations_ast->children; ++i) {
+		zend_ast *adaptation_ast = adaptations_ast->child[i];
+		switch (adaptation_ast->kind) {
+			case ZEND_AST_TRAIT_PRECEDENCE:
+				zend_compile_trait_precedence(adaptation_ast TSRMLS_CC);
+				break;
+			case ZEND_AST_TRAIT_ALIAS:
+				zend_compile_trait_alias(adaptation_ast TSRMLS_CC);
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+	}
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7390,6 +7522,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_CLASS_CONST_DECL:
 			zend_compile_class_const_decl(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_USE_TRAIT:
+			zend_compile_use_trait(ast TSRMLS_CC);
 			break;
 		default:
 		{
