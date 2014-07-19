@@ -925,7 +925,7 @@ function_call:
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_CALL, $1.u.ast, $2.u.ast); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 			{ $$.u.ast = zend_ast_create_ternary(ZEND_AST_STATIC_CALL,
-			      AST_ZVAL(&$1), $3.u.ast, $4.u.ast); }
+			      $1.u.ast, $3.u.ast, $4.u.ast); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 			{ $$.u.ast = zend_ast_create_ternary(ZEND_AST_STATIC_CALL,
 			      $1.u.ast, $3.u.ast, $4.u.ast); }
@@ -934,10 +934,10 @@ function_call:
 ;
 
 class_name:
-		T_STATIC { $$.op_type = IS_CONST; ZVAL_STRINGL(&$$.u.constant, "static", sizeof("static")-1);}
-	|	namespace_name { $$ = $1; }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name { zval tmp; ZVAL_NEW_STR(&tmp, STR_ALLOC(Z_STRLEN($2.u.constant)+1, 0)); Z_STRVAL(tmp)[0] = '\\'; memcpy(Z_STRVAL(tmp) + 1, Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); if (Z_DELREF($2.u.constant) == 0) {efree(Z_STR($2.u.constant));} Z_STR($2.u.constant) = Z_STR(tmp); $$ = $2; }
+		T_STATIC
+			{ zval zv; ZVAL_STRINGL(&zv, "static", sizeof("static")-1);
+			  $$.u.ast = zend_ast_create_zval(&zv); }
+	|	name { $$.u.ast = $1.u.ast; }
 ;
 
 fully_qualified_class_name:
@@ -949,7 +949,7 @@ fully_qualified_class_name:
 
 
 class_name_reference:
-		class_name		{ $$.u.ast = AST_ZVAL(&$1); }
+		class_name		{ $$.u.ast = $1.u.ast; }
 	|	new_variable	{ $$.u.ast = $1.u.ast; }
 ;
 
@@ -1077,7 +1077,7 @@ simple_variable:
 
 static_member:
 		class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_STATIC_PROP, AST_ZVAL(&$1), $3.u.ast); }
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_STATIC_PROP, $1.u.ast, $3.u.ast); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_STATIC_PROP, $1.u.ast, $3.u.ast); }
 ;
@@ -1092,7 +1092,7 @@ new_variable:
 	|	new_variable T_OBJECT_OPERATOR member_name
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_PROP, $1.u.ast, $3.u.ast); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_STATIC_PROP, AST_ZVAL(&$1), $3.u.ast); }
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_STATIC_PROP, $1.u.ast, $3.u.ast); }
 	|	new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_STATIC_PROP, $1.u.ast, $3.u.ast); }
 ;
@@ -1210,7 +1210,7 @@ isset_variable:
 class_constant:
 		class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
 			{ $$.u.ast = zend_ast_create_binary(
-			      ZEND_AST_CLASS_CONST, AST_ZVAL(&$1), AST_ZVAL(&$3)); }
+			      ZEND_AST_CLASS_CONST, $1.u.ast, AST_ZVAL(&$3)); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
 			{ $$.u.ast = zend_ast_create_binary(
 			      ZEND_AST_CLASS_CONST, $1.u.ast, AST_ZVAL(&$3)); }
@@ -1218,7 +1218,7 @@ class_constant:
 
 class_name_scalar:
 	class_name T_PAAMAYIM_NEKUDOTAYIM T_CLASS
-		{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RESOLVE_CLASS_NAME, AST_ZVAL(&$1)); }
+		{ $$.u.ast = zend_ast_create_unary(ZEND_AST_RESOLVE_CLASS_NAME, $1.u.ast); }
 ;
 
 %%
