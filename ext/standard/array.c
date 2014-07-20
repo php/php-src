@@ -4239,7 +4239,7 @@ PHP_FUNCTION(array_product)
 		if (Z_TYPE_P(entry) == IS_ARRAY || Z_TYPE_P(entry) == IS_OBJECT) {
 			continue;
 		}
-		mul_function(return_value, return_value, entry);
+		mul_function(return_value, return_value, entry TSRMLS_CC);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
