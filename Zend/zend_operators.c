@@ -460,7 +460,7 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 			return SUCCESS;
 		case IS_NULL:
 			ZVAL_LONG(op, 0);
-			return SUCCESS;
+			return FAILURE;
 		case IS_ARRAY: 
 			{
 				long temp;
@@ -535,7 +535,7 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 			return SUCCESS;
 		case IS_NULL:
 			ZVAL_DOUBLE(op, (double) 0.0);
-			return SUCCESS;
+			return FAILURE;
 		case IS_ARRAY: 
 			{
 				double temp;
@@ -638,7 +638,7 @@ ZEND_API int _convert_to_string_safe(zval **op_ptr, int separate)
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			ZVAL_STRING(op, "", 1);
-			return SUCCESS;
+			return FAILURE;
 		case IS_STRING:
 			return SUCCESS;
 		case IS_BOOL:

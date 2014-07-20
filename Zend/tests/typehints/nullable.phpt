@@ -46,10 +46,13 @@ boolnullable(NULL);
 
 ?>
 --EXPECTF--
+E_RECOVERABLE_ERROR: Argument 1 passed to intable() must be of the type int, null given, called in %s on line 11 and defined in %s on line 4
 int(0)
 NULL
+E_RECOVERABLE_ERROR: Argument 1 passed to floatable() must be of the type float, null given, called in %s on line 21 and defined in %s on line 14
 float(0)
 NULL
+E_RECOVERABLE_ERROR: Argument 1 passed to stringable() must be of the type string, null given, called in %s on line 31 and defined in %s on line 24
 string(0) ""
 NULL
 E_RECOVERABLE_ERROR: Argument 1 passed to boolable() must be of the type boolean, null given, called in %s on line 41 and defined in %s on line 34
