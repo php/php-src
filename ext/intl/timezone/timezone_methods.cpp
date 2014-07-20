@@ -245,9 +245,9 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	/* must come before zpp because zpp would convert the arg in the stack to 0 */
 	if (ZEND_NUM_ARGS() == 3) {
-		zval **dummy, **zvoffset;
+		zval *dummy, *zvoffset;
 		arg3isnull = zend_get_parameters_ex(3, &dummy, &dummy, &zvoffset)
-				!= FAILURE && Z_TYPE_PP(zvoffset) == IS_NULL;
+				!= FAILURE && Z_TYPE_P(zvoffset) == IS_NULL;
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|s!l",
@@ -325,6 +325,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	efree(str);
 	
 	if (is_systemid) { /* by-ref argument passed */
+		ZVAL_DEREF(is_systemid);
 		zval_dtor(is_systemid);
 		ZVAL_BOOL(is_systemid, isSystemID);
 	}
@@ -436,7 +437,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_id)
 		id_us.getBuffer(), id_us.length(), TIMEZONE_ERROR_CODE_P(to));
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_id: Could not convert id to UTF-8");
 
-	RETURN_STRINGL(id, id_len);
+	RETVAL_STRINGL(id, id_len);
 	//???
 	efree(id);
 }
@@ -468,7 +469,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 	TIMEZONE_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-			"Odbzz", &object, TimeZone_ce_ptr, &date, &local, &rawOffsetArg,
+			"Odbz/z/", &object, TimeZone_ce_ptr, &date, &local, &rawOffsetArg,
 			&dstOffsetArg) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_get_offset: bad arguments", 0 TSRMLS_CC);
@@ -482,8 +483,10 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_offset: error obtaining offset");
 
+	ZVAL_DEREF(rawOffsetArg);
 	zval_dtor(rawOffsetArg);
 	ZVAL_LONG(rawOffsetArg, rawOffset);
+	ZVAL_DEREF(dstOffsetArg);
 	zval_dtor(dstOffsetArg);
 	ZVAL_LONG(dstOffsetArg, dstOffset);
 

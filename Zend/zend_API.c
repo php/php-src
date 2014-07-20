@@ -45,14 +45,13 @@ static zend_class_entry  **class_cleanup_handlers;
 /* this function doesn't check for too many parameters */
 ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 {
-	zval *p;
 	int arg_count;
 	va_list ptr;
 	zval **param, *param_ptr;
 	TSRMLS_FETCH();
 
-	p = zend_vm_stack_top(TSRMLS_C) - 1;
-	arg_count = Z_LVAL_P(p);
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+	arg_count = EG(current_execute_data)->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -62,7 +61,6 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 
 	while (param_count-->0) {
 		param = va_arg(ptr, zval **);
-		param_ptr = (p-arg_count);
 		if (!Z_ISREF_P(param_ptr) && Z_REFCOUNT_P(param_ptr) > 1) {
 			zval new_tmp;
 
@@ -71,7 +69,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 			ZVAL_COPY_VALUE(param_ptr, &new_tmp);
 		}
 		*param = param_ptr;
-		arg_count--;
+		param_ptr++;
 	}
 	va_end(ptr);
 
@@ -83,14 +81,13 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 /* this function doesn't check for too many parameters */
 ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 {
-	zval *p;
 	int arg_count;
 	va_list ptr;
-	zval **param;
+	zval **param, *param_ptr;
 	TSRMLS_FETCH();
 
-	p = zend_vm_stack_top(TSRMLS_C) - 1;
-	arg_count = Z_LVAL_P(p);
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+	arg_count = EG(current_execute_data)->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -99,7 +96,8 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 	va_start(ptr, param_count);
 	while (param_count-->0) {
 		param = va_arg(ptr, zval **);
-		*param = p-(arg_count--);
+		*param = param_ptr;
+		param_ptr++;
 	}
 	va_end(ptr);
 
@@ -109,22 +107,20 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array TSRMLS_DC) /* {{{ */
 {
-	zval *p;
+	zval *param_ptr;
 	int arg_count;
 
-	p = zend_vm_stack_top(TSRMLS_C) - 1;
-	arg_count = Z_LVAL_P(p);
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+	arg_count = EG(current_execute_data)->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
 	}
 
 	while (param_count-->0) {
-		zval *value = (p-arg_count);
-
-		ZVAL_COPY_VALUE(argument_array, value);
+		ZVAL_COPY_VALUE(argument_array, param_ptr);
 		argument_array++;
-		arg_count--;
+		param_ptr++;
 	}
 
 	return SUCCESS;
@@ -133,22 +129,22 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array
 
 ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TSRMLS_DC) /* {{{ */
 {
-	zval *p;
+	zval *param_ptr;
 	int arg_count;
 
-	p = zend_vm_stack_top(TSRMLS_C) - 1;
-	arg_count = Z_LVAL_P(p);
+	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+	arg_count = EG(current_execute_data)->num_args;
 
 	if (param_count>arg_count) {
 		return FAILURE;
 	}
 
 	while (param_count-->0) {
-		zval *param = p-(arg_count--);
-		if (Z_REFCOUNTED_P(param)) {
-			Z_ADDREF_P(param);
+		if (Z_REFCOUNTED_P(param_ptr)) {
+			Z_ADDREF_P(param_ptr);
 		}
-		add_next_index_zval(argument_array, param);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(argument_array), param_ptr);
+		param_ptr++;
 	}
 
 	return SUCCESS;
@@ -251,15 +247,13 @@ static int parse_arg_object_to_string(zval *arg, char **p, int *pl, int type TSR
 		}
 	}
 	if (!Z_OBJ_HANDLER_P(arg, cast_object) && Z_OBJ_HANDLER_P(arg, get)) {
-		int use_copy;
 		zval rv;
 		zval *z = Z_OBJ_HANDLER_P(arg, get)(arg, &rv TSRMLS_CC);
 		Z_ADDREF_P(z);
 		if(Z_TYPE_P(z) != IS_OBJECT) {
 			zval_dtor(arg);
 			ZVAL_NULL(arg);
-			zend_make_printable_zval(z, arg, &use_copy);
-			if (!use_copy) {
+			if (!zend_make_printable_zval(z, arg)) {
 				ZVAL_ZVAL(arg, z, 1, 1);
 			}
 			*pl = Z_STRLEN_P(arg);
@@ -272,7 +266,7 @@ static int parse_arg_object_to_string(zval *arg, char **p, int *pl, int type TSR
 }
 /* }}} */
 
-static int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS_DC) /* {{{ */
+ZEND_API int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS_DC) /* {{{ */
 {
 	if (Z_OBJ_HANDLER_P(arg, cast_object)) {
 		zval obj;
@@ -292,15 +286,13 @@ static int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS
 		}
 	}
 	if (!Z_OBJ_HANDLER_P(arg, cast_object) && Z_OBJ_HANDLER_P(arg, get)) {
-		int use_copy;
 		zval rv;
 		zval *z = Z_OBJ_HANDLER_P(arg, get)(arg, &rv TSRMLS_CC);
 		Z_ADDREF_P(z);
 		if(Z_TYPE_P(z) != IS_OBJECT) {
 			zval_dtor(arg);
 			ZVAL_NULL(arg);
-			zend_make_printable_zval(z, arg, &use_copy);
-			if (!use_copy) {
+			if (!zend_make_printable_zval(z, arg)) {
 				ZVAL_ZVAL(arg, z, 1, 1);
 			}
 			*str = Z_STR_P(arg);
@@ -311,6 +303,94 @@ static int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS
 	return FAILURE;
 }
 /* }}} */
+
+#ifdef FAST_ZPP
+ZEND_API void zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args TSRMLS_DC) /* {{{ */
+{
+	zend_function *active_function = EG(current_execute_data)->func;
+	const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
+
+	zend_error(E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
+		class_name, \
+		class_name[0] ? "::" : "", \
+		active_function->common.function_name->val,
+		min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
+		num_args < min_num_args ? min_num_args : max_num_args,
+		(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
+		num_args);
+}
+/* }}} */
+
+ZEND_API void zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg TSRMLS_DC) /* {{{ */
+{
+	const char *space;
+	const char *class_name = get_active_class_name(&space TSRMLS_CC);
+	static const char * const expected_error[] = {
+		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
+		NULL
+	};
+
+	zend_error(E_WARNING, "%s%s%s() expects parameter %d to be %s, %s given",
+		class_name, space, get_active_function_name(TSRMLS_C), num, expected_error[expected_type], zend_zval_type_name(arg));
+}
+/* }}} */
+
+ZEND_API void zend_wrong_paramer_class_error(int num, char *name, zval *arg TSRMLS_DC) /* {{{ */
+{
+	const char *space;
+	const char *class_name = get_active_class_name(&space TSRMLS_CC);
+
+	zend_error(E_WARNING, "%s%s%s() expects parameter %d to be %s, %s given",
+		class_name, space, get_active_function_name(TSRMLS_C), num, name, zend_zval_type_name(arg));
+}
+/* }}} */
+
+ZEND_API void zend_wrong_callback_error(int severity, int num, char *error TSRMLS_DC) /* {{{ */
+{
+	const char *space;
+	const char *class_name = get_active_class_name(&space TSRMLS_CC);
+
+	zend_error(severity, "%s%s%s() expects parameter %d to be a valid callback, %s",
+		class_name, space, get_active_function_name(TSRMLS_C), num, error);
+	efree(error);
+}
+/* }}} */
+
+ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int check_null TSRMLS_DC) /* {{{ */
+{
+	zend_class_entry *ce_base = *pce;
+
+	if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+		*pce = NULL;
+		return 1;
+	}
+	convert_to_string_ex(arg);
+	*pce = zend_lookup_class(Z_STR_P(arg) TSRMLS_CC);
+	if (ce_base) {
+		if ((!*pce || !instanceof_function(*pce, ce_base TSRMLS_CC))) {
+			const char *space;
+			const char *class_name = get_active_class_name(&space TSRMLS_CC);
+
+			zend_error(E_WARNING, "%s%s%s() expects parameter %d to be a class name derived from %s, '%s' given",
+				class_name, space, get_active_function_name(TSRMLS_C), num,
+				ce_base->name->val, Z_STRVAL_P(arg));
+			*pce = NULL;
+			return 0;
+		}
+	}
+	if (!*pce) {
+		const char *space;
+		const char *class_name = get_active_class_name(&space TSRMLS_CC);
+
+		zend_error(E_WARNING, "%s%s%s() expects parameter %d to be a valid class name, '%s' given",
+			class_name, space, get_active_function_name(TSRMLS_C), num,
+			Z_STRVAL_P(arg));
+		return 0;
+	}
+	return 1;
+}
+/* }}} */
+#endif
 
 static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, const char **spec, char **error, int *severity TSRMLS_DC) /* {{{ */
 {
@@ -840,7 +920,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case '+':
 				if (have_varargs) {
 					if (!quiet) {
-						zend_function *active_function = EG(current_execute_data)->function_state.function;
+						zend_function *active_function = EG(current_execute_data)->func;
 						const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
 						zend_error(E_WARNING, "%s%s%s(): only one varargs specifier (* or +) is permitted",
 								class_name,
@@ -860,7 +940,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 			default:
 				if (!quiet) {
-					zend_function *active_function = EG(current_execute_data)->function_state.function;
+					zend_function *active_function = EG(current_execute_data)->func;
 					const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
 					zend_error(E_WARNING, "%s%s%s(): bad type specifier while parsing parameters",
 							class_name,
@@ -883,7 +963,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 	if (num_args < min_num_args || (num_args > max_num_args && max_num_args > 0)) {
 		if (!quiet) {
-			zend_function *active_function = EG(current_execute_data)->function_state.function;
+			zend_function *active_function = EG(current_execute_data)->func;
 			const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
 			zend_error(E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
 					class_name,
@@ -897,7 +977,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		return FAILURE;
 	}
 
-	arg_count = Z_LVAL_P(zend_vm_stack_top(TSRMLS_C) - 1);
+	arg_count = EG(current_execute_data)->num_args;
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
@@ -921,7 +1001,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 			if (num_varargs > 0) {
 				*n_varargs = num_varargs;
-				*varargs = (zend_vm_stack_top(TSRMLS_C) - 1 - (arg_count - i));
+				*varargs = ZEND_CALL_ARG(EG(current_execute_data), i + 1);
 				/* adjust how many args we have left and restart loop */
 				num_args += 1 - num_varargs;
 				i += num_varargs;
@@ -932,7 +1012,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			}
 		}
 
-		arg = zend_vm_stack_top(TSRMLS_C) - 1 - (arg_count-i);
+		arg = ZEND_CALL_ARG(EG(current_execute_data), i + 1);
 
 		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
 			/* clean up varargs array if it was used */
@@ -1003,7 +1083,7 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 	 * Z_OBJ(EG(This)) to NULL when calling an internal function with common.scope == NULL.
 	 * In that case EG(This) would still be the $this from the calling code and we'd take the
 	 * wrong branch here. */
-	zend_bool is_method = EG(current_execute_data)->function_state.function->common.scope != NULL;
+	zend_bool is_method = EG(current_execute_data)->func->common.scope != NULL;
 	if (!is_method || !this_ptr || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		RETURN_IF_ZERO_ARGS(num_args, p, 0);
 
@@ -1097,7 +1177,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties TSRMLS_DC) 
 			zval member;
 
 			ZVAL_STR(&member, STR_COPY(key));
-			obj_ht->write_property(obj, &member, value, -1 TSRMLS_CC);
+			obj_ht->write_property(obj, &member, value, NULL TSRMLS_CC);
 			zval_ptr_dtor(&member);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1109,7 +1189,7 @@ static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS
 {
 	ZVAL_DEREF(pp);
 	if (Z_CONSTANT_P(pp)) {
-		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
+		zend_class_entry **scope = EG(current_execute_data) ? &EG(scope) : &CG(active_class_entry);
 
 		if ((*scope)->parent) {
 			zend_class_entry *ce = *scope;
@@ -1173,7 +1253,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 	}
 
 	if ((class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) == 0) {
-		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
+		zend_class_entry **scope = EG(current_execute_data) ? &EG(scope) : &CG(active_class_entry);
 		zend_class_entry *old_scope = *scope;
 		zval *val;
 
@@ -1683,7 +1763,7 @@ ZEND_API int add_property_long_ex(zval *arg, const char *key, uint key_len, long
 
 	ZVAL_LONG(&tmp, n);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1697,7 +1777,7 @@ ZEND_API int add_property_bool_ex(zval *arg, const char *key, uint key_len, int 
 
 	ZVAL_BOOL(&tmp, b);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1711,7 +1791,7 @@ ZEND_API int add_property_null_ex(zval *arg, const char *key, uint key_len TSRML
 
 	ZVAL_NULL(&tmp);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1725,7 +1805,7 @@ ZEND_API int add_property_resource_ex(zval *arg, const char *key, uint key_len, 
 
 	ZVAL_RES(&tmp, r);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1739,7 +1819,7 @@ ZEND_API int add_property_double_ex(zval *arg, const char *key, uint key_len, do
 
 	ZVAL_DOUBLE(&tmp, d);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1753,7 +1833,7 @@ ZEND_API int add_property_str_ex(zval *arg, const char *key, uint key_len, zend_
 
 	ZVAL_STR(&tmp, str);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1767,7 +1847,7 @@ ZEND_API int add_property_string_ex(zval *arg, const char *key, uint key_len, co
 
 	ZVAL_STRING(&tmp, str);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1781,7 +1861,7 @@ ZEND_API int add_property_stringl_ex(zval *arg, const char *key, uint key_len, c
 
 	ZVAL_STRINGL(&tmp, str, length);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1793,7 +1873,7 @@ ZEND_API int add_property_zval_ex(zval *arg, const char *key, uint key_len, zval
 	zval z_key;
 
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, value, -1 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, value, NULL TSRMLS_CC);
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
@@ -2538,7 +2618,7 @@ static int module_registry_cleanup(zval *zv TSRMLS_DC) /* {{{ */
 
 ZEND_API void zend_deactivate_modules(TSRMLS_D) /* {{{ */
 {
-	EG(opline_ptr) = NULL; /* we're no longer executing anything */
+	EG(current_execute_data) = NULL; /* we're no longer executing anything */
 
 	zend_try {
 		if (EG(full_tables_cleanup)) {
@@ -2814,7 +2894,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		if (!EG(scope)) {
 			if (error) *error = estrdup("cannot access self:: when no class scope is active");
 		} else {
-			fcc->called_scope = EG(called_scope);
+			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 			fcc->calling_scope = EG(scope);
 			if (!fcc->object && Z_OBJ(EG(This))) {
 				fcc->object = Z_OBJ(EG(This));
@@ -2828,7 +2908,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else if (!EG(scope)->parent) {
 			if (error) *error = estrdup("cannot access parent:: when current class scope has no parent");
 		} else {
-			fcc->called_scope = EG(called_scope);
+			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 			fcc->calling_scope = EG(scope)->parent;
 			if (!fcc->object && Z_OBJ(EG(This))) {
 				fcc->object = Z_OBJ(EG(This));
@@ -2838,11 +2918,11 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		}
 	} else if (name_len == sizeof("static") - 1 &&
 	           !memcmp(lcname->val, "static", sizeof("static") - 1)) {
-		if (!EG(called_scope)) {
+		if (!EG(current_execute_data) || !EG(current_execute_data)->called_scope) {
 			if (error) *error = estrdup("cannot access static:: when no class scope is active");
 		} else {
-			fcc->called_scope = EG(called_scope);
-			fcc->calling_scope = EG(called_scope);
+			fcc->called_scope = EG(current_execute_data)->called_scope;
+			fcc->calling_scope = EG(current_execute_data)->called_scope;
 			if (!fcc->object && Z_OBJ(EG(This))) {
 				fcc->object = Z_OBJ(EG(This));
 			}
@@ -2850,8 +2930,13 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 			ret = 1;
 		}
 	} else if ((ce = zend_lookup_class_ex(name, NULL, 1 TSRMLS_CC)) != NULL) {
-		zend_class_entry *scope = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
+		zend_class_entry *scope;
+		zend_execute_data *ex = EG(current_execute_data);
 
+		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+			ex = ex->prev_execute_data;
+		}
+		scope = ex ? ex->func->common.scope : NULL;
 		fcc->calling_scope = ce;
 		if (scope && !fcc->object && Z_OBJ(EG(This)) &&
 		    instanceof_function(Z_OBJCE(EG(This)), scope TSRMLS_CC) &&
@@ -3775,7 +3860,7 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const 
 		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, class_name->val);
 	}
 	ZVAL_STRINGL(&property, name, name_length);
-	Z_OBJ_HT_P(object)->write_property(object, &property, value, -1 TSRMLS_CC);
+	Z_OBJ_HT_P(object)->write_property(object, &property, value, NULL TSRMLS_CC);
 	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;
@@ -3854,7 +3939,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 	zend_string *key = STR_INIT(name, name_length, 0);
 
 	EG(scope) = scope;
-	property = zend_std_get_static_property(scope, key, 0, -1 TSRMLS_CC);
+	property = zend_std_get_static_property(scope, key, 0, NULL TSRMLS_CC);
 	EG(scope) = old_scope;
 	STR_FREE(key);
 	if (!property) {
@@ -3954,7 +4039,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 	}
 
 	ZVAL_STRINGL(&property, name, name_length);
-	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, -1, &rv TSRMLS_CC);
+	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, NULL, &rv TSRMLS_CC);
 	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;
@@ -3969,7 +4054,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 	zend_string *key = STR_INIT(name, name_length, 0);
 
 	EG(scope) = scope;
-	property = zend_std_get_static_property(scope, key, silent, -1 TSRMLS_CC);
+	property = zend_std_get_static_property(scope, key, silent, NULL TSRMLS_CC);
 	EG(scope) = old_scope;
 	STR_FREE(key);
 

@@ -50,7 +50,7 @@ PHP_FUNCTION( numfmt_parse )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|lz!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|lz/!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -74,7 +74,9 @@ PHP_FUNCTION( numfmt_parse )
 	}
 
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
-	oldlocale = setlocale(LC_NUMERIC, "C");
+	/* need to copy here since setlocale may change it later */
+	oldlocale = estrdup(setlocale(LC_NUMERIC, NULL));
+	setlocale(LC_NUMERIC, "C");
 #endif
 
 	switch(type) {
@@ -101,6 +103,7 @@ PHP_FUNCTION( numfmt_parse )
 	}
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
 	setlocale(LC_NUMERIC, oldlocale);
+	efree(oldlocale);
 #endif
 	if(zposition) {
 		zval_dtor(zposition);
@@ -136,7 +139,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osz|z!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osz/|z/!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

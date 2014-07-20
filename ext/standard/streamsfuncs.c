@@ -447,6 +447,10 @@ PHP_FUNCTION(stream_get_contents)
 		}
 	}
 
+	if (maxlen > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maxlen truncated from %ld to %d bytes", maxlen, INT_MAX);
+		maxlen = INT_MAX;
+	}
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0))) {
 		RETURN_STR(contents);
 	} else {

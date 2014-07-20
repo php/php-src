@@ -63,6 +63,7 @@ static inline void php_converter_throw_failure(php_converter_object *objval, UEr
 
 /* {{{ php_converter_default_callback */
 static void php_converter_default_callback(zval *return_value, zval *zobj, long reason, zval *error TSRMLS_DC) {
+	ZVAL_DEREF(error);
 	zval_dtor(error);
 	ZVAL_LONG(error, U_ZERO_ERROR);
 	/* Basic functionality so children can call parent::toUCallback() */
@@ -251,6 +252,8 @@ static void php_converter_to_u_callback(const void *context,
 
 	if (Z_TYPE(zargs[3]) == IS_LONG) {
 		*pErrorCode = Z_LVAL(zargs[3]);
+	} else if (Z_ISREF(zargs[3]) && Z_TYPE_P(Z_REFVAL(zargs[3])) == IS_LONG) {
+		*pErrorCode = Z_LVAL_P(Z_REFVAL(zargs[3]));
 	}
 
 	zval_ptr_dtor(&zargs[0]);
@@ -334,6 +337,8 @@ static void php_converter_from_u_callback(const void *context,
 
 	if (Z_TYPE(zargs[3]) == IS_LONG) {
 		*pErrorCode = Z_LVAL(zargs[3]);
+	} else if (Z_ISREF(zargs[3]) && Z_TYPE_P(Z_REFVAL(zargs[3])) == IS_LONG) {
+		*pErrorCode = Z_LVAL_P(Z_REFVAL(zargs[3]));
 	}
 
 	zval_ptr_dtor(&zargs[0]);
@@ -698,6 +703,7 @@ static zend_bool php_converter_do_convert(UConverter *dest_cnv, char **pdest, in
 		efree(temp);
 		return 0;
 	}
+
 	dest = safe_emalloc(sizeof(char), dest_len, sizeof(char));
 
 	/* Convert to final encoding */
@@ -773,9 +779,10 @@ static PHP_METHOD(UConverter, convert) {
                                  reverse ? objval->dest : objval->src,
 	                             str,   str_len,
 	                             objval TSRMLS_CC)) {
-		RETURN_STRINGL(dest, dest_len);
+		RETVAL_STRINGL(dest, dest_len);
 		//???
 		efree(dest);
+		return;
 	} else {
 		RETURN_FALSE;
 	}
@@ -832,6 +839,7 @@ static PHP_METHOD(UConverter, transcode) {
 			RETVAL_STRINGL(out, out_len);
 			//???
 			efree(out);
+			return;
 		}
 
 		if (U_FAILURE(error)) {
@@ -1015,7 +1023,7 @@ static zend_function_entry php_converter_methods[] = {
 };
 
 /* {{{ Converter create/clone/destroy */
-static void php_converter_free_object(zend_object *obj TSRMLS_DC) {
+static void php_converter_dtor_object(zend_object *obj TSRMLS_DC) {
 	php_converter_object *objval = php_converter_fetch_object(obj);
 
 	if (objval->src) {
@@ -1027,15 +1035,14 @@ static void php_converter_free_object(zend_object *obj TSRMLS_DC) {
 	}
 
 	intl_error_reset(&(objval->error) TSRMLS_CC);
-	zend_object_std_dtor(&(objval->obj) TSRMLS_CC);
 }
 
 static zend_object *php_converter_object_ctor(zend_class_entry *ce, php_converter_object **pobjval TSRMLS_DC) {
 	php_converter_object *objval;
 
 	objval = ecalloc(1, sizeof(php_converter_object) + sizeof(zval) * (ce->default_properties_count - 1));
-	objval->obj.ce = ce;
 
+	zend_object_std_init(&objval->obj, ce TSRMLS_CC );
 #ifdef ZTS
 	objval->tsrm_ls = TSRMLS_C;
 #endif
@@ -1102,8 +1109,9 @@ int php_converter_minit(INIT_FUNC_ARGS) {
 	php_converter_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	php_converter_ce->create_object = php_converter_create_object;
 	memcpy(&php_converter_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
-	php_converter_object_handlers.free_obj = php_converter_free_object;
+	php_converter_object_handlers.dtor_obj = php_converter_dtor_object;
 
 	/* enum UConverterCallbackReason */
 	CONV_REASON_CONST(UNASSIGNED);

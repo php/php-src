@@ -90,11 +90,12 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		if (object) {
 			fcic.called_scope = Z_OBJCE_P(object);
 		} else if (obj_ce &&
-		           !(EG(called_scope) &&
-		             instanceof_function(EG(called_scope), obj_ce TSRMLS_CC))) {
+		           !(EG(current_execute_data) &&
+		             EG(current_execute_data)->called_scope &&
+		             instanceof_function(EG(current_execute_data)->called_scope, obj_ce TSRMLS_CC))) {
 			fcic.called_scope = obj_ce;
 		} else {
-			fcic.called_scope = EG(called_scope);
+			fcic.called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 		}
 		fcic.object = object ? Z_OBJ_P(object) : NULL;
 		result = zend_call_function(&fci, &fcic TSRMLS_CC);

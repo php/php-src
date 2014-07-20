@@ -891,7 +891,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	}
 	++p;
 
-	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+	ZVAL_UNDEF(&pmembers);
+	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE(pmembers) != IS_ARRAY) {
+		zval_ptr_dtor(&pmembers);
 		goto outexcept;
 	}
 

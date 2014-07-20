@@ -2284,8 +2284,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_lcfirst, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 	
-ZEND_BEGIN_ARG_INFO(arginfo_ucwords, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ucwords, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, delimiters)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strtr, 0, 0, 2)
@@ -4712,9 +4713,16 @@ PHP_FUNCTION(call_user_func)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f*", &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_VARIADIC('*', fci.params, fci.param_count)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	fci.retval = &retval;
 
@@ -4732,9 +4740,16 @@ PHP_FUNCTION(call_user_func_array)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "fa/", &fci, &fci_cache, &params) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_ARRAY_EX(params, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	zend_fcall_info_args(&fci, params TSRMLS_CC);
 	fci.retval = &retval;
@@ -4759,15 +4774,15 @@ PHP_FUNCTION(forward_static_call)
 		return;
 	}
 
-	if (!EG(active_op_array)->scope) {
+	if (!EG(current_execute_data)->prev_execute_data->func->common.scope) {
 		zend_error(E_ERROR, "Cannot call forward_static_call() when no class scope is active");
 	}
 
 	fci.retval = &retval;
 
-	if (EG(called_scope) &&
-		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
-			fci_cache.called_scope = EG(called_scope);
+	if (EG(current_execute_data)->called_scope &&
+		instanceof_function(EG(current_execute_data)->called_scope, fci_cache.calling_scope TSRMLS_CC)) {
+			fci_cache.called_scope = EG(current_execute_data)->called_scope;
 	}
 	
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -4791,9 +4806,9 @@ PHP_FUNCTION(forward_static_call_array)
 	zend_fcall_info_args(&fci, params TSRMLS_CC);
 	fci.retval = &retval;
 
-	if (EG(called_scope) &&
-		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
-			fci_cache.called_scope = EG(called_scope);
+	if (EG(current_execute_data)->called_scope &&
+		instanceof_function(EG(current_execute_data)->called_scope, fci_cache.calling_scope TSRMLS_CC)) {
+			fci_cache.called_scope = EG(current_execute_data)->called_scope;
 	}
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {

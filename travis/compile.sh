@@ -13,6 +13,7 @@ fi
 ./configure --quiet \
 $DEBUG \
 $TS \
+--enable-fpm \
 --with-pdo-mysql=mysqlnd \
 --with-mysql=mysqlnd \
 --with-mysqli=mysqlnd \
@@ -48,5 +49,12 @@ $TS \
 --with-openssl \
 --with-gmp \
 --enable-bcmath \
---enable-phpdbg
+--enable-phpdbg \
+--enable-calendar \
+--enable-ftp \
+--with-pspell=/usr \
+--with-recode=/usr \
+--with-enchant=/usr \
+--enable-wddx \
+--enable-sysvmsg 
 make --quiet

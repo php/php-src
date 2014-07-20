@@ -59,8 +59,6 @@ typedef struct _zend_compiler_context {
 	int        literals_size;
 	int        current_brk_cont;
 	int        backpatch_count;
-	int        nested_calls;
-	int        used_stack;
 	int        in_finally;
 	HashTable *labels;
 } zend_compiler_context;
@@ -266,9 +264,6 @@ struct _zend_op_array {
 
 	zend_uint T;
 
-	zend_uint nested_calls;
-	zend_uint used_stack;
-
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
 
@@ -336,14 +331,9 @@ union _zend_function {
 	zend_internal_function internal_function;
 };
 
-
-typedef struct _zend_function_state {
-	zend_function *function;
-	zval *arguments;
-} zend_function_state;
-
 typedef struct _zend_function_call_entry {
 	zend_function *fbc;
+	zend_uint op_number;
 	zend_uint arg_num;
 	zend_bool uses_argument_unpacking;
 } zend_function_call_entry;
@@ -361,15 +351,6 @@ typedef struct _list_llist_element {
 	znode value;
 } list_llist_element;
 
-typedef struct _call_slot {
-	zend_function     *fbc;
-	zend_class_entry  *called_scope;
-	zend_object       *object;
-	zend_uint          num_additional_args;
-	zend_bool          is_ctor_call;
-	zend_bool          is_ctor_result_used;
-} call_slot;
-
 typedef enum _vm_frame_kind {
 	VM_FRAME_NESTED_FUNCTION,	/* stackless VM call to function */
 	VM_FRAME_NESTED_CODE,		/* stackless VM call to include/require/eval */
@@ -379,28 +360,37 @@ typedef enum _vm_frame_kind {
 
 struct _zend_execute_data {
 	struct _zend_op     *opline;           /* executed opline                */
-	zend_op_array       *op_array;         /* executed op_array              */
-	zend_function_state  function_state;   /* called function and arguments  */
-	zend_object         *object;           /* current $this                  */
-	zend_class_entry    *scope;            /* function scope (self)          */
-	zend_class_entry    *called_scope;     /* function called scope (static) */
-	zend_array          *symbol_table;
+	zend_execute_data   *call;             /* current call                   */
 	void               **run_time_cache;
+	zend_function       *func;             /* executed op_array              */
+	zend_uint            num_args;
+	zend_uchar           flags;
+	zend_uchar           frame_kind;
+	zend_class_entry    *called_scope;
+	zend_object         *object;
+	zend_execute_data   *prev_nested_call;
 	zend_execute_data   *prev_execute_data;
 	zval                *return_value;
-	vm_frame_kind        frame_kind;
-	// TODO: simplify call sequence and remove call_* ???
-	zval old_error_reporting;
-	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
-	zend_object *delayed_exception;
-	call_slot *call_slots;
-	call_slot *call;
+	zend_class_entry    *scope;            /* function scope (self)          */
+	zend_array          *symbol_table;
+	struct _zend_op     *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
+	zend_object         *delayed_exception;
+	zval                 old_error_reporting;
 };
+
+#define ZEND_CALL_CTOR               (1 << 0)
+#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 1)
+
+#define ZEND_CALL_FRAME_SLOT \
+	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
+
+#define ZEND_CALL_ARG(call, n) \
+	(((zval*)(call)) + ((n) + (ZEND_CALL_FRAME_SLOT - 1)))
 
 #define EX(element) execute_data.element
 
 #define EX_VAR_2(ex, n)			((zval*)(((char*)(ex)) + ((int)(n))))
-#define EX_VAR_NUM_2(ex, n)     (((zval*)(((char*)(ex))+ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data))))+(n))
+#define EX_VAR_NUM_2(ex, n)     (((zval*)(ex)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
 
 #define EX_VAR(n)				EX_VAR_2(execute_data, n)
 #define EX_VAR_NUM(n)			EX_VAR_NUM_2(execute_data, n)
@@ -527,7 +517,7 @@ void zend_do_finally(znode *finally_token TSRMLS_DC);
 void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_token TSRMLS_DC);
 void zend_do_throw(znode *expr TSRMLS_DC);
 
-ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time);
+ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC);
 ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface TSRMLS_DC);
@@ -730,8 +720,8 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
 #define ZEND_FETCH_CLASS_PARENT		2
-#define ZEND_FETCH_CLASS_MAIN		3	/* unused */
-#define ZEND_FETCH_CLASS_GLOBAL		4	/* unused */
+#define ZEND_FETCH_CLASS_MAIN		3	/* unused ??? */
+#define ZEND_FETCH_CLASS_GLOBAL		4	/* unused ??? */
 #define ZEND_FETCH_CLASS_AUTO		5
 #define ZEND_FETCH_CLASS_INTERFACE	6
 #define ZEND_FETCH_CLASS_STATIC		7
@@ -749,7 +739,6 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_PARSED_REFERENCE_VARIABLE	(1<<5)
 #define ZEND_PARSED_NEW					(1<<6)
 #define ZEND_PARSED_LIST_EXPR			(1<<7)
-
 
 /* unset types */
 #define ZEND_UNSET_REG 0
@@ -769,6 +758,9 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_OVERLOADED_FUNCTION			3
 #define	ZEND_EVAL_CODE						4
 #define ZEND_OVERLOADED_FUNCTION_TEMPORARY	5
+
+/* A quick check (type == ZEND_USER_FUNCTION || type == ZEND_EVAL_CODE) */
+#define ZEND_USER_CODE(type) ((type & 1) == 0)
 
 #define ZEND_INTERNAL_CLASS         1
 #define ZEND_USER_CLASS             2
@@ -848,6 +840,9 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_FAST_RET_TO_CATCH		1
 #define ZEND_FAST_RET_TO_FINALLY	2
 
+#define ZEND_FAST_CALL_FOR_CATCH	1
+#define ZEND_FAST_CALL_FOR_FINALLY	2
+
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2
@@ -877,7 +872,7 @@ END_EXTERN_C()
 /* call op_array handler of extendions */
 #define ZEND_COMPILE_HANDLE_OP_ARRAY            (1<<1)
 
-/* generate ZEND_DO_FCALL_BY_NAME for internal functions instead of ZEND_DO_FCALL */
+/* generate ZEND_INIT_FCALL_BY_NAME for internal functions instead of ZEND_INIT_FCALL */
 #define ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS	(1<<2)
 
 /* don't perform early binding for classes inherited form internal ones;
@@ -890,6 +885,9 @@ END_EXTERN_C()
 
 /* disable constant substitution at compile-time */
 #define ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION	(1<<5)
+
+/* disable usage of builtin instruction for strlen() */
+#define ZEND_COMPILE_NO_BUILTIN_STRLEN			(1<<6)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

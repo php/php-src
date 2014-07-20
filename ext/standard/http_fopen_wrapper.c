@@ -120,7 +120,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	char *scratch = NULL;
 	char *tmp = NULL;
 	char *ua_str = NULL;
-	zval *ua_zval = NULL, *tmpzval = NULL;
+	zval *ua_zval = NULL, *tmpzval = NULL, ssl_proxy_peer_name;
 	int scratch_len = 0;
 	int body = 0;
 	char location[HTTP_HEADER_BLOCK_SIZE];
@@ -141,6 +141,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	int follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
 	int response_code;
+	zend_array *symbol_table;
 
 	tmp_line[0] = '\0';
 
@@ -224,6 +225,12 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (stream && use_proxy && use_ssl) {
 		smart_str header = {0};
+
+		/* Set peer_name or name verification will try to use the proxy server name */
+		if (!context || (tmpzval = php_stream_context_get_option(context, "ssl", "peer_name")) == NULL) {
+			ZVAL_STRING(&ssl_proxy_peer_name, resource->host);
+			php_stream_context_set_option(stream->context, "ssl", "peer_name", &ssl_proxy_peer_name);
+		}
 
 		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
 		smart_str_appends(&header, resource->host);
@@ -312,7 +319,7 @@ finish:
 
 		/* enable SSL transport layer */
 		if (stream) {
-			if (php_stream_xport_crypto_setup(stream, STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL TSRMLS_CC) < 0 ||
+			if (php_stream_xport_crypto_setup(stream, STREAM_CRYPTO_METHOD_ANY_CLIENT, NULL TSRMLS_CC) < 0 ||
 			    php_stream_xport_crypto_enable(stream, 1 TSRMLS_CC) < 0) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Cannot connect to HTTPS server through proxy");
 				php_stream_close(stream);
@@ -634,9 +641,7 @@ finish:
 
 	location[0] = '\0';
 
-	if (!EG(active_symbol_table)) {
-		zend_rebuild_symbol_table(TSRMLS_C);
-	}
+	symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 
 	if (header_init) {
 		zval ztmp;
@@ -644,7 +649,7 @@ finish:
 		zend_set_local_var_str("http_response_header", sizeof("http_response_header")-1, &ztmp, 0 TSRMLS_CC);
 	}
 
-	response_header = zend_hash_str_find_ind(&EG(active_symbol_table)->ht, "http_response_header", sizeof("http_response_header")-1);
+	response_header = zend_hash_str_find_ind(&symbol_table->ht, "http_response_header", sizeof("http_response_header")-1);
 
 	if (!php_stream_eof(stream)) {
 		size_t tmp_line_len;

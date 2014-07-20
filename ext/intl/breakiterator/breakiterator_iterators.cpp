@@ -217,7 +217,7 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	ii = Z_INTL_ITERATOR_P(object);
 
 	ii->iterator = (zend_object_iterator*)emalloc(sizeof(zoi_break_iter_parts));
-	//zend_iterator_init(ii->iterator TSRMLS_CC);
+	zend_iterator_init(ii->iterator TSRMLS_CC);
 
 	ZVAL_COPY(&ii->iterator->data, break_iter_zv);
 	ii->iterator->funcs = &breakiterator_parts_it_funcs;

@@ -283,7 +283,6 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 #endif
 			if (new_op_array) {
 				ZVAL_UNDEF(&result);
-				EG(active_op_array) = new_op_array;
 
 				zend_try {
 					zend_execute(new_op_array, &result TSRMLS_CC);
@@ -597,6 +596,7 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	if ((strlen(sapi_module.name) == sizeof("cgi-fcgi")-1 && !strncmp(sapi_module.name, "cgi-fcgi", sizeof("cgi-fcgi")-1))
+		|| (strlen(sapi_module.name) == sizeof("fpm-fcgi")-1 && !strncmp(sapi_module.name, "fpm-fcgi", sizeof("fpm-fcgi")-1))
 		|| (strlen(sapi_module.name) == sizeof("cgi")-1 && !strncmp(sapi_module.name, "cgi", sizeof("cgi")-1))) {
 
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) != IS_UNDEF) {

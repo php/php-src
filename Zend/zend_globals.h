@@ -170,9 +170,6 @@ struct _zend_executor_globals {
 	zend_array **symtable_cache_limit;
 	zend_array **symtable_cache_ptr;
 
-	zend_op **opline_ptr;
-
-	zend_array *active_symbol_table;
 	zend_array symbol_table;		/* main symbol table */
 
 	HashTable included_files;	/* files already included */
@@ -183,14 +180,11 @@ struct _zend_executor_globals {
 	int orig_error_reporting;
 	int exit_status;
 
-	zend_op_array *active_op_array;
-
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
 	HashTable *zend_constants;	/* constants table */
 
 	zend_class_entry *scope;
-	zend_class_entry *called_scope; /* Scope of the calling class */
 
 	zval This;
 
@@ -198,7 +192,6 @@ struct _zend_executor_globals {
 
 	int ticks_count;
 
-	zend_bool in_execution;
 	HashTable *in_autoload;
 	zend_function *autoload_func;
 	zend_bool full_tables_cleanup;
@@ -246,7 +239,8 @@ struct _zend_executor_globals {
 
 	zend_property_info std_property_info;
 
-	zend_bool active; 
+	zend_bool active;
+	zend_bool valid_symbol_table;
 
 	zend_op *start_op;
 

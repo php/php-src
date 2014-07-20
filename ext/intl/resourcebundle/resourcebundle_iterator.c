@@ -114,7 +114,7 @@ static void resourcebundle_iterator_key( zend_object_iterator *iter, zval *key T
 }
 /* }}} */
 
-/* {{{ resourcebundle_iterator_has_more */
+/* {{{ resourcebundle_iterator_step */
 static void resourcebundle_iterator_step( zend_object_iterator *iter TSRMLS_DC )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;

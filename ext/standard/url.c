@@ -537,9 +537,15 @@ PHP_FUNCTION(urlencode)
 {
 	zend_string *in_str;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(in_str)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	RETURN_STR(php_url_encode(in_str->val, in_str->len));
 }
@@ -551,9 +557,15 @@ PHP_FUNCTION(urldecode)
 {
 	zend_string *in_str, *out_str;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(in_str)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	out_str = STR_INIT(in_str->val, in_str->len, 0);
 	out_str->len = php_url_decode(out_str->val, out_str->len);
@@ -632,9 +644,15 @@ PHP_FUNCTION(rawurlencode)
 {
 	zend_string *in_str;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(in_str)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	RETURN_STR(php_raw_url_encode(in_str->val, in_str->len));
 }
@@ -646,9 +664,15 @@ PHP_FUNCTION(rawurldecode)
 {
 	zend_string *in_str, *out_str;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(in_str)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	out_str = STR_INIT(in_str->val, in_str->len, 0);
 	out_str->len = php_raw_url_decode(out_str->val, out_str->len);

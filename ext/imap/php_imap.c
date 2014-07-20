@@ -3472,6 +3472,7 @@ PHP_FUNCTION(imap_mail_compose)
 	PARAMETER *param, *disp_param = NULL, *custom_headers_param = NULL, *tmp_param = NULL;
 	char *tmp=NULL, *mystring=NULL, *t=NULL, *tempstring=NULL, *str_copy = NULL;
 	int toppart = 0;
+	int first;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa", &envelope, &body) == FAILURE) {
 		return;
@@ -3543,106 +3544,105 @@ PHP_FUNCTION(imap_mail_compose)
 		}
 	}
 
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(body));
-	if ((data = zend_hash_get_current_data(Z_ARRVAL_P(body))) == NULL || Z_TYPE_P(data) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "body parameter must be a non-empty array");
-		RETURN_FALSE;
-	}
+	first = 1;
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(body), data) {
+		if (first) {
+			first = 0;
 
-	if (Z_TYPE_P(data) == IS_ARRAY) {
-		bod = mail_newbody();
-		topbod = bod;
-
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
-			convert_to_long_ex(pvalue);
-			bod->type = (short) Z_LVAL_P(pvalue);
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "encoding", sizeof("encoding") - 1)) != NULL) {
-			convert_to_long_ex(pvalue);
-			bod->encoding = (short) Z_LVAL_P(pvalue);
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
-			convert_to_string_ex(pvalue);
-			tmp_param = mail_newbody_parameter();
-			tmp_param->value = cpystr(Z_STRVAL_P(pvalue));
-			tmp_param->attribute = cpystr("CHARSET");
-			tmp_param->next = bod->parameter;
-			bod->parameter = tmp_param;
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type.parameters", sizeof("type.parameters") - 1)) != NULL) {
-			if(Z_TYPE_P(pvalue) == IS_ARRAY) {
-				disp_param = tmp_param = NULL;
-				ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
-					disp_param = mail_newbody_parameter();
-					disp_param->attribute = cpystr(key->val);
-					convert_to_string_ex(disp_data);
-					disp_param->value = (char *) fs_get(Z_STRLEN_P(disp_data) + 1);
-					memcpy(disp_param->value, Z_STRVAL_P(disp_data), Z_STRLEN_P(disp_data) + 1);
-					disp_param->next = tmp_param;
-					tmp_param = disp_param;
-				} ZEND_HASH_FOREACH_END();
-				bod->parameter = disp_param;
+			if (Z_TYPE_P(data) != IS_ARRAY) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "body parameter must be a non-empty array");
+				RETURN_FALSE;
 			}
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "subtype", sizeof("subtype") - 1)) != NULL) {
-			convert_to_string_ex(pvalue);
-			bod->subtype = cpystr(Z_STRVAL_P(pvalue));
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "id", sizeof("id") - 1)) != NULL) {
-			convert_to_string_ex(pvalue);
-			bod->id = cpystr(Z_STRVAL_P(pvalue));
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "description", sizeof("description") - 1)) != NULL) {
-			convert_to_string_ex(pvalue);
-			bod->description = cpystr(Z_STRVAL_P(pvalue));
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition.type", sizeof("disposition.type") - 1)) != NULL) {
-			convert_to_string_ex(pvalue);
-			bod->disposition.type = (char *) fs_get(Z_STRLEN_P(pvalue) + 1);
-			memcpy(bod->disposition.type, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition", sizeof("disposition") - 1)) != NULL) {
-			if (Z_TYPE_P(pvalue) == IS_ARRAY) {
-				disp_param = tmp_param = NULL;
-				ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
-					disp_param = mail_newbody_parameter();
-					disp_param->attribute = cpystr(key->val);
-					convert_to_string_ex(disp_data);
-					disp_param->value = (char *) fs_get(Z_STRLEN_P(disp_data) + 1);
-					memcpy(disp_param->value, Z_STRVAL_P(disp_data), Z_STRLEN_P(disp_data) + 1);
-					disp_param->next = tmp_param;
-					tmp_param = disp_param;
-				} ZEND_HASH_FOREACH_END();
-				bod->disposition.parameter = disp_param;
-			}
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "contents.data", sizeof("contents.data") - 1)) != NULL) {
-			convert_to_string_ex(pvalue);
-			bod->contents.text.data = (char *) fs_get(Z_STRLEN_P(pvalue) + 1);
-			memcpy(bod->contents.text.data, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
-			bod->contents.text.size = Z_STRLEN_P(pvalue);
-		} else {
-			bod->contents.text.data = (char *) fs_get(1);
-			memcpy(bod->contents.text.data, "", 1);
-			bod->contents.text.size = 0;
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "lines", sizeof("lines") - 1)) != NULL) {
-			convert_to_long_ex(pvalue);
-			bod->size.lines = Z_LVAL_P(pvalue);
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "bytes", sizeof("bytes") - 1)) != NULL) {
-			convert_to_long_ex(pvalue);
-			bod->size.bytes = Z_LVAL_P(pvalue);
-		}
-		if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "md5", sizeof("md5") - 1)) != NULL) {
-			convert_to_string_ex(pvalue);
-			bod->md5 = cpystr(Z_STRVAL_P(pvalue));
-		}
-	}
 
-	zend_hash_move_forward(Z_ARRVAL_P(body));
-	while ((data = zend_hash_get_current_data(Z_ARRVAL_P(body))) != NULL) {
-		if (Z_TYPE_P(data) == IS_ARRAY) {
+			bod = mail_newbody();
+			topbod = bod;
+
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
+				convert_to_long_ex(pvalue);
+				bod->type = (short) Z_LVAL_P(pvalue);
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "encoding", sizeof("encoding") - 1)) != NULL) {
+				convert_to_long_ex(pvalue);
+				bod->encoding = (short) Z_LVAL_P(pvalue);
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
+				convert_to_string_ex(pvalue);
+				tmp_param = mail_newbody_parameter();
+				tmp_param->value = cpystr(Z_STRVAL_P(pvalue));
+				tmp_param->attribute = cpystr("CHARSET");
+				tmp_param->next = bod->parameter;
+				bod->parameter = tmp_param;
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type.parameters", sizeof("type.parameters") - 1)) != NULL) {
+				if(Z_TYPE_P(pvalue) == IS_ARRAY) {
+					disp_param = tmp_param = NULL;
+					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
+						disp_param = mail_newbody_parameter();
+						disp_param->attribute = cpystr(key->val);
+						convert_to_string_ex(disp_data);
+						disp_param->value = (char *) fs_get(Z_STRLEN_P(disp_data) + 1);
+						memcpy(disp_param->value, Z_STRVAL_P(disp_data), Z_STRLEN_P(disp_data) + 1);
+						disp_param->next = tmp_param;
+						tmp_param = disp_param;
+					} ZEND_HASH_FOREACH_END();
+					bod->parameter = disp_param;
+				}
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "subtype", sizeof("subtype") - 1)) != NULL) {
+				convert_to_string_ex(pvalue);
+				bod->subtype = cpystr(Z_STRVAL_P(pvalue));
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "id", sizeof("id") - 1)) != NULL) {
+				convert_to_string_ex(pvalue);
+				bod->id = cpystr(Z_STRVAL_P(pvalue));
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "description", sizeof("description") - 1)) != NULL) {
+				convert_to_string_ex(pvalue);
+				bod->description = cpystr(Z_STRVAL_P(pvalue));
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition.type", sizeof("disposition.type") - 1)) != NULL) {
+				convert_to_string_ex(pvalue);
+				bod->disposition.type = (char *) fs_get(Z_STRLEN_P(pvalue) + 1);
+				memcpy(bod->disposition.type, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition", sizeof("disposition") - 1)) != NULL) {
+				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
+					disp_param = tmp_param = NULL;
+					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
+						disp_param = mail_newbody_parameter();
+						disp_param->attribute = cpystr(key->val);
+						convert_to_string_ex(disp_data);
+						disp_param->value = (char *) fs_get(Z_STRLEN_P(disp_data) + 1);
+						memcpy(disp_param->value, Z_STRVAL_P(disp_data), Z_STRLEN_P(disp_data) + 1);
+						disp_param->next = tmp_param;
+						tmp_param = disp_param;
+					} ZEND_HASH_FOREACH_END();
+					bod->disposition.parameter = disp_param;
+				}
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "contents.data", sizeof("contents.data") - 1)) != NULL) {
+				convert_to_string_ex(pvalue);
+				bod->contents.text.data = (char *) fs_get(Z_STRLEN_P(pvalue) + 1);
+				memcpy(bod->contents.text.data, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
+				bod->contents.text.size = Z_STRLEN_P(pvalue);
+			} else {
+				bod->contents.text.data = (char *) fs_get(1);
+				memcpy(bod->contents.text.data, "", 1);
+				bod->contents.text.size = 0;
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "lines", sizeof("lines") - 1)) != NULL) {
+				convert_to_long_ex(pvalue);
+				bod->size.lines = Z_LVAL_P(pvalue);
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "bytes", sizeof("bytes") - 1)) != NULL) {
+				convert_to_long_ex(pvalue);
+				bod->size.bytes = Z_LVAL_P(pvalue);
+			}
+			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "md5", sizeof("md5") - 1)) != NULL) {
+				convert_to_string_ex(pvalue);
+				bod->md5 = cpystr(Z_STRVAL_P(pvalue));
+			}
+		} else if (Z_TYPE_P(data) == IS_ARRAY) {
 			short type = -1;
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
 				convert_to_long_ex(pvalue);
@@ -3747,7 +3747,11 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->md5 = cpystr(Z_STRVAL_P(pvalue));
 			}
 		}
-		zend_hash_move_forward(Z_ARRVAL_P(body));
+	} ZEND_HASH_FOREACH_END();
+
+	if (first) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "body parameter must be a non-empty array");
+		RETURN_FALSE;
 	}
 
 	if (bod && bod->type == TYPEMULTIPART && (!bod->nested.part || !bod->nested.part->next)) {

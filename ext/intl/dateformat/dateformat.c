@@ -82,7 +82,7 @@ PHP_FUNCTION( datefmt_get_error_code )
 		RETURN_FALSE;
 	}
 
-	dfo = Z_INTL_DATEFORMATTER_P( object TSRMLS_CC );
+	dfo = Z_INTL_DATEFORMATTER_P( object );
 
 	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(dfo) );
@@ -109,7 +109,7 @@ PHP_FUNCTION( datefmt_get_error_message )
 		RETURN_FALSE;
 	}
 
-	dfo = Z_INTL_DATEFORMATTER_P( object TSRMLS_CC );
+	dfo = Z_INTL_DATEFORMATTER_P( object );
 
 	/* Return last error message. */
 	message = intl_error_get_message( INTL_DATA_ERROR_P(dfo) TSRMLS_CC );

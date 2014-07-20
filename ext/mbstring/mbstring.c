@@ -1619,6 +1619,7 @@ PHP_RINIT_FUNCTION(mbstring)
 	if (MBSTRG(func_overload)){
 		p = &(mb_ovld[0]);
 		
+		CG(compiler_options) |= ZEND_COMPILE_NO_BUILTIN_STRLEN;
 		while (p->type > 0) {
 			if ((MBSTRG(func_overload) & p->type) == p->type && 
 				(orig = zend_hash_str_find_ptr(EG(function_table), p->save_func,
@@ -1687,6 +1688,7 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 			}
 			p++;
 		}
+		CG(compiler_options) &= ~ZEND_COMPILE_NO_BUILTIN_STRLEN;
 	}
 
 #if HAVE_MBREGEX
@@ -2084,10 +2086,9 @@ PHP_FUNCTION(mb_parse_str)
 		detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr TSRMLS_CC);
 	} else {
 		zval tmp;
-		if (!EG(active_symbol_table)) {
-			zend_rebuild_symbol_table(TSRMLS_C);
-		}
-		ZVAL_ARR(&tmp, EG(active_symbol_table));
+		zend_array *symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
+
+		ZVAL_ARR(&tmp, symbol_table);
 		detected = _php_mb_encoding_handler_ex(&info, &tmp, encstr TSRMLS_CC);		
 	}
 

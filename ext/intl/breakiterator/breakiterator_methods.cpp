@@ -73,7 +73,7 @@ static void _breakiter_factory(const char *func_name,
 		RETURN_NULL();
 	}
 
-	breakiterator_object_create(return_value, biter TSRMLS_CC);
+	breakiterator_object_create(return_value, biter, 1 TSRMLS_CC);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_create_word_instance)
@@ -123,7 +123,7 @@ U_CFUNC PHP_FUNCTION(breakiter_create_code_point_instance)
 	}
 
 	CodePointBreakIterator *cpbi = new CodePointBreakIterator();
-	breakiterator_object_create(return_value, cpbi TSRMLS_CC);
+	breakiterator_object_create(return_value, cpbi, 1 TSRMLS_CC);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_get_text)

@@ -182,7 +182,8 @@ U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)
 	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig) TSRMLS_CC);
+		zval_dtor(&orig);
+		RETURN_NULL();
 	}
 }
 
@@ -197,6 +198,8 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		zend_object_store_ctor_failed(Z_OBJ(orig_this) TSRMLS_CC);
+		zval_dtor(&orig_this);
+		ZEND_CTOR_MAKE_NULL();
 	}
 }
 

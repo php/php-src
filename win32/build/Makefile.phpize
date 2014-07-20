@@ -5,10 +5,8 @@ MT="$(MT)"
 
 PHPSDK_DIR=$(PHP_DIR)
 PHPLIB=$(PHPSDK_DIR)\lib\$(PHPLIB)
-LDFLAGS=/libpath:"$(PHPSDK_DIR)\lib\;$(PHPSDK_DIR)"
-
-CFLAGS=/nologo /FD $(BASE_INCLUDES) /D _WINDOWS /D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D_USE_32BIT_TIME_T=1 /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0 /D ZTS=1 /D FD_SETSIZE=256 
-CFLAGS_PHP=/D _USRDLL /D PHP5DLLTS_EXPORTS /D PHP_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=0x500 /D COMPILE_DL_AJAXMIN 
+LDFLAGS=$(LDFLAGS) /libpath:"$(PHPSDK_DIR)\lib\;$(PHPSDK_DIR)"
+BUILD_DIR_DEV=$(PHPSDK_DIR)
 
 all: $(EXT_TARGETS) $(PECL_TARGETS)
 
@@ -35,4 +33,6 @@ _VC_MANIFEST_EMBED_DLL=
 _VC_MANIFEST_EMBED_EXE= if exist $@.manifest $(MT) -nologo -manifest $@.manifest -outputresource:$@;1
 _VC_MANIFEST_EMBED_DLL= if exist $@.manifest $(MT) -nologo -manifest $@.manifest -outputresource:$@;2
 !endif
+
+install: build-headers  build-bins
 

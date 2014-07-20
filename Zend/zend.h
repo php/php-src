@@ -179,6 +179,14 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_DEPRECATED
 #endif
 
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
+# define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
+# define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((cold, unused));
+#else
+# define ZEND_ATTRIBUTE_UNUSED
+# define ZEND_ATTRIBUTE_UNUSED_LABEL
+#endif
+
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
 # define ZEND_FASTCALL __attribute__((fastcall))
 #elif defined(_MSC_VER) && defined(_M_IX86)
@@ -290,8 +298,9 @@ typedef enum {
 
 #define USED_RET() \
 	(!EG(current_execute_data) || \
-	 !EG(current_execute_data)->opline || \
-	 !(EG(current_execute_data)->opline->result_type & EXT_TYPE_UNUSED))
+	 !EG(current_execute_data)->prev_execute_data || \
+	 !ZEND_USER_CODE(EG(current_execute_data)->prev_execute_data->func->common.type) || \
+	 !(EG(current_execute_data)->prev_execute_data->opline->result_type & EXT_TYPE_UNUSED))
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
@@ -355,8 +364,8 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #endif /* ZEND_DEBUG */
 
 #if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
-# define EXPECTED(condition)   __builtin_expect(condition, 1)
-# define UNEXPECTED(condition) __builtin_expect(condition, 0)
+# define EXPECTED(condition)   __builtin_expect(!(!(condition)), 1)
+# define UNEXPECTED(condition) __builtin_expect(!(!(condition)), 0)
 #else
 # define EXPECTED(condition)   (condition)
 # define UNEXPECTED(condition) (condition)
@@ -601,7 +610,7 @@ END_EXTERN_C()
 
 BEGIN_EXTERN_C()
 ZEND_API char *get_zend_version(void);
-ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
+ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
 ZEND_API int zend_print_zval(zval *expr, int indent TSRMLS_DC);
 ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC);
 ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC);
