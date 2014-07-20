@@ -2467,7 +2467,7 @@ ZEND_METHOD(reflection_parameter, isInt)
 /* }}} */
 
 /* {{{ proto public bool ReflectionParameter::isFloat()
-   Returns whether parameter MUST be a flot */
+   Returns whether parameter MUST be a float */
 ZEND_METHOD(reflection_parameter, isFloat)
 {
 	reflection_object *intern;
@@ -2479,6 +2479,22 @@ ZEND_METHOD(reflection_parameter, isFloat)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->type_hint == IS_DOUBLE);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isNumeric()
+   Returns whether parameter MUST be numeric */
+ZEND_METHOD(reflection_parameter, isNumeric)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_NUMERIC);
 }
 /* }}} */
 
@@ -6093,6 +6109,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, isArray, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isInt, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isFloat, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isNumeric, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isBool, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isCallable, arginfo_reflection__void, 0)

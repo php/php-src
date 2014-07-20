@@ -8,6 +8,7 @@ $functions = [
     'array $x' => function (array $x) {},
     'int $x' => function (int $x) {},
     'float $x' => function (float $x) {},
+    'numeric $x' => function (numeric $x) {},
     'string $x' => function (string $x) {},
     'bool $x' => function (bool $x) {}
 ];
@@ -16,6 +17,7 @@ $methods = [
     'isArray',
     'isInt',
     'isFloat',
+    'isNumeric',
     'isString',
     'isBool'
 ];
@@ -39,11 +41,12 @@ foreach ($functions as $name => $function) {
 }
 
 ?>
---EXPECTF--
-              isCallable    isArray       isInt         isFloat       isString      isBool        
-callable $x   1                                                                                   
-array $x                    1                                                                     
-int $x                                    1                                                       
-float $x                                                1                                         
-string $x                                                             1                           
-bool $x                                                                             1             
+--EXPECT--
+              isCallable    isArray       isInt         isFloat       isNumeric     isString      isBool        
+callable $x   1                                                                                                 
+array $x                    1                                                                                   
+int $x                                    1                                                                     
+float $x                                                1                                                       
+numeric $x                                                            1                                         
+string $x                                                                           1                           
+bool $x                                                                                           1         
