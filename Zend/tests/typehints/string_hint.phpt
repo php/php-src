@@ -25,6 +25,7 @@ string(1) "1"
 string(2) "1a"
 string(1) "a"
 string(3) "1.5"
+E_NOTICE: Array to string conversion in %s on line 4
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, array given, called in %s on line 13 and defined in %s on line 4
 string(5) "Array"
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, object given, called in %s on line 14 and defined in %s on line 4
