@@ -411,6 +411,7 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 		case IS_LONG:
 			return SUCCESS;
 		case IS_OBJECT:
+		{
 			TSRMLS_FETCH();
 			
 			convert_object_to_type(op, IS_LONG, convert_to_long);
@@ -421,6 +422,7 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 			zval_dtor(op);
 			ZVAL_LONG(op, 1);
 			return FAILURE;
+		}
 
 		default:
 		case IS_RESOURCE:
@@ -471,6 +473,7 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 		case IS_DOUBLE:
 			return SUCCESS;
 		case IS_OBJECT:
+		{
 			TSRMLS_FETCH();
 			
 			convert_object_to_type(op, IS_DOUBLE, convert_to_long);
@@ -481,6 +484,7 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 			zval_dtor(op);
 			ZVAL_DOUBLE(op, (double) 1.0);
 			return FAILURE;
+		}
 
 		case IS_RESOURCE:
 		case IS_NULL:
@@ -546,6 +550,7 @@ ZEND_API int _convert_to_numeric_safe(zval **op_ptr, int separate)
 				return FAILURE;
 			}
 		case IS_OBJECT:
+		{
 			TSRMLS_FETCH();
 			
 			convert_object_to_type(op, IS_LONG, convert_to_long);
@@ -563,6 +568,8 @@ ZEND_API int _convert_to_numeric_safe(zval **op_ptr, int separate)
 			zval_dtor(op);
 			ZVAL_LONG(op, 1);
 			return FAILURE;
+		}
+			
 		default:
 			zval_dtor(op);
 			ZVAL_LONG(op, 0);
@@ -584,6 +591,7 @@ ZEND_API int _convert_to_boolean_safe(zval **op_ptr, int separate)
 		case IS_BOOL:
 			return SUCCESS;
 		case IS_OBJECT:
+		{
 			TSRMLS_FETCH();
 			
 			convert_object_to_type(op, IS_BOOL, convert_to_boolean);
@@ -594,6 +602,7 @@ ZEND_API int _convert_to_boolean_safe(zval **op_ptr, int separate)
 			zval_dtor(op);
 			ZVAL_BOOL(op, 1);
 			return FAILURE;
+		}
 		
 		case IS_NULL:
 		case IS_STRING:
