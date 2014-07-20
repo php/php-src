@@ -330,14 +330,16 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 
 /* }}} */
 
-/* {{{ convert_object_to_type */
-#define convert_object_to_type(op, ctype, conv_func)										\
+/* {{{ convert_object_to_type_ex */
+#define convert_object_to_type_ex(op, ctype, conv_func, raise_error)						\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
 		zval dst;																			\
 		if (Z_OBJ_HT_P(op)->cast_object(op, &dst, ctype TSRMLS_CC) == FAILURE) {			\
-			zend_error(E_RECOVERABLE_ERROR,													\
-				"Object of class %s could not be converted to %s", Z_OBJCE_P(op)->name,		\
-			zend_get_type_by_const(ctype));													\
+			if (raise_error) {																\
+				zend_error(E_RECOVERABLE_ERROR,												\
+					"Object of class %s could not be converted to %s", Z_OBJCE_P(op)->name,	\
+				zend_get_type_by_const(ctype));												\
+			}																				\
 		} else {																			\
 			zval_dtor(op);																	\
 			Z_TYPE_P(op) = ctype;															\
@@ -358,48 +360,8 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 
 /* }}} */
 
-static int parse_object_to_string(zval **arg, char **p, int *pl, int type TSRMLS_DC) /* {{{ */
-{
-	if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
-		zval *obj;
-		MAKE_STD_ZVAL(obj);
-		if (Z_OBJ_HANDLER_P(*arg, cast_object)(*arg, obj, type TSRMLS_CC) == SUCCESS) {
-			zval_ptr_dtor(arg);
-			*arg = obj;
-			*pl = Z_STRLEN_PP(arg);
-			*p = Z_STRVAL_PP(arg);
-			return SUCCESS;
-		}
-		efree(obj);
-	}
-	/* Standard PHP objects */
-	if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HANDLER_PP(arg, cast_object)) {
-		SEPARATE_ZVAL_IF_NOT_REF(arg);
-		if (zend_std_cast_object_tostring(*arg, *arg, type TSRMLS_CC) == SUCCESS) {
-			*pl = Z_STRLEN_PP(arg);
-			*p = Z_STRVAL_PP(arg);
-			return SUCCESS;
-		}
-	}
-	if (!Z_OBJ_HANDLER_PP(arg, cast_object) && Z_OBJ_HANDLER_PP(arg, get)) {
-		int use_copy;
-		zval *z = Z_OBJ_HANDLER_PP(arg, get)(*arg TSRMLS_CC);
-		Z_ADDREF_P(z);
-		if(Z_TYPE_P(z) != IS_OBJECT) {
-			zval_dtor(*arg);
-			Z_TYPE_P(*arg) = IS_NULL;
-			zend_make_printable_zval(z, *arg, &use_copy);
-			if (!use_copy) {
-				ZVAL_ZVAL(*arg, z, 1, 1);
-			}
-			*pl = Z_STRLEN_PP(arg);
-			*p = Z_STRVAL_PP(arg);
-			return SUCCESS;
-		}
-		zval_ptr_dtor(&z);
-	}
-	return FAILURE;
-}
+/* {{{ convert_object_to_type */
+#define convert_object_to_type(op, ctype, conv_func) convert_object_to_type_ex(op, ctype, conv_func, 1)
 /* }}} */
 
 
@@ -682,13 +644,14 @@ ZEND_API int _convert_to_string_safe(zval **op_ptr, int separate)
 		
 		case IS_OBJECT:
 			{
-				char *p;
-				int l;
-				if (SUCCESS == parse_object_to_string(op_ptr, &p, &l, IS_STRING TSRMLS_CC)) {
-					zval_dtor(op);
-					ZVAL_STRINGL(op, p, l, 0);
+				TSRMLS_FETCH();
+
+				convert_object_to_type_ex(op, IS_STRING, convert_to_string, 0);
+
+				if (Z_TYPE_P(op) == IS_STRING) {
 					return SUCCESS;
 				}
+
 				zval_dtor(op);
 				ZVAL_STRING(op, "Object", 1);
 				return FAILURE;
