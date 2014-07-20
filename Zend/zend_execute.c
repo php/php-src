@@ -686,6 +686,14 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 				}
 				break;
 				
+			case IS_NUMERIC:
+				if (!arg) {
+					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be a numeric type", "", "none", "" TSRMLS_CC);
+				} else if (!(cur_arg_info->allow_null && Z_TYPE_PP(arg) == IS_NULL) && FAILURE == convert_to_numeric_safe_ex(arg)) {
+					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be a numeric type", "", type, "" TSRMLS_CC);
+				}
+				break;
+				
 			case IS_ARRAY:
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "" TSRMLS_CC);

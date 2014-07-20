@@ -600,6 +600,9 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 
 #define IS_CONSTANT_TYPE(type) (((type) & IS_CONSTANT_TYPE_MASK) >= IS_CONSTANT && ((type) & IS_CONSTANT_TYPE_MASK) <= IS_CONSTANT_AST)
 
+/* fake type used only for typehints */
+#define IS_NUMERIC	11
+
 /* overloaded elements data types */
 #define OE_IS_ARRAY		(1<<0)
 #define OE_IS_OBJECT	(1<<1)

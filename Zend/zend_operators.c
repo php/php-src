@@ -563,6 +563,86 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 	}
 }
 
+ZEND_API int _convert_to_numeric_safe(zval **op_ptr, int separate)
+{
+	zval *op = *op_ptr;
+	if (separate && Z_TYPE_P(op) != IS_DOUBLE) {
+		SEPARATE_ZVAL_IF_NOT_REF(op_ptr);
+		op = *op_ptr;
+	}
+	switch (Z_TYPE_P(op)) {
+		case IS_STRING:
+			{
+				int type;
+				long lval;
+				double dval;
+				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, 0)) == 0) {
+					char *strval = Z_STRVAL_P(op);
+					ZVAL_DOUBLE(op, zend_strtod(strval, NULL));
+					STR_FREE(strval);
+					return FAILURE;
+				} else if (type == IS_DOUBLE) {
+					STR_FREE(Z_STRVAL_P(op));
+					ZVAL_DOUBLE(op, dval);
+					return SUCCESS;
+				}
+				STR_FREE(Z_STRVAL_P(op));
+				ZVAL_LONG(op, lval);
+				return SUCCESS;
+			}
+			/* break missing intentionally */
+		case IS_LONG:
+			return SUCCESS;
+		case IS_BOOL:
+			ZVAL_LONG(op, Z_LVAL_P(op));
+			return SUCCESS;
+		case IS_RESOURCE:
+			{
+				TSRMLS_FETCH();
+				zend_list_delete(Z_LVAL_P(op));
+				ZVAL_LONG(op, (long) Z_LVAL_P(op));
+				return FAILURE;
+			}
+		case IS_DOUBLE:
+			return SUCCESS;
+		case IS_NULL:
+			ZVAL_LONG(op, 0);
+			return FAILURE;
+		case IS_ARRAY: 
+			{
+				long temp;
+				temp = (zend_hash_num_elements(Z_ARRVAL_P(op)) ? 1 : 0);
+				zval_dtor(op);
+				ZVAL_LONG(op, temp);
+				return FAILURE;
+			}
+		case IS_OBJECT:
+			TSRMLS_FETCH();
+			
+			convert_object_to_type(op, IS_LONG, convert_to_long);
+			
+			if (Z_TYPE_P(op) == IS_LONG) {
+				return SUCCESS;
+			}
+			
+			convert_object_to_type(op, IS_DOUBLE, convert_to_double);
+			
+			if (Z_TYPE_P(op) == IS_DOUBLE) {
+				return SUCCESS;
+			}
+			
+			zval_dtor(op);
+			ZVAL_LONG(op, 1);
+			return FAILURE;
+		default:
+			zval_dtor(op);
+			ZVAL_LONG(op, 0);
+			return FAILURE;
+		
+	}
+}
+
+
 ZEND_API int _convert_to_boolean_safe(zval **op_ptr, int separate)
 {
 	zval *op = *op_ptr;

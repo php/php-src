@@ -1946,7 +1946,7 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 						zend_error(E_COMPILE_ERROR, "Default value for parameters with callable type hint can only be NULL");
 					}
 				}
-			} else if (class_type->EA == IS_STRING || class_type->EA == IS_LONG || class_type->EA == IS_DOUBLE || class_type->EA == IS_BOOL) {
+			} else if (class_type->EA == IS_STRING || class_type->EA == IS_LONG || class_type->EA == IS_DOUBLE || class_type->EA == IS_BOOL || class_type->EA == IS_NUMERIC) {
 				if (op == ZEND_RECV_INIT) {
 					cur_arg_info->allow_null = Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"));
 				} else {

@@ -340,6 +340,7 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate);
 ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate);
 ZEND_API int _convert_to_boolean_safe(zval **op_ptr, int separate);
 ZEND_API int _convert_to_string_safe(zval **op_ptr, int separate);
+ZEND_API int _convert_to_numeric_safe(zval **op_ptr, int separate);
 
 ZEND_API void multi_convert_to_long_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
@@ -441,12 +442,14 @@ END_EXTERN_C()
 #define convert_to_double_safe(ppzv)		_convert_to_double_safe(ppzv, 0)
 #define convert_to_boolean_safe(ppzv)		_convert_to_boolean_safe(ppzv, 0)
 #define convert_to_string_safe(ppzv)		_convert_to_string_safe(ppzv, 0)
+#define convert_to_numeric_safe(ppzv)		_convert_to_numeric_safe(ppzv, 0)
 
 #define convert_to_long_safe_ex(ppzv)			_convert_to_long_safe(ppzv, 1)
 #define convert_to_long_base_safe_ex(ppzv, base)	_convert_to_long_base_safe(ppzv, base, 1)
 #define convert_to_double_safe_ex(ppzv)			_convert_to_double_safe(ppzv, 1)
 #define convert_to_boolean_safe_ex(ppzv)		_convert_to_boolean_safe(ppzv, 1)
 #define convert_to_string_safe_ex(ppzv)			_convert_to_string_safe(ppzv, 1)
+#define convert_to_numeric_safe_ex(ppzv)		_convert_to_numeric_safe(ppzv, 1)
 
 
 #define convert_scalar_to_number_ex(ppzv)							\
