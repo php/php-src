@@ -324,7 +324,7 @@ static inline zend_uchar is_numeric_string(const char *str, int length, long *lv
     return is_numeric_string_ex(str, length, lval, dval, big, allow_errors, NULL);
 }
 
-ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, long *lval, double *dval);
+ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, long *lval, double *dval, zend_bigint **big);
 
 static inline const char *
 zend_memnstr(const char *haystack, const char *needle, int needle_len, char *end)
