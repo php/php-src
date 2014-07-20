@@ -456,7 +456,6 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 					ZVAL_DOUBLE(op, dval);
 					return SUCCESS;
 				} else {
-					STR_FREE(Z_STRVAL_P(op));
 					break;
 				}
 			}
