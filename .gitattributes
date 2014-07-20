@@ -22,6 +22,10 @@ sapi/nsapi/nsapi.c              ident
 sapi/continuity/capi.c          ident
 Zend/RFCs/002.txt               ident
 Zend/RFCs/003.txt               ident
+ext/exif/exif.c                 ident
+ext/ldap/ldap.c                 ident
+ext/pdo_pgsql/pdo_pgsql.c       ident
+ext/tidy/tidy.c                 ident
 NEWS                            merge=NEWS
 /ext/bz2/tests/with_strings.phpt	-crlf
 /ext/dom/tests/bug40836.phpt	-crlf
