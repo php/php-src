@@ -7349,11 +7349,9 @@ void zend_compile_encaps_list(znode *result, zend_ast *ast TSRMLS_DC) {
 	}
 }
 
-void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) {
+zend_bool zend_try_ct_compile_magic_const(zval *zv, zend_ast *ast TSRMLS_DC) {
 	zend_op_array *op_array = CG(active_op_array);
 	zend_class_entry *ce = CG(active_class_entry);
-	zval *zv = &result->u.constant;
-	result->op_type = IS_CONST;
 
 	switch (ast->attr) {
 		case T_FUNC_C:
@@ -7380,13 +7378,7 @@ void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) {
 		case T_CLASS_C:
 			if (ce) {
 				if (ZEND_CE_IS_TRAIT(ce)) {
-					zval const_zv;
-					ZVAL_STRING(&const_zv, "__CLASS__");
-					zend_ast *const_ast = zend_ast_create_unary(ZEND_AST_CONST,
-						zend_ast_create_zval(&const_zv));
-					zend_compile_const(result, const_ast TSRMLS_CC);
-					efree(const_ast);
-					zval_ptr_dtor(&const_zv);
+					return 0;
 				} else {
 					ZVAL_STR(zv, STR_COPY(ce->name));
 				}
@@ -7402,6 +7394,28 @@ void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) {
 			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+
+	return 1;
+}
+
+void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) {
+	zend_class_entry *ce = CG(active_class_entry);
+
+	if (zend_try_ct_compile_magic_const(&result->u.constant, ast TSRMLS_CC)) {
+		result->op_type = IS_CONST;
+		return;
+	}
+
+	ZEND_ASSERT(ast->attr == T_CLASS_C && ce && ZEND_CE_IS_TRAIT(ce));
+
+	{
+		zval const_zv;
+		ZVAL_STRING(&const_zv, "__CLASS__");
+		zend_ast *const_ast = zend_ast_create_unary(ZEND_AST_CONST,
+			zend_ast_create_zval(&const_zv));
+		zend_compile_const(result, const_ast TSRMLS_CC);
+		zend_ast_destroy(const_ast);
 	}
 }
 
@@ -7912,6 +7926,16 @@ void zend_eval_const_array(zend_ast **ast_ptr TSRMLS_DC) {
 	*ast_ptr = zend_ast_create_zval(&array);
 }
 
+void zend_eval_const_magic_const(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	zval result;
+
+	if (zend_try_ct_compile_magic_const(&result, ast TSRMLS_CC)) {
+		zend_ast_destroy(ast);
+		*ast_ptr = zend_ast_create_zval(&result);
+	}
+}
+
 void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 	zend_ast *ast = *ast_ptr;
 	if (!ast || ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_ZNODE) {
@@ -7939,6 +7963,9 @@ void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 			break;
 		case ZEND_AST_ARRAY:
 			zend_eval_const_array(ast_ptr TSRMLS_CC);
+			break;
+		case ZEND_AST_MAGIC_CONST:
+			zend_eval_const_magic_const(ast_ptr TSRMLS_CC);
 			break;
 	}
 }

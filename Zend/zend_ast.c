@@ -321,7 +321,7 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 		zend_ast *copy = zend_ast_create_zval_ex(zend_ast_get_zval(ast), ast->attr);
 		zval_copy_ctor(zend_ast_get_zval(copy));
 		return copy;
-	} else if (ast->children) {
+	} else {
 		zend_ast *new = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children - 1));
 		int i;
 		new->kind = ast->kind;
@@ -332,7 +332,6 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 		}
 		return new;
 	}
-	return zend_ast_create_dynamic(ast->kind);
 }
 
 ZEND_API void zend_ast_destroy(zend_ast *ast)
