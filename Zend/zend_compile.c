@@ -7377,6 +7377,30 @@ void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) {
 				ZVAL_EMPTY_STRING(zv);
 			}
 			break;
+		case T_CLASS_C:
+			if (ce) {
+				if (ZEND_CE_IS_TRAIT(ce)) {
+					zval const_zv;
+					ZVAL_STRING(&const_zv, "__CLASS__");
+					zend_ast *const_ast = zend_ast_create_unary(ZEND_AST_CONST,
+						zend_ast_create_zval(&const_zv));
+					zend_compile_const(result, const_ast TSRMLS_CC);
+					efree(const_ast);
+					zval_ptr_dtor(&const_zv);
+				} else {
+					ZVAL_STR(zv, STR_COPY(ce->name));
+				}
+			} else {
+				ZVAL_EMPTY_STRING(zv);
+			}
+			break;
+		case T_TRAIT_C:
+			if (ce && ZEND_CE_IS_TRAIT(ce)) {
+				ZVAL_STR(zv, STR_COPY(ce->name));
+			} else {
+				ZVAL_EMPTY_STRING(zv);
+			}
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }

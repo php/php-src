@@ -1595,27 +1595,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__CLASS__" {
-	zend_class_entry *ce = CG(active_class_entry);
-	if (ce && ZEND_ACC_TRAIT == (ce->ce_flags & ZEND_ACC_TRAIT)) {
-		/* Signal that the __CLASS__ needs to be resolved at runtime */
-		ZVAL_UNDEF(zendlval);
-	} else {
-		if (ce && ce->name) {
-			ZVAL_STR(zendlval, STR_COPY(ce->name));
-		} else {
-			ZVAL_EMPTY_STRING(zendlval);
-		}
-	}
 	return T_CLASS_C;
 }
 
 <ST_IN_SCRIPTING>"__TRAIT__" {
-	zend_class_entry *ce = CG(active_class_entry);
-	if (ce && ce->name && ZEND_ACC_TRAIT == (ce->ce_flags & ZEND_ACC_TRAIT)) {
-		ZVAL_STR(zendlval, STR_COPY(ce->name));
-	} else {
-		ZVAL_EMPTY_STRING(zendlval);
-	}
 	return T_TRAIT_C;
 }
 

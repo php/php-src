@@ -248,7 +248,7 @@ name:
 top_statement:
 		statement						{ AS($1); zend_verify_namespace(TSRMLS_C); }
 	|	function_declaration_statement	{ AS($1); zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
-	|	class_declaration_statement		{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
+	|	class_declaration_statement		{ AS($1); zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 	|	T_HALT_COMPILER '(' ')' ';'		{ zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
 	|	T_NAMESPACE namespace_name ';'	{ zend_do_begin_namespace(&$2, 0 TSRMLS_CC); }
 	|	T_NAMESPACE namespace_name '{'	{ zend_do_begin_namespace(&$2, 1 TSRMLS_CC); }
@@ -313,7 +313,7 @@ inner_statement_list:
 inner_statement:
 		statement { $$.u.ast = $1.u.ast; }
 	|	function_declaration_statement { $$.u.ast = $1.u.ast; }
-	|	class_declaration_statement { AN($$); }
+	|	class_declaration_statement { $$.u.ast = $1.u.ast; }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ zend_error_noreturn(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
 ;
@@ -394,10 +394,6 @@ function_declaration_statement:
 			  Z_STR($3.u.constant), $5.u.ast, NULL, $8.u.ast); }
 ;
 
-class_declaration_statement:
-		unticked_class_declaration_statement	{ DO_TICKS(); }
-;
-
 is_reference:
 		/* empty */	{ $$.op_type = 0; }
 	|	'&'			{ $$.op_type = ZEND_PARAM_REF; }
@@ -408,19 +404,19 @@ is_variadic:
 	|	T_ELLIPSIS  { $$.op_type = ZEND_PARAM_VARIADIC; }
 ;
 
-unticked_class_declaration_statement:
+class_declaration_statement:
 		class_entry_type T_STRING extends_from implements_list
 			{ $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }	
 		'{' class_statement_list '}'
 			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLASS, $1.EA, $1.u.op.opline_num,
 			      CG(zend_lineno), LANG_SCNG(yy_text), $5.u.op.ptr,
-				  Z_STR($2.u.constant), $3.u.ast, $4.u.ast, $7.u.ast); AS($$); }
+				  Z_STR($2.u.constant), $3.u.ast, $4.u.ast, $7.u.ast); }
 	|	interface_entry T_STRING interface_extends_list
 			{ $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }	
 		'{' class_statement_list '}'
 			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLASS, $1.EA, $1.u.op.opline_num,
 			      CG(zend_lineno), LANG_SCNG(yy_text), $4.u.op.ptr,
-				  Z_STR($2.u.constant), NULL, $3.u.ast, $6.u.ast); AS($$); }
+				  Z_STR($2.u.constant), NULL, $3.u.ast, $6.u.ast); }
 ;
 
 
@@ -978,18 +974,11 @@ scalar:
 	|	T_LINE 		{ $$.u.ast = AST_ZVAL(&$1); }
 	|	T_FILE 		{ $$.u.ast = AST_ZVAL(&$1); }
 	|	T_DIR   	{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_TRAIT_C	{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_TRAIT_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_TRAIT_C); }
 	|	T_METHOD_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_METHOD_C); }
 	|	T_FUNC_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_FUNC_C); }
 	|	T_NS_C		{ $$.u.ast = AST_ZVAL(&$1); }
-	|	T_CLASS_C
-			{ if (Z_TYPE($1.u.constant) == IS_UNDEF) {
-			      zval class_const; ZVAL_STRING(&class_const, "__CLASS__");
-			      $$.u.ast = zend_ast_create_unary(ZEND_AST_CONST,
-				      zend_ast_create_zval(&class_const));
-			  } else {
-			      $$.u.ast = AST_ZVAL(&$1);
-			  } }
+	|	T_CLASS_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_CLASS_C); }
 	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$.u.ast = AST_ZVAL(&$2); }
 	|	T_START_HEREDOC T_END_HEREDOC
 			{ zval empty_str; ZVAL_EMPTY_STRING(&empty_str);
