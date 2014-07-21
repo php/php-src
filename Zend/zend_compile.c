@@ -7553,6 +7553,23 @@ void zend_compile_const_expr_resolve_class_name(zend_ast **ast_ptr TSRMLS_DC) {
 	*ast_ptr = zend_ast_create_zval(&result);
 }
 
+void zend_compile_const_expr_magic_const(zend_ast **ast_ptr TSRMLS_DC) {
+	zend_ast *ast = *ast_ptr;
+	zend_class_entry *ce = CG(active_class_entry);
+
+	/* Other cases already resolved by constant folding */
+	ZEND_ASSERT(ast->attr == T_CLASS_C && ce && ZEND_CE_IS_TRAIT(ce));
+
+	{
+		zval const_zv;
+		ZVAL_STRING(&const_zv, "__CLASS__");
+		Z_TYPE_INFO(const_zv) = IS_CONSTANT_EX;
+
+		zend_ast_destroy(ast);
+		*ast_ptr = zend_ast_create_zval(&const_zv);
+	}
+}
+
 void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 	zend_ast *ast = *ast_ptr;
 	if (ast == NULL || ast->kind == ZEND_AST_ZVAL) {
@@ -7579,6 +7596,9 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 			break;
 		case ZEND_AST_RESOLVE_CLASS_NAME:
 			zend_compile_const_expr_resolve_class_name(ast_ptr TSRMLS_CC);
+			break;
+		case ZEND_AST_MAGIC_CONST:
+			zend_compile_const_expr_magic_const(ast_ptr TSRMLS_CC);
 			break;
 	}
 }
