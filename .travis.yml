@@ -8,6 +8,9 @@ notifications:
     email: 
        on_failure: change
 
+cache: 
+    - apt
+
 env:
     global:
       - MYSQL_TEST_HOST=127.0.0.1
@@ -20,6 +23,12 @@ env:
     matrix:
       - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
       - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
+
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -y libenchant-dev libaspell-dev libpspell-dev librecode-dev
+    - sudo cp ./travis/de /var/lib/locales/supported.d/de
+    - sudo dpkg-reconfigure locales
 
 before_script:
     # Compile PHP

@@ -231,7 +231,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		if ((input->body = SG(request_info).request_body)) {
 			php_stream_rewind(input->body);
 		} else {
-			input->body = php_stream_temp_create(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE);
+			input->body = php_stream_temp_create_ex(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE, PG(upload_tmp_dir));
 			SG(request_info).request_body = input->body;
 		}
 

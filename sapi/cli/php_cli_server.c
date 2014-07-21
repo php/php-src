@@ -603,11 +603,10 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers TSRMLS
 
 	h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 	while (h) {
-		if (!h->header_len) {
-			continue;
+		if (h->header_len) {
+			smart_str_appendl(&buffer, h->header, h->header_len);
+			smart_str_appendl(&buffer, "\r\n", 2);
 		}
-		smart_str_appendl(&buffer, h->header, h->header_len);
-		smart_str_appendl(&buffer, "\r\n", 2);
 		h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
 	smart_str_appendl(&buffer, "\r\n", 2);
@@ -1622,10 +1621,14 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 		return 1;
 	}
 	{
-		char *header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
-		zend_hash_add(&client->request.headers, header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
-		zend_hash_add(&client->request.headers_original_case, client->current_header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
-		efree(header_name);
+		/* strip off the colon */
+		char *orig_header_name = estrndup(client->current_header_name, client->current_header_name_len);
+		char *lc_header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
+
+		zend_hash_add(&client->request.headers, lc_header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
+		zend_hash_add(&client->request.headers_original_case, orig_header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
+		efree(lc_header_name);
+		efree(orig_header_name);
 	}
 
 	if (client->current_header_name_allocated) {
