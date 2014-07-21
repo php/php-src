@@ -856,7 +856,8 @@ int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*sock
 	return SUCCESS;
 } /* }}} */
 
-void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) {
+void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
+{
 	int is_handled = FAILURE;
 	TSRMLS_FETCH();
 
@@ -874,10 +875,11 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) {
 			break;
 	}
 
-}
+} /* }}} */
 #endif
 
-static inline zend_mm_heap *phpdbg_mm_get_heap() {
+static inline zend_mm_heap *phpdbg_mm_get_heap() /* {{{ */
+{
 	zend_mm_heap *mm_heap;
 
 	TSRMLS_FETCH();
@@ -886,22 +888,22 @@ static inline zend_mm_heap *phpdbg_mm_get_heap() {
 	zend_mm_set_heap(mm_heap TSRMLS_CC);
 
 	return mm_heap;
-}
+} /* }}} */
 
-void *phpdbg_malloc_wrapper(size_t size)
+void *phpdbg_malloc_wrapper(size_t size) /* {{{ */
 {
 	return zend_mm_alloc(phpdbg_mm_get_heap(), size);
-}
+} /* }}} */
 
-void phpdbg_free_wrapper(void *p)
+void phpdbg_free_wrapper(void *p) /* {{{ */
 {
 	zend_mm_free(phpdbg_mm_get_heap(), p);
-}
+} /* }}} */
 
-void *phpdbg_realloc_wrapper(void *ptr, size_t size)
+void *phpdbg_realloc_wrapper(void *ptr, size_t size) /* {{{ */
 {
 	return zend_mm_realloc(phpdbg_mm_get_heap(), ptr, size);
-}
+} /* }}} */
 
 int main(int argc, char **argv) /* {{{ */
 {

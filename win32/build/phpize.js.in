@@ -40,9 +40,13 @@ function ERROR(msg)
 
 function file_get_contents(filename)
 {
+	var t = "";
 	var F = FSO.OpenTextFile(filename, 1);
-	var t = F.ReadAll();
-	F.Close();
+
+	if (!F.AtEndOfStream) {
+		t = F.ReadAll();
+		F.Close();
+	}
 	return t;
 }
 
@@ -208,6 +212,12 @@ STDOUT.WriteLine(PHP_DIR);
 C.WriteLine("/* This file automatically generated from script/confutils.js */");
 C.WriteLine("var MODE_PHPIZE = true;");
 C.WriteLine("var PHP_DIR = " + '"' + PHP_DIR.replace(new RegExp('(["\\\\])', "g"), '\\$1') + '"');
+C.WriteLine("var PHP_PREFIX = " + '"' + PHP_PREFIX.replace(new RegExp('(["\\\\])', "g"), '\\$1') + '"');
+
+C.Write(file_get_contents(PHP_DIR + "//script//ext_deps.js"));
+if (FSO.FileExists(PHP_DIR + "/script/ext_pickle.js")) {
+	C.Write(file_get_contents(PHP_DIR + "//script//ext_pickle.js"));
+}
 
 C.Write(file_get_contents(PHP_DIR + "/script/confutils.js"));
 C.Write(file_get_contents(PHP_DIR + "/script/config.phpize.js"));

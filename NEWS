@@ -2,17 +2,74 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.0 Release Candidate 3
 
+- Core:
+  . Fixed bug #67497 (eval with parse error causes segmentation fault in
+    generator). (Nikita)
+  . Fixed bug #67151 (strtr with empty array crashes). (Nikita)
+  . Fixed bug #67407 (Windows 8.1/Server 2012 R2 reported as Windows 8/Server
+    2012). (Christian Wenz)
+  . Fixed bug #66608 (Incorrect behavior with nested "finally" blocks).
+    (Laruence, Dmitry)
+  . Implemented FR #34407 (ucwords and Title Case). (Tjerk)
+
+- CLI server:
+  . Fixed bug #66830 (Empty header causes PHP built-in web server to hang).
+    (Adam)
+  . Fixed bug #67594 (Unable to access to apache_request_headers() elements).
+    (Tjerk)
+
+- FPM:
+  . Fixed bug #67530 (error_log=syslog ignored). (Remi)
+  . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
+    (pacho@gentoo.org, Remi)
+
+- Intl:
+  . Fixed bug #66921 (Wrong argument type hint for function
+    intltz_from_date_time_zone). (Stas)
+  . Fixed bug #67052 (NumberFormatter::parse() resets LC_NUMERIC setting).
+    (Stas)
+
+- pgsql:
+  . Fixed bug #67555 (Cannot build against libpq 7.3). (Adam)
+
+- OpenSSL:
+  . Fixed bug #67609 (TLS connections fail behind HTTP proxy). (Daniel Lowrey)
+  . Fixed broken build against OpenSSL older than 0.9.8 where ECDH unavailable.
+    (Lior Kaplan)
+
+- Phar:
+  . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
+
+- SPL:
+  . Fixed bug #67539 (ArrayIterator use-after-free due to object change during 
+    sorting). (research at insighti dot org, Laruence)
+  . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
+
+- Session:
+  . Fixed bug #66827 (Session raises E_NOTICE when session name variable is array).
+    (Yasuo)
+
+- OPCache:
+  . Fixed bug #67215 (php-cgi work with opcache, may be segmentation fault
+    happen) (Dmitry, Laruence)
+
+- phpdbg
+  . Fixed bug #67575 (Compilation fails for phpdbg when the
+    build directory != src directory). (Andy Thompson)
+
 03 Jul 2014, PHP 5.6.0 Release Candidate 2
 
 - Core:
+  . Fixed bug #67091 (make install fails to install libphp5.so on FreeBSD 10.0).
+    (Ferenc)
   . Fixed bug #67368 (Memory leak with immediately dereferenced array in class
     constant). (Laruence)
   . Fixed bug #67468 (Segfault in highlight_file()/highlight_string()).
     (Andreas Ferber)
-  . Fixed bug #67091 (make install fails to install libphp5.so on FreeBSD 10.0).
-    (Ferenc)
   . Fixed bug #67498 (phpinfo() Type Confusion Information Leak Vulnerability).
     (Stefan Esser)
+  . Fixed bug #67551 (php://input temp file will be located in sys_temp_dir
+    instead of upload_tmp_dir). (Mike)
 
 - FPM:
   . Fix bug #67531 (syslog cannot be set in pool configuration). (Remi)

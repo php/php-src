@@ -99,6 +99,7 @@ MYSQLND_METHOD(mysqlnd_net, network_write_ex)(MYSQLND_NET * const net, const zen
 {
 	size_t ret;
 	DBG_ENTER("mysqlnd_net::network_write_ex");
+	DBG_INF_FMT("sending %u bytes", count);
 	ret = php_stream_write(net->data->m.get_stream(net TSRMLS_CC), (char *)buffer, count);
 	DBG_RETURN(ret);
 }
@@ -357,6 +358,10 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 
 	do {
 		to_be_sent = MIN(left, MYSQLND_MAX_PACKET_SIZE);
+		DBG_INF_FMT("to_be_sent=%u", to_be_sent);
+		DBG_INF_FMT("packets_sent=%u", packets_sent);
+		DBG_INF_FMT("compressed_envelope_packet_no=%u", net->compressed_envelope_packet_no);
+		DBG_INF_FMT("packet_no=%u", net->packet_no);
 #ifdef MYSQLND_COMPRESSION_ENABLED
 		if (net->data->compressed == TRUE) {
 			/* here we need to compress the data and then write it, first comes the compressed header */

@@ -474,5 +474,7 @@ if (PHP_ANALYZER == "vs") {
 		pvscfg.WriteLine("preprocessor = visualcpp");
 		pvscfg.WriteLine("language = C");
 	}
+} else {
+	PHP_ANALYZER = "no"
 }
 
