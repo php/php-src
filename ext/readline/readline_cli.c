@@ -21,7 +21,9 @@
 
 #include "php.h"
 
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
+#endif
 
 #ifndef HAVE_RL_COMPLETION_MATCHES
 #define rl_completion_matches completion_matches
@@ -82,6 +84,7 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
 static char php_last_char = '\0';
 static FILE *pager_pipe = NULL;
 
+#ifdef HAVE_SIGNAL_H
 static void readline_shell_signal_handler(int signo)
 {
 	if (signo == SIGINT) {
@@ -91,6 +94,7 @@ static void readline_shell_signal_handler(int signo)
 		exit(0);
 	}
 }
+#endif
 
 static size_t readline_shell_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
 {
@@ -619,12 +623,9 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 	rl_special_prefixes = "$";
 	read_history(history_file);
 
-	struct sigaction new_sa;
-
-	sigemptyset(&new_sa.sa_mask);
-	new_sa.sa_flags = 0;
-	new_sa.sa_handler = readline_shell_signal_handler;
-	sigaction(SIGINT, &new_sa, NULL);
+#ifdef HAVE_SIGNAL_H
+	signal(SIGINT, readline_shell_signal_handler);
+#endif
 
 	EG(exit_status) = 0;
 	while ((line = readline(prompt)) != NULL) {
