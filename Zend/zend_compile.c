@@ -6673,8 +6673,9 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 		}
 
 		if (!zend_is_const_default_class_ref(extends_ast)) {
+			zend_string *extends_name = Z_STR_P(zend_ast_get_zval(extends_ast));
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use '%s' as class name as it is reserved", name->val);
+				"Cannot use '%s' as class name as it is reserved", extends_name->val);
 		}
 
 		zend_compile_class_ref(&extends_node, extends_ast TSRMLS_CC);
@@ -6715,7 +6716,27 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 
 	zend_compile_stmt(stmt_ast TSRMLS_CC);
 
-	// TODO.AST validity checks
+	if (ce->constructor) {
+		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
+		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static",
+				ce->name->val, ce->constructor->common.function_name->val);
+		}
+	}
+	if (ce->destructor) {
+		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
+		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static",
+				ce->name->val, ce->destructor->common.function_name->val);
+		}
+	}
+	if (ce->clone) {
+		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
+		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static",
+				ce->name->val, ce->clone->common.function_name->val);
+		}
+	}
 
 	/* Check for traits and proceed like with interfaces.
 	 * The only difference will be a combined handling of them in the end.
