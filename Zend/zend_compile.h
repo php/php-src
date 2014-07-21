@@ -493,7 +493,6 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const ze
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC);
 ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface TSRMLS_DC);
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC);
-void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
 ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC);
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
@@ -501,11 +500,6 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
 void zend_do_early_binding(TSRMLS_D);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS_DC);
-
-void zend_do_begin_class_declaration(const znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC);
-void zend_do_end_class_declaration(const znode *class_token, const znode *parent_token TSRMLS_DC);
-void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC);
-void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC);
 
 void zend_do_halt_compiler_register(TSRMLS_D);
 
