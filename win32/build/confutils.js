@@ -1958,11 +1958,14 @@ function generate_makefile()
 	} else {
 		MF.WriteBlankLines(1);
 		MF.WriteLine("build-ext-libs:");
+		MF.WriteLine("	@if not exist $(BUILD_DIR_DEV)\\lib mkdir $(BUILD_DIR_DEV)\\lib >nul");
 		for (var i in extensions_enabled) {
-			var lib = "php_" + extensions_enabled[i][0] + ".lib";
+			var lib;
+
+			lib = "php_" + extensions_enabled[i][0] + "*.lib";
 
 			if ('shared' == extensions_enabled[i][1]) {
-				MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+				MF.WriteLine("	@if exist $(BUILD_DIR)\\" + lib + " copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
 			}
 		}
 	}
