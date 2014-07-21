@@ -255,7 +255,7 @@ top_statement:
 		top_statement_list '}'		    { zend_do_end_namespace(TSRMLS_C); }
 	|	T_NAMESPACE '{'					{ zend_do_begin_namespace(NULL, 1 TSRMLS_CC); }
 		top_statement_list '}'			{ zend_do_end_namespace(TSRMLS_C); }
-	|	T_USE use_declarations ';'      { zend_verify_namespace(TSRMLS_C); }
+	|	T_USE use_declarations ';'      { AS($2); zend_verify_namespace(TSRMLS_C); }
 	|	T_USE T_FUNCTION use_function_declarations ';' { zend_verify_namespace(TSRMLS_C); }
 	|	T_USE T_CONST use_const_declarations ';'       { zend_verify_namespace(TSRMLS_C); }
 	|	constant_declaration ';'		{ zend_verify_namespace(TSRMLS_C); }
@@ -263,14 +263,20 @@ top_statement:
 
 use_declarations:
 		use_declarations ',' use_declaration
+			{ $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
 	|	use_declaration
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_USE, $1.u.ast); }
 ;
 
 use_declaration:
-		namespace_name 			{ zend_do_use(&$1, NULL, 0 TSRMLS_CC); }
-	|	namespace_name T_AS T_STRING	{ zend_do_use(&$1, &$3, 0 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name { zend_do_use(&$2, NULL, 1 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name T_AS T_STRING { zend_do_use(&$2, &$4, 1 TSRMLS_CC); }
+		namespace_name
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, AST_ZVAL(&$1), NULL); }
+	|	namespace_name T_AS T_STRING
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, AST_ZVAL(&$1), AST_ZVAL(&$3)); }
+	|	T_NS_SEPARATOR namespace_name
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, AST_ZVAL(&$2), NULL); }
+	|	T_NS_SEPARATOR namespace_name T_AS T_STRING
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, AST_ZVAL(&$2), AST_ZVAL(&$4)); }
 ;
 
 use_function_declarations:

@@ -118,6 +118,9 @@ enum _zend_ast_kind {
 	ZEND_AST_METHOD_REFERENCE,
 
 	ZEND_AST_CLASS,
+
+	ZEND_AST_USE,
+	ZEND_AST_USE_ELEM,
 };
 
 typedef unsigned short zend_ast_kind;

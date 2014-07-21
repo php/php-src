@@ -916,6 +916,10 @@ static void ptr_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
+static void str_dtor(zval *zv) {
+	STR_RELEASE(Z_STR_P(zv));
+}
+
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC) /* {{{ */
 {
 	zend_label *dest;
@@ -6478,6 +6482,97 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 	CG(active_class_entry) = NULL;
 }
 
+void zend_compile_use(zend_ast *ast TSRMLS_DC) {
+	zend_uint i;
+	zend_string *current_ns = Z_TYPE(CG(current_namespace)) != IS_UNDEF
+		? Z_STR(CG(current_namespace)) : NULL;
+
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *use_ast = ast->child[i];
+		zend_ast *old_name_ast = use_ast->child[0];
+		zend_ast *new_name_ast = use_ast->child[1];
+		zend_string *old_name = Z_STR_P(zend_ast_get_zval(old_name_ast));
+		zend_string *new_name, *lcname;
+		zend_class_entry *ce;
+
+		if (new_name_ast) {
+			new_name = STR_COPY(Z_STR_P(zend_ast_get_zval(new_name_ast)));
+		} else {
+			/* The form "use A\B" is eqivalent to "use A\B as B" */
+			const char *p = zend_memrchr(old_name->val, '\\', old_name->len);
+			if (p) {
+				new_name = STR_INIT(p + 1, old_name->len - (p - old_name->val + 1), 0);
+			} else {
+				new_name = STR_COPY(old_name);
+
+				if (!current_ns) {
+					if (zend_str_equals(new_name, "strict")) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"You seem to be trying to use a different language...");
+					}
+
+					zend_error(E_WARNING, "The use statement with non-compound name '%s' "
+						"has no effect", new_name->val);
+				}
+			}
+		}
+
+		lcname = STR_ALLOC(new_name->len, 0);
+		zend_str_tolower_copy(lcname->val, new_name->val, new_name->len);
+
+		if (zend_str_equals(lcname, "self") || zend_str_equals(lcname, "parent")) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' "
+				"is a special class name", old_name->val, new_name->val, new_name->val);
+		}
+
+		if (current_ns) {
+			zend_string *ns_name = STR_ALLOC(current_ns->len + 1 + new_name->len, 0);
+			zend_str_tolower_copy(ns_name->val, current_ns->val, current_ns->len);
+			ns_name->val[current_ns->len] = '\\';
+			memcpy(ns_name->val + current_ns->len + 1, lcname->val, lcname->len);
+
+			if (zend_hash_exists(CG(class_table), ns_name)) {
+				char *tmp = zend_str_tolower_dup(old_name->val, old_name->len);
+
+				if (old_name->len != ns_name->len || memcmp(tmp, ns_name->val, ns_name->len)) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because the name "
+						"is already in use", old_name->val, new_name->val);
+				}
+
+				efree(tmp);
+			}
+
+			STR_FREE(ns_name);
+		} else if ((ce = zend_hash_find_ptr(CG(class_table), lcname))
+		           && ce->type == ZEND_USER_CLASS
+		           && ce->info.user.filename == CG(compiled_filename)
+		) {
+			char *tmp = zend_str_tolower_dup(old_name->val, old_name->len);
+
+			if (old_name->len != lcname->len || memcmp(tmp, lcname->val, lcname->len)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because the name "
+					"is already in use", old_name->val, new_name->val);
+			}
+
+			efree(tmp);
+		}
+
+		if (!CG(current_import)) {
+			CG(current_import) = emalloc(sizeof(HashTable));
+			zend_hash_init(CG(current_import), 8, NULL, str_dtor, 0);
+		}
+
+		STR_ADDREF(old_name);
+		if (!zend_hash_add_ptr(CG(current_import), lcname, old_name)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because the name "
+				"is already in use", old_name->val, new_name->val);
+		}
+
+		STR_RELEASE(lcname);
+		STR_RELEASE(new_name);
+	}
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7387,6 +7482,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_CLASS:
 			zend_compile_class_decl(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_USE:
+			zend_compile_use(ast TSRMLS_CC);
 			break;
 		default:
 		{
