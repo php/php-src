@@ -226,6 +226,8 @@ typedef struct _zend_try_catch_element {
 /* function has arguments with type hinting */
 #define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
 
+#define ZEND_CE_IS_TRAIT(ce) (((ce)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)
+
 char *zend_visibility_string(zend_uint fn_flags);
 
 

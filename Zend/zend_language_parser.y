@@ -415,12 +415,12 @@ unticked_class_declaration_statement:
 			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLASS, $1.EA, $1.u.op.opline_num,
 			      CG(zend_lineno), LANG_SCNG(yy_text), $5.u.op.ptr,
 				  Z_STR($2.u.constant), $3.u.ast, $4.u.ast, $7.u.ast); AS($$); }
-	/*|	interface_entry T_STRING
-			{ zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); }
-			interface_extends_list
-			'{'
-				class_statement_list
-			'}' { AS($6); zend_do_end_class_declaration(&$1, NULL TSRMLS_CC); }*/
+	|	interface_entry T_STRING interface_extends_list
+			{ $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }	
+		'{' class_statement_list '}'
+			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLASS, $1.EA, $1.u.op.opline_num,
+			      CG(zend_lineno), LANG_SCNG(yy_text), $4.u.op.ptr,
+				  Z_STR($2.u.constant), NULL, $3.u.ast, $6.u.ast); AS($$); }
 ;
 
 
@@ -431,19 +431,19 @@ class_entry_type:
 	|	T_FINAL T_CLASS { $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_FINAL_CLASS; }
 ;
 
+interface_entry:
+	T_INTERFACE		{ $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_INTERFACE; }
+;
+
 extends_from:
 		/* empty */		{ $$.u.ast = NULL; }
 	|	T_EXTENDS name	{ $$.u.ast = $2.u.ast; }
 ;
 
-interface_entry:
-	T_INTERFACE		{ $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_INTERFACE; }
+interface_extends_list:
+		/* empty */				{ $$.u.ast = NULL; }
+	|	T_EXTENDS name_list	{ $$.u.ast = $2.u.ast; }
 ;
-
-/*interface_extends_list:
-		/* empty /
-	|	T_EXTENDS interface_list
-;*/
 
 implements_list:
 		/* empty */				{ $$.u.ast = NULL; }
@@ -935,13 +935,6 @@ class_name:
 			  $$.u.ast = zend_ast_create_zval_ex(&zv, 1); }
 	|	name { $$.u.ast = $1.u.ast; }
 ;
-
-fully_qualified_class_name:
-		namespace_name { $$ = $1; }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name { zval tmp; ZVAL_NEW_STR(&tmp, STR_ALLOC(Z_STRLEN($2.u.constant)+1, 0)); Z_STRVAL(tmp)[0] = '\\'; memcpy(Z_STRVAL(tmp) + 1, Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); if (Z_DELREF($2.u.constant) == 0) {efree(Z_STR($2.u.constant));} Z_STR($2.u.constant) = Z_STR(tmp); $$ = $2; }
-;
-
 
 class_name_reference:
 		class_name		{ $$.u.ast = $1.u.ast; }

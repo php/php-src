@@ -6045,7 +6045,7 @@ void zend_begin_method_decl(
 ) {
 	zend_class_entry *ce = CG(active_class_entry);
 	zend_bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
-	zend_bool in_trait = (ce->ce_flags & ZEND_ACC_TRAIT) != 0;
+	zend_bool in_trait = ZEND_CE_IS_TRAIT(ce);
 	zend_bool is_public = (op_array->fn_flags & ZEND_ACC_PUBLIC) != 0;
 	zend_bool is_static = (op_array->fn_flags & ZEND_ACC_STATIC) != 0;
 
@@ -6424,7 +6424,7 @@ void zend_compile_class_const_decl(zend_ast *ast TSRMLS_DC) {
 		zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
 		zval value_zv;
 
-		if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		if (ZEND_CE_IS_TRAIT(ce)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
 			return;
 		}
@@ -6574,6 +6574,35 @@ void zend_compile_use_trait(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
+void zend_compile_implements(znode *class_node, zend_ast *ast TSRMLS_DC) {
+	zend_uint i;
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *class_ast = ast->child[i];
+		zend_string *name = Z_STR_P(zend_ast_get_zval(class_ast));
+
+		zend_op *opline;
+
+		/* Traits can not implement interfaces */
+		if (ZEND_CE_IS_TRAIT(CG(active_class_entry))) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' "
+				"since it is a Trait", name->val, CG(active_class_entry)->name->val);
+		}
+
+		if (!zend_is_const_default_class_ref(class_ast)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use '%s' as interface name as it is reserved", name->val);
+		}
+
+		opline = emit_op(NULL, ZEND_ADD_INTERFACE, class_node, NULL TSRMLS_CC);
+		opline->extended_value = ZEND_FETCH_CLASS_INTERFACE;
+		opline->op2_type = IS_CONST;
+		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
+			zend_resolve_class_name_ast(class_ast TSRMLS_CC) TSRMLS_CC);
+
+		CG(active_class_entry)->num_interfaces++;
+	}
+}
+
 void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -6583,7 +6612,7 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 	zend_string *name = decl->name, *lcname, *import_name = NULL;
 	zend_class_entry *ce = emalloc(sizeof(zend_class_entry));
 	zend_op *opline;
-	znode extends_node;
+	znode declare_node, extends_node;
 
 	if (CG(active_class_entry)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
@@ -6637,7 +6666,7 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 	}
 
 	if (extends_ast) {
-		if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		if (ZEND_CE_IS_TRAIT(ce)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. "
 				"Traits can only be composed from other traits with the 'use' keyword. Error",
 				name->val);
@@ -6651,10 +6680,14 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 		zend_compile_class_ref(&extends_node, extends_ast TSRMLS_CC);
 	}
 
-
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	opline->result_type = IS_VAR;
+	GET_NODE(&declare_node, opline->result);
+
+	// TODO.AST drop this
+	GET_NODE(&CG(implementing_class), opline->result);
+
 	opline->op2_type = IS_CONST;
 	LITERAL_STR(opline->op2, lcname);
 
@@ -6676,9 +6709,43 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 
 	CG(active_class_entry) = ce;
 
+	if (implements_ast) {
+		zend_compile_implements(&declare_node, implements_ast TSRMLS_CC);
+	}
+
 	zend_compile_stmt(stmt_ast TSRMLS_CC);
 
-	// TODO.AST traits, interfaces, extends, etc
+	// TODO.AST validity checks
+
+	/* Check for traits and proceed like with interfaces.
+	 * The only difference will be a combined handling of them in the end.
+	 * Thus, we need another opcode here. */
+	if (ce->num_traits > 0) {
+		ce->traits = NULL;
+		ce->num_traits = 0;
+		ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
+
+		emit_op(NULL, ZEND_BIND_TRAITS, &declare_node, NULL TSRMLS_CC);
+	}
+
+	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
+		&& (extends_ast || ce->num_interfaces > 0)
+	) {
+		zend_verify_abstract_class(ce TSRMLS_CC);
+		if (ce->num_interfaces && !(ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
+			do_verify_abstract_class(TSRMLS_C);
+		}
+	}
+
+	/* Inherit interfaces; reset number to zero, we need it for above check and
+	 * will restore it during actual implementation.
+	 * The ZEND_ACC_IMPLEMENT_INTERFACES flag disables double call to
+	 * zend_verify_abstract_class() */
+	if (ce->num_interfaces > 0) {
+		ce->interfaces = NULL;
+		ce->num_interfaces = 0;
+		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
+	}
 
 	CG(active_class_entry) = NULL;
 }
