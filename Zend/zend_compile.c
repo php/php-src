@@ -2943,16 +2943,6 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS
 }
 /* }}} */
 
-static void do_verify_abstract_class(TSRMLS_D) /* {{{ */
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_VERIFY_ABSTRACT_CLASS;
-	SET_NODE(opline->op1, &CG(implementing_class));
-	SET_UNUSED(opline->op2);
-}
-/* }}} */
-
 ZEND_API zend_string *zend_mangle_property_name(const char *src1, int src1_length, const char *src2, int src2_length, int internal) /* {{{ */
 {
 	zend_string *prop_name;
@@ -6471,7 +6461,7 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 	) {
 		zend_verify_abstract_class(ce TSRMLS_CC);
 		if (ce->num_interfaces && !(ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
-			do_verify_abstract_class(TSRMLS_C);
+			emit_op(NULL, ZEND_VERIFY_ABSTRACT_CLASS, &declare_node, NULL TSRMLS_CC);
 		}
 	}
 
