@@ -6230,9 +6230,10 @@ void zend_begin_method_decl(
 }
 
 static void zend_begin_func_decl(
-	znode *result, zend_op_array *op_array, zend_ast_func_decl *fn TSRMLS_DC
+	znode *result, zend_op_array *op_array, zend_ast_decl *decl TSRMLS_DC
 ) {
-	zend_string *name = fn->name, *lcname;
+	zend_ast *params_ast = decl->child[0];
+	zend_string *name = decl->name, *lcname;
 	zend_op *opline;
 
 	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
@@ -6261,7 +6262,7 @@ static void zend_begin_func_decl(
 		}
 	}
 
-	if (zend_str_equals(lcname, ZEND_AUTOLOAD_FUNC_NAME) && fn->params->children != 1) {
+	if (zend_str_equals(lcname, ZEND_AUTOLOAD_FUNC_NAME) && params_ast->children != 1) {
 		zend_error_noreturn(E_COMPILE_ERROR, "%s() must take exactly 1 argument",
 			ZEND_AUTOLOAD_FUNC_NAME);
 	}
@@ -6277,7 +6278,7 @@ static void zend_begin_func_decl(
 
 	{
 		zval key;
-		build_runtime_defined_function_key(&key, lcname, fn->lex_pos TSRMLS_CC);
+		build_runtime_defined_function_key(&key, lcname, decl->lex_pos TSRMLS_CC);
 
 		opline->op1_type = IS_CONST;
 		opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);
@@ -6289,30 +6290,34 @@ static void zend_begin_func_decl(
 }
 
 void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
-	zend_ast_func_decl *fn = (zend_ast_func_decl *) ast;
+	zend_ast_decl *decl = (zend_ast_decl *) ast;
+	zend_ast *params_ast = decl->child[0];
+	zend_ast *uses_ast = decl->child[1];
+	zend_ast *stmt_ast = decl->child[2];
+	zend_bool is_method = decl->kind == ZEND_AST_METHOD;
+
 	zend_op_array *orig_op_array = CG(active_op_array);
 	zend_op_array *op_array = emalloc(sizeof(zend_op_array));
-	zend_bool is_method = ast->kind == ZEND_AST_METHOD;
 
 	// TODO.AST interactive (not just here - also bpc etc!)
 	
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 
-	op_array->fn_flags |= fn->flags;
-	op_array->line_start = fn->start_lineno;
-	op_array->line_end = fn->end_lineno;
-	if (fn->doc_comment) {
-		op_array->doc_comment = STR_COPY(fn->doc_comment);
+	op_array->fn_flags |= decl->flags;
+	op_array->line_start = decl->start_lineno;
+	op_array->line_end = decl->end_lineno;
+	if (decl->doc_comment) {
+		op_array->doc_comment = STR_COPY(decl->doc_comment);
 	}
-	if (ast->kind == ZEND_AST_CLOSURE) {
+	if (decl->kind == ZEND_AST_CLOSURE) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
 
 	if (is_method) {
-		zend_bool has_body = fn->stmt != NULL;
-		zend_begin_method_decl(op_array, fn->name, has_body TSRMLS_CC);
+		zend_bool has_body = stmt_ast != NULL;
+		zend_begin_method_decl(op_array, decl->name, has_body TSRMLS_CC);
 	} else {
-		zend_begin_func_decl(result, op_array, fn TSRMLS_CC);
+		zend_begin_func_decl(result, op_array, decl TSRMLS_CC);
 	}
 
 	CG(active_op_array) = op_array;
@@ -6321,7 +6326,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
 		zend_op *opline_ext = emit_op(NULL, ZEND_EXT_NOP, NULL, NULL TSRMLS_CC);
-		opline_ext->lineno = fn->start_lineno;
+		opline_ext->lineno = decl->start_lineno;
 	}
 
 	{
@@ -6344,9 +6349,9 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline);
 	}
 
-	zend_compile_params(fn->params TSRMLS_CC);
-	zend_compile_closure_uses(fn->uses TSRMLS_CC);
-	zend_compile_stmt(fn->stmt TSRMLS_CC);
+	zend_compile_params(params_ast TSRMLS_CC);
+	zend_compile_closure_uses(uses_ast TSRMLS_CC);
+	zend_compile_stmt(stmt_ast TSRMLS_CC);
 
 	if (is_method) {
 		zend_check_magic_method_implementation(

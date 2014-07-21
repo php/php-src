@@ -45,12 +45,12 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 	return (zend_ast *) ast;
 }
 
-ZEND_API zend_ast *zend_ast_create_func_decl(
+ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, zend_uint flags, zend_uint start_lineno, zend_uint end_lineno,
 	unsigned char *lex_pos, zend_string *doc_comment, zend_string *name,
-	zend_ast *params, zend_ast *uses, zend_ast *stmt
+	zend_ast *child0, zend_ast *child1, zend_ast *child2
 ) {
-	zend_ast_func_decl *ast = emalloc(sizeof(zend_ast_func_decl));
+	zend_ast_decl *ast = emalloc(sizeof(zend_ast_decl));
 
 	ast->kind = kind;
 	ast->attr = 0;
@@ -60,9 +60,9 @@ ZEND_API zend_ast *zend_ast_create_func_decl(
 	ast->lex_pos = lex_pos;
 	ast->doc_comment = doc_comment;
 	ast->name = name;
-	ast->params = params;
-	ast->uses = uses;
-	ast->stmt = stmt;
+	ast->child[0] = child0;
+	ast->child[1] = child1;
+	ast->child[2] = child2;
 
 	return (zend_ast *) ast;
 }
@@ -351,14 +351,14 @@ ZEND_API void zend_ast_destroy(zend_ast *ast)
 		case ZEND_AST_CLOSURE:
 		case ZEND_AST_METHOD:
 		{
-			zend_ast_func_decl *fn = (zend_ast_func_decl *) ast;
-			STR_RELEASE(fn->name);
-			if (fn->doc_comment) {
-				STR_RELEASE(fn->doc_comment);
+			zend_ast_decl *decl = (zend_ast_decl *) ast;
+			STR_RELEASE(decl->name);
+			if (decl->doc_comment) {
+				STR_RELEASE(decl->doc_comment);
 			}
-			zend_ast_destroy(fn->params);
-			zend_ast_destroy(fn->uses);
-			zend_ast_destroy(fn->stmt);
+			zend_ast_destroy(decl->child[0]);
+			zend_ast_destroy(decl->child[1]);
+			zend_ast_destroy(decl->child[2]);
 			break;
 		}
 		default:

@@ -136,8 +136,8 @@ typedef struct _zend_ast_zval {
 	zval val;
 } zend_ast_zval;
 
-/* Using a separate structure as it needs a bunch of extra information. */
-typedef struct _zend_ast_func_decl {
+/* Separate structure for function and class declaration, as they need extra information. */
+typedef struct _zend_ast_decl {
 	zend_ast_kind kind;
 	zend_ast_attr attr; /* Unused - for structure compatibility */
 	zend_uint start_lineno;
@@ -146,10 +146,8 @@ typedef struct _zend_ast_func_decl {
 	unsigned char *lex_pos;
 	zend_string *doc_comment;
 	zend_string *name;
-	zend_ast *params;
-	zend_ast *uses;
-	zend_ast *stmt;
-} zend_ast_func_decl;
+	zend_ast *child[3];
+} zend_ast_decl;
 
 static inline zval *zend_ast_get_zval(zend_ast *ast) {
 	return &((zend_ast_zval *) ast)->val;
@@ -162,10 +160,10 @@ ZEND_API zend_ast *zend_ast_create_ex(
 ZEND_API zend_ast *zend_ast_create(
 	zend_uint children, zend_ast_kind kind, ...);
 
-ZEND_API zend_ast *zend_ast_create_func_decl(
+ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, zend_uint flags, zend_uint start_lineno, zend_uint end_lineno,
 	unsigned char *lex_pos, zend_string *doc_comment, zend_string *name,
-	zend_ast *params, zend_ast *uses, zend_ast *stmt
+	zend_ast *child0, zend_ast *child1, zend_ast *child2
 );
 
 ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind);

@@ -389,7 +389,7 @@ unset_variable:
 
 function_declaration_statement:
 	function returns_ref T_STRING '(' parameter_list ')' '{' inner_statement_list '}'
-		{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_FUNC_DECL, $2.EA,
+		{ $$.u.ast = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2.EA,
 		      $1.EA, CG(zend_lineno), LANG_SCNG(yy_text), $1.u.op.ptr,
 			  Z_STR($3.u.constant), $5.u.ast, NULL, $8.u.ast); }
 ;
@@ -635,7 +635,7 @@ class_statement:
 	|	T_USE name_list trait_adaptations
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_TRAIT, $2.u.ast, $3.u.ast); AS($$); }
 	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')' method_body
-			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_METHOD, $3.EA | Z_LVAL($1.u.constant),
+			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_METHOD, $3.EA | Z_LVAL($1.u.constant),
 			      $2.EA, CG(zend_lineno), LANG_SCNG(yy_text), $2.u.op.ptr,
 				  Z_STR($4.u.constant), $6.u.ast, NULL, $8.u.ast); AS($$); }
 ;
@@ -883,13 +883,13 @@ expr_without_variable:
 	|	T_YIELD expr T_DOUBLE_ARROW expr
 			{ $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $4.u.ast, $2.u.ast); }
 	|	function returns_ref '(' parameter_list ')' lexical_vars '{' inner_statement_list '}'
-			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_CLOSURE, $2.EA,
+			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLOSURE, $2.EA,
 			      $1.EA, CG(zend_lineno), LANG_SCNG(yy_text), $1.u.op.ptr,
 				  STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
 			      $4.u.ast, $6.u.ast, $8.u.ast); }
 	|	T_STATIC function returns_ref '(' parameter_list ')' lexical_vars
 		'{' inner_statement_list '}'
-			{ $$.u.ast = zend_ast_create_func_decl(ZEND_AST_CLOSURE,
+			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLOSURE,
 			      $3.EA | ZEND_ACC_STATIC, $2.EA, CG(zend_lineno), LANG_SCNG(yy_text),
 			      $2.u.op.ptr, STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
 			      $5.u.ast, $7.u.ast, $9.u.ast); }
