@@ -524,9 +524,6 @@ void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRM
 void zend_do_begin_namespace(znode *name, zend_bool with_brackets TSRMLS_DC);
 void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
-void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int is_function, zend_bool case_sensitive, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC);
-void zend_do_use_function(znode *name, znode *new_name, int is_global TSRMLS_DC);
-void zend_do_use_const(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
 void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC);
 

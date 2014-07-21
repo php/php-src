@@ -3548,113 +3548,6 @@ void zend_do_begin_namespace(znode *name, zend_bool with_bracket TSRMLS_DC) /* {
 }
 /* }}} */
 
-void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int is_function, zend_bool case_sensitive, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC) /* {{{ */
-{
-	zend_string *lookup_name;
-	zval *name, ns, tmp;
-	zend_bool warn = 0;
-
-	ZVAL_ZVAL(&ns, &ns_name->u.constant, 0, 0);
-	if (new_name) {
-		name = &new_name->u.constant;
-	} else {
-		const char *p;
-
-		/* The form "use A\B" is eqivalent to "use A\B as B".
-		   So we extract the last part of compound name to use as a new_name */
-		name = &tmp;
-		p = zend_memrchr(Z_STRVAL(ns), '\\', Z_STRLEN(ns));
-		if (p) {
-			ZVAL_STRING(name, p+1);
-		} else {
-			ZVAL_ZVAL(name, &ns, 1, 0);
-			warn = !is_global && Z_TYPE(CG(current_namespace)) == IS_UNDEF;
-		}
-	}
-
-	if (case_sensitive) {
-		lookup_name = STR_COPY(Z_STR_P(name));
-	} else {
-		lookup_name = STR_ALLOC(Z_STRLEN_P(name), 0);
-		zend_str_tolower_copy(lookup_name->val, Z_STRVAL_P(name), Z_STRLEN_P(name));
-	}
-
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		/* Prefix import name with current namespace name to avoid conflicts with functions/consts */
-		zend_string *c_ns_name = STR_ALLOC(Z_STRLEN(CG(current_namespace)) + 1 + Z_STRLEN_P(name), 0);
-
-		zend_str_tolower_copy(c_ns_name->val, Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)));
-		c_ns_name->val[Z_STRLEN(CG(current_namespace))] = '\\';
-		memcpy(c_ns_name->val+Z_STRLEN(CG(current_namespace))+1, lookup_name, Z_STRLEN_P(name)+1);
-		if (zend_hash_exists(lookup_table, c_ns_name)) {
-			char *tmp2 = zend_str_tolower_dup(Z_STRVAL(ns), Z_STRLEN(ns));
-
-			if (Z_STRLEN(ns) != Z_STRLEN(CG(current_namespace)) + 1 + Z_STRLEN_P(name) ||
-				memcmp(tmp2, c_ns_name->val, Z_STRLEN(ns))) {
-				zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", is_function ? "function" : "const", Z_STRVAL(ns), Z_STRVAL_P(name));
-			}
-			efree(tmp2);
-		}
-		STR_FREE(c_ns_name);
-	} else if (is_function) {
-		zend_function *function;
-
-		if ((function = zend_hash_find_ptr(lookup_table, lookup_name)) != NULL && function->type == ZEND_USER_FUNCTION && strcmp(function->op_array.filename->val, CG(compiled_filename)->val) == 0) {
-			char *c_tmp = zend_str_tolower_dup(Z_STRVAL(ns), Z_STRLEN(ns));
-
-			if (Z_STRLEN(ns) != Z_STRLEN_P(name) ||
-				memcmp(c_tmp, lookup_name->val, Z_STRLEN(ns))) {
-				zend_error(E_COMPILE_ERROR, "Cannot use function %s as %s because the name is already in use", Z_STRVAL(ns), Z_STRVAL_P(name));
-			}
-			efree(c_tmp);
-		}
-	} else {
-		zend_string *filename;
-
-		if ((filename = zend_hash_find_ptr(lookup_table, lookup_name)) != NULL && strcmp(filename->val, CG(compiled_filename)->val) == 0) {
-			char *c_tmp = zend_str_tolower_dup(Z_STRVAL(ns), Z_STRLEN(ns));
-
-			if (Z_STRLEN(ns) != Z_STRLEN_P(name) ||
-				memcmp(c_tmp, lookup_name->val, Z_STRLEN(ns))) {
-				zend_error(E_COMPILE_ERROR, "Cannot use const %s as %s because the name is already in use", Z_STRVAL(ns), Z_STRVAL_P(name));
-			}
-			efree(c_tmp);
-		}
-	}
-
-	if (zend_hash_add(current_import_sub, lookup_name, &ns) == NULL) {
-		zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", is_function ? "function" : "const", Z_STRVAL(ns), Z_STRVAL_P(name));
-	}
-	if (warn) {
-		zend_error(E_WARNING, "The use %s statement with non-compound name '%s' has no effect", is_function ? "function" : "const", Z_STRVAL_P(name));
-	}
-	STR_RELEASE(lookup_name);
-	zval_dtor(name);
-}
-/* }}} */
-
-void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{{ */
-{
-	if (!CG(current_import_function)) {
-		CG(current_import_function) = emalloc(sizeof(HashTable));
-		zend_hash_init(CG(current_import_function), 8, NULL, ZVAL_PTR_DTOR, 0);
-	}
-
-	zend_do_use_non_class(ns_name, new_name, is_global, 1, 0, CG(current_import_function), CG(function_table) TSRMLS_CC);
-}
-/* }}} */
-
-void zend_do_use_const(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{{ */
-{
-	if (!CG(current_import_const)) {
-		CG(current_import_const) = emalloc(sizeof(HashTable));
-		zend_hash_init(CG(current_import_const), 8, NULL, ZVAL_PTR_DTOR, 0);
-	}
-
-	zend_do_use_non_class(ns_name, new_name, is_global, 0, 1, CG(current_import_const), &CG(const_filenames) TSRMLS_CC);
-}
-/* }}} */
-
 void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
@@ -6399,18 +6292,71 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 	CG(active_class_entry) = NULL;
 }
 
+static HashTable *zend_get_import_ht(zend_uint type TSRMLS_DC) {
+	switch (type) {
+		case T_CLASS:
+			if (!CG(current_import)) {
+				CG(current_import) = emalloc(sizeof(HashTable));
+				zend_hash_init(CG(current_import), 8, NULL, str_dtor, 0);
+			}
+			return CG(current_import);
+		case T_FUNCTION:
+			if (!CG(current_import_function)) {
+				CG(current_import_function) = emalloc(sizeof(HashTable));
+				zend_hash_init(CG(current_import_function), 8, NULL, str_dtor, 0);
+			}
+			return CG(current_import_function);
+		case T_CONST:
+			if (!CG(current_import_const)) {
+				CG(current_import_const) = emalloc(sizeof(HashTable));
+				zend_hash_init(CG(current_import_const), 8, NULL, str_dtor, 0);
+			}
+			return CG(current_import_const);
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+static char *zend_get_use_type_str(zend_uint type) {
+	switch (type) {
+		case T_CLASS:
+			return "";
+		case T_FUNCTION:
+			return " function";
+		case T_CONST:
+			return " const";
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+static void zend_check_already_in_use(
+	zend_uint type, zend_string *old_name, zend_string *new_name, zend_string *check_name
+) {
+	if (old_name->len == check_name->len) {
+		char *old_name_lc = zend_str_tolower_dup(old_name->val, old_name->len);
+		if (!memcmp(old_name_lc, check_name->val, check_name->len)) {
+			efree(old_name_lc);
+			return;
+		}
+	}
+
+	zend_error_noreturn(E_COMPILE_ERROR, "Cannot use%s %s as %s because the name "
+		"is already in use", zend_get_use_type_str(type), old_name->val, new_name->val);
+}
+
 void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 	zend_string *current_ns = Z_TYPE(CG(current_namespace)) != IS_UNDEF
 		? Z_STR(CG(current_namespace)) : NULL;
+	zend_uint type = ast->attr;
+	HashTable *current_import = zend_get_import_ht(type TSRMLS_CC);
+	zend_bool case_sensitive = type == T_CONST;
 
 	for (i = 0; i < ast->children; ++i) {
 		zend_ast *use_ast = ast->child[i];
 		zend_ast *old_name_ast = use_ast->child[0];
 		zend_ast *new_name_ast = use_ast->child[1];
 		zend_string *old_name = Z_STR_P(zend_ast_get_zval(old_name_ast));
-		zend_string *new_name, *lcname;
-		zend_class_entry *ce;
+		zend_string *new_name, *lookup_name;
 
 		if (new_name_ast) {
 			new_name = STR_COPY(Z_STR_P(zend_ast_get_zval(new_name_ast)));
@@ -6423,7 +6369,7 @@ void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 				new_name = STR_COPY(old_name);
 
 				if (!current_ns) {
-					if (zend_str_equals(new_name, "strict")) {
+					if (type == T_CLASS && zend_str_equals(new_name, "strict")) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 							"You seem to be trying to use a different language...");
 					}
@@ -6434,10 +6380,16 @@ void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 			}
 		}
 
-		lcname = STR_ALLOC(new_name->len, 0);
-		zend_str_tolower_copy(lcname->val, new_name->val, new_name->len);
+		if (case_sensitive) {
+			lookup_name = STR_COPY(new_name);
+		} else {
+			lookup_name = STR_ALLOC(new_name->len, 0);
+			zend_str_tolower_copy(lookup_name->val, new_name->val, new_name->len);
+		}
 
-		if (zend_str_equals(lcname, "self") || zend_str_equals(lcname, "parent")) {
+		if (type == T_CLASS
+			&& (zend_str_equals(lookup_name, "self") || zend_str_equals(lookup_name, "parent"))
+		) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' "
 				"is a special class name", old_name->val, new_name->val, new_name->val);
 		}
@@ -6446,46 +6398,54 @@ void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 			zend_string *ns_name = STR_ALLOC(current_ns->len + 1 + new_name->len, 0);
 			zend_str_tolower_copy(ns_name->val, current_ns->val, current_ns->len);
 			ns_name->val[current_ns->len] = '\\';
-			memcpy(ns_name->val + current_ns->len + 1, lcname->val, lcname->len);
+			memcpy(ns_name->val + current_ns->len + 1, lookup_name->val, lookup_name->len);
 
 			if (zend_hash_exists(CG(class_table), ns_name)) {
-				char *tmp = zend_str_tolower_dup(old_name->val, old_name->len);
-
-				if (old_name->len != ns_name->len || memcmp(tmp, ns_name->val, ns_name->len)) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because the name "
-						"is already in use", old_name->val, new_name->val);
-				}
-
-				efree(tmp);
+				zend_check_already_in_use(type, old_name, new_name, ns_name);
 			}
 
 			STR_FREE(ns_name);
-		} else if ((ce = zend_hash_find_ptr(CG(class_table), lcname))
-		           && ce->type == ZEND_USER_CLASS
-		           && ce->info.user.filename == CG(compiled_filename)
-		) {
-			char *tmp = zend_str_tolower_dup(old_name->val, old_name->len);
-
-			if (old_name->len != lcname->len || memcmp(tmp, lcname->val, lcname->len)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because the name "
-					"is already in use", old_name->val, new_name->val);
+		} else {
+			switch (type) {
+				case T_CLASS:
+				{
+					zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), lookup_name);
+					if (ce && ce->type == ZEND_USER_CLASS
+						&& ce->info.user.filename == CG(compiled_filename)
+					) {
+						zend_check_already_in_use(type, old_name, new_name, lookup_name);
+					}
+					break;
+				}
+				case T_FUNCTION:
+				{
+					zend_function *fn = zend_hash_find_ptr(CG(function_table), lookup_name);
+					if (fn && fn->type == ZEND_USER_FUNCTION
+						&& !strcmp(fn->op_array.filename->val, CG(compiled_filename)->val)
+					) {
+						zend_check_already_in_use(type, old_name, new_name, lookup_name);
+					}
+					break;
+				}
+				case T_CONST:
+				{
+					zend_string *filename = zend_hash_find_ptr(&CG(const_filenames), lookup_name);
+					if (filename && !strcmp(filename->val, CG(compiled_filename)->val)) {
+						zend_check_already_in_use(type, old_name, new_name, lookup_name);
+					}
+					break;
+				}
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
-
-			efree(tmp);
-		}
-
-		if (!CG(current_import)) {
-			CG(current_import) = emalloc(sizeof(HashTable));
-			zend_hash_init(CG(current_import), 8, NULL, str_dtor, 0);
 		}
 
 		STR_ADDREF(old_name);
-		if (!zend_hash_add_ptr(CG(current_import), lcname, old_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because the name "
-				"is already in use", old_name->val, new_name->val);
+		if (!zend_hash_add_ptr(current_import, lookup_name, old_name)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use%s %s as %s because the name "
+				"is already in use", zend_get_use_type_str(type), old_name->val, new_name->val);
 		}
 
-		STR_RELEASE(lcname);
+		STR_RELEASE(lookup_name);
 		STR_RELEASE(new_name);
 	}
 }
