@@ -42,29 +42,6 @@ SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 			/* no post handler registered, so we just swallow the data */
 			sapi_read_standard_form_data(TSRMLS_C);
 		}
-
-		if (populate_raw_post_data(TSRMLS_C)) {
-			size_t length;
-			char *data = NULL;
-
-			php_stream_rewind(SG(request_info).request_body);
-			length = php_stream_copy_to_mem(SG(request_info).request_body, &data, PHP_STREAM_COPY_ALL, 0);
-			php_stream_rewind(SG(request_info).request_body);
-
-			if (length > INT_MAX) {
-				sapi_module.sapi_error(E_WARNING,
-					"HTTP_RAW_POST_DATA truncated from %lu to %d bytes",
-					(unsigned long) length, INT_MAX);
-				length = INT_MAX;
-			}
-			SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, length);
-
-			sapi_module.sapi_error(E_DEPRECATED,
-				"Automatically populating $HTTP_RAW_POST_DATA is deprecated and "
-				"will be removed in a future version. To avoid this warning set "
-				"'always_populate_raw_post_data' to '-1' in php.ini and use the "
-				"php://input stream instead.");
-		}
 	}
 }
 /* }}} */
