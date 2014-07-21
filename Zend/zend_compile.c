@@ -6229,13 +6229,69 @@ void zend_begin_method_decl(
 	STR_RELEASE(lcname);
 }
 
+static void zend_begin_func_decl(
+	znode *result, zend_op_array *op_array, zend_ast_func_decl *fn TSRMLS_DC
+) {
+	zend_string *name = fn->name, *lcname;
+	zend_op *opline;
+
+	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+		op_array->function_name = name = zend_concat_names(
+			Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)), name->val, name->len);
+	} else {
+		op_array->function_name = STR_COPY(name);
+	}
+
+	lcname = STR_ALLOC(name->len, 0);
+	zend_str_tolower_copy(lcname->val, name->val, name->len);
+
+	if (CG(current_import_function)) {
+		zend_string *import_name = zend_hash_find_ptr(CG(current_import_function), lcname);
+		if (import_name) {
+			char *import_name_lc = zend_str_tolower_dup(import_name->val, import_name->len);
+
+			if (import_name->len != name->len
+				|| memcmp(import_name_lc, lcname->val, name->len)
+			) {
+				zend_error(E_COMPILE_ERROR, "Cannot declare function %s "
+					"because the name is already in use", name->val);
+			}
+
+			efree(import_name_lc);
+		}
+	}
+
+	if (zend_str_equals(lcname, ZEND_AUTOLOAD_FUNC_NAME) && fn->params->children != 1) {
+		zend_error_noreturn(E_COMPILE_ERROR, "%s() must take exactly 1 argument",
+			ZEND_AUTOLOAD_FUNC_NAME);
+	}
+
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		opline = emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL TSRMLS_CC);
+	} else {
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_DECLARE_FUNCTION;
+		opline->op2_type = IS_CONST;
+		LITERAL_STR(opline->op2, STR_COPY(lcname));
+	}
+
+	{
+		zval key;
+		build_runtime_defined_function_key(&key, lcname, fn->lex_pos TSRMLS_CC);
+
+		opline->op1_type = IS_CONST;
+		opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);
+
+		zend_hash_update_ptr(CG(function_table), Z_STR(key), op_array);
+	}
+
+	STR_RELEASE(lcname);
+}
+
 void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast_func_decl *fn = (zend_ast_func_decl *) ast;
 	zend_op_array *orig_op_array = CG(active_op_array);
 	zend_op_array *op_array = emalloc(sizeof(zend_op_array));
-	zend_string *name = fn->name, *lcname;
-	zend_op *opline;
-	zend_bool is_closure = ast->kind == ZEND_AST_CLOSURE;
 	zend_bool is_method = ast->kind == ZEND_AST_METHOD;
 
 	// TODO.AST interactive (not just here - also bpc etc!)
@@ -6248,65 +6304,15 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) {
 	if (fn->doc_comment) {
 		op_array->doc_comment = STR_COPY(fn->doc_comment);
 	}
-	if (is_closure) {
+	if (ast->kind == ZEND_AST_CLOSURE) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
 
 	if (is_method) {
 		zend_bool has_body = fn->stmt != NULL;
-		zend_begin_method_decl(op_array, name, has_body TSRMLS_CC);
+		zend_begin_method_decl(op_array, fn->name, has_body TSRMLS_CC);
 	} else {
-		if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-			op_array->function_name = name = zend_concat_names(
-				Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)), name->val, name->len);
-		} else {
-			op_array->function_name = STR_COPY(name);
-		}
-
-		lcname = STR_ALLOC(name->len, 0);
-		zend_str_tolower_copy(lcname->val, name->val, name->len);
-
-		if (CG(current_import_function)) {
-			zend_string *import_name = zend_hash_find_ptr(CG(current_import_function), lcname);
-			if (import_name) {
-				char *import_name_lc = zend_str_tolower_dup(import_name->val, import_name->len);
-
-				if (import_name->len != name->len
-					|| memcmp(import_name_lc, lcname->val, name->len)
-				) {
-					zend_error(E_COMPILE_ERROR, "Cannot declare function %s "
-						"because the name is already in use", name->val);
-				}
-
-				efree(import_name_lc);
-			}
-		}
-
-		if (zend_str_equals(lcname, ZEND_AUTOLOAD_FUNC_NAME) && fn->params->children != 1) {
-			zend_error_noreturn(E_COMPILE_ERROR, "%s() must take exactly 1 argument",
-				ZEND_AUTOLOAD_FUNC_NAME);
-		}
-
-		if (is_closure) {
-			opline = emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL TSRMLS_CC);
-		} else {
-			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-			opline->opcode = ZEND_DECLARE_FUNCTION;
-			opline->op2_type = IS_CONST;
-			LITERAL_STR(opline->op2, STR_COPY(lcname));
-		}
-
-		{
-			zval key;
-			build_runtime_defined_function_key(&key, lcname, fn->lex_pos TSRMLS_CC);
-
-			opline->op1_type = IS_CONST;
-			opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);
-
-			zend_hash_update_ptr(CG(function_table), Z_STR(key), op_array);
-		}
-
-		STR_RELEASE(lcname);
+		zend_begin_func_decl(result, op_array, fn TSRMLS_CC);
 	}
 
 	CG(active_op_array) = op_array;
