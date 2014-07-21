@@ -6574,6 +6574,115 @@ void zend_compile_use_trait(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
+void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
+	zend_ast_decl *decl = (zend_ast_decl *) ast;
+	zend_ast *extends_ast = decl->child[0];
+	zend_ast *implements_ast = decl->child[1];
+	zend_ast *stmt_ast = decl->child[2];
+
+	zend_string *name = decl->name, *lcname, *import_name = NULL;
+	zend_class_entry *ce = emalloc(sizeof(zend_class_entry));
+	zend_op *opline;
+	znode extends_node;
+
+	if (CG(active_class_entry)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
+		return;
+	}
+
+	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name->val, name->len)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved",
+			name->val);
+	}
+
+	lcname = STR_ALLOC(name->len, 0);
+	zend_str_tolower_copy(lcname->val, name->val, name->len);
+
+	if (CG(current_import)) {
+		import_name = zend_hash_find_ptr(CG(current_import), lcname);
+	}
+
+	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+		name = zend_concat_names(Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)),
+			name->val, name->len);
+
+		STR_RELEASE(lcname);
+		lcname = STR_ALLOC(name->len, 0);
+		zend_str_tolower_copy(lcname->val, name->val, name->len);
+	} else {
+		STR_ADDREF(name);
+	}
+
+	if (import_name) {
+		char *import_name_lc = zend_str_tolower_dup(import_name->val, import_name->len);
+		if (lcname->len != import_name->len
+			|| memcmp(import_name_lc, lcname->val, lcname->len)
+		) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
+				"because the name is already in use", name->val);
+		}
+		efree(import_name_lc);
+	}
+
+	ce->type = ZEND_USER_CLASS;
+	ce->name = zend_new_interned_string(name TSRMLS_CC);
+	zend_initialize_class_data(ce, 1 TSRMLS_CC);
+
+	ce->ce_flags |= decl->flags;
+	ce->info.user.filename = zend_get_compiled_filename(TSRMLS_C);
+	ce->info.user.line_start = decl->start_lineno;
+	ce->info.user.line_end = decl->end_lineno;
+	if (decl->doc_comment) {
+		ce->info.user.doc_comment = STR_COPY(decl->doc_comment);
+	}
+
+	if (extends_ast) {
+		if (ce->ce_flags & ZEND_ACC_TRAIT) {
+			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. "
+				"Traits can only be composed from other traits with the 'use' keyword. Error",
+				name->val);
+		}
+
+		if (!zend_is_const_default_class_ref(extends_ast)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use '%s' as class name as it is reserved", name->val);
+		}
+
+		zend_compile_class_ref(&extends_node, extends_ast TSRMLS_CC);
+	}
+
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->result.var = get_temporary_variable(CG(active_op_array));
+	opline->result_type = IS_VAR;
+	opline->op2_type = IS_CONST;
+	LITERAL_STR(opline->op2, lcname);
+
+	if (extends_ast) {
+		opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
+		opline->extended_value = extends_node.u.op.var;
+	} else {
+		opline->opcode = ZEND_DECLARE_CLASS;
+	}
+
+	{
+		zval key;
+		build_runtime_defined_function_key(&key, lcname, decl->lex_pos TSRMLS_CC);
+		opline->op1_type = IS_CONST;
+		opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);
+
+		zend_hash_update_ptr(CG(class_table), Z_STR(key), ce);
+	}
+
+	CG(active_class_entry) = ce;
+
+	zend_compile_stmt(stmt_ast TSRMLS_CC);
+
+	// TODO.AST traits, interfaces, extends, etc
+
+	CG(active_class_entry) = NULL;
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7422,6 +7531,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_USE_TRAIT:
 			zend_compile_use_trait(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_CLASS:
+			zend_compile_class_decl(ast TSRMLS_CC);
 			break;
 		default:
 		{

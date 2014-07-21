@@ -116,6 +116,8 @@ enum _zend_ast_kind {
 	ZEND_AST_TRAIT_PRECEDENCE,
 	ZEND_AST_TRAIT_ALIAS,
 	ZEND_AST_METHOD_REFERENCE,
+
+	ZEND_AST_CLASS,
 };
 
 typedef unsigned short zend_ast_kind;

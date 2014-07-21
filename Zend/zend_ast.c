@@ -350,6 +350,7 @@ ZEND_API void zend_ast_destroy(zend_ast *ast)
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_CLOSURE:
 		case ZEND_AST_METHOD:
+		case ZEND_AST_CLASS:
 		{
 			zend_ast_decl *decl = (zend_ast_decl *) ast;
 			STR_RELEASE(decl->name);
