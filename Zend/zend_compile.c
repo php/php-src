@@ -558,6 +558,10 @@ void zend_discard_doc_comment(TSRMLS_D) {
 	}
 }
 
+void zend_stop_lexing(TSRMLS_D) {
+	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
+}
+
 static void zend_do_op_data(zend_op *data_op, znode *value TSRMLS_DC) /* {{{ */
 {
 	data_op->opcode = ZEND_OP_DATA;
@@ -7292,7 +7296,8 @@ void zend_compile_top_stmt(zend_ast *ast TSRMLS_DC) {
 	}
 
 	zend_compile_stmt(ast TSRMLS_CC);
-	if (ast->kind != ZEND_AST_NAMESPACE) {
+
+	if (ast->kind != ZEND_AST_NAMESPACE && ast->kind != ZEND_AST_HALT_COMPILER) {
 		zend_verify_namespace(TSRMLS_C);
 	}
 	if (ast->kind == ZEND_AST_FUNC_DECL || ast->kind == ZEND_AST_CLASS) {

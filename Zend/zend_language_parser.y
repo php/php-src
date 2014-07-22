@@ -251,7 +251,7 @@ top_statement:
 			{ zval offset_zv; ZVAL_LONG(&offset_zv, zend_get_scanned_file_offset(TSRMLS_C));
 			  $$.u.ast = zend_ast_create_unary(ZEND_AST_HALT_COMPILER,
 			      zend_ast_create_zval(&offset_zv));
-			  /*YYACCEPT;*/ }
+			  zend_stop_lexing(TSRMLS_C); }
 	|	T_NAMESPACE namespace_name ';'
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), NULL);
 			  zend_discard_doc_comment(TSRMLS_C); }
