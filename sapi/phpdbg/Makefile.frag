@@ -8,14 +8,17 @@ $(BUILD_SHARED): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
 $(BUILD_BINARY): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
 	$(BUILD_PHPDBG)
 
-$(builddir)/sapi/phpdbg/phpdbg_lexer.lo: $(srcdir)/sapi/phpdbg/phpdbg_parser.h
+%.c: %.y
+%.c: %.l
 
-$(srcdir)/sapi/phpdbg/phpdbg_lexer.c: $(srcdir)/sapi/phpdbg/phpdbg_lexer.l
-	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l)
+$(builddir)/phpdbg_lexer.lo: $(srcdir)/phpdbg_parser.h
 
-$(srcdir)/sapi/phpdbg/phpdbg_parser.h: $(srcdir)/sapi/phpdbg/phpdbg_parser.c
-$(srcdir)/sapi/phpdbg/phpdbg_parser.c: $(srcdir)/sapi/phpdbg/phpdbg_parser.y
-	@$(YACC) -p phpdbg_ -v -d $(srcdir)/sapi/phpdbg/phpdbg_parser.y -o $@
+$(srcdir)/phpdbg_lexer.c: $(srcdir)/phpdbg_lexer.l
+	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo $(srcdir)/phpdbg_lexer.c $(srcdir)/phpdbg_lexer.l)
+
+$(srcdir)/phpdbg_parser.h: $(srcdir)/phpdbg_parser.c
+$(srcdir)/phpdbg_parser.c: $(srcdir)/phpdbg_parser.y
+	@$(YACC) -p phpdbg_ -v -d $(srcdir)/phpdbg_parser.y -o $@
 
 install-phpdbg: $(BUILD_BINARY)
 	@echo "Installing phpdbg binary:         $(INSTALL_ROOT)$(bindir)/"
@@ -23,6 +26,9 @@ install-phpdbg: $(BUILD_BINARY)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/log
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/run
 	@$(INSTALL) -m 0755 $(BUILD_BINARY) $(INSTALL_ROOT)$(bindir)/$(program_prefix)phpdbg$(program_suffix)$(EXEEXT)
+	@echo "Installing phpdbg man page:       $(INSTALL_ROOT)$(mandir)/man1/"
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
+	@$(INSTALL_DATA) $(srcdir)/phpdbg.1 $(INSTALL_ROOT)$(mandir)/man1/$(program_prefix)phpdbg$(program_suffix).1
 
 clean-phpdbg:
 	@echo "Cleaning phpdbg object files ..."

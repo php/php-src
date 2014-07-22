@@ -57,7 +57,7 @@ END_EXTERN_C()
 #define _STR_HEADER_SIZE XtOffsetOf(zend_string, val)
 
 #define STR_ALLOCA_ALLOC(str, _len, use_heap) do { \
-	(str) = do_alloca(_STR_HEADER_SIZE + (_len) + 1, (use_heap)); \
+	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + (_len) + 1), (use_heap)); \
 	GC_REFCOUNT(str) = 1; \
 	(str)->h = 0; \
 	(str)->len = (_len); \
@@ -109,7 +109,7 @@ static zend_always_inline zend_uint zend_str_delref(zend_string *s)
 
 static zend_always_inline zend_string *zend_str_alloc(int len, int persistent)
 {
-	zend_string *ret = pemalloc(_STR_HEADER_SIZE + len + 1, persistent);
+	zend_string *ret = (zend_string *)pemalloc(ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
 
 	GC_REFCOUNT(ret) = 1;
 #if 1
@@ -127,7 +127,7 @@ static zend_always_inline zend_string *zend_str_alloc(int len, int persistent)
 
 static zend_always_inline zend_string *zend_str_safe_alloc(size_t n, size_t m, size_t l, int persistent)
 {
-	zend_string *ret = safe_pemalloc(n, m, _STR_HEADER_SIZE + l + 1, persistent);
+	zend_string *ret = (zend_string *)safe_pemalloc(n, m, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + l + 1), persistent);
 
 	GC_REFCOUNT(ret) = 1;
 #if 1
@@ -176,8 +176,8 @@ static zend_always_inline zend_string *zend_str_realloc(zend_string *s, int len,
 	if (IS_INTERNED(s)) {
 		ret = STR_ALLOC(len, persistent);
 		memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
-	} else if (STR_REFCOUNT(s) == 1) {
-		ret = perealloc(s, _STR_HEADER_SIZE + len + 1, persistent);
+	} else if (EXPECTED(STR_REFCOUNT(s) == 1)) {
+		ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
 		ret->len = len;
 		STR_FORGET_HASH_VAL(ret);
 	} else {
@@ -194,14 +194,14 @@ static zend_always_inline zend_string *zend_str_safe_realloc(zend_string *s, siz
 
 	if (IS_INTERNED(s)) {
 		ret = STR_SAFE_ALLOC(n, m, l, persistent);
-		memcpy(ret->val, s->val, ((n * m) + l > s->len ? s->len : ((n * m) + l)) + 1);
+		memcpy(ret->val, s->val, ((n * m) + l > (size_t)s->len ? (size_t)s->len : ((n * m) + l)) + 1);
 	} else if (STR_REFCOUNT(s) == 1) {
-		ret = safe_perealloc(s, n, m, _STR_HEADER_SIZE + l + 1, persistent);
+		ret = (zend_string *)safe_perealloc(s, n, m, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + l + 1), persistent);
 		ret->len = (n * m) + l;
 		STR_FORGET_HASH_VAL(ret);
 	} else {
 		ret = STR_SAFE_ALLOC(n, m, l, persistent);
-		memcpy(ret->val, s->val, ((n * m) + l > s->len ? s->len : ((n * m) + l)) + 1);
+		memcpy(ret->val, s->val, ((n * m) + l > (size_t)s->len ? (size_t)s->len : ((n * m) + l)) + 1);
 		STR_DELREF(s);
 	}
 	return ret;

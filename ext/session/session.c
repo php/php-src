@@ -51,6 +51,7 @@
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/url.h"
 #include "ext/standard/basic_functions.h"
+#include "ext/standard/head.h"
 
 #include "mod_files.h"
 #include "mod_user.h"
@@ -555,7 +556,7 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 			}
 		}
 
-		if (ret == FAILURE) {
+		if ((ret == FAILURE) && !EG(exception)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write session data (%s). Please "
 					"verify that the current setting of session.save_path "
 					"is correct (%s)",
@@ -1254,14 +1255,6 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
    * Cookie Management *
    ********************* */
 
-#define COOKIE_SET_COOKIE "Set-Cookie: "
-#define COOKIE_EXPIRES	"; expires="
-#define COOKIE_MAX_AGE	"; Max-Age="
-#define COOKIE_PATH		"; path="
-#define COOKIE_DOMAIN	"; domain="
-#define COOKIE_SECURE	"; secure"
-#define COOKIE_HTTPONLY	"; HttpOnly"
-
 /*
  * Remove already sent session ID cookie.
  * It must be directly removed from SG(sapi_header) because sapi_add_header_ex()
@@ -1327,7 +1320,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
 	e_id = php_url_encode(PS(id)->val, PS(id)->len);
 
-	smart_str_appends(&ncookie, COOKIE_SET_COOKIE);
+	smart_str_appendl(&ncookie, "Set-Cookie: ", sizeof("Set-Cookie: ")-1);
 	smart_str_appendl(&ncookie, e_session_name->val, e_session_name->len);
 	smart_str_appendc(&ncookie, '=');
 	smart_str_appendl(&ncookie, e_id->val, e_id->len);
@@ -1412,9 +1405,16 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-#define PPID2SID \
-		convert_to_string((ppid)); \
-		PS(id) = STR_INIT(Z_STRVAL_P(ppid), Z_STRLEN_P(ppid), 0)
+static void ppid2sid(zval *ppid TSRMLS_DC) {
+	if (Z_TYPE_P(ppid) != IS_STRING) {
+		PS(id) = NULL;
+		PS(send_cookie) = 1;
+	} else {
+		convert_to_string(ppid);
+		PS(id) = STR_INIT(Z_STRVAL_P(ppid), Z_STRLEN_P(ppid), 0);
+		PS(send_cookie) = 0;
+	}
+}
 
 PHPAPI void php_session_reset_id(TSRMLS_D) /* {{{ */
 {
@@ -1509,9 +1509,8 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_P(data) == IS_ARRAY &&
 				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
 		) {
-			PPID2SID;
+			ppid2sid(ppid TSRMLS_CC);
 			PS(apply_trans_sid) = 0;
-			PS(send_cookie) = 0;
 			PS(define_sid) = 0;
 		}
 
@@ -1520,8 +1519,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_P(data) == IS_ARRAY &&
 				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
 		) {
-			PPID2SID;
-			PS(send_cookie) = 0;
+			ppid2sid(ppid TSRMLS_CC);
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
@@ -1529,8 +1527,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_P(data) == IS_ARRAY &&
 				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
 		) {
-			PPID2SID;
-			PS(send_cookie) = 0;
+			ppid2sid(ppid TSRMLS_CC);
 		}
 	}
 

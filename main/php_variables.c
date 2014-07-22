@@ -110,8 +110,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	}
 
 	/* GLOBALS hijack attempt, reject parameter */
-	if (symtable1 && EG(active_symbol_table) &&
-		symtable1 == &EG(active_symbol_table)->ht &&
+	if (symtable1 == &EG(symbol_table).ht &&
 		var_len == sizeof("GLOBALS")-1 &&
 		!memcmp(var, "GLOBALS", sizeof("GLOBALS")-1)) {
 		zval_dtor(val);
@@ -328,9 +327,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 				smart_str_appendl(&post_data.str, buf, len);
 
 				if (SUCCESS != add_post_vars(arr, &post_data, 0 TSRMLS_CC)) {
-					if (post_data.str.s) {
-						smart_str_free(&post_data.str);
-					}
+					smart_str_free(&post_data.str);
 					return;
 				}
 			}
@@ -340,8 +337,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 			}
 		}
 
-		add_post_vars(arr, &post_data, 1 TSRMLS_CC);
 		if (post_data.str.s) {
+			add_post_vars(arr, &post_data, 1 TSRMLS_CC);
 			smart_str_free(&post_data.str);
 		}
 	}

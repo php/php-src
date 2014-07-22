@@ -53,7 +53,7 @@ enum {
 
 static PHP_INI_MH(OnChangeCallback) /* {{{ */
 {
-	if (EG(in_execution)) {
+	if (EG(current_execute_data)) {
 		if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
 			zval_ptr_dtor(&ASSERTG(callback));
 			ZVAL_UNDEF(&ASSERTG(callback));

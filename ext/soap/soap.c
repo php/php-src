@@ -92,7 +92,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	zend_object* _old_error_object = Z_OBJ(SOAP_GLOBAL(error_object));\
 	int _old_soap_version = SOAP_GLOBAL(soap_version);\
 	zend_bool _old_in_compilation = CG(in_compilation); \
-	zend_bool _old_in_execution = EG(in_execution); \
 	zend_execute_data *_old_current_execute_data = EG(current_execute_data); \
 	zval *_old_stack_top = EG(argument_stack)->top; \
 	int _bailout = 0;\
@@ -104,7 +103,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 #define SOAP_CLIENT_END_CODE() \
 	} zend_catch {\
 		CG(in_compilation) = _old_in_compilation; \
-		EG(in_execution) = _old_in_execution; \
 		EG(current_execute_data) = _old_current_execute_data; \
 		if (EG(exception) == NULL || \
 		    !instanceof_function(zend_get_class_entry(EG(exception) TSRMLS_CC), soap_fault_class_entry TSRMLS_CC)) {\
@@ -225,6 +223,7 @@ PHP_METHOD(SoapClient, __getFunctions);
 PHP_METHOD(SoapClient, __getTypes);
 PHP_METHOD(SoapClient, __doRequest);
 PHP_METHOD(SoapClient, __setCookie);
+PHP_METHOD(SoapClient, __getCookies);
 PHP_METHOD(SoapClient, __setLocation);
 PHP_METHOD(SoapClient, __setSoapHeaders);
 
@@ -368,6 +367,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___setcookie, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_soapclient___getcookies, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___setsoapheaders, 0, 0, 1)
 	ZEND_ARG_INFO(0, soapheaders)
 ZEND_END_ARG_INFO()
@@ -422,6 +424,7 @@ static const zend_function_entry soap_client_functions[] = {
 	PHP_ME(SoapClient, __getTypes, 					arginfo_soapclient___gettypes, 0)
 	PHP_ME(SoapClient, __doRequest, 				arginfo_soapclient___dorequest, 0)
 	PHP_ME(SoapClient, __setCookie, 				arginfo_soapclient___setcookie, 0)
+	PHP_ME(SoapClient, __getCookies, 				arginfo_soapclient___getcookies, 0)
 	PHP_ME(SoapClient, __setLocation, 				arginfo_soapclient___setlocation, 0)
 	PHP_ME(SoapClient, __setSoapHeaders, 			arginfo_soapclient___setsoapheaders, 0)
 	PHP_FE_END
@@ -624,7 +627,7 @@ static void delete_service_res(zend_resource *res TSRMLS_DC)
 	delete_service(res->ptr);
 }
 
-static void delete_hashtable_res(zend_resource *res TSRMLS_CC)
+static void delete_hashtable_res(zend_resource *res TSRMLS_DC)
 {
 	delete_hashtable(res->ptr);
 }
@@ -2126,14 +2129,13 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 
 static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
-	zend_bool _old_in_compilation, _old_in_execution;
+	zend_bool _old_in_compilation;
 	zend_execute_data *_old_current_execute_data;
 	int _old_http_response_code;
 	char *_old_http_status_line;
 	TSRMLS_FETCH();
 
 	_old_in_compilation = CG(in_compilation);
-	_old_in_execution = EG(in_execution);
 	_old_current_execute_data = EG(current_execute_data);
 	_old_http_response_code = SG(sapi_headers).http_response_code;
 	_old_http_status_line = SG(sapi_headers).http_status_line;
@@ -2199,7 +2201,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 			} zend_catch {
 				CG(in_compilation) = _old_in_compilation;
-				EG(in_execution) = _old_in_execution;
 				EG(current_execute_data) = _old_current_execute_data;
 				if (SG(sapi_headers).http_status_line) {
 					efree(SG(sapi_headers).http_status_line);
@@ -2282,7 +2283,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		} zend_catch {
 			CG(in_compilation) = _old_in_compilation;
-			EG(in_execution) = _old_in_execution;
 			EG(current_execute_data) = _old_current_execute_data;
 			if (SG(sapi_headers).http_status_line) {
 				efree(SG(sapi_headers).http_status_line);
@@ -2862,7 +2862,7 @@ PHP_METHOD(SoapClient, __call)
 	zend_bool free_soap_headers = 0;
 	zval *this_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|a!zz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|a!zz/",
 		&function, &function_len, &args, &options, &headers, &output_headers) == FAILURE) {
 		return;
 	}
@@ -3142,6 +3142,26 @@ PHP_METHOD(SoapClient, __setCookie)
 		array_init(&zcookie);
 		add_index_stringl(&zcookie, 0, val, val_len);
 		add_assoc_zval_ex(cookies, name, name_len, &zcookie);
+	}
+}
+/* }}} */
+
+/* {{{ proto array SoapClient::__getCookies ( void )
+   Returns list of cookies */
+PHP_METHOD(SoapClient, __getCookies)
+{
+	zval *cookies;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+
+	if ((cookies = zend_hash_str_find(Z_OBJPROP_P(getThis()), "_cookies", sizeof("_cookies")-1)) != NULL) {
+		ZVAL_NEW_ARR(return_value);
+		zend_array_dup(Z_ARRVAL_P(return_value), Z_ARRVAL_P(cookies));
+	} else {
+		array_init(return_value);
 	}
 }
 /* }}} */

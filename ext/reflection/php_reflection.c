@@ -44,7 +44,7 @@
 #define reflection_update_property(object, name, value) do { \
 		zval member; \
 		ZVAL_STRINGL(&member, name, sizeof(name)-1); \
-		zend_std_write_property(object, &member, value, -1 TSRMLS_CC); \
+		zend_std_write_property(object, &member, value, NULL TSRMLS_CC); \
 		if (Z_REFCOUNTED_P(value)) Z_DELREF_P(value); \
 		zval_ptr_dtor(&member); \
 	} while (0)
@@ -1494,9 +1494,17 @@ ZEND_METHOD(reflection, export)
 	int result;
 	zend_bool return_output = 0;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|b", &object, reflector_ptr, &return_output) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJECT_OF_CLASS(object, reflector_ptr)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(return_output)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	/* Invoke the __toString() method */
 	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1);
@@ -3414,7 +3422,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce TSRMLS_CC);
-	prop = zend_std_get_static_property(ce, name, 1, -1 TSRMLS_CC);
+	prop = zend_std_get_static_property(ce, name, 1, NULL TSRMLS_CC);
 	if (!prop) {
 		if (def_value) {
 			RETURN_ZVAL(def_value, 1, 0);
@@ -3447,7 +3455,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce TSRMLS_CC);
-	variable_ptr = zend_std_get_static_property(ce, name, 1, -1 TSRMLS_CC);
+	variable_ptr = zend_std_get_static_property(ce, name, 1, NULL TSRMLS_CC);
 	if (!variable_ptr) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 				"Class %s does not have a property named %s", ce->name->val, name->val);
@@ -3800,7 +3808,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 	} else {
 		if (Z_TYPE(intern->obj) != IS_UNDEF && Z_OBJ_HANDLER(intern->obj, has_property)) {
 			ZVAL_STR(&property, STR_COPY(name));
-			if (Z_OBJ_HANDLER(intern->obj, has_property)(&intern->obj, &property, 2, -1 TSRMLS_CC)) {
+			if (Z_OBJ_HANDLER(intern->obj, has_property)(&intern->obj, &property, 2, NULL TSRMLS_CC)) {
 				zval_ptr_dtor(&property);
 				RETURN_TRUE;
 			}
@@ -4142,7 +4150,7 @@ ZEND_METHOD(reflection_class, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_LONG(ce->ce_flags);
+	RETURN_LONG(ce->ce_flags & ~ZEND_ACC_CONSTANTS_UPDATED);
 }
 /* }}} */
 
@@ -6050,7 +6058,7 @@ const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 static zend_object_handlers *zend_std_obj_handlers;
 
 /* {{{ _reflection_write_property */
-static void _reflection_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
+static void _reflection_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
 {
 	if ((Z_TYPE_P(member) == IS_STRING)
 		&& zend_hash_exists(&Z_OBJCE_P(object)->properties_info, Z_STR_P(member))

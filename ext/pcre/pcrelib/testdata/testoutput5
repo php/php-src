@@ -270,7 +270,7 @@ No match
 /[z-\x{100}]/8DZ
 ------------------------------------------------------------------
         Bra
-        [z-\x{100}]
+        [z-\xff\x{100}]
         Ket
         End
 ------------------------------------------------------------------
@@ -812,7 +812,7 @@ No match
 /[\H]/8BZ
 ------------------------------------------------------------------
         Bra
-        [\x00-\x08\x0a-\x1f!-\x9f\x{a1}-\x{167f}\x{1681}-\x{180d}\x{180f}-\x{1fff}\x{200b}-\x{202e}\x{2030}-\x{205e}\x{2060}-\x{2fff}\x{3001}-\x{10ffff}]
+        [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff\x{100}-\x{167f}\x{1681}-\x{180d}\x{180f}-\x{1fff}\x{200b}-\x{202e}\x{2030}-\x{205e}\x{2060}-\x{2fff}\x{3001}-\x{10ffff}]
         Ket
         End
 ------------------------------------------------------------------
@@ -820,7 +820,7 @@ No match
 /[\V]/8BZ
 ------------------------------------------------------------------
         Bra
-        [\x00-\x09\x0e-\x84\x{86}-\x{2027}\x{202a}-\x{10ffff}]
+        [\x00-\x09\x0e-\x84\x86-\xff\x{100}-\x{2027}\x{202a}-\x{10ffff}]
         Ket
         End
 ------------------------------------------------------------------
@@ -1536,7 +1536,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /[^\x{1234}]+?/iS8I   
 Capturing subpattern count = 0
@@ -1544,7 +1544,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /[^\x{1234}]++/iS8I   
 Capturing subpattern count = 0
@@ -1552,7 +1552,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /[^\x{1234}]{2}/iS8I
 Capturing subpattern count = 0
@@ -1560,7 +1560,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 2
-No set of starting bytes
+No starting char list
 
 //<bsr_anycrlf><bsr_unicode>
 Failed: inconsistent NEWLINE options at offset 0
@@ -1620,7 +1620,7 @@ Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 /[\H\x{d7ff}]+/8BZ
 ------------------------------------------------------------------
         Bra
-        [\x00-\x08\x0a-\x1f!-\x9f\x{a1}-\x{167f}\x{1681}-\x{180d}\x{180f}-\x{1fff}\x{200b}-\x{202e}\x{2030}-\x{205e}\x{2060}-\x{2fff}\x{3001}-\x{10ffff}\x{d7ff}]++
+        [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff\x{100}-\x{167f}\x{1681}-\x{180d}\x{180f}-\x{1fff}\x{200b}-\x{202e}\x{2030}-\x{205e}\x{2060}-\x{2fff}\x{3001}-\x{10ffff}\x{d7ff}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -1660,7 +1660,7 @@ Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 /[\V\x{d7ff}]+/8BZ
 ------------------------------------------------------------------
         Bra
-        [\x00-\x09\x0e-\x84\x{86}-\x{2027}\x{202a}-\x{10ffff}\x{d7ff}]++
+        [\x00-\x09\x0e-\x84\x86-\xff\x{100}-\x{2027}\x{202a}-\x{10ffff}\x{d7ff}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -1881,5 +1881,20 @@ Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 5
 ------------------------------------------------------------------
     aa
  0: aa
+
+/[b-d\x{200}-\x{250}]*[ae-h]?#[\x{200}-\x{250}]{0,8}[\x00-\xff]*#[\x{200}-\x{250}]+[a-z]/8BZ
+------------------------------------------------------------------
+        Bra
+        [b-d\x{200}-\x{250}]*+
+        [ae-h]?+
+        #
+        [\x{200}-\x{250}]{0,8}+
+        [\x00-\xff]*
+        #
+        [\x{200}-\x{250}]++
+        [a-z]
+        Ket
+        End
+------------------------------------------------------------------
 
 /-- End of testinput5 --/

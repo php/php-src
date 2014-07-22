@@ -847,6 +847,8 @@ static union _zend_function *spl_recursive_it_get_method(zend_object **zobject, 
 				*zobject = Z_OBJ_P(zobj);
 				function_handler = (*zobject)->handlers->get_method(zobject, method, key TSRMLS_CC);
 			}
+		} else {
+			*zobject = Z_OBJ_P(zobj);
 		}
 	}
 	return function_handler;
@@ -1194,9 +1196,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	}
 
 	if (Z_TYPE(key) != IS_STRING) {
-		int use_copy;
-		zend_make_printable_zval(&key, &key_copy, &use_copy);
-		if (use_copy) {
+		if (zend_make_printable_zval(&key, &key_copy)) {
 			key = key_copy;
 		}
 	}
@@ -1972,7 +1972,7 @@ SPL_METHOD(RegexIterator, accept)
 	}
 
 	ZVAL_UNDEF(&subject_copy);
-	zend_make_printable_zval(subject_ptr, &subject_copy, &use_copy);
+	use_copy = zend_make_printable_zval(subject_ptr, &subject_copy);
 	if (use_copy) {
 		subject = Z_STRVAL(subject_copy);
 		subject_len = Z_STRLEN(subject_copy);
@@ -2609,7 +2609,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			} else {
 				ZVAL_COPY_VALUE(&intern->u.caching.zstr, &intern->current.data);
 			}
-			zend_make_printable_zval(&intern->u.caching.zstr, &expr_copy, &use_copy);
+			use_copy = zend_make_printable_zval(&intern->u.caching.zstr, &expr_copy);
 			if (use_copy) {
 				ZVAL_COPY(&intern->u.caching.zstr, &expr_copy);
 //???			INIT_PZVAL(intern->u.caching.zstr);
@@ -3458,7 +3458,7 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser T
 		array_set_zval_key(Z_ARRVAL_P(return_value), &key, data TSRMLS_CC);
 		zval_dtor(&key);
 	} else {
-		Z_ADDREF_P(data);
+		Z_TRY_ADDREF_P(data);
 		add_next_index_zval(return_value, data);
 	}
 	return ZEND_HASH_APPLY_KEEP;

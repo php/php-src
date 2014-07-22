@@ -211,7 +211,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!s!a!", &data_source, &data_source_len,
 				&username, &usernamelen, &password, &passwordlen, &options)) {
-		Z_OBJ_P(object) = NULL;
+		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 
@@ -225,7 +225,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		snprintf(alt_dsn, sizeof(alt_dsn), "pdo.dsn.%s", data_source);
 		if (FAILURE == cfg_get_string(alt_dsn, &ini_dsn)) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name");
-			Z_OBJ_P(object) = NULL;
+			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 
@@ -234,7 +234,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name (via INI: %s)", alt_dsn);
-			Z_OBJ_P(object) = NULL;
+			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 	}
@@ -244,13 +244,13 @@ static PHP_METHOD(PDO, dbh_constructor)
 		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn) TSRMLS_CC);
 		if (!data_source) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source URI");
-			Z_OBJ_P(object) = NULL;
+			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name (via URI)");
-			Z_OBJ_P(object) = NULL;
+			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 	}
@@ -261,7 +261,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "could not find driver");
-		Z_OBJ_P(object) = NULL;
+		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 	
@@ -302,6 +302,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 					/* is the connection still alive ? */
 					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh TSRMLS_CC)) {
 						/* nope... need to kill it */
+						/*??? memory leak */
+						zend_list_close(le);
 						pdbh = NULL;
 					}
 				}
@@ -371,6 +373,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 			le.type = php_pdo_list_entry();
 			le.ptr = dbh;
+			GC_REFCOUNT(&le) = 1;
 
 			if ((zend_hash_str_update_mem(&EG(persistent_list), 
 						(char*)dbh->persistent_id, dbh->persistent_id_len, &le, sizeof(le))) == NULL) {
@@ -398,7 +401,7 @@ options:
 
 	/* the connection failed; things will tidy up in free_storage */
 	/* XXX raise exception */
-	Z_OBJ_P(object) = NULL;
+	ZEND_CTOR_MAKE_NULL();
 }
 /* }}} */
 
@@ -429,7 +432,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 
 	ZVAL_STRINGL(&query_string, stmt->query_string, stmt->query_stringlen);
 	ZVAL_STRINGL(&z_key, "queryString", sizeof("queryString") - 1);
-	std_object_handlers.write_property(object, &z_key, &query_string, -1 TSRMLS_CC);
+	std_object_handlers.write_property(object, &z_key, &query_string, NULL TSRMLS_CC);
 	zval_ptr_dtor(&query_string);
 	zval_ptr_dtor(&z_key);
 
@@ -458,6 +461,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			Z_OBJ_P(object) = NULL;
+			ZEND_CTOR_MAKE_NULL();
 			object = NULL; /* marks failure */
 		} else if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);

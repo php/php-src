@@ -80,7 +80,7 @@ static inline void print_block(zend_code_block *block, zend_op *opcodes, char *t
 /* find code blocks in op_array
    code block is a set of opcodes with single flow of control, i.e. without jmps,
    branches, etc. */
-static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
+static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
@@ -88,7 +88,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 	zend_uint opno = 0;
 
 	memset(cfg, 0, sizeof(zend_cfg));
-	blocks = cfg->blocks = ecalloc(op_array->last + 2, sizeof(zend_code_block));
+	blocks = cfg->blocks = zend_arena_calloc(&ctx->arena, op_array->last + 2, sizeof(zend_code_block));
 	opline = op_array->opcodes;
 	blocks[0].start_opline = opline;
 	blocks[0].start_opline_no = 0;
@@ -102,7 +102,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 				/* would not optimize non-optimized BRK/CONTs - we cannot
 				 really know where it jumps, so these optimizations are
 				too dangerous */
-				efree(blocks);
 				return 0;
 #if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 			case ZEND_FAST_CALL:
@@ -169,8 +168,8 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 	/* first find block start points */
 	if (op_array->last_try_catch) {
 		int i;
-		cfg->try = ecalloc(op_array->last_try_catch, sizeof(zend_code_block *));
-		cfg->catch = ecalloc(op_array->last_try_catch, sizeof(zend_code_block *));
+		cfg->try = zend_arena_calloc(&ctx->arena, op_array->last_try_catch, sizeof(zend_code_block *));
+		cfg->catch = zend_arena_calloc(&ctx->arena, op_array->last_try_catch, sizeof(zend_code_block *));
 		for (i = 0; i< op_array->last_try_catch; i++) {
 			cfg->try[i] = &blocks[op_array->try_catch_array[i].try_op];
 			cfg->catch[i] = &blocks[op_array->try_catch_array[i].catch_op];
@@ -203,9 +202,9 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 			}
 		}
 		if (j) {
-			cfg->loop_start = ecalloc(op_array->last_brk_cont, sizeof(zend_code_block *));
-			cfg->loop_cont  = ecalloc(op_array->last_brk_cont, sizeof(zend_code_block *));
-			cfg->loop_brk   = ecalloc(op_array->last_brk_cont, sizeof(zend_code_block *));
+			cfg->loop_start = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
+			cfg->loop_cont  = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
+			cfg->loop_brk   = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
 			j = 0;
 			for (i = 0; i< op_array->last_brk_cont; i++) {
 				if (op_array->brk_cont_array[i].start >= 0 &&
@@ -317,18 +316,16 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 	zend_block_source *__s = tob->sources; \
     while (__s && __s->from != fromb) __s = __s->next; \
 	if (__s == NULL) { \
-		zend_block_source *__t = emalloc(sizeof(zend_block_source)); \
+		zend_block_source *__t = zend_arena_alloc(&ctx->arena, sizeof(zend_block_source)); \
 		__t->next = tob->sources; \
 		tob->sources = __t; \
 		__t->from = fromb; \
 	} \
 }
 
-#define DEL_SOURCE(cs) { \
-	zend_block_source *__ns = (*cs)->next; \
-	efree(*cs); \
-	*cs = __ns; \
-}
+#define DEL_SOURCE(cs) do { \
+		*(cs) = (*(cs))->next; \
+	} while (0)
 
 
 static inline void replace_source(zend_block_source *list, zend_code_block *old, zend_code_block *new)
@@ -400,7 +397,6 @@ static inline void del_source(zend_code_block *from, zend_code_block *to)
 			/* move 'to'`s references to 'from' */
 			to->start_opline = NULL;
 			to->access = 0;
-			efree(to->sources);
 			to->sources = NULL;
 			from_block->follow_to = to->follow_to;
 			if (to->op1_to) {
@@ -423,7 +419,7 @@ static inline void del_source(zend_code_block *from, zend_code_block *to)
 	}
 }
 
-static void delete_code_block(zend_code_block *block)
+static void delete_code_block(zend_code_block *block, zend_optimizer_ctx *ctx)
 {
 	if (block->protected) {
 		return;
@@ -455,7 +451,7 @@ static void delete_code_block(zend_code_block *block)
 	block->access = 0;
 }
 
-static void zend_access_path(zend_code_block *block)
+static void zend_access_path(zend_code_block *block, zend_optimizer_ctx *ctx)
 {
 	if (block->access) {
 		return;
@@ -463,25 +459,25 @@ static void zend_access_path(zend_code_block *block)
 
 	block->access = 1;
 	if (block->op1_to) {
-		zend_access_path(block->op1_to);
+		zend_access_path(block->op1_to, ctx);
 		ADD_SOURCE(block, block->op1_to);
 	}
 	if (block->op2_to) {
-		zend_access_path(block->op2_to);
+		zend_access_path(block->op2_to, ctx);
 		ADD_SOURCE(block, block->op2_to);
 	}
 	if (block->ext_to) {
-		zend_access_path(block->ext_to);
+		zend_access_path(block->ext_to, ctx);
 		ADD_SOURCE(block, block->ext_to);
 	}
 	if (block->follow_to) {
-		zend_access_path(block->follow_to);
+		zend_access_path(block->follow_to, ctx);
 		ADD_SOURCE(block, block->follow_to);
 	}
 }
 
 /* Traverse CFG, mark reachable basic blocks and build back references */
-static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int find_start)
+static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int find_start, zend_optimizer_ctx *ctx)
 {
 	zend_code_block *blocks = cfg->blocks;
 	zend_code_block *start = find_start? NULL : blocks;
@@ -490,31 +486,24 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 	/* Mark all blocks as unaccessible and destroy back references */
 	b = blocks;
 	while (b != NULL) {
-		zend_block_source *cs;
 		if (!start && b->access) {
 			start = b;
 		}
 		b->access = 0;
-		cs = b->sources;
-		while (cs) {
-			zend_block_source *n = cs->next;
-			efree(cs);
-			cs = n;
-		}
 		b->sources = NULL;
 		b = b->next;
 	}
 
 	/* Walk thorough all paths */
-	zend_access_path(start);
+	zend_access_path(start, ctx);
 
 	/* Add brk/cont paths */
 	if (op_array->last_brk_cont) {
 		int i;
 		for (i=0; i< op_array->last_brk_cont; i++) {
-			zend_access_path(cfg->loop_start[i]);
-			zend_access_path(cfg->loop_cont[i]);
-			zend_access_path(cfg->loop_brk[i]);
+			zend_access_path(cfg->loop_start[i], ctx);
+			zend_access_path(cfg->loop_cont[i], ctx);
+			zend_access_path(cfg->loop_brk[i], ctx);
 		}
 	}
 
@@ -523,7 +512,7 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 		int i;
 		for (i=0; i< op_array->last_try_catch; i++) {
 			if (!cfg->catch[i]->access) {
-				zend_access_path(cfg->catch[i]);
+				zend_access_path(cfg->catch[i], ctx);
 			}
 		}
 	}
@@ -558,7 +547,7 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 		convert_to_string((v)); \
 	}
 
-static void strip_nop(zend_code_block *block)
+static void strip_nop(zend_code_block *block, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline = block->start_opline;
 	zend_op *end, *new_end;
@@ -568,7 +557,7 @@ static void strip_nop(zend_code_block *block)
 		if (block->len == 1) {
 			/* this block is all NOPs, join with following block */
 			if (block->follow_to) {
-				delete_code_block(block);
+				delete_code_block(block, ctx);
 			}
 			return;
 		}
@@ -603,11 +592,11 @@ static void strip_nop(zend_code_block *block)
 	block->len = new_end - block->start_opline;
 }
 
-static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array, char *used_ext TSRMLS_DC)
+static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array, char *used_ext, zend_cfg *cfg, zend_optimizer_ctx *ctx TSRMLS_DC)
 {
 	zend_op *opline = block->start_opline;
 	zend_op *end, *last_op = NULL;
-	zend_op **Tsource = NULL;
+	zend_op **Tsource = cfg->Tsource;
 
 	print_block(block, op_array->opcodes, "Opt ");
 
@@ -616,7 +605,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 		if (block->len == 1) {
 			/* this block is all NOPs, join with following block */
 			if (block->follow_to) {
-				delete_code_block(block);
+				delete_code_block(block, ctx);
 			}
 			return;
 		}
@@ -626,9 +615,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 	}
 
 	/* we track data dependencies only insight a single basic block */
-	if (op_array->T) {
-		Tsource = ecalloc(op_array->last_var + op_array->T, sizeof(zend_op *));
-	}
+	memset(Tsource, 0, (op_array->last_var + op_array->T) * sizeof(zend_op *));
 	opline = block->start_opline;
 	end = opline + block->len;
 	while ((op_array->T) && (opline < end)) {
@@ -1198,11 +1185,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 		opline++;
 	}
 
-	strip_nop(block);
-
-	if (op_array->T) {
-		efree(Tsource);
-	}
+	strip_nop(block, ctx);
 }
 
 /* Rebuild plain (optimized) op_array from CFG */
@@ -1277,8 +1260,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 			}
 		}
 		op_array->last_try_catch = j;
-		efree(cfg->try);
-		efree(cfg->catch);
 	}
 
 	/* adjust loop jump targets */
@@ -1289,9 +1270,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 			op_array->brk_cont_array[i].cont = cfg->loop_cont[i]->start_opline - new_opcodes;
 			op_array->brk_cont_array[i].brk = cfg->loop_brk[i]->start_opline - new_opcodes;
 		}
-		efree(cfg->loop_start);
-		efree(cfg->loop_cont);
-		efree(cfg->loop_brk);
 	}
 
     /* adjust jump targets */
@@ -1337,7 +1315,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 #endif
 }
 
-static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_array, zend_code_block *blocks TSRMLS_DC)
+static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_array, zend_code_block *blocks, zend_cfg *cfg, zend_optimizer_ctx *ctx TSRMLS_DC)
 {
 	/* last_op is the last opcode of the current block */
 	zend_op *last_op = (block->start_opline + block->len - 1);
@@ -1364,7 +1342,7 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 					block->len--;
 					if (block->len == 0) {
 						/* this block is nothing but NOP now */
-						delete_code_block(block);
+						delete_code_block(block, ctx);
 					}
 					break;
 				}
@@ -1473,7 +1451,7 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 							block->len--;
 							if(block->len == 0) {
 								/* this block is nothing but NOP now */
-								delete_code_block(block);
+								delete_code_block(block, ctx);
 							}
 							break;
 						}
@@ -1665,10 +1643,8 @@ next_target:
 				if (var_num <= 0) {
    					return;
 				}
-				same_t = ecalloc(var_num, sizeof(char));
-				if (same_t == NULL) {
-					return;
-				}
+				same_t = cfg->same_t;
+				memset(same_t, 0, var_num);
 				same_t[VAR_NUM_EX(last_op->op1)] |= ZEND_OP1_TYPE(last_op);
 				same_t[VAR_NUM_EX(last_op->result)] |= ZEND_RESULT_TYPE(last_op);
 				target_block = block->op2_to;
@@ -1741,9 +1717,6 @@ next_target_ex:
 						block->op2_to = target_block->ext_to;
 					}
 					ADD_SOURCE(block, block->op2_to);
-				}
-				if (same_t != NULL) {
-					efree(same_t);
 				}
 			}
 			break;
@@ -1895,19 +1868,22 @@ next_target_znz:
 
 /* Find a set of variables which are used outside of the block where they are
  * defined. We won't apply some optimization patterns for such variables. */
-static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *used_ext)
+static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *used_ext, zend_optimizer_ctx *ctx)
 {
 	zend_code_block *next_block = block->next;
 	char *usage;
 	char *defined_here;
+	void *checkpoint;
 
 	if (op_array->T == 0) {
 		/* shortcut - if no Ts, nothing to do */
 		return;
 	}
 
-	usage = ecalloc(op_array->last_var + op_array->T, 1);
-	defined_here = emalloc(op_array->last_var + op_array->T);
+	checkpoint = zend_arena_checkpoint(ctx->arena);
+	usage = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
+	memset(usage, 0, op_array->last_var + op_array->T);
+	defined_here = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
 
 	while (next_block) {
 		zend_op *opline = next_block->start_opline;
@@ -1982,7 +1958,6 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
 					case ZEND_DO_FCALL:
-					case ZEND_DO_FCALL_BY_NAME:
 						if (ZEND_RESULT_TYPE(opline) == IS_VAR) {
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 							ZEND_RESULT_TYPE(opline) |= EXT_TYPE_UNUSED;
@@ -2053,18 +2028,18 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 		block = block->next;
 	} /* end blocks */
 
-	efree(defined_here);
-	efree(usage);
+	zend_arena_release(&ctx->arena, checkpoint);
 }
 
 #define PASSES 3
 
-static void zend_block_optimization(zend_op_array *op_array TSRMLS_DC)
+static void zend_block_optimization(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC)
 {
 	zend_cfg cfg;
 	zend_code_block *cur_block;
 	int pass;
 	char *usage;
+	void *checkpoint;
 
 #if DEBUG_BLOCKPASS
 	fprintf(stderr, "File %s func %s\n", op_array->filename, op_array->function_name? op_array->function_name : "main");
@@ -2078,24 +2053,34 @@ static void zend_block_optimization(zend_op_array *op_array TSRMLS_DC)
 #endif
 
     /* Build CFG */
-	if (!find_code_blocks(op_array, &cfg)) {
+	checkpoint = zend_arena_checkpoint(ctx->arena);
+	if (!find_code_blocks(op_array, &cfg, ctx)) {
+		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
 
-	zend_rebuild_access_path(&cfg, op_array, 0);
+	zend_rebuild_access_path(&cfg, op_array, 0, ctx);
 	/* full rebuild here to produce correct sources! */
-	usage = emalloc(op_array->last_var + op_array->T);
+	if (op_array->last_var || op_array->T) {
+		cfg.Tsource = zend_arena_calloc(&ctx->arena, op_array->last_var + op_array->T, sizeof(zend_op *));
+		cfg.same_t = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
+		usage = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
+	} else {
+		cfg.Tsource = NULL;
+		cfg.same_t = NULL;
+		usage = NULL;
+	}
 	for (pass = 0; pass < PASSES; pass++) {
 		/* Compute data dependencies */
 		memset(usage, 0, op_array->last_var + op_array->T);
-		zend_t_usage(cfg.blocks, op_array, usage);
+		zend_t_usage(cfg.blocks, op_array, usage, ctx);
 
 		/* optimize each basic block separately */
 		for (cur_block = cfg.blocks; cur_block; cur_block = cur_block->next) {
 			if (!cur_block->access) {
 				continue;
 			}
-			zend_optimize_block(cur_block, op_array, usage TSRMLS_CC);
+			zend_optimize_block(cur_block, op_array, usage, &cfg, ctx TSRMLS_CC);
 		}
 
 		/* Jump optimization for each block */
@@ -2103,26 +2088,17 @@ static void zend_block_optimization(zend_op_array *op_array TSRMLS_DC)
 			if (!cur_block->access) {
 				continue;
 			}
-			zend_jmp_optimization(cur_block, op_array, cfg.blocks TSRMLS_CC);
+			zend_jmp_optimization(cur_block, op_array, cfg.blocks, &cfg, ctx TSRMLS_CC);
 		}
 
 		/* Eliminate unreachable basic blocks */
-		zend_rebuild_access_path(&cfg, op_array, 1);
+		zend_rebuild_access_path(&cfg, op_array, 1, ctx);
 	}
 
 	memset(usage, 0, op_array->last_var + op_array->T);
-	zend_t_usage(cfg.blocks, op_array, usage);
+	zend_t_usage(cfg.blocks, op_array, usage, ctx);
 	assemble_code_blocks(&cfg, op_array);
-	efree(usage);
 
 	/* Destroy CFG */
-	for (cur_block = cfg.blocks; cur_block; cur_block = cur_block->next) {
-		zend_block_source *cs = cur_block->sources;
-		while (cs) {
-			zend_block_source *n = cs->next;
-			efree(cs);
-			cs = n;
-		}
-	}
-	efree(cfg.blocks);
+	zend_arena_release(&ctx->arena, checkpoint);
 }

@@ -179,6 +179,14 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_DEPRECATED
 #endif
 
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
+# define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
+# define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((cold, unused));
+#else
+# define ZEND_ATTRIBUTE_UNUSED
+# define ZEND_ATTRIBUTE_UNUSED_LABEL
+#endif
+
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
 # define ZEND_FASTCALL __attribute__((fastcall))
 #elif defined(_MSC_VER) && defined(_M_IX86)
@@ -290,8 +298,9 @@ typedef enum {
 
 #define USED_RET() \
 	(!EG(current_execute_data) || \
-	 !EG(current_execute_data)->opline || \
-	 !(EG(current_execute_data)->opline->result_type & EXT_TYPE_UNUSED))
+	 !EG(current_execute_data)->prev_execute_data || \
+	 !ZEND_USER_CODE(EG(current_execute_data)->prev_execute_data->func->common.type) || \
+	 !(EG(current_execute_data)->prev_execute_data->opline->result_type & EXT_TYPE_UNUSED))
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
@@ -317,6 +326,21 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #define Z_ADDREF(z)					Z_ADDREF_P(&(z))
 #define Z_DELREF(z)					Z_DELREF_P(&(z))
 
+#define Z_TRY_ADDREF_P(pz) do {		\
+	if (Z_REFCOUNTED_P((pz))) {		\
+		Z_ADDREF_P((pz));			\
+	}								\
+} while (0)
+
+#define Z_TRY_DELREF_P(pz) do {		\
+	if (Z_REFCOUNTED_P((pz))) {		\
+		Z_DELREF_P((pz));			\
+	}								\
+} while (0)
+
+#define Z_TRY_ADDREF(z)				Z_TRY_ADDREF_P(&(z))
+#define Z_TRY_DELREF(z)				Z_TRY_DELREF_P(&(z))
+
 #if ZEND_DEBUG
 #define zend_always_inline inline
 #define zend_never_inline
@@ -339,8 +363,8 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #endif /* ZEND_DEBUG */
 
 #if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
-# define EXPECTED(condition)   __builtin_expect(condition, 1)
-# define UNEXPECTED(condition) __builtin_expect(condition, 0)
+# define EXPECTED(condition)   __builtin_expect(!(!(condition)), 1)
+# define UNEXPECTED(condition) __builtin_expect(!(!(condition)), 0)
 #else
 # define EXPECTED(condition)   (condition)
 # define UNEXPECTED(condition) (condition)
@@ -379,7 +403,7 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #include "zend_string.h"
 
 static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
-	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
+	ZEND_ASSERT(Z_REFCOUNTED_P(pz) || Z_IMMUTABLE_P(pz));
 	return GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
@@ -585,7 +609,7 @@ END_EXTERN_C()
 
 BEGIN_EXTERN_C()
 ZEND_API char *get_zend_version(void);
-ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
+ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
 ZEND_API int zend_print_zval(zval *expr, int indent TSRMLS_DC);
 ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC);
 ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC);
@@ -707,13 +731,11 @@ END_EXTERN_C()
 		}												\
 	} while (0)
 
-#define ZVAL_DUP_DEREF(z, v)							\
-	do {												\
-		zval *__z1 = (z);								\
-		zval *__z2 = (v);								\
-		ZVAL_DEREF(__z2);								\
-		ZVAL_COPY_VALUE(__z1, __z2);					\
-		zval_opt_copy_ctor(__z1);						\
+#define ZVAL_MAKE_REF(zv) do {							\
+		zval *__zv = (zv);								\
+		if (!Z_ISREF_P(__zv)) {							\
+			ZVAL_NEW_REF(__zv, __zv);					\
+		}												\
 	} while (0)
 
 #define ZVAL_UNREF(z) do {								\
@@ -725,19 +747,52 @@ END_EXTERN_C()
 		efree(ref);										\
 	} while (0)
 
+#define SEPARATE_STRING(zv) do {						\
+		zval *_zv = (zv);								\
+		if (Z_REFCOUNTED_P(_zv) &&						\
+		    Z_REFCOUNT_P(_zv) > 1) {					\
+			Z_DELREF_P(_zv);							\
+			zval_copy_ctor_func(_zv);					\
+		}												\
+	} while (0)
+
+#define SEPARATE_ARRAY(zv) do {							\
+		zval *_zv = (zv);								\
+		if (Z_REFCOUNT_P(_zv) > 1) {					\
+			if (!Z_IMMUTABLE_P(_zv)) {					\
+				Z_DELREF_P(_zv);						\
+			}											\
+			zval_copy_ctor_func(_zv);					\
+		}												\
+	} while (0)
+
+#define SEPARATE_ZVAL_NOREF(zv) do {					\
+		zval *_zv = (zv);								\
+		if (Z_COPYABLE_P(_zv) ||						\
+		    Z_IMMUTABLE_P(_zv)) {						\
+			if (Z_REFCOUNT_P(_zv) > 1) {				\
+				if (!Z_IMMUTABLE_P(_zv)) {				\
+					Z_DELREF_P(_zv);					\
+				}										\
+				zval_copy_ctor_func(_zv);				\
+			}											\
+		}												\
+	} while (0)
+
 #define SEPARATE_ZVAL(zv) do {							\
 		zval *_zv = (zv);								\
 		if (Z_REFCOUNTED_P(_zv) ||						\
 		    Z_IMMUTABLE_P(_zv)) {						\
-			if (Z_IMMUTABLE_P(_zv)) {					\
-				zval_copy_ctor_func(_zv);				\
-			} else if (Z_REFCOUNT_P(_zv) > 1) {			\
-				if (Z_ISREF_P(_zv)) {					\
+			if (Z_REFCOUNT_P(_zv) > 1) {				\
+				if (Z_COPYABLE_P(_zv) ||				\
+				    Z_IMMUTABLE_P(_zv)) {				\
+					if (!Z_IMMUTABLE_P(_zv)) {			\
+						Z_DELREF_P(_zv);				\
+					}									\
+					zval_copy_ctor_func(_zv);			\
+				} else if (Z_ISREF_P(_zv)) {			\
 					Z_DELREF_P(_zv);					\
 					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));		\
-				} else if (Z_COPYABLE_P(_zv)) {			\
-					Z_DELREF_P(_zv);					\
-					zval_copy_ctor_func(_zv);			\
 				}										\
 			}											\
 		}												\
@@ -745,51 +800,21 @@ END_EXTERN_C()
 
 #define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
 		zval *_zv = (zv);								\
-		if (!Z_ISREF_P(_zv)) {							\
-			if (Z_COPYABLE_P(_zv) ||                    \
-			    Z_IMMUTABLE_P(_zv)) {					\
-				if (Z_IMMUTABLE_P(_zv)) {				\
-					zval_copy_ctor_func(_zv);			\
-				} else if (Z_REFCOUNT_P(_zv) > 1) {		\
+		if (Z_COPYABLE_P(_zv) ||                    	\
+		    Z_IMMUTABLE_P(_zv)) {						\
+			if (Z_REFCOUNT_P(_zv) > 1) {				\
+				if (!Z_IMMUTABLE_P(_zv)) {				\
 					Z_DELREF_P(_zv);					\
-					zval_copy_ctor_func(_zv);			\
 				}										\
+				zval_copy_ctor_func(_zv);				\
 			}											\
-		}												\
-	} while (0)
-
-#define SEPARATE_ZVAL_IF_REF(zv) do {					\
-		zval *__zv = (zv);								\
-		if (Z_ISREF_P(__zv)) {							\
-			if (Z_REFCOUNT_P(__zv) == 1) {				\
-				ZVAL_UNREF(__zv);						\
-			} else {									\
-				Z_DELREF_P(__zv);						\
-				ZVAL_DUP(__zv, Z_REFVAL_P(__zv));		\
-			}											\
-		}												\
-	} while (0)
-
-#define SEPARATE_ZVAL_TO_MAKE_IS_REF(zv) do {			\
-		zval *__zv = (zv);								\
-		if (!Z_ISREF_P(__zv)) {							\
-		    if (Z_COPYABLE_P(__zv) &&					\
-			    Z_REFCOUNT_P(__zv) > 1) {				\
-				Z_DELREF_P(__zv);						\
-				zval_copy_ctor_func(__zv);				\
-			}											\
-			ZVAL_NEW_REF(__zv, __zv);					\
 		}												\
 	} while (0)
 
 #define SEPARATE_ARG_IF_REF(varptr) do { 				\
-		zval *_varptr = (varptr);						\
-		if (Z_ISREF_P(_varptr)) { 						\
-			zval tmp;									\
-			ZVAL_DUP(&tmp, Z_REFVAL_P(_varptr));		\
-			varptr = &tmp;								\
-		} else if (Z_REFCOUNTED_P(_varptr)) { 			\
-			Z_ADDREF_P(_varptr); 						\
+		ZVAL_DEREF(varptr);								\
+		if (Z_REFCOUNTED_P(varptr)) { 					\
+			Z_ADDREF_P(varptr); 						\
 		}												\
 	} while (0)
 

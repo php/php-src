@@ -213,13 +213,13 @@ static ZEND_INI_MH(accel_include_path_on_modify)
 			if (ZCG(enabled) && accel_startup_ok &&
 			    (ZCG(counted) || ZCSG(accelerator_enabled))) {
 
-				ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len) + 1);
+				ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len));
 			    if (!ZCG(include_path_key) &&
 			        !zend_accel_hash_is_full(&ZCSG(include_paths))) {
 					SHM_UNPROTECT();
 					zend_shared_alloc_lock(TSRMLS_C);
 
-					ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len) + 1);
+					ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len));
 				    if (!ZCG(include_path_key) &&
 					    !zend_accel_hash_is_full(&ZCSG(include_paths))) {
 						char *key;
@@ -229,7 +229,7 @@ static ZEND_INI_MH(accel_include_path_on_modify)
 							memcpy(key, ZCG(include_path), ZCG(include_path_len) + 1);
 							key[ZCG(include_path_len) + 1] = 'A' + ZCSG(include_paths).num_entries;
 							ZCG(include_path_key) = key + ZCG(include_path_len) + 1;
-							zend_accel_hash_update(&ZCSG(include_paths), key, ZCG(include_path_len) + 1, 0, ZCG(include_path_key));
+							zend_accel_hash_update(&ZCSG(include_paths), key, ZCG(include_path_len), 0, ZCG(include_path_key));
 						} else {
 							zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM TSRMLS_CC);
 						}
@@ -400,10 +400,12 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 	}
 
 	/* class table hash keys, class names, properties, methods, constants, etc */
-	for (idx = 0; idx < CG(class_table)->nNumUsed; idx++) {		
+	for (idx = 0; idx < CG(class_table)->nNumUsed; idx++) {
+		zend_class_entry *ce;
+
 		p = CG(class_table)->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		zend_class_entry *ce = (zend_class_entry*)Z_PTR(p->val);
+		ce = (zend_class_entry*)Z_PTR(p->val);
 
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key TSRMLS_CC);
@@ -733,7 +735,7 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 #endif
 
 	if (sapi_module.get_stat &&
-	    !EG(opline_ptr) &&
+	    !EG(current_execute_data) &&
 	    file_handle->filename == SG(request_info).path_translated) {
 
 		struct stat *tmpbuf = sapi_module.get_stat(TSRMLS_C);
@@ -960,13 +962,13 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
 			if (ZCG(include_path_check) &&
 			    ZCG(enabled) && accel_startup_ok &&
 			    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
-			    !zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len) + 1) &&
+			    !zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len)) &&
 			    !zend_accel_hash_is_full(&ZCSG(include_paths))) {
 
 				SHM_UNPROTECT();
 				zend_shared_alloc_lock(TSRMLS_C);
 
-				ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len) + 1);
+				ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len));
 				if (ZCG(include_path_key)) {
 					include_path = ZCG(include_path_key);
 					include_path_len = 1;
@@ -978,7 +980,7 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
 						memcpy(key, ZCG(include_path), ZCG(include_path_len) + 1);
 						key[ZCG(include_path_len) + 1] = 'A' + ZCSG(include_paths).num_entries;
 						ZCG(include_path_key) = key + ZCG(include_path_len) + 1;
-						zend_accel_hash_update(&ZCSG(include_paths), key, ZCG(include_path_len) + 1, 0, ZCG(include_path_key));
+						zend_accel_hash_update(&ZCSG(include_paths), key, ZCG(include_path_len), 0, ZCG(include_path_key));
 						include_path = ZCG(include_path_key);
 						include_path_len = 1;
 					} else {
@@ -995,7 +997,7 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
            since fopen_wrappers from version 4.0.7 use current script's path
            in include path too.
         */
-        if (EG(in_execution) &&
+        if (EG(current_execute_data) &&
             (parent_script = zend_get_executed_filename(TSRMLS_C)) != NULL &&
 	        parent_script[0] != '[') {
 
@@ -1073,7 +1075,7 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 		return FAILURE;
 	}
 
-	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath, strlen(realpath) + 1);
+	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath, strlen(realpath));
 	if (persistent_script && !persistent_script->corrupted) {
 		zend_file_handle file_handle;
 
@@ -1110,7 +1112,7 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 /* Adds another key for existing cached script */
 static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_hash_entry *bucket TSRMLS_DC)
 {
-	if (!zend_accel_hash_find(&ZCSG(hash), key, key_length + 1)) {
+	if (!zend_accel_hash_find(&ZCSG(hash), key, key_length)) {
 		if (zend_accel_hash_is_full(&ZCSG(hash))) {
 			zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
 			ZSMMG(memory_exhausted) = 1;
@@ -1119,7 +1121,7 @@ static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_ha
 			char *new_key = zend_shared_alloc(key_length + 1);
 			if (new_key) {
 				memcpy(new_key, key, key_length + 1);
-				if (zend_accel_hash_update(&ZCSG(hash), new_key, key_length + 1, 1, bucket)) {
+				if (zend_accel_hash_update(&ZCSG(hash), new_key, key_length, 1, bucket)) {
 					zend_accel_error(ACCEL_LOG_INFO, "Added key '%s'", new_key);
 				}
 			} else {
@@ -1161,7 +1163,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* Check if we still need to put the file into the cache (may be it was
 	 * already stored by another process. This final check is done under
 	 * exclusive lock) */
-	bucket = zend_accel_hash_find_entry(&ZCSG(hash), new_persistent_script->full_path->val, new_persistent_script->full_path->len + 1);
+	bucket = zend_accel_hash_find_entry(&ZCSG(hash), new_persistent_script->full_path->val, new_persistent_script->full_path->len);
 	if (bucket) {
 		zend_persistent_script *existing_persistent_script = (zend_persistent_script *)bucket->data;
 
@@ -1208,7 +1210,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
 
 	/* store script structure in the hash table */
-	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->full_path->val, new_persistent_script->full_path->len + 1, 0, new_persistent_script);
+	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->full_path->val, new_persistent_script->full_path->len, 0, new_persistent_script);
 	if (bucket) {
 		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", new_persistent_script->full_path);
 		if (!ZCG(accel_directives).revalidate_path &&
@@ -1217,7 +1219,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		    (new_persistent_script->full_path->len != key_length ||
 		     memcmp(new_persistent_script->full_path->val, key, key_length) != 0)) {
 			/* link key to the same persistent script in hash table */
-			if (zend_accel_hash_update(&ZCSG(hash), key, key_length + 1, 1, bucket)) {
+			if (zend_accel_hash_update(&ZCSG(hash), key, key_length, 1, bucket)) {
 				zend_accel_error(ACCEL_LOG_INFO, "Added key '%s'", key);
 			} else {
 				zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
@@ -1281,7 +1283,8 @@ static void zend_accel_set_auto_globals(int mask TSRMLS_DC)
 	int n = 1;
 
 	for (i = 0; i < ag_size ; i++) {
-		if (mask & n) {
+		if ((mask & n) && !(ZCG(auto_globals_mask) & n)) {
+			ZCG(auto_globals_mask) |= n;
 			zend_is_auto_global(jit_auto_globals_str[i] TSRMLS_CC);
 		}
 		n += n;
@@ -1517,16 +1520,18 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 	/* In case this callback is called from include_once, require_once or it's
 	 * a main FastCGI request, the key must be already calculated, and cached
 	 * persistent script already found */
-	if ((EG(opline_ptr) == NULL &&
+	if ((EG(current_execute_data) == NULL &&
 	     ZCG(cache_opline) == NULL &&
 	     file_handle->filename == SG(request_info).path_translated &&
 	     ZCG(cache_persistent_script)) ||
-	    (EG(opline_ptr) && *EG(opline_ptr) &&
-	     *EG(opline_ptr) == ZCG(cache_opline) &&
-	     (*EG(opline_ptr))->opcode == ZEND_INCLUDE_OR_EVAL &&
+	    (EG(current_execute_data) &&
+	     EG(current_execute_data)->func &&
+	     ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
+	     EG(current_execute_data)->opline == ZCG(cache_opline) &&
+	     EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-	     ((*EG(opline_ptr))->extended_value == ZEND_INCLUDE_ONCE ||
-	      (*EG(opline_ptr))->extended_value == ZEND_REQUIRE_ONCE))) {
+	     (EG(current_execute_data)->opline->extended_value == ZEND_INCLUDE_ONCE ||
+	      EG(current_execute_data)->opline->extended_value == ZEND_REQUIRE_ONCE))) {
 #else
  	     ((*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_INCLUDE_ONCE ||
  	      (*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_REQUIRE_ONCE))) {
@@ -1544,7 +1549,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 		if ((key = accel_make_persistent_key(file_handle, &key_length TSRMLS_CC)) == NULL) {
 			return accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
 		}
-		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length + 1);
+		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length);
 		if (!persistent_script) {
 			/* try to find cached script by full real path */
 			zend_accel_hash_entry *bucket;
@@ -1574,7 +1579,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 		    }
 
 			if (file_handle->opened_path &&
-			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path, strlen(file_handle->opened_path) + 1)) != NULL) {
+			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path, strlen(file_handle->opened_path))) != NULL) {
 
 				persistent_script = (zend_persistent_script *)bucket->data;
 				if (!ZCG(accel_directives).revalidate_path &&
@@ -1681,11 +1686,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 
 		/* see bug #15471 (old BTS) */
 		if (persistent_script->full_path) {
-			if (!EG(opline_ptr) || !*EG(opline_ptr) ||
-			    (*EG(opline_ptr))->opcode != ZEND_INCLUDE_OR_EVAL ||
+			if (!EG(current_execute_data) || !EG(current_execute_data)->opline ||
+			    !EG(current_execute_data)->func ||
+			    !ZEND_USER_CODE(EG(current_execute_data)->func->common.type) ||
+			    EG(current_execute_data)->opline->opcode != ZEND_INCLUDE_OR_EVAL ||
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-			    ((*EG(opline_ptr))->extended_value != ZEND_INCLUDE_ONCE &&
-			     (*EG(opline_ptr))->extended_value != ZEND_REQUIRE_ONCE)) {
+			    (EG(current_execute_data)->opline->extended_value != ZEND_INCLUDE_ONCE &&
+			     EG(current_execute_data)->opline->extended_value != ZEND_REQUIRE_ONCE)) {
 #else
  			    ((*EG(opline_ptr))->op2.u.constant.value.lval != ZEND_INCLUDE_ONCE &&
  			     (*EG(opline_ptr))->op2.u.constant.value.lval != ZEND_REQUIRE_ONCE)) {
@@ -1842,8 +1849,10 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 	    !CG(interactive) &&
 	    !ZCSG(restart_in_progress)) {
 
-		if (EG(opline_ptr) && *EG(opline_ptr)) {
-			zend_op *opline = *EG(opline_ptr);
+		if (EG(current_execute_data) &&
+		    EG(current_execute_data)->func &&
+		    ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+			zend_op *opline = EG(current_execute_data)->opline;
 
             if (opline->opcode == ZEND_INCLUDE_OR_EVAL &&
                 (opline->op2.u.constant.value.lval == ZEND_INCLUDE_ONCE ||
@@ -1867,7 +1876,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 
 			    /* Check if requested file already cached (by full name) */
 			    if (IS_ABSOLUTE_PATH(filename, filename_len) &&
-				    (persistent_script = zend_accel_hash_find(&ZCSG(hash), (char*)filename, filename_len + 1)) != NULL &&
+				    (persistent_script = zend_accel_hash_find(&ZCSG(hash), (char*)filename, filename_len)) != NULL &&
 				    !persistent_script->corrupted) {
 
 					handle->opened_path = estrndup(persistent_script->full_path, persistent_script->full_path_len);
@@ -1883,7 +1892,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 				key = accel_make_persistent_key_ex(handle, filename_len, &key_length TSRMLS_CC);
 				if (!ZCG(accel_directives).revalidate_path &&
 				    key &&
-					(persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length + 1)) != NULL &&
+					(persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length)) != NULL &&
 				    !persistent_script->corrupted) {
 
 					handle->opened_path = estrndup(persistent_script->full_path, persistent_script->full_path_len);
@@ -1898,7 +1907,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 
 			    /* Check if requested file already cached (by real name) */
 				if (resolved_path &&
-				    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path, strlen(resolved_path) + 1)) != NULL) {
+				    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path, strlen(resolved_path))) != NULL) {
 
 					persistent_script = (zend_persistent_script *)bucket->data;
 					if (persistent_script && !persistent_script->corrupted) {
@@ -1939,14 +1948,15 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 	    !ZCSG(restart_in_progress)) {
 
 		/* check if callback is called from include_once or it's a main request */
-		if ((!EG(opline_ptr) &&
+		if ((!EG(current_execute_data) &&
 		     filename == SG(request_info).path_translated) ||
-		    (EG(opline_ptr) &&
-		     *EG(opline_ptr) &&
-             (*EG(opline_ptr))->opcode == ZEND_INCLUDE_OR_EVAL &&
+		    (EG(current_execute_data) &&
+		     EG(current_execute_data)->func &&
+		     ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
+             EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-             ((*EG(opline_ptr))->extended_value == ZEND_INCLUDE_ONCE ||
-              (*EG(opline_ptr))->extended_value == ZEND_REQUIRE_ONCE))) {
+             (EG(current_execute_data)->opline->extended_value == ZEND_INCLUDE_ONCE ||
+              EG(current_execute_data)->opline->extended_value == ZEND_REQUIRE_ONCE))) {
 #else
               ((*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_INCLUDE_ONCE ||
                (*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_REQUIRE_ONCE))) {
@@ -1959,11 +1969,11 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 			handle->free_filename = 0;
 
 			/* check if cached script was already found by resolve_path() */
-			if ((EG(opline_ptr) == NULL &&
+			if ((EG(current_execute_data) == NULL &&
 			     ZCG(cache_opline) == NULL &&
 			     ZCG(cache_persistent_script) != NULL) ||
-			    (EG(opline_ptr) &&
-			     (ZCG(cache_opline) == *EG(opline_ptr)))) {
+			    (EG(current_execute_data) &&
+			     (ZCG(cache_opline) == EG(current_execute_data)->opline))) {
 				persistent_script = ZCG(cache_persistent_script);
 				handle->opened_path = estrndup(persistent_script->full_path->val, persistent_script->full_path->len);
 				handle->type = ZEND_HANDLE_FILENAME;
@@ -1975,15 +1985,15 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 
 			    if ((IS_ABSOLUTE_PATH(filename, filename_len) ||
 			         is_stream_path(filename)) &&
-				    (persistent_script = zend_accel_hash_find(&ZCSG(hash), (char*)filename, filename_len + 1)) != NULL &&
+				    (persistent_script = zend_accel_hash_find(&ZCSG(hash), (char*)filename, filename_len)) != NULL &&
 				    !persistent_script->corrupted) {
 
 					handle->opened_path = estrndup(persistent_script->full_path, persistent_script->full_path_len);
 					handle->type = ZEND_HANDLE_FILENAME;
 					memcpy(ZCG(key), persistent_script->full_path, persistent_script->full_path_len + 1);
 					ZCG(key_len) = persistent_script->full_path_len;
-					ZCG(cache_opline) = EG(opline_ptr) ? *EG(opline_ptr) : NULL;
-					ZCG(cache_persistent_script) = EG(opline_ptr) ? persistent_script : NULL;
+					ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
+					ZCG(cache_persistent_script) = EG(current_execute_data) ? persistent_script : NULL;
 					return SUCCESS;
 			    }
 #endif
@@ -2004,14 +2014,15 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 	    !ZCSG(restart_in_progress)) {
 
 		/* check if callback is called from include_once or it's a main request */
-		if ((!EG(opline_ptr) &&
+		if ((!EG(current_execute_data) &&
 		     filename == SG(request_info).path_translated) ||
-		    (EG(opline_ptr) &&
-		     *EG(opline_ptr) &&
-             (*EG(opline_ptr))->opcode == ZEND_INCLUDE_OR_EVAL &&
+		    (EG(current_execute_data) &&
+		     EG(current_execute_data)->func &&
+		     ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
+             EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-             ((*EG(opline_ptr))->extended_value == ZEND_INCLUDE_ONCE ||
-              (*EG(opline_ptr))->extended_value == ZEND_REQUIRE_ONCE))) {
+             (EG(current_execute_data)->opline->extended_value == ZEND_INCLUDE_ONCE ||
+              EG(current_execute_data)->opline->extended_value == ZEND_REQUIRE_ONCE))) {
 #else
               ((*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_INCLUDE_ONCE ||
                (*EG(opline_ptr))->op2.u.constant.value.lval == ZEND_REQUIRE_ONCE))) {
@@ -2028,12 +2039,12 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 		    /* Check if requested file already cached (by full name) */
 		    if ((IS_ABSOLUTE_PATH(filename, filename_len) ||
 		         is_stream_path(filename)) &&
-			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), (char*)filename, filename_len + 1)) != NULL) {
+			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), (char*)filename, filename_len)) != NULL) {
 				persistent_script = (zend_persistent_script *)bucket->data;
 				if (persistent_script && !persistent_script->corrupted) {
 					memcpy(ZCG(key), persistent_script->full_path->val, persistent_script->full_path->len + 1);
 					ZCG(key_len) = persistent_script->full_path->len;
-					ZCG(cache_opline) = EG(opline_ptr) ? *EG(opline_ptr) : NULL;
+					ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 					ZCG(cache_persistent_script) = persistent_script;
 					return estrndup(persistent_script->full_path->val, persistent_script->full_path->len);
 				}
@@ -2046,11 +2057,11 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 			key = accel_make_persistent_key_ex(&handle, filename_len, &key_length TSRMLS_CC);
 			if (!ZCG(accel_directives).revalidate_path &&
 			    key &&
-				(persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length + 1)) != NULL &&
+				(persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length)) != NULL &&
 			    !persistent_script->corrupted) {
 
 				/* we have persistent script */
-				ZCG(cache_opline) = EG(opline_ptr) ? *EG(opline_ptr) : NULL;
+				ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 				ZCG(cache_persistent_script) = persistent_script;
 				return estrndup(persistent_script->full_path->val, persistent_script->full_path->len);
 			}
@@ -2060,7 +2071,7 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 
 		    /* Check if requested file already cached (by real path) */
 			if (resolved_path &&
-			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path, strlen(resolved_path) + 1)) != NULL) {
+			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path, strlen(resolved_path))) != NULL) {
 				persistent_script = (zend_persistent_script *)bucket->data;
 
 				if (persistent_script && !persistent_script->corrupted) {
@@ -2072,7 +2083,7 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 						zend_shared_alloc_unlock(TSRMLS_C);
 			    		SHM_PROTECT();
 					}
-					ZCG(cache_opline) = (EG(opline_ptr) && key) ? *EG(opline_ptr): NULL;
+					ZCG(cache_opline) = (EG(current_execute_data) && key) ? EG(current_execute_data)->opline : NULL;
 					ZCG(cache_persistent_script) = key ? persistent_script : NULL;
 					return resolved_path;
 				}
@@ -2110,6 +2121,7 @@ static void accel_activate(void)
 
 	SHM_UNPROTECT();
 	/* PHP-5.4 and above return "double", but we use 1 sec precision */
+	ZCG(auto_globals_mask) = 0;
 	ZCG(request_time) = (time_t)sapi_get_request_time(TSRMLS_C);
 	ZCG(cache_opline) = NULL;
 	ZCG(cache_persistent_script) = NULL;
@@ -2673,7 +2685,7 @@ static int accel_startup(zend_extension *extension)
 		ZCG(include_path_key) = NULL;
 		if (ZCG(include_path) && *ZCG(include_path)) {
 			ZCG(include_path_len) = strlen(ZCG(include_path));
-			ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len) + 1);
+			ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len));
 			if (!ZCG(include_path_key) &&
 			    !zend_accel_hash_is_full(&ZCSG(include_paths))) {
 				char *key;
@@ -2684,7 +2696,7 @@ static int accel_startup(zend_extension *extension)
 					memcpy(key, ZCG(include_path), ZCG(include_path_len) + 1);
 					key[ZCG(include_path_len) + 1] = 'A' + ZCSG(include_paths).num_entries;
 					ZCG(include_path_key) = key + ZCG(include_path_len) + 1;
-					zend_accel_hash_update(&ZCSG(include_paths), key, ZCG(include_path_len) + 1, 0, ZCG(include_path_key));
+					zend_accel_hash_update(&ZCSG(include_paths), key, ZCG(include_path_len), 0, ZCG(include_path_key));
 				} else {
 					zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM TSRMLS_CC);
 				}

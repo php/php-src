@@ -702,9 +702,8 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 			namelen = spprintf(&cols[i].name, 0, "%s.%s", S->fields[i].table, S->fields[i].name);
 			cols[i].namelen = namelen;
 		} else {
-			namelen = strlen(S->fields[i].name);
-			cols[i].namelen = namelen;
-			cols[i].name = estrndup(S->fields[i].name, namelen);
+			cols[i].namelen = S->fields[i].name_length;
+			cols[i].name = estrndup(S->fields[i].name, S->fields[i].name_length);
 		}
 
 		cols[i].precision = S->fields[i].decimals;
@@ -746,7 +745,7 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 	}
 #if PDO_USE_MYSQLND
 	if (S->stmt) {
-		Z_ADDREF_P(S->stmt->data->result_bind[colno].zv);
+		Z_TRY_ADDREF(S->stmt->data->result_bind[colno].zv);
 		*ptr = (char*)&S->stmt->data->result_bind[colno].zv;
 		*len = sizeof(zval);
 		PDO_DBG_RETURN(1);

@@ -47,7 +47,7 @@ static zend_object_handlers closure_handlers;
 
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
-	zend_function *func = EG(current_execute_data)->function_state.function;
+	zend_function *func = EG(current_execute_data)->func;
 	zval *arguments;
 
 	arguments = emalloc(sizeof(zval) * ZEND_NUM_ARGS());
@@ -169,27 +169,27 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 }
 /* }}} */
 
-static zval *zend_closure_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC) /* {{{ */
+static zval *zend_closure_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return &EG(uninitialized_zval);
 }
 /* }}} */
 
-static void zend_closure_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static void zend_closure_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }
 /* }}} */
 
-static zval *zend_closure_get_property_ptr_ptr(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static zval *zend_closure_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
 }
 /* }}} */
 
-static int zend_closure_has_property(zval *object, zval *member, int has_set_exists, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static int zend_closure_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	if (has_set_exists != 2) {
 		ZEND_CLOSURE_PROPERTY_ERROR();
@@ -198,7 +198,7 @@ static int zend_closure_has_property(zval *object, zval *member, int has_set_exi
 }
 /* }}} */
 
-static void zend_closure_unset_property(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static void zend_closure_unset_property(zval *object, zval *member, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }
@@ -213,7 +213,7 @@ static void zend_closure_free_storage(zend_object *object TSRMLS_DC) /* {{{ */
 	if (closure->func.type == ZEND_USER_FUNCTION) {
 		zend_execute_data *ex = EG(current_execute_data);
 		while (ex) {
-			if (ex->op_array == &closure->func.op_array) {
+			if (ex->func == &closure->func) {
 				zend_error(E_ERROR, "Cannot destroy active lambda function");
 			}
 			ex = ex->prev_execute_data;
@@ -456,6 +456,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		}
 	}
 
+	ZVAL_UNDEF(&closure->this_ptr);
 	/* Invariants:
 	 * If the closure is unscoped, it has no bound object.
 	 * The the closure is scoped, it's either static or it's bound */
@@ -466,10 +467,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			ZVAL_COPY(&closure->this_ptr, this_ptr);
 		} else {
 			closure->func.common.fn_flags |= ZEND_ACC_STATIC;
-			ZVAL_UNDEF(&closure->this_ptr);
 		}
-	} else {
-		ZVAL_UNDEF(&closure->this_ptr);
 	}
 }
 /* }}} */

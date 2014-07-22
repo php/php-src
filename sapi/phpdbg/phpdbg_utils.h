@@ -124,4 +124,24 @@ PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D); /* }}} */
 
 int phpdbg_rebuild_symtable(TSRMLS_D);
 
+#if PHP_VERSION_ID < 50500
+/* copy from zend_hash.c PHP 5.5 for 5.4 compatibility */
+static void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos) {
+	Bucket *p;
+
+	p = pos ? (*pos) : ht->pInternalPointer;
+
+	if (!p) {
+		Z_TYPE_P(key) = IS_NULL;
+	} else if (p->nKeyLength) {
+		Z_TYPE_P(key) = IS_STRING;
+		Z_STRVAL_P(key) = IS_INTERNED(p->arKey) ? (char*)p->arKey : estrndup(p->arKey, p->nKeyLength - 1);
+		Z_STRLEN_P(key) = p->nKeyLength - 1;
+	} else {
+		Z_TYPE_P(key) = IS_LONG;
+		Z_LVAL_P(key) = p->h;
+	}
+}
+#endif
+
 #endif /* PHPDBG_UTILS_H */

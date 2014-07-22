@@ -308,7 +308,7 @@ PHP_FUNCTION(msg_receive)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlzlz|blz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz/lz/|blz/",
 				&queue, &desiredmsgtype, &out_msgtype, &maxsize,
 				&out_message, &do_unserialize, &flags, &zerrcode) == FAILURE) {
 		return;
@@ -342,8 +342,6 @@ PHP_FUNCTION(msg_receive)
 
 	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, realflags);
 
-	ZVAL_DEREF(out_msgtype);
-	ZVAL_DEREF(out_message);
 	zval_dtor(out_msgtype);
 	zval_dtor(out_message);
 	ZVAL_LONG(out_msgtype, 0);
@@ -397,7 +395,7 @@ PHP_FUNCTION(msg_send)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz|bbz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz|bbz/",
 				&queue, &msgtype, &message, &do_serialize, &blocking, &zerror) == FAILURE) {
 		return;
 	}
@@ -461,7 +459,6 @@ PHP_FUNCTION(msg_send)
 	if (result == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "msgsnd failed: %s", strerror(errno));
 		if (zerror) {
-			ZVAL_DEREF(zerror);
 			ZVAL_LONG(zerror, errno);
 		}
 	} else {

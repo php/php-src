@@ -1484,4 +1484,13 @@
     \x{a1}\x{a7}  
     \x{37e} 
 
+/[RST]+/8iW
+    Ss\x{17f}
+    
+/[R-T]+/8iW 
+    Ss\x{17f}
+
+/[q-u]+/8iW 
+    Ss\x{17f}
+
 /-- End of testinput6 --/

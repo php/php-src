@@ -4,5 +4,5 @@
  */
 
 if (ZEND_OPTIMIZER_PASS_9 & OPTIMIZATION_LEVEL) {
-	optimize_temporary_variables(op_array);
+	optimize_temporary_variables(op_array, ctx);
 }

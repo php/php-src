@@ -132,7 +132,7 @@
  
 static inline char *smart_str_print_long(char *buf, long num) {
 	char *r; 
-	_zend_print_signed_to_buf(buf, num, unsigned long, r); 
+	_zend_print_signed_to_buf(buf, num, long, r); 
 	return r;
 }
 

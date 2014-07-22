@@ -44,6 +44,8 @@ typedef struct {
 	pcre *re;
 	pcre_extra *extra;
 	int preg_options;
+	int capture_count;
+	int name_count;
 #if HAVE_SETLOCALE
 	char *locale;
 	unsigned const char *tables;

@@ -515,6 +515,10 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				
 				while (ll < dlen) {
 					n = cp[ll];
+					if ((ll + n) >= dlen) {
+						// Invalid chunk length, truncate
+						n = dlen - (ll + 1);
+					}
 					memcpy(tp->val + ll , cp + ll + 1, n);
 					add_next_index_stringl(&entries, (char*)cp + ll + 1, n);
 					ll = ll + n + 1;
@@ -943,16 +947,14 @@ PHP_FUNCTION(dns_get_mx)
 	struct __res_state *handle = &state;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|z", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|z/", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
 		return;
 	}
 
-	mx_list = Z_REFVAL_P(mx_list);
 	zval_dtor(mx_list);
 	array_init(mx_list);
 
 	if (weight_list) {
-		weight_list = Z_REFVAL_P(weight_list);
 		zval_dtor(weight_list);
 		array_init(weight_list);
 	}

@@ -1157,12 +1157,13 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx TSRMLS_DC) 
 		ssl_ctx_options |= SSL_OP_SINGLE_DH_USE;
 	}
 
+#ifdef HAVE_ECDH
 	if (NULL != (val = php_stream_context_get_option(
 				stream->context, "ssl", "single_ecdh_use")) &&
-			zend_is_true(val TSRMLS_CC)
-	) {
+			zend_is_true(val TSRMLS_CC)) {
 		ssl_ctx_options |= SSL_OP_SINGLE_ECDH_USE;
 	}
+#endif
 
 	SSL_CTX_set_options(ctx, ssl_ctx_options);
 

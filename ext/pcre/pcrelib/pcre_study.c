@@ -42,9 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 supporting functions. */
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "pcre_internal.h"
 
@@ -879,9 +877,6 @@ do
       case OP_SOM:
       case OP_THEN:
       case OP_THEN_ARG:
-#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
-      case OP_XCLASS:
-#endif
       return SSB_FAIL;
 
       /* We can ignore word boundary tests. */
@@ -1257,6 +1252,16 @@ do
       with a value >= 0xc4 is a potentially valid starter because it starts a
       character with a value > 255. */
 
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+      case OP_XCLASS:
+      if ((tcode[1 + LINK_SIZE] & XCL_HASPROP) != 0)
+        return SSB_FAIL;
+      /* All bits are set. */
+      if ((tcode[1 + LINK_SIZE] & XCL_MAP) == 0 && (tcode[1 + LINK_SIZE] & XCL_NOT) != 0)
+        return SSB_FAIL;
+#endif
+      /* Fall through */
+
       case OP_NCLASS:
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
       if (utf)
@@ -1273,8 +1278,21 @@ do
       case OP_CLASS:
         {
         pcre_uint8 *map;
-        tcode++;
-        map = (pcre_uint8 *)tcode;
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+        map = NULL;
+        if (*tcode == OP_XCLASS)
+          {
+          if ((tcode[1 + LINK_SIZE] & XCL_MAP) != 0)
+            map = (pcre_uint8 *)(tcode + 1 + LINK_SIZE + 1);
+          tcode += GET(tcode, 1);
+          }
+        else
+#endif
+          {
+          tcode++;
+          map = (pcre_uint8 *)tcode;
+          tcode += 32 / sizeof(pcre_uchar);
+          }
 
         /* In UTF-8 mode, the bits in a bit map correspond to character
         values, not to byte values. However, the bit map we are constructing is
@@ -1282,31 +1300,35 @@ do
         value is > 127. In fact, there are only two possible starting bytes for
         characters in the range 128 - 255. */
 
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
-        if (utf)
-          {
-          for (c = 0; c < 16; c++) start_bits[c] |= map[c];
-          for (c = 128; c < 256; c++)
-            {
-            if ((map[c/8] && (1 << (c&7))) != 0)
-              {
-              int d = (c >> 6) | 0xc0;            /* Set bit for this starter */
-              start_bits[d/8] |= (1 << (d&7));    /* and then skip on to the */
-              c = (c & 0xc0) + 0x40 - 1;          /* next relevant character. */
-              }
-            }
-          }
-        else
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+        if (map != NULL)
 #endif
           {
-          /* In non-UTF-8 mode, the two bit maps are completely compatible. */
-          for (c = 0; c < 32; c++) start_bits[c] |= map[c];
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+          if (utf)
+            {
+            for (c = 0; c < 16; c++) start_bits[c] |= map[c];
+            for (c = 128; c < 256; c++)
+              {
+              if ((map[c/8] && (1 << (c&7))) != 0)
+                {
+                int d = (c >> 6) | 0xc0;            /* Set bit for this starter */
+                start_bits[d/8] |= (1 << (d&7));    /* and then skip on to the */
+                c = (c & 0xc0) + 0x40 - 1;          /* next relevant character. */
+                }
+              }
+            }
+          else
+#endif
+            {
+            /* In non-UTF-8 mode, the two bit maps are completely compatible. */
+            for (c = 0; c < 32; c++) start_bits[c] |= map[c];
+            }
           }
 
         /* Advance past the bit map, and act on what follows. For a zero
         minimum repeat, continue; otherwise stop processing. */
 
-        tcode += 32 / sizeof(pcre_uchar);
         switch (*tcode)
           {
           case OP_CRSTAR:

@@ -87,7 +87,7 @@ static void optimizer_literal_class_info(literal_info   *info,
 	}
 }
 
-static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
+static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC)
 {
 	zend_op *opline, *end;
 	int i, j, n, *map, cache_slots;
@@ -98,17 +98,18 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 	int l_true = -1;
 	HashTable hash;
 	zend_string *key = NULL;
+	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
 	if (op_array->last_literal) {
-		info = (literal_info*)ecalloc(op_array->last_literal, sizeof(literal_info));
+		info = (literal_info*)zend_arena_calloc(&ctx->arena, op_array->last_literal, sizeof(literal_info));
 
 	    /* Mark literals of specific types */
 		opline = op_array->opcodes;
 		end = opline + op_array->last;
 		while (opline < end) {
 			switch (opline->opcode) {
-				case ZEND_DO_FCALL:
-					LITERAL_INFO(opline->op1.constant, LITERAL_FUNC, 1, 1, 1);
+				case ZEND_INIT_FCALL:
+					LITERAL_INFO(opline->op2.constant, LITERAL_FUNC, 1, 1, 1);
 					break;
 				case ZEND_INIT_FCALL_BY_NAME:
 					if (ZEND_OP2_TYPE(opline) == IS_CONST) {
@@ -145,6 +146,9 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					break;
 				case ZEND_CATCH:
 					LITERAL_INFO(opline->op1.constant, LITERAL_CLASS, 1, 1, 2);
+					break;
+				case ZEND_DEFINED:
+					LITERAL_INFO(opline->op1.constant, LITERAL_CONST, 1, 1, 2);
 					break;
 				case ZEND_FETCH_CONSTANT:
 					if (ZEND_OP1_TYPE(opline) == IS_UNUSED) {
@@ -269,7 +273,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 
 			for (i = 0; i < op_array->last_literal; i++) {
 				zval zv = op_array->literals[i].constant;
-				zend_make_printable_zval(&op_array->literals[i].constant, &zv, &use_copy);
+				use_copy = zend_make_printable_zval(&op_array->literals[i].constant, &zv);
 				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
 					zval_dtor(&zv);
@@ -282,7 +286,8 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 		/* Merge equal constants */
 		j = 0; cache_slots = 0;
 		zend_hash_init(&hash, 16, NULL, NULL, 0);
-		map = (int*)ecalloc(op_array->last_literal, sizeof(int));
+		map = (int*)zend_arena_alloc(&ctx->arena, op_array->last_literal * sizeof(int));
+		memset(map, 0, op_array->last_literal * sizeof(int));
 		for (i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].flags) {
 				/* unsed literal */
@@ -440,8 +445,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 			}
 			opline++;
 		}
-		efree(map);
-		efree(info);
+		zend_arena_release(&ctx->arena, checkpoint);
 
 #if DEBUG_COMPACT_LITERALS
 		{
@@ -450,7 +454,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 
 			for (i = 0; i < op_array->last_literal; i++) {
 				zval zv = op_array->literals[i].constant;
-				zend_make_printable_zval(&op_array->literals[i].constant, &zv, &use_copy);
+				use_copy = zend_make_printable_zval(&op_array->literals[i].constant, &zv);
 				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
 					zval_dtor(&zv);

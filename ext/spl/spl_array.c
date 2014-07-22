@@ -882,7 +882,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 }
 /* }}} */
 
-static zval *spl_array_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC) /* {{{ */
+static zval *spl_array_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -893,7 +893,7 @@ static zval *spl_array_read_property(zval *object, zval *member, int type, zend_
 	return std_object_handlers.read_property(object, member, type, cache_slot, rv TSRMLS_CC);
 } /* }}} */
 
-static void spl_array_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static void spl_array_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -905,7 +905,7 @@ static void spl_array_write_property(zval *object, zval *member, zval *value, ze
 	std_object_handlers.write_property(object, member, value, cache_slot TSRMLS_CC);
 } /* }}} */
 
-static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -918,7 +918,7 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 	return NULL;
 } /* }}} */
 
-static int spl_array_has_property(zval *object, zval *member, int has_set_exists, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static int spl_array_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -929,7 +929,7 @@ static int spl_array_has_property(zval *object, zval *member, int has_set_exists
 	return std_object_handlers.has_property(object, member, has_set_exists, cache_slot TSRMLS_CC);
 } /* }}} */
 
-static void spl_array_unset_property(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static void spl_array_unset_property(zval *object, zval *member, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -1261,9 +1261,15 @@ SPL_METHOD(Array, setIteratorClass)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zend_class_entry * ce_get_iterator = spl_ce_Iterator;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "C", &ce_get_iterator) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_CLASS(ce_get_iterator)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	intern->ce_get_iterator = ce_get_iterator;
 }
@@ -1774,6 +1780,7 @@ SPL_METHOD(Array, unserialize)
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	zval members, zflags;
+	HashTable *aht;
 	long flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
@@ -1781,7 +1788,12 @@ SPL_METHOD(Array, unserialize)
 	}
 
 	if (buf_len == 0) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
+		return;
+	}
+
+	aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+	if (aht->u.v.nApplyCount > 0) {
+		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
@@ -1832,7 +1844,9 @@ SPL_METHOD(Array, unserialize)
 	}
 	++p;
 
-	if (!php_var_unserialize(&members, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+	ZVAL_UNDEF(&members);
+	if (!php_var_unserialize(&members, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE(members) != IS_ARRAY) {
+		zval_ptr_dtor(&members);
 		goto outexcept;
 	}
 

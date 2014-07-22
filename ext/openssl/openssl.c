@@ -705,7 +705,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 	char * thestr;
 	long gmadjust = 0;
 
-	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME) {
+	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME && ASN1_STRING_type(timestr) != V_ASN1_GENERALIZEDTIME) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "illegal ASN1 data type for timestamp");
 		return (time_t)-1;
 	}
@@ -716,6 +716,11 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 	}
 
 	if (ASN1_STRING_length(timestr) < 13) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to parse time string %s correctly", timestr->data);
+		return (time_t)-1;
+	}
+
+	if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && ASN1_STRING_length(timestr) < 15) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to parse time string %s correctly", timestr->data);
 		return (time_t)-1;
 	}
@@ -741,13 +746,20 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 	*thestr = '\0';
 	thestr -= 2;
 	thetime.tm_mon = atoi(thestr)-1;
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_year = atoi(thestr);
 
-	if (thetime.tm_year < 68) {
-		thetime.tm_year += 100;
+	*thestr = '\0';
+	if( ASN1_STRING_type(timestr) == V_ASN1_UTCTIME ) {
+		thestr -= 2;
+		thetime.tm_year = atoi(thestr);
+
+		if (thetime.tm_year < 68) {
+			thetime.tm_year += 100;
+		}
+	} else if( ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME ) {
+		thestr -= 4;
+		thetime.tm_year = atoi(thestr) - 1900;
 	}
+
 
 	thetime.tm_isdst = -1;
 	ret = mktime(&thetime);
@@ -1715,10 +1727,9 @@ PHP_FUNCTION(openssl_x509_export)
 	BIO * bio_out;
 	zend_resource *certresource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|b", &zcert, &zout, &notext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz/|b", &zcert, &zout, &notext) == FAILURE) {
 		return;
 	}
-	ZVAL_DEREF(zout);
 	RETVAL_FALSE;
 
 	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
@@ -2481,10 +2492,9 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	zval * item;
 	STACK_OF(X509) *ca = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzzs|a", &zcert, &zout, &zpkey, &pass, &pass_len, &args) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz/zs|a", &zcert, &zout, &zpkey, &pass, &pass_len, &args) == FAILURE)
 		return;
 
-	ZVAL_DEREF(zout);
 	RETVAL_FALSE;
 	
 	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
@@ -2552,9 +2562,9 @@ PHP_FUNCTION(openssl_pkcs12_read)
 	BIO * bio_in = NULL;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szs", &zp12, &zp12_len, &zout, &pass, &pass_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/s", &zp12, &zp12_len, &zout, &pass, &pass_len) == FAILURE)
 		return;
-	ZVAL_DEREF(zout);
+
 	RETVAL_FALSE;
 	
 	bio_in = BIO_new(BIO_s_mem());
@@ -2879,10 +2889,10 @@ PHP_FUNCTION(openssl_csr_export)
 	BIO * bio_out;
 	zend_resource *csr_resource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|b", &zcsr, &zout, &notext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/|b", &zcsr, &zout, &notext) == FAILURE) {
 		return;
 	}
-	ZVAL_DEREF(zout);
+
 	RETVAL_FALSE;
 
 	csr = php_openssl_csr_from_zval(zcsr, 0, &csr_resource TSRMLS_CC);
@@ -3060,10 +3070,9 @@ PHP_FUNCTION(openssl_csr_new)
 	int we_made_the_key = 1;
 	zend_resource *key_resource;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "az|a!a!", &dn, &out_pkey, &args, &attribs) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "az/|a!a!", &dn, &out_pkey, &args, &attribs) == FAILURE) {
 		return;
 	}
-	ZVAL_DEREF(out_pkey);
 	RETVAL_FALSE;
 	
 	PHP_SSL_REQ_INIT(&req);
@@ -3694,10 +3703,9 @@ PHP_FUNCTION(openssl_pkey_export)
 	BIO * bio_out = NULL;
 	const EVP_CIPHER * cipher;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|s!a!", &zpkey, &out, &passphrase, &passphrase_len, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz/|s!a!", &zpkey, &out, &passphrase, &passphrase_len, &args) == FAILURE) {
 		return;
 	}
-	ZVAL_DEREF(out);
 	RETVAL_FALSE;
 
 	key = php_openssl_evp_from_zval(zpkey, 0, passphrase, 0, &key_resource TSRMLS_CC);
@@ -4380,10 +4388,9 @@ PHP_FUNCTION(openssl_private_encrypt)
 	int data_len;
 	long padding = RSA_PKCS1_PADDING;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) { 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/z|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) { 
 		return;
 	}
-	ZVAL_DEREF(crypted);
 	RETVAL_FALSE;
 
 	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource TSRMLS_CC);
@@ -4442,10 +4449,9 @@ PHP_FUNCTION(openssl_private_decrypt)
 	char * data;
 	int data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/z|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
 		return;
 	}
-	ZVAL_DEREF(crypted);
 	RETVAL_FALSE;
 
 	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource TSRMLS_CC);
@@ -4510,9 +4516,8 @@ PHP_FUNCTION(openssl_public_encrypt)
 	char * data;
 	int data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/z|l", &data, &data_len, &crypted, &key, &padding) == FAILURE)
 		return;
-	ZVAL_DEREF(crypted);
 	RETVAL_FALSE;
 	
 	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, &keyresource TSRMLS_CC);
@@ -4571,10 +4576,9 @@ PHP_FUNCTION(openssl_public_decrypt)
 	char * data;
 	int data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/z|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
 		return;
 	}
-	ZVAL_DEREF(crypted);
 	RETVAL_FALSE;
 	
 	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, &keyresource TSRMLS_CC);
@@ -4663,10 +4667,9 @@ PHP_FUNCTION(openssl_sign)
 	long signature_algo = OPENSSL_ALGO_SHA1;
 	const EVP_MD *mdtype;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|z", &data, &data_len, &signature, &key, &method) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/z|z", &data, &data_len, &signature, &key, &method) == FAILURE) {
 		return;
 	}
-	ZVAL_DEREF(signature);
 	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param cannot be coerced into a private key");
@@ -4781,11 +4784,9 @@ PHP_FUNCTION(openssl_seal)
 	const EVP_CIPHER *cipher;
 	EVP_CIPHER_CTX ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szza/|s", &data, &data_len, &sealdata, &ekeys, &pubkeys, &method, &method_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/z/a/|s", &data, &data_len, &sealdata, &ekeys, &pubkeys, &method, &method_len) == FAILURE) {
 		return;
 	}
-	ZVAL_DEREF(sealdata);
-	ZVAL_DEREF(ekeys);	
 	pubkeysht = HASH_OF(pubkeys);
 	nkeys = pubkeysht ? zend_hash_num_elements(pubkeysht) : 0;
 	if (!nkeys) {
@@ -4909,10 +4910,9 @@ PHP_FUNCTION(openssl_open)
 	int method_len = 0;
 	const EVP_CIPHER *cipher;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szsz|s", &data, &data_len, &opendata, &ekey, &ekey_len, &privkey, &method, &method_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/sz|s", &data, &data_len, &opendata, &ekey, &ekey_len, &privkey, &method, &method_len) == FAILURE) {
 		return;
 	}
-	ZVAL_DEREF(opendata);
 
 	pkey = php_openssl_evp_from_zval(privkey, 0, "", 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
@@ -5324,10 +5324,9 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	zval *zstrong_result_returned = NULL;
 	int strong_result = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &buffer_length, &zstrong_result_returned) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z/", &buffer_length, &zstrong_result_returned) == FAILURE) {
 		return;
 	}
-	ZVAL_DEREF(zstrong_result_returned);
 
 	if (buffer_length <= 0) {
 		RETURN_FALSE;

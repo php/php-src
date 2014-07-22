@@ -807,7 +807,6 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	}
 
 	if (buf_len == 0) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
 		return;
 	}
 
@@ -892,7 +891,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	}
 	++p;
 
-	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+	ZVAL_UNDEF(&pmembers);
+	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE(pmembers) != IS_ARRAY) {
+		zval_ptr_dtor(&pmembers);
 		goto outexcept;
 	}
 

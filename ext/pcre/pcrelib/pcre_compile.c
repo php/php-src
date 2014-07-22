@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2013 University of Cambridge
+           Copyright (c) 1997-2014 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 supporting internal functions that are not used by other modules. */
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #define NLBLOCK cd             /* Block containing newline information */
 #define PSSTART start_pattern  /* Field containing processed string start */
@@ -547,6 +545,8 @@ static const char error_texts[] =
   "parentheses are too deeply nested\0"
   "invalid range in character class\0"
   "group name must start with a non-digit\0"
+  /* 85 */
+  "parentheses are too deeply nested (stack check)\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -3070,8 +3070,11 @@ const pcre_uint32 *chr_ptr;
 const pcre_uint32 *ochr_ptr;
 const pcre_uint32 *list_ptr;
 const pcre_uchar *next_code;
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+const pcre_uchar *xclass_flags;
+#endif
 const pcre_uint8 *class_bitset;
-const pcre_uint32 *set1, *set2, *set_end;
+const pcre_uint8 *set1, *set2, *set_end;
 pcre_uint32 chr;
 BOOL accepted, invert_bits;
 
@@ -3202,12 +3205,12 @@ for(;;)
     if (base_list[0] == OP_CLASS)
 #endif
       {
-      set1 = (pcre_uint32 *)(base_end - base_list[2]);
+      set1 = (pcre_uint8 *)(base_end - base_list[2]);
       list_ptr = list;
       }
     else
       {
-      set1 = (pcre_uint32 *)(code - list[2]);
+      set1 = (pcre_uint8 *)(code - list[2]);
       list_ptr = base_list;
       }
 
@@ -3216,41 +3219,53 @@ for(;;)
       {
       case OP_CLASS:
       case OP_NCLASS:
-      set2 = (pcre_uint32 *)
+      set2 = (pcre_uint8 *)
         ((list_ptr == list ? code : base_end) - list_ptr[2]);
       break;
 
-      /* OP_XCLASS cannot be supported here, because its bitset
-      is not necessarily complete. E.g: [a-\0x{200}] is stored
-      as a character range, and the appropriate bits are not set. */
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+      case OP_XCLASS:
+      xclass_flags = (list_ptr == list ? code : base_end) - list_ptr[2] + LINK_SIZE;
+      if ((*xclass_flags & XCL_HASPROP) != 0) return FALSE;
+      if ((*xclass_flags & XCL_MAP) == 0)
+        {
+        /* No bits are set for characters < 256. */
+        if (list[1] == 0) return TRUE;
+        /* Might be an empty repeat. */
+        continue;
+        }
+      set2 = (pcre_uint8 *)(xclass_flags + 1);
+      break;
+#endif
 
       case OP_NOT_DIGIT:
-        invert_bits = TRUE;
-        /* Fall through */
+      invert_bits = TRUE;
+      /* Fall through */
       case OP_DIGIT:
-        set2 = (pcre_uint32 *)(cd->cbits + cbit_digit);
-        break;
+      set2 = (pcre_uint8 *)(cd->cbits + cbit_digit);
+      break;
 
       case OP_NOT_WHITESPACE:
-        invert_bits = TRUE;
-        /* Fall through */
+      invert_bits = TRUE;
+      /* Fall through */
       case OP_WHITESPACE:
-        set2 = (pcre_uint32 *)(cd->cbits + cbit_space);
-        break;
+      set2 = (pcre_uint8 *)(cd->cbits + cbit_space);
+      break;
 
       case OP_NOT_WORDCHAR:
-        invert_bits = TRUE;
-        /* Fall through */
+      invert_bits = TRUE;
+      /* Fall through */
       case OP_WORDCHAR:
-        set2 = (pcre_uint32 *)(cd->cbits + cbit_word);
-        break;
+      set2 = (pcre_uint8 *)(cd->cbits + cbit_word);
+      break;
 
       default:
       return FALSE;
       }
 
-    /* Compare 4 bytes to improve speed. */
-    set_end = set1 + (32 / 4);
+    /* Because the sets are unaligned, we need
+    to perform byte comparison here. */
+    set_end = set1 + 32;
     if (invert_bits)
       {
       do
@@ -3551,7 +3566,9 @@ for(;;)
   if (list[1] == 0) return TRUE;
   }
 
-return FALSE;
+/* Control never reaches here. There used to be a fail-save return FALSE; here,
+but some compilers complain about an unreachable statement. */
+
 }
 
 
@@ -4062,12 +4079,16 @@ for (c = *cptr; c <= d; c++)
 
 if (c > d) return -1;  /* Reached end of range */
 
+/* Found a character that has a single other case. Search for the end of the
+range, which is either the end of the input range, or a character that has zero
+or more than one other cases. */
+
 *ocptr = othercase;
 next = othercase + 1;
 
 for (++c; c <= d; c++)
   {
-  if (UCD_OTHERCASE(c) != next) break;
+  if ((co = UCD_CASESET(c)) != 0 || UCD_OTHERCASE(c) != next) break;
   next++;
   }
 
@@ -4105,6 +4126,7 @@ add_to_class(pcre_uint8 *classbits, pcre_uchar **uchardptr, int options,
   compile_data *cd, pcre_uint32 start, pcre_uint32 end)
 {
 pcre_uint32 c;
+pcre_uint32 classbits_end = (end <= 0xff ? end : 0xff);
 int n8 = 0;
 
 /* If caseless matching is required, scan the range and process alternate
@@ -4148,7 +4170,7 @@ if ((options & PCRE_CASELESS) != 0)
 
   /* Not UTF-mode, or no UCP */
 
-  for (c = start; c <= end && c < 256; c++)
+  for (c = start; c <= classbits_end; c++)
     {
     SETBIT(classbits, cd->fcc[c]);
     n8++;
@@ -4173,22 +4195,21 @@ in all cases. */
 
 #endif /* COMPILE_PCRE[8|16] */
 
-/* If all characters are less than 256, use the bit map. Otherwise use extra
-data. */
+/* Use the bitmap for characters < 256. Otherwise use extra data.*/
 
-if (end < 0x100)
+for (c = start; c <= classbits_end; c++)
   {
-  for (c = start; c <= end; c++)
-    {
-    n8++;
-    SETBIT(classbits, c);
-    }
+  /* Regardless of start, c will always be <= 255. */
+  SETBIT(classbits, c);
+  n8++;
   }
 
-else
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+if (start <= 0xff) start = 0xff + 1;
+
+if (end >= start)
   {
   pcre_uchar *uchardata = *uchardptr;
-
 #ifdef SUPPORT_UTF
   if ((options & PCRE_UTF8) != 0)  /* All UTFs use the same flag bit */
     {
@@ -4228,6 +4249,7 @@ else
 
   *uchardptr = uchardata;   /* Updata extra data pointer */
   }
+#endif /* SUPPORT_UTF || !COMPILE_PCRE8 */
 
 return n8;    /* Number of 8-bit characters */
 }
@@ -4449,6 +4471,9 @@ for (;; ptr++)
   BOOL reset_bracount;
   int class_has_8bitchar;
   int class_one_char;
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+  BOOL xclass_has_prop;
+#endif
   int newoptions;
   int recno;
   int refsign;
@@ -4783,13 +4808,26 @@ for (;; ptr++)
 
     should_flip_negation = FALSE;
 
+    /* Extended class (xclass) will be used when characters > 255
+    might match. */
+
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+    xclass = FALSE;
+    class_uchardata = code + LINK_SIZE + 2;   /* For XCLASS items */
+    class_uchardata_base = class_uchardata;   /* Save the start */
+#endif
+
     /* For optimization purposes, we track some properties of the class:
     class_has_8bitchar will be non-zero if the class contains at least one <
     256 character; class_one_char will be 1 if the class contains just one
-    character. */
+    character; xclass_has_prop will be TRUE if unicode property checks
+    are present in the class. */
 
     class_has_8bitchar = 0;
     class_one_char = 0;
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+    xclass_has_prop = FALSE;
+#endif
 
     /* Initialize the 32-char bit map to all zeros. We build the map in a
     temporary bit of memory, in case the class contains fewer than two
@@ -4797,12 +4835,6 @@ for (;; ptr++)
     map. */
 
     memset(classbits, 0, 32 * sizeof(pcre_uint8));
-
-#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
-    xclass = FALSE;
-    class_uchardata = code + LINK_SIZE + 2;   /* For XCLASS items */
-    class_uchardata_base = class_uchardata;   /* Save the start */
-#endif
 
     /* Process characters until ] is reached. By writing this as a "do" it
     means that an initial ] is taken as a data character. At the start of the
@@ -4927,6 +4959,7 @@ for (;; ptr++)
             *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
             *class_uchardata++ = ptype;
             *class_uchardata++ = 0;
+            xclass_has_prop = TRUE;
             ptr = tempptr + 1;
             continue;
 
@@ -5109,6 +5142,7 @@ for (;; ptr++)
                 XCL_PROP : XCL_NOTPROP;
               *class_uchardata++ = ptype;
               *class_uchardata++ = pdata;
+              xclass_has_prop = TRUE;
               class_has_8bitchar--;                /* Undo! */
               continue;
               }
@@ -5403,6 +5437,7 @@ for (;; ptr++)
       *code++ = OP_XCLASS;
       code += LINK_SIZE;
       *code = negate_class? XCL_NOT:0;
+      if (xclass_has_prop) *code |= XCL_HASPROP;
 
       /* If the map is required, move up the extra data to make room for it;
       otherwise just move the code pointer to the end of the extra data. */
@@ -5412,6 +5447,8 @@ for (;; ptr++)
         *code++ |= XCL_MAP;
         memmove(code + (32 / sizeof(pcre_uchar)), code,
           IN_UCHARS(class_uchardata - code));
+        if (negate_class && !xclass_has_prop)
+          for (c = 0; c < 32; c++) classbits[c] = ~classbits[c];
         memcpy(code, classbits, 32);
         code = class_uchardata + (32 / sizeof(pcre_uchar));
         }
@@ -6580,7 +6617,10 @@ for (;; ptr++)
 
         code[1+LINK_SIZE] = OP_CREF;
         skipbytes = 1+IMM2_SIZE;
-        refsign = -1;
+        refsign = -1;     /* => not a number */
+        namelen = -1;     /* => not a name; must set to avoid warning */
+        name = NULL;      /* Always set to avoid warning */
+        recno = 0;        /* Always set to avoid warning */
 
         /* Check for a test for recursion in a named group. */
 
@@ -6617,7 +6657,6 @@ for (;; ptr++)
 
         if (refsign >= 0)
           {
-          recno = 0;
           while (IS_DIGIT(*ptr))
             {
             recno = recno * 10 + (int)(*ptr - CHAR_0);
@@ -7993,6 +8032,16 @@ int length;
 unsigned int orig_bracount;
 unsigned int max_bracount;
 branch_chain bc;
+
+/* If set, call the external function that checks for stack availability. */
+
+if (PUBL(stack_guard) != NULL && PUBL(stack_guard)())
+  {
+  *errorcodeptr= ERR85;
+  return FALSE;
+  }
+
+/* Miscellaneous initialization */
 
 bc.outer = bcptr;
 bc.current_branch = code;

@@ -35,16 +35,16 @@ static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
 	zval_dtor(zvalue);
 }
 
-static void zend_optimizer_collect_constant(HashTable **constants, zval *name, zval* value)
+static void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value)
 {
 	zval val;
 
-	if (!*constants) {
-		*constants = emalloc(sizeof(HashTable));
-		zend_hash_init(*constants, 16, NULL, zend_optimizer_zval_dtor_wrapper, 0);
+	if (!ctx->constants) {
+		ctx->constants = zend_arena_alloc(&ctx->arena, sizeof(HashTable));
+		zend_hash_init(ctx->constants, 16, NULL, zend_optimizer_zval_dtor_wrapper, 0);
 	}
 	ZVAL_DUP(&val, value);
-	zend_hash_add(*constants, Z_STR_P(name), &val);
+	zend_hash_add(ctx->constants, Z_STR_P(name), &val);
 }
 
 static int zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value)
@@ -171,18 +171,13 @@ static void update_op1_const(zend_op_array *op_array,
 				case ZEND_INIT_STATIC_METHOD_CALL:
 				case ZEND_CATCH:
 				case ZEND_FETCH_CONSTANT:
+				case ZEND_DEFINED:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
 					STR_HASH_VAL(Z_STR(ZEND_OP1_LITERAL(opline)));
 					Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->last_cache_slot++;
 					zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 					zend_optimizer_add_literal(op_array, val TSRMLS_CC);
 					STR_HASH_VAL(Z_STR(op_array->literals[opline->op1.constant+1]));
-					break;
-				case ZEND_DO_FCALL:
-					zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
-					opline->op1.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-					STR_HASH_VAL(Z_STR(ZEND_OP1_LITERAL(opline)));
-					Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->last_cache_slot++;
 					break;
 				default:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
@@ -204,6 +199,13 @@ static void update_op2_const(zend_op_array *op_array,
 {
 	ZEND_OP2_TYPE(opline) = IS_CONST;
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+	if (opline->opcode == ZEND_INIT_FCALL) {
+		zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
+		opline->op2.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
+		STR_HASH_VAL(Z_STR(ZEND_OP2_LITERAL(opline)));
+		Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot++;
+		return;
+	}
 	opline->op2.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
 	if (Z_TYPE_P(val) == IS_STRING) {
 		STR_HASH_VAL(Z_STR(ZEND_OP2_LITERAL(opline)));
@@ -297,10 +299,8 @@ static void update_op2_const(zend_op_array *op_array,
 check_numeric:
 				{
 					ulong index;
-					int numeric = 0;
 
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(val), Z_STRLEN_P(val)+1, index, numeric = 1);
-					if (numeric) {
+					if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
 						zval_dtor(val);
 						ZVAL_LONG(val, index);
 						op_array->literals[opline->op2.constant] = *val;
@@ -342,11 +342,12 @@ static int replace_var_by_const(zend_op_array *op_array,
 						if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {
 							return 0;
 						}
-						opline->extended_value = ZEND_DO_FCALL;
+						opline->extended_value = 0;
+						opline->opcode = ZEND_SEND_VAL_EX;
 					} else {
-						opline->extended_value = ZEND_DO_FCALL_BY_NAME;
+						opline->extended_value = 0;
+						opline->opcode = ZEND_SEND_VAL;
 					}
-					opline->opcode = ZEND_SEND_VAL;
 					break;
 				default:
 					break;
@@ -427,9 +428,8 @@ static void replace_tmp_by_const(zend_op_array *op_array,
 #include "Optimizer/compact_literals.c"
 #include "Optimizer/optimize_func_calls.c"
 
-static void zend_optimize(zend_op_array           *op_array,
-                          zend_persistent_script  *script,
-                          HashTable              **constants TSRMLS_DC)
+static void zend_optimize(zend_op_array      *op_array,
+                          zend_optimizer_ctx *ctx TSRMLS_DC)
 {
 	if (op_array->type == ZEND_EVAL_CODE ||
 	    (op_array->fn_flags & ZEND_ACC_INTERACTIVE)) {
@@ -464,7 +464,7 @@ static void zend_optimize(zend_op_array           *op_array,
 	 * - INIT_FCALL_BY_NAME -> DO_FCALL
 	 */
 	if (ZEND_OPTIMIZER_PASS_4 & OPTIMIZATION_LEVEL) {
-		optimize_func_calls(op_array, script TSRMLS_CC);
+		optimize_func_calls(op_array, ctx TSRMLS_CC);
 	}
 #endif
 
@@ -488,14 +488,13 @@ static void zend_optimize(zend_op_array           *op_array,
 	 * - Compact literals table 
 	 */
 	if (ZEND_OPTIMIZER_PASS_11 & OPTIMIZATION_LEVEL) {
-		optimizer_compact_literals(op_array TSRMLS_CC);
+		optimizer_compact_literals(op_array, ctx TSRMLS_CC);
 	}
 #endif
 }
 
-static void zend_accel_optimize(zend_op_array           *op_array,
-                                zend_persistent_script  *script,
-                                HashTable              **constants TSRMLS_DC)
+static void zend_accel_optimize(zend_op_array      *op_array,
+                                zend_optimizer_ctx *ctx TSRMLS_DC)
 {
 	zend_op *opline, *end;
 
@@ -535,6 +534,9 @@ static void zend_accel_optimize(zend_op_array           *op_array,
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 			case ZEND_JMP_SET_VAR:
 #endif
+			case ZEND_NEW:
+			case ZEND_FE_RESET:
+			case ZEND_FE_FETCH:
 				ZEND_OP2(opline).opline_num = ZEND_OP2(opline).jmp_addr - op_array->opcodes;
 				break;
 		}
@@ -542,7 +544,7 @@ static void zend_accel_optimize(zend_op_array           *op_array,
 	}
 
 	/* Do actual optimizations */
-	zend_optimize(op_array, script, constants TSRMLS_CC);	
+	zend_optimize(op_array, ctx TSRMLS_CC);	
 	
 	/* Redo pass_two() */
 	opline = op_array->opcodes;
@@ -580,6 +582,9 @@ static void zend_accel_optimize(zend_op_array           *op_array,
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 			case ZEND_JMP_SET_VAR:
 #endif
+			case ZEND_NEW:
+			case ZEND_FE_RESET:
+			case ZEND_FE_FETCH:
 				ZEND_OP2(opline).jmp_addr = &op_array->opcodes[ZEND_OP2(opline).opline_num];
 				break;
 		}
@@ -592,17 +597,21 @@ int zend_accel_script_optimize(zend_persistent_script *script TSRMLS_DC)
 {
 	uint idx, j;
 	Bucket *p, *q;
-	HashTable *constants = NULL;
 	zend_class_entry *ce;
 	zend_op_array *op_array;
+	zend_optimizer_ctx ctx;
 
-	zend_accel_optimize(&script->main_op_array, script, &constants TSRMLS_CC);
+	ctx.arena = zend_arena_create(64 * 1024);
+	ctx.script = script;
+	ctx.constants = NULL;
+
+	zend_accel_optimize(&script->main_op_array, &ctx TSRMLS_CC);
 
 	for (idx = 0; idx < script->function_table.nNumUsed; idx++) {
 		p = script->function_table.arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		op_array = (zend_op_array*)Z_PTR(p->val);
-		zend_accel_optimize(op_array, script, &constants TSRMLS_CC);
+		zend_accel_optimize(op_array, &ctx TSRMLS_CC);
 	}
 
 	for (idx = 0; idx < script->class_table.nNumUsed; idx++) {
@@ -614,7 +623,7 @@ int zend_accel_script_optimize(zend_persistent_script *script TSRMLS_DC)
 			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			op_array = (zend_op_array*)Z_PTR(q->val);
 			if (op_array->scope == ce) {
-				zend_accel_optimize(op_array, script, &constants TSRMLS_CC);
+				zend_accel_optimize(op_array, &ctx TSRMLS_CC);
 			} else if (op_array->type == ZEND_USER_FUNCTION) {
 				zend_op_array *orig_op_array;
 				if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, q->key)) != NULL) {
@@ -626,10 +635,10 @@ int zend_accel_script_optimize(zend_persistent_script *script TSRMLS_DC)
 		}
 	}
 
-	if (constants) {
-		zend_hash_destroy(constants);
-		efree(constants);
+	if (ctx.constants) {
+		zend_hash_destroy(ctx.constants);
 	}
+	zend_arena_destroy(ctx.arena);
 
 	return 1;
 }

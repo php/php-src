@@ -199,12 +199,11 @@ PHP_FUNCTION(curl_multi_exec)
 	int        still_running;
 	int        result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz", &z_mh, &z_still_running) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/", &z_mh, &z_still_running) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(mh, php_curlm *, z_mh, -1, le_curl_multi_handle_name, le_curl_multi_handle);
-	ZVAL_DEREF(z_still_running);
 
 	{
 		zend_llist_position pos;
@@ -260,7 +259,7 @@ PHP_FUNCTION(curl_multi_info_read)
 	int        queued_msgs;
 	zval      *zmsgs_in_queue = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z", &z_mh, &zmsgs_in_queue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z/", &z_mh, &zmsgs_in_queue) == FAILURE) {
 		return;
 	}
 

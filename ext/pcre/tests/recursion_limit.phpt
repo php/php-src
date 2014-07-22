@@ -7,6 +7,7 @@ if (@preg_match_all('/\p{N}/', '0123456789', $dummy) === false) {
 }
 ?>
 --INI--
+pcre.jit=0
 pcre.recursion_limit=2
 --FILE--
 <?php

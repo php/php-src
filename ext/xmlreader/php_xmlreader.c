@@ -112,7 +112,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 /* }}} */
 
 /* {{{ xmlreader_get_property_ptr_ptr */
-zval *xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC)
+zval *xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot TSRMLS_DC)
 {
 	xmlreader_object *obj;
 	zval tmp_member;
@@ -147,7 +147,7 @@ zval *xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, zend_
 /* }}} */
 
 /* {{{ xmlreader_read_property */
-zval *xmlreader_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC)
+zval *xmlreader_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC)
 {
 	xmlreader_object *obj;
 	zval tmp_member;
@@ -187,7 +187,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type, zend_uint ca
 /* }}} */
 
 /* {{{ xmlreader_write_property */
-void xmlreader_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
+void xmlreader_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
 {
 	xmlreader_object *obj;
 	zval tmp_member;

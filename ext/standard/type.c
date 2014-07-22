@@ -100,6 +100,7 @@ PHP_FUNCTION(settype)
 	}
 
 	ZVAL_DEREF(var);
+	SEPARATE_ZVAL_NOREF(var);
 	if (!strcasecmp(type, "integer")) {
 		convert_to_long(var);
 	} else if (!strcasecmp(type, "int")) {
@@ -136,27 +137,22 @@ PHP_FUNCTION(settype)
 PHP_FUNCTION(intval)
 {
 	zval *num;
-	long arg_base;
-	int base;
+	long base = 10;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &num) == FAILURE) {
-				return;
-			}
-			base = 10;
-			break;
-
-		case 2:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &num, &arg_base) == FAILURE) {
-				return;
-			}
-			base = arg_base;
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
+		WRONG_PARAM_COUNT;
 	}
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &num, &base) == FAILURE) {
+		return;
+	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(num)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(base)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	RETVAL_ZVAL(num, 1, 0);
 	convert_to_long_base(return_value, base);
@@ -205,28 +201,34 @@ PHP_FUNCTION(strval)
 }
 /* }}} */
 
-static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
+static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	zval *arg;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		RETURN_FALSE;
 	}
-
 	ZVAL_DEREF(arg);
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF(arg)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
+
 	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce;
-			if(Z_OBJ_HT_P(arg)->get_class_entry == NULL) {
-			/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
+			if (Z_OBJ_HT_P(arg)->get_class_entry == NULL) {
+				/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
 				RETURN_TRUE;
 			}
 			ce = Z_OBJCE_P(arg);
-			if (!strcmp(ce->name->val, INCOMPLETE_CLASS)) {
+			if (ce->name->len == sizeof(INCOMPLETE_CLASS) - 1 
+					&& !strncmp(ce->name->val, INCOMPLETE_CLASS, ce->name->len)) {
 				RETURN_FALSE;
 			}
-		}
-		if (type == IS_RESOURCE) {
+		} else if (type == IS_RESOURCE) {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg) TSRMLS_CC);
 			if (!type_name) {
 				RETURN_FALSE;
@@ -347,9 +349,15 @@ PHP_FUNCTION(is_scalar)
 {
 	zval *arg;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	switch (Z_TYPE_P(arg)) {
 		case IS_FALSE:
@@ -378,7 +386,7 @@ PHP_FUNCTION(is_callable)
 	zend_bool syntax_only = 0;
 	int check_flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|bz", &var,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|bz/", &var,
 							  &syntax_only, &callable_name) == FAILURE) {
 		return;
 	}
@@ -387,7 +395,6 @@ PHP_FUNCTION(is_callable)
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
 	if (ZEND_NUM_ARGS() > 2) {
-		ZVAL_DEREF(callable_name);
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error TSRMLS_CC);
 		zval_dtor(callable_name);
 		//??? is it necessary to be consistent with old PHP ("\0" support)

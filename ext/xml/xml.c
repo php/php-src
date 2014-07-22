@@ -1164,7 +1164,7 @@ PHP_FUNCTION(xml_set_object)
 	xml_parser *parser;
 	zval *pind, *mythis;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ro", &pind, &mythis) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ro/", &pind, &mythis) == FAILURE) {
 		return;
 	}
 
@@ -1180,7 +1180,7 @@ PHP_FUNCTION(xml_set_object)
 	zval_add_ref(&parser->object); 
 #endif */
 
-	ZVAL_DUP_DEREF(&parser->object, mythis);
+	ZVAL_COPY(&parser->object, mythis);
 
 	RETVAL_TRUE;
 }
@@ -1389,19 +1389,17 @@ PHP_FUNCTION(xml_parse_into_struct)
 	char *data;
 	int data_len, ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz|z", &pind, &data, &data_len, &xdata, &info) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz/|z/", &pind, &data, &data_len, &xdata, &info) == FAILURE) {
 		return;
 	}
 
 	if (info) {	
-		ZVAL_DEREF(info);
 		zval_ptr_dtor(info);
 		array_init(info);
 	}
 
 	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	ZVAL_DEREF(xdata);
 	zval_ptr_dtor(xdata);
 	array_init(xdata);
 

@@ -105,7 +105,7 @@ Hello, you
 Notice: Undefined variable: this in %s on line %d
 NULL
 
-Strict Standards: call_user_func() expects parameter 1 to be a valid callback, non-static method Hello::world() should not be called statically in %s on line %d
+Strict Standards: %son-static method Hello::world() should not be called statically in %s on line %d
 Hello, you
 
 Notice: Undefined variable: this in %s on line %d

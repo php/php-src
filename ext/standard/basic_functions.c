@@ -395,7 +395,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge, 0, 0, 2)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
-
+    	
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge_recursive, 0, 0, 2)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
@@ -2284,8 +2284,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_lcfirst, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 	
-ZEND_BEGIN_ARG_INFO(arginfo_ucwords, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ucwords, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, delimiters)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strtr, 0, 0, 2)
@@ -2636,7 +2637,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_unserialize, 0, 0, 1)
 	ZEND_ARG_INFO(0, variable_representation)
-	ZEND_ARG_INFO(1, consumed)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_memory_get_usage, 0, 0, 0)
@@ -4042,92 +4042,91 @@ PHP_FUNCTION(putenv)
 {
 	char *setting;
 	int setting_len;
+	char *p, **env;
+	putenv_entry pe;
+#ifdef PHP_WIN32
+	char *value = NULL;
+	int equals = 0;
+	int error_code;
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &setting, &setting_len) == FAILURE) {
 		return;
 	}
+    
+    if(setting_len == 0 || setting[0] == '=') {
+    	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter syntax");
+    	RETURN_FALSE;
+    }
 
-	if (setting_len) {
-		char *p, **env;
-		putenv_entry pe;
+	pe.putenv_string = estrndup(setting, setting_len);
+	pe.key = estrndup(setting, setting_len);
+	if ((p = strchr(pe.key, '='))) {	/* nullify the '=' if there is one */
+		*p = '\0';
 #ifdef PHP_WIN32
-		char *value = NULL;
-		int equals = 0;
-		int error_code;
+		equals = 1;
 #endif
+	}
 
-		pe.putenv_string = estrndup(setting, setting_len);
-		pe.key = estrndup(setting, setting_len);
-		if ((p = strchr(pe.key, '='))) {	/* nullify the '=' if there is one */
-			*p = '\0';
+	pe.key_len = strlen(pe.key);
 #ifdef PHP_WIN32
-			equals = 1;
-#endif
-		}
-
-		pe.key_len = strlen(pe.key);
-#ifdef PHP_WIN32
-		if (equals) {
-			if (pe.key_len < setting_len - 1) {
-				value = p + 1;
-			} else {
-				/* empty string*/
-				value = p;
-			}
-		}
-#endif
-
-		zend_hash_str_del(&BG(putenv_ht), pe.key, pe.key_len);
-
-		/* find previous value */
-		pe.previous_value = NULL;
-		for (env = environ; env != NULL && *env != NULL; env++) {
-			if (!strncmp(*env, pe.key, pe.key_len) && (*env)[pe.key_len] == '=') {	/* found it */
-#if defined(PHP_WIN32)
-				/* must copy previous value because MSVCRT's putenv can free the string without notice */
-				pe.previous_value = estrdup(*env);
-#else
-				pe.previous_value = *env;
-#endif
-				break;
-			}
-		}
-
-#if HAVE_UNSETENV
-		if (!p) { /* no '=' means we want to unset it */
-			unsetenv(pe.putenv_string);
-		}
-		if (!p || putenv(pe.putenv_string) == 0) { /* success */
-#else
-# ifndef PHP_WIN32
-		if (putenv(pe.putenv_string) == 0) { /* success */
-# else
-		error_code = SetEnvironmentVariable(pe.key, value);
-#  if _MSC_VER < 1500
-		/* Yet another VC6 bug, unset may return env not found */
-		if (error_code != 0 || 
-			(error_code == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)) {
-#  else
-		if (error_code != 0) { /* success */
-#  endif
-# endif
-#endif
-			zend_hash_str_add_mem(&BG(putenv_ht), pe.key, pe.key_len, &pe, sizeof(putenv_entry));
-#ifdef HAVE_TZSET
-			if (!strncmp(pe.key, "TZ", pe.key_len)) {
-				tzset();
-			}
-#endif
-			RETURN_TRUE;
+	if (equals) {
+		if (pe.key_len < setting_len - 1) {
+			value = p + 1;
 		} else {
-			efree(pe.putenv_string);
-			efree(pe.key);
-			RETURN_FALSE;
+			/* empty string*/
+			value = p;
+		}
+	}
+#endif
+
+	zend_hash_str_del(&BG(putenv_ht), pe.key, pe.key_len);
+
+	/* find previous value */
+	pe.previous_value = NULL;
+	for (env = environ; env != NULL && *env != NULL; env++) {
+		if (!strncmp(*env, pe.key, pe.key_len) && (*env)[pe.key_len] == '=') {	/* found it */
+#if defined(PHP_WIN32)
+			/* must copy previous value because MSVCRT's putenv can free the string without notice */
+			pe.previous_value = estrdup(*env);
+#else
+			pe.previous_value = *env;
+#endif
+			break;
 		}
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter syntax");
-	RETURN_FALSE;
+#if HAVE_UNSETENV
+	if (!p) { /* no '=' means we want to unset it */
+		unsetenv(pe.putenv_string);
+	}
+	if (!p || putenv(pe.putenv_string) == 0) { /* success */
+#else
+# ifndef PHP_WIN32
+	if (putenv(pe.putenv_string) == 0) { /* success */
+# else
+	error_code = SetEnvironmentVariable(pe.key, value);
+#  if _MSC_VER < 1500
+	/* Yet another VC6 bug, unset may return env not found */
+	if (error_code != 0 || 
+		(error_code == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)) {
+#  else
+	if (error_code != 0) { /* success */
+#  endif
+# endif
+#endif
+		zend_hash_str_add_mem(&BG(putenv_ht), pe.key, pe.key_len, &pe, sizeof(putenv_entry));
+#ifdef HAVE_TZSET
+		if (!strncmp(pe.key, "TZ", pe.key_len)) {
+			tzset();
+		}
+#endif
+		RETURN_TRUE;
+	} else {
+		efree(pe.putenv_string);
+		efree(pe.key);
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 #endif
@@ -4714,9 +4713,16 @@ PHP_FUNCTION(call_user_func)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f*", &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_VARIADIC('*', fci.params, fci.param_count)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	fci.retval = &retval;
 
@@ -4734,9 +4740,16 @@ PHP_FUNCTION(call_user_func_array)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "fa/", &fci, &fci_cache, &params) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_ARRAY_EX(params, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	zend_fcall_info_args(&fci, params TSRMLS_CC);
 	fci.retval = &retval;
@@ -4761,15 +4774,15 @@ PHP_FUNCTION(forward_static_call)
 		return;
 	}
 
-	if (!EG(active_op_array)->scope) {
+	if (!EG(current_execute_data)->prev_execute_data->func->common.scope) {
 		zend_error(E_ERROR, "Cannot call forward_static_call() when no class scope is active");
 	}
 
 	fci.retval = &retval;
 
-	if (EG(called_scope) &&
-		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
-			fci_cache.called_scope = EG(called_scope);
+	if (EG(current_execute_data)->called_scope &&
+		instanceof_function(EG(current_execute_data)->called_scope, fci_cache.calling_scope TSRMLS_CC)) {
+			fci_cache.called_scope = EG(current_execute_data)->called_scope;
 	}
 	
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -4793,9 +4806,9 @@ PHP_FUNCTION(forward_static_call_array)
 	zend_fcall_info_args(&fci, params TSRMLS_CC);
 	fci.retval = &retval;
 
-	if (EG(called_scope) &&
-		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
-			fci_cache.called_scope = EG(called_scope);
+	if (EG(current_execute_data)->called_scope &&
+		instanceof_function(EG(current_execute_data)->called_scope, fci_cache.calling_scope TSRMLS_CC)) {
+			fci_cache.called_scope = EG(current_execute_data)->called_scope;
 	}
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {

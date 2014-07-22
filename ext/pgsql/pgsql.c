@@ -783,7 +783,7 @@ static int le_link, le_plink, le_result, le_lofp, le_string;
 #endif
 
 #if !HAVE_PQESCAPE_CONN
-#define PQescapeStringConn(conn, to, form, len, error) PQescapeString(to, from, len)
+#define PQescapeStringConn(conn, to, from, len, error) PQescapeString(to, from, len)
 #endif
 
 #if HAVE_PQESCAPELITERAL
@@ -1126,7 +1126,9 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_MADE", CONNECTION_MADE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_AWAITING_RESPONSE", CONNECTION_AWAITING_RESPONSE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_AUTH_OK", CONNECTION_AUTH_OK, CONST_CS | CONST_PERSISTENT);
+#ifdef CONNECTION_SSL_STARTUP
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_SSL_STARTUP", CONNECTION_SSL_STARTUP, CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_SETENV", CONNECTION_SETENV, CONST_CS | CONST_PERSISTENT);
 	/* For pg_connect_poll() */
 	REGISTER_LONG_CONSTANT("PGSQL_POLLING_FAILED", PGRES_POLLING_FAILED, CONST_CS | CONST_PERSISTENT);
@@ -2752,8 +2754,14 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 		object_and_properties_init(return_value, ce, NULL);
-		zend_merge_properties(return_value, Z_ARRVAL(dataset), 0 TSRMLS_CC);
-		zval_ptr_dtor(&dataset);
+		if (!ce->default_properties_count && !ce->__set) {
+			ALLOC_HASHTABLE(Z_OBJ_P(return_value)->properties);
+			*Z_OBJ_P(return_value)->properties = *Z_ARRVAL(dataset);
+			efree(Z_ARR(dataset));
+		} else {
+			zend_merge_properties(return_value, Z_ARRVAL(dataset) TSRMLS_CC);
+			zval_ptr_dtor(&dataset);
+		}
 
 		if (ce->constructor) {
 			fci.size = sizeof(fci);

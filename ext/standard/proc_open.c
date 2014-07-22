@@ -459,7 +459,7 @@ PHP_FUNCTION(proc_open)
 	php_file_descriptor_t slave_pty = -1;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz|s!a!a!", &command,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz/|s!a!a!", &command,
 				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment,
 				&other_options) == FAILURE) {
 		RETURN_FALSE;
@@ -877,7 +877,6 @@ PHP_FUNCTION(proc_open)
 	proc->env = env;
 
 	if (pipes != NULL) {
-		ZVAL_DEREF(pipes);
 		zval_dtor(pipes);
 	} 
 

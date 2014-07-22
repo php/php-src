@@ -42,9 +42,13 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 
 PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
 {
+	ulong idx;
+
 	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
-		ZEND_HANDLE_NUMERIC(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, idx);
+		if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), idx)) {
+			return idx;
+		}
 		break;
 	case IS_DOUBLE:
 		return (long)Z_DVAL_P(offset);

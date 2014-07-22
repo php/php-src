@@ -1,6 +1,7 @@
 --TEST--
 preg_replace() with array of failing regular expressions
 --INI--
+pcre.jit=0
 pcre.backtrack_limit=100000
 --FILE--
 <?php

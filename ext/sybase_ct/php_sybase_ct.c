@@ -442,7 +442,7 @@ static int _call_message_handler(zval *callback_name, CS_SERVERMSG *srvmsg TSRML
 		zval expr_copy;
 		int use_copy;
 
-		zend_make_printable_zval(callback_name, &expr_copy, &use_copy);
+		use_copy = zend_make_printable_zval(callback_name, &expr_copy);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cannot call the messagehandler %s", Z_STRVAL(expr_copy));
 		zval_dtor(&expr_copy);
 	}

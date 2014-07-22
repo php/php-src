@@ -43,12 +43,10 @@ PHPAPI zend_class_entry  *spl_ce_SplStack;
 
 #define SPL_LLIST_DELREF(elem) if(!--(elem)->rc) { \
 	efree(elem); \
-	elem = NULL; \
 }
 
 #define SPL_LLIST_CHECK_DELREF(elem) if((elem) && !--(elem)->rc) { \
 	efree(elem); \
-	elem = NULL; \
 }
 
 #define SPL_LLIST_ADDREF(elem) (elem)->rc++
@@ -560,8 +558,6 @@ SPL_METHOD(SplDoublyLinkedList, push)
 		return;
 	}
 
-	SEPARATE_ZVAL_IF_REF(value);
-
 	intern = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_push(intern->llist, value TSRMLS_CC);
 
@@ -579,8 +575,6 @@ SPL_METHOD(SplDoublyLinkedList, unshift)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
 		return;
 	}
-
-	SEPARATE_ZVAL_IF_REF(value);
 
 	intern = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_unshift(intern->llist, value TSRMLS_CC);
@@ -806,7 +800,6 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zindex, &value) == FAILURE) {
 		return;
 	}
-	SEPARATE_ZVAL_IF_REF(value);
 
 	intern = Z_SPLDLLIST_P(getThis());
 
@@ -902,6 +895,10 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 			llist->dtor(element TSRMLS_CC);
 		}
 
+		if (intern->traverse_pointer == element) {
+			SPL_LLIST_DELREF(element);
+			intern->traverse_pointer = NULL;
+		}
 		zval_ptr_dtor(&element->data);
 		ZVAL_UNDEF(&element->data);
 
@@ -1173,7 +1170,6 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	}
 
 	if (buf_len == 0) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Serialized string cannot be empty");
 		return;
 	}
 

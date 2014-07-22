@@ -1910,13 +1910,12 @@ PHP_FUNCTION(ldap_get_option)
 	ldap_linkdata *ld;
 	long option;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &link, &option, &retval) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz/", &link, &option, &retval) != SUCCESS) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, link, -1, "ldap link", le_link);
 
-	ZVAL_DEREF(retval);
 	switch (option) {
 	/* options with int value */
 	case LDAP_OPT_DEREF:
@@ -2186,7 +2185,7 @@ PHP_FUNCTION(ldap_parse_result)
 	char *lmatcheddn, *lerrmsg;
 	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz|zzz", &link, &result, &errcode, &matcheddn, &errmsg, &referrals) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz/|z/z/z/", &link, &result, &errcode, &matcheddn, &errmsg, &referrals) != SUCCESS) {
 		return; 
 	}
 
@@ -2204,14 +2203,12 @@ PHP_FUNCTION(ldap_parse_result)
 		RETURN_FALSE;
 	}
 
-	ZVAL_DEREF(errcode);
 	zval_ptr_dtor(errcode);
 	ZVAL_LONG(errcode, lerrcode);
 
 	/* Reverse -> fall through */
 	switch (myargcount) {
 		case 6:
-			ZVAL_DEREF(referrals);
 			zval_ptr_dtor(referrals);
 			array_init(referrals);
 			if (lreferrals != NULL) {
@@ -2223,7 +2220,6 @@ PHP_FUNCTION(ldap_parse_result)
 				ldap_value_free(lreferrals);
 			}
 		case 5:
-			ZVAL_DEREF(errmsg);
 			zval_ptr_dtor(errmsg);
 			if (lerrmsg == NULL) {
 				ZVAL_EMPTY_STRING(errmsg);
@@ -2232,7 +2228,6 @@ PHP_FUNCTION(ldap_parse_result)
 				ldap_memfree(lerrmsg);
 			}
 		case 4: 
-			ZVAL_DEREF(matcheddn);
 			zval_ptr_dtor(matcheddn);
 			if (lmatcheddn == NULL) {
 				ZVAL_EMPTY_STRING(matcheddn);
@@ -2312,7 +2307,7 @@ PHP_FUNCTION(ldap_parse_reference)
 	ldap_resultentry *resultentry;
 	char **lreferrals, **refp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz", &link, &result_entry, &referrals) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz/", &link, &result_entry, &referrals) != SUCCESS) {
 		return;
 	}
 
@@ -2323,7 +2318,6 @@ PHP_FUNCTION(ldap_parse_reference)
 		RETURN_FALSE;
 	}
 
-	ZVAL_DEREF(referrals);
 	zval_ptr_dtor(referrals);
 	array_init(referrals);
 	if (lreferrals != NULL) {
@@ -2721,7 +2715,7 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 	ber_tag_t tag;
 	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|zz", &link, &result, &cookie, &estimated) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|z/z/", &link, &result, &cookie, &estimated) != SUCCESS) {
 		return;
 	}
 
@@ -2787,7 +2781,6 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 		ZVAL_LONG(estimated, lestimated);
 	}
 
-	ZVAL_DEREF(cookie);
 	zval_ptr_dtor(cookie);
  	if (lcookie.bv_len == 0) {
 		ZVAL_EMPTY_STRING(cookie);

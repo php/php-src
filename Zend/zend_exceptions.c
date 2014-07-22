@@ -88,12 +88,11 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
 #ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
-		const char *classname;
-		zend_uint name_len;
+		zend_string *classname;
 
 		if (exception != NULL) {
-			zend_get_object_classname(Z_OBJ_P(exception), &classname, &name_len TSRMLS_CC);
-			DTRACE_EXCEPTION_THROWN((char *)classname);
+			classname = zend_get_object_classname(Z_OBJ_P(exception) TSRMLS_CC);
+			DTRACE_EXCEPTION_THROWN(classname->val);
 		} else {
 			DTRACE_EXCEPTION_THROWN(NULL);
 		}
@@ -119,7 +118,8 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 		zend_throw_exception_hook(exception TSRMLS_CC);
 	}
 
-	if (EG(current_execute_data)->opline == NULL ||
+	if (!EG(current_execute_data)->func ||
+	    !ZEND_USER_CODE(EG(current_execute_data)->func->common.type) ||
 	    (EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {
 		/* no need to rethrow the exception */
 		return;
@@ -269,8 +269,7 @@ static void _default_exception_get_entry(zval *object, char *name, int name_len,
 	zval *value;
 
 	value = zend_read_property(default_exception_ce, object, name, name_len, 0 TSRMLS_CC);
-
-	ZVAL_DUP_DEREF(return_value, value);
+	ZVAL_COPY(return_value, value);
 }
 /* }}} */
 

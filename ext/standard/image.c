@@ -1396,12 +1396,11 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	int input_len;
 	const int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|z", &input, &input_len, &info) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|z/", &input, &input_len, &info) == FAILURE) {
 			return;
 	}
 
 	if (argc == 2) {
-		info = Z_REFVAL_P(info);
 		zval_dtor(info);
 		array_init(info);
 	}

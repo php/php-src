@@ -30,7 +30,7 @@ struct _zend_property_info;
    symbol table, its reference count should be 0.
 */
 /* Used to fetch property from the object, read-only */
-typedef zval *(*zend_object_read_property_t)(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC);
+typedef zval *(*zend_object_read_property_t)(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC);
 
 /* Used to fetch dimension from the object, read-only */
 typedef zval *(*zend_object_read_dimension_t)(zval *object, zval *offset, int type, zval *rv TSRMLS_DC);
@@ -42,14 +42,14 @@ typedef zval *(*zend_object_read_dimension_t)(zval *object, zval *offset, int ty
    any changes.  You should NOT modify the reference count of the value passed to you.
 */
 /* Used to set property of the object */
-typedef void (*zend_object_write_property_t)(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC);
+typedef void (*zend_object_write_property_t)(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC);
 
 /* Used to set dimension of the object */
 typedef void (*zend_object_write_dimension_t)(zval *object, zval *offset, zval *value TSRMLS_DC);
 
 
 /* Used to create pointer to the property of the object, for future direct r/w access */
-typedef zval *(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC);
+typedef zval *(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member, int type, void **cache_slot TSRMLS_DC);
 
 /* Used to set object value. Can be used to override assignments and scalar
    write ops (like ++, +=) on the object */
@@ -66,13 +66,13 @@ typedef zval* (*zend_object_get_t)(zval *object, zval *rv TSRMLS_DC);
  * 1 (set) whether property exists and is true
  * 2 (exists) whether property exists
  */
-typedef int (*zend_object_has_property_t)(zval *object, zval *member, int has_set_exists, zend_uint cache_slot TSRMLS_DC);
+typedef int (*zend_object_has_property_t)(zval *object, zval *member, int has_set_exists, void **cache_slot TSRMLS_DC);
 
 /* Used to check if a dimension of the object exists */
 typedef int (*zend_object_has_dimension_t)(zval *object, zval *member, int check_empty TSRMLS_DC);
 
 /* Used to remove a property of the object */
-typedef void (*zend_object_unset_property_t)(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC);
+typedef void (*zend_object_unset_property_t)(zval *object, zval *member, void **cache_slot TSRMLS_DC);
 
 /* Used to remove a dimension of the object */
 typedef void (*zend_object_unset_dimension_t)(zval *object, zval *offset TSRMLS_DC);
@@ -156,14 +156,14 @@ extern ZEND_API zend_object_handlers std_object_handlers;
 
 BEGIN_EXTERN_C()
 ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key TSRMLS_DC);
-ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent, zend_uint cache_slot TSRMLS_DC);
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name, zend_uint cache_slot TSRMLS_DC);
+ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent, void **cache_slot TSRMLS_DC);
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name, void **cache_slot TSRMLS_DC);
 ZEND_API union _zend_function *zend_std_get_constructor(zend_object *object TSRMLS_DC);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC);
 ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC);
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC);
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC);
-ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC);
+ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
 

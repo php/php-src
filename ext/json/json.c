@@ -276,7 +276,7 @@ static void json_encode_array(smart_str *buf, zval *val, int options TSRMLS_DC) 
 				if (key) {
 					if (key->val[0] == '\0' && Z_TYPE_P(val) == IS_OBJECT) {
 						/* Skip protected and private members. */
-						if (tmp_ht) {
+						if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
 							ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);
 						}
 						continue;

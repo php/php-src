@@ -1619,6 +1619,7 @@ PHP_RINIT_FUNCTION(mbstring)
 	if (MBSTRG(func_overload)){
 		p = &(mb_ovld[0]);
 		
+		CG(compiler_options) |= ZEND_COMPILE_NO_BUILTIN_STRLEN;
 		while (p->type > 0) {
 			if ((MBSTRG(func_overload) & p->type) == p->type && 
 				(orig = zend_hash_str_find_ptr(EG(function_table), p->save_func,
@@ -1687,6 +1688,7 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 			}
 			p++;
 		}
+		CG(compiler_options) &= ~ZEND_COMPILE_NO_BUILTIN_STRLEN;
 	}
 
 #if HAVE_MBREGEX
@@ -2059,13 +2061,12 @@ PHP_FUNCTION(mb_parse_str)
 	const mbfl_encoding *detected;
 
 	track_vars_array = NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
 		return;
 	}
 
 	if (track_vars_array != NULL) {
 		/* Clear out the array */
-		ZVAL_DEREF(track_vars_array);
 		zval_dtor(track_vars_array);
 		array_init(track_vars_array);
 	}
@@ -2085,10 +2086,9 @@ PHP_FUNCTION(mb_parse_str)
 		detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr TSRMLS_CC);
 	} else {
 		zval tmp;
-		if (!EG(active_symbol_table)) {
-			zend_rebuild_symbol_table(TSRMLS_C);
-		}
-		ZVAL_ARR(&tmp, EG(active_symbol_table));
+		zend_array *symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
+
+		ZVAL_ARR(&tmp, symbol_table);
 		detected = _php_mb_encoding_handler_ex(&info, &tmp, encstr TSRMLS_CC);		
 	}
 
@@ -3600,6 +3600,7 @@ PHP_FUNCTION(mb_convert_variables)
 				if (stack_level <= 0) {
 					var = &args[n++];
 					ZVAL_DEREF(var);
+					SEPARATE_ZVAL_NOREF(var);
 					if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 						target_hash = HASH_OF(var);
 						if (target_hash != NULL) {
@@ -3686,6 +3687,7 @@ detect_end:
 			if (stack_level <= 0) {
 				var = &args[n++];
 				ZVAL_DEREF(var);
+				SEPARATE_ZVAL_NOREF(var);
 				if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 					target_hash = HASH_OF(var);
 					if (target_hash != NULL) {

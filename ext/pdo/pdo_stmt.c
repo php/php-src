@@ -560,9 +560,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 	switch (type) {
 		case PDO_PARAM_ZVAL:
 			if (value && value_len == sizeof(zval)) {
-				int need_copy = (new_type != PDO_PARAM_ZVAL || stmt->dbh->stringify) ? 1 : 0;
-				zval *zv = *(zval**)value;
-				ZVAL_ZVAL(dest, zv, need_copy, 1);
+				ZVAL_COPY_VALUE(dest, (zval *)value);
 			} else {
 				ZVAL_NULL(dest);
 			}
@@ -2185,7 +2183,7 @@ const zend_function_entry pdo_dbstmt_functions[] = {
 };
 
 /* {{{ overloaded handlers for PDOStatement class */
-static void dbstmt_prop_write(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
+static void dbstmt_prop_write(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
 {
 	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
 
@@ -2198,7 +2196,7 @@ static void dbstmt_prop_write(zval *object, zval *member, zval *value, zend_uint
 	}
 }
 
-static void dbstmt_prop_delete(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC)
+static void dbstmt_prop_delete(zval *object, zval *member, void **cache_slot TSRMLS_DC)
 {
 	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
 
@@ -2482,7 +2480,7 @@ const zend_function_entry pdo_row_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static zval *row_prop_read(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC)
+static zval *row_prop_read(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC)
 {
 	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
 	pdo_stmt_t *stmt = row->stmt;
@@ -2525,10 +2523,10 @@ static zval *row_prop_read(zval *object, zval *member, int type, zend_uint cache
 
 static zval *row_dim_read(zval *object, zval *member, int type, zval *rv TSRMLS_DC)
 {
-	return row_prop_read(object, member, type, -1, rv TSRMLS_CC);
+	return row_prop_read(object, member, type, NULL, rv TSRMLS_CC);
 }
 
-static void row_prop_write(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
+static void row_prop_write(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This PDORow is not from a writable result set");
 }
@@ -2538,7 +2536,7 @@ static void row_dim_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This PDORow is not from a writable result set");
 }
 
-static int row_prop_exists(zval *object, zval *member, int check_empty, zend_uint cache_slot TSRMLS_DC)
+static int row_prop_exists(zval *object, zval *member, int check_empty, void **cache_slot TSRMLS_DC)
 {
 	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
 	pdo_stmt_t *stmt = row->stmt;
@@ -2565,10 +2563,10 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, zend_uin
 
 static int row_dim_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
 {
-	return row_prop_exists(object, member, check_empty, -1 TSRMLS_CC);
+	return row_prop_exists(object, member, check_empty, NULL TSRMLS_CC);
 }
 
-static void row_prop_delete(zval *object, zval *offset, zend_uint cache_slot TSRMLS_DC)
+static void row_prop_delete(zval *object, zval *offset, void **cache_slot TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a PDORow");
 }

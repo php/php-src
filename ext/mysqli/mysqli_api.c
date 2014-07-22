@@ -1148,12 +1148,17 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 /* {{{  php_add_field_properties */
 static void php_add_field_properties(zval *value, const MYSQL_FIELD *field TSRMLS_DC)
 {
-	add_property_string(value, "name",(field->name ? field->name : ""));
-	add_property_string(value, "orgname",(field->org_name ? field->org_name : ""));
-	add_property_string(value, "table",(field->table ? field->table : ""));
-	add_property_string(value, "orgtable",(field->org_table ? field->org_table : ""));
-	add_property_string(value, "def",(field->def ? field->def : ""));
-	add_property_string(value, "db",(field->db ? field->db : ""));
+#ifdef MYSQLI_USE_MYSQLND
+	add_property_str(value, "name", STR_COPY(field->sname));
+#else
+	add_property_stringl(value, "name",(field->name ? field->name : ""), field->name_length);
+#endif
+
+	add_property_stringl(value, "orgname", (field->org_name ? field->org_name : ""), field->org_name_length);
+	add_property_stringl(value, "table", (field->table ? field->table : ""), field->table_length);
+	add_property_stringl(value, "orgtable", (field->org_table ? field->org_table : ""), field->org_table_length);
+	add_property_stringl(value, "def", (field->def ? field->def : ""), field->def_length);
+	add_property_stringl(value, "db", (field->db ? field->db : ""), field->db_length);
 
 	/* FIXME: manually set the catalog to "def" due to bug in
 	 * libmysqlclient which does not initialize field->catalog
@@ -1475,7 +1480,14 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS)
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql;
 
-	if (getThis() && (Z_MYSQLI_P(getThis()))->ptr) {
+// TODO: We can't properly check if this was to mysql_init() in a class method 
+//       or a call to mysqli->init().
+//       To solve the problem, we added instanceof check for the class of $this
+//       ???
+	if (getThis() &&
+	    instanceof_function(Z_OBJCE_P(getThis()), mysqli_link_class_entry TSRMLS_CC) &&
+	    (Z_MYSQLI_P(getThis()))->ptr) {
+//???	if (getThis() && (Z_MYSQLI_P(getThis()))->ptr) {
 		return;
 	}
 

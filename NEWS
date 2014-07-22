@@ -2,11 +2,17 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.7.0 
 
+- CLI server:
+  . Refactor MIME type handling to use a hash table instead of linear search.
+    (Adam)
+  . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
+
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
 
 - Standard:
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)
+  . Fix user session handlers (See rfc:session.user.return-value). (Sara)
 
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)

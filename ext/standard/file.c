@@ -344,7 +344,7 @@ PHP_FUNCTION(flock)
 	php_stream *stream;
 	long operation = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &arg1, &operation, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z/", &arg1, &operation, &arg3) == FAILURE) {
 		return;
 	}
 
@@ -356,16 +356,16 @@ PHP_FUNCTION(flock)
 		RETURN_FALSE;
 	}
 
-	if (arg3 && Z_ISREF_P(arg3)) {
-		convert_to_long_ex(Z_REFVAL_P(arg3));
-		Z_LVAL_P(Z_REFVAL_P(arg3)) = 0;
+	if (arg3) {
+		zval_dtor(arg3);
+		ZVAL_LONG(arg3, 0);
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
-		if (operation && errno == EWOULDBLOCK && arg3 && Z_ISREF_P(arg3)) {
-			Z_LVAL_P(Z_REFVAL_P(arg3)) = 1;
+		if (operation && errno == EWOULDBLOCK && arg3) {
+			ZVAL_LONG(arg3, 1);
 		}
 		RETURN_FALSE;
 	}
@@ -557,6 +557,10 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_FALSE;
 	}
 
+	if (maxlen > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maxlen truncated from %ld to %d bytes", maxlen, INT_MAX);
+		maxlen = INT_MAX;
+	}
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0)) != NULL) {
 		RETVAL_STR(contents);
 	} else {
@@ -575,7 +579,7 @@ PHP_FUNCTION(file_put_contents)
 	char *filename;
 	int filename_len;
 	zval *data;
-	int numbytes = 0;
+	long numbytes = 0;
 	long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -627,6 +631,10 @@ PHP_FUNCTION(file_put_contents)
 			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
 				numbytes = -1;
 			} else {
+				if (len > LONG_MAX) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "content truncated from %lu to %ld bytes", (unsigned long) len, LONG_MAX);
+					len = LONG_MAX;
+				}
 				numbytes = len;
 			}
 			break;
@@ -642,7 +650,7 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_STRLEN_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
 				if (numbytes != Z_STRLEN_P(data)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %ld of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
 					numbytes = -1;
 				}
 			}
@@ -681,7 +689,7 @@ PHP_FUNCTION(file_put_contents)
 				if (zend_std_cast_object_tostring(data, &out, IS_STRING TSRMLS_CC) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
 					if (numbytes != Z_STRLEN(out)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %ld of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
 						numbytes = -1;
 					}
 					zval_dtor(&out);
@@ -885,9 +893,15 @@ PHPAPI PHP_FUNCTION(fclose)
 	zval *arg1;
 	php_stream *stream;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(arg1)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
@@ -2301,9 +2315,15 @@ PHP_FUNCTION(realpath)
 	int filename_len;
 	char resolved_path_buff[MAXPATHLEN];
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(filename, filename_len)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	if (VCWD_REALPATH(filename, resolved_path_buff)) {
 		if (php_check_open_basedir(resolved_path_buff TSRMLS_CC)) {

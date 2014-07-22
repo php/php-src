@@ -829,7 +829,7 @@ static zval *php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, 
 }
 /* }}} */
 
-static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	ze_zip_object *obj;
 	zval tmp_member;
@@ -841,7 +841,7 @@ static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, 
 		ZVAL_DUP(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
-		cache_slot = -1;
+		cache_slot = NULL;
 	}
 
 	obj = Z_ZIP_P(object);
@@ -863,7 +863,7 @@ static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, 
 }
 /* }}} */
 
-static zval *php_zip_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC) /* {{{ */
+static zval *php_zip_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC) /* {{{ */
 {
 	ze_zip_object *obj;
 	zval tmp_member;
@@ -875,7 +875,7 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, zend_ui
 		ZVAL_DUP(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
-		cache_slot = -1;
+		cache_slot = NULL;
 	}
 
 	obj = Z_ZIP_P(object);
@@ -902,7 +902,7 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, zend_ui
 }
 /* }}} */
 
-static int php_zip_has_property(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
+static int php_zip_has_property(zval *object, zval *member, int type, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	ze_zip_object *obj;
 	zval tmp_member;
@@ -914,7 +914,7 @@ static int php_zip_has_property(zval *object, zval *member, int type, zend_uint 
 		ZVAL_DUP(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
-		cache_slot = -1;
+		cache_slot = NULL;
 	}
 
 	obj = Z_ZIP_P(object);
@@ -2111,7 +2111,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/z/|l",
 			&name, &name_len, &z_opsys, &z_attr, &flags) == FAILURE) {
 		return;
 	}
@@ -2128,10 +2128,8 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 			(zip_flags_t)flags, &opsys, &attr) < 0) {
 		RETURN_FALSE;
 	}
-	ZVAL_DEREF(z_opsys);
 	zval_ptr_dtor(z_opsys);
 	ZVAL_LONG(z_opsys, opsys);
-	ZVAL_DEREF(z_attr);
 	zval_ptr_dtor(z_attr);
 	ZVAL_LONG(z_attr, attr);
 	RETURN_TRUE;
@@ -2155,7 +2153,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lzz|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz/z/|l",
 			&index, &z_opsys, &z_attr, &flags) == FAILURE) {
 		return;
 	}
@@ -2165,10 +2163,8 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 			(zip_flags_t)flags, &opsys, &attr) < 0) {
 		RETURN_FALSE;
 	}
-	ZVAL_DEREF(z_opsys);
 	zval_dtor(z_opsys);
 	ZVAL_LONG(z_opsys, opsys);
-	ZVAL_DEREF(z_attr);
 	zval_dtor(z_attr);
 	ZVAL_LONG(z_attr, attr);
 	RETURN_TRUE;

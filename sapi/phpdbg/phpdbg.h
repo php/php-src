@@ -64,15 +64,21 @@
 # include "TSRM.h"
 #endif
 
-#ifdef HAVE_LIBREADLINE
+#ifdef LIBREADLINE
 #   include <readline/readline.h>
 #   include <readline/history.h>
 #endif
+#ifdef HAVE_LIBEDIT
+#   include <editline/readline.h>
+#endif
 
+#include "phpdbg_lexer.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
+
+int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 
 #ifdef ZTS
 # define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
@@ -176,10 +182,12 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	phpdbg_frame_t frame;                        /* frame */
 	zend_uint last_line;                         /* last executed line */
 
+	phpdbg_lexer_data lexer;                     /* lexer data */
+	phpdbg_param_t *parser_stack;                /* param stack during lexer / parser phase */
+
 #ifndef _WIN32
 	struct sigaction old_sigsegv_signal;         /* segv signal handler */
 #endif
-	
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */
 	HashTable watchpoints;                       /* watchpoints */

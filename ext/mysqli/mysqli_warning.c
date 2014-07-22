@@ -105,8 +105,8 @@ MYSQLI_WARNING *php_new_warning(const zval * reason, int errorno TSRMLS_DC)
 
 	w = (MYSQLI_WARNING *)ecalloc(1, sizeof(MYSQLI_WARNING));
 
-	ZVAL_DUP(&w->reason, reason);
-	convert_to_string(&w->resson);
+	ZVAL_DUP(&w->reason, (zval *)reason);
+	convert_to_string(&w->reason);
 
 	//????ZVAL_UTF8_STRINGL(&(w->reason),  Z_STRVAL(w->reason), Z_STRLEN(w->reason),  ZSTR_AUTOFREE);
 
@@ -123,7 +123,7 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
 {
 	MYSQLI_WARNING	*w, *first = NULL, *prev = NULL;
 	MYSQL_RES		*result;
-	zval			*row;
+	zval			row;
 
 	if (mysql->m->query(mysql, "SHOW WARNINGS", 13 TSRMLS_CC)) {
 		return NULL;
@@ -135,24 +135,23 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
 		zval *entry;
 		int errno;
 
-		MAKE_STD_ZVAL(row);
-		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, row, MYSQLND_MYSQLI);
-		if (Z_TYPE_P(row) != IS_ARRAY) {
+		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row, MYSQLND_MYSQLI);
+		if (Z_TYPE(row) != IS_ARRAY) {
 			zval_ptr_dtor(&row);
 			break;
 		}
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(row));
+		zend_hash_internal_pointer_reset(Z_ARRVAL(row));
 		/* 0. we don't care about the first */
-		zend_hash_move_forward(Z_ARRVAL_P(row));
+		zend_hash_move_forward(Z_ARRVAL(row));
 
 		/* 1. Here comes the error no */
-		entry = zend_hash_get_current_data(Z_ARRVAL_P(row));
+		entry = zend_hash_get_current_data(Z_ARRVAL(row));
 		convert_to_long_ex(entry);
 		errno = Z_LVAL_P(entry);
-		zend_hash_move_forward(Z_ARRVAL_P(row));
+		zend_hash_move_forward(Z_ARRVAL(row));
 
 		/* 2. Here comes the reason */
-		entry = zend_hash_get_current_data(Z_ARRVAL_P(row));
+		entry = zend_hash_get_current_data(Z_ARRVAL(row));
 
 		w = php_new_warning(entry, errno TSRMLS_CC);
 		/*

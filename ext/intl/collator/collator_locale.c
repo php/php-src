@@ -66,7 +66,7 @@ PHP_FUNCTION( collator_get_locale )
 	COLLATOR_CHECK_STATUS( co, "Error getting locale by type" );
 
 	/* Return it. */
-	RETVAL_STRINGL( locale_name, strlen(locale_name), TRUE );
+	RETVAL_STRINGL( locale_name, strlen(locale_name) );
 }
 /* }}} */
 

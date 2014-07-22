@@ -360,7 +360,6 @@ static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 			    !Z_REFCOUNTED_P(data_ptr) ||
 			    Z_COUNTED_P(data) != Z_COUNTED_P(data_ptr)) {
 				zval_ptr_dtor(data);
-//???			    SEPARATE_ZVAL_TO_MAKE_IS_REF(data_ptr);
 				ZVAL_COPY(data, data_ptr);
 				return 1;
 			}
@@ -1197,7 +1196,7 @@ static zval* get_zval_property(zval* object, char* name, zval *rv TSRMLS_DC)
 		ZVAL_STRING(&member, name);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
-		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, -1, rv TSRMLS_CC);
+		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, NULL, rv TSRMLS_CC);
 		if (data == &EG(uninitialized_zval)) {
 			/* Hack for bug #32455 */
 			zend_property_info *property_info;
@@ -1233,7 +1232,7 @@ static void unset_zval_property(zval* object, char* name TSRMLS_DC)
 		ZVAL_STRING(&member, name);
 		old_scope = EG(scope);
 		EG(scope) = Z_OBJCE_P(object);
-		Z_OBJ_HT_P(object)->unset_property(object, &member, 0 TSRMLS_CC);
+		Z_OBJ_HT_P(object)->unset_property(object, &member, NULL TSRMLS_CC);
 		EG(scope) = old_scope;
 		zval_ptr_dtor(&member);
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
@@ -2276,7 +2275,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 				if (EG(exception)) {
 					goto iterator_done;
 				}
-				array_set_zval_key(Z_ARRVAL(array_copy), &key, val);
+				array_set_zval_key(Z_ARRVAL(array_copy), &key, val TSRMLS_CC);
 				zval_ptr_dtor(val);
 				zval_dtor(&key);
 			} else {

@@ -838,7 +838,7 @@ PHP_FUNCTION(socket_select)
 	int				retval, sets = 0;
 	long			usec = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/!a/!a/!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE) {
 		return;
 	}
 
@@ -1179,7 +1179,7 @@ PHP_FUNCTION(socket_getsockname)
 	char					*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|z", &arg1, &addr, &port) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/|z/", &arg1, &addr, &port) == FAILURE) {
 		return;
 	}
 
@@ -1192,7 +1192,6 @@ PHP_FUNCTION(socket_getsockname)
 		RETURN_FALSE;
 	}
 
-	ZVAL_DEREF(addr);
 	if (port != NULL) {
 		ZVAL_DEREF(port);
 	}
@@ -1261,7 +1260,7 @@ PHP_FUNCTION(socket_getpeername)
 	char					*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|z", &arg1, &arg2, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/|z/", &arg1, &arg2, &arg3) == FAILURE) {
 		return;
 	}
 
@@ -1274,8 +1273,6 @@ PHP_FUNCTION(socket_getpeername)
 		RETURN_FALSE;
 	}
 
-	ZVAL_DEREF(arg2);
-	ZVAL_DEREF(arg3);
 	switch (sa->sa_family) {
 #if HAVE_IPV6
 		case AF_INET6:
@@ -1563,7 +1560,7 @@ PHP_FUNCTION(socket_recv)
 	int			retval;
 	long		len, flags;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzll", &php_sock_res, &buf, &len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/ll", &php_sock_res, &buf, &len, &flags) == FAILURE) {
 		return;
 	}
 
@@ -1576,7 +1573,6 @@ PHP_FUNCTION(socket_recv)
 
 	recv_buf = STR_ALLOC(len, 0);
 
-	ZVAL_DEREF(buf);
 	if ((retval = recv(php_sock->bsd_socket, recv_buf->val, len, flags)) < 1) {
 		efree(recv_buf);
 
@@ -1645,7 +1641,7 @@ PHP_FUNCTION(socket_recvfrom)
 	char				*address;
 	zend_string			*recv_buf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzllz|z", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/llz/|z/", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
 		return;
 	}
 
@@ -1672,8 +1668,6 @@ PHP_FUNCTION(socket_recvfrom)
 			recv_buf->len = retval;
 			recv_buf->val[recv_buf->len] = '\0';
 
-			ZVAL_DEREF(arg2);
-			ZVAL_DEREF(arg5);
 			zval_dtor(arg2);
 			zval_dtor(arg5);
 
@@ -1701,9 +1695,6 @@ PHP_FUNCTION(socket_recvfrom)
 			recv_buf->len = retval;
 			recv_buf->val[recv_buf->len] = '\0';
 
-			ZVAL_DEREF(arg2);
-			ZVAL_DEREF(arg5);
-			ZVAL_DEREF(arg6);
 			zval_dtor(arg2);
 			zval_dtor(arg5);
 			zval_dtor(arg6);
@@ -1735,9 +1726,6 @@ PHP_FUNCTION(socket_recvfrom)
 			recv_buf->len = retval;
 			recv_buf->val[recv_buf->len] = '\0';
 
-			ZVAL_DEREF(arg2);
-			ZVAL_DEREF(arg5);
-			ZVAL_DEREF(arg6);
 			zval_dtor(arg2);
 			zval_dtor(arg5);
 			zval_dtor(arg6);
@@ -2097,14 +2085,13 @@ PHP_FUNCTION(socket_create_pair)
 	PHP_SOCKET	fds_array[2];
 	long		domain, type, protocol;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lllz", &domain, &type, &protocol, &fds_array_zval) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lllz/", &domain, &type, &protocol, &fds_array_zval) == FAILURE) {
 		return;
 	}
 
 	php_sock[0] = php_create_socket();
 	php_sock[1] = php_create_socket();
 
-	ZVAL_DEREF(fds_array_zval);
 	if (domain != AF_INET
 #if HAVE_IPV6
 		&& domain != AF_INET6

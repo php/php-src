@@ -233,7 +233,6 @@ int zend_next_free_module(void);
 
 BEGIN_EXTERN_C()
 ZEND_API int zend_get_parameters(int ht, int param_count, ...);
-ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval *argument_array TSRMLS_DC);
 ZEND_API ZEND_ATTRIBUTE_DEPRECATED int zend_get_parameters_ex(int param_count, ...);
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array TSRMLS_DC);
 
@@ -241,7 +240,7 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array
 ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TSRMLS_DC);
 
 #define zend_get_parameters_array(ht, param_count, argument_array)			\
-	_zend_get_parameters_array(ht, param_count, argument_array TSRMLS_CC)
+	_zend_get_parameters_array_ex(param_count, argument_array TSRMLS_CC)
 #define zend_get_parameters_array_ex(param_count, argument_array)			\
 	_zend_get_parameters_array_ex(param_count, argument_array TSRMLS_CC)
 #define zend_parse_parameters_none()										\
@@ -370,7 +369,7 @@ ZEND_API void object_properties_init(zend_object *object, zend_class_entry *clas
 ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties TSRMLS_DC);
 ZEND_API void object_properties_load(zend_object *object, HashTable *properties TSRMLS_DC);
 
-ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destroy_ht TSRMLS_DC);
+ZEND_API void zend_merge_properties(zval *obj, HashTable *properties TSRMLS_DC);
 
 /* no longer supported */
 ZEND_API int add_assoc_function(zval *arg, const char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
@@ -522,7 +521,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_lengt
 
 ZEND_API int zend_delete_global_variable(zend_string *name TSRMLS_DC);
 
-ZEND_API void zend_rebuild_symbol_table(TSRMLS_D);
+ZEND_API zend_array *zend_rebuild_symbol_table(TSRMLS_D);
 ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data);
 ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data);
 ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force TSRMLS_DC);
@@ -638,6 +637,27 @@ END_EXTERN_C()
 	}                                 \
 } while (0)
 
+/* May be used in internal constructors to make them return NULL */
+#if 1 // support for directly called constructors only ???
+#define ZEND_CTOR_MAKE_NULL() do {										\
+		if (EG(current_execute_data)->return_value) {					\
+			zval_ptr_dtor(EG(current_execute_data)->return_value);		\
+			ZVAL_NULL(EG(current_execute_data)->return_value);			\
+		} \
+	} while (0)
+#else // attempt to support calls to parent::__construct() ???
+#define ZEND_CTOR_MAKE_NULL() do {										\
+		if (EG(current_execute_data)->return_value) {					\
+			zval_ptr_dtor(EG(current_execute_data)->return_value);		\
+			ZVAL_NULL(EG(current_execute_data)->return_value);			\
+		} else if (EG(current_execute_data)->prev_execute_data &&		\
+			EG(current_execute_data)->prev_execute_data->object ==		\
+				EG(current_execute_data)->object) {						\
+			EG(current_execute_data)->prev_execute_data->object = NULL;	\
+		} \
+	} while (0)
+#endif
+
 #define RETURN_ZVAL_FAST(z) { RETVAL_ZVAL_FAST(z); return; }
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p) TSRMLS_CC) : NULL)))
@@ -659,6 +679,610 @@ END_EXTERN_C()
 #define ZEND_MINFO_FUNCTION			ZEND_MODULE_INFO_D
 #define ZEND_GINIT_FUNCTION			ZEND_MODULE_GLOBALS_CTOR_D
 #define ZEND_GSHUTDOWN_FUNCTION		ZEND_MODULE_GLOBALS_DTOR_D
+
+/* Fast parameter parsing API */
+
+/* TODO: This API is experemental. It may be changed or removed ???
+ * It should be used only for really often used functions.
+ * (Keep the original parsing code and wrap usage with #ifndef FAST_ZPP)
+ */
+#define FAST_ZPP 1
+
+#ifdef FAST_ZPP
+
+#define Z_EXPECTED_TYPES(_) \
+	_(Z_EXPECTED_LONG,		"long") \
+	_(Z_EXPECTED_BOOL,		"boolean") \
+	_(Z_EXPECTED_STRING,	"string") \
+	_(Z_EXPECTED_ARRAY,		"array") \
+	_(Z_EXPECTED_FUNC,		"valid callback") \
+	_(Z_EXPECTED_RESOURCE,	"resource") \
+	_(Z_EXPECTED_PATH,		"a valid path") \
+	_(Z_EXPECTED_OBJECT,	"object") \
+	_(Z_EXPECTED_DOUBLE,	"double")
+
+#define Z_EXPECTED_TYPE_ENUM(id, str) id,
+#define Z_EXPECTED_TYPE_STR(id, str)  str,
+
+typedef enum _zend_expected_type {
+	Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_ENUM)
+	Z_EXPECTED_LAST
+} zend_expected_type;
+
+ZEND_API int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS_DC);
+ZEND_API void zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args TSRMLS_DC);
+ZEND_API void zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg TSRMLS_DC);
+ZEND_API void zend_wrong_paramer_class_error(int num, char *name, zval *arg TSRMLS_DC);
+ZEND_API void zend_wrong_callback_error(int severity, int num, char *error TSRMLS_DC);
+ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int check_null TSRMLS_DC);
+
+#define ZEND_PARSE_PARAMETERS_START_EX(flags, min_num_args, max_num_args) do { \
+		const int _flags = (flags); \
+		int _min_num_args = (min_num_args); \
+		int _max_num_args = (max_num_args); \
+		int _num_args = EG(current_execute_data)->num_args; \
+		int _i; \
+		zval *_real_arg, *_arg; \
+		zend_expected_type _expected_type; \
+		char *_error; \
+		zend_bool _dummy; \
+		((void)_i); \
+		((void)_real_arg); \
+		((void)_arg); \
+		((void)_expected_type); \
+		((void)_error); \
+		((void)_dummy); \
+		if (UNEXPECTED(_num_args < _min_num_args) || \
+		    (UNEXPECTED(_num_args > _max_num_args) && \
+		     EXPECTED(_max_num_args >= 0))) { \
+			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
+				zend_wrong_paramers_count_error(_num_args, _min_num_args, _max_num_args TSRMLS_CC); \
+			} \
+			goto zend_parse_params_failure; \
+		} \
+		_i = 0; \
+		_real_arg = ZEND_CALL_ARG(EG(current_execute_data), 0);
+
+#define ZEND_PARSE_PARAMETERS_START(min_num_args, max_num_args) \
+	ZEND_PARSE_PARAMETERS_START_EX(0, min_num_args, max_num_args)
+
+#define ZEND_PARSE_PARAMETERS_END_EX(failure) \
+		if (0) { \
+zend_parse_params_wrong_callback: ZEND_ATTRIBUTE_UNUSED_LABEL \
+			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
+				zend_wrong_callback_error(E_WARNING, _i, _error TSRMLS_CC); \
+			} \
+			goto zend_parse_params_failure; \
+zend_parse_params_wrong_class: ZEND_ATTRIBUTE_UNUSED_LABEL \
+			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
+				zend_wrong_paramer_class_error(_i, _error, _arg TSRMLS_CC); \
+			} \
+			goto zend_parse_params_failure; \
+zend_parse_params_wrong_arg: ZEND_ATTRIBUTE_UNUSED_LABEL \
+			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
+				zend_wrong_paramer_type_error(_i, _expected_type, _arg TSRMLS_CC); \
+			} \
+zend_parse_params_failure: ZEND_ATTRIBUTE_UNUSED_LABEL \
+			failure; \
+		} \
+	} while (0)
+
+#define ZEND_PARSE_PARAMETERS_END() \
+	ZEND_PARSE_PARAMETERS_END_EX(return)
+
+#define Z_PARAM_PROLOGUE(separate) \
+	if (UNEXPECTED(++_i >_num_args)) break; \
+	_real_arg++; \
+	_arg = _real_arg; \
+	ZVAL_DEREF(_arg); \
+	if (separate) { \
+		SEPARATE_ZVAL_NOREF(_arg); \
+	}
+
+/* old "|" */
+#define Z_PARAM_OPTIONAL
+
+/* old "a" */
+#define Z_PARAM_ARRAY_EX(dest, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_array(_arg, &dest, check_null, 0)) { \
+			_expected_type = Z_EXPECTED_ARRAY; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_ARRAY(dest) \
+	Z_PARAM_ARRAY_EX(dest, 0, 0)
+
+/* old "A" */
+#define Z_PARAM_ARRAY_OR_OBJECT_EX(dest, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_array(_arg, &dest, check_null, 1)) { \
+			_expected_type = Z_EXPECTED_ARRAY; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_ARRAY_OR_OBJECT(dest, check_null, separate) \
+	Z_PARAM_ARRAY_OR_OBJECT_EX(dest, 0, 0)
+
+/* old "b" */
+#define Z_PARAM_BOOL_EX(dest, is_null, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_bool(_arg, &dest, &is_null, check_null TSRMLS_CC)) { \
+			_expected_type = Z_EXPECTED_BOOL; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_BOOL(dest) \
+	Z_PARAM_BOOL_EX(dest, _dummy, 0, 0)
+
+/* old "C" */
+#define Z_PARAM_CLASS_EX(dest, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_class(_arg, &dest, _i, check_null TSRMLS_CC)) { \
+			goto zend_parse_params_failure; \
+		} \
+	} while (0);
+
+#define Z_PARAM_CLASS(dest) \
+	Z_PARAM_CLASS_EX(dest, 0, 0)
+
+/* old "d" */
+#define Z_PARAM_DOUBLE_EX(dest, is_null, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_double(_arg, &dest, &is_null, check_null)) { \
+			_expected_type = Z_EXPECTED_DOUBLE; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_DOUBLE(dest) \
+	Z_PARAM_DOUBLE_EX(dest, _dummy, 0, 0)
+
+/* old "f" */
+#define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_func(_arg, &dest_fci, &dest_fcc, check_null, &_error TSRMLS_CC)) { \
+			if (!_error) { \
+				_expected_type = Z_EXPECTED_FUNC; \
+				goto zend_parse_params_wrong_arg; \
+			} else { \
+				goto zend_parse_params_wrong_callback; \
+			} \
+		} else if (_error) { \
+			zend_wrong_callback_error(E_STRICT, _i, _error TSRMLS_CC); \
+		} \
+	} while (0);
+
+#define Z_PARAM_FUNC(dest_fci, dest_fcc) \
+	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 0, 0)
+
+/* old "h" */
+#define Z_PARAM_ARRAY_HT_EX(dest, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_array_ht(_arg, &dest, check_null, 0 TSRMLS_CC)) { \
+			_expected_type = Z_EXPECTED_ARRAY; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_ARRAY_HT(dest) \
+	Z_PARAM_ARRAY_HT_EX(dest, 0, 0)
+
+/* old "H" */
+#define Z_PARAM_ARRAY_OR_OBJECT_HT_EX(dest, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_array_ht(_arg, &dest, check_null, 1 TSRMLS_CC)) { \
+			_expected_type = Z_EXPECTED_ARRAY; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_ARRAY_OR_OBJECT_HT(dest) \
+	Z_PARAM_ARRAY_OR_OBJECT_HT_EX(dest, 0, 0)
+
+/* old "l" */
+#define Z_PARAM_LONG_EX(dest, is_null, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_long(_arg, &dest, &is_null, check_null, 0)) { \
+			_expected_type = Z_EXPECTED_LONG; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_LONG(dest) \
+	Z_PARAM_LONG_EX(dest, _dummy, 0, 0)
+
+/* old "L" */
+#define Z_PARAM_STRICT_LONG_EX(dest, is_null, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_long(_arg, &dest, &is_null, check_null, 1)) { \
+			_expected_type = Z_EXPECTED_LONG; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_STRICT_LONG(dest) \
+	Z_PARAM_STRICT_LONG_EX(dest, _dummy, 0, 0)
+
+/* old "o" */
+#define Z_PARAM_OBJECT_EX(dest, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_object(_arg, &dest, NULL, check_null TSRMLS_CC)) { \
+			_expected_type = Z_EXPECTED_OBJECT; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_OBJECT(dest) \
+	Z_PARAM_OBJECT_EX(dest, 0, 0)
+
+/* old "O" */
+#define Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_object(_arg, &dest, _ce, check_null TSRMLS_CC)) { \
+			if (_ce) { \
+				_error = (_ce)->name->val; \
+				goto zend_parse_params_wrong_class; \
+			} else { \
+				_expected_type = Z_EXPECTED_OBJECT; \
+				goto zend_parse_params_wrong_arg; \
+			} \
+		} \
+	} while (0);
+
+#define Z_PARAM_OBJECT_OF_CLASS(dest, _ce) \
+	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 0, 0)
+
+/* old "p" */
+#define Z_PARAM_PATH_EX(dest, dest_len, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_path(_arg, &dest, &dest_len, check_null TSRMLS_CC)) { \
+			_expected_type = Z_EXPECTED_PATH; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_PATH(dest, dest_len) \
+	Z_PARAM_PATH_EX(dest, dest_len, 0, 0)
+
+/* old "P" */
+#define Z_PARAM_PATH_STR_EX(dest, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_path_str(_arg, &dest, check_null TSRMLS_CC)) { \
+			_expected_type = Z_EXPECTED_PATH; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_PATH_STR(dest) \
+	Z_PARAM_PATH_STR_EX(dest, 0, 0)
+
+/* old "r" */
+#define Z_PARAM_RESOURCE_EX(dest, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_resource(_arg, &dest, check_null)) { \
+			_expected_type = Z_EXPECTED_RESOURCE; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_RESOURCE(dest) \
+	Z_PARAM_RESOURCE_EX(dest, 0, 0)
+
+/* old "s" */
+#define Z_PARAM_STRING_EX(dest, dest_len, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_string(_arg, &dest, &dest_len, check_null TSRMLS_CC)) { \
+			_expected_type = Z_EXPECTED_STRING; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_STRING(dest, dest_len) \
+	Z_PARAM_STRING_EX(dest, dest_len, 0, 0)
+
+/* old "S" */
+#define Z_PARAM_STR_EX(dest, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		if (!_z_param_str(_arg, &dest, check_null TSRMLS_CC)) { \
+			_expected_type = Z_EXPECTED_STRING; \
+			goto zend_parse_params_wrong_arg; \
+		} \
+	} while (0);
+
+#define Z_PARAM_STR(dest) \
+	Z_PARAM_STR_EX(dest, 0, 0)
+
+/* old "z" */
+#define Z_PARAM_ZVAL_EX(dest, check_null, separate) do { \
+		if (separate) { \
+			Z_PARAM_PROLOGUE(separate); \
+			_z_param_zval_deref(_arg, &dest, check_null); \
+		} else { \
+			if (UNEXPECTED(++_i >_num_args)) break; \
+			_real_arg++; \
+			_z_param_zval(_real_arg, &dest, check_null); \
+		} \
+	} while (0);
+
+#define Z_PARAM_ZVAL(dest) \
+	Z_PARAM_ZVAL_EX(dest, 0, 0)
+
+/* old "z" (with dereference) */
+#define Z_PARAM_ZVAL_DEREF_EX(dest, check_null, separate) do { \
+		Z_PARAM_PROLOGUE(separate); \
+		_z_param_zval_deref(_arg, &dest, check_null); \
+	} while (0);
+
+#define Z_PARAM_ZVAL_DEREF(dest) \
+	Z_PARAM_ZVAL_DEREF_EX(dest, 0, 0)
+
+/* old "+" and "*" */
+#define Z_PARAM_VARIADIC_EX(spec, dest, dest_num, post_varargs) do { \
+		int _num_varargs = _num_args - _i - (post_varargs); \
+		if (_num_varargs > 0) { \
+			dest = _real_arg + 1; \
+			dest_num = _num_varargs; \
+			_i += _num_varargs; \
+			_real_arg += _num_varargs; \
+		} else { \
+			dest = NULL; \
+			dest_num = 0; \
+		} \
+	} while (0);
+
+#define Z_PARAM_VARIADIC(spec, dest, dest_num) \
+	Z_PARAM_VARIADIC_EX(spec, dest, dest_num, 0)
+
+/* Private part of new parameter parsing API */
+
+static zend_always_inline int _z_param_bool(zval *arg, zend_bool *dest, zend_bool *is_null, int check_null TSRMLS_DC)
+{
+	if (check_null) {
+		*is_null = 0;
+	}
+	if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
+		*dest = 1;
+	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+		if (check_null) {
+			*is_null = (Z_TYPE_P(arg) == IS_NULL);
+		}
+		*dest = 0;
+	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
+		*dest = zend_is_true(arg TSRMLS_CC);
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_long(zval *arg, long *dest, zend_bool *is_null, int check_null, int strict)
+{
+	if (check_null) {
+		*is_null = 0;
+	}
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		if (strict && UNEXPECTED(Z_DVAL_P(arg) > LONG_MAX)) {
+			*dest = LONG_MAX;
+		} else if (strict && UNEXPECTED(Z_DVAL_P(arg) < LONG_MIN)) {
+			*dest = LONG_MIN;
+		} else {
+			*dest = Z_LVAL_P(arg);
+		}
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
+		*dest = zend_dval_to_lval(Z_DVAL_P(arg));
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
+		double d;
+		int type;
+
+		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
+			if (EXPECTED(type != 0)) {
+				if (strict && UNEXPECTED(d > LONG_MAX)) {
+					*dest = LONG_MAX;
+				} else if (strict && UNEXPECTED(d < LONG_MIN)) {
+					*dest = LONG_MIN;
+				} else {
+					*dest = zend_dval_to_lval(d);
+				}
+			} else {
+				return 0;
+			}
+		}
+	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+		if (check_null) {
+			*is_null = (Z_TYPE_P(arg) == IS_NULL);
+		}
+		*dest = 0;
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
+		*dest = 1;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_double(zval *arg, double *dest, zend_bool *is_null, int check_null)
+{
+	if (check_null) {
+		*is_null = 0;
+	}
+	if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
+		*dest = Z_DVAL_P(arg);
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		*dest = (double)Z_LVAL_P(arg);
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
+		long l;
+		int type;
+
+		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, dest)) != IS_DOUBLE)) {
+			if (EXPECTED(type != 0)) {
+				*dest = (double)(l);
+			} else {
+				return 0;
+			}
+		}
+	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+		if (check_null) {
+			*is_null = (Z_TYPE_P(arg) == IS_NULL);
+		}
+		*dest = 0.0;
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
+		*dest = 1.0;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_str(zval *arg, zend_string **dest, int check_null TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
+		*dest = Z_STR_P(arg);
+	} else if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
+		if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			*dest = NULL;
+		} else {
+			if (Z_COPYABLE_P(arg) && Z_REFCOUNT_P(arg) > 1) {
+				Z_DELREF_P(arg);
+				zval_copy_ctor_func(arg);
+			}
+			convert_to_string(arg);
+			*dest = Z_STR_P(arg);
+		}
+	} else if (UNEXPECTED(Z_TYPE_P(arg) != IS_OBJECT) ||
+	           UNEXPECTED(parse_arg_object_to_str(arg, dest, IS_STRING TSRMLS_CC) != SUCCESS)) {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_string(zval *arg, char **dest, int *dest_len, int check_null TSRMLS_DC)
+{
+	zend_string *str;
+
+	if (!_z_param_str(arg, &str, check_null TSRMLS_CC)) {
+		return 0;
+	}
+	if (check_null && UNEXPECTED(!str)) {
+		*dest = NULL;
+		*dest_len = 0;
+	} else {
+		*dest = str->val;
+		*dest_len = str->len;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_path_str(zval *arg, zend_string **dest, int check_null TSRMLS_DC)
+{
+	if (!_z_param_str(arg, dest, check_null TSRMLS_CC) ||
+		(check_null && UNEXPECTED(!(*dest)->val)) ||
+	    UNEXPECTED(CHECK_NULL_PATH((*dest)->val, (*dest)->len))) {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_path(zval *arg, char **dest, int *dest_len, int check_null TSRMLS_DC)
+{
+	zend_string *str;
+
+	if (!_z_param_path_str(arg, &str, check_null TSRMLS_CC)) {
+		return 0;
+	}
+	if (check_null && UNEXPECTED(!str)) {
+		*dest = NULL;
+		*dest_len = 0;
+	} else {
+		*dest = str->val;
+		*dest_len = str->len;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_array(zval *arg, zval **dest, int check_null, int or_object)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY) ||
+		(or_object && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT))) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_array_ht(zval *arg, HashTable **dest, int check_null, int or_object TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
+		*dest = Z_ARRVAL_P(arg);
+	} else if (or_object && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		*dest = Z_OBJ_HT_P(arg)->get_properties(arg TSRMLS_CC);
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_object(zval *arg, zval **dest, zend_class_entry *ce, int check_null TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT) &&
+	    (!ce || EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC) != 0))) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_resource(zval *arg, zval **dest, int check_null)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_RESOURCE)) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline int _z_param_func(zval *arg, zend_fcall_info *dest_fci, zend_fcall_info_cache *dest_fcc, int check_null, char **error TSRMLS_DC)
+{
+	if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		dest_fci->size = 0;
+		dest_fcc->initialized = 0;
+		*error = NULL;
+	} else if (UNEXPECTED(zend_fcall_info_init(arg, 0, dest_fci, dest_fcc, NULL, error TSRMLS_CC) != SUCCESS)) {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline void _z_param_zval(zval *arg, zval **dest, int check_null)
+{
+	*dest = (check_null &&
+	    (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) ||
+	     (UNEXPECTED(Z_ISREF_P(arg)) &&
+	      UNEXPECTED(Z_TYPE_P(Z_REFVAL_P(arg)) == IS_NULL)))) ? NULL : arg;
+}
+
+static zend_always_inline void _z_param_zval_deref(zval *arg, zval **dest, int check_null)
+{
+	*dest = (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) ? NULL : arg;
+}
+
+#endif /* FAST_ZPP */
+
+/* End of new parameter parsing API */
 
 END_EXTERN_C()
 

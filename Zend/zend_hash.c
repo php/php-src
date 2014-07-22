@@ -1207,7 +1207,7 @@ ZEND_API void zend_array_dup(HashTable *target, HashTable *source)
 				q->key = NULL;
 				if (Z_OPT_REFCOUNTED_P(data)) {
 					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
-						ZVAL_DUP(&q->val, Z_REFVAL_P(data));
+						ZVAL_COPY(&q->val, Z_REFVAL_P(data));
 					} else {
 						ZVAL_COPY(&q->val, data);
 					}
@@ -1256,7 +1256,7 @@ ZEND_API void zend_array_dup(HashTable *target, HashTable *source)
 				target->arHash[nIndex] = target_idx;
 				if (Z_OPT_REFCOUNTED_P(data)) {
 					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
-						ZVAL_DUP(&q->val, Z_REFVAL_P(data));
+						ZVAL_COPY(&q->val, Z_REFVAL_P(data));
 					} else {
 						ZVAL_COPY(&q->val, data);
 					}
@@ -1495,14 +1495,15 @@ ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr)
 	} else if (ht->nInternalPointer != ptr->pos) {
 		IS_CONSISTENT(ht);
 		if (ht->u.flags & HASH_FLAG_PACKED) {
-			if (Z_TYPE(ht->arData[ptr->h].val) != IS_UNDEF) {
+			if (ptr->h < ht->nNumUsed &&
+			    Z_TYPE(ht->arData[ptr->h].val) != IS_UNDEF) {
 				ht->nInternalPointer = ptr->h;
 				return 1;
 			}
 		} else {
 			idx = ht->arHash[ptr->h & ht->nTableMask];
 			while (idx != INVALID_IDX) {
-				if (idx == ptr->pos) {
+				if (ht->arData[idx].h == ptr->h && idx == ptr->pos) {
 					ht->nInternalPointer = idx;
 					return 1;
 				}

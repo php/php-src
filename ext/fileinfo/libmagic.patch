@@ -822,7 +822,16 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  }
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	Tue Feb 26 17:20:42 2013
-+++ libmagic/cdf.c	Fri Feb 21 00:21:27 2014
++++ libmagic/cdf.c	Tue Jul  1 08:57:25 2014
+@@ -35,7 +35,7 @@
+ #include "file.h"
+ 
+ #ifndef lint
+-FILE_RCSID("@(#)$File: cdf.c,v 1.53 2013/02/26 16:20:42 christos Exp $")
++FILE_RCSID("@(#)$File: cdf.c,v 1.55 2014/02/27 23:26:17 christos Exp $")
+ #endif
+ 
+ #include <assert.h>
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -841,7 +850,25 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  #include <string.h>
  #include <time.h>
  #include <ctype.h>
-@@ -296,7 +306,10 @@
+@@ -267,13 +277,15 @@
+ {
+ 	const char *b = (const char *)sst->sst_tab;
+ 	const char *e = ((const char *)p) + tail;
++	size_t ss = sst->sst_dirlen < h->h_min_size_standard_stream ?
++	    CDF_SHORT_SEC_SIZE(h) : CDF_SEC_SIZE(h);
+ 	(void)&line;
+-	if (e >= b && (size_t)(e - b) <= CDF_SEC_SIZE(h) * sst->sst_len)
++	if (e >= b && (size_t)(e - b) <= ss * sst->sst_len)
+ 		return 0;
+ 	DPRINTF(("%d: offset begin %p < end %p || %" SIZE_T_FORMAT "u"
+ 	    " > %" SIZE_T_FORMAT "u [%" SIZE_T_FORMAT "u %"
+ 	    SIZE_T_FORMAT "u]\n", line, b, e, (size_t)(e - b),
+-	    CDF_SEC_SIZE(h) * sst->sst_len, CDF_SEC_SIZE(h), sst->sst_len));
++	    ss * sst->sst_len, ss, sst->sst_len));
+ 	errno = EFTYPE;
+ 	return -1;
+ }
+@@ -296,7 +308,10 @@
  	if (info->i_fd == -1)
  		return -1;
  
@@ -853,7 +880,133 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  		return -1;
  
  	return (ssize_t)len;
-@@ -1132,7 +1145,7 @@
+@@ -352,10 +367,10 @@
+ 	size_t ss = CDF_SHORT_SEC_SIZE(h);
+ 	size_t pos = CDF_SHORT_SEC_POS(h, id);
+ 	assert(ss == len);
+-	if (pos > CDF_SEC_SIZE(h) * sst->sst_len) {
++	if (pos + len > CDF_SEC_SIZE(h) * sst->sst_len) {
+ 		DPRINTF(("Out of bounds read %" SIZE_T_FORMAT "u > %"
+ 		    SIZE_T_FORMAT "u\n",
+-		    pos, CDF_SEC_SIZE(h) * sst->sst_len));
++		    pos + len, CDF_SEC_SIZE(h) * sst->sst_len));
+ 		return -1;
+ 	}
+ 	(void)memcpy(((char *)buf) + offs,
+@@ -455,7 +470,8 @@
+ cdf_count_chain(const cdf_sat_t *sat, cdf_secid_t sid, size_t size)
+ {
+ 	size_t i, j;
+-	cdf_secid_t maxsector = (cdf_secid_t)(sat->sat_len * size);
++	cdf_secid_t maxsector = (cdf_secid_t)((sat->sat_len * size)
++	    / sizeof(maxsector));
+ 
+ 	DPRINTF(("Chain:"));
+ 	for (j = i = 0; sid >= 0; i++, j++) {
+@@ -465,8 +481,8 @@
+ 			errno = EFTYPE;
+ 			return (size_t)-1;
+ 		}
+-		if (sid > maxsector) {
+-			DPRINTF(("Sector %d > %d\n", sid, maxsector));
++		if (sid >= maxsector) {
++			DPRINTF(("Sector %d >= %d\n", sid, maxsector));
+ 			errno = EFTYPE;
+ 			return (size_t)-1;
+ 		}
+@@ -675,11 +691,13 @@
+ 
+ int
+ cdf_read_short_stream(const cdf_info_t *info, const cdf_header_t *h,
+-    const cdf_sat_t *sat, const cdf_dir_t *dir, cdf_stream_t *scn)
++    const cdf_sat_t *sat, const cdf_dir_t *dir, cdf_stream_t *scn,
++    const cdf_directory_t **root)
+ {
+ 	size_t i;
+ 	const cdf_directory_t *d;
+ 
++	*root = NULL;
+ 	for (i = 0; i < dir->dir_len; i++)
+ 		if (dir->dir_tab[i].d_type == CDF_DIR_TYPE_ROOT_STORAGE)
+ 			break;
+@@ -688,6 +706,7 @@
+ 	if (i == dir->dir_len)
+ 		goto out;
+ 	d = &dir->dir_tab[i];
++	*root = d;
+ 
+ 	/* If the it is not there, just fake it; some docs don't have it */
+ 	if (d->d_stream_first_sector < 0)
+@@ -796,7 +815,11 @@
+ 	if (cdf_check_stream_offset(sst, h, e, 0, __LINE__) == -1)
+ 		goto out;
+ 	for (i = 0; i < sh.sh_properties; i++) {
+-		size_t ofs = CDF_GETUINT32(p, (i << 1) + 1);
++		size_t ofs, tail = (i << 1) + 1;
++		if (cdf_check_stream_offset(sst, h, p, tail * sizeof(uint32_t),
++		    __LINE__) == -1)
++			goto out;
++		ofs = CDF_GETUINT32(p, tail);
+ 		q = (const uint8_t *)(const void *)
+ 		    ((const char *)(const void *)p + ofs
+ 		    - 2 * sizeof(uint32_t));
+@@ -810,6 +833,10 @@
+ 		    i, inp[i].pi_id, inp[i].pi_type, q - p, offs));
+ 		if (inp[i].pi_type & CDF_VECTOR) {
+ 			nelements = CDF_GETUINT32(q, 1);
++			if (nelements == 0) {
++				DPRINTF(("CDF_VECTOR with nelements == 0\n"));
++				goto out;
++			}
+ 			o = 2;
+ 		} else {
+ 			nelements = 1;
+@@ -884,7 +911,9 @@
+ 			}
+ 			DPRINTF(("nelements = %" SIZE_T_FORMAT "u\n",
+ 			    nelements));
+-			for (j = 0; j < nelements; j++, i++) {
++			for (j = 0; j < nelements && i < sh.sh_properties; 
++			    j++, i++) 
++			{
+ 				uint32_t l = CDF_GETUINT32(q, o);
+ 				inp[i].pi_str.s_len = l;
+ 				inp[i].pi_str.s_buf = (const char *)
+@@ -929,7 +958,7 @@
+ cdf_unpack_summary_info(const cdf_stream_t *sst, const cdf_header_t *h,
+     cdf_summary_info_header_t *ssi, cdf_property_info_t **info, size_t *count)
+ {
+-	size_t i, maxcount;
++	size_t maxcount;
+ 	const cdf_summary_info_header_t *si =
+ 	    CAST(const cdf_summary_info_header_t *, sst->sst_tab);
+ 	const cdf_section_declaration_t *sd =
+@@ -944,21 +973,13 @@
+ 	ssi->si_os = CDF_TOLE2(si->si_os);
+ 	ssi->si_class = si->si_class;
+ 	cdf_swap_class(&ssi->si_class);
+-	ssi->si_count = CDF_TOLE2(si->si_count);
++	ssi->si_count = CDF_TOLE4(si->si_count);
+ 	*count = 0;
+ 	maxcount = 0;
+ 	*info = NULL;
+-	for (i = 0; i < CDF_TOLE4(si->si_count); i++) {
+-		if (i >= CDF_LOOP_LIMIT) {
+-			DPRINTF(("Unpack summary info loop limit"));
+-			errno = EFTYPE;
+-			return -1;
+-		}
+-		if (cdf_read_property_info(sst, h, CDF_TOLE4(sd->sd_offset),
+-		    info, count, &maxcount) == -1) {
++	if (cdf_read_property_info(sst, h, CDF_TOLE4(sd->sd_offset), info,
++		count, &maxcount) == -1) 
+ 			return -1;
+-		}
+-	}
+ 	return 0;
+ }
+ 
+@@ -1132,7 +1153,7 @@
  	cdf_directory_t *d;
  	char name[__arraycount(d->d_name)];
  	cdf_stream_t scn;
@@ -862,7 +1015,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  
  	static const char *types[] = { "empty", "user storage",
  	    "user stream", "lockbytes", "property", "root storage" };
-@@ -1185,7 +1198,7 @@
+@@ -1185,7 +1206,7 @@
  cdf_dump_property_info(const cdf_property_info_t *info, size_t count)
  {
  	cdf_timestamp_t tp;
@@ -871,7 +1024,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  	char buf[64];
  	size_t i, j;
  
-@@ -1229,7 +1242,11 @@
+@@ -1229,7 +1250,11 @@
  			break;
  		case CDF_FILETIME:
  			tp = info[i].pi_tp;
@@ -885,7 +1038,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  			} else {
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
 --- libmagic.orig/cdf.h	Thu Jun 21 00:19:55 2012
-+++ libmagic/cdf.h	Fri Feb 21 00:21:27 2014
++++ libmagic/cdf.h	Thu Jun  5 18:05:33 2014
 @@ -35,10 +35,12 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -926,6 +1079,16 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  int cdf_read_header(const cdf_info_t *, cdf_header_t *);
  void cdf_swap_header(cdf_header_t *);
  void cdf_unpack_header(cdf_header_t *, char *);
+@@ -294,7 +300,8 @@
+ int cdf_read_ssat(const cdf_info_t *, const cdf_header_t *, const cdf_sat_t *,
+     cdf_sat_t *);
+ int cdf_read_short_stream(const cdf_info_t *, const cdf_header_t *,
+-    const cdf_sat_t *, const cdf_dir_t *, cdf_stream_t *);
++    const cdf_sat_t *, const cdf_dir_t *, cdf_stream_t *,
++    const cdf_directory_t **);
+ int cdf_read_property_info(const cdf_stream_t *, const cdf_header_t *, uint32_t,
+     cdf_property_info_t **, size_t *, size_t *);
+ int cdf_read_summary_info(const cdf_info_t *, const cdf_header_t *,
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
 --- libmagic.orig/cdf_time.c	Thu Jun 21 00:18:33 2012
 +++ libmagic/cdf_time.c	Fri Feb 21 00:21:27 2014
@@ -2543,8 +2706,13 @@ diff -u libmagic.orig/print.c libmagic/print.c
  	}
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
 --- libmagic.orig/readcdf.c	Tue Jan  7 04:13:42 2014
-+++ libmagic/readcdf.c	Thu Apr 24 20:07:51 2014
-@@ -30,7 +30,11 @@
++++ libmagic/readcdf.c	Thu Jun  5 18:05:33 2014
+@@ -26,11 +26,15 @@
+ #include "file.h"
+ 
+ #ifndef lint
+-FILE_RCSID("@(#)$File: readcdf.c,v 1.37 2014/01/06 13:41:18 rrt Exp $")
++FILE_RCSID("@(#)$File: readcdf.c,v 1.40 2014/03/06 15:23:33 christos Exp $")
  #endif
  
  #include <stdlib.h>
@@ -2556,7 +2724,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  #include <string.h>
  #include <time.h>
  #include <ctype.h>
-@@ -69,6 +73,10 @@
+@@ -69,6 +73,44 @@
  	{ NULL,				NULL,			},
  };
  
@@ -2564,10 +2732,49 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
 +# define strcasestr strstr
 +#endif
 +
++static const struct cv {
++	uint64_t clsid[2];
++	const char *mime;
++} clsid2mime[] = {
++	{
++#ifdef PHP_WIN32
++		{ 0x00000000000c1084ui64, 0x46000000000000c0ui64 },
++#else
++		{ 0x00000000000c1084LLU, 0x46000000000000c0LLU },
++#endif
++		"x-msi",
++	}
++}, clsid2desc[] = {
++	{
++#ifdef PHP_WIN32
++		{ 0x00000000000c1084ui64, 0x46000000000000c0ui64 },
++#else
++		{ 0x00000000000c1084LLU, 0x46000000000000c0LLU },
++#endif
++		"MSI Installer",
++	},
++};
++
++private const char *
++cdf_clsid_to_mime(const uint64_t clsid[2], const struct cv *cv)
++{
++	size_t i;
++	for (i = 0; cv[i].mime != NULL; i++) {
++		if (clsid[0] == cv[i].clsid[0] && clsid[1] == cv[i].clsid[1])
++			return cv[i].mime;
++	}
++	return NULL;
++}
++
  private const char *
  cdf_app_to_mime(const char *vbuf, const struct nv *nv)
  {
-@@ -91,12 +99,14 @@
+@@ -87,16 +129,21 @@
+ 
+ private int
+ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
+-    size_t count)
++    size_t count, const cdf_directory_t *root_storage)
  {
          size_t i;
          cdf_timestamp_t tp;
@@ -2580,10 +2787,22 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  
 +	memset(&ts, 0, sizeof(ts));
 +
++        if (!NOTMIME(ms) && root_storage)
++		str = cdf_clsid_to_mime(root_storage->d_storage_uuid, clsid2mime);
++
          for (i = 0; i < count; i++) {
                  cdf_print_property_name(buf, sizeof(buf), info[i].pi_id);
                  switch (info[i].pi_type) {
-@@ -162,8 +172,12 @@
+@@ -153,7 +200,7 @@
+                                                     buf, vbuf) == -1)
+                                                         return -1;
+                                         }
+-                                } else if (info[i].pi_id ==
++                                } else if (str == NULL && info[i].pi_id ==
+ 				    CDF_PROPERTY_NAME_OF_APPLICATION) {
+ 					str = cdf_app_to_mime(vbuf, app2mime);
+ 				}
+@@ -162,8 +209,12 @@
                  case CDF_FILETIME:
                          tp = info[i].pi_tp;
                          if (tp != 0) {
@@ -2598,7 +2817,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
                                          cdf_print_elapsed_time(tbuf,
                                              sizeof(tbuf), tp);
                                          if (NOTMIME(ms) && file_printf(ms,
-@@ -171,8 +185,11 @@
+@@ -171,8 +222,11 @@
                                                  return -1;
                                  } else {
                                          char *c, *ec;
@@ -2612,6 +2831,91 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
                                          if (c != NULL &&
  					    (ec = strchr(c, '\n')) != NULL)
  						*ec = '\0';
+@@ -200,7 +254,7 @@
+ 
+ private int
+ cdf_file_summary_info(struct magic_set *ms, const cdf_header_t *h,
+-    const cdf_stream_t *sst)
++    const cdf_stream_t *sst, const cdf_directory_t *root_storage)
+ {
+         cdf_summary_info_header_t si;
+         cdf_property_info_t *info;
+@@ -211,6 +265,8 @@
+                 return -1;
+ 
+         if (NOTMIME(ms)) {
++		const char *str;
++
+                 if (file_printf(ms, "Composite Document File V2 Document")
+ 		    == -1)
+                         return -1;
+@@ -238,9 +294,15 @@
+                                 return -2;
+                         break;
+                 }
+-        }
++		if (root_storage) {
++			str = cdf_clsid_to_mime(root_storage->d_storage_uuid, clsid2desc);
++			if (str)
++				if (file_printf(ms, ", %s", str) == -1)
++					return -2;
++			}
++		}
+ 
+-        m = cdf_file_property_info(ms, info, count);
++        m = cdf_file_property_info(ms, info, count, root_storage);
+         free(info);
+ 
+         return m == -1 ? -2 : m;
+@@ -258,6 +320,7 @@
+         int i;
+         const char *expn = "";
+         const char *corrupt = "corrupt: ";
++        const cdf_directory_t *root_storage;
+ 
+         info.i_fd = fd;
+         info.i_buf = buf;
+@@ -291,7 +354,8 @@
+                 goto out2;
+         }
+ 
+-        if ((i = cdf_read_short_stream(&info, &h, &sat, &dir, &sst)) == -1) {
++        if ((i = cdf_read_short_stream(&info, &h, &sat, &dir, &sst,
++	    &root_storage)) == -1) {
+                 expn = "Cannot read short stream";
+                 goto out3;
+         }
+@@ -312,23 +376,21 @@
+ #ifdef CDF_DEBUG
+         cdf_dump_summary_info(&h, &scn);
+ #endif
+-        if ((i = cdf_file_summary_info(ms, &h, &scn)) < 0)
+-                expn = "Can't expand summary_info";
++        if ((i = cdf_file_summary_info(ms, &h, &scn, root_storage)) < 0)
++            expn = "Can't expand summary_info";
++
+ 	if (i == 0) {
+ 		const char *str = NULL;
+ 		cdf_directory_t *d;
+ 		char name[__arraycount(d->d_name)];
+ 		size_t j, k;
+-		for (j = 0; j < dir.dir_len; j++) {
++
++		for (j = 0; str == NULL && j < dir.dir_len; j++) {
+ 			d = &dir.dir_tab[j];
+ 			for (k = 0; k < sizeof(name); k++)
+ 				name[k] = (char)cdf_tole2(d->d_name[k]);
+-			if (NOTMIME(ms))
+-				str = cdf_app_to_mime(name, name2desc);
+-			else
+-				str = cdf_app_to_mime(name, name2mime);
+-			if (str != NULL)
+-				break;
++			str = cdf_app_to_mime(name,
++			    NOTMIME(ms) ? name2desc : name2mime);
+ 		}
+ 		if (NOTMIME(ms)) {
+ 			if (str != NULL) {
 diff -u libmagic.orig/readelf.c libmagic/readelf.c
 --- libmagic.orig/readelf.c	Tue Nov  5 16:44:01 2013
 +++ libmagic/readelf.c	Fri Feb 21 00:21:27 2014
@@ -2859,7 +3163,7 @@ diff -u libmagic.orig/readelf.h libmagic/readelf.h
  typedef uint8_t		Elf64_Char;
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	Thu Feb 13 00:20:53 2014
-+++ libmagic/softmagic.c	Sun Mar  9 13:14:07 2014
++++ libmagic/softmagic.c	Tue Jul  1 08:57:25 2014
 @@ -50,6 +50,11 @@
  #include <locale.h>
  #endif
@@ -2994,7 +3298,29 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  			break; \
  		} \
  
-@@ -1178,9 +1162,6 @@
+@@ -931,10 +915,18 @@
+ 		return 1;
+ 	}
+ 	case FILE_PSTRING: {
+-		char *ptr1 = p->s, *ptr2 = ptr1 + file_pstring_length_size(m);
++		size_t sz = file_pstring_length_size(m);
++		char *ptr1 = p->s, *ptr2 = ptr1 + sz;
+ 		size_t len = file_pstring_get_length(m, ptr1);
+-		if (len >= sizeof(p->s))
+-			len = sizeof(p->s) - 1;
++		if (len >= sizeof(p->s)) {
++			/*
++			 * The size of the pascal string length (sz)
++			 * is 1, 2, or 4. We need at least 1 byte for NUL
++			 * termination, but we've already truncated the
++			 * string by p->s, so we need to deduct sz.
++			 */ 
++			len = sizeof(p->s) - sz;
++		}
+ 		while (len--)
+ 			*ptr1++ = *ptr2++;
+ 		*ptr1 = '\0';
+@@ -1178,9 +1170,6 @@
  		    "nbytes=%zu, count=%u)\n", m->type, m->flag, offset, o,
  		    nbytes, count);
  		mdebug(offset, (char *)(void *)p, sizeof(union VALUETYPE));
@@ -3004,7 +3330,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	}
  
  	if (m->flag & INDIR) {
-@@ -1679,9 +1660,6 @@
+@@ -1679,9 +1668,6 @@
  		if ((ms->flags & MAGIC_DEBUG) != 0) {
  			mdebug(offset, (char *)(void *)p,
  			    sizeof(union VALUETYPE));
@@ -3014,7 +3340,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		}
  	}
  
-@@ -1755,11 +1733,21 @@
+@@ -1755,11 +1741,21 @@
  		ms->offset = soffset;
  		if (rv == 1) {
  			if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
@@ -3039,7 +3365,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		}
  		return rv;
  
-@@ -1875,6 +1863,42 @@
+@@ -1875,6 +1871,42 @@
  	return file_strncmp(a, b, len, flags);
  }
  
@@ -3082,13 +3408,16 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  private int
  magiccheck(struct magic_set *ms, struct magic *m)
  {
-@@ -2035,63 +2059,151 @@
+@@ -2035,63 +2067,151 @@
  		break;
  	}
  	case FILE_REGEX: {
 -		int rc;
 -		regex_t rx;
 -		char errmsg[512];
+-
+-		if (ms->search.s == NULL)
+-			return 0;
 +		zval *pattern;
 +		int options = 0;
 +		pcre_cache_entry *pce;
@@ -3225,9 +3554,6 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 +					}
 +				}
  
--		if (ms->search.s == NULL)
--			return 0;
- 
 -		l = 0;
 -		rc = regcomp(&rx, m->value.s,
 -		    REG_EXTENDED|REG_NEWLINE|
@@ -3262,7 +3588,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 -				    (size_t)(pmatch[0].rm_eo - pmatch[0].rm_so);
 -				v = 0;
 -				break;
--
+ 
 -			case REG_NOMATCH:
 +			} else {
  				v = 1;
@@ -3298,4 +3624,3 @@ diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
  #include <assert.h>
  #include <ctype.h>
  #include <string.h>
-
