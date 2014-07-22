@@ -571,7 +571,7 @@ PHP_FUNCTION(ibase_blob_import)
 		if (isc_close_blob(IB_STATUS, &ib_blob.bl_handle)) {
 			break;
 		}
-		RETURN_STRINGL( _php_ibase_quad_to_string(ib_blob.bl_qd), BLOB_ID_LEN, 0);
+		RETURN_STRINGL( _php_ibase_quad_to_string(ib_blob.bl_qd), BLOB_ID_LEN);
 	} while (0);
 
 	_php_ibase_error(TSRMLS_C);

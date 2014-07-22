@@ -1782,7 +1782,7 @@ PHP_FUNCTION(mssql_field_name)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRINGL(result->fields[field_offset].name, strlen(result->fields[field_offset].name), 1);
+	RETURN_STRINGL(result->fields[field_offset].name, strlen(result->fields[field_offset].name));
 }
 /* }}} */
 
@@ -1812,7 +1812,7 @@ PHP_FUNCTION(mssql_field_type)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRINGL(php_mssql_get_field_name(Z_TYPE(result->fields[field_offset])), strlen(php_mssql_get_field_name(Z_TYPE(result->fields[field_offset]))), 1);
+	RETURN_STRINGL(php_mssql_get_field_name(Z_TYPE(result->fields[field_offset])), strlen(php_mssql_get_field_name(Z_TYPE(result->fields[field_offset]))));
 }
 /* }}} */
 

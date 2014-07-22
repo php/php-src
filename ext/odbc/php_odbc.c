@@ -2138,14 +2138,14 @@ PHP_FUNCTION(odbc_result)
 			/* Don't duplicate result, saves one emalloc.
 			   For SQL_SUCCESS, the length is in vallen.
 			 */
-			RETURN_STRINGL(field, (rc == SQL_SUCCESS_WITH_INFO) ? fieldsize : result->values[field_ind].vallen, 0);
+			RETURN_STRINGL(field, (rc == SQL_SUCCESS_WITH_INFO) ? fieldsize : result->values[field_ind].vallen);
 			break;
 			
 		default:
 			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
 				RETURN_NULL();
 			} else {
-				RETURN_STRINGL(result->values[field_ind].value, result->values[field_ind].vallen, 1);
+				RETURN_STRINGL(result->values[field_ind].value, result->values[field_ind].vallen);
 			}
 			break;
 	}

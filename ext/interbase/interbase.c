@@ -1454,7 +1454,7 @@ PHP_FUNCTION(ibase_gen_id)
 		int l;
 
 		l = spprintf(&res, 0, "%" LL_MASK "d", result);
-		RETURN_STRINGL(res, l, 0);
+		RETURN_STRINGL(res, l);
 	}
 #endif
 	RETURN_LONG((long)result);

@@ -299,7 +299,7 @@ PHP_FUNCTION(oci_lob_load)
 		RETURN_FALSE;
 	}
 	if (buffer_len > 0) {
-		RETURN_STRINGL(buffer, buffer_len, 0);
+		RETURN_STRINGL(buffer, buffer_len);
 	}
 	else {
 		RETURN_EMPTY_STRING();
@@ -344,7 +344,7 @@ PHP_FUNCTION(oci_lob_read)
 		RETURN_FALSE;
 	}	
 	if (buffer_len > 0) {
-		RETURN_STRINGL(buffer, buffer_len, 0);
+		RETURN_STRINGL(buffer, buffer_len);
 	}
 	else {
 		RETURN_EMPTY_STRING();
@@ -1146,7 +1146,7 @@ PHP_FUNCTION(oci_field_name)
 	php_oci_out_column *column;
 
 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
-		RETURN_STRINGL(column->name, column->name_len, 1);
+		RETURN_STRINGL(column->name, column->name_len);
 	}
 	RETURN_FALSE;
 }
