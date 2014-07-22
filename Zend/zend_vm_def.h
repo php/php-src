@@ -5936,8 +5936,8 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 			} else {
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 			}
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
-
 	}
 	FREE_OP1();
 	CHECK_EXCEPTION();

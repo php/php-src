@@ -3438,8 +3438,8 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 			} else {
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 			}
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
-
 	}
 
 	CHECK_EXCEPTION();
@@ -10201,8 +10201,8 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 			} else {
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 			}
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
-
 	}
 	zval_dtor(free_op1.var);
 	CHECK_EXCEPTION();
@@ -16960,8 +16960,8 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 			} else {
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 			}
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
-
 	}
 	zval_ptr_dtor_nogc(free_op1.var);
 	CHECK_EXCEPTION();
@@ -34161,8 +34161,8 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 			} else {
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 			}
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
-
 	}
 
 	CHECK_EXCEPTION();

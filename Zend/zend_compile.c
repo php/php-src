@@ -4290,10 +4290,57 @@ zend_bool zend_args_contain_unpack(zend_ast *args) {
 	return 0;
 }
 
-void zend_compile_func_strlen(znode *result, zend_ast *ast TSRMLS_DC) {
-	znode expr_node;
-	zend_compile_expr(&expr_node, ast TSRMLS_CC);
-	emit_op(result, ZEND_STRLEN, &expr_node, NULL TSRMLS_CC);
+int zend_compile_func_strlen(znode *result, zend_ast *args_ast TSRMLS_DC) {
+	znode arg_node;
+
+	if ((CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)
+		|| args_ast->children != 1 || args_ast->child[0]->kind == ZEND_AST_UNPACK
+	) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&arg_node, args_ast->child[0] TSRMLS_CC);
+	emit_op(result, ZEND_STRLEN, &arg_node, NULL TSRMLS_CC);
+	return SUCCESS;
+}
+
+int zend_compile_func_typecheck(znode *result, zend_ast *args_ast, zend_uint type TSRMLS_DC) {
+	znode arg_node;
+	zend_op *opline;
+
+	if (args_ast->children != 1 || args_ast->child[0]->kind == ZEND_AST_UNPACK) {
+		return FAILURE;
+	}
+	
+	zend_compile_expr(&arg_node, args_ast->child[0] TSRMLS_CC);
+	opline = emit_op(result, ZEND_TYPE_CHECK, &arg_node, NULL TSRMLS_CC);
+	opline->extended_value = type;
+	return SUCCESS;
+}
+
+int zend_try_compile_special_func(
+	znode *result, zend_string *lcname, zend_ast *args_ast TSRMLS_DC
+) {
+	if (zend_str_equals(lcname, "strlen")) {
+		return zend_compile_func_strlen(result, args_ast TSRMLS_CC);
+	} else if (zend_str_equals(lcname, "is_null")) {
+		return zend_compile_func_typecheck(result, args_ast, IS_NULL TSRMLS_CC);
+	} else if (zend_str_equals(lcname, "is_bool")) {
+		return zend_compile_func_typecheck(result, args_ast, _IS_BOOL TSRMLS_CC);
+	} else if (zend_str_equals(lcname, "is_long")) {
+		return zend_compile_func_typecheck(result, args_ast, IS_LONG TSRMLS_CC);
+	} else if (zend_str_equals(lcname, "is_float")) {
+		return zend_compile_func_typecheck(result, args_ast, IS_DOUBLE TSRMLS_CC);
+	} else if (zend_str_equals(lcname, "is_string")) {
+		return zend_compile_func_typecheck(result, args_ast, IS_STRING TSRMLS_CC);
+	} else if (zend_str_equals(lcname, "is_array")) {
+		return zend_compile_func_typecheck(result, args_ast, IS_ARRAY TSRMLS_CC);
+	} else if (zend_str_equals(lcname, "is_object")) {
+		return zend_compile_func_typecheck(result, args_ast, IS_OBJECT TSRMLS_CC);
+	} else if (zend_str_equals(lcname, "is_resource")) {
+		return zend_compile_func_typecheck(result, args_ast, IS_RESOURCE TSRMLS_CC);
+	}
+	return FAILURE;
 }
 
 void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
@@ -4324,15 +4371,10 @@ void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 
 		zend_str_tolower_copy(lcname->val, Z_STRVAL_P(name), Z_STRLEN_P(name));
 
-		if (zend_str_equals(lcname, "strlen")) {
-			if (!(CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)
-				&& args_ast->children == 1 && args_ast->child[0]->kind != ZEND_AST_UNPACK
-			) {
-				STR_FREE(lcname);
-				zval_ptr_dtor(&name_node.u.constant);
-				zend_compile_func_strlen(result, args_ast->child[0] TSRMLS_CC);
-				return;
-			}
+		if (zend_try_compile_special_func(result, lcname, args_ast TSRMLS_CC) == SUCCESS) {
+			STR_FREE(lcname);
+			zval_ptr_dtor(&name_node.u.constant);
+			return;
 		}
 
 		if (!(fbc = zend_hash_find_ptr(CG(function_table), lcname)) ||
