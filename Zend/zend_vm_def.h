@@ -4901,7 +4901,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 					hval = 0;
 					ZEND_VM_C_GOTO(num_index_prop);
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					ZEND_VM_C_GOTO(num_index_prop);
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
