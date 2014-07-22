@@ -2058,7 +2058,7 @@ PHP_FUNCTION(oci_client_version)
 	char *version = NULL;
 
 	php_oci_client_get_version(&version TSRMLS_CC);
-	RETURN_STRING(version, 0);
+	RETURN_STRING(version);
 }
 /* }}} */
 
@@ -2080,7 +2080,7 @@ PHP_FUNCTION(oci_server_version)
 		RETURN_FALSE;
 	}
 	
-	RETURN_STRING(version, 0);
+	RETURN_STRING(version);
 }
 /* }}} */
 

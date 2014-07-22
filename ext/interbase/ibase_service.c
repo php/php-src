@@ -304,7 +304,7 @@ query_loop:
 				if (! (line_len = isc_vax_integer(result, 2))) {
 					/* done */
 					if (heap_buf) {
-						RETURN_STRING(heap_buf,0);
+						RETURN_STRING(heap_buf);
 					} else {
 						RETURN_TRUE;
 					}

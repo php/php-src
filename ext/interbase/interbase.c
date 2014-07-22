@@ -479,7 +479,7 @@ PHP_FUNCTION(ibase_errmsg)
 	}
 
 	if (IBG(sql_code) != 0) {
-		RETURN_STRING(IBG(errmsg), 1);
+		RETURN_STRING(IBG(errmsg));
 	}
 
 	RETURN_FALSE;

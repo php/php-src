@@ -1448,9 +1448,9 @@ PHP_FUNCTION(mssql_get_last_message)
 	}
 
 	if (MS_SQL_G(server_message)) {
-		RETURN_STRING(MS_SQL_G(server_message),1);
+		RETURN_STRING(MS_SQL_G(server_message));
 	} else {
-		RETURN_STRING("",1);
+		RETURN_STRING("");
 	}
 }
 /* }}} */
@@ -2246,7 +2246,7 @@ PHP_FUNCTION(mssql_guid_string)
 
 	if (sf) {
 		php_strtoupper(buffer, 32);
-		RETURN_STRING(buffer, 1);
+		RETURN_STRING(buffer);
 	}
 	else {
 		int i;
@@ -2276,7 +2276,7 @@ PHP_FUNCTION(mssql_guid_string)
 		buffer2[36] = 0;
 
 		php_strtoupper(buffer2, 36);
-		RETURN_STRING(buffer2, 1);
+		RETURN_STRING(buffer2);
 	}
 }
 /* }}} */

@@ -210,7 +210,7 @@ PHP_FUNCTION(apache_note)
 	}
 
 	if (old_note_val) {
-		RETURN_STRING(old_note_val, 1);
+		RETURN_STRING(old_note_val);
 	}
 
 	RETURN_FALSE;
@@ -271,7 +271,7 @@ PHP_FUNCTION(apache_getenv)
 
 	env_val = (char*) apr_table_get(ctx->r->subprocess_env, variable);
 	if (env_val != NULL) {
-		RETURN_STRING(env_val, 1);
+		RETURN_STRING(env_val);
 	}
 
 	RETURN_FALSE;
@@ -294,7 +294,7 @@ PHP_FUNCTION(apache_get_version)
 	char *apv = php_apache_get_version();
 
 	if (apv && *apv) {
-		RETURN_STRING(apv, 1);
+		RETURN_STRING(apv);
 	} else {
 		RETURN_FALSE;
 	}

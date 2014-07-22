@@ -1711,7 +1711,7 @@ PHP_FUNCTION(sybase_free_result)
    Returns the last message from server (over min_message_severity) */
 PHP_FUNCTION(sybase_get_last_message)
 {
-	RETURN_STRING(SybCtG(server_message), 1);
+	RETURN_STRING(SybCtG(server_message));
 }
 /* }}} */
 

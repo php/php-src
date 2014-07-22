@@ -182,7 +182,7 @@ PHP_FUNCTION(ibase_wait_event)
 			char *result = estrdup(events[i]);
 			_php_ibase_event_free(event_buffer,result_buffer);
 			efree(args);
-			RETURN_STRING(result,0);
+			RETURN_STRING(result);
 		}
 	}
 

@@ -537,13 +537,13 @@ l1:
 				RETURN_FALSE;
 			}
 			if ( res->values[indx].valtype == SQL_LONGVARCHAR ) {
-				RETURN_STRING(res->values[indx].value,TRUE);
+				RETURN_STRING(res->values[indx].value);
 			} else {
 				RETURN_LONG((long)res->values[indx].value);
 			}
 		default:
 			if ( res->values[indx].value != NULL ) {
-				RETURN_STRING(res->values[indx].value,TRUE);
+				RETURN_STRING(res->values[indx].value);
 			}
 	}
 }
@@ -679,7 +679,7 @@ PHP_FUNCTION(birdstep_fieldname)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Field index not in range");
 		RETURN_FALSE;
 	}
-	RETURN_STRING(res->values[indx].name,TRUE);
+	RETURN_STRING(res->values[indx].name);
 }
 /* }}} */
 

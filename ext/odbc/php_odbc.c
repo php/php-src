@@ -2796,7 +2796,7 @@ PHP_FUNCTION(odbc_field_name)
 		RETURN_FALSE;
 	}
 	
-	RETURN_STRING(result->values[pv_num - 1].name, 1);
+	RETURN_STRING(result->values[pv_num - 1].name);
 }
 /* }}} */
 
@@ -2832,7 +2832,7 @@ PHP_FUNCTION(odbc_field_type)
 	}
 
 	SQLColAttributes(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
-	RETURN_STRING(tmp,1)
+	RETURN_STRING(tmp)
 }
 /* }}} */
 
