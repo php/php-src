@@ -4867,7 +4867,8 @@ PHP_FUNCTION(openssl_seal)
 		zval_dtor(*ivec);
 		if (ivlen) {
 			iv[ivlen] = '\0';
-			ZVAL_STRINGL(*ivec, erealloc(iv, ivlen + 1), ivlen);
+			ZVAL_STRINGL(*ivec, iv, ivlen);
+			efree(iv);
 		} else {
 			ZVAL_EMPTY_STRING(*ivec);
 		}
