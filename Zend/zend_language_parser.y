@@ -221,12 +221,12 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %% /* Rules */
 
 start:
-	top_statement_list	{ zend_do_end_compilation(TSRMLS_C); }
+	top_statement_list	{ zend_compile_top_stmt($1.u.ast TSRMLS_CC); zend_ast_destroy($1.u.ast); zend_do_end_compilation(TSRMLS_C); }
 ;
 
 top_statement_list:
-		top_statement_list  { zend_do_extended_info(TSRMLS_C); } top_statement { HANDLE_INTERACTIVE(); }
-	|	/* empty */
+		top_statement_list top_statement { $$.u.ast = zend_ast_dynamic_add($1.u.ast, $2.u.ast); }
+	|	/* empty */ { $$.u.ast = zend_ast_create_dynamic(ZEND_AST_STMT_LIST); }
 ;
 
 namespace_name:
@@ -245,24 +245,25 @@ name:
 			{ $$.u.ast = AST_ZVAL(&$2); }
 ;
 
+/* TODO.AST early binding! */
 top_statement:
-		statement						{ AS($1); zend_verify_namespace(TSRMLS_C); }
-	|	function_declaration_statement	{ AS($1); zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
-	|	class_declaration_statement		{ AS($1); zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
-	|	T_HALT_COMPILER '(' ')' ';'		{ zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
+		statement						{ $$.u.ast = $1.u.ast; }
+	|	function_declaration_statement	{ $$.u.ast = $1.u.ast; }
+	|	class_declaration_statement		{ $$.u.ast = $1.u.ast; }
+	|	T_HALT_COMPILER '(' ')' ';'		{ AN($$); zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
 	|	T_NAMESPACE namespace_name ';'
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), NULL); AS($$); }
-	|	T_NAMESPACE namespace_name '{'	{ zend_do_begin_namespace(&$2, 1 TSRMLS_CC); }
-		top_statement_list '}'		    { zend_do_end_namespace(TSRMLS_C); }
-	|	T_NAMESPACE '{'					{ zend_do_begin_namespace(NULL, 1 TSRMLS_CC); }
-		top_statement_list '}'			{ zend_do_end_namespace(TSRMLS_C); }
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), NULL); }
+	|	T_NAMESPACE namespace_name '{' top_statement_list '}'
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), $4.u.ast); }
+	|	T_NAMESPACE '{' top_statement_list '}'
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, NULL, $3.u.ast); }
 	|	T_USE use_declarations ';'
-			{ $2.u.ast->attr = T_CLASS; AS($2); zend_verify_namespace(TSRMLS_C); }
+			{ $$.u.ast = $2.u.ast; $$.u.ast->attr = T_CLASS; }
 	|	T_USE T_FUNCTION use_declarations ';'
-			{ $3.u.ast->attr = T_FUNCTION; AS($3); zend_verify_namespace(TSRMLS_C); }
+			{ $$.u.ast = $3.u.ast; $$.u.ast->attr = T_FUNCTION; }
 	|	T_USE T_CONST use_declarations ';'
-			{ $3.u.ast->attr = T_CONST; AS($3); zend_verify_namespace(TSRMLS_C); }
-	|	T_CONST const_list ';'		{ AS($2); zend_verify_namespace(TSRMLS_C); }
+			{ $$.u.ast = $3.u.ast; $$.u.ast->attr = T_CONST; }
+	|	T_CONST const_list ';'			{ $$.u.ast = $2.u.ast; }
 ;
 
 use_declarations:

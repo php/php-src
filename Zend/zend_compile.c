@@ -6499,7 +6499,7 @@ void zend_compile_namespace(zend_ast *ast TSRMLS_DC) {
 	CG(in_namespace) = 1;
 
 	if (stmt_ast) {
-		zend_compile_stmt(stmt_ast TSRMLS_CC);
+		zend_compile_top_stmt(stmt_ast TSRMLS_CC);
 
 		CG(in_namespace) = 0;
 		zend_reset_import_tables(TSRMLS_C);
@@ -7350,13 +7350,31 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 	}
 }
 
+/* Same as compile_stmt, but with early binding */
+void zend_compile_top_stmt(zend_ast *ast TSRMLS_DC) {
+	if (!ast) {
+		return;
+	}
+
+	if (ast->kind == ZEND_AST_STMT_LIST) {
+		zend_uint i;
+		for (i = 0; i < ast->children; ++i) {
+			zend_compile_top_stmt(ast->child[i] TSRMLS_CC);
+		}
+		return;
+	}
+
+	zend_compile_stmt(ast TSRMLS_CC);
+	if (ast->kind == ZEND_AST_FUNC_DECL || ast->kind == ZEND_AST_CLASS) {
+		zend_do_early_binding(TSRMLS_C);
+	}
+}
+
 void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 	if (!ast) {
 		return;
 	}
 
-	// TODO.AST
-	zend_uint orig_lineno = CG(zend_lineno);
 	CG(zend_lineno) = ast->lineno;
 
 	switch (ast->kind) {
@@ -7448,8 +7466,6 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 	if (Z_LVAL(CG(declarables).ticks) && !zend_is_unticked_stmt(ast)) {
 		zend_emit_tick(TSRMLS_C);
 	}
-
-	CG(zend_lineno) = orig_lineno;
 }
 
 void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
