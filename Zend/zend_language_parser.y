@@ -349,7 +349,8 @@ unticked_statement:
 		foreach_statement
 			{ $$.u.ast = zend_ast_create(4, ZEND_AST_FOREACH,
 			      $3.u.ast, $7.u.ast, $5.u.ast, $9.u.ast); }
-	|	T_DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); AN($$); }
+	|	T_DECLARE '(' const_list ')' declare_statement
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_DECLARE, $3.u.ast, $5.u.ast); }
 	|	';'	/* empty statement */ { $$.u.ast = NULL; }
 	|	T_TRY '{' inner_statement_list '}' catch_list finally_statement
 			{ $$.u.ast = zend_ast_create_ternary(ZEND_AST_TRY, $3.u.ast, $5.u.ast, $6.u.ast); }
@@ -457,16 +458,9 @@ foreach_statement:
 
 
 declare_statement:
-		statement { AS($1); }
-	|	':' inner_statement_list T_ENDDECLARE ';' { AS($2); }
+		statement { $$.u.ast = $1.u.ast; }
+	|	':' inner_statement_list T_ENDDECLARE ';' { $$.u.ast = $2.u.ast; }
 ;
-
-
-declare_list:
-		T_STRING '=' static_scalar					{ zend_do_declare_stmt(&$1, &$3 TSRMLS_CC); }
-	|	declare_list ',' T_STRING '=' static_scalar	{ zend_do_declare_stmt(&$3, &$5 TSRMLS_CC); }
-;
-
 
 switch_case_list:
 		'{' case_list '}'					{ $$.u.ast = $2.u.ast; }
@@ -953,10 +947,6 @@ dereferencable_scalar:
 		T_ARRAY '(' array_pair_list ')'	{ $$.u.ast = $3.u.ast; }
 	|	'[' array_pair_list ']'			{ $$.u.ast = $2.u.ast; }
 	|	T_CONSTANT_ENCAPSED_STRING		{ $$.u.ast = AST_ZVAL(&$1); }
-;
-
-static_scalar: /* compile-time evaluated scalars */
-	expr { zend_do_constant_expression(&$$, $1.u.ast TSRMLS_CC); }
 ;
 
 scalar:
