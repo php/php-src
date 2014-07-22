@@ -579,7 +579,8 @@ global_var_list:
 
 global_var:
 	simple_variable
-		{ $$.u.ast = zend_ast_create_unary(ZEND_AST_GLOBAL, $1.u.ast); }
+		{ $$.u.ast = zend_ast_create_unary(ZEND_AST_GLOBAL,
+		      zend_ast_create_unary(ZEND_AST_VAR, $1.u.ast)); }
 ;
 
 

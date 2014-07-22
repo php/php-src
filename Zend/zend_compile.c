@@ -4453,24 +4453,27 @@ void zend_compile_clone(znode *result, zend_ast *ast TSRMLS_DC) {
 
 void zend_compile_global_var(zend_ast *ast TSRMLS_DC) {
 	zend_ast *var_ast = ast->child[0];
+	zend_ast *name_ast = var_ast->child[0];
 
-	znode var_node, result;
+	znode name_node, result;
 
-	zend_compile_expr(&var_node, var_ast TSRMLS_CC);
-	if (var_node.op_type == IS_CONST) {
-		if (Z_TYPE(var_node.u.constant) != IS_STRING) {
-			convert_to_string(&var_node.u.constant);
+	zend_compile_expr(&name_node, name_ast TSRMLS_CC);
+	if (name_node.op_type == IS_CONST) {
+		if (Z_TYPE(name_node.u.constant) != IS_STRING) {
+			convert_to_string(&name_node.u.constant);
 		}
 	}
 
-	emit_op(&result, ZEND_FETCH_W, &var_node, NULL TSRMLS_CC);
+	if (zend_try_compile_cv(&result, var_ast TSRMLS_CC) == SUCCESS) {
+		emit_op(NULL, ZEND_BIND_GLOBAL, &result, &name_node TSRMLS_CC);
+	} else {
+		emit_op(&result, ZEND_FETCH_W, &name_node, NULL TSRMLS_CC);
 
-	// TODO.AST Avoid double fetch
-	//opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
+		// TODO.AST Avoid double fetch
+		//opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
 
-	zend_ast *fetch_ast = zend_ast_create_unary(ZEND_AST_VAR, var_ast);
-	zend_compile_assign_ref_common(NULL, fetch_ast, &result TSRMLS_CC);
-	efree(fetch_ast);
+		zend_compile_assign_ref_common(NULL, var_ast, &result TSRMLS_CC);
+	}
 }
 
 static void zend_compile_static_var_common(
