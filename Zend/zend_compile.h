@@ -504,10 +504,6 @@ void zend_do_halt_compiler_register(TSRMLS_D);
 void zend_init_list(void *result, void *item TSRMLS_DC);
 void zend_add_to_list(void *result, void *item TSRMLS_DC);
 
-void zend_do_declare_begin(TSRMLS_D);
-void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC);
-void zend_do_declare_end(const znode *declare_token TSRMLS_DC);
-
 void zend_do_extended_info(TSRMLS_D);
 void zend_do_extended_fcall_begin(TSRMLS_D);
 void zend_do_extended_fcall_end(TSRMLS_D);
