@@ -124,7 +124,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 		RETURN_STRINGL(digest, 16);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		RETVAL_STRING(md5str);
 	}
 
 }
@@ -171,7 +171,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 		RETURN_STRINGL(digest, 16);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		RETVAL_STRING(md5str);
 	}
 }
 /* }}} */
