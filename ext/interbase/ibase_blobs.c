@@ -118,7 +118,7 @@ int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long m
 			_php_ibase_error(TSRMLS_C);
 			return FAILURE;
 		}
-		RETVAL_STRINGL(bl_data, cur_len, 0);
+		RETVAL_STRINGL(bl_data, cur_len);
 	} else { /* null blob */
 		RETVAL_STRING(""); /* empty string */
 	}
@@ -364,7 +364,7 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end) /* {{{
 		}
 		ib_blob->bl_handle = NULL;
 
-		RETVAL_STRINGL(_php_ibase_quad_to_string(ib_blob->bl_qd), BLOB_ID_LEN, 0);
+		RETVAL_STRINGL(_php_ibase_quad_to_string(ib_blob->bl_qd), BLOB_ID_LEN);
 	} else { /* discard created blob */
 		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
 			_php_ibase_error(TSRMLS_C);
