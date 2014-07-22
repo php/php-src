@@ -247,7 +247,11 @@ top_statement:
 		statement						{ $$.u.ast = $1.u.ast; }
 	|	function_declaration_statement	{ $$.u.ast = $1.u.ast; }
 	|	class_declaration_statement		{ $$.u.ast = $1.u.ast; }
-	|	T_HALT_COMPILER '(' ')' ';'		{ AN($$); zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
+	|	T_HALT_COMPILER '(' ')' ';'
+			{ zval offset_zv; ZVAL_LONG(&offset_zv, zend_get_scanned_file_offset(TSRMLS_C));
+			  $$.u.ast = zend_ast_create_unary(ZEND_AST_HALT_COMPILER,
+			      zend_ast_create_zval(&offset_zv));
+			  /*YYACCEPT;*/ }
 	|	T_NAMESPACE namespace_name ';'
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), NULL);
 			  zend_discard_doc_comment(TSRMLS_C); }

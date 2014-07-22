@@ -6348,8 +6348,6 @@ void zend_compile_namespace(zend_ast *ast TSRMLS_DC) {
 	zend_string *name;
 	zend_bool with_bracket = stmt_ast != NULL;
 
-	// TODO.AST errors!
-
 	/* handle mixed syntax declaration or nested namespaces */
 	if (!CG(has_bracketed_namespaces)) {
 		if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
@@ -6418,6 +6416,25 @@ void zend_compile_namespace(zend_ast *ast TSRMLS_DC) {
 			ZVAL_UNDEF(&CG(current_namespace));
 		}
 	}
+}
+
+void zend_compile_halt_compiler(zend_ast *ast TSRMLS_DC) {
+	zend_ast *offset_ast = ast->child[0];
+	long offset = Z_LVAL_P(zend_ast_get_zval(offset_ast));
+
+	zend_string *filename, *name;
+	const char const_name[] = "__COMPILER_HALT_OFFSET__";
+
+	if (CG(has_bracketed_namespaces) && CG(in_namespace)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope");
+	}
+
+	filename = zend_get_compiled_filename(TSRMLS_C);
+	name = zend_mangle_property_name(const_name, sizeof(const_name) - 1,
+		filename->val, filename->len, 0);
+
+	zend_register_long_constant(name->val, name->len, offset, CONST_CS, 0 TSRMLS_CC);
+	STR_RELEASE(name);
 }
 
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
@@ -7367,6 +7384,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_NAMESPACE:
 			zend_compile_namespace(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_HALT_COMPILER:
+			zend_compile_halt_compiler(ast TSRMLS_CC);
 			break;
 		default:
 		{
