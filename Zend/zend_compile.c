@@ -3030,34 +3030,34 @@ void zend_do_halt_compiler_register(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static zend_constant* zend_get_ct_const(const zval *const_name, int all_internal_constants_substitution TSRMLS_DC) /* {{{ */
+static zend_constant *zend_get_ct_const(zend_string *name, int all_internal_constants_substitution TSRMLS_DC) /* {{{ */
 {
 	zend_constant *c = NULL;
 	char *lookup_name;
 
-	if (Z_STRVAL_P(const_name)[0] == '\\') {
-		if ((c = zend_hash_str_find_ptr(EG(zend_constants), Z_STRVAL_P(const_name)+1, Z_STRLEN_P(const_name)-1)) == NULL) {
-			lookup_name = zend_str_tolower_dup(Z_STRVAL_P(const_name)+1, Z_STRLEN_P(const_name)-1);
-			if ((c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, Z_STRLEN_P(const_name)-1)) != NULL) {
-				if ((c->flags & CONST_CT_SUBST) && !(c->flags & CONST_CS)) {
-					efree(lookup_name);
-					return c;
-				}
-			}
+	if (name->val[0] == '\\') {
+		c = zend_hash_str_find_ptr(EG(zend_constants), name->val + 1, name->len - 1);
+		if (!c) {
+			lookup_name = zend_str_tolower_dup(name->val + 1, name->len - 1);
+			c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, name->len - 1);
 			efree(lookup_name);
-			return NULL;
-		}
-	} else if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR_P(const_name))) == NULL) {
-		lookup_name = zend_str_tolower_dup(Z_STRVAL_P(const_name), Z_STRLEN_P(const_name));
-		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, Z_STRLEN_P(const_name))) != NULL) {
-			if ((c->flags & CONST_CT_SUBST) && !(c->flags & CONST_CS)) {
-				efree(lookup_name);
+
+			if (c && (c->flags & CONST_CT_SUBST) && !(c->flags & CONST_CS)) {
 				return c;
 			}
+			return NULL;
 		}
+	} else if ((c = zend_hash_find_ptr(EG(zend_constants), name)) == NULL) {
+		lookup_name = zend_str_tolower_dup(name->val, name->len);
+		c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, name->len);
 		efree(lookup_name);
+
+		if (c && (c->flags & CONST_CT_SUBST) && !(c->flags & CONST_CS)) {
+			return c;
+		}
 		return NULL;
 	}
+
 	if (c->flags & CONST_CT_SUBST) {
 		return c;
 	}
@@ -3073,7 +3073,8 @@ static zend_constant* zend_get_ct_const(const zval *const_name, int all_internal
 
 static int zend_constant_ct_subst(znode *result, zval *const_name, int all_internal_constants_substitution TSRMLS_DC) /* {{{ */
 {
-	zend_constant *c = zend_get_ct_const(const_name, all_internal_constants_substitution TSRMLS_CC);
+	zend_constant *c = zend_get_ct_const(Z_STR_P(const_name),
+		all_internal_constants_substitution TSRMLS_CC);
 
 	if (c) {
 		result->op_type = IS_CONST;
@@ -3545,55 +3546,6 @@ void zend_do_begin_namespace(znode *name, zend_bool with_bracket TSRMLS_DC) /* {
 		STR_RELEASE(CG(doc_comment));
 		CG(doc_comment) = NULL;
 	}
-}
-/* }}} */
-
-void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline;
-	zval *ns_name;
-
-	if ((Z_TYPE(value->u.constant) == IS_ARRAY) ||
-	    (Z_TYPE(value->u.constant) == IS_CONSTANT_AST &&
-	     Z_ASTVAL(value->u.constant)->kind == ZEND_INIT_ARRAY)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed as constants");
-	}
-
-	if (zend_get_ct_const(&name->u.constant, 0 TSRMLS_CC)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", Z_STRVAL(name->u.constant));
-	}
-
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		/* Prefix constant name with name of current namespace, lowercased */
-		znode tmp;
-
-		tmp.op_type = IS_CONST;
-		ZVAL_NEW_STR(&tmp.u.constant, STR_ALLOC(Z_STRLEN(CG(current_namespace)), 0));
-		zend_str_tolower_copy(Z_STRVAL(tmp.u.constant), Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)));
-		zend_do_build_namespace_name(&tmp, &tmp, name TSRMLS_CC);
-		*name = tmp;
-	}
-
-	/* Constant name must not conflict with import names */
-	if (CG(current_import_const) &&
-	    (ns_name = zend_hash_find(CG(current_import_const), Z_STR(name->u.constant))) != NULL) {
-
-		char *tmp = estrndup(Z_STRVAL_P(ns_name), Z_STRLEN_P(ns_name));
-
-		if (Z_STRLEN_P(ns_name) != Z_STRLEN(name->u.constant) ||
-			memcmp(tmp, Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant))) {
-			zend_error(E_COMPILE_ERROR, "Cannot declare const %s because the name is already in use", Z_STRVAL(name->u.constant));
-		}
-		efree(tmp);
-	}
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_DECLARE_CONST;
-	SET_UNUSED(opline->result);
-	SET_NODE(opline->op1, name);
-	SET_NODE(opline->op2, value);
-
-	zend_hash_add_ptr(&CG(const_filenames), Z_STR(name->u.constant), CG(compiled_filename));
 }
 /* }}} */
 
@@ -5950,11 +5902,7 @@ void zend_compile_class_const_decl(zend_ast *ast TSRMLS_DC) {
 			return;
 		}
 
-		if (value_ast) {
-			_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
-		} else {
-			ZVAL_NULL(&value_zv);
-		}
+		_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
 
 		if (Z_TYPE(value_zv) == IS_ARRAY
 			|| (Z_TYPE(value_zv) == IS_CONSTANT_AST && Z_ASTVAL(value_zv)->kind == ZEND_AST_ARRAY)
@@ -6447,6 +6395,57 @@ void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 
 		STR_RELEASE(lookup_name);
 		STR_RELEASE(new_name);
+	}
+}
+
+void zend_compile_const_decl(zend_ast *ast TSRMLS_DC) {
+	zend_uint i;
+	for (i = 0; i < ast->children; ++i) {
+		zend_ast *const_ast = ast->child[i];
+		zend_ast *name_ast = const_ast->child[0];
+		zend_ast *value_ast = const_ast->child[1];
+		zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
+
+		zend_string *import_name;
+		znode name_node, value_node;
+		zval *value_zv = &value_node.u.constant;
+
+		value_node.op_type = IS_CONST;
+		_tmp_compile_const_expr(value_zv, value_ast TSRMLS_CC);
+
+		if (Z_TYPE_P(value_zv) == IS_ARRAY
+			|| (Z_TYPE_P(value_zv) == IS_CONSTANT_AST
+				&& Z_ASTVAL_P(value_zv)->kind == ZEND_AST_ARRAY)
+		) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed as constants");
+		}
+
+		if (zend_get_ct_const(name, 0 TSRMLS_CC)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", name->val);
+		}
+
+		if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+			name = zend_concat_names(Z_STRVAL(CG(current_namespace)),
+				Z_STRLEN(CG(current_namespace)), name->val, name->len);
+		} else {
+			STR_ADDREF(name);
+		}
+
+		if (CG(current_import_const)
+			&& (import_name = zend_hash_find_ptr(CG(current_import_const), name))
+		) {
+			if (import_name->len != name->len || memcmp(import_name->val, name->val, name->len)) {
+				zend_error(E_COMPILE_ERROR, "Cannot declare const %s because "
+					"the name is already in use", name->val);
+			}
+		}
+
+		name_node.op_type = IS_CONST;
+		ZVAL_STR(&name_node.u.constant, name);
+
+		emit_op(NULL, ZEND_DECLARE_CONST, &name_node, &value_node TSRMLS_CC);
+
+		zend_hash_add_ptr(&CG(const_filenames), name, CG(compiled_filename));
 	}
 }
 
@@ -7362,6 +7361,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_USE:
 			zend_compile_use(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_CONST_DECL:
+			zend_compile_const_decl(ast TSRMLS_CC);
 			break;
 		default:
 		{

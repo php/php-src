@@ -261,7 +261,7 @@ top_statement:
 			{ $3.u.ast->attr = T_FUNCTION; AS($3); zend_verify_namespace(TSRMLS_C); }
 	|	T_USE T_CONST use_declarations ';'
 			{ $3.u.ast->attr = T_CONST; AS($3); zend_verify_namespace(TSRMLS_C); }
-	|	constant_declaration ';'		{ zend_verify_namespace(TSRMLS_C); }
+	|	T_CONST const_list ';'		{ AS($2); zend_verify_namespace(TSRMLS_C); }
 ;
 
 use_declarations:
@@ -282,9 +282,10 @@ use_declaration:
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, AST_ZVAL(&$2), AST_ZVAL(&$4)); }
 ;
 
-constant_declaration:
-		constant_declaration ',' T_STRING '=' static_scalar	{ zend_do_declare_constant(&$3, &$5 TSRMLS_CC); }
-	|	T_CONST T_STRING '=' static_scalar { zend_do_declare_constant(&$2, &$4 TSRMLS_CC); }
+const_list:
+		const_list ',' const_decl { $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
+	|	const_decl
+			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_CONST_DECL, $1.u.ast); }
 ;
 
 inner_statement_list:
@@ -606,8 +607,8 @@ class_statement_list:
 class_statement:
 		variable_modifiers property_list ';'
 			{ $$.u.ast = $2.u.ast; $$.u.ast->attr = Z_LVAL($1.u.constant); }
-	|	class_const_list ';'
-			{ $$.u.ast = $1.u.ast;
+	|	T_CONST class_const_list ';'
+			{ $$.u.ast = $2.u.ast;
 			  if (CG(doc_comment)) { STR_RELEASE(CG(doc_comment)); CG(doc_comment) = NULL; } }
 	|	T_USE name_list trait_adaptations
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_TRAIT, $2.u.ast, $3.u.ast); }
@@ -711,14 +712,14 @@ property:
 ;
 
 class_const_list:
-		class_const_list ',' class_const { $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
-	|	class_const
+		class_const_list ',' const_decl { $$.u.ast = zend_ast_dynamic_add($1.u.ast, $3.u.ast); }
+	|	const_decl
 			{ $$.u.ast = zend_ast_create_dynamic_and_add(ZEND_AST_CLASS_CONST_DECL, $1.u.ast); }
 ;
 
-class_const:
-	T_CONST T_STRING '=' expr
-		{ $$.u.ast = zend_ast_create_binary(ZEND_AST_CONST_ELEM, AST_ZVAL(&$2), $4.u.ast); }
+const_decl:
+	T_STRING '=' expr
+		{ $$.u.ast = zend_ast_create_binary(ZEND_AST_CONST_ELEM, AST_ZVAL(&$1), $3.u.ast); }
 ;
 
 echo_expr_list:
