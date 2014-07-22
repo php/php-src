@@ -1489,14 +1489,14 @@ PHP_FUNCTION(odbc_cursor)
 					odbc_sql_error(result->conn_ptr, result->stmt, "SQLSetCursorName");
 					RETVAL_FALSE;
 				} else {
-					RETVAL_STRING(cursorname,1);
+					RETVAL_STRING(cursorname);
 				}
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQL error: %s, SQL state %s", errormsg, state);
 				RETVAL_FALSE;
 			}
 		} else {
-			RETVAL_STRING(cursorname,1);
+			RETVAL_STRING(cursorname);
 		}
 		efree(cursorname);
 	} else {
@@ -2972,7 +2972,7 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			strlcpy(ptr, ODBCG(lasterrormsg), len+1);
 		}
 	}
-	RETVAL_STRING(ptr, 0);
+	RETVAL_STRING(ptr);
 }
 /* }}} */
 

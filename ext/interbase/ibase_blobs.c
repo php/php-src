@@ -120,7 +120,7 @@ int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long m
 		}
 		RETVAL_STRINGL(bl_data, cur_len, 0);
 	} else { /* null blob */
-		RETVAL_STRING("", 1); /* empty string */
+		RETVAL_STRING(""); /* empty string */
 	}
 	return SUCCESS;
 }
