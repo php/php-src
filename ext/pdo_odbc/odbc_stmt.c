@@ -779,7 +779,7 @@ static int odbc_stmt_get_attr(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 			rc = SQLGetCursorName(S->stmt, buf, sizeof(buf), &len);
 
 			if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
-				ZVAL_STRINGL(val, buf, len, 1);
+				ZVAL_STRINGL(val, buf, len);
 				return 1;
 			}
 			pdo_odbc_stmt_error("SQLGetCursorName");

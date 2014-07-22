@@ -299,7 +299,7 @@ PHP_FUNCTION(oci_lob_load)
 		RETURN_FALSE;
 	}
 	if (buffer_len > 0) {
-		RETURN_STRINGL(buffer, buffer_len, 0);
+		RETURN_STRINGL(buffer, buffer_len);
 	}
 	else {
 		RETURN_EMPTY_STRING();
@@ -344,7 +344,7 @@ PHP_FUNCTION(oci_lob_read)
 		RETURN_FALSE;
 	}	
 	if (buffer_len > 0) {
-		RETURN_STRINGL(buffer, buffer_len, 0);
+		RETURN_STRINGL(buffer, buffer_len);
 	}
 	else {
 		RETURN_EMPTY_STRING();
@@ -1146,7 +1146,7 @@ PHP_FUNCTION(oci_field_name)
 	php_oci_out_column *column;
 
 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
-		RETURN_STRINGL(column->name, column->name_len, 1);
+		RETURN_STRINGL(column->name, column->name_len);
 	}
 	RETURN_FALSE;
 }
@@ -1210,64 +1210,64 @@ PHP_FUNCTION(oci_field_type)
 	switch (column->data_type) {
 #ifdef SQLT_TIMESTAMP
 		case SQLT_TIMESTAMP:
-			RETVAL_STRING("TIMESTAMP",1);
+			RETVAL_STRING("TIMESTAMP");
 			break;
 #endif
 #ifdef SQLT_TIMESTAMP_TZ
 		case SQLT_TIMESTAMP_TZ:
-			RETVAL_STRING("TIMESTAMP WITH TIMEZONE",1);
+			RETVAL_STRING("TIMESTAMP WITH TIMEZONE");
 			break;
 #endif
 #ifdef SQLT_TIMESTAMP_LTZ
 		case SQLT_TIMESTAMP_LTZ:
-			RETVAL_STRING("TIMESTAMP WITH LOCAL TIMEZONE",1);
+			RETVAL_STRING("TIMESTAMP WITH LOCAL TIMEZONE");
 			break;
 #endif
 #ifdef SQLT_INTERVAL_YM
 		case SQLT_INTERVAL_YM:
-			RETVAL_STRING("INTERVAL YEAR TO MONTH",1);
+			RETVAL_STRING("INTERVAL YEAR TO MONTH");
 			break;
 #endif
 #ifdef SQLT_INTERVAL_DS
 		case SQLT_INTERVAL_DS:
-			RETVAL_STRING("INTERVAL DAY TO SECOND",1);
+			RETVAL_STRING("INTERVAL DAY TO SECOND");
 			break;
 #endif
 		case SQLT_DAT:
-			RETVAL_STRING("DATE",1);
+			RETVAL_STRING("DATE");
 			break;
 		case SQLT_NUM:
-			RETVAL_STRING("NUMBER",1);
+			RETVAL_STRING("NUMBER");
 			break;
 		case SQLT_LNG:
-			RETVAL_STRING("LONG",1);
+			RETVAL_STRING("LONG");
 			break;
 		case SQLT_BIN:
-			RETVAL_STRING("RAW",1);
+			RETVAL_STRING("RAW");
 			break;
 		case SQLT_LBI:
-			RETVAL_STRING("LONG RAW",1);
+			RETVAL_STRING("LONG RAW");
 			break;
 		case SQLT_CHR:
-			RETVAL_STRING("VARCHAR2",1);
+			RETVAL_STRING("VARCHAR2");
 			break;
 		case SQLT_RSET:
-			RETVAL_STRING("REFCURSOR",1);
+			RETVAL_STRING("REFCURSOR");
 			break;
 		case SQLT_AFC:
-			RETVAL_STRING("CHAR",1);
+			RETVAL_STRING("CHAR");
 			break;
 		case SQLT_BLOB:
-			RETVAL_STRING("BLOB",1);
+			RETVAL_STRING("BLOB");
 			break;
 		case SQLT_CLOB:
-			RETVAL_STRING("CLOB",1);
+			RETVAL_STRING("CLOB");
 			break;
 		case SQLT_BFILE:
-			RETVAL_STRING("BFILE",1);
+			RETVAL_STRING("BFILE");
 			break;
 		case SQLT_RDD:
-			RETVAL_STRING("ROWID",1);
+			RETVAL_STRING("ROWID");
 			break;
 		default:
 			RETVAL_LONG(column->data_type);
@@ -2058,7 +2058,7 @@ PHP_FUNCTION(oci_client_version)
 	char *version = NULL;
 
 	php_oci_client_get_version(&version TSRMLS_CC);
-	RETURN_STRING(version, 0);
+	RETURN_STRING(version);
 }
 /* }}} */
 
@@ -2080,7 +2080,7 @@ PHP_FUNCTION(oci_server_version)
 		RETURN_FALSE;
 	}
 	
-	RETURN_STRING(version, 0);
+	RETURN_STRING(version);
 }
 /* }}} */
 
@@ -2104,37 +2104,37 @@ PHP_FUNCTION(oci_statement_type)
 
 	switch (type) {
 		case OCI_STMT_SELECT:
-			RETVAL_STRING("SELECT",1);
+			RETVAL_STRING("SELECT");
 			break;
 		case OCI_STMT_UPDATE:
-			RETVAL_STRING("UPDATE",1);
+			RETVAL_STRING("UPDATE");
 			break;
 		case OCI_STMT_DELETE:
-			RETVAL_STRING("DELETE",1);
+			RETVAL_STRING("DELETE");
 			break;
 		case OCI_STMT_INSERT:
-			RETVAL_STRING("INSERT",1);
+			RETVAL_STRING("INSERT");
 			break;
 		case OCI_STMT_CREATE:
-			RETVAL_STRING("CREATE",1);
+			RETVAL_STRING("CREATE");
 			break;
 		case OCI_STMT_DROP:
-			RETVAL_STRING("DROP",1);
+			RETVAL_STRING("DROP");
 			break;
 		case OCI_STMT_ALTER:
-			RETVAL_STRING("ALTER",1);
+			RETVAL_STRING("ALTER");
 			break;
 		case OCI_STMT_BEGIN:
-			RETVAL_STRING("BEGIN",1);
+			RETVAL_STRING("BEGIN");
 			break;
 		case OCI_STMT_DECLARE:
-			RETVAL_STRING("DECLARE",1);
+			RETVAL_STRING("DECLARE");
 			break;
 		case OCI_STMT_CALL:
-			RETVAL_STRING("CALL",1);
+			RETVAL_STRING("CALL");
 			break;
 		default:
-			RETVAL_STRING("UNKNOWN",1);
+			RETVAL_STRING("UNKNOWN");
 	}
 }
 /* }}} */

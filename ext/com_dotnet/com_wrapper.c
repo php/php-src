@@ -485,7 +485,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 
 			/* add the mappings */
 			MAKE_STD_ZVAL(tmp);
-			ZVAL_STRINGL(tmp, name, namelen-1, 1);
+			ZVAL_STRINGL(tmp, name, namelen-1);
 			pid = zend_hash_next_free_element(disp->dispid_to_name);
 			zend_hash_index_update(disp->dispid_to_name, pid, (void*)&tmp, sizeof(zval *), NULL);
 
@@ -517,7 +517,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 
 			/* add the mappings */
 			MAKE_STD_ZVAL(tmp);
-			ZVAL_STRINGL(tmp, name, namelen-1, 1);
+			ZVAL_STRINGL(tmp, name, namelen-1);
 			pid = zend_hash_next_free_element(disp->dispid_to_name);
 			zend_hash_index_update(disp->dispid_to_name, pid, (void*)&tmp, sizeof(zval *), NULL);
 

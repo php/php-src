@@ -613,7 +613,7 @@ PHP_FUNCTION(smfi_getsymval)
 		php_error(E_WARNING, IS_NONE, get_active_function_name(TSRMLS_C));
 	} else if (zend_parse_parameters(1 TSRMLS_CC, "s", &symname, &len) == SUCCESS) {
 		if ((ret = smfi_getsymval(MG(ctx), symname)) != NULL) {
-			RETURN_STRING(ret, 1);
+			RETURN_STRING(ret);
 		}
 	}
 

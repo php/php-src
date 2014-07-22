@@ -192,7 +192,7 @@ static void apache_request_read_string_slot(int offset, INTERNAL_FUNCTION_PARAME
 	s = *(char **)((char*)r + offset);
 
 	if (s) {
-		RETURN_STRING(s, 1);
+		RETURN_STRING(s);
 	}
 
 	RETURN_EMPTY_STRING();
@@ -224,7 +224,7 @@ static void apache_request_string_slot(int offset, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (old_value) {
-		RETURN_STRING(old_value, 1);
+		RETURN_STRING(old_value);
 	}
 
 	RETURN_EMPTY_STRING();
@@ -728,7 +728,7 @@ PHP_FUNCTION(apache_request_remote_host)
 	res = (char *)ap_get_remote_host(r->connection, r->per_dir_config, (int)type);
 
 	if (res) {
-		RETURN_STRING(res, 1);
+		RETURN_STRING(res);
 	}
 
 	RETURN_EMPTY_STRING();
@@ -895,7 +895,7 @@ PHP_FUNCTION(apache_request_auth_type)
 		RETURN_NULL();
 	}
 
-	RETURN_STRING(t, 1);
+	RETURN_STRING(t);
 }
 /* }}} */
 
@@ -918,7 +918,7 @@ PHP_FUNCTION(apache_request_auth_name)
 		RETURN_NULL();
 	}
 
-	RETURN_STRING(t, 1);
+	RETURN_STRING(t);
 }
 /* }}} */
 
@@ -1565,7 +1565,7 @@ PHP_FUNCTION(apache_note)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(note_val, 1);
+	RETURN_STRING(note_val);
 }
 /* }}} */
 
@@ -1933,7 +1933,7 @@ PHP_FUNCTION(apache_get_version)
 	char *apv = (char *) ap_get_server_version();
 
 	if (apv && *apv) {
-		RETURN_STRING(apv, 1);
+		RETURN_STRING(apv);
 	} else {
 		RETURN_FALSE;
 	}

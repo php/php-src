@@ -304,7 +304,7 @@ query_loop:
 				if (! (line_len = isc_vax_integer(result, 2))) {
 					/* done */
 					if (heap_buf) {
-						RETURN_STRING(heap_buf,0);
+						RETURN_STRING(heap_buf);
 					} else {
 						RETURN_TRUE;
 					}
@@ -330,7 +330,7 @@ query_loop:
 			case isc_info_svc_get_env_lock:
 			case isc_info_svc_get_env_msg:
 			case isc_info_svc_user_dbpath:
-				RETURN_STRINGL(result + 2, isc_vax_integer(result, 2), 1);
+				RETURN_STRINGL(result + 2, isc_vax_integer(result, 2));
 
 			case isc_info_svc_svr_db_info:
 				array_init(return_value);

@@ -238,7 +238,7 @@ static PHP_FUNCTION(phpdbg_exec)
 		if (VCWD_STAT(exec, &sb) != FAILURE) {
 			if (sb.st_mode & (S_IFREG|S_IFLNK)) {
 				if (PHPDBG_G(exec)) {
-					ZVAL_STRINGL(return_value, PHPDBG_G(exec), PHPDBG_G(exec_len), 1);
+					ZVAL_STRINGL(return_value, PHPDBG_G(exec), PHPDBG_G(exec_len));
 					efree(PHPDBG_G(exec));
 					result = 0;
 				}
@@ -666,7 +666,7 @@ const char phpdbg_ini_hardcoded[] =
 #define INI_DEFAULT(name, value) \
 	Z_SET_REFCOUNT(tmp, 0); \
 	Z_UNSET_ISREF(tmp); \
-	ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1, 0); \
+	ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1); \
 	zend_hash_update(configuration_hash, name, sizeof(name), &tmp, sizeof(zval), NULL);
 
 void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */

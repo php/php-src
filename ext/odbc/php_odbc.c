@@ -1489,14 +1489,14 @@ PHP_FUNCTION(odbc_cursor)
 					odbc_sql_error(result->conn_ptr, result->stmt, "SQLSetCursorName");
 					RETVAL_FALSE;
 				} else {
-					RETVAL_STRING(cursorname,1);
+					RETVAL_STRING(cursorname);
 				}
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQL error: %s, SQL state %s", errormsg, state);
 				RETVAL_FALSE;
 			}
 		} else {
-			RETVAL_STRING(cursorname,1);
+			RETVAL_STRING(cursorname);
 		}
 		efree(cursorname);
 	} else {
@@ -2138,14 +2138,14 @@ PHP_FUNCTION(odbc_result)
 			/* Don't duplicate result, saves one emalloc.
 			   For SQL_SUCCESS, the length is in vallen.
 			 */
-			RETURN_STRINGL(field, (rc == SQL_SUCCESS_WITH_INFO) ? fieldsize : result->values[field_ind].vallen, 0);
+			RETURN_STRINGL(field, (rc == SQL_SUCCESS_WITH_INFO) ? fieldsize : result->values[field_ind].vallen);
 			break;
 			
 		default:
 			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
 				RETURN_NULL();
 			} else {
-				RETURN_STRINGL(result->values[field_ind].value, result->values[field_ind].vallen, 1);
+				RETURN_STRINGL(result->values[field_ind].value, result->values[field_ind].vallen);
 			}
 			break;
 	}
@@ -2796,7 +2796,7 @@ PHP_FUNCTION(odbc_field_name)
 		RETURN_FALSE;
 	}
 	
-	RETURN_STRING(result->values[pv_num - 1].name, 1);
+	RETURN_STRING(result->values[pv_num - 1].name);
 }
 /* }}} */
 
@@ -2832,7 +2832,7 @@ PHP_FUNCTION(odbc_field_type)
 	}
 
 	SQLColAttributes(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
-	RETURN_STRING(tmp,1)
+	RETURN_STRING(tmp)
 }
 /* }}} */
 
@@ -2972,7 +2972,7 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			strlcpy(ptr, ODBCG(lasterrormsg), len+1);
 		}
 	}
-	RETVAL_STRING(ptr, 0);
+	RETVAL_STRING(ptr);
 }
 /* }}} */
 

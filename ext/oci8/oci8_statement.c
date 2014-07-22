@@ -1035,7 +1035,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 							ZVAL_NULL(*entry);
 						} else {
 							connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
-							ZVAL_STRINGL(*entry, (char *)buff, buff_len, 1);
+							ZVAL_STRINGL(*entry, (char *)buff, buff_len);
 						}
 						zend_hash_move_forward(hash);
 					} else {
@@ -1063,7 +1063,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 					int curr_element_length = bind->array.element_lengths[i];
 					if ((i < bind->array.old_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 						zval_dtor(*entry);
-						ZVAL_STRINGL(*entry, (char *)(((text *)bind->array.elements)+i*bind->array.max_length), curr_element_length, 1);
+						ZVAL_STRINGL(*entry, (char *)(((text *)bind->array.elements)+i*bind->array.max_length), curr_element_length);
 						zend_hash_move_forward(hash);
 					} else {
 						add_next_index_stringl(bind->zval, (char *)(((text *)bind->array.elements)+i*bind->array.max_length), curr_element_length);

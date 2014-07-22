@@ -222,12 +222,12 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 					break;
 
 				case dtype_text:
-					ZVAL_STRINGL(argp[i], (char*)argv[i]->dsc_address, argv[i]->dsc_length,0);
+					ZVAL_STRINGL(argp[i], (char*)argv[i]->dsc_address, argv[i]->dsc_length);
 					break;
 
 				case dtype_varying:
 					ZVAL_STRINGL(argp[i], ((PARAMVARY*)argv[i]->dsc_address)->vary_string,
-						((PARAMVARY*)argv[i]->dsc_address)->vary_length,0);
+						((PARAMVARY*)argv[i]->dsc_address)->vary_length);
 					break;
 
 				case dtype_short:
@@ -268,17 +268,17 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 
 				case dtype_sql_date:
 					isc_decode_sql_date((ISC_DATE*)argv[i]->dsc_address, &t);
-					ZVAL_STRINGL(argp[i], d, strftime(d, sizeof(d), INI_STR("ibase.dateformat"), &t),1); 
+					ZVAL_STRINGL(argp[i], d, strftime(d, sizeof(d), INI_STR("ibase.dateformat"), &t));
 					break;
 
 				case dtype_sql_time:
 					isc_decode_sql_time((ISC_TIME*)argv[i]->dsc_address, &t);
-					ZVAL_STRINGL(argp[i], d, strftime(d, sizeof(d), INI_STR("ibase.timeformat"), &t),1); 
+					ZVAL_STRINGL(argp[i], d, strftime(d, sizeof(d), INI_STR("ibase.timeformat"), &t));
 					break;
 
 				case dtype_timestamp:
 					isc_decode_timestamp((ISC_TIMESTAMP*)argv[i]->dsc_address, &t);
-					ZVAL_STRINGL(argp[i], d, strftime(d, sizeof(d), INI_STR("ibase.timestampformat"), &t),1); 
+					ZVAL_STRINGL(argp[i], d, strftime(d, sizeof(d), INI_STR("ibase.timestampformat"), &t));
 					break;
 			}
 		}
