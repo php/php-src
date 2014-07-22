@@ -959,7 +959,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 				length--;
 			}
 #endif
-			ZVAL_STRINGL(result, data, length, 1); 
+			ZVAL_STRINGL(result, data, length);
 			break;
 		}
 		case SQLFLT4:
@@ -984,7 +984,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			char *data = charcol(offset);
 
 			/* uniqueidentifier is a 16-byte binary number */
-			ZVAL_STRINGL(result, data, 16, 1);
+			ZVAL_STRINGL(result, data, 16);
 			}
 			break;
 		case SQLVARBINARY:
@@ -995,7 +995,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			if (!res_length) {
 				ZVAL_NULL(result);
 			} else {
-				ZVAL_STRINGL(result, (char *)dbdata(mssql_ptr->link, offset), res_length, 1);
+				ZVAL_STRINGL(result, (char *)dbdata(mssql_ptr->link, offset), res_length);
 			}
 		}
 			break;
@@ -1045,7 +1045,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 					spprintf(&res_buf, 0, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
 				}
 		
-				ZVAL_STRINGL(result, res_buf, res_length, 0);
+				ZVAL_STRINGL(result, res_buf, res_length);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "column %d has unknown data type (%d)", offset, coltype(offset));
 				ZVAL_FALSE(result);
@@ -1083,7 +1083,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 		bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 		res_buf[res_length] = '\0';
 		memcpy(res_buf, bin, res_length);
-		ZVAL_STRINGL(result, res_buf, res_length, 0);
+		ZVAL_STRINGL(result, res_buf, res_length);
 	}
 	else if  (dbwillconvert(coltype(offset),SQLCHAR)) {
 		unsigned char *res_buf;
@@ -1125,7 +1125,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 			spprintf(&res_buf, 0, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
 		}
 
-		ZVAL_STRINGL(result, res_buf, res_length, 0);
+		ZVAL_STRINGL(result, res_buf, res_length);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "column %d has unknown data type (%d)", offset, coltype(offset));
 		ZVAL_FALSE(result);

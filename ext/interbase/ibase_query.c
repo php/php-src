@@ -1323,7 +1323,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 			data = ((IBVARY *) data)->vary_string;
 			/* no break */
 		case SQL_TEXT:
-			ZVAL_STRINGL(val,(char *) data,len,1);
+			ZVAL_STRINGL(val,(char *) data,len);
 			break;
 		case SQL_SHORT:
 			n = *(short *) data;
@@ -1335,7 +1335,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 #else
 			if (scale == 0) {
 				l = slprintf(string_data, sizeof(string_data), "%" LL_MASK "d", *(ISC_INT64 *) data);
-				ZVAL_STRINGL(val,string_data,l,1);
+				ZVAL_STRINGL(val,string_data,l);
 			} else {
 				ISC_INT64 n = *(ISC_INT64 *) data, f = scales[-scale];
 
@@ -1346,7 +1346,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 				 } else {
 					l = slprintf(string_data, sizeof(string_data), "-0.%0*" LL_MASK "d", -scale, -n % f);
 				}
-				ZVAL_STRINGL(val,string_data,l,1);
+				ZVAL_STRINGL(val,string_data,l);
 			}
 			break;
 #endif
@@ -1365,7 +1365,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 				} else {
 					l = slprintf(string_data, sizeof(string_data), "-0.%0*ld", -scale, -n % f);
 				}
-				ZVAL_STRINGL(val,string_data,l,1);
+				ZVAL_STRINGL(val,string_data,l);
 			}
 			break;
 		case SQL_FLOAT:
@@ -1414,7 +1414,7 @@ format_date_time:
 						break;
 				}
 #endif
-				ZVAL_STRINGL(val,string_data,l,1);
+				ZVAL_STRINGL(val,string_data,l);
 				break;
 			}
 	} /* switch (type) */
@@ -1601,7 +1601,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 
 					} else { /* blob id only */
 						ISC_QUAD bl_qd = *(ISC_QUAD *) var->sqldata;
-						ZVAL_STRINGL(result,_php_ibase_quad_to_string(bl_qd), BLOB_ID_LEN, 0);
+						ZVAL_STRINGL(result,_php_ibase_quad_to_string(bl_qd), BLOB_ID_LEN);
 					}
 					break;
 				case SQL_ARRAY:
@@ -1627,7 +1627,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 
 					} else { /* blob id only */
 						ISC_QUAD ar_qd = *(ISC_QUAD *) var->sqldata;
-						ZVAL_STRINGL(result,_php_ibase_quad_to_string(ar_qd), BLOB_ID_LEN, 0);
+						ZVAL_STRINGL(result,_php_ibase_quad_to_string(ar_qd), BLOB_ID_LEN);
 					}
 					break;
 				_php_ibase_fetch_error:

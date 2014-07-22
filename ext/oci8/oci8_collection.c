@@ -529,7 +529,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 				return 1;
 			}
 
-			ZVAL_STRINGL(*result_element, (char *)buff, buff_len, 1);
+			ZVAL_STRINGL(*result_element, (char *)buff, buff_len);
 			Z_STRVAL_P(*result_element)[buff_len] = '\0';
 			
 			return 0;

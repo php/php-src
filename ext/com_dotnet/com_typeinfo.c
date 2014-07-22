@@ -583,7 +583,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 				if (id_to_name) {
 					zend_str_tolower(ansiname, ansinamelen);
 					MAKE_STD_ZVAL(tmp);
-					ZVAL_STRINGL(tmp, ansiname, ansinamelen, 0);
+					ZVAL_STRINGL(tmp, ansiname, ansinamelen);
 					zend_hash_index_update(id_to_name, func->memid, (void*)&tmp, sizeof(zval *), NULL);
 				}
 			}

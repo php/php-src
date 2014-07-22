@@ -1185,10 +1185,10 @@ static int php_sybase_finish_results(sybase_result *result TSRMLS_DC)
 		if (errno != ERANGE) {                          \
 			Z_TYPE(result) = IS_DOUBLE;                 \
 		} else {                                        \
-			ZVAL_STRINGL(&result, buf, length- 1, 1);   \
+			ZVAL_STRINGL(&result, buf, length- 1);   \
 		}                                               \
 	} else {                                            \
-		ZVAL_STRINGL(&result, buf, length- 1, 1);       \
+		ZVAL_STRINGL(&result, buf, length- 1);       \
 	}
 
 static int php_sybase_fetch_result_row(sybase_result *result, int numrows TSRMLS_DC)
@@ -1259,7 +1259,7 @@ static int php_sybase_fetch_result_row(sybase_result *result, int numrows TSRMLS
 						if (result->lengths[j] < 1) {
 							ZVAL_NULL(&result->data[i][j]);
 						} else {
-							ZVAL_STRINGL(&result->data[i][j], result->tmp_buffer[j], result->lengths[j]- 1, 1);
+							ZVAL_STRINGL(&result->data[i][j], result->tmp_buffer[j], result->lengths[j]- 1);
 						}
 						break;
 					}

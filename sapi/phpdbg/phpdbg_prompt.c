@@ -86,7 +86,7 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 			zval fname, *fretval;
 			zend_fcall_info fci;
 
-			ZVAL_STRINGL(&fname, name->str, name->len, 1);
+			ZVAL_STRINGL(&fname, name->str, name->len);
 
 			memset(&fci, 0, sizeof(zend_fcall_info));
 
@@ -546,7 +546,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 		Z_OBJCE(exception)->name);
 
 	/* call __toString */
-	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring")-1, 1);
+	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring")-1);
 	fci.size = sizeof(fci);
 	fci.function_table = &Z_OBJCE(exception)->function_table;
 	fci.function_name = &fname;
