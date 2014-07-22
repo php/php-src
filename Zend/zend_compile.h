@@ -460,10 +460,7 @@ ZEND_API zend_string *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
-zend_string *zend_resolve_non_class_name(zend_string *name, zend_bool *is_fully_qualified, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC);
-zend_string *zend_resolve_function_name(zend_string *name, zend_bool *is_fully_qualified TSRMLS_DC);
-zend_string *zend_resolve_const_name(zend_string *name, zend_bool *is_fully_qualified TSRMLS_DC);
-zend_string *zend_resolve_class_name(zend_string *name, zend_bool is_fully_qualified TSRMLS_DC);
+zend_string *zend_resolve_class_name(zend_string *name, zend_uint type TSRMLS_DC);
 ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var);
 
 void zend_resolve_class_name_old(znode *class_name TSRMLS_DC);
@@ -630,6 +627,9 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_PARAM_REF      (1<<0)
 #define ZEND_PARAM_VARIADIC (1<<1)
 
+#define ZEND_NAME_FQ       0
+#define ZEND_NAME_NOT_FQ   1
+#define ZEND_NAME_RELATIVE 2
 
 /* unset types */
 #define ZEND_UNSET_REG 0

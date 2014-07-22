@@ -236,13 +236,11 @@ namespace_name:
 
 name:
 		namespace_name
-			{ $$.u.ast = zend_ast_create_zval_ex(&$1.u.constant, 1); }
+			{ $$.u.ast = zend_ast_create_zval_ex(&$1.u.constant, ZEND_NAME_NOT_FQ); }
 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name
-			{ ZVAL_EMPTY_STRING(&$1.u.constant);
-			  zend_do_build_namespace_name(&$1, &$1, &$3 TSRMLS_CC);
-			  $$.u.ast = AST_ZVAL(&$1); }
+			{ $$.u.ast = zend_ast_create_zval_ex(&$3.u.constant, ZEND_NAME_RELATIVE); }
 	|	T_NS_SEPARATOR namespace_name
-			{ $$.u.ast = AST_ZVAL(&$2); }
+			{ $$.u.ast = zend_ast_create_zval_ex(&$2.u.constant, ZEND_NAME_FQ); }
 ;
 
 /* TODO.AST early binding! */
@@ -916,7 +914,7 @@ function_call:
 class_name:
 		T_STATIC
 			{ zval zv; ZVAL_STRINGL(&zv, "static", sizeof("static")-1);
-			  $$.u.ast = zend_ast_create_zval_ex(&zv, 1); }
+			  $$.u.ast = zend_ast_create_zval_ex(&zv, ZEND_NAME_NOT_FQ); }
 	|	name { $$.u.ast = $1.u.ast; }
 ;
 
