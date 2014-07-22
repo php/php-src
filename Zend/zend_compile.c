@@ -4139,6 +4139,7 @@ zend_uint zend_compile_args(zend_ast *args, zend_function *fbc TSRMLS_DC) {
 
 		if (arg->kind == ZEND_AST_UNPACK) {
 			uses_arg_unpack = 1;
+			fbc = NULL;
 			
 			zend_compile_expr(&arg_node, arg->child[0] TSRMLS_CC);
 			opline = emit_op(NULL, ZEND_SEND_UNPACK, &arg_node, NULL TSRMLS_CC);
@@ -4303,12 +4304,6 @@ void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 		}
 	}
 
-	/* Arg unpacking needs EX(call), so don't try to optimize it away */
-	if (zend_args_contain_unpack(args_ast)) {
-		zend_compile_dynamic_call(result, &name_node, args_ast TSRMLS_CC);
-		return;
-	}
-
 	{
 		zval *name = &name_node.u.constant;
 		zend_string *lcname = STR_ALLOC(Z_STRLEN_P(name), 0);
@@ -4316,6 +4311,7 @@ void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 		zend_op *opline;
 
 		zend_str_tolower_copy(lcname->val, Z_STRVAL_P(name), Z_STRLEN_P(name));
+
 		if (!(fbc = zend_hash_find_ptr(CG(function_table), lcname)) ||
 			((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS) &&
 			fbc->type == ZEND_INTERNAL_FUNCTION)
