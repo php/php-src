@@ -4318,6 +4318,36 @@ int zend_compile_func_typecheck(znode *result, zend_ast *args_ast, zend_uint typ
 	return SUCCESS;
 }
 
+int zend_compile_func_defined(znode *result, zend_ast *args_ast TSRMLS_DC) {
+	zend_string *name;
+	zend_op *opline;
+
+	if (args_ast->children != 1 || args_ast->child[0]->kind != ZEND_AST_ZVAL) {
+		return FAILURE;
+	}
+
+	name = zval_get_string(zend_ast_get_zval(args_ast->child[0]));
+	if (zend_memrchr(name->val, '\\', name->len) || zend_memrchr(name->val, ':', name->len)) {
+		STR_RELEASE(name);
+		return FAILURE;
+	}
+
+	opline = emit_op(result, ZEND_DEFINED, NULL, NULL TSRMLS_CC);
+	opline->op1_type = IS_CONST;
+	LITERAL_STR(opline->op1, name);
+	GET_CACHE_SLOT(opline->op1.constant);
+
+	/* Lowercase constant name in a separate literal */
+	{
+		zval c;
+		zend_string *lcname = STR_ALLOC(name->len, 0);
+		zend_str_tolower_copy(lcname->val, name->val, name->len);
+		ZVAL_NEW_STR(&c, lcname);
+		zend_add_literal(CG(active_op_array), &c TSRMLS_CC);
+	}
+	return SUCCESS;
+}
+
 int zend_try_compile_special_func(
 	znode *result, zend_string *lcname, zend_ast *args_ast TSRMLS_DC
 ) {
@@ -4339,8 +4369,11 @@ int zend_try_compile_special_func(
 		return zend_compile_func_typecheck(result, args_ast, IS_OBJECT TSRMLS_CC);
 	} else if (zend_str_equals(lcname, "is_resource")) {
 		return zend_compile_func_typecheck(result, args_ast, IS_RESOURCE TSRMLS_CC);
+	} else if (zend_str_equals(lcname, "defined")) {
+		return zend_compile_func_defined(result, args_ast TSRMLS_CC);
+	} else {
+		return FAILURE;
 	}
-	return FAILURE;
 }
 
 void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
