@@ -3517,6 +3517,12 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 }
 /* }}} */
 
+static inline zend_bool zend_str_equals(zend_string *str, char *c) {
+	size_t len = strlen(c);
+	return str->len == len && !memcmp(str->val, c, len);
+}
+
+
 static void zend_adjust_for_fetch_type(zend_op *opline, zend_uint type) {
 	switch (type & BP_VAR_MASK) {
 		case BP_VAR_R:
@@ -4284,6 +4290,12 @@ zend_bool zend_args_contain_unpack(zend_ast *args) {
 	return 0;
 }
 
+void zend_compile_func_strlen(znode *result, zend_ast *ast TSRMLS_DC) {
+	znode expr_node;
+	zend_compile_expr(&expr_node, ast TSRMLS_CC);
+	emit_op(result, ZEND_STRLEN, &expr_node, NULL TSRMLS_CC);
+}
+
 void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 	zend_ast *name_ast = ast->child[0];
 	zend_ast *args_ast = ast->child[1];
@@ -4311,6 +4323,17 @@ void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 		zend_op *opline;
 
 		zend_str_tolower_copy(lcname->val, Z_STRVAL_P(name), Z_STRLEN_P(name));
+
+		if (zend_str_equals(lcname, "strlen")) {
+			if (!(CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)
+				&& args_ast->children == 1 && args_ast->child[0]->kind != ZEND_AST_UNPACK
+			) {
+				STR_FREE(lcname);
+				zval_ptr_dtor(&name_node.u.constant);
+				zend_compile_func_strlen(result, args_ast->child[0] TSRMLS_CC);
+				return;
+			}
+		}
 
 		if (!(fbc = zend_hash_find_ptr(CG(function_table), lcname)) ||
 			((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS) &&
@@ -5338,11 +5361,6 @@ void zend_compile_closure_uses(zend_ast *ast TSRMLS_DC) {
 
 		zend_compile_static_var_common(var_ast, &zv, by_ref TSRMLS_CC);
 	}
-}
-
-static inline zend_bool zend_str_equals(zend_string *str, char *c) {
-	size_t len = strlen(c);
-	return str->len == len && !memcmp(str->val, c, len);
 }
 
 void zend_begin_method_decl(
