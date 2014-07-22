@@ -243,7 +243,6 @@ name:
 			{ $$.u.ast = zend_ast_create_zval_ex(&$2.u.constant, ZEND_NAME_FQ); }
 ;
 
-/* TODO.AST early binding! */
 top_statement:
 		statement						{ $$.u.ast = $1.u.ast; }
 	|	function_declaration_statement	{ $$.u.ast = $1.u.ast; }
