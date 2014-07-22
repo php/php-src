@@ -728,6 +728,15 @@ zend_string *zend_concat_names(char *name1, size_t name1_len, char *name2, size_
 	return zend_concat3(name1, name1_len, "\\", 1, name2, name2_len);
 }
 
+zend_string *zend_prefix_with_ns(zend_string *name TSRMLS_DC) {
+	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+		zend_string *ns = Z_STR(CG(current_namespace));
+		return zend_concat_names(ns->val, ns->len, name->val, name->len);
+	} else {
+		return STR_COPY(name);
+	}
+}
+
 void *zend_hash_find_ptr_lc(HashTable *ht, char *str, size_t len) {
 	void *result;
 	zend_string *lcname = STR_ALLOC(len, 0);
@@ -756,12 +765,7 @@ zend_string *zend_resolve_non_class_name(
 
 	if (type == ZEND_NAME_RELATIVE) {
 		*is_fully_qualified = 1;
-		if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-			return zend_concat_names(Z_STRVAL(CG(current_namespace)),
-				Z_STRLEN(CG(current_namespace)), name->val, name->len);
-		} else {
-			return STR_COPY(name);
-		}
+		return zend_prefix_with_ns(name TSRMLS_CC);
 	}
 
 	if (current_import_sub) {
@@ -795,12 +799,7 @@ zend_string *zend_resolve_non_class_name(
 		}
 	}
 
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		return zend_concat_names(
-			Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)), name->val, name->len);
-	}
-
-	return STR_COPY(name);
+	return zend_prefix_with_ns(name TSRMLS_CC);
 }
 /* }}} */
 
@@ -824,12 +823,7 @@ zend_string *zend_resolve_class_name(
 	char *compound;
 
 	if (type == ZEND_NAME_RELATIVE) {
-		if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-			return zend_concat_names(Z_STRVAL(CG(current_namespace)),
-				Z_STRLEN(CG(current_namespace)), name->val, name->len);
-		} else {
-			return STR_COPY(name);
-		}
+		return zend_prefix_with_ns(name TSRMLS_CC);
 	}
 
 	if (type == ZEND_NAME_FQ || name->val[0] == '\\') {
@@ -869,66 +863,13 @@ zend_string *zend_resolve_class_name(
 	}
 
 	/* If not fully qualified and not an alias, prepend the current namespace */
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		return zend_concat_names(
-			Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)), name->val, name->len);
-	}
-
-	return STR_COPY(name);
+	return zend_prefix_with_ns(name TSRMLS_CC);
 }
 
 zend_string *zend_resolve_class_name_ast(zend_ast *ast TSRMLS_DC) {
 	zend_string *name = Z_STR_P(zend_ast_get_zval(ast));
 	return zend_resolve_class_name(name, ast->attr TSRMLS_CC);
 }
-
-void zend_resolve_class_name_old(znode *class_name TSRMLS_DC) {
-	zend_string *resolved_name = zend_resolve_class_name(
-		Z_STR(class_name->u.constant), ZEND_NAME_NOT_FQ TSRMLS_CC);
-	zval_dtor(&class_name->u.constant);
-	ZVAL_STR(&class_name->u.constant, resolved_name);
-}
-
-void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
-{
-	long fetch_class_op_number;
-	zend_op *opline;
-
-	fetch_class_op_number = get_next_op_number(CG(active_op_array));
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_FETCH_CLASS;
-	SET_UNUSED(opline->op1);
-	opline->extended_value = ZEND_FETCH_CLASS_DEFAULT;
-	CG(catch_begin) = fetch_class_op_number;
-	if (class_name->op_type == IS_CONST) {
-		int fetch_type;
-
-		fetch_type = zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
-		switch (fetch_type) {
-			case ZEND_FETCH_CLASS_SELF:
-			case ZEND_FETCH_CLASS_PARENT:
-			case ZEND_FETCH_CLASS_STATIC:
-				SET_UNUSED(opline->op2);
-				opline->extended_value = fetch_type;
-				zval_dtor(&class_name->u.constant);
-				break;
-			default:
-				zend_resolve_class_name_old(class_name TSRMLS_CC);
-				opline->op2_type = IS_CONST;
-				opline->op2.constant =
-					zend_add_class_name_literal(CG(active_op_array), Z_STR(class_name->u.constant) TSRMLS_CC);
-				break;
-		}
-	} else {
-		SET_NODE(opline->op2, class_name);
-	}
-	opline->result.var = get_temporary_variable(CG(active_op_array));
-	opline->result_type = IS_VAR; /* FIXME: Hack so that INIT_FCALL_BY_NAME still knows this is a class */
-	GET_NODE(result, opline->result);
-	result->EA = opline->extended_value;
-}
-/* }}} */
 
 static void ptr_dtor(zval *zv) /* {{{ */
 {
@@ -5729,12 +5670,7 @@ static void zend_begin_func_decl(
 	zend_string *name = decl->name, *lcname;
 	zend_op *opline;
 
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		op_array->function_name = name = zend_concat_names(
-			Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)), name->val, name->len);
-	} else {
-		op_array->function_name = STR_COPY(name);
-	}
+	op_array->function_name = name = zend_prefix_with_ns(name TSRMLS_CC);
 
 	lcname = STR_ALLOC(name->len, 0);
 	zend_str_tolower_copy(lcname->val, name->val, name->len);
@@ -6444,12 +6380,7 @@ void zend_compile_const_decl(zend_ast *ast TSRMLS_DC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", name->val);
 		}
 
-		if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-			name = zend_concat_names(Z_STRVAL(CG(current_namespace)),
-				Z_STRLEN(CG(current_namespace)), name->val, name->len);
-		} else {
-			STR_ADDREF(name);
-		}
+		name = zend_prefix_with_ns(name TSRMLS_CC);
 
 		if (CG(current_import_const)
 			&& (import_name = zend_hash_find_ptr(CG(current_import_const), name))

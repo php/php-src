@@ -460,10 +460,7 @@ ZEND_API zend_string *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
-zend_string *zend_resolve_class_name(zend_string *name, zend_uint type TSRMLS_DC);
 ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var);
-
-void zend_resolve_class_name_old(znode *class_name TSRMLS_DC);
 
 #ifdef ZTS
 const char *zend_get_zendtext(TSRMLS_D);
@@ -481,7 +478,6 @@ ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC);
 void zend_do_free(znode *op1 TSRMLS_DC);
 
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
-void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC);
 void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_class_member TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
