@@ -551,6 +551,13 @@ static inline zend_bool zend_is_function_or_method_call(const znode *variable) /
 
 #define MAKE_NOP(opline)	{ opline->opcode = ZEND_NOP;  memset(&opline->result,0,sizeof(opline->result)); memset(&opline->op1,0,sizeof(opline->op1)); memset(&opline->op2,0,sizeof(opline->op2)); opline->result_type=opline->op1_type=opline->op2_type=IS_UNUSED;  }
 
+void zend_discard_doc_comment(TSRMLS_D) {
+	if (CG(doc_comment)) {
+		STR_RELEASE(CG(doc_comment));
+		CG(doc_comment) = NULL;
+	}
+}
+
 static void zend_do_op_data(zend_op *data_op, znode *value TSRMLS_DC) /* {{{ */
 {
 	data_op->opcode = ZEND_OP_DATA;

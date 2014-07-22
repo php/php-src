@@ -250,11 +250,14 @@ top_statement:
 	|	class_declaration_statement		{ $$.u.ast = $1.u.ast; }
 	|	T_HALT_COMPILER '(' ')' ';'		{ AN($$); zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
 	|	T_NAMESPACE namespace_name ';'
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), NULL); }
-	|	T_NAMESPACE namespace_name '{' top_statement_list '}'
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), $4.u.ast); }
-	|	T_NAMESPACE '{' top_statement_list '}'
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, NULL, $3.u.ast); }
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), NULL);
+			  zend_discard_doc_comment(TSRMLS_C); }
+	|	T_NAMESPACE namespace_name { zend_discard_doc_comment(TSRMLS_C); }
+		'{' top_statement_list '}'
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), $5.u.ast); }
+	|	T_NAMESPACE { zend_discard_doc_comment(TSRMLS_C); }
+		'{' top_statement_list '}'
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, NULL, $4.u.ast); }
 	|	T_USE use_declarations ';'
 			{ $$.u.ast = $2.u.ast; $$.u.ast->attr = T_CLASS; }
 	|	T_USE T_FUNCTION use_declarations ';'
@@ -608,8 +611,7 @@ class_statement:
 		variable_modifiers property_list ';'
 			{ $$.u.ast = $2.u.ast; $$.u.ast->attr = Z_LVAL($1.u.constant); }
 	|	T_CONST class_const_list ';'
-			{ $$.u.ast = $2.u.ast;
-			  if (CG(doc_comment)) { STR_RELEASE(CG(doc_comment)); CG(doc_comment) = NULL; } }
+			{ $$.u.ast = $2.u.ast; zend_discard_doc_comment(TSRMLS_C); }
 	|	T_USE name_list trait_adaptations
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_TRAIT, $2.u.ast, $3.u.ast); }
 	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')' method_body
