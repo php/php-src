@@ -1652,11 +1652,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__NAMESPACE__" {
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		ZVAL_DUP(zendlval, &CG(current_namespace));
-	} else {
-		ZVAL_EMPTY_STRING(zendlval);
-	}
 	return T_NS_C;
 }
 

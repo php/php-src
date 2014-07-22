@@ -122,6 +122,7 @@ enum _zend_ast_kind {
 
 	ZEND_AST_USE,
 	ZEND_AST_USE_ELEM,
+	ZEND_AST_NAMESPACE,
 };
 
 typedef unsigned short zend_ast_kind;

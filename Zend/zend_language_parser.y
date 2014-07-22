@@ -250,7 +250,8 @@ top_statement:
 	|	function_declaration_statement	{ AS($1); zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 	|	class_declaration_statement		{ AS($1); zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 	|	T_HALT_COMPILER '(' ')' ';'		{ zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
-	|	T_NAMESPACE namespace_name ';'	{ zend_do_begin_namespace(&$2, 0 TSRMLS_CC); }
+	|	T_NAMESPACE namespace_name ';'
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), NULL); AS($$); }
 	|	T_NAMESPACE namespace_name '{'	{ zend_do_begin_namespace(&$2, 1 TSRMLS_CC); }
 		top_statement_list '}'		    { zend_do_end_namespace(TSRMLS_C); }
 	|	T_NAMESPACE '{'					{ zend_do_begin_namespace(NULL, 1 TSRMLS_CC); }
@@ -963,7 +964,7 @@ scalar:
 	|	T_TRAIT_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_TRAIT_C); }
 	|	T_METHOD_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_METHOD_C); }
 	|	T_FUNC_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_FUNC_C); }
-	|	T_NS_C		{ $$.u.ast = AST_ZVAL(&$1); }
+	|	T_NS_C		{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_NS_C); }
 	|	T_CLASS_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_CLASS_C); }
 	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$.u.ast = AST_ZVAL(&$2); }
 	|	T_START_HEREDOC T_END_HEREDOC

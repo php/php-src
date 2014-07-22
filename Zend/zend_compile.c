@@ -6449,6 +6449,68 @@ void zend_compile_const_decl(zend_ast *ast TSRMLS_DC) {
 	}
 }
 
+static void zend_reset_import_tables(TSRMLS_D) {
+	if (CG(current_import)) {
+		zend_hash_destroy(CG(current_import));
+		efree(CG(current_import));
+		CG(current_import) = NULL;
+	}
+
+	if (CG(current_import_function)) {
+		zend_hash_destroy(CG(current_import_function));
+		efree(CG(current_import_function));
+		CG(current_import_function) = NULL;
+	}
+
+	if (CG(current_import_const)) {
+		zend_hash_destroy(CG(current_import_const));
+		efree(CG(current_import_const));
+		CG(current_import_const) = NULL;
+	}
+}
+
+void zend_compile_namespace(zend_ast *ast TSRMLS_DC) {
+	zend_ast *name_ast = ast->child[0];
+	zend_ast *stmt_ast = ast->child[1];
+	zend_string *name;
+
+	// TODO.AST errors!
+
+	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+		zval_dtor(&CG(current_namespace));
+	}
+
+	if (name_ast) {
+		name = Z_STR_P(zend_ast_get_zval(name_ast));
+
+		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name->val, name->len)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", name->val);
+		}
+
+		ZVAL_STR(&CG(current_namespace), STR_COPY(name));
+	} else {
+		ZVAL_UNDEF(&CG(current_namespace));
+	}
+
+	zend_reset_import_tables(TSRMLS_C);
+
+	// TODO.AST reset doc comment
+
+	CG(in_namespace) = 1;
+
+	if (stmt_ast) {
+		zend_compile_stmt(stmt_ast TSRMLS_CC);
+
+		CG(in_namespace) = 0;
+		zend_reset_import_tables(TSRMLS_C);
+
+		if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+			zval_dtor(&CG(current_namespace));
+			ZVAL_UNDEF(&CG(current_namespace));
+		}
+	}
+}
+
 void zend_compile_binary_op(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *left_ast = ast->child[0];
 	zend_ast *right_ast = ast->child[1];
@@ -7092,6 +7154,13 @@ zend_bool zend_try_ct_compile_magic_const(zval *zv, zend_ast *ast TSRMLS_DC) {
 				ZVAL_EMPTY_STRING(zv);
 			}
 			break;
+		case T_NS_C:
+			if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+				ZVAL_DUP(zv, &CG(current_namespace));
+			} else {
+				ZVAL_EMPTY_STRING(zv);
+			}
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
@@ -7364,6 +7433,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 			break;
 		case ZEND_AST_CONST_DECL:
 			zend_compile_const_decl(ast TSRMLS_CC);
+			break;
+		case ZEND_AST_NAMESPACE:
+			zend_compile_namespace(ast TSRMLS_CC);
 			break;
 		default:
 		{
