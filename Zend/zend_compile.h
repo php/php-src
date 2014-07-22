@@ -840,8 +840,8 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_FAST_RET_TO_CATCH		1
 #define ZEND_FAST_RET_TO_FINALLY	2
 
-#define ZEND_FAST_CALL_FOR_CATCH	1
-#define ZEND_FAST_CALL_FOR_FINALLY	2
+#define ZEND_FAST_CALL_FROM_CATCH	1
+#define ZEND_FAST_CALL_FROM_FINALLY	2
 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
