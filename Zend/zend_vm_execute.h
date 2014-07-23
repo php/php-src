@@ -4323,6 +4323,16 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 		c.value = *tmp_ptr;
 	} else {
 		INIT_PZVAL_COPY(&c.value, val);
+		if (Z_TYPE(c.value) == IS_ARRAY) {
+			HashTable *ht;
+
+			ALLOC_HASHTABLE(ht);
+			zend_hash_init(ht, zend_hash_num_elements(Z_ARRVAL(c.value)), NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_copy(ht, Z_ARRVAL(c.value), (copy_ctor_func_t) zval_deep_copy, NULL, sizeof(zval *));
+			Z_ARRVAL(c.value) = ht;
+		} else {
+			zval_copy_ctor(&c.value);
+		}
 		zval_copy_ctor(&c.value);
 	}
 	c.flags = CONST_CS; /* non persistent, case sensetive */
