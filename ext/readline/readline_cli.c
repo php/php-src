@@ -664,7 +664,11 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 		}
 
 		if (history_lines_to_write) {
+#if HAVE_LIBEDIT
+			write_history(history_file);
+#else
 			append_history(history_lines_to_write, history_file);
+#endif
 			history_lines_to_write = 0;
 		}
 
