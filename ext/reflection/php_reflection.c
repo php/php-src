@@ -722,9 +722,14 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 		zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
 		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
 			zval zv;
+			zend_class_entry *old_scope;
+
 			string_write(str, " = ", sizeof(" = ")-1);
 			ZVAL_DUP(&zv, precv->op2.zv);
-			zval_update_constant_ex(&zv, 1, fptr->common.scope TSRMLS_CC);
+			old_scope = EG(scope);
+			EG(scope) = fptr->common.scope;
+			zval_update_constant_ex(&zv, 1, NULL TSRMLS_CC);
+			EG(scope) = old_scope;
 			if (Z_TYPE(zv) == IS_TRUE) {
 				string_write(str, "true", sizeof("true")-1);
 			} else if (Z_TYPE(zv) == IS_FALSE) {
@@ -2578,7 +2583,11 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 
 	ZVAL_COPY_VALUE(return_value, precv->op2.zv);
 	if (Z_CONSTANT_P(return_value)) {
-		zval_update_constant_ex(return_value, 0, param->fptr->common.scope TSRMLS_CC);
+		zend_class_entry *old_scope = EG(scope);
+
+		EG(scope) = param->fptr->common.scope;
+		zval_update_constant_ex(return_value, 0, NULL TSRMLS_CC);
+		EG(scope) = old_scope;
 	} else {
 		zval_copy_ctor(return_value);
 	}

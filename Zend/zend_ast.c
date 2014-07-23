@@ -282,9 +282,17 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			zval_dtor(&op2);
 			break;
 		case ZEND_CONST:
-			ZVAL_DUP(result, &ast->u.val);
-			if (Z_OPT_CONSTANT_P(result)) {
-				zval_update_constant_ex(result, 1, scope TSRMLS_CC);
+			/* class constants may be updated in-place */
+			if (scope) {
+				if (Z_OPT_CONSTANT(ast->u.val)) {
+					zval_update_constant_ex(&ast->u.val, 1, scope TSRMLS_CC);
+				}
+				ZVAL_DUP(result, &ast->u.val);
+			} else {
+				ZVAL_DUP(result, &ast->u.val);
+				if (Z_OPT_CONSTANT_P(result)) {
+					zval_update_constant_ex(result, 1, scope TSRMLS_CC);
+				}
 			}
 			break;
 		case ZEND_BOOL_AND:
