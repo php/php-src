@@ -26,8 +26,13 @@
 /* PHP DTrace probes {{{ */
 static inline const char *dtrace_get_executed_filename(TSRMLS_D)
 {
-	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
-		return EG(current_execute_data)->op_array->filename;
+	zend_execute_data *ex = EG(current_execute_data);
+
+	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+		ex = ex->prev_execute_data;
+	}
+	if (ex) {
+		return ex->func->op_array.filename->val;
 	} else {
 		return zend_get_executed_filename(TSRMLS_C);
 	}

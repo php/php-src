@@ -632,12 +632,12 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_vm_stack_free_call_frame(call TSRMLS_CC);
 		} else {
 			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, return_value, VM_FRAME_NESTED_FUNCTION TSRMLS_CC);
+			i_init_func_execute_data(call, &fbc->op_array, return_value, EXPECTED(zend_execute_ex == execute_ex) ? VM_FRAME_NESTED_FUNCTION : VM_FRAME_TOP_FUNCTION TSRMLS_CC);
 
 			if (EXPECTED(zend_execute_ex == execute_ex)) {
 				ZEND_VM_ENTER();
 			} else {
-				execute_ex(call TSRMLS_CC);
+				zend_execute_ex(call TSRMLS_CC);
 			}
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
@@ -1466,7 +1466,7 @@ static int ZEND_FASTCALL  ZEND_FAST_CALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
-	if ((opline->extended_value & ZEND_FAST_CALL_FOR_CATCH) &&
+	if ((opline->extended_value & ZEND_FAST_CALL_FROM_CATCH) &&
 	    UNEXPECTED(EG(prev_exception) != NULL)) {
 	    /* in case of unhandled exception jump to catch block instead of finally */
 		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
@@ -1482,7 +1482,7 @@ static int ZEND_FASTCALL  ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (EX(fast_ret)) {
 		ZEND_VM_SET_OPCODE(EX(fast_ret) + 1);
-		if ((EX(fast_ret)->extended_value & ZEND_FAST_CALL_FOR_FINALLY)) {
+		if ((EX(fast_ret)->extended_value & ZEND_FAST_CALL_FROM_FINALLY)) {
 			EX(fast_ret) = &EX(func)->op_array.opcodes[EX(fast_ret)->op2.opline_num];
 		}
 		ZEND_VM_CONTINUE();
@@ -3048,11 +3048,11 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value, VM_FRAME_NESTED_CODE TSRMLS_CC);
+	    i_init_code_execute_data(call, new_op_array, return_value, EXPECTED(zend_execute_ex == execute_ex) ? VM_FRAME_NESTED_CODE : VM_FRAME_TOP_CODE TSRMLS_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
-			execute_ex(call TSRMLS_CC);
+			zend_execute_ex(call TSRMLS_CC);
 		}
 
 		destroy_op_array(new_op_array TSRMLS_CC);
@@ -8551,11 +8551,11 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value, VM_FRAME_NESTED_CODE TSRMLS_CC);
+	    i_init_code_execute_data(call, new_op_array, return_value, EXPECTED(zend_execute_ex == execute_ex) ? VM_FRAME_NESTED_CODE : VM_FRAME_TOP_CODE TSRMLS_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
-			execute_ex(call TSRMLS_CC);
+			zend_execute_ex(call TSRMLS_CC);
 		}
 
 		destroy_op_array(new_op_array TSRMLS_CC);
@@ -13977,11 +13977,11 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value, VM_FRAME_NESTED_CODE TSRMLS_CC);
+	    i_init_code_execute_data(call, new_op_array, return_value, EXPECTED(zend_execute_ex == execute_ex) ? VM_FRAME_NESTED_CODE : VM_FRAME_TOP_CODE TSRMLS_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
-			execute_ex(call TSRMLS_CC);
+			zend_execute_ex(call TSRMLS_CC);
 		}
 
 		destroy_op_array(new_op_array TSRMLS_CC);
@@ -16673,7 +16673,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -18656,7 +18656,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -21006,7 +21006,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -24229,7 +24229,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -25686,7 +25686,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -26962,7 +26962,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -28240,7 +28240,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -30027,7 +30027,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -31289,11 +31289,11 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value, VM_FRAME_NESTED_CODE TSRMLS_CC);
+	    i_init_code_execute_data(call, new_op_array, return_value, EXPECTED(zend_execute_ex == execute_ex) ? VM_FRAME_NESTED_CODE : VM_FRAME_TOP_CODE TSRMLS_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
-			execute_ex(call TSRMLS_CC);
+			zend_execute_ex(call TSRMLS_CC);
 		}
 
 		destroy_op_array(new_op_array TSRMLS_CC);
@@ -33620,7 +33620,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -35514,7 +35514,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -37744,7 +37744,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);
@@ -40711,7 +40711,7 @@ num_index_prop:
 					hval = 0;
 					goto num_index_prop;
 				case IS_TRUE:
-					hval = 0;
+					hval = 1;
 					goto num_index_prop;
 				case IS_RESOURCE:
 					hval = Z_RES_HANDLE_P(offset);

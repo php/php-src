@@ -486,7 +486,7 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 			RETURN_FALSE;
 	}
 
-	RETURN_STRING(value, 1);
+	RETURN_STRING(value);
 }
 /* }}} */
 #else
