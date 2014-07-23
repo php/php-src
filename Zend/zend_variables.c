@@ -44,8 +44,8 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 				if (arr != &EG(symbol_table)) {
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
-					zend_hash_destroy(&arr->ht);
 					GC_REMOVE_FROM_BUFFER(arr);
+					zend_hash_destroy(&arr->ht);
 					efree(arr);
 				}
 				break;
@@ -104,8 +104,8 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 				if (arr != &EG(symbol_table)) {
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
-					zend_hash_destroy(&arr->ht);
 					GC_REMOVE_FROM_BUFFER(arr);
+					zend_hash_destroy(&arr->ht);
 					efree(arr);
 				}
 				break;
