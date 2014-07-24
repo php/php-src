@@ -383,20 +383,18 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 	switch (Z_TYPE_P(op)) {
 		case IS_STRING:
 			{
-				int type;
 				long lval;
-				double dval;
-				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, 0)) == IS_LONG) {
+				char *endptr;
+				
+				lval = strtol(Z_STRVAL_P(op), &endptr, base);
+				
+				/* If the string was well-formed, endptr would've been set to its end */
+				if (endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
 					STR_FREE(Z_STRVAL_P(op));
 					ZVAL_LONG(op, lval);
 					return SUCCESS;
-				} else if (type == IS_DOUBLE) {
-					STR_FREE(Z_STRVAL_P(op));
-					ZVAL_DOUBLE(op, dval);
-					/* intentionally fall through to IS_DOUBLE case */
-				} else {
-					break;
 				}
+				break;
 			}
 		case IS_DOUBLE:
 			if (Z_DVAL_P(op) == (double)(long) Z_DVAL_P(op)) {
