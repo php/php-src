@@ -36,6 +36,7 @@ PHP                                                                        NEWS
   . Fixed bug #67609 (TLS connections fail behind HTTP proxy). (Daniel Lowrey)
   . Fixed broken build against OpenSSL older than 0.9.8 where ECDH unavailable.
     (Lior Kaplan)
+  . Fixed bug #67666 (Subject altNames doesn't support wildcard matching). (Tjerk)
 
 - Phar:
   . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
