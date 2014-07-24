@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - readline:
   . Fixed bug #55496 (Interactive mode doesn't force a newline before the
     prompt). (Bob, Johannes)
+  . Fixed bug #67496 (Save command history when exiting interactive shell
+    with control-c). (Dmitry Saprykin, Johannes)
 
 ?? ??? 2014, PHP 5.5.15
 
