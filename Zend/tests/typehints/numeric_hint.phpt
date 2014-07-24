@@ -24,9 +24,9 @@ int(1)
 int(1)
 float(1)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be a numeric type, string given, called in %s on line 10 and defined in %s on line 4
-float(1)
+int(1)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be a numeric type, string given, called in %s on line 11 and defined in %s on line 4
-float(0)
+int(0)
 float(1.0E+36)
 float(1.5)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be a numeric type, array given, called in %s on line 14 and defined in %s on line 4

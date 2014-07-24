@@ -442,20 +442,18 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 	switch (Z_TYPE_P(op)) {
 		case IS_STRING:
 			{
-				int type;
-				long lval;
 				double dval;
-				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, 0)) == IS_LONG) {
-					STR_FREE(Z_STRVAL_P(op));
-					ZVAL_LONG(op, lval);
-					/* intentionally fall through to IS_LONG case */
-				} else if (type == IS_DOUBLE) {
+				char *endptr;
+				
+				dval = zend_strtod(Z_STRVAL_P(op), &endptr);
+
+				/* If the string was well-formed, endptr would've been set to its end */
+				if (endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
 					STR_FREE(Z_STRVAL_P(op));
 					ZVAL_DOUBLE(op, dval);
 					return SUCCESS;
-				} else {
-					break;
 				}
+				break;
 			}
 		case IS_LONG:
 			if (Z_LVAL_P(op) == (long) (double) Z_LVAL_P(op)) {
@@ -503,24 +501,35 @@ ZEND_API int _convert_to_numeric_safe(zval **op_ptr, int separate)
 	switch (Z_TYPE_P(op)) {
 		case IS_STRING:
 			{
-				int type;
 				long lval;
+				char *lval_endptr;
 				double dval;
-				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, 0)) == 0) {
-					char *strval = Z_STRVAL_P(op);
-					ZVAL_DOUBLE(op, zend_strtod(strval, NULL));
-					STR_FREE(strval);
-					return FAILURE;
-				} else if (type == IS_DOUBLE) {
+				char *dval_endptr;
+				
+				lval = strtol(Z_STRVAL_P(op), &lval_endptr, 10);
+				/* If the string was well-formed, endptr would've been set to its end */
+				if (lval_endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+					STR_FREE(Z_STRVAL_P(op));
+					ZVAL_LONG(op, lval);
+					return SUCCESS;
+				}
+				
+				dval = zend_strtod(Z_STRVAL_P(op), &dval_endptr);
+				/* If the string was well-formed, endptr would've been set to its end */
+				if (dval_endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
 					STR_FREE(Z_STRVAL_P(op));
 					ZVAL_DOUBLE(op, dval);
 					return SUCCESS;
 				}
+				
 				STR_FREE(Z_STRVAL_P(op));
-				ZVAL_LONG(op, lval);
-				return SUCCESS;
+				if (dval_endptr > lval_endptr || dval > lval) {
+					ZVAL_DOUBLE(op, dval);
+				} else {
+					ZVAL_LONG(op, lval);
+				}
+				return FAILURE;
 			}
-			/* break missing intentionally */
 		case IS_LONG:
 			return SUCCESS;
 		case IS_BOOL:
