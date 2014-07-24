@@ -4397,6 +4397,7 @@ static void zend_compile_init_user_func(
 	opline->extended_value = num_args;
 }
 
+/* cufa = call_user_func_array */
 int zend_compile_func_cufa(znode *result, zend_ast *args_ast, zend_string *lcname TSRMLS_DC) {
 	znode arg_node;
 
@@ -4407,6 +4408,44 @@ int zend_compile_func_cufa(znode *result, zend_ast *args_ast, zend_string *lcnam
 	zend_compile_init_user_func(NULL, args_ast->child[0], 1, lcname TSRMLS_CC);
 	zend_compile_expr(&arg_node, args_ast->child[1] TSRMLS_CC);
 	emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL TSRMLS_CC);
+	emit_op(result, ZEND_DO_FCALL, NULL, NULL TSRMLS_CC);
+
+	return SUCCESS;
+}
+
+/* cuf = call_user_func */
+int zend_compile_func_cuf(znode *result, zend_ast *args_ast, zend_string *lcname TSRMLS_DC) {
+	zend_uint i;
+
+	if (args_ast->children < 1 || zend_args_contain_unpack(args_ast)) {
+		return FAILURE;
+	}
+
+	zend_compile_init_user_func(NULL, args_ast->child[0], args_ast->children - 1, lcname TSRMLS_CC);
+	for (i = 1; i < args_ast->children; ++i) {
+		zend_ast *arg_ast = args_ast->child[i];
+		znode arg_node;
+		zend_op *opline;
+		zend_bool send_user = 0;
+
+		if (zend_is_variable(arg_ast) && !zend_is_call(arg_ast)) {
+			zend_compile_var(&arg_node, arg_ast, BP_VAR_FUNC_ARG | (i << BP_VAR_SHIFT) TSRMLS_CC);
+			send_user = 1;
+		} else {
+			zend_compile_expr(&arg_node, arg_ast TSRMLS_CC);
+			if (arg_node.op_type & (IS_VAR|IS_CV)) {
+				send_user = 1;
+			}
+		}
+
+		if (send_user) {
+			opline = emit_op(NULL, ZEND_SEND_USER, &arg_node, NULL TSRMLS_CC);
+		} else {
+			opline = emit_op(NULL, ZEND_SEND_VAL, &arg_node, NULL TSRMLS_CC);
+		}
+
+		opline->op2.opline_num = i;
+	}
 	emit_op(result, ZEND_DO_FCALL, NULL, NULL TSRMLS_CC);
 
 	return SUCCESS;
@@ -4437,6 +4476,8 @@ int zend_try_compile_special_func(
 		return zend_compile_func_defined(result, args_ast TSRMLS_CC);
 	} else if (zend_str_equals(lcname, "call_user_func_array")) {
 		return zend_compile_func_cufa(result, args_ast, lcname TSRMLS_CC);
+	} else if (zend_str_equals(lcname, "call_user_func")) {
+		return zend_compile_func_cuf(result, args_ast, lcname TSRMLS_CC);
 	} else {
 		return FAILURE;
 	}
