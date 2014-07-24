@@ -366,7 +366,7 @@ ZEND_API zend_bool zend_bigint_long_divisible(long num, const zend_bigint *divis
 
 /*** CONVERTORS ***/
 
-/* Converts to long; if it won't fit, caps at LONG_MAX/_MIN */
+/* Converts to long; if it won't fit, saturates (caps at LONG_MAX/_MIN) */
 ZEND_API long zend_bigint_to_long(const zend_bigint *big) /* {{{ */
 {
 	if (mpz_fits_slong_p(big->mpz)) {
@@ -381,7 +381,7 @@ ZEND_API long zend_bigint_to_long(const zend_bigint *big) /* {{{ */
 }
 /* }}} */
 
-/* Converts to long; if it won't fit, caps at LONG_MAX/_MIN
+/* Converts to long; if it won't fit, saturates (caps at LONG_MAX/_MIN)
  * If it didn't fit, sets overflow to 1, else to 0 */
 ZEND_API long zend_bigint_to_long_ex(const zend_bigint *big, zend_bool *overflow) /* {{{ */
 {
