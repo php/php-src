@@ -590,6 +590,7 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 	char *code = emalloc(size);
 	char *prompt = cli_get_prompt("php", '>' TSRMLS_CC);
 	char *history_file;
+	int history_lines_to_write = 0;
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 		zend_file_handle *prepend_file_p;
@@ -654,6 +655,7 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 
 		if (*line) {
 			add_history(line);
+			history_lines_to_write += 1;
 		}
 
 		free(line);
@@ -661,6 +663,15 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 
 		if (!cli_is_valid_code(code, pos, &prompt TSRMLS_CC)) {
 			continue;
+		}
+
+		if (history_lines_to_write) {
+#if HAVE_LIBEDIT
+			write_history(history_file);
+#else
+			append_history(history_lines_to_write, history_file);
+#endif
+			history_lines_to_write = 0;
 		}
 
 		zend_try {
@@ -684,7 +695,6 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 
 		php_last_char = '\0';
 	}
-	write_history(history_file);
 	free(history_file);
 	efree(code);
 	efree(prompt);
