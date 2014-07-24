@@ -323,7 +323,7 @@ static zend_bool matches_san_list(X509 *peer, const char *subject_name TSRMLS_DC
 		if (san_name_len != strlen((const char*)cert_name)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer SAN entry is malformed");
 		} else {
-			is_match = strcasecmp(subject_name, (const char*)cert_name) == 0;
+			is_match = matches_wildcard_name(subject_name, (const char *)cert_name);
 		}
 
 		OPENSSL_free(cert_name);
