@@ -584,11 +584,14 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		zend_stack_push(&CG(context_stack), (void *) &CG(context));
 		zend_init_compiler_context(TSRMLS_C);
 		compiler_result = zendparse(TSRMLS_C);
-		zend_do_return(&retval_znode, 0 TSRMLS_CC);
-		CG(in_compilation) = original_in_compilation;
 		if (compiler_result != 0) { /* parser error */
 			zend_bailout();
 		}
+		zend_compile_top_stmt(CG(ast) TSRMLS_CC);
+		zend_ast_destroy(CG(ast));
+		zend_do_end_compilation(TSRMLS_C);
+		zend_do_return(&retval_znode, 0 TSRMLS_CC);
+		CG(in_compilation) = original_in_compilation;
 		compilation_successful=1;
 	}
 
@@ -764,6 +767,9 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 			efree(op_array);
 			retval = NULL;
 		} else {
+			zend_compile_top_stmt(CG(ast) TSRMLS_CC);
+			zend_ast_destroy(CG(ast));
+			zend_do_end_compilation(TSRMLS_C);
 			zend_do_return(NULL, 0 TSRMLS_CC);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array TSRMLS_CC);

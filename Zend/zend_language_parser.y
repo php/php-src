@@ -221,7 +221,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %% /* Rules */
 
 start:
-	top_statement_list	{ zend_compile_top_stmt($1.u.ast TSRMLS_CC); zend_ast_destroy($1.u.ast); zend_do_end_compilation(TSRMLS_C); }
+	top_statement_list	{ CG(ast) = $1.u.ast; }
 ;
 
 top_statement_list:

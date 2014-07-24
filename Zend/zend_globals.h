@@ -157,6 +157,8 @@ struct _zend_compiler_globals {
 	zval **static_members_table;
 	int last_static_member;
 #endif
+
+	zend_ast *ast;
 };
 
 
