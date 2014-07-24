@@ -6153,8 +6153,11 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 		efree(import_name_lc);
 	}
 
+	name = zend_new_interned_string(name TSRMLS_CC);
+	lcname = zend_new_interned_string(lcname TSRMLS_CC);
+
 	ce->type = ZEND_USER_CLASS;
-	ce->name = zend_new_interned_string(name TSRMLS_CC);
+	ce->name = name;
 	zend_initialize_class_data(ce, 1 TSRMLS_CC);
 
 	ce->ce_flags |= decl->flags;
