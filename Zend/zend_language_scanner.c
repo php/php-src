@@ -3167,7 +3167,7 @@ yy184:
 		return 0;
 	}
 
-	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
+	zend_error(E_COMPILE_ERROR,"Unexpected character in input 1: YYCURSOR = %d, YYLIMIT =  %d", YYCURSOR, YYLIMIT);
 	goto restart;
 }
 #line 3174 "Zend/zend_language_scanner.c"
