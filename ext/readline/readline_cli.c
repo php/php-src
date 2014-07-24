@@ -99,6 +99,9 @@ static size_t readline_shell_write(const char *str, uint str_length TSRMLS_DC) /
 
 static int readline_shell_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
 {
+	/* We just store the last char here and then pass back to the
+	   caller (sapi_cli_single_write in sapi/cli) which will actually
+	   write due to -1 return code */
 	php_last_char = str[str_length-1];
 	return -1;
 }
@@ -667,7 +670,7 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 		pos = 0;
 					
 		if (!pager_pipe && php_last_char != '\0' && php_last_char != '\n') {
-			readline_shell_write("\n", 1 TSRMLS_CC);
+			php_write("\n", 1 TSRMLS_CC);
 		}
 
 		if (EG(exception)) {
