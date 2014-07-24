@@ -140,6 +140,19 @@ static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
 }
 /* }}} */
 
+static zend_string *zend_new_interned_string_safe(zend_string *str TSRMLS_DC) {
+	zend_string *interned_str;
+
+	STR_ADDREF(str);
+	interned_str = zend_new_interned_string(str TSRMLS_CC);
+	if (str != interned_str) {
+		return interned_str;
+	} else {
+		STR_RELEASE(str);
+		return str;
+	}
+}
+
 static void build_runtime_defined_function_key(zval *result, zend_string *name, unsigned char *lex_pos TSRMLS_DC) /* {{{ */
 {
 	char char_pos_buf[32];
@@ -5908,7 +5921,7 @@ void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) {
 			ZVAL_NULL(&value_zv);
 		}
 
-		name = zend_new_interned_string(name TSRMLS_CC);
+		name = zend_new_interned_string_safe(name TSRMLS_CC);
 		zend_declare_property_ex(ce, name, &value_zv, flags, NULL /* TODO.AST doc comment */ TSRMLS_CC);
 	}
 }
@@ -5937,7 +5950,7 @@ void zend_compile_class_const_decl(zend_ast *ast TSRMLS_DC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
 		}
 
-		name = zend_new_interned_string(name TSRMLS_CC);
+		name = zend_new_interned_string_safe(name TSRMLS_CC);
 		if (zend_hash_add(&ce->constants_table, name, &value_zv) == NULL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s",
 				ce->name->val, name);
