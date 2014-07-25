@@ -159,6 +159,7 @@ struct _zend_compiler_globals {
 #endif
 
 	zend_ast *ast;
+	zend_arena *ast_arena;
 };
 
 

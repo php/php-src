@@ -26,7 +26,7 @@
 ZEND_API zend_ast *zend_ast_create_znode(znode *node)
 {
 	TSRMLS_FETCH();
-	zend_ast_znode *ast = emalloc(sizeof(zend_ast_znode));
+	zend_ast_znode *ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast_znode));
 	ast->kind = ZEND_AST_ZNODE;
 	ast->attr = 0;
 	ast->lineno = CG(zend_lineno);
@@ -37,7 +37,7 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node)
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 {
 	TSRMLS_FETCH();
-	zend_ast_zval *ast = emalloc(sizeof(zend_ast_zval));
+	zend_ast_zval *ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast_zval));
 	ast->kind = ZEND_AST_ZVAL;
 	ast->attr = attr;
 	ast->lineno = CG(zend_lineno);
@@ -50,7 +50,7 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	unsigned char *lex_pos, zend_string *doc_comment, zend_string *name,
 	zend_ast *child0, zend_ast *child1, zend_ast *child2
 ) {
-	zend_ast_decl *ast = emalloc(sizeof(zend_ast_decl));
+	zend_ast_decl *ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast_decl));
 
 	ast->kind = kind;
 	ast->attr = 0;
@@ -74,7 +74,7 @@ static zend_ast *zend_ast_create_from_va_list(
 	zend_uint i;
 	zend_ast *ast;
 	
-	ast = emalloc(sizeof(zend_ast) + (children - 1) * sizeof(zend_ast *));
+	ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast) + (children - 1) * sizeof(zend_ast *));
 	ast->kind = kind;
 	ast->attr = attr;
 	ast->lineno = UINT_MAX;
@@ -124,7 +124,7 @@ ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind)
 {
 	/* use 4 children as default */
 	TSRMLS_FETCH();
-	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * 3);
+	zend_ast *ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast) + sizeof(zend_ast *) * 3);
 	ast->kind = kind;
 	ast->attr = 0;
 	ast->lineno = CG(zend_lineno);
@@ -139,7 +139,11 @@ static inline zend_bool is_power_of_two(unsigned short n) {
 ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op)
 {
 	if (ast->children >= 4 && is_power_of_two(ast->children)) {
-		ast = erealloc(ast, sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children * 2 - 1));
+		size_t old_size = sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children - 1);
+		zend_ast *new_ast = zend_arena_alloc(&CG(ast_arena),
+			sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children * 2 - 1));
+		memcpy(new_ast, ast, old_size);
+		ast = new_ast;
 	}
 	ast->child[ast->children++] = op;
 	return ast;
@@ -332,9 +336,12 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 	if (ast == NULL) {
 		return NULL;
 	} else if (ast->kind == ZEND_AST_ZVAL) {
-		zend_ast *copy = zend_ast_create_zval_ex(zend_ast_get_zval(ast), ast->attr);
-		zval_copy_ctor(zend_ast_get_zval(copy));
-		return copy;
+		zend_ast_zval *copy = emalloc(sizeof(zend_ast_zval));
+		copy->kind = ZEND_AST_ZVAL;
+		copy->attr = ast->attr;
+		copy->lineno = ast->lineno;
+		ZVAL_DUP(&copy->val, zend_ast_get_zval(ast));
+		return (zend_ast *) copy;
 	} else {
 		zend_ast *new = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children - 1));
 		int i;
@@ -384,5 +391,5 @@ ZEND_API void zend_ast_destroy(zend_ast *ast)
 		}
 	}
 
-	efree(ast);
+	//efree(ast);
 }

@@ -3422,16 +3422,17 @@ void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ 
 
 // TODO.AST Sort out the whole constant folding issue
 static void _tmp_compile_const_expr(zval *result, zend_ast *ast TSRMLS_DC) {
-	ast = zend_ast_copy(ast);
+	zend_ast *orig_ast = ast;
 	zend_eval_const_expr(&ast TSRMLS_CC);
 	zend_compile_const_expr(&ast TSRMLS_CC);
 	if (ast->kind == ZEND_AST_ZVAL) {
-		ZVAL_COPY_VALUE(result, zend_ast_get_zval(ast));
+		ZVAL_COPY(result, zend_ast_get_zval(ast));
 		if (Z_TYPE_P(result) == IS_ARRAY) {
 			zend_make_immutable_array_r(result TSRMLS_CC);			
 		}
-		efree(ast);
+		orig_ast->kind = ZEND_AST_ZNODE;
 	} else {
+		ast = zend_ast_copy(ast);
 		ZVAL_NEW_AST(result, ast);
 	}
 }
@@ -4714,7 +4715,6 @@ static void zend_compile_static_var_common(
 	if (by_ref) {
 		zend_ast *fetch_ast = zend_ast_create_unary(ZEND_AST_VAR, var_ast);
 		zend_compile_assign_ref_common(NULL, fetch_ast, &result TSRMLS_CC);
-		efree(fetch_ast);
 	} else {
 		zend_ast *fetch_ast = zend_ast_create_unary(ZEND_AST_VAR, var_ast);
 		zend_ast *znode_ast = zend_ast_create_znode(&result);
@@ -4722,9 +4722,6 @@ static void zend_compile_static_var_common(
 		znode dummy_node;
 		zend_compile_expr(&dummy_node, assign_ast TSRMLS_CC);
 		zend_do_free(&dummy_node TSRMLS_CC);
-		efree(znode_ast);
-		efree(assign_ast);
-		efree(fetch_ast);
 	}
 }
 
@@ -5071,8 +5068,6 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) {
 		zend_ast *assign_ast = zend_ast_create_binary(ZEND_AST_ASSIGN, value_ast, znode_ast);
 		zend_compile_expr(&dummy_node, assign_ast TSRMLS_CC);
 		zend_do_free(&dummy_node TSRMLS_CC);
-		efree(znode_ast);
-		efree(assign_ast);
 	}
 
 	if (key_ast) {
@@ -5080,8 +5075,6 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) {
 		zend_ast *assign_ast = zend_ast_create_binary(ZEND_AST_ASSIGN, key_ast, znode_ast);
 		zend_compile_expr(&dummy_node, assign_ast TSRMLS_CC);
 		zend_do_free(&dummy_node TSRMLS_CC);
-		efree(znode_ast);
-		efree(assign_ast);
 	}
 
 	do_begin_loop(TSRMLS_C);
@@ -6921,7 +6914,6 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast TSRMLS_DC) {
 			/* empty(expr) can be transformed to !expr */
 			zend_ast *not_ast = zend_ast_create_unary(ZEND_BOOL_NOT, var_ast);
 			zend_compile_expr(result, not_ast TSRMLS_CC);
-			efree(not_ast);
 			return;
 		} else {
 			zend_error_noreturn(E_COMPILE_ERROR,
@@ -6989,9 +6981,7 @@ void zend_compile_shell_exec(znode *result, zend_ast *ast TSRMLS_DC) {
 
 	zend_compile_expr(result, call_ast TSRMLS_CC);
 
-	efree(call_ast);
-	efree(args_ast);
-	zend_ast_destroy(name_ast);
+	zval_ptr_dtor(&fn_name);
 }
 
 void zend_compile_array(znode *result, zend_ast *ast TSRMLS_DC) {
@@ -7144,8 +7134,7 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast TSRMLS_DC) {
 
 				zend_compile_expr(result, class_const_ast TSRMLS_CC);
 
-				zend_ast_destroy(class_str_ast);
-				efree(class_const_ast);
+				zval_ptr_dtor(&class_str_zv);
 			}
 			break;
 		case ZEND_FETCH_CLASS_DEFAULT:
@@ -7279,7 +7268,7 @@ void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) {
 		zend_ast *const_ast = zend_ast_create_unary(ZEND_AST_CONST,
 			zend_ast_create_zval(&const_zv));
 		zend_compile_const(result, const_ast TSRMLS_CC);
-		zend_ast_destroy(const_ast);
+		zval_ptr_dtor(&const_zv);
 	}
 }
 

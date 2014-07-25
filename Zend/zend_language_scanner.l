@@ -583,12 +583,14 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		CG(active_op_array) = op_array;
 		zend_stack_push(&CG(context_stack), (void *) &CG(context));
 		zend_init_compiler_context(TSRMLS_C);
+		CG(ast_arena) = zend_arena_create(1024 * 32 TSRMLS_CC);
 		compiler_result = zendparse(TSRMLS_C);
 		if (compiler_result != 0) { /* parser error */
 			zend_bailout();
 		}
 		zend_compile_top_stmt(CG(ast) TSRMLS_CC);
 		zend_ast_destroy(CG(ast));
+		zend_arena_destroy(CG(ast_arena));
 		zend_do_end_compilation(TSRMLS_C);
 		zend_do_return(&retval_znode, 0 TSRMLS_CC);
 		CG(in_compilation) = original_in_compilation;
@@ -753,6 +755,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		zend_stack_push(&CG(context_stack), (void *) &CG(context));
 		zend_init_compiler_context(TSRMLS_C);
 		BEGIN(ST_IN_SCRIPTING);
+		CG(ast_arena) = zend_arena_create(1024 * 32 TSRMLS_CC);
 		compiler_result = zendparse(TSRMLS_C);
 
 		if (SCNG(script_filtered)) {
@@ -769,6 +772,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		} else {
 			zend_compile_top_stmt(CG(ast) TSRMLS_CC);
 			zend_ast_destroy(CG(ast));
+			zend_arena_destroy(CG(ast_arena));
 			zend_do_end_compilation(TSRMLS_C);
 			zend_do_return(NULL, 0 TSRMLS_CC);
 			CG(active_op_array) = original_active_op_array;
