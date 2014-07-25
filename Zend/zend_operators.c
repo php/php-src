@@ -505,10 +505,13 @@ ZEND_API int _convert_to_numeric_safe(zval **op_ptr, int separate)
 				char *lval_endptr;
 				double dval;
 				char *dval_endptr;
+				zend_bool did_overflow;
 				
+				errno = 0;
 				lval = strtol(Z_STRVAL_P(op), &lval_endptr, 10);
+				did_overflow = errno == ERANGE;
 				/* If the string was well-formed, endptr would've been set to its end */
-				if (lval_endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+				if (!did_overflow && lval_endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
 					STR_FREE(Z_STRVAL_P(op));
 					ZVAL_LONG(op, lval);
 					return SUCCESS;
@@ -523,7 +526,7 @@ ZEND_API int _convert_to_numeric_safe(zval **op_ptr, int separate)
 				}
 				
 				STR_FREE(Z_STRVAL_P(op));
-				if (dval_endptr > lval_endptr || dval > lval) {
+				if (dval_endptr > lval_endptr || did_overflow) {
 					ZVAL_DOUBLE(op, dval);
 				} else {
 					ZVAL_LONG(op, lval);
