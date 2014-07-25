@@ -386,10 +386,11 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 				long lval;
 				char *endptr;
 				
+				errno = 0;
 				lval = strtol(Z_STRVAL_P(op), &endptr, base);
 				
 				/* If the string was well-formed, endptr would've been set to its end */
-				if (endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+				if (errno != ERANGE && endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
 					STR_FREE(Z_STRVAL_P(op));
 					ZVAL_LONG(op, lval);
 					return SUCCESS;

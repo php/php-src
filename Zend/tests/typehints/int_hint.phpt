@@ -13,6 +13,7 @@ foo(1.0); // int(1)
 foo("1a"); // E_RECOVERABLE_ERROR
 foo("a"); // E_RECOVERABLE_ERROR
 foo(999999999999999999999999999999999999); // E_RECOVERABLE_ERROR (since it's not exactly representable by an int)
+foo('999999999999999999999999999999999999'); // E_RECOVERABLE_ERROR (since it's not exactly representable by an int)
 foo(1.5); // E_RECOVERABLE_ERROR
 foo(array()); // E_RECOVERABLE_ERROR
 foo(new StdClass); // Notice: Object of class stdClass could not be converted to int int(1)
@@ -29,13 +30,15 @@ E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, string 
 int(0)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, double given, called in %s on line 12 and defined in %s on line 4
 int(0)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, double given, called in %s on line 13 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, string given, called in %s on line 13 and defined in %s on line 4
+int(9223372036854775807)
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, double given, called in %s on line 14 and defined in %s on line 4
 int(1)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, array given, called in %s on line 14 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, array given, called in %s on line 15 and defined in %s on line 4
 int(0)
 E_NOTICE: Object of class stdClass could not be converted to int in %s on line 4
 int(1)
 E_NOTICE: Object of class AThree could not be converted to int in %s on line 4
 int(1)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, resource given, called in %s on line 17 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, resource given, called in %s on line 18 and defined in %s on line 4
 int(%d)
