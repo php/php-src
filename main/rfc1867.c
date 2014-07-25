@@ -36,6 +36,7 @@
 
 #if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
 # define atoll(s) _atoi64(s)
+# define HAVE_ATOLL 1
 #endif
 
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
