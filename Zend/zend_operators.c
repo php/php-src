@@ -404,9 +404,6 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 				return SUCCESS;
 			}
 			break;
-		case IS_BOOL:
-			Z_TYPE_P(op) = IS_LONG;
-			/* break missing intentionally */
 		case IS_LONG:
 			return SUCCESS;
 		case IS_OBJECT:
@@ -426,6 +423,7 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 		default:
 		case IS_RESOURCE:
 		case IS_NULL:
+		case IS_BOOL:
 		case IS_ARRAY:
 			break;
 	}
@@ -463,9 +461,6 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 				return SUCCESS;
 			}
 			break;
-		case IS_BOOL:
-			ZVAL_DOUBLE(op, (double) Z_LVAL_P(op));
-			return SUCCESS;
 		case IS_DOUBLE:
 			return SUCCESS;
 		case IS_OBJECT:
@@ -484,6 +479,7 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 
 		case IS_RESOURCE:
 		case IS_NULL:
+		case IS_BOOL:
 		case IS_ARRAY:
 		default:
 			break;
@@ -538,7 +534,7 @@ ZEND_API int _convert_to_numeric_safe(zval **op_ptr, int separate)
 			return SUCCESS;
 		case IS_BOOL:
 			ZVAL_LONG(op, Z_LVAL_P(op));
-			return SUCCESS;
+			return FAILURE;
 		case IS_RESOURCE:
 			{
 				TSRMLS_FETCH();
@@ -638,13 +634,6 @@ ZEND_API int _convert_to_string_safe(zval **op_ptr, int separate)
 	switch (Z_TYPE_P(op)) {
 		case IS_STRING:
 			return SUCCESS;
-		case IS_BOOL:
-			if (Z_LVAL_P(op)) {
-				ZVAL_STRING(op, "1", 1);
-			} else {
-				ZVAL_STRING(op, "", 1);
-			}
-			return SUCCESS;
 		case IS_LONG:
 			{
 				long lval = Z_LVAL_P(op);
@@ -678,6 +667,7 @@ ZEND_API int _convert_to_string_safe(zval **op_ptr, int separate)
 
 		case IS_NULL:
 		case IS_RESOURCE:
+		case IS_BOOL:
 		case IS_ARRAY:
 		default:
 			break;

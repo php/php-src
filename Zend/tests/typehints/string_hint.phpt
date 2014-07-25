@@ -17,6 +17,9 @@ foo(array()); // E_RECOVERABLE_ERROR
 foo(new StdClass); // E_RECOVERABLE_ERROR
 foo(new AThree); // string "a3"
 foo(fopen("data:text/plain,foobar", "r")); // E_RECOVERABLE_ERROR
+foo(true); // E_RECOVERABLE_ERROR
+foo(false); // E_RECOVERABLE_ERROR
+foo(null); // E_RECOVERABLE_ERROR
 ?>
 --EXPECTF--
 string(1) "1"
@@ -33,3 +36,9 @@ string(6) "Object"
 string(2) "a3"
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, resource given, called in %s on line 16 and defined in %s on line 4
 string(%d) "%s"
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, boolean given, called in %s on line 17 and defined in %s on line 4
+string(1) "1"
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, boolean given, called in %s on line 18 and defined in %s on line 4
+string(0) ""
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, null given, called in %s on line 19 and defined in %s on line 4
+string(0) ""
