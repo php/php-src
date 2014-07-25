@@ -8,7 +8,12 @@ PHP                                                                        NEWS
   . Fixed bug #67496 (Save command history when exiting interactive shell
     with control-c). (Dmitry Saprykin, Johannes)
 
-?? ??? 2014, PHP 5.4.31
+- SPL:
+  . Fixed bug #67539 (ArrayIterator use-after-free due to object change during
+    sorting). (research at insighti dot org, Laruence)
+  . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
+
+24 Jul 2014, PHP 5.4.31
 
 - Core:
   . Fixed bug #67428 (header('Location: foo') will override a 308-399 response
