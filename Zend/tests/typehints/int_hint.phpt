@@ -31,7 +31,7 @@ int(0)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, double given, called in %s on line 12 and defined in %s on line 4
 int(0)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, string given, called in %s on line 13 and defined in %s on line 4
-int(9223372036854775807)
+int(%d)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, double given, called in %s on line 14 and defined in %s on line 4
 int(1)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type int, array given, called in %s on line 15 and defined in %s on line 4
