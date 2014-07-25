@@ -45,6 +45,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #67972 (SessionHandler Invalid memory read create_sid()). (Adam)
 
+- Sysvsem:
+  . Implemented FR #67990 (Add optional nowait argument to sem_acquire).
+    (Matteo)
+
 28 Aug 2014, PHP 5.6.0
 
 - Apache2 Handler SAPI:
