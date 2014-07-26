@@ -3404,22 +3404,6 @@ void zend_make_immutable_array_r(zval *zv TSRMLS_DC) /* {{{ */
 
 void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC);
 
-void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
-{
-	zend_eval_const_expr(&ast TSRMLS_CC);
-	zend_compile_const_expr(&ast TSRMLS_CC);
-	if (ast->kind == ZEND_AST_ZVAL) {
-		ZVAL_COPY_VALUE(&result->u.constant, zend_ast_get_zval(ast));
-		if (Z_TYPE(result->u.constant) == IS_ARRAY) {
-			zend_make_immutable_array_r(&result->u.constant TSRMLS_CC);			
-		}
-		efree(ast);
-	} else {
-		ZVAL_NEW_AST(&result->u.constant, ast);
-	}
-}
-/* }}} */
-
 // TODO.AST Sort out the whole constant folding issue
 static void _tmp_compile_const_expr(zval *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *orig_ast = ast;

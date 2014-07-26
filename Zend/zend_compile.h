@@ -506,7 +506,6 @@ void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRM
 void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
 void zend_do_end_compilation(TSRMLS_D);
-void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC);
 
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
 void zend_release_labels(int temporary TSRMLS_DC);
