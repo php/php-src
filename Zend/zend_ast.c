@@ -50,6 +50,7 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	unsigned char *lex_pos, zend_string *doc_comment, zend_string *name,
 	zend_ast *child0, zend_ast *child1, zend_ast *child2
 ) {
+	TSRMLS_FETCH();
 	zend_ast_decl *ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast_decl));
 
 	ast->kind = kind;
@@ -139,6 +140,7 @@ static inline zend_bool is_power_of_two(unsigned short n) {
 ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op)
 {
 	if (ast->children >= 4 && is_power_of_two(ast->children)) {
+		TSRMLS_FETCH();
 		size_t old_size = sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children - 1);
 		zend_ast *new_ast = zend_arena_alloc(&CG(ast_arena),
 			sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children * 2 - 1));
@@ -355,8 +357,7 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 	}
 }
 
-ZEND_API void zend_ast_destroy(zend_ast *ast)
-{
+static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 	if (!ast) {
 		return;
 	}
@@ -377,19 +378,28 @@ ZEND_API void zend_ast_destroy(zend_ast *ast)
 			if (decl->doc_comment) {
 				STR_RELEASE(decl->doc_comment);
 			}
-			zend_ast_destroy(decl->child[0]);
-			zend_ast_destroy(decl->child[1]);
-			zend_ast_destroy(decl->child[2]);
+			zend_ast_destroy_ex(decl->child[0], free);
+			zend_ast_destroy_ex(decl->child[1], free);
+			zend_ast_destroy_ex(decl->child[2], free);
 			break;
 		}
 		default:
 		{
 			zend_uint i;
 			for (i = 0; i < ast->children; i++) {
-				zend_ast_destroy(ast->child[i]);
+				zend_ast_destroy_ex(ast->child[i], free);
 			}
 		}
 	}
 
-	//efree(ast);
+	if (free) {
+		efree(ast);
+	}
+}
+
+ZEND_API void zend_ast_destroy(zend_ast *ast) {
+	zend_ast_destroy_ex(ast, 0);
+}
+ZEND_API void zend_ast_destroy_and_free(zend_ast *ast) {
+	zend_ast_destroy_ex(ast, 1);
 }

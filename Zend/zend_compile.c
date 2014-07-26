@@ -3426,14 +3426,13 @@ static void _tmp_compile_const_expr(zval *result, zend_ast *ast TSRMLS_DC) {
 	zend_eval_const_expr(&ast TSRMLS_CC);
 	zend_compile_const_expr(&ast TSRMLS_CC);
 	if (ast->kind == ZEND_AST_ZVAL) {
-		ZVAL_COPY(result, zend_ast_get_zval(ast));
+		ZVAL_COPY_VALUE(result, zend_ast_get_zval(ast));
 		if (Z_TYPE_P(result) == IS_ARRAY) {
 			zend_make_immutable_array_r(result TSRMLS_CC);			
 		}
 		orig_ast->kind = ZEND_AST_ZNODE;
 	} else {
-		ast = zend_ast_copy(ast);
-		ZVAL_NEW_AST(result, ast);
+		ZVAL_NEW_AST(result, zend_ast_copy(ast));
 	}
 }
 

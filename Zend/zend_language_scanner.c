@@ -585,7 +585,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		CG(active_op_array) = op_array;
 		zend_stack_push(&CG(context_stack), (void *) &CG(context));
 		zend_init_compiler_context(TSRMLS_C);
-		CG(ast_arena) = zend_arena_create(1024 * 32 TSRMLS_CC);
+		CG(ast_arena) = zend_arena_create(1024 * 32);
 		compiler_result = zendparse(TSRMLS_C);
 		if (compiler_result != 0) { /* parser error */
 			zend_bailout();
@@ -757,7 +757,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		zend_stack_push(&CG(context_stack), (void *) &CG(context));
 		zend_init_compiler_context(TSRMLS_C);
 		BEGIN(ST_IN_SCRIPTING);
-		CG(ast_arena) = zend_arena_create(1024 * 32 TSRMLS_CC);
+		CG(ast_arena) = zend_arena_create(1024 * 32);
 		compiler_result = zendparse(TSRMLS_C);
 
 		if (SCNG(script_filtered)) {
