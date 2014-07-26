@@ -984,36 +984,6 @@ void zend_release_labels(int temporary TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_class_member TSRMLS_DC) /* {{{ */
-{
-	zend_uint length;
-
-	if (!result) {
-		result = prefix;
-	} else {
-		*result = *prefix;
-	}
-
-	if (is_class_member) {
-		int old_len = Z_STRLEN(result->u.constant);
-		length = sizeof("::")-1 + old_len + Z_STRLEN(name->u.constant);
-		Z_STR(result->u.constant) = STR_REALLOC(Z_STR(result->u.constant), length, 0);
-		Z_TYPE_FLAGS(result->u.constant) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
-		memcpy(&Z_STRVAL(result->u.constant)[old_len], "::", sizeof("::")-1);
-		memcpy(&Z_STRVAL(result->u.constant)[old_len + sizeof("::")-1], Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1);
-		STR_RELEASE(Z_STR(name->u.constant));
-	} else {
-		int old_len = Z_STRLEN(result->u.constant);
-		length = sizeof("\\")-1 + old_len + Z_STRLEN(name->u.constant);
-		Z_STR(result->u.constant) = STR_REALLOC(Z_STR(result->u.constant), length, 0);
-		Z_TYPE_FLAGS(result->u.constant) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
-		memcpy(&Z_STRVAL(result->u.constant)[old_len], "\\", sizeof("\\")-1);
-		memcpy(&Z_STRVAL(result->u.constant)[old_len + sizeof("\\")-1], Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1);
-		STR_RELEASE(Z_STR(name->u.constant));
-	}
-}
-/* }}} */
-
 static zend_bool zend_is_call(zend_ast *ast);
 
 static int generate_free_switch_expr(zend_switch_entry *switch_entry TSRMLS_DC) /* {{{ */
@@ -3240,30 +3210,24 @@ ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_ar
 }
 /* }}} */
 
-void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRMLS_DC) /* {{{ */
-{
-	if (prefix) {
-		*result = *prefix;
-		if (Z_TYPE(result->u.constant) == IS_STRING &&
-		    Z_STRLEN(result->u.constant) == 0) {
-			/* namespace\ */
-			if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-				znode tmp;
+zend_ast *zend_ast_append_str(zend_ast *left_ast, zend_ast *right_ast) {
+	zval *left_zv = zend_ast_get_zval(left_ast);
+	zend_string *left = Z_STR_P(left_zv);
+	zend_string *right = zend_ast_get_str(right_ast);
 
-				zval_dtor(&result->u.constant);
-				tmp.op_type = IS_CONST;
-				ZVAL_DUP(&tmp.u.constant, &CG(current_namespace));
-				zend_do_build_namespace_name(result, NULL, &tmp TSRMLS_CC);
-			}
-		}
-	} else {
-		result->op_type = IS_CONST;
-		ZVAL_EMPTY_STRING(&result->u.constant);
-	}
-	/* prefix = result */
-	zend_do_build_full_name(NULL, result, name, 0 TSRMLS_CC);
+	zend_string *result;
+	size_t left_len = left->len;
+	size_t len = left_len + right->len + 1; /* left\right */
+
+	result = STR_REALLOC(left, len, 0);
+	result->val[left_len] = '\\';
+	memcpy(&result->val[left_len + 1], right->val, right->len);
+	result->val[len] = '\0';
+	STR_RELEASE(right);
+
+	ZVAL_STR(left_zv, result);
+	return left_ast;
 }
-/* }}} */
 
 void zend_verify_namespace(TSRMLS_D) /* {{{ */
 {

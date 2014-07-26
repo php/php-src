@@ -230,17 +230,18 @@ top_statement_list:
 ;
 
 namespace_name:
-		T_STRING { zval zv; ZVAL_COPY_VALUE(&zv, zend_ast_get_zval($1.u.ast)); $1.op_type = IS_CONST; ZVAL_COPY_VALUE(&$1.u.constant, &zv); $$ = $1; }
-	|	namespace_name T_NS_SEPARATOR T_STRING { zval zv; ZVAL_COPY_VALUE(&zv, zend_ast_get_zval($3.u.ast)); $3.op_type = IS_CONST; ZVAL_COPY_VALUE(&$3.u.constant, &zv); zend_do_build_namespace_name(&$$, &$1, &$3 TSRMLS_CC); }
+		T_STRING { $$.u.ast = $1.u.ast; }
+	|	namespace_name T_NS_SEPARATOR T_STRING
+			{ $$.u.ast = zend_ast_append_str($1.u.ast, $3.u.ast); }
 ;
 
 name:
 		namespace_name
-			{ $$.u.ast = zend_ast_create_zval_ex(&$1.u.constant, ZEND_NAME_NOT_FQ); }
+			{ $$.u.ast = $1.u.ast; $$.u.ast->attr = ZEND_NAME_NOT_FQ; }
 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name
-			{ $$.u.ast = zend_ast_create_zval_ex(&$3.u.constant, ZEND_NAME_RELATIVE); }
+			{ $$.u.ast = $3.u.ast; $$.u.ast->attr = ZEND_NAME_RELATIVE; }
 	|	T_NS_SEPARATOR namespace_name
-			{ $$.u.ast = zend_ast_create_zval_ex(&$2.u.constant, ZEND_NAME_FQ); }
+			{ $$.u.ast = $2.u.ast; $$.u.ast->attr = ZEND_NAME_FQ; }
 ;
 
 top_statement:
@@ -252,11 +253,11 @@ top_statement:
 			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset(TSRMLS_C)));
 			  zend_stop_lexing(TSRMLS_C); }
 	|	T_NAMESPACE namespace_name ';'
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), NULL);
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, $2.u.ast, NULL);
 			  zend_discard_doc_comment(TSRMLS_C); }
 	|	T_NAMESPACE namespace_name { zend_discard_doc_comment(TSRMLS_C); }
 		'{' top_statement_list '}'
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), $5.u.ast); }
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, $2.u.ast, $5.u.ast); }
 	|	T_NAMESPACE { zend_discard_doc_comment(TSRMLS_C); }
 		'{' top_statement_list '}'
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, NULL, $4.u.ast); }
@@ -278,13 +279,13 @@ use_declarations:
 
 use_declaration:
 		namespace_name
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, AST_ZVAL(&$1), NULL); }
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, $1.u.ast, NULL); }
 	|	namespace_name T_AS T_STRING
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, AST_ZVAL(&$1), $3.u.ast); }
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, $1.u.ast, $3.u.ast); }
 	|	T_NS_SEPARATOR namespace_name
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, AST_ZVAL(&$2), NULL); }
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, $2.u.ast, NULL); }
 	|	T_NS_SEPARATOR namespace_name T_AS T_STRING
-			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, AST_ZVAL(&$2), $4.u.ast); }
+			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_ELEM, $2.u.ast, $4.u.ast); }
 ;
 
 const_list:

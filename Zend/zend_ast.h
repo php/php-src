@@ -230,7 +230,4 @@ static inline zend_ast *zend_ast_create_cast(zend_uint type, zend_ast *op0) {
 	return zend_ast_create_ex(1, ZEND_AST_CAST, type, op0);
 }
 
-/* Temporary, for porting */
-#define AST_ZVAL(znode) zend_ast_create_zval(&(znode)->u.constant)
-
 #endif

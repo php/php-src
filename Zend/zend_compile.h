@@ -467,12 +467,12 @@ ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC);
 void zend_discard_doc_comment(TSRMLS_D);
 void zend_stop_lexing(TSRMLS_D);
 void zend_emit_final_return(zval *zv TSRMLS_DC);
+zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 
 /* parser-driven code generators */
 void zend_do_free(znode *op1 TSRMLS_DC);
 
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
-void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_class_member TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC);
@@ -502,7 +502,6 @@ void zend_do_ticks(TSRMLS_D);
 
 void zend_do_abstract_method(const znode *function_name, znode *modifiers, const znode *body TSRMLS_DC);
 
-void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRMLS_DC);
 void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
 void zend_do_end_compilation(TSRMLS_D);
