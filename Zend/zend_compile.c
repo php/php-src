@@ -5562,7 +5562,7 @@ void zend_begin_method_decl(
 	zend_string *lcname;
 
 	if (in_interface) {
-		if (op_array->fn_flags & ~(ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)) {
+		if ((op_array->fn_flags & ZEND_ACC_PPP_MASK) != ZEND_ACC_PUBLIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method "
 				"%s::%s() must be omitted", ce->name->val, name->val);
 		}
@@ -5945,7 +5945,7 @@ void zend_compile_class_const_decl(zend_ast *ast TSRMLS_DC) {
 		name = zend_new_interned_string_safe(name TSRMLS_CC);
 		if (zend_hash_add(&ce->constants_table, name, &value_zv) == NULL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s",
-				ce->name->val, name);
+				ce->name->val, name->val);
 		}
 
 		if (Z_CONSTANT(value_zv)) {
