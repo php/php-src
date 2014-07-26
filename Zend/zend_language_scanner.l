@@ -559,11 +559,10 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 	zend_op_array *retval=NULL;
 	int compiler_result;
 	zend_bool compilation_successful=0;
-	znode retval_znode;
+	zval retval_zv;
 	zend_bool original_in_compilation = CG(in_compilation);
 
-	retval_znode.op_type = IS_CONST;
-	ZVAL_LONG(&retval_znode.u.constant, 1);
+	ZVAL_LONG(&retval_zv, 1);
 
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 
@@ -592,7 +591,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		zend_ast_destroy(CG(ast));
 		zend_arena_destroy(CG(ast_arena));
 		zend_do_end_compilation(TSRMLS_C);
-		zend_do_return(&retval_znode, 0 TSRMLS_CC);
+		zend_emit_final_return(&retval_zv TSRMLS_CC);
 		CG(in_compilation) = original_in_compilation;
 		compilation_successful=1;
 	}
@@ -774,7 +773,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 			zend_ast_destroy(CG(ast));
 			zend_arena_destroy(CG(ast_arena));
 			zend_do_end_compilation(TSRMLS_C);
-			zend_do_return(NULL, 0 TSRMLS_CC);
+			zend_emit_final_return(NULL TSRMLS_CC);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array TSRMLS_CC);
 			zend_release_labels(0 TSRMLS_CC);

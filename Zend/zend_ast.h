@@ -231,12 +231,6 @@ static inline zend_ast *zend_ast_create_cast(zend_uint type, zend_ast *op0) {
 }
 
 /* Temporary, for porting */
-#define AST_COMPILE_VAR(res, ast, type) do { \
-	zend_ast *_ast = (ast); \
-	zend_compile_var((res), _ast, type TSRMLS_CC); \
-	zend_ast_destroy(_ast); \
-} while (0)
-
 #define AST_ZVAL(znode) zend_ast_create_zval(&(znode)->u.constant)
 
 #endif
