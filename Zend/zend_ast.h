@@ -158,10 +158,6 @@ typedef struct _zend_ast_decl {
 	zend_ast *child[3];
 } zend_ast_decl;
 
-static inline zval *zend_ast_get_zval(zend_ast *ast) {
-	return &((zend_ast_zval *) ast)->val;
-}
-
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr);
 
 ZEND_API zend_ast *zend_ast_create_ex(
@@ -186,6 +182,13 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 ZEND_API zend_ast *zend_ast_copy(zend_ast *ast);
 ZEND_API void zend_ast_destroy(zend_ast *ast);
 ZEND_API void zend_ast_destroy_and_free(zend_ast *ast);
+
+static inline zval *zend_ast_get_zval(zend_ast *ast) {
+	return &((zend_ast_zval *) ast)->val;
+}
+static inline zend_string *zend_ast_get_str(zend_ast *ast) {
+	return Z_STR_P(zend_ast_get_zval(ast));
+}
 
 static inline zend_ast *zend_ast_create_zval(zval *zv) {
 	return zend_ast_create_zval_ex(zv, 0);
@@ -217,9 +220,6 @@ static inline zend_ast *zend_ast_create_dynamic_and_add(zend_ast_kind kind, zend
 	return zend_ast_dynamic_add(zend_ast_create_dynamic(kind), op);
 }
 
-static inline zend_ast *zend_ast_create_var(zval *name) {
-	return zend_ast_create_unary(ZEND_AST_VAR, zend_ast_create_zval(name));
-}
 static inline zend_ast *zend_ast_create_binary_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(2, ZEND_AST_BINARY_OP, opcode, op0, op1);
 }
@@ -231,28 +231,12 @@ static inline zend_ast *zend_ast_create_cast(zend_uint type, zend_ast *op0) {
 }
 
 /* Temporary, for porting */
-#define AST_COMPILE(res, ast) do { \
-	zend_ast *_ast = (ast); \
-	zend_eval_const_expr(&_ast TSRMLS_CC); \
-	zend_compile_expr((res), _ast TSRMLS_CC); \
-	zend_ast_destroy(_ast); \
-} while (0)
 #define AST_COMPILE_VAR(res, ast, type) do { \
 	zend_ast *_ast = (ast); \
 	zend_compile_var((res), _ast, type TSRMLS_CC); \
 	zend_ast_destroy(_ast); \
 } while (0)
-#define AST_COMPILE_STMT(ast) do { \
-	zend_ast *_ast = (ast); \
-	zend_compile_stmt(_ast TSRMLS_CC); \
-	if (_ast) zend_ast_destroy(_ast); \
-} while (0)
 
-#define AST_ZNODE(znode) zend_ast_create_znode((znode))
 #define AST_ZVAL(znode) zend_ast_create_zval(&(znode)->u.constant)
-
-#define AC(znode) AST_COMPILE(&znode, znode.u.ast)
-#define AS(znode) AST_COMPILE_STMT(znode.u.ast)
-#define AN(znode) ((znode).u.ast = NULL)
 
 #endif

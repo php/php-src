@@ -3168,6 +3168,7 @@ ZEND_API void zend_activate_auto_globals(TSRMLS_D) /* {{{ */
 
 int zendlex(znode *zendlval TSRMLS_DC) /* {{{ */
 {
+	zval zv;
 	int retval;
 
 	if (CG(increment_lineno)) {
@@ -3176,8 +3177,8 @@ int zendlex(znode *zendlval TSRMLS_DC) /* {{{ */
 	}
 
 again:
-	Z_TYPE_INFO(zendlval->u.constant) = IS_LONG;
-	retval = lex_scan(&zendlval->u.constant TSRMLS_CC);
+	ZVAL_UNDEF(&zv);
+	retval = lex_scan(&zv TSRMLS_CC);
 	switch (retval) {
 		case T_COMMENT:
 		case T_DOC_COMMENT:
@@ -3198,8 +3199,10 @@ again:
 			retval = T_ECHO;
 			break;
 	}
+	if (Z_TYPE(zv) != IS_UNDEF) {
+		zendlval->u.ast = zend_ast_create_zval(&zv);
+	}
 
-	zendlval->op_type = IS_CONST;
 	return retval;
 }
 /* }}} */
