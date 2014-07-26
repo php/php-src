@@ -398,7 +398,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 				ret_constant = Z_REFVAL_P(ret_constant);
 			}
 		}
-		STR_FREE(class_name);
+		STR_RELEASE(class_name);
 		STR_FREE(constant_name);
 		if (ret_constant && Z_CONSTANT_P(ret_constant)) {
 			zval_update_constant_ex(ret_constant, 1, ce TSRMLS_CC);
