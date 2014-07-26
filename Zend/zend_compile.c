@@ -7454,6 +7454,7 @@ void zend_compile_top_stmt(zend_ast *ast TSRMLS_DC) {
 		zend_verify_namespace(TSRMLS_C);
 	}
 	if (ast->kind == ZEND_AST_FUNC_DECL || ast->kind == ZEND_AST_CLASS) {
+		CG(zend_lineno) = ((zend_ast_decl *) ast)->end_lineno;
 		zend_do_early_binding(TSRMLS_C);
 	}
 }
