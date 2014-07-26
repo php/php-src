@@ -309,7 +309,6 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #endif
 
 #include "zend_object_handlers.h"
-#include "zend_ast.h"
 
 /* overloaded elements data types */
 #define OE_IS_ARRAY					(1<<0)
@@ -401,6 +400,7 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #endif
 
 #include "zend_string.h"
+#include "zend_ast.h"
 
 static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz) || Z_IMMUTABLE_P(pz));

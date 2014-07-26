@@ -248,9 +248,8 @@ top_statement:
 	|	function_declaration_statement	{ $$.u.ast = $1.u.ast; }
 	|	class_declaration_statement		{ $$.u.ast = $1.u.ast; }
 	|	T_HALT_COMPILER '(' ')' ';'
-			{ zval offset_zv; ZVAL_LONG(&offset_zv, zend_get_scanned_file_offset(TSRMLS_C));
-			  $$.u.ast = zend_ast_create_unary(ZEND_AST_HALT_COMPILER,
-			      zend_ast_create_zval(&offset_zv));
+			{ $$.u.ast = zend_ast_create_unary(ZEND_AST_HALT_COMPILER,
+			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset(TSRMLS_C)));
 			  zend_stop_lexing(TSRMLS_C); }
 	|	T_NAMESPACE namespace_name ';'
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, AST_ZVAL(&$2), NULL);
@@ -931,8 +930,7 @@ exit_expr:
 
 backticks_expr:
 		/* empty */
-			{ zval empty_str; ZVAL_EMPTY_STRING(&empty_str);
-			  $$.u.ast = zend_ast_create_zval(&empty_str); }
+			{ $$.u.ast = zend_ast_create_zval_from_str(STR_EMPTY_ALLOC()); }
 	|	T_ENCAPSED_AND_WHITESPACE { $$.u.ast = AST_ZVAL(&$1); }
 	|	encaps_list { $$.u.ast = $1.u.ast; }
 ;
@@ -963,8 +961,7 @@ scalar:
 	|	T_CLASS_C	{ $$.u.ast = zend_ast_create_ex(0, ZEND_AST_MAGIC_CONST, T_CLASS_C); }
 	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$.u.ast = AST_ZVAL(&$2); }
 	|	T_START_HEREDOC T_END_HEREDOC
-			{ zval empty_str; ZVAL_EMPTY_STRING(&empty_str);
-			  $$.u.ast = zend_ast_create_zval(&empty_str); }
+			{ $$.u.ast = zend_ast_create_zval_from_str(STR_EMPTY_ALLOC()); }
 	|	'"' encaps_list '"' 	{ $$.u.ast = $2.u.ast; }
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$.u.ast = $2.u.ast; }
 	|	dereferencable_scalar	{ $$.u.ast = $1.u.ast; }

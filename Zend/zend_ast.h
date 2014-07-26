@@ -190,6 +190,16 @@ ZEND_API void zend_ast_destroy_and_free(zend_ast *ast);
 static inline zend_ast *zend_ast_create_zval(zval *zv) {
 	return zend_ast_create_zval_ex(zv, 0);
 }
+static inline zend_ast *zend_ast_create_zval_from_str(zend_string *str) {
+	zval zv;
+	ZVAL_STR(&zv, str);
+	return zend_ast_create_zval(&zv);
+}
+static inline zend_ast *zend_ast_create_zval_from_long(long lval) {
+	zval zv;
+	ZVAL_LONG(&zv, lval);
+	return zend_ast_create_zval(&zv);
+}
 
 static inline zend_ast *zend_ast_create_unary(zend_ast_kind kind, zend_ast *op0) {
 	return zend_ast_create(1, kind, op0);
