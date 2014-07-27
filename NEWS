@@ -2,16 +2,25 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.4.32
 
+- COM:
+  . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
+
 - Readline:
   . Fixed bug #55496 (Interactive mode doesn't force a newline before the
     prompt). (Bob, Johannes)
   . Fixed bug #67496 (Save command history when exiting interactive shell
     with control-c). (Dmitry Saprykin, Johannes)
 
+- Sessions:
+  . Fixed missing type checks in php_session_create_id (Yussuf Khalil, Stas).
+
 - SPL:
   . Fixed bug #67539 (ArrayIterator use-after-free due to object change during
     sorting). (research at insighti dot org, Laruence)
   . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
+
+- OpenSSL:
+  . Fixed missing type checks in OpenSSL options (Yussuf Khalil, Stas).
 
 24 Jul 2014, PHP 5.4.31
 
