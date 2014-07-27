@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -7453,7 +7454,8 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) {
 }
 
 void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
-	CG(zend_lineno) = ast->lineno;
+	//CG(zend_lineno) = ast->lineno;
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
 
 	switch (ast->kind) {
 		case ZEND_AST_ZVAL:

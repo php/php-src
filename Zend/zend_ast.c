@@ -40,8 +40,8 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 	zend_ast_zval *ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast_zval));
 	ast->kind = ZEND_AST_ZVAL;
 	ast->attr = attr;
-	ast->lineno = CG(zend_lineno);
 	ZVAL_COPY_VALUE(&ast->val, zv);
+	ast->val.u2.lineno = CG(zend_lineno);
 	return (zend_ast *) ast;
 }
 
@@ -83,8 +83,11 @@ static zend_ast *zend_ast_create_from_va_list(
 
 	for (i = 0; i < children; ++i) {
 		ast->child[i] = va_arg(va, zend_ast *);
-		if (ast->child[i] != NULL && ast->child[i]->lineno < ast->lineno) {
-			ast->lineno = ast->child[i]->lineno;
+		if (ast->child[i] != NULL) {
+			zend_uint lineno = zend_ast_get_lineno(ast->child[i]);
+			if (lineno < ast->lineno) {
+				ast->lineno = lineno;
+			}
 		}
 	}
 
@@ -341,7 +344,6 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 		zend_ast_zval *copy = emalloc(sizeof(zend_ast_zval));
 		copy->kind = ZEND_AST_ZVAL;
 		copy->attr = ast->attr;
-		copy->lineno = ast->lineno;
 		ZVAL_DUP(&copy->val, zend_ast_get_zval(ast));
 		return (zend_ast *) copy;
 	} else {

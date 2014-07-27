@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Bob Weinand <bwoebi@php.net>                                |
    |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -141,7 +142,6 @@ struct _zend_ast {
 typedef struct _zend_ast_zval {
 	zend_ast_kind kind;
 	zend_ast_attr attr;
-	zend_uint lineno;
 	zval val;
 } zend_ast_zval;
 
@@ -188,6 +188,14 @@ static inline zval *zend_ast_get_zval(zend_ast *ast) {
 }
 static inline zend_string *zend_ast_get_str(zend_ast *ast) {
 	return Z_STR_P(zend_ast_get_zval(ast));
+}
+static inline zend_uint zend_ast_get_lineno(zend_ast *ast) {
+	if (ast->kind == ZEND_AST_ZVAL) {
+		zval *zv = zend_ast_get_zval(ast);
+		return zv->u2.lineno;
+	} else {
+		return ast->lineno;
+	}
 }
 
 static inline zend_ast *zend_ast_create_zval(zval *zv) {
