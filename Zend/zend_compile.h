@@ -98,6 +98,12 @@ static inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
 }
 
+typedef union _zend_parser_stack_elem {
+	zend_ast *ast;
+	zend_string *str;
+	zend_ulong num;
+} zend_parser_stack_elem;
+
 void zend_ensure_writable_variable(const zend_ast *ast);
 void zend_compile_top_stmt(zend_ast *ast TSRMLS_DC);
 void zend_compile_stmt(zend_ast *ast TSRMLS_DC);
@@ -570,7 +576,7 @@ ZEND_API void zend_activate_auto_globals(TSRMLS_D);
 ZEND_API zend_bool zend_is_auto_global(zend_string *name TSRMLS_DC);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 
-int zendlex(znode *zendlval TSRMLS_DC);
+int zendlex(zend_parser_stack_elem *elem TSRMLS_DC);
 
 int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 

@@ -3069,7 +3069,7 @@ ZEND_API void zend_activate_auto_globals(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-int zendlex(znode *zendlval TSRMLS_DC) /* {{{ */
+int zendlex(zend_parser_stack_elem *elem TSRMLS_DC) /* {{{ */
 {
 	zval zv;
 	int retval;
@@ -3103,7 +3103,7 @@ again:
 			break;
 	}
 	if (Z_TYPE(zv) != IS_UNDEF) {
-		zendlval->u.ast = zend_ast_create_zval(&zv);
+		elem->ast = zend_ast_create_zval(&zv);
 	}
 
 	return retval;
