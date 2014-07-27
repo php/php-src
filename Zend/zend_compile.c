@@ -51,7 +51,6 @@
 			(target)->u.constant = CONSTANT(src.constant); \
 		} else { \
 			(target)->u.op = src; \
-			(target)->EA = 0; \
 		} \
 	} while (0)
 
@@ -552,14 +551,6 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zval *zv, int un
 		ZVAL_NULL(&_c); \
 		op.constant = zend_add_literal(CG(active_op_array), &_c TSRMLS_CC); \
 	} while (0)
-
-static inline zend_bool zend_is_function_or_method_call(const znode *variable) /* {{{ */
-{
-	zend_uint type = variable->EA;
-
-	return  ((type & ZEND_PARSED_METHOD_CALL) || (type == ZEND_PARSED_FUNCTION_CALL));
-}
-/* }}} */
 
 #define MAKE_NOP(opline)	{ opline->opcode = ZEND_NOP;  memset(&opline->result,0,sizeof(opline->result)); memset(&opline->op1,0,sizeof(opline->op1)); memset(&opline->op2,0,sizeof(opline->op2)); opline->result_type=opline->op1_type=opline->op2_type=IS_UNUSED;  }
 
@@ -3658,7 +3649,6 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast TSRMLS_DC) {
 
 		result->op_type = IS_CV;
 		result->u.op.var = lookup_cv(CG(active_op_array), name TSRMLS_CC);
-		result->EA = 0;
 
 		if (name->len == sizeof("this") - 1 && !memcmp(name->val, "this", sizeof("this") - 1)) {
 			CG(active_op_array)->this_var = result->u.op.var;
