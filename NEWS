@@ -14,11 +14,14 @@ PHP                                                                        NEWS
   . Fixed bug #67399 (putenv with empty variable may lead to crash). (Stas)
   . Fixed bug #67492 (unserialize() SPL ArrayObject / SPLObjectStorage Type 
     Confusion) (CVE-2014-3515). (Stefan Esser)
-  . Fixed bug #67498 (phpinfo() Type Confusion Information Leak Vulnerability). 
+  . Fixed bug #67498 (phpinfo() Type Confusion Information Leak Vulnerability).
     (Stefan Esser)
-    
+
+- COM:
+  . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
+
 - Date:
-  . Fixed bug #66060 (Heap buffer over-read in DateInterval). (CVE-2013-6712) 
+  . Fixed bug #66060 (Heap buffer over-read in DateInterval). (CVE-2013-6712)
     (Remi)
   . Fixed bug #67251 (date_parse_from_format out-of-bounds read). (Stas)
   . Fixed bug #67253 (timelib_meridian_with_check out-of-bounds read). (Stas)
@@ -28,12 +31,12 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #66307 (Fileinfo crashes with powerpoint files). (Anatol)
-  . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary 
-    check). (CVE-2014-0207) 
-  . Fixed bug #67327 (fileinfo: CDF infinite loop in nelements DoS). 
+  . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary
+    check). (CVE-2014-0207)
+  . Fixed bug #67327 (fileinfo: CDF infinite loop in nelements DoS).
     (CVE-2014-0238)
-  . Fixed bug #67328 (fileinfo: fileinfo: numerous file_printf calls resulting in
-    performance degradation). (CVE-2014-0237)
+  . Fixed bug #67328 (fileinfo: fileinfo: numerous file_printf calls resulting
+    in performance degradation). (CVE-2014-0237)
   . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
     string size). (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67411 (fileinfo: cdf_check_stream_offset insufficient boundary
@@ -47,10 +50,16 @@ PHP                                                                        NEWS
   . Fixed bug #67349 (Locale::parseLocale Double Free). (Stas)
   . Fixed bug #67397 (Buffer overflow in locale_get_display_name and
     uloc_getDisplayName (libicu 4.8.1)). (Stas)
-    
+
 - Network:
-  . Fixed bug #67432 (Fix potential segfault in dns_check_record()). 
+  . Fixed bug #67432 (Fix potential segfault in dns_check_record()).
     (CVE-2014-4049). (Sara)
+
+- OpenSSL:
+  . Fixed missing type checks in OpenSSL options (Yussuf Khalil, Stas).
+
+- Session:
+  . Fixed missing type checks in php_session_create_id (Yussuf Khalil, Stas).
 
 12 Dec 2013, PHP 5.3.28
 

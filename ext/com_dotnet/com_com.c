@@ -698,9 +698,9 @@ PHP_FUNCTION(com_event_sink)
 		/* 0 => typelibname, 1 => dispname */
 		zval **tmp;
 
-		if (zend_hash_index_find(Z_ARRVAL_P(sink), 0, (void**)&tmp) == SUCCESS)
+		if (zend_hash_index_find(Z_ARRVAL_P(sink), 0, (void**)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_STRING)
 			typelibname = Z_STRVAL_PP(tmp);
-		if (zend_hash_index_find(Z_ARRVAL_P(sink), 1, (void**)&tmp) == SUCCESS)
+		if (zend_hash_index_find(Z_ARRVAL_P(sink), 1, (void**)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_STRING)
 			dispname = Z_STRVAL_PP(tmp);
 	} else if (sink != NULL) {
 		convert_to_string(sink);
