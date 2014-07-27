@@ -400,30 +400,29 @@ is_variadic:
 ;
 
 class_declaration_statement:
-		class_entry_type T_STRING extends_from implements_list
+		class_type
+			{ $$.EA = CG(zend_lineno); }
+		T_STRING extends_from implements_list
 			{ $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }	
 		'{' class_statement_list '}'
-			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLASS, $1.EA, $1.u.op.opline_num,
+			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLASS, $1.EA, $2.EA,
+			      CG(zend_lineno), LANG_SCNG(yy_text), $6.u.op.ptr,
+				  zend_ast_get_str($3.u.ast), $4.u.ast, $5.u.ast, $8.u.ast); }
+	|	T_INTERFACE
+			{ $$.EA = CG(zend_lineno); }
+		T_STRING interface_extends_list
+			{ $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }	
+		'{' class_statement_list '}'
+			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $2.EA,
 			      CG(zend_lineno), LANG_SCNG(yy_text), $5.u.op.ptr,
-				  zend_ast_get_str($2.u.ast), $3.u.ast, $4.u.ast, $7.u.ast); }
-	|	interface_entry T_STRING interface_extends_list
-			{ $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }	
-		'{' class_statement_list '}'
-			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLASS, $1.EA, $1.u.op.opline_num,
-			      CG(zend_lineno), LANG_SCNG(yy_text), $4.u.op.ptr,
-				  zend_ast_get_str($2.u.ast), NULL, $3.u.ast, $6.u.ast); }
+				  zend_ast_get_str($3.u.ast), NULL, $4.u.ast, $7.u.ast); }
 ;
 
-
-class_entry_type:
-		T_CLASS			{ $$.u.op.opline_num = CG(zend_lineno); $$.EA = 0; }
-	|	T_ABSTRACT T_CLASS { $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
-	|	T_TRAIT { $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_TRAIT; }
-	|	T_FINAL T_CLASS { $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_FINAL_CLASS; }
-;
-
-interface_entry:
-	T_INTERFACE		{ $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_INTERFACE; }
+class_type:
+		T_CLASS				{ $$.EA = 0; }
+	|	T_ABSTRACT T_CLASS	{ $$.EA = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
+	|	T_FINAL T_CLASS		{ $$.EA = ZEND_ACC_FINAL_CLASS; }
+	|	T_TRAIT				{ $$.EA = ZEND_ACC_TRAIT; }
 ;
 
 extends_from:
