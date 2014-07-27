@@ -468,11 +468,11 @@ void zend_discard_doc_comment(TSRMLS_D);
 void zend_stop_lexing(TSRMLS_D);
 void zend_emit_final_return(zval *zv TSRMLS_DC);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
+zend_uint zend_add_member_modifier(zend_uint flags, zend_uint new_flag);
 
 /* parser-driven code generators */
 void zend_do_free(znode *op1 TSRMLS_DC);
 
-int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
 void zend_do_handle_exception(TSRMLS_D);
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC);

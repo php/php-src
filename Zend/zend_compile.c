@@ -703,30 +703,25 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier) /* {{{ */
-{
-	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_PPP_MASK)
-		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_PPP_MASK)) {
+zend_uint zend_add_member_modifier(zend_uint flags, zend_uint new_flag) {
+	zend_uint new_flags = flags | new_flag;
+	if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Multiple access type modifiers are not allowed");
 	}
-	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_ABSTRACT)
-		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_ABSTRACT)) {
+	if ((flags & ZEND_ACC_ABSTRACT) && (new_flag & ZEND_ACC_ABSTRACT)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
 	}
-	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_STATIC)
-		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_STATIC)) {
+	if ((flags & ZEND_ACC_STATIC) && (new_flag & ZEND_ACC_STATIC)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Multiple static modifiers are not allowed");
 	}
-	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_FINAL)
-		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_FINAL)) {
+	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
 	}
-	if (((Z_LVAL(current_access_type->u.constant) | Z_LVAL(new_modifier->u.constant)) & (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) == (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) {
+	if ((new_flags & ZEND_ACC_ABSTRACT) && (new_flags & ZEND_ACC_FINAL)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class member");
 	}
-	return (Z_LVAL(current_access_type->u.constant) | Z_LVAL(new_modifier->u.constant));
+	return new_flags;
 }
-/* }}} */
 
 void zend_do_handle_exception(TSRMLS_D) /* {{{ */
 {
