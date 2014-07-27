@@ -79,7 +79,6 @@ static zend_ast *zend_ast_create_from_va_list(
 	ast->kind = kind;
 	ast->attr = attr;
 	ast->lineno = UINT_MAX;
-	ast->children = children;
 
 	for (i = 0; i < children; ++i) {
 		ast->child[i] = va_arg(va, zend_ast *);
@@ -124,16 +123,16 @@ ZEND_API zend_ast *zend_ast_create(
 	return ast;
 }
 
-ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind)
-{
+ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind) {
 	/* use 4 children as default */
 	TSRMLS_FETCH();
-	zend_ast *ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast) + sizeof(zend_ast *) * 3);
-	ast->kind = kind;
-	ast->attr = 0;
-	ast->lineno = CG(zend_lineno);
-	ast->children = 0;
-	return ast;
+	zend_ast_list *list = zend_arena_alloc(&CG(ast_arena),
+		sizeof(zend_ast_list) + sizeof(zend_ast *) * 3);
+	list->kind = kind;
+	list->attr = 0;
+	list->lineno = CG(zend_lineno);
+	list->children = 0;
+	return (zend_ast *) list;
 }
 
 static inline zend_bool is_power_of_two(unsigned short n) {
@@ -142,39 +141,17 @@ static inline zend_bool is_power_of_two(unsigned short n) {
 
 ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op)
 {
-	if (ast->children >= 4 && is_power_of_two(ast->children)) {
+	zend_ast_list *list = zend_ast_get_list(ast);
+	if (list->children >= 4 && is_power_of_two(list->children)) {
 		TSRMLS_FETCH();
-		size_t old_size = sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children - 1);
-		zend_ast *new_ast = zend_arena_alloc(&CG(ast_arena),
-			sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children * 2 - 1));
-		memcpy(new_ast, ast, old_size);
-		ast = new_ast;
+		size_t old_size = sizeof(zend_ast_list) + sizeof(zend_ast *) * (list->children - 1);
+		zend_ast_list *new_list = zend_arena_alloc(&CG(ast_arena),
+			sizeof(zend_ast_list) + sizeof(zend_ast *) * (list->children * 2 - 1));
+		memcpy(new_list, list, old_size);
+		list = new_list;
 	}
-	ast->child[ast->children++] = op;
-	return ast;
-}
-
-ZEND_API void zend_ast_dynamic_shrink(zend_ast **ast)
-{
-	*ast = erealloc(*ast, sizeof(zend_ast) + sizeof(zend_ast *) * ((*ast)->children - 1));
-}
-
-ZEND_API int zend_ast_is_ct_constant(zend_ast *ast)
-{
-	int i;
-
-	if (ast->kind == ZEND_AST_ZVAL) {
-		return !Z_CONSTANT_P(zend_ast_get_zval(ast));
-	} else {
-		for (i = 0; i < ast->children; i++) {
-			if (ast->child[i]) {
-				if (!zend_ast_is_ct_constant(ast->child[i])) {
-					return 0;
-				}
-			}
-		}
-		return 1;
-	}
+	list->child[list->children++] = op;
+	return (zend_ast *) list;
 }
 
 static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr TSRMLS_DC)
@@ -237,16 +214,14 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			zval_dtor(&op2);
 			break;
 		}
-		case ZEND_BW_NOT:
+		case ZEND_AST_UNARY_OP:
+		{
+			unary_op_type op = get_unary_op(ast->attr);
 			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
-			bitwise_not_function(result, &op1 TSRMLS_CC);
+			op(result, &op1 TSRMLS_CC);
 			zval_dtor(&op1);
 			break;
-		case ZEND_BOOL_NOT:
-			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
-			boolean_not_function(result, &op1 TSRMLS_CC);
-			zval_dtor(&op1);
-			break;
+		}
 		case ZEND_AST_ZVAL:
 			ZVAL_DUP(result, zend_ast_get_zval(ast));
 			if (Z_OPT_CONSTANT_P(result)) {
@@ -305,8 +280,9 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			array_init(result);
 			{
 				zend_uint i;
-				for (i = 0; i < ast->children; i++) {
-					zend_ast *elem = ast->child[i];
+				zend_ast_list *list = zend_ast_get_list(ast);
+				for (i = 0; i < list->children; i++) {
+					zend_ast *elem = list->child[i];
 					if (elem->child[1]) {
 						zend_ast_evaluate(&op1, elem->child[1], scope TSRMLS_CC);
 					} else {
@@ -341,18 +317,29 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 	if (ast == NULL) {
 		return NULL;
 	} else if (ast->kind == ZEND_AST_ZVAL) {
-		zend_ast_zval *copy = emalloc(sizeof(zend_ast_zval));
-		copy->kind = ZEND_AST_ZVAL;
-		copy->attr = ast->attr;
-		ZVAL_DUP(&copy->val, zend_ast_get_zval(ast));
-		return (zend_ast *) copy;
+		zend_ast_zval *new = emalloc(sizeof(zend_ast_zval));
+		new->kind = ZEND_AST_ZVAL;
+		new->attr = ast->attr;
+		ZVAL_DUP(&new->val, zend_ast_get_zval(ast));
+		return (zend_ast *) new;
+	} else if (zend_ast_is_list(ast)) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		zend_ast_list *new = emalloc(sizeof(zend_ast_list)
+			+ sizeof(zend_ast *) * (list->children - 1));
+		zend_uint i;
+		new->kind = list->kind;
+		new->attr = list->attr;
+		new->children = list->children;
+		for (i = 0; i < list->children; i++) {
+			new->child[i] = zend_ast_copy(list->child[i]);
+		}
+		return (zend_ast *) new;
 	} else {
-		zend_ast *new = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * (ast->children - 1));
-		int i;
+		zend_uint i, children = zend_ast_get_num_children(ast);
+		zend_ast *new = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * (children - 1));
 		new->kind = ast->kind;
 		new->attr = ast->attr;
-		new->children = ast->children;
-		for (i = 0; i < ast->children; i++) {
+		for (i = 0; i < children; i++) {
 			new->child[i] = zend_ast_copy(ast->child[i]);
 		}
 		return new;
@@ -386,12 +373,18 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 			break;
 		}
 		default:
-		{
-			zend_uint i;
-			for (i = 0; i < ast->children; i++) {
-				zend_ast_destroy_ex(ast->child[i], free);
+			if (zend_ast_is_list(ast)) {
+				zend_ast_list *list = zend_ast_get_list(ast);
+				zend_uint i;
+				for (i = 0; i < list->children; i++) {
+					zend_ast_destroy_ex(list->child[i], free);
+				}
+			} else {
+				zend_uint i, children = zend_ast_get_num_children(ast);
+				for (i = 0; i < children; i++) {
+					zend_ast_destroy_ex(ast->child[i], free);
+				}
 			}
-		}
 	}
 
 	if (free) {
@@ -404,4 +397,19 @@ ZEND_API void zend_ast_destroy(zend_ast *ast) {
 }
 ZEND_API void zend_ast_destroy_and_free(zend_ast *ast) {
 	zend_ast_destroy_ex(ast, 1);
+}
+
+ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn TSRMLS_DC) {
+	if (zend_ast_is_list(ast)) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		zend_uint i;
+		for (i = 0; i < list->children; ++i) {
+			fn(&list->child[i] TSRMLS_CC);
+		}
+	} else {
+		zend_uint i, children = zend_ast_get_num_children(ast);
+		for (i = 0; i < children; ++i) {
+			fn(&ast->child[i] TSRMLS_CC);
+		}
+	}
 }

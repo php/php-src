@@ -329,10 +329,10 @@ unticked_statement:
 			{ $$.ast = zend_ast_create(4, ZEND_AST_FOR, $3.ast, $5.ast, $7.ast, $9.ast); }
 	|	T_SWITCH parenthesis_expr switch_case_list
 			{ $$.ast = zend_ast_create_binary(ZEND_AST_SWITCH, $2.ast, $3.ast); }
-	|	T_BREAK ';'			{ $$.ast = zend_ast_create_unary(ZEND_BRK, NULL); }
-	|	T_BREAK expr ';'	{ $$.ast = zend_ast_create_unary(ZEND_BRK, $2.ast); }
-	|	T_CONTINUE ';'		{ $$.ast = zend_ast_create_unary(ZEND_CONT, NULL); }
-	|	T_CONTINUE expr ';'	{ $$.ast = zend_ast_create_unary(ZEND_CONT, $2.ast); }
+	|	T_BREAK ';'			{ $$.ast = zend_ast_create_unary(ZEND_AST_BREAK, NULL); }
+	|	T_BREAK expr ';'	{ $$.ast = zend_ast_create_unary(ZEND_AST_BREAK, $2.ast); }
+	|	T_CONTINUE ';'		{ $$.ast = zend_ast_create_unary(ZEND_AST_CONTINUE, NULL); }
+	|	T_CONTINUE expr ';'	{ $$.ast = zend_ast_create_unary(ZEND_AST_CONTINUE, $2.ast); }
 	|	T_RETURN ';'
 			{ $$.ast = zend_ast_create_unary(ZEND_AST_RETURN, NULL); }
 	|	T_RETURN expr ';'
@@ -340,7 +340,7 @@ unticked_statement:
 	|	T_GLOBAL global_var_list ';' { $$.ast = $2.ast; }
 	|	T_STATIC static_var_list ';' { $$.ast = $2.ast; }
 	|	T_ECHO echo_expr_list ';' { $$.ast = $2.ast; }
-	|	T_INLINE_HTML { $$.ast = zend_ast_create_unary(ZEND_ECHO, $1.ast); }
+	|	T_INLINE_HTML { $$.ast = zend_ast_create_unary(ZEND_AST_ECHO, $1.ast); }
 	|	expr ';' { $$.ast = $1.ast; }
 	|	T_UNSET '(' unset_variables ')' ';' { $$.ast = $3.ast; }
 	|	T_FOREACH '(' expr T_AS foreach_variable ')' foreach_statement
@@ -355,8 +355,8 @@ unticked_statement:
 	|	';'	/* empty statement */ { $$.ast = NULL; }
 	|	T_TRY '{' inner_statement_list '}' catch_list finally_statement
 			{ $$.ast = zend_ast_create_ternary(ZEND_AST_TRY, $3.ast, $5.ast, $6.ast); }
-	|	T_THROW expr ';' { $$.ast = zend_ast_create_unary(ZEND_THROW, $2.ast); }
-	|	T_GOTO T_STRING ';' { $$.ast = zend_ast_create_unary(ZEND_GOTO, $2.ast); }
+	|	T_THROW expr ';' { $$.ast = zend_ast_create_unary(ZEND_AST_THROW, $2.ast); }
+	|	T_GOTO T_STRING ';' { $$.ast = zend_ast_create_unary(ZEND_AST_GOTO, $2.ast); }
 ;
 
 catch_list:
@@ -733,7 +733,7 @@ echo_expr_list:
 	|	echo_expr { $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_STMT_LIST, $1.ast); }
 ;
 echo_expr:
-	expr { $$.ast = zend_ast_create_unary(ZEND_ECHO, $1.ast); }
+	expr { $$.ast = zend_ast_create_unary(ZEND_AST_ECHO, $1.ast); }
 ;
 
 for_expr:
@@ -748,7 +748,7 @@ non_empty_for_expr:
 
 new_expr:
 		T_NEW class_name_reference ctor_arguments
-			{ $$.ast = zend_ast_create_binary(ZEND_NEW, $2.ast, $3.ast); }
+			{ $$.ast = zend_ast_create_binary(ZEND_AST_NEW, $2.ast, $3.ast); }
 ;
 
 expr_without_variable:
@@ -761,8 +761,8 @@ expr_without_variable:
 	|	variable '=' '&' T_NEW class_name_reference ctor_arguments
 			{ zend_error(E_DEPRECATED, "Assigning the return value of new by reference is deprecated");
 			  $$.ast = zend_ast_create_binary(ZEND_AST_ASSIGN_REF, $1.ast,
-			      zend_ast_create_binary(ZEND_NEW, $5.ast, $6.ast)); }
-	|	T_CLONE expr { $$.ast = zend_ast_create_unary(ZEND_CLONE, $2.ast); }
+			      zend_ast_create_binary(ZEND_AST_NEW, $5.ast, $6.ast)); }
+	|	T_CLONE expr { $$.ast = zend_ast_create_unary(ZEND_AST_CLONE, $2.ast); }
 	|	variable T_PLUS_EQUAL expr
 			{ $$.ast = zend_ast_create_assign_op(ZEND_ASSIGN_ADD, $1.ast, $3.ast); }
 	|	variable T_MINUS_EQUAL expr
@@ -787,10 +787,10 @@ expr_without_variable:
 			{ $$.ast = zend_ast_create_assign_op(ZEND_ASSIGN_SL, $1.ast, $3.ast); }
 	|	variable T_SR_EQUAL expr
 			{ $$.ast = zend_ast_create_assign_op(ZEND_ASSIGN_SR, $1.ast, $3.ast); }
-	|	variable T_INC { $$.ast = zend_ast_create_unary(ZEND_POST_INC, $1.ast); }
-	|	T_INC variable { $$.ast = zend_ast_create_unary(ZEND_PRE_INC, $2.ast); }
-	|	variable T_DEC { $$.ast = zend_ast_create_unary(ZEND_POST_DEC, $1.ast); }
-	|	T_DEC variable { $$.ast = zend_ast_create_unary(ZEND_PRE_DEC, $2.ast); }
+	|	variable T_INC { $$.ast = zend_ast_create_unary(ZEND_AST_POST_INC, $1.ast); }
+	|	T_INC variable { $$.ast = zend_ast_create_unary(ZEND_AST_PRE_INC, $2.ast); }
+	|	variable T_DEC { $$.ast = zend_ast_create_unary(ZEND_AST_POST_DEC, $1.ast); }
+	|	T_DEC variable { $$.ast = zend_ast_create_unary(ZEND_AST_PRE_DEC, $2.ast); }
 	|	expr T_BOOLEAN_OR expr
 			{ $$.ast = zend_ast_create_binary(ZEND_AST_OR, $1.ast, $3.ast); }
 	|	expr T_BOOLEAN_AND expr
@@ -815,8 +815,8 @@ expr_without_variable:
 	|	expr T_SR expr	{ $$.ast = zend_ast_create_binary_op(ZEND_SR, $1.ast, $3.ast); }
 	|	'+' expr %prec T_INC { $$.ast = zend_ast_create_unary(ZEND_AST_UNARY_PLUS, $2.ast); }
 	|	'-' expr %prec T_INC { $$.ast = zend_ast_create_unary(ZEND_AST_UNARY_MINUS, $2.ast); }
-	|	'!' expr { $$.ast = zend_ast_create_unary(ZEND_BOOL_NOT, $2.ast); }
-	|	'~' expr { $$.ast = zend_ast_create_unary(ZEND_BW_NOT, $2.ast); }
+	|	'!' expr { $$.ast = zend_ast_create_ex(1, ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, $2.ast); }
+	|	'~' expr { $$.ast = zend_ast_create_ex(1, ZEND_AST_UNARY_OP, ZEND_BW_NOT, $2.ast); }
 	|	expr T_IS_IDENTICAL expr
 			{ $$.ast = zend_ast_create_binary_op(ZEND_IS_IDENTICAL, $1.ast, $3.ast); }
 	|	expr T_IS_NOT_IDENTICAL expr
@@ -834,7 +834,7 @@ expr_without_variable:
 	|	expr T_IS_GREATER_OR_EQUAL expr
 			{ $$.ast = zend_ast_create_binary(ZEND_AST_GREATER_EQUAL, $1.ast, $3.ast); }
 	|	expr T_INSTANCEOF class_name_reference
-			{ $$.ast = zend_ast_create_binary(ZEND_INSTANCEOF, $1.ast, $3.ast); }
+			{ $$.ast = zend_ast_create_binary(ZEND_AST_INSTANCEOF, $1.ast, $3.ast); }
 	|	parenthesis_expr { $$.ast = $1.ast; }
 	|	new_expr { $$.ast = $1.ast; }
 	|	expr '?' expr ':' expr
@@ -857,15 +857,15 @@ expr_without_variable:
 			{ $$.ast = zend_ast_create_cast(_IS_BOOL, $2.ast); }
 	|	T_UNSET_CAST expr
 			{ $$.ast = zend_ast_create_cast(IS_NULL, $2.ast); }
-	|	T_EXIT exit_expr { $$.ast = zend_ast_create_unary(ZEND_EXIT, $2.ast); }
+	|	T_EXIT exit_expr { $$.ast = zend_ast_create_unary(ZEND_AST_EXIT, $2.ast); }
 	|	'@' expr { $$.ast = zend_ast_create_unary(ZEND_AST_SILENCE, $2.ast); }
 	|	scalar { $$.ast = $1.ast; }
 	|	'`' backticks_expr '`' { $$.ast = zend_ast_create_unary(ZEND_AST_SHELL_EXEC, $2.ast); }
-	|	T_PRINT expr { $$.ast = zend_ast_create_unary(ZEND_PRINT, $2.ast); }
-	|	T_YIELD { $$.ast = zend_ast_create_binary(ZEND_YIELD, NULL, NULL); }
-	|	T_YIELD expr { $$.ast = zend_ast_create_binary(ZEND_YIELD, $2.ast, NULL); }
+	|	T_PRINT expr { $$.ast = zend_ast_create_unary(ZEND_AST_PRINT, $2.ast); }
+	|	T_YIELD { $$.ast = zend_ast_create_binary(ZEND_AST_YIELD, NULL, NULL); }
+	|	T_YIELD expr { $$.ast = zend_ast_create_binary(ZEND_AST_YIELD, $2.ast, NULL); }
 	|	T_YIELD expr T_DOUBLE_ARROW expr
-			{ $$.ast = zend_ast_create_binary(ZEND_YIELD, $4.ast, $2.ast); }
+			{ $$.ast = zend_ast_create_binary(ZEND_AST_YIELD, $4.ast, $2.ast); }
 	|	function returns_ref '(' parameter_list ')' lexical_vars
 			{ $$.str = CG(doc_comment); CG(doc_comment) = NULL; }
 		'{' inner_statement_list '}'
@@ -1151,15 +1151,15 @@ internal_functions_in_yacc:
 		T_ISSET '(' isset_variables ')' { $$.ast  = $3.ast; }
 	|	T_EMPTY '(' expr ')' { $$.ast = zend_ast_create_unary(ZEND_AST_EMPTY, $3.ast); }
 	|	T_INCLUDE expr
-			{ $$.ast = zend_ast_create_ex(1, ZEND_INCLUDE_OR_EVAL, ZEND_INCLUDE, $2.ast); }
+			{ $$.ast = zend_ast_create_ex(1, ZEND_AST_INCLUDE_OR_EVAL, ZEND_INCLUDE, $2.ast); }
 	|	T_INCLUDE_ONCE expr
-			{ $$.ast = zend_ast_create_ex(1, ZEND_INCLUDE_OR_EVAL, ZEND_INCLUDE_ONCE, $2.ast); }
+			{ $$.ast = zend_ast_create_ex(1, ZEND_AST_INCLUDE_OR_EVAL, ZEND_INCLUDE_ONCE, $2.ast); }
 	|	T_EVAL '(' expr ')'
-			{ $$.ast = zend_ast_create_ex(1, ZEND_INCLUDE_OR_EVAL, ZEND_EVAL, $3.ast); }
+			{ $$.ast = zend_ast_create_ex(1, ZEND_AST_INCLUDE_OR_EVAL, ZEND_EVAL, $3.ast); }
 	|	T_REQUIRE expr
-			{ $$.ast = zend_ast_create_ex(1, ZEND_INCLUDE_OR_EVAL, ZEND_REQUIRE, $2.ast); }
+			{ $$.ast = zend_ast_create_ex(1, ZEND_AST_INCLUDE_OR_EVAL, ZEND_REQUIRE, $2.ast); }
 	|	T_REQUIRE_ONCE expr
-			{ $$.ast = zend_ast_create_ex(1, ZEND_INCLUDE_OR_EVAL, ZEND_REQUIRE_ONCE, $2.ast); }
+			{ $$.ast = zend_ast_create_ex(1, ZEND_AST_INCLUDE_OR_EVAL, ZEND_REQUIRE_ONCE, $2.ast); }
 ;
 
 isset_variables:
