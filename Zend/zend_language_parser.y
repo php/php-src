@@ -381,10 +381,12 @@ unset_variable:
 ;
 
 function_declaration_statement:
-	function returns_ref T_STRING '(' parameter_list ')' '{' inner_statement_list '}'
+	function returns_ref T_STRING '(' parameter_list ')'
+		{ $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }
+	'{' inner_statement_list '}'
 		{ $$.u.ast = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2.EA,
-		      $1.EA, CG(zend_lineno), LANG_SCNG(yy_text), $1.u.op.ptr,
-			  zend_ast_get_str($3.u.ast), $5.u.ast, NULL, $8.u.ast); }
+		      $1.EA, CG(zend_lineno), LANG_SCNG(yy_text), $7.u.op.ptr,
+			  zend_ast_get_str($3.u.ast), $5.u.ast, NULL, $9.u.ast); }
 ;
 
 is_reference:
@@ -612,10 +614,12 @@ class_statement:
 			{ $$.u.ast = $2.u.ast; zend_discard_doc_comment(TSRMLS_C); }
 	|	T_USE name_list trait_adaptations
 			{ $$.u.ast = zend_ast_create_binary(ZEND_AST_USE_TRAIT, $2.u.ast, $3.u.ast); }
-	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')' method_body
+	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')'
+			{ $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }
+		method_body
 			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_METHOD, $3.EA | $1.EA,
-			      $2.EA, CG(zend_lineno), LANG_SCNG(yy_text), $2.u.op.ptr,
-				  zend_ast_get_str($4.u.ast), $6.u.ast, NULL, $8.u.ast); }
+			      $2.EA, CG(zend_lineno), LANG_SCNG(yy_text), $8.u.op.ptr,
+				  zend_ast_get_str($4.u.ast), $6.u.ast, NULL, $9.u.ast); }
 ;
 
 name_list:
@@ -862,22 +866,24 @@ expr_without_variable:
 	|	T_YIELD expr { $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $2.u.ast, NULL); }
 	|	T_YIELD expr T_DOUBLE_ARROW expr
 			{ $$.u.ast = zend_ast_create_binary(ZEND_YIELD, $4.u.ast, $2.u.ast); }
-	|	function returns_ref '(' parameter_list ')' lexical_vars '{' inner_statement_list '}'
+	|	function returns_ref '(' parameter_list ')' lexical_vars
+			{ $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }
+		'{' inner_statement_list '}'
 			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLOSURE, $2.EA,
-			      $1.EA, CG(zend_lineno), LANG_SCNG(yy_text), $1.u.op.ptr,
+			      $1.EA, CG(zend_lineno), LANG_SCNG(yy_text), $7.u.op.ptr,
 				  STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
-			      $4.u.ast, $6.u.ast, $8.u.ast); }
+			      $4.u.ast, $6.u.ast, $9.u.ast); }
 	|	T_STATIC function returns_ref '(' parameter_list ')' lexical_vars
+			{ $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }
 		'{' inner_statement_list '}'
 			{ $$.u.ast = zend_ast_create_decl(ZEND_AST_CLOSURE,
 			      $3.EA | ZEND_ACC_STATIC, $2.EA, CG(zend_lineno), LANG_SCNG(yy_text),
-			      $2.u.op.ptr, STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
-			      $5.u.ast, $7.u.ast, $9.u.ast); }
+			      $8.u.op.ptr, STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
+			      $5.u.ast, $7.u.ast, $10.u.ast); }
 ;
 
 function:
-	T_FUNCTION
-		{ $$.EA = CG(zend_lineno); $$.u.op.ptr = CG(doc_comment); CG(doc_comment) = NULL; }
+	T_FUNCTION { $$.EA = CG(zend_lineno); }
 ;
 
 returns_ref:
