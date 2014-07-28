@@ -359,25 +359,11 @@ union _zend_function {
 	zend_internal_function internal_function;
 };
 
-typedef struct _zend_function_call_entry {
-	zend_function *fbc;
-	zend_uint op_number;
-	zend_uint arg_num;
-	zend_bool uses_argument_unpacking;
-} zend_function_call_entry;
-
 typedef struct _zend_switch_entry {
 	znode cond;
 	int default_case;
 	int control_var;
 } zend_switch_entry;
-
-
-typedef struct _list_llist_element {
-	znode var;
-	zend_llist dimensions;
-	znode value;
-} list_llist_element;
 
 typedef enum _vm_frame_kind {
 	VM_FRAME_NESTED_FUNCTION,	/* stackless VM call to function */
@@ -545,9 +531,6 @@ int print_class(zend_class_entry *class_entry TSRMLS_DC);
 void print_op_array(zend_op_array *op_array, int optimizations);
 ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
-void zend_do_first_catch(znode *open_parentheses TSRMLS_DC);
-void zend_initialize_try_catch_element(znode *catch_token TSRMLS_DC);
-void zend_do_mark_last_catch(const znode *first_catch, const znode *last_additional_catch TSRMLS_DC);
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);

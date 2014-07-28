@@ -1024,11 +1024,8 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	zval orig_user_error_handler;
 	zend_bool in_compilation;
 	zend_class_entry *saved_class_entry;
-	zend_stack bp_stack;
-	zend_stack function_call_stack;
 	zend_stack switch_cond_stack;
 	zend_stack foreach_copy_stack;
-	zend_stack list_stack;
 	zend_stack context_stack;
 	zend_array *symbol_table;
 	TSRMLS_FETCH();
@@ -1191,11 +1188,8 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			if (in_compilation) {
 				saved_class_entry = CG(active_class_entry);
 				CG(active_class_entry) = NULL;
-				SAVE_STACK(bp_stack);
-				SAVE_STACK(function_call_stack);
 				SAVE_STACK(switch_cond_stack);
 				SAVE_STACK(foreach_copy_stack);
-				SAVE_STACK(list_stack);
 				SAVE_STACK(context_stack);
 				CG(in_compilation) = 0;
 			}
@@ -1215,11 +1209,8 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 
 			if (in_compilation) {
 				CG(active_class_entry) = saved_class_entry;
-				RESTORE_STACK(bp_stack);
-				RESTORE_STACK(function_call_stack);
 				RESTORE_STACK(switch_cond_stack);
 				RESTORE_STACK(foreach_copy_stack);
-				RESTORE_STACK(list_stack);
 				RESTORE_STACK(context_stack);
 				CG(in_compilation) = 1;
 			}

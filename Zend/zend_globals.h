@@ -71,19 +71,10 @@ typedef struct _zend_ini_entry zend_ini_entry;
 
 
 struct _zend_compiler_globals {
-	zend_stack bp_stack;
 	zend_stack switch_cond_stack;
 	zend_stack foreach_copy_stack;
-	zend_stack object_stack; /* TODO: remove */
 
 	zend_class_entry *active_class_entry;
-
-	/* variables for list() compilation */
-	zend_llist list_llist;
-	zend_llist dimension_llist;
-	zend_stack list_stack;
-
-	zend_stack function_call_stack;
 
 	zend_string *compiled_filename;
 
@@ -111,8 +102,6 @@ struct _zend_compiler_globals {
 
 	zend_llist open_files;
 
-	long catch_begin;
-
 	struct _zend_ini_parser_param *ini_parser_param;
 
 	int interactive;
@@ -121,8 +110,6 @@ struct _zend_compiler_globals {
 	zend_bool increment_lineno;
 
 	znode implementing_class;
-
-	zend_uint access_type;
 
 	zend_string *doc_comment;
 
@@ -153,13 +140,13 @@ struct _zend_compiler_globals {
 	zend_bool detect_unicode;
 	zend_bool encoding_declared;
 
+	zend_ast *ast;
+	zend_arena *ast_arena;
+
 #ifdef ZTS
 	zval **static_members_table;
 	int last_static_member;
 #endif
-
-	zend_ast *ast;
-	zend_arena *ast_arena;
 };
 
 

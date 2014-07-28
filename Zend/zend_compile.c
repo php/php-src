@@ -195,14 +195,9 @@ void zend_init_compiler_context(TSRMLS_D) /* {{{ */
 
 void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 {
-	zend_stack_init(&CG(bp_stack), sizeof(zend_llist));
-	zend_stack_init(&CG(function_call_stack), sizeof(zend_function_call_entry));
 	zend_stack_init(&CG(switch_cond_stack), sizeof(zend_switch_entry));
 	zend_stack_init(&CG(foreach_copy_stack), sizeof(zend_op));
 	CG(active_class_entry) = NULL;
-	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
-	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
-	zend_stack_init(&CG(list_stack), sizeof(zend_llist));
 	CG(in_compilation) = 0;
 	CG(start_lineno) = 0;
 	ZVAL_UNDEF(&CG(current_namespace));
@@ -242,11 +237,8 @@ void init_compiler(TSRMLS_D) /* {{{ */
 
 void shutdown_compiler(TSRMLS_D) /* {{{ */
 {
-	zend_stack_destroy(&CG(bp_stack));
-	zend_stack_destroy(&CG(function_call_stack));
 	zend_stack_destroy(&CG(switch_cond_stack));
 	zend_stack_destroy(&CG(foreach_copy_stack));
-	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_hash_destroy(&CG(const_filenames));
 	zend_stack_destroy(&CG(context_stack));
