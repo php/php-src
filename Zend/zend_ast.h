@@ -187,10 +187,8 @@ typedef struct _zend_ast_decl {
 
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr);
 
-ZEND_API zend_ast *zend_ast_create_ex(
-	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, ...);
-ZEND_API zend_ast *zend_ast_create(
-	zend_uint children, zend_ast_kind kind, ...);
+ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ...);
+ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...);
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, zend_uint flags, zend_uint start_lineno, zend_string *doc_comment,
@@ -253,13 +251,13 @@ static inline zend_ast *zend_ast_create_zval_from_long(long lval) {
 }
 
 static inline zend_ast *zend_ast_create_binary_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
-	return zend_ast_create_ex(2, ZEND_AST_BINARY_OP, opcode, op0, op1);
+	return zend_ast_create_ex(ZEND_AST_BINARY_OP, opcode, op0, op1);
 }
 static inline zend_ast *zend_ast_create_assign_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
-	return zend_ast_create_ex(2, ZEND_AST_ASSIGN_OP, opcode, op0, op1);
+	return zend_ast_create_ex(ZEND_AST_ASSIGN_OP, opcode, op0, op1);
 }
 static inline zend_ast *zend_ast_create_cast(zend_uint type, zend_ast *op0) {
-	return zend_ast_create_ex(1, ZEND_AST_CAST, type, op0);
+	return zend_ast_create_ex(ZEND_AST_CAST, type, op0);
 }
 
 #endif

@@ -33,6 +33,14 @@ static inline void *zend_ast_realloc(void *old, size_t old_size, size_t new_size
 	return new;
 }
 
+size_t zend_ast_size(zend_uint children) {
+	return sizeof(zend_ast) + sizeof(zend_ast *) * (children - 1);
+}
+
+size_t zend_ast_list_size(zend_uint children) {
+	return sizeof(zend_ast_list) + sizeof(zend_ast *) * (children - 1);
+}
+
 ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
 	TSRMLS_FETCH();
 	zend_ast_znode *ast = zend_ast_alloc(sizeof(zend_ast_znode) TSRMLS_CC);
@@ -75,14 +83,10 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	return (zend_ast *) ast;
 }
 
-static zend_ast *zend_ast_create_from_va_list(
-	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, va_list va
-) {
+static zend_ast *zend_ast_create_from_va_list(zend_ast_kind kind, zend_ast_attr attr, va_list va) {
 	TSRMLS_FETCH();
-	zend_uint i;
-	zend_ast *ast;
-	
-	ast = zend_ast_alloc(sizeof(zend_ast) + (children - 1) * sizeof(zend_ast *) TSRMLS_CC);
+	zend_uint i, children = kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
+	zend_ast *ast = zend_ast_alloc(zend_ast_size(children) TSRMLS_CC);
 	ast->kind = kind;
 	ast->attr = attr;
 	ast->lineno = UINT_MAX;
@@ -104,34 +108,26 @@ static zend_ast *zend_ast_create_from_va_list(
 	return ast;
 }
 
-ZEND_API zend_ast *zend_ast_create_ex(
-	zend_uint children, zend_ast_kind kind, zend_ast_attr attr, ...
-) {
+ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ...) {
 	va_list va;
 	zend_ast *ast;
 
 	va_start(va, attr);
-	ast = zend_ast_create_from_va_list(children, kind, attr, va);
+	ast = zend_ast_create_from_va_list(kind, attr, va);
 	va_end(va);
 
 	return ast;
 }
 
-ZEND_API zend_ast *zend_ast_create(
-	zend_uint children, zend_ast_kind kind, ...
-) {
+ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...) {
 	va_list va;
 	zend_ast *ast;
 
 	va_start(va, kind);
-	ast = zend_ast_create_from_va_list(children, kind, 0, va);
+	ast = zend_ast_create_from_va_list(kind, 0, va);
 	va_end(va);
 
 	return ast;
-}
-
-size_t zend_ast_list_size(zend_uint children) {
-	return sizeof(zend_ast_list) + sizeof(zend_ast *) * (children - 1);
 }
 
 ZEND_API zend_ast_list *zend_ast_create_list(zend_uint init_children, zend_ast_kind kind, ...) {
@@ -339,8 +335,7 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 		return (zend_ast *) new;
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
-		zend_ast_list *new = emalloc(sizeof(zend_ast_list)
-			+ sizeof(zend_ast *) * (list->children - 1));
+		zend_ast_list *new = emalloc(zend_ast_list_size(list->children));
 		zend_uint i;
 		new->kind = list->kind;
 		new->attr = list->attr;
@@ -351,7 +346,7 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 		return (zend_ast *) new;
 	} else {
 		zend_uint i, children = zend_ast_get_num_children(ast);
-		zend_ast *new = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * (children - 1));
+		zend_ast *new = emalloc(zend_ast_size(children));
 		new->kind = ast->kind;
 		new->attr = ast->attr;
 		for (i = 0; i < children; i++) {

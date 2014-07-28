@@ -4483,12 +4483,12 @@ static void zend_compile_static_var_common(
 	opline->extended_value = ZEND_FETCH_STATIC;
 
 	if (by_ref) {
-		zend_ast *fetch_ast = zend_ast_create(1, ZEND_AST_VAR, var_ast);
+		zend_ast *fetch_ast = zend_ast_create(ZEND_AST_VAR, var_ast);
 		zend_compile_assign_ref_common(NULL, fetch_ast, &result TSRMLS_CC);
 	} else {
-		zend_ast *fetch_ast = zend_ast_create(1, ZEND_AST_VAR, var_ast);
+		zend_ast *fetch_ast = zend_ast_create(ZEND_AST_VAR, var_ast);
 		zend_ast *znode_ast = zend_ast_create_znode(&result);
-		zend_ast *assign_ast = zend_ast_create(2, ZEND_AST_ASSIGN, fetch_ast, znode_ast);
+		zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, fetch_ast, znode_ast);
 		znode dummy_node;
 		zend_compile_expr(&dummy_node, assign_ast TSRMLS_CC);
 		zend_do_free(&dummy_node TSRMLS_CC);
@@ -4838,14 +4838,14 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) {
 		zend_compile_assign_ref_common(NULL, value_ast, &value_node TSRMLS_CC);
 	} else {
 		zend_ast *znode_ast = zend_ast_create_znode(&value_node);
-		zend_ast *assign_ast = zend_ast_create(2, ZEND_AST_ASSIGN, value_ast, znode_ast);
+		zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, value_ast, znode_ast);
 		zend_compile_expr(&dummy_node, assign_ast TSRMLS_CC);
 		zend_do_free(&dummy_node TSRMLS_CC);
 	}
 
 	if (key_ast) {
 		zend_ast *znode_ast = zend_ast_create_znode(&key_node);
-		zend_ast *assign_ast = zend_ast_create(2, ZEND_AST_ASSIGN, key_ast, znode_ast);
+		zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, key_ast, znode_ast);
 		zend_compile_expr(&dummy_node, assign_ast TSRMLS_CC);
 		zend_do_free(&dummy_node TSRMLS_CC);
 	}
@@ -6671,7 +6671,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast TSRMLS_DC) {
 	if (!zend_is_variable(var_ast) || zend_is_call(var_ast)) {
 		if (ast->kind == ZEND_AST_EMPTY) {
 			/* empty(expr) can be transformed to !expr */
-			zend_ast *not_ast = zend_ast_create_ex(1, ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, var_ast);
+			zend_ast *not_ast = zend_ast_create_ex(ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, var_ast);
 			zend_compile_expr(result, not_ast TSRMLS_CC);
 			return;
 		} else {
@@ -6736,7 +6736,7 @@ void zend_compile_shell_exec(znode *result, zend_ast *ast TSRMLS_DC) {
 	ZVAL_STRING(&fn_name, "shell_exec");
 	name_ast = zend_ast_create_zval(&fn_name);
 	args_ast = (zend_ast *) zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast);
-	call_ast = zend_ast_create(2, ZEND_AST_CALL, name_ast, args_ast);
+	call_ast = zend_ast_create(ZEND_AST_CALL, name_ast, args_ast);
 
 	zend_compile_expr(result, call_ast TSRMLS_CC);
 
@@ -6888,7 +6888,7 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast TSRMLS_DC) {
 
 				ZVAL_STRING(&class_str_zv, "class");
 				class_str_ast = zend_ast_create_zval(&class_str_zv);
-				class_const_ast = zend_ast_create(2, 
+				class_const_ast = zend_ast_create(
 					ZEND_AST_CLASS_CONST, name_ast, class_str_ast);
 
 				zend_compile_expr(result, class_const_ast TSRMLS_CC);
@@ -7025,7 +7025,7 @@ void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) {
 	{
 		zval const_zv;
 		ZVAL_STRING(&const_zv, "__CLASS__");
-		zend_ast *const_ast = zend_ast_create(1, ZEND_AST_CONST,
+		zend_ast *const_ast = zend_ast_create(ZEND_AST_CONST,
 			zend_ast_create_zval(&const_zv));
 		zend_compile_const(result, const_ast TSRMLS_CC);
 		zval_ptr_dtor(&const_zv);
