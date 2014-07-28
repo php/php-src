@@ -197,8 +197,8 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2
 );
 
-ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind);
-ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op);
+ZEND_API zend_ast_list *zend_ast_create_list(zend_uint init_children, zend_ast_kind kind, ...);
+ZEND_API zend_ast_list *zend_ast_list_add(zend_ast_list *list, zend_ast *op);
 
 ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope TSRMLS_DC);
 
@@ -262,10 +262,6 @@ static inline zend_ast *zend_ast_create_ternary(
 	zend_ast_kind kind, zend_ast *op0, zend_ast *op1, zend_ast *op2
 ) {
 	return zend_ast_create(3, kind, op0, op1, op2);
-}
-
-static inline zend_ast *zend_ast_create_dynamic_and_add(zend_ast_kind kind, zend_ast *op) {
-	return zend_ast_dynamic_add(zend_ast_create_dynamic(kind), op);
 }
 
 static inline zend_ast *zend_ast_create_binary_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {

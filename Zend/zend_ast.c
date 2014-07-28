@@ -134,30 +134,39 @@ size_t zend_ast_list_size(zend_uint children) {
 	return sizeof(zend_ast_list) + sizeof(zend_ast *) * (children - 1);
 }
 
-ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind) {
-	/* use 4 children as default */
+ZEND_API zend_ast_list *zend_ast_create_list(zend_uint init_children, zend_ast_kind kind, ...) {
 	TSRMLS_FETCH();
 	zend_ast_list *list = zend_ast_alloc(zend_ast_list_size(4) TSRMLS_CC);
 	list->kind = kind;
 	list->attr = 0;
 	list->lineno = CG(zend_lineno);
 	list->children = 0;
-	return (zend_ast *) list;
+
+	{
+		va_list va;
+		zend_uint i;
+		va_start(va, kind);
+		for (i = 0; i < init_children; ++i) {
+			list = zend_ast_list_add(list, va_arg(va, zend_ast *));
+		}
+		va_end(va);
+	}
+
+	return list;
 }
 
 static inline zend_bool is_power_of_two(unsigned short n) {
 	return n == (n & -n);
 }
 
-ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op) {
-	zend_ast_list *list = zend_ast_get_list(ast);
+ZEND_API zend_ast_list *zend_ast_list_add(zend_ast_list *list, zend_ast *op) {
 	if (list->children >= 4 && is_power_of_two(list->children)) {
 		TSRMLS_FETCH();
 		list = zend_ast_realloc(list,
 			zend_ast_list_size(list->children), zend_ast_list_size(list->children * 2) TSRMLS_CC);
 	}
 	list->child[list->children++] = op;
-	return (zend_ast *) list;
+	return list;
 }
 
 static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr TSRMLS_DC)

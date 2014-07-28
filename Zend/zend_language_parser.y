@@ -226,8 +226,8 @@ start:
 ;
 
 top_statement_list:
-		top_statement_list top_statement { $$.ast = zend_ast_dynamic_add($1.ast, $2.ast); }
-	|	/* empty */ { $$.ast = zend_ast_create_dynamic(ZEND_AST_STMT_LIST); }
+		top_statement_list top_statement { $$.list = zend_ast_list_add($1.list, $2.ast); }
+	|	/* empty */ { $$.list = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
 namespace_name:
@@ -273,9 +273,9 @@ top_statement:
 
 use_declarations:
 		use_declarations ',' use_declaration
-			{ $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
+			{ $$.list = zend_ast_list_add($1.list, $3.ast); }
 	|	use_declaration
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_USE, $1.ast); }
+			{ $$.list = zend_ast_create_list(1, ZEND_AST_USE, $1.ast); }
 ;
 
 use_declaration:
@@ -290,16 +290,15 @@ use_declaration:
 ;
 
 const_list:
-		const_list ',' const_decl { $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
-	|	const_decl
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_CONST_DECL, $1.ast); }
+		const_list ',' const_decl { $$.list = zend_ast_list_add($1.list, $3.ast); }
+	|	const_decl { $$.list = zend_ast_create_list(1, ZEND_AST_CONST_DECL, $1.ast); }
 ;
 
 inner_statement_list:
 		inner_statement_list inner_statement
-			{ $$.ast = zend_ast_dynamic_add($1.ast, $2.ast); }
+			{ $$.list = zend_ast_list_add($1.list, $2.ast); }
 	|	/* empty */
-			{ $$.ast = zend_ast_create_dynamic(ZEND_AST_STMT_LIST); }
+			{ $$.list = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
 
@@ -361,9 +360,9 @@ unticked_statement:
 
 catch_list:
 		/* empty */
-			{ $$.ast = zend_ast_create_dynamic(ZEND_AST_CATCH_LIST); }
+			{ $$.list = zend_ast_create_list(0, ZEND_AST_CATCH_LIST); }
 	|	catch_list T_CATCH '(' name T_VARIABLE ')' '{' inner_statement_list '}'
-			{ $$.ast = zend_ast_dynamic_add($1.ast,
+			{ $$.list = zend_ast_list_add($1.list,
 			      zend_ast_create_ternary(ZEND_AST_CATCH, $4.ast, $5.ast, $8.ast)); }
 ;
 
@@ -373,8 +372,8 @@ finally_statement:
 ;
 
 unset_variables:
-		unset_variable { $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_STMT_LIST, $1.ast); }
-	|	unset_variables ',' unset_variable { $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
+		unset_variable { $$.list = zend_ast_create_list(1, ZEND_AST_STMT_LIST, $1.ast); }
+	|	unset_variables ',' unset_variable { $$.list = zend_ast_list_add($1.list, $3.ast); }
 ;
 
 unset_variable:
@@ -469,12 +468,12 @@ switch_case_list:
 ;
 
 case_list:
-		/* empty */ { $$.ast = zend_ast_create_dynamic(ZEND_AST_SWITCH_LIST); }
+		/* empty */ { $$.list = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
 	|	case_list T_CASE expr case_separator inner_statement_list
-			{ $$.ast = zend_ast_dynamic_add($1.ast,
+			{ $$.list = zend_ast_list_add($1.list,
 			      zend_ast_create_binary(ZEND_AST_SWITCH_CASE, $3.ast, $5.ast)); }
 	|	case_list T_DEFAULT case_separator inner_statement_list
-			{ $$.ast = zend_ast_dynamic_add($1.ast,
+			{ $$.list = zend_ast_list_add($1.list,
 			      zend_ast_create_binary(ZEND_AST_SWITCH_CASE, NULL, $4.ast)); }
 ;
 
@@ -492,47 +491,47 @@ while_statement:
 
 if_stmt_without_else:
 		T_IF parenthesis_expr statement
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_IF,
+			{ $$.list = zend_ast_create_list(1, ZEND_AST_IF,
 			      zend_ast_create_binary(ZEND_AST_IF_ELEM, $2.ast, $3.ast)); }
 	|	if_stmt_without_else T_ELSEIF parenthesis_expr statement
-			{ $$.ast = zend_ast_dynamic_add($1.ast,
+			{ $$.list = zend_ast_list_add($1.list,
 			      zend_ast_create_binary(ZEND_AST_IF_ELEM, $3.ast, $4.ast)); }
 ;
 
 if_stmt:
 		if_stmt_without_else { $$.ast = $1.ast; }
 	|	if_stmt_without_else T_ELSE statement
-			{ $$.ast = zend_ast_dynamic_add($1.ast,
+			{ $$.list = zend_ast_list_add($1.list,
 			      zend_ast_create_binary(ZEND_AST_IF_ELEM, NULL, $3.ast)); }
 ;
 
 alt_if_stmt_without_else:
 		T_IF parenthesis_expr ':' inner_statement_list
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_IF,
+			{ $$.list = zend_ast_create_list(1, ZEND_AST_IF,
 			      zend_ast_create_binary(ZEND_AST_IF_ELEM, $2.ast, $4.ast)); }
 	|	alt_if_stmt_without_else T_ELSEIF parenthesis_expr ':' inner_statement_list
-			{ $$.ast = zend_ast_dynamic_add($1.ast,
+			{ $$.list = zend_ast_list_add($1.list,
 			      zend_ast_create_binary(ZEND_AST_IF_ELEM, $3.ast, $5.ast)); }
 ;
 
 alt_if_stmt:
 		alt_if_stmt_without_else T_ENDIF ';' { $$.ast = $1.ast; }
 	|	alt_if_stmt_without_else T_ELSE ':' inner_statement_list T_ENDIF ';'
-			{ $$.ast = zend_ast_dynamic_add($1.ast,
+			{ $$.list = zend_ast_list_add($1.list,
 			      zend_ast_create_binary(ZEND_AST_IF_ELEM, NULL, $4.ast)); }
 ;
 
 parameter_list:
 		non_empty_parameter_list { $$.ast = $1.ast; }
-	|	/* empty */	{ $$.ast = zend_ast_create_dynamic(ZEND_AST_PARAM_LIST); }
+	|	/* empty */	{ $$.list = zend_ast_create_list(0, ZEND_AST_PARAM_LIST); }
 ;
 
 
 non_empty_parameter_list:
 		parameter
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_PARAM_LIST, $1.ast); }
+			{ $$.list = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, $1.ast); }
 	|	non_empty_parameter_list ',' parameter
-			{ $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
+			{ $$.list = zend_ast_list_add($1.list, $3.ast); }
 ;
 
 parameter:
@@ -553,15 +552,15 @@ optional_type:
 ;
 
 argument_list:
-		'(' ')'	{ $$.ast = zend_ast_create_dynamic(ZEND_AST_ARG_LIST); }
+		'(' ')'	{ $$.list = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
 	|	'(' non_empty_argument_list ')' { $$.ast = $2.ast; }
 ;
 
 non_empty_argument_list:
 		argument
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_ARG_LIST, $1.ast); }
+			{ $$.list = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1.ast); }
 	|	non_empty_argument_list ',' argument
-			{ $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
+			{ $$.list = zend_ast_list_add($1.list, $3.ast); }
 ;
 
 argument:
@@ -572,8 +571,8 @@ argument:
 ;
 
 global_var_list:
-		global_var_list ',' global_var { $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
-	|	global_var { $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_STMT_LIST, $1.ast); }
+		global_var_list ',' global_var { $$.list = zend_ast_list_add($1.list, $3.ast); }
+	|	global_var { $$.list = zend_ast_create_list(1, ZEND_AST_STMT_LIST, $1.ast); }
 ;
 
 global_var:
@@ -584,8 +583,8 @@ global_var:
 
 
 static_var_list:
-		static_var_list ',' static_var { $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
-	|	static_var { $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_STMT_LIST, $1.ast); }
+		static_var_list ',' static_var { $$.list = zend_ast_list_add($1.list, $3.ast); }
+	|	static_var { $$.list = zend_ast_create_list(1, ZEND_AST_STMT_LIST, $1.ast); }
 ;
 
 static_var:
@@ -598,9 +597,9 @@ static_var:
 
 class_statement_list:
 		class_statement_list class_statement
-			{ $$.ast = zend_ast_dynamic_add($1.ast, $2.ast); }
+			{ $$.list = zend_ast_list_add($1.list, $2.ast); }
 	|	/* empty */
-			{ $$.ast = zend_ast_create_dynamic(ZEND_AST_STMT_LIST); }
+			{ $$.list = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
 
@@ -619,8 +618,8 @@ class_statement:
 ;
 
 name_list:
-		name { $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_NAME_LIST, $1.ast); }
-	|	name_list ',' name { $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
+		name { $$.list = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1.ast); }
+	|	name_list ',' name { $$.list = zend_ast_list_add($1.list, $3.ast); }
 ;
 
 trait_adaptations:
@@ -631,9 +630,9 @@ trait_adaptations:
 
 trait_adaptation_list:
 		trait_adaptation
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_TRAIT_ADAPTATIONS, $1.ast); }
+			{ $$.list = zend_ast_create_list(1, ZEND_AST_TRAIT_ADAPTATIONS, $1.ast); }
 	|	trait_adaptation_list trait_adaptation
-			{ $$.ast = zend_ast_dynamic_add($1.ast, $2.ast); }
+			{ $$.list = zend_ast_list_add($1.list, $2.ast); }
 ;
 
 trait_adaptation:
@@ -703,8 +702,8 @@ member_modifier:
 ;
 
 property_list:
-		property_list ',' property { $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
-	|	property { $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_PROP_DECL, $1.ast); }
+		property_list ',' property { $$.list = zend_ast_list_add($1.list, $3.ast); }
+	|	property { $$.list = zend_ast_create_list(1, ZEND_AST_PROP_DECL, $1.ast); }
 ;
 
 property:
@@ -714,9 +713,9 @@ property:
 ;
 
 class_const_list:
-		class_const_list ',' const_decl { $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
+		class_const_list ',' const_decl { $$.list = zend_ast_list_add($1.list, $3.ast); }
 	|	const_decl
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_CLASS_CONST_DECL, $1.ast); }
+			{ $$.list = zend_ast_create_list(1, ZEND_AST_CLASS_CONST_DECL, $1.ast); }
 ;
 
 const_decl:
@@ -725,8 +724,8 @@ const_decl:
 ;
 
 echo_expr_list:
-		echo_expr_list ',' echo_expr { $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
-	|	echo_expr { $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_STMT_LIST, $1.ast); }
+		echo_expr_list ',' echo_expr { $$.list = zend_ast_list_add($1.list, $3.ast); }
+	|	echo_expr { $$.list = zend_ast_create_list(1, ZEND_AST_STMT_LIST, $1.ast); }
 ;
 echo_expr:
 	expr { $$.ast = zend_ast_create_unary(ZEND_AST_ECHO, $1.ast); }
@@ -738,8 +737,8 @@ for_expr:
 ;
 
 non_empty_for_expr:
-		non_empty_for_expr ',' expr { $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
-	|	expr { $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_EXPR_LIST, $1.ast); }
+		non_empty_for_expr ',' expr { $$.list = zend_ast_list_add($1.list, $3.ast); }
+	|	expr { $$.list = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1.ast); }
 ;
 
 new_expr:
@@ -891,8 +890,8 @@ lexical_vars:
 ;
 
 lexical_var_list:
-		lexical_var_list ',' lexical_var { $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
-	|	lexical_var { $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_CLOSURE_USES, $1.ast); }
+		lexical_var_list ',' lexical_var { $$.list = zend_ast_list_add($1.list, $3.ast); }
+	|	lexical_var { $$.list = zend_ast_create_list(1, ZEND_AST_CLOSURE_USES, $1.ast); }
 ;
 
 lexical_var:
@@ -940,7 +939,7 @@ backticks_expr:
 
 
 ctor_arguments:
-		/* empty */	{ $$.ast = zend_ast_create_dynamic(ZEND_AST_ARG_LIST); }
+		/* empty */	{ $$.list = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
 	|	argument_list { $$.ast = $1.ast; }
 ;
 
@@ -1069,9 +1068,9 @@ member_name:
 
 assignment_list:
 		assignment_list ',' assignment_list_element
-			{ $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
+			{ $$.list = zend_ast_list_add($1.list, $3.ast); }
 	|	assignment_list_element
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_LIST, $1.ast); }
+			{ $$.list = zend_ast_create_list(1, ZEND_AST_LIST, $1.ast); }
 ;
 
 assignment_list_element:
@@ -1082,15 +1081,15 @@ assignment_list_element:
 
 
 array_pair_list:
-		/* empty */ { $$.ast = zend_ast_create_dynamic(ZEND_AST_ARRAY); }
+		/* empty */ { $$.list = zend_ast_create_list(0, ZEND_AST_ARRAY); }
 	|	non_empty_array_pair_list possible_comma { $$.ast = $1.ast; }
 ;
 
 non_empty_array_pair_list:
 		non_empty_array_pair_list ',' array_pair
-			{ $$.ast = zend_ast_dynamic_add($1.ast, $3.ast); }
+			{ $$.list = zend_ast_list_add($1.list, $3.ast); }
 	|	array_pair
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_ARRAY, $1.ast); }
+			{ $$.list = zend_ast_create_list(1, ZEND_AST_ARRAY, $1.ast); }
 ;
 
 array_pair:
@@ -1105,14 +1104,13 @@ array_pair:
 
 encaps_list:
 		encaps_list encaps_var
-			{ $$.ast = zend_ast_dynamic_add($1.ast, $2.ast); }
+			{ $$.list = zend_ast_list_add($1.list, $2.ast); }
 	|	encaps_list T_ENCAPSED_AND_WHITESPACE
-			{ $$.ast = zend_ast_dynamic_add($1.ast, $2.ast); }
+			{ $$.list = zend_ast_list_add($1.list, $2.ast); }
 	|	encaps_var
-			{ $$.ast = zend_ast_create_dynamic_and_add(ZEND_AST_ENCAPS_LIST, $1.ast); }
+			{ $$.list = zend_ast_create_list(1, ZEND_AST_ENCAPS_LIST, $1.ast); }
 	|	T_ENCAPSED_AND_WHITESPACE encaps_var
-			{ $$.ast = zend_ast_dynamic_add(zend_ast_create_dynamic_and_add(
-			      ZEND_AST_ENCAPS_LIST, $1.ast), $2.ast); }
+			{ $$.list = zend_ast_create_list(2, ZEND_AST_ENCAPS_LIST, $1.ast, $2.ast); }
 ;
 
 encaps_var:

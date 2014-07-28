@@ -6873,7 +6873,7 @@ void zend_compile_shell_exec(znode *result, zend_ast *ast TSRMLS_DC) {
 
 	ZVAL_STRING(&fn_name, "shell_exec");
 	name_ast = zend_ast_create_zval(&fn_name);
-	args_ast = zend_ast_dynamic_add(zend_ast_create_dynamic(ZEND_AST_ARG_LIST), expr_ast);
+	args_ast = (zend_ast *) zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast);
 	call_ast = zend_ast_create_binary(ZEND_AST_CALL, name_ast, args_ast);
 
 	zend_compile_expr(result, call_ast TSRMLS_CC);

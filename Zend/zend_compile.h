@@ -100,6 +100,7 @@ static inline znode *zend_ast_get_znode(zend_ast *ast) {
 
 typedef union _zend_parser_stack_elem {
 	zend_ast *ast;
+	zend_ast_list *list;
 	zend_string *str;
 	zend_ulong num;
 } zend_parser_stack_elem;
