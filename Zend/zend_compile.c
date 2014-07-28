@@ -200,7 +200,7 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;
 	CG(start_lineno) = 0;
-	ZVAL_UNDEF(&CG(current_namespace));
+	CG(current_namespace) = NULL;
 	CG(in_namespace) = 0;
 	CG(has_bracketed_namespaces) = 0;
 	CG(current_import) = NULL;
@@ -660,8 +660,8 @@ zend_string *zend_concat_names(char *name1, size_t name1_len, char *name2, size_
 }
 
 zend_string *zend_prefix_with_ns(zend_string *name TSRMLS_DC) {
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		zend_string *ns = Z_STR(CG(current_namespace));
+	if (CG(current_namespace)) {
+		zend_string *ns = CG(current_namespace);
 		return zend_concat_names(ns->val, ns->len, name->val, name->len);
 	} else {
 		return STR_COPY(name);
@@ -3129,9 +3129,9 @@ static void zend_reset_import_tables(TSRMLS_D) {
 static void zend_end_namespace(TSRMLS_D) {
 	CG(in_namespace) = 0;
 	zend_reset_import_tables(TSRMLS_C);
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		zval_dtor(&CG(current_namespace));
-		ZVAL_UNDEF(&CG(current_namespace));
+	if (CG(current_namespace)) {
+		STR_RELEASE(CG(current_namespace));
+		CG(current_namespace) = NULL;
 	}
 }
 
@@ -4042,7 +4042,7 @@ zend_bool zend_compile_function_name(znode *name_node, zend_ast *name_ast TSRMLS
 	ZVAL_STR(&name_node->u.constant, zend_resolve_function_name(
 		orig_name, name_ast->attr, &is_fully_qualified TSRMLS_CC));
 
-	return !is_fully_qualified && Z_TYPE(CG(current_namespace)) != IS_UNDEF;
+	return !is_fully_qualified && CG(current_namespace);
 }
 
 void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast TSRMLS_DC) {
@@ -5908,9 +5908,8 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 		import_name = zend_hash_find_ptr(CG(current_import), lcname);
 	}
 
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		name = zend_concat_names(Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)),
-			name->val, name->len);
+	if (CG(current_namespace)) {
+		name = zend_prefix_with_ns(name TSRMLS_CC);
 
 		STR_RELEASE(lcname);
 		lcname = STR_ALLOC(name->len, 0);
@@ -6095,8 +6094,7 @@ static void zend_check_already_in_use(
 void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_uint i;
-	zend_string *current_ns = Z_TYPE(CG(current_namespace)) != IS_UNDEF
-		? Z_STR(CG(current_namespace)) : NULL;
+	zend_string *current_ns = CG(current_namespace);
 	zend_uint type = ast->attr;
 	HashTable *current_import = zend_get_import_ht(type TSRMLS_CC);
 	zend_bool case_sensitive = type == T_CONST;
@@ -6255,7 +6253,7 @@ void zend_compile_namespace(zend_ast *ast TSRMLS_DC) {
 
 	/* handle mixed syntax declaration or nested namespaces */
 	if (!CG(has_bracketed_namespaces)) {
-		if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+		if (CG(current_namespace)) {
 			/* previous namespace declarations were unbracketed */
 			if (with_bracket) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot mix bracketed namespace declarations "
@@ -6267,12 +6265,12 @@ void zend_compile_namespace(zend_ast *ast TSRMLS_DC) {
 		if (!with_bracket) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot mix bracketed namespace declarations "
 				"with unbracketed namespace declarations");
-		} else if (Z_TYPE(CG(current_namespace)) != IS_UNDEF || CG(in_namespace)) {
+		} else if (CG(current_namespace) || CG(in_namespace)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Namespace declarations cannot be nested");
 		}
 	}
 
-	if (((!with_bracket && Z_TYPE(CG(current_namespace)) == IS_UNDEF)
+	if (((!with_bracket && !CG(current_namespace))
 		 || (with_bracket && !CG(has_bracketed_namespaces))) && CG(active_op_array)->last > 0
 	) {
 		/* ignore ZEND_EXT_STMT and ZEND_TICKS */
@@ -6288,8 +6286,8 @@ void zend_compile_namespace(zend_ast *ast TSRMLS_DC) {
 		}
 	}
 
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		zval_dtor(&CG(current_namespace));
+	if (CG(current_namespace)) {
+		STR_RELEASE(CG(current_namespace));
 	}
 
 	if (name_ast) {
@@ -6299,9 +6297,9 @@ void zend_compile_namespace(zend_ast *ast TSRMLS_DC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", name->val);
 		}
 
-		ZVAL_STR(&CG(current_namespace), STR_COPY(name));
+		CG(current_namespace) = STR_COPY(name);
 	} else {
-		ZVAL_UNDEF(&CG(current_namespace));
+		CG(current_namespace) = NULL;
 	}
 
 	zend_reset_import_tables(TSRMLS_C);
@@ -6809,7 +6807,7 @@ void zend_compile_const(znode *result, zend_ast *ast TSRMLS_DC) {
 			CG(active_op_array), &resolved_name, 0 TSRMLS_CC);
 	} else {
 		opline->extended_value = IS_CONSTANT_UNQUALIFIED;
-		if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
+		if (CG(current_namespace)) {
 			opline->extended_value |= IS_CONSTANT_IN_NAMESPACE;
 			opline->op2.constant = zend_add_const_name_literal(
 				CG(active_op_array), &resolved_name, 1 TSRMLS_CC);
@@ -6985,8 +6983,8 @@ zend_bool zend_try_ct_compile_magic_const(zval *zv, zend_ast *ast TSRMLS_DC) {
 			}
 			break;
 		case T_NS_C:
-			if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-				ZVAL_DUP(zv, &CG(current_namespace));
+			if (CG(current_namespace)) {
+				ZVAL_STR(zv, STR_COPY(CG(current_namespace)));
 			} else {
 				ZVAL_EMPTY_STRING(zv);
 			}

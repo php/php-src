@@ -115,7 +115,7 @@ struct _zend_compiler_globals {
 
 	zend_uint compiler_options; /* set of ZEND_COMPILE_* constants */
 
-	zval       current_namespace;
+	zend_string *current_namespace;
 	HashTable *current_import;
 	HashTable *current_import_function;
 	HashTable *current_import_const;
