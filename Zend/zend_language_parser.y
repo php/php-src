@@ -647,11 +647,9 @@ trait_precedence:
 
 trait_alias:
 		trait_method_reference T_AS trait_modifiers T_STRING
-			{ $$.ast = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS,
-			      $3.num, $1.ast, $4.ast); }
+			{ $$.ast = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, $3.num, $1.ast, $4.ast); }
 	|	trait_method_reference T_AS member_modifier
-			{ $$.ast = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS,
-			      $3.num, $1.ast, NULL); }
+			{ $$.ast = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, $3.num, $1.ast, NULL); }
 ;
 
 trait_method_reference:
