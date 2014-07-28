@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
     (pacho@gentoo.org, Remi)
 
+- OpenSSL:
+  . Fixed missing type checks in OpenSSL options (Yussuf Khalil, Stas).
+
 - readline:
   . Fixed bug #55496 (Interactive mode doesn't force a newline before the
     prompt). (Bob, Johannes)
@@ -17,9 +20,6 @@ PHP                                                                        NEWS
 
 - Sessions:
   . Fixed missing type checks in php_session_create_id (Yussuf Khalil, Stas).
-
-- OpenSSL:
-  . Fixed missing type checks in OpenSSL options (Yussuf Khalil, Stas).
 
 24 Jul 2014, PHP 5.5.15
 
