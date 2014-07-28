@@ -566,14 +566,6 @@ void zend_stop_lexing(TSRMLS_D) {
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
 }
 
-static void zend_do_op_data(zend_op *data_op, znode *value TSRMLS_DC) /* {{{ */
-{
-	data_op->opcode = ZEND_OP_DATA;
-	SET_NODE(data_op->op1, value);
-	SET_UNUSED(data_op->op2);
-}
-/* }}} */
-
 void zend_do_abstract_method(const znode *function_name, znode *modifiers, const znode *body TSRMLS_DC) /* {{{ */
 {
 	char *method_type;
@@ -3498,6 +3490,10 @@ static void zend_emit_tick(TSRMLS_D) {
 	opline->extended_value = Z_LVAL(CG(declarables).ticks);
 }
 
+static zend_op *zend_emit_op_data(znode *value TSRMLS_DC) {
+	return emit_op(NULL, ZEND_OP_DATA, value, NULL TSRMLS_CC);
+}
+
 static zend_uint zend_emit_jump(zend_uint opnum_target TSRMLS_DC) {
 	zend_uint opnum = get_next_op_number(CG(active_op_array));
 	zend_op *opline = emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
@@ -3924,19 +3920,15 @@ void zend_compile_assign(znode *result, zend_ast *ast TSRMLS_DC) {
 			opline = zend_compile_dim_common(result, var_ast, BP_VAR_W TSRMLS_CC);
 			opline->opcode = ZEND_ASSIGN_DIM;
 
-			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-			zend_do_op_data(opline, &expr_node TSRMLS_CC);
+			opline = zend_emit_op_data(&expr_node TSRMLS_CC);
 			opline->op2.var = get_temporary_variable(CG(active_op_array));
 			opline->op2_type = IS_VAR;
-			SET_UNUSED(opline->result);
 			return;
 		case ZEND_AST_PROP:
 			opline = zend_compile_prop_common(result, var_ast, BP_VAR_W TSRMLS_CC);
 			opline->opcode = ZEND_ASSIGN_OBJ;
 
-			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-			zend_do_op_data(opline, &expr_node TSRMLS_CC);
-			SET_UNUSED(opline->result);
+			zend_emit_op_data(&expr_node TSRMLS_CC);
 			return;
 		case ZEND_AST_LIST:
 			zend_compile_list_assign(result, var_ast, &expr_node TSRMLS_CC);
@@ -4013,20 +4005,16 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast TSRMLS_DC) {
 			opline->opcode = opcode;
 			opline->extended_value = ZEND_ASSIGN_DIM;
 
-			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-			zend_do_op_data(opline, &expr_node TSRMLS_CC);
+			opline = zend_emit_op_data(&expr_node TSRMLS_CC);
 			opline->op2.var = get_temporary_variable(CG(active_op_array));
 			opline->op2_type = IS_VAR;
-			SET_UNUSED(opline->result);
 			return;
 		case ZEND_AST_PROP:
 			opline = zend_compile_prop_common(result, var_ast, BP_VAR_RW TSRMLS_CC);
 			opline->opcode = opcode;
 			opline->extended_value = ZEND_ASSIGN_OBJ;
 
-			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-			zend_do_op_data(opline, &expr_node TSRMLS_CC);
-			SET_UNUSED(opline->result);
+			opline = zend_emit_op_data(&expr_node TSRMLS_CC);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
