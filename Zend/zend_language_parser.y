@@ -255,11 +255,11 @@ top_statement:
 			  zend_stop_lexing(TSRMLS_C); }
 	|	T_NAMESPACE namespace_name ';'
 			{ $$.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, $2.ast, NULL);
-			  zend_discard_doc_comment(TSRMLS_C); }
-	|	T_NAMESPACE namespace_name { zend_discard_doc_comment(TSRMLS_C); }
+			  RESET_DOC_COMMENT(); }
+	|	T_NAMESPACE namespace_name { RESET_DOC_COMMENT(); }
 		'{' top_statement_list '}'
 			{ $$.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, $2.ast, $5.ast); }
-	|	T_NAMESPACE { zend_discard_doc_comment(TSRMLS_C); }
+	|	T_NAMESPACE { RESET_DOC_COMMENT(); }
 		'{' top_statement_list '}'
 			{ $$.ast = zend_ast_create_binary(ZEND_AST_NAMESPACE, NULL, $4.ast); }
 	|	T_USE use_declarations ';'
@@ -607,7 +607,7 @@ class_statement:
 		variable_modifiers property_list ';'
 			{ $$.ast = $2.ast; $$.ast->attr = $1.num; }
 	|	T_CONST class_const_list ';'
-			{ $$.ast = $2.ast; zend_discard_doc_comment(TSRMLS_C); }
+			{ $$.ast = $2.ast; RESET_DOC_COMMENT(); }
 	|	T_USE name_list trait_adaptations
 			{ $$.ast = zend_ast_create_binary(ZEND_AST_USE_TRAIT, $2.ast, $3.ast); }
 	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')'

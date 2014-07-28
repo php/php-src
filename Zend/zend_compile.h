@@ -40,15 +40,13 @@
 #define INC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count++); }
 #define DEC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count--); }
 #define HANDLE_INTERACTIVE()  if (CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) { execute_new_code(TSRMLS_C); }
-#define DO_TICKS()            if (Z_LVAL(CG(declarables).ticks)) { zend_do_ticks(TSRMLS_C); }
 
-#define RESET_DOC_COMMENT()        \
-    {                              \
-        if (CG(doc_comment)) {     \
-          STR_RELEASE(CG(doc_comment));  \
-          CG(doc_comment) = NULL;  \
-        }                          \
-    }
+#define RESET_DOC_COMMENT() do { \
+	if (CG(doc_comment)) { \
+		STR_RELEASE(CG(doc_comment)); \
+		CG(doc_comment) = NULL; \
+	} \
+} while (0)
 
 typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
@@ -495,8 +493,6 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 void zend_do_early_binding(TSRMLS_D);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS_DC);
 
-void zend_do_halt_compiler_register(TSRMLS_D);
-
 /* Functions for a null terminated pointer list, used for traits parsing and compilation */
 void zend_init_list(void *result, void *item TSRMLS_DC);
 void zend_add_to_list(void *result, void *item TSRMLS_DC);
@@ -504,8 +500,6 @@ void zend_add_to_list(void *result, void *item TSRMLS_DC);
 void zend_do_extended_info(TSRMLS_D);
 void zend_do_extended_fcall_begin(TSRMLS_D);
 void zend_do_extended_fcall_end(TSRMLS_D);
-
-void zend_do_ticks(TSRMLS_D);
 
 void zend_do_abstract_method(const znode *function_name, znode *modifiers, const znode *body TSRMLS_DC);
 

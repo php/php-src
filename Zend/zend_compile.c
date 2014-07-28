@@ -555,13 +555,6 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zval *zv, int un
 
 #define MAKE_NOP(opline)	{ opline->opcode = ZEND_NOP;  memset(&opline->result,0,sizeof(opline->result)); memset(&opline->op1,0,sizeof(opline->op1)); memset(&opline->op2,0,sizeof(opline->op2)); opline->result_type=opline->op1_type=opline->op2_type=IS_UNUSED;  }
 
-void zend_discard_doc_comment(TSRMLS_D) {
-	if (CG(doc_comment)) {
-		STR_RELEASE(CG(doc_comment));
-		CG(doc_comment) = NULL;
-	}
-}
-
 void zend_stop_lexing(TSRMLS_D) {
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
 }
@@ -2840,27 +2833,6 @@ ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int le
 }
 /* }}} */
 
-void zend_do_halt_compiler_register(TSRMLS_D) /* {{{ */
-{
-	zend_string *name;
-	zend_string *cfilename;
-	char haltoff[] = "__COMPILER_HALT_OFFSET__";
-
-	if (CG(has_bracketed_namespaces) && CG(in_namespace)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope");
-	}
-
-	cfilename = zend_get_compiled_filename(TSRMLS_C);
-	name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, cfilename->val, cfilename->len, 0);
-	zend_register_long_constant(name->val, name->len, zend_get_scanned_file_offset(TSRMLS_C), CONST_CS, 0 TSRMLS_CC);
-	STR_FREE(name);
-
-	if (CG(in_namespace)) {
-		zend_do_end_namespace(TSRMLS_C);
-	}
-}
-/* }}} */
-
 static zend_constant *zend_get_ct_const(zend_string *name, int all_internal_constants_substitution TSRMLS_DC) /* {{{ */
 {
 	zend_constant *c = NULL;
@@ -2993,17 +2965,6 @@ void zend_do_extended_fcall_end(TSRMLS_D) /* {{{ */
 	opline->opcode = ZEND_EXT_FCALL_END;
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
-}
-/* }}} */
-
-void zend_do_ticks(TSRMLS_D) /* {{{ */
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_TICKS;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
-	opline->extended_value = Z_LVAL(CG(declarables).ticks);
 }
 /* }}} */
 
