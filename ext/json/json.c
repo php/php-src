@@ -31,12 +31,12 @@
 #include "php_json.h"
 #include <zend_exceptions.h>
 
-/*
- * This number is an approximated number from 3 + DBL_MANT_DIG - DBL_MIN_EXP (constants are from float.h)
- *
- * The constants can vary between operation systems, so using the highest number found so far.
- */
-#define NUM_BUF_SIZE		1090
+#include <float.h>
+#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
+#define NUM_BUF_SIZE (3 + DBL_MANT_DIG - DBL_MIN_EXP)
+#else
+#define NUM_BUF_SIZE 1080
+#endif
 
 
 static PHP_MINFO_FUNCTION(json);
