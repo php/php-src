@@ -3543,7 +3543,7 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast TSRMLS_DC) {
 		result->op_type = IS_CV;
 		result->u.op.var = lookup_cv(CG(active_op_array), name TSRMLS_CC);
 
-		if (name->len == sizeof("this") - 1 && !memcmp(name->val, "this", sizeof("this") - 1)) {
+		if (zend_str_equals(name, "this")) {
 			CG(active_op_array)->this_var = result->u.op.var;
 		}
 		return SUCCESS;
@@ -3634,8 +3634,7 @@ static zend_bool is_this_fetch(zend_ast *ast) {
 	}
 
 	zval *name = zend_ast_get_zval(ast->child[0]);
-	return Z_TYPE_P(name) == IS_STRING && Z_STRLEN_P(name) == sizeof("this") - 1
-		&& !memcmp(Z_STRVAL_P(name), "this", sizeof("this") - 1);
+	return Z_TYPE_P(name) == IS_STRING && zend_str_equals(Z_STR_P(name), "this");
 }
 
 zend_op *zend_compile_prop_common(znode *result, zend_ast *ast, int type TSRMLS_DC) {
@@ -4353,11 +4352,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, int type TSRMLS_DC) 
 }
 
 zend_bool zend_is_constructor(zend_string *name) {
-	char *lcname = zend_str_tolower_dup(name->val, name->len);
-	zend_bool is_ctor = name->len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME) - 1 &&
-		!memcmp(lcname, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME) - 1);
-	efree(lcname);
-	return is_ctor;
+	return zend_str_equals_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
 }
 
 void zend_compile_static_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
@@ -5211,9 +5206,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 		if (EX_VAR_TO_NUM(var_node.u.op.var) != i) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Redefinition of parameter %s",
 				name->val);
-		} else if (name->len == sizeof("this") - 1
-		           && !memcmp(name->val, "this", sizeof("this") - 1)
-		) {
+		} else if (zend_str_equals(name, "this")) {
 			if (op_array->scope && (op_array->fn_flags & ZEND_ACC_STATIC) == 0) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 			}
