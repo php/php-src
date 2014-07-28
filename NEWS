@@ -12,6 +12,9 @@ PHP                                                                        NEWS
     (Laruence, Dmitry)
   . Implemented FR #34407 (ucwords and Title Case). (Tjerk)
 
+- COM:
+  . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
+
 - CLI server:
   . Fixed bug #66830 (Empty header causes PHP built-in web server to hang).
     (Adam)
@@ -33,6 +36,7 @@ PHP                                                                        NEWS
   . Fixed bug #67555 (Cannot build against libpq 7.3). (Adam)
 
 - OpenSSL:
+  . Fixed missing type checks in OpenSSL options (Yussuf Khalil, Stas).
   . Fixed bug #67609 (TLS connections fail behind HTTP proxy). (Daniel Lowrey)
   . Fixed broken build against OpenSSL older than 0.9.8 where ECDH unavailable.
     (Lior Kaplan)
@@ -47,6 +51,7 @@ PHP                                                                        NEWS
   . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
 
 - Session:
+  . Fixed missing type checks in php_session_create_id (Yussuf Khalil, Stas).
   . Fixed bug #66827 (Session raises E_NOTICE when session name variable is array).
     (Yasuo)
 
