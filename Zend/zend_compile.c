@@ -6171,7 +6171,7 @@ void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 				{
 					zend_function *fn = zend_hash_find_ptr(CG(function_table), lookup_name);
 					if (fn && fn->type == ZEND_USER_FUNCTION
-						&& !strcmp(fn->op_array.filename->val, CG(compiled_filename)->val)
+						&& fn->op_array.filename == CG(compiled_filename)
 					) {
 						zend_check_already_in_use(type, old_name, new_name, lookup_name);
 					}
@@ -6180,7 +6180,7 @@ void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 				case T_CONST:
 				{
 					zend_string *filename = zend_hash_find_ptr(&CG(const_filenames), lookup_name);
-					if (filename && !strcmp(filename->val, CG(compiled_filename)->val)) {
+					if (filename && filename == CG(compiled_filename)) {
 						zend_check_already_in_use(type, old_name, new_name, lookup_name);
 					}
 					break;
