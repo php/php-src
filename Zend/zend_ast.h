@@ -25,13 +25,13 @@
 
 #include "zend.h"
 
-
-#define ZEND_AST_IS_LIST_SHIFT      11
-#define ZEND_AST_NUM_CHILDREN_SHIFT 12
+#define ZEND_AST_SPECIAL_SHIFT      6
+#define ZEND_AST_IS_LIST_SHIFT      7
+#define ZEND_AST_NUM_CHILDREN_SHIFT 8
 
 enum _zend_ast_kind {
-	/* first 256 kinds are reserved for opcodes */
-	ZEND_AST_ZVAL = 256,
+	/* special nodes */
+	ZEND_AST_ZVAL = 1 << ZEND_AST_SPECIAL_SHIFT,
 	ZEND_AST_ZNODE,
 
 	/* declaration nodes */
@@ -150,7 +150,7 @@ typedef unsigned short zend_ast_kind;
 typedef unsigned short zend_ast_attr;
 
 struct _zend_ast {
-	zend_ast_kind kind; /* Type of the node (either opcode or ZEND_AST_* constant) */
+	zend_ast_kind kind; /* Type of the node (ZEND_AST_* enum constant) */
 	zend_ast_attr attr; /* Additional attribute, use depending on node type */
 	zend_uint lineno;   /* Line number */
 	zend_ast *child[1]; /* Array of children (using struct hack) */
@@ -165,6 +165,7 @@ typedef struct _zend_ast_list {
 	zend_ast *child[1];
 } zend_ast_list;
 
+/* Lineno is stored in val.u2.lineno */
 typedef struct _zend_ast_zval {
 	zend_ast_kind kind;
 	zend_ast_attr attr;
@@ -192,9 +193,8 @@ ZEND_API zend_ast *zend_ast_create(
 	zend_uint children, zend_ast_kind kind, ...);
 
 ZEND_API zend_ast *zend_ast_create_decl(
-	zend_ast_kind kind, zend_uint flags, zend_uint start_lineno, zend_uint end_lineno,
-	unsigned char *lex_pos, zend_string *doc_comment, zend_string *name,
-	zend_ast *child0, zend_ast *child1, zend_ast *child2
+	zend_ast_kind kind, zend_uint flags, zend_uint start_lineno, zend_string *doc_comment,
+	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2
 );
 
 ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind);
@@ -217,16 +217,17 @@ static inline zend_ast_list *zend_ast_get_list(zend_ast *ast) {
 	return (zend_ast_list *) ast;
 }
 
-/* Only for non-lists! */
-static inline zend_uint zend_ast_get_num_children(zend_ast *ast) {
-	return ast->kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
-}
-
 static inline zval *zend_ast_get_zval(zend_ast *ast) {
+	ZEND_ASSERT(ast->kind == ZEND_AST_ZVAL);
 	return &((zend_ast_zval *) ast)->val;
 }
 static inline zend_string *zend_ast_get_str(zend_ast *ast) {
 	return Z_STR_P(zend_ast_get_zval(ast));
+}
+
+static inline zend_uint zend_ast_get_num_children(zend_ast *ast) {
+	ZEND_ASSERT(!zend_ast_is_list(ast));
+	return ast->kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
 }
 static inline zend_uint zend_ast_get_lineno(zend_ast *ast) {
 	if (ast->kind == ZEND_AST_ZVAL) {

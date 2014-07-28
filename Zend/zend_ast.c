@@ -23,10 +23,19 @@
 #include "zend_API.h"
 #include "zend_operators.h"
 
-ZEND_API zend_ast *zend_ast_create_znode(znode *node)
-{
+static inline void *zend_ast_alloc(size_t size TSRMLS_DC) {
+	return zend_arena_alloc(&CG(ast_arena), size);
+}
+
+static inline void *zend_ast_realloc(void *old, size_t old_size, size_t new_size TSRMLS_DC) {
+	void *new = zend_ast_alloc(new_size TSRMLS_CC);
+	memcpy(new, old, old_size);
+	return new;
+}
+
+ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
 	TSRMLS_FETCH();
-	zend_ast_znode *ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast_znode));
+	zend_ast_znode *ast = zend_ast_alloc(sizeof(zend_ast_znode) TSRMLS_CC);
 	ast->kind = ZEND_AST_ZNODE;
 	ast->attr = 0;
 	ast->lineno = CG(zend_lineno);
@@ -34,10 +43,9 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node)
 	return (zend_ast *) ast;
 }
 
-ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
-{
+ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
 	TSRMLS_FETCH();
-	zend_ast_zval *ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast_zval));
+	zend_ast_zval *ast = zend_ast_alloc(sizeof(zend_ast_zval) TSRMLS_CC);
 	ast->kind = ZEND_AST_ZVAL;
 	ast->attr = attr;
 	ZVAL_COPY_VALUE(&ast->val, zv);
@@ -46,19 +54,18 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr)
 }
 
 ZEND_API zend_ast *zend_ast_create_decl(
-	zend_ast_kind kind, zend_uint flags, zend_uint start_lineno, zend_uint end_lineno,
-	unsigned char *lex_pos, zend_string *doc_comment, zend_string *name,
-	zend_ast *child0, zend_ast *child1, zend_ast *child2
+	zend_ast_kind kind, zend_uint flags, zend_uint start_lineno, zend_string *doc_comment,
+	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2
 ) {
 	TSRMLS_FETCH();
-	zend_ast_decl *ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast_decl));
+	zend_ast_decl *ast = zend_ast_alloc(sizeof(zend_ast_decl) TSRMLS_CC);
 
 	ast->kind = kind;
 	ast->attr = 0;
 	ast->start_lineno = start_lineno;
-	ast->end_lineno = end_lineno;
+	ast->end_lineno = CG(zend_lineno);
 	ast->flags = flags;
-	ast->lex_pos = lex_pos;
+	ast->lex_pos = LANG_SCNG(yy_text);
 	ast->doc_comment = doc_comment;
 	ast->name = name;
 	ast->child[0] = child0;
@@ -75,7 +82,7 @@ static zend_ast *zend_ast_create_from_va_list(
 	zend_uint i;
 	zend_ast *ast;
 	
-	ast = zend_arena_alloc(&CG(ast_arena), sizeof(zend_ast) + (children - 1) * sizeof(zend_ast *));
+	ast = zend_ast_alloc(sizeof(zend_ast) + (children - 1) * sizeof(zend_ast *) TSRMLS_CC);
 	ast->kind = kind;
 	ast->attr = attr;
 	ast->lineno = UINT_MAX;
@@ -123,11 +130,14 @@ ZEND_API zend_ast *zend_ast_create(
 	return ast;
 }
 
+size_t zend_ast_list_size(zend_uint children) {
+	return sizeof(zend_ast_list) + sizeof(zend_ast *) * (children - 1);
+}
+
 ZEND_API zend_ast *zend_ast_create_dynamic(zend_ast_kind kind) {
 	/* use 4 children as default */
 	TSRMLS_FETCH();
-	zend_ast_list *list = zend_arena_alloc(&CG(ast_arena),
-		sizeof(zend_ast_list) + sizeof(zend_ast *) * 3);
+	zend_ast_list *list = zend_ast_alloc(zend_ast_list_size(4) TSRMLS_CC);
 	list->kind = kind;
 	list->attr = 0;
 	list->lineno = CG(zend_lineno);
@@ -139,16 +149,12 @@ static inline zend_bool is_power_of_two(unsigned short n) {
 	return n == (n & -n);
 }
 
-ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op)
-{
+ZEND_API zend_ast *zend_ast_dynamic_add(zend_ast *ast, zend_ast *op) {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	if (list->children >= 4 && is_power_of_two(list->children)) {
 		TSRMLS_FETCH();
-		size_t old_size = sizeof(zend_ast_list) + sizeof(zend_ast *) * (list->children - 1);
-		zend_ast_list *new_list = zend_arena_alloc(&CG(ast_arena),
-			sizeof(zend_ast_list) + sizeof(zend_ast *) * (list->children * 2 - 1));
-		memcpy(new_list, list, old_size);
-		list = new_list;
+		list = zend_ast_realloc(list,
+			zend_ast_list_size(list->children), zend_ast_list_size(list->children * 2) TSRMLS_CC);
 	}
 	list->child[list->children++] = op;
 	return (zend_ast *) list;

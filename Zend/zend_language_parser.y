@@ -385,9 +385,8 @@ function_declaration_statement:
 	function returns_ref T_STRING '(' parameter_list ')'
 		{ $$.str = CG(doc_comment); CG(doc_comment) = NULL; }
 	'{' inner_statement_list '}'
-		{ $$.ast = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2.num,
-		      $1.num, CG(zend_lineno), LANG_SCNG(yy_text), $7.str,
-			  zend_ast_get_str($3.ast), $5.ast, NULL, $9.ast); }
+		{ $$.ast = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2.num, $1.num, $7.str,
+		      zend_ast_get_str($3.ast), $5.ast, NULL, $9.ast); }
 ;
 
 is_reference:
@@ -406,16 +405,14 @@ class_declaration_statement:
 		T_STRING extends_from implements_list
 			{ $$.str = CG(doc_comment); CG(doc_comment) = NULL; }	
 		'{' class_statement_list '}'
-			{ $$.ast = zend_ast_create_decl(ZEND_AST_CLASS, $1.num, $2.num,
-			      CG(zend_lineno), LANG_SCNG(yy_text), $6.str,
+			{ $$.ast = zend_ast_create_decl(ZEND_AST_CLASS, $1.num, $2.num, $6.str,
 				  zend_ast_get_str($3.ast), $4.ast, $5.ast, $8.ast); }
 	|	T_INTERFACE
 			{ $$.num = CG(zend_lineno); }
 		T_STRING interface_extends_list
 			{ $$.str = CG(doc_comment); CG(doc_comment) = NULL; }	
 		'{' class_statement_list '}'
-			{ $$.ast = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $2.num,
-			      CG(zend_lineno), LANG_SCNG(yy_text), $5.str,
+			{ $$.ast = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $2.num, $5.str,
 				  zend_ast_get_str($3.ast), NULL, $4.ast, $7.ast); }
 ;
 
@@ -617,8 +614,7 @@ class_statement:
 	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')'
 			{ $$.str = CG(doc_comment); CG(doc_comment) = NULL; }
 		method_body
-			{ $$.ast = zend_ast_create_decl(ZEND_AST_METHOD, $3.num | $1.num,
-			      $2.num, CG(zend_lineno), LANG_SCNG(yy_text), $8.str,
+			{ $$.ast = zend_ast_create_decl(ZEND_AST_METHOD, $3.num | $1.num, $2.num, $8.str,
 				  zend_ast_get_str($4.ast), $6.ast, NULL, $9.ast); }
 ;
 
@@ -869,15 +865,13 @@ expr_without_variable:
 	|	function returns_ref '(' parameter_list ')' lexical_vars
 			{ $$.str = CG(doc_comment); CG(doc_comment) = NULL; }
 		'{' inner_statement_list '}'
-			{ $$.ast = zend_ast_create_decl(ZEND_AST_CLOSURE, $2.num,
-			      $1.num, CG(zend_lineno), LANG_SCNG(yy_text), $7.str,
+			{ $$.ast = zend_ast_create_decl(ZEND_AST_CLOSURE, $2.num, $1.num, $7.str,
 				  STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
 			      $4.ast, $6.ast, $9.ast); }
 	|	T_STATIC function returns_ref '(' parameter_list ')' lexical_vars
 			{ $$.str = CG(doc_comment); CG(doc_comment) = NULL; }
 		'{' inner_statement_list '}'
-			{ $$.ast = zend_ast_create_decl(ZEND_AST_CLOSURE,
-			      $3.num | ZEND_ACC_STATIC, $2.num, CG(zend_lineno), LANG_SCNG(yy_text),
+			{ $$.ast = zend_ast_create_decl(ZEND_AST_CLOSURE, $3.num | ZEND_ACC_STATIC, $2.num,
 			      $8.str, STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
 			      $5.ast, $7.ast, $10.ast); }
 ;
