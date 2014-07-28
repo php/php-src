@@ -284,7 +284,7 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC);
 
 void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
 
-#define IS_SQL_LONG(x) (x == SQL_LONGVARBINARY || x == SQL_LONGVARCHAR)
+#define IS_SQL_LONG(x) (x == SQL_LONGVARBINARY || x == SQL_LONGVARCHAR || x == SQL_WVARCHAR || x == SQL_WLONGVARCHAR)
 #define IS_SQL_BINARY(x) (x == SQL_BINARY || x == SQL_VARBINARY || x == SQL_LONGVARBINARY)
 
 #ifdef ZTS

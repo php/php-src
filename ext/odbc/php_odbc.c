@@ -780,6 +780,8 @@ PHP_MINIT_FUNCTION(odbc)
 	REGISTER_LONG_CONSTANT("SQL_TYPE_DATE", SQL_TYPE_DATE, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("SQL_TYPE_TIME", SQL_TYPE_TIME, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("SQL_TYPE_TIMESTAMP", SQL_TYPE_TIMESTAMP, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_TYPE_WVARCHAR", SQL_TYPE_WVARCHAR, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_TYPE_WLONGVARCHAR", SQL_TYPE_WLONGVARCHAR, CONST_PERSISTENT | CONST_CS);
 
 	/*
 	 * SQLSpecialColumns values
@@ -966,6 +968,8 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 			case SQL_VARBINARY:
 			case SQL_LONGVARBINARY:
 			case SQL_LONGVARCHAR:
+			case SQL_WVARCHAR:
+			case SQL_WLONGVARCHAR:
 				result->values[i].value = NULL;
 				break;
 				
@@ -1724,6 +1728,8 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (result->binmode == 1) {
 					sql_c_type = SQL_C_BINARY;
 				}
+			case SQL_WVARCHAR:
+			case SQL_WLONGVARCHAR:
 			case SQL_LONGVARCHAR:
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
 					Z_STRVAL_P(tmp) = STR_EMPTY_ALLOC();
@@ -1876,6 +1882,8 @@ PHP_FUNCTION(odbc_fetch_into)
 					break;
 				}
 				if (result->binmode == 1) sql_c_type = SQL_C_BINARY; 
+			case SQL_WVARCHAR:
+			case SQL_WLONGVARCHAR:
 			case SQL_LONGVARCHAR:
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
 					Z_STRVAL_P(tmp) = STR_EMPTY_ALLOC();
@@ -2095,6 +2103,8 @@ PHP_FUNCTION(odbc_result)
 				break; 
 			}
 		case SQL_LONGVARCHAR:
+		case SQL_WVARCHAR:
+		case SQL_WLONGVARCHAR:
 			if (IS_SQL_LONG(result->values[field_ind].coltype)) {
 				if (result->longreadlen <= 0) {
 				   break;
@@ -2132,7 +2142,9 @@ PHP_FUNCTION(odbc_result)
 			}
 			/* Reduce fieldlen by 1 if we have char data. One day we might 
 			   have binary strings... */
-			if (result->values[field_ind].coltype == SQL_LONGVARCHAR) {
+			if ((result->values[field_ind].coltype == SQL_LONGVARCHAR) ||
+			    (result->values[field_ind].coltype == SQL_WVARCHAR) ||
+			    (result->values[field_ind].coltype == SQL_WLONGVARCHAR)) {
 				fieldsize -= 1;
 			}
 			/* Don't duplicate result, saves one emalloc.
@@ -2247,6 +2259,8 @@ PHP_FUNCTION(odbc_result_all)
 						break;
 					}
 					if (result->binmode <= 1) sql_c_type = SQL_C_BINARY; 
+				case SQL_WVARCHAR:
+				case SQL_WLONGVARCHAR:
 				case SQL_LONGVARCHAR:
 					if (IS_SQL_LONG(result->values[i].coltype) && 
 						result->longreadlen <= 0) {
