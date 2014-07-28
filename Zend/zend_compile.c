@@ -649,16 +649,6 @@ zend_uint zend_add_member_modifier(zend_uint flags, zend_uint new_flag) {
 	return new_flags;
 }
 
-void zend_do_handle_exception(TSRMLS_D) /* {{{ */
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_HANDLE_EXCEPTION;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
-}
-/* }}} */
-
 zend_string *zend_concat3(
 	char *str1, size_t str1_len, char *str2, size_t str2_len, char *str3, size_t str3_len
 ) {
@@ -4344,8 +4334,6 @@ void zend_compile_method_call(znode *result, zend_ast *ast, int type TSRMLS_DC) 
 	//zend_ast *obj_ast = ast->child[0];
 	//zend_ast *method_ast = ast->child[1];
 	zend_ast *args_ast = ast->child[2];
-
-	// TODO.AST __clone check - WTF is that done in here?!
 
 	// TODO.AST using an evil overload from AST_METHOD to AST_PROP here ...
 	zend_op *opline = zend_compile_prop_common(NULL, ast, BP_VAR_R TSRMLS_CC);

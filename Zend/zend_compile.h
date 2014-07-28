@@ -478,8 +478,6 @@ zend_uint zend_add_member_modifier(zend_uint flags, zend_uint new_flag);
 /* parser-driven code generators */
 void zend_do_free(znode *op1 TSRMLS_DC);
 
-void zend_do_handle_exception(TSRMLS_D);
-
 ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC);
@@ -501,7 +499,6 @@ void zend_do_extended_info(TSRMLS_D);
 void zend_do_extended_fcall_begin(TSRMLS_D);
 void zend_do_extended_fcall_end(TSRMLS_D);
 
-void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
 void zend_do_end_compilation(TSRMLS_D);
 
