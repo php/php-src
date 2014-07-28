@@ -3292,6 +3292,14 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 }
 /* }}} */
 
+static inline zend_bool zend_str_equals_str(zend_string *str1, zend_string *str2) {
+	return str1->len == str2->len && !memcmp(str1->val, str2->val, str2->len);
+}
+static inline zend_bool zend_str_equals_str_ci(zend_string *str1, zend_string *str2) {
+	return str1->len == str2->len
+		&& !zend_binary_strcasecmp(str1->val, str1->len, str2->val, str2->len);
+}
+
 static inline zend_bool zend_str_equals(zend_string *str, char *c) {
 	size_t len = strlen(c);
 	return str->len == len && !memcmp(str->val, c, len);
@@ -3779,7 +3787,7 @@ zend_bool zend_is_assign_to_self(zend_ast *var_ast, zend_ast *expr_ast TSRMLS_DC
 	{
 		zend_string *name1 = zval_get_string(zend_ast_get_zval(var_ast->child[0]));
 		zend_string *name2 = zval_get_string(zend_ast_get_zval(expr_ast->child[0]));
-		zend_bool result = name1->len == name2->len && !memcmp(name1->val, name2->val, name1->len);
+		zend_bool result = zend_str_equals_str(name1, name2);
 		STR_RELEASE(name1);
 		STR_RELEASE(name2);
 		return result;
@@ -5430,13 +5438,7 @@ void zend_begin_method_decl(
 			}
 		}
 	} else {
-		ALLOCA_FLAG(use_heap);
-		char *class_lcname = do_alloca(ce->name->len + 1, use_heap);
-		zend_str_tolower_copy(class_lcname, ce->name->val, ce->name->len);
-
-		if (!in_trait && lcname->len == ce->name->len
-			&& !memcmp(class_lcname, lcname->val, lcname->len)
-		) {
+		if (!in_trait && zend_str_equals_str_ci(lcname, ce->name)) {
 			if (!ce->constructor) {
 				ce->constructor = (zend_function *) op_array;
 			}
@@ -5506,8 +5508,6 @@ void zend_begin_method_decl(
 		} else if (!is_static) {
 			op_array->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 		}
-
-		free_alloca(class_lcname, use_heap);
 	}
 
 	STR_RELEASE(lcname);
@@ -5527,17 +5527,9 @@ static void zend_begin_func_decl(
 
 	if (CG(current_import_function)) {
 		zend_string *import_name = zend_hash_find_ptr(CG(current_import_function), lcname);
-		if (import_name) {
-			char *import_name_lc = zend_str_tolower_dup(import_name->val, import_name->len);
-
-			if (import_name->len != name->len
-				|| memcmp(import_name_lc, lcname->val, name->len)
-			) {
-				zend_error(E_COMPILE_ERROR, "Cannot declare function %s "
-					"because the name is already in use", name->val);
-			}
-
-			efree(import_name_lc);
+		if (import_name && !zend_str_equals_str_ci(lcname, import_name)) {
+			zend_error(E_COMPILE_ERROR, "Cannot declare function %s "
+				"because the name is already in use", name->val);
 		}
 	}
 
@@ -5930,15 +5922,9 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 		STR_ADDREF(name);
 	}
 
-	if (import_name) {
-		char *import_name_lc = zend_str_tolower_dup(import_name->val, import_name->len);
-		if (lcname->len != import_name->len
-			|| memcmp(import_name_lc, lcname->val, lcname->len)
-		) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
-				"because the name is already in use", name->val);
-		}
-		efree(import_name_lc);
+	if (import_name && !zend_str_equals_str_ci(lcname, import_name)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
+			"because the name is already in use", name->val);
 	}
 
 	name = zend_new_interned_string(name TSRMLS_CC);
@@ -6101,12 +6087,8 @@ static char *zend_get_use_type_str(zend_uint type) {
 static void zend_check_already_in_use(
 	zend_uint type, zend_string *old_name, zend_string *new_name, zend_string *check_name
 ) {
-	if (old_name->len == check_name->len) {
-		char *old_name_lc = zend_str_tolower_dup(old_name->val, old_name->len);
-		if (!memcmp(old_name_lc, check_name->val, check_name->len)) {
-			efree(old_name_lc);
-			return;
-		}
+	if (zend_str_equals_str_ci(old_name, check_name)) {
+		return;
 	}
 
 	zend_error_noreturn(E_COMPILE_ERROR, "Cannot use%s %s as %s because the name "
@@ -6253,7 +6235,7 @@ void zend_compile_const_decl(zend_ast *ast TSRMLS_DC) {
 		if (CG(current_import_const)
 			&& (import_name = zend_hash_find_ptr(CG(current_import_const), name))
 		) {
-			if (import_name->len != name->len || memcmp(import_name->val, name->val, name->len)) {
+			if (!zend_str_equals_str(import_name, name)) {
 				zend_error(E_COMPILE_ERROR, "Cannot declare const %s because "
 					"the name is already in use", name->val);
 			}
