@@ -252,18 +252,6 @@ static inline zend_ast *zend_ast_create_zval_from_long(long lval) {
 	return zend_ast_create_zval(&zv);
 }
 
-static inline zend_ast *zend_ast_create_unary(zend_ast_kind kind, zend_ast *op0) {
-	return zend_ast_create(1, kind, op0);
-}
-static inline zend_ast *zend_ast_create_binary(zend_ast_kind kind, zend_ast *op0, zend_ast *op1) {
-	return zend_ast_create(2, kind, op0, op1);
-}
-static inline zend_ast *zend_ast_create_ternary(
-	zend_ast_kind kind, zend_ast *op0, zend_ast *op1, zend_ast *op2
-) {
-	return zend_ast_create(3, kind, op0, op1, op2);
-}
-
 static inline zend_ast *zend_ast_create_binary_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(2, ZEND_AST_BINARY_OP, opcode, op0, op1);
 }
