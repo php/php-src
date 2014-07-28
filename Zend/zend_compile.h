@@ -501,8 +501,6 @@ void zend_do_extended_info(TSRMLS_D);
 void zend_do_extended_fcall_begin(TSRMLS_D);
 void zend_do_extended_fcall_end(TSRMLS_D);
 
-void zend_do_abstract_method(const znode *function_name, znode *modifiers, const znode *body TSRMLS_DC);
-
 void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
 void zend_do_end_compilation(TSRMLS_D);
