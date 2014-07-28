@@ -529,31 +529,13 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zval *zv, int un
 		op.constant = zend_add_literal(CG(active_op_array), &_c TSRMLS_CC); \
 	} while (0)
 
-#define LITERAL_STRINGL(op, str, len) do { \
-		zval _c; \
-		ZVAL_STRINGL(&_c, str, len); \
-		op.constant = zend_add_literal(CG(active_op_array), &_c TSRMLS_CC); \
-	} while (0)
-
-#define LITERAL_LONG(op, val) do { \
-		zval _c; \
-		ZVAL_LONG(&_c, val); \
-		op.constant = zend_add_literal(CG(active_op_array), &_c TSRMLS_CC); \
-	} while (0)
-
-#define LITERAL_LONG_EX(op_array, op, val) do { \
-		zval _c; \
-		ZVAL_LONG(&_c, val); \
-		op.constant = zend_add_literal(op_array, &_c TSRMLS_CC); \
-	} while (0)
-
-#define LITERAL_NULL(op) do { \
-		zval _c; \
-		ZVAL_NULL(&_c); \
-		op.constant = zend_add_literal(CG(active_op_array), &_c TSRMLS_CC); \
-	} while (0)
-
-#define MAKE_NOP(opline)	{ opline->opcode = ZEND_NOP;  memset(&opline->result,0,sizeof(opline->result)); memset(&opline->op1,0,sizeof(opline->op1)); memset(&opline->op2,0,sizeof(opline->op2)); opline->result_type=opline->op1_type=opline->op2_type=IS_UNUSED;  }
+#define MAKE_NOP(opline) do { \
+	opline->opcode = ZEND_NOP; \
+	memset(&opline->result, 0, sizeof(opline->result)); \
+	memset(&opline->op1, 0, sizeof(opline->op1)); \
+	memset(&opline->op2, 0, sizeof(opline->op2)); \
+	opline->result_type = opline->op1_type = opline->op2_type = IS_UNUSED; \
+} while (0)
 
 void zend_stop_lexing(TSRMLS_D) {
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
