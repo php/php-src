@@ -874,7 +874,7 @@ zend_string *zend_resolve_class_name(
 }
 
 zend_string *zend_resolve_class_name_ast(zend_ast *ast TSRMLS_DC) {
-	zend_string *name = Z_STR_P(zend_ast_get_zval(ast));
+	zend_string *name = zend_ast_get_str(ast);
 	return zend_resolve_class_name(name, ast->attr TSRMLS_CC);
 }
 
@@ -4135,7 +4135,7 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 }
 
 zend_bool zend_compile_function_name(znode *name_node, zend_ast *name_ast TSRMLS_DC) {
-	zend_string *orig_name = Z_STR_P(zend_ast_get_zval(name_ast));
+	zend_string *orig_name = zend_ast_get_str(name_ast);
 	zend_bool is_fully_qualified;
 
 	name_node->op_type = IS_CONST;
@@ -4252,7 +4252,7 @@ static int zend_try_compile_ct_bound_init_user_func(
 		return FAILURE;
 	}
 
-	name = Z_STR_P(zend_ast_get_zval(name_ast));
+	name = zend_ast_get_str(name_ast);
 	lcname = STR_ALLOC(name->len, 0);
 	zend_str_tolower_copy(lcname->val, name->val, name->len);
 
@@ -5198,7 +5198,7 @@ void zend_compile_declare(zend_ast *ast TSRMLS_DC) {
 		zend_ast *name_ast = declare_ast->child[0];
 		zend_ast *value_ast = declare_ast->child[1];
 
-		zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
+		zend_string *name = zend_ast_get_str(name_ast);
 		zval value_zv;
 
 		_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
@@ -5295,7 +5295,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 		zend_ast *type_ast = param_ast->child[0];
 		zend_ast *var_ast = param_ast->child[1];
 		zend_ast *default_ast = param_ast->child[2];
-		zend_string *name = Z_STR_P(zend_ast_get_zval(var_ast));
+		zend_string *name = zend_ast_get_str(var_ast);
 		zend_bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		zend_bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
 
@@ -5387,7 +5387,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 					}
 				}
 			} else {
-				zend_string *class_name = Z_STR_P(zend_ast_get_zval(type_ast));
+				zend_string *class_name = zend_ast_get_str(type_ast);
 
 				if (zend_is_const_default_class_ref(type_ast)) {
 					class_name = zend_resolve_class_name_ast(type_ast TSRMLS_CC);
@@ -5420,7 +5420,7 @@ void zend_compile_closure_uses(zend_ast *ast TSRMLS_DC) {
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *var_ast = list->child[i];
-		zend_string *name = Z_STR_P(zend_ast_get_zval(var_ast));
+		zend_string *name = zend_ast_get_str(var_ast);
 		zend_bool by_ref = var_ast->attr;
 		zval zv;
 
@@ -5783,7 +5783,7 @@ void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) {
 		zend_ast *prop_ast = list->child[i];
 		zend_ast *name_ast = prop_ast->child[0];
 		zend_ast *value_ast = prop_ast->child[1];
-		zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
+		zend_string *name = zend_ast_get_str(name_ast);
 		zval value_zv;
 
 		if (flags & ZEND_ACC_FINAL) {
@@ -5817,7 +5817,7 @@ void zend_compile_class_const_decl(zend_ast *ast TSRMLS_DC) {
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast *value_ast = const_ast->child[1];
-		zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
+		zend_string *name = zend_ast_get_str(name_ast);
 		zval value_zv;
 
 		if (ZEND_CE_IS_TRAIT(ce)) {
@@ -5851,7 +5851,7 @@ static zend_trait_method_reference *zend_compile_method_ref(zend_ast *ast TSRMLS
 
 	zend_trait_method_reference *method_ref = emalloc(sizeof(zend_trait_method_reference));
 	method_ref->ce = NULL;
-	method_ref->method_name = STR_COPY(Z_STR_P(zend_ast_get_zval(method_ast)));
+	method_ref->method_name = STR_COPY(zend_ast_get_str(method_ast));
 
 	if (class_ast) {
 		method_ref->class_name = zend_resolve_class_name_ast(class_ast TSRMLS_CC);
@@ -5909,7 +5909,7 @@ static void zend_compile_trait_alias(zend_ast *ast TSRMLS_DC) {
 	alias->modifiers = modifiers;
 
 	if (alias_ast) {
-		alias->alias = STR_COPY(Z_STR_P(zend_ast_get_zval(alias_ast)));
+		alias->alias = STR_COPY(zend_ast_get_str(alias_ast));
 	} else {
 		alias->alias = NULL;
 	}
@@ -5926,7 +5926,7 @@ void zend_compile_use_trait(zend_ast *ast TSRMLS_DC) {
 
 	for (i = 0; i < traits->children; ++i) {
 		zend_ast *trait_ast = traits->child[i];
-		zend_string *name = Z_STR_P(zend_ast_get_zval(trait_ast));
+		zend_string *name = zend_ast_get_str(trait_ast);
 
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use traits inside of interfaces. "
@@ -5976,7 +5976,7 @@ void zend_compile_implements(znode *class_node, zend_ast *ast TSRMLS_DC) {
 	zend_uint i;
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *class_ast = list->child[i];
-		zend_string *name = Z_STR_P(zend_ast_get_zval(class_ast));
+		zend_string *name = zend_ast_get_str(class_ast);
 
 		zend_op *opline;
 
@@ -6074,7 +6074,7 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 		}
 
 		if (!zend_is_const_default_class_ref(extends_ast)) {
-			zend_string *extends_name = Z_STR_P(zend_ast_get_zval(extends_ast));
+			zend_string *extends_name = zend_ast_get_str(extends_ast);
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use '%s' as class name as it is reserved", extends_name->val);
 		}
@@ -6236,11 +6236,11 @@ void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 		zend_ast *use_ast = list->child[i];
 		zend_ast *old_name_ast = use_ast->child[0];
 		zend_ast *new_name_ast = use_ast->child[1];
-		zend_string *old_name = Z_STR_P(zend_ast_get_zval(old_name_ast));
+		zend_string *old_name = zend_ast_get_str(old_name_ast);
 		zend_string *new_name, *lookup_name;
 
 		if (new_name_ast) {
-			new_name = STR_COPY(Z_STR_P(zend_ast_get_zval(new_name_ast)));
+			new_name = STR_COPY(zend_ast_get_str(new_name_ast));
 		} else {
 			/* The form "use A\B" is eqivalent to "use A\B as B" */
 			const char *p = zend_memrchr(old_name->val, '\\', old_name->len);
@@ -6338,7 +6338,7 @@ void zend_compile_const_decl(zend_ast *ast TSRMLS_DC) {
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast *value_ast = const_ast->child[1];
-		zend_string *name = Z_STR_P(zend_ast_get_zval(name_ast));
+		zend_string *name = zend_ast_get_str(name_ast);
 
 		zend_string *import_name;
 		znode name_node, value_node;
@@ -6443,7 +6443,7 @@ void zend_compile_namespace(zend_ast *ast TSRMLS_DC) {
 	}
 
 	if (name_ast) {
-		name = Z_STR_P(zend_ast_get_zval(name_ast));
+		name = zend_ast_get_str(name_ast);
 
 		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name->val, name->len)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", name->val);
@@ -6940,7 +6940,7 @@ void zend_compile_array(znode *result, zend_ast *ast TSRMLS_DC) {
 
 void zend_compile_const(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *name_ast = ast->child[0];
-	zend_string *orig_name = Z_STR_P(zend_ast_get_zval(name_ast));
+	zend_string *orig_name = zend_ast_get_str(name_ast);
 	zend_bool is_fully_qualified;
 
 	zval resolved_name;
@@ -7187,8 +7187,8 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) {
 	zend_ast *ast = *ast_ptr;
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *const_ast = ast->child[1];
-	zend_string *class_name = Z_STR_P(zend_ast_get_zval(class_ast));
-	zend_string *const_name = Z_STR_P(zend_ast_get_zval(const_ast));
+	zend_string *class_name = zend_ast_get_str(class_ast);
+	zend_string *const_name = zend_ast_get_str(const_ast);
 	zval result;
 	int fetch_type;
 
