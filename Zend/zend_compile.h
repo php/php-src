@@ -33,8 +33,6 @@
 
 #define DEBUG_ZEND 0
 
-#define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);
-
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
 #define INC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count++); }
@@ -107,7 +105,6 @@ void zend_ensure_writable_variable(const zend_ast *ast);
 void zend_compile_top_stmt(zend_ast *ast TSRMLS_DC);
 void zend_compile_stmt(zend_ast *ast TSRMLS_DC);
 void zend_compile_expr(znode *node, zend_ast *ast TSRMLS_DC);
-int zend_compile_expr_maybe_ct(znode *node, zend_ast *ast, zend_bool ct_required TSRMLS_DC);
 void zend_compile_var(znode *node, zend_ast *ast, int type TSRMLS_DC);
 void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC);
 
