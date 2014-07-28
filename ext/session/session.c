@@ -302,7 +302,8 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 	if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &array) == SUCCESS &&
 		Z_TYPE_PP(array) == IS_ARRAY &&
-		zend_hash_find(Z_ARRVAL_PP(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR"), (void **) &token) == SUCCESS
+		zend_hash_find(Z_ARRVAL_PP(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR"), (void **) &token) == SUCCESS &&
+		Z_TYPE_PP(token) == IS_STRING
 	) {
 		remote_addr = Z_STRVAL_PP(token);
 	}
