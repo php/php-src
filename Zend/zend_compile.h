@@ -554,7 +554,7 @@ void zend_do_mark_last_catch(const znode *first_catch, const znode *last_additio
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);
-int zend_get_class_fetch_type(const char *class_name, uint class_name_len);
+zend_uint zend_get_class_fetch_type(zend_string *name);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name TSRMLS_DC);
 typedef struct _zend_auto_global {

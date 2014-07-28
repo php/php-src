@@ -783,7 +783,7 @@ zend_string *zend_resolve_class_name(
 			STR_ADDREF(name);
 		}
 		/* Ensure that \self, \parent and \static are not used */
-		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name->val, name->len)) {
+		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "'\\%s' is an invalid class name", name->val);
 		}
 		return name;
@@ -3076,22 +3076,20 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 }
 /* }}} */
 
-int zend_get_class_fetch_type(const char *class_name, uint class_name_len) /* {{{ */
-{
-	if ((class_name_len == sizeof("self")-1) &&
-		!strncasecmp(class_name, "self", sizeof("self")-1)) {
+zend_uint zend_get_class_fetch_type(zend_string *name) {
+	if (name->len == sizeof("self") - 1 &&
+		!strncasecmp(name->val, "self", sizeof("self") - 1)) {
 		return ZEND_FETCH_CLASS_SELF;
-	} else if ((class_name_len == sizeof("parent")-1) &&
-		!strncasecmp(class_name, "parent", sizeof("parent")-1)) {
+	} else if (name->len == sizeof("parent") - 1 &&
+		!strncasecmp(name->val, "parent", sizeof("parent") - 1)) {
 		return ZEND_FETCH_CLASS_PARENT;
-	} else if ((class_name_len == sizeof("static")-1) &&
-		!strncasecmp(class_name, "static", sizeof("static")-1)) {
+	} else if (name->len == sizeof("static") - 1 &&
+		!strncasecmp(name->val, "static", sizeof("static") - 1)) {
 		return ZEND_FETCH_CLASS_STATIC;
 	} else {
 		return ZEND_FETCH_CLASS_DEFAULT;
 	}
 }
-/* }}} */
 
 ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var) /* {{{ */
 {
@@ -3485,8 +3483,7 @@ static zend_bool zend_can_write_to_variable(zend_ast *ast) {
 }
 
 static zend_bool zend_is_const_default_class_ref(zend_ast *name_ast) {
-	zval *name;
-	int fetch_type;
+	zend_string *name;
 
 	if (name_ast->kind != ZEND_AST_ZVAL) {
 		return 0;
@@ -3497,9 +3494,8 @@ static zend_bool zend_is_const_default_class_ref(zend_ast *name_ast) {
 		return 1;
 	}
 
-	name = zend_ast_get_zval(name_ast);
-	fetch_type = zend_get_class_fetch_type(Z_STRVAL_P(name), Z_STRLEN_P(name));
-	return fetch_type == ZEND_FETCH_CLASS_DEFAULT;
+	name = zend_ast_get_str(name_ast);
+	return ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(name);
 }
 
 static void zend_handle_numeric_op2(zend_op *opline TSRMLS_DC) {
@@ -3527,8 +3523,7 @@ static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast TSRMLS_
 	zend_op *opline;
 
 	if (name_ast->kind == ZEND_AST_ZVAL) {
-		zval *name = zend_ast_get_zval(name_ast);
-		int fetch_type = zend_get_class_fetch_type(Z_STRVAL_P(name), Z_STRLEN_P(name));
+		zend_uint fetch_type = zend_get_class_fetch_type(zend_ast_get_str(name_ast));
 
 		opline = emit_op(result, ZEND_FETCH_CLASS, NULL, NULL TSRMLS_CC);
 		opline->extended_value = fetch_type;
@@ -5847,7 +5842,7 @@ void zend_compile_use_trait(zend_ast *ast TSRMLS_DC) {
 				"%s is used in %s", name->val, ce->name->val);
 		}
 
-		switch (zend_get_class_fetch_type(name->val, name->len)) {
+		switch (zend_get_class_fetch_type(name)) {
 			case ZEND_FETCH_CLASS_SELF:
 			case ZEND_FETCH_CLASS_PARENT:
 			case ZEND_FETCH_CLASS_STATIC:
@@ -5931,7 +5926,7 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 		return;
 	}
 
-	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name->val, name->len)) {
+	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved",
 			name->val);
 	}
@@ -6339,7 +6334,7 @@ void zend_compile_namespace(zend_ast *ast TSRMLS_DC) {
 	if (name_ast) {
 		name = zend_ast_get_str(name_ast);
 
-		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name->val, name->len)) {
+		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", name->val);
 		}
 
@@ -6890,8 +6885,7 @@ void zend_compile_class_const(znode *result, zend_ast *ast TSRMLS_DC) {
 
 void zend_compile_resolve_class_name(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *name_ast = ast->child[0];
-	zval *name = zend_ast_get_zval(name_ast);
-	int fetch_type = zend_get_class_fetch_type(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	zend_uint fetch_type = zend_get_class_fetch_type(zend_ast_get_str(name_ast));
 
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
@@ -7084,7 +7078,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) {
 			"Dynamic class names are not allowed in compile-time class constant references");
 	}
 
-	fetch_type = zend_get_class_fetch_type(class_name->val, class_name->len);
+	fetch_type = zend_get_class_fetch_type(class_name);
 
 	if (ZEND_FETCH_CLASS_STATIC == fetch_type) {
 		zend_error_noreturn(E_COMPILE_ERROR,
@@ -7142,8 +7136,7 @@ void zend_compile_const_expr_const(zend_ast **ast_ptr TSRMLS_DC) {
 void zend_compile_const_expr_resolve_class_name(zend_ast **ast_ptr TSRMLS_DC) {
 	zend_ast *ast = *ast_ptr;
 	zend_ast *name_ast = ast->child[0];
-	zval *name = zend_ast_get_zval(name_ast);
-	int fetch_type = zend_get_class_fetch_type(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	zend_uint fetch_type = zend_get_class_fetch_type(zend_ast_get_str(name_ast));
 	zval result;
 
 	switch (fetch_type) {

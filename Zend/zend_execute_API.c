@@ -1467,7 +1467,7 @@ check_fetch_type:
 			}
 			return EG(current_execute_data)->called_scope;
 		case ZEND_FETCH_CLASS_AUTO: {
-				fetch_type = zend_get_class_fetch_type(class_name->val, class_name->len);
+				fetch_type = zend_get_class_fetch_type(class_name);
 				if (fetch_type!=ZEND_FETCH_CLASS_DEFAULT) {
 					goto check_fetch_type;
 				}
