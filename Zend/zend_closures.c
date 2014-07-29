@@ -70,6 +70,61 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 }
 /* }}} */
 
+/* {{{ proto mixed Closure::apply(object $to [, mixed $parameter] [, mixed $...] )
+   Call closure, binding to a given object */
+ZEND_METHOD(Closure, apply) /* {{{ */
+{
+	zval *zclosure, *newthis, *closure_result_ptr = NULL;
+	zend_closure *closure;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oo*", &zclosure, zend_ce_closure, &newthis, &fci.params, &fci.param_count) == FAILURE) {
+		RETURN_NULL();
+	}
+	
+	closure = (zend_closure *)zend_object_store_get_object(zclosure TSRMLS_CC);
+	
+	if (closure->func.common.fn_flags & ZEND_ACC_STATIC) {
+		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
+		RETURN_NULL();
+	}
+
+	if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
+		/* verify that we aren't binding internal function to a wrong object */
+		if((closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+				!instanceof_function(Z_OBJCE_P(newthis), closure->func.common.scope TSRMLS_CC)) {
+			zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", closure->func.common.scope->name, closure->func.common.function_name, Z_OBJCE_P(newthis)->name);
+			RETURN_NULL();
+		}
+	}
+
+	fci.size = sizeof(fci);
+	fci.function_table = CG(function_table);
+	fci.object_ptr = newthis;
+	fci.function_name = zclosure;
+	fci.retval_ptr_ptr = &closure_result_ptr;
+	fci.no_separation = 1;
+	fci.symbol_table = NULL;
+	
+	fci_cache.initialized = 1;
+	fci_cache.function_handler = &closure->func;
+	fci_cache.object_ptr = newthis;
+	fci_cache.calling_scope = fci_cache.called_scope = Z_OBJCE_P(newthis);
+
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == FAILURE) {
+		RETVAL_FALSE;
+	} else if (closure_result_ptr) {
+		zval_ptr_dtor(&return_value);
+		*return_value_ptr = closure_result_ptr;
+	}
+	
+	if (fci.param_count) {
+		efree(fci.params);
+	}
+}
+/* }}} */
+
 /* {{{ proto Closure Closure::bind(Closure $old, object $to [, mixed $scope = "static" ] )
    Create a closure from another one and bind to another object and scope */
 ZEND_METHOD(Closure, bind)
@@ -399,10 +454,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bind, 0, 0, 2)
 	ZEND_ARG_INFO(0, newscope)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_apply, 0, 0, 1)
+	ZEND_ARG_INFO(0, newthis)
+	ZEND_ARG_VARIADIC_INFO(0, parameters)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry closure_functions[] = {
 	ZEND_ME(Closure, __construct, NULL, ZEND_ACC_PRIVATE)
 	ZEND_ME(Closure, bind, arginfo_closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_MALIAS(Closure, bindTo, bind, arginfo_closure_bindto, ZEND_ACC_PUBLIC)
+	ZEND_ME(Closure, apply, arginfo_closure_apply, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

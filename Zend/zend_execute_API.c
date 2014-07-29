@@ -653,7 +653,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			zend_error(E_ERROR, "Corrupted fcall_info provided to zend_call_function()");
 			break;
 	}
-
+	
 	/* Initialize execute_data */
 	if (EG(current_execute_data)) {
 		execute_data = *EG(current_execute_data);
