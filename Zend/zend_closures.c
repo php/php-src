@@ -125,15 +125,16 @@ ZEND_METHOD(Closure, apply) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto Closure Closure::bind(Closure $old, object $to [, mixed $scope = "static" ] )
+/* {{{ proto Closure Closure::bind(Closure $old, object $to [, mixed $scope = "static" ] [, bool $unbound_scoped = false ] )
    Create a closure from another one and bind to another object and scope */
 ZEND_METHOD(Closure, bind)
 {
 	zval *newthis, *zclosure, *scope_arg = NULL;
 	zend_closure *closure;
 	zend_class_entry *ce, **ce_p;
+	zend_bool unbound_scoped = false;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oo!|zb", &zclosure, zend_ce_closure, &newthis, &scope_arg, &unbound_scoped) == FAILURE) {
 		RETURN_NULL();
 	}
 
@@ -182,7 +183,7 @@ ZEND_METHOD(Closure, bind)
 		ce = closure->func.common.scope;
 	}
 
-	zend_create_closure(return_value, &closure->func, ce, newthis TSRMLS_CC);
+	zend_create_closure_ex(return_value, &closure->func, ce, newthis, unbound_scoped TSRMLS_CC);
 }
 /* }}} */
 
@@ -446,12 +447,14 @@ ZEND_METHOD(Closure, __construct)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bindto, 0, 0, 1)
 	ZEND_ARG_INFO(0, newthis)
 	ZEND_ARG_INFO(0, newscope)
+	ZEND_ARG_INFO(0, unbound_scoped)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bind, 0, 0, 2)
 	ZEND_ARG_INFO(0, closure)
 	ZEND_ARG_INFO(0, newthis)
 	ZEND_ARG_INFO(0, newscope)
+	ZEND_ARG_INFO(0, unbound_scoped)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_apply, 0, 0, 1)
@@ -495,6 +498,11 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 /* }}} */
 
 ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zval *this_ptr TSRMLS_DC) /* {{{ */
+{
+	zend_create_closure_ex(res, func, scope, this_ptr, 0 TSRMLS_CC);
+}
+
+ZEND_API void zend_create_closure_ex(zval *res, zend_function *func, zend_class_entry *scope, zval *this_ptr, zend_bool unbound_scoped TSRMLS_DC) /* {{{ */
 {
 	zend_closure *closure;
 
@@ -543,15 +551,17 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 
 	closure->this_ptr = NULL;
 	/* Invariants:
-	 * If the closure is unscoped, it has no bound object.
-	 * The the closure is scoped, it's either static or it's bound */
+	 * If the closure is unscoped, it is unbound.
+	 * If the closure is scoped, it may be static, bound or unbound */
 	closure->func.common.scope = scope;
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
 		if (this_ptr && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {
 			closure->this_ptr = this_ptr;
 			Z_ADDREF_P(this_ptr);
-		} else {
+		/* We assume that a static scoped closure is desired if given NULL to bind to
+		   If an unbound scoped closure is desired, the parameter must be set to 1*/
+		} else if (!unbound_scoped) {
 			closure->func.common.fn_flags |= ZEND_ACC_STATIC;
 		}
 	}
