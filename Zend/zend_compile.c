@@ -3513,21 +3513,25 @@ static void zend_set_class_name_op1(zend_op *opline, znode *class_node TSRMLS_DC
 
 static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast TSRMLS_DC) {
 	zend_op *opline;
+	znode name_node;
+	zend_compile_expr(&name_node, name_ast TSRMLS_CC);
 
-	if (name_ast->kind == ZEND_AST_ZVAL) {
-		zend_uint fetch_type = zend_get_class_fetch_type(zend_ast_get_str(name_ast));
+	if (name_node.op_type == IS_CONST) {
+		zend_string *name = Z_STR(name_node.u.constant);
+		zend_uint fetch_type = zend_get_class_fetch_type(name);
 
 		opline = zend_emit_op(result, ZEND_FETCH_CLASS, NULL, NULL TSRMLS_CC);
 		opline->extended_value = fetch_type;
 
 		if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
+			zend_uint type = name_ast->kind == ZEND_AST_ZVAL ? name_ast->attr : ZEND_NAME_FQ;
 			opline->op2_type = IS_CONST;
 			opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
-				zend_resolve_class_name_ast(name_ast TSRMLS_CC) TSRMLS_CC);
+				zend_resolve_class_name(name, type TSRMLS_CC) TSRMLS_CC);
 		}
+
+		STR_RELEASE(name);
 	} else {
-		znode name_node;
-		zend_compile_expr(&name_node, name_ast TSRMLS_CC);
 		opline = zend_emit_op(result, ZEND_FETCH_CLASS, NULL, &name_node TSRMLS_CC);
 		opline->extended_value = ZEND_FETCH_CLASS_DEFAULT;
 	}
