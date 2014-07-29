@@ -441,24 +441,11 @@ PHP_FUNCTION(spl_autoload_call)
 
 #define HT_MOVE_TAIL_TO_HEAD(ht)						        \
 	do {												        \
-		uint first = 0;									        \
-		uint last = (ht)->nNumUsed;						        \
-		while (first < last) {							        \
-			if (Z_TYPE((ht)->arData[first].val) != IS_UNDEF)    \
-				break;			                                \
-			first++;									        \
-		}												        \
-		while (last > first) {							        \
-			last--;										        \
-			if (Z_TYPE((ht)->arData[last].val) != IS_UNDEF)     \
-				break;			                                \
-		}												        \
-		if (first != last) {							        \
-			Bucket tmp = (ht)->arData[first];                   \
-			(ht)->arData[first] = (ht)->arData[last];           \
-			(ht)->arData[last] = tmp;                           \
-			zend_hash_rehash(ht);						        \
-		}												        \
+		Bucket tmp = (ht)->arData[(ht)->nNumUsed-1];				\
+		memmove((ht)->arData + 1, (ht)->arData,					\
+			sizeof(Bucket) * ((ht)->nNumUsed - 1));				\
+		(ht)->arData[0] = tmp;									\
+		zend_hash_rehash(ht);						        	\
 	} while (0)
 
 /* {{{ proto bool spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true [, prepend]]])
