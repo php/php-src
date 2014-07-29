@@ -4454,7 +4454,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -6248,7 +6249,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -6929,7 +6931,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -9840,7 +9843,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -11515,7 +11519,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -12080,7 +12085,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -16612,7 +16618,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -16709,6 +16716,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -18692,6 +18702,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -20945,7 +20958,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -21042,6 +21056,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -22269,7 +22286,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -24265,6 +24283,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -25722,6 +25743,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -26998,6 +27022,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -28276,6 +28303,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -30063,6 +30093,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -33559,7 +33592,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -33656,6 +33690,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -35550,6 +35587,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -37683,7 +37723,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -37780,6 +37821,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -38889,7 +38933,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -40747,6 +40792,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
