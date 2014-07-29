@@ -13634,7 +13634,7 @@ static int ZEND_FASTCALL  ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			// This solution breaks the following test (emit warning message) ???
 			// ext/pdo_sqlite/tests/pdo_005.phpt
 #endif
-		    (!Z_ISREF_P(arg) && Z_REFCOUNT_P(arg) > 1)) {
+		    (!Z_ISREF_P(arg) /*&& Z_REFCOUNT_P(arg) > 1???*/)) {
 
 			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 
@@ -30988,7 +30988,7 @@ static int ZEND_FASTCALL  ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			// This solution breaks the following test (emit warning message) ???
 			// ext/pdo_sqlite/tests/pdo_005.phpt
 #endif
-		    (!Z_ISREF_P(arg) && Z_REFCOUNT_P(arg) > 1)) {
+		    (!Z_ISREF_P(arg) /*&& Z_REFCOUNT_P(arg) > 1???*/)) {
 
 			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 
