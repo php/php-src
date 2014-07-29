@@ -6422,19 +6422,16 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast TSRMLS_DC) {
 
 void zend_compile_post_incdec(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *var_ast = ast->child[0];
-
-	znode var_node;
-	zend_op *opline;
-
 	ZEND_ASSERT(ast->kind == ZEND_AST_POST_INC || ast->kind == ZEND_AST_POST_DEC);
 
 	if (var_ast->kind == ZEND_AST_PROP) {
-		opline = zend_compile_prop_common(NULL, var_ast, BP_VAR_RW TSRMLS_CC);
+		zend_op *opline = zend_compile_prop_common(NULL, var_ast, BP_VAR_RW TSRMLS_CC);
 		opline->opcode = ast->kind == ZEND_AST_POST_INC ? ZEND_POST_INC_OBJ : ZEND_POST_DEC_OBJ;
 		opline->result_type = IS_TMP_VAR;
 		opline->result.var = get_temporary_variable(CG(active_op_array));
 		GET_NODE(result, opline->result);
 	} else {
+		znode var_node;
 		zend_compile_var(&var_node, var_ast, BP_VAR_RW TSRMLS_CC);
 		zend_emit_op_tmp(result, ast->kind == ZEND_AST_POST_INC ? ZEND_POST_INC : ZEND_POST_DEC,
 			&var_node, NULL TSRMLS_CC);
@@ -6443,16 +6440,13 @@ void zend_compile_post_incdec(znode *result, zend_ast *ast TSRMLS_DC) {
 
 void zend_compile_pre_incdec(znode *result, zend_ast *ast TSRMLS_DC) {
 	zend_ast *var_ast = ast->child[0];
-
-	znode var_node;
-	zend_op *opline;
-
 	ZEND_ASSERT(ast->kind == ZEND_AST_PRE_INC || ast->kind == ZEND_AST_PRE_DEC);
 
 	if (var_ast->kind == ZEND_AST_PROP) {
-		opline = zend_compile_prop_common(result, var_ast, BP_VAR_RW TSRMLS_CC);
+		zend_op *opline = zend_compile_prop_common(result, var_ast, BP_VAR_RW TSRMLS_CC);
 		opline->opcode = ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC_OBJ : ZEND_PRE_DEC_OBJ;
 	} else {
+		znode var_node;
 		zend_compile_var(&var_node, var_ast, BP_VAR_RW TSRMLS_CC);
 		zend_emit_op(result, ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC : ZEND_PRE_DEC,
 			&var_node, NULL TSRMLS_CC);
