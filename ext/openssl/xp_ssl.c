@@ -274,11 +274,12 @@ static zend_bool matches_wildcard_name(const char *subjectname, const char *cert
 		return 1;
 	}
 
-	if (!(wildcard = strchr(certname, '*'))) {
+	/* wildcard, if present, must only be present in the left-most component */
+	if (!(wildcard = strchr(certname, '*')) || memchr(certname, '.', wildcard - certname)) {
 		return 0;
 	}
 
-	// 1) prefix, if not empty, must match subject
+	/* 1) prefix, if not empty, must match subject */
 	prefix_len = wildcard - certname;
 	if (prefix_len && strncasecmp(subjectname, certname, prefix_len) != 0) {
 		return 0;
