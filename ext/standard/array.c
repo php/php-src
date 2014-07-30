@@ -1893,7 +1893,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	/* If we did a shift... re-index like it did before */
 	if (!off_the_end) {
 		zend_hash_reindex(Z_ARRVAL_P(stack), 1);
-	} else if (!key_len && index >= Z_ARRVAL_P(stack)->nNextFreeElement - 1) {
+	} else if (!key_len && Z_ARRVAL_P(stack)->nNextFreeElement > 0 && index >= Z_ARRVAL_P(stack)->nNextFreeElement - 1) {
 		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
 	}
 
