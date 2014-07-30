@@ -3180,24 +3180,6 @@ void zend_make_immutable_array_r(zval *zv TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC);
-
-// TODO.AST Sort out the whole constant folding issue
-static void _tmp_compile_const_expr(zval *result, zend_ast *ast TSRMLS_DC) {
-	zend_ast *orig_ast = ast;
-	zend_eval_const_expr(&ast TSRMLS_CC);
-	zend_compile_const_expr(&ast TSRMLS_CC);
-	if (ast->kind == ZEND_AST_ZVAL) {
-		ZVAL_COPY_VALUE(result, zend_ast_get_zval(ast));
-		if (Z_TYPE_P(result) == IS_ARRAY) {
-			zend_make_immutable_array_r(result TSRMLS_CC);			
-		}
-		orig_ast->kind = ZEND_AST_ZNODE;
-	} else {
-		ZVAL_NEW_AST(result, zend_ast_copy(ast));
-	}
-}
-
 /* {{{ zend_dirname
    Returns directory name component of path */
 ZEND_API size_t zend_dirname(char *path, size_t len)
@@ -4510,7 +4492,7 @@ void zend_compile_static_var(zend_ast *ast TSRMLS_DC) {
 	zval value_zv;
 
 	if (value_ast) {
-		_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
+		zend_const_expr_to_zval(&value_zv, value_ast TSRMLS_CC);
 	} else {
 		ZVAL_NULL(&value_zv);
 	}
@@ -5101,7 +5083,7 @@ void zend_compile_declare(zend_ast *ast TSRMLS_DC) {
 		zend_string *name = zend_ast_get_str(name_ast);
 		zval value_zv;
 
-		_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
+		zend_const_expr_to_zval(&value_zv, value_ast TSRMLS_CC);
 
 		if (zend_str_equals_literal_ci(name, "ticks")) {
 			convert_to_long(&value_zv);
@@ -5238,7 +5220,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 		} else if (default_ast) {
 			opcode = ZEND_RECV_INIT;
 			default_node.op_type = IS_CONST;
-			_tmp_compile_const_expr(&default_node.u.constant, default_ast TSRMLS_CC);
+			zend_const_expr_to_zval(&default_node.u.constant, default_ast TSRMLS_CC);
 		} else {
 			opcode = ZEND_RECV;
 			default_node.op_type = IS_UNUSED;
@@ -5679,7 +5661,7 @@ void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) {
 		}
 
 		if (value_ast) {
-			_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
+			zend_const_expr_to_zval(&value_zv, value_ast TSRMLS_CC);
 		} else {
 			ZVAL_NULL(&value_zv);
 		}
@@ -5707,7 +5689,7 @@ void zend_compile_class_const_decl(zend_ast *ast TSRMLS_DC) {
 			return;
 		}
 
-		_tmp_compile_const_expr(&value_zv, value_ast TSRMLS_CC);
+		zend_const_expr_to_zval(&value_zv, value_ast TSRMLS_CC);
 
 		if (Z_TYPE(value_zv) == IS_ARRAY
 			|| (Z_TYPE(value_zv) == IS_CONSTANT_AST && Z_ASTVAL(value_zv)->kind == ZEND_AST_ARRAY)
@@ -6215,7 +6197,7 @@ void zend_compile_const_decl(zend_ast *ast TSRMLS_DC) {
 		zval *value_zv = &value_node.u.constant;
 
 		value_node.op_type = IS_CONST;
-		_tmp_compile_const_expr(value_zv, value_ast TSRMLS_CC);
+		zend_const_expr_to_zval(value_zv, value_ast TSRMLS_CC);
 
 		if (Z_TYPE_P(value_zv) == IS_ARRAY
 			|| (Z_TYPE_P(value_zv) == IS_CONSTANT_AST
@@ -7279,6 +7261,22 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 		default:
 			zend_ast_apply(ast, zend_compile_const_expr TSRMLS_CC);
 			break;
+	}
+}
+
+void zend_const_expr_to_zval(zval *result, zend_ast *ast TSRMLS_DC) {
+	zend_ast *orig_ast = ast;
+	zend_eval_const_expr(&ast TSRMLS_CC);
+	zend_compile_const_expr(&ast TSRMLS_CC);
+	if (ast->kind == ZEND_AST_ZVAL) {
+		ZVAL_COPY_VALUE(result, zend_ast_get_zval(ast));
+
+		/* Kill this branch of the original AST, as it was already destroyed.
+		 * It would be nice to find a better solution to this problem in the
+		 * future. */
+		orig_ast->kind = 0;
+	} else {
+		ZVAL_NEW_AST(result, zend_ast_copy(ast));
 	}
 }
 
