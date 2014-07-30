@@ -7263,8 +7263,6 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
 	}
 
-	zend_ast_apply(ast, zend_compile_const_expr TSRMLS_CC);
-
 	switch (ast->kind) {
 		case ZEND_AST_CLASS_CONST:
 			zend_compile_const_expr_class_const(ast_ptr TSRMLS_CC);
@@ -7277,6 +7275,9 @@ void zend_compile_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 			break;
 		case ZEND_AST_MAGIC_CONST:
 			zend_compile_const_expr_magic_const(ast_ptr TSRMLS_CC);
+			break;
+		default:
+			zend_ast_apply(ast, zend_compile_const_expr TSRMLS_CC);
 			break;
 	}
 }
@@ -7573,14 +7574,14 @@ void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 	zend_ast *ast = *ast_ptr;
 	zval result;
 
-	if (!ast || ast->kind == ZEND_AST_ZVAL) {
+	if (!ast) {
 		return;
 	}
 
-	zend_ast_apply(ast, zend_eval_const_expr TSRMLS_CC);
-
 	switch (ast->kind) {
 		case ZEND_AST_BINARY_OP:
+			zend_eval_const_expr(&ast->child[0] TSRMLS_CC);
+			zend_eval_const_expr(&ast->child[1] TSRMLS_CC);
 			if (ast->child[0]->kind != ZEND_AST_ZVAL || ast->child[1]->kind != ZEND_AST_ZVAL) {
 				return;
 			}
@@ -7590,6 +7591,8 @@ void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 			break;
 		case ZEND_AST_GREATER:
 		case ZEND_AST_GREATER_EQUAL:
+			zend_eval_const_expr(&ast->child[0] TSRMLS_CC);
+			zend_eval_const_expr(&ast->child[1] TSRMLS_CC);
 			if (ast->child[0]->kind != ZEND_AST_ZVAL || ast->child[1]->kind != ZEND_AST_ZVAL) {
 				return;
 			}
@@ -7599,6 +7602,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 			break;
 		case ZEND_AST_UNARY_PLUS:
 		case ZEND_AST_UNARY_MINUS:
+			zend_eval_const_expr(&ast->child[0] TSRMLS_CC);
 			if (ast->child[0]->kind != ZEND_AST_ZVAL) {
 				return;
 			}
