@@ -1929,7 +1929,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
-		} else {
+		} else if (!(fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC_EXPLICIT)){
 			/* FIXME: output identifiers properly */
 			/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 			zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically", fbc->common.scope->name, fbc->common.function_name);

@@ -563,6 +563,12 @@ ZEND_API void zend_create_closure_ex(zval *res, zend_function *func, zend_class_
 		   If an unbound scoped closure is desired, the parameter must be set to 1*/
 		} else if (!unbound_scoped) {
 			closure->func.common.fn_flags |= ZEND_ACC_STATIC;
+		/* Unbound but scoped was explicitly specified and we wish to avoid E_ERROR when calling without object
+		   We don't do this if it has implict allowed static (i.e. is a method, should E_STRICT)
+		   Nor do we do this if it's an internal function (which would blow up if $this was NULL)
+		   (In that case, we're actually creating a closure which can't be called without apply) */
+		} else if ((func->common.fn_flags & ZEND_ACC_ALLOW_STATIC) == 0 && func->type == ZEND_USER_FUNCTION) {
+			closure->func.common.fn_flags |= ZEND_ACC_ALLOW_STATIC_EXPLICIT;
 		}
 	}
 }
