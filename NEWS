@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
     (pacho@gentoo.org, Remi)
 
+- Milter:
+  . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
+  
 - OpenSSL:
   . Fixed missing type checks in OpenSSL options (Yussuf Khalil, Stas).
 
