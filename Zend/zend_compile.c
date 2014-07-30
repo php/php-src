@@ -6422,12 +6422,12 @@ zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast TSRMLS_DC) {
 	/* First ensure that *all* child nodes are constant and by-val */
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
-		zend_ast *value_ast = elem_ast->child[0];
-		zend_ast *key_ast = elem_ast->child[1];
 		zend_bool by_ref = elem_ast->attr;
+		zend_eval_const_expr(&elem_ast->child[0] TSRMLS_CC);
+		zend_eval_const_expr(&elem_ast->child[1] TSRMLS_CC);
 
-		if (by_ref || (key_ast && key_ast->kind != ZEND_AST_ZVAL)
-			|| value_ast->kind != ZEND_AST_ZVAL
+		if (by_ref || elem_ast->child[0]->kind != ZEND_AST_ZVAL
+			|| (elem_ast->child[1] && elem_ast->child[1]->kind != ZEND_AST_ZVAL)
 		) {
 			return 0;
 		}
@@ -7573,7 +7573,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 	zend_ast *ast = *ast_ptr;
 	zval result;
 
-	if (!ast || ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_ZNODE) {
+	if (!ast || ast->kind == ZEND_AST_ZVAL) {
 		return;
 	}
 
