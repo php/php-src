@@ -45,6 +45,10 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
 
+- Reflection:
+  . Implemented FR #67713 (loosen the restrictions on
+    ReflectionClass::newInstanceWithoutConstructor()). (Ferenc)
+
 - SPL:
   . Fixed bug #67539 (ArrayIterator use-after-free due to object change during 
     sorting). (research at insighti dot org, Laruence)
