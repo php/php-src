@@ -3471,7 +3471,7 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, ANY)
 			// This solution breaks the following test (emit warning message) ???
 			// ext/pdo_sqlite/tests/pdo_005.phpt
 #endif
-		    (!Z_ISREF_P(arg) && Z_REFCOUNT_P(arg) > 1)) {
+		    (!Z_ISREF_P(arg) /*&& Z_REFCOUNT_P(arg) > 1???*/)) {
 
 			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 
@@ -4839,8 +4839,9 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		FREE_OP1();
 	}
 
-	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+	if (opline->extended_value & ZEND_ISSET) {		
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -4937,6 +4938,9 @@ ZEND_VM_C_LABEL(num_index_prop):
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {

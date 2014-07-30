@@ -597,7 +597,7 @@ found:
 						if (Z_REFCOUNTED_P(value) && Z_REFCOUNT_P(value) > 0) {
 							zval_copy_ctor(Z_REFVAL_P(variable_ptr));
 						}
-						zval_dtor(&garbage);
+						zval_ptr_dtor(&garbage);
 					} else {
 						zval garbage;
 

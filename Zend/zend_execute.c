@@ -697,34 +697,23 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 		if (Z_TYPE_P(object) == IS_NULL ||
 		    Z_TYPE_P(object) == IS_FALSE ||
 		    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0)) {
-//??? The following block may handle only non-interned empty string,
-//??? but it doesn't work anyway
-//??? see: Zend/tests/bug54265.phpt
-#if 0
-			if (Z_REFCOUNTED_P(object)) {
-				if (!Z_ISREF_P(object_ptr)) {
-					SEPARATE_ZVAL(object);
-				}
-				Z_ADDREF_P(object);
-				zend_error(E_WARNING, "Creating default object from empty value");
-				if (Z_REFCOUNT_P(object) == 1) {
-					/* object was removed by error handler, nothing to assign to */
-					zval_ptr_dtor(object);
-					if (retval) {
-						ZVAL_NULL(retval);
-					}
-					FREE_OP(free_value);
-					return;
-				}
-				Z_DELREF_P(object);
-			} else {
-				zend_error(E_WARNING, "Creating default object from empty value");
-			}
-#else
-			zend_error(E_WARNING, "Creating default object from empty value");
-#endif
-			zval_dtor(object);
+			zend_object *obj;
+
+			zval_ptr_dtor(object);
 			object_init(object);
+			Z_ADDREF_P(object);
+			obj = Z_OBJ_P(object);
+			zend_error(E_WARNING, "Creating default object from empty value");
+			if (GC_REFCOUNT(obj) == 1) {
+				/* the enclosing container was deleted, obj is unreferenced */
+				if (retval) {
+					ZVAL_NULL(retval);
+				}
+				FREE_OP(free_value);
+				OBJ_RELEASE(obj);
+				return;
+			}
+			Z_DELREF_P(object);
 		} else {
 			zend_error(E_WARNING, "Attempt to assign property of non-object");
 			if (retval) {
