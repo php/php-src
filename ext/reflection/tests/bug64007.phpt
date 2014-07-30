@@ -14,6 +14,6 @@ $generator  = $reflection->newInstance();
 var_dump($generator);
 ?>
 --EXPECTF--
-string(%d) "Class Generator is an internal class with a final __construct thus cannot be instantiated without invoking its constructor"
+string(%d) "Class Generator is an internal class marked as final that cannot be instantiated without invoking its constructor"
 
 Catchable fatal error: The "Generator" class is reserved for internal use and cannot be manually instantiated in %sbug64007.php on line %d
