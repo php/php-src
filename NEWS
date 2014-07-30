@@ -37,6 +37,10 @@ PHP                                                                        NEWS
 - pgsql:
   . Fixed bug #67555 (Cannot build against libpq 7.3). (Adam)
 
+- ODBC:
+  . Fixed bug #60616 (odbc_fetch_into returns junk at end of multi-byte char
+    fields). (Keyur Govande)
+
 - OpenSSL:
   . Fixed missing type checks in OpenSSL options (Yussuf Khalil, Stas).
   . Fixed bug #67609 (TLS connections fail behind HTTP proxy). (Daniel Lowrey)
