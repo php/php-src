@@ -1,5 +1,5 @@
 --TEST--
-Closure::apply
+Closure::call
 --FILE--
 <?php
 
@@ -19,8 +19,8 @@ $foobar = new Foo;
 $foobar->x = 3;
 
 var_dump($qux());
-var_dump($qux->apply($foo));
-var_dump($qux->apply($foobar));
+var_dump($qux->call($foo));
+var_dump($qux->call($foobar));
 
 
 $bar = function () {
@@ -30,14 +30,14 @@ $bar = function () {
 $elePHPant = new StdClass;
 $elePHPant->x = 7;
 
-var_dump($bar->apply($elePHPant));
+var_dump($bar->call($elePHPant));
 
 
 $beta = function ($z) {
     return $this->x * $z;
 };
 
-var_dump($beta->apply($elePHPant, 3));
+var_dump($beta->call($elePHPant, 3));
 
 ?>
 --EXPECT--

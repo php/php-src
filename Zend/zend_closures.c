@@ -70,9 +70,9 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed Closure::apply(object $to [, mixed $parameter] [, mixed $...] )
+/* {{{ proto mixed Closure::call(object $to [, mixed $parameter] [, mixed $...] )
    Call closure, binding to a given object */
-ZEND_METHOD(Closure, apply) /* {{{ */
+ZEND_METHOD(Closure, call) /* {{{ */
 {
 	zval *zclosure, *newthis, *closure_result_ptr = NULL;
 	zend_closure *closure;
@@ -457,7 +457,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bind, 0, 0, 2)
 	ZEND_ARG_INFO(0, unbound_scoped)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_apply, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_call, 0, 0, 1)
 	ZEND_ARG_INFO(0, newthis)
 	ZEND_ARG_VARIADIC_INFO(0, parameters)
 ZEND_END_ARG_INFO()
@@ -466,7 +466,7 @@ static const zend_function_entry closure_functions[] = {
 	ZEND_ME(Closure, __construct, NULL, ZEND_ACC_PRIVATE)
 	ZEND_ME(Closure, bind, arginfo_closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_MALIAS(Closure, bindTo, bind, arginfo_closure_bindto, ZEND_ACC_PUBLIC)
-	ZEND_ME(Closure, apply, arginfo_closure_apply, ZEND_ACC_PUBLIC)
+	ZEND_ME(Closure, call, arginfo_closure_call, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
