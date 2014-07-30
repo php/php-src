@@ -1763,6 +1763,7 @@ void spl_array_unserialize_helper(spl_array_object *intern, const unsigned char 
 {
 	const unsigned char *p, *s;
 	zval *pmembers, *pflags = NULL;
+	HashTable *aht;
 	long flags;
 
 	/* storage */
@@ -1850,6 +1851,12 @@ SPL_METHOD(Array, unserialize)
 
 	if (buf_len == 0) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
+		return;
+	}
+
+	aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+	if (aht->nApplyCount > 0) {
+		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
