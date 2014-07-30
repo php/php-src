@@ -47,6 +47,12 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
 
+- readline:
+  . Fixed bug #55496 (Interactive mode doesn't force a newline before the
+    prompt). (Bob, Johannes)
+  . Fixed bug #67496 (Save command history when exiting interactive shell
+    with control-c). (Dmitry Saprykin, Johannes)
+
 - Reflection:
   . Implemented FR #67713 (loosen the restrictions on
     ReflectionClass::newInstanceWithoutConstructor()). (Ferenc)
