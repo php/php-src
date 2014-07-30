@@ -13,10 +13,6 @@ PHP                                                                        NEWS
 - SPL:
   . Revert fix for bug #67064 (BC issues). (Bob)
 
-- ODBC:
-  . Fixed bug #60616 (odbc_fetch_into returns junk data at end of multi-byte
-    char fields). (Keyur)
-
 31 Jul 2014, PHP 5.6.0 Release Candidate 3
 
 - Core:
