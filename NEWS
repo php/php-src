@@ -7,7 +7,10 @@ PHP                                                                        NEWS
   . Removed inconsistency regarding behaviour of array in constants at
     run-time. (Bob)
 
- - SPL:
+- Milter:
+  . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
+
+- SPL:
   . Revert fix for bug #67064 (BC issues). (Bob)
 
 31 Jul 2014, PHP 5.6.0 Release Candidate 3
