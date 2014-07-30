@@ -125,6 +125,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* A fatal error / die occurred during the generator execution. Trying to clean
 		 * up the stack may not be safe in this case. */
 		if (CG(unclean_shutdown)) {
+			generator->execute_data = NULL;
 			return;
 		}
 

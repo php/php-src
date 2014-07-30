@@ -728,12 +728,17 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
 			zval *zv, zv_copy;
 			int use_copy;
+			zend_class_entry *old_scope;
+
 			string_write(str, " = ", sizeof(" = ")-1);
 			ALLOC_ZVAL(zv);
 			*zv = *precv->op2.zv;
 			zval_copy_ctor(zv);
 			INIT_PZVAL(zv);
-			zval_update_constant_ex(&zv, 1, fptr->common.scope TSRMLS_CC);
+			old_scope = EG(scope);
+			EG(scope) = fptr->common.scope;
+			zval_update_constant_ex(&zv, 1, NULL TSRMLS_CC);
+			EG(scope) = old_scope;
 			if (Z_TYPE_P(zv) == IS_BOOL) {
 				if (Z_LVAL_P(zv)) {
 					string_write(str, "true", sizeof("true")-1);
@@ -2579,6 +2584,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 {
 	parameter_reference *param;
 	zend_op *precv;
+	zend_class_entry *old_scope;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2599,7 +2605,10 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 	if (!IS_CONSTANT_TYPE(Z_TYPE_P(return_value))) {
 		zval_copy_ctor(return_value);
 	}
-	zval_update_constant_ex(&return_value, 0, param->fptr->common.scope TSRMLS_CC);
+	old_scope = EG(scope);
+	EG(scope) = param->fptr->common.scope;
+	zval_update_constant_ex(&return_value, 0, NULL TSRMLS_CC);
+	EG(scope) = old_scope;
 }
 /* }}} */
 
@@ -4299,8 +4308,8 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (ce->create_object != NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s is an internal class that cannot be instantiated without invoking its constructor", ce->name);
+	if (ce->create_object != NULL && ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ce->name);
 	}
 
 	object_init_ex(return_value, ce);

@@ -1,5 +1,23 @@
 /*
-Copyright (c) 2013, Lite Speed Technologies Inc.
+   +----------------------------------------------------------------------+
+   | PHP Version 5                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2014 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at the following url:        |
+   | http://www.php.net/license/3_01.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: George Wang <gwang@litespeedtech.com>                        |
+   +----------------------------------------------------------------------+
+*/
+
+/*
+Copyright (c) 2002-2014, Lite Speed Technologies Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,14 +47,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
-
-/***************************************************************************
-                          lsapilib.c  -  description
-                             -------------------
-    begin                : Mon Feb 21 2005
-    copyright            : (C) 2005 by George Wang
-    email                : gwang@litespeedtech.com
- ***************************************************************************/
 
 
 #include <ctype.h>
@@ -1211,6 +1221,7 @@ int LSAPI_IsRunning(void)
 
 int LSAPI_InitRequest( LSAPI_Request * pReq, int fd )
 {
+    int newfd;
     if ( !pReq )
         return -1;
     memset( pReq, 0, sizeof( LSAPI_Request ) );
@@ -1224,7 +1235,14 @@ int LSAPI_InitRequest( LSAPI_Request * pReq, int fd )
     pReq->m_respPktHeaderEnd = &pReq->m_respPktHeader[5];
     if ( allocateRespHeaderBuf( pReq, LSAPI_INIT_RESP_HEADER_LEN ) == -1 )
         return -1;
- 
+
+    if ( fd == STDIN_FILENO )
+    {
+        fd = dup( fd );
+        newfd = open( "/dev/null", O_RDWR );
+        dup2( newfd, STDIN_FILENO ); 
+    } 
+
     if ( isPipe( fd ) )
     {
         pReq->m_fdListen = -1;
@@ -1927,6 +1945,7 @@ int LSAPI_ForeachOrgHeader_r( LSAPI_Request * pReq,
         {
             pKey = pReq->m_pHttpHeader + pCur->nameOff;
             keyLen = pCur->nameLen;
+            *(pKey + keyLen ) = 0;
 
             pValue = pReq->m_pHttpHeader + pCur->valueOff;
             *(pValue + pCur->valueLen ) = 0;
@@ -2386,6 +2405,8 @@ typedef struct _lsapi_prefork_server
     int m_iAvoidFork;
     
     lsapi_child_status * m_pChildrenStatus;
+    lsapi_child_status * m_pChildrenStatusCur;
+    lsapi_child_status * m_pChildrenStatusEnd;
     
 }lsapi_prefork_server;
 
@@ -2474,11 +2495,15 @@ static void lsapi_cleanup(int signal)
 static lsapi_child_status * find_child_status( int pid )
 {
     lsapi_child_status * pStatus = g_prefork_server->m_pChildrenStatus;
-    lsapi_child_status * pEnd = g_prefork_server->m_pChildrenStatus + g_prefork_server->m_iMaxChildren * 2;
+    lsapi_child_status * pEnd = g_prefork_server->m_pChildrenStatusEnd;
     while( pStatus < pEnd )
     {
         if ( pStatus->m_pid == pid )
+        {
+            if ( pStatus + 1 > g_prefork_server->m_pChildrenStatusCur )
+                g_prefork_server->m_pChildrenStatusCur = pStatus + 1;
             return pStatus;
+        }
         ++pStatus;
     }
     return NULL;
@@ -2513,8 +2538,12 @@ static void lsapi_sigchild( int signal )
         {
             child_status->m_pid = 0;
             --g_prefork_server->m_iCurChildren;
+
         }
     }
+    while(( g_prefork_server->m_pChildrenStatusCur > g_prefork_server->m_pChildrenStatus )
+            &&( g_prefork_server->m_pChildrenStatusCur[-1].m_pid == 0 ))
+        --g_prefork_server->m_pChildrenStatusCur;
 
 }
 
@@ -2523,7 +2552,7 @@ static int lsapi_init_children_status()
     int size = 4096;
     
     char * pBuf;
-    size = g_prefork_server->m_iMaxChildren * sizeof( lsapi_child_status ) * 2;
+    size = (g_prefork_server->m_iMaxChildren + g_prefork_server->m_iExtraChildren ) * sizeof( lsapi_child_status ) * 2;
     size = (size + 4095 ) / 4096 * 4096;
     pBuf =( char*) mmap( NULL, size, PROT_READ | PROT_WRITE,
         MAP_ANON | MAP_SHARED, -1, 0 );
@@ -2533,7 +2562,9 @@ static int lsapi_init_children_status()
         return -1;
     }
     memset( pBuf, 0, size );
-    g_prefork_server->m_pChildrenStatus = (lsapi_child_status *)pBuf;        
+    g_prefork_server->m_pChildrenStatus = (lsapi_child_status *)pBuf;
+    g_prefork_server->m_pChildrenStatusCur = (lsapi_child_status *)pBuf;
+    g_prefork_server->m_pChildrenStatusEnd = (lsapi_child_status *)pBuf + size / sizeof( lsapi_child_status );
     return 0;
 }
 
@@ -2563,7 +2594,7 @@ static void lsapi_check_child_status( long tmCur )
     int dying = 0;
     int count = 0;
     lsapi_child_status * pStatus = g_prefork_server->m_pChildrenStatus;
-    lsapi_child_status * pEnd = g_prefork_server->m_pChildrenStatus + g_prefork_server->m_iMaxChildren * 2;
+    lsapi_child_status * pEnd = g_prefork_server->m_pChildrenStatusCur;
     while( pStatus < pEnd )
     {
         tobekilled = 0;
@@ -2576,13 +2607,15 @@ static void lsapi_check_child_status( long tmCur )
                 if (( g_prefork_server->m_iCurChildren - dying > g_prefork_server->m_iMaxChildren)||
                     ( idle > g_prefork_server->m_iMaxIdleChildren ))
                 {
-                    tobekilled = SIGUSR1;
+                    ++pStatus->m_iKillSent;
+                    //tobekilled = SIGUSR1;
                 }
                 else
                 {
                     if (( s_max_idle_secs> 0)&&(tmCur - pStatus->m_tmWaitBegin > s_max_idle_secs + 5 ))
                     {
-                        tobekilled = SIGUSR1;
+                        ++pStatus->m_iKillSent;
+                        //tobekilled = SIGUSR1;
                     }
                 }
                 if ( !tobekilled )
@@ -2716,6 +2749,8 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer, LSAPI_Re
 
         if ( pServer->m_iCurChildren >= (pServer->m_iMaxChildren + pServer->m_iExtraChildren ) )
         {
+            fprintf( stderr, "Reached max children process limit: %d, extra: %d, current: %d, please increase LSAPI_CHILDREN.\n",
+                                pServer->m_iMaxChildren, pServer->m_iExtraChildren, pServer->m_iCurChildren );
             usleep( 100000 );
             continue;
         }
@@ -2822,8 +2857,8 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer, LSAPI_Re
         }
     }
     sigaction( SIGUSR1, &old_usr1, 0 );
-    kill( -getpgrp(), SIGUSR1 );
-    lsapi_all_children_must_die();  /* Sorry, children ;-) */
+    //kill( -getpgrp(), SIGUSR1 );
+    //lsapi_all_children_must_die();  /* Sorry, children ;-) */
     return -1;
 
 }
@@ -2876,7 +2911,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
         {
             if ( !g_running )
                 return -1;
-            if (( s_pChildStatus )&&( s_pChildStatus->m_iKillSent ))
+            if ((s_req_processed)&&( s_pChildStatus )&&( s_pChildStatus->m_iKillSent ))
                 return -1; 
             FD_ZERO( &readfds );
             FD_SET( fd, &readfds );
@@ -2904,7 +2939,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
             }
             else if ( ret >= 1 )
             {
-                if (( s_pChildStatus )&&( s_pChildStatus->m_iKillSent ))
+                if (s_req_processed && ( s_pChildStatus )&&( s_pChildStatus->m_iKillSent ))
                     return -1; 
                 if ( fd == pReq->m_fdListen )
                 {
@@ -3066,6 +3101,8 @@ static int lsapi_initSuEXEC()
         {
             if ( g_prefork_server->m_iMaxChildren < 100 )
                 g_prefork_server->m_iMaxChildren = 100;
+            if ( g_prefork_server->m_iExtraChildren < 1000 )
+                g_prefork_server->m_iExtraChildren = 1000;
         }
     }
     if ( !s_defaultUid || !s_defaultGid )

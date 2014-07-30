@@ -274,11 +274,12 @@ static zend_bool matches_wildcard_name(const char *subjectname, const char *cert
 		return 1;
 	}
 
-	if (!(wildcard = strchr(certname, '*'))) {
+	/* wildcard, if present, must only be present in the left-most component */
+	if (!(wildcard = strchr(certname, '*')) || memchr(certname, '.', wildcard - certname)) {
 		return 0;
 	}
 
-	// 1) prefix, if not empty, must match subject
+	/* 1) prefix, if not empty, must match subject */
 	prefix_len = wildcard - certname;
 	if (prefix_len && strncasecmp(subjectname, certname, prefix_len) != 0) {
 		return 0;
@@ -321,7 +322,7 @@ static zend_bool matches_san_list(X509 *peer, const char *subject_name TSRMLS_DC
 		if (san_name_len != strlen((const char*)cert_name)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer SAN entry is malformed");
 		} else {
-			is_match = strcasecmp(subject_name, (const char*)cert_name) == 0;
+			is_match = matches_wildcard_name(subject_name, (const char *)cert_name);
 		}
 
 		OPENSSL_free(cert_name);
@@ -1164,12 +1165,14 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx TSRMLS_DC) 
 		ssl_ctx_options |= SSL_OP_SINGLE_DH_USE;
 	}
 
+#ifdef HAVE_ECDH
 	if (SUCCESS == php_stream_context_get_option(
 				stream->context, "ssl", "single_ecdh_use", &val) &&
 			zend_is_true(*val)
 	) {
 		ssl_ctx_options |= SSL_OP_SINGLE_ECDH_USE;
 	}
+#endif
 
 	SSL_CTX_set_options(ctx, ssl_ctx_options);
 
