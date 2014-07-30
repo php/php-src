@@ -452,11 +452,11 @@ ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC);
 
-void zend_discard_doc_comment(TSRMLS_D);
 void zend_stop_lexing(TSRMLS_D);
 void zend_emit_final_return(zval *zv TSRMLS_DC);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 zend_uint zend_add_member_modifier(zend_uint flags, zend_uint new_flag);
+zend_ast_list *zend_ast_append_doc_comment(zend_ast_list *list TSRMLS_DC);
 
 /* parser-driven code generators */
 void zend_do_free(znode *op1 TSRMLS_DC);

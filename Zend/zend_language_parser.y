@@ -605,7 +605,7 @@ class_statement_list:
 
 class_statement:
 		variable_modifiers property_list ';'
-			{ $$.ast = $2.ast; $$.ast->attr = $1.num; }
+			{ $$.list = zend_ast_append_doc_comment($2.list TSRMLS_CC); $$.ast->attr = $1.num; }
 	|	T_CONST class_const_list ';'
 			{ $$.ast = $2.ast; RESET_DOC_COMMENT(); }
 	|	T_USE name_list trait_adaptations

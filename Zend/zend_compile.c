@@ -3098,6 +3098,16 @@ zend_ast *zend_ast_append_str(zend_ast *left_ast, zend_ast *right_ast) {
 	return left_ast;
 }
 
+/* A hacky way that is used to store the doc comment for properties */
+zend_ast_list *zend_ast_append_doc_comment(zend_ast_list *list TSRMLS_DC) {
+	if (CG(doc_comment)) {
+		list = zend_ast_list_add(list, zend_ast_create_zval_from_str(CG(doc_comment)));
+		CG(doc_comment) = NULL;
+	}
+
+	return list;
+}
+
 void zend_verify_namespace(TSRMLS_D) /* {{{ */
 {
 	if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
@@ -3693,7 +3703,7 @@ void zend_compile_static_prop(znode *result, zend_ast *ast, zend_uint type TSRML
 	zend_adjust_for_fetch_type(opline, type);
 }
 
-static zend_uchar get_list_fetch_opcode(zend_uchar op_type) {
+static inline zend_uchar get_list_fetch_opcode(zend_uchar op_type) {
 	switch (op_type) {
 		case IS_VAR:
 		case IS_CV:
@@ -5632,7 +5642,8 @@ void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_uint flags = list->attr;
 	zend_class_entry *ce = CG(active_class_entry);
-	zend_uint i;
+	zend_uint i, children = list->children;
+	zend_string *doc_comment = NULL;
 
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include member variables");
@@ -5642,7 +5653,13 @@ void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
 	}
 
-	for (i = 0; i < list->children; ++i) {
+	/* Doc comment has been appended as last element in property list */
+	if (list->child[children - 1]->kind == ZEND_AST_ZVAL) {
+		doc_comment = STR_COPY(zend_ast_get_str(list->child[children - 1]));
+		children -= 1;
+	}
+
+	for (i = 0; i < children; ++i) {
 		zend_ast *prop_ast = list->child[i];
 		zend_ast *name_ast = prop_ast->child[0];
 		zend_ast *value_ast = prop_ast->child[1];
@@ -5667,8 +5684,10 @@ void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) {
 		}
 
 		name = zend_new_interned_string_safe(name TSRMLS_CC);
-		zend_declare_property_ex(ce, name, &value_zv, flags,
-			NULL /* TODO.AST doc comment */ TSRMLS_CC);
+		zend_declare_property_ex(ce, name, &value_zv, flags, doc_comment TSRMLS_CC);
+
+		/* Doc comment is only assigned to first property */
+		doc_comment = NULL;
 	}
 }
 
