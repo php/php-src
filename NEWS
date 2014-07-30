@@ -82,6 +82,9 @@ PHP                                                                        NEWS
   . Fixed bug #67575 (Compilation fails for phpdbg when the
     build directory != src directory). (Andy Thompson)
 
+- LiteSpeed:
+  . Updated LiteSpeed SAPI code to V6.6 (George Wang)
+
 03 Jul 2014, PHP 5.6.0 Release Candidate 2
 
 - Core:
