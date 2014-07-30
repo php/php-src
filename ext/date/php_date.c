@@ -5032,7 +5032,24 @@ static zval *date_period_read_property(zval *object, zval *member, int type, con
 /* {{{ date_period_write_property */
 static void date_period_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
-	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Writing to DatePeriod properties is unsupported");
+	zval **hnd;
+	zend_object_handlers *std_hnd;
+	int ret = FAILURE;
+	HashTable *properties;
+
+	if (member->type != IS_STRING) {
+		return;
+	}
+
+	properties = date_object_get_properties_period(object);
+	ret = zend_hash_find((HashTable *)properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+
+	if (ret == SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write to read-only property");
+	} else {
+		std_hnd = zend_get_std_object_handlers();
+		std_hnd->write_property(object, member, value, key TSRMLS_CC);
+	}
 }
 /* }}} */
 
