@@ -17,4 +17,7 @@ PHP                                                                        NEWS
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
 
+- LiteSpeed:
+  . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
