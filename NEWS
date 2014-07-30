@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #67693 (incorrect push to the empty array). (Tjerk)
+  . Removed inconsistency regarding behaviour of array in constants at
+    run-time. (Bob)
 
  - SPL:
   . Revert fix for bug #67064 (BC issues). (Bob)

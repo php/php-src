@@ -339,7 +339,6 @@ PHP_FUNCTION(count)
 					RETVAL_LONG(Z_LVAL_P(retval));
 					zval_ptr_dtor(&retval);
 				}
-				zval_ptr_dtor(&mode_zv);
 				return;
 			}
 #endif

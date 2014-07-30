@@ -22,7 +22,7 @@ class foo {
 
 var_dump(foo::bar);
 
-var_dump(a); // Eventually allow that later with array dereferencing of constants
+var_dump(a, a[0], a[2], a[2][1], a[3]);
 
 ?>
 --EXPECTF--
@@ -32,4 +32,35 @@ int(1)
 int(4)
 int(1)
 
-Fatal error: Arrays are not allowed in constants at run-time in %s on line %d
+Notice: Undefined offset: 3 in %s on line %d
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  array(2) {
+    [0]=>
+    int(3)
+    [1]=>
+    array(1) {
+      [0]=>
+      int(4)
+    }
+  }
+}
+int(1)
+array(2) {
+  [0]=>
+  int(3)
+  [1]=>
+  array(1) {
+    [0]=>
+    int(4)
+  }
+}
+array(1) {
+  [0]=>
+  int(4)
+}
+NULL

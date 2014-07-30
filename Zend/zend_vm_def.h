@@ -3772,9 +3772,6 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 		}
 	}
 constant_fetch_end:
-	if (Z_TYPE(EX_T(opline->result.var).tmp_var) == IS_ARRAY) {
-		zend_error_noreturn(E_ERROR, "Arrays are not allowed in constants at run-time");
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
