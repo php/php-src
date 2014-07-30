@@ -429,23 +429,17 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 				smart_str_append_long(buf, p);
 			} else if (type == IS_DOUBLE) {
 				if (!zend_isinf(d) && !zend_isnan(d)) {
-					if (options & PHP_JSON_PRESERVE_FRACTIONAL_PART) {
-						char num[NUM_BUF_SIZE];
-						int l;
-						php_gcvt(d, EG(precision), '.', 'e', (char *)num);
-						l = strlen(num);
-						if (strchr(num, '.') == NULL) {
-							num[l++] = '.';
-							num[l++] = '0';
-							num[l] = '\0';
-						}
-						smart_str_appendl(buf, num, l);
-					} else {
-						char *tmp;
-						int l = spprintf(&tmp, 0, "%.*k", (int) EG(precision), d);
-						smart_str_appendl(buf, tmp, l);
-						efree(tmp);
+					char num[NUM_BUF_SIZE];
+					int l;
+
+					php_gcvt(d, EG(precision), '.', 'e', (char *)num);
+					l = strlen(num);
+					if (options & PHP_JSON_PRESERVE_FRACTIONAL_PART && strchr(num, '.') == NULL) {
+						num[l++] = '.';
+						num[l++] = '0';
+						num[l] = '\0';
 					}
+					smart_str_appendl(buf, num, l);
 				} else {
 					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
 					smart_str_appendc(buf, '0');
@@ -646,28 +640,19 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 
 		case IS_DOUBLE:
 			{
+				char num[NUM_BUF_SIZE];
 				int len;
 				double dbl = Z_DVAL_P(val);
 
 				if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
-					if (options & PHP_JSON_PRESERVE_FRACTIONAL_PART) {
-						char num[NUM_BUF_SIZE];
-
-						php_gcvt(dbl, EG(precision), '.', 'e', (char *)num);
-						len = strlen(num);
-						if (strchr(num, '.') == NULL) {
-							num[len++] = '.';
-							num[len++] = '0';
-							num[len] = '\0';
-						}
-						smart_str_appendl(buf, num, len);
-					} else {
-						char *d = NULL;
-
-						len = spprintf(&d, 0, "%.*k", (int) EG(precision), dbl);
-						smart_str_appendl(buf, d, len);
-						efree(d);
+					php_gcvt(dbl, EG(precision), '.', 'e', (char *)num);
+					len = strlen(num);
+					if (options & PHP_JSON_PRESERVE_FRACTIONAL_PART && strchr(num, '.') == NULL) {
+						num[len++] = '.';
+						num[len++] = '0';
+						num[len] = '\0';
 					}
+					smart_str_appendl(buf, num, len);
 				} else {
 					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
 					smart_str_appendc(buf, '0');
