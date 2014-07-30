@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - COM:
   . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
 
+- Milter:
+  . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
+
 - OpenSSL:
   . Fixed missing type checks in OpenSSL options (Yussuf Khalil, Stas).
 
