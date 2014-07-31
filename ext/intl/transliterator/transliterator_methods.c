@@ -463,7 +463,7 @@ cleanup:
 		RETVAL_FALSE;
 	}
 
-	zval_ptr_dtor( &tmp_object );
+	/* zval_ptr_dtor( &tmp_object ); */
 }
 /* }}} */
 
