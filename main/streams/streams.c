@@ -466,6 +466,10 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 //???		while (zend_list_delete(stream->res) == SUCCESS) {}
 //???		stream->res->gc.refcount = 0;
 		zend_list_close(stream->res);
+		if (!stream->__exposed) {
+			zend_list_delete(stream->res);
+			stream->res = NULL;
+		}
 	}
 
 	if (close_options & PHP_STREAM_FREE_CALL_DTOR) {
