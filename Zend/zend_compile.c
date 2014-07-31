@@ -6406,6 +6406,7 @@ str_index:
 	} else {
 		GET_NODE(result, init_opline->result);
 	}
+	result->EA = 0;
 }
 /* }}} */
 
