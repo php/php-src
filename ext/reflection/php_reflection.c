@@ -3351,16 +3351,12 @@ ZEND_METHOD(reflection_class, __construct)
 /* {{{ add_class_vars */
 static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value TSRMLS_DC)
 {
-	HashPosition pos;
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
 	zend_string *key;
 	ulong num_index;
 
-	zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
-	while ((prop_info = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL) {
-		zend_hash_get_current_key_ex(&ce->properties_info, &key, &num_index, 0, &pos);
-		zend_hash_move_forward_ex(&ce->properties_info, &pos);
+	ZEND_HASH_FOREACH_KEY_PTR(&ce->properties_info, num_index, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_SHADOW) &&
 		     prop_info->ce != ce) ||
 		    ((prop_info->flags & ZEND_ACC_PROTECTED) &&
@@ -3382,6 +3378,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		}
 
 		/* copy: enforce read only access */
+		ZVAL_DEREF(prop);
 		ZVAL_DUP(&prop_copy, prop);
 
 		/* this is necessary to make it able to work with default array
@@ -3391,7 +3388,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		}
 
 		zend_hash_update(Z_ARRVAL_P(return_value), key, &prop_copy);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
