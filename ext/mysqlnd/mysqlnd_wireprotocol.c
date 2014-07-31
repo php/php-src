@@ -226,7 +226,7 @@ php_mysqlnd_net_store_length_size(uint64_t length)
 	if (length < (uint64_t) L64(16777216)) {
 		return 4;
 	}
-	return 8;
+	return 9;
 }
 /* }}} */
 
