@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 201?, PHP 5.3.29
+31 Jul 2014, PHP 5.3.29RC1
 
 - Core:
   . Fixed bug #66127 (Segmentation fault with ArrayObject unset). (Stas)
