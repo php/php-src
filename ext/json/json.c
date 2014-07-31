@@ -434,7 +434,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 
 					php_gcvt(d, EG(precision), '.', 'e', (char *)num);
 					l = strlen(num);
-					if (options & PHP_JSON_PRESERVE_FRACTIONAL_PART && strchr(num, '.') == NULL) {
+					if (options & PHP_JSON_PRESERVE_FRACTIONAL_PART && strchr(num, '.') == NULL && l < NUM_BUF_SIZE - 2) {
 						num[l++] = '.';
 						num[l++] = '0';
 						num[l] = '\0';
@@ -647,7 +647,7 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 				if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
 					php_gcvt(dbl, EG(precision), '.', 'e', (char *)num);
 					len = strlen(num);
-					if (options & PHP_JSON_PRESERVE_FRACTIONAL_PART && strchr(num, '.') == NULL) {
+					if (options & PHP_JSON_PRESERVE_FRACTIONAL_PART && strchr(num, '.') == NULL && len < NUM_BUF_SIZE - 2) {
 						num[len++] = '.';
 						num[len++] = '0';
 						num[len] = '\0';
