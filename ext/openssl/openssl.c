@@ -1760,7 +1760,7 @@ PHP_FUNCTION(openssl_x509_export)
 }
 /* }}} */
 
-static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw, char **out, int *out_len TSRMLS_DC)
+int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw, char **out, int *out_len TSRMLS_DC)
 {
 	unsigned char md[EVP_MAX_MD_SIZE];
 	const EVP_MD *mdtype;
@@ -1785,61 +1785,6 @@ static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_boo
 	}
 
 	return SUCCESS;
-}
-
-static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *expected TSRMLS_DC)
-{
-	char *fingerprint;
-	int fingerprint_len;
-	int result = -1;
-
-	if (php_openssl_x509_fingerprint(peer, method, 0, &fingerprint, &fingerprint_len TSRMLS_CC) == SUCCESS) {
-		result = strcmp(expected, fingerprint);
-		efree(fingerprint);
-	}
-
-	return result;
-}
-
-zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
-{
-	if (Z_TYPE_P(val) == IS_STRING) {
-		const char *method = NULL;
-
-		switch (Z_STRLEN_P(val)) {
-			case 32:
-				method = "md5";
-				break;
-
-			case 40:
-				method = "sha1";
-				break;
-		}
-
-		return method && php_x509_fingerprint_cmp(peer, method, Z_STRVAL_P(val) TSRMLS_CC) == 0;
-	} else if (Z_TYPE_P(val) == IS_ARRAY) {
-		HashPosition pos;
-		zval **current;
-		char *key;
-		uint key_len;
-		ulong key_index;
-
-		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(val), &pos);
-			zend_hash_get_current_data_ex(Z_ARRVAL_P(val), (void **)&current, &pos) == SUCCESS;
-			zend_hash_move_forward_ex(Z_ARRVAL_P(val), &pos)
-		) {
-			int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(val), &key, &key_len, &key_index, 0, &pos);
-
-			if (key_type == HASH_KEY_IS_STRING 
-				&& Z_TYPE_PP(current) == IS_STRING
-				&& php_x509_fingerprint_cmp(peer, key, Z_STRVAL_PP(current) TSRMLS_CC) != 0
-			) {
-				return 0;
-			}
-		}
-		return 1;
-	}
-	return 0;
 }
 
 PHP_FUNCTION(openssl_x509_fingerprint)
