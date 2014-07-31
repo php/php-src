@@ -931,8 +931,8 @@ mssqltime        = hour12 ":" minutelz ":" secondlz [:.] [0-9]+ meridian;
 isoweekday       = year4 "-"? "W" weekofyear "-"? [0-7];
 isoweek          = year4 "-"? "W" weekofyear;
 exif             = year4 ":" monthlz ":" daylz " " hour24lz ":" minutelz ":" secondlz;
-firstdayof       = 'first day of'?;
-lastdayof        = 'last day of'?;
+firstdayof       = 'first day of';
+lastdayof        = 'last day of';
 backof           = 'back of ' hour24 space? meridian?;
 frontof          = 'front of ' hour24 space? meridian?;
 
