@@ -333,16 +333,12 @@ PHP_FUNCTION(count)
 #ifdef HAVE_SPL
 			/* if not and the object implements Countable we call its count() method */
 			if (Z_OBJ_HT_P(array)->get_class_entry && instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
-				zval *mode_zv;
-				MAKE_STD_ZVAL(mode_zv);
-				ZVAL_LONG(mode_zv, mode);
-				zend_call_method_with_1_params(&array, NULL, NULL, "count", &retval, mode_zv);
+				zend_call_method_with_0_params(&array, NULL, NULL, "count", &retval);
 				if (retval) {
 					convert_to_long_ex(&retval);
 					RETVAL_LONG(Z_LVAL_P(retval));
 					zval_ptr_dtor(&retval);
 				}
-				zval_ptr_dtor(&mode_zv);
 				return;
 			}
 #endif
@@ -1893,7 +1889,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	/* If we did a shift... re-index like it did before */
 	if (!off_the_end) {
 		zend_hash_reindex(Z_ARRVAL_P(stack), 1);
-	} else if (!key_len && index >= Z_ARRVAL_P(stack)->nNextFreeElement - 1) {
+	} else if (!key_len && Z_ARRVAL_P(stack)->nNextFreeElement > 0 && index >= Z_ARRVAL_P(stack)->nNextFreeElement - 1) {
 		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
 	}
 
