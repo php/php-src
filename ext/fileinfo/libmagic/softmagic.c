@@ -67,7 +67,7 @@ private int32_t mprint(struct magic_set *, struct magic *);
 private int32_t moffset(struct magic_set *, struct magic *);
 private void mdebug(uint32_t, const char *, size_t);
 private int mcopy(struct magic_set *, union VALUETYPE *, int, int,
-    const unsigned char *, uint32_t, size_t, size_t);
+    const unsigned char *, uint32_t, size_t, struct magic *);
 private int mconvert(struct magic_set *, struct magic *, int);
 private int print_sep(struct magic_set *, int);
 private int handle_annotation(struct magic_set *, struct magic *);
@@ -1038,7 +1038,7 @@ mdebug(uint32_t offset, const char *str, size_t len)
 
 private int
 mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
-    const unsigned char *s, uint32_t offset, size_t nbytes, size_t linecnt)
+    const unsigned char *s, uint32_t offset, size_t nbytes, struct magic *m)
 {
 	/*
 	 * Note: FILE_SEARCH and FILE_REGEX do not actually copy
@@ -1058,15 +1058,24 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 			const char *last;	/* end of search region */
 			const char *buf;	/* start of search region */
 			const char *end;
-			size_t lines;
+			size_t lines, linecnt, bytecnt;
 
+			linecnt = m->str_range;
+			bytecnt = linecnt * 80;
+
+			if (bytecnt == 0) {
+				bytecnt = 8192;
+			}
+			if (bytecnt > nbytes) {
+				bytecnt = nbytes;
+			}
 			if (s == NULL) {
 				ms->search.s_len = 0;
 				ms->search.s = NULL;
 				return 0;
 			}
 			buf = RCAST(const char *, s) + offset;
-			end = last = RCAST(const char *, s) + nbytes;
+			end = last = RCAST(const char *, s) + bytecnt;
 			/* mget() guarantees buf <= last */
 			for (lines = linecnt, b = buf; lines && b < end &&
 			     ((b = CAST(const char *,
@@ -1079,7 +1088,7 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 					b++;
 			}
 			if (lines)
-				last = RCAST(const char *, s) + nbytes;
+				last = RCAST(const char *, s) + bytecnt;
 
 			ms->search.s = buf;
 			ms->search.s_len = last - buf;
@@ -1150,7 +1159,6 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
     int *need_separator, int *returnval)
 {
 	uint32_t soffset, offset = ms->offset;
-	uint32_t count = m->str_range;
 	int rv, oneed_separator, in_type;
 	char *sbuf, *rbuf;
 	union VALUETYPE *p = &ms->ms_value;
@@ -1162,13 +1170,12 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 	}
 
 	if (mcopy(ms, p, m->type, m->flag & INDIR, s, (uint32_t)(offset + o),
-	    (uint32_t)nbytes, count) == -1)
+	    (uint32_t)nbytes, m) == -1)
 		return -1;
 
 	if ((ms->flags & MAGIC_DEBUG) != 0) {
 		fprintf(stderr, "mget(type=%d, flag=%x, offset=%u, o=%zu, "
-		    "nbytes=%zu, count=%u)\n", m->type, m->flag, offset, o,
-		    nbytes, count);
+		    "nbytes=%zu)\n", m->type, m->flag, offset, o, nbytes);
 		mdebug(offset, (char *)(void *)p, sizeof(union VALUETYPE));
 	}
 
@@ -1661,7 +1668,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				fprintf(stderr, "indirect +offs=%u\n", offset);
 		}
-		if (mcopy(ms, p, m->type, 0, s, offset, nbytes, count) == -1)
+		if (mcopy(ms, p, m->type, 0, s, offset, nbytes, m) == -1)
 			return -1;
 		ms->offset = offset;
 
@@ -2093,7 +2100,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			zval *retval;
 			zval *subpats;
 			char *haystack;
-			
+
 			MAKE_STD_ZVAL(retval);
 			ALLOC_INIT_ZVAL(subpats);
 			

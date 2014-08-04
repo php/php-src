@@ -151,7 +151,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr),"service", sizeof("service"), (void **)&tmp) != FAILURE) { \
 			ss = (soapServicePtr)zend_fetch_resource(tmp TSRMLS_CC, -1, "service", NULL, 1, le_service); \
 		} else { \
-			ss = NULL; \
+	                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not fetch service object"); \
+			SOAP_SERVER_END_CODE(); \
+			return; \
 		} \
 	}
 
