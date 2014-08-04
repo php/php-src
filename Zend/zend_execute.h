@@ -289,6 +289,8 @@ ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_t
 ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
+ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *dim TSRMLS_DC);
+
 #ifdef ZEND_WIN32
 void zend_init_timeout_thread(void);
 void zend_shutdown_timeout_thread(void);

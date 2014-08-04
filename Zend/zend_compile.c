@@ -5846,12 +5846,6 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 
 void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC) /* {{{ */
 {
-	if ((Z_TYPE(value->u.constant) == IS_ARRAY) ||
-	    (Z_TYPE(value->u.constant) == IS_CONSTANT_AST &&
-	     Z_ASTVAL(value->u.constant)->kind == ZEND_INIT_ARRAY)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
-		return;
-	}
 	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
 		return;
@@ -7773,12 +7767,6 @@ void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	zval *ns_name;
-
-	if ((Z_TYPE(value->u.constant) == IS_ARRAY) ||
-	    (Z_TYPE(value->u.constant) == IS_CONSTANT_AST &&
-	     Z_ASTVAL(value->u.constant)->kind == ZEND_INIT_ARRAY)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed as constants");
-	}
 
 	if (zend_get_ct_const(&name->u.constant, 0 TSRMLS_CC)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", Z_STRVAL(name->u.constant));

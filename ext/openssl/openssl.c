@@ -838,13 +838,13 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 			req->config_filename, req->var, req->req_config TSRMLS_CC) == FAILURE) return FAILURE
 
 #define SET_OPTIONAL_STRING_ARG(key, varname, defval)	\
-		if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), key, sizeof(key)-1)) != NULL) \
+		if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), key, sizeof(key)-1)) != NULL && Z_TYPE_P(item) == IS_STRING) \
 		varname = Z_STRVAL_P(item); \
 	else \
 		varname = defval
 
 #define SET_OPTIONAL_LONG_ARG(key, varname, defval)	\
-	if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), key, sizeof(key)-1)) != NULL) \
+	if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), key, sizeof(key)-1)) != NULL && Z_TYPE_P(item) == IS_LONG) \
 		varname = Z_LVAL_P(item); \
 	else \
 		varname = defval
@@ -904,7 +904,8 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		}
 	}
 
-	if (req->priv_key_encrypt && optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), "encrypt_key_cipher", sizeof("encrypt_key_cipher")-1)) != NULL) {
+	if (req->priv_key_encrypt && optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), "encrypt_key_cipher", sizeof("encrypt_key_cipher")-1)) != NULL
+		&& Z_TYPE_P(item) == IS_LONG) {
 		long cipher_algo = Z_LVAL_P(item);
 		const EVP_CIPHER* cipher = php_openssl_get_evp_cipher_from_algo(cipher_algo);
 		if (cipher == NULL) {
@@ -1759,7 +1760,7 @@ PHP_FUNCTION(openssl_x509_export)
 }
 /* }}} */
 
-static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw, char **out, int *out_len TSRMLS_DC)
+int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw, char **out, int *out_len TSRMLS_DC)
 {
 	unsigned char md[EVP_MAX_MD_SIZE];
 	const EVP_MD *mdtype;
@@ -1784,52 +1785,6 @@ static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_boo
 	}
 
 	return SUCCESS;
-}
-
-static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *expected TSRMLS_DC)
-{
-	char *fingerprint;
-	int fingerprint_len;
-	int result = -1;
-
-	if (php_openssl_x509_fingerprint(peer, method, 0, &fingerprint, &fingerprint_len TSRMLS_CC) == SUCCESS) {
-		result = strcmp(expected, fingerprint);
-		efree(fingerprint);
-	}
-
-	return result;
-}
-
-zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
-{
-	if (Z_TYPE_P(val) == IS_STRING) {
-		const char *method = NULL;
-
-		switch (Z_STRLEN_P(val)) {
-			case 32:
-				method = "md5";
-				break;
-
-			case 40:
-				method = "sha1";
-				break;
-		}
-
-		return method && php_x509_fingerprint_cmp(peer, method, Z_STRVAL_P(val) TSRMLS_CC) == 0;
-	} else if (Z_TYPE_P(val) == IS_ARRAY) {
-		zval *current;
-		zend_string *key;
-
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), key, current) {
-			if (Z_TYPE_P(current) == IS_STRING
-				&& php_x509_fingerprint_cmp(peer, key->val, Z_STRVAL_P(current) TSRMLS_CC) != 0
-			) {
-				return 0;
-			}
-		} ZEND_HASH_FOREACH_END();
-		return 1;
-	}
-	return 0;
 }
 
 PHP_FUNCTION(openssl_x509_fingerprint)
@@ -2435,7 +2390,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	}
 
 	/* parse extra config from args array, promote this to an extra function */
-	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name")-1)) != NULL)
+	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name")-1)) != NULL && Z_TYPE_P(item) == IS_STRING)
 		friendly_name = Z_STRVAL_P(item);
 	/* certpbe (default RC2-40)
 	   keypbe (default 3DES)
@@ -2513,7 +2468,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	}
 
 	/* parse extra config from args array, promote this to an extra function */
-	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name")-1)) != NULL)
+	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name")-1)) != NULL && Z_TYPE_P(item) == IS_STRING)
 		friendly_name = Z_STRVAL_P(item);
 
 	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts")-1)) != NULL)
