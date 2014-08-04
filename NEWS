@@ -14,7 +14,7 @@ PHP                                                                        NEWS
     (pacho@gentoo.org, Remi)
 
 - GD:
-  . Fixed bug #66901i (php-gd 'c_color' NULL pointer dereference).
+  . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
     (CVE-2014-2497) (Remi)
 
 - Milter:
