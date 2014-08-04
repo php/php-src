@@ -5073,6 +5073,9 @@ void zend_do_default_before_statement(const znode *case_list, znode *default_tok
 	default_token->u.op.opline_num = next_op_number;
 
 	next_op_number = get_next_op_number(CG(active_op_array));
+	if (switch_entry_ptr->default_case >= 0) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Switch statements must have at most one default label");
+	}
 	switch_entry_ptr->default_case = next_op_number;
 
 	if (case_list->op_type==IS_UNUSED) {
