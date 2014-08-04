@@ -782,6 +782,9 @@ PHP_MINIT_FUNCTION(odbc)
 	REGISTER_INT_CONSTANT("SQL_TYPE_DATE", SQL_TYPE_DATE, CONST_PERSISTENT | CONST_CS);
 	REGISTER_INT_CONSTANT("SQL_TYPE_TIME", SQL_TYPE_TIME, CONST_PERSISTENT | CONST_CS);
 	REGISTER_INT_CONSTANT("SQL_TYPE_TIMESTAMP", SQL_TYPE_TIMESTAMP, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("SQL_WCHAR", SQL_WCHAR, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("SQL_WVARCHAR", SQL_WVARCHAR, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("SQL_WLONGVARCHAR", SQL_WLONGVARCHAR, CONST_PERSISTENT | CONST_CS);
 
 	/*
 	 * SQLSpecialColumns values
@@ -945,9 +948,13 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 {
 	RETCODE rc;
 	int i;
-	SQLSMALLINT colnamelen; /* Not used */
-	SQLLEN      displaysize;
+	SQLSMALLINT 	colnamelen; /* Not used */
+	SQLLEN      	displaysize;
+	SQLUSMALLINT	colfieldid;
+	int		charextraalloc;
 
+	colfieldid = SQL_COLUMN_DISPLAY_SIZE;
+	charextraalloc = 0;
 	result->values = (odbc_result_value *) safe_emalloc(sizeof(odbc_result_value), result->numcols, 0);
 
 	result->longreadlen = ODBCG(defaultlrl);
@@ -968,6 +975,9 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 			case SQL_VARBINARY:
 			case SQL_LONGVARBINARY:
 			case SQL_LONGVARCHAR:
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+			case SQL_WLONGVARCHAR:
+#endif
 				result->values[i].value = NULL;
 				break;
 				
@@ -978,14 +988,26 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 							27, &result->values[i].vallen);
 				break;
 #endif /* HAVE_ADABAS */
+			case SQL_CHAR:
+			case SQL_VARCHAR:
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+			case SQL_WCHAR:
+			case SQL_WVARCHAR:
+				colfieldid = SQL_DESC_OCTET_LENGTH;
+#else
+				charextraalloc = 1;
+#endif
 			default:
-				rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_DISPLAY_SIZE,
-									NULL, 0, NULL, &displaysize);
-				displaysize = displaysize <= result->longreadlen ? displaysize : 
-								result->longreadlen;
+				rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), colfieldid,
+								NULL, 0, NULL, &displaysize);
 				/* Workaround for Oracle ODBC Driver bug (#50162) when fetching TIMESTAMP column */
 				if (result->values[i].coltype == SQL_TIMESTAMP) {
 					displaysize += 3;
+				}
+
+				if (charextraalloc) {
+					/* Since we don't know the exact # of bytes, allocate extra */
+					displaysize *= 4;
 				}
 				result->values[i].value = (char *)emalloc(displaysize + 1);
 				rc = SQLBindCol(result->stmt, (SQLUSMALLINT)(i+1), SQL_C_CHAR, result->values[i].value,
@@ -1728,6 +1750,9 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 					sql_c_type = SQL_C_BINARY;
 				}
 			case SQL_LONGVARCHAR:
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+			case SQL_WLONGVARCHAR:
+#endif
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
 					Z_STRVAL_P(tmp) = STR_EMPTY_ALLOC();
 					break;
@@ -1879,7 +1904,11 @@ PHP_FUNCTION(odbc_fetch_into)
 					break;
 				}
 				if (result->binmode == 1) sql_c_type = SQL_C_BINARY; 
+
 			case SQL_LONGVARCHAR:
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+			case SQL_WLONGVARCHAR:
+#endif
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
 					Z_STRVAL_P(tmp) = STR_EMPTY_ALLOC();
 					break;
@@ -2098,6 +2127,9 @@ PHP_FUNCTION(odbc_result)
 				break; 
 			}
 		case SQL_LONGVARCHAR:
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+		case SQL_WLONGVARCHAR:
+#endif
 			if (IS_SQL_LONG(result->values[field_ind].coltype)) {
 				if (result->longreadlen <= 0) {
 				   break;
@@ -2135,7 +2167,11 @@ PHP_FUNCTION(odbc_result)
 			}
 			/* Reduce fieldlen by 1 if we have char data. One day we might 
 			   have binary strings... */
-			if (result->values[field_ind].coltype == SQL_LONGVARCHAR) {
+			if ((result->values[field_ind].coltype == SQL_LONGVARCHAR)
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+			    || (result->values[field_ind].coltype == SQL_WLONGVARCHAR)
+#endif
+			) {
 				fieldsize -= 1;
 			}
 			/* Don't duplicate result, saves one emalloc.
@@ -2252,6 +2288,9 @@ PHP_FUNCTION(odbc_result_all)
 					}
 					if (result->binmode <= 1) sql_c_type = SQL_C_BINARY; 
 				case SQL_LONGVARCHAR:
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+				case SQL_WLONGVARCHAR:
+#endif
 					if (IS_SQL_LONG(result->values[i].coltype) && 
 						result->longreadlen <= 0) {
 						php_printf("<td>Not printable</td>"); 
