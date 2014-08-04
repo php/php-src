@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     (Adam)
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
+- Core:
+  . Added PHP_INT_MIN constant. (Andrea)
+
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
 
