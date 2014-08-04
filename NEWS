@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - COM:
   . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
 
+- Fileinfo:
+  . Fixed bug #67705 (extensive backtracking in rule regular expression).
+    (CVE-2014-3538) (Remi)
+
 - Milter:
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
 
