@@ -151,6 +151,13 @@ PHP 5.6 UPGRADE NOTES
 - Non-blocking read/write query behavior now optionally available in database
   operations using the ext/pgsql extension.
 
+- Stream socket servers may now use SO_REUSEPORT in systems that support the
+  option to bind on the same address/port in separate processes via a new
+  "so_reuseport" socket context option.
+
+- UDP stream servers and clients may now enable SO_BROADCAST via a new
+  "so_broadcast" socket context option.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
