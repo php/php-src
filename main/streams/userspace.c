@@ -370,6 +370,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	ZVAL_STRING(&args[1], mode);
 	ZVAL_LONG(&args[2], options);
 	ZVAL_NEW_REF(&args[3], &EG(uninitialized_zval));
+	ZVAL_UNDEF(&args[4]);
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_OPEN);
 
@@ -1121,7 +1122,6 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	zval_ptr_dtor(&zretval);
 	zval_ptr_dtor(&zfuncname);
 
-	zval_ptr_dtor(&args[1]);
 	zval_ptr_dtor(&args[0]);
 
 	return ret;
