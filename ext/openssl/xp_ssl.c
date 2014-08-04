@@ -284,7 +284,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
 	if (Z_TYPE_P(val) == IS_STRING) {
 		const char *method = NULL;
 
-		switch (Z_STRLEN_P(val)) {
+		switch (Z_STRSIZE_P(val)) {
 			case 32:
 				method = "md5";
 				break;
