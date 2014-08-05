@@ -195,6 +195,7 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 			} else {
 				if (Z_IMMUTABLE_P(z)) {
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
@@ -202,6 +203,10 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 				} else {
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
+					/* make immutable array */
+					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
+					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
+					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 				}
 			}
 			break;
@@ -252,6 +257,7 @@ static void zend_persist_zval_const(zval *z TSRMLS_DC)
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 			} else {
 				if (Z_IMMUTABLE_P(z)) {
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
@@ -259,6 +265,10 @@ static void zend_persist_zval_const(zval *z TSRMLS_DC)
 				} else {
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
+					/* make immutable array */
+					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
+					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
+					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 				}
 			}
 			break;

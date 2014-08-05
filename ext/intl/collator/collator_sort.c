@@ -498,7 +498,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	/* sort it */
 	zend_qsort( sortKeyIndxBuf, sortKeyCount, sortKeyIndxSize, collator_cmp_sort_keys TSRMLS_CC );
 
-	zval_dtor( array );
+	zval_ptr_dtor( array );
 	/* for resulting hash we'll assign new hash keys rather then reordering */
 	array_init(array);
 

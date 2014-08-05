@@ -6378,22 +6378,26 @@ str_index:
 	if (constant_array) {
 		/* remove run-time array construction and use constant array instead */
 		opline = &CG(active_op_array)->opcodes[next_op_num-1];
-		while (opline != init_opline) {
+		while (1) {
 			if (opline->op2_type == IS_CONST) {
 				zend_del_literal(CG(active_op_array), opline->op2.constant);
 			}
-			zend_del_literal(CG(active_op_array), opline->op1.constant);
+			if (opline->op1_type == IS_CONST) {
+				if (Z_TYPE(CONSTANT(opline->op1.constant)) == IS_ARRAY && 
+				    Z_REFCOUNTED(CONSTANT(opline->op1.constant)) &&
+				    Z_REFCOUNT(CONSTANT(opline->op1.constant)) == 2) {
+				    /* don't delete nested arrays */
+					Z_DELREF(CONSTANT(opline->op1.constant));
+					ZVAL_UNDEF(&CONSTANT(opline->op1.constant));
+				}
+				zend_del_literal(CG(active_op_array), opline->op1.constant);
+			}
+			if (opline == init_opline) {
+				break;
+			}
 			opline--;
 		}
-		if (opline->op2_type == IS_CONST) {
-			zend_del_literal(CG(active_op_array), opline->op2.constant);
-		}
-		if (opline->op1_type == IS_CONST) {
-			zend_del_literal(CG(active_op_array), opline->op1.constant);
-		}		 
 		CG(active_op_array)->last = array_node->u.op.opline_num;
-
-		zend_make_immutable_array(&array TSRMLS_CC);
 
 		result->op_type = IS_CONST;
 		ZVAL_COPY_VALUE(&result->u.constant, &array);		
@@ -7846,58 +7850,14 @@ void zend_do_end_compilation(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC) /* {{{ */
-{
-	zend_constant *c;
-
-	if (Z_IMMUTABLE_P(zv)) {
-		return;
-	}
-
-	Z_TYPE_FLAGS_P(zv) = IS_TYPE_IMMUTABLE;
-	GC_REFCOUNT(Z_COUNTED_P(zv)) = 2;
-	Z_ARRVAL_P(zv)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
-
-	/* store as an anonymous constant */
-	c = emalloc(sizeof(zend_constant));
-	ZVAL_COPY_VALUE(&c->value, zv);
-	c->flags = 0;
-	c->name = NULL;
-	c->module_number = PHP_USER_CONSTANT;
-	zend_hash_next_index_insert_ptr(EG(zend_constants), c);
-}
-/* }}} */
-
-void zend_make_immutable_array_r(zval *zv TSRMLS_DC) /* {{{ */
-{
-	zval *el;
-
-	if (Z_IMMUTABLE_P(zv)) {
-		return;
-	}
-	zend_make_immutable_array(zv TSRMLS_CC);
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zv), el) {
-		if (Z_TYPE_P(el) == IS_ARRAY) {
-			zend_make_immutable_array_r(el TSRMLS_CC);			
-		}
-	} ZEND_HASH_FOREACH_END();
-}
-/* }}} */
-
 void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 {
 	if (ast->kind == ZEND_CONST) {
 		ZVAL_COPY_VALUE(&result->u.constant, &ast->u.val);
 		efree(ast);
-		if (Z_TYPE(result->u.constant) == IS_ARRAY) {
-			zend_make_immutable_array_r(&result->u.constant TSRMLS_CC);			
-		}
 	} else if (zend_ast_is_ct_constant(ast)) {
 		zend_ast_evaluate(&result->u.constant, ast, NULL TSRMLS_CC);
 		zend_ast_destroy(ast);
-		if (Z_TYPE(result->u.constant) == IS_ARRAY) {
-			zend_make_immutable_array_r(&result->u.constant TSRMLS_CC);			
-		}
 	} else {
 		ZVAL_NEW_AST(&result->u.constant, ast);
 	}

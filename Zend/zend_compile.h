@@ -461,7 +461,6 @@ typedef int (*unary_op_type)(zval *, zval * TSRMLS_DC);
 typedef int (*binary_op_type)(zval *, zval *, zval * TSRMLS_DC);
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
-ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC);
 
 void zend_do_while_cond(znode *expr, znode *close_bracket_token TSRMLS_DC);
 void zend_do_while_end(const znode *while_token, const znode *close_bracket_token TSRMLS_DC);

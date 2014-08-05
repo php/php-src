@@ -3095,6 +3095,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				}
 			} else if (Z_IMMUTABLE_P(array_ptr)) {
 				zval_copy_ctor(array_ptr);
+			} else {
+				SEPARATE_ZVAL_NOREF(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -4137,7 +4139,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		retval = EX_VAR(opline->result.var);
 		ZVAL_COPY_VALUE(retval, &c->value);
 		if (Z_OPT_COPYABLE_P(retval) || Z_OPT_REFCOUNTED_P(retval)) {
-			if (Z_OPT_COPYABLE_P(retval) && (c->flags & CONST_PERSISTENT)) {
+			if (Z_OPT_COPYABLE_P(retval)) {
 				zval_copy_ctor_func(retval);
 			} else {
 				Z_ADDREF_P(retval);
@@ -8601,6 +8603,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				}
 			} else if (Z_IMMUTABLE_P(array_ptr)) {
 				zval_copy_ctor(array_ptr);
+			} else {
+				SEPARATE_ZVAL_NOREF(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -14030,6 +14034,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				}
 			} else if (Z_IMMUTABLE_P(array_ptr)) {
 				zval_copy_ctor(array_ptr);
+			} else {
+				SEPARATE_ZVAL_NOREF(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -16173,7 +16179,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 		retval = EX_VAR(opline->result.var);
 		ZVAL_COPY_VALUE(retval, &c->value);
 		if (Z_OPT_COPYABLE_P(retval) || Z_OPT_REFCOUNTED_P(retval)) {
-			if (Z_OPT_COPYABLE_P(retval) && (c->flags & CONST_PERSISTENT)) {
+			if (Z_OPT_COPYABLE_P(retval)) {
 				zval_copy_ctor_func(retval);
 			} else {
 				Z_ADDREF_P(retval);
@@ -25440,7 +25446,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 		retval = EX_VAR(opline->result.var);
 		ZVAL_COPY_VALUE(retval, &c->value);
 		if (Z_OPT_COPYABLE_P(retval) || Z_OPT_REFCOUNTED_P(retval)) {
-			if (Z_OPT_COPYABLE_P(retval) && (c->flags & CONST_PERSISTENT)) {
+			if (Z_OPT_COPYABLE_P(retval)) {
 				zval_copy_ctor_func(retval);
 			} else {
 				Z_ADDREF_P(retval);
@@ -31369,6 +31375,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				}
 			} else if (Z_IMMUTABLE_P(array_ptr)) {
 				zval_copy_ctor(array_ptr);
+			} else {
+				SEPARATE_ZVAL_NOREF(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
