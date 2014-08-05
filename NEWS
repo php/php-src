@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed bug #60616 (odbc_fetch_into returns junk data at end of multi-byte
     char fields). (Keyur)
 
+- Zlib:
+  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
+    data). (Mike)
+	  
 24 Jul 2014, PHP 5.5.15
 
 - Core:
