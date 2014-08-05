@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - SPL:
   . Revert fix for bug #67064 (BC issues). (Bob)
 
+- Zlib:
+  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
+    data). (Mike)
+
 31 Jul 2014, PHP 5.6.0 Release Candidate 3
 
 - Core:
