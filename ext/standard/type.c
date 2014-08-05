@@ -365,6 +365,37 @@ PHP_FUNCTION(is_scalar)
 }
 /* }}} */
 
+/* {{{ proto bool sempty(mixed value)
+   Returns true if value is empty, in a strict fashion */
+PHP_FUNCTION(sempty)
+{
+	zval **arg;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+		return;
+	}
+	
+	if(Z_STRLEN_PP(arg) == 0){
+		RETURN_TRUE;
+	}
+	
+	switch (Z_TYPE_PP(arg)) {
+		case IS_BOOL:
+		case IS_DOUBLE:
+		case IS_LONG:
+		case IS_STRING:
+			
+			RETURN_FALSE;
+			break;
+
+		default:
+			RETURN_TRUE;
+			break;
+	}
+}
+/* }}} */
+
+
 /* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]]) 
    Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
