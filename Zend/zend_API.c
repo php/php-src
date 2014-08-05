@@ -1720,7 +1720,7 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value TSRMLS_DC)
 		case IS_BIGINT:
 			{
 				char *temp = zend_bigint_to_string(Z_BIG_P(key));
-				zend_symtable_str_update(ht, temp, strlen(temp), value);
+				result = zend_symtable_str_update(ht, temp, strlen(temp), value);
 				efree(temp);
 			}
 			break;

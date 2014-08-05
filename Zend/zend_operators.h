@@ -242,13 +242,13 @@ check_digits:
 
 				if (big) {
 					local_bigint = zend_bigint_alloc();
-					zend_bigint_init_strtol(local_bigint, str, &ptr, 10);
+					zend_bigint_init_strtol(local_bigint, str, (char **)&ptr, 10);
 				}
 			}
 		} else if (!(digits < SIZEOF_LONG * 2 || (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
 			if (big) {
 				local_bigint = zend_bigint_alloc();
-				zend_bigint_init_strtol(local_bigint, str, &ptr, 16);
+				zend_bigint_init_strtol(local_bigint, str, (char **)&ptr, 16);
 			}
 			if (oflow_info != NULL) {
 				*oflow_info = 1;
