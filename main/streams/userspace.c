@@ -385,7 +385,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 		stream = php_stream_alloc_rel(&php_stream_userspace_ops, us, 0, mode);
 
 		/* if the opened path is set, copy it out */
-		if (Z_ISREF(args[2]) && Z_TYPE_P(Z_REFVAL(args[3])) == IS_STRING && opened_path) {
+		if (Z_ISREF(args[3]) && Z_TYPE_P(Z_REFVAL(args[3])) == IS_STRING && opened_path) {
 			*opened_path = estrndup(Z_STRVAL_P(Z_REFVAL(args[3])), Z_STRLEN_P(Z_REFVAL(args[3])));
 		}
 
