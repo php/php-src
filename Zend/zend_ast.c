@@ -295,9 +295,17 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			zval_dtor(&op2);
 			break;
 		case ZEND_CONST:
-			ZVAL_DUP(result, &ast->u.val);
-			if (Z_OPT_CONSTANT_P(result)) {
-				zval_update_constant_ex(result, 1, scope TSRMLS_CC);
+			/* class constants may be updated in-place */
+			if (scope) {
+				if (Z_OPT_CONSTANT(ast->u.val)) {
+					zval_update_constant_ex(&ast->u.val, 1, scope TSRMLS_CC);
+				}
+				ZVAL_DUP(result, &ast->u.val);
+			} else {
+				ZVAL_DUP(result, &ast->u.val);
+				if (Z_OPT_CONSTANT_P(result)) {
+					zval_update_constant_ex(result, 1, scope TSRMLS_CC);
+				}
 			}
 			break;
 		case ZEND_BOOL_AND:
@@ -363,20 +371,17 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 				}
 			}
 			break;
-//???
-#if 0
 		case ZEND_FETCH_DIM_R:
 			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
 			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			{
-				zval *tmp;
+				zval tmp;
 				zend_fetch_dimension_by_zval(&tmp, &op1, &op2 TSRMLS_CC);
-				ZVAL_ZVAL(result, tmp, 1, 1);
+				ZVAL_ZVAL(result, &tmp, 1, 1);
 			}
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
-#endif
 		default:
 			zend_error(E_ERROR, "Unsupported constant expression");
 	}

@@ -63,9 +63,11 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 		return;
 
 	/* Update current hash item with the converted value. */
-	ZVAL_STRINGL( &znew_val, (char*)new_val, UBYTES(new_val_len) );
+	ZVAL_STRINGL( &znew_val, (char*)new_val, UBYTES(new_val_len + 1) );
 	//???
 	efree(new_val);
+	/* hack to fix use of initialized value */
+	Z_STRLEN(znew_val) = Z_STRLEN(znew_val) - UBYTES(1);
 
 	if( hashKey)
 	{

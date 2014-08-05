@@ -525,6 +525,10 @@ static sfsistat mlfi_close(SMFICTX *ctx)
 	int status;
 	TSRMLS_FETCH();
 
+	if (!SG(sapi_started) && SUCCESS != php_request_startup(TSRMLS_C)) {
+		return ret;
+	}
+
 	/* call userland */
 	INIT_ZVAL(function_name);
 	ZVAL_STRING(&function_name, "milter_close", 0);
@@ -550,7 +554,7 @@ static sfsistat mlfi_close(SMFICTX *ctx)
 
 /* {{{ Milter entry struct
  */
-struct smfiDesc smfilter = {
+static struct smfiDesc smfilter = {
     "php-milter",	/* filter name */
     SMFI_VERSION,   /* version code -- leave untouched */
     0,				/* flags */
@@ -1011,6 +1015,7 @@ int main(int argc, char *argv[])
 
 
 	tsrm_startup(1, 1, 0, NULL);
+	tsrm_ls = ts_resource(0);
 	sapi_startup(&milter_sapi_module);
 	
 	while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
@@ -1028,7 +1033,6 @@ int main(int argc, char *argv[])
 
 	milter_sapi_module.executable_location = argv[0];
 
-	tsrm_ls = ts_resource(0);
 
 	sapi_module.startup(&milter_sapi_module);
 

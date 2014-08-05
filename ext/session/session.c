@@ -298,7 +298,8 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 	if ((array = zend_hash_str_find(&EG(symbol_table).ht, "_SERVER", sizeof("_SERVER") - 1)) &&
 		Z_TYPE_P(array) == IS_ARRAY &&
-		(token = zend_hash_str_find(Z_ARRVAL_P(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR") - 1))
+		(token = zend_hash_str_find(Z_ARRVAL_P(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR") - 1)) &&
+		Z_TYPE_P(token) == IS_STRING
 	) {
 		remote_addr = Z_STRVAL_P(token);
 	}
@@ -1405,9 +1406,16 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-#define PPID2SID \
-		convert_to_string((ppid)); \
-		PS(id) = STR_INIT(Z_STRVAL_P(ppid), Z_STRLEN_P(ppid), 0)
+static void ppid2sid(zval *ppid TSRMLS_DC) {
+	if (Z_TYPE_P(ppid) != IS_STRING) {
+		PS(id) = NULL;
+		PS(send_cookie) = 1;
+	} else {
+		convert_to_string(ppid);
+		PS(id) = STR_INIT(Z_STRVAL_P(ppid), Z_STRLEN_P(ppid), 0);
+		PS(send_cookie) = 0;
+	}
+}
 
 PHPAPI void php_session_reset_id(TSRMLS_D) /* {{{ */
 {
@@ -1502,9 +1510,8 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_P(data) == IS_ARRAY &&
 				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
 		) {
-			PPID2SID;
+			ppid2sid(ppid TSRMLS_CC);
 			PS(apply_trans_sid) = 0;
-			PS(send_cookie) = 0;
 			PS(define_sid) = 0;
 		}
 
@@ -1513,8 +1520,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_P(data) == IS_ARRAY &&
 				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
 		) {
-			PPID2SID;
-			PS(send_cookie) = 0;
+			ppid2sid(ppid TSRMLS_CC);
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
@@ -1522,8 +1528,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_P(data) == IS_ARRAY &&
 				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
 		) {
-			PPID2SID;
-			PS(send_cookie) = 0;
+			ppid2sid(ppid TSRMLS_CC);
 		}
 	}
 

@@ -63,9 +63,9 @@ static uint zend_hash_persist_calc(HashTable *ht, uint (*pPersistElement)(zval *
 		RETURN_SIZE();
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
-		ADD_DUP_SIZE(ht->arData, sizeof(Bucket) * ht->nTableSize);
+		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed);
 	} else {
-		ADD_DUP_SIZE(ht->arData, (sizeof(Bucket) + sizeof(zend_uint)) * ht->nTableSize);
+		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed + sizeof(zend_uint) * ht->nTableSize);
 	}
 
 	for (idx = 0; idx < ht->nNumUsed; idx++) {

@@ -332,14 +332,11 @@ PHP_FUNCTION(count)
 #ifdef HAVE_SPL
 			/* if not and the object implements Countable we call its count() method */
 			if (Z_OBJ_HT_P(array)->get_class_entry && instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
-				zval mode_zv;
-				ZVAL_LONG(&mode_zv, mode);
-				zend_call_method_with_1_params(array, NULL, NULL, "count", &retval, &mode_zv);
+				zend_call_method_with_0_params(array, NULL, NULL, "count", &retval);
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					RETVAL_LONG(zval_get_long(&retval));
 					zval_ptr_dtor(&retval);
 				}
-				zval_ptr_dtor(&mode_zv);
 				return;
 			}
 #endif
@@ -607,6 +604,7 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 PHP_FUNCTION(usort)
 {
 	zval *array;
+	zend_refcounted *arr;
 	unsigned int refcount;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
@@ -617,30 +615,31 @@ PHP_FUNCTION(usort)
 		return;
 	}
 
-	/* Clear the is_ref flag, so the attemts to modify the array in user
+	/* Increase reference counter, so the attemts to modify the array in user
 	 * comparison function will create a copy of array and won't affect the
 	 * original array. The fact of modification is detected using refcount
 	 * comparison. The result of sorting in such case is undefined and the
 	 * function returns FALSE.
 	 */
-//???	Z_UNSET_ISREF_P(array);
+	Z_ADDREF_P(array);
 	refcount = Z_REFCOUNT_P(array);
+	arr = Z_COUNTED_P(array);
 
 	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_user_compare, 1 TSRMLS_CC) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		if (refcount > Z_REFCOUNT_P(array)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array was modified by the user comparison function");
+			if (--GC_REFCOUNT(arr) <= 0) {
+				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
+			}
 			RETVAL_FALSE;
 		} else {
+			Z_DELREF_P(array);
 			RETVAL_TRUE;
 		}
 	}
 	
-	if (Z_REFCOUNT_P(array) > 1) {
-//???		Z_SET_ISREF_P(array);
-	}
-
 	PHP_ARRAY_CMP_FUNC_RESTORE();
 }
 /* }}} */
@@ -650,6 +649,7 @@ PHP_FUNCTION(usort)
 PHP_FUNCTION(uasort)
 {
 	zval *array;
+	zend_refcounted *arr;
 	unsigned int refcount;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
@@ -660,28 +660,29 @@ PHP_FUNCTION(uasort)
 		return;
 	}
 
-	/* Clear the is_ref flag, so the attemts to modify the array in user
-	 * comaprison function will create a copy of array and won't affect the
+	/* Increase reference counter, so the attemts to modify the array in user
+	 * comparison function will create a copy of array and won't affect the
 	 * original array. The fact of modification is detected using refcount
 	 * comparison. The result of sorting in such case is undefined and the
 	 * function returns FALSE.
 	 */
-//???	Z_UNSET_ISREF_P(array);
+	Z_ADDREF_P(array);
 	refcount = Z_REFCOUNT_P(array);
+	arr = Z_COUNTED_P(array);
 
 	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_user_compare, 0 TSRMLS_CC) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		if (refcount > Z_REFCOUNT_P(array)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array was modified by the user comparison function");
+			if (--GC_REFCOUNT(arr) <= 0) {
+				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
+			}
 			RETVAL_FALSE;
 		} else {
+			Z_DELREF_P(array);
 			RETVAL_TRUE;
 		}
-	}
-
-	if (Z_REFCOUNT_P(array) > 1) {
-//???		Z_SET_ISREF_P(array);
 	}
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
@@ -736,6 +737,7 @@ static int php_array_user_key_compare(const void *a, const void *b TSRMLS_DC) /*
 PHP_FUNCTION(uksort)
 {
 	zval *array;
+	zend_refcounted *arr;
 	unsigned int refcount;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
@@ -746,28 +748,29 @@ PHP_FUNCTION(uksort)
 		return;
 	}
 
-	/* Clear the is_ref flag, so the attemts to modify the array in user
-	 * comaprison function will create a copy of array and won't affect the
+	/* Increase reference counter, so the attemts to modify the array in user
+	 * comparison function will create a copy of array and won't affect the
 	 * original array. The fact of modification is detected using refcount
 	 * comparison. The result of sorting in such case is undefined and the
 	 * function returns FALSE.
 	 */
-//???	Z_UNSET_ISREF_P(array);
+	Z_ADDREF_P(array);
 	refcount = Z_REFCOUNT_P(array);
+	arr = Z_COUNTED_P(array);
 
 	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_user_key_compare, 0 TSRMLS_CC) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		if (refcount > Z_REFCOUNT_P(array)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array was modified by the user comparison function");
+			if (--GC_REFCOUNT(arr) <= 0) {
+				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
+			}
 			RETVAL_FALSE;
 		} else {
+			Z_DELREF_P(array);
 			RETVAL_TRUE;
 		}
-	}
-
-	if (Z_REFCOUNT_P(array) > 1) {
-//???		Z_SET_ISREF_P(array);
 	}
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
@@ -2079,7 +2082,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 				zend_hash_rehash(Z_ARRVAL_P(stack));
 			}
 		}
-	} else if (!key && index >= Z_ARRVAL_P(stack)->nNextFreeElement - 1) {
+	} else if (!key && Z_ARRVAL_P(stack)->nNextFreeElement > 0 && index >= Z_ARRVAL_P(stack)->nNextFreeElement - 1) {
 		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
 	}
 
