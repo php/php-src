@@ -570,6 +570,8 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 {
 	char *host = NULL;
 	int portno, err;
+	long sockopts = STREAM_SOCKOP_NONE;
+	zval **tmpzval = NULL;
 
 #ifdef AF_UNIX
 	if (stream->ops == &php_stream_unix_socket_ops || stream->ops == &php_stream_unixdg_socket_ops) {
@@ -599,8 +601,28 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 		return -1;
 	}
 
+#ifdef SO_REUSEPORT
+	if (stream->context
+		&& php_stream_context_get_option(stream->context, "socket", "so_reuseport", &tmpzval) == SUCCESS
+		&& zend_is_true(*tmpzval TSRMLS_CC)
+	) {
+		sockopts |= STREAM_SOCKOP_SO_REUSEPORT;
+	}
+#endif
+
+#ifdef SO_BROADCAST
+	if (&php_stream_udp_socket_ops /* SO_BROADCAST is only applicable for UDP */
+		&& stream->context
+		&& php_stream_context_get_option(stream->context, "socket", "so_broadcast", &tmpzval) == SUCCESS
+		&& zend_is_true(*tmpzval TSRMLS_CC)
+	) {
+		sockopts |= STREAM_SOCKOP_SO_BROADCAST;
+	}
+#endif
+
 	sock->socket = php_network_bind_socket_to_local_addr(host, portno,
 			stream->ops == &php_stream_udp_socket_ops ? SOCK_DGRAM : SOCK_STREAM,
+			sockopts,
 			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 			&err
 			TSRMLS_CC);
@@ -620,6 +642,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	int err = 0;
 	int ret;
 	zval **tmpzval = NULL;
+	long sockopts = STREAM_SOCKOP_NONE;
 
 #ifdef AF_UNIX
 	if (stream->ops == &php_stream_unix_socket_ops || stream->ops == &php_stream_unixdg_socket_ops) {
@@ -665,6 +688,16 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		bindto = parse_ip_address_ex(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), &bindport, xparam->want_errortext, &xparam->outputs.error_text TSRMLS_CC);
 	}
 
+#ifdef SO_BROADCAST
+	if (&php_stream_udp_socket_ops /* SO_BROADCAST is only applicable for UDP */
+		&& stream->context
+		&& php_stream_context_get_option(stream->context, "socket", "so_broadcast", &tmpzval) == SUCCESS
+		&& zend_is_true(*tmpzval TSRMLS_CC)
+	) {
+		sockopts |= STREAM_SOCKOP_SO_BROADCAST;
+	}
+#endif
+
 	/* Note: the test here for php_stream_udp_socket_ops is important, because we
 	 * want the default to be TCP sockets so that the openssl extension can
 	 * re-use this code. */
@@ -676,7 +709,8 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 			&err,
 			bindto,
-			bindport
+			bindport,
+			sockopts
 			TSRMLS_CC);
 	
 	ret = sock->socket == -1 ? -1 : 0;

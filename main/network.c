@@ -416,13 +416,14 @@ static inline void sub_times(struct timeval a, struct timeval b, struct timeval 
  * */
 /* {{{ php_network_bind_socket_to_local_addr */
 php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
-		int socktype, char **error_string, int *error_code
+		int socktype, long sockopts, char **error_string, int *error_code
 		TSRMLS_DC)
 {
 	int num_addrs, n, err = 0;
 	php_socket_t sock;
 	struct sockaddr **sal, **psal, *sa;
 	socklen_t socklen;
+	int sockoptval = 1;
 
 	num_addrs = php_network_getaddresses(host, socktype, &psal, error_string TSRMLS_CC);
 
@@ -464,9 +465,16 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 			/* attempt to bind */
 
 #ifdef SO_REUSEADDR
-			{
-				int val = 1;
-				setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof(val));
+			setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&sockoptval, sizeof(sockoptval));
+#endif
+#ifdef SO_REUSEPORT
+			if (sockopts & STREAM_SOCKOP_SO_REUSEPORT) {
+				setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&sockoptval, sizeof(sockoptval));
+			}
+#endif
+#ifdef SO_BROADCAST
+			if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
+				setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&sockoptval, sizeof(sockoptval));
 			}
 #endif
 
@@ -762,7 +770,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 /* {{{ php_network_connect_socket_to_host */
 php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
-		int *error_code, char *bindto, unsigned short bindport
+		int *error_code, char *bindto, unsigned short bindport, long sockopts
 		TSRMLS_DC)
 {
 	int num_addrs, n, fatal = 0;
@@ -864,6 +872,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 					}
 				}
 #endif
+
 				if (!local_address || bind(sock, local_address, local_address_len)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to bind to '%s:%d', system said: %s", bindto, bindport, strerror(errno));
 				}
@@ -878,6 +887,14 @@ skip_bind:
 				*error_string = NULL;
 			}
 
+#ifdef SO_BROADCAST
+			{
+				int val = 1;
+				if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
+					setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof(val));
+				}
+			}
+#endif
 			n = php_network_connect_socket(sock, sa, socklen, asynchronous,
 					timeout ? &working_timeout : NULL,
 					error_string, error_code);
