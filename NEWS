@@ -7,11 +7,27 @@ PHP                                                                        NEWS
   . Removed inconsistency regarding behaviour of array in constants at
     run-time. (Bob)
 
+- Fileinfo:
+  . Fixed bug #67705 (extensive backtracking in rule regular expression).
+    (CVE-2014-3538) (Remi)
+
+- GD:
+  . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
+    (CVE-2014-2497) (Remi)
+
 - Milter:
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
 
 - SPL:
   . Revert fix for bug #67064 (BC issues). (Bob)
+
+- Streams:
+  . Expose so_reuseport and so_broadcast capability via socket context option
+    assignment. (Daniel Lowrey)
+
+- Zlib:
+  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
+    data). (Mike)
 
 31 Jul 2014, PHP 5.6.0 Release Candidate 3
 
