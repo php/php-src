@@ -1,9 +1,19 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2014, PHP 5.4.33
+
 ?? ??? 2014, PHP 5.4.32
 
 - COM:
   . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
+
+- Fileinfo:
+  . Fixed bug #67705 (extensive backtracking in rule regular expression).
+    (CVE-2014-3538) (Remi)
+
+- GD:
+  . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
+    (CVE-2014-2497) (Remi)
 
 - Milter:
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
@@ -31,6 +41,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #60616 (odbc_fetch_into returns junk data at end of multi-byte
     char fields). (Keyur)
+
+- Zlib:
+  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
+    data). (Mike)
 
 24 Jul 2014, PHP 5.4.31
 
