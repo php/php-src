@@ -43,7 +43,6 @@ enum_func_status mysqlnd_stmt_execute_batch_generate_request(MYSQLND_STMT * cons
 static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC);
 static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
 
-
 /* {{{ mysqlnd_stmt::store_result */
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
@@ -246,7 +245,7 @@ MYSQLND_METHOD(mysqlnd_stmt, next_result)(MYSQLND_STMT * s TSRMLS_DC)
 	DBG_INF_FMT("server_status=%u cursor=%u", stmt->upsert_status->server_status, stmt->upsert_status->server_status & SERVER_STATUS_CURSOR_EXISTS);
 
 	/* Free space for next result */
-	s->m->free_stmt_content(s TSRMLS_CC);
+	s->m->free_stmt_result(s TSRMLS_CC);
 	{
 		enum_func_status ret = s->m->parse_execute_response(s TSRMLS_CC);
 		DBG_RETURN(ret);
@@ -2091,6 +2090,37 @@ mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param
 /* }}} */
 
 
+/* {{{ mysqlnd_stmt::free_stmt_result */
+static void
+MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)(MYSQLND_STMT * const s TSRMLS_DC)
+{
+	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
+	DBG_ENTER("mysqlnd_stmt::free_stmt_result");
+	if (!stmt) {
+		DBG_VOID_RETURN;
+	}
+
+	/*
+	  First separate the bound variables, which point to the result set, then
+	  destroy the set.
+	*/
+	mysqlnd_stmt_separate_result_bind(s TSRMLS_CC);
+	/* Not every statement has a result set attached */
+	if (stmt->result) {
+		stmt->result->m.free_result_internal(stmt->result TSRMLS_CC);
+		stmt->result = NULL;
+	}
+	if (stmt->error_info->error_list) {
+		zend_llist_clean(stmt->error_info->error_list);
+		mnd_pefree(stmt->error_info->error_list, s->persistent);
+		stmt->error_info->error_list = NULL;
+	}
+
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_stmt::free_stmt_content */
 static void
 MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)(MYSQLND_STMT * const s TSRMLS_DC)
@@ -2123,22 +2153,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)(MYSQLND_STMT * const s TSRMLS_DC
 		stmt->param_bind = NULL;
 	}
 
-	/*
-	  First separate the bound variables, which point to the result set, then
-	  destroy the set.
-	*/
-	mysqlnd_stmt_separate_result_bind(s TSRMLS_CC);
-	/* Not every statement has a result set attached */
-	if (stmt->result) {
-		stmt->result->m.free_result_internal(stmt->result TSRMLS_CC);
-		stmt->result = NULL;
-	}
-	if (stmt->error_info->error_list) {
-		zend_llist_clean(stmt->error_info->error_list);
-		mnd_pefree(stmt->error_info->error_list, s->persistent);
-		stmt->error_info->error_list = NULL;
-	}
-
+	s->m->free_stmt_result(s TSRMLS_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -2357,7 +2372,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	mysqlnd_stmt_execute_generate_request,
 	mysqlnd_stmt_execute_parse_response,
 	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content),
-	MYSQLND_METHOD(mysqlnd_stmt, flush)
+	MYSQLND_METHOD(mysqlnd_stmt, flush),
+	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)
 MYSQLND_CLASS_METHODS_END;
 
 
