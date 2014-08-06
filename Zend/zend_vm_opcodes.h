@@ -173,5 +173,7 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_SEND_UNPACK                     165
 #define ZEND_POW                             166
 #define ZEND_ASSIGN_POW                      167
+#define ZEND_INTDIV                          168
+#define ZEND_ASSIGN_INTDIV                   169
 
 #endif

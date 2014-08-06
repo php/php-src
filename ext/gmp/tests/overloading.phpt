@@ -86,6 +86,7 @@ var_dump($a);
 $x = gmp_init(3);
 $y = gmp_init(2);
 var_dump($x ** $y);
+var_dump($x / $y);
 
 ?>
 --EXPECTF--
@@ -263,4 +264,8 @@ object(GMP)#%d (1) {
 object(GMP)#%d (1) {
   ["num"]=>
   string(1) "9"
+}
+object(GMP)#11 (1) {
+  ["num"]=>
+  string(1) "1"
 }

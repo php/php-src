@@ -1114,6 +1114,38 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
+ZEND_API int intdiv_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	zval op1_copy, op2_copy;
+	long op1_lval;
+
+	if (Z_TYPE_P(op1) != IS_LONG || Z_TYPE_P(op2) != IS_LONG) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_INTDIV);
+
+		zendi_convert_to_long(op1, op1_copy, result);
+		op1_lval = Z_LVAL_P(op1);
+		zendi_convert_to_long(op2, op2_copy, result);
+	} else {
+		op1_lval = Z_LVAL_P(op1);
+	}
+
+	if (Z_LVAL_P(op2) == 0) {
+		zend_error(E_WARNING, "Division by zero");
+		ZVAL_BOOL(result, 0);
+		return FAILURE;			/* modulus by zero */
+	}
+
+	if (Z_LVAL_P(op2) == -1 && op1_lval == LONG_MIN) {
+		/* Prevent overflow error/crash if op1==LONG_MIN */
+		ZVAL_LONG(result, 0);
+		return SUCCESS;
+	}
+
+	ZVAL_LONG(result, op1_lval / Z_LVAL_P(op2));
+	return SUCCESS;
+}
+/* }}} */
+
 ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;

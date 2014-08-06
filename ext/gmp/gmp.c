@@ -536,6 +536,7 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 		shift_operator_helper(mpz_pow_ui, result, op1, op2 TSRMLS_CC);
 		return SUCCESS;
 	case ZEND_DIV:
+	case ZEND_INTDIV:
 		DO_BINARY_UI_OP_EX(mpz_tdiv_q, mpz_tdiv_q_ui, 1);
 	case ZEND_MOD:
 		DO_BINARY_UI_OP_EX(mpz_mod, mpz_mod_ui, 1);
