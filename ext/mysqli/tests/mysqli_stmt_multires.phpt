@@ -48,37 +48,42 @@ require_once('skipifconnectfailure.inc');
 		printf("[007] Shouldn't have fetched anything\n");
 		var_dump($c_id, $c_label);
 	}
+
+	if ($stmt->fetch()) {
+		printf("[008] No more rows expected\n");
+	}
+
 	if (!$stmt->more_results()) {
-		printf("[008] Expected more results\n");
+		printf("[009] Expected more results\n");
 	} else {
-		var_dump("next_result:", $stmt->next_result());
+		var_dump("[009] next_result:", $stmt->next_result());
 	}
 
 	if (!$stmt->bind_result($c_id, $c_label)) {
-		printf("[004] [%d] %s\n", $stmt->error, $stmt->errno);
+		printf("[010] [%d] %s\n", $stmt->error, $stmt->errno);
 	}
 	var_dump("pre:",$c_id, $c_label);
 
 	if (!$stmt->fetch()) {
-		printf("[009] [%d] %s\n", $stmt->error, $stmt->errno);
+		printf("[011] [%d] %s\n", $stmt->error, $stmt->errno);
 	}
 
 	var_dump("post:",$c_id, $c_label);
 
-	if (!$stmt->more_results()) {
-		printf("[010] Expected more results\n");
-	} else {
-		var_dump("next_result:", $stmt->next_result());
+	if ($stmt->fetch()) {
+		printf("[012] No more rows expected\n");
 	}
 
 	if (!$stmt->more_results()) {
-		printf("[010] Expected more results\n");
+		printf("[013] Expected more results\n");
 	} else {
-		var_dump("next_result:", $stmt->next_result());
+		var_dump("[013] next_result:", $stmt->next_result());
 	}
 
 	if ($stmt->more_results()) {
-		printf("[011] No more results expected\n");
+		printf("[014] No more results expected\n");
+	} else {
+		printf("[014] No result, as expected\n");
 	}
 
 	$stmt->close();
@@ -95,4 +100,21 @@ require_once('skipifconnectfailure.inc');
 	}
 ?>
 --EXPECTF--
+string(4) "pre:"
+NULL
+NULL
+string(5) "post:"
+int(13)
+string(6) "a-ahoi"
+string(18) "[009] next_result:"
+bool(true)
+string(4) "pre:"
+int(13)
+string(6) "a-ahoi"
+string(5) "post:"
+int(43)
+string(5) "a---a"
+string(18) "[013] next_result:"
+bool(true)
+[014] No result, as expected
 done
