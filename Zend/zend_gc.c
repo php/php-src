@@ -472,7 +472,7 @@ static int gc_collect_white(zend_refcounted *ref TSRMLS_DC)
 	Bucket *p;
 
 tail_call:
-	if (GC_INFO(ref) == GC_WHITE) {
+	if (GC_GET_COLOR(GC_INFO(ref)) == GC_WHITE) {
 		ht = NULL;
 		GC_SET_BLACK(GC_INFO(ref));
 
@@ -568,13 +568,20 @@ static int gc_collect_roots(TSRMLS_D)
 	int count = 0;
 	gc_root_buffer *current = GC_G(roots).next;
 
+	/* remove non-garbage from the list */
 	while (current != &GC_G(roots)) {
-		GC_SET_ADDRESS(GC_INFO(current->ref), 0);
-		if (GC_INFO(current->ref) == GC_WHITE) {
-			count += gc_collect_white(current->ref TSRMLS_CC);
-			GC_SET_ADDRESS(GC_INFO(current->ref), current - GC_G(buf));
-		} else {
+		if (GC_GET_COLOR(GC_INFO(current->ref)) != GC_WHITE) {
+			GC_SET_ADDRESS(GC_INFO(current->ref), 0);
 			GC_REMOVE_FROM_ROOTS(current);
+		}
+		current = current->next;
+	}
+
+	current = GC_G(roots).next;
+	while (current != &GC_G(roots)) {
+		if (GC_GET_COLOR(GC_INFO(current->ref)) == GC_WHITE) {
+			GC_REFCOUNT(current->ref)++;
+			count += gc_collect_white(current->ref TSRMLS_CC);
 		}
 		current = current->next;
 	}
