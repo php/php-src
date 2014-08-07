@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - Milter:
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
 
+- OpenSSL:
+  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads)
+    (Daniel Lowrey).
+
 - SPL:
   . Revert fix for bug #67064 (BC issues). (Bob)
 
