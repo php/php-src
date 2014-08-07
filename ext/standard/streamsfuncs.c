@@ -40,7 +40,7 @@ typedef unsigned long long php_timeout_ull;
 typedef unsigned __int64 php_timeout_ull;
 #endif
 
-#define GET_CTX_OPT(stream, wrapper, name, val) (stream->context && NULL != (val = php_stream_context_get_option(stream->context, wrapper, name)))
+#define GET_CTX_OPT(stream, wrapper, name, val) (PHP_STREAM_CONTEXT(stream) && NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), wrapper, name)))
 
 static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC);
 
@@ -939,13 +939,14 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 		stream = zend_fetch_resource(contextresource TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream);
 
 		if (stream) {
-			context = stream->context;
+			context = PHP_STREAM_CONTEXT(stream);
 			if (context == NULL) {
 				/* Only way this happens is if file is opened with NO_DEFAULT_CONTEXT
 				   param, but then something is called which requires a context.
 				   Don't give them the default one though since they already said they
 	 			   didn't want it. */
-				context = stream->context = php_stream_context_alloc(TSRMLS_C);
+				context = php_stream_context_alloc(TSRMLS_C);
+				stream->ctx = context->res;
 			}
 		}
 	}

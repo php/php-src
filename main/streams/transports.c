@@ -160,7 +160,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 					zval *zbacklog = NULL;
 					int backlog = 32;
 					
-					if (stream->context && (zbacklog = php_stream_context_get_option(stream->context, "socket", "backlog")) != NULL) {
+					if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
 						zval *ztmp = zbacklog;
 						
 						convert_to_long_ex(ztmp);

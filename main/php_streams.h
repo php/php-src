@@ -205,7 +205,7 @@ struct _php_stream  {
 	int __exposed;	/* non-zero if exposed as a zval somewhere */
 	char *orig_path;
 
-	php_stream_context *context;
+	zend_resource *ctx;
 	int flags;	/* PHP_STREAM_FLAG_XXX */
 
 	/* buffer */
@@ -227,6 +227,9 @@ struct _php_stream  {
 
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
 }; /* php_stream */
+
+#define PHP_STREAM_CONTEXT(stream) \
+	((php_stream_context*) ((stream)->ctx ? ((stream)->ctx->ptr) : NULL))
 
 /* state definitions when closing down; these are private to streams.c */
 #define PHP_STREAM_FCLOSE_NONE 0

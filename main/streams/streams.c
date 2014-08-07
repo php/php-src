@@ -91,11 +91,11 @@ fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 
 	stream->res = NULL;
 
-	if (stream->context) {
+	if (PHP_STREAM_CONTEXT(stream)) {
 		zend_hash_apply_with_argument(&EG(regular_list),
 				_php_stream_release_context,
-				stream->context TSRMLS_CC);
-		stream->context = NULL;
+				PHP_STREAM_CONTEXT(stream) TSRMLS_CC);
+		stream->ctx = NULL;
 	}
 
 	return 0;
@@ -333,7 +333,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 	ZVAL_UNDEF(&ret->wrapperdata);
 	ret->stdiocast        = NULL;
 	ret->orig_path        = NULL;
-	ret->context          = NULL;
+	ret->ctx              = NULL;
 	ret->readbuf          = NULL;
 	ret->enclosing_stream = NULL;
 
@@ -387,7 +387,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 	 * already been freed (if it was created after the stream resource), so
 	 * don't reference it */
 	if (EG(active)) {
-		context = stream->context;
+		context = PHP_STREAM_CONTEXT(stream);
 	}
 
 	if (stream->flags & PHP_STREAM_FLAG_NO_CLOSE) {
@@ -2167,12 +2167,13 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 /* {{{ context API */
 PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context TSRMLS_DC)
 {
-	php_stream_context *oldcontext = stream->context;
-
-	stream->context = context;
+	php_stream_context *oldcontext = PHP_STREAM_CONTEXT(stream);
 
 	if (context) {
+		stream->ctx = context->res;
 		GC_REFCOUNT(context->res)++;
+	} else {
+		stream->ctx = NULL;
 	}
 	if (oldcontext) {
 		zend_list_delete(oldcontext->res);

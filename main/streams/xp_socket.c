@@ -101,7 +101,7 @@ retry:
 	}
 
 	if (didwrite > 0) {
-		php_stream_notify_progress_increment(stream->context, didwrite, 0);
+		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), didwrite, 0);
 	}
 
 	if (didwrite < 0) {
@@ -161,7 +161,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	stream->eof = (nr_bytes == 0 || (nr_bytes == -1 && php_socket_errno() != EWOULDBLOCK));
 
 	if (nr_bytes > 0) {
-		php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
+		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
 	}
 
 	if (nr_bytes < 0) {
@@ -666,7 +666,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		return -1;
 	}
 
-	if (stream->context && (tmpzval = php_stream_context_get_option(stream->context, "socket", "bindto")) != NULL) {
+	if (PHP_STREAM_CONTEXT(stream) && (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "bindto")) != NULL) {
 		if (Z_TYPE_P(tmpzval) != IS_STRING) {
 			if (xparam->want_errortext) {
 				spprintf(&xparam->outputs.error_text, 0, "local_addr context option is not a string.");
@@ -744,9 +744,9 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 
 			xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
 			if (xparam->outputs.client) {
-				xparam->outputs.client->context = stream->context;
-				if (stream->context) {
-					GC_REFCOUNT(stream->context->res)++;
+				xparam->outputs.client->ctx = stream->ctx;
+				if (stream->ctx) {
+					GC_REFCOUNT(stream->ctx)++;
 				}
 			}
 		}
