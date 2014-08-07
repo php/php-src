@@ -2544,6 +2544,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_is_scalar, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_sempty, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_is_callable, 0, 0, 1)
 	ZEND_ARG_INFO(0, var)
 	ZEND_ARG_INFO(0, syntax_only)
@@ -3041,6 +3045,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_array,														arginfo_is_array)
 	PHP_FE(is_object,														arginfo_is_object)
 	PHP_FE(is_scalar,														arginfo_is_scalar)
+	PHP_FE(sempty,															arginfo_sempty)
 	PHP_FE(is_callable,														arginfo_is_callable)
 
 	/* functions from file.c */
