@@ -109,7 +109,6 @@ static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr TS
 			break;
 		case IS_STRING:
 			zend_symtable_update(Z_ARRVAL_P(result), Z_STR_P(offset), expr);
-//???
 			zval_dtor(offset);
 			break;
 		case IS_NULL:

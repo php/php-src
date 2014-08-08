@@ -285,7 +285,6 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 {
 	/* create an instance of our class */
 	object_init_ex(object, uwrap->ce);
-//???	Z_SET_ISREF_P(object);
 
 	if (context) {
 		add_property_resource(object, "context", context->res);
