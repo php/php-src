@@ -226,13 +226,15 @@ again:
 			ZVAL_EMPTY_STRING(expr_copy);
 			break;
 		}
-		case IS_TRUE:
-			if (CG(one_char_string)['1']) {
+		case IS_TRUE: {
+		    TSRMLS_FETCH();
+		    if (CG(one_char_string)['1']) {
 				ZVAL_INT_STR(expr_copy, CG(one_char_string)['1']);
 			} else {
 				ZVAL_NEW_STR(expr_copy, STR_INIT("1", 1, 0));
 			}
 			break;
+		}
 		case IS_RESOURCE: {
 				char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
 				int len;
