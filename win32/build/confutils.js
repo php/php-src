@@ -1362,9 +1362,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	if (MODE_PHPIZE && FSO.FileExists(PHP_DIR + "/include/main/config.pickle.h")) {
 		cflags = "/FI main/config.pickle.h " + cflags;
 	}
-	if (MODE_PHPIZE && FSO.FileExists(PHP_DIR + "/include/main/config.pickle.h")) {
-		cflags = "/FI main/config.pickle.h " + cflags;
-	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
 
 	if (PHP_DSP != "no") {
@@ -1884,6 +1881,7 @@ function generate_phpize()
 
 	var MF = FSO.CreateTextFile(dest + "/phpize.js", true);
 	var DEPS = FSO.CreateTextFile(dest + "/ext_deps.js", true);
+	
 	prefix = get_define("PHP_PREFIX");
 	prefix = prefix.replace(new RegExp("/", "g"), "\\");
 	prefix = prefix.replace(new RegExp("\\\\", "g"), "\\\\");
@@ -1969,8 +1967,21 @@ function generate_makefile()
 		for (var i in extensions_enabled) {
 			var lib = "php_" + extensions_enabled[i][0] + ".lib";
 			var dll = "php_" + extensions_enabled[i][0] + ".dll";
-			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib\\" + lib);
-			//MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)\\" + dll);
+			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)");
+		}
+	} else {
+		MF.WriteBlankLines(1);
+		MF.WriteLine("build-ext-libs:");
+		MF.WriteLine("	@if not exist $(BUILD_DIR_DEV)\\lib mkdir $(BUILD_DIR_DEV)\\lib >nul");
+		for (var i in extensions_enabled) {
+			var lib;
+
+			lib = "php_" + extensions_enabled[i][0] + "*.lib";
+
+			if ('shared' == extensions_enabled[i][1]) {
+				MF.WriteLine("	@if exist $(BUILD_DIR)\\" + lib + " copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+			}
 		}
 	}
 	TF.Close();
