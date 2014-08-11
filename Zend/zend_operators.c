@@ -1888,10 +1888,9 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 }
 /* }}} */
 
-static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
+static int hash_zval_identical_function(zval *z1, zval *z2 TSRMLS_DC) /* {{{ */
 {
 	zval result;
-	TSRMLS_FETCH();
 
 	/* is_identical_function() returns 1 in case of identity and 0 in case
 	 * of a difference;
