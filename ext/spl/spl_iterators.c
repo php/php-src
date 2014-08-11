@@ -1270,7 +1270,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	}
 
 	if (Z_TYPE(key) != IS_STRING) {
-		if (zend_make_printable_zval(&key, &key_copy)) {
+		if (zend_make_printable_zval(&key, &key_copy TSRMLS_CC)) {
 			key = key_copy;
 		}
 	}
@@ -2047,7 +2047,7 @@ SPL_METHOD(RegexIterator, accept)
 	}
 
 	ZVAL_UNDEF(&subject_copy);
-	use_copy = zend_make_printable_zval(subject_ptr, &subject_copy);
+	use_copy = zend_make_printable_zval(subject_ptr, &subject_copy TSRMLS_CC);
 	if (use_copy) {
 		subject = Z_STRVAL(subject_copy);
 		subject_len = Z_STRLEN(subject_copy);
@@ -2684,7 +2684,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			} else {
 				ZVAL_COPY_VALUE(&intern->u.caching.zstr, &intern->current.data);
 			}
-			use_copy = zend_make_printable_zval(&intern->u.caching.zstr, &expr_copy);
+			use_copy = zend_make_printable_zval(&intern->u.caching.zstr, &expr_copy TSRMLS_CC);
 			if (use_copy) {
 				ZVAL_COPY(&intern->u.caching.zstr, &expr_copy);
 //???			INIT_PZVAL(intern->u.caching.zstr);

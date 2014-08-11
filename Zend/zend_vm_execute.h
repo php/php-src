@@ -10334,7 +10334,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -11174,7 +11174,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -12567,7 +12567,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -26721,7 +26721,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDL
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -28002,7 +28002,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDL
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -29794,7 +29794,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLE
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
