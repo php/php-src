@@ -105,6 +105,11 @@ typedef int php_socket_t;
 # define SOCK_RECV_ERR -1
 #endif
 
+#define STREAM_SOCKOP_NONE         1 << 0
+#define STREAM_SOCKOP_SO_REUSEPORT 1 << 1
+#define STREAM_SOCKOP_SO_BROADCAST 1 << 2
+
+
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
 /* #define PHP_USE_POLL_2_EMULATION 1 */
 
@@ -229,7 +234,7 @@ PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
 
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
-		int *error_code, char *bindto, unsigned short bindport 
+		int *error_code, char *bindto, unsigned short bindport, long sockopts
 		TSRMLS_DC);
 
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,
@@ -244,7 +249,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	php_network_connect_socket((sock), (addr), (addrlen), 0, (timeout), NULL, NULL)
 
 PHPAPI php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
-		int socktype, char **error_string, int *error_code
+		int socktype, long sockopts, char **error_string, int *error_code
 		TSRMLS_DC);
 
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,

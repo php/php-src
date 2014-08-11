@@ -66,8 +66,12 @@
 // 7.18.1 Integer types
 
 // 7.18.1.1 Exact-width integer types
+#ifndef int8_t
 typedef __int8            int8_t;
+#endif
+#ifndef int16_t
 typedef __int16           int16_t;
+#endif
 #ifndef int32_t
 typedef __int32           int32_t;
 #endif
