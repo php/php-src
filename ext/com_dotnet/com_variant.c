@@ -38,18 +38,17 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 	SAFEARRAYBOUND bound;
 	HashPosition pos;
 	int keytype;
-	char *strindex;
-	int strindexlen;
+	zend_string *strindex;
 	long intindex = -1;
 	long max_index = 0;
 	VARIANT *va;
-	zval **item;
+	zval *item;
 		
 	/* find the largest array index, and assert that all keys are integers */
 	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
 	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
 
-		keytype = zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &strindexlen, &intindex, 0, &pos);
+		keytype = zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &intindex, 0, &pos);
 
 		if (HASH_KEY_IS_STRING == keytype) {
 			goto bogus;
@@ -73,11 +72,11 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 	/* now fill it in */
 	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
 	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
-		if (FAILURE == zend_hash_get_current_data_ex(HASH_OF(z), (void**)&item, &pos)) {
+		if (NULL == (item = zend_hash_get_current_data_ex(HASH_OF(z), &pos))) {
 			break;
 		}
-		zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &strindexlen, &intindex, 0, &pos);
-		php_com_variant_from_zval(&va[intindex], *item, codepage TSRMLS_CC);		
+		zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &intindex, 0, &pos);
+		php_com_variant_from_zval(&va[intindex], item, codepage TSRMLS_CC);		
 	}
 
 	/* Unlock it and stuff it into our variant */
@@ -109,9 +108,14 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 			V_VT(v) = VT_NULL;
 			break;
 
-		case IS_BOOL:
+		case IS_FALSE:
 			V_VT(v) = VT_BOOL;
-			V_BOOL(v) = Z_BVAL_P(z) ? VARIANT_TRUE : VARIANT_FALSE;
+			V_BOOL(v) = VARIANT_FALSE;
+			break;
+
+		case IS_TRUE:
+			V_VT(v) = VT_BOOL;
+			V_BOOL(v) = VARIANT_TRUE;
 			break;
 
 		case IS_OBJECT:
@@ -218,9 +222,12 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 		case VT_BSTR:
 			olestring = V_BSTR(v);
 			if (olestring) {
-				Z_TYPE_P(z) = IS_STRING;
-				Z_STRVAL_P(z) = php_com_olestring_to_string(olestring,
-					&Z_STRLEN_P(z), codepage TSRMLS_CC);
+				int len;
+				char *str = php_com_olestring_to_string(olestring,
+					&len, codepage TSRMLS_CC);
+				ZVAL_STRINGL(z, str, len);
+				// TODO: avoid reallocation???
+				efree(str);
 				olestring = NULL;
 			}
 			break;

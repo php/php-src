@@ -102,6 +102,41 @@ void zend_ts_hash_display_pListTail(TsHashTable *ht);
 void zend_ts_hash_display(TsHashTable *ht);
 #endif
 
+ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, int len);
+ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, int len, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, int len, zval *pData ZEND_FILE_LINE_DC);
+
+#define zend_ts_hash_str_update(ht, key, len, pData) \
+		_zend_ts_hash_str_update(ht, key, len, pData ZEND_FILE_LINE_CC)
+#define zend_ts_hash_str_add(ht, key, len, pData) \
+		_zend_ts_hash_str_add(ht, key, len, pData ZEND_FILE_LINE_CC)
+
+static inline void *zend_ts_hash_str_find_ptr(TsHashTable *ht, const char *str, int len)
+{
+	zval *zv;
+
+	zv = zend_ts_hash_str_find(ht, str, len);
+	return zv ? Z_PTR_P(zv) : NULL;
+}
+
+static inline void *zend_ts_hash_str_update_ptr(TsHashTable *ht, const char *str, int len, void *pData)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, pData);
+	zv = zend_ts_hash_str_update(ht, str, len, &tmp);
+	return zv ? Z_PTR_P(zv) : NULL;
+}
+
+static inline void *zend_ts_hash_str_add_ptr(TsHashTable *ht, const char *str, int len, void *pData)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, pData);
+	zv = zend_ts_hash_str_add(ht, str, len, &tmp);
+	return zv ? Z_PTR_P(zv) : NULL;
+}
+
 END_EXTERN_C()
 
 #define ZEND_TS_INIT_SYMTABLE(ht)								\
