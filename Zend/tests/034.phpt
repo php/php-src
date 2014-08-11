@@ -22,5 +22,5 @@ switch (1) {
 }
 
 ?>
---EXPECT--
-3
+--EXPECTF--
+Fatal error: Switch statements must have at most one default label in %s on line %d
