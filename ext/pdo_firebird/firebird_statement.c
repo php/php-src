@@ -437,7 +437,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param T
 		put_cnt += chunk_size;
 	}
 	
-	zval_ptr_dtor(param);
+	zval_dtor(param);
 
 	if (isc_close_blob(H->isc_status, &h)) {
 		RECORD_ERROR(stmt);
@@ -521,6 +521,19 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			} else {
 				parameter = &param->parameter;
 			}
+			
+			if (Z_TYPE_P(parameter) == IS_RESOURCE) {
+				php_stream *stm;
+
+				php_stream_from_zval_no_verify(stm, parameter);
+				if (stm) {
+					zval_ptr_dtor(parameter);
+					ZVAL_STR(parameter, php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0));
+				} else {
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
+					return 0;
+				}
+			}
 
 			switch (var->sqltype & ~1) {
 				case SQL_ARRAY:
@@ -601,6 +614,8 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			} else {
 				parameter = &param->parameter;
 			}
+			zval_ptr_dtor(parameter);
+			ZVAL_NULL(parameter);
 			
 			if (firebird_stmt_get_col(stmt, param->paramno, &value, &value_len, &caller_frees TSRMLS_CC)) {
 				switch (PDO_PARAM_TYPE(param->param_type)) {
