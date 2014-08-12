@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - COM:
   . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
+  . Fixed bug #41577 (DOTNET is successful once per server run)
+    (Aidas Kasparas)
 
 - Fileinfo:
   . Fixed bug #67705 (extensive backtracking in rule regular expression).
