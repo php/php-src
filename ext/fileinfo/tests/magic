@@ -3474,7 +3474,7 @@
 >>>0x44		string	=GLOB		\b.
 >>>>0x60	beshort	x		\b%.4d
 
-# Scripts that run in the embeded Python interpreter
+# Scripts that run in the embedded Python interpreter
 0		string	#!BPY		Blender3D BPython script
 
 #------------------------------------------------------------------------------
@@ -5154,7 +5154,7 @@
 >>0	ubyte		0xF5		FoxPro with memo
 # http://msdn.microsoft.com/en-US/library/st4a0s68(v=vs.80).aspx
 #>>0	ubyte		0xFA		FoxPro 2.x, with memo
-# unkown version (should not happen)
+# unknown version (should not happen)
 >>0	default		x		xBase
 >>>0	ubyte		x		(0x%x)
 # flags in version byte
@@ -5226,7 +5226,7 @@
 >>>>0	ubelong			=0		\b, next free block index %lu
 >>>>0	ubelong			!0		\b, next free block index %lu
 >>>512	default			x		dBase IV DBT
-# DBF file name without extention 
+# DBF file name without extension 
 >>>>8	string			>\0		\b of %-.8s.DBF
 # size of blocks  ; not reliable 0x2020204C
 #>>>>4	ulelong			=0		\b, blocks size %lu
@@ -6591,7 +6591,7 @@
 >>>>>379	string	GRUB\ \0		\b, GRUB version 0.95 or 0.96
 >>>>391		string	Geom\0Hard\ Disk\0Read\0\ Error\0
 >>>>>385	string	GRUB\ \0		\b, GRUB version 0.97
-#unkown version
+#unknown version
 >>>343		string	Geom\0Read\0\ Error\0	
 >>>>321		string	Loading\ stage1.5	\b, GRUB version x.y
 >>>380		string	Geom\0Hard\ Disk\0Read\0\ Error\0
@@ -12695,7 +12695,7 @@
 #>65	string		ZSYS		(Pre-System 7 system file)
 #>65	string		acf3		(Aldus FreeHand)
 #>65	string		cdev		(control panel)
-#>65	string		dfil		(Desk Acessory suitcase)
+#>65	string		dfil		(Desk Accessory suitcase)
 #>65	string		libr		(library)
 #>65	string		nX^d		(WriteNow word processor)
 #>65	string		nX^w		(WriteNow dictionary)
@@ -17992,7 +17992,7 @@
 # $File: sysex,v 1.7 2013/09/16 15:12:42 christos Exp $
 # sysex: file(1) magic for MIDI sysex files
 #
-# GRR: orginal 1 byte test at offset was too general as it catches also many FATs of DOS filesystems
+# GRR: original 1 byte test at offset was too general as it catches also many FATs of DOS filesystems
 # where real SYStem EXclusive messages at offset 1 are limited to seven bits
 # http://en.wikipedia.org/wiki/MIDI
 0	ubeshort&0xFF80		0xF000		SysEx File -
