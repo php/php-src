@@ -358,7 +358,7 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
-			ZVAL_STRING(val, "ODBC-" PDO_ODBC_TYPE, 1);
+			ZVAL_STRING(val, "ODBC-" PDO_ODBC_TYPE);
 			return 1;
 
 		case PDO_ATTR_SERVER_VERSION:
