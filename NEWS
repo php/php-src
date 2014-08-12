@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #67705 (extensive backtracking in rule regular expression).
     (CVE-2014-3538) (Remi)
 
+- FPM:
+  . Fix bug #67606 (revised fix 67541, broke mod_fastcgi BC). (David Zuelke)
+
 - GD:
   . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
     (CVE-2014-2497) (Remi)
