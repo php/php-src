@@ -2658,6 +2658,7 @@ PHP_FUNCTION(date_create)
 
 	php_date_instantiate(date_ce_date, return_value TSRMLS_CC);
 	if (!php_date_initialize(zend_object_store_get_object(return_value TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 0 TSRMLS_CC)) {
+		zval_ptr_dtor(&return_value);
 		RETURN_FALSE;
 	}
 }
@@ -2678,6 +2679,7 @@ PHP_FUNCTION(date_create_immutable)
 
 	php_date_instantiate(date_ce_immutable, return_value TSRMLS_CC);
 	if (!php_date_initialize(zend_object_store_get_object(return_value TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 0 TSRMLS_CC)) {
+		zval_ptr_dtor(&return_value);
 		RETURN_FALSE;
 	}
 }
@@ -2698,6 +2700,7 @@ PHP_FUNCTION(date_create_from_format)
 
 	php_date_instantiate(date_ce_date, return_value TSRMLS_CC);
 	if (!php_date_initialize(zend_object_store_get_object(return_value TSRMLS_CC), time_str, time_str_len, format_str, timezone_object, 0 TSRMLS_CC)) {
+		zval_ptr_dtor(&return_value);
 		RETURN_FALSE;
 	}
 }
@@ -2718,6 +2721,7 @@ PHP_FUNCTION(date_create_immutable_from_format)
 
 	php_date_instantiate(date_ce_immutable, return_value TSRMLS_CC);
 	if (!php_date_initialize(zend_object_store_get_object(return_value TSRMLS_CC), time_str, time_str_len, format_str, timezone_object, 0 TSRMLS_CC)) {
+		zval_ptr_dtor(&return_value);
 		RETURN_FALSE;
 	}
 }
