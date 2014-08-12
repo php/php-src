@@ -476,7 +476,7 @@ static void _close_odbc_conn(zend_resource *rsrc TSRMLS_DC)
 		if (p->ptr && (p->type == le_result)) {
 			res = (odbc_result *)p->ptr;
 			if (res->conn_ptr == conn) {
-				zend_list_delete(p);
+				zend_list_close(p);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -501,7 +501,7 @@ static void _close_odbc_pconn(zend_resource *rsrc TSRMLS_DC)
 		if (p->ptr && (p->type == le_result)) {
 			res = (odbc_result *)p->ptr;
 			if (res->conn_ptr == conn) {
-				zend_list_delete(p);
+				zend_list_close(p);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1105,7 +1105,7 @@ PHP_FUNCTION(odbc_close_all)
 	/* Loop through list and close all statements */
 	ZEND_HASH_FOREACH_PTR(&EG(regular_list), p) {
 		if (p->ptr && (p->type == le_result)) {
-			zend_list_delete(p);
+			zend_list_close(p);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -1113,9 +1113,9 @@ PHP_FUNCTION(odbc_close_all)
 	ZEND_HASH_FOREACH_PTR(&EG(regular_list), p) {
 		if (p->ptr) {
 			if (p->type == le_conn){
-				zend_list_delete(p);
+				zend_list_close(p);
 			} else if (p->type == le_pconn){
-				zend_list_delete(p);
+				zend_list_close(p);
 				/* Delete the persistent connection */
 				zend_hash_apply_with_argument(&EG(persistent_list), 
 					(apply_func_arg_t) _close_pconn_with_res, (void *)p TSRMLS_CC);
@@ -1822,13 +1822,13 @@ PHP_FUNCTION(odbc_fetch_into)
 #endif /* HAVE_SQL_EXTENDED_FETCH */
 
 #ifdef HAVE_SQL_EXTENDED_FETCH
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|l", &pv_res, &pv_res_arr, &pv_row) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/|l", &pv_res, &pv_res_arr, &pv_row) == FAILURE) {
 		return;
 	}
 	
 	rownum = pv_row;
 #else
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz", &pv_res, &pv_res_arr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/", &pv_res, &pv_res_arr) == FAILURE) {
 		return;
 	}
 #endif /* HAVE_SQL_EXTENDED_FETCH */
@@ -2342,7 +2342,7 @@ PHP_FUNCTION(odbc_free_result)
 		result->values = NULL;
 	}
 			
-	zend_list_delete(Z_RES_P(pv_res));
+	zend_list_close(Z_RES_P(pv_res));
 	
 	RETURN_TRUE;
 }
@@ -2683,12 +2683,12 @@ PHP_FUNCTION(odbc_close)
 		if (p->ptr && (p->type == le_result)) {
 			res = (odbc_result *)p->ptr;
 			if (res->conn_ptr == conn) {
-				zend_list_delete(p);
+				zend_list_close(p);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
 	
-	zend_list_delete(Z_RES_P(pv_conn));
+	zend_list_close(Z_RES_P(pv_conn));
 	
 	if(is_pconn){
 		zend_hash_apply_with_argument(&EG(persistent_list),	(apply_func_arg_t) _close_pconn_with_res, (void *) Z_RES_P(pv_conn) TSRMLS_CC);	
