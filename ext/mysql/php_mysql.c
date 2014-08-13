@@ -641,10 +641,9 @@ PHP_RINIT_FUNCTION(mysql)
 /* }}} */
 
 #if defined(A0) && defined(MYSQL_USE_MYSQLND)
-static int php_mysql_persistent_helper(zval *el;zend_rsrc_list_entry *le TSRMLS_DC)
+static int php_mysql_persistent_helper(zval *el TSRMLS_DC)
 {
-	//???
-	//zend_rsrc_list_entry *le = (zend_rsrc_list_entry*)Z_PTR_P(el);
+	zend_resource *le = (zend_resource *)Z_PTR_P(el);
 	if (le->type == le_plink) {
 		mysqlnd_end_psession(((php_mysql_conn *) le->ptr)->conn);
 	}
