@@ -50,7 +50,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 		int flags, const char *persistent_id,
 		struct timeval *timeout,
 		php_stream_context *context,
-		char **error_string,
+		zend_string **error_string,
 		int *error_code
 		STREAMS_DC TSRMLS_DC);
 
@@ -60,7 +60,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 /* Bind the stream to a local address */
 PHPAPI int php_stream_xport_bind(php_stream *stream,
 		const char *name, size_t namelen,
-		char **error_text
+		zend_string **error_text
 		TSRMLS_DC);
 
 /* Connect to a remote address */
@@ -68,28 +68,28 @@ PHPAPI int php_stream_xport_connect(php_stream *stream,
 		const char *name, size_t namelen,
 		int asynchronous,
 		struct timeval *timeout,
-		char **error_text,
+		zend_string **error_text,
 		int *error_code
 		TSRMLS_DC);
 
 /* Prepare to listen */
 PHPAPI int php_stream_xport_listen(php_stream *stream,
 		int backlog,
-		char **error_text
+		zend_string **error_text
 		TSRMLS_DC);
 
 /* Get the next client and their address as a string, or the underlying address
  * structure.  You must efree either of these if you request them */
 PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
-		char **textaddr, int *textaddrlen,
+		zend_string **textaddr,
 		void **addr, socklen_t *addrlen,
 		struct timeval *timeout,
-		char **error_text
+		zend_string **error_text
 		TSRMLS_DC);
 
 /* Get the name of either the socket or it's peer */
 PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
-		char **textaddr, int *textaddrlen,
+		zend_string **textaddr,
 		void **addr, socklen_t *addrlen
 		TSRMLS_DC);
 
@@ -102,7 +102,7 @@ enum php_stream_xport_send_recv_flags {
  * peeking, optionally retrieving OOB data */
 PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t buflen,
 		long flags, void **addr, socklen_t *addrlen,
-		char **textaddr, int *textaddrlen TSRMLS_DC);
+		zend_string **textaddr TSRMLS_DC);
 
 /* Similar to send() system call; send data to the stream, optionally
  * sending it as OOB data */
@@ -155,10 +155,8 @@ typedef struct _php_stream_xport_param {
 		int returncode;
 		struct sockaddr *addr;
 		socklen_t addrlen;
-		char *textaddr;
-		long textaddrlen;
-
-		char *error_text;
+		zend_string *textaddr;
+		zend_string *error_text;
 		int error_code;
 	} outputs;
 } php_stream_xport_param;

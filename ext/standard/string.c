@@ -146,41 +146,42 @@ static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
 
 /* {{{ php_hex2bin
  */
-static char *php_hex2bin(const unsigned char *old, const size_t oldlen, size_t *newlen)
+static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 {
 	size_t target_length = oldlen >> 1;
-	register unsigned char *str = (unsigned char *)safe_emalloc(target_length, sizeof(char), 1);
+	zend_string *str = STR_ALLOC(target_length, 0);
+	unsigned char *ret = (unsigned char *)str->val;
 	size_t i, j;
+
 	for (i = j = 0; i < target_length; i++) {
-		char c = old[j++];
+		unsigned char c = old[j++];
+		unsigned char d;
+
 		if (c >= '0' && c <= '9') {
-			str[i] = (c - '0') << 4;
+			d = (c - '0') << 4;
 		} else if (c >= 'a' && c <= 'f') {
-			str[i] = (c - 'a' + 10) << 4;
+			d = (c - 'a' + 10) << 4;
 		} else if (c >= 'A' && c <= 'F') {
-			str[i] = (c - 'A' + 10) << 4;
+			d = (c - 'A' + 10) << 4;
 		} else {
-			efree(str);
+			STR_FREE(str);
 			return NULL;
 		}
 		c = old[j++];
 		if (c >= '0' && c <= '9') {
-			str[i] |= c - '0';
+			d |= c - '0';
 		} else if (c >= 'a' && c <= 'f') {
-			str[i] |= c - 'a' + 10;
+			d |= c - 'a' + 10;
 		} else if (c >= 'A' && c <= 'F') {
-			str[i] |= c - 'A' + 10;
+			d |= c - 'A' + 10;
 		} else {
-			efree(str);
+			STR_FREE(str);
 			return NULL;
 		}
+		ret[i] = d;
 	}
-	str[target_length] = '\0';
 
-	if (newlen)
-		*newlen = target_length;
-
-	return (char *)str;
+	return str;
 }
 /* }}} */
 
@@ -256,29 +257,25 @@ PHP_FUNCTION(bin2hex)
    Converts the hex representation of data to binary */
 PHP_FUNCTION(hex2bin)
 {
-	char *result, *data;
-	size_t newlen;
-	int datalen;
+	zend_string *result, *data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &datalen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &data) == FAILURE) {
 		return;
 	}
 
-	if (datalen % 2 != 0) {
+	if (data->len % 2 != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hexadecimal input string must have an even length");
 		RETURN_FALSE;
 	}
 
-	result = php_hex2bin((unsigned char *)data, datalen, &newlen);
+	result = php_hex2bin((unsigned char *)data->val, data->len);
 
 	if (!result) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input string must be hexadecimal string");
 		RETURN_FALSE;
 	}
 
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(result, newlen);
-	efree(result);
+	RETVAL_STR(result);
 }
 /* }}} */
 
@@ -2457,7 +2454,7 @@ PHP_FUNCTION(substr_replace)
 				orig_str = tmp_str;
 			}
 
-			/*
+			/*???
 			refcount = Z_REFCOUNT_P(orig_str);
 			*/
 
@@ -2528,7 +2525,7 @@ PHP_FUNCTION(substr_replace)
 					} else {
 						repl_str = tmp_repl;
 					}
-					/*
+					/*???
 					if (Z_REFCOUNT_P(orig_str) != refcount) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument was modified while replacing");
 						if (Z_TYPE_P(tmp_repl) != IS_STRING) {

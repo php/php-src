@@ -1210,7 +1210,7 @@ static void php_cli_server_logf(const char *format TSRMLS_DC, ...) /* {{{ */
 	efree(buf);
 } /* }}} */
 
-static int php_network_listen_socket(const char *host, int *port, int socktype, int *af, socklen_t *socklen, char **errstr TSRMLS_DC) /* {{{ */
+static int php_network_listen_socket(const char *host, int *port, int socktype, int *af, socklen_t *socklen, zend_string **errstr TSRMLS_DC) /* {{{ */
 {
 	int retval = SOCK_ERR;
 	int err = 0;
@@ -1325,7 +1325,7 @@ out:
 			closesocket(retval);
 		}
 		if (errstr) {
-			*errstr = php_socket_strerror(err, NULL, 0);
+			*errstr = php_socket_error_str(err);
 		}
 		return SOCK_ERR;
 	}
@@ -1795,12 +1795,12 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 	client->addr = addr;
 	client->addr_len = addr_len;
 	{
-		char *addr_str = 0;
-		long addr_str_len = 0;
-		php_network_populate_name_from_sockaddr(addr, addr_len, &addr_str, &addr_str_len, NULL, 0 TSRMLS_CC);
-		client->addr_str = pestrndup(addr_str, addr_str_len, 1);
-		client->addr_str_len = addr_str_len;
-		efree(addr_str);
+		zend_string *addr_str = 0;
+
+		php_network_populate_name_from_sockaddr(addr, addr_len, &addr_str, NULL, 0 TSRMLS_CC);
+		client->addr_str = pestrndup(addr_str->val, addr_str->len, 1);
+		client->addr_str_len = addr_str->len;
+		STR_RELEASE(addr_str);
 	}
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = 0;
@@ -2187,7 +2187,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 {
 	int retval = SUCCESS;
 	char *host = NULL;
-	char *errstr = NULL;
+	zend_string *errstr = NULL;
 	char *_document_root = NULL;
 	char *_router = NULL;
 	int err = 0;
@@ -2234,8 +2234,10 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 
 	server_sock = php_network_listen_socket(host, &port, SOCK_STREAM, &server->address_family, &server->socklen, &errstr TSRMLS_CC);
 	if (server_sock == SOCK_ERR) {
-		php_cli_server_logf("Failed to listen on %s:%d (reason: %s)" TSRMLS_CC, host, port, errstr ? errstr: "?");
-		efree(errstr);
+		php_cli_server_logf("Failed to listen on %s:%d (reason: %s)" TSRMLS_CC, host, port, errstr ? errstr->val : "?");
+		if (errstr) {
+			STR_RELEASE(errstr);
+		}
 		retval = FAILURE;
 		goto out;
 	}
