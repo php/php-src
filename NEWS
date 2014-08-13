@@ -36,6 +36,9 @@ PHP                                                                        NEWS
   . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
     data). (Mike)
 
+- Date:
+  . Fixed bug #66091 (memory leaks in DateTime constructor) (Tjerk).
+
 31 Jul 2014, PHP 5.6.0 Release Candidate 3
 
 - Core:
