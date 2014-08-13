@@ -2541,6 +2541,24 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 			break;
 
 		case CURLOPT_HEADERFUNCTION:
+			/* check if we're setting to NULL = we're restoring php default handler */
+			if(Z_TYPE_PP(zvalue) == IS_NULL) {
+				if(ch->handlers->write_header->method == PHP_CURL_USER) {
+					if(ch->handlers->write_header->func_name) {
+						zval_ptr_dtor(&ch->handlers->write_header->func_name);
+						ch->handlers->write_header->fci_cache = empty_fcall_info_cache;
+					}
+					ch->handlers->write_header->func_name = NULL;
+					ch->handlers->write_header->method = PHP_CURL_IGNORE;
+					break;
+				} else if(ch->handlers->write_header->method == PHP_CURL_IGNORE) {
+					/* prevent the assign-code later on if user passed NULL and the handler was IGNORE already */
+					break; 
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set CURLOPT_HEADERFUNCTION to NULL after it was something other than a callable");
+					break;
+				}
+			}
 			if (ch->handlers->write_header->func_name) {
 				zval_ptr_dtor(&ch->handlers->write_header->func_name);
 				ch->handlers->write_header->fci_cache = empty_fcall_info_cache;
