@@ -2680,6 +2680,9 @@ PHP_FUNCTION(date_create_immutable)
 	if (!php_date_initialize(zend_object_store_get_object(&datetime_object TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 0 TSRMLS_CC)) {
 		zval_dtor(&datetime_object);
 		RETURN_FALSE;
+	} else {
+		zval *datetime_object_ptr = &datetime_object;
+		RETVAL_ZVAL(datetime_object_ptr, 0, 0);
 	}
 	RETVAL_ZVAL(&datetime_object, 0, 0);
 }
@@ -2726,6 +2729,9 @@ PHP_FUNCTION(date_create_immutable_from_format)
 	if (!php_date_initialize(zend_object_store_get_object(&datetime_object TSRMLS_CC), time_str, time_str_len, format_str, timezone_object, 0 TSRMLS_CC)) {
 		zval_dtor(&datetime_object);
 		RETURN_FALSE;
+	} else {
+		zval *datetime_object_ptr = &datetime_object;
+		RETVAL_ZVAL(datetime_object_ptr, 0, 0);
 	}
 	RETVAL_ZVAL(&datetime_object, 0, 0);
 }
