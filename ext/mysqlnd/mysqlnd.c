@@ -1727,7 +1727,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn TSRMLS_DC
 
 /* {{{ mysqlnd_conn_data::statistic */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, char **message, unsigned int * message_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_string **message TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, get_server_statistics);
 	enum_func_status ret = FAIL;
@@ -1750,9 +1750,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, char **me
 
 			if (PASS == (ret = PACKET_READ(stats_header, conn))) {
 				/* will be freed by Zend, thus don't use the mnd_ allocator */
-				*message = estrndup(stats_header->message, stats_header->message_len); 
-				*message_len = stats_header->message_len;
-				DBG_INF(*message);
+				*message = STR_INIT(stats_header->message, stats_header->message_len, 0); 
+				DBG_INF((*message)->val);
 			}
 			PACKET_FREE(stats_header);
 		} while (0);

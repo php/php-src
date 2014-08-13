@@ -1310,10 +1310,12 @@ PHP_FUNCTION(mysql_stat)
 {
 	php_mysql_conn *mysql;
 	zval *mysql_link = NULL;
+#ifndef MYSQL_USE_MYSQLND
 	char *stat;
-#ifdef MYSQL_USE_MYSQLND
-	uint stat_len;
+#else
+	zend_string *stat;
 #endif
+
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &mysql_link) == FAILURE) {
 		return;
@@ -1332,10 +1334,8 @@ PHP_FUNCTION(mysql_stat)
 	if ((stat = (char *)mysql_stat(mysql->conn))) {
 		RETURN_STRING(stat);
 #else
-	if (mysqlnd_stat(mysql->conn, &stat, &stat_len) == PASS) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL(stat, stat_len);
-		efree(stat);
+	if (mysqlnd_stat(mysql->conn, &stat) == PASS) {
+		RETURN_STR(stat);
 #endif
 	} else {
 		RETURN_FALSE;

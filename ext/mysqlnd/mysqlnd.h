@@ -208,7 +208,7 @@ void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 #define mysqlnd_refresh(conn, options)		((conn)->data)->m->refresh_server((conn)->data, (options) TSRMLS_CC)
 #define mysqlnd_shutdown(conn, level)		((conn)->data)->m->shutdown_server((conn)->data, (level) TSRMLS_CC)
 #define mysqlnd_set_character_set(conn, cs)	((conn)->data)->m->set_charset((conn)->data, (cs) TSRMLS_CC)
-#define mysqlnd_stat(conn, msg, msg_len)	((conn)->data)->m->get_server_statistics(((conn)->data), (msg), (msg_len) TSRMLS_CC)
+#define mysqlnd_stat(conn, msg)				((conn)->data)->m->get_server_statistics(((conn)->data), (msg) TSRMLS_CC)
 #define mysqlnd_options(conn, opt, value)	((conn)->data)->m->set_client_option((conn)->data, (opt), (value) TSRMLS_CC)
 #define mysqlnd_options4(conn, opt, k, v)	((conn)->data)->m->set_client_option_2d((conn)->data, (opt), (k), (v) TSRMLS_CC)
 #define mysqlnd_set_server_option(conn, op)	((conn)->data)->m->set_server_option((conn)->data, (op) TSRMLS_CC)

@@ -443,7 +443,7 @@ typedef void				(*func_mysqlnd_conn_data__get_statistics)(const MYSQLND_CONN_DAT
 
 typedef unsigned long		(*func_mysqlnd_conn_data__get_server_version)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC);
 typedef const char *		(*func_mysqlnd_conn_data__get_server_information)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC);
-typedef enum_func_status	(*func_mysqlnd_conn_data__get_server_statistics)(MYSQLND_CONN_DATA * conn, char **message, unsigned int * message_len TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__get_server_statistics)(MYSQLND_CONN_DATA * conn, zend_string **message TSRMLS_DC);
 typedef const char *		(*func_mysqlnd_conn_data__get_host_information)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC);
 typedef unsigned int		(*func_mysqlnd_conn_data__get_protocol_information)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC);
 typedef const char *		(*func_mysqlnd_conn_data__get_last_message)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC);
