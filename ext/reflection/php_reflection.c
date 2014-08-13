@@ -1799,8 +1799,7 @@ ZEND_METHOD(reflection_function, getFileName)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
-// TODO: we have to duplicate it, becaise it may be in opcache SHM ???
-		RETURN_STR(STR_DUP(fptr->op_array.filename, 0));
+		RETURN_STR(STR_COPY(fptr->op_array.filename));
 	}
 	RETURN_FALSE;
 }
@@ -1854,8 +1853,7 @@ ZEND_METHOD(reflection_function, getDocComment)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
-// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
-		RETURN_STR(STR_DUP(fptr->op_array.doc_comment, 0));
+		RETURN_STR(STR_COPY(fptr->op_array.doc_comment));
 	}
 	RETURN_FALSE;
 }
@@ -3451,8 +3449,6 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	zend_class_entry *ce;
 	zend_string *name;
 	zval *variable_ptr, *value;
-//???	int refcount;
-//???	zend_uchar is_ref;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &name, &value) == FAILURE) {
 		return;
@@ -3467,13 +3463,8 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 				"Class %s does not have a property named %s", ce->name->val, name->val);
 		return;
 	}
-//???	refcount = Z_REFCOUNT_PP(variable_ptr);
-//???	is_ref = Z_ISREF_PP(variable_ptr);
-	zval_dtor(variable_ptr);
-	ZVAL_DUP(variable_ptr, value);
-//???	Z_SET_REFCOUNT_PP(variable_ptr, refcount);
-//???	Z_SET_ISREF_TO_PP(variable_ptr, is_ref);
-
+	zval_ptr_dtor(variable_ptr);
+	ZVAL_COPY(variable_ptr, value);
 }
 /* }}} */
 
@@ -3566,8 +3557,7 @@ ZEND_METHOD(reflection_class, getFileName)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
-// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
-		RETURN_STR(STR_DUP(ce->info.user.filename, 0));
+		RETURN_STR(STR_COPY(ce->info.user.filename));
 	}
 	RETURN_FALSE;
 }

@@ -563,7 +563,6 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, long ad
 	if (n == 0) {
 		if (errstr) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to resolve `%s': %s", tmp, errstr);
-//???			STR_FREE(errstr);
 			efree(errstr);
 		}
 		goto out;
@@ -590,7 +589,6 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, long ad
 	php_network_freeaddresses(psal);
 
 out:
-//???	STR_FREE(tmp);
 	efree(tmp);
 	return ret;
 }
