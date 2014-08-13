@@ -3372,7 +3372,7 @@ PHPAPI zend_string *php_addcslashes(const char *str, int length, int should_free
 		new_str = STR_REALLOC(new_str, newlen, 0);
 	}
 	if (should_free) {
-//???		STR_FREE((char*)str);
+		efree((char*)str);
 	}
 	return new_str;
 }
@@ -3417,7 +3417,7 @@ PHPAPI zend_string *php_addslashes(char *str, int length, int should_free TSRMLS
 
 	*target = 0;
 	if (should_free) {
-//???		STR_FREE(str);
+		efree(str);
 	}
 	new_str = STR_REALLOC(new_str, target - new_str->val, 0);
 
