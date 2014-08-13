@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #67813 (CachingIterator::__construct InvalidArgumentException
     wrong message). (tim_siebels_aurich at yahoo dot de)
 
+- Date:
+  . Fixed bug #66091 (memory leaks in DateTime constructor) (Tjerk).
+
 ?? ??? 2014, PHP 5.5.16
 
 - COM:
