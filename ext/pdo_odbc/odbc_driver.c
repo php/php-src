@@ -36,22 +36,20 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	pdo_odbc_errinfo *einfo = &H->einfo;
 	pdo_odbc_stmt *S = NULL;
-	char *message = NULL;
+	zend_string *message = NULL;
 
 	if (stmt) {
 		S = (pdo_odbc_stmt*)stmt->driver_data;
 		einfo = &S->einfo;
 	}
 
-	spprintf(&message, 0, "%s (%s[%ld] at %s:%d)",
+	message = strpprintf(0, "%s (%s[%ld] at %s:%d)",
 				einfo->last_err_msg,
 				einfo->what, einfo->last_error,
 				einfo->file, einfo->line);
 
 	add_next_index_long(info, einfo->last_error);
-	// TODO: avoid reallocation ???
-	add_next_index_string(info, message);
-	efree(message);
+	add_next_index_str(info, message);
 	add_next_index_string(info, einfo->last_state);
 
 	return 1;
