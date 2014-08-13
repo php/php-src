@@ -84,17 +84,12 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 	}
 
 	if (NULL != (stuff = zend_hash_str_find(_SERVER, "PATH_TRANSLATED", sizeof("PATH_TRANSLATED")-1))) {
-		char *str = NULL;
-		int len;
-
-		// TODO: avoid reallocation ???
-		len = spprintf(&str, 4096, "phar://%s%s", fname, entry);
+		zend_string *str = strpprintf(4096, "phar://%s%s", fname, entry);
 
 		ZVAL_STR(&temp, Z_STR_P(stuff));
-		ZVAL_STRINGL(stuff, str, len);
-		efree(str);
+		ZVAL_STR(stuff, str);
 
-		zend_hash_str_update(_SERVER, "PHAR_PATH_TRANSLATED", sizeof("PHAR_PATH_TRANSLATED")-1, (void *) &temp);
+		zend_hash_str_update(_SERVER, "PHAR_PATH_TRANSLATED", sizeof("PHAR_PATH_TRANSLATED")-1, &temp);
 	}
 
 	if (!PHAR_GLOBALS->phar_SERVER_mung_list) {
@@ -136,15 +131,10 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 
 	if (PHAR_GLOBALS->phar_SERVER_mung_list & PHAR_MUNG_SCRIPT_FILENAME) {
 		if (NULL != (stuff = zend_hash_str_find(_SERVER, "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1))) {
-			char *str = NULL;
-			int len;
-
-			// TODO: avoid reallocation ???
-			len = spprintf(&str, 4096, "phar://%s%s", fname, entry);
+			zend_string *str = strpprintf(4096, "phar://%s%s", fname, entry);
 
 			ZVAL_STR(&temp, Z_STR_P(stuff));
-			ZVAL_STRINGL(stuff, str, len);
-			efree(str);
+			ZVAL_STR(stuff, str);
 
 			zend_hash_str_update(_SERVER, "PHAR_SCRIPT_FILENAME", sizeof("PHAR_SCRIPT_FILENAME")-1, &temp);
 		}
@@ -3033,8 +3023,7 @@ PHP_METHOD(Phar, getSignature)
 	}
 
 	if (phar_obj->archive->signature) {
-		char *unknown;
-		int unknown_len;
+		zend_string *unknown;
 
 		array_init(return_value);
 		add_assoc_stringl(return_value, "hash", phar_obj->archive->signature, phar_obj->archive->sig_len);
@@ -3055,10 +3044,8 @@ PHP_METHOD(Phar, getSignature)
 				add_assoc_stringl(return_value, "hash_type", "OpenSSL", 7);
 				break;
 			default:
-				unknown_len = spprintf(&unknown, 0, "Unknown (%u)", phar_obj->archive->sig_flags);
-				// TODO: avoid reallocation ???
-				add_assoc_stringl(return_value, "hash_type", unknown, unknown_len);
-				efree(unknown);
+				unknown = strpprintf(0, "Unknown (%u)", phar_obj->archive->sig_flags);
+				add_assoc_str(return_value, "hash_type", unknown);
 				break;
 		}
 	} else {
@@ -3520,6 +3507,7 @@ PHP_METHOD(Phar, offsetGet)
 	zval zfname;
 	phar_entry_info *entry;
 	PHAR_ARCHIVE_OBJECT();
+	zend_string *sfname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
 		return;
@@ -3549,10 +3537,8 @@ PHP_METHOD(Phar, offsetGet)
 			efree(entry);
 		}
 
-		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->archive->fname, fname);
-		/* TODO: avoid reallocation ??? */
-		ZVAL_STRINGL(&zfname, fname, fname_len);
-		efree(fname);
+		sfname = strpprintf(0, "phar://%s/%s", phar_obj->archive->fname, fname);
+		ZVAL_STR(&zfname, sfname);
 		spl_instantiate_arg_ex1(phar_obj->spl.info_class, return_value, &zfname TSRMLS_CC);
 		zval_ptr_dtor(&zfname);
 	}
@@ -3837,7 +3823,7 @@ PHP_METHOD(Phar, addFromString)
 PHP_METHOD(Phar, getStub)
 {
 	size_t len;
-	char *buf;
+	zend_string *buf;
 	php_stream *fp;
 	php_stream_filter *filter = NULL;
 	phar_entry_info *stub;
@@ -3903,15 +3889,15 @@ PHP_METHOD(Phar, getStub)
 
 	php_stream_rewind(fp);
 carry_on:
-	buf = safe_emalloc(len, 1, 1);
+	buf = STR_ALLOC(len, 0);
 
-	if (len != php_stream_read(fp, buf, len)) {
+	if (len != php_stream_read(fp, buf->val, len)) {
 		if (fp != phar_obj->archive->fp) {
 			php_stream_close(fp);
 		}
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
 			"Unable to read stub");
-		efree(buf);
+		STR_RELEASE(buf);
 		return;
 	}
 
@@ -3924,10 +3910,9 @@ carry_on:
 		php_stream_close(fp);
 	}
 
-	buf[len] = '\0';
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(buf, len);
-	efree(buf);
+	buf->val[len] = '\0';
+	buf->len = len;
+	RETVAL_STR(buf);
 }
 /* }}}*/
 
