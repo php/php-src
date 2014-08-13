@@ -415,7 +415,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	HashTable *headers;
 	zend_string *key;
 	char *value;
-	HashPosition pos;
+	zval tmp;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -426,13 +426,10 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 
 	array_init_size(return_value, zend_hash_num_elements(headers));
 
-	zend_hash_internal_pointer_reset_ex(headers, &pos);
-	while ((value = zend_hash_get_current_data_ptr_ex(headers, &pos)) != NULL) {
-		zend_hash_get_current_key_ex(headers, &key, NULL, 0, &pos);
-//???
-		add_assoc_string_ex(return_value, key->val, key->len, value);
-		zend_hash_move_forward_ex(headers, &pos);
-	}
+	ZEND_HASH_FOREACH_STR_KEY_PTR(headers, key, value) {
+		ZVAL_STRING(&tmp, value);
+		zend_symtable_update(Z_ARRVAL_P(return_value), key, &tmp);
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

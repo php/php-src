@@ -75,7 +75,7 @@
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
 
 extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
-extern int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw, char **out, int *out_len TSRMLS_DC);
+extern zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw TSRMLS_DC);
 extern int php_openssl_get_ssl_stream_data_index();
 extern int php_openssl_get_x509_list_id(void);
 
@@ -265,13 +265,13 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 
 static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *expected TSRMLS_DC)
 {
-	char *fingerprint;
-	int fingerprint_len;
+	zend_string *fingerprint;
 	int result = -1;
 
-	if (php_openssl_x509_fingerprint(peer, method, 0, &fingerprint, &fingerprint_len TSRMLS_CC) == SUCCESS) {
-		result = strcmp(expected, fingerprint);
-		efree(fingerprint);
+	fingerprint = php_openssl_x509_fingerprint(peer, method, 0 TSRMLS_CC);
+	if (fingerprint) {
+		result = strcmp(expected, fingerprint->val);
+		STR_RELEASE(fingerprint);
 	}
 
 	return result;

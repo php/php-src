@@ -180,6 +180,7 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 		}
 		ret[i] = d;
 	}
+	ret[i] = '\0';
 
 	return str;
 }
