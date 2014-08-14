@@ -1935,8 +1935,8 @@ static PHP_FUNCTION(session_id)
 	}
 
 	if (PS(id)) {
-		/* keep compatibility for "\0" characters
-		/ see: ext/session/tests/session_id_error3.phpt */
+		/* keep compatibility for "\0" characters ???
+		 * see: ext/session/tests/session_id_error3.phpt */
 		int len = strlen(PS(id)->val);
 		if (UNEXPECTED(len != PS(id)->len)) {
 			RETVAL_STR(STR_INIT(PS(id)->val, len, 0));
