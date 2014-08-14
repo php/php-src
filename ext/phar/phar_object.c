@@ -3506,8 +3506,8 @@ PHP_METHOD(Phar, offsetGet)
 	int fname_len;
 	zval zfname;
 	phar_entry_info *entry;
-	PHAR_ARCHIVE_OBJECT();
 	zend_string *sfname;
+	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
 		return;
