@@ -114,7 +114,7 @@ ZEND_API int clean_non_persistent_function_full(zend_function *function TSRMLS_D
 }
 /* }}} */
 
-ZEND_API int clean_non_persistent_class(zend_class_entry **ce TSRMLS_DC) /* {{{ */
+static int clean_non_persistent_class(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 {
 	return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
 }
