@@ -75,7 +75,7 @@
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
 
 extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
-extern zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC);
+extern int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw, char **out, int *out_len TSRMLS_DC);
 extern int php_openssl_get_ssl_stream_data_index();
 extern int php_openssl_get_x509_list_id(void);
 
@@ -264,6 +264,61 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 	return ret;
 }
 /* }}} */
+
+static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *expected TSRMLS_DC)
+{
+	char *fingerprint;
+	int fingerprint_len;
+	int result = -1;
+
+	if (php_openssl_x509_fingerprint(peer, method, 0, &fingerprint, &fingerprint_len TSRMLS_CC) == SUCCESS) {
+		result = strcmp(expected, fingerprint);
+		efree(fingerprint);
+	}
+
+	return result;
+}
+
+static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
+{
+	if (Z_TYPE_P(val) == IS_STRING) {
+		const char *method = NULL;
+
+		switch (Z_STRLEN_P(val)) {
+			case 32:
+				method = "md5";
+				break;
+
+			case 40:
+				method = "sha1";
+				break;
+		}
+
+		return method && php_x509_fingerprint_cmp(peer, method, Z_STRVAL_P(val) TSRMLS_CC) == 0;
+	} else if (Z_TYPE_P(val) == IS_ARRAY) {
+		HashPosition pos;
+		zval **current;
+		char *key;
+		uint key_len;
+		ulong key_index;
+
+		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(val), &pos);
+			zend_hash_get_current_data_ex(Z_ARRVAL_P(val), (void **)&current, &pos) == SUCCESS;
+			zend_hash_move_forward_ex(Z_ARRVAL_P(val), &pos)
+		) {
+			int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(val), &key, &key_len, &key_index, 0, &pos);
+
+			if (key_type == HASH_KEY_IS_STRING 
+				&& Z_TYPE_PP(current) == IS_STRING
+				&& php_x509_fingerprint_cmp(peer, key, Z_STRVAL_PP(current) TSRMLS_CC) != 0
+			) {
+				return 0;
+			}
+		}
+		return 1;
+	}
+	return 0;
+}
 
 static zend_bool matches_wildcard_name(const char *subjectname, const char *certname) /* {{{ */
 {
@@ -1743,13 +1798,59 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
 }
 /* }}} */
 
+static void php_openssl_stream_wait_for_data(php_netstream_data_t *sock)
+{
+	int retval;
+	struct timeval *ptimeout;
+
+	if (sock->socket == -1) {
+		return;
+	}
+	
+	sock->timeout_event = 0;
+
+	if (sock->timeout.tv_sec == -1)
+		ptimeout = NULL;
+	else
+		ptimeout = &sock->timeout;
+
+	while(1) {
+		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
+
+		if (retval == 0)
+			sock->timeout_event = 1;
+
+		if (retval >= 0)
+			break;
+
+		if (php_socket_errno() != EINTR)
+			break;
+	}
+}
+
 static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+	php_netstream_data_t *sock;
 	int nr_bytes = 0;
 
 	if (sslsock->ssl_active) {
 		int retry = 1;
+		sock = (php_netstream_data_t*)stream->abstract;
+
+		/* The SSL_read() function will block indefinitely waiting for data on a blocking
+		   socket. If we don't poll for readability first this operation has the potential
+		   to hang forever. To avoid this scenario we poll with a timeout before performing
+		   the actual read. If it times out we're finished.
+		*/
+		if (sock->is_blocked) {
+			php_openssl_stream_wait_for_data(sock);
+			if (sock->timeout_event) {
+				stream->eof = 1;
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL read operation timed out");
+				return nr_bytes;
+			}
+		}
 
 		do {
 			nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);

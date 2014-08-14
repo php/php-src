@@ -592,6 +592,14 @@ PHPAPI char *php_get_uname(char mode)
 
 		php_get_windows_cpu(wincpu, sizeof(wincpu));
 		dwBuild = (DWORD)(HIWORD(dwVersion));
+		
+		/* Windows "version" 6.2 could be Windows 8/Windows Server 2012, but also Windows 8.1/Windows Server 2012 R2 */
+		if (dwWindowsMajorVersion == 6 && dwWindowsMinorVersion == 2) {
+			if (strncmp(winver, "Windows 8.1", 11) == 0 || strncmp(winver, "Windows Server 2012 R2", 22) == 0) {
+				dwWindowsMinorVersion = 3;
+			}
+		}
+		
 		snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d (%s) %s",
 				 "Windows NT", ComputerName,
 				 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild, winver?winver:"unknown", wincpu);

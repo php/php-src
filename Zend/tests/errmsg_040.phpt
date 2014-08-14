@@ -12,4 +12,12 @@ var_dump(test::TEST);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Fatal error: Arrays are not allowed in constants at run-time in %s on line %d
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+Done
