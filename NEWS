@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.0 Release Candidate 4
+?? ??? 2014, PHP 5.6.0 ???
+
+14 Aug 2014, PHP 5.6.0 Release Candidate 4
 
 - COM:
   . Fixed bug #41577 (DOTNET is successful once per server run)
