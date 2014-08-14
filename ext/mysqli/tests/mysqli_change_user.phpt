@@ -41,6 +41,11 @@ require_once('skipifconnectfailure.inc');
 	if (false !== ($tmp = mysqli_change_user($link, $user, $passwd, $db . '_unknown_really')))
 		printf("[009] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
+	// Reconnect because after 3 failed change_user attempts, the server blocks you off.
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+		printf("[006] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+			$host, $user, $db, $port, $socket);
+
 	if (!mysqli_query($link, 'SET @mysqli_change_user_test_var=1'))
 		printf("[010] Failed to set test variable: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
