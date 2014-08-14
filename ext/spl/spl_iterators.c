@@ -1958,7 +1958,6 @@ SPL_METHOD(RecursiveCallbackFilterIterator, getChildren)
 		return;
 	}
 
-//???	intern = Z_SPLDUAL_IT_P(getThis());
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
@@ -2686,13 +2685,8 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			}
 			use_copy = zend_make_printable_zval(&intern->u.caching.zstr, &expr_copy TSRMLS_CC);
 			if (use_copy) {
-				ZVAL_COPY(&intern->u.caching.zstr, &expr_copy);
-//???			INIT_PZVAL(intern->u.caching.zstr);
-				//zval_copy_ctor(&intern->u.caching.zstr);
-				zval_dtor(&expr_copy);
+				ZVAL_COPY_VALUE(&intern->u.caching.zstr, &expr_copy);
 			} else if (Z_REFCOUNTED(intern->u.caching.zstr)) {
-//???			INIT_PZVAL(intern->u.caching.zstr);
-				//zval_copy_ctor(&intern->u.caching.zstr);
 				Z_ADDREF(intern->u.caching.zstr);
 			}
 		}

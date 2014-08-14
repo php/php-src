@@ -43,7 +43,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int err;
 	char *hostname = NULL;
 	long hostname_len;
-	char *errstr = NULL;
+	zend_string *errstr = NULL;
 
 	RETVAL_FALSE;
 	
@@ -83,7 +83,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(hostname);
 	}
 	if (stream == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%ld (%s)", host, port, errstr == NULL ? "Unknown error" : errstr);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%ld (%s)", host, port, errstr == NULL ? "Unknown error" : errstr->val);
 	}
 
 	if (hashkey) {
@@ -98,18 +98,16 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-			// TODO: avoid reallocation ???
-			ZVAL_STRING(zerrstr, errstr);
-			efree(errstr);
+			ZVAL_STR(zerrstr, errstr);
 		} else if (!zerrstr && errstr) {
-			efree(errstr);
+			STR_RELEASE(errstr);
 		} 
 
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		efree(errstr);
+		STR_RELEASE(errstr);
 	}
 		
 	php_stream_to_zval(stream, return_value);

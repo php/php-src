@@ -97,7 +97,7 @@ PHP_FUNCTION(stream_socket_client)
 	php_stream *stream = NULL;
 	int err;
 	long flags = PHP_STREAM_CLIENT_CONNECT;
-	char *errstr = NULL;
+	zend_string *errstr = NULL;
 	php_stream_context *context = NULL;
 
 	RETVAL_FALSE;
@@ -140,7 +140,7 @@ PHP_FUNCTION(stream_socket_client)
 		/* host might contain binary characters */
 		zend_string *quoted_host = php_addslashes(host, host_len, 0 TSRMLS_CC);
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s (%s)", quoted_host->val, errstr == NULL ? "Unknown error" : errstr);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s (%s)", quoted_host->val, errstr == NULL ? "Unknown error" : errstr->val);
 		STR_RELEASE(quoted_host);
 	}
 
@@ -154,19 +154,16 @@ PHP_FUNCTION(stream_socket_client)
 			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-			// TODO: avoid reallocation ???
-			ZVAL_STRING(zerrstr, errstr);
-			efree(errstr);
+			ZVAL_STR(zerrstr, errstr);
 		} else if (errstr) {
-			efree(errstr);
+			STR_RELEASE(errstr);
 		}
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		efree(errstr);
+		STR_RELEASE(errstr);
 	}
 
 	php_stream_to_zval(stream, return_value);
@@ -184,7 +181,7 @@ PHP_FUNCTION(stream_socket_server)
 	php_stream *stream = NULL;
 	int err = 0;
 	long flags = STREAM_XPORT_BIND | STREAM_XPORT_LISTEN;
-	char *errstr = NULL;
+	zend_string *errstr = NULL;
 	php_stream_context *context = NULL;
 
 	RETVAL_FALSE;
@@ -213,7 +210,7 @@ PHP_FUNCTION(stream_socket_server)
 			NULL, NULL, context, &errstr, &err);
 
 	if (stream == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s (%s)", host, errstr == NULL ? "Unknown error" : errstr);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s (%s)", host, errstr == NULL ? "Unknown error" : errstr->val);
 	}
 
 	if (stream == NULL)	{
@@ -222,19 +219,16 @@ PHP_FUNCTION(stream_socket_server)
 			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-			// TODO: avoid reallocation ???
-			ZVAL_STRING(zerrstr, errstr);
-			efree(errstr);
+			ZVAL_STR(zerrstr, errstr);
 		} else if (errstr) {
-			efree(errstr);
+			STR_RELEASE(errstr);
 		}
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		efree(errstr);
+		STR_RELEASE(errstr);
 	}
 
 	php_stream_to_zval(stream, return_value);
@@ -247,14 +241,12 @@ PHP_FUNCTION(stream_socket_accept)
 {
 	double timeout = FG(default_socket_timeout);
 	zval *zpeername = NULL;
-	char *peername = NULL;
-	int peername_len;
+	zend_string *peername = NULL;
 	php_timeout_ull conv;
 	struct timeval tv;
 	php_stream *stream = NULL, *clistream = NULL;
 	zval *zstream;
-
-	char *errstr = NULL;
+	zend_string *errstr = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|dz/", &zstream, &timeout, &zpeername) == FAILURE) {
 		RETURN_FALSE;
@@ -278,24 +270,21 @@ PHP_FUNCTION(stream_socket_accept)
 
 	if (0 == php_stream_xport_accept(stream, &clistream,
 				zpeername ? &peername : NULL,
-				zpeername ? &peername_len : NULL,
 				NULL, NULL,
 				&tv, &errstr
 				TSRMLS_CC) && clistream) {
 
 		if (peername) {
-			// TODO: avoid reallocation ???
-			ZVAL_STRINGL(zpeername, peername, peername_len);
-			efree(peername);
+			ZVAL_STR(zpeername, peername);
 		}
 		php_stream_to_zval(clistream, return_value);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "accept failed: %s", errstr ? errstr : "Unknown error");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "accept failed: %s", errstr ? errstr->val : "Unknown error");
 		RETVAL_FALSE;
 	}
 
 	if (errstr) {
-		efree(errstr);
+		STR_RELEASE(errstr);
 	}
 }
 /* }}} */
@@ -307,8 +296,7 @@ PHP_FUNCTION(stream_socket_get_name)
 	php_stream *stream;
 	zval *zstream;
 	zend_bool want_peer;
-	char *name = NULL;
-	int name_len;
+	zend_string *name = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &zstream, &want_peer) == FAILURE) {
 		RETURN_FALSE;
@@ -318,15 +306,12 @@ PHP_FUNCTION(stream_socket_get_name)
 
 	if (0 != php_stream_xport_get_name(stream, want_peer,
 				&name,
-				&name_len,
 				NULL, NULL
 				TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(name, name_len);
-	efree(name);
+	RETVAL_STR(name);
 }
 /* }}} */
 
@@ -365,8 +350,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 {
 	php_stream *stream;
 	zval *zstream, *zremote = NULL;
-	char *remote_addr = NULL;
-	int remote_addr_len;
+	zend_string *remote_addr = NULL;
 	long to_read = 0;
 	zend_string *read_buf;
 	long flags = 0;
@@ -391,15 +375,12 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	read_buf = STR_ALLOC(to_read, 0);
 
 	recvd = php_stream_xport_recvfrom(stream, read_buf->val, to_read, flags, NULL, NULL,
-			zremote ? &remote_addr : NULL,
-			zremote ? &remote_addr_len : NULL
+			zremote ? &remote_addr : NULL
 			TSRMLS_CC);
 
 	if (recvd >= 0) {
 		if (zremote) {
-			// TODO: avoid reallocation ???
-			ZVAL_STRINGL(zremote, remote_addr, remote_addr_len);
-			efree(remote_addr);
+			ZVAL_STR(zremote, remote_addr);
 		}
 		read_buf->val[recvd] = '\0';
 		read_buf->len = recvd;

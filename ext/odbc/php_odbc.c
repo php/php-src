@@ -2954,7 +2954,7 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_connection *conn;
 	zval *pv_handle;
-	char *ptr;
+	zend_string *ptr;
 	int len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &pv_handle) == FAILURE) {
@@ -2969,23 +2969,21 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	if (ZEND_NUM_ARGS() == 1) {
 		ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_handle, -1, "ODBC-Link", le_conn, le_pconn);
-		ptr = ecalloc(len + 1, 1);
+		ptr = STR_ALLOC(len + 1, 0);
 		if (mode == 0) {
-			strlcpy(ptr, conn->laststate, len+1);
+			strlcpy(ptr->val, conn->laststate, len+1);
 		} else {
-			strlcpy(ptr, conn->lasterrormsg, len+1);
+			strlcpy(ptr->val, conn->lasterrormsg, len+1);
 		}
 	} else {
-		ptr = ecalloc(len + 1, 1);
+		ptr = STR_ALLOC(len, 0);
 		if (mode == 0) {
-			strlcpy(ptr, ODBCG(laststate), len+1);
+			strlcpy(ptr->val, ODBCG(laststate), len+1);
 		} else {
-			strlcpy(ptr, ODBCG(lasterrormsg), len+1);
+			strlcpy(ptr->val, ODBCG(lasterrormsg), len+1);
 		}
 	}
-	RETVAL_STRING(ptr);
-	// TODO: avoid double reallocation ???
-	efree(ptr);
+	RETVAL_STR(ptr);
 }
 /* }}} */
 

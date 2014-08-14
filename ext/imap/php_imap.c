@@ -76,8 +76,8 @@ MAILSTREAM DEFAULTPROTO;
 
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC);
 static void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC);
-static char* _php_imap_parse_address(ADDRESS *addresslist, zval *paddress TSRMLS_DC);
-static char* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC);
+static zend_string* _php_imap_parse_address(ADDRESS *addresslist, zval *paddress TSRMLS_DC);
+static zend_string* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC);
 
 /* the gets we use */
 static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DATA *md);
@@ -1482,7 +1482,7 @@ PHP_FUNCTION(imap_set_quota)
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
-	limits.text.data = "STORAGE";
+	limits.text.data = (unsigned char*)"STORAGE";
 	limits.text.size = mailbox_size;
 	limits.next = NIL;
 
@@ -1864,7 +1864,7 @@ PHP_FUNCTION(imap_list)
 	array_init(return_value);
 	cur=IMAPG(imap_folders);
 	while (cur != NIL) {
-		add_next_index_string(return_value, cur->LTEXT);
+		add_next_index_string(return_value, (char*)cur->LTEXT);
 		cur=cur->next;
 	}
 	mail_free_stringlist (&IMAPG(imap_folders));
@@ -1905,7 +1905,7 @@ PHP_FUNCTION(imap_list_full)
 	cur=IMAPG(imap_folder_objects);
 	while (cur != NIL) {
 		object_init(&mboxob);
-		add_property_string(&mboxob, "name", cur->LTEXT);
+		add_property_string(&mboxob, "name", (char*)cur->LTEXT);
 		add_property_long(&mboxob, "attributes", cur->attributes);
 #ifdef IMAP41
 		delim[0] = (char)cur->delimiter;
@@ -1948,7 +1948,7 @@ PHP_FUNCTION(imap_listscan)
 	array_init(return_value);
 	cur=IMAPG(imap_folders);
 	while (cur != NIL) {
-		add_next_index_string(return_value, cur->LTEXT);
+		add_next_index_string(return_value, (char*)cur->LTEXT);
 		cur=cur->next;
 	}
 	mail_free_stringlist (&IMAPG(imap_folders));
@@ -2170,7 +2170,7 @@ PHP_FUNCTION(imap_lsub)
 	array_init(return_value);
 	cur=IMAPG(imap_sfolders);
 	while (cur != NIL) {
-		add_next_index_string(return_value, cur->LTEXT);
+		add_next_index_string(return_value, (char*)cur->LTEXT);
 		cur=cur->next;
 	}
 	mail_free_stringlist (&IMAPG(imap_sfolders));
@@ -2210,7 +2210,7 @@ PHP_FUNCTION(imap_lsub_full)
 	cur=IMAPG(imap_sfolder_objects);
 	while (cur != NIL) {
 		object_init(&mboxob);
-		add_property_string(&mboxob, "name", cur->LTEXT);
+		add_property_string(&mboxob, "name", (char*)cur->LTEXT);
 		add_property_long(&mboxob, "attributes", cur->attributes);
 #ifdef IMAP41
 		delim[0] = (char)cur->delimiter;
@@ -2535,7 +2535,7 @@ PHP_FUNCTION(imap_binary)
 		return;
 	}
 
-	decode = rfc822_binary(text, text_len, &newlength);
+	decode = (char*)rfc822_binary(text, text_len, &newlength);
 
 	if (decode == NULL) {
 		RETURN_FALSE;
@@ -2600,7 +2600,7 @@ PHP_FUNCTION(imap_rfc822_write_address)
 	char *mailbox, *host, *personal;
 	int mailbox_len, host_len, personal_len;
 	ADDRESS *addr;
-	char *string;
+	zend_string *string;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &mailbox, &mailbox_len, &host, &host_len, &personal, &personal_len) == FAILURE) {
 		return;
@@ -2626,8 +2626,7 @@ PHP_FUNCTION(imap_rfc822_write_address)
 
 	string = _php_rfc822_write_address(addr TSRMLS_CC);
 	if (string) {
-		RETVAL_STRING(string);
-		efree(string);
+		RETVAL_STR(string);
 	} else {
 		RETURN_FALSE;
 	}
@@ -2704,7 +2703,7 @@ PHP_FUNCTION(imap_utf8)
 #else
 	utf8_mime2text(&src, &dest, U8T_DECOMPOSE);
 #endif
-	RETVAL_STRINGL(dest.data, dest.size);
+	RETVAL_STRINGL((char*)dest.data, dest.size);
 	if (dest.data) {
 		free(dest.data);
 	}
@@ -2869,7 +2868,7 @@ PHP_FUNCTION(imap_utf7_decode)
 	}
 #endif
 
-	RETURN_STRINGL(out, outlen);
+	RETURN_STRINGL((char*)out, outlen);
 }
 /* }}} */
 
@@ -2933,7 +2932,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	out = STR_ALLOC(outlen, 0);
 
 	/* encode input string */
-	outp = out->val;
+	outp = (unsigned char*)out->val;
 	state = ST_NORMAL;
 	endp = (inp = in) + inlen;
 	while (inp < endp || state != ST_NORMAL) {
@@ -3283,7 +3282,7 @@ PHP_FUNCTION(imap_bodystruct)
 
 	object_init(return_value);
 
-	body=mail_body(imap_le_struct->imap_stream, msg, section);
+	body=mail_body(imap_le_struct->imap_stream, msg, (unsigned char*)section);
 	if (body == NULL) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
@@ -3378,7 +3377,7 @@ PHP_FUNCTION(imap_fetch_overview)
 	int sequence_len;
 	pils *imap_le_struct;
 	zval myoverview;
-	char *address;
+	zend_string *address;
 	long status, flags = 0L;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3396,8 +3395,8 @@ PHP_FUNCTION(imap_fetch_overview)
 	array_init(return_value);
 
 	status = (flags & FT_UID)
-		? mail_uid_sequence(imap_le_struct->imap_stream, sequence)
-		: mail_sequence(imap_le_struct->imap_stream, sequence);
+		? mail_uid_sequence(imap_le_struct->imap_stream, (unsigned char*)sequence)
+		: mail_sequence(imap_le_struct->imap_stream, (unsigned char*)sequence);
 
 	if (status) {
 		MESSAGECACHE *elt;
@@ -3415,22 +3414,18 @@ PHP_FUNCTION(imap_fetch_overview)
 					env->from->next=NULL;
 					address =_php_rfc822_write_address(env->from TSRMLS_CC);
 					if (address) {
-						// TODO: avoid reallocation ???
-						add_property_string(&myoverview, "from", address);
-						efree(address);
+						add_property_str(&myoverview, "from", address);
 					}
 				}
 				if (env->to) {
 					env->to->next = NULL;
 					address = _php_rfc822_write_address(env->to TSRMLS_CC);
 					if (address) {
-						// TODO: avoid reallocation ???
-						add_property_string(&myoverview, "to", address);
-						efree(address);
+						add_property_str(&myoverview, "to", address);
 					}
 				}
 				if (env->date) {
-					add_property_string(&myoverview, "date", env->date);
+					add_property_string(&myoverview, "date", (char*)env->date);
 				}
 				if (env->message_id) {
 					add_property_string(&myoverview, "message_id", env->message_id);
@@ -3494,7 +3489,7 @@ PHP_FUNCTION(imap_mail_compose)
 	}
 	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "date", sizeof("date") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
-		env->date = cpystr(Z_STRVAL_P(pvalue));
+		env->date = (unsigned char*)cpystr(Z_STRVAL_P(pvalue));
 	}
 	if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(envelope), "from", sizeof("from") - 1)) != NULL) {
 		convert_to_string_ex(pvalue);
@@ -3622,11 +3617,11 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "contents.data", sizeof("contents.data") - 1)) != NULL) {
 				convert_to_string_ex(pvalue);
-				bod->contents.text.data = (char *) fs_get(Z_STRLEN_P(pvalue) + 1);
+				bod->contents.text.data = fs_get(Z_STRLEN_P(pvalue) + 1);
 				memcpy(bod->contents.text.data, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
 				bod->contents.text.size = Z_STRLEN_P(pvalue);
 			} else {
-				bod->contents.text.data = (char *) fs_get(1);
+				bod->contents.text.data = fs_get(1);
 				memcpy(bod->contents.text.data, "", 1);
 				bod->contents.text.size = 0;
 			}
@@ -3726,11 +3721,11 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "contents.data", sizeof("contents.data") - 1)) != NULL) {
 				convert_to_string_ex(pvalue);
-				bod->contents.text.data = (char *) fs_get(Z_STRLEN_P(pvalue) + 1);
+				bod->contents.text.data = fs_get(Z_STRLEN_P(pvalue) + 1);
 				memcpy(bod->contents.text.data, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue) + 1);
 				bod->contents.text.size = Z_STRLEN_P(pvalue);
 			} else {
-				bod->contents.text.data = (char *) fs_get(1);
+				bod->contents.text.data = fs_get(1);
 				memcpy(bod->contents.text.data, "", 1);
 				bod->contents.text.size = 0;
 			}
@@ -4133,7 +4128,7 @@ PHP_FUNCTION(imap_alerts)
 
 	cur = IMAPG(imap_alertstack);
 	while (cur != NIL) {
-		add_next_index_string(return_value, cur->LTEXT);
+		add_next_index_string(return_value, (char*)cur->LTEXT);
 		cur = cur->next;
 	}
 	mail_free_stringlist(&IMAPG(imap_alertstack));
@@ -4160,7 +4155,7 @@ PHP_FUNCTION(imap_errors)
 
 	cur = IMAPG(imap_errorstack);
 	while (cur != NIL) {
-		add_next_index_string(return_value, cur->LTEXT);
+		add_next_index_string(return_value, (char*)cur->LTEXT);
 		cur = cur->next;
 	}
 	mail_free_errorlist(&IMAPG(imap_errorstack));
@@ -4186,7 +4181,7 @@ PHP_FUNCTION(imap_last_error)
 	cur = IMAPG(imap_errorstack);
 	while (cur != NIL) {
 		if (cur->next == NIL) {
-			RETURN_STRING(cur->LTEXT);
+			RETURN_STRING((char*)cur->LTEXT);
 		}
 		cur = cur->next;
 	}
@@ -4305,10 +4300,9 @@ static long _php_rfc822_soutr (void *stream, char *string)
 
 /* {{{ _php_rfc822_write_address
  */
-static char* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
+static zend_string* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
 {
 	char address[MAILTMPLEN];
-	char *str;
 	smart_str ret = {0};
 	RFC822BUFFER buf;
 
@@ -4320,11 +4314,7 @@ static char* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
 	rfc822_output_address_list(&buf, addresslist, 0, NULL);
 	rfc822_output_flush(&buf);
 	smart_str_0(&ret);
-	/* avoide dup? */
-	str = estrndup(ret.s->val, ret.s->len);
-	smart_str_free(&ret);
-
-	return str;
+	return ret.s;
 }
 /* }}} */
 
@@ -4390,7 +4380,7 @@ static int _php_imap_address_size (ADDRESS *addresslist)
 
 /* {{{ _php_rfc822_write_address
  */
-static char* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
+static zend_string* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
 {
 	char address[SENDBUFLEN];
 
@@ -4400,15 +4390,15 @@ static char* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
 	}
 	address[0] = 0;
 	rfc822_write_address(address, addresslist);
-	return estrdup(address);
+	return STR_INIT(address, strlen(address), 0);
 }
 /* }}} */
 #endif
 /* {{{ _php_imap_parse_address
  */
-static char* _php_imap_parse_address (ADDRESS *addresslist, zval *paddress TSRMLS_DC)
+static zend_string* _php_imap_parse_address (ADDRESS *addresslist, zval *paddress TSRMLS_DC)
 {
-	char *fulladdress;
+	zend_string *fulladdress;
 	ADDRESS *addresstmp;
 	zval tmpvals;
 
@@ -4434,13 +4424,13 @@ static char* _php_imap_parse_address (ADDRESS *addresslist, zval *paddress TSRML
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 {
 	zval paddress;
-	char *fulladdress=NULL;
+	zend_string *fulladdress=NULL;
 
 	object_init(myzvalue);
 
 	if (en->remail) add_property_string(myzvalue, "remail", en->remail);
-	if (en->date) add_property_string(myzvalue, "date", en->date);
-	if (en->date) add_property_string(myzvalue, "Date", en->date);
+	if (en->date) add_property_string(myzvalue, "date", (char*)en->date);
+	if (en->date) add_property_string(myzvalue, "Date", (char*)en->date);
 	if (en->subject) add_property_string(myzvalue, "subject", en->subject);
 	if (en->subject) add_property_string(myzvalue, "Subject", en->subject);
 	if (en->in_reply_to) add_property_string(myzvalue, "in_reply_to", en->in_reply_to);
@@ -4453,9 +4443,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 		array_init(&paddress);
 		fulladdress = _php_imap_parse_address(en->to, &paddress TSRMLS_CC);
 		if (fulladdress) {
-			// TODO: avoid reallocation ???
-			add_property_string(myzvalue, "toaddress", fulladdress);
-			efree(fulladdress);
+			add_property_str(myzvalue, "toaddress", fulladdress);
 		}
 		add_assoc_object(myzvalue, "to", &paddress TSRMLS_CC);
 	}
@@ -4464,9 +4452,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 		array_init(&paddress);
 		fulladdress = _php_imap_parse_address(en->from, &paddress TSRMLS_CC);
 		if (fulladdress) {
-			// TODO: avoid reallocation ???
-			add_property_string(myzvalue, "fromaddress", fulladdress);
-			efree(fulladdress);
+			add_property_str(myzvalue, "fromaddress", fulladdress);
 		}
 		add_assoc_object(myzvalue, "from", &paddress TSRMLS_CC);
 	}
@@ -4475,9 +4461,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 		array_init(&paddress);
 		fulladdress = _php_imap_parse_address(en->cc, &paddress TSRMLS_CC);
 		if (fulladdress) {
-			// TODO: avoid reallocation ???
-			add_property_string(myzvalue, "ccaddress", fulladdress);
-			efree(fulladdress);
+			add_property_str(myzvalue, "ccaddress", fulladdress);
 		}
 		add_assoc_object(myzvalue, "cc", &paddress TSRMLS_CC);
 	}
@@ -4486,9 +4470,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 		array_init(&paddress);
 		fulladdress = _php_imap_parse_address(en->bcc, &paddress TSRMLS_CC);
 		if (fulladdress) {
-			// TODO: avoid reallocation ???
-			add_property_string(myzvalue, "bccaddress", fulladdress);
-			efree(fulladdress);
+			add_property_str(myzvalue, "bccaddress", fulladdress);
 		}
 		add_assoc_object(myzvalue, "bcc", &paddress TSRMLS_CC);
 	}
@@ -4497,9 +4479,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 		array_init(&paddress);
 		fulladdress = _php_imap_parse_address(en->reply_to, &paddress TSRMLS_CC);
 		if (fulladdress) {
-			// TODO: avoid reallocation ???
-			add_property_string(myzvalue, "reply_toaddress", fulladdress);
-			efree(fulladdress);
+			add_property_str(myzvalue, "reply_toaddress", fulladdress);
 		}
 		add_assoc_object(myzvalue, "reply_to", &paddress TSRMLS_CC);
 	}
@@ -4508,9 +4488,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 		array_init(&paddress);
 		fulladdress = _php_imap_parse_address(en->sender, &paddress TSRMLS_CC);
 		if (fulladdress) {
-			// TODO: avoid reallocation ???
-			add_property_string(myzvalue, "senderaddress", fulladdress);
-			efree(fulladdress);
+			add_property_str(myzvalue, "senderaddress", fulladdress);
 		}
 		add_assoc_object(myzvalue, "sender", &paddress TSRMLS_CC);
 	}
@@ -4519,9 +4497,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 		array_init(&paddress);
 		fulladdress = _php_imap_parse_address(en->return_path, &paddress TSRMLS_CC);
 		if (fulladdress) {
-			// TODO: avoid reallocation ???
-			add_property_string(myzvalue, "return_pathaddress", fulladdress);
-			efree(fulladdress);
+			add_property_str(myzvalue, "return_pathaddress", fulladdress);
 		}
 		add_assoc_object(myzvalue, "return_path", &paddress TSRMLS_CC);
 	}
@@ -4873,7 +4849,7 @@ PHP_IMAP_EXPORT void mm_notify(MAILSTREAM *stream, char *str, long errflg)
 	if (strncmp(str, "[ALERT] ", 8) == 0) {
 		if (IMAPG(imap_alertstack) == NIL) {
 			IMAPG(imap_alertstack) = mail_newstringlist();
-			IMAPG(imap_alertstack)->LSIZE = strlen(IMAPG(imap_alertstack)->LTEXT = cpystr(str));
+			IMAPG(imap_alertstack)->LSIZE = strlen((char*)(IMAPG(imap_alertstack)->LTEXT = (unsigned char*)cpystr(str)));
 			IMAPG(imap_alertstack)->next = NIL;
 		} else {
 			cur = IMAPG(imap_alertstack);
@@ -4882,7 +4858,7 @@ PHP_IMAP_EXPORT void mm_notify(MAILSTREAM *stream, char *str, long errflg)
 			}
 			cur->next = mail_newstringlist ();
 			cur = cur->next;
-			cur->LSIZE = strlen(cur->LTEXT = cpystr(str));
+			cur->LSIZE = strlen((char*)(cur->LTEXT = (unsigned char*)cpystr(str)));
 			cur->next = NIL;
 		}
 	}
@@ -4899,7 +4875,7 @@ PHP_IMAP_EXPORT void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox,
 		/* Author: CJH */
 		if (IMAPG(imap_folder_objects) == NIL) {
 			IMAPG(imap_folder_objects) = mail_newfolderobjectlist();
-			IMAPG(imap_folder_objects)->LSIZE=strlen(IMAPG(imap_folder_objects)->LTEXT=cpystr(mailbox));
+			IMAPG(imap_folder_objects)->LSIZE=strlen((char*)(IMAPG(imap_folder_objects)->LTEXT = (unsigned char*)cpystr(mailbox)));
 			IMAPG(imap_folder_objects)->delimiter = delimiter;
 			IMAPG(imap_folder_objects)->attributes = attributes;
 			IMAPG(imap_folder_objects)->next = NIL;
@@ -4908,7 +4884,7 @@ PHP_IMAP_EXPORT void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox,
 			ocur=IMAPG(imap_folder_objects_tail);
 			ocur->next=mail_newfolderobjectlist();
 			ocur=ocur->next;
-			ocur->LSIZE = strlen(ocur->LTEXT = cpystr(mailbox));
+			ocur->LSIZE = strlen((char*)(ocur->LTEXT = (unsigned char*)cpystr(mailbox)));
 			ocur->delimiter = delimiter;
 			ocur->attributes = attributes;
 			ocur->next = NIL;
@@ -4920,14 +4896,14 @@ PHP_IMAP_EXPORT void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox,
 		if (!(attributes & LATT_NOSELECT)) {
 			if (IMAPG(imap_folders) == NIL) {
 				IMAPG(imap_folders)=mail_newstringlist();
-				IMAPG(imap_folders)->LSIZE=strlen(IMAPG(imap_folders)->LTEXT=cpystr(mailbox));
+				IMAPG(imap_folders)->LSIZE=strlen((char*)(IMAPG(imap_folders)->LTEXT = (unsigned char*)cpystr(mailbox)));
 				IMAPG(imap_folders)->next=NIL;
 				IMAPG(imap_folders_tail) = IMAPG(imap_folders);
 			} else {
 				cur=IMAPG(imap_folders_tail);
 				cur->next=mail_newstringlist ();
 				cur=cur->next;
-				cur->LSIZE = strlen (cur->LTEXT = cpystr (mailbox));
+				cur->LSIZE = strlen((char*)(cur->LTEXT = (unsigned char*)cpystr(mailbox)));
 				cur->next = NIL;
 				IMAPG(imap_folders_tail) = cur;
 			}
@@ -4946,7 +4922,7 @@ PHP_IMAP_EXPORT void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox,
 		/* Author: CJH */
 		if (IMAPG(imap_sfolder_objects) == NIL) {
 			IMAPG(imap_sfolder_objects) = mail_newfolderobjectlist();
-			IMAPG(imap_sfolder_objects)->LSIZE=strlen(IMAPG(imap_sfolder_objects)->LTEXT=cpystr(mailbox));
+			IMAPG(imap_sfolder_objects)->LSIZE = strlen((char*)(IMAPG(imap_sfolder_objects)->LTEXT = (unsigned char*)cpystr(mailbox)));
 			IMAPG(imap_sfolder_objects)->delimiter = delimiter;
 			IMAPG(imap_sfolder_objects)->attributes = attributes;
 			IMAPG(imap_sfolder_objects)->next = NIL;
@@ -4955,7 +4931,7 @@ PHP_IMAP_EXPORT void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox,
 			ocur=IMAPG(imap_sfolder_objects_tail);
 			ocur->next=mail_newfolderobjectlist();
 			ocur=ocur->next;
-			ocur->LSIZE=strlen(ocur->LTEXT = cpystr(mailbox));
+			ocur->LSIZE=strlen((char*)(ocur->LTEXT = (unsigned char*)cpystr(mailbox)));
 			ocur->delimiter = delimiter;
 			ocur->attributes = attributes;
 			ocur->next = NIL;
@@ -4965,14 +4941,14 @@ PHP_IMAP_EXPORT void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox,
 		/* build the old simple array for imap_listsubscribed() */
 		if (IMAPG(imap_sfolders) == NIL) {
 			IMAPG(imap_sfolders)=mail_newstringlist();
-			IMAPG(imap_sfolders)->LSIZE=strlen(IMAPG(imap_sfolders)->LTEXT=cpystr(mailbox));
+			IMAPG(imap_sfolders)->LSIZE=strlen((char*)(IMAPG(imap_sfolders)->LTEXT = (unsigned char*)cpystr(mailbox)));
 			IMAPG(imap_sfolders)->next=NIL;
 			IMAPG(imap_sfolders_tail) = IMAPG(imap_sfolders);
 		} else {
 			cur=IMAPG(imap_sfolders_tail);
 			cur->next=mail_newstringlist ();
 			cur=cur->next;
-			cur->LSIZE = strlen (cur->LTEXT = cpystr (mailbox));
+			cur->LSIZE = strlen((char*)(cur->LTEXT = (unsigned char*)cpystr(mailbox)));
 			cur->next = NIL;
 			IMAPG(imap_sfolders_tail) = cur;
 		}
@@ -5010,7 +4986,7 @@ PHP_IMAP_EXPORT void mm_log(char *str, long errflg)
 	if (errflg != NIL) { /* CJH: maybe put these into a more comprehensive log for debugging purposes? */
 		if (IMAPG(imap_errorstack) == NIL) {
 			IMAPG(imap_errorstack) = mail_newerrorlist();
-			IMAPG(imap_errorstack)->LSIZE = strlen(IMAPG(imap_errorstack)->LTEXT = cpystr(str));
+			IMAPG(imap_errorstack)->LSIZE = strlen((char*)(IMAPG(imap_errorstack)->LTEXT = (unsigned char*)cpystr(str)));
 			IMAPG(imap_errorstack)->errflg = errflg;
 			IMAPG(imap_errorstack)->next = NIL;
 		} else {
@@ -5020,7 +4996,7 @@ PHP_IMAP_EXPORT void mm_log(char *str, long errflg)
 			}
 			cur->next = mail_newerrorlist();
 			cur = cur->next;
-			cur->LSIZE = strlen(cur->LTEXT = cpystr(str));
+			cur->LSIZE = strlen((char*)(cur->LTEXT = (unsigned char*)cpystr(str)));
 			cur->errflg = errflg;
 			cur->next = NIL;
 		}
