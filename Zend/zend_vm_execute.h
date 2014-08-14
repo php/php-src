@@ -16724,7 +16724,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -18710,7 +18711,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -21067,7 +21069,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -24297,7 +24300,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -25757,7 +25761,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -27036,7 +27041,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -28317,7 +28323,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -30107,7 +30114,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -33709,7 +33717,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -35606,7 +35615,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -37843,7 +37853,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -40817,7 +40828,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
