@@ -933,6 +933,9 @@ static inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value TSRM
 						value = Z_REFVAL_P(value);
 					}
 					if (Z_REFCOUNTED_P(value)) {
+						if (UNEXPECTED(variable_ptr == value)) {
+							return variable_ptr;
+						}
 						Z_ADDREF_P(value);
 					}
 				}
