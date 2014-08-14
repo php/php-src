@@ -1783,6 +1783,14 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				return SUCCESS;
 
 			default:
+				if (Z_ISREF_P(op1)) {
+					op1 = Z_REFVAL_P(op1);
+					continue;
+				} else if (Z_ISREF_P(op2)) {
+					op2 = Z_REFVAL_P(op2);
+					continue;
+				}
+
 				if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, compare)) {
 					return Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2 TSRMLS_CC);
 				} else if (Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, compare)) {
@@ -1841,11 +1849,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						return SUCCESS;
 					}
 				}
-				if (Z_ISREF_P(op1)) {
-					op1 = Z_REFVAL_P(op1);
-				} else if (Z_ISREF_P(op2)) {
-					op2 = Z_REFVAL_P(op2);
-				} else if (!converted) {
+				if (!converted) {
 					if (Z_TYPE_P(op1) == IS_NULL || Z_TYPE_P(op1) == IS_FALSE) {
 						zendi_convert_to_boolean(op2, op2_copy, result);
 						ZVAL_LONG(result, (Z_TYPE_P(op2) == IS_TRUE) ? -1 : 0);
