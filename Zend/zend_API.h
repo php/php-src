@@ -646,6 +646,7 @@ END_EXTERN_C()
 		} \
 	} while (0)
 #else // attempt to support calls to parent::__construct() ???
+	  // see: ext/date/tests/bug67118.phpt
 #define ZEND_CTOR_MAKE_NULL() do {										\
 		if (EG(current_execute_data)->return_value) {					\
 			zval_ptr_dtor(EG(current_execute_data)->return_value);		\

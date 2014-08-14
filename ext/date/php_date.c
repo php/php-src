@@ -2147,8 +2147,6 @@ static zend_object *date_object_clone_date(zval *this_ptr TSRMLS_DC) /* {{{ */
 static void date_clone_immutable(zval *object, zval *new_object TSRMLS_DC) /* {{{ */
 {
 	ZVAL_OBJ(new_object, date_object_clone_date(object TSRMLS_CC));
-//???	Z_SET_REFCOUNT_P(new_object, 1);
-//???	Z_SET_ISREF_P(new_object);
 } /* }}} */
 
 static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC) /* {{{ */
@@ -2416,7 +2414,7 @@ static inline zend_object *date_object_new_period_ex(zend_class_entry *class_typ
 	if (init_props) {
 		object_properties_init(&intern->std, class_type);
 	}
-//???	date_object_free_storage_period, NULL TSRMLS_CC);
+
 	intern->std.handlers = &date_object_handlers_period;
 	
 	return &intern->std;
@@ -3672,7 +3670,7 @@ PHP_METHOD(DateTimeZone, __construct)
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &tz, &tz_len)) {
 		tzobj = Z_PHPTIMEZONE_P(getThis());
 		if (FAILURE == timezone_initialize(tzobj, tz TSRMLS_CC)) {
-//???			ZVAL_NULL(getThis());
+			ZEND_CTOR_MAKE_NULL();
 		}
 	}
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
@@ -4096,8 +4094,8 @@ PHP_METHOD(DateInterval, __construct)
 			diobj = Z_PHPINTERVAL_P(getThis());
 			diobj->diff = reltime;
 			diobj->initialized = 1;
-//???		} else {
-//???			ZVAL_NULL(getThis());
+		} else {
+			ZEND_CTOR_MAKE_NULL();
 		}
 	}
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
