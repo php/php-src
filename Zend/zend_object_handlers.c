@@ -1469,6 +1469,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 found:
 			switch (has_set_exists) {
 				case 0:
+					ZVAL_DEREF(value);
 					result = (Z_TYPE_P(value) != IS_NULL);
 					break;
 				default:
