@@ -537,7 +537,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 		free(compiler_globals->static_members_table);
 	}
 	if (compiler_globals->script_encoding_list) {
-		pefree(compiler_globals->script_encoding_list, 1);
+		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
 }

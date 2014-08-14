@@ -719,7 +719,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 		ftime /= 10000000L;
 
 		if (size) {
-			*size = (size_t)(((unsigned __int64)fdata.nFileSizeHigh) << 32 + (unsigned __int64)fdata.nFileSizeLow);
+			*size = (size_t)((((unsigned __int64)fdata.nFileSizeHigh) << 32) + (unsigned __int64)fdata.nFileSizeLow);
 		}
 		return (accel_time_t)ftime;
 	}

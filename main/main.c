@@ -2503,7 +2503,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 
 #ifdef PHP_WIN32
 		if(primary_file->filename) {
-			UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+			UpdateIniFromRegistry((char*)primary_file->filename TSRMLS_CC);
 		}
 #endif
 
@@ -2595,7 +2595,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret T
 	zend_try {
 #ifdef PHP_WIN32
 		if(primary_file->filename) {
-			UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+			UpdateIniFromRegistry((char*)primary_file->filename TSRMLS_CC);
 		}
 #endif
 

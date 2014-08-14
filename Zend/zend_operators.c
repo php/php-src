@@ -819,6 +819,7 @@ try_again:
 			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+	return 0;
 }
 /* }}} */
 
@@ -859,6 +860,7 @@ try_again:
 			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+	return 0.0;
 }
 /* }}} */
 
@@ -912,6 +914,7 @@ try_again:
 			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+	return NULL;
 }
 /* }}} */
 
