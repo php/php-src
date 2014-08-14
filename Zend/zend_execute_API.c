@@ -108,19 +108,19 @@ static int clean_non_persistent_function(zend_function *function TSRMLS_DC) /* {
 }
 /* }}} */
 
-static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC) /* {{{ */
+ZEND_API int clean_non_persistent_function_full(zend_function *function TSRMLS_DC) /* {{{ */
 {
 	return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
-static int clean_non_persistent_class(zend_class_entry **ce TSRMLS_DC) /* {{{ */
+ZEND_API int clean_non_persistent_class(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 {
 	return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
-static int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC) /* {{{ */
+ZEND_API int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 {
 	return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
