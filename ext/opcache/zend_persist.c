@@ -149,7 +149,7 @@ static zend_ast *zend_persist_ast(zend_ast *ast TSRMLS_DC)
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		zend_ast_list *copy = zend_accel_memdup(ast,
-			sizeof(zend_ast) + sizeof(zend_ast *) * (list->children - 1));
+			sizeof(zend_ast_list) + sizeof(zend_ast *) * (list->children - 1));
 		for (i = 0; i < list->children; i++) {
 			if (copy->child[i]) {
 				copy->child[i] = zend_persist_ast(copy->child[i] TSRMLS_CC);
