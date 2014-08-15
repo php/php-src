@@ -88,17 +88,26 @@ static uint zend_hash_persist_calc(HashTable *ht, uint (*pPersistElement)(zval *
 #if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 static uint zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
 {
-	int i;
+	zend_uint i;
 	START_SIZE();
 
-	if (ast->kind == ZEND_CONST) {
-		ADD_SIZE(sizeof(zend_ast));
-		ADD_SIZE(zend_persist_zval_calc(&ast->u.val TSRMLS_CC));
+	if (ast->kind == ZEND_AST_ZVAL) {
+		ADD_SIZE(sizeof(zend_ast_zval));
+		ADD_SIZE(zend_persist_zval_calc(zend_ast_get_zval(ast) TSRMLS_CC));
+	} else if (zend_ast_is_list(ast)) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		ADD_SIZE(sizeof(zend_ast_list) + sizeof(zend_ast *) * (list->children - 1));
+		for (i = 0; i < list->children; i++) {
+			if (list->child[i]) {
+				ADD_SIZE(zend_persist_ast_calc(list->child[i] TSRMLS_CC));
+			}
+		}
 	} else {
-		ADD_SIZE(sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
-		for (i = 0; i < ast->children; i++) {
-			if ((&ast->u.child)[i]) {
-				ADD_SIZE(zend_persist_ast_calc((&ast->u.child)[i] TSRMLS_CC));
+		zend_uint children = zend_ast_get_num_children(ast);
+		ADD_SIZE(sizeof(zend_ast) + sizeof(zend_ast *) * (children - 1));
+		for (i = 0; i < children; i++) {
+			if (ast->child[i]) {
+				ADD_SIZE(zend_persist_ast_calc(ast->child[i] TSRMLS_CC));
 			}
 		}
 	}
