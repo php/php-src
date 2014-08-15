@@ -2,10 +2,6 @@
 Test decbin() function : usage variations - different data types as $number arg
 --INI--
 precision=14
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
 --FILE--
 <?php
 /* Prototype  : string decbin  ( int $number  )
@@ -107,10 +103,10 @@ string(14) "11000000111001"
 string(64) "1111111111111111111111111111111111111111111111111111011011010111"
 
 -- Iteration 5 --
-string(1) "0"
+string(63) "111111111111111111111111111111111111111111111111111111111111111"
 
 -- Iteration 6 --
-string(1) "0"
+string(63) "111111111111111111111111111111111111111111111111111111111111111"
 
 -- Iteration 7 --
 string(4) "1010"

@@ -48,6 +48,7 @@
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_virtual_cwd.h"
+#include "zend_bigint.h"
 #include "tsrm_config_common.h"
 
 #define YYCTYPE   unsigned char
@@ -1527,11 +1528,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		} else {
 			ZVAL_LONG(zendlval, strtol(bin, NULL, 2));
 		}
-		return T_LNUMBER;
 	} else {
-		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, NULL));
-		return T_DNUMBER;
+		ZVAL_NEW_BIGINT(zendlval);
+		zend_bigint_init_from_string_length(Z_BIG_P(zendlval), bin, len, 2);
 	}
+	return T_LNUMBER;
 }
 
 <ST_IN_SCRIPTING>{LNUM} {
@@ -1542,11 +1543,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		ZVAL_LONG(zendlval, strtol(yytext, NULL, 0));
 		if (errno == ERANGE) { /* Overflow */
 			if (yytext[0] == '0') { /* octal overflow */
-				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, NULL));
+				ZVAL_NEW_BIGINT(zendlval);
+				zend_bigint_init_from_string_length(Z_BIG_P(zendlval), yytext, yyleng, 8);
 			} else {
-				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, NULL));
+				ZVAL_NEW_BIGINT(zendlval);
+				zend_bigint_init_from_string_length(Z_BIG_P(zendlval), yytext, yyleng, 10);
 			}
-			return T_DNUMBER;
 		}
 	}
 	return T_LNUMBER;
@@ -1568,11 +1570,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		} else {
 			ZVAL_LONG(zendlval, strtol(hex, NULL, 16));
 		}
-		return T_LNUMBER;
 	} else {
-		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, NULL));
-		return T_DNUMBER;
+		ZVAL_NEW_BIGINT(zendlval);
+		zend_bigint_init_from_string_length(Z_BIG_P(zendlval), hex, len, 16);
 	}
+	return T_DNUMBER;
 }
 
 <ST_VAR_OFFSET>[0]|([1-9][0-9]*) { /* Offset could be treated as a long */

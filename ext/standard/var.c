@@ -103,6 +103,7 @@ PHPAPI void php_var_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 	ulong num;
 	zend_string *key;
 	zval *val;
+	char *temp_str;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -121,6 +122,11 @@ again:
 			break;
 		case IS_LONG:
 			php_printf("%sint(%ld)\n", COMMON, Z_LVAL_P(struc));
+			break;
+		case IS_BIGINT:
+			temp_str = zend_bigint_to_string(Z_BIG_P(struc));
+			php_printf("%sint(%s)\n", COMMON, temp_str);
+			efree(temp_str);
 			break;
 		case IS_DOUBLE:
 			php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
@@ -273,6 +279,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 	int is_ref = 0;
 	ulong index;
 	zend_string *key;
+	char *str;
 	zval *val;
 
 	if (level > 1) {
@@ -295,6 +302,11 @@ again:
 		break;
 	case IS_DOUBLE:
 		php_printf("%sdouble(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
+		break;
+	case IS_BIGINT:
+		str = zend_bigint_to_string(Z_BIG_P(struc));
+		php_printf("%sbigint(%s) refcount(%u)\n", COMMON, str, Z_REFCOUNT_P(struc));
+		efree(str);
 		break;
 	case IS_STRING:
 		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_P(struc));

@@ -29,6 +29,8 @@
 #include "zend_virtual_cwd.h"
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
+#include "zend_string.h"
+#include "zend_bigint.h"
 
 #define CONSTANT_EX(op_array, op) \
 	(op_array)->literals[op]
@@ -5347,7 +5349,8 @@ void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC) /* {{{ */
 	if (expr) {
 		if (expr->op_type != IS_CONST) {
 			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator with non-constant operand is no longer supported", op == ZEND_BRK ? "break" : "continue");
-		} else if (Z_TYPE(expr->u.constant) != IS_LONG || Z_LVAL(expr->u.constant) < 1) {
+		} else if (!((Z_TYPE(expr->u.constant) == IS_LONG && Z_LVAL(expr->u.constant) > 1)
+			|| (Z_TYPE(expr->u.constant) == IS_BIGINT && zend_bigint_sign(Z_BIG(expr->u.constant)) == 1))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator accepts only positive numbers", op == ZEND_BRK ? "break" : "continue");
 		}
 		SET_NODE(opline->op2, expr);
@@ -6349,6 +6352,9 @@ str_index:
 						case IS_DOUBLE:
 							num = zend_dval_to_lval(Z_DVAL(CONSTANT(opline->op2.constant)));
 							goto num_index;
+						case IS_BIGINT:
+							constant_array = 0;
+							break;
 						case IS_FALSE:
 							num = 0;
 							goto num_index;

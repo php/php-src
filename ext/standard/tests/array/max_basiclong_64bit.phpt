@@ -1,9 +1,5 @@
 --TEST--
-Test max function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test max function : 64bit long and bigint tests
 --FILE--
 <?php
  
@@ -31,5 +27,5 @@ $longVals = array(
 ===DONE===
 --EXPECT--
 int(9223372036854775807)
-int(9223372036854775807)
+int(9223372036854775808)
 ===DONE===

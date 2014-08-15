@@ -1,9 +1,5 @@
 --TEST--
 Test >> operator : various numbers as strings
---SKIPIF--
-<?php
-if ((65<<65)==0) die("skip this test is for Intel only");
-?>
 --FILE--
 <?php
 
@@ -30,11 +26,11 @@ string(2) "30"
 --- testing: '0' >> '65' ---
 string(2) "30"
 --- testing: '0' >> '-44' ---
-string(2) "30"
+string(0) ""
 --- testing: '0' >> '1.2' ---
 string(2) "30"
 --- testing: '0' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: '0' >> 'abc' ---
 string(2) "30"
 --- testing: '0' >> '123abc' ---
@@ -56,13 +52,13 @@ string(2) "30"
 --- testing: '65' >> '0' ---
 string(4) "3635"
 --- testing: '65' >> '65' ---
-string(4) "3332"
---- testing: '65' >> '-44' ---
 string(2) "30"
+--- testing: '65' >> '-44' ---
+string(0) ""
 --- testing: '65' >> '1.2' ---
 string(4) "3332"
 --- testing: '65' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: '65' >> 'abc' ---
 string(4) "3635"
 --- testing: '65' >> '123abc' ---
@@ -84,13 +80,13 @@ string(4) "3635"
 --- testing: '-44' >> '0' ---
 string(6) "2d3434"
 --- testing: '-44' >> '65' ---
-string(6) "2d3232"
---- testing: '-44' >> '-44' ---
 string(4) "2d31"
+--- testing: '-44' >> '-44' ---
+string(0) ""
 --- testing: '-44' >> '1.2' ---
 string(6) "2d3232"
 --- testing: '-44' >> '-7.7' ---
-string(4) "2d31"
+string(0) ""
 --- testing: '-44' >> 'abc' ---
 string(6) "2d3434"
 --- testing: '-44' >> '123abc' ---
@@ -114,11 +110,11 @@ string(2) "31"
 --- testing: '1.2' >> '65' ---
 string(2) "30"
 --- testing: '1.2' >> '-44' ---
-string(2) "30"
+string(0) ""
 --- testing: '1.2' >> '1.2' ---
 string(2) "30"
 --- testing: '1.2' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: '1.2' >> 'abc' ---
 string(2) "31"
 --- testing: '1.2' >> '123abc' ---
@@ -140,13 +136,13 @@ string(2) "31"
 --- testing: '-7.7' >> '0' ---
 string(4) "2d37"
 --- testing: '-7.7' >> '65' ---
-string(4) "2d34"
---- testing: '-7.7' >> '-44' ---
 string(4) "2d31"
+--- testing: '-7.7' >> '-44' ---
+string(0) ""
 --- testing: '-7.7' >> '1.2' ---
 string(4) "2d34"
 --- testing: '-7.7' >> '-7.7' ---
-string(4) "2d31"
+string(0) ""
 --- testing: '-7.7' >> 'abc' ---
 string(4) "2d37"
 --- testing: '-7.7' >> '123abc' ---
@@ -170,11 +166,11 @@ string(2) "30"
 --- testing: 'abc' >> '65' ---
 string(2) "30"
 --- testing: 'abc' >> '-44' ---
-string(2) "30"
+string(0) ""
 --- testing: 'abc' >> '1.2' ---
 string(2) "30"
 --- testing: 'abc' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: 'abc' >> 'abc' ---
 string(2) "30"
 --- testing: 'abc' >> '123abc' ---
@@ -196,13 +192,13 @@ string(2) "30"
 --- testing: '123abc' >> '0' ---
 string(6) "313233"
 --- testing: '123abc' >> '65' ---
-string(4) "3631"
---- testing: '123abc' >> '-44' ---
 string(2) "30"
+--- testing: '123abc' >> '-44' ---
+string(0) ""
 --- testing: '123abc' >> '1.2' ---
 string(4) "3631"
 --- testing: '123abc' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: '123abc' >> 'abc' ---
 string(6) "313233"
 --- testing: '123abc' >> '123abc' ---
@@ -224,13 +220,13 @@ string(6) "313233"
 --- testing: '123e5' >> '0' ---
 string(6) "313233"
 --- testing: '123e5' >> '65' ---
-string(4) "3631"
---- testing: '123e5' >> '-44' ---
 string(2) "30"
+--- testing: '123e5' >> '-44' ---
+string(0) ""
 --- testing: '123e5' >> '1.2' ---
 string(4) "3631"
 --- testing: '123e5' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: '123e5' >> 'abc' ---
 string(6) "313233"
 --- testing: '123e5' >> '123abc' ---
@@ -252,13 +248,13 @@ string(6) "313233"
 --- testing: '123e5xyz' >> '0' ---
 string(6) "313233"
 --- testing: '123e5xyz' >> '65' ---
-string(4) "3631"
---- testing: '123e5xyz' >> '-44' ---
 string(2) "30"
+--- testing: '123e5xyz' >> '-44' ---
+string(0) ""
 --- testing: '123e5xyz' >> '1.2' ---
 string(4) "3631"
 --- testing: '123e5xyz' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: '123e5xyz' >> 'abc' ---
 string(6) "313233"
 --- testing: '123e5xyz' >> '123abc' ---
@@ -280,13 +276,13 @@ string(6) "313233"
 --- testing: ' 123abc' >> '0' ---
 string(6) "313233"
 --- testing: ' 123abc' >> '65' ---
-string(4) "3631"
---- testing: ' 123abc' >> '-44' ---
 string(2) "30"
+--- testing: ' 123abc' >> '-44' ---
+string(0) ""
 --- testing: ' 123abc' >> '1.2' ---
 string(4) "3631"
 --- testing: ' 123abc' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: ' 123abc' >> 'abc' ---
 string(6) "313233"
 --- testing: ' 123abc' >> '123abc' ---
@@ -308,13 +304,13 @@ string(6) "313233"
 --- testing: '123 abc' >> '0' ---
 string(6) "313233"
 --- testing: '123 abc' >> '65' ---
-string(4) "3631"
---- testing: '123 abc' >> '-44' ---
 string(2) "30"
+--- testing: '123 abc' >> '-44' ---
+string(0) ""
 --- testing: '123 abc' >> '1.2' ---
 string(4) "3631"
 --- testing: '123 abc' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: '123 abc' >> 'abc' ---
 string(6) "313233"
 --- testing: '123 abc' >> '123abc' ---
@@ -336,13 +332,13 @@ string(6) "313233"
 --- testing: '123abc ' >> '0' ---
 string(6) "313233"
 --- testing: '123abc ' >> '65' ---
-string(4) "3631"
---- testing: '123abc ' >> '-44' ---
 string(2) "30"
+--- testing: '123abc ' >> '-44' ---
+string(0) ""
 --- testing: '123abc ' >> '1.2' ---
 string(4) "3631"
 --- testing: '123abc ' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: '123abc ' >> 'abc' ---
 string(6) "313233"
 --- testing: '123abc ' >> '123abc' ---
@@ -364,13 +360,13 @@ string(6) "313233"
 --- testing: '3.4a' >> '0' ---
 string(2) "33"
 --- testing: '3.4a' >> '65' ---
-string(2) "31"
---- testing: '3.4a' >> '-44' ---
 string(2) "30"
+--- testing: '3.4a' >> '-44' ---
+string(0) ""
 --- testing: '3.4a' >> '1.2' ---
 string(2) "31"
 --- testing: '3.4a' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: '3.4a' >> 'abc' ---
 string(2) "33"
 --- testing: '3.4a' >> '123abc' ---
@@ -394,11 +390,11 @@ string(2) "30"
 --- testing: 'a5.9' >> '65' ---
 string(2) "30"
 --- testing: 'a5.9' >> '-44' ---
-string(2) "30"
+string(0) ""
 --- testing: 'a5.9' >> '1.2' ---
 string(2) "30"
 --- testing: 'a5.9' >> '-7.7' ---
-string(2) "30"
+string(0) ""
 --- testing: 'a5.9' >> 'abc' ---
 string(2) "30"
 --- testing: 'a5.9' >> '123abc' ---

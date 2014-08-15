@@ -36,8 +36,8 @@ for ($i = 0; $i < count($values); $i++) {
 --EXPECTF--
 int(455)
 int(0)
-int(32766)
-int(5)
+int(2147483647)
+int(2147483648)
 int(129)
 int(455)
 int(224)

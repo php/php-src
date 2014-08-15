@@ -123,6 +123,10 @@ SOURCE=.\zend_ast.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_bigint.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_builtin_functions.c
 # End Source File
 # Begin Source File

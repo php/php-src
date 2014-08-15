@@ -1,11 +1,12 @@
 --TEST--
 incrementing different variables
---SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
 --INI--
 precision=14
 --FILE--
 <?php
+
+const PHP_INT_MAX32 = 0x7FFFFFFF;
+const PHP_INT_MAX64 = 0x7FFFFFFFFFFFFFFF;
 
 $a = array(
 	array(1,2,3),
@@ -21,8 +22,10 @@ $a = array(
 	false,
 	new stdclass,
 	array(),
-	PHP_INT_MAX,
-	(string)PHP_INT_MAX
+	PHP_INT_MAX32,
+	(string)PHP_INT_MAX32,
+	PHP_INT_MAX64,
+	(string)PHP_INT_MAX64
 );
 
 foreach ($a as $var) {
@@ -55,6 +58,8 @@ object(stdClass)#%d (0) {
 }
 array(0) {
 }
-float(2147483648)
-float(2147483648)
+int(2147483648)
+int(2147483648)
+int(9223372036854775808)
+int(9223372036854775808)
 Done

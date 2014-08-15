@@ -24,6 +24,7 @@
 #include "php.h"
 #include "php_math.h"
 #include "zend_multiply.h"
+#include "zend_bigint.h"
 
 #include <math.h>
 #include <float.h>
@@ -287,10 +288,16 @@ PHP_FUNCTION(abs)
 		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
 		if (Z_LVAL_P(value) == LONG_MIN) {
-			RETURN_DOUBLE(-(double)LONG_MIN);
+			zend_bigint *out = zend_bigint_init_alloc();
+			zend_bigint_long_subtract_long(out, 0, LONG_MIN);
+			RETURN_BIGINT(out);
 		} else {
 			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
 		}
+	} else if (Z_TYPE_P(value) == IS_BIGINT) {
+		zend_bigint *out = zend_bigint_init_alloc();
+		zend_bigint_abs(out, Z_BIG_P(value));
+		RETURN_BIGINT(out);
 	}
 	RETURN_FALSE;
 }
@@ -309,7 +316,7 @@ PHP_FUNCTION(ceil)
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
-	} else if (Z_TYPE_P(value) == IS_LONG) {
+	} else if (Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT) {
 		RETURN_DOUBLE(zval_get_double(value));
 	}
 	RETURN_FALSE;
@@ -329,7 +336,7 @@ PHP_FUNCTION(floor)
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(floor(Z_DVAL_P(value)));
-	} else if (Z_TYPE_P(value) == IS_LONG) {
+	} else if (Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT) {
 		RETURN_DOUBLE(zval_get_double(value));
 	}
 	RETURN_FALSE;
@@ -361,10 +368,18 @@ PHP_FUNCTION(round)
 			if (places >= 0) {
 				RETURN_DOUBLE((double) Z_LVAL_P(value));
 			}
-			/* break omitted intentionally */
-
+			goto process_double;
+		
+		case IS_BIGINT:
+			/* Simple case - bigint that doesn't need to be rounded. */
+			if (places >= 0) {
+				RETURN_DOUBLE(zend_bigint_to_double(Z_BIG_P(value)));
+			}
+			goto process_double;
+			
+process_double:
 		case IS_DOUBLE:
-			return_val = (Z_TYPE_P(value) == IS_LONG) ? (double)Z_LVAL_P(value) : Z_DVAL_P(value);
+			return_val = (Z_TYPE_P(value) == IS_LONG) ? (double)Z_LVAL_P(value) : (Z_TYPE_P(value) == IS_DOUBLE ? Z_DVAL_P(value) : zend_bigint_to_double(Z_BIG_P(value)));
 			return_val = _php_math_round(return_val, places, mode);
 			RETURN_DOUBLE(return_val);
 			break;

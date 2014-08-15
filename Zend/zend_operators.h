@@ -36,6 +36,7 @@
 
 #include "zend_strtod.h"
 #include "zend_multiply.h"
+#include "zend_bigint.h"
 
 #if 0&&HAVE_BCMATH
 #include "ext/bcmath/libbcmath/src/bcmath.h"
@@ -71,8 +72,21 @@ ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, c
 ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce TSRMLS_DC);
 END_EXTERN_C()
 
+/* isnan() might not be available (<C99), so we'll definite it if so */
+#ifndef isnan
+	/* NaN is never equal to itself */
+#	define isnan(n) ((n) != (n))
+#endif
+
 #if ZEND_DVAL_TO_LVAL_CAST_OK
-# define zend_dval_to_lval(d) ((long) (d))
+static zend_always_inline long zend_dval_to_lval(double d)
+{
+	if (EXPECTED(!isnan(d))) {
+		return (long)d;
+	} else {
+		return 0; 
+	}
+}
 #elif SIZEOF_LONG == 4
 static zend_always_inline long zend_dval_to_lval(double d)
 {
@@ -87,6 +101,8 @@ static zend_always_inline long zend_dval_to_lval(double d)
 			dmod = ceil(dmod) + two_pow_32;
 		}
 		return (long)(unsigned long)dmod;
+	} else if (UNEXPECTED(isnan(d))) {
+		return 0;
 	}
 	return (long)d;
 }
@@ -105,10 +121,30 @@ static zend_always_inline long zend_dval_to_lval(double d)
 			dmod += two_pow_64;
 		}
 		return (long)(unsigned long)dmod;
+	} else if (UNEXPECTED(isnan(d))) {
+		return 0;
 	}
 	return (long)d;
 }
 #endif
+/* }}} */
+
+static zend_always_inline zend_uchar zend_dval_to_big_or_lval(double d, long *lval, zend_bigint **big)
+{
+#if SIZEOF_LONG == 4
+	if (d > LONG_MAX || d < LONG_MIN) {
+#else
+	/* >= as (double)LONG_MAX is outside signed range */
+	if (d >= LONG_MAX || d < LONG_MIN) {
+#endif
+		*big = zend_bigint_alloc();
+		zend_bigint_init_from_double(*big, d);
+		return IS_BIGINT;
+	} else {
+		*lval = zend_dval_to_lval(d);
+		return IS_LONG;
+	}
+}
 /* }}} */
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
@@ -120,20 +156,22 @@ static zend_always_inline long zend_dval_to_lval(double d)
  * just its prefix. Leading whitespace is allowed.
  *
  * The function returns 0 if the string did not contain a valid number; IS_LONG
- * if it contained a number that fits within the range of a long; or IS_DOUBLE
- * if the number was out of long range or contained a decimal point/exponent.
- * The number's value is returned into the respective pointer, *lval or *dval,
- * if that pointer is not NULL.
+ * if it contained a number that fits within the range of a long; IS_BIGINT
+ * if the number was out of long range; or IS_DOUBLE if it contained a decimal
+ * point/exponent. The number's value is returned into the respective pointer,
+ * *lval, *dval or **big if that pointer is not NULL.
  *
  * This variant also gives information if a string that represents an integer
- * could not be represented as such due to overflow. It writes 1 to oflow_info
- * if the integer is larger than LONG_MAX and -1 if it's smaller than LONG_MIN.
+ * could not be represented as a long due to overflow. It writes 1 to
+ * oflow_info if the integer is larger than LONG_MAX and -1 if it's smaller
+ * than LONG_MIN.
  */
-static inline zend_uchar is_numeric_string_ex(const char *str, int length, long *lval, double *dval, int allow_errors, int *oflow_info)
+static inline zend_uchar is_numeric_string_ex(const char *str, int length, long *lval, double *dval, zend_bigint **big, int allow_errors, int *oflow_info)
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
 	double local_dval = 0.0;
+	zend_bigint *local_bigint = NULL;
 	zend_uchar type;
 
 	if (!length) {
@@ -170,9 +208,8 @@ static inline zend_uchar is_numeric_string_ex(const char *str, int length, long 
 		}
 
 		/* Count the number of digits. If a decimal point/exponent is found,
-		 * it's a double. Otherwise, if there's a dval or no need to check for
-		 * a full match, stop when there are too many digits for a long */
-		for (type = IS_LONG; !(digits >= MAX_LENGTH_OF_LONG && (dval || allow_errors == 1)); digits++, ptr++) {
+		 * it's a double. */
+		for (type = IS_LONG;; digits++, ptr++) {
 check_digits:
 			if (ZEND_IS_DIGIT(*ptr) || (base == 16 && ZEND_IS_XDIGIT(*ptr))) {
 				continue;
@@ -200,27 +237,34 @@ check_digits:
 					*oflow_info = *str == '-' ? -1 : 1;
 				}
 				dp_or_e = -1;
-				goto process_double;
+
+				type = IS_BIGINT;
+
+				if (big) {
+					local_bigint = zend_bigint_alloc();
+					zend_bigint_init_strtol(local_bigint, str, (char **)&ptr, 10);
+				}
 			}
 		} else if (!(digits < SIZEOF_LONG * 2 || (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
-			if (dval) {
-				local_dval = zend_hex_strtod(str, &ptr);
+			if (big) {
+				local_bigint = zend_bigint_alloc();
+				zend_bigint_init_strtol(local_bigint, str, (char **)&ptr, 16);
 			}
 			if (oflow_info != NULL) {
 				*oflow_info = 1;
 			}
-			type = IS_DOUBLE;
+			type = IS_BIGINT;
 		}
 	} else if (*ptr == '.' && ZEND_IS_DIGIT(ptr[1])) {
 process_double:
 		type = IS_DOUBLE;
 
-		/* If there's a dval, do the conversion; else continue checking
-		 * the digits if we need to check for a full match */
+		/* If there's a dval, do the conversion */
 		if (dval) {
 			local_dval = zend_strtod(str, &ptr);
 		} else if (allow_errors != 1 && dp_or_e != -1) {
 			dp_or_e = (*ptr++ == '.') ? 1 : 2;
+			/* continue checking digits to ensure string is well-formed */
 			goto check_digits;
 		}
 	} else {
@@ -229,6 +273,9 @@ process_double:
 
 	if (ptr != str + length) {
 		if (!allow_errors) {
+			if (local_bigint) {
+				zend_bigint_release(local_bigint);
+			}
 			return 0;
 		}
 		if (allow_errors == -1) {
@@ -241,14 +288,15 @@ process_double:
 			int cmp = strcmp(&ptr[-digits], long_min_digits);
 
 			if (!(cmp < 0 || (cmp == 0 && *str == '-'))) {
-				if (dval) {
-					*dval = zend_strtod(str, NULL);
+				if (big) {
+					*big = zend_bigint_alloc();
+					zend_bigint_init_strtol(*big, str, NULL, 10);
 				}
 				if (oflow_info != NULL) {
 					*oflow_info = *str == '-' ? -1 : 1;
 				}
 
-				return IS_DOUBLE;
+				return IS_BIGINT;
 			}
 		}
 
@@ -257,20 +305,26 @@ process_double:
 		}
 
 		return IS_LONG;
-	} else {
+	} else if (type == IS_DOUBLE) {
 		if (dval) {
 			*dval = local_dval;
 		}
 
 		return IS_DOUBLE;
+	} else {
+		if (big) {
+			*big = local_bigint;
+		}
+
+		return IS_BIGINT;
 	}
 }
 
-static inline zend_uchar is_numeric_string(const char *str, int length, long *lval, double *dval, int allow_errors) {
-    return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
+static inline zend_uchar is_numeric_string(const char *str, int length, long *lval, double *dval, zend_bigint **big, int allow_errors) {
+    return is_numeric_string_ex(str, length, lval, dval, big, allow_errors, NULL);
 }
 
-ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, long *lval, double *dval);
+ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, long *lval, double *dval, zend_bigint **big);
 
 static inline const char *
 zend_memnstr(const char *haystack, const char *needle, int needle_len, char *end)
@@ -332,6 +386,10 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void convert_to_long(zval *op);
 ZEND_API void convert_to_double(zval *op);
 ZEND_API void convert_to_long_base(zval *op, int base);
+ZEND_API void convert_to_bigint(zval *op);
+ZEND_API void convert_to_bigint_base(zval *op, int base);
+ZEND_API void convert_to_bigint_or_long(zval *op);
+ZEND_API void convert_to_bigint_or_long_base(zval *op, int base);
 ZEND_API void convert_to_null(zval *op);
 ZEND_API void convert_to_boolean(zval *op);
 ZEND_API void convert_to_array(zval *op);
@@ -342,6 +400,7 @@ ZEND_API void multi_convert_to_string_ex(int argc, ...);
 
 ZEND_API long _zval_get_long_func(zval *op TSRMLS_DC);
 ZEND_API double _zval_get_double_func(zval *op TSRMLS_DC);
+ZEND_API zend_uchar _zval_get_bigint_or_long_func(zval *op, long *lval, zend_bigint **big TSRMLS_DC);
 ZEND_API zend_string *_zval_get_string_func(zval *op TSRMLS_DC);
 
 static zend_always_inline long _zval_get_long(zval *op TSRMLS_DC) {
@@ -350,12 +409,24 @@ static zend_always_inline long _zval_get_long(zval *op TSRMLS_DC) {
 static zend_always_inline double _zval_get_double(zval *op TSRMLS_DC) {
 	return Z_TYPE_P(op) == IS_DOUBLE ? Z_DVAL_P(op) : _zval_get_double_func(op TSRMLS_CC);
 }
+static zend_always_inline double _zval_get_bigint_or_long(zval *op, long *lval, zend_bigint **big TSRMLS_DC) {
+	if (Z_TYPE_P(op) == IS_LONG) {
+		*lval = Z_LVAL_P(op);
+		return IS_LONG;
+	} else if (Z_TYPE_P(op) == IS_BIGINT){
+		*big = Z_BIG_P(op);
+		return IS_BIGINT;
+	} else {
+		return _zval_get_bigint_or_long_func(op, lval, big TSRMLS_CC);
+	}
+}
 static zend_always_inline zend_string *_zval_get_string(zval *op TSRMLS_DC) {
 	return Z_TYPE_P(op) == IS_STRING ? STR_COPY(Z_STR_P(op)) : _zval_get_string_func(op TSRMLS_CC);
 }
 
 #define zval_get_long(op) _zval_get_long((op) TSRMLS_CC)
 #define zval_get_double(op) _zval_get_double((op) TSRMLS_CC)
+#define zval_get_bigint_or_long(op, lval, big) _zval_get_bigint_or_long((op), (lval), (big) TSRMLS_CC)
 #define zval_get_string(op) _zval_get_string((op) TSRMLS_CC)
 
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2);
@@ -419,6 +490,9 @@ END_EXTERN_C()
 			case IS_DOUBLE:						\
 				convert_to_double(pzv);			\
 				break;							\
+			case IS_BIGINT_OR_LONG:				\
+				convert_to_bigint_or_long(pzv); \
+				break;							\
 			case _IS_BOOL:						\
 				convert_to_boolean(pzv);		\
 				break;							\
@@ -443,13 +517,15 @@ END_EXTERN_C()
 		convert_to_explicit_type(pzv, str_type);	\
 	}
 
-#define convert_to_boolean_ex(pzv)	convert_to_ex_master(pzv, boolean, _IS_BOOL)
-#define convert_to_long_ex(pzv)		convert_to_ex_master(pzv, long, IS_LONG)
-#define convert_to_double_ex(pzv)	convert_to_ex_master(pzv, double, IS_DOUBLE)
-#define convert_to_string_ex(pzv)	convert_to_ex_master(pzv, string, IS_STRING)
-#define convert_to_array_ex(pzv)	convert_to_ex_master(pzv, array, IS_ARRAY)
-#define convert_to_object_ex(pzv)	convert_to_ex_master(pzv, object, IS_OBJECT)
-#define convert_to_null_ex(pzv)		convert_to_ex_master(pzv, null, IS_NULL)
+#define convert_to_boolean_ex(pzv)			convert_to_ex_master(pzv, boolean, _IS_BOOL)
+#define convert_to_long_ex(pzv)				convert_to_ex_master(pzv, long, IS_LONG)
+#define convert_to_double_ex(pzv)			convert_to_ex_master(pzv, double, IS_DOUBLE)
+#define convert_to_bigint_ex(pzv)			convert_to_ex_master(pzv, bigint, IS_LONG)
+#define convert_to_bigint_or_long_ex(pzv)	convert_to_ex_master(pzv, bigint_or_long, IS_BIGINT_OR_LONG)
+#define convert_to_string_ex(pzv)			convert_to_ex_master(pzv, string, IS_STRING)
+#define convert_to_array_ex(pzv)			convert_to_ex_master(pzv, array, IS_ARRAY)
+#define convert_to_object_ex(pzv)			convert_to_ex_master(pzv, object, IS_OBJECT)
+#define convert_to_null_ex(pzv)				convert_to_ex_master(pzv, null, IS_NULL)
 
 #define convert_scalar_to_number_ex(pzv)							\
 	if (Z_TYPE_P(pzv)!=IS_LONG && Z_TYPE_P(pzv)!=IS_DOUBLE) {		\
@@ -477,6 +553,9 @@ ZEND_API void zend_update_current_locale(void);
 static zend_always_inline int fast_increment_function(zval *op1)
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+/* assembly commented-out as it uses the old float overflow behaviour
+ * however, now longs overflow to bigints, so we can't use it */
+#if 0
 #if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"incl (%0)\n\t"
@@ -504,12 +583,16 @@ static zend_always_inline int fast_increment_function(zval *op1)
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
 #else
+#endif
+#endif
 		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MAX)) {
-			/* switch to double */
-			ZVAL_DOUBLE(op1, (double)LONG_MAX + 1.0);
+			zend_bigint *out = zend_bigint_init_alloc();
+			zend_bigint_long_add_long(out, Z_LVAL_P(op1), 1);
+			ZVAL_BIGINT(op1, out);
 		} else {
 			Z_LVAL_P(op1)++;
 		}
+#if 0
 #endif
 		return SUCCESS;
 	}
@@ -519,6 +602,9 @@ static zend_always_inline int fast_increment_function(zval *op1)
 static zend_always_inline int fast_decrement_function(zval *op1)
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+/* assembly commented-out as it uses the old float overflow behaviour
+* however, now longs overflow to bigints, so we can't use it */
+#if 0
 #if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"decl (%0)\n\t"
@@ -546,12 +632,17 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
 #else
+#endif
+#endif
 		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MIN)) {
-			/* switch to double */
-			ZVAL_DOUBLE(op1, (double)LONG_MIN - 1.0);
+			/* switch to bigint */
+			zend_bigint *out = zend_bigint_init_alloc();
+			zend_bigint_long_subtract_long(out, Z_LVAL_P(op1), 1);
+			ZVAL_BIGINT(op1, out);
 		} else {
 			Z_LVAL_P(op1)--;
 		}
+#if 0
 #endif
 		return SUCCESS;
 	}
@@ -562,6 +653,9 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+/* assembly commented-out as it uses the old float overflow behaviour
+ * however, now longs overflow to bigints, so we can't use it */
+#if 0
 #if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"movl	(%1), %%eax\n\t"
@@ -609,6 +703,8 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "rax","cc");
 #else
+#endif
+#endif
 			/*
 			 * 'result' may alias with op1 or op2, so we need to
 			 * ensure that 'result' is not updated until after we
@@ -617,10 +713,13 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 
 			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
 				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != ((Z_LVAL_P(op1) + Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
-				ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+				zend_bigint *out = zend_bigint_init_alloc();
+				zend_bigint_long_add_long(out, Z_LVAL_P(op1), Z_LVAL_P(op2));
+				ZVAL_BIGINT(result, out);
 			} else {
 				ZVAL_LONG(result, Z_LVAL_P(op1) + Z_LVAL_P(op2));
 			}
+#if 0
 #endif
 			return SUCCESS;
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
@@ -643,6 +742,9 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+/* assembly commented-out as it uses the old float overflow behaviour
+ * however, now longs overflow to bigints, so we can't use it */
+#if 0
 #if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"movl	(%1), %%eax\n\t"
@@ -698,12 +800,17 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "rax","cc");
 #else
+#endif
+#endif
 			ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 
 			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
 				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
-				ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+				zend_bigint *out = zend_bigint_init_alloc();
+				zend_bigint_long_subtract_long(out, Z_LVAL_P(op1), Z_LVAL_P(op2));
+				ZVAL_BIGINT(result, out);
 			}
+#if 0
 #endif
 			return SUCCESS;
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
@@ -728,8 +835,8 @@ static zend_always_inline int fast_mul_function(zval *result, zval *op1, zval *o
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			long overflow;
 
-			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_BIG_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_BIGINT_EX : IS_LONG;
 			return SUCCESS;
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));

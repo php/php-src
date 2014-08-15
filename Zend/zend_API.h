@@ -599,6 +599,7 @@ END_EXTERN_C()
 #define RETVAL_NULL() 					ZVAL_NULL(return_value)
 #define RETVAL_LONG(l) 					ZVAL_LONG(return_value, l)
 #define RETVAL_DOUBLE(d) 				ZVAL_DOUBLE(return_value, d)
+#define RETVAL_BIGINT(b) 				ZVAL_BIGINT(return_value, b)
 #define RETVAL_STR(s)			 		ZVAL_STR(return_value, s)
 #define RETVAL_INT_STR(s)		 		ZVAL_INT_STR(return_value, s)
 #define RETVAL_NEW_STR(s)		 		ZVAL_NEW_STR(return_value, s)
@@ -615,6 +616,7 @@ END_EXTERN_C()
 #define RETURN_NULL() 					{ RETVAL_NULL(); return;}
 #define RETURN_LONG(l) 					{ RETVAL_LONG(l); return; }
 #define RETURN_DOUBLE(d) 				{ RETVAL_DOUBLE(d); return; }
+#define RETURN_BIGINT(b) 				{ RETVAL_BIGINT(b); return; }
 #define RETURN_STR(s) 					{ RETVAL_STR(s); return; }
 #define RETURN_INT_STR(s)				{ RETVAL_INT_STR(s); return; }
 #define RETURN_NEW_STR(s)				{ RETVAL_NEW_STR(s); return; }
@@ -1089,16 +1091,22 @@ static zend_always_inline int _z_param_long(zval *arg, long *dest, zend_bool *is
 		*dest = zend_dval_to_lval(Z_DVAL_P(arg));
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
+		zend_bigint *big;
 		int type;
 
-		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
+		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d, &big)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
-				if (strict && UNEXPECTED(d > LONG_MAX)) {
-					*dest = LONG_MAX;
-				} else if (strict && UNEXPECTED(d < LONG_MIN)) {
-					*dest = LONG_MIN;
+				if (EXPECTED(type == IS_DOUBLE)) {
+					if (strict && UNEXPECTED(d > LONG_MAX)) {
+						*dest = LONG_MAX;
+					} else if (strict && UNEXPECTED(d < LONG_MIN)) {
+						*dest = LONG_MIN;
+					} else {
+						*dest = zend_dval_to_lval(d);
+					}
 				} else {
-					*dest = zend_dval_to_lval(d);
+					*dest = zend_bigint_to_long(big);
+					zend_bigint_release(big);
 				}
 			} else {
 				return 0;
@@ -1128,11 +1136,17 @@ static zend_always_inline int _z_param_double(zval *arg, double *dest, zend_bool
 		*dest = (double)Z_LVAL_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		long l;
+		zend_bigint *big;
 		int type;
 
-		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, dest)) != IS_DOUBLE)) {
+		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, dest, &big)) != IS_DOUBLE)) {
 			if (EXPECTED(type != 0)) {
-				*dest = (double)(l);
+				if (type == IS_DOUBLE) {
+					*dest = (double)(l);
+				} else {
+					*dest = zend_bigint_to_double(big);
+					zend_bigint_release(big);
+				}
 			} else {
 				return 0;
 			}

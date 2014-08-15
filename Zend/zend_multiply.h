@@ -19,6 +19,12 @@
 
 /* $Id$ */
 
+#include "zend_bigint.h"
+
+/* assembly commented-out as it uses the old float overflow behaviour
+* however, now longs overflow to bigints, so we can't use it */
+
+#if 0
 #if defined(__i386__) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
@@ -69,11 +75,16 @@
 } while (0)
 
 #elif SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
+#endif
+#endif
+#if SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
 
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
 	zend_long64 __result = (zend_long64) (a) * (zend_long64) (b);	\
 	if (__result > LONG_MAX || __result < LONG_MIN) {				\
-		(dval) = (double) __result;									\
+		zend_bigint *__out = zend_bigint_init_alloc();				\
+		zend_bigint_long_multiply_long(__out, a, b);				\
+		(big) = __out;												\
 		(usedval) = 1;												\
 	} else {														\
 		(lval) = (long) __result;									\
@@ -83,14 +94,18 @@
 
 #else
 
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
 	long   __lres  = (a) * (b);										\
 	long double __dres  = (long double)(a) * (long double)(b);		\
 	long double __delta = (long double) __lres - __dres;			\
 	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
-		(dval) = __dres;											\
+		zend_bigint *__out = zend_bigint_init_alloc();				\
+		zend_bigint_long_multiply_long(__out, a, b);				\
+		(big) = __out;												\
+		(usedval) = 1;												\
 	} else {														\
 		(lval) = __lres;											\
+		(usedval) = 0;												\
 	}																\
 } while (0)
 

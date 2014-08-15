@@ -31,6 +31,7 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_virtual_cwd.h"
+#include "zend_bigint.h"
 
 #ifdef ZTS
 # define GLOBAL_FUNCTION_TABLE		global_function_table
@@ -270,6 +271,9 @@ again:
 			}
 			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name->val);
 			ZVAL_EMPTY_STRING(expr_copy);
+			break;
+		case IS_BIGINT:
+			ZVAL_NEW_STR(expr_copy, zend_bigint_to_zend_string(Z_BIG_P(expr), 0));
 			break;
 		case IS_DOUBLE:
 			ZVAL_DUP(expr_copy, expr);
@@ -653,6 +657,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 #endif
 
 	zend_startup_strtod();
+	zend_startup_bigint();
 	zend_startup_extensions_mechanism();
 
 	/* Set up utility functions and values */

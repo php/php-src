@@ -1,7 +1,5 @@
 --TEST--
 decrementing different variables
---SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
 --INI--
 precision=14
 --FILE--
@@ -21,8 +19,10 @@ $a = array(
 	false,
 	new stdclass,
 	array(),
-	-PHP_INT_MAX-1,
-	(string)(-PHP_INT_MAX-1),
+	-0x7FFFFFFF-1,
+	(string)(-0x7FFFFFFF-1),
+	-0x7FFFFFFFFFFFFFFF-1,
+	(string)(-0x7FFFFFFFFFFFFFFF-1),
 );
 
 foreach ($a as $var) {
@@ -55,6 +55,8 @@ object(stdClass)#%d (0) {
 }
 array(0) {
 }
-float(-2147483649)
-float(-2147483649)
+int(-2147483649)
+int(-2147483649)
+int(-9223372036854775809)
+int(-9223372036854775809)
 Done

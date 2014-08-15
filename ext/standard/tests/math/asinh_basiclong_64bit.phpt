@@ -1,9 +1,5 @@
 --TEST--
-Test asinh function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test asinh function : 64bit long and bigint tests
 --FILE--
 <?php
  
@@ -51,10 +47,10 @@ float(22.873856958245)
 float(22.87385695778)
 --- testing: 9223372036854775806 ---
 float(44.361419555836)
---- testing: 9.2233720368548E+18 ---
+--- testing: 9223372036854775808 ---
 float(44.361419555836)
 --- testing: -9223372036854775807 ---
 float(-44.361419555836)
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 float(-44.361419555836)
 ===DONE===

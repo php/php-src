@@ -42,6 +42,7 @@ PHP_FUNCTION(gettype)
 			break;
 
 		case IS_LONG:
+		case IS_BIGINT:
 			RETVAL_STRING("integer");
 			break;
 
@@ -103,9 +104,9 @@ PHP_FUNCTION(settype)
 	ZVAL_DEREF(var);
 	SEPARATE_ZVAL_NOREF(var);
 	if (!strcasecmp(type, "integer")) {
-		convert_to_long(var);
+		convert_to_bigint_or_long(var);
 	} else if (!strcasecmp(type, "int")) {
-		convert_to_long(var);
+		convert_to_bigint_or_long(var);
 	} else if (!strcasecmp(type, "float")) {
 		convert_to_double(var);
 	} else if (!strcasecmp(type, "double")) { /* deprecated */
@@ -236,6 +237,8 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 			}
 		}
 		RETURN_TRUE;
+	} else if (type == IS_BIGINT_OR_LONG && (Z_TYPE_P(arg) == IS_BIGINT || Z_TYPE_P(arg) == IS_LONG)) {
+		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
@@ -277,7 +280,7 @@ PHP_FUNCTION(is_bool)
    Returns true if variable is a long (integer) */
 PHP_FUNCTION(is_long)
 {
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_BIGINT_OR_LONG);
 }
 /* }}} */
 
@@ -326,11 +329,12 @@ PHP_FUNCTION(is_numeric)
 	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:
 		case IS_DOUBLE:
+		case IS_BIGINT:
 			RETURN_TRUE;
 			break;
 
 		case IS_STRING:
-			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 0)) {
+			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, NULL, 0)) {
 				RETURN_TRUE;
 			} else {
 				RETURN_FALSE;
@@ -365,6 +369,7 @@ PHP_FUNCTION(is_scalar)
 		case IS_TRUE:
 		case IS_DOUBLE:
 		case IS_LONG:
+		case IS_BIGINT:
 		case IS_STRING:
 			RETURN_TRUE;
 			break;

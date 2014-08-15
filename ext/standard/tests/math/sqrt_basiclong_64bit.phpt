@@ -1,9 +1,5 @@
 --TEST--
-Test sqrt function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test sqrt function : 64bit long and bigint tests
 --FILE--
 <?php
  
@@ -51,10 +47,10 @@ float(65535.999992371)
 float(65535.999977112)
 --- testing: 9223372036854775806 ---
 float(3037000499.976)
---- testing: 9.2233720368548E+18 ---
+--- testing: 9223372036854775808 ---
 float(3037000499.976)
 --- testing: -9223372036854775807 ---
 float(NAN)
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 float(NAN)
 ===DONE===
