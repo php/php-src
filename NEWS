@@ -61,7 +61,10 @@ PHP                                                                        NEWS
 - Zlib:
   . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
     data). (Mike)
-	  
+
+- MySQLi:
+  . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
+
 24 Jul 2014, PHP 5.5.15
 
 - Core:
