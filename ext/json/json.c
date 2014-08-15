@@ -382,7 +382,7 @@ static int json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{
 			}
 		}
 	} else {
-		/* Only check if utf8 string is valid, and compute utf16 lenght */
+		/* Only check if utf8 string is valid, and compute utf16 length */
 		for (j=0 ; pos < len ; j++) {
 			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
 			if (status != SUCCESS) {

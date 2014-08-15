@@ -88,7 +88,7 @@ function mark_methods_as_tested($method_info, $phpt_files) {
 
         foreach($tested_functions as $tested_function) {
 
-            // go through method info array marking this funtion as tested
+            // go through method info array marking this function as tested
             foreach($method_info as &$current_method_record) {
                 if (strcasecmp($tested_function, $current_method_record[METHOD_NAME]) == 0) {
                     // matched the method name
