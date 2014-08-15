@@ -6,7 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #47358 (glob returns error, should be empty array()). (Pierre)
 
 - OpenSSL:
-  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads)
+  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
     (Daniel Lowrey).
 
 - SPL:
@@ -14,7 +14,7 @@ PHP                                                                        NEWS
     wrong message). (tim_siebels_aurich at yahoo dot de)
 
 - Date:
-  . Fixed bug #66091 (memory leaks in DateTime constructor) (Tjerk).
+  . Fixed bug #66091 (memory leaks in DateTime constructor). (Tjerk).
 
 ?? ??? 2014, PHP 5.5.16
 
@@ -26,6 +26,7 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #67705 (extensive backtracking in rule regular expression).
     (CVE-2014-3538) (Remi)
+  . Fixed bug #67716 (Segfault in cdf.c). (CVE-2014-3587) (Remi)
 
 - FPM:
   . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
@@ -39,7 +40,7 @@ PHP                                                                        NEWS
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
   
 - OpenSSL:
-  . Fixed missing type checks in OpenSSL options (Yussuf Khalil, Stas).
+  . Fixed missing type checks in OpenSSL options. (Yussuf Khalil, Stas)
 
 - readline:
   . Fixed bug #55496 (Interactive mode doesn't force a newline before the
