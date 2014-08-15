@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #67705 (extensive backtracking in rule regular expression).
     (CVE-2014-3538) (Remi)
+  . Fixed bug #67716 (Segfault in cdf.c). (CVE-2014-3587) (Remi)
 
 - GD:
   . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
