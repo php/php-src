@@ -28,11 +28,7 @@
 #include "zend_accelerator_blacklist.h"
 #include "php_ini.h"
 #include "SAPI.h"
-#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
-# include "zend_virtual_cwd.h"
-#else
-# include "TSRM/tsrm_virtual_cwd.h"
-#endif
+#include "zend_virtual_cwd.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
 
@@ -258,9 +254,7 @@ ZEND_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY("opcache.log_verbosity_level"   , "1"   , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.log_verbosity_level,       zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.memory_consumption"    , "64"  , PHP_INI_SYSTEM, OnUpdateMemoryConsumption,    accel_directives.memory_consumption,        zend_accel_globals, accel_globals)
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	STD_PHP_INI_ENTRY("opcache.interned_strings_buffer", "4"  , PHP_INI_SYSTEM, OnUpdateLong,                 accel_directives.interned_strings_buffer,   zend_accel_globals, accel_globals)
-#endif
 	STD_PHP_INI_ENTRY("opcache.max_accelerated_files" , "2000", PHP_INI_SYSTEM, OnUpdateMaxAcceleratedFiles,	 accel_directives.max_accelerated_files,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_wasted_percentage" , "5"   , PHP_INI_SYSTEM, OnUpdateMaxWastedPercentage,	 accel_directives.max_wasted_percentage,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.consistency_checks"    , "0"   , PHP_INI_ALL   , OnUpdateLong,	             accel_directives.consistency_checks,        zend_accel_globals, accel_globals)
@@ -286,26 +280,6 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.mmap_base", NULL, PHP_INI_SYSTEM,	OnUpdateString,	                             accel_directives.mmap_base,                 zend_accel_globals, accel_globals)
 #endif
 ZEND_INI_END()
-
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-
-#undef  EX
-#define EX(element) execute_data->element
-#define EX_T(offset) (*(temp_variable *)((char *) EX(Ts) + offset))
-
-static int ZEND_DECLARE_INHERITED_CLASS_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_class_entry **pce, **pce_orig;
-
-	if (zend_hash_find(EG(class_table), Z_STRVAL(EX(opline)->op2.u.constant), Z_STRLEN(EX(opline)->op2.u.constant) + 1, (void **)&pce) == FAILURE ||
-	    (zend_hash_find(EG(class_table), Z_STRVAL(EX(opline)->op1.u.constant), Z_STRLEN(EX(opline)->op1.u.constant), (void**)&pce_orig) == SUCCESS &&
-	     *pce != *pce_orig)) {
-		do_bind_inherited_class(EX(opline), EG(class_table), EX_T(EX(opline)->extended_value).class_entry, 0 TSRMLS_CC);
-	}
-	EX(opline)++;
-	return ZEND_USER_OPCODE_CONTINUE;
-}
-#endif
 
 static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
 {
@@ -379,9 +353,7 @@ static ZEND_MINIT_FUNCTION(zend_accelerator)
 	(void)type; /* keep the compiler happy */
 
 	REGISTER_INI_ENTRIES();
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-	zend_set_user_opcode_handler(ZEND_DECLARE_INHERITED_CLASS_DELAYED, ZEND_DECLARE_INHERITED_CLASS_DELAYED_HANDLER);
-#endif
+
 	return SUCCESS;
 }
 
@@ -445,14 +417,12 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Free memory", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Wasted memory", buf);
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 			if (ZCSG(interned_strings_start) && ZCSG(interned_strings_end) && ZCSG(interned_strings_top)) {
 				snprintf(buf, sizeof(buf), "%ld", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
 				php_info_print_table_row(2, "Interned Strings Used memory", buf);
 				snprintf(buf, sizeof(buf), "%ld", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
 				php_info_print_table_row(2, "Interned Strings Free memory", buf);
 			}
-#endif
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_direct_entries);
 			php_info_print_table_row(2, "Cached scripts", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_entries);
@@ -485,17 +455,10 @@ static zend_module_entry accel_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
 int start_accel_module(TSRMLS_D)
 {
 	return zend_startup_module(&accel_module_entry TSRMLS_CC);
 }
-#else
-int start_accel_module(void)
-{
-	return zend_startup_module(&accel_module_entry);
-}
-#endif
 
 /* {{{ proto array accelerator_get_scripts()
    Get the scripts which are accelerated by ZendAccelerator */
@@ -583,7 +546,6 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_double(&memory_usage, "current_wasted_percentage", (((double) ZSMMG(wasted_shared_memory))/ZCG(accel_directives).memory_consumption)*100.0);
 	add_assoc_zval(return_value, "memory_usage", &memory_usage);
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (ZCSG(interned_strings_start) && ZCSG(interned_strings_end) && ZCSG(interned_strings_top)) {
 		zval interned_strings_usage;
 
@@ -594,7 +556,6 @@ static ZEND_FUNCTION(opcache_get_status)
 		add_assoc_long(&interned_strings_usage, "number_of_strings", ZCSG(interned_strings).nNumOfElements);
 		add_assoc_zval(return_value, "interned_strings_usage", &interned_strings_usage);
 	}
-#endif
 	
 	/* Accelerator statistics */
 	array_init(&statistics);
@@ -634,11 +595,9 @@ static ZEND_FUNCTION(opcache_get_configuration)
 {
 	zval directives, version, blacklist;
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_FALSE;
 	}
-#endif
 
 	if (!validate_api_restriction(TSRMLS_C)) {
 		RETURN_FALSE;
@@ -658,9 +617,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 
 	add_assoc_long(&directives,   "opcache.log_verbosity_level",    ZCG(accel_directives).log_verbosity_level);
 	add_assoc_long(&directives,	 "opcache.memory_consumption",     ZCG(accel_directives).memory_consumption);
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	add_assoc_long(&directives,	 "opcache.interned_strings_buffer",ZCG(accel_directives).interned_strings_buffer);
-#endif
 	add_assoc_long(&directives, 	 "opcache.max_accelerated_files",  ZCG(accel_directives).max_accelerated_files);
 	add_assoc_double(&directives, "opcache.max_wasted_percentage",  ZCG(accel_directives).max_wasted_percentage);
 	add_assoc_long(&directives, 	 "opcache.consistency_checks",     ZCG(accel_directives).consistency_checks);
@@ -696,11 +653,9 @@ static ZEND_FUNCTION(opcache_get_configuration)
    Request that the contents of the opcode cache to be reset */
 static ZEND_FUNCTION(opcache_reset)
 {
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_FALSE;
 	}
-#endif
 
 	if (!validate_api_restriction(TSRMLS_C)) {
 		RETURN_FALSE;

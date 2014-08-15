@@ -1,64 +1,3 @@
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-
-/* ops that use CLs:
-op1:
-ZEND_FETCH_CONSTANT:
-ZEND_INIT_CTOR_CALL:
-ZEND_INIT_STATIC_METHOD_CALL:
-ZEND_INIT_METHOD_CALL:
-ZEND_IMPORT_CLASS:
-ZEND_IMPORT_FUNCTION:
-ZEND_IMPORT_CONST:
-ZEND_ADD_INTERFACE:
-ZEND_VERIFY_ABSTRACT_CLASS:
-ZEND_NEW:
-ZEND_CATCH:
-ZEND_INIT_FCALL_BY_NAME:
-
-op2:
-ZEND_UNSET_VAR:
-ZEND_ISSET_ISEMPTY_VAR:
-ZEND_FETCH_UNSET:
-ZEND_FETCH_IS:
-ZEND_FETCH_R:
-ZEND_FETCH_W:
-ZEND_FETCH_RW:
-ZEND_FETCH_FUNC_ARG:
-ZEND_ADD_INTERFACE:
-ZEND_INSTANCEOF:
-
-extended_value:
-ZEND_DECLARE_INHERITED_CLASS:
-
-ignore result
-INIT_METHOD_CALL:
-*/
-
-#define OP1_CONST_IS_CLASS 1
-#define OP2_CONST_IS_CLASS 2
-#define EXT_CONST_IS_CLASS 4
-#define RESULT_IS_UNUSED   8
-
-static const char op_const_means_class[256]  = {
-	/* 0 */
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 32 */
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-	/* 64 */
-	0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2,
-	/* 96 */
-	0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 128 */
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 4, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 160 */
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 192 */
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 224 */
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-#endif
-
 #define GET_AVAILABLE_T()		\
 	for (i = 0; i < T; i++) {	\
 		if (!taken_T[i]) {		\
@@ -95,13 +34,6 @@ static void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer
 
     /* Find T definition points */
     while (opline >= end) {
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-        if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR | IS_CONST)) {
-			if (!(op_const_means_class[opline->opcode] & RESULT_IS_UNUSED)) {
-				start_of_T[VAR_NUM(ZEND_RESULT(opline).var) - offset] = opline;
-			}
-		}
-#else
         if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
 			start_of_T[VAR_NUM(ZEND_RESULT(opline).var) - offset] = opline;
 		}
@@ -115,7 +47,6 @@ static void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer
 				start_of_T[VAR_NUM(ZEND_OP1(opline).var) + 1 - offset] = opline;
 			}
 		}
-#endif
 		opline--;
 	}
 
@@ -126,11 +57,7 @@ static void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer
     opline = &op_array->opcodes[op_array->last - 1];
 
     while (opline >= end) {
-		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR))
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-			|| ((op_const_means_class[opline->opcode] & OP1_CONST_IS_CLASS) && ZEND_OP1_TYPE(opline) == IS_CONST)
-#endif
-			) {
+		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
 
 			/* special puprose variable to keep HashPointer on VM stack */
 			if (opline->opcode == ZEND_OP_DATA &&
@@ -160,11 +87,7 @@ static void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer
 		    continue;
 		}
 
-		if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_TMP_VAR))
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-			|| ((op_const_means_class[opline->opcode] & OP2_CONST_IS_CLASS) && ZEND_OP2_TYPE(opline) == IS_CONST)
-#endif
-		   ) {
+		if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
 			currT = VAR_NUM(ZEND_OP2(opline).var) - offset;
 			if (!valid_T[currT]) {
 				GET_AVAILABLE_T();
@@ -174,12 +97,8 @@ static void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer
 			ZEND_OP2(opline).var = NUM_VAR(map_T[currT] + offset);
 		}
 
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-		if ((op_const_means_class[opline->opcode] & EXT_CONST_IS_CLASS)) {
-#else
 		if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS ||
             opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
-#endif
 			currT = VAR_NUM(opline->extended_value) - offset;
 			if (!valid_T[currT]) {
 				GET_AVAILABLE_T();
@@ -202,33 +121,25 @@ static void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer
 			var_to_free = i;
 		}
 
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-		if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR | IS_CONST)) {
-			if (!(op_const_means_class[opline->opcode] & RESULT_IS_UNUSED)) {
-#else
 		if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
-#endif
-				currT = VAR_NUM(ZEND_RESULT(opline).var) - offset;
-				if (valid_T[currT]) {
-					if (start_of_T[currT] == opline) {
-						taken_T[map_T[currT]] = 0;
-					}
-					ZEND_RESULT(opline).var = NUM_VAR(map_T[currT] + offset);
-				} else { /* Au still needs to be assigned a T which is a bit dumb. Should consider changing Zend */
-					GET_AVAILABLE_T();
-
-					if (RESULT_UNUSED(opline)) {
-						taken_T[i] = 0;
-					} else {
-						/* Code which gets here is using a wrongly built opcode such as RECV() */
-						map_T[currT] = i;
-						valid_T[currT] = 1;
-					}
-					ZEND_RESULT(opline).var = NUM_VAR(i + offset);
+			currT = VAR_NUM(ZEND_RESULT(opline).var) - offset;
+			if (valid_T[currT]) {
+				if (start_of_T[currT] == opline) {
+					taken_T[map_T[currT]] = 0;
 				}
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+				ZEND_RESULT(opline).var = NUM_VAR(map_T[currT] + offset);
+			} else { /* Au still needs to be assigned a T which is a bit dumb. Should consider changing Zend */
+				GET_AVAILABLE_T();
+
+				if (RESULT_UNUSED(opline)) {
+					taken_T[i] = 0;
+				} else {
+					/* Code which gets here is using a wrongly built opcode such as RECV() */
+					map_T[currT] = i;
+					valid_T[currT] = 1;
+				}
+				ZEND_RESULT(opline).var = NUM_VAR(i + offset);
 			}
-#endif
 		}
 
 		if (var_to_free >= 0) {

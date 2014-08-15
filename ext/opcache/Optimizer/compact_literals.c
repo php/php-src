@@ -1,8 +1,6 @@
 /* pass 11
  * - compact literals table
  */
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-
 #define DEBUG_COMPACT_LITERALS 0
 
 #define LITERAL_VALUE                        0x0100
@@ -465,4 +463,3 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 #endif
 	}
 }
-#endif

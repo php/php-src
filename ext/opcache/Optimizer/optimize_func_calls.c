@@ -1,8 +1,6 @@
 /* pass 4
  * - optimize INIT_FCALL_BY_NAME to DO_FCALL
  */
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-
 typedef struct _optimizer_call_info {
 	zend_function *func;
 	zend_op       *opline;
@@ -128,12 +126,10 @@ static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				}
 				break;
 #endif
-#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 			case ZEND_SEND_UNPACK:
 				call_stack[call - 1].func = NULL;
 				call_stack[call - 1].opline = NULL;
 				break;
-#endif
 			default:
 				break;
 		}
@@ -142,4 +138,3 @@ static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx
 
 	zend_arena_release(&ctx->arena, checkpoint);
 }
-#endif

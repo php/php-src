@@ -6,11 +6,7 @@
  * - pre-evaluate constant function calls
  */
 
-#if ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
-# define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
-#else
-# define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
-#endif
+#define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
 
 if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 	int i = 0;
@@ -25,9 +21,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 		case ZEND_MUL:
 		case ZEND_DIV:
 		case ZEND_MOD:
-#if ZEND_EXTENSION_API_NO >= PHP_5_6_X_API_NO
 		case ZEND_POW:
-#endif
 		case ZEND_SL:
 		case ZEND_SR:
 		case ZEND_CONCAT:
@@ -125,11 +119,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 
 				er = EG(error_reporting);
 				EG(error_reporting) = 0;
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-				if (unary_op(&result, &ZEND_OP1_LITERAL(opline)) != SUCCESS) {
-#else
 				if (unary_op(&result, &ZEND_OP1_LITERAL(opline) TSRMLS_CC) != SUCCESS) {
-#endif
 					EG(error_reporting) = er;
 					break;
 				}
@@ -254,7 +244,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				replace_tmp_by_const(op_array, opline, tv, &c TSRMLS_CC);
 			}
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 			/* class constant */
 			if (ZEND_OP1_TYPE(opline) != IS_UNUSED &&
 			    ZEND_OP2_TYPE(opline) == IS_CONST &&
@@ -317,7 +306,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					}
 				}
 			}
-#endif
 			break;
 
 		case ZEND_INIT_FCALL:
@@ -481,7 +469,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				MAKE_NOP(opline);
 			}
 			break;
-#if ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
 		case ZEND_DECLARE_CONST:
 			if (collect_constants &&
 			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
@@ -489,27 +476,18 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline));
 			}
 			break;
-#endif
 
 		case ZEND_RETURN:
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 		case ZEND_RETURN_BY_REF:
-#endif
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 		case ZEND_GENERATOR_RETURN:
-#endif
 		case ZEND_EXIT:
 		case ZEND_THROW:
 		case ZEND_CATCH:
 		case ZEND_BRK:
 		case ZEND_CONT:
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 		case ZEND_GOTO:
-#endif
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 		case ZEND_FAST_CALL:
 		case ZEND_FAST_RET:
-#endif
 		case ZEND_JMP:
 		case ZEND_JMPZNZ:
 		case ZEND_JMPZ:
@@ -520,15 +498,10 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 		case ZEND_FE_FETCH:
 		case ZEND_NEW:
 		case ZEND_DO_FCALL:
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 		case ZEND_JMP_SET:
-#endif
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 		case ZEND_JMP_SET_VAR:
-#endif
 			collect_constants = 0;
 			break;
-#if ZEND_EXTENSION_API_NO >= PHP_5_5_X_API_NO
 		case ZEND_FETCH_R:
 		case ZEND_FETCH_W:
 		case ZEND_FETCH_RW:
@@ -591,7 +564,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				}
 			}
 			break;
-#endif
 		}
 		opline++;
 		i++;
