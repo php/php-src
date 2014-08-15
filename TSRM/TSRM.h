@@ -164,8 +164,10 @@ TSRM_API void tsrm_free_interpreter_context(void *context);
 #define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
 #define TSRMLS_D	void ***tsrm_ls
 #define TSRMLS_DC	, TSRMLS_D
+#define TSRMLS_DN	TSRMLS_D
 #define TSRMLS_C	tsrm_ls
 #define TSRMLS_CC	, TSRMLS_C
+#define TSRMLS_CN	TSRMLS_C
 
 #ifdef __cplusplus
 }
@@ -178,8 +180,10 @@ TSRM_API void tsrm_free_interpreter_context(void *context);
 #define TSRMLS_SET_CTX(ctx)
 #define TSRMLS_D	void
 #define TSRMLS_DC
+#define TSRMLS_DN	void ***tsrm_ls
 #define TSRMLS_C
 #define TSRMLS_CC
+#define TSRMLS_CN	NULL
 
 #endif /* ZTS */
 
