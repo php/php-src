@@ -990,7 +990,7 @@ static void to_zval_read_cmsg_data(const char *cmsghdr_c, zval *zv, res_context 
 	}
 
 	len = (size_t)cmsg->cmsg_len; /* use another var because type of cmsg_len varies */
-	//????? len_p point to stack value len 
+
 	if (zend_hash_str_add_ptr(&ctx->params, KEY_CMSG_LEN, sizeof(KEY_CMSG_LEN) - 1, len_p) == NULL) {
 		do_to_zval_err(ctx, "%s", "could not set parameter " KEY_CMSG_LEN);
 		return;

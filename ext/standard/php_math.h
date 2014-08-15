@@ -66,6 +66,7 @@ PHP_FUNCTION(number_format);
 PHP_FUNCTION(fmod);
 PHP_FUNCTION(deg2rad);
 PHP_FUNCTION(rad2deg);
+PHP_FUNCTION(intdiv);
 
    /*
    WARNING: these functions are expermental: they could change their names or 

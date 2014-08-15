@@ -1688,7 +1688,8 @@ static int mysqli_options_get_option_zval_type(int option)
 {
 	switch (option) {
 #ifdef MYSQLI_USE_MYSQLND
-#if PHP_MAJOR_VERSION >= 6
+#if PHP_MAJOR_VERSION == 6
+		/* PHP-7 doesn't supprt unicode yet ??? */
 		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
 #endif
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
@@ -2262,9 +2263,10 @@ PHP_FUNCTION(mysqli_stat)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
-	char		*stat;
 #if defined(MYSQLI_USE_MYSQLND)
-	uint		stat_len;
+	zend_string *stat;
+#else
+	char		*stat;
 #endif
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
@@ -2277,10 +2279,9 @@ PHP_FUNCTION(mysqli_stat)
 	{
 		RETURN_STRING(stat);
 #else
-	if (mysqlnd_stat(mysql->mysql, &stat, &stat_len) == PASS)
+	if (mysqlnd_stat(mysql->mysql, &stat) == PASS)
 	{
-		RETVAL_STRINGL(stat, stat_len);
-		efree(stat);
+		RETURN_STR(stat);
 #endif
 	} else {
 		RETURN_FALSE;

@@ -340,7 +340,6 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	/* create the object */
 	object_init_ex(&obj, fdat->ce);
-//???	Z_SET_ISREF_P(obj);
 
 	/* filtername */
 	add_property_string(&obj, "filtername", (char*)filtername);

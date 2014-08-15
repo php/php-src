@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "2.7.0-dev"
+#define ZEND_VERSION "2.8.0-dev"
 
 #define ZEND_ENGINE_2
 
@@ -610,7 +610,7 @@ END_EXTERN_C()
 
 BEGIN_EXTERN_C()
 ZEND_API char *get_zend_version(void);
-ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
+ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy TSRMLS_DC);
 ZEND_API int zend_print_zval(zval *expr, int indent TSRMLS_DC);
 ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC);
 ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC);

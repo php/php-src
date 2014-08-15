@@ -32,9 +32,7 @@ void free_zend_constant(zval *zv)
 	zend_constant *c = Z_PTR_P(zv);
 
 	if (!(c->flags & CONST_PERSISTENT)) {
-		if (Z_REFCOUNTED(c->value) || Z_IMMUTABLE(c->value)) {
-			_zval_dtor_func(Z_COUNTED(c->value) ZEND_FILE_LINE_CC);
-		}
+		zval_dtor(&c->value);
 	} else {
 		zval_internal_dtor(&c->value);
 	}

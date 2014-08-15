@@ -40,20 +40,20 @@ PHPAPI int php_stream_xport_unregister(const char *protocol TSRMLS_DC)
 }
 
 #define ERR_REPORT(out_err, fmt, arg) \
-	if (out_err) { spprintf(out_err, 0, fmt, arg); } \
+	if (out_err) { *out_err = strpprintf(0, fmt, arg); } \
 	else { php_error_docref(NULL TSRMLS_CC, E_WARNING, fmt, arg); }
 
 #define ERR_RETURN(out_err, local_err, fmt) \
 	if (out_err) { *out_err = local_err; } \
-	else { php_error_docref(NULL TSRMLS_CC, E_WARNING, fmt, local_err ? local_err : "Unspecified error"); \
-		if (local_err) { efree(local_err); local_err = NULL; } \
+	else { php_error_docref(NULL TSRMLS_CC, E_WARNING, fmt, local_err ? local_err->val : "Unspecified error"); \
+		if (local_err) { STR_RELEASE(local_err); local_err = NULL; } \
 	}
 	
 PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, int options,
 		int flags, const char *persistent_id,
 		struct timeval *timeout,
 		php_stream_context *context,
-		char **error_string,
+		zend_string **error_string,
 		int *error_code
 		STREAMS_DC TSRMLS_DC)
 {
@@ -61,7 +61,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	php_stream_transport_factory factory = NULL;
 	const char *p, *protocol = NULL;
 	int n = 0, failed = 0;
-	char *error_text = NULL;
+	zend_string *error_text = NULL;
 	struct timeval default_timeout = { 0, 0 };
 	
 	default_timeout.tv_sec = FG(default_socket_timeout);
@@ -160,7 +160,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 					zval *zbacklog = NULL;
 					int backlog = 32;
 					
-					if (stream->context && (zbacklog = php_stream_context_get_option(stream->context, "socket", "backlog")) != NULL) {
+					if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
 						zval *ztmp = zbacklog;
 						
 						convert_to_long_ex(ztmp);
@@ -195,7 +195,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 /* Bind the stream to a local address */
 PHPAPI int php_stream_xport_bind(php_stream *stream,
 		const char *name, size_t namelen,
-		char **error_text
+		zend_string **error_text
 		TSRMLS_DC)
 {
 	php_stream_xport_param param;
@@ -225,7 +225,7 @@ PHPAPI int php_stream_xport_connect(php_stream *stream,
 		const char *name, size_t namelen,
 		int asynchronous,
 		struct timeval *timeout,
-		char **error_text,
+		zend_string **error_text,
 		int *error_code
 		TSRMLS_DC)
 {
@@ -257,7 +257,7 @@ PHPAPI int php_stream_xport_connect(php_stream *stream,
 }
 
 /* Prepare to listen */
-PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, char **error_text TSRMLS_DC)
+PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, zend_string **error_text TSRMLS_DC)
 {
 	php_stream_xport_param param;
 	int ret;
@@ -282,10 +282,10 @@ PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, char **error
 
 /* Get the next client and their address (as a string) */
 PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
-		char **textaddr, int *textaddrlen,
+		zend_string **textaddr,
 		void **addr, socklen_t *addrlen,
 		struct timeval *timeout,
-		char **error_text
+		zend_string **error_text
 		TSRMLS_DC)
 {
 	php_stream_xport_param param;
@@ -309,7 +309,6 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 		}
 		if (textaddr) {
 			*textaddr = param.outputs.textaddr;
-			*textaddrlen = param.outputs.textaddrlen;
 		}
 		if (error_text) {
 			*error_text = param.outputs.error_text;
@@ -321,7 +320,7 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 }
 
 PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
-		char **textaddr, int *textaddrlen,
+		zend_string **textaddr,
 		void **addr, socklen_t *addrlen
 		TSRMLS_DC)
 {
@@ -343,7 +342,6 @@ PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
 		}
 		if (textaddr) {
 			*textaddr = param.outputs.textaddr;
-			*textaddrlen = param.outputs.textaddrlen;
 		}
 
 		return param.outputs.returncode;
@@ -395,7 +393,7 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRML
 /* Similar to recv() system call; read data from the stream, optionally
  * peeking, optionally retrieving OOB data */
 PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t buflen,
-		long flags, void **addr, socklen_t *addrlen, char **textaddr, int *textaddrlen
+		long flags, void **addr, socklen_t *addrlen, zend_string **textaddr
 		TSRMLS_DC)
 {
 	php_stream_xport_param param;
@@ -455,7 +453,6 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 		}
 		if (textaddr) {
 			*textaddr = param.outputs.textaddr;
-			*textaddrlen = param.outputs.textaddrlen;
 		}
 		return recvd_len + param.outputs.returncode;
 	}

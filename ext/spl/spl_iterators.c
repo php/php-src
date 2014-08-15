@@ -1270,7 +1270,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	}
 
 	if (Z_TYPE(key) != IS_STRING) {
-		if (zend_make_printable_zval(&key, &key_copy)) {
+		if (zend_make_printable_zval(&key, &key_copy TSRMLS_CC)) {
 			key = key_copy;
 		}
 	}
@@ -1481,7 +1481,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			if (spl_cit_check_flags(flags) != SUCCESS) {
-				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
+				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER", 0 TSRMLS_CC);
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				return NULL;
 			}
@@ -1958,7 +1958,6 @@ SPL_METHOD(RecursiveCallbackFilterIterator, getChildren)
 		return;
 	}
 
-//???	intern = Z_SPLDUAL_IT_P(getThis());
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
@@ -2047,7 +2046,7 @@ SPL_METHOD(RegexIterator, accept)
 	}
 
 	ZVAL_UNDEF(&subject_copy);
-	use_copy = zend_make_printable_zval(subject_ptr, &subject_copy);
+	use_copy = zend_make_printable_zval(subject_ptr, &subject_copy TSRMLS_CC);
 	if (use_copy) {
 		subject = Z_STRVAL(subject_copy);
 		subject_len = Z_STRLEN(subject_copy);
@@ -2684,15 +2683,10 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			} else {
 				ZVAL_COPY_VALUE(&intern->u.caching.zstr, &intern->current.data);
 			}
-			use_copy = zend_make_printable_zval(&intern->u.caching.zstr, &expr_copy);
+			use_copy = zend_make_printable_zval(&intern->u.caching.zstr, &expr_copy TSRMLS_CC);
 			if (use_copy) {
-				ZVAL_COPY(&intern->u.caching.zstr, &expr_copy);
-//???			INIT_PZVAL(intern->u.caching.zstr);
-				//zval_copy_ctor(&intern->u.caching.zstr);
-				zval_dtor(&expr_copy);
+				ZVAL_COPY_VALUE(&intern->u.caching.zstr, &expr_copy);
 			} else if (Z_REFCOUNTED(intern->u.caching.zstr)) {
-//???			INIT_PZVAL(intern->u.caching.zstr);
-				//zval_copy_ctor(&intern->u.caching.zstr);
 				Z_ADDREF(intern->u.caching.zstr);
 			}
 		}

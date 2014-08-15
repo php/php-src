@@ -1760,31 +1760,30 @@ PHP_FUNCTION(openssl_x509_export)
 }
 /* }}} */
 
-int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw, char **out, int *out_len TSRMLS_DC)
+zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw TSRMLS_DC)
 {
 	unsigned char md[EVP_MAX_MD_SIZE];
 	const EVP_MD *mdtype;
 	unsigned int n;
+	zend_string *ret;
 
 	if (!(mdtype = EVP_get_digestbyname(method))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
-		return FAILURE;
+		return NULL;
 	} else if (!X509_digest(peer, mdtype, md, &n)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not generate signature");
-		return FAILURE;
+		return NULL;
 	}
 
 	if (raw) {
-		*out_len = n;
-		*out = estrndup((char *) md, n);
+		ret = STR_INIT((char*)md, n, 0);
 	} else {
-		*out_len = n * 2;
-		*out = emalloc(*out_len + 1);
-
-		make_digest_ex(*out, md, n);
+		ret = STR_ALLOC(n * 2, 0);
+		make_digest_ex(ret->val, md, n);
+		ret->val[n * 2] = '\0';
 	}
 
-	return SUCCESS;
+	return ret;
 }
 
 PHP_FUNCTION(openssl_x509_fingerprint)
@@ -1795,9 +1794,7 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 	zend_bool raw_output = 0;
 	char *method = "sha1";
 	int method_len;
-
-	char *fingerprint;
-	int fingerprint_len;
+	zend_string *fingerprint;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|sb", &zcert, &method, &method_len, &raw_output) == FAILURE) {
 		return;
@@ -1809,10 +1806,9 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 		RETURN_FALSE;
 	}
 
-	if (php_openssl_x509_fingerprint(cert, method, raw_output, &fingerprint, &fingerprint_len TSRMLS_CC) == SUCCESS) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL(fingerprint, fingerprint_len);
-		efree(fingerprint);
+	fingerprint = php_openssl_x509_fingerprint(cert, method, raw_output TSRMLS_CC);
+	if (fingerprint) {
+		RETVAL_STR(fingerprint);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -3458,12 +3454,10 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC)
 #define OPENSSL_PKEY_GET_BN(_type, _name) do {							\
 		if (pkey->pkey._type->_name != NULL) {							\
 			int len = BN_num_bytes(pkey->pkey._type->_name);			\
-			char *str = emalloc(len + 1);								\
-			BN_bn2bin(pkey->pkey._type->_name, (unsigned char*)str);	\
-			str[len] = 0;                                           	\
-			/* TODO: avoid reallocation ??? */							\
-			add_assoc_stringl(&_type, #_name, str, len);				\
-			efree(str);													\
+			zend_string *str = STR_ALLOC(len, 0);						\
+			BN_bn2bin(pkey->pkey._type->_name, (unsigned char*)str->val);	\
+			str->val[len] = 0;                                          \
+			add_assoc_str(&_type, #_name, str);							\
 		}																\
 	} while (0)
 
@@ -3877,7 +3871,7 @@ PHP_FUNCTION(openssl_pbkdf2)
 	char *password; int password_len;
 	char *salt; int salt_len;
 	char *method; int method_len = 0;
-	unsigned char *out_buffer;
+	zend_string *out_buffer;
 
 	const EVP_MD *digest;
 
@@ -3904,15 +3898,13 @@ PHP_FUNCTION(openssl_pbkdf2)
 		RETURN_FALSE;
 	}
 
-	out_buffer = emalloc(key_length + 1);
-	out_buffer[key_length] = '\0';
+	out_buffer = STR_ALLOC(key_length, 0);
 
-	if (PKCS5_PBKDF2_HMAC(password, password_len, (unsigned char *)salt, salt_len, iterations, digest, key_length, out_buffer) == 1) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL((char *)out_buffer, key_length);
-		efree(out_buffer);
+	if (PKCS5_PBKDF2_HMAC(password, password_len, (unsigned char *)salt, salt_len, iterations, digest, key_length, (unsigned char*)out_buffer->val) == 1) {
+		out_buffer->val[key_length] = 0;
+		RETURN_STR(out_buffer);
 	} else {
-		efree(out_buffer);
+		STR_RELEASE(out_buffer);
 		RETURN_FALSE;
 	}
 }
@@ -4336,7 +4328,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 	zval *key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
-	unsigned char *cryptedbuf = NULL;
+	zend_string *cryptedbuf = NULL;
 	int successful = 0;
 	zend_resource *keyresource = NULL;
 	char * data;
@@ -4356,14 +4348,14 @@ PHP_FUNCTION(openssl_private_encrypt)
 	}
 
 	cryptedlen = EVP_PKEY_size(pkey);
-	cryptedbuf = emalloc(cryptedlen + 1);
+	cryptedbuf = STR_ALLOC(cryptedlen, 0);
 
 	switch (pkey->type) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
 			successful =  (RSA_private_encrypt(data_len, 
 						(unsigned char *)data, 
-						cryptedbuf, 
+						(unsigned char *)cryptedbuf->val,
 						pkey->pkey.rsa, 
 						padding) == cryptedlen);
 			break;
@@ -4373,15 +4365,13 @@ PHP_FUNCTION(openssl_private_encrypt)
 
 	if (successful) {
 		zval_dtor(crypted);
-		cryptedbuf[cryptedlen] = '\0';
-		// TODO: avoid reallocation ???
-		ZVAL_STRINGL(crypted, (char *)cryptedbuf, cryptedlen);
-		efree(cryptedbuf);
+		cryptedbuf->val[cryptedlen] = '\0';
+		ZVAL_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
 	}
 	if (cryptedbuf) {
-		efree(cryptedbuf);
+		STR_RELEASE(cryptedbuf);
 	}
 	if (keyresource == NULL) { 
 		EVP_PKEY_free(pkey);
@@ -4396,7 +4386,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 	zval *key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
-	unsigned char *cryptedbuf = NULL;
+	zend_string *cryptedbuf = NULL;
 	unsigned char *crypttemp;
 	int successful = 0;
 	long padding = RSA_PKCS1_PADDING;
@@ -4427,8 +4417,8 @@ PHP_FUNCTION(openssl_private_decrypt)
 					pkey->pkey.rsa, 
 					padding);
 			if (cryptedlen != -1) {
-				cryptedbuf = emalloc(cryptedlen + 1);
-				memcpy(cryptedbuf, crypttemp, cryptedlen);
+				cryptedbuf = STR_ALLOC(cryptedlen, 0);
+				memcpy(cryptedbuf->val, crypttemp, cryptedlen);
 				successful = 1;
 			}
 			break;
@@ -4440,10 +4430,8 @@ PHP_FUNCTION(openssl_private_decrypt)
 
 	if (successful) {
 		zval_dtor(crypted);
-		cryptedbuf[cryptedlen] = '\0';
-		// TODO: avoid reallocation ???
-		ZVAL_STRINGL(crypted, (char *)cryptedbuf, cryptedlen);
-		efree(cryptedbuf);
+		cryptedbuf->val[cryptedlen] = '\0';
+		ZVAL_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
 	}
@@ -4452,7 +4440,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 		EVP_PKEY_free(pkey);
 	}
 	if (cryptedbuf) { 
-		efree(cryptedbuf);
+		STR_RELEASE(cryptedbuf);
 	}
 }
 /* }}} */
@@ -4464,7 +4452,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 	zval *key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
-	unsigned char *cryptedbuf;
+	zend_string *cryptedbuf;
 	int successful = 0;
 	zend_resource *keyresource = NULL;
 	long padding = RSA_PKCS1_PADDING;
@@ -4482,14 +4470,14 @@ PHP_FUNCTION(openssl_public_encrypt)
 	}
 
 	cryptedlen = EVP_PKEY_size(pkey);
-	cryptedbuf = emalloc(cryptedlen + 1);
+	cryptedbuf = STR_ALLOC(cryptedlen, 0);
 
 	switch (pkey->type) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
 			successful = (RSA_public_encrypt(data_len, 
 						(unsigned char *)data, 
-						cryptedbuf, 
+						(unsigned char *)cryptedbuf->val, 
 						pkey->pkey.rsa, 
 						padding) == cryptedlen);
 			break;
@@ -4500,10 +4488,8 @@ PHP_FUNCTION(openssl_public_encrypt)
 
 	if (successful) {
 		zval_dtor(crypted);
-		cryptedbuf[cryptedlen] = '\0';
-		// TODO: avoid reallocation ???
-		ZVAL_STRINGL(crypted, (char *)cryptedbuf, cryptedlen);
-		efree(cryptedbuf);
+		cryptedbuf->val[cryptedlen] = '\0';
+		ZVAL_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
 	}
@@ -4511,7 +4497,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 		EVP_PKEY_free(pkey);
 	}
 	if (cryptedbuf) {
-		efree(cryptedbuf);
+		STR_RELEASE(cryptedbuf);
 	}
 }
 /* }}} */
@@ -4523,7 +4509,7 @@ PHP_FUNCTION(openssl_public_decrypt)
 	zval *key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
-	unsigned char *cryptedbuf = NULL;
+	zend_string *cryptedbuf = NULL;
 	unsigned char *crypttemp;
 	int successful = 0;
 	zend_resource *keyresource = NULL;
@@ -4554,8 +4540,8 @@ PHP_FUNCTION(openssl_public_decrypt)
 					pkey->pkey.rsa, 
 					padding);
 			if (cryptedlen != -1) {
-				cryptedbuf = emalloc(cryptedlen + 1);
-				memcpy(cryptedbuf, crypttemp, cryptedlen);
+				cryptedbuf = STR_ALLOC(cryptedlen, 0);
+				memcpy(cryptedbuf->val, crypttemp, cryptedlen);
 				successful = 1;
 			}
 			break;
@@ -4569,16 +4555,14 @@ PHP_FUNCTION(openssl_public_decrypt)
 
 	if (successful) {
 		zval_dtor(crypted);
-		cryptedbuf[cryptedlen] = '\0';
-		// TODO: avoid reallocation ???
-		ZVAL_STRINGL(crypted, (char *)cryptedbuf, cryptedlen);
-		efree(cryptedbuf);
+		cryptedbuf->val[cryptedlen] = '\0';
+		ZVAL_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
 	}
 
 	if (cryptedbuf) {
-		efree(cryptedbuf);
+		STR_RELEASE(cryptedbuf);
 	}
 	if (keyresource == NULL) {
 		EVP_PKEY_free(pkey);
@@ -4612,8 +4596,8 @@ PHP_FUNCTION(openssl_sign)
 {
 	zval *key, *signature;
 	EVP_PKEY *pkey;
-	int siglen;
-	unsigned char *sigbuf;
+	unsigned int siglen;
+	zend_string *sigbuf;
 	zend_resource *keyresource = NULL;
 	char * data;
 	int data_len;
@@ -4648,16 +4632,15 @@ PHP_FUNCTION(openssl_sign)
 	}
 
 	siglen = EVP_PKEY_size(pkey);
-	sigbuf = emalloc(siglen + 1);
+	sigbuf = STR_ALLOC(siglen, 0);
 
 	EVP_SignInit(&md_ctx, mdtype);
 	EVP_SignUpdate(&md_ctx, data, data_len);
-	if (EVP_SignFinal (&md_ctx, sigbuf,(unsigned int *)&siglen, pkey)) {
+	if (EVP_SignFinal (&md_ctx, (unsigned char*)sigbuf->val, &siglen, pkey)) {
 		zval_dtor(signature);
-		sigbuf[siglen] = '\0';
-		// TODO: avoid reallocation ???
-		ZVAL_STRINGL(signature, (char *)sigbuf, siglen);
-		efree(sigbuf);
+		sigbuf->val[siglen] = '\0';
+		sigbuf->len = siglen;
+		ZVAL_STR(signature, sigbuf);
 		RETVAL_TRUE;
 	} else {
 		efree(sigbuf);
@@ -4965,8 +4948,8 @@ PHP_FUNCTION(openssl_digest)
 	int data_len, method_len;
 	const EVP_MD *mdtype;
 	EVP_MD_CTX md_ctx;
-	int siglen;
-	unsigned char *sigbuf;
+	unsigned int siglen;
+	zend_string *sigbuf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &data, &data_len, &method, &method_len, &raw_output) == FAILURE) {
 		return;
@@ -4978,28 +4961,26 @@ PHP_FUNCTION(openssl_digest)
 	}
 
 	siglen = EVP_MD_size(mdtype);
-	sigbuf = emalloc(siglen + 1);
+	sigbuf = STR_ALLOC(siglen, 0);
 
 	EVP_DigestInit(&md_ctx, mdtype);
 	EVP_DigestUpdate(&md_ctx, (unsigned char *)data, data_len);
-	if (EVP_DigestFinal (&md_ctx, (unsigned char *)sigbuf, (unsigned int *)&siglen)) {
+	if (EVP_DigestFinal (&md_ctx, (unsigned char *)sigbuf->val, &siglen)) {
 		if (raw_output) {
-			sigbuf[siglen] = '\0';
-			// TODO: avoid reallocation ???
-			RETVAL_STRINGL((char *)sigbuf, siglen);
-			efree(sigbuf);
+			sigbuf->val[siglen] = '\0';
+			sigbuf->len = siglen;
+			RETVAL_STR(sigbuf);
 		} else {
 			int digest_str_len = siglen * 2;
-			char *digest_str = emalloc(digest_str_len + 1);
+			zend_string *digest_str = STR_ALLOC(digest_str_len, 0);
 
-			make_digest_ex(digest_str, sigbuf, siglen);
-			efree(sigbuf);
-			// TODO: avid reallocation ???
-			RETVAL_STRINGL(digest_str, digest_str_len);
-			efree(digest_str);
+			make_digest_ex(digest_str->val, (unsigned char*)sigbuf->val, siglen);
+			digest_str->val[digest_str_len] = '\0';
+			STR_RELEASE(sigbuf);
+			RETVAL_STR(digest_str);
 		}
 	} else {
-		efree(sigbuf);
+		STR_RELEASE(sigbuf);
 		RETVAL_FALSE;
 	}
 }
@@ -5049,7 +5030,8 @@ PHP_FUNCTION(openssl_encrypt)
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX cipher_ctx;
 	int i=0, outlen, keylen;
-	unsigned char *outbuf, *key;
+	zend_string *outbuf;
+	unsigned char *key;
 	zend_bool free_iv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ls", &data, &data_len, &method, &method_len, &password, &password_len, &options, &iv, &iv_len) == FAILURE) {
@@ -5077,7 +5059,7 @@ PHP_FUNCTION(openssl_encrypt)
 	free_iv = php_openssl_validate_iv(&iv, &iv_len, max_iv_len TSRMLS_CC);
 
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
-	outbuf = emalloc(outlen + 1);
+	outbuf = STR_ALLOC(outlen, 0);
 
 	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
@@ -5088,25 +5070,24 @@ PHP_FUNCTION(openssl_encrypt)
 		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
 	}
 	if (data_len > 0) {
-		EVP_EncryptUpdate(&cipher_ctx, outbuf, &i, (unsigned char *)data, data_len);
+		EVP_EncryptUpdate(&cipher_ctx, (unsigned char*)outbuf->val, &i, (unsigned char *)data, data_len);
 	}
 	outlen = i;
-	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf + i, &i)) {
+	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf->val + i, &i)) {
 		outlen += i;
 		if (options & OPENSSL_RAW_DATA) {
-			outbuf[outlen] = '\0';
-			// TODO: avoid reallocation ???
-			RETVAL_STRINGL((char *)outbuf, outlen);
-			efree(outbuf);
+			outbuf->val[outlen] = '\0';
+			outbuf->len = outlen;
+			RETVAL_STR(outbuf);
 		} else {
 			zend_string *base64_str;
 
-			base64_str = php_base64_encode(outbuf, outlen);
-			efree(outbuf);
+			base64_str = php_base64_encode((unsigned char*)outbuf->val, outlen);
+			STR_RELEASE(outbuf);
 			RETVAL_STR(base64_str);
 		}
 	} else {
-		efree(outbuf);
+		STR_RELEASE(outbuf);
 		RETVAL_FALSE;
 	}
 	if (key != (unsigned char*)password) {
@@ -5129,7 +5110,8 @@ PHP_FUNCTION(openssl_decrypt)
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX cipher_ctx;
 	int i, outlen, keylen;
-	unsigned char *outbuf, *key;
+	zend_string *outbuf;
+	unsigned char *key;
 	zend_string *base64_str = NULL;
 	zend_bool free_iv;
 
@@ -5170,7 +5152,7 @@ PHP_FUNCTION(openssl_decrypt)
 	free_iv = php_openssl_validate_iv(&iv, &iv_len, EVP_CIPHER_iv_length(cipher_type) TSRMLS_CC);
 
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
-	outbuf = emalloc(outlen + 1);
+	outbuf = STR_ALLOC(outlen, 0);
 
 	EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
@@ -5180,16 +5162,15 @@ PHP_FUNCTION(openssl_decrypt)
 	if (options & OPENSSL_ZERO_PADDING) {
 		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
 	}
-	EVP_DecryptUpdate(&cipher_ctx, outbuf, &i, (unsigned char *)data, data_len);
+	EVP_DecryptUpdate(&cipher_ctx, (unsigned char*)outbuf->val, &i, (unsigned char *)data, data_len);
 	outlen = i;
-	if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)outbuf + i, &i)) {
+	if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)outbuf->val + i, &i)) {
 		outlen += i;
-		outbuf[outlen] = '\0';
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL((char *)outbuf, outlen);
-		efree(outbuf);
+		outbuf->val[outlen] = '\0';
+		outbuf->len = outlen;
+		RETVAL_STR(outbuf);
 	} else {
-		efree(outbuf);
+		STR_RELEASE(outbuf);
 		RETVAL_FALSE;
 	}
 	if (key != (unsigned char*)password) {
@@ -5241,7 +5222,7 @@ PHP_FUNCTION(openssl_dh_compute_key)
 	int pub_len;
 	EVP_PKEY *pkey;
 	BIGNUM *pub;
-	char *data;
+	zend_string *data;
 	int len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sr", &pub_str, &pub_len, &key) == FAILURE) {
@@ -5254,16 +5235,15 @@ PHP_FUNCTION(openssl_dh_compute_key)
 
 	pub = BN_bin2bn((unsigned char*)pub_str, pub_len, NULL);
 
-	data = emalloc(DH_size(pkey->pkey.dh) + 1);
-	len = DH_compute_key((unsigned char*)data, pub, pkey->pkey.dh);
+	data = STR_ALLOC(DH_size(pkey->pkey.dh), 0);
+	len = DH_compute_key((unsigned char*)data->val, pub, pkey->pkey.dh);
 
 	if (len >= 0) {
-		data[len] = 0;
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL(data, len);
-		efree(data);
+		data->len = len;
+		data->val[len] = 0;
+		RETVAL_STR(data);
 	} else {
-		efree(data);
+		STR_RELEASE(data);
 		RETVAL_FALSE;
 	}
 
@@ -5276,7 +5256,7 @@ PHP_FUNCTION(openssl_dh_compute_key)
 PHP_FUNCTION(openssl_random_pseudo_bytes)
 {
 	long buffer_length;
-	unsigned char *buffer = NULL;
+	zend_string *buffer = NULL;
 	zval *zstrong_result_returned = NULL;
 	int strong_result = 0;
 
@@ -5293,21 +5273,21 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		ZVAL_BOOL(zstrong_result_returned, 0);
 	}
 
-	buffer = emalloc(buffer_length + 1);
+	buffer = STR_ALLOC(buffer_length, 0);
 
 #ifdef PHP_WIN32
 	strong_result = 1;
 	/* random/urandom equivalent on Windows */
-	if (php_win32_get_random_bytes(buffer, (size_t) buffer_length) == FAILURE){
-		efree(buffer);
+	if (php_win32_get_random_bytes((unsigned char*)buffer->val, (size_t) buffer_length) == FAILURE){
+		STR_RELEASE(buffer);
 		if (zstrong_result_returned) {
 			ZVAL_BOOL(zstrong_result_returned, 0);
 		}
 		RETURN_FALSE;
 	}
 #else
-	if ((strong_result = RAND_pseudo_bytes(buffer, buffer_length)) < 0) {
-		efree(buffer);
+	if ((strong_result = RAND_pseudo_bytes((unsigned char*)buffer->val, buffer_length)) < 0) {
+		STR_RELEASE(buffer);
 		if (zstrong_result_returned) {
 			ZVAL_BOOL(zstrong_result_returned, 0);
 		}
@@ -5315,10 +5295,8 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	}
 #endif
 
-	buffer[buffer_length] = 0;
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)buffer, buffer_length);
-	efree(buffer);
+	buffer->val[buffer_length] = 0;
+	RETVAL_STR(buffer);
 
 	if (zstrong_result_returned) {
 		ZVAL_BOOL(zstrong_result_returned, strong_result);

@@ -214,6 +214,7 @@ static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht,
 	nIndex = h & ht->nTableMask;
 	idx = ht->arHash[nIndex];
 	while (idx != INVALID_IDX) {
+		ZEND_ASSERT(idx < ht->nTableSize);
 		p = ht->arData + idx;
 		if ((p->h == h) 
 			 && p->key
@@ -235,6 +236,7 @@ static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *h
 	nIndex = h & ht->nTableMask;
 	idx = ht->arHash[nIndex];
 	while (idx != INVALID_IDX) {
+		ZEND_ASSERT(idx < ht->nTableSize);
 		p = ht->arData + idx;
 		if (p->h == h && !p->key) {
 			return p;
@@ -579,6 +581,9 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 	IS_CONSISTENT(ht);
 
 	if (UNEXPECTED(ht->nNumOfElements == 0)) {
+		if (ht->nTableMask) {
+			memset(ht->arHash, INVALID_IDX, ht->nTableSize * sizeof(zend_uint));
+		}
 		return SUCCESS;
 	}
 

@@ -1124,6 +1124,7 @@ try_again:
 			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+	return 0;
 }
 /* }}} */
 
@@ -1166,6 +1167,7 @@ try_again:
 			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+	return 0.0;
 }
 /* }}} */
 
@@ -1280,6 +1282,7 @@ try_again:
 			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+	return NULL;
 }
 /* }}} */
 
@@ -2388,10 +2391,10 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_CONCAT);
 
 		if (Z_TYPE_P(op1) != IS_STRING) {
-			use_copy1 = zend_make_printable_zval(op1, &op1_copy);
+			use_copy1 = zend_make_printable_zval(op1, &op1_copy TSRMLS_CC);
 		}
 		if (Z_TYPE_P(op2) != IS_STRING) {
-			use_copy2 = zend_make_printable_zval(op2, &op2_copy);
+			use_copy2 = zend_make_printable_zval(op2, &op2_copy TSRMLS_CC);
 		}
 	}
 
@@ -2664,6 +2667,14 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				return SUCCESS;
 
 			default:
+				if (Z_ISREF_P(op1)) {
+					op1 = Z_REFVAL_P(op1);
+					continue;
+				} else if (Z_ISREF_P(op2)) {
+					op2 = Z_REFVAL_P(op2);
+					continue;
+				}
+
 				if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, compare)) {
 					return Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2 TSRMLS_CC);
 				} else if (Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, compare)) {
@@ -2722,11 +2733,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						return SUCCESS;
 					}
 				}
-				if (Z_ISREF_P(op1)) {
-					op1 = Z_REFVAL_P(op1);
-				} else if (Z_ISREF_P(op2)) {
-					op2 = Z_REFVAL_P(op2);
-				} else if (!converted) {
+				if (!converted) {
 					if (Z_TYPE_P(op1) == IS_NULL || Z_TYPE_P(op1) == IS_FALSE) {
 						zendi_convert_to_boolean(op2, op2_copy, result);
 						ZVAL_LONG(result, (Z_TYPE_P(op2) == IS_TRUE) ? -1 : 0);
@@ -2769,10 +2776,9 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 }
 /* }}} */
 
-static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
+static int hash_zval_identical_function(zval *z1, zval *z2 TSRMLS_DC) /* {{{ */
 {
 	zval result;
-	TSRMLS_FETCH();
 
 	/* is_identical_function() returns 1 in case of identity and 0 in case
 	 * of a difference;

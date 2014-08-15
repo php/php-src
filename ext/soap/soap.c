@@ -928,8 +928,7 @@ PHP_METHOD(SoapFault, SoapFault)
 PHP_METHOD(SoapFault, __toString)
 {
 	zval *faultcode, *faultstring, *file, *line, trace;
-	char *str;
-	int len;
+	zend_string *str;
 	zend_fcall_info fci;
 	zval *this_ptr;
 
@@ -957,15 +956,13 @@ PHP_METHOD(SoapFault, __toString)
 
 	zval_ptr_dtor(&fci.function_name);
 
-	len = spprintf(&str, 0, "SoapFault exception: [%s] %s in %s:%ld\nStack trace:\n%s",
+	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:%ld\nStack trace:\n%s",
 	               Z_STRVAL_P(faultcode), Z_STRVAL_P(faultstring), Z_STRVAL_P(file), Z_LVAL_P(line),
 	               Z_STRLEN(trace) ? Z_STRVAL(trace) : "#0 {main}\n");
 
 	zval_ptr_dtor(&trace);
 
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(str, len);
-	efree(str);
+	RETVAL_STR(str);
 }
 /* }}} */
 

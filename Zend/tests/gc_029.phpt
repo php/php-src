@@ -33,5 +33,5 @@ unset($foo);
 unset($bar);
 var_dump(gc_collect_cycles());
 ?>
---EXPECT--
-int(3)
+--EXPECTREGEX--
+int\([23]\)

@@ -389,9 +389,10 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 			 *   It is reset to ' ' by non-numeric formats
 			 */
 			switch (*fmt) {
-				case 'Z':
+				case 'Z': {
+					TSRMLS_FETCH();
 					zvp = (zval*) va_arg(ap, zval*);
-					free_zcopy = zend_make_printable_zval(zvp, &zcopy);
+					free_zcopy = zend_make_printable_zval(zvp, &zcopy TSRMLS_CC);
 					if (free_zcopy) {
 						zvp = &zcopy;
 					}
@@ -401,6 +402,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 						s_len = precision;
 					}
 					break;
+				}
 				case 'u':
 					switch(modifier) {
 						default:

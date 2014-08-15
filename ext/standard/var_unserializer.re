@@ -181,24 +181,24 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 
 /* }}} */
 
-static char *unserialize_str(const unsigned char **p, size_t *len, size_t maxlen)
+static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t maxlen)
 {
 	size_t i, j;
-	char *str = safe_emalloc(*len, 1, 1);
+	zend_string *str = STR_ALLOC(len, 0);
 	unsigned char *end = *(unsigned char **)p+maxlen;
 
 	if (end < *p) {
-		efree(str);
+		STR_FREE(str);
 		return NULL;
 	}
 
-	for (i = 0; i < *len; i++) {
+	for (i = 0; i < len; i++) {
 		if (*p >= end) {
-			efree(str);
+			STR_FREE(str);
 			return NULL;
 		}
 		if (**p != '\\') {
-			str[i] = (char)**p;
+			str->val[i] = (char)**p;
 		} else {
 			unsigned char ch = 0;
 
@@ -211,16 +211,16 @@ static char *unserialize_str(const unsigned char **p, size_t *len, size_t maxlen
 				} else if (**p >= 'A' && **p <= 'F') {
 					ch = (ch << 4) + (**p -'A'+10);
 				} else {
-					efree(str);
+					STR_FREE(str);
 					return NULL;
 				}
 			}
-			str[i] = (char)ch;
+			str->val[i] = (char)ch;
 		}
 		(*p)++;
 	}
-	str[i] = 0;
-	*len = i;
+	str->val[i] = 0;
+	str->len = i;
 	return str;
 }
 
@@ -504,7 +504,6 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 		ZVAL_NEW_REF(rval_ref, rval_ref);
 		ZVAL_COPY(rval, rval_ref);
 	}
-//???	Z_SET_ISREF_PP(rval);
 	
 	return 1;
 }
@@ -624,8 +623,7 @@ use_double:
 
 "S:" uiv ":" ["] 	{
 	size_t len, maxlen;
-//??? TODO: use zend_string* instead of char*
-	char *str;
+	zend_string *str;
 
 	len = parse_uiv(start + 2);
 	maxlen = max - YYCURSOR;
@@ -634,12 +632,12 @@ use_double:
 		return 0;
 	}
 
-	if ((str = unserialize_str(&YYCURSOR, &len, maxlen)) == NULL) {
+	if ((str = unserialize_str(&YYCURSOR, len, maxlen)) == NULL) {
 		return 0;
 	}
 
 	if (*(YYCURSOR) != '"') {
-		efree(str);
+		STR_FREE(str);
 		*p = YYCURSOR;
 		return 0;
 	}
@@ -647,8 +645,7 @@ use_double:
 	YYCURSOR += 2;
 	*p = YYCURSOR;
 
-	ZVAL_STRINGL(rval, str, len);
-	efree(str);
+	ZVAL_STR(rval, str);
 	return 1;
 }
 

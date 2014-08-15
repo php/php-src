@@ -616,9 +616,6 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		return (res);
 	}
 
-//???PHPAPI zend_string *php_str_to_str(char *haystack, int length, char *needle,
-//???		int needle_len, char *str, int str_len);
-	
 	/* Escape \n. sequences
 	 * We use php_str_to_str() and not php_str_replace_in_subject(), since the latter
 	 * uses ZVAL as it's parameters */

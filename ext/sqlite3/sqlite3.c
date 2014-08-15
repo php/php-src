@@ -2002,7 +2002,6 @@ static void php_sqlite3_free_list_dtor(void **item)
 
 static int php_sqlite3_compare_stmt_zval_free(php_sqlite3_free_list **free_list, zval *statement ) /* {{{ */
 {
-	//?????  return ((*free_list)->stmt_obj->initialised && statement == (*free_list)->stmt_obj_zval);
 	return  ((*free_list)->stmt_obj->initialised && Z_PTR_P(statement) == Z_PTR((*free_list)->stmt_obj_zval));	
 }
 /* }}} */
