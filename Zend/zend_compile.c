@@ -3389,7 +3389,7 @@ static void zend_emit_tick(TSRMLS_D) {
 	opline->extended_value = Z_LVAL(CG(declarables).ticks);
 }
 
-static inline zend_op *zend_zend_emit_op_data(znode *value TSRMLS_DC) {
+static inline zend_op *zend_emit_op_data(znode *value TSRMLS_DC) {
 	return zend_emit_op(NULL, ZEND_OP_DATA, value, NULL TSRMLS_CC);
 }
 
@@ -3873,7 +3873,7 @@ void zend_compile_assign(znode *result, zend_ast *ast TSRMLS_DC) {
 			opline = zend_delayed_compile_end(offset TSRMLS_CC);
 			opline->opcode = ZEND_ASSIGN_DIM;
 
-			opline = zend_zend_emit_op_data(&expr_node TSRMLS_CC);
+			opline = zend_emit_op_data(&expr_node TSRMLS_CC);
 			opline->op2.var = get_temporary_variable(CG(active_op_array));
 			opline->op2_type = IS_VAR;
 			return;
@@ -3885,7 +3885,7 @@ void zend_compile_assign(znode *result, zend_ast *ast TSRMLS_DC) {
 			opline = zend_delayed_compile_end(offset TSRMLS_CC);
 			opline->opcode = ZEND_ASSIGN_OBJ;
 
-			zend_zend_emit_op_data(&expr_node TSRMLS_CC);
+			zend_emit_op_data(&expr_node TSRMLS_CC);
 			return;
 		case ZEND_AST_LIST:
 			zend_compile_expr(&expr_node, expr_ast TSRMLS_CC);
@@ -3963,7 +3963,7 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast TSRMLS_DC) {
 			opline->opcode = opcode;
 			opline->extended_value = ZEND_ASSIGN_DIM;
 
-			opline = zend_zend_emit_op_data(&expr_node TSRMLS_CC);
+			opline = zend_emit_op_data(&expr_node TSRMLS_CC);
 			opline->op2.var = get_temporary_variable(CG(active_op_array));
 			opline->op2_type = IS_VAR;
 			return;
@@ -3976,7 +3976,7 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast TSRMLS_DC) {
 			opline->opcode = opcode;
 			opline->extended_value = ZEND_ASSIGN_OBJ;
 
-			zend_zend_emit_op_data(&expr_node TSRMLS_CC);
+			zend_emit_op_data(&expr_node TSRMLS_CC);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
