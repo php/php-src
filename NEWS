@@ -6,11 +6,11 @@ PHP                                                                        NEWS
   . Fixed bug #47358 (glob returns error, should be empty array()). (Pierre)
 
 - OpenSSL:
-  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads)
+  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
     (Daniel Lowrey).
 
 - Date:
-  . Fixed bug #66091 (memory leaks in DateTime constructor) (Tjerk).
+  . Fixed bug #66091 (memory leaks in DateTime constructor). (Tjerk).
 
 ?? ??? 2014, PHP 5.4.32
 
@@ -21,11 +21,12 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #67705 (extensive backtracking in rule regular expression).
-    (CVE-2014-3538) (Remi)
+    (CVE-2014-3538). (Remi)
+  . Fixed bug #67716 (Segfault in cdf.c). (CVE-2014-3587) (Remi)
 
 - GD:
   . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
-    (CVE-2014-2497) (Remi)
+    (CVE-2014-2497). (Remi)
 
 - Milter:
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
@@ -40,7 +41,7 @@ PHP                                                                        NEWS
     with control-c). (Dmitry Saprykin, Johannes)
 
 - Sessions:
-  . Fixed missing type checks in php_session_create_id (Yussuf Khalil, Stas).
+  . Fixed missing type checks in php_session_create_id. (Yussuf Khalil, Stas).
 
 - SPL:
   . Fixed bug #67539 (ArrayIterator use-after-free due to object change during
