@@ -410,9 +410,25 @@ is_variadic:
 	|	T_ELLIPSIS  { $$.op_type = 1; }
 ;
 
+non_optional_class_type:
+		T_ARRAY						{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_ARRAY; }
+	|	T_CALLABLE					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_CALLABLE; }
+	|	fully_qualified_class_name			{ $$ = $1; }
+;
+
+optional_class_type:
+		/* empty */					{ $$.op_type = IS_UNUSED; }
+	|	non_optional_class_type		{ $$ = $1; }
+;
+
+function_return_hint:
+		/* empty */                     { $$.op_type = IS_UNUSED; }
+	|  ':' non_optional_class_type     	{ zend_do_function_return_hint(&$2 TSRMLS_CC); }
+;
+
 unticked_function_declaration_statement:
 		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL TSRMLS_CC); }
-		'(' parameter_list ')'
+		'(' parameter_list ')' function_return_hint
 		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 ;
 
@@ -568,15 +584,6 @@ parameter:
 			{ zend_do_receive_param(ZEND_RECV_INIT, &$4, &$6, &$1, $2.op_type, $3.op_type TSRMLS_CC); }
 ;
 
-
-optional_class_type:
-		/* empty */					{ $$.op_type = IS_UNUSED; }
-	|	T_ARRAY						{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_ARRAY; }
-	|	T_CALLABLE					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_CALLABLE; }
-	|	fully_qualified_class_name			{ $$ = $1; }
-;
-
-
 function_call_parameter_list:
 		'(' ')'	{ Z_LVAL($$.u.constant) = 0; }
 	|	'(' non_empty_function_call_parameter_list ')'	{ $$ = $2; }
@@ -629,8 +636,8 @@ class_statement:
 	|	class_constant_declaration ';'
 	|	trait_use_statement
 	|	method_modifiers function is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1 TSRMLS_CC); }
-		'(' parameter_list ')'
-		method_body { zend_do_abstract_method(&$4, &$1, &$9 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
+		'(' parameter_list ')'  function_return_hint
+		method_body { zend_do_abstract_method(&$4, &$1, &$10 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 ;
 
 trait_use_statement:
@@ -850,10 +857,10 @@ expr_without_variable:
 	|	T_PRINT expr  { zend_do_print(&$$, &$2 TSRMLS_CC); }
 	|	T_YIELD { zend_do_yield(&$$, NULL, NULL, 0 TSRMLS_CC); }
 	|	function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, 0 TSRMLS_CC); }
-		'(' parameter_list ')' lexical_vars
+		'(' parameter_list ')' lexical_vars function_return_hint
 		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $3; }
 	|	T_STATIC function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
-		'(' parameter_list ')' lexical_vars
+		'(' parameter_list ')' lexical_vars function_return_hint
 		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); $$ = $4; }
 ;
 

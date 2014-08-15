@@ -1856,6 +1856,52 @@ ZEND_METHOD(reflection_function, getEndLine)
 }
 /* }}} */
 
+/* {{{ proto public mixed ReflectionFunction::getReturnType()
+   Returns the hinted return type as a ReflectionClass or string (array, callable) */
+ZEND_METHOD(reflection_function, getReturnType)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	
+	if (fptr->common.return_hint->used) {
+		zend_return_hint *hint = fptr->common.return_hint;
+		
+		switch (hint->type) {
+			case IS_OBJECT: {
+				zend_class_entry **pce;
+				if (zend_lookup_class(hint->class_name, hint->class_name_len, &pce TSRMLS_CC) != SUCCESS) {
+					zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not exist", hint->class_name);
+				}
+				zend_reflection_class_factory(*pce, return_value TSRMLS_CC);
+			} break;
+			
+			case IS_CALLABLE: RETURN_STRING("callable", 1); break;
+			case IS_ARRAY:    RETURN_STRING("array", 1);    break;
+		}
+	}
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionFunction::hasReturnType()
+   Tells if a return type is present */
+ZEND_METHOD(reflection_function, hasReturnType)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	RETURN_BOOL(fptr->common.return_hint->used);
+}
+/* }}} */
+
 /* {{{ proto public string ReflectionFunction::getDocComment()
    Returns the doc comment for this function */
 ZEND_METHOD(reflection_function, getDocComment)
@@ -5744,6 +5790,8 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isVariadic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureScopeClass, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, hasReturnType, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, getReturnType, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getEndLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getExtension, arginfo_reflection__void, 0)

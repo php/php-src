@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_constants.h"
+#include "zend_generators.h"
 #include "zend_llist.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
@@ -101,6 +102,64 @@ ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filena
 ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
+
+ZEND_API void zend_return_hint_error(int type, zend_function *function, zval *returned, const char *message TSRMLS_DC) {
+	char *scope = NULL;
+	char *expected = NULL;
+	char *got = NULL;
+	char *ftype = (function->common.fn_flags & ZEND_ACC_GENERATOR) ? "generator" : "function";
+	
+	if (function->common.scope) {
+		zend_spprintf(&scope, 0, "%s::%s", 
+			ZEND_FN_SCOPE_NAME(function),
+			function->common.function_name);
+	} else scope = estrdup(function->common.function_name);
+	
+	if (function->common.return_hint->type == IS_OBJECT) {
+		zend_spprintf(&expected, 0, "an object of class %s", function->common.return_hint->class_name);
+	} else switch (function->common.return_hint->type) {
+		case IS_ARRAY: {
+			zend_spprintf(&expected, 0, "an array");
+		} break;
+
+		default:
+			zend_spprintf(&expected, 0, "a %s", zend_get_type_by_const(function->common.return_hint->type));
+	}
+	
+	if (message) {
+		zend_error(type, "the %s %s was expected to return %s, %s", ftype, scope, expected, message);
+		efree(scope);
+		efree(expected);
+		return;
+	}
+
+	if (!returned) {
+		got = "nothing";
+	} else {
+		if (Z_TYPE_P(returned) == IS_OBJECT) {
+			zend_spprintf(&got, 0, "an object of class %s", Z_OBJCE_P(returned)->name);
+		} else switch (Z_TYPE_P(returned)) {
+			case IS_NULL:
+				got = estrdup("null");
+			break;
+
+			case IS_LONG:
+			case IS_ARRAY: {
+				zend_spprintf(&got, 0, "an %s", zend_zval_type_name(returned));
+			} break;
+			
+			default:
+				zend_spprintf(&got, 0, "a %s", zend_zval_type_name(returned));
+		}
+	}	
+
+	zend_error(type, "the %s %s was expected to return %s and returned %s", ftype, scope, expected, got);
+
+	efree(scope);
+	efree(expected);
+	if (returned)
+		efree(got);	
+}
 
 static void zend_push_function_call_entry(zend_function *fbc TSRMLS_DC) /* {{{ */
 {
@@ -1833,6 +1892,42 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 	char lcname[16];
 	int name_len;
 
+	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->return_hint->used) {
+		char *errmsg = "Generators may only be hinted as Generator, Iterator or Traversable, %s is not a valid type";
+		char *lower_name;
+		int class_hint_len = CG(active_op_array)->return_hint->class_name_len;
+
+		if (CG(active_op_array)->return_hint->type != IS_OBJECT) {
+			zend_error_noreturn(E_COMPILE_ERROR, errmsg, 
+				zend_get_type_by_const(CG(active_op_array)->return_hint->type));
+		}
+
+		/**
+ 		 * This is a dirty workaround to not crash when opcache is enabled
+ 		 *
+ 		 * Basically, opcache overrides the class table while compiling files.
+ 		 * That means that a instanceof check during compile will fail, as we 
+ 		 * will not be able to load the internal classes.
+ 		 * 
+ 		 * Considering this is an internal edge case, where the return type is
+ 		 * dictated by the engine itself, it is OK to just do a plain string
+ 		 * comparison.
+ 		 *
+ 		 * The alternative would be to introduce a opcode handler just to do this
+ 		 * particular check, which has WAY more overhead both in maintainability
+ 		 * and runtime cost.
+ 		 */
+		lower_name = zend_str_tolower_dup(CG(active_op_array)->return_hint->class_name, class_hint_len);
+		if (0 != zend_binary_strcmp(lower_name, class_hint_len, "traversable", 11)
+			&& 0 != zend_binary_strcmp(lower_name, class_hint_len, "generator", 9)
+			&& 0 != zend_binary_strcmp(lower_name, class_hint_len, "iterator", 8)
+		) {
+			efree(lower_name);
+			zend_error_noreturn(E_COMPILE_ERROR, errmsg, CG(active_op_array)->return_hint->class_name);
+		}
+		efree(lower_name);
+	}
+
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
 
@@ -1861,6 +1956,39 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 	zend_stack_del_top(&CG(foreach_copy_stack));
 }
 /* }}} */
+
+/* {{{ */
+void zend_do_function_return_hint(znode *return_hint TSRMLS_DC) {			
+	if (return_hint->op_type != IS_UNUSED) {
+		CG(active_op_array)->return_hint->used = 1;
+		
+		if (return_hint->op_type == IS_CONST) {
+			if (Z_TYPE(return_hint->u.constant) == IS_STRING) {
+				int fetch_type = zend_get_class_fetch_type(Z_STRVAL(return_hint->u.constant), Z_STRLEN(return_hint->u.constant));
+				
+				switch (fetch_type) {
+					case ZEND_FETCH_CLASS_SELF:
+						if (!CG(active_class_entry)) {
+							zend_error_noreturn(E_COMPILE_ERROR, "Cannot access self when no class scope is active");
+						}
+						CG(active_op_array)->return_hint->class_name_type = fetch_type;
+					break;
+					
+					default:
+						CG(active_op_array)->return_hint->class_name_type = ZEND_FETCH_CLASS_SILENT;
+						zend_resolve_class_name(return_hint TSRMLS_CC);
+				}
+			
+				CG(active_op_array)->return_hint->type = IS_OBJECT;
+				CG(active_op_array)->return_hint->class_name_len = Z_STRLEN(return_hint->u.constant);
+				CG(active_op_array)->return_hint->class_name = zend_new_interned_string
+					(Z_STRVAL(return_hint->u.constant), Z_STRLEN(return_hint->u.constant)+1, 1 TSRMLS_CC);
+			} else {
+				CG(active_op_array)->return_hint->type = Z_TYPE(return_hint->u.constant);
+			}
+		}
+	}
+} /* }}} */
 
 void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_uchar pass_by_reference, zend_bool is_variadic TSRMLS_DC) /* {{{ */
 {
@@ -2855,7 +2983,7 @@ void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_v
 	if (!CG(active_op_array)->function_name) {
 		zend_error_noreturn(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a function");
 	}
-
+	
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
 
 	if (is_variable) {
@@ -3518,12 +3646,55 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 			REALLOC_BUF_IF_EXCEED(buf, offset, length, 32);
 		}
 	}
+	
 	*(offset++) = ')';
+	
+	if (fptr->common.return_hint && fptr->common.return_hint->used) {
+		REALLOC_BUF_IF_EXCEED(buf, offset, length, 4);
+		*(offset++) = ' ';
+		*(offset++) = ':';
+		*(offset++) = ' ';
+		
+		switch (fptr->common.return_hint->type) {
+			case IS_OBJECT:
+				REALLOC_BUF_IF_EXCEED(buf, offset, length, fptr->common.return_hint->class_name_len);
+				memcpy(offset, fptr->common.return_hint->class_name, fptr->common.return_hint->class_name_len);
+				offset += fptr->common.return_hint->class_name_len;
+			break;
+			
+			default: {
+				char *type = zend_get_type_by_const(fptr->common.return_hint->type);
+				if (type) {
+					size_t type_len = strlen(type);
+					REALLOC_BUF_IF_EXCEED(buf, offset, length, type_len);
+					memcpy(offset, type, type_len);
+					offset += type_len;
+				}
+			}
+		}
+	}
+	
 	*offset = '\0';
 
 	return buf;
 }
 /* }}} */
+
+static inline zend_class_entry ** fetch_return_hint_ce(zend_function *method TSRMLS_DC) {
+	zend_class_entry **cce;
+	switch (method->common.return_hint->class_name_type) {
+		case ZEND_FETCH_CLASS_SELF:
+			return &method->common.scope;
+		break;
+		default:
+			if (zend_lookup_class(method->common.return_hint->class_name, method->common.return_hint->class_name_len, &cce TSRMLS_CC) != SUCCESS) {
+				zend_error(E_COMPILE_ERROR, "Declaration of %s::%s declares return type %s, which could not be found", 
+					ZEND_FN_SCOPE_NAME(method), method->common.function_name, method->common.return_hint->class_name);
+				return NULL;
+			}
+			return cce;
+	}
+}
 
 static void do_inheritance_check_on_method(zend_function *child, zend_function *parent TSRMLS_DC) /* {{{ */
 {
@@ -3594,8 +3765,50 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			efree(method_prototype);
 		}
 	}
+	
+	if (parent->common.return_hint && parent->common.return_hint->used) {
+		
+		if (!child->common.return_hint || !child->common.return_hint->used) {
+			char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
+			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s should be compatible with %s, return type missing", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
+			efree(method_prototype);
+			return;
+		}
+		
+		if (child->common.return_hint->type != parent->common.return_hint->type) {
+			char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
+			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s should be compatible with %s, return type mismatch", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
+			efree(method_prototype);
+			return;
+		}
+		
+		if (child->common.return_hint->type == IS_OBJECT) {
+			zend_class_entry **pce = NULL, **cce = NULL;
+			
+			cce = fetch_return_hint_ce(child TSRMLS_CC);
+			
+			if (cce == NULL) {
+				return;
+			}
+			
+			pce = fetch_return_hint_ce(parent TSRMLS_CC);
+			
+			if (pce == NULL) {
+				return;
+			}
+			
+			if (!instanceof_function(*cce, *pce TSRMLS_CC)) {
+				char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
+				zend_error(E_COMPILE_ERROR, "Declaration of %s::%s should be compatible with %s, return type mismatch", 
+					ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
+				efree(method_prototype);
+				return;
+			}
+		}
+	}
 }
 /* }}} */
+
 
 static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, const zend_hash_key *hash_key, zend_class_entry *child_ce) /* {{{ */
 {
