@@ -3,6 +3,10 @@
  */
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 
+#define ZEND_OP2_IS_CONST_STRING(opline) \
+	(ZEND_OP2_TYPE(opline) == IS_CONST && \
+	Z_TYPE(op_array->literals[(opline)->op2.constant]) == IS_STRING)
+
 typedef struct _optimizer_call_info {
 	zend_function *func;
 	zend_op       *opline;
@@ -25,7 +29,7 @@ static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		switch (opline->opcode) {
 			case ZEND_INIT_FCALL_BY_NAME:
 			case ZEND_INIT_NS_FCALL_BY_NAME:
-				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
+				if (ZEND_OP2_IS_CONST_STRING(opline)) {
 					zend_function *func;
 					zval *function_name = &op_array->literals[opline->op2.constant + 1];
 					if ((func = zend_hash_find_ptr(&ctx->script->function_table,
@@ -64,7 +68,7 @@ static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				} else if (opline->extended_value == 0 &&
 				           call_stack[call].opline &&
 				           call_stack[call].opline->opcode == ZEND_INIT_FCALL_BY_NAME &&
-				           ZEND_OP2_TYPE(call_stack[call].opline) == IS_CONST) {
+						   ZEND_OP2_IS_CONST_STRING(call_stack[call].opline)) {
 
 					zend_op *fcall = call_stack[call].opline;
 
