@@ -129,7 +129,7 @@ if ($version[0] <= 4 && $version[1] < 1)
 		var_dump($defaults);
 	}
 
-	if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1)) {
+	if ((version_compare(PHP_VERSION, '6.0', '==') == 1)) {
 		// charsets cannot take any other value but utf8 in unicode mode
 		$defaults['charset_client'] = 'utf8';
 		$defaults['charset_connection'] = 'utf8';
