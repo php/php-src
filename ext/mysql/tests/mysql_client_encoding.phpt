@@ -50,7 +50,9 @@ if ($link_enc !== $tmp['charset']) {
 	}
 }
 
-if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && function_exists('is_unicode')) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+    function_exists('is_unicode')) {
 // unicode mode
 	if (!is_unicode($default_link_enc) || !is_unicode($link_enc)) {
 		printf("[010] No unicode returned!\n");
