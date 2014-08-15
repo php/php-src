@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2010 University of Cambridge
+           Copyright (c) 1997-2012 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -44,16 +44,53 @@ local functions. This source file is used in two places:
 
 (1) It is #included by pcre_compile.c when it is compiled in debugging mode
 (PCRE_DEBUG defined in pcre_internal.h). It is not included in production
-compiles.
+compiles. In this case PCRE_INCLUDED is defined.
 
-(2) It is always #included by pcretest.c, which can be asked to print out a
-compiled regex for debugging purposes. */
+(2) It is also compiled separately and linked with pcretest.c, which can be
+asked to print out a compiled regex for debugging purposes. */
 
+#ifndef PCRE_INCLUDED
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+/* For pcretest program. */
+#define PRIV(name) name
+
+/* We have to include pcre_internal.h because we need the internal info for
+displaying the results of pcre_study() and we also need to know about the
+internal macros, structures, and other internal data values; pcretest has
+"inside information" compared to a program that strictly follows the PCRE API.
+
+Although pcre_internal.h does itself include pcre.h, we explicitly include it
+here before pcre_internal.h so that the PCRE_EXP_xxx macros get set
+appropriately for an application, not for building PCRE. */
+
+#include "pcre.h"
+#include "pcre_internal.h"
+
+/* These are the funtions that are contained within. It doesn't seem worth
+having a separate .h file just for this. */
+
+#endif /* PCRE_INCLUDED */
+
+#ifdef PCRE_INCLUDED
+static /* Keep the following function as private. */
+#endif
+
+#if defined COMPILE_PCRE8
+void pcre_printint(pcre *external_re, FILE *f, BOOL print_lengths);
+#elif defined COMPILE_PCRE16
+void pcre16_printint(pcre *external_re, FILE *f, BOOL print_lengths);
+#elif defined COMPILE_PCRE32
+void pcre32_printint(pcre *external_re, FILE *f, BOOL print_lengths);
+#endif
 
 /* Macro that decides whether a character should be output as a literal or in
 hexadecimal. We don't use isprint() because that can vary from system to system
 (even without the use of locales) and we want the output always to be the same,
-for testing purposes. This macro is used in pcretest as well as in this file. */
+for testing purposes. */
 
 #ifdef EBCDIC
 #define PRINTABLE(c) ((c) >= 64 && (c) < 255)
@@ -63,7 +100,13 @@ for testing purposes. This macro is used in pcretest as well as in this file. */
 
 /* The table of operator names. */
 
-static const char *OP_names[] = { OP_NAME_LIST };
+static const char *priv_OP_names[] = { OP_NAME_LIST };
+
+/* This table of operator lengths is not actually used by the working code,
+but its size is needed for a check that ensures it is the correct size for the
+number of opcodes (thus catching update omissions). */
+
+static const pcre_uint8 priv_OP_lengths[] = { OP_LENGTHS };
 
 
 
@@ -71,28 +114,36 @@ static const char *OP_names[] = { OP_NAME_LIST };
 *       Print single- or multi-byte character    *
 *************************************************/
 
-static int
-print_char(FILE *f, uschar *ptr, BOOL utf8)
+static unsigned int
+print_char(FILE *f, pcre_uchar *ptr, BOOL utf)
 {
-int c = *ptr;
+pcre_uint32 c = *ptr;
 
-#ifndef SUPPORT_UTF8
-utf8 = utf8;  /* Avoid compiler warning */
-if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x%02x", c);
+#ifndef SUPPORT_UTF
+
+(void)utf;  /* Avoid compiler warning */
+if (PRINTABLE(c)) fprintf(f, "%c", (char)c);
+else if (c <= 0x80) fprintf(f, "\\x%02x", c);
+else fprintf(f, "\\x{%x}", c);
 return 0;
 
 #else
-if (!utf8 || (c & 0xc0) != 0xc0)
+
+#if defined COMPILE_PCRE8
+
+if (!utf || (c & 0xc0) != 0xc0)
   {
-  if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x%02x", c);
+  if (PRINTABLE(c)) fprintf(f, "%c", (char)c);
+  else if (c < 0x80) fprintf(f, "\\x%02x", c);
+  else fprintf(f, "\\x{%02x}", c);
   return 0;
   }
 else
   {
   int i;
-  int a = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */
+  int a = PRIV(utf8_table4)[c & 0x3f];  /* Number of additional bytes */
   int s = 6*a;
-  c = (c & _pcre_utf8_table3[a]) << s;
+  c = (c & PRIV(utf8_table3)[a]) << s;
   for (i = 1; i <= a; i++)
     {
     /* This is a check for malformed UTF-8; it should only occur if the sanity
@@ -110,34 +161,127 @@ else
     s -= 6;
     c |= (ptr[i] & 0x3f) << s;
     }
-  if (c < 128) fprintf(f, "\\x%02x", c); else fprintf(f, "\\x{%x}", c);
+  fprintf(f, "\\x{%x}", c);
   return a;
   }
-#endif
+
+#elif defined COMPILE_PCRE16
+
+if (!utf || (c & 0xfc00) != 0xd800)
+  {
+  if (PRINTABLE(c)) fprintf(f, "%c", (char)c);
+  else if (c <= 0x80) fprintf(f, "\\x%02x", c);
+  else fprintf(f, "\\x{%02x}", c);
+  return 0;
+  }
+else
+  {
+  /* This is a check for malformed UTF-16; it should only occur if the sanity
+  check has been turned off. Rather than swallow a low surrogate, just stop if
+  we hit a bad one. Print it with \X instead of \x as an indication. */
+
+  if ((ptr[1] & 0xfc00) != 0xdc00)
+    {
+    fprintf(f, "\\X{%x}", c);
+    return 0;
+    }
+
+  c = (((c & 0x3ff) << 10) | (ptr[1] & 0x3ff)) + 0x10000;
+  fprintf(f, "\\x{%x}", c);
+  return 1;
+  }
+
+#elif defined COMPILE_PCRE32
+
+if (!utf || (c & 0xfffff800u) != 0xd800u)
+  {
+  if (PRINTABLE(c)) fprintf(f, "%c", (char)c);
+  else if (c <= 0x80) fprintf(f, "\\x%02x", c);
+  else fprintf(f, "\\x{%x}", c);
+  return 0;
+  }
+else
+  {
+  /* This is a check for malformed UTF-32; it should only occur if the sanity
+  check has been turned off. Rather than swallow a surrogate, just stop if
+  we hit one. Print it with \X instead of \x as an indication. */
+  fprintf(f, "\\X{%x}", c);
+  return 0;
+  }
+
+#endif /* COMPILE_PCRE[8|16|32] */
+
+#endif /* SUPPORT_UTF */
 }
 
+/*************************************************
+*  Print uchar string (regardless of utf)        *
+*************************************************/
 
+static void
+print_puchar(FILE *f, PCRE_PUCHAR ptr)
+{
+while (*ptr != '\0')
+  {
+  register pcre_uint32 c = *ptr++;
+  if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x{%x}", c);
+  }
+}
 
 /*************************************************
 *          Find Unicode property name            *
 *************************************************/
 
 static const char *
-get_ucpname(int ptype, int pvalue)
+get_ucpname(unsigned int ptype, unsigned int pvalue)
 {
 #ifdef SUPPORT_UCP
 int i;
-for (i = _pcre_utt_size - 1; i >= 0; i--)
+for (i = PRIV(utt_size) - 1; i >= 0; i--)
   {
-  if (ptype == _pcre_utt[i].type && pvalue == _pcre_utt[i].value) break;
+  if (ptype == PRIV(utt)[i].type && pvalue == PRIV(utt)[i].value) break;
   }
-return (i >= 0)? _pcre_utt_names + _pcre_utt[i].name_offset : "??";
+return (i >= 0)? PRIV(utt_names) + PRIV(utt)[i].name_offset : "??";
 #else
 /* It gets harder and harder to shut off unwanted compiler warnings. */
 ptype = ptype * pvalue;
 return (ptype == pvalue)? "??" : "??";
 #endif
 }
+
+
+/*************************************************
+*       Print Unicode property value             *
+*************************************************/
+
+/* "Normal" properties can be printed from tables. The PT_CLIST property is a
+pseudo-property that contains a pointer to a list of case-equivalent
+characters. This is used only when UCP support is available and UTF mode is
+selected. It should never occur otherwise, but just in case it does, have
+something ready to print. */
+
+static void
+print_prop(FILE *f, pcre_uchar *code, const char *before, const char *after)
+{
+if (code[1] != PT_CLIST)
+  {
+  fprintf(f, "%s%s %s%s", before, priv_OP_names[*code], get_ucpname(code[1],
+    code[2]), after);
+  }
+else
+  {
+  const char *not = (*code == OP_PROP)? "" : "not ";
+#ifndef SUPPORT_UCP
+  fprintf(f, "%s%sclist %d%s", before, not, code[2], after);
+#else
+  const pcre_uint32 *p = PRIV(ucd_caseless_sets) + code[2];
+  fprintf (f, "%s%sclist", before, not);
+  while (*p < NOTACHAR) fprintf(f, " %04x", *p++);
+  fprintf(f, "%s", after);
+#endif
+  }
+}
+
 
 
 
@@ -151,12 +295,23 @@ print_lengths flag controls whether offsets and lengths of items are printed.
 They can be turned off from pcretest so that automatic tests on bytecode can be
 written that do not depend on the value of LINK_SIZE. */
 
-static void
+#ifdef PCRE_INCLUDED
+static /* Keep the following function as private. */
+#endif
+#if defined COMPILE_PCRE8
+void
 pcre_printint(pcre *external_re, FILE *f, BOOL print_lengths)
+#elif defined COMPILE_PCRE16
+void
+pcre16_printint(pcre *external_re, FILE *f, BOOL print_lengths)
+#elif defined COMPILE_PCRE32
+void
+pcre32_printint(pcre *external_re, FILE *f, BOOL print_lengths)
+#endif
 {
-real_pcre *re = (real_pcre *)external_re;
-uschar *codestart, *code;
-BOOL utf8;
+REAL_PCRE *re = (REAL_PCRE *)external_re;
+pcre_uchar *codestart, *code;
+BOOL utf;
 
 unsigned int options = re->options;
 int offset = re->name_table_offset;
@@ -174,14 +329,16 @@ if (re->magic_number != MAGIC_NUMBER)
             ((options >> 24) & 0x000000ff);
   }
 
-code = codestart = (uschar *)re + offset + count * size;
-utf8 = (options & PCRE_UTF8) != 0;
+code = codestart = (pcre_uchar *)re + offset + count * size;
+/* PCRE_UTF(16|32) have the same value as PCRE_UTF8. */
+utf = (options & PCRE_UTF8) != 0;
 
 for(;;)
   {
-  uschar *ccode;
-  int c;
-  int extra = 0;
+  pcre_uchar *ccode;
+  const char *flag = "  ";
+  pcre_uint32 c;
+  unsigned int extra = 0;
 
   if (print_lengths)
     fprintf(f, "%3d ", (int)(code - codestart));
@@ -192,65 +349,61 @@ for(;;)
     {
 /* ========================================================================== */
       /* These cases are never obeyed. This is a fudge that causes a compile-
-      time error if the vectors OP_names or _pcre_OP_lengths, which are indexed
+      time error if the vectors OP_names or OP_lengths, which are indexed
       by opcode, are not the correct length. It seems to be the only way to do
       such a check at compile time, as the sizeof() operator does not work in
-      the C preprocessor. We do this while compiling pcretest, because that
-      #includes pcre_tables.c, which holds _pcre_OP_lengths. We can't do this
-      when building pcre_compile.c with PCRE_DEBUG set, because it doesn't then
-      know the size of _pcre_OP_lengths. */
+      the C preprocessor. */
 
-#ifdef COMPILING_PCRETEST
       case OP_TABLE_LENGTH:
       case OP_TABLE_LENGTH +
-        ((sizeof(OP_names)/sizeof(const char *) == OP_TABLE_LENGTH) &&
-        (sizeof(_pcre_OP_lengths) == OP_TABLE_LENGTH)):
+        ((sizeof(priv_OP_names)/sizeof(const char *) == OP_TABLE_LENGTH) &&
+        (sizeof(priv_OP_lengths) == OP_TABLE_LENGTH)):
       break;
-#endif
 /* ========================================================================== */
 
     case OP_END:
-    fprintf(f, "    %s\n", OP_names[*code]);
+    fprintf(f, "    %s\n", priv_OP_names[*code]);
     fprintf(f, "------------------------------------------------------------------\n");
     return;
-
-    case OP_OPT:
-    fprintf(f, " %.2x %s", code[1], OP_names[*code]);
-    break;
 
     case OP_CHAR:
     fprintf(f, "    ");
     do
       {
       code++;
-      code += 1 + print_char(f, code, utf8);
+      code += 1 + print_char(f, code, utf);
       }
     while (*code == OP_CHAR);
     fprintf(f, "\n");
     continue;
 
-    case OP_CHARNC:
-    fprintf(f, " NC ");
+    case OP_CHARI:
+    fprintf(f, " /i ");
     do
       {
       code++;
-      code += 1 + print_char(f, code, utf8);
+      code += 1 + print_char(f, code, utf);
       }
-    while (*code == OP_CHARNC);
+    while (*code == OP_CHARI);
     fprintf(f, "\n");
     continue;
 
     case OP_CBRA:
+    case OP_CBRAPOS:
     case OP_SCBRA:
+    case OP_SCBRAPOS:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
       else fprintf(f, "    ");
-    fprintf(f, "%s %d", OP_names[*code], GET2(code, 1+LINK_SIZE));
+    fprintf(f, "%s %d", priv_OP_names[*code], GET2(code, 1+LINK_SIZE));
     break;
 
     case OP_BRA:
+    case OP_BRAPOS:
     case OP_SBRA:
+    case OP_SBRAPOS:
     case OP_KETRMAX:
     case OP_KETRMIN:
+    case OP_KETRPOS:
     case OP_ALT:
     case OP_KET:
     case OP_ASSERT:
@@ -258,21 +411,22 @@ for(;;)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
+    case OP_ONCE_NC:
     case OP_COND:
     case OP_SCOND:
     case OP_REVERSE:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
       else fprintf(f, "    ");
-    fprintf(f, "%s", OP_names[*code]);
+    fprintf(f, "%s", priv_OP_names[*code]);
     break;
 
     case OP_CLOSE:
-    fprintf(f, "    %s %d", OP_names[*code], GET2(code, 1));
+    fprintf(f, "    %s %d", priv_OP_names[*code], GET2(code, 1));
     break;
 
     case OP_CREF:
     case OP_NCREF:
-    fprintf(f, "%3d %s", GET2(code,1), OP_names[*code]);
+    fprintf(f, "%3d %s", GET2(code,1), priv_OP_names[*code]);
     break;
 
     case OP_RREF:
@@ -295,6 +449,17 @@ for(;;)
     fprintf(f, "    Cond def");
     break;
 
+    case OP_STARI:
+    case OP_MINSTARI:
+    case OP_POSSTARI:
+    case OP_PLUSI:
+    case OP_MINPLUSI:
+    case OP_POSPLUSI:
+    case OP_QUERYI:
+    case OP_MINQUERYI:
+    case OP_POSQUERYI:
+    flag = "/i";
+    /* Fall through */
     case OP_STAR:
     case OP_MINSTAR:
     case OP_POSSTAR:
@@ -313,43 +478,49 @@ for(;;)
     case OP_TYPEQUERY:
     case OP_TYPEMINQUERY:
     case OP_TYPEPOSQUERY:
-    fprintf(f, "    ");
+    fprintf(f, " %s ", flag);
     if (*code >= OP_TYPESTAR)
       {
-      fprintf(f, "%s", OP_names[code[1]]);
       if (code[1] == OP_PROP || code[1] == OP_NOTPROP)
         {
-        fprintf(f, " %s ", get_ucpname(code[2], code[3]));
+        print_prop(f, code + 1, "", " ");
         extra = 2;
         }
+      else fprintf(f, "%s", priv_OP_names[code[1]]);
       }
-    else extra = print_char(f, code+1, utf8);
-    fprintf(f, "%s", OP_names[*code]);
+    else extra = print_char(f, code+1, utf);
+    fprintf(f, "%s", priv_OP_names[*code]);
     break;
 
+    case OP_EXACTI:
+    case OP_UPTOI:
+    case OP_MINUPTOI:
+    case OP_POSUPTOI:
+    flag = "/i";
+    /* Fall through */
     case OP_EXACT:
     case OP_UPTO:
     case OP_MINUPTO:
     case OP_POSUPTO:
-    fprintf(f, "    ");
-    extra = print_char(f, code+3, utf8);
+    fprintf(f, " %s ", flag);
+    extra = print_char(f, code + 1 + IMM2_SIZE, utf);
     fprintf(f, "{");
-    if (*code != OP_EXACT) fprintf(f, "0,");
+    if (*code != OP_EXACT && *code != OP_EXACTI) fprintf(f, "0,");
     fprintf(f, "%d}", GET2(code,1));
-    if (*code == OP_MINUPTO) fprintf(f, "?");
-      else if (*code == OP_POSUPTO) fprintf(f, "+");
+    if (*code == OP_MINUPTO || *code == OP_MINUPTOI) fprintf(f, "?");
+      else if (*code == OP_POSUPTO || *code == OP_POSUPTOI) fprintf(f, "+");
     break;
 
     case OP_TYPEEXACT:
     case OP_TYPEUPTO:
     case OP_TYPEMINUPTO:
     case OP_TYPEPOSUPTO:
-    fprintf(f, "    %s", OP_names[code[3]]);
-    if (code[3] == OP_PROP || code[3] == OP_NOTPROP)
+    if (code[1 + IMM2_SIZE] == OP_PROP || code[1 + IMM2_SIZE] == OP_NOTPROP)
       {
-      fprintf(f, " %s ", get_ucpname(code[4], code[5]));
+      print_prop(f, code + IMM2_SIZE + 1, "    ", " ");
       extra = 2;
       }
+    else fprintf(f, "    %s", priv_OP_names[code[1 + IMM2_SIZE]]);
     fprintf(f, "{");
     if (*code != OP_TYPEEXACT) fprintf(f, "0,");
     fprintf(f, "%d}", GET2(code,1));
@@ -357,11 +528,26 @@ for(;;)
       else if (*code == OP_TYPEPOSUPTO) fprintf(f, "+");
     break;
 
+    case OP_NOTI:
+    flag = "/i";
+    /* Fall through */
     case OP_NOT:
-    c = code[1];
-    if (PRINTABLE(c)) fprintf(f, "    [^%c]", c);
-      else fprintf(f, "    [^\\x%02x]", c);
+    fprintf(f, " %s [^", flag);
+    extra = print_char(f, code + 1, utf);
+    fprintf(f, "]");
     break;
+
+    case OP_NOTSTARI:
+    case OP_NOTMINSTARI:
+    case OP_NOTPOSSTARI:
+    case OP_NOTPLUSI:
+    case OP_NOTMINPLUSI:
+    case OP_NOTPOSPLUSI:
+    case OP_NOTQUERYI:
+    case OP_NOTMINQUERYI:
+    case OP_NOTPOSQUERYI:
+    flag = "/i";
+    /* Fall through */
 
     case OP_NOTSTAR:
     case OP_NOTMINSTAR:
@@ -372,56 +558,68 @@ for(;;)
     case OP_NOTQUERY:
     case OP_NOTMINQUERY:
     case OP_NOTPOSQUERY:
-    c = code[1];
-    if (PRINTABLE(c)) fprintf(f, "    [^%c]", c);
-      else fprintf(f, "    [^\\x%02x]", c);
-    fprintf(f, "%s", OP_names[*code]);
+    fprintf(f, " %s [^", flag);
+    extra = print_char(f, code + 1, utf);
+    fprintf(f, "]%s", priv_OP_names[*code]);
     break;
+
+    case OP_NOTEXACTI:
+    case OP_NOTUPTOI:
+    case OP_NOTMINUPTOI:
+    case OP_NOTPOSUPTOI:
+    flag = "/i";
+    /* Fall through */
 
     case OP_NOTEXACT:
     case OP_NOTUPTO:
     case OP_NOTMINUPTO:
     case OP_NOTPOSUPTO:
-    c = code[3];
-    if (PRINTABLE(c)) fprintf(f, "    [^%c]{", c);
-      else fprintf(f, "    [^\\x%02x]{", c);
-    if (*code != OP_NOTEXACT) fprintf(f, "0,");
+    fprintf(f, " %s [^", flag);
+    extra = print_char(f, code + 1 + IMM2_SIZE, utf);
+    fprintf(f, "]{");
+    if (*code != OP_NOTEXACT && *code != OP_NOTEXACTI) fprintf(f, "0,");
     fprintf(f, "%d}", GET2(code,1));
-    if (*code == OP_NOTMINUPTO) fprintf(f, "?");
-      else if (*code == OP_NOTPOSUPTO) fprintf(f, "+");
+    if (*code == OP_NOTMINUPTO || *code == OP_NOTMINUPTOI) fprintf(f, "?");
+      else
+    if (*code == OP_NOTPOSUPTO || *code == OP_NOTPOSUPTOI) fprintf(f, "+");
     break;
 
     case OP_RECURSE:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
       else fprintf(f, "    ");
-    fprintf(f, "%s", OP_names[*code]);
+    fprintf(f, "%s", priv_OP_names[*code]);
     break;
 
+    case OP_REFI:
+    flag = "/i";
+    /* Fall through */
     case OP_REF:
-    fprintf(f, "    \\%d", GET2(code,1));
-    ccode = code + _pcre_OP_lengths[*code];
+    fprintf(f, " %s \\%d", flag, GET2(code,1));
+    ccode = code + priv_OP_lengths[*code];
     goto CLASS_REF_REPEAT;
 
     case OP_CALLOUT:
-    fprintf(f, "    %s %d %d %d", OP_names[*code], code[1], GET(code,2),
+    fprintf(f, "    %s %d %d %d", priv_OP_names[*code], code[1], GET(code,2),
       GET(code, 2 + LINK_SIZE));
     break;
 
     case OP_PROP:
     case OP_NOTPROP:
-    fprintf(f, "    %s %s", OP_names[*code], get_ucpname(code[1], code[2]));
+    print_prop(f, code, "    ", "");
     break;
 
-    /* OP_XCLASS can only occur in UTF-8 mode. However, there's no harm in
-    having this code always here, and it makes it less messy without all those
-    #ifdefs. */
+    /* OP_XCLASS can only occur in UTF or PCRE16 modes. However, there's no
+    harm in having this code always here, and it makes it less messy without
+    all those #ifdefs. */
 
     case OP_CLASS:
     case OP_NCLASS:
     case OP_XCLASS:
       {
-      int i, min, max;
+      int i;
+      unsigned int min, max;
       BOOL printmap;
+      pcre_uint8 *map;
 
       fprintf(f, "    [");
 
@@ -442,13 +640,14 @@ for(;;)
 
       if (printmap)
         {
+        map = (pcre_uint8 *)ccode;
         for (i = 0; i < 256; i++)
           {
-          if ((ccode[i/8] & (1 << (i&7))) != 0)
+          if ((map[i/8] & (1 << (i&7))) != 0)
             {
             int j;
             for (j = i+1; j < 256; j++)
-              if ((ccode[j/8] & (1 << (j&7))) == 0) break;
+              if ((map[j/8] & (1 << (j&7))) == 0) break;
             if (i == '-' || i == ']') fprintf(f, "\\");
             if (PRINTABLE(i)) fprintf(f, "%c", i);
               else fprintf(f, "\\x%02x", i);
@@ -462,41 +661,41 @@ for(;;)
             i = j;
             }
           }
-        ccode += 32;
+        ccode += 32 / sizeof(pcre_uchar);
         }
 
       /* For an XCLASS there is always some additional data */
 
       if (*code == OP_XCLASS)
         {
-        int ch;
+        pcre_uchar ch;
         while ((ch = *ccode++) != XCL_END)
           {
           if (ch == XCL_PROP)
             {
-            int ptype = *ccode++;
-            int pvalue = *ccode++;
+            unsigned int ptype = *ccode++;
+            unsigned int pvalue = *ccode++;
             fprintf(f, "\\p{%s}", get_ucpname(ptype, pvalue));
             }
           else if (ch == XCL_NOTPROP)
             {
-            int ptype = *ccode++;
-            int pvalue = *ccode++;
+            unsigned int ptype = *ccode++;
+            unsigned int pvalue = *ccode++;
             fprintf(f, "\\P{%s}", get_ucpname(ptype, pvalue));
             }
           else
             {
-            ccode += 1 + print_char(f, ccode, TRUE);
+            ccode += 1 + print_char(f, ccode, utf);
             if (ch == XCL_RANGE)
               {
               fprintf(f, "-");
-              ccode += 1 + print_char(f, ccode, TRUE);
+              ccode += 1 + print_char(f, ccode, utf);
               }
             }
           }
         }
 
-      /* Indicate a non-UTF8 class which was created by negation */
+      /* Indicate a non-UTF class which was created by negation */
 
       fprintf(f, "]%s", (*code == OP_NCLASS)? " (neg)" : "");
 
@@ -511,18 +710,18 @@ for(;;)
         case OP_CRMINPLUS:
         case OP_CRQUERY:
         case OP_CRMINQUERY:
-        fprintf(f, "%s", OP_names[*ccode]);
-        extra += _pcre_OP_lengths[*ccode];
+        fprintf(f, "%s", priv_OP_names[*ccode]);
+        extra += priv_OP_lengths[*ccode];
         break;
 
         case OP_CRRANGE:
         case OP_CRMINRANGE:
         min = GET2(ccode,1);
-        max = GET2(ccode,3);
-        if (max == 0) fprintf(f, "{%d,}", min);
-        else fprintf(f, "{%d,%d}", min, max);
+        max = GET2(ccode,1 + IMM2_SIZE);
+        if (max == 0) fprintf(f, "{%u,}", min);
+        else fprintf(f, "{%u,%u}", min, max);
         if (*ccode == OP_CRMINRANGE) fprintf(f, "?");
-        extra += _pcre_OP_lengths[*ccode];
+        extra += priv_OP_lengths[*ccode];
         break;
 
         /* Do nothing if it's not a repeat; this code stops picky compilers
@@ -537,34 +736,29 @@ for(;;)
     case OP_MARK:
     case OP_PRUNE_ARG:
     case OP_SKIP_ARG:
-    fprintf(f, "    %s %s", OP_names[*code], code + 2);
+    case OP_THEN_ARG:
+    fprintf(f, "    %s ", priv_OP_names[*code]);
+    print_puchar(f, code + 2);
     extra += code[1];
     break;
 
     case OP_THEN:
-    if (print_lengths)
-      fprintf(f, "    %s %d", OP_names[*code], GET(code, 1));
-    else
-      fprintf(f, "    %s", OP_names[*code]);
+    fprintf(f, "    %s", priv_OP_names[*code]);
     break;
 
-    case OP_THEN_ARG:
-    if (print_lengths)
-      fprintf(f, "    %s %d %s", OP_names[*code], GET(code, 1),
-        code + 2 + LINK_SIZE);
-    else
-      fprintf(f, "    %s %s", OP_names[*code], code + 2 + LINK_SIZE);
-    extra += code[1+LINK_SIZE];
-    break;
+    case OP_CIRCM:
+    case OP_DOLLM:
+    flag = "/m";
+    /* Fall through */
 
-    /* Anything else is just an item with no data*/
+    /* Anything else is just an item with no data, but possibly a flag. */
 
     default:
-    fprintf(f, "    %s", OP_names[*code]);
+    fprintf(f, " %s %s", flag, priv_OP_names[*code]);
     break;
     }
 
-  code += _pcre_OP_lengths[*code] + extra;
+  code += priv_OP_lengths[*code] + extra;
   fprintf(f, "\n");
   }
 }
