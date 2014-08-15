@@ -44,6 +44,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #66091 (memory leaks in DateTime constructor) (Tjerk).
 
+- MySQLi:
+  . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
+
 31 Jul 2014, PHP 5.6.0 Release Candidate 3
 
 - Core:
