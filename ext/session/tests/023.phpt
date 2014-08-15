@@ -29,8 +29,8 @@ $arr[3]->method();
 var_dump($baz);
 var_dump($arr);
 session_destroy();
---EXPECT--
-object(foo)#1 (2) {
+--EXPECTF--
+object(foo)#%d (2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>

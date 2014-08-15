@@ -1,5 +1,5 @@
 --TEST--
-Test session_set_save_handler() : full handler implementation
+Test session_set_save_handler() function: class with validate_sid
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
@@ -11,12 +11,12 @@ session.name=PHPSESSID
 ob_start();
 
 /*
- * Prototype : bool session_set_save_handler(SessionHandler $handler [, bool $register_shutdown_function = true])
+ * Prototype : bool session_set_save_handler(SessionHandlerInterface $handler [, bool $register_shutdown_function = true])
  * Description : Sets user-level session storage functions
  * Source code : ext/session/session.c
  */
 
-echo "*** Testing session_set_save_handler() : full handler implementation ***\n";
+echo "*** Testing session_set_save_handler() function: class with validate_sid ***\n";
 
 class MySession2 extends SessionHandler {
 	public $path;
@@ -38,12 +38,11 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function write($id, $data) {
-		return (bool)file_put_contents($this->path . $id, $data);
+		return file_put_contents($this->path . $id, $data);
 	}
 
 	public function destroy($id) {
 		@unlink($this->path . $id);
-		return true;
 	}
 
 	public function gc($maxlifetime) {
@@ -54,26 +53,17 @@ class MySession2 extends SessionHandler {
 		}
 		return true;
 	}
+
+	public function create_sid() {
+		return 'my_sid';
+	}
+
+	public function validate_sid($id) {
+		return 'my_sid'===$id;
+	}
 }
 
 $handler = new MySession2;
-session_set_save_handler(array($handler, 'open'), array($handler, 'close'),
-	array($handler, 'read'), array($handler, 'write'), array($handler, 'destroy'), array($handler, 'gc'));
-session_start();
-
-$_SESSION['foo'] = "hello";
-
-var_dump(session_id(), ini_get('session.save_handler'), $_SESSION);
-
-session_write_close();
-session_unset();
-
-session_start();
-var_dump($_SESSION);
-
-session_write_close();
-session_unset();
-
 session_set_save_handler($handler);
 session_start();
 
@@ -91,18 +81,8 @@ session_write_close();
 session_unset();
 
 --EXPECTF--
-*** Testing session_set_save_handler() : full handler implementation ***
-string(%d) "%s"
-string(4) "user"
-array(1) {
-  ["foo"]=>
-  string(5) "hello"
-}
-array(1) {
-  ["foo"]=>
-  string(5) "hello"
-}
-string(%d) "%s"
+*** Testing session_set_save_handler() function: class with validate_sid ***
+string(%d) "my_sid"
 string(4) "user"
 array(1) {
   ["foo"]=>

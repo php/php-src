@@ -34,6 +34,14 @@
 		RETURN_FALSE;						\
 	}							
 
+
+/* Object based session save handler uses "previously used save handler" functions
+   as its base method. i.e. Old save handler's "open" becomes "SessionHandler->open".
+   PS(default_mod) holds pointer to old save handlers functions.
+   These methods are not called unless save handler calls parent::methods(). */
+
+/******** SessionHandler **********/
+
 /* {{{ proto bool SessionHandler::open(string save_path, string session_name)
    Wraps the old open handler */
 PHP_METHOD(SessionHandler, open)
@@ -143,10 +151,16 @@ PHP_METHOD(SessionHandler, gc)
 /* }}} */
 
 /* {{{ proto char SessionHandler::create_sid()
-   Wraps the old create_sid handler */
+   Wraps the old create_sid handlers
+   This should be replaced by createId() when 5.5 becomes unsupported.
+
+   Note: Do *NOT* document this method.
+ */
 PHP_METHOD(SessionHandler, create_sid)
 {
 	char *id;
+
+	/* This method may be called regardless of session state */
 
 	if (zend_parse_parameters_none() == FAILURE) {
 	    return;
@@ -155,5 +169,86 @@ PHP_METHOD(SessionHandler, create_sid)
 	id = PS(default_mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 
 	RETURN_STRING(id, 0);
+}
+/* }}} */
+
+
+/******** No interface ************/
+
+/* Since 5.5.1, create_sid() method is added. However, this name does not
+   confirm naming standard. If create_sid() is defined and createId() is
+   not defined, use create_sid() for compatibility.
+   This method should replaced create_sid() when 5.5 becomes unsupported.
+   This should be a member of SessionHandler. Otherwise createId() is used
+   always. (BC for PHP 5.5)
+
+   Note: This method is not member of SessionHandler. It is here for documentation
+         and future implementation.
+*/
+
+/* {{{ proto char SessionUpdateTimestampHandler::createId()
+   Wraps the old create_sid handler */
+PHP_METHOD(SessionHandler, createId)
+{
+	char *id;
+
+	PS_SANITY_CHECK_IS_OPEN;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+	    return;
+	}
+
+	id = PS(default_mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
+
+	RETURN_STRING(id, 0);
+}
+/* }}} */
+
+
+/******** SessionUpdateTimestampHandlerInterface ************/
+
+/* SessionHandler should not have to have these APIs. Otherwise, all users are forced
+   to implement these API by their own.
+
+   Note: These methods are not member of SessionHandler. It is here for documentation
+         and future implementation.
+
+*/
+
+/* {{{ proto char SessionUpdateTimestampHandler::validateId(string id)
+   Simply return TRUE */
+PHP_METHOD(SessionHandler, validateId)
+{
+	char *key;
+	int key_len;
+
+	PS_SANITY_CHECK_IS_OPEN;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+		return;
+	}
+
+	/* Previous save handler may not support validate_sid API. */
+	/* RETVAL_BOOL(SUCCESS == PS(default_mod)->s_validate_sid(&PS(mod_data), key TSRMLS_CC)); */
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool SessionUpdateTimestampHandler::updateTimestamp(string id, string data)
+   Simply call update_timestamp */
+PHP_METHOD(SessionHandler, updateTimestamp)
+{
+	char *key, *val;
+	int key_len, val_len;
+
+	PS_SANITY_CHECK_IS_OPEN;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &key, &key_len, &val, &val_len) == FAILURE) {
+		return;
+	}
+
+	/* Prevoius save handler may not support update_timestamp API. */
+	/* RETVAL_BOOL(SUCCESS == PS(default_mod)->s_update_timestamp(&PS(mod_data), key, val, val_len TSRMLS_CC)); */
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, val_len TSRMLS_CC));
 }
 /* }}} */

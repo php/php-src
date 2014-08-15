@@ -24,6 +24,6 @@
 extern ps_module ps_mod_files;
 #define ps_files_ptr &ps_mod_files
 
-PS_FUNCS_SID(files);
+PS_FUNCS_UPDATE_TIMESTAMP(files);
 
 #endif
