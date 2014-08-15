@@ -25,16 +25,16 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: getservbyport() expects parameter 1 to be long, array given in %s on line %d
+Warning: getservbyport() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
-Warning: getservbyport() expects parameter 1 to be long, array given in %s on line %d
+Warning: getservbyport() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
-Warning: getservbyport() expects parameter 1 to be long, array given in %s on line %d
+Warning: getservbyport() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 bool(false)
 string(%d) "%s"
 
-Warning: getservbyport() expects parameter 1 to be long, object given in %s on line %d
+Warning: getservbyport() expects parameter 1 to be integer, object given in %s on line %d
 NULL

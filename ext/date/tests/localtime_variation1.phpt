@@ -226,34 +226,34 @@ array(9) {
 
 --empty array--
 
-Warning: localtime() expects parameter 1 to be long, array given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, array given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: localtime() expects parameter 1 to be long, array given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, array given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: localtime() expects parameter 1 to be long, array given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, array given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: localtime() expects parameter 1 to be long, array given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, array given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -510,66 +510,66 @@ array(9) {
 
 --empty string DQ--
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
 
-Warning: localtime() expects parameter 1 to be long, object given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, object given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, object given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, object given in %s on line %d
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: localtime() expects parameter 1 to be long, object given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, object given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, object given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer, object given in %s on line %d
 bool(false)
 
 --undefined var--

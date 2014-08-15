@@ -9,4 +9,4 @@ $s->setMaxLineLen('string');
 
 ?>
 --EXPECTF--
-Warning: SplFileObject::setMaxLineLen() expects parameter 1 to be long, string given in %s on line %d
+Warning: SplFileObject::setMaxLineLen() expects parameter 1 to be integer, string given in %s on line %d

@@ -90,7 +90,7 @@ Constant: IMAGETYPE_XBM
 Warning: image_type_to_extension() expects parameter 2 to be boolean, array given in %s on line %d
 bool(false)
 
-Warning: image_type_to_extension() expects parameter 1 to be long, object given in %s on line %d
+Warning: image_type_to_extension() expects parameter 1 to be integer, object given in %s on line %d
 bool(false)
 bool(false)
 

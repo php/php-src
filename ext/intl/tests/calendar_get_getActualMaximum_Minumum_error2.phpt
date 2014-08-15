@@ -48,13 +48,13 @@ error: 2, intlcal_get_actual_maximum(): intlcal_get_actual_maximum: invalid fiel
 bool(false)
 error: 2, intlcal_get_actual_minimum(): intlcal_get_actual_minimum: invalid field
 bool(false)
-error: 2, intlcal_get() expects parameter 2 to be long, string given
+error: 2, intlcal_get() expects parameter 2 to be integer, string given
 error: 2, intlcal_get(): intlcal_get: bad arguments
 bool(false)
-error: 2, intlcal_get_actual_maximum() expects parameter 2 to be long, string given
+error: 2, intlcal_get_actual_maximum() expects parameter 2 to be integer, string given
 error: 2, intlcal_get_actual_maximum(): intlcal_get_actual_maximum: bad arguments
 bool(false)
-error: 2, intlcal_get_actual_minimum() expects parameter 2 to be long, string given
+error: 2, intlcal_get_actual_minimum() expects parameter 2 to be integer, string given
 error: 2, intlcal_get_actual_minimum(): intlcal_get_actual_minimum: bad arguments
 bool(false)
 error: 4096, Argument 1 passed to intlcal_get() must be an instance of IntlCalendar, integer given

@@ -40,6 +40,6 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: filter_has_var() expects parameter 1 to be long, string given in %s on line %d
+Warning: filter_has_var() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 Done

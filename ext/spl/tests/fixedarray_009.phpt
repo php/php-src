@@ -7,4 +7,4 @@ $a = new SplFixedArray('FOO');
 
 ?>
 --EXPECTF--
-Warning: SplFixedArray::__construct() expects parameter 1 to be long, string given in %s on line %d
+Warning: SplFixedArray::__construct() expects parameter 1 to be integer, string given in %s on line %d

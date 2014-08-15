@@ -469,7 +469,7 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 				if (Z_TYPE_P(op) == IS_DOUBLE) {
 					return;
 				}
-				zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name);
+				zend_error(E_NOTICE, "Object of class %s could not be converted to float", Z_OBJCE_P(op)->name);
 
 				zval_dtor(op);
 				ZVAL_DOUBLE(op, retval);

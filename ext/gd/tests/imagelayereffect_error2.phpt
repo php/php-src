@@ -15,4 +15,4 @@ $image = imagecreatetruecolor(180, 30);
 $layer = imagelayereffect($image, 'IMG_EFFECT_REPLACE');
 ?>
 --EXPECTF--
-Warning: imagelayereffect() expects parameter 2 to be long, %s given in %s on line %d
+Warning: imagelayereffect() expects parameter 2 to be integer, %s given in %s on line %d

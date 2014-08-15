@@ -146,22 +146,22 @@ int(-205162155)
 
 -- empty array --
 
-Warning: mktime() expects parameter 7 to be long, array given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: mktime() expects parameter 7 to be long, array given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: mktime() expects parameter 7 to be long, array given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: mktime() expects parameter 7 to be long, array given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
@@ -196,42 +196,42 @@ int(%i)
 
 -- empty string DQ --
 
-Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: mktime() expects parameter 7 to be long, object given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, object given in %s on line %d
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: mktime() expects parameter 7 to be long, object given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, object given in %s on line %d
 bool(false)
 
 -- undefined var --
@@ -246,6 +246,6 @@ int(%i)
 
 -- resource --
 
-Warning: mktime() expects parameter 7 to be long, resource given in %s on line %d
+Warning: mktime() expects parameter 7 to be integer, resource given in %s on line %d
 bool(false)
 ===DONE===

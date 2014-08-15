@@ -132,22 +132,22 @@ string(24) "January 1, 1970, 1:00 am"
 
 -- empty array --
 
-Warning: date() expects parameter 2 to be long, array given in %s on line %d
+Warning: date() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: date() expects parameter 2 to be long, array given in %s on line %d
+Warning: date() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: date() expects parameter 2 to be long, array given in %s on line %d
+Warning: date() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: date() expects parameter 2 to be long, array given in %s on line %d
+Warning: date() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
@@ -170,42 +170,42 @@ string(24) "January 1, 1970, 1:00 am"
 
 -- empty string DQ --
 
-Warning: date() expects parameter 2 to be long, string given in %s on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: date() expects parameter 2 to be long, string given in %s on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: date() expects parameter 2 to be long, string given in %s on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: date() expects parameter 2 to be long, string given in %s on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: date() expects parameter 2 to be long, string given in %s on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: date() expects parameter 2 to be long, string given in %s on line %d
+Warning: date() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: date() expects parameter 2 to be long, object given in %s on line %d
+Warning: date() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: date() expects parameter 2 to be long, object given in %s on line %d
+Warning: date() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 
 -- undefined var --
@@ -216,7 +216,7 @@ string(24) "January 1, 1970, 1:00 am"
 
 -- resource --
 
-Warning: date() expects parameter 2 to be long, resource given in %s on line %d
+Warning: date() expects parameter 2 to be integer, resource given in %s on line %d
 bool(false)
 ===DONE===
 
