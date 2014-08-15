@@ -1804,7 +1804,7 @@ PHP_FUNCTION(strstr)
    An alias for strstr */
 /* }}} */
 
-/* {{{ proto int strpos(string haystack, string needle [, int offset])
+/* {{{ proto int strpos(string haystack, string needle [, int offset [, int length]])
    Finds position of first occurrence of a string within another */
 PHP_FUNCTION(strpos)
 {
@@ -1814,12 +1814,27 @@ PHP_FUNCTION(strpos)
 	char  needle_char[2];
 	long  offset = 0;
 	int   haystack_len;
+	zval  **len_zv = NULL;
+	long  len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &needle, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|lZ", &haystack, &haystack_len, &needle, &offset, &len_zv) == FAILURE) {
 		return;
 	}
 
-	if (offset < 0 || offset > haystack_len) {
+	if (len_zv != NULL && Z_TYPE_PP(len_zv) != IS_NULL) {
+		convert_to_long_ex(len_zv);
+		len = Z_LVAL_PP(len_zv);
+		if (len < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+			RETURN_FALSE;
+		} else if (len == 0) {
+			len = -1;
+		}
+	} else {
+		len = -1;
+	}
+
+	if (offset < 0 || offset > haystack_len || (len != -1 && (offset + len) > haystack_len)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
@@ -1833,7 +1848,7 @@ PHP_FUNCTION(strpos)
 		found = php_memnstr(haystack + offset,
 			                Z_STRVAL_P(needle),
 			                Z_STRLEN_P(needle),
-			                haystack + haystack_len);
+			                (len != -1) ? haystack + offset + len : haystack + haystack_len);
 	} else {
 		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
 			RETURN_FALSE;
@@ -1843,7 +1858,7 @@ PHP_FUNCTION(strpos)
 		found = php_memnstr(haystack + offset,
 							needle_char,
 							1,
-		                    haystack + haystack_len);
+		                    (len != -1) ? haystack + offset + len : haystack + haystack_len);
 	}
 
 	if (found) {
@@ -1854,7 +1869,7 @@ PHP_FUNCTION(strpos)
 }
 /* }}} */
 
-/* {{{ proto int stripos(string haystack, string needle [, int offset])
+/* {{{ proto int stripos(string haystack, string needle [, int offset [, int length]])
    Finds position of first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stripos)
 {
@@ -1865,12 +1880,27 @@ PHP_FUNCTION(stripos)
 	char *needle_dup = NULL, *haystack_dup;
 	char needle_char[2];
 	zval *needle;
+	zval  **len_zv = NULL;
+	long  len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &needle, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|lZ", &haystack, &haystack_len, &needle, &offset, &len_zv) == FAILURE) {
 		return;
 	}
 
-	if (offset < 0 || offset > haystack_len) {
+	if (len_zv != NULL && Z_TYPE_PP(len_zv) != IS_NULL) {
+		convert_to_long_ex(len_zv);
+		len = Z_LVAL_PP(len_zv);
+		if (len < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+			RETURN_FALSE;
+		} else if (len == 0) {
+			len = -1;
+		}
+	} else {
+		len = -1;
+	}
+
+	if (offset < 0 || offset > haystack_len || (len != -1 && (offset + len) > haystack_len)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
@@ -1890,7 +1920,7 @@ PHP_FUNCTION(stripos)
 
 		needle_dup = estrndup(Z_STRVAL_P(needle), Z_STRLEN_P(needle));
 		php_strtolower(needle_dup, Z_STRLEN_P(needle));
-		found = php_memnstr(haystack_dup + offset, needle_dup, Z_STRLEN_P(needle), haystack_dup + haystack_len);
+		found = php_memnstr(haystack_dup + offset, needle_dup, Z_STRLEN_P(needle), (len != -1) ? haystack_dup + offset + len : haystack_dup + haystack_len);
 	} else {
 		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
 			efree(haystack_dup);
@@ -1901,7 +1931,7 @@ PHP_FUNCTION(stripos)
 		found = php_memnstr(haystack_dup + offset,
 							needle_char,
 							sizeof(needle_char) - 1,
-							haystack_dup + haystack_len);
+							(len != -1) ? haystack_dup + offset + len : haystack_dup + haystack_len);
 	}
 
 	efree(haystack_dup);
