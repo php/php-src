@@ -995,7 +995,7 @@ PHP_MINFO_FUNCTION(mysqli)
 
 /* Dependancies */
 static const  zend_module_dep mysqli_deps[] = {
-#if defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
+#if defined(HAVE_SPL) && (PHP_VERSION_ID >= 50100)
 	ZEND_MOD_REQUIRED("spl")
 #endif
 #if defined(MYSQLI_USE_MYSQLND)
