@@ -3148,7 +3148,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 		ce->__debugInfo = ce->parent->__debugInfo;
 	}
 	if (ce->constructor) {
-		if (ce->parent->constructor && ce->parent->constructor->common.fn_flags & ZEND_ACC_FINAL) {
+		if (ce->parent->constructor && ZEND_IS_FINAL_FUNCTION(*(ce->parent->constructor))) {
 			zend_error(E_ERROR, "Cannot override final %s::%s() with %s::%s()",
 				ce->parent->name, ce->parent->constructor->common.function_name,
 				ce->name, ce->constructor->common.function_name
@@ -3171,7 +3171,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 			lc_parent_class_name = zend_str_tolower_dup(ce->parent->name, ce->parent->name_length);
 			if (!zend_hash_exists(&ce->function_table, lc_parent_class_name, ce->parent->name_length+1) &&
 					zend_hash_find(&ce->parent->function_table, lc_parent_class_name, ce->parent->name_length+1, (void **)&function)==SUCCESS) {
-				if (function->common.fn_flags & ZEND_ACC_CTOR) {
+				if (ZEND_IS_CONSTRUCTOR(*function)) {
 					/* inherit parent's constructor */
 					zend_hash_update(&ce->function_table, lc_parent_class_name, ce->parent->name_length+1, function, sizeof(zend_function), (void**)&new_function);
 					function_add_ref(new_function);
@@ -3225,14 +3225,14 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
 	 */
-	if ((fe->common.fn_flags & ZEND_ACC_CTOR)
+	if (ZEND_IS_CONSTRUCTOR(*fe)
 		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
-			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)) {
+			&& !ZEND_IS_ABSTRACT_FUNCTION(*proto))) {
 		return 1;
 	}
 
 	/* If both methods are private do not enforce a signature */
-    if ((fe->common.fn_flags & ZEND_ACC_PRIVATE) && (proto->common.fn_flags & ZEND_ACC_PRIVATE)) {
+    if (ZEND_IS_PRIVATE_FUNCTION(*fe) && ZEND_IS_PRIVATE_FUNCTION(*proto)) {
 		return 1;
 	}
 
@@ -3531,7 +3531,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	zend_uint parent_flags = parent->common.fn_flags;
 
 	if ((parent->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
-		&& parent->common.fn_flags & ZEND_ACC_ABSTRACT
+		&& ZEND_IS_ABSTRACT_FUNCTION(*parent)
 		&& parent->common.scope != (child->common.prototype ? child->common.prototype->common.scope : child->common.scope)
 		&& child->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_IMPLEMENTED_ABSTRACT)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Can't inherit abstract function %s::%s() (previously declared abstract in %s)",
@@ -3548,7 +3548,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	/* You cannot change from static to non static and vice versa.
 	 */
 	if ((child_flags & ZEND_ACC_STATIC) != (parent_flags & ZEND_ACC_STATIC)) {
-		if (child->common.fn_flags & ZEND_ACC_STATIC) {
+		if (ZEND_IS_STATIC_FUNCTION(*child)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 		} else {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
@@ -3578,12 +3578,12 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	} else if (parent_flags & ZEND_ACC_ABSTRACT) {
 		child->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
 		child->common.prototype = parent;
-	} else if (!(parent->common.fn_flags & ZEND_ACC_CTOR) || (parent->common.prototype && (parent->common.prototype->common.scope->ce_flags & ZEND_ACC_INTERFACE))) {
+	} else if (!ZEND_IS_CONSTRUCTOR(*parent) || (parent->common.prototype && (parent->common.prototype->common.scope->ce_flags & ZEND_ACC_INTERFACE))) {
 		/* ctors only have a prototype if it comes from an interface */
 		child->common.prototype = parent->common.prototype ? parent->common.prototype : parent;
 	}
 
-	if (child->common.prototype && (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+	if (child->common.prototype && ZEND_IS_ABSTRACT_FUNCTION(*child->common.prototype)) {
 		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_get_function_declaration(child->common.prototype TSRMLS_CC));
 		}
@@ -4013,14 +4013,14 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 			/* use temporary *overriden HashTable to detect hidden conflict */
 			if (*overriden) {
 				if (zend_hash_quick_find(*overriden, arKey, nKeyLength, h, (void**) &existing_fn) == SUCCESS) {
-					if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+					if (ZEND_IS_ABSTRACT_FUNCTION(*existing_fn)) {
 						/* Make sure the trait method is compatible with previosly declared abstract method */
 						if (!zend_traits_method_compatibility_check(fn, existing_fn TSRMLS_CC)) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 								zend_get_function_declaration(fn TSRMLS_CC),
 								zend_get_function_declaration(existing_fn TSRMLS_CC));
 						}
-					} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+					} else if (ZEND_IS_ABSTRACT_FUNCTION(*fn)) {
 						/* Make sure the abstract declaration is compatible with previous declaration */
 						if (!zend_traits_method_compatibility_check(existing_fn, fn TSRMLS_CC)) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
@@ -4036,14 +4036,14 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 			}
 			zend_hash_quick_update(*overriden, arKey, nKeyLength, h, fn, sizeof(zend_function), (void**)&fn);
 			return;
-		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		} else if (ZEND_IS_ABSTRACT_FUNCTION(*existing_fn)) {
 			/* Make sure the trait method is compatible with previosly declared abstract method */
 			if (!zend_traits_method_compatibility_check(fn, existing_fn TSRMLS_CC)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 					zend_get_function_declaration(fn TSRMLS_CC),
 					zend_get_function_declaration(existing_fn TSRMLS_CC));
 			}
-		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		} else if (ZEND_IS_ABSTRACT_FUNCTION(*fn)) {
 			/* Make sure the abstract declaration is compatible with previous declaration */
 			if (!zend_traits_method_compatibility_check(existing_fn, fn TSRMLS_CC)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
@@ -4081,7 +4081,7 @@ static int zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce TSRML
 
 		fn->common.scope = ce;
 
-		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		if (ZEND_IS_ABSTRACT_FUNCTION(*fn)) {
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
 		if (fn->op_array.static_variables) {
@@ -5214,19 +5214,19 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 
 	if (ce->constructor) {
 		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
-		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
+		if (ZEND_IS_STATIC_FUNCTION(*ce->constructor)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static", ce->name, ce->constructor->common.function_name);
 		}
 	}
 	if (ce->destructor) {
 		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
-		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
+		if (ZEND_IS_STATIC_FUNCTION(*ce->destructor)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static", ce->name, ce->destructor->common.function_name);
 		}
 	}
 	if (ce->clone) {
 		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
-		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
+		if (ZEND_IS_STATIC_FUNCTION(*ce->clone)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static", ce->name, ce->clone->common.function_name);
 		}
 	}

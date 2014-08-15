@@ -203,6 +203,38 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_CLOSURE              0x100000
 #define ZEND_ACC_GENERATOR            0x800000
 
+/* method flag helpers */
+#define ZEND_IS_STATIC_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_STATIC	\
+)
+#define ZEND_IS_FINAL_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_FINAL	\
+)
+#define ZEND_IS_ABSTRACT_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_ABSTRACT	\
+)
+#define ZEND_IS_PRIVATE_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_PRIVATE	\
+)
+#define ZEND_IS_PROTECTED_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_PROTECTED	\
+)
+#define ZEND_IS_PUBLIC_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_PUBLIC	\
+)
+#define ZEND_IS_CONSTRUCTOR(f) ( \
+	(f).common.fn_flags & ZEND_ACC_CTOR	\
+)
+#define ZEND_IS_DESTRUCTOR(f) ( \
+	(f).common.fn_flags & ZEND_ACC_DTOR	\
+)
+#define ZEND_IS_DEPRECATED_FUNCTION(f) ( \
+	(f).common.fn_flags & ZEND_ACC_DEPRECATED	\
+)
+#define ZEND_IS_CLOSURE(f) ( \
+	(f).common.fn_flags & ZEND_ACC_CLOSURE	\
+)
+
 /* function flag for internal user call handlers __call, __callstatic */
 #define ZEND_ACC_CALL_VIA_HANDLER     0x200000
 

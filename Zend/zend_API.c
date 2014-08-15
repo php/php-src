@@ -2226,69 +2226,69 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		scope->__debugInfo = __debugInfo;
 		if (ctor) {
 			ctor->common.fn_flags |= ZEND_ACC_CTOR;
-			if (ctor->common.fn_flags & ZEND_ACC_STATIC) {
+			if (ZEND_IS_STATIC_FUNCTION(*ctor)) {
 				zend_error(error_type, "Constructor %s::%s() cannot be static", scope->name, ctor->common.function_name);
 			}
 			ctor->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (dtor) {
 			dtor->common.fn_flags |= ZEND_ACC_DTOR;
-			if (dtor->common.fn_flags & ZEND_ACC_STATIC) {
+			if (ZEND_IS_STATIC_FUNCTION(*dtor)) {
 				zend_error(error_type, "Destructor %s::%s() cannot be static", scope->name, dtor->common.function_name);
 			}
 			dtor->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (clone) {
 			clone->common.fn_flags |= ZEND_ACC_CLONE;
-			if (clone->common.fn_flags & ZEND_ACC_STATIC) {
+			if (ZEND_IS_STATIC_FUNCTION(*clone)) {
 				zend_error(error_type, "Constructor %s::%s() cannot be static", scope->name, clone->common.function_name);
 			}
 			clone->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (__call) {
-			if (__call->common.fn_flags & ZEND_ACC_STATIC) {
+			if (ZEND_IS_STATIC_FUNCTION(*__call)) {
 				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __call->common.function_name);
 			}
 			__call->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (__callstatic) {
-			if (!(__callstatic->common.fn_flags & ZEND_ACC_STATIC)) {
+			if (!ZEND_IS_STATIC_FUNCTION(*__callstatic)) {
 				zend_error(error_type, "Method %s::%s() must be static", scope->name, __callstatic->common.function_name);
 			}
 			__callstatic->common.fn_flags |= ZEND_ACC_STATIC;
 		}
 		if (__tostring) {
-			if (__tostring->common.fn_flags & ZEND_ACC_STATIC) {
+			if (ZEND_IS_STATIC_FUNCTION(*__tostring)) {
 				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __tostring->common.function_name);
 			}
 			__tostring->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (__get) {
-			if (__get->common.fn_flags & ZEND_ACC_STATIC) {
+			if (ZEND_IS_STATIC_FUNCTION(*__get)) {
 				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __get->common.function_name);
 			}
 			__get->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (__set) {
-			if (__set->common.fn_flags & ZEND_ACC_STATIC) {
+			if (ZEND_IS_STATIC_FUNCTION(*__set)) {
 				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __set->common.function_name);
 			}
 			__set->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (__unset) {
-			if (__unset->common.fn_flags & ZEND_ACC_STATIC) {
+			if (ZEND_IS_STATIC_FUNCTION(*__unset)) {
 				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __unset->common.function_name);
 			}
 			__unset->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (__isset) {
-			if (__isset->common.fn_flags & ZEND_ACC_STATIC) {
+			if (ZEND_IS_STATIC_FUNCTION(*__isset)) {
 				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __isset->common.function_name);
 			}
 			__isset->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (__debugInfo) {
-			if (__debugInfo->common.fn_flags & ZEND_ACC_STATIC) {
+			if (ZEND_IS_STATIC_FUNCTION(*__debugInfo)) {
 				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __debugInfo->common.function_name);
 			}
 		}
@@ -2852,7 +2852,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			zend_function *priv_fbc;
 
 			if (zend_hash_find(&EG(scope)->function_table, lmname, mlen+1, (void **) &priv_fbc)==SUCCESS
-				&& priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
+				&& ZEND_IS_PRIVATE_FUNCTION(*priv_fbc)
 				&& priv_fbc->common.scope == EG(scope)) {
 				fcc->function_handler = priv_fbc;
 			}
@@ -2867,7 +2867,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 					fcc->function_handler = NULL;
 					goto get_function_via_handler;
 				}
-			} else if (fcc->function_handler->common.fn_flags & ZEND_ACC_PROTECTED) {
+			} else if (ZEND_IS_PROTECTED_FUNCTION(*fcc->function_handler)) {
 				if (!zend_check_protected(fcc->function_handler->common.scope, EG(scope))) {
 					retval = 0;
 					fcc->function_handler = NULL;
@@ -2928,14 +2928,14 @@ get_function_via_handler:
 
 	if (retval) {
 		if (fcc->calling_scope && !call_via_handler) {
-			if (!fcc->object_ptr && (fcc->function_handler->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+			if (!fcc->object_ptr && ZEND_IS_ABSTRACT_FUNCTION(*fcc->function_handler)) {
 				if (error) {
 					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", fcc->calling_scope->name, fcc->function_handler->common.function_name);
 					retval = 0;
 				} else {
 					zend_error(E_ERROR, "Cannot call abstract method %s::%s()", fcc->calling_scope->name, fcc->function_handler->common.function_name);
 				}
-			} else if (!fcc->object_ptr && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
+			} else if (!fcc->object_ptr && !ZEND_IS_STATIC_FUNCTION(*fcc->function_handler)) {
 				int severity;
 				char *verb;
 				if (fcc->function_handler->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -2981,7 +2981,7 @@ get_function_via_handler:
 						}
 						retval = 0;
 					}
-				} else if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PROTECTED)) {
+				} else if (ZEND_IS_PROTECTED_FUNCTION(*fcc->function_handler)) {
 					if (!zend_check_protected(fcc->function_handler->common.scope, EG(scope))) {
 						if (error) {
 							if (*error) {

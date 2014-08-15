@@ -84,7 +84,7 @@ ZEND_METHOD(Closure, bind)
 
 	closure = (zend_closure *)zend_object_store_get_object(zclosure TSRMLS_CC);
 
-	if ((newthis != NULL) && (closure->func.common.fn_flags & ZEND_ACC_STATIC)) {
+	if ((newthis != NULL) && ZEND_IS_STATIC_FUNCTION(closure->func)) {
 		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
 	}
 
@@ -467,7 +467,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 				zend_error(E_WARNING, "Cannot bind function %s::%s to scope class %s", func->common.scope->name, func->common.function_name, scope->name);
 				scope = NULL;
 			}
-			if(scope && this_ptr && (func->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+			if(scope && this_ptr && !ZEND_IS_STATIC_FUNCTION(*func) &&
 					!instanceof_function(Z_OBJCE_P(this_ptr), closure->func.common.scope TSRMLS_CC)) {
 				zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", func->common.scope->name, func->common.function_name, Z_OBJCE_P(this_ptr)->name);
 				scope = NULL;
@@ -487,7 +487,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	closure->func.common.scope = scope;
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
-		if (this_ptr && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {
+		if (this_ptr && !ZEND_IS_STATIC_FUNCTION(closure->func)) {
 			closure->this_ptr = this_ptr;
 			Z_ADDREF_P(this_ptr);
 		} else {
