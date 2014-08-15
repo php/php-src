@@ -3786,6 +3786,10 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 		dim_node.op_type = IS_CONST;
 		ZVAL_LONG(&dim_node.u.constant, i);
 
+		if (expr_node->op_type == IS_CONST) {
+			Z_TRY_ADDREF(expr_node->u.constant);
+		}
+
 		opline = zend_emit_op(&fetch_result,
 			get_list_fetch_opcode(expr_node->op_type), expr_node, &dim_node TSRMLS_CC);
 		opline->extended_value |= ZEND_FETCH_ADD_LOCK;
