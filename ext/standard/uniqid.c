@@ -49,7 +49,7 @@ PHP_FUNCTION(uniqid)
 #else
 	zend_bool more_entropy = 0;
 #endif
-	char *uniqid;
+	zend_string *uniqid;
 	int sec, usec, prefix_len = 0;
 	struct timeval tv;
 
@@ -76,12 +76,12 @@ PHP_FUNCTION(uniqid)
 	 * digits for usecs.
 	 */
 	if (more_entropy) {
-		spprintf(&uniqid, 0, "%s%08x%05x%.8F", prefix, sec, usec, php_combined_lcg(TSRMLS_C) * 10);
+		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, php_combined_lcg(TSRMLS_C) * 10);
 	} else {
-		spprintf(&uniqid, 0, "%s%08x%05x", prefix, sec, usec);
+		uniqid = strpprintf(0, "%s%08x%05x", prefix, sec, usec);
 	}
 
-	RETURN_STRING(uniqid, 0);
+	RETURN_STR(uniqid);
 }
 #endif
 /* }}} */

@@ -84,13 +84,13 @@ static int little_endian_long_map[4];
 
 /* {{{ php_pack
  */
-static void php_pack(zval **val, int size, int *map, char *output)
+static void php_pack(zval *val, int size, int *map, char *output)
 {
 	int i;
 	char *v;
 
 	convert_to_long_ex(val);
-	v = (char *) &Z_LVAL_PP(val);
+	v = (char *) &Z_LVAL_P(val);
 
 	for (i = 0; i < size; i++) {
 		*output++ = v[map[i]];
@@ -105,7 +105,7 @@ static void php_pack(zval **val, int size, int *map, char *output)
    Takes one or more arguments and packs them into a binary string according to the format argument */
 PHP_FUNCTION(pack)
 {
-	zval ***argv = NULL;
+	zval *argv = NULL;
 	int num_args, i;
 	int currentarg;
 	char *format;
@@ -120,13 +120,13 @@ PHP_FUNCTION(pack)
 		return;
 	}
 
-	if (Z_ISREF_PP(argv[0])) {
-		SEPARATE_ZVAL(argv[0]);
+	if (Z_ISREF(argv[0])) {
+		SEPARATE_ZVAL(&argv[0]);
 	}
-	convert_to_string_ex(argv[0]);
+	convert_to_string_ex(&argv[0]);
 
-	format = Z_STRVAL_PP(argv[0]);
-	formatlen = Z_STRLEN_PP(argv[0]);
+	format = Z_STRVAL(argv[0]);
+	formatlen = Z_STRLEN(argv[0]);
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
@@ -174,7 +174,6 @@ PHP_FUNCTION(pack)
 			case 'h': 
 			case 'H':
 				if (currentarg >= num_args) {
-					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough arguments", code);
@@ -182,11 +181,11 @@ PHP_FUNCTION(pack)
 				}
 
 				if (arg < 0) {
-					if (Z_ISREF_PP(argv[currentarg])) {
-						SEPARATE_ZVAL(argv[currentarg]);
+					if (Z_ISREF(argv[currentarg])) {
+						SEPARATE_ZVAL(&argv[currentarg]);
 					}
-					convert_to_string_ex(argv[currentarg]);
-					arg = Z_STRLEN_PP(argv[currentarg]);
+					convert_to_string_ex(&argv[currentarg]);
+					arg = Z_STRLEN(argv[currentarg]);
 					if (code == 'Z') {
 						/* add one because Z is always NUL-terminated:
 						 * pack("Z*", "aa") === "aa\0"
@@ -220,7 +219,6 @@ PHP_FUNCTION(pack)
 				currentarg += arg;
 
 				if (currentarg > num_args) {
-					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: too few arguments", code);
@@ -229,7 +227,6 @@ PHP_FUNCTION(pack)
 				break;
 
 			default:
-				efree(argv);
 				efree(formatcodes);
 				efree(formatargs);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: unknown format code", code);
@@ -318,22 +315,21 @@ PHP_FUNCTION(pack)
 	for (i = 0; i < formatcount; i++) {
 	    int code = (int) formatcodes[i];
 		int arg = formatargs[i];
-		zval **val;
 
 		switch ((int) code) {
 			case 'a': 
 			case 'A': 
 			case 'Z': {
 				int arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
+
+				zend_string *str = zval_get_string(&argv[currentarg++]);
+
 				memset(&output[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
-				val = argv[currentarg++];
-				if (Z_ISREF_PP(val)) {
-					SEPARATE_ZVAL(val);
-				}
-				convert_to_string_ex(val);
-				memcpy(&output[outputpos], Z_STRVAL_PP(val),
-					   (Z_STRLEN_PP(val) < arg_cp) ? Z_STRLEN_PP(val) : arg_cp);
+				memcpy(&output[outputpos], str->val,
+					   (str->len < arg_cp) ? str->len : arg_cp);
+
 				outputpos += arg;
+				STR_RELEASE(str);
 				break;
 			}
 
@@ -341,18 +337,14 @@ PHP_FUNCTION(pack)
 			case 'H': {
 				int nibbleshift = (code == 'h') ? 0 : 4;
 				int first = 1;
-				char *v;
 
-				val = argv[currentarg++];
-				if (Z_ISREF_PP(val)) {
-					SEPARATE_ZVAL(val);
-				}
-				convert_to_string_ex(val);
-				v = Z_STRVAL_PP(val);
+				zend_string *str = zval_get_string(&argv[currentarg++]);
+				char *v = str->val; 
+
 				outputpos--;
-				if(arg > Z_STRLEN_PP(val)) {
+				if(arg > str->len) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough characters in string", code);
-					arg = Z_STRLEN_PP(val);
+					arg = str->len;
 				}
 
 				while (arg-- > 0) {
@@ -380,13 +372,14 @@ PHP_FUNCTION(pack)
 				}
 
 				outputpos++;
+				STR_RELEASE(str);
 				break;
 			}
 
 			case 'c': 
 			case 'C':
 				while (arg-- > 0) {
-					php_pack(argv[currentarg++], 1, byte_map, &output[outputpos]);
+					php_pack(&argv[currentarg++], 1, byte_map, &output[outputpos]);
 					outputpos++;
 				}
 				break;
@@ -404,7 +397,7 @@ PHP_FUNCTION(pack)
 				}
 
 				while (arg-- > 0) {
-					php_pack(argv[currentarg++], 2, map, &output[outputpos]);
+					php_pack(&argv[currentarg++], 2, map, &output[outputpos]);
 					outputpos += 2;
 				}
 				break;
@@ -413,7 +406,7 @@ PHP_FUNCTION(pack)
 			case 'i': 
 			case 'I': 
 				while (arg-- > 0) {
-					php_pack(argv[currentarg++], sizeof(int), int_map, &output[outputpos]);
+					php_pack(&argv[currentarg++], sizeof(int), int_map, &output[outputpos]);
 					outputpos += sizeof(int);
 				}
 				break;
@@ -431,19 +424,15 @@ PHP_FUNCTION(pack)
 				}
 
 				while (arg-- > 0) {
-					php_pack(argv[currentarg++], 4, map, &output[outputpos]);
+					php_pack(&argv[currentarg++], 4, map, &output[outputpos]);
 					outputpos += 4;
 				}
 				break;
 			}
 
 			case 'f': {
-				float v;
-
 				while (arg-- > 0) {
-					val = argv[currentarg++];
-					convert_to_double_ex(val);
-					v = (float) Z_DVAL_PP(val);
+					float v = (float) zval_get_double(&argv[currentarg++]);
 					memcpy(&output[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -451,12 +440,8 @@ PHP_FUNCTION(pack)
 			}
 
 			case 'd': {
-				double v;
-
 				while (arg-- > 0) {
-					val = argv[currentarg++];
-					convert_to_double_ex(val);
-					v = (double) Z_DVAL_PP(val);
+					double v = (double) zval_get_double(&argv[currentarg++]);
 					memcpy(&output[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -485,11 +470,10 @@ PHP_FUNCTION(pack)
 		}
 	}
 
-	efree(argv);
 	efree(formatcodes);
 	efree(formatargs);
 	output[outputpos] = '\0';
-	RETVAL_STRINGL(output, outputpos, 1);
+	RETVAL_STRINGL(output, outputpos);
 	efree(output);
 }
 /* }}} */
@@ -685,7 +669,7 @@ PHP_FUNCTION(unpack)
 
 						size = len;
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len, 1);
+						add_assoc_stringl(return_value, n, &input[inputpos], len);
 						break;
 					}
 					case 'A': {
@@ -711,7 +695,7 @@ PHP_FUNCTION(unpack)
 								break;
 						}
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len + 1, 1);
+						add_assoc_stringl(return_value, n, &input[inputpos], len + 1);
 						break;
 					}
 					/* New option added for Z to remain in-line with the Perl implementation */
@@ -735,7 +719,7 @@ PHP_FUNCTION(unpack)
 						}
 						len = s;
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len, 1);
+						add_assoc_stringl(return_value, n, &input[inputpos], len);
 						break;
 					}
 
@@ -778,7 +762,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						buf[len] = '\0';
-						add_assoc_stringl(return_value, n, buf, len, 1);
+						add_assoc_stringl(return_value, n, buf, len);
 						efree(buf);
 						break;
 					}

@@ -118,13 +118,12 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	struct zip_stat sb;
 	const char *path = stream->orig_path;
 	int path_len = strlen(stream->orig_path);
-	char *file_basename;
-	size_t file_basename_len;
 	char file_dirname[MAXPATHLEN];
 	struct zip *za;
 	char *fragment;
 	int fragment_len;
 	int err;
+	zend_string *file_basename;
 
 	fragment = strchr(path, '#');
 	if (!fragment) {
@@ -149,11 +148,11 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	memcpy(file_dirname, path, path_len - fragment_len);
 	file_dirname[path_len - fragment_len] = '\0';
 
-	php_basename((char *)path, path_len - fragment_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
+	file_basename = php_basename((char *)path, path_len - fragment_len, NULL, 0 TSRMLS_CC);
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		efree(file_basename);
+		STR_RELEASE(file_basename);
 		return -1;
 	}
 
@@ -161,7 +160,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	if (za) {
 		memset(ssb, 0, sizeof(php_stream_statbuf));
 		if (zip_stat(za, fragment, ZIP_FL_NOCASE, &sb) != 0) {
-			efree(file_basename);
+			STR_RELEASE(file_basename);
 			return -1;
 		}
 		zip_close(za);
@@ -185,7 +184,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 #endif
 		ssb->sb.st_ino = -1;
 	}
-	efree(file_basename);
+	STR_RELEASE(file_basename);
 	return 0;
 }
 /* }}} */
@@ -259,8 +258,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 {
 	int path_len;
 
-	char *file_basename;
-	size_t file_basename_len;
+	zend_string *file_basename;
 	char file_dirname[MAXPATHLEN];
 
 	struct zip *za;
@@ -294,11 +292,11 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 	memcpy(file_dirname, path, path_len - fragment_len);
 	file_dirname[path_len - fragment_len] = '\0';
 
-	php_basename(path, path_len - fragment_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
+	file_basename = php_basename(path, path_len - fragment_len, NULL, 0 TSRMLS_CC);
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		efree(file_basename);
+		STR_RELEASE(file_basename);
 		return NULL;
 	}
 
@@ -322,7 +320,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 		}
 	}
 
-	efree(file_basename);
+	STR_RELEASE(file_basename);
 
 	if (!stream) {
 		return NULL;

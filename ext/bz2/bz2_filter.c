@@ -80,12 +80,12 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 	php_stream_filter_status_t exit_status = PSFS_FEED_ME;
 	bz_stream *streamp;
 
-	if (!thisfilter || !thisfilter->abstract) {
+	if (!Z_PTR(thisfilter->abstract)) {
 		/* Should never happen */
 		return PSFS_ERR_FATAL;
 	}
 
-	data = (php_bz2_filter_data *)(thisfilter->abstract);
+	data = (php_bz2_filter_data *)Z_PTR(thisfilter->abstract);
 	streamp = &(data->strm);
 
 	while (buckets_in->head) {
@@ -182,8 +182,8 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 
 static void php_bz2_decompress_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
-	if (thisfilter && thisfilter->abstract) {
-		php_bz2_filter_data *data = thisfilter->abstract;
+	if (thisfilter && Z_PTR(thisfilter->abstract)) {
+		php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
 		if (data->status == PHP_BZ2_RUNNING) {
 			BZ2_bzDecompressEnd(&(data->strm));
 		}
@@ -217,12 +217,12 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 	int status;
 	php_stream_filter_status_t exit_status = PSFS_FEED_ME;
 
-	if (!thisfilter || !thisfilter->abstract) {
+	if (!Z_PTR(thisfilter->abstract)) {
 		/* Should never happen */
 		return PSFS_ERR_FATAL;
 	}
 
-	data = (php_bz2_filter_data *)(thisfilter->abstract);
+	data = (php_bz2_filter_data *)Z_PTR(thisfilter->abstract);
 
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
@@ -288,8 +288,8 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 
 static void php_bz2_compress_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
-	if (thisfilter && thisfilter->abstract) {
-		php_bz2_filter_data *data = thisfilter->abstract;
+	if (Z_PTR(thisfilter->abstract)) {
+		php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
 		BZ2_bzCompressEnd(&(data->strm));
 		pefree(data->inbuf, data->persistent);
 		pefree(data->outbuf, data->persistent);
@@ -347,34 +347,21 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 		data->expect_concatenated = 0;
 
 		if (filterparams) {
-			zval **tmpzval = NULL;
+			zval *tmpzval = NULL;
 
 			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
-
-				if (SUCCESS == zend_hash_find(HASH_OF(filterparams), "concatenated", sizeof("concatenated"), (void **) &tmpzval) ) {
-					zval tmp, *tmp2;
-
-					tmp = **tmpzval;
-					zval_copy_ctor(&tmp);
-					tmp2 = &tmp;
-					convert_to_boolean_ex(&tmp2);
-					data->expect_concatenated = Z_LVAL(tmp);
+				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "concatenated", sizeof("concatenated")-1))) {
+					data->expect_concatenated = zend_is_true(tmpzval TSRMLS_CC);
 					tmpzval = NULL;
 				}
 
-				zend_hash_find(HASH_OF(filterparams), "small", sizeof("small"), (void **) &tmpzval);
+				tmpzval = zend_hash_str_find(HASH_OF(filterparams), "small", sizeof("small")-1);
 			} else {
-				tmpzval = &filterparams;
+				tmpzval = filterparams;
 			}
 
 			if (tmpzval) {
-				zval tmp, *tmp2;
-
-				tmp = **tmpzval;
-				zval_copy_ctor(&tmp);
-				tmp2 = &tmp;
-				convert_to_boolean_ex(&tmp2);
-				data->small_footprint = Z_LVAL(tmp);
+				data->small_footprint = zend_is_true(tmpzval TSRMLS_CC);
 			}
 		}
 
@@ -385,29 +372,27 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 		int workFactor = PHP_BZ2_FILTER_DEFAULT_WORKFACTOR;
 
 		if (filterparams) {
-			zval **tmpzval;
+			zval *tmpzval;
 
 			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
-				if (zend_hash_find(HASH_OF(filterparams), "blocks", sizeof("blocks"), (void**) &tmpzval) == SUCCESS) {
+				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "blocks", sizeof("blocks")-1))) {
 					/* How much memory to allocate (1 - 9) x 100kb */
 					zval tmp;
 	
-					tmp = **tmpzval;
-					zval_copy_ctor(&tmp);
+					ZVAL_DUP(&tmp, tmpzval);
 					convert_to_long(&tmp);
 					if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > 9) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%ld)", Z_LVAL_PP(tmpzval));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%ld)", Z_LVAL_P(tmpzval));
 					} else {
 						blockSize100k = Z_LVAL(tmp);
 					}
 				}
 
-				if (zend_hash_find(HASH_OF(filterparams), "work", sizeof("work"), (void**) &tmpzval) == SUCCESS) {
+				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "work", sizeof("work")-1))) {
 					/* Work Factor (0 - 250) */
 					zval tmp;
 	
-					tmp = **tmpzval;
-					zval_copy_ctor(&tmp);
+					ZVAL_DUP(&tmp, tmpzval);
 					convert_to_long(&tmp);
 
 					if (Z_LVAL(tmp) < 0 || Z_LVAL(tmp) > 250) {

@@ -34,6 +34,9 @@ string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
     Entry [ pcre.recursion_limit <ALL> ]
       Current = '%d'
     }
+    Entry [ pcre.jit <ALL> ]
+      Current = '%d'
+    }
   }
 
   - Constants [14] {

@@ -285,7 +285,9 @@ PHP_FUNCTION(iptcembed)
 	fclose(fp);
 
 	if (spool < 2) {
-		RETVAL_STRINGL(spoolbuf, poi - spoolbuf, 0);
+		// TODO: avoid reallocation ???
+		RETVAL_STRINGL(spoolbuf, poi - spoolbuf);
+		efree(spoolbuf);
 	} else {
 		RETURN_TRUE;
 	}
@@ -301,7 +303,7 @@ PHP_FUNCTION(iptcparse)
 	unsigned char *buffer, recnum, dataset, key[ 16 ];
 	char *str;
 	int str_len;
-	zval *values, **element;
+	zval values, *element;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) != SUCCESS) {
 		return;
@@ -350,14 +352,13 @@ PHP_FUNCTION(iptcparse)
 			array_init(return_value);
 		}
 
-		if (zend_hash_find(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void **) &element) == FAILURE) {
-			MAKE_STD_ZVAL(values);
-			array_init(values);
+		if ((element = zend_hash_str_find(Z_ARRVAL_P(return_value), key, strlen(key))) == NULL) {
+			array_init(&values);
 			
-			zend_hash_update(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void *) &values, sizeof(zval*), (void **) &element);
+			element = zend_hash_str_update(Z_ARRVAL_P(return_value), key, strlen(key), &values);
 		} 
 			
-		add_next_index_stringl(*element, buffer+inx, len, 1);
+		add_next_index_stringl(element, buffer+inx, len);
 		inx += len;
 		tagsfound++;
 	}

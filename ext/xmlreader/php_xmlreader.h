@@ -32,14 +32,19 @@ extern zend_module_entry xmlreader_module_entry;
 #include <libxml/xmlreader.h>
 
 typedef struct _xmlreader_object {
-	zend_object  std;
 	xmlTextReaderPtr ptr;
 	/* strings must be set in input buffer as copy is required */
 	xmlParserInputBufferPtr input;
 	void *schema;
 	HashTable *prop_handler;
-	zend_object_handle handle;
+	zend_object  std;
 } xmlreader_object;
+
+static inline xmlreader_object *php_xmlreader_fetch_object(zend_object *obj) {
+	return (xmlreader_object *)((char*)(obj) - XtOffsetOf(xmlreader_object, std));
+}
+
+#define Z_XMLREADER_P(zv) php_xmlreader_fetch_object(Z_OBJ_P((zv)))
 
 PHP_MINIT_FUNCTION(xmlreader);
 PHP_MSHUTDOWN_FUNCTION(xmlreader);

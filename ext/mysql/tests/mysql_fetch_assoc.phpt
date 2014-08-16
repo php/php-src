@@ -87,7 +87,7 @@ array(5) {
   %unicode|string%(1) "1"
 }
 
-Warning: mysql_fetch_assoc(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_fetch_assoc(): supplied resource is not a valid MySQL result resource in %s on line %d
 
 Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [010]

@@ -442,7 +442,7 @@ static int _call_message_handler(zval *callback_name, CS_SERVERMSG *srvmsg TSRML
 		zval expr_copy;
 		int use_copy;
 
-		zend_make_printable_zval(callback_name, &expr_copy, &use_copy);
+		use_copy = zend_make_printable_zval(callback_name, &expr_copy TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cannot call the messagehandler %s", Z_STRVAL(expr_copy));
 		zval_dtor(&expr_copy);
 	}
@@ -2001,11 +2001,11 @@ PHP_FUNCTION(sybase_fetch_field)
 
 	object_init(return_value);
 
-	add_property_string(return_value, "name", result->fields[field_offset].name, 1);
+	add_property_string(return_value, "name", result->fields[field_offset].name);
 	add_property_long(return_value, "max_length", result->fields[field_offset].max_length);
-	add_property_string(return_value, "column_source", result->fields[field_offset].column_source, 1);
+	add_property_string(return_value, "column_source", result->fields[field_offset].column_source);
 	add_property_long(return_value, "numeric", result->fields[field_offset].numeric);
-	add_property_string(return_value, "type", php_sybase_get_field_name(Z_TYPE(result->fields[field_offset])), 1);
+	add_property_string(return_value, "type", php_sybase_get_field_name(Z_TYPE(result->fields[field_offset])));
 }
 /* }}} */
 

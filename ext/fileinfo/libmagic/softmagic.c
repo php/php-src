@@ -67,7 +67,7 @@ private int32_t mprint(struct magic_set *, struct magic *);
 private int32_t moffset(struct magic_set *, struct magic *);
 private void mdebug(uint32_t, const char *, size_t);
 private int mcopy(struct magic_set *, union VALUETYPE *, int, int,
-    const unsigned char *, uint32_t, size_t, size_t);
+    const unsigned char *, uint32_t, size_t, struct magic *);
 private int mconvert(struct magic_set *, struct magic *, int);
 private int print_sep(struct magic_set *, int);
 private int handle_annotation(struct magic_set *, struct magic *);
@@ -359,17 +359,20 @@ check_fmt(struct magic_set *ms, struct magic *m)
 	pcre *pce;
 	int re_options, rv = -1;
 	pcre_extra *re_extra;
+	zend_string *pattern;
 	TSRMLS_FETCH();
 	
 	if (strchr(m->desc, '%') == NULL)
 		return 0;
 
 	(void)setlocale(LC_CTYPE, "C");
-	if ((pce = pcre_get_compiled_regex("~%[-0-9.]*s~", &re_extra, &re_options TSRMLS_CC)) == NULL) {
+	pattern = STR_INIT("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
+	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options TSRMLS_CC)) == NULL) {
 		rv = -1;
 	} else {
 	 	rv = !pcre_exec(pce, re_extra, m->desc, strlen(m->desc), 0, re_options, NULL, 0);
 	}
+	STR_RELEASE(pattern);
 	(void)setlocale(LC_CTYPE, "");
 	return rv;
 }
@@ -1038,7 +1041,7 @@ mdebug(uint32_t offset, const char *str, size_t len)
 
 private int
 mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
-    const unsigned char *s, uint32_t offset, size_t nbytes, size_t linecnt)
+    const unsigned char *s, uint32_t offset, size_t nbytes, struct magic *m)
 {
 	/*
 	 * Note: FILE_SEARCH and FILE_REGEX do not actually copy
@@ -1058,15 +1061,24 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 			const char *last;	/* end of search region */
 			const char *buf;	/* start of search region */
 			const char *end;
-			size_t lines;
+			size_t lines, linecnt, bytecnt;
 
+			linecnt = m->str_range;
+			bytecnt = linecnt * 80;
+
+			if (bytecnt == 0) {
+				bytecnt = 8192;
+			}
+			if (bytecnt > nbytes) {
+				bytecnt = nbytes;
+			}
 			if (s == NULL) {
 				ms->search.s_len = 0;
 				ms->search.s = NULL;
 				return 0;
 			}
 			buf = RCAST(const char *, s) + offset;
-			end = last = RCAST(const char *, s) + nbytes;
+			end = last = RCAST(const char *, s) + bytecnt;
 			/* mget() guarantees buf <= last */
 			for (lines = linecnt, b = buf; lines && b < end &&
 			     ((b = CAST(const char *,
@@ -1079,7 +1091,7 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 					b++;
 			}
 			if (lines)
-				last = RCAST(const char *, s) + nbytes;
+				last = RCAST(const char *, s) + bytecnt;
 
 			ms->search.s = buf;
 			ms->search.s_len = last - buf;
@@ -1150,7 +1162,6 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
     int *need_separator, int *returnval)
 {
 	uint32_t soffset, offset = ms->offset;
-	uint32_t count = m->str_range;
 	int rv, oneed_separator, in_type;
 	char *sbuf, *rbuf;
 	union VALUETYPE *p = &ms->ms_value;
@@ -1162,13 +1173,12 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 	}
 
 	if (mcopy(ms, p, m->type, m->flag & INDIR, s, (uint32_t)(offset + o),
-	    (uint32_t)nbytes, count) == -1)
+	    (uint32_t)nbytes, m) == -1)
 		return -1;
 
 	if ((ms->flags & MAGIC_DEBUG) != 0) {
 		fprintf(stderr, "mget(type=%d, flag=%x, offset=%u, o=%zu, "
-		    "nbytes=%zu, count=%u)\n", m->type, m->flag, offset, o,
-		    nbytes, count);
+		    "nbytes=%zu)\n", m->type, m->flag, offset, o, nbytes);
 		mdebug(offset, (char *)(void *)p, sizeof(union VALUETYPE));
 	}
 
@@ -1661,7 +1671,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				fprintf(stderr, "indirect +offs=%u\n", offset);
 		}
-		if (mcopy(ms, p, m->type, 0, s, offset, nbytes, count) == -1)
+		if (mcopy(ms, p, m->type, 0, s, offset, nbytes, m) == -1)
 			return -1;
 		ms->offset = offset;
 
@@ -1872,39 +1882,38 @@ file_strncmp16(const char *a, const char *b, size_t len, uint32_t flags)
 }
 
 public void
-convert_libmagic_pattern(zval *pattern, int options)
+convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
 {
-		int i, j=0;
-		char *t;
+	int i, j=0;
+	zend_string *t;
 
-		t = (char *) safe_emalloc(Z_STRLEN_P(pattern), 2, 5);
-		
-		t[j++] = '~';
-		
-		for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
-			switch (Z_STRVAL_P(pattern)[i]) {
-				case '~':
-					t[j++] = '\\';
-					t[j] = '~';
-					break;
-				default:
-					t[j] = Z_STRVAL_P(pattern)[i];
-					break;
-			}
+	t = STR_ALLOC(len * 2 + 4, 0);
+
+	t->val[j++] = '~';
+
+	for (i = 0; i < len; i++, j++) {
+		switch (val[i]) {
+			case '~':
+				t->val[j++] = '\\';
+				t->val[j] = '~';
+				break;
+			default:
+				t->val[j] = val[i];
+				break;
 		}
-		t[j++] = '~';
-	
-		if (options & PCRE_CASELESS) 
-			t[j++] = 'i';
-	
-		if (options & PCRE_MULTILINE)
-			t[j++] = 'm';
+	}
+	t->val[j++] = '~';
 
-		t[j]='\0';
-	
-		Z_STRVAL_P(pattern) = t;
-		Z_STRLEN_P(pattern) = j;
+	if (options & PCRE_CASELESS) 
+		t->val[j++] = 'i';
 
+	if (options & PCRE_MULTILINE)
+		t->val[j++] = 'm';
+
+	t->val[j]='\0';
+	t->len = j;
+
+	ZVAL_STR(pattern, t);
 }
 
 private int
@@ -2067,151 +2076,112 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		break;
 	}
 	case FILE_REGEX: {
-		zval *pattern;
+		zval pattern;
 		int options = 0;
 		pcre_cache_entry *pce;
 		TSRMLS_FETCH();
 		
-		MAKE_STD_ZVAL(pattern);
-		ZVAL_STRINGL(pattern, (char *)m->value.s, m->vallen, 0);
-	
 		options |= PCRE_MULTILINE;
 		
 		if (m->str_flags & STRING_IGNORE_CASE) {
 			options |= PCRE_CASELESS;
 		}
 		
-		convert_libmagic_pattern(pattern, options);
+		convert_libmagic_pattern(&pattern, (char *)m->value.s, m->vallen, options);
 		
 		l = v = 0;
-		if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
-			zval_dtor(pattern);
-			FREE_ZVAL(pattern);
+		if ((pce = pcre_get_compiled_regex_cache(Z_STR(pattern) TSRMLS_CC)) == NULL) {
+			zval_ptr_dtor(&pattern);
 			return -1;
 		} else {
 			/* pce now contains the compiled regex */
-			zval *retval;
-			zval *subpats;
+			zval retval;
+			zval subpats;
 			char *haystack;
 			
-			MAKE_STD_ZVAL(retval);
-			ALLOC_INIT_ZVAL(subpats);
-			
+			ZVAL_NULL(&retval);
+			ZVAL_NULL(&subpats);
+
 			/* Cut the search len from haystack, equals to REG_STARTEND */
 			haystack = estrndup(ms->search.s, ms->search.s_len);
 
 			/* match v = 0, no match v = 1 */
-			php_pcre_match_impl(pce, haystack, ms->search.s_len, retval, subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
+			php_pcre_match_impl(pce, haystack, ms->search.s_len, &retval, &subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
 			/* Free haystack */
 			efree(haystack);
 			
-			if (Z_LVAL_P(retval) < 0) {
+			if (Z_LVAL(retval) < 0) {
 				zval_ptr_dtor(&subpats);
-				FREE_ZVAL(retval);
-				zval_dtor(pattern);
-				FREE_ZVAL(pattern);
+				zval_ptr_dtor(&pattern);
 				return -1;
-			} else if ((Z_LVAL_P(retval) > 0) && (Z_TYPE_P(subpats) == IS_ARRAY)) {
-				
+			} else if ((Z_LVAL(retval) > 0) && (Z_TYPE(subpats) == IS_ARRAY)) {
 				/* Need to fetch global match which equals pmatch[0] */
-				HashTable *ht = Z_ARRVAL_P(subpats);
-				HashPosition outer_pos;
+				zval *pzval;
+				HashTable *ht = Z_ARRVAL(subpats);
 				zval *pattern_match = NULL, *pattern_offset = NULL;
-				
-				zend_hash_internal_pointer_reset_ex(ht, &outer_pos); 
-				
-				if (zend_hash_has_more_elements_ex(ht, &outer_pos) == SUCCESS &&
-					zend_hash_move_forward_ex(ht, &outer_pos)) {
-					
-					zval **ppzval;
-					
-					/* The first element (should be) is the global match 
-					   Need to move to the inner array to get the global match */
-					
-					if (zend_hash_get_current_data_ex(ht, (void**)&ppzval, &outer_pos) != FAILURE) { 
-						
-						HashTable *inner_ht;
-						HashPosition inner_pos;
-						zval **match, **offset;
-						zval tmpcopy = **ppzval, matchcopy, offsetcopy;
-						
-						zval_copy_ctor(&tmpcopy); 
-						INIT_PZVAL(&tmpcopy);
-						
-						inner_ht = Z_ARRVAL(tmpcopy);
-						
-						/* If everything goes according to the master plan
-						   tmpcopy now contains two elements:
-						   0 = the match
-						   1 = starting position of the match */
-						zend_hash_internal_pointer_reset_ex(inner_ht, &inner_pos); 
-						
-						if (zend_hash_has_more_elements_ex(inner_ht, &inner_pos) == SUCCESS &&
-							zend_hash_move_forward_ex(inner_ht, &inner_pos)) {
-						
-							if (zend_hash_get_current_data_ex(inner_ht, (void**)&match, &inner_pos) != FAILURE) { 
-									
-								matchcopy = **match;
-								zval_copy_ctor(&matchcopy);
-								INIT_PZVAL(&matchcopy);
-								convert_to_string(&matchcopy); 
-								
-								MAKE_STD_ZVAL(pattern_match);
-								Z_STRVAL_P(pattern_match) = (char *)Z_STRVAL(matchcopy);
-								Z_STRLEN_P(pattern_match) = Z_STRLEN(matchcopy);
-								Z_TYPE_P(pattern_match) = IS_STRING; 
+				int first = 1, inner_first;
 
-								zval_dtor(&matchcopy);
-							}
-						}
-						
-						if (zend_hash_has_more_elements_ex(inner_ht, &inner_pos) == SUCCESS &&
-							zend_hash_move_forward_ex(inner_ht, &inner_pos)) {
-							
-							if (zend_hash_get_current_data_ex(inner_ht, (void**)&offset, &inner_pos) != FAILURE) { 
-								
-								offsetcopy = **offset;
-								zval_copy_ctor(&offsetcopy);
-								INIT_PZVAL(&offsetcopy);
-								convert_to_long(&offsetcopy); 
-								
-								MAKE_STD_ZVAL(pattern_offset);
-								Z_LVAL_P(pattern_offset) = Z_LVAL(offsetcopy);
-								Z_TYPE_P(pattern_offset) = IS_LONG;
-								
-								zval_dtor(&offsetcopy);
-							}
-						}
-						zval_dtor(&tmpcopy); 	
+				ZEND_HASH_FOREACH_VAL(ht, pzval) {
+					HashTable *inner_ht;
+					zval *match, *offset;
+					zval tmpcopy, matchcopy, offsetcopy;
+
+					if (first) {
+						first = 0;
+						continue;
 					}
-					
+					ZVAL_DUP(&tmpcopy, pzval);
+
+					inner_ht = Z_ARRVAL(tmpcopy);
+
+					/* If everything goes according to the master plan
+					   tmpcopy now contains two elements:
+					   0 = the match
+					   1 = starting position of the match */
+					inner_first = 1;
+					ZEND_HASH_FOREACH_VAL(inner_ht, match) {
+						if (inner_first) {
+							inner_first = 0;
+							continue;
+						}
+						ZVAL_DUP(&matchcopy, match);
+						convert_to_string(&matchcopy); 
+						pattern_match = &matchcopy;
+					} ZEND_HASH_FOREACH_END();
+
+					inner_first = 1;
+					ZEND_HASH_FOREACH_VAL(inner_ht, offset) {
+						if (inner_first) {
+							inner_first = 0;
+							continue;
+						}
+						ZVAL_DUP(&offsetcopy, offset);
+						convert_to_long(&offsetcopy); 
+						pattern_offset = &offsetcopy;
+					} ZEND_HASH_FOREACH_END();
+
+					zval_dtor(&tmpcopy); 	
+
 					if ((pattern_match != NULL) && (pattern_offset != NULL)) {
-						ms->search.s += (int)Z_LVAL_P(pattern_offset); /* this is where the match starts */
-						ms->search.offset += (size_t)Z_LVAL_P(pattern_offset); /* this is where the match starts as size_t */
+						ms->search.s += Z_LVAL_P(pattern_offset); /* this is where the match starts */
+						ms->search.offset += Z_LVAL_P(pattern_offset); /* this is where the match starts as size_t */
 						ms->search.rm_len = Z_STRLEN_P(pattern_match) /* This is the length of the matched pattern */;
 						v = 0;
-						
-						efree(pattern_match);
-						efree(pattern_offset);
-						
+
+						zval_ptr_dtor(pattern_match);
+						zval_ptr_dtor(pattern_offset);
 					} else {
 						zval_ptr_dtor(&subpats);
-						FREE_ZVAL(retval);
-						zval_dtor(pattern);
-						FREE_ZVAL(pattern);
+						zval_ptr_dtor(&pattern);
 						return -1;
 					}
-				}
-
-
+				} ZEND_HASH_FOREACH_END();
 			} else {
 				v = 1;
 			}
 			zval_ptr_dtor(&subpats);
-			FREE_ZVAL(retval);
+			zval_ptr_dtor(&pattern);
 		}
-		zval_dtor(pattern);
-		FREE_ZVAL(pattern);
 		break;
 	}
 	case FILE_INDIRECT:

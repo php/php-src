@@ -101,7 +101,7 @@ PHP_FUNCTION(soundex)
 	}
 	soundex[_small] = '\0';
 
-	RETURN_STRINGL(soundex, _small, 1);
+	RETURN_STRINGL(soundex, _small);
 }
 /* }}} */
 

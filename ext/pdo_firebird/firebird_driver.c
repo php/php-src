@@ -447,8 +447,9 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, long sql
 				} else {
 					*ppname++ = 0;
 					if (named_params) {
-						zend_hash_update(named_params, pname, (unsigned int)(ppname-pname),
-							(void*)&pindex, sizeof(long)+1,NULL);
+						zval tmp;
+						ZVAL_LONG(&tmp, pindex);
+						zend_hash_str_update(named_params, pname, (unsigned int)(ppname - pname - 1), &tmp);
 					}
 				}
 			}
@@ -479,9 +480,9 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 			convert_to_boolean(val);
 	
 			/* ignore if the new value equals the old one */			
-			if (dbh->auto_commit ^ Z_BVAL_P(val)) {
+			if (dbh->auto_commit ^ (Z_TYPE_P(val) == IS_TRUE? 1 : 0)) {
 				if (dbh->in_txn) {
-					if (Z_BVAL_P(val)) {
+					if (Z_TYPE_P(val) == IS_TRUE) {
 						/* turning on auto_commit with an open transaction is illegal, because
 						   we won't know what to do with it */
 						H->last_app_error = "Cannot enable auto-commit while a transaction is already open";
@@ -494,13 +495,13 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 						dbh->in_txn = 0;
 					}
 				}
-				dbh->auto_commit = Z_BVAL_P(val);
+				dbh->auto_commit = Z_TYPE_P(val) == IS_TRUE? 1 : 0;
 			}
 			return 1;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			convert_to_boolean(val);
-			H->fetch_table_names = Z_BVAL_P(val);
+			H->fetch_table_names = Z_TYPE_P(val) == IS_TRUE? 1 : 0;
 			return 1;
 
 		case PDO_FB_ATTR_DATE_FORMAT:
@@ -574,7 +575,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 #endif
 			if (info_func) {
 				info_func(tmp);
-				ZVAL_STRING(val,tmp,1);
+				ZVAL_STRING(val, tmp);
 			} 
 #else
 			ZVAL_NULL(val);
@@ -587,7 +588,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 			*tmp = 0;
 			
 			if (!isc_version(&H->db, firebird_info_cb, (void*)tmp)) {
-				ZVAL_STRING(val,tmp,1);
+				ZVAL_STRING(val, tmp);
 				return 1;
 			}
 			
@@ -614,10 +615,10 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 			i += l;
 			strcpy(&buf[i++], " ");
 		}
-		add_next_index_string(info, buf, 1);
+		add_next_index_string(info, buf);
 	} else if (H->last_app_error) {
 		add_next_index_long(info, -999);
-		add_next_index_string(info, const_cast(H->last_app_error),1);
+		add_next_index_string(info, const_cast(H->last_app_error));
 	}
 	return 1;
 }

@@ -188,8 +188,7 @@ PHPAPI void mysqlnd_free_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind TSRM
 PHPAPI const char * mysqlnd_field_type_name(enum mysqlnd_field_types field_type);
 
 /* LOAD DATA LOCAL */
-PHPAPI void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
-PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, const char * const funcname);
+void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 
 /* Simple commands */
 #define mysqlnd_autocommit(conn, mode)		((conn)->data)->m->set_autocommit((conn)->data, (mode) TSRMLS_CC)
@@ -209,7 +208,7 @@ PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, con
 #define mysqlnd_refresh(conn, options)		((conn)->data)->m->refresh_server((conn)->data, (options) TSRMLS_CC)
 #define mysqlnd_shutdown(conn, level)		((conn)->data)->m->shutdown_server((conn)->data, (level) TSRMLS_CC)
 #define mysqlnd_set_character_set(conn, cs)	((conn)->data)->m->set_charset((conn)->data, (cs) TSRMLS_CC)
-#define mysqlnd_stat(conn, msg, msg_len)	((conn)->data)->m->get_server_statistics(((conn)->data), (msg), (msg_len) TSRMLS_CC)
+#define mysqlnd_stat(conn, msg)				((conn)->data)->m->get_server_statistics(((conn)->data), (msg) TSRMLS_CC)
 #define mysqlnd_options(conn, opt, value)	((conn)->data)->m->set_client_option((conn)->data, (opt), (value) TSRMLS_CC)
 #define mysqlnd_options4(conn, opt, k, v)	((conn)->data)->m->set_client_option_2d((conn)->data, (opt), (k), (v) TSRMLS_CC)
 #define mysqlnd_set_server_option(conn, op)	((conn)->data)->m->set_server_option((conn)->data, (op) TSRMLS_CC)

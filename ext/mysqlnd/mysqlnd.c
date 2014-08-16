@@ -113,7 +113,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn TSRMLS
 
 	DBG_ENTER("mysqlnd_conn_data::free_contents");
 
-	mysqlnd_local_infile_default(conn);
 	if (conn->current_result) {
 		conn->current_result->m.free_result(conn->current_result, TRUE TSRMLS_CC);
 		conn->current_result = NULL;
@@ -321,6 +320,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request)(MYSQLND_CONN_DATA
 	DBG_ENTER("mysqlnd_conn_data::simple_command_send_request");
 	DBG_INF_FMT("command=%s silent=%u", mysqlnd_command_to_text[command], silent);
 	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
+	DBG_INF_FMT("sending %u bytes", arg_len + 1); /* + 1 is for the command */
 
 	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
@@ -448,6 +448,31 @@ mysqlnd_switch_to_ssl_if_needed(
 	const MYSQLND_CHARSET * charset;
 	MYSQLND_PACKET_AUTH * auth_packet;
 	DBG_ENTER("mysqlnd_switch_to_ssl_if_needed");
+	DBG_INF_FMT("client_capability_flags=%lu", mysql_flags);
+	DBG_INF_FMT("CLIENT_LONG_PASSWORD=	%d", mysql_flags & CLIENT_LONG_PASSWORD? 1:0);
+	DBG_INF_FMT("CLIENT_FOUND_ROWS=		%d", mysql_flags & CLIENT_FOUND_ROWS? 1:0);
+	DBG_INF_FMT("CLIENT_LONG_FLAG=		%d", mysql_flags & CLIENT_LONG_FLAG? 1:0);
+	DBG_INF_FMT("CLIENT_NO_SCHEMA=		%d", mysql_flags & CLIENT_NO_SCHEMA? 1:0);
+	DBG_INF_FMT("CLIENT_COMPRESS=		%d", mysql_flags & CLIENT_COMPRESS? 1:0);
+	DBG_INF_FMT("CLIENT_ODBC=			%d", mysql_flags & CLIENT_ODBC? 1:0);
+	DBG_INF_FMT("CLIENT_LOCAL_FILES=	%d", mysql_flags & CLIENT_LOCAL_FILES? 1:0);
+	DBG_INF_FMT("CLIENT_IGNORE_SPACE=	%d", mysql_flags & CLIENT_IGNORE_SPACE? 1:0);
+	DBG_INF_FMT("CLIENT_PROTOCOL_41=	%d", mysql_flags & CLIENT_PROTOCOL_41? 1:0);
+	DBG_INF_FMT("CLIENT_INTERACTIVE=	%d", mysql_flags & CLIENT_INTERACTIVE? 1:0);
+	DBG_INF_FMT("CLIENT_SSL=			%d", mysql_flags & CLIENT_SSL? 1:0);
+	DBG_INF_FMT("CLIENT_IGNORE_SIGPIPE=	%d", mysql_flags & CLIENT_IGNORE_SIGPIPE? 1:0);
+	DBG_INF_FMT("CLIENT_TRANSACTIONS=	%d", mysql_flags & CLIENT_TRANSACTIONS? 1:0);
+	DBG_INF_FMT("CLIENT_RESERVED=		%d", mysql_flags & CLIENT_RESERVED? 1:0);
+	DBG_INF_FMT("CLIENT_SECURE_CONNECTION=%d", mysql_flags & CLIENT_SECURE_CONNECTION? 1:0);
+	DBG_INF_FMT("CLIENT_MULTI_STATEMENTS=%d", mysql_flags & CLIENT_MULTI_STATEMENTS? 1:0);
+	DBG_INF_FMT("CLIENT_MULTI_RESULTS=	%d", mysql_flags & CLIENT_MULTI_RESULTS? 1:0);
+	DBG_INF_FMT("CLIENT_PS_MULTI_RESULTS=%d", mysql_flags & CLIENT_PS_MULTI_RESULTS? 1:0);
+	DBG_INF_FMT("CLIENT_CONNECT_ATTRS=	%d", mysql_flags & CLIENT_PLUGIN_AUTH? 1:0);
+	DBG_INF_FMT("CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA=	%d", mysql_flags & CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA? 1:0);
+	DBG_INF_FMT("CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS=	%d", mysql_flags & CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS? 1:0);
+	DBG_INF_FMT("CLIENT_SESSION_TRACK=		%d", mysql_flags & CLIENT_SESSION_TRACK? 1:0);
+	DBG_INF_FMT("CLIENT_SSL_VERIFY_SERVER_CERT=	%d", mysql_flags & CLIENT_SSL_VERIFY_SERVER_CERT? 1:0);
+	DBG_INF_FMT("CLIENT_REMEMBER_OPTIONS=		%d", mysql_flags & CLIENT_REMEMBER_OPTIONS? 1:0);
 
 	auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
 	if (!auth_packet) {
@@ -972,8 +997,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		*/
 		net->data->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
 
-		conn->user				= mnd_pestrdup(user, conn->persistent);
-		conn->user_len			= strlen(conn->user);
+		conn->user_len			= strlen(user);
+		conn->user				= mnd_pestrndup(user, conn->user_len, conn->persistent);
 		conn->passwd			= mnd_pestrndup(passwd, passwd_len, conn->persistent);
 		conn->passwd_len		= passwd_len;
 		conn->port				= port;
@@ -986,12 +1011,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		}
 
 		if (!unix_socket && !named_pipe) {
-			conn->host = mnd_pestrdup(host, conn->persistent);
+			conn->host = mnd_pestrndup(host, host_len, conn->persistent);
 			if (!conn->host) {
 				SET_OOM_ERROR(*conn->error_info);
 				goto err; /* OOM */
 			}
-			conn->host_len = strlen(conn->host);
+			conn->host_len = host_len;
 			{
 				char *p;
 				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->host);
@@ -999,7 +1024,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 					SET_OOM_ERROR(*conn->error_info);
 					goto err; /* OOM */
 				}
-				conn->host_info =  mnd_pestrdup(p, conn->persistent);
+				conn->host_info = mnd_pestrdup(p, conn->persistent);
 				mnd_sprintf_free(p);
 				if (!conn->host_info) {
 					SET_OOM_ERROR(*conn->error_info);
@@ -1702,7 +1727,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn TSRMLS_DC
 
 /* {{{ mysqlnd_conn_data::statistic */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, char **message, unsigned int * message_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_string **message TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, get_server_statistics);
 	enum_func_status ret = FAIL;
@@ -1725,9 +1750,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, char **me
 
 			if (PASS == (ret = PACKET_READ(stats_header, conn))) {
 				/* will be freed by Zend, thus don't use the mnd_ allocator */
-				*message = estrndup(stats_header->message, stats_header->message_len); 
-				*message_len = stats_header->message_len;
-				DBG_INF(*message);
+				*message = STR_INIT(stats_header->message, stats_header->message_len, 0); 
+				DBG_INF((*message)->val);
 			}
 			PACKET_FREE(stats_header);
 		} while (0);
@@ -1863,6 +1887,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 	enum_func_status ret = PASS;
 	MYSQLND_NET * net = conn->net;
 	php_stream * net_stream = net->data->m.get_stream(net TSRMLS_CC);
+	enum mysqlnd_connection_state state;
 
 	DBG_ENTER("mysqlnd_send_close");
 	DBG_INF_FMT("conn=%llu net->data->stream->abstract=%p", conn->thread_id, net_stream? net_stream->abstract:NULL);
@@ -1873,7 +1898,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
 		}
 	}
-	switch (CONN_GET_STATE(conn)) {
+	state = CONN_GET_STATE(conn);
+	DBG_INF_FMT("state=%u", state);
+	switch (state) {
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
 			if (net_stream) {
@@ -2254,7 +2281,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	}
 
 	/* XXX: passwords that have \0 inside work during auth, but in this case won't work with change user */
-	ret = mysqlnd_run_authentication(conn, user, passwd, strlen(passwd), db, strlen(db),
+	ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, strlen(db),
 									conn->auth_plugin_data, conn->auth_plugin_data_len, conn->options->auth_protocol,
 									0 /*charset not used*/, conn->options, conn->server_capabilities, silent, TRUE/*is_change*/ TSRMLS_CC);
 
@@ -2416,7 +2443,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQL_OPT_CONNECT_ATTR_DELETE:
 			if (conn->options->connect_attr && value) {
 				DBG_INF_FMT("Before delete %d attribute(s)", zend_hash_num_elements(conn->options->connect_attr));
-				zend_hash_del(conn->options->connect_attr, value, strlen(value));
+				zend_hash_str_del(conn->options->connect_attr, value, strlen(value));
 				DBG_INF_FMT("%d left", zend_hash_num_elements(conn->options->connect_attr));
 			}
 			break;
@@ -2436,34 +2463,6 @@ oom:
 	conn->m->local_tx_end(conn, this_func, FAIL TSRMLS_CC);	
 end:
 	DBG_RETURN(FAIL);
-}
-/* }}} */
-
-
-/* {{{ connect_attr_item_edtor */
-static void
-connect_attr_item_edtor(void * pDest)
-{
-#ifdef ZTS
-	TSRMLS_FETCH();
-#endif
-	DBG_ENTER("connect_attr_item_edtor");
-	mnd_efree(*(char **) pDest);
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
-/* {{{ connect_attr_item_pdtor */
-static void
-connect_attr_item_pdtor(void * pDest)
-{
-#ifdef ZTS
-	TSRMLS_FETCH();
-#endif
-	DBG_ENTER("connect_attr_item_pdtor");
-	mnd_pefree(*(char **) pDest, 1);
-	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -2492,15 +2491,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 				if (!conn->options->connect_attr) {
 					goto oom;
 				}
-				zend_hash_init(conn->options->connect_attr, 0, NULL, conn->persistent? connect_attr_item_pdtor:connect_attr_item_edtor, conn->persistent);
+				zend_hash_init(conn->options->connect_attr, 0, NULL, ZVAL_PTR_DTOR, conn->persistent);
 			}
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
-				const char * copyv = mnd_pestrdup(value, conn->persistent);
-				if (!copyv) {
-					goto oom;
-				}
-				zend_hash_update(conn->options->connect_attr, key, strlen(key), &copyv, sizeof(char *), NULL);
+				zval attrz;
+				ZVAL_STR(&attrz, STR_INIT(value, strlen(value), 1));
+				zend_hash_str_update(conn->options->connect_attr, key, strlen(key), &attrz);
 			}
 			break;
 		default:
@@ -2669,24 +2666,24 @@ static void
 MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * str, const unsigned int mode TSRMLS_DC)
 {
 	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
-		if (str->len) {
+		if (str->s && str->s->len) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
 	} else if (mode & TRANS_COR_AND_NO_CHAIN && !(mode & TRANS_COR_AND_CHAIN)) {
-		if (str->len) {
+		if (str->s && str->s->len) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
 	}
 
 	if (mode & TRANS_COR_RELEASE && !(mode & TRANS_COR_NO_RELEASE)) {
-		if (str->len) {
+		if (str->s && str->s->len) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
 	} else if (mode & TRANS_COR_NO_RELEASE && !(mode & TRANS_COR_RELEASE)) {
-		if (str->len) {
+		if (str->s && str->s->len) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "NO RELEASE", sizeof("NO RELEASE") - 1);
@@ -2749,7 +2746,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		do {
-			smart_str tmp_str = {0, 0, 0};
+			smart_str tmp_str = {0, 0};
 			conn->m->tx_cor_options_to_string(conn, &tmp_str, flags TSRMLS_CC);
 			smart_str_0(&tmp_str);
 
@@ -2760,7 +2757,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 				char * name_esc = mysqlnd_escape_string_for_tx_name_in_comment(name TSRMLS_CC);
 				
 				query_len = mnd_sprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
-										name_esc? name_esc:"", tmp_str.c? tmp_str.c:"");
+										name_esc? name_esc:"", tmp_str.s? tmp_str.s->val:"");
 				smart_str_free(&tmp_str);
 				if (name_esc) {
 					mnd_efree(name_esc);
@@ -2793,9 +2790,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		do {
-			smart_str tmp_str = {0, 0, 0};
+			smart_str tmp_str = {0, 0};
 			if (mode & TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
-				if (tmp_str.len) {
+				if (tmp_str.s) {
 					smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 				}
 				smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
@@ -2807,12 +2804,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 					smart_str_free(&tmp_str);
 					break;
 				} else if (mode & TRANS_START_READ_WRITE) {
-					if (tmp_str.len) {
+					if (tmp_str.s->len) {
 						smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 					}
 					smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
 				} else if (mode & TRANS_START_READ_ONLY) {
-					if (tmp_str.len) {
+					if (tmp_str.s->len) {
 						smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 					}
 					smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
@@ -2823,7 +2820,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 			{
 				char * name_esc = mysqlnd_escape_string_for_tx_name_in_comment(name TSRMLS_CC);
 				char * query;
-				unsigned int query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", name_esc? name_esc:"", tmp_str.c? tmp_str.c:"");
+				unsigned int query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", name_esc? name_esc:"", tmp_str.s? tmp_str.s->val:"");
 				smart_str_free(&tmp_str);
 				if (name_esc) {
 					mnd_efree(name_esc);

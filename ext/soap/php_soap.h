@@ -74,8 +74,8 @@ typedef struct _soapService soapService, *soapServicePtr;
 #include "php_packet_soap.h"
 
 struct _soapMapping {
-	zval *to_xml;
-	zval *to_zval;
+	zval to_xml;
+	zval to_zval;
 };
 
 struct _soapHeader;
@@ -90,12 +90,12 @@ struct _soapService {
 
 	struct _soap_class {
 		zend_class_entry *ce;
-		zval **argv;
+		zval *argv;
 		int argc;
 		int persistance;
 	} soap_class;
 
-	zval *soap_object;
+	zval soap_object;
 
 	HashTable *typemap;
 	int        version;
@@ -166,7 +166,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	sdlPtr     sdl;
 	zend_bool  use_soap_error_handler;
 	char*      error_code;
-	zval*      error_object;
+	zval       error_object;
 	char       cache;
 	char       cache_mode;
 	char       cache_enabled;
@@ -200,7 +200,7 @@ ZEND_EXTERN_MODULE_GLOBALS(soap)
 
 extern zend_class_entry* soap_var_class_entry;
 
-zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
+void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 
 #define soap_error0(severity, format) \
 	php_error(severity, "SOAP-ERROR: " format)

@@ -23,7 +23,7 @@
 
 #include "php.h"
 
-typedef zend_object_value (*create_object_func_t)(zend_class_entry *class_type TSRMLS_DC);
+typedef zend_object* (*create_object_func_t)(zend_class_entry *class_type TSRMLS_DC);
 
 #define REGISTER_SPL_STD_CLASS(class_name, obj_ctor) \
 	spl_register_std_class(&spl_ce_ ## class_name, # class_name, obj_ctor, NULL TSRMLS_CC);
@@ -66,7 +66,7 @@ void spl_add_traits(zval * list, zend_class_entry * pce, int allow, int ce_flags
 int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int ce_flags TSRMLS_DC);
 
 /* caller must efree(return) */
-char * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len, int *name_len TSRMLS_DC);
+zend_string *spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len TSRMLS_DC);
 
 #define SPL_ME(class_name, function_name, arg_info, flags) \
 	PHP_ME( spl_ ## class_name, function_name, arg_info, flags)

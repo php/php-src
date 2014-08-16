@@ -26,8 +26,13 @@
 /* PHP DTrace probes {{{ */
 static inline const char *dtrace_get_executed_filename(TSRMLS_D)
 {
-	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
-		return EG(current_execute_data)->op_array->filename;
+	zend_execute_data *ex = EG(current_execute_data);
+
+	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+		ex = ex->prev_execute_data;
+	}
+	if (ex) {
+		return ex->func->op_array.filename->val;
 	} else {
 		return zend_get_executed_filename(TSRMLS_C);
 	}
@@ -81,7 +86,7 @@ ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 }
 
-ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC)
+ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data, zval *return_value TSRMLS_DC)
 {
 	int lineno;
 	const char *filename;
@@ -94,7 +99,7 @@ ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, zend_
 		DTRACE_EXECUTE_ENTRY((char *)filename, lineno);
 	}
 
-	execute_internal(execute_data_ptr, fci, return_value_used TSRMLS_CC);
+	execute_internal(execute_data, return_value TSRMLS_CC);
 
 	if (DTRACE_EXECUTE_RETURN_ENABLED()) {
 		DTRACE_EXECUTE_RETURN((char *)filename, lineno);

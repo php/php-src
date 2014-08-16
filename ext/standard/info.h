@@ -63,7 +63,7 @@ PHP_FUNCTION(php_sapi_name);
 PHP_FUNCTION(php_uname);
 PHP_FUNCTION(php_ini_scanned_files);
 PHP_FUNCTION(php_ini_loaded_file);
-PHPAPI char *php_info_html_esc(char *string TSRMLS_DC);
+PHPAPI zend_string *php_info_html_esc(char *string TSRMLS_DC);
 PHPAPI void php_info_html_esc_write(char *string, int str_len TSRMLS_DC);
 PHPAPI void php_print_info_htmlhead(TSRMLS_D);
 PHPAPI void php_print_info(int flag TSRMLS_DC);
@@ -79,7 +79,7 @@ PHPAPI void php_info_print_box_start(int bg);
 PHPAPI void php_info_print_box_end(void);
 PHPAPI void php_info_print_hr(void);
 PHPAPI void php_info_print_module(zend_module_entry *module TSRMLS_DC);
-PHPAPI char *php_get_uname(char mode);
+PHPAPI zend_string *php_get_uname(char mode);
 
 void register_phpinfo_constants(INIT_FUNC_ARGS);
 END_EXTERN_C()

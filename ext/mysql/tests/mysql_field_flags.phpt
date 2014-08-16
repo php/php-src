@@ -32,7 +32,9 @@ if (false !== ($tmp = mysql_field_flags($res, -1)))
 if (!is_string($tmp = mysql_field_flags($res, 0)) || empty($tmp))
 	printf("[006] Expecting non empty string, got %s/%s\n", gettype($tmp), $tmp);
 
-if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp)) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+    !is_unicode($tmp)) {
 	printf("[007] Check the unicode support!\n");
 	var_inspect($tmp);
 }
@@ -152,6 +154,6 @@ Warning: mysql_field_flags(): Field -1 is invalid for MySQL result index %d in %
 
 Warning: mysql_field_flags(): Field 2 is invalid for MySQL result index %d in %s on line %d
 
-Warning: mysql_field_flags(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_field_flags(): supplied resource is not a valid MySQL result resource in %s on line %d
 bool(false)
 done!

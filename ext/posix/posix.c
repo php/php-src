@@ -531,7 +531,7 @@ PHP_FUNCTION(posix_getlogin)
 		RETURN_FALSE;
 	}
 	
-	RETURN_STRING(p, 1);
+	RETURN_STRING(p);
 }
 #endif
 /* }}} */
@@ -626,14 +626,14 @@ PHP_FUNCTION(posix_uname)
 
 	array_init(return_value);
 
-	add_assoc_string(return_value, "sysname",  u.sysname,  1);
-	add_assoc_string(return_value, "nodename", u.nodename, 1);
-	add_assoc_string(return_value, "release",  u.release,  1);
-	add_assoc_string(return_value, "version",  u.version,  1);
-	add_assoc_string(return_value, "machine",  u.machine,  1);
+	add_assoc_string(return_value, "sysname",  u.sysname);
+	add_assoc_string(return_value, "nodename", u.nodename);
+	add_assoc_string(return_value, "release",  u.release);
+	add_assoc_string(return_value, "version",  u.version);
+	add_assoc_string(return_value, "machine",  u.machine);
 
 #if defined(_GNU_SOURCE) && !defined(DARWIN) && defined(HAVE_UTSNAME_DOMAINNAME)
-	add_assoc_string(return_value, "domainname", u.domainname, 1);
+	add_assoc_string(return_value, "domainname", u.domainname);
 #endif
 }
 /* }}} */
@@ -687,7 +687,7 @@ PHP_FUNCTION(posix_ctermid)
 		RETURN_FALSE;
 	}
 	
-	RETURN_STRING(buffer, 1);
+	RETURN_STRING(buffer);
 }
 #endif
 /* }}} */
@@ -697,7 +697,7 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream;
 
-	php_stream_from_zval_no_verify(stream, &zfp);
+	php_stream_from_zval_no_verify(stream, zfp);
 
 	if (stream == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 1 to be a valid stream resource");
@@ -720,26 +720,26 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd TSRMLS_DC) /* {{{ */
    Determine terminal device name (POSIX.1, 4.7.2) */
 PHP_FUNCTION(posix_ttyname)
 {
-	zval **z_fd;
+	zval *z_fd;
 	char *p;
 	int fd;
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	long buflen;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &z_fd) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	switch (Z_TYPE_PP(z_fd)) {
+	switch (Z_TYPE_P(z_fd)) {
 		case IS_RESOURCE:
-			if (!php_posix_stream_get_fd(*z_fd, &fd TSRMLS_CC)) {
+			if (!php_posix_stream_get_fd(z_fd, &fd TSRMLS_CC)) {
 				RETURN_FALSE;
 			}
 			break;
 		default:
 			convert_to_long_ex(z_fd);
-			fd = Z_LVAL_PP(z_fd);
+			fd = Z_LVAL_P(z_fd);
 	}
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	buflen = sysconf(_SC_TTY_NAME_MAX);
@@ -753,14 +753,15 @@ PHP_FUNCTION(posix_ttyname)
 		efree(p);
 		RETURN_FALSE;
 	}
-	RETURN_STRING(p, 0);
+	RETURN_STRING(p);
+	efree(p);
 #else
 	if (NULL == (p = ttyname(fd))) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
 	}
 #endif	
-	RETURN_STRING(p, 1);
+	RETURN_STRING(p);
 }
 /* }}} */
 
@@ -768,22 +769,22 @@ PHP_FUNCTION(posix_ttyname)
    Determine if filedesc is a tty (POSIX.1, 4.7.1) */
 PHP_FUNCTION(posix_isatty)
 {
-	zval **z_fd;
+	zval *z_fd;
 	int fd;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &z_fd) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
-	switch (Z_TYPE_PP(z_fd)) {
+	switch (Z_TYPE_P(z_fd)) {
 		case IS_RESOURCE:
-			if (!php_posix_stream_get_fd(*z_fd, &fd TSRMLS_CC)) {
+			if (!php_posix_stream_get_fd(z_fd, &fd TSRMLS_CC)) {
 				RETURN_FALSE;
 			}
 			break;
 		default:
 			convert_to_long_ex(z_fd);
-			fd = Z_LVAL_PP(z_fd);
+			fd = Z_LVAL_P(z_fd);
 	}
 
 	if (isatty(fd)) {
@@ -818,7 +819,7 @@ PHP_FUNCTION(posix_getcwd)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(buffer, 1);
+	RETURN_STRING(buffer);
 }
 /* }}} */
 
@@ -913,7 +914,7 @@ PHP_FUNCTION(posix_mknod)
  * array container and fills the array with the posix group member data. */
 int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 {
-	zval *array_members;
+	zval array_members;
 	int count;
 
 	if (NULL == g)
@@ -922,15 +923,14 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 	if (array_group == NULL || Z_TYPE_P(array_group) != IS_ARRAY)
 		return 0;
 
-	MAKE_STD_ZVAL(array_members);
-	array_init(array_members);
+	array_init(&array_members);
 	
-	add_assoc_string(array_group, "name", g->gr_name, 1);
-	add_assoc_string(array_group, "passwd", g->gr_passwd, 1);
+	add_assoc_string(array_group, "name", g->gr_name);
+	add_assoc_string(array_group, "passwd", g->gr_passwd);
 	for (count=0; g->gr_mem[count] != NULL; count++) {
-		add_next_index_string(array_members, g->gr_mem[count], 1);
+		add_next_index_string(&array_members, g->gr_mem[count]);
 	}
-	zend_hash_update(Z_ARRVAL_P(array_group), "members", sizeof("members"), (void*)&array_members, sizeof(zval*), NULL);
+	zend_hash_str_update(Z_ARRVAL_P(array_group), "members", sizeof("members")-1, &array_members);
 	add_assoc_long(array_group, "gid", g->gr_gid);
 	return 1;
 }
@@ -1094,13 +1094,13 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 	if (NULL == return_value || Z_TYPE_P(return_value) != IS_ARRAY)
 		return 0;
 
-	add_assoc_string(return_value, "name",      pw->pw_name, 1);
-	add_assoc_string(return_value, "passwd",    pw->pw_passwd, 1);
+	add_assoc_string(return_value, "name",      pw->pw_name);
+	add_assoc_string(return_value, "passwd",    pw->pw_passwd);
 	add_assoc_long  (return_value, "uid",       pw->pw_uid);
 	add_assoc_long  (return_value, "gid",		pw->pw_gid);
-	add_assoc_string(return_value, "gecos",     pw->pw_gecos, 1);
-	add_assoc_string(return_value, "dir",       pw->pw_dir, 1);
-	add_assoc_string(return_value, "shell",     pw->pw_shell, 1);
+	add_assoc_string(return_value, "gecos",     pw->pw_gecos);
+	add_assoc_string(return_value, "dir",       pw->pw_dir);
+	add_assoc_string(return_value, "shell",     pw->pw_shell);
 	return 1;
 }
 /* }}} */
@@ -1227,13 +1227,13 @@ static int posix_addlimit(int limit, char *name, zval *return_value TSRMLS_DC) {
 	}
 
 	if (rl.rlim_cur == RLIM_INFINITY) {
-		add_assoc_stringl(return_value, soft, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1, 1);
+		add_assoc_stringl(return_value, soft, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1);
 	} else {
 		add_assoc_long(return_value, soft, rl.rlim_cur);
 	}
 
 	if (rl.rlim_max == RLIM_INFINITY) {
-		add_assoc_stringl(return_value, hard, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1, 1);
+		add_assoc_stringl(return_value, hard, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1);
 	} else {
 		add_assoc_long(return_value, hard, rl.rlim_max);
 	}
@@ -1342,7 +1342,7 @@ PHP_FUNCTION(posix_strerror)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(strerror(error), 1);
+	RETURN_STRING(strerror(error));
 }
 /* }}} */
 

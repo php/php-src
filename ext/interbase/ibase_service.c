@@ -31,12 +31,12 @@ typedef struct {
 	isc_svc_handle handle;
 	char *hostname;
 	char *username;
-	long res_id;
+	zend_resource *res;
 } ibase_service;
 
 static int le_service;
 
-static void _php_ibase_free_service(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
+static void _php_ibase_free_service(zend_resource *rsrc TSRMLS_DC) /* {{{ */
 {
 	ibase_service *sv = (ibase_service *) rsrc->ptr;
 
@@ -58,7 +58,7 @@ static void _php_ibase_free_service(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{
 /* the svc api seems to get confused after an error has occurred, 
    so invalidate the handle on errors */
 #define IBASE_SVC_ERROR(svm) \
-	do { zend_list_delete(svm->res_id); _php_ibase_error(TSRMLS_C); } while (0)
+	do { zend_list_delete(svm->res); _php_ibase_error(TSRMLS_C); } while (0)
 	
 
 void php_ibase_service_minit(INIT_FUNC_ARGS) /* {{{ */
@@ -151,7 +151,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, char operation) /* {{{
 		RETURN_FALSE;
 	}
 			
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1, "Interbase service manager handle",
+	ZEND_FETCH_RESOURCE(svm, ibase_service *, res, -1, "Interbase service manager handle",
 		le_service);
 
 	buf[0] = operation;
@@ -246,7 +246,8 @@ PHP_FUNCTION(ibase_service_attach)
 	svm->username = estrdup(user);
 
 	ZEND_REGISTER_RESOURCE(return_value, svm, le_service);
-	svm->res_id = Z_LVAL_P(return_value);
+	Z_ADDREF_P(return_value);
+	svm->res = Z_RES_P(return_value);
 }
 /* }}} */
 
@@ -262,7 +263,7 @@ PHP_FUNCTION(ibase_service_detach)
 		RETURN_FALSE;
 	}
 
-	zend_list_delete(Z_LVAL_P(res));
+	zend_list_delete(Z_RES_P(res));
 
 	RETURN_TRUE;
 }
@@ -304,7 +305,9 @@ query_loop:
 				if (! (line_len = isc_vax_integer(result, 2))) {
 					/* done */
 					if (heap_buf) {
-						RETURN_STRING(heap_buf,0);
+						RETVAL_STRING(heap_buf);
+						efree(heap_buf);
+						return;
 					} else {
 						RETURN_TRUE;
 					}
@@ -330,7 +333,7 @@ query_loop:
 			case isc_info_svc_get_env_lock:
 			case isc_info_svc_get_env_msg:
 			case isc_info_svc_user_dbpath:
-				RETURN_STRINGL(result + 2, isc_vax_integer(result, 2), 1);
+				RETURN_STRINGL(result + 2, isc_vax_integer(result, 2));
 
 			case isc_info_svc_svr_db_info:
 				array_init(return_value);
@@ -351,14 +354,14 @@ query_loop:
 
 						case isc_spb_dbname:
 							len = isc_vax_integer(result,2);
-							add_next_index_stringl(return_value, result +2, len, 1);
+							add_next_index_stringl(return_value, result +2, len);
 							result += len+2;
 					}
 				} while (*result != isc_info_flag_end);
 				return;
 
 			case isc_info_svc_get_users: {
-				zval *user;
+				zval user;
 				array_init(return_value);
 
 				while (*result != isc_info_end) {
@@ -368,40 +371,39 @@ query_loop:
 
 						case isc_spb_sec_username:
 							/* it appears that the username is always first */
-							ALLOC_INIT_ZVAL(user);
-							array_init(user);
-							add_next_index_zval(return_value, user);
+							array_init(&user);
+							add_next_index_zval(return_value, &user);
 
 							len = isc_vax_integer(result,2);
-							add_assoc_stringl(user, "user_name", result +2, len, 1);
+							add_assoc_stringl(&user, "user_name", result +2, len);
 							result += len+2;
 							break;
 
 						case isc_spb_sec_firstname:
 							len = isc_vax_integer(result,2);
-							add_assoc_stringl(user, "first_name", result +2, len, 1);
+							add_assoc_stringl(&user, "first_name", result +2, len);
 							result += len+2;
 							break;
 
 						case isc_spb_sec_middlename:
 							len = isc_vax_integer(result,2);
-							add_assoc_stringl(user, "middle_name", result +2, len, 1);
+							add_assoc_stringl(&user, "middle_name", result +2, len);
 							result += len+2;
 							break;
 
 						case isc_spb_sec_lastname:
 							len = isc_vax_integer(result,2);
-							add_assoc_stringl(user, "last_name", result +2, len, 1);
+							add_assoc_stringl(&user, "last_name", result +2, len);
 							result += len+2;
 							break;
 
 						case isc_spb_sec_userid:
-							add_assoc_long(user, "user_id", isc_vax_integer(result, 4));
+							add_assoc_long(&user, "user_id", isc_vax_integer(result, 4));
 							result += 4;
 							break;
 
 						case isc_spb_sec_groupid:
-							add_assoc_long(user, "group_id", isc_vax_integer(result, 4));
+							add_assoc_long(&user, "group_id", isc_vax_integer(result, 4));
 							result += 4;
 							break;
 					}
@@ -435,7 +437,7 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1,
+	ZEND_FETCH_RESOURCE(svm, ibase_service *, res, -1,
 		"Interbase service manager handle", le_service);
 
 	/* fill the param buffer */
@@ -498,7 +500,7 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1,
+	ZEND_FETCH_RESOURCE(svm, ibase_service *, res, -1,
 		"Interbase service manager handle", le_service);
 
 	if (svc_action == isc_action_svc_db_stats) {
@@ -604,7 +606,7 @@ PHP_FUNCTION(ibase_server_info)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1,
+	ZEND_FETCH_RESOURCE(svm, ibase_service *, res, -1,
 		"Interbase service manager handle", le_service);
 
 	_php_ibase_service_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, svm, (char)action);

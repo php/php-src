@@ -58,10 +58,9 @@ PHP_MINFO_FUNCTION(spl);
 
 
 ZEND_BEGIN_MODULE_GLOBALS(spl)
-	char *       autoload_extensions;
-	HashTable *  autoload_functions;
+	zend_string *autoload_extensions;
+	HashTable   *autoload_functions;
 	int          autoload_running;
-	int          autoload_extensions_len;
 	intptr_t     hash_mask_handle;
 	intptr_t     hash_mask_handlers;
 	int          hash_mask_init;

@@ -145,9 +145,10 @@ static void php_to64(char *s, long v, int n) /* {{{ */
 }
 /* }}} */
 
-PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, char **result)
+PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const char *salt, int salt_len)
 {
 	char *crypt_res;
+	zend_string *result;
 /* Windows (win32/crypt) has a stripped down version of libxcrypt and 
 	a CryptoApi md5_crypt implementation */
 #if PHP_USE_PHP_CRYPT_R
@@ -159,10 +160,9 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 
 			out = php_md5_crypt_r(password, salt, output);
 			if (out) {
-				*result = estrdup(out);
-				return SUCCESS;
+				return STR_INIT(out, strlen(out), 0);
 			}
-			return FAILURE;
+			return NULL;
 		} else if (salt[0]=='$' && salt[1]=='6' && salt[2]=='$') {
 			char *output;
 			output = emalloc(PHP_MAX_SALT_LEN);
@@ -171,12 +171,12 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 			if (!crypt_res) {
 				memset(output, 0, PHP_MAX_SALT_LEN);
 				efree(output);
-				return FAILURE;
+				return NULL;
 			} else {
-				*result = estrdup(output);
+				result = STR_INIT(output, strlen(output), 0);
 				memset(output, 0, PHP_MAX_SALT_LEN);
 				efree(output);
-				return SUCCESS;
+				return result;
 			}
 		} else if (salt[0]=='$' && salt[1]=='5' && salt[2]=='$') {
 			char *output;
@@ -186,12 +186,12 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 			if (!crypt_res) {
 				memset(output, 0, PHP_MAX_SALT_LEN);
 				efree(output);
-				return FAILURE;
+				return NULL;
 			} else {
-				*result = estrdup(output);
+				result = STR_INIT(output, strlen(output), 0);
 				memset(output, 0, PHP_MAX_SALT_LEN);
 				efree(output);
-				return SUCCESS;
+				return result;
 			}
 		} else if (
 				salt[0] == '$' &&
@@ -208,11 +208,11 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 			crypt_res = php_crypt_blowfish_rn(password, salt, output, sizeof(output));
 			if (!crypt_res) {
 				memset(output, 0, PHP_MAX_SALT_LEN + 1);
-				return FAILURE;
+				return NULL;
 			} else {
-				*result = estrdup(output);
+				result = STR_INIT(output, strlen(output), 0);
 				memset(output, 0, PHP_MAX_SALT_LEN + 1);
-				return SUCCESS;
+				return result;
 			}
 		} else {
 			memset(&buffer, 0, sizeof(buffer));
@@ -220,10 +220,10 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 
 			crypt_res = _crypt_extended_r(password, salt, &buffer);
 			if (!crypt_res) {
-				return FAILURE;
+				return NULL;
 			} else {
-				*result = estrdup(crypt_res);
-				return SUCCESS;
+				result = STR_INIT(crypt_res, strlen(crypt_res), 0);
+				return result;
 			}
 		}
 	}
@@ -243,8 +243,8 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 		if (!crypt_res) {
 			return FAILURE;
 		} else {
-			*result = estrdup(crypt_res);
-			return SUCCESS;
+			result = STR_INIT(crypt_res, strlen(crypt_res), 0);
+			return result;
 		}
 	}
 # endif
@@ -258,8 +258,10 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 PHP_FUNCTION(crypt)
 {
 	char salt[PHP_MAX_SALT_LEN + 1];
-	char *str, *salt_in = NULL, *result = NULL;
+	char *str, *salt_in = NULL;
 	int str_len, salt_in_len = 0;
+	zend_string *result;
+
 	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 
 	/* This will produce suitable results if people depend on DES-encryption
@@ -293,14 +295,14 @@ PHP_FUNCTION(crypt)
 	}
 	salt[salt_in_len] = '\0';
 
-	if (php_crypt(str, str_len, salt, salt_in_len, &result) == FAILURE) {
+	if ((result = php_crypt(str, str_len, salt, salt_in_len)) == NULL) {
 		if (salt[0] == '*' && salt[1] == '0') {
-			RETURN_STRING("*1", 1);
+			RETURN_STRING("*1");
 		} else {
-			RETURN_STRING("*0", 1);
+			RETURN_STRING("*0");
 		}
 	}
-	RETURN_STRING(result, 0);
+	RETURN_STR(result);
 }
 /* }}} */
 #endif

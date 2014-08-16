@@ -107,7 +107,7 @@ typedef struct _php_stream_filter_chain {
 
 struct _php_stream_filter {
 	php_stream_filter_ops *fops;
-	void *abstract; /* for use by filter implementation */
+	zval abstract; /* for use by filter implementation */
 	php_stream_filter *next;
 	php_stream_filter *prev;
 	int is_persistent;
@@ -119,7 +119,7 @@ struct _php_stream_filter {
 	php_stream_bucket_brigade buffer;
 
 	/* filters are auto_registered when they're applied */
-	int rsrc_id;
+	zend_resource *res;
 };
 
 /* stack filter onto a stream */

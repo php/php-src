@@ -1758,11 +1758,22 @@ static void zend_mm_safe_error(zend_mm_heap *heap,
 		uint error_lineno;
 		TSRMLS_FETCH();
 		if (zend_is_compiling(TSRMLS_C)) {
-			error_filename = zend_get_compiled_filename(TSRMLS_C);
+			zend_string *str = zend_get_compiled_filename(TSRMLS_C);
+			error_filename = str ? str->val : NULL;
 			error_lineno = zend_get_compiled_lineno(TSRMLS_C);
-		} else if (EG(in_execution)) {
-			error_filename = EG(active_op_array)?EG(active_op_array)->filename:NULL;
-			error_lineno = EG(opline_ptr)?(*EG(opline_ptr))->lineno:0;
+		} else if (EG(current_execute_data)) {
+			zend_execute_data *ex = EG(current_execute_data);
+
+			while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+				ex = ex->prev_execute_data;
+			}
+			if (ex) {
+				error_filename = ex->func->op_array.filename->val;
+				error_lineno = ex->opline->lineno;
+			} else {
+				error_filename = NULL;
+				error_lineno = 0;
+			}
 		} else {
 			error_filename = NULL;
 			error_lineno = 0;

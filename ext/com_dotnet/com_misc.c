@@ -60,9 +60,9 @@ PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 	IDispatch_AddRef(V_DISPATCH(&obj->v));
 	IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);
 
-	Z_TYPE_P(z) = IS_OBJECT;
-	z->value.obj.handle = zend_objects_store_put(obj, NULL, php_com_object_free_storage, php_com_object_clone TSRMLS_CC);
-	z->value.obj.handlers = &php_com_object_handlers;
+	zend_object_std_init(&obj->zo, php_com_variant_class_entry TSRMLS_CC);
+	obj->zo.handlers = &php_com_object_handlers;
+	ZVAL_OBJ(z, &obj->zo);
 }
 
 PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
@@ -84,10 +84,9 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 		IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);
 	}
 
-	Z_TYPE_P(z) = IS_OBJECT;
-	
-	z->value.obj.handle = zend_objects_store_put(obj, NULL, php_com_object_free_storage, php_com_object_clone TSRMLS_CC);
-	z->value.obj.handlers = &php_com_object_handlers;
+	zend_object_std_init(&obj->zo, php_com_variant_class_entry TSRMLS_CC);
+	obj->zo.handlers = &php_com_object_handlers;
+	ZVAL_OBJ(z, &obj->zo);
 }
 
 /* this is a convenience function for fetching a particular

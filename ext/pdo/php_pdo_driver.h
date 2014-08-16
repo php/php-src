@@ -24,8 +24,10 @@
 #include "php_pdo.h"
 
 /* forward declarations */
-typedef struct _pdo_dbh_t 	pdo_dbh_t;
-typedef struct _pdo_stmt_t	pdo_stmt_t;
+typedef struct _pdo_dbh_t 		 pdo_dbh_t;
+typedef struct _pdo_dbh_object_t pdo_dbh_object_t;
+typedef struct _pdo_stmt_t		 pdo_stmt_t;
+typedef struct _pdo_row_t		 pdo_row_t;
 struct pdo_bound_param_data;
 
 #ifdef PHP_WIN32
@@ -194,21 +196,21 @@ enum pdo_null_handling {
 /* {{{ utils for reading attributes set as driver_options */
 static inline long pdo_attr_lval(zval *options, enum pdo_attribute_type option_name, long defval TSRMLS_DC)
 {
-	zval **v;
+	zval *v;
 
-	if (options && SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), option_name, (void**)&v)) {
+	if (options && (v = zend_hash_index_find(Z_ARRVAL_P(options), option_name))) {
 		convert_to_long_ex(v);
-		return Z_LVAL_PP(v);
+		return Z_LVAL_P(v);
 	}
 	return defval;
 }
 static inline char *pdo_attr_strval(zval *options, enum pdo_attribute_type option_name, char *defval TSRMLS_DC)
 {
-	zval **v;
+	zval *v;
 
-	if (options && SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), option_name, (void**)&v)) {
+	if (options && (v = zend_hash_index_find(Z_ARRVAL_P(options), option_name))) {
 		convert_to_string_ex(v);
-		return estrndup(Z_STRVAL_PP(v), Z_STRLEN_PP(v));
+		return estrndup(Z_STRVAL_P(v), Z_STRLEN_P(v));
 	}
 	return defval ? estrdup(defval) : NULL;
 }
@@ -424,15 +426,7 @@ enum pdo_placeholder_support {
 	PDO_PLACEHOLDER_POSITIONAL=2
 };
 
-/* represents a connection to a database */
 struct _pdo_dbh_t {
-	/* these items must appear in this order at the beginning of the
-       struct so that this can be cast as a zend_object.  we need this
-       to allow the extending class to escape all the custom handlers
-	   that PDO declares.
-    */
-	zend_object std;
-
 	/* driver specific methods */
 	struct pdo_dbh_methods *methods;
 	/* driver specific data */
@@ -496,7 +490,7 @@ struct _pdo_dbh_t {
 	
 	zend_class_entry *def_stmt_ce;
 
-	zval *def_stmt_ctor_args;
+	zval def_stmt_ctor_args;
 
 	/* when calling PDO::query(), we need to keep the error
 	 * context from the statement around until we next clear it.
@@ -508,6 +502,28 @@ struct _pdo_dbh_t {
 	/* defaults for fetches */
 	enum pdo_fetch_type default_fetch_type;
 };
+
+/* represents a connection to a database */
+struct _pdo_dbh_object_t {
+	pdo_dbh_t *inner;
+	/* these items must appear in this order at the beginning of the
+       struct so that this can be cast as a zend_object.  we need this
+       to allow the extending class to escape all the custom handlers
+	   that PDO declares.
+    */
+	zend_object std;
+};
+
+static inline pdo_dbh_t *php_pdo_dbh_fetch_inner(zend_object *obj) {
+	return (pdo_dbh_t *)(((pdo_dbh_object_t *)((char*)(obj) - XtOffsetOf(pdo_dbh_object_t, std)))->inner);
+}
+
+static inline pdo_dbh_object_t *php_pdo_dbh_fetch_object(zend_object *obj) {
+	return (pdo_dbh_object_t *)((char*)(obj) - XtOffsetOf(pdo_dbh_object_t, std));
+}
+
+#define Z_PDO_DBH_P(zv) php_pdo_dbh_fetch_inner(Z_OBJ_P((zv)))
+#define Z_PDO_OBJECT_P(zv) php_pdo_dbh_fetch_object(Z_OBJ_P((zv)))
 
 /* describes a column */
 struct pdo_column_data {
@@ -524,15 +540,14 @@ struct pdo_column_data {
 /* describes a bound parameter */
 struct pdo_bound_param_data {
 	long paramno; /* if -1, then it has a name, and we don't know the index *yet* */
-	char *name;
-	int namelen;
+	zend_string *name;
 
 	long max_value_len;	/* as a hint for pre-allocation */
 	
-	zval *parameter;				/* the variable itself */
+	zval parameter;				/* the variable itself */
 	enum pdo_param_type param_type; /* desired or suggested type */
 
-	zval *driver_params;			/* optional parameter(s) for the driver */
+	zval driver_params;			/* optional parameter(s) for the driver */
 	void *driver_data;
 
 	pdo_stmt_t *stmt;	/* for convenience in dtor */
@@ -541,13 +556,6 @@ struct pdo_bound_param_data {
 
 /* represents a prepared statement */
 struct _pdo_stmt_t {
-	/* these items must appear in this order at the beginning of the
-       struct so that this can be cast as a zend_object.  we need this
-       to allow the extending class to escape all the custom handlers
-	   that PDO declares.
-    */
-	zend_object std;
-
 	/* driver specifics */
 	struct pdo_stmt_methods *methods;
 	void *driver_data;
@@ -606,26 +614,44 @@ struct _pdo_stmt_t {
 	union {
 		int column;
 		struct {
-			zend_class_entry *ce;	
-			zval *ctor_args;            /* freed */
-			zval *retval_ptr; 
+			zval ctor_args;            /* freed */
 			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
+			zval retval; 
+			zend_class_entry *ce;	
 		} cls;
 		struct {
-			zval *function;
-			zval *fetch_args;           /* freed */
-			zval *object;
+			zval fetch_args;           /* freed */
 			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
-			zval **values;              /* freed */
+			zval object;
+			zval function;
+			zval *values;              /* freed */
 		} func;
-		zval *into;
+		zval into;
 	} fetch;
 
 	/* used by the query parser for driver specific
 	 * parameter naming (see pgsql driver for example) */
 	const char *named_rewrite_template;
+
+	/* these items must appear in this order at the beginning of the
+       struct so that this can be cast as a zend_object.  we need this
+       to allow the extending class to escape all the custom handlers
+	   that PDO declares.
+    */
+	zend_object std;
+};
+
+static inline pdo_stmt_t *php_pdo_stmt_fetch_object(zend_object *obj) {
+	return (pdo_stmt_t *)((char*)(obj) - XtOffsetOf(pdo_stmt_t, std));
+}
+
+#define Z_PDO_STMT_P(zv) php_pdo_stmt_fetch_object(Z_OBJ_P((zv)))
+
+struct _pdo_row_t {
+	zend_object std;
+	pdo_stmt_t *stmt;
 };
 
 /* call this in MINIT to register your PDO driver */

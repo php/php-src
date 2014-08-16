@@ -2394,7 +2394,7 @@ void XMLRPC_ServerDestroy(XMLRPC_SERVER server) {
          my_free(sm);
          sm = Q_Next(&server->methodlist);
       }
-      if(server->xIntrospection) {
+      if (server->xIntrospection) {
          XMLRPC_CleanupValue(server->xIntrospection);
       }
 

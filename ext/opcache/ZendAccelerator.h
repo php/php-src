@@ -127,47 +127,17 @@ extern int lock_file;
 # endif
 #endif
 
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-	#define Z_REFCOUNT_P(pz)				(pz)->refcount
-	#define Z_SET_REFCOUNT_P(pz, v)			(pz)->refcount = (v)
-	#define Z_ADDREF_P(pz)					++((pz)->refcount)
-	#define Z_DELREF_P(pz)					--((pz)->refcount)
-	#define Z_ISREF_P(pz)					(pz)->is_ref
-	#define Z_SET_ISREF_P(pz)				Z_SET_ISREF_TO_P(pz, 1)
-	#define Z_UNSET_ISREF_P(pz)				Z_SET_ISREF_TO_P(pz, 0)
-	#define Z_SET_ISREF_TO_P(pz, isref)		(pz)->is_ref = (isref)
-	#define PZ_REFCOUNT_P(pz)				(pz)->refcount
-	#define PZ_SET_REFCOUNT_P(pz, v)		(pz)->refcount = (v)
-	#define PZ_ADDREF_P(pz)					++((pz)->refcount)
-	#define PZ_DELREF_P(pz)					--((pz)->refcount)
-	#define PZ_ISREF_P(pz)					(pz)->is_ref
-	#define PZ_SET_ISREF_P(pz)				Z_SET_ISREF_TO_P(pz, 1)
-	#define PZ_UNSET_ISREF_P(pz)			Z_SET_ISREF_TO_P(pz, 0)
-	#define PZ_SET_ISREF_TO_P(pz, isref)	(pz)->is_ref = (isref)
-#else
-	#define PZ_REFCOUNT_P(pz)				(pz)->refcount__gc
-	#define PZ_SET_REFCOUNT_P(pz, v)		(pz)->refcount__gc = (v)
-	#define PZ_ADDREF_P(pz)					++((pz)->refcount__gc)
-	#define PZ_DELREF_P(pz)					--((pz)->refcount__gc)
-	#define PZ_ISREF_P(pz)					(pz)->is_ref__gc
-	#define PZ_SET_ISREF_P(pz)				Z_SET_ISREF_TO_P(pz, 1)
-	#define PZ_UNSET_ISREF_P(pz)			Z_SET_ISREF_TO_P(pz, 0)
-	#define PZ_SET_ISREF_TO_P(pz, isref)	(pz)->is_ref__gc = (isref)
-#endif
+#define PZ_REFCOUNT_P(pz)				(pz)->refcount__gc
+#define PZ_SET_REFCOUNT_P(pz, v)		(pz)->refcount__gc = (v)
+#define PZ_ADDREF_P(pz)					++((pz)->refcount__gc)
+#define PZ_DELREF_P(pz)					--((pz)->refcount__gc)
+#define PZ_ISREF_P(pz)					(pz)->is_ref__gc
+#define PZ_SET_ISREF_P(pz)				Z_SET_ISREF_TO_P(pz, 1)
+#define PZ_UNSET_ISREF_P(pz)			Z_SET_ISREF_TO_P(pz, 0)
+#define PZ_SET_ISREF_TO_P(pz, isref)	(pz)->is_ref__gc = (isref)
 
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-# ifdef ALLOCA_FLAG
-	#define DO_ALLOCA(x)	do_alloca_with_limit(x, use_heap)
-	#define FREE_ALLOCA(x)	free_alloca_with_limit(x, use_heap)
-# else
-	#define ALLOCA_FLAG(x)
-	#define DO_ALLOCA(x)	do_alloca(x)
-	#define FREE_ALLOCA(x)	free_alloca(x)
-# endif
-#else
-	#define DO_ALLOCA(x)	do_alloca(x, use_heap)
-	#define FREE_ALLOCA(x)	free_alloca(x, use_heap)
-#endif
+#define DO_ALLOCA(x)	do_alloca(x, use_heap)
+#define FREE_ALLOCA(x)	free_alloca(x, use_heap)
 
 
 #if ZEND_WIN32
@@ -183,9 +153,7 @@ typedef enum _zend_accel_restart_reason {
 } zend_accel_restart_reason;
 
 typedef struct _zend_persistent_script {
-	ulong          hash_value;
-	char          *full_path;              /* full real path with resolved symlinks */
-	unsigned int   full_path_len;
+	zend_string   *full_path;              /* full real path with resolved symlinks */
 	zend_op_array  main_op_array;
 	HashTable      function_table;
 	HashTable      class_table;
@@ -193,9 +161,6 @@ typedef struct _zend_persistent_script {
 	int            ping_auto_globals_mask; /* which autoglobals are used by the script */
 	accel_time_t   timestamp;              /* the script modification time */
 	zend_bool      corrupted;
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-	zend_uint      early_binding;          /* the linked list of delayed declarations */
-#endif
 
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
@@ -241,9 +206,7 @@ typedef struct _zend_accel_directives {
 
 	long           optimization_level;
 	long           max_file_size;
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	long           interned_strings_buffer;
-#endif
 	char          *restrict_api;
 } zend_accel_directives;
 
@@ -263,6 +226,7 @@ typedef struct _zend_accel_globals {
 	char                   *include_path;     /* current section of "include_path" directive */
 	int                     include_path_len; /* "include_path" string length */
 	int                     include_path_check;
+	int                     auto_globals_mask;
 	time_t                  request_time;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
@@ -299,19 +263,12 @@ typedef struct _zend_accel_shared_globals {
 #endif
 	zend_bool       restart_in_progress;
     time_t          revalidate_at;
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	/* Interned Strings Support */
 	char           *interned_strings_start;
 	char           *interned_strings_top;
 	char           *interned_strings_end;
+	char           *interned_strings_saved_top;
 	HashTable       interned_strings;
-	struct {
-		Bucket **arBuckets;
-		Bucket  *pListHead;
-		Bucket  *pListTail;
-		char    *top;
-	} interned_strings_saved_state;
-#endif
 } zend_accel_shared_globals;
 
 extern zend_bool accel_startup_ok;
@@ -347,55 +304,24 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 
 #define ZEND_DECLARE_INHERITED_CLASS_DELAYED_FLAG 0x80
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+#define IS_ACCEL_INTERNED(str) \
+	((char*)(str) >= ZCSG(interned_strings_start) && (char*)(str) < ZCSG(interned_strings_end))
 
-const char *accel_new_interned_string(const char *arKey, int nKeyLength, int free_src TSRMLS_DC);
+zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC);
 
-# define interned_free(s) do { \
-		if (!IS_INTERNED(s)) { \
-			free(s); \
-		} \
-	} while (0)
-# define interned_efree(s) do { \
-		if (!IS_INTERNED(s)) { \
-			efree(s); \
-		} \
-	} while (0)
-# define interned_estrndup(s, n) \
-	(IS_INTERNED(s) ? (s) : estrndup(s, n))
 # define ZEND_RESULT_TYPE(opline)	(opline)->result_type
 # define ZEND_RESULT(opline)		(opline)->result
 # define ZEND_OP1_TYPE(opline)		(opline)->op1_type
 # define ZEND_OP1(opline)			(opline)->op1
 # define ZEND_OP1_CONST(opline)		(*(opline)->op1.zv)
-# define ZEND_OP1_LITERAL(opline)	(op_array)->literals[(opline)->op1.constant].constant
+# define ZEND_OP1_LITERAL(opline)	(op_array)->literals[(opline)->op1.constant]
 # define ZEND_OP2_TYPE(opline)		(opline)->op2_type
 # define ZEND_OP2(opline)			(opline)->op2
 # define ZEND_OP2_CONST(opline)		(*(opline)->op2.zv)
-# define ZEND_OP2_LITERAL(opline)	(op_array)->literals[(opline)->op2.constant].constant
+# define ZEND_OP2_LITERAL(opline)	(op_array)->literals[(opline)->op2.constant]
 # define ZEND_DONE_PASS_TWO(op_array)	(((op_array)->fn_flags & ZEND_ACC_DONE_PASS_TWO) != 0)
 # define ZEND_CE_FILENAME(ce)			(ce)->info.user.filename
 # define ZEND_CE_DOC_COMMENT(ce)        (ce)->info.user.doc_comment
 # define ZEND_CE_DOC_COMMENT_LEN(ce)	(ce)->info.user.doc_comment_len
-#else
-# define IS_INTERNED(s)				0
-# define interned_free(s)			free(s)
-# define interned_efree(s)			efree(s)
-# define interned_estrndup(s, n)	estrndup(s, n)
-# define ZEND_RESULT_TYPE(opline)	(opline)->result.op_type
-# define ZEND_RESULT(opline)		(opline)->result.u
-# define ZEND_OP1_TYPE(opline)		(opline)->op1.op_type
-# define ZEND_OP1(opline)			(opline)->op1.u
-# define ZEND_OP1_CONST(opline)		(opline)->op1.u.constant
-# define ZEND_OP1_LITERAL(opline)	(opline)->op1.u.constant
-# define ZEND_OP2_TYPE(opline)		(opline)->op2.op_type
-# define ZEND_OP2(opline)			(opline)->op2.u
-# define ZEND_OP2_CONST(opline)		(opline)->op2.u.constant
-# define ZEND_OP2_LITERAL(opline)	(opline)->op2.u.constant
-# define ZEND_DONE_PASS_TWO(op_array)	((op_array)->done_pass_two != 0)
-# define ZEND_CE_FILENAME(ce)			(ce)->filename
-# define ZEND_CE_DOC_COMMENT(ce)        (ce)->doc_comment
-# define ZEND_CE_DOC_COMMENT_LEN(ce)	(ce)->doc_comment_len
-#endif
 
 #endif /* ZEND_ACCELERATOR_H */

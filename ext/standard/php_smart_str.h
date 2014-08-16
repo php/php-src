@@ -29,8 +29,8 @@
 #endif
 
 #define smart_str_0(x) do {											\
-	if ((x)->c) {													\
-		(x)->c[(x)->len] = '\0';									\
+	if ((x)->s) {													\
+		(x)->s->val[(x)->s->len] = '\0';							\
 	}																\
 } while (0)
 
@@ -42,28 +42,33 @@
 #define SMART_STR_START_SIZE 78
 #endif
 
+
 #ifdef SMART_STR_USE_REALLOC
-#define SMART_STR_REALLOC(a,b,c) realloc((a),(b))
+#define SMART_STR_DO_REALLOC(b, w) do {								\
+	int oldlen = (b)->s->len;										\
+	(b)->s = erealloc((buf)->s, _STR_HEADER_SIZE + (b)->a + 1);		\
+	(b)->s->len = oldlen;											\
+} while (0)
 #else
-#define SMART_STR_REALLOC(a,b,c) perealloc((a),(b),(c))
+#define SMART_STR_DO_REALLOC(b, w) do {								\
+	(b)->s = perealloc((b)->s, _STR_HEADER_SIZE + (b)->a + 1, (w));	\
+} while (0)
 #endif
 
-#define SMART_STR_DO_REALLOC(d, what) \
-	(d)->c = SMART_STR_REALLOC((d)->c, (d)->a + 1, (what))
 
 #define smart_str_alloc4(d, n, what, newlen) do {					\
-	if (!(d)->c) {													\
-		(d)->len = 0;												\
+	if (!(d)->s) {													\
 		newlen = (n);												\
 		(d)->a = newlen < SMART_STR_START_SIZE 						\
 				? SMART_STR_START_SIZE 								\
 				: newlen + SMART_STR_PREALLOC;						\
-		SMART_STR_DO_REALLOC(d, what);								\
+		(d)->s = STR_ALLOC((d)->a, (what));							\
+		(d)->s->len = 0;											\
 	} else {														\
-		newlen = (d)->len + (n);									\
+		newlen = (d)->s->len + (n);									\
 		if (newlen >= (d)->a) {										\
 			(d)->a = newlen + SMART_STR_PREALLOC;					\
-			SMART_STR_DO_REALLOC(d, what);							\
+			SMART_STR_DO_REALLOC((d), (what));						\
 		}															\
 	}																\
 } while (0)
@@ -93,20 +98,20 @@
 #define smart_str_append_unsigned(dest, val) \
 	smart_str_append_unsigned_ex((dest), (val), 0)
 
-#define smart_str_appendc_ex(dest, ch, what) do {					\
-	register size_t __nl;											\
-	smart_str_alloc4((dest), 1, (what), __nl);						\
-	(dest)->len = __nl;												\
-	((unsigned char *) (dest)->c)[(dest)->len - 1] = (ch);			\
+#define smart_str_appendc_ex(dest, ch, what) do {				   \
+	register size_t __nl;										   \
+	smart_str_alloc4((dest), 1, (what), __nl);					   \
+	(dest)->s->len = __nl;										   \
+	((unsigned char *) (dest)->s->val)[(dest)->s->len - 1] = (ch); \
 } while (0)
 
-#define smart_str_free_ex(s, what) do {								\
-	smart_str *__s = (smart_str *) (s);								\
-	if (__s->c) {													\
-		pefree(__s->c, what);										\
-		__s->c = NULL;												\
+#define smart_str_free_ex(buf, what) do {							\
+	smart_str *__s = (smart_str *) (buf);							\
+	if (__s->s) {													\
+		STR_RELEASE(__s->s);										\
+		__s->s = NULL;												\
 	}																\
-	__s->a = __s->len = 0;											\
+	__s->a = 0;														\
 } while (0)
 
 #define smart_str_appendl_ex(dest, src, nlen, what) do {			\
@@ -114,33 +119,8 @@
 	smart_str *__dest = (smart_str *) (dest);						\
 																	\
 	smart_str_alloc4(__dest, (nlen), (what), __nl);					\
-	memcpy(__dest->c + __dest->len, (src), (nlen));					\
-	__dest->len = __nl;												\
-} while (0)
-
-/* input: buf points to the END of the buffer */
-#define smart_str_print_unsigned4(buf, num, vartype, result) do {	\
-	char *__p = (buf);												\
-	vartype __num = (num);											\
-	*__p = '\0';													\
-	do {															\
-		*--__p = (char) (__num % 10) + '0';							\
-		__num /= 10;												\
-	} while (__num > 0);											\
-	result = __p;													\
-} while (0)
-
-/* buf points to the END of the buffer */
-#define smart_str_print_long4(buf, num, vartype, result) do {	\
-	if (num < 0) {													\
-		/* this might cause problems when dealing with LONG_MIN		\
-		   and machines which don't support long long.  Works		\
-		   flawlessly on 32bit x86 */								\
-		smart_str_print_unsigned4((buf), -(num), vartype, (result));	\
-		*--(result) = '-';											\
-	} else {														\
-		smart_str_print_unsigned4((buf), (num), vartype, (result));	\
-	}																\
+	memcpy(__dest->s->val + __dest->s->len, (src), (nlen));			\
+	__dest->s->len = __nl;											\
 } while (0)
 
 /*
@@ -152,20 +132,20 @@
  
 static inline char *smart_str_print_long(char *buf, long num) {
 	char *r; 
-	smart_str_print_long4(buf, num, unsigned long, r); 
+	_zend_print_signed_to_buf(buf, num, long, r); 
 	return r;
 }
 
 static inline char *smart_str_print_unsigned(char *buf, long num) {
 	char *r; 
-	smart_str_print_unsigned4(buf, num, unsigned long, r); 
+	_zend_print_unsigned_to_buf(buf, num, unsigned long, r); 
 	return r;
 }
 
 #define smart_str_append_generic_ex(dest, num, type, vartype, func) do {	\
 	char __b[32];															\
 	char *__t;																\
-   	smart_str_print##func##4 (__b + sizeof(__b) - 1, (num), vartype, __t);	\
+   	_zend_print##func##_to_buf (__b + sizeof(__b) - 1, (num), vartype, __t);	\
 	smart_str_appendl_ex((dest), __t, __b + sizeof(__b) - 1 - __t, (type));	\
 } while (0)
 	
@@ -173,20 +153,18 @@ static inline char *smart_str_print_unsigned(char *buf, long num) {
 	smart_str_append_generic_ex((dest), (num), (type), unsigned long, _unsigned)
 
 #define smart_str_append_long_ex(dest, num, type) \
-	smart_str_append_generic_ex((dest), (num), (type), unsigned long, _long)
+	smart_str_append_generic_ex((dest), (num), (type), unsigned long, _signed)
 
 #define smart_str_append_off_t_ex(dest, num, type) \
-	smart_str_append_generic_ex((dest), (num), (type), off_t, _long)
+	smart_str_append_generic_ex((dest), (num), (type), off_t, _signed)
 
-#define smart_str_append_ex(dest, src, what) \
-	smart_str_appendl_ex((dest), ((smart_str *)(src))->c, \
-		((smart_str *)(src))->len, (what));
-
+#define smart_str_append_ex(dest, src, what) 						\
+	smart_str_appendl_ex((dest), ((smart_str *)(src))->s->val, 		\
+		((smart_str *)(src))->s->len, (what));
 
 #define smart_str_setl(dest, src, nlen) do {						\
-	(dest)->len = (nlen);											\
-	(dest)->a = (nlen) + 1;											\
-	(dest)->c = (char *) (src);										\
+	smart_str_free((dest));											\
+	smart_str_appendl_ex((dest), (src), (nlen), 0);					\
 } while (0)
 
 #define smart_str_sets(dest, src) \

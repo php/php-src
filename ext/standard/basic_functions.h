@@ -162,7 +162,7 @@ typedef signed long php_int32;
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
-	zval *strtok_zval;
+	zval  strtok_zval;
 	char *strtok_string;
 	char *locale_string;
 	char *strtok_last;
@@ -175,7 +175,7 @@ typedef struct _php_basic_globals {
 	zend_fcall_info_cache user_compare_fci_cache;
 	zend_llist *user_tick_functions;
 
-	zval *active_ini_file_section;
+	zval active_ini_file_section;
 	
 	/* pageinfo.c */
 	long page_uid;
@@ -251,7 +251,7 @@ PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
 
 typedef struct _php_shutdown_function_entry {
-	zval **arguments;
+	zval *arguments;
 	int arg_count;
 } php_shutdown_function_entry;
 

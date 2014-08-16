@@ -22,7 +22,7 @@
 
 #define CTX_PUTC(c,ctx) ctx->putC(ctx, c)
 
-static void _php_image_output_putc(struct gdIOCtx *ctx, int c)
+static void _php_image_output_putc(struct gdIOCtx *ctx, int c) /* {{{ */
 {
 	/* without the following downcast, the write will fail
 	 * (i.e., will write a zero byte) for all
@@ -31,36 +31,36 @@ static void _php_image_output_putc(struct gdIOCtx *ctx, int c)
 	unsigned char ch = (unsigned char) c;
 	TSRMLS_FETCH();
 	php_write(&ch, 1 TSRMLS_CC);
-}
+} /* }}} */
 
-static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l)
+static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
 {
 	TSRMLS_FETCH();
 	return php_write((void *)buf, l TSRMLS_CC);
-}
+} /* }}} */
 
-static void _php_image_output_ctxfree(struct gdIOCtx *ctx)
+static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 {
 	if(ctx) {
 		efree(ctx);
 	}
-}
+} /* }}} */
 
-static void _php_image_stream_putc(struct gdIOCtx *ctx, int c)  {
+static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
 	char ch = (char) c;
 	php_stream * stream = (php_stream *)ctx->data;
 	TSRMLS_FETCH();
 	php_stream_write(stream, &ch, 1);
-}
+} /* }}} */
 
-static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l)
+static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
 {
 	php_stream * stream = (php_stream *)ctx->data;
 	TSRMLS_FETCH();
 	return php_stream_write(stream, (void *)buf, l);
-}
+} /* }}} */
 
-static void _php_image_stream_ctxfree(struct gdIOCtx *ctx)
+static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -71,7 +71,7 @@ static void _php_image_stream_ctxfree(struct gdIOCtx *ctx)
 	if(ctx) {
 		efree(ctx);
 	}
-}
+} /* }}} */
 
 /* {{{ _php_image_output_ctx */
 static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
@@ -108,7 +108,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		}
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, &imgind, -1, "Image", phpi_get_le_gd());
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", phpi_get_le_gd());
 
 	if (argc >= 3) {
 		q = quality; /* or colorindex for foreground of BW images (defaults to black) */
@@ -119,7 +119,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 
 	if (argc > 1 && to_zval != NULL) {
 		if (Z_TYPE_P(to_zval) == IS_RESOURCE) {
-			php_stream_from_zval_no_verify(stream, &to_zval);
+			php_stream_from_zval_no_verify(stream, to_zval);
 			if (stream == NULL) {
 				RETURN_FALSE;
 			}

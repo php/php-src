@@ -177,5 +177,5 @@ bool(false)
 -- Iteration 24 --
 
 Warning: mb_strrpos() expects parameter 1 to be string, resource given in %s on line %d
-bool(false)
+NULL
 Done

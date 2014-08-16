@@ -7232,7 +7232,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 3
-Starting byte set: a d x 
+Starting chars: a d x 
     terhjk;abcdaadsfe
  0: abc
     the quick xyz brown fox 

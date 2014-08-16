@@ -85,11 +85,12 @@ documentation is supplied in two other forms:
   1. There are files called doc/pcre.txt, doc/pcregrep.txt, and
      doc/pcretest.txt in the source distribution. The first of these is a
      concatenation of the text forms of all the section 3 man pages except
-     those that summarize individual functions. The other two are the text
-     forms of the section 1 man pages for the pcregrep and pcretest commands.
-     These text forms are provided for ease of scanning with text editors or
-     similar tools. They are installed in <prefix>/share/doc/pcre, where
-     <prefix> is the installation prefix (defaulting to /usr/local).
+     the listing of pcredemo.c and those that summarize individual functions.
+     The other two are the text forms of the section 1 man pages for the
+     pcregrep and pcretest commands. These text forms are provided for ease of
+     scanning with text editors or similar tools. They are installed in
+     <prefix>/share/doc/pcre, where <prefix> is the installation prefix
+     (defaulting to /usr/local).
 
   2. A set of files containing all the documentation in HTML form, hyperlinked
      in various ways, and rooted in a file called index.html, is distributed in
@@ -372,12 +373,12 @@ library. They are also documented in the pcrebuild man page.
 
   Of course, the relevant libraries must be installed on your system.
 
-. The default size of internal buffer used by pcregrep can be set by, for
-  example:
+. The default size (in bytes) of the internal buffer used by pcregrep can be
+  set by, for example:
 
-  --with-pcregrep-bufsize=50K
+  --with-pcregrep-bufsize=51200
 
-  The default value is 20K.
+  The value must be a plain integer. The default is 20480.
 
 . It is possible to compile pcretest so that it links with the libreadline
   or libedit libraries, by specifying, respectively,
@@ -987,4 +988,4 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 05 November 2013
+Last updated: 17 January 2014

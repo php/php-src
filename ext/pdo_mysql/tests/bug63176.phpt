@@ -47,8 +47,8 @@ object(ModelA)#%d (1) {
 }
 object(ModelA)#%d (1) {
   ["db"]=>
-  object(PDO2)#%d (1) {
-    ["transLevel":protected]=>
+  object(PDO3)#%d (1) {
+    ["tomato":protected]=>
     NULL
   }
 }

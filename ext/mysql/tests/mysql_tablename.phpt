@@ -51,6 +51,6 @@ Warning: mysql_tablename(): Unable to jump to row -1 on MySQL result index %d in
 
 Warning: mysql_tablename(): Unable to jump to row 2 on MySQL result index %d in %s on line %d
 
-Warning: mysql_tablename(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_tablename(): supplied resource is not a valid MySQL result resource in %s on line %d
 bool(false)
 done!

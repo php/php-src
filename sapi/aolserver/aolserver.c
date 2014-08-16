@@ -273,7 +273,7 @@ PHP_FUNCTION(getallheaders)
 		char *key = Ns_SetKey(NSG(conn->headers), i);
 		char *value = Ns_SetValue(NSG(conn->headers), i);
 		
-		add_assoc_string(return_value, key, value, 1);
+		add_assoc_string(return_value, key, value);
 	}
 }
 

@@ -121,19 +121,19 @@ typedef enum {
 typedef struct _spl_cbfilter_it_intern {
 	zend_fcall_info       fci;
 	zend_fcall_info_cache fcc;
+	zend_object           *object;
 } _spl_cbfilter_it_intern;
 
 typedef struct _spl_dual_it_object {
-	zend_object              std;
 	struct {
-		zval                 *zobject;
+		zval                 zobject;
 		zend_class_entry     *ce;
 		zend_object          *object;
 		zend_object_iterator *iterator;
 	} inner;
 	struct {
-		zval                 *data;
-		zval                 *key;
+		zval                 data;
+		zval                 key;
 		int                  pos;
 	} current;
 	dual_it_type             dit_type;
@@ -144,12 +144,12 @@ typedef struct _spl_dual_it_object {
 		} limit;
 		struct {
 			long             flags; /* CIT_* */
-			zval             *zstr;
-			zval             *zchildren;
-			zval             *zcache;
+			zval             zstr;
+			zval             zchildren;
+			zval             zcache;
 		} caching;
 		struct {
-			zval                 *zarrayit;
+			zval                  zarrayit;
 			zend_object_iterator *iterator;
 		} append;
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
@@ -159,13 +159,19 @@ typedef struct _spl_dual_it_object {
 			regex_mode       mode;
 			long             preg_flags;
 			pcre_cache_entry *pce;
-			char             *regex;
-			uint             regex_len;
+			zend_string      *regex;
 		} regex;
 #endif
 		_spl_cbfilter_it_intern *cbfilter;
 	} u;
+	zend_object              std;
 } spl_dual_it_object;
+
+static inline spl_dual_it_object *spl_dual_it_from_obj(zend_object *obj) /* {{{ */ {
+	return (spl_dual_it_object*)((char*)(obj) - XtOffsetOf(spl_dual_it_object, std));
+} /* }}} */
+
+#define Z_SPLDUAL_IT_P(zv)  spl_dual_it_from_obj(Z_OBJ_P((zv)))
 
 typedef int (*spl_iterator_apply_func_t)(zend_object_iterator *iter, void *puser TSRMLS_DC);
 

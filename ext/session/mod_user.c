@@ -28,7 +28,6 @@ ps_module ps_mod_user = {
 
 #define SESS_ZVAL_LONG(val, a)						\
 {													\
-	MAKE_STD_ZVAL(a);								\
 	ZVAL_LONG(a, val);								\
 }
 
@@ -40,42 +39,44 @@ ps_module ps_mod_user = {
 
 #define SESS_ZVAL_STRINGN(vl, ln, a)				\
 {													\
-	MAKE_STD_ZVAL(a);								\
-	ZVAL_STRINGL(a, vl, ln, 1);						\
+	ZVAL_STRINGL(a, vl, ln);						\
 }
 
-static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
+#define SESS_ZVAL_STR(vl, a)						\
+{													\
+	ZVAL_STR(a, STR_COPY(vl));						\
+}
+
+static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval TSRMLS_DC)
 {
 	int i;
-	zval *retval = NULL;
-
-	MAKE_STD_ZVAL(retval);
 	if (call_user_function(EG(function_table), NULL, func, retval, argc, argv TSRMLS_CC) == FAILURE) {
-		zval_ptr_dtor(&retval);
-		retval = NULL;
+		zval_ptr_dtor(retval);
+		ZVAL_UNDEF(retval);
+	} else if (Z_ISUNDEF_P(retval)) {
+		ZVAL_NULL(retval);
 	}
-
 	for (i = 0; i < argc; i++) {
 		zval_ptr_dtor(&argv[i]);
 	}
-
-	return retval;
 }
 
 #define STDVARS								\
-	zval *retval = NULL;					\
+	zval retval;							\
 	int ret = FAILURE
 
 #define PSF(a) PS(mod_user_names).name.ps_##a
 
 #define FINISH \
-	if (retval) { \
-		if (Z_TYPE_P(retval) == IS_BOOL) { \
-			ret = Z_BVAL_P(retval) ? SUCCESS : FAILURE; \
-                }  else if ((Z_TYPE_P(retval) == IS_LONG) && (Z_LVAL_P(retval) == -1)) { \
+	if (Z_TYPE(retval) != IS_UNDEF) { \
+		if (Z_TYPE(retval) == IS_TRUE) { \
+			ret = SUCCESS; \
+		} else if (Z_TYPE(retval) == IS_FALSE) { \
+			ret = FAILURE; \
+        }  else if ((Z_TYPE(retval) == IS_LONG) && (Z_LVAL(retval) == -1)) { \
 			/* BC for clever users - Deprecate me */ \
 			ret = FAILURE; \
-		} else if ((Z_TYPE_P(retval) == IS_LONG) && (Z_LVAL_P(retval) == 0)) { \
+		} else if ((Z_TYPE(retval) == IS_LONG) && (Z_LVAL(retval) == 0)) { \
 			/* BC for clever users - Deprecate me */ \
 			ret = SUCCESS; \
 		} else { \
@@ -84,27 +85,27 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 				                 "Session callback expects true/false return value"); \
 			} \
 			ret = FAILURE; \
+			zval_ptr_dtor(&retval); \
 		} \
-		zval_ptr_dtor(&retval); \
 	} \
 	return ret
 
 PS_OPEN_FUNC(user)
 {
-	zval *args[2];
+	zval args[2];
 	STDVARS;
 	
-	if (PSF(open) == NULL) {
+	if (Z_ISUNDEF(PSF(open))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"user session functions not defined");
 			
 		return FAILURE;
 	}
 
-	SESS_ZVAL_STRING((char*)save_path, args[0]);
-	SESS_ZVAL_STRING((char*)session_name, args[1]);
+	SESS_ZVAL_STRING((char*)save_path, &args[0]);
+	SESS_ZVAL_STRING((char*)session_name, &args[1]);
 
-	retval = ps_call_handler(PSF(open), 2, args TSRMLS_CC);
+	ps_call_handler(&PSF(open), 2, args, &retval TSRMLS_CC);
 	PS(mod_user_implemented) = 1;
 
 	FINISH;
@@ -121,7 +122,7 @@ PS_CLOSE_FUNC(user)
 	}
 
 	zend_try {
-		retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
+		ps_call_handler(&PSF(close), 0, NULL, &retval TSRMLS_CC);
 	} zend_catch {
 		bailout = 1;
 	} zend_end_try();
@@ -129,7 +130,7 @@ PS_CLOSE_FUNC(user)
 	PS(mod_user_implemented) = 0;
 
 	if (bailout) {
-		if (retval) {
+		if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);
 		}
 		zend_bailout();
@@ -140,17 +141,16 @@ PS_CLOSE_FUNC(user)
 
 PS_READ_FUNC(user)
 {
-	zval *args[1];
+	zval args[1];
 	STDVARS;
 
-	SESS_ZVAL_STRING((char*)key, args[0]);
+	SESS_ZVAL_STR(key, &args[0]);
 
-	retval = ps_call_handler(PSF(read), 1, args TSRMLS_CC);
+	ps_call_handler(&PSF(read), 1, args, &retval TSRMLS_CC);
 
-	if (retval) {
-		if (Z_TYPE_P(retval) == IS_STRING) {
-			*val = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-			*vallen = Z_STRLEN_P(retval);
+	if (!Z_ISUNDEF(retval)) {
+		if (Z_TYPE(retval) == IS_STRING) {
+			*val = STR_COPY(Z_STR(retval));
 			ret = SUCCESS;
 		}
 		zval_ptr_dtor(&retval);
@@ -161,37 +161,37 @@ PS_READ_FUNC(user)
 
 PS_WRITE_FUNC(user)
 {
-	zval *args[2];
+	zval args[2];
 	STDVARS;
 
-	SESS_ZVAL_STRING((char*)key, args[0]);
-	SESS_ZVAL_STRINGN((char*)val, vallen, args[1]);
+	SESS_ZVAL_STR(key, &args[0]);
+	SESS_ZVAL_STR(val, &args[1]);
 
-	retval = ps_call_handler(PSF(write), 2, args TSRMLS_CC);
+	ps_call_handler(&PSF(write), 2, args, &retval TSRMLS_CC);
 
 	FINISH;
 }
 
 PS_DESTROY_FUNC(user)
 {
-	zval *args[1];
+	zval args[1];
 	STDVARS;
 
-	SESS_ZVAL_STRING((char*)key, args[0]);
+	SESS_ZVAL_STR(key, &args[0]);
 
-	retval = ps_call_handler(PSF(destroy), 1, args TSRMLS_CC);
+	ps_call_handler(&PSF(destroy), 1, args, &retval TSRMLS_CC);
 
 	FINISH;
 }
 
 PS_GC_FUNC(user)
 {
-	zval *args[1];
+	zval args[1];
 	STDVARS;
 
-	SESS_ZVAL_LONG(maxlifetime, args[0]);
+	SESS_ZVAL_LONG(maxlifetime, &args[0]);
 
-	retval = ps_call_handler(PSF(gc), 1, args TSRMLS_CC);
+	ps_call_handler(&PSF(gc), 1, args, &retval TSRMLS_CC);
 
 	FINISH;
 }
@@ -199,19 +199,18 @@ PS_GC_FUNC(user)
 PS_CREATE_SID_FUNC(user)
 {
 	/* maintain backwards compatibility */
-	if (PSF(create_sid) != NULL) {
-		char *id = NULL;
-		zval *retval = NULL;
+	if (!Z_ISUNDEF(PSF(create_sid))) {
+		zend_string *id = NULL;
+		zval retval;
 
-		retval = ps_call_handler(PSF(create_sid), 0, NULL TSRMLS_CC);
+		ps_call_handler(&PSF(create_sid), 0, NULL, &retval TSRMLS_CC);
 
-		if (retval) {
-			if (Z_TYPE_P(retval) == IS_STRING) {
-				id = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+		if (!Z_ISUNDEF(retval)) {
+			if (Z_TYPE(retval) == IS_STRING) {
+				id = STR_COPY(Z_STR(retval));
 			}
 			zval_ptr_dtor(&retval);
-		}
-		else {
+		} else {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "No session id returned by function");
 			return NULL;
 		}
@@ -225,7 +224,7 @@ PS_CREATE_SID_FUNC(user)
 	}
 
 	/* function as defined by PS_MOD */
-	return php_session_create_id(mod_data, newlen TSRMLS_CC);
+	return php_session_create_id(mod_data TSRMLS_CC);
 }
 
 /*

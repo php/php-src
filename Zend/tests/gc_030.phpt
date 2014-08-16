@@ -28,6 +28,7 @@ Stack trace:
 
 Next exception 'Exception' with message 'foobar' in %sgc_030.php:%d
 Stack trace:
-#0 %sgc_030.php(%d): foo->__destruct()
-#1 {main}
+#0 [internal function]: foo->__destruct()
+#1 %sgc_030.php(%d): gc_collect_cycles()
+#2 {main}
   thrown in %sgc_030.php on line %d

@@ -131,7 +131,7 @@ ssize_t fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, i
 int fcgi_flush(fcgi_request *req, int close);
 
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
-void fcgi_free_mgmt_var_cb(void * ptr);
+void fcgi_free_mgmt_var_cb(zval *ptr);
 
 char *fcgi_get_last_client_ip();
 
