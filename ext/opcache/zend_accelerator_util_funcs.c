@@ -41,9 +41,7 @@ static zend_uint zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 static const zend_uint uninitialized_bucket = {INVALID_IDX};
-#endif
 
 static int zend_prepare_function_for_execution(zend_op_array *op_array);
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind);
@@ -180,18 +178,11 @@ void zend_accel_free_user_functions(HashTable *ht TSRMLS_DC)
 	ht->pDestructor = orig_dtor;
 }
 
-static int move_user_function(zval *zv
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	TSRMLS_DC 
-#endif
-	, int num_args, va_list args, zend_hash_key *hash_key) 
+static int move_user_function(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) 
 {
 	zend_function *function = Z_PTR_P(zv);
 	HashTable *function_table = va_arg(args, HashTable *);
 	(void)num_args; /* keep the compiler happy */
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-	TSRMLS_FETCH();
-#endif 
 
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_hash_update_ptr(function_table, hash_key->key, function);
@@ -206,11 +197,7 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst TSRMLS_DC)
 	dtor_func_t orig_dtor = src->pDestructor;
 
 	src->pDestructor = NULL;
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-	zend_hash_apply_with_arguments(src, (apply_func_args_t)move_user_function, 1, dst);
-#else
 	zend_hash_apply_with_arguments(src TSRMLS_CC, (apply_func_args_t)move_user_function, 1, dst);
-#endif 
 	src->pDestructor = orig_dtor;
 }
 
@@ -265,19 +252,12 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 		return;
 	}
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	switch (Z_TYPE_P(src)) {
-#else
-	switch (Z_TYPE_P(src)) {
-#endif
 		case IS_STRING:
 	    case IS_CONSTANT:
 			Z_STR_P(src) = zend_clone_str(Z_STR_P(src) TSRMLS_CC);
 			break;
 		case IS_ARRAY:
-#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
-	    case IS_CONSTANT_ARRAY:
-#endif
 			if (Z_ARR_P(src) != &EG(symbol_table)) {
 		    	if (bind && Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_ARR_P(src))) != NULL) {
 		    		Z_ARR_P(src) = ptr;
@@ -323,7 +303,6 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 	}
 }
 
-#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
 {
 	zend_uint i;
@@ -365,7 +344,6 @@ static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
 		return copy;
 	}
 }
-#endif
 
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 {
@@ -385,12 +363,10 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	ht->arHash = NULL;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (!ht->nTableMask) {
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 		return;
 	}
-#endif
 
 	if (source->u.flags & HASH_FLAG_PACKED) {
 		ht->u.flags |= HASH_FLAG_PACKED;
@@ -466,12 +442,10 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->u.flags = 0;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (!ht->nTableMask) {
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 		return;
 	}
-#endif
 
 	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
 	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(zend_uint)));
@@ -545,12 +519,10 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->u.flags = 0;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (!ht->nTableMask) {
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 		return;
 	}
-#endif
 
 	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
 	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(zend_uint)));
@@ -644,7 +616,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		accel_xlat_set(old_ce, ce);
 	}
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (old_ce->default_properties_table) {
 		int i;
 
@@ -654,14 +625,10 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 			zend_clone_zval(&ce->default_properties_table[i], 1 TSRMLS_CC);
 		}
 	}
-#else
-	zend_hash_clone_zval(&ce->default_properties, &old_ce->default_properties, 0);
-#endif
 
 	zend_hash_clone_methods(&ce->function_table, &old_ce->function_table, old_ce, ce TSRMLS_CC);
 
 	/* static members */
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (old_ce->default_static_members_table) {
 		int i;
 
@@ -672,10 +639,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		}
 	}
 	ce->static_members_table = ce->default_static_members_table;
-#else
-	zend_hash_clone_zval(&ce->default_static_members, &old_ce->default_static_members, 1);
-	ce->static_members = &ce->default_static_members;
-#endif
 
 	/* properties_info */
 	zend_hash_clone_prop_info(&ce->properties_info, &old_ce->properties_info, old_ce, ce TSRMLS_CC);
@@ -723,13 +686,10 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 /* 5.2 stuff */
 	zend_update_inherited_handler(__tostring);
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 /* 5.3 stuff */
 	zend_update_inherited_handler(__callstatic);
-#endif
 	zend_update_inherited_handler(__debugInfo);
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 /* 5.4 traits */
 	if (ce->trait_aliases) {
 		zend_trait_alias **trait_aliases;
@@ -808,7 +768,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		trait_precedences[i] = NULL;
 		ce->trait_precedences = trait_precedences;
 	}
-#endif
 }
 
 static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor TSRMLS_DC)
@@ -905,38 +864,10 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 failure:
 	ce1 = Z_PTR(p->val);
 	CG(in_compilation) = 1;
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	zend_set_compiled_filename(ce1->info.user.filename TSRMLS_CC);
 	CG(zend_lineno) = ce1->info.user.line_start;
-#else
-	zend_set_compiled_filename(ce1->filename TSRMLS_CC);
-	CG(zend_lineno) = ce1->line_start;
-#endif
 	zend_error(E_ERROR, "Cannot redeclare class %s", ce1->name->val);
 }
-
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-static void zend_do_delayed_early_binding(zend_op_array *op_array, zend_uint early_binding TSRMLS_DC)
-{
-	zend_uint opline_num = early_binding;
-
-	if ((int)opline_num != -1) {
-		zend_bool orig_in_compilation = CG(in_compilation);
-		char *orig_compiled_filename = zend_set_compiled_filename(op_array->filename TSRMLS_CC);
-		zend_class_entry **pce;
-
-		CG(in_compilation) = 1;
-		while ((int)opline_num != -1) {
-			if (zend_lookup_class(Z_STRVAL(op_array->opcodes[opline_num - 1].op2.u.constant), Z_STRLEN(op_array->opcodes[opline_num - 1].op2.u.constant), &pce TSRMLS_CC) == SUCCESS) {
-				do_bind_inherited_class(&op_array->opcodes[opline_num], EG(class_table), *pce, 1 TSRMLS_CC);
-			}
-			opline_num = op_array->opcodes[opline_num].result.u.opline_num;
-		}
-		zend_restore_compiled_filename(orig_compiled_filename TSRMLS_CC);
-		CG(in_compilation) = orig_in_compilation;
-	}
-}
-#endif
 
 zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory TSRMLS_DC)
 {
@@ -974,13 +905,6 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		}
 
 		zend_hash_destroy(&ZCG(bind_hash));
-
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-		if ((int)persistent_script->early_binding != -1) {
-			zend_do_delayed_early_binding(op_array, persistent_script->early_binding TSRMLS_CC);
-		}
-#endif
-
 	} else /* if (!from_shared_memory) */ {
 		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
 			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table, NULL TSRMLS_CC);
@@ -990,14 +914,12 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		}
 	}
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	if (op_array->early_binding != (zend_uint)-1) {
 		zend_string *orig_compiled_filename = CG(compiled_filename);
 		CG(compiled_filename) = persistent_script->full_path;
 		zend_do_delayed_early_binding(op_array TSRMLS_CC);
 		CG(compiled_filename) = orig_compiled_filename;
 	}
-#endif
 
 	if (!from_shared_memory) {
 		free_persistent_script(persistent_script, 0); /* free only hashes */

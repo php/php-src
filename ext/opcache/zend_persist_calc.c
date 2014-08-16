@@ -31,7 +31,6 @@
 #define ADD_SIZE(m)        memory_used += ZEND_ALIGNED_SIZE(m)
 #define RETURN_SIZE()      return memory_used
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 # define ADD_STRING(str) \
 		ADD_DUP_SIZE((str), _STR_HEADER_SIZE + (str)->len + 1)
 # define ADD_INTERNED_STRING(str, do_free) do { \
@@ -47,9 +46,6 @@
 			} \
 		} \
 	} while (0)
-#else
-# define ADD_INTERNED_STRING(str, len) ADD_DUP_SIZE((str), (len))
-#endif
 
 static uint zend_persist_zval_calc(zval *z TSRMLS_DC);
 
@@ -85,7 +81,6 @@ static uint zend_hash_persist_calc(HashTable *ht, uint (*pPersistElement)(zval *
 	RETURN_SIZE();
 }
 
-#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 static uint zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
 {
 	zend_uint i;
@@ -113,7 +108,6 @@ static uint zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
 	}
 	RETURN_SIZE();
 }
-#endif
 
 static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 {
@@ -121,11 +115,7 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 	uint size;
 	START_SIZE();
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	switch (Z_TYPE_P(z)) {
-#else
-	switch (Z_TYPE_P(z)) {
-#endif
 		case IS_STRING:
 		case IS_CONSTANT:
 			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
@@ -136,16 +126,12 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 			Z_GC_FLAGS_P(z) |= flags;
 			break;
 		case IS_ARRAY:
-#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
-		case IS_CONSTANT_ARRAY:
-#endif
 			size = zend_shared_memdup_size(Z_ARR_P(z), sizeof(zend_array));
 			if (size) {
 				ADD_SIZE(size);
 				ADD_SIZE(zend_hash_persist_calc(Z_ARRVAL_P(z), zend_persist_zval_calc TSRMLS_CC));
 			}
 			break;
-#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 		case IS_REFERENCE:
 			size = zend_shared_memdup_size(Z_REF_P(z), sizeof(zend_reference));
 			if (size) {
@@ -160,7 +146,6 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 				ADD_SIZE(zend_persist_ast_calc(Z_ASTVAL_P(z) TSRMLS_CC));
 			}
 			break;
-#endif
 	}
 	RETURN_SIZE();
 }
@@ -189,7 +174,6 @@ static uint zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 		RETURN_SIZE();
 	}
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (op_array->literals) {
 		zval *p = op_array->literals;
 		zval *end = p + op_array->last_literal;
@@ -199,25 +183,8 @@ static uint zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 			p++;
 		}
 	}
-#endif
-
-#if ZEND_EXTENSION_API_NO <= PHP_5_3_X_API_NO
-	opline = op_array->opcodes;
-	end = op_array->opcodes + op_array->last;
 
 	ADD_DUP_SIZE(op_array->opcodes, sizeof(zend_op) * op_array->last);
-	while (opline<end) {
-		if (opline->op1.op_type == IS_CONST) {
-			ADD_SIZE(zend_persist_zval_calc(&opline->op1.u.constant TSRMLS_CC));
-		}
-		if (opline->op2.op_type == IS_CONST) {
-			ADD_SIZE(zend_persist_zval_calc(&opline->op2.u.constant TSRMLS_CC));
-		}
-		opline++;
-	}
-#else
-	ADD_DUP_SIZE(op_array->opcodes, sizeof(zend_op) * op_array->last);
-#endif
 
 	if (op_array->function_name) {
 		zend_string *old_name = op_array->function_name;
@@ -306,7 +273,6 @@ static uint zend_persist_class_entry_calc(zval *zv TSRMLS_DC)
 		ADD_DUP_SIZE(ce, sizeof(zend_class_entry));
 		ADD_INTERNED_STRING(ce->name, 0);
 		ADD_SIZE(zend_hash_persist_calc(&ce->function_table, zend_persist_op_array_calc TSRMLS_CC));
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 		if (ce->default_properties_table) {
 		    int i;
 
@@ -323,10 +289,6 @@ static uint zend_persist_class_entry_calc(zval *zv TSRMLS_DC)
 				ADD_SIZE(zend_persist_zval_calc(&ce->default_static_members_table[i] TSRMLS_CC));
 			}
 		}
-#else
-		ADD_SIZE(zend_hash_persist_calc(&ce->default_properties, (int (*)(void* TSRMLS_DC)) zend_persist_zval_ptr_calc, sizeof(zval**) TSRMLS_CC));
-		ADD_SIZE(zend_hash_persist_calc(&ce->default_static_members, (int (*)(void* TSRMLS_DC)) zend_persist_zval_ptr_calc, sizeof(zval**) TSRMLS_CC));
-#endif
 		ADD_SIZE(zend_hash_persist_calc(&ce->constants_table, zend_persist_zval_calc TSRMLS_CC));
 
 		if (ZEND_CE_FILENAME(ce)) {
@@ -338,7 +300,6 @@ static uint zend_persist_class_entry_calc(zval *zv TSRMLS_DC)
 
 		ADD_SIZE(zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc TSRMLS_CC));
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 		if (ce->trait_aliases) {
 			int i = 0;
 			while (ce->trait_aliases[i]) {
@@ -383,7 +344,6 @@ static uint zend_persist_class_entry_calc(zval *zv TSRMLS_DC)
 			}
 			ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
 		}
-#endif
 	}
 	RETURN_SIZE();
 }

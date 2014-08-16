@@ -58,7 +58,9 @@ if (mysql_query('DROP PROCEDURE IF EXISTS p', $link)) {
 			printf("[009] Result seems wrong, dumping\n");
 			var_dump($tmp);
 		}
-		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp['p_version'])) {
+		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+		    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+		    !is_unicode($tmp['p_version'])) {
 			printf("[010] Expecting unicode string, dumping\n");
 			var_dump($tmp);
 		}
@@ -75,7 +77,9 @@ if (mysql_query('DROP PROCEDURE IF EXISTS p', $link)) {
 			printf("[012] Result seems wrong, dumping\n");
 			var_dump($tmp);
 		}
-		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp['f_version'])) {
+		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+		    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+		    !is_unicode($tmp['f_version'])) {
 			printf("[013] Expecting unicode string, dumping\n");
 			var_dump($tmp);
 		}

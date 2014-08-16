@@ -1,7 +1,25 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend OPcache                                                         |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2014 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   |          Xinchen Hui <laruence@php.net>                              |
+   +----------------------------------------------------------------------+
+*/
+
 /* pass 4
  * - optimize INIT_FCALL_BY_NAME to DO_FCALL
  */
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 
 #define ZEND_OP2_IS_CONST_STRING(opline) \
 	(ZEND_OP2_TYPE(opline) == IS_CONST && \
@@ -132,12 +150,10 @@ static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				}
 				break;
 #endif
-#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 			case ZEND_SEND_UNPACK:
 				call_stack[call - 1].func = NULL;
 				call_stack[call - 1].opline = NULL;
 				break;
-#endif
 			default:
 				break;
 		}
@@ -146,4 +162,3 @@ static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx
 
 	zend_arena_release(&ctx->arena, checkpoint);
 }
-#endif

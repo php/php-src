@@ -48,6 +48,14 @@ if (mysqli_get_server_version($link) >= 50600)
 	if (false !== ($tmp = mysqli_change_user($link, $user, $passwd, $db . '_unknown_really')))
 		printf("[009] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
+	// Reconnect because Percona and MariaDB block any commands after 3 failed
+	// change_user commands
+	mysqli_close($link);
+
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+		printf("[020] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+			$host, $user, $db, $port, $socket);
+	}
 	if (!mysqli_query($link, 'SET @mysqli_change_user_test_var=1'))
 		printf("[010] Failed to set test variable: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 

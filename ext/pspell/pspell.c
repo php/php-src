@@ -465,7 +465,6 @@ static PHP_FUNCTION(pspell_new_personal)
    Load a dictionary based on the given config */
 static PHP_FUNCTION(pspell_new_config)
 {
-	int type;
 	long conf;	
 	zval *ind;
 	PspellCanHaveError *ret;
@@ -496,7 +495,7 @@ static PHP_FUNCTION(pspell_new_config)
    Returns true if word is valid */
 static PHP_FUNCTION(pspell_check)
 {
-	int type, word_len;
+	int word_len;
 	long scin;
 	char *word;
 	PspellManager *manager;
@@ -523,7 +522,6 @@ static PHP_FUNCTION(pspell_suggest)
 	char *word;
 	int word_len;
 	PspellManager *manager;
-	int type;
 	const PspellWordList *wl;
 	const char *sug;
 
@@ -553,7 +551,7 @@ static PHP_FUNCTION(pspell_suggest)
    Notify the dictionary of a user-selected replacement */
 static PHP_FUNCTION(pspell_store_replacement)
 {
-	int type, miss_len, corr_len;
+	int miss_len, corr_len;
 	long scin;
 	char *miss, *corr;
 	PspellManager *manager;
@@ -578,7 +576,7 @@ static PHP_FUNCTION(pspell_store_replacement)
    Adds a word to a personal list */
 static PHP_FUNCTION(pspell_add_to_personal)
 {
-	int type, word_len;
+	int word_len;
 	long scin;
 	char *word;
 	PspellManager *manager;
@@ -608,7 +606,7 @@ static PHP_FUNCTION(pspell_add_to_personal)
    Adds a word to the current session */
 static PHP_FUNCTION(pspell_add_to_session)
 {
-	int type, word_len;
+	int word_len;
 	long scin;
 	char *word;
 	PspellManager *manager;
@@ -638,7 +636,6 @@ static PHP_FUNCTION(pspell_add_to_session)
    Clears the current session */
 static PHP_FUNCTION(pspell_clear_session)
 {
-	int type;
 	long scin;
 	PspellManager *manager;
 
@@ -662,7 +659,6 @@ static PHP_FUNCTION(pspell_clear_session)
    Saves the current (personal) wordlist */
 static PHP_FUNCTION(pspell_save_wordlist)
 {
-	int type;
 	long scin;
 	PspellManager *manager;
 
@@ -756,7 +752,6 @@ static PHP_FUNCTION(pspell_config_create)
    Consider run-together words as valid components */
 static PHP_FUNCTION(pspell_config_runtogether)
 {
-	int type;
 	long conf;
 	zend_bool runtogether;
 	PspellConfig *config;
@@ -777,7 +772,6 @@ static PHP_FUNCTION(pspell_config_runtogether)
    Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
 static PHP_FUNCTION(pspell_config_mode)
 {
-	int type;
 	long conf, mode;
 	PspellConfig *config;
 
@@ -804,7 +798,6 @@ static PHP_FUNCTION(pspell_config_mode)
    Ignore words <= n chars */
 static PHP_FUNCTION(pspell_config_ignore)
 {
-	int type;
 	char ignore_str[MAX_LENGTH_OF_LONG + 1];	
 	long conf, ignore = 0L;
 	PspellConfig *config;
@@ -824,7 +817,6 @@ static PHP_FUNCTION(pspell_config_ignore)
 
 static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 {
-	int type;
 	long conf;
 	char *value;
 	int value_len;
@@ -873,7 +865,6 @@ static PHP_FUNCTION(pspell_config_data_dir)
    Use a personal dictionary with replacement pairs for this config */
 static PHP_FUNCTION(pspell_config_repl)
 {
-	int type;
 	long conf;
 	char *repl;
 	int repl_len;
@@ -901,7 +892,6 @@ static PHP_FUNCTION(pspell_config_repl)
    Save replacement pairs when personal list is saved for this config */
 static PHP_FUNCTION(pspell_config_save_repl)
 {
-	int type;
 	long conf;
 	zend_bool save;
 	PspellConfig *config;

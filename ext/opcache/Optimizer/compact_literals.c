@@ -1,8 +1,25 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend OPcache                                                         |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2014 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   |          Xinchen Hui <laruence@php.net>                              |
+   +----------------------------------------------------------------------+
+*/
+
 /* pass 11
  * - compact literals table
  */
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-
 #define DEBUG_COMPACT_LITERALS 0
 
 #define LITERAL_VALUE                        0x0100
@@ -465,4 +482,3 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 #endif
 	}
 }
-#endif
