@@ -531,11 +531,11 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 		if (!const_value) {
 			char *actual = Z_STRVAL_P(p);
 
-			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
+			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRSIZE_P(p)))) {
 				int len;
 
 				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
-				len = Z_STRLEN_P(p) - ((colon - Z_STRVAL_P(p)) + 1);
+				len = Z_STRSIZE_P(p) - ((colon - Z_STRVAL_P(p)) + 1);
 				if (inline_change) {
 					zend_string *tmp = STR_INIT(colon + 1, len, 0);
 					STR_RELEASE(Z_STR_P(p));
@@ -547,7 +547,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			} else {
 				zend_string *save = Z_STR_P(p);
 				char *slash;
-				int actual_len = Z_STRLEN_P(p);
+				int actual_len = Z_STRSIZE_P(p);
 				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
 					actual = slash + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
@@ -559,8 +559,8 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				}
 				if (actual[0] == '\\') {
 					if (inline_change) {
-						memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRLEN_P(p));
-						--Z_STRLEN_P(p);
+						memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRSIZE_P(p));
+						--Z_STRSIZE_P(p);
 					} else {
 						++actual;
 					}
@@ -1069,8 +1069,8 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 		ZVAL_NEW_STR(&pv, STR_ALLOC(str_len + sizeof("return ;")-1, 1));
 		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, str_len);
-		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
-		Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
+		Z_STRVAL(pv)[Z_STRSIZE(pv) - 1] = ';';
+		Z_STRVAL(pv)[Z_STRSIZE(pv)] = '\0';
 	} else {
 		ZVAL_STRINGL(&pv, str, str_len);
 	}
@@ -1183,7 +1183,7 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 		}
 		switch (opline->opcode) {
 			case ZEND_GOTO:
-				if (Z_TYPE_P(opline->op2.zv) != IS_LONG) {
+				if (Z_TYPE_P(opline->op2.zv) != IS_INT) {
 					zend_resolve_goto_label(CG(active_op_array), opline, 1 TSRMLS_CC);
 				}
 				/* break omitted intentionally */
@@ -1360,7 +1360,7 @@ void zend_shutdown_timeout_thread(void) /* {{{ */
 #define SIGPROF 27
 #endif
 
-void zend_set_timeout(long seconds, int reset_signals) /* {{{ */
+void zend_set_timeout(zend_int_t seconds, int reset_signals) /* {{{ */
 {
 	TSRMLS_FETCH();
 

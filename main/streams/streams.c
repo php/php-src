@@ -675,7 +675,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 	} else {
 		/* is there enough data in the buffer ? */
-		if (stream->writepos - stream->readpos < (off_t)size) {
+		if (stream->writepos - stream->readpos < (zend_off_t)size) {
 			size_t justread = 0;
 
 			/* reduce buffer memory consumption if possible, to avoid a realloc */
@@ -1269,12 +1269,12 @@ PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, 
 	return count;
 }
 
-PHPAPI off_t _php_stream_tell(php_stream *stream TSRMLS_DC)
+PHPAPI zend_off_t _php_stream_tell(php_stream *stream TSRMLS_DC)
 {
 	return stream->position;
 }
 
-PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
+PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence TSRMLS_DC)
 {
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 		/* flush to commit data written to the fopencookie FILE* */
@@ -2136,7 +2136,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (stream && stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && strchr(mode, 'a') && stream->position == 0) {
-		off_t newpos = 0;
+		zend_off_t newpos = 0;
 
 		/* if opened for append, we need to revise our idea of the initial file position */
 		if (0 == stream->ops->seek(stream, 0, SEEK_CUR, &newpos TSRMLS_CC)) {

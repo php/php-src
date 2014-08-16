@@ -360,6 +360,9 @@ PHPAPI char *GetSMErrorText(int index)
 	}
 }
 
+PHPAPI zend_string *php_str_to_str(char *haystack, int length, char *needle,
+		int needle_len, char *str, int str_len);
+	
 
 /*********************************************************************
 // Name:  SendText

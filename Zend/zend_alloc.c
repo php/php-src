@@ -488,16 +488,16 @@ static unsigned int _zend_mm_cookie = 0;
 #define ZEND_MM_RESERVE_SIZE            (8*1024)
 
 #ifdef _WIN64
-# define ZEND_MM_LONG_CONST(x)	(x##i64)
+# define ZEND_MM_INT_CONST(x)	(x##i64)
 #else
-# define ZEND_MM_LONG_CONST(x)	(x##L)
+# define ZEND_MM_INT_CONST(x)	(x##L)
 #endif
 
-#define ZEND_MM_TYPE_MASK		ZEND_MM_LONG_CONST(0x3)
+#define ZEND_MM_TYPE_MASK		ZEND_MM_INT_CONST(0x3)
 
-#define ZEND_MM_FREE_BLOCK		ZEND_MM_LONG_CONST(0x0)
-#define ZEND_MM_USED_BLOCK		ZEND_MM_LONG_CONST(0x1)
-#define ZEND_MM_GUARD_BLOCK		ZEND_MM_LONG_CONST(0x3)
+#define ZEND_MM_FREE_BLOCK		ZEND_MM_INT_CONST(0x0)
+#define ZEND_MM_USED_BLOCK		ZEND_MM_INT_CONST(0x1)
+#define ZEND_MM_GUARD_BLOCK		ZEND_MM_INT_CONST(0x3)
 
 #define ZEND_MM_BLOCK(b, type, size)	do { \
 											size_t _size = (size); \
@@ -742,7 +742,7 @@ static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_blo
 			*p = mm_block;
 			mm_block->parent = p;
 			mm_block->prev_free_block = mm_block->next_free_block = mm_block;
-			heap->large_free_bitmap |= (ZEND_MM_LONG_CONST(1) << index);
+			heap->large_free_bitmap |= (ZEND_MM_INT_CONST(1) << index);
 		} else {
 			size_t m;
 
@@ -775,7 +775,7 @@ static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_blo
 
 		prev = ZEND_MM_SMALL_FREE_BUCKET(heap, index);
 		if (prev->prev_free_block == prev) {
-			heap->free_bitmap |= (ZEND_MM_LONG_CONST(1) << index);
+			heap->free_bitmap |= (ZEND_MM_INT_CONST(1) << index);
 		}
 		next = prev->next_free_block;
 
@@ -809,7 +809,7 @@ static inline void zend_mm_remove_from_free_list(zend_mm_heap *heap, zend_mm_fre
 			ZEND_MM_CHECK_TREE(mm_block);
 			*mm_block->parent = NULL;
 			if (mm_block->parent == &heap->large_free_buckets[index]) {
-				heap->large_free_bitmap &= ~(ZEND_MM_LONG_CONST(1) << index);
+				heap->large_free_bitmap &= ~(ZEND_MM_INT_CONST(1) << index);
 		    }
 		} else {
 			while (*(cp = &(prev->child[prev->child[1] != NULL])) != NULL) {
@@ -847,7 +847,7 @@ subst_block:
 				size_t index = ZEND_MM_BUCKET_INDEX(ZEND_MM_FREE_BLOCK_SIZE(mm_block));
 
 				if (EXPECTED(heap->free_buckets[index*2] == heap->free_buckets[index*2+1])) {
-					heap->free_bitmap &= ~(ZEND_MM_LONG_CONST(1) << index);
+					heap->free_bitmap &= ~(ZEND_MM_INT_CONST(1) << index);
 				}
 			}
 		} else if (UNEXPECTED(mm_block->parent == ZEND_MM_REST_BLOCK)) {
@@ -1116,7 +1116,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 	heap->real_size = 0;
 	heap->overflow = 0;
 	heap->real_peak = 0;
-	heap->limit = ZEND_MM_LONG_CONST(1)<<(ZEND_MM_NUM_BUCKETS-2);
+	heap->limit = ZEND_MM_INT_CONST(1)<<(ZEND_MM_NUM_BUCKETS-2);
 	heap->size = 0;
 	heap->peak = 0;
 	heap->internal = internal;
@@ -1231,9 +1231,9 @@ ZEND_API zend_mm_heap *zend_mm_startup(void)
 }
 
 #if ZEND_DEBUG
-static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
+static zend_int_t zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
 {
-	long leaks = 0;
+	zend_int_t leaks = 0;
 	zend_mm_block *p, *q;
 
 	p = ZEND_MM_NEXT_BLOCK(b);
@@ -1291,7 +1291,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 		}
 		if (!ZEND_MM_IS_FREE_BLOCK(p)) {
 			if (p->magic == MEM_BLOCK_VALID) {
-				long repeated;
+				zend_int_t repeated;
 				zend_leak_info leak;
 
 				ZEND_MM_SET_MAGIC(p, MEM_BLOCK_LEAK);
@@ -1842,7 +1842,7 @@ static zend_mm_free_block *zend_mm_search_large_block(zend_mm_heap *heap, size_t
 				best_size = ZEND_MM_FREE_BLOCK_SIZE(p);
 				best_fit = p;
 			}
-			if ((m & (ZEND_MM_LONG_CONST(1) << (ZEND_MM_NUM_BUCKETS-1))) == 0) {
+			if ((m & (ZEND_MM_INT_CONST(1) << (ZEND_MM_NUM_BUCKETS-1))) == 0) {
 				if (p->child[1]) {
 					rst = p->child[1];
 				}
@@ -1984,9 +1984,9 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted at %s:%d (tried to allocate %lu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_UINT_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted (tried to allocate %lu bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_UINT_FMT " bytes exhausted (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, size);
 #endif
 		}
 
@@ -2297,9 +2297,9 @@ realloc_segment:
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted at %s:%d (tried to allocate %ld bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_UINT_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted (tried to allocate %ld bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_UINT_FMT " bytes exhausted (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, size);
 #endif
 			return NULL;
 		}
@@ -2630,7 +2630,7 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	int length;
+	zend_size_t length;
 	char *p;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
@@ -2649,7 +2649,7 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	return p;
 }
 
-ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+ZEND_API char *_estrndup(const char *s, zend_size_t length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
 #ifdef ZEND_SIGNALS
@@ -2670,7 +2670,7 @@ ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_
 }
 
 
-ZEND_API char *zend_strndup(const char *s, uint length)
+ZEND_API char *zend_strndup(const char *s, zend_size_t length)
 {
 	char *p;
 #ifdef ZEND_SIGNALS

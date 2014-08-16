@@ -87,8 +87,8 @@ again:
 		case IS_TRUE:
 			result = 1;
 			break;
-		case IS_LONG:
-			result = (Z_LVAL_P(op)?1:0);
+		case IS_INT:
+			result = (Z_IVAL_P(op)?1:0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_HANDLE_P(op)?1:0);
@@ -97,8 +97,8 @@ again:
 			result = (Z_DVAL_P(op) ? 1 : 0);
 			break;
 		case IS_STRING:
-			if (Z_STRLEN_P(op) == 0
-				|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
+			if (Z_STRSIZE_P(op) == 0
+				|| (Z_STRSIZE_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
 				result = 0;
 			} else {
 				result = 1;
@@ -279,7 +279,7 @@ ZEND_API const char *zend_get_executed_filename(TSRMLS_D);
 ZEND_API uint zend_get_executed_lineno(TSRMLS_D);
 ZEND_API zend_bool zend_is_executing(TSRMLS_D);
 
-ZEND_API void zend_set_timeout(long seconds, int reset_signals);
+ZEND_API void zend_set_timeout(zend_int_t seconds, int reset_signals);
 ZEND_API void zend_unset_timeout(TSRMLS_D);
 ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type TSRMLS_DC);

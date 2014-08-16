@@ -40,7 +40,7 @@
 #define INC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count++); }
 #define DEC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count--); }
 #define HANDLE_INTERACTIVE()  if (CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) { execute_new_code(TSRMLS_C); }
-#define DO_TICKS()            if (Z_LVAL(CG(declarables).ticks)) { zend_do_ticks(TSRMLS_C); }
+#define DO_TICKS()            if (Z_IVAL(CG(declarables).ticks)) { zend_do_ticks(TSRMLS_C); }
 
 #define RESET_DOC_COMMENT()        \
     {                              \
@@ -67,7 +67,7 @@ typedef union _znode_op {
 	zend_uint      constant;
 	zend_uint      var;
 	zend_uint      num;
-	zend_ulong     hash;
+	zend_uint_t     hash;
 	zend_uint      opline_num; /*  Needs to be signed */
 	zend_op       *jmp_addr;
 	zval          *zv;
@@ -100,7 +100,7 @@ struct _zend_op {
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
-	ulong extended_value;
+	zend_uint_t extended_value;
 	uint lineno;
 	zend_uchar opcode;
 	zend_uchar op1_type;
@@ -128,10 +128,14 @@ typedef struct _zend_try_catch_element {
 	zend_uint finally_end;
 } zend_try_catch_element;
 
-#if SIZEOF_LONG == 8
-#define THIS_HASHVAL 6385726429UL
+#if SIZEOF_ZEND_INT == 8
+# ifdef _WIN32
+#  define THIS_HASHVAL 210728972157Ui64
+# else
+#  define THIS_HASHVAL 210728972157ULL
+# endif
 #else
-#define THIS_HASHVAL 2090759133UL
+#define THIS_HASHVAL 275574653UL
 #endif
 
 /* method flags (types) */
@@ -210,7 +214,7 @@ char *zend_visibility_string(zend_uint fn_flags);
 typedef struct _zend_property_info {
 	zend_uint flags;
 	zend_string *name;
-	ulong h;
+	zend_uint_t h;
 	int offset;
 	zend_string *doc_comment;
 	zend_class_entry *ce;
