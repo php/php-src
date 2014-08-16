@@ -314,7 +314,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 				}
 			}
 			break;
-		case ZEND_FETCH_DIM_R:
+		case ZEND_AST_DIM:
 			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
 			zend_ast_evaluate(&op2, ast->child[1], scope TSRMLS_CC);
 			{

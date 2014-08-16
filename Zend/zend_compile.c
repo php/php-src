@@ -613,7 +613,7 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 			}
 		}
 	} else if (op1->op_type == IS_CONST) {
-		zval_dtor(&op1->u.constant);
+		zval_ptr_dtor(&op1->u.constant);
 	}
 }
 /* }}} */
@@ -5738,12 +5738,6 @@ void zend_compile_class_const_decl(zend_ast *ast TSRMLS_DC) {
 
 		zend_const_expr_to_zval(&value_zv, value_ast TSRMLS_CC);
 
-		if (Z_TYPE(value_zv) == IS_ARRAY
-			|| (Z_TYPE(value_zv) == IS_CONSTANT_AST && Z_ASTVAL(value_zv)->kind == ZEND_AST_ARRAY)
-		) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
-		}
-
 		name = zend_new_interned_string_safe(name TSRMLS_CC);
 		if (zend_hash_add(&ce->constants_table, name, &value_zv) == NULL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s",
@@ -6243,13 +6237,6 @@ void zend_compile_const_decl(zend_ast *ast TSRMLS_DC) {
 
 		value_node.op_type = IS_CONST;
 		zend_const_expr_to_zval(value_zv, value_ast TSRMLS_CC);
-
-		if (Z_TYPE_P(value_zv) == IS_ARRAY
-			|| (Z_TYPE_P(value_zv) == IS_CONSTANT_AST
-				&& Z_ASTVAL_P(value_zv)->kind == ZEND_AST_ARRAY)
-		) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed as constants");
-		}
 
 		if (zend_get_ct_const(name, 0 TSRMLS_CC)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", name->val);
@@ -7156,7 +7143,7 @@ zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) {
 		|| kind == ZEND_AST_AND || kind == ZEND_AST_OR
 		|| kind == ZEND_AST_UNARY_OP
 		|| kind == ZEND_AST_UNARY_PLUS || kind == ZEND_AST_UNARY_MINUS
-		|| kind == ZEND_AST_CONDITIONAL
+		|| kind == ZEND_AST_CONDITIONAL || kind == ZEND_AST_DIM
 		|| kind == ZEND_AST_ARRAY || kind == ZEND_AST_ARRAY_ELEM
 		|| kind == ZEND_AST_CONST || kind == ZEND_AST_CLASS_CONST
 		|| kind == ZEND_AST_RESOLVE_CLASS_NAME || kind == ZEND_AST_MAGIC_CONST;
