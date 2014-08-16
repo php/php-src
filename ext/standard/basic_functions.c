@@ -3545,28 +3545,28 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	BG(incomplete_class) = incomplete_class_entry = php_create_incomplete_class(TSRMLS_C);
 
-	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CONNECTION_NORMAL",  PHP_CONNECTION_NORMAL,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CONNECTION_TIMEOUT", PHP_CONNECTION_TIMEOUT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("CONNECTION_NORMAL",  PHP_CONNECTION_NORMAL,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("CONNECTION_TIMEOUT", PHP_CONNECTION_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("INI_USER",   ZEND_INI_USER,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INI_PERDIR", ZEND_INI_PERDIR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INI_SYSTEM", ZEND_INI_SYSTEM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INI_ALL",    ZEND_INI_ALL,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("INI_USER",   ZEND_INI_USER,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("INI_PERDIR", ZEND_INI_PERDIR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("INI_SYSTEM", ZEND_INI_SYSTEM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("INI_ALL",    ZEND_INI_ALL,    CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("INI_SCANNER_NORMAL", ZEND_INI_SCANNER_NORMAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INI_SCANNER_RAW",    ZEND_INI_SCANNER_RAW,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("INI_SCANNER_NORMAL", ZEND_INI_SCANNER_NORMAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("INI_SCANNER_RAW",    ZEND_INI_SCANNER_RAW,    CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("PHP_URL_SCHEME", PHP_URL_SCHEME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_HOST", PHP_URL_HOST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_PORT", PHP_URL_PORT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_USER", PHP_URL_USER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_PASS", PHP_URL_PASS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_PATH", PHP_URL_PATH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_QUERY", PHP_URL_QUERY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_FRAGMENT", PHP_URL_FRAGMENT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_QUERY_RFC1738", PHP_QUERY_RFC1738, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_QUERY_RFC3986", PHP_QUERY_RFC3986, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_URL_SCHEME", PHP_URL_SCHEME, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_URL_HOST", PHP_URL_HOST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_URL_PORT", PHP_URL_PORT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_URL_USER", PHP_URL_USER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_URL_PASS", PHP_URL_PASS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_URL_PATH", PHP_URL_PATH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_URL_QUERY", PHP_URL_QUERY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_URL_FRAGMENT", PHP_URL_FRAGMENT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_QUERY_RFC1738", PHP_QUERY_RFC1738, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_QUERY_RFC3986", PHP_QUERY_RFC3986, CONST_CS | CONST_PERSISTENT);
 
 #define REGISTER_MATH_CONSTANT(x)  REGISTER_DOUBLE_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
 	REGISTER_MATH_CONSTANT(M_E);
@@ -3589,10 +3589,10 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	REGISTER_DOUBLE_CONSTANT("INF", php_get_inf(), CONST_CS | CONST_PERSISTENT);
 	REGISTER_DOUBLE_CONSTANT("NAN", php_get_nan(), CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_UP", PHP_ROUND_HALF_UP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_DOWN", PHP_ROUND_HALF_DOWN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_EVEN", PHP_ROUND_HALF_EVEN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_ODD", PHP_ROUND_HALF_ODD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_ROUND_HALF_UP", PHP_ROUND_HALF_UP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_ROUND_HALF_DOWN", PHP_ROUND_HALF_DOWN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_ROUND_HALF_EVEN", PHP_ROUND_HALF_EVEN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_ROUND_HALF_ODD", PHP_ROUND_HALF_ODD, CONST_CS | CONST_PERSISTENT);
 
 #if ENABLE_TEST_CLASS
 	test_class_startup();
@@ -3925,7 +3925,7 @@ PHP_FUNCTION(ip2long)
 	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG(ntohl(ip.s_addr));
+	RETURN_INT(ntohl(ip.s_addr));
 #else
 	if (addr_len == 0 || (ip = inet_addr(addr)) == INADDR_NONE) {
 		/* The only special case when we should return -1 ourselves,
@@ -3934,11 +3934,11 @@ PHP_FUNCTION(ip2long)
 		if (addr_len == sizeof("255.255.255.255") - 1 &&
 			!memcmp(addr, "255.255.255.255", sizeof("255.255.255.255") - 1)
 		) {
-			RETURN_LONG(0xFFFFFFFF);
+			RETURN_INT(0xFFFFFFFF);
 		}
 		RETURN_FALSE;
 	}
-	RETURN_LONG(ntohl(ip));
+	RETURN_INT(ntohl(ip));
 #endif
 }
 /* }}} */
@@ -4342,7 +4342,7 @@ PHP_FUNCTION(getopt)
 
 		/* Add this option / argument pair to the result hash. */
 		optname_len = strlen(optname);
-		if (!(optname_len > 1 && optname[0] == '0') && is_numeric_string(optname, optname_len, NULL, NULL, 0) == IS_LONG) {
+		if (!(optname_len > 1 && optname[0] == '0') && is_numeric_string(optname, optname_len, NULL, NULL, 0) == IS_INT) {
 			/* numeric string */
 			int optname_int = atoi(optname);
 			if ((args = zend_hash_index_find(HASH_OF(return_value), optname_int)) != NULL) {
@@ -4396,7 +4396,7 @@ PHP_FUNCTION(sleep)
 		RETURN_FALSE;
 	}
 #ifdef PHP_SLEEP_NON_VOID
-	RETURN_LONG(php_sleep(num));
+	RETURN_INT(php_sleep(num));
 #else
 	php_sleep(num);
 #endif
@@ -4450,8 +4450,8 @@ PHP_FUNCTION(time_nanosleep)
 		RETURN_TRUE;
 	} else if (errno == EINTR) {
 		array_init(return_value);
-		add_assoc_long_ex(return_value, "seconds", sizeof("seconds"), php_rem.tv_sec);
-		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds"), php_rem.tv_nsec);
+		add_assoc_int_ex(return_value, "seconds", sizeof("seconds"), php_rem.tv_sec);
+		add_assoc_int_ex(return_value, "nanoseconds", sizeof("nanoseconds"), php_rem.tv_nsec);
 		return;
 	} else if (errno == EINVAL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
@@ -4703,10 +4703,10 @@ PHP_FUNCTION(error_get_last)
 
 	if (PG(last_error_message)) {
 		array_init(return_value);
-		add_assoc_long_ex(return_value, "type", sizeof("type")-1, PG(last_error_type));
+		add_assoc_int_ex(return_value, "type", sizeof("type")-1, PG(last_error_type));
 		add_assoc_string_ex(return_value, "message", sizeof("message")-1, PG(last_error_message));
 		add_assoc_string_ex(return_value, "file", sizeof("file")-1, PG(last_error_file)?PG(last_error_file):"-");
-		add_assoc_long_ex(return_value, "line", sizeof("line")-1, PG(last_error_lineno));
+		add_assoc_int_ex(return_value, "line", sizeof("line")-1, PG(last_error_lineno));
 	}
 }
 /* }}} */
@@ -4937,11 +4937,11 @@ static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_
 	} else if (Z_TYPE_P(func1) == IS_ARRAY && Z_TYPE_P(func2) == IS_ARRAY) {
 		zval result;
 		zend_compare_arrays(&result, func1, func2 TSRMLS_CC);
-		ret = (Z_LVAL(result) == 0);
+		ret = (Z_IVAL(result) == 0);
 	} else if (Z_TYPE_P(func1) == IS_OBJECT && Z_TYPE_P(func2) == IS_OBJECT) {
 		zval result;
 		zend_compare_objects(&result, func1, func2 TSRMLS_CC);
-		ret = (Z_LVAL(result) == 0);
+		ret = (Z_IVAL(result) == 0);
 	} else {
 		ret = 0;
 	}
@@ -5242,7 +5242,7 @@ static int php_ini_get_option(zval *zv TSRMLS_DC, int num_args, va_list args, ze
 				add_assoc_null(&option, "local_value");
 			}
 
-			add_assoc_long(&option, "access", ini_entry->modifiable);
+			add_assoc_int(&option, "access", ini_entry->modifiable);
 
 			add_assoc_zval_ex(ini_array, ini_entry->name, ini_entry->name_length, &option);
 		} else {
@@ -5450,7 +5450,7 @@ PHP_FUNCTION(print_r)
    Returns true if client disconnected */
 PHP_FUNCTION(connection_aborted)
 {
-	RETURN_LONG(PG(connection_status) & PHP_CONNECTION_ABORTED);
+	RETURN_INT(PG(connection_status) & PHP_CONNECTION_ABORTED);
 }
 /* }}} */
 
@@ -5458,7 +5458,7 @@ PHP_FUNCTION(connection_aborted)
    Returns the connection status bitfield */
 PHP_FUNCTION(connection_status)
 {
-	RETURN_LONG(PG(connection_status));
+	RETURN_INT(PG(connection_status));
 }
 /* }}} */
 
@@ -5482,7 +5482,7 @@ PHP_FUNCTION(ignore_user_abort)
 		STR_RELEASE(key);
 	}
 
-	RETURN_LONG(old_setting);
+	RETURN_INT(old_setting);
 }
 /* }}} */
 
@@ -5514,7 +5514,7 @@ PHP_FUNCTION(getservbyname)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(ntohs(serv->s_port));
+	RETURN_INT(ntohs(serv->s_port));
 }
 /* }}} */
 #endif
@@ -5563,7 +5563,7 @@ PHP_FUNCTION(getprotobyname)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(ent->p_proto);
+	RETURN_INT(ent->p_proto);
 }
 /* }}} */
 #endif
@@ -5777,8 +5777,8 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				break;
 			}
 
-			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) == IS_LONG) {
-				ulong key = (ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+			if (!(Z_STRSIZE_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1), NULL, NULL, 0) == IS_INT) {
+				ulong key = (ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1));
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
 					find_hash = zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash);
@@ -5797,7 +5797,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 
 			ZVAL_DUP(&element, arg2);
 
-			if (arg3 && Z_STRLEN_P(arg3) > 0) {
+			if (arg3 && Z_STRSIZE_P(arg3) > 0) {
 				zend_symtable_update(Z_ARRVAL_P(find_hash), Z_STR_P(arg3), &element);
 			} else {
 				add_next_index_zval(find_hash, &element);

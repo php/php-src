@@ -744,9 +744,9 @@ literal:
 					} else if (numVars) {
 						current = Z_REFVAL(args[objIndex++]);
 						zval_ptr_dtor(current);
-						ZVAL_LONG(current, (long)(string - baseString) );
+						ZVAL_INT(current, (long)(string - baseString) );
 					} else {
-						add_index_long(return_value, objIndex++, string - baseString);
+						add_index_int(return_value, objIndex++, string - baseString);
 					}
 				}
 				nconversions++;
@@ -1068,9 +1068,9 @@ addToInt:
 						} else if (numVars) {
 							current = Z_REFVAL(args[objIndex++]);
 							zval_ptr_dtor(current);
-							ZVAL_LONG(current, value);
+							ZVAL_INT(current, value);
 						} else {
-							add_index_long(return_value, objIndex++, value);
+							add_index_int(return_value, objIndex++, value);
 						}
 					}
 				}
@@ -1190,8 +1190,8 @@ done:
 		scan_set_error_return( numVars, return_value );
 		result = SCAN_ERROR_EOF;
 	} else if (numVars) {
-		convert_to_long(return_value );
-		Z_LVAL_P(return_value) = nconversions;
+		convert_to_int(return_value );
+		Z_IVAL_P(return_value) = nconversions;
 	} else if (nconversions < totalVars) {
 		/* TODO: not all elements converted. we need to prune the list - cc */
 	}
@@ -1203,7 +1203,7 @@ done:
 static inline void scan_set_error_return(int numVars, zval *return_value) /* {{{ */
 {
 	if (numVars) {
-		ZVAL_LONG(return_value, SCAN_ERROR_EOF);  /* EOF marker */
+		ZVAL_INT(return_value, SCAN_ERROR_EOF);  /* EOF marker */
 	} else {
 		/* convert_to_null calls destructor */
 		convert_to_null(return_value);

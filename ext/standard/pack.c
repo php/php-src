@@ -89,8 +89,8 @@ static void php_pack(zval *val, int size, int *map, char *output)
 	int i;
 	char *v;
 
-	convert_to_long_ex(val);
-	v = (char *) &Z_LVAL_P(val);
+	convert_to_int_ex(val);
+	v = (char *) &Z_IVAL_P(val);
 
 	for (i = 0; i < size; i++) {
 		*output++ = v[map[i]];
@@ -126,7 +126,7 @@ PHP_FUNCTION(pack)
 	convert_to_string_ex(&argv[0]);
 
 	format = Z_STRVAL(argv[0]);
-	formatlen = Z_STRLEN(argv[0]);
+	formatlen = Z_STRSIZE(argv[0]);
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
@@ -185,7 +185,7 @@ PHP_FUNCTION(pack)
 						SEPARATE_ZVAL(&argv[currentarg]);
 					}
 					convert_to_string_ex(&argv[currentarg]);
-					arg = Z_STRLEN(argv[currentarg]);
+					arg = Z_STRSIZE(argv[currentarg]);
 					if (code == 'Z') {
 						/* add one because Z is always NUL-terminated:
 						 * pack("Z*", "aa") === "aa\0"
@@ -771,7 +771,7 @@ PHP_FUNCTION(unpack)
 					case 'C': {
 						int issigned = (type == 'c') ? (input[inputpos] & 0x80) : 0;
 						long v = php_unpack(&input[inputpos], 1, issigned, byte_map);
-						add_assoc_long(return_value, n, v);
+						add_assoc_int(return_value, n, v);
 						break;
 					}
 
@@ -792,7 +792,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						v = php_unpack(&input[inputpos], 2, issigned, map);
-						add_assoc_long(return_value, n, v);
+						add_assoc_int(return_value, n, v);
 						break;
 					}
 
@@ -806,7 +806,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						v = php_unpack(&input[inputpos], sizeof(int), issigned, int_map);
-						add_assoc_long(return_value, n, v);
+						add_assoc_int(return_value, n, v);
 						break;
 					}
 
@@ -840,7 +840,7 @@ PHP_FUNCTION(unpack)
 								v = (unsigned int) v;
 							}
 						}
-						add_assoc_long(return_value, n, v);
+						add_assoc_int(return_value, n, v);
 						break;
 					}
 
@@ -948,8 +948,8 @@ PHP_MINIT_FUNCTION(pack)
 	}
 	else {
 		zval val;
-		int size = sizeof(Z_LVAL(val));
-		Z_LVAL(val)=0; /*silence a warning*/
+		int size = sizeof(Z_IVAL(val));
+		Z_IVAL(val)=0; /*silence a warning*/
 
 		/* Where to get hi to lo bytes from */
 		byte_map[0] = size - 1;

@@ -426,7 +426,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 							double d;
 							int type;
 
-							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), p, &d, -1)) == 0) {
+							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), p, &d, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
 								if (c == 'L') {
@@ -439,7 +439,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 									}
 								}
 
-								*p = zend_dval_to_lval(d);
+								*p = zend_dval_to_ival(d);
 							}
 						}
 						break;
@@ -457,7 +457,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_NULL:
 					case IS_FALSE:
 					case IS_TRUE:
-					case IS_LONG:
+					case IS_INT:
 						convert_to_int_ex(arg);
 						*p = Z_IVAL_P(arg);
 						break;
@@ -472,7 +472,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			break;
 
 		case 'i':
-		case 'i':
+		case 'I':
 			{
 				zend_int_t *p = va_arg(*va, zend_int_t *);
 
@@ -490,7 +490,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), p, &d, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
-								if (c == 'L') {
+								if (c == 'I') {
 									if (d > ZEND_INT_MAX) {
 										*p = ZEND_INT_MAX;
 										break;
@@ -506,7 +506,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 						break;
 
 					case IS_DOUBLE:
-						if (c == 'L') {
+						if (c == 'I') {
 							if (Z_DVAL_P(arg) > ZEND_INT_MAX) {
 								*p = ZEND_INT_MAX;
 								break;

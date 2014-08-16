@@ -416,12 +416,12 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 	}
 	
 	format = Z_STRVAL(args[format_offset]);
-	format_len = Z_STRLEN(args[format_offset]);
+	format_len = Z_STRSIZE(args[format_offset]);
 	result = STR_ALLOC(size, 0);
 
 	currarg = 1;
 
-	while (inpos < Z_STRLEN(args[format_offset])) {
+	while (inpos < Z_STRSIZE(args[format_offset])) {
 		int expprec = 0;
 		zval *tmp;
 
@@ -687,7 +687,7 @@ PHP_FUNCTION(user_printf)
 	}
 	rlen = PHPWRITE(result->val, result->len);
 	STR_FREE(result);
-	RETURN_LONG(rlen);
+	RETURN_INT(rlen);
 }
 /* }}} */
 
@@ -703,7 +703,7 @@ PHP_FUNCTION(vprintf)
 	}
 	rlen = PHPWRITE(result->val, result->len);
 	STR_FREE(result);
-	RETURN_LONG(rlen);
+	RETURN_INT(rlen);
 }
 /* }}} */
 
@@ -731,7 +731,7 @@ PHP_FUNCTION(fprintf)
 
 	php_stream_write(stream, result->val, result->len);
 
-	RETVAL_LONG(result->len);
+	RETVAL_INT(result->len);
 	STR_FREE(result);
 }
 /* }}} */
@@ -760,7 +760,7 @@ PHP_FUNCTION(vfprintf)
 
 	php_stream_write(stream, result->val, result->len);
 
-	RETVAL_LONG(result->len);
+	RETVAL_INT(result->len);
 	STR_FREE(result);
 }
 /* }}} */

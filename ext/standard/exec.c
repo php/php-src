@@ -200,7 +200,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	}
 	if (ret_code) {
 		zval_dtor(ret_code);
-		ZVAL_LONG(ret_code, ret);
+		ZVAL_INT(ret_code, ret);
 	}
 }
 /* }}} */

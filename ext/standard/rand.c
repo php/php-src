@@ -301,7 +301,7 @@ PHP_FUNCTION(rand)
 		RAND_RANGE(number, min, max, PHP_RAND_MAX);
 	}
 
-	RETURN_LONG(number);
+	RETURN_INT(number);
 }
 /* }}} */
 
@@ -340,7 +340,7 @@ PHP_FUNCTION(mt_rand)
 		RAND_RANGE(number, min, max, PHP_MT_RAND_MAX);
 	}
 
-	RETURN_LONG(number);
+	RETURN_INT(number);
 }
 /* }}} */
 
@@ -352,7 +352,7 @@ PHP_FUNCTION(getrandmax)
 		return;
 	}
 
-	RETURN_LONG(PHP_RAND_MAX);
+	RETURN_INT(PHP_RAND_MAX);
 }
 /* }}} */
 
@@ -368,7 +368,7 @@ PHP_FUNCTION(mt_getrandmax)
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain
 	 * compatibility with the previous php_rand
 	 */
-  	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
+  	RETURN_INT(PHP_MT_RAND_MAX); /* 2^^31 */
 }
 /* }}} */
 

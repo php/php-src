@@ -178,19 +178,19 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				case IS_STRING: {
 						zend_string *ekey;
 						if (enc_type == PHP_QUERY_RFC3986) {
-							ekey = php_raw_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));
+							ekey = php_raw_url_encode(Z_STRVAL_P(zdata), Z_STRSIZE_P(zdata));
 						} else {
-							ekey = php_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));						
+							ekey = php_url_encode(Z_STRVAL_P(zdata), Z_STRSIZE_P(zdata));						
 						}
 						smart_str_appendl(formstr, ekey->val, ekey->len);
 						STR_FREE(ekey);
 					}
 					break;
-				case IS_LONG:
+				case IS_INT:
 					{
 						char *ekey;
 					  	int ekey_len;
-					  	ekey_len = spprintf(&ekey, 0, "%ld", Z_LVAL_P(zdata));
+					  	ekey_len = spprintf(&ekey, 0, "%ld", Z_IVAL_P(zdata));
 						smart_str_appendl(formstr, ekey, ekey_len);
 						efree(ekey);
 				  	}
@@ -217,9 +217,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 						ZVAL_DUP(&copyzval, zdata);
 						convert_to_string_ex(&copyzval);
 						if (enc_type == PHP_QUERY_RFC3986) {
-							ekey = php_raw_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
+							ekey = php_raw_url_encode(Z_STRVAL(copyzval), Z_STRSIZE(copyzval));
 						} else {
-							ekey = php_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
+							ekey = php_url_encode(Z_STRVAL(copyzval), Z_STRSIZE(copyzval));
 						}
 						smart_str_appendl(formstr, ekey->val, ekey->len);
 						zval_ptr_dtor(&copyzval);

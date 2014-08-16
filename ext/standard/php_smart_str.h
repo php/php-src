@@ -91,8 +91,8 @@
 	smart_str_appendl_ex((dest), (src), (len), 0)
 #define smart_str_append(dest, src) \
 	smart_str_append_ex((dest), (src), 0)
-#define smart_str_append_long(dest, val) \
-	smart_str_append_long_ex((dest), (val), 0)
+#define smart_str_append_int(dest, val) \
+	smart_str_append_int_ex((dest), (val), 0)
 #define smart_str_append_off_t(dest, val) \
 	smart_str_append_off_t_ex((dest), (val), 0)
 #define smart_str_append_unsigned(dest, val) \
@@ -152,7 +152,7 @@ static inline char *smart_str_print_unsigned(char *buf, long num) {
 #define smart_str_append_unsigned_ex(dest, num, type) \
 	smart_str_append_generic_ex((dest), (num), (type), unsigned long, _unsigned)
 
-#define smart_str_append_long_ex(dest, num, type) \
+#define smart_str_append_int_ex(dest, num, type) \
 	smart_str_append_generic_ex((dest), (num), (type), unsigned long, _signed)
 
 #define smart_str_append_off_t_ex(dest, num, type) \

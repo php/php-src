@@ -337,10 +337,10 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 		return NULL;
 	}
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset TSRMLS_CC);
+	if (Z_TYPE_P(offset) != IS_INT) {
+		index = spl_offset_convert_to_int(offset TSRMLS_CC);
 	} else {
-		index = Z_LVAL_P(offset);
+		index = Z_IVAL_P(offset);
 	}
 	
 	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
@@ -392,10 +392,10 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 		return;
 	}
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset TSRMLS_CC);
+	if (Z_TYPE_P(offset) != IS_INT) {
+		index = spl_offset_convert_to_int(offset TSRMLS_CC);
 	} else {
-		index = Z_LVAL_P(offset);
+		index = Z_IVAL_P(offset);
 	}
 
 	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
@@ -440,10 +440,10 @@ static inline void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_o
 {
 	long index;
 	
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset TSRMLS_CC);
+	if (Z_TYPE_P(offset) != IS_INT) {
+		index = spl_offset_convert_to_int(offset TSRMLS_CC);
 	} else {
-		index = Z_LVAL_P(offset);
+		index = Z_IVAL_P(offset);
 	}
 	
 	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
@@ -479,10 +479,10 @@ static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_obje
 	long index;
 	int retval;
 	
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset TSRMLS_CC);
+	if (Z_TYPE_P(offset) != IS_INT) {
+		index = spl_offset_convert_to_int(offset TSRMLS_CC);
 	} else {
-		index = Z_LVAL_P(offset);
+		index = Z_IVAL_P(offset);
 	}
 	
 	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
@@ -539,8 +539,8 @@ static int spl_fixedarray_object_count_elements(zval *object, long *count TSRMLS
 		if (!Z_ISUNDEF(rv)) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_long(&intern->retval);
-			*count = (long) Z_LVAL(intern->retval);
+			convert_to_int(&intern->retval);
+			*count = (long) Z_IVAL(intern->retval);
 			return SUCCESS;
 		}
 	} else if (intern->array) {
@@ -629,9 +629,9 @@ SPL_METHOD(SplFixedArray, count)
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 	if (intern->array) {
-		RETURN_LONG(intern->array->size);
+		RETURN_INT(intern->array->size);
 	}
-	RETURN_LONG(0);
+	RETURN_INT(0);
 }
 /* }}} */
 
@@ -747,9 +747,9 @@ SPL_METHOD(SplFixedArray, getSize)
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 	if (intern->array) {
-		RETURN_LONG(intern->array->size);
+		RETURN_INT(intern->array->size);
 	}
-	RETURN_LONG(0);
+	RETURN_INT(0);
 }
 /* }}} */
 
@@ -895,7 +895,7 @@ static zval *spl_fixedarray_it_get_current_data(zend_object_iterator *iter TSRML
 	} else {
 		zval *data;
 
-		ZVAL_LONG(&zindex, object->current);
+		ZVAL_INT(&zindex, object->current);
 
 		data = spl_fixedarray_object_read_dimension_helper(object, &zindex TSRMLS_CC);
 		zval_ptr_dtor(&zindex);
@@ -915,7 +915,7 @@ static void spl_fixedarray_it_get_current_key(zend_object_iterator *iter, zval *
 	if (object->flags & SPL_FIXEDARRAY_OVERLOADED_KEY) {
 		zend_user_it_get_current_key(iter, key TSRMLS_CC);
 	} else {
-		ZVAL_LONG(key, object->current);
+		ZVAL_INT(key, object->current);
 	}
 }
 /* }}} */
@@ -943,7 +943,7 @@ SPL_METHOD(SplFixedArray, key)
 		return;
 	}
 
-	RETURN_LONG(intern->current);
+	RETURN_INT(intern->current);
 }
 /* }}} */
 
@@ -1000,7 +1000,7 @@ SPL_METHOD(SplFixedArray, current)
 		return;
 	}
 
-	ZVAL_LONG(&zindex, intern->current);
+	ZVAL_INT(&zindex, intern->current);
 
 	value = spl_fixedarray_object_read_dimension_helper(intern, &zindex TSRMLS_CC);
 

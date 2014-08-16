@@ -83,15 +83,15 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	zend_string *res;
 	char *lc_pattern;
 
-	res = STR_SAFE_ALLOC(Z_STRLEN_P(pattern), 2, 4, persistent);
+	res = STR_SAFE_ALLOC(Z_STRSIZE_P(pattern), 2, 4, persistent);
 	t = res->val;
 
-	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
+	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRSIZE_P(pattern));
 
 	t[j++] = '\xA7'; /* section sign */
 	t[j++] = '^';
 
-	for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
+	for (i=0; i<Z_STRSIZE_P(pattern); i++, j++) {
 		switch (lc_pattern[i]) {
 			case '?':
 				t[j] = '.';
@@ -163,16 +163,16 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				}
 
 				/* Set proper value for true/false settings */
-				if ((Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "on", sizeof("on") - 1)) ||
-					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
-					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
+				if ((Z_STRSIZE_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "on", sizeof("on") - 1)) ||
+					(Z_STRSIZE_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
+					(Z_STRSIZE_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
 				) {
 					ZVAL_NEW_STR(&new_property, STR_INIT("1", sizeof("1")-1, persistent));
 				} else if (
-					(Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
-					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
-					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
-					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
+					(Z_STRSIZE_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
+					(Z_STRSIZE_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
+					(Z_STRSIZE_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
+					(Z_STRSIZE_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
 				) {
 					// TODO: USE STR_EMPTY_ALLOC()?
 					ZVAL_NEW_STR(&new_property, STR_INIT("", sizeof("")-1, persistent));
@@ -203,7 +203,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					pefree(bdata->current_section_name, persistent);
 				}
 				bdata->current_section_name = pestrndup(Z_STRVAL_P(arg1),
-						Z_STRLEN_P(arg1), persistent);
+						Z_STRSIZE_P(arg1), persistent);
 
 				zend_hash_update(bdata->htab, Z_STR_P(arg1), &bdata->current_section);
 
@@ -388,7 +388,7 @@ static int browser_reg_compare(zval *browser TSRMLS_DC, int num_args, va_list ar
 
 			ua_len = lookup_browser_length;
 
-			for (i = 0; i < Z_STRLEN_P(previous_match); i++) {
+			for (i = 0; i < Z_STRSIZE_P(previous_match); i++) {
 				switch (Z_STRVAL_P(previous_match)[i]) {
 					case '?':
 					case '*':
@@ -400,7 +400,7 @@ static int browser_reg_compare(zval *browser TSRMLS_DC, int num_args, va_list ar
 				}
 			}
 
-			for (i = 0; i < Z_STRLEN_P(current_match); i++) {
+			for (i = 0; i < Z_STRSIZE_P(current_match); i++) {
 				switch (Z_STRVAL_P(current_match)[i]) {
 					case '?':
 					case '*':
@@ -475,7 +475,7 @@ PHP_FUNCTION(get_browser)
 			RETURN_FALSE;
 		}
 		agent_name = Z_STRVAL_P(http_user_agent);
-		agent_name_len = Z_STRLEN_P(http_user_agent);
+		agent_name_len = Z_STRSIZE_P(http_user_agent);
 	}
 
 	lookup_browser_name = estrndup(agent_name, agent_name_len);

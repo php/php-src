@@ -437,9 +437,9 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		if(wrapper && wrapper->wops->stream_metadata) {
 			int option;
 			void *value;
-			if (Z_TYPE_P(group) == IS_LONG) {
+			if (Z_TYPE_P(group) == IS_INT) {
 				option = PHP_STREAM_META_GROUP;
-				value = &Z_LVAL_P(group);
+				value = &Z_IVAL_P(group);
 			} else if (Z_TYPE_P(group) == IS_STRING) {
 				option = PHP_STREAM_META_GROUP_NAME;
 				value = Z_STRVAL_P(group);
@@ -465,8 +465,8 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	/* We have no native chgrp on Windows, nothing left to do if stream doesn't have own implementation */
 	RETURN_FALSE;
 #else
-	if (Z_TYPE_P(group) == IS_LONG) {
-		gid = (gid_t)Z_LVAL_P(group);
+	if (Z_TYPE_P(group) == IS_INT) {
+		gid = (gid_t)Z_IVAL_P(group);
 	} else if (Z_TYPE_P(group) == IS_STRING) {
 		if(php_get_gid_by_name(Z_STRVAL_P(group), &gid TSRMLS_CC) != SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
@@ -574,9 +574,9 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		if(wrapper && wrapper->wops->stream_metadata) {
 			int option;
 			void *value;
-			if (Z_TYPE_P(user) == IS_LONG) {
+			if (Z_TYPE_P(user) == IS_INT) {
 				option = PHP_STREAM_META_OWNER;
-				value = &Z_LVAL_P(user);
+				value = &Z_IVAL_P(user);
 			} else if (Z_TYPE_P(user) == IS_STRING) {
 				option = PHP_STREAM_META_OWNER_NAME;
 				value = Z_STRVAL_P(user);
@@ -603,8 +603,8 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	RETURN_FALSE;
 #else
 
-	if (Z_TYPE_P(user) == IS_LONG) {
-		uid = (uid_t)Z_LVAL_P(user);
+	if (Z_TYPE_P(user) == IS_INT) {
+		uid = (uid_t)Z_IVAL_P(user);
 	} else if (Z_TYPE_P(user) == IS_STRING) {
 		if(php_get_uid_by_name(Z_STRVAL_P(user), &uid TSRMLS_CC) != SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
@@ -962,21 +962,21 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 	switch (type) {
 	case FS_PERMS:
-		RETURN_LONG((long)ssb.sb.st_mode);
+		RETURN_INT((long)ssb.sb.st_mode);
 	case FS_INODE:
-		RETURN_LONG((long)ssb.sb.st_ino);
+		RETURN_INT((long)ssb.sb.st_ino);
 	case FS_SIZE:
-		RETURN_LONG((long)ssb.sb.st_size);
+		RETURN_INT((long)ssb.sb.st_size);
 	case FS_OWNER:
-		RETURN_LONG((long)ssb.sb.st_uid);
+		RETURN_INT((long)ssb.sb.st_uid);
 	case FS_GROUP:
-		RETURN_LONG((long)ssb.sb.st_gid);
+		RETURN_INT((long)ssb.sb.st_gid);
 	case FS_ATIME:
-		RETURN_LONG((long)ssb.sb.st_atime);
+		RETURN_INT((long)ssb.sb.st_atime);
 	case FS_MTIME:
-		RETURN_LONG((long)ssb.sb.st_mtime);
+		RETURN_INT((long)ssb.sb.st_mtime);
 	case FS_CTIME:
-		RETURN_LONG((long)ssb.sb.st_ctime);
+		RETURN_INT((long)ssb.sb.st_ctime);
 	case FS_TYPE:
 		if (S_ISLNK(ssb.sb.st_mode)) {
 			RETURN_STRING("link");
@@ -1012,30 +1012,30 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_STAT:
 		array_init(return_value);
 
-		ZVAL_LONG(&stat_dev, stat_sb->st_dev);
-		ZVAL_LONG(&stat_ino, stat_sb->st_ino);
-		ZVAL_LONG(&stat_mode, stat_sb->st_mode);
-		ZVAL_LONG(&stat_nlink, stat_sb->st_nlink);
-		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
-		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
+		ZVAL_INT(&stat_dev, stat_sb->st_dev);
+		ZVAL_INT(&stat_ino, stat_sb->st_ino);
+		ZVAL_INT(&stat_mode, stat_sb->st_mode);
+		ZVAL_INT(&stat_nlink, stat_sb->st_nlink);
+		ZVAL_INT(&stat_uid, stat_sb->st_uid);
+		ZVAL_INT(&stat_gid, stat_sb->st_gid);
 #ifdef HAVE_ST_RDEV
-		ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
+		ZVAL_INT(&stat_rdev, stat_sb->st_rdev);
 #else
-		ZVAL_LONG(&stat_rdev, -1);
+		ZVAL_INT(&stat_rdev, -1);
 #endif
-		ZVAL_LONG(&stat_size, stat_sb->st_size);
-		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
-		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
-		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
+		ZVAL_INT(&stat_size, stat_sb->st_size);
+		ZVAL_INT(&stat_atime, stat_sb->st_atime);
+		ZVAL_INT(&stat_mtime, stat_sb->st_mtime);
+		ZVAL_INT(&stat_ctime, stat_sb->st_ctime);
 #ifdef HAVE_ST_BLKSIZE
-		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
+		ZVAL_INT(&stat_blksize, stat_sb->st_blksize);
 #else
-		ZVAL_LONG(&stat_blksize,-1);
+		ZVAL_INT(&stat_blksize,-1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
+		ZVAL_INT(&stat_blocks, stat_sb->st_blocks);
 #else
-		ZVAL_LONG(&stat_blocks,-1);
+		ZVAL_INT(&stat_blocks,-1);
 #endif
 		/* Store numeric indexes in propper order */
 		zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);
@@ -1201,7 +1201,7 @@ PHP_FUNCTION(realpath_cache_size)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_LONG(realpath_cache_size(TSRMLS_C));
+	RETURN_INT(realpath_cache_size(TSRMLS_C));
 }
 
 /* {{{ proto bool realpath_cache_get()
@@ -1224,13 +1224,13 @@ PHP_FUNCTION(realpath_cache_get)
 
 			/* bucket->key is unsigned long */
 			if (LONG_MAX >= bucket->key) {
-				add_assoc_long(&entry, "key", bucket->key);
+				add_assoc_int(&entry, "key", bucket->key);
 			} else {
 				add_assoc_double(&entry, "key", (double)bucket->key);
 			}
 			add_assoc_bool(&entry, "is_dir", bucket->is_dir);
 			add_assoc_stringl(&entry, "realpath", bucket->realpath, bucket->realpath_len);
-			add_assoc_long(&entry, "expires", bucket->expires);
+			add_assoc_int(&entry, "expires", bucket->expires);
 #ifdef PHP_WIN32
 			add_assoc_bool(&entry, "is_rvalid", bucket->is_rvalid);
 			add_assoc_bool(&entry, "is_wvalid", bucket->is_wvalid);

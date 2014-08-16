@@ -372,8 +372,8 @@ fetch_dim_string:
 	case IS_TRUE:
 		index = 1;
 		goto num_index;
-	case IS_LONG:
-		index = Z_LVAL_P(offset);
+	case IS_INT:
+		index = Z_IVAL_P(offset);
 num_index:
 		if ((retval = zend_hash_index_find(ht, index)) == NULL) {
 			switch (type) {
@@ -504,8 +504,8 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		case IS_TRUE:
 			index = 1;
 			goto num_index;
-		case IS_LONG:
-			index = Z_LVAL_P(offset);
+		case IS_INT:
+			index = Z_IVAL_P(offset);
 num_index:
 			ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 			if (ht->u.v.nApplyCount > 0) {
@@ -596,8 +596,8 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 	case IS_TRUE:
 		index = 1;
 		goto num_index;
-	case IS_LONG:
-		index = Z_LVAL_P(offset);
+	case IS_INT:
+		index = Z_IVAL_P(offset);
 num_index:
 		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 		if (ht->u.v.nApplyCount > 0) {
@@ -675,8 +675,8 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 			case IS_TRUE: 
 				index = 1;
 				goto num_index;
-			case IS_LONG:
-				index = Z_LVAL_P(offset);
+			case IS_INT:
+				index = Z_IVAL_P(offset);
 num_index:
 				if ((tmp = zend_hash_index_find(ht, index)) != NULL) {
 					if (check_empty == 2) {
@@ -957,7 +957,7 @@ static int spl_array_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 	ht2		= spl_array_get_hash_table(intern2, 0 TSRMLS_CC);
 
 	zend_compare_symbol_tables(&temp_zv, ht1, ht2 TSRMLS_CC);
-	result = (int)Z_LVAL(temp_zv);
+	result = (int)Z_IVAL(temp_zv);
 	/* if we just compared std.properties, don't do it again */
 	if (result == 0 &&
 			!(ht1 == intern1->std.properties && ht2 == intern2->std.properties)) {
@@ -1302,7 +1302,7 @@ SPL_METHOD(Array, getFlags)
 		return;
 	}
 
-	RETURN_LONG(intern->ar_flags & ~SPL_ARRAY_INT_MASK);
+	RETURN_INT(intern->ar_flags & ~SPL_ARRAY_INT_MASK);
 }
 /* }}} */
 
@@ -1449,8 +1449,8 @@ int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ 
 		if (Z_TYPE(rv) != IS_UNDEF) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_long(&intern->retval);
-			*count = (long)Z_LVAL(intern->retval);
+			convert_to_int(&intern->retval);
+			*count = (long)Z_IVAL(intern->retval);
 			return SUCCESS;
 		}
 		*count = 0;
@@ -1473,7 +1473,7 @@ SPL_METHOD(Array, count)
 
 	spl_array_object_count_elements_helper(intern, &count TSRMLS_CC);
 
-	RETURN_LONG(count);
+	RETURN_INT(count);
 } /* }}} */
 
 static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len, int use_arg) /* {{{ */
@@ -1706,7 +1706,7 @@ SPL_METHOD(Array, getChildren)
 		}
 	}
 
-	ZVAL_LONG(&flags, SPL_ARRAY_USE_OTHER | intern->ar_flags);
+	ZVAL_INT(&flags, SPL_ARRAY_USE_OTHER | intern->ar_flags);
 	spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), return_value, entry, &flags TSRMLS_CC);
 }
 /* }}} */
@@ -1733,7 +1733,7 @@ SPL_METHOD(Array, serialize)
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
-	ZVAL_LONG(&flags, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
+	ZVAL_INT(&flags, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
 
 	/* storage */
 	smart_str_appendl(&buf, "x:", 2);
@@ -1806,12 +1806,12 @@ SPL_METHOD(Array, unserialize)
 	}
 	++p;
 
-	if (!php_var_unserialize(&zflags, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE(zflags) != IS_LONG) {
+	if (!php_var_unserialize(&zflags, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE(zflags) != IS_INT) {
 		goto outexcept;
 	}
 
 	--p; /* for ';' */
-	flags = Z_LVAL(zflags);
+	flags = Z_IVAL(zflags);
 	/* flags needs to be verified and we also need to verify whether the next
 	 * thing we get is ';'. After that we require an 'm' or somethign else
 	 * where 'm' stands for members and anything else should be an array. If
@@ -2018,13 +2018,13 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(RecursiveArrayIterator, RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
 
-	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
-	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
+	REGISTER_SPL_CLASS_CONST_INT(ArrayObject,   "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
+	REGISTER_SPL_CLASS_CONST_INT(ArrayObject,   "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
 
-	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
-	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
+	REGISTER_SPL_CLASS_CONST_INT(ArrayIterator, "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
+	REGISTER_SPL_CLASS_CONST_INT(ArrayIterator, "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
 
-	REGISTER_SPL_CLASS_CONST_LONG(RecursiveArrayIterator, "CHILD_ARRAYS_ONLY", SPL_ARRAY_CHILD_ARRAYS_ONLY);
+	REGISTER_SPL_CLASS_CONST_INT(RecursiveArrayIterator, "CHILD_ARRAYS_ONLY", SPL_ARRAY_CHILD_ARRAYS_ONLY);
 
 	return SUCCESS;
 }

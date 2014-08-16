@@ -285,11 +285,11 @@ PHP_FUNCTION(abs)
 	
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
-	} else if (Z_TYPE_P(value) == IS_LONG) {
-		if (Z_LVAL_P(value) == LONG_MIN) {
+	} else if (Z_TYPE_P(value) == IS_INT) {
+		if (Z_IVAL_P(value) == LONG_MIN) {
 			RETURN_DOUBLE(-(double)LONG_MIN);
 		} else {
-			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
+			RETURN_INT(Z_IVAL_P(value) < 0 ? -Z_IVAL_P(value) : Z_IVAL_P(value));
 		}
 	}
 	RETURN_FALSE;
@@ -309,7 +309,7 @@ PHP_FUNCTION(ceil)
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
-	} else if (Z_TYPE_P(value) == IS_LONG) {
+	} else if (Z_TYPE_P(value) == IS_INT) {
 		RETURN_DOUBLE(zval_get_double(value));
 	}
 	RETURN_FALSE;
@@ -329,7 +329,7 @@ PHP_FUNCTION(floor)
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(floor(Z_DVAL_P(value)));
-	} else if (Z_TYPE_P(value) == IS_LONG) {
+	} else if (Z_TYPE_P(value) == IS_INT) {
 		RETURN_DOUBLE(zval_get_double(value));
 	}
 	RETURN_FALSE;
@@ -356,15 +356,15 @@ PHP_FUNCTION(round)
 	convert_scalar_to_number_ex(value);
 
 	switch (Z_TYPE_P(value)) {
-		case IS_LONG:
+		case IS_INT:
 			/* Simple case - long that doesn't need to be rounded. */
 			if (places >= 0) {
-				RETURN_DOUBLE((double) Z_LVAL_P(value));
+				RETURN_DOUBLE((double) Z_IVAL_P(value));
 			}
 			/* break omitted intentionally */
 
 		case IS_DOUBLE:
-			return_val = (Z_TYPE_P(value) == IS_LONG) ? (double)Z_LVAL_P(value) : Z_DVAL_P(value);
+			return_val = (Z_TYPE_P(value) == IS_INT) ? (double)Z_IVAL_P(value) : Z_DVAL_P(value);
 			return_val = _php_math_round(return_val, places, mode);
 			RETURN_DOUBLE(return_val);
 			break;
@@ -938,7 +938,7 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
 
 	s = Z_STRVAL_P(arg);
 
-	for (i = Z_STRLEN_P(arg); i > 0; i--) {
+	for (i = Z_STRSIZE_P(arg); i > 0; i--) {
 		c = *s++;
 		
 		digit = (c >= '0' && c <= '9') ? c - '0'
@@ -990,7 +990,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	cutoff = LONG_MAX / base;
 	cutlim = LONG_MAX % base;
 	
-	for (i = Z_STRLEN_P(arg); i > 0; i--) {
+	for (i = Z_STRSIZE_P(arg); i > 0; i--) {
 		c = *s++;
 
 		/* might not work for EBCDIC */
@@ -1024,7 +1024,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	if (mode == 1) {
 		ZVAL_DOUBLE(ret, fnum);
 	} else {
-		ZVAL_LONG(ret, num);
+		ZVAL_INT(ret, num);
 	}
 	return SUCCESS;
 }
@@ -1042,11 +1042,11 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base TSRMLS_DC)
 	char *ptr, *end;
 	unsigned long value;
 
-	if (Z_TYPE_P(arg) != IS_LONG || base < 2 || base > 36) {
+	if (Z_TYPE_P(arg) != IS_INT || base < 2 || base > 36) {
 		return STR_EMPTY_ALLOC();
 	}
 
-	value = Z_LVAL_P(arg);
+	value = Z_IVAL_P(arg);
 
 	end = ptr = buf + sizeof(buf) - 1;
 	*ptr = '\0';
@@ -1069,7 +1069,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
+	if ((Z_TYPE_P(arg) != IS_INT && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
 		return STR_EMPTY_ALLOC();
 	}
 
@@ -1157,7 +1157,7 @@ PHP_FUNCTION(decbin)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_long_ex(arg);
+	convert_to_int_ex(arg);
 	result = _php_math_longtobase(arg, 2 TSRMLS_CC);
 	RETURN_STR(result);
 }
@@ -1173,7 +1173,7 @@ PHP_FUNCTION(decoct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_long_ex(arg);
+	convert_to_int_ex(arg);
 	result = _php_math_longtobase(arg, 8 TSRMLS_CC);
 	RETURN_STR(result);
 }
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(dechex)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_long_ex(arg);
+	convert_to_int_ex(arg);
 	result = _php_math_longtobase(arg, 16 TSRMLS_CC);
 	RETURN_STR(result);
 }
@@ -1434,10 +1434,10 @@ PHP_FUNCTION(intdiv)
 	} else if (divisor == -1 && numerator == LONG_MIN) {
 		/* Prevent overflow error/crash 
 		   We don't return a float here as that violates function contract */
-		RETURN_LONG(0);
+		RETURN_INT(0);
 	}
 	
-	RETURN_LONG(numerator/divisor);
+	RETURN_INT(numerator/divisor);
 }
 /* }}} */ 
 

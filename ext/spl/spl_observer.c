@@ -397,7 +397,7 @@ static int spl_object_storage_compare_info(zval *e1, zval *e2 TSRMLS_DC) /* {{{ 
 		return 1;
 	}
 
-	return Z_LVAL(result);
+	return Z_IVAL(result);
 }
 /* }}} */
 
@@ -526,7 +526,7 @@ SPL_METHOD(SplObjectStorage, addAll)
 
 	spl_object_storage_addall(intern, getThis(), other TSRMLS_CC);
 
-	RETURN_LONG(zend_hash_num_elements(&intern->storage));
+	RETURN_INT(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
 /* {{{ proto bool SplObjectStorage::removeAll(SplObjectStorage $os)
@@ -554,7 +554,7 @@ SPL_METHOD(SplObjectStorage, removeAll)
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	intern->index = 0;
 
-	RETURN_LONG(zend_hash_num_elements(&intern->storage));
+	RETURN_INT(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
 /* {{{ proto bool SplObjectStorage::removeAllExcept(SplObjectStorage $os)
@@ -581,7 +581,7 @@ SPL_METHOD(SplObjectStorage, removeAllExcept)
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	intern->index = 0;
 
-	RETURN_LONG(zend_hash_num_elements(&intern->storage));
+	RETURN_INT(zend_hash_num_elements(&intern->storage));
 }
 /* }}} */
 
@@ -617,11 +617,11 @@ SPL_METHOD(SplObjectStorage, count)
 			ret += php_count_recursive(element, mode TSRMLS_CC);
 		} ZEND_HASH_FOREACH_END();
 
-		RETURN_LONG(ret);
+		RETURN_INT(ret);
 		return;
 	}
 
-	RETURN_LONG(zend_hash_num_elements(&intern->storage));
+	RETURN_INT(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
 /* {{{ proto void SplObjectStorage::rewind()
@@ -661,7 +661,7 @@ SPL_METHOD(SplObjectStorage, key)
 		return;
 	}
 	
-	RETURN_LONG(intern->index);
+	RETURN_INT(intern->index);
 } /* }}} */
 
 /* {{{ proto mixed SplObjectStorage::current()
@@ -751,7 +751,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 	
 	/* storage */
 	smart_str_appendl(&buf, "x:", 2);
-	ZVAL_LONG(&flags, zend_hash_num_elements(&intern->storage));
+	ZVAL_INT(&flags, zend_hash_num_elements(&intern->storage));
 	php_var_serialize(&buf, &flags, &var_hash TSRMLS_CC);
 	zval_ptr_dtor(&flags);
 
@@ -822,13 +822,13 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	if (!php_var_unserialize(&pcount, &p, s + buf_len, &var_hash TSRMLS_CC)) {
 		goto outexcept;
 	}
-	if (Z_TYPE(pcount) != IS_LONG) {
+	if (Z_TYPE(pcount) != IS_INT) {
 		zval_ptr_dtor(&pcount);
 		goto outexcept;
 	}
 
 	--p; /* for ';' */
-	count = Z_LVAL(pcount);
+	count = Z_IVAL(pcount);
 		
 	while (count-- > 0) {
 		spl_SplObjectStorageElement *pelement;
@@ -1011,7 +1011,7 @@ SPL_METHOD(MultipleIterator, getFlags)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_LONG(intern->flags);
+	RETURN_INT(intern->flags);
 }
 /* }}} */
 
@@ -1045,7 +1045,7 @@ SPL_METHOD(MultipleIterator, attachIterator)
 		spl_SplObjectStorageElement *element;
 		zval                         compare_result;
 
-		if (Z_TYPE_P(info) != IS_LONG && Z_TYPE_P(info) != IS_STRING) {
+		if (Z_TYPE_P(info) != IS_INT && Z_TYPE_P(info) != IS_STRING) {
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Info must be NULL, integer or string", 0 TSRMLS_CC);
 			return;
 		}
@@ -1203,8 +1203,8 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 
 		if (intern->flags & MIT_KEYS_ASSOC) {
 			switch (Z_TYPE(element->inf)) {
-				case IS_LONG:
-					add_index_zval(return_value, Z_LVAL(element->inf), &retval);
+				case IS_INT:
+					add_index_zval(return_value, Z_IVAL(element->inf), &retval);
 					break;
 				case IS_STRING:
 					zend_hash_update(Z_ARRVAL_P(return_value), Z_STR(element->inf), &retval);
@@ -1312,10 +1312,10 @@ PHP_MINIT_FUNCTION(spl_observer)
 	REGISTER_SPL_STD_CLASS_EX(MultipleIterator, spl_SplObjectStorage_new, spl_funcs_MultipleIterator);
 	REGISTER_SPL_ITERATOR(MultipleIterator);
 
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ANY",     MIT_NEED_ANY);
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ALL",     MIT_NEED_ALL);
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_KEYS_NUMERIC", MIT_KEYS_NUMERIC);
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_KEYS_ASSOC",   MIT_KEYS_ASSOC);
+	REGISTER_SPL_CLASS_CONST_INT(MultipleIterator, "MIT_NEED_ANY",     MIT_NEED_ANY);
+	REGISTER_SPL_CLASS_CONST_INT(MultipleIterator, "MIT_NEED_ALL",     MIT_NEED_ALL);
+	REGISTER_SPL_CLASS_CONST_INT(MultipleIterator, "MIT_KEYS_NUMERIC", MIT_KEYS_NUMERIC);
+	REGISTER_SPL_CLASS_CONST_INT(MultipleIterator, "MIT_KEYS_ASSOC",   MIT_KEYS_ASSOC);
 
 	return SUCCESS;
 }
