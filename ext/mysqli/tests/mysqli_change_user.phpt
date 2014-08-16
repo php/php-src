@@ -42,9 +42,33 @@ require_once('skipifconnectfailure.inc');
 	if (false !== ($tmp = @mysqli_change_user($link, $user, $passwd . '_unknown_really', $db)))
 		printf("[009] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
+	// Reconnect because after 3 failed change_user attempts, the server blocks you off.
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-		printf("[010] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+		printf("[009a] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
+
+	if (!mysqli_query($link, 'SET @mysqli_change_user_test_var=1'))
+		printf("[010] Failed to set test variable: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!$res = mysqli_query($link, 'SELECT @mysqli_change_user_test_var AS test_var'))
+		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+	$tmp = mysqli_fetch_assoc($res);
+	mysqli_free_result($res);
+	if (1 != $tmp['test_var'])
+		printf("[012] Cannot set test variable\n");
+
+	if (true !== ($tmp = mysqli_change_user($link, $user, $passwd, $db)))
+		printf("[013] Expecting true, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (!$res = mysqli_query($link, 'SELECT database() AS dbname, user() AS user'))
+		printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+	$tmp = mysqli_fetch_assoc($res);
+	mysqli_free_result($res);
+
+	if (substr($tmp['user'], 0, strlen($user)) !== $user)
+		printf("[015] Expecting user %s, got user() %s\n", $user, $tmp['user']);
+	if ($tmp['dbname'] != $db)
+		printf("[016] Expecting database %s, got database() %s\n", $db, $tmp['dbname']);
 
 	if (false !== ($tmp = @mysqli_change_user($link, $user, $passwd, $db . '_unknown_really')))
 		printf("[011] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
