@@ -2319,16 +2319,10 @@ ZEND_API int zend_binary_strcmp(const char *s1, zend_size_t len1, const char *s2
 	}
 	retval = memcmp(s1, s2, MIN(len1, len2));
 	if (!retval) {
-		if (len1 > len2) {
-			retval = 1;
-		} else if (len1 < len2) {
-			retval = -1;
-		} else {
-			retval = 0;
-		}
+		return (int)(len1 - len2);
+	} else {
+		return retval;
 	}
-
-	return retval;
 }
 /* }}} */
 
@@ -2341,16 +2335,10 @@ ZEND_API int zend_binary_strncmp(const char *s1, zend_size_t len1, const char *s
 	}
 	retval = memcmp(s1, s2, MIN(length, MIN(len1, len2)));
 	if (!retval) {
-		if (MIN(length, len1) > MIN(length, len2)) {
-			retval = 1;
-		} else if (MIN(length, len1) < MIN(length, len2)) {
-			retval = -1;
-		} else {
-			retval = 0;
-		}
+		return (int)(MIN(length, len1) - MIN(length, len2));
+	} else {
+		return retval;
 	}
-
-	return retval;
 }
 /* }}} */
 
@@ -2372,13 +2360,7 @@ ZEND_API int zend_binary_strcasecmp(const char *s1, zend_size_t len1, const char
 		}
 	}
 
-	if (len1 > len2) {
-		return 1;
-	} else if (len1 < len2) {
-		return -1;
-	} else {
-		return 0;
-	}
+	return (int)(len1 - len2);
 }
 /* }}} */
 
@@ -2399,13 +2381,7 @@ ZEND_API int zend_binary_strncasecmp(const char *s1, zend_size_t len1, const cha
 		}
 	}
 
-	if (MIN(length, len1) > MIN(length, len2)) {
-		return 1;
-	} else if (MIN(length, len1) < MIN(length, len2)) {
-		return -1;
-	} else {
-		return 0;
-	}
+	return (int)(MIN(length, len1) - MIN(length, len2));
 }
 /* }}} */
 
@@ -2427,13 +2403,7 @@ ZEND_API int zend_binary_strcasecmp_l(const char *s1, zend_size_t len1, const ch
 		}
 	}
 
-	if (len1 > len2) {
-		return 1;
-	} else if (len1 < len2) {
-		return -1;
-	} else {
-		return 0;
-	}
+	return (int)(len1 - len2);
 }
 /* }}} */
 
@@ -2454,13 +2424,7 @@ ZEND_API int zend_binary_strncasecmp_l(const char *s1, zend_size_t len1, const c
 		}
 	}
 
-	if (MIN(length, len1) > MIN(length, len2)) {
-		return 1;
-	} else if (MIN(length, len1) < MIN(length, len2)) {
-		return -1;
-	} else {
-		return 0;
-	}
+	return (int)(MIN(length, len1) - MIN(length, len2));
 }
 /* }}} */
 

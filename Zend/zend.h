@@ -646,7 +646,7 @@ END_EXTERN_C()
 #define ZEND_PUTC(c)					zend_write(&(c), 1)
 
 BEGIN_EXTERN_C()
-extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
+extern ZEND_API zend_size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path TSRMLS_DC);
 extern ZEND_API void (*zend_block_interruptions)(void);
@@ -655,7 +655,7 @@ extern ZEND_API void (*zend_ticks_function)(int ticks TSRMLS_DC);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 extern ZEND_API void (*zend_on_timeout)(int seconds TSRMLS_DC);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
-extern int (*zend_vspprintf)(char **pbuf, zend_size_t max_len, const char *format, va_list ap);
+extern zend_int_t (*zend_vspprintf)(char **pbuf, zend_size_t max_len, const char *format, va_list ap);
 extern zend_string *(*zend_vstrpprintf)(zend_size_t max_len, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
 extern ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRMLS_DC);

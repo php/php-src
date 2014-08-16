@@ -46,7 +46,7 @@
 
 /* true multithread-shared globals */
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
-ZEND_API int (*zend_printf)(const char *format, ...);
+ZEND_API zend_size_t (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
 ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path TSRMLS_DC);
 ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
@@ -54,7 +54,7 @@ ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API void (*zend_ticks_function)(int ticks TSRMLS_DC);
 ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
-int (*zend_vspprintf)(char **pbuf, zend_size_t max_len, const char *format, va_list ap);
+zend_size_t (*zend_vspprintf)(char **pbuf, zend_size_t max_len, const char *format, va_list ap);
 zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
 ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
@@ -204,7 +204,7 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 		if (string_key) {
 			ZEND_WRITE(string_key->val, string_key->len);
 		} else {
-			zend_printf("%ld", num_key);
+			zend_printf(ZEND_UINT_FMT, num_key);
 		}
 		ZEND_PUTS("] => ");
 		zend_print_flat_zval_r(tmp TSRMLS_CC);

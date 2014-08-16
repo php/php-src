@@ -491,7 +491,7 @@ convert_to_hash:
 			ZVAL_COPY_VALUE(&p->val, pData);
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 			if ((zend_int_t)h >= (zend_int_t)ht->nNextFreeElement) {
-				ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
+				ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
 			}
 			return &p->val;
 		}

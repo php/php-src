@@ -4730,7 +4730,7 @@ PHP_FUNCTION(str_repeat)
 	zend_string	*result;		/* Resulting string */
 	size_t		result_len;		/* Length of the resulting string */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl", &input_str, &mult) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si", &input_str, &mult) == FAILURE) {
 		return;
 	}
 

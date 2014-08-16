@@ -8797,7 +8797,7 @@ static int ZEND_FASTCALL  ZEND_END_SILENCE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	SAVE_OPLINE();
 	if (!EG(error_reporting) && Z_IVAL_P(EX_VAR(opline->op1.var)) != 0) {
 		EG(error_reporting) = Z_IVAL_P(EX_VAR(opline->op1.var));
-		_zend_print_signed_to_buf(buf + sizeof(buf) - 1, EG(error_reporting), unsigned long, res);
+		_zend_print_signed_to_buf(buf + sizeof(buf) - 1, EG(error_reporting), zend_uint_t, res);
 		if (EXPECTED(EG(error_reporting_ini_entry) != NULL)) {
 			if (EXPECTED(EG(error_reporting_ini_entry)->modified &&
 			    EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value)) {
