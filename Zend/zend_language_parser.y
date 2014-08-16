@@ -965,10 +965,16 @@ scalar:
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$.ast = $2.ast; }
 	|	dereferencable_scalar	{ $$.ast = $1.ast; }
 	|	class_name_scalar	{ $$.ast = $1.ast; }
-	|	class_constant		{ $$.ast = $1.ast; }
-	|	name				{ $$.ast = zend_ast_create(ZEND_AST_CONST, $1.ast); }
+	|	constant			{ $$.ast = $1.ast; }
 ;
 
+constant:
+		name { $$.ast = zend_ast_create(ZEND_AST_CONST, $1.ast); }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
+			{ $$.ast = zend_ast_create(ZEND_AST_CLASS_CONST, $1.ast, $3.ast); }
+	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
+			{ $$.ast = zend_ast_create(ZEND_AST_CLASS_CONST, $1.ast, $3.ast); }
+;
 
 possible_comma:
 		/* empty */
@@ -1004,6 +1010,8 @@ callable_variable:
 		simple_variable
 			{ $$.ast = zend_ast_create(ZEND_AST_VAR, $1.ast); }
 	|	dereferencable '[' dim_offset ']'
+			{ $$.ast = zend_ast_create(ZEND_AST_DIM, $1.ast, $3.ast); }
+	|	constant '[' dim_offset ']'
 			{ $$.ast = zend_ast_create(ZEND_AST_DIM, $1.ast, $3.ast); }
 	|	dereferencable '{' expr '}'
 			{ $$.ast = zend_ast_create(ZEND_AST_DIM, $1.ast, $3.ast); }
@@ -1159,13 +1167,6 @@ isset_variables:
 
 isset_variable:
 		expr { $$.ast = zend_ast_create(ZEND_AST_ISSET, $1.ast); }
-;
-
-class_constant:
-		class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
-			{ $$.ast = zend_ast_create(ZEND_AST_CLASS_CONST, $1.ast, $3.ast); }
-	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
-			{ $$.ast = zend_ast_create(ZEND_AST_CLASS_CONST, $1.ast, $3.ast); }
 ;
 
 class_name_scalar:
