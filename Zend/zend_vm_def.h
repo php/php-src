@@ -2231,7 +2231,6 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		/* No exception raised: Skip over arguments until fcall opcode with correct
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
-			/* fprintf(stderr, "SKIP %s => ", zend_get_opcode_name(opline->opcode)); */
 			opline++;
 
 			if (opline->opcode == ZEND_INIT_FCALL ||
@@ -2239,15 +2238,12 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_METHOD_CALL ||
 				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-				opline->opcode == ZEND_INIT_USER_CALL ||
 				opline->opcode == ZEND_NEW
 			) {
 				nesting++;
 			} else if (opline->opcode == ZEND_DO_FCALL) {
 				nesting--;
 			}
-
-			/* fprintf(stderr, "%s %d\n", zend_get_opcode_name(opline->opcode), nesting); */
 		} while (nesting);
 
 		if (RETURN_VALUE_USED(opline)) {
