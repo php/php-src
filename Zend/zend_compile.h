@@ -75,10 +75,7 @@ typedef struct _znode { /* used only during compilation */
 	union {
 		znode_op op;
 		zval constant; /* replaced by literal/zv */
-		zend_op_array *op_array;
-		zend_ast *ast;
 	} u;
-	zend_uint EA;      /* extended attributes */
 } znode;
 
 /* Temporarily defined here, to avoid header ordering issues */
