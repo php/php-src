@@ -1333,7 +1333,7 @@ PHP_FUNCTION(set_time_limit)
 	int new_timeout_strlen;
 	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_timeout) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &new_timeout) == FAILURE) {
 		return;
 	}
 

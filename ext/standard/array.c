@@ -4432,7 +4432,7 @@ PHP_FUNCTION(array_map)
 	RETVAL_NULL();
 
 	if (n_arrays == 1) {
-		ulong num_key;
+		php_uint_t num_key;
 		zend_string *str_key;
 		zval *zv;
 

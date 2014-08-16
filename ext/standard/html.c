@@ -1443,6 +1443,7 @@ encode_amp:
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
 	zend_string *str, *hint_charset = NULL;
+	char *default_charset;
 	php_int_t flags = ENT_COMPAT;
 	zend_string *replaced;
 	zend_bool double_encode = 1;
@@ -1462,9 +1463,9 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 #endif
 
 	if (!hint_charset) {
-		hint_charset = get_default_charset(TSRMLS_C);
+		default_charset = get_default_charset(TSRMLS_C);
 	}
-	replaced = php_escape_html_entities_ex((unsigned char*)str->val, str->len, all, (int) flags, (hint_charset ? hint_charset->val : NULL), double_encode TSRMLS_CC);
+	replaced = php_escape_html_entities_ex((unsigned char*)str->val, str->len, all, (int) flags, (hint_charset ? hint_charset->val : default_charset), double_encode TSRMLS_CC);
 	RETVAL_STR(replaced);
 }
 /* }}} */
@@ -1525,6 +1526,7 @@ PHP_FUNCTION(htmlspecialchars_decode)
 PHP_FUNCTION(html_entity_decode)
 {
 	zend_string *str, *hint_charset = NULL;
+	char *default_charset;
 	size_t new_len = 0;
 	php_int_t quote_style = ENT_COMPAT;
 	zend_string *replaced;
@@ -1544,9 +1546,9 @@ PHP_FUNCTION(html_entity_decode)
 #endif
 
 	if (!hint_charset) {
-		hint_charset = get_default_charset(TSRMLS_C);
+		default_charset = get_default_charset(TSRMLS_C);
 	}
-	replaced = php_unescape_html_entities((unsigned char*)str->val, str->len, 1 /*all*/, quote_style, hint_charset->val TSRMLS_CC);
+	replaced = php_unescape_html_entities((unsigned char*)str->val, str->len, 1 /*all*/, quote_style, (hint_charset ? hint_charset->val : default_charset) TSRMLS_CC);
 
 	if (replaced) {
 		RETURN_STR(replaced);

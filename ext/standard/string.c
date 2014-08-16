@@ -283,10 +283,10 @@ PHP_FUNCTION(hex2bin)
 static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
 {
 	char *s11, *s22;
-	int len1, len2;
+	php_int_t len1, len2;
 	php_int_t start = 0, len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &s11, &len1,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ii", &s11, &len1,
 				&s22, &len2, &start, &len) == FAILURE) {
 		return;
 	}
@@ -2252,20 +2252,20 @@ PHP_FUNCTION(substr)
 	if (argc > 2) {
 		if ((l < 0 && -l > str->len)) {
 			RETURN_FALSE;
-		} else if (l > str->len) {
+		} else if (l > (php_int_t)str->len) {
 			l = str->len;
 		}
 	} else {
 		l = str->len;
 	}
 
-	if (f > str->len) {
+	if (f > (php_int_t)str->len) {
 		RETURN_FALSE;
 	} else if (f < 0 && -f > str->len) {
 		f = 0;
 	}
 
-	if (l < 0 && (l + str->len - f) < 0) {
+	if (l < 0 && (l + (php_int_t)str->len - f) < 0) {
 		RETURN_FALSE;
 	}
 
@@ -2273,7 +2273,7 @@ PHP_FUNCTION(substr)
 	 * of the string
 	 */
 	if (f < 0) {
-		f = str->len + f;
+		f = (php_int_t)str->len + f;
 		if (f < 0) {
 			f = 0;
 		}
@@ -2283,17 +2283,17 @@ PHP_FUNCTION(substr)
 	 * needed to stop that many chars from the end of the string
 	 */
 	if (l < 0) {
-		l = (str->len - f) + l;
+		l = ((php_int_t)str->len - f) + l;
 		if (l < 0) {
 			l = 0;
 		}
 	}
 
-	if (f >= str->len) {
+	if (f >= (php_int_t)str->len) {
 		RETURN_FALSE;
 	}
 
-	if ((f + l) > str->len) {
+	if ((f + l) > (php_int_t)str->len) {
 		l = str->len - f;
 	}
 
@@ -2418,7 +2418,7 @@ PHP_FUNCTION(substr_replace)
 		}
 	} else { /* str is array of strings */
 		zend_string *str_index = NULL;
-		ulong num_index;
+		php_uint_t num_index;
 		int result_len;
 
 		array_init(return_value);
@@ -2815,7 +2815,7 @@ static int php_strtr_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 /* {{{ php_strtr_array */
 static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *pats TSRMLS_DC)
 {
-	ulong num_key;
+	php_uint_t num_key;
 	zend_string *str_key;
 	int len, pos, found;
 	int num_keys = 0;
@@ -3805,7 +3805,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	zval *subject, *search, *replace, *subject_entry, *zcount = NULL;
 	zval result;
 	zend_string *string_key;
-	ulong num_key;
+	php_uint_t num_key;
 	int count = 0;
 	int argc = ZEND_NUM_ARGS();
 
