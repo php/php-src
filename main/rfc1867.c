@@ -611,9 +611,9 @@ static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int ne
 }
 
 /* read until a boundary condition */
-static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes, int *end TSRMLS_DC)
+static int multipart_buffer_read(multipart_buffer *self, char *buf, php_size_t bytes, int *end TSRMLS_DC)
 {
-	int len, max;
+	php_size_t len, max;
 	char *bound;
 
 	/* fill buffer if needed */
@@ -657,7 +657,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes, i
   XXX: this is horrible memory-usage-wise, but we only expect
   to do this on small pieces of form data.
 */
-static char *multipart_buffer_read_body(multipart_buffer *self, unsigned int *len TSRMLS_DC)
+static char *multipart_buffer_read_body(multipart_buffer *self, php_size_t *len TSRMLS_DC)
 {
 	char buf[FILLUNIT], *out=NULL;
 	int total_bytes=0, read_bytes=0;

@@ -426,7 +426,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 							double d;
 							int type;
 
-							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), p, &d, -1)) == 0) {
+							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), (zend_int_t *)p, &d, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
 								if (c == 'L') {

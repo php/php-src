@@ -288,12 +288,12 @@ PHPAPI int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 PHP_FUNCTION(count)
 {
 	zval *array;
-	long mode = COUNT_NORMAL;
+	php_int_t mode = COUNT_NORMAL;
 	php_int_t cnt;
 	zval *element;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &array, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &array, &mode) == FAILURE) {
 		return;
 	}
 #else

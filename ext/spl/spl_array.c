@@ -66,7 +66,7 @@ typedef struct _spl_array_object {
 	zval              array;
 	zval              retval;
 	HashPosition      pos;
-	ulong             pos_h;
+	php_uint_t             pos_h;
 	int               ar_flags;
 	int               is_self;
 	zend_function     *fptr_offset_get;
@@ -969,7 +969,7 @@ static int spl_array_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht TSRMLS_DC) /* {{{ */
 {
 	zend_string *string_key;
-	ulong num_key;
+	php_uint_t num_key;
 	zval *data;
 
 	if (Z_TYPE(intern->array) == IS_OBJECT) {

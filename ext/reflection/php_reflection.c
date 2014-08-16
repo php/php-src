@@ -444,7 +444,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			HashPosition pos;
 			zval *value;
 			zend_string *key;
-			ulong num_index;
+			php_uint_t num_index;
 
 			zend_hash_internal_pointer_reset_ex(&ce->constants_table, &pos);
 
@@ -574,7 +574,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 			while ((prop = zend_hash_get_current_data_ptr_ex(properties, &pos)) != NULL) {
 				zend_string *prop_name;
-				ulong index;
+				php_uint_t index;
 
 				if (zend_hash_get_current_key_ex(properties, &prop_name, &index, 0, &pos) == HASH_KEY_IS_STRING) {
 					if (prop_name->len && prop_name->val[0]) { /* skip all private and protected properties */
@@ -611,7 +611,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 				{
 					zend_string *key;
-					ulong num_index;
+					php_uint_t num_index;
 					uint len = mptr->common.function_name->len;
 
 					/* Do not display old-style inherited constructors */
@@ -783,7 +783,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 static void _function_closure_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
 	zend_uint i, count;
-	ulong num_index;
+	php_uint_t num_index;
 	zend_string *key;
 	HashTable *static_variables;
 	HashPosition pos;
@@ -3352,7 +3352,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
 	zend_string *key;
-	ulong num_index;
+	php_uint_t num_index;
 
 	ZEND_HASH_FOREACH_KEY_PTR(&ce->properties_info, num_index, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_SHADOW) &&

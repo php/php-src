@@ -544,11 +544,11 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 	zend_string		 *subject;			/* String to match against */
 	pcre_cache_entry *pce;				/* Compiled regular expression */
 	zval			 *subpats = NULL;	/* Array for subpatterns */
-	long			  flags = 0;		/* Match control flags */
-	long			  start_offset = 0;	/* Where the new search starts */
+	php_int_t		  flags = 0;		/* Match control flags */
+	php_int_t		  start_offset = 0;	/* Where the new search starts */
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|z/ll", &regex,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|z/ii", &regex,
 							  &subject, &subpats, &flags, &start_offset) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1434,7 +1434,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 				    *subject_entry,
 				    *zcount = NULL;
 	int				 limit_val = -1;
-	long			 limit = -1;
+	php_int_t		 limit = -1;
 	zend_string		*result;
 	zend_string		*string_key;
 	ulong			 num_key;
@@ -1443,7 +1443,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	
 #ifndef FAST_ZPP
 	/* Get function parameters and do error-checking. */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|lz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|iz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
 		return;
 	}
 #else
@@ -1553,14 +1553,14 @@ static PHP_FUNCTION(preg_filter)
 static PHP_FUNCTION(preg_split)
 {
 	zend_string			*regex;			/* Regular expression */
-	zend_string				*subject;		/* String to match against */
-	long				 limit_val = -1;/* Integer value of limit */
-	long				 flags = 0;		/* Match control flags */
+	zend_string			*subject;		/* String to match against */
+	php_int_t			 limit_val = -1;/* Integer value of limit */
+	php_int_t			 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get function parameters and do error checking */	
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|ll", &regex,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|ii", &regex,
 							  &subject, &subject_len, &limit_val, &flags) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1862,12 +1862,12 @@ static PHP_FUNCTION(preg_grep)
 {
 	zend_string			*regex;			/* Regular expression */
 	zval				*input;			/* Input array */
-	long				 flags = 0;		/* Match control flags */
+	php_int_t			 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get arguments and do error checking */
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sa|l", &regex,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sa|i", &regex,
 							  &input, &flags) == FAILURE) {
 		return;
 	}

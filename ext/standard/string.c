@@ -1798,26 +1798,25 @@ PHP_FUNCTION(strstr)
 PHP_FUNCTION(strpos)
 {
 	zval *needle;
-	char *haystack;
+	zend_string *haystack;
 	char *found = NULL;
 	char  needle_char[2];
-	long  offset = 0;
-	int   haystack_len;
+	php_int_t  offset = 0;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &needle, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz|i", &haystack, &needle, &offset) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(haystack, haystack_len)
+		Z_PARAM_STR(haystack)
 		Z_PARAM_ZVAL(needle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	if (offset < 0 || offset > haystack_len) {
+	if (offset < 0 || offset > haystack->len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
@@ -1828,24 +1827,24 @@ PHP_FUNCTION(strpos)
 			RETURN_FALSE;
 		}
 
-		found = (char*)php_memnstr(haystack + offset,
+		found = (char*)php_memnstr(haystack->val + offset,
 			                Z_STRVAL_P(needle),
 			                Z_STRSIZE_P(needle),
-			                haystack + haystack_len);
+			                haystack->val + haystack->len);
 	} else {
 		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
 			RETURN_FALSE;
 		}
 		needle_char[1] = 0;
 
-		found = (char*)php_memnstr(haystack + offset,
+		found = (char*)php_memnstr(haystack->val + offset,
 							needle_char,
 							1,
-		                    haystack + haystack_len);
+		                    haystack->val + haystack->len);
 	}
 
 	if (found) {
-		RETURN_INT(found - haystack);
+		RETURN_INT(found - haystack->val);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1920,18 +1919,19 @@ PHP_FUNCTION(stripos)
 PHP_FUNCTION(strrpos)
 {
 	zval *zneedle;
-	char *needle, *haystack;
-	int needle_len, haystack_len;
-	long offset = 0;
+	char *needle;
+	zend_string *haystack;
+	php_size_t needle_len;
+	php_int_t offset = 0;
 	char *p, *e, ord_needle[2];
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &zneedle, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz|i", &haystack, &zneedle, &offset) == FAILURE) {
 		RETURN_FALSE;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(haystack, haystack_len)
+		Z_PARAM_STR(haystack)
 		Z_PARAM_ZVAL(zneedle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
@@ -1950,28 +1950,28 @@ PHP_FUNCTION(strrpos)
 		needle_len = 1;
 	}
 
-	if ((haystack_len == 0) || (needle_len == 0)) {
+	if ((haystack->len == 0) || (needle_len == 0)) {
 		RETURN_FALSE;
 	}
 
 	if (offset >= 0) {
-		if (offset > haystack_len) {
+		if (offset > haystack->len) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
-		p = haystack + offset;
-		e = haystack + haystack_len - needle_len;
+		p = haystack->val + offset;
+		e = haystack->val + haystack->len - needle_len;
 	} else {
-		if (offset < -INT_MAX || -offset > haystack_len) {
+		if (offset < -INT_MAX || -offset > haystack->len) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 
-		p = haystack;
+		p = haystack->val;
 		if (needle_len > -offset) {
-			e = haystack + haystack_len - needle_len;
+			e = haystack->val + haystack->len - needle_len;
 		} else {
-			e = haystack + haystack_len + offset;
+			e = haystack->val + haystack->len + offset;
 		}
 	}
 

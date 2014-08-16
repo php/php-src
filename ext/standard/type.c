@@ -138,13 +138,13 @@ PHP_FUNCTION(settype)
 PHP_FUNCTION(intval)
 {
 	zval *num;
-	long base = 10;
+	php_int_t base = 10;
 
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
 	}
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &num, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &num, &base) == FAILURE) {
 		return;
 	}
 #else

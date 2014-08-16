@@ -42,7 +42,7 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 
 PHPAPI long spl_offset_convert_to_int(zval *offset TSRMLS_DC) /* {{{ */
 {
-	ulong idx;
+	php_uint_t idx;
 
 	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
