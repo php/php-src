@@ -1,9 +1,5 @@
 --TEST--
 Test >> operator : various numbers as strings
---SKIPIF--
-<?php
-if ((65<<65)==0) die("skip this test is for Intel only");
-?>
 --FILE--
 <?php
 
@@ -56,7 +52,7 @@ int(0)
 --- testing: '65' >> '0' ---
 int(65)
 --- testing: '65' >> '65' ---
-int(32)
+int(0)
 --- testing: '65' >> '-44' ---
 bool(false)
 --- testing: '65' >> '1.2' ---
@@ -84,7 +80,7 @@ int(65)
 --- testing: '-44' >> '0' ---
 int(-44)
 --- testing: '-44' >> '65' ---
-int(-22)
+int(-1)
 --- testing: '-44' >> '-44' ---
 bool(false)
 --- testing: '-44' >> '1.2' ---
@@ -140,7 +136,7 @@ int(1)
 --- testing: '-7.7' >> '0' ---
 int(-7)
 --- testing: '-7.7' >> '65' ---
-int(-4)
+int(-1)
 --- testing: '-7.7' >> '-44' ---
 bool(false)
 --- testing: '-7.7' >> '1.2' ---
@@ -196,7 +192,7 @@ int(0)
 --- testing: '123abc' >> '0' ---
 int(123)
 --- testing: '123abc' >> '65' ---
-int(61)
+int(0)
 --- testing: '123abc' >> '-44' ---
 bool(false)
 --- testing: '123abc' >> '1.2' ---
@@ -224,7 +220,7 @@ int(123)
 --- testing: '123e5' >> '0' ---
 int(123)
 --- testing: '123e5' >> '65' ---
-int(61)
+int(0)
 --- testing: '123e5' >> '-44' ---
 bool(false)
 --- testing: '123e5' >> '1.2' ---
@@ -252,7 +248,7 @@ int(123)
 --- testing: '123e5xyz' >> '0' ---
 int(123)
 --- testing: '123e5xyz' >> '65' ---
-int(61)
+int(0)
 --- testing: '123e5xyz' >> '-44' ---
 bool(false)
 --- testing: '123e5xyz' >> '1.2' ---
@@ -280,7 +276,7 @@ int(123)
 --- testing: ' 123abc' >> '0' ---
 int(123)
 --- testing: ' 123abc' >> '65' ---
-int(61)
+int(0)
 --- testing: ' 123abc' >> '-44' ---
 bool(false)
 --- testing: ' 123abc' >> '1.2' ---
@@ -308,7 +304,7 @@ int(123)
 --- testing: '123 abc' >> '0' ---
 int(123)
 --- testing: '123 abc' >> '65' ---
-int(61)
+int(0)
 --- testing: '123 abc' >> '-44' ---
 bool(false)
 --- testing: '123 abc' >> '1.2' ---
@@ -336,7 +332,7 @@ int(123)
 --- testing: '123abc ' >> '0' ---
 int(123)
 --- testing: '123abc ' >> '65' ---
-int(61)
+int(0)
 --- testing: '123abc ' >> '-44' ---
 bool(false)
 --- testing: '123abc ' >> '1.2' ---
@@ -364,7 +360,7 @@ int(123)
 --- testing: '3.4a' >> '0' ---
 int(3)
 --- testing: '3.4a' >> '65' ---
-int(1)
+int(0)
 --- testing: '3.4a' >> '-44' ---
 bool(false)
 --- testing: '3.4a' >> '1.2' ---
