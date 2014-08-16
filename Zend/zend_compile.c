@@ -4008,7 +4008,7 @@ zend_uint zend_compile_args(zend_ast *ast, zend_function *fbc TSRMLS_DC) {
 			zend_compile_expr(&arg_node, arg TSRMLS_CC);
 			if (arg_node.op_type & (IS_VAR|IS_CV)) {
 				opcode = ZEND_SEND_VAR_NO_REF;
-				if (fbc && ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
+				if (fbc && ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
 					flags |= ZEND_ARG_SEND_BY_REF;
 				}
 			} else {
