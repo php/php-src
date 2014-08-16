@@ -585,7 +585,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	mysqli_object_handlers.write_property = mysqli_write_property;
 	mysqli_object_handlers.get_property_ptr_ptr = std_hnd->get_property_ptr_ptr;
 	mysqli_object_handlers.has_property = mysqli_object_has_property;
-#if PHP_VERSION_ID >= 53000
+#if PHP_VERSION_ID >= 50300
 	mysqli_object_handlers.get_debug_info = mysqli_object_get_debug_info;
 #endif
 	memcpy(&mysqli_object_driver_handlers, &mysqli_object_handlers, sizeof(zend_object_handlers));

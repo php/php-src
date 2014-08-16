@@ -30,7 +30,7 @@ static zend_class_entry *phar_ce_PharException;
 static zend_class_entry *phar_ce_entry;
 #endif
 
-#if PHP_VERSION_ID >= 53000
+#if PHP_VERSION_ID >= 50300
 # define PHAR_ARG_INFO
 #else
 # define PHAR_ARG_INFO static
