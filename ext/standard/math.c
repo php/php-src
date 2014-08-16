@@ -792,15 +792,27 @@ PHP_FUNCTION(log)
 	if (ZEND_NUM_ARGS() == 1) {
 		RETURN_DOUBLE(log(num));
 	}
+
+#ifdef HAVE_LOG2
+	if (base == 2.0) {
+		RETURN_DOUBLE(log2(num));
+	}
+#endif
+
+	if (base == 10.0) {
+		RETURN_DOUBLE(log10(num));
+	}
+
+	if (base == 1.0) {
+		RETURN_DOUBLE(php_get_nan());
+	}
+
 	if (base <= 0.0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "base must be greater than 0");				
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "base must be greater than 0");
 		RETURN_FALSE;
 	}
-	if (base == 1) {
-		RETURN_DOUBLE(php_get_nan());
-	} else {
-		RETURN_DOUBLE(log(num) / log(base));
-	}
+
+	RETURN_DOUBLE(log(num) / log(base));
 }
 /* }}} */
 
@@ -1406,7 +1418,28 @@ PHP_FUNCTION(fmod)
 }
 /* }}} */
 
-
+/* {{{ proto int intdiv(int numerator, int divisor)
+   Returns the integer division of the numerator by the divisor */
+PHP_FUNCTION(intdiv) 
+{
+	long numerator, divisor;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &numerator, &divisor) == FAILURE) {
+		return;
+	}
+	
+	if (divisor == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
+		RETURN_BOOL(0);
+	} else if (divisor == -1 && numerator == LONG_MIN) {
+		/* Prevent overflow error/crash 
+		   We don't return a float here as that violates function contract */
+		RETURN_LONG(0);
+	}
+	
+	RETURN_LONG(numerator/divisor);
+}
+/* }}} */ 
 
 /*
  * Local variables:

@@ -593,11 +593,25 @@ found:
 						ZVAL_COPY_VALUE(&garbage, Z_REFVAL_P(variable_ptr)); /* old value should be destroyed */
 
 						/* To check: can't *variable_ptr be some system variable like error_zval here? */
-						ZVAL_COPY_VALUE(Z_REFVAL_P(variable_ptr), value);
-						if (Z_REFCOUNTED_P(value) && Z_REFCOUNT_P(value) > 0) {
-							zval_copy_ctor(Z_REFVAL_P(variable_ptr));
+						if (UNEXPECTED(Z_REFCOUNTED_P(value))) {
+							if (EXPECTED(!Z_ISREF_P(value))) {
+								Z_ADDREF_P(value);
+							} else {
+								if (Z_REFCOUNT_P(value) == 1) {
+									ZVAL_UNREF(value);
+								} else {
+									value = Z_REFVAL_P(value);
+								}
+								if (Z_REFCOUNTED_P(value)) {
+									if (UNEXPECTED(Z_REFVAL_P(variable_ptr) == value)) {
+										goto exit;
+									}
+									Z_ADDREF_P(value);
+								}
+							}
 						}
-						zval_dtor(&garbage);
+						ZVAL_COPY_VALUE(Z_REFVAL_P(variable_ptr), value);
+						zval_ptr_dtor(&garbage);
 					} else {
 						zval garbage;
 
@@ -1455,6 +1469,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 found:
 			switch (has_set_exists) {
 				case 0:
+					ZVAL_DEREF(value);
 					result = (Z_TYPE_P(value) != IS_NULL);
 					break;
 				default:

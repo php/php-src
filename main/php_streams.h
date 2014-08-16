@@ -202,12 +202,10 @@ struct _php_stream  {
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
 	int fclose_stdiocast;
 	FILE *stdiocast;    /* cache this, otherwise we might leak! */
-#if ZEND_DEBUG
 	int __exposed;	/* non-zero if exposed as a zval somewhere */
-#endif
 	char *orig_path;
 
-	php_stream_context *context;
+	zend_resource *ctx;
 	int flags;	/* PHP_STREAM_FLAG_XXX */
 
 	/* buffer */
@@ -230,6 +228,9 @@ struct _php_stream  {
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
 }; /* php_stream */
 
+#define PHP_STREAM_CONTEXT(stream) \
+	((php_stream_context*) ((stream)->ctx ? ((stream)->ctx->ptr) : NULL))
+
 /* state definitions when closing down; these are private to streams.c */
 #define PHP_STREAM_FCLOSE_NONE 0
 #define PHP_STREAM_FCLOSE_FDOPEN	1
@@ -243,17 +244,12 @@ END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC TSRMLS_CC)
 
 #define php_stream_get_resource_id(stream)		((php_stream *)(stream))->res->handle
-#if ZEND_DEBUG
 /* use this to tell the stream that it is OK if we don't explicitly close it */
-# define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
+#define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
 /* use this to assign the stream to a zval and tell the stream that is
  * has been exported to the engine; it will expect to be closed automatically
  * when the resources are auto-destructed */
-# define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed++; }
-#else
-# define php_stream_auto_cleanup(stream)	/* nothing */
-# define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); }
-#endif
+#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed++; }
 
 #define php_stream_from_zval(xstr, pzval)	ZEND_FETCH_RESOURCE2((xstr), php_stream *, (pzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
 #define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource((pzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())

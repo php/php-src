@@ -628,6 +628,17 @@ static inline void *zend_hash_index_find_ptr(const HashTable *ht, ulong h)
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
+static inline void *zend_symtable_str_find_ptr(HashTable *ht, const char *str, int len)
+{
+	ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
+		return zend_hash_index_find_ptr(ht, idx);
+	} else {
+		return zend_hash_str_find_ptr(ht, str, len);
+	}
+}
+
 static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPosition *pos)
 {
 	zval *zv;

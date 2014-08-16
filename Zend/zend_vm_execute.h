@@ -3093,6 +3093,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				}
 			} else if (Z_IMMUTABLE_P(array_ptr)) {
 				zval_copy_ctor(array_ptr);
+			} else {
+				SEPARATE_ZVAL_NOREF(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -3844,6 +3846,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -4286,7 +4291,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		retval = EX_VAR(opline->result.var);
 		ZVAL_COPY_VALUE(retval, &c->value);
 		if (Z_OPT_COPYABLE_P(retval) || Z_OPT_REFCOUNTED_P(retval)) {
-			if (Z_OPT_COPYABLE_P(retval) && (c->flags & CONST_PERSISTENT)) {
+			if (Z_OPT_COPYABLE_P(retval)) {
 				zval_copy_ctor_func(retval);
 			} else {
 				Z_ADDREF_P(retval);
@@ -4603,7 +4608,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -6343,6 +6349,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -6987,7 +6996,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -7395,6 +7405,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -7846,7 +7859,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -9807,6 +9821,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				}
 			} else if (Z_IMMUTABLE_P(array_ptr)) {
 				zval_copy_ctor(array_ptr);
+			} else {
+				SEPARATE_ZVAL_NOREF(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -10587,6 +10603,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -11200,7 +11219,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -11968,7 +11988,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -12864,6 +12884,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -13101,7 +13124,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -13465,7 +13488,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -13873,6 +13897,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -14208,7 +14235,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -14818,7 +14846,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -16048,7 +16076,7 @@ static int ZEND_FASTCALL  ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			// This solution breaks the following test (emit warning message) ???
 			// ext/pdo_sqlite/tests/pdo_005.phpt
 #endif
-		    (!Z_ISREF_P(arg) && Z_REFCOUNT_P(arg) > 1)) {
+		    (!Z_ISREF_P(arg) /*&& Z_REFCOUNT_P(arg) > 1???*/)) {
 
 			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 
@@ -16444,6 +16472,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				}
 			} else if (Z_IMMUTABLE_P(array_ptr)) {
 				zval_copy_ctor(array_ptr);
+			} else {
+				SEPARATE_ZVAL_NOREF(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -17875,6 +17905,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -18593,7 +18626,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 		retval = EX_VAR(opline->result.var);
 		ZVAL_COPY_VALUE(retval, &c->value);
 		if (Z_OPT_COPYABLE_P(retval) || Z_OPT_REFCOUNTED_P(retval)) {
-			if (Z_OPT_COPYABLE_P(retval) && (c->flags & CONST_PERSISTENT)) {
+			if (Z_OPT_COPYABLE_P(retval)) {
 				zval_copy_ctor_func(retval);
 			} else {
 				Z_ADDREF_P(retval);
@@ -19038,7 +19071,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -19116,7 +19150,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -19135,6 +19170,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -21105,7 +21143,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -21124,6 +21163,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -22248,6 +22290,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -23383,7 +23428,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -23461,7 +23507,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -23480,6 +23527,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -24148,6 +24198,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -24710,7 +24763,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -26693,7 +26747,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -26712,6 +26767,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -27869,7 +27927,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 		retval = EX_VAR(opline->result.var);
 		ZVAL_COPY_VALUE(retval, &c->value);
 		if (Z_OPT_COPYABLE_P(retval) || Z_OPT_REFCOUNTED_P(retval)) {
-			if (Z_OPT_COPYABLE_P(retval) && (c->flags & CONST_PERSISTENT)) {
+			if (Z_OPT_COPYABLE_P(retval)) {
 				zval_copy_ctor_func(retval);
 			} else {
 				Z_ADDREF_P(retval);
@@ -28153,7 +28211,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -28172,6 +28231,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -29117,7 +29179,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDL
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -29432,7 +29494,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -29451,6 +29514,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -30398,7 +30464,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDL
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -30713,7 +30779,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -30732,6 +30799,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -32190,7 +32260,7 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLE
 	if (Z_TYPE_P(var) != IS_STRING) {
 		ZVAL_DEREF(var);
 		if (Z_TYPE_P(var) != IS_STRING) {
-			use_copy = zend_make_printable_zval(var, &var_copy);
+			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
 			if (use_copy) {
 				var = &var_copy;
@@ -32503,7 +32573,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -32522,6 +32593,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -33414,7 +33488,7 @@ static int ZEND_FASTCALL  ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			// This solution breaks the following test (emit warning message) ???
 			// ext/pdo_sqlite/tests/pdo_005.phpt
 #endif
-		    (!Z_ISREF_P(arg) && Z_REFCOUNT_P(arg) > 1)) {
+		    (!Z_ISREF_P(arg) /*&& Z_REFCOUNT_P(arg) > 1???*/)) {
 
 			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 
@@ -33795,6 +33869,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				}
 			} else if (Z_IMMUTABLE_P(array_ptr)) {
 				zval_copy_ctor(array_ptr);
+			} else {
+				SEPARATE_ZVAL_NOREF(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -35075,6 +35151,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -36024,7 +36103,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -36102,7 +36182,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -36121,6 +36202,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -38002,7 +38086,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -38021,6 +38106,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -39143,6 +39231,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -40160,7 +40251,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -40238,7 +40330,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -40257,6 +40350,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
@@ -40923,6 +41019,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
+			ZVAL_UNREF(retval);
+		}
 		ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	} else {
 		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
@@ -41369,7 +41468,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 	}
 
 	if (opline->extended_value & ZEND_ISSET) {
-		if (isset && Z_TYPE_P(value) != IS_NULL) {
+		if (isset && Z_TYPE_P(value) != IS_NULL &&
+		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL)) {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 1);
 		} else {
 			ZVAL_BOOL(EX_VAR(opline->result.var), 0);
@@ -43214,7 +43314,8 @@ num_index_prop:
 
 		if (opline->extended_value & ZEND_ISSET) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
-			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
+			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
+			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
@@ -43233,6 +43334,9 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_DEREF(offset);
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {

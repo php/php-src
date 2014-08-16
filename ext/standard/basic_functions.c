@@ -1758,6 +1758,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_fmod, 0)
 	ZEND_ARG_INFO(0, x)
 	ZEND_ARG_INFO(0, y)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_intdiv, 0)
+	ZEND_ARG_INFO(0, numerator)
+	ZEND_ARG_INFO(0, divisor)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ md5.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_md5, 0, 0, 1)
@@ -2635,7 +2640,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_serialize, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_unserialize, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_unserialize, 0)
 	ZEND_ARG_INFO(0, variable_representation)
 ZEND_END_ARG_INFO()
 
@@ -2894,6 +2899,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(base_convert,													arginfo_base_convert)
 	PHP_FE(number_format,													arginfo_number_format)
 	PHP_FE(fmod,															arginfo_fmod)
+	PHP_FE(intdiv,															arginfo_intdiv)
 #ifdef HAVE_INET_NTOP
 	PHP_RAW_NAMED_FE(inet_ntop,		php_inet_ntop,								arginfo_inet_ntop)
 #endif

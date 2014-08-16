@@ -439,14 +439,13 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 			ZVAL_STRING(return_value, (char *)mysql_get_host_info(H->server));
 			break;
 		case PDO_ATTR_SERVER_INFO: {
-			char *tmp;
 #if defined(PDO_USE_MYSQLND)
-			unsigned int tmp_len;
+			zend_string *tmp;
 
-			if (mysqlnd_stat(H->server, &tmp, &tmp_len) == PASS) {
-				ZVAL_STRINGL(return_value, tmp, tmp_len);
-				efree(tmp);
+			if (mysqlnd_stat(H->server, &tmp) == PASS) {
+				ZVAL_STR(return_value, tmp);
 #else
+			char *tmp;
 			if ((tmp = (char *)mysql_stat(H->server))) {
 				ZVAL_STRING(return_value, tmp);
 #endif

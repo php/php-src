@@ -285,7 +285,6 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 {
 	/* create an instance of our class */
 	object_init_ex(object, uwrap->ce);
-//???	Z_SET_ISREF_P(object);
 
 	if (context) {
 		add_property_resource(object, "context", context->res);
@@ -385,8 +384,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 		stream = php_stream_alloc_rel(&php_stream_userspace_ops, us, 0, mode);
 
 		/* if the opened path is set, copy it out */
-		if (Z_ISREF(args[4]) && Z_TYPE_P(Z_REFVAL(args[4])) == IS_STRING && opened_path) {
-			*opened_path = estrndup(Z_STRVAL_P(Z_REFVAL(args[4])), Z_STRLEN_P(Z_REFVAL(args[4])));
+		if (Z_ISREF(args[3]) && Z_TYPE_P(Z_REFVAL(args[3])) == IS_STRING && opened_path) {
+			*opened_path = estrndup(Z_STRVAL_P(Z_REFVAL(args[3])), Z_STRLEN_P(Z_REFVAL(args[3])));
 		}
 
 		/* set wrapper data to be a reference to our object */
@@ -1121,7 +1120,6 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	zval_ptr_dtor(&zretval);
 	zval_ptr_dtor(&zfuncname);
 
-	zval_ptr_dtor(&args[1]);
 	zval_ptr_dtor(&args[0]);
 
 	return ret;

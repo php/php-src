@@ -231,9 +231,11 @@ ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #ifdef ZTS
-static int zend_ini_refresh_cache(zval *el, int stage TSRMLS_DC) /* {{{ */
+static int zend_ini_refresh_cache(zval *el, void *arg TSRMLS_DC) /* {{{ */
 {
 	zend_ini_entry *p = (zend_ini_entry *)Z_PTR_P(el);
+	int stage = (int)(zend_intptr_t)arg;
+
 	if (p->on_modify) {
 		p->on_modify(p, p->value, p->value_length, p->mh_arg1, p->mh_arg2, p->mh_arg3, stage TSRMLS_CC);
 	}

@@ -433,16 +433,18 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 
 	if (!resolved_path) {
 		if (SG(request_info).path_translated != filename) {
-//???			STR_FREE(filename);
-			if (filename) efree(filename);
+			if (filename) {
+				efree(filename);
+			}
 		}
 		/* we have to free SG(request_info).path_translated here because
 		 * php_destroy_request_info assumes that it will get
 		 * freed when the include_names hash is emptied, but
 		 * we're not adding it in this case */
-//???		STR_FREE(SG(request_info).path_translated);
-		if (SG(request_info).path_translated) efree(SG(request_info).path_translated);
-		SG(request_info).path_translated = NULL;
+		if (SG(request_info).path_translated) {
+			efree(SG(request_info).path_translated);
+			SG(request_info).path_translated = NULL;
+		}
 		return FAILURE;
 	}
 	efree(resolved_path);
@@ -452,19 +454,22 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 	if (zend_stream_open(filename, file_handle TSRMLS_CC) == FAILURE) {
 		PG(display_errors) = orig_display_errors;
 		if (SG(request_info).path_translated != filename) {
-//???			STR_FREE(filename);
-			if (filename) efree(filename);
+			if (filename) {
+				efree(filename);
+			}
 		}
-//???		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
-		if (SG(request_info).path_translated) efree(SG(request_info).path_translated);
-		SG(request_info).path_translated = NULL;
+		if (SG(request_info).path_translated) {
+			efree(SG(request_info).path_translated);
+			SG(request_info).path_translated = NULL;
+		}
 		return FAILURE;
 	}
 	PG(display_errors) = orig_display_errors;
 
 	if (SG(request_info).path_translated != filename) {
-//???		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
-		if (SG(request_info).path_translated) efree(SG(request_info).path_translated);
+		if (SG(request_info).path_translated) {
+			efree(SG(request_info).path_translated);
+		}
 		SG(request_info).path_translated = filename;
 	}
 

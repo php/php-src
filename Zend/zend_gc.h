@@ -74,9 +74,10 @@
 	GC_SET_PURPLE(Z_GC_INFO_P(v))
 
 typedef struct _gc_root_buffer {
-	struct _gc_root_buffer   *prev;		/* double-linked list               */
-	struct _gc_root_buffer   *next;
 	zend_refcounted          *ref;
+	struct _gc_root_buffer   *next;     /* double-linked list               */
+	struct _gc_root_buffer   *prev;
+	zend_uint                 refcount;
 } gc_root_buffer;
 
 typedef struct _zend_gc_globals {

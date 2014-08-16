@@ -290,7 +290,7 @@ static int le_xml_parser;
 /* {{{ startup, shutdown and info functions */
 static PHP_GINIT_FUNCTION(xml)
 {
-	xml_globals->default_encoding = "UTF-8";
+	xml_globals->default_encoding = (XML_Char*)"UTF-8";
 }
 
 static void *php_xml_malloc_wrapper(size_t sz)
@@ -727,11 +727,13 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 			array_init(&args[2]);
 
 			while (attributes && *attributes) {
+				zval tmp;
+
 				att = _xml_decode_tag(parser, (const char *)attributes[0]);
 				val = xml_utf8_decode(attributes[1], strlen((char *)attributes[1]), parser->target_encoding);
 
-				// TODO: avoid reallocation ???
-				add_assoc_str(&args[2], att->val, val);
+				ZVAL_STR(&tmp, val);
+				zend_symtable_update(Z_ARRVAL(args[2]), att, &tmp);
 
 				attributes += 2;
 
@@ -762,11 +764,13 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 				attributes = (const XML_Char **) attrs;
 
 				while (attributes && *attributes) {
+					zval tmp;
+
 					att = _xml_decode_tag(parser, (const char *)attributes[0]);
 					val = xml_utf8_decode(attributes[1], strlen((char *)attributes[1]), parser->target_encoding);
 
-					// TODO: avoid reallocation ???
-					add_assoc_str(&atr, att->val, val);
+					ZVAL_STR(&tmp, val);
+					zend_symtable_update(Z_ARRVAL(atr), att, &tmp);
 
 					atcnt++;
 					attributes += 2;
@@ -889,7 +893,6 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 								decoded_value->val, decoded_value->len + 1);
 						STR_RELEASE(decoded_value);
 					} else {
-						// TODO: avoid reallocation ???
 						add_assoc_str(parser->ctag, "value", decoded_value);
 					}
 					
@@ -919,7 +922,6 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 						_xml_add_to_info(parser,parser->ltags[parser->level-1] + parser->toffset);
 
 						add_assoc_string(&tag, "tag", parser->ltags[parser->level-1] + parser->toffset);
-						// TODO: avoid reallocation ???
 						add_assoc_str(&tag, "value", decoded_value);
 						add_assoc_string(&tag, "type", "cdata");
 						add_assoc_long(&tag, "level", parser->level);
@@ -1109,11 +1111,11 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 			encoding = XML(default_encoding);
 			auto_detect = 1;
 		} else if (strcasecmp(encoding_param, "ISO-8859-1") == 0) {
-			encoding = "ISO-8859-1";
+			encoding = (XML_Char*)"ISO-8859-1";
 		} else if (strcasecmp(encoding_param, "UTF-8") == 0) {
-			encoding = "UTF-8";
+			encoding = (XML_Char*)"UTF-8";
 		} else if (strcasecmp(encoding_param, "US-ASCII") == 0) {
-			encoding = "US-ASCII";
+			encoding = (XML_Char*)"US-ASCII";
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unsupported source encoding \"%s\"", encoding_param);
 			RETURN_FALSE;
@@ -1128,7 +1130,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 
 	parser = ecalloc(1, sizeof(xml_parser));
 	parser->parser = XML_ParserCreate_MM((auto_detect ? NULL : encoding),
-                                         &php_xml_mem_hdlrs, ns_param);
+                                         &php_xml_mem_hdlrs, (XML_Char*)ns_param);
 
 	parser->target_encoding = encoding;
 	parser->case_folding = 1;
@@ -1372,7 +1374,7 @@ PHP_FUNCTION(xml_parse)
 	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
 	parser->isparsing = 1;
-	ret = XML_Parse(parser->parser, data, data_len, isFinal);
+	ret = XML_Parse(parser->parser, (XML_Char*)data, data_len, isFinal);
 	parser->isparsing = 0;
 	RETVAL_LONG(ret);
 }
@@ -1417,7 +1419,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 
 	parser->isparsing = 1;
-	ret = XML_Parse(parser->parser, data, data_len, 1);
+	ret = XML_Parse(parser->parser, (XML_Char*)data, data_len, 1);
 	parser->isparsing = 0;
 
 	RETVAL_LONG(ret);
@@ -1566,7 +1568,7 @@ PHP_FUNCTION(xml_parser_set_option)
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			xml_encoding *enc;
 			convert_to_string_ex(val);
-			enc = xml_get_encoding(Z_STRVAL_P(val));
+			enc = xml_get_encoding((XML_Char*)Z_STRVAL_P(val));
 			if (enc == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported target encoding \"%s\"", Z_STRVAL_P(val));
 				RETURN_FALSE;
@@ -1625,7 +1627,7 @@ PHP_FUNCTION(utf8_encode)
 		return;
 	}
 
-	encoded = xml_utf8_encode(arg, arg_len, "ISO-8859-1");
+	encoded = xml_utf8_encode(arg, arg_len, (XML_Char*)"ISO-8859-1");
 	if (encoded == NULL) {
 		RETURN_FALSE;
 	}
@@ -1645,7 +1647,7 @@ PHP_FUNCTION(utf8_decode)
 		return;
 	}
 
-	decoded = xml_utf8_decode(arg, arg_len, "ISO-8859-1");
+	decoded = xml_utf8_decode((XML_Char*)arg, arg_len, (XML_Char*)"ISO-8859-1");
 	if (decoded == NULL) {
 		RETURN_FALSE;
 	}

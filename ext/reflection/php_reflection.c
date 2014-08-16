@@ -722,9 +722,14 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 		zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
 		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
 			zval zv;
+			zend_class_entry *old_scope;
+
 			string_write(str, " = ", sizeof(" = ")-1);
 			ZVAL_DUP(&zv, precv->op2.zv);
-			zval_update_constant_ex(&zv, 1, fptr->common.scope TSRMLS_CC);
+			old_scope = EG(scope);
+			EG(scope) = fptr->common.scope;
+			zval_update_constant_ex(&zv, 1, NULL TSRMLS_CC);
+			EG(scope) = old_scope;
 			if (Z_TYPE(zv) == IS_TRUE) {
 				string_write(str, "true", sizeof("true")-1);
 			} else if (Z_TYPE(zv) == IS_FALSE) {
@@ -1794,8 +1799,7 @@ ZEND_METHOD(reflection_function, getFileName)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
-// TODO: we have to duplicate it, becaise it may be in opcache SHM ???
-		RETURN_STR(STR_DUP(fptr->op_array.filename, 0));
+		RETURN_STR(STR_COPY(fptr->op_array.filename));
 	}
 	RETURN_FALSE;
 }
@@ -1849,8 +1853,7 @@ ZEND_METHOD(reflection_function, getDocComment)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
-// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
-		RETURN_STR(STR_DUP(fptr->op_array.doc_comment, 0));
+		RETURN_STR(STR_COPY(fptr->op_array.doc_comment));
 	}
 	RETURN_FALSE;
 }
@@ -2578,7 +2581,11 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 
 	ZVAL_COPY_VALUE(return_value, precv->op2.zv);
 	if (Z_CONSTANT_P(return_value)) {
-		zval_update_constant_ex(return_value, 0, param->fptr->common.scope TSRMLS_CC);
+		zend_class_entry *old_scope = EG(scope);
+
+		EG(scope) = param->fptr->common.scope;
+		zval_update_constant_ex(return_value, 0, NULL TSRMLS_CC);
+		EG(scope) = old_scope;
 	} else {
 		zval_copy_ctor(return_value);
 	}
@@ -3342,16 +3349,12 @@ ZEND_METHOD(reflection_class, __construct)
 /* {{{ add_class_vars */
 static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value TSRMLS_DC)
 {
-	HashPosition pos;
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
 	zend_string *key;
 	ulong num_index;
 
-	zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
-	while ((prop_info = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL) {
-		zend_hash_get_current_key_ex(&ce->properties_info, &key, &num_index, 0, &pos);
-		zend_hash_move_forward_ex(&ce->properties_info, &pos);
+	ZEND_HASH_FOREACH_KEY_PTR(&ce->properties_info, num_index, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_SHADOW) &&
 		     prop_info->ce != ce) ||
 		    ((prop_info->flags & ZEND_ACC_PROTECTED) &&
@@ -3373,6 +3376,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		}
 
 		/* copy: enforce read only access */
+		ZVAL_DEREF(prop);
 		ZVAL_DUP(&prop_copy, prop);
 
 		/* this is necessary to make it able to work with default array
@@ -3382,7 +3386,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		}
 
 		zend_hash_update(Z_ARRVAL_P(return_value), key, &prop_copy);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -3445,8 +3449,6 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	zend_class_entry *ce;
 	zend_string *name;
 	zval *variable_ptr, *value;
-//???	int refcount;
-//???	zend_uchar is_ref;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &name, &value) == FAILURE) {
 		return;
@@ -3461,13 +3463,8 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 				"Class %s does not have a property named %s", ce->name->val, name->val);
 		return;
 	}
-//???	refcount = Z_REFCOUNT_PP(variable_ptr);
-//???	is_ref = Z_ISREF_PP(variable_ptr);
-	zval_dtor(variable_ptr);
-	ZVAL_DUP(variable_ptr, value);
-//???	Z_SET_REFCOUNT_PP(variable_ptr, refcount);
-//???	Z_SET_ISREF_TO_PP(variable_ptr, is_ref);
-
+	zval_ptr_dtor(variable_ptr);
+	ZVAL_COPY(variable_ptr, value);
 }
 /* }}} */
 
@@ -3560,8 +3557,7 @@ ZEND_METHOD(reflection_class, getFileName)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
-// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
-		RETURN_STR(STR_DUP(ce->info.user.filename, 0));
+		RETURN_STR(STR_COPY(ce->info.user.filename));
 	}
 	RETURN_FALSE;
 }
@@ -4254,8 +4250,8 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (ce->create_object != NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s is an internal class that cannot be instantiated without invoking its constructor", ce->name->val);
+	if (ce->create_object != NULL && ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ce->name->val);
 	}
 
 	object_init_ex(return_value, ce);

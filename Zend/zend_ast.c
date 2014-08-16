@@ -173,7 +173,6 @@ static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr TS
 			break;
 		case IS_STRING:
 			zend_symtable_update(Z_ARRVAL_P(result), Z_STR_P(offset), expr);
-//???
 			zval_dtor(offset);
 			break;
 		case IS_NULL:
@@ -234,11 +233,22 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			break;
 		}
 		case ZEND_AST_ZVAL:
-			ZVAL_DUP(result, zend_ast_get_zval(ast));
-			if (Z_OPT_CONSTANT_P(result)) {
-				zval_update_constant_ex(result, 1, scope TSRMLS_CC);
+		{
+			zval *zv = zend_ast_get_zval(ast);
+			if (scope) {
+				/* class constants may be updated in-place */
+				if (Z_OPT_CONSTANT_P(zv)) {
+					zval_update_constant_ex(zv, 1, scope TSRMLS_CC);
+				}
+				ZVAL_DUP(result, zv);
+			} else {
+				ZVAL_DUP(result, zv);
+				if (Z_OPT_CONSTANT_P(result)) {
+					zval_update_constant_ex(result, 1, scope TSRMLS_CC);
+				}
 			}
 			break;
+		}
 		case ZEND_AST_AND:
 			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
 			if (zend_is_true(&op1 TSRMLS_CC)) {
@@ -304,20 +314,17 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 				}
 			}
 			break;
-//???
-#if 0
 		case ZEND_FETCH_DIM_R:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
+			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->child[1], scope TSRMLS_CC);
 			{
-				zval *tmp;
+				zval tmp;
 				zend_fetch_dimension_by_zval(&tmp, &op1, &op2 TSRMLS_CC);
-				ZVAL_ZVAL(result, tmp, 1, 1);
+				ZVAL_ZVAL(result, &tmp, 1, 1);
 			}
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
-#endif
 		default:
 			zend_error(E_ERROR, "Unsupported constant expression");
 	}

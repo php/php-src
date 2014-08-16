@@ -719,7 +719,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 		ftime /= 10000000L;
 
 		if (size) {
-			*size = (size_t)(((unsigned __int64)fdata.nFileSizeHigh) << 32 + (unsigned __int64)fdata.nFileSizeLow);
+			*size = (size_t)((((unsigned __int64)fdata.nFileSizeHigh) << 32) + (unsigned __int64)fdata.nFileSizeLow);
 		}
 		return (accel_time_t)ftime;
 	}
@@ -1650,6 +1650,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 
 	/* If script was not found or invalidated by validate_timestamps */
 	if (!persistent_script) {
+		zend_uint old_const_num = zend_hash_next_free_element(EG(zend_constants));
 		zend_op_array *op_array;
 
 		/* Cache miss.. */
@@ -1673,6 +1674,14 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 		if (!persistent_script) {
 			SHM_PROTECT();
 			return op_array;
+		}
+		if (from_shared_memory) {
+			/* Delete immutable arrays moved into SHM */
+			zend_uint new_const_num = zend_hash_next_free_element(EG(zend_constants));
+			while (new_const_num > old_const_num) {
+				new_const_num--;
+				zend_hash_index_del(EG(zend_constants), new_const_num);
+			}
 		}
 	} else {
 

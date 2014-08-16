@@ -212,7 +212,7 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy) /* {{{ */
+ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy TSRMLS_DC) /* {{{ */
 {
 	if (Z_TYPE_P(expr) == IS_STRING) {
 		return 0;
@@ -221,15 +221,16 @@ ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy) /* {{{ */
 again:
 	switch (Z_TYPE_P(expr)) {
 		case IS_NULL:
-		case IS_FALSE: {
-			TSRMLS_FETCH();
+		case IS_FALSE:
 			ZVAL_EMPTY_STRING(expr_copy);
-			break;
-		}
+		    break;
 		case IS_TRUE:
-			// TODO: use interned string ???
-			ZVAL_NEW_STR(expr_copy, STR_INIT("1", 1, 0));
-			break;
+		    if (CG(one_char_string)['1']) {
+				ZVAL_INT_STR(expr_copy, CG(one_char_string)['1']);
+			} else {
+				ZVAL_NEW_STR(expr_copy, STR_INIT("1", 1, 0));
+			}
+		    break;
 		case IS_RESOURCE: {
 				char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
 				int len;
@@ -244,35 +245,31 @@ again:
 			ZVAL_NEW_STR(expr_copy, STR_INIT("Array", sizeof("Array") - 1, 0));
 			break;
 		case IS_OBJECT:
-			{
-				TSRMLS_FETCH();
-
-				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
-					Z_ADDREF_P(expr);
-					if (Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-						zval_ptr_dtor(expr);
-						break;
-					}
+			if (Z_OBJ_HANDLER_P(expr, cast_object)) {
+				Z_ADDREF_P(expr);
+				if (Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 					zval_ptr_dtor(expr);
+					break;
 				}
-				if (!Z_OBJ_HANDLER_P(expr, cast_object) && Z_OBJ_HANDLER_P(expr, get)) {
-					zval rv;
-					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr, &rv TSRMLS_CC);
-
-					Z_ADDREF_P(z);
-					if (Z_TYPE_P(z) != IS_OBJECT) {
-						if (zend_make_printable_zval(z, expr_copy)) {
-							zval_ptr_dtor(z);
-						} else {
-							ZVAL_ZVAL(expr_copy, z, 0, 1);
-						}
-						return 1;
-					}
-					zval_ptr_dtor(z);
-				}
-				zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name->val);
-				ZVAL_EMPTY_STRING(expr_copy);
+				zval_ptr_dtor(expr);
 			}
+			if (!Z_OBJ_HANDLER_P(expr, cast_object) && Z_OBJ_HANDLER_P(expr, get)) {
+				zval rv;
+				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr, &rv TSRMLS_CC);
+
+				Z_ADDREF_P(z);
+				if (Z_TYPE_P(z) != IS_OBJECT) {
+					if (zend_make_printable_zval(z, expr_copy TSRMLS_CC)) {
+						zval_ptr_dtor(z);
+					} else {
+						ZVAL_ZVAL(expr_copy, z, 0, 1);
+					}
+					return 1;
+				}
+				zval_ptr_dtor(z);
+			}
+			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name->val);
+			ZVAL_EMPTY_STRING(expr_copy);
 			break;
 		case IS_DOUBLE:
 			ZVAL_DUP(expr_copy, expr);
@@ -540,7 +537,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 		free(compiler_globals->static_members_table);
 	}
 	if (compiler_globals->script_encoding_list) {
-		pefree(compiler_globals->script_encoding_list, 1);
+		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
 }

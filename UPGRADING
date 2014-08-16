@@ -28,6 +28,8 @@ PHP X.Y UPGRADE NOTES
 2. New Features
 ========================================
 
+- Standard
+  . intdiv() function for integer division added.
 
 ========================================
 3. Changes in SAPI modules
@@ -68,6 +70,8 @@ PHP X.Y UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Core
+  . PHP_INT_MIN added.
 
 ========================================
 11. Changes to INI File Handling

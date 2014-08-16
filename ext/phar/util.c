@@ -1510,11 +1510,6 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			pfp = php_stream_open_wrapper(pfile, "rb", 0, NULL);
 			efree(pfile);
 
-//???#if PHP_MAJOR_VERSION > 5
-//???			if (!pfp || !(pubkey_len = php_stream_copy_to_mem(pfp, (void **) &pubkey, PHP_STREAM_COPY_ALL, 0)) || !pubkey) {
-//???#else
-//???			if (!pfp || !(pubkey_len = php_stream_copy_to_mem(pfp, &pubkey, PHP_STREAM_COPY_ALL, 0)) || !pubkey) {
-//???#endif
 			if (!pfp || !(pubkey = php_stream_copy_to_mem(pfp, PHP_STREAM_COPY_ALL, 0)) || !pubkey->len) {
 				if (pfp) {
 					php_stream_close(pfp);

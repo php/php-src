@@ -641,10 +641,9 @@ PHP_RINIT_FUNCTION(mysql)
 /* }}} */
 
 #if defined(A0) && defined(MYSQL_USE_MYSQLND)
-static int php_mysql_persistent_helper(zval *el;zend_rsrc_list_entry *le TSRMLS_DC)
+static int php_mysql_persistent_helper(zval *el TSRMLS_DC)
 {
-	//???
-	//zend_rsrc_list_entry *le = (zend_rsrc_list_entry*)Z_PTR_P(el);
+	zend_resource *le = (zend_resource *)Z_PTR_P(el);
 	if (le->type == le_plink) {
 		mysqlnd_end_psession(((php_mysql_conn *) le->ptr)->conn);
 	}
@@ -1310,10 +1309,12 @@ PHP_FUNCTION(mysql_stat)
 {
 	php_mysql_conn *mysql;
 	zval *mysql_link = NULL;
+#ifndef MYSQL_USE_MYSQLND
 	char *stat;
-#ifdef MYSQL_USE_MYSQLND
-	uint stat_len;
+#else
+	zend_string *stat;
 #endif
+
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &mysql_link) == FAILURE) {
 		return;
@@ -1332,10 +1333,8 @@ PHP_FUNCTION(mysql_stat)
 	if ((stat = (char *)mysql_stat(mysql->conn))) {
 		RETURN_STRING(stat);
 #else
-	if (mysqlnd_stat(mysql->conn, &stat, &stat_len) == PASS) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL(stat, stat_len);
-		efree(stat);
+	if (mysqlnd_stat(mysql->conn, &stat) == PASS) {
+		RETURN_STR(stat);
 #endif
 	} else {
 		RETURN_FALSE;

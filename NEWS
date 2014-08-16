@@ -7,12 +7,17 @@ PHP                                                                        NEWS
     (Adam)
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
+- Core:
+  . Added PHP_INT_MIN constant. (Andrea)
+
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
 
 - Standard:
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)
   . Fix user session handlers (See rfc:session.user.return-value). (Sara)
+  . Added intdiv() function. (Andrea)
+  . Improved precision of log() function for base 2 and 10. (Marc Bennewitz)
 
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)

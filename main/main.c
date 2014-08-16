@@ -1192,10 +1192,19 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		case E_USER_ERROR:
 		{ /* new block to allow variable definition */
 			/* eval() errors do not affect exit_status or response code */
-			zend_bool during_eval = (type == E_PARSE) && (EG(current_execute_data) &&
-						EG(current_execute_data)->opline &&
-						EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
-						EG(current_execute_data)->opline->extended_value == ZEND_EVAL);
+			zend_bool during_eval = 0;
+			
+			if (type == E_PARSE) {
+				zend_execute_data *execute_data = EG(current_execute_data);
+
+				while (execute_data && (!execute_data->func || !ZEND_USER_CODE(execute_data->func->common.type))) {
+					execute_data = execute_data->prev_execute_data;
+				}
+
+				during_eval = (execute_data &&
+					execute_data->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
+					execute_data->opline->extended_value == ZEND_EVAL);
+			}
 			if (!during_eval) {
 				EG(exit_status) = 255;
 			}
@@ -2201,6 +2210,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_EOL", PHP_EOL, sizeof(PHP_EOL)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_MAXPATHLEN", MAXPATHLEN, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MAX", LONG_MAX, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MIN", LONG_MIN, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_SIZE", sizeof(long), CONST_PERSISTENT | CONST_CS);
 
 #ifdef PHP_WIN32
@@ -2493,7 +2503,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 
 #ifdef PHP_WIN32
 		if(primary_file->filename) {
-			UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+			UpdateIniFromRegistry((char*)primary_file->filename TSRMLS_CC);
 		}
 #endif
 
@@ -2585,7 +2595,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret T
 	zend_try {
 #ifdef PHP_WIN32
 		if(primary_file->filename) {
-			UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+			UpdateIniFromRegistry((char*)primary_file->filename TSRMLS_CC);
 		}
 #endif
 

@@ -63,9 +63,11 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 		return;
 
 	/* Update current hash item with the converted value. */
-	ZVAL_STRINGL( &znew_val, (char*)new_val, UBYTES(new_val_len) );
+	ZVAL_STRINGL( &znew_val, (char*)new_val, UBYTES(new_val_len + 1) );
 	//???
 	efree(new_val);
+	/* hack to fix use of initialized value */
+	Z_STRLEN(znew_val) = Z_STRLEN(znew_val) - UBYTES(1);
 
 	if( hashKey)
 	{
@@ -390,7 +392,7 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
  *
  * @return zval* UTF16 string.
  */
-zval* collator_make_printable_zval( zval* arg, zval *rv )
+zval* collator_make_printable_zval( zval* arg, zval *rv)
 {
 	zval arg_copy;
 	int use_copy = 0;
@@ -398,7 +400,9 @@ zval* collator_make_printable_zval( zval* arg, zval *rv )
 
 	if( Z_TYPE_P(arg) != IS_STRING )
 	{
-		use_copy = zend_make_printable_zval(arg, &arg_copy);
+	    TSRMLS_FETCH();
+	    
+		use_copy = zend_make_printable_zval(arg, &arg_copy TSRMLS_CC);
 
 		if( use_copy )
 		{

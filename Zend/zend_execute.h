@@ -115,9 +115,6 @@ again:
 						result = Z_TYPE(tmp) == IS_TRUE;
 						break;
 					}
-
-					// TODO: do we really need this warning ???
-					// Nikita, add your comments here.
 					zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to boolean", Z_OBJ_P(op)->ce->name->val);
 				} else if (Z_OBJ_HT_P(op)->get) {
 					zval rv;
@@ -288,6 +285,8 @@ ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type TSRMLS_DC);
 ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
+
+ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *dim TSRMLS_DC);
 
 #ifdef ZEND_WIN32
 void zend_init_timeout_thread(void);

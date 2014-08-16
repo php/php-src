@@ -1137,6 +1137,22 @@ static void init_request_info(TSRMLS_D)
 				TRANSLATE_SLASHES(env_document_root);
 			}
 
+			if (!apache_was_here && env_path_translated != NULL && env_redirect_url != NULL &&
+			    env_path_translated != script_path_translated &&
+			    strcmp(env_path_translated, script_path_translated) != 0) {
+				/*
+				 * pretty much apache specific.  If we have a redirect_url
+				 * then our script_filename and script_name point to the
+				 * php executable
+				 * we don't want to do this for the new mod_proxy_fcgi approach,
+				 * where redirect_url may also exist but the below will break
+				 * with rewrites to PATH_INFO, hence the !apache_was_here check
+				 */
+				script_path_translated = env_path_translated;
+				/* we correct SCRIPT_NAME now in case we don't have PATH_INFO */
+				env_script_name = env_redirect_url;
+			}
+
 #ifdef __riscos__
 			/* Convert path to unix format*/
 			__riscosify_control |= __RISCOSIFY_DONT_CHECK_DIR;
@@ -1313,6 +1329,18 @@ static void init_request_info(TSRMLS_D)
 						_sapi_cgibin_putenv("ORIG_SCRIPT_FILENAME", orig_script_filename TSRMLS_CC);
 					}
 					script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME", script_path_translated TSRMLS_CC);
+				}
+				if (!apache_was_here && env_redirect_url) {
+					/* if we used PATH_TRANSLATED to work around Apache mod_fastcgi (but not mod_proxy_fcgi,
+					 * hence !apache_was_here) weirdness, strip info accordingly */
+					if (orig_path_info) {
+						_sapi_cgibin_putenv("ORIG_PATH_INFO", orig_path_info TSRMLS_CC);
+						_sapi_cgibin_putenv("PATH_INFO", NULL TSRMLS_CC);
+					}
+					if (orig_path_translated) {
+						_sapi_cgibin_putenv("ORIG_PATH_TRANSLATED", orig_path_translated TSRMLS_CC);
+						_sapi_cgibin_putenv("PATH_TRANSLATED", NULL TSRMLS_CC);
+					}
 				}
 				if (env_script_name != orig_script_name) {
 					if (orig_script_name) {

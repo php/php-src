@@ -149,7 +149,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(getThis()),"service", sizeof("service")-1)) != NULL) { \
 			ss = (soapServicePtr)zend_fetch_resource(tmp TSRMLS_CC, -1, "service", NULL, 1, le_service); \
 		} else { \
-			ss = NULL; \
+	                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not fetch service object"); \
+			SOAP_SERVER_END_CODE(); \
+			return; \
 		} \
 	}
 
@@ -926,8 +928,7 @@ PHP_METHOD(SoapFault, SoapFault)
 PHP_METHOD(SoapFault, __toString)
 {
 	zval *faultcode, *faultstring, *file, *line, trace;
-	char *str;
-	int len;
+	zend_string *str;
 	zend_fcall_info fci;
 	zval *this_ptr;
 
@@ -955,15 +956,13 @@ PHP_METHOD(SoapFault, __toString)
 
 	zval_ptr_dtor(&fci.function_name);
 
-	len = spprintf(&str, 0, "SoapFault exception: [%s] %s in %s:%ld\nStack trace:\n%s",
+	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:%ld\nStack trace:\n%s",
 	               Z_STRVAL_P(faultcode), Z_STRVAL_P(faultstring), Z_STRVAL_P(file), Z_LVAL_P(line),
 	               Z_STRLEN(trace) ? Z_STRVAL(trace) : "#0 {main}\n");
 
 	zval_ptr_dtor(&trace);
 
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(str, len);
-	efree(str);
+	RETVAL_STR(str);
 }
 /* }}} */
 

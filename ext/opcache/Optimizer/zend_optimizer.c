@@ -110,9 +110,6 @@ int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC)
 	int i = op_array->last_literal;
 	op_array->last_literal++;
 	op_array->literals = (zval*)erealloc(op_array->literals, op_array->last_literal * sizeof(zval));
-	if (Z_TYPE_P(zv) == IS_ARRAY) {
-		zend_make_immutable_array(zv TSRMLS_CC);
-	}
 	ZVAL_COPY_VALUE(&op_array->literals[i], zv);
 	Z_CACHE_SLOT(op_array->literals[i]) = -1;
 //???	Z_SET_REFCOUNT(op_array->literals[i].constant, 2);

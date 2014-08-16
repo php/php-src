@@ -249,7 +249,7 @@ static int parse_arg_object_to_string(zval *arg, char **p, int *pl, int type TSR
 		if(Z_TYPE_P(z) != IS_OBJECT) {
 			zval_dtor(arg);
 			ZVAL_NULL(arg);
-			if (!zend_make_printable_zval(z, arg)) {
+			if (!zend_make_printable_zval(z, arg TSRMLS_CC)) {
 				ZVAL_ZVAL(arg, z, 1, 1);
 			}
 			*pl = Z_STRLEN_P(arg);
@@ -288,7 +288,7 @@ ZEND_API int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRM
 		if(Z_TYPE_P(z) != IS_OBJECT) {
 			zval_dtor(arg);
 			ZVAL_NULL(arg);
-			if (!zend_make_printable_zval(z, arg)) {
+			if (!zend_make_printable_zval(z, arg TSRMLS_CC)) {
 				ZVAL_ZVAL(arg, z, 1, 1);
 			}
 			*str = Z_STR_P(arg);

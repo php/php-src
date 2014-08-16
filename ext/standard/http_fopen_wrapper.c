@@ -130,7 +130,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	char tmp_line[128];
 	size_t chunk_size = 0, file_size = 0;
 	int eol_detect = 0;
-	char *transport_string, *errstr = NULL;
+	char *transport_string;
+	zend_string *errstr = NULL;
 	int transport_len, have_header = 0, request_fulluri = 0, ignore_errors = 0;
 	char *protocol_version = NULL;
 	int protocol_version_len = 3; /* Default: "1.0" */
@@ -216,8 +217,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	}
 			
 	if (errstr) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", errstr);
-		efree(errstr);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", errstr->val);
+		STR_RELEASE(errstr);
 		errstr = NULL;
 	}
 
@@ -229,7 +230,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		/* Set peer_name or name verification will try to use the proxy server name */
 		if (!context || (tmpzval = php_stream_context_get_option(context, "ssl", "peer_name")) == NULL) {
 			ZVAL_STRING(&ssl_proxy_peer_name, resource->host);
-			php_stream_context_set_option(stream->context, "ssl", "peer_name", &ssl_proxy_peer_name);
+			php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name", &ssl_proxy_peer_name);
 		}
 
 		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);

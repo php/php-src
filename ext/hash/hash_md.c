@@ -121,10 +121,10 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	PHP_MD5Update(&context, arg, arg_len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_STRINGL(digest, 16);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		RETVAL_STRING(md5str);
 	}
 
 }
@@ -168,10 +168,10 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	}
 
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_STRINGL(digest, 16);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		RETVAL_STRING(md5str);
 	}
 }
 /* }}} */

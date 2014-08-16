@@ -66,50 +66,50 @@ PHP_FUNCTION(com_create_instance)
 			&typelib_name, &typelib_name_len)) {
 
 		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid arguments!" TSRMLS_CC);
-		ZVAL_NULL(object);
+		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 
 	if (server_name) {
 		ctx = CLSCTX_REMOTE_SERVER;
 	} else if (server_params) {
-		zval **tmp;
+		zval *tmp;
 
 		/* decode the data from the array */
 
-		if (SUCCESS == zend_hash_find(HASH_OF(server_params),
-				"Server", sizeof("Server"), (void**)&tmp)) {
+		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+				"Server", sizeof("Server")-1))) {
 			convert_to_string_ex(tmp);
-			server_name = Z_STRVAL_PP(tmp);
-			server_name_len = Z_STRLEN_PP(tmp);
+			server_name = Z_STRVAL_P(tmp);
+			server_name_len = Z_STRLEN_P(tmp);
 			ctx = CLSCTX_REMOTE_SERVER;
 		}
 
-		if (SUCCESS == zend_hash_find(HASH_OF(server_params),
-				"Username", sizeof("Username"), (void**)&tmp)) {
+		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+				"Username", sizeof("Username")-1))) {
 			convert_to_string_ex(tmp);
-			user_name = Z_STRVAL_PP(tmp);
-			user_name_len = Z_STRLEN_PP(tmp);
+			user_name = Z_STRVAL_P(tmp);
+			user_name_len = Z_STRLEN_P(tmp);
 		}
 
-		if (SUCCESS == zend_hash_find(HASH_OF(server_params),
-				"Password", sizeof("Password"), (void**)&tmp)) {
+		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+				"Password", sizeof("Password")-1))) {
 			convert_to_string_ex(tmp);
-			password = Z_STRVAL_PP(tmp);
-			password_len = Z_STRLEN_PP(tmp);
+			password = Z_STRVAL_P(tmp);
+			password_len = Z_STRLEN_P(tmp);
 		}
 
-		if (SUCCESS == zend_hash_find(HASH_OF(server_params),
-				"Domain", sizeof("Domain"), (void**)&tmp)) {
+		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+				"Domain", sizeof("Domain")-1))) {
 			convert_to_string_ex(tmp);
-			domain_name = Z_STRVAL_PP(tmp);
-			domain_name_len = Z_STRLEN_PP(tmp);
+			domain_name = Z_STRVAL_P(tmp);
+			domain_name_len = Z_STRLEN_P(tmp);
 		}
 
-		if (SUCCESS == zend_hash_find(HASH_OF(server_params),
-				"Flags", sizeof("Flags"), (void**)&tmp)) {
+		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+				"Flags", sizeof("Flags")-1))) {
 			convert_to_long_ex(tmp);
-			ctx = (CLSCTX)Z_LVAL_PP(tmp);
+			ctx = (CLSCTX)Z_LVAL_P(tmp);
 		}
 	}
 
@@ -215,8 +215,8 @@ PHP_FUNCTION(com_create_instance)
 	}
 
 	if (server_name) {
-		STR_FREE((char*)info.pwszName);
-		STR_FREE((char*)authid.User);
+		if (info.pwszName) efree(info.pwszName);
+		if (authid.User) efree(authid.User);
 	}
 
 	efree(moniker);
@@ -230,7 +230,7 @@ PHP_FUNCTION(com_create_instance)
 
 		php_com_throw_exception(res, msg TSRMLS_CC);
 		efree(msg);
-		ZVAL_NULL(object);
+		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 
@@ -263,7 +263,7 @@ PHP_FUNCTION(com_create_instance)
 			if (SUCCEEDED(ITypeLib_GetDocumentation(TL, -1, &name, NULL, NULL, NULL))) {
 				typelib_name = php_com_olestring_to_string(name, &typelib_name_len, obj->code_page TSRMLS_CC);
 
-				if (SUCCESS == zend_ts_hash_add(&php_com_typelibraries, typelib_name, typelib_name_len+1, (void*)&TL, sizeof(ITypeLib*), NULL)) {
+				if (NULL != zend_ts_hash_str_add_ptr(&php_com_typelibraries, typelib_name, typelib_name_len, TL)) {
 					php_com_import_typelib(TL, mode, obj->code_page TSRMLS_CC);
 
 					/* add a reference for the hash */
@@ -420,14 +420,14 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 {
 	OLECHAR *olename;
 	HRESULT hr;
-	DISPID *dispid_ptr;
+	zval *tmp;
 
 	if (namelen == -1) {
 		namelen = strlen(name);
 	}
 
-	if (obj->id_of_name_cache && SUCCESS == zend_hash_find(obj->id_of_name_cache, name, namelen, (void**)&dispid_ptr)) {
-		*dispid = *dispid_ptr;
+	if (obj->id_of_name_cache && NULL != (tmp = zend_hash_str_find(obj->id_of_name_cache, name, namelen))) {
+		*dispid = Z_LVAL_P(tmp);
 		return S_OK;
 	}
 	
@@ -449,12 +449,15 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 	efree(olename);
 
 	if (SUCCEEDED(hr)) {
+		zval tmp;
+
 		/* cache the mapping */
 		if (!obj->id_of_name_cache) {
 			ALLOC_HASHTABLE(obj->id_of_name_cache);
 			zend_hash_init(obj->id_of_name_cache, 2, NULL, NULL, 0);
 		}
-		zend_hash_update(obj->id_of_name_cache, name, namelen, dispid, sizeof(*dispid), NULL);
+		ZVAL_LONG(&tmp, *dispid);
+		zend_hash_str_update(obj->id_of_name_cache, name, namelen, &tmp);
 	}
 	
 	return hr;
@@ -462,14 +465,14 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 
 /* the core of COM */
 int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
-		WORD flags,	VARIANT *v, int nargs, zval ***args TSRMLS_DC)
+		WORD flags,	VARIANT *v, int nargs, zval *args TSRMLS_DC)
 {
 	DISPID dispid, altdispid;
 	DISPPARAMS disp_params;
 	HRESULT hr;
 	VARIANT *vargs = NULL, *byref_vals = NULL;
 	int i, byref_count = 0, j;
-	zend_internal_function *f = (zend_internal_function*)EG(current_execute_data)->function_state.function;
+	zend_internal_function *f = (zend_internal_function*)EG(current_execute_data)->func;
 
 	/* assumption: that the active function (f) is the function we generated for the engine */
 	if (!f || f->arg_info == NULL) {
@@ -507,7 +510,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 		for (j = 0, i = 0; i < nargs; i++) {
 			if (f->arg_info[nargs - i - 1].pass_by_reference) {
 				/* put the value into byref_vals instead */
-				php_com_variant_from_zval(&byref_vals[j], *args[nargs - i - 1], obj->code_page TSRMLS_CC);
+				php_com_variant_from_zval(&byref_vals[j], &args[nargs - i - 1], obj->code_page TSRMLS_CC);
 
 				/* if it is already byref, "move" it into the vargs array, otherwise
 				 * make vargs a reference to this value */
@@ -522,14 +525,14 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 				}
 				j++;
 			} else {
-				php_com_variant_from_zval(&vargs[i], *args[nargs - i - 1], obj->code_page TSRMLS_CC);
+				php_com_variant_from_zval(&vargs[i], &args[nargs - i - 1], obj->code_page TSRMLS_CC);
 			}
 		}
 		
 	} else {
 		/* Invoke'd args are in reverse order */
 		for (i = 0; i < nargs; i++) {
-			php_com_variant_from_zval(&vargs[i], *args[nargs - i - 1], obj->code_page TSRMLS_CC);
+			php_com_variant_from_zval(&vargs[i], &args[nargs - i - 1], obj->code_page TSRMLS_CC);
 		}
 	}
 
@@ -552,7 +555,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 		for (i = 0, j = 0; i < nargs; i++) {
 			/* if this was byref, update the zval */
 			if (f && f->arg_info[nargs - i - 1].pass_by_reference) {
-				SEPARATE_ZVAL_IF_NOT_REF(args[nargs - i - 1]);
+				SEPARATE_ZVAL_IF_NOT_REF(&args[nargs - i - 1]);
 
 				/* if the variant is pointing at the byref_vals, we need to map
 				 * the pointee value as a zval; otherwise, the value is pointing
@@ -560,13 +563,13 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 				if (V_VT(&vargs[i]) & VT_BYREF) {
 					if (vargs[i].byref == &V_UINT(&byref_vals[j])) {
 						/* copy that value */
-						php_com_zval_from_variant(*args[nargs - i - 1], &byref_vals[j],
+						php_com_zval_from_variant(&args[nargs - i - 1], &byref_vals[j],
 							obj->code_page TSRMLS_CC);
 					}
 				} else {
 					/* not sure if this can ever happen; the variant we marked as BYREF
 					 * is no longer BYREF - copy its value */
-					php_com_zval_from_variant(*args[nargs - i - 1], &vargs[i],
+					php_com_zval_from_variant(&args[nargs - i - 1], &vargs[i],
 						obj->code_page TSRMLS_CC);
 				}
 				VariantClear(&byref_vals[j]);
@@ -583,7 +586,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 
 
 int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
-		WORD flags,	VARIANT *v, int nargs, zval **args, int silent, int allow_noarg TSRMLS_DC)
+		WORD flags,	VARIANT *v, int nargs, zval *args, int silent, int allow_noarg TSRMLS_DC)
 {
 	DISPID altdispid;
 	DISPPARAMS disp_params;
@@ -597,7 +600,7 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 
 	/* Invoke'd args are in reverse order */
 	for (i = 0; i < nargs; i++) {
-		php_com_variant_from_zval(&vargs[i], args[nargs - i - 1], obj->code_page TSRMLS_CC);
+		php_com_variant_from_zval(&vargs[i], &args[nargs - i - 1], obj->code_page TSRMLS_CC);
 	}
 
 	disp_params.cArgs = nargs;
@@ -630,7 +633,7 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 }
 
 int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
-		WORD flags,	VARIANT *v, int nargs, zval **args, int allow_noarg TSRMLS_DC)
+		WORD flags,	VARIANT *v, int nargs, zval *args, int allow_noarg TSRMLS_DC)
 {
 	DISPID dispid;
 	HRESULT hr;
@@ -664,8 +667,13 @@ PHP_FUNCTION(com_create_guid)
 
 	php_com_initialize(TSRMLS_C);
 	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {
-		Z_TYPE_P(return_value) = IS_STRING;
-		Z_STRVAL_P(return_value) = php_com_olestring_to_string(guid_string, &Z_STRLEN_P(return_value), CP_ACP TSRMLS_CC);
+		int len;
+		char *str;
+
+		str = php_com_olestring_to_string(guid_string, &len, CP_ACP TSRMLS_CC);
+		RETVAL_STRINGL(str, len);
+		// TODO: avoid reallocation ???
+		efree(str);
 
 		CoTaskMemFree(guid_string);
 	} else {
@@ -696,12 +704,12 @@ PHP_FUNCTION(com_event_sink)
 	
 	if (sink && Z_TYPE_P(sink) == IS_ARRAY) {
 		/* 0 => typelibname, 1 => dispname */
-		zval **tmp;
+		zval *tmp;
 
-		if (zend_hash_index_find(Z_ARRVAL_P(sink), 0, (void**)&tmp) == SUCCESS)
-			typelibname = Z_STRVAL_PP(tmp);
-		if (zend_hash_index_find(Z_ARRVAL_P(sink), 1, (void**)&tmp) == SUCCESS)
-			dispname = Z_STRVAL_PP(tmp);
+		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(sink), 0)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
+			typelibname = Z_STRVAL_P(tmp);
+		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(sink), 1)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
+			dispname = Z_STRVAL_P(tmp);
 	} else if (sink != NULL) {
 		convert_to_string(sink);
 		dispname = Z_STRVAL_P(sink);

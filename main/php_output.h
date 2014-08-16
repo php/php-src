@@ -127,8 +127,7 @@ typedef struct _php_output_handler_user_func_t {
 } php_output_handler_user_func_t;
 
 typedef struct _php_output_handler {
-	char *name;
-	size_t name_len;
+	zend_string *name;
 	int flags;
 	int level;
 	size_t size;

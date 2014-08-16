@@ -3149,44 +3149,6 @@ void zend_do_end_compilation(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC) /* {{{ */
-{
-	zend_constant *c;
-
-	if (Z_IMMUTABLE_P(zv)) {
-		return;
-	}
-
-	Z_TYPE_FLAGS_P(zv) = IS_TYPE_IMMUTABLE;
-	GC_REFCOUNT(Z_COUNTED_P(zv)) = 2;
-	Z_ARRVAL_P(zv)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
-
-	/* store as an anonymous constant */
-	c = emalloc(sizeof(zend_constant));
-	ZVAL_COPY_VALUE(&c->value, zv);
-	c->flags = 0;
-	c->name = NULL;
-	c->module_number = PHP_USER_CONSTANT;
-	zend_hash_next_index_insert_ptr(EG(zend_constants), c);
-}
-/* }}} */
-
-void zend_make_immutable_array_r(zval *zv TSRMLS_DC) /* {{{ */
-{
-	zval *el;
-
-	if (Z_IMMUTABLE_P(zv)) {
-		return;
-	}
-	zend_make_immutable_array(zv TSRMLS_CC);
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zv), el) {
-		if (Z_TYPE_P(el) == IS_ARRAY) {
-			zend_make_immutable_array_r(el TSRMLS_CC);			
-		}
-	} ZEND_HASH_FOREACH_END();
-}
-/* }}} */
-
 /* {{{ zend_dirname
    Returns directory name component of path */
 ZEND_API size_t zend_dirname(char *path, size_t len)
@@ -6542,7 +6504,6 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast TSRMLS_DC) {
 		}
 	}
 
-	zend_make_immutable_array(result TSRMLS_CC);
 	return 1;
 }
 

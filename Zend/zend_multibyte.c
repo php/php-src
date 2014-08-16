@@ -168,7 +168,7 @@ ZEND_API const zend_encoding *zend_multibyte_get_script_encoding(TSRMLS_D)
 ZEND_API int zend_multibyte_set_script_encoding(const zend_encoding **encoding_list, size_t encoding_list_size TSRMLS_DC)
 {
 	if (CG(script_encoding_list)) {
-		free(CG(script_encoding_list));
+		free((char*)CG(script_encoding_list));
 	}
 	CG(script_encoding_list) = encoding_list;
 	CG(script_encoding_list_size) = encoding_list_size;
@@ -195,7 +195,7 @@ ZEND_API int zend_multibyte_set_script_encoding_by_string(const char *new_value,
 	}
 
 	if (size == 0) {
-		pefree(list, 1);
+		pefree((void*)list, 1);
 		return FAILURE;
 	}
 

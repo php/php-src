@@ -160,7 +160,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	unsigned int streams_flags = STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT;
 	char * hashed_details = NULL;
 	int hashed_details_len = 0;
-	char * errstr = NULL;
+	zend_string *errstr = NULL;
 	int errcode = 0;
 	struct timeval tv;
 	dtor_func_t origin_dtor;
@@ -190,10 +190,10 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 			mnd_sprintf_free(hashed_details);
 		}
 		errcode = CR_CONNECTION_ERROR;
-		SET_CLIENT_ERROR(*error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr);
+		SET_CLIENT_ERROR(*error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr->val);
 		if (errstr) {
 			/* no mnd_ since we don't allocate it */
-			efree(errstr);
+			STR_RELEASE(errstr);
 		}
 		DBG_RETURN(NULL);
 	}

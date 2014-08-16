@@ -86,11 +86,18 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		return;
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
-		zend_accel_store(ht->arData, sizeof(Bucket) * ht->nTableSize);
+		zend_accel_store(ht->arData, sizeof(Bucket) * ht->nNumUsed);
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 	} else {
-		zend_accel_store(ht->arData, (sizeof(Bucket) + sizeof(zend_uint)) * ht->nTableSize);
-		ht->arHash = (zend_uint*)(ht->arData + ht->nTableSize);
+		Bucket *d = (Bucket*)ZCG(mem);
+		zend_uint *h = (zend_uint*)(d + ht->nNumUsed);
+
+		ZCG(mem) = (void*)(h + ht->nTableSize);
+		memcpy(d, ht->arData, sizeof(Bucket) * ht->nNumUsed);
+		memcpy(h, ht->arHash, sizeof(zend_uint) * ht->nTableSize);
+		efree(ht->arData);
+		ht->arData = d;
+		ht->arHash = h;
 	}
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		p = ht->arData + idx;
@@ -116,11 +123,17 @@ static void zend_hash_persist_immutable(HashTable *ht TSRMLS_DC)
 		return;
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
-		ht->arData = zend_accel_memdup(ht->arData, sizeof(Bucket) * ht->nTableSize);
+		ht->arData = zend_accel_memdup(ht->arData, sizeof(Bucket) * ht->nNumUsed);
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 	} else {
-		ht->arData = zend_accel_memdup(ht->arData, (sizeof(Bucket) + sizeof(zend_uint)) * ht->nTableSize);
-		ht->arHash = (zend_uint*)(ht->arData + ht->nTableSize);
+		Bucket *d = (Bucket*)ZCG(mem);
+		zend_uint *h = (zend_uint*)(d + ht->nNumUsed);
+
+		ZCG(mem) = (void*)(h + ht->nTableSize);
+		memcpy(d, ht->arData, sizeof(Bucket) * ht->nNumUsed);
+		memcpy(h, ht->arHash, sizeof(zend_uint) * ht->nTableSize);
+		ht->arData = d;
+		ht->arHash = h;
 	}
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		p = ht->arData + idx;
@@ -195,6 +208,7 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 			} else {
 				if (Z_IMMUTABLE_P(z)) {
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
@@ -202,6 +216,10 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 				} else {
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
+					/* make immutable array */
+					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
+					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
+					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 				}
 			}
 			break;
@@ -252,6 +270,7 @@ static void zend_persist_zval_const(zval *z TSRMLS_DC)
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 			} else {
 				if (Z_IMMUTABLE_P(z)) {
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
@@ -259,6 +278,10 @@ static void zend_persist_zval_const(zval *z TSRMLS_DC)
 				} else {
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
+					/* make immutable array */
+					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
+					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
+					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 				}
 			}
 			break;

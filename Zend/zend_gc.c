@@ -472,7 +472,7 @@ static int gc_collect_white(zend_refcounted *ref TSRMLS_DC)
 	Bucket *p;
 
 tail_call:
-	if (GC_INFO(ref) == GC_WHITE) {
+	if (GC_GET_COLOR(GC_INFO(ref)) == GC_WHITE) {
 		ht = NULL;
 		GC_SET_BLACK(GC_INFO(ref));
 
@@ -480,6 +480,30 @@ tail_call:
 		if (GC_TYPE(ref) != IS_REFERENCE) {
 			count++;
 		}
+
+#if 1
+		if ((GC_TYPE(ref) == IS_OBJECT || GC_TYPE(ref) == IS_ARRAY) &&
+		    !GC_ADDRESS(GC_INFO(ref))) {
+			/* add garbage into list */
+			gc_root_buffer *buf = GC_G(unused);
+
+			if (buf) {
+				GC_G(unused) = buf->prev;
+			} else if (GC_G(first_unused) != GC_G(last_unused)) {
+				buf = GC_G(first_unused);
+				GC_G(first_unused)++;
+			}
+			/* TODO: what should we do if we don't have room ??? */
+			if (buf) {
+				buf->ref = ref;
+				buf->next = GC_G(roots).next;
+				buf->prev = &GC_G(roots);
+				GC_G(roots).next->prev = buf;
+				GC_G(roots).next = buf;
+				GC_SET_ADDRESS(GC_INFO(ref), buf - GC_G(buf));				
+			}
+		}
+#endif
 
 		if (GC_TYPE(ref) == IS_OBJECT && EG(objects_store).object_buckets) {
 			zend_object_get_gc_t get_gc;
@@ -568,13 +592,20 @@ static int gc_collect_roots(TSRMLS_D)
 	int count = 0;
 	gc_root_buffer *current = GC_G(roots).next;
 
+	/* remove non-garbage from the list */
 	while (current != &GC_G(roots)) {
-		GC_SET_ADDRESS(GC_INFO(current->ref), 0);
-		if (GC_INFO(current->ref) == GC_WHITE) {
-			count += gc_collect_white(current->ref TSRMLS_CC);
-			GC_SET_ADDRESS(GC_INFO(current->ref), current - GC_G(buf));
-		} else {
+		if (GC_GET_COLOR(GC_INFO(current->ref)) != GC_WHITE) {
+			GC_SET_ADDRESS(GC_INFO(current->ref), 0);
 			GC_REMOVE_FROM_ROOTS(current);
+		}
+		current = current->next;
+	}
+
+	current = GC_G(roots).next;
+	while (current != &GC_G(roots)) {
+		if (GC_GET_COLOR(GC_INFO(current->ref)) == GC_WHITE) {
+			GC_REFCOUNT(current->ref)++;
+			count += gc_collect_white(current->ref TSRMLS_CC);
 		}
 		current = current->next;
 	}
@@ -598,6 +629,73 @@ static int gc_collect_roots(TSRMLS_D)
 		GC_G(roots).prev = &GC_G(roots);
 	}
 	return count;
+}
+
+static void gc_remove_nested_data_from_buffer(zend_refcounted *ref TSRMLS_DC)
+{
+	HashTable *ht;
+	uint idx;
+	Bucket *p;
+
+tail_call:
+	if (GC_ADDRESS(GC_INFO(ref)) != 0) {
+		GC_REMOVE_FROM_BUFFER(ref);
+
+		if (GC_TYPE(ref) == IS_OBJECT && EG(objects_store).object_buckets) {
+			zend_object_get_gc_t get_gc;
+			zend_object *obj = (zend_object*)ref;
+
+			if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+		             (get_gc = obj->handlers->get_gc) != NULL)) {
+				int i, n;
+				zval *table;
+				zval tmp;
+				HashTable *props;
+
+				ZVAL_OBJ(&tmp, obj);
+				props = get_gc(&tmp, &table, &n TSRMLS_CC);
+
+				while (n > 0 && !Z_REFCOUNTED(table[n-1])) n--;
+				for (i = 0; i < n; i++) {
+					if (Z_REFCOUNTED(table[i])) {
+						ref = Z_COUNTED(table[i]);
+						if (!props && i == n - 1) {
+							goto tail_call;
+						} else {
+							gc_remove_nested_data_from_buffer(ref TSRMLS_CC);
+						}
+					}
+				}
+				if (!props) {
+					return;
+				}
+				ht = props;
+			}
+		} else if (GC_TYPE(ref) == IS_ARRAY) {
+			ht = &((zend_array*)ref)->ht;
+		} else if (GC_TYPE(ref) == IS_REFERENCE) {
+			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
+				if (UNEXPECTED(!EG(objects_store).object_buckets) &&
+				    Z_TYPE(((zend_reference*)ref)->val) == IS_OBJECT) {
+					return;
+				}
+				ref = Z_COUNTED(((zend_reference*)ref)->val);
+				goto tail_call;
+			}
+			return;
+		}
+		if (!ht) return;
+		for (idx = 0; idx < ht->nNumUsed; idx++) {
+			p = ht->arData + idx;
+			if (!Z_REFCOUNTED(p->val)) continue;
+			ref = Z_COUNTED(p->val);
+			if (idx == ht->nNumUsed-1) {
+				goto tail_call;
+			} else {
+				gc_remove_nested_data_from_buffer(ref TSRMLS_CC);
+			}
+		}
+	}
 }
 
 ZEND_API int gc_collect_cycles(TSRMLS_D)
@@ -636,7 +734,14 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 
 		orig_next_to_free = GC_G(next_to_free);
 
-		/* First call destructors */
+		/* Remember reference counters before calling destructors */
+		current = to_free.next;
+		while (current != &to_free) {
+			current->refcount = GC_REFCOUNT(current->ref);
+			current = current->next;
+		}
+
+		/* Call destructors */
 		current = to_free.next;
 		while (current != &to_free) {
 			p = current->ref;
@@ -655,6 +760,16 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 						GC_REFCOUNT(obj)--;
 					}
 				}
+			}
+			current = GC_G(next_to_free);
+		}
+
+		/* Remove values captured in destructors */
+		current = to_free.next;
+		while (current != &to_free) {
+			GC_G(next_to_free) = current->next;
+			if (GC_REFCOUNT(current->ref) > current->refcount) {
+				gc_remove_nested_data_from_buffer(current->ref TSRMLS_CC);
 			}
 			current = GC_G(next_to_free);
 		}

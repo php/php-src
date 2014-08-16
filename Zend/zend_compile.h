@@ -450,7 +450,6 @@ typedef int (*unary_op_type)(zval *, zval * TSRMLS_DC);
 typedef int (*binary_op_type)(zval *, zval *, zval * TSRMLS_DC);
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
-ZEND_API void zend_make_immutable_array(zval *zv TSRMLS_DC);
 
 void zend_stop_lexing(TSRMLS_D);
 void zend_emit_final_return(zval *zv TSRMLS_DC);
@@ -562,12 +561,10 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
 #define ZEND_FETCH_CLASS_PARENT		2
-#define ZEND_FETCH_CLASS_MAIN		3	/* unused ??? */
-#define ZEND_FETCH_CLASS_GLOBAL		4	/* unused ??? */
-#define ZEND_FETCH_CLASS_AUTO		5
-#define ZEND_FETCH_CLASS_INTERFACE	6
-#define ZEND_FETCH_CLASS_STATIC		7
-#define ZEND_FETCH_CLASS_TRAIT		14
+#define ZEND_FETCH_CLASS_STATIC		3
+#define ZEND_FETCH_CLASS_AUTO		4
+#define ZEND_FETCH_CLASS_INTERFACE	5
+#define ZEND_FETCH_CLASS_TRAIT		6
 #define ZEND_FETCH_CLASS_MASK        0x0f
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
 #define ZEND_FETCH_CLASS_SILENT      0x0100

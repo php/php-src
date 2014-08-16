@@ -995,8 +995,7 @@ try_again:
 				add_index_string(&zcookie, 2, phpurl->host);
 			}
 
-			// TODO: avoid reallocation ???
-			add_assoc_zval_ex(cookies, name.s->val, name.s->len, &zcookie);
+			zend_symtable_update(Z_ARRVAL_P(cookies), name.s, &zcookie);
 			smart_str_free(&name);
 		}
 

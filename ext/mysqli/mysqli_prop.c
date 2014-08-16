@@ -250,14 +250,13 @@ static zval *link_stat_read(mysqli_object *obj, zval *retval TSRMLS_DC)
  	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
 	if (mysql) {
-		char * stat_msg;
 #if defined(MYSQLI_USE_MYSQLND)
-		uint stat_msg_len;
-		if (mysqlnd_stat(mysql->mysql, &stat_msg, &stat_msg_len) == PASS) {
-			ZVAL_STRINGL(retval, stat_msg, stat_msg_len);
-			efree(stat_msg);
+		zend_string * stat_msg;
+		if (mysqlnd_stat(mysql->mysql, &stat_msg) == PASS) {
+			ZVAL_STR(retval, stat_msg);
 		}
 #else
+		char * stat_msg;
 		if ((stat_msg = (char *)mysql_stat(mysql->mysql))) {
 			ZVAL_STRING(retval, stat_msg);
 		}
