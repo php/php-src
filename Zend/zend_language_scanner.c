@@ -1645,7 +1645,7 @@ yy61:
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 2153 "Zend/zend_language_scanner.l"
 		{
-	Z_IVAL_P(zendlval) = (long) '{';
+	Z_IVAL_P(zendlval) = (zend_int_t) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;
@@ -1873,7 +1873,7 @@ yy83:
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 2153 "Zend/zend_language_scanner.l"
 		{
-	Z_IVAL_P(zendlval) = (long) '{';
+	Z_IVAL_P(zendlval) = (zend_int_t) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;
@@ -2132,7 +2132,7 @@ yy107:
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 2153 "Zend/zend_language_scanner.l"
 		{
-	Z_IVAL_P(zendlval) = (long) '{';
+	Z_IVAL_P(zendlval) = (zend_int_t) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;

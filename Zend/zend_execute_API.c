@@ -1680,7 +1680,7 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force TSRMLS
 
 	if (execute_data) {
 		if (!execute_data->symbol_table) {
-			zend_ulong h = STR_HASH_VAL(name);
+			zend_uint_t h = STR_HASH_VAL(name);
 			zend_op_array *op_array = &execute_data->func->op_array;
 			int i;
 
@@ -1716,7 +1716,7 @@ ZEND_API int zend_set_local_var_str(const char *name, int len, zval *value, int 
 
 	if (execute_data) {
 		if (!execute_data->symbol_table) {
-			zend_ulong h = zend_hash_func(name, len);
+			zend_uint_t h = zend_hash_func(name, len);
 			zend_op_array *op_array = &execute_data->func->op_array;
 			int i;
 

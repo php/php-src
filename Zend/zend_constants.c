@@ -323,7 +323,7 @@ ZEND_API zval *zend_get_constant(zend_string *name TSRMLS_DC)
 	return c ? &c->value : NULL;
 }
 
-ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, ulong flags TSRMLS_DC)
+ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, zend_uint_t flags TSRMLS_DC)
 {
 	zend_constant *c;
 	const char *colon;
@@ -449,7 +449,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	}
 }
 
-zend_constant *zend_quick_get_constant(const zval *key, ulong flags TSRMLS_DC)
+zend_constant *zend_quick_get_constant(const zval *key, zend_uint_t flags TSRMLS_DC)
 {
 	zend_constant *c;
 

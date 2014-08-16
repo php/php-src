@@ -81,7 +81,7 @@
 	}																\
 } while (0)
 
-#elif SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
+#elif SIZEOF_ZEND_INT == 4 && defined(HAVE_ZEND_LONG64)
 
 #define ZEND_SIGNED_MULTIPLY_INT(a, b, lval, dval, usedval) do {	\
 	zend_long64 __result = (zend_long64) (a) * (zend_long64) (b);	\

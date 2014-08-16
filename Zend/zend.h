@@ -388,7 +388,7 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 # else /* ! (CRAY || __arm) */
 
 # define XtOffset(p_type, field) \
-    ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
+    ((zend_int_t) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 # endif /* !CRAY */
 

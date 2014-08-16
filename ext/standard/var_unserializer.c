@@ -30,13 +30,13 @@
 
 typedef struct {
 	zval *data[VAR_ENTRIES_MAX];
-	long used_slots;
+	php_int_t used_slots;
 	void *next;
 } var_entries;
 
 typedef struct {
 	zval data[VAR_ENTRIES_MAX];
-	long used_slots;
+	php_int_t used_slots;
 	void *next;
 } var_dtor_entries;
 
@@ -119,7 +119,7 @@ PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval *rva
 
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nzval)
 {
-	long i;
+	php_int_t i;
 	var_entries *var_hash = (*var_hashx)->first;
 #if VAR_ENTRIES_DBG
 	fprintf(stderr, "var_replace(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(nzval));
@@ -136,7 +136,7 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nz
 	}
 }
 
-static zval *var_access(php_unserialize_data_t *var_hashx, long id)
+static zval *var_access(php_unserialize_data_t *var_hashx, php_int_t id)
 {
 	var_entries *var_hash = (*var_hashx)->first;
 #if VAR_ENTRIES_DBG
@@ -158,7 +158,7 @@ static zval *var_access(php_unserialize_data_t *var_hashx, long id)
 PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 {
 	void *next;
-	long i;
+	php_int_t i;
 	var_entries *var_hash = (*var_hashx)->first;
 	var_dtor_entries *var_dtor_hash = (*var_hashx)->first_dtor;
 #if VAR_ENTRIES_DBG
@@ -238,10 +238,10 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 
 
 
-static inline long parse_iv2(const unsigned char *p, const unsigned char **q)
+static inline php_int_t parse_iv2(const unsigned char *p, const unsigned char **q)
 {
 	char cursor;
-	long result = 0;
+	php_int_t result = 0;
 	int neg = 0;
 
 	switch (*p) {
@@ -266,7 +266,7 @@ static inline long parse_iv2(const unsigned char *p, const unsigned char **q)
 	return result;
 }
 
-static inline long parse_iv(const unsigned char *p)
+static inline php_int_t parse_iv(const unsigned char *p)
 {
 	return parse_iv2(p, NULL);
 }
@@ -296,7 +296,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 #define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash TSRMLS_CC
 
-static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long elements, int objprops)
+static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, php_int_t elements, int objprops)
 {
 	while (elements-- > 0) {
 		zval key, *data, d, *old_data;
@@ -380,14 +380,14 @@ static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 
 static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 {
-	long datalen;
+	php_int_t datalen;
 
 	datalen = parse_iv2((*p) + 2, p);
 
 	(*p) += 2;
 
 	if (datalen < 0 || (*p) + datalen >= max) {
-		zend_error(E_WARNING, "Insufficient data for unserializing - %ld required, %ld present", datalen, (long)(max - (*p)));
+		zend_error(E_WARNING, "Insufficient data for unserializing - %ld required, %ld present", datalen, (php_int_t)(max - (*p)));
 		return 0;
 	}
 
@@ -403,9 +403,9 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	return finish_nested_data(UNSERIALIZE_PASSTHRU);
 }
 
-static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
+static inline php_int_t object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 {
-	long elements;
+	php_int_t elements;
 	
 	elements = parse_iv2((*p) + 2, p);
 
@@ -426,7 +426,7 @@ static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 #ifdef PHP_WIN32
 # pragma optimize("", off)
 #endif
-static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
+static inline int object_common2(UNSERIALIZE_PARAMETER, php_int_t elements)
 {
 	zval retval;
 	zval fname;
@@ -625,7 +625,7 @@ yy20:
 #line 681 "ext/standard/var_unserializer.re"
 	{
 	size_t len, len2, len3, maxlen;
-	long elements;
+	php_int_t elements;
 	char *str;
 	zend_string *class_name;
 	zend_class_entry *ce;
@@ -817,7 +817,7 @@ yy34:
 	++YYCURSOR;
 #line 652 "ext/standard/var_unserializer.re"
 	{
-	long elements = parse_iv(start + 2);
+	php_int_t elements = parse_iv(start + 2);
 	/* use iv() not uiv() in order to check data range */
 	*p = YYCURSOR;
 
@@ -1023,7 +1023,7 @@ yy63:
 	++YYCURSOR;
 #line 588 "ext/standard/var_unserializer.re"
 	{
-#if SIZEOF_LONG == 4
+#if SIZEOF_ZEND_INT == 4
 use_double:
 #endif
 	*p = YYCURSOR;
@@ -1134,14 +1134,14 @@ yy79:
 	++YYCURSOR;
 #line 546 "ext/standard/var_unserializer.re"
 	{
-#if SIZEOF_LONG == 4
+#if SIZEOF_ZEND_INT == 4
 	int digits = YYCURSOR - start - 3;
 
 	if (start[2] == '-' || start[2] == '+') {
 		digits--;
 	}
 
-	/* Use double for large long values that were serialized on a 64-bit system */
+	/* Use double for large php_int_t values that were serialized on a 64-bit system */
 	if (digits >= MAX_LENGTH_OF_ZEND_INT - 1) {
 		if (digits == MAX_LENGTH_OF_ZEND_INT - 1) {
 			int cmp = strncmp((char*)YYCURSOR - MAX_LENGTH_OF_ZEND_INT, int_min_digits, MAX_LENGTH_OF_ZEND_INT - 1);
@@ -1206,7 +1206,7 @@ yy91:
 	++YYCURSOR;
 #line 511 "ext/standard/var_unserializer.re"
 	{
-	long id;
+	php_int_t id;
 
  	*p = YYCURSOR;
 	if (!var_hash) return 0;
@@ -1252,7 +1252,7 @@ yy97:
 	++YYCURSOR;
 #line 489 "ext/standard/var_unserializer.re"
 	{
-	long id;
+	php_int_t id;
 
  	*p = YYCURSOR;
 	if (!var_hash) return 0;

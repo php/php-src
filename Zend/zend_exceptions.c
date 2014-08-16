@@ -459,7 +459,7 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 			TRACE_APPEND_STR("true, ");
 			break;
 		case IS_RESOURCE: {
-			long lval = Z_RES_HANDLE_P(arg);
+			zend_int_t lval = Z_RES_HANDLE_P(arg);
 			char s_tmp[MAX_LENGTH_OF_ZEND_INT + 1];
 			int l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
 			TRACE_APPEND_STR("Resource id #");
@@ -468,7 +468,7 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 			break;
 		}
 		case IS_INT: {
-			long lval = Z_IVAL_P(arg);
+			zend_int_t lval = Z_IVAL_P(arg);
 			char s_tmp[MAX_LENGTH_OF_ZEND_INT + 1];
 			int l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
@@ -509,7 +509,7 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static void _build_trace_string(zval *frame, ulong index, zend_string **str_ptr, int *num TSRMLS_DC) /* {{{ */
+static void _build_trace_string(zval *frame, zend_uint_t index, zend_string **str_ptr, int *num TSRMLS_DC) /* {{{ */
 {
 	char *s_tmp;
 	int len;
@@ -584,7 +584,7 @@ static void _build_trace_string(zval *frame, ulong index, zend_string **str_ptr,
 ZEND_METHOD(exception, getTraceAsString)
 {
 	zval *trace, *frame;
-	ulong index;
+	zend_uint_t index;
 	zend_string *str, *key;
 	int num = 0, len;
 	char s_tmp[MAX_LENGTH_OF_ZEND_INT + 7 + 1 + 1];

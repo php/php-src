@@ -2539,7 +2539,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 }
 /* }}} */
 
-static int zend_do_convert_call(zend_op *init_opline, zend_op *opline, long num_args, zend_function **func_ptr TSRMLS_DC)  /* {{{ */
+static int zend_do_convert_call(zend_op *init_opline, zend_op *opline, zend_int_t num_args, zend_function **func_ptr TSRMLS_DC)  /* {{{ */
 {
 	zval *function_name;
 	zend_string *lcname;
@@ -6312,7 +6312,7 @@ void zend_do_end_array(znode *result, const znode *array_node TSRMLS_DC) /* {{{ 
 	if (constant_array) {
 		/* try to construct constant array */
 		zend_uint size;
-		long num;
+		zend_int_t num;
 		zend_string *str;
 
 		if (init_opline->op1_type != IS_UNUSED) {

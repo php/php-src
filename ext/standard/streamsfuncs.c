@@ -619,7 +619,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 	php_stream *stream;
 	int ret = 0;
 	zend_string *key;
-	ulong num_ind;
+	php_uint_t num_ind;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;

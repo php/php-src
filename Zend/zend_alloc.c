@@ -1373,7 +1373,7 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 #ifdef ZTS
 	if (ZEND_MM_BAD_THREAD_ID(p)) {
 		if (!silent) {
-			zend_debug_alloc_output("Invalid pointer: ((thread_id=0x%0.8X) != (expected=0x%0.8X))\n", (long)p->thread_id, (long)tsrm_thread_id());
+			zend_debug_alloc_output("Invalid pointer: ((thread_id=0x%0.8X) != (expected=0x%0.8X))\n", (zend_int_t)p->thread_id, (zend_int_t)tsrm_thread_id());
 			had_problems = 1;
 		} else {
 			return zend_mm_check_ptr(heap, ptr, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -2474,7 +2474,7 @@ ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
 	size_t res = nmemb;
-	unsigned long overflow = 0;
+	zend_uint_t overflow = 0;
 
 	__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (overflow)
@@ -2494,7 +2494,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
         size_t res = nmemb;
-        unsigned long overflow = 0;
+        zend_uint_t overflow = 0;
 
 #ifdef __ILP32__ /* x32 */
 # define LP_SUFF "l"
@@ -2523,7 +2523,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
         size_t res;
-        unsigned long overflow;
+        zend_uint_t overflow;
 
         __asm__ ("umlal %0,%1,%2,%3"
              : "=r"(res), "=r"(overflow)
@@ -2544,7 +2544,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
         size_t res;
-        unsigned long overflow;
+        zend_uint_t overflow;
 
         __asm__ ("mul %0,%2,%3\n\tumulh %1,%2,%3\n\tadds %0,%0,%4\n\tadc %1,%1,xzr"
              : "=&r"(res), "=&r"(overflow)

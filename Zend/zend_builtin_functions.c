@@ -411,10 +411,10 @@ ZEND_FUNCTION(func_get_arg)
 {
 	int arg_count, first_extra_arg;
 	zval *arg;
-	long requested_offset;
+	zend_int_t requested_offset;
 	zend_execute_data *ex;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &requested_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &requested_offset) == FAILURE) {
 		return;
 	}
 
@@ -1907,7 +1907,7 @@ ZEND_FUNCTION(zend_test_func)
 #ifdef ZTS
 ZEND_FUNCTION(zend_thread_id)
 {
-	RETURN_INT((long)tsrm_thread_id());
+	RETURN_INT((zend_int_t)tsrm_thread_id());
 }
 #endif
 #endif
@@ -2111,10 +2111,10 @@ ZEND_FUNCTION(debug_print_backtrace)
 	const char *include_filename = NULL;
 	zval arg_array;
 	int indent = 0;
-	long options = 0;
-	long limit = 0;
+	zend_int_t options = 0;
+	zend_int_t limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &options, &limit) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ii", &options, &limit) == FAILURE) {
 		return;
 	}
 
@@ -2499,10 +2499,10 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
    Return backtrace as array */
 ZEND_FUNCTION(debug_backtrace)
 {
-	long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
-	long limit = 0;
+	zend_int_t options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
+	zend_int_t limit = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &options, &limit) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ii", &options, &limit) == FAILURE) {
 		return;
 	}
 

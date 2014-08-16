@@ -174,7 +174,7 @@ typedef unsigned long int uint32_t;
 #endif
 
 #define Long    int32_t
-#define ULong   uint32_t
+#define zend_uint_t   uint32_t
 
 #ifdef __cplusplus
 #include "malloc.h"
@@ -272,7 +272,7 @@ BEGIN_EXTERN_C()
 
 	typedef union {
 		    double d;
-			    ULong ul[2];
+			    zend_uint_t ul[2];
 	} _double;
 #define value(x) ((x).d)
 #ifdef IEEE_LITTLE_ENDIAN
@@ -418,7 +418,7 @@ extern double rnd_prod(double, double), rnd_quot(double, double);
 struct Bigint {
 	struct Bigint *next;
 	int k, maxwds, sign, wds;
-	ULong x[1];
+	zend_uint_t x[1];
 };
 
 typedef struct Bigint Bigint;
@@ -519,9 +519,9 @@ static void Bfree(Bigint *v)
 static char * rv_alloc(int i) {
 	int j, k, *r;
 
-	j = sizeof(ULong);
+	j = sizeof(zend_uint_t);
 	for(k = 0;
-			sizeof(Bigint) - sizeof(ULong) - sizeof(int) + j <= i;
+			sizeof(Bigint) - sizeof(zend_uint_t) - sizeof(int) + j <= i;
 			j <<= 1) {
 		k++;
 	}
@@ -548,9 +548,9 @@ static char * nrv_alloc(char *s, char **rve, int n)
 static Bigint * multadd(Bigint *b, int m, int a) /* multiply by m and add a */
 {
 	int i, wds;
-	ULong *x, y;
+	zend_uint_t *x, y;
 #ifdef Pack_32
-	ULong xi, z;
+	zend_uint_t xi, z;
 #endif
 	Bigint *b1;
 
@@ -584,7 +584,7 @@ static Bigint * multadd(Bigint *b, int m, int a) /* multiply by m and add a */
 	return b;
 }
 
-static int hi0bits(ULong x)
+static int hi0bits(zend_uint_t x)
 {
 	int k = 0;
 
@@ -613,10 +613,10 @@ static int hi0bits(ULong x)
 	return k;
 }
 
-static int lo0bits(ULong *y)
+static int lo0bits(zend_uint_t *y)
 {
 	int k;
-	ULong x = *y;
+	zend_uint_t x = *y;
 
 	if (x & 7) {
 		if (x & 1) {
@@ -671,10 +671,10 @@ static Bigint * mult(Bigint *a, Bigint *b)
 {
 	Bigint *c;
 	int k, wa, wb, wc;
-	ULong carry, y, z;
-	ULong *x, *xa, *xae, *xb, *xbe, *xc, *xc0;
+	zend_uint_t carry, y, z;
+	zend_uint_t *x, *xa, *xae, *xb, *xbe, *xc, *xc0;
 #ifdef Pack_32
-	ULong z2;
+	zend_uint_t z2;
 #endif
 
 	if (a->wds < b->wds) {
@@ -751,7 +751,7 @@ static Bigint * mult(Bigint *a, Bigint *b)
 	return c;
 }
 
-static Bigint * s2b (CONST char *s, int nd0, int nd, ULong y9)
+static Bigint * s2b (CONST char *s, int nd0, int nd, zend_uint_t y9)
 {
 	Bigint *b;
 	int i, k;
@@ -830,7 +830,7 @@ static Bigint *lshift(Bigint *b, int k)
 {
 	int i, k1, n, n1;
 	Bigint *b1;
-	ULong *x, *x1, *xe, z;
+	zend_uint_t *x, *x1, *xe, z;
 
 #ifdef Pack_32
 	n = k >> 5;
@@ -886,7 +886,7 @@ static Bigint *lshift(Bigint *b, int k)
 
 static int cmp(Bigint *a, Bigint *b)
 {
-	ULong *xa, *xa0, *xb, *xb0;
+	zend_uint_t *xa, *xa0, *xb, *xb0;
 	int i, j;
 
 	i = a->wds;
@@ -918,7 +918,7 @@ static Bigint * diff(Bigint *a, Bigint *b)
 	Bigint *c;
 	int i, wa, wb;
 	Long borrow, y; /* We need signed shifts here. */
-	ULong *xa, *xae, *xb, *xbe, *xc;
+	zend_uint_t *xa, *xae, *xb, *xbe, *xc;
 #ifdef Pack_32
 	Long z;
 #endif
@@ -1030,11 +1030,11 @@ b2d
 (Bigint *a, int *e)
 #endif
 {
-	ULong *xa, *xa0, w, y, z;
+	zend_uint_t *xa, *xa0, w, y, z;
 	int k;
 	volatile _double d;
 #ifdef VAX
-	ULong d0, d1;
+	zend_uint_t d0, d1;
 #else
 #define d0 word0(d)
 #define d1 word1(d)
@@ -1097,10 +1097,10 @@ static Bigint * d2b(double _d, int *e, int *bits)
 {
 	Bigint *b;
 	int de, i, k;
-	ULong *x, y, z;
+	zend_uint_t *x, y, z;
 	volatile _double d;
 #ifdef VAX
-	ULong d0, d1;
+	zend_uint_t d0, d1;
 #endif
 
 	value(d) = _d;
@@ -1283,11 +1283,11 @@ static int quorem(Bigint *b, Bigint *S)
 {
 	int n;
 	Long borrow, y;
-	ULong carry, q, ys;
-	ULong *bx, *bxe, *sx, *sxe;
+	zend_uint_t carry, q, ys;
+	zend_uint_t *bx, *bxe, *sx, *sxe;
 #ifdef Pack_32
 	Long z;
-	ULong si, zs;
+	zend_uint_t si, zs;
 #endif
 
 	n = S->wds;
@@ -1481,7 +1481,7 @@ ZEND_API char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sig
 	Long L;
 #ifndef Sudden_Underflow
 	int denorm;
-	ULong x;
+	zend_uint_t x;
 #endif
 	Bigint *b, *b1, *delta, *mlo, *mhi, *S, *tmp;
 	double ds;
@@ -2044,7 +2044,7 @@ ZEND_API double zend_strtod (CONST char *s00, CONST char **se)
 	volatile double aadj, aadj1, adj;
 	volatile _double rv, rv0;
 	Long L;
-	ULong y, z;
+	zend_uint_t y, z;
 	Bigint *bb, *bb1, *bd, *bd0, *bs, *delta, *tmp;
 	double result;
 

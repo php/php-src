@@ -427,7 +427,7 @@ PHP_FUNCTION(proc_open)
 	int i;
 	zval *descitem = NULL;
 	zend_string *str_index;
-	ulong nindex;
+	php_uint_t nindex;
 	struct php_proc_open_descriptor_item descriptors[PHP_PROC_OPEN_MAX_DESCRIPTORS];
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;

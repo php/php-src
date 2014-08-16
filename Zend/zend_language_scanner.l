@@ -2151,7 +2151,7 @@ inline_html:
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
-	Z_IVAL_P(zendlval) = (long) '{';
+	Z_IVAL_P(zendlval) = (zend_int_t) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;

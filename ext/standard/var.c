@@ -54,7 +54,7 @@ static uint zend_obj_num_elements(HashTable *ht)
 	return num;
 }
 
-static void php_array_element_dump(zval *zv, ulong index, zend_string *key, int level TSRMLS_DC) /* {{{ */
+static void php_array_element_dump(zval *zv, php_uint_t index, zend_string *key, int level TSRMLS_DC) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', index);
@@ -67,7 +67,7 @@ static void php_array_element_dump(zval *zv, ulong index, zend_string *key, int 
 }
 /* }}} */
 
-static void php_object_property_dump(zval *zv, ulong index, zend_string *key, int level TSRMLS_DC) /* {{{ */
+static void php_object_property_dump(zval *zv, php_uint_t index, zend_string *key, int level TSRMLS_DC) /* {{{ */
 {
 	const char *prop_name, *class_name;
 
@@ -100,7 +100,7 @@ PHPAPI void php_var_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 	zend_string *class_name;
 	int is_temp;
 	int is_ref = 0;
-	ulong num;
+	php_uint_t num;
 	zend_string *key;
 	zval *val;
 
@@ -171,7 +171,7 @@ again:
 				php_printf("%sobject(unknown class)#%d (%d) {\n", COMMON, Z_OBJ_HANDLE_P(struc), myht ? zend_obj_num_elements(myht) : 0);
 			}
 			if (myht) {
-				ulong num;
+				php_uint_t num;
 				zend_string *key;
 				zval *val;
 
@@ -227,7 +227,7 @@ PHP_FUNCTION(var_dump)
 }
 /* }}} */
 
-static void zval_array_element_dump(zval *zv, ulong index, zend_string *key, int level TSRMLS_DC) /* {{{ */
+static void zval_array_element_dump(zval *zv, php_uint_t index, zend_string *key, int level TSRMLS_DC) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', index);
@@ -240,7 +240,7 @@ static void zval_array_element_dump(zval *zv, ulong index, zend_string *key, int
 }
 /* }}} */
 
-static void zval_object_property_dump(zval *zv, ulong index, zend_string *key, int level TSRMLS_DC) /* {{{ */
+static void zval_object_property_dump(zval *zv, php_uint_t index, zend_string *key, int level TSRMLS_DC) /* {{{ */
 {
 	const char *prop_name, *class_name;
 
@@ -271,7 +271,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 	zend_string *class_name;
 	int is_temp = 0;
 	int is_ref = 0;
-	ulong index;
+	php_uint_t index;
 	zend_string *key;
 	zval *val;
 
@@ -398,7 +398,7 @@ PHP_FUNCTION(debug_zval_dump)
 		efree(tmp_spaces); \
 	} while(0);
 
-static void php_array_element_export(zval *zv, ulong index, zend_string *key, int level, smart_str *buf TSRMLS_DC) /* {{{ */
+static void php_array_element_export(zval *zv, php_uint_t index, zend_string *key, int level, smart_str *buf TSRMLS_DC) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
@@ -426,7 +426,7 @@ static void php_array_element_export(zval *zv, ulong index, zend_string *key, in
 }
 /* }}} */
 
-static void php_object_element_export(zval *zv, ulong index, zend_string *key, int level, smart_str *buf TSRMLS_DC) /* {{{ */
+static void php_object_element_export(zval *zv, php_uint_t index, zend_string *key, int level, smart_str *buf TSRMLS_DC) /* {{{ */
 {
 	buffer_append_spaces(buf, level + 2);
 	if (key != NULL) {
@@ -459,7 +459,7 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC) 
 	int tmp_len;
 	zend_string *class_name;
 	zend_string *ztmp, *ztmp2;
-	ulong index;
+	php_uint_t index;
 	zend_string *key;
 	zval *val;
 
