@@ -541,22 +541,21 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 {
 	/* parameters */
 	zend_string		 *regex;			/* Regular expression */
-	char			 *subject;			/* String to match against */
-	int				  subject_len;
+	zend_string		 *subject;			/* String to match against */
 	pcre_cache_entry *pce;				/* Compiled regular expression */
 	zval			 *subpats = NULL;	/* Array for subpatterns */
 	long			  flags = 0;		/* Match control flags */
 	long			  start_offset = 0;	/* Where the new search starts */
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ss|z/ll", &regex,
-							  &subject, &subject_len, &subpats, &flags, &start_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|z/ll", &regex,
+							  &subject, &subpats, &flags, &start_offset) == FAILURE) {
 		RETURN_FALSE;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_STR(regex)
-		Z_PARAM_STRING(subject, subject_len)
+		Z_PARAM_STR(subject)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL_EX(subpats, 0, 1)
 		Z_PARAM_LONG(flags)
@@ -569,7 +568,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
-	php_pcre_match_impl(pce, subject, subject_len, return_value, subpats, 
+	php_pcre_match_impl(pce, subject->val, subject->len, return_value, subpats, 
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset TSRMLS_CC);
 }
 /* }}} */
@@ -1554,22 +1553,21 @@ static PHP_FUNCTION(preg_filter)
 static PHP_FUNCTION(preg_split)
 {
 	zend_string			*regex;			/* Regular expression */
-	char				*subject;		/* String to match against */
-	int					 subject_len;
+	zend_string				*subject;		/* String to match against */
 	long				 limit_val = -1;/* Integer value of limit */
 	long				 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get function parameters and do error checking */	
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ss|ll", &regex,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|ll", &regex,
 							  &subject, &subject_len, &limit_val, &flags) == FAILURE) {
 		RETURN_FALSE;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(regex)
-		Z_PARAM_STRING(subject, subject_len)
+		Z_PARAM_STR(subject)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit_val)
 		Z_PARAM_LONG(flags)
@@ -1581,7 +1579,7 @@ static PHP_FUNCTION(preg_split)
 		RETURN_FALSE;
 	}
 
-	php_pcre_split_impl(pce, subject, subject_len, return_value, limit_val, flags TSRMLS_CC);
+	php_pcre_split_impl(pce, subject->val, subject->len, return_value, limit_val, flags TSRMLS_CC);
 }
 /* }}} */
 

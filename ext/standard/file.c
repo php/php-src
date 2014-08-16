@@ -342,9 +342,9 @@ PHP_FUNCTION(flock)
 	zval *arg1, *arg3 = NULL;
 	int act;
 	php_stream *stream;
-	long operation = 0;
+	php_int_t operation = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z/", &arg1, &operation, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|z/", &arg1, &operation, &arg3) == FAILURE) {
 		return;
 	}
 
@@ -526,14 +526,14 @@ PHP_FUNCTION(file_get_contents)
 	int filename_len;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
-	long offset = -1;
-	long maxlen = PHP_STREAM_COPY_ALL;
+	php_int_t offset = -1;
+	php_int_t maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	zend_string *contents;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|br!ii", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
 		return;
 	}
 
@@ -552,7 +552,7 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if (offset > 0 && php_stream_seek(stream, offset, SEEK_SET) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream", offset);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position " ZEND_INT_FMT " in the stream", offset);
 		php_stream_close(stream);
 		RETURN_FALSE;
 	}
@@ -579,14 +579,15 @@ PHP_FUNCTION(file_put_contents)
 	char *filename;
 	int filename_len;
 	zval *data;
-	long numbytes = 0;
-	long flags = 0;
+	php_int_t numbytes = 0;
+	php_int_t flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *srcstream = NULL;
 	char mode[3] = "wb";
+	char ret_ok = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/|lr!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/|ir!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -627,13 +628,13 @@ PHP_FUNCTION(file_put_contents)
 
 	switch (Z_TYPE_P(data)) {
 		case IS_RESOURCE: {
-			size_t len;
+			php_size_t len;
 			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
-				numbytes = -1;
+				ret_ok = 0;
 			} else {
-				if (len > LONG_MAX) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "content truncated from %lu to %ld bytes", (unsigned long) len, LONG_MAX);
-					len = LONG_MAX;
+				if (len > PHP_INT_MAX) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "content truncated from %zu to " ZEND_INT_FMT " bytes", len, PHP_INT_MAX);
+					len = PHP_INT_MAX;
 				}
 				numbytes = len;
 			}
@@ -650,7 +651,7 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_STRSIZE_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRSIZE_P(data));
 				if (numbytes != Z_STRSIZE_P(data)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %ld of %d bytes written, possibly out of free disk space", numbytes, Z_STRSIZE_P(data));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %ld of %zd bytes written, possibly out of free disk space", numbytes, Z_STRSIZE_P(data));
 					numbytes = -1;
 				}
 			}
@@ -658,7 +659,7 @@ PHP_FUNCTION(file_put_contents)
 
 		case IS_ARRAY:
 			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
-				int bytes_written;
+				php_size_t bytes_written;
 				zval *tmp;
 
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
@@ -666,13 +667,9 @@ PHP_FUNCTION(file_put_contents)
 					if (str->len) {
 						numbytes += str->len;
 						bytes_written = php_stream_write(stream, str->val, str->len);
-						if (bytes_written < 0 || bytes_written != str->len) {
-							if (bytes_written < 0) {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s", str->len, filename);
-							} else {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", bytes_written, str->len);
-							}
-							numbytes = -1;
+						if (bytes_written != str->len) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %zd bytes to %s", str->len, filename);
+							ret_ok = 0;
 							STR_RELEASE(str);
 							break;
 						}
@@ -689,7 +686,7 @@ PHP_FUNCTION(file_put_contents)
 				if (zend_std_cast_object_tostring(data, &out, IS_STRING TSRMLS_CC) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRSIZE(out));
 					if (numbytes != Z_STRSIZE(out)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %ld of %d bytes written, possibly out of free disk space", numbytes, Z_STRSIZE(out));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %ld of %zd bytes written, possibly out of free disk space", numbytes, Z_STRSIZE(out));
 						numbytes = -1;
 					}
 					zval_dtor(&out);
@@ -697,12 +694,12 @@ PHP_FUNCTION(file_put_contents)
 				}
 			}
 		default:
-			numbytes = -1;
+			ret_ok = 0;
 			break;
 	}
 	php_stream_close(stream);
 
-	if (numbytes < 0) {
+	if (!ret_ok) {
 		RETURN_FALSE;
 	}
 
@@ -721,7 +718,7 @@ PHP_FUNCTION(file)
 	char *p, *s, *e;
 	register int i = 0;
 	char eol_marker = '\n';
-	long flags = 0;
+	php_int_t flags = 0;
 	zend_bool use_include_path;
 	zend_bool include_new_line;
 	zend_bool skip_blank_lines;
@@ -731,11 +728,11 @@ PHP_FUNCTION(file)
 	zend_string *target_buf;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|ir!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%ld' flag is not supported", flags);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'" ZEND_INT_FMT "' flag is not supported", flags);
 		RETURN_FALSE;
 	}
 
@@ -1010,13 +1007,13 @@ PHPAPI PHP_FUNCTION(feof)
 PHPAPI PHP_FUNCTION(fgets)
 {
 	zval *arg1;
-	long len = 1024;
+	php_int_t len = 1024;
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &arg1, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &arg1, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1094,7 +1091,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 PHPAPI PHP_FUNCTION(fgetss)
 {
 	zval *fd;
-	long bytes = 0;
+	php_int_t bytes = 0;
 	size_t len = 0;
 	size_t actual_len, retval_len;
 	char *buf = NULL, *retval;
@@ -1103,7 +1100,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 	char *allowed_tags=NULL;
 	int allowed_tags_len=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lS", &fd, &bytes, &allowed) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|iS", &fd, &bytes, &allowed) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1200,11 +1197,11 @@ PHPAPI PHP_FUNCTION(fwrite)
 	int arg2len;
 	int ret;
 	int num_bytes;
-	long arg3 = 0;
+	php_int_t arg3 = 0;
 	char *buffer = NULL;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &arg2, &arg2len, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|i", &arg1, &arg2, &arg2len, &arg3) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1276,7 +1273,7 @@ PHPAPI PHP_FUNCTION(rewind)
 PHPAPI PHP_FUNCTION(ftell)
 {
 	zval *arg1;
-	long ret;
+	php_int_t ret;
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
@@ -1298,10 +1295,10 @@ PHPAPI PHP_FUNCTION(ftell)
 PHPAPI PHP_FUNCTION(fseek)
 {
 	zval *arg1;
-	long arg2, whence = SEEK_SET;
+	php_int_t arg2, whence = SEEK_SET;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &arg1, &arg2, &whence) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|i", &arg1, &arg2, &whence) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1315,7 +1312,7 @@ PHPAPI PHP_FUNCTION(fseek)
 */
 
 /* DEPRECATED APIs: Use php_stream_mkdir() instead */
-PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC)
+PHPAPI int php_mkdir_ex(const char *dir, php_int_t mode, int options TSRMLS_DC)
 {
 	int ret;
 
@@ -1330,7 +1327,7 @@ PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC)
 	return ret;
 }
 
-PHPAPI int php_mkdir(const char *dir, long mode TSRMLS_DC)
+PHPAPI int php_mkdir(const char *dir, php_int_t mode TSRMLS_DC)
 {
 	return php_mkdir_ex(dir, mode, REPORT_ERRORS TSRMLS_CC);
 }
@@ -1409,7 +1406,7 @@ PHP_FUNCTION(readfile)
    Return or change the umask */
 PHP_FUNCTION(umask)
 {
-	long arg1 = 0;
+	php_int_t arg1 = 0;
 	int oldumask;
 
 	oldumask = umask(077);
@@ -1418,7 +1415,7 @@ PHP_FUNCTION(umask)
 		BG(umask) = oldumask;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1524,10 +1521,10 @@ PHP_FUNCTION(unlink)
 PHP_NAMED_FUNCTION(php_if_ftruncate)
 {
 	zval *fp;
-	long size;
+	php_int_t size;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &fp, &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &fp, &size) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1767,10 +1764,10 @@ safe_to_copy:
 PHPAPI PHP_FUNCTION(fread)
 {
 	zval *arg1;
-	long len;
+	php_int_t len;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &arg1, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1891,8 +1888,8 @@ PHP_FUNCTION(fputcsv)
 }
 /* }}} */
 
-/* {{{ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC) */
-PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
+/* {{{ PHPAPI php_size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC) */
+PHPAPI php_size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
 {
 	int count, i = 0, ret;
 	zval *field_tmp;
@@ -1959,7 +1956,7 @@ PHP_FUNCTION(fgetcsv)
 
 	/* first section exactly as php_fgetss */
 
-	long len = 0;
+	php_int_t len = 0;
 	size_t buf_len;
 	char *buf;
 	php_stream *stream;

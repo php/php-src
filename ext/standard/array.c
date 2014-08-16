@@ -255,7 +255,7 @@ PHP_FUNCTION(ksort)
 
 PHPAPI int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 {
-	long cnt = 0;
+	php_int_t cnt = 0;
 	zval *element;
 
 	if (Z_TYPE_P(array) == IS_ARRAY) {
@@ -289,7 +289,7 @@ PHP_FUNCTION(count)
 {
 	zval *array;
 	long mode = COUNT_NORMAL;
-	long cnt;
+	php_int_t cnt;
 	zval *element;
 
 #ifndef FAST_ZPP
@@ -1230,7 +1230,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ 
 		 *array,				/* array to check in */
 		 *entry,				/* pointer to array entry */
 		  res;					/* comparison result */
-	ulong num_idx;
+	php_uint_t num_idx;
 	zend_string *str_idx;
 	zend_bool strict = 0;		/* strict comparison or not */
 
@@ -1360,7 +1360,7 @@ PHP_FUNCTION(extract)
 	long extract_type = EXTR_OVERWRITE;
 	zval *entry;
 	zend_string *var_name;
-	ulong num_key;
+	php_uint_t num_key;
 	int var_exists, count = 0;
 	int extract_refs = 0;
 	zend_array *symbol_table;
@@ -1554,9 +1554,9 @@ PHP_FUNCTION(compact)
 PHP_FUNCTION(array_fill)
 {
 	zval *val;
-	long start_key, num;
+	php_int_t start_key, num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llz", &start_key, &num, &val) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iiz", &start_key, &num, &val) == FAILURE) {
 		return;
 	}
 
@@ -1652,7 +1652,7 @@ PHP_FUNCTION(range)
 	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING && Z_STRSIZE_P(zlow) >= 1 && Z_STRSIZE_P(zhigh) >= 1) {
 		int type1, type2;
 		unsigned char low, high;
-		long lstep = (long) step;
+		php_int_t lstep = (php_int_t) step;
 
 		type1 = is_numeric_string(Z_STRVAL_P(zlow), Z_STRSIZE_P(zlow), NULL, NULL, 0);
 		type2 = is_numeric_string(Z_STRVAL_P(zhigh), Z_STRSIZE_P(zhigh), NULL, NULL, 0);
@@ -1709,7 +1709,7 @@ PHP_FUNCTION(range)
 
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
 		double low, high, value;
-		long i;
+		php_int_t i;
 double_str:
 		low = zval_get_double(zlow);
 		high = zval_get_double(zhigh);
@@ -1742,11 +1742,11 @@ double_str:
 		}
 	} else {
 		double low, high;
-		long lstep;
+		php_int_t lstep;
 long_str:
 		low = zval_get_double(zlow);
 		high = zval_get_double(zhigh);
-		lstep = (long) step;
+		lstep = (php_int_t) step;
 
 		Z_TYPE_INFO(tmp) = IS_INT;
 		if (low > high) { 		/* Negative steps */
@@ -1755,7 +1755,7 @@ long_str:
 				goto err;
 			}
 			for (; low >= high; low -= lstep) {
-				Z_IVAL(tmp) = (long)low;
+				Z_IVAL(tmp) = (php_int_t)low;
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 			}
 		} else if (high > low) { 	/* Positive steps */
@@ -1764,11 +1764,11 @@ long_str:
 				goto err;
 			}
 			for (; low <= high; low += lstep) {
-				Z_IVAL(tmp) = (long)low;
+				Z_IVAL(tmp) = (php_int_t)low;
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 			}
 		} else {
-			Z_IVAL(tmp) = (long)low;
+			Z_IVAL(tmp) = (php_int_t)low;
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	}
@@ -1995,7 +1995,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	zval *stack,	/* Input stack */
 		 *val;		/* Value to be popped */
 	zend_string *key = NULL;
-	ulong index;
+	php_uint_t index;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/", &stack) == FAILURE) {
@@ -2145,13 +2145,13 @@ PHP_FUNCTION(array_splice)
 	HashTable  old_hash;
 	uint    idx;
 	Bucket *p;					/* Bucket used for traversing hash */
-	long	i,
+	php_int_t	i,
 			offset,
 			length = 0,
 			repl_num = 0;		/* Number of replacement elements */
 	int		num_in;				/* Number of elements in the input array */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/l|lz/", &array, &offset, &length, &repl_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/i|iz/", &array, &offset, &length, &repl_array) == FAILURE) {
 		return;
 	}
 
@@ -2190,7 +2190,7 @@ PHP_FUNCTION(array_splice)
 		/* ..and the length */
 		if (length < 0) {
 			size = num_in - offset + length;
-		} else if (((unsigned long) offset + (unsigned long) length) > (unsigned) num_in) {
+		} else if (((php_uint_t) offset + (php_uint_t) length) > (unsigned) num_in) {
 			size = num_in - offset;
 		}
 
@@ -2222,16 +2222,16 @@ PHP_FUNCTION(array_slice)
 	zval	 *input,		/* Input array */
 			 *z_length = NULL, /* How many elements to get */ 
 			 *entry;		/* An array entry */
-	long	 offset,		/* Offset to get elements from */
+	php_int_t	 offset,		/* Offset to get elements from */
 			 length = 0;	
 	zend_bool preserve_keys = 0; /* Whether to preserve keys while copying to the new array or not */
 	int		 num_in,		/* Number of elements in the input array */
 			 pos;			/* Current position in the array */
 	zend_string *string_key;
-	ulong num_key;
+	php_uint_t num_key;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|zb", &input, &offset, &z_length, &preserve_keys) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ai|zb", &input, &offset, &z_length, &preserve_keys) == FAILURE) {
 		return;
 	}
 #else
@@ -2265,7 +2265,7 @@ PHP_FUNCTION(array_slice)
 	/* ..and the length */
 	if (length < 0) {
 		length = num_in - offset + length;
-	} else if (((unsigned long) offset + (unsigned long) length) > (unsigned) num_in) {
+	} else if (((php_uint_t) offset + (php_uint_t) length) > (unsigned) num_in) {
 		length = num_in - offset;
 	}
 
@@ -2404,7 +2404,7 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 {
 	zval *src_entry, *dest_entry, *src_zval, *dest_zval;
 	zend_string *string_key;
-	ulong num_key;
+	php_uint_t num_key;
 	int ret;
 
 	ZEND_HASH_FOREACH_KEY_VAL(src, num_key, string_key, src_entry) {
@@ -2564,7 +2564,7 @@ PHP_FUNCTION(array_keys)
 	       new_val;				/* New value */
 	int    add_key;				/* Flag to indicate whether a key should be added */
 	zend_bool strict = 0;		/* do strict comparison */
-	ulong num_idx;
+	php_uint_t num_idx;
 	zend_string *str_idx;
 	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
 
@@ -2775,7 +2775,7 @@ PHP_FUNCTION(array_reverse)
 	zval	 *input,				/* Input array */
 			 *entry;				/* An entry in the input array */
 	zend_string *string_key;
-	ulong	  num_key;
+	php_uint_t	  num_key;
 	zend_bool preserve_keys = 0;	/* whether to preserve keys */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &input, &preserve_keys) == FAILURE) {
@@ -2810,20 +2810,20 @@ PHP_FUNCTION(array_pad)
 	zval  *pads;		/* Array to pass to splice */
 	HashTable *new_hash;/* Return value from splice */
 	HashTable  old_hash;
-	long pad_size;		/* Size to pad to */
-	long pad_size_abs;	/* Absolute value of pad_size */
+	php_int_t pad_size;		/* Size to pad to */
+	php_int_t pad_size_abs;	/* Absolute value of pad_size */
 	int	input_size;		/* Size of the input array */
 	int	num_pads;		/* How many pads do we need */
 	int	do_pad;			/* Whether we should do padding at all */
 	int	i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "alz", &input, &pad_size, &pad_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aiz", &input, &pad_size, &pad_value) == FAILURE) {
 		return;
 	}
 
 	/* Do some initial calculations */
 	input_size = zend_hash_num_elements(Z_ARRVAL_P(input));
-	pad_size_abs = abs(pad_size);
+	pad_size_abs = ZEND_ABS(pad_size);
 	if (pad_size_abs < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may only pad up to 1048576 elements at a time");
 		zval_dtor(return_value);
@@ -2874,7 +2874,7 @@ PHP_FUNCTION(array_pad)
 PHP_FUNCTION(array_flip)
 {
 	zval *array, *entry, data;
-	ulong num_idx;
+	php_uint_t num_idx;
 	zend_string *str_idx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
@@ -2912,10 +2912,10 @@ PHP_FUNCTION(array_change_key_case)
 	zval *array, *entry;
 	zend_string *string_key;
 	zend_string *new_key;
-	ulong num_key;
-	long change_to_upper=0;
+	php_uint_t num_key;
+	php_int_t change_to_upper=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &change_to_upper) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &array, &change_to_upper) == FAILURE) {
 		return;
 	}
 
@@ -4141,12 +4141,12 @@ PHP_FUNCTION(array_multisort)
 PHP_FUNCTION(array_rand)
 {
 	zval *input;
-	long randval, num_req = 1;
+	php_int_t randval, num_req = 1;
 	int num_avail;
 	zend_string *string_key;
-	ulong num_key;
+	php_uint_t num_key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &input, &num_req) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &input, &num_req) == FAILURE) {
 		return;
 	}
 
@@ -4247,7 +4247,7 @@ PHP_FUNCTION(array_product)
 
 		if (Z_TYPE(entry_n) == IS_INT && Z_TYPE_P(return_value) == IS_INT) {
 			dval = (double)Z_IVAL_P(return_value) * (double)Z_IVAL(entry_n);
-			if ( (double)LONG_MIN <= dval && dval <= (double)LONG_MAX ) {
+			if ( (double)PHP_INT_MIN <= dval && dval <= (double)PHP_INT_MAX ) {
 				Z_IVAL_P(return_value) *= Z_IVAL(entry_n);
 				continue;
 			}
@@ -4328,7 +4328,7 @@ PHP_FUNCTION(array_filter)
 	zend_string *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	ulong num_key;
+	php_uint_t num_key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|fl", &array, &fci, &fci_cache, &use_type) == FAILURE) {
 		return;
@@ -4620,15 +4620,15 @@ PHP_FUNCTION(array_key_exists)
 PHP_FUNCTION(array_chunk)
 {
 	int argc = ZEND_NUM_ARGS(), num_in;
-	long size, current = 0;
+	php_int_t size, current = 0;
 	zend_string *str_key;
-	ulong num_key;
+	php_uint_t num_key;
 	zend_bool preserve_keys = 0;
 	zval *input = NULL;
 	zval chunk;
 	zval *entry;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "al|b", &input, &size, &preserve_keys) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "ai|b", &input, &size, &preserve_keys) == FAILURE) {
 		return;
 	}
 	/* Do bounds checking for size parameter. */

@@ -286,8 +286,8 @@ PHP_FUNCTION(abs)
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_INT) {
-		if (Z_IVAL_P(value) == LONG_MIN) {
-			RETURN_DOUBLE(-(double)LONG_MIN);
+		if (Z_IVAL_P(value) == ZEND_INT_MIN) {
+			RETURN_DOUBLE(-(double)ZEND_INT_MIN);
 		} else {
 			RETURN_INT(Z_IVAL_P(value) < 0 ? -Z_IVAL_P(value) : Z_IVAL_P(value));
 		}
@@ -342,11 +342,11 @@ PHP_FUNCTION(round)
 {
 	zval *value;
 	int places = 0;
-	long precision = 0;
-	long mode = PHP_ROUND_HALF_UP;
+	php_int_t precision = 0;
+	php_int_t mode = PHP_ROUND_HALF_UP;
 	double return_val;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ll", &value, &precision, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ii", &value, &precision, &mode) == FAILURE) {
 		return;
 	}
 
@@ -926,9 +926,9 @@ PHP_FUNCTION(rad2deg)
 /*
  * Convert a string representation of a base(2-36) number to a long.
  */
-PHPAPI long _php_math_basetolong(zval *arg, int base)
+PHPAPI php_int_t _php_math_basetolong(zval *arg, int base)
 {
-	long num = 0, digit, onum;
+	php_int_t num = 0, digit, onum;
 	int i;
 	char c, *s;
 
@@ -959,7 +959,7 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
 			TSRMLS_FETCH();
 
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number '%s' is too big to fit in long", s);
-			return LONG_MAX;
+			return ZEND_INT_MAX;
 		}
 	}
 
@@ -973,12 +973,12 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
  */
 PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 {
-	long num = 0;
+	php_int_t num = 0;
 	double fnum = 0;
 	int i;
 	int mode = 0;
 	char c, *s;
-	long cutoff;
+	php_int_t cutoff;
 	int cutlim;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
@@ -987,8 +987,8 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 
 	s = Z_STRVAL_P(arg);
 
-	cutoff = LONG_MAX / base;
-	cutlim = LONG_MAX % base;
+	cutoff = ZEND_INT_MAX / base;
+	cutlim = ZEND_INT_MAX % base;
 	
 	for (i = Z_STRSIZE_P(arg); i > 0; i--) {
 		c = *s++;
@@ -1038,9 +1038,9 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 PHPAPI zend_string * _php_math_longtobase(zval *arg, int base TSRMLS_DC)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-	char buf[(sizeof(unsigned long) << 3) + 1];
+	char buf[(sizeof(php_uint_t) << 3) + 1];
 	char *ptr, *end;
-	unsigned long value;
+	php_uint_t value;
 
 	if (Z_TYPE_P(arg) != IS_INT || base < 2 || base > 36) {
 		return STR_EMPTY_ALLOC();
@@ -1200,20 +1200,20 @@ PHP_FUNCTION(dechex)
 PHP_FUNCTION(base_convert)
 {
 	zval *number, temp;
-	long frombase, tobase;
+	php_int_t frombase, tobase;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zll", &number, &frombase, &tobase) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zii", &number, &frombase, &tobase) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(number);
 	
 	if (frombase < 2 || frombase > 36) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `from base' (%ld)", frombase);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `from base' (%pd)", frombase);
 		RETURN_FALSE;
 	}
 	if (tobase < 2 || tobase > 36) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `to base' (%ld)", tobase);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `to base' (%pd)", tobase);
 		RETURN_FALSE;
 	}
 
@@ -1350,13 +1350,13 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 PHP_FUNCTION(number_format)
 {
 	double num;
-	long dec = 0;
+	php_int_t dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	char thousand_sep_chr = ',', dec_point_chr = '.';
 	int thousand_sep_len = 0, dec_point_len = 0;
 	
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|ls!s!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|is!s!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
 		return;
 	}
 #else

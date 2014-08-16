@@ -1172,7 +1172,7 @@ static zend_always_inline int _z_param_str(zval *arg, zend_string **dest, int ch
 	return 1;
 }
 
-static zend_always_inline int _z_param_string(zval *arg, char **dest, zend_size_t *dest_len, int check_null TSRMLS_DC)
+static zend_always_inline int _z_param_string(zval *arg, char **dest, int *dest_len, int check_null TSRMLS_DC)
 {
 	zend_string *str;
 

@@ -284,7 +284,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 {
 	char *s11, *s22;
 	int len1, len2;
-	long start = 0, len = 0;
+	php_int_t start = 0, len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &s11, &len1,
 				&s22, &len2, &start, &len) == FAILURE) {
@@ -694,7 +694,7 @@ PHP_FUNCTION(nl_langinfo)
 #endif
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Item '%ld' is not valid", item);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Item '" ZEND_INT_FMT "' is not valid", item);
 			RETURN_FALSE;
 	}
 	/* }}} */
@@ -732,7 +732,7 @@ PHP_FUNCTION(strcoll)
  * it needs to be incrementing.
  * Returns: FAILURE/SUCCESS whether the input was correct (i.e. no range errors)
  */
-static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_DC)
+static inline int php_charmask(unsigned char *input, php_size_t len, char *mask TSRMLS_DC)
 {
 	unsigned char *end;
 	unsigned char c;
@@ -781,9 +781,9 @@ static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_
  * mode 3 : trim left and right
  * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
-PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zval *return_value, int mode TSRMLS_DC)
+PHPAPI char *php_trim(char *c, php_size_t len, char *what, php_size_t what_len, zval *return_value, int mode TSRMLS_DC)
 {
-	register int i;
+	register php_int_t i;
 	int trimmed = 0;
 	char mask[256];
 
@@ -828,23 +828,22 @@ PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zval *return_v
  */
 static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	char *str;
-	char *what = NULL;
-	int str_len, what_len = 0;
+	zend_string *str;
+	zend_string *what = NULL;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &str, &str_len, &what, &what_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &str, &what) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(what, what_len)
+		Z_PARAM_STR(what)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	php_trim(str, str_len, what, what_len, return_value, mode TSRMLS_CC);
+	php_trim(str->val, str->len, (what ? what->val : NULL), (what ? what->len : 0), return_value, mode TSRMLS_CC);
 }
 /* }}} */
 
@@ -1085,11 +1084,11 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
 PHP_FUNCTION(explode)
 {
 	zend_string *str, *delim;
-	long limit = LONG_MAX; /* No limit */
+	php_int_t limit = PHP_INT_MAX; /* No limit */
 	zval zdelim, zstr;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &delim, &str, &limit) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|i", &delim, &str, &limit) == FAILURE) {
 		return;
 	}
 #else
@@ -1384,21 +1383,20 @@ PHPAPI char *php_strtolower(char *s, size_t len)
    Makes a string lowercase */
 PHP_FUNCTION(strtolower)
 {
-	char *str;
-	int arglen;
+	zend_string *str;
 	zend_string *result;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &arglen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(str, arglen)
+		Z_PARAM_STR(str)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	result = STR_INIT(str, arglen, 0);
+	result = STR_INIT(str->val, str->len, 0);
 	php_strtolower(result->val, result->len);
 	RETURN_NEW_STR(result);
 }
@@ -2234,18 +2232,17 @@ PHP_FUNCTION(chunk_split)
    Returns part of a string */
 PHP_FUNCTION(substr)
 {
-	char *str;
-	long l = 0, f;
-	int str_len;
+	zend_string *str;
+	php_int_t l = 0, f;
 	int argc = ZEND_NUM_ARGS();
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|l", &str, &str_len, &f, &l) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si|i", &str, &f, &l) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_LONG(f)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(l)
@@ -2253,22 +2250,22 @@ PHP_FUNCTION(substr)
 #endif
 
 	if (argc > 2) {
-		if ((l < 0 && -l > str_len)) {
+		if ((l < 0 && -l > str->len)) {
 			RETURN_FALSE;
-		} else if (l > str_len) {
-			l = str_len;
+		} else if (l > str->len) {
+			l = str->len;
 		}
 	} else {
-		l = str_len;
+		l = str->len;
 	}
 
-	if (f > str_len) {
+	if (f > str->len) {
 		RETURN_FALSE;
-	} else if (f < 0 && -f > str_len) {
+	} else if (f < 0 && -f > str->len) {
 		f = 0;
 	}
 
-	if (l < 0 && (l + str_len - f) < 0) {
+	if (l < 0 && (l + str->len - f) < 0) {
 		RETURN_FALSE;
 	}
 
@@ -2276,7 +2273,7 @@ PHP_FUNCTION(substr)
 	 * of the string
 	 */
 	if (f < 0) {
-		f = str_len + f;
+		f = str->len + f;
 		if (f < 0) {
 			f = 0;
 		}
@@ -2286,21 +2283,21 @@ PHP_FUNCTION(substr)
 	 * needed to stop that many chars from the end of the string
 	 */
 	if (l < 0) {
-		l = (str_len - f) + l;
+		l = (str->len - f) + l;
 		if (l < 0) {
 			l = 0;
 		}
 	}
 
-	if (f >= str_len) {
+	if (f >= str->len) {
 		RETURN_FALSE;
 	}
 
-	if ((f + l) > str_len) {
-		l = str_len - f;
+	if ((f + l) > str->len) {
+		l = str->len - f;
 	}
 
-	RETURN_STRINGL(str + f, l);
+	RETURN_STRINGL(str->val + f, l);
 }
 /* }}} */
 
@@ -2783,9 +2780,9 @@ PHP_FUNCTION(ucwords)
 
 /* {{{ php_strtr
  */
-PHPAPI char *php_strtr(char *str, int len, char *str_from, char *str_to, int trlen)
+PHPAPI char *php_strtr(char *str, php_size_t len, char *str_from, char *str_to, php_size_t trlen)
 {
-	int i;
+	php_size_t i;
 	unsigned char xlat[256];
 
 	if ((trlen < 1) || (len < 1)) {
@@ -3127,10 +3124,10 @@ PHP_FUNCTION(similar_text)
 /* {{{ php_stripslashes
  *
  * be careful, this edits the string in-place */
-PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
+PHPAPI void php_stripslashes(char *str, php_size_t *len TSRMLS_DC)
 {
 	char *s, *t;
-	int l;
+	php_size_t l;
 
 	if (len != NULL) {
 		l = *len;
@@ -3171,22 +3168,21 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
    Escapes all chars mentioned in charlist with backslash. It creates octal representations if asked to backslash characters with 8th bit set or with ASCII<32 (except '\n', '\r', '\t' etc...) */
 PHP_FUNCTION(addcslashes)
 {
-	char *str, *what;
-	int str_len, what_len;
+	zend_string *str, *what;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &str, &str_len, &what, &what_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &str, &what) == FAILURE) {
 		return;
 	}
 
-	if (str_len == 0) {
+	if (str->len == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	if (what_len == 0) {
-		RETURN_STRINGL(str, str_len);
+	if (what->len == 0) {
+		RETURN_STRINGL(str->val, str->len);
 	}
 
-	RETURN_STR(php_addcslashes(str, str_len, 0, what, what_len TSRMLS_CC));
+	RETURN_STR(php_addcslashes(str->val, str->len, 0, what->val, what->len TSRMLS_CC));
 }
 /* }}} */
 
@@ -3194,24 +3190,23 @@ PHP_FUNCTION(addcslashes)
    Escapes single quote, double quotes and backslash characters in a string with backslashes */
 PHP_FUNCTION(addslashes)
 {
-	char *str;
-	int  str_len;
+	zend_string *str;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	if (str_len == 0) {
+	if (str->len == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	RETURN_STR(php_addslashes(str, str_len, 0 TSRMLS_CC));
+	RETURN_STR(php_addslashes(str->val, str->len, 0 TSRMLS_CC));
 }
 /* }}} */
 
@@ -3219,14 +3214,13 @@ PHP_FUNCTION(addslashes)
    Strips backslashes from a string. Uses C-style conventions */
 PHP_FUNCTION(stripcslashes)
 {
-	char *str;
-	int  str_len;
+	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str) == FAILURE) {
 		return;
 	}
 
-	ZVAL_STRINGL(return_value, str, str_len);
+	ZVAL_STRINGL(return_value, str->val, str->len);
 	php_stripcslashes(Z_STRVAL_P(return_value), &Z_STRSIZE_P(return_value));
 }
 /* }}} */
@@ -3235,14 +3229,13 @@ PHP_FUNCTION(stripcslashes)
    Strips backslashes from a string */
 PHP_FUNCTION(stripslashes)
 {
-	char *str;
-	int  str_len;
+	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str) == FAILURE) {
 		return;
 	}
 
-	ZVAL_STRINGL(return_value, str, str_len);
+	ZVAL_STRINGL(return_value, str->val, str->len);
 	php_stripslashes(Z_STRVAL_P(return_value), &Z_STRSIZE_P(return_value) TSRMLS_CC);
 }
 /* }}} */
@@ -3268,10 +3261,10 @@ char *php_strerror(int errnum)
 
 /* {{{ php_stripcslashes
  */
-PHPAPI void php_stripcslashes(char *str, int *len)
+PHPAPI void php_stripcslashes(char *str, php_size_t *len)
 {
 	char *source, *target, *end;
-	int  nlen = *len, i;
+	php_size_t  nlen = *len, i;
 	char numtmp[4];
 
 	for (source=str, end=str+nlen, target=str; source < end; source++) {
@@ -3331,13 +3324,13 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 
 /* {{{ php_addcslashes
  */
-PHPAPI zend_string *php_addcslashes(const char *str, int length, int should_free, char *what, int wlength TSRMLS_DC)
+PHPAPI zend_string *php_addcslashes(const char *str, php_size_t length, int should_free, char *what, php_size_t wlength TSRMLS_DC)
 {
 	char flags[256];
 	char *source, *target;
 	char *end;
 	char c;
-	int  newlen;
+	php_size_t  newlen;
 	zend_string *new_str = STR_ALLOC(4 * (length? length : (length = strlen(str))), 0);
 
 	if (!wlength) {
@@ -3381,7 +3374,7 @@ PHPAPI zend_string *php_addcslashes(const char *str, int length, int should_free
 
 /* {{{ php_addslashes
  */
-PHPAPI zend_string *php_addslashes(char *str, int length, int should_free TSRMLS_DC)
+PHPAPI zend_string *php_addslashes(char *str, php_size_t length, int should_free TSRMLS_DC)
 {
 	/* maximum string length, worst case situation */
 	char *source, *target;
@@ -4732,13 +4725,12 @@ PHP_FUNCTION(str_getcsv)
    Returns the input string repeat mult times */
 PHP_FUNCTION(str_repeat)
 {
-	char		*input_str;		/* Input string */
-	int 		input_len;
-	long 		mult;			/* Multiplier */
+	zend_string		*input_str;		/* Input string */
+	php_int_t 		mult;			/* Multiplier */
 	zend_string	*result;		/* Resulting string */
 	size_t		result_len;		/* Length of the resulting string */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &input_str, &input_len, &mult) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl", &input_str, &mult) == FAILURE) {
 		return;
 	}
 
@@ -4749,22 +4741,22 @@ PHP_FUNCTION(str_repeat)
 
 	/* Don't waste our time if it's empty */
 	/* ... or if the multiplier is zero */
-	if (input_len == 0 || mult == 0)
+	if (input_str->len == 0 || mult == 0)
 		RETURN_EMPTY_STRING();
 
 	/* Initialize the result string */
-	result = STR_SAFE_ALLOC(input_len, mult, 0, 0);
-	result_len = input_len * mult;
+	result = STR_SAFE_ALLOC(input_str->len, mult, 0, 0);
+	result_len = input_str->len * mult;
 
 	/* Heavy optimization for situations where input string is 1 byte long */
-	if (input_len == 1) {
-		memset(result->val, *(input_str), mult);
+	if (input_str->len == 1) {
+		memset(result->val, *(input_str->val), mult);
 	} else {
 		char *s, *e, *ee;
-		int l=0;
-		memcpy(result->val, input_str, input_len);
+		ptrdiff_t l=0;
+		memcpy(result->val, input_str->val, input_str->len);
 		s = result->val;
-		e = result->val + input_len;
+		e = result->val + input_str->len;
 		ee = result->val + result_len;
 
 		while (e<ee) {

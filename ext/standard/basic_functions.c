@@ -4386,9 +4386,9 @@ PHP_FUNCTION(flush)
    Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
-	long num;
+	php_int_t num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &num) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (num < 0) {
@@ -4409,9 +4409,9 @@ PHP_FUNCTION(sleep)
 PHP_FUNCTION(usleep)
 {
 #if HAVE_USLEEP
-	long num;
+	php_int_t num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &num) == FAILURE) {
 		return;
 	}
 	if (num < 0) {
@@ -4428,7 +4428,7 @@ PHP_FUNCTION(usleep)
    Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {
-	long tv_sec, tv_nsec;
+	php_int_t tv_sec, tv_nsec;
 	struct timespec php_req, php_rem;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &tv_sec, &tv_nsec) == FAILURE) {
@@ -5778,7 +5778,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			if (!(Z_STRSIZE_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1), NULL, NULL, 0) == IS_INT) {
-				ulong key = (ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1));
+				php_uint_t key = (php_uint_t) zend_atol(Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1));
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
 					find_hash = zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash);

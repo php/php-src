@@ -932,6 +932,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case 'f': case 'A':
 			case 'H': case 'p':
 			case 'S': case 'P':
+			case 'i':
 				max_num_args++;
 				break;
 

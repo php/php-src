@@ -311,7 +311,7 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 			return 0;
 		}
 
-		if (Z_TYPE(key) != IS_LONG && Z_TYPE(key) != IS_STRING) {
+		if (Z_TYPE(key) != IS_INT && Z_TYPE(key) != IS_STRING) {
 			zval_dtor(&key);
 			return 0;
 		}
@@ -321,12 +321,12 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 
 		if (!objprops) {
 			switch (Z_TYPE(key)) {
-			case IS_LONG:
-				if ((old_data = zend_hash_index_find(ht, Z_LVAL(key))) != NULL) {
+			case IS_INT:
+				if ((old_data = zend_hash_index_find(ht, Z_IVAL(key))) != NULL) {
 					//??? update hash
 					var_push_dtor(var_hash, old_data);
 				}
-				data = zend_hash_index_update(ht, Z_LVAL(key), &d);
+				data = zend_hash_index_update(ht, Z_IVAL(key), &d);
 				break;
 			case IS_STRING:
 				if ((old_data = zend_symtable_find(ht, Z_STR(key))) != NULL) {
@@ -552,9 +552,9 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	}
 
 	/* Use double for large long values that were serialized on a 64-bit system */
-	if (digits >= MAX_LENGTH_OF_LONG - 1) {
-		if (digits == MAX_LENGTH_OF_LONG - 1) {
-			int cmp = strncmp((char*)YYCURSOR - MAX_LENGTH_OF_LONG, long_min_digits, MAX_LENGTH_OF_LONG - 1);
+	if (digits >= MAX_LENGTH_OF_ZEND_INT - 1) {
+		if (digits == MAX_LENGTH_OF_ZEND_INT - 1) {
+			int cmp = strncmp((char*)YYCURSOR - MAX_LENGTH_OF_ZEND_INT, int_min_digits, MAX_LENGTH_OF_ZEND_INT - 1);
 
 			if (!(cmp < 0 || (cmp == 0 && start[2] == '-'))) {
 				goto use_double;
@@ -565,7 +565,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	}
 #endif
 	*p = YYCURSOR;
-	ZVAL_LONG(rval, parse_iv(start + 2));
+	ZVAL_INT(rval, parse_iv(start + 2));
 	return 1;
 }
 

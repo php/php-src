@@ -88,7 +88,7 @@ PHP_FUNCTION(linkinfo)
 {
 	char *link;
 	int link_len;
-	struct stat sb;
+	php_stat_t sb;
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &link, &link_len) == FAILURE) {

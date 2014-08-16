@@ -120,7 +120,7 @@ again:
 			php_printf("%sNULL\n", COMMON);
 			break;
 		case IS_INT:
-			php_printf("%sint(%ld)\n", COMMON, Z_IVAL_P(struc));
+			php_printf("%sint(" ZEND_INT_FMT ")\n", COMMON, Z_IVAL_P(struc));
 			break;
 		case IS_DOUBLE:
 			php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
@@ -291,7 +291,7 @@ again:
 		php_printf("%sNULL\n", COMMON);
 		break;
 	case IS_INT:
-		php_printf("%slong(%ld)\n", COMMON, Z_IVAL_P(struc));
+		php_printf("%slong(" ZEND_INT_FMT ")\n", COMMON, Z_IVAL_P(struc));
 		break;
 	case IS_DOUBLE:
 		php_printf("%sdouble(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
@@ -354,7 +354,7 @@ again:
 		break;
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc) TSRMLS_CC);
-		php_printf("%sresource(%ld) of type (%s) refcount(%u)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
+		php_printf("%sresource(" ZEND_INT_FMT ") of type (%s) refcount(%u)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
 		break;
 	}
 	case IS_REFERENCE:
@@ -613,16 +613,16 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var_ptr, zval *var
 	}
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
 		p = smart_str_print_long(id + sizeof(id) - 1,
-				(long) Z_OBJ_P(var));
+				(php_int_t) Z_OBJ_P(var));
 		*(--p) = 'O';
 		len = id + sizeof(id) - 1 - p;
 	} else if (var_ptr != var) {
 		p = smart_str_print_long(id + sizeof(id) - 1,
-				(long) Z_REF_P(var_ptr));
+				(php_int_t) Z_REF_P(var_ptr));
 		*(--p) = 'R';
 		len = id + sizeof(id) - 1 - p;
 	} else {
-		p = smart_str_print_long(id + sizeof(id) - 1, (long) var);
+		p = smart_str_print_long(id + sizeof(id) - 1, (php_int_t) var);
 		len = id + sizeof(id) - 1 - p;
 	}
 
@@ -635,7 +635,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var_ptr, zval *var
 			zend_hash_next_index_insert(var_hash, &var_no);
 		}
 #if 0
-		fprintf(stderr, "- had var (%d): %lu\n", Z_TYPE_P(var), **(ulong**)var_old);
+		fprintf(stderr, "- had var (%d): %lu\n", Z_TYPE_P(var), **(php_uint_t**)var_old);
 #endif
 		return FAILURE;
 	}
@@ -650,7 +650,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var_ptr, zval *var
 }
 /* }}} */
 
-static inline void php_var_serialize_long(smart_str *buf, long val) /* {{{ */
+static inline void php_var_serialize_long(smart_str *buf, php_int_t val) /* {{{ */
 {
 	smart_str_appendl(buf, "i:", 2);
 	smart_str_append_int(buf, val);
@@ -928,7 +928,7 @@ again:
 			if (i > 0) {
 				zend_string *key;
 				zval *data;
-				ulong index;
+				php_uint_t index;
 
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
 
@@ -1031,7 +1031,7 @@ PHP_FUNCTION(unserialize)
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		zval_dtor(return_value);
 		if (!EG(exception)) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset " ZEND_INT_FMT " of %d bytes", (php_int_t)((char*)p - buf), buf_len);
 		}
 		RETURN_FALSE;
 	}

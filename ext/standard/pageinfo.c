@@ -59,7 +59,7 @@
  */
 PHPAPI void php_statpage(TSRMLS_D)
 {
-	struct stat *pstat;
+	php_stat_t *pstat;
 
 	pstat = sapi_get_stat(TSRMLS_C);
 
