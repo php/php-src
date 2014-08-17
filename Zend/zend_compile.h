@@ -130,12 +130,12 @@ typedef struct _zend_try_catch_element {
 
 #if SIZEOF_ZEND_INT == 8
 # ifdef _WIN32
-#  define THIS_HASHVAL 210728972157Ui64
+#  define THIS_HASHVAL 6385726429Ui64
 # else
-#  define THIS_HASHVAL 210728972157ULL
+#  define THIS_HASHVAL 6385726429ULL
 # endif
 #else
-#define THIS_HASHVAL 275574653UL
+#define THIS_HASHVAL 2090759133UL
 #endif
 
 /* method flags (types) */
