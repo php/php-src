@@ -158,7 +158,7 @@ static int php_disk_total_space(char *path, double *space TSRMLS_DC) /* {{{ */
 
 			/* i know - this is ugly, but i works <thies@thieso.net> */
 			bytestotal  = TotalNumberOfBytes.HighPart *
-				(double) (((unsigned long)1) << 31) * 2.0 +
+				(double) (((php_uint_t)1) << 31) * 2.0 +
 				TotalNumberOfBytes.LowPart;
 		} else { /* If it's not available, we just use GetDiskFreeSpace */
 			if (GetDiskFreeSpace(path,
@@ -290,7 +290,7 @@ static int php_disk_free_space(char *path, double *space TSRMLS_DC) /* {{{ */
 
 			/* i know - this is ugly, but i works <thies@thieso.net> */
 			bytesfree  = FreeBytesAvailableToCaller.HighPart *
-				(double) (((unsigned long)1) << 31) * 2.0 +
+				(double) (((php_uint_t)1) << 31) * 2.0 +
 				FreeBytesAvailableToCaller.LowPart;
 		} else { /* If it's not available, we just use GetDiskFreeSpace */
 			if (GetDiskFreeSpace(path,

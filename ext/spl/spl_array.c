@@ -300,7 +300,7 @@ static zend_object *spl_array_object_clone(zval *zobject TSRMLS_DC)
 static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
 {
 	zval *retval;
-	long index;
+	php_int_t index;
 	zend_string *offset_key;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
@@ -360,11 +360,11 @@ fetch_dim_string:
 		}
 		return retval;
 	case IS_RESOURCE:
-		zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_RES_P(offset)->handle, Z_RES_P(offset)->handle);
+		zend_error(E_STRICT, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_P(offset)->handle, Z_RES_P(offset)->handle);
 		index = Z_RES_P(offset)->handle;
 		goto num_index;
 	case IS_DOUBLE:
-		index = (long)Z_DVAL_P(offset);
+		index = (php_int_t)Z_DVAL_P(offset);
 		goto num_index;
 	case IS_FALSE:
 		index = 0;
@@ -378,13 +378,13 @@ num_index:
 		if ((retval = zend_hash_index_find(ht, index)) == NULL) {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined offset: %ld", index);
+					zend_error(E_NOTICE, "Undefined offset: %pd", index);
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE, "Undefined offset: %ld", index);
+					zend_error(E_NOTICE, "Undefined offset: %pd", index);
 				case BP_VAR_W: {
 				    zval value;
 					ZVAL_UNDEF(&value);
@@ -450,7 +450,7 @@ static zval *spl_array_read_dimension(zval *object, zval *offset, int type, zval
 static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval *offset, zval *value TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	long index;
+	php_int_t index;
 	HashTable *ht;
 
 	if (check_inherited && intern->fptr_offset_set) {
@@ -535,7 +535,7 @@ static void spl_array_write_dimension(zval *object, zval *offset, zval *value TS
 
 static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval *offset TSRMLS_DC) /* {{{ */
 {
-	long index;
+	php_int_t index;
 	HashTable *ht;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -585,7 +585,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		}
 		break;
 	case IS_DOUBLE:
-		index = (long)Z_DVAL_P(offset);
+		index = (php_int_t)Z_DVAL_P(offset);
 		goto num_index;
 	case IS_RESOURCE:
 		index = Z_RES_HANDLE_P(offset);
@@ -605,7 +605,7 @@ num_index:
 			return;
 		}
 		if (zend_hash_index_del(ht, index) == FAILURE) {
-			zend_error(E_NOTICE,"Undefined offset: %ld", index);
+			zend_error(E_NOTICE,"Undefined offset: %pd", index);
 		}
 		break;
 	default:
@@ -623,7 +623,7 @@ static void spl_array_unset_dimension(zval *object, zval *offset TSRMLS_DC) /* {
 static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *offset, int check_empty TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	long index;
+	php_int_t index;
 	zval rv, *value = NULL, *tmp;
 
 	if (check_inherited && intern->fptr_offset_has) {
@@ -664,7 +664,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 				break;
 
 			case IS_DOUBLE:
-				index = (long)Z_DVAL_P(offset);
+				index = (php_int_t)Z_DVAL_P(offset);
 				goto num_index;
 			case IS_RESOURCE:
 				index = Z_RES_HANDLE_P(offset);
@@ -1141,7 +1141,7 @@ static void spl_array_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /* {{{ spl_array_set_array */
-static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, long ar_flags, int just_array TSRMLS_DC) {
+static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, php_int_t ar_flags, int just_array TSRMLS_DC) {
 
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		SEPARATE_ZVAL_IF_NOT_REF(array);
@@ -1223,7 +1223,7 @@ SPL_METHOD(Array, __construct)
 	zval *object = getThis();
 	spl_array_object *intern;
 	zval *array;
-	long ar_flags = 0;
+	php_int_t ar_flags = 0;
 	zend_class_entry *ce_get_iterator = spl_ce_Iterator;
 	zend_error_handling error_handling;
 
@@ -1312,9 +1312,9 @@ SPL_METHOD(Array, setFlags)
 {
 	zval *object = getThis();
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	long ar_flags = 0;
+	php_int_t ar_flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ar_flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &ar_flags) == FAILURE) {
 		return;
 	}
 
@@ -1381,13 +1381,13 @@ SPL_METHOD(Array, rewind)
    Seek to position. */
 SPL_METHOD(Array, seek)
 {
-	long opos, position;
+	php_int_t opos, position;
 	zval *object = getThis();
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 	int result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &position) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &position) == FAILURE) {
 		return;
 	}
 
@@ -1408,10 +1408,10 @@ SPL_METHOD(Array, seek)
 			return; /* ok */
 		}
 	}
-	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %ld is out of range", opos);
+	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %pd is out of range", opos);
 } /* }}} */
 
-int static spl_array_object_count_elements_helper(spl_array_object *intern, long *count TSRMLS_DC) /* {{{ */
+int static spl_array_object_count_elements_helper(spl_array_object *intern, php_int_t *count TSRMLS_DC) /* {{{ */
 {
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 	HashPosition pos;
@@ -1439,7 +1439,7 @@ int static spl_array_object_count_elements_helper(spl_array_object *intern, long
 	}
 } /* }}} */
 
-int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+int spl_array_object_count_elements(zval *object, php_int_t *count TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
@@ -1450,7 +1450,7 @@ int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ 
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 			convert_to_int(&intern->retval);
-			*count = (long)Z_IVAL(intern->retval);
+			*count = (php_int_t)Z_IVAL(intern->retval);
 			return SUCCESS;
 		}
 		*count = 0;
@@ -1464,7 +1464,7 @@ int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ 
    Return the number of elements in the Iterator. */
 SPL_METHOD(Array, count)
 {
-	long count;
+	php_int_t count;
 	spl_array_object *intern = Z_SPLARRAY_P(getThis());
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1781,7 +1781,7 @@ SPL_METHOD(Array, unserialize)
 	php_unserialize_data_t var_hash;
 	zval members, zflags;
 	HashTable *aht;
-	long flags;
+	php_int_t flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
 		return;
@@ -1861,7 +1861,7 @@ SPL_METHOD(Array, unserialize)
 
 outexcept:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %pd of %d bytes", (php_int_t)((char*)p - buf), buf_len);
 	return;
 
 } /* }}} */

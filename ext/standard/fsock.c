@@ -36,7 +36,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	long port = -1;
 	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout = FG(default_socket_timeout);
-	unsigned long conv;
+	php_uint_t conv;
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
@@ -63,7 +63,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	
 	/* prepare the timeout value for use */
-	conv = (unsigned long) (timeout * 1000000.0);
+	conv = (php_uint_t) (timeout * 1000000.0);
 	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 

@@ -1320,7 +1320,7 @@ static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *fie
 
 static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
 {
-	unsigned long l;
+	php_uint_t l;
 	php_conv_err_t err;
 
 	*pretval = 0;

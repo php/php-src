@@ -143,9 +143,9 @@ static spl_ptr_llist *spl_ptr_llist_init(spl_ptr_llist_ctor_func ctor, spl_ptr_l
 }
 /* }}} */
 
-static long spl_ptr_llist_count(spl_ptr_llist *llist) /* {{{ */
+static php_int_t spl_ptr_llist_count(spl_ptr_llist *llist) /* {{{ */
 {
-	return (long)llist->count;
+	return (php_int_t)llist->count;
 }
 /* }}} */
 
@@ -167,7 +167,7 @@ static void spl_ptr_llist_destroy(spl_ptr_llist *llist TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static spl_ptr_llist_element *spl_ptr_llist_offset(spl_ptr_llist *llist, long offset, int backward) /* {{{ */
+static spl_ptr_llist_element *spl_ptr_llist_offset(spl_ptr_llist *llist, php_int_t offset, int backward) /* {{{ */
 {
 
 	spl_ptr_llist_element *current;
@@ -474,7 +474,7 @@ static zend_object *spl_dllist_object_clone(zval *zobject TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int spl_dllist_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+static int spl_dllist_object_count_elements(zval *object, php_int_t *count TSRMLS_DC) /* {{{ */
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
 
@@ -485,7 +485,7 @@ static int spl_dllist_object_count_elements(zval *object, long *count TSRMLS_DC)
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 			convert_to_int(&intern->retval);
-			*count = (long) Z_IVAL(intern->retval);
+			*count = (php_int_t) Z_IVAL(intern->retval);
 			return SUCCESS;
 		}
 		*count = 0;
@@ -673,7 +673,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
  Return the number of elements in the datastructure. */
 SPL_METHOD(SplDoublyLinkedList, count)
 {
-	long count;
+	php_int_t count;
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -689,7 +689,7 @@ SPL_METHOD(SplDoublyLinkedList, count)
  Return true if the SplDoublyLinkedList is empty. */
 SPL_METHOD(SplDoublyLinkedList, isEmpty)
 {
-	long count;
+	php_int_t count;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -704,10 +704,10 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
  Set the mode of iteration */
 SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 {
-	long value;
+	php_int_t value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &value) == FAILURE) {
 		return;
 	}
 
@@ -747,7 +747,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 {
 	zval              *zindex;
 	spl_dllist_object *intern;
-	long               index;
+	php_int_t               index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zindex) == FAILURE) {
 		return;
@@ -764,7 +764,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 SPL_METHOD(SplDoublyLinkedList, offsetGet)
 {
 	zval                  *zindex;
-	long                   index;
+	php_int_t                   index;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
 
@@ -808,7 +808,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		spl_ptr_llist_push(intern->llist, value TSRMLS_CC);
 	} else {
 		/* $obj[$foo] = ... */
-		long                   index;
+		php_int_t                   index;
 		spl_ptr_llist_element *element;
 
 		index = spl_offset_convert_to_int(zindex TSRMLS_CC);
@@ -849,7 +849,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 {
 	zval                  *zindex;
-	long                   index;
+	php_int_t             index;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
 	spl_ptr_llist         *llist;
@@ -1221,7 +1221,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 	zval                  *zindex, *value;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
-	long                  index;
+	php_int_t                  index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zindex, &value) == FAILURE) {
 		return;

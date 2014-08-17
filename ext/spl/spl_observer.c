@@ -81,9 +81,9 @@ PHPAPI zend_object_handlers spl_handler_SplObjectStorage;
 
 typedef struct _spl_SplObjectStorage { /* {{{ */
 	HashTable         storage;
-	long              index;
+	php_int_t         index;
 	HashPosition      pos;
-	long              flags;
+	php_int_t         flags;
 	zend_function    *fptr_get_hash;
 	HashTable        *debug_info;
 	zend_object       std;
@@ -603,14 +603,14 @@ SPL_METHOD(SplObjectStorage, contains)
 SPL_METHOD(SplObjectStorage, count)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(getThis());
-	long mode = COUNT_NORMAL;
+	php_int_t mode = COUNT_NORMAL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &mode) == FAILURE) {
 		return;
 	}
 
 	if (mode == COUNT_RECURSIVE) {
-		long ret = zend_hash_num_elements(&intern->storage);
+		php_int_t ret = zend_hash_num_elements(&intern->storage);
 		zval *element;
 
 		ZEND_HASH_FOREACH_VAL(&intern->storage, element) {
@@ -800,7 +800,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	php_unserialize_data_t var_hash;
 	zval entry, pmembers, pcount, inf;
 	spl_SplObjectStorageElement *element;
-	long count;
+	php_int_t count;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
 		return;
@@ -909,7 +909,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 
 outexcept:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (php_int_t)((char*)p - buf), buf_len);
 	return;
 
 } /* }}} */
@@ -986,12 +986,12 @@ typedef enum {
 SPL_METHOD(MultipleIterator, __construct)
 {
 	spl_SplObjectStorage   *intern;
-	long                    flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC;
+	php_int_t               flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &flags) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
@@ -1022,7 +1022,7 @@ SPL_METHOD(MultipleIterator, setFlags)
 	spl_SplObjectStorage *intern;
 	intern = Z_SPLOBJSTORAGE_P(getThis());
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &intern->flags) == FAILURE) {
 		return;
 	}
 }
@@ -1118,7 +1118,7 @@ SPL_METHOD(MultipleIterator, valid)
 	spl_SplObjectStorage        *intern;
 	spl_SplObjectStorageElement *element;
 	zval                        *it, retval;
-	long                         expect, valid;
+	php_int_t                         expect, valid;
 
 	intern = Z_SPLOBJSTORAGE_P(getThis());
 	

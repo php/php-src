@@ -671,19 +671,19 @@ zend_function *spl_filesystem_object_get_method_check(zend_object **object, zend
 #define DIT_CTOR_FLAGS  0x00000001
 #define DIT_CTOR_GLOB   0x00000002
 
-void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_flags) /* {{{ */
+void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, php_int_t ctor_flags) /* {{{ */
 {
 	spl_filesystem_object *intern;
 	char *path;
 	int parsed, len;
-	long flags;
+	php_int_t flags;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling TSRMLS_CC);
 
 	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_FLAGS)) {
 		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO;
-		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &len, &flags);
+		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &path, &len, &flags);
 	} else {
 		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_SELF;
 		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &len);
@@ -813,9 +813,9 @@ SPL_METHOD(DirectoryIterator, seek)
 {
 	spl_filesystem_object *intern    = Z_SPLFILESYSTEM_P(getThis());
 	zval retval;
-	long pos;
+	php_int_t pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &pos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &pos) == FAILURE) {
 		return;
 	}
 
@@ -1453,9 +1453,9 @@ SPL_METHOD(FilesystemIterator, getFlags)
 SPL_METHOD(FilesystemIterator, setFlags)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	long flags;
+	php_int_t flags;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &flags) == FAILURE) {
 		return;
 	}
 
@@ -2025,7 +2025,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 {
 	char *buf;
 	size_t line_len = 0;
-	long line_add = (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) ? 1 : 0;
+	php_int_t line_add = (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) ? 1 : 0;
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
 	
@@ -2319,14 +2319,14 @@ SPL_METHOD(SplFileObject, __construct)
    Construct a new temp file object */
 SPL_METHOD(SplTempFileObject, __construct)
 {
-	long max_memory = PHP_STREAM_MAX_MEM;
+	php_int_t max_memory = PHP_STREAM_MAX_MEM;
 	char tmp_fname[48];
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &max_memory) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &max_memory) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
@@ -2537,7 +2537,7 @@ SPL_METHOD(SplFileObject, getMaxLineLen)
 		return;
 	}
 
-	RETURN_INT((long)intern->u.file.max_line_len);
+	RETURN_INT((php_int_t)intern->u.file.max_line_len);
 } /* }}} */
 
 /* {{{ proto bool SplFileObject::hasChildren()
@@ -2740,7 +2740,7 @@ SPL_METHOD(SplFileObject, fflush)
 SPL_METHOD(SplFileObject, ftell)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());	
-	long ret;
+	php_int_t ret;
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Object not initialized");
@@ -2761,9 +2761,9 @@ SPL_METHOD(SplFileObject, ftell)
 SPL_METHOD(SplFileObject, fseek)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	long pos, whence = SEEK_SET;
+	php_int_t pos, whence = SEEK_SET;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &pos, &whence) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|i", &pos, &whence) == FAILURE) {
 		return;
 	}
 
@@ -2869,9 +2869,9 @@ SPL_METHOD(SplFileObject, fwrite)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *str;
 	int str_len;
-	long length = 0;
+	php_int_t length = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &str, &str_len, &length) == FAILURE) {
 		return;
 	}
 
@@ -2926,9 +2926,9 @@ FileFunction(fstat)
 SPL_METHOD(SplFileObject, ftruncate)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	long size;
+	php_int_t size;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &size) == FAILURE) {
 		return;
 	}
 
@@ -2950,9 +2950,9 @@ SPL_METHOD(SplFileObject, ftruncate)
 SPL_METHOD(SplFileObject, seek)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	long line_pos;
+	php_int_t line_pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &line_pos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &line_pos) == FAILURE) {
 		return;
 	}
 	if(!intern->u.file.stream) {
@@ -2961,7 +2961,7 @@ SPL_METHOD(SplFileObject, seek)
 	}
 
 	if (line_pos < 0) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Can't seek file %s to negative line %ld", intern->file_name, line_pos);
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Can't seek file %s to negative line %pd", intern->file_name, line_pos);
 		RETURN_FALSE;		
 	}
 

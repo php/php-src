@@ -139,11 +139,11 @@ typedef struct _spl_dual_it_object {
 	dual_it_type             dit_type;
 	union {
 		struct {
-			long             offset;
-			long             count;
+			php_int_t             offset;
+			php_int_t             count;
 		} limit;
 		struct {
-			long             flags; /* CIT_* */
+			php_int_t             flags; /* CIT_* */
 			zval             zstr;
 			zval             zchildren;
 			zval             zcache;
@@ -155,9 +155,9 @@ typedef struct _spl_dual_it_object {
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 		struct {
 			int              use_flags;
-			long             flags;
+			php_int_t             flags;
 			regex_mode       mode;
-			long             preg_flags;
+			php_int_t             preg_flags;
 			pcre_cache_entry *pce;
 			zend_string      *regex;
 		} regex;

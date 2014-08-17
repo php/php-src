@@ -58,7 +58,7 @@ static php_rfc1867_basename_t php_rfc1867_basename = NULL;
 
 PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra TSRMLS_DC) = NULL;
 
-static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
+static void safe_php_register_variable(char *var, char *strval, php_size_t val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
 
 /* The longest property name we use in an uploaded file array */
 #define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
@@ -161,7 +161,7 @@ static zend_bool is_protected_variable(char *varname TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC) /* {{{ */
+static void safe_php_register_variable(char *var, char *strval, php_size_t val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC) /* {{{ */
 {
 	if (override_protection || !is_protected_variable(var TSRMLS_CC)) {
 		php_register_variable_safe(var, strval, val_len, track_vars_array TSRMLS_CC);

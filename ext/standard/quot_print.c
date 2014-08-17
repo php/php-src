@@ -147,7 +147,7 @@ PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t lengt
  
 PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t length) /* {{{ */
 {
-	unsigned long lp = 0;
+	php_uint_t lp = 0;
 	unsigned char c, *d;
 	char *hex = "0123456789ABCDEF";
 	zend_string *ret;

@@ -40,7 +40,7 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 }
 /* }}} */
 
-PHPAPI long spl_offset_convert_to_int(zval *offset TSRMLS_DC) /* {{{ */
+PHPAPI php_int_t spl_offset_convert_to_int(zval *offset TSRMLS_DC) /* {{{ */
 {
 	php_uint_t idx;
 
@@ -51,7 +51,7 @@ PHPAPI long spl_offset_convert_to_int(zval *offset TSRMLS_DC) /* {{{ */
 		}
 		break;
 	case IS_DOUBLE:
-		return (long)Z_DVAL_P(offset);
+		return (php_int_t)Z_DVAL_P(offset);
 	case IS_INT:
 		return Z_IVAL_P(offset);
 	case IS_FALSE:

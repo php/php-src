@@ -43,7 +43,7 @@ PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_arra
 }
 
 /* binary-safe version */
-PHPAPI void php_register_variable_safe(char *var, char *strval, int str_len, zval *track_vars_array TSRMLS_DC)
+PHPAPI void php_register_variable_safe(char *var, char *strval, php_size_t str_len, zval *track_vars_array TSRMLS_DC)
 {
 	zval new_entry;
 	assert(strval != NULL);

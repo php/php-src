@@ -105,7 +105,7 @@ static void spl_ptr_heap_zval_ctor(zval *elem TSRMLS_DC) { /* {{{ */
 }
 /* }}} */
 
-static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, long *result TSRMLS_DC) { /* {{{ */
+static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, php_int_t *result TSRMLS_DC) { /* {{{ */
 	zval zresult;
 
 	zend_call_method_with_2_params(object, heap_object->std.ce, &heap_object->fptr_cmp, "compare", &zresult, a, b);
@@ -155,7 +155,7 @@ static int spl_ptr_heap_zval_max_cmp(zval *a, zval *b, zval *object TSRMLS_DC) {
 	if (object) {
 		spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 		if (heap_object->fptr_cmp) {
-			long lval = 0;
+			php_int_t lval = 0;
 			if (spl_ptr_heap_cmp_cb_helper(object, heap_object, a, b, &lval TSRMLS_CC) == FAILURE) {
 				/* exception or call failure */
 				return 0;
@@ -179,7 +179,7 @@ static int spl_ptr_heap_zval_min_cmp(zval *a, zval *b, zval *object TSRMLS_DC) {
 	if (object) {
 		spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 		if (heap_object->fptr_cmp) {
-			long lval = 0;
+			php_int_t lval = 0;
 			if (spl_ptr_heap_cmp_cb_helper(object, heap_object, a, b, &lval TSRMLS_CC) == FAILURE) {
 				/* exception or call failure */
 				return 0;
@@ -210,7 +210,7 @@ static int spl_ptr_pqueue_zval_cmp(zval *a, zval *b, zval *object TSRMLS_DC) { /
 	if (object) {
 		spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 		if (heap_object->fptr_cmp) {
-			long lval = 0;
+			php_int_t lval = 0;
 			if (spl_ptr_heap_cmp_cb_helper((zval *)object, heap_object, a_priority_p, b_priority_p, &lval TSRMLS_CC) == FAILURE) {
 				/* exception or call failure */
 				return 0;
@@ -572,7 +572,7 @@ static HashTable* spl_pqueue_object_get_debug_info(zval *obj, int *is_temp TSRML
  Return the number of elements in the heap. */
 SPL_METHOD(SplHeap, count)
 {
-	long count;
+	php_int_t count;
 	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -765,10 +765,10 @@ SPL_METHOD(SplPriorityQueue, top)
  Set the flags of extraction*/
 SPL_METHOD(SplPriorityQueue, setExtractFlags)
 {
-	long value;
+	php_int_t value;
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &value) == FAILURE) {
 		return;
 	}
 

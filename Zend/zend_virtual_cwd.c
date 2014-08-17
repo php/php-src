@@ -178,7 +178,7 @@ static int php_check_dots(const char *element, int n)
 #define MAXIMUM_REPARSE_DATA_BUFFER_SIZE  ( 16 * 1024 )
 
 typedef struct {
-	unsigned long  ReparseTag;
+	zend_uint_t  ReparseTag;
 	unsigned short ReparseDataLength;
 	unsigned short Reserved;
 	union {
@@ -187,7 +187,7 @@ typedef struct {
 			unsigned short SubstituteNameLength;
 			unsigned short PrintNameOffset;
 			unsigned short PrintNameLength;
-			unsigned long  Flags;
+			zend_uint_t  Flags;
 			wchar_t        ReparseTarget[1];
 		} SymbolicLinkReparseBuffer;
 		struct {

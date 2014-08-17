@@ -1437,10 +1437,10 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	php_int_t		 limit = -1;
 	zend_string		*result;
 	zend_string		*string_key;
-	ulong			 num_key;
+	php_uint_t		 num_key;
 	zend_string		*callback_name;
 	int				 replace_count=0, old_replace_count;
-	
+
 #ifndef FAST_ZPP
 	/* Get function parameters and do error-checking. */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|iz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
@@ -1898,7 +1898,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
 	zend_string		*string_key;
-	ulong			 num_key;
+	php_uint_t		 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
 										   entries */
 	ALLOCA_FLAG(use_heap);
