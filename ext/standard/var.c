@@ -57,7 +57,7 @@ static uint zend_obj_num_elements(HashTable *ht)
 static void php_array_element_dump(zval *zv, php_uint_t index, zend_string *key, int level TSRMLS_DC) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
-		php_printf("%*c[%ld]=>\n", level + 1, ' ', index);
+		php_printf("%*c[" ZEND_UINT_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(key->val, key->len);
@@ -72,7 +72,7 @@ static void php_object_property_dump(zval *zv, php_uint_t index, zend_string *ke
 	const char *prop_name, *class_name;
 
 	if (key == NULL) { /* numeric key */
-		php_printf("%*c[%ld]=>\n", level + 1, ' ', index);
+		php_printf("%*c[" ZEND_UINT_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
 		int unmangle = zend_unmangle_property_name(key->val, key->len, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
@@ -230,7 +230,7 @@ PHP_FUNCTION(var_dump)
 static void zval_array_element_dump(zval *zv, php_uint_t index, zend_string *key, int level TSRMLS_DC) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
-		php_printf("%*c[%ld]=>\n", level + 1, ' ', index);
+		php_printf("%*c[" ZEND_UINT_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(key->val, key->len);
@@ -245,7 +245,7 @@ static void zval_object_property_dump(zval *zv, php_uint_t index, zend_string *k
 	const char *prop_name, *class_name;
 
 	if (key == NULL) { /* numeric key */
-		php_printf("%*c[%ld]=>\n", level + 1, ' ', index);
+		php_printf("%*c[" ZEND_UINT_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
 		zend_unmangle_property_name(key->val, key->len, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
