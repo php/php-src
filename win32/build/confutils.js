@@ -1521,7 +1521,7 @@ function output_as_table(header, ar_out)
 {
 	var l = header.length;
 	var cols = 80;
-	var fixedlenght = "";
+	var fixedlength = "";
 	var t = 0;
 	var i,j,k,m;
 	var out = "| ";
