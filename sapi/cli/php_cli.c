@@ -252,10 +252,10 @@ static inline int sapi_cli_select(int fd TSRMLS_DC)
 	return ret != -1;
 }
 
-PHP_CLI_API php_size_t sapi_cli_single_write(const char *str, php_size_t str_length TSRMLS_DC) /* {{{ */
+PHP_CLI_API size_t sapi_cli_single_write(const char *str, php_size_t str_length TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
-	long ret;
+	php_int_t ret;
 #else
 	php_size_t ret;
 #endif
