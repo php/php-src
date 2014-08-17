@@ -223,6 +223,12 @@ if ($replace_macros) {
 		'smart_str_append_long'                  => 'smart_str_append_int',
 		'cfg_get_long'                           => 'cfg_get_int',
 		'pdo_attr_lval'                          => 'pdo_attr_ival',
+		'zend_long_to_str'                       => 'zend_int_to_str',
+		'_zval_get_long_func'                    => '_zval_get_int_func',
+		'Z_PARAM_LONG_EX'                        => 'Z_PARAM_INT_EX',
+		'Z_PARAM_LONG'                           => 'Z_PARAM_INT',
+		'Z_PARAM_STRICT_LONG_EX'                 => 'Z_PARAM_STRICT_INT_EX',
+		'Z_PARAM_STRICT_LONG'                    => 'Z_PARAM_STRICT_INT',
 	);
 
 	if ($reverse_replace) {
