@@ -29,7 +29,6 @@ void zend_register_closure_ce(TSRMLS_D);
 extern ZEND_API zend_class_entry *zend_ce_closure;
 
 ZEND_API void zend_create_closure(zval *res, zend_function *op_array, zend_class_entry *scope, zval *this_ptr TSRMLS_DC);
-ZEND_API void zend_create_closure_ex(zval *res, zend_function *op_array, zend_class_entry *scope, zval *this_ptr, zend_bool unbound_scoped TSRMLS_DC);
 ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *obj TSRMLS_DC);
 ZEND_API const zend_function *zend_get_closure_method_def(zval *obj TSRMLS_DC);
 ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC);

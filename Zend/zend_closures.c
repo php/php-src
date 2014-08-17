@@ -76,6 +76,7 @@ ZEND_METHOD(Closure, call) /* {{{ */
 	zend_fcall_info_cache fci_cache;
 	zval *my_params;
 	zend_uint my_param_count = 0;
+	zend_function my_function;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o*", &newthis, &my_params, &my_param_count) == FAILURE) {
 		RETURN_NULL();
@@ -108,6 +109,11 @@ ZEND_METHOD(Closure, call) /* {{{ */
 	fci.param_count = my_param_count;
 	fci.object = fci_cache.object = Z_OBJ_P(newthis);
 	fci_cache.initialized = 1;
+	
+	my_function = *fci_cache.function_handler;
+	/* use scope of passed object */
+	my_function.common.scope = Z_OBJCE_P(newthis);
+	fci_cache.function_handler = &my_function;
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(closure_result) != IS_UNDEF) {
 		ZVAL_COPY_VALUE(return_value, &closure_result);
@@ -115,16 +121,15 @@ ZEND_METHOD(Closure, call) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto Closure Closure::bind(Closure $old, object $to [, mixed $scope = "static" ] [, bool $unbound_scoped = false ] )
+/* {{{ proto Closure Closure::bind(Closure $old, object $to [, mixed $scope = "static" ] )
    Create a closure from another one and bind to another object and scope */
 ZEND_METHOD(Closure, bind)
 {
 	zval *newthis, *zclosure, *scope_arg = NULL;
 	zend_closure *closure;
 	zend_class_entry *ce;
-	zend_bool unbound_scoped = false;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oo!|zb", &zclosure, zend_ce_closure, &newthis, &scope_arg, &unbound_scoped) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
 		RETURN_NULL();
 	}
 
@@ -155,7 +160,7 @@ ZEND_METHOD(Closure, bind)
 		ce = closure->func.common.scope;
 	}
 
-	zend_create_closure_ex(return_value, &closure->func, ce, newthis, unbound_scoped TSRMLS_CC);
+	zend_create_closure(return_value, &closure->func, ce, newthis TSRMLS_CC);
 }
 /* }}} */
 
@@ -415,14 +420,12 @@ ZEND_METHOD(Closure, __construct)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bindto, 0, 0, 1)
 	ZEND_ARG_INFO(0, newthis)
 	ZEND_ARG_INFO(0, newscope)
-	ZEND_ARG_INFO(0, unbound_scoped)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bind, 0, 0, 2)
 	ZEND_ARG_INFO(0, closure)
 	ZEND_ARG_INFO(0, newthis)
 	ZEND_ARG_INFO(0, newscope)
-	ZEND_ARG_INFO(0, unbound_scoped)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_call, 0, 0, 1)
@@ -468,11 +471,6 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 /* }}} */
 
 ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zval *this_ptr TSRMLS_DC) /* {{{ */
-{
-	zend_create_closure_ex(res, func, scope, this_ptr, 0 TSRMLS_CC);
-}
-
-ZEND_API void zend_create_closure_ex(zval *res, zend_function *func, zend_class_entry *scope, zval *this_ptr, zend_bool unbound_scoped TSRMLS_DC) /* {{{ */
 {
 	zend_closure *closure;
 
@@ -522,22 +520,14 @@ ZEND_API void zend_create_closure_ex(zval *res, zend_function *func, zend_class_
 	ZVAL_UNDEF(&closure->this_ptr);
 	/* Invariants:
 	 * If the closure is unscoped, it is unbound.
-	 * If the closure is scoped, it may be static, bound or unbound */
+	 * If the closure is scoped, it is static or unbound */
 	closure->func.common.scope = scope;
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
 		if (this_ptr && Z_TYPE_P(this_ptr) == IS_OBJECT && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {
 			ZVAL_COPY(&closure->this_ptr, this_ptr);
- 		/* We assume that a static scoped closure is desired if given NULL to bind to
- 		   If an unbound scoped closure is desired, the parameter must be set to 1*/
- 		} else if (!unbound_scoped) {
+ 		} else {
 			closure->func.common.fn_flags |= ZEND_ACC_STATIC;
-		/* Unbound but scoped was explicitly specified and we wish to avoid E_ERROR when calling without object
-		   We don't do this if it has implict allowed static (i.e. is a method, should E_STRICT)
-		   Nor do we do this if it's an internal function (which would blow up if $this was NULL)
-		   (In that case, we're actually creating a closure which can't be called without apply) */
-		} else if ((func->common.fn_flags & ZEND_ACC_ALLOW_STATIC) == 0 && func->type == ZEND_USER_FUNCTION) {
-			closure->func.common.fn_flags |= ZEND_ACC_ALLOW_STATIC_EXPLICIT;
 		}
 	}
 }
