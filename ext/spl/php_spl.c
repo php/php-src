@@ -315,7 +315,7 @@ PHP_FUNCTION(spl_autoload)
 		RETURN_FALSE;
 	}
 
-	if (file_exts == NULL) { /* autoload_extensions is not intialzed, set to defaults */
+	if (file_exts == NULL) { /* autoload_extensions is not initialized, set to defaults */
 		pos = SPL_DEFAULT_FILE_EXTENSIONS;
 		pos_len = sizeof(SPL_DEFAULT_FILE_EXTENSIONS) - 1;
 	} else {
