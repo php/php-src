@@ -613,7 +613,13 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 			}
 		}
 	} else if (op1->op_type == IS_CONST) {
-		zval_ptr_dtor(&op1->u.constant);
+		/* Destroy value without using GC: When opcache moves arrays into SHM it will
+		 * free the zend_array structure, so references to it from outside the op array
+		 * become invalid. GC would cause such a reference in the root buffer. */
+		zval *zv = &op1->u.constant;
+		if (Z_REFCOUNTED_P(zv) && !Z_DELREF_P(zv)) {
+			_zval_dtor_func_for_ptr(Z_COUNTED_P(zv) ZEND_FILE_LINE_CC);
+		}
 	}
 }
 /* }}} */
