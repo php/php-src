@@ -2646,7 +2646,6 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically", fbc->common.scope->name->val, fbc->common.function_name->val);
 		}
 	}
-}
 
 	LOAD_OPLINE();
 

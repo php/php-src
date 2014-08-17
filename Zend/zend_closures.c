@@ -74,11 +74,15 @@ ZEND_METHOD(Closure, call) /* {{{ */
 	zend_closure *closure;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
+	char *error;
+	zval *my_params;
+	zend_uint my_param_count = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oo*", &zclosure, zend_ce_closure, &newthis, &fci.params, &fci.param_count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o*", &newthis, &my_params, &my_param_count) == FAILURE) {
 		RETURN_NULL();
 	}
 	
+	zclosure = getThis();
 	closure = (zend_closure *)Z_OBJ_P(zclosure);
 	
 	if (closure->func.common.fn_flags & ZEND_ACC_STATIC) {
@@ -90,33 +94,24 @@ ZEND_METHOD(Closure, call) /* {{{ */
 		/* verify that we aren't binding internal function to a wrong object */
 		if((closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0 &&
 				!instanceof_function(Z_OBJCE_P(newthis), closure->func.common.scope TSRMLS_CC)) {
-			zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", closure->func.common.scope->name, closure->func.common.function_name, Z_OBJCE_P(newthis)->name);
+			zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", closure->func.common.scope->name->val, closure->func.common.function_name->val, Z_OBJCE_P(newthis)->name->val);
 			RETURN_NULL();
 		}
 	}
 
-	fci.size = sizeof(fci);
-	fci.function_table = CG(function_table);
-	fci.object = Z_OBJ_P(newthis);
-	fci.function_name = *zclosure;
-	fci.retval = &closure_result;
-	fci.no_separation = 1;
-	fci.symbol_table = NULL;
-	
-	fci_cache.initialized = 1;
-	fci_cache.function_handler = &closure->func;
-	fci_cache.object = Z_OBJ_P(newthis);
-	fci_cache.calling_scope = fci_cache.called_scope = Z_OBJCE_P(newthis);
-
-	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == FAILURE) {
-		RETVAL_FALSE;
-	} else {
-		zval_ptr_dtor(&return_value);
-		*return_value = closure_result;
+	if (zend_fcall_info_init(zclosure, 0, &fci, &fci_cache, NULL, NULL TSRMLS_CC) != SUCCESS) {
+		zend_error(E_ERROR, "Closure not callable");
+		RETURN_NULL();
 	}
-	
-	if (fci.param_count) {
-		efree(fci.params);
+
+	fci.retval = &closure_result;
+	fci.params = my_params;
+	fci.param_count = my_param_count;
+	fci.object = fci_cache.object = Z_OBJ_P(newthis);
+	fci_cache.initialized = 1;
+
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(closure_result) != IS_UNDEF) {
+		ZVAL_COPY_VALUE(return_value, &closure_result);
 	}
 }
 /* }}} */
