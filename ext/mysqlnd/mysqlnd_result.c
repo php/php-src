@@ -1438,7 +1438,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 		  No need to FREE_ALLOCA as we can reuse the
 		  'lengths' and 'fields' arrays. For lengths its absolutely safe.
 		  'fields' is reused because the ownership of the strings has been
-		  transfered above. 
+		  transferred above.
 		*/
 	}
 	/* Overflow ? */

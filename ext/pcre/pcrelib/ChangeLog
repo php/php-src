@@ -5311,7 +5311,7 @@ by an auxiliary program - but can then be edited by hand if required. There are
 now no calls to isalnum(), isspace(), isdigit(), isxdigit(), tolower() or
 toupper() in the code.
 
-7. Turn the malloc/free funtions variables into pcre_malloc and pcre_free and
+7. Turn the malloc/free functions variables into pcre_malloc and pcre_free and
 make them global. Abolish the function for setting them, as the caller can now
 set them directly.
 
