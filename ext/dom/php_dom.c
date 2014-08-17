@@ -518,7 +518,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp TSRMLS_DC
 			value = null_value;
 		} else if (Z_TYPE_P(value) == IS_OBJECT) {
 			/* these are zvalues create on demand, with refcount and is_ref
-			 * status left in an uninitalized stated */
+			 * status left in an uninitialized stated */
 			zval_dtor(value);
 			efree(value);
 
