@@ -237,14 +237,13 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
 PHP_FUNCTION(bin2hex)
 {
 	zend_string *result;
-	char *data;
-	int datalen;
+	zend_string *data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &datalen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &data) == FAILURE) {
 		return;
 	}
 
-	result = php_bin2hex((unsigned char *)data, datalen);
+	result = php_bin2hex((unsigned char *)data->val, data->len);
 
 	if (!result) {
 		RETURN_FALSE;
@@ -282,39 +281,38 @@ PHP_FUNCTION(hex2bin)
 
 static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
 {
-	char *s11, *s22;
-	php_int_t len1, len2;
+	zend_string *s11, *s22;
 	php_int_t start = 0, len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ii", &s11, &len1,
-				&s22, &len2, &start, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|ii", &s11,
+				&s22, &start, &len) == FAILURE) {
 		return;
 	}
 
 	if (ZEND_NUM_ARGS() < 4) {
-		len = len1;
+		len = s11->len;
 	}
 
 	/* look at substr() function for more information */
 
 	if (start < 0) {
-		start += len1;
+		start += (php_int_t)s11->len;
 		if (start < 0) {
 			start = 0;
 		}
-	} else if (start > len1) {
+	} else if ((php_size_t)start > s11->len) {
 		RETURN_FALSE;
 	}
 
 	if (len < 0) {
-		len += (len1 - start);
+		len += (s11->len - start);
 		if (len < 0) {
 			len = 0;
 		}
 	}
 
-	if (len > len1 - start) {
-		len = len1 - start;
+	if (len > (php_int_t)s11->len - start) {
+		len = s11->len - start;
 	}
 
 	if(len == 0) {
@@ -322,15 +320,15 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 	}
 
 	if (behavior == STR_STRSPN) {
-		RETURN_INT(php_strspn(s11 + start /*str1_start*/,
-						s22 /*str2_start*/,
-						s11 + start + len /*str1_end*/,
-						s22 + len2 /*str2_end*/));
+		RETURN_INT(php_strspn(s11->val + start /*str1_start*/,
+						s22->val /*str2_start*/,
+						s11->val + start + len /*str1_end*/,
+						s22->val + s22->len /*str2_end*/));
 	} else if (behavior == STR_STRCSPN) {
-		RETURN_INT(php_strcspn(s11 + start /*str1_start*/,
-						s22 /*str2_start*/,
-						s11 + start + len /*str1_end*/,
-						s22 + len2 /*str2_end*/));
+		RETURN_INT(php_strcspn(s11->val + start /*str1_start*/,
+						s22->val /*str2_start*/,
+						s11->val + start + len /*str1_end*/,
+						s22->val + s22->len /*str2_end*/));
 	}
 
 }
