@@ -86,7 +86,7 @@ PHP_METHOD(domtext, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+	intern = Z_DOMOBJ_P(id);
 	if (intern != NULL) {
 		oldnode = dom_object_get_node(intern);
 		if (oldnode != NULL) {
@@ -102,7 +102,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-wholeText
 Since: DOM Level 3
 */
-int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_text_whole_text_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	xmlNodePtr node;
 	xmlChar *wholetext = NULL;
@@ -125,12 +125,11 @@ int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 		node = node->next;
 	}
 
-	ALLOC_ZVAL(*retval);
 	if (wholetext != NULL) {
-		ZVAL_STRING(*retval, wholetext, 1);
+		ZVAL_STRING(retval, wholetext);
 		xmlFree(wholetext);
 	} else {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_EMPTY_STRING(retval);
 	}
 
 	return SUCCESS;
@@ -151,7 +150,6 @@ PHP_FUNCTION(dom_text_split_text)
 	xmlNodePtr  node;
 	xmlNodePtr  nnode;
 	long        offset;
-	int         ret;
 	int         length;
 	dom_object	*intern;
 
@@ -196,7 +194,7 @@ PHP_FUNCTION(dom_text_split_text)
 		nnode->type = XML_TEXT_NODE;
 	}
 	
-	return_value = php_dom_create_object(nnode, &ret, return_value, intern TSRMLS_CC);
+	php_dom_create_object(nnode, return_value, intern TSRMLS_CC);
 }
 /* }}} end dom_text_split_text */
 

@@ -43,7 +43,6 @@ enum_func_status mysqlnd_stmt_execute_batch_generate_request(MYSQLND_STMT * cons
 static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC);
 static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
 
-
 /* {{{ mysqlnd_stmt::store_result */
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
@@ -111,12 +110,12 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
 					DBG_RETURN(NULL);
 				}
 				/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
-				set->data = mnd_emalloc((size_t)(result->stored_data->row_count * result->meta->field_count * sizeof(zval *)));
+				set->data = mnd_emalloc((size_t)(result->stored_data->row_count * result->meta->field_count * sizeof(zval)));
 				if (!set->data) {
 					SET_OOM_ERROR(*conn->error_info);
 					DBG_RETURN(NULL);
 				}
-				memset(set->data, 0, (size_t)(result->stored_data->row_count * result->meta->field_count * sizeof(zval *)));
+				memset(set->data, 0, (size_t)(result->stored_data->row_count * result->meta->field_count * sizeof(zval)));;
 			}
 			/* Position at the first row */
 			set->data_cursor = set->data;
@@ -246,7 +245,7 @@ MYSQLND_METHOD(mysqlnd_stmt, next_result)(MYSQLND_STMT * s TSRMLS_DC)
 	DBG_INF_FMT("server_status=%u cursor=%u", stmt->upsert_status->server_status, stmt->upsert_status->server_status & SERVER_STATUS_CURSOR_EXISTS);
 
 	/* Free space for next result */
-	s->m->free_stmt_content(s TSRMLS_CC);
+	s->m->free_stmt_result(s TSRMLS_CC);
 	{
 		enum_func_status ret = s->m->parse_execute_response(s TSRMLS_CC);
 		DBG_RETURN(ret);
@@ -644,11 +643,13 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 			  fetch(); <-- no binding, but that's not a problem
 			  bind_result();
 			  execute(); <-- here we will leak because we separate without need
-			*/
+			  */
 			unsigned int i;
 			for (i = 0; i < stmt->field_count; i++) {
 				if (stmt->result_bind[i].bound == TRUE) {
-					zval_copy_ctor(stmt->result_bind[i].zv);
+					zval *result = &stmt->result_bind[i].zv;
+					ZVAL_DEREF(result);
+					Z_TRY_ADDREF_P(result);
 				}
 			}
 		}
@@ -682,7 +683,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 			DBG_RETURN(FAIL);
 		}
 		for (i = 0; i < stmt->param_count; i++) {
-			if (stmt->param_bind[i].zv == NULL) {
+			if (Z_ISUNDEF(stmt->param_bind[i].zv)) {
 				not_bound++;
 			}
 		}
@@ -753,9 +754,9 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int
 			/* The user could have skipped binding - don't crash*/
 			if (stmt->result_bind) {
 				unsigned int i;
-				zval **current_row = set->data_cursor;
+				zval *current_row = set->data_cursor;
 
-				if (NULL == current_row[0]) {
+				if (Z_ISUNDEF(current_row[0])) {
 					uint64_t row_num = (set->data_cursor - set->data) / field_count;
 					enum_func_status rc = result->stored_data->m.row_decoder(result->stored_data->row_buffers[row_num],
 													current_row,
@@ -774,8 +775,8 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int
 							  String of zero size, definitely can't be the next max_length.
 							  Thus for NULL and zero-length we are quite efficient.
 							*/
-							if (Z_TYPE_P(current_row[i]) >= IS_STRING) {
-								unsigned long len = Z_STRLEN_P(current_row[i]);
+							if (Z_TYPE(current_row[i]) == IS_STRING) {
+								unsigned long len = Z_STRLEN(current_row[i]);
 								if (meta->fields[i].max_length < len) {
 									meta->fields[i].max_length = len;
 								}
@@ -785,16 +786,17 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int
 				}
 
 				for (i = 0; i < result->field_count; i++) {
+					zval *result = &stmt->result_bind[i].zv;
+
+					ZVAL_DEREF(result);
 					/* Clean what we copied last time */
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-					if (stmt->result_bind[i].zv) {
-						zval_dtor(stmt->result_bind[i].zv);
-					}
+					zval_dtor(result);
 #endif
 					/* copy the type */
 					if (stmt->result_bind[i].bound == TRUE) {
-						DBG_INF_FMT("i=%u type=%u", i, Z_TYPE_P(current_row[i]));
-						if (Z_TYPE_P(current_row[i]) != IS_NULL) {
+						DBG_INF_FMT("i=%u type=%u", i, Z_TYPE(current_row[i]));
+						if (Z_TYPE(current_row[i]) != IS_NULL) {
 							/*
 							  Copy the value.
 							  Pre-condition is that the zvals in the result_bind buffer
@@ -803,13 +805,12 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int
 							  counting the user can't delete the strings the variables point to.
 							*/
 
-							Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(current_row[i]);
-							stmt->result_bind[i].zv->value = current_row[i]->value;
+							ZVAL_COPY_VALUE(result, &current_row[i]);
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-							zval_copy_ctor(stmt->result_bind[i].zv);
+							Z_TRY_ADDREF_P(result);
 #endif
 						} else {
-							ZVAL_NULL(stmt->result_bind[i].zv);
+							ZVAL_NULL(result);
 						}
 					}
 				}
@@ -891,19 +892,23 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, unsigned i
 
 			for (i = 0; i < field_count; i++) {
 				if (stmt->result_bind[i].bound == TRUE) {
-					zval *data = result->unbuf->last_row_data[i];
+					zval *data = &result->unbuf->last_row_data[i];
+					zval *result = &stmt->result_bind[i].zv;
+
+					ZVAL_DEREF(result);
 					/*
 					  stmt->result_bind[i].zv has been already destructed
 					  in result->unbuf->m.free_last_data()
 					*/
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-					zval_dtor(stmt->result_bind[i].zv);
+					zval_dtor(result);
 #endif
-					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data)) ) {
-						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
+					if (!Z_ISNULL_P(data)) {
+						if ((Z_TYPE_P(data) == IS_STRING) &&
+								(meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
 							meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
-						stmt->result_bind[i].zv->value = data->value;
+						ZVAL_COPY_VALUE(result, data);
 						/* copied data, thus also the ownership. Thus null data */
 						ZVAL_NULL(data);
 					}
@@ -1071,21 +1076,27 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 			/* If no result bind, do nothing. We consumed the data */
 			for (i = 0; i < field_count; i++) {
 				if (stmt->result_bind[i].bound == TRUE) {
-					zval *data = result->unbuf->last_row_data[i];
+					zval *data = &result->unbuf->last_row_data[i];
+					zval *result = &stmt->result_bind[i].zv;
+
+					ZVAL_DEREF(result);
 					/*
 					  stmt->result_bind[i].zv has been already destructed
 					  in result->unbuf->m.free_last_data()
 					*/
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-					zval_dtor(stmt->result_bind[i].zv);
+					zval_dtor(result);
 #endif
-					DBG_INF_FMT("i=%u bound_var=%p type=%u refc=%u", i, stmt->result_bind[i].zv,
-								Z_TYPE_P(data), Z_REFCOUNT_P(stmt->result_bind[i].zv));
-					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data))) {
-						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
+					DBG_INF_FMT("i=%u bound_var=%p type=%u refc=%u", i, &stmt->result_bind[i].zv,
+								Z_TYPE_P(data), Z_REFCOUNTED(stmt->result_bind[i].zv)?
+							   	Z_REFCOUNT(stmt->result_bind[i].zv) : 0);
+
+					if (!Z_ISNULL_P(data)) {
+						if ((Z_TYPE_P(data) == IS_STRING) &&
+								(meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
 							meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
-						stmt->result_bind[i].zv->value = data->value;
+						ZVAL_COPY_VALUE(result, data);
 						/* copied data, thus also the ownership. Thus null data */
 						ZVAL_NULL(data);
 					}
@@ -1169,7 +1180,7 @@ MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, zend_bool * const fe
 	SET_EMPTY_ERROR(*stmt->error_info);
 	SET_EMPTY_ERROR(*stmt->conn->error_info);
 
-	DBG_INF_FMT("result_bind=%p separated_once=%u", stmt->result_bind, stmt->result_zvals_separated_once);
+	DBG_INF_FMT("result_bind=%p separated_once=%u", &stmt->result_bind, stmt->result_zvals_separated_once);
 	/*
 	  The user might have not bound any variables for result.
 	  Do the binding once she does it.
@@ -1182,8 +1193,10 @@ MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, zend_bool * const fe
 		*/
 		for (i = 0; i < stmt->result->field_count; i++) {
 			if (stmt->result_bind[i].bound == TRUE) {
-				zval_dtor(stmt->result_bind[i].zv);
-				ZVAL_NULL(stmt->result_bind[i].zv);
+				zval *result = &stmt->result_bind[i].zv;
+				ZVAL_DEREF(result);
+				zval_dtor(result);
+				ZVAL_NULL(result);
 			}
 		}
 		stmt->result_zvals_separated_once = TRUE;
@@ -1439,9 +1452,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const s, MYSQLND_PA
 				  We may have the last reference, then call zval_ptr_dtor() or we may leak memory.
 				  Switching from bind_one_parameter to bind_parameters may result in zv being NULL
 				*/
-				if (stmt->param_bind[i].zv) {
-					zval_ptr_dtor(&stmt->param_bind[i].zv);
-				}
+				zval_ptr_dtor(&stmt->param_bind[i].zv);
 			}
 			if (stmt->param_bind != param_bind) {
 				s->m->free_parameter_bind(s, stmt->param_bind TSRMLS_CC);
@@ -1454,7 +1465,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const s, MYSQLND_PA
 			DBG_INF_FMT("%u is of type %u", i, stmt->param_bind[i].type);
 			/* Prevent from freeing */
 			/* Don't update is_ref, or we will leak during conversion */
-			Z_ADDREF_P(stmt->param_bind[i].zv);
+			Z_TRY_ADDREF(stmt->param_bind[i].zv);
 			stmt->param_bind[i].flags = 0;
 			if (stmt->param_bind[i].type == MYSQL_TYPE_LONG_BLOB) {
 				stmt->param_bind[i].flags &= ~MYSQLND_PARAM_BIND_BLOB_USED;
@@ -1504,17 +1515,15 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const s, unsigne
 
 		/* Prevent from freeing */
 		/* Don't update is_ref, or we will leak during conversion */
-		Z_ADDREF_P(zv);
+		Z_TRY_ADDREF_P(zv);
 		DBG_INF("Binding");
 		/* Release what we had, if we had */
-		if (stmt->param_bind[param_no].zv) {
-			zval_ptr_dtor(&stmt->param_bind[param_no].zv);
-		}
+		zval_ptr_dtor(&stmt->param_bind[param_no].zv);
 		if (type == MYSQL_TYPE_LONG_BLOB) {
 			/* The client will use stmt_send_long_data */
 			stmt->param_bind[param_no].flags &= ~MYSQLND_PARAM_BIND_BLOB_USED;
 		}
-		stmt->param_bind[param_no].zv = zv;
+		ZVAL_COPY_VALUE(&stmt->param_bind[param_no].zv, zv);
 		stmt->param_bind[param_no].type = type;
 
 		stmt->send_types_to_server = 1;
@@ -1590,8 +1599,10 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const s,
 		stmt->result_bind = result_bind;
 		for (i = 0; i < stmt->field_count; i++) {
 			/* Prevent from freeing */
-			Z_ADDREF_P(stmt->result_bind[i].zv);
-			DBG_INF_FMT("ref of %p = %u", stmt->result_bind[i].zv, Z_REFCOUNT_P(stmt->result_bind[i].zv));
+			Z_TRY_ADDREF(stmt->result_bind[i].zv);
+
+			DBG_INF_FMT("ref of %p = %u", &stmt->result_bind[i].zv,
+					Z_REFCOUNTED(stmt->result_bind[i].zv)? Z_REFCOUNT(stmt->result_bind[i].zv) : 0);
 			/*
 			  Don't update is_ref !!! it's not our job
 			  Otherwise either 009.phpt or mysqli_stmt_bind_result.phpt
@@ -1645,7 +1656,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, unsigned i
 		if (!stmt->result_bind) {
 			DBG_RETURN(FAIL);
 		}
-		ALLOC_INIT_ZVAL(stmt->result_bind[param_no].zv);
+		ZVAL_NULL(&stmt->result_bind[param_no].zv);
 		/*
 		  Don't update is_ref !!! it's not our job
 		  Otherwise either 009.phpt or mysqli_stmt_bind_result.phpt
@@ -2010,29 +2021,12 @@ mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s TSRMLS_DC)
 	for (i = 0; i < stmt->field_count; i++) {
 		/* Let's try with no cache */
 		if (stmt->result_bind[i].bound == TRUE) {
-			DBG_INF_FMT("%u has refcount=%u", i, Z_REFCOUNT_P(stmt->result_bind[i].zv));
-			/*
-			  We have to separate the actual zval value of the bound
-			  variable from our allocated zvals or we will face double-free
-			*/
-			if (Z_REFCOUNT_P(stmt->result_bind[i].zv) > 1) {
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-				zval_copy_ctor(stmt->result_bind[i].zv);
-#endif
-				zval_ptr_dtor(&stmt->result_bind[i].zv);
-			} else {
-				/*
-				  If it is a string, what is pointed will be freed
-				  later in free_result(). We need to remove the variable to
-				  which the user has lost reference.
-				*/
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-				ZVAL_NULL(stmt->result_bind[i].zv);
-#endif
-				zval_ptr_dtor(&stmt->result_bind[i].zv);
-			}
+			DBG_INF_FMT("%u has refcount=%u", i,
+					Z_REFCOUNTED(stmt->result_bind[i].zv)? Z_REFCOUNT(stmt->result_bind[i].zv) : 0);
+			zval_ptr_dtor(&stmt->result_bind[i].zv);
 		}
 	}
+
 	s->m->free_result_bind(s, stmt->result_bind TSRMLS_CC);
 	stmt->result_bind = NULL;
 
@@ -2063,27 +2057,41 @@ mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param
 	*/
 	/* Let's try with no cache */
 	if (stmt->result_bind[param_no].bound == TRUE) {
-		DBG_INF_FMT("%u has refcount=%u", param_no, Z_REFCOUNT_P(stmt->result_bind[param_no].zv));
-		/*
-		  We have to separate the actual zval value of the bound
-		  variable from our allocated zvals or we will face double-free
-		*/
-		if (Z_REFCOUNT_P(stmt->result_bind[param_no].zv) > 1) {
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-			zval_copy_ctor(stmt->result_bind[param_no].zv);
-#endif
-			zval_ptr_dtor(&stmt->result_bind[param_no].zv);
-		} else {
-			/*
-			  If it is a string, what is pointed will be freed
-			  later in free_result(). We need to remove the variable to
-			  which the user has lost reference.
-			*/
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-			ZVAL_NULL(stmt->result_bind[param_no].zv);
-#endif
-			zval_ptr_dtor(&stmt->result_bind[param_no].zv);
-		}
+		DBG_INF_FMT("%u has refcount=%u", param_no,
+				Z_REFCOUNTED(stmt->result_bind[param_no].zv)?
+				Z_REFCOUNT(stmt->result_bind[param_no].zv) : 0);
+		zval_ptr_dtor(&stmt->result_bind[param_no].zv);
+	}
+
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stmt::free_stmt_result */
+static void
+MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)(MYSQLND_STMT * const s TSRMLS_DC)
+{
+	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
+	DBG_ENTER("mysqlnd_stmt::free_stmt_result");
+	if (!stmt) {
+		DBG_VOID_RETURN;
+	}
+
+	/*
+	  First separate the bound variables, which point to the result set, then
+	  destroy the set.
+	*/
+	mysqlnd_stmt_separate_result_bind(s TSRMLS_CC);
+	/* Not every statement has a result set attached */
+	if (stmt->result) {
+		stmt->result->m.free_result_internal(stmt->result TSRMLS_CC);
+		stmt->result = NULL;
+	}
+	if (stmt->error_info->error_list) {
+		zend_llist_clean(stmt->error_info->error_list);
+		mnd_pefree(stmt->error_info->error_list, s->persistent);
+		stmt->error_info->error_list = NULL;
 	}
 
 	DBG_VOID_RETURN;
@@ -2115,30 +2123,13 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)(MYSQLND_STMT * const s TSRMLS_DC
 			  If bind_one_parameter was used, but not everything was
 			  bound and nothing was fetched, then some `zv` could be NULL
 			*/
-			if (stmt->param_bind[i].zv) {
-				zval_ptr_dtor(&stmt->param_bind[i].zv);
-			}
+			zval_ptr_dtor(&stmt->param_bind[i].zv);
 		}
 		s->m->free_parameter_bind(s, stmt->param_bind TSRMLS_CC);
 		stmt->param_bind = NULL;
 	}
 
-	/*
-	  First separate the bound variables, which point to the result set, then
-	  destroy the set.
-	*/
-	mysqlnd_stmt_separate_result_bind(s TSRMLS_CC);
-	/* Not every statement has a result set attached */
-	if (stmt->result) {
-		stmt->result->m.free_result_internal(stmt->result TSRMLS_CC);
-		stmt->result = NULL;
-	}
-	if (stmt->error_info->error_list) {
-		zend_llist_clean(stmt->error_info->error_list);
-		mnd_pefree(stmt->error_info->error_list, s->persistent);
-		stmt->error_info->error_list = NULL;
-	}
-
+	s->m->free_stmt_result(s TSRMLS_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -2357,7 +2348,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	mysqlnd_stmt_execute_generate_request,
 	mysqlnd_stmt_execute_parse_response,
 	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content),
-	MYSQLND_METHOD(mysqlnd_stmt, flush)
+	MYSQLND_METHOD(mysqlnd_stmt, flush),
+	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)
 MYSQLND_CLASS_METHODS_END;
 
 

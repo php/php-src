@@ -228,7 +228,7 @@ typedef struct odbc_connection {
     ODBC_SQL_CONN_T hdbc;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
-	int id;
+	zend_resource *res;
 	int persistent;
 } odbc_connection;
 

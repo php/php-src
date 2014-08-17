@@ -361,7 +361,7 @@ Options: extended
 No first char
 No need char
 Subject length lower bound = 3
-Starting byte set: \x09 \x20 ! " # $ % & ' ( * + - / 0 1 2 3 4 5 6 7 8 
+Starting chars: \x09 \x20 ! " # $ % & ' ( * + - / 0 1 2 3 4 5 6 7 8 
   9 = ? A B C D E F G H I J K L M N O P Q R S T U V W X Y Z ^ _ ` a b c d e 
   f g h i j k l m n o p q r s t u v w x y z { | } ~ \x7f 
 
@@ -388,7 +388,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: \x09 \x20 \xa0 
+Starting chars: \x09 \x20 \xa0 
 
 /\H/SI
 Capturing subpattern count = 0
@@ -396,7 +396,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /\v/SI
 Capturing subpattern count = 0
@@ -404,7 +404,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: \x0a \x0b \x0c \x0d \x85 
+Starting chars: \x0a \x0b \x0c \x0d \x85 
 
 /\V/SI
 Capturing subpattern count = 0
@@ -412,7 +412,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /\R/SI
 Capturing subpattern count = 0
@@ -420,7 +420,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: \x0a \x0b \x0c \x0d \x85 
+Starting chars: \x0a \x0b \x0c \x0d \x85 
 
 /[\h]/BZ
 ------------------------------------------------------------------

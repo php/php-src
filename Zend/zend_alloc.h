@@ -136,9 +136,6 @@ inline static void * __zend_realloc(void *p, size_t len)
 #define perealloc_recoverable_rel(ptr, size, persistent) ((persistent)?__zend_realloc((ptr), (size)):erealloc_recoverable_rel((ptr), (size)))
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
-#define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):STR_EMPTY_ALLOC())
-#define safe_estrndup(ptr, len) ((ptr)?(estrndup((ptr), (len))):STR_EMPTY_ALLOC())
-
 ZEND_API int zend_set_memory_limit(size_t memory_limit TSRMLS_DC);
 
 ZEND_API void start_memory_manager(TSRMLS_D);
@@ -160,19 +157,6 @@ ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC);
 ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC);
 
 END_EXTERN_C()
-
-/* fast cache for zval's */
-#define ALLOC_ZVAL(z)	\
-	(z) = (zval *) emalloc(sizeof(zval))
-
-#define FREE_ZVAL(z)	\
-	efree_rel(z)
-
-#define ALLOC_ZVAL_REL(z)	\
-	(z) = (zval *) emalloc_rel(sizeof(zval))
-
-#define FREE_ZVAL_REL(z)	\
-	efree_rel(z)
 
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\

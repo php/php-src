@@ -211,7 +211,7 @@ static int getSingletonPos(const char* str)
    Get default locale */
 PHP_NAMED_FUNCTION(zif_locale_get_default)
 {
-	RETURN_STRING( intl_locale_get_default( TSRMLS_C ), TRUE );
+	RETURN_STRING( intl_locale_get_default( TSRMLS_C ) );
 }
 
 /* }}} */
@@ -225,6 +225,7 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 {
 	char* locale_name = NULL;
 	int   len=0;	
+	zend_string *ini_name;
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC,  "s",
 		&locale_name ,&len ) == FAILURE)
@@ -239,8 +240,10 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 		locale_name =  (char *)uloc_getDefault() ;
 		len = strlen(locale_name);
 	}
-
-	zend_alter_ini_entry(LOCALE_INI_NAME, sizeof(LOCALE_INI_NAME), locale_name, len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);	
+	
+	ini_name = STR_INIT(LOCALE_INI_NAME, sizeof(LOCALE_INI_NAME) - 1, 0);
+	zend_alter_ini_entry(ini_name, locale_name, len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);	
+	STR_RELEASE(ini_name);
 
 	RETURN_TRUE;
 }
@@ -403,12 +406,15 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 		if( tag_value){
 			efree( tag_value);
 		}
-		RETURN_STRING( empty_result , TRUE);
+		RETURN_STRING( empty_result);
 	}
 
 	/* value found */
 	if( tag_value){
-		RETURN_STRING( tag_value , FALSE);
+		RETVAL_STRING( tag_value );
+		//???
+		efree(tag_value);
+		return;
 	}
 
 	/* Error encountered while fetching the value */
@@ -593,7 +599,9 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL( utf8value, utf8value_len , FALSE);
+	RETVAL_STRINGL( utf8value, utf8value_len );
+	//????
+	efree(utf8value);
 
 }
 /* }}} */
@@ -731,7 +739,9 @@ PHP_FUNCTION( locale_get_keywords )
         		RETURN_FALSE;
 			}
 
-       		add_assoc_stringl( return_value, (char *)kw_key, kw_value , kw_value_len, 0);
+			// TODO: avoid reallocation ???
+       		add_assoc_stringl( return_value, (char *)kw_key, kw_value , kw_value_len);
+       		efree(kw_value);
 		} /* end of while */
 
 	} /* end of if e!=NULL */
@@ -760,10 +770,10 @@ PHP_FUNCTION(locale_canonicalize)
 */
 static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_name)
 {
-	zval**	ele_value	= NULL;
+	zval *ele_value;
 
-	if(zend_hash_find(hash_arr , key_name , strlen(key_name) + 1 ,(void **)&ele_value ) == SUCCESS ) {
-		if(Z_TYPE_PP(ele_value)!= IS_STRING ){
+	if ((ele_value = zend_hash_str_find(hash_arr , key_name, strlen(key_name))) != NULL ) {
+		if(Z_TYPE_P(ele_value)!= IS_STRING ){
 			/* element value is not a string */
 			return FAILURE;
 		}
@@ -772,7 +782,7 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_
 			/* not lang or grandfathered tag */
 			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
 		}
-		smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value));
+		smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
 		return SUCCESS;
 	}
 
@@ -801,36 +811,33 @@ static void add_prefix(smart_str* loc_name, char* key_name)
 */
 static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, char* key_name TSRMLS_DC)
 {
-	zval**	ele_value    	= NULL;
+	zval	*ele_value;
 	int 	i 		= 0;
 	int 	isFirstSubtag 	= 0;
 	int 	max_value 	= 0;
 
 	/* Variant/ Extlang/Private etc. */
-	if( zend_hash_find( hash_arr , key_name , strlen(key_name) + 1 ,(void **)&ele_value ) == SUCCESS ) {
-		if( Z_TYPE_PP(ele_value) == IS_STRING ){
+	if ((ele_value = zend_hash_str_find( hash_arr , key_name , strlen(key_name))) != NULL) {
+		if( Z_TYPE_P(ele_value) == IS_STRING ){
 			add_prefix( loc_name , key_name);
 
 			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-			smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value));
+			smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
 			return SUCCESS;
-		} else if(Z_TYPE_PP(ele_value) == IS_ARRAY ) {
-			HashPosition pos;
-			HashTable *arr = HASH_OF(*ele_value);
-			zval **data = NULL;
+		} else if(Z_TYPE_P(ele_value) == IS_ARRAY ) {
+			HashTable *arr = HASH_OF(ele_value);
+			zval *data;
 
-			zend_hash_internal_pointer_reset_ex(arr, &pos);
-			while(zend_hash_get_current_data_ex(arr, (void **)&data, &pos) != FAILURE) {
-				if(Z_TYPE_PP(data) != IS_STRING) {
+			ZEND_HASH_FOREACH_VAL(arr, data) {
+				if(Z_TYPE_P(data) != IS_STRING) {
 					return FAILURE;
 				}
 				if (isFirstSubtag++ == 0){
 					add_prefix(loc_name , key_name);
 				}
 				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-				smart_str_appendl(loc_name, Z_STRVAL_PP(data) , Z_STRLEN_PP(data));
-				zend_hash_move_forward_ex(arr, &pos);
-			}
+				smart_str_appendl(loc_name, Z_STRVAL_P(data) , Z_STRLEN_P(data));
+			} ZEND_HASH_FOREACH_END();
 			return SUCCESS;
 		} else {
 			return FAILURE;
@@ -852,8 +859,8 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 		isFirstSubtag = 0;
 		for( i=0 ; i< max_value; i++ ){  
 			snprintf( cur_key_name , 30, "%s%d", key_name , i);	
-			if( zend_hash_find( hash_arr , cur_key_name , strlen(cur_key_name) + 1,(void **)&ele_value ) == SUCCESS ){
-				if( Z_TYPE_PP(ele_value)!= IS_STRING ){
+			if ((ele_value = zend_hash_str_find( hash_arr , cur_key_name , strlen(cur_key_name))) != NULL) {
+				if( Z_TYPE_P(ele_value)!= IS_STRING ){
 					/* variant is not a string */
 					return FAILURE;
 				}
@@ -862,7 +869,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 					add_prefix(loc_name , cur_key_name);
 				}
 				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-				smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value));
+				smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
 			}
 		} /* end of for */
 	} /* end of else */
@@ -889,7 +896,7 @@ static int handleAppendResult( int result, smart_str* loc_name TSRMLS_DC)
 }
 /* }}} */
 
-#define RETURN_SMART_STR(s) smart_str_0((s)); RETURN_STRINGL((s)->c, (s)->len, 0)
+#define RETURN_SMART_STR(str) smart_str_0((str)); RETURN_STR((str)->s)
 /* {{{ proto static string Locale::composeLocale($array) 
 * Creates a locale by combining the parts of locale-ID passed	
 * }}} */
@@ -1054,11 +1061,11 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name 
 			}
 			cur_key_name = (char*)ecalloc( 25,  25);
 			sprintf( cur_key_name , "%s%d", key_name , cnt++);	
-			add_assoc_string( hash_arr, cur_key_name , token ,TRUE );
+			add_assoc_string( hash_arr, cur_key_name , token);
 			/* tokenize on the "_" or "-" and stop  at singleton if any */
 			while( (token = php_strtok_r(NULL , DELIMITER , &last_ptr)) && (strlen(token)>1) ){
 				sprintf( cur_key_name , "%s%d", key_name , cnt++);	
-				add_assoc_string( hash_arr, cur_key_name , token , TRUE );
+				add_assoc_string( hash_arr, cur_key_name , token);
 			}
 /*
 			if( strcmp(key_name, LOC_PRIVATE_TAG) == 0 ){
@@ -1067,7 +1074,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name 
 		}
 	} else {
 		if( result == 1 ){
-			add_assoc_string( hash_arr, key_name , key_value , TRUE );
+			add_assoc_string( hash_arr, key_name , key_value);
 			cur_result = 1;
 		}
 	}
@@ -1114,7 +1121,7 @@ PHP_FUNCTION(locale_parse)
 
 	grOffset =  findOffset( LOC_GRANDFATHERED , loc_name );
 	if( grOffset >= 0 ){
-		add_assoc_string( return_value , LOC_GRANDFATHERED_LANG_TAG , estrdup(loc_name) ,FALSE );
+		add_assoc_string( return_value , LOC_GRANDFATHERED_LANG_TAG, (char *)loc_name);
 	}
 	else{
 		/* Not grandfathered */
@@ -1171,10 +1178,10 @@ PHP_FUNCTION(locale_get_all_variants)
 		if( result > 0 && variant){
 			/* Tokenize on the "_" or "-" */
 			token = php_strtok_r( variant , DELIMITER , &saved_ptr);	
-			add_next_index_stringl( return_value, token , strlen(token) ,TRUE );
+			add_next_index_stringl( return_value, token , strlen(token));
 			/* tokenize on the "_" or "-" and stop  at singleton if any	*/
 			while( (token = php_strtok_r(NULL , DELIMITER, &saved_ptr)) && (strlen(token)>1) ){
- 				add_next_index_stringl( return_value, token , strlen(token) ,TRUE );
+ 				add_next_index_stringl( return_value, token , strlen(token));
 			}
 		}
 		if( variant ){
@@ -1415,7 +1422,7 @@ static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int ca
 	int result = 0;
 
 	char* lang_tag = NULL;
-	zval** ele_value = NULL;
+	zval* ele_value = NULL;
 	char** cur_arr = NULL;
 
 	char* cur_loc_range	= NULL;
@@ -1425,29 +1432,22 @@ static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int ca
 	char* return_value = NULL;
 
 	cur_arr = ecalloc(zend_hash_num_elements(hash_arr)*2, sizeof(char *));
+	ZEND_HASH_FOREACH_VAL(hash_arr, ele_value) {
 	/* convert the array to lowercase , also replace hyphens with the underscore and store it in cur_arr */
-	for(zend_hash_internal_pointer_reset(hash_arr);
-		zend_hash_has_more_elements(hash_arr) == SUCCESS;
-		zend_hash_move_forward(hash_arr)) {
-		
-		if (zend_hash_get_current_data(hash_arr, (void**)&ele_value) == FAILURE) {
-			/* Should never actually fail since the key is known to exist.*/
-			continue;
-		}
-		if(Z_TYPE_PP(ele_value)!= IS_STRING) {
+		if(Z_TYPE_P(ele_value)!= IS_STRING) {
 			/* element value is not a string */
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: locale array element is not a string", 0 TSRMLS_CC);
 			LOOKUP_CLEAN_RETURN(NULL);
 		} 
-		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_PP(ele_value), Z_STRLEN_PP(ele_value));
-		result = strToMatch(Z_STRVAL_PP(ele_value), cur_arr[cur_arr_len*2]);
+		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
+		result = strToMatch(Z_STRVAL_P(ele_value), cur_arr[cur_arr_len*2]);
 		if(result == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag", 0 TSRMLS_CC);
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
-		cur_arr[cur_arr_len*2+1] = Z_STRVAL_PP(ele_value);
+		cur_arr[cur_arr_len*2+1] = Z_STRVAL_P(ele_value);
 		cur_arr_len++ ; 
-	} /* end of for */
+	} ZEND_HASH_FOREACH_END(); /* end of for */
 
 	/* Canonicalize array elements */
 	if(canonicalize) {
@@ -1565,7 +1565,9 @@ PHP_FUNCTION(locale_lookup)
 		}
 	}
 
-	RETVAL_STRINGL(result, strlen(result), 0);
+	RETVAL_STRINGL(result, strlen(result));
+	//????
+	efree(result);
 }
 /* }}} */
 
@@ -1602,7 +1604,7 @@ PHP_FUNCTION(locale_accept_from_http)
 	if (len < 0 || outResult == ULOC_ACCEPT_FAILED) {
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL(resultLocale, len, 1);
+	RETURN_STRINGL(resultLocale, len);
 }
 /* }}} */
 

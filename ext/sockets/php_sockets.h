@@ -59,7 +59,7 @@ typedef struct {
 	int			type;
 	int			error;
 	int			blocking;
-	zval		*zstream;
+	zval		zstream;
 } php_socket;
 
 #ifdef PHP_WIN32

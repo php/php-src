@@ -42,7 +42,8 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			&rules, &rules_len, &compiled) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"rbbi_create_instance: bad arguments", 0 TSRMLS_CC);
-		RETURN_NULL();
+		Z_OBJ_P(return_value) = NULL;
+		return;
 	}
 
 	// instantiation of ICU object
@@ -66,12 +67,13 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			smart_str parse_error_str;
 			parse_error_str = intl_parse_error_to_string(&parseError);
 			spprintf(&msg, 0, "rbbi_create_instance: unable to create "
-				"RuleBasedBreakIterator from rules (%s)", parse_error_str.c);
+				"RuleBasedBreakIterator from rules (%s)", parse_error_str.s? parse_error_str.s->val : "");
 			smart_str_free(&parse_error_str);
 			intl_error_set_custom_msg(NULL, msg, 1 TSRMLS_CC);
 			efree(msg);
 			delete rbbi;
-			RETURN_NULL();
+			Z_OBJ_P(return_value) = NULL;
+			return;
 		}
 	} else { // compiled
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
@@ -79,17 +81,18 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
 				"create instance from compiled rules", 0 TSRMLS_CC);
-			delete rbbi;
-			RETURN_NULL();
+			Z_OBJ_P(return_value) = NULL;
+			return;
 		}
 #else
 		intl_error_set(NULL, U_UNSUPPORTED_ERROR, "rbbi_create_instance: "
 			"compiled rules require ICU >= 4.8", 0 TSRMLS_CC);
-		RETURN_NULL();
+		Z_OBJ_P(return_value) = NULL;
+		return;
 #endif
 	}
 
-	breakiterator_object_create(return_value, rbbi TSRMLS_CC);
+	breakiterator_object_create(return_value, rbbi, 0 TSRMLS_CC);
 }
 
 U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
@@ -97,12 +100,12 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 	zval	orig_this		= *getThis();
 
 	return_value = getThis();
-	//changes this to IS_NULL (without first destroying) if there's an error
 	_php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
-	if (Z_TYPE_P(return_value) == IS_NULL) {
-		zend_object_store_ctor_failed(&orig_this TSRMLS_CC);
+	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+		zend_object_store_ctor_failed(Z_OBJ(orig_this) TSRMLS_CC);
 		zval_dtor(&orig_this);
+		ZEND_CTOR_MAKE_NULL();
 	}
 }
 
@@ -119,17 +122,20 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
+	char *str;
+	int str_len;
 	const UnicodeString rules = fetch_rbbi(bio)->getRules();
 
-	Z_TYPE_P(return_value) = IS_STRING;
-	if (intl_charFromString(rules, &Z_STRVAL_P(return_value),
-			&Z_STRLEN_P(return_value), BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
+	if (intl_charFromString(rules, &str, &str_len, BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
 	{
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_hash_code: Error converting result to UTF-8 string",
 				0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
+	RETVAL_STRINGL(str, str_len);
+	//???
+	efree(str);
 }
 
 U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
@@ -212,10 +218,10 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 		RETURN_FALSE;
 	}
 
-	char *ret_rules = static_cast<char*>(emalloc(rules_len + 1));
-	memcpy(ret_rules, rules, rules_len);
-	ret_rules[rules_len] = '\0';
+	zend_string *ret_rules = STR_ALLOC(rules_len, 0);
+	memcpy(ret_rules->val, rules, rules_len);
+	ret_rules->val[rules_len] = '\0';
 
-	RETURN_STRINGL(ret_rules, rules_len, 0);
+	RETURN_STR(ret_rules);
 }
 #endif

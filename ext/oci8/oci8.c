@@ -120,15 +120,15 @@ zend_class_entry *oci_coll_class_entry_ptr;
 #endif
 
 /* {{{ static protos */
-static void php_oci_connection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
-static void php_oci_pconnection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
-static void php_oci_pconnection_list_np_dtor (zend_rsrc_list_entry * TSRMLS_DC);
-static void php_oci_statement_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
-static void php_oci_descriptor_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
-static void php_oci_spool_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC);
-static void php_oci_collection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
+static void php_oci_connection_list_dtor (zend_resource * TSRMLS_DC);
+static void php_oci_pconnection_list_dtor (zend_resource * TSRMLS_DC);
+static void php_oci_pconnection_list_np_dtor (zend_resource * TSRMLS_DC);
+static void php_oci_statement_list_dtor (zend_resource * TSRMLS_DC);
+static void php_oci_descriptor_list_dtor (zend_resource * TSRMLS_DC);
+static void php_oci_spool_list_dtor(zend_resource *entry TSRMLS_DC);
+static void php_oci_collection_list_dtor (zend_resource * TSRMLS_DC);
 
-static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC);
+static int php_oci_persistent_helper(zend_resource *le TSRMLS_DC);
 static int php_oci_connection_ping(php_oci_connection * TSRMLS_DC);
 static int php_oci_connection_status(php_oci_connection * TSRMLS_DC);
 static int php_oci_connection_close(php_oci_connection * TSRMLS_DC);
@@ -138,7 +138,7 @@ static OCIEnv *php_oci_create_env(ub2 charsetid TSRMLS_DC);
 static int php_oci_create_session(php_oci_connection *connection, php_oci_spool *session_pool, char *dbname, int dbname_len, char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, int session_mode TSRMLS_DC);
 static int php_oci_old_create_session(php_oci_connection *connection, char *dbname, int dbname_len, char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, int session_mode TSRMLS_DC);
 static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, int charsetid TSRMLS_DC);
-static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, char *hash_key, int hash_key_len, int charsetid TSRMLS_DC);
+static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, zend_string *hash_key, int charsetid TSRMLS_DC);
 static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TSRMLS_DC);
 /* }}} */
 
@@ -1397,7 +1397,7 @@ PHP_MINFO_FUNCTION(oci)
  *
  * Non-persistent connection destructor
  */
-static void php_oci_connection_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
+static void php_oci_connection_list_dtor(zend_resource *entry TSRMLS_DC)
 {
 	php_oci_connection *connection = (php_oci_connection *)entry->ptr;
 
@@ -1412,7 +1412,7 @@ static void php_oci_connection_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
  *
  * Persistent connection destructor
  */
-static void php_oci_pconnection_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
+static void php_oci_pconnection_list_dtor(zend_resource *entry TSRMLS_DC)
 {
 	php_oci_connection *connection = (php_oci_connection *)entry->ptr;
 
@@ -1429,10 +1429,11 @@ static void php_oci_pconnection_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
  * Non-Persistent destructor for persistent connection - This gets invoked when
  * the refcount of this goes to zero in the regular list
  */
-static void php_oci_pconnection_list_np_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
+static void php_oci_pconnection_list_np_dtor(zend_resource *entry TSRMLS_DC)
 {
 	php_oci_connection *connection = (php_oci_connection *)entry->ptr;
-	zend_rsrc_list_entry *le;
+	zval *zvp;
+	zend_resource *le;
 
 	/*
 	 * We cannot get connection as NULL or as a stub in this function. This is the function that
@@ -1452,8 +1453,10 @@ static void php_oci_pconnection_list_np_dtor(zend_rsrc_list_entry *entry TSRMLS_
 		OCI_G(in_call)) {
 
 		/* Remove the hash entry if present */
-		if ((zend_hash_find(&EG(persistent_list), connection->hash_key, strlen(connection->hash_key)+1, (void **) &le)== SUCCESS) && (le->type == le_pconnection) && (le->ptr == connection)) {
-			zend_hash_del(&EG(persistent_list), connection->hash_key, strlen(connection->hash_key)+1);
+		zvp = zend_hash_find(&EG(persistent_list), connection->hash_key);
+		le = Z_RES_P(zvp); 		/* PHPNG TODO check for null zvp */
+		if (le != NULL && le->type == le_pconnection && le->ptr == connection) {
+			zend_hash_del(&EG(persistent_list), connection->hash_key);
 		}
 		else {
 			php_oci_connection_close(connection TSRMLS_CC);
@@ -1490,7 +1493,7 @@ static void php_oci_pconnection_list_np_dtor(zend_rsrc_list_entry *entry TSRMLS_
  *
  * Statement destructor
  */
-static void php_oci_statement_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
+static void php_oci_statement_list_dtor(zend_resource *entry TSRMLS_DC)
 {
 	php_oci_statement *statement = (php_oci_statement *)entry->ptr;
 	php_oci_statement_free(statement TSRMLS_CC);
@@ -1501,7 +1504,7 @@ static void php_oci_statement_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
  *
  *	Descriptor destructor
  */
-static void php_oci_descriptor_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
+static void php_oci_descriptor_list_dtor(zend_resource *entry TSRMLS_DC)
 {
 	php_oci_descriptor *descriptor = (php_oci_descriptor *)entry->ptr;
 	php_oci_lob_free(descriptor TSRMLS_CC);
@@ -1512,7 +1515,7 @@ static void php_oci_descriptor_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
  *
  * Collection destructor
  */
-static void php_oci_collection_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
+static void php_oci_collection_list_dtor(zend_resource *entry TSRMLS_DC)
 {
 	php_oci_collection *collection = (php_oci_collection *)entry->ptr;
 	php_oci_collection_close(collection TSRMLS_CC);
@@ -1573,13 +1576,13 @@ void php_oci_column_hash_dtor(void *data)
 	php_oci_out_column *column = (php_oci_out_column *) data;
 	TSRMLS_FETCH();
 
-	if (column->stmtid) {
-		zend_list_delete(column->stmtid);
-	}
+	/* if (column->stmtid) { */ /* PHPNG TODO */
+		zend_list_close(column->stmtid);
+	/* } */
 
-	if (column->is_descr) {
-		zend_list_delete(column->descid);
-	}
+	/* if (column->is_descr) { */ /* PHPNG TODO */
+		zend_list_close(column->descid);
+	/* } */
 
 	if (column->data) {
 		efree(column->data);
@@ -1798,8 +1801,9 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
  */
 php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, long session_mode, int persistent, int exclusive TSRMLS_DC)
 {
-	zend_rsrc_list_entry *le;
-	zend_rsrc_list_entry new_le;
+	zval *zvp;
+	zend_resource *le;
+	zend_resource new_le;
 	php_oci_connection *connection = NULL;
 	smart_str hashed_details = {0};
 	time_t timestamp;
@@ -1923,25 +1927,30 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	smart_str_0(&hashed_details);
 
 	/* make it lowercase */
-	php_strtolower(hashed_details.c, hashed_details.len);
+	/* PHPNG TODO is this safe to do? What about interned strings? */
+	php_strtolower(hashed_details.s->val, hashed_details.s->len);
 
 	if (!exclusive && !new_password) {
 		zend_bool found = 0;
 
-		if (persistent && zend_hash_find(&EG(persistent_list), hashed_details.c, hashed_details.len+1, (void **) &le) == SUCCESS) {
+		/* PHPNG TODO Check hashed_details is used correctly */
+		if (persistent && ((zvp = zend_hash_find(&EG(persistent_list), hashed_details.s))) != NULL) {
+			zend_resource *le = Z_RES_P(zvp);
+
 			found = 1;
 			/* found */
 			if (le->type == le_pconnection) {
 				connection = (php_oci_connection *)le->ptr;
 			}
-		} else if (!persistent && zend_hash_find(&EG(regular_list), hashed_details.c, hashed_details.len+1, (void **) &le) == SUCCESS) {
+		} else if (!persistent && ((zvp = zend_hash_find(&EG(regular_list), hashed_details.s)) != NULL)) {
+			le = Z_RES_P(zvp);
 			found = 1;
 			if (le->type == le_index_ptr) {
 				int type, link;
 				void *ptr;
 
 				link = OCI8_PTR_TO_INT(le->ptr);
-				ptr = zend_list_find(link,&type);
+				ptr = zend_list_find(link, &type); /* PHPNG TODO */
 				if (ptr && (type == le_connection)) {
 					connection = (php_oci_connection *)ptr;
 				}
@@ -1964,7 +1973,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		if (connection && connection->is_persistent && connection->is_stub) {
 			if (php_oci_create_session(connection, NULL, dbname, dbname_len, username, username_len, password, password_len, new_password, new_password_len, session_mode TSRMLS_CC)) {
 				smart_str_free_ex(&hashed_details, 0);
-				zend_hash_del(&EG(persistent_list), connection->hash_key, strlen(connection->hash_key)+1);
+				zend_hash_del(&EG(persistent_list), connection->hash_key);
 
 				return NULL;
 			}
@@ -2000,8 +2009,8 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 							connection->used_this_request = 1;
 							tmp = (php_oci_connection *)zend_list_find(connection->id, &rsrc_type);
 
-							if (tmp != NULL && rsrc_type == le_pconnection && strlen(tmp->hash_key) == hashed_details.len &&
-								memcmp(tmp->hash_key, hashed_details.c, hashed_details.len) == 0 && zend_list_addref(connection->id) == SUCCESS) {
+							if (tmp != NULL && rsrc_type == le_pconnection && tmp->hash_key->len == hashed_details.s->len &&
+								memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0 && zend_list_addref(connection->id) == SUCCESS) {
 								/* do nothing */
 							} else {
 								PHP_OCI_REGISTER_RESOURCE(connection, le_pconnection);
@@ -2043,21 +2052,21 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 					le->ptr = NULL;
 				}
 
-				zend_hash_del(&EG(persistent_list), hashed_details.c, hashed_details.len+1);
+				zend_hash_del(&EG(persistent_list), hashed_details.s);
 			} else {
 				/* We only remove the hash entry. The resource and the list entry with its pointer
 				 * to the resource are still intact
 				 */
-				zend_hash_del(&EG(regular_list), hashed_details.c, hashed_details.len+1);
+				zend_hash_del(&EG(regular_list), hashed_details.s);
 			}
 
 			connection = NULL;
 		} else if (found) {
 			/* found something, but it's not a connection, delete it */
 			if (persistent) {
-				zend_hash_del(&EG(persistent_list), hashed_details.c, hashed_details.len+1);
+				zend_hash_del(&EG(persistent_list), hashed_details.s);
 			} else {
-				zend_hash_del(&EG(regular_list), hashed_details.c, hashed_details.len+1);
+				zend_hash_del(&EG(regular_list), hashed_details.s);
 			}
 		}
 	}
@@ -2081,7 +2090,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 		if (alloc_non_persistent) {
 			connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
-			connection->hash_key = estrndup(hashed_details.c, hashed_details.len);
+			connection->hash_key = zend_str_dup(hashed_details.s, 0);
 			connection->is_persistent = 0;
 #ifdef HAVE_OCI8_DTRACE
 			connection->client_id = NULL;
@@ -2091,7 +2100,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			if (connection == NULL) {
 				return NULL;
 			}
-			connection->hash_key = zend_strndup(hashed_details.c, hashed_details.len);
+			connection->hash_key = zend_str_dup(hashed_details.s, 1);
 			if (connection->hash_key == NULL) {
 				free(connection);
 				return NULL;
@@ -2103,7 +2112,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		}
 	} else {
 		connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
-		connection->hash_key = estrndup(hashed_details.c, hashed_details.len);
+		connection->hash_key = zend_str_dup(hashed_details.s, 0);
 		connection->is_persistent = 0;
 #ifdef HAVE_OCI8_DTRACE
 		connection->client_id = NULL;
@@ -2174,14 +2183,14 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		if (OCI_G(old_oci_close_semantics)) {
 			zend_list_addref(connection->id);
 		}
-		zend_hash_update(&EG(persistent_list), connection->hash_key, strlen(connection->hash_key)+1, (void *)&new_le, sizeof(zend_rsrc_list_entry), NULL);
+		zend_hash_update_mem(&EG(persistent_list), connection->hash_key, (void *)&new_le, sizeof(zend_resource));
 		OCI_G(num_persistent)++;
 		OCI_G(num_links)++;
 	} else if (!exclusive) {
 		PHP_OCI_REGISTER_RESOURCE(connection, le_connection);
 		new_le.ptr = OCI8_INT_TO_PTR(connection->id);
 		new_le.type = le_index_ptr;
-		zend_hash_update(&EG(regular_list), connection->hash_key, strlen(connection->hash_key)+1, (void *)&new_le, sizeof(zend_rsrc_list_entry), NULL);
+		zend_hash_update_mem(&EG(regular_list), connection->hash_key, (void *)&new_le, sizeof(zend_resource));
 		OCI_G(num_links)++;
 	} else {
 		PHP_OCI_REGISTER_RESOURCE(connection, le_connection);
@@ -2589,7 +2598,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 				return 1;
 			} else {
 				if (lob_length > 0) {
-					ZVAL_STRINGL(value, lob_buffer, lob_length, 0);
+					ZVAL_STRINGL(value, lob_buffer, lob_length);
 				} else {
 					ZVAL_EMPTY_STRING(value);
 				}
@@ -2617,7 +2626,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 				return 0;
 		}
 
-		ZVAL_STRINGL(value, column->data, column_size, 1);
+		ZVAL_STRINGL(value, column->data, column_size);
 	}
 	return 0;
 }
@@ -2792,7 +2801,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
  * Helper function to close/rollback persistent connections at the end of request. A return value of
  * 1 indicates that the connection is to be destroyed
  */
-static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
+static int php_oci_persistent_helper(zend_resource *le TSRMLS_DC)
 {
 	time_t timestamp;
 	php_oci_connection *connection;
@@ -2823,7 +2832,7 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
  *
  *	 Create(alloc + Init) Session pool for the given dbname and charsetid
  */
-static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, char *hash_key, int hash_key_len, int charsetid TSRMLS_DC)
+static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, zend_string *hash_key, int charsetid TSRMLS_DC)
 {
 	php_oci_spool *session_pool = NULL;
 	zend_bool iserror = 0;
@@ -2839,8 +2848,8 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	}
 
 	/* Populate key if passed */
-	if (hash_key_len) {
-		session_pool->spool_hash_key = zend_strndup(hash_key, hash_key_len);
+	if (hash_key->val) {
+		session_pool->spool_hash_key = zend_str_dup(hash_key, 1);
 		if (session_pool->spool_hash_key == NULL) {
 			iserror = 1;
 			goto exit_create_spool;
@@ -2964,8 +2973,8 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 {
 	smart_str spool_hashed_details = {0};
 	php_oci_spool *session_pool = NULL;
-	zend_rsrc_list_entry spool_le = {0};
-	zend_rsrc_list_entry *spool_out_le = NULL;
+	zend_resource spool_le = {0};
+	zend_resource *spool_out_le = NULL;
 	zend_bool iserror = 0;
 
 	/* {{{ Create the spool hash key */
@@ -2994,12 +3003,13 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	/* Session Pool Hash Key : oci8spool***username**edition**hashedpassword**dbname**charset */
 
 	smart_str_0(&spool_hashed_details);
-	php_strtolower(spool_hashed_details.c, spool_hashed_details.len);
+	/* PHPNG TODO is this safe to do? */
+	php_strtolower(spool_hashed_details.s->val, spool_hashed_details.s->len);
 	/* }}} */
 
-	if (zend_hash_find(&EG(persistent_list),spool_hashed_details.c, spool_hashed_details.len+1, (void **)&spool_out_le) == FAILURE) {
+	if ((spool_out_le = zend_hash_find(&EG(persistent_list), spool_hashed_details.s)) == NULL) {
 
-		session_pool = php_oci_create_spool(username, username_len, password, password_len, dbname, dbname_len, spool_hashed_details.c, spool_hashed_details.len, charsetid TSRMLS_CC);
+		session_pool = php_oci_create_spool(username, username_len, password, password_len, dbname, dbname_len, spool_hashed_details.s, charsetid TSRMLS_CC);
 
 		if (session_pool == NULL) {
 			iserror = 1;
@@ -3008,10 +3018,10 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 		spool_le.ptr  = session_pool;
 		spool_le.type = le_psessionpool;
 		PHP_OCI_REGISTER_RESOURCE(session_pool, le_psessionpool);
-		zend_hash_update(&EG(persistent_list), session_pool->spool_hash_key, strlen(session_pool->spool_hash_key)+1,(void *)&spool_le, sizeof(zend_rsrc_list_entry),NULL);
+		zend_hash_update_mem(&EG(persistent_list), session_pool->spool_hash_key, (void *)&spool_le, sizeof(zend_resource));
 	} else if (spool_out_le->type == le_psessionpool &&
-		strlen(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key) == spool_hashed_details.len &&
-		memcmp(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key, spool_hashed_details.c, spool_hashed_details.len) == 0) {
+		((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key->len == spool_hashed_details.s->len &&
+		memcmp(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key->val, spool_hashed_details.s->val, spool_hashed_details.s->len) == 0) {
 		/* retrieve the cached session pool */
 		session_pool = (php_oci_spool *)(spool_out_le->ptr);
 	}
@@ -3259,7 +3269,7 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 
 	/* Persistent connections have private session pools */
 	if (connection->is_persistent && !connection->private_spool &&
-		!(connection->private_spool = php_oci_create_spool(username, username_len, password, password_len, dbname, dbname_len, NULL, 0, connection->charset TSRMLS_CC))) {
+		!(connection->private_spool = php_oci_create_spool(username, username_len, password, password_len, dbname, dbname_len, NULL, connection->charset TSRMLS_CC))) {
 			return 1;
 	}
 	actual_spool = (connection->is_persistent) ? (connection->private_spool) : (session_pool);
@@ -3410,7 +3420,7 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
  *
  * Session pool destructor function
  */
-static void php_oci_spool_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
+static void php_oci_spool_list_dtor(zend_resource *entry TSRMLS_DC)
 {
 	php_oci_spool *session_pool = (php_oci_spool *)entry->ptr;
 

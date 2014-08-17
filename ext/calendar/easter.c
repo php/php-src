@@ -30,7 +30,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
 	struct tm te;
-	long year, golden, solar, lunar, pfm, dom, tmp, easter;
+	long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
 	long method = CAL_EASTER_DEFAULT;
 
 	/* Default to the current year if year parameter is not given */
@@ -111,14 +111,11 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			te.tm_mon = 3;			/* April */
 			te.tm_mday = easter-10;
 		}
-
-	        Z_LVAL_P(return_value) = mktime(&te);
+	    result = mktime(&te);
 	} else {							/* return the days after March 21 */	
-	        Z_LVAL_P(return_value) = easter;
+	    result = easter;
 	}
-
-        Z_TYPE_P(return_value) = IS_LONG;
-
+    ZVAL_LONG(return_value, result);
 }
 
 /* {{{ proto int easter_date([int year])

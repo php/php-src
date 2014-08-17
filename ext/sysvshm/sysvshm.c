@@ -112,7 +112,7 @@ ZEND_GET_MODULE(sysvshm)
 
 #undef shm_ptr					/* undefine AIX-specific macro */
 
-#define SHM_FETCH_RESOURCE(shm_ptr, z_ptr) ZEND_FETCH_RESOURCE(shm_ptr, sysvshm_shm *, &z_ptr, -1, PHP_SHM_RSRC_NAME, php_sysvshm.le_shm)
+#define SHM_FETCH_RESOURCE(shm_ptr, z_ptr) ZEND_FETCH_RESOURCE(shm_ptr, sysvshm_shm *, z_ptr, -1, PHP_SHM_RSRC_NAME, php_sysvshm.le_shm)
 
 THREAD_LS sysvshm_module php_sysvshm;
 
@@ -122,7 +122,7 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, long shm_varpos);
 
 /* {{{ php_release_sysvshm
  */
-static void php_release_sysvshm(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void php_release_sysvshm(zend_resource *rsrc TSRMLS_DC)
 {
 	sysvshm_shm *shm_ptr = (sysvshm_shm *) rsrc->ptr;
 	shmdt((void *) shm_ptr->ptr);
@@ -212,7 +212,7 @@ PHP_FUNCTION(shm_detach)
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
-	RETURN_BOOL(SUCCESS == zend_list_delete(Z_LVAL_P(shm_id)));
+	RETURN_BOOL(SUCCESS == zend_list_close(Z_RES_P(shm_id)));
 }
 /* }}} */
 
@@ -254,17 +254,17 @@ PHP_FUNCTION(shm_put_var)
 	
 	/* setup string-variable and serialize */
 	PHP_VAR_SERIALIZE_INIT(var_hash);
-	php_var_serialize(&shm_var, &arg_var, &var_hash TSRMLS_CC);
+	php_var_serialize(&shm_var, arg_var, &var_hash TSRMLS_CC);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	
-	shm_list_ptr = zend_fetch_resource(&shm_id TSRMLS_CC, -1, PHP_SHM_RSRC_NAME, NULL, 1, php_sysvshm.le_shm);
+	shm_list_ptr = zend_fetch_resource(shm_id TSRMLS_CC, -1, PHP_SHM_RSRC_NAME, NULL, 1, php_sysvshm.le_shm);
 	if (!shm_list_ptr) {
 		smart_str_free(&shm_var);
 		RETURN_FALSE;
 	}
 
 	/* insert serialized variable into shared memory */
-	ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.c, shm_var.len);
+	ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s? shm_var.s->val : NULL, shm_var.s? shm_var.s->len : 0);
 
 	/* free string */
 	smart_str_free(&shm_var);
@@ -306,7 +306,7 @@ PHP_FUNCTION(shm_get_var)
 	shm_data = &shm_var->mem;
 	
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if (php_var_unserialize(&return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash TSRMLS_CC) != 1) {
+	if (php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash TSRMLS_CC) != 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable data in shared memory is corrupted");
 		RETVAL_FALSE;
 	}

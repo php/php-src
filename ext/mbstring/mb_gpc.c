@@ -55,7 +55,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 {
 	char *res = NULL, *separator=NULL;
 	const char *c_var;
-	zval *array_ptr;
+	zval v_array;
 	int free_buffer=0;
 	const mbfl_encoding *detected;
 	php_mb_encoding_handler_info_t info;
@@ -74,28 +74,26 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 		case PARSE_POST:
 		case PARSE_GET:
 		case PARSE_COOKIE:
-			ALLOC_ZVAL(array_ptr);
-			array_init(array_ptr);
-			INIT_PZVAL(array_ptr);
+			array_init(&v_array);
 			switch (arg) {
 				case PARSE_POST:
-					PG(http_globals)[TRACK_VARS_POST] = array_ptr;
+					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_POST], &v_array);
 					break;
 				case PARSE_GET:
-					PG(http_globals)[TRACK_VARS_GET] = array_ptr;
+					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_GET], &v_array);
 					break;
 				case PARSE_COOKIE:
-					PG(http_globals)[TRACK_VARS_COOKIE] = array_ptr;
+					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_COOKIE], &v_array);
 					break;
 			}
 			break;
 		default:
-			array_ptr=destArray;
+			ZVAL_COPY_VALUE(&v_array, destArray);
 			break;
 	}
 
-	if (arg==PARSE_POST) { 
-		sapi_handle_post(array_ptr TSRMLS_CC);
+	if (arg == PARSE_POST) { 
+		sapi_handle_post(&v_array TSRMLS_CC);
 		return;
 	}
 
@@ -125,29 +123,29 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 	}
 
 	switch (arg) {
-	case PARSE_POST:
-	case PARSE_GET:
-	case PARSE_STRING:
-		separator = (char *) estrdup(PG(arg_separator).input);
-		break;
-	case PARSE_COOKIE:
-		separator = ";\0";
-		break;
+		case PARSE_POST:
+		case PARSE_GET:
+		case PARSE_STRING:
+			separator = (char *) estrdup(PG(arg_separator).input);
+			break;
+		case PARSE_COOKIE:
+			separator = ";\0";
+			break;
 	}
 	
-	switch(arg) {
-	case PARSE_POST:
-		MBSTRG(http_input_identify_post) = NULL;
-		break;
-	case PARSE_GET:
-		MBSTRG(http_input_identify_get) = NULL;
-		break;
-	case PARSE_COOKIE:
-		MBSTRG(http_input_identify_cookie) = NULL;
-		break;
-	case PARSE_STRING:
-		MBSTRG(http_input_identify_string) = NULL;
-		break;
+	switch (arg) {
+		case PARSE_POST:
+			MBSTRG(http_input_identify_post) = NULL;
+			break;
+		case PARSE_GET:
+			MBSTRG(http_input_identify_get) = NULL;
+			break;
+		case PARSE_COOKIE:
+			MBSTRG(http_input_identify_cookie) = NULL;
+			break;
+		case PARSE_STRING:
+			MBSTRG(http_input_identify_string) = NULL;
+			break;
 	}
 
 	info.data_type              = arg;
@@ -161,7 +159,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 
 	MBSTRG(illegalchars) = 0;
 
-	detected = _php_mb_encoding_handler_ex(&info, array_ptr, res TSRMLS_CC);
+	detected = _php_mb_encoding_handler_ex(&info, &v_array, res TSRMLS_CC);
 	MBSTRG(http_input_identify) = detected;
 
 	if (detected) {
@@ -364,7 +362,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 {
 	const mbfl_encoding *detected;
 	php_mb_encoding_handler_info_t info;
-	char *post_data_str = NULL;
+	zend_string *post_data_str = NULL;
 
 	MBSTRG(http_input_identify_post) = NULL;
 
@@ -378,9 +376,9 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	info.from_language          = MBSTRG(language);
 
 	php_stream_rewind(SG(request_info).request_body);
-	php_stream_copy_to_mem(SG(request_info).request_body, &post_data_str, PHP_STREAM_COPY_ALL, 0);
-	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str TSRMLS_CC);
-	STR_FREE(post_data_str);
+	post_data_str = php_stream_copy_to_mem(SG(request_info).request_body, PHP_STREAM_COPY_ALL, 0);
+	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str->val TSRMLS_CC);
+	STR_RELEASE(post_data_str);
 
 	MBSTRG(http_input_identify) = detected;
 	if (detected) {

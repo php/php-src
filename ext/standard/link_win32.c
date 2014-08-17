@@ -78,7 +78,7 @@ PHP_FUNCTION(readlink)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
 		RETURN_FALSE;
 	}
-	RETURN_STRING(target, 1);
+	RETURN_STRING(target);
 }
 /* }}} */
 

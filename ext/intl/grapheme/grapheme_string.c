@@ -438,7 +438,7 @@ PHP_FUNCTION(grapheme_substr)
 			RETURN_FALSE;
 		}
 
-		RETURN_STRINGL(((char *)sub_str), sub_str_len, 1);
+		RETURN_STRINGL(((char *)sub_str), sub_str_len);
 	}
 
 	ustr = NULL;
@@ -528,7 +528,10 @@ PHP_FUNCTION(grapheme_substr)
 		}
 
 		/* return the allocated string, not a duplicate */
-		RETURN_STRINGL(((char *)sub_str), sub_str_len, 0);
+		RETVAL_STRINGL(((char *)sub_str), sub_str_len);
+		//???
+		efree(sub_str);
+		return;
 	}
 
 	if(length == 0) {
@@ -604,7 +607,9 @@ PHP_FUNCTION(grapheme_substr)
 	}
 
 	 /* return the allocated string, not a duplicate */
-	RETURN_STRINGL(((char *)sub_str), sub_str_len, 0);
+	RETVAL_STRINGL(((char *)sub_str), sub_str_len);
+	//????
+	efree(sub_str);
 
 }
 /* }}} */
@@ -650,9 +655,9 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 			size_t found_offset = found - haystack;
 
 			if (part) {
-				RETURN_STRINGL(((char *)haystack) , found_offset, 1);
+				RETURN_STRINGL(((char *)haystack) , found_offset);
 			} else {
-				RETURN_STRINGL(((char *)found), haystack_len - found_offset, 1);
+				RETURN_STRINGL(((char *)found), haystack_len - found_offset);
 			}
 		}
 
@@ -671,10 +676,10 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	U8_FWD_N(haystack, ret_pos, haystack_len, uchar_pos);
 
 	if (part) {
-		RETURN_STRINGL(((char *)haystack), ret_pos, 1);
+		RETURN_STRINGL(((char *)haystack), ret_pos);
 	}
 	else {
-		RETURN_STRINGL(((char *)haystack) + ret_pos, haystack_len - ret_pos, 1);
+		RETURN_STRINGL(((char *)haystack) + ret_pos, haystack_len - ret_pos);
 	}
 
 }
@@ -830,14 +835,16 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( NULL != next ) {
-		if ( !PZVAL_IS_REF(next) ) {
+		if ( !Z_ISREF_P(next) ) {
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				 "grapheme_extract: 'next' was not passed by reference", 0 TSRMLS_CC );
 
 			RETURN_FALSE;
 		}
 		else {
+			ZVAL_DEREF(next);
 			/* initialize next */
+			SEPARATE_ZVAL(next);
 			zval_dtor(next);
             ZVAL_LONG(next, lstart);
 		}
@@ -895,7 +902,7 @@ PHP_FUNCTION(grapheme_extract)
 		if ( NULL != next ) {
 			ZVAL_LONG(next, start+nsize);
 		}
-		RETURN_STRINGL(((char *)pstr), nsize, 1);
+		RETURN_STRINGL(((char *)pstr), nsize);
 	}
 
 	/* convert the strings to UTF-16. */
@@ -939,7 +946,7 @@ PHP_FUNCTION(grapheme_extract)
 		ZVAL_LONG(next, start+ret_pos);
 	}
 
-	RETURN_STRINGL(((char *)pstr), ret_pos, 1);
+	RETURN_STRINGL(((char *)pstr), ret_pos);
 }
 
 /* }}} */

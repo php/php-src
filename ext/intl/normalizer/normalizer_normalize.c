@@ -159,7 +159,9 @@ PHP_FUNCTION( normalizer_normalize )
 	}
 
 	/* Return it. */
-	RETVAL_STRINGL( ret_buf, ret_len, FALSE );
+	RETVAL_STRINGL( ret_buf, ret_len );
+	//???
+	efree(ret_buf);
 }
 /* }}} */
 

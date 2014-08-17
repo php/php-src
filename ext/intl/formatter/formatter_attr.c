@@ -146,11 +146,11 @@ PHP_FUNCTION( numfmt_get_text_attribute )
 PHP_FUNCTION( numfmt_set_attribute )
 {
 	long attribute;
-	zval **value;
+	zval *value;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OlZ",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olz",
 		&object, NumberFormatter_ce_ptr, &attribute, &value ) == FAILURE)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -183,11 +183,11 @@ PHP_FUNCTION( numfmt_set_attribute )
 		case UNUM_MAX_SIGNIFICANT_DIGITS:
 		case UNUM_LENIENT_PARSE:
 			convert_to_long_ex(value);
-			unum_setAttribute(FORMATTER_OBJECT(nfo), attribute, Z_LVAL_PP(value));
+			unum_setAttribute(FORMATTER_OBJECT(nfo), attribute, Z_LVAL_P(value));
 			break;
 		case UNUM_ROUNDING_INCREMENT:
 			convert_to_double_ex(value);
-			unum_setDoubleAttribute(FORMATTER_OBJECT(nfo), attribute, Z_DVAL_PP(value));
+			unum_setDoubleAttribute(FORMATTER_OBJECT(nfo), attribute, Z_DVAL_P(value));
 			break;
 		default:
 			INTL_DATA_ERROR_CODE(nfo) = U_UNSUPPORTED_ERROR;
@@ -445,7 +445,7 @@ PHP_FUNCTION( numfmt_get_locale )
 
 	loc = (char *)unum_getLocaleByType(FORMATTER_OBJECT(nfo), type, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error getting locale" );
-	RETURN_STRING(loc, 1);
+	RETURN_STRING(loc);
 }
 /* }}} */
 

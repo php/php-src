@@ -77,9 +77,7 @@ static void curlfile_get_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 		return;
 	}
 	res = zend_read_property(curl_CURLFile_class, getThis(), name, strlen(name), 1 TSRMLS_CC);
-	*return_value = *res;
-	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
+	RETURN_ZVAL(res, 1, 0);
 }
 
 static void curlfile_set_property(char *name, INTERNAL_FUNCTION_PARAMETERS)

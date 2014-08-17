@@ -178,7 +178,7 @@ PHP_NAMED_FUNCTION(zif_textdomain)
 
 	retval = textdomain(domain_name);
 
-	RETURN_STRING(retval, 1);
+	RETURN_STRING(retval);
 }
 /* }}} */
 
@@ -196,7 +196,7 @@ PHP_NAMED_FUNCTION(zif_gettext)
 	PHP_GETTEXT_LENGTH_CHECK("msgid", msgid_len)
 	msgstr = gettext(msgid);
 
-	RETURN_STRING(msgstr, 1);
+	RETURN_STRING(msgstr);
 }
 /* }}} */
 
@@ -216,7 +216,7 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 
 	msgstr = dgettext(domain, msgid);
 
-	RETURN_STRING(msgstr, 1);
+	RETURN_STRING(msgstr);
 }
 /* }}} */
 
@@ -237,7 +237,7 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
 
 	msgstr = dcgettext(domain, msgid, category);
 
-	RETURN_STRING(msgstr, 1);
+	RETURN_STRING(msgstr);
 }
 /* }}} */
 
@@ -270,7 +270,7 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 
 	retval = bindtextdomain(domain, dir_name);
 
-	RETURN_STRING(retval, 1);
+	RETURN_STRING(retval);
 }
 /* }}} */
 
@@ -292,7 +292,7 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 
 	msgstr = ngettext(msgid1, msgid2, count);
 	if (msgstr) {
-		RETVAL_STRING(msgstr, 1);
+		RETVAL_STRING(msgstr);
 	}
 }
 /* }}} */
@@ -318,7 +318,7 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 
 	msgstr = dngettext(domain, msgid1, msgid2, count);
 	if (msgstr) {
-		RETVAL_STRING(msgstr, 1);
+		RETVAL_STRING(msgstr);
 	}
 }
 /* }}} */
@@ -347,7 +347,7 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 	msgstr = dcngettext(domain, msgid1, msgid2, count, category);
 
 	if (msgstr) {
-		RETVAL_STRING(msgstr, 1);
+		RETVAL_STRING(msgstr);
 	}
 }
 /* }}} */
@@ -373,7 +373,7 @@ PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
 	if (!retval) {
 		RETURN_FALSE;
 	}
-	RETURN_STRING(retval, 1);
+	RETURN_STRING(retval);
 }
 /* }}} */
 #endif

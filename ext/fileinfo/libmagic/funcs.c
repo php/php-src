@@ -56,7 +56,7 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.67 2014/02/12 23:20:53 christos Exp $")
 # define PREG_OFFSET_CAPTURE                 (1<<8)
 #endif
 
-extern public void convert_libmagic_pattern(zval *pattern, int options);
+extern public void convert_libmagic_pattern(zval *pattern, char *val, int len, int options);
 
 protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
@@ -440,46 +440,38 @@ file_printedlen(const struct magic_set *ms)
 
 file_replace(struct magic_set *ms, const char *pat, const char *rep)
 {
-	zval *patt;
+	zval patt;
 	int opts = 0;
 	pcre_cache_entry *pce;
-	char *res;
-	zval *repl;
-	int res_len, rep_cnt = 0;
+	zend_string *res;
+	zval repl;
+	int  rep_cnt = 0;
 	TSRMLS_FETCH();
 
 	(void)setlocale(LC_CTYPE, "C");
 
-	MAKE_STD_ZVAL(patt);
-	ZVAL_STRINGL(patt, pat, strlen(pat), 0);
 	opts |= PCRE_MULTILINE;
-	convert_libmagic_pattern(patt, opts);
-	if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(patt), Z_STRLEN_P(patt) TSRMLS_CC)) == NULL) {
-		zval_dtor(patt);
-		FREE_ZVAL(patt);
+	convert_libmagic_pattern(&patt, pat, strlen(pat), opts);
+	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt) TSRMLS_CC)) == NULL) {
+		zval_ptr_dtor(&patt);
 		rep_cnt = -1;
 		goto out;
 	}
+	zval_ptr_dtor(&patt);
 
-	MAKE_STD_ZVAL(repl);
-	ZVAL_STRINGL(repl, rep, strlen(rep), 0);
+	ZVAL_STRING(&repl, rep);
+	res = php_pcre_replace_impl(pce, ms->o.buf, strlen(ms->o.buf), &repl, 0, -1, &rep_cnt TSRMLS_CC);
 
-	res = php_pcre_replace_impl(pce, ms->o.buf, strlen(ms->o.buf), repl,
-			0, &res_len, -1, &rep_cnt TSRMLS_CC);
-
-	FREE_ZVAL(repl);
-	zval_dtor(patt);
-	FREE_ZVAL(patt);
-
+	zval_ptr_dtor(&repl);
 	if (NULL == res) {
 		rep_cnt = -1;
 		goto out;
 	}
 
-	strncpy(ms->o.buf, res, res_len);
-	ms->o.buf[res_len] = '\0';
+	strncpy(ms->o.buf, res->val, res->len);
+	ms->o.buf[res->len] = '\0';
 
-	efree(res);
+	STR_RELEASE(res);
 
 out:
 	(void)setlocale(LC_CTYPE, "");

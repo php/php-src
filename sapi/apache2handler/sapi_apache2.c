@@ -514,16 +514,12 @@ static void php_apache_ini_dtor(request_rec *r, request_rec *p TSRMLS_DC)
 typedef struct {
 	HashTable config;
 } php_conf_rec;
-		char *str;
-		uint str_len;
+		zend_string *str;
 		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php5_module);
 
-		for (zend_hash_internal_pointer_reset(&c->config);
-			zend_hash_get_current_key_ex(&c->config, &str, &str_len, NULL, 0,  NULL) == HASH_KEY_IS_STRING;
-			zend_hash_move_forward(&c->config)
-		) {
-			zend_restore_ini_entry(str, str_len, ZEND_INI_STAGE_SHUTDOWN);
-		}
+		ZEND_HASH_FOREACH_STR_KEY(&c->config, str) {
+			zend_restore_ini_entry(str, ZEND_INI_STAGE_SHUTDOWN);
+		} ZEND_HASH_FOREACH_END();
 	}
 	if (p) {
 		((php_struct *)SG(server_context))->r = p;

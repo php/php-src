@@ -55,7 +55,6 @@ typedef enum {
 } SXE_ITER;
 
 typedef struct {
-	zend_object zo;
 	php_libxml_node_ptr *node;
 	php_libxml_ref_obj *document;
 	HashTable *properties;
@@ -65,10 +64,11 @@ typedef struct {
 		xmlChar               *nsprefix;
 		int                   isprefix;
 		SXE_ITER              type;
-		zval                  *data;
+		zval                  data;
 	} iter;
-	zval *tmp;
+	zval tmp;
 	zend_function *fptr_count;
+	zend_object zo;
 } php_sxe_object;
 
 #ifdef ZTS

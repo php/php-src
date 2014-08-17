@@ -26,7 +26,7 @@ typedef struct {
 	ResourceBundle_object *subject;
 	zend_bool             is_table;
 	long                  length;
-	zval                  *current;
+	zval                  current;
 	char                  *currentkey;
 	long                  i;
 } ResourceBundle_iterator;

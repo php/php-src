@@ -84,12 +84,12 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_END_SILENCE                      58
 #define ZEND_INIT_FCALL_BY_NAME               59
 #define ZEND_DO_FCALL                         60
-#define ZEND_DO_FCALL_BY_NAME                 61
+#define ZEND_INIT_FCALL                       61
 #define ZEND_RETURN                           62
 #define ZEND_RECV                             63
 #define ZEND_RECV_INIT                        64
 #define ZEND_SEND_VAL                         65
-#define ZEND_SEND_VAR                         66
+#define ZEND_SEND_VAR_EX                      66
 #define ZEND_SEND_REF                         67
 #define ZEND_NEW                              68
 #define ZEND_INIT_NS_FCALL_BY_NAME            69
@@ -139,6 +139,14 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_INIT_STATIC_METHOD_CALL         113
 #define ZEND_ISSET_ISEMPTY_VAR               114
 #define ZEND_ISSET_ISEMPTY_DIM_OBJ           115
+#define ZEND_SEND_VAL_EX                     116
+#define ZEND_SEND_VAR                        117
+#define ZEND_INIT_USER_CALL                  118
+#define ZEND_SEND_ARRAY                      119
+#define ZEND_SEND_USER                       120
+#define ZEND_STRLEN                          121
+#define ZEND_DEFINED                         122
+#define ZEND_TYPE_CHECK                      123
 #define ZEND_PRE_INC_OBJ                     132
 #define ZEND_PRE_DEC_OBJ                     133
 #define ZEND_POST_INC_OBJ                    134
@@ -173,5 +181,6 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_SEND_UNPACK                     165
 #define ZEND_POW                             166
 #define ZEND_ASSIGN_POW                      167
+#define ZEND_BIND_GLOBAL                     168
 
 #endif

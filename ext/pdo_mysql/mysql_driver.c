@@ -130,7 +130,7 @@ static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 
 	if (einfo->errcode) {
 		add_next_index_long(info, einfo->errcode);
-		add_next_index_string(info, einfo->errmsg, 1);
+		add_next_index_string(info, einfo->errmsg);
 	}
 
 	PDO_DBG_RETURN(1);
@@ -376,26 +376,31 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_D
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:		
 			convert_to_boolean(val);
-	
 			/* ignore if the new value equals the old one */			
-			if (dbh->auto_commit ^ Z_BVAL_P(val)) {
-				dbh->auto_commit = Z_BVAL_P(val);
+			if (dbh->auto_commit ^ (Z_TYPE_P(val) == IS_TRUE)) {
+				dbh->auto_commit = (Z_TYPE_P(val) == IS_TRUE);
 				mysql_handle_autocommit(dbh TSRMLS_CC);
 			}
 			PDO_DBG_RETURN(1);
 
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
-			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = Z_BVAL_P(val);
+			convert_to_boolean(val);
+			/* ignore if the new value equals the old one */			
+			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = (Z_TYPE_P(val) == IS_TRUE);
 			PDO_DBG_RETURN(1);
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 		case PDO_ATTR_EMULATE_PREPARES:
-			((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = Z_BVAL_P(val);
+			convert_to_boolean(val);
+			/* ignore if the new value equals the old one */			
+			((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = (Z_TYPE_P(val) == IS_TRUE);
 			PDO_DBG_RETURN(1);
 		case PDO_ATTR_FETCH_TABLE_NAMES:
-			((pdo_mysql_db_handle *)dbh->driver_data)->fetch_table_names = Z_BVAL_P(val);
+			convert_to_boolean(val);
+			((pdo_mysql_db_handle *)dbh->driver_data)->fetch_table_names = (Z_TYPE_P(val) == IS_TRUE);
 			PDO_DBG_RETURN(1);
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
+			convert_to_long(val);
 			if (Z_LVAL_P(val) < 0) {
 				/* TODO: Johannes, can we throw a warning here? */
  				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
@@ -423,26 +428,26 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 	PDO_DBG_INF_FMT("attr=%l", attr);
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
-			ZVAL_STRING(return_value, (char *)mysql_get_client_info(), 1);
+			ZVAL_STRING(return_value, (char *)mysql_get_client_info());
 			break;
 
 		case PDO_ATTR_SERVER_VERSION:
-			ZVAL_STRING(return_value, (char *)mysql_get_server_info(H->server), 1);
+			ZVAL_STRING(return_value, (char *)mysql_get_server_info(H->server));
 			break;
 
 		case PDO_ATTR_CONNECTION_STATUS:
-			ZVAL_STRING(return_value, (char *)mysql_get_host_info(H->server), 1);
+			ZVAL_STRING(return_value, (char *)mysql_get_host_info(H->server));
 			break;
 		case PDO_ATTR_SERVER_INFO: {
-			char *tmp;
 #if defined(PDO_USE_MYSQLND)
-			unsigned int tmp_len;
+			zend_string *tmp;
 
-			if (mysqlnd_stat(H->server, &tmp, &tmp_len) == PASS) {
-				ZVAL_STRINGL(return_value, tmp, tmp_len, 0);
+			if (mysqlnd_stat(H->server, &tmp) == PASS) {
+				ZVAL_STR(return_value, tmp);
 #else
+			char *tmp;
 			if ((tmp = (char *)mysql_stat(H->server))) {
-				ZVAL_STRING(return_value, tmp, 1);
+				ZVAL_STRING(return_value, tmp);
 #endif
 			} else {
 				pdo_mysql_error(dbh);

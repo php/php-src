@@ -73,7 +73,7 @@ static void _breakiter_factory(const char *func_name,
 		RETURN_NULL();
 	}
 
-	breakiterator_object_create(return_value, biter TSRMLS_CC);
+	breakiterator_object_create(return_value, biter, 1 TSRMLS_CC);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_create_word_instance)
@@ -123,7 +123,7 @@ U_CFUNC PHP_FUNCTION(breakiter_create_code_point_instance)
 	}
 
 	CodePointBreakIterator *cpbi = new CodePointBreakIterator();
-	breakiterator_object_create(return_value, cpbi TSRMLS_CC);
+	breakiterator_object_create(return_value, cpbi, 1 TSRMLS_CC);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_get_text)
@@ -139,10 +139,10 @@ U_CFUNC PHP_FUNCTION(breakiter_get_text)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	if (bio->text == NULL) {
+	if (Z_ISUNDEF(bio->text)) {
 		RETURN_NULL();
 	} else {
-		RETURN_ZVAL(bio->text, 1, 0);
+		ZVAL_COPY(return_value, &bio->text);
 	}
 }
 
@@ -151,7 +151,7 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
 	char	*text;
 	int		text_len;
 	UText	*ut = NULL;
-	zval	**textzv;
+	zval	*textzv;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
 
@@ -169,7 +169,7 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
 
 	/* assert it's safe to use text and text_len because zpp changes the
 	 * arguments in the stack */
-	assert(text == Z_STRVAL_PP(textzv));
+	assert(text == Z_STRVAL_P(textzv));
 
 	ut = utext_openUTF8(ut, text, text_len, BREAKITER_ERROR_CODE_P(bio));
 	INTL_CTOR_CHECK_STATUS(bio, "breakiter_set_text: error opening UText");
@@ -182,11 +182,8 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
 	/* When ICU clones the UText, it does not copy the buffer, so we have to
 	 * keep the string buffer around by holding a reference to its zval. This
 	 * also allows a faste implementation of getText() */
-	if (bio->text != NULL) {
-		zval_ptr_dtor(&bio->text);
-	}
-	bio->text = *textzv;
-	zval_add_ref(&bio->text);
+	zval_ptr_dtor(&bio->text);
+	ZVAL_COPY(&bio->text, textzv);
 
 	RETURN_TRUE;
 }
@@ -274,12 +271,12 @@ U_CFUNC PHP_FUNCTION(breakiter_next)
 	if (ZEND_NUM_ARGS() == 0) {
 		no_arg_version = true;
 	} else if (ZEND_NUM_ARGS() == 1) {
-		zval **arg;
+		zval *arg;
 		int res = zend_get_parameters_ex(1, &arg);
 		assert(res == SUCCESS);
-		if (Z_TYPE_PP(arg) == IS_NULL) {
+		if (Z_TYPE_P(arg) == IS_NULL) {
 			no_arg_version = true;
-			ht = 0; /* pretend we don't have any argument */
+			ZEND_NUM_ARGS() = 0; /* pretend we don't have any argument */
 		} else {
 			no_arg_version = false;
 		}
@@ -380,7 +377,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_locale)
 	INTL_METHOD_CHECK_STATUS(bio,
 		"breakiter_get_locale: Call to ICU method has failed");
 
-	RETURN_STRING(locale.getName(), 1);
+	RETURN_STRING(locale.getName());
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_get_parts_iterator)
@@ -421,7 +418,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_code)
 	}
 
 	/* Fetch the object (without resetting its last error code ). */
-	bio = (BreakIterator_object*)zend_object_store_get_object(object TSRMLS_CC);
+	bio = Z_INTL_BREAKITERATOR_P(object);
 	if (bio == NULL)
 		RETURN_FALSE;
 
@@ -430,7 +427,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_code)
 
 U_CFUNC PHP_FUNCTION(breakiter_get_error_message)
 {
-	const char* message = NULL;
+	zend_string* message = NULL;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
 
@@ -442,11 +439,11 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_message)
 
 
 	/* Fetch the object (without resetting its last error code ). */
-	bio = (BreakIterator_object*)zend_object_store_get_object(object TSRMLS_CC);
+	bio = Z_INTL_BREAKITERATOR_P(object);
 	if (bio == NULL)
 		RETURN_FALSE;
 
 	/* Return last error message. */
 	message = intl_error_get_message(BREAKITER_ERROR_P(bio) TSRMLS_CC);
-	RETURN_STRING(message, 0);
+	RETURN_STR(message);
 }

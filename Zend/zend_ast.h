@@ -22,8 +22,6 @@
 #ifndef ZEND_AST_H
 #define ZEND_AST_H
 
-typedef struct _zend_ast zend_ast;
-
 #include "zend.h"
 
 typedef enum _zend_ast_kind {
@@ -40,7 +38,7 @@ struct _zend_ast {
 	unsigned short kind;
 	unsigned short children;
 	union {
-		zval     *val;
+		zval      val;
 		zend_ast *child;
 	} u;
 };

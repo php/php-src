@@ -781,9 +781,10 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			 *   It is reset to ' ' by non-numeric formats
 			 */
 			switch (*fmt) {
-				case 'Z':
-					zvp = (zval*) va_arg(ap, zval*);
-					zend_make_printable_zval(zvp, &zcopy, &free_zcopy);
+				case 'Z': {
+				    TSRMLS_FETCH();
+				    zvp = (zval*) va_arg(ap, zval*);
+					free_zcopy = zend_make_printable_zval(zvp, &zcopy TSRMLS_CC);
 					if (free_zcopy) {
 						zvp = &zcopy;
 					}
@@ -791,8 +792,9 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					s = Z_STRVAL_P(zvp);
 					if (adjust_precision && precision < s_len) {
 						s_len = precision;
-					}
+					}	
 					break;
+				}
 				case 'u':
 					switch(modifier) {
 						default:

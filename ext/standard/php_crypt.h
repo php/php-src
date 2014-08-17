@@ -23,7 +23,7 @@
 #ifndef PHP_CRYPT_H
 #define PHP_CRYPT_H
 
-PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, char **result);
+PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const char *salt, int salt_len);
 PHP_FUNCTION(crypt);
 #if HAVE_CRYPT
 PHP_MINIT_FUNCTION(crypt);

@@ -256,7 +256,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	register int i;
 	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
 	table_entry *elts = (table_entry *) arr->elts;
-	zval **path_translated;
+	zval *path_translated;
 	HashTable *symbol_table;
 	unsigned int new_val_len;
 
@@ -277,14 +277,14 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 
 	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
 	if (track_vars_array) {
-		symbol_table = track_vars_array->value.ht;
+		symbol_table = Z_ARRVAL_P(track_vars_array);
 	} else {
 		symbol_table = NULL;
 	}
 	if (symbol_table
-		&& !zend_hash_exists(symbol_table, "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"))
-		&& zend_hash_find(symbol_table, "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &path_translated)==SUCCESS) {
-		php_register_variable("PATH_TRANSLATED", Z_STRVAL_PP(path_translated), track_vars_array TSRMLS_CC);
+		&& !zend_hash_str_exists(symbol_table, "PATH_TRANSLATED", sizeof("PATH_TRANSLATED")-1)
+		&& (path_translated = zend_hash_str_find(symbol_table, "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) != NULL) {
+		php_register_variable("PATH_TRANSLATED", Z_STRVAL_P(path_translated), track_vars_array TSRMLS_CC);
 	}
 
 	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &((request_rec *) SG(server_context))->uri, strlen(((request_rec *) SG(server_context))->uri), &new_val_len TSRMLS_CC)) {
@@ -566,7 +566,9 @@ static void init_request_info(TSRMLS_D)
  */
 static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry TSRMLS_DC)
 {
-	zend_alter_ini_entry(per_dir_entry->key, per_dir_entry->key_length+1, per_dir_entry->value, per_dir_entry->value_length, per_dir_entry->type, per_dir_entry->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE);
+	zend_string *key = STR_INIT(per_dir_entry->key, per_dir_entry->key_length, 0);
+	zend_alter_ini_entry(key, per_dir_entry->value, per_dir_entry->value_length, per_dir_entry->type, per_dir_entry->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE);
+	STR_RELEASE(key);
 	return 0;
 }
 /* }}} */
@@ -710,36 +712,44 @@ static int send_parsed_php_source(request_rec * r)
 
 /* {{{ destroy_per_dir_entry
  */
-static void destroy_per_dir_entry(php_per_dir_entry *per_dir_entry)
+static void destroy_per_dir_entry(zval *zv)
 {
+	php_per_dir_entry *per_dir_entry = Z_PTR_P(zv);
+
 	free(per_dir_entry->key);
 	free(per_dir_entry->value);
+	free(per_dir_entry);
 }
 /* }}} */
 
 /* {{{ copy_per_dir_entry
  */
-static void copy_per_dir_entry(php_per_dir_entry *per_dir_entry)
+static void copy_per_dir_entry(zval *zv)
 {
-	php_per_dir_entry tmp = *per_dir_entry;
+	php_per_dir_entry *old_per_dir_entry = Z_PTR_P(zv);
+	php_per_dir_entry *new_per_dir_entry = malloc(sizeof(php_per_dir_entry));
 
-	per_dir_entry->key = (char *) malloc(tmp.key_length+1);
-	memcpy(per_dir_entry->key, tmp.key, tmp.key_length);
-	per_dir_entry->key[per_dir_entry->key_length] = 0;
+	memcpy(new_per_dir_entry, old_per_dir_entry, sizeof(php_per_dir_entry));
+	Z_PTR_P(zv) = new_per_dir_entry;
 
-	per_dir_entry->value = (char *) malloc(tmp.value_length+1);
-	memcpy(per_dir_entry->value, tmp.value, tmp.value_length);
-	per_dir_entry->value[per_dir_entry->value_length] = 0;
+	new_per_dir_entry->key = (char *) malloc(old_per_dir_entry->key_length+1);
+	memcpy(new_per_dir_entry->key, old_per_dir_entry->key, old_per_dir_entry->key_length);
+	new_per_dir_entry->key[new_per_dir_entry->key_length] = 0;
+
+	new_per_dir_entry->value = (char *) malloc(old_per_dir_entry->value_length+1);
+	memcpy(new_per_dir_entry->value, old_per_dir_entry->value, old_per_dir_entry->value_length);
+	new_per_dir_entry->value[new_per_dir_entry->value_length] = 0;
 }
 /* }}} */
 
 /* {{{ should_overwrite_per_dir_entry
  */
-static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, php_per_dir_entry *new_per_dir_entry, zend_hash_key *hash_key, void *pData)
+static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, zend_hash_key *hash_key, void *pData)
 {
+	php_per_dir_entry *new_per_dir_entry = Z_PTR_P(zv);
 	php_per_dir_entry *orig_per_dir_entry;
 
-	if (zend_hash_find(target_ht, hash_key->arKey, hash_key->nKeyLength, (void **) &orig_per_dir_entry)==FAILURE) {
+	if ((orig_per_dir_entry = zend_hash_find_ptr(target_ht, hash_key->key)) == NULL) {
 		return 1; /* does not exist in dest, copy from source */
 	}
 
@@ -768,7 +778,7 @@ static void *php_create_dir(pool *p, char *dummy)
 	HashTable *per_dir_info;
 
 	per_dir_info = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init_ex(per_dir_info, 5, NULL, (void (*)(void *)) destroy_per_dir_entry, 1, 0);
+	zend_hash_init_ex(per_dir_info, 5, NULL, destroy_per_dir_entry, 1, 0);
 	register_cleanup(p, (void *) per_dir_info, (void (*)(void *)) php_destroy_per_dir_info, (void (*)(void *)) zend_hash_destroy);
 
 	return per_dir_info;
@@ -784,9 +794,9 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 
 	/* need a copy of addv to merge */
 	new = php_create_dir(p, "php_merge_dir");
-	zend_hash_copy(new, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, NULL, sizeof(php_per_dir_entry));
+	zend_hash_copy(new, (HashTable *) basev, copy_per_dir_entry);
 
-	zend_hash_merge_ex(new, (HashTable *) addv, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
+	zend_hash_merge_ex(new, (HashTable *) addv, copy_per_dir_entry, should_overwrite_per_dir_entry, NULL);
 	return new;
 }
 /* }}} */
@@ -823,7 +833,7 @@ static CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable 
 	memcpy(per_dir_entry.value, arg2, per_dir_entry.value_length);
 	per_dir_entry.value[per_dir_entry.value_length] = 0;
 
-	zend_hash_update(conf, per_dir_entry.key, per_dir_entry.key_length, &per_dir_entry, sizeof(php_per_dir_entry), NULL);
+	zend_hash_str_update_mem(conf, per_dir_entry.key, per_dir_entry.key_length, &per_dir_entry, sizeof(php_per_dir_entry));
 	return NULL;
 }
 /* }}} */

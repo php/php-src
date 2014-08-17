@@ -18,7 +18,7 @@ if (false !== getenv('PDO_PGSQL_TEST_DSN')) {
 		$config['ENV']['PDOTEST_ATTR'] = getenv('PDO_PGSQL_TEST_ATTR');
 	}
 } else {
-	$config['ENV']['PDOTEST_DSN'] = 'pgsql:host=localhost port=5432 dbname=test user=root password=';
+	$config['ENV']['PDOTEST_DSN'] = 'pgsql:host=localhost port=5432 dbname=test user= password=';
 }
 	
 return $config;

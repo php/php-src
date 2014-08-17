@@ -136,7 +136,7 @@ ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
 
 	ftp->fd = php_network_connect_socket_to_host(host,
 			(unsigned short) (port ? port : 21), SOCK_STREAM,
-			0, &tv, NULL, NULL, NULL, 0 TSRMLS_CC);
+			0, &tv, NULL, NULL, NULL, 0, STREAM_SOCKOP_NONE TSRMLS_CC);
 	if (ftp->fd == -1) {
 		goto bail;
 	}
@@ -479,7 +479,7 @@ ftp_raw(ftpbuf_t *ftp, const char *cmd, zval *return_value)
 	}
 	array_init(return_value);
 	while (ftp_readline(ftp)) {
-		add_next_index_string(return_value, ftp->inbuf, 1);
+		add_next_index_string(return_value, ftp->inbuf);
 		if (isdigit(ftp->inbuf[0]) && isdigit(ftp->inbuf[1]) && isdigit(ftp->inbuf[2]) && ftp->inbuf[3] == ' ') {
 			return;
 		}
@@ -537,10 +537,11 @@ ftp_cdup(ftpbuf_t *ftp)
 
 /* {{{ ftp_mkdir
  */
-char*
+zend_string*
 ftp_mkdir(ftpbuf_t *ftp, const char *dir)
 {
 	char *mkd, *end;
+	zend_string *ret;
 
 	if (ftp == NULL) {
 		return NULL;
@@ -553,17 +554,16 @@ ftp_mkdir(ftpbuf_t *ftp, const char *dir)
 	}
 	/* copy out the dir from response */
 	if ((mkd = strchr(ftp->inbuf, '"')) == NULL) {
-		mkd = estrdup(dir);
-		return mkd;
+		return STR_INIT(dir, strlen(dir), 0);
 	}
 	if ((end = strrchr(++mkd, '"')) == NULL) {
 		return NULL;
 	}
 	*end = 0;
-	mkd = estrdup(mkd);
+	ret = STR_INIT(mkd, end - mkd, 0);
 	*end = '"';
 
-	return mkd;
+	return ret;
 }
 /* }}} */
 
@@ -616,7 +616,7 @@ ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filenam
 /* {{{ ftp_alloc
  */
 int
-ftp_alloc(ftpbuf_t *ftp, const long size, char **response)
+ftp_alloc(ftpbuf_t *ftp, const long size, zend_string **response)
 {
 	char buffer[64];
 
@@ -635,7 +635,7 @@ ftp_alloc(ftpbuf_t *ftp, const long size, char **response)
 	}
 
 	if (response) {
-		*response = estrdup(ftp->inbuf);
+		*response = STR_INIT(ftp->inbuf, strlen(ftp->inbuf), 0);
 	}
 
 	if (ftp->resp < 200 || ftp->resp >= 300) {

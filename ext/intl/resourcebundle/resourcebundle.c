@@ -47,7 +47,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 		case URES_BINARY:
 			bfield = ures_getBinary( source->child, &ilen, &INTL_DATA_ERROR_CODE(source) );
 			INTL_METHOD_CHECK_STATUS(source, "Failed to retrieve binary value");
-			ZVAL_STRINGL( return_value, (char *) bfield, ilen, 1 );
+			ZVAL_STRINGL( return_value, (char *) bfield, ilen );
 			break;
 
 		case URES_INT:
@@ -68,7 +68,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 		case URES_ARRAY:
 		case URES_TABLE:
 			object_init_ex( return_value, ResourceBundle_ce_ptr );
-			newrb = (ResourceBundle_object *) zend_object_store_get_object( return_value TSRMLS_CC );
+			newrb = Z_INTL_RESOURCEBUNDLE_P(return_value);
 			newrb->me = source->child;
 			source->child = NULL;
 			intl_errors_reset(INTL_DATA_ERROR_P(source) TSRMLS_CC);

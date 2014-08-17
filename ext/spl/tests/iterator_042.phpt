@@ -83,7 +83,7 @@ object(ArrayIterator)#%d (1) {
       }
     }
     [2]=>
-    object(ArrayIterator)#5 (1) {
+    object(ArrayIterator)#%d (1) {
       %s"storage"%s"ArrayIterator":private]=>
       array(3) {
         [0]=>

@@ -67,7 +67,7 @@ void closelog(void)
 		PW32G(log_source) = NULL;
 	}
 	if (PW32G(log_header)) {
-		STR_FREE(PW32G(log_header));
+		efree(PW32G(log_header));
 		PW32G(log_header) = NULL;
 	}
 }
@@ -129,7 +129,7 @@ void openlog(const char *ident, int logopt, int facility)
 		closelog();
 	}
 
-	STR_FREE(PW32G(log_header));
+	efree(PW32G(log_header));
 
 	PW32G(log_source) = RegisterEventSource(NULL, "PHP-" PHP_VERSION);
 	spprintf(&PW32G(log_header), 0, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());

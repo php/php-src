@@ -219,14 +219,12 @@ PHP_METHOD(domelement, __construct)
 		xmlNodeSetContentLen(nodep, (xmlChar *) value, value_len);
 	}
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
-	if (intern != NULL) {
-		oldnode = dom_object_get_node(intern);
-		if (oldnode != NULL) {
-			php_libxml_node_free_resource(oldnode  TSRMLS_CC);
-		}
-		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
+	intern = Z_DOMOBJ_P(id);
+	oldnode = dom_object_get_node(intern);
+	if (oldnode != NULL) {
+		php_libxml_node_free_resource(oldnode  TSRMLS_CC);
 	}
+	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 }
 /* }}} end DOMElement::__construct */
 
@@ -235,7 +233,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-104682815
 Since: 
 */
-int dom_element_tag_name_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_element_tag_name_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	xmlNodePtr nodep;
 	xmlNsPtr ns;
@@ -248,16 +246,15 @@ int dom_element_tag_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
 	ns = nodep->ns;
 	if (ns != NULL && ns->prefix) {
 		qname = xmlStrdup(ns->prefix);
 		qname = xmlStrcat(qname, (xmlChar *)":");
 		qname = xmlStrcat(qname, nodep->name);
-		ZVAL_STRING(*retval, (char *)qname, 1);
+		ZVAL_STRING(retval, (char *)qname);
 		xmlFree(qname);
 	} else {
-		ZVAL_STRING(*retval, (char *) nodep->name, 1);
+		ZVAL_STRING(retval, (char *) nodep->name);
 	}
 
 	return SUCCESS;
@@ -270,10 +267,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Element-schemaTypeInfo
 Since: DOM Level 3
 */
-int dom_element_schema_type_info_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_element_schema_type_info_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 
@@ -359,7 +355,7 @@ PHP_FUNCTION(dom_element_get_attribute)
 	if (value == NULL) {
 		RETURN_EMPTY_STRING();
 	} else {
-		RETVAL_STRING((char *)value, 1);
+		RETVAL_STRING((char *)value);
 		xmlFree(value);
 	}
 }
@@ -648,7 +644,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
 	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
-	namednode = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
+	namednode = Z_DOMOBJ_P(return_value);
 	local = xmlCharStrndup(name, name_len);
 	dom_namednode_iter(intern, 0, namednode, NULL, local, NULL TSRMLS_CC);
 }
@@ -677,13 +673,13 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 	strattr = xmlGetNsProp(elemp, (xmlChar *) name, (xmlChar *) uri);
 
 	if (strattr != NULL) {
-		RETVAL_STRING((char *)strattr, 1);
+		RETVAL_STRING((char *)strattr);
 		xmlFree(strattr);
 	} else {
 		if (xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
 			nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
 			if (nsptr != NULL) {
-				RETVAL_STRING((char *) nsptr->href, 1);
+				RETVAL_STRING((char *) nsptr->href);
 			} else {
 				RETVAL_EMPTY_STRING();
 			}
@@ -1042,7 +1038,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
 	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
-	namednode = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
+	namednode = Z_DOMOBJ_P(return_value);
 	local = xmlCharStrndup(name, name_len);
 	nsuri = xmlCharStrndup(uri, uri_len);
 	dom_namednode_iter(intern, 0, namednode, NULL, local, nsuri TSRMLS_CC);

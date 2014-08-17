@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <zend.h>
 
-const char *zend_vm_opcodes_map[168] = {
+const char *zend_vm_opcodes_map[169] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -83,12 +83,12 @@ const char *zend_vm_opcodes_map[168] = {
 	"ZEND_END_SILENCE",
 	"ZEND_INIT_FCALL_BY_NAME",
 	"ZEND_DO_FCALL",
-	"ZEND_DO_FCALL_BY_NAME",
+	"ZEND_INIT_FCALL",
 	"ZEND_RETURN",
 	"ZEND_RECV",
 	"ZEND_RECV_INIT",
 	"ZEND_SEND_VAL",
-	"ZEND_SEND_VAR",
+	"ZEND_SEND_VAR_EX",
 	"ZEND_SEND_REF",
 	"ZEND_NEW",
 	"ZEND_INIT_NS_FCALL_BY_NAME",
@@ -138,14 +138,14 @@ const char *zend_vm_opcodes_map[168] = {
 	"ZEND_INIT_STATIC_METHOD_CALL",
 	"ZEND_ISSET_ISEMPTY_VAR",
 	"ZEND_ISSET_ISEMPTY_DIM_OBJ",
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	"ZEND_SEND_VAL_EX",
+	"ZEND_SEND_VAR",
+	"ZEND_INIT_USER_CALL",
+	"ZEND_SEND_ARRAY",
+	"ZEND_SEND_USER",
+	"ZEND_STRLEN",
+	"ZEND_DEFINED",
+	"ZEND_TYPE_CHECK",
 	NULL,
 	NULL,
 	NULL,
@@ -190,6 +190,7 @@ const char *zend_vm_opcodes_map[168] = {
 	"ZEND_SEND_UNPACK",
 	"ZEND_POW",
 	"ZEND_ASSIGN_POW",
+	"ZEND_BIND_GLOBAL",
 };
 
 ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {

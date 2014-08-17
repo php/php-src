@@ -71,23 +71,21 @@ PHP_METHOD(SessionHandler, close)
    Wraps the old read handler */
 PHP_METHOD(SessionHandler, read)
 {
-	char *key, *val;
-	int key_len, val_len;
+	zend_string *val;
+	zend_string *key;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &key) == FAILURE) {
 		return;
 	}
 
-	if (PS(default_mod)->s_read(&PS(mod_data), key, &val, &val_len TSRMLS_CC) == FAILURE) {
+	if (PS(default_mod)->s_read(&PS(mod_data), key, &val TSRMLS_CC) == FAILURE) {
 		RETVAL_FALSE;
 		return;
 	}
 
-	RETVAL_STRINGL(val, val_len, 1);
-	str_efree(val);
-	return;
+	RETURN_STR(val);
 }
 /* }}} */
 
@@ -95,16 +93,15 @@ PHP_METHOD(SessionHandler, read)
    Wraps the old write handler */
 PHP_METHOD(SessionHandler, write)
 {
-	char *key, *val;
-	int key_len, val_len;
+	zend_string *key, *val;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &key, &key_len, &val, &val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &key, &val) == FAILURE) {
 		return;
 	}
 
-	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, val_len TSRMLS_CC));
+	RETURN_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val TSRMLS_CC));
 }
 /* }}} */
 
@@ -112,16 +109,15 @@ PHP_METHOD(SessionHandler, write)
    Wraps the old destroy handler */
 PHP_METHOD(SessionHandler, destroy)
 {
-	char *key;
-	int key_len;
+	zend_string *key;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &key) == FAILURE) {
 		return;
 	}
 	
-	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key TSRMLS_CC));
+	RETURN_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key TSRMLS_CC));
 }
 /* }}} */
 
@@ -138,7 +134,7 @@ PHP_METHOD(SessionHandler, gc)
 		return;
 	}
 	
-	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels TSRMLS_CC));
+	RETURN_BOOL(SUCCESS == PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels TSRMLS_CC));
 }
 /* }}} */
 
@@ -146,14 +142,14 @@ PHP_METHOD(SessionHandler, gc)
    Wraps the old create_sid handler */
 PHP_METHOD(SessionHandler, create_sid)
 {
-	char *id;
+	zend_string *id;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 	    return;
 	}
 
-	id = PS(default_mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
+	id = PS(default_mod)->s_create_sid(&PS(mod_data) TSRMLS_CC);
 
-	RETURN_STRING(id, 0);
+	RETURN_STR(id);
 }
 /* }}} */

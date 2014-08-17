@@ -23,16 +23,7 @@
 #include "main/fopen_wrappers.h"
 #include "ZendAccelerator.h"
 #include "zend_accelerator_blacklist.h"
-
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-# include "ext/ereg/php_regex.h"
-#else
-# include "main/php_regex.h"
-#endif
-
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-# include "ext/standard/php_string.h"
-#endif
+#include "ext/ereg/php_regex.h"
 
 #ifdef ZEND_WIN32
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB|REG_ICASE)
@@ -256,11 +247,7 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	zend_accel_error(ACCEL_LOG_DEBUG,"Loading blacklist file:  '%s'", filename);
 
 	if (VCWD_REALPATH(filename, buf)) {
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-		blacklist_path_length = php_dirname(buf, strlen(buf));
-#else
 		blacklist_path_length = zend_dirname(buf, strlen(buf));
-#endif
 		blacklist_path = zend_strndup(buf, blacklist_path_length);
 	}
 
@@ -371,7 +358,7 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 	return ret;
 }
 
-void zend_accel_blacklist_apply(zend_blacklist *blacklist, apply_func_arg_t func, void *argument TSRMLS_DC)
+void zend_accel_blacklist_apply(zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument TSRMLS_DC)
 {
 	int i;
 
