@@ -74,7 +74,6 @@ ZEND_METHOD(Closure, call) /* {{{ */
 	zend_closure *closure;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
-	char *error;
 	zval *my_params;
 	zend_uint my_param_count = 0;
 
