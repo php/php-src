@@ -67,7 +67,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 /* }}} */
 
 /* {{{ proto mixed Closure::call(object $to [, mixed $parameter] [, mixed $...] )
-   Call closure, binding to a given object */
+   Call closure, binding to a given object with its class as the scope */
 ZEND_METHOD(Closure, call) /* {{{ */
 {
 	zval *zclosure, *newthis, closure_result;
