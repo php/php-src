@@ -898,7 +898,7 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 	Z_PARAM_ARRAY_OR_OBJECT_HT_EX(dest, 0, 0)
 
 /* old "l" */
-#define Z_PARAM_LONG_EX(dest, is_null, check_null, separate) \
+#define Z_PARAM_INT_EX(dest, is_null, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
 		if (UNEXPECTED(!_z_param_long(_arg, &dest, &is_null, check_null, 0))) { \
 			_expected_type = Z_EXPECTED_LONG; \
@@ -906,11 +906,11 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 			break; \
 		}
 
-#define Z_PARAM_LONG(dest) \
-	Z_PARAM_LONG_EX(dest, _dummy, 0, 0)
+#define Z_PARAM_INT(dest) \
+	Z_PARAM_INT_EX(dest, _dummy, 0, 0)
 
 /* old "L" */
-#define Z_PARAM_STRICT_LONG_EX(dest, is_null, check_null, separate) \
+#define Z_PARAM_STRICT_INT_EX(dest, is_null, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
 		if (UNEXPECTED(!_z_param_long(_arg, &dest, &is_null, check_null, 1))) { \
 			_expected_type = Z_EXPECTED_LONG; \
@@ -918,8 +918,8 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 			break; \
 		}
 
-#define Z_PARAM_STRICT_LONG(dest) \
-	Z_PARAM_STRICT_LONG_EX(dest, _dummy, 0, 0)
+#define Z_PARAM_STRICT_INT(dest) \
+	Z_PARAM_STRICT_INT_EX(dest, _dummy, 0, 0)
 
 /* old "o" */
 #define Z_PARAM_OBJECT_EX(dest, check_null, separate) \

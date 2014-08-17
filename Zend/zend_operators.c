@@ -604,7 +604,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		}
 		case IS_INT: {
-			ZVAL_NEW_STR(op, zend_long_to_str(Z_IVAL_P(op)));
+			ZVAL_NEW_STR(op, zend_int_to_str(Z_IVAL_P(op)));
 			break;
 		}
 		case IS_DOUBLE: {
@@ -784,7 +784,7 @@ ZEND_API void multi_convert_to_string_ex(int argc, ...) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_int_t _zval_get_long_func(zval *op TSRMLS_DC) /* {{{ */
+ZEND_API zend_int_t _zval_get_int_func(zval *op TSRMLS_DC) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -883,7 +883,7 @@ try_again:
 			return STR_INIT(buf, len, 0);
 		}
 		case IS_INT: {
-			return zend_long_to_str(Z_IVAL_P(op));
+			return zend_int_to_str(Z_IVAL_P(op));
 		}
 		case IS_DOUBLE: {
 			return zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(op));
@@ -2558,7 +2558,7 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_string *zend_long_to_str(zend_int_t num) /* {{{ */
+ZEND_API zend_string *zend_int_to_str(zend_int_t num) /* {{{ */
 {
 	char buf[MAX_LENGTH_OF_ZEND_INT + 1];
 	char *res;

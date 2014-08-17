@@ -344,12 +344,12 @@ ZEND_API void multi_convert_to_int_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 
-ZEND_API zend_int_t _zval_get_long_func(zval *op TSRMLS_DC);
+ZEND_API zend_int_t _zval_get_int_func(zval *op TSRMLS_DC);
 ZEND_API double _zval_get_double_func(zval *op TSRMLS_DC);
 ZEND_API zend_string *_zval_get_string_func(zval *op TSRMLS_DC);
 
 static zend_always_inline zend_int_t _zval_get_long(zval *op TSRMLS_DC) {
-	return Z_TYPE_P(op) == IS_INT ? Z_IVAL_P(op) : _zval_get_long_func(op TSRMLS_CC);
+	return Z_TYPE_P(op) == IS_INT ? Z_IVAL_P(op) : _zval_get_int_func(op TSRMLS_CC);
 }
 static zend_always_inline double _zval_get_double(zval *op TSRMLS_DC) {
 	return Z_TYPE_P(op) == IS_DOUBLE ? Z_DVAL_P(op) : _zval_get_double_func(op TSRMLS_CC);
@@ -1045,7 +1045,7 @@ static zend_always_inline void fast_is_not_identical_function(zval *result, zval
 	}                                                                           \
 } while (0)
 
-ZEND_API zend_string *zend_long_to_str(zend_int_t num);
+ZEND_API zend_string *zend_int_to_str(zend_int_t num);
 
 #endif
 

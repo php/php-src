@@ -1363,7 +1363,7 @@ PHP_FUNCTION(number_format)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_DOUBLE(num)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(dec)
+		Z_PARAM_INT(dec)
 		Z_PARAM_STRING_EX(dec_point, dec_point_len, 1, 0)
 		Z_PARAM_STRING_EX(thousand_sep, thousand_sep_len, 1, 0)
 	ZEND_PARSE_PARAMETERS_END();

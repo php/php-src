@@ -1456,7 +1456,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(flags)
+		Z_PARAM_INT(flags)
 		Z_PARAM_STR_EX(hint_charset, 1, 0)
 		Z_PARAM_BOOL(double_encode);
 	ZEND_PARSE_PARAMETERS_END();
@@ -1540,7 +1540,7 @@ PHP_FUNCTION(html_entity_decode)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(quote_style)
+		Z_PARAM_INT(quote_style)
 		Z_PARAM_STR(hint_charset)
 	ZEND_PARSE_PARAMETERS_END();
 #endif

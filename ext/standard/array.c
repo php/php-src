@@ -300,7 +300,7 @@ PHP_FUNCTION(count)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(array)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(mode)
+		Z_PARAM_INT(mode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
@@ -2237,7 +2237,7 @@ PHP_FUNCTION(array_slice)
 #else
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY(input)
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(z_length)
 		Z_PARAM_BOOL(preserve_keys)

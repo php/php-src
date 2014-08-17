@@ -558,8 +558,8 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		Z_PARAM_STR(subject)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL_EX(subpats, 0, 1)
-		Z_PARAM_LONG(flags)
-		Z_PARAM_LONG(start_offset)
+		Z_PARAM_INT(flags)
+		Z_PARAM_INT(start_offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 #endif
 	
@@ -1452,7 +1452,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		Z_PARAM_ZVAL(replace)
 		Z_PARAM_ZVAL(subject)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit)
+		Z_PARAM_INT(limit)
 		Z_PARAM_ZVAL_EX(zcount, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
@@ -1569,8 +1569,8 @@ static PHP_FUNCTION(preg_split)
 		Z_PARAM_STR(regex)
 		Z_PARAM_STR(subject)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit_val)
-		Z_PARAM_LONG(flags)
+		Z_PARAM_INT(limit_val)
+		Z_PARAM_INT(flags)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 #endif
 	
@@ -1876,7 +1876,7 @@ static PHP_FUNCTION(preg_grep)
 		Z_PARAM_STR(regex)
 		Z_PARAM_ARRAY(input)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(flags)
+		Z_PARAM_INT(flags)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 	
