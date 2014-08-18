@@ -25,10 +25,10 @@
 /* }}} */
 
 ZEND_BEGIN_MODULE_GLOBALS(assert)
-	long active;
-	long bail;
-	long warning;
-	long quiet_eval;
+	php_int_t active;
+	php_int_t bail;
+	php_int_t warning;
+	php_int_t quiet_eval;
 	zval callback;
 	char *cb;
 ZEND_END_MODULE_GLOBALS(assert)
@@ -256,12 +256,12 @@ PHP_FUNCTION(assert)
 PHP_FUNCTION(assert_options)
 {
 	zval *value = NULL;
-	long what;
+	php_int_t what;
 	int oldint;
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
-	if (zend_parse_parameters(ac TSRMLS_CC, "l|z", &what, &value) == FAILURE) {
+	if (zend_parse_parameters(ac TSRMLS_CC, "i|z", &what, &value) == FAILURE) {
 		return;
 	}
 

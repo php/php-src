@@ -4626,9 +4626,9 @@ PHP_FUNCTION(error_log)
 	char *message, *opt = NULL, *headers = NULL;
 	int message_len, opt_len = 0, headers_len = 0;
 	int opt_err = 0, argc = ZEND_NUM_ARGS();
-	long erropt = 0;
+	php_int_t erropt = 0;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|lps", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|ips", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
 		return;
 	}
 
@@ -5526,10 +5526,10 @@ PHP_FUNCTION(getservbyport)
 {
 	char *proto;
 	int proto_len;
-	long port;
+	php_int_t port;
 	struct servent *serv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &port, &proto, &proto_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "is", &port, &proto, &proto_len) == FAILURE) {
 		return;
 	}
 
@@ -5573,10 +5573,10 @@ PHP_FUNCTION(getprotobyname)
    Returns protocol name associated with protocol number proto */
 PHP_FUNCTION(getprotobynumber)
 {
-	long proto;
+	php_int_t proto;
 	struct protoent *ent;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &proto) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &proto) == FAILURE) {
 		return;
 	}
 
@@ -5839,11 +5839,11 @@ PHP_FUNCTION(parse_ini_file)
 	char *filename = NULL;
 	int filename_len = 0;
 	zend_bool process_sections = 0;
-	long scanner_mode = ZEND_INI_SCANNER_NORMAL;
+	php_int_t scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|bl", &filename, &filename_len, &process_sections, &scanner_mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|bi", &filename, &filename_len, &process_sections, &scanner_mode) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -5880,10 +5880,10 @@ PHP_FUNCTION(parse_ini_string)
 	char *string = NULL, *str = NULL;
 	int str_len = 0;
 	zend_bool process_sections = 0;
-	long scanner_mode = ZEND_INI_SCANNER_NORMAL;
+	php_int_t scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_ini_parser_cb_t ini_parser_cb;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &str, &str_len, &process_sections, &scanner_mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bi", &str, &str_len, &process_sections, &scanner_mode) == FAILURE) {
 		RETURN_FALSE;
 	}
 

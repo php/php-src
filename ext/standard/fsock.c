@@ -33,7 +33,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *host;
 	int host_len;
-	long port = -1;
+	php_int_t port = -1;
 	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout = FG(default_socket_timeout);
 	php_uint_t conv;
@@ -42,28 +42,28 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	php_stream *stream = NULL;
 	int err;
 	char *hostname = NULL;
-	long hostname_len;
+	php_int_t hostname_len;
 	zend_string *errstr = NULL;
 
 	RETVAL_FALSE;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/z/d", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|iz/z/d", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (persistent) {
-		spprintf(&hashkey, 0, "pfsockopen__%s:%ld", host, port);
+		spprintf(&hashkey, 0, "pfsockopen__%s:" ZEND_INT_FMT, host, port);
 	}
 
 	if (port > 0) {
-		hostname_len = spprintf(&hostname, 0, "%s:%ld", host, port);
+		hostname_len = spprintf(&hostname, 0, "%s:" ZEND_INT_FMT, host, port);
 	} else {
 		hostname_len = host_len;
 		hostname = host;
 	}
 	
 	/* prepare the timeout value for use */
-	conv = (php_uint_t) (timeout * 1000000.0);
+	conv = (unsigned long) (timeout * 1000000.0);
 	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 
@@ -83,7 +83,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(hostname);
 	}
 	if (stream == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%ld (%s)", host, port, errstr == NULL ? "Unknown error" : errstr->val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:" ZEND_INT_FMT " (%s)", host, port, errstr == NULL ? "Unknown error" : errstr->val);
 	}
 
 	if (hashkey) {
