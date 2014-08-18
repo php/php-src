@@ -761,7 +761,7 @@ SPL_METHOD(SplFixedArray, setSize)
 	spl_fixedarray_object *intern;
 	php_int_t size;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &size) == FAILURE) {
 		return;
 	}
 
