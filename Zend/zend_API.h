@@ -900,7 +900,7 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 /* old "l" */
 #define Z_PARAM_INT_EX(dest, is_null, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!_z_param_long(_arg, &dest, &is_null, check_null, 0))) { \
+		if (UNEXPECTED(!_z_param_int(_arg, &dest, &is_null, check_null, 0))) { \
 			_expected_type = Z_EXPECTED_LONG; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -912,7 +912,7 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 /* old "L" */
 #define Z_PARAM_STRICT_INT_EX(dest, is_null, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!_z_param_long(_arg, &dest, &is_null, check_null, 1))) { \
+		if (UNEXPECTED(!_z_param_int(_arg, &dest, &is_null, check_null, 1))) { \
 			_expected_type = Z_EXPECTED_LONG; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -1072,7 +1072,7 @@ static zend_always_inline int _z_param_bool(zval *arg, zend_bool *dest, zend_boo
 	return 1;
 }
 
-static zend_always_inline int _z_param_long(zval *arg, zend_int_t *dest, zend_bool *is_null, int check_null, int strict)
+static zend_always_inline int _z_param_int(zval *arg, zend_int_t *dest, zend_bool *is_null, int check_null, int strict)
 {
 	if (check_null) {
 		*is_null = 0;
