@@ -4298,14 +4298,18 @@ PHP_FUNCTION(array_reduce)
 	fci.no_separation = 0;
 
 	ZEND_HASH_FOREACH_VAL(htbl, operand) {
-		ZVAL_COPY_VALUE(&args[0], &result);
-		ZVAL_COPY_VALUE(&args[1], operand);
+		ZVAL_COPY(&args[0], &result);
+		ZVAL_COPY(&args[1], operand);
 		fci.params = args;
 
 		if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+			zval_ptr_dtor(&args[1]);
+			zval_ptr_dtor(&args[0]);
 			zval_ptr_dtor(&result);
 			ZVAL_COPY_VALUE(&result, &retval);
 		} else {
+			zval_ptr_dtor(&args[1]);
+			zval_ptr_dtor(&args[0]);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the reduction callback");
 			return;
 		}
