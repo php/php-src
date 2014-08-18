@@ -186,10 +186,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		}
 
 		if (pp - p > 0 && pp - p < 6 && (*pp == '/' || *pp == '\0')) {
-			long port;
+			php_int_t port;
 			memcpy(port_buf, p, (pp - p));
 			port_buf[pp - p] = '\0';
-			port = strtol(port_buf, NULL, 10);
+			port = ZEND_STRTOI(port_buf, NULL, 10);
 			if (port > 0 && port <= 65535) {
 				ret->port = (unsigned short) port;
 			} else {
@@ -280,10 +280,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				efree(ret);
 				return NULL;
 			} else if (e - p > 0) {
-				long port;
+				php_int_t port;
 				memcpy(port_buf, p, (e - p));
 				port_buf[e - p] = '\0';
-				port = strtol(port_buf, NULL, 10);
+				port = ZEND_STRTOI(port_buf, NULL, 10);
 				if (port > 0 && port <= 65535) {
 					ret->port = (unsigned short)port;
 				} else {
@@ -377,9 +377,9 @@ PHP_FUNCTION(parse_url)
 	char *str;
 	int str_len;
 	php_url *resource;
-	long key = -1;
+	php_int_t key = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &key) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &str, &str_len, &key) == FAILURE) {
 		return;
 	}
 
@@ -416,7 +416,7 @@ PHP_FUNCTION(parse_url)
 				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment);
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier %ld", key);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier " ZEND_INT_FMT, key);
 				RETVAL_FALSE;
 		}
 		goto done;
@@ -719,9 +719,9 @@ PHP_FUNCTION(get_headers)
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL, *h;
 	HashTable *hashT;
-	long format = 0;
+	php_int_t format = 0;
                 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &url, &url_len, &format) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &url, &url_len, &format) == FAILURE) {
 		return;
 	}
 	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc(TSRMLS_C));

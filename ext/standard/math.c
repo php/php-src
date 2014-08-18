@@ -1422,16 +1422,16 @@ PHP_FUNCTION(fmod)
    Returns the integer division of the numerator by the divisor */
 PHP_FUNCTION(intdiv) 
 {
-	long numerator, divisor;
+	php_int_t numerator, divisor;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &numerator, &divisor) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ii", &numerator, &divisor) == FAILURE) {
 		return;
 	}
 	
 	if (divisor == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
 		RETURN_BOOL(0);
-	} else if (divisor == -1 && numerator == LONG_MIN) {
+	} else if (divisor == -1 && numerator == PHP_INT_MIN) {
 		/* Prevent overflow error/crash 
 		   We don't return a float here as that violates function contract */
 		RETURN_INT(0);

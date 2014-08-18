@@ -402,7 +402,7 @@ static void php_array_element_export(zval *zv, php_uint_t index, zend_string *ke
 {
 	if (key == NULL) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
-		smart_str_append_int(buf, (long) index);
+		smart_str_append_int(buf, (php_int_t) index);
 		smart_str_appendl(buf, " => ", 4);
 
 	} else { /* string key */
@@ -443,7 +443,7 @@ static void php_object_element_export(zval *zv, php_uint_t index, zend_string *k
 		smart_str_appendc(buf, '\'');
 		STR_RELEASE(pname_esc);
 	} else {
-		smart_str_append_int(buf, (long) index);
+		smart_str_append_int(buf, (php_int_t) index);
 	}
 	smart_str_appendl(buf, " => ", 4);
 	php_var_export_ex(zv, level + 2, buf TSRMLS_CC);
@@ -456,7 +456,7 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC) 
 {
 	HashTable *myht;
 	char *tmp_str;
-	int tmp_len;
+	php_size_t tmp_len;
 	zend_string *class_name;
 	zend_string *ztmp, *ztmp2;
 	php_uint_t index;

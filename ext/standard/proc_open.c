@@ -260,9 +260,9 @@ PHP_FUNCTION(proc_terminate)
 {
 	zval *zproc;
 	struct php_process_handle *proc;
-	long sig_no = SIGTERM;
+	php_int_t sig_no = SIGTERM;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zproc, &sig_no) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &zproc, &sig_no) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -328,7 +328,7 @@ PHP_FUNCTION(proc_get_status)
 	array_init(return_value);
 
 	add_assoc_string(return_value, "command", proc->command);
-	add_assoc_int(return_value, "pid", (long) proc->child);
+	add_assoc_int(return_value, "pid", (php_int_t) proc->child);
 
 #ifdef PHP_WIN32
 

@@ -115,7 +115,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 }
 /* }}} */
 
-int php_tag_find(char *tag, int len, char *set);
+int php_tag_find(char *tag, php_size_t len, char *set);
 
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
@@ -2410,8 +2410,8 @@ PHP_FUNCTION(substr_replace)
 		}
 	} else { /* str is array of strings */
 		zend_string *str_index = NULL;
-		php_uint_t num_index;
 		php_size_t result_len;
+		php_uint_t num_index;
 
 		array_init(return_value);
 
@@ -3879,12 +3879,12 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	char *str;
 	char *heb_str, *tmp, *target;
 	int block_start, block_end, block_type, block_length, i;
-	long max_chars=0;
+	php_int_t max_chars=0;
 	int begin, end, char_count, orig_begin;
 	int str_len;
 	zend_string *broken_str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &max_chars) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &str, &str_len, &max_chars) == FAILURE) {
 		return;
 	}
 
@@ -4333,7 +4333,7 @@ PHP_FUNCTION(parse_str)
  * 0 start tag
  * 1 first non-whitespace char seen
  */
-int php_tag_find(char *tag, int len, char *set) {
+int php_tag_find(char *tag, php_size_t len, char *set) {
 	char c, *n, *t;
 	int state=0, done=0;
 	char *norm;

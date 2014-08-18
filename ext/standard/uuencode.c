@@ -65,9 +65,9 @@
 
 #define PHP_UU_DEC(c) (((c) - ' ') & 077)
 
-PHPAPI zend_string *php_uuencode(char *src, int src_len) /* {{{ */
+PHPAPI zend_string *php_uuencode(char *src, php_size_t src_len) /* {{{ */
 {
-	int len = 45;
+	php_size_t len = 45;
 	char *p, *s, *e, *ee;
 	zend_string *dest;
 
@@ -127,9 +127,9 @@ PHPAPI zend_string *php_uuencode(char *src, int src_len) /* {{{ */
 }
 /* }}} */
 
-PHPAPI zend_string *php_uudecode(char *src, int src_len) /* {{{ */
+PHPAPI zend_string *php_uudecode(char *src, php_size_t src_len) /* {{{ */
 {
-	int len, total_len=0;
+	php_size_t len, total_len=0;
 	char *s, *e, *p, *ee;
 	zend_string *dest;
 
@@ -199,14 +199,13 @@ err:
    uuencode a string */
 PHP_FUNCTION(convert_uuencode)
 {
-	char *src;
-	int src_len;
+	zend_string *src;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &src, &src_len) == FAILURE || src_len < 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &src) == FAILURE || src->len < 1) {
 		RETURN_FALSE;
 	}
 
-	RETURN_STR(php_uuencode(src, src_len));
+	RETURN_STR(php_uuencode(src->val, src->len));
 }
 /* }}} */
 
@@ -214,15 +213,14 @@ PHP_FUNCTION(convert_uuencode)
    decode a uuencoded string */
 PHP_FUNCTION(convert_uudecode)
 {
-	char *src;
-	int src_len;
+	zend_string *src;
 	zend_string *dest;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &src, &src_len) == FAILURE || src_len < 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &src) == FAILURE || src->len < 1) {
 		RETURN_FALSE;
 	}
 
-	if ((dest = php_uudecode(src, src_len)) == NULL) {
+	if ((dest = php_uudecode(src->val, src->len)) == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The given parameter is not a valid uuencoded string");
 		RETURN_FALSE;
 	}

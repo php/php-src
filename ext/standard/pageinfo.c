@@ -79,14 +79,14 @@ PHPAPI void php_statpage(TSRMLS_D)
 
 /* {{{ php_getuid
  */
-long php_getuid(TSRMLS_D)
+php_int_t php_getuid(TSRMLS_D)
 {
 	php_statpage(TSRMLS_C);
 	return (BG(page_uid));
 }
 /* }}} */
 
-long php_getgid(TSRMLS_D)
+php_int_t php_getgid(TSRMLS_D)
 {
 	php_statpage(TSRMLS_C);
 	return (BG(page_gid));
@@ -96,7 +96,7 @@ long php_getgid(TSRMLS_D)
    Get PHP script owner's UID */
 PHP_FUNCTION(getmyuid)
 {
-	long uid;
+	php_int_t uid;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -115,7 +115,7 @@ PHP_FUNCTION(getmyuid)
    Get PHP script owner's GID */
 PHP_FUNCTION(getmygid)
 {
-	long gid;
+	php_int_t gid;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -134,7 +134,7 @@ PHP_FUNCTION(getmygid)
    Get current process ID */
 PHP_FUNCTION(getmypid)
 {
-	int pid;
+	php_int_t pid;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -144,7 +144,7 @@ PHP_FUNCTION(getmypid)
 	if (pid < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_INT((long) pid);
+		RETURN_INT(pid);
 	}
 }
 /* }}} */
@@ -166,7 +166,7 @@ PHP_FUNCTION(getmyinode)
 }
 /* }}} */
 
-PHPAPI long php_getlastmod(TSRMLS_D)
+PHPAPI time_t php_getlastmod(TSRMLS_D)
 {
 	php_statpage(TSRMLS_C);
 	return BG(page_mtime);
@@ -176,7 +176,7 @@ PHPAPI long php_getlastmod(TSRMLS_D)
    Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {
-	long lm;
+	php_int_t lm;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
