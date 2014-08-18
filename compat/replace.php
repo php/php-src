@@ -229,6 +229,8 @@ if ($replace_macros) {
 		'Z_PARAM_LONG'                           => 'Z_PARAM_INT',
 		'Z_PARAM_STRICT_LONG_EX'                 => 'Z_PARAM_STRICT_INT_EX',
 		'Z_PARAM_STRICT_LONG'                    => 'Z_PARAM_STRICT_INT',
+		'zval_get_long'                          => 'zval_get_int',
+		'_z_param_long'                          => '_z_param_int',
 	);
 
 	if ($reverse_replace) {
