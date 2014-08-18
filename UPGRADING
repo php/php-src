@@ -232,6 +232,13 @@ PHP 5.6 UPGRADE NOTES
   crypto method from the context is used as a fallback if no crypto method is
   specified at call-time.
 
+- Reflection:
+  ReflectionClass::newInstanceWithoutConstructor previously not allowed the
+  instantiation of any internal class which used custom object storage
+  (overriding the default create_object handler), this was changed to only
+  reject the instantiation of such classes if the class is also marked as
+  final.
+
 - XMLReader:
   XMLReader::getAttributeNs and XMLReader::getAttributeNo now return NULL if
   the attribute could not be found, just like XMLReader::getAttribute.
