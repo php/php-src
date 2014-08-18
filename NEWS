@@ -9,7 +9,9 @@ PHP                                                                        NEWS
 
 - Core:
   . Added PHP_INT_MIN constant. (Andrea)
-  . Fixed inheritance chain of Reflector in ext/reflection (Tjerk)
+
+- Reflection
+  . Fixed inheritance chain of Reflector interface (Tjerk)
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
