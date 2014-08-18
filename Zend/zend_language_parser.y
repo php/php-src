@@ -349,8 +349,10 @@ unticked_statement:
 		foreach_statement
 			{ $$.ast = zend_ast_create(ZEND_AST_FOREACH,
 			      $3.ast, $7.ast, $5.ast, $9.ast); }
-	|	T_DECLARE '(' const_list ')' declare_statement
-			{ $$.ast = zend_ast_create(ZEND_AST_DECLARE, $3.ast, $5.ast); }
+	|	T_DECLARE '(' const_list ')'
+			{ zend_handle_encoding_declaration($3.list TSRMLS_CC); }
+				declare_statement
+			{ $$.ast = zend_ast_create(ZEND_AST_DECLARE, $3.ast, $6.ast); }
 	|	';'	/* empty statement */ { $$.ast = NULL; }
 	|	T_TRY '{' inner_statement_list '}' catch_list finally_statement
 			{ $$.ast = zend_ast_create(ZEND_AST_TRY, $3.ast, $5.ast, $6.ast); }

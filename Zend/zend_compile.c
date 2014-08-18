@@ -5113,6 +5113,52 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 	efree(jmp_opnums);
 }
 
+/* Encoding declarations must already be handled during parsing */
+void zend_handle_encoding_declaration(zend_ast_list *declares TSRMLS_DC) {
+	zend_uint i;
+	for (i = 0; i < declares->children; ++i) {
+		zend_ast *declare_ast = declares->child[i];
+		zend_ast *name_ast = declare_ast->child[0];
+		zend_ast *value_ast = declare_ast->child[1];
+		zend_string *name = zend_ast_get_str(name_ast);
+
+		if (zend_str_equals_literal_ci(name, "encoding")) {
+			if (value_ast->kind != ZEND_AST_ZVAL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Encoding must be a literal");
+			}
+
+			if (CG(multibyte)) {
+				zend_string *encoding_name = zval_get_string(zend_ast_get_zval(value_ast));
+
+				const zend_encoding *new_encoding, *old_encoding;
+				zend_encoding_filter old_input_filter;
+
+				CG(encoding_declared) = 1;
+
+				new_encoding = zend_multibyte_fetch_encoding(encoding_name->val TSRMLS_CC);
+				if (!new_encoding) {
+					zend_error(E_COMPILE_WARNING, "Unsupported encoding [%s]", encoding_name->val);
+				} else {
+					old_input_filter = LANG_SCNG(input_filter);
+					old_encoding = LANG_SCNG(script_encoding);
+					zend_multibyte_set_filter(new_encoding TSRMLS_CC);
+
+					/* need to re-scan if input filter changed */
+					if (old_input_filter != LANG_SCNG(input_filter) ||
+						 (old_input_filter && new_encoding != old_encoding)) {
+						zend_multibyte_yyinput_again(old_input_filter, old_encoding TSRMLS_CC);
+					}
+				}
+
+				STR_RELEASE(encoding_name);
+			} else {
+				zend_error(E_COMPILE_WARNING, "declare(encoding=...) ignored because "
+					"Zend multibyte feature is turned off by settings");
+			}
+		}
+	}
+}
+
 void zend_compile_declare(zend_ast *ast TSRMLS_DC) {
 	zend_ast_list *declares = zend_ast_get_list(ast->child[0]);
 	zend_ast *stmt_ast = ast->child[1];
@@ -5125,68 +5171,28 @@ void zend_compile_declare(zend_ast *ast TSRMLS_DC) {
 		zend_ast *value_ast = declare_ast->child[1];
 
 		zend_string *name = zend_ast_get_str(name_ast);
-		zval value_zv;
-
-		zend_const_expr_to_zval(&value_zv, value_ast TSRMLS_CC);
-
 		if (zend_str_equals_literal_ci(name, "ticks")) {
+			zval value_zv;
+			zend_const_expr_to_zval(&value_zv, value_ast TSRMLS_CC);
 			convert_to_long(&value_zv);
 			ZVAL_COPY_VALUE(&CG(declarables).ticks, &value_zv);
-		} else if (zend_str_equals_literal_ci(name, "encoding")) {
-			if (Z_TYPE(value_zv) == IS_CONSTANT) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use constants as encoding");
-			}
-
-			/*
-			 * Check that the pragma comes before any opcodes. If the compilation
-			 * got as far as this, the previous portion of the script must have been
-			 * parseable according to the .ini script_encoding setting. We still
-			 * want to tell them to put declare() at the top.
-			 */
-			{
-				zend_uint num = CG(active_op_array)->last;
-				/* ignore ZEND_EXT_STMT and ZEND_TICKS */
-				while (num > 0 &&
-					   (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
-						CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
-					--num;
-				}
-
-				if (num > 0) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
-						"the very first statement in the script");
-				}
-			}
-
-			if (CG(multibyte)) {
-				const zend_encoding *new_encoding, *old_encoding;
-				zend_encoding_filter old_input_filter;
-
-				CG(encoding_declared) = 1;
-
-				convert_to_string(&value_zv);
-				new_encoding = zend_multibyte_fetch_encoding(Z_STRVAL(value_zv) TSRMLS_CC);
-				if (!new_encoding) {
-					zend_error(E_COMPILE_WARNING, "Unsupported encoding [%s]", Z_STRVAL(value_zv));
-				} else {
-					old_input_filter = LANG_SCNG(input_filter);
-					old_encoding = LANG_SCNG(script_encoding);
-					zend_multibyte_set_filter(new_encoding TSRMLS_CC);
-
-					/* need to re-scan if input filter changed */
-					if (old_input_filter != LANG_SCNG(input_filter) ||
-						 (old_input_filter && new_encoding != old_encoding)) {
-						zend_multibyte_yyinput_again(old_input_filter, old_encoding TSRMLS_CC);
-					}
-				}
-			} else {
-				zend_error(E_COMPILE_WARNING, "declare(encoding=...) ignored because "
-					"Zend multibyte feature is turned off by settings");
-			}
 			zval_dtor(&value_zv);
+		} else if (zend_str_equals_literal_ci(name, "encoding")) {
+			/* Encoding declaration was already handled during parsing. Here we
+			 * only check that it is the first statement in the file. */
+			zend_uint num = CG(active_op_array)->last;
+			while (num > 0 &&
+				   (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
+					CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
+				--num;
+			}
+
+			if (num > 0) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
+					"the very first statement in the script");
+			}
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", name->val);
-			zval_dtor(&value_zv);
 		}
 	}
 

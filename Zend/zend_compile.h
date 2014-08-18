@@ -453,6 +453,7 @@ void zend_emit_final_return(zval *zv TSRMLS_DC);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 zend_uint zend_add_member_modifier(zend_uint flags, zend_uint new_flag);
 zend_ast_list *zend_ast_append_doc_comment(zend_ast_list *list TSRMLS_DC);
+void zend_handle_encoding_declaration(zend_ast_list *declares TSRMLS_DC);
 
 /* parser-driven code generators */
 void zend_do_free(znode *op1 TSRMLS_DC);
