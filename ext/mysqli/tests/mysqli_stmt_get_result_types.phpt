@@ -15,7 +15,7 @@ mysqli_stmt_get_result - data types
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	$hint_str_or_unicode = (version_compare(PHP_VERSION, '5.9.9', '>') == 1) ? 'unicode' : 'string';
+	$hint_str_or_unicode = (version_compare(PHP_VERSION, '6.0', '==') == 1) ? 'unicode' : 'string';
 
 	function func_mysqli_stmt_get_result($link, $engine, $bind_type, $sql_type, $bind_value, $offset, $type_hint = null) {
 

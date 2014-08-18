@@ -10,9 +10,6 @@ require_once('skipifemb.inc');
 if (!function_exists('mysqli_set_charset')) {
 	die('skip mysqli_set_charset() not available');
 }
-if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
-	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
-}
 ?>
 --FILE--
 <?php
