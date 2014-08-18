@@ -1078,15 +1078,15 @@ static zend_always_inline int _z_param_long(zval *arg, long *dest, zend_bool *is
 		*is_null = 0;
 	}
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		*dest = Z_LVAL_P(arg);
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
 		if (strict && UNEXPECTED(Z_DVAL_P(arg) > LONG_MAX)) {
 			*dest = LONG_MAX;
 		} else if (strict && UNEXPECTED(Z_DVAL_P(arg) < LONG_MIN)) {
 			*dest = LONG_MIN;
 		} else {
-			*dest = Z_LVAL_P(arg);
+			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
 		}
-	} else if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
-		*dest = zend_dval_to_lval(Z_DVAL_P(arg));
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
 		int type;
