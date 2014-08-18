@@ -99,7 +99,7 @@ ZEND_METHOD(Closure, call) /* {{{ */
 		}
 	}
 
-	/* This should never happen as this closure must, by definition, be a callable */
+	/* This should never happen as closures will always be callable */
 	if (zend_fcall_info_init(zclosure, 0, &fci, &fci_cache, NULL, NULL TSRMLS_CC) != SUCCESS) {
 		ZEND_ASSERT(0);
 	}
