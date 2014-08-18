@@ -7,14 +7,18 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
-    (Daniel Lowrey).
+    (Daniel Lowrey)
 
 - SPL:
   . Fixed bug #67813 (CachingIterator::__construct InvalidArgumentException
     wrong message). (tim_siebels_aurich at yahoo dot de)
 
 - Date:
-  . Fixed bug #66091 (memory leaks in DateTime constructor). (Tjerk).
+  . Fixed bug #66091 (memory leaks in DateTime constructor). (Tjerk)
+  . Fixed bug #66985 (Some timezones are no longer valid in PHP 5.5.10).
+    (Derick)
+  . Fixed bug #67109 (First uppercase letter breaks date string parsing).
+    (Derick)
 
 ?? ??? 2014, PHP 5.5.16
 
