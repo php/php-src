@@ -45,7 +45,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %}
 
 %pure_parser
-%expect 3
+%expect 2
 
 %code requires {
 #ifdef ZTS
@@ -825,9 +825,8 @@ expr_without_variable:
 	|	expr '>' expr 					{ zend_do_binary_op(ZEND_IS_SMALLER, &$$, &$3, &$1 TSRMLS_CC); }
 	|	expr T_IS_GREATER_OR_EQUAL expr { zend_do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &$$, &$3, &$1 TSRMLS_CC); }
 	|	expr T_INSTANCEOF class_name_reference { zend_do_instanceof(&$$, &$1, &$3, 0 TSRMLS_CC); }
-	|	parenthesis_expr 	{ $$ = $1; }
+	|	parenthesis_expr { $$ = $1; } instance_call { $$ = $3; }
 	|	new_expr		{ $$ = $1; }
-	|	'(' new_expr ')' { $$ = $2; } instance_call { $$ = $5; }
 	|	expr '?' { zend_do_begin_qm_op(&$1, &$2 TSRMLS_CC); }
 		expr ':' { zend_do_qm_true(&$4, &$2, &$5 TSRMLS_CC); }
 		expr	 { zend_do_qm_false(&$$, &$7, &$2, &$5 TSRMLS_CC); }
