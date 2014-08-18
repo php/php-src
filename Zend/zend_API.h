@@ -1081,7 +1081,7 @@ static zend_always_inline int _z_param_int(zval *arg, zend_int_t *dest, zend_boo
 		*dest = Z_IVAL_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
 		if (strict && UNEXPECTED(Z_DVAL_P(arg) > ZEND_INT_MAX)) {
-			*dest = ZEND_INT__MAX;
+			*dest = ZEND_INT_MAX;
 		} else if (strict && UNEXPECTED(Z_DVAL_P(arg) < ZEND_INT_MIN)) {
 			*dest = ZEND_INT_MIN;
 		} else {
