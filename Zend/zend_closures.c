@@ -92,16 +92,16 @@ ZEND_METHOD(Closure, call) /* {{{ */
 
 	if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
 		/* verify that we aren't binding internal function to a wrong object */
-		if((closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+		if ((closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0 &&
 				!instanceof_function(Z_OBJCE_P(newthis), closure->func.common.scope TSRMLS_CC)) {
 			zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", closure->func.common.scope->name->val, closure->func.common.function_name->val, Z_OBJCE_P(newthis)->name->val);
 			RETURN_NULL();
 		}
 	}
 
+	/* This should never happen as this closure must, by definition, be a callable */
 	if (zend_fcall_info_init(zclosure, 0, &fci, &fci_cache, NULL, NULL TSRMLS_CC) != SUCCESS) {
-		zend_error(E_ERROR, "Closure not callable");
-		RETURN_NULL();
+		ZEND_ASSERT(0);
 	}
 
 	fci.retval = &closure_result;
