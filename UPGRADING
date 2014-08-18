@@ -233,7 +233,7 @@ PHP 5.6 UPGRADE NOTES
   specified at call-time.
 
 - Reflection:
-  ReflectionClass::newInstanceWithoutConstructor previously not allowed the
+  ReflectionClass::newInstanceWithoutConstructor previously didn't allow the
   instantiation of any internal class which used custom object storage
   (overriding the default create_object handler), this was changed to only
   reject the instantiation of such classes if the class is also marked as
