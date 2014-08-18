@@ -303,8 +303,10 @@ typedef enum {
 	 !(EG(current_execute_data)->prev_execute_data->opline->result_type & EXT_TYPE_UNUSED))
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
+#  define ZEND_NORETURN __attribute__((noreturn))
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
 #else
+#  define ZEND_NORETURN
 #  define zend_error_noreturn zend_error
 #endif
 
