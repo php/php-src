@@ -39,24 +39,6 @@ static __inline __int64_t php_date_llabs( __int64_t i ) { return i >= 0 ? i : -i
 static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; }
 #endif
 
-#ifdef PHP_WIN32
-#define DATE_I64_BUF_LEN 65
-# define DATE_I64A(i, s, len) _i64toa_s(i, s, len, 10)
-# define DATE_A64I(i, s) i = _atoi64(s)
-#else
-#define DATE_I64_BUF_LEN 65
-# define DATE_I64A(i, s, len) \
-	do { \
-		int st = snprintf(s, len, "%lld", i); \
-		s[st] = '\0'; \
-	} while (0);
-#ifdef HAVE_ATOLL
-# define DATE_A64I(i, s) i = atoll(s)
-#else
-# define DATE_A64I(i, s) i = strtoll(s, NULL, 10)
-#endif
-#endif
-
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
@@ -1217,9 +1199,9 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 {
 	char   *format;
 	int     format_len;
-	long    ts;
+	php_int_t    ts;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &format, &format_len, &ts) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (ZEND_NUM_ARGS() == 1) {
@@ -1373,10 +1355,10 @@ PHP_FUNCTION(idate)
 {
 	char   *format;
 	int     format_len;
-	long    ts = 0;
+	php_int_t    ts = 0;
 	int ret; 
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &format, &format_len, &ts) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1411,12 +1393,12 @@ PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb)
 /* }}} */
 
 /* {{{ php_parse_date: Backwards compatibility function */
-PHPAPI signed long php_parse_date(char *string, signed long *now)
+PHPAPI php_int_t php_parse_date(char *string, php_int_t *now)
 {
 	timelib_time *parsed_time;
 	timelib_error_container *error = NULL;
 	int           error2;
-	signed long   retval;
+	php_int_t   retval;
 
 	parsed_time = timelib_strtotime(string, strlen(string), &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	if (error->error_count) {
@@ -1442,14 +1424,14 @@ PHP_FUNCTION(strtotime)
 	char *times, *initial_ts;
 	int   time_len, error1, error2;
 	struct timelib_error_container *error;
-	long  preset_ts = 0, ts;
+	php_int_t preset_ts = 0, ts;
 
 	timelib_time *t, *now;
 	timelib_tzinfo *tzi;
 
 	tzi = get_timezone_info(TSRMLS_C);
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sl", &times, &time_len, &preset_ts) != FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "si", &times, &time_len, &preset_ts) != FAILURE) {
 		/* We have an initial timestamp */
 		now = timelib_time_ctor();
 
@@ -1462,7 +1444,7 @@ PHP_FUNCTION(strtotime)
 		timelib_unixtime2local(now, t->sse);
 		timelib_time_dtor(t);
 		efree(initial_ts);
-	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &times, &time_len, &preset_ts) != FAILURE) {
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &times, &time_len, &preset_ts) != FAILURE) {
 		/* We have no initial timestamp */
 		now = timelib_time_ctor();
 		now->tz_info = tzi;
@@ -1498,13 +1480,13 @@ PHP_FUNCTION(strtotime)
 /* {{{ php_mktime - (gm)mktime helper */
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
-	long hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0, dst = -1;
+	php_int_t hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0, dst = -1;
 	timelib_time *now;
 	timelib_tzinfo *tzi = NULL;
-	long ts, adjust_seconds = 0;
+	php_int_t ts, adjust_seconds = 0;
 	int error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lllllll", &hou, &min, &sec, &mon, &day, &yea, &dst) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|iiiiiii", &hou, &min, &sec, &mon, &day, &yea, &dst) == FAILURE) {
 		RETURN_FALSE;
 	}
 	/* Initialize structure with current time */
@@ -1607,9 +1589,9 @@ PHP_FUNCTION(gmmktime)
    Returns true(1) if it is a valid date in gregorian calendar */
 PHP_FUNCTION(checkdate)
 {
-	long m, d, y;
+	php_int_t m, d, y;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &m, &d, &y) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iii", &m, &d, &y) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1626,7 +1608,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	char                *format;
 	int                  format_len;
-	long                 timestamp = 0;
+	php_int_t                 timestamp = 0;
 	struct tm            ta;
 	int                  max_reallocs = 5;
 	size_t               buf_len = 256, real_len;
@@ -1635,9 +1617,9 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	timelib_time_offset *offset = NULL;
 	zend_string 		*buf;
 
-	timestamp = (long) time(NULL);
+	timestamp = (php_int_t) time(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &timestamp) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &format, &format_len, &timestamp) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1698,7 +1680,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	/* VS2012 strftime() returns number of characters, not bytes.
 		See VC++11 bug id 766205. */
 	if (real_len > 0) {
-		real_len = buf->len;
+		real_len = strlen(buf->val);
 	}
 #endif
 
@@ -1737,7 +1719,7 @@ PHP_FUNCTION(gmstrftime)
    Return current UNIX timestamp */
 PHP_FUNCTION(time)
 {
-	RETURN_INT((long)time(NULL));
+	RETURN_INT((php_int_t)time(NULL));
 }
 /* }}} */
 
@@ -1745,12 +1727,12 @@ PHP_FUNCTION(time)
    Returns the results of the C system call localtime as an associative array if the associative_array argument is set to 1 other wise it is a regular array */
 PHP_FUNCTION(localtime)
 {
-	long timestamp = (long)time(NULL);
+	php_int_t timestamp = (php_int_t)time(NULL);
 	zend_bool associative = 0;
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lb", &timestamp, &associative) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ib", &timestamp, &associative) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1792,11 +1774,11 @@ PHP_FUNCTION(localtime)
    Get date/time information */
 PHP_FUNCTION(getdate)
 {
-	long timestamp = (long)time(NULL);
+	php_int_t timestamp = (php_int_t)time(NULL);
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timestamp) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &timestamp) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -2377,7 +2359,7 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC) /*
 	}
 
 #define PHP_DATE_INTERVAL_ADD_PROPERTY(n,f) \
-	ZVAL_INT(&zv, (long)intervalobj->diff->f); \
+	ZVAL_INT(&zv, (php_int_t)intervalobj->diff->f); \
 	zend_hash_str_update(props, n, sizeof(n)-1, &zv);
 
 	PHP_DATE_INTERVAL_ADD_PROPERTY("y", y);
@@ -3377,7 +3359,7 @@ PHP_FUNCTION(date_offset_get)
 }
 /* }}} */
 
-static void php_date_time_set(zval *object, long h, long i, long s, zval *return_value TSRMLS_DC) /* {{{ */
+static void php_date_time_set(zval *object, php_int_t h, php_int_t i, php_int_t s, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	php_date_obj *dateobj;
 
@@ -3395,9 +3377,9 @@ static void php_date_time_set(zval *object, long h, long i, long s, zval *return
 PHP_FUNCTION(date_time_set)
 {
 	zval *object;
-	long  h, i, s = 0;
+	php_int_t  h, i, s = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll|l", &object, date_ce_date, &h, &i, &s) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oii|i", &object, date_ce_date, &h, &i, &s) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3412,9 +3394,9 @@ PHP_FUNCTION(date_time_set)
 PHP_METHOD(DateTimeImmutable, setTime)
 {
 	zval *object, new_object;
-	long  h, i, s = 0;
+	php_int_t  h, i, s = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll|l", &object, date_ce_immutable, &h, &i, &s) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oii|i", &object, date_ce_immutable, &h, &i, &s) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3425,7 +3407,7 @@ PHP_METHOD(DateTimeImmutable, setTime)
 }
 /* }}} */
 
-static void php_date_date_set(zval *object, long y, long m, long d, zval *return_value TSRMLS_DC) /* {{{ */
+static void php_date_date_set(zval *object, php_int_t y, php_int_t m, php_int_t d, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	php_date_obj *dateobj;
 
@@ -3443,9 +3425,9 @@ static void php_date_date_set(zval *object, long y, long m, long d, zval *return
 PHP_FUNCTION(date_date_set)
 {
 	zval *object;
-	long  y, m, d;
+	php_int_t  y, m, d;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olll", &object, date_ce_date, &y, &m, &d) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oiii", &object, date_ce_date, &y, &m, &d) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3460,9 +3442,9 @@ PHP_FUNCTION(date_date_set)
 PHP_METHOD(DateTimeImmutable, setDate)
 {
 	zval *object, new_object;
-	long  y, m, d;
+	php_int_t  y, m, d;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olll", &object, date_ce_immutable, &y, &m, &d) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oiii", &object, date_ce_immutable, &y, &m, &d) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3473,7 +3455,7 @@ PHP_METHOD(DateTimeImmutable, setDate)
 }
 /* }}} */
 
-static void php_date_isodate_set(zval *object, long y, long w, long d, zval *return_value TSRMLS_DC) /* {{{ */
+static void php_date_isodate_set(zval *object, php_int_t y, php_int_t w, php_int_t d, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	php_date_obj *dateobj;
 
@@ -3495,9 +3477,9 @@ static void php_date_isodate_set(zval *object, long y, long w, long d, zval *ret
 PHP_FUNCTION(date_isodate_set)
 {
 	zval *object;
-	long  y, w, d = 1;
+	php_int_t  y, w, d = 1;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll|l", &object, date_ce_date, &y, &w, &d) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oii|i", &object, date_ce_date, &y, &w, &d) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3512,9 +3494,9 @@ PHP_FUNCTION(date_isodate_set)
 PHP_METHOD(DateTimeImmutable, setISODate)
 {
 	zval *object, new_object;
-	long  y, w, d = 1;
+	php_int_t  y, w, d = 1;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll|l", &object, date_ce_immutable, &y, &w, &d) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oii|i", &object, date_ce_immutable, &y, &w, &d) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3525,7 +3507,7 @@ PHP_METHOD(DateTimeImmutable, setISODate)
 }
 /* }}} */
 
-static void php_date_timestamp_set(zval *object, long timestamp, zval *return_value TSRMLS_DC) /* {{{ */
+static void php_date_timestamp_set(zval *object, php_int_t timestamp, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	php_date_obj *dateobj;
 
@@ -3541,9 +3523,9 @@ static void php_date_timestamp_set(zval *object, long timestamp, zval *return_va
 PHP_FUNCTION(date_timestamp_set)
 {
 	zval *object;
-	long  timestamp;
+	php_int_t  timestamp;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &object, date_ce_date, &timestamp) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oi", &object, date_ce_date, &timestamp) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3558,9 +3540,9 @@ PHP_FUNCTION(date_timestamp_set)
 PHP_METHOD(DateTimeImmutable, setTimestamp)
 {
 	zval *object, new_object;
-	long  timestamp;
+	php_int_t  timestamp;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &object, date_ce_immutable, &timestamp) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oi", &object, date_ce_immutable, &timestamp) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3578,7 +3560,7 @@ PHP_FUNCTION(date_timestamp_get)
 {
 	zval         *object;
 	php_date_obj *dateobj;
-	long          timestamp;
+	php_int_t          timestamp;
 	int           error;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, date_ce_interface) == FAILURE) {
@@ -3605,9 +3587,9 @@ PHP_FUNCTION(date_diff)
 	zval         *object1, *object2;
 	php_date_obj *dateobj1, *dateobj2;
 	php_interval_obj *interval;
-	long          absolute = 0;
+	php_int_t          absolute = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO|l", &object1, date_ce_interface, &object2, date_ce_interface, &absolute) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO|i", &object1, date_ce_interface, &object2, date_ce_interface, &absolute) == FAILURE) {
 		RETURN_FALSE;
 	}
 	dateobj1 = Z_PHPDATE_P(object1);
@@ -3782,10 +3764,10 @@ PHP_FUNCTION(timezone_name_from_abbr)
 	char    *abbr;
 	char    *tzid;
 	int      abbr_len;
-	long     gmtoffset = -1;
-	long     isdst = -1;
+	php_int_t     gmtoffset = -1;
+	php_int_t     isdst = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &abbr, &abbr_len, &gmtoffset, &isdst) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ii", &abbr, &abbr_len, &gmtoffset, &isdst) == FAILURE) {
 		RETURN_FALSE;
 	}
 	tzid = timelib_timezone_id_from_abbr(abbr, gmtoffset, isdst);
@@ -3840,9 +3822,9 @@ PHP_FUNCTION(timezone_transitions_get)
 	zval                *object, element;
 	php_timezone_obj    *tzobj;
 	unsigned int         i, begin = 0, found;
-	long                 timestamp_begin = LONG_MIN, timestamp_end = LONG_MAX;
+	php_int_t            timestamp_begin = PHP_INT_MIN, timestamp_end = PHP_INT_MAX;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ll", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ii", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
 		RETURN_FALSE;
 	}
 	tzobj = Z_PHPTIMEZONE_P(object);
@@ -3873,7 +3855,7 @@ PHP_FUNCTION(timezone_transitions_get)
 
 	array_init(return_value);
 
-	if (timestamp_begin == LONG_MIN) {
+	if (timestamp_begin == PHP_INT_MIN) {
 		add_nominal();
 		begin = 0;
 		found = 1;
@@ -4130,7 +4112,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 		zval *z_arg = zend_hash_str_find(myht, element, sizeof(element) - 1); \
 		if (z_arg) { \
 			zend_string *str = zval_get_string(z_arg); \
-			DATE_A64I((*intobj)->diff->member, str->val); \
+			ZEND_ATOI((*intobj)->diff->member, str->val); \
 			STR_RELEASE(str); \
 		} else { \
 			(*intobj)->diff->member = -1LL; \
@@ -4248,8 +4230,8 @@ static zend_string *date_interval_format(char *format, int format_len, timelib_r
 				case 'I': length = slprintf(buffer, 32, "%02d", (int) t->i); break;
 				case 'i': length = slprintf(buffer, 32, "%d", (int) t->i); break;
 
-				case 'S': length = slprintf(buffer, 32, "%02ld", (long) t->s); break;
-				case 's': length = slprintf(buffer, 32, "%ld", (long) t->s); break;
+				case 'S': length = slprintf(buffer, 32, "%02" ZEND_INT_FMT_SPEC, (php_int_t) t->s); break;
+				case 's': length = slprintf(buffer, 32, ZEND_INT_FMT, (php_int_t) t->s); break;
 
 				case 'a': {
 					if ((int) t->days != -99999) {
@@ -4301,7 +4283,7 @@ PHP_FUNCTION(date_interval_format)
 }
 /* }}} */
 
-static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_rel_time **d, long *recurrences, /*const*/ char *format, int format_length TSRMLS_DC) /* {{{ */
+static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_rel_time **d, php_int_t *recurrences, /*const*/ char *format, int format_length TSRMLS_DC) /* {{{ */
 {
 	timelib_time     *b = NULL, *e = NULL;
 	timelib_rel_time *p = NULL;
@@ -4334,16 +4316,16 @@ PHP_METHOD(DatePeriod, __construct)
 	php_date_obj     *dateobj;
 	php_interval_obj *intobj;
 	zval *start, *end = NULL, *interval;
-	long  recurrences = 0, options = 0;
+	php_int_t  recurrences = 0, options = 0;
 	char *isostr = NULL;
 	int   isostr_len = 0;
 	timelib_time *clone;
 	zend_error_handling error_handling;
 	
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOl|l", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
-		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
-			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &isostr, &isostr_len, &options) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOi|i", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOO|i", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
+			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &isostr, &isostr_len, &options) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "This constructor accepts either (DateTimeInterface, DateInterval, int) OR (DateTimeInterface, DateInterval, DateTime) OR (string) as arguments.");
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				return;
@@ -4413,7 +4395,7 @@ PHP_METHOD(DatePeriod, __construct)
 }
 /* }}} */
 
-static int check_id_allowed(char *id, long what) /* {{{ */
+static int check_id_allowed(char *id, php_int_t what) /* {{{ */
 {
 	if (what & PHP_DATE_TIMEZONE_GROUP_AFRICA     && strncasecmp(id, "Africa/",      7) == 0) return 1;
 	if (what & PHP_DATE_TIMEZONE_GROUP_AMERICA    && strncasecmp(id, "America/",     8) == 0) return 1;
@@ -4437,11 +4419,11 @@ PHP_FUNCTION(timezone_identifiers_list)
 	const timelib_tzdb             *tzdb;
 	const timelib_tzdb_index_entry *table;
 	int                             i, item_count;
-	long                            what = PHP_DATE_TIMEZONE_GROUP_ALL;
+	php_int_t                            what = PHP_DATE_TIMEZONE_GROUP_ALL;
 	char                           *option = NULL;
 	int                             option_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ls", &what, &option, &option_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|is", &what, &option, &option_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4558,13 +4540,13 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	double latitude = 0.0, longitude = 0.0, zenith = 0.0, gmt_offset = 0, altitude;
 	double h_rise, h_set, N;
 	timelib_sll rise, set, transit;
-	long time, retformat = 0;
+	php_int_t time, retformat = 0;
 	int             rs;
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
 	zend_string    *retstr;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ldddd", &time, &retformat, &latitude, &longitude, &zenith, &gmt_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|idddd", &time, &retformat, &latitude, &longitude, &zenith, &gmt_offset) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
@@ -4657,7 +4639,7 @@ PHP_FUNCTION(date_sunset)
    Returns an array with information about sun set/rise and twilight begin/end */
 PHP_FUNCTION(date_sun_info)
 {
-	long            time;
+	php_int_t       time;
 	double          latitude, longitude;
 	timelib_time   *t, *t2;
 	timelib_tzinfo *tzi;
@@ -4666,7 +4648,7 @@ PHP_FUNCTION(date_sun_info)
 	int             dummy;
 	double          ddummy;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ldd", &time, &latitude, &longitude) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "idd", &time, &latitude, &longitude) == FAILURE) {
 		RETURN_FALSE;
 	}
 	/* Initialize time struct */
