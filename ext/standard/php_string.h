@@ -128,17 +128,17 @@ PHPAPI void php_stripcslashes(char *str, php_size_t *len);
 PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t sufflen TSRMLS_DC);
 PHPAPI size_t php_dirname(char *str, size_t len);
 PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len);
-PHPAPI zend_string *php_str_to_str_ex(char *haystack, int length, char *needle,
-		int needle_len, char *str, int str_len, int case_sensitivity, int *replace_count);
-PHPAPI zend_string *php_str_to_str(char *haystack, int length, char *needle,
-		int needle_len, char *str, int str_len);
+PHPAPI zend_string *php_str_to_str_ex(char *haystack, php_size_t length, char *needle,
+		php_size_t needle_len, char *str, php_size_t str_len, int case_sensitivity, php_size_t *replace_count);
+PHPAPI zend_string *php_str_to_str(char *haystack, php_size_t length, char *needle,
+		php_size_t needle_len, char *str, php_size_t str_len);
 PHPAPI char *php_trim(char *c, php_size_t len, char *what, php_size_t what_len, zval *return_value, int mode TSRMLS_DC);
-PHPAPI size_t php_strip_tags(char *rbuf, int len, int *state, char *allow, int allow_len);
-PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow, int allow_len, zend_bool allow_tag_spaces);
-PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_len, zval *result, int case_sensitivity, int *replace_count);
-PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len, zval *result);
+PHPAPI size_t php_strip_tags(char *rbuf, php_size_t len, int *state, char *allow, php_size_t allow_len);
+PHPAPI size_t php_strip_tags_ex(char *rbuf, php_size_t len, int *stateptr, char *allow, php_size_t allow_len, zend_bool allow_tag_spaces);
+PHPAPI php_size_t php_char_to_str_ex(char *str, php_size_t len, char from, char *to, php_size_t to_len, zval *result, int case_sensitivity, php_size_t *replace_count);
+PHPAPI php_size_t php_char_to_str(char *str, php_size_t len, char from, char *to, php_size_t to_len, zval *result);
 PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC);
-PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, long limit);
+PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, php_int_t limit);
 
 PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end); 
 PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end); 
