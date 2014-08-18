@@ -524,10 +524,10 @@ PHP_MINIT_FUNCTION(nl_langinfo)
    Query language and locale information */
 PHP_FUNCTION(nl_langinfo)
 {
-	long item;
+	php_int_t item;
 	char *value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &item) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &item) == FAILURE) {
 		return;
 	}
 
@@ -712,15 +712,14 @@ PHP_FUNCTION(nl_langinfo)
    Compares two strings using the current locale */
 PHP_FUNCTION(strcoll)
 {
-	char *s1, *s2;
-	int s1len, s2len;
+	zend_string *s1, *s2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &s1, &s1len, &s2, &s2len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &s1, &s2) == FAILURE) {
 		return;
 	}
 
-	RETURN_INT(strcoll((const char *) s1,
-	                    (const char *) s2));
+	RETURN_INT(strcoll((const char *) s1->val,
+	                    (const char *) s2->val));
 }
 /* }}} */
 #endif
@@ -2331,7 +2330,7 @@ PHP_FUNCTION(substr_replace)
 
 	if (argc > 3) {
 		if (Z_TYPE_P(len) != IS_ARRAY) {
-			l = zval_get_long(len);
+			l = zval_get_int(len);
 		}
 	} else {
 		if (Z_TYPE_P(str) != IS_ARRAY) {
@@ -2456,7 +2455,7 @@ PHP_FUNCTION(substr_replace)
 
 			if (Z_TYPE_P(from) == IS_ARRAY) {
 				if (NULL != (tmp_from = zend_hash_get_current_data_ex(Z_ARRVAL_P(from), &pos_from))) {
-					f = zval_get_long(tmp_from);
+					f = zval_get_int(tmp_from);
 
 					if (f < 0) {
 						f = Z_STRSIZE_P(orig_str) + f;
@@ -2484,7 +2483,7 @@ PHP_FUNCTION(substr_replace)
 
 			if (argc > 3 && Z_TYPE_P(len) == IS_ARRAY) {
 				if (NULL != (tmp_len = zend_hash_get_current_data_ex(Z_ARRVAL_P(len), &pos_len))) {
-					l = zval_get_long(tmp_len);
+					l = zval_get_int(tmp_len);
 					zend_hash_move_forward_ex(Z_ARRVAL_P(len), &pos_len);
 				} else {
 					l = Z_STRSIZE_P(orig_str);

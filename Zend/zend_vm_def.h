@@ -4053,7 +4053,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 			ZVAL_BOOL(result, zend_is_true(expr TSRMLS_CC));
 			break;
 		case IS_INT:
-			ZVAL_INT(result, zval_get_long(expr));
+			ZVAL_INT(result, zval_get_int(expr));
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));

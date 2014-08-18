@@ -567,14 +567,14 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 
 				case 'd':
 					php_sprintf_appendint(&result, &outpos,
-										  zval_get_long(tmp),
+										  zval_get_int(tmp),
 										  width, padding, alignment,
 										  always_sign);
 					break;
 
 				case 'u':
 					php_sprintf_appenduint(&result, &outpos,
-										  zval_get_long(tmp),
+										  zval_get_int(tmp),
 										  width, padding, alignment);
 					break;
 
@@ -594,33 +594,33 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 					
 				case 'c':
 					php_sprintf_appendchar(&result, &outpos,
-										(char) zval_get_long(tmp) TSRMLS_CC);
+										(char) zval_get_int(tmp) TSRMLS_CC);
 					break;
 
 				case 'o':
 					php_sprintf_append2n(&result, &outpos,
-										 zval_get_long(tmp),
+										 zval_get_int(tmp),
 										 width, padding, alignment, 3,
 										 hexchars, expprec);
 					break;
 
 				case 'x':
 					php_sprintf_append2n(&result, &outpos,
-										 zval_get_long(tmp),
+										 zval_get_int(tmp),
 										 width, padding, alignment, 4,
 										 hexchars, expprec);
 					break;
 
 				case 'X':
 					php_sprintf_append2n(&result, &outpos,
-										 zval_get_long(tmp),
+										 zval_get_int(tmp),
 										 width, padding, alignment, 4,
 										 HEXCHARS, expprec);
 					break;
 
 				case 'b':
 					php_sprintf_append2n(&result, &outpos,
-										 zval_get_long(tmp),
+										 zval_get_int(tmp),
 										 width, padding, alignment, 1,
 										 hexchars, expprec);
 					break;

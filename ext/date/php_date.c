@@ -4062,7 +4062,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 
 #define SET_VALUE_FROM_STRUCT(n,m)            \
 	if (strcmp(Z_STRVAL_P(member), m) == 0) { \
-		obj->diff->n = zval_get_long(value); \
+		obj->diff->n = zval_get_int(value); \
 		break;								  \
 	}
 
@@ -4119,7 +4119,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 	do { \
 		zval *z_arg = zend_hash_str_find(myht, element, sizeof(element) - 1); \
 		if (z_arg) { \
-			(*intobj)->diff->member = (itype)zval_get_long(z_arg); \
+			(*intobj)->diff->member = (itype)zval_get_int(z_arg); \
 		} else { \
 			(*intobj)->diff->member = (itype)def; \
 		} \

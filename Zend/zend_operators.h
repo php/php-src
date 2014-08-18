@@ -348,7 +348,7 @@ ZEND_API zend_int_t _zval_get_int_func(zval *op TSRMLS_DC);
 ZEND_API double _zval_get_double_func(zval *op TSRMLS_DC);
 ZEND_API zend_string *_zval_get_string_func(zval *op TSRMLS_DC);
 
-static zend_always_inline zend_int_t _zval_get_long(zval *op TSRMLS_DC) {
+static zend_always_inline zend_int_t _zval_get_int(zval *op TSRMLS_DC) {
 	return Z_TYPE_P(op) == IS_INT ? Z_IVAL_P(op) : _zval_get_int_func(op TSRMLS_CC);
 }
 static zend_always_inline double _zval_get_double(zval *op TSRMLS_DC) {
@@ -358,7 +358,7 @@ static zend_always_inline zend_string *_zval_get_string(zval *op TSRMLS_DC) {
 	return Z_TYPE_P(op) == IS_STRING ? STR_COPY(Z_STR_P(op)) : _zval_get_string_func(op TSRMLS_CC);
 }
 
-#define zval_get_long(op) _zval_get_long((op) TSRMLS_CC)
+#define zval_get_int(op) _zval_get_int((op) TSRMLS_CC)
 #define zval_get_double(op) _zval_get_double((op) TSRMLS_CC)
 #define zval_get_string(op) _zval_get_string((op) TSRMLS_CC)
 

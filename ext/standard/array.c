@@ -203,7 +203,7 @@ static int php_array_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 		return ZEND_NORMALIZE_BOOL(Z_DVAL(result));
 	}
 
-	return ZEND_NORMALIZE_BOOL(zval_get_long(&result));
+	return ZEND_NORMALIZE_BOOL(zval_get_int(&result));
 }
 /* }}} */
 
@@ -334,7 +334,7 @@ PHP_FUNCTION(count)
 			if (Z_OBJ_HT_P(array)->get_class_entry && instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
 				zend_call_method_with_0_params(array, NULL, NULL, "count", &retval);
 				if (Z_TYPE(retval) != IS_UNDEF) {
-					RETVAL_INT(zval_get_long(&retval));
+					RETVAL_INT(zval_get_int(&retval));
 					zval_ptr_dtor(&retval);
 				}
 				return;
@@ -384,7 +384,7 @@ static int php_array_data_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 		return ZEND_NORMALIZE_BOOL(Z_DVAL(result));
 	}
 
-	return ZEND_NORMALIZE_BOOL(zval_get_long(&result));
+	return ZEND_NORMALIZE_BOOL(zval_get_int(&result));
 }
 /* }}} */
 
@@ -557,7 +557,7 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 	BG(user_compare_fci).retval = &retval;
 	BG(user_compare_fci).no_separation = 0;
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		long ret = zval_get_long(&retval);
+		long ret = zval_get_int(&retval);
 		zval_ptr_dtor(&retval);
 		zval_ptr_dtor(&args[1]);
 		zval_ptr_dtor(&args[0]);
@@ -719,7 +719,7 @@ static int php_array_user_key_compare(const void *a, const void *b TSRMLS_DC) /*
 	BG(user_compare_fci).retval = &retval;
 	BG(user_compare_fci).no_separation = 0;
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		result = zval_get_long(&retval);
+		result = zval_get_int(&retval);
 		zval_ptr_dtor(&retval);
 	} else {
 		result = 0;
@@ -2251,7 +2251,7 @@ PHP_FUNCTION(array_slice)
 	if (ZEND_NUM_ARGS() < 3 || Z_TYPE_P(z_length) == IS_NULL) {
 		length = num_in;
 	} else {
-		length = zval_get_long(z_length);
+		length = zval_get_int(z_length);
 	}
 
 	/* Clamp the offset.. */
@@ -3061,7 +3061,7 @@ static int zval_user_compare(zval *a, zval *b TSRMLS_DC) /* {{{ */
 	BG(user_compare_fci).no_separation = 0;
 
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		long ret = zval_get_long(&retval);
+		long ret = zval_get_int(&retval);
 		zval_ptr_dtor(&retval);
 		return ret < 0 ? -1 : ret > 0 ? 1 : 0;;
 	} else {

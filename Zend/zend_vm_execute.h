@@ -2869,7 +2869,7 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ZVAL_BOOL(result, zend_is_true(expr TSRMLS_CC));
 			break;
 		case IS_INT:
-			ZVAL_INT(result, zval_get_long(expr));
+			ZVAL_INT(result, zval_get_int(expr));
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -8385,7 +8385,7 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ZVAL_BOOL(result, zend_is_true(expr TSRMLS_CC));
 			break;
 		case IS_INT:
-			ZVAL_INT(result, zval_get_long(expr));
+			ZVAL_INT(result, zval_get_int(expr));
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -13824,7 +13824,7 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ZVAL_BOOL(result, zend_is_true(expr TSRMLS_CC));
 			break;
 		case IS_INT:
-			ZVAL_INT(result, zval_get_long(expr));
+			ZVAL_INT(result, zval_get_int(expr));
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -31184,7 +31184,7 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ZVAL_BOOL(result, zend_is_true(expr TSRMLS_CC));
 			break;
 		case IS_INT:
-			ZVAL_INT(result, zval_get_long(expr));
+			ZVAL_INT(result, zval_get_int(expr));
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));

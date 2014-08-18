@@ -1177,7 +1177,7 @@ convert_to_array:
 					break;
 			}
 
-			offset = zval_get_long(dim);
+			offset = zval_get_int(dim);
 		} else {
 			offset = Z_IVAL_P(dim);
 		}
@@ -1305,7 +1305,7 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 					break;
 			}
 
-			offset = zval_get_long(dim);
+			offset = zval_get_int(dim);
 		} else {
 			offset = Z_IVAL_P(dim);
 		}

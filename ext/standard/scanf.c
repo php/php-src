@@ -356,7 +356,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			 * must not be a mixture of XPG3 specs and non-XPG3 specs
 			 * in the same format string.
 			 */
-			value = strtoul(format-1, &end, 10);
+			value = ZEND_STRTOUI(format-1, &end, 10);
 			if (*end != '$') {
 				goto notXpg;
 			}
@@ -403,7 +403,7 @@ xpgCheckDone:
 		 * Parse any width specifier.
 		 */
 		if (isdigit(UCHAR(*ch))) {
-			value = strtoul(format-1, &format, 10);
+			value = ZEND_STRTOUI(format-1, &format, 10);
 			flags |= SCAN_WIDTH;
 			ch = format++;
 		}
@@ -708,7 +708,7 @@ literal:
 			flags |= SCAN_SUPPRESS;
 			ch = format++;
 		} else if ( isdigit(UCHAR(*ch))) {
-			value = strtoul(format-1, &end, 10);
+			value = ZEND_STRTOUI(format-1, &end, 10);
 			if (*end == '$') {
 				format = end+1;
 				ch = format++;
@@ -720,7 +720,7 @@ literal:
 		 * Parse any width specifier.
 		 */
 		if ( isdigit(UCHAR(*ch))) {
-			width = strtoul(format-1, &format, 10);
+			width = ZEND_STRTOUI(format-1, &format, 10);
 			ch = format++;
 		} else {
 			width = 0;
@@ -761,7 +761,7 @@ literal:
 			case 'i':
 				op = 'i';
 				base = 0;
-				fn = (php_int_t(*)())ZEND_STRTOI_PTR;
+				fn = (php_int_t (*)())ZEND_STRTOI_PTR;
 				break;
 			case 'o':
 				op = 'i';
@@ -778,7 +778,7 @@ literal:
 				op = 'i';
 				base = 10;
 				flags |= SCAN_UNSIGNED;
-				fn = (php_int_t (*)())ZEND_STRTOI_PTR;
+				fn = (php_int_t (*)())ZEND_STRTOUI_PTR;
 				break;
 
 			case 'f':
@@ -1051,7 +1051,7 @@ addToInt:
 					*end = '\0';
 					value = (php_int_t) (*fn)(buf, NULL, base);
 					if ((flags & SCAN_UNSIGNED) && (value < 0)) {
-						snprintf(buf, sizeof(buf), "%lu", value); /* INTL: ISO digit */
+						snprintf(buf, sizeof(buf), ZEND_UINT_FMT, value); /* INTL: ISO digit */
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {

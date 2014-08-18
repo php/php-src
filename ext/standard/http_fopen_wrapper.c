@@ -346,7 +346,7 @@ finish:
 	php_stream_notify_info(context, PHP_STREAM_NOTIFY_CONNECT, NULL, 0);
 
 	if (header_init && context && (tmpzval = php_stream_context_get_option(context, "http", "max_redirects")) != NULL) {
-		redirect_max = zval_get_long(tmpzval);
+		redirect_max = zval_get_int(tmpzval);
 	}
 
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "method")) != NULL) {
@@ -731,7 +731,7 @@ finish:
 
 			if (!strncasecmp(http_header_line, "Location: ", 10)) {
 				if (context && (tmpzval = php_stream_context_get_option(context, "http", "follow_location")) != NULL) {
-					follow_location = zval_get_long(tmpzval);
+					follow_location = zval_get_int(tmpzval);
 				} else if (!(response_code >= 300 && response_code < 304 || 307 == response_code || 308 == response_code)) {
 					/* we shouldn't redirect automatically
 					if follow_location isn't set and response_code not in (300, 301, 302, 303 and 307) 
