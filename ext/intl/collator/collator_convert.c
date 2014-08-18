@@ -28,7 +28,7 @@
 #include <unicode/ustring.h>
 #include <php.h>
 
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 1)
+#if PHP_VERSION_ID <= 50100
 #define CAST_OBJECT_SHOULD_FREE ,0
 #else
 #define CAST_OBJECT_SHOULD_FREE

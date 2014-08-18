@@ -261,15 +261,6 @@ static void _default_lookup_entry(zval *object, char *name, int name_len, zval *
 /* }}} */
 #endif
 
-static void reflection_register_implement(zend_class_entry *class_entry, zend_class_entry *interface_entry TSRMLS_DC) /* {{{ */
-{
-	zend_uint num_interfaces = ++class_entry->num_interfaces;
-
-	class_entry->interfaces = (zend_class_entry **) realloc(class_entry->interfaces, sizeof(zend_class_entry *) * num_interfaces);
-	class_entry->interfaces[num_interfaces - 1] = interface_entry;
-}
-/* }}} */
-
 static zend_function *_copy_function(zend_function *fptr TSRMLS_DC) /* {{{ */
 {
 	if (fptr
@@ -5687,7 +5678,6 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	PHP_ABSTRACT_ME(reflection_function, __toString, arginfo_reflection__void)
 	ZEND_ME(reflection_function, inNamespace, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isClosure, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isDeprecated, arginfo_reflection__void, 0)
@@ -6094,7 +6084,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionFunctionAbstract", reflection_function_abstract_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_function_abstract_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	reflection_register_implement(reflection_function_abstract_ptr, reflector_ptr TSRMLS_CC);
+	zend_class_implements(reflection_function_abstract_ptr TSRMLS_CC, 1, reflector_ptr);
 	zend_declare_property_string(reflection_function_abstract_ptr, "name", sizeof("name")-1, "", ZEND_ACC_ABSTRACT TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionFunction", reflection_function_functions);
@@ -6107,7 +6097,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionParameter", reflection_parameter_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_parameter_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	reflection_register_implement(reflection_parameter_ptr, reflector_ptr TSRMLS_CC);
+	zend_class_implements(reflection_parameter_ptr TSRMLS_CC, 1, reflector_ptr);
 	zend_declare_property_string(reflection_parameter_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionMethod", reflection_method_functions);
@@ -6126,7 +6116,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionClass", reflection_class_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_class_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	reflection_register_implement(reflection_class_ptr, reflector_ptr TSRMLS_CC);
+	zend_class_implements(reflection_class_ptr TSRMLS_CC, 1, reflector_ptr);
 	zend_declare_property_string(reflection_class_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
@@ -6140,7 +6130,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionProperty", reflection_property_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_property_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	reflection_register_implement(reflection_property_ptr, reflector_ptr TSRMLS_CC);
+	zend_class_implements(reflection_property_ptr TSRMLS_CC, 1, reflector_ptr);
 	zend_declare_property_string(reflection_property_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_string(reflection_property_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
@@ -6152,13 +6142,13 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", reflection_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_extension_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	reflection_register_implement(reflection_extension_ptr, reflector_ptr TSRMLS_CC);
+	zend_class_implements(reflection_extension_ptr TSRMLS_CC, 1, reflector_ptr);
 	zend_declare_property_string(reflection_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionZendExtension", reflection_zend_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_zend_extension_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	reflection_register_implement(reflection_zend_extension_ptr, reflector_ptr TSRMLS_CC);
+	zend_class_implements(reflection_zend_extension_ptr TSRMLS_CC, 1, reflector_ptr);
 	zend_declare_property_string(reflection_zend_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	return SUCCESS;
