@@ -1029,7 +1029,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_HAVE_RELATIVE();
 
 		/* skip "last day of" or "first day of" */
-		if (*ptr == 'l') {
+		if (*ptr == 'l' || *ptr == 'L') {
 			s->time->relative.first_last_day_of = 2;
 		} else {
 			s->time->relative.first_last_day_of = 1;
