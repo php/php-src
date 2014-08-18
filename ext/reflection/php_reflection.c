@@ -110,8 +110,8 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 	target = intern->ptr;                                                                                   \
 
 /* Class constants */
-#define REGISTER_REFLECTION_CLASS_CONST_LONG(class_name, const_name, value)                                        \
-	zend_declare_class_constant_long(reflection_ ## class_name ## _ptr, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+#define REGISTER_REFLECTION_CLASS_CONST_INT(class_name, const_name, value)                                        \
+	zend_declare_class_constant_int(reflection_ ## class_name ## _ptr, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
 
 /* {{{ Smart string functions */
 typedef struct _string {
@@ -435,7 +435,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			HashPosition pos;
 			zval *value;
 			zend_string *key;
-			ulong num_index;
+			php_uint_t num_index;
 
 			zend_hash_internal_pointer_reset_ex(&ce->constants_table, &pos);
 
@@ -565,7 +565,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 			while ((prop = zend_hash_get_current_data_ptr_ex(properties, &pos)) != NULL) {
 				zend_string *prop_name;
-				ulong index;
+				php_uint_t index;
 
 				if (zend_hash_get_current_key_ex(properties, &prop_name, &index, 0, &pos) == HASH_KEY_IS_STRING) {
 					if (prop_name->len && prop_name->val[0]) { /* skip all private and protected properties */
@@ -602,7 +602,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 				{
 					zend_string *key;
-					ulong num_index;
+					php_uint_t num_index;
 					uint len = mptr->common.function_name->len;
 
 					/* Do not display old-style inherited constructors */
@@ -729,8 +729,8 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 				string_write(str, "NULL", sizeof("NULL")-1);
 			} else if (Z_TYPE(zv) == IS_STRING) {
 				string_write(str, "'", sizeof("'")-1);
-				string_write(str, Z_STRVAL(zv), MIN(Z_STRLEN(zv), 15));
-				if (Z_STRLEN(zv) > 15) {
+				string_write(str, Z_STRVAL(zv), MIN(Z_STRSIZE(zv), 15));
+				if (Z_STRSIZE(zv) > 15) {
 					string_write(str, "...", sizeof("...")-1);
 				}
 				string_write(str, "'", sizeof("'")-1);
@@ -774,7 +774,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 static void _function_closure_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
 	zend_uint i, count;
-	ulong num_index;
+	php_uint_t num_index;
 	zend_string *key;
 	HashTable *static_variables;
 	HashPosition pos;
@@ -1808,7 +1808,7 @@ ZEND_METHOD(reflection_function, getStartLine)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
-		RETURN_LONG(fptr->op_array.line_start);
+		RETURN_INT(fptr->op_array.line_start);
 	}
 	RETURN_FALSE;
 }
@@ -1826,7 +1826,7 @@ ZEND_METHOD(reflection_function, getEndLine)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
-		RETURN_LONG(fptr->op_array.line_end);
+		RETURN_INT(fptr->op_array.line_end);
 	}
 	RETURN_FALSE;
 }
@@ -2009,7 +2009,7 @@ ZEND_METHOD(reflection_function, getNumberOfParameters)
 	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	RETURN_LONG(fptr->common.num_args);
+	RETURN_INT(fptr->common.num_args);
 }
 /* }}} */
 
@@ -2023,7 +2023,7 @@ ZEND_METHOD(reflection_function, getNumberOfRequiredParameters)
 	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	RETURN_LONG(fptr->common.required_num_args);
+	RETURN_INT(fptr->common.required_num_args);
 }
 /* }}} */
 
@@ -2140,7 +2140,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				unsigned int lcname_len;
 				char *lcname;
 
-				lcname_len = Z_STRLEN_P(reference);
+				lcname_len = Z_STRSIZE_P(reference);
 				lcname = zend_str_tolower_dup(Z_STRVAL_P(reference), lcname_len);
 				if ((fptr = zend_hash_str_find_ptr(EG(function_table), lcname, lcname_len)) == NULL) {
 					efree(lcname);
@@ -2178,7 +2178,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				}
 
 				convert_to_string_ex(method);
-				lcname_len = Z_STRLEN_P(method);
+				lcname_len = Z_STRSIZE_P(method);
 				lcname = zend_str_tolower_dup(Z_STRVAL_P(method), lcname_len);
 				if (ce == zend_ce_closure && Z_TYPE_P(classref) == IS_OBJECT
 					&& (lcname_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
@@ -2219,8 +2219,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 
 	/* Now, search for the parameter */
 	arg_info = fptr->common.arg_info;
-	if (Z_TYPE_P(parameter) == IS_LONG) {
-		position= Z_LVAL_P(parameter);
+	if (Z_TYPE_P(parameter) == IS_INT) {
+		position= Z_IVAL_P(parameter);
 		if (position < 0 || (zend_uint)position >= fptr->common.num_args) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
@@ -2503,7 +2503,7 @@ ZEND_METHOD(reflection_parameter, getPosition)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_LONG(param->offset);
+	RETVAL_INT(param->offset);
 }
 /* }}} */
 
@@ -3103,7 +3103,7 @@ ZEND_METHOD(reflection_function, inNamespace)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
+		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRSIZE_P(name)))
 		&& backslash > Z_STRVAL_P(name))
 	{
 		RETURN_TRUE;
@@ -3126,7 +3126,7 @@ ZEND_METHOD(reflection_function, getNamespaceName)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
+		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRSIZE_P(name)))
 		&& backslash > Z_STRVAL_P(name))
 	{
 		RETURN_STRINGL(Z_STRVAL_P(name), backslash - Z_STRVAL_P(name));
@@ -3149,10 +3149,10 @@ ZEND_METHOD(reflection_function, getShortName)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
+		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRSIZE_P(name)))
 		&& backslash > Z_STRVAL_P(name))
 	{
-		RETURN_STRINGL(backslash + 1, Z_STRLEN_P(name) - (backslash - Z_STRVAL_P(name) + 1));
+		RETURN_STRINGL(backslash + 1, Z_STRSIZE_P(name) - (backslash - Z_STRVAL_P(name) + 1));
 	}
 	RETURN_ZVAL(name, 1, 0);
 }
@@ -3203,7 +3203,7 @@ ZEND_METHOD(reflection_method, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	RETURN_LONG(mptr->common.fn_flags);
+	RETURN_INT(mptr->common.fn_flags);
 }
 /* }}} */
 
@@ -3343,7 +3343,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
 	zend_string *key;
-	ulong num_index;
+	php_uint_t num_index;
 
 	ZEND_HASH_FOREACH_KEY_PTR(&ce->properties_info, num_index, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_SHADOW) &&
@@ -3566,7 +3566,7 @@ ZEND_METHOD(reflection_class, getStartLine)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_FUNCTION) {
-		RETURN_LONG(ce->info.user.line_start);
+		RETURN_INT(ce->info.user.line_start);
 	}
 	RETURN_FALSE;
 }
@@ -3584,7 +3584,7 @@ ZEND_METHOD(reflection_class, getEndLine)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
-		RETURN_LONG(ce->info.user.line_end);
+		RETURN_INT(ce->info.user.line_end);
 	}
 	RETURN_FALSE;
 }
@@ -4137,7 +4137,7 @@ ZEND_METHOD(reflection_class, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_LONG(ce->ce_flags & ~ZEND_ACC_CONSTANTS_UPDATED);
+	RETURN_INT(ce->ce_flags & ~ZEND_ACC_CONSTANTS_UPDATED);
 }
 /* }}} */
 
@@ -4648,7 +4648,7 @@ ZEND_METHOD(reflection_class, inNamespace)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
+		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRSIZE_P(name)))
 		&& backslash > Z_STRVAL_P(name))
 	{
 		RETURN_TRUE;
@@ -4671,7 +4671,7 @@ ZEND_METHOD(reflection_class, getNamespaceName)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
+		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRSIZE_P(name)))
 		&& backslash > Z_STRVAL_P(name))
 	{
 		RETURN_STRINGL(Z_STRVAL_P(name), backslash - Z_STRVAL_P(name));
@@ -4694,10 +4694,10 @@ ZEND_METHOD(reflection_class, getShortName)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
+		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRSIZE_P(name)))
 		&& backslash > Z_STRVAL_P(name))
 	{
-		RETURN_STRINGL(backslash + 1, Z_STRLEN_P(name) - (backslash - Z_STRVAL_P(name) + 1));
+		RETURN_STRINGL(backslash + 1, Z_STRSIZE_P(name) - (backslash - Z_STRVAL_P(name) + 1));
 	}
 	RETURN_ZVAL(name, 1, 0);
 }
@@ -4917,7 +4917,7 @@ ZEND_METHOD(reflection_property, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_LONG(ref->prop.flags);
+	RETURN_INT(ref->prop.flags);
 }
 /* }}} */
 
@@ -6048,8 +6048,8 @@ static void _reflection_write_property(zval *object, zval *member, zval *value, 
 {
 	if ((Z_TYPE_P(member) == IS_STRING)
 		&& zend_hash_exists(&Z_OBJCE_P(object)->properties_info, Z_STR_P(member))
-		&& ((Z_STRLEN_P(member) == sizeof("name") - 1  && !memcmp(Z_STRVAL_P(member), "name",  sizeof("name")))
-			|| (Z_STRLEN_P(member) == sizeof("class") - 1 && !memcmp(Z_STRVAL_P(member), "class", sizeof("class")))))
+		&& ((Z_STRSIZE_P(member) == sizeof("name") - 1  && !memcmp(Z_STRVAL_P(member), "name",  sizeof("name")))
+			|| (Z_STRSIZE_P(member) == sizeof("class") - 1 && !memcmp(Z_STRVAL_P(member), "class", sizeof("class")))))
 	{
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 			"Cannot set read-only property %s::$%s", Z_OBJCE_P(object)->name->val, Z_STRVAL_P(member));
@@ -6092,7 +6092,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_function_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_function_abstract_ptr TSRMLS_CC);
 	zend_declare_property_string(reflection_function_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
-	REGISTER_REFLECTION_CLASS_CONST_LONG(function, "IS_DEPRECATED", ZEND_ACC_DEPRECATED);
+	REGISTER_REFLECTION_CLASS_CONST_INT(function, "IS_DEPRECATED", ZEND_ACC_DEPRECATED);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionParameter", reflection_parameter_functions);
 	_reflection_entry.create_object = reflection_objects_new;
@@ -6106,12 +6106,12 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	zend_declare_property_string(reflection_method_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_string(reflection_method_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
-	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_STATIC", ZEND_ACC_STATIC);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_PUBLIC", ZEND_ACC_PUBLIC);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_PROTECTED", ZEND_ACC_PROTECTED);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_PRIVATE", ZEND_ACC_PRIVATE);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_ABSTRACT", ZEND_ACC_ABSTRACT);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_FINAL", ZEND_ACC_FINAL);
+	REGISTER_REFLECTION_CLASS_CONST_INT(method, "IS_STATIC", ZEND_ACC_STATIC);
+	REGISTER_REFLECTION_CLASS_CONST_INT(method, "IS_PUBLIC", ZEND_ACC_PUBLIC);
+	REGISTER_REFLECTION_CLASS_CONST_INT(method, "IS_PROTECTED", ZEND_ACC_PROTECTED);
+	REGISTER_REFLECTION_CLASS_CONST_INT(method, "IS_PRIVATE", ZEND_ACC_PRIVATE);
+	REGISTER_REFLECTION_CLASS_CONST_INT(method, "IS_ABSTRACT", ZEND_ACC_ABSTRACT);
+	REGISTER_REFLECTION_CLASS_CONST_INT(method, "IS_FINAL", ZEND_ACC_FINAL);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionClass", reflection_class_functions);
 	_reflection_entry.create_object = reflection_objects_new;
@@ -6119,9 +6119,9 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	zend_class_implements(reflection_class_ptr TSRMLS_CC, 1, reflector_ptr);
 	zend_declare_property_string(reflection_class_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
-	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_FINAL", ZEND_ACC_FINAL_CLASS);
+	REGISTER_REFLECTION_CLASS_CONST_INT(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
+	REGISTER_REFLECTION_CLASS_CONST_INT(class, "IS_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
+	REGISTER_REFLECTION_CLASS_CONST_INT(class, "IS_FINAL", ZEND_ACC_FINAL_CLASS);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionObject", reflection_object_functions);
 	_reflection_entry.create_object = reflection_objects_new;
@@ -6134,10 +6134,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	zend_declare_property_string(reflection_property_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_string(reflection_property_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_STATIC", ZEND_ACC_STATIC);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PUBLIC", ZEND_ACC_PUBLIC);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PROTECTED", ZEND_ACC_PROTECTED);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PRIVATE", ZEND_ACC_PRIVATE);
+	REGISTER_REFLECTION_CLASS_CONST_INT(property, "IS_STATIC", ZEND_ACC_STATIC);
+	REGISTER_REFLECTION_CLASS_CONST_INT(property, "IS_PUBLIC", ZEND_ACC_PUBLIC);
+	REGISTER_REFLECTION_CLASS_CONST_INT(property, "IS_PROTECTED", ZEND_ACC_PROTECTED);
+	REGISTER_REFLECTION_CLASS_CONST_INT(property, "IS_PRIVATE", ZEND_ACC_PRIVATE);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", reflection_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;

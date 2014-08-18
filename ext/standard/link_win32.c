@@ -88,7 +88,7 @@ PHP_FUNCTION(linkinfo)
 {
 	char *link;
 	int link_len;
-	struct stat sb;
+	php_stat_t sb;
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &link, &link_len) == FAILURE) {
@@ -98,10 +98,10 @@ PHP_FUNCTION(linkinfo)
 	ret = VCWD_STAT(link, &sb);
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		RETURN_LONG(-1L);
+		RETURN_INT(-1L);
 	}
 
-	RETURN_LONG((long) sb.st_dev);
+	RETURN_INT((long) sb.st_dev);
 }
 /* }}} */
 

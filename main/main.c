@@ -160,7 +160,9 @@ static php_win32_disable_functions(TSRMLS_D)
  */
 static PHP_INI_MH(OnSetPrecision)
 {
-	int i = atoi(new_value);
+	php_int_t i;
+
+	ZEND_ATOI(i, new_value);
 	if (i >= 0) {
 		EG(precision) = i;
 		return SUCCESS;
@@ -279,7 +281,7 @@ static void php_binary_init(TSRMLS_D)
 			if ((envpath = getenv("PATH")) != NULL) {
 				char *search_dir, search_path[MAXPATHLEN];
 				char *last = NULL;
-				struct stat s;
+				php_stat_t s;
 
 				path = estrdup(envpath);
 				search_dir = php_strtok_r(path, ":", &last);
@@ -316,11 +318,11 @@ static PHP_INI_MH(OnUpdateTimeout)
 {
 	if (stage==PHP_INI_STAGE_STARTUP) {
 		/* Don't set a timeout on startup, only per-request */
-		EG(timeout_seconds) = atoi(new_value);
+		ZEND_ATOI(EG(timeout_seconds), new_value);
 		return SUCCESS;
 	}
 	zend_unset_timeout(TSRMLS_C);
-	EG(timeout_seconds) = atoi(new_value);
+	ZEND_ATOI(EG(timeout_seconds), new_value);
 	zend_set_timeout(EG(timeout_seconds), 0);
 	return SUCCESS;
 }
@@ -347,7 +349,7 @@ static int php_get_display_errors_mode(char *value, int value_length)
 	} else if (value_length == 6 && !strcasecmp(value, "stdout")) {
 		mode = PHP_DISPLAY_ERRORS_STDOUT;
 	} else {
-		mode = atoi(value);
+		ZEND_ATOI(mode, value);
 		if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
 			mode = PHP_DISPLAY_ERRORS_STDOUT;
 		}
@@ -707,7 +709,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 
 /* {{{ php_write
    wrapper for modules to use PHPWRITE */
-PHPAPI int php_write(void *buf, uint size TSRMLS_DC)
+PHPAPI php_size_t php_write(void *buf, php_size_t size TSRMLS_DC)
 {
 	return PHPWRITE(buf, size);
 }
@@ -715,12 +717,12 @@ PHPAPI int php_write(void *buf, uint size TSRMLS_DC)
 
 /* {{{ php_printf
  */
-PHPAPI int php_printf(const char *format, ...)
+PHPAPI php_size_t php_printf(const char *format, ...)
 {
 	va_list args;
-	int ret;
+	php_size_t ret;
 	char *buffer;
-	int size;
+	php_size_t size;
 	TSRMLS_FETCH();
 
 	va_start(args, format);
@@ -1263,7 +1265,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
  */
 PHPAPI char *php_get_current_user(TSRMLS_D)
 {
-	struct stat *pstat;
+	php_stat_t *pstat;
 
 	if (SG(request_info).current_user) {
 		return SG(request_info).current_user;
@@ -1326,16 +1328,16 @@ PHPAPI char *php_get_current_user(TSRMLS_D)
    Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
 {
-	long new_timeout;
+	php_int_t new_timeout;
 	char *new_timeout_str;
 	int new_timeout_strlen;
 	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_timeout) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &new_timeout) == FAILURE) {
 		return;
 	}
 
-	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, "%ld", new_timeout);
+	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, ZEND_INT_FMT, new_timeout);
 
 	key = STR_INIT("max_execution_time", sizeof("max_execution_time")-1, 0);
 	if (zend_alter_ini_entry_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
@@ -1921,7 +1923,7 @@ PHPAPI void php_com_initialize(TSRMLS_D)
 
 /* {{{ php_output_wrapper
  */
-static int php_output_wrapper(const char *str, uint str_length)
+static php_size_t php_output_wrapper(const char *str, php_size_t str_length)
 {
 	TSRMLS_FETCH();
 	return php_output_write(str, str_length TSRMLS_CC);
@@ -2178,17 +2180,17 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	/* Register constants */
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_MAJOR_VERSION", PHP_MAJOR_VERSION, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_MINOR_VERSION", PHP_MINOR_VERSION, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_RELEASE_VERSION", PHP_RELEASE_VERSION, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_MAJOR_VERSION", PHP_MAJOR_VERSION, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_MINOR_VERSION", PHP_MINOR_VERSION, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_RELEASE_VERSION", PHP_RELEASE_VERSION, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_EXTRA_VERSION", PHP_EXTRA_VERSION, sizeof(PHP_EXTRA_VERSION) - 1, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_VERSION_ID", PHP_VERSION_ID, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_VERSION_ID", PHP_VERSION_ID, CONST_PERSISTENT | CONST_CS);
 #ifdef ZTS
-	REGISTER_MAIN_LONG_CONSTANT("PHP_ZTS", 1, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_ZTS", 1, CONST_PERSISTENT | CONST_CS);
 #else
-	REGISTER_MAIN_LONG_CONSTANT("PHP_ZTS", 0, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_ZTS", 0, CONST_PERSISTENT | CONST_CS);
 #endif
-	REGISTER_MAIN_LONG_CONSTANT("PHP_DEBUG", PHP_DEBUG, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_DEBUG", PHP_DEBUG, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php_os, strlen(php_os), CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_SAPI", sapi_module.name, strlen(sapi_module.name), CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("DEFAULT_INCLUDE_PATH", PHP_INCLUDE_PATH, sizeof(PHP_INCLUDE_PATH)-1, CONST_PERSISTENT | CONST_CS);
@@ -2208,23 +2210,23 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_CONFIG_FILE_SCAN_DIR", PHP_CONFIG_FILE_SCAN_DIR, sizeof(PHP_CONFIG_FILE_SCAN_DIR)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_SHLIB_SUFFIX", PHP_SHLIB_SUFFIX, sizeof(PHP_SHLIB_SUFFIX)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_EOL", PHP_EOL, sizeof(PHP_EOL)-1, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_MAXPATHLEN", MAXPATHLEN, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MAX", LONG_MAX, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MIN", LONG_MIN, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_SIZE", sizeof(long), CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_MAXPATHLEN", MAXPATHLEN, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_INT_MAX", PHP_INT_MAX, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_INT_MIN", PHP_INT_MIN, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_INT_SIZE", SIZEOF_ZEND_INT, CONST_PERSISTENT | CONST_CS);
 
 #ifdef PHP_WIN32
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_VERSION_MAJOR",      EG(windows_version_info).dwMajorVersion, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_VERSION_MINOR",      EG(windows_version_info).dwMinorVersion, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_VERSION_BUILD",      EG(windows_version_info).dwBuildNumber, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_VERSION_PLATFORM",   EG(windows_version_info).dwPlatformId, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_VERSION_SP_MAJOR",   EG(windows_version_info).wServicePackMajor, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_VERSION_SP_MINOR",   EG(windows_version_info).wServicePackMinor, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_VERSION_SUITEMASK",  EG(windows_version_info).wSuiteMask, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_VERSION_PRODUCTTYPE", EG(windows_version_info).wProductType, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_NT_DOMAIN_CONTROLLER", VER_NT_DOMAIN_CONTROLLER, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_NT_SERVER", VER_NT_SERVER, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_NT_WORKSTATION", VER_NT_WORKSTATION, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_VERSION_MAJOR",      EG(windows_version_info).dwMajorVersion, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_VERSION_MINOR",      EG(windows_version_info).dwMinorVersion, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_VERSION_BUILD",      EG(windows_version_info).dwBuildNumber, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_VERSION_PLATFORM",   EG(windows_version_info).dwPlatformId, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_VERSION_SP_MAJOR",   EG(windows_version_info).wServicePackMajor, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_VERSION_SP_MINOR",   EG(windows_version_info).wServicePackMinor, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_VERSION_SUITEMASK",  EG(windows_version_info).wSuiteMask, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_VERSION_PRODUCTTYPE", EG(windows_version_info).wProductType, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_NT_DOMAIN_CONTROLLER", VER_NT_DOMAIN_CONTROLLER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_NT_SERVER", VER_NT_SERVER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_INT_CONSTANT("PHP_WINDOWS_NT_WORKSTATION", VER_NT_WORKSTATION, CONST_PERSISTENT | CONST_CS);
 #endif
 
 	php_binary_init(TSRMLS_C);
@@ -2372,9 +2374,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 				const char **p = directives[i].directives;
 
 				while(*p) {
-					long value;
+					php_int_t value;
 
-					if (cfg_get_long((char*)*p, &value) == SUCCESS && value) {
+					if (cfg_get_int((char*)*p, &value) == SUCCESS && value) {
 						zend_error(directives[i].error_level, directives[i].phrase, *p);
 					}
 

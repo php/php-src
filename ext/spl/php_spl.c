@@ -417,8 +417,8 @@ PHP_FUNCTION(spl_autoload_call)
 	if (SPL_G(autoload_functions)) {
 		int l_autoload_running = SPL_G(autoload_running);
 		SPL_G(autoload_running) = 1;
-		lc_name = STR_ALLOC(Z_STRLEN_P(class_name), 0);
-		zend_str_tolower_copy(lc_name->val, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
+		lc_name = STR_ALLOC(Z_STRSIZE_P(class_name), 0);
+		zend_str_tolower_copy(lc_name->val, Z_STRVAL_P(class_name), Z_STRSIZE_P(class_name));
 		ZEND_HASH_FOREACH_STR_KEY_PTR(SPL_G(autoload_functions), func_name, alfi) {
 			zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, func_name->val, func_name->len, retval, 1, class_name, NULL TSRMLS_CC);
 			zend_exception_save(TSRMLS_C);

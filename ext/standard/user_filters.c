@@ -113,13 +113,13 @@ PHP_MINIT_FUNCTION(user_filters)
 		return FAILURE;
 	}
 
-	REGISTER_LONG_CONSTANT("PSFS_PASS_ON",			PSFS_PASS_ON,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_FEED_ME",			PSFS_FEED_ME,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_ERR_FATAL",		PSFS_ERR_FATAL,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_PASS_ON",			PSFS_PASS_ON,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_FEED_ME",			PSFS_FEED_ME,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_ERR_FATAL",		PSFS_ERR_FATAL,			CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("PSFS_FLAG_NORMAL",		PSFS_FLAG_NORMAL,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_FLAG_FLUSH_INC",	PSFS_FLAG_FLUSH_INC,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_FLAG_FLUSH_CLOSE",	PSFS_FLAG_FLUSH_CLOSE,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_FLAG_NORMAL",		PSFS_FLAG_NORMAL,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_FLAG_FLUSH_INC",	PSFS_FLAG_FLUSH_INC,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_FLAG_FLUSH_CLOSE",	PSFS_FLAG_FLUSH_CLOSE,	CONST_CS | CONST_PERSISTENT);
 	
 	return SUCCESS;
 }
@@ -203,7 +203,7 @@ php_stream_filter_status_t userfilter_filter(
 	ZEND_REGISTER_RESOURCE(&args[1], buckets_out, le_bucket_brigade);
 
 	if (bytes_consumed) {
-		ZVAL_LONG(&args[2], *bytes_consumed);
+		ZVAL_INT(&args[2], *bytes_consumed);
 	} else {
 		ZVAL_NULL(&args[2]);
 	}
@@ -220,14 +220,14 @@ php_stream_filter_status_t userfilter_filter(
 	zval_ptr_dtor(&func_name);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		convert_to_long(&retval);
-		ret = Z_LVAL(retval);
+		convert_to_int(&retval);
+		ret = Z_IVAL(retval);
 	} else if (call_result == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call filter function");
 	}
 
 	if (bytes_consumed) {
-		*bytes_consumed = Z_LVAL_P(&args[2]);
+		*bytes_consumed = Z_IVAL_P(&args[2]);
 	}
 
 	if (buckets_in->head) {
@@ -424,7 +424,7 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&zbucket);
 		add_property_stringl(return_value, "data", bucket->buf, bucket->buflen);
-		add_property_long(return_value, "datalen", bucket->buflen);
+		add_property_int(return_value, "datalen", bucket->buflen);
 	}
 }
 /* }}} */
@@ -453,9 +453,9 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
 		}
-		if ((int)bucket->buflen != Z_STRLEN_P(pzdata)) {
-			bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
-			bucket->buflen = Z_STRLEN_P(pzdata);
+		if ((int)bucket->buflen != Z_STRSIZE_P(pzdata)) {
+			bucket->buf = perealloc(bucket->buf, Z_STRSIZE_P(pzdata), bucket->is_persistent);
+			bucket->buflen = Z_STRSIZE_P(pzdata);
 		}
 		memcpy(bucket->buf, Z_STRVAL_P(pzdata), bucket->buflen);
 	}
@@ -525,7 +525,7 @@ PHP_FUNCTION(stream_bucket_new)
 	/* add_property_zval increments the refcount which is unwanted here */
 	zval_ptr_dtor(&zbucket);
 	add_property_stringl(return_value, "data", bucket->buf, bucket->buflen);
-	add_property_long(return_value, "datalen", bucket->buflen);
+	add_property_int(return_value, "datalen", bucket->buflen);
 }
 /* }}} */
 

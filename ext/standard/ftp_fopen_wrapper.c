@@ -498,7 +498,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	} else if (read_write == 2) {
 		/* when writing file (but not appending), it must NOT exist, unless a context option exists which allows it */
 		if (context && (tmpzval = php_stream_context_get_option(context, "ftp", "overwrite")) != NULL) {
-			allow_overwrite = Z_LVAL_P(tmpzval);
+			allow_overwrite = Z_IVAL_P(tmpzval);
 		}
 		if (result <= 299 && result >= 200) {
 			if (allow_overwrite) {
@@ -529,12 +529,12 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		/* set resume position if applicable */
 		if (context &&
 			(tmpzval = php_stream_context_get_option(context, "ftp", "resume_pos")) != NULL &&
-			Z_TYPE_P(tmpzval) == IS_LONG &&
-			Z_LVAL_P(tmpzval) > 0) {
-			php_stream_printf(stream TSRMLS_CC, "REST %ld\r\n", Z_LVAL_P(tmpzval));
+			Z_TYPE_P(tmpzval) == IS_INT &&
+			Z_IVAL_P(tmpzval) > 0) {
+			php_stream_printf(stream TSRMLS_CC, "REST %ld\r\n", Z_IVAL_P(tmpzval));
 			result = GET_FTP_RESULT(stream);
 			if (result < 300 || result > 399) {			
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to resume from offset %ld", Z_LVAL_P(tmpzval));
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to resume from offset %ld", Z_IVAL_P(tmpzval));
 				goto errexit;
 			}
 		}

@@ -300,7 +300,7 @@ PHP_FUNCTION(proc_close)
 	FG(pclose_wait) = 1;
 	zend_list_close(Z_RES_P(zproc));
 	FG(pclose_wait) = 0;
-	RETURN_LONG(FG(pclose_ret));
+	RETURN_INT(FG(pclose_ret));
 }
 /* }}} */
 
@@ -328,7 +328,7 @@ PHP_FUNCTION(proc_get_status)
 	array_init(return_value);
 
 	add_assoc_string(return_value, "command", proc->command);
-	add_assoc_long(return_value, "pid", (long) proc->child);
+	add_assoc_int(return_value, "pid", (long) proc->child);
 
 #ifdef PHP_WIN32
 
@@ -368,9 +368,9 @@ PHP_FUNCTION(proc_get_status)
 	add_assoc_bool(return_value, "running", running);
 	add_assoc_bool(return_value, "signaled", signaled);
 	add_assoc_bool(return_value, "stopped", stopped);
-	add_assoc_long(return_value, "exitcode", exitcode);
-	add_assoc_long(return_value, "termsig", termsig);
-	add_assoc_long(return_value, "stopsig", stopsig);
+	add_assoc_int(return_value, "exitcode", exitcode);
+	add_assoc_int(return_value, "termsig", termsig);
+	add_assoc_int(return_value, "stopsig", stopsig);
 }
 /* }}} */
 
@@ -427,7 +427,7 @@ PHP_FUNCTION(proc_open)
 	int i;
 	zval *descitem = NULL;
 	zend_string *str_index;
-	ulong nindex;
+	php_uint_t nindex;
 	struct php_proc_open_descriptor_item descriptors[PHP_PROC_OPEN_MAX_DESCRIPTORS];
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
@@ -471,14 +471,14 @@ PHP_FUNCTION(proc_open)
 	if (other_options) {
 		zval *item = zend_hash_str_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors") - 1);
 		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
+			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_INT) && Z_IVAL_P(item))) {
 				suppress_errors = 1;
 			}
 		}
 
 		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell") - 1);
 		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
+			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_INT) && Z_IVAL_P(item))) {
 				bypass_shell = 1;
 			}
 		}
@@ -584,7 +584,7 @@ PHP_FUNCTION(proc_open)
 #endif
 				descriptors[ndesc].mode_flags = descriptors[ndesc].mode & DESC_PARENT_MODE_WRITE ? O_WRONLY : O_RDONLY;
 #ifdef PHP_WIN32
-				if (Z_STRLEN_P(zmode) >= 2 && Z_STRVAL_P(zmode)[1] == 'b')
+				if (Z_STRSIZE_P(zmode) >= 2 && Z_STRVAL_P(zmode)[1] == 'b')
 					descriptors[ndesc].mode_flags |= O_BINARY;
 #endif
 

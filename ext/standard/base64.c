@@ -53,7 +53,7 @@ static const short base64_reverse_table[256] = {
 };
 /* }}} */
 
-PHPAPI zend_string *php_base64_encode(const unsigned char *str, int length) /* {{{ */
+PHPAPI zend_string *php_base64_encode(const unsigned char *str, php_size_t length) /* {{{ */
 {
 	const unsigned char *current = str;
 	unsigned char *p;
@@ -131,13 +131,13 @@ void php_base64_init(void)
 */
 /* }}} */
 
-PHPAPI zend_string *php_base64_decode(const unsigned char *str, int length) /* {{{ */
+PHPAPI zend_string *php_base64_decode(const unsigned char *str, php_size_t length) /* {{{ */
 {
 	return php_base64_decode_ex(str, length, 0);
 }
 /* }}} */
 
-PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, int length, zend_bool strict) /* {{{ */
+PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, php_size_t length, zend_bool strict) /* {{{ */
 {
 	const unsigned char *current = str;
 	int ch, i = 0, j = 0, k;

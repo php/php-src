@@ -323,7 +323,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	} else {
 		/* we convert numbers to integers and treat them as a string */
 		if (Z_TYPE_P(regex) == IS_DOUBLE) {
-			convert_to_long_ex(regex);	/* get rid of decimal places */
+			convert_to_int_ex(regex);	/* get rid of decimal places */
 		}
 		convert_to_string_ex(regex);
 		/* don't bother doing an extended regex with just a number */
@@ -379,7 +379,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	} else {
 		if (match_len == 0)
 			match_len = 1;
-		RETVAL_LONG(match_len);
+		RETVAL_INT(match_len);
 	}
 	regfree(&re);
 }
@@ -564,28 +564,28 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (Z_TYPE_P(arg_pattern) == IS_STRING) {
-		if (Z_STRVAL_P(arg_pattern) && Z_STRLEN_P(arg_pattern)) {
+		if (Z_STRVAL_P(arg_pattern) && Z_STRSIZE_P(arg_pattern)) {
 			pattern = STR_COPY(Z_STR_P(arg_pattern));
 		} else {
 			pattern = STR_EMPTY_ALLOC();
 		}
 	} else {
-		convert_to_long_ex(arg_pattern);
+		convert_to_int_ex(arg_pattern);
 		pattern = STR_ALLOC(1, 0);
-		pattern->val[0] = (char) Z_LVAL_P(arg_pattern);
+		pattern->val[0] = (char) Z_IVAL_P(arg_pattern);
 		pattern->val[1] = '\0';
 	}
 
 	if (Z_TYPE_P(arg_replace) == IS_STRING) {
-		if (Z_STRVAL_P(arg_replace) && Z_STRLEN_P(arg_replace)) {
+		if (Z_STRVAL_P(arg_replace) && Z_STRSIZE_P(arg_replace)) {
 			replace = STR_COPY(Z_STR_P(arg_replace));
 		} else {
 			replace = STR_EMPTY_ALLOC();
 		}
 	} else {
-		convert_to_long_ex(arg_replace);
+		convert_to_int_ex(arg_replace);
 		replace = STR_ALLOC(1, 0);
-		replace->val[0] = (char) Z_LVAL_P(arg_replace);
+		replace->val[0] = (char) Z_IVAL_P(arg_replace);
 		replace->val[1] = '\0';
 	}
 

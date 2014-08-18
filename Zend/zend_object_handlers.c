@@ -423,7 +423,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 }
 /* }}} */
 
-static long *zend_get_property_guard(zend_object *zobj, zend_property_info *property_info, zval *member) /* {{{ */
+static zend_int_t *zend_get_property_guard(zend_object *zobj, zend_property_info *property_info, zval *member) /* {{{ */
 {
 	zend_property_info info;
 	zval stub, *guard;
@@ -448,15 +448,15 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 		if (str) {
 			STR_RELEASE(str);
 		}
-		return &Z_LVAL_P(guard);
+		return &Z_IVAL_P(guard);
 	}
 
-	ZVAL_LONG(&stub, 0);
+	ZVAL_INT(&stub, 0);
 	guard = zend_hash_add_new(zobj->guards, property_info->name, &stub);
 	if (str) {
 		STR_RELEASE(str);
 	}
-	return &Z_LVAL_P(guard);
+	return &Z_IVAL_P(guard);
 }
 /* }}} */
 
@@ -501,7 +501,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 
 	/* magic get */
 	if (zobj->ce->__get) {
-		long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_int_t *guard = zend_get_property_guard(zobj, property_info, member);
 		if (!((*guard) & IN_GET)) {
 			zval tmp_object;
 
@@ -526,7 +526,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			zval_ptr_dtor(&tmp_object);
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
+				if (Z_STRSIZE_P(member) == 0) {
 					zend_error(E_ERROR, "Cannot access empty property");
 				} else {
 					zend_error(E_ERROR, "Cannot access property started with '\\0'");
@@ -635,7 +635,7 @@ found:
 
 	/* magic set */
 	if (zobj->ce->__set) {
-		long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_int_t *guard = zend_get_property_guard(zobj, property_info, member);
 
 	    if (!((*guard) & IN_SET)) {
 			zval tmp_object;
@@ -651,7 +651,7 @@ found:
 			goto write_std_property;
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
+				if (Z_STRSIZE_P(member) == 0) {
 					zend_error(E_ERROR, "Cannot access empty property");
 				} else {
 					zend_error(E_ERROR, "Cannot access property started with '\\0'");
@@ -778,7 +778,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 	zval tmp_member;
 	zval *retval, tmp;
 	zend_property_info *property_info;
-	long *guard;
+	zend_int_t *guard;
 
 	zobj = Z_OBJ_P(object);
 
@@ -875,7 +875,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 	
 	/* magic unset */
 	if (zobj->ce->__unset) {
-		long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_int_t *guard = zend_get_property_guard(zobj, property_info, member);
 		if (!((*guard) & IN_UNSET)) {
 			zval tmp_object;
 
@@ -887,7 +887,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 			zval_ptr_dtor(&tmp_object);
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
+				if (Z_STRSIZE_P(member) == 0) {
 					zend_error(E_ERROR, "Cannot access empty property");
 				} else {
 					zend_error(E_ERROR, "Cannot access property started with '\\0'");
@@ -1404,10 +1404,10 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return 1;
 					}
-					if (Z_LVAL(result) != 0) {
+					if (Z_IVAL(result) != 0) {
 						Z_OBJ_UNPROTECT_RECURSION(o1);
 						Z_OBJ_UNPROTECT_RECURSION(o2);
-						return Z_LVAL(result);
+						return Z_IVAL(result);
 					}
 				} else {
 					Z_OBJ_UNPROTECT_RECURSION(o1);
@@ -1485,7 +1485,7 @@ found:
 
 	result = 0;
 	if ((has_set_exists != 2) && zobj->ce->__isset) {
-		long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_int_t *guard = zend_get_property_guard(zobj, property_info, member);
 
 		if (!((*guard) & IN_ISSET)) {
 			zval rv;
@@ -1586,13 +1586,13 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 		case _IS_BOOL:
 			ZVAL_BOOL(writeobj, 1);
 			return SUCCESS;
-		case IS_LONG:
+		case IS_INT:
 			ce = Z_OBJCE_P(readobj);
 			zend_error(E_NOTICE, "Object of class %s could not be converted to int", ce->name->val);
 			if (readobj == writeobj) {
 				zval_dtor(readobj);
 			}
-			ZVAL_LONG(writeobj, 1);
+			ZVAL_INT(writeobj, 1);
 			return SUCCESS;
 		case IS_DOUBLE:
 			ce = Z_OBJCE_P(readobj);

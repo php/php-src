@@ -143,20 +143,20 @@ static PHP_MINIT_FUNCTION(pcre)
 {
 	REGISTER_INI_ENTRIES();
 	
-	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_GREP_INVERT", PREG_GREP_INVERT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_GREP_INVERT", PREG_GREP_INVERT, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("PREG_NO_ERROR", PHP_PCRE_NO_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_INTERNAL_ERROR", PHP_PCRE_INTERNAL_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_BACKTRACK_LIMIT_ERROR", PHP_PCRE_BACKTRACK_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_RECURSION_LIMIT_ERROR", PHP_PCRE_RECURSION_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_NO_ERROR", PHP_PCRE_NO_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_INTERNAL_ERROR", PHP_PCRE_INTERNAL_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_BACKTRACK_LIMIT_ERROR", PHP_PCRE_BACKTRACK_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_RECURSION_LIMIT_ERROR", PHP_PCRE_RECURSION_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("PCRE_VERSION", (char *)pcre_version(), CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
@@ -527,7 +527,7 @@ static inline void add_offset_pair(zval *result, char *str, int len, int offset,
 
 	/* Add (match, offset) to the return value */
 	add_next_index_stringl(&match_pair, str, len);
-	add_next_index_long(&match_pair, offset);
+	add_next_index_int(&match_pair, offset);
 	
 	if (name) {
 		zval_add_ref(&match_pair);
@@ -541,26 +541,25 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 {
 	/* parameters */
 	zend_string		 *regex;			/* Regular expression */
-	char			 *subject;			/* String to match against */
-	int				  subject_len;
+	zend_string		 *subject;			/* String to match against */
 	pcre_cache_entry *pce;				/* Compiled regular expression */
 	zval			 *subpats = NULL;	/* Array for subpatterns */
-	long			  flags = 0;		/* Match control flags */
-	long			  start_offset = 0;	/* Where the new search starts */
+	php_int_t		  flags = 0;		/* Match control flags */
+	php_int_t		  start_offset = 0;	/* Where the new search starts */
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ss|z/ll", &regex,
-							  &subject, &subject_len, &subpats, &flags, &start_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|z/ii", &regex,
+							  &subject, &subpats, &flags, &start_offset) == FAILURE) {
 		RETURN_FALSE;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_STR(regex)
-		Z_PARAM_STRING(subject, subject_len)
+		Z_PARAM_STR(subject)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL_EX(subpats, 0, 1)
-		Z_PARAM_LONG(flags)
-		Z_PARAM_LONG(start_offset)
+		Z_PARAM_INT(flags)
+		Z_PARAM_INT(start_offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 #endif
 	
@@ -569,7 +568,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
-	php_pcre_match_impl(pce, subject, subject_len, return_value, subpats, 
+	php_pcre_match_impl(pce, subject->val, subject->len, return_value, subpats, 
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset TSRMLS_CC);
 }
 /* }}} */
@@ -888,7 +887,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 	/* Did we encounter an error? */
 	if (PCRE_G(error_code) == PHP_PCRE_NO_ERROR) {
-		RETVAL_LONG(matched);
+		RETVAL_INT(matched);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -1142,7 +1141,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 		}
 	} else {
 		replace = Z_STRVAL_P(replace_val);
-		replace_len = Z_STRLEN_P(replace_val);
+		replace_len = Z_STRSIZE_P(replace_val);
 		replace_end = replace + replace_len;
 	}
 
@@ -1435,16 +1434,16 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 				    *subject_entry,
 				    *zcount = NULL;
 	int				 limit_val = -1;
-	long			 limit = -1;
+	php_int_t		 limit = -1;
 	zend_string		*result;
 	zend_string		*string_key;
-	ulong			 num_key;
+	php_uint_t		 num_key;
 	zend_string		*callback_name;
 	int				 replace_count=0, old_replace_count;
-	
+
 #ifndef FAST_ZPP
 	/* Get function parameters and do error-checking. */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|lz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|iz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
 		return;
 	}
 #else
@@ -1453,7 +1452,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		Z_PARAM_ZVAL(replace)
 		Z_PARAM_ZVAL(subject)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit)
+		Z_PARAM_INT(limit)
 		Z_PARAM_ZVAL_EX(zcount, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
@@ -1519,7 +1518,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	}
 	if (ZEND_NUM_ARGS() > 4) {
 		zval_dtor(zcount);
-		ZVAL_LONG(zcount, replace_count);
+		ZVAL_INT(zcount, replace_count);
 	}
     	
 }
@@ -1554,25 +1553,24 @@ static PHP_FUNCTION(preg_filter)
 static PHP_FUNCTION(preg_split)
 {
 	zend_string			*regex;			/* Regular expression */
-	char				*subject;		/* String to match against */
-	int					 subject_len;
-	long				 limit_val = -1;/* Integer value of limit */
-	long				 flags = 0;		/* Match control flags */
+	zend_string			*subject;		/* String to match against */
+	php_int_t			 limit_val = -1;/* Integer value of limit */
+	php_int_t			 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get function parameters and do error checking */	
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ss|ll", &regex,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|ii", &regex,
 							  &subject, &subject_len, &limit_val, &flags) == FAILURE) {
 		RETURN_FALSE;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(regex)
-		Z_PARAM_STRING(subject, subject_len)
+		Z_PARAM_STR(subject)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit_val)
-		Z_PARAM_LONG(flags)
+		Z_PARAM_INT(limit_val)
+		Z_PARAM_INT(flags)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 #endif
 	
@@ -1581,7 +1579,7 @@ static PHP_FUNCTION(preg_split)
 		RETURN_FALSE;
 	}
 
-	php_pcre_split_impl(pce, subject, subject_len, return_value, limit_val, flags TSRMLS_CC);
+	php_pcre_split_impl(pce, subject->val, subject->len, return_value, limit_val, flags TSRMLS_CC);
 }
 /* }}} */
 
@@ -1864,12 +1862,12 @@ static PHP_FUNCTION(preg_grep)
 {
 	zend_string			*regex;			/* Regular expression */
 	zval				*input;			/* Input array */
-	long				 flags = 0;		/* Match control flags */
+	php_int_t			 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get arguments and do error checking */
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sa|l", &regex,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sa|i", &regex,
 							  &input, &flags) == FAILURE) {
 		return;
 	}
@@ -1878,7 +1876,7 @@ static PHP_FUNCTION(preg_grep)
 		Z_PARAM_STR(regex)
 		Z_PARAM_ARRAY(input)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(flags)
+		Z_PARAM_INT(flags)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 	
@@ -1900,7 +1898,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
 	zend_string		*string_key;
-	ulong			 num_key;
+	php_uint_t		 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
 										   entries */
 	ALLOCA_FLAG(use_heap);
@@ -1988,7 +1986,7 @@ static PHP_FUNCTION(preg_last_error)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	RETURN_LONG(PCRE_G(error_code));
+	RETURN_INT(PCRE_G(error_code));
 }
 /* }}} */
 

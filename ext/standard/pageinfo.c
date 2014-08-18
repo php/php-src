@@ -59,7 +59,7 @@
  */
 PHPAPI void php_statpage(TSRMLS_D)
 {
-	struct stat *pstat;
+	php_stat_t *pstat;
 
 	pstat = sapi_get_stat(TSRMLS_C);
 
@@ -106,7 +106,7 @@ PHP_FUNCTION(getmyuid)
 	if (uid < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(uid);
+		RETURN_INT(uid);
 	}
 }
 /* }}} */
@@ -125,7 +125,7 @@ PHP_FUNCTION(getmygid)
 	if (gid < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(gid);
+		RETURN_INT(gid);
 	}
 }
 /* }}} */
@@ -144,7 +144,7 @@ PHP_FUNCTION(getmypid)
 	if (pid < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG((long) pid);
+		RETURN_INT((long) pid);
 	}
 }
 /* }}} */
@@ -161,7 +161,7 @@ PHP_FUNCTION(getmyinode)
 	if (BG(page_inode) < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(BG(page_inode));
+		RETURN_INT(BG(page_inode));
 	}
 }
 /* }}} */
@@ -186,7 +186,7 @@ PHP_FUNCTION(getlastmod)
 	if (lm < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(lm);
+		RETURN_INT(lm);
 	}
 }
 /* }}} */

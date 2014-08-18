@@ -36,7 +36,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	long port = -1;
 	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout = FG(default_socket_timeout);
-	unsigned long conv;
+	php_uint_t conv;
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
@@ -63,13 +63,13 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	
 	/* prepare the timeout value for use */
-	conv = (unsigned long) (timeout * 1000000.0);
+	conv = (php_uint_t) (timeout * 1000000.0);
 	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 
 	if (zerrno)	{
 		zval_dtor(zerrno);
-		ZVAL_LONG(zerrno, 0);
+		ZVAL_INT(zerrno, 0);
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
@@ -93,7 +93,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (stream == NULL)	{
 		if (zerrno) {
 			zval_dtor(zerrno);
-			ZVAL_LONG(zerrno, err);
+			ZVAL_INT(zerrno, err);
 		}
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */

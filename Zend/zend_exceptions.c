@@ -163,7 +163,7 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 	Z_SET_REFCOUNT(trace, 0);
 
 	zend_update_property_string(default_exception_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
-	zend_update_property_long(default_exception_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
+	zend_update_property_int(default_exception_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
 	zend_update_property(default_exception_ce, &obj, "trace", sizeof("trace")-1, &trace TSRMLS_CC);
 
 	return object;
@@ -211,7 +211,7 @@ ZEND_METHOD(exception, __construct)
 	}
 
 	if (code) {
-		zend_update_property_long(default_exception_ce, object, "code", sizeof("code")-1, code TSRMLS_CC);
+		zend_update_property_int(default_exception_ce, object, "code", sizeof("code")-1, code TSRMLS_CC);
 	}
 
 	if (previous) {
@@ -240,21 +240,21 @@ ZEND_METHOD(error_exception, __construct)
 	}
 
 	if (code) {
-		zend_update_property_long(default_exception_ce, object, "code", sizeof("code")-1, code TSRMLS_CC);
+		zend_update_property_int(default_exception_ce, object, "code", sizeof("code")-1, code TSRMLS_CC);
 	}
 
 	if (previous) {
 		zend_update_property(default_exception_ce, object, "previous", sizeof("previous")-1, previous TSRMLS_CC);
 	}
 
-	zend_update_property_long(default_exception_ce, object, "severity", sizeof("severity")-1, severity TSRMLS_CC);
+	zend_update_property_int(default_exception_ce, object, "severity", sizeof("severity")-1, severity TSRMLS_CC);
 
 	if (argc >= 4) {
 	    zend_update_property_string(default_exception_ce, object, "file", sizeof("file")-1, filename TSRMLS_CC);
     	if (argc < 5) {
     	    lineno = 0; /* invalidate lineno */
     	}
-    	zend_update_property_long(default_exception_ce, object, "line", sizeof("line")-1, lineno TSRMLS_CC);
+    	zend_update_property_int(default_exception_ce, object, "line", sizeof("line")-1, lineno TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -354,7 +354,7 @@ ZEND_METHOD(error_exception, getSeverity)
 				zend_error(E_WARNING, "Value for %s is no string", key);    \
 				TRACE_APPEND_STR("[unknown]");                              \
 			} else {                                                        \
-				TRACE_APPEND_STRL(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));        \
+				TRACE_APPEND_STRL(Z_STRVAL_P(tmp), Z_STRSIZE_P(tmp));        \
 			}                                                               \
 		} \
 	} while (0)
@@ -386,12 +386,12 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 		case IS_STRING: {
 			int l_added;
 			TRACE_APPEND_CHR('\'');
-			if (Z_STRLEN_P(arg) > 15) {
+			if (Z_STRSIZE_P(arg) > 15) {
 				TRACE_APPEND_STRL(Z_STRVAL_P(arg), 15);
 				TRACE_APPEND_STR("...', ");
 				l_added = 15 + 6 + 1; /* +1 because of while (--l_added) */
 			} else {
-				l_added = Z_STRLEN_P(arg);
+				l_added = Z_STRSIZE_P(arg);
 				TRACE_APPEND_STRL(Z_STRVAL_P(arg), l_added);
 				TRACE_APPEND_STR("', ");
 				l_added += 3 + 1;
@@ -459,17 +459,17 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 			TRACE_APPEND_STR("true, ");
 			break;
 		case IS_RESOURCE: {
-			long lval = Z_RES_HANDLE_P(arg);
-			char s_tmp[MAX_LENGTH_OF_LONG + 1];
+			zend_int_t lval = Z_RES_HANDLE_P(arg);
+			char s_tmp[MAX_LENGTH_OF_ZEND_INT + 1];
 			int l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
 			TRACE_APPEND_STR("Resource id #");
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
 			TRACE_APPEND_STR(", ");
 			break;
 		}
-		case IS_LONG: {
-			long lval = Z_LVAL_P(arg);
-			char s_tmp[MAX_LENGTH_OF_LONG + 1];
+		case IS_INT: {
+			zend_int_t lval = Z_IVAL_P(arg);
+			char s_tmp[MAX_LENGTH_OF_ZEND_INT + 1];
 			int l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
 			TRACE_APPEND_STR(", ");
@@ -509,7 +509,7 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static void _build_trace_string(zval *frame, ulong index, zend_string **str_ptr, int *num TSRMLS_DC) /* {{{ */
+static void _build_trace_string(zval *frame, zend_uint_t index, zend_string **str_ptr, int *num TSRMLS_DC) /* {{{ */
 {
 	char *s_tmp;
 	int len;
@@ -524,7 +524,7 @@ static void _build_trace_string(zval *frame, ulong index, zend_string **str_ptr,
 	}
 
 	ht = Z_ARRVAL_P(frame);
-	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
+	s_tmp = emalloc(1 + MAX_LENGTH_OF_ZEND_INT + 1 + 1);
 	len = sprintf(s_tmp, "#%d ", (*num)++);
 	TRACE_APPEND_STRL(s_tmp, len);
 	efree(s_tmp);
@@ -536,8 +536,8 @@ static void _build_trace_string(zval *frame, ulong index, zend_string **str_ptr,
 		} else{
 			tmp = zend_hash_str_find(ht, "line", sizeof("line")-1);
 			if (tmp) {
-				if (Z_TYPE_P(tmp) == IS_LONG) {
-					line = Z_LVAL_P(tmp);
+				if (Z_TYPE_P(tmp) == IS_INT) {
+					line = Z_IVAL_P(tmp);
 				} else {
 					zend_error(E_WARNING, "Line is no long");
 					line = 0;
@@ -545,7 +545,7 @@ static void _build_trace_string(zval *frame, ulong index, zend_string **str_ptr,
 			} else {
 				line = 0;
 			}
-			s_tmp = emalloc(Z_STRLEN_P(file) + MAX_LENGTH_OF_LONG + 4 + 1);
+			s_tmp = emalloc(Z_STRSIZE_P(file) + MAX_LENGTH_OF_ZEND_INT + 4 + 1);
 			len = sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_P(file), line);
 			TRACE_APPEND_STRL(s_tmp, len);
 			efree(s_tmp);
@@ -584,10 +584,10 @@ static void _build_trace_string(zval *frame, ulong index, zend_string **str_ptr,
 ZEND_METHOD(exception, getTraceAsString)
 {
 	zval *trace, *frame;
-	ulong index;
+	zend_uint_t index;
 	zend_string *str, *key;
 	int num = 0, len;
-	char s_tmp[MAX_LENGTH_OF_LONG + 7 + 1 + 1];
+	char s_tmp[MAX_LENGTH_OF_ZEND_INT + 7 + 1 + 1];
 
 	DEFAULT_0_PARAMS;
 	
@@ -667,7 +667,7 @@ ZEND_METHOD(exception, __toString)
 
 		convert_to_string(&message);
 		convert_to_string(&file);
-		convert_to_long(&line);
+		convert_to_int(&line);
 
 		fci.size = sizeof(fci);
 		fci.function_table = &Z_OBJCE_P(exception)->function_table;
@@ -686,15 +686,15 @@ ZEND_METHOD(exception, __toString)
 			ZVAL_UNDEF(&trace);
 		}
 
-		if (Z_STRLEN(message) > 0) {
+		if (Z_STRSIZE(message) > 0) {
 			str = zend_strpprintf(0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s%s%s",
-					Z_OBJCE_P(exception)->name->val, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
-					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
+					Z_OBJCE_P(exception)->name->val, Z_STRVAL(message), Z_STRVAL(file), Z_IVAL(line),
+					(Z_TYPE(trace) == IS_STRING && Z_STRSIZE(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
 					prev_str->len ? "\n\nNext " : "", prev_str->val);
 		} else {
 			str = zend_strpprintf(0, "exception '%s' in %s:%ld\nStack trace:\n%s%s%s",
-					Z_OBJCE_P(exception)->name->val, Z_STRVAL(file), Z_LVAL(line),
-					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
+					Z_OBJCE_P(exception)->name->val, Z_STRVAL(file), Z_IVAL(line),
+					(Z_TYPE(trace) == IS_STRING && Z_STRSIZE(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
 					prev_str->len ? "\n\nNext " : "", prev_str->val);
 		}
 		STR_RELEASE(prev_str);
@@ -775,7 +775,7 @@ void zend_register_default_exception(TSRMLS_D) /* {{{ */
 
 	zend_declare_property_string(default_exception_ce, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_string(default_exception_ce, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE TSRMLS_CC);
-	zend_declare_property_long(default_exception_ce, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_int(default_exception_ce, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_null(default_exception_ce, "file", sizeof("file")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_null(default_exception_ce, "line", sizeof("line")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_null(default_exception_ce, "trace", sizeof("trace")-1, ZEND_ACC_PRIVATE TSRMLS_CC);
@@ -784,7 +784,7 @@ void zend_register_default_exception(TSRMLS_D) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "ErrorException", error_exception_functions);
 	error_exception_ce = zend_register_internal_class_ex(&ce, default_exception_ce TSRMLS_CC);
 	error_exception_ce->create_object = zend_error_exception_new;
-	zend_declare_property_long(error_exception_ce, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_int(error_exception_ce, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED TSRMLS_CC);
 }
 /* }}} */
 
@@ -819,7 +819,7 @@ ZEND_API zend_object *zend_throw_exception(zend_class_entry *exception_ce, const
 		zend_update_property_string(default_exception_ce, &ex, "message", sizeof("message")-1, message TSRMLS_CC);
 	}
 	if (code) {
-		zend_update_property_long(default_exception_ce, &ex, "code", sizeof("code")-1, code TSRMLS_CC);
+		zend_update_property_int(default_exception_ce, &ex, "code", sizeof("code")-1, code TSRMLS_CC);
 	}
 
 	zend_throw_exception_internal(&ex TSRMLS_CC);
@@ -847,7 +847,7 @@ ZEND_API zend_object *zend_throw_error_exception(zend_class_entry *exception_ce,
 	zval ex;
 	zend_object *obj = zend_throw_exception(exception_ce, message, code TSRMLS_CC);
 	ZVAL_OBJ(&ex, obj);
-	zend_update_property_long(default_exception_ce, &ex, "severity", sizeof("severity")-1, severity TSRMLS_CC);
+	zend_update_property_int(default_exception_ce, &ex, "severity", sizeof("severity")-1, severity TSRMLS_CC);
 	return obj;
 }
 /* }}} */
@@ -895,13 +895,13 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity TSRMLS_DC) /* {
 				line = zend_read_property(default_exception_ce, &zv, "line", sizeof("line")-1, 1 TSRMLS_CC);
 
 				convert_to_string(file);
-				file = (Z_STRLEN_P(file) > 0) ? file : NULL;
-				line = (Z_TYPE_P(line) == IS_LONG) ? line : NULL;
+				file = (Z_STRSIZE_P(file) > 0) ? file : NULL;
+				line = (Z_TYPE_P(line) == IS_INT) ? line : NULL;
 			} else {
 				file = NULL;
 				line = NULL;
 			}
-			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_LVAL_P(line) : 0, "Uncaught %s in exception handling during call to %s::__tostring()", Z_OBJCE(zv)->name->val, ce_exception->name->val);
+			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_IVAL_P(line) : 0, "Uncaught %s in exception handling during call to %s::__tostring()", Z_OBJCE(zv)->name->val, ce_exception->name->val);
 		}
 
 		str = zend_read_property(default_exception_ce, &exception, "string", sizeof("string")-1, 1 TSRMLS_CC);
@@ -910,9 +910,9 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity TSRMLS_DC) /* {
 
 		convert_to_string(str);
 		convert_to_string(file);
-		convert_to_long(line);
+		convert_to_int(line);
 
-		zend_error_va(severity, (Z_STRLEN_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
+		zend_error_va(severity, (Z_STRSIZE_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_IVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name->val);
 	}

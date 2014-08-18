@@ -398,7 +398,7 @@ PHP_FUNCTION(parse_url)
 				if (resource->host != NULL) RETVAL_STRING(resource->host);
 				break;
 			case PHP_URL_PORT:
-				if (resource->port != 0) RETVAL_LONG(resource->port);
+				if (resource->port != 0) RETVAL_INT(resource->port);
 				break;
 			case PHP_URL_USER:
 				if (resource->user != NULL) RETVAL_STRING(resource->user);
@@ -431,7 +431,7 @@ PHP_FUNCTION(parse_url)
 	if (resource->host != NULL)
 		add_assoc_string(return_value, "host", resource->host);
 	if (resource->port != 0)
-		add_assoc_long(return_value, "port", resource->port);
+		add_assoc_int(return_value, "port", resource->port);
 	if (resource->user != NULL)
 		add_assoc_string(return_value, "user", resource->user);
 	if (resource->pass != NULL)
@@ -769,10 +769,10 @@ no_name_header:
 				}
 
 				if ((prev_val = zend_hash_str_find(HASH_OF(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
-					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr) + 1), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
+					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr) + 1), s, (Z_STRSIZE_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				} else { /* some headers may occur more then once, therefor we need to remake the string into an array */
 					convert_to_array(prev_val);
-					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
+					add_next_index_stringl(prev_val, s, (Z_STRSIZE_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				}
 
 				*p = c;

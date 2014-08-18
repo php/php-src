@@ -22,6 +22,8 @@
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
+#include "zend_int.h"
+
 #ifdef WORDS_BIGENDIAN
 # define ZEND_ENDIAN_LOHI(lo, hi)          hi; lo;
 # define ZEND_ENDIAN_LOHI_3(lo, mi, hi)    hi; mi; lo;
@@ -43,6 +45,21 @@ typedef unsigned char zend_uchar;
 typedef unsigned int zend_uint;
 typedef unsigned long zend_ulong;
 typedef unsigned short zend_ushort;
+
+#ifdef ZEND_ENABLE_INT64
+# ifdef ZEND_WIN32
+#  define ZEND_SIZE_MAX  _UI64_MAX
+# else
+#  define ZEND_SIZE_MAX  SIZE_MAX
+# endif
+#else
+# if defined(ZEND_WIN32)
+#  define ZEND_SIZE_MAX  _UI32_MAX
+# else
+#  define ZEND_SIZE_MAX SIZE_MAX
+# endif
+#endif
+typedef size_t zend_size_t;
 
 #define HAVE_ZEND_LONG64
 #ifdef ZEND_WIN32
@@ -87,7 +104,7 @@ typedef void (*dtor_func_t)(zval *pDest);
 typedef void (*copy_ctor_func_t)(zval *pElement);
 
 typedef union _zend_value {
-	long              lval;				/* long value */
+	zend_int_t        lval;				/* long value */
 	double            dval;				/* double value */
 	zend_refcounted  *counted;
 	zend_string      *str;
@@ -137,13 +154,13 @@ struct _zend_refcounted {
 
 struct _zend_string {
 	zend_refcounted   gc;
-	zend_ulong        h;                /* hash value */
-	int               len;
+	zend_uint_t       h;                /* hash value */
+	zend_size_t       len;
 	char              val[1];
 };
 
 typedef struct _Bucket {
-	zend_ulong        h;                /* hash value (or numeric index)   */
+	zend_uint_t       h;                /* hash value (or numeric index)   */
 	zend_string      *key;              /* string key or NULL for numerics */
 	zval              val;
 } Bucket;
@@ -153,7 +170,7 @@ typedef struct _HashTable {
 	zend_uint         nTableMask;
 	zend_uint         nNumUsed;
 	zend_uint         nNumOfElements;
-	long              nNextFreeElement;
+	zend_int_t        nNextFreeElement;
 	Bucket           *arData;
 	zend_uint        *arHash;
 	dtor_func_t       pDestructor;
@@ -186,7 +203,7 @@ struct _zend_object {
 
 struct _zend_resource {
 	zend_refcounted   gc;
-	long              handle; // TODO: may be removed ???
+	zend_int_t              handle; // TODO: may be removed ???
 	int               type;
 	void             *ptr;
 };
@@ -206,7 +223,7 @@ struct _zend_ast_ref {
 #define IS_NULL						1
 #define IS_FALSE					2
 #define IS_TRUE						3
-#define IS_LONG						4
+#define IS_INT						4
 #define IS_DOUBLE					5
 #define IS_STRING					6
 #define IS_ARRAY					7
@@ -381,8 +398,8 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_ISNULL(zval)				(Z_TYPE(zval) == IS_NULL)
 #define Z_ISNULL_P(zval_p)			Z_ISNULL(*(zval_p))
 
-#define Z_LVAL(zval)				(zval).value.lval
-#define Z_LVAL_P(zval_p)			Z_LVAL(*(zval_p))
+#define Z_IVAL(zval)				(zval).value.lval
+#define Z_IVAL_P(zval_p)			Z_IVAL(*(zval_p))
 
 #define Z_DVAL(zval)				(zval).value.dval
 #define Z_DVAL_P(zval_p)			Z_DVAL(*(zval_p))
@@ -393,8 +410,8 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_STRVAL(zval)				Z_STR(zval)->val
 #define Z_STRVAL_P(zval_p)			Z_STRVAL(*(zval_p))
 
-#define Z_STRLEN(zval)				Z_STR(zval)->len
-#define Z_STRLEN_P(zval_p)			Z_STRLEN(*(zval_p))
+#define Z_STRSIZE(zval)				Z_STR(zval)->len
+#define Z_STRSIZE_P(zval_p)			Z_STRSIZE(*(zval_p))
 
 #define Z_STRHASH(zval)				Z_STR(zval)->h
 #define Z_STRHASH_P(zval_p)			Z_STRHASH(*(zval_p))
@@ -483,10 +500,10 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 			(b) ? IS_TRUE : IS_FALSE;	\
 	} while (0)
 
-#define ZVAL_LONG(z, l) {				\
+#define ZVAL_INT(z, l) {				\
 		zval *__z = (z);				\
-		Z_LVAL_P(__z) = l;				\
-		Z_TYPE_INFO_P(__z) = IS_LONG;	\
+		Z_IVAL_P(__z) = l;				\
+		Z_TYPE_INFO_P(__z) = IS_INT;	\
 	}
 
 #define ZVAL_DOUBLE(z, d) {				\

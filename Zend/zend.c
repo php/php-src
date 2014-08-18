@@ -46,7 +46,7 @@
 
 /* true multithread-shared globals */
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
-ZEND_API int (*zend_printf)(const char *format, ...);
+ZEND_API zend_size_t (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
 ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path TSRMLS_DC);
 ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
@@ -54,14 +54,14 @@ ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API void (*zend_ticks_function)(int ticks TSRMLS_DC);
 ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
-int (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
+zend_size_t (*zend_vspprintf)(char **pbuf, zend_size_t max_len, const char *format, va_list ap);
 zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
 ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
 
 void (*zend_on_timeout)(int seconds TSRMLS_DC);
 
-static void (*zend_message_dispatcher_p)(long message, const void *data TSRMLS_DC);
+static void (*zend_message_dispatcher_p)(zend_int_t message, const void *data TSRMLS_DC);
 static int (*zend_get_configuration_directive_p)(const char *name, uint name_length, zval *contents);
 
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
@@ -134,7 +134,7 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 {
 	zval *tmp;
 	zend_string *string_key;
-	ulong num_key;
+	zend_uint_t num_key;
 	int i;
 
 	for (i = 0; i < indent; i++) {
@@ -193,7 +193,7 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 {
 	zval *tmp;
 	zend_string *string_key;
-	ulong num_key;
+	zend_uint_t num_key;
 	int i = 0;
 
 	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, string_key, tmp) {
@@ -204,7 +204,7 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 		if (string_key) {
 			ZEND_WRITE(string_key->val, string_key->len);
 		} else {
-			zend_printf("%ld", num_key);
+			zend_printf(ZEND_UINT_FMT, num_key);
 		}
 		ZEND_PUTS("] => ");
 		zend_print_flat_zval_r(tmp TSRMLS_CC);
@@ -232,7 +232,7 @@ again:
 			}
 		    break;
 		case IS_RESOURCE: {
-				char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
+				char buf[sizeof("Resource id #") + MAX_LENGTH_OF_ZEND_INT];
 				int len;
 
 				len = snprintf(buf, sizeof(buf), "Resource id #%ld", Z_RES_HANDLE_P(expr));
@@ -1158,7 +1158,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			va_end(usr_copy);
 #endif
 
-			ZVAL_LONG(&params[0], type);
+			ZVAL_INT(&params[0], type);
 
 			if (error_filename) {
 				ZVAL_STRING(&params[2], error_filename);
@@ -1166,7 +1166,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				ZVAL_NULL(&params[2]);
 			}
 
-			ZVAL_LONG(&params[3], error_lineno);
+			ZVAL_INT(&params[3], error_lineno);
 
 			symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
 
@@ -1293,7 +1293,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
 	int i;
 	zend_file_handle *file_handle;
 	zend_op_array *op_array;
-    long orig_interactive = CG(interactive);
+	zend_int_t orig_interactive = CG(interactive);
 
 	va_start(files, file_count);
 	for (i = 0; i < file_count; i++) {

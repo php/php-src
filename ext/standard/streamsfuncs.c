@@ -123,7 +123,7 @@ PHP_FUNCTION(stream_socket_client)
 #endif
 	if (zerrno)	{
 		zval_dtor(zerrno);
-		ZVAL_LONG(zerrno, 0);
+		ZVAL_INT(zerrno, 0);
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
@@ -151,7 +151,7 @@ PHP_FUNCTION(stream_socket_client)
 	if (stream == NULL)	{
 		if (zerrno) {
 			zval_dtor(zerrno);
-			ZVAL_LONG(zerrno, err);
+			ZVAL_INT(zerrno, err);
 		}
 		if (zerrstr && errstr) {
 			zval_dtor(zerrstr);
@@ -198,7 +198,7 @@ PHP_FUNCTION(stream_socket_server)
 
 	if (zerrno)	{
 		zval_dtor(zerrno);
-		ZVAL_LONG(zerrno, 0);
+		ZVAL_INT(zerrno, 0);
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
@@ -216,7 +216,7 @@ PHP_FUNCTION(stream_socket_server)
 	if (stream == NULL)	{
 		if (zerrno) {
 			zval_dtor(zerrno);
-			ZVAL_LONG(zerrno, err);
+			ZVAL_INT(zerrno, err);
 		}
 		if (zerrstr && errstr) {
 			zval_dtor(zerrstr);
@@ -340,7 +340,7 @@ PHP_FUNCTION(stream_socket_sendto)
 		}
 	}
 
-	RETURN_LONG(php_stream_xport_sendto(stream, data, datalen, flags, target_addr ? &sa : NULL, sl TSRMLS_CC));
+	RETURN_INT(php_stream_xport_sendto(stream, data, datalen, flags, target_addr ? &sa : NULL, sl TSRMLS_CC));
 }
 /* }}} */
 
@@ -467,7 +467,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 	if (ret != SUCCESS) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG(len);
+	RETURN_INT(len);
 }
 /* }}} */
 
@@ -511,7 +511,7 @@ PHP_FUNCTION(stream_get_meta_data)
 	}
 #endif
 
-	add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
+	add_assoc_int(return_value, "unread_bytes", stream->writepos - stream->readpos);
 
 	add_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);
 	if (stream->orig_path) {
@@ -619,7 +619,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 	php_stream *stream;
 	int ret = 0;
 	zend_string *key;
-	ulong num_ind;
+	php_uint_t num_ind;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
@@ -763,9 +763,9 @@ PHP_FUNCTION(stream_select)
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (sec != NULL) {
-		convert_to_long_ex(sec);
+		convert_to_int_ex(sec);
 
-		if (Z_LVAL_P(sec) < 0) {
+		if (Z_IVAL_P(sec) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The seconds parameter must be greater than 0");
 			RETURN_FALSE;
 		} else if (usec < 0) {
@@ -775,10 +775,10 @@ PHP_FUNCTION(stream_select)
 
 		/* Solaris + BSD do not like microsecond values which are >= 1 sec */
 		if (usec > 999999) {
-			tv.tv_sec = Z_LVAL_P(sec) + (usec / 1000000);
+			tv.tv_sec = Z_IVAL_P(sec) + (usec / 1000000);
 			tv.tv_usec = usec % 1000000;
 		} else {
-			tv.tv_sec = Z_LVAL_P(sec);
+			tv.tv_sec = Z_IVAL_P(sec);
 			tv.tv_usec = usec;
 		}
 
@@ -798,7 +798,7 @@ PHP_FUNCTION(stream_select)
 			if (e_array != NULL) {
 				zend_hash_clean(Z_ARRVAL_P(e_array));
 			}
-			RETURN_LONG(retval);
+			RETURN_INT(retval);
 		}
 	}
 
@@ -814,7 +814,7 @@ PHP_FUNCTION(stream_select)
 	if (w_array != NULL) stream_array_from_fd_set(w_array, &wfds TSRMLS_CC);
 	if (e_array != NULL) stream_array_from_fd_set(e_array, &efds TSRMLS_CC);
 
-	RETURN_LONG(retval);
+	RETURN_INT(retval);
 }
 /* }}} */
 
@@ -827,16 +827,16 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	zval zvs[6];
 	int i;
 
-	ZVAL_LONG(&zvs[0], notifycode);
-	ZVAL_LONG(&zvs[1], severity);
+	ZVAL_INT(&zvs[0], notifycode);
+	ZVAL_INT(&zvs[1], severity);
 	if (xmsg) {
 		ZVAL_STRING(&zvs[2], xmsg);
 	} else {
 		ZVAL_NULL(&zvs[2]);
 	}
-	ZVAL_LONG(&zvs[3], xcode);
-	ZVAL_LONG(&zvs[4], bytes_sofar);
-	ZVAL_LONG(&zvs[5], bytes_max);
+	ZVAL_INT(&zvs[3], xcode);
+	ZVAL_INT(&zvs[4], bytes_sofar);
+	ZVAL_INT(&zvs[5], bytes_max);
 
 	if (FAILURE == call_user_function_ex(EG(function_table), NULL, callback, &retval, 6, zvs, 0, NULL TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call user notifier");
@@ -1356,7 +1356,7 @@ PHP_FUNCTION(stream_set_write_buffer)
 		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_WRITE_BUFFER, PHP_STREAM_BUFFER_FULL, &buff);
 	}
 
-	RETURN_LONG(ret == 0 ? 0 : EOF);
+	RETURN_INT(ret == 0 ? 0 : EOF);
 }
 /* }}} */
 
@@ -1390,7 +1390,7 @@ PHP_FUNCTION(stream_set_chunk_size)
 
 	ret = php_stream_set_option(stream, PHP_STREAM_OPTION_SET_CHUNK_SIZE, (int)csize, NULL);
 	
-	RETURN_LONG(ret > 0 ? (long)ret : (long)EOF);
+	RETURN_INT(ret > 0 ? (long)ret : (long)EOF);
 }
 /* }}} */
 
@@ -1419,7 +1419,7 @@ PHP_FUNCTION(stream_set_read_buffer)
 		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER, PHP_STREAM_BUFFER_FULL, &buff);
 	}
 
-	RETURN_LONG(ret == 0 ? 0 : EOF);
+	RETURN_INT(ret == 0 ? 0 : EOF);
 }
 /* }}} */
 
@@ -1448,7 +1448,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 				RETURN_FALSE;
 			}
 
-			cryptokind = Z_LVAL_P(val);
+			cryptokind = Z_IVAL_P(val);
 		}
 
 		if (zsessstream) {
@@ -1466,7 +1466,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 			RETURN_FALSE;
 
 		case 0:
-			RETURN_LONG(0);
+			RETURN_INT(0);
 
 		default:
 			RETURN_TRUE;

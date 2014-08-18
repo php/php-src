@@ -41,7 +41,7 @@ PHP_FUNCTION(gettype)
 			RETVAL_STRING("boolean");
 			break;
 
-		case IS_LONG:
+		case IS_INT:
 			RETVAL_STRING("integer");
 			break;
 
@@ -103,9 +103,9 @@ PHP_FUNCTION(settype)
 	ZVAL_DEREF(var);
 	SEPARATE_ZVAL_NOREF(var);
 	if (!strcasecmp(type, "integer")) {
-		convert_to_long(var);
+		convert_to_int(var);
 	} else if (!strcasecmp(type, "int")) {
-		convert_to_long(var);
+		convert_to_int(var);
 	} else if (!strcasecmp(type, "float")) {
 		convert_to_double(var);
 	} else if (!strcasecmp(type, "double")) { /* deprecated */
@@ -138,25 +138,25 @@ PHP_FUNCTION(settype)
 PHP_FUNCTION(intval)
 {
 	zval *num;
-	long base = 10;
+	php_int_t base = 10;
 
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
 	}
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &num, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &num, &base) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(num)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(base)
+		Z_PARAM_INT(base)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
 	RETVAL_ZVAL(num, 1, 0);
-	convert_to_long_base(return_value, base);
+	convert_to_int_base(return_value, base);
 }
 /* }}} */
 
@@ -277,7 +277,7 @@ PHP_FUNCTION(is_bool)
    Returns true if variable is a long (integer) */
 PHP_FUNCTION(is_long)
 {
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_INT);
 }
 /* }}} */
 
@@ -324,13 +324,13 @@ PHP_FUNCTION(is_numeric)
 	}
 
 	switch (Z_TYPE_P(arg)) {
-		case IS_LONG:
+		case IS_INT:
 		case IS_DOUBLE:
 			RETURN_TRUE;
 			break;
 
 		case IS_STRING:
-			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 0)) {
+			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), NULL, NULL, 0)) {
 				RETURN_TRUE;
 			} else {
 				RETURN_FALSE;
@@ -364,7 +364,7 @@ PHP_FUNCTION(is_scalar)
 		case IS_FALSE:
 		case IS_TRUE:
 		case IS_DOUBLE:
-		case IS_LONG:
+		case IS_INT:
 		case IS_STRING:
 			RETURN_TRUE;
 			break;

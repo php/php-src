@@ -358,7 +358,7 @@ ZEND_FUNCTION(zend_version)
    Returns number of freed zvals */
 ZEND_FUNCTION(gc_collect_cycles)
 {
-	RETURN_LONG(gc_collect_cycles(TSRMLS_C));
+	RETURN_INT(gc_collect_cycles(TSRMLS_C));
 }
 /* }}} */
 
@@ -397,10 +397,10 @@ ZEND_FUNCTION(func_num_args)
 	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
 
 	if (ex->frame_kind == VM_FRAME_NESTED_FUNCTION || ex->frame_kind == VM_FRAME_TOP_FUNCTION) {
-		RETURN_LONG(ex->num_args);
+		RETURN_INT(ex->num_args);
 	} else {
 		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
-		RETURN_LONG(-1);
+		RETURN_INT(-1);
 	}
 }
 /* }}} */
@@ -411,10 +411,10 @@ ZEND_FUNCTION(func_get_arg)
 {
 	int arg_count, first_extra_arg;
 	zval *arg;
-	long requested_offset;
+	zend_int_t requested_offset;
 	zend_execute_data *ex;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &requested_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &requested_offset) == FAILURE) {
 		return;
 	}
 
@@ -528,7 +528,7 @@ ZEND_FUNCTION(strlen)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	RETVAL_LONG(s->len);
+	RETVAL_INT(s->len);
 }
 /* }}} */
 
@@ -537,14 +537,13 @@ ZEND_FUNCTION(strlen)
    Binary safe string comparison */
 ZEND_FUNCTION(strcmp)
 {
-	char *s1, *s2;
-	int s1_len, s2_len;
+	zend_string *s1, *s2;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &s1, &s1_len, &s2, &s2_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &s1, &s2) == FAILURE) {
 		return;
 	}
 
-	RETURN_LONG(zend_binary_strcmp(s1, s1_len, s2, s2_len));
+	RETURN_INT(zend_binary_strcmp(s1->val, s1->len, s2->val, s2->len));
 }
 /* }}} */
 
@@ -553,11 +552,10 @@ ZEND_FUNCTION(strcmp)
    Binary safe string comparison */
 ZEND_FUNCTION(strncmp)
 {
-	char *s1, *s2;
-	int s1_len, s2_len;
-	long len;
+	zend_string *s1, *s2;
+	zend_int_t len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl", &s1, &s1_len, &s2, &s2_len, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSi", &s1, &s2, &len) == FAILURE) {
 		return;
 	}
 
@@ -566,7 +564,7 @@ ZEND_FUNCTION(strncmp)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(zend_binary_strncmp(s1, s1_len, s2, s2_len, len));
+	RETURN_INT(zend_binary_strncmp(s1->val, s1->len, s2->val, s2->len, len));
 }
 /* }}} */
 
@@ -575,14 +573,13 @@ ZEND_FUNCTION(strncmp)
    Binary safe case-insensitive string comparison */
 ZEND_FUNCTION(strcasecmp)
 {
-	char *s1, *s2;
-	int s1_len, s2_len;
+	zend_string *s1, *s2;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &s1, &s1_len, &s2, &s2_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &s1, &s2) == FAILURE) {
 		return;
 	}
 
-	RETURN_LONG(zend_binary_strcasecmp(s1, s1_len, s2, s2_len));
+	RETURN_INT(zend_binary_strcasecmp(s1->val, s1->len, s2->val, s2->len));
 }
 /* }}} */
 
@@ -591,11 +588,10 @@ ZEND_FUNCTION(strcasecmp)
    Binary safe string comparison */
 ZEND_FUNCTION(strncasecmp)
 {
-	char *s1, *s2;
-	int s1_len, s2_len;
-	long len;
+	zend_string *s1, *s2;
+	zend_int_t len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl", &s1, &s1_len, &s2, &s2_len, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSi", &s1, &s2, &len) == FAILURE) {
 		return;
 	}
 
@@ -604,7 +600,7 @@ ZEND_FUNCTION(strncasecmp)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(zend_binary_strncasecmp(s1, s1_len, s2, s2_len, len));
+	RETURN_INT(zend_binary_strncasecmp(s1->val, s1->len, s2->val, s2->len, len));
 }
 /* }}} */
 
@@ -614,7 +610,7 @@ ZEND_FUNCTION(strncasecmp)
 ZEND_FUNCTION(each)
 {
 	zval *array, *entry, tmp;
-	ulong num_key;
+	zend_uint_t num_key;
 	HashTable *target_hash;
 	zend_string *key;
 
@@ -660,7 +656,7 @@ ZEND_FUNCTION(each)
 		ZVAL_STR(&tmp, STR_COPY(key));
 		if (Z_REFCOUNTED(tmp)) Z_ADDREF(tmp);
 	} else {
-		ZVAL_LONG(&tmp, num_key);
+		ZVAL_INT(&tmp, num_key);
 	}
 	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 0, &tmp);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "key", sizeof("key")-1, &tmp);
@@ -688,7 +684,7 @@ ZEND_FUNCTION(error_reporting)
 		STR_RELEASE(key);
 	}
 
-	RETVAL_LONG(old_error_reporting);
+	RETVAL_INT(old_error_reporting);
 }
 /* }}} */
 
@@ -730,7 +726,7 @@ ZEND_FUNCTION(define)
 
 repeat:
 	switch (Z_TYPE_P(val)) {
-		case IS_LONG:
+		case IS_INT:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_FALSE:
@@ -1472,7 +1468,7 @@ ZEND_FUNCTION(class_alias)
    Cause an intentional memory leak, for testing/debugging purposes */
 ZEND_FUNCTION(leak)
 {
-	long leakbytes=3;
+	zend_int_t leakbytes=3;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &leakbytes) == FAILURE) {
 		return;
@@ -1540,7 +1536,7 @@ ZEND_FUNCTION(get_included_files)
    Generates a user-level error/warning/notice message */
 ZEND_FUNCTION(trigger_error)
 {
-	long error_type = E_USER_NOTICE;
+	zend_int_t error_type = E_USER_NOTICE;
 	char *message;
 	int message_len;
 
@@ -1572,7 +1568,7 @@ ZEND_FUNCTION(set_error_handler)
 {
 	zval *error_handler;
 	zend_string *error_handler_name = NULL;
-	long error_type = E_ALL;
+	zend_int_t error_type = E_ALL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &error_handler, &error_type) == FAILURE) {
 		return;
@@ -1880,11 +1876,11 @@ ZEND_FUNCTION(create_function)
 		}
 		(*func->refcount)++;
 
-		function_name = STR_ALLOC(sizeof("0lambda_")+MAX_LENGTH_OF_LONG, 0);
+		function_name = STR_ALLOC(sizeof("0lambda_")+MAX_LENGTH_OF_ZEND_INT, 0);
 		function_name->val[0] = '\0';
 
 		do {
-			function_name->len = snprintf(function_name->val + 1, sizeof("lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count)) + 1;
+			function_name->len = snprintf(function_name->val + 1, sizeof("lambda_")+MAX_LENGTH_OF_ZEND_INT, "lambda_%d", ++EG(lambda_count)) + 1;
 		} while (zend_hash_add_ptr(EG(function_table), function_name, func) == NULL);
 		static_variables = func->static_variables;
 		func->static_variables = NULL;
@@ -1911,7 +1907,7 @@ ZEND_FUNCTION(zend_test_func)
 #ifdef ZTS
 ZEND_FUNCTION(zend_thread_id)
 {
-	RETURN_LONG((long)tsrm_thread_id());
+	RETURN_INT((zend_int_t)tsrm_thread_id());
 }
 #endif
 #endif
@@ -2115,10 +2111,10 @@ ZEND_FUNCTION(debug_print_backtrace)
 	const char *include_filename = NULL;
 	zval arg_array;
 	int indent = 0;
-	long options = 0;
-	long limit = 0;
+	zend_int_t options = 0;
+	zend_int_t limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &options, &limit) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ii", &options, &limit) == FAILURE) {
 		return;
 	}
 
@@ -2356,7 +2352,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				lineno = skip->opline->lineno;
 			}
 			add_assoc_string_ex(&stack_frame, "file", sizeof("file")-1, (char*)filename);
-			add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, lineno);
+			add_assoc_int_ex(&stack_frame, "line", sizeof("line")-1, lineno);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
 			 * and debug_baktrace() might have been called by the error_handler. in this case we don't 
@@ -2375,7 +2371,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				}				    
 				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
 					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, STR_COPY(prev->func->op_array.filename));
-					add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, prev->opline->lineno);
+					add_assoc_int_ex(&stack_frame, "line", sizeof("line")-1, prev->opline->lineno);
 					break;
 				}
 				prev_call = prev;
@@ -2503,10 +2499,10 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
    Return backtrace as array */
 ZEND_FUNCTION(debug_backtrace)
 {
-	long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
-	long limit = 0;
+	zend_int_t options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
+	zend_int_t limit = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &options, &limit) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ii", &options, &limit) == FAILURE) {
 		return;
 	}
 
