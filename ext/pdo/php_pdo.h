@@ -49,7 +49,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo);
 PHP_MINFO_FUNCTION(pdo);
 
 ZEND_BEGIN_MODULE_GLOBALS(pdo)
-	long  global_value;
+	php_int_t  global_value;
 ZEND_END_MODULE_GLOBALS(pdo)
 
 #ifdef ZTS
@@ -59,12 +59,12 @@ ZEND_END_MODULE_GLOBALS(pdo)
 #endif
 
 #define REGISTER_PDO_CLASS_CONST_INT(const_name, value) \
-	zend_declare_class_constant_int(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+	zend_declare_class_constant_int(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (php_int_t)value TSRMLS_CC);
 
 #define REGISTER_PDO_CONST_LONG(const_name, value) { \
 	zend_class_entry **pce;	\
 	if (zend_hash_find(CG(class_table), "pdo", sizeof("pdo"), (void **) &pce) != FAILURE)	\
-		zend_declare_class_constant_int(*pce, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);	\
+		zend_declare_class_constant_int(*pce, const_name, sizeof(const_name)-1, (php_int_t)value TSRMLS_CC);	\
 }	\
 
 #define REGISTER_PDO_CLASS_CONST_STRING(const_name, value) \
