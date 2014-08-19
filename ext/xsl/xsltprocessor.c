@@ -138,7 +138,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 	zval *value;
 	char *xpath_expr;
 	zend_string *string_key;
-	ulong num_key;
+	php_uint_t num_key;
 	char **params = NULL;
 	int i = 0;
 
@@ -292,7 +292,11 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	
 	fci.size = sizeof(fci);
 	fci.function_table = EG(function_table);
-	fci.params = args;
+	if (fci.param_count > 0) {
+		fci.params = args;
+	} else {
+		fci.params = NULL;
+	}
 	
 	obj = valuePop(ctxt);
 	if (obj->stringval == NULL) {
@@ -760,7 +764,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 	zval *id;
 	zval *array_value, *entry, new_string;
 	xsl_object *intern;
-	ulong idx;
+	php_uint_t idx;
 	char *namespace;
 	int namespace_len;
 	zend_string *string_key, *name, *value;
@@ -914,10 +918,10 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 {
 	zval *id;
 	xsl_object *intern;
-	long securityPrefs, oldSecurityPrefs;
+	php_int_t securityPrefs, oldSecurityPrefs;
 
 	DOM_GET_THIS(id);
- 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &securityPrefs) == FAILURE) {
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &securityPrefs) == FAILURE) {
 		return;
 	}
 	intern = Z_XSL_P(id);

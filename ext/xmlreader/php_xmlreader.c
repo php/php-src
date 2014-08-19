@@ -561,11 +561,11 @@ Get value of an attribute at index from current element */
 PHP_METHOD(xmlreader, getAttributeNo)
 {
 	zval *id;
-	long attr_pos;
+	php_int_t attr_pos;
 	char *retchar = NULL;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &attr_pos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &attr_pos) == FAILURE) {
 		return;
 	}
 
@@ -618,11 +618,11 @@ Indicates whether given property (one of the parser option constants) is set or 
 PHP_METHOD(xmlreader, getParserProperty)
 {
 	zval *id;
-	long property;
+	php_int_t property;
 	int retval = -1;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &property) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &property) == FAILURE) {
 		return;
 	}
 
@@ -697,11 +697,11 @@ Returns TRUE on success and FALSE on failure */
 PHP_METHOD(xmlreader, moveToAttributeNo)
 {
 	zval *id;
-	long attr_pos;
+	php_int_t attr_pos;
 	int retval;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &attr_pos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &attr_pos) == FAILURE) {
 		return;
 	}
 
@@ -847,14 +847,14 @@ PHP_METHOD(xmlreader, open)
 {
 	zval *id;
 	int source_len = 0, encoding_len = 0;
-	long options = 0;
+	php_int_t options = 0;
 	xmlreader_object *intern = NULL;
 	char *source, *valid_file = NULL;
 	char *encoding = NULL;
 	char resolved_path[MAXPATHLEN + 1];
 	xmlTextReaderPtr reader = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|s!i", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
 		return;
 	}
 
@@ -978,12 +978,12 @@ Properties must be set after open() or XML() and before the first read() is call
 PHP_METHOD(xmlreader, setParserProperty)
 {
 	zval *id;
-	long property;
+	php_int_t property;
 	int retval = -1;
 	zend_bool value;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lb", &property, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ib", &property, &value) == FAILURE) {
 		return;
 	}
 
@@ -1030,7 +1030,7 @@ PHP_METHOD(xmlreader, XML)
 {
 	zval *id;
 	int source_len = 0, encoding_len = 0;
-	long options = 0;
+	php_int_t options = 0;
 	xmlreader_object *intern = NULL;
 	char *source, *uri = NULL, *encoding = NULL;
 	int resolved_path_len, ret = 0;
@@ -1038,7 +1038,7 @@ PHP_METHOD(xmlreader, XML)
 	xmlParserInputBufferPtr inputbfr;
 	xmlTextReaderPtr reader;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!i", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
 		return;
 	}
 
