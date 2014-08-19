@@ -79,7 +79,7 @@ ZEND_METHOD(Closure, call) /* {{{ */
 	zend_function my_function;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o*", &newthis, &my_params, &my_param_count) == FAILURE) {
-		RETURN_NULL();
+		return;
 	}
 	
 	zclosure = getThis();
@@ -87,7 +87,7 @@ ZEND_METHOD(Closure, call) /* {{{ */
 	
 	if (closure->func.common.fn_flags & ZEND_ACC_STATIC) {
 		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
-		RETURN_NULL();
+		return;
 	}
 
 	if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
@@ -95,7 +95,7 @@ ZEND_METHOD(Closure, call) /* {{{ */
 		if ((closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0 &&
 				!instanceof_function(Z_OBJCE_P(newthis), closure->func.common.scope TSRMLS_CC)) {
 			zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", closure->func.common.scope->name->val, closure->func.common.function_name->val, Z_OBJCE_P(newthis)->name->val);
-			RETURN_NULL();
+			return;
 		}
 	}
 
