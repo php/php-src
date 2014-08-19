@@ -41,7 +41,7 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 	while (s < e) {
 		if (chars[*s]) {
 			smart_str_appendl(&str, "&#", 2);
-			smart_str_append_unsigned(&str, (unsigned long)*s);
+			smart_str_append_unsigned(&str, (php_uint_t)*s);
 			smart_str_appendc(&str, ';');
 		} else {
 			/* XXX: this needs to be optimized to work with blocks of 'safe' chars */
@@ -108,7 +108,7 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 	ZVAL_STR(value, str);
 }
 
-static void php_filter_strip(zval *value, long flags)
+static void php_filter_strip(zval *value, php_int_t flags)
 {
 	unsigned char *str;
 	int   i, c;

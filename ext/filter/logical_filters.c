@@ -80,8 +80,8 @@
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
 
-static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
-	long ctx_value;
+static int php_filter_parse_int(const char *str, unsigned int str_len, php_int_t *ret TSRMLS_DC) { /* {{{ */
+	php_int_t ctx_value;
 	int sign = 0, digit = 0;
 	const char *end = str + str_len;
 
@@ -115,9 +115,9 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 	while (str < end) {
 		if (*str >= '0' && *str <= '9') {
 			digit = (*(str++) - '0');
-			if ( (!sign) && ctx_value <= (LONG_MAX-digit)/10 ) {
+			if ( (!sign) && ctx_value <= (PHP_INT_MAX-digit)/10 ) {
 				ctx_value = (ctx_value * 10) + digit;
-			} else if ( sign && ctx_value >= (LONG_MIN+digit)/10) {
+			} else if ( sign && ctx_value >= (PHP_INT_MIN+digit)/10) {
 				ctx_value = (ctx_value * 10) - digit;
 			} else {
 				return -1;
@@ -132,16 +132,16 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 }
 /* }}} */
 
-static int php_filter_parse_octal(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
-	unsigned long ctx_value = 0;
+static int php_filter_parse_octal(const char *str, unsigned int str_len, php_int_t *ret TSRMLS_DC) { /* {{{ */
+	php_uint_t ctx_value = 0;
 	const char *end = str + str_len;
 
 	while (str < end) {
 		if (*str >= '0' && *str <= '7') {
-			unsigned long n = ((*(str++)) - '0');
+			php_uint_t n = ((*(str++)) - '0');
 
-			if ((ctx_value > ((unsigned long)(~(long)0)) / 8) ||
-				((ctx_value = ctx_value * 8) > ((unsigned long)(~(long)0)) - n)) {
+			if ((ctx_value > ((php_uint_t)(~(php_int_t)0)) / 8) ||
+				((ctx_value = ctx_value * 8) > ((php_uint_t)(~(php_int_t)0)) - n)) {
 				return -1;
 			}
 			ctx_value += n;
@@ -150,15 +150,15 @@ static int php_filter_parse_octal(const char *str, unsigned int str_len, long *r
 		}
 	}
 	
-	*ret = (long)ctx_value;
+	*ret = (php_int_t)ctx_value;
 	return 1;
 }
 /* }}} */
 
-static int php_filter_parse_hex(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
-	unsigned long ctx_value = 0;
+static int php_filter_parse_hex(const char *str, unsigned int str_len, php_int_t *ret TSRMLS_DC) { /* {{{ */
+	php_uint_t ctx_value = 0;
 	const char *end = str + str_len;
-	unsigned long n;
+	php_uint_t n;
 
 	while (str < end) {
 		if (*str >= '0' && *str <= '9') {
@@ -170,14 +170,14 @@ static int php_filter_parse_hex(const char *str, unsigned int str_len, long *ret
 		} else {
 			return -1;
 		}
-		if ((ctx_value > ((unsigned long)(~(long)0)) / 16) ||
-			((ctx_value = ctx_value * 16) > ((unsigned long)(~(long)0)) - n)) {
+		if ((ctx_value > ((php_uint_t)(~(php_int_t)0)) / 16) ||
+			((ctx_value = ctx_value * 16) > ((php_uint_t)(~(php_int_t)0)) - n)) {
 			return -1;
 		}
 		ctx_value += n;
 	}
 
-	*ret = (long)ctx_value;
+	*ret = (php_int_t)ctx_value;
 	return 1;
 }
 /* }}} */
@@ -185,11 +185,11 @@ static int php_filter_parse_hex(const char *str, unsigned int str_len, long *ret
 void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	zval *option_val;
-	long  min_range, max_range, option_flags;
+	php_int_t  min_range, max_range, option_flags;
 	int   min_range_set, max_range_set;
 	int   allow_octal = 0, allow_hex = 0;
 	int	  len, error = 0;
-	long  ctx_value;
+	php_int_t  ctx_value;
 	char *p;
 
 	/* Parse options */
@@ -327,7 +327,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	char dec_sep = '.';
 	char tsd_sep[3] = "',.";
 
-	long lval;
+	php_int_t lval;
 	double dval;
 
 	int first, n;
@@ -422,7 +422,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	zval *option_val;
 	zend_string *regexp;
-	long option_flags;
+	php_int_t option_flags;
 	int regexp_set, option_flags_set;
 	pcre *re = NULL;
 	pcre_extra *pcre_extra = NULL;
@@ -796,7 +796,7 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int tokens, length, i, offset, exp_separator_set, exp_separator_len;
 	char separator;
 	char *exp_separator;
-	long ret = 0;
+	php_int_t ret = 0;
 	zval *option_val;
 
 	FETCH_STRING_OPTION(exp_separator, "separator");
