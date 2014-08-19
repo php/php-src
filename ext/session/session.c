@@ -1266,12 +1266,13 @@ static void php_session_remove_cookie(TSRMLS_D) {
 	zend_llist *l = &SG(sapi_headers).headers;
 	zend_llist_element *next;
 	zend_llist_element *current;
-	char *session_cookie, *e_session_name;
+	char *session_cookie;
+	zend_string *e_session_name;
 	int session_cookie_len, len = sizeof("Set-Cookie")-1;
 
 	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
-	spprintf(&session_cookie, 0, "Set-Cookie: %s=", e_session_name);
-	efree(e_session_name);
+	spprintf(&session_cookie, 0, "Set-Cookie: %s=", e_session_name->val);
+	STR_FREE(e_session_name);
 
 	session_cookie_len = strlen(session_cookie);
 	current = l->head;
