@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-08 Aug 2014, PHP 5.5.16RC1
+21 Aug 2014, PHP 5.5.16
 
 - COM:
   . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #67705 (extensive backtracking in rule regular expression).
     (CVE-2014-3538) (Remi)
+  . Fixed bug #67716 (Segfault in cdf.c). (CVE-2014-3587) (Remi)  
 
 - FPM:
   . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
@@ -16,6 +17,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
     (CVE-2014-2497) (Remi)
+  . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
+    (CVE-2014-5120) (Ryan Mauger)
 
 - Milter:
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
@@ -34,6 +37,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #67693 (incorrect push to the empty array) (Tjerk)
+  . Fixed bug #67717 (segfault in dns_get_record). (CVE-2014-3597) (Remi) 
 
 - ODBC:
   . Fixed bug #60616 (odbc_fetch_into returns junk data at end of multi-byte
