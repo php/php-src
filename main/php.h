@@ -69,6 +69,7 @@
 #define php_size_t zend_size_t
 #define php_int_t zend_int_t
 #define php_uint_t zend_uint_t
+#define php_off_t zend_off_t
 #define PHP_INT_MAX ZEND_INT_MAX
 #define PHP_INT_MIN ZEND_INT_MIN
 #define PHP_UINT_MAX ZEND_UINT_MAX
