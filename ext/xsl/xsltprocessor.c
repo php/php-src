@@ -292,7 +292,12 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	
 	fci.size = sizeof(fci);
 	fci.function_table = EG(function_table);
-	fci.params = args;
+	if (fci.param_count > 0) {
+		fci.params = args;
+	} else {
+		fci.params = NULL;
+	}
+
 	
 	obj = valuePop(ctxt);
 	if (obj->stringval == NULL) {
