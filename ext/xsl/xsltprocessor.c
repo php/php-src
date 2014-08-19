@@ -297,6 +297,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	} else {
 		fci.params = NULL;
 	}
+
 	
 	obj = valuePop(ctxt);
 	if (obj->stringval == NULL) {
