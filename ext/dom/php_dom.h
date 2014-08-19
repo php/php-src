@@ -76,6 +76,7 @@ typedef struct _dom_xpath_object {
 	int registerPhpFunctions;
 	HashTable *registered_phpfunctions;
 	HashTable *node_list;
+	zend_bool enable_register_node_ns;
 } dom_xpath_object;
 
 typedef struct _dom_nnodemap_object {

@@ -344,6 +344,25 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ enableRegisterNodeNS boolean
+readonly=no
+*/
+int dom_xpath_enable_register_node_ns_read(dom_object *obj, zval **retval TSRMLS_DC)
+{
+	MAKE_STD_ZVAL(*retval);
+	ZVAL_BOOL(*retval, ((dom_xpath_object *)obj)->enable_register_node_ns);
+
+	return SUCCESS;
+}
+
+int dom_xpath_enable_register_node_ns_write(dom_object *obj, zval *newval TSRMLS_DC)
+{
+	((dom_xpath_object *)obj)->enable_register_node_ns = zend_is_true(newval);
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ proto boolean dom_xpath_register_ns(string prefix, string uri); */
 PHP_FUNCTION(dom_xpath_register_ns)
 {
@@ -429,6 +448,11 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	}
 
 	ctxp->node = nodep;
+
+	if (ZEND_NUM_ARGS() < 3) {
+		/* register_node_ns was not passed, fetch default value from the property */
+		register_node_ns = intern->enable_register_node_ns;
+	}
 
 	if (register_node_ns) {
 		/* Register namespaces in the node */
