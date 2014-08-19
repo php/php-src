@@ -25,4 +25,7 @@ PHP                                                                        NEWS
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
 
+- GD:
+  . Made fontFetch's path parser thread-safe. (Sara)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
