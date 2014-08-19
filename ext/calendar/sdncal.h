@@ -53,7 +53,7 @@
  *
  *    int y1, m1, d1;
  *    int y2, m2, d2;
- *    long int sdn;
+ *    php_int_t sdn;
  *    ...
  *    sdn = GregorianToSdn(y1, m1, d1);
  *    if (sdn > 0) {
@@ -65,19 +65,21 @@
  *
  **************************************************************************/
 
+#include "php.h"
+
 /* Gregorian calendar conversions. */
-void SdnToGregorian(long int sdn, int *pYear, int *pMonth, int *pDay);
-long int GregorianToSdn(int year, int month, int day);
+void SdnToGregorian(php_int_t sdn, int *pYear, int *pMonth, int *pDay);
+php_int_t GregorianToSdn(int year, int month, int day);
 extern char *MonthNameShort[13];
 extern char *MonthNameLong[13];
 
 /* Julian calendar conversions. */
-void SdnToJulian(long int sdn, int *pYear, int *pMonth, int *pDay);
-long int JulianToSdn(int year, int month, int day);
+void SdnToJulian(php_int_t sdn, int *pYear, int *pMonth, int *pDay);
+php_int_t JulianToSdn(int year, int month, int day);
 
 /* Jewish calendar conversions. */
-void SdnToJewish(long int sdn, int *pYear, int *pMonth, int *pDay);
-long int JewishToSdn(int year, int month, int day);
+void SdnToJewish(php_int_t sdn, int *pYear, int *pMonth, int *pDay);
+php_int_t JewishToSdn(int year, int month, int day);
 extern char *JewishMonthName[14];
 extern char *JewishMonthNameLeap[14];
 extern char *JewishMonthHebName[14];
@@ -85,15 +87,15 @@ extern char *JewishMonthHebNameLeap[14];
 extern int monthsPerYear[19];
 
 /* French republic calendar conversions. */
-void SdnToFrench(long int sdn, int *pYear, int *pMonth, int *pDay);
-long int FrenchToSdn(int inputYear, int inputMonth, int inputDay);
+void SdnToFrench(php_int_t sdn, int *pYear, int *pMonth, int *pDay);
+php_int_t FrenchToSdn(int inputYear, int inputMonth, int inputDay);
 extern char *FrenchMonthName[14];
 
 /* Islamic calendar conversions. */
 /* Not implemented yet. */
 
 /* Day of week conversion.  0=Sunday, 6=Saturday */
-int DayOfWeek(long int sdn);
+int DayOfWeek(php_int_t sdn);
 extern char *DayNameShort[7];
 extern char *DayNameLong[7];
 

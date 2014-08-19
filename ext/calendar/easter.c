@@ -24,14 +24,14 @@
 #include "sdncal.h"
 #include <time.h>
 
-static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
+static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, php_int_t gm)
 {
 
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
 	struct tm te;
-	long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
-	long method = CAL_EASTER_DEFAULT;
+	php_int_t year, golden, solar, lunar, pfm, dom, tmp, easter, result;
+	php_int_t method = CAL_EASTER_DEFAULT;
 
 	/* Default to the current year if year parameter is not given */
 	{
@@ -47,7 +47,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"|ll", &year, &method) == FAILURE) {
+		"|ii", &year, &method) == FAILURE) {
 			return;
 	}
  
