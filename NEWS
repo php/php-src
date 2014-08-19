@@ -2,8 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 07 Aug 2014, PHP 5.4.32 RC1
 
+- Core:
+  . Fixed bug #67717 (segfault in dns_get_record). (CVE-2014-3597) (Remi) 
+
 - COM:
-  . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
+  . Fixed missing type checks in com_event_sink. (Yussuf Khalil, Stas)
 
 - Fileinfo:
   . Fixed bug #67705 (extensive backtracking in rule regular expression).
