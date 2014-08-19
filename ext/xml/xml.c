@@ -383,7 +383,7 @@ static void _xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encodi
 	if (len == 0) {
 		len = _xml_xmlcharlen(s);
 	}
-	ZVAL_STRINGL(ret, (char *)s, len);
+	ZVAL_STR(ret, xml_utf8_decode(s, len, encoding));
 }
 /* }}} */
 

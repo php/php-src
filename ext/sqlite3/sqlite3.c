@@ -1396,8 +1396,8 @@ PHP_METHOD(sqlite3stmt, bindParam)
 	php_sqlite3_stmt *stmt_obj;
 	zval *object = getThis();
 	struct php_sqlite3_bound_param param = {0};
-	stmt_obj = Z_SQLITE3_STMT_P(object);
 	zval *parameter;
+	stmt_obj = Z_SQLITE3_STMT_P(object);
 
 	param.param_number = -1;
 	param.type = SQLITE3_TEXT;
@@ -1430,8 +1430,8 @@ PHP_METHOD(sqlite3stmt, bindValue)
 	php_sqlite3_stmt *stmt_obj;
 	zval *object = getThis();
 	struct php_sqlite3_bound_param param = {0};
-	stmt_obj = Z_SQLITE3_STMT_P(object);
 	zval *parameter;
+	stmt_obj = Z_SQLITE3_STMT_P(object);
 
 	param.param_number = -1;
 	param.type = SQLITE3_TEXT;
