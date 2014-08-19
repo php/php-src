@@ -71,16 +71,10 @@ ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, c
 ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce TSRMLS_DC);
 END_EXTERN_C()
 
-/* isnan() might not be available (<C99), so we'll define it if so */
-#ifndef isnan
-	/* NaN is never equal to itself */
-#	define isnan(n) ((n) != (n))
-#endif
-
 #if ZEND_DVAL_TO_LVAL_CAST_OK
 static zend_always_inline long zend_dval_to_lval(double d)
 {
-    if (EXPECTED(!isnan(d))) {
+    if (EXPECTED(zend_finite(d)) && EXPECTED(!zend_isnan(d))) {
         return (long)d;
     } else {
         return 0;
@@ -100,7 +94,7 @@ static zend_always_inline long zend_dval_to_lval(double d)
 			dmod = ceil(dmod) + two_pow_32;
 		}
 		return (long)(unsigned long)dmod;
-	} else if (UNEXPECTED(isnan(d))) {
+	} else if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
 		return 0;
 	}
 	return (long)d;
@@ -120,7 +114,7 @@ static zend_always_inline long zend_dval_to_lval(double d)
 			dmod += two_pow_64;
 		}
 		return (long)(unsigned long)dmod;
-	} else if (UNEXPECTED(isnan(d))) {
+	} else if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
 		return 0;
 	}
 	return (long)d;
