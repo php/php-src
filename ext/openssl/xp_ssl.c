@@ -89,9 +89,9 @@ typedef struct _php_openssl_sni_cert_t {
 
 /* Provides leaky bucket handhsake renegotiation rate-limiting  */
 typedef struct _php_openssl_handshake_bucket_t {
-	long prev_handshake;
-	long limit;
-	long window;
+	php_int_t prev_handshake;
+	php_int_t limit;
+	php_int_t window;
 	float tokens;
 	unsigned should_close;
 } php_openssl_handshake_bucket_t;
@@ -146,7 +146,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 	int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
 	char esbuf[512];
 	smart_str ebuf = {0};
-	unsigned long ecode;
+	php_uint_t ecode;
 	int retry = 1;
 
 	switch(err) {
@@ -230,7 +230,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 	SSL *ssl;
 	int err, depth, ret;
 	zval *val;
-	unsigned long allowed_depth = OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
+	php_uint_t allowed_depth = OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
 
 	TSRMLS_FETCH();
 
@@ -254,7 +254,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 
 	/* check the depth */
 	GET_VER_OPT_LONG("verify_depth", allowed_depth);
-	if ((unsigned long)depth > allowed_depth) {
+	if ((php_uint_t)depth > allowed_depth) {
 		ret = 0;
 		X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
 	}
@@ -880,7 +880,7 @@ static int set_local_cert(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static const SSL_METHOD *php_select_crypto_method(long method_value, int is_client TSRMLS_DC) /* {{{ */
+static const SSL_METHOD *php_select_crypto_method(php_int_t method_value, int is_client TSRMLS_DC) /* {{{ */
 {
 	if (method_value == STREAM_CRYPTO_METHOD_SSLv2) {
 #ifndef OPENSSL_NO_SSL2
@@ -918,9 +918,9 @@ static const SSL_METHOD *php_select_crypto_method(long method_value, int is_clie
 }
 /* }}} */
 
-static long php_get_crypto_method_ctx_flags(long method_flags TSRMLS_DC) /* {{{ */
+static php_int_t php_get_crypto_method_ctx_flags(php_int_t method_flags TSRMLS_DC) /* {{{ */
 {
-	long ssl_ctx_options = SSL_OP_ALL;
+	php_int_t ssl_ctx_options = SSL_OP_ALL;
 
 #ifndef OPENSSL_NO_SSL2
 	if (!(method_flags & STREAM_CRYPTO_METHOD_SSLv2)) {
@@ -956,7 +956,7 @@ static void limit_handshake_reneg(const SSL *ssl) /* {{{ */
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
 	struct timeval now;
-	long elapsed_time;
+	php_int_t elapsed_time;
 
 	stream = php_openssl_get_stream_from_ssl_handle(ssl);
 	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
@@ -1025,8 +1025,8 @@ static void info_callback(const SSL *ssl, int where, int ret) /* {{{ */
 static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
 {
 	zval *val;
-	long limit = OPENSSL_DEFAULT_RENEG_LIMIT;
-	long window = OPENSSL_DEFAULT_RENEG_WINDOW;
+	php_int_t limit = OPENSSL_DEFAULT_RENEG_LIMIT;
+	php_int_t window = OPENSSL_DEFAULT_RENEG_WINDOW;
 
 	if (PHP_STREAM_CONTEXT(stream) &&
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
@@ -1255,7 +1255,7 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 	zval *val;
 	zval *current;
 	zend_string *key;
-	ulong key_index;
+	php_uint_t key_index;
 	int i = 0;
 	char resolved_path_buff[MAXPATHLEN];
 	SSL_CTX *ctx;
@@ -2167,13 +2167,13 @@ php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_set_option,
 };
 
-static long get_crypto_method(php_stream_context *ctx, long crypto_method)
+static php_int_t get_crypto_method(php_stream_context *ctx, php_int_t crypto_method)
 {
 	zval *val;
 
 	if (ctx && (val = php_stream_context_get_option(ctx, "ssl", "crypto_method")) != NULL) {
 		convert_to_int_ex(val);
-		crypto_method = (long)Z_IVAL_P(val);
+		crypto_method = (php_int_t)Z_IVAL_P(val);
 	        crypto_method |= STREAM_CRYPTO_IS_CLIENT;
 	}
 
