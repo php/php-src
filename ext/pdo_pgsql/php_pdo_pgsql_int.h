@@ -54,7 +54,7 @@ typedef struct {
 typedef struct {
 	char         *def;
 	Oid          pgsql_type;
-	long         intval;
+	php_int_t         intval;
 	zend_bool    boolval;
 } pdo_pgsql_column;
 

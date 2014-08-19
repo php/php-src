@@ -88,7 +88,7 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
-	unsigned long affected_rows = 0;
+	php_uint_t affected_rows = 0;
 	static char info_count[] = {isc_info_sql_records};
 	char result[64];
 
@@ -153,7 +153,7 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 /* called by PDO to fetch the next row from a statement */
 static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
-	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, php_int_t offset TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
@@ -219,7 +219,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ 
 
 /* fetch a blob into a fetch buffer */
 static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ */
-	unsigned long *len, ISC_QUAD *blob_id TSRMLS_DC)
+	php_uint_t *len, ISC_QUAD *blob_id TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
@@ -263,7 +263,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 	/* we've found the blob's length, now fetch! */
 	
 	if (*len) {
-		unsigned long cur_len;
+		php_uint_t cur_len;
 		unsigned short seg_len;
 		ISC_STATUS stat;
 
@@ -296,7 +296,7 @@ fetch_blob_end:
 /* }}} */
 
 static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{{ */
-	unsigned long *len, int *caller_frees TSRMLS_DC)
+	php_uint_t *len, int *caller_frees TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	XSQLVAR const *var = &S->out_sqlda.sqlvar[colno];
@@ -413,7 +413,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param T
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
 	isc_blob_handle h = NULL;
-	unsigned long put_cnt = 0, rem_cnt;
+	php_uint_t put_cnt = 0, rem_cnt;
 	unsigned short chunk_size;
 	int result = 1;
 	
@@ -495,7 +495,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 	
 	switch (event_type) {
 		char *value;
-		unsigned long value_len;
+		php_uint_t value_len;
 		int caller_frees;
 		zval *parameter;
 			
@@ -551,9 +551,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				
 				case IS_INT:
 					/* keep the allow-NULL flag */
-					var->sqltype = (sizeof(long) == 8 ? SQL_INT64 : SQL_LONG) | (var->sqltype & 1);
+					var->sqltype = (sizeof(php_int_t) == 8 ? SQL_INT64 : SQL_LONG) | (var->sqltype & 1);
 					var->sqldata = (void*)&Z_IVAL_P(parameter);
-					var->sqllen = sizeof(long);
+					var->sqllen = sizeof(php_int_t);
 					break;
 				case IS_DOUBLE:
 					/* keep the allow-NULL flag */
@@ -626,7 +626,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						}
 					case PDO_PARAM_INT:
 						if (value) {
-							ZVAL_INT(parameter, *(long*)value);
+							ZVAL_INT(parameter, *(php_int_t*)value);
 							break;
 						}
 					case PDO_PARAM_EVT_NORMALIZE:
@@ -654,7 +654,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 }
 /* }}} */
 
-static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC) /* {{{ */
+static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, php_int_t attr, zval *val TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	
@@ -675,7 +675,7 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, long attr, zval *val TS
 }
 /* }}} */
 
-static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC) /* {{{ */
+static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, php_int_t attr, zval *val TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	
