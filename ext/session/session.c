@@ -305,7 +305,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	}
 
 	/* maximum 15+19+19+10 bytes */
-	spprintf(&buf, 0, "%.15s%ld%ld%0.8F", remote_addr ? remote_addr : "", tv.tv_sec, (long int)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
+	spprintf(&buf, 0, "%.15s%ld%ld%0.8F", remote_addr ? remote_addr : "", tv.tv_sec, (php_int_t)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
 
 	switch (PS(hash_func)) {
 		case PS_HASH_FUNC_MD5:
@@ -705,14 +705,14 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 
 static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 {
-	long val;
+	php_int_t val;
 	char *endptr = NULL;
 
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 	PS(hash_ops) = NULL;
 #endif
 
-	val = strtol(new_value, &endptr, 10);
+	val = ZEND_STRTOI(new_value, &endptr, 10);
 	if (endptr && (*endptr == '\0')) {
 		/* Numeric value */
 		PS(hash_func) = val ? 1 : 0;
@@ -1148,7 +1148,7 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) /* {{{ */
 static inline void last_modified(TSRMLS_D) /* {{{ */
 {
 	const char *path;
-	struct stat sb;
+	php_stat_t sb;
 	char buf[MAX_STR + 1];
 
 	path = SG(request_info).path_translated;
@@ -1778,7 +1778,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		zend_string *func_name;
 		HashPosition pos;
 		zend_function *default_mptr, *current_mptr;
-		ulong func_index;
+		php_uint_t func_index;
 		php_shutdown_function_entry shutdown_function_entry;
 		zend_bool register_shutdown = 1;
 
@@ -2719,7 +2719,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				array_init(&progress->data);
 				array_init(&progress->files);
 
-				add_assoc_int_ex(&progress->data, "start_time", sizeof("start_time") - 1, (long)sapi_get_request_time(TSRMLS_C));
+				add_assoc_int_ex(&progress->data, "start_time", sizeof("start_time") - 1, (php_int_t)sapi_get_request_time(TSRMLS_C));
 				add_assoc_int_ex(&progress->data, "content_length",  sizeof("content_length") - 1, progress->content_length);
 				add_assoc_int_ex(&progress->data, "bytes_processed", sizeof("bytes_processed") - 1, data->post_bytes_processed);
 				add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 0);
@@ -2742,7 +2742,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			add_assoc_int_ex(&progress->current_file, "error", sizeof("error") - 1, 0);
 
 			add_assoc_bool_ex(&progress->current_file, "done", sizeof("done") - 1, 0);
-			add_assoc_int_ex(&progress->current_file, "start_time", sizeof("start_time") - 1, (long)time(NULL));
+			add_assoc_int_ex(&progress->current_file, "start_time", sizeof("start_time") - 1, (php_int_t)time(NULL));
 			add_assoc_int_ex(&progress->current_file, "bytes_processed", sizeof("bytes_processed") - 1, 0);
 
 			add_next_index_zval(&progress->files, &progress->current_file);

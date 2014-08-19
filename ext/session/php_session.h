@@ -104,8 +104,8 @@ typedef struct _php_session_rfc1867_progress {
 	zval      sid;
 	smart_str key;
 
-	long      update_step;
-	long      next_update;
+	php_int_t      update_step;
+	php_int_t      next_update;
 	double    next_update_time;
 	zend_bool cancel_upload;
 	zend_bool apply_trans_sid;
@@ -125,8 +125,8 @@ typedef struct _php_ps_globals {
 	char *extern_referer_chk;
 	char *entropy_file;
 	char *cache_limiter;
-	long entropy_length;
-	long cookie_lifetime;
+	php_int_t entropy_length;
+	php_int_t cookie_lifetime;
 	char *cookie_path;
 	char *cookie_domain;
 	zend_bool  cookie_secure;
@@ -135,11 +135,11 @@ typedef struct _php_ps_globals {
 	ps_module *default_mod;
 	void *mod_data;
 	php_session_status session_status;
-	long gc_probability;
-	long gc_divisor;
-	long gc_maxlifetime;
+	php_int_t gc_probability;
+	php_int_t gc_divisor;
+	php_int_t gc_maxlifetime;
 	int module_number;
-	long cache_expire;
+	php_int_t cache_expire;
 	union {
 		zval names[7];
 		struct {
@@ -162,11 +162,11 @@ typedef struct _php_ps_globals {
 	zend_bool use_trans_sid;	/* contains the INI value of whether to use trans-sid */
 	zend_bool apply_trans_sid;	/* whether or not to enable trans-sid for the current request */
 
-	long hash_func;
+	php_int_t hash_func;
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 	php_hash_ops *hash_ops;
 #endif
-	long hash_bits_per_character;
+	php_int_t hash_bits_per_character;
 	int send_cookie;
 	int define_sid;
 	zend_bool invalid_session_id;	/* allows the driver to report about an invalid session id and request id regeneration */
@@ -176,7 +176,7 @@ typedef struct _php_ps_globals {
 	zend_bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 	char *rfc1867_prefix;  /* session.upload_progress.prefix */
 	char *rfc1867_name;    /* session.upload_progress.name */
-	long rfc1867_freq;         /* session.upload_progress.freq */
+	php_int_t rfc1867_freq;         /* session.upload_progress.freq */
 	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
 
 	zend_bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
@@ -254,7 +254,7 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 
 #define PS_ENCODE_VARS 												\
 	zend_string *key;												\
-	ulong num_key;													\
+	php_uint_t num_key;													\
 	zval *struc;
 
 #define PS_ENCODE_LOOP(code) do {									\
