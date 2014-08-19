@@ -72,8 +72,8 @@
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
 
-static int
-php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
+static php_size_t
+php_apache_sapi_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
 {
 	request_rec *r;
 	php_struct *ctx;
@@ -180,8 +180,8 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
-static int
-php_apache_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
+static apr_size_t
+php_apache_sapi_read_post(char *buf, php_size_t count_bytes TSRMLS_DC)
 {
 	apr_size_t len, tlen=0;
 	php_struct *ctx = SG(server_context);
@@ -212,7 +212,7 @@ php_apache_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 	return tlen;
 }
 
-static struct stat*
+static php_stat_t*
 php_apache_sapi_get_stat(TSRMLS_D)
 {
 	php_struct *ctx = SG(server_context);
@@ -270,7 +270,7 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
-	int new_val_len;
+	php_size_t new_val_len;
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) {
