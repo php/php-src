@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #66091 (memory leaks in DateTime constructor). (Tjerk).
 
+- GD
+  . Made fontFetch's path parser thread-safe. (Sara).
+
 ?? ??? 2014, PHP 5.4.32
 
 - COM:
