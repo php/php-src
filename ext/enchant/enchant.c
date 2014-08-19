@@ -422,11 +422,11 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 {
 	zval *broker;
 	enchant_broker *pbroker;
-	long dict_type;
+	php_int_t dict_type;
 	char *value;
 	int value_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &broker, &dict_type, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ris", &broker, &dict_type, &value, &value_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -462,10 +462,10 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 {
 	zval *broker;
 	enchant_broker *pbroker;
-	long dict_type;
+	php_int_t dict_type;
 	char *value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &broker, &dict_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &broker, &dict_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
