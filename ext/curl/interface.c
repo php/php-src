@@ -154,7 +154,7 @@ static void _php_curl_close(zend_resource *rsrc TSRMLS_DC);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
-#define CAAL(s, v) add_assoc_int_ex(return_value, s, sizeof(s) - 1, (long) v);
+#define CAAL(s, v) add_assoc_int_ex(return_value, s, sizeof(s) - 1, (php_int_t) v);
 #define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s) - 1, (double) v);
 #define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s) - 1, (char *) (v ? v : ""));
 #define CAASTR(s, v) add_assoc_str_ex(return_value, s, sizeof(s) - 1, v ? v : STR_EMPTY_ALLOC());
@@ -166,7 +166,7 @@ static void _php_curl_close(zend_resource *rsrc TSRMLS_DC);
 # define php_curl_ret(__ret) RETVAL_FALSE; return;
 #endif
 
-static int php_curl_option_str(php_curl *ch, long option, const char *str, const int len, zend_bool make_copy TSRMLS_DC)
+static int php_curl_option_str(php_curl *ch, php_int_t option, const char *str, const int len, zend_bool make_copy TSRMLS_DC)
 {
 	CURLcode error = CURLE_OK;
 
@@ -1670,9 +1670,9 @@ static void curl_free_slist(zval *el)
 PHP_FUNCTION(curl_version)
 {
 	curl_version_info_data *d;
-	long uversion = CURLVERSION_NOW;
+	php_int_t uversion = CURLVERSION_NOW;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &uversion) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &uversion) == FAILURE) {
 		return;
 	}
 
@@ -1986,7 +1986,7 @@ PHP_FUNCTION(curl_copy_handle)
 }
 /* }}} */
 
-static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /* {{{ */
+static int _php_curl_setopt(php_curl *ch, php_int_t option, zval *zvalue TSRMLS_DC) /* {{{ */
 {
 	CURLcode error = CURLE_OK;
 
@@ -2744,10 +2744,10 @@ static int _php_curl_setopt(php_curl *ch, long option, zval *zvalue TSRMLS_DC) /
 PHP_FUNCTION(curl_setopt)
 {
 	zval       *zid, *zvalue;
-	long        options;
+	php_int_t        options;
 	php_curl   *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &zid, &options, &zvalue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riz", &zid, &options, &zvalue) == FAILURE) {
 		return;
 	}
 
@@ -2772,7 +2772,7 @@ PHP_FUNCTION(curl_setopt_array)
 {
 	zval		*zid, *arr, *entry;
 	php_curl	*ch;
-	ulong		option;
+	php_uint_t	option;
 	zend_string	*string_key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za", &zid, &arr) == FAILURE) {
@@ -2787,7 +2787,7 @@ PHP_FUNCTION(curl_setopt_array)
 					"Array keys must be CURLOPT constants or equivalent integer values");
 			RETURN_FALSE;
 		}
-		if (_php_curl_setopt(ch, (long) option, entry TSRMLS_CC) == FAILURE) {
+		if (_php_curl_setopt(ch, (php_int_t) option, entry TSRMLS_CC) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -2872,9 +2872,9 @@ PHP_FUNCTION(curl_getinfo)
 {
 	zval		*zid;
 	php_curl	*ch;
-	long		option = 0;
+	php_int_t		option = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zid, &option) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &zid, &option) == FAILURE) {
 		return;
 	}
 
@@ -2882,7 +2882,7 @@ PHP_FUNCTION(curl_getinfo)
 
 	if (ZEND_NUM_ARGS() < 2) {
 		char *s_code;
-		long l_code;
+		php_int_t l_code;
 		double d_code;
 #if LIBCURL_VERSION_NUM >  0x071301
 		struct curl_certinfo *ci = NULL;
@@ -3026,7 +3026,7 @@ PHP_FUNCTION(curl_getinfo)
 					}
 					case CURLINFO_LONG:
 					{
-						long code = 0;
+						php_int_t code = 0;
 
 						if (curl_easy_getinfo(ch->cp, option, &code) == CURLE_OK) {
 							RETURN_INT(code);
@@ -3217,10 +3217,10 @@ static void _php_curl_close(zend_resource *rsrc TSRMLS_DC)
       return string describing error code */
 PHP_FUNCTION(curl_strerror)
 {
-	long code;
+	php_int_t code;
 	const char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &code) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &code) == FAILURE) {
 		return;
 	}
 
@@ -3363,11 +3363,11 @@ PHP_FUNCTION(curl_unescape)
        pause and unpause a connection */
 PHP_FUNCTION(curl_pause)
 {
-	long       bitmask;
+	php_int_t       bitmask;
 	zval       *zid;
 	php_curl   *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zid, &bitmask) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &zid, &bitmask) == FAILURE) {
 		return;
 	}
 
