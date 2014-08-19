@@ -992,6 +992,7 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 		buf = estrdup(errstr);
 	} else {
 		strncpy(buf, errstr, bufsize);
+		buf[bufsize?(bufsize-1):0] = 0;
 	}
 	return buf;
 #else
@@ -1016,6 +1017,7 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 		buf = estrdup(sysbuf);
 	} else {
 		strncpy(buf, sysbuf, bufsize);
+		buf[bufsize?(bufsize-1):0] = 0;
 	}
 
 	if (free_it) {
