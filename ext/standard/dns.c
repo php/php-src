@@ -711,8 +711,9 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 
 			CHECKCP(1);
 			n = (cp[0] & 0xFF);
+			cp++;
 			CHECKCP(n);
-			add_assoc_stringl(subarray, "flags", (char*)++cp, n);
+			add_assoc_stringl(subarray, "flags", (char*)cp, n);
 			cp += n;
 
 			CHECKCP(1);
