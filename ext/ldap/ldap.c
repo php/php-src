@@ -295,11 +295,11 @@ PHP_FUNCTION(ldap_connect)
 {
 	char *host = NULL;
 	int hostlen;
-	long port = 389; /* Default port */
+	php_int_t port = 389; /* Default port */
 #ifdef HAVE_ORALDAP
 	char *wallet = NULL, *walletpasswd = NULL;
 	int walletlen = 0, walletpasswdlen = 0;
-	long authmode = GSLC_SSL_NO_AUTH;
+	php_int_t authmode = GSLC_SSL_NO_AUTH;
 	int ssl=0;
 #endif
 	ldap_linkdata *ld;
@@ -310,7 +310,7 @@ PHP_FUNCTION(ldap_connect)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|slssl", &host, &hostlen, &port, &wallet, &walletlen, &walletpasswd, &walletpasswdlen, &authmode) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sissi", &host, &hostlen, &port, &wallet, &walletlen, &walletpasswd, &walletpasswdlen, &authmode) != SUCCESS) {
 		RETURN_FALSE;
 	}
 
@@ -318,7 +318,7 @@ PHP_FUNCTION(ldap_connect)
 		ssl = 1;
 	}
 #else
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &host, &hostlen, &port) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|si", &host, &hostlen, &port) != SUCCESS) {
 		RETURN_FALSE;
 	}
 #endif
@@ -610,7 +610,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
 	zval *link, *base_dn, *filter, *attrs = NULL, *attr;
-	long attrsonly, sizelimit, timelimit, deref;
+	php_int_t attrsonly, sizelimit, timelimit, deref;
 	char *ldap_base_dn = NULL, *ldap_filter = NULL, **ldap_attrs = NULL; 
 	ldap_linkdata *ld = NULL;
 	LDAPMessage *ldap_res;
@@ -618,7 +618,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;	 
 	int num_attribs = 0, ret = 1, i, errno, argcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argcount TSRMLS_CC, "zzz|allll", &link, &base_dn, &filter, &attrs, &attrsonly,
+	if (zend_parse_parameters(argcount TSRMLS_CC, "zzz|aiiii", &link, &base_dn, &filter, &attrs, &attrsonly,
 		&sizelimit, &timelimit, &deref) == FAILURE) {
 		return;
 	}
@@ -1031,9 +1031,9 @@ PHP_FUNCTION(ldap_first_attribute)
 	ldap_linkdata *ld;
 	ldap_resultentry *resultentry;
 	char *attribute;
-	long dummy_ber;
+	php_int_t dummy_ber;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|l", &link, &result_entry, &dummy_ber) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|i", &link, &result_entry, &dummy_ber) != SUCCESS) {
 		return;
 	}
 
@@ -1059,9 +1059,9 @@ PHP_FUNCTION(ldap_next_attribute)
 	ldap_linkdata *ld;
 	ldap_resultentry *resultentry;
 	char *attribute;
-	long dummy_ber;
+	php_int_t dummy_ber;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|l", &link, &result_entry, &dummy_ber) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|i", &link, &result_entry, &dummy_ber) != SUCCESS) {
 		return;
 	}
 
@@ -1214,11 +1214,11 @@ PHP_FUNCTION(ldap_get_dn)
    Splits DN into its component parts */
 PHP_FUNCTION(ldap_explode_dn)
 {
-	long with_attrib;
+	php_int_t with_attrib;
 	char *dn, **ldap_value;
 	int i, count, dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &dn, &dn_len, &with_attrib) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "si", &dn, &dn_len, &with_attrib) != SUCCESS) {
 		return;
 	}
 
@@ -1280,7 +1280,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	int i, j, num_attribs, num_values, dn_len;
 	int *num_berval;
 	zend_string *attribute;
-	ulong index;
+	php_uint_t index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsa", &link, &dn, &dn_len, &entry) != SUCCESS) {
@@ -1539,10 +1539,10 @@ PHP_FUNCTION(ldap_modify_batch)
 	/* perform validation */
 	{
 		zend_string *modkey;
-		long modtype;
+		php_int_t modtype;
 
 		/* to store the wrongly-typed keys */
-		ulong tmpUlong;
+		php_uint_t tmpUlong;
 
 		/* make sure the DN contains no NUL bytes */
 		if (_ldap_strlen_max(dn, dn_len) != dn_len) {
@@ -1808,9 +1808,9 @@ PHP_FUNCTION(ldap_errno)
    Convert error number to error string */
 PHP_FUNCTION(ldap_err2str)
 {
-	long perrno;
+	php_int_t perrno;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &perrno) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &perrno) != SUCCESS) {
 		return;
 	}
 
@@ -1908,9 +1908,9 @@ PHP_FUNCTION(ldap_get_option)
 {
 	zval *link, *retval;
 	ldap_linkdata *ld;
-	long option;
+	php_int_t option;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz/", &link, &option, &retval) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riz/", &link, &option, &retval) != SUCCESS) {
 		return;
 	}
 
@@ -2013,9 +2013,9 @@ PHP_FUNCTION(ldap_set_option)
 	zval *link, *newval;
 	ldap_linkdata *ld;
 	LDAP *ldap;
-	long option;
+	php_int_t option;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlz", &link, &option, &newval) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ziz", &link, &option, &newval) != SUCCESS) {
 		return;
 	}
 
@@ -2522,10 +2522,10 @@ PHP_FUNCTION(ldap_escape)
 	char *value, *ignores, *result;
 	int valuelen = 0, ignoreslen = 0, i;
 	size_t resultlen;
-	long flags = 0;
+	php_int_t flags = 0;
 	zend_bool map[256] = {0}, havecharlist = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sl", &value, &valuelen, &ignores, &ignoreslen, &flags) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|si", &value, &valuelen, &ignores, &ignoreslen, &flags) != SUCCESS) {
 		return;
 	}
 
@@ -2613,7 +2613,7 @@ PHP_FUNCTION(ldap_8859_to_t61)
    Inject paged results control*/
 PHP_FUNCTION(ldap_control_paged_result) 
 {
-	long pagesize;
+	php_int_t pagesize;
 	zend_bool iscritical;
 	zval *link;
 	char *cookie = NULL;
@@ -2625,7 +2625,7 @@ PHP_FUNCTION(ldap_control_paged_result)
 	LDAPControl	ctrl, *ctrlsp[2];
 	int rc, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|bs", &link, &pagesize, &iscritical, &cookie, &cookie_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|bs", &link, &pagesize, &iscritical, &cookie, &cookie_len) != SUCCESS) {
 		return;
 	}
 
