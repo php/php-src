@@ -34,11 +34,11 @@ static inline void *zend_ast_realloc(void *old, size_t old_size, size_t new_size
 }
 
 size_t zend_ast_size(zend_uint children) {
-	return sizeof(zend_ast) + sizeof(zend_ast *) * (children - 1);
+	return sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
 }
 
 size_t zend_ast_list_size(zend_uint children) {
-	return sizeof(zend_ast_list) + sizeof(zend_ast *) * (children - 1);
+	return sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
 }
 
 ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
