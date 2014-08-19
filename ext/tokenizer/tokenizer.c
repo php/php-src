@@ -206,9 +206,9 @@ PHP_FUNCTION(token_get_all)
  */
 PHP_FUNCTION(token_name)
 {
-	long type;
+	php_int_t type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &type) == FAILURE) {
 		return;
 	}
 
