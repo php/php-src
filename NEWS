@@ -30,6 +30,9 @@ PHP                                                                        NEWS
 - Milter:
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
 
+- Network:
+  . Fixed bug #67717 (segfault in dns_get_record). (CVE-2014-3597) (Remi)
+
 - OpenSSL:
   . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads)
     (Daniel Lowrey).
