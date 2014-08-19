@@ -1343,7 +1343,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 			STR_RELEASE(date_fmt);
 
 			smart_str_appends(&ncookie, COOKIE_MAX_AGE);
-			smart_str_append_long(&ncookie, PS(cookie_lifetime));
+			smart_str_append_int(&ncookie, PS(cookie_lifetime));
 		}
 	}
 
@@ -1412,7 +1412,7 @@ static void ppid2sid(zval *ppid TSRMLS_DC) {
 		PS(send_cookie) = 1;
 	} else {
 		convert_to_string(ppid);
-		PS(id) = STR_INIT(Z_STRVAL_P(ppid), Z_STRLEN_P(ppid), 0);
+		PS(id) = STR_INIT(Z_STRVAL_P(ppid), Z_STRSIZE_P(ppid), 0);
 		PS(send_cookie) = 0;
 	}
 }
@@ -1559,7 +1559,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 			!Z_ISUNDEF(PG(http_globals)[TRACK_VARS_SERVER]) &&
 			(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER") - 1)) &&
 			Z_TYPE_P(data) == IS_STRING &&
-			Z_STRLEN_P(data) != 0 &&
+			Z_STRSIZE_P(data) != 0 &&
 			strstr(Z_STRVAL_P(data), PS(extern_referer_chk)) == NULL
 	) {
 		STR_RELEASE(PS(id));
@@ -1655,7 +1655,7 @@ static PHP_FUNCTION(session_set_cookie_params)
 	convert_to_string_ex(lifetime);
 
 	ini_name = STR_INIT("session.cookie_lifetime", sizeof("session.cookie_lifetime") - 1, 0);
-	zend_alter_ini_entry(ini_name,  Z_STRVAL_P(lifetime), Z_STRLEN_P(lifetime), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	zend_alter_ini_entry(ini_name,  Z_STRVAL_P(lifetime), Z_STRSIZE_P(lifetime), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	STR_RELEASE(ini_name);
 
 	if (path) {
@@ -1692,7 +1692,7 @@ static PHP_FUNCTION(session_get_cookie_params)
 
 	array_init(return_value);
 
-	add_assoc_long(return_value, "lifetime", PS(cookie_lifetime));
+	add_assoc_int(return_value, "lifetime", PS(cookie_lifetime));
 	add_assoc_string(return_value, "path", PS(cookie_path));
 	add_assoc_string(return_value, "domain", PS(cookie_domain));
 	add_assoc_bool(return_value, "secure", PS(cookie_secure));
@@ -2027,12 +2027,12 @@ static PHP_FUNCTION(session_cache_expire)
 		return;
 	}
 
-	RETVAL_LONG(PS(cache_expire));
+	RETVAL_INT(PS(cache_expire));
 
 	if (expires) {
 		convert_to_string_ex(expires);
 		ini_name = STR_INIT("session.cache_expire", sizeof("session.cache_expire") - 1, 0);
-		zend_alter_ini_entry(ini_name, Z_STRVAL_P(expires), Z_STRLEN_P(expires), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry(ini_name, Z_STRVAL_P(expires), Z_STRSIZE_P(expires), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 		STR_RELEASE(ini_name);
 	}
 }
@@ -2156,7 +2156,7 @@ static PHP_FUNCTION(session_status)
 		return;
 	}
 
-	RETURN_LONG(PS(session_status));
+	RETURN_INT(PS(session_status));
 }
 /* }}} */
 
@@ -2459,9 +2459,9 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	zend_class_implements(php_session_class_entry TSRMLS_CC, 1, php_session_iface_entry);
 	zend_class_implements(php_session_class_entry TSRMLS_CC, 1, php_session_id_iface_entry);
 
-	REGISTER_LONG_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_SESSION_ACTIVE", php_session_active, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PHP_SESSION_ACTIVE", php_session_active, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -2602,7 +2602,7 @@ static zend_bool php_check_cancel_upload(php_session_rfc1867_progress *progress 
 static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, int force_update TSRMLS_DC) /* {{{ */
 {
 	if (!force_update) {
-		if (Z_LVAL_P(progress->post_bytes_processed) < progress->next_update) {
+		if (Z_IVAL_P(progress->post_bytes_processed) < progress->next_update) {
 			return;
 		}
 #ifdef HAVE_GETTIMEOFDAY
@@ -2617,7 +2617,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 			progress->next_update_time = dtv + PS(rfc1867_min_freq);
 		}
 #endif
-		progress->next_update = Z_LVAL_P(progress->post_bytes_processed) + progress->update_step;
+		progress->next_update = Z_IVAL_P(progress->post_bytes_processed) + progress->update_step;
 	}
 
 	php_session_initialize(TSRMLS_C);
@@ -2719,16 +2719,16 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				array_init(&progress->data);
 				array_init(&progress->files);
 
-				add_assoc_long_ex(&progress->data, "start_time", sizeof("start_time") - 1, (long)sapi_get_request_time(TSRMLS_C));
-				add_assoc_long_ex(&progress->data, "content_length",  sizeof("content_length") - 1, progress->content_length);
-				add_assoc_long_ex(&progress->data, "bytes_processed", sizeof("bytes_processed") - 1, data->post_bytes_processed);
+				add_assoc_int_ex(&progress->data, "start_time", sizeof("start_time") - 1, (long)sapi_get_request_time(TSRMLS_C));
+				add_assoc_int_ex(&progress->data, "content_length",  sizeof("content_length") - 1, progress->content_length);
+				add_assoc_int_ex(&progress->data, "bytes_processed", sizeof("bytes_processed") - 1, data->post_bytes_processed);
 				add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 0);
 				add_assoc_zval_ex(&progress->data, "files", sizeof("files") - 1, &progress->files);
 
 				progress->post_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->data), "bytes_processed", sizeof("bytes_processed") - 1);
 
 				php_rinit_session(0 TSRMLS_CC);
-				PS(id) = STR_INIT(Z_STRVAL(progress->sid), Z_STRLEN(progress->sid), 0);
+				PS(id) = STR_INIT(Z_STRVAL(progress->sid), Z_STRSIZE(progress->sid), 0);
 				PS(apply_trans_sid) = progress->apply_trans_sid;
 				PS(send_cookie) = 0;
 			}
@@ -2739,17 +2739,17 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			add_assoc_string_ex(&progress->current_file, "field_name", sizeof("field_name") - 1, data->name);
 			add_assoc_string_ex(&progress->current_file, "name", sizeof("name") - 1, *data->filename);
 			add_assoc_null_ex(&progress->current_file, "tmp_name", sizeof("tmp_name") - 1);
-			add_assoc_long_ex(&progress->current_file, "error", sizeof("error") - 1, 0);
+			add_assoc_int_ex(&progress->current_file, "error", sizeof("error") - 1, 0);
 
 			add_assoc_bool_ex(&progress->current_file, "done", sizeof("done") - 1, 0);
-			add_assoc_long_ex(&progress->current_file, "start_time", sizeof("start_time") - 1, (long)time(NULL));
-			add_assoc_long_ex(&progress->current_file, "bytes_processed", sizeof("bytes_processed") - 1, 0);
+			add_assoc_int_ex(&progress->current_file, "start_time", sizeof("start_time") - 1, (long)time(NULL));
+			add_assoc_int_ex(&progress->current_file, "bytes_processed", sizeof("bytes_processed") - 1, 0);
 
 			add_next_index_zval(&progress->files, &progress->current_file);
 			
 			progress->current_file_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->current_file), "bytes_processed", sizeof("bytes_processed") - 1);
 
-			Z_LVAL_P(progress->current_file_bytes_processed) =  data->post_bytes_processed;
+			Z_IVAL_P(progress->current_file_bytes_processed) =  data->post_bytes_processed;
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
 		break;
@@ -2760,8 +2760,8 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				break;
 			}
 			
-			Z_LVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
-			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
+			Z_IVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
+			Z_IVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
@@ -2777,10 +2777,10 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				add_assoc_string_ex(&progress->current_file, "tmp_name",  sizeof("tmp_name") - 1, data->temp_filename);
 			}
 
-			add_assoc_long_ex(&progress->current_file, "error", sizeof("error") - 1, data->cancel_upload);
+			add_assoc_int_ex(&progress->current_file, "error", sizeof("error") - 1, data->cancel_upload);
 			add_assoc_bool_ex(&progress->current_file, "done", sizeof("done") - 1,  1);
 
-			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
+			Z_IVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
@@ -2793,7 +2793,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 					php_session_rfc1867_cleanup(progress TSRMLS_CC);
 				} else {
 					add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 1);
-					Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
+					Z_IVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 					php_session_rfc1867_update(progress, 1 TSRMLS_CC);
 				}
 				php_rshutdown_session_globals(TSRMLS_C);

@@ -992,7 +992,7 @@ static int fcgi_read_request(fcgi_request *req)
 			if ((value = zend_hash_str_find(&fcgi_mgmt_vars, q->var, q->var_len)) == NULL) {
 				continue;
 			}
-			zlen = Z_STRLEN_P(value);
+			zlen = Z_STRSIZE_P(value);
 			if ((p + 4 + 4 + q->var_len + zlen) >= (buf + sizeof(buf))) {
 				break;
 			}

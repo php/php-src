@@ -139,7 +139,7 @@ int dom_characterdata_length_read(dom_object *obj, zval *retval TSRMLS_DC)
 		xmlFree(content);
 	}
 
-	ZVAL_LONG(retval, length);
+	ZVAL_INT(retval, length);
 
 	return SUCCESS;
 }

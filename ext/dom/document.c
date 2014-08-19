@@ -388,7 +388,7 @@ int dom_document_standalone_write(dom_object *obj, zval *newval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	standalone = zval_get_long(newval);
+	standalone = zval_get_int(newval);
 	docp->standalone = ZEND_NORMALIZE_BOOL(standalone);
 
 	return SUCCESS;
@@ -1575,7 +1575,7 @@ PHP_FUNCTION(dom_document_save)
 	if (bytes == -1) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG(bytes);
+	RETURN_INT(bytes);
 }
 /* }}} end dom_document_save */
 
@@ -1723,7 +1723,7 @@ PHP_FUNCTION(dom_document_xinclude)
 	}
 
 	if (err) {
-		RETVAL_LONG(err);
+		RETVAL_INT(err);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2087,7 +2087,7 @@ PHP_FUNCTION(dom_document_save_html_file)
 	if (bytes == -1) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG(bytes);
+	RETURN_INT(bytes);
 }
 /* }}} end dom_document_save_html_file */
 

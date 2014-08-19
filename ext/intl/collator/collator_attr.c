@@ -53,7 +53,7 @@ PHP_FUNCTION( collator_get_attribute )
 	value = ucol_getAttribute( co->ucoll, attribute, COLLATOR_ERROR_CODE_P( co ) );
 	COLLATOR_CHECK_STATUS( co, "Error getting attribute value" );
 
-	RETURN_LONG( value );
+	RETURN_INT( value );
 }
 /* }}} */
 
@@ -112,7 +112,7 @@ PHP_FUNCTION( collator_get_strength )
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 	/* Get current strength and return it. */
-	RETURN_LONG( ucol_getStrength( co->ucoll ) );
+	RETURN_INT( ucol_getStrength( co->ucoll ) );
 }
 /* }}} */
 

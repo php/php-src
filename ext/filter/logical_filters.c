@@ -56,7 +56,7 @@
 		if ((option_val = zend_hash_str_find(HASH_OF(option_array), option_name, sizeof(option_name) - 1)) != NULL) { \
 			if (Z_TYPE_P(option_val) == IS_STRING) { \
 				var_name = Z_STRVAL_P(option_val); \
-				var_name##_len = Z_STRLEN_P(option_val); \
+				var_name##_len = Z_STRSIZE_P(option_val); \
 				var_name##_set = 1; \
 			} \
 		} \
@@ -106,8 +106,8 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 		return -1;
 	}
 
-	if ((end - str > MAX_LENGTH_OF_LONG - 1) /* number too long */
-	 || (SIZEOF_LONG == 4 && (end - str == MAX_LENGTH_OF_LONG - 1) && *str > '2')) {
+	if ((end - str > MAX_LENGTH_OF_ZEND_INT - 1) /* number too long */
+	 || (SIZEOF_LONG == 4 && (end - str == MAX_LENGTH_OF_ZEND_INT - 1) && *str > '2')) {
 		/* overflow */
 		return -1;
 	}
@@ -197,7 +197,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	FETCH_LONG_OPTION(max_range,    "max_range");
 	option_flags = flags;
 
-	len = Z_STRLEN_P(value);
+	len = Z_STRSIZE_P(value);
 
 	if (len == 0) {
 		RETURN_VALIDATION_FAILED
@@ -241,7 +241,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	} else {
 		zval_ptr_dtor(value);
-		ZVAL_LONG(value, ctx_value);
+		ZVAL_INT(value, ctx_value);
 		return;
 	}
 }
@@ -250,7 +250,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	char *str = Z_STRVAL_P(value);
-	int len = Z_STRLEN_P(value);
+	int len = Z_STRSIZE_P(value);
 	int ret;
 
 	PHP_FILTER_TRIM_DEFAULT_EX(str, len, 0);
@@ -332,7 +332,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	int first, n;
 
-	len = Z_STRLEN_P(value);
+	len = Z_STRSIZE_P(value);
 	str = Z_STRVAL_P(value);
 
 	PHP_FILTER_TRIM_DEFAULT(str, len);
@@ -398,7 +398,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	*p = 0;
 
 	switch (is_numeric_string(num, p - num, &lval, &dval, 0)) {
-		case IS_LONG:
+		case IS_INT:
 			zval_ptr_dtor(value);
 			ZVAL_DOUBLE(value, lval);
 			break;
@@ -443,7 +443,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (!re) {
 		RETURN_VALIDATION_FAILED
 	}
-	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, 0, ovector, 3);
+	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), Z_STRSIZE_P(value), 0, 0, ovector, 3);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
 	if (matches < 0) {
@@ -455,16 +455,16 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	php_url *url;
-	int old_len = Z_STRLEN_P(value);
+	int old_len = Z_STRSIZE_P(value);
 	
 	php_filter_url(value, flags, option_array, charset TSRMLS_CC);
 
-	if (Z_TYPE_P(value) != IS_STRING || old_len != Z_STRLEN_P(value)) {
+	if (Z_TYPE_P(value) != IS_STRING || old_len != Z_STRSIZE_P(value)) {
 		RETURN_VALIDATION_FAILED
 	}
 
 	/* Use parse_url - if it returns false, we return NULL */
-	url = php_url_parse_ex(Z_STRVAL_P(value), Z_STRLEN_P(value));
+	url = php_url_parse_ex(Z_STRVAL_P(value), Z_STRSIZE_P(value));
 
 	if (url == NULL) {
 		RETURN_VALIDATION_FAILED
@@ -543,7 +543,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 
 	/* The maximum length of an e-mail address is 320 octets, per RFC 2821. */
-	if (Z_STRLEN_P(value) > 320) {
+	if (Z_STRSIZE_P(value) > 320) {
 		RETURN_VALIDATION_FAILED
 	}
 
@@ -554,7 +554,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 	STR_RELEASE(sregexp);
-	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, 0, ovector, 3);
+	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), Z_STRSIZE_P(value), 0, 0, ovector, 3);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
 	if (matches < 0) {
@@ -688,9 +688,9 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int            ip[4];
 	int            mode;
 
-	if (memchr(Z_STRVAL_P(value), ':', Z_STRLEN_P(value))) {
+	if (memchr(Z_STRVAL_P(value), ':', Z_STRSIZE_P(value))) {
 		mode = FORMAT_IPV6;
-	} else if (memchr(Z_STRVAL_P(value), '.', Z_STRLEN_P(value))) {
+	} else if (memchr(Z_STRVAL_P(value), '.', Z_STRSIZE_P(value))) {
 		mode = FORMAT_IPV4;
 	} else {
 		RETURN_VALIDATION_FAILED
@@ -706,7 +706,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	switch (mode) {
 		case FORMAT_IPV4:
-			if (!_php_filter_validate_ipv4(Z_STRVAL_P(value), Z_STRLEN_P(value), ip)) {
+			if (!_php_filter_validate_ipv4(Z_STRVAL_P(value), Z_STRSIZE_P(value), ip)) {
 				RETURN_VALIDATION_FAILED
 			}
 
@@ -738,18 +738,18 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		case FORMAT_IPV6:
 			{
 				int res = 0;
-				res = _php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value) TSRMLS_CC);
+				res = _php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRSIZE_P(value) TSRMLS_CC);
 				if (res < 1) {
 					RETURN_VALIDATION_FAILED
 				}
 				/* Check flags */
 				if (flags & FILTER_FLAG_NO_PRIV_RANGE) {
-					if (Z_STRLEN_P(value) >=2 && (!strncasecmp("FC", Z_STRVAL_P(value), 2) || !strncasecmp("FD", Z_STRVAL_P(value), 2))) {
+					if (Z_STRSIZE_P(value) >=2 && (!strncasecmp("FC", Z_STRVAL_P(value), 2) || !strncasecmp("FD", Z_STRVAL_P(value), 2))) {
 						RETURN_VALIDATION_FAILED
 					}
 				}
 				if (flags & FILTER_FLAG_NO_RES_RANGE) {
-					switch (Z_STRLEN_P(value)) {
+					switch (Z_STRSIZE_P(value)) {
 						case 1: case 0:
 							break;
 						case 2:
@@ -763,7 +763,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 							}
 							break;
 						default:
-							if (Z_STRLEN_P(value) >= 5) {
+							if (Z_STRSIZE_P(value) >= 5) {
 								if (
 									!strncasecmp("fe8", Z_STRVAL_P(value), 3) ||
 									!strncasecmp("fe9", Z_STRVAL_P(value), 3) ||
@@ -774,10 +774,10 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 								}
 							}
 							if (
-								(Z_STRLEN_P(value) >= 9 &&  !strncasecmp("2001:0db8", Z_STRVAL_P(value), 9)) ||
-								(Z_STRLEN_P(value) >= 2 &&  !strncasecmp("5f", Z_STRVAL_P(value), 2)) ||
-								(Z_STRLEN_P(value) >= 4 &&  !strncasecmp("3ff3", Z_STRVAL_P(value), 4)) ||
-								(Z_STRLEN_P(value) >= 8 &&  !strncasecmp("2001:001", Z_STRVAL_P(value), 8))
+								(Z_STRSIZE_P(value) >= 9 &&  !strncasecmp("2001:0db8", Z_STRVAL_P(value), 9)) ||
+								(Z_STRSIZE_P(value) >= 2 &&  !strncasecmp("5f", Z_STRVAL_P(value), 2)) ||
+								(Z_STRSIZE_P(value) >= 4 &&  !strncasecmp("3ff3", Z_STRVAL_P(value), 4)) ||
+								(Z_STRSIZE_P(value) >= 8 &&  !strncasecmp("2001:001", Z_STRVAL_P(value), 8))
 							) {
 								RETURN_VALIDATION_FAILED
 							}
@@ -792,7 +792,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	char *input = Z_STRVAL_P(value);
-	int input_len = Z_STRLEN_P(value);
+	int input_len = Z_STRSIZE_P(value);
 	int tokens, length, i, offset, exp_separator_set, exp_separator_len;
 	char separator;
 	char *exp_separator;

@@ -72,7 +72,7 @@ PHP_FUNCTION( numfmt_get_attribute )
 			if(value == -1) {
 				INTL_DATA_ERROR_CODE(nfo) = U_UNSUPPORTED_ERROR;
 			} else {
-				RETVAL_LONG(value);
+				RETVAL_INT(value);
 			}
 			break;
 		case UNUM_ROUNDING_INCREMENT:
@@ -182,8 +182,8 @@ PHP_FUNCTION( numfmt_set_attribute )
 		case UNUM_MIN_SIGNIFICANT_DIGITS:
 		case UNUM_MAX_SIGNIFICANT_DIGITS:
 		case UNUM_LENIENT_PARSE:
-			convert_to_long_ex(value);
-			unum_setAttribute(FORMATTER_OBJECT(nfo), attribute, Z_LVAL_P(value));
+			convert_to_int_ex(value);
+			unum_setAttribute(FORMATTER_OBJECT(nfo), attribute, Z_IVAL_P(value));
 			break;
 		case UNUM_ROUNDING_INCREMENT:
 			convert_to_double_ex(value);

@@ -425,7 +425,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param T
 	SEPARATE_ZVAL(param);
 	convert_to_string_ex(param);
 	
-	for (rem_cnt = Z_STRLEN_P(param); rem_cnt > 0; rem_cnt -= chunk_size)  {
+	for (rem_cnt = Z_STRSIZE_P(param); rem_cnt > 0; rem_cnt -= chunk_size)  {
 
 		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : (unsigned short)rem_cnt;
 
@@ -467,7 +467,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 
 		/* try to determine the index by looking in the named_params hash */
 		if ((index = zend_hash_find(S->named_params, param->name)) != NULL) {
-			param->paramno = Z_LVAL_P(index);
+			param->paramno = Z_IVAL_P(index);
 		} else {
 			/* ... or by looking in the input descriptor */
 			int i;
@@ -549,10 +549,10 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			switch (Z_TYPE_P(parameter)) {
 				int force_null;
 				
-				case IS_LONG:
+				case IS_INT:
 					/* keep the allow-NULL flag */
 					var->sqltype = (sizeof(long) == 8 ? SQL_INT64 : SQL_LONG) | (var->sqltype & 1);
-					var->sqldata = (void*)&Z_LVAL_P(parameter);
+					var->sqldata = (void*)&Z_IVAL_P(parameter);
 					var->sqllen = sizeof(long);
 					break;
 				case IS_DOUBLE:
@@ -574,13 +574,13 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						case SQL_TIMESTAMP:
 						case SQL_TYPE_DATE:
 						case SQL_TYPE_TIME:
-							force_null = (Z_STRLEN_P(parameter) == 0);
+							force_null = (Z_STRSIZE_P(parameter) == 0);
 					}
 					if (!force_null) {
 						/* keep the allow-NULL flag */
 						var->sqltype = SQL_TEXT | (var->sqltype & 1);
 						var->sqldata = Z_STRVAL_P(parameter);
-						var->sqllen	 = Z_STRLEN_P(parameter);
+						var->sqllen	 = Z_STRSIZE_P(parameter);
 						break;
 					}
 				case IS_NULL:
@@ -626,7 +626,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						}
 					case PDO_PARAM_INT:
 						if (value) {
-							ZVAL_LONG(parameter, *(long*)value);
+							ZVAL_INT(parameter, *(long*)value);
 							break;
 						}
 					case PDO_PARAM_EVT_NORMALIZE:

@@ -525,7 +525,7 @@ PHP_FUNCTION(bccomp)
 
 	bc_str2num(&first, left, scale TSRMLS_CC);
 	bc_str2num(&second, right, scale TSRMLS_CC);
-	RETVAL_LONG(bc_compare(first, second));
+	RETVAL_INT(bc_compare(first, second));
 
 	bc_free_num(&first);
 	bc_free_num(&second);

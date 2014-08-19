@@ -68,8 +68,8 @@ PHP_FUNCTION( numfmt_parse )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
-		position = (int32_t)Z_LVAL_P( zposition );
+		convert_to_int(zposition);
+		position = (int32_t)Z_IVAL_P( zposition );
 		position_p = &position;
 	}
 
@@ -82,14 +82,14 @@ PHP_FUNCTION( numfmt_parse )
 	switch(type) {
 		case FORMAT_TYPE_INT32:
 			val32 = unum_parse(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, &INTL_DATA_ERROR_CODE(nfo));
-			RETVAL_LONG(val32);
+			RETVAL_INT(val32);
 			break;
 		case FORMAT_TYPE_INT64:
 			val64 = unum_parseInt64(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, &INTL_DATA_ERROR_CODE(nfo));
 			if(val64 > LONG_MAX || val64 < LONG_MIN) {
 				RETVAL_DOUBLE(val64);
 			} else {
-				RETVAL_LONG((long)val64);
+				RETVAL_INT((long)val64);
 			}
 			break;
 		case FORMAT_TYPE_DOUBLE:
@@ -107,7 +107,7 @@ PHP_FUNCTION( numfmt_parse )
 #endif
 	if(zposition) {
 		zval_dtor(zposition);
-		ZVAL_LONG(zposition, position);
+		ZVAL_INT(zposition, position);
 	}
 
 	if (sstr) {
@@ -157,15 +157,15 @@ PHP_FUNCTION( numfmt_parse_currency )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
-		position = (int32_t)Z_LVAL_P( zposition );
+		convert_to_int(zposition);
+		position = (int32_t)Z_IVAL_P( zposition );
 		position_p = &position;
 	}
 
 	number = unum_parseDoubleCurrency(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, currency, &INTL_DATA_ERROR_CODE(nfo));
 	if(zposition) {
 		zval_dtor(zposition);
-		ZVAL_LONG(zposition, position);
+		ZVAL_INT(zposition, position);
 	}
 	if (sstr) {
 		efree(sstr);

@@ -145,9 +145,9 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 			safe_array_from_zval(v, z, codepage TSRMLS_CC);
 			break;
 
-		case IS_LONG:
+		case IS_INT:
 			V_VT(v) = VT_I4;
-			V_I4(v) = Z_LVAL_P(z);
+			V_I4(v) = Z_IVAL_P(z);
 			break;
 
 		case IS_DOUBLE:
@@ -157,11 +157,11 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 
 		case IS_STRING:
 			V_VT(v) = VT_BSTR;
-			olestring = php_com_string_to_olestring(Z_STRVAL_P(z), Z_STRLEN_P(z), codepage TSRMLS_CC);
+			olestring = php_com_string_to_olestring(Z_STRVAL_P(z), Z_STRSIZE_P(z), codepage TSRMLS_CC);
 			if (CP_UTF8 == codepage) {
 				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, wcslen(olestring) * sizeof(OLECHAR));
 			} else {
-				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRLEN_P(z) * sizeof(OLECHAR));
+				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRSIZE_P(z) * sizeof(OLECHAR));
 			}
 			efree(olestring);
 			break;
@@ -187,28 +187,28 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 			ZVAL_NULL(z);
 			break;
 		case VT_UI1:
-			ZVAL_LONG(z, (long)V_UI1(v));
+			ZVAL_INT(z, (long)V_UI1(v));
 			break;
 		case VT_I1:
-			ZVAL_LONG(z, (long)V_I1(v));
+			ZVAL_INT(z, (long)V_I1(v));
 			break;
 		case VT_UI2:
-			ZVAL_LONG(z, (long)V_UI2(v));
+			ZVAL_INT(z, (long)V_UI2(v));
 			break;
 		case VT_I2:
-			ZVAL_LONG(z, (long)V_I2(v));
+			ZVAL_INT(z, (long)V_I2(v));
 			break;
 		case VT_UI4:  /* TODO: promote to double if large? */
-			ZVAL_LONG(z, (long)V_UI4(v));
+			ZVAL_INT(z, (long)V_UI4(v));
 			break;
 		case VT_I4:
-			ZVAL_LONG(z, (long)V_I4(v));
+			ZVAL_INT(z, (long)V_I4(v));
 			break;
 		case VT_INT:
-			ZVAL_LONG(z, V_INT(v));
+			ZVAL_INT(z, V_INT(v));
 			break;
 		case VT_UINT: /* TODO: promote to double if large? */
-			ZVAL_LONG(z, (long)V_UINT(v));
+			ZVAL_INT(z, (long)V_UINT(v));
 			break;
 		case VT_R4:
 			ZVAL_DOUBLE(z, (double)V_R4(v));
@@ -909,7 +909,7 @@ PHP_FUNCTION(variant_cmp)
 		return;
 	}
 
-	ZVAL_LONG(return_value, VarCmp(vleft, vright, lcid, flags));
+	ZVAL_INT(return_value, VarCmp(vleft, vright, lcid, flags));
 
 	VariantClear(&left_val);
 	VariantClear(&right_val);
@@ -948,7 +948,7 @@ PHP_FUNCTION(variant_date_to_timestamp)
 		tmv.tm_isdst = -1;
 
 		tzset();
-		RETVAL_LONG(mktime(&tmv));
+		RETVAL_INT(mktime(&tmv));
 	}
 
 	VariantClear(&vres);
@@ -1010,7 +1010,7 @@ PHP_FUNCTION(variant_get_type)
 	}
 	obj = CDNO_FETCH(zobj);
 		
-	RETURN_LONG(V_VT(&obj->v));
+	RETURN_INT(V_VT(&obj->v));
 }
 /* }}} */
 

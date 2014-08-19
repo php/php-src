@@ -69,7 +69,7 @@
 /* Simplify ssl context option retrieval */
 #define GET_VER_OPT(name)               (PHP_STREAM_CONTEXT(stream) && (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", name)) != NULL)
 #define GET_VER_OPT_STRING(name, str)   if (GET_VER_OPT(name)) { convert_to_string_ex(val); str = Z_STRVAL_P(val); }
-#define GET_VER_OPT_LONG(name, num)     if (GET_VER_OPT(name)) { convert_to_long_ex(val); num = Z_LVAL_P(val); }
+#define GET_VER_OPT_LONG(name, num)     if (GET_VER_OPT(name)) { convert_to_int_ex(val); num = Z_IVAL_P(val); }
 
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
@@ -282,7 +282,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
 	if (Z_TYPE_P(val) == IS_STRING) {
 		const char *method = NULL;
 
-		switch (Z_STRLEN_P(val)) {
+		switch (Z_STRSIZE_P(val)) {
 			case 32:
 				method = "md5";
 				break;
@@ -513,9 +513,9 @@ static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 	GET_VER_OPT_STRING("passphrase", passphrase);
 
 	if (passphrase) {
-		if (Z_STRLEN_P(val) < num - 1) {
-			memcpy(buf, Z_STRVAL_P(val), Z_STRLEN_P(val)+1);
-			return Z_STRLEN_P(val);
+		if (Z_STRSIZE_P(val) < num - 1) {
+			memcpy(buf, Z_STRVAL_P(val), Z_STRSIZE_P(val)+1);
+			return Z_STRSIZE_P(val);
 		}
 	}
 	return 0;
@@ -1032,8 +1032,8 @@ static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_da
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
 				"ssl", "reneg_limit"))
 	) {
-		convert_to_long(val);
-		limit = Z_LVAL_P(val);
+		convert_to_int(val);
+		limit = Z_IVAL_P(val);
 	}
 
 	/* No renegotiation rate-limiting */
@@ -1045,8 +1045,8 @@ static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_da
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
 				"ssl", "reneg_window"))
 	) {
-		convert_to_long(val);
-		window = Z_LVAL_P(val);
+		convert_to_int(val);
+		window = Z_IVAL_P(val);
 	}
 
 	sslsock->reneg = (void*)pemalloc(sizeof(php_openssl_handshake_bucket_t),
@@ -1070,7 +1070,7 @@ static int set_server_rsa_key(php_stream *stream, SSL_CTX *ctx TSRMLS_DC) /* {{{
 	RSA* rsa;
 
 	if ((val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "rsa_key_size")) != NULL) {
-		rsa_key_size = (int) Z_LVAL_P(val);
+		rsa_key_size = (int) Z_IVAL_P(val);
 		if ((rsa_key_size != 1) && (rsa_key_size & (rsa_key_size - 1))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "RSA key size requires a power of 2: %d", rsa_key_size);
 			rsa_key_size = 2048;
@@ -1534,7 +1534,7 @@ static zend_array *capture_session_meta(SSL *ssl_handle) /* {{{ */
 	array_init(&meta_arr);
 	add_assoc_string(&meta_arr, "protocol", proto_str);
 	add_assoc_string(&meta_arr, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
-	add_assoc_long(&meta_arr, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
+	add_assoc_int(&meta_arr, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
 	add_assoc_string(&meta_arr, "cipher_version", SSL_CIPHER_get_version(cipher));
 
 	return Z_ARR(meta_arr);
@@ -2172,8 +2172,8 @@ static long get_crypto_method(php_stream_context *ctx, long crypto_method)
 	zval *val;
 
 	if (ctx && (val = php_stream_context_get_option(ctx, "ssl", "crypto_method")) != NULL) {
-		convert_to_long_ex(val);
-		crypto_method = (long)Z_LVAL_P(val);
+		convert_to_int_ex(val);
+		crypto_method = (long)Z_IVAL_P(val);
 	        crypto_method |= STREAM_CRYPTO_IS_CLIENT;
 	}
 

@@ -152,9 +152,9 @@ PHP_FUNCTION(mysqli_affected_rows)
 
 	rc = mysql_affected_rows(mysql->mysql);
 	if (rc == (my_ulonglong) -1) {
-		RETURN_LONG(-1);
+		RETURN_INT(-1);
 	}
-	MYSQLI_RETURN_LONG_LONG(rc);
+	MYSQLI_RETURN_INT_INT(rc);
 }
 /* }}} */
 
@@ -218,7 +218,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 #elif SIZEOF_LONG==4
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
 #endif
-				bind[ofs].buffer = &Z_LVAL_P(param);
+				bind[ofs].buffer = &Z_IVAL_P(param);
 				bind[ofs].is_null = &stmt->param.is_null[ofs];
 				break;
 
@@ -443,7 +443,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 			case MYSQL_TYPE_LONG:
 			case MYSQL_TYPE_INT24:
 			case MYSQL_TYPE_YEAR:
-				stmt->result.buf[ofs].type = IS_LONG;
+				stmt->result.buf[ofs].type = IS_INT;
 				/* don't set stmt->result.buf[ofs].buflen to 0, we used ecalloc */
 				stmt->result.buf[ofs].val = (char *)emalloc(sizeof(int));
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
@@ -843,7 +843,7 @@ PHP_FUNCTION(mysqli_errno)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-	RETURN_LONG(mysql_errno(mysql->mysql));
+	RETURN_INT(mysql_errno(mysql->mysql));
 }
 /* }}} */
 
@@ -911,7 +911,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 					case MYSQL_TYPE_VAR_STRING:
 						convert_to_string_ex(param);
 						stmt->stmt->params[i].buffer = Z_STRVAL_P(param);
-						stmt->stmt->params[i].buffer_length = Z_STRLEN_P(param);
+						stmt->stmt->params[i].buffer_length = Z_STRSIZE_P(param);
 						break;
 					case MYSQL_TYPE_DOUBLE:
 						convert_to_double_ex(param);
@@ -919,8 +919,8 @@ PHP_FUNCTION(mysqli_stmt_execute)
 						break;
 					case MYSQL_TYPE_LONGLONG:
 					case MYSQL_TYPE_LONG:
-						convert_to_long_ex(param);
-						stmt->stmt->params[i].buffer = &Z_LVAL_P(param);
+						convert_to_int_ex(param);
+						stmt->stmt->params[i].buffer = &Z_IVAL_P(param);
 						break;
 					default:
 						break;
@@ -990,7 +990,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 			zval_ptr_dtor(result);
 			if (!stmt->result.is_null[i]) {
 				switch (stmt->result.buf[i].type) {
-					case IS_LONG:
+					case IS_INT:
 						if ((stmt->stmt->fields[i].type == MYSQL_TYPE_LONG)
 						    && (stmt->stmt->fields[i].flags & UNSIGNED_FLAG))
 						{
@@ -1015,9 +1015,9 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 						}
 						if (stmt->stmt->fields[i].flags & UNSIGNED_FLAG) {
-							ZVAL_LONG(result, *(unsigned int *)stmt->result.buf[i].val);
+							ZVAL_INT(result, *(unsigned int *)stmt->result.buf[i].val);
 						} else {
-							ZVAL_LONG(result, *(int *)stmt->result.buf[i].val);
+							ZVAL_INT(result, *(int *)stmt->result.buf[i].val);
 						}
 						break;
 					case IS_DOUBLE:
@@ -1063,7 +1063,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 								snprintf(tmp, sizeof(tmp), (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
 								ZVAL_STRING(result, tmp);
 							} else {
-								ZVAL_LONG(result, llval);
+								ZVAL_INT(result, llval);
 							}
 						} else {
 #if defined(MYSQL_DATA_TRUNCATED) && MYSQL_VERSION_ID > 50002
@@ -1166,12 +1166,12 @@ static void php_add_field_properties(zval *value, const MYSQL_FIELD *field TSRML
 	 */
 	add_property_string(value, "catalog", "def");
 
-	add_property_long(value, "max_length", field->max_length);
-	add_property_long(value, "length", field->length);
-	add_property_long(value, "charsetnr", field->charsetnr);
-	add_property_long(value, "flags", field->flags);
-	add_property_long(value, "type", field->type);
-	add_property_long(value, "decimals", field->decimals);
+	add_property_int(value, "max_length", field->max_length);
+	add_property_int(value, "length", field->length);
+	add_property_int(value, "charsetnr", field->charsetnr);
+	add_property_int(value, "flags", field->flags);
+	add_property_int(value, "type", field->type);
+	add_property_int(value, "decimals", field->decimals);
 }
 /* }}} */
 
@@ -1278,7 +1278,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 	array_init(return_value);
 
 	for (i = 0; i < mysql_num_fields(result); i++) {
-		add_index_long(return_value, i, ret[i]);
+		add_index_int(return_value, i, ret[i]);
 	}
 }
 /* }}} */
@@ -1304,7 +1304,7 @@ PHP_FUNCTION(mysqli_field_count)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_LONG(mysql_field_count(mysql->mysql));
+	RETURN_INT(mysql_field_count(mysql->mysql));
 }
 /* }}} */
 
@@ -1344,7 +1344,7 @@ PHP_FUNCTION(mysqli_field_tell)
 	}
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
-	RETURN_LONG(mysql_field_tell(result));
+	RETURN_INT(mysql_field_tell(result));
 }
 /* }}} */
 
@@ -1380,7 +1380,7 @@ PHP_FUNCTION(mysqli_get_client_info)
    Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_version)
 {
-	RETURN_LONG((long)mysql_get_client_version());
+	RETURN_INT((long)mysql_get_client_version());
 }
 /* }}} */
 
@@ -1414,7 +1414,7 @@ PHP_FUNCTION(mysqli_get_proto_info)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-	RETURN_LONG(mysql_get_proto_info(mysql->mysql));
+	RETURN_INT(mysql_get_proto_info(mysql->mysql));
 }
 /* }}} */
 
@@ -1450,7 +1450,7 @@ PHP_FUNCTION(mysqli_get_server_version)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_LONG(mysql_get_server_version(mysql->mysql));
+	RETURN_INT(mysql_get_server_version(mysql->mysql));
 }
 /* }}} */
 
@@ -1540,7 +1540,7 @@ PHP_FUNCTION(mysqli_insert_id)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	rc = mysql_insert_id(mysql->mysql);
-	MYSQLI_RETURN_LONG_LONG(rc)
+	MYSQLI_RETURN_INT_INT(rc)
 }
 /* }}} */
 
@@ -1658,7 +1658,7 @@ PHP_FUNCTION(mysqli_num_fields)
 	}
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
-	RETURN_LONG(mysql_num_fields(result));
+	RETURN_INT(mysql_num_fields(result));
 }
 /* }}} */
 
@@ -1676,10 +1676,10 @@ PHP_FUNCTION(mysqli_num_rows)
 
 	if (mysqli_result_is_unbuffered_and_not_everything_is_fetched(result)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Function cannot be used with MYSQL_USE_RESULT");
-		RETURN_LONG(0);
+		RETURN_INT(0);
 	}
 
-	MYSQLI_RETURN_LONG_LONG(mysql_num_rows(result));
+	MYSQLI_RETURN_INT_INT(mysql_num_rows(result));
 }
 /* }}} */
 
@@ -1725,12 +1725,12 @@ static int mysqli_options_get_option_zval_type(int option)
 		case MYSQL_OPT_COMPRESS:
 #endif /* mysqlnd @ PHP 5.3.2 */
 #ifdef MYSQL_OPT_SSL_VERIFY_SERVER_CERT
-	REGISTER_LONG_CONSTANT("MYSQLI_OPT_SSL_VERIFY_SERVER_CERT", MYSQL_OPT_SSL_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MYSQLI_OPT_SSL_VERIFY_SERVER_CERT", MYSQL_OPT_SSL_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
 #endif /* MySQL 5.1.1., mysqlnd @ PHP 5.3.3 */
 #if (MYSQL_VERSION_ID >= 50611 && defined(CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS)) || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS:
 #endif
-			return IS_LONG;
+			return IS_INT;
 
 #ifdef MYSQL_SHARED_MEMORY_BASE_NAME
                 case MYSQL_SHARED_MEMORY_BASE_NAME:
@@ -1786,8 +1786,8 @@ PHP_FUNCTION(mysqli_options)
 			case IS_STRING:
 				convert_to_string_ex(mysql_value);
 				break;
-			case IS_LONG:
-				convert_to_long_ex(mysql_value);
+			case IS_INT:
+				convert_to_int_ex(mysql_value);
 				break;
 			default:
 				break;
@@ -1797,8 +1797,8 @@ PHP_FUNCTION(mysqli_options)
 		case IS_STRING:
 			ret = mysql_options(mysql->mysql, mysql_option, Z_STRVAL_P(mysql_value));
 			break;
-		case IS_LONG:
-			l_value = Z_LVAL_P(mysql_value);
+		case IS_INT:
+			l_value = Z_IVAL_P(mysql_value);
 			ret = mysql_options(mysql->mysql, mysql_option, (char *)&l_value);
 			break;
 		default:
@@ -2037,9 +2037,9 @@ PHP_FUNCTION(mysqli_stmt_affected_rows)
 
 	rc = mysql_stmt_affected_rows(stmt->stmt);
 	if (rc == (my_ulonglong) -1) {
-		RETURN_LONG(-1);
+		RETURN_INT(-1);
 	}
-	MYSQLI_RETURN_LONG_LONG(rc)
+	MYSQLI_RETURN_INT_INT(rc)
 }
 /* }}} */
 
@@ -2097,7 +2097,7 @@ PHP_FUNCTION(mysqli_stmt_field_count)
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	RETURN_LONG(mysql_stmt_field_count(stmt->stmt));
+	RETURN_INT(mysql_stmt_field_count(stmt->stmt));
 }
 /* }}} */
 
@@ -2131,7 +2131,7 @@ PHP_FUNCTION(mysqli_stmt_insert_id)
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 	rc = mysql_stmt_insert_id(stmt->stmt);
-	MYSQLI_RETURN_LONG_LONG(rc)
+	MYSQLI_RETURN_INT_INT(rc)
 }
 /* }}} */
 
@@ -2147,7 +2147,7 @@ PHP_FUNCTION(mysqli_stmt_param_count)
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	RETURN_LONG(mysql_stmt_param_count(stmt->stmt));
+	RETURN_INT(mysql_stmt_param_count(stmt->stmt));
 }
 /* }}} */
 
@@ -2186,7 +2186,7 @@ PHP_FUNCTION(mysqli_stmt_num_rows)
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 	rc = mysql_stmt_num_rows(stmt->stmt);
-	MYSQLI_RETURN_LONG_LONG(rc)
+	MYSQLI_RETURN_INT_INT(rc)
 }
 /* }}} */
 
@@ -2380,7 +2380,7 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 	if (attr == STMT_ATTR_UPDATE_MAX_LENGTH)
 		value = *((my_bool *)&value);
 #endif
-	RETURN_LONG((long)value);
+	RETURN_INT((long)value);
 }
 /* }}} */
 
@@ -2396,7 +2396,7 @@ PHP_FUNCTION(mysqli_stmt_errno)
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_INITIALIZED);
 
-	RETURN_LONG(mysql_stmt_errno(stmt->stmt));
+	RETURN_INT(mysql_stmt_errno(stmt->stmt));
 }
 /* }}} */
 
@@ -2619,7 +2619,7 @@ PHP_FUNCTION(mysqli_thread_id)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_LONG((long) mysql_thread_id(mysql->mysql));
+	RETURN_INT((long) mysql_thread_id(mysql->mysql));
 }
 /* }}} */
 
@@ -2672,7 +2672,7 @@ PHP_FUNCTION(mysqli_warning_count)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_LONG(mysql_warning_count(mysql->mysql));
+	RETURN_INT(mysql_warning_count(mysql->mysql));
 }
 /* }}} */
 

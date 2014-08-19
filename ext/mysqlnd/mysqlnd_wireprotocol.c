@@ -586,7 +586,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 				zval * entry_value;
 				ZEND_HASH_FOREACH_KEY_VAL(packet->connect_attr, unused_num_key, key, entry_value) {
 					if (key) { /* HASH_KEY_IS_STRING */
-						size_t value_len = Z_STRLEN_P(entry_value);
+						size_t value_len = Z_STRSIZE_P(entry_value);
 
 						ca_payload_len += php_mysqlnd_net_store_length_size(key->len);
 						ca_payload_len += key->len;
@@ -625,7 +625,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 					zval * entry_value;
 					ZEND_HASH_FOREACH_KEY_VAL(packet->connect_attr, unused_num_key, key, entry_value) {
 						if (key) { /* HASH_KEY_IS_STRING */
-							size_t value_len = Z_STRLEN_P(entry_value);
+							size_t value_len = Z_STRSIZE_P(entry_value);
 
 							/* copy key */
 							p = php_mysqlnd_net_store_length(p, key->len);
@@ -1587,7 +1587,7 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1,
 										STAT_BYTES_RECEIVED_PURE_DATA_PS,
 										(Z_TYPE_P(current_field) == IS_STRING)?
-											Z_STRLEN_P(current_field) : (p - orig_p));
+											Z_STRSIZE_P(current_field) : (p - orig_p));
 
 		if (!((bit<<=1) & 255)) {
 			bit = 1;	/* to the following byte */
@@ -1667,7 +1667,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1, STAT_BYTES_RECEIVED_PURE_DATA_TEXT, len);
 			}
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
-			if (as_int_or_float && perm_bind.php_type == IS_LONG) {
+			if (as_int_or_float && perm_bind.php_type == IS_INT) {
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
@@ -1679,7 +1679,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 #else
 						_atoi64((char *) p);
 #endif
-					ZVAL_LONG(current_field, (long) v); /* the cast is safe */
+					ZVAL_INT(current_field, (long) v); /* the cast is safe */
 				} else {
 					uint64_t v =
 #ifndef PHP_WIN32
@@ -1701,7 +1701,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 					{
 						ZVAL_STRINGL(current_field, (char *)p, len);
 					} else {
-						ZVAL_LONG(current_field, (long) v); /* the cast is safe */
+						ZVAL_INT(current_field, (long) v); /* the cast is safe */
 					}
 				}
 				*(p + len) = save;
@@ -1730,12 +1730,12 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				  later in this function there will be an advancement.
 				*/
 				p -= len;
-				if (Z_TYPE_P(current_field) == IS_LONG) {
-					bit_area += 1 + sprintf((char *)start, "%ld", Z_LVAL_P(current_field));
+				if (Z_TYPE_P(current_field) == IS_INT) {
+					bit_area += 1 + sprintf((char *)start, "%ld", Z_IVAL_P(current_field));
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
 				} else if (Z_TYPE_P(current_field) == IS_STRING){
-					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRLEN_P(current_field));
-					bit_area += Z_STRLEN_P(current_field);
+					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRSIZE_P(current_field));
+					bit_area += Z_STRSIZE_P(current_field);
 					*bit_area++ = '\0';
 					zval_dtor(current_field);
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);

@@ -115,7 +115,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	} else {							/* return the days after March 21 */	
 	    result = easter;
 	}
-    ZVAL_LONG(return_value, result);
+    ZVAL_INT(return_value, result);
 }
 
 /* {{{ proto int easter_date([int year])

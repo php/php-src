@@ -113,7 +113,7 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 	pdo_pgsql_error_info *einfo = &H->einfo;
 
 	if (einfo->errcode) {
-		add_next_index_long(info, einfo->errcode);
+		add_next_index_int(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg);
 	}
 
@@ -229,7 +229,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	stmt->driver_data = S;
 	stmt->methods = &pgsql_stmt_methods;
 
-	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
+	scrollable = pdo_attr_ival(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY TSRMLS_CC) == PDO_CURSOR_SCROLL;
 
 	if (scrollable) {
@@ -239,14 +239,14 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		spprintf(&S->cursor_name, 0, "pdo_crsr_%08x", ++H->stmt_counter);
 		emulate = 1;
 	} else if (driver_options) {
-		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, H->disable_native_prepares TSRMLS_CC) == 1) {
+		if (pdo_attr_ival(driver_options, PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, H->disable_native_prepares TSRMLS_CC) == 1) {
 			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
 			emulate = 1;
 		}
-		if (pdo_attr_lval(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares TSRMLS_CC) == 1) {
+		if (pdo_attr_ival(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares TSRMLS_CC) == 1) {
 			emulate = 1;
 		}
-		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_PREPARES, H->disable_prepares TSRMLS_CC) == 1) {
+		if (pdo_attr_ival(driver_options, PDO_PGSQL_ATTR_DISABLE_PREPARES, H->disable_prepares TSRMLS_CC) == 1) {
 			execute_only = 1;
 		}
 	} else {
@@ -573,12 +573,12 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 			int query_len;
 			convert_to_string_ex(tmp);
 
-			if (buffer_len < Z_STRLEN_P(tmp)) {
-				buffer_len = Z_STRLEN_P(tmp);
+			if (buffer_len < Z_STRSIZE_P(tmp)) {
+				buffer_len = Z_STRSIZE_P(tmp);
 				query = erealloc(query, buffer_len + 2); /* room for \n\0 */
 			}
-			memcpy(query, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
-			query_len = Z_STRLEN_P(tmp);
+			memcpy(query, Z_STRVAL_P(tmp), Z_STRSIZE_P(tmp));
+			query_len = Z_STRSIZE_P(tmp);
 			if (query[query_len - 1] != '\n') {
 				query[query_len++] = '\n';
 			}
@@ -1056,11 +1056,11 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 	array_init(return_value);
 	if (result_type == PDO_FETCH_NUM || result_type == PDO_FETCH_BOTH) {
 		add_index_string(return_value, 0, pgsql_notify->relname);
-		add_index_long(return_value, 1, pgsql_notify->be_pid);
+		add_index_int(return_value, 1, pgsql_notify->be_pid);
 	}
 	if (result_type == PDO_FETCH_ASSOC || result_type == PDO_FETCH_BOTH) {
 		add_assoc_string(return_value, "message", pgsql_notify->relname);
-		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
+		add_assoc_int(return_value, "pid", pgsql_notify->be_pid);
 	}
 
 	PQfreemem(pgsql_notify);
@@ -1079,7 +1079,7 @@ static PHP_METHOD(PDO, pgsqlGetPid)
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
-	RETURN_LONG(PQbackendPID(H->server));
+	RETURN_INT(PQbackendPID(H->server));
 }
 /* }}} */
 
@@ -1113,17 +1113,17 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 
 	switch (attr) {
 		case PDO_ATTR_EMULATE_PREPARES:
-			convert_to_long(val);
-			H->emulate_prepares = Z_LVAL_P(val);
+			convert_to_int(val);
+			H->emulate_prepares = Z_IVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT:
-			convert_to_long(val);
+			convert_to_int(val);
 			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
-			H->disable_native_prepares = Z_LVAL_P(val);
+			H->disable_native_prepares = Z_IVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
-			convert_to_long(val);
-			H->disable_prepares = Z_LVAL_P(val);
+			convert_to_int(val);
+			H->disable_prepares = Z_IVAL_P(val);
 			return 1;
 		default:
 			return 0;
@@ -1172,7 +1172,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	if (driver_options) {
-		connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
+		connect_timeout = pdo_attr_ival(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
 	}
 
 	if (dbh->password) {

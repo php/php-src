@@ -711,19 +711,19 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (Z_TYPE_P(arg_pattern) != IS_STRING) {
 		/* we convert numbers to integers and treat them as a string */
 		if (Z_TYPE_P(arg_pattern) == IS_DOUBLE) {
-			convert_to_long_ex(arg_pattern);	/* get rid of decimal places */
+			convert_to_int_ex(arg_pattern);	/* get rid of decimal places */
 		}
 		convert_to_string_ex(arg_pattern);
 		/* don't bother doing an extended regex with just a number */
 	}
 
-	if (!Z_STRVAL_P(arg_pattern) || Z_STRLEN_P(arg_pattern) == 0) {
+	if (!Z_STRVAL_P(arg_pattern) || Z_STRSIZE_P(arg_pattern) == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "empty pattern");
 		RETVAL_FALSE;
 		goto out;
 	}
 
-	re = php_mbregex_compile_pattern(Z_STRVAL_P(arg_pattern), Z_STRLEN_P(arg_pattern), options, MBREX(current_mbctype), MBREX(regex_default_syntax) TSRMLS_CC);
+	re = php_mbregex_compile_pattern(Z_STRVAL_P(arg_pattern), Z_STRSIZE_P(arg_pattern), options, MBREX(current_mbctype), MBREX(regex_default_syntax) TSRMLS_CC);
 	if (re == NULL) {
 		RETVAL_FALSE;
 		goto out;
@@ -758,7 +758,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (match_len == 0) {
 		match_len = 1;
 	}
-	RETVAL_LONG(match_len);
+	RETVAL_INT(match_len);
 out:
 	if (regs != NULL) {
 		onig_region_free(regs, 1);
@@ -855,11 +855,11 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	}
 	if (Z_TYPE_P(arg_pattern_zval) == IS_STRING) {
 		arg_pattern = Z_STRVAL_P(arg_pattern_zval);
-		arg_pattern_len = Z_STRLEN_P(arg_pattern_zval);
+		arg_pattern_len = Z_STRSIZE_P(arg_pattern_zval);
 	} else {
 		/* FIXME: this code is not multibyte aware! */
-		convert_to_long_ex(arg_pattern_zval);
-		pat_buf[0] = (char)Z_LVAL_P(arg_pattern_zval);	
+		convert_to_int_ex(arg_pattern_zval);
+		pat_buf[0] = (char)Z_IVAL_P(arg_pattern_zval);	
 		pat_buf[1] = '\0';
 
 		arg_pattern = pat_buf;
@@ -947,7 +947,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 				/* result of eval */
 				convert_to_string(&v);
-				smart_str_appendl(&out_buf, Z_STRVAL(v), Z_STRLEN(v));
+				smart_str_appendl(&out_buf, Z_STRVAL(v), Z_STRSIZE(v));
 				/* Clean up */
 				eval_buf.s->len = 0;
 				zval_dtor(&v);
@@ -971,7 +971,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				if (zend_call_function(&arg_replace_fci, &arg_replace_fci_cache TSRMLS_CC) == SUCCESS &&
 						!Z_ISUNDEF(retval)) {
 					convert_to_string_ex(&retval);
-					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
+					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRSIZE(retval));
 					if (eval_buf.s) {
 						eval_buf.s->len = 0;
 					}
@@ -1209,7 +1209,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	len = 0;
 	if (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING){
 		str = (OnigUChar *)Z_STRVAL(MBREX(search_str));
-		len = Z_STRLEN(MBREX(search_str));
+		len = Z_STRSIZE(MBREX(search_str));
 	}
 
 	if (MBREX(search_re) == NULL) {
@@ -1245,8 +1245,8 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			array_init(return_value);
 			beg = MBREX(search_regs)->beg[0];
 			end = MBREX(search_regs)->end[0];
-			add_next_index_long(return_value, beg);
-			add_next_index_long(return_value, end - beg);
+			add_next_index_int(return_value, beg);
+			add_next_index_int(return_value, end - beg);
 			break;
 		case 2:
 			array_init(return_value);
@@ -1368,7 +1368,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 		array_init(return_value);
 
 		str = (OnigUChar *)Z_STRVAL(MBREX(search_str));
-		len = Z_STRLEN(MBREX(search_str));
+		len = Z_STRSIZE(MBREX(search_str));
 		n = MBREX(search_regs)->num_regs;
 		for (i = 0; i < n; i++) {
 			beg = MBREX(search_regs)->beg[i];
@@ -1389,7 +1389,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
    Get search start position */
 PHP_FUNCTION(mb_ereg_search_getpos)
 {
-	RETVAL_LONG(MBREX(search_pos));
+	RETVAL_INT(MBREX(search_pos));
 }
 /* }}} */
 
@@ -1403,7 +1403,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 		return;
 	}
 
-	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && position >= Z_STRLEN(MBREX(search_str)))) {
+	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && position >= Z_STRSIZE(MBREX(search_str)))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;
 		RETURN_FALSE;

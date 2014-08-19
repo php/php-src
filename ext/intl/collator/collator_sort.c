@@ -80,10 +80,10 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 		}
 
 		/* Compare the strings using ICU. */
-		ZVAL_LONG(result, ucol_strcoll(
+		ZVAL_INT(result, ucol_strcoll(
 					co->ucoll,
-					INTL_Z_STRVAL_P(str1_p), INTL_Z_STRLEN_P(str1_p),
-					INTL_Z_STRVAL_P(str2_p), INTL_Z_STRLEN_P(str2_p) ));
+					INTL_Z_STRVAL_P(str1_p), INTL_Z_STRSIZE_P(str1_p),
+					INTL_Z_STRVAL_P(str2_p), INTL_Z_STRSIZE_P(str2_p) ));
 	}
 	else
 	{
@@ -190,10 +190,10 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2 TSRM
 	co = Z_INTL_COLLATOR_P(&INTL_G(current_collator));
 
 	/* Compare the strings using ICU. */
-	ZVAL_LONG(result, ucol_strcoll(
+	ZVAL_INT(result, ucol_strcoll(
 				co->ucoll,
-				INTL_Z_STRVAL_P(str1_p), INTL_Z_STRLEN_P(str1_p),
-				INTL_Z_STRVAL_P(str2_p), INTL_Z_STRLEN_P(str2_p) ));
+				INTL_Z_STRVAL_P(str1_p), INTL_Z_STRSIZE_P(str1_p),
+				INTL_Z_STRVAL_P(str2_p), INTL_Z_STRSIZE_P(str2_p) ));
 
 	zval_ptr_dtor( str1_p );
 	zval_ptr_dtor( str2_p );
@@ -232,11 +232,11 @@ static int collator_compare_func( const void* a, const void* b TSRMLS_DC )
 			return 0;
 	}
 
-	convert_to_long(&result);
+	convert_to_int(&result);
 
-	if( Z_LVAL(result) < 0 )
+	if( Z_IVAL(result) < 0 )
 		return -1;
-	else if( Z_LVAL(result) > 0 )
+	else if( Z_IVAL(result) > 0 )
 		return 1;
 
 	return 0;
@@ -424,7 +424,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 		/* Process string values only. */
 		if( Z_TYPE_P( hashData ) == IS_STRING )
 		{
-			intl_convert_utf8_to_utf16( &utf16_buf, &utf16_len, Z_STRVAL_P( hashData ), Z_STRLEN_P( hashData ), COLLATOR_ERROR_CODE_P( co ) );
+			intl_convert_utf8_to_utf16( &utf16_buf, &utf16_len, Z_STRVAL_P( hashData ), Z_STRSIZE_P( hashData ), COLLATOR_ERROR_CODE_P( co ) );
 
 			if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
 			{

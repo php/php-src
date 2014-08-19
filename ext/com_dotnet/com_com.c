@@ -81,7 +81,7 @@ PHP_FUNCTION(com_create_instance)
 				"Server", sizeof("Server")-1))) {
 			convert_to_string_ex(tmp);
 			server_name = Z_STRVAL_P(tmp);
-			server_name_len = Z_STRLEN_P(tmp);
+			server_name_len = Z_STRSIZE_P(tmp);
 			ctx = CLSCTX_REMOTE_SERVER;
 		}
 
@@ -89,27 +89,27 @@ PHP_FUNCTION(com_create_instance)
 				"Username", sizeof("Username")-1))) {
 			convert_to_string_ex(tmp);
 			user_name = Z_STRVAL_P(tmp);
-			user_name_len = Z_STRLEN_P(tmp);
+			user_name_len = Z_STRSIZE_P(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
 				"Password", sizeof("Password")-1))) {
 			convert_to_string_ex(tmp);
 			password = Z_STRVAL_P(tmp);
-			password_len = Z_STRLEN_P(tmp);
+			password_len = Z_STRSIZE_P(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
 				"Domain", sizeof("Domain")-1))) {
 			convert_to_string_ex(tmp);
 			domain_name = Z_STRVAL_P(tmp);
-			domain_name_len = Z_STRLEN_P(tmp);
+			domain_name_len = Z_STRSIZE_P(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
 				"Flags", sizeof("Flags")-1))) {
-			convert_to_long_ex(tmp);
-			ctx = (CLSCTX)Z_LVAL_P(tmp);
+			convert_to_int_ex(tmp);
+			ctx = (CLSCTX)Z_IVAL_P(tmp);
 		}
 	}
 
@@ -427,7 +427,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 	}
 
 	if (obj->id_of_name_cache && NULL != (tmp = zend_hash_str_find(obj->id_of_name_cache, name, namelen))) {
-		*dispid = Z_LVAL_P(tmp);
+		*dispid = Z_IVAL_P(tmp);
 		return S_OK;
 	}
 	
@@ -456,7 +456,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 			ALLOC_HASHTABLE(obj->id_of_name_cache);
 			zend_hash_init(obj->id_of_name_cache, 2, NULL, NULL, 0);
 		}
-		ZVAL_LONG(&tmp, *dispid);
+		ZVAL_INT(&tmp, *dispid);
 		zend_hash_str_update(obj->id_of_name_cache, name, namelen, &tmp);
 	}
 	

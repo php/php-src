@@ -307,7 +307,7 @@ notfound:
 		}
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
-		RETURN_LONG(size);
+		RETURN_INT(size);
 	}
 
 skip_phar:
@@ -477,32 +477,32 @@ static void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value T
 
 	switch (type) {
 	case FS_PERMS:
-		RETURN_LONG((long)stat_sb->st_mode);
+		RETURN_INT((long)stat_sb->st_mode);
 	case FS_INODE:
-		RETURN_LONG((long)stat_sb->st_ino);
+		RETURN_INT((long)stat_sb->st_ino);
 	case FS_SIZE:
-		RETURN_LONG((long)stat_sb->st_size);
+		RETURN_INT((long)stat_sb->st_size);
 	case FS_OWNER:
-		RETURN_LONG((long)stat_sb->st_uid);
+		RETURN_INT((long)stat_sb->st_uid);
 	case FS_GROUP:
-		RETURN_LONG((long)stat_sb->st_gid);
+		RETURN_INT((long)stat_sb->st_gid);
 	case FS_ATIME:
 #ifdef NETWARE
-		RETURN_LONG((long)stat_sb->st_atime.tv_sec);
+		RETURN_INT((long)stat_sb->st_atime.tv_sec);
 #else
-		RETURN_LONG((long)stat_sb->st_atime);
+		RETURN_INT((long)stat_sb->st_atime);
 #endif
 	case FS_MTIME:
 #ifdef NETWARE
-		RETURN_LONG((long)stat_sb->st_mtime.tv_sec);
+		RETURN_INT((long)stat_sb->st_mtime.tv_sec);
 #else
-		RETURN_LONG((long)stat_sb->st_mtime);
+		RETURN_INT((long)stat_sb->st_mtime);
 #endif
 	case FS_CTIME:
 #ifdef NETWARE
-		RETURN_LONG((long)stat_sb->st_ctime.tv_sec);
+		RETURN_INT((long)stat_sb->st_ctime.tv_sec);
 #else
-		RETURN_LONG((long)stat_sb->st_ctime);
+		RETURN_INT((long)stat_sb->st_ctime);
 #endif
 	case FS_TYPE:
 		if (S_ISLNK(stat_sb->st_mode)) {
@@ -533,36 +533,36 @@ static void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value T
 	case FS_STAT:
 		array_init(return_value);
 
-		ZVAL_LONG(&stat_dev, stat_sb->st_dev);
-		ZVAL_LONG(&stat_ino, stat_sb->st_ino);
-		ZVAL_LONG(&stat_mode, stat_sb->st_mode);
-		ZVAL_LONG(&stat_nlink, stat_sb->st_nlink);
-		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
-		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
+		ZVAL_INT(&stat_dev, stat_sb->st_dev);
+		ZVAL_INT(&stat_ino, stat_sb->st_ino);
+		ZVAL_INT(&stat_mode, stat_sb->st_mode);
+		ZVAL_INT(&stat_nlink, stat_sb->st_nlink);
+		ZVAL_INT(&stat_uid, stat_sb->st_uid);
+		ZVAL_INT(&stat_gid, stat_sb->st_gid);
 #ifdef HAVE_ST_RDEV
-		ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
+		ZVAL_INT(&stat_rdev, stat_sb->st_rdev);
 #else
-		ZVAL_LONG(&stat_rdev, -1);
+		ZVAL_INT(&stat_rdev, -1);
 #endif
-		ZVAL_LONG(&stat_size, stat_sb->st_size);
+		ZVAL_INT(&stat_size, stat_sb->st_size);
 #ifdef NETWARE
-		ZVAL_LONG(&stat_atime, (stat_sb->st_atime).tv_sec);
-		ZVAL_LONG(&stat_mtime, (stat_sb->st_mtime).tv_sec);
-		ZVAL_LONG(&stat_ctime, (stat_sb->st_ctime).tv_sec);
+		ZVAL_INT(&stat_atime, (stat_sb->st_atime).tv_sec);
+		ZVAL_INT(&stat_mtime, (stat_sb->st_mtime).tv_sec);
+		ZVAL_INT(&stat_ctime, (stat_sb->st_ctime).tv_sec);
 #else
-		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
-		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
-		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
+		ZVAL_INT(&stat_atime, stat_sb->st_atime);
+		ZVAL_INT(&stat_mtime, stat_sb->st_mtime);
+		ZVAL_INT(&stat_ctime, stat_sb->st_ctime);
 #endif
 #ifdef HAVE_ST_BLKSIZE
-		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
+		ZVAL_INT(&stat_blksize, stat_sb->st_blksize);
 #else
-		ZVAL_LONG(&stat_blksize,-1);
+		ZVAL_INT(&stat_blksize,-1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
+		ZVAL_INT(&stat_blocks, stat_sb->st_blocks);
 #else
-		ZVAL_LONG(&stat_blocks,-1);
+		ZVAL_INT(&stat_blocks,-1);
 #endif
 		/* Store numeric indexes in propper order */
 		zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);

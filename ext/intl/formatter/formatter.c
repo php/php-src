@@ -40,9 +40,9 @@ void formatter_register_constants( INIT_FUNC_ARGS )
 		zend_error(E_ERROR, "NumberFormatter class not defined");
 	}
 
-	#define FORMATTER_EXPOSE_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_PERSISTENT | CONST_CS)
-	#define FORMATTER_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_long( NumberFormatter_ce_ptr, ZEND_STRS( #x ) - 1, UNUM_##x TSRMLS_CC );
-	#define FORMATTER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( NumberFormatter_ce_ptr, ZEND_STRS( name ) - 1, value TSRMLS_CC );
+	#define FORMATTER_EXPOSE_CONST(x) REGISTER_INT_CONSTANT(#x, x, CONST_PERSISTENT | CONST_CS)
+	#define FORMATTER_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_int( NumberFormatter_ce_ptr, ZEND_STRS( #x ) - 1, UNUM_##x TSRMLS_CC );
+	#define FORMATTER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_int( NumberFormatter_ce_ptr, ZEND_STRS( name ) - 1, value TSRMLS_CC );
 
 	/* UNumberFormatStyle constants */
 	FORMATTER_EXPOSE_CLASS_CONST( PATTERN_DECIMAL );

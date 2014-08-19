@@ -1142,93 +1142,93 @@ PHP_MINIT_FUNCTION(gd)
 #endif
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("IMG_GIF", 1, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_JPG", 2, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_JPEG", 2, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_PNG", 4, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_WBMP", 8, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_XPM", 16, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_GIF", 1, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_JPG", 2, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_JPEG", 2, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_PNG", 4, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_WBMP", 8, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_XPM", 16, CONST_CS | CONST_PERSISTENT);
 
 	/* special colours for gd */
-	REGISTER_LONG_CONSTANT("IMG_COLOR_TILED", gdTiled, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_COLOR_STYLED", gdStyled, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_COLOR_BRUSHED", gdBrushed, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_COLOR_STYLEDBRUSHED", gdStyledBrushed, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_COLOR_TRANSPARENT", gdTransparent, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_COLOR_TILED", gdTiled, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_COLOR_STYLED", gdStyled, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_COLOR_BRUSHED", gdBrushed, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_COLOR_STYLEDBRUSHED", gdStyledBrushed, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_COLOR_TRANSPARENT", gdTransparent, CONST_CS | CONST_PERSISTENT);
 
 	/* for imagefilledarc */
-	REGISTER_LONG_CONSTANT("IMG_ARC_ROUNDED", gdArc, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_ARC_PIE", gdPie, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_ARC_CHORD", gdChord, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_ARC_NOFILL", gdNoFill, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_ARC_EDGED", gdEdged, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_ARC_ROUNDED", gdArc, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_ARC_PIE", gdPie, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_ARC_CHORD", gdChord, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_ARC_NOFILL", gdNoFill, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_ARC_EDGED", gdEdged, CONST_CS | CONST_PERSISTENT);
 
     /* GD2 image format types */
-	REGISTER_LONG_CONSTANT("IMG_GD2_RAW", GD2_FMT_RAW, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_GD2_COMPRESSED", GD2_FMT_COMPRESSED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FLIP_HORIZONTAL", GD_FLIP_HORINZONTAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FLIP_VERTICAL", GD_FLIP_VERTICAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FLIP_BOTH", GD_FLIP_BOTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_EFFECT_REPLACE", gdEffectReplace, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_EFFECT_ALPHABLEND", gdEffectAlphaBlend, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_EFFECT_NORMAL", gdEffectNormal, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_EFFECT_OVERLAY", gdEffectOverlay, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_GD2_RAW", GD2_FMT_RAW, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_GD2_COMPRESSED", GD2_FMT_COMPRESSED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FLIP_HORIZONTAL", GD_FLIP_HORINZONTAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FLIP_VERTICAL", GD_FLIP_VERTICAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FLIP_BOTH", GD_FLIP_BOTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_EFFECT_REPLACE", gdEffectReplace, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_EFFECT_ALPHABLEND", gdEffectAlphaBlend, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_EFFECT_NORMAL", gdEffectNormal, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_EFFECT_OVERLAY", gdEffectOverlay, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("IMG_CROP_DEFAULT", GD_CROP_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CROP_TRANSPARENT", GD_CROP_TRANSPARENT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CROP_BLACK", GD_CROP_BLACK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CROP_WHITE", GD_CROP_WHITE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CROP_SIDES", GD_CROP_SIDES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CROP_THRESHOLD", GD_CROP_THRESHOLD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_CROP_DEFAULT", GD_CROP_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_CROP_TRANSPARENT", GD_CROP_TRANSPARENT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_CROP_BLACK", GD_CROP_BLACK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_CROP_WHITE", GD_CROP_WHITE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_CROP_SIDES", GD_CROP_SIDES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_CROP_THRESHOLD", GD_CROP_THRESHOLD, CONST_CS | CONST_PERSISTENT);
 
 	
-	REGISTER_LONG_CONSTANT("IMG_BELL", GD_BELL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BESSEL", GD_BESSEL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BILINEAR_FIXED", GD_BILINEAR_FIXED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BICUBIC", GD_BICUBIC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BICUBIC_FIXED", GD_BICUBIC_FIXED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BLACKMAN", GD_BLACKMAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BOX", GD_BOX, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BSPLINE", GD_BSPLINE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CATMULLROM", GD_CATMULLROM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_GAUSSIAN", GD_GAUSSIAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_GENERALIZED_CUBIC", GD_GENERALIZED_CUBIC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_HERMITE", GD_HERMITE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_HAMMING", GD_HAMMING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_HANNING", GD_HANNING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_MITCHELL", GD_MITCHELL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_POWER", GD_POWER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_QUADRATIC", GD_QUADRATIC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_SINC", GD_SINC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_NEAREST_NEIGHBOUR", GD_NEAREST_NEIGHBOUR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_WEIGHTED4", GD_WEIGHTED4, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_TRIANGLE", GD_TRIANGLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_BELL", GD_BELL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_BESSEL", GD_BESSEL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_BILINEAR_FIXED", GD_BILINEAR_FIXED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_BICUBIC", GD_BICUBIC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_BICUBIC_FIXED", GD_BICUBIC_FIXED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_BLACKMAN", GD_BLACKMAN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_BOX", GD_BOX, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_BSPLINE", GD_BSPLINE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_CATMULLROM", GD_CATMULLROM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_GAUSSIAN", GD_GAUSSIAN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_GENERALIZED_CUBIC", GD_GENERALIZED_CUBIC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_HERMITE", GD_HERMITE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_HAMMING", GD_HAMMING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_HANNING", GD_HANNING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_MITCHELL", GD_MITCHELL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_POWER", GD_POWER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_QUADRATIC", GD_QUADRATIC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_SINC", GD_SINC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_NEAREST_NEIGHBOUR", GD_NEAREST_NEIGHBOUR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_WEIGHTED4", GD_WEIGHTED4, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_TRIANGLE", GD_TRIANGLE, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("IMG_AFFINE_TRANSLATE", GD_AFFINE_TRANSLATE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_AFFINE_SCALE", GD_AFFINE_SCALE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_AFFINE_ROTATE", GD_AFFINE_ROTATE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_AFFINE_SHEAR_HORIZONTAL", GD_AFFINE_SHEAR_HORIZONTAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_AFFINE_SHEAR_VERTICAL", GD_AFFINE_SHEAR_VERTICAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_AFFINE_TRANSLATE", GD_AFFINE_TRANSLATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_AFFINE_SCALE", GD_AFFINE_SCALE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_AFFINE_ROTATE", GD_AFFINE_ROTATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_AFFINE_SHEAR_HORIZONTAL", GD_AFFINE_SHEAR_HORIZONTAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_AFFINE_SHEAR_VERTICAL", GD_AFFINE_SHEAR_VERTICAL, CONST_CS | CONST_PERSISTENT);
 
 #if defined(HAVE_GD_BUNDLED)
-	REGISTER_LONG_CONSTANT("GD_BUNDLED", 1, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("GD_BUNDLED", 1, CONST_CS | CONST_PERSISTENT);
 #else
-	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* Section Filters */
-	REGISTER_LONG_CONSTANT("IMG_FILTER_NEGATE", IMAGE_FILTER_NEGATE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_GRAYSCALE", IMAGE_FILTER_GRAYSCALE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_BRIGHTNESS", IMAGE_FILTER_BRIGHTNESS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_CONTRAST", IMAGE_FILTER_CONTRAST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_COLORIZE", IMAGE_FILTER_COLORIZE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_EDGEDETECT", IMAGE_FILTER_EDGEDETECT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_GAUSSIAN_BLUR", IMAGE_FILTER_GAUSSIAN_BLUR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_SELECTIVE_BLUR", IMAGE_FILTER_SELECTIVE_BLUR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_EMBOSS", IMAGE_FILTER_EMBOSS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_MEAN_REMOVAL", IMAGE_FILTER_MEAN_REMOVAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_SMOOTH", IMAGE_FILTER_SMOOTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_PIXELATE", IMAGE_FILTER_PIXELATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_NEGATE", IMAGE_FILTER_NEGATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_GRAYSCALE", IMAGE_FILTER_GRAYSCALE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_BRIGHTNESS", IMAGE_FILTER_BRIGHTNESS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_CONTRAST", IMAGE_FILTER_CONTRAST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_COLORIZE", IMAGE_FILTER_COLORIZE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_EDGEDETECT", IMAGE_FILTER_EDGEDETECT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_GAUSSIAN_BLUR", IMAGE_FILTER_GAUSSIAN_BLUR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_SELECTIVE_BLUR", IMAGE_FILTER_SELECTIVE_BLUR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_EMBOSS", IMAGE_FILTER_EMBOSS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_MEAN_REMOVAL", IMAGE_FILTER_MEAN_REMOVAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_SMOOTH", IMAGE_FILTER_SMOOTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IMG_FILTER_PIXELATE", IMAGE_FILTER_PIXELATE, CONST_CS | CONST_PERSISTENT);
 	/* End Section Filters */
 
 #ifdef GD_VERSION_STRING
@@ -1236,9 +1236,9 @@ PHP_MINIT_FUNCTION(gd)
 #endif
 
 #if defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && defined(GD_RELEASE_VERSION) && defined(GD_EXTRA_VERSION)
-	REGISTER_LONG_CONSTANT("GD_MAJOR_VERSION", GD_MAJOR_VERSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GD_MINOR_VERSION", GD_MINOR_VERSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GD_RELEASE_VERSION", GD_RELEASE_VERSION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("GD_MAJOR_VERSION", GD_MAJOR_VERSION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("GD_MINOR_VERSION", GD_MINOR_VERSION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("GD_RELEASE_VERSION", GD_RELEASE_VERSION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("GD_EXTRA_VERSION", GD_EXTRA_VERSION, CONST_CS | CONST_PERSISTENT);
 #endif
 
@@ -1250,13 +1250,13 @@ PHP_MINIT_FUNCTION(gd)
 	 * /usr/include/pngconf.h:310:2: error: #error png.h already includes setjmp.h with some additional fixup.
 	 * as error, use the values for now...
 	 */
-	REGISTER_LONG_CONSTANT("PNG_NO_FILTER",	    0x00, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_NONE",   0x08, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_SUB",    0x10, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_UP",     0x20, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_AVG",    0x40, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_PAETH",  0x80, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_ALL_FILTERS",   0x08 | 0x10 | 0x20 | 0x40 | 0x80, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PNG_NO_FILTER",	    0x00, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PNG_FILTER_NONE",   0x08, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PNG_FILTER_SUB",    0x10, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PNG_FILTER_UP",     0x20, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PNG_FILTER_AVG",    0x40, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PNG_FILTER_PAETH",  0x80, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PNG_ALL_FILTERS",   0x08 | 0x10 | 0x20 | 0x40 | 0x80, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	return SUCCESS;
@@ -1515,7 +1515,7 @@ PHP_FUNCTION(imageloadfont)
 	 * that overlap with the old fonts (with indices 1-5).  The first
 	 * list index given out is always 1.
 	 */
-	RETURN_LONG(Z_RES_HANDLE_P(ind) + 5);
+	RETURN_INT(Z_RES_HANDLE_P(ind) + 5);
 }
 /* }}} */
 
@@ -1538,13 +1538,13 @@ PHP_FUNCTION(imagesetstyle)
 	stylearr = safe_emalloc(sizeof(int), zend_hash_num_elements(HASH_OF(styles)), 0);
 
 	ZEND_HASH_FOREACH_VAL(HASH_OF(styles), item) {
-		if (Z_TYPE_P(item) != IS_LONG) {
+		if (Z_TYPE_P(item) != IS_INT) {
 			zval lval;
 			ZVAL_COPY(&lval, item);
-			convert_to_long(&lval);
-			stylearr[index++] = Z_LVAL(lval);
+			convert_to_int(&lval);
+			stylearr[index++] = Z_IVAL(lval);
 		} else {
-			stylearr[index++] = Z_LVAL_P(item);
+			stylearr[index++] = Z_IVAL_P(item);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -1830,7 +1830,7 @@ PHP_FUNCTION(imagecolorallocatealpha)
 	if (ct < 0) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG((long)ct);
+	RETURN_INT((long)ct);
 }
 /* }}} */
 
@@ -1848,7 +1848,7 @@ PHP_FUNCTION(imagecolorresolvealpha)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageColorResolveAlpha(im, red, green, blue, alpha));
+	RETURN_INT(gdImageColorResolveAlpha(im, red, green, blue, alpha));
 }
 /* }}} */
 
@@ -1866,7 +1866,7 @@ PHP_FUNCTION(imagecolorclosestalpha)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageColorClosestAlpha(im, red, green, blue, alpha));
+	RETURN_INT(gdImageColorClosestAlpha(im, red, green, blue, alpha));
 }
 /* }}} */
 
@@ -1884,7 +1884,7 @@ PHP_FUNCTION(imagecolorexactalpha)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageColorExactAlpha(im, red, green, blue, alpha));
+	RETURN_INT(gdImageColorExactAlpha(im, red, green, blue, alpha));
 }
 /* }}} */
 
@@ -2182,7 +2182,7 @@ PHP_FUNCTION(imagetypes)
 		return;
 	}
 
-	RETURN_LONG(ret);
+	RETURN_INT(ret);
 }
 /* }}} */
 
@@ -2251,7 +2251,7 @@ gdImagePtr _php_image_create_from_string(zval *data, char *tn, gdImagePtr (*ioct
 	gdImagePtr im;
 	gdIOCtx *io_ctx;
 
-	io_ctx = gdNewDynamicCtxEx(Z_STRLEN_P(data), Z_STRVAL_P(data), 0);
+	io_ctx = gdNewDynamicCtxEx(Z_STRSIZE_P(data), Z_STRVAL_P(data), 0);
 
 	if (!io_ctx) {
 		return NULL;
@@ -2284,7 +2284,7 @@ PHP_FUNCTION(imagecreatefromstring)
 	}
 
 	convert_to_string_ex(data);
-	if (Z_STRLEN_P(data) < 8) {
+	if (Z_STRSIZE_P(data) < 8) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty string or invalid image");
 		RETURN_FALSE;
 	}
@@ -2808,7 +2808,7 @@ PHP_FUNCTION(imagecolorallocate)
 	if (ct < 0) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG(ct);
+	RETURN_INT(ct);
 }
 /* }}} */
 
@@ -2846,14 +2846,14 @@ PHP_FUNCTION(imagecolorat)
 
 	if (gdImageTrueColor(im)) {
 		if (im->tpixels && gdImageBoundsSafe(im, x, y)) {
-			RETURN_LONG(gdImageTrueColorPixel(im, x, y));
+			RETURN_INT(gdImageTrueColorPixel(im, x, y));
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", x, y);
 			RETURN_FALSE;
 		}
 	} else {
 		if (im->pixels && gdImageBoundsSafe(im, x, y)) {
-			RETURN_LONG(im->pixels[y][x]);
+			RETURN_INT(im->pixels[y][x]);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", x, y);
 			RETURN_FALSE;
@@ -2876,7 +2876,7 @@ PHP_FUNCTION(imagecolorclosest)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageColorClosest(im, red, green, blue));
+	RETURN_INT(gdImageColorClosest(im, red, green, blue));
 }
 /* }}} */
 
@@ -2894,7 +2894,7 @@ PHP_FUNCTION(imagecolorclosesthwb)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageColorClosestHWB(im, red, green, blue));
+	RETURN_INT(gdImageColorClosestHWB(im, red, green, blue));
 }
 /* }}} */
 
@@ -2944,7 +2944,7 @@ PHP_FUNCTION(imagecolorresolve)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageColorResolve(im, red, green, blue));
+	RETURN_INT(gdImageColorResolve(im, red, green, blue));
 }
 /* }}} */
 
@@ -2962,7 +2962,7 @@ PHP_FUNCTION(imagecolorexact)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageColorExact(im, red, green, blue));
+	RETURN_INT(gdImageColorExact(im, red, green, blue));
 }
 /* }}} */
 
@@ -3014,10 +3014,10 @@ PHP_FUNCTION(imagecolorsforindex)
 	if ((col >= 0 && gdImageTrueColor(im)) || (!gdImageTrueColor(im) && col >= 0 && col < gdImageColorsTotal(im))) {
 		array_init(return_value);
 
-		add_assoc_long(return_value,"red",  gdImageRed(im,col));
-		add_assoc_long(return_value,"green", gdImageGreen(im,col));
-		add_assoc_long(return_value,"blue", gdImageBlue(im,col));
-		add_assoc_long(return_value,"alpha", gdImageAlpha(im,col));
+		add_assoc_int(return_value,"red",  gdImageRed(im,col));
+		add_assoc_int(return_value,"green", gdImageGreen(im,col));
+		add_assoc_int(return_value,"blue", gdImageBlue(im,col));
+		add_assoc_int(return_value,"alpha", gdImageAlpha(im,col));
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color index %d out of range", col);
 		RETURN_FALSE;
@@ -3264,7 +3264,7 @@ PHP_FUNCTION(imagecolorstotal)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageColorsTotal(im));
+	RETURN_INT(gdImageColorsTotal(im));
 }
 /* }}} */
 
@@ -3287,7 +3287,7 @@ PHP_FUNCTION(imagecolortransparent)
 		gdImageColorTransparent(im, COL);
 	}
 
-	RETURN_LONG(gdImageGetTransparent(im));
+	RETURN_INT(gdImageGetTransparent(im));
 }
 /* }}} */
 
@@ -3310,7 +3310,7 @@ PHP_FUNCTION(imageinterlace)
 		gdImageInterlace(im, INT);
 	}
 
-	RETURN_LONG(gdImageGetInterlaced(im));
+	RETURN_INT(gdImageGetInterlaced(im));
 }
 /* }}} */
 
@@ -3354,23 +3354,23 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 
 	for (i = 0; i < npoints; i++) {
 		if ((var = zend_hash_index_find(Z_ARRVAL_P(POINTS), (i * 2))) != NULL) {
-			if (Z_TYPE_P(var) != IS_LONG) {
+			if (Z_TYPE_P(var) != IS_INT) {
 				zval lval;
 				ZVAL_COPY(&lval, var);
-				convert_to_long(&lval);
-				points[i].x = Z_LVAL(lval);
+				convert_to_int(&lval);
+				points[i].x = Z_IVAL(lval);
 			} else {
-				points[i].x = Z_LVAL_P(var);
+				points[i].x = Z_IVAL_P(var);
 			}
 		}
 		if ((var = zend_hash_index_find(Z_ARRVAL_P(POINTS), (i * 2) + 1)) != NULL) {
-			if (Z_TYPE_P(var) != IS_LONG) {
+			if (Z_TYPE_P(var) != IS_INT) {
 				zval lval;
 				ZVAL_COPY(&lval, var);
-				convert_to_long(&lval);
-				points[i].y = Z_LVAL(lval);
+				convert_to_int(&lval);
+				points[i].y = Z_IVAL(lval);
 			} else {
-				points[i].y = Z_LVAL_P(var);
+				points[i].y = Z_IVAL_P(var);
 			}
 		}
 	}
@@ -3457,7 +3457,7 @@ static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 	}
 
 	font = php_find_gd_font(SIZE TSRMLS_CC);
-	RETURN_LONG(arg ? font->h : font->w);
+	RETURN_INT(arg ? font->h : font->w);
 }
 /* }}} */
 
@@ -3736,7 +3736,7 @@ PHP_FUNCTION(imagesx)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageSX(im));
+	RETURN_INT(gdImageSX(im));
 }
 /* }}} */
 
@@ -3753,7 +3753,7 @@ PHP_FUNCTION(imagesy)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-	RETURN_LONG(gdImageSY(im));
+	RETURN_INT(gdImageSY(im));
 }
 /* }}} */
 
@@ -3878,7 +3878,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 
 	/* return array with the text's bounding box */
 	for (i = 0; i < 8; i++) {
-		add_next_index_long(return_value, brect[i]);
+		add_next_index_int(return_value, brect[i]);
 	}
 }
 /* }}} */
@@ -3994,7 +3994,7 @@ PHP_FUNCTION(imagepscopyfont)
 
 	nf_ind->extend = 1;
 	l_ind = zend_list_insert(nf_ind, le_ps_font TSRMLS_CC);
-	RETURN_LONG(l_ind);
+	RETURN_INT(l_ind);
 }
 */
 /* }}} */
@@ -4231,10 +4231,10 @@ PHP_FUNCTION(imagepstext)
 
 	array_init(return_value);
 
-	add_next_index_long(return_value, str_img->metrics.leftSideBearing);
-	add_next_index_long(return_value, str_img->metrics.descent);
-	add_next_index_long(return_value, str_img->metrics.rightSideBearing);
-	add_next_index_long(return_value, str_img->metrics.ascent);
+	add_next_index_int(return_value, str_img->metrics.leftSideBearing);
+	add_next_index_int(return_value, str_img->metrics.descent);
+	add_next_index_int(return_value, str_img->metrics.rightSideBearing);
+	add_next_index_int(return_value, str_img->metrics.ascent);
 }
 /* }}} */
 
@@ -4330,10 +4330,10 @@ PHP_FUNCTION(imagepsbbox)
 	/*
 	printf("%d %d %d %d\n", str_bbox.llx, str_bbox.lly, str_bbox.urx, str_bbox.ury);
 	*/
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.llx)*sz/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.lly)*sz/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.urx)*sz/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.ury)*sz/1000));
+	add_next_index_int(return_value, (int) ceil(((double) str_bbox.llx)*sz/1000));
+	add_next_index_int(return_value, (int) ceil(((double) str_bbox.lly)*sz/1000));
+	add_next_index_int(return_value, (int) ceil(((double) str_bbox.urx)*sz/1000));
+	add_next_index_int(return_value, (int) ceil(((double) str_bbox.ury)*sz/1000));
 }
 /* }}} */
 #endif
@@ -4972,13 +4972,13 @@ PHP_FUNCTION(imagecrop)
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "x", sizeof("x") -1)) != NULL) {
-		if (Z_TYPE_P(tmp) != IS_LONG) {
+		if (Z_TYPE_P(tmp) != IS_INT) {
 			zval lval;
 			ZVAL_COPY(&lval, tmp);
-			convert_to_long(&lval);
-			rect.x = Z_LVAL(lval);
+			convert_to_int(&lval);
+			rect.x = Z_IVAL(lval);
 		} else {
-			rect.x = Z_LVAL_P(tmp);
+			rect.x = Z_IVAL_P(tmp);
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing x position");
@@ -4986,13 +4986,13 @@ PHP_FUNCTION(imagecrop)
 	}
 
 	if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "y", sizeof("y") - 1)) != NULL) {
-		if (Z_TYPE_P(tmp) != IS_LONG) {
+		if (Z_TYPE_P(tmp) != IS_INT) {
 			zval lval;
 			ZVAL_COPY(&lval, tmp);
-			convert_to_long(&lval);
-			rect.y = Z_LVAL(lval);
+			convert_to_int(&lval);
+			rect.y = Z_IVAL(lval);
 		} else {
-			rect.y = Z_LVAL_P(tmp);
+			rect.y = Z_IVAL_P(tmp);
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing y position");
@@ -5000,13 +5000,13 @@ PHP_FUNCTION(imagecrop)
 	}
 
 	if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "width", sizeof("width") - 1)) != NULL) {
-		if (Z_TYPE_P(tmp) != IS_LONG) {
+		if (Z_TYPE_P(tmp) != IS_INT) {
 			zval lval;
 			ZVAL_COPY(&lval, tmp);
-			convert_to_long(&lval);
-			rect.width = Z_LVAL(lval);
+			convert_to_int(&lval);
+			rect.width = Z_IVAL(lval);
 		} else {
-			rect.width = Z_LVAL_P(tmp);
+			rect.width = Z_IVAL_P(tmp);
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing width");
@@ -5014,13 +5014,13 @@ PHP_FUNCTION(imagecrop)
 	}
 
 	if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "height", sizeof("height") - 1)) != NULL) {
-		if (Z_TYPE_P(tmp) != IS_LONG) {
+		if (Z_TYPE_P(tmp) != IS_INT) {
 			zval lval;
 			ZVAL_COPY(&lval, tmp);
-			convert_to_long(&lval);
-			rect.height = Z_LVAL(lval);
+			convert_to_int(&lval);
+			rect.height = Z_IVAL(lval);
 		} else {
-			rect.height = Z_LVAL_P(tmp);
+			rect.height = Z_IVAL_P(tmp);
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing height");
@@ -5147,8 +5147,8 @@ PHP_FUNCTION(imageaffine)
 	for (i = 0; i < nelems; i++) {
 		if ((zval_affine_elem = zend_hash_index_find(Z_ARRVAL_P(z_affine), i)) != NULL) {
 			switch (Z_TYPE_P(zval_affine_elem)) {
-				case IS_LONG:
-					affine[i]  = Z_LVAL_P(zval_affine_elem);
+				case IS_INT:
+					affine[i]  = Z_IVAL_P(zval_affine_elem);
 					break;
 				case IS_DOUBLE:
 					affine[i] = Z_DVAL_P(zval_affine_elem);
@@ -5170,13 +5170,13 @@ PHP_FUNCTION(imageaffine)
 
 	if (z_rect != NULL) {
 		if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "x", sizeof("x") - 1)) != NULL) {
-			if (Z_TYPE_P(tmp) != IS_LONG) {
+			if (Z_TYPE_P(tmp) != IS_INT) {
 				zval lval;
 				ZVAL_COPY(&lval, tmp);
-				convert_to_long(&lval);
-				rect.x = Z_LVAL(lval);
+				convert_to_int(&lval);
+				rect.x = Z_IVAL(lval);
 			} else {
-				rect.x = Z_LVAL_P(tmp);
+				rect.x = Z_IVAL_P(tmp);
 			}
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing x position");
@@ -5184,13 +5184,13 @@ PHP_FUNCTION(imageaffine)
 		}
 
 		if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "y", sizeof("y") - 1)) != NULL) {
-			if (Z_TYPE_P(tmp) != IS_LONG) {
+			if (Z_TYPE_P(tmp) != IS_INT) {
 				zval lval;
 				ZVAL_COPY(&lval, tmp);
-				convert_to_long(&lval);
-				rect.y = Z_LVAL(lval);
+				convert_to_int(&lval);
+				rect.y = Z_IVAL(lval);
 			} else {
-				rect.y = Z_LVAL_P(tmp);
+				rect.y = Z_IVAL_P(tmp);
 			}
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing y position");
@@ -5198,13 +5198,13 @@ PHP_FUNCTION(imageaffine)
 		}
 
 		if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "width", sizeof("width") - 1)) != NULL) {
-			if (Z_TYPE_P(tmp) != IS_LONG) {
+			if (Z_TYPE_P(tmp) != IS_INT) {
 				zval lval;
 				ZVAL_COPY(&lval, tmp);
-				convert_to_long(&lval);
-				rect.width = Z_LVAL(lval);
+				convert_to_int(&lval);
+				rect.width = Z_IVAL(lval);
 			} else {
-				rect.width = Z_LVAL_P(tmp);
+				rect.width = Z_IVAL_P(tmp);
 			}
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing width");
@@ -5212,13 +5212,13 @@ PHP_FUNCTION(imageaffine)
 		}
 
 		if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "height", sizeof("height") - 1)) != NULL) {
-			if (Z_TYPE_P(tmp) != IS_LONG) {
+			if (Z_TYPE_P(tmp) != IS_INT) {
 				zval lval;
 				ZVAL_COPY(&lval, tmp);
-				convert_to_long(&lval);
-				rect.height = Z_LVAL(lval);
+				convert_to_int(&lval);
+				rect.height = Z_IVAL(lval);
 			} else {
-				rect.height = Z_LVAL_P(tmp);
+				rect.height = Z_IVAL_P(tmp);
 			}
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing height");
@@ -5365,8 +5365,8 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	for (i = 0; i < 6; i++) {
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m1), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
-				case IS_LONG:
-					m1[i]  = Z_LVAL_P(tmp);
+				case IS_INT:
+					m1[i]  = Z_IVAL_P(tmp);
 					break;
 				case IS_DOUBLE:
 					m1[i] = Z_DVAL_P(tmp);
@@ -5386,8 +5386,8 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		}
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m2), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
-				case IS_LONG:
-					m2[i]  = Z_LVAL_P(tmp);
+				case IS_INT:
+					m2[i]  = Z_IVAL_P(tmp);
 					break;
 				case IS_DOUBLE:
 					m2[i] = Z_DVAL_P(tmp);

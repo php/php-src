@@ -419,19 +419,19 @@ static int _call_message_handler(zval *callback_name, CS_SERVERMSG *srvmsg TSRML
 
 	/* Build arguments */
 	MAKE_STD_ZVAL(msgnumber);
-	ZVAL_LONG(msgnumber, srvmsg->msgnumber);
+	ZVAL_INT(msgnumber, srvmsg->msgnumber);
 	args[0] = &msgnumber;
 
 	MAKE_STD_ZVAL(severity);
-	ZVAL_LONG(severity, srvmsg->severity);
+	ZVAL_INT(severity, srvmsg->severity);
 	args[1] = &severity;
 
 	MAKE_STD_ZVAL(state);
-	ZVAL_LONG(state, srvmsg->state);
+	ZVAL_INT(state, srvmsg->state);
 	args[2] = &state;
 
 	MAKE_STD_ZVAL(line);
-	ZVAL_LONG(line, srvmsg->line);
+	ZVAL_INT(line, srvmsg->line);
 	args[3] = &line;
 
 	MAKE_STD_ZVAL(text);	
@@ -559,7 +559,7 @@ static PHP_GINIT_FUNCTION(sybase)
 	 * signals to implement timeouts, they are actually implemented
 	 * by using poll() or select() on Solaris and Linux.
 	 */
-	if (cfg_get_long("sybct.timeout", &opt)==SUCCESS) {
+	if (cfg_get_int("sybct.timeout", &opt)==SUCCESS) {
 		CS_INT cs_timeout = opt;
 		if (ct_config(sybase_globals->context, CS_SET, CS_TIMEOUT, &cs_timeout, CS_UNUSED, NULL)!=CS_SUCCEED) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Unable to update the timeout");
@@ -678,7 +678,7 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 		}
 	}
 	
-	if (cfg_get_long("sybct.packet_size", &packetsize) == SUCCESS) {
+	if (cfg_get_int("sybct.packet_size", &packetsize) == SUCCESS) {
 		if (ct_con_props(sybase->connection, CS_SET, CS_PACKETSIZE, (CS_VOID *)&packetsize, CS_UNUSED, NULL) != CS_SUCCEED) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to update connection packetsize");
 		}
@@ -864,7 +864,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			ptr = zend_list_find(link, &type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
 				zend_list_addref(link);
-				Z_LVAL_P(return_value) = SybCtG(default_link) = link;
+				Z_IVAL_P(return_value) = SybCtG(default_link) = link;
 				Z_TYPE_P(return_value) = IS_RESOURCE;
 				efree(hashed_details);
 				return;
@@ -889,7 +889,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ZEND_REGISTER_RESOURCE(return_value, sybase_ptr, le_link);
 
 		/* add it to the hash */
-		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
+		new_index_ptr.ptr = (void *) Z_IVAL_P(return_value);
 		Z_TYPE(new_index_ptr) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1, (void *) &new_index_ptr, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
 			ct_close(sybase_ptr->connection, CS_UNUSED);
@@ -901,7 +901,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		SybCtG(num_links)++;
 	}
 	efree(hashed_details);
-	SybCtG(default_link)=Z_LVAL_P(return_value);
+	SybCtG(default_link)=Z_IVAL_P(return_value);
 	zend_list_addref(SybCtG(default_link));
 }
 
@@ -1225,7 +1225,7 @@ static int php_sybase_fetch_result_row(sybase_result *result, int numrows TSRMLS
 				switch (result->numerics[j]) {
 					case 1: {
 						/* This indicates a long */
-						ZVAL_LONG(&result->data[i][j], strtol(result->tmp_buffer[j], NULL, 10));
+						ZVAL_INT(&result->data[i][j], strtol(result->tmp_buffer[j], NULL, 10));
 						break;
 					}
 					
@@ -1238,14 +1238,14 @@ static int php_sybase_fetch_result_row(sybase_result *result, int numrows TSRMLS
 					case 3: {
 						/* This indicates either a long or a float, which ever fits */
 						errno = 0;
-						Z_LVAL(result->data[i][j]) = strtol(result->tmp_buffer[j], NULL, 10);
+						Z_IVAL(result->data[i][j]) = strtol(result->tmp_buffer[j], NULL, 10);
 						if (errno == ERANGE) {
 						
 							/* An overflow occurred, so try to fit it into a double */
 							RETURN_DOUBLE_VAL(result->data[i][j], result->tmp_buffer[j], result->lengths[j]); 
 							break;
 						}
-						Z_TYPE(result->data[i][j]) = IS_LONG;
+						Z_TYPE(result->data[i][j]) = IS_INT;
 						break;
 					}
 					
@@ -1469,7 +1469,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 		
 		/* Get the resultset and free it */
 		ALLOC_ZVAL(tmp);
-		Z_LVAL_P(tmp)= sybase_ptr->active_result_index;
+		Z_IVAL_P(tmp)= sybase_ptr->active_result_index;
 		Z_TYPE_P(tmp)= IS_RESOURCE;
 		INIT_PZVAL(tmp);
 		ZEND_FETCH_RESOURCE(result, sybase_result *, &tmp, -1, "Sybase result", le_result);
@@ -1701,7 +1701,7 @@ PHP_FUNCTION(sybase_free_result)
 		php_sybase_finish_results(result TSRMLS_CC);
 	}
 	
-	zend_list_delete(Z_LVAL_P(sybase_result_index));
+	zend_list_delete(Z_IVAL_P(sybase_result_index));
 	RETURN_TRUE;
 }
 
@@ -1727,8 +1727,8 @@ PHP_FUNCTION(sybase_num_rows)
 	}
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
-	Z_LVAL_P(return_value) = result->num_rows;
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_IVAL_P(return_value) = result->num_rows;
+	Z_TYPE_P(return_value) = IS_INT;
 }
 
 /* }}} */
@@ -1745,8 +1745,8 @@ PHP_FUNCTION(sybase_num_fields)
 	}
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
-	Z_LVAL_P(return_value) = result->num_fields;
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_IVAL_P(return_value) = result->num_fields;
+	Z_TYPE_P(return_value) = IS_INT;
 }
 
 /* }}} */
@@ -1867,7 +1867,7 @@ PHP_FUNCTION(sybase_fetch_object)
 				zend_class_entry **pce = NULL;
 				convert_to_string(object);
 
-				if (zend_lookup_class(Z_STRVAL_P(object), Z_STRLEN_P(object), &pce TSRMLS_CC) == FAILURE) {
+				if (zend_lookup_class(Z_STRVAL_P(object), Z_STRSIZE_P(object), &pce TSRMLS_CC) == FAILURE) {
 					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Class %s has not been declared", Z_STRVAL_P(object));
 					/* Use default (ZEND_STANDARD_CLASS_DEF_PTR) */
 				} else {
@@ -2002,9 +2002,9 @@ PHP_FUNCTION(sybase_fetch_field)
 	object_init(return_value);
 
 	add_property_string(return_value, "name", result->fields[field_offset].name);
-	add_property_long(return_value, "max_length", result->fields[field_offset].max_length);
+	add_property_int(return_value, "max_length", result->fields[field_offset].max_length);
 	add_property_string(return_value, "column_source", result->fields[field_offset].column_source);
-	add_property_long(return_value, "numeric", result->fields[field_offset].numeric);
+	add_property_int(return_value, "numeric", result->fields[field_offset].numeric);
 	add_property_string(return_value, "type", php_sybase_get_field_name(Z_TYPE(result->fields[field_offset])));
 }
 /* }}} */
@@ -2076,8 +2076,8 @@ PHP_FUNCTION(sybase_result)
 			break;
 		}
 		default:
-			convert_to_long(field);
-			field_offset = Z_LVAL_P(field);
+			convert_to_int(field);
+			field_offset = Z_IVAL_P(field);
 			if (field_offset < 0 || field_offset >= result->num_fields) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Bad column offset specified");
 				RETURN_FALSE;
@@ -2110,8 +2110,8 @@ PHP_FUNCTION(sybase_affected_rows)
 
 	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", le_link, le_plink);
 
-	Z_LVAL_P(return_value) = sybase_ptr->affected_rows;
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_IVAL_P(return_value) = sybase_ptr->affected_rows;
+	Z_TYPE_P(return_value) = IS_INT;
 }
 /* }}} */
 

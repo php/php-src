@@ -680,7 +680,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 
 	if (valueretrieval & SNMP_VALUE_OBJECT) {
 		object_init(snmpval);
-		add_property_long(snmpval, "type", vars->type);
+		add_property_int(snmpval, "type", vars->type);
 		add_property_zval(snmpval, "value", &val);
 	} else  {
 		ZVAL_COPY(snmpval, &val);
@@ -1014,8 +1014,8 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 		objid_query->vars[objid_query->count].oid = Z_STRVAL_P(oid);
 		if (st & SNMP_CMD_SET) {
 			if (Z_TYPE_P(type) == IS_STRING && Z_TYPE_P(value) == IS_STRING) {
-				if (Z_STRLEN_P(type) != 1) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bogus type '%s', should be single char, got %u", Z_STRVAL_P(type), Z_STRLEN_P(type));
+				if (Z_STRSIZE_P(type) != 1) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bogus type '%s', should be single char, got %u", Z_STRVAL_P(type), Z_STRSIZE_P(type));
 					efree(objid_query->vars);
 					return FALSE;
 				}
@@ -1054,8 +1054,8 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 				} else if (Z_TYPE_P(type) == IS_ARRAY) {
 					if ((tmp_type = zend_hash_get_current_data_ex(Z_ARRVAL_P(type), &pos_type)) != NULL) {
 						convert_to_string_ex(tmp_type);
-						if (Z_STRLEN_P(tmp_type) != 1) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%s': bogus type '%s', should be single char, got %u", Z_STRVAL_P(tmp_oid), Z_STRVAL_P(tmp_type), Z_STRLEN_P(tmp_type));
+						if (Z_STRSIZE_P(tmp_type) != 1) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%s': bogus type '%s', should be single char, got %u", Z_STRVAL_P(tmp_oid), Z_STRVAL_P(tmp_type), Z_STRSIZE_P(tmp_type));
 							efree(objid_query->vars);
 							return FALSE;
 						}
@@ -1781,7 +1781,7 @@ PHP_FUNCTION(snmp_get_valueretrieval)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(SNMP_G(valueretrieval));
+	RETURN_INT(SNMP_G(valueretrieval));
 }
 /* }}} */
 
@@ -1942,7 +1942,7 @@ PHP_METHOD(snmp, getErrno)
 
 	snmp_object = Z_SNMP_P(object);
 
-	RETVAL_LONG(snmp_object->snmp_errno);
+	RETVAL_INT(snmp_object->snmp_errno);
 	return;
 }
 /* }}} */
@@ -2127,13 +2127,13 @@ static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval TSRMLS_
 	ZVAL_STRINGL(&val, snmp_object->session->peername, strlen(snmp_object->session->peername));
 	add_assoc_zval(retval, "hostname", &val);
 	
-	ZVAL_LONG(&val, snmp_object->session->remote_port);
+	ZVAL_INT(&val, snmp_object->session->remote_port);
 	add_assoc_zval(retval, "port", &val);
 	
-	ZVAL_LONG(&val, snmp_object->session->timeout);
+	ZVAL_INT(&val, snmp_object->session->timeout);
 	add_assoc_zval(retval, "timeout", &val);
 	
-	ZVAL_LONG(&val, snmp_object->session->retries);
+	ZVAL_INT(&val, snmp_object->session->retries);
 	add_assoc_zval(retval, "retries", &val);
 	
 	return SUCCESS;
@@ -2144,7 +2144,7 @@ static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval TSRMLS_
 static int php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *retval TSRMLS_DC)
 {
 	if (snmp_object->max_oids > 0) {
-		ZVAL_LONG(retval, snmp_object->max_oids);
+		ZVAL_INT(retval, snmp_object->max_oids);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -2163,16 +2163,16 @@ PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(oid_increasing_check)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(quick_print)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(enum_print)
 
-#define PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(name) \
+#define PHP_SNMP_INT_PROPERTY_READER_FUNCTION(name) \
 	static int php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval TSRMLS_DC) \
 	{ \
-		ZVAL_LONG(retval, snmp_object->name); \
+		ZVAL_INT(retval, snmp_object->name); \
 		return SUCCESS; \
 	}
 
-PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(valueretrieval)
-PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(oid_output_format)
-PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(exceptions_enabled)
+PHP_SNMP_INT_PROPERTY_READER_FUNCTION(valueretrieval)
+PHP_SNMP_INT_PROPERTY_READER_FUNCTION(oid_output_format)
+PHP_SNMP_INT_PROPERTY_READER_FUNCTION(exceptions_enabled)
 
 /* {{{ */
 static int php_snmp_write_info(php_snmp_object *snmp_object, zval *newval TSRMLS_DC)
@@ -2193,17 +2193,17 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval TS
 		return ret;
 	}
 
-	if (Z_TYPE_P(newval) != IS_LONG) {
+	if (Z_TYPE_P(newval) != IS_INT) {
 		ztmp = *newval;
 		zval_copy_ctor(&ztmp);
-		convert_to_long(&ztmp);
+		convert_to_int(&ztmp);
 		newval = &ztmp;
 	}
 
-	if (Z_LVAL_P(newval) > 0) {
-		snmp_object->max_oids = Z_LVAL_P(newval);
+	if (Z_IVAL_P(newval) > 0) {
+		snmp_object->max_oids = Z_IVAL_P(newval);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "max_oids should be positive integer or NULL, got %ld", Z_LVAL_P(newval));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "max_oids should be positive integer or NULL, got %ld", Z_IVAL_P(newval));
 	}
 	
 	if (newval == &ztmp) {
@@ -2220,17 +2220,17 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 	zval ztmp;
 	int ret = SUCCESS;
 
-	if (Z_TYPE_P(newval) != IS_LONG) {
+	if (Z_TYPE_P(newval) != IS_INT) {
 		ztmp = *newval;
 		zval_copy_ctor(&ztmp);
-		convert_to_long(&ztmp);
+		convert_to_int(&ztmp);
 		newval = &ztmp;
 	}
 
-	if (Z_LVAL_P(newval) >= 0 && Z_LVAL_P(newval) <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
-		snmp_object->valueretrieval = Z_LVAL_P(newval);
+	if (Z_IVAL_P(newval) >= 0 && Z_IVAL_P(newval) <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
+		snmp_object->valueretrieval = Z_IVAL_P(newval);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", Z_LVAL_P(newval));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", Z_IVAL_P(newval));
 		ret = FAILURE;
 	}
 	
@@ -2264,23 +2264,23 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 {
 	zval ztmp;
 	int ret = SUCCESS;
-	if (Z_TYPE_P(newval) != IS_LONG) {
+	if (Z_TYPE_P(newval) != IS_INT) {
 		ZVAL_COPY(&ztmp, newval);
-		convert_to_long(&ztmp);
+		convert_to_int(&ztmp);
 		newval = &ztmp;
 	}
 	
-	switch(Z_LVAL_P(newval)) {
+	switch(Z_IVAL_P(newval)) {
 		case NETSNMP_OID_OUTPUT_SUFFIX:
 		case NETSNMP_OID_OUTPUT_MODULE:
 		case NETSNMP_OID_OUTPUT_FULL:
 		case NETSNMP_OID_OUTPUT_NUMERIC:
 		case NETSNMP_OID_OUTPUT_UCD:
 		case NETSNMP_OID_OUTPUT_NONE:
-			snmp_object->oid_output_format = Z_LVAL_P(newval);
+			snmp_object->oid_output_format = Z_IVAL_P(newval);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP output print format '%ld'", Z_LVAL_P(newval));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP output print format '%ld'", Z_IVAL_P(newval));
 			ret = FAILURE;
 			break;
 	}
@@ -2297,13 +2297,13 @@ static int php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval 
 {
 	zval ztmp;
 	int ret = SUCCESS;
-	if (Z_TYPE_P(newval) != IS_LONG) {
+	if (Z_TYPE_P(newval) != IS_INT) {
 		ZVAL_COPY(&ztmp, newval);
-		convert_to_long(&ztmp);
+		convert_to_int(&ztmp);
 		newval = &ztmp;
 	}
 
-	snmp_object->exceptions_enabled = Z_LVAL_P(newval);	
+	snmp_object->exceptions_enabled = Z_IVAL_P(newval);	
 
 	if (newval == &ztmp) {
 		zval_ptr_dtor(newval);
@@ -2391,43 +2391,43 @@ PHP_MINIT_FUNCTION(snmp)
 	zend_hash_init(&php_snmp_properties, 0, NULL, free_php_snmp_properties, 1);
 	PHP_SNMP_ADD_PROPERTIES(&php_snmp_properties, php_snmp_property_entries);
 
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_SUFFIX",	NETSNMP_OID_OUTPUT_SUFFIX,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_MODULE",	NETSNMP_OID_OUTPUT_MODULE,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_FULL",		NETSNMP_OID_OUTPUT_FULL,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_NUMERIC",	NETSNMP_OID_OUTPUT_NUMERIC,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_UCD",		NETSNMP_OID_OUTPUT_UCD,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_NONE",		NETSNMP_OID_OUTPUT_NONE,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_OID_OUTPUT_SUFFIX",	NETSNMP_OID_OUTPUT_SUFFIX,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_OID_OUTPUT_MODULE",	NETSNMP_OID_OUTPUT_MODULE,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_OID_OUTPUT_FULL",		NETSNMP_OID_OUTPUT_FULL,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_OID_OUTPUT_NUMERIC",	NETSNMP_OID_OUTPUT_NUMERIC,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_OID_OUTPUT_UCD",		NETSNMP_OID_OUTPUT_UCD,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_OID_OUTPUT_NONE",		NETSNMP_OID_OUTPUT_NONE,	CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("SNMP_VALUE_LIBRARY",	SNMP_VALUE_LIBRARY,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_VALUE_PLAIN",	SNMP_VALUE_PLAIN,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_VALUE_OBJECT",	SNMP_VALUE_OBJECT,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_VALUE_LIBRARY",	SNMP_VALUE_LIBRARY,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_VALUE_PLAIN",	SNMP_VALUE_PLAIN,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_VALUE_OBJECT",	SNMP_VALUE_OBJECT,	CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("SNMP_BIT_STR",		ASN_BIT_STR,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OCTET_STR",	ASN_OCTET_STR,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OPAQUE",		ASN_OPAQUE,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_NULL",		ASN_NULL,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OBJECT_ID",	ASN_OBJECT_ID,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_IPADDRESS",	ASN_IPADDRESS,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_COUNTER",		ASN_GAUGE,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_UNSIGNED",		ASN_UNSIGNED,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_TIMETICKS",	ASN_TIMETICKS,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_UINTEGER",		ASN_UINTEGER,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_INTEGER",		ASN_INTEGER,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_COUNTER64",	ASN_COUNTER64,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_BIT_STR",		ASN_BIT_STR,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_OCTET_STR",	ASN_OCTET_STR,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_OPAQUE",		ASN_OPAQUE,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_NULL",		ASN_NULL,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_OBJECT_ID",	ASN_OBJECT_ID,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_IPADDRESS",	ASN_IPADDRESS,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_COUNTER",		ASN_GAUGE,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_UNSIGNED",		ASN_UNSIGNED,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_TIMETICKS",	ASN_TIMETICKS,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_UINTEGER",		ASN_UINTEGER,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_INTEGER",		ASN_INTEGER,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SNMP_COUNTER64",	ASN_COUNTER64,	CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_1",			SNMP_VERSION_1);
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_2c",			SNMP_VERSION_2c);
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_2C",			SNMP_VERSION_2c);
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_3",			SNMP_VERSION_3);
+	REGISTER_SNMP_CLASS_CONST_INT("VERSION_1",			SNMP_VERSION_1);
+	REGISTER_SNMP_CLASS_CONST_INT("VERSION_2c",			SNMP_VERSION_2c);
+	REGISTER_SNMP_CLASS_CONST_INT("VERSION_2C",			SNMP_VERSION_2c);
+	REGISTER_SNMP_CLASS_CONST_INT("VERSION_3",			SNMP_VERSION_3);
 
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_NOERROR",			PHP_SNMP_ERRNO_NOERROR);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_ANY",			PHP_SNMP_ERRNO_ANY);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_GENERIC",			PHP_SNMP_ERRNO_GENERIC);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_TIMEOUT",			PHP_SNMP_ERRNO_TIMEOUT);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_ERROR_IN_REPLY",		PHP_SNMP_ERRNO_ERROR_IN_REPLY);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_NOT_INCREASING",	PHP_SNMP_ERRNO_OID_NOT_INCREASING);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_PARSING_ERROR",	PHP_SNMP_ERRNO_OID_PARSING_ERROR);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_MULTIPLE_SET_QUERIES",	PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES);
+	REGISTER_SNMP_CLASS_CONST_INT("ERRNO_NOERROR",			PHP_SNMP_ERRNO_NOERROR);
+	REGISTER_SNMP_CLASS_CONST_INT("ERRNO_ANY",			PHP_SNMP_ERRNO_ANY);
+	REGISTER_SNMP_CLASS_CONST_INT("ERRNO_GENERIC",			PHP_SNMP_ERRNO_GENERIC);
+	REGISTER_SNMP_CLASS_CONST_INT("ERRNO_TIMEOUT",			PHP_SNMP_ERRNO_TIMEOUT);
+	REGISTER_SNMP_CLASS_CONST_INT("ERRNO_ERROR_IN_REPLY",		PHP_SNMP_ERRNO_ERROR_IN_REPLY);
+	REGISTER_SNMP_CLASS_CONST_INT("ERRNO_OID_NOT_INCREASING",	PHP_SNMP_ERRNO_OID_NOT_INCREASING);
+	REGISTER_SNMP_CLASS_CONST_INT("ERRNO_OID_PARSING_ERROR",	PHP_SNMP_ERRNO_OID_PARSING_ERROR);
+	REGISTER_SNMP_CLASS_CONST_INT("ERRNO_MULTIPLE_SET_QUERIES",	PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES);
 
 	/* Register SNMPException class */
 	INIT_CLASS_ENTRY(cex, "SNMPException", NULL);

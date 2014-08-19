@@ -177,9 +177,9 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 	intl_error_reset( NULL TSRMLS_CC );	
 	RESOURCEBUNDLE_METHOD_FETCH_OBJECT;
 
-	if(Z_TYPE_P(offset) == IS_LONG) {
+	if(Z_TYPE_P(offset) == IS_INT) {
 		is_numeric = 1;
-		meindex = Z_LVAL_P(offset);
+		meindex = Z_IVAL_P(offset);
 		rb->child = ures_getByIndex( rb->me, meindex, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else if(Z_TYPE_P(offset) == IS_STRING) {
 		mekey = Z_STRVAL_P(offset);
@@ -299,7 +299,7 @@ PHP_FUNCTION( resourcebundle_count )
 	RESOURCEBUNDLE_METHOD_FETCH_OBJECT;
 
 	len = ures_getSize( rb->me );
-	RETURN_LONG( len );
+	RETURN_INT( len );
 }
 
 /* {{{ arginfo_resourcebundle_getlocales */
@@ -372,7 +372,7 @@ PHP_FUNCTION( resourcebundle_get_error_code )
 
 	rb = Z_INTL_RESOURCEBUNDLE_P( object );
 
-	RETURN_LONG(INTL_DATA_ERROR_CODE(rb));
+	RETURN_INT(INTL_DATA_ERROR_CODE(rb));
 }
 /* }}} */
 

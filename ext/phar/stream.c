@@ -213,11 +213,11 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			if (idata->internal_file->uncompressed_filesize == 0
 				&& idata->internal_file->compressed_filesize == 0
 				&& (pzoption = zend_hash_str_find(pharcontext, "compress", sizeof("compress")-1)) != NULL
-				&& Z_TYPE_P(pzoption) == IS_LONG
-				&& (Z_LVAL_P(pzoption) & ~PHAR_ENT_COMPRESSION_MASK) == 0
+				&& Z_TYPE_P(pzoption) == IS_INT
+				&& (Z_IVAL_P(pzoption) & ~PHAR_ENT_COMPRESSION_MASK) == 0
 			) {
 				idata->internal_file->flags &= ~PHAR_ENT_COMPRESSION_MASK;
-				idata->internal_file->flags |= Z_LVAL_P(pzoption);
+				idata->internal_file->flags |= Z_IVAL_P(pzoption);
 			}
 			if ((pzoption = zend_hash_str_find(pharcontext, "metadata", sizeof("metadata")-1)) != NULL) {
 				if (Z_TYPE(idata->internal_file->metadata) != IS_UNDEF) {

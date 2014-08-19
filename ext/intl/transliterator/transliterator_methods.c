@@ -342,7 +342,7 @@ PHP_FUNCTION( transliterator_transliterate )
 				convert_to_string( arg1 );
 			}
 			object = &tmp_object;
-			res = create_transliterator( Z_STRVAL_P( arg1 ), Z_STRLEN_P( arg1 ),
+			res = create_transliterator( Z_STRVAL_P( arg1 ), Z_STRSIZE_P( arg1 ),
 					TRANSLITERATOR_FORWARD, object TSRMLS_CC );
 			if( res == FAILURE )
 			{
@@ -497,7 +497,7 @@ PHP_FUNCTION( transliterator_get_error_code )
 	if (to == NULL )
 		RETURN_FALSE;
 
-	RETURN_LONG( (long) TRANSLITERATOR_ERROR_CODE( to ) );
+	RETURN_INT( (long) TRANSLITERATOR_ERROR_CODE( to ) );
 }
 /* }}} */
 

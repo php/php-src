@@ -1443,7 +1443,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 	}
 	php_trim(new_value, new_value_length, NULL, 0, &tmp, 3 TSRMLS_CC);
 
-	if (Z_STRLEN(tmp) > 0) {
+	if (Z_STRSIZE(tmp) > 0) {
 		if (!(re = _php_mb_compile_regex(Z_STRVAL(tmp) TSRMLS_CC))) {
 			zval_dtor(&tmp);
 			return FAILURE;
@@ -1559,13 +1559,13 @@ PHP_MINIT_FUNCTION(mbstring)
 		sapi_register_post_entries(mbstr_post_entries TSRMLS_CC);
 	}
 
-	REGISTER_LONG_CONSTANT("MB_OVERLOAD_MAIL", MB_OVERLOAD_MAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MB_OVERLOAD_STRING", MB_OVERLOAD_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MB_OVERLOAD_REGEX", MB_OVERLOAD_REGEX, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_OVERLOAD_MAIL", MB_OVERLOAD_MAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_OVERLOAD_STRING", MB_OVERLOAD_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_OVERLOAD_REGEX", MB_OVERLOAD_REGEX, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("MB_CASE_UPPER", PHP_UNICODE_CASE_UPPER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MB_CASE_LOWER", PHP_UNICODE_CASE_LOWER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MB_CASE_TITLE", PHP_UNICODE_CASE_TITLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_CASE_UPPER", PHP_UNICODE_CASE_UPPER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_CASE_LOWER", PHP_UNICODE_CASE_LOWER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_CASE_TITLE", PHP_UNICODE_CASE_TITLE, CONST_CS | CONST_PERSISTENT);
 
 #if HAVE_MBREGEX
 	PHP_MINIT(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
@@ -1938,7 +1938,7 @@ PHP_FUNCTION(mb_detect_order)
 				break;
 			default:
 				convert_to_string_ex(arg1);
-				if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), &list, &size, 0 TSRMLS_CC)) {
+				if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1), &list, &size, 0 TSRMLS_CC)) {
 					if (list) {
 						efree(list);
 					}
@@ -1979,25 +1979,25 @@ PHP_FUNCTION(mb_substitute_character)
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
 			RETURN_STRING("entity");
 		} else {
-			RETURN_LONG(MBSTRG(current_filter_illegal_substchar));
+			RETURN_INT(MBSTRG(current_filter_illegal_substchar));
 		}
 	} else {
 		RETVAL_TRUE;
 
 		switch (Z_TYPE_P(arg1)) {
 			case IS_STRING:
-				if (strncasecmp("none", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
+				if (strncasecmp("none", Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1)) == 0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
-				} else if (strncasecmp("long", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
+				} else if (strncasecmp("long", Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1)) == 0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
-				} else if (strncasecmp("entity", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
+				} else if (strncasecmp("entity", Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1)) == 0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 				} else {
-					convert_to_long_ex(arg1);
+					convert_to_int_ex(arg1);
 
-					if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
+					if (Z_IVAL_P(arg1) < 0xffff && Z_IVAL_P(arg1) > 0x0) {
 						MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-						MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
+						MBSTRG(current_filter_illegal_substchar) = Z_IVAL_P(arg1);
 					} else {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 						RETURN_FALSE;
@@ -2005,10 +2005,10 @@ PHP_FUNCTION(mb_substitute_character)
 				}
 				break;
 			default:
-				convert_to_long_ex(arg1);
-				if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
+				convert_to_int_ex(arg1);
+				if (Z_IVAL_P(arg1) < 0xffff && Z_IVAL_P(arg1) > 0x0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
+					MBSTRG(current_filter_illegal_substchar) = Z_IVAL_P(arg1);
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 					RETURN_FALSE;
@@ -2232,7 +2232,7 @@ PHP_FUNCTION(mb_strlen)
 
 	n = mbfl_strlen(&string);
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2280,7 +2280,7 @@ PHP_FUNCTION(mb_strpos)
 
 	n = mbfl_strpos(&haystack, &needle, offset, reverse);
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		switch (-n) {
 		case 1:
@@ -2330,7 +2330,7 @@ PHP_FUNCTION(mb_strrpos)
 	if (zoffset) {
 		if (Z_TYPE_P(zoffset) == IS_STRING) {
 			enc_name2     = Z_STRVAL_P(zoffset);
-			enc_name_len2 = Z_STRLEN_P(zoffset);
+			enc_name_len2 = Z_STRSIZE_P(zoffset);
 			str_flg       = 1;
 
 			if (enc_name2 != NULL) {
@@ -2356,15 +2356,15 @@ PHP_FUNCTION(mb_strrpos)
 			}
 
 			if (str_flg) {
-				convert_to_long_ex(zoffset);
-				offset   = Z_LVAL_P(zoffset);
+				convert_to_int_ex(zoffset);
+				offset   = Z_IVAL_P(zoffset);
 			} else {
 				enc_name     = enc_name2;
 				enc_name_len = enc_name_len2;
 			}
 		} else {
-			convert_to_long_ex(zoffset);
-			offset = Z_LVAL_P(zoffset);
+			convert_to_int_ex(zoffset);
+			offset = Z_IVAL_P(zoffset);
 		}
 	}
 
@@ -2394,7 +2394,7 @@ PHP_FUNCTION(mb_strrpos)
 
 	n = mbfl_strpos(&haystack, &needle, offset, 1);
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2423,7 +2423,7 @@ PHP_FUNCTION(mb_stripos)
 	n = php_mb_stripos(0, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding TSRMLS_CC);
 
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2449,7 +2449,7 @@ PHP_FUNCTION(mb_strripos)
 	n = php_mb_stripos(1, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding TSRMLS_CC);
 
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2737,7 +2737,7 @@ PHP_FUNCTION(mb_substr_count)
 
 	n = mbfl_substr_count(&haystack, &needle);
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2777,8 +2777,8 @@ PHP_FUNCTION(mb_substr)
 	if (argc < 3 || Z_TYPE_P(z_len) == IS_NULL) {
 		len = str_len;
 	} else {
-		convert_to_long_ex(z_len);
-		len = Z_LVAL_P(z_len);
+		convert_to_int_ex(z_len);
+		len = Z_IVAL_P(z_len);
 	}
 
 	/* measures length */
@@ -2853,8 +2853,8 @@ PHP_FUNCTION(mb_strcut)
 	if (argc < 3 || Z_TYPE_P(z_len) == IS_NULL) {
 		len = string.len;
 	} else {
-		convert_to_long_ex(z_len);
-		len = Z_LVAL_P(z_len);
+		convert_to_int_ex(z_len);
+		len = Z_IVAL_P(z_len);
 	}
 
 	/* if "from" position is negative, count start position from the end
@@ -2920,7 +2920,7 @@ PHP_FUNCTION(mb_strwidth)
 
 	n = mbfl_strwidth(&string);
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -3106,7 +3106,7 @@ PHP_FUNCTION(mb_convert_encoding)
 						n = strlen(Z_STRVAL_P(hash_entry));
 						_from_encodings = erealloc(_from_encodings, l+n+2);
 						memcpy(_from_encodings + l, ",", 1);
-						memcpy(_from_encodings + l + 1, Z_STRVAL_P(hash_entry), Z_STRLEN_P(hash_entry) + 1);
+						memcpy(_from_encodings + l + 1, Z_STRVAL_P(hash_entry), Z_STRSIZE_P(hash_entry) + 1);
 					} else {
 						_from_encodings = estrdup(Z_STRVAL_P(hash_entry));
 					}
@@ -3256,7 +3256,7 @@ PHP_FUNCTION(mb_detect_encoding)
 			break;
 		default:
 			convert_to_string(encoding_list);
-			if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(encoding_list), Z_STRLEN_P(encoding_list), &list, &size, 0 TSRMLS_CC)) {
+			if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(encoding_list), Z_STRSIZE_P(encoding_list), &list, &size, 0 TSRMLS_CC)) {
 				if (list) {
 					efree(list);
 					list = NULL;
@@ -3579,7 +3579,7 @@ PHP_FUNCTION(mb_convert_variables)
 			break;
 		default:
 			convert_to_string_ex(zfrom_enc);
-			php_mb_parse_encoding_list(Z_STRVAL_P(zfrom_enc), Z_STRLEN_P(zfrom_enc), &elist, &elistsz, 0 TSRMLS_CC);
+			php_mb_parse_encoding_list(Z_STRVAL_P(zfrom_enc), Z_STRSIZE_P(zfrom_enc), &elist, &elistsz, 0 TSRMLS_CC);
 			break;
 	}
 
@@ -3636,7 +3636,7 @@ PHP_FUNCTION(mb_convert_variables)
 								}
 							} else if (Z_TYPE_P(hash_entry) == IS_STRING) {
 								string.val = (unsigned char *)Z_STRVAL_P(hash_entry);
-								string.len = Z_STRLEN_P(hash_entry);
+								string.len = Z_STRSIZE_P(hash_entry);
 								if (mbfl_encoding_detector_feed(identd, &string)) {
 									goto detect_end;		/* complete detecting */
 								}
@@ -3645,7 +3645,7 @@ PHP_FUNCTION(mb_convert_variables)
 					}
 				} else if (Z_TYPE_P(var) == IS_STRING) {
 					string.val = (unsigned char *)Z_STRVAL_P(var);
-					string.len = Z_STRLEN_P(var);
+					string.len = Z_STRSIZE_P(var);
 					if (mbfl_encoding_detector_feed(identd, &string)) {
 						goto detect_end;		/* complete detecting */
 					}
@@ -3725,7 +3725,7 @@ detect_end:
 							}
 						} else if (Z_TYPE_P(hash_entry) == IS_STRING) {
 							string.val = (unsigned char *)Z_STRVAL_P(hash_entry);
-							string.len = Z_STRLEN_P(hash_entry);
+							string.len = Z_STRSIZE_P(hash_entry);
 							ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
 							if (ret != NULL) {
 								zval_ptr_dtor(hash_entry_ptr);
@@ -3738,7 +3738,7 @@ detect_end:
 				}
 			} else if (Z_TYPE_P(var) == IS_STRING) {
 				string.val = (unsigned char *)Z_STRVAL_P(var);
-				string.len = Z_STRLEN_P(var);
+				string.len = Z_STRSIZE_P(var);
 				ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
 				if (ret != NULL) {
 					zval_ptr_dtor(var);
@@ -3814,8 +3814,8 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 			mapelm = convmap;
 			mapsize = 0;
 			ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-				convert_to_long_ex(hash_entry);
-				*mapelm++ = Z_LVAL_P(hash_entry);
+				convert_to_int_ex(hash_entry);
+				*mapelm++ = Z_IVAL_P(hash_entry);
 				mapsize++;
 			} ZEND_HASH_FOREACH_END();
 		}
@@ -4352,7 +4352,7 @@ PHP_FUNCTION(mb_get_info)
 		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)) != NULL) {
 			add_assoc_string(return_value, "http_output_conv_mimetypes", name);
 		}
-		add_assoc_long(return_value, "func_overload", MBSTRG(func_overload));
+		add_assoc_int(return_value, "func_overload", MBSTRG(func_overload));
 		if (MBSTRG(func_overload)){
 			over_func = &(mb_ovld[0]);
 			array_init(&row1);
@@ -4377,7 +4377,7 @@ PHP_FUNCTION(mb_get_info)
 				add_assoc_string(return_value, "mail_body_encoding", name);
 			}
 		}
-		add_assoc_long(return_value, "illegal_chars", MBSTRG(illegalchars));
+		add_assoc_int(return_value, "illegal_chars", MBSTRG(illegalchars));
 		if (MBSTRG(encoding_translation)) {
 			add_assoc_string(return_value, "encoding_translation", "On");
 		} else {
@@ -4404,7 +4404,7 @@ PHP_FUNCTION(mb_get_info)
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
 			add_assoc_string(return_value, "substitute_character", "entity");
 		} else {
-			add_assoc_long(return_value, "substitute_character", MBSTRG(current_filter_illegal_substchar));
+			add_assoc_int(return_value, "substitute_character", MBSTRG(current_filter_illegal_substchar));
 		}
 		if (MBSTRG(strict_detection)) {
 			add_assoc_string(return_value, "strict_detection", "On");
@@ -4428,7 +4428,7 @@ PHP_FUNCTION(mb_get_info)
 			RETVAL_STRING(name);
 		}
 	} else if (!strcasecmp("func_overload", typ)) {
- 		RETVAL_LONG(MBSTRG(func_overload));
+ 		RETVAL_INT(MBSTRG(func_overload));
 	} else if (!strcasecmp("func_overload_list", typ)) {
 		if (MBSTRG(func_overload)){
 				over_func = &(mb_ovld[0]);
@@ -4455,7 +4455,7 @@ PHP_FUNCTION(mb_get_info)
 			RETVAL_STRING(name);
 		}
 	} else if (!strcasecmp("illegal_chars", typ)) {
-		RETVAL_LONG(MBSTRG(illegalchars));
+		RETVAL_INT(MBSTRG(illegalchars));
 	} else if (!strcasecmp("encoding_translation", typ)) {
 		if (MBSTRG(encoding_translation)) {
 			RETVAL_STRING("On");
@@ -4485,7 +4485,7 @@ PHP_FUNCTION(mb_get_info)
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
 			RETVAL_STRING("entity");
 		} else {
-			RETVAL_LONG(MBSTRG(current_filter_illegal_substchar));
+			RETVAL_INT(MBSTRG(current_filter_illegal_substchar));
 		}
 	} else if (!strcasecmp("strict_detection", typ)) {
 		if (MBSTRG(strict_detection)) {

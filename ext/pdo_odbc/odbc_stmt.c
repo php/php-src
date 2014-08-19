@@ -195,11 +195,11 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 				switch (pdo_odbc_utf82ucs2(stmt, P->is_unicode, 
 							Z_STRVAL_P(parameter),
-							Z_STRLEN_P(parameter),
+							Z_STRSIZE_P(parameter),
 							&ulen)) {
 					case PDO_ODBC_CONV_NOT_REQUIRED:
 						SQLPutData(S->stmt, Z_STRVAL_P(parameter),
-							Z_STRLEN_P(parameter));
+							Z_STRSIZE_P(parameter));
 						break;
 					case PDO_ODBC_CONV_OK:
 						SQLPutData(S->stmt, S->convbuf, ulen);
@@ -447,10 +447,10 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					} else {
 						convert_to_string(parameter);
 						if (P->outbuf) {
-							P->len = Z_STRLEN_P(parameter);
+							P->len = Z_STRSIZE_P(parameter);
 							memcpy(P->outbuf, Z_STRVAL_P(parameter), P->len);
 						} else {
-							P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
+							P->len = SQL_LEN_DATA_AT_EXEC(Z_STRSIZE_P(parameter));
 						}
 					}
 				} else if (Z_TYPE_P(parameter) == IS_NULL || PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL) {
@@ -461,11 +461,11 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 						unsigned long ulen;
 						switch (pdo_odbc_utf82ucs2(stmt, P->is_unicode,
 								Z_STRVAL_P(parameter),
-								Z_STRLEN_P(parameter),
+								Z_STRSIZE_P(parameter),
 								&ulen)) {
 							case PDO_ODBC_CONV_FAIL:
 							case PDO_ODBC_CONV_NOT_REQUIRED:
-								P->len = Z_STRLEN_P(parameter);
+								P->len = Z_STRSIZE_P(parameter);
 								memcpy(P->outbuf, Z_STRVAL_P(parameter), P->len);
 								break;
 							case PDO_ODBC_CONV_OK:
@@ -474,7 +474,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 								break;
 						}
 					} else {
-						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
+						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRSIZE_P(parameter));
 					}
 				}
 				return 1;
@@ -514,7 +514,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 										
 							ZVAL_NEW_STR(parameter, STR_ALLOC(srclen, 0));
 							memcpy(Z_STRVAL_P(parameter), srcbuf, srclen);
-							Z_STRVAL_P(parameter)[Z_STRLEN_P(parameter)] = '\0';
+							Z_STRVAL_P(parameter)[Z_STRSIZE_P(parameter)] = '\0';
 					}
 				}
 				return 1;
@@ -763,7 +763,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 	switch (attr) {
 		case PDO_ATTR_CURSOR_NAME:
 			convert_to_string(val);
-			rc = SQLSetCursorName(S->stmt, Z_STRVAL_P(val), Z_STRLEN_P(val));
+			rc = SQLSetCursorName(S->stmt, Z_STRVAL_P(val), Z_STRSIZE_P(val));
 
 			if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
 				return 1;

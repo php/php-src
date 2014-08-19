@@ -78,7 +78,7 @@ static void com_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 	if (I->key == (ulong)-1) {
 		ZVAL_NULL(key);
 	} else {
-		ZVAL_LONG(key, I->key);
+		ZVAL_INT(key, I->key);
 	}
 }
 

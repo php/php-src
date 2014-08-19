@@ -1618,7 +1618,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 #ifndef MAX_WBITS
 #define MAX_WBITS 15
 #endif
-				add_assoc_long(&filterparams, "window", MAX_WBITS + 32);
+				add_assoc_int(&filterparams, "window", MAX_WBITS + 32);
 
 				/* entire file is gzip-compressed, uncompress to temporary file */
 				if (!(temp = php_stream_fopen_tmpfile())) {
@@ -1630,7 +1630,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 
 				if (!filter) {
 					err = 1;
-					add_assoc_long(&filterparams, "window", MAX_WBITS);
+					add_assoc_int(&filterparams, "window", MAX_WBITS);
 					filter = php_stream_filter_create("zlib.inflate", &filterparams, php_stream_is_persistent(fp) TSRMLS_CC);
 					zval_dtor(&filterparams);
 
@@ -3230,7 +3230,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			zval filterparams;
 
 			array_init(&filterparams);
-			add_assoc_long(&filterparams, "window", MAX_WBITS+16);
+			add_assoc_int(&filterparams, "window", MAX_WBITS+16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			zval_dtor(&filterparams);
 

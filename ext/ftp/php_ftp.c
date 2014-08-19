@@ -308,16 +308,16 @@ static void ftp_destructor_ftpbuf(zend_resource *rsrc TSRMLS_DC)
 PHP_MINIT_FUNCTION(ftp)
 {
 	le_ftpbuf = zend_register_list_destructors_ex(ftp_destructor_ftpbuf, NULL, le_ftpbuf_name, module_number);
-	REGISTER_LONG_CONSTANT("FTP_ASCII",  FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_TEXT",   FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_BINARY", FTPTYPE_IMAGE, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_IMAGE",  FTPTYPE_IMAGE, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_AUTORESUME", PHP_FTP_AUTORESUME, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_TIMEOUT_SEC", PHP_FTP_OPT_TIMEOUT_SEC, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_AUTOSEEK", PHP_FTP_OPT_AUTOSEEK, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_FAILED", PHP_FTP_FAILED, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_FINISHED", PHP_FTP_FINISHED, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_MOREDATA", PHP_FTP_MOREDATA, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("FTP_ASCII",  FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("FTP_TEXT",   FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("FTP_BINARY", FTPTYPE_IMAGE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("FTP_IMAGE",  FTPTYPE_IMAGE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("FTP_AUTORESUME", PHP_FTP_AUTORESUME, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("FTP_TIMEOUT_SEC", PHP_FTP_OPT_TIMEOUT_SEC, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("FTP_AUTOSEEK", PHP_FTP_OPT_AUTOSEEK, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("FTP_FAILED", PHP_FTP_FAILED, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("FTP_FINISHED", PHP_FTP_FINISHED, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("FTP_MOREDATA", PHP_FTP_MOREDATA, CONST_PERSISTENT | CONST_CS);
 	return SUCCESS;
 }
 
@@ -619,7 +619,7 @@ PHP_FUNCTION(ftp_chmod)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(mode);
+	RETURN_INT(mode);
 }
 /* }}} */
 
@@ -817,10 +817,10 @@ PHP_FUNCTION(ftp_nb_fget)
 
 	if ((ret = ftp_nb_get(ftp, stream, file, xtype, resumepos TSRMLS_CC)) == PHP_FTP_FAILED) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
-		RETURN_LONG(ret);
+		RETURN_INT(ret);
 	}
 
-	RETURN_LONG(ret);
+	RETURN_INT(ret);
 }
 /* }}} */
 
@@ -967,7 +967,7 @@ PHP_FUNCTION(ftp_nb_get)
 		ftp->stream = NULL;
 		VCWD_UNLINK(local);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
-		RETURN_LONG(PHP_FTP_FAILED);
+		RETURN_INT(PHP_FTP_FAILED);
 	}
 
 	if (ret == PHP_FTP_FINISHED){
@@ -975,7 +975,7 @@ PHP_FUNCTION(ftp_nb_get)
 		ftp->stream = NULL;
 	}
 
-	RETURN_LONG(ret);
+	RETURN_INT(ret);
 }
 /* }}} */
 
@@ -995,7 +995,7 @@ PHP_FUNCTION(ftp_nb_continue)
 
 	if (!ftp->nb) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no nbronous transfer to continue.");
-		RETURN_LONG(PHP_FTP_FAILED);
+		RETURN_INT(PHP_FTP_FAILED);
 	}
 
 	if (ftp->direction) {
@@ -1013,7 +1013,7 @@ PHP_FUNCTION(ftp_nb_continue)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 	}
 
-	RETURN_LONG(ret);
+	RETURN_INT(ret);
 }
 /* }}} */
 
@@ -1108,10 +1108,10 @@ PHP_FUNCTION(ftp_nb_fput)
 
 	if (((ret = ftp_nb_put(ftp, remote, stream, xtype, startpos TSRMLS_CC)) == PHP_FTP_FAILED)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
-		RETURN_LONG(ret);
+		RETURN_INT(ret);
 	}
 
-	RETURN_LONG(ret);
+	RETURN_INT(ret);
 }
 /* }}} */
 
@@ -1225,7 +1225,7 @@ PHP_FUNCTION(ftp_nb_put)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 	}
 
-	RETURN_LONG(ret);
+	RETURN_INT(ret);
 }
 /* }}} */
 
@@ -1245,7 +1245,7 @@ PHP_FUNCTION(ftp_size)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* get file size */
-	RETURN_LONG(ftp_size(ftp, file));
+	RETURN_INT(ftp_size(ftp, file));
 }
 /* }}} */
 
@@ -1265,7 +1265,7 @@ PHP_FUNCTION(ftp_mdtm)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* get file mod time */
-	RETURN_LONG(ftp_mdtm(ftp, file));
+	RETURN_INT(ftp_mdtm(ftp, file));
 }
 /* }}} */
 
@@ -1379,16 +1379,16 @@ PHP_FUNCTION(ftp_set_option)
 
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
-			if (Z_TYPE_P(z_value) != IS_LONG) {
+			if (Z_TYPE_P(z_value) != IS_INT) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option TIMEOUT_SEC expects value of type long, %s given",
 					zend_zval_type_name(z_value));
 				RETURN_FALSE;
 			}
-			if (Z_LVAL_P(z_value) <= 0) {
+			if (Z_IVAL_P(z_value) <= 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Timeout has to be greater than 0");
 				RETURN_FALSE;
 			}
-			ftp->timeout_sec = Z_LVAL_P(z_value);
+			ftp->timeout_sec = Z_IVAL_P(z_value);
 			RETURN_TRUE;
 			break;
 		case PHP_FTP_OPT_AUTOSEEK:
@@ -1424,7 +1424,7 @@ PHP_FUNCTION(ftp_get_option)
 
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
-			RETURN_LONG(ftp->timeout_sec);
+			RETURN_INT(ftp->timeout_sec);
 			break;
 		case PHP_FTP_OPT_AUTOSEEK:
 			RETURN_BOOL(ftp->autoseek);

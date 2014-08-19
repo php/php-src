@@ -160,7 +160,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 			if (!xpath_params) {
 				xpath_expr = php_xsl_xslt_string_to_xpathexpr(Z_STRVAL_P(value) TSRMLS_CC);
 			} else {
-				xpath_expr = estrndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
+				xpath_expr = estrndup(Z_STRVAL_P(value), Z_STRSIZE_P(value));
 			}
 			if (xpath_expr) {
 				params[i++] = estrndup(string_key->val, string_key->len);
@@ -346,7 +346,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				nodep = dom_object_get_node(obj);
 				valuePush(ctxt, xmlXPathNewNodeSet(nodep));
 			} else if (Z_TYPE(retval) == IS_TRUE || Z_TYPE(retval) == IS_FALSE) {
-				valuePush(ctxt, xmlXPathNewBoolean(Z_LVAL(retval)));
+				valuePush(ctxt, xmlXPathNewBoolean(Z_IVAL(retval)));
 			} else if (Z_TYPE(retval) == IS_OBJECT) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
 				valuePush(ctxt, xmlXPathNewString(""));
@@ -432,8 +432,8 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	ZVAL_STRING(&member, "cloneDocument");
 	cloneDocu = std_hnd->read_property(id, &member, BP_VAR_IS, NULL, &rv TSRMLS_CC);
 	if (Z_TYPE_P(cloneDocu) != IS_NULL) {
-		convert_to_long(cloneDocu);
-		clone_docu = Z_LVAL_P(cloneDocu);
+		convert_to_int(cloneDocu);
+		clone_docu = Z_IVAL_P(cloneDocu);
 	}
 	zval_ptr_dtor(&member);
 	if (clone_docu == 0) {
@@ -531,8 +531,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	ZVAL_STRING(&member, "doXInclude");
 	doXInclude = std_hnd->read_property(id, &member, BP_VAR_IS, NULL, &rv TSRMLS_CC);
 	if (Z_TYPE_P(doXInclude) != IS_NULL) {
-		convert_to_long(doXInclude);
-		ctxt->xinclude = Z_LVAL_P(doXInclude);
+		convert_to_int(doXInclude);
+		ctxt->xinclude = Z_IVAL_P(doXInclude);
 	}
 	zval_ptr_dtor(&member);
 
@@ -710,7 +710,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 		xmlFreeDoc(newdocp);
 	}
 
-	RETVAL_LONG(ret);
+	RETVAL_INT(ret);
 }
 /* }}} end xsl_xsltprocessor_transform_to_uri */
 
@@ -863,7 +863,7 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array_value), entry) {
 			SEPARATE_ZVAL(entry);
 			convert_to_string_ex(entry);
-			ZVAL_LONG(&new_string ,1);
+			ZVAL_INT(&new_string ,1);
 			zend_hash_update(intern->registered_phpfunctions, Z_STR_P(entry), &new_string);
 		} ZEND_HASH_FOREACH_END();
 
@@ -871,7 +871,7 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "S",  &name) == SUCCESS) {
 		intern = Z_XSL_P(id);
 		
-		ZVAL_LONG(&new_string,1);
+		ZVAL_INT(&new_string,1);
 		zend_hash_update(intern->registered_phpfunctions, name, &new_string);
 		intern->registerPhpFunctions = 2;
 		
@@ -925,7 +925,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 	intern->securityPrefs = securityPrefs;
 	/* set this to 1 so that we know, it was set through this method. Can be removed, when we remove the ini setting */
 	intern->securityPrefsSet = 1;
-	RETURN_LONG(oldSecurityPrefs);
+	RETURN_INT(oldSecurityPrefs);
 }
 /* }}} end xsl_xsltprocessor_set_security_prefs */
 
@@ -938,7 +938,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_security_prefs)
 	DOM_GET_THIS(id);
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "") == SUCCESS) {
 		intern = Z_XSL_P(id);
-		RETURN_LONG(intern->securityPrefs);
+		RETURN_INT(intern->securityPrefs);
 	} else {
 		WRONG_PARAM_COUNT;
 	}

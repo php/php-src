@@ -136,7 +136,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 {
 	php_sysvshm.le_shm = zend_register_list_destructors_ex(php_release_sysvshm, NULL, PHP_SHM_RSRC_NAME, module_number);
 
-	if (cfg_get_long("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
+	if (cfg_get_int("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
 		php_sysvshm.init_mem=10000;
 	}
 	return SUCCESS;
@@ -229,7 +229,7 @@ PHP_FUNCTION(shm_remove)
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	
 	if (shmctl(shm_list_ptr->id, IPC_RMID, NULL) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x, id %ld: %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x, id %ld: %s", shm_list_ptr->key, Z_IVAL_P(shm_id), strerror(errno));
 		RETURN_FALSE;
 	}
 

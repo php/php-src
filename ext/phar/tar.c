@@ -1300,7 +1300,7 @@ nostub:
 #ifndef MAX_WBITS
 #define MAX_WBITS 15
 #endif
-			add_assoc_long(&filterparams, "window", MAX_WBITS + 16);
+			add_assoc_int(&filterparams, "window", MAX_WBITS + 16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			zval_dtor(&filterparams);
 

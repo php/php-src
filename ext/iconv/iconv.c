@@ -300,8 +300,8 @@ PHP_MINIT_FUNCTION(miconv)
 #endif
 	REGISTER_STRING_CONSTANT("ICONV_VERSION", version, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("ICONV_MIME_DECODE_STRICT", PHP_ICONV_MIME_DECODE_STRICT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ICONV_MIME_DECODE_CONTINUE_ON_ERROR", PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ICONV_MIME_DECODE_STRICT", PHP_ICONV_MIME_DECODE_STRICT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ICONV_MIME_DECODE_CONTINUE_ON_ERROR", PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR, CONST_CS | CONST_PERSISTENT);
 
 	if (php_iconv_stream_filter_register_factory(TSRMLS_C) != PHP_ICONV_ERR_SUCCESS) {
 		return FAILURE;
@@ -2054,7 +2054,7 @@ PHP_FUNCTION(iconv_strlen)
 	err = _php_iconv_strlen(&retval, str, str_len, charset);
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 	if (err == PHP_ICONV_ERR_SUCCESS) {
-		RETVAL_LONG(retval);
+		RETVAL_INT(retval);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2142,7 +2142,7 @@ PHP_FUNCTION(iconv_strpos)
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 
 	if (err == PHP_ICONV_ERR_SUCCESS && retval != (unsigned int)-1) {
-		RETVAL_LONG((long)retval);
+		RETVAL_INT((long)retval);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2184,7 +2184,7 @@ PHP_FUNCTION(iconv_strrpos)
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 
 	if (err == PHP_ICONV_ERR_SUCCESS && retval != (unsigned int)-1) {
-		RETVAL_LONG((long)retval);
+		RETVAL_INT((long)retval);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2221,7 +2221,7 @@ PHP_FUNCTION(iconv_mime_encode)
 		zval *pzval;
 
 		if ((pzval = zend_hash_str_find(Z_ARRVAL_P(pref), "scheme", sizeof("scheme") - 1)) != NULL) {
-			if (Z_TYPE_P(pzval) == IS_STRING && Z_STRLEN_P(pzval) > 0) {
+			if (Z_TYPE_P(pzval) == IS_STRING && Z_STRSIZE_P(pzval) > 0) {
 				switch (Z_STRVAL_P(pzval)[0]) {
 					case 'B': case 'b':
 						scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
@@ -2235,24 +2235,24 @@ PHP_FUNCTION(iconv_mime_encode)
 		}
 
 		if ((pzval = zend_hash_str_find(Z_ARRVAL_P(pref), "input-charset", sizeof("input-charset") - 1)) != NULL) {
-			if (Z_STRLEN_P(pzval) >= ICONV_CSNMAXLEN) {
+			if (Z_STRSIZE_P(pzval) >= ICONV_CSNMAXLEN) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 				RETURN_FALSE;
 			}
 
-			if (Z_TYPE_P(pzval) == IS_STRING && Z_STRLEN_P(pzval) > 0) {
+			if (Z_TYPE_P(pzval) == IS_STRING && Z_STRSIZE_P(pzval) > 0) {
 				in_charset = Z_STRVAL_P(pzval);
 			}
 		}
 
 
 		if ((pzval = zend_hash_str_find(Z_ARRVAL_P(pref), "output-charset", sizeof("output-charset") - 1)) != NULL) {
-			if (Z_STRLEN_P(pzval) >= ICONV_CSNMAXLEN) {
+			if (Z_STRSIZE_P(pzval) >= ICONV_CSNMAXLEN) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 				RETURN_FALSE;
 			}
 
-			if (Z_TYPE_P(pzval) == IS_STRING && Z_STRLEN_P(pzval) > 0) {
+			if (Z_TYPE_P(pzval) == IS_STRING && Z_STRSIZE_P(pzval) > 0) {
 				out_charset = Z_STRVAL_P(pzval);
 			}
 		}
@@ -2260,13 +2260,13 @@ PHP_FUNCTION(iconv_mime_encode)
 		if ((pzval = zend_hash_str_find(Z_ARRVAL_P(pref), "line-length", sizeof("line-length") - 1)) != NULL) {
 			zval val;
 
-			if (Z_TYPE_P(pzval) != IS_LONG) {
+			if (Z_TYPE_P(pzval) != IS_INT) {
 				ZVAL_DUP(&val, pzval);
-				convert_to_long(&val);
+				convert_to_int(&val);
 				pzval = &val;
 			}
 
-			line_len = Z_LVAL_P(pzval);
+			line_len = Z_IVAL_P(pzval);
 		}
 
 		if ((pzval = zend_hash_str_find(Z_ARRVAL_P(pref), "line-break-chars", sizeof("line-break-chars") - 1)) != NULL) {

@@ -44,9 +44,9 @@
  */
 void grapheme_register_constants( INIT_FUNC_ARGS )
 {
-	REGISTER_LONG_CONSTANT("GRAPHEME_EXTR_COUNT", GRAPHEME_EXTRACT_TYPE_COUNT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GRAPHEME_EXTR_MAXBYTES", GRAPHEME_EXTRACT_TYPE_MAXBYTES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GRAPHEME_EXTR_MAXCHARS", GRAPHEME_EXTRACT_TYPE_MAXCHARS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("GRAPHEME_EXTR_COUNT", GRAPHEME_EXTRACT_TYPE_COUNT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("GRAPHEME_EXTR_MAXBYTES", GRAPHEME_EXTRACT_TYPE_MAXBYTES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("GRAPHEME_EXTR_MAXCHARS", GRAPHEME_EXTRACT_TYPE_MAXCHARS, CONST_CS | CONST_PERSISTENT);
 }
 /* }}} */
 
@@ -72,7 +72,7 @@ PHP_FUNCTION(grapheme_strlen)
 	ret_len = grapheme_ascii_check(string, string_len);
 
 	if ( ret_len >= 0 )
-		RETURN_LONG(ret_len);
+		RETURN_INT(ret_len);
 
 	/* convert the string to UTF-16. */
 	status = U_ZERO_ERROR;
@@ -97,7 +97,7 @@ PHP_FUNCTION(grapheme_strlen)
 	}
 
 	if (ret_len >= 0) {
-		RETVAL_LONG(ret_len);
+		RETVAL_INT(ret_len);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -156,14 +156,14 @@ PHP_FUNCTION(grapheme_strpos)
 	/* if it is there, and if the haystack is ascii, we are all done */
 	if ( grapheme_ascii_check(haystack, haystack_len) >= 0 ) {
 
-		RETURN_LONG(found - haystack);
+		RETURN_INT(found - haystack);
 	}
 
 	/* do utf16 part of the strpos */
 	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 0 /* fIgnoreCase */, 0 /* last */ TSRMLS_CC );
 
 	if ( ret_pos >= 0 ) {
-		RETURN_LONG(ret_pos);
+		RETURN_INT(ret_pos);
 	} else {
 		RETURN_FALSE;
 	}
@@ -225,7 +225,7 @@ PHP_FUNCTION(grapheme_stripos)
 		efree(needle_dup);
 
 		if (found) {
-			RETURN_LONG(found - haystack_dup);
+			RETURN_INT(found - haystack_dup);
 		}
 
 		/* if needle was ascii too, we are all done, otherwise we need to try using Unicode to see what we get */
@@ -238,7 +238,7 @@ PHP_FUNCTION(grapheme_stripos)
 	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 1 /* fIgnoreCase */, 0 /*last */ TSRMLS_CC );
 
 	if ( ret_pos >= 0 ) {
-		RETURN_LONG(ret_pos);
+		RETURN_INT(ret_pos);
 	} else {
 		RETURN_FALSE;
 	}
@@ -292,7 +292,7 @@ PHP_FUNCTION(grapheme_strrpos)
 
 
 		if ( ret_pos >= 0 ) {
-			RETURN_LONG(ret_pos);
+			RETURN_INT(ret_pos);
 		}
 
 		/* if the needle was ascii too, we are done */
@@ -307,7 +307,7 @@ PHP_FUNCTION(grapheme_strrpos)
 	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 0 /* f_ignore_case */, 1/* last */ TSRMLS_CC);
 
 	if ( ret_pos >= 0 ) {
-		RETURN_LONG(ret_pos);
+		RETURN_INT(ret_pos);
 	} else {
 		RETURN_FALSE;
 	}
@@ -370,7 +370,7 @@ PHP_FUNCTION(grapheme_strripos)
 		efree(needle_dup);
 
 		if ( ret_pos >= 0 ) {
-			RETURN_LONG(ret_pos);
+			RETURN_INT(ret_pos);
 		}
 
 		/* if the needle was ascii too, we are done */
@@ -385,7 +385,7 @@ PHP_FUNCTION(grapheme_strripos)
 	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL,  1 /* f_ignore_case */, 1 /*last */ TSRMLS_CC);
 
 	if ( ret_pos >= 0 ) {
-		RETURN_LONG(ret_pos);
+		RETURN_INT(ret_pos);
 	} else {
 		RETURN_FALSE;
 	}
@@ -846,7 +846,7 @@ PHP_FUNCTION(grapheme_extract)
 			/* initialize next */
 			SEPARATE_ZVAL(next);
 			zval_dtor(next);
-            ZVAL_LONG(next, lstart);
+            ZVAL_INT(next, lstart);
 		}
 	}
 
@@ -900,7 +900,7 @@ PHP_FUNCTION(grapheme_extract)
 	if ( -1 != grapheme_ascii_check(pstr, size + 1 < str_len ? size + 1 : str_len ) ) {
         long nsize = ( size < str_len ? size : str_len );
 		if ( NULL != next ) {
-			ZVAL_LONG(next, start+nsize);
+			ZVAL_INT(next, start+nsize);
 		}
 		RETURN_STRINGL(((char *)pstr), nsize);
 	}
@@ -943,7 +943,7 @@ PHP_FUNCTION(grapheme_extract)
 	ubrk_close(bi);
 
 	if ( NULL != next ) {
-		ZVAL_LONG(next, start+ret_pos);
+		ZVAL_INT(next, start+ret_pos);
 	}
 
 	RETURN_STRINGL(((char *)pstr), ret_pos);

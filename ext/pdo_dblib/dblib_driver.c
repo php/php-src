@@ -60,12 +60,12 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS
 	spprintf(&message, 0, "%s [%d] (severity %d) [%s]",
 		msg, einfo->dberr, einfo->severity, stmt ? stmt->active_query_string : "");
 
-	add_next_index_long(info, einfo->dberr);
+	add_next_index_int(info, einfo->dberr);
 	// TODO: avoid reallocation ???
 	add_next_index_string(info, message);
 	efree(message);
-	add_next_index_long(info, einfo->oserr);
-	add_next_index_long(info, einfo->severity);
+	add_next_index_int(info, einfo->oserr);
+	add_next_index_int(info, einfo->severity);
 	if (einfo->oserrstr) {
 		add_next_index_string(info, einfo->oserrstr);
 	}

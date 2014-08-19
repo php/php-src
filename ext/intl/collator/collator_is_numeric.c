@@ -245,7 +245,7 @@ zend_uchar collator_is_numeric( UChar *str, int length, long *lval, double *dval
 			if (lval) {
 				*lval = local_lval;
 			}
-			return IS_LONG;
+			return IS_INT;
 		} else if (end_ptr_long == str && *end_ptr_long != '\0' && *str != '.' && *str != '-') { /* ignore partial string matches */
 			return 0;
 		}
@@ -288,7 +288,7 @@ zend_uchar collator_is_numeric( UChar *str, int length, long *lval, double *dval
 			return IS_DOUBLE;
 		} else if (end_ptr_long && lval) {
 			*lval = local_lval;
-			return IS_LONG;
+			return IS_INT;
 		}
 	}
 	return 0;

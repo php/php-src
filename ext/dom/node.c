@@ -375,9 +375,9 @@ int dom_node_node_type_read(dom_object *obj, zval *retval TSRMLS_DC)
 
 	/* Specs dictate that they are both type XML_DOCUMENT_TYPE_NODE */
 	if (nodep->type == XML_DTD_NODE) {
-		ZVAL_LONG(retval, XML_DOCUMENT_TYPE_NODE);
+		ZVAL_INT(retval, XML_DOCUMENT_TYPE_NODE);
 	} else {
-		ZVAL_LONG(retval, nodep->type);
+		ZVAL_INT(retval, nodep->type);
 	}
 
 	return SUCCESS;
@@ -1815,7 +1815,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 
 		bytes = xmlOutputBufferClose(buf);
 		if (mode == 1 && (ret >= 0)) {
-			RETURN_LONG(bytes);
+			RETURN_INT(bytes);
 		}
 	}
 }
@@ -1872,7 +1872,7 @@ PHP_METHOD(domnode, getLineNo)
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
-	RETURN_LONG(xmlGetLineNo(nodep));
+	RETURN_INT(xmlGetLineNo(nodep));
 }
 /* }}} */
 

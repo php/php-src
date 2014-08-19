@@ -632,7 +632,7 @@ static inline int accel_is_inactive(TSRMLS_D)
 	return FAILURE;
 }
 
-static int zend_get_stream_timestamp(const char *filename, struct stat *statbuf TSRMLS_DC)
+static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf TSRMLS_DC)
 {
 	php_stream_wrapper *wrapper;
 	php_stream_statbuf stream_statbuf;
@@ -715,7 +715,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 
 static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size TSRMLS_DC)
 {
-	struct stat statbuf;
+	zend_stat_t statbuf;
 #ifdef ZEND_WIN32
 	accel_time_t res;
 #endif
@@ -724,7 +724,7 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 	    !EG(current_execute_data) &&
 	    file_handle->filename == SG(request_info).path_translated) {
 
-		struct stat *tmpbuf = sapi_module.get_stat(TSRMLS_C);
+		zend_stat_t *tmpbuf = sapi_module.get_stat(TSRMLS_C);
 
 		if (tmpbuf) {
 			if (size) {
@@ -1959,7 +1959,7 @@ static void accel_fast_zval_dtor(zval *zvalue)
 					zend_list_delete(Z_RES_P(zvalue));
 				}
 				break;
-			case IS_LONG:
+			case IS_INT:
 			case IS_DOUBLE:
 			case IS_FALSE:
 			case IS_TRUE:

@@ -47,7 +47,7 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 	
 	if (error_code) {
 		zval_dtor(error_code);
-		ZVAL_LONG(error_code, ret);
+		ZVAL_INT(error_code, ret);
 	}
 	RETVAL_BOOL(ret != 0);
 }
@@ -80,7 +80,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 	
 	if (error_code) {
 		zval_dtor(error_code);
-		ZVAL_LONG(error_code, ret);
+		ZVAL_INT(error_code, ret);
 	}
 	RETVAL_BOOL(ret != 0);
 }

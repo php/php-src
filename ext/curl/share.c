@@ -73,8 +73,8 @@ static int _php_curl_share_setopt(php_curlsh *sh, long option, zval *zvalue, zva
 	switch (option) {
 		case CURLSHOPT_SHARE:
 		case CURLSHOPT_UNSHARE:
-			convert_to_long_ex(zvalue);
-			error = curl_share_setopt(sh->share, option, Z_LVAL_P(zvalue));
+			convert_to_int_ex(zvalue);
+			error = curl_share_setopt(sh->share, option, Z_IVAL_P(zvalue));
 			break;
 
 		default:

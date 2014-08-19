@@ -448,7 +448,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, long sql
 					*ppname++ = 0;
 					if (named_params) {
 						zval tmp;
-						ZVAL_LONG(&tmp, pindex);
+						ZVAL_INT(&tmp, pindex);
 						zend_hash_str_update(named_params, pname, (unsigned int)(ppname - pname - 1), &tmp);
 					}
 				}
@@ -553,7 +553,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 		char tmp[512];
 		
 		case PDO_ATTR_AUTOCOMMIT:
-			ZVAL_LONG(val,dbh->auto_commit);
+			ZVAL_INT(val,dbh->auto_commit);
 			return 1;
 
 		case PDO_ATTR_CONNECTION_STATUS:
@@ -609,7 +609,7 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 	long i = 0, l, sqlcode = isc_sqlcode(s);
 
 	if (sqlcode) {
-		add_next_index_long(info, sqlcode);
+		add_next_index_int(info, sqlcode);
 
 		while ((sizeof(buf)>(i+2))&&(l = fb_interpret(&buf[i],(sizeof(buf)-i-2),&s))) {
 			i += l;
@@ -617,7 +617,7 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 		}
 		add_next_index_string(info, buf);
 	} else if (H->last_app_error) {
-		add_next_index_long(info, -999);
+		add_next_index_int(info, -999);
 		add_next_index_string(info, const_cast(H->last_app_error));
 	}
 	return 1;

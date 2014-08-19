@@ -721,12 +721,12 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	new_break.code = estrndup(expr, expr_len);
 	new_break.code_len = expr_len;
 
-	Z_STRLEN(pv) = expr_len + sizeof("return ;") - 1;
-	Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
+	Z_STRSIZE(pv) = expr_len + sizeof("return ;") - 1;
+	Z_STRVAL(pv) = emalloc(Z_STRSIZE(pv) + 1);
 	memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 	memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, expr, expr_len);
-	Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
-	Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
+	Z_STRVAL(pv)[Z_STRSIZE(pv) - 1] = ';';
+	Z_STRVAL(pv)[Z_STRSIZE(pv)] = '\0';
 	Z_TYPE(pv) = IS_STRING;
 
 	new_break.ops = zend_compile_string(

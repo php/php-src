@@ -393,7 +393,7 @@ static PHP_FUNCTION(bzopen)
 
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_P(file) == IS_STRING) {
-		if (Z_STRLEN_P(file) == 0) {
+		if (Z_STRSIZE_P(file) == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "filename cannot be empty");
 			RETURN_FALSE;
 		}
@@ -527,7 +527,7 @@ static PHP_FUNCTION(bzcompress)
 	error = BZ2_bzBuffToBuffCompress(dest->val, &dest_len, source, source_len, block_size, 0, work_factor);
 	if (error != BZ_OK) {
 		STR_FREE(dest);
-		RETURN_LONG(error);
+		RETURN_INT(error);
 	} else {
 		/* Copy the buffer, we have perhaps allocate a lot more than we need,
 		   so we erealloc() the buffer to the proper size */
@@ -586,7 +586,7 @@ static PHP_FUNCTION(bzdecompress)
 		efree(dest);
 	} else { /* real error */
 		efree(dest);
-		RETVAL_LONG(error);
+		RETVAL_INT(error);
 	}
 
 	BZ2_bzDecompressEnd(&bzs);
@@ -621,7 +621,7 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	/* Determine what to return */
 	switch (opt) {
 		case PHP_BZ_ERRNO:
-			RETURN_LONG(errnum);
+			RETURN_INT(errnum);
 			break;
 		case PHP_BZ_ERRSTR:
 			RETURN_STRING((char*)errstr);
@@ -629,7 +629,7 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 		case PHP_BZ_ERRBOTH:
 			array_init(return_value);
 		
-			add_assoc_long  (return_value, "errno",  errnum);
+			add_assoc_int  (return_value, "errno",  errnum);
 			add_assoc_string(return_value, "errstr", (char*)errstr);
 			break;
 	}

@@ -186,7 +186,7 @@ static HRESULT STDMETHODCALLTYPE disp_getidsofnames(
 			ret = DISP_E_UNKNOWNNAME;
 			rgDispId[i] = 0;
 		} else {
-			rgDispId[i] = Z_LVAL_P(tmp);
+			rgDispId[i] = Z_IVAL_P(tmp);
 		}
 
 		efree(name);
@@ -231,7 +231,7 @@ static HRESULT STDMETHODCALLTYPE disp_getdispid(
 	/* Lookup the name in the hash */
 	if ((tmp = zend_hash_str_find(disp->name_to_dispid, name, namelen)) != NULL) {
 		trace("found it\n");
-		*pid = Z_LVAL_P(tmp);
+		*pid = Z_IVAL_P(tmp);
 		ret = S_OK;
 	}
 
@@ -260,7 +260,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 	if (NULL != (name = zend_hash_index_find(disp->dispid_to_name, id))) {
 		/* TODO: add support for overloaded objects */
 
-		trace("-- Invoke: %d %20s [%d] flags=%08x args=%d\n", id, Z_STRVAL_P(name), Z_STRLEN_P(name), wFlags, pdp->cArgs);
+		trace("-- Invoke: %d %20s [%d] flags=%08x args=%d\n", id, Z_STRVAL_P(name), Z_STRSIZE_P(name), wFlags, pdp->cArgs);
 		
 		/* convert args into zvals.
 		 * Args are in reverse order */
@@ -283,9 +283,9 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		 * and expose it as a COM exception */
 		
 		if (wFlags & DISPATCH_PROPERTYGET) {
-			retval = zend_read_property(Z_OBJCE(disp->object), &disp->object, Z_STRVAL_P(name), Z_STRLEN_P(name)+1, 1 TSRMLS_CC);
+			retval = zend_read_property(Z_OBJCE(disp->object), &disp->object, Z_STRVAL_P(name), Z_STRSIZE_P(name)+1, 1 TSRMLS_CC);
 		} else if (wFlags & DISPATCH_PROPERTYPUT) {
-			zend_update_property(Z_OBJCE(disp->object), &disp->object, Z_STRVAL_P(name), Z_STRLEN_P(name), &params[0] TSRMLS_CC);
+			zend_update_property(Z_OBJCE(disp->object), &disp->object, Z_STRVAL_P(name), Z_STRSIZE_P(name), &params[0] TSRMLS_CC);
 		} else if (wFlags & DISPATCH_METHOD) {
 			zend_try {
 				retval = &rv;
@@ -385,7 +385,7 @@ static HRESULT STDMETHODCALLTYPE disp_getmembername(
 	FETCH_DISP("GetMemberName");
 
 	if (NULL != (name = zend_hash_index_find(disp->dispid_to_name, id))) {
-		OLECHAR *olestr = php_com_string_to_olestring(Z_STRVAL_P(name), Z_STRLEN_P(name), COMG(code_page) TSRMLS_CC);
+		OLECHAR *olestr = php_com_string_to_olestring(Z_STRVAL_P(name), Z_STRSIZE_P(name), COMG(code_page) TSRMLS_CC);
 		*pbstrName = SysAllocString(olestr);
 		efree(olestr);
 		return S_OK;
@@ -466,7 +466,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 				zend_hash_get_current_key_ex(Z_OBJPROP(disp->object), &name,
 				&pid, 0, &pos))) {
 			char namebuf[32];
-			if (keytype == HASH_KEY_IS_LONG) {
+			if (keytype == HASH_KEY_IS_INT) {
 				snprintf(namebuf, sizeof(namebuf), "%d", pid);
 				name = STR_INIT(namebuf, strlen(namebuf), 0);
 			} else {
@@ -486,7 +486,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 			pid = zend_hash_next_free_element(disp->dispid_to_name);
 			zend_hash_index_update(disp->dispid_to_name, pid, &tmp2);
 			
-			ZVAL_LONG(&tmp2, pid);
+			ZVAL_INT(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
 
 			STR_RELEASE(name);
@@ -501,7 +501,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 			 	&name, &pid, 0, &pos))) {
 
 			char namebuf[32];
-			if (keytype == HASH_KEY_IS_LONG) {
+			if (keytype == HASH_KEY_IS_INT) {
 				snprintf(namebuf, sizeof(namebuf), "%d", pid);
 				name = STR_INIT(namebuf, strlen(namebuf), 0);
 			} else {
@@ -521,7 +521,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 			pid = zend_hash_next_free_element(disp->dispid_to_name);
 			zend_hash_index_update(disp->dispid_to_name, pid, &tmp2);
 
-			ZVAL_LONG(&tmp2, pid);
+			ZVAL_INT(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
 
 			STR_RELEASE(name);
@@ -604,11 +604,11 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 	while (HASH_KEY_NON_EXISTENT != (keytype =
 				zend_hash_get_current_key_ex(id_to_name, &name, &pid, 0, &pos))) {
 
-		if (keytype == HASH_KEY_IS_LONG) {
+		if (keytype == HASH_KEY_IS_INT) {
 
 			ntmp = zend_hash_get_current_data_ex(id_to_name, &pos);
 			
-			ZVAL_LONG(&tmp, pid);
+			ZVAL_INT(&tmp, pid);
 			zend_hash_update(disp->name_to_dispid, Z_STR_P(ntmp), &tmp);
 		}
 

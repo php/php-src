@@ -29,7 +29,7 @@
 
 static zend_uint zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
 
-#if SIZEOF_SIZE_T <= SIZEOF_LONG
+#if SIZEOF_SIZE_T <= SIZEOF_ZEND_INT || defined PHP_WIN32
 /* If sizeof(void*) == sizeof(ulong) we can use zend_hash index functions */
 # define accel_xlat_set(old, new)	zend_hash_index_update_ptr(&ZCG(bind_hash), (ulong)(zend_uintptr_t)(old), (new))
 # define accel_xlat_get(old)		zend_hash_index_find_ptr(&ZCG(bind_hash), (ulong)(zend_uintptr_t)(old))
@@ -883,7 +883,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 
 			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, persistent_script->full_path->val, persistent_script->full_path->len, 0);
 			if (!zend_hash_exists(EG(zend_constants), name)) {
-				zend_register_long_constant(name->val, name->len, persistent_script->compiler_halt_offset, CONST_CS, 0 TSRMLS_CC);
+				zend_register_int_constant(name->val, name->len, persistent_script->compiler_halt_offset, CONST_CS, 0 TSRMLS_CC);
 			}
 			STR_RELEASE(name);
 		}

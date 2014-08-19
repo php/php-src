@@ -118,7 +118,7 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 						break;
 						
 						case NUMERIC_PARAM:
-							add_next_index_long(&params, next->num);
+							add_next_index_int(&params, next->num);
 						break;
 						
 						case METHOD_PARAM:

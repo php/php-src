@@ -321,7 +321,7 @@ PHP_FUNCTION(mysqli_link_construct)
    Returns the numerical value of the error message from last connect command */
 PHP_FUNCTION(mysqli_connect_errno)
 {
-	RETURN_LONG(MyG(error_no));
+	RETURN_INT(MyG(error_no));
 }
 /* }}} */
 
@@ -428,7 +428,7 @@ PHP_FUNCTION(mysqli_error_list)
 		{
 			zval single_error;
 			array_init(&single_error);
-			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
+			add_assoc_int_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
 			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
 			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
 			add_next_index_zval(return_value, &single_error);
@@ -438,7 +438,7 @@ PHP_FUNCTION(mysqli_error_list)
 	if (mysql_errno(mysql->mysql)) {
 		zval single_error;
 		array_init(&single_error);
-		add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, mysql_errno(mysql->mysql));
+		add_assoc_int_ex(&single_error, "errno", sizeof("errno") - 1, mysql_errno(mysql->mysql));
 		add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, mysql_sqlstate(mysql->mysql));
 		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_error(mysql->mysql));
 		add_next_index_zval(return_value, &single_error);
@@ -469,7 +469,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 		{
 			zval single_error;
 			array_init(&single_error);
-			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
+			add_assoc_int_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
 			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
 			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
 			add_next_index_zval(return_value, &single_error);
@@ -479,7 +479,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 	if (mysql_stmt_errno(stmt->stmt)) {
 		zval single_error;
 		array_init(&single_error);
-		add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, mysql_stmt_errno(stmt->stmt));
+		add_assoc_int_ex(&single_error, "errno", sizeof("errno") - 1, mysql_stmt_errno(stmt->stmt));
 		add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, mysql_stmt_sqlstate(stmt->stmt));
 		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_stmt_error(stmt->stmt));
 		add_next_index_zval(return_value, &single_error);
@@ -795,7 +795,7 @@ PHP_FUNCTION(mysqli_poll)
 		efree(new_e_array);
 	}
 	if (ret == PASS) {
-		RETURN_LONG(desc_num);
+		RETURN_INT(desc_num);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1009,10 +1009,10 @@ PHP_FUNCTION(mysqli_get_charset)
 	add_property_string(return_value, "charset", (name) ? (char *)name : "");
 	add_property_string(return_value, "collation",(collation) ? (char *)collation : "");
 	add_property_string(return_value, "dir", (dir) ? (char *)dir : "");
-	add_property_long(return_value, "min_length", minlength);
-	add_property_long(return_value, "max_length", maxlength);
-	add_property_long(return_value, "number", number);
-	add_property_long(return_value, "state", state);
+	add_property_int(return_value, "min_length", minlength);
+	add_property_int(return_value, "max_length", maxlength);
+	add_property_int(return_value, "number", number);
+	add_property_int(return_value, "state", state);
 	add_property_string(return_value, "comment", (comment) ? (char *)comment : "");
 }
 /* }}} */
@@ -1190,9 +1190,9 @@ PHP_FUNCTION(mysqli_get_links_stats)
 		return;	
 	}
 	array_init(return_value);
-	add_assoc_long_ex(return_value, "total", sizeof("total") - 1, MyG(num_links));
-	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks") - 1, MyG(num_active_persistent));
-	add_assoc_long_ex(return_value, "cached_plinks", sizeof("cached_plinks") - 1, MyG(num_inactive_persistent));
+	add_assoc_int_ex(return_value, "total", sizeof("total") - 1, MyG(num_links));
+	add_assoc_int_ex(return_value, "active_plinks", sizeof("active_plinks") - 1, MyG(num_active_persistent));
+	add_assoc_int_ex(return_value, "cached_plinks", sizeof("cached_plinks") - 1, MyG(num_inactive_persistent));
 }
 /* }}} */
 

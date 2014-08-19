@@ -90,7 +90,7 @@ static int le_zip_entry;
 /* }}} */
 
 # define add_ascii_assoc_string add_assoc_string
-# define add_ascii_assoc_long add_assoc_long
+# define add_ascii_assoc_long add_assoc_int
 
 /* Flatten a path by making a relative path (to .)*/
 static char * php_zip_make_relative_path(char *path, int path_len) /* {{{ */
@@ -316,13 +316,13 @@ static int php_zip_parse_options(zval *options, long *remove_all_path, char **re
 	zval *option;
 	if ((option = zend_hash_str_find(HASH_OF(options), "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {
 		long opt;
-		if (Z_TYPE_P(option) != IS_LONG) {
+		if (Z_TYPE_P(option) != IS_INT) {
 			zval tmp;
 			ZVAL_DUP(&tmp, option);
-			convert_to_long(&tmp);
-			opt = Z_LVAL(tmp);
+			convert_to_int(&tmp);
+			opt = Z_IVAL(tmp);
 		} else {
-			opt = Z_LVAL_P(option);
+			opt = Z_IVAL_P(option);
 		}
 		*remove_all_path = opt;
 	}
@@ -334,17 +334,17 @@ static int php_zip_parse_options(zval *options, long *remove_all_path, char **re
 			return -1;
 		}
 
-		if (Z_STRLEN_P(option) < 1) {
+		if (Z_STRSIZE_P(option) < 1) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Empty string given as remove_path option");
 			return -1;
 		}
 
-		if (Z_STRLEN_P(option) >= MAXPATHLEN) {
+		if (Z_STRSIZE_P(option) >= MAXPATHLEN) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "remove_path string is too long (max: %i, %i given)",
-						MAXPATHLEN - 1, Z_STRLEN_P(option));
+						MAXPATHLEN - 1, Z_STRSIZE_P(option));
 			return -1;
 		}
-		*remove_path_len = Z_STRLEN_P(option);
+		*remove_path_len = Z_STRSIZE_P(option);
 		*remove_path = Z_STRVAL_P(option);
 	}
 
@@ -354,26 +354,26 @@ static int php_zip_parse_options(zval *options, long *remove_all_path, char **re
 			return -1;
 		}
 
-		if (Z_STRLEN_P(option) < 1) {
+		if (Z_STRSIZE_P(option) < 1) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Empty string given as the add_path option");
 			return -1;
 		}
 
-		if (Z_STRLEN_P(option) >= MAXPATHLEN) {
+		if (Z_STRSIZE_P(option) >= MAXPATHLEN) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "add_path string too long (max: %i, %i given)",
-						MAXPATHLEN - 1, Z_STRLEN_P(option));
+						MAXPATHLEN - 1, Z_STRSIZE_P(option));
 			return -1;
 		}
-		*add_path_len = Z_STRLEN_P(option);
+		*add_path_len = Z_STRSIZE_P(option);
 		*add_path = Z_STRVAL_P(option);
 	}
 	return 1;
 }
 /* }}} */
 
-/* {{{ REGISTER_ZIP_CLASS_CONST_LONG */
-#define REGISTER_ZIP_CLASS_CONST_LONG(const_name, value) \
-	    zend_declare_class_constant_long(zip_class_entry, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+/* {{{ REGISTER_ZIP_CLASS_CONST_INT */
+#define REGISTER_ZIP_CLASS_CONST_INT(const_name, value) \
+	    zend_declare_class_constant_int(zip_class_entry, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
 /* }}} */
 
 /* {{{ ZIP_FROM_OBJECT */
@@ -818,8 +818,8 @@ static zval *php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, 
 		case IS_FALSE:
 			ZVAL_BOOL(rv, (long)retint);
 			break;
-		case IS_LONG:
-			ZVAL_LONG(rv, (long)retint);
+		case IS_INT:
+			ZVAL_INT(rv, (long)retint);
 			break;
 		default:
 			ZVAL_NULL(rv);
@@ -1124,7 +1124,7 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 	rsrc_int->za = zip_open(resolved_path, 0, &err);
 	if (rsrc_int->za == NULL) {
 		efree(rsrc_int);
-		RETURN_LONG((long)err);
+		RETURN_INT((long)err);
 	}
 
 	rsrc_int->index_current = 0;
@@ -1296,10 +1296,10 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 			RETURN_STRING((char *)zr_rsrc->sb.name);
 			break;
 		case 1:
-			RETURN_LONG((long) (zr_rsrc->sb.comp_size));
+			RETURN_INT((long) (zr_rsrc->sb.comp_size));
 			break;
 		case 2:
-			RETURN_LONG((long) (zr_rsrc->sb.size));
+			RETURN_INT((long) (zr_rsrc->sb.size));
 			break;
 		case 3:
 			switch (zr_rsrc->sb.comp_method) {
@@ -1333,7 +1333,7 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 				default:
 					RETURN_FALSE;
 			}
-			RETURN_LONG((long) (zr_rsrc->sb.comp_method));
+			RETURN_INT((long) (zr_rsrc->sb.comp_method));
 			break;
 	}
 
@@ -1423,7 +1423,7 @@ static ZIPARCHIVE_METHOD(open)
 	intern = zip_open(resolved_path, flags, &err);
 	if (!intern || err) {
 		efree(resolved_path);
-		RETURN_LONG((long)err);
+		RETURN_INT((long)err);
 	}
 	ze_obj->filename = resolved_path;
 	ze_obj->filename_len = strlen(resolved_path);
@@ -1632,15 +1632,15 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 
 			if ((zval_file = zend_hash_index_find(Z_ARRVAL_P(return_value), i)) != NULL) {
 				if (remove_all_path) {
-					basename = php_basename(Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), NULL, 0 TSRMLS_CC);
+					basename = php_basename(Z_STRVAL_P(zval_file), Z_STRSIZE_P(zval_file), NULL, 0 TSRMLS_CC);
 					file_stripped = basename->val;
 					file_stripped_len = basename->len;
 				} else if (remove_path && strstr(Z_STRVAL_P(zval_file), remove_path) != NULL) {
 					file_stripped = Z_STRVAL_P(zval_file) + remove_path_len + 1;
-					file_stripped_len = Z_STRLEN_P(zval_file) - remove_path_len - 1;
+					file_stripped_len = Z_STRSIZE_P(zval_file) - remove_path_len - 1;
 				} else {
 					file_stripped = Z_STRVAL_P(zval_file);
-					file_stripped_len = Z_STRLEN_P(zval_file);
+					file_stripped_len = Z_STRSIZE_P(zval_file);
 				}
 
 				if (add_path) {
@@ -1656,13 +1656,13 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					entry_name_len = strlen(entry_name);
 				} else {
 					entry_name = Z_STRVAL_P(zval_file);
-					entry_name_len = Z_STRLEN_P(zval_file);
+					entry_name_len = Z_STRSIZE_P(zval_file);
 				}
 				if (basename) {
 					STR_RELEASE(basename);
 					basename = NULL;
 				}
-				if (php_zip_add_file(intern, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file),
+				if (php_zip_add_file(intern, Z_STRVAL_P(zval_file), Z_STRSIZE_P(zval_file),
 					entry_name, entry_name_len, 0, 0 TSRMLS_CC) < 0) {
 					zval_dtor(return_value);
 					RETURN_FALSE;
@@ -1871,7 +1871,7 @@ static ZIPARCHIVE_METHOD(locateName)
 	idx = (long)zip_name_locate(intern, (const char *)name->val, flags);
 
 	if (idx >= 0) {
-		RETURN_LONG(idx);
+		RETURN_INT(idx);
 	} else {
 		RETURN_FALSE;
 	}
@@ -2129,9 +2129,9 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 		RETURN_FALSE;
 	}
 	zval_ptr_dtor(z_opsys);
-	ZVAL_LONG(z_opsys, opsys);
+	ZVAL_INT(z_opsys, opsys);
 	zval_ptr_dtor(z_attr);
-	ZVAL_LONG(z_attr, attr);
+	ZVAL_INT(z_attr, attr);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2164,9 +2164,9 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 		RETURN_FALSE;
 	}
 	zval_dtor(z_opsys);
-	ZVAL_LONG(z_opsys, opsys);
+	ZVAL_INT(z_opsys, opsys);
 	zval_dtor(z_attr);
-	ZVAL_LONG(z_attr, attr);
+	ZVAL_INT(z_attr, attr);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2518,7 +2518,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 	if (zval_files && (Z_TYPE_P(zval_files) != IS_NULL)) {
 		switch (Z_TYPE_P(zval_files)) {
 			case IS_STRING:
-				if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_files), Z_STRLEN_P(zval_files) TSRMLS_CC)) {
+				if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_files), Z_STRSIZE_P(zval_files) TSRMLS_CC)) {
 					RETURN_FALSE;
 				}
 				break;
@@ -2530,10 +2530,10 @@ static ZIPARCHIVE_METHOD(extractTo)
 				for (i = 0; i < nelems; i++) {
 					if ((zval_file = zend_hash_index_find(Z_ARRVAL_P(zval_files), i)) != NULL) {
 						switch (Z_TYPE_P(zval_file)) {
-							case IS_LONG:
+							case IS_INT:
 								break;
 							case IS_STRING:
-								if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file) TSRMLS_CC)) {
+								if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRSIZE_P(zval_file) TSRMLS_CC)) {
 									RETURN_FALSE;
 								}
 								break;
@@ -2541,7 +2541,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 					}
 				}
 				break;
-			case IS_LONG:
+			case IS_INT:
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument, expect string or array of strings");
 				break;
@@ -2897,88 +2897,88 @@ static PHP_MINIT_FUNCTION(zip)
 	zip_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
 	zend_hash_init(&zip_prop_handlers, 0, NULL, php_zip_free_prop_handler, 1);
-	php_zip_register_prop_handler(&zip_prop_handlers, "status",    php_zip_status, NULL, NULL, IS_LONG TSRMLS_CC);
-	php_zip_register_prop_handler(&zip_prop_handlers, "statusSys", php_zip_status_sys, NULL, NULL, IS_LONG TSRMLS_CC);
-	php_zip_register_prop_handler(&zip_prop_handlers, "numFiles",  php_zip_get_num_files, NULL, NULL, IS_LONG TSRMLS_CC);
+	php_zip_register_prop_handler(&zip_prop_handlers, "status",    php_zip_status, NULL, NULL, IS_INT TSRMLS_CC);
+	php_zip_register_prop_handler(&zip_prop_handlers, "statusSys", php_zip_status_sys, NULL, NULL, IS_INT TSRMLS_CC);
+	php_zip_register_prop_handler(&zip_prop_handlers, "numFiles",  php_zip_get_num_files, NULL, NULL, IS_INT TSRMLS_CC);
 	php_zip_register_prop_handler(&zip_prop_handlers, "filename", NULL, NULL, php_zipobj_get_filename, IS_STRING TSRMLS_CC);
 	php_zip_register_prop_handler(&zip_prop_handlers, "comment", NULL, php_zipobj_get_zip_comment, NULL, IS_STRING TSRMLS_CC);
 
-	REGISTER_ZIP_CLASS_CONST_LONG("CREATE", ZIP_CREATE);
-	REGISTER_ZIP_CLASS_CONST_LONG("EXCL", ZIP_EXCL);
-	REGISTER_ZIP_CLASS_CONST_LONG("CHECKCONS", ZIP_CHECKCONS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OVERWRITE", ZIP_OVERWRITE);
+	REGISTER_ZIP_CLASS_CONST_INT("CREATE", ZIP_CREATE);
+	REGISTER_ZIP_CLASS_CONST_INT("EXCL", ZIP_EXCL);
+	REGISTER_ZIP_CLASS_CONST_INT("CHECKCONS", ZIP_CHECKCONS);
+	REGISTER_ZIP_CLASS_CONST_INT("OVERWRITE", ZIP_OVERWRITE);
 
-	REGISTER_ZIP_CLASS_CONST_LONG("FL_NOCASE", ZIP_FL_NOCASE);
-	REGISTER_ZIP_CLASS_CONST_LONG("FL_NODIR", ZIP_FL_NODIR);
-	REGISTER_ZIP_CLASS_CONST_LONG("FL_COMPRESSED", ZIP_FL_COMPRESSED);
-	REGISTER_ZIP_CLASS_CONST_LONG("FL_UNCHANGED", ZIP_FL_UNCHANGED);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_DEFAULT", ZIP_CM_DEFAULT);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_STORE", ZIP_CM_STORE);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_SHRINK", ZIP_CM_SHRINK);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_REDUCE_1", ZIP_CM_REDUCE_1);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_REDUCE_2", ZIP_CM_REDUCE_2);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_REDUCE_3", ZIP_CM_REDUCE_3);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_REDUCE_4", ZIP_CM_REDUCE_4);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_IMPLODE", ZIP_CM_IMPLODE);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_DEFLATE", ZIP_CM_DEFLATE);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_DEFLATE64", ZIP_CM_DEFLATE64);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_PKWARE_IMPLODE", ZIP_CM_PKWARE_IMPLODE);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_BZIP2", ZIP_CM_BZIP2);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_LZMA", ZIP_CM_LZMA);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_TERSE", ZIP_CM_TERSE);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_LZ77", ZIP_CM_LZ77);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_WAVPACK", ZIP_CM_WAVPACK);
-	REGISTER_ZIP_CLASS_CONST_LONG("CM_PPMD", ZIP_CM_PPMD);
+	REGISTER_ZIP_CLASS_CONST_INT("FL_NOCASE", ZIP_FL_NOCASE);
+	REGISTER_ZIP_CLASS_CONST_INT("FL_NODIR", ZIP_FL_NODIR);
+	REGISTER_ZIP_CLASS_CONST_INT("FL_COMPRESSED", ZIP_FL_COMPRESSED);
+	REGISTER_ZIP_CLASS_CONST_INT("FL_UNCHANGED", ZIP_FL_UNCHANGED);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_DEFAULT", ZIP_CM_DEFAULT);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_STORE", ZIP_CM_STORE);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_SHRINK", ZIP_CM_SHRINK);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_REDUCE_1", ZIP_CM_REDUCE_1);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_REDUCE_2", ZIP_CM_REDUCE_2);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_REDUCE_3", ZIP_CM_REDUCE_3);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_REDUCE_4", ZIP_CM_REDUCE_4);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_IMPLODE", ZIP_CM_IMPLODE);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_DEFLATE", ZIP_CM_DEFLATE);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_DEFLATE64", ZIP_CM_DEFLATE64);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_PKWARE_IMPLODE", ZIP_CM_PKWARE_IMPLODE);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_BZIP2", ZIP_CM_BZIP2);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_LZMA", ZIP_CM_LZMA);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_TERSE", ZIP_CM_TERSE);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_LZ77", ZIP_CM_LZ77);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_WAVPACK", ZIP_CM_WAVPACK);
+	REGISTER_ZIP_CLASS_CONST_INT("CM_PPMD", ZIP_CM_PPMD);
 
 	/* Error code */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_OK",			ZIP_ER_OK);			/* N No error */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_MULTIDISK",	ZIP_ER_MULTIDISK);	/* N Multi-disk zip archives not supported */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_RENAME",		ZIP_ER_RENAME);		/* S Renaming temporary file failed */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_CLOSE",		ZIP_ER_CLOSE);		/* S Closing zip archive failed */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_SEEK",		ZIP_ER_SEEK);		/* S Seek error */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_READ",		ZIP_ER_READ);		/* S Read error */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_WRITE",		ZIP_ER_WRITE);		/* S Write error */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_CRC",			ZIP_ER_CRC);		/* N CRC error */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_ZIPCLOSED",	ZIP_ER_ZIPCLOSED);	/* N Containing zip archive was closed */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_NOENT",		ZIP_ER_NOENT);		/* N No such file */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_EXISTS",		ZIP_ER_EXISTS);		/* N File already exists */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_OPEN",		ZIP_ER_OPEN);		/* S Can't open file */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_TMPOPEN",		ZIP_ER_TMPOPEN);	/* S Failure to create temporary file */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_ZLIB",		ZIP_ER_ZLIB);		/* Z Zlib error */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_MEMORY",		ZIP_ER_MEMORY);		/* N Malloc failure */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_CHANGED",		ZIP_ER_CHANGED);	/* N Entry has been changed */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_COMPNOTSUPP",	ZIP_ER_COMPNOTSUPP);/* N Compression method not supported */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_EOF",			ZIP_ER_EOF);		/* N Premature EOF */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_INVAL",		ZIP_ER_INVAL);		/* N Invalid argument */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_NOZIP",		ZIP_ER_NOZIP);		/* N Not a zip archive */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_INTERNAL",	ZIP_ER_INTERNAL);	/* N Internal error */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_INCONS",		ZIP_ER_INCONS);		/* N Zip archive inconsistent */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_REMOVE",		ZIP_ER_REMOVE);		/* S Can't remove file */
-	REGISTER_ZIP_CLASS_CONST_LONG("ER_DELETED",  	ZIP_ER_DELETED);	/* N Entry has been deleted */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_OK",			ZIP_ER_OK);			/* N No error */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_MULTIDISK",	ZIP_ER_MULTIDISK);	/* N Multi-disk zip archives not supported */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_RENAME",		ZIP_ER_RENAME);		/* S Renaming temporary file failed */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_CLOSE",		ZIP_ER_CLOSE);		/* S Closing zip archive failed */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_SEEK",		ZIP_ER_SEEK);		/* S Seek error */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_READ",		ZIP_ER_READ);		/* S Read error */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_WRITE",		ZIP_ER_WRITE);		/* S Write error */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_CRC",			ZIP_ER_CRC);		/* N CRC error */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_ZIPCLOSED",	ZIP_ER_ZIPCLOSED);	/* N Containing zip archive was closed */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_NOENT",		ZIP_ER_NOENT);		/* N No such file */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_EXISTS",		ZIP_ER_EXISTS);		/* N File already exists */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_OPEN",		ZIP_ER_OPEN);		/* S Can't open file */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_TMPOPEN",		ZIP_ER_TMPOPEN);	/* S Failure to create temporary file */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_ZLIB",		ZIP_ER_ZLIB);		/* Z Zlib error */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_MEMORY",		ZIP_ER_MEMORY);		/* N Malloc failure */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_CHANGED",		ZIP_ER_CHANGED);	/* N Entry has been changed */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_COMPNOTSUPP",	ZIP_ER_COMPNOTSUPP);/* N Compression method not supported */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_EOF",			ZIP_ER_EOF);		/* N Premature EOF */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_INVAL",		ZIP_ER_INVAL);		/* N Invalid argument */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_NOZIP",		ZIP_ER_NOZIP);		/* N Not a zip archive */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_INTERNAL",	ZIP_ER_INTERNAL);	/* N Internal error */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_INCONS",		ZIP_ER_INCONS);		/* N Zip archive inconsistent */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_REMOVE",		ZIP_ER_REMOVE);		/* S Can't remove file */
+	REGISTER_ZIP_CLASS_CONST_INT("ER_DELETED",  	ZIP_ER_DELETED);	/* N Entry has been deleted */
 
 #ifdef ZIP_OPSYS_DEFAULT
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_DOS",				ZIP_OPSYS_DOS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_AMIGA",			ZIP_OPSYS_AMIGA);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_OPENVMS",			ZIP_OPSYS_OPENVMS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_UNIX",				ZIP_OPSYS_UNIX);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_VM_CMS",			ZIP_OPSYS_VM_CMS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_ATARI_ST",			ZIP_OPSYS_ATARI_ST);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_OS_2",				ZIP_OPSYS_OS_2);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_MACINTOSH",		ZIP_OPSYS_MACINTOSH);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_Z_SYSTEM",			ZIP_OPSYS_Z_SYSTEM);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_Z_CPM",			ZIP_OPSYS_CPM);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_WINDOWS_NTFS",		ZIP_OPSYS_WINDOWS_NTFS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_MVS",				ZIP_OPSYS_MVS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_VSE",				ZIP_OPSYS_VSE);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_ACORN_RISC",		ZIP_OPSYS_ACORN_RISC);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_VFAT",				ZIP_OPSYS_VFAT);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_ALTERNATE_MVS",	ZIP_OPSYS_ALTERNATE_MVS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_BEOS",				ZIP_OPSYS_BEOS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_TANDEM",			ZIP_OPSYS_TANDEM);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_OS_400",			ZIP_OPSYS_OS_400);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_OS_X",				ZIP_OPSYS_OS_X);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_DOS",				ZIP_OPSYS_DOS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_AMIGA",			ZIP_OPSYS_AMIGA);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_OPENVMS",			ZIP_OPSYS_OPENVMS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_UNIX",				ZIP_OPSYS_UNIX);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_VM_CMS",			ZIP_OPSYS_VM_CMS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_ATARI_ST",			ZIP_OPSYS_ATARI_ST);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_OS_2",				ZIP_OPSYS_OS_2);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_MACINTOSH",		ZIP_OPSYS_MACINTOSH);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_Z_SYSTEM",			ZIP_OPSYS_Z_SYSTEM);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_Z_CPM",			ZIP_OPSYS_CPM);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_WINDOWS_NTFS",		ZIP_OPSYS_WINDOWS_NTFS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_MVS",				ZIP_OPSYS_MVS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_VSE",				ZIP_OPSYS_VSE);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_ACORN_RISC",		ZIP_OPSYS_ACORN_RISC);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_VFAT",				ZIP_OPSYS_VFAT);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_ALTERNATE_MVS",	ZIP_OPSYS_ALTERNATE_MVS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_BEOS",				ZIP_OPSYS_BEOS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_TANDEM",			ZIP_OPSYS_TANDEM);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_OS_400",			ZIP_OPSYS_OS_400);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_OS_X",				ZIP_OPSYS_OS_X);
 
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_DEFAULT", ZIP_OPSYS_DEFAULT);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_DEFAULT", ZIP_OPSYS_DEFAULT);
 #endif /* ifdef ZIP_OPSYS_DEFAULT */
 
 	php_register_url_stream_wrapper("zip", &php_stream_zip_wrapper TSRMLS_CC);

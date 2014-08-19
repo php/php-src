@@ -144,7 +144,7 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	mfo = Z_INTL_MESSAGEFORMATTER_P( object );
 
 	/* Return formatter's last error code. */
-	RETURN_LONG( INTL_DATA_ERROR_CODE(mfo) );
+	RETURN_INT( INTL_DATA_ERROR_CODE(mfo) );
 }
 /* }}} */
 

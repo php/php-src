@@ -125,7 +125,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 	nfo = Z_INTL_NUMBERFORMATTER_P(object);
 
 	/* Return formatter's last error code. */
-	RETURN_LONG( INTL_DATA_ERROR_CODE(nfo) );
+	RETURN_INT( INTL_DATA_ERROR_CODE(nfo) );
 }
 /* }}} */
 

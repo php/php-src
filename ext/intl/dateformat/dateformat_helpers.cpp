@@ -47,9 +47,9 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 
 		cal_int_type = UCAL_GREGORIAN;
 
-	} else if (Z_TYPE_P(calendar_zv) == IS_LONG) {
+	} else if (Z_TYPE_P(calendar_zv) == IS_INT) {
 
-		long v = Z_LVAL_P(calendar_zv);
+		long v = Z_IVAL_P(calendar_zv);
 		if (v != (long)UCAL_TRADITIONAL && v != (long)UCAL_GREGORIAN) {
 			spprintf(&msg, 0, "%s: invalid value for calendar type; it must be "
 					"one of IntlDateFormatter::TRADITIONAL (locale's default "
@@ -66,7 +66,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 		}
 		calendar_owned = true;
 
-		cal_int_type = Z_LVAL_P(calendar_zv);
+		cal_int_type = Z_IVAL_P(calendar_zv);
 
 	} else if (Z_TYPE_P(calendar_zv) == IS_OBJECT &&
 			instanceof_function_ex(Z_OBJCE_P(calendar_zv),

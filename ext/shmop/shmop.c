@@ -216,7 +216,7 @@ PHP_FUNCTION(shmop_open)
 	shmop->size = shm.shm_segsz;
 
 	ZEND_REGISTER_RESOURCE(return_value, shmop, shm_type);
-	RETURN_LONG(Z_RES_HANDLE_P(return_value));
+	RETURN_INT(Z_RES_HANDLE_P(return_value));
 err:
 	efree(shmop);
 	RETURN_FALSE;
@@ -289,7 +289,7 @@ PHP_FUNCTION(shmop_size)
 
 	ZEND_FETCH_RESOURCE(shmop, struct php_shmop *, NULL, shmid, "shmop", shm_type);
 
-	RETURN_LONG(shmop->size);
+	RETURN_INT(shmop->size);
 }
 /* }}} */
 
@@ -322,7 +322,7 @@ PHP_FUNCTION(shmop_write)
 	writesize = (data_len < shmop->size - offset) ? data_len : shmop->size - offset;
 	memcpy(shmop->addr + offset, data, writesize);
 
-	RETURN_LONG(writesize);
+	RETURN_INT(writesize);
 }
 /* }}} */
 

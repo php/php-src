@@ -96,10 +96,10 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry * TSRMLS_DC
 	mysql->multi_query = 1; \
 }
 
-#define MYSQLI_RETURN_LONG_LONG(__val) \
+#define MYSQLI_RETURN_INT_INT(__val) \
 { \
 	if ((__val) < LONG_MAX) {		\
-		RETURN_LONG((long) (__val));		\
+		RETURN_INT((long) (__val));		\
 	} else {				\
 		/* always used with my_ulonglong -> %llu */ \
 		RETURN_STR(strpprintf(0, MYSQLI_LLU_SPEC, (__val)));	\
