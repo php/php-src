@@ -35,6 +35,8 @@ PHP X.Y UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- FPM
+  . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes).
 
 ========================================
 4. Deprecated Functionality

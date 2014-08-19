@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
 
+- FPM:
+  . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
+
 - Standard:
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)
   . Fix user session handlers (See rfc:session.user.return-value). (Sara)
