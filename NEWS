@@ -20,6 +20,9 @@ PHP                                                                        NEWS
   . Fixed bug #67109 (First uppercase letter breaks date string parsing).
     (Derick)
 
+- GD
+  . Made fontFetch's path parser thread-safe. (Sara).
+
 ?? ??? 2014, PHP 5.5.16
 
 - COM:
