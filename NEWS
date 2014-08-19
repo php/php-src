@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 
 - GD
   . Made fontFetch's path parser thread-safe. (Sara)
+  . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
+    (CVE-2014-5120) (Ryan Mauger)
 
 14 Aug 2014, PHP 5.6.0 Release Candidate 4
 
