@@ -440,7 +440,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp TSRMLS_DC
 			zend_hash_move_forward_ex(prop_handlers, &pos)) {
 		zval value;
 		zend_string *string_key;
-		ulong num_key;
+		php_uint_t num_key;
 
 		if (entry->read_func(obj, &value TSRMLS_CC) == FAILURE) {
 			continue;
