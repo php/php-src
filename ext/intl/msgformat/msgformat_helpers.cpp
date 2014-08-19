@@ -388,7 +388,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 
 	// Key related variables
 	zend_string		*str_index;
-	ulong			num_index;
+	php_uint_t			num_index;
 
 	ZEND_HASH_FOREACH_KEY_VAL(args, num_index, str_index, elem) {
 		Formattable& formattable = fargs[argNum];

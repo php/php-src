@@ -190,7 +190,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		}
 		add_assoc_bool_ex(idna_info, "isTransitionalDifferent",
 				sizeof("isTransitionalDifferent")-1, info.isTransitionalDifferent);
-		add_assoc_int_ex(idna_info, "errors", sizeof("errors")-1, (long)info.errors);
+		add_assoc_int_ex(idna_info, "errors", sizeof("errors")-1, (php_int_t)info.errors);
 	}
 
 	if (!buffer_used) {
@@ -265,13 +265,13 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	char *domain;
 	int domain_len;
-	long option = 0,
+	php_int_t option = 0,
 		 variant = INTL_IDN_VARIANT_2003;
 	zval *idna_info = NULL;
 
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llz/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|iiz/",
 			&domain, &domain_len, &option, &variant, &idna_info) == FAILURE) {
 		php_intl_bad_args("bad arguments", mode TSRMLS_CC);
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */

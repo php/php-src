@@ -48,10 +48,10 @@ PHP_FUNCTION( intl_get_error_message )
  */
 PHP_FUNCTION( intl_is_failure )
 {
-	long err_code;
+	php_int_t err_code;
 
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "l",
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "i",
 		&err_code ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -70,10 +70,10 @@ PHP_FUNCTION( intl_is_failure )
  */
 PHP_FUNCTION( intl_error_name )
 {
-	long err_code;
+	php_int_t err_code;
 
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "l",
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "i",
 		&err_code ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

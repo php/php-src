@@ -33,7 +33,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 								 const char *func_name,
 								 intl_error *err,
 								 Calendar*& cal,
-								 long& cal_int_type,
+								 php_int_t& cal_int_type,
 								 bool& calendar_owned TSRMLS_DC)
 {
 	char *msg;
@@ -49,8 +49,8 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 
 	} else if (Z_TYPE_P(calendar_zv) == IS_INT) {
 
-		long v = Z_IVAL_P(calendar_zv);
-		if (v != (long)UCAL_TRADITIONAL && v != (long)UCAL_GREGORIAN) {
+		php_int_t v = Z_IVAL_P(calendar_zv);
+		if (v != (php_int_t)UCAL_TRADITIONAL && v != (php_int_t)UCAL_GREGORIAN) {
 			spprintf(&msg, 0, "%s: invalid value for calendar type; it must be "
 					"one of IntlDateFormatter::TRADITIONAL (locale's default "
 					"calendar) or IntlDateFormatter::GREGORIAN. "
@@ -59,7 +59,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
 			efree(msg);
 			return FAILURE;
-		} else if (v == (long)UCAL_TRADITIONAL) {
+		} else if (v == (php_int_t)UCAL_TRADITIONAL) {
 			cal = Calendar::createInstance(locale, status);
 		} else { //UCAL_GREGORIAN
 			cal = new GregorianCalendar(locale, status);

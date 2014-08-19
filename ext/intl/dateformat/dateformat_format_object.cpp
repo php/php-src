@@ -47,9 +47,9 @@ static const DateFormat::EStyle valid_styles[] = {
 
 static bool valid_format(zval *z) {
 	if (Z_TYPE_P(z) == IS_INT) {
-		long lval = Z_IVAL_P(z);
+		php_int_t lval = Z_IVAL_P(z);
 		for (int i = 0; i < sizeof(valid_styles) / sizeof(*valid_styles); i++) {
-			if ((long)valid_styles[i] == lval) {
+			if ((php_int_t)valid_styles[i] == lval) {
 				return true;
 			}
 		}

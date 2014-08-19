@@ -258,7 +258,7 @@ static int collator_cmp_sort_keys( const void *p1, const void *p2 TSRMLS_DC )
 /* {{{ collator_get_compare_function
  * Choose compare function according to sort flags.
  */
-static collator_compare_func_t collator_get_compare_function( const long sort_flags )
+static collator_compare_func_t collator_get_compare_function( const php_int_t sort_flags )
 {
 	collator_compare_func_t func;
 
@@ -290,12 +290,12 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	zval           saved_collator;
 	zval*          array            = NULL;
 	HashTable*     hash             = NULL;
-	long           sort_flags       = COLLATOR_SORT_REGULAR;
+	php_int_t           sort_flags       = COLLATOR_SORT_REGULAR;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/|i",
 		&object, Collator_ce_ptr, &array, &sort_flags ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

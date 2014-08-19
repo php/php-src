@@ -259,7 +259,7 @@ PHP_FUNCTION( resourcebundle_get )
 /* }}} */
 
 /* {{{ resourcebundle_array_count */
-int resourcebundle_array_count(zval *object, long *count TSRMLS_DC) 
+int resourcebundle_array_count(zval *object, php_int_t *count TSRMLS_DC) 
 {
 	ResourceBundle_object *rb;
 	RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK;

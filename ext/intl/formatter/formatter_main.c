@@ -30,13 +30,13 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	const char* locale;
 	char*       pattern = NULL;
 	int         locale_len = 0, pattern_len = 0;
-	long        style;
+	php_int_t        style;
 	UChar*      spattern     = NULL;
 	int         spattern_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sl|s",
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "si|s",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

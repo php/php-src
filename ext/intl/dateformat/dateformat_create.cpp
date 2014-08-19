@@ -43,11 +43,11 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	const char	*locale_str;
 	int			locale_len		= 0;
 	Locale		locale;
-    long		date_type		= 0;
-    long		time_type		= 0;
+    php_int_t		date_type		= 0;
+    php_int_t		time_type		= 0;
 	zval		*calendar_zv	= NULL;
 	Calendar	*calendar		= NULL;
-	long		calendar_type;
+	php_int_t		calendar_type;
 	bool		calendar_owned;
 	zval		*timezone_zv	= NULL;
 	TimeZone	*timezone		= NULL;
@@ -61,7 +61,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	intl_error_reset(NULL TSRMLS_CC);
 	object = return_value;
 	/* Parse parameters. */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll|zzs",
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sii|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "

@@ -33,14 +33,14 @@
 PHP_FUNCTION( numfmt_format )
 {
 	zval *number;
-	long type = FORMAT_TYPE_DEFAULT;
+	php_int_t type = FORMAT_TYPE_DEFAULT;
 	UChar format_buf[32];
 	UChar* formatted = format_buf;
 	int formatted_len = USIZE(format_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz|i",
 		&object, NumberFormatter_ce_ptr,  &number, &type ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -59,7 +59,7 @@ PHP_FUNCTION( numfmt_format )
 
 		if(Z_TYPE_P(number) == IS_INT) {
 			/* take INT32 on 32-bit, int64 on 64-bit */
-			type = (sizeof(long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
+			type = (sizeof(php_int_t) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
 		} else if(Z_TYPE_P(number) == IS_DOUBLE) {
 			type = FORMAT_TYPE_DOUBLE;
 		} else {
