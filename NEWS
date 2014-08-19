@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
     (CVE-2014-2497). (Remi)
+  . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
+    (CVE-2014-5120) (Ryan Mauger)
 
 - Network:
   . Fixed bug #67717 (segfault in dns_get_record). (CVE-2014-3597) (Remi)
