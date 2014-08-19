@@ -56,7 +56,7 @@ int(0)
 --- testing: '65' << '0' ---
 int(65)
 --- testing: '65' << '65' ---
-int(130)
+int(0)
 --- testing: '65' << '-44' ---
 bool(false)
 --- testing: '65' << '1.2' ---
@@ -66,17 +66,17 @@ bool(false)
 --- testing: '65' << 'abc' ---
 int(65)
 --- testing: '65' << '123abc' ---
-int(576460752303423488)
+int(0)
 --- testing: '65' << '123e5' ---
-int(576460752303423488)
+int(0)
 --- testing: '65' << '123e5xyz' ---
-int(576460752303423488)
+int(0)
 --- testing: '65' << ' 123abc' ---
-int(576460752303423488)
+int(0)
 --- testing: '65' << '123 abc' ---
-int(576460752303423488)
+int(0)
 --- testing: '65' << '123abc ' ---
-int(576460752303423488)
+int(0)
 --- testing: '65' << '3.4a' ---
 int(520)
 --- testing: '65' << 'a5.9' ---
@@ -84,7 +84,7 @@ int(65)
 --- testing: '-44' << '0' ---
 int(-44)
 --- testing: '-44' << '65' ---
-int(-88)
+int(0)
 --- testing: '-44' << '-44' ---
 bool(false)
 --- testing: '-44' << '1.2' ---
@@ -94,17 +94,17 @@ bool(false)
 --- testing: '-44' << 'abc' ---
 int(-44)
 --- testing: '-44' << '123abc' ---
-int(-6917529027641081856)
+int(0)
 --- testing: '-44' << '123e5' ---
-int(-6917529027641081856)
+int(0)
 --- testing: '-44' << '123e5xyz' ---
-int(-6917529027641081856)
+int(0)
 --- testing: '-44' << ' 123abc' ---
-int(-6917529027641081856)
+int(0)
 --- testing: '-44' << '123 abc' ---
-int(-6917529027641081856)
+int(0)
 --- testing: '-44' << '123abc ' ---
-int(-6917529027641081856)
+int(0)
 --- testing: '-44' << '3.4a' ---
 int(-352)
 --- testing: '-44' << 'a5.9' ---
@@ -112,7 +112,7 @@ int(-44)
 --- testing: '1.2' << '0' ---
 int(1)
 --- testing: '1.2' << '65' ---
-int(2)
+int(0)
 --- testing: '1.2' << '-44' ---
 bool(false)
 --- testing: '1.2' << '1.2' ---
@@ -122,17 +122,17 @@ bool(false)
 --- testing: '1.2' << 'abc' ---
 int(1)
 --- testing: '1.2' << '123abc' ---
-int(576460752303423488)
+int(0)
 --- testing: '1.2' << '123e5' ---
-int(576460752303423488)
+int(0)
 --- testing: '1.2' << '123e5xyz' ---
-int(576460752303423488)
+int(0)
 --- testing: '1.2' << ' 123abc' ---
-int(576460752303423488)
+int(0)
 --- testing: '1.2' << '123 abc' ---
-int(576460752303423488)
+int(0)
 --- testing: '1.2' << '123abc ' ---
-int(576460752303423488)
+int(0)
 --- testing: '1.2' << '3.4a' ---
 int(8)
 --- testing: '1.2' << 'a5.9' ---
@@ -140,7 +140,7 @@ int(1)
 --- testing: '-7.7' << '0' ---
 int(-7)
 --- testing: '-7.7' << '65' ---
-int(-14)
+int(0)
 --- testing: '-7.7' << '-44' ---
 bool(false)
 --- testing: '-7.7' << '1.2' ---
@@ -150,17 +150,17 @@ bool(false)
 --- testing: '-7.7' << 'abc' ---
 int(-7)
 --- testing: '-7.7' << '123abc' ---
-int(-4035225266123964416)
+int(0)
 --- testing: '-7.7' << '123e5' ---
-int(-4035225266123964416)
+int(0)
 --- testing: '-7.7' << '123e5xyz' ---
-int(-4035225266123964416)
+int(0)
 --- testing: '-7.7' << ' 123abc' ---
-int(-4035225266123964416)
+int(0)
 --- testing: '-7.7' << '123 abc' ---
-int(-4035225266123964416)
+int(0)
 --- testing: '-7.7' << '123abc ' ---
-int(-4035225266123964416)
+int(0)
 --- testing: '-7.7' << '3.4a' ---
 int(-56)
 --- testing: '-7.7' << 'a5.9' ---
@@ -196,7 +196,7 @@ int(0)
 --- testing: '123abc' << '0' ---
 int(123)
 --- testing: '123abc' << '65' ---
-int(246)
+int(0)
 --- testing: '123abc' << '-44' ---
 bool(false)
 --- testing: '123abc' << '1.2' ---
@@ -206,17 +206,17 @@ bool(false)
 --- testing: '123abc' << 'abc' ---
 int(123)
 --- testing: '123abc' << '123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc' << '123e5' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc' << '123e5xyz' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc' << ' 123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc' << '123 abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc' << '123abc ' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc' << '3.4a' ---
 int(984)
 --- testing: '123abc' << 'a5.9' ---
@@ -224,7 +224,7 @@ int(123)
 --- testing: '123e5' << '0' ---
 int(123)
 --- testing: '123e5' << '65' ---
-int(246)
+int(0)
 --- testing: '123e5' << '-44' ---
 bool(false)
 --- testing: '123e5' << '1.2' ---
@@ -234,17 +234,17 @@ bool(false)
 --- testing: '123e5' << 'abc' ---
 int(123)
 --- testing: '123e5' << '123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5' << '123e5' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5' << '123e5xyz' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5' << ' 123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5' << '123 abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5' << '123abc ' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5' << '3.4a' ---
 int(984)
 --- testing: '123e5' << 'a5.9' ---
@@ -252,7 +252,7 @@ int(123)
 --- testing: '123e5xyz' << '0' ---
 int(123)
 --- testing: '123e5xyz' << '65' ---
-int(246)
+int(0)
 --- testing: '123e5xyz' << '-44' ---
 bool(false)
 --- testing: '123e5xyz' << '1.2' ---
@@ -262,17 +262,17 @@ bool(false)
 --- testing: '123e5xyz' << 'abc' ---
 int(123)
 --- testing: '123e5xyz' << '123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5xyz' << '123e5' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5xyz' << '123e5xyz' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5xyz' << ' 123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5xyz' << '123 abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5xyz' << '123abc ' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123e5xyz' << '3.4a' ---
 int(984)
 --- testing: '123e5xyz' << 'a5.9' ---
@@ -280,7 +280,7 @@ int(123)
 --- testing: ' 123abc' << '0' ---
 int(123)
 --- testing: ' 123abc' << '65' ---
-int(246)
+int(0)
 --- testing: ' 123abc' << '-44' ---
 bool(false)
 --- testing: ' 123abc' << '1.2' ---
@@ -290,17 +290,17 @@ bool(false)
 --- testing: ' 123abc' << 'abc' ---
 int(123)
 --- testing: ' 123abc' << '123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: ' 123abc' << '123e5' ---
-int(-2882303761517117440)
+int(0)
 --- testing: ' 123abc' << '123e5xyz' ---
-int(-2882303761517117440)
+int(0)
 --- testing: ' 123abc' << ' 123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: ' 123abc' << '123 abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: ' 123abc' << '123abc ' ---
-int(-2882303761517117440)
+int(0)
 --- testing: ' 123abc' << '3.4a' ---
 int(984)
 --- testing: ' 123abc' << 'a5.9' ---
@@ -308,7 +308,7 @@ int(123)
 --- testing: '123 abc' << '0' ---
 int(123)
 --- testing: '123 abc' << '65' ---
-int(246)
+int(0)
 --- testing: '123 abc' << '-44' ---
 bool(false)
 --- testing: '123 abc' << '1.2' ---
@@ -318,17 +318,17 @@ bool(false)
 --- testing: '123 abc' << 'abc' ---
 int(123)
 --- testing: '123 abc' << '123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123 abc' << '123e5' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123 abc' << '123e5xyz' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123 abc' << ' 123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123 abc' << '123 abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123 abc' << '123abc ' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123 abc' << '3.4a' ---
 int(984)
 --- testing: '123 abc' << 'a5.9' ---
@@ -336,7 +336,7 @@ int(123)
 --- testing: '123abc ' << '0' ---
 int(123)
 --- testing: '123abc ' << '65' ---
-int(246)
+int(0)
 --- testing: '123abc ' << '-44' ---
 bool(false)
 --- testing: '123abc ' << '1.2' ---
@@ -346,17 +346,17 @@ bool(false)
 --- testing: '123abc ' << 'abc' ---
 int(123)
 --- testing: '123abc ' << '123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc ' << '123e5' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc ' << '123e5xyz' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc ' << ' 123abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc ' << '123 abc' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc ' << '123abc ' ---
-int(-2882303761517117440)
+int(0)
 --- testing: '123abc ' << '3.4a' ---
 int(984)
 --- testing: '123abc ' << 'a5.9' ---
@@ -364,7 +364,7 @@ int(123)
 --- testing: '3.4a' << '0' ---
 int(3)
 --- testing: '3.4a' << '65' ---
-int(6)
+int(0)
 --- testing: '3.4a' << '-44' ---
 bool(false)
 --- testing: '3.4a' << '1.2' ---
@@ -374,17 +374,17 @@ bool(false)
 --- testing: '3.4a' << 'abc' ---
 int(3)
 --- testing: '3.4a' << '123abc' ---
-int(1729382256910270464)
+int(0)
 --- testing: '3.4a' << '123e5' ---
-int(1729382256910270464)
+int(0)
 --- testing: '3.4a' << '123e5xyz' ---
-int(1729382256910270464)
+int(0)
 --- testing: '3.4a' << ' 123abc' ---
-int(1729382256910270464)
+int(0)
 --- testing: '3.4a' << '123 abc' ---
-int(1729382256910270464)
+int(0)
 --- testing: '3.4a' << '123abc ' ---
-int(1729382256910270464)
+int(0)
 --- testing: '3.4a' << '3.4a' ---
 int(24)
 --- testing: '3.4a' << 'a5.9' ---
