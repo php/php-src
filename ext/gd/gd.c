@@ -1560,10 +1560,10 @@ PHP_FUNCTION(imagesetstyle)
    Create a new true color image */
 PHP_FUNCTION(imagecreatetruecolor)
 {
-	long x_size, y_size;
+	php_int_t x_size, y_size;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &x_size, &y_size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ii", &x_size, &y_size) == FAILURE) {
 		return;
 	}
 
@@ -1605,10 +1605,10 @@ PHP_FUNCTION(imagetruecolortopalette)
 {
 	zval *IM;
 	zend_bool dither;
-	long ncolors;
+	php_int_t ncolors;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rbl", &IM, &dither, &ncolors) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rbi", &IM, &dither, &ncolors) == FAILURE)  {
 		return;
 	}
 
@@ -1689,10 +1689,10 @@ PHP_FUNCTION(imagecolormatch)
 PHP_FUNCTION(imagesetthickness)
 {
 	zval *IM;
-	long thick;
+	php_int_t thick;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &IM, &thick) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &IM, &thick) == FAILURE) {
 		return;
 	}
 
@@ -1709,10 +1709,10 @@ PHP_FUNCTION(imagesetthickness)
 PHP_FUNCTION(imagefilledellipse)
 {
 	zval *IM;
-	long cx, cy, w, h, color;
+	php_int_t cx, cy, w, h, color;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &cx, &cy, &w, &h, &color) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiiii", &IM, &cx, &cy, &w, &h, &color) == FAILURE) {
 		return;
 	}
 
@@ -1729,11 +1729,11 @@ PHP_FUNCTION(imagefilledellipse)
 PHP_FUNCTION(imagefilledarc)
 {
 	zval *IM;
-	long cx, cy, w, h, ST, E, col, style;
+	php_int_t cx, cy, w, h, ST, E, col, style;
 	gdImagePtr im;
 	int e, st;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllllllll", &IM, &cx, &cy, &w, &h, &ST, &E, &col, &style) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiiiiiii", &IM, &cx, &cy, &w, &h, &ST, &E, &col, &style) == FAILURE) {
 		return;
 	}
 
@@ -1798,10 +1798,10 @@ PHP_FUNCTION(imagesavealpha)
 PHP_FUNCTION(imagelayereffect)
 {
 	zval *IM;
-	long effect;
+	php_int_t effect;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &IM, &effect) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &IM, &effect) == FAILURE) {
 		return;
 	}
 
@@ -1817,11 +1817,11 @@ PHP_FUNCTION(imagelayereffect)
 PHP_FUNCTION(imagecolorallocatealpha)
 {
 	zval *IM;
-	long red, green, blue, alpha;
+	php_int_t red, green, blue, alpha;
 	gdImagePtr im;
 	int ct = (-1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiii", &IM, &red, &green, &blue, &alpha) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1830,7 +1830,7 @@ PHP_FUNCTION(imagecolorallocatealpha)
 	if (ct < 0) {
 		RETURN_FALSE;
 	}
-	RETURN_INT((long)ct);
+	RETURN_INT((php_int_t)ct);
 }
 /* }}} */
 
@@ -1839,10 +1839,10 @@ PHP_FUNCTION(imagecolorallocatealpha)
 PHP_FUNCTION(imagecolorresolvealpha)
 {
 	zval *IM;
-	long red, green, blue, alpha;
+	php_int_t red, green, blue, alpha;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiii", &IM, &red, &green, &blue, &alpha) == FAILURE) {
 		return;
 	}
 
@@ -1857,10 +1857,10 @@ PHP_FUNCTION(imagecolorresolvealpha)
 PHP_FUNCTION(imagecolorclosestalpha)
 {
 	zval *IM;
-	long red, green, blue, alpha;
+	php_int_t red, green, blue, alpha;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiii", &IM, &red, &green, &blue, &alpha) == FAILURE) {
 		return;
 	}
 
@@ -1875,10 +1875,10 @@ PHP_FUNCTION(imagecolorclosestalpha)
 PHP_FUNCTION(imagecolorexactalpha)
 {
 	zval *IM;
-	long red, green, blue, alpha;
+	php_int_t red, green, blue, alpha;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiii", &IM, &red, &green, &blue, &alpha) == FAILURE) {
 		return;
 	}
 
@@ -1893,11 +1893,11 @@ PHP_FUNCTION(imagecolorexactalpha)
 PHP_FUNCTION(imagecopyresampled)
 {
 	zval *SIM, *DIM;
-	long SX, SY, SW, SH, DX, DY, DW, DH;
+	php_int_t SX, SY, SW, SH, DX, DY, DW, DH;
 	gdImagePtr im_dst, im_src;
 	int srcH, srcW, dstH, dstW, srcY, srcX, dstY, dstX;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrllllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rriiiiiiii", &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) {
 		return;
 	}
 
@@ -1925,7 +1925,7 @@ PHP_FUNCTION(imagecopyresampled)
 PHP_FUNCTION(imagegrabwindow)
 {
 	HWND window;
-	long client_area = 0;
+	php_int_t client_area = 0;
 	RECT rc = {0};
 	RECT rc_win = {0};
 	int Width, Height;
@@ -1934,12 +1934,12 @@ PHP_FUNCTION(imagegrabwindow)
 	HBITMAP memBM;
 	HBITMAP hOld;
 	HINSTANCE handle;
-	long lwindow_handle;
+	php_int_t lwindow_handle;
 	typedef BOOL (WINAPI *tPrintWindow)(HWND, HDC,UINT);
 	tPrintWindow pPrintWindow = 0;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &lwindow_handle, &client_area) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|i", &lwindow_handle, &client_area) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -2076,10 +2076,10 @@ PHP_FUNCTION(imagerotate)
 	zval *SIM;
 	gdImagePtr im_dst, im_src;
 	double degrees;
-	long color;
-	long ignoretransparent = 0;
+	php_int_t color;
+	php_int_t ignoretransparent = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rdl|l", &SIM, &degrees, &color, &ignoretransparent) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rdi|i", &SIM, &degrees, &color, &ignoretransparent) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -2139,10 +2139,10 @@ PHP_FUNCTION(imagesetbrush)
    Create a new image */
 PHP_FUNCTION(imagecreate)
 {
-	long x_size, y_size;
+	php_int_t x_size, y_size;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &x_size, &y_size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ii", &x_size, &y_size) == FAILURE) {
 		return;
 	}
 
@@ -2344,7 +2344,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 {
 	char *file;
 	int file_len;
-	long srcx, srcy, width, height;
+	php_int_t srcx, srcy, width, height;
 	gdImagePtr im = NULL;
 	php_stream *stream;
 	FILE * fp = NULL;
@@ -2353,7 +2353,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 #endif
 
 	if (image_type == PHP_GDIMG_TYPE_GD2PART) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sllll", &file, &file_len, &srcx, &srcy, &width, &height) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "siiii", &file, &file_len, &srcx, &srcy, &width, &height) == FAILURE) {
 			return;
 		}
 		if (width < 1 || height < 1) {
@@ -2551,7 +2551,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 {
 	zval *imgind;
 	char *file = NULL;
-	long quality = 0, type = 0;
+	php_int_t quality = 0, type = 0;
 	gdImagePtr im;
 	char *fn = NULL;
 	FILE *fp;
@@ -2562,7 +2562,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
 	/* The quality parameter for gd2 stands for chunk size */
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "r|pll", &imgind, &file, &file_len, &quality, &type) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|pii", &imgind, &file, &file_len, &quality, &type) == FAILURE) {
 		return;
 	}
 
@@ -2794,11 +2794,11 @@ PHP_FUNCTION(imagedestroy)
 PHP_FUNCTION(imagecolorallocate)
 {
 	zval *IM;
-	long red, green, blue;
+	php_int_t red, green, blue;
 	gdImagePtr im;
 	int ct = (-1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &red, &green, &blue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riii", &IM, &red, &green, &blue) == FAILURE) {
 		return;
 	}
 
@@ -2835,10 +2835,10 @@ PHP_FUNCTION(imagepalettecopy)
 PHP_FUNCTION(imagecolorat)
 {
 	zval *IM;
-	long x, y;
+	php_int_t x, y;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll", &IM, &x, &y) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rii", &IM, &x, &y) == FAILURE) {
 		return;
 	}
 
@@ -2867,10 +2867,10 @@ PHP_FUNCTION(imagecolorat)
 PHP_FUNCTION(imagecolorclosest)
 {
 	zval *IM;
-	long red, green, blue;
+	php_int_t red, green, blue;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &red, &green, &blue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riii", &IM, &red, &green, &blue) == FAILURE) {
 		return;
 	}
 
@@ -2885,10 +2885,10 @@ PHP_FUNCTION(imagecolorclosest)
 PHP_FUNCTION(imagecolorclosesthwb)
 {
 	zval *IM;
-	long red, green, blue;
+	php_int_t red, green, blue;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &red, &green, &blue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riii", &IM, &red, &green, &blue) == FAILURE) {
 		return;
 	}
 
@@ -2903,11 +2903,11 @@ PHP_FUNCTION(imagecolorclosesthwb)
 PHP_FUNCTION(imagecolordeallocate)
 {
 	zval *IM;
-	long index;
+	php_int_t index;
 	int col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &IM, &index) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &IM, &index) == FAILURE) {
 		return;
 	}
 
@@ -2935,10 +2935,10 @@ PHP_FUNCTION(imagecolordeallocate)
 PHP_FUNCTION(imagecolorresolve)
 {
 	zval *IM;
-	long red, green, blue;
+	php_int_t red, green, blue;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &red, &green, &blue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riii", &IM, &red, &green, &blue) == FAILURE) {
 		return;
 	}
 
@@ -2953,10 +2953,10 @@ PHP_FUNCTION(imagecolorresolve)
 PHP_FUNCTION(imagecolorexact)
 {
 	zval *IM;
-	long red, green, blue;
+	php_int_t red, green, blue;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &red, &green, &blue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riii", &IM, &red, &green, &blue) == FAILURE) {
 		return;
 	}
 
@@ -2971,11 +2971,11 @@ PHP_FUNCTION(imagecolorexact)
 PHP_FUNCTION(imagecolorset)
 {
 	zval *IM;
-	long color, red, green, blue, alpha = 0;
+	php_int_t color, red, green, blue, alpha = 0;
 	int col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll|l", &IM, &color, &red, &green, &blue, &alpha) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiii|i", &IM, &color, &red, &green, &blue, &alpha) == FAILURE) {
 		return;
 	}
 
@@ -2999,11 +2999,11 @@ PHP_FUNCTION(imagecolorset)
 PHP_FUNCTION(imagecolorsforindex)
 {
 	zval *IM;
-	long index;
+	php_int_t index;
 	int col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &IM, &index) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &IM, &index) == FAILURE) {
 		return;
 	}
 
@@ -3073,10 +3073,10 @@ PHP_FUNCTION(imagegammacorrect)
 PHP_FUNCTION(imagesetpixel)
 {
 	zval *IM;
-	long x, y, col;
+	php_int_t x, y, col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &x, &y, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riii", &IM, &x, &y, &col) == FAILURE) {
 		return;
 	}
 
@@ -3091,10 +3091,10 @@ PHP_FUNCTION(imagesetpixel)
 PHP_FUNCTION(imageline)
 {
 	zval *IM;
-	long x1, y1, x2, y2, col;
+	php_int_t x1, y1, x2, y2, col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiiii", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
 		return;
 	}
 
@@ -3117,10 +3117,10 @@ PHP_FUNCTION(imageline)
 PHP_FUNCTION(imagedashedline)
 {
 	zval *IM;
-	long x1, y1, x2, y2, col;
+	php_int_t x1, y1, x2, y2, col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiiii", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
 		return;
 	}
 
@@ -3135,10 +3135,10 @@ PHP_FUNCTION(imagedashedline)
 PHP_FUNCTION(imagerectangle)
 {
 	zval *IM;
-	long x1, y1, x2, y2, col;
+	php_int_t x1, y1, x2, y2, col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiiii", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
 		return;
 	}
 
@@ -3153,10 +3153,10 @@ PHP_FUNCTION(imagerectangle)
 PHP_FUNCTION(imagefilledrectangle)
 {
 	zval *IM;
-	long x1, y1, x2, y2, col;
+	php_int_t x1, y1, x2, y2, col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiiii", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
 		return;
 	}
 
@@ -3171,11 +3171,11 @@ PHP_FUNCTION(imagefilledrectangle)
 PHP_FUNCTION(imagearc)
 {
 	zval *IM;
-	long cx, cy, w, h, ST, E, col;
+	php_int_t cx, cy, w, h, ST, E, col;
 	gdImagePtr im;
 	int e, st;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllllll", &IM, &cx, &cy, &w, &h, &ST, &E, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiiiiii", &IM, &cx, &cy, &w, &h, &ST, &E, &col) == FAILURE) {
 		return;
 	}
 
@@ -3201,10 +3201,10 @@ PHP_FUNCTION(imagearc)
 PHP_FUNCTION(imageellipse)
 {
 	zval *IM;
-	long cx, cy, w, h, color;
+	php_int_t cx, cy, w, h, color;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &cx, &cy, &w, &h, &color) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiiii", &IM, &cx, &cy, &w, &h, &color) == FAILURE) {
 		return;
 	}
 
@@ -3220,10 +3220,10 @@ PHP_FUNCTION(imageellipse)
 PHP_FUNCTION(imagefilltoborder)
 {
 	zval *IM;
-	long x, y, border, col;
+	php_int_t x, y, border, col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &x, &y, &border, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiii", &IM, &x, &y, &border, &col) == FAILURE) {
 		return;
 	}
 
@@ -3238,10 +3238,10 @@ PHP_FUNCTION(imagefilltoborder)
 PHP_FUNCTION(imagefill)
 {
 	zval *IM;
-	long x, y, col;
+	php_int_t x, y, col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &x, &y, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riii", &IM, &x, &y, &col) == FAILURE) {
 		return;
 	}
 
@@ -3273,11 +3273,11 @@ PHP_FUNCTION(imagecolorstotal)
 PHP_FUNCTION(imagecolortransparent)
 {
 	zval *IM;
-	long COL = 0;
+	php_int_t COL = 0;
 	gdImagePtr im;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &IM, &COL) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|i", &IM, &COL) == FAILURE) {
 		return;
 	}
 
@@ -3297,10 +3297,10 @@ PHP_FUNCTION(imageinterlace)
 {
 	zval *IM;
 	int argc = ZEND_NUM_ARGS();
-	long INT = 0;
+	php_int_t INT = 0;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &IM, &INT) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|i", &IM, &INT) == FAILURE) {
 		return;
 	}
 
@@ -3321,13 +3321,13 @@ PHP_FUNCTION(imageinterlace)
 static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 {
 	zval *IM, *POINTS;
-	long NPOINTS, COL;
+	php_int_t NPOINTS, COL;
 	zval *var = NULL;
 	gdImagePtr im;
 	gdPointPtr points;
 	int npoints, col, nelem, i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rall", &IM, &POINTS, &NPOINTS, &COL) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "raii", &IM, &POINTS, &NPOINTS, &COL) == FAILURE) {
 		return;
 	}
 
@@ -3449,10 +3449,10 @@ static gdFontPtr php_find_gd_font(int size TSRMLS_DC)
  */
 static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 {
-	long SIZE;
+	php_int_t SIZE;
 	gdFontPtr font;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &SIZE) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &SIZE) == FAILURE) {
 		return;
 	}
 
@@ -3512,7 +3512,7 @@ static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c, i
 static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zval *IM;
-	long SIZE, X, Y, COL;
+	php_int_t SIZE, X, Y, COL;
 	char *C;
 	int C_len;
 	gdImagePtr im;
@@ -3520,7 +3520,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	unsigned char *str = NULL;
 	gdFontPtr font;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllsl", &IM, &SIZE, &X, &Y, &C, &C_len, &COL) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiisi", &IM, &SIZE, &X, &Y, &C, &C_len, &COL) == FAILURE) {
 		return;
 	}
 
@@ -3607,11 +3607,11 @@ PHP_FUNCTION(imagestringup)
 PHP_FUNCTION(imagecopy)
 {
 	zval *SIM, *DIM;
-	long SX, SY, SW, SH, DX, DY;
+	php_int_t SX, SY, SW, SH, DX, DY;
 	gdImagePtr im_dst, im_src;
 	int srcH, srcW, srcY, srcX, dstY, dstX;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rriiiiii", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH) == FAILURE) {
 		return;
 	}
 
@@ -3635,11 +3635,11 @@ PHP_FUNCTION(imagecopy)
 PHP_FUNCTION(imagecopymerge)
 {
 	zval *SIM, *DIM;
-	long SX, SY, SW, SH, DX, DY, PCT;
+	php_int_t SX, SY, SW, SH, DX, DY, PCT;
 	gdImagePtr im_dst, im_src;
 	int srcH, srcW, srcY, srcX, dstY, dstX, pct;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrlllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rriiiiiii", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
 		return;
 	}
 
@@ -3664,11 +3664,11 @@ PHP_FUNCTION(imagecopymerge)
 PHP_FUNCTION(imagecopymergegray)
 {
 	zval *SIM, *DIM;
-	long SX, SY, SW, SH, DX, DY, PCT;
+	php_int_t SX, SY, SW, SH, DX, DY, PCT;
 	gdImagePtr im_dst, im_src;
 	int srcH, srcW, srcY, srcX, dstY, dstX, pct;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrlllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rriiiiiii", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
 		return;
 	}
 
@@ -3693,11 +3693,11 @@ PHP_FUNCTION(imagecopymergegray)
 PHP_FUNCTION(imagecopyresized)
 {
 	zval *SIM, *DIM;
-	long SX, SY, SW, SH, DX, DY, DW, DH;
+	php_int_t SX, SY, SW, SH, DX, DY, DW, DH;
 	gdImagePtr im_dst, im_src;
 	int srcH, srcW, dstH, dstW, srcY, srcX, dstY, dstX;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrllllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rriiiiiiii", &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) {
 		return;
 	}
 
@@ -3804,7 +3804,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 {
 	zval *IM, *EXT = NULL;
 	gdImagePtr im=NULL;
-	long col = -1, x = -1, y = -1;
+	php_int_t col = -1, x = -1, y = -1;
 	int str_len, fontname_len, i, brect[8];
 	double ptsize, angle;
 	char *str = NULL, *fontname = NULL;
@@ -3821,7 +3821,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	} else {
 		if (argc < 8 || argc > ((extended) ? 9 : 8)) {
 			ZEND_WRONG_PARAM_COUNT();
-		} else if (zend_parse_parameters(argc TSRMLS_CC, "rddlllss|a", &IM, &ptsize, &angle, &x, &y, &col, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
+		} else if (zend_parse_parameters(argc TSRMLS_CC, "rddiiiss|a", &IM, &ptsize, &angle, &x, &y, &col, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -3833,7 +3833,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	if (extended && EXT) {	/* parse extended info */
 		zval *item;
 		zend_string *key;
-		ulong num_key;
+		php_uint_t num_key;
 
 		/* walk the assoc array */
 		ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(EXT), num_key, key, item) {
@@ -4105,7 +4105,7 @@ PHP_FUNCTION(imagepstext)
 {
 	zval *img, *fnt;
 	int i, j;
-	long _fg, _bg, x, y, size, space = 0, aa_steps = 4, width = 0;
+	php_int_t _fg, _bg, x, y, size, space = 0, aa_steps = 4, width = 0;
 	int *f_ind;
 	int h_lines, v_lines, c_ind;
 	int rd, gr, bl, fg_rd, fg_gr, fg_bl, bg_rd, bg_gr, bg_bl;
@@ -4121,7 +4121,7 @@ PHP_FUNCTION(imagepstext)
 	char *str;
 	int str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrlllll|lldl", &img, &str, &str_len, &fnt, &size, &_fg, &_bg, &x, &y, &space, &width, &angle, &aa_steps) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsriiiii|iidi", &img, &str, &str_len, &fnt, &size, &_fg, &_bg, &x, &y, &space, &width, &angle, &aa_steps) == FAILURE) {
 		return;
 	}
 
@@ -4243,7 +4243,7 @@ PHP_FUNCTION(imagepstext)
 PHP_FUNCTION(imagepsbbox)
 {
 	zval *fnt;
-	long sz = 0, sp = 0, wd = 0;
+	php_int_t sz = 0, sp = 0, wd = 0;
 	char *str;
 	int i, space = 0, add_width = 0, char_width, amount_kern;
 	int cur_x, cur_y, dx, dy;
@@ -4258,7 +4258,7 @@ PHP_FUNCTION(imagepsbbox)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "srl|lld", &str, &str_len, &fnt, &sz, &sp, &wd, &angle) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sri|iid", &str, &str_len, &fnt, &sz, &sp, &wd, &angle) == FAILURE) {
 		return;
 	}
 	
@@ -4423,7 +4423,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 {
 	char *f_org, *f_dest;
 	int f_org_len, f_dest_len;
-	long height, width, threshold;
+	php_int_t height, width, threshold;
 	gdImagePtr im_org, im_dest, im_tmp;
 	char *fn_org = NULL;
 	char *fn_dest = NULL;
@@ -4437,10 +4437,10 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	int x, y;
 	float x_ratio, y_ratio;
 #ifdef HAVE_GD_JPG
-    long ignore_warning;
+    php_int_t ignore_warning;
 #endif
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pplll", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ppiii", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
 		return;
 	}
 
@@ -4635,9 +4635,9 @@ static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *SIM;
 	gdImagePtr im_src;
-	long brightness, tmp;
+	php_int_t brightness, tmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zll", &SIM, &tmp, &brightness) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zii", &SIM, &tmp, &brightness) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4658,9 +4658,9 @@ static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *SIM;
 	gdImagePtr im_src;
-	long contrast, tmp;
+	php_int_t contrast, tmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll", &SIM, &tmp, &contrast) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rii", &SIM, &tmp, &contrast) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4681,10 +4681,10 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *SIM;
 	gdImagePtr im_src;
-	long r,g,b,tmp;
-	long a = 0;
+	php_int_t r,g,b,tmp;
+	php_int_t a = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll|l", &SIM, &tmp, &r, &g, &b, &a) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riiii|i", &SIM, &tmp, &r, &g, &b, &a) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4759,11 +4759,11 @@ static void php_image_filter_mean_removal(INTERNAL_FUNCTION_PARAMETERS)
 static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *SIM;
-	long tmp;
+	php_int_t tmp;
 	gdImagePtr im_src;
 	double weight;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rld", &SIM, &tmp, &weight) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rid", &SIM, &tmp, &weight) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4784,10 +4784,10 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *IM;
 	gdImagePtr im;
-	long tmp, blocksize;
+	php_int_t tmp, blocksize;
 	zend_bool mode = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll|b", &IM, &tmp, &blocksize, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rii|b", &IM, &tmp, &blocksize, &mode) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4811,7 +4811,7 @@ PHP_FUNCTION(imagefilter)
 	zval *tmp;
 
 	typedef void (*image_filter)(INTERNAL_FUNCTION_PARAMETERS);
-	long filtertype;
+	php_int_t filtertype;
 	image_filter filters[] =
 	{
 		php_image_filter_negate ,
@@ -4830,7 +4830,7 @@ PHP_FUNCTION(imagefilter)
 
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > IMAGE_FILTER_MAX_ARGS) {
 		WRONG_PARAM_COUNT;
-	} else if (zend_parse_parameters(2 TSRMLS_CC, "rl", &tmp, &filtertype) == FAILURE) {
+	} else if (zend_parse_parameters(2 TSRMLS_CC, "ri", &tmp, &filtertype) == FAILURE) {
 		return;
 	}
 
@@ -4903,10 +4903,10 @@ PHP_FUNCTION(imageconvolution)
 PHP_FUNCTION(imageflip)
 {
 	zval *IM;
-	long mode;
+	php_int_t mode;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &IM, &mode) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &IM, &mode) == FAILURE)  {
 		return;
 	}
 
@@ -5042,13 +5042,13 @@ PHP_FUNCTION(imagecrop)
 PHP_FUNCTION(imagecropauto)
 {
 	zval *IM;
-	long mode = -1;
-	long color = -1;
+	php_int_t mode = -1;
+	php_int_t color = -1;
 	double threshold = 0.5f;
 	gdImagePtr im;
 	gdImagePtr im_crop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ldl", &IM, &mode, &threshold, &color) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|idi", &IM, &mode, &threshold, &color) == FAILURE)  {
 		return;
 	}
 
@@ -5093,10 +5093,10 @@ PHP_FUNCTION(imagescale)
 	gdImagePtr im;
 	gdImagePtr im_scaled = NULL;
 	int new_width, new_height;
-	long tmp_w, tmp_h=-1, tmp_m = GD_BILINEAR_FIXED;
+	php_int_t tmp_w, tmp_h=-1, tmp_m = GD_BILINEAR_FIXED;
 	gdInterpolationMethod method;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|ll", &IM, &tmp_w, &tmp_h, &tmp_m) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|ii", &IM, &tmp_w, &tmp_h, &tmp_m) == FAILURE)  {
 		return;
 	}
 	method = tmp_m;
@@ -5250,12 +5250,12 @@ PHP_FUNCTION(imageaffine)
 PHP_FUNCTION(imageaffinematrixget)
 {
 	double affine[6];
-	long type;
+	php_int_t type;
 	zval *options = NULL;
 	zval *tmp;
 	int res = GD_FALSE, i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &type, &options) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|z", &type, &options) == FAILURE)  {
 		return;
 	}
 
@@ -5423,9 +5423,9 @@ PHP_FUNCTION(imagesetinterpolation)
 {
 	zval *IM;
 	gdImagePtr im;
-	long method = GD_BILINEAR_FIXED;
+	php_int_t method = GD_BILINEAR_FIXED;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &IM, &method) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &IM, &method) == FAILURE)  {
 		return;
 	}
 
