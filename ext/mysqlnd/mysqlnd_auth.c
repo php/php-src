@@ -37,7 +37,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const char * const db,
 							  const size_t db_len,
 							  const MYSQLND_OPTIONS * const options,
-							  unsigned long mysql_flags,
+							  php_uint_t mysql_flags,
 							  unsigned int server_charset_no,
 							  zend_bool use_full_blown_auth_packet,
 							  const char * const auth_protocol,
@@ -361,7 +361,7 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_OPTIONS * const options,
 								  const MYSQLND_NET_OPTIONS * const net_options,
-								  unsigned long mysql_flags
+								  php_uint_t mysql_flags
 								  TSRMLS_DC)
 {
 	zend_uchar * ret = NULL;
@@ -421,7 +421,7 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 							   const MYSQLND_OPTIONS * const options,
 							   const MYSQLND_NET_OPTIONS * const net_options,
-							   unsigned long mysql_flags
+							   php_uint_t mysql_flags
 							   TSRMLS_DC)
 {
 	zend_uchar * ret = NULL;
@@ -571,7 +571,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_OPTIONS * const options,
 								  const MYSQLND_NET_OPTIONS * const net_options,
-								  unsigned long mysql_flags
+								  php_uint_t mysql_flags
 								  TSRMLS_DC)
 {
 	RSA * server_public_key;

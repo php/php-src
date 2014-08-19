@@ -440,7 +440,7 @@ mysqlnd_switch_to_ssl_if_needed(
 			MYSQLND_CONN_DATA * conn,
 			const MYSQLND_PACKET_GREET * const greet_packet,
 			const MYSQLND_OPTIONS * const options,
-			unsigned long mysql_flags
+			php_uint_t mysql_flags
 			TSRMLS_DC
 		)
 {
@@ -546,7 +546,7 @@ mysqlnd_run_authentication(
 			const char * const auth_protocol,
 			unsigned int charset_no,
 			const MYSQLND_OPTIONS * const options,
-			unsigned long mysql_flags,
+			php_uint_t mysql_flags,
 			zend_bool silent,
 			zend_bool is_change_user
 			TSRMLS_DC)
@@ -678,7 +678,7 @@ mysqlnd_connect_run_authentication(
 			size_t passwd_len,
 			const MYSQLND_PACKET_GREET * const greet_packet,
 			const MYSQLND_OPTIONS * const options,
-			unsigned long mysql_flags
+			php_uint_t mysql_flags
 			TSRMLS_DC)
 {
 	enum_func_status ret = FAIL;
@@ -1588,7 +1588,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, sqlstate)(const MYSQLND_CONN_DATA * const conn
 
 
 /* {{{ mysqlnd_old_escape_string */
-PHPAPI ulong 
+PHPAPI  php_uint_t
 mysqlnd_old_escape_string(char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_old_escape_string");
@@ -1622,11 +1622,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, ssl_set)(MYSQLND_CONN_DATA * const conn, const
 
 
 /* {{{ mysqlnd_conn_data::escape_string */
-static ulong
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_conn_data, escape_string)(MYSQLND_CONN_DATA * const conn, char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, escape_string);
-	ulong ret = FAIL;
+	php_uint_t ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::escape_string");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
@@ -2114,23 +2114,23 @@ MYSQLND_METHOD(mysqlnd_conn_data, thread_id)(const MYSQLND_CONN_DATA * const con
 
 
 /* {{{ mysqlnd_conn_data::get_server_version */
-static unsigned long
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_conn_data, get_server_version)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
-	long major, minor, patch;
+	php_int_t major, minor, patch;
 	char *p;
 
 	if (!(p = conn->server_version)) {
 		return 0;
 	}
 
-	major = strtol(p, &p, 10);
+	major = ZEND_STRTOI(p, &p, 10);
 	p += 1; /* consume the dot */
-	minor = strtol(p, &p, 10);
+	minor = ZEND_STRTOI(p, &p, 10);
 	p += 1; /* consume the dot */
-	patch = strtol(p, &p, 10);
+	patch = ZEND_STRTOI(p, &p, 10);
 
-	return (unsigned long)(major * 10000L + (unsigned long)(minor * 100L + patch));
+	return (php_uint_t)(major * Z_I(10000) + (php_uint_t)(minor * Z_I(100) + patch));
 }
 /* }}} */
 

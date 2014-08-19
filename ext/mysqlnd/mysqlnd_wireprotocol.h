@@ -28,7 +28,7 @@
 #define MYSQLND_HEADER_SIZE 4
 #define COMPRESSED_HEADER_SIZE 3
 
-#define MYSQLND_NULL_LENGTH	(unsigned long) ~0
+#define MYSQLND_NULL_LENGTH	(php_uint_t) ~0
 
 /* Used in mysqlnd_debug.c */
 PHPAPI extern const char mysqlnd_read_header_name[];
@@ -185,7 +185,7 @@ typedef struct st_mysqlnd_packet_rset_header {
 	  error_no != 0 => error
 	  others => result set -> Read res_field packets up to field_count
 	*/
-	unsigned long		field_count;
+	php_uint_t		field_count;
 	/*
 	  These are filled if no SELECT query. For SELECT warning_count
 	  and server status are in the last row packet, the EOF packet.
@@ -258,7 +258,7 @@ typedef struct st_mysqlnd_packet_prepare_response {
 	MYSQLND_PACKET_HEADER	header;
 	/* also known as field_count 0x00=OK , 0xFF=error */
 	unsigned char	error_code;
-	unsigned long	stmt_id;
+	php_uint_t	stmt_id;
 	unsigned int	field_count;
 	unsigned int	param_count;
 	unsigned int	warning_count;
@@ -300,7 +300,7 @@ typedef struct  st_mysqlnd_packet_sha256_pk_request_response {
 
 PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass, size_t pass_len);
 
-unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
+php_uint_t	php_mysqlnd_net_field_length(zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
 size_t			php_mysqlnd_net_store_length_size(uint64_t length);
 

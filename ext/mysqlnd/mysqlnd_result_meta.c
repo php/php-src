@@ -64,7 +64,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 	}
 	field_packet->persistent_alloc = meta->persistent;
 	for (;i < meta->field_count; i++) {
-		long idx;
+		php_int_t idx;
 
 		if (meta->fields[i].root) {
 			/* We re-read metadata for PS */

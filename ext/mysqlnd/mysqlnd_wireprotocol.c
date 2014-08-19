@@ -126,14 +126,14 @@ static enum_mysqlnd_collected_stats packet_type_to_statistic_packet_count[PROT_L
 
 /* {{{ php_mysqlnd_net_field_length
    Get next field's length */
-unsigned long
+php_uint_t
 php_mysqlnd_net_field_length(zend_uchar **packet)
 {
 	register zend_uchar *p= (zend_uchar *)*packet;
 
 	if (*p < 251) {
 		(*packet)++;
-		return (unsigned long) *p;
+		return (php_uint_t) *p;
 	}
 
 	switch (*p) {
@@ -142,13 +142,13 @@ php_mysqlnd_net_field_length(zend_uchar **packet)
 			return MYSQLND_NULL_LENGTH;
 		case 252:
 			(*packet) += 3;
-			return (unsigned long) uint2korr(p+1);
+			return (php_uint_t) uint2korr(p+1);
 		case 253:
 			(*packet) += 4;
-			return (unsigned long) uint3korr(p+1);
+			return (php_uint_t) uint3korr(p+1);
 		default:
 			(*packet) += 9;
-			return (unsigned long) uint4korr(p+1);
+			return (php_uint_t) uint4korr(p+1);
 	}
 }
 /* }}} */
@@ -567,7 +567,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 			while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
 				char *s_key;
 				unsigned int s_len;
-				unsigned long num_key;
+				php_uint_t num_key;
 				size_t value_len = strlen(*entry_value);
 				
 				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, 0, &pos_value)) {
@@ -582,7 +582,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 
 			{
 				zend_string * key;
-				unsigned long unused_num_key;
+				php_uint_t unused_num_key;
 				zval * entry_value;
 				ZEND_HASH_FOREACH_KEY_VAL(packet->connect_attr, unused_num_key, key, entry_value) {
 					if (key) { /* HASH_KEY_IS_STRING */
@@ -604,7 +604,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 				while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
 					char *s_key;
 					unsigned int s_len;
-					unsigned long num_key;
+					php_uint_t num_key;
 					size_t value_len = strlen(*entry_value);
 					if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, 0, &pos_value)) {
 						/* copy key */
@@ -621,7 +621,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 #else
 				{
 					zend_string * key;
-					unsigned long unused_num_key;
+					php_uint_t unused_num_key;
 					zval * entry_value;
 					ZEND_HASH_FOREACH_KEY_VAL(packet->connect_attr, unused_num_key, key, entry_value) {
 						if (key) { /* HASH_KEY_IS_STRING */
@@ -685,7 +685,7 @@ php_mysqlnd_auth_response_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_D
 	zend_uchar *buf = conn->net->cmd_buffer.buffer? (zend_uchar *) conn->net->cmd_buffer.buffer : local_buf;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
-	unsigned long i;
+	php_uint_t i;
 	register MYSQLND_PACKET_AUTH_RESPONSE * packet= (MYSQLND_PACKET_AUTH_RESPONSE *) _packet;
 
 	DBG_ENTER("php_mysqlnd_auth_response_read");
@@ -753,7 +753,7 @@ php_mysqlnd_auth_response_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_D
 			packet->message_len = 0;
 		}
 
-		DBG_INF_FMT("OK packet: aff_rows=%lld last_ins_id=%ld server_status=%u warnings=%u",
+		DBG_INF_FMT("OK packet: aff_rows=%lld last_ins_id=%pd server_status=%u warnings=%u",
 					packet->affected_rows, packet->last_insert_id, packet->server_status,
 					packet->warning_count);
 	}
@@ -848,7 +848,7 @@ php_mysqlnd_ok_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	zend_uchar *buf = conn->net->cmd_buffer.buffer? (zend_uchar *) conn->net->cmd_buffer.buffer : local_buf;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
-	unsigned long i;
+	php_uint_t i;
 	register MYSQLND_PACKET_OK *packet= (MYSQLND_PACKET_OK *) _packet;
 
 	DBG_ENTER("php_mysqlnd_ok_read");
@@ -1230,7 +1230,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 	char *root_ptr;
-	unsigned long len;
+	php_uint_t len;
 	MYSQLND_FIELD *meta;
 	unsigned int i, field_count = sizeof(rset_field_offsets)/sizeof(size_t);
 
@@ -1622,7 +1622,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 
 	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
 		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
-		unsigned long len = php_mysqlnd_net_field_length(&p);
+		php_uint_t len = php_mysqlnd_net_field_length(&p);
 
 		/* NULL or NOT NULL, this is the question! */
 		if (len == MYSQLND_NULL_LENGTH) {
@@ -1671,7 +1671,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
-				if (perm_bind.pack_len < SIZEOF_LONG) {
+				if (perm_bind.pack_len < SIZEOF_ZEND_INT) {
 					/* direct conversion */
 					int64_t v =
 #ifndef PHP_WIN32
@@ -1679,7 +1679,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 #else
 						_atoi64((char *) p);
 #endif
-					ZVAL_INT(current_field, (long) v); /* the cast is safe */
+					ZVAL_INT(current_field, (php_int_t) v); /* the cast is safe */
 				} else {
 					uint64_t v =
 #ifndef PHP_WIN32
@@ -1689,9 +1689,9 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 #endif
 					zend_bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
 					/* We have to make it ASCIIZ temporarily */
-#if SIZEOF_LONG==8
+#if SIZEOF_ZEND_INT==8
 					if (uns == TRUE && v > 9223372036854775807L)
-#elif SIZEOF_LONG==4
+#elif SIZEOF_ZEND_INT==4
 					if ((uns == TRUE && v > L64(2147483647)) ||
 						(uns == FALSE && (( L64(2147483647) < (int64_t) v) ||
 						(L64(-2147483648) > (int64_t) v))))
@@ -1701,7 +1701,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 					{
 						ZVAL_STRINGL(current_field, (char *)p, len);
 					} else {
-						ZVAL_INT(current_field, (long) v); /* the cast is safe */
+						ZVAL_INT(current_field, (php_int_t) v); /* the cast is safe */
 					}
 				}
 				*(p + len) = save;
@@ -1731,7 +1731,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				*/
 				p -= len;
 				if (Z_TYPE_P(current_field) == IS_INT) {
-					bit_area += 1 + sprintf((char *)start, "%ld", Z_IVAL_P(current_field));
+					bit_area += 1 + sprintf((char *)start, ZEND_INT_FMT, Z_IVAL_P(current_field));
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
 				} else if (Z_TYPE_P(current_field) == IS_STRING){
 					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRSIZE_P(current_field));
