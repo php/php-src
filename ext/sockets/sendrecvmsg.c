@@ -167,7 +167,7 @@ PHP_FUNCTION(socket_sendmsg)
 {
 	zval			*zsocket,
 					*zmsg;
-	long			flags = 0;
+	php_int_t			flags = 0;
 	php_socket		*php_sock;
 	struct msghdr	*msghdr;
 	zend_llist		*allocations;
@@ -175,7 +175,7 @@ PHP_FUNCTION(socket_sendmsg)
 	ssize_t			res;
 
 	/* zmsg should be passed by ref */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|l", &zsocket, &zmsg, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|i", &zsocket, &zmsg, &flags) == FAILURE) {
 		return;
 	}
 
@@ -209,7 +209,7 @@ PHP_FUNCTION(socket_recvmsg)
 {
 	zval			*zsocket,
 					*zmsg;
-	long			flags = 0;
+	php_int_t			flags = 0;
 	php_socket		*php_sock;
 	ssize_t			res;
 	struct msghdr	*msghdr;
@@ -217,7 +217,7 @@ PHP_FUNCTION(socket_recvmsg)
 	struct err_s	err = {0};
 
 	//ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra/|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra/|i",
 			&zsocket, &zmsg, &flags) == FAILURE) {
 		return;
 	}
@@ -268,17 +268,17 @@ PHP_FUNCTION(socket_recvmsg)
 		RETURN_FALSE;
 	}
 
-	RETURN_INT((long)res);
+	RETURN_INT((php_int_t)res);
 }
 
 PHP_FUNCTION(socket_cmsg_space)
 {
-	long				level,
+	php_int_t				level,
 						type,
 						n = 0;
 	ancillary_reg_entry	*entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ii|i",
 			&level, &type, &n) == FAILURE) {
 		return;
 	}
@@ -295,16 +295,16 @@ PHP_FUNCTION(socket_cmsg_space)
 
 	entry = get_ancillary_reg_entry(level, type);
 	if (entry == NULL) {
-		php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The pair level %ld/type %ld is "
+		php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The pair level %pd/type %pd is "
 				"not supported by PHP", level, type);
 		return;
 	}
 
-	if (entry->var_el_size > 0 && n > (LONG_MAX - (long)entry->size -
-			(long)CMSG_SPACE(0) - 15L) / entry->var_el_size) {
+	if (entry->var_el_size > 0 && n > (PHP_INT_MAX - (php_int_t)entry->size -
+			(php_int_t)CMSG_SPACE(0) - 15L) / entry->var_el_size) {
 		/* the -15 is to account for any padding CMSG_SPACE may add after the data */
 		php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The value for the "
-				"third argument (%ld) is too large", n);
+				"third argument (%pd) is too large", n);
 		return;
 	}
 
