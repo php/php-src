@@ -45,7 +45,7 @@
 typedef struct _zend_accel_hash_entry zend_accel_hash_entry;
 
 struct _zend_accel_hash_entry {
-	zend_ulong             hash_value;
+	zend_uint_t             hash_value;
 	char                  *key;
 	zend_uint              key_length;
 	zend_accel_hash_entry *next;

@@ -299,7 +299,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 {
 /* for now interned strings are supported only for non-ZTS build */
 #ifndef ZTS
-	ulong h;
+	zend_uint_t h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;

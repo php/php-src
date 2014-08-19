@@ -61,7 +61,7 @@ static int zend_optimizer_get_collected_constant(HashTable *constants, zval *nam
 static int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 {
 	int i = 0;
-	ulong hash_value = STR_HASH_VAL(name);
+	zend_uint_t hash_value = STR_HASH_VAL(name);
 
 	while (i < op_array->last_var) {
 		if (op_array->vars[i] == name ||
@@ -273,7 +273,7 @@ static void update_op2_const(zend_op_array *op_array,
 			case ZEND_FETCH_DIM_TMP_VAR:
 check_numeric:
 				{
-					ulong index;
+					zend_uint_t index;
 
 					if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
 						zval_dtor(val);
