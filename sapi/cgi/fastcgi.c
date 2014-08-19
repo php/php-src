@@ -19,6 +19,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "php_network.h"
 #include "fastcgi.h"
 
 #include <string.h>
