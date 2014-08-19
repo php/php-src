@@ -81,8 +81,8 @@ static zval *__func(mysqli_object *obj, zval *retval TSRMLS_DC) \
 		ZVAL_NULL(retval);\
 	} else {\
 		l = (__ret_type)__int_func(p);\
-		if (l < LONG_MAX) {\
-			ZVAL_INT(retval, (long) l);\
+		if (l < PHP_INT_MAX) {\
+			ZVAL_INT(retval, (php_int_t) l);\
 		} else { \
 			ZVAL_STR(retval, strpprintf(0, __ret_type_sprint_mod, l)); \
 		} \
@@ -167,8 +167,8 @@ static zval *link_affected_rows_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 			return retval;
 		}
 
-		if (rc < LONG_MAX) {
-			ZVAL_INT(retval, (long) rc);
+		if (rc < PHP_INT_MAX) {
+			ZVAL_INT(retval, (php_int_t) rc);
 		} else {
 			ZVAL_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
 		}
@@ -289,7 +289,7 @@ static zval *result_type_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 static zval *result_lengths_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 {
 	MYSQL_RES *p;
-	ulong *ret;
+	php_uint_t *ret;
 	uint field_count;
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
@@ -298,7 +298,7 @@ static zval *result_lengths_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 	if (!p || !field_count || !(ret = mysql_fetch_lengths(p))) {
 		ZVAL_NULL(retval);
 	} else {
-		ulong i;
+		php_uint_t i;
 
 		array_init(retval);
 
@@ -310,8 +310,8 @@ static zval *result_lengths_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 }
 /* }}} */
 
-MYSQLI_MAP_PROPERTY_FUNC_INT(result_current_field_read, mysql_field_tell, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), ulong, "%lu")
-MYSQLI_MAP_PROPERTY_FUNC_INT(result_field_count_read, mysql_num_fields, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), ulong, "%lu")
+MYSQLI_MAP_PROPERTY_FUNC_INT(result_current_field_read, mysql_field_tell, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), php_uint_t, ZEND_UINT_FMT)
+MYSQLI_MAP_PROPERTY_FUNC_INT(result_field_count_read, mysql_num_fields, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), php_uint_t, ZEND_UINT_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_INT(result_num_rows_read, mysql_num_rows, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
 
 /* statement properties */
@@ -354,8 +354,8 @@ static zval *stmt_affected_rows_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 			return retval;
 		}
 
-		if (rc < LONG_MAX) {
-			ZVAL_INT(retval, (long) rc);
+		if (rc < PHP_INT_MAX) {
+			ZVAL_INT(retval, (php_int_t) rc);
 		} else {
 			ZVAL_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
 		}
@@ -407,9 +407,9 @@ static zval *stmt_error_list_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 
 MYSQLI_MAP_PROPERTY_FUNC_INT(stmt_insert_id_read, mysql_stmt_insert_id, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
 MYSQLI_MAP_PROPERTY_FUNC_INT(stmt_num_rows_read, mysql_stmt_num_rows, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
-MYSQLI_MAP_PROPERTY_FUNC_INT(stmt_param_count_read, mysql_stmt_param_count, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), ulong, "%lu")
-MYSQLI_MAP_PROPERTY_FUNC_INT(stmt_field_count_read, mysql_stmt_field_count, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), ulong, "%lu")
-MYSQLI_MAP_PROPERTY_FUNC_INT(stmt_errno_read, mysql_stmt_errno, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED), ulong, "%lu")
+MYSQLI_MAP_PROPERTY_FUNC_INT(stmt_param_count_read, mysql_stmt_param_count, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), php_uint_t, ZEND_UINT_FMT)
+MYSQLI_MAP_PROPERTY_FUNC_INT(stmt_field_count_read, mysql_stmt_field_count, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), php_uint_t, ZEND_UINT_FMT)
+MYSQLI_MAP_PROPERTY_FUNC_INT(stmt_errno_read, mysql_stmt_errno, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED), php_uint_t, ZEND_UINT_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_error_read, mysql_stmt_error, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED))
 MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_sqlstate_read, mysql_stmt_sqlstate, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED))
 

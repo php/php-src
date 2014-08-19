@@ -884,7 +884,7 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 #ifndef MYSQLI_USE_MYSQLND
 #if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
-	unsigned long client_ver = mysql_get_client_version();
+	php_uint_t client_ver = mysql_get_client_version();
 	/*
 	  Can't call mysql_server_end() multiple times prior to 5.0.46 on Windows.
 	  PHP bug#41350 MySQL bug#25621
@@ -1105,7 +1105,7 @@ PHP_FUNCTION(mysqli_result_construct)
 	MYSQL_RES			*result = NULL;
 	zval				*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	long				resmode = MYSQLI_STORE_RESULT;
+	php_int_t				resmode = MYSQLI_STORE_RESULT;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1114,7 +1114,7 @@ PHP_FUNCTION(mysqli_result_construct)
 			}
 			break;
 		case 2:
-			if (zend_parse_parameters(2 TSRMLS_CC, "Ol", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
+			if (zend_parse_parameters(2 TSRMLS_CC, "Oi", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
 				return;
 			}
 			break;
@@ -1149,13 +1149,13 @@ PHP_FUNCTION(mysqli_result_construct)
 
 /* {{{ php_mysqli_fetch_into_hash_aux
  */
-void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, long fetchtype TSRMLS_DC)
+void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, php_int_t fetchtype TSRMLS_DC)
 {
 #if !defined(MYSQLI_USE_MYSQLND)
 	MYSQL_ROW row;
 	unsigned int	i;
 	MYSQL_FIELD		*fields;
-	unsigned long	*field_len;
+	php_uint_t	*field_len;
 	
 	if (!(row = mysql_fetch_row(result))) {
 		RETURN_NULL();
@@ -1238,7 +1238,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 {
 	MYSQL_RES		*result;
 	zval			*mysql_result;
-	long			fetchtype;
+	php_int_t			fetchtype;
 	zval			*ctor_params = NULL;
 	zend_class_entry *ce = NULL;
 
@@ -1266,7 +1266,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fetchtype = override_flags;
 		} else {
 			fetchtype = MYSQLI_BOTH;
-			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
+			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|i", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
 				return;
 			}
 		}
