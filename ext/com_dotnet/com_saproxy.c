@@ -353,7 +353,7 @@ static int saproxy_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC
 	return FAILURE;
 }
 
-static int saproxy_count_elements(zval *object, long *count TSRMLS_DC)
+static int saproxy_count_elements(zval *object, php_int_t *count TSRMLS_DC)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	LONG ubound, lbound;

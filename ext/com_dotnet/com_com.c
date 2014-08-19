@@ -57,11 +57,11 @@ PHP_FUNCTION(com_create_instance)
 	obj = CDNO_FETCH(object);
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS() TSRMLS_CC, "s|s!ls",
+			ZEND_NUM_ARGS() TSRMLS_CC, "s|s!is",
 			&module_name, &module_name_len, &server_name, &server_name_len,
 			&obj->code_page, &typelib_name, &typelib_name_len) &&
 		FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS() TSRMLS_CC, "sa|ls",
+			ZEND_NUM_ARGS() TSRMLS_CC, "sa|is",
 			&module_name, &module_name_len, &server_params, &obj->code_page,
 			&typelib_name, &typelib_name_len)) {
 
@@ -289,14 +289,14 @@ PHP_FUNCTION(com_get_active_object)
 	CLSID clsid;
 	char *module_name;
 	int module_name_len;
-	long code_page = COMG(code_page);
+	php_int_t code_page = COMG(code_page);
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
 	OLECHAR *module = NULL;
 
 	php_com_initialize(TSRMLS_C);
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i",
 				&module_name, &module_name_len, &code_page)) {
 		php_com_throw_exception(E_INVALIDARG, "Invalid arguments!" TSRMLS_CC);
 		return;
@@ -784,11 +784,11 @@ PHP_FUNCTION(com_print_typeinfo)
    Process COM messages, sleeping for up to timeoutms milliseconds */
 PHP_FUNCTION(com_message_pump)
 {
-	long timeoutms = 0;
+	php_int_t timeoutms = 0;
 	MSG msg;
 	DWORD result;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timeoutms) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &timeoutms) == FAILURE)
 		RETURN_FALSE;
 	
 	php_com_initialize(TSRMLS_C);

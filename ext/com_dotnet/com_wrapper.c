@@ -450,7 +450,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 	zend_string *name = NULL;
 	zval *tmp, tmp2;
 	int keytype;
-	ulong pid;
+	php_uint_t pid;
 
 	if (disp->dispid_to_name == NULL) {
 		ALLOC_HASHTABLE(disp->dispid_to_name);
@@ -467,7 +467,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 				&pid, 0, &pos))) {
 			char namebuf[32];
 			if (keytype == HASH_KEY_IS_INT) {
-				snprintf(namebuf, sizeof(namebuf), "%d", pid);
+				snprintf(namebuf, sizeof(namebuf), ZEND_UINT_FMT, pid);
 				name = STR_INIT(namebuf, strlen(namebuf), 0);
 			} else {
 				STR_ADDREF(name);
@@ -590,7 +590,7 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 	zend_string *name = NULL;
 	zval tmp, *ntmp;
 	int keytype;
-	ulong pid;
+	php_uint_t pid;
 
 	disp->dispid_to_name = id_to_name;
 
