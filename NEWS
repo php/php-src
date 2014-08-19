@@ -42,6 +42,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
     (CVE-2014-2497) (Remi)
+  . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
+    (CVE-2014-5120) (Ryan Mauger)
 
 - Milter:
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
