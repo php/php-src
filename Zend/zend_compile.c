@@ -428,6 +428,7 @@ static int zend_add_class_name_literal(zend_op_array *op_array, zend_string *nam
 	ZVAL_STR(&zv, name);
 
 	ret = zend_add_literal(op_array, &zv TSRMLS_CC);
+	name = Z_STR(zv); /* Load new name string in case it was interned */
 
 	lc_name = STR_ALLOC(name->len, 0);
 	zend_str_tolower_copy(lc_name->val, name->val, name->len);
