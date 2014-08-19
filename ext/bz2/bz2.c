@@ -343,11 +343,11 @@ static PHP_MINFO_FUNCTION(bz2)
 static PHP_FUNCTION(bzread)
 {
 	zval *bz;
-	long len = 1024;
+	php_int_t len = 1024;
 	php_stream *stream;
 	zend_string *data;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &bz, &len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &bz, &len)) {
 		RETURN_FALSE;
 	}
 
@@ -406,7 +406,7 @@ static PHP_FUNCTION(bzopen)
 	} else if (Z_TYPE_P(file) == IS_RESOURCE) {
 		/* If it is a resource, than its a stream resource */
 		php_socket_t fd;
-		int stream_mode_len;
+		php_size_t stream_mode_len;
 
 		php_stream_from_zval(stream, file);
 		stream_mode_len = strlen(stream->mode);
@@ -490,8 +490,8 @@ static PHP_FUNCTION(bzerror)
 static PHP_FUNCTION(bzcompress)
 {
 	char             *source;          /* Source data to compress */
-	long              zblock_size = 0; /* Optional block size to use */
-	long              zwork_factor = 0;/* Optional work factor to use */
+	php_int_t              zblock_size = 0; /* Optional block size to use */
+	php_int_t              zwork_factor = 0;/* Optional work factor to use */
 	zend_string      *dest = NULL;     /* Destination to place the compressed data into */
 	int               error,           /* Error Container */
 					  block_size  = 4, /* Block size for compression algorithm */
@@ -502,7 +502,7 @@ static PHP_FUNCTION(bzcompress)
 
 	argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ii", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
 		return;
 	}
 
@@ -544,7 +544,7 @@ static PHP_FUNCTION(bzdecompress)
 {
 	char *source, *dest;
 	int source_len, error;
-	long small = 0;
+	php_int_t small = 0;
 #if defined(PHP_WIN32)
 	unsigned __int64 size = 0;
 #else
@@ -552,7 +552,7 @@ static PHP_FUNCTION(bzdecompress)
 #endif
 	bz_stream bzs;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &source, &source_len, &small)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &source, &source_len, &small)) {
 		RETURN_FALSE;
 	}
 
