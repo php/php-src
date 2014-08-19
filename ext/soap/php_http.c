@@ -161,7 +161,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	char *host;
 	char *name;
 	char *protocol;
-	long namelen;
+	php_int_t namelen;
 	int port;
 	int old_error_reporting;
 	struct timeval tv;
@@ -347,7 +347,7 @@ int make_http_soap_request(zval  *this_ptr,
 	int http_1_1;
 	int http_status;
 	int content_type_xml = 0;
-	long redirect_max = 20;
+	php_int_t redirect_max = 20;
 	char *content_encoding;
 	char *http_msg = NULL;
 	zend_bool old_allow_url_fopen;

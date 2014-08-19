@@ -1121,7 +1121,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	zval *wsdl = NULL, *options = NULL;
 	zend_resource *res;
 	int version = SOAP_1_1;
-	long cache_wsdl;
+	php_int_t cache_wsdl;
 	HashTable *typemap_ht = NULL;
 
 	SOAP_SERVER_BEGIN_CODE();
@@ -1248,19 +1248,19 @@ PHP_METHOD(SoapServer, SoapServer)
 PHP_METHOD(SoapServer, setPersistence)
 {
 	soapServicePtr service;
-	long value;
+	php_int_t value;
 
 	SOAP_SERVER_BEGIN_CODE();
 
 	FETCH_THIS_SERVICE(service);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &value) != FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &value) != FAILURE) {
 		if (service->type == SOAP_CLASS) {
 			if (value == SOAP_PERSISTENCE_SESSION ||
 				value == SOAP_PERSISTENCE_REQUEST) {
 				service->soap_class.persistance = value;
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set persistence with bogus value (%ld)", value);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set persistence with bogus value (%pd)", value);
 				return;
 			}
 		} else {
@@ -2330,7 +2330,7 @@ PHP_METHOD(SoapClient, SoapClient)
 	zval *wsdl, *options = NULL;
 	int  soap_version = SOAP_1_1;
 	php_stream_context *context = NULL;
-	long cache_wsdl;
+	php_int_t cache_wsdl;
 	sdlPtr sdl = NULL;
 	HashTable *typemap_ht = NULL;
 	zval *this_ptr = getThis();
@@ -3082,11 +3082,11 @@ PHP_METHOD(SoapClient, __doRequest)
 {
   char *buf, *location, *action;
   int   buf_size, location_size, action_size;
-  long  version;
-  long  one_way = 0;
+  php_int_t  version;
+  php_int_t  one_way = 0;
   zval *this_ptr = getThis();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssl|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssi|i",
 	    &buf, &buf_size,
 	    &location, &location_size,
 	    &action, &action_size,
@@ -3801,7 +3801,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 		int i = 0;
 		zend_string *param_name;
 //???
-		ulong param_index = i;
+		php_uint_t param_index = i;
 
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(ret), param_index, param_name, data) {
 			parameter = get_param(function, param_name->val, param_index, TRUE);

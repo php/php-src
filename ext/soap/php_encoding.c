@@ -290,7 +290,7 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node TSRMLS_DC) {
 		if (Z_TYPE_P(data) == IS_OBJECT) {
 			data = (zval*)Z_OBJ_P(data);
 		}
-		if ((node_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (ulong)data)) != NULL) {
+		if ((node_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (php_uint_t)data)) != NULL) {
 			xmlAttrPtr attr = node_ptr->properties;
 			char *id;
 			smart_str prefix = {0};
@@ -344,7 +344,7 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node TSRMLS_DC) {
 			smart_str_free(&prefix);
 			return 1;
 		} else {
-			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (ulong)data, node);
+			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (php_uint_t)data, node);
 		}
 	}
 	return 0;
@@ -355,7 +355,7 @@ static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 	zval *data_ptr;
 
 	if (SOAP_GLOBAL(ref_map)) {
-		if ((data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
+		if ((data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (php_uint_t)node)) != NULL) {
 			if (!Z_REFCOUNTED_P(data) ||
 			    !Z_REFCOUNTED_P(data_ptr) ||
 			    Z_COUNTED_P(data) != Z_COUNTED_P(data_ptr)) {
@@ -371,7 +371,7 @@ static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 static void soap_add_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 {
 	if (SOAP_GLOBAL(ref_map)) {
-		zend_hash_index_update(SOAP_GLOBAL(ref_map), (ulong)node, data);
+		zend_hash_index_update(SOAP_GLOBAL(ref_map), (php_uint_t)node, data);
 	}
 }
 
@@ -986,7 +986,7 @@ static zval *to_zval_double(zval *ret, encodeTypePtr type, xmlNodePtr data TSRML
 
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
-			long lval;
+			php_int_t lval;
 			double dval;
 
 			whiteSpace_collapse(data->children->content);
@@ -1024,7 +1024,7 @@ static zval *to_zval_long(zval *ret, encodeTypePtr type, xmlNodePtr data TSRMLS_
 
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
-			long lval;
+			php_int_t lval;
 			double dval;
 
 			whiteSpace_collapse(data->children->content);
@@ -2689,7 +2689,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 {
 	zval *temp_data;
 	zend_string *key_val;
-	ulong int_val;
+	php_uint_t int_val;
 	xmlNodePtr xmlParam;
 	xmlNodePtr xparam, item;
 	xmlNodePtr key;
@@ -3498,7 +3498,7 @@ encodePtr get_conversion(int encode)
 
 static int is_map(zval *array)
 {
-	ulong index;
+	php_uint_t index;
 	zend_string *key;
 	int i = 0;
 

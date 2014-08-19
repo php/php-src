@@ -3151,7 +3151,7 @@ static void delete_psdl(zval *zv)
 	free(Z_PTR_P(zv));
 }
 
-sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
+sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 {
 	char  fn[MAXPATHLEN];
 	sdlPtr sdl = NULL;
