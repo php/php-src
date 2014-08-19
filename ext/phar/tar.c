@@ -256,7 +256,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 			phar_tar_number(hdr->size, sizeof(hdr->size));
 
 		if (((!old && hdr->prefix[0] == 0) || old) && strlen(hdr->name) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
-			off_t curloc;
+			php_off_t curloc;
 
 			if (size > 511) {
 				if (error) {
@@ -921,7 +921,7 @@ static int phar_tar_setupmetadata(zval *zv, void *argument TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
+int phar_tar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info entry = {0};
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";

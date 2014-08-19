@@ -98,8 +98,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	zend_string *contents;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
-	long offset = -1;
-	long maxlen = PHP_STREAM_COPY_ALL;
+	php_int_t offset = -1;
+	php_int_t maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
 
 	if (!PHAR_G(intercepted)) {
@@ -112,7 +112,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	}
 
 	/* Parse arguments */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p|br!ii", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
 		goto skip_phar;
 	}
 
@@ -195,7 +195,7 @@ phar_it:
 			}
 
 			if (offset > 0 && php_stream_seek(stream, offset, SEEK_SET) < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream", offset);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %pd in the stream", offset);
 				php_stream_close(stream);
 				RETURN_FALSE;
 			}
@@ -433,7 +433,7 @@ skip_phar:
 
 /* {{{ php_stat
  */
-static void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value TSRMLS_DC)
+static void phar_fancy_stat(php_stat_t *stat_sb, int type, zval *return_value TSRMLS_DC)
 {
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
 		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
@@ -477,32 +477,32 @@ static void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value T
 
 	switch (type) {
 	case FS_PERMS:
-		RETURN_INT((long)stat_sb->st_mode);
+		RETURN_INT((php_int_t)stat_sb->st_mode);
 	case FS_INODE:
-		RETURN_INT((long)stat_sb->st_ino);
+		RETURN_INT((php_int_t)stat_sb->st_ino);
 	case FS_SIZE:
-		RETURN_INT((long)stat_sb->st_size);
+		RETURN_INT((php_int_t)stat_sb->st_size);
 	case FS_OWNER:
-		RETURN_INT((long)stat_sb->st_uid);
+		RETURN_INT((php_int_t)stat_sb->st_uid);
 	case FS_GROUP:
-		RETURN_INT((long)stat_sb->st_gid);
+		RETURN_INT((php_int_t)stat_sb->st_gid);
 	case FS_ATIME:
 #ifdef NETWARE
-		RETURN_INT((long)stat_sb->st_atime.tv_sec);
+		RETURN_INT((php_int_t)stat_sb->st_atime.tv_sec);
 #else
-		RETURN_INT((long)stat_sb->st_atime);
+		RETURN_INT((php_int_t)stat_sb->st_atime);
 #endif
 	case FS_MTIME:
 #ifdef NETWARE
-		RETURN_INT((long)stat_sb->st_mtime.tv_sec);
+		RETURN_INT((php_int_t)stat_sb->st_mtime.tv_sec);
 #else
-		RETURN_INT((long)stat_sb->st_mtime);
+		RETURN_INT((php_int_t)stat_sb->st_mtime);
 #endif
 	case FS_CTIME:
 #ifdef NETWARE
-		RETURN_INT((long)stat_sb->st_ctime.tv_sec);
+		RETURN_INT((php_int_t)stat_sb->st_ctime.tv_sec);
 #else
-		RETURN_INT((long)stat_sb->st_ctime);
+		RETURN_INT((php_int_t)stat_sb->st_ctime);
 #endif
 	case FS_TYPE:
 		if (S_ISLNK(stat_sb->st_mode)) {
@@ -611,7 +611,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 	if (!IS_ABSOLUTE_PATH(filename, filename_length) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
-		struct stat sb = {0};
+		php_stat_t sb = {0};
 		phar_entry_info *data = NULL;
 		phar_archive_data *phar;
 
