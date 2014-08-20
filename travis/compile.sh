@@ -49,7 +49,6 @@ $TS \
 --with-openssl \
 --with-gmp \
 --enable-bcmath \
---enable-phpdbg \
 --enable-calendar \
 --enable-ftp \
 --with-pspell=/usr \
