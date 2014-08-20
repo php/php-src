@@ -3546,9 +3546,10 @@ ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count
 }
 /* }}} */
 
-ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /* {{{ */
+ZEND_API int zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, zval *args TSRMLS_DC) /* {{{ */
 {
 	zval *arg, *params;
+	int n = 1;
 
 	zend_fcall_info_args_clear(fci, !args);
 
@@ -3564,11 +3565,25 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /*
 	fci->params = params = (zval *) erealloc(fci->params, fci->param_count * sizeof(zval));
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), arg) {
-		ZVAL_COPY(params, arg);
+		if (func && !Z_ISREF_P(arg) && ARG_SHOULD_BE_SENT_BY_REF(func, n)) {
+			ZVAL_NEW_REF(params, arg);
+			if (Z_REFCOUNTED_P(arg)) {
+				Z_ADDREF_P(arg);
+			}
+		} else {
+			ZVAL_COPY(params, arg);
+		}
 		params++;
+		n++;
 	} ZEND_HASH_FOREACH_END();
 
 	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /* {{{ */
+{
+	return zend_fcall_info_args_ex(fci, NULL, args TSRMLS_CC);
 }
 /* }}} */
 

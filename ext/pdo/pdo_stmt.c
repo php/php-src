@@ -748,7 +748,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		fci->params = NULL;
 		fci->no_separation = 1;
 
-		zend_fcall_info_args(fci, &stmt->fetch.cls.ctor_args TSRMLS_CC);
+		zend_fcall_info_args_ex(fci, ce->constructor, &stmt->fetch.cls.ctor_args TSRMLS_CC);
 
 		fcc->initialized = 1;
 		fcc->function_handler = ce->constructor;
