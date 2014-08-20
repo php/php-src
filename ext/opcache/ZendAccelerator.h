@@ -170,7 +170,11 @@ typedef struct _zend_persistent_script {
 	 */
 	struct zend_persistent_script_dynamic_members {
 		time_t       last_used;
+#ifdef ZEND_WIN32
+		LONGLONG   hits;
+#else
 		zend_uint_t        hits;
+#endif
 		unsigned int memory_consumption;
 		unsigned int checksum;
 		time_t       revalidate;
@@ -258,8 +262,8 @@ typedef struct _zend_accel_shared_globals {
 	zend_accel_restart_reason restart_reason;
 	zend_bool       cache_status_before_restart;
 #ifdef ZEND_WIN32
-    zend_uint_t   mem_usage;
-    zend_uint_t   restart_in;
+	LONGLONG   mem_usage;
+	LONGLONG   restart_in;
 #endif
 	zend_bool       restart_in_progress;
     time_t          revalidate_at;

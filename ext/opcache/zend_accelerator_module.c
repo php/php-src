@@ -407,7 +407,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			char buf[32];
 			php_info_print_table_row(2, "Startup", "OK");
 			php_info_print_table_row(2, "Shared memory model", zend_accel_get_shared_model());
-			snprintf(buf, sizeof(buf), ZEND_UINT_FMT, ZCSG(hits));
+			snprintf(buf, sizeof(buf), ZEND_UINT_FMT, (zend_uint_t)ZCSG(hits));
 			php_info_print_table_row(2, "Cache hits", buf);
 			snprintf(buf, sizeof(buf), "%pd", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
 			php_info_print_table_row(2, "Cache misses", buf);
@@ -488,7 +488,7 @@ static int accelerator_get_scripts(zval *return_value TSRMLS_DC)
 
 			array_init(&persistent_script_report);
 			add_assoc_str(&persistent_script_report, "full_path", STR_DUP(script->full_path, 0));
-			add_assoc_int(&persistent_script_report, "hits", script->dynamic_members.hits);
+			add_assoc_int(&persistent_script_report, "hits", (zend_int_t)script->dynamic_members.hits);
 			add_assoc_int(&persistent_script_report, "memory_consumption", script->dynamic_members.memory_consumption);
 			ta = localtime(&script->dynamic_members.last_used);
 			str = asctime(ta);
@@ -562,7 +562,7 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_int(&statistics, "num_cached_scripts", ZCSG(hash).num_direct_entries);
 	add_assoc_int(&statistics, "num_cached_keys",    ZCSG(hash).num_entries);
 	add_assoc_int(&statistics, "max_cached_keys",    ZCSG(hash).max_num_entries);
-	add_assoc_int(&statistics, "hits", ZCSG(hits));
+	add_assoc_int(&statistics, "hits", (zend_int_t)ZCSG(hits));
 	add_assoc_int(&statistics, "start_time", ZCSG(start_time));
 	add_assoc_int(&statistics, "last_restart_time", ZCSG(last_restart_time));
 	add_assoc_int(&statistics, "oom_restarts", ZCSG(oom_restarts));

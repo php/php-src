@@ -107,8 +107,8 @@ static void (*orig_chdir)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 
 #ifdef ZEND_WIN32
-# define INCREMENT(v) InterlockedIncrement(&ZCSG(v))
-# define DECREMENT(v) InterlockedDecrement(&ZCSG(v))
+# define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
+# define DECREMENT(v) InterlockedDecrement64(&ZCSG(v))
 # define LOCKVAL(v)   (ZCSG(v))
 #endif
 
@@ -743,12 +743,12 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FD:
-			if (fstat(file_handle->handle.fd, &statbuf) == -1) {
+			if (zend_fstat(file_handle->handle.fd, &statbuf) == -1) {
 				return 0;
 			}
 			break;
 		case ZEND_HANDLE_FP:
-			if (fstat(fileno(file_handle->handle.fp), &statbuf) == -1) {
+			if (zend_fstat(fileno(file_handle->handle.fp), &statbuf) == -1) {
 				if (zend_get_stream_timestamp(file_handle->filename, &statbuf TSRMLS_CC) != SUCCESS) {
 					return 0;
 				}
@@ -1620,8 +1620,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 		ZCSG(hits)++; /* TBFixed: may lose one hit */
 		persistent_script->dynamic_members.hits++; /* see above */
 #else
-		InterlockedIncrement(&ZCSG(hits));
-		InterlockedIncrement(&persistent_script->dynamic_members.hits);
+		INCREMENT(hits);
+		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #endif
 
 		/* see bug #15471 (old BTS) */
