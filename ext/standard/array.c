@@ -4438,7 +4438,7 @@ PHP_FUNCTION(array_map)
 	if (n_arrays == 1) {
 		php_uint_t num_key;
 		zend_string *str_key;
-		zval *zv;
+		zval *zv, arg;
 
 		if (Z_TYPE(arrays[0]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d should be an array", 2);
@@ -4457,20 +4457,18 @@ PHP_FUNCTION(array_map)
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(arrays[0]), num_key, str_key, zv) {
 			fci.retval = &result;
 			fci.param_count = 1;
-			fci.params = zv;
+			fci.params = &arg;
 			fci.no_separation = 0;
 			
-			if (Z_REFCOUNTED_P(zv)) {
-				Z_ADDREF_P(zv);
-			}
+			ZVAL_COPY(&arg, zv);
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the map callback");
 				zval_dtor(return_value);
-				zval_ptr_dtor(zv);
+				zval_ptr_dtor(&arg);
 				RETURN_NULL();
 			} else {
-				zval_ptr_dtor(zv);
+				zval_ptr_dtor(&arg);
 			}
 			if (str_key) {
 				zend_hash_add_new(Z_ARRVAL_P(return_value), str_key, &result);

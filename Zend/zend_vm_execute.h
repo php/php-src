@@ -3156,7 +3156,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				}
 				ZVAL_DUP(&tmp, array_ref);
 				array_ptr = array_ref = &tmp;
-			} else if (IS_CONST == IS_CV) {
+			} else if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				if (Z_ISREF_P(array_ref) && Z_REFCOUNT_P(array_ref) == 1) {
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
@@ -3170,7 +3170,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 					}
 					zval_copy_ctor(array_ptr);
 				}
-				Z_ADDREF_P(array_ref);
+				if (IS_CONST == IS_CV) {
+					Z_ADDREF_P(array_ref);
+				}
 			}
 		}
 	}
@@ -8679,7 +8681,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				}
 				ZVAL_DUP(&tmp, array_ref);
 				array_ptr = array_ref = &tmp;
-			} else if (IS_TMP_VAR == IS_CV) {
+			} else if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				if (Z_ISREF_P(array_ref) && Z_REFCOUNT_P(array_ref) == 1) {
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
@@ -8693,7 +8695,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					}
 					zval_copy_ctor(array_ptr);
 				}
-				Z_ADDREF_P(array_ref);
+				if (IS_TMP_VAR == IS_CV) {
+					Z_ADDREF_P(array_ref);
+				}
 			}
 		}
 	}
@@ -14122,7 +14126,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				}
 				ZVAL_DUP(&tmp, array_ref);
 				array_ptr = array_ref = &tmp;
-			} else if (IS_VAR == IS_CV) {
+			} else if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				if (Z_ISREF_P(array_ref) && Z_REFCOUNT_P(array_ref) == 1) {
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
@@ -14136,7 +14140,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					}
 					zval_copy_ctor(array_ptr);
 				}
-				Z_ADDREF_P(array_ref);
+				if (IS_VAR == IS_CV) {
+					Z_ADDREF_P(array_ref);
+				}
 			}
 		}
 	}
@@ -31483,7 +31489,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				}
 				ZVAL_DUP(&tmp, array_ref);
 				array_ptr = array_ref = &tmp;
-			} else if (IS_CV == IS_CV) {
+			} else if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				if (Z_ISREF_P(array_ref) && Z_REFCOUNT_P(array_ref) == 1) {
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
@@ -31497,7 +31503,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 					}
 					zval_copy_ctor(array_ptr);
 				}
-				Z_ADDREF_P(array_ref);
+				if (IS_CV == IS_CV) {
+					Z_ADDREF_P(array_ref);
+				}
 			}
 		}
 	}
