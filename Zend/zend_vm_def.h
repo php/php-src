@@ -4539,7 +4539,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 				}
 				ZVAL_DUP(&tmp, array_ref);
 				array_ptr = array_ref = &tmp;
-			} else if (OP1_TYPE == IS_CV) {
+			} else if (OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) {
 				if (Z_ISREF_P(array_ref) && Z_REFCOUNT_P(array_ref) == 1) {
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
@@ -4553,7 +4553,9 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 					}
 					zval_copy_ctor(array_ptr);
 				}
-				Z_ADDREF_P(array_ref);
+				if (OP1_TYPE == IS_CV) {
+					Z_ADDREF_P(array_ref);
+				}
 			}
 		}
 	}
