@@ -1944,7 +1944,7 @@ ZEND_FUNCTION(get_resources)
 {
 	zend_string *type = NULL;
 	zend_string *key;
-	ulong index;
+	zend_uint_t index;
 	zval *val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &type) == FAILURE) {
