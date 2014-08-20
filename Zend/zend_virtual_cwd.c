@@ -593,8 +593,8 @@ static inline zend_uint_t realpath_cache_key(const char *path, int path_len TSRM
 		return 0;
 	}
 
-	for (h = 2166136261U; bucket_key < e;) {
-		h *= 16777619;
+	for (h = Z_UI(2166136261); bucket_key < e;) {
+		h *= Z_UI(16777619);
 		h ^= *bucket_key++;
 	}
 	HeapFree(GetProcessHeap(), 0, (LPVOID)bucket_key_start);
@@ -607,8 +607,8 @@ static inline zend_uint_t realpath_cache_key(const char *path, int path_len) /* 
 	register zend_uint_t h;
 	const char *e = path + path_len;
 
-	for (h = 2166136261U; path < e;) {
-		h *= 16777619;
+	for (h = Z_UI(2166136261); path < e;) {
+		h *= Z_UI(16777619);
 		h ^= *path++;
 	}
 
@@ -756,12 +756,12 @@ CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_
 }
 /* }}} */
 
-CWD_API int realpath_cache_size(TSRMLS_D)
+CWD_API zend_int_t realpath_cache_size(TSRMLS_D)
 {
 	return CWDG(realpath_cache_size);
 }
 
-CWD_API int realpath_cache_max_buckets(TSRMLS_D)
+CWD_API zend_int_t realpath_cache_max_buckets(TSRMLS_D)
 {
 	return (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 }
