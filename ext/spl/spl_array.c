@@ -493,7 +493,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 			zend_symtable_update_ind(ht, Z_STR_P(offset), value);
 			return;
 		case IS_DOUBLE:
-			index = (long)Z_DVAL_P(offset);
+			index = (php_int_t)Z_DVAL_P(offset);
 			goto num_index;
 		case IS_RESOURCE:
 			index = Z_RES_HANDLE_P(offset);

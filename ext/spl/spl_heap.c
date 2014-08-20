@@ -483,7 +483,7 @@ static zend_object *spl_heap_object_clone(zval *zobject TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int spl_heap_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+static int spl_heap_object_count_elements(zval *object, php_int_t *count TSRMLS_DC) /* {{{ */
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(object);
 
@@ -494,7 +494,7 @@ static int spl_heap_object_count_elements(zval *object, long *count TSRMLS_DC) /
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 			convert_to_int(&intern->retval);
-			*count = (long) Z_IVAL(intern->retval);
+			*count = (php_int_t) Z_IVAL(intern->retval);
 			return SUCCESS;
 		}
 		*count = 0;

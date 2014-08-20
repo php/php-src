@@ -2511,11 +2511,11 @@ SPL_METHOD(SplFileObject, getFlags)
    Set maximum line length */
 SPL_METHOD(SplFileObject, setMaxLineLen)
 {
-	long max_len;
+	php_int_t max_len;
 
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &max_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &max_len) == FAILURE) {
 		return;
 	}
 
@@ -2893,9 +2893,9 @@ SPL_METHOD(SplFileObject, fwrite)
 SPL_METHOD(SplFileObject, fread)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	long length = 0;
+	php_int_t length = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &length) == FAILURE) {
 		return;
 	}
 
