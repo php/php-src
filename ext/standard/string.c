@@ -4772,6 +4772,7 @@ PHP_FUNCTION(count_chars)
 	int inx;
 	char retstr[256];
 	php_size_t retlen=0;
+	php_size_t tmp = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &input, &mymode) == FAILURE) {
 		return;
@@ -4782,13 +4783,13 @@ PHP_FUNCTION(count_chars)
 		RETURN_FALSE;
 	}
 
-	buf = (unsigned char *) input;
+	buf = (unsigned char *) input->val;
 	memset((void*) chars, 0, sizeof(chars));
 
-	while (input->len > 0) {
+	while (tmp < input->len) {
 		chars[*buf]++;
 		buf++;
-		input->len--;
+		tmp++;
 	}
 
 	if (mymode < 3) {
