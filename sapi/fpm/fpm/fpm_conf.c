@@ -1508,7 +1508,8 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 		ini_filename = filename;
 		for (n = 0; (nb_read = read(fd, &c, sizeof(char))) == sizeof(char) && c != '\n'; n++) {
 			if (n == bufsize) {
-				newbuf = (char*) realloc(buf, sizeof(char) * (bufsize + 1024 + 1));
+				bufsize += 1024;
+				newbuf = (char*) realloc(buf, sizeof(char) * (bufsize + 2));
 				if (newbuf == NULL) {
 					ini_recursion--;
 					close(fd);
@@ -1516,8 +1517,6 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 					return -1;
 				}
 				buf = newbuf;
-				memset(buf + ((bufsize + 1) * sizeof(char)), 0, sizeof(char) * 1024);
-				bufsize += 1024;
 			}
 
 			buf[n] = c;
@@ -1525,7 +1524,9 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 		if (n == 0) {
 			continue;
 		}
+		/* always append newline and null terminate */
 		buf[n++] = '\n';
+		buf[n] = '\0';
 		tmp = zend_parse_ini_string(buf, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fpm_conf_ini_parser, &error TSRMLS_CC);
 		ini_filename = filename;
 		if (error || tmp == FAILURE) {
@@ -1549,14 +1550,12 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 			}
 			free(tmp);
 		}
-		memset(buf, 0, sizeof(char) * (bufsize + 1));
 	}
 	free(buf);
 
 	ini_recursion--;
 	close(fd);
 	return ret;
-
 }
 /* }}} */
 
