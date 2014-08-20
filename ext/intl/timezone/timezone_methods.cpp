@@ -228,7 +228,7 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 	}
 
 	int32_t result = TimeZone::countEquivalentIDs(id);
-	RETURN_INT((long)result);
+	RETURN_INT((php_int_t)result);
 }
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48

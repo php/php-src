@@ -209,7 +209,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		const char	*name	= debug_info_fields[i].name; 
 		int32_t		res		= cal->get(debug_info_fields[i].field, uec);
 		if (U_SUCCESS(uec)) {
-			add_assoc_int(&zfields, name, (long)res);
+			add_assoc_int(&zfields, name, (php_int_t)res);
 		} else {
 			add_assoc_string(&zfields, name, const_cast<char*>(u_errorName(uec)));
 		}

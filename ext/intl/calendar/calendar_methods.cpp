@@ -1322,7 +1322,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_error_code)
 	if (co == NULL)
 		RETURN_FALSE;
 
-	RETURN_INT((long)CALENDAR_ERROR_CODE(co));
+	RETURN_INT((php_int_t)CALENDAR_ERROR_CODE(co));
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get_error_message)

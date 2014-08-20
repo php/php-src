@@ -5267,7 +5267,7 @@ zend_function_entry phar_exception_methods[] = {
 /* }}} */
 
 #define REGISTER_PHAR_CLASS_CONST_INT(class_name, const_name, value) \
-	zend_declare_class_constant_int(class_name, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+	zend_declare_class_constant_int(class_name, const_name, sizeof(const_name)-1, (php_int_t)value TSRMLS_CC);
 
 #define phar_exception_get_default() zend_exception_get_default(TSRMLS_C)
 

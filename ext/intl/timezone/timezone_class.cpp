@@ -331,9 +331,9 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		return debug_info;
 	}
 	
-	ZVAL_INT(&zv, (long)rawOffset);
+	ZVAL_INT(&zv, (php_int_t)rawOffset);
 	zend_hash_str_update(debug_info,"rawOffset", sizeof("rawOffset") - 1, &zv); 
-	ZVAL_INT(&zv, (long)(rawOffset + dstOffset));
+	ZVAL_INT(&zv, (php_int_t)(rawOffset + dstOffset));
 	zend_hash_str_update(debug_info,"currentOffset", sizeof("currentOffset") - 1, &zv); 
 
 	return debug_info;

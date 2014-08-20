@@ -27,7 +27,7 @@
 #include "intl_convert.h"
 
 #if !defined(HAVE_PTRDIFF_T) && !defined(_PTRDIFF_T_DEFINED)
-typedef long ptrdiff_t;
+typedef php_int_t ptrdiff_t;
 #endif
 
 /**
