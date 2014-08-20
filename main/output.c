@@ -1319,7 +1319,7 @@ PHP_FUNCTION(ob_start)
 	php_int_t chunk_size = 0;
 	php_int_t flags = PHP_OUTPUT_HANDLER_STDFLAGS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z/ll", &output_handler, &chunk_size, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z/ii", &output_handler, &chunk_size, &flags) == FAILURE) {
 		return;
 	}
 
