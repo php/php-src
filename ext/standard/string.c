@@ -4122,7 +4122,7 @@ PHP_FUNCTION(nl2br)
 				*target++ = '>';
 
 				if ((*tmp == '\r' && *(tmp+1) == '\n') || (*tmp == '\n' && *(tmp+1) == '\r')) {
-					*target++ = (*tmp)++;
+					*target++ = *tmp++;
 				}
 				/* lack of a break; is intentional */
 			default:
