@@ -4551,6 +4551,9 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 				    (Z_ISREF_P(array_ref) &&
 				     Z_REFCOUNTED_P(array_ptr) &&
 				     Z_REFCOUNT_P(array_ptr) > 1)) {
+					if (!Z_IMMUTABLE_P(array_ptr)) {
+						Z_DELREF_P(array_ptr);
+					}
 					zval_copy_ctor(array_ptr);
 				}
 				Z_ADDREF_P(array_ref);
