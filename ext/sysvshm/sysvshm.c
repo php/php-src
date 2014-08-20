@@ -346,7 +346,7 @@ PHP_FUNCTION(shm_remove_var)
 	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
 
 	if (shm_varpos < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable key %id doesn't exist", shm_key);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable key %pd doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
 	php_remove_shm_data((shm_list_ptr->ptr), shm_varpos);

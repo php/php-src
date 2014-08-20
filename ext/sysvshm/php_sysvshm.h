@@ -46,10 +46,10 @@ typedef struct {
 
 typedef struct {
 	char magic[8];
-	long start;
-	long end;
-	long free;
-	long total;
+	php_int_t start;
+	php_int_t end;
+	php_int_t free;
+	php_int_t total;
 } sysvshm_chunk_head;
 
 typedef struct {
