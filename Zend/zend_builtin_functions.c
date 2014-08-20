@@ -78,6 +78,7 @@ static ZEND_FUNCTION(get_defined_functions);
 static ZEND_FUNCTION(get_defined_vars);
 static ZEND_FUNCTION(create_function);
 static ZEND_FUNCTION(get_resource_type);
+static ZEND_FUNCTION(get_resources);
 static ZEND_FUNCTION(get_loaded_extensions);
 static ZEND_FUNCTION(extension_loaded);
 static ZEND_FUNCTION(get_extension_funcs);
@@ -218,6 +219,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_resource_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, res)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_resources, 0, 0, 0)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_loaded_extensions, 0, 0, 0)
 	ZEND_ARG_INFO(0, zend_extensions)
 ZEND_END_ARG_INFO()
@@ -291,6 +296,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_defined_vars,		arginfo_zend__void)
 	ZEND_FE(create_function,		arginfo_create_function)
 	ZEND_FE(get_resource_type,		arginfo_get_resource_type)
+	ZEND_FE(get_resources,			arginfo_get_resources)
 	ZEND_FE(get_loaded_extensions,		arginfo_get_loaded_extensions)
 	ZEND_FE(extension_loaded,		arginfo_extension_loaded)
 	ZEND_FE(get_extension_funcs,		arginfo_extension_loaded)
@@ -1936,6 +1942,54 @@ ZEND_FUNCTION(get_resource_type)
 }
 /* }}} */
 
+/* {{{ proto array get_resources()
+   Get an array with all active resources */
+ZEND_FUNCTION(get_resources)
+{
+	zend_string *type = NULL;
+	zend_string *key;
+	ulong index;
+	zval *val;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &type) == FAILURE) {
+		return;
+	}
+
+	if (!type) {
+		array_init(return_value);
+		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
+			if (!key) {
+				Z_ADDREF_P(val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else if (type->len == sizeof("Unknown")-1 &&
+	           memcmp(type->val, "Unknown", sizeof("Unknown")-1) == 0) {
+		array_init(return_value);
+		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
+			if (!key && Z_RES_TYPE_P(val) <= 0) {
+				Z_ADDREF_P(val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		int id = zend_fetch_list_dtor_id(type->val);
+
+		if (id <= 0) {
+			zend_error(E_WARNING, "get_resources():  Unknown resource type '%s'", type->val);
+			RETURN_FALSE;
+		}
+
+		array_init(return_value);
+		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
+			if (!key && Z_RES_TYPE_P(val) == id) {
+				Z_ADDREF_P(val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+/* }}} */
 
 static int add_extension_info(zval *item, void *arg TSRMLS_DC)
 {

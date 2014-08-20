@@ -19,7 +19,7 @@ function do_test() {
 
 	$pid = http_server("tcp://127.0.0.1:12342", $responses, $output);
 
-	$a = $b = null;
+	$a = $b = count(get_resources());
 
 	$i = 3;
 	while ($i--) {
@@ -28,7 +28,7 @@ function do_test() {
 		unset($context);
 		
 		$b = $a;
-		$a = memory_get_usage();
+		$a = count(get_resources());
 	}
 
 	http_server_kill($pid);
