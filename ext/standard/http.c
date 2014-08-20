@@ -241,9 +241,9 @@ PHP_FUNCTION(http_build_query)
 	char *prefix = NULL, *arg_sep=NULL;
 	int arg_sep_len = 0, prefix_len = 0;
 	smart_str formstr = {0};
-	long enc_type = PHP_QUERY_RFC1738;
+	php_int_t enc_type = PHP_QUERY_RFC1738;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ssl", &formdata, &prefix, &prefix_len, &arg_sep, &arg_sep_len, &enc_type) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ssi", &formdata, &prefix, &prefix_len, &arg_sep, &arg_sep_len, &enc_type) != SUCCESS) {
 		RETURN_FALSE;
 	}
 

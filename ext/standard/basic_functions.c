@@ -99,7 +99,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
 #ifndef INADDR_NONE
-#define INADDR_NONE ((unsigned long int) -1)
+#define INADDR_NONE ((php_uint_t) -1)
 #endif
 
 #include "zend_globals.h"
@@ -3914,7 +3914,7 @@ PHP_FUNCTION(ip2long)
 #ifdef HAVE_INET_PTON
 	struct in_addr ip;
 #else
-	unsigned long int ip;
+	php_uint_t ip;
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &addr, &addr_len) == FAILURE) {
@@ -3950,7 +3950,7 @@ PHP_FUNCTION(long2ip)
 	/* "It's a long but it's not, PHP ints are signed */
 	char *ip;
 	int ip_len;
-	unsigned long n;
+	php_uint_t n;
 	struct in_addr myaddr;
 #ifdef HAVE_INET_PTON
 	char str[40];
@@ -4428,10 +4428,10 @@ PHP_FUNCTION(usleep)
    Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {
-	long tv_sec, tv_nsec;
+	php_int_t tv_sec, tv_nsec;
 	struct timespec php_req, php_rem;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &tv_sec, &tv_nsec) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ii", &tv_sec, &tv_nsec) == FAILURE) {
 		return;
 	}
 

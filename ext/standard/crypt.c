@@ -136,7 +136,7 @@ PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-static void php_to64(char *s, long v, int n) /* {{{ */
+static void php_to64(char *s, php_int_t v, int n) /* {{{ */
 {
 	while (--n >= 0) {
 		*s++ = itoa64[v&0x3f];

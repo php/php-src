@@ -1306,7 +1306,7 @@ static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretva
 #if IT_WAS_USED
 static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
 {
-	long l;
+	php_int_t l;
 	php_conv_err_t err;
 
 	*pretval = 0;

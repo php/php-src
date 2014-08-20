@@ -1340,11 +1340,11 @@ PHP_FUNCTION(mkdir)
 	char *dir;
 	int dir_len;
 	zval *zcontext = NULL;
-	long mode = 0777;
+	php_int_t mode = 0777;
 	zend_bool recursive = 0;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|lbr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|ibr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -2454,9 +2454,9 @@ PHP_FUNCTION(fnmatch)
 {
 	char *pattern, *filename;
 	int pattern_len, filename_len;
-	long flags = 0;
+	php_int_t flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp|l", &pattern, &pattern_len, &filename, &filename_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp|i", &pattern, &pattern_len, &filename, &filename_len, &flags) == FAILURE) {
 		return;
 	}
 

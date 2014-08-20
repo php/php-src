@@ -790,7 +790,7 @@ static inline int numeric_entity_is_allowed(unsigned uni_cp, int document_type)
  */
 static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 {
-	long code_l;
+	php_int_t code_l;
 	int hexadecimal = (**buf == 'x' || **buf == 'X'); /* TODO: XML apparently disallows "X" */
 	char *endptr;
 
@@ -804,7 +804,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 		return FAILURE;
 	}
 
-	code_l = strtol(*buf, &endptr, hexadecimal ? 16 : 10);
+	code_l = ZEND_STRTOI(*buf, &endptr, hexadecimal ? 16 : 10);
 	/* we're guaranteed there were valid digits, so *endptr > buf */
 	*buf = endptr;
 
@@ -813,7 +813,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 
 	/* many more are invalid, but that depends on whether it's HTML
 	 * (and which version) or XML. */
-	if (code_l > 0x10FFFFL)
+	if (code_l > Z_I(0x10FFFF))
 		return FAILURE;
 
 	if (code_point != NULL)
@@ -1506,10 +1506,10 @@ PHP_FUNCTION(htmlspecialchars_decode)
 {
 	char *str;
 	int str_len;
-	long quote_style = ENT_COMPAT;
+	php_int_t quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &quote_style) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &str, &str_len, &quote_style) == FAILURE) {
 		return;
 	}
 
@@ -1626,7 +1626,7 @@ static inline void write_s3row_data(
    Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
-	long all = HTML_SPECIALCHARS,
+	php_int_t all = HTML_SPECIALCHARS,
 		 flags = ENT_COMPAT;
 	int doctype;
 	entity_table_opt entity_table;
@@ -1639,7 +1639,7 @@ PHP_FUNCTION(get_html_translation_table)
 	 * getting the translated table from data structures that are optimized for
 	 * random access, not traversal */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lls",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|iis",
 			&all, &flags, &charset_hint, &charset_hint_len) == FAILURE) {
 		return;
 	}

@@ -358,7 +358,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	zval array;
 	int free_buffer = 0;
 	char *strtok_buf = NULL;
-	long count = 0;
+	php_int_t count = 0;
 	
 	ZVAL_UNDEF(&array);
 	switch (arg) {
