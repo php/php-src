@@ -60,7 +60,7 @@
 #include "ext/standard/quot_print.h"
 
 #define _php_iconv_memequal(a, b, c) \
-  ((c) == sizeof(unsigned long) ? *((unsigned long *)(a)) == *((unsigned long *)(b)) : ((c) == sizeof(unsigned int) ? *((unsigned int *)(a)) == *((unsigned int *)(b)) : memcmp(a, b, c) == 0))
+  ((c) == sizeof(php_uint_t) ? *((php_uint_t *)(a)) == *((php_uint_t *)(b)) : ((c) == sizeof(unsigned int) ? *((unsigned int *)(a)) == *((unsigned int *)(b)) : memcmp(a, b, c) == 0))
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_strlen, 0, 0, 1)
@@ -753,7 +753,8 @@ static php_iconv_err_t _php_iconv_strlen(php_size_t *pretval, const char *str, s
 #endif
 	}
 
-	errno = out_left = 0;
+	errno = 0;
+	out_left = 0;
 
 	for (in_p = str, in_left = nbytes, cnt = 0; in_left > 0; cnt+=2) {
 		size_t prev_in_left;
@@ -889,7 +890,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 			}
 		}
 
-		if (cnt >= (unsigned int)offset) {
+		if ((php_int_t)cnt >= offset) {
 			if (cd2 == (iconv_t)NULL) {
 				cd2 = iconv_open(enc, GENERIC_SUPERSET_NAME);
 
@@ -1321,7 +1322,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 				prev_in_left = in_left;
 
-				encoded = php_base64_encode((unsigned char *) buf, (int)(out_size - out_left));
+				encoded = php_base64_encode((unsigned char *) buf, (out_size - out_left));
 
 				if (char_cnt < encoded->len) {
 					/* something went wrong! */
@@ -1803,11 +1804,11 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 						switch (enc_scheme) {
 							case PHP_ICONV_ENC_SCHEME_BASE64:
-								decoded_text = php_base64_decode((unsigned char*)encoded_text, (int)encoded_text_len);
+								decoded_text = php_base64_decode((unsigned char*)encoded_text, encoded_text_len);
 								break;
 
 							case PHP_ICONV_ENC_SCHEME_QPRINT:
-								decoded_text = php_quot_print_decode((unsigned char*)encoded_text, (int)encoded_text_len, 1);
+								decoded_text = php_quot_print_decode((unsigned char*)encoded_text, encoded_text_len, 1);
 								break;
 							default:
 								decoded_text = NULL;
