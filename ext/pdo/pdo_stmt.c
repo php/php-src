@@ -1274,7 +1274,7 @@ static PHP_METHOD(PDOStatement, fetch)
 	php_int_t off = 0;
     PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lll", &how,
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|iii", &how,
 			&ori, &off)) {
 		RETURN_FALSE;
 	}
