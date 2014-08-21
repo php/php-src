@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #47358 (glob returns error, should be empty array()). (Pierre)
   . Fixed bug #67878 (program_prefix not honoured in man pages). (Remi)
 
+- COM:
+  . Fixed bug #41577 (DOTNET is successful once per server run)
+    (Aidas Kasparas)
+
 - OpenSSL:
   . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
     (Daniel Lowrey)
@@ -24,12 +28,17 @@ PHP                                                                        NEWS
 - GD
   . Made fontFetch's path parser thread-safe. (Sara).
 
-?? ??? 2014, PHP 5.5.16
+- MySQLi:
+  . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
+
+- Zlib:
+  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
+    data). (Mike)
+
+21 Aug 2014, PHP 5.5.16
 
 - COM:
   . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
-  . Fixed bug #41577 (DOTNET is successful once per server run)
-    (Aidas Kasparas)
 
 - Fileinfo:
   . Fixed bug #67705 (extensive backtracking in rule regular expression).
@@ -70,13 +79,6 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #60616 (odbc_fetch_into returns junk data at end of multi-byte
     char fields). (Keyur)
-
-- Zlib:
-  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
-    data). (Mike)
-
-- MySQLi:
-  . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
 
 24 Jul 2014, PHP 5.5.15
 
