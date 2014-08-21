@@ -2812,8 +2812,8 @@ PHP_FUNCTION(array_pad)
 	HashTable  old_hash;
 	php_int_t pad_size;		/* Size to pad to */
 	php_int_t pad_size_abs;	/* Absolute value of pad_size */
-	int	input_size;		/* Size of the input array */
-	int	num_pads;		/* How many pads do we need */
+	php_int_t input_size;		/* Size of the input array */
+	php_int_t num_pads;		/* How many pads do we need */
 	int	do_pad;			/* Whether we should do padding at all */
 	int	i;
 
@@ -2841,7 +2841,7 @@ PHP_FUNCTION(array_pad)
 
 	/* Populate the pads array */
 	num_pads = pad_size_abs - input_size;
-	if (num_pads > 1048576) {
+	if (num_pads > Z_I(1048576)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may only pad up to 1048576 elements at a time");
 		zval_dtor(return_value);
 		RETURN_FALSE;
