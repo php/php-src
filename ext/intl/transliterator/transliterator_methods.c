@@ -355,7 +355,7 @@ PHP_FUNCTION( transliterator_transliterate )
 			}
 		}
 	}
-	else if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s|ll",
+	else if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s|ii",
 		&str, &str_len, &start, &limit ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
