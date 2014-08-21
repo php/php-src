@@ -1535,10 +1535,10 @@ PHP_FUNCTION(pathinfo)
 	zval tmp;
 	char *path, *dirname;
 	int path_len, have_basename;
-	long opt = PHP_PATHINFO_ALL;
+	php_int_t opt = PHP_PATHINFO_ALL;
 	zend_string *ret = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &path_len, &opt) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &path, &path_len, &opt) == FAILURE) {
 		return;
 	}
 
