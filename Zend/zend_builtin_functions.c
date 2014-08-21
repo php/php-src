@@ -438,7 +438,7 @@ ZEND_FUNCTION(func_get_arg)
 	arg_count = ex->num_args;
 
 	if (requested_offset >= arg_count) {
-		zend_error(E_WARNING, "func_get_arg():  Argument %ld not passed to function", requested_offset);
+		zend_error(E_WARNING, "func_get_arg():  Argument " ZEND_INT_FMT " not passed to function", requested_offset);
 		RETURN_FALSE;
 	}
 
@@ -1546,7 +1546,7 @@ ZEND_FUNCTION(trigger_error)
 	char *message;
 	int message_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &message, &message_len, &error_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &message, &message_len, &error_type) == FAILURE) {
 		return;
 	}
 
@@ -1576,7 +1576,7 @@ ZEND_FUNCTION(set_error_handler)
 	zend_string *error_handler_name = NULL;
 	zend_int_t error_type = E_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &error_handler, &error_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &error_handler, &error_type) == FAILURE) {
 		return;
 	}
 
