@@ -872,7 +872,7 @@ PHP_FUNCTION(ltrim)
    Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
-	zend_string *text, *breakchar;
+	zend_string *text, *breakchar = NULL, *breakchar_save = NULL;
 	php_size_t newtextlen, chk;
 	size_t alloced;
 	php_int_t current = 0, laststart = 0, lastspace = 0;
@@ -880,10 +880,18 @@ PHP_FUNCTION(wordwrap)
 	zend_bool docut = 0;
 	zend_string *newtext;
 
-	breakchar = STR_INIT("\n", 1, 0);
+	breakchar = breakchar_save = STR_INIT("\n", 1, 1);
+	if (!breakchar) {
+		return;
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|iSb", &text, &linelength, &breakchar, &docut) == FAILURE) {
+		STR_FREE(breakchar);
 		return;
+	}
+
+	if (breakchar != breakchar_save) {
+		STR_FREE(breakchar_save);
 	}
 
 	if (text->len == 0) {
