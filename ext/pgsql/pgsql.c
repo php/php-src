@@ -3825,7 +3825,7 @@ PHP_FUNCTION(pg_set_error_verbosity)
 		id = PGG(default_link)? PGG(default_link)->handle : -1;
 		CHECK_DEFAULT_LINK(id);
 	} else {
-		if (zend_parse_parameters(argc TSRMLS_CC, "rl", &pgsql_link, &verbosity) == FAILURE) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "ri", &pgsql_link, &verbosity) == FAILURE) {
 			return;
 		}
 	}
