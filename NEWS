@@ -18,6 +18,11 @@ PHP                                                                        NEWS
 - Wddx:
   . Fixed bug #67873 (Segfaults in php_wddx_serialize_var). (Anatol, Remi)
 
+- Zlib:
+  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
+    data). (Mike)
+  . Fixed bug #67865 (internal corruption phar error). (Mike)
+
 ?? ??? 2014, PHP 5.4.32
 
 - COM:
@@ -65,10 +70,6 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #60616 (odbc_fetch_into returns junk data at end of multi-byte
     char fields). (Keyur)
-
-- Zlib:
-  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
-    data). (Mike)
 
 - MySQLi:
   . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
