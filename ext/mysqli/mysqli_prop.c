@@ -128,7 +128,7 @@ static zval *link_client_info_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 /* {{{ property link_connect_errno_read */
 static zval *link_connect_errno_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 {
-	ZVAL_INT(retval, (long)MyG(error_no));
+	ZVAL_INT(retval, (php_int_t)MyG(error_no));
 	return retval;
 }
 /* }}} */
@@ -221,18 +221,18 @@ static zval *link_error_list_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 /* }}} */
 
 /* link properties */
-MYSQLI_MAP_PROPERTY_FUNC_INT(link_errno_read, mysql_errno, MYSQLI_GET_MYSQL(MYSQLI_STATUS_INITIALIZED), ulong, "%lu")
+MYSQLI_MAP_PROPERTY_FUNC_INT(link_errno_read, mysql_errno, MYSQLI_GET_MYSQL(MYSQLI_STATUS_INITIALIZED), php_uint_t, ZEND_UINT_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_STRING(link_error_read, mysql_error, MYSQLI_GET_MYSQL(MYSQLI_STATUS_INITIALIZED))
-MYSQLI_MAP_PROPERTY_FUNC_INT(link_field_count_read, mysql_field_count, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), ulong, "%lu")
+MYSQLI_MAP_PROPERTY_FUNC_INT(link_field_count_read, mysql_field_count, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), php_uint_t, ZEND_UINT_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_STRING(link_host_info_read, mysql_get_host_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
 MYSQLI_MAP_PROPERTY_FUNC_STRING(link_info_read, mysql_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
 MYSQLI_MAP_PROPERTY_FUNC_INT(link_insert_id_read, mysql_insert_id, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
-MYSQLI_MAP_PROPERTY_FUNC_INT(link_protocol_version_read, mysql_get_proto_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), ulong, "%lu")
+MYSQLI_MAP_PROPERTY_FUNC_INT(link_protocol_version_read, mysql_get_proto_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), php_uint_t, ZEND_UINT_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_STRING(link_server_info_read, mysql_get_server_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
-MYSQLI_MAP_PROPERTY_FUNC_INT(link_server_version_read, mysql_get_server_version, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), ulong, "%lu")
+MYSQLI_MAP_PROPERTY_FUNC_INT(link_server_version_read, mysql_get_server_version, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), php_uint_t, ZEND_UINT_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_STRING(link_sqlstate_read, mysql_sqlstate, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
-MYSQLI_MAP_PROPERTY_FUNC_INT(link_thread_id_read, mysql_thread_id, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), ulong, "%lu")
-MYSQLI_MAP_PROPERTY_FUNC_INT(link_warning_count_read, mysql_warning_count, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), ulong, "%lu")
+MYSQLI_MAP_PROPERTY_FUNC_INT(link_thread_id_read, mysql_thread_id, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), php_uint_t, ZEND_UINT_FMT)
+MYSQLI_MAP_PROPERTY_FUNC_INT(link_warning_count_read, mysql_warning_count, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), php_uint_t, ZEND_UINT_FMT)
 
 /* {{{ property link_stat_read */
 static zval *link_stat_read(mysqli_object *obj, zval *retval TSRMLS_DC)

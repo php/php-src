@@ -1879,7 +1879,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 		}
 		case STMT_ATTR_CURSOR_TYPE: {
 			unsigned int ival = *(unsigned int *) value;
-			if (ival > (unsigned long) CURSOR_TYPE_READ_ONLY) {
+			if (ival > (php_uint_t) CURSOR_TYPE_READ_ONLY) {
 				SET_STMT_ERROR(stmt, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 				DBG_INF("FAIL");
 				DBG_RETURN(FAIL);

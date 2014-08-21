@@ -201,7 +201,7 @@ php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length)
 
 	if (length < (uint64_t) L64(16777216)) {
 		*packet++ = 253;
-		int3store(packet,(ulong) length);
+		int3store(packet,(php_uint_t) length);
 		return packet + 3;
 	}
 	*packet++ = 254;
