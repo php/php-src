@@ -135,10 +135,10 @@ PHP_MSHUTDOWN_FUNCTION(syslog)
 PHP_FUNCTION(openlog)
 {
 	char *ident;
-	long option, facility;
+	php_int_t option, facility;
 	int ident_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll", &ident,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sii", &ident,
 							  &ident_len, &option, &facility) == FAILURE) {
 		return;
 	}
@@ -175,11 +175,11 @@ PHP_FUNCTION(closelog)
    Generate a system log message */
 PHP_FUNCTION(syslog)
 {
-	long priority;
+	php_int_t priority;
 	char *message;
 	int message_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &priority,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "is", &priority,
 							  &message, &message_len) == FAILURE) {
 		return;
 	}
