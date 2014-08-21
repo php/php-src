@@ -2908,7 +2908,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 	ALLOCA_FLAG(use_heap);
 
 	STR_ALLOCA_ALLOC(lcname, name_len, use_heap);	
-	zend_str_tolower_copy(lcname->val, name->val, name_len + 1);
+	zend_str_tolower_copy(lcname->val, name->val, name_len);
 
 	*strict_class = 0;
 	if (name_len == sizeof("self") - 1 &&
