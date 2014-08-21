@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
     (CVE-2014-5120) (Ryan Mauger)
 
+- Zlib:
+  . Fixed bug #67865 (internal corruption phar error). Mike
+
 14 Aug 2014, PHP 5.6.0 Release Candidate 4
 
 - COM:
