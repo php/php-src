@@ -2489,7 +2489,7 @@ SPL_METHOD(SplFileObject, setFlags)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &intern->flags) == FAILURE) {
 		return;
 	}
 } /* }}} */

@@ -1235,7 +1235,7 @@ SPL_METHOD(Array, __construct)
 
 	intern = Z_SPLARRAY_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|iC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
