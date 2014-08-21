@@ -391,7 +391,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 	MYSQL_BIND	*bind;
 	int			i, ofs;
 	int			var_cnt = argc - start;
-	long		col_type;
+	php_int_t		col_type;
 	php_uint_t		rc;
 
 	/* prevent leak if variables are already bound */

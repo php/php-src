@@ -106,7 +106,7 @@ typedef struct {
 	unsigned fetch_table_names:1;
 	unsigned _reserved:31;	
 #if !PDO_USE_MYSQLND
-	unsigned long max_buffer_size;
+	php_uint_t max_buffer_size;
 #endif
 
 	pdo_mysql_error_info einfo;

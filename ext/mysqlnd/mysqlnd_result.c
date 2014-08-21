@@ -1967,7 +1967,7 @@ mysqlnd_result_buffered_zval_init(unsigned int field_count, zend_bool ps, zend_b
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
-	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(unsigned long), persistent))) {
+	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(php_uint_t), persistent))) {
 		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}
