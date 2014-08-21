@@ -1942,7 +1942,7 @@ ZEND_FUNCTION(get_resource_type)
 }
 /* }}} */
 
-/* {{{ proto array get_resources()
+/* {{{ proto array get_resources([string resouce_type])
    Get an array with all active resources */
 ZEND_FUNCTION(get_resources)
 {
