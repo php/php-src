@@ -1476,7 +1476,7 @@ ZEND_FUNCTION(leak)
 {
 	zend_int_t leakbytes=3;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &leakbytes) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &leakbytes) == FAILURE) {
 		return;
 	}
 
