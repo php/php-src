@@ -1705,7 +1705,7 @@ static int copy_class_or_interface_name(zval *el TSRMLS_DC, int num_args, va_lis
 	if ((hash_key->key && hash_key->key->val[0] != 0)
 		&& (comply_mask == (ce->ce_flags & mask))) {
 		if (ce->refcount > 1 && 
-		    (ce->name->len != hash_key->key->len - 1 || 
+		    (ce->name->len != hash_key->key->len || 
 		     !same_name(hash_key->key->val, ce->name->val, ce->name->len))) {
 			add_next_index_str(array, STR_COPY(hash_key->key));
 		} else {
