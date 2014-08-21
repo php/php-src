@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.0 ???
 
+- Core:
+  . Fixed bug #67878 (program_prefix not honoured in man pages). (Remi)
+
 - Fileinfo:
   . Fixed bug #67716 (Segfault in cdf.c). (CVE-2014-3587) (Remi)
 
