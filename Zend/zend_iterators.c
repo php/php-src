@@ -24,12 +24,13 @@
 
 static zend_class_entry zend_iterator_class_entry;
 
+static void iter_wrapper_free(zend_object *object TSRMLS_DC);
 static void iter_wrapper_dtor(zend_object *object TSRMLS_DC);
 
 static zend_object_handlers iterator_object_handlers = {
 	0,
+	iter_wrapper_free,
 	iter_wrapper_dtor,
-	NULL,
 	NULL,
 	NULL, /* prop read */
 	NULL, /* prop write */
@@ -58,10 +59,14 @@ ZEND_API void zend_register_iterator_wrapper(TSRMLS_D)
 	INIT_CLASS_ENTRY(zend_iterator_class_entry, "__iterator_wrapper", NULL);
 }
 
-static void iter_wrapper_dtor(zend_object *object TSRMLS_DC)
+static void iter_wrapper_free(zend_object *object TSRMLS_DC)
 {
 	zend_object_iterator *iter = (zend_object_iterator*)object;
 	iter->funcs->dtor(iter TSRMLS_CC);
+}
+
+static void iter_wrapper_dtor(zend_object *object TSRMLS_DC)
+{
 }
 
 ZEND_API void zend_iterator_init(zend_object_iterator *iter TSRMLS_DC)
