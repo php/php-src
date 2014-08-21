@@ -1400,11 +1400,11 @@ PHP_FUNCTION(mcrypt_ofb)
 PHP_FUNCTION(mcrypt_create_iv)
 {
 	char *iv;
-	long source = URANDOM;
-	long size;
+	php_int_t source = URANDOM;
+	php_int_t size;
 	int n = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &size, &source) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|i", &size, &source) == FAILURE) {
 		return;
 	}
 
