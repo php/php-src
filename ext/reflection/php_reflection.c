@@ -1532,9 +1532,9 @@ ZEND_METHOD(reflection, export)
    Returns an array of modifier names */
 ZEND_METHOD(reflection, getModifierNames)
 {
-	long modifiers;
+	php_int_t modifiers;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &modifiers) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &modifiers) == FAILURE) {
 		return;
 	}
 
@@ -3744,12 +3744,12 @@ ZEND_METHOD(reflection_class, getMethods)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	long filter = 0;
+	php_int_t filter = 0;
 	int argc = ZEND_NUM_ARGS();
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (argc) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "|i", &filter) == FAILURE) {
 			return;
 		}
 	} else {
@@ -3934,12 +3934,12 @@ ZEND_METHOD(reflection_class, getProperties)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	long filter = 0;
+	php_int_t filter = 0;
 	int argc = ZEND_NUM_ARGS();
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (argc) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "|i", &filter) == FAILURE) {
 			return;
 		}
 	} else {
