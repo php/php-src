@@ -34,6 +34,7 @@ PHP                                                                        NEWS
 - Zlib:
   . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
     data). (Mike)
+  . Fixed bug #67865 (internal corruption phar error). Mike
 
 21 Aug 2014, PHP 5.5.16
 
