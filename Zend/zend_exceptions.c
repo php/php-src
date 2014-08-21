@@ -665,9 +665,9 @@ ZEND_METHOD(exception, __toString)
 		_default_exception_get_entry(exception, "file", sizeof("file")-1, &file TSRMLS_CC);
 		_default_exception_get_entry(exception, "line", sizeof("line")-1, &line TSRMLS_CC);
 
-		convert_to_string(&message);
-		convert_to_string(&file);
-		convert_to_int(&line);
+		convert_to_string_ex(&message);
+		convert_to_string_ex(&file);
+		convert_to_int_ex(&line);
 
 		fci.size = sizeof(fci);
 		fci.function_table = &Z_OBJCE_P(exception)->function_table;
@@ -894,7 +894,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity TSRMLS_DC) /* {
 				file = zend_read_property(default_exception_ce, &zv, "file", sizeof("file")-1, 1 TSRMLS_CC);
 				line = zend_read_property(default_exception_ce, &zv, "line", sizeof("line")-1, 1 TSRMLS_CC);
 
-				convert_to_string(file);
+				convert_to_string_ex(file);
 				file = (Z_STRSIZE_P(file) > 0) ? file : NULL;
 				line = (Z_TYPE_P(line) == IS_INT) ? line : NULL;
 			} else {
@@ -908,9 +908,9 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity TSRMLS_DC) /* {
 		file = zend_read_property(default_exception_ce, &exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
 		line = zend_read_property(default_exception_ce, &exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
 
-		convert_to_string(str);
-		convert_to_string(file);
-		convert_to_int(line);
+		convert_to_string_ex(str);
+		convert_to_string_ex(file);
+		convert_to_int_ex(line);
 
 		zend_error_va(severity, (Z_STRSIZE_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_IVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {

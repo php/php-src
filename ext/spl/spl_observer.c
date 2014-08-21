@@ -311,7 +311,7 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 	spl_SplObjectStorageElement *element;
 	HashTable *props;
 	zval tmp, storage;
-	char md5str[33];
+	zend_string *md5str;
 	zend_string *zname;
 
 	*is_temp = 0;
@@ -330,14 +330,15 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 		array_init(&storage);
 
 		ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
-			php_spl_object_hash(&element->obj, md5str TSRMLS_CC);
+			md5str = php_spl_object_hash(&element->obj TSRMLS_CC);
 			array_init(&tmp);
 			/* Incrementing the refcount of obj and inf would confuse the garbage collector.
 			 * Prefer to null the destructor */
 			Z_ARRVAL_P(&tmp)->pDestructor = NULL;
 			add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &element->obj);
 			add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
-			add_assoc_zval_ex(&storage, md5str, 32, &tmp);
+			zend_hash_update(Z_ARRVAL(storage), md5str, &tmp);
+			STR_RELEASE(md5str);
 		} ZEND_HASH_FOREACH_END();
 
 		zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1 TSRMLS_CC);
@@ -469,16 +470,12 @@ SPL_METHOD(SplObjectStorage, detach)
 SPL_METHOD(SplObjectStorage, getHash)
 {
 	zval *obj;
-	char *hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
 		return;
 	}
-
-	hash = emalloc(33);
-	php_spl_object_hash(obj, hash TSRMLS_CC);
 	
-	RETVAL_STRING(hash);
+	RETURN_NEW_STR(php_spl_object_hash(obj TSRMLS_CC));
 
 } /* }}} */
 
