@@ -5053,16 +5053,24 @@ PHP_FUNCTION(str_pad)
 
 	/* Helper variables */
 	size_t num_pad_chars;		/* Number of padding characters (total - input size) */
-	zend_string  *pad_str;	/* Pointer to padding string */
+	zend_string  *pad_str, *pad_str_save;	/* Pointer to padding string */
 	php_int_t   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
 	int	   i, left_pad=0, right_pad=0;
 	zend_string *result = NULL;	/* Resulting string */
 
-	pad_str = STR_INIT(" ", 1, 0);
+	pad_str = pad_str_save = STR_INIT(" ", 1, 1);
+        if (!pad_str) {
+            return;
+        }
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si|Si", &input, &pad_length, &pad_str, &pad_type_val) == FAILURE) {
+                STR_FREE(pad_str);
 		return;
 	}
+
+        if (pad_str != pad_str_save) {
+            STR_FREE(pad_str_save);
+        }
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
