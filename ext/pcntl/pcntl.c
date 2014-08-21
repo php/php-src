@@ -725,7 +725,7 @@ PHP_FUNCTION(pcntl_wstopsig)
 #ifdef WSTOPSIG
 	php_int_t status_word;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &status_word) == FAILURE) {
 	       return;
 	}
 
@@ -840,7 +840,7 @@ PHP_FUNCTION(pcntl_signal)
 	php_int_t signo;
 	zend_bool restart_syscalls = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|b", &signo, &handle, &restart_syscalls) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iz|b", &signo, &handle, &restart_syscalls) == FAILURE) {
 		return;
 	}
 
