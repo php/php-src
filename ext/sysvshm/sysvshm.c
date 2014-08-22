@@ -44,6 +44,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_attach, 0, 0, 1)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, memsize)
 	ZEND_ARG_INFO(0, perm)
+	ZEND_ARG_INFO(0, grp)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_detach, 0, 0, 1)
@@ -149,8 +150,12 @@ PHP_FUNCTION(shm_attach)
 {
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
+	char *group_name = NULL;
+	int grp_len;
 	sysvshm_chunk_head *chunk_ptr;
 	long shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
+	struct group *group_info;
+	struct shmid_ds shm_info;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ll", &shm_key, &shm_size, &shm_flag)) {
 		return;
@@ -172,6 +177,31 @@ PHP_FUNCTION(shm_attach)
 		}
 		if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL)) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%lx: %s", shm_key, strerror(errno));
+			efree(shm_list_ptr);
+			RETURN_FALSE;
+		}
+	}
+
+	if ( group_name != NULL ) {
+		if (shmctl(shm_id, IPC_STAT, &shm_info) == -1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to stat SHM id %ld: %s", shm_id, strerror(errno));
+			efree(shm_list_ptr);
+			RETURN_FALSE;
+		}
+
+		group_info = emalloc(sizeof(group));
+		if ( !(group_info = getgrnam(group_name)) ) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to get group ID for group %s: %s", group_name, strerror(errno));
+			efree(group_info);
+			efree(shm_list_ptr);
+			RETURN_FALSE;
+		}
+
+		shm_info.shm_perm.gid = group_info->gr_gid;
+		efree(group_info);
+
+		if (shmctl(shm_id, IPC_SET, &shm_info) == -1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to set group to SHM id %ld: %s", shm_id, strerror(errno));
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
