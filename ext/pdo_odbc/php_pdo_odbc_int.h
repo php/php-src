@@ -135,7 +135,7 @@ typedef struct {
 
 typedef struct {
 	char *data;
-	unsigned long datalen;
+	SQLLEN datalen;
 	SQLLEN fetched_len;
 	SWORD	coltype;
 	char colname[128];
