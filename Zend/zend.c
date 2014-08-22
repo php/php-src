@@ -972,7 +972,7 @@ ZEND_API void zend_deactivate(TSRMLS_D) /* {{{ */
 /* }}} */
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(long message, const void *data TSRMLS_DC) /* {{{ */
+ZEND_API void zend_message_dispatcher(zend_int_t message, const void *data TSRMLS_DC) /* {{{ */
 {
 	if (zend_message_dispatcher_p) {
 		zend_message_dispatcher_p(message, data TSRMLS_CC);
