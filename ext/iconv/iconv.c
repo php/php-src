@@ -596,7 +596,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	}
 
 	if (out_left < 8) {
-		size_t pos = out_p - out_buffer;
+		size_t pos = out_p - out_buffer->val;
 		out_buffer = STR_REALLOC(out_buffer, out_size + 8, 0);
 		out_p = out_buffer->val + pos;
 		out_size += 7;
