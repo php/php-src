@@ -537,15 +537,19 @@ PHP_FUNCTION(bccomp)
    Sets default scale parameter for all bc math functions */
 PHP_FUNCTION(bcscale)
 {
-	long new_scale;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_scale) == FAILURE) {
+	long old_scale, new_scale;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &new_scale) == FAILURE) {
 		return;
 	}
 
-	BCG(bc_precision) = ((int)new_scale < 0) ? 0 : new_scale;
+	old_scale = BCG(bc_precision);
 
-	RETURN_TRUE;
+	if (ZEND_NUM_ARGS() == 1) {
+		BCG(bc_precision) = ((int)new_scale < 0) ? 0 : new_scale;
+	}
+
+	RETURN_LONG(old_scale);
 }
 /* }}} */
 
