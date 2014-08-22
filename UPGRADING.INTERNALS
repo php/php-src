@@ -7,6 +7,7 @@ UPGRADE NOTES - PHP X.Y
   b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
   c. POST data handling
   d. Arginfo changes
+  e. New data types
 
 2. Build system changes
   a. Unix build system changes
@@ -18,6 +19,44 @@ UPGRADE NOTES - PHP X.Y
 ========================
 
   a. zend_set_memory_limit() now takes the TSRMLS_CC macro as its last argument
+  e. New data types
+
+     String
+
+        Besides the old way of accepting the strings with 's', the new 'S' ZPP spec
+	was introduced. It expects an argument of the type zend_string *. String lengths
+	in it do no more depend on the firm 'int' datatype. The replacement
+	is a platform dependent size_t datatype called php_size_t.
+
+	String length is defined as zend_size_t inside Zend and aliased as php_size_t
+	anywhere else. The inclusion of php.h is necessary.
+
+     Integer types
+
+	Integers do no more depend on the firm 'long' type. Instead a platform
+	dependent integer type is used. That datatype is defined dynamically to
+	guarantee the consistent 64 bit support. The zval field representing user
+	land integer it bound to php_int_t.
+
+	Signed integer is defined as zend_int_t, unsigned integer as zend_uint_t
+	inside Zend. Both are aliased as php_int_t and php_uint_t anywhere else,
+	respectively. The inclusion of php.h is necessary.
+
+     Other datatypes
+
+	zend_off_t  - portable off_t analogue
+	zend_stat_t - portable 'struct stat' analogue
+
+	These datatypes are declared to be portable across platforms. Thus, direct
+	usage of the functions like fseek, stat, etc. as well as direct usage of
+	off_t and struct stat is strongly not recommended. Instead the portable
+	macros should be used.
+
+	zend_fseek - portable fseek equivalent
+	zend_ftell - portable ftell equivalent
+	zend_lseek - portable lseek equivalent
+	zend_fstat - portable fstat equivalent
+	zend_stat  - portable stat equivalent
 
 
 ========================
