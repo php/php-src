@@ -231,6 +231,8 @@ if ($replace_macros) {
 		'Z_PARAM_STRICT_LONG'                    => 'Z_PARAM_STRICT_INT',
 		'zval_get_long'                          => 'zval_get_int',
 		'_z_param_long'                          => '_z_param_int',
+		'smart_str_print_long'                   => 'smart_str_print_long',
+		'GET_VER_OPT_LONG'                       => 'GET_VER_OPT_INT',
 	);
 
 	if ($reverse_replace) {
