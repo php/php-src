@@ -8,6 +8,7 @@ UPGRADE NOTES - PHP X.Y
   c. POST data handling
   d. Arginfo changes
   e. New data types
+  f. zend_parse_parameters() specs
 
 2. Build system changes
   a. Unix build system changes
@@ -58,6 +59,10 @@ UPGRADE NOTES - PHP X.Y
 	zend_fstat - portable fstat equivalent
 	zend_stat  - portable stat equivalent
 
+  f. zend_parse_parameters() specs
+
+      The new spec 'S' introduced, which expects an argument of type zend_string *.
+      The new specs 'i' and 'I' introduced, which expect an argument of type php_int_t.
 
 ========================
 2. Build system changes
