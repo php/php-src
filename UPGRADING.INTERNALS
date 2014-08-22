@@ -12,6 +12,7 @@ UPGRADE NOTES - PHP X.Y
   g. sprintf() formats
   h. HashTable API
   i. New portable macros for large file support
+  j. New portable macros for integers
 
 2. Build system changes
   a. Unix build system changes
@@ -82,12 +83,26 @@ UPGRADE NOTES - PHP X.Y
 
   i. New portable macros for large file support
 
-      Function          Alias           Comment
+      Function(s)       Alias           Comment
       stat, _stat64     zend_stat   for use with zend_stat_t
       fstat, _fstat64   zend_fstat  for use with zend_stat_t
       lseek, _lseeki64  zend_lseek  for use with zend_off_t
       ftell, _ftelli64  zend_ftell  for use with zend_off_t
       fseek, _fseeki64  zend_fseek  for use with zend_off_t
+
+  j. New portable macros for integers
+
+      Function(s)                                         Alias             Comment
+      snprintf with "%ld" or "%lld", _ltoa_s, _i64toa_s   ZEND_ITOA         for use with zend_int_t
+      atol, atoll, _atoi64                                ZEND_ATOI         for use with zend_int_t
+      strtol, strtoll, _strtoi64                          ZEND_STRTOI       for use with zend_int_t
+      strtoul, strtoull, _strtoui64                       ZEND_STRTOUI      for use with zend_int_t
+      abs, llabs, _abs64                                  ZEND_ABS          for use with zend_int_t
+      -                                                   ZEND_INT_MAX      Aliased with PHP_INT_MAX in php.h, replaces LONG_MAX where appropriate
+      -                                                   ZEND_INT_MIN      Aliased with PHP_INT_MIN in php.h, replaces LONG_MIN where appropriate
+      -                                                   ZEND_UINT_MAX     ULONG_MAX
+      -                                                   SIZEOF_ZEND_INT   Replaces SIZEOF_ZEND_LONG where appropriate
+      -                                                   ZEND_SIZE_MAX     Max value of zend_size_t
 
 ========================
 2. Build system changes
