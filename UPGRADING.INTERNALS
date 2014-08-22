@@ -11,6 +11,7 @@ UPGRADE NOTES - PHP X.Y
   f. zend_parse_parameters() specs
   g. sprintf() formats
   h. HashTable API
+  i. New portable macros for large file support
 
 2. Build system changes
   a. Unix build system changes
@@ -78,6 +79,15 @@ UPGRADE NOTES - PHP X.Y
   h. HashTable API
 
        Datatype for array indexes was changed to php_uint_t, for string keys to zend_string *.
+
+  i. New portable macros for large file support
+
+      Function          Alias           Comment
+      stat, _stat64     zend_stat   for use with zend_stat_t
+      fstat, _fstat64   zend_fstat  for use with zend_stat_t
+      lseek, _lseeki64  zend_lseek  for use with zend_off_t
+      ftell, _ftelli64  zend_ftell  for use with zend_off_t
+      fseek, _fseeki64  zend_fseek  for use with zend_off_t
 
 ========================
 2. Build system changes
