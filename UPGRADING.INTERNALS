@@ -9,6 +9,8 @@ UPGRADE NOTES - PHP X.Y
   d. Arginfo changes
   e. New data types
   f. zend_parse_parameters() specs
+  g. sprintf() formats
+  h. HashTable API
 
 2. Build system changes
   a. Unix build system changes
@@ -61,8 +63,21 @@ UPGRADE NOTES - PHP X.Y
 
   f. zend_parse_parameters() specs
 
-      The new spec 'S' introduced, which expects an argument of type zend_string *.
-      The new specs 'i' and 'I' introduced, which expect an argument of type php_int_t.
+       The new spec 'S' introduced, which expects an argument of type zend_string *.
+       The new specs 'i' and 'I' introduced, which expect an argument of type php_int_t.
+
+  g. sprintf() formats
+
+       New printf modifier 'p' was implemented to platform independently output php_int_t,
+       php_uint_t and php_size_t datatypes. That modifier can be used with'd', 'u', 'x' and 'o'
+       printf format specs with spprintf, snprintf and the wrapping printf implementations.
+       %pu is sufficient for both php_uint_t and php_size_t. the code using %p spec to output
+       pointer address might need to be enclosed into #ifdef when it unlickily followed by 'd',
+       'u', 'x' or 'o'.
+
+  h. HashTable API
+
+       Datatype for array indexes was changed to php_uint_t, for string keys to zend_string *.
 
 ========================
 2. Build system changes
