@@ -44,10 +44,10 @@ static int php_embed_deactivate(TSRMLS_D)
 	return SUCCESS;
 }
 
-static inline size_t php_embed_single_write(const char *str, uint str_length)
+static inline size_t php_embed_single_write(const char *str, php_size_t str_length)
 {
 #ifdef PHP_WRITE_STDOUT
-	long ret;
+	php_int_t ret;
 
 	ret = write(STDOUT_FILENO, str, str_length);
 	if (ret <= 0) return 0;
@@ -61,10 +61,10 @@ static inline size_t php_embed_single_write(const char *str, uint str_length)
 }
 
 
-static int php_embed_ub_write(const char *str, uint str_length TSRMLS_DC)
+static php_size_t php_embed_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
 {
 	const char *ptr = str;
-	uint remaining = str_length;
+	php_size_t remaining = str_length;
 	size_t ret;
 
 	while (remaining > 0) {

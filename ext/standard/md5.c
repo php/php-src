@@ -46,20 +46,19 @@ PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /
    Calculate the md5 hash of a string */
 PHP_NAMED_FUNCTION(php_if_md5)
 {
-	char *arg;
-	int arg_len;
+	zend_string *arg;
 	zend_bool raw_output = 0;
 	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &raw_output) == FAILURE) {
 		return;
 	}
 	
 	md5str[0] = '\0';
 	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, arg, arg_len);
+	PHP_MD5Update(&context, arg->val, arg->len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
 		RETURN_STRINGL(digest, 16);
@@ -82,7 +81,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
-	int           n;
+	php_size_t           n;
 	php_stream    *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &arg, &arg_len, &raw_output) == FAILURE) {

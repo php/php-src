@@ -32,7 +32,7 @@
 #include "sdncal.h"
 
 int DayOfWeek(
-				 long int sdn)
+				 php_int_t sdn)
 {
 	int dow;
 

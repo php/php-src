@@ -25,10 +25,10 @@
 /* }}} */
 
 ZEND_BEGIN_MODULE_GLOBALS(assert)
-	long active;
-	long bail;
-	long warning;
-	long quiet_eval;
+	php_int_t active;
+	php_int_t bail;
+	php_int_t warning;
+	php_int_t quiet_eval;
 	zval callback;
 	char *cb;
 ZEND_END_MODULE_GLOBALS(assert)
@@ -98,11 +98,11 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", ASSERT_ACTIVE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", ASSERT_CALLBACK, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_QUIET_EVAL", ASSERT_QUIET_EVAL, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ASSERT_ACTIVE", ASSERT_ACTIVE, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ASSERT_CALLBACK", ASSERT_CALLBACK, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ASSERT_QUIET_EVAL", ASSERT_QUIET_EVAL, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -164,7 +164,7 @@ PHP_FUNCTION(assert)
 		}
 
 		compiled_string_description = zend_make_compiled_string_description("assert code" TSRMLS_CC);
-		if (zend_eval_stringl(myeval, Z_STRLEN_P(assertion), &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
+		if (zend_eval_stringl(myeval, Z_STRSIZE_P(assertion), &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
 			efree(compiled_string_description);
 			if (description_len == 0) {
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
@@ -205,7 +205,7 @@ PHP_FUNCTION(assert)
 		const char *filename = zend_get_executed_filename(TSRMLS_C);
 
 		ZVAL_STRING(&args[0], SAFE_STRING(filename));
-		ZVAL_LONG (&args[1], lineno);
+		ZVAL_INT (&args[1], lineno);
 		ZVAL_STRING(&args[2], SAFE_STRING(myeval));
 
 		ZVAL_FALSE(&retval);
@@ -256,12 +256,12 @@ PHP_FUNCTION(assert)
 PHP_FUNCTION(assert_options)
 {
 	zval *value = NULL;
-	long what;
+	php_int_t what;
 	int oldint;
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
-	if (zend_parse_parameters(ac TSRMLS_CC, "l|z", &what, &value) == FAILURE) {
+	if (zend_parse_parameters(ac TSRMLS_CC, "i|z", &what, &value) == FAILURE) {
 		return;
 	}
 
@@ -275,7 +275,7 @@ PHP_FUNCTION(assert_options)
 			STR_RELEASE(key);
 			STR_RELEASE(value_str);
 		}
-		RETURN_LONG(oldint);
+		RETURN_INT(oldint);
 		break;
 
 	case ASSERT_BAIL:
@@ -287,7 +287,7 @@ PHP_FUNCTION(assert_options)
 			STR_RELEASE(key);
 			STR_RELEASE(value_str);
 		}
-		RETURN_LONG(oldint);
+		RETURN_INT(oldint);
 		break;
 
 	case ASSERT_QUIET_EVAL:
@@ -299,7 +299,7 @@ PHP_FUNCTION(assert_options)
 			STR_RELEASE(key);
 			STR_RELEASE(value_str);
 		}
-		RETURN_LONG(oldint);
+		RETURN_INT(oldint);
 		break;
 
 	case ASSERT_WARNING:
@@ -311,7 +311,7 @@ PHP_FUNCTION(assert_options)
 			STR_RELEASE(key);
 			STR_RELEASE(value_str);
 		}
-		RETURN_LONG(oldint);
+		RETURN_INT(oldint);
 		break;
 
 	case ASSERT_CALLBACK:

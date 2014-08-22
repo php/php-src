@@ -250,21 +250,21 @@ PHP_FUNCTION(readline_info)
 	if (!what) {
 		array_init(return_value);
 		add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer));
-		add_assoc_long(return_value,"point",rl_point);
-		add_assoc_long(return_value,"end",rl_end);
+		add_assoc_int(return_value,"point",rl_point);
+		add_assoc_int(return_value,"end",rl_end);
 #ifdef HAVE_LIBREADLINE
-		add_assoc_long(return_value,"mark",rl_mark);
-		add_assoc_long(return_value,"done",rl_done);
-		add_assoc_long(return_value,"pending_input",rl_pending_input);
+		add_assoc_int(return_value,"mark",rl_mark);
+		add_assoc_int(return_value,"done",rl_done);
+		add_assoc_int(return_value,"pending_input",rl_pending_input);
 		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt));
 		add_assoc_string(return_value,"terminal_name",(char *)SAFE_STRING(rl_terminal_name));
 #endif
 #if HAVE_ERASE_EMPTY_LINE
-		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
+		add_assoc_int(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
 		add_assoc_string(return_value,"library_version",(char *)SAFE_STRING(rl_library_version));
 		add_assoc_string(return_value,"readline_name",(char *)SAFE_STRING(rl_readline_name));
-		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
+		add_assoc_int(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
 		if (!strcasecmp(what,"line_buffer")) {
 			oldstr = rl_line_buffer;
@@ -275,26 +275,26 @@ PHP_FUNCTION(readline_info)
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
 		} else if (!strcasecmp(what, "point")) {
-			RETVAL_LONG(rl_point);
+			RETVAL_INT(rl_point);
 		} else if (!strcasecmp(what, "end")) {
-			RETVAL_LONG(rl_end);
+			RETVAL_INT(rl_end);
 #ifdef HAVE_LIBREADLINE
 		} else if (!strcasecmp(what, "mark")) {
-			RETVAL_LONG(rl_mark);
+			RETVAL_INT(rl_mark);
 		} else if (!strcasecmp(what, "done")) {
 			oldval = rl_done;
 			if (value) {
-				convert_to_long_ex(value);
-				rl_done = Z_LVAL_P(value);
+				convert_to_int_ex(value);
+				rl_done = Z_IVAL_P(value);
 			}
-			RETVAL_LONG(oldval);
+			RETVAL_INT(oldval);
 		} else if (!strcasecmp(what, "pending_input")) {
 			oldval = rl_pending_input;
 			if (value) {
 				convert_to_string_ex(value);
 				rl_pending_input = Z_STRVAL_P(value)[0];
 			}
-			RETVAL_LONG(oldval);
+			RETVAL_INT(oldval);
 		} else if (!strcasecmp(what, "prompt")) {
 			RETVAL_STRING(SAFE_STRING(rl_prompt));
 		} else if (!strcasecmp(what, "terminal_name")) {
@@ -304,10 +304,10 @@ PHP_FUNCTION(readline_info)
 		} else if (!strcasecmp(what, "erase_empty_line")) {
 			oldval = rl_erase_empty_line;
 			if (value) {
-				convert_to_long_ex(value);
-				rl_erase_empty_line = Z_LVAL_PP(value);
+				convert_to_int_ex(value);
+				rl_erase_empty_line = Z_IVAL_PP(value);
 			}
-			RETVAL_LONG(oldval);
+			RETVAL_INT(oldval);
 #endif
 		} else if (!strcasecmp(what,"library_version")) {
 			RETVAL_STRING((char *)SAFE_STRING(rl_library_version));
@@ -322,10 +322,10 @@ PHP_FUNCTION(readline_info)
 		} else if (!strcasecmp(what, "attempted_completion_over")) {
 			oldval = rl_attempted_completion_over;
 			if (value) {
-				convert_to_long_ex(value);
-				rl_attempted_completion_over = Z_LVAL_P(value);
+				convert_to_int_ex(value);
+				rl_attempted_completion_over = Z_IVAL_P(value);
 			}
-			RETVAL_LONG(oldval);
+			RETVAL_INT(oldval);
 		}
 	}
 }
@@ -473,7 +473,7 @@ static void _readline_string_zval(zval *ret, const char *str)
 
 static void _readline_long_zval(zval *ret, long l)
 {
-	ZVAL_LONG(ret, l);
+	ZVAL_INT(ret, l);
 }
 
 static char **_readline_completion_cb(const char *text, int start, int end)

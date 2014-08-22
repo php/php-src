@@ -165,7 +165,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 				free(ref);
 				break;
 			}
-		case IS_LONG:
+		case IS_INT:
 		case IS_DOUBLE:
 		case IS_FALSE:
 		case IS_TRUE:
@@ -196,7 +196,7 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 				free(ref);
 				break;
 			}
-		case IS_LONG:
+		case IS_INT:
 		case IS_DOUBLE:
 		case IS_FALSE:
 		case IS_TRUE:

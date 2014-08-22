@@ -100,8 +100,8 @@ static int validate_api_restriction(TSRMLS_D)
 
 static ZEND_INI_MH(OnUpdateMemoryConsumption)
 {
-	long *p;
-	long memsize;
+	php_int_t *p;
+	php_int_t memsize;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -111,7 +111,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 	/* keep the compiler happy */
 	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
-	p = (long *) (base + (size_t)mh_arg1);
+	p = (php_int_t *) (base + (size_t)mh_arg1);
 	memsize = atoi(new_value);
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
@@ -137,8 +137,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 {
-	long *p;
-	long size;
+	php_int_t *p;
+	php_int_t size;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -148,7 +148,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 	/* keep the compiler happy */
 	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
-	p = (long *) (base + (size_t)mh_arg1);
+	p = (php_int_t *) (base + (size_t)mh_arg1);
 	size = atoi(new_value);
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
 
@@ -183,7 +183,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 {
 	double *p;
-	long percentage;
+	php_int_t percentage;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -315,10 +315,10 @@ static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_array_ex(1, &zfilename) == FAILURE ||
 	    Z_TYPE(zfilename) != IS_STRING ||
-	    Z_STRLEN(zfilename) == 0) {
+	    Z_STRSIZE(zfilename) == 0) {
 		return 0;
 	}
-	return filename_is_in_cache(Z_STRVAL(zfilename), Z_STRLEN(zfilename) TSRMLS_CC);
+	return filename_is_in_cache(Z_STRVAL(zfilename), Z_STRSIZE(zfilename) TSRMLS_CC);
 }
 
 static void accel_file_exists(INTERNAL_FUNCTION_PARAMETERS)
@@ -407,33 +407,33 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			char buf[32];
 			php_info_print_table_row(2, "Startup", "OK");
 			php_info_print_table_row(2, "Shared memory model", zend_accel_get_shared_model());
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(hits));
+			snprintf(buf, sizeof(buf), ZEND_UINT_FMT, (zend_uint_t)ZCSG(hits));
 			php_info_print_table_row(2, "Cache hits", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
+			snprintf(buf, sizeof(buf), "%pd", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
 			php_info_print_table_row(2, "Cache misses", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCG(accel_directives).memory_consumption-zend_shared_alloc_get_free_memory()-ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Used memory", buf);
-			snprintf(buf, sizeof(buf), "%ld", zend_shared_alloc_get_free_memory());
+			snprintf(buf, sizeof(buf), "%pd", zend_shared_alloc_get_free_memory());
 			php_info_print_table_row(2, "Free memory", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZSMMG(wasted_shared_memory));
+			snprintf(buf, sizeof(buf), "%pd", ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Wasted memory", buf);
 			if (ZCSG(interned_strings_start) && ZCSG(interned_strings_end) && ZCSG(interned_strings_top)) {
-				snprintf(buf, sizeof(buf), "%ld", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
+				snprintf(buf, sizeof(buf), "%pd", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
 				php_info_print_table_row(2, "Interned Strings Used memory", buf);
-				snprintf(buf, sizeof(buf), "%ld", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
+				snprintf(buf, sizeof(buf), "%pd", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
 				php_info_print_table_row(2, "Interned Strings Free memory", buf);
 			}
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_direct_entries);
 			php_info_print_table_row(2, "Cached scripts", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_entries);
 			php_info_print_table_row(2, "Cached keys", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).max_num_entries);
+			snprintf(buf, sizeof(buf), "%pd", ZCSG(hash).max_num_entries);
 			php_info_print_table_row(2, "Max keys", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(oom_restarts));
+			snprintf(buf, sizeof(buf), "%pd", ZCSG(oom_restarts));
 			php_info_print_table_row(2, "OOM restarts", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash_restarts));
+			snprintf(buf, sizeof(buf), "%pd", ZCSG(hash_restarts));
 			php_info_print_table_row(2, "Hash keys restarts", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(manual_restarts));
+			snprintf(buf, sizeof(buf), "%pd", ZCSG(manual_restarts));
 			php_info_print_table_row(2, "Manual restarts", buf);
 		}
 	}
@@ -488,16 +488,16 @@ static int accelerator_get_scripts(zval *return_value TSRMLS_DC)
 
 			array_init(&persistent_script_report);
 			add_assoc_str(&persistent_script_report, "full_path", STR_DUP(script->full_path, 0));
-			add_assoc_long(&persistent_script_report, "hits", script->dynamic_members.hits);
-			add_assoc_long(&persistent_script_report, "memory_consumption", script->dynamic_members.memory_consumption);
+			add_assoc_int(&persistent_script_report, "hits", (zend_int_t)script->dynamic_members.hits);
+			add_assoc_int(&persistent_script_report, "memory_consumption", script->dynamic_members.memory_consumption);
 			ta = localtime(&script->dynamic_members.last_used);
 			str = asctime(ta);
 			len = strlen(str);
 			if (len > 0 && str[len - 1] == '\n') len--;
 			add_assoc_stringl(&persistent_script_report, "last_used", str, len);
-			add_assoc_long(&persistent_script_report, "last_used_timestamp", script->dynamic_members.last_used);
+			add_assoc_int(&persistent_script_report, "last_used_timestamp", script->dynamic_members.last_used);
 			if (ZCG(accel_directives).validate_timestamps) {
-				add_assoc_long(&persistent_script_report, "timestamp", (long)script->timestamp);
+				add_assoc_int(&persistent_script_report, "timestamp", (zend_int_t)script->timestamp);
 			}
 			timerclear(&exec_time);
 			timerclear(&fetch_time);
@@ -514,7 +514,7 @@ static int accelerator_get_scripts(zval *return_value TSRMLS_DC)
    Obtain statistics information regarding code acceleration */
 static ZEND_FUNCTION(opcache_get_status)
 {
-	long reqs;
+	zend_int_t reqs;
 	zval memory_usage, statistics, scripts;
 	zend_bool fetch_scripts = 1;
 
@@ -540,9 +540,9 @@ static ZEND_FUNCTION(opcache_get_status)
 
 	/* Memory usage statistics */
 	array_init(&memory_usage);
-	add_assoc_long(&memory_usage, "used_memory", ZCG(accel_directives).memory_consumption-zend_shared_alloc_get_free_memory()-ZSMMG(wasted_shared_memory));
-	add_assoc_long(&memory_usage, "free_memory", zend_shared_alloc_get_free_memory());
-	add_assoc_long(&memory_usage, "wasted_memory", ZSMMG(wasted_shared_memory));
+	add_assoc_int(&memory_usage, "used_memory", ZCG(accel_directives).memory_consumption-zend_shared_alloc_get_free_memory()-ZSMMG(wasted_shared_memory));
+	add_assoc_int(&memory_usage, "free_memory", zend_shared_alloc_get_free_memory());
+	add_assoc_int(&memory_usage, "wasted_memory", ZSMMG(wasted_shared_memory));
 	add_assoc_double(&memory_usage, "current_wasted_percentage", (((double) ZSMMG(wasted_shared_memory))/ZCG(accel_directives).memory_consumption)*100.0);
 	add_assoc_zval(return_value, "memory_usage", &memory_usage);
 
@@ -550,26 +550,26 @@ static ZEND_FUNCTION(opcache_get_status)
 		zval interned_strings_usage;
 
 		array_init(&interned_strings_usage);
-		add_assoc_long(&interned_strings_usage, "buffer_size", ZCSG(interned_strings_end) - ZCSG(interned_strings_start));
-		add_assoc_long(&interned_strings_usage, "used_memory", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
-		add_assoc_long(&interned_strings_usage, "free_memory", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
-		add_assoc_long(&interned_strings_usage, "number_of_strings", ZCSG(interned_strings).nNumOfElements);
+		add_assoc_int(&interned_strings_usage, "buffer_size", ZCSG(interned_strings_end) - ZCSG(interned_strings_start));
+		add_assoc_int(&interned_strings_usage, "used_memory", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
+		add_assoc_int(&interned_strings_usage, "free_memory", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
+		add_assoc_int(&interned_strings_usage, "number_of_strings", ZCSG(interned_strings).nNumOfElements);
 		add_assoc_zval(return_value, "interned_strings_usage", &interned_strings_usage);
 	}
 	
 	/* Accelerator statistics */
 	array_init(&statistics);
-	add_assoc_long(&statistics, "num_cached_scripts", ZCSG(hash).num_direct_entries);
-	add_assoc_long(&statistics, "num_cached_keys",    ZCSG(hash).num_entries);
-	add_assoc_long(&statistics, "max_cached_keys",    ZCSG(hash).max_num_entries);
-	add_assoc_long(&statistics, "hits", ZCSG(hits));
-	add_assoc_long(&statistics, "start_time", ZCSG(start_time));
-	add_assoc_long(&statistics, "last_restart_time", ZCSG(last_restart_time));
-	add_assoc_long(&statistics, "oom_restarts", ZCSG(oom_restarts));
-	add_assoc_long(&statistics, "hash_restarts", ZCSG(hash_restarts));
-	add_assoc_long(&statistics, "manual_restarts", ZCSG(manual_restarts));
-	add_assoc_long(&statistics, "misses", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
-	add_assoc_long(&statistics, "blacklist_misses", ZCSG(blacklist_misses));
+	add_assoc_int(&statistics, "num_cached_scripts", ZCSG(hash).num_direct_entries);
+	add_assoc_int(&statistics, "num_cached_keys",    ZCSG(hash).num_entries);
+	add_assoc_int(&statistics, "max_cached_keys",    ZCSG(hash).max_num_entries);
+	add_assoc_int(&statistics, "hits", (zend_int_t)ZCSG(hits));
+	add_assoc_int(&statistics, "start_time", ZCSG(start_time));
+	add_assoc_int(&statistics, "last_restart_time", ZCSG(last_restart_time));
+	add_assoc_int(&statistics, "oom_restarts", ZCSG(oom_restarts));
+	add_assoc_int(&statistics, "hash_restarts", ZCSG(hash_restarts));
+	add_assoc_int(&statistics, "manual_restarts", ZCSG(manual_restarts));
+	add_assoc_int(&statistics, "misses", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
+	add_assoc_int(&statistics, "blacklist_misses", ZCSG(blacklist_misses));
 	reqs = ZCSG(hits)+ZCSG(misses);
 	add_assoc_double(&statistics, "blacklist_miss_ratio", reqs?(((double) ZCSG(blacklist_misses))/reqs)*100.0:0);
 	add_assoc_double(&statistics, "opcache_hit_rate", reqs?(((double) ZCSG(hits))/reqs)*100.0:0);
@@ -615,17 +615,17 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_bool(&directives, "opcache.dups_fix",            ZCG(accel_directives).ignore_dups);
 	add_assoc_bool(&directives, "opcache.revalidate_path",     ZCG(accel_directives).revalidate_path);
 
-	add_assoc_long(&directives,   "opcache.log_verbosity_level",    ZCG(accel_directives).log_verbosity_level);
-	add_assoc_long(&directives,	 "opcache.memory_consumption",     ZCG(accel_directives).memory_consumption);
-	add_assoc_long(&directives,	 "opcache.interned_strings_buffer",ZCG(accel_directives).interned_strings_buffer);
-	add_assoc_long(&directives, 	 "opcache.max_accelerated_files",  ZCG(accel_directives).max_accelerated_files);
+	add_assoc_int(&directives,   "opcache.log_verbosity_level",    ZCG(accel_directives).log_verbosity_level);
+	add_assoc_int(&directives,	 "opcache.memory_consumption",     ZCG(accel_directives).memory_consumption);
+	add_assoc_int(&directives,	 "opcache.interned_strings_buffer",ZCG(accel_directives).interned_strings_buffer);
+	add_assoc_int(&directives, 	 "opcache.max_accelerated_files",  ZCG(accel_directives).max_accelerated_files);
 	add_assoc_double(&directives, "opcache.max_wasted_percentage",  ZCG(accel_directives).max_wasted_percentage);
-	add_assoc_long(&directives, 	 "opcache.consistency_checks",     ZCG(accel_directives).consistency_checks);
-	add_assoc_long(&directives, 	 "opcache.force_restart_timeout",  ZCG(accel_directives).force_restart_timeout);
-	add_assoc_long(&directives, 	 "opcache.revalidate_freq",        ZCG(accel_directives).revalidate_freq);
+	add_assoc_int(&directives, 	 "opcache.consistency_checks",     ZCG(accel_directives).consistency_checks);
+	add_assoc_int(&directives, 	 "opcache.force_restart_timeout",  ZCG(accel_directives).force_restart_timeout);
+	add_assoc_int(&directives, 	 "opcache.revalidate_freq",        ZCG(accel_directives).revalidate_freq);
 	add_assoc_string(&directives, "opcache.preferred_memory_model", STRING_NOT_NULL(ZCG(accel_directives).memory_model));
 	add_assoc_string(&directives, "opcache.blacklist_filename",     STRING_NOT_NULL(ZCG(accel_directives).user_blacklist_filename));
-	add_assoc_long(&directives,   "opcache.max_file_size",          ZCG(accel_directives).max_file_size);
+	add_assoc_int(&directives,   "opcache.max_file_size",          ZCG(accel_directives).max_file_size);
 	add_assoc_string(&directives, "opcache.error_log",              STRING_NOT_NULL(ZCG(accel_directives).error_log));
 
 	add_assoc_bool(&directives,   "opcache.protect_memory",         ZCG(accel_directives).protect_memory);
@@ -633,7 +633,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_bool(&directives,   "opcache.load_comments",          ZCG(accel_directives).load_comments);
 	add_assoc_bool(&directives,   "opcache.fast_shutdown",          ZCG(accel_directives).fast_shutdown);
 	add_assoc_bool(&directives,   "opcache.enable_file_override",   ZCG(accel_directives).file_override_enabled);
-	add_assoc_long(&directives, 	 "opcache.optimization_level",     ZCG(accel_directives).optimization_level);
+	add_assoc_int(&directives, 	 "opcache.optimization_level",     ZCG(accel_directives).optimization_level);
 
 	add_assoc_zval(return_value, "directives", &directives);
 

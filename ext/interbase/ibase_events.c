@@ -297,8 +297,8 @@ PHP_FUNCTION(ibase_set_event_handler)
 			RETURN_FALSE;
 		}
 
-		convert_to_long_ex(&args[0]);
-		link_res_id = Z_LVAL(args[0]);
+		convert_to_int_ex(&args[0]);
+		link_res_id = Z_IVAL(args[0]);
 
 	} else {
 		/* callback, event_1 [, ... event_15] 

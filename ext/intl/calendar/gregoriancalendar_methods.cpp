@@ -43,7 +43,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 				*args		= &args_a[0];
 	char		*locale		= NULL;
 	int			locale_len;
-	long		largs[6];
+	php_int_t		largs[6];
 	UErrorCode	status		= U_ZERO_ERROR;
 	int			variant;
 	intl_error_reset(NULL TSRMLS_CC);
@@ -242,11 +242,11 @@ U_CFUNC PHP_FUNCTION(intlgregcal_get_gregorian_change)
 
 U_CFUNC PHP_FUNCTION(intlgregcal_is_leap_year)
 {
-	long year;
+	php_int_t year;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-			"Ol", &object, GregorianCalendar_ce_ptr, &year) == FAILURE) {
+			"Oi", &object, GregorianCalendar_ce_ptr, &year) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlgregcal_is_leap_year: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;

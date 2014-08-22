@@ -300,7 +300,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	if ((ret = php_wddx_deserialize_ex(val, vallen, &retval)) == SUCCESS) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(retval), idx, key, ent) {
 			if (key == NULL) {
-				key = zend_long_to_str(idx);
+				key = zend_int_to_str(idx);
 			} else {
 				STR_ADDREF(key);
 			}
@@ -389,10 +389,10 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var TSRMLS_DC)
 {
 	php_wddx_add_chunk_static(packet, WDDX_STRING_S);
 
-	if (Z_STRLEN_P(var) > 0) {
+	if (Z_STRSIZE_P(var) > 0) {
 		zend_string *buf;
 
-		buf = php_escape_html_entities(Z_STRVAL_P(var), Z_STRLEN_P(var), 0, ENT_QUOTES, NULL TSRMLS_CC);
+		buf = php_escape_html_entities(Z_STRVAL_P(var), Z_STRSIZE_P(var), 0, ENT_QUOTES, NULL TSRMLS_CC);
 
 		php_wddx_add_chunk_ex(packet, buf->val, buf->len);
 
@@ -512,7 +512,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 				php_wddx_serialize_var(packet, ent, tmp TSRMLS_CC);
 				STR_RELEASE(tmp);
 			} else {
-				key = zend_long_to_str(idx);
+				key = zend_int_to_str(idx);
 				php_wddx_serialize_var(packet, ent, key TSRMLS_CC);
 				STR_RELEASE(key);
 			}
@@ -568,7 +568,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 			if (key) {
 				php_wddx_serialize_var(packet, ent, key TSRMLS_CC);
 			} else {
-				key = zend_long_to_str(idx);
+				key = zend_int_to_str(idx);
 				php_wddx_serialize_var(packet, ent, key TSRMLS_CC);
 				STR_RELEASE(key);
 			}
@@ -612,7 +612,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name TS
 			php_wddx_serialize_string(packet, var TSRMLS_CC);
 			break;
 			
-		case IS_LONG:
+		case IS_INT:
 		case IS_DOUBLE:
 			php_wddx_serialize_number(packet, var);
 			break;
@@ -750,7 +750,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 		ent.type = ST_NUMBER;
 		SET_STACK_VARNAME;
 		
-		ZVAL_LONG(&ent.data, 0);
+		ZVAL_INT(&ent.data, 0);
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp((char *)name, EL_BOOLEAN)) {
 		int i;
@@ -854,7 +854,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 		ent.type = ST_DATETIME;
 		SET_STACK_VARNAME;
 		
-		ZVAL_LONG(&ent.data, 0);
+		ZVAL_INT(&ent.data, 0);
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	}
 }
@@ -886,7 +886,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		if (!strcmp((char *)name, EL_BINARY)) {
 			zend_string *new_str;
 
-			new_str = php_base64_decode(Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+			new_str = php_base64_decode(Z_STRVAL(ent1->data), Z_STRSIZE(ent1->data));
 			zval_ptr_dtor(&ent1->data);
 			ZVAL_STR(&ent1->data, new_str);
 		}
@@ -919,10 +919,10 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 
 				if (ent1->varname) {
 					if (!strcmp(ent1->varname, PHP_CLASS_NAME_VAR) &&
-						Z_TYPE(ent1->data) == IS_STRING && Z_STRLEN(ent1->data)) {
+						Z_TYPE(ent1->data) == IS_STRING && Z_STRSIZE(ent1->data)) {
 						zend_bool incomplete_class = 0;
 
-						zend_str_tolower(Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+						zend_str_tolower(Z_STRVAL(ent1->data), Z_STRSIZE(ent1->data));
 						STR_FORGET_HASH_VAL(Z_STR(ent1->data));
 						if ((pce = zend_hash_find_ptr(EG(class_table), Z_STR(ent1->data))) == NULL) {
 							incomplete_class = 1;
@@ -938,7 +938,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 										zval_add_ref, 0);
 
 						if (incomplete_class) {
-							php_store_class_name(&obj, Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+							php_store_class_name(&obj, Z_STRVAL(ent1->data), Z_STRSIZE(ent1->data));
 						}
 
 						/* Clean up old array entry */
@@ -992,13 +992,13 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 		switch (ent->type) {
 			case ST_BINARY:
 			case ST_STRING: 
-				if (Z_STRLEN(ent->data) == 0) {
+				if (Z_STRSIZE(ent->data) == 0) {
 					zval_ptr_dtor(&ent->data);
 					ZVAL_STRINGL(&ent->data, (char *)s, len);
 				} else {
-					Z_STR(ent->data) = STR_REALLOC(Z_STR(ent->data), Z_STRLEN(ent->data) + len, 0);
-					memcpy(Z_STRVAL(ent->data) + Z_STRLEN(ent->data) - len, (char *)s, len);
-					Z_STRVAL(ent->data)[Z_STRLEN(ent->data)] = '\0';
+					Z_STR(ent->data) = STR_REALLOC(Z_STR(ent->data), Z_STRSIZE(ent->data) + len, 0);
+					memcpy(Z_STRVAL(ent->data) + Z_STRSIZE(ent->data) - len, (char *)s, len);
+					Z_STRVAL(ent->data)[Z_STRSIZE(ent->data)] = '\0';
 				}
 				break;
 			case ST_NUMBER:
@@ -1008,9 +1008,9 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 
 			case ST_BOOLEAN:
 				if (!strcmp((char *)s, "true")) {
-					Z_LVAL(ent->data) = 1;
+					Z_IVAL(ent->data) = 1;
 				} else if (!strcmp((char *)s, "false")) {
-					Z_LVAL(ent->data) = 0;
+					Z_IVAL(ent->data) = 0;
 				} else {
 					stack->top--;
 					zval_ptr_dtor(&ent->data);
@@ -1027,9 +1027,9 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 				memcpy(tmp, (char *)s, len);
 				tmp[len] = '\0';
 
-				Z_LVAL(ent->data) = php_parse_date(tmp, NULL);
+				Z_IVAL(ent->data) = php_parse_date(tmp, NULL);
 				/* date out of range < 1969 or > 2038 */
-				if (Z_LVAL(ent->data) == -1) {
+				if (Z_IVAL(ent->data) == -1) {
 					ZVAL_STRINGL(&ent->data, (char *)s, len);
 				}
 				efree(tmp);

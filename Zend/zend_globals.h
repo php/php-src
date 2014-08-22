@@ -112,7 +112,7 @@ struct _zend_compiler_globals {
 
 	zend_llist open_files;
 
-	long catch_begin;
+	zend_int_t catch_begin;
 
 	struct _zend_ini_parser_param *ini_parser_param;
 
@@ -188,7 +188,7 @@ struct _zend_executor_globals {
 
 	zval This;
 
-	long precision;
+	zend_int_t precision;
 
 	int ticks_count;
 
@@ -220,7 +220,7 @@ struct _zend_executor_globals {
 	zend_class_entry      *exception_class;
 
 	/* timeout support */
-	int timeout_seconds;
+	zend_int_t timeout_seconds;
 
 	int lambda_count;
 

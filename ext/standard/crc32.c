@@ -39,7 +39,7 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 	for (; nr--; ++p) {
 		crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32tab[(crc ^ (*p)) & 0xFF ];
 	}
-	RETVAL_LONG(crc^0xFFFFFFFF);
+	RETVAL_INT(crc^0xFFFFFFFF);
 }
 /* }}} */
 

@@ -139,7 +139,7 @@ int dom_characterdata_length_read(dom_object *obj, zval *retval TSRMLS_DC)
 		xmlFree(content);
 	}
 
-	ZVAL_LONG(retval, length);
+	ZVAL_INT(retval, length);
 
 	return SUCCESS;
 }
@@ -156,11 +156,11 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	xmlChar    *cur;
 	xmlChar    *substring;
 	xmlNodePtr  node;
-	long        offset, count;
+	php_int_t        offset, count;
 	int         length;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &id, dom_characterdata_class_entry, &offset, &count) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oii", &id, dom_characterdata_class_entry, &offset, &count) == FAILURE) {
 		return;
 	}
 
@@ -239,11 +239,11 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	xmlChar		*cur, *first, *second;
 	xmlNodePtr  node;
 	char		*arg;
-	long        offset;
+	php_int_t        offset;
 	int         length, arg_len;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ois", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -286,11 +286,11 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 	zval *id;
 	xmlChar    *cur, *substring, *second;
 	xmlNodePtr  node;
-	long        offset, count;
+	php_int_t        offset, count;
 	int         length;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &id, dom_characterdata_class_entry, &offset, &count) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oii", &id, dom_characterdata_class_entry, &offset, &count) == FAILURE) {
 		return;
 	}
 
@@ -342,11 +342,11 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	xmlChar		*cur, *substring, *second = NULL;
 	xmlNodePtr  node;
 	char		*arg;
-	long        offset, count;
+	php_int_t        offset, count;
 	int         length, arg_len;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olls", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oiis", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len) == FAILURE) {
 		return;
 	}
 

@@ -50,7 +50,7 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 	int i_result;
 	int i_op1, i_op2;
 	int str_len;
-	char str_result[MAX_LENGTH_OF_LONG];
+	char str_result[MAX_LENGTH_OF_ZEND_INT];
 
 	i_op1 = atoi(Z_STRVAL_P(op1));
 	STR_FREE(Z_STR_P(op1));
@@ -99,11 +99,11 @@ static void zend_ini_init_string(zval *result)
 */
 static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 {
-	int op1_len = Z_STRLEN_P(op1);
-	int length = op1_len + Z_STRLEN_P(op2);
+	int op1_len = Z_STRSIZE_P(op1);
+	int length = op1_len + Z_STRSIZE_P(op2);
 
 	ZVAL_NEW_STR(result, STR_REALLOC(Z_STR_P(op1), length, 1));
-	memcpy(Z_STRVAL_P(result)+op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+	memcpy(Z_STRVAL_P(result)+op1_len, Z_STRVAL_P(op2), Z_STRSIZE_P(op2));
 	Z_STRVAL_P(result)[length] = 0;
 }
 /* }}} */
@@ -115,7 +115,7 @@ static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 	zval *c, tmp;
 
 	/* If name contains ':' it is not a constant. Bug #26893. */
-	if (!memchr(Z_STRVAL_P(name), ':', Z_STRLEN_P(name))
+	if (!memchr(Z_STRVAL_P(name), ':', Z_STRSIZE_P(name))
 		   	&& (c = zend_get_constant(Z_STR_P(name) TSRMLS_CC)) != 0) {
 		if (Z_TYPE_P(c) != IS_STRING) {
 			ZVAL_COPY_VALUE(&tmp, c);
@@ -126,7 +126,7 @@ static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 			convert_to_string(&tmp);
 			c = &tmp;
 		}
-		ZVAL_PSTRINGL(result, Z_STRVAL_P(c), Z_STRLEN_P(c));
+		ZVAL_PSTRINGL(result, Z_STRVAL_P(c), Z_STRSIZE_P(c));
 		if (c == &tmp) {
 			zval_dtor(&tmp);
 		}
@@ -145,10 +145,10 @@ static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 	char *envvar;
 
 	/* Fetch configuration option value */
-	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRLEN_P(name), &curval) == SUCCESS) {
-		ZVAL_PSTRINGL(result, Z_STRVAL(curval), Z_STRLEN(curval));
+	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRSIZE_P(name), &curval) == SUCCESS) {
+		ZVAL_PSTRINGL(result, Z_STRVAL(curval), Z_STRSIZE(curval));
 	/* ..or if not found, try ENV */
-	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name) TSRMLS_CC)) != NULL ||
+	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRSIZE_P(name) TSRMLS_CC)) != NULL ||
 			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {
 		ZVAL_PSTRING(result, envvar);
 	} else {

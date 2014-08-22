@@ -84,13 +84,13 @@ static int little_endian_long_map[4];
 
 /* {{{ php_pack
  */
-static void php_pack(zval *val, int size, int *map, char *output)
+static void php_pack(zval *val, php_size_t size, int *map, char *output)
 {
 	int i;
 	char *v;
 
-	convert_to_long_ex(val);
-	v = (char *) &Z_LVAL_P(val);
+	convert_to_int_ex(val);
+	v = (char *) &Z_IVAL_P(val);
 
 	for (i = 0; i < size; i++) {
 		*output++ = v[map[i]];
@@ -126,7 +126,7 @@ PHP_FUNCTION(pack)
 	convert_to_string_ex(&argv[0]);
 
 	format = Z_STRVAL(argv[0]);
-	formatlen = Z_STRLEN(argv[0]);
+	formatlen = Z_STRSIZE(argv[0]);
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
@@ -185,7 +185,7 @@ PHP_FUNCTION(pack)
 						SEPARATE_ZVAL(&argv[currentarg]);
 					}
 					convert_to_string_ex(&argv[currentarg]);
-					arg = Z_STRLEN(argv[currentarg]);
+					arg = Z_STRSIZE(argv[currentarg]);
 					if (code == 'Z') {
 						/* add one because Z is always NUL-terminated:
 						 * pack("Z*", "aa") === "aa\0"
@@ -480,9 +480,9 @@ PHP_FUNCTION(pack)
 
 /* {{{ php_unpack
  */
-static long php_unpack(char *data, int size, int issigned, int *map)
+static php_int_t php_unpack(char *data, php_size_t size, int issigned, int *map)
 {
-	long result;
+	php_int_t result;
 	char *cresult = (char *) &result;
 	int i;
 
@@ -512,19 +512,20 @@ static long php_unpack(char *data, int size, int issigned, int *map)
    Unpack binary string into named array elements according to format argument */
 PHP_FUNCTION(unpack)
 {
-	char *format, *input, *formatarg, *inputarg;
-	int formatlen, formatarg_len, inputarg_len;
-	int inputpos, inputlen, i;
+	char *format, *input;
+	zend_string *formatarg, *inputarg;
+	php_size_t formatlen, inputpos, inputlen;
+	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &formatarg, &formatarg_len,
-		&inputarg, &inputarg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &formatarg, 
+		&inputarg) == FAILURE) {
 		return;
 	}
 
-	format = formatarg;
-	formatlen = formatarg_len;
-	input = inputarg;
-	inputlen = inputarg_len;
+	format = formatarg->val;
+	formatlen = formatarg->len;
+	input = inputarg->val;
+	inputlen = inputarg->len;
 	inputpos = 0;
 
 	array_init(return_value);
@@ -656,11 +657,11 @@ PHP_FUNCTION(unpack)
 				inputpos = 0;
 			}
 
-			if ((inputpos + size) <= inputlen) {
+			if ((size >=0 && (inputpos + size) <= inputlen) || (size < 0 && -size <= (inputlen - inputpos))) {
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
-						int len = inputlen - inputpos;	/* Remaining string */
+						php_size_t len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -675,7 +676,7 @@ PHP_FUNCTION(unpack)
 					case 'A': {
 						/* A will strip any trailing whitespace */
 						char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
-						int len = inputlen - inputpos;	/* Remaining string */
+						php_size_t len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -702,7 +703,7 @@ PHP_FUNCTION(unpack)
 					case 'Z': {
 						/* Z will strip everything after the first null character */
 						char pad = '\0';
-						int	 s,
+						php_size_t	 s,
 							 len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
@@ -726,11 +727,11 @@ PHP_FUNCTION(unpack)
 					
 					case 'h': 
 					case 'H': {
-						int len = (inputlen - inputpos) * 2;	/* Remaining */
+						php_size_t len = (inputlen - inputpos) * 2;	/* Remaining */
 						int nibbleshift = (type == 'h') ? 0 : 4;
 						int first = 1;
 						char *buf;
-						int ipos, opos;
+						php_size_t ipos, opos;
 
 						/* If size was given take minimum of len and size */
 						if (size >= 0 && len > (size * 2)) {
@@ -770,8 +771,8 @@ PHP_FUNCTION(unpack)
 					case 'c': 
 					case 'C': {
 						int issigned = (type == 'c') ? (input[inputpos] & 0x80) : 0;
-						long v = php_unpack(&input[inputpos], 1, issigned, byte_map);
-						add_assoc_long(return_value, n, v);
+						php_int_t v = php_unpack(&input[inputpos], 1, issigned, byte_map);
+						add_assoc_int(return_value, n, v);
 						break;
 					}
 
@@ -779,7 +780,7 @@ PHP_FUNCTION(unpack)
 					case 'S': 
 					case 'n': 
 					case 'v': {
-						long v;
+						php_int_t v;
 						int issigned = 0;
 						int *map = machine_endian_short_map;
 
@@ -792,13 +793,13 @@ PHP_FUNCTION(unpack)
 						}
 
 						v = php_unpack(&input[inputpos], 2, issigned, map);
-						add_assoc_long(return_value, n, v);
+						add_assoc_int(return_value, n, v);
 						break;
 					}
 
 					case 'i': 
 					case 'I': {
-						long v;
+						php_int_t v;
 						int issigned = 0;
 
 						if (type == 'i') {
@@ -806,7 +807,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						v = php_unpack(&input[inputpos], sizeof(int), issigned, int_map);
-						add_assoc_long(return_value, n, v);
+						add_assoc_int(return_value, n, v);
 						break;
 					}
 
@@ -816,7 +817,7 @@ PHP_FUNCTION(unpack)
 					case 'V': {
 						int issigned = 0;
 						int *map = machine_endian_long_map;
-						long v = 0;
+						php_int_t v = 0;
 
 						if (type == 'l' || type == 'L') {
 							issigned = input[inputpos + (machine_little_endian ? 3 : 0)] & 0x80;
@@ -828,19 +829,19 @@ PHP_FUNCTION(unpack)
 							map = little_endian_long_map;
 						}
 
-						if (sizeof(long) > 4 && issigned) {
+						if (SIZEOF_ZEND_INT > 4 && issigned) {
 							v = ~INT_MAX;
 						}
 
 						v |= php_unpack(&input[inputpos], 4, issigned, map);
-						if (sizeof(long) > 4) {
+						if (SIZEOF_ZEND_INT > 4) {
  							if (type == 'l') {
 								v = (signed int) v; 
 							} else {
 								v = (unsigned int) v;
 							}
 						}
-						add_assoc_long(return_value, n, v);
+						add_assoc_int(return_value, n, v);
 						break;
 					}
 
@@ -903,8 +904,10 @@ PHP_FUNCTION(unpack)
 			}
 		}
 
-		formatlen--;	/* Skip '/' separator, does no harm if inputlen == 0 */
-		format++;
+		if (formatlen > 0) {
+			formatlen--;	/* Skip '/' separator, does no harm if inputlen == 0 */
+			format++;
+		}
 	}
 }
 /* }}} */
@@ -948,8 +951,8 @@ PHP_MINIT_FUNCTION(pack)
 	}
 	else {
 		zval val;
-		int size = sizeof(Z_LVAL(val));
-		Z_LVAL(val)=0; /*silence a warning*/
+		int size = sizeof(Z_IVAL(val));
+		Z_IVAL(val)=0; /*silence a warning*/
 
 		/* Where to get hi to lo bytes from */
 		byte_map[0] = size - 1;

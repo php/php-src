@@ -2110,11 +2110,11 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			/* Free haystack */
 			efree(haystack);
 			
-			if (Z_LVAL(retval) < 0) {
+			if (Z_IVAL(retval) < 0) {
 				zval_ptr_dtor(&subpats);
 				zval_ptr_dtor(&pattern);
 				return -1;
-			} else if ((Z_LVAL(retval) > 0) && (Z_TYPE(subpats) == IS_ARRAY)) {
+			} else if ((Z_IVAL(retval) > 0) && (Z_TYPE(subpats) == IS_ARRAY)) {
 				/* Need to fetch global match which equals pmatch[0] */
 				zval *pzval;
 				HashTable *ht = Z_ARRVAL(subpats);
@@ -2156,16 +2156,16 @@ magiccheck(struct magic_set *ms, struct magic *m)
 							continue;
 						}
 						ZVAL_DUP(&offsetcopy, offset);
-						convert_to_long(&offsetcopy); 
+						convert_to_int(&offsetcopy); 
 						pattern_offset = &offsetcopy;
 					} ZEND_HASH_FOREACH_END();
 
 					zval_dtor(&tmpcopy); 	
 
 					if ((pattern_match != NULL) && (pattern_offset != NULL)) {
-						ms->search.s += Z_LVAL_P(pattern_offset); /* this is where the match starts */
-						ms->search.offset += Z_LVAL_P(pattern_offset); /* this is where the match starts as size_t */
-						ms->search.rm_len = Z_STRLEN_P(pattern_match) /* This is the length of the matched pattern */;
+						ms->search.s += Z_IVAL_P(pattern_offset); /* this is where the match starts */
+						ms->search.offset += Z_IVAL_P(pattern_offset); /* this is where the match starts as size_t */
+						ms->search.rm_len = Z_STRSIZE_P(pattern_match) /* This is the length of the matched pattern */;
 						v = 0;
 
 						zval_ptr_dtor(pattern_match);

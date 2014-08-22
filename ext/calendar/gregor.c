@@ -135,7 +135,7 @@
 #define DAYS_PER_400_YEARS 146097
 
 void SdnToGregorian(
-					   long int sdn,
+					   php_int_t sdn,
 					   int *pYear,
 					   int *pMonth,
 					   int *pDay)
@@ -144,7 +144,7 @@ void SdnToGregorian(
 	int year;
 	int month;
 	int day;
-	long int temp;
+	php_int_t temp;
 	int dayOfYear;
 
 	if (sdn <= 0 ||
@@ -190,7 +190,7 @@ fail:
 	*pDay = 0;
 }
 
-long int GregorianToSdn(
+php_int_t GregorianToSdn(
 						   int inputYear,
 						   int inputMonth,
 						   int inputDay)

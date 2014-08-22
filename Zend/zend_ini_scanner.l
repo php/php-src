@@ -267,7 +267,7 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 
 	/* convert escape sequences */
 	s = t = Z_STRVAL_P(lval);
-	end = s + Z_STRLEN_P(lval);
+	end = s + Z_STRSIZE_P(lval);
 
 	while (s < end) {
 		if (*s == '\\') {
@@ -286,7 +286,7 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 				case '\\':
 				case '$':
 					*t++ = *s;
-					Z_STRLEN_P(lval)--;
+					Z_STRSIZE_P(lval)--;
 					break;
 				default:
 					*t++ = '\\';

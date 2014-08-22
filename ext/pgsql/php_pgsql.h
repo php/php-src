@@ -211,11 +211,11 @@ PHP_FUNCTION(pg_select);
 
 /* exported functions */
 PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, zend_bool extended TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, ulong opt TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, ulong opt, zend_string **sql TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, ulong opt , zend_string **sql TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, ulong opt, zend_string **sql TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, ulong opt, zend_string **sql  TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, php_uint_t opt TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, php_uint_t opt, zend_string **sql TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, php_uint_t opt , zend_string **sql TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, php_uint_t opt, zend_string **sql TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, php_uint_t opt, zend_string **sql  TSRMLS_DC);
 PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC);
 
 /* internal functions */
@@ -309,10 +309,10 @@ static php_stream_ops php_stream_pgsql_fd_ops = {
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(pgsql)
-	long num_links,num_persistent;
-	long max_links,max_persistent;
-	long allow_persistent;
-	long auto_reset_persistent;
+	php_int_t num_links,num_persistent;
+	php_int_t max_links,max_persistent;
+	php_int_t allow_persistent;
+	php_int_t auto_reset_persistent;
 	int le_lofp,le_string;
 	int ignore_notices,log_notices;
 	HashTable notices;  /* notice message for each connection */

@@ -36,7 +36,7 @@
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
 
-static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_DC);
+static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, php_int_t attr, zval *value TSRMLS_DC);
 
 void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp TSRMLS_DC) /* {{{ */
 {
@@ -85,7 +85,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		array_init(&info);
 
 		add_next_index_string(&info, *pdo_err);
-		add_next_index_long(&info, 0);
+		add_next_index_int(&info, 0);
 		zend_update_property(pdo_ex, &ex, "errorInfo", sizeof("errorInfo")-1, &info TSRMLS_CC);
 		zval_ptr_dtor(&info);
 
@@ -103,7 +103,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{
 	pdo_error_type *pdo_err = &dbh->error_code;
 	const char *msg = "<<Unknown>>";
 	char *supp = NULL;
-	long native_code = 0;
+	php_int_t native_code = 0;
 	zend_string *message = NULL;
 	zval info;
 
@@ -131,11 +131,11 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{
 			zval *item;
 
 			if ((item = zend_hash_index_find(Z_ARRVAL(info), 1)) != NULL) {
-				native_code = Z_LVAL_P(item);
+				native_code = Z_IVAL_P(item);
 			}
 			
 			if ((item = zend_hash_index_find(Z_ARRVAL(info), 2)) != NULL) {
-				supp = estrndup(Z_STRVAL_P(item), Z_STRLEN_P(item));
+				supp = estrndup(Z_STRVAL_P(item), Z_STRSIZE_P(item));
 			}
 		}
 	}
@@ -277,7 +277,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		if ((v = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT)) != NULL) {
 			if (Z_TYPE_P(v) == IS_STRING &&
-				!is_numeric_string(Z_STRVAL_P(v), Z_STRLEN_P(v), NULL, NULL, 0) && Z_STRLEN_P(v) > 0) {
+				!is_numeric_string(Z_STRVAL_P(v), Z_STRSIZE_P(v), NULL, NULL, 0) && Z_STRSIZE_P(v) > 0) {
 				/* user specified key */
 				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s:%s", data_source,
 						username ? username : "",
@@ -285,8 +285,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 						Z_STRVAL_P(v));
 				is_persistent = 1;
 			} else {
-				convert_to_long_ex(v);
-				is_persistent = Z_LVAL_P(v) ? 1 : 0;
+				convert_to_int_ex(v);
+				is_persistent = Z_IVAL_P(v) ? 1 : 0;
 				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s", data_source,
 						username ? username : "",
 						password ? password : "");
@@ -350,7 +350,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		dbh->default_fetch_type = PDO_FETCH_BOTH;
 	}	
 
-	dbh->auto_commit = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
+	dbh->auto_commit = pdo_attr_ival(options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
 
 	if (!dbh->data_source || (username && !dbh->username) || (password && !dbh->password)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
@@ -385,7 +385,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 options:
 		if (options) {
 			zval *attr_value;
-			ulong long_key;
+			php_uint_t long_key;
 			zend_string *str_key = NULL;
 
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), long_key, str_key, attr_value) {
@@ -675,11 +675,11 @@ static PHP_METHOD(PDO, inTransaction)
 }
 /* }}} */
 
-static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_DC) /* {{{ */
+static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, php_int_t attr, zval *value TSRMLS_DC) /* {{{ */
 {
 
-#define PDO_LONG_PARAM_CHECK \
-	if (Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_STRING && Z_TYPE_P(value) != IS_FALSE && Z_TYPE_P(value) != IS_TRUE) { \
+#define PDO_INT_PARAM_CHECK \
+	if (Z_TYPE_P(value) != IS_INT && Z_TYPE_P(value) != IS_STRING && Z_TYPE_P(value) != IS_FALSE && Z_TYPE_P(value) != IS_TRUE) { \
 		pdo_raise_impl_error(dbh, NULL, "HY000", "attribute value must be an integer" TSRMLS_CC); \
 		PDO_HANDLE_DBH_ERR(); \
 		return FAILURE; \
@@ -687,13 +687,13 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_D
 
 	switch (attr) {
 		case PDO_ATTR_ERRMODE:
-			PDO_LONG_PARAM_CHECK;
-			convert_to_long(value);
-			switch (Z_LVAL_P(value)) {
+			PDO_INT_PARAM_CHECK;
+			convert_to_int(value);
+			switch (Z_IVAL_P(value)) {
 				case PDO_ERRMODE_SILENT:
 				case PDO_ERRMODE_WARNING:
 				case PDO_ERRMODE_EXCEPTION:
-					dbh->error_mode = Z_LVAL_P(value);
+					dbh->error_mode = Z_IVAL_P(value);
 					return SUCCESS;
 				default:
 					pdo_raise_impl_error(dbh, NULL, "HY000", "invalid error mode" TSRMLS_CC);
@@ -703,13 +703,13 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_D
 			return FAILURE;
 
 		case PDO_ATTR_CASE:
-			PDO_LONG_PARAM_CHECK;
-			convert_to_long(value);
-			switch (Z_LVAL_P(value)) {
+			PDO_INT_PARAM_CHECK;
+			convert_to_int(value);
+			switch (Z_IVAL_P(value)) {
 				case PDO_CASE_NATURAL:
 				case PDO_CASE_UPPER:
 				case PDO_CASE_LOWER:
-					dbh->desired_case = Z_LVAL_P(value);
+					dbh->desired_case = Z_IVAL_P(value);
 					return SUCCESS;
 				default:
 					pdo_raise_impl_error(dbh, NULL, "HY000", "invalid case folding mode" TSRMLS_CC);
@@ -719,35 +719,35 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_D
 			return FAILURE;
 
 		case PDO_ATTR_ORACLE_NULLS:
-			PDO_LONG_PARAM_CHECK;
-			convert_to_long(value);
-			dbh->oracle_nulls = Z_LVAL_P(value);
+			PDO_INT_PARAM_CHECK;
+			convert_to_int(value);
+			dbh->oracle_nulls = Z_IVAL_P(value);
 			return SUCCESS;
 
 		case PDO_ATTR_DEFAULT_FETCH_MODE:
 			if (Z_TYPE_P(value) == IS_ARRAY) {
 				zval *tmp;
-				if ((tmp = zend_hash_index_find(Z_ARRVAL_P(value), 0)) != NULL && Z_TYPE_P(tmp) == IS_LONG) {
-					if (Z_LVAL_P(tmp) == PDO_FETCH_INTO || Z_LVAL_P(tmp) == PDO_FETCH_CLASS) {
+				if ((tmp = zend_hash_index_find(Z_ARRVAL_P(value), 0)) != NULL && Z_TYPE_P(tmp) == IS_INT) {
+					if (Z_IVAL_P(tmp) == PDO_FETCH_INTO || Z_IVAL_P(tmp) == PDO_FETCH_CLASS) {
 						pdo_raise_impl_error(dbh, NULL, "HY000", "FETCH_INTO and FETCH_CLASS are not yet supported as default fetch modes" TSRMLS_CC);
 						return FAILURE;
 					}
 				}
 			} else {
-				PDO_LONG_PARAM_CHECK;
+				PDO_INT_PARAM_CHECK;
 			}
-			convert_to_long(value);
-			if (Z_LVAL_P(value) == PDO_FETCH_USE_DEFAULT) {
+			convert_to_int(value);
+			if (Z_IVAL_P(value) == PDO_FETCH_USE_DEFAULT) {
 				pdo_raise_impl_error(dbh, NULL, "HY000", "invalid fetch mode type" TSRMLS_CC);
 				return FAILURE;
 			}
-			dbh->default_fetch_type = Z_LVAL_P(value);
+			dbh->default_fetch_type = Z_IVAL_P(value);
 			return SUCCESS;
 
 		case PDO_ATTR_STRINGIFY_FETCHES:
-			PDO_LONG_PARAM_CHECK;
-			convert_to_long(value);
-			dbh->stringify = Z_LVAL_P(value) ? 1 : 0;
+			PDO_INT_PARAM_CHECK;
+			convert_to_int(value);
+			dbh->stringify = Z_IVAL_P(value) ? 1 : 0;
 			return SUCCESS;
 			
 		case PDO_ATTR_STATEMENT_CLASS: {
@@ -835,10 +835,10 @@ fail:
 static PHP_METHOD(PDO, setAttribute)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
-	long attr;
+	php_int_t attr;
 	zval *value;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz", &attr, &value)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iz", &attr, &value)) {
 		RETURN_FALSE;
 	}
 
@@ -857,9 +857,9 @@ static PHP_METHOD(PDO, setAttribute)
 static PHP_METHOD(PDO, getAttribute)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
-	long attr;
+	php_int_t attr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &attr)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &attr)) {
 		RETURN_FALSE;
 	}
 
@@ -872,13 +872,13 @@ static PHP_METHOD(PDO, getAttribute)
 			RETURN_BOOL(dbh->is_persistent);
 			
 		case PDO_ATTR_CASE:
-			RETURN_LONG(dbh->desired_case);
+			RETURN_INT(dbh->desired_case);
 
 		case PDO_ATTR_ORACLE_NULLS:
-			RETURN_LONG(dbh->oracle_nulls);
+			RETURN_INT(dbh->oracle_nulls);
 
 		case PDO_ATTR_ERRMODE:
-			RETURN_LONG(dbh->error_mode);
+			RETURN_INT(dbh->error_mode);
 
 		case PDO_ATTR_DRIVER_NAME:
 			RETURN_STRINGL((char*)dbh->driver->driver_name, dbh->driver->driver_name_len);
@@ -892,7 +892,7 @@ static PHP_METHOD(PDO, getAttribute)
 			}
 			return;
 		case PDO_ATTR_DEFAULT_FETCH_MODE:
-			RETURN_LONG(dbh->default_fetch_type);
+			RETURN_INT(dbh->default_fetch_type);
 		default:
 			break;
 	}
@@ -924,7 +924,7 @@ static PHP_METHOD(PDO, exec)
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
 	char *statement;
 	int statement_len;
-	long ret;
+	php_int_t ret;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &statement, &statement_len)) {
 		RETURN_FALSE;
@@ -941,7 +941,7 @@ static PHP_METHOD(PDO, exec)
 		PDO_HANDLE_DBH_ERR();
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(ret);
+		RETURN_INT(ret);
 	}
 }
 /* }}} */
@@ -1136,11 +1136,11 @@ static PHP_METHOD(PDO, quote)
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
 	char *str;
 	int str_len;
-	long paramtype = PDO_PARAM_STR;
+	php_int_t paramtype = PDO_PARAM_STR;
 	char *qstr;
 	int qlen;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &paramtype)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &str, &str_len, &paramtype)) {
 		RETURN_FALSE;
 	}
 	
@@ -1382,99 +1382,100 @@ void pdo_dbh_init(TSRMLS_D)
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
 	pdo_dbh_object_handlers.compare_objects = dbh_compare;
 	
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_BOOL", (long)PDO_PARAM_BOOL);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_NULL", (long)PDO_PARAM_NULL);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_INT",  (long)PDO_PARAM_INT);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_STR",  (long)PDO_PARAM_STR);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_LOB",  (long)PDO_PARAM_LOB);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_STMT", (long)PDO_PARAM_STMT);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_INPUT_OUTPUT", (long)PDO_PARAM_INPUT_OUTPUT);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_BOOL", (php_int_t)PDO_PARAM_BOOL);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_NULL", (php_int_t)PDO_PARAM_NULL);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_INT",  (php_int_t)PDO_PARAM_INT);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_STR",  (php_int_t)PDO_PARAM_STR);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_LOB",  (php_int_t)PDO_PARAM_LOB);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_STMT", (php_int_t)PDO_PARAM_STMT);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_INPUT_OUTPUT", (php_int_t)PDO_PARAM_INPUT_OUTPUT);
 
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_ALLOC",		(long)PDO_PARAM_EVT_ALLOC);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_FREE",			(long)PDO_PARAM_EVT_FREE);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_EXEC_PRE",		(long)PDO_PARAM_EVT_EXEC_PRE);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_EXEC_POST",	(long)PDO_PARAM_EVT_EXEC_POST);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_FETCH_PRE",	(long)PDO_PARAM_EVT_FETCH_PRE);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_FETCH_POST",	(long)PDO_PARAM_EVT_FETCH_POST);
-	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_NORMALIZE",	(long)PDO_PARAM_EVT_NORMALIZE);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_EVT_ALLOC",		(php_int_t)PDO_PARAM_EVT_ALLOC);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_EVT_FREE",			(php_int_t)PDO_PARAM_EVT_FREE);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_EVT_EXEC_PRE",		(php_int_t)PDO_PARAM_EVT_EXEC_PRE);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_EVT_EXEC_POST",	(php_int_t)PDO_PARAM_EVT_EXEC_POST);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_EVT_FETCH_PRE",	(php_int_t)PDO_PARAM_EVT_FETCH_PRE);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_EVT_FETCH_POST",	(php_int_t)PDO_PARAM_EVT_FETCH_POST);
+	REGISTER_PDO_CLASS_CONST_INT("PARAM_EVT_NORMALIZE",	(php_int_t)PDO_PARAM_EVT_NORMALIZE);
 
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_LAZY", (long)PDO_FETCH_LAZY);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_ASSOC",(long)PDO_FETCH_ASSOC);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_NUM",  (long)PDO_FETCH_NUM);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_BOTH", (long)PDO_FETCH_BOTH);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_OBJ",  (long)PDO_FETCH_OBJ);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_BOUND",(long)PDO_FETCH_BOUND);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_COLUMN",(long)PDO_FETCH_COLUMN);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_CLASS",(long)PDO_FETCH_CLASS);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_INTO", (long)PDO_FETCH_INTO);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_FUNC", (long)PDO_FETCH_FUNC);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_GROUP",(long)PDO_FETCH_GROUP);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_UNIQUE",(long)PDO_FETCH_UNIQUE);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_KEY_PAIR",(long)PDO_FETCH_KEY_PAIR);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_CLASSTYPE",(long)PDO_FETCH_CLASSTYPE);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_LAZY", (php_int_t)PDO_FETCH_LAZY);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_ASSOC", (php_int_t)PDO_FETCH_ASSOC);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_NUM",  (php_int_t)PDO_FETCH_NUM);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_BOTH", (php_int_t)PDO_FETCH_BOTH);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_OBJ",  (php_int_t)PDO_FETCH_OBJ);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_BOUND", (php_int_t)PDO_FETCH_BOUND);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_COLUMN", (php_int_t)PDO_FETCH_COLUMN);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_CLASS", (php_int_t)PDO_FETCH_CLASS);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_INTO", (php_int_t)PDO_FETCH_INTO);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_FUNC", (php_int_t)PDO_FETCH_FUNC);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_GROUP", (php_int_t)PDO_FETCH_GROUP);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_UNIQUE", (php_int_t)PDO_FETCH_UNIQUE);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_KEY_PAIR", (php_int_t)PDO_FETCH_KEY_PAIR);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_CLASSTYPE", (php_int_t)PDO_FETCH_CLASSTYPE);
+
 #if PHP_VERSION_ID >= 50100
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_SERIALIZE",(long)PDO_FETCH_SERIALIZE);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_SERIALIZE",(php_int_t)PDO_FETCH_SERIALIZE);
 #endif
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_PROPS_LATE",(long)PDO_FETCH_PROPS_LATE);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_NAMED",(long)PDO_FETCH_NAMED);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_PROPS_LATE", (php_int_t)PDO_FETCH_PROPS_LATE);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_NAMED", (php_int_t)PDO_FETCH_NAMED);
 
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_AUTOCOMMIT",	(long)PDO_ATTR_AUTOCOMMIT);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_PREFETCH",		(long)PDO_ATTR_PREFETCH);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_TIMEOUT", 		(long)PDO_ATTR_TIMEOUT);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_ERRMODE", 		(long)PDO_ATTR_ERRMODE);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_SERVER_VERSION",	(long)PDO_ATTR_SERVER_VERSION);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_CLIENT_VERSION", 	(long)PDO_ATTR_CLIENT_VERSION);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_SERVER_INFO",		(long)PDO_ATTR_SERVER_INFO);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_CONNECTION_STATUS", 	(long)PDO_ATTR_CONNECTION_STATUS);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_CASE",		 	(long)PDO_ATTR_CASE);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_CURSOR_NAME", 	(long)PDO_ATTR_CURSOR_NAME);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_CURSOR",	 	(long)PDO_ATTR_CURSOR);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_ORACLE_NULLS",	(long)PDO_ATTR_ORACLE_NULLS);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_PERSISTENT",	(long)PDO_ATTR_PERSISTENT);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_STATEMENT_CLASS",		(long)PDO_ATTR_STATEMENT_CLASS);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_FETCH_TABLE_NAMES",		(long)PDO_ATTR_FETCH_TABLE_NAMES);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_FETCH_CATALOG_NAMES",		(long)PDO_ATTR_FETCH_CATALOG_NAMES);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_DRIVER_NAME",		(long)PDO_ATTR_DRIVER_NAME);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_STRINGIFY_FETCHES",(long)PDO_ATTR_STRINGIFY_FETCHES);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_MAX_COLUMN_LEN",(long)PDO_ATTR_MAX_COLUMN_LEN);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_EMULATE_PREPARES",(long)PDO_ATTR_EMULATE_PREPARES);
-	REGISTER_PDO_CLASS_CONST_LONG("ATTR_DEFAULT_FETCH_MODE",(long)PDO_ATTR_DEFAULT_FETCH_MODE);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_AUTOCOMMIT",	(php_int_t)PDO_ATTR_AUTOCOMMIT);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_PREFETCH",		(php_int_t)PDO_ATTR_PREFETCH);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_TIMEOUT", 		(php_int_t)PDO_ATTR_TIMEOUT);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_ERRMODE", 		(php_int_t)PDO_ATTR_ERRMODE);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_SERVER_VERSION",	(php_int_t)PDO_ATTR_SERVER_VERSION);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_CLIENT_VERSION", 	(php_int_t)PDO_ATTR_CLIENT_VERSION);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_SERVER_INFO",		(php_int_t)PDO_ATTR_SERVER_INFO);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_CONNECTION_STATUS", 	(php_int_t)PDO_ATTR_CONNECTION_STATUS);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_CASE",		 	(php_int_t)PDO_ATTR_CASE);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_CURSOR_NAME", 	(php_int_t)PDO_ATTR_CURSOR_NAME);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_CURSOR",	 	(php_int_t)PDO_ATTR_CURSOR);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_ORACLE_NULLS",	(php_int_t)PDO_ATTR_ORACLE_NULLS);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_PERSISTENT",	(php_int_t)PDO_ATTR_PERSISTENT);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_STATEMENT_CLASS",		(php_int_t)PDO_ATTR_STATEMENT_CLASS);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_FETCH_TABLE_NAMES",		(php_int_t)PDO_ATTR_FETCH_TABLE_NAMES);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_FETCH_CATALOG_NAMES",		(php_int_t)PDO_ATTR_FETCH_CATALOG_NAMES);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_DRIVER_NAME",		(php_int_t)PDO_ATTR_DRIVER_NAME);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_STRINGIFY_FETCHES", (php_int_t)PDO_ATTR_STRINGIFY_FETCHES);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_MAX_COLUMN_LEN", (php_int_t)PDO_ATTR_MAX_COLUMN_LEN);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_EMULATE_PREPARES", (php_int_t)PDO_ATTR_EMULATE_PREPARES);
+	REGISTER_PDO_CLASS_CONST_INT("ATTR_DEFAULT_FETCH_MODE", (php_int_t)PDO_ATTR_DEFAULT_FETCH_MODE);
 	
-	REGISTER_PDO_CLASS_CONST_LONG("ERRMODE_SILENT",	(long)PDO_ERRMODE_SILENT);
-	REGISTER_PDO_CLASS_CONST_LONG("ERRMODE_WARNING",	(long)PDO_ERRMODE_WARNING);
-	REGISTER_PDO_CLASS_CONST_LONG("ERRMODE_EXCEPTION",	(long)PDO_ERRMODE_EXCEPTION);
+	REGISTER_PDO_CLASS_CONST_INT("ERRMODE_SILENT",	(php_int_t)PDO_ERRMODE_SILENT);
+	REGISTER_PDO_CLASS_CONST_INT("ERRMODE_WARNING",	(php_int_t)PDO_ERRMODE_WARNING);
+	REGISTER_PDO_CLASS_CONST_INT("ERRMODE_EXCEPTION",	(php_int_t)PDO_ERRMODE_EXCEPTION);
 
-	REGISTER_PDO_CLASS_CONST_LONG("CASE_NATURAL",	(long)PDO_CASE_NATURAL);
-	REGISTER_PDO_CLASS_CONST_LONG("CASE_LOWER",	(long)PDO_CASE_LOWER);
-	REGISTER_PDO_CLASS_CONST_LONG("CASE_UPPER",	(long)PDO_CASE_UPPER);
+	REGISTER_PDO_CLASS_CONST_INT("CASE_NATURAL",	(php_int_t)PDO_CASE_NATURAL);
+	REGISTER_PDO_CLASS_CONST_INT("CASE_LOWER",	(php_int_t)PDO_CASE_LOWER);
+	REGISTER_PDO_CLASS_CONST_INT("CASE_UPPER",	(php_int_t)PDO_CASE_UPPER);
 
-	REGISTER_PDO_CLASS_CONST_LONG("NULL_NATURAL",	(long)PDO_NULL_NATURAL);
-	REGISTER_PDO_CLASS_CONST_LONG("NULL_EMPTY_STRING",	(long)PDO_NULL_EMPTY_STRING);
-	REGISTER_PDO_CLASS_CONST_LONG("NULL_TO_STRING",	(long)PDO_NULL_TO_STRING);
+	REGISTER_PDO_CLASS_CONST_INT("NULL_NATURAL",	(php_int_t)PDO_NULL_NATURAL);
+	REGISTER_PDO_CLASS_CONST_INT("NULL_EMPTY_STRING",	(php_int_t)PDO_NULL_EMPTY_STRING);
+	REGISTER_PDO_CLASS_CONST_INT("NULL_TO_STRING",	(php_int_t)PDO_NULL_TO_STRING);
 			
 	REGISTER_PDO_CLASS_CONST_STRING("ERR_NONE",	PDO_ERR_NONE);
 
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_ORI_NEXT", (long)PDO_FETCH_ORI_NEXT);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_ORI_PRIOR", (long)PDO_FETCH_ORI_PRIOR);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_ORI_FIRST", (long)PDO_FETCH_ORI_FIRST);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_ORI_LAST", (long)PDO_FETCH_ORI_LAST);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_ORI_ABS", (long)PDO_FETCH_ORI_ABS);
-	REGISTER_PDO_CLASS_CONST_LONG("FETCH_ORI_REL", (long)PDO_FETCH_ORI_REL);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_ORI_NEXT", (php_int_t)PDO_FETCH_ORI_NEXT);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_ORI_PRIOR", (php_int_t)PDO_FETCH_ORI_PRIOR);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_ORI_FIRST", (php_int_t)PDO_FETCH_ORI_FIRST);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_ORI_LAST", (php_int_t)PDO_FETCH_ORI_LAST);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_ORI_ABS", (php_int_t)PDO_FETCH_ORI_ABS);
+	REGISTER_PDO_CLASS_CONST_INT("FETCH_ORI_REL", (php_int_t)PDO_FETCH_ORI_REL);
 	
-	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_FWDONLY", (long)PDO_CURSOR_FWDONLY);
-	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_SCROLL", (long)PDO_CURSOR_SCROLL);
+	REGISTER_PDO_CLASS_CONST_INT("CURSOR_FWDONLY", (php_int_t)PDO_CURSOR_FWDONLY);
+	REGISTER_PDO_CLASS_CONST_INT("CURSOR_SCROLL", (php_int_t)PDO_CURSOR_SCROLL);
 
 #if 0
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_CANT_MAP", 		(long)PDO_ERR_CANT_MAP);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_SYNTAX", 		(long)PDO_ERR_SYNTAX);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_CONSTRAINT", 	(long)PDO_ERR_CONSTRAINT);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_NOT_FOUND", 		(long)PDO_ERR_NOT_FOUND);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_ALREADY_EXISTS", 	(long)PDO_ERR_ALREADY_EXISTS);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_NOT_IMPLEMENTED", 	(long)PDO_ERR_NOT_IMPLEMENTED);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_MISMATCH", 		(long)PDO_ERR_MISMATCH);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_TRUNCATED", 		(long)PDO_ERR_TRUNCATED);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_DISCONNECTED", 	(long)PDO_ERR_DISCONNECTED);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_NO_PERM",		(long)PDO_ERR_NO_PERM);
+	REGISTER_PDO_CLASS_CONST_INT("ERR_CANT_MAP", 		(php_int_t)PDO_ERR_CANT_MAP);
+	REGISTER_PDO_CLASS_CONST_INT("ERR_SYNTAX", 		(php_int_t)PDO_ERR_SYNTAX);
+	REGISTER_PDO_CLASS_CONST_INT("ERR_CONSTRAINT", 	(php_int_t)PDO_ERR_CONSTRAINT);
+	REGISTER_PDO_CLASS_CONST_INT("ERR_NOT_FOUND", 		(php_int_t)PDO_ERR_NOT_FOUND);
+	REGISTER_PDO_CLASS_CONST_INT("ERR_ALREADY_EXISTS", 	(php_int_t)PDO_ERR_ALREADY_EXISTS);
+	REGISTER_PDO_CLASS_CONST_INT("ERR_NOT_IMPLEMENTED", 	(php_int_t)PDO_ERR_NOT_IMPLEMENTED);
+	REGISTER_PDO_CLASS_CONST_INT("ERR_MISMATCH", 		(php_int_t)PDO_ERR_MISMATCH);
+	REGISTER_PDO_CLASS_CONST_INT("ERR_TRUNCATED", 		(php_int_t)PDO_ERR_TRUNCATED);
+	REGISTER_PDO_CLASS_CONST_INT("ERR_DISCONNECTED", 	(php_int_t)PDO_ERR_DISCONNECTED);
+	REGISTER_PDO_CLASS_CONST_INT("ERR_NO_PERM",		(php_int_t)PDO_ERR_NO_PERM);
 #endif
 
 }

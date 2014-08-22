@@ -95,7 +95,7 @@ PHP_FUNCTION(levenshtein)
 	char *str1, *str2;
 	char *callback_name;
 	int str1_len, str2_len, callback_len;
-	long cost_ins, cost_rep, cost_del;
+	php_int_t cost_ins, cost_rep, cost_del;
 	int distance = -1;
 
 	switch (argc) {
@@ -107,7 +107,7 @@ PHP_FUNCTION(levenshtein)
 			break;
 
 		case 5: /* more general version: calc cost by ins/rep/del weights */
-			if (zend_parse_parameters(5 TSRMLS_CC, "sslll", &str1, &str1_len, &str2, &str2_len, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
+			if (zend_parse_parameters(5 TSRMLS_CC, "ssiii", &str1, &str1_len, &str2, &str2_len, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
 				return;
 			}
 			distance = reference_levdist(str1, str1_len, str2, str2_len, cost_ins, cost_rep, cost_del);
@@ -128,7 +128,7 @@ PHP_FUNCTION(levenshtein)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument string(s) too long");
 	}
 
-	RETURN_LONG(distance);
+	RETURN_INT(distance);
 }
 /* }}} */
 

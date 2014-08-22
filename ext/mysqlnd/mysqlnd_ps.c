@@ -776,7 +776,7 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int
 							  Thus for NULL and zero-length we are quite efficient.
 							*/
 							if (Z_TYPE(current_row[i]) == IS_STRING) {
-								unsigned long len = Z_STRLEN(current_row[i]);
+								php_uint_t len = Z_STRSIZE(current_row[i]);
 								if (meta->fields[i].max_length < len) {
 									meta->fields[i].max_length = len;
 								}
@@ -905,8 +905,8 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, unsigned i
 #endif
 					if (!Z_ISNULL_P(data)) {
 						if ((Z_TYPE_P(data) == IS_STRING) &&
-								(meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
-							meta->fields[i].max_length = Z_STRLEN_P(data);
+								(meta->fields[i].max_length < (unsigned long) Z_STRSIZE_P(data))) {
+							meta->fields[i].max_length = Z_STRSIZE_P(data);
 						}
 						ZVAL_COPY_VALUE(result, data);
 						/* copied data, thus also the ownership. Thus null data */
@@ -1093,8 +1093,8 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 
 					if (!Z_ISNULL_P(data)) {
 						if ((Z_TYPE_P(data) == IS_STRING) &&
-								(meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
-							meta->fields[i].max_length = Z_STRLEN_P(data);
+								(meta->fields[i].max_length < (unsigned long) Z_STRSIZE_P(data))) {
+							meta->fields[i].max_length = Z_STRSIZE_P(data);
 						}
 						ZVAL_COPY_VALUE(result, data);
 						/* copied data, thus also the ownership. Thus null data */
@@ -1302,7 +1302,7 @@ MYSQLND_METHOD(mysqlnd_stmt, flush)(MYSQLND_STMT * const s TSRMLS_DC)
 /* {{{ mysqlnd_stmt::send_long_data */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned int param_no,
-							 				 const char * const data, unsigned long length TSRMLS_DC)
+							 				 const char * const data, php_uint_t length TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	enum_func_status ret = FAIL;
@@ -1879,7 +1879,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 		}
 		case STMT_ATTR_CURSOR_TYPE: {
 			unsigned int ival = *(unsigned int *) value;
-			if (ival > (unsigned long) CURSOR_TYPE_READ_ONLY) {
+			if (ival > (php_uint_t) CURSOR_TYPE_READ_ONLY) {
 				SET_STMT_ERROR(stmt, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 				DBG_INF("FAIL");
 				DBG_RETURN(FAIL);
@@ -1927,10 +1927,10 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 			*(zend_bool *) value= stmt->update_max_length;
 			break;
 		case STMT_ATTR_CURSOR_TYPE:
-			*(unsigned long *) value= stmt->flags;
+			*(php_uint_t *) value= stmt->flags;
 			break;
 		case STMT_ATTR_PREFETCH_ROWS:
-			*(unsigned long *) value= stmt->prefetch_rows;
+			*(php_uint_t *) value= stmt->prefetch_rows;
 			break;
 		default:
 			DBG_RETURN(FAIL);

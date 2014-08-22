@@ -37,9 +37,9 @@ There is also snprintf: See difference explained in snprintf.h
 #include "snprintf.h"
 
 BEGIN_EXTERN_C()
-PHPAPI int spprintf( char **pbuf, size_t max_len, const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI php_size_t spprintf( char **pbuf, size_t max_len, const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 
-PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
+PHPAPI php_size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 
 PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap);
 

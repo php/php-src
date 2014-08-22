@@ -72,7 +72,7 @@
 		*p = ' ';								\
 	}											\
 
-extern long php_getuid(TSRMLS_D);
+extern php_int_t php_getuid(TSRMLS_D);
 
 /* {{{ proto int ezmlm_hash(string addr)
    Calculate EZMLM list hash value. */
@@ -92,7 +92,7 @@ PHP_FUNCTION(ezmlm_hash)
 
 	h = (h % 53);
 
-	RETURN_LONG((int) h);
+	RETURN_INT((int) h);
 }
 /* }}} */
 

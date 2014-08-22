@@ -606,7 +606,7 @@ enum php_mysqlnd_server_command
 };
 
 
-#define MYSQLND_DEFAULT_PREFETCH_ROWS (ulong) 1
+#define MYSQLND_DEFAULT_PREFETCH_ROWS (php_uint_t) 1
 
 #define MYSQLND_REFRESH_GRANT		1	/* Refresh grant tables */
 #define MYSQLND_REFRESH_LOG			2	/* Start on new log file */

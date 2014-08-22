@@ -103,8 +103,18 @@ typedef struct _php_stream_filter php_stream_filter;
 #include "streams/php_stream_context.h"
 #include "streams/php_stream_filter_api.h"
 
+#ifdef _WIN64
+# define php_fstat _fstat64
+# define php_stat_fn _stat64
+typedef struct __stat64 php_stat_t;
+#else
+# define php_fstat fstat
+# define php_stat_fn stat
+typedef struct stat php_stat_t;
+#endif
+
 typedef struct _php_stream_statbuf {
-	struct stat sb; /* regular info */
+	zend_stat_t sb; /* regular info */
 	/* extended info to go here some day: content-type etc. etc. */
 } php_stream_statbuf;
 
@@ -123,7 +133,7 @@ typedef struct _php_stream_ops  {
 	const char *label; /* label for this ops structure */
 
 	/* these are optional */
-	int (*seek)(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
+	int (*seek)(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC);
 	int (*cast)(php_stream *stream, int castas, void **ret TSRMLS_DC);
 	int (*stat)(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 	int (*set_option)(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
@@ -209,11 +219,11 @@ struct _php_stream  {
 	int flags;	/* PHP_STREAM_FLAG_XXX */
 
 	/* buffer */
-	off_t position; /* of underlying stream */
+	zend_off_t position; /* of underlying stream */
 	unsigned char *readbuf;
 	size_t readbuflen;
-	off_t readpos;
-	off_t writepos;
+	zend_off_t readpos;
+	zend_off_t writepos;
 
 	/* how much data to read when filling buffer */
 	size_t chunk_size;
@@ -279,11 +289,11 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC);
 #define php_stream_close(stream)	_php_stream_free((stream), PHP_STREAM_FREE_CLOSE TSRMLS_CC)
 #define php_stream_pclose(stream)	_php_stream_free((stream), PHP_STREAM_FREE_CLOSE_PERSISTENT TSRMLS_CC)
 
-PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC);
+PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence TSRMLS_DC);
 #define php_stream_rewind(stream)	_php_stream_seek((stream), 0L, SEEK_SET TSRMLS_CC)
 #define php_stream_seek(stream, offset, whence)	_php_stream_seek((stream), (offset), (whence) TSRMLS_CC)
 
-PHPAPI off_t _php_stream_tell(php_stream *stream TSRMLS_DC);
+PHPAPI zend_off_t _php_stream_tell(php_stream *stream TSRMLS_DC);
 #define php_stream_tell(stream)	_php_stream_tell((stream) TSRMLS_CC)
 
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC);

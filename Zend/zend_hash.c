@@ -183,7 +183,7 @@ ZEND_API void zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProt
 
 static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key)
 {
-	ulong h;
+	zend_uint_t h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
@@ -205,7 +205,7 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 	return NULL;
 }
 
-static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht, const char *str, int len, ulong h)
+static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht, const char *str, int len, zend_uint_t h)
 {
 	uint nIndex;
 	uint idx;
@@ -227,7 +227,7 @@ static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht,
 	return NULL;
 }
 
-static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *ht, ulong h)
+static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *ht, zend_uint_t h)
 {
 	uint nIndex;
 	uint idx;
@@ -248,7 +248,7 @@ static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *h
 
 static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_string *key, zval *pData, int flag ZEND_FILE_LINE_DC)
 {
-	ulong h;
+	zend_uint_t h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
@@ -375,7 +375,7 @@ ZEND_API zval *_zend_hash_str_add_new(HashTable *ht, const char *str, int len, z
 	return ret;
 }
 
-ZEND_API zval *zend_hash_index_add_empty_element(HashTable *ht, ulong h)
+ZEND_API zval *zend_hash_index_add_empty_element(HashTable *ht, zend_uint_t h)
 {
 	
 	zval dummy;
@@ -402,7 +402,7 @@ ZEND_API zval *zend_hash_str_add_empty_element(HashTable *ht, const char *str, i
 	return zend_hash_str_add(ht, str, len, &dummy);
 }
 
-static zend_always_inline zval *_zend_hash_index_update_or_next_insert_i(HashTable *ht, ulong h, zval *pData, int flag ZEND_FILE_LINE_DC)
+static zend_always_inline zval *_zend_hash_index_update_or_next_insert_i(HashTable *ht, zend_uint_t h, zval *pData, int flag ZEND_FILE_LINE_DC)
 {
 	uint nIndex;
 	uint idx;
@@ -430,8 +430,8 @@ static zend_always_inline zval *_zend_hash_index_update_or_next_insert_i(HashTab
 						ht->pDestructor(&p->val);
 					}
 					ZVAL_COPY_VALUE(&p->val, pData);
-					if ((long)h >= (long)ht->nNextFreeElement) {
-						ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
+					if ((zend_int_t)h >= (zend_int_t)ht->nNextFreeElement) {
+						ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
 					}
 					return &p->val;
 				} else { /* we have to keep the order :( */
@@ -460,8 +460,8 @@ static zend_always_inline zval *_zend_hash_index_update_or_next_insert_i(HashTab
 			if (ht->nInternalPointer == INVALID_IDX) {
 				ht->nInternalPointer = h;
 			}
-			if ((long)h >= (long)ht->nNextFreeElement) {
-				ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
+			if ((zend_int_t)h >= (zend_int_t)ht->nNextFreeElement) {
+				ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
 			}
 			p->h = h;
 			p->key = NULL;
@@ -490,8 +490,8 @@ convert_to_hash:
 			}
 			ZVAL_COPY_VALUE(&p->val, pData);
 			HANDLE_UNBLOCK_INTERRUPTIONS();
-			if ((long)h >= (long)ht->nNextFreeElement) {
-				ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
+			if ((zend_int_t)h >= (zend_int_t)ht->nNextFreeElement) {
+				ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
 			}
 			return &p->val;
 		}
@@ -505,8 +505,8 @@ convert_to_hash:
 	if (ht->nInternalPointer == INVALID_IDX) {
 		ht->nInternalPointer = idx;
 	}
-	if ((long)h >= (long)ht->nNextFreeElement) {
-		ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
+	if ((zend_int_t)h >= (zend_int_t)ht->nNextFreeElement) {
+		ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
 	}
 	p = ht->arData + idx;
 	p->h = h;
@@ -520,22 +520,22 @@ convert_to_hash:
 	return &p->val;
 }
 
-ZEND_API zval *_zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zval *pData, int flag ZEND_FILE_LINE_DC)
+ZEND_API zval *_zend_hash_index_update_or_next_insert(HashTable *ht, zend_uint_t h, zval *pData, int flag ZEND_FILE_LINE_DC)
 {
 	return _zend_hash_index_update_or_next_insert_i(ht, h, pData, flag ZEND_FILE_LINE_RELAY_CC);
 }
 
-ZEND_API zval *_zend_hash_index_add(HashTable *ht, ulong h, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *_zend_hash_index_add(HashTable *ht, zend_uint_t h, zval *pData ZEND_FILE_LINE_DC)
 {
 	return _zend_hash_index_update_or_next_insert_i(ht, h, pData, HASH_ADD ZEND_FILE_LINE_RELAY_CC);
 }
 
-ZEND_API zval *_zend_hash_index_add_new(HashTable *ht, ulong h, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *_zend_hash_index_add_new(HashTable *ht, zend_uint_t h, zval *pData ZEND_FILE_LINE_DC)
 {
 	return _zend_hash_index_update_or_next_insert_i(ht, h, pData, HASH_ADD | HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
 }
 
-ZEND_API zval *_zend_hash_index_update(HashTable *ht, ulong h, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *_zend_hash_index_update(HashTable *ht, zend_uint_t h, zval *pData ZEND_FILE_LINE_DC)
 {
 	return _zend_hash_index_update_or_next_insert_i(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_RELAY_CC);
 }
@@ -669,7 +669,7 @@ static zend_always_inline void _zend_hash_del_el(HashTable *ht, uint idx, Bucket
 
 ZEND_API int zend_hash_del(HashTable *ht, zend_string *key)
 {
-	ulong h;
+	zend_uint_t h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
@@ -708,7 +708,7 @@ ZEND_API int zend_hash_del(HashTable *ht, zend_string *key)
 
 ZEND_API int zend_hash_del_ind(HashTable *ht, zend_string *key)
 {
-	ulong h;
+	zend_uint_t h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
@@ -760,7 +760,7 @@ ZEND_API int zend_hash_del_ind(HashTable *ht, zend_string *key)
 
 ZEND_API int zend_hash_str_del(HashTable *ht, const char *str, int len)
 {
-	ulong h;
+	zend_uint_t h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
@@ -811,7 +811,7 @@ ZEND_API int zend_hash_str_del(HashTable *ht, const char *str, int len)
 
 ZEND_API int zend_hash_str_del_ind(HashTable *ht, const char *str, int len)
 {
-	ulong h;
+	zend_uint_t h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
@@ -843,7 +843,7 @@ ZEND_API int zend_hash_str_del_ind(HashTable *ht, const char *str, int len)
 	return FAILURE;
 }
 
-ZEND_API int zend_hash_index_del(HashTable *ht, ulong h)
+ZEND_API int zend_hash_index_del(HashTable *ht, zend_uint_t h)
 {
 	uint nIndex;
 	uint idx;
@@ -1383,7 +1383,7 @@ ZEND_API zval *zend_hash_find(const HashTable *ht, zend_string *key)
 
 ZEND_API zval *zend_hash_str_find(const HashTable *ht, const char *str, int len)
 {
-	ulong h;
+	zend_uint_t h;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
@@ -1413,7 +1413,7 @@ ZEND_API int zend_hash_exists(const HashTable *ht, zend_string *key)
 
 ZEND_API int zend_hash_str_exists(const HashTable *ht, const char *str, int len)
 {
-	ulong h;
+	zend_uint_t h;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
@@ -1427,7 +1427,7 @@ ZEND_API int zend_hash_str_exists(const HashTable *ht, const char *str, int len)
 	return p ? 1 : 0;
 }
 
-ZEND_API zval *zend_hash_index_find(const HashTable *ht, ulong h)
+ZEND_API zval *zend_hash_index_find(const HashTable *ht, zend_uint_t h)
 {
 	Bucket *p;
 
@@ -1448,7 +1448,7 @@ ZEND_API zval *zend_hash_index_find(const HashTable *ht, ulong h)
 }
 
 
-ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h)
+ZEND_API int zend_hash_index_exists(const HashTable *ht, zend_uint_t h)
 {
 	Bucket *p;
 
@@ -1602,7 +1602,7 @@ ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 
 
 /* This function should be made binary safe  */
-ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, ulong *num_index, zend_bool duplicate, HashPosition *pos)
+ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_uint_t *num_index, zend_bool duplicate, HashPosition *pos)
 {
 	uint idx = *pos;
 	Bucket *p;
@@ -1619,7 +1619,7 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str
 			return HASH_KEY_IS_STRING;
 		} else {
 			*num_index = p->h;
-			return HASH_KEY_IS_LONG;
+			return HASH_KEY_IS_INT;
 		}
 	}
 	return HASH_KEY_NON_EXISTENT;
@@ -1639,7 +1639,7 @@ ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, 
 			ZVAL_STR(key, p->key);
 			STR_ADDREF(p->key);
 		} else {
-			ZVAL_LONG(key, p->h);
+			ZVAL_INT(key, p->h);
 		}
 	}
 }
@@ -1655,7 +1655,7 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 		if (p->key) {
 			return HASH_KEY_IS_STRING;
 		} else {
-			return HASH_KEY_IS_LONG;
+			return HASH_KEY_IS_INT;
 		}
 	}
 	return HASH_KEY_NON_EXISTENT;

@@ -507,7 +507,7 @@ bound:
 }
 /* }}} */
 
-PHPAPI int php_network_parse_network_address_with_port(const char *addr, long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC)
+PHPAPI int php_network_parse_network_address_with_port(const char *addr, php_int_t addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC)
 {
 	char *colon;
 	char *tmp;
@@ -1110,7 +1110,7 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 		int socktype, struct timeval *timeout, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
 	char *res;
-	long reslen;
+	php_int_t reslen;
 	php_stream *stream;
 
 	reslen = spprintf(&res, 0, "tcp://%s:%d", host, port);

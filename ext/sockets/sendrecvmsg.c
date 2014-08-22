@@ -167,7 +167,7 @@ PHP_FUNCTION(socket_sendmsg)
 {
 	zval			*zsocket,
 					*zmsg;
-	long			flags = 0;
+	php_int_t			flags = 0;
 	php_socket		*php_sock;
 	struct msghdr	*msghdr;
 	zend_llist		*allocations;
@@ -175,7 +175,7 @@ PHP_FUNCTION(socket_sendmsg)
 	ssize_t			res;
 
 	/* zmsg should be passed by ref */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|l", &zsocket, &zmsg, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|i", &zsocket, &zmsg, &flags) == FAILURE) {
 		return;
 	}
 
@@ -198,7 +198,7 @@ PHP_FUNCTION(socket_sendmsg)
 		zend_llist_destroy(allocations);
 		efree(allocations);
 
-		RETURN_LONG((long)res);
+		RETURN_INT((long)res);
 	} else {
 		PHP_SOCKET_ERROR(php_sock, "error in sendmsg", errno);
 		RETURN_FALSE;
@@ -209,7 +209,7 @@ PHP_FUNCTION(socket_recvmsg)
 {
 	zval			*zsocket,
 					*zmsg;
-	long			flags = 0;
+	php_int_t			flags = 0;
 	php_socket		*php_sock;
 	ssize_t			res;
 	struct msghdr	*msghdr;
@@ -217,7 +217,7 @@ PHP_FUNCTION(socket_recvmsg)
 	struct err_s	err = {0};
 
 	//ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra/|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra/|i",
 			&zsocket, &zmsg, &flags) == FAILURE) {
 		return;
 	}
@@ -268,17 +268,17 @@ PHP_FUNCTION(socket_recvmsg)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG((long)res);
+	RETURN_INT((php_int_t)res);
 }
 
 PHP_FUNCTION(socket_cmsg_space)
 {
-	long				level,
+	php_int_t				level,
 						type,
 						n = 0;
 	ancillary_reg_entry	*entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ii|i",
 			&level, &type, &n) == FAILURE) {
 		return;
 	}
@@ -295,20 +295,20 @@ PHP_FUNCTION(socket_cmsg_space)
 
 	entry = get_ancillary_reg_entry(level, type);
 	if (entry == NULL) {
-		php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The pair level %ld/type %ld is "
+		php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The pair level %pd/type %pd is "
 				"not supported by PHP", level, type);
 		return;
 	}
 
-	if (entry->var_el_size > 0 && n > (LONG_MAX - (long)entry->size -
-			(long)CMSG_SPACE(0) - 15L) / entry->var_el_size) {
+	if (entry->var_el_size > 0 && n > (PHP_INT_MAX - (php_int_t)entry->size -
+			(php_int_t)CMSG_SPACE(0) - 15L) / entry->var_el_size) {
 		/* the -15 is to account for any padding CMSG_SPACE may add after the data */
 		php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The value for the "
-				"third argument (%ld) is too large", n);
+				"third argument (%pd) is too large", n);
 		return;
 	}
 
-	RETURN_LONG((long)CMSG_SPACE(entry->size + n * entry->var_el_size));
+	RETURN_INT((long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
 #if HAVE_IPV6
@@ -409,35 +409,35 @@ void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 {
 	/* IPv6 ancillary data */
 #if defined(IPV6_RECVPKTINFO) && HAVE_IPV6
-	REGISTER_LONG_CONSTANT("IPV6_RECVPKTINFO",		IPV6_RECVPKTINFO,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_PKTINFO",          IPV6_PKTINFO,       CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_RECVPKTINFO",		IPV6_RECVPKTINFO,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_PKTINFO",          IPV6_PKTINFO,       CONST_CS | CONST_PERSISTENT);
 #endif
 #if defined(IPV6_RECVHOPLIMIT) && HAVE_IPV6
-	REGISTER_LONG_CONSTANT("IPV6_RECVHOPLIMIT",		IPV6_RECVHOPLIMIT,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_HOPLIMIT",         IPV6_HOPLIMIT,      CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_RECVHOPLIMIT",		IPV6_RECVHOPLIMIT,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_HOPLIMIT",         IPV6_HOPLIMIT,      CONST_CS | CONST_PERSISTENT);
 #endif
 	/* would require some effort:
-	REGISTER_LONG_CONSTANT("IPV6_RECVRTHDR",		IPV6_RECVRTHDR,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_RECVHOPOPTS",		IPV6_RECVHOPOPTS,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_RECVDSTOPTS",		IPV6_RECVDSTOPTS,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_RECVRTHDR",		IPV6_RECVRTHDR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_RECVHOPOPTS",		IPV6_RECVHOPOPTS,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_RECVDSTOPTS",		IPV6_RECVDSTOPTS,	CONST_CS | CONST_PERSISTENT);
 	*/
 #if defined(IPV6_RECVTCLASS) && HAVE_IPV6
-	REGISTER_LONG_CONSTANT("IPV6_RECVTCLASS",		IPV6_RECVTCLASS,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_TCLASS",			IPV6_TCLASS,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_RECVTCLASS",		IPV6_RECVTCLASS,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_TCLASS",			IPV6_TCLASS,		CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/*
-	REGISTER_LONG_CONSTANT("IPV6_RTHDR",			IPV6_RTHDR,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_HOPOPTS",			IPV6_HOPOPTS,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_DSTOPTS",			IPV6_DSTOPTS,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_RTHDR",			IPV6_RTHDR,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_HOPOPTS",			IPV6_HOPOPTS,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("IPV6_DSTOPTS",			IPV6_DSTOPTS,		CONST_CS | CONST_PERSISTENT);
 	*/
 
 #ifdef SCM_RIGHTS
-	REGISTER_LONG_CONSTANT("SCM_RIGHTS",			SCM_RIGHTS,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SCM_RIGHTS",			SCM_RIGHTS,			CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef SO_PASSCRED
-	REGISTER_LONG_CONSTANT("SCM_CREDENTIALS",		SCM_CREDENTIALS,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SO_PASSCRED",			SO_PASSCRED,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SCM_CREDENTIALS",		SCM_CREDENTIALS,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SO_PASSCRED",			SO_PASSCRED,		CONST_CS | CONST_PERSISTENT);
 #endif
 
 #ifdef ZTS

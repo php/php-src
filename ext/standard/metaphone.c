@@ -25,23 +25,21 @@
 #include "php.h"
 #include "php_metaphone.h"
 
-static int metaphone(unsigned char *word, int word_len, long max_phonemes, zend_string **phoned_word, int traditional);
+static int metaphone(unsigned char *word, php_size_t word_len, php_int_t max_phonemes, zend_string **phoned_word, int traditional);
 
 /* {{{ proto string metaphone(string text[, int phones])
    Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
 {
-	char *str;
+	zend_string *str;
 	zend_string *result = NULL;
-	int str_len;
-	long phones = 0;
+	php_int_t phones = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len,
-							  &phones) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &str, &phones) == FAILURE) {
 		return;
 	}
 
-	if (metaphone((unsigned char *)str, str_len, phones, &result, 1) == 0) {
+	if (metaphone((unsigned char *)str->val, str->len, phones, &result, 1) == 0) {
 		RETVAL_STR(result);
 	} else {
 		if (result) {
@@ -167,11 +165,11 @@ static char Lookahead(char *word, int how_far)
 
 /* {{{ metaphone
  */
-static int metaphone(unsigned char *word, int word_len, long max_phonemes, zend_string **phoned_word, int traditional)
+static int metaphone(unsigned char *word, php_size_t word_len, php_int_t max_phonemes, zend_string **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
 	int p_idx = 0;				/* end of the phoned phrase */
-	int max_buffer_len = 0;		/* maximum length of the destination buffer */
+	php_size_t max_buffer_len = 0;		/* maximum length of the destination buffer */
 
 /*-- Parameter checks --*/
 	/* Negative phoneme length is meaningless */

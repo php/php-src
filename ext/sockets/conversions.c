@@ -303,45 +303,45 @@ static void to_zval_read_aggregation(const char *structure,
 }
 
 /* CONVERSIONS for integers */
-static long from_zval_integer_common(const zval *arr_value, ser_context *ctx)
+static php_int_t from_zval_integer_common(const zval *arr_value, ser_context *ctx)
 {
-	long ret = 0;
+	php_int_t ret = 0;
 	zval lzval;
 
 	ZVAL_NULL(&lzval);
-	if (Z_TYPE_P(arr_value) != IS_LONG) {
+	if (Z_TYPE_P(arr_value) != IS_INT) {
 		ZVAL_COPY(&lzval, arr_value);
 		arr_value = &lzval;
 	}
 
 	switch (Z_TYPE_P(arr_value)) {
-	case IS_LONG:
+	case IS_INT:
 long_case:
-		ret = Z_LVAL_P(arr_value);
+		ret = Z_IVAL_P(arr_value);
 		break;
 
 	/* if not long we're operating on lzval */
 	case IS_DOUBLE:
 double_case:
-		convert_to_long(&lzval);
+		convert_to_int(&lzval);
 		goto long_case;
 
 	case IS_OBJECT:
 	case IS_STRING: {
-		long lval;
+		php_int_t lval;
 		double dval;
 
 		convert_to_string(&lzval);
 
-		switch (is_numeric_string(Z_STRVAL(lzval), Z_STRLEN(lzval), &lval, &dval, 0)) {
+		switch (is_numeric_string(Z_STRVAL(lzval), Z_STRSIZE(lzval), &lval, &dval, 0)) {
 		case IS_DOUBLE:
 			zval_dtor(&lzval);
 			ZVAL_DOUBLE(&lzval, dval);
 			goto double_case;
 
-		case IS_LONG:
+		case IS_INT:
 			zval_dtor(&lzval);
-			ZVAL_LONG(&lzval, lval);
+			ZVAL_INT(&lzval, lval);
 			goto long_case;
 		}
 
@@ -363,7 +363,7 @@ double_case:
 }
 void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	int ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -382,7 +382,7 @@ void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx)
 }
 static void from_zval_write_uint32(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	uint32_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -401,7 +401,7 @@ static void from_zval_write_uint32(const zval *arr_value, char *field, ser_conte
 }
 static void from_zval_write_net_uint16(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	uint16_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -420,7 +420,7 @@ static void from_zval_write_net_uint16(const zval *arr_value, char *field, ser_c
 }
 static void from_zval_write_sa_family(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	sa_family_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -439,7 +439,7 @@ static void from_zval_write_sa_family(const zval *arr_value, char *field, ser_co
 }
 static void from_zval_write_pid_t(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	pid_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -458,7 +458,7 @@ static void from_zval_write_pid_t(const zval *arr_value, char *field, ser_contex
 }
 static void from_zval_write_uid_t(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	uid_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -490,49 +490,49 @@ void to_zval_read_int(const char *data, zval *zv, res_context *ctx)
 	int ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_INT(zv, (long)ival);
 }
 static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
 {
 	unsigned ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_INT(zv, (long)ival);
 }
 static void to_zval_read_net_uint16(const char *data, zval *zv, res_context *ctx)
 {
 	uint16_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ntohs(ival));
+	ZVAL_INT(zv, (long)ntohs(ival));
 }
 static void to_zval_read_uint32(const char *data, zval *zv, res_context *ctx)
 {
 	uint32_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_INT(zv, (long)ival);
 }
 static void to_zval_read_sa_family(const char *data, zval *zv, res_context *ctx)
 {
 	sa_family_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_INT(zv, (long)ival);
 }
 static void to_zval_read_pid_t(const char *data, zval *zv, res_context *ctx)
 {
 	pid_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_INT(zv, (long)ival);
 }
 static void to_zval_read_uid_t(const char *data, zval *zv, res_context *ctx)
 {
 	uid_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_INT(zv, (long)ival);
 }
 
 /* CONVERSIONS for sockaddr */
@@ -576,7 +576,7 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STRSIZE_P(zv) = strlen(Z_STRVAL_P(zv));
 }
 static const field_descriptor descriptors_sockaddr_in[] = {
 		{"family", sizeof("family"), 0, offsetof(struct sockaddr_in, sin_family), from_zval_write_sa_family, to_zval_read_sa_family},
@@ -635,7 +635,7 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STRSIZE_P(zv) = strlen(Z_STRVAL_P(zv));
 }
 static const field_descriptor descriptors_sockaddr_in6[] = {
 		{"family", sizeof("family"), 0, offsetof(struct sockaddr_in6, sin6_family), from_zval_write_sa_family, to_zval_read_sa_family},
@@ -669,18 +669,18 @@ static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_
 	/* code in this file relies on the path being nul terminated, even though
 	 * this is not required, at least on linux for abstract paths. It also
 	 * assumes that the path is not empty */
-	if (Z_STRLEN_P(path) == 0) {
+	if (Z_STRSIZE_P(path) == 0) {
 		do_from_zval_err(ctx, "%s", "the path is cannot be empty");
 		return;
 	}
-	if (Z_STRLEN_P(path) >= sizeof(saddr->sun_path)) {
+	if (Z_STRSIZE_P(path) >= sizeof(saddr->sun_path)) {
 		do_from_zval_err(ctx, "the path is too long, the maximum permitted "
 				"length is %ld", sizeof(saddr->sun_path) - 1);
 		return;
 	}
 
-	memcpy(&saddr->sun_path, Z_STRVAL_P(path), Z_STRLEN_P(path));
-	saddr->sun_path[Z_STRLEN_P(path)] = '\0';
+	memcpy(&saddr->sun_path, Z_STRVAL_P(path), Z_STRSIZE_P(path));
+	saddr->sun_path[Z_STRSIZE_P(path)] = '\0';
 
 	zval_dtor(&lzval);
 }
@@ -984,8 +984,8 @@ static void to_zval_read_cmsg_data(const char *cmsghdr_c, zval *zv, res_context 
 	}
 	if (CMSG_LEN(entry->size) > cmsg->cmsg_len) {
 		do_to_zval_err(ctx, "the cmsghdr structure is unexpectedly small; "
-				"expected a length of at least %ld, but got %ld",
-				(long)CMSG_LEN(entry->size), (long)cmsg->cmsg_len);
+				"expected a length of at least %pd, but got %pd",
+				(php_int_t)CMSG_LEN(entry->size), (php_int_t)cmsg->cmsg_len);
 		return;
 	}
 
@@ -1072,7 +1072,7 @@ static void to_zval_read_name(const char *sockaddr_p, zval *zv, res_context *ctx
 }
 static void from_zval_write_msghdr_buffer_size(const zval *elem, char *msghdr_c, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	struct msghdr *msghdr = (struct msghdr *)msghdr_c;
 
 	lval = from_zval_integer_common(elem, ctx);
@@ -1081,8 +1081,8 @@ static void from_zval_write_msghdr_buffer_size(const zval *elem, char *msghdr_c,
 	}
 
 	if (lval < 0 || lval > MAX_USER_BUFF_SIZE) {
-		do_from_zval_err(ctx, "the buffer size must be between 1 and %ld; "
-				"given %ld", (long)MAX_USER_BUFF_SIZE, lval);
+		do_from_zval_err(ctx, "the buffer size must be between 1 and %pd; "
+				"given %pd", (php_int_t)MAX_USER_BUFF_SIZE, lval);
 		return;
 	}
 
@@ -1101,7 +1101,7 @@ static void from_zval_write_iov_array_aux(zval *elem, unsigned i, void **args, s
 	}
 	convert_to_string_ex(elem);
 
-	len = Z_STRLEN_P(elem);
+	len = Z_STRSIZE_P(elem);
 	msg->msg_iov[i - 1].iov_base = accounted_emalloc(len, ctx);
 	msg->msg_iov[i - 1].iov_len = len;
 	memcpy(msg->msg_iov[i - 1].iov_base, Z_STRVAL_P(elem), len);
@@ -1257,12 +1257,12 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 
 	ZVAL_NULL(&lzval);
 
-	if (Z_TYPE_P(zv) == IS_LONG) {
-		if (Z_LVAL_P(zv) < 0 || Z_LVAL_P(zv) > UINT_MAX) { /* allow 0 (unspecified interface) */
+	if (Z_TYPE_P(zv) == IS_INT) {
+		if (Z_IVAL_P(zv) < 0 || Z_IVAL_P(zv) > UINT_MAX) { /* allow 0 (unspecified interface) */
 			do_from_zval_err(ctx, "the interface index cannot be negative or "
-					"larger than %u; given %ld", UINT_MAX, Z_LVAL_P(zv));
+					"larger than %u; given %ld", UINT_MAX, Z_IVAL_P(zv));
 		} else {
-			ret = (unsigned)Z_LVAL_P(zv);
+			ret = (unsigned)Z_IVAL_P(zv);
 		}
 	} else {
 		if (Z_TYPE_P(zv) != IS_STRING) {
@@ -1431,7 +1431,7 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 
 	if (*cmsg_len < data_offset) {
 		do_to_zval_err(ctx, "length of cmsg is smaller than its data member "
-				"offset (%ld vs %ld)", (long)*cmsg_len, (long)data_offset);
+				"offset (%pd vs %pd)", (php_int_t)*cmsg_len, (php_int_t)data_offset);
 		return;
 	}
 	num_elems = (*cmsg_len - data_offset) / sizeof(int);

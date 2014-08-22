@@ -306,7 +306,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 		TSRMLS_DC);
 
 PHPAPI int php_network_parse_network_address_with_port(const char *addr,
-		long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC);
+		php_int_t addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC);
 END_EXTERN_C()
 
 #define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC TSRMLS_CC)

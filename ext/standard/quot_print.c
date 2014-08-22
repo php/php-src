@@ -147,7 +147,7 @@ PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t lengt
  
 PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t length) /* {{{ */
 {
-	unsigned long lp = 0;
+	php_uint_t lp = 0;
 	unsigned char c, *d;
 	char *hex = "0123456789ABCDEF";
 	zend_string *ret;
@@ -201,21 +201,22 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
    Convert a quoted-printable string to an 8 bit string */
 PHP_FUNCTION(quoted_printable_decode)
 {
-	char *arg1, *str_in;
+	zend_string *arg1;
+	char *str_in;
 	zend_string *str_out;
-	int arg1_len, i = 0, j = 0, k;
+	php_size_t i = 0, j = 0, k;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg1, &arg1_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arg1) == FAILURE) {
 		return;
 	}
     
-	if (arg1_len == 0) {
+	if (arg1->len == 0) {
 		/* shortcut */
 		RETURN_EMPTY_STRING();
 	}
 
-	str_in = arg1;
-	str_out = STR_ALLOC(arg1_len, 0);
+	str_in = arg1->val;
+	str_out = STR_ALLOC(arg1->len, 0);
 	while (str_in[i]) {
 		switch (str_in[i]) {
 		case '=':
@@ -263,19 +264,18 @@ PHP_FUNCTION(quoted_printable_decode)
 /* {{{ proto string quoted_printable_encode(string str) */
 PHP_FUNCTION(quoted_printable_encode)
 {
-	char *str;
+	zend_string *str;
 	zend_string *new_str;
-	int str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str) != SUCCESS) {
 		return;
 	}
 
-	if (!str_len) {
+	if (!str->len) {
 		RETURN_EMPTY_STRING();
 	}
 
-	new_str = php_quot_print_encode((unsigned char *)str, (size_t)str_len);
+	new_str = php_quot_print_encode((unsigned char *)str->val, (size_t)str->len);
 	RETURN_STR(new_str);
 }
 /* }}} */

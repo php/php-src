@@ -114,8 +114,8 @@ static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr TS
 		case IS_NULL:
 			zend_symtable_update(Z_ARRVAL_P(result), STR_EMPTY_ALLOC(), expr);
 			break;
-		case IS_LONG:
-			zend_hash_index_update(Z_ARRVAL_P(result), Z_LVAL_P(offset), expr);
+		case IS_INT:
+			zend_hash_index_update(Z_ARRVAL_P(result), Z_IVAL_P(offset), expr);
 			break;
 		case IS_FALSE:
 			zend_hash_index_update(Z_ARRVAL_P(result), 0, expr);
@@ -124,7 +124,7 @@ static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr TS
 			zend_hash_index_update(Z_ARRVAL_P(result), 1, expr);
 			break;
 		case IS_DOUBLE:
-			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_lval(Z_DVAL_P(offset)), expr);
+			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_ival(Z_DVAL_P(offset)), expr);
 			break;
 		default:
 			zend_error(E_ERROR, "Illegal offset type");
@@ -331,13 +331,13 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			}
 			break;
 		case ZEND_UNARY_PLUS:
-			ZVAL_LONG(&op1, 0);
+			ZVAL_INT(&op1, 0);
 			zend_ast_evaluate(&op2, (&ast->u.child)[0], scope TSRMLS_CC);
 			add_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op2);
 			break;
 		case ZEND_UNARY_MINUS:
-			ZVAL_LONG(&op1, 0);
+			ZVAL_INT(&op1, 0);
 			zend_ast_evaluate(&op2, (&ast->u.child)[0], scope TSRMLS_CC);
 			sub_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op2);

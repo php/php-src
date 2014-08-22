@@ -635,7 +635,7 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 		dir_len = php_dirname(file_dirname, strlen(source));
 
 		if (dir_len > 0) {
-			struct stat buf;
+			php_stat_t buf;
 			if (php_sys_stat(file_dirname, &buf) != 0) {
 				xmlFreeURI(uri);
 				return NULL;
@@ -1756,7 +1756,7 @@ static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) 
 				xmlBufferEmpty(buffer);
 			}
 		} else {
-			RETVAL_LONG(output_bytes);
+			RETVAL_INT(output_bytes);
 		}
 		return;
 	}

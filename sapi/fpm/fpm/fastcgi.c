@@ -611,7 +611,7 @@ static int fcgi_read_request(fcgi_request *req)
 			if (!value) {
 				continue;
 			}
-			zlen = Z_STRLEN_P(value);
+			zlen = Z_STRSIZE_P(value);
 			if ((p + 4 + 4 + key->len + zlen) >= (buf + sizeof(buf))) {
 				break;
 			}

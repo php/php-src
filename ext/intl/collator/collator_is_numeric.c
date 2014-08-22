@@ -125,15 +125,15 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
  *
  * Ignores `locale' stuff.
  */
-static long collator_u_strtol(nptr, endptr, base)
+static php_int_t collator_u_strtol(nptr, endptr, base)
 	const UChar *nptr;
 	UChar **endptr;
 	register int base;
 {
 	register const UChar *s = nptr;
-	register unsigned long acc;
+	register php_uint_t acc;
 	register UChar c;
-	register unsigned long cutoff;
+	register php_uint_t cutoff;
 	register int neg = 0, any, cutlim;
 
 	if (s == NULL) {
@@ -184,9 +184,9 @@ static long collator_u_strtol(nptr, endptr, base)
 	 * Set any if any `digits' consumed; make it negative to indicate
 	 * overflow.
 	 */
-	cutoff = neg ? -(unsigned long)LONG_MIN : LONG_MAX;
-	cutlim = cutoff % (unsigned long)base;
-	cutoff /= (unsigned long)base;
+	cutoff = neg ? -(php_uint_t)PHP_INT_MIN : PHP_INT_MAX;
+	cutlim = cutoff % (php_uint_t)base;
+	cutoff /= (php_uint_t)base;
 	for (acc = 0, any = 0;; c = *s++) {
 		if (c >= 0x30 /*'0'*/ && c <= 0x39 /*'9'*/)
 			c -= 0x30 /*'0'*/;
@@ -208,7 +208,7 @@ static long collator_u_strtol(nptr, endptr, base)
 		}
 	}
 	if (any < 0) {
-		acc = neg ? LONG_MIN : LONG_MAX;
+		acc = neg ? PHP_INT_MIN : PHP_INT_MAX;
 		errno = ERANGE;
 	} else if (neg)
 		acc = -acc;
@@ -222,9 +222,9 @@ static long collator_u_strtol(nptr, endptr, base)
 /* {{{ collator_is_numeric]
  * Taken from PHP6:is_numeric_unicode()
  */
-zend_uchar collator_is_numeric( UChar *str, int length, long *lval, double *dval, int allow_errors )
+zend_uchar collator_is_numeric( UChar *str, int length, php_int_t *lval, double *dval, int allow_errors )
 {
-	long local_lval;
+	php_int_t local_lval;
 	double local_dval;
 	UChar *end_ptr_long, *end_ptr_double;
 	int conv_base=10;
@@ -245,7 +245,7 @@ zend_uchar collator_is_numeric( UChar *str, int length, long *lval, double *dval
 			if (lval) {
 				*lval = local_lval;
 			}
-			return IS_LONG;
+			return IS_INT;
 		} else if (end_ptr_long == str && *end_ptr_long != '\0' && *str != '.' && *str != '-') { /* ignore partial string matches */
 			return 0;
 		}
@@ -288,7 +288,7 @@ zend_uchar collator_is_numeric( UChar *str, int length, long *lval, double *dval
 			return IS_DOUBLE;
 		} else if (end_ptr_long && lval) {
 			*lval = local_lval;
-			return IS_LONG;
+			return IS_INT;
 		}
 	}
 	return 0;

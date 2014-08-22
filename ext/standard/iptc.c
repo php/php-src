@@ -179,7 +179,7 @@ PHP_FUNCTION(iptcembed)
 {
 	char *iptcdata, *jpeg_file;
 	int iptcdata_len, jpeg_file_len;
-	long spool = 0;
+	php_int_t spool = 0;
 	FILE *fp;
 	unsigned int marker, done = 0;
 	int inx;
@@ -187,7 +187,7 @@ PHP_FUNCTION(iptcembed)
 	struct stat sb;
 	zend_bool written = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|i", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
 		return;
 	}
 
@@ -334,8 +334,8 @@ PHP_FUNCTION(iptcparse)
 			if((inx+6) >= str_len) {
 				break;
 			}
-			len = (((long) buffer[ inx + 2 ]) << 24) + (((long) buffer[ inx + 3 ]) << 16) + 
-				  (((long) buffer[ inx + 4 ]) <<  8) + (((long) buffer[ inx + 5 ]));
+			len = (((php_int_t) buffer[ inx + 2 ]) << 24) + (((php_int_t) buffer[ inx + 3 ]) << 16) + 
+				  (((php_int_t) buffer[ inx + 4 ]) <<  8) + (((php_int_t) buffer[ inx + 5 ]));
 			inx += 6;
 		} else { /* short tag */
 			len = (((unsigned short) buffer[ inx ])<<8) | (unsigned short)buffer[ inx+1 ];

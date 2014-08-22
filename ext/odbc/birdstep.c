@@ -193,7 +193,7 @@ PHP_MINIT_FUNCTION(birdstep)
 {
 	SQLAllocEnv(&henv);
 
-	if ( cfg_get_long("birdstep.max_links",&php_birdstep_module.max_links) == FAILURE ) {
+	if ( cfg_get_int("birdstep.max_links",&php_birdstep_module.max_links) == FAILURE ) {
 		php_birdstep_module.max_links = -1;
 	}
 	php_birdstep_module.num_links = 0;
@@ -291,7 +291,7 @@ PHP_FUNCTION(birdstep_connect)
 	RETCODE stat;
 	HDBC hdbc;
 	VConn *new;
-	long ind;
+	php_int_t ind;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &serv, &serv_len, &user, &user_len, &pass, &pass_len) == FAILURE) {
 		return;
@@ -316,7 +316,7 @@ PHP_FUNCTION(birdstep_connect)
 	new = (VConn *)emalloc(sizeof(VConn));
 	ind = birdstep_add_conn(list,new,hdbc TSRMLS_CC);
 	php_birdstep_module.num_links++;
-	RETURN_LONG(ind);
+	RETURN_INT(ind);
 }
 /* }}} */
 
@@ -324,10 +324,10 @@ PHP_FUNCTION(birdstep_connect)
  */
 PHP_FUNCTION(birdstep_close)
 {
-	long id;
+	php_int_t id;
 	VConn *conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &id) == FAILURE) {
 		return;
 	}
 
@@ -346,7 +346,7 @@ PHP_FUNCTION(birdstep_close)
 PHP_FUNCTION(birdstep_exec)
 {
 	char *query;
-	long ind;
+	php_int_t ind;
 	int query_len, indx;
 	VConn *conn;
 	Vresult *res;
@@ -354,7 +354,7 @@ PHP_FUNCTION(birdstep_exec)
 	SWORD cols,i,colnamelen;
 	SDWORD rows,coldesc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &ind, &query, &query_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "is", &ind, &query, &query_len) == FAILURE) {
 		return;
 	}
 
@@ -392,7 +392,7 @@ PHP_FUNCTION(birdstep_exec)
 		}
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
-		RETURN_LONG(rows);
+		RETURN_INT(rows);
 	} else {  /* Was SELECT query */
 		res->values = (VResVal *)safe_emalloc(sizeof(VResVal), cols, 0);
 		res->numcols = cols;
@@ -418,7 +418,7 @@ PHP_FUNCTION(birdstep_exec)
 	}
 	res->fetched = 0;
 	indx = birdstep_add_result(list,res,conn);
-	RETURN_LONG(indx);
+	RETURN_INT(indx);
 }
 /* }}} */
 
@@ -426,13 +426,13 @@ PHP_FUNCTION(birdstep_exec)
  */
 PHP_FUNCTION(birdstep_fetch)
 {
-	long ind;
+	php_int_t ind;
 	Vresult *res;
 	RETCODE stat;
 	UDWORD  row;
 	UWORD   RowStat[1];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &ind) == FAILURE) {
 		return;
 	}
 
@@ -441,13 +441,13 @@ PHP_FUNCTION(birdstep_fetch)
 	stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
 	if ( stat == SQL_NO_DATA_FOUND ) {
 		SQLFreeStmt(res->hstmt,SQL_DROP);
-		birdstep_del_result(list,Z_LVAL_PP(ind));
+		birdstep_del_result(list,Z_IVAL_PP(ind));
 		RETURN_FALSE;
 	}
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLFetch return error");
 		SQLFreeStmt(res->hstmt,SQL_DROP);
-		birdstep_del_result(list,Z_LVAL_PP(ind));
+		birdstep_del_result(list,Z_IVAL_PP(ind));
 		RETURN_FALSE;
 	}
 	res->fetched = 1;
@@ -460,7 +460,7 @@ PHP_FUNCTION(birdstep_fetch)
 PHP_FUNCTION(birdstep_result)
 {
 	zval **col;
-	long ind;
+	php_int_t ind;
 	Vresult *res;
 	RETCODE stat;
 	int i,sql_c_type;
@@ -469,7 +469,7 @@ PHP_FUNCTION(birdstep_result)
 	SWORD indx = -1;
 	char *field = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lZ", &ind, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iZ", &ind, &col) == FAILURE) {
 		return;
 	}
 
@@ -478,8 +478,8 @@ PHP_FUNCTION(birdstep_result)
 	if ( Z_TYPE_PP(col) == IS_STRING ) {
 		field = Z_STRVAL_PP(col);
 	} else {
-		convert_to_long_ex(col);
-		indx = Z_LVAL_PP(col);
+		convert_to_int_ex(col);
+		indx = Z_IVAL_PP(col);
 	}
 	if ( field ) {
 		for ( i = 0; i < res->numcols; i++ ) {
@@ -502,13 +502,13 @@ PHP_FUNCTION(birdstep_result)
 		stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
 		if ( stat == SQL_NO_DATA_FOUND ) {
 			SQLFreeStmt(res->hstmt,SQL_DROP);
-			birdstep_del_result(list,Z_LVAL_PP(ind));
+			birdstep_del_result(list,Z_IVAL_PP(ind));
 			RETURN_FALSE;
 		}
 		if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLFetch return error");
 			SQLFreeStmt(res->hstmt,SQL_DROP);
-			birdstep_del_result(list,Z_LVAL_PP(ind));
+			birdstep_del_result(list,Z_IVAL_PP(ind));
 			RETURN_FALSE;
 		}
 		res->fetched = 1;
@@ -527,19 +527,19 @@ l1:
 				res->values[indx].value,4095,&res->values[indx].vallen);
 			if ( stat == SQL_NO_DATA_FOUND ) {
 				SQLFreeStmt(res->hstmt,SQL_DROP);
-				birdstep_del_result(list,Z_LVAL_PP(ind));
+				birdstep_del_result(list,Z_IVAL_PP(ind));
 				RETURN_FALSE;
 			}
 			if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLGetData return error");
 				SQLFreeStmt(res->hstmt,SQL_DROP);
-				birdstep_del_result(list,Z_LVAL_PP(ind));
+				birdstep_del_result(list,Z_IVAL_PP(ind));
 				RETURN_FALSE;
 			}
 			if ( res->values[indx].valtype == SQL_LONGVARCHAR ) {
 				RETURN_STRING(res->values[indx].value,TRUE);
 			} else {
-				RETURN_LONG((long)res->values[indx].value);
+				RETURN_INT((long)res->values[indx].value);
 			}
 		default:
 			if ( res->values[indx].value != NULL ) {
@@ -553,10 +553,10 @@ l1:
  */
 PHP_FUNCTION(birdstep_freeresult)
 {
-	long ind;
+	php_int_t ind;
 	Vresult *res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &ind) == FAILURE) {
 		return;
 	}
 
@@ -572,11 +572,11 @@ PHP_FUNCTION(birdstep_freeresult)
  */
 PHP_FUNCTION(birdstep_autocommit)
 {
-	long id;
+	php_int_t id;
 	RETCODE stat;
 	VConn *conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &id) == FAILURE) {
 		return;
 	}
 
@@ -595,11 +595,11 @@ PHP_FUNCTION(birdstep_autocommit)
  */
 PHP_FUNCTION(birdstep_off_autocommit)
 {
-	long id;
+	php_int_t id;
 	RETCODE stat;
 	VConn *conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &id) == FAILURE) {
 		return;
 	}
 
@@ -618,11 +618,11 @@ PHP_FUNCTION(birdstep_off_autocommit)
  */
 PHP_FUNCTION(birdstep_commit)
 {
-	long id;
+php_int_t
 	RETCODE stat;
 	VConn *conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &id) == FAILURE) {
 		return;
 	}
 
@@ -641,11 +641,11 @@ PHP_FUNCTION(birdstep_commit)
  */
 PHP_FUNCTION(birdstep_rollback)
 {
-	long id;
+	php_int_t id;
 	RETCODE stat;
 	VConn *conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &id) == FAILURE) {
 		return;
 	}
 
@@ -664,11 +664,11 @@ PHP_FUNCTION(birdstep_rollback)
  */
 PHP_FUNCTION(birdstep_fieldname)
 {
-	long ind, col;
+	php_int_t ind, col;
 	Vresult *res;
 	SWORD indx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &ind, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ii", &ind, &col) == FAILURE) {
 		return;
 	}
 
@@ -687,16 +687,16 @@ PHP_FUNCTION(birdstep_fieldname)
  */
 PHP_FUNCTION(birdstep_fieldnum)
 {
-	long ind;
+	php_int_t ind;
 	Vresult *res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &ind) == FAILURE) {
 		return;
 	}
 
 	PHP_GET_BIRDSTEP_RES_IDX(ind);
 
-	RETURN_LONG(res->numcols);
+	RETURN_INT(res->numcols);
 }
 /* }}} */
 

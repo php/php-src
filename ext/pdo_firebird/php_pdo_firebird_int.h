@@ -35,7 +35,7 @@
 
 #define SHORT_MAX (1 << (8*sizeof(short)-1))
 
-#if SIZEOF_LONG == 8
+#if SIZEOF_ZEND_INT == 8 && !defined(PHP_WIN32)
 # define LL_MASK "l"
 # define LL_LIT(lit) lit ## L
 #else
@@ -128,7 +128,7 @@ extern pdo_driver_t pdo_firebird_driver;
 
 extern struct pdo_stmt_methods firebird_stmt_methods;
 
-void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long line TSRMLS_DC);
+void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, php_int_t line TSRMLS_DC);
 
 enum {
 	PDO_FB_ATTR_DATE_FORMAT = PDO_ATTR_DRIVER_SPECIFIC,

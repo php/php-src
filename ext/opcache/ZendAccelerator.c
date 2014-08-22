@@ -107,8 +107,8 @@ static void (*orig_chdir)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 
 #ifdef ZEND_WIN32
-# define INCREMENT(v) InterlockedIncrement(&ZCSG(v))
-# define DECREMENT(v) InterlockedDecrement(&ZCSG(v))
+# define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
+# define DECREMENT(v) InterlockedDecrement64(&ZCSG(v))
 # define LOCKVAL(v)   (ZCSG(v))
 #endif
 
@@ -299,7 +299,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 {
 /* for now interned strings are supported only for non-ZTS build */
 #ifndef ZTS
-	ulong h;
+	zend_uint_t h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
@@ -632,7 +632,7 @@ static inline int accel_is_inactive(TSRMLS_D)
 	return FAILURE;
 }
 
-static int zend_get_stream_timestamp(const char *filename, struct stat *statbuf TSRMLS_DC)
+static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf TSRMLS_DC)
 {
 	php_stream_wrapper *wrapper;
 	php_stream_statbuf stream_statbuf;
@@ -715,7 +715,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 
 static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size TSRMLS_DC)
 {
-	struct stat statbuf;
+	zend_stat_t statbuf;
 #ifdef ZEND_WIN32
 	accel_time_t res;
 #endif
@@ -724,7 +724,7 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 	    !EG(current_execute_data) &&
 	    file_handle->filename == SG(request_info).path_translated) {
 
-		struct stat *tmpbuf = sapi_module.get_stat(TSRMLS_C);
+		zend_stat_t *tmpbuf = sapi_module.get_stat(TSRMLS_C);
 
 		if (tmpbuf) {
 			if (size) {
@@ -743,12 +743,12 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FD:
-			if (fstat(file_handle->handle.fd, &statbuf) == -1) {
+			if (zend_fstat(file_handle->handle.fd, &statbuf) == -1) {
 				return 0;
 			}
 			break;
 		case ZEND_HANDLE_FP:
-			if (fstat(fileno(file_handle->handle.fp), &statbuf) == -1) {
+			if (zend_fstat(fileno(file_handle->handle.fp), &statbuf) == -1) {
 				if (zend_get_stream_timestamp(file_handle->filename, &statbuf TSRMLS_CC) != SUCCESS) {
 					return 0;
 				}
@@ -1620,8 +1620,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 		ZCSG(hits)++; /* TBFixed: may lose one hit */
 		persistent_script->dynamic_members.hits++; /* see above */
 #else
-		InterlockedIncrement(&ZCSG(hits));
-		InterlockedIncrement(&persistent_script->dynamic_members.hits);
+		INCREMENT(hits);
+		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #endif
 
 		/* see bug #15471 (old BTS) */
@@ -1959,7 +1959,7 @@ static void accel_fast_zval_dtor(zval *zvalue)
 					zend_list_delete(Z_RES_P(zvalue));
 				}
 				break;
-			case IS_LONG:
+			case IS_INT:
 			case IS_DOUBLE:
 			case IS_FALSE:
 			case IS_TRUE:

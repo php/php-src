@@ -524,7 +524,7 @@ PHP_FUNCTION(dom_xpath_register_php_functions)
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(array_value));
 		while ((entry = zend_hash_get_current_data(Z_ARRVAL_P(array_value)))) {
 			zend_string *str = zval_get_string(entry);
-			ZVAL_LONG(&new_string,1);
+			ZVAL_INT(&new_string,1);
 			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
 			zend_hash_move_forward(Z_ARRVAL_P(array_value));
 			STR_RELEASE(str);
@@ -535,7 +535,7 @@ PHP_FUNCTION(dom_xpath_register_php_functions)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "S",  &name) == SUCCESS) {
 		intern = Z_XPATHOBJ_P(id);
 		
-		ZVAL_LONG(&new_string, 1);
+		ZVAL_INT(&new_string, 1);
 		zend_hash_update(intern->registered_phpfunctions, name, &new_string);
 		intern->registerPhpFunctions = 2;
 	} else {

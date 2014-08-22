@@ -187,7 +187,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 	DIR *dir;
 	char dentry[sizeof(struct dirent) + MAXPATHLEN];
 	struct dirent *entry = (struct dirent *) &dentry;
-	struct stat sbuf;
+	php_stat_t sbuf;
 	char buf[MAXPATHLEN];
 	time_t now;
 	int nrdels = 0;
@@ -238,7 +238,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 static int ps_files_key_exists(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
-	struct stat sbuf;
+	php_stat_t sbuf;
 
 	if (!key || !ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;
@@ -283,7 +283,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 1) {
 		errno = 0;
-		dirdepth = (size_t) strtol(argv[0], NULL, 10);
+		dirdepth = (size_t) ZEND_STRTOI(argv[0], NULL, 10);
 		if (errno == ERANGE) {
 			php_error(E_WARNING, "The first parameter in session.save_path is invalid");
 			return FAILURE;
@@ -292,7 +292,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 2) {
 		errno = 0;
-		filemode = strtol(argv[1], NULL, 8);
+		filemode = ZEND_STRTOI(argv[1], NULL, 8);
 		if (errno == ERANGE || filemode < 0 || filemode > 07777) {
 			php_error(E_WARNING, "The second parameter in session.save_path is invalid");
 			return FAILURE;
@@ -335,7 +335,7 @@ PS_CLOSE_FUNC(files)
 
 PS_READ_FUNC(files)
 {
-	long n;
+	php_int_t n;
 	struct stat sbuf;
 	PS_FILES_DATA;
 
@@ -398,7 +398,7 @@ PS_READ_FUNC(files)
 
 PS_WRITE_FUNC(files)
 {
-	long n;
+	php_int_t n;
 	PS_FILES_DATA;
 
 	ps_files_open(data, key->val TSRMLS_CC);

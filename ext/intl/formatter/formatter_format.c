@@ -33,14 +33,14 @@
 PHP_FUNCTION( numfmt_format )
 {
 	zval *number;
-	long type = FORMAT_TYPE_DEFAULT;
+	php_int_t type = FORMAT_TYPE_DEFAULT;
 	UChar format_buf[32];
 	UChar* formatted = format_buf;
 	int formatted_len = USIZE(format_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz|i",
 		&object, NumberFormatter_ce_ptr,  &number, &type ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -57,9 +57,9 @@ PHP_FUNCTION( numfmt_format )
 			convert_scalar_to_number_ex(number);
 		}
 
-		if(Z_TYPE_P(number) == IS_LONG) {
+		if(Z_TYPE_P(number) == IS_INT) {
 			/* take INT32 on 32-bit, int64 on 64-bit */
-			type = (sizeof(long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
+			type = (sizeof(php_int_t) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
 		} else if(Z_TYPE_P(number) == IS_DOUBLE) {
 			type = FORMAT_TYPE_DOUBLE;
 		} else {
@@ -67,20 +67,20 @@ PHP_FUNCTION( numfmt_format )
 		}
 	}
 
-	if(Z_TYPE_P(number) != IS_DOUBLE && Z_TYPE_P(number) != IS_LONG) {
+	if(Z_TYPE_P(number) != IS_DOUBLE && Z_TYPE_P(number) != IS_INT) {
 		SEPARATE_ZVAL_IF_NOT_REF(number);
 		convert_scalar_to_number(number TSRMLS_CC );
 	}
 
 	switch(type) {
 		case FORMAT_TYPE_INT32:
-			convert_to_long_ex(number);
-			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number), 
+			convert_to_int_ex(number);
+			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_IVAL_P(number), 
 				formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
 				intl_error_reset(INTL_DATA_ERROR_P(nfo) TSRMLS_CC); 
 				formatted = eumalloc(formatted_len);
-				formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number), 
+				formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_IVAL_P(number), 
 					formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
 					efree(formatted);
@@ -91,7 +91,7 @@ PHP_FUNCTION( numfmt_format )
 
 		case FORMAT_TYPE_INT64:
 		{
-			int64_t value = (Z_TYPE_P(number) == IS_DOUBLE)?(int64_t)Z_DVAL_P(number):Z_LVAL_P(number);
+			int64_t value = (Z_TYPE_P(number) == IS_DOUBLE)?(int64_t)Z_DVAL_P(number):Z_IVAL_P(number);
 			formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
 				intl_error_reset(INTL_DATA_ERROR_P(nfo) TSRMLS_CC); 

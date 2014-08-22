@@ -163,8 +163,8 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 					if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
 						zval *ztmp = zbacklog;
 						
-						convert_to_long_ex(ztmp);
-						backlog = Z_LVAL_P(ztmp);
+						convert_to_int_ex(ztmp);
+						backlog = Z_IVAL_P(ztmp);
 						if (ztmp != zbacklog) {
 							zval_ptr_dtor(ztmp);
 						}

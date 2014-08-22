@@ -99,9 +99,9 @@ enum mysqli_status {
 
 typedef struct {
 	char		*val;
-	ulong		buflen;
-	ulong		output_len;
-	ulong		type;
+	php_uint_t		buflen;
+	php_uint_t		output_len;
+	php_uint_t		type;
 } VAR_BUFFER;
 
 typedef struct {
@@ -214,7 +214,7 @@ extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_stat
 extern zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
 extern zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 
-extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, long fetchtype TSRMLS_DC);
+extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, php_int_t fetchtype TSRMLS_DC);
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
@@ -318,27 +318,27 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
-	long			default_link;
-	long			num_links;
-	long			max_links;
-	long 			num_active_persistent;
-	long 			num_inactive_persistent;
-	long			max_persistent;
-	long			allow_persistent;
-	unsigned long	default_port;
+	php_int_t			default_link;
+	php_int_t			num_links;
+	php_int_t			max_links;
+	php_int_t 			num_active_persistent;
+	php_int_t 			num_inactive_persistent;
+	php_int_t			max_persistent;
+	php_int_t			allow_persistent;
+	php_uint_t	default_port;
 	char			*default_host;
 	char			*default_user;
 	char			*default_socket;
 	char			*default_pw;
-	long			reconnect;
-	long			allow_local_infile;
-	long			strict;
-	long			error_no;
+	php_int_t			reconnect;
+	php_int_t			allow_local_infile;
+	php_int_t			strict;
+	php_int_t			error_no;
 	char			*error_msg;
-	long			report_mode;
+	php_int_t			report_mode;
 	HashTable		*report_ht;
-	unsigned long	multi_query;
-	unsigned long	embedded;
+	php_uint_t	multi_query;
+	php_uint_t	embedded;
 	zend_bool 		rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)
 

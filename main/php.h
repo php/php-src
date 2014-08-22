@@ -66,6 +66,15 @@
 #	define PHP_EOL "\n"
 #endif
 
+#define php_size_t zend_size_t
+#define php_int_t zend_int_t
+#define php_uint_t zend_uint_t
+#define php_off_t zend_off_t
+#define PHP_INT_MAX ZEND_INT_MAX
+#define PHP_INT_MIN ZEND_INT_MIN
+#define PHP_UINT_MAX ZEND_UINT_MAX
+#define PHP_SIZE_MAX ZEND_SIZE_MAX
+
 #ifdef NETWARE
 /* For php_get_uname() function */
 #define PHP_UNAME  "NetWare"
@@ -280,8 +289,8 @@ ssize_t pread(int, void *, size_t, off64_t);
 
 BEGIN_EXTERN_C()
 void phperror(char *error);
-PHPAPI int php_write(void *buf, uint size TSRMLS_DC);
-PHPAPI int php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
+PHPAPI php_size_t php_write(void *buf, php_size_t size TSRMLS_DC);
+PHPAPI php_size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
 		2);
 PHPAPI int php_get_module_initialized(void);
 PHPAPI void php_log_err(char *log_message TSRMLS_DC);

@@ -69,7 +69,7 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, char *new_value, uint ne
 ZEND_API int zend_restore_ini_entry(zend_string *name, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
-ZEND_API long zend_ini_long(char *name, uint name_length, int orig);
+ZEND_API zend_int_t zend_ini_int(char *name, uint name_length, int orig);
 ZEND_API double zend_ini_double(char *name, uint name_length, int orig);
 ZEND_API char *zend_ini_string(char *name, uint name_length, int orig);
 ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_bool *exists);
@@ -124,12 +124,12 @@ END_EXTERN_C()
 	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, NULL, zend_ini_boolean_displayer_cb)
 #endif
 
-#define INI_INT(name) zend_ini_long((name), sizeof(name)-1, 0)
+#define INI_INT(name) zend_ini_int((name), sizeof(name)-1, 0)
 #define INI_FLT(name) zend_ini_double((name), sizeof(name)-1, 0)
 #define INI_STR(name) zend_ini_string_ex((name), sizeof(name)-1, 0, NULL)
 #define INI_BOOL(name) ((zend_bool) INI_INT(name))
 
-#define INI_ORIG_INT(name)	zend_ini_long((name), sizeof(name)-1, 1)
+#define INI_ORIG_INT(name)	zend_ini_int((name), sizeof(name)-1, 1)
 #define INI_ORIG_FLT(name)	zend_ini_double((name), sizeof(name)-1, 1)
 #define INI_ORIG_STR(name)	zend_ini_string((name), sizeof(name)-1, 1)
 #define INI_ORIG_BOOL(name) ((zend_bool) INI_ORIG_INT(name))

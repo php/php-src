@@ -200,7 +200,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	}
 	if (ret_code) {
 		zval_dtor(ret_code);
-		ZVAL_LONG(ret_code, ret);
+		ZVAL_INT(ret_code, ret);
 	}
 }
 /* }}} */
@@ -470,9 +470,9 @@ PHP_FUNCTION(shell_exec)
    Change the priority of the current process */
 PHP_FUNCTION(proc_nice)
 {
-	long pri;
+	php_int_t pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &pri) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &pri) == FAILURE) {
 		RETURN_FALSE;
 	}
 

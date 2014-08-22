@@ -180,7 +180,7 @@ static int php_glob_stream_close(php_stream *stream, int close_handle TSRMLS_DC)
 }
 /* {{{ */
 
-static int php_glob_stream_rewind(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC) /* {{{ */
+static int php_glob_stream_rewind(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 

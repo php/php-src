@@ -21,6 +21,7 @@
 #ifndef __TIMELIB_H__
 #define __TIMELIB_H__
 
+#include "php.h" /* for php_int_t */
 #include "timelib_structs.h"
 #if HAVE_LIMITS_H
 #include <limits.h>
@@ -128,7 +129,7 @@ void timelib_time_offset_dtor(timelib_time_offset* t);
 
 void timelib_error_container_dtor(timelib_error_container *errors);
 
-signed long timelib_date_to_int(timelib_time *d, int *error);
+php_int_t timelib_date_to_int(timelib_time *d, int *error);
 void timelib_dump_date(timelib_time *d, int options);
 void timelib_dump_rel_time(timelib_rel_time *d);
 

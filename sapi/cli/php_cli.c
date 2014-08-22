@@ -252,16 +252,16 @@ static inline int sapi_cli_select(int fd TSRMLS_DC)
 	return ret != -1;
 }
 
-PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+PHP_CLI_API size_t sapi_cli_single_write(const char *str, php_size_t str_length TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
-	long ret;
+	php_int_t ret;
 #else
-	size_t ret;
+	php_size_t ret;
 #endif
 
 	if (cli_shell_callbacks.cli_shell_write) {
-		size_t shell_wrote;
+		php_size_t shell_wrote;
 		shell_wrote = cli_shell_callbacks.cli_shell_write(str, str_length TSRMLS_CC);
 		if (shell_wrote > -1) {
 			return shell_wrote;
@@ -285,10 +285,10 @@ PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS
 }
 /* }}} */
 
-static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+static php_size_t sapi_cli_ub_write(const char *str, php_size_t str_length TSRMLS_DC) /* {{{ */
 {
 	const char *ptr = str;
-	uint remaining = str_length;
+	php_size_t remaining = str_length;
 	size_t ret;
 
 	if (!str_length) {
@@ -296,7 +296,7 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 	}
 
 	if (cli_shell_callbacks.cli_shell_ub_write) {
-		int ub_wrote;
+		php_size_t ub_wrote;
 		ub_wrote = cli_shell_callbacks.cli_shell_ub_write(str, str_length TSRMLS_CC);
 		if (ub_wrote > -1) {
 			return ub_wrote;
@@ -338,7 +338,7 @@ static char *script_filename = "";
 
 static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{ */
 {
-	unsigned int len;
+	php_size_t len;
 	char   *docroot = "";
 
 	/* In CGI mode, we consider the environment to be a part of the server
@@ -1033,7 +1033,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				if (exec_begin && zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1 TSRMLS_CC) == FAILURE) {
 					exit_status=254;
 				}
-				ZVAL_LONG(&argi, index);
+				ZVAL_INT(&argi, index);
 				zend_hash_str_update(&EG(symbol_table).ht, "argi", sizeof("argi")-1, &argi);
 				while (exit_status == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
 					len = strlen(input);
@@ -1042,7 +1042,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 					}
 					ZVAL_STRINGL(&argn, input, len);
 					zend_hash_str_update(&EG(symbol_table).ht, "argn", sizeof("argn")-1, &argn);
-					Z_LVAL(argi) = ++index;
+					Z_IVAL(argi) = ++index;
 					if (exec_run) {
 						if (zend_eval_string_ex(exec_run, NULL, "Command line run code", 1 TSRMLS_CC) == FAILURE) {
 							exit_status=254;

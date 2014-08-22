@@ -38,7 +38,7 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #else
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC);
+static int phar_call_openssl_signverify(int is_sign, php_stream *fp, php_off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC);
 #endif
 
 /* for links to relative location, prepend cwd of the entry */
@@ -117,10 +117,10 @@ php_stream *phar_get_efp(phar_entry_info *entry, int follow_links TSRMLS_DC) /* 
 }
 /* }}} */
 
-int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position, int follow_links TSRMLS_DC) /* {{{ */
+int phar_seek_efp(phar_entry_info *entry, php_off_t offset, int whence, php_off_t position, int follow_links TSRMLS_DC) /* {{{ */
 {
 	php_stream *fp = phar_get_efp(entry, follow_links TSRMLS_CC);
-	off_t temp, eoffset;
+	php_off_t temp, eoffset;
 
 	if (!fp) {
 		return -1;
@@ -154,7 +154,7 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 			temp = 0;
 	}
 
-	if (temp > eoffset + (off_t) entry->uncompressed_filesize) {
+	if (temp > eoffset + (php_off_t) entry->uncompressed_filesize) {
 		return -1;
 	}
 
@@ -693,7 +693,7 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 	php_stream_filter *filter;
 	phar_archive_data *phar = entry->phar;
 	char *filtername;
-	off_t loc;
+	php_off_t loc;
 	php_stream *ufp;
 	phar_entry_data dummy;
 
@@ -786,7 +786,7 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 	php_stream_flush(ufp);
 	php_stream_filter_remove(filter, 1 TSRMLS_CC);
 
-	if (php_stream_tell(ufp) - loc != (off_t) entry->uncompressed_filesize) {
+	if (php_stream_tell(ufp) - loc != (php_off_t) entry->uncompressed_filesize) {
 		spprintf(error, 4096, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
 		return FAILURE;
 	}
@@ -1388,7 +1388,7 @@ static int phar_hex_str(const char *digest, size_t digest_len, char **signature 
 /* }}} */
 
 #ifndef PHAR_HAVE_OPENSSL
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC) /* {{{ */
+static int phar_call_openssl_signverify(int is_sign, php_stream *fp, php_off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC) /* {{{ */
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
@@ -1406,7 +1406,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 		ZVAL_EMPTY_STRING(&zp[0]);
 	}
 
-	if (end != Z_STRLEN(zp[0])) {
+	if (end != Z_STRSIZE(zp[0])) {
 		zval_dtor(&zp[0]);
 		zval_dtor(&zp[1]);
 		zval_dtor(&zp[2]);
@@ -1457,15 +1457,15 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 
 	switch (Z_TYPE(retval)) {
 		default:
-		case IS_LONG:
+		case IS_INT:
 			zval_dtor(&zp[1]);
-			if (1 == Z_LVAL(retval)) {
+			if (1 == Z_IVAL(retval)) {
 				return SUCCESS;
 			}
 			return FAILURE;
 		case IS_TRUE:
-			*signature = estrndup(Z_STRVAL(zp[1]), Z_STRLEN(zp[1]));
-			*signature_len = Z_STRLEN(zp[1]);
+			*signature = estrndup(Z_STRVAL(zp[1]), Z_STRSIZE(zp[1]));
+			*signature_len = Z_STRSIZE(zp[1]);
 			zval_dtor(&zp[1]);
 			return SUCCESS;
 		case IS_FALSE:
@@ -1479,7 +1479,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error TSRMLS_DC) /* {{{ */
 {
 	int read_size, len;
-	off_t read_len;
+	php_off_t read_len;
 	unsigned char buf[1024];
 
 	php_stream_rewind(fp);
@@ -1576,7 +1576,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 
 			while (read_size && (len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
 				EVP_VerifyUpdate (&md_ctx, buf, len);
-				read_len -= (off_t)len;
+				read_len -= (php_off_t)len;
 
 				if (read_len < read_size) {
 					read_size = (int)read_len;
@@ -1616,7 +1616,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 
 			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
 				PHP_SHA512Update(&context, buf, len);
-				read_len -= (off_t)len;
+				read_len -= (php_off_t)len;
 				if (read_len < read_size) {
 					read_size = (int)read_len;
 				}
@@ -1649,7 +1649,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 
 			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
 				PHP_SHA256Update(&context, buf, len);
-				read_len -= (off_t)len;
+				read_len -= (php_off_t)len;
 				if (read_len < read_size) {
 					read_size = (int)read_len;
 				}
@@ -1690,7 +1690,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 
 			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
 				PHP_SHA1Update(&context, buf, len);
-				read_len -= (off_t)len;
+				read_len -= (php_off_t)len;
 				if (read_len < read_size) {
 					read_size = (int)read_len;
 				}
@@ -1723,7 +1723,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 
 			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
 				PHP_MD5Update(&context, buf, len);
-				read_len -= (off_t)len;
+				read_len -= (php_off_t)len;
 				if (read_len < read_size) {
 					read_size = (int)read_len;
 				}

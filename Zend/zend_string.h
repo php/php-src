@@ -29,7 +29,7 @@ ZEND_API extern zend_string *(*zend_new_interned_string)(zend_string *str TSRMLS
 ZEND_API extern void (*zend_interned_strings_snapshot)(TSRMLS_D);
 ZEND_API extern void (*zend_interned_strings_restore)(TSRMLS_D);
 
-ZEND_API zend_ulong zend_hash_func(const char *str, uint len);
+ZEND_API zend_uint_t zend_hash_func(const char *str, zend_size_t len);
 void zend_interned_strings_init(TSRMLS_D);
 void zend_interned_strings_dtor(TSRMLS_D);
 
@@ -70,7 +70,7 @@ END_EXTERN_C()
 
 #define STR_ALLOCA_FREE(str, use_heap) free_alloca(str, use_heap)
 
-static zend_always_inline zend_ulong zend_str_hash_val(zend_string *s)
+static zend_always_inline zend_uint_t zend_str_hash_val(zend_string *s)
 {
 	if (!s->h) {
 		s->h = zend_hash_func(s->val, s->len);
@@ -107,7 +107,7 @@ static zend_always_inline zend_uint zend_str_delref(zend_string *s)
 	return 1;
 }
 
-static zend_always_inline zend_string *zend_str_alloc(int len, int persistent)
+static zend_always_inline zend_string *zend_str_alloc(zend_size_t len, int persistent)
 {
 	zend_string *ret = (zend_string *)pemalloc(ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
 
@@ -143,7 +143,7 @@ static zend_always_inline zend_string *zend_str_safe_alloc(size_t n, size_t m, s
 	return ret;
 }
 
-static zend_always_inline zend_string *zend_str_init(const char *str, int len, int persistent)
+static zend_always_inline zend_string *zend_str_init(const char *str, zend_size_t len, int persistent)
 {
 	zend_string *ret = STR_ALLOC(len, persistent);
 
@@ -169,7 +169,7 @@ static zend_always_inline zend_string *zend_str_dup(zend_string *s, int persiste
 	}
 }
 
-static zend_always_inline zend_string *zend_str_realloc(zend_string *s, int len, int persistent)
+static zend_always_inline zend_string *zend_str_realloc(zend_string *s, zend_size_t len, int persistent)
 {
 	zend_string *ret;
 
@@ -257,9 +257,9 @@ static zend_always_inline void zend_str_release(zend_string *s)
  *                  -- Ralf S. Engelschall <rse@engelschall.com>
  */
 
-static inline ulong zend_inline_hash_func(const char *str, uint len)
+static inline zend_uint_t zend_inline_hash_func(const char *str, zend_size_t len)
 {
-	register ulong hash = 5381;
+	register zend_uint_t hash = Z_UI(5381);
 
 	/* variant with the hash unrolled eight times */
 	for (; len >= 8; len -= 8) {

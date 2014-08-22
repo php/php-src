@@ -43,7 +43,7 @@ PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_arra
 }
 
 /* binary-safe version */
-PHPAPI void php_register_variable_safe(char *var, char *strval, int str_len, zval *track_vars_array TSRMLS_DC)
+PHPAPI void php_register_variable_safe(char *var, char *strval, php_size_t str_len, zval *track_vars_array TSRMLS_DC)
 {
 	zval new_entry;
 	assert(strval != NULL);
@@ -141,7 +141,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 				/* do not output the error message to the screen,
 				 this helps us to to avoid "information disclosure" */
 				if (!PG(display_errors)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variable nesting level exceeded %ld. To increase the limit change max_input_nesting_level in php.ini.", PG(max_input_nesting_level));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variable nesting level exceeded " ZEND_INT_FMT ". To increase the limit change max_input_nesting_level in php.ini.", PG(max_input_nesting_level));
 				}
 				free_alloca(var_orig, use_heap);
 				return;
@@ -246,7 +246,7 @@ static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof TSR
 	char *ksep, *vsep;
 	size_t klen, vlen;
 	/* FIXME: string-size_t */
-	unsigned int new_vlen;
+	php_size_t new_vlen;
 
 	if (var->ptr >= var->end) {
 		return 0;
@@ -358,7 +358,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	zval array;
 	int free_buffer = 0;
 	char *strtok_buf = NULL;
-	long count = 0;
+	php_int_t count = 0;
 	
 	ZVAL_UNDEF(&array);
 	switch (arg) {
@@ -442,13 +442,13 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		}
 
 		if (++count > PG(max_input_vars)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded " ZEND_INT_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 			break;
 		}
 
 		if (val) { /* have a value */
-			int val_len;
-			unsigned int new_val_len;
+			php_size_t val_len;
+			php_size_t new_val_len;
 
 			*val++ = '\0';
 			php_url_decode(var, strlen(var));
@@ -459,8 +459,8 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			}
 			efree(val);
 		} else {
-			int val_len;
-			unsigned int new_val_len;
+			php_size_t val_len;
+			php_size_t new_val_len;
 
 			php_url_decode(var, strlen(var));
 			val_len = 0;
@@ -562,9 +562,9 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 
 	/* prepare argc */
 	if (SG(request_info).argc) {
-		ZVAL_LONG(&argc, SG(request_info).argc);
+		ZVAL_INT(&argc, SG(request_info).argc);
 	} else {
-		ZVAL_LONG(&argc, count);
+		ZVAL_INT(&argc, count);
 	}
 
 	if (SG(request_info).argc) {
@@ -608,7 +608,7 @@ static inline void php_register_server_variables(TSRMLS_D)
 		zval request_time_float, request_time_long;
 		ZVAL_DOUBLE(&request_time_float, sapi_get_request_time(TSRMLS_C));
 		php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, &PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
-		ZVAL_LONG(&request_time_long, zend_dval_to_lval(Z_DVAL(request_time_float)));
+		ZVAL_INT(&request_time_long, zend_dval_to_ival(Z_DVAL(request_time_float)));
 		php_register_variable_ex("REQUEST_TIME", &request_time_long, &PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
 	}
 
@@ -621,7 +621,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 {
 	zval *src_entry, *dest_entry;
 	zend_string *string_key;
-	ulong num_key;
+	php_uint_t num_key;
 	int globals_check = (dest == (&EG(symbol_table).ht));
 
 	ZEND_HASH_FOREACH_KEY_VAL(src, num_key, string_key, src_entry) {

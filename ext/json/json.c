@@ -93,29 +93,29 @@ static PHP_MINIT_FUNCTION(json)
 	INIT_CLASS_ENTRY(ce, "JsonSerializable", json_serializable_interface);
 	php_json_serializable_ce = zend_register_internal_interface(&ce TSRMLS_CC);
 
-	REGISTER_LONG_CONSTANT("JSON_HEX_TAG",  PHP_JSON_HEX_TAG,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_HEX_AMP",  PHP_JSON_HEX_AMP,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_HEX_APOS", PHP_JSON_HEX_APOS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_HEX_QUOT", PHP_JSON_HEX_QUOT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_FORCE_OBJECT", PHP_JSON_FORCE_OBJECT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_NUMERIC_CHECK", PHP_JSON_NUMERIC_CHECK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_SLASHES", PHP_JSON_UNESCAPED_SLASHES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_PRETTY_PRINT", PHP_JSON_PRETTY_PRINT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_UNICODE", PHP_JSON_UNESCAPED_UNICODE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_PARTIAL_OUTPUT_ON_ERROR", PHP_JSON_PARTIAL_OUTPUT_ON_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_HEX_TAG",  PHP_JSON_HEX_TAG,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_HEX_AMP",  PHP_JSON_HEX_AMP,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_HEX_APOS", PHP_JSON_HEX_APOS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_HEX_QUOT", PHP_JSON_HEX_QUOT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_FORCE_OBJECT", PHP_JSON_FORCE_OBJECT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_NUMERIC_CHECK", PHP_JSON_NUMERIC_CHECK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_UNESCAPED_SLASHES", PHP_JSON_UNESCAPED_SLASHES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_PRETTY_PRINT", PHP_JSON_PRETTY_PRINT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_UNESCAPED_UNICODE", PHP_JSON_UNESCAPED_UNICODE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_PARTIAL_OUTPUT_ON_ERROR", PHP_JSON_PARTIAL_OUTPUT_ON_ERROR, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_STATE_MISMATCH", PHP_JSON_ERROR_STATE_MISMATCH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_CTRL_CHAR", PHP_JSON_ERROR_CTRL_CHAR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_SYNTAX", PHP_JSON_ERROR_SYNTAX, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_UTF8", PHP_JSON_ERROR_UTF8, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_RECURSION", PHP_JSON_ERROR_RECURSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_INF_OR_NAN", PHP_JSON_ERROR_INF_OR_NAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_UNSUPPORTED_TYPE", PHP_JSON_ERROR_UNSUPPORTED_TYPE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_ERROR_STATE_MISMATCH", PHP_JSON_ERROR_STATE_MISMATCH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_ERROR_CTRL_CHAR", PHP_JSON_ERROR_CTRL_CHAR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_ERROR_SYNTAX", PHP_JSON_ERROR_SYNTAX, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_ERROR_UTF8", PHP_JSON_ERROR_UTF8, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_ERROR_RECURSION", PHP_JSON_ERROR_RECURSION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_ERROR_INF_OR_NAN", PHP_JSON_ERROR_INF_OR_NAN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_ERROR_UNSUPPORTED_TYPE", PHP_JSON_ERROR_UNSUPPORTED_TYPE, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("JSON_OBJECT_AS_ARRAY",		PHP_JSON_OBJECT_AS_ARRAY,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_BIGINT_AS_STRING",		PHP_JSON_BIGINT_AS_STRING,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_OBJECT_AS_ARRAY",		PHP_JSON_OBJECT_AS_ARRAY,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("JSON_BIGINT_AS_STRING",		PHP_JSON_BIGINT_AS_STRING,		CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -177,7 +177,7 @@ static int json_determine_array_type(zval *val TSRMLS_DC) /* {{{ */
 	i = myht ? zend_hash_num_elements(myht) : 0;
 	if (i > 0) {
 		zend_string *key;
-		ulong index, idx;
+		php_uint_t index, idx;
 
 		idx = 0;
 		ZEND_HASH_FOREACH_KEY(myht, index, key) {
@@ -252,7 +252,7 @@ static void json_encode_array(smart_str *buf, zval *val, int options TSRMLS_DC) 
 	if (i > 0) {
 		zend_string *key;
 		zval *data;
-		ulong index;
+		php_uint_t index;
 		HashTable *tmp_ht;
 
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
@@ -308,7 +308,7 @@ static void json_encode_array(smart_str *buf, zval *val, int options TSRMLS_DC) 
 					json_pretty_print_indent(buf, options TSRMLS_CC);
 
 					smart_str_appendc(buf, '"');
-					smart_str_append_long(buf, (long) index);
+					smart_str_append_int(buf, (php_int_t) index);
 					smart_str_appendc(buf, '"');
 					smart_str_appendc(buf, ':');
 
@@ -395,11 +395,11 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 	if (options & PHP_JSON_NUMERIC_CHECK) {
 		double d;
 		int type;
-		long p;
+		php_int_t p;
 
 		if ((type = is_numeric_string(s, len, &p, &d, 0)) != 0) {
-			if (type == IS_LONG) {
-				smart_str_append_long(buf, p);
+			if (type == IS_INT) {
+				smart_str_append_int(buf, p);
 			} else if (type == IS_DOUBLE) {
 				if (!zend_isinf(d) && !zend_isnan(d)) {
 					char *tmp;
@@ -602,8 +602,8 @@ again:
 			smart_str_appendl(buf, "false", 5);
 			break;
 
-		case IS_LONG:
-			smart_str_append_long(buf, Z_LVAL_P(val));
+		case IS_INT:
+			smart_str_append_int(buf, Z_IVAL_P(val));
 			break;
 
 		case IS_DOUBLE:
@@ -624,7 +624,7 @@ again:
 			break;
 
 		case IS_STRING:
-			json_escape_string(buf, Z_STRVAL_P(val), Z_STRLEN_P(val), options TSRMLS_CC);
+			json_escape_string(buf, Z_STRVAL_P(val), Z_STRSIZE_P(val), options TSRMLS_CC);
 			break;
 
 		case IS_OBJECT:
@@ -651,7 +651,7 @@ again:
 }
 /* }}} */
 
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len, int options, long depth TSRMLS_DC) /* {{{ */
+PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len, int options, php_int_t depth TSRMLS_DC) /* {{{ */
 {
 	int utf16_len;
 	unsigned short *utf16;
@@ -678,7 +678,7 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 	if (!parse_JSON_ex(jp, return_value, utf16, utf16_len, options TSRMLS_CC)) {
 		double d;
 		int type, overflow_info;
-		long p;
+		php_int_t p;
 		char *trim = str;
 		int trim_len = str_len;
 
@@ -710,8 +710,8 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 		}
 
 		if ((type = is_numeric_string_ex(trim, trim_len, &p, &d, 0, &overflow_info)) != 0) {
-			if (type == IS_LONG) {
-				RETVAL_LONG(p);
+			if (type == IS_INT) {
+				RETVAL_INT(p);
 			} else if (type == IS_DOUBLE) {
 				if (options & PHP_JSON_BIGINT_AS_STRING && overflow_info) {
 					/* Within an object or array, a numeric literal is assumed
@@ -758,10 +758,10 @@ static PHP_FUNCTION(json_encode)
 {
 	zval *parameter;
 	smart_str buf = {0};
-	long options = 0;
-    long depth = JSON_PARSER_DEFAULT_DEPTH;
+	php_int_t options = 0;
+    php_int_t depth = JSON_PARSER_DEFAULT_DEPTH;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ll", &parameter, &options, &depth) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ii", &parameter, &options, &depth) == FAILURE) {
 		return;
 	}
 
@@ -788,10 +788,10 @@ static PHP_FUNCTION(json_decode)
 	char *str;
 	int str_len;
 	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
-	long depth = JSON_PARSER_DEFAULT_DEPTH;
-	long options = 0;
+	php_int_t depth = JSON_PARSER_DEFAULT_DEPTH;
+	php_int_t options = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bll", &str, &str_len, &assoc, &depth, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bii", &str, &str_len, &assoc, &depth, &options) == FAILURE) {
 		return;
 	}
 
@@ -820,7 +820,7 @@ static PHP_FUNCTION(json_last_error)
 		return;
 	}
 
-	RETURN_LONG(JSON_G(error_code));
+	RETURN_INT(JSON_G(error_code));
 }
 /* }}} */
 

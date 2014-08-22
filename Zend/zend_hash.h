@@ -26,7 +26,7 @@
 #include "zend.h"
 
 #define HASH_KEY_IS_STRING 1
-#define HASH_KEY_IS_LONG 2
+#define HASH_KEY_IS_INT 2
 #define HASH_KEY_NON_EXISTENT 3
 #define HASH_KEY_NON_EXISTANT HASH_KEY_NON_EXISTENT /* Keeping old define (with typo) for backward compatibility */
 
@@ -45,7 +45,7 @@
 #define HASH_MASK_CONSISTENCY      0x60
 
 typedef struct _zend_hash_key {
-	ulong        h;
+	zend_uint_t        h;
 	zend_string *key;
 } zend_hash_key;
 
@@ -98,10 +98,10 @@ ZEND_API zval *_zend_hash_str_add_new(HashTable *ht, const char *key, int len, z
 #define zend_hash_str_add_new(ht, key, len, pData) \
 		_zend_hash_str_add_new(ht, key, len, pData ZEND_FILE_LINE_CC)
 
-ZEND_API zval *_zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zval *pData, int flag ZEND_FILE_LINE_DC);
-ZEND_API zval *_zend_hash_index_add(HashTable *ht, ulong h, zval *pData ZEND_FILE_LINE_DC);
-ZEND_API zval *_zend_hash_index_add_new(HashTable *ht, ulong h, zval *pData ZEND_FILE_LINE_DC);
-ZEND_API zval *_zend_hash_index_update(HashTable *ht, ulong h, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_index_update_or_next_insert(HashTable *ht, zend_uint_t h, zval *pData, int flag ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_index_add(HashTable *ht, zend_uint_t h, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_index_add_new(HashTable *ht, zend_uint_t h, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_index_update(HashTable *ht, zend_uint_t h, zval *pData ZEND_FILE_LINE_DC);
 ZEND_API zval *_zend_hash_next_index_insert(HashTable *ht, zval *pData ZEND_FILE_LINE_DC);
 ZEND_API zval *_zend_hash_next_index_insert_new(HashTable *ht, zval *pData ZEND_FILE_LINE_DC);
 
@@ -116,7 +116,7 @@ ZEND_API zval *_zend_hash_next_index_insert_new(HashTable *ht, zval *pData ZEND_
 #define zend_hash_next_index_insert_new(ht, pData) \
 		_zend_hash_next_index_insert_new(ht, pData ZEND_FILE_LINE_CC)
 
-ZEND_API zval *zend_hash_index_add_empty_element(HashTable *ht, ulong h);
+ZEND_API zval *zend_hash_index_add_empty_element(HashTable *ht, zend_uint_t h);
 ZEND_API zval *zend_hash_add_empty_element(HashTable *ht, zend_string *key);
 ZEND_API zval *zend_hash_str_add_empty_element(HashTable *ht, const char *key, int len);
 
@@ -148,24 +148,24 @@ ZEND_API int zend_hash_del(HashTable *ht, zend_string *key);
 ZEND_API int zend_hash_del_ind(HashTable *ht, zend_string *key);
 ZEND_API int zend_hash_str_del(HashTable *ht, const char *key, int len);
 ZEND_API int zend_hash_str_del_ind(HashTable *ht, const char *key, int len);
-ZEND_API int zend_hash_index_del(HashTable *ht, ulong h);
+ZEND_API int zend_hash_index_del(HashTable *ht, zend_uint_t h);
 
 /* Data retreival */
 ZEND_API zval *zend_hash_find(const HashTable *ht, zend_string *key);
 ZEND_API zval *zend_hash_str_find(const HashTable *ht, const char *key, int len);
-ZEND_API zval *zend_hash_index_find(const HashTable *ht, ulong h);
+ZEND_API zval *zend_hash_index_find(const HashTable *ht, zend_uint_t h);
 
 /* Misc */
 ZEND_API int zend_hash_exists(const HashTable *ht, zend_string *key);
 ZEND_API int zend_hash_str_exists(const HashTable *ht, const char *str, int len);
-ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h);
+ZEND_API int zend_hash_index_exists(const HashTable *ht, zend_uint_t h);
 
 /* traversing */
 #define zend_hash_has_more_elements_ex(ht, pos) \
 	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS)
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, ulong *num_index, zend_bool duplicate, HashPosition *pos);
+ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_uint_t *num_index, zend_bool duplicate, HashPosition *pos);
 ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
 ZEND_API zval *zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos);
@@ -175,7 +175,7 @@ ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos
 typedef struct _HashPointer {
 	HashPosition pos;
 	HashTable *ht;
-	ulong h;
+	zend_uint_t h;
 } HashPointer;
 
 ZEND_API int zend_hash_get_pointer(const HashTable *ht, HashPointer *ptr);
@@ -235,7 +235,7 @@ END_EXTERN_C()
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 
-static inline int _zend_handle_numeric_str(const char *key, int length, ulong *idx)
+static inline int _zend_handle_numeric_str(const char *key, zend_size_t length, zend_uint_t *idx)
 {
 	register const char *tmp = key;
 	const char *end;
@@ -257,9 +257,9 @@ static inline int _zend_handle_numeric_str(const char *key, int length, ulong *i
 
 	if ((*end != '\0') /* not a null terminated string */
 	 || (*tmp == '0' && length > 1) /* numbers with leading zeros */
-	 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */
-	 || (SIZEOF_LONG == 4 &&
-	     end - tmp == MAX_LENGTH_OF_LONG - 1 &&
+	 || (end - tmp > MAX_LENGTH_OF_ZEND_INT - 1) /* number too long */
+	 || (SIZEOF_ZEND_INT == 4 &&
+	     end - tmp == MAX_LENGTH_OF_ZEND_INT - 1 &&
 	     *tmp > '2')) { /* overflow */
 		return 0;
 	}
@@ -268,11 +268,11 @@ static inline int _zend_handle_numeric_str(const char *key, int length, ulong *i
 		++tmp;
 		if (tmp == end) {
 			if (*key == '-') {
-				if (*idx-1 > LONG_MAX) { /* overflow */
+				if (*idx-1 > ZEND_INT_MAX) { /* overflow */
 					return 0;
 				}
 				*idx = 0 - *idx;
-			} else if (*idx > LONG_MAX) { /* overflow */
+			} else if (*idx > ZEND_INT_MAX) { /* overflow */
 				return 0;
 			}
 			return 1;
@@ -322,7 +322,7 @@ static inline zval *zend_hash_str_find_ind(const HashTable *ht, const char *str,
 
 static inline zval *zend_symtable_update(HashTable *ht, zend_string *key, zval *pData)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC(key, idx)) {
 		return zend_hash_index_update(ht, idx, pData);
@@ -334,7 +334,7 @@ static inline zval *zend_symtable_update(HashTable *ht, zend_string *key, zval *
 
 static inline zval *zend_symtable_update_ind(HashTable *ht, zend_string *key, zval *pData)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC(key, idx)) {
 		return zend_hash_index_update(ht, idx, pData);
@@ -346,7 +346,7 @@ static inline zval *zend_symtable_update_ind(HashTable *ht, zend_string *key, zv
 
 static inline int zend_symtable_del(HashTable *ht, zend_string *key)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC(key, idx)) {
 		return zend_hash_index_del(ht, idx);
@@ -358,7 +358,7 @@ static inline int zend_symtable_del(HashTable *ht, zend_string *key)
 
 static inline int zend_symtable_del_ind(HashTable *ht, zend_string *key)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC(key, idx)) {
 		return zend_hash_index_del(ht, idx);
@@ -370,7 +370,7 @@ static inline int zend_symtable_del_ind(HashTable *ht, zend_string *key)
 
 static inline zval *zend_symtable_find(const HashTable *ht, zend_string *key)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC(key, idx)) {
 		return zend_hash_index_find(ht, idx);
@@ -382,7 +382,7 @@ static inline zval *zend_symtable_find(const HashTable *ht, zend_string *key)
 
 static inline zval *zend_symtable_find_ind(const HashTable *ht, zend_string *key)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC(key, idx)) {
 		return zend_hash_index_find(ht, idx);
@@ -394,7 +394,7 @@ static inline zval *zend_symtable_find_ind(const HashTable *ht, zend_string *key
 
 static inline int zend_symtable_exists(HashTable *ht, zend_string *key)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC(key, idx)) {
 		return zend_hash_index_exists(ht, idx);
@@ -406,7 +406,7 @@ static inline int zend_symtable_exists(HashTable *ht, zend_string *key)
 
 static inline zval *zend_symtable_str_update(HashTable *ht, const char *str, int len, zval *pData)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
 		return zend_hash_index_update(ht, idx, pData);
@@ -418,7 +418,7 @@ static inline zval *zend_symtable_str_update(HashTable *ht, const char *str, int
 
 static inline zval *zend_symtable_str_update_ind(HashTable *ht, const char *str, int len, zval *pData)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
 		return zend_hash_index_update(ht, idx, pData);
@@ -430,7 +430,7 @@ static inline zval *zend_symtable_str_update_ind(HashTable *ht, const char *str,
 
 static inline int zend_symtable_str_del(HashTable *ht, const char *str, int len)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
 		return zend_hash_index_del(ht, idx);
@@ -442,7 +442,7 @@ static inline int zend_symtable_str_del(HashTable *ht, const char *str, int len)
 
 static inline int zend_symtable_str_del_ind(HashTable *ht, const char *str, int len)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
 		return zend_hash_index_del(ht, idx);
@@ -454,7 +454,7 @@ static inline int zend_symtable_str_del_ind(HashTable *ht, const char *str, int 
 
 static inline zval *zend_symtable_str_find(HashTable *ht, const char *str, int len)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
 		return zend_hash_index_find(ht, idx);
@@ -466,7 +466,7 @@ static inline zval *zend_symtable_str_find(HashTable *ht, const char *str, int l
 
 static inline int zend_symtable_str_exists(HashTable *ht, const char *str, int len)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
 		return zend_hash_index_exists(ht, idx);
@@ -564,7 +564,7 @@ static inline void *zend_hash_str_update_mem(HashTable *ht, const char *str, int
 	return zend_hash_str_update_ptr(ht, str, len, p);
 }
 
-static inline void *zend_hash_index_update_ptr(HashTable *ht, ulong h, void *pData)
+static inline void *zend_hash_index_update_ptr(HashTable *ht, zend_uint_t h, void *pData)
 {
 	zval tmp, *zv;
 
@@ -582,7 +582,7 @@ static inline void *zend_hash_next_index_insert_ptr(HashTable *ht, void *pData)
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-static inline void *zend_hash_index_update_mem(HashTable *ht, ulong h, void *pData, size_t size)
+static inline void *zend_hash_index_update_mem(HashTable *ht, zend_uint_t h, void *pData, size_t size)
 {
 	void *p;
 
@@ -620,7 +620,7 @@ static inline void *zend_hash_str_find_ptr(const HashTable *ht, const char *str,
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-static inline void *zend_hash_index_find_ptr(const HashTable *ht, ulong h)
+static inline void *zend_hash_index_find_ptr(const HashTable *ht, zend_uint_t h)
 {
 	zval *zv;
 
@@ -630,7 +630,7 @@ static inline void *zend_hash_index_find_ptr(const HashTable *ht, ulong h)
 
 static inline void *zend_symtable_str_find_ptr(HashTable *ht, const char *str, int len)
 {
-	ulong idx;
+	zend_uint_t idx;
 
 	if (ZEND_HANDLE_NUMERIC_STR(str, len, idx)) {
 		return zend_hash_index_find_ptr(ht, idx);

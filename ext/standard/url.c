@@ -186,10 +186,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		}
 
 		if (pp - p > 0 && pp - p < 6 && (*pp == '/' || *pp == '\0')) {
-			long port;
+			php_int_t port;
 			memcpy(port_buf, p, (pp - p));
 			port_buf[pp - p] = '\0';
-			port = strtol(port_buf, NULL, 10);
+			port = ZEND_STRTOI(port_buf, NULL, 10);
 			if (port > 0 && port <= 65535) {
 				ret->port = (unsigned short) port;
 			} else {
@@ -280,10 +280,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				efree(ret);
 				return NULL;
 			} else if (e - p > 0) {
-				long port;
+				php_int_t port;
 				memcpy(port_buf, p, (e - p));
 				port_buf[e - p] = '\0';
-				port = strtol(port_buf, NULL, 10);
+				port = ZEND_STRTOI(port_buf, NULL, 10);
 				if (port > 0 && port <= 65535) {
 					ret->port = (unsigned short)port;
 				} else {
@@ -377,9 +377,9 @@ PHP_FUNCTION(parse_url)
 	char *str;
 	int str_len;
 	php_url *resource;
-	long key = -1;
+	php_int_t key = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &key) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &str, &str_len, &key) == FAILURE) {
 		return;
 	}
 
@@ -398,7 +398,7 @@ PHP_FUNCTION(parse_url)
 				if (resource->host != NULL) RETVAL_STRING(resource->host);
 				break;
 			case PHP_URL_PORT:
-				if (resource->port != 0) RETVAL_LONG(resource->port);
+				if (resource->port != 0) RETVAL_INT(resource->port);
 				break;
 			case PHP_URL_USER:
 				if (resource->user != NULL) RETVAL_STRING(resource->user);
@@ -416,7 +416,7 @@ PHP_FUNCTION(parse_url)
 				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment);
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier %ld", key);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier " ZEND_INT_FMT, key);
 				RETVAL_FALSE;
 		}
 		goto done;
@@ -431,7 +431,7 @@ PHP_FUNCTION(parse_url)
 	if (resource->host != NULL)
 		add_assoc_string(return_value, "host", resource->host);
 	if (resource->port != 0)
-		add_assoc_long(return_value, "port", resource->port);
+		add_assoc_int(return_value, "port", resource->port);
 	if (resource->user != NULL)
 		add_assoc_string(return_value, "user", resource->user);
 	if (resource->pass != NULL)
@@ -719,9 +719,9 @@ PHP_FUNCTION(get_headers)
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL, *h;
 	HashTable *hashT;
-	long format = 0;
+	php_int_t format = 0;
                 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &url, &url_len, &format) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &url, &url_len, &format) == FAILURE) {
 		return;
 	}
 	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc(TSRMLS_C));
@@ -769,10 +769,10 @@ no_name_header:
 				}
 
 				if ((prev_val = zend_hash_str_find(HASH_OF(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
-					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr) + 1), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
+					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr) + 1), s, (Z_STRSIZE_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				} else { /* some headers may occur more then once, therefor we need to remake the string into an array */
 					convert_to_array(prev_val);
-					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
+					add_next_index_stringl(prev_val, s, (Z_STRSIZE_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				}
 
 				*p = c;

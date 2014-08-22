@@ -37,10 +37,10 @@
 
 PHP_MINIT_FUNCTION(password) /* {{{ */
 {
-	REGISTER_LONG_CONSTANT("PASSWORD_DEFAULT", PHP_PASSWORD_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PASSWORD_DEFAULT", PHP_PASSWORD_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -195,9 +195,9 @@ PHP_FUNCTION(password_get_info)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 			{
-				long cost = PHP_PASSWORD_BCRYPT_COST;
-				sscanf(hash, "$2y$%ld$", &cost);
-				add_assoc_long(&options, "cost", cost);
+				php_int_t cost = PHP_PASSWORD_BCRYPT_COST;
+				sscanf(hash, "$2y$" ZEND_INT_FMT "$", &cost);
+				add_assoc_int(&options, "cost", cost);
 			}
 			break;
 		case PHP_PASSWORD_UNKNOWN:
@@ -207,21 +207,21 @@ PHP_FUNCTION(password_get_info)
 
 	array_init(return_value);
 	
-	add_assoc_long(return_value, "algo", algo);
+	add_assoc_int(return_value, "algo", algo);
 	add_assoc_string(return_value, "algoName", algo_name);
 	add_assoc_zval(return_value, "options", &options);	
 }
 
 PHP_FUNCTION(password_needs_rehash)
 {
-	long new_algo = 0;
+	php_int_t new_algo = 0;
 	php_password_algo algo;
 	int hash_len;
 	char *hash;
 	HashTable *options = 0;
 	zval *option_buffer;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "si|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
 		return;
 	}
 
@@ -239,21 +239,21 @@ PHP_FUNCTION(password_needs_rehash)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 			{
-				long new_cost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
+				php_int_t new_cost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
 				
 				if (options && (option_buffer = zend_symtable_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
-					if (Z_TYPE_P(option_buffer) != IS_LONG) {
+					if (Z_TYPE_P(option_buffer) != IS_INT) {
 						zval cast_option_buffer;
 						ZVAL_DUP(&cast_option_buffer, option_buffer);
-						convert_to_long(&cast_option_buffer);
-						new_cost = Z_LVAL(cast_option_buffer);
+						convert_to_int(&cast_option_buffer);
+						new_cost = Z_IVAL(cast_option_buffer);
 						zval_dtor(&cast_option_buffer);
 					} else {
-						new_cost = Z_LVAL_P(option_buffer);
+						new_cost = Z_IVAL_P(option_buffer);
 					}
 				}
 
-				sscanf(hash, "$2y$%ld$", &cost);
+				sscanf(hash, "$2y$" ZEND_INT_FMT "$", &cost);
 				if (cost != new_cost) {
 					RETURN_TRUE;
 				}
@@ -307,36 +307,36 @@ Hash a password */
 PHP_FUNCTION(password_hash)
 {
 	char *hash_format, *hash, *salt, *password;
-	long algo = 0;
+	php_int_t algo = 0;
 	int password_len = 0, hash_len;
 	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
 	zval *option_buffer;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &password, &password_len, &algo, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "si|H", &password, &password_len, &algo, &options) == FAILURE) {
 		return;
 	}
 
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 		{
-			long cost = PHP_PASSWORD_BCRYPT_COST;
+			php_int_t cost = PHP_PASSWORD_BCRYPT_COST;
 	
 			if (options && (option_buffer = zend_symtable_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
-				if (Z_TYPE_P(option_buffer) != IS_LONG) {
+				if (Z_TYPE_P(option_buffer) != IS_INT) {
 					zval cast_option_buffer;
 					ZVAL_DUP(&cast_option_buffer, option_buffer);
-					convert_to_long(&cast_option_buffer);
-					cost = Z_LVAL(cast_option_buffer);
+					convert_to_int(&cast_option_buffer);
+					cost = Z_IVAL(cast_option_buffer);
 					zval_dtor(&cast_option_buffer);
 				} else {
-					cost = Z_LVAL_P(option_buffer);
+					cost = Z_IVAL_P(option_buffer);
 				}
 			}
 	
 			if (cost < 4 || cost > 31) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: %ld", cost);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: " ZEND_INT_FMT, cost);
 				RETURN_NULL();
 			}
 			
@@ -348,7 +348,7 @@ PHP_FUNCTION(password_hash)
 		break;
 		case PHP_PASSWORD_UNKNOWN:
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: %ld", algo);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: " ZEND_INT_FMT, algo);
 			RETURN_NULL();
 	}
 
@@ -358,10 +358,10 @@ PHP_FUNCTION(password_hash)
 		size_t buffer_len;
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING:
-				buffer = estrndup(Z_STRVAL_P(option_buffer), Z_STRLEN_P(option_buffer));
-				buffer_len_int = Z_STRLEN_P(option_buffer);
+				buffer = estrndup(Z_STRVAL_P(option_buffer), Z_STRSIZE_P(option_buffer));
+				buffer_len_int = Z_STRSIZE_P(option_buffer);
 				break;
-			case IS_LONG:
+			case IS_INT:
 			case IS_DOUBLE:
 			case IS_OBJECT: {
 				zval cast_option_buffer;
@@ -369,8 +369,8 @@ PHP_FUNCTION(password_hash)
 				ZVAL_DUP(&cast_option_buffer, option_buffer);
 				convert_to_string(&cast_option_buffer);
 				if (Z_TYPE(cast_option_buffer) == IS_STRING) {
-					buffer = estrndup(Z_STRVAL(cast_option_buffer), Z_STRLEN(cast_option_buffer));
-					buffer_len_int = Z_STRLEN(cast_option_buffer);
+					buffer = estrndup(Z_STRVAL(cast_option_buffer), Z_STRSIZE(cast_option_buffer));
+					buffer_len_int = Z_STRSIZE(cast_option_buffer);
 					zval_dtor(&cast_option_buffer);
 					break;
 				}

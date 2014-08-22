@@ -41,7 +41,7 @@ PHP_FUNCTION(header)
 	zend_bool rep = 1;
 	sapi_header_line ctr = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &ctr.line,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bi", &ctr.line,
 				&ctr.line_len, &rep, &ctr.response_code) == FAILURE)
 		return;
 
@@ -178,11 +178,11 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 PHP_FUNCTION(setcookie)
 {
 	char *name, *value = NULL, *path = NULL, *domain = NULL;
-	long expires = 0;
+	php_int_t expires = 0;
 	zend_bool secure = 0, httponly = 0;
 	int name_len, value_len = 0, path_len = 0, domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sissbb", &name,
 							  &name_len, &value, &value_len, &expires, &path,
 							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
 		return;
@@ -201,11 +201,11 @@ PHP_FUNCTION(setcookie)
 PHP_FUNCTION(setrawcookie)
 {
 	char *name, *value = NULL, *path = NULL, *domain = NULL;
-	long expires = 0;
+	php_int_t expires = 0;
 	zend_bool secure = 0, httponly = 0;
 	int name_len, value_len = 0, path_len = 0, domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sissbb", &name,
 							  &name_len, &value, &value_len, &expires, &path,
 							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
 		return;
@@ -239,7 +239,7 @@ PHP_FUNCTION(headers_sent)
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
 		zval_dtor(arg2);
-		ZVAL_LONG(arg2, line);
+		ZVAL_INT(arg2, line);
 	case 1:
 		zval_dtor(arg1);
 		if (file) {
@@ -289,21 +289,21 @@ PHP_FUNCTION(headers_list)
    Sets a response code, or returns the current HTTP response code */
 PHP_FUNCTION(http_response_code)
 {
-	long response_code = 0;
+	php_int_t response_code = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &response_code) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &response_code) == FAILURE) {
 		return;
 	}
 
 	if (response_code)
 	{
-		long old_response_code;
+		php_int_t old_response_code;
 
 		old_response_code = SG(sapi_headers).http_response_code;
 		SG(sapi_headers).http_response_code = response_code;
 
 		if (old_response_code) {
-			RETURN_LONG(old_response_code);
+			RETURN_INT(old_response_code);
 		}
 
 		RETURN_TRUE;
@@ -313,7 +313,7 @@ PHP_FUNCTION(http_response_code)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(SG(sapi_headers).http_response_code);
+	RETURN_INT(SG(sapi_headers).http_response_code);
 }
 /* }}} */
 

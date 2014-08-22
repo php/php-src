@@ -198,7 +198,8 @@ static size_t strnlen(const char *s, size_t maxlen) {
 static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt, va_list ap) /* {{{ */
 {
 	char *s = NULL;
-	int s_len, free_zcopy;
+	php_size_t s_len;
+	int free_zcopy;
 	zval *zvp, zcopy;
 
 	int min_width = 0;
@@ -366,6 +367,16 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					modifier = LM_SIZE_T;
 #endif
 					break;
+				case 'p': {
+						char __next = *(fmt+1);
+						if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) { 
+							fmt++;
+							modifier = LM_PHP_INT_T;
+						} else {
+							modifier = LM_STD;
+						}
+					}
+					break;
 				case 'h':
 					fmt++;
 					if (*fmt == 'h') {
@@ -396,7 +407,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					if (free_zcopy) {
 						zvp = &zcopy;
 					}
-					s_len = Z_STRLEN_P(zvp);
+					s_len = Z_STRSIZE_P(zvp);
 					s = Z_STRVAL_P(zvp);
 					if (adjust_precision && precision < s_len) {
 						s_len = precision;
@@ -431,6 +442,9 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 							i_num = (wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
+						case LM_PHP_INT_T:
+							i_num = (wide_int) va_arg(ap, php_uint_t);
+							break;
 					}
 					/*
 					 * The rest also applies to other integer formats, so fall
@@ -473,6 +487,9 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 								i_num = (wide_int) va_arg(ap, ptrdiff_t);
 								break;
 #endif
+							case LM_PHP_INT_T:
+								i_num = (wide_int) va_arg(ap, php_int_t);
+								break;
 						}
 					}
 					s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
@@ -518,6 +535,9 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
+						case LM_PHP_INT_T:
+							ui_num = (u_wide_int) va_arg(ap, php_uint_t);
+							break;
 					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
@@ -558,6 +578,9 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
+						case LM_PHP_INT_T:
+							ui_num = (u_wide_int) va_arg(ap, php_uint_t);
+							break;
 					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
@@ -796,10 +819,10 @@ skip_output:
 /*
  * This is the general purpose conversion function.
  */
-PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
+PHPAPI php_size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_string buf = {0};
-	int result;
+	php_size_t result;
 
 	xbuf_format_converter(&buf, 1, format, ap);
 
@@ -821,9 +844,9 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 }
 /* }}} */
 
-PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...) /* {{{ */
+PHPAPI php_size_t spprintf(char **pbuf, size_t max_len, const char *format, ...) /* {{{ */
 {
-	int cc;
+	php_size_t cc;
 	va_list ap;
 
 	va_start(ap, format);

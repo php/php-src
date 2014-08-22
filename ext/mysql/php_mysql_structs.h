@@ -112,18 +112,18 @@ PHP_FUNCTION(mysql_set_charset);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	zend_resource *default_link;
-	long num_links,num_persistent;
-	long max_links,max_persistent;
-	long allow_persistent;
-	long default_port;
+	php_int_t num_links,num_persistent;
+	php_int_t max_links,max_persistent;
+	php_int_t allow_persistent;
+	php_int_t default_port;
 	char *default_host, *default_user, *default_password;
 	char *default_socket;
 	char *connect_error;
-	long connect_errno;
-	long connect_timeout;
-	long result_allocated;
-	long trace_mode;
-	long allow_local_infile;
+	php_int_t connect_errno;
+	php_int_t connect_timeout;
+	php_int_t result_allocated;
+	php_int_t trace_mode;
+	php_int_t allow_local_infile;
 ZEND_END_MODULE_GLOBALS(mysql)
 
 #ifdef ZTS

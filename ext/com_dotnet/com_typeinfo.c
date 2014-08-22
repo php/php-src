@@ -208,9 +208,9 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 
 				/* register the constant */
 				php_com_zval_from_variant(&value, pVarDesc->lpvarValue, codepage TSRMLS_CC);
-				if (Z_TYPE(value) == IS_LONG) {
+				if (Z_TYPE(value) == IS_INT) {
 					c.flags = mode;
-					ZVAL_LONG(&c.value, Z_LVAL(value));
+					ZVAL_INT(&c.value, Z_IVAL(value));
 					c.module_number = 0;
 					zend_register_constant(&c TSRMLS_CC);
 				}

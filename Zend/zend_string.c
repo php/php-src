@@ -29,7 +29,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC);
 static void zend_interned_strings_snapshot_int(TSRMLS_D);
 static void zend_interned_strings_restore_int(TSRMLS_D);
 
-ZEND_API zend_ulong zend_hash_func(const char *str, uint len)
+ZEND_API zend_uint_t zend_hash_func(const char *str, zend_size_t len)
 {
 	return zend_inline_hash_func(str, len);
 }
@@ -85,7 +85,7 @@ void zend_interned_strings_dtor(TSRMLS_D)
 static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 {
 #ifndef ZTS
-	ulong h;
+	zend_uint_t h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
