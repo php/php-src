@@ -43,9 +43,9 @@ int(1)
 string(1) "a"
 array(1) {
   [0]=>
-  object(Closure)#2 (1) {
+  object(Closure)#%d (1) {
     ["this"]=>
-    object(foo)#1 (1) {
+    object(foo)#%d (1) {
       ["a"]=>
       array(1) {
         [0]=>
