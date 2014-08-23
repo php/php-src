@@ -31,4 +31,7 @@ PHP                                                                        NEWS
 - GD:
   . Made fontFetch's path parser thread-safe. (Sara)
 
+- Session:
+  . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

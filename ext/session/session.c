@@ -1979,7 +1979,7 @@ static PHP_FUNCTION(session_regenerate_id)
 				RETURN_FALSE;
 			}
 			STR_RELEASE(PS(id));
-			PS(id) = NULL;
+			memset(PS(session_data_hash),'\0', 16);
 		}
 
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data) TSRMLS_CC);
