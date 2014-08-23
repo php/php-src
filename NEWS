@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - Zlib:
   . Fixed bug #67865 (internal corruption phar error). Mike
 
+- Session:
+  . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
+
 14 Aug 2014, PHP 5.6.0 Release Candidate 4
 
 - COM:
