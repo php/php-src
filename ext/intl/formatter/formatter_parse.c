@@ -97,7 +97,7 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_DOUBLE(val_double);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported format type %ld", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported format type %pd", type);
 			RETVAL_FALSE;
 			break;
 	}

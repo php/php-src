@@ -1436,7 +1436,7 @@ PHP_FUNCTION(strtotime)
 		now = timelib_time_ctor();
 
 		initial_ts = emalloc(25);
-		snprintf(initial_ts, 24, "@%ld UTC", preset_ts);
+		snprintf(initial_ts, 24, "@" ZEND_INT_FMT " UTC", preset_ts);
 		t = timelib_strtotime(initial_ts, strlen(initial_ts), NULL, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper); /* we ignore the error here, as this should never fail */
 		timelib_update_ts(t, tzi);
 		now->tz_info = tzi;

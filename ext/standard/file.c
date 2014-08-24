@@ -558,7 +558,7 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if (maxlen > INT_MAX) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maxlen truncated from %ld to %d bytes", maxlen, INT_MAX);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maxlen truncated from %pd to %d bytes", maxlen, INT_MAX);
 		maxlen = INT_MAX;
 	}
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0)) != NULL) {
@@ -651,7 +651,7 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_STRSIZE_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRSIZE_P(data));
 				if (numbytes != Z_STRSIZE_P(data)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %ld of %zd bytes written, possibly out of free disk space", numbytes, Z_STRSIZE_P(data));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %pl of %zd bytes written, possibly out of free disk space", numbytes, Z_STRSIZE_P(data));
 					numbytes = -1;
 				}
 			}
@@ -686,7 +686,7 @@ PHP_FUNCTION(file_put_contents)
 				if (zend_std_cast_object_tostring(data, &out, IS_STRING TSRMLS_CC) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRSIZE(out));
 					if (numbytes != Z_STRSIZE(out)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %ld of %zd bytes written, possibly out of free disk space", numbytes, Z_STRSIZE(out));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %pd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRSIZE(out));
 						numbytes = -1;
 					}
 					zval_dtor(&out);
@@ -903,7 +903,7 @@ PHPAPI PHP_FUNCTION(fclose)
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid stream resource", stream->res->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid stream resource", stream->res->handle);
 		RETURN_FALSE;
 	}
 

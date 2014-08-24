@@ -423,13 +423,13 @@ PHP_FUNCTION(stream_get_contents)
 
 		if (seek_res != 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"Failed to seek to position %ld in the stream", desiredpos);
+				"Failed to seek to position %pd in the stream", desiredpos);
 			RETURN_FALSE;
 		}
 	}
 
 	if (maxlen > INT_MAX) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maxlen truncated from %ld to %d bytes", maxlen, INT_MAX);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maxlen truncated from %pd to %d bytes", maxlen, INT_MAX);
 		maxlen = INT_MAX;
 	}
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0))) {

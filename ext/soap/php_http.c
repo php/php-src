@@ -631,7 +631,7 @@ try_again:
 					unsigned char hash[16];
 
 					PHP_MD5Init(&md5ctx);
-					snprintf(cnonce, sizeof(cnonce), "%ld", php_rand(TSRMLS_C));
+					snprintf(cnonce, sizeof(cnonce), ZEND_INT_FMT, php_rand(TSRMLS_C));
 					PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, strlen(cnonce));
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(cnonce, hash);

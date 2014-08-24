@@ -174,7 +174,7 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 			}
 		} else {
 			char key[25];
-			snprintf(key, sizeof(key), "%ld", num_key);
+			snprintf(key, sizeof(key), ZEND_INT_FMT, num_key);
 			ZEND_PUTS_EX(key);
 		}
 		ZEND_PUTS_EX("] => ");
@@ -235,7 +235,7 @@ again:
 				char buf[sizeof("Resource id #") + MAX_LENGTH_OF_ZEND_INT];
 				int len;
 
-				len = snprintf(buf, sizeof(buf), "Resource id #%ld", Z_RES_HANDLE_P(expr));
+				len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_INT_FMT, Z_RES_HANDLE_P(expr));
 				ZVAL_NEW_STR(expr_copy, STR_INIT(buf, len, 0));
 			}
 			break;

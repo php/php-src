@@ -109,7 +109,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				char *ekey;
 				int ekey_len;
 				/* Is an integer key */
-				ekey_len = spprintf(&ekey, 0, "%ld", idx);
+				ekey_len = spprintf(&ekey, 0, "%pd", idx);
 				newprefix_len = key_prefix_len + num_prefix_len + ekey_len + key_suffix_len + 3 /* %5B */;
 				newprefix = emalloc(newprefix_len + 1);
 				p = newprefix;
@@ -168,7 +168,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				if (num_prefix) {
 					smart_str_appendl(formstr, num_prefix, num_prefix_len);
 				}
-				ekey_len = spprintf(&ekey, 0, "%ld", idx);
+				ekey_len = spprintf(&ekey, 0, "%pd", idx);
 				smart_str_appendl(formstr, ekey, ekey_len);
 				efree(ekey);
 			}
@@ -190,7 +190,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					{
 						char *ekey;
 					  	int ekey_len;
-					  	ekey_len = spprintf(&ekey, 0, "%ld", Z_IVAL_P(zdata));
+					  	ekey_len = spprintf(&ekey, 0, "%pd", Z_IVAL_P(zdata));
 						smart_str_appendl(formstr, ekey, ekey_len);
 						efree(ekey);
 				  	}

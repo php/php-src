@@ -599,7 +599,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		case IS_RESOURCE: {
 			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_ZEND_INT];
-			int len = snprintf(buf, sizeof(buf), "Resource id #%ld", Z_RES_HANDLE_P(op));
+			int len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_INT_FMT, Z_RES_HANDLE_P(op));
 			ZVAL_NEW_STR(op, STR_INIT(buf, len, 0));
 			break;
 		}
@@ -879,7 +879,7 @@ try_again:
 			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_ZEND_INT];
 			int len;
 
-			len = snprintf(buf, sizeof(buf), "Resource id #%ld", Z_RES_HANDLE_P(op));
+			len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_INT_FMT, Z_RES_HANDLE_P(op));
 			return STR_INIT(buf, len, 0);
 		}
 		case IS_INT: {

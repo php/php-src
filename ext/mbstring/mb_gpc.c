@@ -254,7 +254,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	} 
 
 	if (n > (PG(max_input_vars) * 2)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %pd. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 		goto out;
 	}
 

@@ -176,7 +176,7 @@ zend_function_entry finfo_class_functions[] = {
 
 #define FINFO_SET_OPTION(magic, options) \
 	if (magic_setflags(magic, options) == -1) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to set option '%ld' %d:%s", \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to set option '%pd' %d:%s", \
 				options, magic_errno(magic), magic_error(magic)); \
 		RETURN_FALSE; \
 	}
@@ -339,7 +339,7 @@ PHP_FUNCTION(finfo_open)
 
 	if (finfo->magic == NULL) {
 		efree(finfo);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid mode '%ld'.", options);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid mode '%pd'.", options);
 		FILEINFO_DESTROY_OBJECT(object);
 		RETURN_FALSE;
 	}

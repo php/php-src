@@ -262,7 +262,7 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
 		if (key == NULL) {											\
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE,				\
-					"Skipping numeric key %ld", num_key);			\
+					"Skipping numeric key %pd", num_key);			\
 			continue;												\
 		}															\
 		if ((struc = php_get_session_var(key TSRMLS_CC))) {			\

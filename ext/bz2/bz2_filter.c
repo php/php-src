@@ -382,7 +382,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					ZVAL_DUP(&tmp, tmpzval);
 					convert_to_int(&tmp);
 					if (Z_IVAL(tmp) < 1 || Z_IVAL(tmp) > 9) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%ld)", Z_IVAL_P(tmpzval));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%pd)", Z_IVAL_P(tmpzval));
 					} else {
 						blockSize100k = Z_IVAL(tmp);
 					}
@@ -396,7 +396,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					convert_to_int(&tmp);
 
 					if (Z_IVAL(tmp) < 0 || Z_IVAL(tmp) > 250) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for work factor. (%ld)", Z_IVAL(tmp));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for work factor. (%pd)", Z_IVAL(tmp));
 					} else {
 						workFactor = Z_IVAL(tmp);
 					}

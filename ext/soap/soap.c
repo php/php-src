@@ -956,7 +956,7 @@ PHP_METHOD(SoapFault, __toString)
 
 	zval_ptr_dtor(&fci.function_name);
 
-	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:%ld\nStack trace:\n%s",
+	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:%pd\nStack trace:\n%s",
 	               Z_STRVAL_P(faultcode), Z_STRVAL_P(faultstring), Z_STRVAL_P(file), Z_IVAL_P(line),
 	               Z_STRSIZE(trace) ? Z_STRVAL(trace) : "#0 {main}\n");
 

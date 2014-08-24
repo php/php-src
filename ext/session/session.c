@@ -305,7 +305,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	}
 
 	/* maximum 15+19+19+10 bytes */
-	spprintf(&buf, 0, "%.15s%ld%ld%0.8F", remote_addr ? remote_addr : "", tv.tv_sec, (php_int_t)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
+	spprintf(&buf, 0, "%.15s%ld" ZEND_INT_FMT "%0.8F", remote_addr ? remote_addr : "", tv.tv_sec, (php_int_t)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
 
 	switch (PS(hash_func)) {
 		case PS_HASH_FUNC_MD5:
@@ -1178,7 +1178,7 @@ CACHE_LIMITER_FUNC(public) /* {{{ */
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
 	ADD_HEADER(buf);
 
-	snprintf(buf, sizeof(buf) , "Cache-Control: public, max-age=%ld", PS(cache_expire) * 60); /* SAFE */
+	snprintf(buf, sizeof(buf) , "Cache-Control: public, max-age=" ZEND_INT_FMT, PS(cache_expire) * 60); /* SAFE */
 	ADD_HEADER(buf);
 
 	last_modified(TSRMLS_C);
@@ -1189,7 +1189,7 @@ CACHE_LIMITER_FUNC(private_no_expire) /* {{{ */
 {
 	char buf[MAX_STR + 1];
 
-	snprintf(buf, sizeof(buf), "Cache-Control: private, max-age=%ld, pre-check=%ld", PS(cache_expire) * 60, PS(cache_expire) * 60); /* SAFE */
+	snprintf(buf, sizeof(buf), "Cache-Control: private, max-age=" ZEND_INT_FMT ", pre-check=" ZEND_INT_FMT, PS(cache_expire) * 60, PS(cache_expire) * 60); /* SAFE */
 	ADD_HEADER(buf);
 
 	last_modified(TSRMLS_C);

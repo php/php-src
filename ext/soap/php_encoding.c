@@ -2901,7 +2901,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 		ta = php_localtime_r(&timestamp, &tmbuf);
 		/*ta = php_gmtime_r(&timestamp, &tmbuf);*/
 		if (!ta) {
-			soap_error1(E_ERROR, "Encoding: Invalid timestamp %ld", Z_IVAL_P(data));
+			soap_error1(E_ERROR, "Encoding: Invalid timestamp %pd", Z_IVAL_P(data));
 		}
 
 		buf = (char *) emalloc(buf_len);

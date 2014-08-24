@@ -273,7 +273,7 @@ PHP_FUNCTION(closedir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -387,7 +387,7 @@ PHP_FUNCTION(rewinddir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -406,7 +406,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 

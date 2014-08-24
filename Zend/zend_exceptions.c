@@ -461,7 +461,7 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 		case IS_RESOURCE: {
 			zend_int_t lval = Z_RES_HANDLE_P(arg);
 			char s_tmp[MAX_LENGTH_OF_ZEND_INT + 1];
-			int l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
+			int l_tmp = zend_sprintf(s_tmp, ZEND_INT_FMT, lval);  /* SAFE */
 			TRACE_APPEND_STR("Resource id #");
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
 			TRACE_APPEND_STR(", ");
@@ -470,7 +470,7 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 		case IS_INT: {
 			zend_int_t lval = Z_IVAL_P(arg);
 			char s_tmp[MAX_LENGTH_OF_ZEND_INT + 1];
-			int l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
+			int l_tmp = zend_sprintf(s_tmp, ZEND_INT_FMT, lval);  /* SAFE */
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
 			TRACE_APPEND_STR(", ");
 			break;
@@ -519,7 +519,7 @@ static void _build_trace_string(zval *frame, zend_uint_t index, zend_string **st
 	zend_string *str = *str_ptr;
 
 	if (Z_TYPE_P(frame) != IS_ARRAY) {
-		zend_error(E_WARNING, "Expected array for frame %lu", index);
+		zend_error(E_WARNING, "Expected array for frame %pu", index);
 		return;
 	}
 

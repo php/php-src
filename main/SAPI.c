@@ -269,7 +269,7 @@ SAPI_API int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC)
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
 	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %pd bytes exceeds the limit of %pd bytes",
 					SG(request_info).content_length, SG(post_max_size));
 		return;
 	}

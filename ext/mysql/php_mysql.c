@@ -662,7 +662,7 @@ PHP_RSHUTDOWN_FUNCTION(mysql)
 
 	if (MySG(trace_mode)) {
 		if (MySG(result_allocated)){
-			php_error_docref("function.mysql-free-result" TSRMLS_CC, E_WARNING, "%lu result set(s) not freed. Use mysql_free_result to free result sets which were requested using mysql_query()", MySG(result_allocated));
+			php_error_docref("function.mysql-free-result" TSRMLS_CC, E_WARNING, "%pu result set(s) not freed. Use mysql_free_result to free result sets which were requested using mysql_query()", MySG(result_allocated));
 		}
 	}
 
@@ -686,9 +686,9 @@ PHP_MINFO_FUNCTION(mysql)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "MySQL Support", "enabled");
-	snprintf(buf, sizeof(buf), "%ld", MySG(num_persistent));
+	snprintf(buf, sizeof(buf), ZEND_INT_FMT, MySG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
-	snprintf(buf, sizeof(buf), "%ld", MySG(num_links));
+	snprintf(buf, sizeof(buf), ZEND_INT_FMT, MySG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
 #if !defined (PHP_WIN32) && !defined (NETWARE) && !defined(MYSQL_USE_MYSQLND)
@@ -821,7 +821,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 		hashed_details = STR_ALLOC(sizeof("mysql____") + (host_and_port? strlen(host_and_port) : 0)
 				+ (user? strlen(user) : 0) + (passwd? strlen(passwd) : 0) + MAX_LENGTH_OF_ZEND_INT - 1, 0);
-		hashed_details->len = snprintf(hashed_details->val, hashed_details->len + 1, "mysql_%s_%s_%s_%ld", SAFE_STRING(host_and_port), SAFE_STRING(user), SAFE_STRING(passwd), client_flags);
+		hashed_details->len = snprintf(hashed_details->val, hashed_details->len + 1, "mysql_%s_%s_%s_" ZEND_INT_FMT, SAFE_STRING(host_and_port), SAFE_STRING(user), SAFE_STRING(passwd), client_flags);
 	}
 
 	/* We cannot use mysql_port anymore in windows, need to use
@@ -862,13 +862,13 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			zval new_le;
 
 			if (MySG(max_links) != -1 && MySG(num_links) >= MySG(max_links)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MySG(num_links));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%pd)", MySG(num_links));
 				STR_RELEASE(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 
 			if (MySG(max_persistent) != -1 && MySG(num_persistent) >= MySG(max_persistent)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%ld)", MySG(num_persistent));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%pd)", MySG(num_persistent));
 				STR_RELEASE(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
@@ -997,7 +997,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 
 		if (MySG(max_links) != -1 && MySG(num_links) >= MySG(max_links)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MySG(num_links));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%pd)", MySG(num_links));
 			STR_RELEASE(hashed_details);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
@@ -1947,7 +1947,7 @@ Q: String or long first?
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 
 	if (row < 0 || row >= (int)mysql_num_rows(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on MySQL result index %ld", row, Z_RES_P(result)->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on MySQL result index %pd", row, Z_RES_P(result)->handle);
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, row);
@@ -1977,7 +1977,7 @@ Q: String or long first?
 						i++;
 					}
 					if (!tmp_field) { /* no match found */
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s%s%s not found in MySQL result index %ld",
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s%s%s not found in MySQL result index %pd",
 									(table_name?table_name:""), (table_name?".":""), field_name, Z_RES_P(result)->handle);
 						efree(field_name);
 						if (table_name) {
@@ -2281,7 +2281,7 @@ PHP_FUNCTION(mysql_data_seek)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 
 	if (offset < 0 || offset >= (int)mysql_num_rows(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset %ld is invalid for MySQL result index %ld (or the query data is unbuffered)", offset, Z_RES_P(result)->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset %pd is invalid for MySQL result index %pd (or the query data is unbuffered)", offset, Z_RES_P(result)->handle);
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, offset);
@@ -2454,7 +2454,7 @@ PHP_FUNCTION(mysql_field_seek)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 
 	if (offset < 0 || offset >= (int)mysql_num_fields(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %ld is invalid for MySQL result index %ld", offset, Z_RES_P(result)->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %pd is invalid for MySQL result index %pd", offset, Z_RES_P(result)->handle);
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, offset);
@@ -2486,7 +2486,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 
 	if (field < 0 || field >= (int)mysql_num_fields(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %ld is invalid for MySQL result index %ld", field, Z_RES_P(result)->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %pd is invalid for MySQL result index %pd", field, Z_RES_P(result)->handle);
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, field);

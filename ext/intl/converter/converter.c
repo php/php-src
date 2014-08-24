@@ -154,7 +154,7 @@ static PHP_METHOD(UConverter, fromUCallback) {
 /* {{{ php_converter_check_limits */
 static inline zend_bool php_converter_check_limits(php_converter_object *objval, php_int_t available, php_int_t needed TSRMLS_DC) {
 	if (available < needed) {
-		php_converter_throw_failure(objval, U_BUFFER_OVERFLOW_ERROR TSRMLS_CC, "Buffer overrun %ld bytes needed, %ld available", needed, available);
+		php_converter_throw_failure(objval, U_BUFFER_OVERFLOW_ERROR TSRMLS_CC, "Buffer overrun %pd bytes needed, %pd available", needed, available);
 		return 0;
 	}
 	return 1;
@@ -748,7 +748,7 @@ static PHP_METHOD(UConverter, reasonText) {
 		UCNV_REASON_CASE(CLOSE)
 		UCNV_REASON_CASE(CLONE)
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown UConverterCallbackReason: %ld", reason);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown UConverterCallbackReason: %pd", reason);
 			RETURN_FALSE;
 	}
 }

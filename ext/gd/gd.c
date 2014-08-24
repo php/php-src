@@ -2848,14 +2848,14 @@ PHP_FUNCTION(imagecolorat)
 		if (im->tpixels && gdImageBoundsSafe(im, x, y)) {
 			RETURN_INT(gdImageTrueColorPixel(im, x, y));
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", x, y);
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%pd,%pd is out of bounds", x, y);
 			RETURN_FALSE;
 		}
 	} else {
 		if (im->pixels && gdImageBoundsSafe(im, x, y)) {
 			RETURN_INT(im->pixels[y][x]);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", x, y);
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%pd,%pd is out of bounds", x, y);
 			RETURN_FALSE;
 		}
 	}
@@ -4135,12 +4135,12 @@ PHP_FUNCTION(imagepstext)
 
 	/* Ensure that the provided colors are valid */
 	if (_fg < 0 || (!gdImageTrueColor(bg_img) && _fg > gdImageColorsTotal(bg_img))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Foreground color index %ld out of range", _fg);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Foreground color index %pd out of range", _fg);
 		RETURN_FALSE;
 	}
 
 	if (_bg < 0 || (!gdImageTrueColor(bg_img) && _fg > gdImageColorsTotal(bg_img))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Background color index %ld out of range", _bg);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Background color index %pd out of range", _bg);
 		RETURN_FALSE;
 	}
 
@@ -4174,7 +4174,7 @@ PHP_FUNCTION(imagepstext)
 			T1_AASetLevel(T1_AA_HIGH);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value %ld as number of steps for antialiasing", aa_steps);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value %pd as number of steps for antialiasing", aa_steps);
 			RETURN_FALSE;
 	}
 

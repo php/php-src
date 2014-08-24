@@ -1260,7 +1260,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 	if (Z_TYPE_P(zv) == IS_INT) {
 		if (Z_IVAL_P(zv) < 0 || Z_IVAL_P(zv) > UINT_MAX) { /* allow 0 (unspecified interface) */
 			do_from_zval_err(ctx, "the interface index cannot be negative or "
-					"larger than %u; given %ld", UINT_MAX, Z_IVAL_P(zv));
+					"larger than %u; given %pd", UINT_MAX, Z_IVAL_P(zv));
 		} else {
 			ret = (unsigned)Z_IVAL_P(zv);
 		}
