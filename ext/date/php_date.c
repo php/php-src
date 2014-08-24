@@ -39,6 +39,24 @@ static __inline __int64_t php_date_llabs( __int64_t i ) { return i >= 0 ? i : -i
 static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; }
 #endif
 
+#ifdef PHP_WIN32
+#define DATE_I64_BUF_LEN 65
+# define DATE_I64A(i, s, len) _i64toa_s(i, s, len, 10)
+# define DATE_A64I(i, s) i = _atoi64(s)
+#else
+#define DATE_I64_BUF_LEN 65
+# define DATE_I64A(i, s, len) \
+	do { \
+		int st = snprintf(s, len, "%lld", i); \
+		s[st] = '\0'; \
+	} while (0);
+#ifdef HAVE_ATOLL
+# define DATE_A64I(i, s) i = atoll(s)
+#else
+# define DATE_A64I(i, s) i = strtoll(s, NULL, 10)
+#endif
+#endif
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
@@ -4112,7 +4130,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 		zval *z_arg = zend_hash_str_find(myht, element, sizeof(element) - 1); \
 		if (z_arg) { \
 			zend_string *str = zval_get_string(z_arg); \
-			ZEND_ATOI((*intobj)->diff->member, str->val); \
+			DATE_A64I((*intobj)->diff->member, str->val); \
 			STR_RELEASE(str); \
 		} else { \
 			(*intobj)->diff->member = -1LL; \
