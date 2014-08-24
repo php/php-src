@@ -79,7 +79,7 @@ UPGRADE NOTES - PHP X.Y
 
        The only exceptions are the snprintf and zend_sprintf functions yet, because in some cases
        they can use the implemenations available on the system, not the PHP one. Fro snprintf the
-       usage of the macros ZEND_INT_FMT ZEND_UINT_FMT should be used.
+       the macros ZEND_INT_FMT ZEND_UINT_FMT should be used.
 
   h. HashTable API
 
