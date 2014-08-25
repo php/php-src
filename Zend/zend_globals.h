@@ -104,8 +104,6 @@ struct _zend_compiler_globals {
 
 	struct _zend_ini_parser_param *ini_parser_param;
 
-	int interactive;
-
 	uint32_t start_lineno;
 	zend_bool increment_lineno;
 

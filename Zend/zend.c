@@ -503,8 +503,6 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	zend_set_default_compile_time_values(TSRMLS_C);
 
-	CG(interactive) = 0;
-
 	compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->auto_globals, 8, NULL, NULL, 1, 0);
 	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, NULL /* empty element */);
@@ -1281,7 +1279,6 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
 	int i;
 	zend_file_handle *file_handle;
 	zend_op_array *op_array;
-	zend_long orig_interactive = CG(interactive);
 
 	va_start(files, file_count);
 	for (i = 0; i < file_count; i++) {
@@ -1289,14 +1286,6 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
 		if (!file_handle) {
 			continue;
 		}
-
-        if (orig_interactive) {
-            if (file_handle->filename[0] != '-' || file_handle->filename[1]) {
-                CG(interactive) = 0;
-            } else {
-                CG(interactive) = 1;
-            }
-        }
        
 		op_array = zend_compile_file(file_handle, type TSRMLS_CC);
 		if (file_handle->opened_path) {
@@ -1335,12 +1324,10 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
 			efree(op_array);
 		} else if (type==ZEND_REQUIRE) {
 			va_end(files);
-            CG(interactive) = orig_interactive;
 			return FAILURE;
 		}
 	}
 	va_end(files);
-    CG(interactive) = orig_interactive;
 
 	return SUCCESS;
 }

@@ -1134,8 +1134,6 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-		CG(interactive) = interactive;
-
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
 		if (argc > ap_php_optind && !filename) {
 			filename=argv[ap_php_optind];

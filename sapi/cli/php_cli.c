@@ -902,8 +902,6 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 			fflush(stdout);
 		}
 
-		CG(interactive) = interactive;
-
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
 		if (argc > php_optind 
 		  && !script_file 

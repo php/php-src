@@ -52,13 +52,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 {
 	op_array->type = type;
 
-	if (CG(interactive)) {
-		/* We must avoid a realloc() on the op_array in interactive mode, since pointers to constants
-		 * will become invalid
-		 */
-		initial_ops_size = INITIAL_INTERACTIVE_OP_ARRAY_SIZE;
-	}
-
 	op_array->refcount = (uint32_t *) emalloc(sizeof(uint32_t));
 	*op_array->refcount = 1;
 	op_array->last = 0;
@@ -91,7 +84,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->this_var = -1;
 
-	op_array->fn_flags = CG(interactive)?ZEND_ACC_INTERACTIVE:0;
+	op_array->fn_flags = 0;
 
 	op_array->early_binding = -1;
 
@@ -397,12 +390,6 @@ zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC)
 	zend_op *next_op;
 
 	if (next_op_num >= CG(context).opcodes_size) {
-		if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) {
-			/* we messed up */
-			zend_printf("Ran out of opcode space!\n"
-						"You should probably consider writing this huge script into a file!\n");
-			zend_bailout();
-		}
 		CG(context).opcodes_size *= 4;
 		op_array_alloc_ops(op_array, CG(context).opcodes_size);
 	}
@@ -701,15 +688,15 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_handler, op_array TSRMLS_CC);
 	}
 
-	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && CG(context).vars_size != op_array->last_var) {
+	if (CG(context).vars_size != op_array->last_var) {
 		op_array->vars = (zend_string**) erealloc(op_array->vars, sizeof(zend_string*)*op_array->last_var);
 		CG(context).vars_size = op_array->last_var;
 	}
-	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && CG(context).opcodes_size != op_array->last) {
+	if (CG(context).opcodes_size != op_array->last) {
 		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
 		CG(context).opcodes_size = op_array->last;
 	}
-	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && CG(context).literals_size != op_array->last_literal) {
+	if (CG(context).literals_size != op_array->last_literal) {
 		op_array->literals = (zval*)erealloc(op_array->literals, sizeof(zval) * op_array->last_literal);
 		CG(context).literals_size = op_array->last_literal;
 	}

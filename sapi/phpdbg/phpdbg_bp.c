@@ -970,7 +970,6 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 	     zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], (void*)&bp, &position) == SUCCESS;
 	     zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position)) {
 		zval *retval = NULL;
-		int orig_interactive = CG(interactive);
 		zval **orig_retval = EG(return_value_ptr_ptr);
 		zend_op_array *orig_ops = EG(active_op_array);
 		zend_op **orig_opline = EG(opline_ptr);
@@ -995,8 +994,6 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
 
-		CG(interactive) = 0;
-
 		zend_try {
 			PHPDBG_G(flags) |= PHPDBG_IN_COND_BP;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
@@ -1008,16 +1005,12 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 				breakpoint = SUCCESS;
 			}
 		} zend_catch {
-			CG(interactive) = orig_interactive;
-
 			EG(no_extensions)=1;
 			EG(return_value_ptr_ptr) = orig_retval;
 			EG(active_op_array) = orig_ops;
 			EG(opline_ptr) = orig_opline;
 			PHPDBG_G(flags) &= ~PHPDBG_IN_COND_BP;
  		} zend_end_try();
-
-		CG(interactive) = orig_interactive;
 
 		EG(no_extensions)=1;
 		EG(return_value_ptr_ptr) = orig_retval;

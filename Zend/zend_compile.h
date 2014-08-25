@@ -35,10 +35,6 @@
 
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
-#define INC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count++); }
-#define DEC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count--); }
-#define HANDLE_INTERACTIVE()  if (CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) { execute_new_code(TSRMLS_C); }
-
 #define RESET_DOC_COMMENT() do { \
 	if (CG(doc_comment)) { \
 		zend_string_release(CG(doc_comment)); \
@@ -172,9 +168,6 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_FINAL_CLASS	            0x40
 #define ZEND_ACC_INTERFACE		            0x80
 #define ZEND_ACC_TRAIT						0x120
-
-/* op_array flags */
-#define ZEND_ACC_INTERACTIVE				0x10
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */
@@ -491,7 +484,6 @@ void zend_release_labels(int temporary TSRMLS_DC);
 ZEND_API void function_add_ref(zend_function *function);
 
 #define INITIAL_OP_ARRAY_SIZE 64
-#define INITIAL_INTERACTIVE_OP_ARRAY_SIZE 8192
 
 
 /* helper functions in zend_language_scanner.l */

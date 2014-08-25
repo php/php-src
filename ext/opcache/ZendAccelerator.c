@@ -1448,7 +1448,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 	if (!file_handle->filename ||
 		!ZCG(enabled) || !accel_startup_ok ||
 		(!ZCG(counted) && !ZCSG(accelerator_enabled)) ||
-	    CG(interactive) ||
 	    (ZCSG(restart_in_progress) && accel_restart_is_active(TSRMLS_C)) ||
 	    (is_stream_path(file_handle->filename) && 
 	     !is_cacheable_stream_path(file_handle->filename))) {
@@ -1667,7 +1666,6 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 {
 	if (ZCG(enabled) && accel_startup_ok &&
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
-	    !CG(interactive) &&
 	    !ZCSG(restart_in_progress)) {
 
 		/* check if callback is called from include_once or it's a main request */
@@ -1727,7 +1725,6 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 {
 	if (ZCG(enabled) && accel_startup_ok &&
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
-	    !CG(interactive) &&
 	    !ZCSG(restart_in_progress)) {
 
 		/* check if callback is called from include_once or it's a main request */

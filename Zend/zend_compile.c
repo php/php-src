@@ -63,11 +63,6 @@
 static inline void zend_alloc_cache_slot(uint32_t literal TSRMLS_DC) {
 	zend_op_array *op_array = CG(active_op_array);
 	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->last_cache_slot++;
-	if ((op_array->fn_flags & ZEND_ACC_INTERACTIVE) && op_array->run_time_cache) {
-		op_array->run_time_cache = erealloc(op_array->run_time_cache,
-			op_array->last_cache_slot * sizeof(void*));
-		op_array->run_time_cache[CG(active_op_array)->last_cache_slot - 1] = NULL;
-	}
 }
 
 #define POLYMORPHIC_CACHE_SLOT_SIZE 2
@@ -76,12 +71,6 @@ static inline void zend_alloc_polymorphic_cache_slot(uint32_t literal TSRMLS_DC)
 	zend_op_array *op_array = CG(active_op_array);
 	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->last_cache_slot;
 	op_array->last_cache_slot += POLYMORPHIC_CACHE_SLOT_SIZE;
-	if ((op_array->fn_flags & ZEND_ACC_INTERACTIVE) && op_array->run_time_cache) {
-		op_array->run_time_cache = erealloc(
-			op_array->run_time_cache, op_array->last_cache_slot * sizeof(void *));
-		op_array->run_time_cache[op_array->last_cache_slot - 1] = NULL;
-		op_array->run_time_cache[op_array->last_cache_slot - 2] = NULL;
-	}
 }
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
@@ -178,7 +167,7 @@ static void init_compiler_declarables(TSRMLS_D) /* {{{ */
 
 void zend_init_compiler_context(TSRMLS_D) /* {{{ */
 {
-	CG(context).opcodes_size = (CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) ? INITIAL_INTERACTIVE_OP_ARRAY_SIZE : INITIAL_OP_ARRAY_SIZE;
+	CG(context).opcodes_size = INITIAL_OP_ARRAY_SIZE;
 	CG(context).vars_size = 0;
 	CG(context).literals_size = 0;
 	CG(context).current_brk_cont = -1;
@@ -837,7 +826,6 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 			zend_error_noreturn(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
 		} else {
 			/* Label is not defined. Delay to pass 2. */
-			INC_BPC(op_array);
 			return;
 		}
 	}
@@ -868,10 +856,6 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 	} else {
 		/* Set real break distance */
 		ZVAL_LONG(label, distance);
-	}
-
-	if (pass2) {
-		DEC_BPC(op_array);
 	}
 }
 /* }}} */

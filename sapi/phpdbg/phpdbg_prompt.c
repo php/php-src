@@ -1134,7 +1134,7 @@ static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_ar
 		}
 	}
 
-	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
+	EX(opline) = op_array->opcodes;
 	EG(opline_ptr) = &EX(opline);
 
 	EX(function_state).function = (zend_function *) op_array;

@@ -2130,7 +2130,6 @@ consult the installation file that came with this distribution, or visit \n\
 		while (!fastcgi || fcgi_accept_request(request) >= 0) {
 			SG(server_context) = fastcgi ? (void *) request : (void *) 1;
 			init_request_info(request TSRMLS_CC);
-			CG(interactive) = 0;
 
 			if (!cgi && !fastcgi) {
 				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
@@ -2138,7 +2137,6 @@ consult the installation file that came with this distribution, or visit \n\
 
 						case 'a':	/* interactive mode */
 							printf("Interactive mode enabled\n\n");
-							CG(interactive) = 1;
 							break;
 
 						case 'C': /* don't chdir to the script directory */

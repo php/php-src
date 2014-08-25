@@ -269,9 +269,6 @@ static zend_always_inline void zend_vm_stack_free_call_frame(zend_execute_data *
 	}
 }
 
-void execute_new_code(TSRMLS_D);
-
-
 /* services */
 ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC);
 ZEND_API const char *get_active_function_name(TSRMLS_D);

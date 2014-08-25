@@ -400,8 +400,7 @@ static void replace_tmp_by_const(zend_op_array *op_array,
 static void zend_optimize(zend_op_array      *op_array,
                           zend_optimizer_ctx *ctx TSRMLS_DC)
 {
-	if (op_array->type == ZEND_EVAL_CODE ||
-	    (op_array->fn_flags & ZEND_ACC_INTERACTIVE)) {
+	if (op_array->type == ZEND_EVAL_CODE) {
 		return;
 	}
 

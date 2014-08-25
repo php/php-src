@@ -1084,10 +1084,8 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 
 	if (new_op_array) {
 		zval local_retval;
-		int orig_interactive = CG(interactive);
 
 		EG(no_extensions)=1;		
-		CG(interactive) = 0;
 
 		zend_try {
 			ZVAL_UNDEF(&local_retval);
@@ -1098,7 +1096,6 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 			zend_bailout();
 		} zend_end_try();
 
-		CG(interactive) = orig_interactive;
 		if (Z_TYPE(local_retval) != IS_UNDEF) {
 			if (retval_ptr) {
 				ZVAL_COPY_VALUE(retval_ptr, &local_retval);
@@ -1145,84 +1142,6 @@ ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
 {
 	return zend_eval_stringl_ex(str, strlen(str), retval_ptr, string_name, handle_exceptions TSRMLS_CC);
-}
-/* }}} */
-
-void execute_new_code(TSRMLS_D) /* {{{ */
-{
-	zend_op *opline, *end;
-	zend_op *ret_opline;
-	int orig_interactive;
-
-	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE)
-		|| CG(context).backpatch_count>0
-		|| CG(active_op_array)->function_name
-		|| CG(active_op_array)->type!=ZEND_USER_FUNCTION) {
-		return;
-	}
-
-	ret_opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	ret_opline->opcode = ZEND_RETURN;
-	ret_opline->op1_type = IS_CONST;
-	ret_opline->op1.constant = zend_add_literal(CG(active_op_array), &EG(uninitialized_zval) TSRMLS_CC);
-	SET_UNUSED(ret_opline->op2);
-
-	if (!EG(start_op)) {
-		EG(start_op) = CG(active_op_array)->opcodes;
-	}
-
-	opline=EG(start_op);
-	end=CG(active_op_array)->opcodes+CG(active_op_array)->last;
-
-	while (opline<end) {
-		if (opline->op1_type == IS_CONST) {
-			opline->op1.zv = &CG(active_op_array)->literals[opline->op1.constant];
-		}
-		if (opline->op2_type == IS_CONST) {
-			opline->op2.zv = &CG(active_op_array)->literals[opline->op2.constant];
-		}
-		switch (opline->opcode) {
-			case ZEND_GOTO:
-				if (Z_TYPE_P(opline->op2.zv) != IS_LONG) {
-					zend_resolve_goto_label(CG(active_op_array), opline, 1 TSRMLS_CC);
-				}
-				/* break omitted intentionally */
-			case ZEND_JMP:
-				opline->op1.jmp_addr = &CG(active_op_array)->opcodes[opline->op1.opline_num];
-				break;
-			case ZEND_JMPZNZ:
-				/* absolute index to relative offset */
-				opline->extended_value = (char*)(CG(active_op_array)->opcodes + opline->extended_value) - (char*)opline;
-				/* break omitted intentionally */
-			case ZEND_JMPZ:
-			case ZEND_JMPNZ:
-			case ZEND_JMPZ_EX:
-			case ZEND_JMPNZ_EX:
-			case ZEND_JMP_SET:
-			case ZEND_JMP_SET_VAR:
-			case ZEND_NEW:
-			case ZEND_FE_RESET:
-			case ZEND_FE_FETCH:
-				opline->op2.jmp_addr = &CG(active_op_array)->opcodes[opline->op2.opline_num];
-				break;
-		}
-		ZEND_VM_SET_OPCODE_HANDLER(opline);
-		opline++;
-	}
-
-	zend_release_labels(1 TSRMLS_CC);
-
-	orig_interactive = CG(interactive);
-	CG(interactive) = 0;
-	zend_execute(CG(active_op_array), NULL TSRMLS_CC);
-	CG(interactive) = orig_interactive;
-
-	if (EG(exception)) {
-		zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
-	}
-
-	CG(active_op_array)->last -= 1;	/* get rid of that ZEND_RETURN */
-	EG(start_op) = CG(active_op_array)->opcodes+CG(active_op_array)->last;
 }
 /* }}} */
 
