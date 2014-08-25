@@ -195,7 +195,7 @@ ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter TSRMLS_
 static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	*int_key = _iter->index;
-	return HASH_KEY_IS_INT;
+	return HASH_KEY_IS_LONG;
 }
 #endif
 /* }}} */
@@ -216,7 +216,7 @@ ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *ke
 			zend_error(E_WARNING, "Nothing returned from %s::key()", iter->ce->name->val);
 		}
 
-		ZVAL_INT(key, 0);
+		ZVAL_LONG(key, 0);
 	}
 }
 /* }}} */
@@ -424,8 +424,8 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint
 			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_STRING:
-			*buffer = (unsigned char*)estrndup(Z_STRVAL(retval), Z_STRSIZE(retval));
-			*buf_len = Z_STRSIZE(retval);
+			*buffer = (unsigned char*)estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
+			*buf_len = Z_STRLEN(retval);
 			result = SUCCESS;
 			break;
 		default: /* failure */

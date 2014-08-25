@@ -72,7 +72,7 @@
 		*p = ' ';								\
 	}											\
 
-extern php_int_t php_getuid(TSRMLS_D);
+extern zend_long php_getuid(TSRMLS_D);
 
 /* {{{ proto int ezmlm_hash(string addr)
    Calculate EZMLM list hash value. */
@@ -92,7 +92,7 @@ PHP_FUNCTION(ezmlm_hash)
 
 	h = (h % 53);
 
-	RETURN_INT((int) h);
+	RETURN_LONG((int) h);
 }
 /* }}} */
 
@@ -182,7 +182,7 @@ PHP_FUNCTION(mail)
 	}
 
 	if (extra_cmd) {
-		STR_RELEASE(extra_cmd);
+		zend_string_release(extra_cmd);
 	}
 	if (to_r != to) {
 		efree(to_r);
@@ -259,7 +259,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 
 		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", date_str->val, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), to, hdr ? hdr : "");
 
-		STR_FREE(date_str);
+		zend_string_free(date_str);
 
 		if (hdr) {
 			php_mail_log_crlf_to_spaces(tmp);
@@ -289,7 +289,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		} else {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_INT_FMT ":%s", php_getuid(TSRMLS_C), f->val);
 		}
-		STR_RELEASE(f);
+		zend_string_release(f);
 	}
 
 	if (!sendmail_path) {

@@ -103,7 +103,7 @@ retry:
 		}
 		estr = php_socket_strerror(err, NULL, 0);
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of " ZEND_INT_FMT " bytes failed with errno=%ld %s",
-				(php_int_t)count, err, estr);
+				(zend_long)count, err, estr);
 		efree(estr);
 	}
 
@@ -702,7 +702,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			efree(host);
 			return -1;
 		}
-		bindto = parse_ip_address_ex(Z_STRVAL_P(tmpzval), Z_STRSIZE_P(tmpzval), &bindport, xparam->want_errortext, &xparam->outputs.error_text TSRMLS_CC);
+		bindto = parse_ip_address_ex(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval), &bindport, xparam->want_errortext, &xparam->outputs.error_text TSRMLS_CC);
 	}
 
 #ifdef SO_BROADCAST

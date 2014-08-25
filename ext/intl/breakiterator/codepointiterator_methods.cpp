@@ -40,5 +40,5 @@ U_CFUNC PHP_FUNCTION(cpbi_get_last_code_point)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	RETURN_INT(fetch_cpbi(bio)->getLastCodePoint());
+	RETURN_LONG(fetch_cpbi(bio)->getLastCodePoint());
 }

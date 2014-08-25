@@ -119,7 +119,7 @@ PHP_FUNCTION( collator_compare )
 		efree( ustr2 );
 
 	/* Return result of the comparison. */
-	RETURN_INT( result );
+	RETURN_LONG( result );
 }
 /* }}} */
 

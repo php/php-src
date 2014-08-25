@@ -255,7 +255,7 @@ static inline int sapi_cli_select(int fd TSRMLS_DC)
 PHP_CLI_API size_t sapi_cli_single_write(const char *str, php_size_t str_length TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
-	php_int_t ret;
+	zend_long ret;
 #else
 	php_size_t ret;
 #endif
@@ -425,7 +425,7 @@ static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 
 /* overwriteable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
-	ZVAL_NEW_STR(&tmp, STR_INIT(value, sizeof(value)-1, 1));\
+	ZVAL_NEW_STR(&tmp, zend_string_init(value, sizeof(value)-1, 1));\
 	zend_hash_str_update(configuration_hash, name, sizeof(name)-1, &tmp);\
 
 static void sapi_cli_ini_defaults(HashTable *configuration_hash)
@@ -581,19 +581,19 @@ static void cli_register_file_handles(TSRMLS_D) /* {{{ */
 	
 	ZVAL_COPY_VALUE(&ic.value, &zin);
 	ic.flags = CONST_CS;
-	ic.name = STR_INIT("STDIN", sizeof("STDIN")-1, 1);
+	ic.name = zend_string_init("STDIN", sizeof("STDIN")-1, 1);
 	ic.module_number = 0;
 	zend_register_constant(&ic TSRMLS_CC);
 
 	ZVAL_COPY_VALUE(&oc.value, &zout);
 	oc.flags = CONST_CS;
-	oc.name = STR_INIT("STDOUT", sizeof("STDOUT")-1, 1);
+	oc.name = zend_string_init("STDOUT", sizeof("STDOUT")-1, 1);
 	oc.module_number = 0;
 	zend_register_constant(&oc TSRMLS_CC);
 
 	ZVAL_COPY_VALUE(&ec.value, &zerr);
 	ec.flags = CONST_CS;
-	ec.name = STR_INIT("STDERR", sizeof("STDERR")-1, 1);
+	ec.name = zend_string_init("STDERR", sizeof("STDERR")-1, 1);
 	ec.module_number = 0;
 	zend_register_constant(&ec TSRMLS_CC);
 }
@@ -963,9 +963,9 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 			}
 		}
 
-		key = STR_INIT("_SERVER", sizeof("_SERVER")-1, 0);
+		key = zend_string_init("_SERVER", sizeof("_SERVER")-1, 0);
 		zend_is_auto_global(key TSRMLS_CC);
-		STR_RELEASE(key);
+		zend_string_release(key);
 
 		PG(during_request_startup) = 0;
 		switch (behavior) {
@@ -1033,7 +1033,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				if (exec_begin && zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1 TSRMLS_CC) == FAILURE) {
 					exit_status=254;
 				}
-				ZVAL_INT(&argi, index);
+				ZVAL_LONG(&argi, index);
 				zend_hash_str_update(&EG(symbol_table).ht, "argi", sizeof("argi")-1, &argi);
 				while (exit_status == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
 					len = strlen(input);
@@ -1042,7 +1042,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 					}
 					ZVAL_STRINGL(&argn, input, len);
 					zend_hash_str_update(&EG(symbol_table).ht, "argn", sizeof("argn")-1, &argn);
-					Z_IVAL(argi) = ++index;
+					Z_LVAL(argi) = ++index;
 					if (exec_run) {
 						if (zend_eval_string_ex(exec_run, NULL, "Command line run code", 1 TSRMLS_CC) == FAILURE) {
 							exit_status=254;

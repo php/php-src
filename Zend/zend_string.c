@@ -29,7 +29,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC);
 static void zend_interned_strings_snapshot_int(TSRMLS_D);
 static void zend_interned_strings_restore_int(TSRMLS_D);
 
-ZEND_API zend_uint_t zend_hash_func(const char *str, zend_size_t len)
+ZEND_API zend_ulong zend_hash_func(const char *str, size_t len)
 {
 	return zend_inline_hash_func(str, len);
 }
@@ -54,13 +54,13 @@ void zend_interned_strings_init(TSRMLS_D)
 	memset(CG(interned_strings).arHash, INVALID_IDX, CG(interned_strings).nTableSize * sizeof(zend_uint));
 
 	/* interned empty string */
-	str = STR_ALLOC(sizeof("")-1, 1);
+	str = zend_string_alloc(sizeof("")-1, 1);
 	str->val[0] = '\000';
 	CG(empty_string) = zend_new_interned_string_int(str TSRMLS_CC);
 #else
-	str = STR_ALLOC(sizeof("")-1, 1);
+	str = zend_string_alloc(sizeof("")-1, 1);
 	str->val[0] = '\000';
-	STR_HASH_VAL(str);
+	zend_string_hash_val(str);
 	str->gc.u.v.flags |= IS_STR_INTERNED;
 	CG(empty_string) = str;
 #endif
@@ -85,7 +85,7 @@ void zend_interned_strings_dtor(TSRMLS_D)
 static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 {
 #ifndef ZTS
-	zend_uint_t h;
+	zend_ulong h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
@@ -94,14 +94,14 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 		return str;
 	}
 
-	h = STR_HASH_VAL(str);
+	h = zend_string_hash_val(str);
 	nIndex = h & CG(interned_strings).nTableMask;
 	idx = CG(interned_strings).arHash[nIndex];
 	while (idx != INVALID_IDX) {
 		p = CG(interned_strings).arData + idx;
 		if ((p->h == h) && (p->key->len == str->len)) {
 			if (!memcmp(p->key->val, str->val, str->len)) {
-				STR_RELEASE(str);
+				zend_string_release(str);
 				return p->key;
 			}
 		}
@@ -182,7 +182,7 @@ static void zend_interned_strings_restore_int(TSRMLS_D)
 
 		GC_FLAGS(p->key) &= ~IS_STR_INTERNED;
 		GC_REFCOUNT(p->key) = 1;
-		STR_FREE(p->key);
+		zend_string_free(p->key);
 
 		nIndex = p->h & CG(interned_strings).nTableMask;
 		if (CG(interned_strings).arHash[nIndex] == idx) {

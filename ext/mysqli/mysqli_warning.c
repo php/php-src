@@ -29,7 +29,7 @@
 #include "mysqli_priv.h"
 
 /* Define these in the PHP5 tree to make merging easy process */
-#define ZSTR_DUPLICATE (1<<0)
+#define Zzend_string_dupLICATE (1<<0)
 #define ZSTR_AUTOFREE  (1<<1)
 
 #define ZVAL_UTF8_STRING(z, s, flags)          ZVAL_STRING((z), (char*)(s))
@@ -59,9 +59,9 @@ MYSQLI_WARNING *php_new_warning(const char *reason, int errorno TSRMLS_DC)
 
 	w = (MYSQLI_WARNING *)ecalloc(1, sizeof(MYSQLI_WARNING));
 
-	ZVAL_UTF8_STRING(&(w->reason), reason, ZSTR_DUPLICATE);
+	ZVAL_UTF8_STRING(&(w->reason), reason, Zzend_string_dupLICATE);
 
-	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
+	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  Zzend_string_dupLICATE);
 
 	w->errorno = errorno;
 
@@ -108,9 +108,9 @@ MYSQLI_WARNING *php_new_warning(const zval * reason, int errorno TSRMLS_DC)
 	ZVAL_DUP(&w->reason, (zval *)reason);
 	convert_to_string(&w->reason);
 
-	//????ZVAL_UTF8_STRINGL(&(w->reason),  Z_STRVAL(w->reason), Z_STRSIZE(w->reason),  ZSTR_AUTOFREE);
+	//????ZVAL_UTF8_STRINGL(&(w->reason),  Z_STRVAL(w->reason), Z_STRLEN(w->reason),  ZSTR_AUTOFREE);
 
-	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
+	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  Zzend_string_dupLICATE);
 
 	w->errorno = errorno;
 
@@ -147,7 +147,7 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
 		/* 1. Here comes the error no */
 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
 		convert_to_int_ex(entry);
-		errno = Z_IVAL_P(entry);
+		errno = Z_LVAL_P(entry);
 		zend_hash_move_forward(Z_ARRVAL(row));
 
 		/* 2. Here comes the reason */
@@ -243,7 +243,7 @@ zval *mysqli_warning_errno(mysqli_object *obj, zval *retval TSRMLS_DC)
 		return NULL;
 	}
 	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
-	ZVAL_INT(retval, w->errorno);
+	ZVAL_LONG(retval, w->errorno);
 	return retval;
 }
 /* }}} */

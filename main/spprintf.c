@@ -407,7 +407,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					if (free_zcopy) {
 						zvp = &zcopy;
 					}
-					s_len = Z_STRSIZE_P(zvp);
+					s_len = Z_STRLEN_P(zvp);
 					s = Z_STRVAL_P(zvp);
 					if (adjust_precision && precision < s_len) {
 						s_len = precision;
@@ -443,7 +443,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 							break;
 #endif
 						case LM_PHP_INT_T:
-							i_num = (wide_int) va_arg(ap, php_uint_t);
+							i_num = (wide_int) va_arg(ap, zend_ulong);
 							break;
 					}
 					/*
@@ -488,7 +488,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 								break;
 #endif
 							case LM_PHP_INT_T:
-								i_num = (wide_int) va_arg(ap, php_int_t);
+								i_num = (wide_int) va_arg(ap, zend_long);
 								break;
 						}
 					}
@@ -536,7 +536,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 							break;
 #endif
 						case LM_PHP_INT_T:
-							ui_num = (u_wide_int) va_arg(ap, php_uint_t);
+							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
 							break;
 					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt,
@@ -579,7 +579,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 							break;
 #endif
 						case LM_PHP_INT_T:
-							ui_num = (u_wide_int) va_arg(ap, php_uint_t);
+							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
 							break;
 					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt,

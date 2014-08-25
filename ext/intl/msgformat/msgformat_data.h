@@ -30,7 +30,7 @@ typedef struct {
 	// formatter handling
 	UMessageFormat* umsgf;
 	char*			orig_format;
-	php_uint_t		orig_format_len;
+	zend_ulong		orig_format_len;
 	HashTable*		arg_types;
 	int				tz_set; /* if we've already the time zone in sub-formats */
 } msgformat_data;

@@ -1406,7 +1406,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, php_off_t e
 		ZVAL_EMPTY_STRING(&zp[0]);
 	}
 
-	if (end != Z_STRSIZE(zp[0])) {
+	if (end != Z_STRLEN(zp[0])) {
 		zval_dtor(&zp[0]);
 		zval_dtor(&zp[1]);
 		zval_dtor(&zp[2]);
@@ -1457,15 +1457,15 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, php_off_t e
 
 	switch (Z_TYPE(retval)) {
 		default:
-		case IS_INT:
+		case IS_LONG:
 			zval_dtor(&zp[1]);
-			if (1 == Z_IVAL(retval)) {
+			if (1 == Z_LVAL(retval)) {
 				return SUCCESS;
 			}
 			return FAILURE;
 		case IS_TRUE:
-			*signature = estrndup(Z_STRVAL(zp[1]), Z_STRSIZE(zp[1]));
-			*signature_len = Z_STRSIZE(zp[1]);
+			*signature = estrndup(Z_STRVAL(zp[1]), Z_STRLEN(zp[1]));
+			*signature_len = Z_STRLEN(zp[1]);
 			zval_dtor(&zp[1]);
 			return SUCCESS;
 		case IS_FALSE:
@@ -1526,7 +1526,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 
 			if (FAILURE == phar_call_openssl_signverify(0, fp, end_of_phar, pubkey ? pubkey->val : NULL, pubkey ? pubkey->len : 0, &sig, &tempsig TSRMLS_CC)) {
 				if (pubkey) {
-					STR_RELEASE(pubkey);
+					zend_string_release(pubkey);
 				}
 
 				if (error) {
@@ -1537,7 +1537,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			}
 
 			if (pubkey) {
-				STR_RELEASE(pubkey);
+				zend_string_release(pubkey);
 			}
 
 			sig_len = tempsig;
@@ -1545,7 +1545,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			in = BIO_new_mem_buf(pubkey ? pubkey->val : NULL, pubkey ? pubkey->len : 0);
 
 			if (NULL == in) {
-				STR_RELEASE(pubkey);
+				zend_string_release(pubkey);
 				if (error) {
 					spprintf(error, 0, "openssl signature could not be processed");
 				}
@@ -1554,7 +1554,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 
 			key = PEM_read_bio_PUBKEY(in, NULL,NULL, NULL);
 			BIO_free(in);
-			STR_RELEASE(pubkey);
+			zend_string_release(pubkey);
 
 			if (NULL == key) {
 				if (error) {

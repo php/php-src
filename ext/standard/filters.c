@@ -263,14 +263,14 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(filterparams), tmp) {
 				convert_to_string_ex(tmp);
 				smart_str_appendc(&tags_ss, '<');
-				smart_str_appendl(&tags_ss, Z_STRVAL_P(tmp), Z_STRSIZE_P(tmp));
+				smart_str_appendl(&tags_ss, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 				smart_str_appendc(&tags_ss, '>');
 			} ZEND_HASH_FOREACH_END();
 			smart_str_0(&tags_ss);
 		} else {
 			/* FIXME: convert_to_* may clutter zvals and lead it into segfault ? */
 			convert_to_string_ex(filterparams);
-			smart_str_setl(&tags_ss, Z_STRVAL_P(filterparams), Z_STRSIZE_P(filterparams));
+			smart_str_setl(&tags_ss, Z_STRVAL_P(filterparams), Z_STRLEN_P(filterparams));
 		}
 	}
 
@@ -1224,7 +1224,7 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 
 		*pretval_len = str->len;
 		memcpy(*pretval, str->val, str->len + 1);
-		STR_RELEASE(str);
+		zend_string_release(str);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	}
@@ -1232,7 +1232,7 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 }
 
 #if IT_WAS_USED
-static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, php_int_t *pretval, char *field_name, size_t field_name_len)
+static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, zend_long *pretval, char *field_name, size_t field_name_len)
 {
 	zval **tmpval;
 
@@ -1241,13 +1241,13 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, php_int_t *
 	if (zend_hash_find((HashTable *)ht, field_name, field_name_len, (void **)&tmpval) == SUCCESS) {
 		zval tmp, *ztval = *tmpval;
 
-		if (Z_TYPE_PP(tmpval) != IS_INT) {
+		if (Z_TYPE_PP(tmpval) != IS_LONG) {
 			tmp = *ztval;
 			zval_copy_ctor(&tmp);
 			convert_to_int(&tmp);
 			ztval = &tmp;
 		}
-		*pretval = Z_IVAL_P(ztval);
+		*pretval = Z_LVAL_P(ztval);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	} 
@@ -1255,7 +1255,7 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, php_int_t *
 }
 #endif
 
-static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, php_uint_t *pretval, char *field_name, size_t field_name_len)
+static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, zend_ulong *pretval, char *field_name, size_t field_name_len)
 {
 	zval *tmpval;
 
@@ -1264,15 +1264,15 @@ static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, php_uint_t
 	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
 		zval tmp;
 
-		if (Z_TYPE_P(tmpval) != IS_INT) {
+		if (Z_TYPE_P(tmpval) != IS_LONG) {
 			ZVAL_DUP(&tmp, tmpval);;
 			convert_to_int(&tmp);
 			tmpval = &tmp;
 		}
-		if (Z_IVAL_P(tmpval) < 0) {
+		if (Z_LVAL_P(tmpval) < 0) {
 			*pretval = 0;
 		} else {
-			*pretval = Z_IVAL_P(tmpval);
+			*pretval = Z_LVAL_P(tmpval);
 		}
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
@@ -1306,7 +1306,7 @@ static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretva
 #if IT_WAS_USED
 static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
 {
-	php_int_t l;
+	zend_long l;
 	php_conv_err_t err;
 
 	*pretval = 0;
@@ -1320,7 +1320,7 @@ static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *fie
 
 static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
 {
-	php_uint_t l;
+	zend_ulong l;
 	php_conv_err_t err;
 
 	*pretval = 0;

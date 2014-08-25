@@ -98,8 +98,8 @@
 		tidy_object_handlers_ ## name.clone_obj = NULL; \
 	}
 
-#define TIDY_TAG_CONST(tag) REGISTER_INT_CONSTANT("TIDY_TAG_" #tag, TidyTag_##tag, CONST_CS | CONST_PERSISTENT)
-#define TIDY_NODE_CONST(name, type) REGISTER_INT_CONSTANT("TIDY_NODETYPE_" #name, TidyNode_##type, CONST_CS | CONST_PERSISTENT)
+#define TIDY_TAG_CONST(tag) REGISTER_LONG_CONSTANT("TIDY_TAG_" #tag, TidyTag_##tag, CONST_CS | CONST_PERSISTENT)
+#define TIDY_NODE_CONST(name, type) REGISTER_LONG_CONSTANT("TIDY_NODETYPE_" #name, TidyNode_##type, CONST_CS | CONST_PERSISTENT)
 
 #ifndef TRUE
 #define TRUE 1
@@ -134,7 +134,7 @@
 #define ADD_PROPERTY_LONG(_table, _key, _long) \
 	{ \
 		zval tmp; \
-		ZVAL_INT(&tmp, _long); \
+		ZVAL_LONG(&tmp, _long); \
 		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
 	}
 
@@ -524,21 +524,21 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 			break;
 
 		case TidyInteger:
-			if (Z_TYPE(conv) != IS_INT) {
+			if (Z_TYPE(conv) != IS_LONG) {
 				zval_copy_ctor(&conv);
 				convert_to_int(&conv);
 			}
-			if (tidyOptSetInt(doc, tidyOptGetId(opt), Z_IVAL(conv))) {
+			if (tidyOptSetInt(doc, tidyOptGetId(opt), Z_LVAL(conv))) {
 				return SUCCESS;
 			}
 			break;
 
 		case TidyBoolean:
-			if (Z_TYPE(conv) != IS_INT) {
+			if (Z_TYPE(conv) != IS_LONG) {
 				zval_copy_ctor(&conv);
 				convert_to_int(&conv);
 			}
-			if (tidyOptSetBool(doc, tidyOptGetId(opt), Z_IVAL(conv))) {
+			if (tidyOptSetBool(doc, tidyOptGetId(opt), Z_LVAL(conv))) {
 				return SUCCESS;
 			}
 			break;
@@ -627,7 +627,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 
 	if (is_file) {
-		STR_RELEASE(data);
+		zend_string_release(data);
 	}
 
 	tidyBufFree(errbuf);
@@ -734,8 +734,8 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 	PHPTidyObj *obj;
 
 	switch (type) {
-		case IS_INT:
-			ZVAL_INT(out, 0);
+		case IS_LONG:
+			ZVAL_LONG(out, 0);
 			break;
 
 		case IS_DOUBLE:
@@ -767,8 +767,8 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type TSRMLS_DC)
 	PHPTidyObj *obj;
 
 	switch(type) {
-		case IS_INT:
-			ZVAL_INT(out, 0);
+		case IS_LONG:
+			ZVAL_LONG(out, 0);
 			break;
 
 		case IS_DOUBLE:
@@ -1264,7 +1264,7 @@ static PHP_FUNCTION(tidy_parse_file)
 		RETVAL_FALSE;
 	}
 
-	STR_RELEASE(contents);
+	zend_string_release(contents);
 }
 /* }}} */
 
@@ -1396,7 +1396,7 @@ static PHP_FUNCTION(tidy_get_config)
 				break;
 
 			case TidyInteger:
-				add_assoc_int(return_value, opt_name, (long)opt_value);
+				add_assoc_long(return_value, opt_name, (long)opt_value);
 				break;
 
 			case TidyBoolean:
@@ -1415,7 +1415,7 @@ static PHP_FUNCTION(tidy_get_status)
 {
 	TIDY_FETCH_OBJECT;
 
-	RETURN_INT(tidyStatus(obj->ptdoc->doc));
+	RETURN_LONG(tidyStatus(obj->ptdoc->doc));
 }
 /* }}} */
 
@@ -1425,7 +1425,7 @@ static PHP_FUNCTION(tidy_get_html_ver)
 {
 	TIDY_FETCH_OBJECT;
 
-	RETURN_INT(tidyDetectedHtmlVersion(obj->ptdoc->doc));
+	RETURN_LONG(tidyDetectedHtmlVersion(obj->ptdoc->doc));
 }
 /* }}} */
 
@@ -1455,7 +1455,7 @@ static PHP_FUNCTION(tidy_error_count)
 {
 	TIDY_FETCH_OBJECT;
 
-	RETURN_INT(tidyErrorCount(obj->ptdoc->doc));
+	RETURN_LONG(tidyErrorCount(obj->ptdoc->doc));
 }
 /* }}} */
 
@@ -1465,7 +1465,7 @@ static PHP_FUNCTION(tidy_warning_count)
 {
 	TIDY_FETCH_OBJECT;
 
-	RETURN_INT(tidyWarningCount(obj->ptdoc->doc));
+	RETURN_LONG(tidyWarningCount(obj->ptdoc->doc));
 }
 /* }}} */
 
@@ -1475,7 +1475,7 @@ static PHP_FUNCTION(tidy_access_count)
 {
 	TIDY_FETCH_OBJECT;
 
-	RETURN_INT(tidyAccessWarningCount(obj->ptdoc->doc));
+	RETURN_LONG(tidyAccessWarningCount(obj->ptdoc->doc));
 }
 /* }}} */
 
@@ -1485,7 +1485,7 @@ static PHP_FUNCTION(tidy_config_count)
 {
 	TIDY_FETCH_OBJECT;
 
-	RETURN_INT(tidyConfigErrorCount(obj->ptdoc->doc));
+	RETURN_LONG(tidyConfigErrorCount(obj->ptdoc->doc));
 }
 /* }}} */
 
@@ -1529,7 +1529,7 @@ static PHP_FUNCTION(tidy_getopt)
 			return;
 
 		case TidyInteger:
-			RETURN_INT((long)optval);
+			RETURN_LONG((long)optval);
 			break;
 
 		case TidyBoolean:
@@ -1577,7 +1577,7 @@ static TIDY_DOC_METHOD(__construct)
 
 		php_tidy_parse_string(obj, contents->val, contents->len, enc TSRMLS_CC);
 
-		STR_RELEASE(contents);
+		zend_string_release(contents);
 	}
 }
 
@@ -1612,7 +1612,7 @@ static TIDY_DOC_METHOD(parseFile)
 		RETVAL_TRUE;
 	}
 
-	STR_RELEASE(contents);
+	zend_string_release(contents);
 }
 
 static TIDY_DOC_METHOD(parseString)

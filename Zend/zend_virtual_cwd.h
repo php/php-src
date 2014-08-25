@@ -211,7 +211,7 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC);
 #define REALPATH_CACHE_SIZE 0      /* disabled while php.ini isn't loaded */
 
 typedef struct _realpath_cache_bucket {
-	zend_uint_t                    key;
+	zend_ulong                    key;
 	char                          *path;
 	int                            path_len;
 	char                          *realpath;
@@ -229,9 +229,9 @@ typedef struct _realpath_cache_bucket {
 
 typedef struct _virtual_cwd_globals {
 	cwd_state cwd;
-	zend_int_t                   realpath_cache_size;
-	zend_int_t                   realpath_cache_size_limit;
-	zend_int_t                   realpath_cache_ttl;
+	zend_long                   realpath_cache_size;
+	zend_long                   realpath_cache_size_limit;
+	zend_long                   realpath_cache_ttl;
 	realpath_cache_bucket *realpath_cache[1024];
 } virtual_cwd_globals;
 
@@ -246,8 +246,8 @@ extern virtual_cwd_globals cwd_globals;
 CWD_API void realpath_cache_clean(TSRMLS_D);
 CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC);
 CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t TSRMLS_DC);
-CWD_API zend_int_t realpath_cache_size(TSRMLS_D);
-CWD_API zend_int_t realpath_cache_max_buckets(TSRMLS_D);
+CWD_API zend_long realpath_cache_size(TSRMLS_D);
+CWD_API zend_long realpath_cache_max_buckets(TSRMLS_D);
 CWD_API realpath_cache_bucket** realpath_cache_get_buckets(TSRMLS_D);
 
 /* The actual macros to be used in programs using TSRM

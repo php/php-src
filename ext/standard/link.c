@@ -106,11 +106,11 @@ PHP_FUNCTION(linkinfo)
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		efree(dirname);
-		RETURN_INT(-1L);
+		RETURN_LONG(-1L);
 	}
 
 	efree(dirname);
-	RETURN_INT((long) sb.st_dev);
+	RETURN_LONG((long) sb.st_dev);
 }
 /* }}} */
 

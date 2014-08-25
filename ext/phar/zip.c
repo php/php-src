@@ -167,7 +167,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
-	php_int_t size;
+	zend_long size;
 	php_uint16 i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
@@ -241,7 +241,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 					mydata->metadata_len = 0;
 					/* if not valid serialized data, it is a regular string */
 
-					ZVAL_STR(&mydata->metadata, STR_INIT(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent));
+					ZVAL_STR(&mydata->metadata, zend_string_init(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent));
 				}
 			} else {
 				ZVAL_UNDEF(&mydata->metadata);
@@ -529,7 +529,7 @@ foundit:
 				entry.metadata_len = 0;
 				/* if not valid serialized data, it is a regular string */
 
-				ZVAL_STR(&entry.metadata, STR_INIT(buf, PHAR_GET_16(zipentry.comment_len), entry.is_persistent));
+				ZVAL_STR(&entry.metadata, zend_string_init(buf, PHAR_GET_16(zipentry.comment_len), entry.is_persistent));
 			}
 		} else {
 			ZVAL_UNDEF(&entry.metadata);
@@ -586,7 +586,7 @@ foundit:
 					if (str) {
 						entry.uncompressed_filesize = str->len;
 						actual_alias = estrndup(str->val, str->len);
-						STR_RELEASE(str);
+						zend_string_release(str);
 					} else {
 						actual_alias = NULL;
 						entry.uncompressed_filesize = 0;
@@ -618,7 +618,7 @@ foundit:
 					if (str) {
 						entry.uncompressed_filesize = str->len;
 						actual_alias = estrndup(str->val, str->len);
-						STR_RELEASE(str);
+						zend_string_release(str);
 					} else {
 						actual_alias = NULL;
 						entry.uncompressed_filesize = 0;
@@ -640,7 +640,7 @@ foundit:
 					if (str) {
 						entry.uncompressed_filesize = str->len;
 						actual_alias = estrndup(str->val, str->len);
-						STR_RELEASE(str);
+						zend_string_release(str);
 					} else {
 						actual_alias = NULL;
 						entry.uncompressed_filesize = 0;
@@ -1177,7 +1177,7 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 }
 /* }}} */
 
-int phar_zip_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
+int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
 {
 	char *pos;
 	smart_str main_metadata_str = {0};
@@ -1274,7 +1274,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int 
 				if (str) {
 					len = str->len;
 					user_stub = estrndup(str->val, str->len);
-					STR_RELEASE(str);
+					zend_string_release(str);
 				} else {
 					user_stub = NULL;
 					len = 0;

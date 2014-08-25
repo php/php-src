@@ -921,7 +921,7 @@ static int phar_tar_setupmetadata(zval *zv, void *argument TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-int phar_tar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
+int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info entry = {0};
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";
@@ -1004,7 +1004,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int 
 				if (str) {
 					len = str->len;
 					user_stub = estrndup(str->val, str->len);
-					STR_RELEASE(str);
+					zend_string_release(str);
 				} else {
 					user_stub = NULL;
 					len = 0;
@@ -1300,7 +1300,7 @@ nostub:
 #ifndef MAX_WBITS
 #define MAX_WBITS 15
 #endif
-			add_assoc_int(&filterparams, "window", MAX_WBITS + 16);
+			add_assoc_long(&filterparams, "window", MAX_WBITS + 16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			zval_dtor(&filterparams);
 

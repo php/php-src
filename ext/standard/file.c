@@ -188,135 +188,135 @@ PHP_MINIT_FUNCTION(file)
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_INT_CONSTANT("SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LOCK_SH", PHP_LOCK_SH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LOCK_EX", PHP_LOCK_EX, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LOCK_UN", PHP_LOCK_UN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LOCK_NB", PHP_LOCK_NB, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_SH", PHP_LOCK_SH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_EX", PHP_LOCK_EX, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_UN", PHP_LOCK_UN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_NB", PHP_LOCK_NB, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_CONNECT",			PHP_STREAM_NOTIFY_CONNECT,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_AUTH_REQUIRED",	PHP_STREAM_NOTIFY_AUTH_REQUIRED,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_AUTH_RESULT",		PHP_STREAM_NOTIFY_AUTH_RESULT,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_MIME_TYPE_IS",	PHP_STREAM_NOTIFY_MIME_TYPE_IS,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_FILE_SIZE_IS",	PHP_STREAM_NOTIFY_FILE_SIZE_IS,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_REDIRECTED",		PHP_STREAM_NOTIFY_REDIRECTED,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_PROGRESS",		PHP_STREAM_NOTIFY_PROGRESS,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_FAILURE",			PHP_STREAM_NOTIFY_FAILURE,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_COMPLETED",		PHP_STREAM_NOTIFY_COMPLETED,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_RESOLVE",			PHP_STREAM_NOTIFY_RESOLVE,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_CONNECT",			PHP_STREAM_NOTIFY_CONNECT,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_AUTH_REQUIRED",	PHP_STREAM_NOTIFY_AUTH_REQUIRED,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_AUTH_RESULT",		PHP_STREAM_NOTIFY_AUTH_RESULT,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_MIME_TYPE_IS",	PHP_STREAM_NOTIFY_MIME_TYPE_IS,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_FILE_SIZE_IS",	PHP_STREAM_NOTIFY_FILE_SIZE_IS,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_REDIRECTED",		PHP_STREAM_NOTIFY_REDIRECTED,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_PROGRESS",		PHP_STREAM_NOTIFY_PROGRESS,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_FAILURE",			PHP_STREAM_NOTIFY_FAILURE,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_COMPLETED",		PHP_STREAM_NOTIFY_COMPLETED,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_RESOLVE",			PHP_STREAM_NOTIFY_RESOLVE,			CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_SEVERITY_INFO",	PHP_STREAM_NOTIFY_SEVERITY_INFO,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_SEVERITY_WARN",	PHP_STREAM_NOTIFY_SEVERITY_WARN,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_NOTIFY_SEVERITY_ERR",	PHP_STREAM_NOTIFY_SEVERITY_ERR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_INFO",	PHP_STREAM_NOTIFY_SEVERITY_INFO,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_WARN",	PHP_STREAM_NOTIFY_SEVERITY_WARN,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_ERR",	PHP_STREAM_NOTIFY_SEVERITY_ERR,		CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("STREAM_FILTER_READ",			PHP_STREAM_FILTER_READ,				CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_FILTER_WRITE",			PHP_STREAM_FILTER_WRITE,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_FILTER_ALL",				PHP_STREAM_FILTER_ALL,				CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_FILTER_READ",			PHP_STREAM_FILTER_READ,				CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_FILTER_WRITE",			PHP_STREAM_FILTER_WRITE,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_FILTER_ALL",				PHP_STREAM_FILTER_ALL,				CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("STREAM_CLIENT_PERSISTENT",		PHP_STREAM_CLIENT_PERSISTENT,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CLIENT_ASYNC_CONNECT",	PHP_STREAM_CLIENT_ASYNC_CONNECT,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CLIENT_CONNECT",			PHP_STREAM_CLIENT_CONNECT,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CLIENT_PERSISTENT",		PHP_STREAM_CLIENT_PERSISTENT,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CLIENT_ASYNC_CONNECT",	PHP_STREAM_CLIENT_ASYNC_CONNECT,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CLIENT_CONNECT",			PHP_STREAM_CLIENT_CONNECT,	CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_ANY_CLIENT",	STREAM_CRYPTO_METHOD_ANY_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_CLIENT",	STREAM_CRYPTO_METHOD_SSLv2_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_CLIENT",	STREAM_CRYPTO_METHOD_SSLv3_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_SSLv23_CLIENT",	STREAM_CRYPTO_METHOD_SSLv23_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_TLS_CLIENT",	STREAM_CRYPTO_METHOD_TLS_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_ANY_SERVER",	STREAM_CRYPTO_METHOD_ANY_SERVER,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_SERVER",	STREAM_CRYPTO_METHOD_SSLv2_SERVER,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_SERVER",	STREAM_CRYPTO_METHOD_SSLv3_SERVER,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_SSLv23_SERVER",	STREAM_CRYPTO_METHOD_SSLv23_SERVER,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_TLS_SERVER",	STREAM_CRYPTO_METHOD_TLS_SERVER,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_0_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_0_SERVER,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_ANY_CLIENT",	STREAM_CRYPTO_METHOD_ANY_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_CLIENT",	STREAM_CRYPTO_METHOD_SSLv2_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_CLIENT",	STREAM_CRYPTO_METHOD_SSLv3_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv23_CLIENT",	STREAM_CRYPTO_METHOD_SSLv23_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLS_CLIENT",	STREAM_CRYPTO_METHOD_TLS_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_ANY_SERVER",	STREAM_CRYPTO_METHOD_ANY_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_SERVER",	STREAM_CRYPTO_METHOD_SSLv2_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_SERVER",	STREAM_CRYPTO_METHOD_SSLv3_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv23_SERVER",	STREAM_CRYPTO_METHOD_SSLv23_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLS_SERVER",	STREAM_CRYPTO_METHOD_TLS_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_0_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_0_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,	CONST_CS|CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("STREAM_SHUT_RD",	STREAM_SHUT_RD,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_SHUT_WR",	STREAM_SHUT_WR,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_SHUT_RDWR",	STREAM_SHUT_RDWR,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_SHUT_RD",	STREAM_SHUT_RD,		CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_SHUT_WR",	STREAM_SHUT_WR,		CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_SHUT_RDWR",	STREAM_SHUT_RDWR,	CONST_CS|CONST_PERSISTENT);
 
 #ifdef PF_INET
-	REGISTER_INT_CONSTANT("STREAM_PF_INET", PF_INET, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_PF_INET", PF_INET, CONST_CS|CONST_PERSISTENT);
 #elif defined(AF_INET)
-	REGISTER_INT_CONSTANT("STREAM_PF_INET", AF_INET, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_PF_INET", AF_INET, CONST_CS|CONST_PERSISTENT);
 #endif
 
 #if HAVE_IPV6
 # ifdef PF_INET6
-	REGISTER_INT_CONSTANT("STREAM_PF_INET6", PF_INET6, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_PF_INET6", PF_INET6, CONST_CS|CONST_PERSISTENT);
 # elif defined(AF_INET6)
-	REGISTER_INT_CONSTANT("STREAM_PF_INET6", AF_INET6, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_PF_INET6", AF_INET6, CONST_CS|CONST_PERSISTENT);
 # endif
 #endif
 
 #ifdef PF_UNIX
-	REGISTER_INT_CONSTANT("STREAM_PF_UNIX", PF_UNIX, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_PF_UNIX", PF_UNIX, CONST_CS|CONST_PERSISTENT);
 #elif defined(AF_UNIX)
-	REGISTER_INT_CONSTANT("STREAM_PF_UNIX", AF_UNIX, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_PF_UNIX", AF_UNIX, CONST_CS|CONST_PERSISTENT);
 #endif
 
 #ifdef IPPROTO_IP
 	/* most people will use this one when calling socket() or socketpair() */
-	REGISTER_INT_CONSTANT("STREAM_IPPROTO_IP", IPPROTO_IP, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_IP", IPPROTO_IP, CONST_CS|CONST_PERSISTENT);
 #endif
 
 #ifdef IPPROTO_TCP
-	REGISTER_INT_CONSTANT("STREAM_IPPROTO_TCP", IPPROTO_TCP, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_TCP", IPPROTO_TCP, CONST_CS|CONST_PERSISTENT);
 #endif
 
 #ifdef IPPROTO_UDP
-	REGISTER_INT_CONSTANT("STREAM_IPPROTO_UDP", IPPROTO_UDP, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_UDP", IPPROTO_UDP, CONST_CS|CONST_PERSISTENT);
 #endif
 
 #ifdef IPPROTO_ICMP
-	REGISTER_INT_CONSTANT("STREAM_IPPROTO_ICMP", IPPROTO_ICMP, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_ICMP", IPPROTO_ICMP, CONST_CS|CONST_PERSISTENT);
 #endif
 
 #ifdef IPPROTO_RAW
-	REGISTER_INT_CONSTANT("STREAM_IPPROTO_RAW", IPPROTO_RAW, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_RAW", IPPROTO_RAW, CONST_CS|CONST_PERSISTENT);
 #endif
 
-	REGISTER_INT_CONSTANT("STREAM_SOCK_STREAM", SOCK_STREAM, CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_SOCK_DGRAM", SOCK_DGRAM, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_SOCK_STREAM", SOCK_STREAM, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_SOCK_DGRAM", SOCK_DGRAM, CONST_CS|CONST_PERSISTENT);
 
 #ifdef SOCK_RAW
-	REGISTER_INT_CONSTANT("STREAM_SOCK_RAW", SOCK_RAW, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_SOCK_RAW", SOCK_RAW, CONST_CS|CONST_PERSISTENT);
 #endif
 
 #ifdef SOCK_SEQPACKET
-	REGISTER_INT_CONSTANT("STREAM_SOCK_SEQPACKET", SOCK_SEQPACKET, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_SOCK_SEQPACKET", SOCK_SEQPACKET, CONST_CS|CONST_PERSISTENT);
 #endif
 
 #ifdef SOCK_RDM
-	REGISTER_INT_CONSTANT("STREAM_SOCK_RDM", SOCK_RDM, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_SOCK_RDM", SOCK_RDM, CONST_CS|CONST_PERSISTENT);
 #endif
 
-	REGISTER_INT_CONSTANT("STREAM_PEEK", STREAM_PEEK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_OOB",  STREAM_OOB, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_PEEK", STREAM_PEEK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_OOB",  STREAM_OOB, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("STREAM_SERVER_BIND",			STREAM_XPORT_BIND,					CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("STREAM_SERVER_LISTEN",			STREAM_XPORT_LISTEN,				CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_SERVER_BIND",			STREAM_XPORT_BIND,					CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_SERVER_LISTEN",			STREAM_XPORT_LISTEN,				CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILE_USE_INCLUDE_PATH",			PHP_FILE_USE_INCLUDE_PATH,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILE_IGNORE_NEW_LINES",			PHP_FILE_IGNORE_NEW_LINES,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILE_SKIP_EMPTY_LINES",			PHP_FILE_SKIP_EMPTY_LINES,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILE_APPEND",					PHP_FILE_APPEND,					CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILE_NO_DEFAULT_CONTEXT",		PHP_FILE_NO_DEFAULT_CONTEXT,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_USE_INCLUDE_PATH",			PHP_FILE_USE_INCLUDE_PATH,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_IGNORE_NEW_LINES",			PHP_FILE_IGNORE_NEW_LINES,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES",			PHP_FILE_SKIP_EMPTY_LINES,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_APPEND",					PHP_FILE_APPEND,					CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_NO_DEFAULT_CONTEXT",		PHP_FILE_NO_DEFAULT_CONTEXT,		CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILE_TEXT",						0,									CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILE_BINARY",					0,									CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_TEXT",						0,									CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_BINARY",					0,									CONST_CS | CONST_PERSISTENT);
 
 #ifdef HAVE_FNMATCH
-	REGISTER_INT_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FNM_PATHNAME", FNM_PATHNAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FNM_PERIOD",   FNM_PERIOD,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FNM_PATHNAME", FNM_PATHNAME, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FNM_PERIOD",   FNM_PERIOD,   CONST_CS | CONST_PERSISTENT);
 # ifdef FNM_CASEFOLD /* a GNU extension */ /* TODO emulate if not available */
-	REGISTER_INT_CONSTANT("FNM_CASEFOLD", FNM_CASEFOLD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FNM_CASEFOLD", FNM_CASEFOLD, CONST_CS | CONST_PERSISTENT);
 # endif
 #endif
 
@@ -342,9 +342,9 @@ PHP_FUNCTION(flock)
 	zval *arg1, *arg3 = NULL;
 	int act;
 	php_stream *stream;
-	php_int_t operation = 0;
+	zend_long operation = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|z/", &arg1, &operation, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z/", &arg1, &operation, &arg3) == FAILURE) {
 		return;
 	}
 
@@ -358,14 +358,14 @@ PHP_FUNCTION(flock)
 
 	if (arg3) {
 		zval_dtor(arg3);
-		ZVAL_INT(arg3, 0);
+		ZVAL_LONG(arg3, 0);
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
 		if (operation && errno == EWOULDBLOCK && arg3) {
-			ZVAL_INT(arg3, 1);
+			ZVAL_LONG(arg3, 1);
 		}
 		RETURN_FALSE;
 	}
@@ -526,14 +526,14 @@ PHP_FUNCTION(file_get_contents)
 	int filename_len;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
-	php_int_t offset = -1;
-	php_int_t maxlen = PHP_STREAM_COPY_ALL;
+	zend_long offset = -1;
+	zend_long maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	zend_string *contents;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|br!ii", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
 		return;
 	}
 
@@ -579,15 +579,15 @@ PHP_FUNCTION(file_put_contents)
 	char *filename;
 	int filename_len;
 	zval *data;
-	php_int_t numbytes = 0;
-	php_int_t flags = 0;
+	zend_long numbytes = 0;
+	zend_long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *srcstream = NULL;
 	char mode[3] = "wb";
 	char ret_ok = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/|ir!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/|lr!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -641,17 +641,17 @@ PHP_FUNCTION(file_put_contents)
 			break;
 		}
 		case IS_NULL:
-		case IS_INT:
+		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_FALSE:
 		case IS_TRUE:
 			convert_to_string_ex(data);
 
 		case IS_STRING:
-			if (Z_STRSIZE_P(data)) {
-				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRSIZE_P(data));
-				if (numbytes != Z_STRSIZE_P(data)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %pl of %zd bytes written, possibly out of free disk space", numbytes, Z_STRSIZE_P(data));
+			if (Z_STRLEN_P(data)) {
+				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
+				if (numbytes != Z_STRLEN_P(data)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %pl of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
 					numbytes = -1;
 				}
 			}
@@ -670,11 +670,11 @@ PHP_FUNCTION(file_put_contents)
 						if (bytes_written != str->len) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %zd bytes to %s", str->len, filename);
 							ret_ok = 0;
-							STR_RELEASE(str);
+							zend_string_release(str);
 							break;
 						}
 					}
-					STR_RELEASE(str);
+					zend_string_release(str);
 				} ZEND_HASH_FOREACH_END();
 			}
 			break;
@@ -684,9 +684,9 @@ PHP_FUNCTION(file_put_contents)
 				zval out;
 
 				if (zend_std_cast_object_tostring(data, &out, IS_STRING TSRMLS_CC) == SUCCESS) {
-					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRSIZE(out));
-					if (numbytes != Z_STRSIZE(out)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %pd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRSIZE(out));
+					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
+					if (numbytes != Z_STRLEN(out)) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %pd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
 						numbytes = -1;
 					}
 					zval_dtor(&out);
@@ -703,7 +703,7 @@ PHP_FUNCTION(file_put_contents)
 		RETURN_FALSE;
 	}
 
-	RETURN_INT(numbytes);
+	RETURN_LONG(numbytes);
 }
 /* }}} */
 
@@ -718,7 +718,7 @@ PHP_FUNCTION(file)
 	char *p, *s, *e;
 	register int i = 0;
 	char eol_marker = '\n';
-	php_int_t flags = 0;
+	zend_long flags = 0;
 	zend_bool use_include_path;
 	zend_bool include_new_line;
 	zend_bool skip_blank_lines;
@@ -728,7 +728,7 @@ PHP_FUNCTION(file)
 	zend_string *target_buf;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|ir!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
@@ -795,7 +795,7 @@ parse_eol:
 	}
 
 	if (target_buf) {
-		STR_FREE(target_buf);
+		zend_string_free(target_buf);
 	}
 	php_stream_close(stream);
 }
@@ -832,7 +832,7 @@ PHP_FUNCTION(tempnam)
 		RETVAL_STRING(opened_path);
 		efree(opened_path);
 	}
-	STR_RELEASE(p);
+	zend_string_release(p);
 }
 /* }}} */
 
@@ -977,7 +977,7 @@ PHP_FUNCTION(pclose)
 	FG(pclose_wait) = 1;
 	zend_list_close(stream->res);
 	FG(pclose_wait) = 0;
-	RETURN_INT(FG(pclose_ret));
+	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
 
@@ -1007,13 +1007,13 @@ PHPAPI PHP_FUNCTION(feof)
 PHPAPI PHP_FUNCTION(fgets)
 {
 	zval *arg1;
-	php_int_t len = 1024;
+	zend_long len = 1024;
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &arg1, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &arg1, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1091,7 +1091,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 PHPAPI PHP_FUNCTION(fgetss)
 {
 	zval *fd;
-	php_int_t bytes = 0;
+	zend_long bytes = 0;
 	size_t len = 0;
 	size_t actual_len, retval_len;
 	char *buf = NULL, *retval;
@@ -1100,7 +1100,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 	char *allowed_tags=NULL;
 	int allowed_tags_len=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|iS", &fd, &bytes, &allowed) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lS", &fd, &bytes, &allowed) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1197,11 +1197,11 @@ PHPAPI PHP_FUNCTION(fwrite)
 	int arg2len;
 	int ret;
 	int num_bytes;
-	php_int_t arg3 = 0;
+	zend_long arg3 = 0;
 	char *buffer = NULL;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|i", &arg1, &arg2, &arg2len, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &arg2, &arg2len, &arg3) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1212,7 +1212,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	}
 
 	if (!num_bytes) {
-		RETURN_INT(0);
+		RETURN_LONG(0);
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
@@ -1222,7 +1222,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 		efree(buffer);
 	}
 
-	RETURN_INT(ret);
+	RETURN_LONG(ret);
 }
 /* }}} */
 
@@ -1273,7 +1273,7 @@ PHPAPI PHP_FUNCTION(rewind)
 PHPAPI PHP_FUNCTION(ftell)
 {
 	zval *arg1;
-	php_int_t ret;
+	zend_long ret;
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
@@ -1286,7 +1286,7 @@ PHPAPI PHP_FUNCTION(ftell)
 	if (ret == -1)	{
 		RETURN_FALSE;
 	}
-	RETURN_INT(ret);
+	RETURN_LONG(ret);
 }
 /* }}} */
 
@@ -1295,16 +1295,16 @@ PHPAPI PHP_FUNCTION(ftell)
 PHPAPI PHP_FUNCTION(fseek)
 {
 	zval *arg1;
-	php_int_t arg2, whence = SEEK_SET;
+	zend_long arg2, whence = SEEK_SET;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|i", &arg1, &arg2, &whence) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &arg1, &arg2, &whence) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
-	RETURN_INT(php_stream_seek(stream, arg2, whence));
+	RETURN_LONG(php_stream_seek(stream, arg2, whence));
 }
 /* }}} */
 
@@ -1312,7 +1312,7 @@ PHPAPI PHP_FUNCTION(fseek)
 */
 
 /* DEPRECATED APIs: Use php_stream_mkdir() instead */
-PHPAPI int php_mkdir_ex(const char *dir, php_int_t mode, int options TSRMLS_DC)
+PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options TSRMLS_DC)
 {
 	int ret;
 
@@ -1327,7 +1327,7 @@ PHPAPI int php_mkdir_ex(const char *dir, php_int_t mode, int options TSRMLS_DC)
 	return ret;
 }
 
-PHPAPI int php_mkdir(const char *dir, php_int_t mode TSRMLS_DC)
+PHPAPI int php_mkdir(const char *dir, zend_long mode TSRMLS_DC)
 {
 	return php_mkdir_ex(dir, mode, REPORT_ERRORS TSRMLS_CC);
 }
@@ -1340,11 +1340,11 @@ PHP_FUNCTION(mkdir)
 	char *dir;
 	int dir_len;
 	zval *zcontext = NULL;
-	php_int_t mode = 0777;
+	zend_long mode = 0777;
 	zend_bool recursive = 0;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|ibr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|lbr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1395,7 +1395,7 @@ PHP_FUNCTION(readfile)
 	if (stream) {
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
-		RETURN_INT(size);
+		RETURN_LONG(size);
 	}
 
 	RETURN_FALSE;
@@ -1406,7 +1406,7 @@ PHP_FUNCTION(readfile)
    Return or change the umask */
 PHP_FUNCTION(umask)
 {
-	php_int_t arg1 = 0;
+	zend_long arg1 = 0;
 	int oldumask;
 
 	oldumask = umask(077);
@@ -1415,7 +1415,7 @@ PHP_FUNCTION(umask)
 		BG(umask) = oldumask;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1425,7 +1425,7 @@ PHP_FUNCTION(umask)
 		umask(arg1);
 	}
 
-	RETURN_INT(oldumask);
+	RETURN_LONG(oldumask);
 }
 /* }}} */
 
@@ -1444,7 +1444,7 @@ PHPAPI PHP_FUNCTION(fpassthru)
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	size = php_stream_passthru(stream);
-	RETURN_INT(size);
+	RETURN_LONG(size);
 }
 /* }}} */
 
@@ -1521,10 +1521,10 @@ PHP_FUNCTION(unlink)
 PHP_NAMED_FUNCTION(php_if_ftruncate)
 {
 	zval *fp;
-	php_int_t size;
+	zend_long size;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &fp, &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &fp, &size) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1565,30 +1565,30 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 
 	array_init(return_value);
 
-	ZVAL_INT(&stat_dev, stat_ssb.sb.st_dev);
-	ZVAL_INT(&stat_ino, stat_ssb.sb.st_ino);
-	ZVAL_INT(&stat_mode, stat_ssb.sb.st_mode);
-	ZVAL_INT(&stat_nlink, stat_ssb.sb.st_nlink);
-	ZVAL_INT(&stat_uid, stat_ssb.sb.st_uid);
-	ZVAL_INT(&stat_gid, stat_ssb.sb.st_gid);
+	ZVAL_LONG(&stat_dev, stat_ssb.sb.st_dev);
+	ZVAL_LONG(&stat_ino, stat_ssb.sb.st_ino);
+	ZVAL_LONG(&stat_mode, stat_ssb.sb.st_mode);
+	ZVAL_LONG(&stat_nlink, stat_ssb.sb.st_nlink);
+	ZVAL_LONG(&stat_uid, stat_ssb.sb.st_uid);
+	ZVAL_LONG(&stat_gid, stat_ssb.sb.st_gid);
 #ifdef HAVE_ST_RDEV
-	ZVAL_INT(&stat_rdev, stat_ssb.sb.st_rdev);
+	ZVAL_LONG(&stat_rdev, stat_ssb.sb.st_rdev);
 #else
-	ZVAL_INT(&stat_rdev, -1);
+	ZVAL_LONG(&stat_rdev, -1);
 #endif
-	ZVAL_INT(&stat_size, stat_ssb.sb.st_size);
-	ZVAL_INT(&stat_atime, stat_ssb.sb.st_atime);
-	ZVAL_INT(&stat_mtime, stat_ssb.sb.st_mtime);
-	ZVAL_INT(&stat_ctime, stat_ssb.sb.st_ctime);
+	ZVAL_LONG(&stat_size, stat_ssb.sb.st_size);
+	ZVAL_LONG(&stat_atime, stat_ssb.sb.st_atime);
+	ZVAL_LONG(&stat_mtime, stat_ssb.sb.st_mtime);
+	ZVAL_LONG(&stat_ctime, stat_ssb.sb.st_ctime);
 #ifdef HAVE_ST_BLKSIZE
-	ZVAL_INT(&stat_blksize, stat_ssb.sb.st_blksize);
+	ZVAL_LONG(&stat_blksize, stat_ssb.sb.st_blksize);
 #else
-	ZVAL_INT(&stat_blksize,-1);
+	ZVAL_LONG(&stat_blksize,-1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-	ZVAL_INT(&stat_blocks, stat_ssb.sb.st_blocks);
+	ZVAL_LONG(&stat_blocks, stat_ssb.sb.st_blocks);
 #else
-	ZVAL_INT(&stat_blocks,-1);
+	ZVAL_LONG(&stat_blocks,-1);
 #endif
 	/* Store numeric indexes in propper order */
 	zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);
@@ -1764,10 +1764,10 @@ safe_to_copy:
 PHPAPI PHP_FUNCTION(fread)
 {
 	zval *arg1;
-	php_int_t len;
+	zend_long len;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &arg1, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1778,11 +1778,11 @@ PHPAPI PHP_FUNCTION(fread)
 		RETURN_FALSE;
 	}
 
-	ZVAL_NEW_STR(return_value, STR_ALLOC(len, 0));
-	Z_STRSIZE_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
+	ZVAL_NEW_STR(return_value, zend_string_alloc(len, 0));
+	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
 
 	/* needed because recv/read/gzread doesnt put a null at the end*/
-	Z_STRVAL_P(return_value)[Z_STRSIZE_P(return_value)] = 0;
+	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
 }
 /* }}} */
 
@@ -1884,7 +1884,7 @@ PHP_FUNCTION(fputcsv)
 	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	ret = php_fputcsv(stream, fields, delimiter, enclosure, escape_char TSRMLS_CC);
-	RETURN_INT(ret);
+	RETURN_LONG(ret);
 }
 /* }}} */
 
@@ -1932,7 +1932,7 @@ PHPAPI php_size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, 
 		if (++i != count) {
 			smart_str_appendl(&csvline, &delimiter, 1);
 		}
-		STR_RELEASE(field_str);
+		zend_string_release(field_str);
 	} ZEND_HASH_FOREACH_END();
 
 	smart_str_appendc(&csvline, '\n');
@@ -1956,7 +1956,7 @@ PHP_FUNCTION(fgetcsv)
 
 	/* first section exactly as php_fgetss */
 
-	php_int_t len = 0;
+	zend_long len = 0;
 	size_t buf_len;
 	char *buf;
 	php_stream *stream;
@@ -2015,7 +2015,7 @@ PHP_FUNCTION(fgetcsv)
 		}
 
 		if (len_zv != NULL && Z_TYPE_P(len_zv) != IS_NULL) {
-			len = zval_get_int(len_zv);
+			len = zval_get_long(len_zv);
 			if (len < 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 				RETURN_FALSE;
@@ -2454,9 +2454,9 @@ PHP_FUNCTION(fnmatch)
 {
 	char *pattern, *filename;
 	int pattern_len, filename_len;
-	php_int_t flags = 0;
+	zend_long flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp|i", &pattern, &pattern_len, &filename, &filename_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp|l", &pattern, &pattern_len, &filename, &filename_len, &flags) == FAILURE) {
 		return;
 	}
 

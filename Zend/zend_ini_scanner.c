@@ -134,7 +134,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #define EAT_TRAILING_WHITESPACE()	EAT_TRAILING_WHITESPACE_EX('X')
 
 #define zend_ini_copy_value(retval, str, len)	\
-	ZVAL_NEW_STR(retval, STR_INIT(str, len, 1))
+	ZVAL_NEW_STR(retval, zend_string_init(str, len, 1))
 
 
 #define RETURN_TOKEN(type, str, len) {           \
@@ -269,7 +269,7 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 
 	/* convert escape sequences */
 	s = t = Z_STRVAL_P(lval);
-	end = s + Z_STRSIZE_P(lval);
+	end = s + Z_STRLEN_P(lval);
 
 	while (s < end) {
 		if (*s == '\\') {
@@ -288,7 +288,7 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 				case '\\':
 				case '$':
 					*t++ = *s;
-					Z_STRSIZE_P(lval)--;
+					Z_STRLEN_P(lval)--;
 					break;
 				default:
 					*t++ = '\\';

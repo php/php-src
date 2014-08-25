@@ -113,7 +113,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 		VariantInit(&v);
 
 		res = php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
-			   	Z_STRSIZE(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
+			   	Z_STRLEN(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
 			   	proxy->dimensions, args, 0 TSRMLS_CC);
 
 		if (res == SUCCESS) {
@@ -149,7 +149,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 	SafeArrayGetLBound(sa, proxy->dimensions, &lbound);
 	SafeArrayGetUBound(sa, proxy->dimensions, &ubound);
 
-	if (Z_IVAL_P(offset) < lbound || Z_IVAL_P(offset) > ubound) {
+	if (Z_LVAL_P(offset) < lbound || Z_LVAL_P(offset) > ubound) {
 		php_com_throw_exception(DISP_E_BADINDEX, "index out of bounds" TSRMLS_CC);
 		return rv;
 	}
@@ -167,11 +167,11 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 		/* copy indices from proxy */
 		for (i = 0; i < dims; i++) {
 			convert_to_int(&proxy->indices[i]);
-			indices[i] = Z_IVAL(proxy->indices[i]);
+			indices[i] = Z_LVAL(proxy->indices[i]);
 		}
 
 		/* add user-supplied index */
-		indices[dims-1] = Z_IVAL_P(offset);
+		indices[dims-1] = Z_LVAL_P(offset);
 
 		/* now fetch the value */
 		if (FAILED(SafeArrayGetVartype(sa, &vt)) || vt == VT_EMPTY) {
@@ -225,7 +225,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		convert_to_string(&proxy->indices[0]);
 		VariantInit(&v);
 		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
-					Z_STRSIZE(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
+					Z_STRLEN(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
 					args, 0 TSRMLS_CC)) {
 			VariantClear(&v);
 		}
@@ -241,12 +241,12 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		/* copy indices from proxy */
 		for (i = 0; i < dims; i++) {
 			convert_to_int(&proxy->indices[i]);
-			indices[i] = Z_IVAL(proxy->indices[i]);
+			indices[i] = Z_LVAL(proxy->indices[i]);
 		}
 
 		/* add user-supplied index */
 		convert_to_int(offset);
-		indices[dims-1] = Z_IVAL_P(offset);
+		indices[dims-1] = Z_LVAL_P(offset);
 
 		if (FAILED(SafeArrayGetVartype(V_ARRAY(&proxy->obj->v), &vt)) || vt == VT_EMPTY) {
 			vt = V_VT(&proxy->obj->v) & ~VT_ARRAY;
@@ -340,7 +340,7 @@ static zend_class_entry *saproxy_class_entry_get(const zend_object *object TSRML
 
 static zend_string* saproxy_class_name_get(const zend_object *object, int parent TSRMLS_DC)
 {
-	return STR_COPY(php_com_saproxy_class_entry->name);
+	return zend_string_copy(php_com_saproxy_class_entry->name);
 }
 
 static int saproxy_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
@@ -353,7 +353,7 @@ static int saproxy_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC
 	return FAILURE;
 }
 
-static int saproxy_count_elements(zval *object, php_int_t *count TSRMLS_DC)
+static int saproxy_count_elements(zval *object, zend_long *count TSRMLS_DC)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	LONG ubound, lbound;
@@ -516,7 +516,7 @@ static void saproxy_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC
 	if (I->key == -1) {
 		ZVAL_NULL(key);
 	} else {
-		ZVAL_INT(key, I->key);
+		ZVAL_LONG(key, I->key);
 	}
 }
 
@@ -561,7 +561,7 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 	I->indices = safe_emalloc(proxy->dimensions + 1, sizeof(LONG), 0);
 	for (i = 0; i < proxy->dimensions; i++) {
 		convert_to_int(&proxy->indices[i]);
-		I->indices[i] = Z_IVAL(proxy->indices[i]);
+		I->indices[i] = Z_LVAL(proxy->indices[i]);
 	}
 
 	SafeArrayGetLBound(V_ARRAY(&proxy->obj->v), proxy->dimensions, &I->imin);

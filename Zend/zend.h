@@ -274,11 +274,11 @@ char *alloca ();
 #endif
 
 #if SIZEOF_ZEND_INT == 4
-#define MAX_LENGTH_OF_ZEND_INT 11
-static const char int_min_digits[] = "2147483648";
+#define MAX_LENGTH_OF_LONG 11
+static const char long_min_digits[] = "2147483648";
 #elif SIZEOF_ZEND_INT == 8
-#define MAX_LENGTH_OF_ZEND_INT 20
-static const char int_min_digits[] = "9223372036854775808";
+#define MAX_LENGTH_OF_LONG 20
+static const char long_min_digits[] = "9223372036854775808";
 #else
 #error "Unknown SIZEOF_ZEND_INT"
 #endif
@@ -388,7 +388,7 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 # else /* ! (CRAY || __arm) */
 
 # define XtOffset(p_type, field) \
-    ((zend_int_t) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
+    ((zend_long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 # endif /* !CRAY */
 
@@ -534,8 +534,8 @@ struct _zend_class_entry {
 #include "zend_stream.h"
 typedef struct _zend_utility_functions {
 	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
-	zend_size_t (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
-	zend_size_t (*write_function)(const char *str, zend_size_t str_length);
+	size_t (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
+	size_t (*write_function)(const char *str, size_t str_length);
 	FILE *(*fopen_function)(const char *filename, char **opened_path TSRMLS_DC);
 	void (*message_handler)(long message, const void *data TSRMLS_DC);
 	void (*block_interruptions)(void);
@@ -544,7 +544,7 @@ typedef struct _zend_utility_functions {
 	void (*ticks_function)(int ticks TSRMLS_DC);
 	void (*on_timeout)(int seconds TSRMLS_DC);
 	int (*stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
-	zend_size_t (*vspprintf_function)(char **pbuf, size_t max_len, const char *format, va_list ap);
+	size_t (*vspprintf_function)(char **pbuf, size_t max_len, const char *format, va_list ap);
 	zend_string *(*vstrpprintf_function)(size_t max_len, const char *format, va_list ap);
 	char *(*getenv_function)(char *name, size_t name_len TSRMLS_DC);
 	char *(*resolve_path_function)(const char *filename, int filename_len TSRMLS_DC);
@@ -646,7 +646,7 @@ END_EXTERN_C()
 #define ZEND_PUTC(c)					zend_write(&(c), 1)
 
 BEGIN_EXTERN_C()
-extern ZEND_API zend_size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
+extern ZEND_API size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path TSRMLS_DC);
 extern ZEND_API void (*zend_block_interruptions)(void);
@@ -655,8 +655,8 @@ extern ZEND_API void (*zend_ticks_function)(int ticks TSRMLS_DC);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 extern ZEND_API void (*zend_on_timeout)(int seconds TSRMLS_DC);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
-extern zend_size_t (*zend_vspprintf)(char **pbuf, zend_size_t max_len, const char *format, va_list ap);
-extern zend_string *(*zend_vstrpprintf)(zend_size_t max_len, const char *format, va_list ap);
+extern size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
+extern zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
 extern ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
 
@@ -685,7 +685,7 @@ END_EXTERN_C()
 #endif
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(zend_int_t message, const void *data TSRMLS_DC);
+ZEND_API void zend_message_dispatcher(zend_long message, const void *data TSRMLS_DC);
 
 ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents);
 END_EXTERN_C()

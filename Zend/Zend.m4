@@ -130,7 +130,7 @@ int main()
 	exit(1);
 }
 ], [
-  AC_DEFINE([ZEND_DVAL_TO_IVAL_CAST_OK], 1, [Define if double cast to long preserves least significant bits])
+  AC_DEFINE([ZEND_DVAL_TO_LVAL_CAST_OK], 1, [Define if double cast to long preserves least significant bits])
   AC_MSG_RESULT(yes)
 ], [
   AC_MSG_RESULT(no)

@@ -178,7 +178,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	int mode_rw = 0;
 	php_stream * stream = NULL;
 	char *p, *token, *pathdup;
-	php_int_t max_memory;
+	zend_long max_memory;
 	FILE *file = NULL;
 
 	if (!strncasecmp(path, "php://", 6)) {
@@ -286,7 +286,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	} else if (!strncasecmp(path, "fd/", 3)) {
 		const char *start;
 		char       *end;
-		php_int_t  fildes_ori;
+		zend_long  fildes_ori;
 		int		   dtablesize;
 
 		if (strcmp(sapi_module.name, "cli")) {

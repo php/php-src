@@ -38,7 +38,7 @@
 			zend_string *tmp = accel_new_interned_string(str TSRMLS_CC); \
 			if (tmp != (str)) { \
 				if (do_free) { \
-					/*STR_RELEASE(str);*/ \
+					/*zend_string_release(str);*/ \
 				} \
 				(str) = tmp; \
 			} else { \

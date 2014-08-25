@@ -55,7 +55,7 @@ DBA_OPEN_FUNC(gdbm)
 
 	if(info->argc > 0) {
 		convert_to_int_ex(&info->argv[0]);
-		filemode = Z_IVAL(info->argv[0]);
+		filemode = Z_LVAL(info->argv[0]);
 	}
 
 	dbf = gdbm_open(info->path, 0, gmode, filemode, NULL);

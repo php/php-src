@@ -38,8 +38,8 @@ PHP_MSHUTDOWN_FUNCTION(ldap);
 PHP_MINFO_FUNCTION(ldap);
 
 ZEND_BEGIN_MODULE_GLOBALS(ldap)
-	php_int_t num_links;
-	php_int_t max_links;
+	zend_long num_links;
+	zend_long max_links;
 ZEND_END_MODULE_GLOBALS(ldap)
 
 #ifdef ZTS

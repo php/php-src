@@ -313,7 +313,7 @@ static php_size_t sapi_fcgi_ub_write(const char *str, php_size_t str_length TSRM
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	while (remaining > 0) {
-		php_int_t ret = fcgi_write(request, FCGI_STDOUT, ptr, remaining);
+		zend_long ret = fcgi_write(request, FCGI_STDOUT, ptr, remaining);
 
 		if (ret <= 0) {
 			php_handle_aborted_connection();
@@ -1587,7 +1587,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 		char buf[128];
 		char **env, *p, *q, *var, *val, *t = buf;
 		size_t alloc_size = sizeof(buf);
-		php_uint_t var_len;
+		zend_ulong var_len;
 
 		for (env = environ; env != NULL && *env != NULL; env++) {
 			val = strchr(*env, '=');

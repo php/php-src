@@ -106,7 +106,7 @@ typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int type TSRMLS_D
 
 /* updates *count to hold the number of elements present and returns SUCCESS.
  * Returns FAILURE if the object does not have any sense of overloaded dimensions */
-typedef int (*zend_object_count_elements_t)(zval *object, zend_int_t *count TSRMLS_DC);
+typedef int (*zend_object_count_elements_t)(zval *object, zend_long *count TSRMLS_DC);
 
 typedef int (*zend_object_get_closure_t)(zval *obj, zend_class_entry **ce_ptr, union _zend_function **fptr_ptr, zend_object **obj_ptr TSRMLS_DC);
 

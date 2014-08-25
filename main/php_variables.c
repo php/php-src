@@ -49,7 +49,7 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, php_size_t str_l
 	assert(strval != NULL);
 	
 	/* Prepare value */
-	ZVAL_NEW_STR(&new_entry, STR_INIT(strval, str_len, 0));
+	ZVAL_NEW_STR(&new_entry, zend_string_init(strval, str_len, 0));
 	php_register_variable_ex(var, &new_entry, track_vars_array TSRMLS_CC);
 }
 
@@ -358,7 +358,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	zval array;
 	int free_buffer = 0;
 	char *strtok_buf = NULL;
-	php_int_t count = 0;
+	zend_long count = 0;
 	
 	ZVAL_UNDEF(&array);
 	switch (arg) {
@@ -535,7 +535,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		for (i = 0; i < SG(request_info).argc; i++) {
 			ZVAL_STRING(&tmp, SG(request_info).argv[i]);
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {				
-				STR_FREE(Z_STR(tmp));
+				zend_string_free(Z_STR(tmp));
 			}
 		}
 	} else 	if (s && *s) {
@@ -549,7 +549,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 			ZVAL_STRING(&tmp, ss);
 			count++;
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {
-				STR_FREE(Z_STR(tmp));
+				zend_string_free(Z_STR(tmp));
 			}
 			if (space) {
 				*space = '+';
@@ -562,9 +562,9 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 
 	/* prepare argc */
 	if (SG(request_info).argc) {
-		ZVAL_INT(&argc, SG(request_info).argc);
+		ZVAL_LONG(&argc, SG(request_info).argc);
 	} else {
-		ZVAL_INT(&argc, count);
+		ZVAL_LONG(&argc, count);
 	}
 
 	if (SG(request_info).argc) {
@@ -608,7 +608,7 @@ static inline void php_register_server_variables(TSRMLS_D)
 		zval request_time_float, request_time_long;
 		ZVAL_DOUBLE(&request_time_float, sapi_get_request_time(TSRMLS_C));
 		php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, &PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
-		ZVAL_INT(&request_time_long, zend_dval_to_ival(Z_DVAL(request_time_float)));
+		ZVAL_LONG(&request_time_long, zend_dval_to_lval(Z_DVAL(request_time_float)));
 		php_register_variable_ex("REQUEST_TIME", &request_time_long, &PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
 	}
 
@@ -621,7 +621,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 {
 	zval *src_entry, *dest_entry;
 	zend_string *string_key;
-	php_uint_t num_key;
+	zend_ulong num_key;
 	int globals_check = (dest == (&EG(symbol_table).ht));
 
 	ZEND_HASH_FOREACH_KEY_VAL(src, num_key, string_key, src_entry) {
@@ -816,13 +816,13 @@ static zend_bool php_auto_globals_create_request(zend_string *name TSRMLS_DC)
 
 void php_startup_auto_globals(TSRMLS_D)
 {
-	zend_register_auto_global(STR_INIT("_GET", sizeof("_GET")-1, 1), 0, php_auto_globals_create_get TSRMLS_CC);
-	zend_register_auto_global(STR_INIT("_POST", sizeof("_POST")-1, 1), 0, php_auto_globals_create_post TSRMLS_CC);
-	zend_register_auto_global(STR_INIT("_COOKIE", sizeof("_COOKIE")-1, 1), 0, php_auto_globals_create_cookie TSRMLS_CC);
-	zend_register_auto_global(STR_INIT("_SERVER", sizeof("_SERVER")-1, 1), PG(auto_globals_jit), php_auto_globals_create_server TSRMLS_CC);
-	zend_register_auto_global(STR_INIT("_ENV", sizeof("_ENV")-1, 1), PG(auto_globals_jit), php_auto_globals_create_env TSRMLS_CC);
-	zend_register_auto_global(STR_INIT("_REQUEST", sizeof("_REQUEST")-1, 1), PG(auto_globals_jit), php_auto_globals_create_request TSRMLS_CC);
-	zend_register_auto_global(STR_INIT("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files TSRMLS_CC);
+	zend_register_auto_global(zend_string_init("_GET", sizeof("_GET")-1, 1), 0, php_auto_globals_create_get TSRMLS_CC);
+	zend_register_auto_global(zend_string_init("_POST", sizeof("_POST")-1, 1), 0, php_auto_globals_create_post TSRMLS_CC);
+	zend_register_auto_global(zend_string_init("_COOKIE", sizeof("_COOKIE")-1, 1), 0, php_auto_globals_create_cookie TSRMLS_CC);
+	zend_register_auto_global(zend_string_init("_SERVER", sizeof("_SERVER")-1, 1), PG(auto_globals_jit), php_auto_globals_create_server TSRMLS_CC);
+	zend_register_auto_global(zend_string_init("_ENV", sizeof("_ENV")-1, 1), PG(auto_globals_jit), php_auto_globals_create_env TSRMLS_CC);
+	zend_register_auto_global(zend_string_init("_REQUEST", sizeof("_REQUEST")-1, 1), PG(auto_globals_jit), php_auto_globals_create_request TSRMLS_CC);
+	zend_register_auto_global(zend_string_init("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files TSRMLS_CC);
 }
 
 /*

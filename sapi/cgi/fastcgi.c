@@ -993,7 +993,7 @@ static int fcgi_read_request(fcgi_request *req)
 			if ((value = zend_hash_str_find(&fcgi_mgmt_vars, q->var, q->var_len)) == NULL) {
 				continue;
 			}
-			zlen = Z_STRSIZE_P(value);
+			zlen = Z_STRLEN_P(value);
 			if ((p + 4 + 4 + q->var_len + zlen) >= (buf + sizeof(buf))) {
 				break;
 			}
@@ -1512,7 +1512,7 @@ void fcgi_impersonate(void)
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
-	ZVAL_NEW_STR(&zvalue, STR_INIT(value, value_len, 1));
+	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
 	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
 }
 

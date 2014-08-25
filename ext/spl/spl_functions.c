@@ -84,7 +84,7 @@ void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_fla
 
 		if ((tmp = zend_hash_find(Z_ARRVAL_P(list), pce->name)) == NULL) {
 			zval t;
-			STR_ADDREF(pce->name);
+			zend_string_addref(pce->name);
 			ZVAL_STR(&t, pce->name);
 			zend_hash_add(Z_ARRVAL_P(list), pce->name, &t);
 		}

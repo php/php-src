@@ -150,7 +150,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				case T_DOC_COMMENT:
 					break;
 				default:
-					STR_RELEASE(Z_STR(token));
+					zend_string_release(Z_STR(token));
 					break;
 			}
 		}
@@ -211,7 +211,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 					break;
 
 				default:
-					STR_RELEASE(Z_STR(token));
+					zend_string_release(Z_STR(token));
 					break;
 			}
 		}

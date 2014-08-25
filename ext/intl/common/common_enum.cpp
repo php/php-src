@@ -238,7 +238,7 @@ static PHP_METHOD(IntlIterator, key)
 	if (ii->iterator->funcs->get_current_key) {
 		ii->iterator->funcs->get_current_key(ii->iterator, return_value TSRMLS_CC);
 	} else {
-		RETURN_INT(ii->iterator->index);
+		RETURN_LONG(ii->iterator->index);
 	}
 }
 

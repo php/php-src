@@ -71,21 +71,21 @@ static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
 	}
 
 	if ((ele_value = zend_hash_str_find(hash_arr, key_name, strlen(key_name))) != NULL) {
-		if(Z_TYPE_P(ele_value) != IS_INT) {
+		if(Z_TYPE_P(ele_value) != IS_LONG) {
 			spprintf(&message, 0, "datefmt_format: parameter array contains "
 					"a non-integer element for key '%s'", key_name);
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
 			efree(message);
 		} else {
-			if (Z_IVAL_P(ele_value) > INT32_MAX ||
-					Z_IVAL_P(ele_value) < INT32_MIN) {
+			if (Z_LVAL_P(ele_value) > INT32_MAX ||
+					Z_LVAL_P(ele_value) < INT32_MIN) {
 				spprintf(&message, 0, "datefmt_format: value %pd is out of "
 						"bounds for a 32-bit integer in key '%s'",
-						Z_IVAL_P(ele_value), key_name);
+						Z_LVAL_P(ele_value), key_name);
 				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
 				efree(message);
 			} else {
-				result = Z_IVAL_P(ele_value);
+				result = Z_LVAL_P(ele_value);
 			}
 		}
 	}

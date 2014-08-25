@@ -176,7 +176,7 @@ void timelib_error_container_dtor(timelib_error_container *errors)
 	free(errors);
 }
 
-php_int_t timelib_date_to_int(timelib_time *d, int *error)
+zend_long timelib_date_to_int(timelib_time *d, int *error)
 {
 	timelib_sll ts;
 
@@ -191,7 +191,7 @@ php_int_t timelib_date_to_int(timelib_time *d, int *error)
 	if (error) {
 		*error = 0;
 	}
-	return (php_int_t) d->sse;
+	return (zend_long) d->sse;
 }
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec)

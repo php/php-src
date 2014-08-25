@@ -298,7 +298,7 @@ if (IS_GMP(zval)) {                                               \
 #define INIT_GMP_RETVAL(gmpnumber) \
 	gmp_create(return_value, &gmpnumber TSRMLS_CC)
 
-static void gmp_strval(zval *result, mpz_t gmpnum, php_int_t base);
+static void gmp_strval(zval *result, mpz_t gmpnum, zend_long base);
 static int convert_to_gmp(mpz_t gmpnumber, zval *val, int base TSRMLS_DC);
 static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg TSRMLS_DC);
 
@@ -311,14 +311,14 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg TSRMLS_DC);
 typedef void (*gmp_unary_op_t)(mpz_ptr, mpz_srcptr);
 typedef int (*gmp_unary_opl_t)(mpz_srcptr);
 
-typedef void (*gmp_unary_ui_op_t)(mpz_ptr, php_uint_t);
+typedef void (*gmp_unary_ui_op_t)(mpz_ptr, zend_ulong);
 
 typedef void (*gmp_binary_op_t)(mpz_ptr, mpz_srcptr, mpz_srcptr);
 typedef int (*gmp_binary_opl_t)(mpz_srcptr, mpz_srcptr);
 
-typedef void (*gmp_binary_ui_op_t)(mpz_ptr, mpz_srcptr, php_uint_t);
+typedef void (*gmp_binary_ui_op_t)(mpz_ptr, mpz_srcptr, zend_ulong);
 typedef void (*gmp_binary_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, mpz_srcptr);
-typedef void (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, php_uint_t);
+typedef void (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, zend_ulong);
 
 static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero TSRMLS_DC);
 static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op2_t gmp_op, gmp_binary_ui_op2_t gmp_ui_op, int check_b_zero TSRMLS_DC);
@@ -407,9 +407,9 @@ static int gmp_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC) /*
 		gmpnum = GET_GMP_FROM_ZVAL(readobj);
 		gmp_strval(writeobj, gmpnum, 10);
 		return SUCCESS;
-	case IS_INT:
+	case IS_LONG:
 		gmpnum = GET_GMP_FROM_ZVAL(readobj);
-		ZVAL_INT(writeobj, mpz_get_si(gmpnum));
+		ZVAL_LONG(writeobj, mpz_get_si(gmpnum));
 		return SUCCESS;
 	case IS_DOUBLE:
 		gmpnum = GET_GMP_FROM_ZVAL(readobj);
@@ -452,7 +452,7 @@ static zend_object *gmp_clone_obj(zval *obj TSRMLS_DC) /* {{{ */
 /* }}} */
 
 static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2 TSRMLS_DC) {
-	php_int_t shift = zval_get_int(op2);
+	zend_long shift = zval_get_long(op2);
 
 	if (shift < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Shift cannot be negative");
@@ -463,7 +463,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 
 		FETCH_GMP_ZVAL(gmpnum_op, op1, temp);
 		INIT_GMP_RETVAL(gmpnum_result);
-		op(gmpnum_result, gmpnum_op, (php_uint_t) shift);
+		op(gmpnum_result, gmpnum_op, (zend_ulong) shift);
 		FREE_GMP_TEMP(temp);
 	}
 }
@@ -523,7 +523,7 @@ static int gmp_compare(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	gmp_cmp(result, op1, op2 TSRMLS_CC);
 	if (Z_TYPE_P(result) == IS_FALSE) {
-		ZVAL_INT(result, 1);
+		ZVAL_LONG(result, 1);
 	}
 	return SUCCESS;
 }
@@ -550,7 +550,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, zend_uint *buf_le
 	PHP_VAR_SERIALIZE_DESTROY(serialize_data);
 	*buffer = (unsigned char *) estrndup(buf.s->val, buf.s->len);
 	*buf_len = buf.s->len;
-	STR_RELEASE(buf.s);
+	zend_string_release(buf.s);
 
 	return SUCCESS;
 }
@@ -631,9 +631,9 @@ ZEND_MINIT_FUNCTION(gmp)
 	gmp_object_handlers.do_operation = gmp_do_operation;
 	gmp_object_handlers.compare = gmp_compare;
 
-	REGISTER_INT_CONSTANT("GMP_ROUND_ZERO", GMP_ROUND_ZERO, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("GMP_ROUND_PLUSINF", GMP_ROUND_PLUSINF, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("GMP_ROUND_MINUSINF", GMP_ROUND_MINUSINF, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_ROUND_ZERO", GMP_ROUND_ZERO, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_ROUND_PLUSINF", GMP_ROUND_PLUSINF, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_ROUND_MINUSINF", GMP_ROUND_MINUSINF, CONST_CS | CONST_PERSISTENT);
 #ifdef mpir_version
 	REGISTER_STRING_CONSTANT("GMP_MPIR_VERSION", (char *)mpir_version, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -679,10 +679,10 @@ ZEND_MODULE_INFO_D(gmp)
 static int convert_to_gmp(mpz_t gmpnumber, zval *val, int base TSRMLS_DC) 
 {
 	switch (Z_TYPE_P(val)) {
-	case IS_INT:
+	case IS_LONG:
 	case IS_FALSE:
 	case IS_TRUE: {
-		mpz_set_si(gmpnumber, zval_get_int(val));
+		mpz_set_si(gmpnumber, zval_get_long(val));
 		return SUCCESS;
 	}
 	case IS_STRING: {
@@ -690,7 +690,7 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, int base TSRMLS_DC)
 		int skip_lead = 0;
 		int ret;
 
-		if (Z_STRSIZE_P(val) > 2) {
+		if (Z_STRLEN_P(val) > 2) {
 			if (numstr[0] == '0') {
 				if (numstr[1] == 'x' || numstr[1] == 'X') {
 					base = 16;
@@ -719,7 +719,7 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, int base TSRMLS_DC)
 }
 /* }}} */
 
-static void gmp_strval(zval *result, mpz_t gmpnum, php_int_t base) /* {{{ */
+static void gmp_strval(zval *result, mpz_t gmpnum, zend_long base) /* {{{ */
 {
 	int num_len;
 	zend_string *str;
@@ -729,7 +729,7 @@ static void gmp_strval(zval *result, mpz_t gmpnum, php_int_t base) /* {{{ */
 		num_len++;
 	}
 
-	str = STR_ALLOC(num_len, 0);
+	str = zend_string_alloc(num_len, 0);
 	mpz_get_str(str->val, base, gmpnum);
 	
 	/* 
@@ -755,11 +755,11 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg TSRMLS_DC) /* {
 	mpz_ptr gmpnum_a, gmpnum_b;
 	gmp_temp_t temp_a, temp_b;
 	zend_bool use_si = 0;
-	php_int_t res;
+	zend_long res;
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 
-	if (Z_TYPE_P(b_arg) == IS_INT) {
+	if (Z_TYPE_P(b_arg) == IS_LONG) {
 		use_si = 1;
 		temp_b.is_used = 0;
 	} else {
@@ -767,7 +767,7 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg TSRMLS_DC) /* {
 	}
 
 	if (use_si) {
-		res = mpz_cmp_si(gmpnum_a, Z_IVAL_P(b_arg));
+		res = mpz_cmp_si(gmpnum_a, Z_LVAL_P(b_arg));
 	} else {
 		res = mpz_cmp(gmpnum_a, gmpnum_b);
 	}
@@ -775,7 +775,7 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg TSRMLS_DC) /* {
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 	
-	RETURN_INT(res);
+	RETURN_LONG(res);
 }
 /* }}} */
 
@@ -790,7 +790,7 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 	
-	if (gmp_ui_op && Z_TYPE_P(b_arg) == IS_INT && Z_IVAL_P(b_arg) >= 0) {
+	if (gmp_ui_op && Z_TYPE_P(b_arg) == IS_LONG && Z_LVAL_P(b_arg) >= 0) {
 		use_ui = 1;
 		temp_b.is_used = 0;
 	} else {
@@ -800,7 +800,7 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 	if (check_b_zero) {
 		int b_is_zero = 0;
 		if (use_ui) {
-			b_is_zero = (Z_IVAL_P(b_arg) == 0);
+			b_is_zero = (Z_LVAL_P(b_arg) == 0);
 		} else {
 			b_is_zero = !mpz_cmp_ui(gmpnum_b, 0);
 		}
@@ -816,7 +816,7 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 	INIT_GMP_RETVAL(gmpnum_result);
 
 	if (use_ui) {
-		gmp_ui_op(gmpnum_result, gmpnum_a, (php_uint_t) Z_IVAL_P(b_arg));
+		gmp_ui_op(gmpnum_result, gmpnum_a, (zend_ulong) Z_LVAL_P(b_arg));
 	} else {
 		gmp_op(gmpnum_result, gmpnum_a, gmpnum_b);
 	}
@@ -838,7 +838,7 @@ static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval 
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 
-	if (gmp_ui_op && Z_TYPE_P(b_arg) == IS_INT && Z_IVAL_P(b_arg) >= 0) {
+	if (gmp_ui_op && Z_TYPE_P(b_arg) == IS_LONG && Z_LVAL_P(b_arg) >= 0) {
 		/* use _ui function */
 		use_ui = 1;
 		temp_b.is_used = 0;
@@ -849,7 +849,7 @@ static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval 
 	if (check_b_zero) {
 		int b_is_zero = 0;
 		if (use_ui) {
-			b_is_zero = (Z_IVAL_P(b_arg) == 0);
+			b_is_zero = (Z_LVAL_P(b_arg) == 0);
 		} else {
 			b_is_zero = !mpz_cmp_ui(gmpnum_b, 0);
 		}
@@ -870,7 +870,7 @@ static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval 
 	add_next_index_zval(return_value, &result2);
 
 	if (use_ui) {
-		gmp_ui_op(gmpnum_result1, gmpnum_result2, gmpnum_a, (php_uint_t) Z_IVAL_P(b_arg));
+		gmp_ui_op(gmpnum_result1, gmpnum_result2, gmpnum_a, (zend_ulong) Z_LVAL_P(b_arg));
 	} else {
 		gmp_op(gmpnum_result1, gmpnum_result2, gmpnum_a, gmpnum_b);
 	}
@@ -919,7 +919,7 @@ static inline void gmp_zval_unary_ui_op(zval *return_value, zval *a_arg, gmp_una
 	mpz_ptr gmpnum_result;
 
 	INIT_GMP_RETVAL(gmpnum_result);
-	gmp_op(gmpnum_result, zval_get_int(a_arg));
+	gmp_op(gmpnum_result, zval_get_long(a_arg));
 }
 /* }}} */
 
@@ -965,7 +965,7 @@ static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t 
 	}
 	
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-	RETVAL_INT(gmp_op(gmpnum_a));
+	RETVAL_LONG(gmp_op(gmpnum_a));
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
@@ -985,7 +985,7 @@ static inline void _gmp_binary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_opl_
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
 
-	RETVAL_INT(gmp_op(gmpnum_a, gmpnum_b));
+	RETVAL_LONG(gmp_op(gmpnum_a, gmpnum_b));
 
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
@@ -998,9 +998,9 @@ ZEND_FUNCTION(gmp_init)
 {
 	zval *number_arg;
 	mpz_ptr gmpnumber;
-	php_int_t base = 0;
+	zend_long base = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &number_arg, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &number_arg, &base) == FAILURE) {
 		return;
 	}
 
@@ -1028,9 +1028,9 @@ ZEND_FUNCTION(gmp_intval)
 	}
 	
 	if (IS_GMP(gmpnumber_arg)) {
-		RETVAL_INT(mpz_get_si(GET_GMP_FROM_ZVAL(gmpnumber_arg)));
+		RETVAL_LONG(mpz_get_si(GET_GMP_FROM_ZVAL(gmpnumber_arg)));
 	} else {
-		RETVAL_INT(zval_get_int(gmpnumber_arg));
+		RETVAL_LONG(zval_get_long(gmpnumber_arg));
 	}
 }
 /* }}} */
@@ -1040,11 +1040,11 @@ ZEND_FUNCTION(gmp_intval)
 ZEND_FUNCTION(gmp_strval)
 {
 	zval *gmpnumber_arg;
-	php_int_t base = 10;
+	zend_long base = 10;
 	mpz_ptr gmpnum;
 	gmp_temp_t temp_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &gmpnumber_arg, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &gmpnumber_arg, &base) == FAILURE) {
 		return;
 	}
 
@@ -1097,9 +1097,9 @@ ZEND_FUNCTION(gmp_mul)
 ZEND_FUNCTION(gmp_div_qr)
 {
 	zval *a_arg, *b_arg;
-	php_int_t round = GMP_ROUND_ZERO;
+	zend_long round = GMP_ROUND_ZERO;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|i", &a_arg, &b_arg, &round) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|l", &a_arg, &b_arg, &round) == FAILURE) {
 		return;
 	}
 
@@ -1125,9 +1125,9 @@ ZEND_FUNCTION(gmp_div_qr)
 ZEND_FUNCTION(gmp_div_r)
 {
 	zval *a_arg, *b_arg;
-	php_int_t round = GMP_ROUND_ZERO;
+	zend_long round = GMP_ROUND_ZERO;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|i", &a_arg, &b_arg, &round) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|l", &a_arg, &b_arg, &round) == FAILURE) {
 		return;
 	}
 
@@ -1153,9 +1153,9 @@ ZEND_FUNCTION(gmp_div_r)
 ZEND_FUNCTION(gmp_div_q)
 {
 	zval *a_arg, *b_arg;
-	php_int_t round = GMP_ROUND_ZERO;
+	zend_long round = GMP_ROUND_ZERO;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|i", &a_arg, &b_arg, &round) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|l", &a_arg, &b_arg, &round) == FAILURE) {
 		return;
 	}
 
@@ -1226,7 +1226,7 @@ ZEND_FUNCTION(gmp_fact)
 			RETURN_FALSE;
 		}
 	} else {
-		if (zval_get_int(a_arg) < 0) {
+		if (zval_get_long(a_arg) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number has to be greater than or equal to 0");
 			RETURN_FALSE;
 		}
@@ -1243,9 +1243,9 @@ ZEND_FUNCTION(gmp_pow)
 	zval *base_arg;
 	mpz_ptr gmpnum_result, gmpnum_base;
 	gmp_temp_t temp_base;
-	php_int_t exp;
+	zend_long exp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zi", &base_arg, &exp) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &base_arg, &exp) == FAILURE) {
 		return;
 	}
 
@@ -1255,8 +1255,8 @@ ZEND_FUNCTION(gmp_pow)
 	}
 	
 	INIT_GMP_RETVAL(gmpnum_result);
-	if (Z_TYPE_P(base_arg) == IS_INT && Z_IVAL_P(base_arg) >= 0) {
-		mpz_ui_pow_ui(gmpnum_result, Z_IVAL_P(base_arg), exp);
+	if (Z_TYPE_P(base_arg) == IS_LONG && Z_LVAL_P(base_arg) >= 0) {
+		mpz_ui_pow_ui(gmpnum_result, Z_LVAL_P(base_arg), exp);
 	} else {
 		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base);
 		mpz_pow_ui(gmpnum_result, gmpnum_base, exp);
@@ -1280,7 +1280,7 @@ ZEND_FUNCTION(gmp_powm)
 
 	FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base);
 
-	if (Z_TYPE_P(exp_arg) == IS_INT && Z_IVAL_P(exp_arg) >= 0) {
+	if (Z_TYPE_P(exp_arg) == IS_LONG && Z_LVAL_P(exp_arg) >= 0) {
 		use_ui = 1;
 		temp_exp.is_used = 0;
 	} else {
@@ -1305,7 +1305,7 @@ ZEND_FUNCTION(gmp_powm)
 
 	INIT_GMP_RETVAL(gmpnum_result);
 	if (use_ui) {
-		mpz_powm_ui(gmpnum_result, gmpnum_base, (php_uint_t) Z_IVAL_P(exp_arg), gmpnum_mod);
+		mpz_powm_ui(gmpnum_result, gmpnum_base, (zend_ulong) Z_LVAL_P(exp_arg), gmpnum_mod);
 	} else {
 		mpz_powm(gmpnum_result, gmpnum_base, gmpnum_exp, gmpnum_mod);
 		FREE_GMP_TEMP(temp_exp);
@@ -1380,11 +1380,11 @@ ZEND_FUNCTION(gmp_sqrtrem)
 ZEND_FUNCTION(gmp_root)
 {
 	zval *a_arg;
-	php_int_t nth;
+	zend_long nth;
 	mpz_ptr gmpnum_a, gmpnum_result;
 	gmp_temp_t temp_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zi", &a_arg, &nth) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &a_arg, &nth) == FAILURE) {
 		return;
 	}
 
@@ -1412,12 +1412,12 @@ ZEND_FUNCTION(gmp_root)
 ZEND_FUNCTION(gmp_rootrem)
 {
 	zval *a_arg;
-	php_int_t nth;
+	zend_long nth;
 	mpz_ptr gmpnum_a, gmpnum_result1, gmpnum_result2;
 	gmp_temp_t temp_a;
 	zval result1, result2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zi", &a_arg, &nth) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &a_arg, &nth) == FAILURE) {
 		return;
 	}
 
@@ -1479,16 +1479,16 @@ ZEND_FUNCTION(gmp_prob_prime)
 {
 	zval *gmpnumber_arg;
 	mpz_ptr gmpnum_a;
-	php_int_t reps = 10;
+	zend_long reps = 10;
 	gmp_temp_t temp_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &gmpnumber_arg, &reps) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &gmpnumber_arg, &reps) == FAILURE) {
 		return;
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, gmpnumber_arg, temp_a);
 
-	RETVAL_INT(mpz_probab_prime_p(gmpnum_a, reps));
+	RETVAL_LONG(mpz_probab_prime_p(gmpnum_a, reps));
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
@@ -1604,7 +1604,7 @@ ZEND_FUNCTION(gmp_sign)
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 
-	RETVAL_INT(mpz_sgn(gmpnum_a));
+	RETVAL_LONG(mpz_sgn(gmpnum_a));
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
@@ -1613,10 +1613,10 @@ ZEND_FUNCTION(gmp_sign)
    Gets random number */
 ZEND_FUNCTION(gmp_random)
 {
-	php_int_t limiter = 20;
+	zend_long limiter = 20;
 	mpz_ptr gmpnum_result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &limiter) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &limiter) == FAILURE) {
 		return;
 	}
 
@@ -1684,11 +1684,11 @@ ZEND_FUNCTION(gmp_xor)
 ZEND_FUNCTION(gmp_setbit)
 {
 	zval *a_arg;
-	php_int_t index;
+	zend_long index;
 	zend_bool set = 1;
 	mpz_ptr gmpnum_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Oi|b", &a_arg, gmp_ce, &index, &set) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ol|b", &a_arg, gmp_ce, &index, &set) == FAILURE) {
 		return;
 	}
 
@@ -1712,10 +1712,10 @@ ZEND_FUNCTION(gmp_setbit)
 ZEND_FUNCTION(gmp_clrbit)
 {
 	zval *a_arg;
-	php_int_t index;
+	zend_long index;
 	mpz_ptr gmpnum_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Oi", &a_arg, gmp_ce, &index) == FAILURE){
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ol", &a_arg, gmp_ce, &index) == FAILURE){
 		return;
 	}
 
@@ -1734,11 +1734,11 @@ ZEND_FUNCTION(gmp_clrbit)
 ZEND_FUNCTION(gmp_testbit)
 {
 	zval *a_arg;
-	php_int_t index;
+	zend_long index;
 	mpz_ptr gmpnum_a;
 	gmp_temp_t temp_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zi", &a_arg, &index) == FAILURE){
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &a_arg, &index) == FAILURE){
 		return;
 	}
 
@@ -1776,9 +1776,9 @@ ZEND_FUNCTION(gmp_scan0)
 	zval *a_arg;
 	mpz_ptr gmpnum_a;
 	gmp_temp_t temp_a;
-	php_int_t start;
+	zend_long start;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zi", &a_arg, &start) == FAILURE){
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &a_arg, &start) == FAILURE){
 		return;
 	}
 
@@ -1789,7 +1789,7 @@ ZEND_FUNCTION(gmp_scan0)
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 
-	RETVAL_INT(mpz_scan0(gmpnum_a, start));
+	RETVAL_LONG(mpz_scan0(gmpnum_a, start));
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
@@ -1801,9 +1801,9 @@ ZEND_FUNCTION(gmp_scan1)
 	zval *a_arg;
 	mpz_ptr gmpnum_a;
 	gmp_temp_t temp_a;
-	php_int_t start;
+	zend_long start;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zi", &a_arg, &start) == FAILURE){
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &a_arg, &start) == FAILURE){
 		return;
 	}
 
@@ -1814,7 +1814,7 @@ ZEND_FUNCTION(gmp_scan1)
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 
-	RETVAL_INT(mpz_scan1(gmpnum_a, start));
+	RETVAL_LONG(mpz_scan1(gmpnum_a, start));
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */

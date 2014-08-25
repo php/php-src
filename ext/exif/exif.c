@@ -223,9 +223,9 @@ PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
 	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) {
-		REGISTER_INT_CONSTANT("EXIF_USE_MBSTRING", 1, CONST_CS | CONST_PERSISTENT); 
+		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 1, CONST_CS | CONST_PERSISTENT); 
 	} else {
-		REGISTER_INT_CONSTANT("EXIF_USE_MBSTRING", 0, CONST_CS | CONST_PERSISTENT); 
+		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 0, CONST_CS | CONST_PERSISTENT); 
 	}
 	return SUCCESS;
 }
@@ -2020,16 +2020,16 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									if (l>1) {
 										info_value = &info_data->value;
 										for (b=0;b<l;b++) {
-											add_index_int(&array, b, (int)(info_value->s[b]));
+											add_index_long(&array, b, (int)(info_value->s[b]));
 										}
 										break;
 									}
 								case TAG_FMT_USHORT:
 								case TAG_FMT_ULONG:
 									if (l==1) {
-										add_assoc_int(&tmpi, name, (int)info_value->u);
+										add_assoc_long(&tmpi, name, (int)info_value->u);
 									} else {
-										add_index_int(&array, ap, (int)info_value->u);
+										add_index_long(&array, ap, (int)info_value->u);
 									}
 									break;
 
@@ -2046,16 +2046,16 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									if (l>1) {
 										info_value = &info_data->value;
 										for (b=0;b<l;b++) {
-											add_index_int(&array, ap, (int)info_value->s[b]);
+											add_index_long(&array, ap, (int)info_value->s[b]);
 										}
 										break;
 									}
 								case TAG_FMT_SSHORT:
 								case TAG_FMT_SLONG:
 									if (l==1) {
-										add_assoc_int(&tmpi, name, info_value->i);
+										add_assoc_long(&tmpi, name, info_value->i);
 									} else {
-										add_index_int(&array, ap, info_value->i);
+										add_index_long(&array, ap, info_value->i);
 									}
 									break;
 
@@ -2334,10 +2334,10 @@ static char * exif_get_markername(int marker)
 	Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
-	php_int_t tag;
+	zend_long tag;
 	char *szTemp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &tag) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &tag) == FAILURE) {
 		return;
 	}
 
@@ -3884,7 +3884,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 
 	base = php_basename(FileName, strlen(FileName), NULL, 0 TSRMLS_CC);
 	ImageInfo->FileName          = estrndup(base->val, base->len);
-	STR_RELEASE(base);
+	zend_string_release(base);
 	ImageInfo->read_thumbnail = read_thumbnail;
 	ImageInfo->read_all = read_all;
 	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
@@ -4129,12 +4129,12 @@ PHP_FUNCTION(exif_thumbnail)
 		}
 		zval_dtor(p_width);
 		zval_dtor(p_height);
-		ZVAL_INT(p_width,  ImageInfo.Thumbnail.width);
-		ZVAL_INT(p_height, ImageInfo.Thumbnail.height);
+		ZVAL_LONG(p_width,  ImageInfo.Thumbnail.width);
+		ZVAL_LONG(p_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
 		zval_dtor(p_imagetype);
-		ZVAL_INT(p_imagetype, ImageInfo.Thumbnail.filetype);
+		ZVAL_LONG(p_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
 #ifdef EXIF_DEBUG
@@ -4175,7 +4175,7 @@ PHP_FUNCTION(exif_imagetype)
 	if (itype == IMAGE_FILETYPE_UNKNOWN) {
 		RETURN_FALSE;
 	} else {
-		ZVAL_INT(return_value, itype);
+		ZVAL_LONG(return_value, itype);
 	}
 }
 /* }}} */

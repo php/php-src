@@ -22,14 +22,10 @@
 #ifndef ZEND_INT_H
 #define ZEND_INT_H
 
-#ifndef ZEND_WIN32
-/* this probably needs more on non windows, like for C++ and C99*/
-# include <stdint.h>
-# include <inttypes.h>
-#endif
+#include "main/php_stdint.h"
 
 /* This is the heart of the whole int64 enablement in zval. Based on this
-   macros the zend_size_t datatype is handled, see zend_types.h */
+   macros the size_t datatype is handled, see zend_types.h */
 #if defined(__X86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
 # define ZEND_ENABLE_INT64 1
 #endif
@@ -38,8 +34,8 @@
 #ifdef ZEND_ENABLE_INT64
 # ifdef ZEND_WIN32
 #  ifdef _WIN64
-typedef __int64 zend_int_t;
-typedef unsigned __int64 zend_uint_t;
+typedef __int64 zend_long;
+typedef unsigned __int64 zend_ulong;
 typedef __int64 zend_off_t;
 #   define ZEND_INT_MAX _I64_MAX
 #   define ZEND_INT_MIN _I64_MIN
@@ -51,8 +47,8 @@ typedef __int64 zend_off_t;
 #  endif
 # else
 #  if defined(__X86_64__) || defined(__LP64__) || defined(_LP64)
-typedef int64_t zend_int_t;
-typedef uint64_t zend_uint_t;
+typedef int64_t zend_long;
+typedef uint64_t zend_ulong;
 typedef off_t zend_off_t;
 #   define ZEND_INT_MAX INT64_MAX
 #   define ZEND_INT_MIN INT64_MIN
@@ -65,8 +61,8 @@ typedef off_t zend_off_t;
 # endif
 # define SIZEOF_ZEND_INT 8
 #else
-typedef long zend_int_t;
-typedef unsigned long zend_uint_t;
+typedef long zend_long;
+typedef unsigned long zend_ulong;
 typedef long zend_off_t;
 # define ZEND_INT_MAX LONG_MAX
 # define ZEND_INT_MIN LONG_MIN

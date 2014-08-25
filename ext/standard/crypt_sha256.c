@@ -372,7 +372,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	if (strncmp(salt, sha256_rounds_prefix, sizeof(sha256_rounds_prefix) - 1) == 0) {
 		const char *num = salt + sizeof(sha256_rounds_prefix) - 1;
 		char *endp;
-		php_uint_t srounds = ZEND_STRTOUI(num, &endp, 10);
+		zend_ulong srounds = ZEND_STRTOUI(num, &endp, 10);
 		if (*endp == '$') {
 			salt = endp + 1;
 			rounds = MAX(ROUNDS_MIN, MIN(srounds, ROUNDS_MAX));

@@ -125,12 +125,12 @@ PHP_METHOD(SessionHandler, destroy)
    Wraps the old gc handler */
 PHP_METHOD(SessionHandler, gc)
 {
-	php_int_t maxlifetime;
+	zend_long maxlifetime;
 	int nrdels;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &maxlifetime) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &maxlifetime) == FAILURE) {
 		return;
 	}
 	

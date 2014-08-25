@@ -402,7 +402,7 @@ PHP_FUNCTION(oci_lob_tell)
 	
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(*tmp, descriptor);
 	
-	RETURN_INT(descriptor->lob_current_position);	
+	RETURN_LONG(descriptor->lob_current_position);	
 }
 /* }}} */
 
@@ -508,7 +508,7 @@ PHP_FUNCTION(oci_lob_size)
 	if (php_oci_lob_get_length(descriptor, &lob_length TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	RETURN_INT(lob_length);
+	RETURN_LONG(lob_length);
 }
 /* }}} */
 
@@ -550,13 +550,13 @@ PHP_FUNCTION(oci_lob_write)
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(*tmp, descriptor);
 	
 	if (data_len <= 0) {
-		RETURN_INT(0);
+		RETURN_LONG(0);
 	}
 	
 	if (php_oci_lob_write(descriptor, descriptor->lob_current_position, data, data_len, &bytes_written TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	RETURN_INT(bytes_written);
+	RETURN_LONG(bytes_written);
 }
 /* }}} */
 
@@ -689,7 +689,7 @@ PHP_FUNCTION(oci_lob_erase)
 	if (php_oci_lob_erase(descriptor, offset, length, &bytes_erased TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	RETURN_INT(bytes_erased);
+	RETURN_LONG(bytes_erased);
 }
 /* }}} */
 
@@ -1161,9 +1161,9 @@ PHP_FUNCTION(oci_field_size)
 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
 		/* Handle data type of LONG */
 		if (column->data_type == SQLT_LNG){
-			RETURN_INT(column->storage_size4);
+			RETURN_LONG(column->storage_size4);
 		}
-		RETURN_INT(column->data_size);
+		RETURN_LONG(column->data_size);
 	}
 	RETURN_FALSE;
 }
@@ -1176,7 +1176,7 @@ PHP_FUNCTION(oci_field_scale)
 	php_oci_out_column *column;
 
 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
-		RETURN_INT(column->scale);
+		RETURN_LONG(column->scale);
 	}
 	RETURN_FALSE;
 }
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(oci_field_precision)
 	php_oci_out_column *column;
 
 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
-		RETURN_INT(column->precision);
+		RETURN_LONG(column->precision);
 	}
 	RETURN_FALSE;
 }
@@ -1270,7 +1270,7 @@ PHP_FUNCTION(oci_field_type)
 			RETVAL_STRING("ROWID",1);
 			break;
 		default:
-			RETVAL_INT(column->data_type);
+			RETVAL_LONG(column->data_type);
 	}
 }
 /* }}} */
@@ -1283,7 +1283,7 @@ PHP_FUNCTION(oci_field_type_raw)
 
 	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (column) {
-		RETURN_INT(column->data_type);
+		RETURN_LONG(column->data_type);
 	}
 	RETURN_FALSE;
 }
@@ -1405,7 +1405,7 @@ PHP_FUNCTION(oci_fetch_all)
 
 	while (skip--) {
 		if (php_oci_statement_fetch(statement, nrows TSRMLS_CC)) {
-			RETURN_INT(0);
+			RETURN_LONG(0);
 		}
 	}
 
@@ -1484,7 +1484,7 @@ PHP_FUNCTION(oci_fetch_all)
 		efree(outarrs);
 	}
 
-	RETURN_INT(rows);
+	RETURN_LONG(rows);
 }
 /* }}} */
 
@@ -1659,11 +1659,11 @@ go_out:
 
 	if (errcode) {
 		array_init(return_value);
-		add_assoc_int(return_value, "code", errcode);
+		add_assoc_long(return_value, "code", errcode);
 		// TODO: avoid reallocation ???
 		add_assoc_string(return_value, "message", (char*) errbuf);
 		efree(errbuf);
-		add_assoc_int(return_value, "offset", error_offset);
+		add_assoc_long(return_value, "offset", error_offset);
 		add_assoc_string(return_value, "sqltext", sqltext ? (char *) sqltext : "");
 	} else {
 		RETURN_FALSE;
@@ -1684,7 +1684,7 @@ PHP_FUNCTION(oci_num_fields)
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
-	RETURN_INT(statement->ncolumns);
+	RETURN_LONG(statement->ncolumns);
 }
 /* }}} */
 
@@ -2156,7 +2156,7 @@ PHP_FUNCTION(oci_num_rows)
 	if (php_oci_statement_get_numrows(statement, &rowcount TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	RETURN_INT(rowcount);
+	RETURN_LONG(rowcount);
 }
 /* }}} */
 
@@ -2353,7 +2353,7 @@ PHP_FUNCTION(oci_collection_size)
 	if (php_oci_collection_size(collection, &size TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	RETURN_INT(size);
+	RETURN_LONG(size);
 }
 /* }}} */
 
@@ -2381,7 +2381,7 @@ PHP_FUNCTION(oci_collection_max)
 	if (php_oci_collection_max(collection, &max TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	RETURN_INT(max);
+	RETURN_LONG(max);
 }
 /* }}} */
 

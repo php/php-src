@@ -208,7 +208,7 @@ pdo_driver_t *pdo_find_driver(const char *name, int namelen) /* {{{ */
 }
 /* }}} */
 
-PDO_API int php_pdo_parse_data_source(const char *data_source, php_uint_t data_source_len, struct pdo_data_src_parser *parsed, int nparams) /* {{{ */
+PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_source_len, struct pdo_data_src_parser *parsed, int nparams) /* {{{ */
 {
 	int i, j;
 	int valstart = -1;
@@ -314,7 +314,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC) /* {{{ */
 	char buffer[65];
 	char outbuf[65] = "";
 	register char *p;
-	php_int_t long_val;
+	zend_long long_val;
 	char *dst = outbuf;
 
 	if (i64 < 0) {
@@ -337,9 +337,9 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC) /* {{{ */
 		*--p = digit_vec[rem];
 		i64 = (pdo_int64_t)quo;
 	}
-	long_val = (php_int_t)i64;
+	long_val = (zend_long)i64;
 	while (long_val != 0) {
-		php_int_t quo = long_val / 10;
+		zend_long quo = long_val / 10;
 		*--p = digit_vec[(unsigned int)(long_val - quo * 10)];
 		long_val = quo;
 	}

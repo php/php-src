@@ -289,8 +289,8 @@ PHP_MINIT_FUNCTION(enchant)
 {
 	le_enchant_broker = zend_register_list_destructors_ex(php_enchant_broker_free, NULL, "enchant_broker", module_number);
 	le_enchant_dict = zend_register_list_destructors_ex(php_enchant_dict_free, NULL, "enchant_dict", module_number);
-	REGISTER_INT_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("ENCHANT_ISPELL", PHP_ENCHANT_ISPELL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL", PHP_ENCHANT_ISPELL, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -422,11 +422,11 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 {
 	zval *broker;
 	enchant_broker *pbroker;
-	php_int_t dict_type;
+	zend_long dict_type;
 	char *value;
 	int value_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ris", &broker, &dict_type, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &broker, &dict_type, &value, &value_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -462,10 +462,10 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 {
 	zval *broker;
 	enchant_broker *pbroker;
-	php_int_t dict_type;
+	zend_long dict_type;
 	char *value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &broker, &dict_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &broker, &dict_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 	

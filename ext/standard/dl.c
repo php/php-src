@@ -83,7 +83,7 @@ PHPAPI PHP_FUNCTION(dl)
 	}
 
 	php_dl(filename, MODULE_TEMPORARY, return_value, 0 TSRMLS_CC);
-	if (Z_IVAL_P(return_value) == 1) {
+	if (Z_LVAL_P(return_value) == 1) {
 		EG(full_tables_cleanup) = 1;
 	}
 }

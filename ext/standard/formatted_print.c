@@ -56,7 +56,7 @@ php_sprintf_appendchar(zend_string **buffer, php_size_t *pos, char add TSRMLS_DC
 {
 	if (!*buffer || (*pos + 1) >= (*buffer)->len) {
 		PRINTF_DEBUG(("%s(): ereallocing buffer to %d bytes\n", get_active_function_name(TSRMLS_C), (*buffer)->len));
-		*buffer = STR_REALLOC(*buffer, (*buffer)->len << 1, 0);
+		*buffer = zend_string_realloc(*buffer, (*buffer)->len << 1, 0);
 	}
 	PRINTF_DEBUG(("sprintf: appending '%c', pos=\n", add, *pos));
 	(*buffer)->val[(*pos)++] = add;
@@ -88,7 +88,7 @@ php_sprintf_appendstring(zend_string **buffer, php_size_t *pos, char *add,
 	req_size = *pos + m_width + 1;
 
 	if (!*buffer || req_size > (*buffer)->len) {
-		zend_size_t size = (*buffer)->len;
+		size_t size = (*buffer)->len;
 		while (req_size > size) {
 			if (size > ZEND_SIZE_MAX/2) {
 				zend_error_noreturn(E_ERROR, "Field width %zd is too long", req_size); 
@@ -96,7 +96,7 @@ php_sprintf_appendstring(zend_string **buffer, php_size_t *pos, char *add,
 			size <<= 1;
 		}
 		PRINTF_DEBUG(("sprintf ereallocing buffer to %d bytes\n", size));
-		*buffer = STR_REALLOC(*buffer, size, 0);
+		*buffer = zend_string_realloc(*buffer, size, 0);
 	}
 	if (alignment == ALIGN_RIGHT) {
 		if ((neg || always_sign) && padding=='0') {
@@ -122,21 +122,21 @@ php_sprintf_appendstring(zend_string **buffer, php_size_t *pos, char *add,
 
 /* php_spintf_appendint() {{{ */
 inline static void
-php_sprintf_appendint(zend_string **buffer, php_size_t *pos, php_int_t number,
+php_sprintf_appendint(zend_string **buffer, php_size_t *pos, zend_long number,
 						php_size_t width, char padding, php_size_t alignment, 
 						int always_sign)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register php_uint_t magn, nmagn;
+	register zend_ulong magn, nmagn;
 	register unsigned int i = NUM_BUF_SIZE - 1, neg = 0;
 
 	PRINTF_DEBUG(("sprintf: appendint(%x, %x, %x, %d, %d, '%c', %d)\n",
 				  *buffer, pos, &(*buffer)->len, number, width, padding, alignment));
 	if (number < 0) {
 		neg = 1;
-		magn = ((php_uint_t) -(number + 1)) + 1;
+		magn = ((zend_ulong) -(number + 1)) + 1;
 	} else {
-		magn = (php_uint_t) number;
+		magn = (zend_ulong) number;
 	}
 
 	/* Can't right-pad 0's on integers */
@@ -167,16 +167,16 @@ php_sprintf_appendint(zend_string **buffer, php_size_t *pos, php_int_t number,
 /* php_spintf_appenduint() {{{ */
 inline static void
 php_sprintf_appenduint(zend_string **buffer, php_size_t *pos,
-					   php_uint_t number,
+					   zend_ulong number,
 					   php_size_t width, char padding, php_size_t alignment)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register php_uint_t magn, nmagn;
+	register zend_ulong magn, nmagn;
 	register unsigned int i = NUM_BUF_SIZE - 1;
 
 	PRINTF_DEBUG(("sprintf: appenduint(%x, %x, %x, %d, %d, '%c', %d)\n",
 				  *buffer, pos, &(*buffer)->len, number, width, padding, alignment));
-	magn = (php_uint_t) number;
+	magn = (zend_ulong) number;
 
 	/* Can't right-pad 0's on integers */
 	if (alignment == 0 && padding == '0') padding = ' ';
@@ -290,13 +290,13 @@ php_sprintf_appenddouble(zend_string **buffer, php_size_t *pos,
 
 /* php_spintf_appendd2n() {{{ */
 inline static void
-php_sprintf_append2n(zend_string **buffer, php_size_t *pos, php_int_t number,
+php_sprintf_append2n(zend_string **buffer, php_size_t *pos, zend_long number,
 					 php_size_t width, char padding, php_size_t alignment, int n,
 					 char *chartable, int expprec)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register php_uint_t num;
-	register php_uint_t  i = NUM_BUF_SIZE - 1;
+	register zend_ulong num;
+	register zend_ulong  i = NUM_BUF_SIZE - 1;
 	register int andbits = (1 << n) - 1;
 
 	PRINTF_DEBUG(("sprintf: append2n(%x, %x, %x, %d, %d, '%c', %d, %d, %x)\n",
@@ -304,7 +304,7 @@ php_sprintf_append2n(zend_string **buffer, php_size_t *pos, php_int_t number,
 				  chartable));
 	PRINTF_DEBUG(("sprintf: append2n 2^%d andbits=%x\n", n, andbits));
 
-	num = (php_uint_t) number;
+	num = (zend_ulong) number;
 	numbuf[i] = '\0';
 
 	do {
@@ -324,7 +324,7 @@ inline static int
 php_sprintf_getnumber(char *buffer, php_size_t *pos)
 {
 	char *endptr;
-	register php_int_t num = ZEND_STRTOI(&buffer[*pos], &endptr, 10);
+	register zend_long num = ZEND_STRTOI(&buffer[*pos], &endptr, 10);
 	register php_size_t i = 0;
 
 	if (endptr != NULL) {
@@ -414,12 +414,12 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 	}
 	
 	format = Z_STRVAL(args[format_offset]);
-	format_len = Z_STRSIZE(args[format_offset]);
-	result = STR_ALLOC(size, 0);
+	format_len = Z_STRLEN(args[format_offset]);
+	result = zend_string_alloc(size, 0);
 
 	currarg = 1;
 
-	while (inpos < Z_STRSIZE(args[format_offset])) {
+	while (inpos < Z_STRLEN(args[format_offset])) {
 		int expprec = 0;
 		zval *tmp;
 
@@ -561,20 +561,20 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 											 alignment,
 											 str->len,
 											 0, expprec, 0);
-					STR_RELEASE(str);
+					zend_string_release(str);
 					break;
 				}
 
 				case 'd':
 					php_sprintf_appendint(&result, &outpos,
-										  zval_get_int(tmp),
+										  zval_get_long(tmp),
 										  width, padding, alignment,
 										  always_sign);
 					break;
 
 				case 'u':
 					php_sprintf_appenduint(&result, &outpos,
-										  zval_get_int(tmp),
+										  zval_get_long(tmp),
 										  width, padding, alignment);
 					break;
 
@@ -594,33 +594,33 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 					
 				case 'c':
 					php_sprintf_appendchar(&result, &outpos,
-										(char) zval_get_int(tmp) TSRMLS_CC);
+										(char) zval_get_long(tmp) TSRMLS_CC);
 					break;
 
 				case 'o':
 					php_sprintf_append2n(&result, &outpos,
-										 zval_get_int(tmp),
+										 zval_get_long(tmp),
 										 width, padding, alignment, 3,
 										 hexchars, expprec);
 					break;
 
 				case 'x':
 					php_sprintf_append2n(&result, &outpos,
-										 zval_get_int(tmp),
+										 zval_get_long(tmp),
 										 width, padding, alignment, 4,
 										 hexchars, expprec);
 					break;
 
 				case 'X':
 					php_sprintf_append2n(&result, &outpos,
-										 zval_get_int(tmp),
+										 zval_get_long(tmp),
 										 width, padding, alignment, 4,
 										 HEXCHARS, expprec);
 					break;
 
 				case 'b':
 					php_sprintf_append2n(&result, &outpos,
-										 zval_get_int(tmp),
+										 zval_get_long(tmp),
 										 width, padding, alignment, 1,
 										 hexchars, expprec);
 					break;
@@ -684,8 +684,8 @@ PHP_FUNCTION(user_printf)
 		RETURN_FALSE;
 	}
 	rlen = PHPWRITE(result->val, result->len);
-	STR_FREE(result);
-	RETURN_INT(rlen);
+	zend_string_free(result);
+	RETURN_LONG(rlen);
 }
 /* }}} */
 
@@ -700,8 +700,8 @@ PHP_FUNCTION(vprintf)
 		RETURN_FALSE;
 	}
 	rlen = PHPWRITE(result->val, result->len);
-	STR_FREE(result);
-	RETURN_INT(rlen);
+	zend_string_free(result);
+	RETURN_LONG(rlen);
 }
 /* }}} */
 
@@ -729,8 +729,8 @@ PHP_FUNCTION(fprintf)
 
 	php_stream_write(stream, result->val, result->len);
 
-	RETVAL_INT(result->len);
-	STR_FREE(result);
+	RETVAL_LONG(result->len);
+	zend_string_free(result);
 }
 /* }}} */
 
@@ -758,8 +758,8 @@ PHP_FUNCTION(vfprintf)
 
 	php_stream_write(stream, result->val, result->len);
 
-	RETVAL_INT(result->len);
-	STR_FREE(result);
+	RETVAL_LONG(result->len);
+	zend_string_free(result);
 }
 /* }}} */
 

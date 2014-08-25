@@ -662,14 +662,14 @@ int phar_parse_metadata(char **buffer, zval *metadata, int zip_metadata_len TSRM
  * This is used by phar_open_from_filename to process the manifest, but can be called
  * directly.
  */
-static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, php_int_t halt_offset, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
+static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, zend_long halt_offset, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
 {
 	char b32[4], *buffer, *endbuffer, *savebuf;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry;
 	php_uint32 manifest_len, manifest_count, manifest_flags, manifest_index, tmp_len, sig_flags;
 	php_uint16 manifest_ver;
-	php_int_t offset;
+	zend_long offset;
 	int sig_len, register_alias = 0, temp_alias = 0;
 	char *signature = NULL;
 
@@ -1575,9 +1575,9 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 	char *pos, test = '\0';
 	const int window_size = 1024;
 	char buffer[1024 + sizeof(token)]; /* a 1024 byte window + the size of the halt_compiler token (moving window) */
-	const php_int_t readsize = sizeof(buffer) - sizeof(token);
-	const php_int_t tokenlen = sizeof(token) - 1;
-	php_int_t halt_offset;
+	const zend_long readsize = sizeof(buffer) - sizeof(token);
+	const zend_long tokenlen = sizeof(token) - 1;
+	zend_long halt_offset;
 	size_t got;
 	php_uint32 compression = PHAR_FILE_COMPRESSED_NONE;
 
@@ -1618,7 +1618,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 #ifndef MAX_WBITS
 #define MAX_WBITS 15
 #endif
-				add_assoc_int(&filterparams, "window", MAX_WBITS + 32);
+				add_assoc_long(&filterparams, "window", MAX_WBITS + 32);
 
 				/* entire file is gzip-compressed, uncompress to temporary file */
 				if (!(temp = php_stream_fopen_tmpfile())) {
@@ -1630,7 +1630,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 
 				if (!filter) {
 					err = 1;
-					add_assoc_int(&filterparams, "window", MAX_WBITS);
+					add_assoc_long(&filterparams, "window", MAX_WBITS);
 					filter = php_stream_filter_create("zlib.inflate", &filterparams, php_stream_is_persistent(fp) TSRMLS_CC);
 					zval_dtor(&filterparams);
 
@@ -1960,7 +1960,7 @@ woohoo:
 			}
 		} else {
 			zend_string *str_key;
-			php_uint_t unused;
+			zend_ulong unused;
 
 			for (zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_fname_map));
 				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &str_key, &unused, 0, &PHAR_GLOBALS->phar_fname_map.nInternalPointer);
@@ -2534,7 +2534,7 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
  * user_stub contains either a string, or a resource pointer, if len is a negative length.
  * user_stub and len should be both 0 if the default or existing stub should be used
  */
-int phar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int convert, char **error TSRMLS_DC) /* {{{ */
+int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int convert, char **error TSRMLS_DC) /* {{{ */
 {
 	char halt_stub[] = "__HALT_COMPILER();";
 	char *newstub, *tmp;
@@ -2543,7 +2543,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int conv
 	char *pos, has_dirs = 0;
 	char manifest[18], entry_buffer[24];
 	php_off_t manifest_ftell;
-	php_int_t offset;
+	zend_long offset;
 	size_t wrote;
 	php_uint32 manifest_len, mytime, loc, new_manifest_count;
 	php_uint32 newcrc32;
@@ -2650,7 +2650,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int conv
 				spprintf(error, 0, "illegal stub for phar \"%s\"", phar->fname);
 			}
 			if (free_user_stub) {
-				STR_FREE(suser_stub);
+				zend_string_free(suser_stub);
 			}
 			return EOF;
 		}
@@ -2667,13 +2667,13 @@ int phar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int conv
 				spprintf(error, 0, "unable to create stub from string in new phar \"%s\"", phar->fname);
 			}
 			if (free_user_stub) {
-				STR_FREE(suser_stub);
+				zend_string_free(suser_stub);
 			}
 			return EOF;
 		}
 		phar->halt_offset = len + 5;
 		if (free_user_stub) {
-			STR_FREE(suser_stub);
+			zend_string_free(suser_stub);
 		}
 	} else {
 		size_t written;
@@ -3230,7 +3230,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int conv
 			zval filterparams;
 
 			array_init(&filterparams);
-			add_assoc_int(&filterparams, "window", MAX_WBITS+16);
+			add_assoc_long(&filterparams, "window", MAX_WBITS+16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			zval_dtor(&filterparams);
 

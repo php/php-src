@@ -61,7 +61,7 @@ DBA_OPEN_FUNC(dbm)
 
 	if(info->argc > 0) {
 		convert_to_int_ex(&info->argv[0]);
-		filemode = Z_IVAL(info->argv[0]);
+		filemode = Z_LVAL(info->argv[0]);
 	}
 	
 	if(info->mode == DBA_TRUNC) {

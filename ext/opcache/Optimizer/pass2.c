@@ -61,7 +61,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_SL:
 			case ZEND_SR:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_INT) {
+					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_LONG) {
 						convert_to_int(&ZEND_OP1_LITERAL(opline));
 					}
 				}
@@ -74,7 +74,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					break;
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
-					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_INT) {
+					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
 						convert_to_int(&ZEND_OP2_LITERAL(opline));
 					}
 				}

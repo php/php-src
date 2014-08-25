@@ -121,7 +121,7 @@ union ipbox {
 /* {{{ ftp_open
  */
 ftpbuf_t*
-ftp_open(const char *host, short port, php_int_t timeout_sec TSRMLS_DC)
+ftp_open(const char *host, short port, zend_long timeout_sec TSRMLS_DC)
 {
 	ftpbuf_t		*ftp;
 	socklen_t		 size;
@@ -248,7 +248,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 {
 #if HAVE_OPENSSL_EXT
 	SSL_CTX	*ctx = NULL;
-	php_int_t ssl_ctx_options = SSL_OP_ALL;
+	zend_long ssl_ctx_options = SSL_OP_ALL;
 #endif
 	if (ftp == NULL) {
 		return 0;
@@ -554,13 +554,13 @@ ftp_mkdir(ftpbuf_t *ftp, const char *dir)
 	}
 	/* copy out the dir from response */
 	if ((mkd = strchr(ftp->inbuf, '"')) == NULL) {
-		return STR_INIT(dir, strlen(dir), 0);
+		return zend_string_init(dir, strlen(dir), 0);
 	}
 	if ((end = strrchr(++mkd, '"')) == NULL) {
 		return NULL;
 	}
 	*end = 0;
-	ret = STR_INIT(mkd, end - mkd, 0);
+	ret = zend_string_init(mkd, end - mkd, 0);
 	*end = '"';
 
 	return ret;
@@ -616,7 +616,7 @@ ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filenam
 /* {{{ ftp_alloc
  */
 int
-ftp_alloc(ftpbuf_t *ftp, const php_int_t size, zend_string **response)
+ftp_alloc(ftpbuf_t *ftp, const zend_long size, zend_string **response)
 {
 	char buffer[64];
 
@@ -635,7 +635,7 @@ ftp_alloc(ftpbuf_t *ftp, const php_int_t size, zend_string **response)
 	}
 
 	if (response) {
-		*response = STR_INIT(ftp->inbuf, strlen(ftp->inbuf), 0);
+		*response = zend_string_init(ftp->inbuf, strlen(ftp->inbuf), 0);
 	}
 
 	if (ftp->resp < 200 || ftp->resp >= 300) {
@@ -791,7 +791,7 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 /* {{{ ftp_get
  */
 int
-ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, php_int_t resumepos TSRMLS_DC)
+ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
 	size_t			rcvd;
@@ -883,10 +883,10 @@ bail:
 /* {{{ ftp_put
  */
 int
-ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, php_int_t startpos TSRMLS_DC)
+ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
-	php_int_t			size;
+	zend_long			size;
 	char			*ptr;
 	int			ch;
 	char			arg[11];
@@ -960,7 +960,7 @@ bail:
 
 /* {{{ ftp_size
  */
-php_int_t
+zend_long
 ftp_size(ftpbuf_t *ftp, const char *path)
 {
 	if (ftp == NULL) {
@@ -1227,7 +1227,7 @@ ftp_getresp(ftpbuf_t *ftp)
 int
 my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
-	php_int_t		size, sent;
+	zend_long		size, sent;
     int         n;
 
 	size = len;
@@ -1493,7 +1493,7 @@ data_accept(databuf_t *data, ftpbuf_t *ftp TSRMLS_DC)
 
 #if HAVE_OPENSSL_EXT
 	SSL_CTX		*ctx;
-	php_int_t ssl_ctx_options = SSL_OP_ALL;
+	zend_long ssl_ctx_options = SSL_OP_ALL;
 #endif
 
 	if (data->fd != -1) {
@@ -1711,7 +1711,7 @@ bail:
 /* {{{ ftp_nb_get
  */
 int
-ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, php_int_t resumepos TSRMLS_DC)
+ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
 	char			arg[11];
@@ -1828,7 +1828,7 @@ bail:
 /* {{{ ftp_nb_put
  */
 int
-ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, php_int_t startpos TSRMLS_DC)
+ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
 	char			arg[11];

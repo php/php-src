@@ -82,7 +82,7 @@ typedef struct {
 	const char *request_method;
 	char *query_string;
 	char *cookie_data;
-	zend_int_t content_length;
+	zend_long content_length;
 
 	char *path_translated;
 	char *request_uri;
@@ -129,7 +129,7 @@ typedef struct _sapi_globals_struct {
 	char *default_mimetype;
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
-	zend_int_t post_max_size;
+	zend_long post_max_size;
 	int options;
 	zend_bool sapi_started;
 	double global_request_time;
@@ -170,7 +170,7 @@ END_EXTERN_C()
 typedef struct {
 	char *line; /* If you allocated this, you need to free it yourself */
 	uint line_len;
-	zend_int_t response_code; /* long due to zend_parse_parameters compatibility */
+	zend_long response_code; /* long due to zend_parse_parameters compatibility */
 } sapi_header_line;
 
 typedef enum {					/* Parameter: 			*/

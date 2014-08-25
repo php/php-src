@@ -113,7 +113,7 @@ ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
 			break;
 		case ZEND_INTERNAL_FUNCTION:
 			if (function->common.function_name) {
-				STR_RELEASE(function->common.function_name);
+				zend_string_release(function->common.function_name);
 			}
 			/* do nothing */
 			break;
@@ -198,16 +198,16 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 		while (ce->trait_aliases[i]) {
 			if (ce->trait_aliases[i]->trait_method) {
 				if (ce->trait_aliases[i]->trait_method->method_name) {
-	 				STR_RELEASE(ce->trait_aliases[i]->trait_method->method_name);
+	 				zend_string_release(ce->trait_aliases[i]->trait_method->method_name);
 				}
 				if (ce->trait_aliases[i]->trait_method->class_name) {
-	 				STR_RELEASE(ce->trait_aliases[i]->trait_method->class_name);
+	 				zend_string_release(ce->trait_aliases[i]->trait_method->class_name);
 				}
 				efree(ce->trait_aliases[i]->trait_method);
 			}
 			
 			if (ce->trait_aliases[i]->alias) {
-				STR_RELEASE(ce->trait_aliases[i]->alias);
+				zend_string_release(ce->trait_aliases[i]->alias);
 			}
 			
 			efree(ce->trait_aliases[i]);
@@ -221,8 +221,8 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 		size_t i = 0;
 		
 		while (ce->trait_precedences[i]) {
-			STR_RELEASE(ce->trait_precedences[i]->trait_method->method_name);
-			STR_RELEASE(ce->trait_precedences[i]->trait_method->class_name);
+			zend_string_release(ce->trait_precedences[i]->trait_method->method_name);
+			zend_string_release(ce->trait_precedences[i]->trait_method->class_name);
 			efree(ce->trait_precedences[i]->trait_method);
 
 			if (ce->trait_precedences[i]->exclude_from_classes) {
@@ -266,14 +266,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 				efree(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			STR_RELEASE(ce->name);
+			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
 			if (ce->info.user.doc_comment) {
-				STR_RELEASE(ce->info.user.doc_comment);
+				zend_string_release(ce->info.user.doc_comment);
 			}
 			
 			_destroy_zend_class_traits_info(ce);
@@ -299,7 +299,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				free(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			STR_RELEASE(ce->name);
+			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
@@ -342,7 +342,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		i = op_array->last_var;
 		while (i > 0) {
 			i--;
-			STR_RELEASE(op_array->vars[i]);
+			zend_string_release(op_array->vars[i]);
 		}
 		efree(op_array->vars);
 	}
@@ -358,10 +358,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	efree(op_array->opcodes);
 
 	if (op_array->function_name) {
-		STR_RELEASE(op_array->function_name);
+		zend_string_release(op_array->function_name);
 	}
 	if (op_array->doc_comment) {
-		STR_RELEASE(op_array->doc_comment);
+		zend_string_release(op_array->doc_comment);
 	}
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
@@ -648,7 +648,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 				int nest_levels, array_offset;
 				zend_brk_cont_element *jmp_to;
 
-				nest_levels = Z_IVAL(op_array->literals[opline->op2.constant]);
+				nest_levels = Z_LVAL(op_array->literals[opline->op2.constant]);
 				if ((array_offset = opline->op1.opline_num) != -1) {
 					do {
 						jmp_to = &op_array->brk_cont_array[array_offset];
@@ -661,7 +661,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 				}
 			}
 			case ZEND_GOTO:
-				if (Z_TYPE(op_array->literals[opline->op2.constant]) != IS_INT) {
+				if (Z_TYPE(op_array->literals[opline->op2.constant]) != IS_LONG) {
 					zend_uint num = opline->op2.constant;
 					opline->op2.zv = &op_array->literals[opline->op2.constant];
 					zend_resolve_goto_label(op_array, opline, 1 TSRMLS_CC);
@@ -734,7 +734,7 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 				opline->extended_value = (zend_uint)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->extended_value);
 				break;
 			case ZEND_GOTO:
-				if (Z_TYPE_P(opline->op2.zv) != IS_INT) {
+				if (Z_TYPE_P(opline->op2.zv) != IS_LONG) {
 					zend_resolve_goto_label(op_array, opline, 1 TSRMLS_CC);
 				}
 				/* break omitted intentionally */

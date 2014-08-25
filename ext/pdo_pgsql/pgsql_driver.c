@@ -113,7 +113,7 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 	pdo_pgsql_error_info *einfo = &H->einfo;
 
 	if (einfo->errcode) {
-		add_next_index_int(info, einfo->errcode);
+		add_next_index_long(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg);
 	}
 
@@ -214,7 +214,7 @@ static int pgsql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_pgsql_stmt *S = ecalloc(1, sizeof(pdo_pgsql_stmt));
@@ -229,7 +229,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_
 	stmt->driver_data = S;
 	stmt->methods = &pgsql_stmt_methods;
 
-	scrollable = pdo_attr_ival(driver_options, PDO_ATTR_CURSOR,
+	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY TSRMLS_CC) == PDO_CURSOR_SCROLL;
 
 	if (scrollable) {
@@ -239,14 +239,14 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_
 		spprintf(&S->cursor_name, 0, "pdo_crsr_%08x", ++H->stmt_counter);
 		emulate = 1;
 	} else if (driver_options) {
-		if (pdo_attr_ival(driver_options, PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, H->disable_native_prepares TSRMLS_CC) == 1) {
+		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, H->disable_native_prepares TSRMLS_CC) == 1) {
 			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
 			emulate = 1;
 		}
-		if (pdo_attr_ival(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares TSRMLS_CC) == 1) {
+		if (pdo_attr_lval(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares TSRMLS_CC) == 1) {
 			emulate = 1;
 		}
-		if (pdo_attr_ival(driver_options, PDO_PGSQL_ATTR_DISABLE_PREPARES, H->disable_prepares TSRMLS_CC) == 1) {
+		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_PREPARES, H->disable_prepares TSRMLS_CC) == 1) {
 			execute_only = 1;
 		}
 	} else {
@@ -287,11 +287,11 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_
 	return 1;
 }
 
-static php_int_t pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_len TSRMLS_DC)
+static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	PGresult *res;
-	php_int_t ret = 1;
+	zend_long ret = 1;
 	ExecStatusType qs;
 
 	if (!(res = PQexec(H->server, sql))) {
@@ -354,7 +354,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 		if (H->pgoid == InvalidOid) {
 			return NULL;
 		}
-		*len = spprintf(&id, 0, ZEND_INT_FMT, (php_int_t) H->pgoid);
+		*len = spprintf(&id, 0, ZEND_INT_FMT, (zend_long) H->pgoid);
 	} else {
 		PGresult *res;
 		ExecStatusType status;
@@ -377,7 +377,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 	return id;
 }
 
-static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *return_value TSRMLS_DC)
+static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
@@ -577,12 +577,12 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 			int query_len;
 			convert_to_string_ex(tmp);
 
-			if (buffer_len < Z_STRSIZE_P(tmp)) {
-				buffer_len = Z_STRSIZE_P(tmp);
+			if (buffer_len < Z_STRLEN_P(tmp)) {
+				buffer_len = Z_STRLEN_P(tmp);
 				query = erealloc(query, buffer_len + 2); /* room for \n\0 */
 			}
-			memcpy(query, Z_STRVAL_P(tmp), Z_STRSIZE_P(tmp));
-			query_len = Z_STRSIZE_P(tmp);
+			memcpy(query, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+			query_len = Z_STRLEN_P(tmp);
 			if (query[query_len - 1] != '\n') {
 				query[query_len++] = '\n';
 			}
@@ -910,7 +910,7 @@ static PHP_METHOD(PDO, pgsqlLOBCreate)
 	lfd = lo_creat(H->server, INV_READ|INV_WRITE);
 
 	if (lfd != InvalidOid) {
-		zend_string *buf = strpprintf(0, ZEND_UINT_FMT, (php_int_t) lfd);
+		zend_string *buf = strpprintf(0, ZEND_UINT_FMT, (zend_long) lfd);
 
 		RETURN_STR(buf);
 	}
@@ -1015,11 +1015,11 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
-	php_int_t result_type = PDO_FETCH_USE_DEFAULT;
-	php_int_t ms_timeout = 0;
+	zend_long result_type = PDO_FETCH_USE_DEFAULT;
+	zend_long ms_timeout = 0;
 	PGnotify *pgsql_notify;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ii",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll",
 				&result_type, &ms_timeout)) {
 		RETURN_FALSE;
 	}
@@ -1060,11 +1060,11 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 	array_init(return_value);
 	if (result_type == PDO_FETCH_NUM || result_type == PDO_FETCH_BOTH) {
 		add_index_string(return_value, 0, pgsql_notify->relname);
-		add_index_int(return_value, 1, pgsql_notify->be_pid);
+		add_index_long(return_value, 1, pgsql_notify->be_pid);
 	}
 	if (result_type == PDO_FETCH_ASSOC || result_type == PDO_FETCH_BOTH) {
 		add_assoc_string(return_value, "message", pgsql_notify->relname);
-		add_assoc_int(return_value, "pid", pgsql_notify->be_pid);
+		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
 	}
 
 	PQfreemem(pgsql_notify);
@@ -1083,7 +1083,7 @@ static PHP_METHOD(PDO, pgsqlGetPid)
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
-	RETURN_INT(PQbackendPID(H->server));
+	RETURN_LONG(PQbackendPID(H->server));
 }
 /* }}} */
 
@@ -1111,23 +1111,23 @@ static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, i
 	}
 }
 
-static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, php_int_t attr, zval *val TSRMLS_DC)
+static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	switch (attr) {
 		case PDO_ATTR_EMULATE_PREPARES:
 			convert_to_int(val);
-			H->emulate_prepares = Z_IVAL_P(val);
+			H->emulate_prepares = Z_LVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT:
 			convert_to_int(val);
 			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
-			H->disable_native_prepares = Z_IVAL_P(val);
+			H->disable_native_prepares = Z_LVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
 			convert_to_int(val);
-			H->disable_prepares = Z_IVAL_P(val);
+			H->disable_prepares = Z_LVAL_P(val);
 			return 1;
 		default:
 			return 0;
@@ -1158,7 +1158,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	int ret = 0;
 	char *conn_str, *p, *e;
 	char *tmp_pass;
-	php_int_t connect_timeout = 30;
+	zend_long connect_timeout = 30;
 
 	H = pecalloc(1, sizeof(pdo_pgsql_db_handle), dbh->is_persistent);
 	dbh->driver_data = H;
@@ -1176,7 +1176,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	if (driver_options) {
-		connect_timeout = pdo_attr_ival(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
+		connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
 	}
 
 	if (dbh->password) {

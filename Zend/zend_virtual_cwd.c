@@ -178,7 +178,7 @@ static int php_check_dots(const char *element, int n)
 #define MAXIMUM_REPARSE_DATA_BUFFER_SIZE  ( 16 * 1024 )
 
 typedef struct {
-	zend_uint_t  ReparseTag;
+	zend_ulong  ReparseTag;
 	unsigned short ReparseDataLength;
 	unsigned short Reserved;
 	union {
@@ -187,7 +187,7 @@ typedef struct {
 			unsigned short SubstituteNameLength;
 			unsigned short PrintNameOffset;
 			unsigned short PrintNameLength;
-			zend_uint_t  Flags;
+			zend_ulong  Flags;
 			wchar_t        ReparseTarget[1];
 		} SymbolicLinkReparseBuffer;
 		struct {
@@ -582,9 +582,9 @@ CWD_API char *virtual_getcwd(char *buf, size_t size TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #ifdef PHP_WIN32
-static inline zend_uint_t realpath_cache_key(const char *path, int path_len TSRMLS_DC) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, int path_len TSRMLS_DC) /* {{{ */
 {
-	register zend_uint_t h;
+	register zend_ulong h;
 	char *bucket_key_start = tsrm_win32_get_path_sid_key(path TSRMLS_CC);
 	char *bucket_key = (char *)bucket_key_start;
 	const char *e = bucket_key + strlen(bucket_key);
@@ -602,9 +602,9 @@ static inline zend_uint_t realpath_cache_key(const char *path, int path_len TSRM
 }
 /* }}} */
 #else
-static inline zend_uint_t realpath_cache_key(const char *path, int path_len) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {{{ */
 {
-	register zend_uint_t h;
+	register zend_ulong h;
 	const char *e = path + path_len;
 
 	for (h = Z_UI(2166136261); path < e;) {
@@ -637,11 +637,11 @@ CWD_API void realpath_cache_clean(TSRMLS_D) /* {{{ */
 CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WIN32
-	zend_uint_t key = realpath_cache_key(path, path_len TSRMLS_CC);
+	zend_ulong key = realpath_cache_key(path, path_len TSRMLS_CC);
 #else
-	zend_uint_t key = realpath_cache_key(path, path_len);
+	zend_ulong key = realpath_cache_key(path, path_len);
 #endif
-	zend_uint_t n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
+	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 	realpath_cache_bucket **bucket = &CWDG(realpath_cache)[n];
 
 	while (*bucket != NULL) {
@@ -668,7 +668,7 @@ CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC) /* {{{
 
 static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, int realpath_len, int is_dir, time_t t TSRMLS_DC) /* {{{ */
 {
-	zend_int_t size = sizeof(realpath_cache_bucket) + path_len + 1;
+	zend_long size = sizeof(realpath_cache_bucket) + path_len + 1;
 	int same = 1;
 
 	if (realpath_len != path_len ||
@@ -679,7 +679,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 
 	if (CWDG(realpath_cache_size) + size <= CWDG(realpath_cache_size_limit)) {
 		realpath_cache_bucket *bucket = malloc(size);
-		zend_uint_t n;
+		zend_ulong n;
 
 		if (bucket == NULL) {
 			return;
@@ -719,12 +719,12 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 static inline realpath_cache_bucket* realpath_cache_find(const char *path, int path_len, time_t t TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WIN32
-	zend_uint_t key = realpath_cache_key(path, path_len TSRMLS_CC);
+	zend_ulong key = realpath_cache_key(path, path_len TSRMLS_CC);
 #else
-	zend_uint_t key = realpath_cache_key(path, path_len);
+	zend_ulong key = realpath_cache_key(path, path_len);
 #endif
 
-	zend_uint_t n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
+	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 	realpath_cache_bucket **bucket = &CWDG(realpath_cache)[n];
 
 	while (*bucket != NULL) {
@@ -756,12 +756,12 @@ CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_
 }
 /* }}} */
 
-CWD_API zend_int_t realpath_cache_size(TSRMLS_D)
+CWD_API zend_long realpath_cache_size(TSRMLS_D)
 {
 	return CWDG(realpath_cache_size);
 }
 
-CWD_API zend_int_t realpath_cache_max_buckets(TSRMLS_D)
+CWD_API zend_long realpath_cache_max_buckets(TSRMLS_D)
 {
 	return (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 }

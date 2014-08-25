@@ -66,9 +66,9 @@
 #	define PHP_EOL "\n"
 #endif
 
-#define php_size_t zend_size_t
-#define php_int_t zend_int_t
-#define php_uint_t zend_uint_t
+#define php_size_t size_t
+#define zend_long zend_long
+#define zend_ulong zend_ulong
 #define php_off_t zend_off_t
 #define PHP_INT_MAX ZEND_INT_MAX
 #define PHP_INT_MIN ZEND_INT_MIN

@@ -70,9 +70,9 @@ static int php_zlib_output_encoding(TSRMLS_D)
 	zval *enc;
 
 	if (!ZLIBG(compression_coding)) {
-		zend_string *name = STR_INIT("_SERVER", sizeof("_SERVER") - 1, 0);
+		zend_string *name = zend_string_init("_SERVER", sizeof("_SERVER") - 1, 0);
 		zend_is_auto_global(name TSRMLS_CC);
-		STR_RELEASE(name);
+		zend_string_release(name);
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
 			(enc = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING") - 1))) {
 			convert_to_string(enc);
@@ -315,7 +315,7 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 	Z.zfree = php_zlib_free;
 
 	if (Z_OK == (status = deflateInit2(&Z, level, Z_DEFLATED, encoding, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY))) {
-		out = STR_ALLOC(PHP_ZLIB_BUFFER_SIZE_GUESS(in_len), 0);
+		out = zend_string_alloc(PHP_ZLIB_BUFFER_SIZE_GUESS(in_len), 0);
 
 		Z.next_in = (Bytef *) in_buf;
 		Z.next_out = (Bytef *) out->val;
@@ -327,11 +327,11 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 
 		if (Z_STREAM_END == status) {
 			/* size buffer down to actual length */
-			out = STR_REALLOC(out, Z.total_out, 0);
+			out = zend_string_realloc(out, Z.total_out, 0);
 			out->val[out->len] = '\0';
 			return out;
 		} else {
-			STR_FREE(out);
+			zend_string_free(out);
 		}
 	}
 
@@ -448,7 +448,7 @@ static PHP_FUNCTION(ob_gzhandler)
 {
 	char *in_str;
 	int in_len;
-	php_int_t flags = 0;
+	zend_long flags = 0;
 	php_output_context ctx = {0};
 	int encoding, rv;
 
@@ -460,7 +460,7 @@ static PHP_FUNCTION(ob_gzhandler)
 	 * - OG(running) is not set or set to any other output handler
 	 * - we have to mess around with php_output_context */
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "si", &in_str, &in_len, &flags)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &in_str, &in_len, &flags)) {
 		RETURN_FALSE;
 	}
 
@@ -537,10 +537,10 @@ static PHP_FUNCTION(gzfile)
 	int flags = REPORT_ERRORS;
 	char buf[8192] = {0};
 	register int i = 0;
-	php_int_t use_include_path = 0;
+	zend_long use_include_path = 0;
 	php_stream *stream;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|i", &filename, &filename_len, &use_include_path)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l", &filename, &filename_len, &use_include_path)) {
 		return;
 	}
 
@@ -578,9 +578,9 @@ static PHP_FUNCTION(gzopen)
 	int filename_len, mode_len;
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
-	php_int_t use_include_path = 0;
+	zend_long use_include_path = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|i", &filename, &filename_len, &mode, &mode_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &filename, &filename_len, &mode, &mode_len, &use_include_path) == FAILURE) {
 		return;
 	}
 
@@ -606,9 +606,9 @@ static PHP_FUNCTION(readgzfile)
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
 	int size;
-	php_int_t use_include_path = 0;
+	zend_long use_include_path = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &filename, &filename_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &use_include_path) == FAILURE) {
 		return;
 	}
 
@@ -623,7 +623,7 @@ static PHP_FUNCTION(readgzfile)
 	}
 	size = php_stream_passthru(stream);
 	php_stream_close(stream);
-	RETURN_INT(size);
+	RETURN_LONG(size);
 }
 /* }}} */
 
@@ -631,14 +631,14 @@ static PHP_FUNCTION(readgzfile)
 static PHP_FUNCTION(name) \
 { \
 	zend_string *in, *out; \
-	php_int_t level = -1; \
-	php_int_t encoding = default_encoding; \
+	zend_long level = -1; \
+	zend_long encoding = default_encoding; \
 	if (default_encoding) { \
-		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|ii", &in, &level, &encoding)) { \
+		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|ll", &in, &level, &encoding)) { \
 			return; \
 		} \
 	} else { \
-		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si|i", &in, &encoding, &level)) { \
+		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|l", &in, &encoding, &level)) { \
 			return; \
 		} \
 	} \
@@ -667,8 +667,8 @@ static PHP_FUNCTION(name) \
 	char *in_buf, *out_buf; \
 	int in_len; \
 	size_t out_len; \
-	php_int_t max_len = 0; \
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &in_buf, &in_len, &max_len)) { \
+	zend_long max_len = 0; \
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &in_buf, &in_len, &max_len)) { \
 		return; \
 	} \
 	if (max_len < 0) { \
@@ -937,12 +937,12 @@ static PHP_MINIT_FUNCTION(zlib)
 	php_output_handler_conflict_register(ZEND_STRL("ob_gzhandler"), php_zlib_output_conflict_check TSRMLS_CC);
 	php_output_handler_conflict_register(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME), php_zlib_output_conflict_check TSRMLS_CC);
 
-	REGISTER_INT_CONSTANT("FORCE_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FORCE_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FORCE_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FORCE_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("ZLIB_ENCODING_RAW", PHP_ZLIB_ENCODING_RAW, CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("ZLIB_ENCODING_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("ZLIB_ENCODING_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_ENCODING_RAW", PHP_ZLIB_ENCODING_RAW, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_ENCODING_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_ENCODING_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }

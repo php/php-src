@@ -299,7 +299,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 {
 /* for now interned strings are supported only for non-ZTS build */
 #ifndef ZTS
-	zend_uint_t h;
+	zend_ulong h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
@@ -309,7 +309,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 		return str;
 	}
 
-	h = STR_HASH_VAL(str);
+	h = zend_string_hash_val(str);
 	nIndex = h & ZCSG(interned_strings).nTableMask;
 
 	/* check for existing interned string */
@@ -318,7 +318,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 		p = ZCSG(interned_strings).arData + idx;
 		if ((p->h == h) && (p->key->len == str->len)) {
 			if (!memcmp(p->key->val, str->val, str->len)) {
-				STR_RELEASE(str);
+				zend_string_release(str);
 				return p->key;
 			}
 		}
@@ -354,7 +354,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 	ZVAL_STR(&p->val, p->key);
 	Z_NEXT(p->val) = ZCSG(interned_strings).arHash[nIndex];
 	ZCSG(interned_strings).arHash[nIndex] = idx;
-	STR_RELEASE(str);
+	zend_string_release(str);
 	return p->key;
 #else
 	return str;
@@ -374,7 +374,7 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 		char s[2];
 		s[0] = j;
 		s[1] = 0;
-		CG(one_char_string)[j] = accel_new_interned_string(STR_INIT(s, 1, 0) TSRMLS_CC);
+		CG(one_char_string)[j] = accel_new_interned_string(zend_string_init(s, 1, 0) TSRMLS_CC);
 	}
 
 	/* function table hash keys */
@@ -1268,8 +1268,8 @@ static void zend_accel_init_auto_globals(TSRMLS_D)
 	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
 
 	for (i = 0; i < ag_size ; i++) {
-		jit_auto_globals_str[i] = STR_INIT(jit_auto_globals_info[i].name, jit_auto_globals_info[i].len, 1);
-		STR_HASH_VAL(jit_auto_globals_str[i]);
+		jit_auto_globals_str[i] = zend_string_init(jit_auto_globals_info[i].name, jit_auto_globals_info[i].len, 1);
+		zend_string_hash_val(jit_auto_globals_str[i]);
 		jit_auto_globals_str[i] = accel_new_interned_string(jit_auto_globals_str[i] TSRMLS_CC);
 	}
 }
@@ -1427,11 +1427,11 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 	}
 
 	if (file_handle->opened_path) {
-		new_persistent_script->full_path = STR_INIT(file_handle->opened_path, strlen(file_handle->opened_path), 0);
+		new_persistent_script->full_path = zend_string_init(file_handle->opened_path, strlen(file_handle->opened_path), 0);
 	} else {
-		new_persistent_script->full_path = STR_INIT(file_handle->filename, strlen(file_handle->filename), 0);
+		new_persistent_script->full_path = zend_string_init(file_handle->filename, strlen(file_handle->filename), 0);
 	}
-	STR_HASH_VAL(new_persistent_script->full_path);
+	zend_string_hash_val(new_persistent_script->full_path);
 
 	/* Now persistent_script structure is ready in process memory */
 	return cache_script_in_shared_memory(new_persistent_script, key, key_length, from_shared_memory TSRMLS_CC);
@@ -1959,7 +1959,7 @@ static void accel_fast_zval_dtor(zval *zvalue)
 					zend_list_delete(Z_RES_P(zvalue));
 				}
 				break;
-			case IS_INT:
+			case IS_LONG:
 			case IS_DOUBLE:
 			case IS_FALSE:
 			case IS_TRUE:

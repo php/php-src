@@ -38,7 +38,7 @@ static void nop_removal(zend_op_array *op_array)
 
 		/* GOTO target is unresolved yet. We can't optimize. */
 		if (opline->opcode == ZEND_GOTO &&
-			Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_INT) {
+			Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
 			/* TODO: in general we can avoid this restriction */
 			FREE_ALLOCA(shiftlist);
 			return;

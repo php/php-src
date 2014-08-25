@@ -208,9 +208,9 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
 		hashed_ini_entry->module_number = module_number;
 		if ((zend_get_configuration_directive(p->name, p->name_length, &default_value)) == SUCCESS) {
 			if (!hashed_ini_entry->on_modify
-				|| hashed_ini_entry->on_modify(hashed_ini_entry, Z_STRVAL(default_value), Z_STRSIZE(default_value), hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, ZEND_INI_STAGE_STARTUP TSRMLS_CC) == SUCCESS) {
+				|| hashed_ini_entry->on_modify(hashed_ini_entry, Z_STRVAL(default_value), Z_STRLEN(default_value), hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, ZEND_INI_STAGE_STARTUP TSRMLS_CC) == SUCCESS) {
 				hashed_ini_entry->value = Z_STRVAL(default_value);
-				hashed_ini_entry->value_length = Z_STRSIZE(default_value);
+				hashed_ini_entry->value_length = Z_STRLEN(default_value);
 				config_directive_success = 1;
 			}
 		}
@@ -352,7 +352,7 @@ ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*di
  * Data retrieval
  */
 
-ZEND_API zend_int_t zend_ini_int(char *name, uint name_length, int orig) /* {{{ */
+ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	TSRMLS_FETCH();
@@ -587,7 +587,7 @@ ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 {
-	zend_int_t *p;
+	zend_long *p;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -596,7 +596,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
-	p = (zend_int_t *) (base+(size_t) mh_arg1);
+	p = (zend_long *) (base+(size_t) mh_arg1);
 
 	*p = zend_atol(new_value, new_value_length);
 	return SUCCESS;
@@ -605,7 +605,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 {
-	zend_int_t *p, tmp;
+	zend_long *p, tmp;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -619,7 +619,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 		return FAILURE;
 	}
 
-	p = (zend_int_t *) (base+(size_t) mh_arg1);
+	p = (zend_long *) (base+(size_t) mh_arg1);
 	*p = tmp;
 
 	return SUCCESS;

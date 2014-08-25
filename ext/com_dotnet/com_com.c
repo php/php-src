@@ -57,11 +57,11 @@ PHP_FUNCTION(com_create_instance)
 	obj = CDNO_FETCH(object);
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS() TSRMLS_CC, "s|s!is",
+			ZEND_NUM_ARGS() TSRMLS_CC, "s|s!ls",
 			&module_name, &module_name_len, &server_name, &server_name_len,
 			&obj->code_page, &typelib_name, &typelib_name_len) &&
 		FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS() TSRMLS_CC, "sa|is",
+			ZEND_NUM_ARGS() TSRMLS_CC, "sa|ls",
 			&module_name, &module_name_len, &server_params, &obj->code_page,
 			&typelib_name, &typelib_name_len)) {
 
@@ -81,7 +81,7 @@ PHP_FUNCTION(com_create_instance)
 				"Server", sizeof("Server")-1))) {
 			convert_to_string_ex(tmp);
 			server_name = Z_STRVAL_P(tmp);
-			server_name_len = Z_STRSIZE_P(tmp);
+			server_name_len = Z_STRLEN_P(tmp);
 			ctx = CLSCTX_REMOTE_SERVER;
 		}
 
@@ -89,27 +89,27 @@ PHP_FUNCTION(com_create_instance)
 				"Username", sizeof("Username")-1))) {
 			convert_to_string_ex(tmp);
 			user_name = Z_STRVAL_P(tmp);
-			user_name_len = Z_STRSIZE_P(tmp);
+			user_name_len = Z_STRLEN_P(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
 				"Password", sizeof("Password")-1))) {
 			convert_to_string_ex(tmp);
 			password = Z_STRVAL_P(tmp);
-			password_len = Z_STRSIZE_P(tmp);
+			password_len = Z_STRLEN_P(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
 				"Domain", sizeof("Domain")-1))) {
 			convert_to_string_ex(tmp);
 			domain_name = Z_STRVAL_P(tmp);
-			domain_name_len = Z_STRSIZE_P(tmp);
+			domain_name_len = Z_STRLEN_P(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
 				"Flags", sizeof("Flags")-1))) {
 			convert_to_int_ex(tmp);
-			ctx = (CLSCTX)Z_IVAL_P(tmp);
+			ctx = (CLSCTX)Z_LVAL_P(tmp);
 		}
 	}
 
@@ -289,14 +289,14 @@ PHP_FUNCTION(com_get_active_object)
 	CLSID clsid;
 	char *module_name;
 	int module_name_len;
-	php_int_t code_page = COMG(code_page);
+	zend_long code_page = COMG(code_page);
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
 	OLECHAR *module = NULL;
 
 	php_com_initialize(TSRMLS_C);
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
 				&module_name, &module_name_len, &code_page)) {
 		php_com_throw_exception(E_INVALIDARG, "Invalid arguments!" TSRMLS_CC);
 		return;
@@ -427,7 +427,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 	}
 
 	if (obj->id_of_name_cache && NULL != (tmp = zend_hash_str_find(obj->id_of_name_cache, name, namelen))) {
-		*dispid = Z_IVAL_P(tmp);
+		*dispid = Z_LVAL_P(tmp);
 		return S_OK;
 	}
 	
@@ -456,7 +456,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 			ALLOC_HASHTABLE(obj->id_of_name_cache);
 			zend_hash_init(obj->id_of_name_cache, 2, NULL, NULL, 0);
 		}
-		ZVAL_INT(&tmp, *dispid);
+		ZVAL_LONG(&tmp, *dispid);
 		zend_hash_str_update(obj->id_of_name_cache, name, namelen, &tmp);
 	}
 	
@@ -784,11 +784,11 @@ PHP_FUNCTION(com_print_typeinfo)
    Process COM messages, sleeping for up to timeoutms milliseconds */
 PHP_FUNCTION(com_message_pump)
 {
-	php_int_t timeoutms = 0;
+	zend_long timeoutms = 0;
 	MSG msg;
 	DWORD result;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &timeoutms) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timeoutms) == FAILURE)
 		RETURN_FALSE;
 	
 	php_com_initialize(TSRMLS_C);

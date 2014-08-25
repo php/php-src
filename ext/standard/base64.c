@@ -63,7 +63,7 @@ PHPAPI zend_string *php_base64_encode(const unsigned char *str, php_size_t lengt
 		return NULL;
 	}
 
-	result = STR_ALLOC(((length + 2) / 3) * 4 * sizeof(char), 0);
+	result = zend_string_alloc(((length + 2) / 3) * 4 * sizeof(char), 0);
 	p = (unsigned char *)result->val;
 
 	while (length > 2) { /* keep going until we have less than 24 bits */
@@ -144,7 +144,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, php_size_t le
 	/* this sucks for threaded environments */
 	zend_string *result;
 
-	result = STR_ALLOC(length, 0);
+	result = zend_string_alloc(length, 0);
 
 	/* run through the whole string, converting as we go */
 	while ((ch = *current++) != '\0' && length-- > 0) {
@@ -158,7 +158,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, php_size_t le
 						continue;
 					}
 				}
-				STR_FREE(result);
+				zend_string_free(result);
 				return NULL;
 			}
 			continue;
@@ -168,7 +168,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, php_size_t le
 		if ((!strict && ch < 0) || ch == -1) { /* a space or some other separator character, we simply skip over */
 			continue;
 		} else if (ch == -2) {
-			STR_FREE(result);
+			zend_string_free(result);
 			return NULL;
 		}
 
@@ -196,7 +196,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, php_size_t le
 	if (ch == base64_pad) {
 		switch(i % 4) {
 		case 1:
-			STR_FREE(result);
+			zend_string_free(result);
 			return NULL;
 		case 2:
 			k++;

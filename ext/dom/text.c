@@ -149,11 +149,11 @@ PHP_FUNCTION(dom_text_split_text)
 	xmlChar    *second;
 	xmlNodePtr  node;
 	xmlNodePtr  nnode;
-	php_int_t        offset;
+	zend_long        offset;
 	int         length;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oi", &id, dom_text_class_entry, &offset) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &id, dom_text_class_entry, &offset) == FAILURE) {
 		return;
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);

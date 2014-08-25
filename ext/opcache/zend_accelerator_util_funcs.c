@@ -31,11 +31,11 @@ static zend_uint zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
 
 #if SIZEOF_SIZE_T <= SIZEOF_ZEND_INT
 /* If sizeof(void*) == sizeof(ulong) we can use zend_hash index functions */
-# define accel_xlat_set(old, new)	zend_hash_index_update_ptr(&ZCG(bind_hash), (zend_uint_t)(zend_uintptr_t)(old), (new))
-# define accel_xlat_get(old)		zend_hash_index_find_ptr(&ZCG(bind_hash), (zend_uint_t)(zend_uintptr_t)(old))
+# define accel_xlat_set(old, new)	zend_hash_index_update_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old), (new))
+# define accel_xlat_get(old)		zend_hash_index_find_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old))
 #else
-# define accel_xlat_set(old, new)	(zend_hash_str_add_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_uint_t)(zend_uintptr_t)(old), (void**)&(new))
-# define accel_xlat_get(old, new)	((new) = zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_uint_t)(zend_uintptr_t)(old), (void**)&(new)))
+# define accel_xlat_set(old, new)	(zend_hash_str_add_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_ulong)(zend_uintptr_t)(old), (void**)&(new))
+# define accel_xlat_get(old, new)	((new) = zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_ulong)(zend_uintptr_t)(old), (void**)&(new)))
 #endif
 
 typedef int (*id_function_t)(void *, void *);
@@ -220,9 +220,9 @@ static void zend_destroy_property_info(zval *zv)
 {
 	zend_property_info *property_info = Z_PTR_P(zv);
 
-	STR_RELEASE(property_info->name);
+	zend_string_release(property_info->name);
 	if (property_info->doc_comment) {
-		STR_RELEASE(property_info->doc_comment);
+		zend_string_release(property_info->doc_comment);
 	}
 }
 
@@ -232,14 +232,14 @@ static inline zend_string *zend_clone_str(zend_string *str TSRMLS_DC)
 
 	if (IS_INTERNED(str)) {		
 		ret = str;
-	} else if (STR_REFCOUNT(str) <= 1 || (ret = accel_xlat_get(str)) == NULL) {
-		ret = STR_DUP(str, 0);
+	} else if (zend_string_refcount(str) <= 1 || (ret = accel_xlat_get(str)) == NULL) {
+		ret = zend_string_dup(str, 0);
 		GC_FLAGS(ret) = GC_FLAGS(str);
-		if (STR_REFCOUNT(str) > 1) {
+		if (zend_string_refcount(str) > 1) {
 			accel_xlat_set(str, ret);
 		}
 	} else {
-		STR_ADDREF(ret);
+		zend_string_addref(ret);
 	}
 	return ret;
 }
@@ -333,7 +333,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 {
 	uint idx;
 	Bucket *p, *q, *r;
-	zend_uint_t nIndex;
+	zend_ulong nIndex;
 	TSRMLS_FETCH();
 
 	ht->nTableSize = source->nTableSize;
@@ -412,7 +412,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 {
 	uint idx;
 	Bucket *p, *q;
-	zend_uint_t nIndex;
+	zend_ulong nIndex;
 	zend_class_entry *new_ce;
 	zend_function *new_prototype;
 	zend_op_array *new_entry;
@@ -490,7 +490,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 {
 	uint idx;
 	Bucket *p, *q;
-	zend_uint_t nIndex;
+	zend_ulong nIndex;
 	zend_class_entry *new_ce;
 	zend_property_info *prop_info;
 
@@ -538,7 +538,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		prop_info->name = zend_clone_str(prop_info->name TSRMLS_CC);
 		if (prop_info->doc_comment) {
 			if (ZCG(accel_directives).load_comments) {
-				prop_info->doc_comment = STR_DUP(prop_info->doc_comment, 0);
+				prop_info->doc_comment = zend_string_dup(prop_info->doc_comment, 0);
 			} else {
 				prop_info->doc_comment = NULL;
 			}
@@ -642,7 +642,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	}
 	if (ZEND_CE_DOC_COMMENT(ce)) {
 		if (ZCG(accel_directives).load_comments) {
-			ZEND_CE_DOC_COMMENT(ce) = STR_DUP(ZEND_CE_DOC_COMMENT(ce), 0);
+			ZEND_CE_DOC_COMMENT(ce) = zend_string_dup(ZEND_CE_DOC_COMMENT(ce), 0);
 		} else {
 			ZEND_CE_DOC_COMMENT(ce) =  NULL;
 		}
@@ -883,9 +883,9 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 
 			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, persistent_script->full_path->val, persistent_script->full_path->len, 0);
 			if (!zend_hash_exists(EG(zend_constants), name)) {
-				zend_register_int_constant(name->val, name->len, persistent_script->compiler_halt_offset, CONST_CS, 0 TSRMLS_CC);
+				zend_register_long_constant(name->val, name->len, persistent_script->compiler_halt_offset, CONST_CS, 0 TSRMLS_CC);
 			}
-			STR_RELEASE(name);
+			zend_string_release(name);
 		}
 
 		zend_hash_destroy(&ZCG(bind_hash));

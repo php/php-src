@@ -113,7 +113,7 @@ int dom_namednodemap_length_read(dom_object *obj, zval *retval TSRMLS_DC)
 		}
 	}
 
-	ZVAL_INT(retval, count);
+	ZVAL_LONG(retval, count);
 	return SUCCESS;
 }
 
@@ -200,7 +200,7 @@ Since:
 PHP_FUNCTION(dom_namednodemap_item)
 {
 	zval *id;
-	php_int_t index;
+	zend_long index;
 	int ret;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
@@ -209,7 +209,7 @@ PHP_FUNCTION(dom_namednodemap_item)
 	xmlNodePtr nodep, curnode;
 	int count;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oi", &id, dom_namednodemap_class_entry, &index) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &id, dom_namednodemap_class_entry, &index) == FAILURE) {
 		return;
 	}
 	if (index >= 0) {

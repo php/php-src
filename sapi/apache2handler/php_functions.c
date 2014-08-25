@@ -109,9 +109,9 @@ PHP_FUNCTION(virtual)
 /* }}} */
 
 #define ADD_LONG(name) \
-		add_property_int(return_value, #name, rr->name)
+		add_property_long(return_value, #name, rr->name)
 #define ADD_TIME(name) \
-		add_property_int(return_value, #name, apr_time_sec(rr->name));
+		add_property_long(return_value, #name, apr_time_sec(rr->name));
 #define ADD_STRING(name) \
 		if (rr->name) add_property_string(return_value, #name, (char *) rr->name)
 

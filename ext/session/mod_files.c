@@ -335,7 +335,7 @@ PS_CLOSE_FUNC(files)
 
 PS_READ_FUNC(files)
 {
-	php_int_t n;
+	zend_long n;
 	struct stat sbuf;
 	PS_FILES_DATA;
 
@@ -344,7 +344,7 @@ PS_READ_FUNC(files)
 		ps_files_key_exists(data, key? key->val : NULL TSRMLS_CC) == FAILURE) {
 		/* key points to PS(id), but cannot change here. */
 		if (key) {
-			STR_RELEASE(PS(id));
+			zend_string_release(PS(id));
 			PS(id) = NULL;
 		}
 		PS(id) = PS(mod)->s_create_sid((void **)&data TSRMLS_CC);
@@ -374,7 +374,7 @@ PS_READ_FUNC(files)
 		return SUCCESS;
 	}
 
-	*val = STR_ALLOC(sbuf.st_size, 0);
+	*val = zend_string_alloc(sbuf.st_size, 0);
 
 #if defined(HAVE_PREAD)
 	n = pread(data->fd, (*val)->val, (*val)->len, 0);
@@ -389,7 +389,7 @@ PS_READ_FUNC(files)
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "read returned less bytes than requested");
 		}
-		STR_RELEASE(*val);
+		zend_string_release(*val);
 		return FAILURE;
 	}
 
@@ -398,7 +398,7 @@ PS_READ_FUNC(files)
 
 PS_WRITE_FUNC(files)
 {
-	php_int_t n;
+	zend_long n;
 	PS_FILES_DATA;
 
 	ps_files_open(data, key->val TSRMLS_CC);
@@ -481,7 +481,7 @@ PS_CREATE_SID_FUNC(files)
 		/* Check collision */
 		if (data && ps_files_key_exists(data, sid? sid->val : NULL TSRMLS_CC) == SUCCESS) {
 			if (sid) {
-				STR_RELEASE(sid);
+				zend_string_release(sid);
 				sid = NULL;
 			}
 			if (!(maxfail--)) {

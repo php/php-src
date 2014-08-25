@@ -221,7 +221,7 @@ PHP_FUNCTION(version_compare)
 	}
 	compare = php_version_compare(v1, v2);
 	if (argc == 2) {
-		RETURN_INT(compare);
+		RETURN_LONG(compare);
 	}
 	if (!strncmp(op, "<", op_len) || !strncmp(op, "lt", op_len)) {
 		RETURN_BOOL(compare == -1);

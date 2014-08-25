@@ -249,11 +249,11 @@ typedef struct _phar_entry_info {
 	char                     *filename;
 	enum phar_fp_type        fp_type;
 	/* offset within original phar file of the file contents */
-	php_int_t                     offset_abs;
+	zend_long                     offset_abs;
 	/* offset within fp of the file contents */
-	php_int_t                     offset;
+	zend_long                     offset;
 	/* offset within original phar file of the file header (for zip-based/tar-based) */
-	php_int_t                     header_offset;
+	zend_long                     header_offset;
 	php_stream               *fp;
 	php_stream               *cfp;
 	int                      fp_refcount;
@@ -334,7 +334,7 @@ struct _phar_archive_data {
 typedef struct _phar_entry_fp_info {
 	enum phar_fp_type        fp_type;
 	/* offset within fp of the file contents */
-	php_int_t                     offset;
+	zend_long                     offset;
 } phar_entry_fp_info;
 
 struct _phar_entry_fp {
@@ -578,12 +578,12 @@ int phar_copy_on_write(phar_archive_data **pphar TSRMLS_DC);
 int phar_is_tar(char *buf, char *fname);
 int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error TSRMLS_DC);
 int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
-int phar_tar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int defaultstub, char **error TSRMLS_DC);
+int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error TSRMLS_DC);
 
 /* zip functions in zip.c */
 int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
-int phar_zip_flush(phar_archive_data *archive, char *user_stub, php_int_t len, int defaultstub, char **error TSRMLS_DC);
+int phar_zip_flush(phar_archive_data *archive, char *user_stub, zend_long len, int defaultstub, char **error TSRMLS_DC);
 
 #ifdef PHAR_MAIN
 static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, int is_data, char **error TSRMLS_DC);
@@ -600,7 +600,7 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int pa
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, int path_len, char dir, char **error, int security TSRMLS_DC);
 phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, const char *mode, char allow_dir, char **error, int security TSRMLS_DC);
 int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, const char *mode, char allow_dir, char **error, int security TSRMLS_DC);
-int phar_flush(phar_archive_data *archive, char *user_stub, php_int_t len, int convert, char **error TSRMLS_DC);
+int phar_flush(phar_archive_data *archive, char *user_stub, zend_long len, int convert, char **error TSRMLS_DC);
 int phar_detect_phar_fname_ext(const char *filename, int filename_len, const char **ext_str, int *ext_len, int executable, int for_create, int is_complete TSRMLS_DC);
 int phar_split_fname(const char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len, int executable, int for_create TSRMLS_DC);
 

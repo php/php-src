@@ -194,13 +194,13 @@ This file is public domain and comes with NO WARRANTY of any kind */
                    (((uint32_t) (zend_uchar) (A)[2]) << 16) |\
                    (((uint32_t) (zend_uchar) (A)[1]) << 8) | \
                     ((uint32_t) (zend_uchar) (A)[0])))
-#define sint4korr(A)  (*((php_int_t *) (A)))
+#define sint4korr(A)  (*((zend_long *) (A)))
 
 #define uint2korr(A)  (*((uint16_t *) (A)))
 #define uint3korr(A)  (uint32_t) (((uint32_t) ((zend_uchar) (A)[0])) +\
                                (((uint32_t) ((zend_uchar) (A)[1])) << 8) +\
                                (((uint32_t) ((zend_uchar) (A)[2])) << 16))
-#define uint4korr(A)  (*((php_uint_t *) (A)))
+#define uint4korr(A)  (*((zend_ulong *) (A)))
 
 
 
@@ -211,7 +211,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
                   *(T)=  (zend_uchar) ((A));\
                   *(T+1)=(zend_uchar) (((uint32_t) (A) >> 8));\
                   *(T+2)=(zend_uchar) (((A) >> 16)); }
-#define int4store(T,A)    *((php_int_t *) (T))= (php_int_t) (A)
+#define int4store(T,A)    *((zend_long *) (T))= (zend_long) (A)
 #define int5store(T,A)    { \
               *((zend_uchar *)(T))= (zend_uchar)((A));\
               *(((zend_uchar *)(T))+1)=(zend_uchar) (((A) >> 8));\
@@ -232,12 +232,12 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 typedef union {
   double v;
-  php_int_t m[2];
+  zend_long m[2];
 } float8get_union;
-#define float8get(V,M)    { ((float8get_union *)&(V))->m[0] = *((php_int_t*) (M)); \
-                            ((float8get_union *)&(V))->m[1] = *(((php_int_t*) (M))+1); }
-#define float8store(T,V) { *((php_int_t *) (T))     = ((float8get_union *)&(V))->m[0]; \
-                           *(((php_int_t *) (T))+1) = ((float8get_union *)&(V))->m[1]; }
+#define float8get(V,M)    { ((float8get_union *)&(V))->m[0] = *((zend_long*) (M)); \
+                            ((float8get_union *)&(V))->m[1] = *(((zend_long*) (M))+1); }
+#define float8store(T,V) { *((zend_long *) (T))     = ((float8get_union *)&(V))->m[0]; \
+                           *(((zend_long *) (T))+1) = ((float8get_union *)&(V))->m[1]; }
 #define float4get(V,M)	{ *((float *) &(V)) = *((float*) (M)); }
 /* From Andrey Hristov based on float8get */
 #define floatget(V,M)    memcpy((char*) &(V),(char*) (M),sizeof(float))

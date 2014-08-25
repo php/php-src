@@ -386,13 +386,13 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 	le_mcrypt = zend_register_list_destructors_ex(php_mcrypt_module_dtor, NULL, "mcrypt", module_number);
 
 	/* modes for mcrypt_??? routines */
-	REGISTER_INT_CONSTANT("MCRYPT_ENCRYPT", 0, CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("MCRYPT_DECRYPT", 1, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MCRYPT_ENCRYPT", 0, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MCRYPT_DECRYPT", 1, CONST_PERSISTENT);
 
 	/* sources for mcrypt_create_iv */
-	REGISTER_INT_CONSTANT("MCRYPT_DEV_RANDOM", RANDOM, CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("MCRYPT_DEV_URANDOM", URANDOM, CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("MCRYPT_RAND", RAND, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MCRYPT_DEV_RANDOM", RANDOM, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MCRYPT_DEV_URANDOM", URANDOM, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MCRYPT_RAND", RAND, CONST_PERSISTENT);
 
 	/* ciphers */
 	MCRYPT_ENTRY2_2_4(3DES, "tripledes");
@@ -603,7 +603,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 		}
 	}
 	pm->init = 1;
-	RETVAL_INT(result);
+	RETVAL_LONG(result);
 
 	efree(iv_s);
 	efree(key_s);
@@ -712,7 +712,7 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 	key_sizes = mcrypt_enc_get_supported_key_sizes(pm->td, &count);
 
 	for (i = 0; i < count; i++) {
-		add_index_int(return_value, i, key_sizes[i]);
+		add_index_long(return_value, i, key_sizes[i]);
 	}
 
 	mcrypt_free(key_sizes);
@@ -724,7 +724,7 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 PHP_FUNCTION(mcrypt_enc_self_test)
 {
 	MCRYPT_GET_TD_ARG
-	RETURN_INT(mcrypt_enc_self_test(pm->td));
+	RETURN_LONG(mcrypt_enc_self_test(pm->td));
 }
 /* }}} */
 
@@ -800,7 +800,7 @@ PHP_FUNCTION(mcrypt_enc_is_block_mode)
 PHP_FUNCTION(mcrypt_enc_get_block_size)
 {
 	MCRYPT_GET_TD_ARG
-	RETURN_INT(mcrypt_enc_get_block_size(pm->td));
+	RETURN_LONG(mcrypt_enc_get_block_size(pm->td));
 }
 /* }}} */
 
@@ -809,7 +809,7 @@ PHP_FUNCTION(mcrypt_enc_get_block_size)
 PHP_FUNCTION(mcrypt_enc_get_key_size)
 {
 	MCRYPT_GET_TD_ARG
-	RETURN_INT(mcrypt_enc_get_key_size(pm->td));
+	RETURN_LONG(mcrypt_enc_get_key_size(pm->td));
 }
 /* }}} */
 
@@ -818,7 +818,7 @@ PHP_FUNCTION(mcrypt_enc_get_key_size)
 PHP_FUNCTION(mcrypt_enc_get_iv_size)
 {
 	MCRYPT_GET_TD_ARG
-	RETURN_INT(mcrypt_enc_get_iv_size(pm->td));
+	RETURN_LONG(mcrypt_enc_get_iv_size(pm->td));
 }
 /* }}} */
 
@@ -910,7 +910,7 @@ PHP_FUNCTION(mcrypt_module_get_algo_block_size)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 	
-	RETURN_INT(mcrypt_module_get_algo_block_size(module, dir));
+	RETURN_LONG(mcrypt_module_get_algo_block_size(module, dir));
 }
 /* }}} */
 
@@ -920,7 +920,7 @@ PHP_FUNCTION(mcrypt_module_get_algo_key_size)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
 	
-	RETURN_INT(mcrypt_module_get_algo_key_size(module, dir));
+	RETURN_LONG(mcrypt_module_get_algo_key_size(module, dir));
 }
 /* }}} */
 
@@ -937,7 +937,7 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 	key_sizes = mcrypt_module_get_algo_supported_key_sizes(module, dir, &count);
 
 	for (i = 0; i < count; i++) {
-		add_index_int(return_value, i, key_sizes[i]);
+		add_index_long(return_value, i, key_sizes[i]);
 	}
 	mcrypt_free(key_sizes);
 }
@@ -1017,7 +1017,7 @@ PHP_FUNCTION(mcrypt_get_key_size)
 	
 	td = mcrypt_module_open(cipher, cipher_dir_string, module, module_dir_string);
 	if (td != MCRYPT_FAILED) {
-		RETVAL_INT(mcrypt_enc_get_key_size(td));
+		RETVAL_LONG(mcrypt_enc_get_key_size(td));
 		mcrypt_module_close(td);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_OPEN_MODULE_FAILED);
@@ -1046,7 +1046,7 @@ PHP_FUNCTION(mcrypt_get_block_size)
 	
 	td = mcrypt_module_open(cipher, cipher_dir_string, module, module_dir_string);
 	if (td != MCRYPT_FAILED) {
-		RETVAL_INT(mcrypt_enc_get_block_size(td));
+		RETVAL_LONG(mcrypt_enc_get_block_size(td));
 		mcrypt_module_close(td);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_OPEN_MODULE_FAILED);
@@ -1075,7 +1075,7 @@ PHP_FUNCTION(mcrypt_get_iv_size)
 	
 	td = mcrypt_module_open(cipher, cipher_dir_string, module, module_dir_string);
 	if (td != MCRYPT_FAILED) {
-		RETVAL_INT(mcrypt_enc_get_iv_size(td));
+		RETVAL_LONG(mcrypt_enc_get_iv_size(td));
 		mcrypt_module_close(td);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_OPEN_MODULE_FAILED);
@@ -1149,7 +1149,7 @@ static char *php_mcrypt_get_key_size_str(
 				smart_str_appends(&str, ", ");
 			}
 
-			smart_str_append_int(&str, key_sizes[i]);
+			smart_str_append_long(&str, key_sizes[i]);
 		}
 
 		smart_str_appends(&str, " supported");
@@ -1343,7 +1343,7 @@ PHP_FUNCTION(mcrypt_ecb)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ecb", iv, iv_len, Z_IVAL_P(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ecb", iv, iv_len, Z_LVAL_P(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1359,7 +1359,7 @@ PHP_FUNCTION(mcrypt_cbc)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cbc", iv, iv_len, Z_IVAL_P(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cbc", iv, iv_len, Z_LVAL_P(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1375,7 +1375,7 @@ PHP_FUNCTION(mcrypt_cfb)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cfb", iv, iv_len, Z_IVAL_P(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cfb", iv, iv_len, Z_LVAL_P(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1391,7 +1391,7 @@ PHP_FUNCTION(mcrypt_ofb)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ofb", iv, iv_len, Z_IVAL_P(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ofb", iv, iv_len, Z_LVAL_P(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1400,11 +1400,11 @@ PHP_FUNCTION(mcrypt_ofb)
 PHP_FUNCTION(mcrypt_create_iv)
 {
 	char *iv;
-	php_int_t source = URANDOM;
-	php_int_t size;
+	zend_long source = URANDOM;
+	zend_long size;
 	int n = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|i", &size, &source) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &size, &source) == FAILURE) {
 		return;
 	}
 

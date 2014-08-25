@@ -36,19 +36,19 @@
 #define zend_accel_store_string(str) do { \
 		zend_string *new_str = zend_shared_alloc_get_xlat_entry(str); \
 		if (new_str) { \
-			STR_RELEASE(str); \
+			zend_string_release(str); \
 			str = new_str; \
 		} else { \
 	    	new_str = zend_accel_memdup((void*)str, _STR_HEADER_SIZE + (str)->len + 1); \
-			STR_RELEASE(str); \
+			zend_string_release(str); \
 	    	str = new_str; \
-	    	STR_HASH_VAL(str); \
+	    	zend_string_hash_val(str); \
 	    	GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
 		} \
     } while (0)
 #define zend_accel_memdup_string(str) do { \
 		str = zend_accel_memdup(str, _STR_HEADER_SIZE + (str)->len + 1); \
-    	STR_HASH_VAL(str); \
+    	zend_string_hash_val(str); \
 		GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
 	} while (0)
 #define zend_accel_store_interned_string(str) do { \
@@ -292,7 +292,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		fake_execute_data.func = (zend_function*)op_array;
 		EG(current_execute_data) = &fake_execute_data;
 		if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1 TSRMLS_CC)) != NULL) {
-			main_persistent_script->compiler_halt_offset = Z_IVAL_P(offset);
+			main_persistent_script->compiler_halt_offset = Z_LVAL_P(offset);
 		}
 		EG(current_execute_data) = orig_execute_data;
 	}
@@ -433,7 +433,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			}
 		} else {
 			if (!already_stored) {
-				STR_RELEASE(op_array->doc_comment);
+				zend_string_release(op_array->doc_comment);
 			}
 			op_array->doc_comment = NULL;
 		}
@@ -488,7 +488,7 @@ static void zend_persist_property_info(zval *zv TSRMLS_DC)
 			if (!zend_shared_alloc_get_xlat_entry(prop->doc_comment)) {
 				zend_shared_alloc_register_xlat_entry(prop->doc_comment, prop->doc_comment);
 			}
-			STR_RELEASE(prop->doc_comment);
+			zend_string_release(prop->doc_comment);
 			prop->doc_comment = NULL;
 		}
 	}
@@ -532,7 +532,7 @@ static void zend_persist_class_entry(zval *zv TSRMLS_DC)
 			} else {
 				if (!zend_shared_alloc_get_xlat_entry(ZEND_CE_DOC_COMMENT(ce))) {
 					zend_shared_alloc_register_xlat_entry(ZEND_CE_DOC_COMMENT(ce), ZEND_CE_DOC_COMMENT(ce));
-					STR_RELEASE(ZEND_CE_DOC_COMMENT(ce));
+					zend_string_release(ZEND_CE_DOC_COMMENT(ce));
 				}
 				ZEND_CE_DOC_COMMENT(ce) = NULL;
 			}

@@ -44,7 +44,7 @@ static zval *com_property_read(zval *object, zval *member, int type, void **cahc
 
 		convert_to_string_ex(member);
 
-		res = php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRSIZE_P(member),
+		res = php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
 				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1 TSRMLS_CC);
 
 		if (res == SUCCESS) {
@@ -71,7 +71,7 @@ static void com_property_write(zval *object, zval *member, zval *value, void **c
 		VariantInit(&v);
 
 		convert_to_string_ex(member);
-		if (SUCCESS == php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRSIZE_P(member),
+		if (SUCCESS == php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
 				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, value, 0 TSRMLS_CC)) {
 			VariantClear(&v);
 		}
@@ -101,7 +101,7 @@ static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv T
 		convert_to_int(offset);
 
 		if (SafeArrayGetDim(V_ARRAY(&obj->v)) == 1) {	
-			if (php_com_safearray_get_elem(&obj->v, &v, Z_IVAL_P(offset) TSRMLS_CC)) {
+			if (php_com_safearray_get_elem(&obj->v, &v, Z_LVAL_P(offset) TSRMLS_CC)) {
 				php_com_wrap_variant(rv, &v, obj->code_page TSRMLS_CC);
 				VariantClear(&v);
 			}
@@ -145,7 +145,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 			}
 
 			convert_to_int(offset);
-			indices = Z_IVAL_P(offset);
+			indices = Z_LVAL_P(offset);
 
 			VariantInit(&v);
 			php_com_variant_from_zval(&v, value, obj->code_page TSRMLS_CC);
@@ -197,7 +197,7 @@ static int com_property_exists(zval *object, zval *member, int check_empty, void
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		convert_to_string_ex(member);
-		if (SUCCEEDED(php_com_get_id_of_name(obj, Z_STRVAL_P(member), Z_STRSIZE_P(member), &dispid TSRMLS_CC))) {
+		if (SUCCEEDED(php_com_get_id_of_name(obj, Z_STRVAL_P(member), Z_STRLEN_P(member), &dispid TSRMLS_CC))) {
 			/* TODO: distinguish between property and method! */
 			return 1;
 		}
@@ -238,7 +238,7 @@ static void function_dtor(zval *zv)
 {
 	zend_internal_function *f = (zend_internal_function*)Z_PTR_P(zv);
 
-	STR_RELEASE(f->function_name);
+	zend_string_release(f->function_name);
 	if (f->arg_info) {
 		efree(f->arg_info);
 	}
@@ -277,7 +277,7 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 		f.arg_info = NULL;
 		f.scope = obj->ce;
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-		f.function_name = STR_COPY(name);
+		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
 
 		fptr = &f;
@@ -434,7 +434,7 @@ static zend_string* com_class_name_get(const zend_object *object, int parent TSR
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
 
-	return STR_COPY(obj->ce->name);
+	return zend_string_copy(obj->ce->name);
 }
 
 /* This compares two variants for equality */
@@ -491,7 +491,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 	}
 
 	switch(type) {
-		case IS_INT:
+		case IS_LONG:
 			vt = VT_INT;
 			break;
 		case IS_DOUBLE:

@@ -47,7 +47,7 @@ static int php_embed_deactivate(TSRMLS_D)
 static inline size_t php_embed_single_write(const char *str, php_size_t str_length)
 {
 #ifdef PHP_WRITE_STDOUT
-	php_int_t ret;
+	zend_long ret;
 
 	ret = write(STDOUT_FILENO, str, str_length);
 	if (ret <= 0) return 0;

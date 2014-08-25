@@ -38,7 +38,7 @@ typedef struct _php_com_dotnet_object {
 	int modified;
 
 	ITypeInfo *typeinfo;
-	php_int_t code_page;
+	zend_long code_page;
 
 	zend_class_entry *ce;
 

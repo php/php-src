@@ -41,7 +41,7 @@ PHP_FUNCTION(gettype)
 			RETVAL_STRING("boolean");
 			break;
 
-		case IS_INT:
+		case IS_LONG:
 			RETVAL_STRING("integer");
 			break;
 
@@ -138,20 +138,20 @@ PHP_FUNCTION(settype)
 PHP_FUNCTION(intval)
 {
 	zval *num;
-	php_int_t base = 10;
+	zend_long base = 10;
 
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
 	}
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &num, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &num, &base) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(num)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_INT(base)
+		Z_PARAM_LONG(base)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
@@ -277,7 +277,7 @@ PHP_FUNCTION(is_bool)
    Returns true if variable is a long (integer) */
 PHP_FUNCTION(is_long)
 {
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_INT);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
 }
 /* }}} */
 
@@ -324,13 +324,13 @@ PHP_FUNCTION(is_numeric)
 	}
 
 	switch (Z_TYPE_P(arg)) {
-		case IS_INT:
+		case IS_LONG:
 		case IS_DOUBLE:
 			RETURN_TRUE;
 			break;
 
 		case IS_STRING:
-			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), NULL, NULL, 0)) {
+			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 0)) {
 				RETURN_TRUE;
 			} else {
 				RETURN_FALSE;
@@ -364,7 +364,7 @@ PHP_FUNCTION(is_scalar)
 		case IS_FALSE:
 		case IS_TRUE:
 		case IS_DOUBLE:
-		case IS_INT:
+		case IS_LONG:
 		case IS_STRING:
 			RETURN_TRUE;
 			break;
@@ -401,7 +401,7 @@ PHP_FUNCTION(is_callable)
 		//??? is it necessary to be consistent with old PHP ("\0" support)
 		if (UNEXPECTED(name->len) != strlen(name->val)) {
 			ZVAL_STRINGL(callable_name, name->val, strlen(name->val));
-			STR_RELEASE(name);
+			zend_string_release(name);
 		} else {
 			ZVAL_STR(callable_name, name);
 		}

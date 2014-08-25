@@ -149,7 +149,7 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 	}
 	if (old_object->properties) {
 		zval *prop, new_prop;
-		zend_uint_t num_key;
+		zend_ulong num_key;
 		zend_string *key;
 
 		if (!new_object->properties) {

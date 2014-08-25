@@ -43,7 +43,7 @@ typedef struct _zend_generator {
 	/* Variable to put sent value into */
 	zval *send_target;
 	/* Largest used integer key for auto-incrementing keys */
-	zend_int_t largest_used_integer_key;
+	zend_long largest_used_integer_key;
 
 	/* ZEND_GENERATOR_* flags */
 	zend_uchar flags;

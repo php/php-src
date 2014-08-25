@@ -48,7 +48,7 @@ PHP_FUNCTION( collator_get_error_code )
 		RETURN_FALSE;
 
 	/* Return collator's last error code. */
-	RETURN_INT( COLLATOR_ERROR_CODE( co ) );
+	RETURN_LONG( COLLATOR_ERROR_CODE( co ) );
 }
 /* }}} */
 

@@ -69,7 +69,7 @@
 /* Simplify ssl context option retrieval */
 #define GET_VER_OPT(name)               (PHP_STREAM_CONTEXT(stream) && (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", name)) != NULL)
 #define GET_VER_OPT_STRING(name, str)   if (GET_VER_OPT(name)) { convert_to_string_ex(val); str = Z_STRVAL_P(val); }
-#define GET_VER_OPT_LONG(name, num)     if (GET_VER_OPT(name)) { convert_to_int_ex(val); num = Z_IVAL_P(val); }
+#define GET_VER_OPT_LONG(name, num)     if (GET_VER_OPT(name)) { convert_to_int_ex(val); num = Z_LVAL_P(val); }
 
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
@@ -89,9 +89,9 @@ typedef struct _php_openssl_sni_cert_t {
 
 /* Provides leaky bucket handhsake renegotiation rate-limiting  */
 typedef struct _php_openssl_handshake_bucket_t {
-	php_int_t prev_handshake;
-	php_int_t limit;
-	php_int_t window;
+	zend_long prev_handshake;
+	zend_long limit;
+	zend_long window;
 	float tokens;
 	unsigned should_close;
 } php_openssl_handshake_bucket_t;
@@ -146,7 +146,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 	int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
 	char esbuf[512];
 	smart_str ebuf = {0};
-	php_uint_t ecode;
+	zend_ulong ecode;
 	int retry = 1;
 
 	switch(err) {
@@ -230,7 +230,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 	SSL *ssl;
 	int err, depth, ret;
 	zval *val;
-	php_uint_t allowed_depth = OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
+	zend_ulong allowed_depth = OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
 
 	TSRMLS_FETCH();
 
@@ -254,7 +254,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 
 	/* check the depth */
 	GET_VER_OPT_LONG("verify_depth", allowed_depth);
-	if ((php_uint_t)depth > allowed_depth) {
+	if ((zend_ulong)depth > allowed_depth) {
 		ret = 0;
 		X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
 	}
@@ -271,7 +271,7 @@ static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *
 	fingerprint = php_openssl_x509_fingerprint(peer, method, 0 TSRMLS_CC);
 	if (fingerprint) {
 		result = strcmp(expected, fingerprint->val);
-		STR_RELEASE(fingerprint);
+		zend_string_release(fingerprint);
 	}
 
 	return result;
@@ -282,7 +282,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
 	if (Z_TYPE_P(val) == IS_STRING) {
 		const char *method = NULL;
 
-		switch (Z_STRSIZE_P(val)) {
+		switch (Z_STRLEN_P(val)) {
 			case 32:
 				method = "md5";
 				break;
@@ -513,9 +513,9 @@ static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 	GET_VER_OPT_STRING("passphrase", passphrase);
 
 	if (passphrase) {
-		if (Z_STRSIZE_P(val) < num - 1) {
-			memcpy(buf, Z_STRVAL_P(val), Z_STRSIZE_P(val)+1);
-			return Z_STRSIZE_P(val);
+		if (Z_STRLEN_P(val) < num - 1) {
+			memcpy(buf, Z_STRVAL_P(val), Z_STRLEN_P(val)+1);
+			return Z_STRLEN_P(val);
 		}
 	}
 	return 0;
@@ -880,7 +880,7 @@ static int set_local_cert(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static const SSL_METHOD *php_select_crypto_method(php_int_t method_value, int is_client TSRMLS_DC) /* {{{ */
+static const SSL_METHOD *php_select_crypto_method(zend_long method_value, int is_client TSRMLS_DC) /* {{{ */
 {
 	if (method_value == STREAM_CRYPTO_METHOD_SSLv2) {
 #ifndef OPENSSL_NO_SSL2
@@ -918,9 +918,9 @@ static const SSL_METHOD *php_select_crypto_method(php_int_t method_value, int is
 }
 /* }}} */
 
-static php_int_t php_get_crypto_method_ctx_flags(php_int_t method_flags TSRMLS_DC) /* {{{ */
+static zend_long php_get_crypto_method_ctx_flags(zend_long method_flags TSRMLS_DC) /* {{{ */
 {
-	php_int_t ssl_ctx_options = SSL_OP_ALL;
+	zend_long ssl_ctx_options = SSL_OP_ALL;
 
 #ifndef OPENSSL_NO_SSL2
 	if (!(method_flags & STREAM_CRYPTO_METHOD_SSLv2)) {
@@ -956,7 +956,7 @@ static void limit_handshake_reneg(const SSL *ssl) /* {{{ */
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
 	struct timeval now;
-	php_int_t elapsed_time;
+	zend_long elapsed_time;
 
 	stream = php_openssl_get_stream_from_ssl_handle(ssl);
 	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
@@ -1025,15 +1025,15 @@ static void info_callback(const SSL *ssl, int where, int ret) /* {{{ */
 static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
 {
 	zval *val;
-	php_int_t limit = OPENSSL_DEFAULT_RENEG_LIMIT;
-	php_int_t window = OPENSSL_DEFAULT_RENEG_WINDOW;
+	zend_long limit = OPENSSL_DEFAULT_RENEG_LIMIT;
+	zend_long window = OPENSSL_DEFAULT_RENEG_WINDOW;
 
 	if (PHP_STREAM_CONTEXT(stream) &&
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
 				"ssl", "reneg_limit"))
 	) {
 		convert_to_int(val);
-		limit = Z_IVAL_P(val);
+		limit = Z_LVAL_P(val);
 	}
 
 	/* No renegotiation rate-limiting */
@@ -1046,7 +1046,7 @@ static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_da
 				"ssl", "reneg_window"))
 	) {
 		convert_to_int(val);
-		window = Z_IVAL_P(val);
+		window = Z_LVAL_P(val);
 	}
 
 	sslsock->reneg = (void*)pemalloc(sizeof(php_openssl_handshake_bucket_t),
@@ -1070,7 +1070,7 @@ static int set_server_rsa_key(php_stream *stream, SSL_CTX *ctx TSRMLS_DC) /* {{{
 	RSA* rsa;
 
 	if ((val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "rsa_key_size")) != NULL) {
-		rsa_key_size = (int) Z_IVAL_P(val);
+		rsa_key_size = (int) Z_LVAL_P(val);
 		if ((rsa_key_size != 1) && (rsa_key_size & (rsa_key_size - 1))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "RSA key size requires a power of 2: %d", rsa_key_size);
 			rsa_key_size = 2048;
@@ -1255,7 +1255,7 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 	zval *val;
 	zval *current;
 	zend_string *key;
-	php_uint_t key_index;
+	zend_ulong key_index;
 	int i = 0;
 	char resolved_path_buff[MAXPATHLEN];
 	SSL_CTX *ctx;
@@ -1534,7 +1534,7 @@ static zend_array *capture_session_meta(SSL *ssl_handle) /* {{{ */
 	array_init(&meta_arr);
 	add_assoc_string(&meta_arr, "protocol", proto_str);
 	add_assoc_string(&meta_arr, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
-	add_assoc_int(&meta_arr, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
+	add_assoc_long(&meta_arr, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
 	add_assoc_string(&meta_arr, "cipher_version", SSL_CIPHER_get_version(cipher));
 
 	return Z_ARR(meta_arr);
@@ -2167,13 +2167,13 @@ php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_set_option,
 };
 
-static php_int_t get_crypto_method(php_stream_context *ctx, php_int_t crypto_method)
+static zend_long get_crypto_method(php_stream_context *ctx, zend_long crypto_method)
 {
 	zval *val;
 
 	if (ctx && (val = php_stream_context_get_option(ctx, "ssl", "crypto_method")) != NULL) {
 		convert_to_int_ex(val);
-		crypto_method = (php_int_t)Z_IVAL_P(val);
+		crypto_method = (zend_long)Z_LVAL_P(val);
 	        crypto_method |= STREAM_CRYPTO_IS_CLIENT;
 	}
 

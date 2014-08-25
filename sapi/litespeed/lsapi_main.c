@@ -104,7 +104,7 @@ static int php_lsapi_startup(sapi_module_struct *sapi_module)
 #define INI_DEFAULT(name,value)\
     ZVAL_STRING(tmp, value, 0);\
     zend_hash_update(configuration_hash, name, sizeof(name), tmp, sizeof(zval), (void**)&entry);\
-    Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRSIZE_P(entry))
+    Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRLEN_P(entry))
 
 static void sapi_lsapi_ini_defaults(HashTable *configuration_hash)
 {
@@ -212,7 +212,7 @@ static int add_variable( const char * pKey, int keyLen, const char * pValue, int
     register char * pKey1 = (char *)pKey;
 
     MAKE_STD_ZVAL(gpc_element);
-    Z_STRSIZE_P( gpc_element ) = valLen;
+    Z_STRLEN_P( gpc_element ) = valLen;
     Z_STRVAL_P( gpc_element ) = estrndup(pValue, valLen);
     Z_TYPE_P( gpc_element ) = IS_STRING;
 #if PHP_MAJOR_VERSION > 4
@@ -233,8 +233,8 @@ static int add_variable_magic_quote( const char * pKey, int keyLen, const char *
     register char * pKey1 = (char *)pKey;
 
     MAKE_STD_ZVAL(gpc_element);
-    Z_STRSIZE_P( gpc_element ) = valLen;
-    Z_STRVAL_P( gpc_element ) = php_addslashes((char *)pValue, valLen, &Z_STRSIZE_P( gpc_element ), 0 );
+    Z_STRLEN_P( gpc_element ) = valLen;
+    Z_STRVAL_P( gpc_element ) = php_addslashes((char *)pValue, valLen, &Z_STRLEN_P( gpc_element ), 0 );
     Z_TYPE_P( gpc_element ) = IS_STRING;
 #if PHP_MAJOR_VERSION > 4
     zend_symtable_update( symtable1, pKey1, keyLen + 1, &gpc_element, sizeof( zval *), (void **) &gpc_element_p );

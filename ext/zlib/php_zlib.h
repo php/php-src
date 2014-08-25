@@ -50,11 +50,11 @@ typedef struct _php_zlib_context {
 ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	/* variables for transparent gzip encoding */
 	int compression_coding;
-	php_int_t output_compression;
-	php_int_t output_compression_level;
+	zend_long output_compression;
+	zend_long output_compression_level;
 	char *output_handler;
 	php_zlib_context *ob_gzhandler;
-	php_int_t output_compression_default;
+	zend_long output_compression_default;
     zend_bool handler_registered;
 ZEND_END_MODULE_GLOBALS(zlib);
 

@@ -345,7 +345,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 			{
 				zend_string *str = zval_get_string(newval);
 				xmlNodeSetContentLen(nodep, str->val, str->len + 1);
-				STR_RELEASE(str);
+				zend_string_release(str);
 				break;
 			}
 		default:
@@ -375,9 +375,9 @@ int dom_node_node_type_read(dom_object *obj, zval *retval TSRMLS_DC)
 
 	/* Specs dictate that they are both type XML_DOCUMENT_TYPE_NODE */
 	if (nodep->type == XML_DTD_NODE) {
-		ZVAL_INT(retval, XML_DOCUMENT_TYPE_NODE);
+		ZVAL_LONG(retval, XML_DOCUMENT_TYPE_NODE);
 	} else {
-		ZVAL_INT(retval, nodep->type);
+		ZVAL_LONG(retval, nodep->type);
 	}
 
 	return SUCCESS;
@@ -745,14 +745,14 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 				}
 
 				if (ns == NULL) {
-					STR_RELEASE(str);
+					zend_string_release(str);
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document) TSRMLS_CC);
 					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
 			}
-			STR_RELEASE(str);
+			zend_string_release(str);
 			break;
 		default:
 			break;
@@ -1334,9 +1334,9 @@ PHP_FUNCTION(dom_node_clone_node)
 	xmlNode *n, *node;
 	int ret;
 	dom_object *intern;
-	php_int_t recursive = 0;
+	zend_long recursive = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|i", &id, dom_node_class_entry, &recursive) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &id, dom_node_class_entry, &recursive) == FAILURE) {
 		return;
 	}
 
@@ -1815,7 +1815,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 
 		bytes = xmlOutputBufferClose(buf);
 		if (mode == 1 && (ret >= 0)) {
-			RETURN_INT(bytes);
+			RETURN_LONG(bytes);
 		}
 	}
 }
@@ -1872,7 +1872,7 @@ PHP_METHOD(domnode, getLineNo)
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
-	RETURN_INT(xmlGetLineNo(nodep));
+	RETURN_LONG(xmlGetLineNo(nodep));
 }
 /* }}} */
 

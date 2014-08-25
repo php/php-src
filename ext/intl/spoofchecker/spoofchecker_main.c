@@ -47,7 +47,7 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 	
 	if (error_code) {
 		zval_dtor(error_code);
-		ZVAL_INT(error_code, ret);
+		ZVAL_LONG(error_code, ret);
 	}
 	RETVAL_BOOL(ret != 0);
 }
@@ -80,7 +80,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 	
 	if (error_code) {
 		zval_dtor(error_code);
-		ZVAL_INT(error_code, ret);
+		ZVAL_LONG(error_code, ret);
 	}
 	RETVAL_BOOL(ret != 0);
 }
@@ -115,10 +115,10 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
  */
 PHP_METHOD(Spoofchecker, setChecks)
 {
-	php_int_t checks;
+	zend_long checks;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 		
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &checks)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &checks)) {
 		return;
 	}
 
