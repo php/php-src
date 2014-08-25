@@ -326,7 +326,7 @@ static void json_create_zval(zval *z, smart_str *buf, int type, int options TSRM
 			}
 		}
 
-		ZVAL_LONG(z, strtol(buf->s->val, NULL, 10));
+		ZVAL_LONG(z, ZEND_STRTOL(buf->s->val, NULL, 10));
     }
     else if (type == IS_DOUBLE)
     {
