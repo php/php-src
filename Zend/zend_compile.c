@@ -3553,7 +3553,9 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast TSRMLS_DC) {
 	return FAILURE;
 }
 
-static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, int type TSRMLS_DC) {
+static zend_op *zend_compile_simple_var_no_cv(
+	znode *result, zend_ast *ast, uint32_t type TSRMLS_DC
+) {
 	zend_ast *name_ast = ast->child[0];
 	znode name_node;
 	zend_op *opline;
@@ -3581,14 +3583,14 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, int 
 	return opline;
 }
 
-static void zend_compile_simple_var(znode *result, zend_ast *ast, int type TSRMLS_DC) {
+static void zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type TSRMLS_DC) {
 	if (zend_try_compile_cv(result, ast TSRMLS_CC) == FAILURE) {
 		zend_op *opline = zend_compile_simple_var_no_cv(result, ast, type TSRMLS_CC);
 		zend_adjust_for_fetch_type(opline, type);
 	}
 }
 
-static void zend_separate_if_call_and_write(znode *node, zend_ast *ast, int type TSRMLS_DC) {
+static void zend_separate_if_call_and_write(znode *node, zend_ast *ast, uint32_t type TSRMLS_DC) {
 	if (type != BP_VAR_R && type != BP_VAR_IS && zend_is_call(ast)) {
 		zend_op *opline = zend_emit_op(NULL, ZEND_SEPARATE, node, NULL TSRMLS_CC);
 		opline->result_type = IS_VAR;
@@ -3631,7 +3633,7 @@ static inline zend_op *zend_compile_dim_common(
 	return zend_delayed_compile_end(offset TSRMLS_CC);
 }
 
-void zend_compile_dim(znode *result, zend_ast *ast, int type TSRMLS_DC) {
+void zend_compile_dim(znode *result, zend_ast *ast, uint32_t type TSRMLS_DC) {
 	zend_op *opline = zend_compile_dim_common(result, ast, type TSRMLS_CC);
 	zend_adjust_for_fetch_type(opline, type);
 }
@@ -3676,12 +3678,12 @@ static zend_op *zend_compile_prop_common(znode *result, zend_ast *ast, uint32_t 
 	return zend_delayed_compile_end(offset TSRMLS_CC);
 }
 
-void zend_compile_prop(znode *result, zend_ast *ast, int type TSRMLS_DC) {
+void zend_compile_prop(znode *result, zend_ast *ast, uint32_t type TSRMLS_DC) {
 	zend_op *opline = zend_compile_prop_common(result, ast, type TSRMLS_CC);
 	zend_adjust_for_fetch_type(opline, type);
 }
 
-zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, int type TSRMLS_DC) {
+zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t type TSRMLS_DC) {
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *prop_ast = ast->child[1];
 
@@ -4306,7 +4308,7 @@ int zend_try_compile_special_func(
 	}
 }
 
-void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
+void zend_compile_call(znode *result, zend_ast *ast, uint32_t type TSRMLS_DC) {
 	zend_ast *name_ast = ast->child[0];
 	zend_ast *args_ast = ast->child[1];
 
@@ -4361,7 +4363,7 @@ void zend_compile_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 	}
 }
 
-void zend_compile_method_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
+void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type TSRMLS_DC) {
 	zend_ast *obj_ast = ast->child[0];
 	zend_ast *method_ast = ast->child[1];
 	zend_ast *args_ast = ast->child[2];
@@ -4398,7 +4400,7 @@ zend_bool zend_is_constructor(zend_string *name) {
 	return zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
 }
 
-void zend_compile_static_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
+void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type TSRMLS_DC) {
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *method_ast = ast->child[1];
 	zend_ast *args_ast = ast->child[2];
@@ -7566,7 +7568,7 @@ void zend_compile_expr(znode *result, zend_ast *ast TSRMLS_DC) {
 	}
 }
 
-void zend_compile_var(znode *result, zend_ast *ast, int type TSRMLS_DC) {
+void zend_compile_var(znode *result, zend_ast *ast, uint32_t type TSRMLS_DC) {
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
 			zend_compile_simple_var(result, ast, type TSRMLS_CC);
