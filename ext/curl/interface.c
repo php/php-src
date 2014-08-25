@@ -2476,7 +2476,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 					char *postval;
 					/* Pretend we have a string_key here */
 					if (!string_key) {
-						string_key = zend_longo_str(num_key);
+						string_key = zend_long_to_str(num_key);
 					} else {
 						zend_string_addref(string_key);
 					}

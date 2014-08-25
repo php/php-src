@@ -1045,7 +1045,7 @@ static zend_always_inline void fast_is_not_identical_function(zval *result, zval
 	}                                                                           \
 } while (0)
 
-ZEND_API zend_string *zend_longo_str(zend_long num);
+ZEND_API zend_string *zend_long_to_str(zend_long num);
 
 #endif
 

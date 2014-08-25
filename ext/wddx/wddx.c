@@ -300,7 +300,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	if ((ret = php_wddx_deserialize_ex(val, vallen, &retval)) == SUCCESS) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(retval), idx, key, ent) {
 			if (key == NULL) {
-				key = zend_longo_str(idx);
+				key = zend_long_to_str(idx);
 			} else {
 				zend_string_addref(key);
 			}
@@ -512,7 +512,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 				php_wddx_serialize_var(packet, ent, tmp TSRMLS_CC);
 				zend_string_release(tmp);
 			} else {
-				key = zend_longo_str(idx);
+				key = zend_long_to_str(idx);
 				php_wddx_serialize_var(packet, ent, key TSRMLS_CC);
 				zend_string_release(key);
 			}
@@ -568,7 +568,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 			if (key) {
 				php_wddx_serialize_var(packet, ent, key TSRMLS_CC);
 			} else {
-				key = zend_longo_str(idx);
+				key = zend_long_to_str(idx);
 				php_wddx_serialize_var(packet, ent, key TSRMLS_CC);
 				zend_string_release(key);
 			}
