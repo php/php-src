@@ -3250,17 +3250,12 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 }
 /* }}} */
 
-static inline zend_bool zend_str_equals_str(zend_string *str1, zend_string *str2) {
-	return str1->len == str2->len && !memcmp(str1->val, str2->val, str2->len);
-}
-static inline zend_bool zend_str_equals_str_ci(zend_string *str1, zend_string *str2) {
+static inline zend_bool zend_string_equals_str_ci(zend_string *str1, zend_string *str2) {
 	return str1->len == str2->len
 		&& !zend_binary_strcasecmp(str1->val, str1->len, str2->val, str2->len);
 }
 
-#define zend_str_equals_literal(str, c) \
-	((str)->len == sizeof(c) - 1 && !memcmp((str)->val, (c), sizeof(c) - 1))
-#define zend_str_equals_literal_ci(str, c) \
+#define zend_string_equals_literal_ci(str, c) \
 	((str)->len == sizeof(c) - 1 \
 	 && !zend_binary_strcasecmp((str)->val, (str)->len, (c), sizeof(c) - 1))
 
@@ -3549,7 +3544,7 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast TSRMLS_DC) {
 		result->op_type = IS_CV;
 		result->u.op.var = lookup_cv(CG(active_op_array), name TSRMLS_CC);
 
-		if (zend_str_equals_literal(name, "this")) {
+		if (zend_string_equals_literal(name, "this")) {
 			CG(active_op_array)->this_var = result->u.op.var;
 		}
 		return SUCCESS;
@@ -3644,7 +3639,7 @@ void zend_compile_dim(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 static zend_bool is_this_fetch(zend_ast *ast) {
 	if (ast->kind == ZEND_AST_VAR && ast->child[0]->kind == ZEND_AST_ZVAL) {
 		zval *name = zend_ast_get_zval(ast->child[0]);
-		return Z_TYPE_P(name) == IS_STRING && zend_str_equals_literal(Z_STR_P(name), "this");
+		return Z_TYPE_P(name) == IS_STRING && zend_string_equals_literal(Z_STR_P(name), "this");
 	}
 
 	return 0;
@@ -3804,7 +3799,7 @@ zend_bool zend_is_assign_to_self(zend_ast *var_ast, zend_ast *expr_ast TSRMLS_DC
 	{
 		zend_string *name1 = zval_get_string(zend_ast_get_zval(var_ast->child[0]));
 		zend_string *name2 = zval_get_string(zend_ast_get_zval(expr_ast->child[0]));
-		zend_bool result = zend_str_equals_str(name1, name2);
+		zend_bool result = zend_string_equals(name1, name2);
 		zend_string_release(name1);
 		zend_string_release(name2);
 		return result;
@@ -4282,29 +4277,29 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 int zend_try_compile_special_func(
 	znode *result, zend_string *lcname, zend_ast_list *args TSRMLS_DC
 ) {
-	if (zend_str_equals_literal(lcname, "strlen")) {
+	if (zend_string_equals_literal(lcname, "strlen")) {
 		return zend_compile_func_strlen(result, args TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "is_null")) {
+	} else if (zend_string_equals_literal(lcname, "is_null")) {
 		return zend_compile_func_typecheck(result, args, IS_NULL TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "is_bool")) {
+	} else if (zend_string_equals_literal(lcname, "is_bool")) {
 		return zend_compile_func_typecheck(result, args, _IS_BOOL TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "is_long")) {
+	} else if (zend_string_equals_literal(lcname, "is_long")) {
 		return zend_compile_func_typecheck(result, args, IS_LONG TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "is_float")) {
+	} else if (zend_string_equals_literal(lcname, "is_float")) {
 		return zend_compile_func_typecheck(result, args, IS_DOUBLE TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "is_string")) {
+	} else if (zend_string_equals_literal(lcname, "is_string")) {
 		return zend_compile_func_typecheck(result, args, IS_STRING TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "is_array")) {
+	} else if (zend_string_equals_literal(lcname, "is_array")) {
 		return zend_compile_func_typecheck(result, args, IS_ARRAY TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "is_object")) {
+	} else if (zend_string_equals_literal(lcname, "is_object")) {
 		return zend_compile_func_typecheck(result, args, IS_OBJECT TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "is_resource")) {
+	} else if (zend_string_equals_literal(lcname, "is_resource")) {
 		return zend_compile_func_typecheck(result, args, IS_RESOURCE TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "defined")) {
+	} else if (zend_string_equals_literal(lcname, "defined")) {
 		return zend_compile_func_defined(result, args TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "call_user_func_array")) {
+	} else if (zend_string_equals_literal(lcname, "call_user_func_array")) {
 		return zend_compile_func_cufa(result, args, lcname TSRMLS_CC);
-	} else if (zend_str_equals_literal(lcname, "call_user_func")) {
+	} else if (zend_string_equals_literal(lcname, "call_user_func")) {
 		return zend_compile_func_cuf(result, args, lcname TSRMLS_CC);
 	} else {
 		return FAILURE;
@@ -4400,7 +4395,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, int type TSRMLS_DC) 
 }
 
 zend_bool zend_is_constructor(zend_string *name) {
-	return zend_str_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
+	return zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
 }
 
 void zend_compile_static_call(znode *result, zend_ast *ast, int type TSRMLS_DC) {
@@ -5123,7 +5118,7 @@ void zend_handle_encoding_declaration(zend_ast_list *declares TSRMLS_DC) {
 		zend_ast *value_ast = declare_ast->child[1];
 		zend_string *name = zend_ast_get_str(name_ast);
 
-		if (zend_str_equals_literal_ci(name, "encoding")) {
+		if (zend_string_equals_literal_ci(name, "encoding")) {
 			if (value_ast->kind != ZEND_AST_ZVAL) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding must be a literal");
 			}
@@ -5172,13 +5167,13 @@ void zend_compile_declare(zend_ast *ast TSRMLS_DC) {
 		zend_ast *value_ast = declare_ast->child[1];
 
 		zend_string *name = zend_ast_get_str(name_ast);
-		if (zend_str_equals_literal_ci(name, "ticks")) {
+		if (zend_string_equals_literal_ci(name, "ticks")) {
 			zval value_zv;
 			zend_const_expr_to_zval(&value_zv, value_ast TSRMLS_CC);
 			convert_to_long(&value_zv);
 			ZVAL_COPY_VALUE(&CG(declarables).ticks, &value_zv);
 			zval_dtor(&value_zv);
-		} else if (zend_str_equals_literal_ci(name, "encoding")) {
+		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 			/* Encoding declaration was already handled during parsing. Here we
 			 * only check that it is the first statement in the file. */
 			uint32_t num = CG(active_op_array)->last;
@@ -5248,7 +5243,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 		if (EX_VAR_TO_NUM(var_node.u.op.var) != i) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Redefinition of parameter $%s",
 				name->val);
-		} else if (zend_str_equals_literal(name, "this")) {
+		} else if (zend_string_equals_literal(name, "this")) {
 			if (op_array->scope && (op_array->fn_flags & ZEND_ACC_STATIC) == 0) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 			}
@@ -5355,7 +5350,7 @@ void zend_compile_closure_uses(zend_ast *ast TSRMLS_DC) {
 		zend_bool by_ref = var_ast->attr;
 		zval zv;
 
-		if (zend_str_equals_literal(name, "this")) {
+		if (zend_string_equals_literal(name, "this")) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
 		}
 
@@ -5425,115 +5420,115 @@ void zend_begin_method_decl(
 	}
 
 	if (in_interface) {
-		if (zend_str_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
+		if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __call() must have "
 					"public visibility and cannot be static");
 			}
-		} else if (zend_str_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
 			if (!is_public || !is_static) {
 				zend_error(E_WARNING, "The magic method __callStatic() must have "
 					"public visibility and be static");
 			}
-		} else if (zend_str_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __get() must have "
 					"public visibility and cannot be static");
 			}
-		} else if (zend_str_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __set() must have "
 					"public visibility and cannot be static");
 			}
-		} else if (zend_str_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __unset() must have "
 					"public visibility and cannot be static");
 			}
-		} else if (zend_str_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __isset() must have "
 					"public visibility and cannot be static");
 			}
-		} else if (zend_str_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __toString() must have "
 					"public visibility and cannot be static");
 			}
-		} else if (zend_str_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __invoke() must have "
 					"public visibility and cannot be static");
 			}
-		} else if (zend_str_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __debugInfo() must have "
 					"public visibility and cannot be static");
 			}
 		}
 	} else {
-		if (!in_trait && zend_str_equals_str_ci(lcname, ce->name)) {
+		if (!in_trait && zend_string_equals_str_ci(lcname, ce->name)) {
 			if (!ce->constructor) {
 				ce->constructor = (zend_function *) op_array;
 			}
-		} else if (zend_str_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 			if (CG(active_class_entry)->constructor) {
 				zend_error(E_STRICT, "Redefining already defined constructor for class %s",
 					ce->name->val);
 			}
 			ce->constructor = (zend_function *) op_array;
-		} else if (zend_str_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 			ce->destructor = (zend_function *) op_array;
-		} else if (zend_str_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
 			ce->clone = (zend_function *) op_array;
-		} else if (zend_str_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __call() must have "
 					"public visibility and cannot be static");
 			}
 			ce->__call = (zend_function *) op_array;
-		} else if (zend_str_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
 			if (!is_public || !is_static) {
 				zend_error(E_WARNING, "The magic method __callStatic() must have "
 					"public visibility and be static");
 			}
 			ce->__callstatic = (zend_function *) op_array;
-		} else if (zend_str_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __get() must have "
 					"public visibility and cannot be static");
 			}
 			ce->__get = (zend_function *) op_array;
-		} else if (zend_str_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __set() must have "
 					"public visibility and cannot be static");
 			}
 			ce->__set = (zend_function *) op_array;
-		} else if (zend_str_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __unset() must have "
 					"public visibility and cannot be static");
 			}
 			ce->__unset = (zend_function *) op_array;
-		} else if (zend_str_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __isset() must have "
 					"public visibility and cannot be static");
 			}
 			ce->__isset = (zend_function *) op_array;
-		} else if (zend_str_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __toString() must have "
 					"public visibility and cannot be static");
 			}
 			ce->__tostring = (zend_function *) op_array;
-		} else if (zend_str_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __invoke() must have "
 					"public visibility and cannot be static");
 			}
-		} else if (zend_str_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
+		} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __debugInfo() must have "
 					"public visibility and cannot be static");
@@ -5561,13 +5556,13 @@ static void zend_begin_func_decl(
 
 	if (CG(current_import_function)) {
 		zend_string *import_name = zend_hash_find_ptr(CG(current_import_function), lcname);
-		if (import_name && !zend_str_equals_str_ci(lcname, import_name)) {
+		if (import_name && !zend_string_equals_str_ci(lcname, import_name)) {
 			zend_error(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", name->val);
 		}
 	}
 
-	if (zend_str_equals_literal(lcname, ZEND_AUTOLOAD_FUNC_NAME)
+	if (zend_string_equals_literal(lcname, ZEND_AUTOLOAD_FUNC_NAME)
 		&& zend_ast_get_list(params_ast)->children != 1
 	) {
 		zend_error_noreturn(E_COMPILE_ERROR, "%s() must take exactly 1 argument",
@@ -5957,7 +5952,7 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) {
 		zend_string_addref(name);
 	}
 
-	if (import_name && !zend_str_equals_str_ci(lcname, import_name)) {
+	if (import_name && !zend_string_equals_str_ci(lcname, import_name)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
 			"because the name is already in use", name->val);
 	}
@@ -6120,7 +6115,7 @@ static char *zend_get_use_type_str(uint32_t type) {
 static void zend_check_already_in_use(
 	uint32_t type, zend_string *old_name, zend_string *new_name, zend_string *check_name
 ) {
-	if (zend_str_equals_str_ci(old_name, check_name)) {
+	if (zend_string_equals_str_ci(old_name, check_name)) {
 		return;
 	}
 
@@ -6154,7 +6149,7 @@ void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 				new_name = zend_string_copy(old_name);
 
 				if (!current_ns) {
-					if (type == T_CLASS && zend_str_equals_literal(new_name, "strict")) {
+					if (type == T_CLASS && zend_string_equals_literal(new_name, "strict")) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 							"You seem to be trying to use a different language...");
 					}
@@ -6172,8 +6167,8 @@ void zend_compile_use(zend_ast *ast TSRMLS_DC) {
 			zend_str_tolower_copy(lookup_name->val, new_name->val, new_name->len);
 		}
 
-		if (type == T_CLASS && (zend_str_equals_literal(lookup_name, "self")
-			|| zend_str_equals_literal(lookup_name, "parent"))
+		if (type == T_CLASS && (zend_string_equals_literal(lookup_name, "self")
+			|| zend_string_equals_literal(lookup_name, "parent"))
 		) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' "
 				"is a special class name", old_name->val, new_name->val, new_name->val);
@@ -6260,7 +6255,7 @@ void zend_compile_const_decl(zend_ast *ast TSRMLS_DC) {
 		if (CG(current_import_const)
 			&& (import_name = zend_hash_find_ptr(CG(current_import_const), name))
 		) {
-			if (!zend_str_equals_str(import_name, name)) {
+			if (!zend_string_equals(import_name, name)) {
 				zend_error(E_COMPILE_ERROR, "Cannot declare const %s because "
 					"the name is already in use", name->val);
 			}

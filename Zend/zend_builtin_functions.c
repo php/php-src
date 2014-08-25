@@ -1198,9 +1198,8 @@ ZEND_FUNCTION(method_exists)
 			&& (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0
 			) {
 				/* Returns true to the fake Closure's __invoke */
-				RETVAL_BOOL((func->common.scope == zend_ce_closure
-					&& (method_name->len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-					&& memcmp(lcname->val, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0) ? 1 : 0);
+				RETVAL_BOOL(func->common.scope == zend_ce_closure
+					&& zend_string_equals_literal(method_name, ZEND_INVOKE_FUNC_NAME));
 					
 				zend_string_free(lcname);
 				zend_string_release(func->common.function_name);
@@ -1959,8 +1958,7 @@ ZEND_FUNCTION(get_resources)
 				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
 			}
 		} ZEND_HASH_FOREACH_END();
-	} else if (type->len == sizeof("Unknown")-1 &&
-	           memcmp(type->val, "Unknown", sizeof("Unknown")-1) == 0) {
+	} else if (zend_string_equals_literal(type, "Unknown")) {
 		array_init(return_value);
 		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
 			if (!key && Z_RES_TYPE_P(val) <= 0) {

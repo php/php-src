@@ -91,8 +91,7 @@ ZEND_METHOD(Closure, bind)
 			ce = NULL;
 		} else {
 			zend_string *class_name = zval_get_string(scope_arg);
-			if ((class_name->len == sizeof("static") - 1) &&
-				(memcmp("static", class_name->val, sizeof("static") - 1) == 0)) {
+			if (zend_string_equals_literal(class_name, "static")) {
 				ce = closure->func.common.scope;
 			} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1 TSRMLS_CC)) == NULL) {
 				zend_error(E_WARNING, "Class '%s' not found", class_name->val);
@@ -158,9 +157,7 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 
 	lc_name = zend_string_alloc(method->len, 0);
 	zend_str_tolower_copy(lc_name->val, method->val, method->len);
-	if ((method->len == sizeof(ZEND_INVOKE_FUNC_NAME)-1) &&
-		memcmp(lc_name->val, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-	) {
+	if (zend_string_equals_literal(method, ZEND_INVOKE_FUNC_NAME)) {
 		zend_string_free(lc_name);
 		return zend_get_closure_invoke_method(*object TSRMLS_CC);
 	}

@@ -209,6 +209,14 @@ static zend_always_inline void zend_string_release(zend_string *s)
 	}
 }
 
+static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_string *s2)
+{
+	return s1 == s2 || (s1->len == s2->len && !memcmp(s1->val, s2->val, s1->len));
+}
+
+#define zend_string_equals_literal(str, literal) \
+	((str)->len == sizeof(literal)-1 && !memcmp((str)->val, literal, sizeof(literal) - 1))
+
 /*
  * DJBX33A (Daniel J. Bernstein, Times 33 with Addition)
  *
