@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
     (CVE-2014-5120) (Ryan Mauger)
 
+- OpenSSL
+  . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3)
+    (Daniel Lowrey)
+
 - Zlib:
   . Fixed bug #67865 (internal corruption phar error). Mike
 
