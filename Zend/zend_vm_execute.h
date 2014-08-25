@@ -564,7 +564,7 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		EG(current_execute_data) = call;
 
 		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-			zend_uint i;
+			uint32_t i;
 			zval *p = ZEND_CALL_ARG(call, 1);
 
 			for (i = 0; i < call->num_args; ++i) {
@@ -904,7 +904,7 @@ static int ZEND_FASTCALL  ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		EX(call)->called_scope = NULL;
 		EX(call)->object = NULL;
 	} else {
-		zend_uint arg_num = 1;
+		uint32_t arg_num = 1;
 
 		HashTable *ht = Z_ARRVAL_P(args);
 		zval *arg, *param, tmp;
@@ -912,7 +912,7 @@ static int ZEND_FASTCALL  ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht) TSRMLS_CC);
 
 		if (opline->op1_type != IS_CONST && opline->op1_type != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
-			zend_uint i;
+			uint32_t i;
 			int separate = 0;
 
 			/* check if any of arguments are going to be passed by reference */
@@ -1003,7 +1003,7 @@ static int ZEND_FASTCALL  ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_uint arg_num = opline->op1.num;
+	uint32_t arg_num = opline->op1.num;
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(arg_num > EX(num_args))) {
@@ -1022,8 +1022,8 @@ static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_uint arg_num = opline->op1.num;
-	zend_uint arg_count = EX(num_args);
+	uint32_t arg_num = opline->op1.num;
+	uint32_t arg_count = EX(num_args);
 	zval *params;
 
 	SAVE_OPLINE();
@@ -1297,9 +1297,9 @@ static int ZEND_FASTCALL  ZEND_BIND_TRAITS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_uint op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
+	uint32_t op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
 	int i;
-	zend_uint catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
+	uint32_t catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
 
 	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
 		if (EX(func)->op_array.try_catch_array[i].try_op > op_num) {
@@ -1738,7 +1738,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 static int ZEND_FASTCALL  ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_uint arg_num = opline->op1.num;
+	uint32_t arg_num = opline->op1.num;
 	zval *param;
 
 	SAVE_OPLINE();
@@ -4305,7 +4305,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -5220,7 +5220,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -6103,7 +6103,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -6788,7 +6788,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -7731,7 +7731,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -9713,7 +9713,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -10552,7 +10552,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -11392,7 +11392,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -11961,7 +11961,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -12782,7 +12782,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -16376,7 +16376,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -18515,7 +18515,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -20721,7 +20721,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -22181,7 +22181,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -24104,7 +24104,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -25565,7 +25565,7 @@ constant_fetch_end:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -26845,7 +26845,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -28127,7 +28127,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -28918,7 +28918,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPC
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -29918,7 +29918,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -33374,7 +33374,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -35424,7 +35424,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -37510,7 +37510,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -38852,7 +38852,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -40637,7 +40637,7 @@ str_index:
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);

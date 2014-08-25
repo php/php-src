@@ -61,7 +61,7 @@ static uint zend_hash_persist_calc(HashTable *ht, uint (*pPersistElement)(zval *
 	if (ht->u.flags & HASH_FLAG_PACKED) {
 		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed);
 	} else {
-		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed + sizeof(zend_uint) * ht->nTableSize);
+		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed + sizeof(uint32_t) * ht->nTableSize);
 	}
 
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
@@ -194,7 +194,7 @@ static uint zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (op_array->arg_info) {
-		zend_uint i;
+		uint32_t i;
 
 		ADD_DUP_SIZE(op_array->arg_info, sizeof(zend_arg_info) * op_array->num_args);
 		for (i = 0; i < op_array->num_args; i++) {

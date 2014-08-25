@@ -118,16 +118,16 @@ struct _zend_compiler_globals {
 
 	int interactive;
 
-	zend_uint start_lineno;
+	uint32_t start_lineno;
 	zend_bool increment_lineno;
 
 	znode implementing_class;
 
-	zend_uint access_type;
+	uint32_t access_type;
 
 	zend_string *doc_comment;
 
-	zend_uint compiler_options; /* set of ZEND_COMPILE_* constants */
+	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
 
 	zval       current_namespace;
 	HashTable *current_import;

@@ -50,8 +50,8 @@ void zend_interned_strings_init(TSRMLS_D)
 	
 	CG(interned_strings).nTableMask = CG(interned_strings).nTableSize - 1;
 	CG(interned_strings).arData = (Bucket*) pecalloc(CG(interned_strings).nTableSize, sizeof(Bucket), 1);
-	CG(interned_strings).arHash = (zend_uint*) pecalloc(CG(interned_strings).nTableSize, sizeof(zend_uint), 1);
-	memset(CG(interned_strings).arHash, INVALID_IDX, CG(interned_strings).nTableSize * sizeof(zend_uint));
+	CG(interned_strings).arHash = (uint32_t*) pecalloc(CG(interned_strings).nTableSize, sizeof(uint32_t), 1);
+	memset(CG(interned_strings).arHash, INVALID_IDX, CG(interned_strings).nTableSize * sizeof(uint32_t));
 
 	/* interned empty string */
 	str = zend_string_alloc(sizeof("")-1, 1);
@@ -114,7 +114,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 	if (CG(interned_strings).nNumUsed >= CG(interned_strings).nTableSize) {
 		if ((CG(interned_strings).nTableSize << 1) > 0) {	/* Let's double the table size */
 			Bucket *d = (Bucket *) perealloc_recoverable(CG(interned_strings).arData, (CG(interned_strings).nTableSize << 1) * sizeof(Bucket), 1);
-			zend_uint *h = (zend_uint *) perealloc_recoverable(CG(interned_strings).arHash, (CG(interned_strings).nTableSize << 1) * sizeof(zend_uint), 1);
+			uint32_t *h = (uint32_t *) perealloc_recoverable(CG(interned_strings).arHash, (CG(interned_strings).nTableSize << 1) * sizeof(uint32_t), 1);
 
 			if (d && h) {
 				HANDLE_BLOCK_INTERRUPTIONS();

@@ -192,8 +192,8 @@ typedef struct _property_reference {
 
 /* Struct for parameters */
 typedef struct _parameter_reference {
-	zend_uint offset;
-	zend_uint required;
+	uint32_t offset;
+	uint32_t required;
 	struct _zend_arg_info *arg_info;
 	zend_function *fptr;
 } parameter_reference;
@@ -406,7 +406,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	}
 
 	if (ce->num_interfaces) {
-		zend_uint i;
+		uint32_t i;
 
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 			string_printf(str, " extends %s", ce->interfaces[0]->name->val);
@@ -660,7 +660,7 @@ static void _const_string(string *str, char *name, zval *value, char *indent TSR
 /* }}} */
 
 /* {{{ _get_recv_opcode */
-static zend_op* _get_recv_op(zend_op_array *op_array, zend_uint offset)
+static zend_op* _get_recv_op(zend_op_array *op_array, uint32_t offset)
 {
 	zend_op *op = op_array->opcodes;
 	zend_op *end = op + op_array->last;
@@ -679,7 +679,7 @@ static zend_op* _get_recv_op(zend_op_array *op_array, zend_uint offset)
 /* }}} */
 
 /* {{{ _parameter_string */
-static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, zend_uint offset, zend_uint required, char* indent TSRMLS_DC)
+static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, uint32_t required, char* indent TSRMLS_DC)
 {
 	string_printf(str, "Parameter #%d [ ", offset);
 	if (offset >= required) {
@@ -752,7 +752,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 static void _function_parameter_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
 	struct _zend_arg_info *arg_info = fptr->common.arg_info;
-	zend_uint i, required = fptr->common.required_num_args;
+	uint32_t i, required = fptr->common.required_num_args;
 
 	if (!arg_info) {
 		return;
@@ -773,7 +773,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 /* {{{ _function_closure_string */
 static void _function_closure_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
-	zend_uint i, count;
+	uint32_t i, count;
 	zend_ulong num_index;
 	zend_string *key;
 	HashTable *static_variables;
@@ -1216,7 +1216,7 @@ static void reflection_extension_factory(zval *object, const char *name_str TSRM
 /* }}} */
 
 /* {{{ reflection_parameter_factory */
-static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, zend_uint offset, zend_uint required, zval *object TSRMLS_DC)
+static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, uint32_t required, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	parameter_reference *reference;
@@ -2033,7 +2033,7 @@ ZEND_METHOD(reflection_function, getParameters)
 {
 	reflection_object *intern;
 	zend_function *fptr;
-	zend_uint i;
+	uint32_t i;
 	struct _zend_arg_info *arg_info;
 
 	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
@@ -2221,7 +2221,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	arg_info = fptr->common.arg_info;
 	if (Z_TYPE_P(parameter) == IS_LONG) {
 		position= Z_LVAL_P(parameter);
-		if (position < 0 || (zend_uint)position >= fptr->common.num_args) {
+		if (position < 0 || (uint32_t)position >= fptr->common.num_args) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
 					zend_string_release(fptr->common.function_name);
@@ -2235,7 +2235,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 			/* returns out of this function */
 		}
 	} else {
-		zend_uint i;
+		uint32_t i;
 
 		position= -1;
 		convert_to_string_ex(parameter);
@@ -2269,7 +2269,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 
 	ref = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	ref->arg_info = &arg_info[position];
-	ref->offset = (zend_uint)position;
+	ref->offset = (uint32_t)position;
 	ref->required = fptr->common.required_num_args;
 	ref->fptr = fptr;
 	/* TODO: copy fptr */
@@ -4352,7 +4352,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 	array_init(return_value);
 
 	if (ce->num_interfaces) {
-		zend_uint i;
+		uint32_t i;
 
 		for (i=0; i < ce->num_interfaces; i++) {
 			zval interface;
@@ -4369,7 +4369,7 @@ ZEND_METHOD(reflection_class, getInterfaceNames)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	zend_uint i;
+	uint32_t i;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -4391,7 +4391,7 @@ ZEND_METHOD(reflection_class, getTraits)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	zend_uint i;
+	uint32_t i;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -4414,7 +4414,7 @@ ZEND_METHOD(reflection_class, getTraitNames)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	zend_uint i;
+	uint32_t i;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -4444,7 +4444,7 @@ ZEND_METHOD(reflection_class, getTraitAliases)
 	array_init(return_value);
 
 	if (ce->trait_aliases) {
-		zend_uint i = 0;
+		uint32_t i = 0;
 		while (ce->trait_aliases[i]) {
 			zend_string *mname;
 			zend_trait_method_reference *cur_ref = ce->trait_aliases[i]->trait_method;

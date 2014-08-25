@@ -1673,7 +1673,7 @@ PHP_FUNCTION(range)
 			}
 			for (; low >= high; low -= (unsigned int)lstep) {
 				if (CG(one_char_string)[low]) {
-					ZVAL_LONG_STR(&tmp, CG(one_char_string)[low]);
+					ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
 				} else {
 					ZVAL_STRINGL(&tmp, (char*)&low, 1);
 				}
@@ -1689,7 +1689,7 @@ PHP_FUNCTION(range)
 			}
 			for (; low <= high; low += (unsigned int)lstep) {
 				if (CG(one_char_string)[low]) {
-					ZVAL_LONG_STR(&tmp, CG(one_char_string)[low]);
+					ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
 				} else {
 					ZVAL_STRINGL(&tmp, (char*)&low, 1);
 				}
@@ -1700,7 +1700,7 @@ PHP_FUNCTION(range)
 			}
 		} else {
 			if (CG(one_char_string)[low]) {
-				ZVAL_LONG_STR(&tmp, CG(one_char_string)[low]);
+				ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
 			} else {
 				ZVAL_STRINGL(&tmp, (char*)&low, 1);
 			}
@@ -4477,7 +4477,7 @@ PHP_FUNCTION(array_map)
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {		
-		zend_uint *array_pos = (HashPosition *)ecalloc(n_arrays, sizeof(HashPosition));
+		uint32_t *array_pos = (HashPosition *)ecalloc(n_arrays, sizeof(HashPosition));
 
 		for (i = 0; i < n_arrays; i++) {
 			if (Z_TYPE(arrays[i]) != IS_ARRAY) {
@@ -4505,7 +4505,7 @@ PHP_FUNCTION(array_map)
 				for (i = 0; i < n_arrays; i++) {
 					/* If this array still has elements, add the current one to the
 					 * parameter list, otherwise use null value. */
-					zend_uint pos = array_pos[i];
+					uint32_t pos = array_pos[i];
 					while (1) {
 						if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
 							ZVAL_NULL(&zv);
@@ -4531,7 +4531,7 @@ PHP_FUNCTION(array_map)
 				for (i = 0; i < n_arrays; i++) {
 					/* If this array still has elements, add the current one to the
 					 * parameter list, otherwise use null value. */
-					zend_uint pos = array_pos[i];
+					uint32_t pos = array_pos[i];
 					while (1) {
 						if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
 							ZVAL_NULL(&params[i]);
@@ -4688,7 +4688,7 @@ PHP_FUNCTION(array_chunk)
 PHP_FUNCTION(array_combine)
 {
 	zval *values, *keys;
-	zend_uint pos_values = 0;
+	uint32_t pos_values = 0;
 	zval *entry_keys, *entry_values;
 	int num_keys, num_values;
 

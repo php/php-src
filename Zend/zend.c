@@ -226,7 +226,7 @@ again:
 		    break;
 		case IS_TRUE:
 		    if (CG(one_char_string)['1']) {
-				ZVAL_LONG_STR(expr_copy, CG(one_char_string)['1']);
+				ZVAL_INTERNED_STR(expr_copy, CG(one_char_string)['1']);
 			} else {
 				ZVAL_NEW_STR(expr_copy, zend_string_init("1", 1, 0));
 			}
@@ -443,7 +443,7 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path TSRMLS_
 #ifdef ZTS
 static zend_bool asp_tags_default		  = 0;
 static zend_bool short_tags_default		  = 1;
-static zend_uint compiler_options_default = ZEND_COMPILE_DEFAULT;
+static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
 # define asp_tags_default			0
 # define short_tags_default			1

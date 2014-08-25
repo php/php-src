@@ -2657,7 +2657,7 @@ int zend_next_free_module(void) /* {{{ */
 }
 /* }}} */
 
-static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class_entry, zend_uint ce_flags TSRMLS_DC) /* {{{ */
+static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class_entry, uint32_t ce_flags TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
 	zend_string *lowercase_name = zend_string_alloc(orig_class_entry->name->len, 1);

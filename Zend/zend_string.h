@@ -68,7 +68,7 @@ static zend_always_inline void zend_string_forget_hash_val(zend_string *s)
 	s->h = 0;
 }
 
-static zend_always_inline zend_uint zend_string_refcount(zend_string *s)
+static zend_always_inline uint32_t zend_string_refcount(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
 		return GC_REFCOUNT(s);
@@ -76,7 +76,7 @@ static zend_always_inline zend_uint zend_string_refcount(zend_string *s)
 	return 1;
 }
 
-static zend_always_inline zend_uint zend_string_addref(zend_string *s)
+static zend_always_inline uint32_t zend_string_addref(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
 		return ++GC_REFCOUNT(s);
@@ -84,7 +84,7 @@ static zend_always_inline zend_uint zend_string_addref(zend_string *s)
 	return 1;
 }
 
-static zend_always_inline zend_uint zend_string_delref(zend_string *s)
+static zend_always_inline uint32_t zend_string_delref(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
 		return --GC_REFCOUNT(s);

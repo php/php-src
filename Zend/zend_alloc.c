@@ -1276,7 +1276,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 {
 	zend_mm_segment *segment = heap->segments_list;
 	zend_mm_block *p, *q;
-	zend_uint total = 0;
+	uint32_t total = 0;
 
 	if (!segment) {
 		return;

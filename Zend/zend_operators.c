@@ -135,7 +135,7 @@ ZEND_API zend_long zend_atol(const char *str, int str_len) /* {{{ */
 }
 /* }}} */
 
-ZEND_API double zend_string_to_double(const char *number, zend_uint length) /* {{{ */
+ZEND_API double zend_string_to_double(const char *number, uint32_t length) /* {{{ */
 {
 	double divisor = 10.0;
 	double result = 0.0;
@@ -2013,7 +2013,7 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSR
 
 ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC) /* {{{ */
 {
-	zend_uint i;
+	uint32_t i;
 
 	for (i=0; i<instance_ce->num_interfaces; i++) {
 		if (instanceof_function(instance_ce->interfaces[i], ce TSRMLS_CC)) {

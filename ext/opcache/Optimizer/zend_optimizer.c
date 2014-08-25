@@ -290,7 +290,7 @@ check_numeric:
 
 static int replace_var_by_const(zend_op_array *op_array,
                                 zend_op       *opline,
-                                zend_uint      var,
+                                uint32_t      var,
                                 zval          *val TSRMLS_DC)
 {
 	zend_op *end = op_array->opcodes + op_array->last;
@@ -344,7 +344,7 @@ static int replace_var_by_const(zend_op_array *op_array,
 
 static void replace_tmp_by_const(zend_op_array *op_array,
                                  zend_op       *opline,
-                                 zend_uint      var,
+                                 uint32_t      var,
                                  zval          *val
                                  TSRMLS_DC)
 {

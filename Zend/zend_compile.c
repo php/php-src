@@ -97,7 +97,7 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
-static void zend_push_function_call_entry(zend_function *fbc, zend_uint opline_num TSRMLS_DC) /* {{{ */
+static void zend_push_function_call_entry(zend_function *fbc, uint32_t opline_num TSRMLS_DC) /* {{{ */
 {
 	zend_function_call_entry fcall = { fbc, opline_num };
 	zend_stack_push(&CG(function_call_stack), &fcall);
@@ -292,9 +292,9 @@ ZEND_API zend_bool zend_is_compiling(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
+static uint32_t get_temporary_variable(zend_op_array *op_array) /* {{{ */
 {
-	return (zend_uint)op_array->T++;
+	return (uint32_t)op_array->T++;
 }
 /* }}} */
 
@@ -563,7 +563,7 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zval *zv, int un
 
 static inline zend_bool zend_is_function_or_method_call(const znode *variable) /* {{{ */
 {
-	zend_uint type = variable->EA;
+	uint32_t type = variable->EA;
 
 	return  ((type & ZEND_PARSED_METHOD_CALL) || (type == ZEND_PARSED_FUNCTION_CALL));
 }
@@ -1253,7 +1253,7 @@ void zend_do_if_end(TSRMLS_D) /* {{{ */
 
 void zend_check_writable_variable(const znode *variable) /* {{{ */
 {
-	zend_uint type = variable->EA;
+	uint32_t type = variable->EA;
 
 	if (type & ZEND_PARSED_METHOD_CALL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Can't use method return value in write context");
@@ -1279,7 +1279,7 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 	zend_llist_element *le = fetch_list_ptr->head;
 	zend_op *opline = NULL;
 	zend_op *opline_ptr;
-	zend_uint this_var = -1;
+	uint32_t this_var = -1;
 
 	/* TODO: $foo->x->y->z = 1 should fetch "x" and "y" for R or RW, not just W */
 
@@ -1508,7 +1508,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	zend_op_array op_array;
 	zend_string *name = Z_STR(function_name->u.constant);
 	int function_begin_line = function_token->u.op.opline_num;
-	zend_uint fn_flags;
+	uint32_t fn_flags;
 	zend_string *lcname;
 	zend_bool orig_interactive;
 	ALLOCA_FLAG(use_heap)
@@ -1955,7 +1955,7 @@ void zend_do_receive_param(zend_uchar op, znode *varname, znode *initialization,
 int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
-	zend_uint op_number;
+	uint32_t op_number;
 	zend_function *function;
 	zend_string *lcname;
 	char *is_compound = memchr(Z_STRVAL(function_name->u.constant), '\\', Z_STRLEN(function_name->u.constant));
@@ -2062,7 +2062,7 @@ void zend_do_clone(znode *result, znode *expr TSRMLS_DC) /* {{{ */
 
 void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRMLS_DC) /* {{{ */
 {
-	zend_uint op_number;
+	uint32_t op_number;
 	zend_op *opline;
 
 	op_number = get_next_op_number(CG(active_op_array));
@@ -2453,7 +2453,7 @@ void zend_release_labels(int temporary TSRMLS_DC) /* {{{ */
 
 void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_class_member TSRMLS_DC) /* {{{ */
 {
-	zend_uint length;
+	uint32_t length;
 
 	if (!result) {
 		result = prefix;
@@ -2484,7 +2484,7 @@ void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_c
 int zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC) /* {{{ */
 {
 	znode class_node;
-	zend_uint op_number;
+	uint32_t op_number;
 	zend_op *opline;
 
 	if (method_name->op_type == IS_CONST) {
@@ -2593,12 +2593,12 @@ static int zend_do_convert_call(zend_op *init_opline, zend_op *opline, zend_long
 }
 /* }}} */
 
-static int zend_do_convert_call_user_func(zend_op *init_opline, zend_uint num_args TSRMLS_DC) /* {{{ */
+static int zend_do_convert_call_user_func(zend_op *init_opline, uint32_t num_args TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = init_opline + 1;
 	int level = 0;
 	int converted = 0;
-	zend_uint arg_num = 0;
+	uint32_t arg_num = 0;
 	zend_function *func = NULL;
 
 	while (1) {
@@ -2751,7 +2751,7 @@ static int zend_do_convert_strlen(zend_op *init_opline, znode *result TSRMLS_DC)
 }
 /* }}} */
 
-static int zend_do_convert_type_check(zend_op *init_opline, znode *result, zend_uint type TSRMLS_DC) /* {{{ */
+static int zend_do_convert_type_check(zend_op *init_opline, znode *result, uint32_t type TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = init_opline + 1;
 	zend_op *send = NULL;
@@ -2841,7 +2841,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, int is_metho
 		}
 		opline = &CG(active_op_array)->opcodes[Z_LVAL(function_name->u.constant)];
 	} else {
-		zend_uint call_flags = 0;
+		uint32_t call_flags = 0;
 
 		opline = &CG(active_op_array)->opcodes[fcall->op_number];
 		opline->extended_value = fcall->arg_num;
@@ -3245,7 +3245,7 @@ void zend_do_yield(znode *result, znode *value, znode *key, zend_bool is_variabl
 }
 /* }}} */
 
-static int zend_add_try_element(zend_uint try_op TSRMLS_DC) /* {{{ */
+static int zend_add_try_element(uint32_t try_op TSRMLS_DC) /* {{{ */
 {
 	int try_catch_offset = CG(active_op_array)->last_try_catch++;
 
@@ -3258,7 +3258,7 @@ static int zend_add_try_element(zend_uint try_op TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void zend_add_catch_element(int offset, zend_uint catch_op TSRMLS_DC) /* {{{ */
+static void zend_add_catch_element(int offset, uint32_t catch_op TSRMLS_DC) /* {{{ */
 {
 	CG(active_op_array)->try_catch_array[offset].catch_op = catch_op;
 }
@@ -3551,7 +3551,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-char *zend_visibility_string(zend_uint fn_flags) /* {{{ */
+char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 {
 	if (fn_flags & ZEND_ACC_PRIVATE) {
 		return "private";
@@ -3588,7 +3588,7 @@ static zend_function *do_inherit_method(zend_function *old_function TSRMLS_DC) /
 
 static zend_bool zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto TSRMLS_DC) /* {{{ */
 {
-	zend_uint i, num_args;
+	uint32_t i, num_args;
 
 	/* If it's a user function then arg_info == NULL means we don't have any parameters but
 	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
@@ -3730,7 +3730,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{{ */
 {
 	char *offset, *buf;
-	zend_uint length = 1024;
+	uint32_t length = 1024;
 
 	offset = buf = (char *)emalloc(length * sizeof(char));
 	if (fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
@@ -3754,14 +3754,14 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 
 	*(offset++) = '(';
 	if (fptr->common.arg_info) {
-		zend_uint i, required;
+		uint32_t i, required;
 		zend_arg_info *arg_info = fptr->common.arg_info;
 
 		required = fptr->common.required_num_args;
 		for (i = 0; i < fptr->common.num_args;) {
 			if (arg_info->class_name) {
 				const char *class_name;
-				zend_uint class_name_len;
+				uint32_t class_name_len;
 				if (!strcasecmp(arg_info->class_name, "self") && fptr->common.scope ) {
 					class_name = fptr->common.scope->name->val;
 					class_name_len = fptr->common.scope->name->len;
@@ -3777,7 +3777,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 				offset += class_name_len;
 				*(offset++) = ' ';
 			} else if (arg_info->type_hint) {
-				zend_uint type_name_len;
+				uint32_t type_name_len;
 				char *type_name = zend_get_type_by_const(arg_info->type_hint);
 				type_name_len = strlen(type_name);
 				REALLOC_BUF_IF_EXCEED(buf, offset, length, type_name_len);
@@ -3803,7 +3803,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 				memcpy(offset, arg_info->name, arg_info->name_len);
 				offset += arg_info->name_len;
 			} else {
-				zend_uint idx = i;
+				uint32_t idx = i;
 				memcpy(offset, "param", 5);
 				offset += 5;
 				do {
@@ -3818,7 +3818,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 				if (fptr->type == ZEND_USER_FUNCTION) {
 					zend_op *precv = NULL;
 					{
-						zend_uint idx  = i;
+						uint32_t idx  = i;
 						zend_op *op = ((zend_op_array *)fptr)->opcodes;
 						zend_op *end = op + ((zend_op_array *)fptr)->last;
 
@@ -3896,8 +3896,8 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 
 static void do_inheritance_check_on_method(zend_function *child, zend_function *parent TSRMLS_DC) /* {{{ */
 {
-	zend_uint child_flags;
-	zend_uint parent_flags = parent->common.fn_flags;
+	uint32_t child_flags;
+	uint32_t parent_flags = parent->common.fn_flags;
 
 	if ((parent->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
 		&& parent->common.fn_flags & ZEND_ACC_ABSTRACT
@@ -3968,7 +3968,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, zend_string *key, zend_class_entry *child_ce) /* {{{ */
 {
-	zend_uint parent_flags = parent->common.fn_flags;
+	uint32_t parent_flags = parent->common.fn_flags;
 	zend_function *child;
 	TSRMLS_FETCH();
 
@@ -4047,7 +4047,7 @@ static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry
 ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface TSRMLS_DC) /* {{{ */
 {
 	/* expects interface to be contained in ce's interface list already */
-	zend_uint i, ce_num, if_num = iface->num_interfaces;
+	uint32_t i, ce_num, if_num = iface->num_interfaces;
 	zend_class_entry *entry;
 
 	if (if_num==0) {
@@ -4286,9 +4286,9 @@ static void do_inherit_iface_constant(zend_string *name, zval *zv, zend_class_en
 
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC) /* {{{ */
 {
-	zend_uint i, ignore = 0;
-	zend_uint current_iface_num = ce->num_interfaces;
-	zend_uint parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
+	uint32_t i, ignore = 0;
+	uint32_t current_iface_num = ce->num_interfaces;
+	uint32_t parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
 	zend_function *func;
 	zend_string *key;
 	zval *zv;
@@ -4339,9 +4339,9 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 
 ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC) /* {{{ */
 {
-	zend_uint i, ignore = 0;
-	zend_uint current_trait_num = ce->num_traits;
-	zend_uint parent_trait_num  = ce->parent ? ce->parent->num_traits : 0;
+	uint32_t i, ignore = 0;
+	uint32_t current_trait_num = ce->num_traits;
+	uint32_t parent_trait_num  = ce->parent ? ce->parent->num_traits : 0;
 
 	for (i = 0; i < ce->num_traits; i++) {
 		if (ce->traits[i] == NULL) {
@@ -4368,8 +4368,8 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 
 static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_function *other_fn TSRMLS_DC) /* {{{ */
 {
-	zend_uint    fn_flags = fn->common.scope->ce_flags;
-	zend_uint other_flags = other_fn->common.scope->ce_flags;
+	uint32_t    fn_flags = fn->common.scope->ce_flags;
+	uint32_t other_flags = other_fn->common.scope->ce_flags;
 
 	return zend_do_perform_implementation_check(fn, other_fn TSRMLS_CC)
 		&& ((other_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) || zend_do_perform_implementation_check(other_fn, fn TSRMLS_CC))
@@ -4586,7 +4586,7 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 
 static void zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC) /* {{{ */
 {
-	zend_uint i;
+	uint32_t i;
 
 	if ((trait->ce_flags & ZEND_ACC_TRAIT) != ZEND_ACC_TRAIT) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class %s is not a trait, Only traits may be used in 'as' and 'insteadof' statements", trait->name->val);
@@ -4734,7 +4734,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 
 static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
-	zend_uint i;
+	uint32_t i;
 	HashTable *overriden = NULL;
 	zend_string *key;
 	zend_function *fn;
@@ -4798,7 +4798,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 	const char* class_name_unused;
 	zend_bool not_compatible;
 	zval* prop_value;
-	zend_uint flags;
+	uint32_t flags;
 	zend_string *doc_comment;
 
 	/* In the following steps the properties are inserted into the property table
@@ -5185,7 +5185,7 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 				    ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) &&
 				     (ce->type == ZEND_INTERNAL_CLASS))) {
 				    if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
-						zend_uint *opline_num = &CG(active_op_array)->early_binding;
+						uint32_t *opline_num = &CG(active_op_array)->early_binding;
 
 						while (*opline_num != -1) {
 							opline_num = &CG(active_op_array)->opcodes[*opline_num].result.opline_num;
@@ -5230,7 +5230,7 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS
 {
 	if (op_array->early_binding != -1) {
 		zend_bool orig_in_compilation = CG(in_compilation);
-		zend_uint opline_num = op_array->early_binding;
+		uint32_t opline_num = op_array->early_binding;
 		zend_class_entry *ce;
 
 		CG(in_compilation) = 1;
@@ -5801,7 +5801,7 @@ ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int le
 }
 /* }}} */
 
-void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC) /* {{{ */
+void zend_do_declare_property(znode *var_name, znode *value, uint32_t access_type TSRMLS_DC) /* {{{ */
 {
 	zval property;
 	zend_property_info *existing_property_info;
@@ -6311,7 +6311,7 @@ void zend_do_end_array(znode *result, const znode *array_node TSRMLS_DC) /* {{{ 
 	
 	if (constant_array) {
 		/* try to construct constant array */
-		zend_uint size;
+		uint32_t size;
 		zend_long num;
 		zend_string *str;
 
@@ -7461,7 +7461,7 @@ int zend_get_class_fetch_type(const char *class_name, uint class_name_len) /* {{
 }
 /* }}} */
 
-ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var) /* {{{ */
+ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, uint32_t var) /* {{{ */
 {
 	return op_array->vars[EX_VAR_TO_NUM(var)];
 }

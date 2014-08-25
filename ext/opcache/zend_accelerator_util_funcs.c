@@ -27,7 +27,7 @@
 
 #define ZEND_PROTECTED_REFCOUNT	(1<<30)
 
-static zend_uint zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
+static uint32_t zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
 
 #if SIZEOF_SIZE_T <= SIZEOF_ZEND_INT
 /* If sizeof(void*) == sizeof(ulong) we can use zend_hash index functions */
@@ -41,7 +41,7 @@ static zend_uint zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
 
-static const zend_uint uninitialized_bucket = {INVALID_IDX};
+static const uint32_t uninitialized_bucket = {INVALID_IDX};
 
 static int zend_prepare_function_for_execution(zend_op_array *op_array);
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind);
@@ -113,7 +113,7 @@ static int compact_hash_table(HashTable *ht)
 		return 1;
 	}
 
-	d = (Bucket *)pemalloc(nSize * (sizeof(Bucket) + sizeof(zend_uint)), ht->u.flags & HASH_FLAG_PERSISTENT);
+	d = (Bucket *)pemalloc(nSize * (sizeof(Bucket) + sizeof(uint32_t)), ht->u.flags & HASH_FLAG_PERSISTENT);
 	if (!d) {
 		return 0;
 	}
@@ -129,7 +129,7 @@ static int compact_hash_table(HashTable *ht)
 	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
 
 	ht->arData = d;
-	ht->arHash = (zend_uint *)(d + nSize);
+	ht->arHash = (uint32_t *)(d + nSize);
 	ht->nTableSize = nSize;
 	ht->nTableMask = ht->nTableSize - 1;
 	zend_hash_rehash(ht);
@@ -348,14 +348,14 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 	if (!ht->nTableMask) {
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 
 	if (source->u.flags & HASH_FLAG_PACKED) {
 		ht->u.flags |= HASH_FLAG_PACKED;
 		ht->arData = (Bucket *) emalloc(ht->nTableSize * sizeof(Bucket));
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 	
 		for (idx = 0; idx < source->nNumUsed; idx++) {
 			p = source->arData + idx;
@@ -379,9 +379,9 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 			zend_clone_zval(&q->val, bind TSRMLS_CC);
 		}
 	} else {
-		ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(zend_uint)));
-		ht->arHash = (zend_uint*)(ht->arData + ht->nTableSize);
-		memset(ht->arHash, INVALID_IDX, sizeof(zend_uint) * ht->nTableSize);
+		ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
+		ht->arHash = (uint32_t*)(ht->arData + ht->nTableSize);
+		memset(ht->arHash, INVALID_IDX, sizeof(uint32_t) * ht->nTableSize);
 	
 		for (idx = 0; idx < source->nNumUsed; idx++) {
 			p = source->arData + idx;
@@ -427,14 +427,14 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 	if (!ht->nTableMask) {
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 
 	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
-	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(zend_uint)));
-	ht->arHash = (zend_uint *)(ht->arData + ht->nTableSize);
-	memset(ht->arHash, INVALID_IDX, sizeof(zend_uint) * ht->nTableSize);
+	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
+	ht->arHash = (uint32_t *)(ht->arData + ht->nTableSize);
+	memset(ht->arHash, INVALID_IDX, sizeof(uint32_t) * ht->nTableSize);
 
 	for (idx = 0; idx < source->nNumUsed; idx++) {		
 		p = source->arData + idx;
@@ -504,14 +504,14 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 	if (!ht->nTableMask) {
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 
 	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
-	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(zend_uint)));
-	ht->arHash = (zend_uint*)(ht->arData + ht->nTableSize);
-	memset(ht->arHash, INVALID_IDX, sizeof(zend_uint) * ht->nTableSize);
+	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
+	ht->arHash = (uint32_t*)(ht->arData + ht->nTableSize);
+	memset(ht->arHash, INVALID_IDX, sizeof(uint32_t) * ht->nTableSize);
 
 	for (idx = 0; idx < source->nNumUsed; idx++) {		
 		p = source->arData + idx;
@@ -898,7 +898,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		}
 	}
 
-	if (op_array->early_binding != (zend_uint)-1) {
+	if (op_array->early_binding != (uint32_t)-1) {
 		zend_string *orig_compiled_filename = CG(compiled_filename);
 		CG(compiled_filename) = persistent_script->full_path;
 		zend_do_delayed_early_binding(op_array TSRMLS_CC);

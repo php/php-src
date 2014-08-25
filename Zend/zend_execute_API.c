@@ -633,13 +633,13 @@ ZEND_API int zval_update_constant(zval *pp, zend_bool inline_change TSRMLS_DC) /
 }
 /* }}} */
 
-int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, zend_uint param_count, zval params[] TSRMLS_DC) /* {{{ */
+int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[] TSRMLS_DC) /* {{{ */
 {
 	return call_user_function_ex(function_table, object, function_name, retval_ptr, param_count, params, 1, NULL TSRMLS_CC);
 }
 /* }}} */
 
-int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, zend_uint param_count, zval params[], int no_separation, zend_array *symbol_table TSRMLS_DC) /* {{{ */
+int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], int no_separation, zend_array *symbol_table TSRMLS_DC) /* {{{ */
 {
 	zend_fcall_info fci;
 
@@ -659,7 +659,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 
 int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC) /* {{{ */
 {
-	zend_uint i;
+	uint32_t i;
 	zend_class_entry *calling_scope = NULL;
 	zend_execute_data *call, dummy_execute_data;
 	zend_fcall_info_cache fci_cache_local;
@@ -1062,7 +1062,7 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 {
 	zval pv;
 	zend_op_array *new_op_array;
-	zend_uint original_compiler_options;
+	uint32_t original_compiler_options;
 	int retval;
 
 	if (retval_ptr) {
@@ -1584,7 +1584,7 @@ ZEND_API int zend_delete_global_variable(zend_string *name TSRMLS_DC) /* {{{ */
 
 ZEND_API zend_array *zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 {
-	zend_uint i;
+	uint32_t i;
 	zend_execute_data *ex;
 	zend_array *symbol_table;
 

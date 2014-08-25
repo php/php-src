@@ -26,7 +26,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zend_literal *literal TSRMLS_DC) /* {{{ */
+static inline uint32_t phpdbg_decode_literal(zend_op_array *ops, zend_literal *literal TSRMLS_DC) /* {{{ */
 {
 	int iter = 0;
 
@@ -40,7 +40,7 @@ static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zend_literal *
 	return 0;
 } /* }}} */
 
-static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint type, HashTable *vars TSRMLS_DC) /* {{{ */
+static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t type, HashTable *vars TSRMLS_DC) /* {{{ */
 {
 	char *decode = NULL;
 

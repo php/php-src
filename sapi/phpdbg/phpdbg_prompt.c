@@ -430,7 +430,7 @@ PHPDBG_COMMAND(until) /* {{{ */
 
 	PHPDBG_G(flags) |= PHPDBG_IN_UNTIL;
 	{
-		zend_uint next = 0,
+		uint32_t next = 0,
 				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
 		zend_op  *opline = &EG(active_op_array)->opcodes[self];
 
@@ -458,7 +458,7 @@ PHPDBG_COMMAND(finish) /* {{{ */
 
 	PHPDBG_G(flags) |= PHPDBG_IN_FINISH;
 	{
-		zend_uint next = 0,
+		uint32_t next = 0,
 				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
 
 		for (next = self; next < EG(active_op_array)->last; next++) {
@@ -491,7 +491,7 @@ PHPDBG_COMMAND(leave) /* {{{ */
 
 	PHPDBG_G(flags) |= PHPDBG_IN_LEAVE;
 	{
-		zend_uint next = 0,
+		uint32_t next = 0,
 				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
 
 		for (next = self; next < EG(active_op_array)->last; next++) {
@@ -534,7 +534,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 
 	/* get filename and linenumber before unsetting exception */
 	const char *filename = zend_get_executed_filename(TSRMLS_C);
-	zend_uint lineno = zend_get_executed_lineno(TSRMLS_C);
+	uint32_t lineno = zend_get_executed_lineno(TSRMLS_C);
 
 	/* copy exception */
 	exception = *EG(exception);

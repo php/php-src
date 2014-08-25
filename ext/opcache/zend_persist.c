@@ -67,7 +67,7 @@ typedef void (*zend_persist_func_t)(zval* TSRMLS_DC);
 static void zend_persist_zval(zval *z TSRMLS_DC);
 static void zend_persist_zval_const(zval *z TSRMLS_DC);
 
-static const zend_uint uninitialized_bucket = {INVALID_IDX};
+static const uint32_t uninitialized_bucket = {INVALID_IDX};
 
 static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement TSRMLS_DC)
 {
@@ -75,19 +75,19 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	Bucket *p;
 
 	if (!ht->nTableMask) {
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
 		zend_accel_store(ht->arData, sizeof(Bucket) * ht->nNumUsed);
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 	} else {
 		Bucket *d = (Bucket*)ZCG(mem);
-		zend_uint *h = (zend_uint*)(d + ht->nNumUsed);
+		uint32_t *h = (uint32_t*)(d + ht->nNumUsed);
 
 		ZCG(mem) = (void*)(h + ht->nTableSize);
 		memcpy(d, ht->arData, sizeof(Bucket) * ht->nNumUsed);
-		memcpy(h, ht->arHash, sizeof(zend_uint) * ht->nTableSize);
+		memcpy(h, ht->arHash, sizeof(uint32_t) * ht->nTableSize);
 		efree(ht->arData);
 		ht->arData = d;
 		ht->arHash = h;
@@ -112,19 +112,19 @@ static void zend_hash_persist_immutable(HashTable *ht TSRMLS_DC)
 	Bucket *p;
 
 	if (!ht->nTableMask) {
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
 		ht->arData = zend_accel_memdup(ht->arData, sizeof(Bucket) * ht->nNumUsed);
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 	} else {
 		Bucket *d = (Bucket*)ZCG(mem);
-		zend_uint *h = (zend_uint*)(d + ht->nNumUsed);
+		uint32_t *h = (uint32_t*)(d + ht->nNumUsed);
 
 		ZCG(mem) = (void*)(h + ht->nTableSize);
 		memcpy(d, ht->arData, sizeof(Bucket) * ht->nNumUsed);
-		memcpy(h, ht->arHash, sizeof(zend_uint) * ht->nTableSize);
+		memcpy(h, ht->arHash, sizeof(uint32_t) * ht->nTableSize);
 		ht->arData = d;
 		ht->arHash = h;
 	}
@@ -399,7 +399,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			ZEND_ASSERT(new_ptr != NULL);
 			op_array->arg_info = new_ptr;
 		} else {
-			zend_uint i;
+			uint32_t i;
 
 			zend_accel_store(op_array->arg_info, sizeof(zend_arg_info) * op_array->num_args);
 			for (i = 0; i < op_array->num_args; i++) {

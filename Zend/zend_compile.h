@@ -54,7 +54,7 @@ typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
 
 typedef struct _zend_compiler_context {
-	zend_uint  opcodes_size;
+	uint32_t  opcodes_size;
 	int        vars_size;
 	int        literals_size;
 	int        current_brk_cont;
@@ -64,11 +64,11 @@ typedef struct _zend_compiler_context {
 } zend_compiler_context;
 
 typedef union _znode_op {
-	zend_uint      constant;
-	zend_uint      var;
-	zend_uint      num;
+	uint32_t      constant;
+	uint32_t      var;
+	uint32_t      num;
 	zend_ulong     hash;
-	zend_uint      opline_num; /*  Needs to be signed */
+	uint32_t      opline_num; /*  Needs to be signed */
 	zend_op       *jmp_addr;
 	zval          *zv;
 	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
@@ -82,7 +82,7 @@ typedef struct _znode { /* used only during compilation */
 		zend_op_array *op_array;
 		zend_ast *ast;
 	} u;
-	zend_uint EA;      /* extended attributes */
+	uint32_t EA;      /* extended attributes */
 } znode;
 
 typedef struct _zend_execute_data zend_execute_data;
@@ -118,14 +118,14 @@ typedef struct _zend_brk_cont_element {
 
 typedef struct _zend_label {
 	int brk_cont;
-	zend_uint opline_num;
+	uint32_t opline_num;
 } zend_label;
 
 typedef struct _zend_try_catch_element {
-	zend_uint try_op;
-	zend_uint catch_op;  /* ketchup! */
-	zend_uint finally_op;
-	zend_uint finally_end;
+	uint32_t try_op;
+	uint32_t catch_op;  /* ketchup! */
+	uint32_t finally_op;
+	uint32_t finally_end;
 } zend_try_catch_element;
 
 #if SIZEOF_ZEND_INT == 8
@@ -208,11 +208,11 @@ typedef struct _zend_try_catch_element {
 /* function has arguments with type hinting */
 #define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
 
-char *zend_visibility_string(zend_uint fn_flags);
+char *zend_visibility_string(uint32_t fn_flags);
 
 
 typedef struct _zend_property_info {
-	zend_uint flags;
+	uint32_t flags;
 	zend_string *name;
 	zend_ulong h;
 	int offset;
@@ -222,9 +222,9 @@ typedef struct _zend_property_info {
 
 typedef struct _zend_arg_info {
 	const char *name;			// TODO: convert into zend_string ???
-	zend_uint name_len;
+	uint32_t name_len;
 	const char *class_name;		// TODO: convert into zend_string ???
-	zend_uint class_name_len;
+	uint32_t class_name_len;
 	zend_uchar type_hint;
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
@@ -237,9 +237,9 @@ typedef struct _zend_arg_info {
  */
 typedef struct _zend_internal_function_info {
 	const char *_name;
-	zend_uint _name_len;
+	uint32_t _name_len;
 	const char *_class_name;
-	zend_uint required_num_args;
+	uint32_t required_num_args;
 	zend_uchar _type_hint;
 	zend_bool return_reference;
 	zend_bool _allow_null;
@@ -251,22 +251,22 @@ struct _zend_op_array {
 	zend_uchar type;
 	zend_string *function_name;
 	zend_class_entry *scope;
-	zend_uint fn_flags;
+	uint32_t fn_flags;
 	zend_function *prototype;
-	zend_uint num_args;
-	zend_uint required_num_args;
+	uint32_t num_args;
+	uint32_t required_num_args;
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
-	zend_uint *refcount;
+	uint32_t *refcount;
 
 	zend_op *opcodes;
-	zend_uint last;
+	uint32_t last;
 
 	zend_string **vars;
 	int last_var;
 
-	zend_uint T;
+	uint32_t T;
 
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
@@ -278,13 +278,13 @@ struct _zend_op_array {
 	/* static variables support */
 	HashTable *static_variables;
 
-	zend_uint this_var;
+	uint32_t this_var;
 
 	zend_string *filename;
-	zend_uint line_start;
-	zend_uint line_end;
+	uint32_t line_start;
+	uint32_t line_end;
 	zend_string *doc_comment;
-	zend_uint early_binding; /* the linked list of delayed declarations */
+	uint32_t early_binding; /* the linked list of delayed declarations */
 
 	zval *literals;
 	int last_literal;
@@ -304,10 +304,10 @@ typedef struct _zend_internal_function {
 	zend_uchar type;
 	zend_string* function_name;
 	zend_class_entry *scope;
-	zend_uint fn_flags;
+	uint32_t fn_flags;
 	zend_function *prototype;
-	zend_uint num_args;
-	zend_uint required_num_args;
+	uint32_t num_args;
+	uint32_t required_num_args;
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
@@ -324,10 +324,10 @@ union _zend_function {
 		zend_uchar type;  /* never used */
 		zend_string *function_name;
 		zend_class_entry *scope;
-		zend_uint fn_flags;
+		uint32_t fn_flags;
 		union _zend_function *prototype;
-		zend_uint num_args;
-		zend_uint required_num_args;
+		uint32_t num_args;
+		uint32_t required_num_args;
 		zend_arg_info *arg_info;
 	} common;
 
@@ -337,8 +337,8 @@ union _zend_function {
 
 typedef struct _zend_function_call_entry {
 	zend_function *fbc;
-	zend_uint op_number;
-	zend_uint arg_num;
+	uint32_t op_number;
+	uint32_t arg_num;
 	zend_bool uses_argument_unpacking;
 } zend_function_call_entry;
 
@@ -367,7 +367,7 @@ struct _zend_execute_data {
 	zend_execute_data   *call;             /* current call                   */
 	void               **run_time_cache;
 	zend_function       *func;             /* executed op_array              */
-	zend_uint            num_args;
+	uint32_t            num_args;
 	zend_uchar           flags;
 	zend_uchar           frame_kind;
 	zend_class_entry    *called_scope;
@@ -435,7 +435,7 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace
 void zend_resolve_function_name(znode *element_name, zend_bool *check_namespace TSRMLS_DC);
 void zend_resolve_const_name(znode *element_name, zend_bool *check_namespace TSRMLS_DC);
 void zend_resolve_class_name(znode *class_name TSRMLS_DC);
-ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var);
+ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, uint32_t var);
 
 #ifdef ZTS
 const char *zend_get_zendtext(TSRMLS_D);
@@ -559,7 +559,7 @@ void zend_do_default_before_statement(const znode *case_list, znode *default_tok
 
 void zend_do_begin_class_declaration(const znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC);
 void zend_do_end_class_declaration(const znode *class_token, const znode *parent_token TSRMLS_DC);
-void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC);
+void zend_do_declare_property(znode *var_name, znode *value, uint32_t access_type TSRMLS_DC);
 void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC);
 
 void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC);

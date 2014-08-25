@@ -1080,7 +1080,7 @@ ZEND_FUNCTION(get_object_vars)
 }
 /* }}} */
 
-static int same_name(const char *key, const char *name, zend_uint name_len)
+static int same_name(const char *key, const char *name, uint32_t name_len)
 {
 	char *lcname = zend_str_tolower_dup(name, name_len);
 	int ret = memcmp(lcname, key, name_len) == 0;
@@ -1694,9 +1694,9 @@ static int copy_class_or_interface_name(zval *el TSRMLS_DC, int num_args, va_lis
 {
 	zend_class_entry *ce = (zend_class_entry *)Z_PTR_P(el);
 	zval *array = va_arg(args, zval *);
-	zend_uint mask = va_arg(args, zend_uint);
-	zend_uint comply = va_arg(args, zend_uint);
-	zend_uint comply_mask = (comply)? mask:0;
+	uint32_t mask = va_arg(args, uint32_t);
+	uint32_t comply = va_arg(args, uint32_t);
+	uint32_t comply_mask = (comply)? mask:0;
 
 	if ((hash_key->key && hash_key->key->val[0] != 0)
 		&& (comply_mask == (ce->ce_flags & mask))) {
@@ -1715,8 +1715,8 @@ static int copy_class_or_interface_name(zval *el TSRMLS_DC, int num_args, va_lis
    Returns an array of all declared traits. */
 ZEND_FUNCTION(get_declared_traits)
 {
-	zend_uint mask = ZEND_ACC_TRAIT;
-	zend_uint comply = 1;
+	uint32_t mask = ZEND_ACC_TRAIT;
+	uint32_t comply = 1;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1732,8 +1732,8 @@ ZEND_FUNCTION(get_declared_traits)
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
-	zend_uint mask = ZEND_ACC_INTERFACE | (ZEND_ACC_TRAIT & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
-	zend_uint comply = 0;
+	uint32_t mask = ZEND_ACC_INTERFACE | (ZEND_ACC_TRAIT & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
+	uint32_t comply = 0;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1748,8 +1748,8 @@ ZEND_FUNCTION(get_declared_classes)
    Returns an array of all declared interfaces. */
 ZEND_FUNCTION(get_declared_interfaces)
 {
-	zend_uint mask = ZEND_ACC_INTERFACE;
-	zend_uint comply = 1;
+	uint32_t mask = ZEND_ACC_INTERFACE;
+	uint32_t comply = 1;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;

@@ -43,7 +43,7 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 	}
 }
 
-static void op_array_alloc_ops(zend_op_array *op_array, zend_uint size)
+static void op_array_alloc_ops(zend_op_array *op_array, uint32_t size)
 {
 	op_array->opcodes = erealloc(op_array->opcodes, size * sizeof(zend_op));
 }
@@ -59,7 +59,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 		initial_ops_size = INITIAL_INTERACTIVE_OP_ARRAY_SIZE;
 	}
 
-	op_array->refcount = (zend_uint *) emalloc(sizeof(zend_uint));
+	op_array->refcount = (uint32_t *) emalloc(sizeof(uint32_t));
 	*op_array->refcount = 1;
 	op_array->last = 0;
 	op_array->opcodes = NULL;
@@ -321,7 +321,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 {
 	zval *literal = op_array->literals;
 	zval *end;
-	zend_uint i;
+	uint32_t i;
 
 	if (op_array->static_variables) {
 		zend_hash_destroy(op_array->static_variables);
@@ -392,7 +392,7 @@ void init_op(zend_op *op TSRMLS_DC)
 
 zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_uint next_op_num = op_array->last++;
+	uint32_t next_op_num = op_array->last++;
 	zend_op *next_op;
 
 	if (next_op_num >= CG(context).opcodes_size) {
@@ -455,9 +455,9 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 	}
 }
 
-static void zend_check_finally_breakout(zend_op_array *op_array, zend_uint op_num, zend_uint dst_num TSRMLS_DC)
+static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num, uint32_t dst_num TSRMLS_DC)
 {
-	zend_uint i;
+	uint32_t i;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
 		if ((op_num < op_array->try_catch_array[i].finally_op ||
@@ -480,10 +480,10 @@ static void zend_check_finally_breakout(zend_op_array *op_array, zend_uint op_nu
 	} 
 }
 
-static void zend_adjust_fast_call(zend_op_array *op_array, zend_uint fast_call, zend_uint start, zend_uint end TSRMLS_DC)
+static void zend_adjust_fast_call(zend_op_array *op_array, uint32_t fast_call, uint32_t start, uint32_t end TSRMLS_DC)
 {
 	int i;
-	zend_uint op_num = 0;
+	uint32_t op_num = 0;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
 		if (op_array->try_catch_array[i].finally_op > start 
@@ -501,10 +501,10 @@ static void zend_adjust_fast_call(zend_op_array *op_array, zend_uint fast_call, 
 	}
 }
 
-static void zend_resolve_fast_call(zend_op_array *op_array, zend_uint fast_call, zend_uint op_num TSRMLS_DC)
+static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t fast_call, uint32_t op_num TSRMLS_DC)
 {
 	int i;
-	zend_uint finally_op_num = 0;
+	uint32_t finally_op_num = 0;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
 		if (op_num >= op_array->try_catch_array[i].finally_op
@@ -523,13 +523,13 @@ static void zend_resolve_fast_call(zend_op_array *op_array, zend_uint fast_call,
 	} 
 }
 
-static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num, zend_uint dst_num TSRMLS_DC)
+static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, uint32_t dst_num TSRMLS_DC)
 {
-	zend_uint start_op;
+	uint32_t start_op;
 	zend_op *opline;
-	zend_uint i = op_array->last_try_catch;
+	uint32_t i = op_array->last_try_catch;
 
-	if (dst_num != (zend_uint)-1) {
+	if (dst_num != (uint32_t)-1) {
 		zend_check_finally_breakout(op_array, op_num, dst_num TSRMLS_CC);
 	}
 
@@ -601,10 +601,10 @@ static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num,
 	}	
 }
 
-static void zend_resolve_finally_ret(zend_op_array *op_array, zend_uint op_num TSRMLS_DC)
+static void zend_resolve_finally_ret(zend_op_array *op_array, uint32_t op_num TSRMLS_DC)
 {
 	int i;
-	zend_uint catch_op_num = 0, finally_op_num = 0;
+	uint32_t catch_op_num = 0, finally_op_num = 0;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
 		if (op_array->try_catch_array[i].try_op > op_num) {
@@ -631,7 +631,7 @@ static void zend_resolve_finally_ret(zend_op_array *op_array, zend_uint op_num T
 
 static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_uint i, j;
+	uint32_t i, j;
 	zend_op *opline;
 
 	for (i = 0, j = op_array->last; i < j; i++) {
@@ -640,7 +640,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
 			case ZEND_GENERATOR_RETURN:
-				zend_resolve_finally_call(op_array, i, (zend_uint)-1 TSRMLS_CC);
+				zend_resolve_finally_call(op_array, i, (uint32_t)-1 TSRMLS_CC);
 				break;
 			case ZEND_BRK:
 			case ZEND_CONT:
@@ -662,7 +662,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 			}
 			case ZEND_GOTO:
 				if (Z_TYPE(op_array->literals[opline->op2.constant]) != IS_LONG) {
-					zend_uint num = opline->op2.constant;
+					uint32_t num = opline->op2.constant;
 					opline->op2.zv = &op_array->literals[opline->op2.constant];
 					zend_resolve_goto_label(op_array, opline, 1 TSRMLS_CC);
 					opline->op2.constant = num;					
@@ -718,20 +718,20 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 		if (opline->op1_type == IS_CONST) {
 			opline->op1.zv = &op_array->literals[opline->op1.constant];
 		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op1.var = (zend_uint)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->op1.var);
+			opline->op1.var = (uint32_t)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->op1.var);
 		}
 		if (opline->op2_type == IS_CONST) {
 			opline->op2.zv = &op_array->literals[opline->op2.constant];
 		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op2.var = (zend_uint)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->op2.var);
+			opline->op2.var = (uint32_t)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->op2.var);
 		}
 		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->result.var = (zend_uint)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->result.var);
+			opline->result.var = (uint32_t)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->result.var);
 		}
 		switch (opline->opcode) {
 			case ZEND_DECLARE_INHERITED_CLASS:
 			case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
-				opline->extended_value = (zend_uint)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->extended_value);
+				opline->extended_value = (uint32_t)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->extended_value);
 				break;
 			case ZEND_GOTO:
 				if (Z_TYPE_P(opline->op2.zv) != IS_LONG) {

@@ -106,7 +106,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
 	zend_code_block *blocks, *cur_block;
-	zend_uint opno = 0;
+	uint32_t opno = 0;
 
 	memset(cfg, 0, sizeof(zend_cfg));
 	blocks = cfg->blocks = zend_arena_calloc(&ctx->arena, op_array->last + 2, sizeof(zend_code_block));
@@ -1264,8 +1264,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	op_array->opcodes = erealloc(new_opcodes, op_array->last * sizeof(zend_op));
 
 	/* adjust early binding list */
-	if (op_array->early_binding != (zend_uint)-1) {
-		zend_uint *opline_num = &op_array->early_binding;
+	if (op_array->early_binding != (uint32_t)-1) {
+		uint32_t *opline_num = &op_array->early_binding;
 		zend_op *end;
 
 		opline = op_array->opcodes;
@@ -1441,7 +1441,7 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 
 			if (block->op2_to) {
 				zend_uchar same_type = ZEND_OP1_TYPE(last_op);
-				zend_uint same_var = VAR_NUM_EX(last_op->op1);
+				uint32_t same_var = VAR_NUM_EX(last_op->op1);
 				zend_op *target;
 				zend_op *target_end;
 				zend_code_block *target_block = block->op2_to;;

@@ -2671,7 +2671,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		EG(current_execute_data) = call;
 
 		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-			zend_uint i;
+			uint32_t i;
 			zval *p = ZEND_CALL_ARG(call, 1);
 
 			for (i = 0; i < call->num_args; ++i) {
@@ -3349,7 +3349,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 		EX(call)->called_scope = NULL;
 		EX(call)->object = NULL;
 	} else {
-		zend_uint arg_num = 1;
+		uint32_t arg_num = 1;
 
 		HashTable *ht = Z_ARRVAL_P(args);
 		zval *arg, *param, tmp;
@@ -3357,7 +3357,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 		zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht) TSRMLS_CC);
 
 		if (OP1_TYPE != IS_CONST && OP1_TYPE != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
-			zend_uint i;
+			uint32_t i;
 			int separate = 0;
 
 			/* check if any of arguments are going to be passed by reference */
@@ -3527,7 +3527,7 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, ANY)
 ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 {
 	USE_OPLINE
-	zend_uint arg_num = opline->op1.num;
+	uint32_t arg_num = opline->op1.num;
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(arg_num > EX(num_args))) {
@@ -3546,7 +3546,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 {
 	USE_OPLINE
-	zend_uint arg_num = opline->op1.num;
+	uint32_t arg_num = opline->op1.num;
 	zval *param;
 
 	SAVE_OPLINE();
@@ -3574,8 +3574,8 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 {
 	USE_OPLINE
-	zend_uint arg_num = opline->op1.num;
-	zend_uint arg_count = EX(num_args);
+	uint32_t arg_num = opline->op1.num;
+	uint32_t arg_count = EX(num_args);
 	zval *params;
 
 	SAVE_OPLINE();
@@ -3990,7 +3990,7 @@ ZEND_VM_C_LABEL(str_index):
 ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|UNUSED|CV)
 {
 	zval *array;
-	zend_uint size;
+	uint32_t size;
 	USE_OPLINE
 
 	array = EX_VAR(opline->result.var);
@@ -5395,9 +5395,9 @@ ZEND_VM_HANDLER(155, ZEND_BIND_TRAITS, ANY, ANY)
 
 ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 {
-	zend_uint op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
+	uint32_t op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
 	int i;
-	zend_uint catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
+	uint32_t catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
 
 	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
 		if (EX(func)->op_array.try_catch_array[i].try_op > op_num) {

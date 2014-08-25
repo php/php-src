@@ -308,7 +308,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 		}
 
 		if (arg_info) {
-			zend_uint i, required = closure->func.common.required_num_args;
+			uint32_t i, required = closure->func.common.required_num_args;
 
 			array_init(&val);
 

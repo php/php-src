@@ -44,7 +44,7 @@
 #define LITERAL_NUM_SLOTS(info)   ((info & LITERAL_NUM_SLOTS_MASK) >> LITERAL_NUM_SLOTS_SHIFT)
 
 typedef struct _literal_info {
-	zend_uint  flags; /* bitmask (see defines above) */
+	uint32_t  flags; /* bitmask (see defines above) */
 	union {
 		int    num;   /* variable number or class name literal number */
 	} u;
@@ -71,9 +71,9 @@ static void optimizer_literal_obj_info(literal_info   *info,
                                        zend_uchar      op_type,
                                        znode_op        op,
                                        int             constant,
-                                       zend_uint       kind,
-                                       zend_uint       slots,
-                                       zend_uint       related,
+                                       uint32_t       kind,
+                                       uint32_t       slots,
+                                       uint32_t       related,
                                        zend_op_array  *op_array)
 {
 	/* For now we merge only $this object properties and methods.
@@ -92,9 +92,9 @@ static void optimizer_literal_class_info(literal_info   *info,
                                          zend_uchar      op_type,
                                          znode_op        op,
                                          int             constant,
-                                         zend_uint       kind,
-                                         zend_uint       slots,
-                                         zend_uint       related,
+                                         uint32_t       kind,
+                                         uint32_t       slots,
+                                         uint32_t       related,
                                          zend_op_array  *op_array)
 {
 	if (op_type == IS_CONST) {

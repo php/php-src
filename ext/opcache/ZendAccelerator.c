@@ -1283,7 +1283,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 	zend_op_array *op_array;
 	int do_bailout = 0;
 	accel_time_t timestamp = 0;
-	zend_uint orig_compiler_options = 0;
+	uint32_t orig_compiler_options = 0;
 
     /* Try to open file */
     if (file_handle->type == ZEND_HANDLE_FILENAME) {
@@ -1581,7 +1581,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 
 	/* If script was not found or invalidated by validate_timestamps */
 	if (!persistent_script) {
-		zend_uint old_const_num = zend_hash_next_free_element(EG(zend_constants));
+		uint32_t old_const_num = zend_hash_next_free_element(EG(zend_constants));
 		zend_op_array *op_array;
 
 		/* Cache miss.. */
@@ -1608,7 +1608,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 		}
 		if (from_shared_memory) {
 			/* Delete immutable arrays moved into SHM */
-			zend_uint new_const_num = zend_hash_next_free_element(EG(zend_constants));
+			uint32_t new_const_num = zend_hash_next_free_element(EG(zend_constants));
 			while (new_const_num > old_const_num) {
 				new_const_num--;
 				zend_hash_index_del(EG(zend_constants), new_const_num);
@@ -2185,13 +2185,13 @@ static int zend_accel_init_shm(TSRMLS_D)
 	if (ZCG(accel_directives).interned_strings_buffer) {
 		ZCSG(interned_strings).nTableMask = ZCSG(interned_strings).nTableSize - 1;
 		ZCSG(interned_strings).arData = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket));
-		ZCSG(interned_strings).arHash = (zend_uint*)zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(zend_uint));
+		ZCSG(interned_strings).arHash = (uint32_t*)zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(uint32_t));
 		ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
 		if (!ZCSG(interned_strings).arData || !ZCSG(interned_strings_start)) {
 			zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
 			return FAILURE;
 		}
-		memset(ZCSG(interned_strings).arHash, INVALID_IDX, ZCSG(interned_strings).nTableSize * sizeof(zend_uint));
+		memset(ZCSG(interned_strings).arHash, INVALID_IDX, ZCSG(interned_strings).nTableSize * sizeof(uint32_t));
 		ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
 		ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
 

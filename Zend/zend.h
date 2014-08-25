@@ -293,7 +293,7 @@ typedef enum {
 #include "zend_hash.h"
 #include "zend_llist.h"
 
-#define INTERNAL_FUNCTION_PARAMETERS zend_uint param_count, zval *return_value TSRMLS_DC
+#define INTERNAL_FUNCTION_PARAMETERS uint32_t param_count, zval *return_value TSRMLS_DC
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU param_count, return_value TSRMLS_CC
 
 #define USED_RET() \
@@ -402,22 +402,22 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 
 #include "zend_string.h"
 
-static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
+static zend_always_inline uint32_t zval_refcount_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz) || Z_IMMUTABLE_P(pz));
 	return GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
-static zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
+static zend_always_inline uint32_t zval_set_refcount_p(zval* pz, uint32_t rc) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
 	return GC_REFCOUNT(Z_COUNTED_P(pz)) = rc;
 }
 
-static zend_always_inline zend_uint zval_addref_p(zval* pz) {
+static zend_always_inline uint32_t zval_addref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
 	return ++GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
-static zend_always_inline zend_uint zval_delref_p(zval* pz) {
+static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
 	return --GC_REFCOUNT(Z_COUNTED_P(pz));
 }
@@ -463,7 +463,7 @@ struct _zend_trait_alias {
 	/**
 	* modifiers to be set on trait method
 	*/
-	zend_uint modifiers;
+	uint32_t modifiers;
 };
 typedef struct _zend_trait_alias zend_trait_alias;
 
@@ -472,7 +472,7 @@ struct _zend_class_entry {
 	zend_string *name;
 	struct _zend_class_entry *parent;
 	int refcount;
-	zend_uint ce_flags;
+	uint32_t ce_flags;
 
 	HashTable function_table;
 	HashTable properties_info;
@@ -506,22 +506,22 @@ struct _zend_class_entry {
 	union _zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method TSRMLS_DC);
 
 	/* serializer callbacks */
-	int (*serialize)(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
-	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
+	int (*serialize)(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC);
+	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, uint32_t buf_len, zend_unserialize_data *data TSRMLS_DC);
 
 	zend_class_entry **interfaces;
-	zend_uint num_interfaces;
+	uint32_t num_interfaces;
 	
 	zend_class_entry **traits;
-	zend_uint num_traits;
+	uint32_t num_traits;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 
 	union {
 		struct {
 			zend_string *filename;
-			zend_uint line_start;
-			zend_uint line_end;
+			uint32_t line_start;
+			uint32_t line_end;
 			zend_string *doc_comment;
 		} user;
 		struct {

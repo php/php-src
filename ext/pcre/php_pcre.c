@@ -1351,7 +1351,7 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 				 empty_replace;
 	zend_string *result;
 	zend_string	*subject_str = zval_get_string(subject);
-	zend_uint replace_idx;
+	uint32_t replace_idx;
 
 	/* FIXME: This might need to be changed to STR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
 	ZVAL_EMPTY_STRING(&empty_replace);
