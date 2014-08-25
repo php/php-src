@@ -318,7 +318,7 @@ PHP_FUNCTION(mt_rand)
 		if (zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE) {
 			return;
 		} else if (max < min) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(" ZEND_INT_FMT ") is smaller than min(" ZEND_INT_FMT ")", max, min);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
 			RETURN_FALSE;
 		}
 	}

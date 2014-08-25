@@ -719,7 +719,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 	for (i = 0; i < argc; i++) {
 		switch (sqlite3_value_type(argv[i])) {
 			case SQLITE_INTEGER:
-#if PHP_INT_MAX > 2147483647
+#if ZEND_LONG_MAX > 2147483647
 				ZVAL_LONG(&zargs[i + is_agg], sqlite3_value_int64(argv[i]));
 #else
 				ZVAL_LONG(&zargs[i + is_agg], sqlite3_value_int(argv[i]));
@@ -765,7 +765,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 		if (!Z_ISUNDEF(retval)) {
 			switch (Z_TYPE(retval)) {
 				case IS_LONG:
-#if PHP_INT_MAX > 2147483647
+#if ZEND_LONG_MAX > 2147483647
 					sqlite3_result_int64(context, Z_LVAL(retval));
 #else
 					sqlite3_result_int(context, Z_LVAL(retval));
@@ -1496,7 +1496,7 @@ PHP_METHOD(sqlite3stmt, execute)
 			switch (param->type) {
 				case SQLITE_INTEGER:
 					convert_to_int(parameter);
-#if PHP_INT_MAX > 2147483647
+#if ZEND_LONG_MAX > 2147483647
 					sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
 #else
 					sqlite3_bind_int(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));

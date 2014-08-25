@@ -3847,7 +3847,7 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all TSRMLS_DC)
 {
 	int ret;
-	php_stat_t st;
+	zend_stat_t st;
 	zend_string *base;
 	
 	/* Start with an empty image information structure. */

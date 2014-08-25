@@ -268,11 +268,11 @@ static inline int _zend_handle_numeric_str(const char *key, size_t length, zend_
 		++tmp;
 		if (tmp == end) {
 			if (*key == '-') {
-				if (*idx-1 > ZEND_INT_MAX) { /* overflow */
+				if (*idx-1 > ZEND_LONG_MAX) { /* overflow */
 					return 0;
 				}
 				*idx = 0 - *idx;
-			} else if (*idx > ZEND_INT_MAX) { /* overflow */
+			} else if (*idx > ZEND_LONG_MAX) { /* overflow */
 				return 0;
 			}
 			return 1;

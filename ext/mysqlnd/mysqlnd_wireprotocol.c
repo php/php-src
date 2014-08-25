@@ -1731,7 +1731,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				*/
 				p -= len;
 				if (Z_TYPE_P(current_field) == IS_LONG) {
-					bit_area += 1 + sprintf((char *)start, ZEND_INT_FMT, Z_LVAL_P(current_field));
+					bit_area += 1 + sprintf((char *)start, ZEND_LONG_FMT, Z_LVAL_P(current_field));
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
 				} else if (Z_TYPE_P(current_field) == IS_STRING){
 					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRLEN_P(current_field));

@@ -300,7 +300,7 @@ PHP_FUNCTION(socket_cmsg_space)
 		return;
 	}
 
-	if (entry->var_el_size > 0 && n > (PHP_INT_MAX - (zend_long)entry->size -
+	if (entry->var_el_size > 0 && n > (ZEND_LONG_MAX - (zend_long)entry->size -
 			(zend_long)CMSG_SPACE(0) - 15L) / entry->var_el_size) {
 		/* the -15 is to account for any padding CMSG_SPACE may add after the data */
 		php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The value for the "

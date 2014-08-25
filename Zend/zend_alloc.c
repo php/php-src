@@ -1984,9 +1984,9 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_UINT_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_UINT_FMT " bytes exhausted (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, size);
 #endif
 		}
 
@@ -2297,9 +2297,9 @@ realloc_segment:
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_UINT_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_UINT_FMT " bytes exhausted (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, size);
 #endif
 			return NULL;
 		}

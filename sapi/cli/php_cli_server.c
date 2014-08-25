@@ -139,7 +139,7 @@ typedef struct php_cli_server_request {
 	size_t content_len;
 	const char *ext;
 	size_t ext_len;
-	php_stat_t sb;
+	zend_stat_t sb;
 } php_cli_server_request;
 
 typedef struct php_cli_server_chunk {
@@ -539,7 +539,7 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static php_size_t sapi_cli_server_ub_write(const char *str, php_size_t str_length TSRMLS_DC) /* {{{ */
+static size_t sapi_cli_server_ub_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	if (!client) {
@@ -619,7 +619,7 @@ static char *sapi_cli_server_read_cookies(TSRMLS_D) /* {{{ */
 	return val;
 } /* }}} */
 
-static php_size_t sapi_cli_server_read_post(char *buf, php_size_t count_bytes TSRMLS_DC) /* {{{ */
+static size_t sapi_cli_server_read_post(char *buf, size_t count_bytes TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	if (client->request.content) {
@@ -635,7 +635,7 @@ static php_size_t sapi_cli_server_read_post(char *buf, php_size_t count_bytes TS
 static void sapi_cli_server_register_variable(zval *track_vars_array, const char *key, const char *val TSRMLS_DC) /* {{{ */
 {
 	char *new_val = (char *)val;
-	php_size_t new_val_len;
+	size_t new_val_len;
 	if (sapi_module.input_filter(PARSE_SERVER, (char*)key, &new_val, strlen(val), &new_val_len TSRMLS_CC)) {
 		php_register_variable_safe((char *)key, new_val, new_val_len, track_vars_array TSRMLS_CC);
 	}
@@ -1377,7 +1377,7 @@ static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 
 static void php_cli_server_request_translate_vpath(php_cli_server_request *request, const char *document_root, size_t document_root_len) /* {{{ */
 {
-	php_stat_t sb;
+	zend_stat_t sb;
 	static const char *index_files[] = { "index.php", "index.html", NULL };
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
@@ -2487,7 +2487,7 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 	}
 
 	if (document_root) {
-		php_stat_t sb;
+		zend_stat_t sb;
 
 		if (php_stat_fn(document_root, &sb)) {
 			fprintf(stderr, "Directory %s does not exist.\n", document_root);

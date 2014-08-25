@@ -106,11 +106,11 @@ typedef struct _php_stream_filter php_stream_filter;
 #ifdef _WIN64
 # define php_fstat _fstat64
 # define php_stat_fn _stat64
-typedef struct __stat64 php_stat_t;
+typedef struct __stat64 zend_stat_t;
 #else
 # define php_fstat fstat
 # define php_stat_fn stat
-typedef struct stat php_stat_t;
+typedef struct stat zend_stat_t;
 #endif
 
 typedef struct _php_stream_statbuf {

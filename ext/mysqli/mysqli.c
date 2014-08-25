@@ -976,11 +976,11 @@ PHP_MINFO_FUNCTION(mysqli)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "MysqlI Support", "enabled");
 	php_info_print_table_row(2, "Client API library version", mysql_get_client_info());
-	snprintf(buf, sizeof(buf), ZEND_INT_FMT, MyG(num_active_persistent));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_active_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
-	snprintf(buf, sizeof(buf), ZEND_INT_FMT, MyG(num_inactive_persistent));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_inactive_persistent));
 	php_info_print_table_row(2, "Inactive Persistent Links", buf);
-	snprintf(buf, sizeof(buf), ZEND_INT_FMT, MyG(num_links));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 #if !defined(MYSQLI_USE_MYSQLND)
 	php_info_print_table_row(2, "Client API header version", MYSQL_SERVER_VERSION);

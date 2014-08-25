@@ -431,7 +431,7 @@ static zend_always_inline zval *_zend_hash_index_update_or_next_insert_i(HashTab
 					}
 					ZVAL_COPY_VALUE(&p->val, pData);
 					if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-						ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
+						ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
 					}
 					return &p->val;
 				} else { /* we have to keep the order :( */
@@ -461,7 +461,7 @@ static zend_always_inline zval *_zend_hash_index_update_or_next_insert_i(HashTab
 				ht->nInternalPointer = h;
 			}
 			if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-				ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
+				ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
 			}
 			p->h = h;
 			p->key = NULL;
@@ -491,7 +491,7 @@ convert_to_hash:
 			ZVAL_COPY_VALUE(&p->val, pData);
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 			if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-				ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
+				ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
 			}
 			return &p->val;
 		}
@@ -506,7 +506,7 @@ convert_to_hash:
 		ht->nInternalPointer = idx;
 	}
 	if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-		ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
+		ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
 	}
 	p = ht->arData + idx;
 	p->h = h;

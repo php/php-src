@@ -430,11 +430,11 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 								return "long";
 							} else if (type == IS_DOUBLE) {
 								if (c == 'L') {
-									if (d > ZEND_INT_MAX) {
-										*p = ZEND_INT_MAX;
+									if (d > ZEND_LONG_MAX) {
+										*p = ZEND_LONG_MAX;
 										break;
-									} else if (d < ZEND_INT_MIN) {
-										*p = ZEND_INT_MIN;
+									} else if (d < ZEND_LONG_MIN) {
+										*p = ZEND_LONG_MIN;
 										break;
 									}
 								}
@@ -446,11 +446,11 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 
 					case IS_DOUBLE:
 						if (c == 'L') {
-							if (Z_DVAL_P(arg) > ZEND_INT_MAX) {
-								*p = ZEND_INT_MAX;
+							if (Z_DVAL_P(arg) > ZEND_LONG_MAX) {
+								*p = ZEND_LONG_MAX;
 								break;
-							} else if (Z_DVAL_P(arg) < ZEND_INT_MIN) {
-								*p = ZEND_INT_MIN;
+							} else if (Z_DVAL_P(arg) < ZEND_LONG_MIN) {
+								*p = ZEND_LONG_MIN;
 								break;
 							}
 						}
@@ -1686,7 +1686,7 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value TSRMLS_DC)
 			result = zend_symtable_update(ht, STR_EMPTY_ALLOC(), value);
 			break;
 		case IS_RESOURCE:
-			zend_error(E_STRICT, "Resource ID#" ZEND_INT_FMT " used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
+			zend_error(E_STRICT, "Resource ID#" ZEND_LONG_FMT " used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
 			result = zend_hash_index_update(ht, Z_RES_HANDLE_P(key), value);
 			break;
 		case IS_FALSE:

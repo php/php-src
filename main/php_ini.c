@@ -545,7 +545,7 @@ int php_init_config(TSRMLS_D)
 
 		/* Check if php_ini_file_name is a file and can be opened */
 		if (php_ini_file_name && php_ini_file_name[0]) {
-			php_stat_t statbuf;
+			zend_stat_t statbuf;
 
 			if (!VCWD_STAT(php_ini_file_name, &statbuf)) {
 				if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
@@ -614,7 +614,7 @@ int php_init_config(TSRMLS_D)
 	if (!sapi_module.php_ini_ignore && php_ini_scanned_path_len) {
 		struct dirent **namelist;
 		int ndir, i;
-		php_stat_t sb;
+		zend_stat_t sb;
 		char ini_file[MAXPATHLEN];
 		char *p;
 		zend_file_handle fh2;
@@ -744,7 +744,7 @@ void php_ini_register_extensions(TSRMLS_D)
  */
 PHPAPI int php_parse_user_ini_file(const char *dirname, char *ini_filename, HashTable *target_hash TSRMLS_DC)
 {
-	php_stat_t sb;
+	zend_stat_t sb;
 	char ini_file[MAXPATHLEN];
 	zend_file_handle fh;
 

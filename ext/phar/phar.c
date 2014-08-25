@@ -771,7 +771,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	/* be ignored on reading because it is being generated anyways. */
 	if (manifest_flags & PHAR_HDR_SIGNATURE) {
 		char sig_buf[8], *sig_ptr = sig_buf;
-		php_off_t read_len;
+		zend_off_t read_len;
 		size_t end_of_phar;
 
 		if (-1 == php_stream_seek(fp, -8, SEEK_END)
@@ -792,7 +792,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			case PHAR_SIG_OPENSSL: {
 				php_uint32 signature_len;
 				char *sig;
-				php_off_t whence;
+				zend_off_t whence;
 
 				/* we store the signature followed by the signature length */
 				if (-1 == php_stream_seek(fp, -12, SEEK_CUR)
@@ -2542,7 +2542,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	int halt_offset, restore_alias_len, global_flags = 0, closeoldfile;
 	char *pos, has_dirs = 0;
 	char manifest[18], entry_buffer[24];
-	php_off_t manifest_ftell;
+	zend_off_t manifest_ftell;
 	zend_long offset;
 	size_t wrote;
 	php_uint32 manifest_len, mytime, loc, new_manifest_count;

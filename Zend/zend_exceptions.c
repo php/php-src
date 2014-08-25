@@ -461,7 +461,7 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 		case IS_RESOURCE: {
 			zend_long lval = Z_RES_HANDLE_P(arg);
 			char s_tmp[MAX_LENGTH_OF_LONG + 1];
-			int l_tmp = zend_sprintf(s_tmp, ZEND_INT_FMT, lval);  /* SAFE */
+			int l_tmp = zend_sprintf(s_tmp, ZEND_LONG_FMT, lval);  /* SAFE */
 			TRACE_APPEND_STR("Resource id #");
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
 			TRACE_APPEND_STR(", ");
@@ -470,7 +470,7 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 		case IS_LONG: {
 			zend_long lval = Z_LVAL_P(arg);
 			char s_tmp[MAX_LENGTH_OF_LONG + 1];
-			int l_tmp = zend_sprintf(s_tmp, ZEND_INT_FMT, lval);  /* SAFE */
+			int l_tmp = zend_sprintf(s_tmp, ZEND_LONG_FMT, lval);  /* SAFE */
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
 			TRACE_APPEND_STR(", ");
 			break;

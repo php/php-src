@@ -53,6 +53,7 @@
 #include <locale.h>
 #endif
 #include "zend.h"
+#include "zend_types.h"
 #include "zend_extensions.h"
 #include "php_ini.h"
 #include "php_globals.h"
@@ -162,7 +163,7 @@ static PHP_INI_MH(OnSetPrecision)
 {
 	zend_long i;
 
-	ZEND_ATOI(i, new_value);
+	ZEND_ATOL(i, new_value);
 	if (i >= 0) {
 		EG(precision) = i;
 		return SUCCESS;
@@ -281,7 +282,7 @@ static void php_binary_init(TSRMLS_D)
 			if ((envpath = getenv("PATH")) != NULL) {
 				char *search_dir, search_path[MAXPATHLEN];
 				char *last = NULL;
-				php_stat_t s;
+				zend_stat_t s;
 
 				path = estrdup(envpath);
 				search_dir = php_strtok_r(path, ":", &last);
@@ -318,11 +319,11 @@ static PHP_INI_MH(OnUpdateTimeout)
 {
 	if (stage==PHP_INI_STAGE_STARTUP) {
 		/* Don't set a timeout on startup, only per-request */
-		ZEND_ATOI(EG(timeout_seconds), new_value);
+		ZEND_ATOL(EG(timeout_seconds), new_value);
 		return SUCCESS;
 	}
 	zend_unset_timeout(TSRMLS_C);
-	ZEND_ATOI(EG(timeout_seconds), new_value);
+	ZEND_ATOL(EG(timeout_seconds), new_value);
 	zend_set_timeout(EG(timeout_seconds), 0);
 	return SUCCESS;
 }
@@ -349,7 +350,7 @@ static int php_get_display_errors_mode(char *value, int value_length)
 	} else if (value_length == 6 && !strcasecmp(value, "stdout")) {
 		mode = PHP_DISPLAY_ERRORS_STDOUT;
 	} else {
-		ZEND_ATOI(mode, value);
+		ZEND_ATOL(mode, value);
 		if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
 			mode = PHP_DISPLAY_ERRORS_STDOUT;
 		}
@@ -709,7 +710,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 
 /* {{{ php_write
    wrapper for modules to use PHPWRITE */
-PHPAPI php_size_t php_write(void *buf, php_size_t size TSRMLS_DC)
+PHPAPI size_t php_write(void *buf, size_t size TSRMLS_DC)
 {
 	return PHPWRITE(buf, size);
 }
@@ -717,12 +718,12 @@ PHPAPI php_size_t php_write(void *buf, php_size_t size TSRMLS_DC)
 
 /* {{{ php_printf
  */
-PHPAPI php_size_t php_printf(const char *format, ...)
+PHPAPI size_t php_printf(const char *format, ...)
 {
 	va_list args;
-	php_size_t ret;
+	size_t ret;
 	char *buffer;
-	php_size_t size;
+	size_t size;
 	TSRMLS_FETCH();
 
 	va_start(args, format);
@@ -1265,7 +1266,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
  */
 PHPAPI char *php_get_current_user(TSRMLS_D)
 {
-	php_stat_t *pstat;
+	zend_stat_t *pstat;
 
 	if (SG(request_info).current_user) {
 		return SG(request_info).current_user;
@@ -1337,7 +1338,7 @@ PHP_FUNCTION(set_time_limit)
 		return;
 	}
 
-	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, ZEND_INT_FMT, new_timeout);
+	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
 
 	key = zend_string_init("max_execution_time", sizeof("max_execution_time")-1, 0);
 	if (zend_alter_ini_entry_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
@@ -1923,7 +1924,7 @@ PHPAPI void php_com_initialize(TSRMLS_D)
 
 /* {{{ php_output_wrapper
  */
-static php_size_t php_output_wrapper(const char *str, php_size_t str_length)
+static size_t php_output_wrapper(const char *str, size_t str_length)
 {
 	TSRMLS_FETCH();
 	return php_output_write(str, str_length TSRMLS_CC);
@@ -2211,8 +2212,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_SHLIB_SUFFIX", PHP_SHLIB_SUFFIX, sizeof(PHP_SHLIB_SUFFIX)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_EOL", PHP_EOL, sizeof(PHP_EOL)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_MAXPATHLEN", MAXPATHLEN, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MAX", PHP_INT_MAX, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MIN", PHP_INT_MIN, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MAX", ZEND_LONG_MAX, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MIN", ZEND_LONG_MIN, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_SIZE", SIZEOF_ZEND_INT, CONST_PERSISTENT | CONST_CS);
 
 #ifdef PHP_WIN32

@@ -86,7 +86,7 @@ ZEND_API int zend_atoi(const char *str, int str_len) /* {{{ */
 	if (!str_len) {
 		str_len = strlen(str);
 	}
-	retval = ZEND_STRTOI(str, NULL, 0);
+	retval = ZEND_STRTOL(str, NULL, 0);
 	if (str_len>0) {
 		switch (str[str_len-1]) {
 			case 'g':
@@ -114,7 +114,7 @@ ZEND_API zend_long zend_atol(const char *str, int str_len) /* {{{ */
 	if (!str_len) {
 		str_len = strlen(str);
 	}
-	retval = ZEND_STRTOI(str, NULL, 0);
+	retval = ZEND_STRTOL(str, NULL, 0);
 	if (str_len>0) {
 		switch (str[str_len-1]) {
 			case 'g':
@@ -283,7 +283,7 @@ try_again:
 				ZVAL_LONG(&holder, zend_dval_to_lval(Z_DVAL_P(op)));\
 				break;												\
 			case IS_STRING:											\
-				ZVAL_LONG(&holder, ZEND_STRTOI(Z_STRVAL_P(op), NULL, 10));\
+				ZVAL_LONG(&holder, ZEND_STRTOL(Z_STRVAL_P(op), NULL, 10));\
 				break;												\
 			case IS_ARRAY:											\
 				ZVAL_LONG(&holder, zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);	\
@@ -599,7 +599,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		case IS_RESOURCE: {
 			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
-			int len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_INT_FMT, Z_RES_HANDLE_P(op));
+			int len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, Z_RES_HANDLE_P(op));
 			ZVAL_NEW_STR(op, zend_string_init(buf, len, 0));
 			break;
 		}
@@ -800,7 +800,7 @@ try_again:
 		case IS_DOUBLE:
 			return zend_dval_to_lval(Z_DVAL_P(op));
 		case IS_STRING:
-			return ZEND_STRTOI(Z_STRVAL_P(op), NULL, 10);
+			return ZEND_STRTOL(Z_STRVAL_P(op), NULL, 10);
 		case IS_ARRAY:
 			return zend_hash_num_elements(Z_ARRVAL_P(op)) ? 1 : 0;
 		case IS_OBJECT:
@@ -879,7 +879,7 @@ try_again:
 			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
 			int len;
 
-			len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_INT_FMT, Z_RES_HANDLE_P(op));
+			len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, Z_RES_HANDLE_P(op));
 			return zend_string_init(buf, len, 0);
 		}
 		case IS_LONG: {
@@ -1182,9 +1182,9 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 					zend_error(E_WARNING, "Division by zero");
 					ZVAL_BOOL(result, 0);
 					return FAILURE;			/* division by zero */
-				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_INT_MIN) {
+				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
 					/* Prevent overflow error/crash */
-					ZVAL_DOUBLE(result, (double) ZEND_INT_MIN / -1);
+					ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
 					return SUCCESS;
 				}
 				if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
@@ -2135,7 +2135,7 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 try_again:
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
-			if (Z_LVAL_P(op1) == ZEND_INT_MAX) {
+			if (Z_LVAL_P(op1) == ZEND_LONG_MAX) {
 				/* switch to double */
 				double d = (double)Z_LVAL_P(op1);
 				ZVAL_DOUBLE(op1, d+1);
@@ -2156,7 +2156,7 @@ try_again:
 				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 					case IS_LONG:
 						zend_string_release(Z_STR_P(op1));
-						if (lval == ZEND_INT_MAX) {
+						if (lval == ZEND_LONG_MAX) {
 							/* switch to double */
 							double d = (double)lval;
 							ZVAL_DOUBLE(op1, d+1);
@@ -2206,7 +2206,7 @@ ZEND_API int decrement_function(zval *op1) /* {{{ */
 try_again:
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
-			if (Z_LVAL_P(op1) == ZEND_INT_MIN) {
+			if (Z_LVAL_P(op1) == ZEND_LONG_MIN) {
 				double d = (double)Z_LVAL_P(op1);
 				ZVAL_DOUBLE(op1, d-1);
 			} else {
@@ -2225,7 +2225,7 @@ try_again:
 			switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 				case IS_LONG:
 					zend_string_release(Z_STR_P(op1));
-					if (lval == ZEND_INT_MIN) {
+					if (lval == ZEND_LONG_MIN) {
 						double d = (double)lval;
 						ZVAL_DOUBLE(op1, d-1);
 					} else {

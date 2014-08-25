@@ -84,7 +84,7 @@ static int little_endian_long_map[4];
 
 /* {{{ php_pack
  */
-static void php_pack(zval *val, php_size_t size, int *map, char *output)
+static void php_pack(zval *val, size_t size, int *map, char *output)
 {
 	int i;
 	char *v;
@@ -480,7 +480,7 @@ PHP_FUNCTION(pack)
 
 /* {{{ php_unpack
  */
-static zend_long php_unpack(char *data, php_size_t size, int issigned, int *map)
+static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
 {
 	zend_long result;
 	char *cresult = (char *) &result;
@@ -514,7 +514,7 @@ PHP_FUNCTION(unpack)
 {
 	char *format, *input;
 	zend_string *formatarg, *inputarg;
-	php_size_t formatlen, inputpos, inputlen;
+	size_t formatlen, inputpos, inputlen;
 	int i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &formatarg, 
@@ -661,7 +661,7 @@ PHP_FUNCTION(unpack)
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
-						php_size_t len = inputlen - inputpos;	/* Remaining string */
+						size_t len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -676,7 +676,7 @@ PHP_FUNCTION(unpack)
 					case 'A': {
 						/* A will strip any trailing whitespace */
 						char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
-						php_size_t len = inputlen - inputpos;	/* Remaining string */
+						size_t len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -703,7 +703,7 @@ PHP_FUNCTION(unpack)
 					case 'Z': {
 						/* Z will strip everything after the first null character */
 						char pad = '\0';
-						php_size_t	 s,
+						size_t	 s,
 							 len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
@@ -727,11 +727,11 @@ PHP_FUNCTION(unpack)
 					
 					case 'h': 
 					case 'H': {
-						php_size_t len = (inputlen - inputpos) * 2;	/* Remaining */
+						size_t len = (inputlen - inputpos) * 2;	/* Remaining */
 						int nibbleshift = (type == 'h') ? 0 : 4;
 						int first = 1;
 						char *buf;
-						php_size_t ipos, opos;
+						size_t ipos, opos;
 
 						/* If size was given take minimum of len and size */
 						if (size >= 0 && len > (size * 2)) {

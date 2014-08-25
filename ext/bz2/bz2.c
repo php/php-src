@@ -406,7 +406,7 @@ static PHP_FUNCTION(bzopen)
 	} else if (Z_TYPE_P(file) == IS_RESOURCE) {
 		/* If it is a resource, than its a stream resource */
 		php_socket_t fd;
-		php_size_t stream_mode_len;
+		size_t stream_mode_len;
 
 		php_stream_from_zval(stream, file);
 		stream_mode_len = strlen(stream->mode);

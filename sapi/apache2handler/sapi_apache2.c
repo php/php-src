@@ -72,8 +72,8 @@
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
 
-static php_size_t
-php_apache_sapi_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
+static size_t
+php_apache_sapi_ub_write(const char *str, size_t str_length TSRMLS_DC)
 {
 	request_rec *r;
 	php_struct *ctx;
@@ -181,7 +181,7 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 }
 
 static apr_size_t
-php_apache_sapi_read_post(char *buf, php_size_t count_bytes TSRMLS_DC)
+php_apache_sapi_read_post(char *buf, size_t count_bytes TSRMLS_DC)
 {
 	apr_size_t len, tlen=0;
 	php_struct *ctx = SG(server_context);
@@ -212,7 +212,7 @@ php_apache_sapi_read_post(char *buf, php_size_t count_bytes TSRMLS_DC)
 	return tlen;
 }
 
-static php_stat_t*
+static zend_stat_t*
 php_apache_sapi_get_stat(TSRMLS_D)
 {
 	php_struct *ctx = SG(server_context);
@@ -270,18 +270,18 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
-	php_size_t new_val_len;
+	size_t new_val_len;
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) {
 			val = "";
 		}
-		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), (php_size_t *)&new_val_len TSRMLS_CC)) {
+		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), (size_t *)&new_val_len TSRMLS_CC)) {
 			php_register_variable_safe(key, val, new_val_len, track_vars_array TSRMLS_CC);
 		}
 	APR_ARRAY_FOREACH_CLOSE()
 
-	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), (php_size_t *)&new_val_len TSRMLS_CC)) {
+	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), (size_t *)&new_val_len TSRMLS_CC)) {
 		php_register_variable_safe("PHP_SELF", ctx->r->uri, new_val_len, track_vars_array TSRMLS_CC);
 	}
 }

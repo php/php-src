@@ -197,7 +197,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	char *strtok_buf = NULL, **val_list = NULL;
 	zval *array_ptr = (zval *) arg;
 	int n, num, *len_list = NULL;
-	php_size_t val_len, new_val_len;
+	size_t val_len, new_val_len;
 	mbfl_string string, resvar, resval;
 	const mbfl_encoding *from_encoding = NULL;
 	mbfl_encoding_detector *identd = NULL; 

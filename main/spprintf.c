@@ -198,7 +198,7 @@ static size_t strnlen(const char *s, size_t maxlen) {
 static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt, va_list ap) /* {{{ */
 {
 	char *s = NULL;
-	php_size_t s_len;
+	size_t s_len;
 	int free_zcopy;
 	zval *zvp, zcopy;
 
@@ -819,10 +819,10 @@ skip_output:
 /*
  * This is the general purpose conversion function.
  */
-PHPAPI php_size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
+PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_string buf = {0};
-	php_size_t result;
+	size_t result;
 
 	xbuf_format_converter(&buf, 1, format, ap);
 
@@ -844,9 +844,9 @@ PHPAPI php_size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_
 }
 /* }}} */
 
-PHPAPI php_size_t spprintf(char **pbuf, size_t max_len, const char *format, ...) /* {{{ */
+PHPAPI size_t spprintf(char **pbuf, size_t max_len, const char *format, ...) /* {{{ */
 {
-	php_size_t cc;
+	size_t cc;
 	va_list ap;
 
 	va_start(ap, format);

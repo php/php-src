@@ -433,7 +433,7 @@ skip_phar:
 
 /* {{{ php_stat
  */
-static void phar_fancy_stat(php_stat_t *stat_sb, int type, zval *return_value TSRMLS_DC)
+static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value TSRMLS_DC)
 {
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
 		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
@@ -611,7 +611,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 	if (!IS_ABSOLUTE_PATH(filename, filename_length) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
-		php_stat_t sb = {0};
+		zend_stat_t sb = {0};
 		phar_entry_info *data = NULL;
 		phar_archive_data *phar;
 

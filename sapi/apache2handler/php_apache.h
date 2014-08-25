@@ -43,7 +43,7 @@ typedef struct php_struct {
 #if defined(NETWARE) && defined(CLIB_STAT_PATCH)
 	struct stat_libc finfo;
 #else
-	php_stat_t finfo;
+	zend_stat_t finfo;
 #endif
 	/* Whether or not we've processed PHP in the output filters yet. */
 	int request_processed;

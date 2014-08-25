@@ -663,7 +663,7 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
 
         case Formattable::kInt64:
             aInt64 = fargs[i].getInt64();
-			if(aInt64 > PHP_INT_MAX || aInt64 < -PHP_INT_MAX) {
+			if(aInt64 > ZEND_LONG_MAX || aInt64 < -ZEND_LONG_MAX) {
 				ZVAL_DOUBLE(&(*args)[i], (double)aInt64);
 			} else {
 				ZVAL_LONG(&(*args)[i], (zend_long)aInt64);

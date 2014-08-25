@@ -174,7 +174,7 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 			}
 		} else {
 			char key[25];
-			snprintf(key, sizeof(key), ZEND_INT_FMT, num_key);
+			snprintf(key, sizeof(key), ZEND_LONG_FMT, num_key);
 			ZEND_PUTS_EX(key);
 		}
 		ZEND_PUTS_EX("] => ");
@@ -204,7 +204,7 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 		if (string_key) {
 			ZEND_WRITE(string_key->val, string_key->len);
 		} else {
-			zend_printf(ZEND_UINT_FMT, num_key);
+			zend_printf(ZEND_ULONG_FMT, num_key);
 		}
 		ZEND_PUTS("] => ");
 		zend_print_flat_zval_r(tmp TSRMLS_CC);
@@ -235,7 +235,7 @@ again:
 				char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
 				int len;
 
-				len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_INT_FMT, Z_RES_HANDLE_P(expr));
+				len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, Z_RES_HANDLE_P(expr));
 				ZVAL_NEW_STR(expr_copy, zend_string_init(buf, len, 0));
 			}
 			break;

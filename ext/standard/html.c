@@ -804,7 +804,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 		return FAILURE;
 	}
 
-	code_l = ZEND_STRTOI(*buf, &endptr, hexadecimal ? 16 : 10);
+	code_l = ZEND_STRTOL(*buf, &endptr, hexadecimal ? 16 : 10);
 	/* we're guaranteed there were valid digits, so *endptr > buf */
 	*buf = endptr;
 

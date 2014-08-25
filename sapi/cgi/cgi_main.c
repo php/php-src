@@ -287,10 +287,10 @@ static inline size_t sapi_cgi_single_write(const char *str, uint str_length TSRM
 #endif
 }
 
-static php_size_t sapi_cgi_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
+static size_t sapi_cgi_ub_write(const char *str, size_t str_length TSRMLS_DC)
 {
 	const char *ptr = str;
-	php_size_t remaining = str_length;
+	size_t remaining = str_length;
 	size_t ret;
 
 	while (remaining > 0) {
@@ -306,10 +306,10 @@ static php_size_t sapi_cgi_ub_write(const char *str, php_size_t str_length TSRML
 	return str_length;
 }
 
-static php_size_t sapi_fcgi_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
+static size_t sapi_fcgi_ub_write(const char *str, size_t str_length TSRMLS_DC)
 {
 	const char *ptr = str;
-	php_size_t remaining = str_length;
+	size_t remaining = str_length;
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	while (remaining > 0) {
@@ -505,9 +505,9 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 # define STDIN_FILENO 0
 #endif
 
-static php_size_t sapi_cgi_read_post(char *buffer, php_size_t count_bytes TSRMLS_DC)
+static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 {
-	php_size_t read_bytes = 0;
+	size_t read_bytes = 0;
 	int tmp_read_bytes;
 
 	count_bytes = MIN(count_bytes, SG(request_info).content_length - SG(read_post_bytes));
@@ -521,9 +521,9 @@ static php_size_t sapi_cgi_read_post(char *buffer, php_size_t count_bytes TSRMLS
 	return read_bytes;
 }
 
-static php_size_t sapi_fcgi_read_post(char *buffer, php_size_t count_bytes TSRMLS_DC)
+static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 {
-	php_size_t read_bytes = 0;
+	size_t read_bytes = 0;
 	int tmp_read_bytes;
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
@@ -622,7 +622,7 @@ static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, uns
 {
 	zval *array_ptr = (zval*)arg;	
 	int filter_arg = (Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))?PARSE_ENV:PARSE_SERVER;
-	php_size_t new_val_len;
+	size_t new_val_len;
 
 	if (sapi_module.input_filter(filter_arg, var, &val, strlen(val), &new_val_len TSRMLS_CC)) {
 		php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
@@ -658,7 +658,7 @@ static void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
-	php_size_t php_self_len;
+	size_t php_self_len;
 	char *php_self;
 
 	/* In CGI mode, we consider the environment to be a part of the server
@@ -1184,7 +1184,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 #endif
 
 		if (CGIG(fix_pathinfo)) {
-			php_stat_t st;
+			zend_stat_t st;
 			char *real_path = NULL;
 			char *env_redirect_url = CGI_GETENV("REDIRECT_URL");
 			char *env_document_root = CGI_GETENV("DOCUMENT_ROOT");
@@ -2416,7 +2416,7 @@ consult the installation file that came with this distribution, or visit \n\
 							/* handle situations where line is terminated by \r\n */
 							if (c == '\r') {
 								if (php_stream_getc((php_stream*)file_handle.handle.stream.handle) != '\n') {
-									php_off_t pos = php_stream_tell((php_stream*)file_handle.handle.stream.handle);
+									zend_off_t pos = php_stream_tell((php_stream*)file_handle.handle.stream.handle);
 									php_stream_seek((php_stream*)file_handle.handle.stream.handle, pos - 1, SEEK_SET);
 								}
 							}

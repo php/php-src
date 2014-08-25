@@ -405,7 +405,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	if (strncmp(salt, sha512_rounds_prefix, sizeof(sha512_rounds_prefix) - 1) == 0) {
 		const char *num = salt + sizeof(sha512_rounds_prefix) - 1;
 		char *endp;
-		zend_ulong srounds = ZEND_STRTOUI(num, &endp, 10);
+		zend_ulong srounds = ZEND_STRTOUL(num, &endp, 10);
 
 		if (*endp == '$') {
 			salt = endp + 1;

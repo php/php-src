@@ -52,11 +52,11 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (persistent) {
-		spprintf(&hashkey, 0, "pfsockopen__%s:" ZEND_INT_FMT, host, port);
+		spprintf(&hashkey, 0, "pfsockopen__%s:" ZEND_LONG_FMT, host, port);
 	}
 
 	if (port > 0) {
-		hostname_len = spprintf(&hostname, 0, "%s:" ZEND_INT_FMT, host, port);
+		hostname_len = spprintf(&hostname, 0, "%s:" ZEND_LONG_FMT, host, port);
 	} else {
 		hostname_len = host_len;
 		hostname = host;
@@ -83,7 +83,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(hostname);
 	}
 	if (stream == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:" ZEND_INT_FMT " (%s)", host, port, errstr == NULL ? "Unknown error" : errstr->val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:" ZEND_LONG_FMT " (%s)", host, port, errstr == NULL ? "Unknown error" : errstr->val);
 	}
 
 	if (hashkey) {

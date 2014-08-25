@@ -57,7 +57,7 @@ static uint zend_obj_num_elements(HashTable *ht)
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level TSRMLS_DC) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
-		php_printf("%*c[" ZEND_INT_FMT "]=>\n", level + 1, ' ', index);
+		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(key->val, key->len);
@@ -72,7 +72,7 @@ static void php_object_property_dump(zval *zv, zend_ulong index, zend_string *ke
 	const char *prop_name, *class_name;
 
 	if (key == NULL) { /* numeric key */
-		php_printf("%*c[" ZEND_INT_FMT "]=>\n", level + 1, ' ', index);
+		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
 		int unmangle = zend_unmangle_property_name(key->val, key->len, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
@@ -120,7 +120,7 @@ again:
 			php_printf("%sNULL\n", COMMON);
 			break;
 		case IS_LONG:
-			php_printf("%sint(" ZEND_INT_FMT ")\n", COMMON, Z_LVAL_P(struc));
+			php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
 			php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
@@ -230,7 +230,7 @@ PHP_FUNCTION(var_dump)
 static void zval_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level TSRMLS_DC) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
-		php_printf("%*c[" ZEND_INT_FMT "]=>\n", level + 1, ' ', index);
+		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(key->val, key->len);
@@ -245,7 +245,7 @@ static void zval_object_property_dump(zval *zv, zend_ulong index, zend_string *k
 	const char *prop_name, *class_name;
 
 	if (key == NULL) { /* numeric key */
-		php_printf("%*c[" ZEND_INT_FMT "]=>\n", level + 1, ' ', index);
+		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
 		zend_unmangle_property_name(key->val, key->len, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
@@ -291,7 +291,7 @@ again:
 		php_printf("%sNULL\n", COMMON);
 		break;
 	case IS_LONG:
-		php_printf("%slong(" ZEND_INT_FMT ")\n", COMMON, Z_LVAL_P(struc));
+		php_printf("%slong(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
 		break;
 	case IS_DOUBLE:
 		php_printf("%sdouble(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
@@ -354,7 +354,7 @@ again:
 		break;
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc) TSRMLS_CC);
-		php_printf("%sresource(" ZEND_INT_FMT ") of type (%s) refcount(%u)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
+		php_printf("%sresource(" ZEND_LONG_FMT ") of type (%s) refcount(%u)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
 		break;
 	}
 	case IS_REFERENCE:
@@ -456,7 +456,7 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC) 
 {
 	HashTable *myht;
 	char *tmp_str;
-	php_size_t tmp_len;
+	size_t tmp_len;
 	zend_string *class_name;
 	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
@@ -1031,7 +1031,7 @@ PHP_FUNCTION(unserialize)
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		zval_dtor(return_value);
 		if (!EG(exception)) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset " ZEND_INT_FMT " of %d bytes", (zend_long)((char*)p - buf), buf_len);
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %d bytes", (zend_long)((char*)p - buf), buf_len);
 		}
 		RETURN_FALSE;
 	}

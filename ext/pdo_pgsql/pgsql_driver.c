@@ -151,8 +151,8 @@ static int pgsql_lob_flush(php_stream *stream TSRMLS_DC)
 	return 0;
 }
 
-static int pgsql_lob_seek(php_stream *stream, php_off_t offset, int whence,
-		php_off_t *newoffset TSRMLS_DC)
+static int pgsql_lob_seek(php_stream *stream, zend_off_t offset, int whence,
+		zend_off_t *newoffset TSRMLS_DC)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
 	int pos = lo_lseek(self->conn, self->lfd, offset, whence);
@@ -307,7 +307,7 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sq
 	}
 	H->pgoid = PQoidValue(res);
 	if (qs == PGRES_COMMAND_OK) {
-		ZEND_ATOI(ret, PQcmdTuples(res));
+		ZEND_ATOL(ret, PQcmdTuples(res));
 	} else {
 		ret = Z_I(0);
 	}
@@ -354,7 +354,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 		if (H->pgoid == InvalidOid) {
 			return NULL;
 		}
-		*len = spprintf(&id, 0, ZEND_INT_FMT, (zend_long) H->pgoid);
+		*len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
 	} else {
 		PGresult *res;
 		ExecStatusType status;
@@ -910,7 +910,7 @@ static PHP_METHOD(PDO, pgsqlLOBCreate)
 	lfd = lo_creat(H->server, INV_READ|INV_WRITE);
 
 	if (lfd != InvalidOid) {
-		zend_string *buf = strpprintf(0, ZEND_UINT_FMT, (zend_long) lfd);
+		zend_string *buf = strpprintf(0, ZEND_ULONG_FMT, (zend_long) lfd);
 
 		RETURN_STR(buf);
 	}

@@ -338,7 +338,7 @@ foundit:
 	/* add each central directory item to the manifest */
 	for (i = 0; i < PHAR_GET_16(locator.count); ++i) {
 		phar_zip_central_dir_file zipentry;
-		php_off_t beforeus = php_stream_tell(fp);
+		zend_off_t beforeus = php_stream_tell(fp);
 
 		if (sizeof(zipentry) != php_stream_read(fp, (char *) &zipentry, sizeof(zipentry))) {
 			PHAR_ZIP_FAIL("unable to read central directory entry, truncated");
@@ -393,7 +393,7 @@ foundit:
 		if (entry.filename_len == sizeof(".phar/signature.bin")-1 && !strncmp(entry.filename, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
 			size_t read;
 			php_stream *sigfile;
-			php_off_t now;
+			zend_off_t now;
 			char *sig;
 
 			now = php_stream_tell(fp);
@@ -448,7 +448,7 @@ foundit:
 		phar_add_virtual_dirs(mydata, entry.filename, entry.filename_len TSRMLS_CC);
 
 		if (PHAR_GET_16(zipentry.extra_len)) {
-			php_off_t loc = php_stream_tell(fp);
+			zend_off_t loc = php_stream_tell(fp);
 			if (FAILURE == phar_zip_process_extra(fp, &entry, PHAR_GET_16(zipentry.extra_len) TSRMLS_CC)) {
 				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("Unable to process extra field header for file in central directory");
@@ -537,7 +537,7 @@ foundit:
 
 		if (!actual_alias && entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
 			php_stream_filter *filter;
-			php_off_t saveloc;
+			zend_off_t saveloc;
 			/* verify local file header */
 			phar_zip_file_header local;
 
@@ -790,7 +790,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg TSRMLS_D
 	phar_zip_central_dir_file central;
 	struct _phar_zip_pass *p;
 	php_uint32 newcrc32;
-	php_off_t offset;
+	zend_off_t offset;
 	int not_really_modified = 0;
 	p = (struct _phar_zip_pass*) arg;
 
@@ -1108,7 +1108,7 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		char *signature, sigbuf[8];
 		phar_entry_info entry = {0};
 		php_stream *newfile;
-		php_off_t tell, st;
+		zend_off_t tell, st;
 
 		newfile = php_stream_fopen_tmpfile();
 		if (newfile == NULL) {

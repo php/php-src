@@ -138,7 +138,7 @@ typedef struct {
 	HANDLE file_mapping;
 #endif
 
-	php_stat_t sb;
+	zend_stat_t sb;
 } php_stdio_stream_data;
 #define PHP_STDIOP_GET_FD(anfd, data)	anfd = (data)->file ? fileno((data)->file) : (data)->fd
 
@@ -1102,7 +1102,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 #ifndef PHP_WIN32
 # ifdef EXDEV
 		if (errno == EXDEV) {
-			php_stat_t sb;
+			zend_stat_t sb;
 			if (php_copy_file(url_from, url_to TSRMLS_CC) == SUCCESS) {
 				if (VCWD_STAT(url_from, &sb) == 0) {
 #  if !defined(TSRM_WIN32) && !defined(NETWARE)
@@ -1165,7 +1165,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	} else {
 		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
 		char *e;
-		php_stat_t sb;
+		zend_stat_t sb;
 		int dir_len = strlen(dir);
 		int offset = 0;
 		char buf[MAXPATHLEN];

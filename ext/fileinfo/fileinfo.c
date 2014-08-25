@@ -480,7 +480,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		case FILEINFO_MODE_STREAM:
 		{
 				php_stream *stream;
-				php_off_t streampos;
+				zend_off_t streampos;
 
 				php_stream_from_zval_no_verify(stream, what);
 				if (!stream) {

@@ -624,7 +624,7 @@ ftp_alloc(ftpbuf_t *ftp, const zend_long size, zend_string **response)
 		return 0;
 	}
 
-	snprintf(buffer, sizeof(buffer) - 1, ZEND_INT_FMT, size);
+	snprintf(buffer, sizeof(buffer) - 1, ZEND_LONG_FMT, size);
     
 	if (!ftp_putcmd(ftp, "ALLO", buffer)) {
 		return 0;
@@ -811,7 +811,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 	ftp->data = data;
 
 	if (resumepos > 0) {
-		snprintf(arg, sizeof(arg), ZEND_INT_FMT, resumepos);
+		snprintf(arg, sizeof(arg), ZEND_LONG_FMT, resumepos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -903,7 +903,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, z
 	ftp->data = data;	
 
 	if (startpos > 0) {
-		snprintf(arg, sizeof(arg), ZEND_INT_FMT, startpos);
+		snprintf(arg, sizeof(arg), ZEND_LONG_FMT, startpos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -1729,7 +1729,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 	}
 
 	if (resumepos>0) {
-		snprintf(arg, sizeof(arg), ZEND_INT_FMT, resumepos);
+		snprintf(arg, sizeof(arg), ZEND_LONG_FMT, resumepos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -1843,7 +1843,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 		goto bail;
 	}
 	if (startpos > 0) {
-		snprintf(arg, sizeof(arg), ZEND_INT_FMT, startpos);
+		snprintf(arg, sizeof(arg), ZEND_LONG_FMT, startpos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}

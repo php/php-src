@@ -182,7 +182,7 @@ zend_long timelib_date_to_int(timelib_time *d, int *error)
 
 	ts = d->sse;
 
-	if (ts < PHP_INT_MIN || ts > PHP_INT_MAX) {
+	if (ts < ZEND_LONG_MIN || ts > ZEND_LONG_MAX) {
 		if (error) {
 			*error = 1;
 		}

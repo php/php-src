@@ -544,7 +544,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 {
 	struct pdo_column_data *col;
 	char *value = NULL;
-	php_size_t value_len = 0;
+	size_t value_len = 0;
 	int caller_frees = 0;
 	int type, new_type;
 

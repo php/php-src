@@ -415,7 +415,7 @@ static inline void phar_set_pharufp(phar_archive_data *phar, php_stream *fp TSRM
 	PHAR_GLOBALS->cached_fp[phar->phar_pos].ufp = fp;
 }
 
-static inline void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type type, php_off_t offset TSRMLS_DC)
+static inline void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type type, zend_off_t offset TSRMLS_DC)
 {
 	phar_entry_fp_info *data;
 
@@ -437,7 +437,7 @@ static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry TSRMLS_D
 	return PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type;
 }
 
-static inline php_off_t phar_get_fp_offset(phar_entry_info *entry TSRMLS_DC)
+static inline zend_off_t phar_get_fp_offset(phar_entry_info *entry TSRMLS_DC)
 {
 	if (!entry->is_persistent) {
 		return entry->offset;
@@ -466,9 +466,9 @@ typedef struct _phar_entry_data {
 	phar_archive_data        *phar;
 	php_stream               *fp;
 	/* stream position proxy, allows multiple open streams referring to the same fp */
-	php_off_t                    position;
+	zend_off_t                    position;
 	/* for copies of the phar fp, defines where 0 is */
-	php_off_t                    zero;
+	zend_off_t                    zero;
 	unsigned int             for_write:1;
 	unsigned int             is_zip:1;
 	unsigned int             is_tar:1;
@@ -564,7 +564,7 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC);
 int phar_parse_metadata(char **buffer, zval *metadata, int zip_metadata_len TSRMLS_DC);
 void destroy_phar_manifest_entry(zval *zv);
-int phar_seek_efp(phar_entry_info *entry, php_off_t offset, int whence, php_off_t position, int follow_links TSRMLS_DC);
+int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links TSRMLS_DC);
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links TSRMLS_DC);
 int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error TSRMLS_DC);
 int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TSRMLS_DC);

@@ -115,9 +115,9 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, zend_long
 	while (str < end) {
 		if (*str >= '0' && *str <= '9') {
 			digit = (*(str++) - '0');
-			if ( (!sign) && ctx_value <= (PHP_INT_MAX-digit)/10 ) {
+			if ( (!sign) && ctx_value <= (ZEND_LONG_MAX-digit)/10 ) {
 				ctx_value = (ctx_value * 10) + digit;
-			} else if ( sign && ctx_value >= (PHP_INT_MIN+digit)/10) {
+			} else if ( sign && ctx_value >= (ZEND_LONG_MIN+digit)/10) {
 				ctx_value = (ctx_value * 10) - digit;
 			} else {
 				return -1;

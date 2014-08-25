@@ -438,7 +438,7 @@ ZEND_FUNCTION(func_get_arg)
 	arg_count = ex->num_args;
 
 	if (requested_offset >= arg_count) {
-		zend_error(E_WARNING, "func_get_arg():  Argument " ZEND_INT_FMT " not passed to function", requested_offset);
+		zend_error(E_WARNING, "func_get_arg():  Argument " ZEND_LONG_FMT " not passed to function", requested_offset);
 		RETURN_FALSE;
 	}
 

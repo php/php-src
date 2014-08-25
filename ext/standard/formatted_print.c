@@ -52,7 +52,7 @@ static char HEXCHARS[] = "0123456789ABCDEF";
 
 /* php_spintf_appendchar() {{{ */
 inline static void
-php_sprintf_appendchar(zend_string **buffer, php_size_t *pos, char add TSRMLS_DC)
+php_sprintf_appendchar(zend_string **buffer, size_t *pos, char add TSRMLS_DC)
 {
 	if (!*buffer || (*pos + 1) >= (*buffer)->len) {
 		PRINTF_DEBUG(("%s(): ereallocing buffer to %d bytes\n", get_active_function_name(TSRMLS_C), (*buffer)->len));
@@ -65,14 +65,14 @@ php_sprintf_appendchar(zend_string **buffer, php_size_t *pos, char add TSRMLS_DC
 
 /* php_spintf_appendstring() {{{ */
 inline static void
-php_sprintf_appendstring(zend_string **buffer, php_size_t *pos, char *add,
-						   php_size_t min_width, php_size_t max_width, char padding,
-						   php_size_t alignment, php_size_t len, int neg, int expprec, int always_sign)
+php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
+						   size_t min_width, size_t max_width, char padding,
+						   size_t alignment, size_t len, int neg, int expprec, int always_sign)
 {
-	register php_size_t npad;
-	php_size_t req_size;
-	php_size_t copy_len;
-	php_size_t m_width;
+	register size_t npad;
+	size_t req_size;
+	size_t copy_len;
+	size_t m_width;
 
 	copy_len = (expprec ? MIN(max_width, len) : len);
 	npad = (min_width < copy_len) ? 0 : min_width - copy_len;
@@ -122,8 +122,8 @@ php_sprintf_appendstring(zend_string **buffer, php_size_t *pos, char *add,
 
 /* php_spintf_appendint() {{{ */
 inline static void
-php_sprintf_appendint(zend_string **buffer, php_size_t *pos, zend_long number,
-						php_size_t width, char padding, php_size_t alignment, 
+php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
+						size_t width, char padding, size_t alignment, 
 						int always_sign)
 {
 	char numbuf[NUM_BUF_SIZE];
@@ -166,9 +166,9 @@ php_sprintf_appendint(zend_string **buffer, php_size_t *pos, zend_long number,
 
 /* php_spintf_appenduint() {{{ */
 inline static void
-php_sprintf_appenduint(zend_string **buffer, php_size_t *pos,
+php_sprintf_appenduint(zend_string **buffer, size_t *pos,
 					   zend_ulong number,
-					   php_size_t width, char padding, php_size_t alignment)
+					   size_t width, char padding, size_t alignment)
 {
 	char numbuf[NUM_BUF_SIZE];
 	register zend_ulong magn, nmagn;
@@ -198,17 +198,17 @@ php_sprintf_appenduint(zend_string **buffer, php_size_t *pos,
 
 /* php_spintf_appenddouble() {{{ */
 inline static void
-php_sprintf_appenddouble(zend_string **buffer, php_size_t *pos,
+php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 						 double number,
-						 php_size_t width, char padding,
-						 php_size_t alignment, int precision,
+						 size_t width, char padding,
+						 size_t alignment, int precision,
 						 int adjust, char fmt,
 						 int always_sign
 						 TSRMLS_DC)
 {
 	char num_buf[NUM_BUF_SIZE];
 	char *s = NULL;
-	php_size_t s_len = 0;
+	size_t s_len = 0;
 	int is_negative = 0;
 #ifdef HAVE_LOCALE_H
 	struct lconv *lconv;
@@ -290,8 +290,8 @@ php_sprintf_appenddouble(zend_string **buffer, php_size_t *pos,
 
 /* php_spintf_appendd2n() {{{ */
 inline static void
-php_sprintf_append2n(zend_string **buffer, php_size_t *pos, zend_long number,
-					 php_size_t width, char padding, php_size_t alignment, int n,
+php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
+					 size_t width, char padding, size_t alignment, int n,
 					 char *chartable, int expprec)
 {
 	char numbuf[NUM_BUF_SIZE];
@@ -321,11 +321,11 @@ php_sprintf_append2n(zend_string **buffer, php_size_t *pos, zend_long number,
 
 /* php_spintf_getnumber() {{{ */
 inline static int
-php_sprintf_getnumber(char *buffer, php_size_t *pos)
+php_sprintf_getnumber(char *buffer, size_t *pos)
 {
 	char *endptr;
-	register zend_long num = ZEND_STRTOI(&buffer[*pos], &endptr, 10);
-	register php_size_t i = 0;
+	register zend_long num = ZEND_STRTOL(&buffer[*pos], &endptr, 10);
+	register size_t i = 0;
 
 	if (endptr != NULL) {
 		i = (endptr - &buffer[*pos]);
@@ -371,7 +371,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 	zval *newargs = NULL;
 	zval *args, *z_format;
 	int argc;
-	php_size_t size = 240, inpos = 0, outpos = 0, temppos;
+	size_t size = 240, inpos = 0, outpos = 0, temppos;
 	int alignment, currarg, adjusting, argnum, width, precision;
 	char *format, padding;
 	zend_string *result;
@@ -678,7 +678,7 @@ PHP_FUNCTION(vsprintf)
 PHP_FUNCTION(user_printf)
 {
 	zend_string *result;
-	php_size_t rlen;
+	size_t rlen;
 	
 	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 0, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
@@ -694,7 +694,7 @@ PHP_FUNCTION(user_printf)
 PHP_FUNCTION(vprintf)
 {
 	zend_string *result;
-	php_size_t rlen;
+	size_t rlen;
 	
 	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 1, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;

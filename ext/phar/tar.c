@@ -256,7 +256,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 			phar_tar_number(hdr->size, sizeof(hdr->size));
 
 		if (((!old && hdr->prefix[0] == 0) || old) && strlen(hdr->name) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
-			php_off_t curloc;
+			zend_off_t curloc;
 
 			if (size > 511) {
 				if (error) {

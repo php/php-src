@@ -2193,7 +2193,7 @@ static X509_STORE * setup_verify(zval * calist TSRMLS_DC)
 	X509_LOOKUP * dir_lookup, * file_lookup;
 	int ndirs = 0, nfiles = 0;
 	zval * item;
-	php_stat_t sb;
+	zend_stat_t sb;
 
 	store = X509_STORE_new();
 

@@ -619,12 +619,12 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 
 	if (iterations <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iterations must be a positive integer: " ZEND_INT_FMT, iterations);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iterations must be a positive integer: " ZEND_LONG_FMT, iterations);
 		RETURN_FALSE;
 	}
 
 	if (length < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length must be greater than or equal to 0: " ZEND_INT_FMT, length);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
 		RETURN_FALSE;
 	}
 

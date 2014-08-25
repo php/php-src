@@ -286,8 +286,8 @@ PHP_FUNCTION(abs)
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
-		if (Z_LVAL_P(value) == ZEND_INT_MIN) {
-			RETURN_DOUBLE(-(double)ZEND_INT_MIN);
+		if (Z_LVAL_P(value) == ZEND_LONG_MIN) {
+			RETURN_DOUBLE(-(double)ZEND_LONG_MIN);
 		} else {
 			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
 		}
@@ -959,7 +959,7 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 			TSRMLS_FETCH();
 
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number '%s' is too big to fit in long", s);
-			return ZEND_INT_MAX;
+			return ZEND_LONG_MAX;
 		}
 	}
 
@@ -987,8 +987,8 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 
 	s = Z_STRVAL_P(arg);
 
-	cutoff = ZEND_INT_MAX / base;
-	cutlim = ZEND_INT_MAX % base;
+	cutoff = ZEND_LONG_MAX / base;
+	cutlim = ZEND_LONG_MAX % base;
 	
 	for (i = Z_STRLEN_P(arg); i > 0; i--) {
 		c = *s++;
@@ -1431,7 +1431,7 @@ PHP_FUNCTION(intdiv)
 	if (divisor == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
 		RETURN_BOOL(0);
-	} else if (divisor == -1 && numerator == PHP_INT_MIN) {
+	} else if (divisor == -1 && numerator == ZEND_LONG_MIN) {
 		/* Prevent overflow error/crash 
 		   We don't return a float here as that violates function contract */
 		RETURN_LONG(0);

@@ -180,7 +180,7 @@ PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX * context)
    context.
  */
 PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *input,
-			   php_size_t inputLen)
+			   size_t inputLen)
 {
 	unsigned int i, index, partLen;
 

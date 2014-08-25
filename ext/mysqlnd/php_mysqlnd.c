@@ -138,11 +138,11 @@ PHP_MINFO_FUNCTION(mysqlnd)
 #else
 								"not supported");
 #endif
-	snprintf(buf, sizeof(buf), ZEND_INT_FMT, MYSQLND_G(net_cmd_buffer_size));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MYSQLND_G(net_cmd_buffer_size));
 	php_info_print_table_row(2, "Command buffer size", buf);
-	snprintf(buf, sizeof(buf), ZEND_INT_FMT, MYSQLND_G(net_read_buffer_size));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MYSQLND_G(net_read_buffer_size));
 	php_info_print_table_row(2, "Read buffer size", buf);
-	snprintf(buf, sizeof(buf), ZEND_INT_FMT, MYSQLND_G(net_read_timeout));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MYSQLND_G(net_read_timeout));
 	php_info_print_table_row(2, "Read timeout", buf);
 	php_info_print_table_row(2, "Collecting statistics", MYSQLND_G(collect_statistics)? "Yes":"No");
 	php_info_print_table_row(2, "Collecting memory statistics", MYSQLND_G(collect_memory_statistics)? "Yes":"No");
@@ -208,7 +208,7 @@ static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 {
 	zend_long long_value;
 
-	ZEND_ATOI(long_value, new_value);
+	ZEND_ATOL(long_value, new_value);
 	if (long_value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
 		return FAILURE;
 	}

@@ -184,7 +184,7 @@ static zend_long collator_u_strtol(nptr, endptr, base)
 	 * Set any if any `digits' consumed; make it negative to indicate
 	 * overflow.
 	 */
-	cutoff = neg ? -(zend_ulong)PHP_INT_MIN : PHP_INT_MAX;
+	cutoff = neg ? -(zend_ulong)ZEND_LONG_MIN : ZEND_LONG_MAX;
 	cutlim = cutoff % (zend_ulong)base;
 	cutoff /= (zend_ulong)base;
 	for (acc = 0, any = 0;; c = *s++) {
@@ -208,7 +208,7 @@ static zend_long collator_u_strtol(nptr, endptr, base)
 		}
 	}
 	if (any < 0) {
-		acc = neg ? PHP_INT_MIN : PHP_INT_MAX;
+		acc = neg ? ZEND_LONG_MIN : ZEND_LONG_MAX;
 		errno = ERANGE;
 	} else if (neg)
 		acc = -acc;

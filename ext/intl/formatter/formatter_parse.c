@@ -86,7 +86,7 @@ PHP_FUNCTION( numfmt_parse )
 			break;
 		case FORMAT_TYPE_INT64:
 			val64 = unum_parseInt64(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, &INTL_DATA_ERROR_CODE(nfo));
-			if(val64 > ZEND_INT_MAX || val64 < ZEND_INT_MIN) {
+			if(val64 > ZEND_LONG_MAX || val64 < ZEND_LONG_MIN) {
 				RETVAL_DOUBLE(val64);
 			} else {
 				RETVAL_LONG((zend_long)val64);

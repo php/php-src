@@ -187,7 +187,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 	DIR *dir;
 	char dentry[sizeof(struct dirent) + MAXPATHLEN];
 	struct dirent *entry = (struct dirent *) &dentry;
-	php_stat_t sbuf;
+	zend_stat_t sbuf;
 	char buf[MAXPATHLEN];
 	time_t now;
 	int nrdels = 0;
@@ -238,7 +238,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 static int ps_files_key_exists(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
-	php_stat_t sbuf;
+	zend_stat_t sbuf;
 
 	if (!key || !ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;
@@ -283,7 +283,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 1) {
 		errno = 0;
-		dirdepth = (size_t) ZEND_STRTOI(argv[0], NULL, 10);
+		dirdepth = (size_t) ZEND_STRTOL(argv[0], NULL, 10);
 		if (errno == ERANGE) {
 			php_error(E_WARNING, "The first parameter in session.save_path is invalid");
 			return FAILURE;
@@ -292,7 +292,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 2) {
 		errno = 0;
-		filemode = ZEND_STRTOI(argv[1], NULL, 8);
+		filemode = ZEND_STRTOL(argv[1], NULL, 8);
 		if (errno == ERANGE || filemode < 0 || filemode > 07777) {
 			php_error(E_WARNING, "The second parameter in session.save_path is invalid");
 			return FAILURE;

@@ -4247,7 +4247,7 @@ PHP_FUNCTION(array_product)
 
 		if (Z_TYPE(entry_n) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {
 			dval = (double)Z_LVAL_P(return_value) * (double)Z_LVAL(entry_n);
-			if ( (double)PHP_INT_MIN <= dval && dval <= (double)PHP_INT_MAX ) {
+			if ( (double)ZEND_LONG_MIN <= dval && dval <= (double)ZEND_LONG_MAX ) {
 				Z_LVAL_P(return_value) *= Z_LVAL(entry_n);
 				continue;
 			}

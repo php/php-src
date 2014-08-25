@@ -66,9 +66,9 @@
 #define PGSQL_MAX_LENGTH_OF_LONG   30
 #define PGSQL_MAX_LENGTH_OF_DOUBLE 60
 
-#if PHP_INT_MAX < UINT_MAX
+#if ZEND_LONG_MAX < UINT_MAX
 #define PGSQL_RETURN_OID(oid) do { \
-	if (oid > PHP_INT_MAX) { \
+	if (oid > ZEND_LONG_MAX) { \
 		smart_str s = {0}; \
 		smart_str_append_unsigned(&s, oid); \
 		smart_str_0(&s); \
@@ -1254,9 +1254,9 @@ PHP_MINFO_FUNCTION(pgsql)
 	php_info_print_table_row(2, "SSL support", "disabled");
 #endif
 #endif /* HAVE_PG_CONFIG_H */
-	snprintf(buf, sizeof(buf), ZEND_INT_FMT, PGG(num_persistent));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, PGG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
-	snprintf(buf, sizeof(buf), ZEND_INT_FMT, PGG(num_links));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, PGG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_end();
 
@@ -2412,8 +2412,8 @@ PHP_FUNCTION(pg_field_table)
 	}
 
 	if (return_oid) {
-#if UINT_MAX > PHP_INT_MAX /* Oid is unsigned int, we don't need this code, where LONG is wider */
-		if (oid > PHP_INT_MAX) {
+#if UINT_MAX > ZEND_LONG_MAX /* Oid is unsigned int, we don't need this code, where LONG is wider */
+		if (oid > ZEND_LONG_MAX) {
 			smart_str oidstr = {0};
 			smart_str_append_unsigned(&oidstr, oid);
 			smart_str_0(&oidstr);
@@ -2514,8 +2514,8 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 		case PHP_PG_FIELD_TYPE_OID:
 			
 			oid = PQftype(pgsql_result, field);
-#if UINT_MAX > PHP_INT_MAX
-			if (oid > PHP_INT_MAX) {
+#if UINT_MAX > ZEND_LONG_MAX
+			if (oid > ZEND_LONG_MAX) {
 				smart_str s = {0};
 				smart_str_append_unsigned(&s, oid);
 				smart_str_0(&s);

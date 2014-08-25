@@ -252,16 +252,16 @@ static inline int sapi_cli_select(int fd TSRMLS_DC)
 	return ret != -1;
 }
 
-PHP_CLI_API size_t sapi_cli_single_write(const char *str, php_size_t str_length TSRMLS_DC) /* {{{ */
+PHP_CLI_API size_t sapi_cli_single_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
 	zend_long ret;
 #else
-	php_size_t ret;
+	size_t ret;
 #endif
 
 	if (cli_shell_callbacks.cli_shell_write) {
-		php_size_t shell_wrote;
+		size_t shell_wrote;
 		shell_wrote = cli_shell_callbacks.cli_shell_write(str, str_length TSRMLS_CC);
 		if (shell_wrote > -1) {
 			return shell_wrote;
@@ -285,10 +285,10 @@ PHP_CLI_API size_t sapi_cli_single_write(const char *str, php_size_t str_length 
 }
 /* }}} */
 
-static php_size_t sapi_cli_ub_write(const char *str, php_size_t str_length TSRMLS_DC) /* {{{ */
+static size_t sapi_cli_ub_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 	const char *ptr = str;
-	php_size_t remaining = str_length;
+	size_t remaining = str_length;
 	size_t ret;
 
 	if (!str_length) {
@@ -296,7 +296,7 @@ static php_size_t sapi_cli_ub_write(const char *str, php_size_t str_length TSRML
 	}
 
 	if (cli_shell_callbacks.cli_shell_ub_write) {
-		php_size_t ub_wrote;
+		size_t ub_wrote;
 		ub_wrote = cli_shell_callbacks.cli_shell_ub_write(str, str_length TSRMLS_CC);
 		if (ub_wrote > -1) {
 			return ub_wrote;
@@ -338,7 +338,7 @@ static char *script_filename = "";
 
 static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{ */
 {
-	php_size_t len;
+	size_t len;
 	char   *docroot = "";
 
 	/* In CGI mode, we consider the environment to be a part of the server

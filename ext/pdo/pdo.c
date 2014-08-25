@@ -331,7 +331,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC) /* {{{ */
 	p = &buffer[sizeof(buffer)-1];
 	*p = '\0';
 
-	while ((pdo_uint64_t)i64 > (pdo_uint64_t)PHP_INT_MAX) {
+	while ((pdo_uint64_t)i64 > (pdo_uint64_t)ZEND_LONG_MAX) {
 		pdo_uint64_t quo = (pdo_uint64_t)i64 / (unsigned int)10;
 		unsigned int rem = (unsigned int)(i64 - quo*10U);
 		*--p = digit_vec[rem];

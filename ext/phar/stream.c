@@ -377,7 +377,7 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 
 	got = php_stream_read(data->fp, buf, MIN(count, entry->uncompressed_filesize - data->position));
 	data->position = php_stream_tell(data->fp) - data->zero;
-	stream->eof = (data->position == (php_off_t) entry->uncompressed_filesize);
+	stream->eof = (data->position == (zend_off_t) entry->uncompressed_filesize);
 
 	return got;
 }
@@ -386,12 +386,12 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 /**
  * Used for fseek($fp) on a phar file handle
  */
-static int phar_stream_seek(php_stream *stream, php_off_t offset, int whence, php_off_t *newoffset TSRMLS_DC) /* {{{ */
+static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	phar_entry_info *entry;
 	int res;
-	php_off_t temp;
+	zend_off_t temp;
 
 	if (data->internal_file->link) {
 		entry = phar_get_link_source(data->internal_file TSRMLS_CC);
@@ -412,7 +412,7 @@ static int phar_stream_seek(php_stream *stream, php_off_t offset, int whence, ph
 		default:
 			temp = 0;
 	}
-	if (temp > data->zero + (php_off_t) entry->uncompressed_filesize) {
+	if (temp > data->zero + (zend_off_t) entry->uncompressed_filesize) {
 		*newoffset = -1;
 		return -1;
 	}
@@ -440,7 +440,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 		return -1;
 	}
 	data->position = php_stream_tell(data->fp);
-	if (data->position > (php_off_t)data->internal_file->uncompressed_filesize) {
+	if (data->position > (zend_off_t)data->internal_file->uncompressed_filesize) {
 		data->internal_file->uncompressed_filesize = data->position;
 	}
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize;

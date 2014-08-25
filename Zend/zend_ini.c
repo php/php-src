@@ -360,9 +360,9 @@ ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig) /* {{{ 
 	ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
 	if (ini_entry) {
 		if (orig && ini_entry->modified) {
-			return (ini_entry->orig_value ? ZEND_STRTOI(ini_entry->orig_value, NULL, 0) : 0);
+			return (ini_entry->orig_value ? ZEND_STRTOL(ini_entry->orig_value, NULL, 0) : 0);
 		} else {
-			return (ini_entry->value      ? ZEND_STRTOI(ini_entry->value, NULL, 0)      : 0);
+			return (ini_entry->value      ? ZEND_STRTOL(ini_entry->value, NULL, 0)      : 0);
 		}
 	}
 

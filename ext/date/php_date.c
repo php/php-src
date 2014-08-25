@@ -1454,7 +1454,7 @@ PHP_FUNCTION(strtotime)
 		now = timelib_time_ctor();
 
 		initial_ts = emalloc(25);
-		snprintf(initial_ts, 24, "@" ZEND_INT_FMT " UTC", preset_ts);
+		snprintf(initial_ts, 24, "@" ZEND_LONG_FMT " UTC", preset_ts);
 		t = timelib_strtotime(initial_ts, strlen(initial_ts), NULL, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper); /* we ignore the error here, as this should never fail */
 		timelib_update_ts(t, tzi);
 		now->tz_info = tzi;
@@ -3840,7 +3840,7 @@ PHP_FUNCTION(timezone_transitions_get)
 	zval                *object, element;
 	php_timezone_obj    *tzobj;
 	unsigned int         i, begin = 0, found;
-	zend_long            timestamp_begin = PHP_INT_MIN, timestamp_end = PHP_INT_MAX;
+	zend_long            timestamp_begin = ZEND_LONG_MIN, timestamp_end = ZEND_LONG_MAX;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ll", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
 		RETURN_FALSE;
@@ -3873,7 +3873,7 @@ PHP_FUNCTION(timezone_transitions_get)
 
 	array_init(return_value);
 
-	if (timestamp_begin == PHP_INT_MIN) {
+	if (timestamp_begin == ZEND_LONG_MIN) {
 		add_nominal();
 		begin = 0;
 		found = 1;
@@ -4248,8 +4248,8 @@ static zend_string *date_interval_format(char *format, int format_len, timelib_r
 				case 'I': length = slprintf(buffer, 32, "%02d", (int) t->i); break;
 				case 'i': length = slprintf(buffer, 32, "%d", (int) t->i); break;
 
-				case 'S': length = slprintf(buffer, 32, "%02" ZEND_INT_FMT_SPEC, (zend_long) t->s); break;
-				case 's': length = slprintf(buffer, 32, ZEND_INT_FMT, (zend_long) t->s); break;
+				case 'S': length = slprintf(buffer, 32, "%02" ZEND_LONG_FMT_SPEC, (zend_long) t->s); break;
+				case 's': length = slprintf(buffer, 32, ZEND_LONG_FMT, (zend_long) t->s); break;
 
 				case 'a': {
 					if ((int) t->days != -99999) {

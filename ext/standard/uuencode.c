@@ -65,9 +65,9 @@
 
 #define PHP_UU_DEC(c) (((c) - ' ') & 077)
 
-PHPAPI zend_string *php_uuencode(char *src, php_size_t src_len) /* {{{ */
+PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 {
-	php_size_t len = 45;
+	size_t len = 45;
 	char *p, *s, *e, *ee;
 	zend_string *dest;
 
@@ -127,9 +127,9 @@ PHPAPI zend_string *php_uuencode(char *src, php_size_t src_len) /* {{{ */
 }
 /* }}} */
 
-PHPAPI zend_string *php_uudecode(char *src, php_size_t src_len) /* {{{ */
+PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 {
-	php_size_t len, total_len=0;
+	size_t len, total_len=0;
 	char *s, *e, *p, *ee;
 	zend_string *dest;
 

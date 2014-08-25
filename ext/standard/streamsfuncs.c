@@ -458,7 +458,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 	php_stream_from_zval(dest, zdest);
 
 	if (pos > 0 && php_stream_seek(src, pos, SEEK_SET) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position " ZEND_INT_FMT " in the stream", pos);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", pos);
 		RETURN_FALSE;
 	}
 
@@ -1374,7 +1374,7 @@ PHP_FUNCTION(stream_set_chunk_size)
 	}
 
 	if (csize <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The chunk size must be a positive integer, given " ZEND_INT_FMT, csize);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The chunk size must be a positive integer, given " ZEND_LONG_FMT, csize);
 		RETURN_FALSE;
 	}
 	/* stream.chunk_size is actually a size_t, but php_stream_set_option 

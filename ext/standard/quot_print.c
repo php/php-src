@@ -204,7 +204,7 @@ PHP_FUNCTION(quoted_printable_decode)
 	zend_string *arg1;
 	char *str_in;
 	zend_string *str_out;
-	php_size_t i = 0, j = 0, k;
+	size_t i = 0, j = 0, k;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arg1) == FAILURE) {
 		return;

@@ -76,7 +76,7 @@ END_EXTERN_C()
 #elif SIZEOF_ZEND_INT == 4
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
-	if (d > ZEND_INT_MAX || d < ZEND_INT_MIN) {
+	if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 		double	two_pow_32 = pow(2., 32.),
 				dmod;
 
@@ -93,8 +93,8 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 #else
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
-	/* >= as (double)ZEND_INT_MAX is outside signed range */
-	if (d >= ZEND_INT_MAX || d < ZEND_INT_MIN) {
+	/* >= as (double)ZEND_LONG_MAX is outside signed range */
+	if (d >= ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 		double	two_pow_64 = pow(2., 64.),
 				dmod;
 
@@ -127,7 +127,7 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
  *
  * This variant also gives information if a string that represents an integer
  * could not be represented as such due to overflow. It writes 1 to oflow_info
- * if the integer is larger than ZEND_INT_MAX and -1 if it's smaller than ZEND_INT_MIN.
+ * if the integer is larger than ZEND_LONG_MAX and -1 if it's smaller than ZEND_LONG_MIN.
  */
 static inline zend_uchar is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info)
 {
@@ -253,7 +253,7 @@ process_double:
 		}
 
 		if (lval) {
-			*lval = ZEND_STRTOI(str, NULL, base);
+			*lval = ZEND_STRTOL(str, NULL, base);
 		}
 
 		return IS_LONG;
@@ -508,9 +508,9 @@ static zend_always_inline int fast_increment_function(zval *op1)
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
 #else
-		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_INT_MAX)) {
+		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
 			/* switch to double */
-			ZVAL_DOUBLE(op1, (double)ZEND_INT_MAX + 1.0);
+			ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
 		} else {
 			Z_LVAL_P(op1)++;
 		}
@@ -550,9 +550,9 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
 #else
-		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_INT_MIN)) {
+		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
 			/* switch to double */
-			ZVAL_DOUBLE(op1, (double)ZEND_INT_MIN - 1.0);
+			ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
 		} else {
 			Z_LVAL_P(op1)--;
 		}
@@ -760,9 +760,9 @@ static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *o
 				zend_error(E_WARNING, "Division by zero");
 				ZVAL_BOOL(result, 0);
 				return FAILURE;
-			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_INT_MIN)) {
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
 				/* Prevent overflow error/crash */
-				ZVAL_DOUBLE(result, (double) ZEND_INT_MIN / -1);
+				ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
 			} else if (EXPECTED(Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0)) {
 				/* integer */
 				ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
@@ -811,7 +811,7 @@ static zend_always_inline int fast_mod_function(zval *result, zval *op1, zval *o
 				ZVAL_BOOL(result, 0);
 				return FAILURE;
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
-				/* Prevent overflow error/crash if op1==ZEND_INT_MIN */
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
 				return SUCCESS;
 			}

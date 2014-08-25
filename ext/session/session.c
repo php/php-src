@@ -305,7 +305,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	}
 
 	/* maximum 15+19+19+10 bytes */
-	spprintf(&buf, 0, "%.15s%ld" ZEND_INT_FMT "%0.8F", remote_addr ? remote_addr : "", tv.tv_sec, (zend_long)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
+	spprintf(&buf, 0, "%.15s%ld" ZEND_LONG_FMT "%0.8F", remote_addr ? remote_addr : "", tv.tv_sec, (zend_long)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
 
 	switch (PS(hash_func)) {
 		case PS_HASH_FUNC_MD5:
@@ -712,7 +712,7 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 	PS(hash_ops) = NULL;
 #endif
 
-	val = ZEND_STRTOI(new_value, &endptr, 10);
+	val = ZEND_STRTOL(new_value, &endptr, 10);
 	if (endptr && (*endptr == '\0')) {
 		/* Numeric value */
 		PS(hash_func) = val ? 1 : 0;
@@ -1148,7 +1148,7 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) /* {{{ */
 static inline void last_modified(TSRMLS_D) /* {{{ */
 {
 	const char *path;
-	php_stat_t sb;
+	zend_stat_t sb;
 	char buf[MAX_STR + 1];
 
 	path = SG(request_info).path_translated;
@@ -1178,7 +1178,7 @@ CACHE_LIMITER_FUNC(public) /* {{{ */
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
 	ADD_HEADER(buf);
 
-	snprintf(buf, sizeof(buf) , "Cache-Control: public, max-age=" ZEND_INT_FMT, PS(cache_expire) * 60); /* SAFE */
+	snprintf(buf, sizeof(buf) , "Cache-Control: public, max-age=" ZEND_LONG_FMT, PS(cache_expire) * 60); /* SAFE */
 	ADD_HEADER(buf);
 
 	last_modified(TSRMLS_C);
@@ -1189,7 +1189,7 @@ CACHE_LIMITER_FUNC(private_no_expire) /* {{{ */
 {
 	char buf[MAX_STR + 1];
 
-	snprintf(buf, sizeof(buf), "Cache-Control: private, max-age=" ZEND_INT_FMT ", pre-check=" ZEND_INT_FMT, PS(cache_expire) * 60, PS(cache_expire) * 60); /* SAFE */
+	snprintf(buf, sizeof(buf), "Cache-Control: private, max-age=" ZEND_LONG_FMT ", pre-check=" ZEND_LONG_FMT, PS(cache_expire) * 60, PS(cache_expire) * 60); /* SAFE */
 	ADD_HEADER(buf);
 
 	last_modified(TSRMLS_C);

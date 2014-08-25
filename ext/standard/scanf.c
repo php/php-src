@@ -356,7 +356,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			 * must not be a mixture of XPG3 specs and non-XPG3 specs
 			 * in the same format string.
 			 */
-			value = ZEND_STRTOUI(format-1, &end, 10);
+			value = ZEND_STRTOUL(format-1, &end, 10);
 			if (*end != '$') {
 				goto notXpg;
 			}
@@ -403,7 +403,7 @@ xpgCheckDone:
 		 * Parse any width specifier.
 		 */
 		if (isdigit(UCHAR(*ch))) {
-			value = ZEND_STRTOUI(format-1, &format, 10);
+			value = ZEND_STRTOUL(format-1, &format, 10);
 			flags |= SCAN_WIDTH;
 			ch = format++;
 		}
@@ -708,7 +708,7 @@ literal:
 			flags |= SCAN_SUPPRESS;
 			ch = format++;
 		} else if ( isdigit(UCHAR(*ch))) {
-			value = ZEND_STRTOUI(format-1, &end, 10);
+			value = ZEND_STRTOUL(format-1, &end, 10);
 			if (*end == '$') {
 				format = end+1;
 				ch = format++;
@@ -720,7 +720,7 @@ literal:
 		 * Parse any width specifier.
 		 */
 		if ( isdigit(UCHAR(*ch))) {
-			width = ZEND_STRTOUI(format-1, &format, 10);
+			width = ZEND_STRTOUL(format-1, &format, 10);
 			ch = format++;
 		} else {
 			width = 0;
@@ -756,29 +756,29 @@ literal:
 			case 'D':
 				op = 'i';
 				base = 10;
-				fn = (zend_long (*)())ZEND_STRTOI_PTR;
+				fn = (zend_long (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'i':
 				op = 'i';
 				base = 0;
-				fn = (zend_long (*)())ZEND_STRTOI_PTR;
+				fn = (zend_long (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'o':
 				op = 'i';
 				base = 8;
-				fn = (zend_long (*)())ZEND_STRTOI_PTR;
+				fn = (zend_long (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'x':
 			case 'X':
 				op = 'i';
 				base = 16;
-				fn = (zend_long (*)())ZEND_STRTOI_PTR;
+				fn = (zend_long (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'u':
 				op = 'i';
 				base = 10;
 				flags |= SCAN_UNSIGNED;
-				fn = (zend_long (*)())ZEND_STRTOUI_PTR;
+				fn = (zend_long (*)())ZEND_STRTOUL_PTR;
 				break;
 
 			case 'f':
@@ -1051,7 +1051,7 @@ addToInt:
 					*end = '\0';
 					value = (zend_long) (*fn)(buf, NULL, base);
 					if ((flags & SCAN_UNSIGNED) && (value < 0)) {
-						snprintf(buf, sizeof(buf), ZEND_UINT_FMT, value); /* INTL: ISO digit */
+						snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, value); /* INTL: ISO digit */
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {

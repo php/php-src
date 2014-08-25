@@ -115,7 +115,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 }
 /* }}} */
 
-int php_tag_find(char *tag, php_size_t len, char *set);
+int php_tag_find(char *tag, size_t len, char *set);
 
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
@@ -300,7 +300,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 		if (start < 0) {
 			start = 0;
 		}
-	} else if ((php_size_t)start > s11->len) {
+	} else if ((size_t)start > s11->len) {
 		RETURN_FALSE;
 	}
 
@@ -692,7 +692,7 @@ PHP_FUNCTION(nl_langinfo)
 #endif
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Item '" ZEND_INT_FMT "' is not valid", item);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Item '" ZEND_LONG_FMT "' is not valid", item);
 			RETURN_FALSE;
 	}
 	/* }}} */
@@ -729,7 +729,7 @@ PHP_FUNCTION(strcoll)
  * it needs to be incrementing.
  * Returns: FAILURE/SUCCESS whether the input was correct (i.e. no range errors)
  */
-static inline int php_charmask(unsigned char *input, php_size_t len, char *mask TSRMLS_DC)
+static inline int php_charmask(unsigned char *input, size_t len, char *mask TSRMLS_DC)
 {
 	unsigned char *end;
 	unsigned char c;
@@ -778,7 +778,7 @@ static inline int php_charmask(unsigned char *input, php_size_t len, char *mask 
  * mode 3 : trim left and right
  * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
-PHPAPI char *php_trim(char *c, php_size_t len, char *what, php_size_t what_len, zval *return_value, int mode TSRMLS_DC)
+PHPAPI char *php_trim(char *c, size_t len, char *what, size_t what_len, zval *return_value, int mode TSRMLS_DC)
 {
 	register zend_long i;
 	int trimmed = 0;
@@ -873,7 +873,7 @@ PHP_FUNCTION(ltrim)
 PHP_FUNCTION(wordwrap)
 {
 	zend_string *text, *breakchar = NULL, *breakchar_save = NULL;
-	php_size_t newtextlen, chk;
+	size_t newtextlen, chk;
 	size_t alloced;
 	zend_long current = 0, laststart = 0, lastspace = 0;
 	zend_long linelength = 75;
@@ -933,7 +933,7 @@ PHP_FUNCTION(wordwrap)
 	} else {
 		/* Multiple character line break or forced cut */
 		if (linelength > 0) {
-			chk = (php_size_t)(text->len/linelength + 1);
+			chk = (size_t)(text->len/linelength + 1);
 			newtext = zend_string_alloc(chk * breakchar->len + text->len, 0);
 			alloced = text->len + chk * breakchar->len + 1;
 		} else {
@@ -948,9 +948,9 @@ PHP_FUNCTION(wordwrap)
 		laststart = lastspace = 0;
 		for (current = 0; current < text->len; current++) {
 			if (chk <= 0) {
-				alloced += (php_size_t) (((text->len - current + 1)/linelength + 1) * breakchar->len) + 1;
+				alloced += (size_t) (((text->len - current + 1)/linelength + 1) * breakchar->len) + 1;
 				newtext = zend_string_realloc(newtext, alloced, 0);
-				chk = (php_size_t) ((text->len - current)/linelength) + 1;
+				chk = (size_t) ((text->len - current)/linelength) + 1;
 			}
 			/* when we hit an existing break, copy to new buffer, and
 			 * fix up laststart and lastspace */
@@ -1061,7 +1061,7 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
 		by doing nothing we return empty array
 		*/
 	} else {
-		php_size_t allocated = EXPLODE_ALLOC_STEP, found = 0;
+		size_t allocated = EXPLODE_ALLOC_STEP, found = 0;
 		zend_long i, to_return;
 		char **positions = emalloc(allocated * sizeof(char *));
 
@@ -1091,7 +1091,7 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
 PHP_FUNCTION(explode)
 {
 	zend_string *str, *delim;
-	zend_long limit = PHP_INT_MAX; /* No limit */
+	zend_long limit = ZEND_LONG_MAX; /* No limit */
 	zval zdelim, zstr;
 
 #ifndef FAST_ZPP
@@ -1173,7 +1173,7 @@ again:
 
 			case IS_DOUBLE: {
 				char *stmp;
-				php_size_t str_len = spprintf(&stmp, 0, "%.*G", (int) EG(precision), Z_DVAL_P(tmp));
+				size_t str_len = spprintf(&stmp, 0, "%.*G", (int) EG(precision), Z_DVAL_P(tmp));
 				smart_str_appendl(&implstr, stmp, str_len);
 				efree(stmp);
 			}
@@ -1702,7 +1702,7 @@ PHP_FUNCTION(stristr)
 	zval *needle;
 	zend_string *haystack;
 	char *found = NULL;
-	php_size_t  found_offset;
+	size_t  found_offset;
 	char *haystack_dup;
 	char needle_char[2];
 	zend_bool part = 0;
@@ -1922,7 +1922,7 @@ PHP_FUNCTION(strrpos)
 	zval *zneedle;
 	char *needle;
 	zend_string *haystack;
-	php_size_t needle_len;
+	size_t needle_len;
 	zend_long offset = 0;
 	char *p, *e, ord_needle[2];
 
@@ -2005,7 +2005,7 @@ PHP_FUNCTION(strripos)
 	zval *zneedle;
 	char *needle;
 	zend_string *haystack;
-	php_size_t needle_len;
+	size_t needle_len;
 	zend_long offset = 0;
 	char *p, *e, ord_needle[2];
 	char *needle_dup, *haystack_dup;
@@ -2138,12 +2138,12 @@ PHP_FUNCTION(strrchr)
 
 /* {{{ php_chunk_split
  */
-static zend_string *php_chunk_split(char *src, php_size_t srclen, char *end, php_size_t endlen, php_size_t chunklen)
+static zend_string *php_chunk_split(char *src, size_t srclen, char *end, size_t endlen, size_t chunklen)
 {
 	char *p, *q;
-	php_size_t chunks; /* complete chunks! */
-	php_size_t restlen;
-	php_size_t out_len;
+	size_t chunks; /* complete chunks! */
+	size_t restlen;
+	size_t out_len;
 	zend_string *dest;
 
 	chunks = srclen / chunklen;
@@ -2359,7 +2359,7 @@ PHP_FUNCTION(substr_replace)
 
 	if (Z_TYPE_P(str) != IS_ARRAY) {
 		if (Z_TYPE_P(from) != IS_ARRAY) {
-			php_size_t repl_len = 0;
+			size_t repl_len = 0;
 
 			f = Z_LVAL_P(from);
 
@@ -2418,7 +2418,7 @@ PHP_FUNCTION(substr_replace)
 		}
 	} else { /* str is array of strings */
 		zend_string *str_index = NULL;
-		php_size_t result_len;
+		size_t result_len;
 		zend_ulong num_index;
 
 		array_init(return_value);
@@ -2778,9 +2778,9 @@ PHP_FUNCTION(ucwords)
 
 /* {{{ php_strtr
  */
-PHPAPI char *php_strtr(char *str, php_size_t len, char *str_from, char *str_to, php_size_t trlen)
+PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen)
 {
-	php_size_t i;
+	size_t i;
 	unsigned char xlat[256];
 
 	if ((trlen < 1) || (len < 1)) {
@@ -2811,14 +2811,14 @@ static int php_strtr_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 /* }}} */
 
 /* {{{ php_strtr_array */
-static void php_strtr_array(zval *return_value, char *str, php_size_t slen, HashTable *pats TSRMLS_DC)
+static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTable *pats TSRMLS_DC)
 {
 	zend_ulong num_key;
 	zend_string *str_key;
-	php_size_t len, pos, found;
+	size_t len, pos, found;
 	int num_keys = 0;
-	php_size_t minlen = 128*1024;
-	php_size_t maxlen = 0;
+	size_t minlen = 128*1024;
+	size_t maxlen = 0;
 	HashTable str_hash, num_hash;
 	zval *entry, tmp, dummy;
 	char *key;
@@ -3038,12 +3038,12 @@ PHP_FUNCTION(strrev)
 
 /* {{{ php_similar_str
  */
-static void php_similar_str(const char *txt1, php_size_t len1, const char *txt2, php_size_t len2, php_size_t *pos1, php_size_t *pos2, php_size_t *max)
+static void php_similar_str(const char *txt1, size_t len1, const char *txt2, size_t len2, size_t *pos1, size_t *pos2, size_t *max)
 {
 	char *p, *q;
 	char *end1 = (char *) txt1 + len1;
 	char *end2 = (char *) txt2 + len2;
-	php_size_t l;
+	size_t l;
 
 	*max = 0;
 	for (p = (char *) txt1; p < end1; p++) {
@@ -3061,10 +3061,10 @@ static void php_similar_str(const char *txt1, php_size_t len1, const char *txt2,
 
 /* {{{ php_similar_char
  */
-static php_size_t php_similar_char(const char *txt1, php_size_t len1, const char *txt2, php_size_t len2)
+static size_t php_similar_char(const char *txt1, size_t len1, const char *txt2, size_t len2)
 {
-	php_size_t sum;
-	php_size_t pos1 = 0, pos2 = 0, max;
+	size_t sum;
+	size_t pos1 = 0, pos2 = 0, max;
 
 	php_similar_str(txt1, len1, txt2, len2, &pos1, &pos2, &max);
 	if ((sum = max)) {
@@ -3089,7 +3089,7 @@ PHP_FUNCTION(similar_text)
 	zend_string *t1, *t2;
 	zval *percent = NULL;
 	int ac = ZEND_NUM_ARGS();
-	php_size_t sim;
+	size_t sim;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|z/", &t1, &t2, &percent) == FAILURE) {
 		return;
@@ -3120,10 +3120,10 @@ PHP_FUNCTION(similar_text)
 /* {{{ php_stripslashes
  *
  * be careful, this edits the string in-place */
-PHPAPI void php_stripslashes(char *str, php_size_t *len TSRMLS_DC)
+PHPAPI void php_stripslashes(char *str, size_t *len TSRMLS_DC)
 {
 	char *s, *t;
-	php_size_t l;
+	size_t l;
 
 	if (len != NULL) {
 		l = *len;
@@ -3257,10 +3257,10 @@ char *php_strerror(int errnum)
 
 /* {{{ php_stripcslashes
  */
-PHPAPI void php_stripcslashes(char *str, php_size_t *len)
+PHPAPI void php_stripcslashes(char *str, size_t *len)
 {
 	char *source, *target, *end;
-	php_size_t  nlen = *len, i;
+	size_t  nlen = *len, i;
 	char numtmp[4];
 
 	for (source=str, end=str+nlen, target=str; source < end; source++) {
@@ -3320,13 +3320,13 @@ PHPAPI void php_stripcslashes(char *str, php_size_t *len)
 
 /* {{{ php_addcslashes
  */
-PHPAPI zend_string *php_addcslashes(const char *str, php_size_t length, int should_free, char *what, php_size_t wlength TSRMLS_DC)
+PHPAPI zend_string *php_addcslashes(const char *str, size_t length, int should_free, char *what, size_t wlength TSRMLS_DC)
 {
 	char flags[256];
 	char *source, *target;
 	char *end;
 	char c;
-	php_size_t  newlen;
+	size_t  newlen;
 	zend_string *new_str = zend_string_alloc(4 * (length? length : (length = strlen(str))), 0);
 
 	if (!wlength) {
@@ -3370,7 +3370,7 @@ PHPAPI zend_string *php_addcslashes(const char *str, php_size_t length, int shou
 
 /* {{{ php_addslashes
  */
-PHPAPI zend_string *php_addslashes(char *str, php_size_t length, int should_free TSRMLS_DC)
+PHPAPI zend_string *php_addslashes(char *str, size_t length, int should_free TSRMLS_DC)
 {
 	/* maximum string length, worst case situation */
 	char *source, *target;
@@ -3423,10 +3423,10 @@ PHPAPI zend_string *php_addslashes(char *str, php_size_t length, int should_free
 
 /* {{{ php_char_to_str_ex
  */
-PHPAPI php_size_t php_char_to_str_ex(char *str, php_size_t len, char from, char *to, php_size_t to_len, zval *result, int case_sensitivity, php_size_t *replace_count)
+PHPAPI size_t php_char_to_str_ex(char *str, size_t len, char from, char *to, size_t to_len, zval *result, int case_sensitivity, size_t *replace_count)
 {
-	php_size_t char_count = 0;
-	php_size_t replaced = 0;
+	size_t char_count = 0;
+	size_t replaced = 0;
 	char *source, *target, *tmp, *source_end=str+len, *tmp_end = NULL;
 
 	if (case_sensitivity) {
@@ -3496,7 +3496,7 @@ PHPAPI php_size_t php_char_to_str_ex(char *str, php_size_t len, char from, char 
 
 /* {{{ php_char_to_str
  */
-PHPAPI php_size_t php_char_to_str(char *str, php_size_t len, char from, char *to, php_size_t to_len, zval *result)
+PHPAPI size_t php_char_to_str(char *str, size_t len, char from, char *to, size_t to_len, zval *result)
 {
 	return php_char_to_str_ex(str, len, from, to, to_len, result, 1, NULL);
 }
@@ -3504,8 +3504,8 @@ PHPAPI php_size_t php_char_to_str(char *str, php_size_t len, char from, char *to
 
 /* {{{ php_str_to_str_ex
  */
-PHPAPI zend_string *php_str_to_str_ex(char *haystack, php_size_t length,
-	char *needle, php_size_t needle_len, char *str, php_size_t str_len, int case_sensitivity, php_size_t *replace_count)
+PHPAPI zend_string *php_str_to_str_ex(char *haystack, size_t length,
+	char *needle, size_t needle_len, char *str, size_t str_len, int case_sensitivity, size_t *replace_count)
 {
 	zend_string *new_str;
 
@@ -3551,7 +3551,7 @@ PHPAPI zend_string *php_str_to_str_ex(char *haystack, php_size_t length,
 			if (str_len < needle_len) {
 				new_str = zend_string_alloc(length, 0);
 			} else {
-				php_size_t count = 0;
+				size_t count = 0;
 				char *o, *n, *endp;
 
 				if (case_sensitivity) {
@@ -3669,7 +3669,7 @@ nothing_todo:
 
 /* {{{ php_str_to_str
  */
-PHPAPI zend_string *php_str_to_str(char *haystack, php_size_t length, char *needle, php_size_t needle_len, char *str, php_size_t str_len)
+PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle, size_t needle_len, char *str, size_t str_len)
 {
 	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, 1, NULL);
 }
@@ -3677,14 +3677,14 @@ PHPAPI zend_string *php_str_to_str(char *haystack, php_size_t length, char *need
 
 /* {{{ php_str_replace_in_subject
  */
-static void php_str_replace_in_subject(zval *search, zval *replace, zval *subject, zval *result, int case_sensitivity, php_size_t *replace_count TSRMLS_DC)
+static void php_str_replace_in_subject(zval *search, zval *replace, zval *subject, zval *result, int case_sensitivity, size_t *replace_count TSRMLS_DC)
 {
 	zval		*search_entry,
 				*replace_entry = NULL,
 				 temp_result,
 				 tmp_subject;
 	char		*replace_value = NULL;
-	php_size_t			 replace_len = 0;
+	size_t			 replace_len = 0;
 	HashPosition pos;
 
 	/* Make sure we're dealing with strings. */
@@ -4073,7 +4073,7 @@ PHP_FUNCTION(nl2br)
 	char	*tmp;
 	zend_string *str;
 	char	*end, *target;
-	php_size_t	repl_cnt = 0;
+	size_t	repl_cnt = 0;
 	zend_bool	is_xhtml = 1;
 	zend_string *result;
 
@@ -4341,7 +4341,7 @@ PHP_FUNCTION(parse_str)
  * 0 start tag
  * 1 first non-whitespace char seen
  */
-int php_tag_find(char *tag, php_size_t len, char *set) {
+int php_tag_find(char *tag, size_t len, char *set) {
 	char c, *n, *t;
 	int state=0, done=0;
 	char *norm;
@@ -4396,7 +4396,7 @@ int php_tag_find(char *tag, php_size_t len, char *set) {
 }
 /* }}} */
 
-PHPAPI php_size_t php_strip_tags(char *rbuf, php_size_t len, int *stateptr, char *allow, php_size_t allow_len) /* {{{ */
+PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *stateptr, char *allow, size_t allow_len) /* {{{ */
 {
 	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
 }
@@ -4422,7 +4422,7 @@ PHPAPI php_size_t php_strip_tags(char *rbuf, php_size_t len, int *stateptr, char
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-PHPAPI size_t php_strip_tags_ex(char *rbuf, php_size_t len, int *stateptr, char *allow, php_size_t allow_len, zend_bool allow_tag_spaces)
+PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, char *allow, size_t allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0, depth=0, in_q = 0;
@@ -4779,8 +4779,8 @@ PHP_FUNCTION(count_chars)
 	unsigned char *buf;
 	int inx;
 	char retstr[256];
-	php_size_t retlen=0;
-	php_size_t tmp = 0;
+	size_t retlen=0;
+	size_t tmp = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &input, &mymode) == FAILURE) {
 		return;
@@ -5007,7 +5007,7 @@ PHP_FUNCTION(substr_count)
 	}
 
 	if (offset > haystack_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value " ZEND_INT_FMT " exceeds string length", offset);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value " ZEND_LONG_FMT " exceeds string length", offset);
 		RETURN_FALSE;
 	}
 	p += offset;
@@ -5019,7 +5019,7 @@ PHP_FUNCTION(substr_count)
 			RETURN_FALSE;
 		}
 		if (length > (haystack_len - offset)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length value " ZEND_INT_FMT " exceeds string length", length);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length value " ZEND_LONG_FMT " exceeds string length", length);
 			RETURN_FALSE;
 		}
 		endp = p + length;
@@ -5253,7 +5253,7 @@ PHP_FUNCTION(str_word_count)
 			/* nothing to be done */
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format value " ZEND_INT_FMT, type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format value " ZEND_LONG_FMT, type);
 			RETURN_FALSE;
 	}
 
@@ -5350,7 +5350,7 @@ PHP_FUNCTION(str_split)
 	zend_string *str;
 	zend_long split_length = 1;
 	char *p;
-	php_size_t n_reg_segments;
+	size_t n_reg_segments;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &str, &split_length) == FAILURE) {
 		return;
@@ -5419,7 +5419,7 @@ PHP_FUNCTION(substr_compare)
 	zend_string *s1, *s2;
 	zend_long offset, len=0;
 	zend_bool cs=0;
-	php_size_t cmp_len;
+	size_t cmp_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSl|lb", &s1, &s2, &offset, &len, &cs) == FAILURE) {
 		RETURN_FALSE;
@@ -5444,7 +5444,7 @@ PHP_FUNCTION(substr_compare)
 		RETURN_FALSE;
 	}
 
-	cmp_len = (php_size_t) (len ? len : MAX(s2->len, (s1->len - offset)));
+	cmp_len = (size_t) (len ? len : MAX(s2->len, (s1->len - offset)));
 
 	if (!cs) {
 		RETURN_LONG(zend_binary_strncmp(s1->val + offset, (s1->len - offset), s2->val, s2->len, cmp_len));
