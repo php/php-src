@@ -577,7 +577,7 @@ PHP_FUNCTION(pcntl_waitpid)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz/|l", &pid, &z_status, &options) == FAILURE)
 		return;
 	
-	convert_to_int_ex(z_status);
+	convert_to_long_ex(z_status);
 
 	status = Z_LVAL_P(z_status);
 
@@ -605,7 +605,7 @@ PHP_FUNCTION(pcntl_wait)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/|l", &z_status, &options) == FAILURE)
 		return;
 	
-	convert_to_int_ex(z_status);
+	convert_to_long_ex(z_status);
 
 	status = Z_LVAL_P(z_status);
 #ifdef HAVE_WAIT3
@@ -929,7 +929,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
 		if (Z_TYPE_P(user_signo) != IS_LONG) {
 			SEPARATE_ZVAL(user_signo);
-			convert_to_int_ex(user_signo);
+			convert_to_long_ex(user_signo);
 		}
 		signo = Z_LVAL_P(user_signo);
 		if (sigaddset(&set, signo) != 0) {
@@ -994,7 +994,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
 		if (Z_TYPE_P(user_signo) != IS_LONG) {
 			SEPARATE_ZVAL(user_signo);
-			convert_to_int_ex(user_signo);
+			convert_to_long_ex(user_signo);
 		}
 		signo = Z_LVAL_P(user_signo);
 		if (sigaddset(&set, signo) != 0) {

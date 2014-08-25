@@ -319,7 +319,7 @@ static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char
 		if (Z_TYPE_P(option) != IS_LONG) {
 			zval tmp;
 			ZVAL_DUP(&tmp, option);
-			convert_to_int(&tmp);
+			convert_to_long(&tmp);
 			opt = Z_LVAL(tmp);
 		} else {
 			opt = Z_LVAL_P(option);

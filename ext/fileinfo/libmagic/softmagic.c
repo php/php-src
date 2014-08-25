@@ -2156,7 +2156,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 							continue;
 						}
 						ZVAL_DUP(&offsetcopy, offset);
-						convert_to_int(&offsetcopy); 
+						convert_to_long(&offsetcopy); 
 						pattern_offset = &offsetcopy;
 					} ZEND_HASH_FOREACH_END();
 

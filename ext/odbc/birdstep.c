@@ -478,7 +478,7 @@ PHP_FUNCTION(birdstep_result)
 	if ( Z_TYPE_PP(col) == IS_STRING ) {
 		field = Z_STRVAL_PP(col);
 	} else {
-		convert_to_int_ex(col);
+		convert_to_long_ex(col);
 		indx = Z_LVAL_PP(col);
 	}
 	if ( field ) {

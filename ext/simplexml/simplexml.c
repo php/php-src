@@ -1771,7 +1771,7 @@ static int cast_object(zval *object, int type, char *contents TSRMLS_DC)
 			convert_to_boolean(object);
 			break;
 		case IS_LONG:
-			convert_to_int(object);
+			convert_to_long(object);
 			break;
 		case IS_DOUBLE:
 			convert_to_double(object);
@@ -1903,7 +1903,7 @@ static int sxe_count_elements(zval *object, zend_long *count TSRMLS_DC) /* {{{ *
 				zval_ptr_dtor(&intern->tmp);
 			}
 			ZVAL_ZVAL(&intern->tmp, &rv, 0, 0);
-			convert_to_int(&intern->tmp);
+			convert_to_long(&intern->tmp);
 			*count = (zend_long)Z_LVAL(intern->tmp);
 			return SUCCESS;
 		}

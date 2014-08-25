@@ -1541,7 +1541,7 @@ PHP_FUNCTION(imagesetstyle)
 		if (Z_TYPE_P(item) != IS_LONG) {
 			zval lval;
 			ZVAL_COPY(&lval, item);
-			convert_to_int(&lval);
+			convert_to_long(&lval);
 			stylearr[index++] = Z_LVAL(lval);
 		} else {
 			stylearr[index++] = Z_LVAL_P(item);
@@ -3357,7 +3357,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 			if (Z_TYPE_P(var) != IS_LONG) {
 				zval lval;
 				ZVAL_COPY(&lval, var);
-				convert_to_int(&lval);
+				convert_to_long(&lval);
 				points[i].x = Z_LVAL(lval);
 			} else {
 				points[i].x = Z_LVAL_P(var);
@@ -3367,7 +3367,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 			if (Z_TYPE_P(var) != IS_LONG) {
 				zval lval;
 				ZVAL_COPY(&lval, var);
-				convert_to_int(&lval);
+				convert_to_long(&lval);
 				points[i].y = Z_LVAL(lval);
 			} else {
 				points[i].y = Z_LVAL_P(var);
@@ -4975,7 +4975,7 @@ PHP_FUNCTION(imagecrop)
 		if (Z_TYPE_P(tmp) != IS_LONG) {
 			zval lval;
 			ZVAL_COPY(&lval, tmp);
-			convert_to_int(&lval);
+			convert_to_long(&lval);
 			rect.x = Z_LVAL(lval);
 		} else {
 			rect.x = Z_LVAL_P(tmp);
@@ -4989,7 +4989,7 @@ PHP_FUNCTION(imagecrop)
 		if (Z_TYPE_P(tmp) != IS_LONG) {
 			zval lval;
 			ZVAL_COPY(&lval, tmp);
-			convert_to_int(&lval);
+			convert_to_long(&lval);
 			rect.y = Z_LVAL(lval);
 		} else {
 			rect.y = Z_LVAL_P(tmp);
@@ -5003,7 +5003,7 @@ PHP_FUNCTION(imagecrop)
 		if (Z_TYPE_P(tmp) != IS_LONG) {
 			zval lval;
 			ZVAL_COPY(&lval, tmp);
-			convert_to_int(&lval);
+			convert_to_long(&lval);
 			rect.width = Z_LVAL(lval);
 		} else {
 			rect.width = Z_LVAL_P(tmp);
@@ -5017,7 +5017,7 @@ PHP_FUNCTION(imagecrop)
 		if (Z_TYPE_P(tmp) != IS_LONG) {
 			zval lval;
 			ZVAL_COPY(&lval, tmp);
-			convert_to_int(&lval);
+			convert_to_long(&lval);
 			rect.height = Z_LVAL(lval);
 		} else {
 			rect.height = Z_LVAL_P(tmp);
@@ -5173,7 +5173,7 @@ PHP_FUNCTION(imageaffine)
 			if (Z_TYPE_P(tmp) != IS_LONG) {
 				zval lval;
 				ZVAL_COPY(&lval, tmp);
-				convert_to_int(&lval);
+				convert_to_long(&lval);
 				rect.x = Z_LVAL(lval);
 			} else {
 				rect.x = Z_LVAL_P(tmp);
@@ -5187,7 +5187,7 @@ PHP_FUNCTION(imageaffine)
 			if (Z_TYPE_P(tmp) != IS_LONG) {
 				zval lval;
 				ZVAL_COPY(&lval, tmp);
-				convert_to_int(&lval);
+				convert_to_long(&lval);
 				rect.y = Z_LVAL(lval);
 			} else {
 				rect.y = Z_LVAL_P(tmp);
@@ -5201,7 +5201,7 @@ PHP_FUNCTION(imageaffine)
 			if (Z_TYPE_P(tmp) != IS_LONG) {
 				zval lval;
 				ZVAL_COPY(&lval, tmp);
-				convert_to_int(&lval);
+				convert_to_long(&lval);
 				rect.width = Z_LVAL(lval);
 			} else {
 				rect.width = Z_LVAL_P(tmp);
@@ -5215,7 +5215,7 @@ PHP_FUNCTION(imageaffine)
 			if (Z_TYPE_P(tmp) != IS_LONG) {
 				zval lval;
 				ZVAL_COPY(&lval, tmp);
-				convert_to_int(&lval);
+				convert_to_long(&lval);
 				rect.height = Z_LVAL(lval);
 			} else {
 				rect.height = Z_LVAL_P(tmp);

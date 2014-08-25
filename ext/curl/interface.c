@@ -1319,7 +1319,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 				length = -1;
 			} else if (!Z_ISUNDEF(retval)) {
 				if (Z_TYPE(retval) != IS_LONG) {
-					convert_to_int_ex(&retval);
+					convert_to_long_ex(&retval);
 				}
 				length = Z_LVAL(retval);
 			}
@@ -1372,7 +1372,7 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_FNMATCH_FUNCTION");
 			} else if (!Z_ISUNDEF(retval)) {
 				if (Z_TYPE(retval) != IS_LONG) {
-					convert_to_int_ex(&retval);
+					convert_to_long_ex(&retval);
 				}
 				rval = Z_LVAL(retval);
 			}
@@ -1432,7 +1432,7 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_PROGRESSFUNCTION");
 			} else if (!Z_ISUNDEF(retval)) {
 				if (Z_TYPE(retval) != IS_LONG) {
-					convert_to_int_ex(&retval);
+					convert_to_long_ex(&retval);
 				}
 				if (0 != Z_LVAL(retval)) {
 					rval = 1;
@@ -1563,7 +1563,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 				length = -1;
 			} else if (!Z_ISUNDEF(retval)) {
 				if (Z_TYPE(retval) != IS_LONG) {
-					convert_to_int_ex(&retval);
+					convert_to_long_ex(&retval);
 				}
 				length = Z_LVAL(retval);
 			}
@@ -1993,7 +1993,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 	switch (option) {
 		/* Long options */
 		case CURLOPT_SSL_VERIFYHOST:
-			convert_to_int(zvalue);
+			convert_to_long(zvalue);
 			if (Z_LVAL_P(zvalue) == 1) {
 #if LIBCURL_VERSION_NUM <= 0x071c00 /* 7.28.0 */
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "CURLOPT_SSL_VERIFYHOST with value 1 is deprecated and will be removed as of libcurl 7.28.1. It is recommended to use value 2 instead");
@@ -2148,7 +2148,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 #if CURLOPT_MUTE != 0
 		case CURLOPT_MUTE:
 #endif
-			convert_to_int_ex(zvalue);
+			convert_to_long_ex(zvalue);
 #if LIBCURL_VERSION_NUM >= 0x71304
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
 				(PG(open_basedir) && *PG(open_basedir)) && (Z_LVAL_P(zvalue) & CURLPROTO_FILE)) {
@@ -2159,7 +2159,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_P(zvalue));
 			break;
 		case CURLOPT_SAFE_UPLOAD:
-			convert_to_int_ex(zvalue);
+			convert_to_long_ex(zvalue);
 			ch->safe_upload = (Z_LVAL_P(zvalue) != 0);
 			break;
 
@@ -2436,7 +2436,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 			break;
 
 		case CURLOPT_FOLLOWLOCATION:
-			convert_to_int_ex(zvalue);
+			convert_to_long_ex(zvalue);
 #if LIBCURL_VERSION_NUM < 0x071304
 			if (PG(open_basedir) && *PG(open_basedir)) {
 				if (Z_LVAL_P(zvalue) != 0) {
@@ -2619,7 +2619,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 			break;
 
 		case CURLOPT_RETURNTRANSFER:
-			convert_to_int_ex(zvalue);
+			convert_to_long_ex(zvalue);
 			if (Z_LVAL_P(zvalue)) {
 				ch->handlers->write->method = PHP_CURL_RETURN;
 			} else {
@@ -2639,14 +2639,14 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 #if LIBCURL_VERSION_NUM >= 0x070f05 /* Available since 7.15.5 */
 		case CURLOPT_MAX_RECV_SPEED_LARGE:
 		case CURLOPT_MAX_SEND_SPEED_LARGE:
-			convert_to_int_ex(zvalue);
+			convert_to_long_ex(zvalue);
 			error = curl_easy_setopt(ch->cp, option, (curl_off_t)Z_LVAL_P(zvalue));
 			break;
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
 		case CURLOPT_POSTREDIR:
-			convert_to_int_ex(zvalue);
+			convert_to_long_ex(zvalue);
 			error = curl_easy_setopt(ch->cp, CURLOPT_POSTREDIR, Z_LVAL_P(zvalue) & CURL_REDIR_POST_ALL);
 			break;
 #endif
@@ -2692,7 +2692,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 		}
 
 		case CURLINFO_HEADER_OUT:
-			convert_to_int_ex(zvalue);
+			convert_to_long_ex(zvalue);
 			if (Z_LVAL_P(zvalue) == 1) {
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGFUNCTION, curl_debug);
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA, (void *)ch);

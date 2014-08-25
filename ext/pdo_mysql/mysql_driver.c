@@ -400,7 +400,7 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val TSR
 			PDO_DBG_RETURN(1);
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
-			convert_to_int(val);
+			convert_to_long(val);
 			if (Z_LVAL_P(val) < 0) {
 				/* TODO: Johannes, can we throw a warning here? */
  				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;

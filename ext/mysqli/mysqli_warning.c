@@ -146,7 +146,7 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
 
 		/* 1. Here comes the error no */
 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
-		convert_to_int_ex(entry);
+		convert_to_long_ex(entry);
 		errno = Z_LVAL_P(entry);
 		zend_hash_move_forward(Z_ARRVAL(row));
 

@@ -285,7 +285,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 						Z_STRVAL_P(v));
 				is_persistent = 1;
 			} else {
-				convert_to_int_ex(v);
+				convert_to_long_ex(v);
 				is_persistent = Z_LVAL_P(v) ? 1 : 0;
 				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s", data_source,
 						username ? username : "",
@@ -688,7 +688,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value TSR
 	switch (attr) {
 		case PDO_ATTR_ERRMODE:
 			PDO_LONG_PARAM_CHECK;
-			convert_to_int(value);
+			convert_to_long(value);
 			switch (Z_LVAL_P(value)) {
 				case PDO_ERRMODE_SILENT:
 				case PDO_ERRMODE_WARNING:
@@ -704,7 +704,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value TSR
 
 		case PDO_ATTR_CASE:
 			PDO_LONG_PARAM_CHECK;
-			convert_to_int(value);
+			convert_to_long(value);
 			switch (Z_LVAL_P(value)) {
 				case PDO_CASE_NATURAL:
 				case PDO_CASE_UPPER:
@@ -720,7 +720,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value TSR
 
 		case PDO_ATTR_ORACLE_NULLS:
 			PDO_LONG_PARAM_CHECK;
-			convert_to_int(value);
+			convert_to_long(value);
 			dbh->oracle_nulls = Z_LVAL_P(value);
 			return SUCCESS;
 
@@ -736,7 +736,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value TSR
 			} else {
 				PDO_LONG_PARAM_CHECK;
 			}
-			convert_to_int(value);
+			convert_to_long(value);
 			if (Z_LVAL_P(value) == PDO_FETCH_USE_DEFAULT) {
 				pdo_raise_impl_error(dbh, NULL, "HY000", "invalid fetch mode type" TSRMLS_CC);
 				return FAILURE;
@@ -746,7 +746,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value TSR
 
 		case PDO_ATTR_STRINGIFY_FETCHES:
 			PDO_LONG_PARAM_CHECK;
-			convert_to_int(value);
+			convert_to_long(value);
 			dbh->stringify = Z_LVAL_P(value) ? 1 : 0;
 			return SUCCESS;
 			

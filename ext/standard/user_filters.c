@@ -220,7 +220,7 @@ php_stream_filter_status_t userfilter_filter(
 	zval_ptr_dtor(&func_name);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		convert_to_int(&retval);
+		convert_to_long(&retval);
 		ret = Z_LVAL(retval);
 	} else if (call_result == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call filter function");

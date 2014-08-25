@@ -2684,7 +2684,7 @@ zend_bool array_column_param_helper(zval *param,
                                     const char *name TSRMLS_DC) {
 	switch (Z_TYPE_P(param)) {
 		case IS_DOUBLE:
-			convert_to_int_ex(param);
+			convert_to_long_ex(param);
 			/* fallthrough */
 		case IS_LONG:
 			return 1;
@@ -3035,7 +3035,7 @@ static int zval_compare(zval *a, zval *b TSRMLS_DC) /* {{{ */
 		return ZEND_NORMALIZE_BOOL(Z_DVAL(result));
 	}
 
-	convert_to_int(&result);
+	convert_to_long(&result);
 	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
 }
 /* }}} */

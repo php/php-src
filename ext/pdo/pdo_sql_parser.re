@@ -248,7 +248,7 @@ safe:
 
 						case IS_FALSE:
 						case IS_TRUE:
-							convert_to_int(&tmp_param);
+							convert_to_long(&tmp_param);
 							/* fall through */
 						case IS_LONG:
 						case IS_DOUBLE:

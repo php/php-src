@@ -1041,7 +1041,7 @@ int _xml_externalEntityRefHandler(XML_Parser parserPtr,
 		_xml_xmlchar_zval(publicId, 0, parser->target_encoding, &args[4]);
 		xml_call_handler(parser, &parser->externalEntityRefHandler, parser->externalEntityRefPtr, 5, args, &retval);
 		if (!Z_ISUNDEF(retval)) {
-			convert_to_int(&retval);
+			convert_to_long(&retval);
 			ret = Z_LVAL(retval);
 		} else {
 			ret = 0;
@@ -1554,15 +1554,15 @@ PHP_FUNCTION(xml_parser_set_option)
 
 	switch (opt) {
 		case PHP_XML_OPTION_CASE_FOLDING:
-			convert_to_int_ex(val);
+			convert_to_long_ex(val);
 			parser->case_folding = Z_LVAL_P(val);
 			break;
 		case PHP_XML_OPTION_SKIP_TAGSTART:
-			convert_to_int_ex(val);
+			convert_to_long_ex(val);
 			parser->toffset = Z_LVAL_P(val);
 			break;
 		case PHP_XML_OPTION_SKIP_WHITE:
-			convert_to_int_ex(val);
+			convert_to_long_ex(val);
 			parser->skipwhite = Z_LVAL_P(val);
 			break;
 		case PHP_XML_OPTION_TARGET_ENCODING: {

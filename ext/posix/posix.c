@@ -738,7 +738,7 @@ PHP_FUNCTION(posix_ttyname)
 			}
 			break;
 		default:
-			convert_to_int_ex(z_fd);
+			convert_to_long_ex(z_fd);
 			fd = Z_LVAL_P(z_fd);
 	}
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
@@ -783,7 +783,7 @@ PHP_FUNCTION(posix_isatty)
 			}
 			break;
 		default:
-			convert_to_int_ex(z_fd);
+			convert_to_long_ex(z_fd);
 			fd = Z_LVAL_P(z_fd);
 	}
 

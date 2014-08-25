@@ -484,7 +484,7 @@ static int spl_dllist_object_count_elements(zval *object, zend_long *count TSRML
 		if (!Z_ISUNDEF(rv)) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_int(&intern->retval);
+			convert_to_long(&intern->retval);
 			*count = (zend_long) Z_LVAL(intern->retval);
 			return SUCCESS;
 		}
@@ -754,7 +754,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 	}
 
 	intern = Z_SPLDLLIST_P(getThis());
-	index  = spl_offset_convert_to_int(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 	RETURN_BOOL(index >= 0 && index < intern->llist->count);
 } /* }}} */
@@ -773,7 +773,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	}
 
 	intern = Z_SPLDLLIST_P(getThis());
-	index  = spl_offset_convert_to_int(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 	if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
@@ -811,7 +811,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		zend_long                   index;
 		spl_ptr_llist_element *element;
 
-		index = spl_offset_convert_to_int(zindex TSRMLS_CC);
+		index = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 		if (index < 0 || index >= intern->llist->count) {
 			zval_ptr_dtor(value);
@@ -859,7 +859,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 	}
 
 	intern = Z_SPLDLLIST_P(getThis());
-	index  = spl_offset_convert_to_int(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 	llist  = intern->llist;
 
 	if (index < 0 || index >= intern->llist->count) {
@@ -1228,7 +1228,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 	}
 
 	intern = Z_SPLDLLIST_P(getThis());
-	index  = spl_offset_convert_to_int(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 	if (index < 0 || index > intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);

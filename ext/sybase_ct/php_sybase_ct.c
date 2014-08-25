@@ -2076,7 +2076,7 @@ PHP_FUNCTION(sybase_result)
 			break;
 		}
 		default:
-			convert_to_int(field);
+			convert_to_long(field);
 			field_offset = Z_LVAL_P(field);
 			if (field_offset < 0 || field_offset >= result->num_fields) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Bad column offset specified");

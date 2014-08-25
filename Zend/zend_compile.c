@@ -6998,7 +6998,7 @@ void zend_do_declare_begin(TSRMLS_D) /* {{{ */
 void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 {
 	if (!zend_binary_strcasecmp(Z_STRVAL(var->u.constant), Z_STRLEN(var->u.constant), "ticks", sizeof("ticks")-1)) {
-		convert_to_int(&val->u.constant);
+		convert_to_long(&val->u.constant);
 		CG(declarables).ticks = val->u.constant;
 	} else if (!zend_binary_strcasecmp(Z_STRVAL(var->u.constant), Z_STRLEN(var->u.constant), "encoding", sizeof("encoding")-1)) {
 		if (Z_TYPE(val->u.constant) == IS_CONSTANT) {

@@ -323,7 +323,7 @@ long_case:
 	/* if not long we're operating on lzval */
 	case IS_DOUBLE:
 double_case:
-		convert_to_int(&lzval);
+		convert_to_long(&lzval);
 		goto long_case;
 
 	case IS_OBJECT:

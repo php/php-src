@@ -98,7 +98,7 @@ static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv T
 			VariantClear(&v);
 		}
 	} else if (V_ISARRAY(&obj->v)) {
-		convert_to_int(offset);
+		convert_to_long(offset);
 
 		if (SafeArrayGetDim(V_ARRAY(&obj->v)) == 1) {	
 			if (php_com_safearray_get_elem(&obj->v, &v, Z_LVAL_P(offset) TSRMLS_CC)) {
@@ -144,7 +144,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 				vt = V_VT(&obj->v) & ~VT_ARRAY;
 			}
 
-			convert_to_int(offset);
+			convert_to_long(offset);
 			indices = Z_LVAL_P(offset);
 
 			VariantInit(&v);

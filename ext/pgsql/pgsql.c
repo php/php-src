@@ -1306,7 +1306,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		connstring = Z_STRVAL(args[0]);
 	} else if (ZEND_NUM_ARGS() == 2 ) { /* Safe to add conntype_option, since 2 args was illegal */
 		connstring = Z_STRVAL(args[0]);
-		convert_to_int_ex(&args[1]);
+		convert_to_long_ex(&args[1]);
 		connect_type = Z_LVAL(args[1]);
 	} else {
 		host = Z_STRVAL(args[0]);
@@ -2630,7 +2630,7 @@ PHP_FUNCTION(pg_fetch_result)
 			field_offset = PQfnumber(pgsql_result, Z_STRVAL_P(field));
 			break;
 		default:
-			convert_to_int_ex(field);
+			convert_to_long_ex(field);
 			field_offset = Z_LVAL_P(field);
 			break;
 	}
@@ -2684,7 +2684,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	if (zrow == NULL) {
 		row = -1;
 	} else {
-		convert_to_int(zrow);
+		convert_to_long(zrow);
 		row = Z_LVAL_P(zrow);
 		if (row < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The row parameter must be greater or equal to zero");
@@ -2983,7 +2983,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			field_offset = PQfnumber(pgsql_result, Z_STRVAL_P(field));
 			break;
 		default:
-			convert_to_int_ex(field);
+			convert_to_long_ex(field);
 			field_offset = Z_LVAL_P(field);
 			break;
 	}
@@ -5859,7 +5859,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 
 					case IS_DOUBLE:
 						ZVAL_DOUBLE(&new_val, Z_DVAL_P(val));
-						convert_to_int_ex(&new_val);
+						convert_to_long_ex(&new_val);
 						break;
 						
 					case IS_LONG:
@@ -5998,14 +5998,14 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							}
 							else {
 								ZVAL_STRINGL(&new_val, Z_STRVAL_P(val), Z_STRLEN_P(val));
-								convert_to_int_ex(&new_val);
+								convert_to_long_ex(&new_val);
 							}
 						}
 						break;
 
 					case IS_DOUBLE:
 						ZVAL_DOUBLE(&new_val, Z_DVAL_P(val));
-						convert_to_int_ex(&new_val);
+						convert_to_long_ex(&new_val);
 						break;
 
 					case IS_LONG:

@@ -2039,7 +2039,7 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			int val;
 
-			convert_to_int_ex(newval);
+			convert_to_long_ex(newval);
 			val = Z_LVAL_P(newval);
 			if (ldap_set_option(ldap, option, &val)) {
 				RETURN_FALSE;
@@ -2050,7 +2050,7 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			struct timeval timeout;
 
-			convert_to_int_ex(newval);
+			convert_to_long_ex(newval);
 			timeout.tv_sec = Z_LVAL_P(newval);
 			timeout.tv_usec = 0;
 			if (ldap_set_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
@@ -2062,7 +2062,7 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			int timeout;
 
-			convert_to_int_ex(newval);
+			convert_to_long_ex(newval);
 			timeout = 1000 * Z_LVAL_P(newval); /* Convert to milliseconds */
 			if (ldap_set_option(ldap, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
 				RETURN_FALSE;
@@ -2424,7 +2424,7 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 	ZVAL_COPY_VALUE(&cb_args[0], cb_link);
 	ZVAL_STRING(&cb_args[1], url);
 	if (call_user_function_ex(EG(function_table), NULL, &ld->rebindproc, &cb_retval, 2, cb_args, 0, NULL TSRMLS_CC) == SUCCESS && !Z_ISUNDEF(cb_retval)) {
-		convert_to_int_ex(&cb_retval);
+		convert_to_long_ex(&cb_retval);
 		retval = Z_LVAL(cb_retval);
 		zval_ptr_dtor(&cb_retval);
 	} else {

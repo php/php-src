@@ -328,7 +328,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 			convert_to_string(parameter);
 		}
 	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT && (Z_TYPE_P(parameter) == IS_FALSE || Z_TYPE_P(parameter) == IS_TRUE)) {
-		convert_to_int(parameter);
+		convert_to_long(parameter);
 	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL && Z_TYPE_P(parameter) == IS_LONG) {
 		convert_to_boolean(parameter);
 	}
@@ -639,7 +639,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 	if (type != new_type) {
 		switch (new_type) {
 			case PDO_PARAM_INT:
-				convert_to_int_ex(dest);
+				convert_to_long_ex(dest);
 				break;
 			case PDO_PARAM_BOOL:
 				convert_to_boolean_ex(dest);
@@ -1470,7 +1470,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 			stmt->fetch.column = how & PDO_FETCH_GROUP ? -1 : 0;
 			break;
 		case 2:
-			convert_to_int(arg2);
+			convert_to_long(arg2);
 			stmt->fetch.column = Z_LVAL_P(arg2);
 			break;
 		case 3:

@@ -284,7 +284,7 @@ PHP_FUNCTION(readline_info)
 		} else if (!strcasecmp(what, "done")) {
 			oldval = rl_done;
 			if (value) {
-				convert_to_int_ex(value);
+				convert_to_long_ex(value);
 				rl_done = Z_LVAL_P(value);
 			}
 			RETVAL_LONG(oldval);
@@ -304,7 +304,7 @@ PHP_FUNCTION(readline_info)
 		} else if (!strcasecmp(what, "erase_empty_line")) {
 			oldval = rl_erase_empty_line;
 			if (value) {
-				convert_to_int_ex(value);
+				convert_to_long_ex(value);
 				rl_erase_empty_line = Z_LVAL_PP(value);
 			}
 			RETVAL_LONG(oldval);
@@ -322,7 +322,7 @@ PHP_FUNCTION(readline_info)
 		} else if (!strcasecmp(what, "attempted_completion_over")) {
 			oldval = rl_attempted_completion_over;
 			if (value) {
-				convert_to_int_ex(value);
+				convert_to_long_ex(value);
 				rl_attempted_completion_over = Z_LVAL_P(value);
 			}
 			RETVAL_LONG(oldval);

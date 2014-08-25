@@ -301,7 +301,7 @@ static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_
 
 	switch (attr) {
 		case PDO_ATTR_TIMEOUT:
-			convert_to_int(val);
+			convert_to_long(val);
 			sqlite3_busy_timeout(H->db, Z_LVAL_P(val) * 1000);
 			return 1;
 	}
@@ -497,7 +497,7 @@ static int php_sqlite3_collation_callback(void *context,
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the callback");
 	} else if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
-			convert_to_int_ex(&retval);
+			convert_to_long_ex(&retval);
 		}
 		ret = 0;
 		if (Z_LVAL(retval) > 0) {

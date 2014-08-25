@@ -711,7 +711,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (Z_TYPE_P(arg_pattern) != IS_STRING) {
 		/* we convert numbers to integers and treat them as a string */
 		if (Z_TYPE_P(arg_pattern) == IS_DOUBLE) {
-			convert_to_int_ex(arg_pattern);	/* get rid of decimal places */
+			convert_to_long_ex(arg_pattern);	/* get rid of decimal places */
 		}
 		convert_to_string_ex(arg_pattern);
 		/* don't bother doing an extended regex with just a number */
@@ -858,7 +858,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		arg_pattern_len = Z_STRLEN_P(arg_pattern_zval);
 	} else {
 		/* FIXME: this code is not multibyte aware! */
-		convert_to_int_ex(arg_pattern_zval);
+		convert_to_long_ex(arg_pattern_zval);
 		pat_buf[0] = (char)Z_LVAL_P(arg_pattern_zval);	
 		pat_buf[1] = '\0';
 

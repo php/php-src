@@ -16772,7 +16772,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -18759,7 +18759,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -21117,7 +21117,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -24348,7 +24348,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -25809,7 +25809,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -27089,7 +27089,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -28371,7 +28371,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -30162,7 +30162,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -33770,7 +33770,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -35668,7 +35668,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -37906,7 +37906,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}
@@ -40881,7 +40881,7 @@ num_index_prop:
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
-				convert_to_int(&tmp);
+				convert_to_long(&tmp);
 				offset = &tmp;
 			}
 		}

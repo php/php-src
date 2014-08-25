@@ -333,14 +333,14 @@ ZEND_API int decrement_function(zval *op2);
 ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC);
 ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
-ZEND_API void convert_to_int(zval *op);
+ZEND_API void convert_to_long(zval *op);
 ZEND_API void convert_to_double(zval *op);
-ZEND_API void convert_to_int_base(zval *op, int base);
+ZEND_API void convert_to_long_base(zval *op, int base);
 ZEND_API void convert_to_null(zval *op);
 ZEND_API void convert_to_boolean(zval *op);
 ZEND_API void convert_to_array(zval *op);
 ZEND_API void convert_to_object(zval *op);
-ZEND_API void multi_convert_to_int_ex(int argc, ...);
+ZEND_API void multi_convert_to_long_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 
@@ -418,7 +418,7 @@ END_EXTERN_C()
 				convert_to_null(pzv);			\
 				break;							\
 			case IS_LONG:						\
-				convert_to_int(pzv);			\
+				convert_to_long(pzv);			\
 				break;							\
 			case IS_DOUBLE:						\
 				convert_to_double(pzv);			\
@@ -448,7 +448,7 @@ END_EXTERN_C()
 	}
 
 #define convert_to_boolean_ex(pzv)	convert_to_ex_master(pzv, boolean, _IS_BOOL)
-#define convert_to_int_ex(pzv)		convert_to_ex_master(pzv, int, IS_LONG)
+#define convert_to_long_ex(pzv)		convert_to_ex_master(pzv, int, IS_LONG)
 #define convert_to_double_ex(pzv)	convert_to_ex_master(pzv, double, IS_DOUBLE)
 #define convert_to_string_ex(pzv)	convert_to_ex_master(pzv, string, IS_STRING)
 #define convert_to_array_ex(pzv)	convert_to_ex_master(pzv, array, IS_ARRAY)

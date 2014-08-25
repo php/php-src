@@ -146,7 +146,7 @@ PHP_FUNCTION(datefmt_parse)
 
 	if (z_parse_pos) {
 		ZVAL_DEREF(z_parse_pos);
-		convert_to_int(z_parse_pos);
+		convert_to_long(z_parse_pos);
 		parse_pos = (int32_t)Z_LVAL_P(z_parse_pos);
 		if(parse_pos > text_len) {
 			RETURN_FALSE;
@@ -185,7 +185,7 @@ PHP_FUNCTION(datefmt_localtime)
 
 	if (z_parse_pos) {
 		ZVAL_DEREF(z_parse_pos);
-		convert_to_int(z_parse_pos);
+		convert_to_long(z_parse_pos);
 		parse_pos = (int32_t)Z_LVAL_P(z_parse_pos);
 		if(parse_pos > text_len) {
 			RETURN_FALSE;

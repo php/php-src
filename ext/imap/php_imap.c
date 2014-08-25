@@ -3553,11 +3553,11 @@ PHP_FUNCTION(imap_mail_compose)
 			topbod = bod;
 
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
-				convert_to_int_ex(pvalue);
+				convert_to_long_ex(pvalue);
 				bod->type = (short) Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "encoding", sizeof("encoding") - 1)) != NULL) {
-				convert_to_int_ex(pvalue);
+				convert_to_long_ex(pvalue);
 				bod->encoding = (short) Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
@@ -3626,11 +3626,11 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->contents.text.size = 0;
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "lines", sizeof("lines") - 1)) != NULL) {
-				convert_to_int_ex(pvalue);
+				convert_to_long_ex(pvalue);
 				bod->size.lines = Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "bytes", sizeof("bytes") - 1)) != NULL) {
-				convert_to_int_ex(pvalue);
+				convert_to_long_ex(pvalue);
 				bod->size.bytes = Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "md5", sizeof("md5") - 1)) != NULL) {
@@ -3640,7 +3640,7 @@ PHP_FUNCTION(imap_mail_compose)
 		} else if (Z_TYPE_P(data) == IS_ARRAY) {
 			short type = -1;
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
-				convert_to_int_ex(pvalue);
+				convert_to_long_ex(pvalue);
 				type = (short) Z_LVAL_P(pvalue);
 			}
 
@@ -3660,7 +3660,7 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "encoding", sizeof("encoding") - 1)) != NULL) {
-				convert_to_int_ex(pvalue);
+				convert_to_long_ex(pvalue);
 				bod->encoding = (short) Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
@@ -3730,11 +3730,11 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->contents.text.size = 0;
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "lines", sizeof("lines") - 1)) != NULL) {
-				convert_to_int_ex(pvalue);
+				convert_to_long_ex(pvalue);
 				bod->size.lines = Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "bytes", sizeof("bytes") - 1)) != NULL) {
-				convert_to_int_ex(pvalue);
+				convert_to_long_ex(pvalue);
 				bod->size.bytes = Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "md5", sizeof("md5") - 1)) != NULL) {

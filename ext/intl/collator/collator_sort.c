@@ -232,7 +232,7 @@ static int collator_compare_func( const void* a, const void* b TSRMLS_DC )
 			return 0;
 	}
 
-	convert_to_int(&result);
+	convert_to_long(&result);
 
 	if( Z_LVAL(result) < 0 )
 		return -1;

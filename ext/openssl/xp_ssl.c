@@ -69,7 +69,7 @@
 /* Simplify ssl context option retrieval */
 #define GET_VER_OPT(name)               (PHP_STREAM_CONTEXT(stream) && (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", name)) != NULL)
 #define GET_VER_OPT_STRING(name, str)   if (GET_VER_OPT(name)) { convert_to_string_ex(val); str = Z_STRVAL_P(val); }
-#define GET_VER_OPT_LONG(name, num)     if (GET_VER_OPT(name)) { convert_to_int_ex(val); num = Z_LVAL_P(val); }
+#define GET_VER_OPT_LONG(name, num)     if (GET_VER_OPT(name)) { convert_to_long_ex(val); num = Z_LVAL_P(val); }
 
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
@@ -1038,7 +1038,7 @@ static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_da
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
 				"ssl", "reneg_limit"))
 	) {
-		convert_to_int(val);
+		convert_to_long(val);
 		limit = Z_LVAL_P(val);
 	}
 
@@ -1051,7 +1051,7 @@ static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_da
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
 				"ssl", "reneg_window"))
 	) {
-		convert_to_int(val);
+		convert_to_long(val);
 		window = Z_LVAL_P(val);
 	}
 
@@ -2178,7 +2178,7 @@ static zend_long get_crypto_method(php_stream_context *ctx, zend_long crypto_met
 	zval *val;
 
 	if (ctx && (val = php_stream_context_get_option(ctx, "ssl", "crypto_method")) != NULL) {
-		convert_to_int_ex(val);
+		convert_to_long_ex(val);
 		crypto_method = (zend_long)Z_LVAL_P(val);
 	        crypto_method |= STREAM_CRYPTO_IS_CLIENT;
 	}

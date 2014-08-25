@@ -1449,7 +1449,7 @@ int spl_array_object_count_elements(zval *object, zend_long *count TSRMLS_DC) /*
 		if (Z_TYPE(rv) != IS_UNDEF) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_int(&intern->retval);
+			convert_to_long(&intern->retval);
 			*count = (zend_long)Z_LVAL(intern->retval);
 			return SUCCESS;
 		}

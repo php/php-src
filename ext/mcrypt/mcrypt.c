@@ -1341,7 +1341,7 @@ PHP_FUNCTION(mcrypt_ecb)
 	
 	MCRYPT_GET_CRYPT_ARGS
 
-	convert_to_int_ex(mode);
+	convert_to_long_ex(mode);
 
 	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ecb", iv, iv_len, Z_LVAL_P(mode), return_value TSRMLS_CC);
 }
@@ -1357,7 +1357,7 @@ PHP_FUNCTION(mcrypt_cbc)
 
 	MCRYPT_GET_CRYPT_ARGS
 
-	convert_to_int_ex(mode);
+	convert_to_long_ex(mode);
 
 	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cbc", iv, iv_len, Z_LVAL_P(mode), return_value TSRMLS_CC);
 }
@@ -1373,7 +1373,7 @@ PHP_FUNCTION(mcrypt_cfb)
 	
 	MCRYPT_GET_CRYPT_ARGS
 
-	convert_to_int_ex(mode);
+	convert_to_long_ex(mode);
 
 	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cfb", iv, iv_len, Z_LVAL_P(mode), return_value TSRMLS_CC);
 }
@@ -1389,7 +1389,7 @@ PHP_FUNCTION(mcrypt_ofb)
 	
 	MCRYPT_GET_CRYPT_ARGS
 
-	convert_to_int_ex(mode);
+	convert_to_long_ex(mode);
 
 	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ofb", iv, iv_len, Z_LVAL_P(mode), return_value TSRMLS_CC);
 }

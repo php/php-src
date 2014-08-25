@@ -323,7 +323,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	} else {
 		/* we convert numbers to integers and treat them as a string */
 		if (Z_TYPE_P(regex) == IS_DOUBLE) {
-			convert_to_int_ex(regex);	/* get rid of decimal places */
+			convert_to_long_ex(regex);	/* get rid of decimal places */
 		}
 		convert_to_string_ex(regex);
 		/* don't bother doing an extended regex with just a number */
@@ -570,7 +570,7 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			pattern = STR_EMPTY_ALLOC();
 		}
 	} else {
-		convert_to_int_ex(arg_pattern);
+		convert_to_long_ex(arg_pattern);
 		pattern = zend_string_alloc(1, 0);
 		pattern->val[0] = (char) Z_LVAL_P(arg_pattern);
 		pattern->val[1] = '\0';
@@ -583,7 +583,7 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			replace = STR_EMPTY_ALLOC();
 		}
 	} else {
-		convert_to_int_ex(arg_replace);
+		convert_to_long_ex(arg_replace);
 		replace = zend_string_alloc(1, 0);
 		replace->val[0] = (char) Z_LVAL_P(arg_replace);
 		replace->val[1] = '\0';

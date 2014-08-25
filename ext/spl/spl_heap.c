@@ -114,7 +114,7 @@ static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object
 		return FAILURE;
 	}
 
-	convert_to_int(&zresult);
+	convert_to_long(&zresult);
 	*result = Z_LVAL(zresult);
 
 	zval_ptr_dtor(&zresult);
@@ -493,7 +493,7 @@ static int spl_heap_object_count_elements(zval *object, zend_long *count TSRMLS_
 		if (!Z_ISUNDEF(rv)) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_int(&intern->retval);
+			convert_to_long(&intern->retval);
 			*count = (zend_long) Z_LVAL(intern->retval);
 			return SUCCESS;
 		}

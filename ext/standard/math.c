@@ -1157,7 +1157,7 @@ PHP_FUNCTION(decbin)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_int_ex(arg);
+	convert_to_long_ex(arg);
 	result = _php_math_longtobase(arg, 2 TSRMLS_CC);
 	RETURN_STR(result);
 }
@@ -1173,7 +1173,7 @@ PHP_FUNCTION(decoct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_int_ex(arg);
+	convert_to_long_ex(arg);
 	result = _php_math_longtobase(arg, 8 TSRMLS_CC);
 	RETURN_STR(result);
 }
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(dechex)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_int_ex(arg);
+	convert_to_long_ex(arg);
 	result = _php_math_longtobase(arg, 16 TSRMLS_CC);
 	RETURN_STR(result);
 }

@@ -526,7 +526,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 		case TidyInteger:
 			if (Z_TYPE(conv) != IS_LONG) {
 				zval_copy_ctor(&conv);
-				convert_to_int(&conv);
+				convert_to_long(&conv);
 			}
 			if (tidyOptSetInt(doc, tidyOptGetId(opt), Z_LVAL(conv))) {
 				return SUCCESS;
@@ -536,7 +536,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 		case TidyBoolean:
 			if (Z_TYPE(conv) != IS_LONG) {
 				zval_copy_ctor(&conv);
-				convert_to_int(&conv);
+				convert_to_long(&conv);
 			}
 			if (tidyOptSetBool(doc, tidyOptGetId(opt), Z_LVAL(conv))) {
 				return SUCCESS;

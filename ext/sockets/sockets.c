@@ -864,7 +864,7 @@ PHP_FUNCTION(socket_select)
 		if (Z_TYPE_P(sec) != IS_LONG) {
 			tmp = *sec;
 			zval_copy_ctor(&tmp);
-			convert_to_int(&tmp);
+			convert_to_long(&tmp);
 			sec = &tmp;
 		}
 
@@ -2000,8 +2000,8 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_FALSE;
 			}
 
-			convert_to_int_ex(l_onoff);
-			convert_to_int_ex(l_linger);
+			convert_to_long_ex(l_onoff);
+			convert_to_long_ex(l_linger);
 
 			lv.l_onoff = (unsigned short)Z_LVAL_P(l_onoff);
 			lv.l_linger = (unsigned short)Z_LVAL_P(l_linger);
@@ -2028,8 +2028,8 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_FALSE;
 			}
 
-			convert_to_int_ex(sec);
-			convert_to_int_ex(usec);
+			convert_to_long_ex(sec);
+			convert_to_long_ex(usec);
 #ifndef PHP_WIN32
 			tv.tv_sec = Z_LVAL_P(sec);
 			tv.tv_usec = Z_LVAL_P(usec);
@@ -2057,7 +2057,7 @@ PHP_FUNCTION(socket_set_option)
 
 		default:
 default_case:
-			convert_to_int_ex(arg4);
+			convert_to_long_ex(arg4);
 			ov = Z_LVAL_P(arg4);
 
 			optlen = sizeof(ov);

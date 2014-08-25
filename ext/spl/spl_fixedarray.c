@@ -338,7 +338,7 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 	}
 
 	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_int(offset TSRMLS_CC);
+		index = spl_offset_convert_to_long(offset TSRMLS_CC);
 	} else {
 		index = Z_LVAL_P(offset);
 	}
@@ -393,7 +393,7 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 	}
 
 	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_int(offset TSRMLS_CC);
+		index = spl_offset_convert_to_long(offset TSRMLS_CC);
 	} else {
 		index = Z_LVAL_P(offset);
 	}
@@ -441,7 +441,7 @@ static inline void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_o
 	zend_long index;
 	
 	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_int(offset TSRMLS_CC);
+		index = spl_offset_convert_to_long(offset TSRMLS_CC);
 	} else {
 		index = Z_LVAL_P(offset);
 	}
@@ -480,7 +480,7 @@ static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_obje
 	int retval;
 	
 	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_int(offset TSRMLS_CC);
+		index = spl_offset_convert_to_long(offset TSRMLS_CC);
 	} else {
 		index = Z_LVAL_P(offset);
 	}
@@ -539,7 +539,7 @@ static int spl_fixedarray_object_count_elements(zval *object, zend_long *count T
 		if (!Z_ISUNDEF(rv)) {
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_int(&intern->retval);
+			convert_to_long(&intern->retval);
 			*count = (zend_long) Z_LVAL(intern->retval);
 			return SUCCESS;
 		}

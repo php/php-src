@@ -567,7 +567,7 @@ retry_kint64:
 				break;
 			case IS_TRUE:
 			case IS_FALSE:
-				convert_to_int_ex(elem);
+				convert_to_long_ex(elem);
 				/* Intentional fallthrough */
 			case IS_LONG:
 				formattable.setInt64((int64_t)Z_LVAL_P(elem));

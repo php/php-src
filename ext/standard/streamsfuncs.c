@@ -763,7 +763,7 @@ PHP_FUNCTION(stream_select)
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (sec != NULL) {
-		convert_to_int_ex(sec);
+		convert_to_long_ex(sec);
 
 		if (Z_LVAL_P(sec) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The seconds parameter must be greater than 0");

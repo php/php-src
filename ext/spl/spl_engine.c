@@ -40,7 +40,7 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 }
 /* }}} */
 
-PHPAPI zend_long spl_offset_convert_to_int(zval *offset TSRMLS_DC) /* {{{ */
+PHPAPI zend_long spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
 {
 	zend_ulong idx;
 

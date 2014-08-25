@@ -62,7 +62,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_SR:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_LONG) {
-						convert_to_int(&ZEND_OP1_LITERAL(opline));
+						convert_to_long(&ZEND_OP1_LITERAL(opline));
 					}
 				}
 				/* break missing *intentionally - the assign_op's may only optimize op2 */
@@ -75,7 +75,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
-						convert_to_int(&ZEND_OP2_LITERAL(opline));
+						convert_to_long(&ZEND_OP2_LITERAL(opline));
 					}
 				}
 				break;
@@ -183,7 +183,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					if (ZEND_OP2_TYPE(opline) != IS_CONST) {
 						break;
 					}
-					convert_to_int(&ZEND_OP2_LITERAL(opline));
+					convert_to_long(&ZEND_OP2_LITERAL(opline));
 					nest_levels = ZEND_OP2_LITERAL(opline).value.lval;
 
 					array_offset = ZEND_OP1(opline).opline_num;

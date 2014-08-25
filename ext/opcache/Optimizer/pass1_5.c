@@ -104,7 +104,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						convert_to_boolean(&res);
 						break;
 					case IS_LONG:
-						convert_to_int(&res);
+						convert_to_long(&res);
 						break;
 					case IS_DOUBLE:
 						convert_to_double(&res);

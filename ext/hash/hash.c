@@ -836,7 +836,7 @@ PHP_FUNCTION(mhash)
 	}
 
 	SEPARATE_ZVAL(z_algorithm);
-	convert_to_int_ex(z_algorithm);
+	convert_to_long_ex(z_algorithm);
 	algorithm = Z_LVAL_P(z_algorithm);
 
 	/* need to convert the first parameter from int constant to string algorithm name */

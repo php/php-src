@@ -218,7 +218,7 @@ PHP_FUNCTION(curl_multi_exec)
 		}
 	}
 
-	convert_to_int_ex(z_still_running);
+	convert_to_long_ex(z_still_running);
 	still_running = Z_LVAL_P(z_still_running);
 	result = curl_multi_perform(mh->multi, &still_running);
 	ZVAL_LONG(z_still_running, still_running);
@@ -386,7 +386,7 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 #if LIBCURL_VERSION_NUM >= 0x071003 /* 7.16.3 */
 		case CURLMOPT_MAXCONNECTS:
 #endif
-			convert_to_int_ex(zvalue);
+			convert_to_long_ex(zvalue);
 			error = curl_multi_setopt(mh->multi, option, Z_LVAL_P(zvalue));
 			break;
 

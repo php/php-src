@@ -1244,7 +1244,7 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, zend_long *
 		if (Z_TYPE_PP(tmpval) != IS_LONG) {
 			tmp = *ztval;
 			zval_copy_ctor(&tmp);
-			convert_to_int(&tmp);
+			convert_to_long(&tmp);
 			ztval = &tmp;
 		}
 		*pretval = Z_LVAL_P(ztval);
@@ -1266,7 +1266,7 @@ static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, zend_ulong
 
 		if (Z_TYPE_P(tmpval) != IS_LONG) {
 			ZVAL_DUP(&tmp, tmpval);;
-			convert_to_int(&tmp);
+			convert_to_long(&tmp);
 			tmpval = &tmp;
 		}
 		if (Z_LVAL_P(tmpval) < 0) {

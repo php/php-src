@@ -2196,7 +2196,7 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval TS
 	if (Z_TYPE_P(newval) != IS_LONG) {
 		ztmp = *newval;
 		zval_copy_ctor(&ztmp);
-		convert_to_int(&ztmp);
+		convert_to_long(&ztmp);
 		newval = &ztmp;
 	}
 
@@ -2223,7 +2223,7 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 	if (Z_TYPE_P(newval) != IS_LONG) {
 		ztmp = *newval;
 		zval_copy_ctor(&ztmp);
-		convert_to_int(&ztmp);
+		convert_to_long(&ztmp);
 		newval = &ztmp;
 	}
 
@@ -2266,7 +2266,7 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 	int ret = SUCCESS;
 	if (Z_TYPE_P(newval) != IS_LONG) {
 		ZVAL_COPY(&ztmp, newval);
-		convert_to_int(&ztmp);
+		convert_to_long(&ztmp);
 		newval = &ztmp;
 	}
 	
@@ -2299,7 +2299,7 @@ static int php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval 
 	int ret = SUCCESS;
 	if (Z_TYPE_P(newval) != IS_LONG) {
 		ZVAL_COPY(&ztmp, newval);
-		convert_to_int(&ztmp);
+		convert_to_long(&ztmp);
 		newval = &ztmp;
 	}
 

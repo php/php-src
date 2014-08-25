@@ -437,7 +437,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	ZVAL_STRING(&member, "cloneDocument");
 	cloneDocu = std_hnd->read_property(id, &member, BP_VAR_IS, NULL, &rv TSRMLS_CC);
 	if (Z_TYPE_P(cloneDocu) != IS_NULL) {
-		convert_to_int(cloneDocu);
+		convert_to_long(cloneDocu);
 		clone_docu = Z_LVAL_P(cloneDocu);
 	}
 	zval_ptr_dtor(&member);
@@ -536,7 +536,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	ZVAL_STRING(&member, "doXInclude");
 	doXInclude = std_hnd->read_property(id, &member, BP_VAR_IS, NULL, &rv TSRMLS_CC);
 	if (Z_TYPE_P(doXInclude) != IS_NULL) {
-		convert_to_int(doXInclude);
+		convert_to_long(doXInclude);
 		ctxt->xinclude = Z_LVAL_P(doXInclude);
 	}
 	zval_ptr_dtor(&member);

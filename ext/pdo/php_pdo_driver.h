@@ -199,7 +199,7 @@ static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type opt
 	zval *v;
 
 	if (options && (v = zend_hash_index_find(Z_ARRVAL_P(options), option_name))) {
-		convert_to_int_ex(v);
+		convert_to_long_ex(v);
 		return Z_LVAL_P(v);
 	}
 	return defval;

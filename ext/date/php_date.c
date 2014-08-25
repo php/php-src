@@ -2760,7 +2760,7 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 		convert_to_string(z_date);
 		z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1);
 		if (z_timezone_type) {
-			convert_to_int(z_timezone_type);
+			convert_to_long(z_timezone_type);
 			z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1);
 			if (z_timezone) {
 				convert_to_string(z_timezone);
@@ -3692,7 +3692,7 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 
 	if ((z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1)) != NULL) {
 		if ((z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1)) != NULL) {
-			convert_to_int(z_timezone_type);
+			convert_to_long(z_timezone_type);
 			if (SUCCESS == timezone_initialize(*tzobj, Z_STRVAL_P(z_timezone) TSRMLS_CC)) {
 				return SUCCESS;
 			}

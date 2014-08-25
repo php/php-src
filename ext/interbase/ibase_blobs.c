@@ -337,7 +337,7 @@ PHP_FUNCTION(ibase_blob_get)
 		RETURN_FALSE;
 	}
 
-	convert_to_int_ex(len_arg);
+	convert_to_long_ex(len_arg);
 
 	if (_php_ibase_blob_get(return_value, ib_blob, Z_LVAL_P(len_arg) TSRMLS_CC) != SUCCESS) {
 		RETURN_FALSE;

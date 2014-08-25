@@ -245,7 +245,7 @@ PHP_FUNCTION(password_needs_rehash)
 					if (Z_TYPE_P(option_buffer) != IS_LONG) {
 						zval cast_option_buffer;
 						ZVAL_DUP(&cast_option_buffer, option_buffer);
-						convert_to_int(&cast_option_buffer);
+						convert_to_long(&cast_option_buffer);
 						new_cost = Z_LVAL(cast_option_buffer);
 						zval_dtor(&cast_option_buffer);
 					} else {
@@ -327,7 +327,7 @@ PHP_FUNCTION(password_hash)
 				if (Z_TYPE_P(option_buffer) != IS_LONG) {
 					zval cast_option_buffer;
 					ZVAL_DUP(&cast_option_buffer, option_buffer);
-					convert_to_int(&cast_option_buffer);
+					convert_to_long(&cast_option_buffer);
 					cost = Z_LVAL(cast_option_buffer);
 					zval_dtor(&cast_option_buffer);
 				} else {

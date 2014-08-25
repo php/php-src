@@ -1067,7 +1067,7 @@ static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style, xmlNode
 
 		zval_copy_ctor(&tmp);
 		if (Z_TYPE(tmp) != IS_LONG) {
-			convert_to_int(&tmp);
+			convert_to_long(&tmp);
 		}
 		convert_to_string(&tmp);
 		xmlNodeSetContentLen(ret, BAD_CAST(Z_STRVAL(tmp)), Z_STRLEN(tmp));

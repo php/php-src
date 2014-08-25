@@ -919,7 +919,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 						break;
 					case MYSQL_TYPE_LONGLONG:
 					case MYSQL_TYPE_LONG:
-						convert_to_int_ex(param);
+						convert_to_long_ex(param);
 						stmt->stmt->params[i].buffer = &Z_LVAL_P(param);
 						break;
 					default:
@@ -1787,7 +1787,7 @@ PHP_FUNCTION(mysqli_options)
 				convert_to_string_ex(mysql_value);
 				break;
 			case IS_LONG:
-				convert_to_int_ex(mysql_value);
+				convert_to_long_ex(mysql_value);
 				break;
 			default:
 				break;

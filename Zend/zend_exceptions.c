@@ -667,7 +667,7 @@ ZEND_METHOD(exception, __toString)
 
 		convert_to_string_ex(&message);
 		convert_to_string_ex(&file);
-		convert_to_int_ex(&line);
+		convert_to_long_ex(&line);
 
 		fci.size = sizeof(fci);
 		fci.function_table = &Z_OBJCE_P(exception)->function_table;
@@ -910,7 +910,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity TSRMLS_DC) /* {
 
 		convert_to_string_ex(str);
 		convert_to_string_ex(file);
-		convert_to_int_ex(line);
+		convert_to_long_ex(line);
 
 		zend_error_va(severity, (Z_STRLEN_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {

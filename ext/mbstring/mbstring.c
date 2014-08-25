@@ -1993,7 +1993,7 @@ PHP_FUNCTION(mb_substitute_character)
 				} else if (strncasecmp("entity", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 				} else {
-					convert_to_int_ex(arg1);
+					convert_to_long_ex(arg1);
 
 					if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
 						MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
@@ -2005,7 +2005,7 @@ PHP_FUNCTION(mb_substitute_character)
 				}
 				break;
 			default:
-				convert_to_int_ex(arg1);
+				convert_to_long_ex(arg1);
 				if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
@@ -2356,14 +2356,14 @@ PHP_FUNCTION(mb_strrpos)
 			}
 
 			if (str_flg) {
-				convert_to_int_ex(zoffset);
+				convert_to_long_ex(zoffset);
 				offset   = Z_LVAL_P(zoffset);
 			} else {
 				enc_name     = enc_name2;
 				enc_name_len = enc_name_len2;
 			}
 		} else {
-			convert_to_int_ex(zoffset);
+			convert_to_long_ex(zoffset);
 			offset = Z_LVAL_P(zoffset);
 		}
 	}
@@ -2777,7 +2777,7 @@ PHP_FUNCTION(mb_substr)
 	if (argc < 3 || Z_TYPE_P(z_len) == IS_NULL) {
 		len = str_len;
 	} else {
-		convert_to_int_ex(z_len);
+		convert_to_long_ex(z_len);
 		len = Z_LVAL_P(z_len);
 	}
 
@@ -2853,7 +2853,7 @@ PHP_FUNCTION(mb_strcut)
 	if (argc < 3 || Z_TYPE_P(z_len) == IS_NULL) {
 		len = string.len;
 	} else {
-		convert_to_int_ex(z_len);
+		convert_to_long_ex(z_len);
 		len = Z_LVAL_P(z_len);
 	}
 
@@ -3814,7 +3814,7 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 			mapelm = convmap;
 			mapsize = 0;
 			ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-				convert_to_int_ex(hash_entry);
+				convert_to_long_ex(hash_entry);
 				*mapelm++ = Z_LVAL_P(hash_entry);
 				mapsize++;
 			} ZEND_HASH_FOREACH_END();

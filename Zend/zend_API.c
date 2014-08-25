@@ -458,7 +458,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_FALSE:
 					case IS_TRUE:
 					case IS_LONG:
-						convert_to_int_ex(arg);
+						convert_to_long_ex(arg);
 						*p = Z_LVAL_P(arg);
 						break;
 

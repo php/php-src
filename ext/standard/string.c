@@ -1680,7 +1680,7 @@ static int php_needle_char(zval *needle, char *target TSRMLS_DC)
 			{
 				zval holder = *needle;
 				zval_copy_ctor(&(holder));
-				convert_to_int(&(holder));
+				convert_to_long(&(holder));
 				if(Z_TYPE(holder) != IS_LONG) {
 					return FAILURE;
 				}
@@ -2328,7 +2328,7 @@ PHP_FUNCTION(substr_replace)
 		convert_to_string_ex(repl);
 	}
 	if (Z_TYPE_P(from) != IS_ARRAY) {
-		convert_to_int_ex(from);
+		convert_to_long_ex(from);
 	}
 
 	if (argc > 3) {

@@ -2035,7 +2035,7 @@ PHP_FUNCTION(odbc_result)
 	if (Z_TYPE_P(pv_field) == IS_STRING) {
 		field = Z_STRVAL_P(pv_field);
 	} else {
-		convert_to_int_ex(pv_field);
+		convert_to_long_ex(pv_field);
 		field_ind = Z_LVAL_P(pv_field) - 1;
 	}
 	

@@ -1190,7 +1190,7 @@ done:
 		scan_set_error_return( numVars, return_value );
 		result = SCAN_ERROR_EOF;
 	} else if (numVars) {
-		convert_to_int(return_value );
+		convert_to_long(return_value );
 		Z_LVAL_P(return_value) = nconversions;
 	} else if (nconversions < totalVars) {
 		/* TODO: not all elements converted. we need to prune the list - cc */

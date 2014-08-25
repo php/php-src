@@ -608,7 +608,7 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 
 	didwrite = 0;
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		convert_to_int(&retval);
+		convert_to_long(&retval);
 		didwrite = Z_LVAL(retval);
 	} else if (call_result == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " is not implemented!",
@@ -831,7 +831,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 #define STAT_PROP_ENTRY_EX(name, name2)                        \
 	if (NULL != (elem = zend_hash_str_find(Z_ARRVAL_P(array), #name, sizeof(#name)-1))) {     \
 		SEPARATE_ZVAL(elem);																	 \
-		convert_to_int(elem);                                                                   \
+		convert_to_long(elem);                                                                   \
 		ssb->sb.st_##name2 = Z_LVAL_P(elem);                                                      \
 	}
 

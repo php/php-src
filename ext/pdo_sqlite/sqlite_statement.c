@@ -117,7 +117,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 								return 1;
 							}
 						} else {
-							convert_to_int(parameter);
+							convert_to_long(parameter);
 #if ZEND_LONG_MAX > 2147483647
 							if (SQLITE_OK == sqlite3_bind_int64(S->stmt, param->paramno + 1, Z_LVAL_P(parameter))) {
 								return 1;

@@ -2255,7 +2255,7 @@ PHP_FUNCTION(iconv_mime_encode)
 
 			if (Z_TYPE_P(pzval) != IS_LONG) {
 				ZVAL_DUP(&val, pzval);
-				convert_to_int(&val);
+				convert_to_long(&val);
 				pzval = &val;
 			}
 

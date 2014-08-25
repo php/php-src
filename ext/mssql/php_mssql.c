@@ -1160,7 +1160,7 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 							case SQLINT1:
 							case SQLINT2:
 							case SQLINT4:
-								convert_to_int_ex(&bind->zval);
+								convert_to_long_ex(&bind->zval);
 								/* FIXME this works only on little endian machine !!! */
 								Z_LVAL_P(bind->zval) = *((int *)(dbretdata(mssql_ptr->link,i)));
 								break;
@@ -1195,7 +1195,7 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 	if (statement->binds != NULL) {	/*	Maybe a non-parameter sp	*/
 		if (zend_hash_find(statement->binds, "RETVAL", 6, (void**)&bind)==SUCCESS) {
 			if (dbhasretstat(mssql_ptr->link)) {
-				convert_to_int_ex(&bind->zval);
+				convert_to_long_ex(&bind->zval);
 				Z_LVAL_P(bind->zval)=dbretstatus(mssql_ptr->link);
 			}
 			else {
@@ -1877,7 +1877,7 @@ PHP_FUNCTION(mssql_result)
 			break;
 		}
 		default:
-			convert_to_int_ex(field);
+			convert_to_long_ex(field);
 			field_offset = Z_LVAL_PP(field);
 			if (field_offset<0 || field_offset>=result->num_fields) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
@@ -2067,7 +2067,7 @@ PHP_FUNCTION(mssql_bind)
 			case SQLINT1:
 			case SQLINT2:
 			case SQLINT4:
-				convert_to_int_ex(var);
+				convert_to_long_ex(var);
 				value=(LPBYTE)(&Z_LVAL_PP(var));
 				break;
 

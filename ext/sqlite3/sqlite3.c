@@ -1495,7 +1495,7 @@ PHP_METHOD(sqlite3stmt, execute)
 
 			switch (param->type) {
 				case SQLITE_INTEGER:
-					convert_to_int(parameter);
+					convert_to_long(parameter);
 #if ZEND_LONG_MAX > 2147483647
 					sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_LVAL_P(parameter));
 #else

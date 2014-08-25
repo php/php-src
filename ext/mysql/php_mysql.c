@@ -1992,7 +1992,7 @@ Q: String or long first?
 				}
 				break;
 			default:
-				convert_to_int_ex(field);
+				convert_to_long_ex(field);
 				field_offset = Z_LVAL_P(field);
 				if (field_offset < 0 || field_offset >= (int)mysql_num_fields(mysql_result)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
