@@ -291,7 +291,7 @@ PHP_FUNCTION(birdstep_connect)
 	RETCODE stat;
 	HDBC hdbc;
 	VConn *new;
-	long ind;
+	zend_long ind;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &serv, &serv_len, &user, &user_len, &pass, &pass_len) == FAILURE) {
 		return;
@@ -324,7 +324,7 @@ PHP_FUNCTION(birdstep_connect)
  */
 PHP_FUNCTION(birdstep_close)
 {
-	long id;
+	zend_long id;
 	VConn *conn;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
@@ -346,7 +346,7 @@ PHP_FUNCTION(birdstep_close)
 PHP_FUNCTION(birdstep_exec)
 {
 	char *query;
-	long ind;
+	zend_long ind;
 	int query_len, indx;
 	VConn *conn;
 	Vresult *res;
@@ -426,7 +426,7 @@ PHP_FUNCTION(birdstep_exec)
  */
 PHP_FUNCTION(birdstep_fetch)
 {
-	long ind;
+	zend_long ind;
 	Vresult *res;
 	RETCODE stat;
 	UDWORD  row;
@@ -460,7 +460,7 @@ PHP_FUNCTION(birdstep_fetch)
 PHP_FUNCTION(birdstep_result)
 {
 	zval **col;
-	long ind;
+	zend_long ind;
 	Vresult *res;
 	RETCODE stat;
 	int i,sql_c_type;
@@ -478,7 +478,7 @@ PHP_FUNCTION(birdstep_result)
 	if ( Z_TYPE_PP(col) == IS_STRING ) {
 		field = Z_STRVAL_PP(col);
 	} else {
-		convert_to_long_ex(col);
+		convert_to_int_ex(col);
 		indx = Z_LVAL_PP(col);
 	}
 	if ( field ) {
@@ -553,7 +553,7 @@ l1:
  */
 PHP_FUNCTION(birdstep_freeresult)
 {
-	long ind;
+	zend_long ind;
 	Vresult *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
@@ -572,7 +572,7 @@ PHP_FUNCTION(birdstep_freeresult)
  */
 PHP_FUNCTION(birdstep_autocommit)
 {
-	long id;
+	zend_long id;
 	RETCODE stat;
 	VConn *conn;
 
@@ -595,7 +595,7 @@ PHP_FUNCTION(birdstep_autocommit)
  */
 PHP_FUNCTION(birdstep_off_autocommit)
 {
-	long id;
+	zend_long id;
 	RETCODE stat;
 	VConn *conn;
 
@@ -618,7 +618,7 @@ PHP_FUNCTION(birdstep_off_autocommit)
  */
 PHP_FUNCTION(birdstep_commit)
 {
-	long id;
+zend_long
 	RETCODE stat;
 	VConn *conn;
 
@@ -641,7 +641,7 @@ PHP_FUNCTION(birdstep_commit)
  */
 PHP_FUNCTION(birdstep_rollback)
 {
-	long id;
+	zend_long id;
 	RETCODE stat;
 	VConn *conn;
 
@@ -664,7 +664,7 @@ PHP_FUNCTION(birdstep_rollback)
  */
 PHP_FUNCTION(birdstep_fieldname)
 {
-	long ind, col;
+	zend_long ind, col;
 	Vresult *res;
 	SWORD indx;
 
@@ -687,7 +687,7 @@ PHP_FUNCTION(birdstep_fieldname)
  */
 PHP_FUNCTION(birdstep_fieldnum)
 {
-	long ind;
+	zend_long ind;
 	Vresult *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {

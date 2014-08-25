@@ -130,7 +130,7 @@ Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
 bool(false)
 
 -- Iteration 7 --
-int(8)
+bool(false)
 
 -- Iteration 8 --
 int(8)

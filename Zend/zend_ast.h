@@ -146,13 +146,13 @@ enum _zend_ast_kind {
 	ZEND_AST_FOREACH,
 };
 
-typedef unsigned short zend_ast_kind;
-typedef unsigned short zend_ast_attr;
+typedef uint16_t zend_ast_kind;
+typedef uint16_t zend_ast_attr;
 
 struct _zend_ast {
 	zend_ast_kind kind; /* Type of the node (ZEND_AST_* enum constant) */
 	zend_ast_attr attr; /* Additional attribute, use depending on node type */
-	zend_uint lineno;   /* Line number */
+	uint32_t lineno;    /* Line number */
 	zend_ast *child[1]; /* Array of children (using struct hack) */
 };
 
@@ -160,8 +160,8 @@ struct _zend_ast {
 typedef struct _zend_ast_list {
 	zend_ast_kind kind;
 	zend_ast_attr attr;
-	zend_uint lineno;
-	zend_uint children;
+	uint32_t lineno;
+	uint32_t children;
 	zend_ast *child[1];
 } zend_ast_list;
 
@@ -176,9 +176,9 @@ typedef struct _zend_ast_zval {
 typedef struct _zend_ast_decl {
 	zend_ast_kind kind;
 	zend_ast_attr attr; /* Unused - for structure compatibility */
-	zend_uint start_lineno;
-	zend_uint end_lineno;
-	zend_uint flags;
+	uint32_t start_lineno;
+	uint32_t end_lineno;
+	uint32_t flags;
 	unsigned char *lex_pos;
 	zend_string *doc_comment;
 	zend_string *name;
@@ -191,11 +191,11 @@ ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ..
 ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...);
 
 ZEND_API zend_ast *zend_ast_create_decl(
-	zend_ast_kind kind, zend_uint flags, zend_uint start_lineno, zend_string *doc_comment,
+	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2
 );
 
-ZEND_API zend_ast_list *zend_ast_create_list(zend_uint init_children, zend_ast_kind kind, ...);
+ZEND_API zend_ast_list *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...);
 ZEND_API zend_ast_list *zend_ast_list_add(zend_ast_list *list, zend_ast *op);
 
 ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope TSRMLS_DC);
@@ -223,11 +223,11 @@ static inline zend_string *zend_ast_get_str(zend_ast *ast) {
 	return Z_STR_P(zend_ast_get_zval(ast));
 }
 
-static inline zend_uint zend_ast_get_num_children(zend_ast *ast) {
+static inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 	ZEND_ASSERT(!zend_ast_is_list(ast));
 	return ast->kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
 }
-static inline zend_uint zend_ast_get_lineno(zend_ast *ast) {
+static inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
 		return zv->u2.lineno;
@@ -244,19 +244,19 @@ static inline zend_ast *zend_ast_create_zval_from_str(zend_string *str) {
 	ZVAL_STR(&zv, str);
 	return zend_ast_create_zval(&zv);
 }
-static inline zend_ast *zend_ast_create_zval_from_long(long lval) {
+static inline zend_ast *zend_ast_create_zval_from_long(zend_long lval) {
 	zval zv;
 	ZVAL_LONG(&zv, lval);
 	return zend_ast_create_zval(&zv);
 }
 
-static inline zend_ast *zend_ast_create_binary_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
+static inline zend_ast *zend_ast_create_binary_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(ZEND_AST_BINARY_OP, opcode, op0, op1);
 }
-static inline zend_ast *zend_ast_create_assign_op(zend_uint opcode, zend_ast *op0, zend_ast *op1) {
+static inline zend_ast *zend_ast_create_assign_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(ZEND_AST_ASSIGN_OP, opcode, op0, op1);
 }
-static inline zend_ast *zend_ast_create_cast(zend_uint type, zend_ast *op0) {
+static inline zend_ast *zend_ast_create_cast(uint32_t type, zend_ast *op0) {
 	return zend_ast_create_ex(ZEND_AST_CAST, type, op0);
 }
 

@@ -27,21 +27,21 @@
 
 #define ZEND_PROTECTED_REFCOUNT	(1<<30)
 
-static zend_uint zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
+static uint32_t zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
 
-#if SIZEOF_SIZE_T <= SIZEOF_LONG
+#if SIZEOF_SIZE_T <= SIZEOF_ZEND_INT
 /* If sizeof(void*) == sizeof(ulong) we can use zend_hash index functions */
-# define accel_xlat_set(old, new)	zend_hash_index_update_ptr(&ZCG(bind_hash), (ulong)(zend_uintptr_t)(old), (new))
-# define accel_xlat_get(old)		zend_hash_index_find_ptr(&ZCG(bind_hash), (ulong)(zend_uintptr_t)(old))
+# define accel_xlat_set(old, new)	zend_hash_index_update_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old), (new))
+# define accel_xlat_get(old)		zend_hash_index_find_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old))
 #else
-# define accel_xlat_set(old, new)	(zend_hash_str_add_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (ulong)(zend_uintptr_t)(old), (void**)&(new))
-# define accel_xlat_get(old, new)	((new) = zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (ulong)(zend_uintptr_t)(old), (void**)&(new)))
+# define accel_xlat_set(old, new)	(zend_hash_str_add_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_ulong)(zend_uintptr_t)(old), (void**)&(new))
+# define accel_xlat_get(old, new)	((new) = zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_ulong)(zend_uintptr_t)(old), (void**)&(new)))
 #endif
 
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
 
-static const zend_uint uninitialized_bucket = {INVALID_IDX};
+static const uint32_t uninitialized_bucket = {INVALID_IDX};
 
 static int zend_prepare_function_for_execution(zend_op_array *op_array);
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind);
@@ -113,7 +113,7 @@ static int compact_hash_table(HashTable *ht)
 		return 1;
 	}
 
-	d = (Bucket *)pemalloc(nSize * (sizeof(Bucket) + sizeof(zend_uint)), ht->u.flags & HASH_FLAG_PERSISTENT);
+	d = (Bucket *)pemalloc(nSize * (sizeof(Bucket) + sizeof(uint32_t)), ht->u.flags & HASH_FLAG_PERSISTENT);
 	if (!d) {
 		return 0;
 	}
@@ -129,7 +129,7 @@ static int compact_hash_table(HashTable *ht)
 	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
 
 	ht->arData = d;
-	ht->arHash = (zend_uint *)(d + nSize);
+	ht->arHash = (uint32_t *)(d + nSize);
 	ht->nTableSize = nSize;
 	ht->nTableMask = ht->nTableSize - 1;
 	zend_hash_rehash(ht);
@@ -220,9 +220,9 @@ static void zend_destroy_property_info(zval *zv)
 {
 	zend_property_info *property_info = Z_PTR_P(zv);
 
-	STR_RELEASE(property_info->name);
+	zend_string_release(property_info->name);
 	if (property_info->doc_comment) {
-		STR_RELEASE(property_info->doc_comment);
+		zend_string_release(property_info->doc_comment);
 	}
 }
 
@@ -232,14 +232,14 @@ static inline zend_string *zend_clone_str(zend_string *str TSRMLS_DC)
 
 	if (IS_INTERNED(str)) {		
 		ret = str;
-	} else if (STR_REFCOUNT(str) <= 1 || (ret = accel_xlat_get(str)) == NULL) {
-		ret = STR_DUP(str, 0);
+	} else if (zend_string_refcount(str) <= 1 || (ret = accel_xlat_get(str)) == NULL) {
+		ret = zend_string_dup(str, 0);
 		GC_FLAGS(ret) = GC_FLAGS(str);
-		if (STR_REFCOUNT(str) > 1) {
+		if (zend_string_refcount(str) > 1) {
 			accel_xlat_set(str, ret);
 		}
 	} else {
-		STR_ADDREF(ret);
+		zend_string_addref(ret);
 	}
 	return ret;
 }
@@ -305,7 +305,7 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 
 static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
 {
-	zend_uint i;
+	uint32_t i;
 
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zend_ast_zval *copy = emalloc(sizeof(zend_ast_zval));
@@ -330,7 +330,7 @@ static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
 		}
 		return (zend_ast *) copy;
 	} else {
-		zend_uint children = zend_ast_get_num_children(ast);
+		uint32_t children = zend_ast_get_num_children(ast);
 		zend_ast *copy = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * (children - 1));
 		copy->kind = ast->kind;
 		copy->attr = ast->attr;
@@ -349,7 +349,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 {
 	uint idx;
 	Bucket *p, *q, *r;
-	ulong nIndex;
+	zend_ulong nIndex;
 	TSRMLS_FETCH();
 
 	ht->nTableSize = source->nTableSize;
@@ -364,14 +364,14 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 	if (!ht->nTableMask) {
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 
 	if (source->u.flags & HASH_FLAG_PACKED) {
 		ht->u.flags |= HASH_FLAG_PACKED;
 		ht->arData = (Bucket *) emalloc(ht->nTableSize * sizeof(Bucket));
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 	
 		for (idx = 0; idx < source->nNumUsed; idx++) {
 			p = source->arData + idx;
@@ -395,9 +395,9 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 			zend_clone_zval(&q->val, bind TSRMLS_CC);
 		}
 	} else {
-		ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(zend_uint)));
-		ht->arHash = (zend_uint*)(ht->arData + ht->nTableSize);
-		memset(ht->arHash, INVALID_IDX, sizeof(zend_uint) * ht->nTableSize);
+		ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
+		ht->arHash = (uint32_t*)(ht->arData + ht->nTableSize);
+		memset(ht->arHash, INVALID_IDX, sizeof(uint32_t) * ht->nTableSize);
 	
 		for (idx = 0; idx < source->nNumUsed; idx++) {
 			p = source->arData + idx;
@@ -428,7 +428,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 {
 	uint idx;
 	Bucket *p, *q;
-	ulong nIndex;
+	zend_ulong nIndex;
 	zend_class_entry *new_ce;
 	zend_function *new_prototype;
 	zend_op_array *new_entry;
@@ -443,14 +443,14 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 	if (!ht->nTableMask) {
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 
 	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
-	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(zend_uint)));
-	ht->arHash = (zend_uint *)(ht->arData + ht->nTableSize);
-	memset(ht->arHash, INVALID_IDX, sizeof(zend_uint) * ht->nTableSize);
+	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
+	ht->arHash = (uint32_t *)(ht->arData + ht->nTableSize);
+	memset(ht->arHash, INVALID_IDX, sizeof(uint32_t) * ht->nTableSize);
 
 	for (idx = 0; idx < source->nNumUsed; idx++) {		
 		p = source->arData + idx;
@@ -506,7 +506,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 {
 	uint idx;
 	Bucket *p, *q;
-	ulong nIndex;
+	zend_ulong nIndex;
 	zend_class_entry *new_ce;
 	zend_property_info *prop_info;
 
@@ -520,14 +520,14 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 	if (!ht->nTableMask) {
-		ht->arHash = (zend_uint*)&uninitialized_bucket;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 
 	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
-	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(zend_uint)));
-	ht->arHash = (zend_uint*)(ht->arData + ht->nTableSize);
-	memset(ht->arHash, INVALID_IDX, sizeof(zend_uint) * ht->nTableSize);
+	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
+	ht->arHash = (uint32_t*)(ht->arData + ht->nTableSize);
+	memset(ht->arHash, INVALID_IDX, sizeof(uint32_t) * ht->nTableSize);
 
 	for (idx = 0; idx < source->nNumUsed; idx++) {		
 		p = source->arData + idx;
@@ -554,7 +554,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		prop_info->name = zend_clone_str(prop_info->name TSRMLS_CC);
 		if (prop_info->doc_comment) {
 			if (ZCG(accel_directives).load_comments) {
-				prop_info->doc_comment = STR_DUP(prop_info->doc_comment, 0);
+				prop_info->doc_comment = zend_string_dup(prop_info->doc_comment, 0);
 			} else {
 				prop_info->doc_comment = NULL;
 			}
@@ -658,7 +658,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	}
 	if (ZEND_CE_DOC_COMMENT(ce)) {
 		if (ZCG(accel_directives).load_comments) {
-			ZEND_CE_DOC_COMMENT(ce) = STR_DUP(ZEND_CE_DOC_COMMENT(ce), 0);
+			ZEND_CE_DOC_COMMENT(ce) = zend_string_dup(ZEND_CE_DOC_COMMENT(ce), 0);
 		} else {
 			ZEND_CE_DOC_COMMENT(ce) =  NULL;
 		}
@@ -901,7 +901,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			if (!zend_hash_exists(EG(zend_constants), name)) {
 				zend_register_long_constant(name->val, name->len, persistent_script->compiler_halt_offset, CONST_CS, 0 TSRMLS_CC);
 			}
-			STR_RELEASE(name);
+			zend_string_release(name);
 		}
 
 		zend_hash_destroy(&ZCG(bind_hash));
@@ -914,7 +914,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		}
 	}
 
-	if (op_array->early_binding != (zend_uint)-1) {
+	if (op_array->early_binding != (uint32_t)-1) {
 		zend_string *orig_compiled_filename = CG(compiled_filename);
 		CG(compiled_filename) = persistent_script->full_path;
 		zend_do_delayed_early_binding(op_array TSRMLS_CC);

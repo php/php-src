@@ -864,13 +864,13 @@ expr_without_variable:
 			{ $$.str = CG(doc_comment); CG(doc_comment) = NULL; }
 		'{' inner_statement_list '}'
 			{ $$.ast = zend_ast_create_decl(ZEND_AST_CLOSURE, $2.num, $1.num, $7.str,
-				  STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
+				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 			      $4.ast, $6.ast, $9.ast); }
 	|	T_STATIC function returns_ref '(' parameter_list ')' lexical_vars
 			{ $$.str = CG(doc_comment); CG(doc_comment) = NULL; }
 		'{' inner_statement_list '}'
 			{ $$.ast = zend_ast_create_decl(ZEND_AST_CLOSURE, $3.num | ZEND_ACC_STATIC, $2.num,
-			      $8.str, STR_INIT("{closure}", sizeof("{closure}") - 1, 0),
+			      $8.str, zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 			      $5.ast, $7.ast, $10.ast); }
 ;
 

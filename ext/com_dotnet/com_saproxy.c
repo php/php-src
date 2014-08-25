@@ -134,7 +134,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 	/* the SafeArray case */
 	
 	/* offset/index must be an integer */
-	convert_to_long(offset);
+	convert_to_int(offset);
 	
 	sa = V_ARRAY(&proxy->obj->v);
 	dims = SafeArrayGetDim(sa);
@@ -166,7 +166,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 
 		/* copy indices from proxy */
 		for (i = 0; i < dims; i++) {
-			convert_to_long(&proxy->indices[i]);
+			convert_to_int(&proxy->indices[i]);
 			indices[i] = Z_LVAL(proxy->indices[i]);
 		}
 
@@ -240,12 +240,12 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		indices = safe_emalloc(dims, sizeof(LONG), 0);
 		/* copy indices from proxy */
 		for (i = 0; i < dims; i++) {
-			convert_to_long(&proxy->indices[i]);
+			convert_to_int(&proxy->indices[i]);
 			indices[i] = Z_LVAL(proxy->indices[i]);
 		}
 
 		/* add user-supplied index */
-		convert_to_long(offset);
+		convert_to_int(offset);
 		indices[dims-1] = Z_LVAL_P(offset);
 
 		if (FAILED(SafeArrayGetVartype(V_ARRAY(&proxy->obj->v), &vt)) || vt == VT_EMPTY) {
@@ -340,7 +340,7 @@ static zend_class_entry *saproxy_class_entry_get(const zend_object *object TSRML
 
 static zend_string* saproxy_class_name_get(const zend_object *object, int parent TSRMLS_DC)
 {
-	return STR_COPY(php_com_saproxy_class_entry->name);
+	return zend_string_copy(php_com_saproxy_class_entry->name);
 }
 
 static int saproxy_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
@@ -353,7 +353,7 @@ static int saproxy_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC
 	return FAILURE;
 }
 
-static int saproxy_count_elements(zval *object, long *count TSRMLS_DC)
+static int saproxy_count_elements(zval *object, zend_long *count TSRMLS_DC)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	LONG ubound, lbound;
@@ -560,7 +560,7 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 
 	I->indices = safe_emalloc(proxy->dimensions + 1, sizeof(LONG), 0);
 	for (i = 0; i < proxy->dimensions; i++) {
-		convert_to_long(&proxy->indices[i]);
+		convert_to_int(&proxy->indices[i]);
 		I->indices[i] = Z_LVAL(proxy->indices[i]);
 	}
 

@@ -1738,14 +1738,14 @@ PHP_FUNCTION(mb_language)
 	if (name == NULL) {
 		RETVAL_STRING((char *)mbfl_no_language2name(MBSTRG(language)));
 	} else {
-		zend_string *ini_name = STR_INIT("mbstring.language", sizeof("mbstring.language") - 1, 0);
+		zend_string *ini_name = zend_string_init("mbstring.language", sizeof("mbstring.language") - 1, 0);
 		if (FAILURE == zend_alter_ini_entry(ini_name, name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown language \"%s\"", name);
 			RETVAL_FALSE;
 		} else {
 			RETVAL_TRUE;
 		}
-		STR_RELEASE(ini_name);
+		zend_string_release(ini_name);
 	}
 }
 /* }}} */
@@ -1993,7 +1993,7 @@ PHP_FUNCTION(mb_substitute_character)
 				} else if (strncasecmp("entity", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 				} else {
-					convert_to_long_ex(arg1);
+					convert_to_int_ex(arg1);
 
 					if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
 						MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
@@ -2005,7 +2005,7 @@ PHP_FUNCTION(mb_substitute_character)
 				}
 				break;
 			default:
-				convert_to_long_ex(arg1);
+				convert_to_int_ex(arg1);
 				if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
@@ -2106,7 +2106,7 @@ PHP_FUNCTION(mb_output_handler)
 {
 	char *arg_string;
 	int arg_string_len;
-	long arg_status;
+	zend_long arg_status;
 	mbfl_string string, result;
 	const char *charset;
 	char *p;
@@ -2244,7 +2244,7 @@ PHP_FUNCTION(mb_strlen)
 PHP_FUNCTION(mb_strpos)
 {
 	int n, reverse = 0;
-	long offset;
+	zend_long offset;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
 	int enc_name_len;
@@ -2356,14 +2356,14 @@ PHP_FUNCTION(mb_strrpos)
 			}
 
 			if (str_flg) {
-				convert_to_long_ex(zoffset);
+				convert_to_int_ex(zoffset);
 				offset   = Z_LVAL_P(zoffset);
 			} else {
 				enc_name     = enc_name2;
 				enc_name_len = enc_name_len2;
 			}
 		} else {
-			convert_to_long_ex(zoffset);
+			convert_to_int_ex(zoffset);
 			offset = Z_LVAL_P(zoffset);
 		}
 	}
@@ -2406,7 +2406,7 @@ PHP_FUNCTION(mb_strrpos)
 PHP_FUNCTION(mb_stripos)
 {
 	int n;
-	long offset;
+	zend_long offset;
 	mbfl_string haystack, needle;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
 	int from_encoding_len;
@@ -2435,7 +2435,7 @@ PHP_FUNCTION(mb_stripos)
 PHP_FUNCTION(mb_strripos)
 {
 	int n;
-	long offset;
+	zend_long offset;
 	mbfl_string haystack, needle;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
 	int from_encoding_len;
@@ -2750,7 +2750,7 @@ PHP_FUNCTION(mb_substr)
 {
 	size_t argc = ZEND_NUM_ARGS();
 	char *str, *encoding;
-	long from, len;
+	zend_long from, len;
 	int mblen, str_len, encoding_len;
 	zval *z_len = NULL;
 	mbfl_string string, result, *ret;
@@ -2777,7 +2777,7 @@ PHP_FUNCTION(mb_substr)
 	if (argc < 3 || Z_TYPE_P(z_len) == IS_NULL) {
 		len = str_len;
 	} else {
-		convert_to_long_ex(z_len);
+		convert_to_int_ex(z_len);
 		len = Z_LVAL_P(z_len);
 	}
 
@@ -2829,7 +2829,7 @@ PHP_FUNCTION(mb_strcut)
 {
 	size_t argc = ZEND_NUM_ARGS();
 	char *encoding;
-	long from, len;
+	zend_long from, len;
 	int encoding_len;
 	zval *z_len = NULL;
 	mbfl_string string, result, *ret;
@@ -2853,7 +2853,7 @@ PHP_FUNCTION(mb_strcut)
 	if (argc < 3 || Z_TYPE_P(z_len) == IS_NULL) {
 		len = string.len;
 	} else {
-		convert_to_long_ex(z_len);
+		convert_to_int_ex(z_len);
 		len = Z_LVAL_P(z_len);
 	}
 
@@ -2932,7 +2932,7 @@ PHP_FUNCTION(mb_strwidth)
 PHP_FUNCTION(mb_strimwidth)
 {
 	char *str, *trimmarker, *encoding;
-	long from, width;
+	zend_long from, width;
 	int str_len, trimmarker_len, encoding_len;
 	mbfl_string string, result, marker, *ret;
 
@@ -3148,7 +3148,7 @@ PHP_FUNCTION(mb_convert_case)
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
 	char *str;
 	int str_len, from_encoding_len;
-	long case_mode = 0;
+	zend_long case_mode = 0;
 	char *newstr;
 	size_t ret_len;
 
@@ -3356,7 +3356,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	int trans_enc_name_len;
 	char *linefeed = "\r\n";
 	int linefeed_len;
-	long indent = 0;
+	zend_long indent = 0;
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(language);
@@ -3814,7 +3814,7 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 			mapelm = convmap;
 			mapsize = 0;
 			ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-				convert_to_long_ex(hash_entry);
+				convert_to_int_ex(hash_entry);
 				*mapelm++ = Z_LVAL_P(hash_entry);
 				mapsize++;
 			} ZEND_HASH_FOREACH_END();
@@ -3907,7 +3907,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 				}
 
 				if (state == 0 || state == 1) {
-					fld_name = STR_INIT(token, token_pos, 0);
+					fld_name = zend_string_init(token, token_pos, 0);
 
 					state = 2;
 				} else {
@@ -3972,7 +3972,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 					case 3:
 						if (crlf_state == -1) {
-							fld_val = STR_INIT(token, token_pos, 0);
+							fld_val = zend_string_init(token, token_pos, 0);
 
 							if (fld_name != NULL && fld_val != NULL) {
 								zval val;
@@ -3983,7 +3983,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 								zend_hash_update(ht, fld_name, &val);
 
-								STR_RELEASE(fld_name);
+								zend_string_release(fld_name);
 							}
 
 							fld_name = fld_val = NULL;
@@ -4019,7 +4019,7 @@ out:
 		state = 3;
 	}
 	if (state == 3) {
-		fld_val = STR_INIT(token, 0, 0);
+		fld_val = zend_string_init(token, 0, 0);
 
 		if (fld_name != NULL && fld_val != NULL) {
 			zval val;
@@ -4030,7 +4030,7 @@ out:
 
 			zend_hash_update(ht, fld_name, &val);
 
-			STR_RELEASE(fld_name);
+			zend_string_release(fld_name);
 		}
 	}
 	return state;
@@ -4297,7 +4297,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	if (extra_cmd) {
-		STR_RELEASE(extra_cmd);
+		zend_string_release(extra_cmd);
 	}
 
 	if (to_r != to) {

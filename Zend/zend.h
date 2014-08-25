@@ -273,14 +273,14 @@ char *alloca ();
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
-#if SIZEOF_LONG == 4
+#if SIZEOF_ZEND_INT == 4
 #define MAX_LENGTH_OF_LONG 11
 static const char long_min_digits[] = "2147483648";
-#elif SIZEOF_LONG == 8
+#elif SIZEOF_ZEND_INT == 8
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
 #else
-#error "Unknown SIZEOF_LONG"
+#error "Unknown SIZEOF_ZEND_INT"
 #endif
 
 #define MAX_LENGTH_OF_DOUBLE 32
@@ -293,7 +293,7 @@ typedef enum {
 #include "zend_hash.h"
 #include "zend_llist.h"
 
-#define INTERNAL_FUNCTION_PARAMETERS zend_uint param_count, zval *return_value TSRMLS_DC
+#define INTERNAL_FUNCTION_PARAMETERS uint32_t param_count, zval *return_value TSRMLS_DC
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU param_count, return_value TSRMLS_CC
 
 #define USED_RET() \
@@ -387,7 +387,7 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 # else /* ! (CRAY || __arm) */
 
 # define XtOffset(p_type, field) \
-    ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
+    ((zend_long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 # endif /* !CRAY */
 
@@ -402,22 +402,22 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #include "zend_string.h"
 #include "zend_ast.h"
 
-static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
+static zend_always_inline uint32_t zval_refcount_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz) || Z_IMMUTABLE_P(pz));
 	return GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
-static zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
+static zend_always_inline uint32_t zval_set_refcount_p(zval* pz, uint32_t rc) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
 	return GC_REFCOUNT(Z_COUNTED_P(pz)) = rc;
 }
 
-static zend_always_inline zend_uint zval_addref_p(zval* pz) {
+static zend_always_inline uint32_t zval_addref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
 	return ++GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
-static zend_always_inline zend_uint zval_delref_p(zval* pz) {
+static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
 	return --GC_REFCOUNT(Z_COUNTED_P(pz));
 }
@@ -463,7 +463,7 @@ struct _zend_trait_alias {
 	/**
 	* modifiers to be set on trait method
 	*/
-	zend_uint modifiers;
+	uint32_t modifiers;
 };
 typedef struct _zend_trait_alias zend_trait_alias;
 
@@ -472,7 +472,7 @@ struct _zend_class_entry {
 	zend_string *name;
 	struct _zend_class_entry *parent;
 	int refcount;
-	zend_uint ce_flags;
+	uint32_t ce_flags;
 
 	HashTable function_table;
 	HashTable properties_info;
@@ -506,22 +506,22 @@ struct _zend_class_entry {
 	union _zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method TSRMLS_DC);
 
 	/* serializer callbacks */
-	int (*serialize)(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
-	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
+	int (*serialize)(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC);
+	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, uint32_t buf_len, zend_unserialize_data *data TSRMLS_DC);
 
 	zend_class_entry **interfaces;
-	zend_uint num_interfaces;
+	uint32_t num_interfaces;
 	
 	zend_class_entry **traits;
-	zend_uint num_traits;
+	uint32_t num_traits;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 
 	union {
 		struct {
 			zend_string *filename;
-			zend_uint line_start;
-			zend_uint line_end;
+			uint32_t line_start;
+			uint32_t line_end;
 			zend_string *doc_comment;
 		} user;
 		struct {
@@ -534,8 +534,8 @@ struct _zend_class_entry {
 #include "zend_stream.h"
 typedef struct _zend_utility_functions {
 	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
-	int (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
-	int (*write_function)(const char *str, uint str_length);
+	size_t (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
+	size_t (*write_function)(const char *str, size_t str_length);
 	FILE *(*fopen_function)(const char *filename, char **opened_path TSRMLS_DC);
 	void (*message_handler)(long message, const void *data TSRMLS_DC);
 	void (*block_interruptions)(void);
@@ -544,7 +544,7 @@ typedef struct _zend_utility_functions {
 	void (*ticks_function)(int ticks TSRMLS_DC);
 	void (*on_timeout)(int seconds TSRMLS_DC);
 	int (*stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
-	int (*vspprintf_function)(char **pbuf, size_t max_len, const char *format, va_list ap);
+	size_t (*vspprintf_function)(char **pbuf, size_t max_len, const char *format, va_list ap);
 	zend_string *(*vstrpprintf_function)(size_t max_len, const char *format, va_list ap);
 	char *(*getenv_function)(char *name, size_t name_len TSRMLS_DC);
 	char *(*resolve_path_function)(const char *filename, int filename_len TSRMLS_DC);
@@ -646,7 +646,7 @@ END_EXTERN_C()
 #define ZEND_PUTC(c)					zend_write(&(c), 1)
 
 BEGIN_EXTERN_C()
-extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
+extern ZEND_API size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path TSRMLS_DC);
 extern ZEND_API void (*zend_block_interruptions)(void);
@@ -655,7 +655,7 @@ extern ZEND_API void (*zend_ticks_function)(int ticks TSRMLS_DC);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 extern ZEND_API void (*zend_on_timeout)(int seconds TSRMLS_DC);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
-extern int (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
+extern size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 extern zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
 extern ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
@@ -685,7 +685,7 @@ END_EXTERN_C()
 #endif
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(long message, const void *data TSRMLS_DC);
+ZEND_API void zend_message_dispatcher(zend_long message, const void *data TSRMLS_DC);
 
 ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents);
 END_EXTERN_C()

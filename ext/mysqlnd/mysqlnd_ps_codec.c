@@ -41,7 +41,7 @@ enum mysqlnd_timestamp_type
 struct st_mysqlnd_time
 {
   unsigned int  year, month, day, hour, minute, second;
-  unsigned long second_part;
+  zend_ulong second_part;
   zend_bool     neg;
   enum mysqlnd_timestamp_type time_type;
 };
@@ -76,7 +76,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigne
 			case 1:uval = (uint64_t) uint1korr(*row);break;
 		}
 
-#if SIZEOF_LONG==4
+#if SIZEOF_ZEND_INT==4
 		if (uval > INT_MAX) {
 			DBG_INF("stringify");
 			tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, uval);
@@ -84,7 +84,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigne
 #endif /* #if SIZEOF_LONG==4 */
 		{
 			if (byte_count < 8 || uval <= L64(9223372036854775807)) {
-				ZVAL_LONG(zv, (long) uval); /* the cast is safe, we are in the range */
+				ZVAL_LONG(zv, (zend_long) uval); /* the cast is safe, we are in the range */
 			} else {
 				DBG_INF("stringify");
 				tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, uval);
@@ -105,14 +105,14 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigne
 			case 1:lval = (int64_t) *(int8_t*)*row;break;
 		}
 
-#if SIZEOF_LONG==4
+#if SIZEOF_ZEND_INT==4
 		if ((L64(2147483647) < (int64_t) lval) || (L64(-2147483648) > (int64_t) lval)) {
 			DBG_INF("stringify");
 			tmp_len = sprintf((char *)&tmp, MYSQLND_LL_SPEC, lval);
 		} else
 #endif /* SIZEOF */
 		{
-			ZVAL_LONG(zv, (long) lval); /* the cast is safe, we are in the range */
+			ZVAL_LONG(zv, (zend_long) lval); /* the cast is safe, we are in the range */
 		}
 	}
 
@@ -246,7 +246,7 @@ static void
 ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
 	struct st_mysqlnd_time t;
-	unsigned long length; /* First byte encodes the length*/
+	zend_ulong length; /* First byte encodes the length*/
 	char * value;
 	DBG_ENTER("ps_fetch_time");
 
@@ -256,11 +256,11 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_le
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
 		t.neg			= (zend_bool) to[0];
 
-		t.day			= (unsigned long) sint4korr(to+1);
+		t.day			= (zend_ulong) sint4korr(to+1);
 		t.hour			= (unsigned int) to[5];
 		t.minute		= (unsigned int) to[6];
 		t.second		= (unsigned int) to[7];
-		t.second_part	= (length > 8) ? (unsigned long) sint4korr(to+8) : 0;
+		t.second_part	= (length > 8) ? (zend_ulong) sint4korr(to+8) : 0;
 		t.year			= t.month= 0;
 		if (t.day) {
 			/* Convert days to hours at once */
@@ -289,7 +289,7 @@ static void
 ps_fetch_date(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
 	struct st_mysqlnd_time t = {0};
-	unsigned long length; /* First byte encodes the length*/
+	zend_ulong length; /* First byte encodes the length*/
 	char * value;
 	DBG_ENTER("ps_fetch_date");
 
@@ -326,7 +326,7 @@ static void
 ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
 	struct st_mysqlnd_time t;
-	unsigned long length; /* First byte encodes the length*/
+	zend_ulong length; /* First byte encodes the length*/
 	char * value;
 	DBG_ENTER("ps_fetch_datetime");
 
@@ -347,7 +347,7 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, unsigned int pac
 		} else {
 			t.hour = t.minute = t.second= 0;
 		}
-		t.second_part = (length > 7) ? (unsigned long) sint4korr(to+7) : 0;
+		t.second_part = (length > 7) ? (zend_ulong) sint4korr(to+7) : 0;
 
 		(*row)+= length;
 	} else {
@@ -373,7 +373,7 @@ ps_fetch_string(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_
 	  For now just copy, before we make it possible
 	  to write \0 to the row buffer
 	*/
-	const unsigned long length = php_mysqlnd_net_field_length(row);
+	const zend_ulong length = php_mysqlnd_net_field_length(row);
 	DBG_ENTER("ps_fetch_string");
 	DBG_INF_FMT("len = %lu", length);
 	DBG_INF("copying from the row buffer");
@@ -389,7 +389,7 @@ ps_fetch_string(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_
 static void
 ps_fetch_bit(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
-	unsigned long length = php_mysqlnd_net_field_length(row);
+	zend_ulong length = php_mysqlnd_net_field_length(row);
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, length TSRMLS_CC);
 }
 /* }}} */
@@ -636,11 +636,11 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 				  We do transformation here, which will be used later when sending types. The code later relies on this.
 				*/
-				if (Z_DVAL(tmp_data_copy) > LONG_MAX || Z_DVAL(tmp_data_copy) < LONG_MIN) {
+				if (Z_DVAL(tmp_data_copy) > ZEND_LONG_MAX || Z_DVAL(tmp_data_copy) < ZEND_LONG_MIN) {
 					stmt->send_types_to_server = *resend_types_next_time = 1;
 					convert_to_string_ex(tmp_data);
 				} else {
-					convert_to_long_ex(tmp_data);
+					convert_to_int_ex(tmp_data);
 				}
 
 				zval_ptr_dtor(&tmp_data_copy);
@@ -663,7 +663,7 @@ mysqlnd_stmt_execute_store_types(MYSQLND_STMT_DATA * stmt, zval * copies, zend_u
 		short current_type = stmt->param_bind[i].type;
 		zval *parameter = &stmt->param_bind[i].zv;
 		/* our types are not unsigned */
-#if SIZEOF_LONG==8  
+#if SIZEOF_ZEND_INT==8  
 		if (current_type == MYSQL_TYPE_LONG) {
 			current_type = MYSQL_TYPE_LONGLONG;
 		}
@@ -684,7 +684,7 @@ mysqlnd_stmt_execute_store_types(MYSQLND_STMT_DATA * stmt, zval * copies, zend_u
 					current_type = MYSQL_TYPE_VAR_STRING;
 					/*
 					  don't change stmt->param_bind[i].type to MYSQL_TYPE_VAR_STRING
-					  we force convert_to_long_ex in all cases, thus the type will be right in the next switch.
+					  we force convert_to_int_ex in all cases, thus the type will be right in the next switch.
 					  if the type is however not long, then we will do a goto in the next switch.
 					  We want to preserve the original bind type given by the user. Thus, we do these hacks.
 					*/
@@ -751,7 +751,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 					if (Z_TYPE_P(tmp_data) == IS_STRING) {
 						goto use_string;
 					}
-					convert_to_long_ex(tmp_data);
+					convert_to_int_ex(tmp_data);
 				}
 				*data_size += 4 + is_longlong;
 				break;

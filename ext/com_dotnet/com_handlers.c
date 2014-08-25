@@ -98,7 +98,7 @@ static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv T
 			VariantClear(&v);
 		}
 	} else if (V_ISARRAY(&obj->v)) {
-		convert_to_long(offset);
+		convert_to_int(offset);
 
 		if (SafeArrayGetDim(V_ARRAY(&obj->v)) == 1) {	
 			if (php_com_safearray_get_elem(&obj->v, &v, Z_LVAL_P(offset) TSRMLS_CC)) {
@@ -144,7 +144,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 				vt = V_VT(&obj->v) & ~VT_ARRAY;
 			}
 
-			convert_to_long(offset);
+			convert_to_int(offset);
 			indices = Z_LVAL_P(offset);
 
 			VariantInit(&v);
@@ -238,7 +238,7 @@ static void function_dtor(zval *zv)
 {
 	zend_internal_function *f = (zend_internal_function*)Z_PTR_P(zv);
 
-	STR_RELEASE(f->function_name);
+	zend_string_release(f->function_name);
 	if (f->arg_info) {
 		efree(f->arg_info);
 	}
@@ -277,7 +277,7 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 		f.arg_info = NULL;
 		f.scope = obj->ce;
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-		f.function_name = STR_COPY(name);
+		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
 
 		fptr = &f;
@@ -434,7 +434,7 @@ static zend_string* com_class_name_get(const zend_object *object, int parent TSR
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
 
-	return STR_COPY(obj->ce->name);
+	return zend_string_copy(obj->ce->name);
 }
 
 /* This compares two variants for equality */

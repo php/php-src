@@ -18,9 +18,11 @@
 #include <unicode/uchriter.h>
 #include <typeinfo>
 
+#include "php.h"
+
 //copied from cmemory.h, which is not public
 typedef union {
-    long    t1;
+    zend_long    t1;
     double  t2;
     void   *t3;
 } UAlignedMemory;

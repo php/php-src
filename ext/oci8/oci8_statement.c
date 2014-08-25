@@ -1143,7 +1143,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid variable used for bind");
 				return 1;
 			}
-			convert_to_long(var);
+			convert_to_int(var);
 			bind_data = (ub4 *)&Z_LVAL_P(var);
 			value_sz = sizeof(ub4);
 			mode = OCI_DEFAULT;
@@ -1463,7 +1463,7 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 		/* NB: for PHP4 compat only, it should be using 'Z' instead */
 		tmp = *column_index;
 		zval_copy_ctor(&tmp);
-		convert_to_long(&tmp);
+		convert_to_int(&tmp);
 		column = php_oci_statement_get_column(statement, Z_LVAL(tmp), NULL, 0 TSRMLS_CC);
 		if (!column) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column index \"%ld\"", Z_LVAL(tmp));
@@ -1720,7 +1720,7 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, long max_table_length 
 			bind->array.element_lengths[i] = sizeof(ub4);
 		}
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
-			convert_to_long_ex(entry);
+			convert_to_int_ex(entry);
 			((ub4 *)bind->array.elements)[i] = (ub4) Z_LVAL_PP(entry);
 			zend_hash_move_forward(hash);
 		} else {

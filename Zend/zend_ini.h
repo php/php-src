@@ -69,7 +69,7 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, char *new_value, uint ne
 ZEND_API int zend_restore_ini_entry(zend_string *name, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
-ZEND_API long zend_ini_long(char *name, uint name_length, int orig);
+ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig);
 ZEND_API double zend_ini_double(char *name, uint name_length, int orig);
 ZEND_API char *zend_ini_string(char *name, uint name_length, int orig);
 ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_bool *exists);

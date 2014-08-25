@@ -422,7 +422,7 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 {
 	zval *broker;
 	enchant_broker *pbroker;
-	long dict_type;
+	zend_long dict_type;
 	char *value;
 	int value_len;
 
@@ -462,7 +462,7 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 {
 	zval *broker;
 	enchant_broker *pbroker;
-	long dict_type;
+	zend_long dict_type;
 	char *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &broker, &dict_type) == FAILURE) {

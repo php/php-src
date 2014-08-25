@@ -33,11 +33,11 @@ static inline void *zend_ast_realloc(void *old, size_t old_size, size_t new_size
 	return new;
 }
 
-size_t zend_ast_size(zend_uint children) {
+static inline size_t zend_ast_size(uint32_t children) {
 	return sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
 }
 
-size_t zend_ast_list_size(zend_uint children) {
+static inline size_t zend_ast_list_size(uint32_t children) {
 	return sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
 }
 
@@ -62,7 +62,7 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
 }
 
 ZEND_API zend_ast *zend_ast_create_decl(
-	zend_ast_kind kind, zend_uint flags, zend_uint start_lineno, zend_string *doc_comment,
+	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2
 ) {
 	TSRMLS_FETCH();
@@ -85,16 +85,16 @@ ZEND_API zend_ast *zend_ast_create_decl(
 
 static zend_ast *zend_ast_create_from_va_list(zend_ast_kind kind, zend_ast_attr attr, va_list va) {
 	TSRMLS_FETCH();
-	zend_uint i, children = kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
+	uint32_t i, children = kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
 	zend_ast *ast = zend_ast_alloc(zend_ast_size(children) TSRMLS_CC);
 	ast->kind = kind;
 	ast->attr = attr;
-	ast->lineno = UINT_MAX;
+	ast->lineno = (uint32_t) -1;
 
 	for (i = 0; i < children; ++i) {
 		ast->child[i] = va_arg(va, zend_ast *);
 		if (ast->child[i] != NULL) {
-			zend_uint lineno = zend_ast_get_lineno(ast->child[i]);
+			uint32_t lineno = zend_ast_get_lineno(ast->child[i]);
 			if (lineno < ast->lineno) {
 				ast->lineno = lineno;
 			}
@@ -130,7 +130,7 @@ ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...) {
 	return ast;
 }
 
-ZEND_API zend_ast_list *zend_ast_create_list(zend_uint init_children, zend_ast_kind kind, ...) {
+ZEND_API zend_ast_list *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...) {
 	TSRMLS_FETCH();
 	zend_ast_list *list = zend_ast_alloc(zend_ast_list_size(4) TSRMLS_CC);
 	list->kind = kind;
@@ -140,7 +140,7 @@ ZEND_API zend_ast_list *zend_ast_create_list(zend_uint init_children, zend_ast_k
 
 	{
 		va_list va;
-		zend_uint i;
+		uint32_t i;
 		va_start(va, kind);
 		for (i = 0; i < init_children; ++i) {
 			list = zend_ast_list_add(list, va_arg(va, zend_ast *));
@@ -151,7 +151,7 @@ ZEND_API zend_ast_list *zend_ast_create_list(zend_uint init_children, zend_ast_k
 	return list;
 }
 
-static inline zend_bool is_power_of_two(unsigned short n) {
+static inline zend_bool is_power_of_two(uint32_t n) {
 	return n == (n & -n);
 }
 
@@ -300,7 +300,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 		case ZEND_AST_ARRAY:
 			array_init(result);
 			{
-				zend_uint i;
+				uint32_t i;
 				zend_ast_list *list = zend_ast_get_list(ast);
 				for (i = 0; i < list->children; i++) {
 					zend_ast *elem = list->child[i];
@@ -343,7 +343,7 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		zend_ast_list *new = emalloc(zend_ast_list_size(list->children));
-		zend_uint i;
+		uint32_t i;
 		new->kind = list->kind;
 		new->attr = list->attr;
 		new->children = list->children;
@@ -352,7 +352,7 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 		}
 		return (zend_ast *) new;
 	} else {
-		zend_uint i, children = zend_ast_get_num_children(ast);
+		uint32_t i, children = zend_ast_get_num_children(ast);
 		zend_ast *new = emalloc(zend_ast_size(children));
 		new->kind = ast->kind;
 		new->attr = ast->attr;
@@ -386,9 +386,9 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 		case ZEND_AST_CLASS:
 		{
 			zend_ast_decl *decl = (zend_ast_decl *) ast;
-			STR_RELEASE(decl->name);
+			zend_string_release(decl->name);
 			if (decl->doc_comment) {
-				STR_RELEASE(decl->doc_comment);
+				zend_string_release(decl->doc_comment);
 			}
 			zend_ast_destroy_ex(decl->child[0], free);
 			zend_ast_destroy_ex(decl->child[1], free);
@@ -398,12 +398,12 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 		default:
 			if (zend_ast_is_list(ast)) {
 				zend_ast_list *list = zend_ast_get_list(ast);
-				zend_uint i;
+				uint32_t i;
 				for (i = 0; i < list->children; i++) {
 					zend_ast_destroy_ex(list->child[i], free);
 				}
 			} else {
-				zend_uint i, children = zend_ast_get_num_children(ast);
+				uint32_t i, children = zend_ast_get_num_children(ast);
 				for (i = 0; i < children; i++) {
 					zend_ast_destroy_ex(ast->child[i], free);
 				}
@@ -425,12 +425,12 @@ ZEND_API void zend_ast_destroy_and_free(zend_ast *ast) {
 ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn TSRMLS_DC) {
 	if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
-		zend_uint i;
+		uint32_t i;
 		for (i = 0; i < list->children; ++i) {
 			fn(&list->child[i] TSRMLS_CC);
 		}
 	} else {
-		zend_uint i, children = zend_ast_get_num_children(ast);
+		uint32_t i, children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; ++i) {
 			fn(&ast->child[i] TSRMLS_CC);
 		}

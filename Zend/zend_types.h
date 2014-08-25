@@ -22,6 +22,8 @@
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
+#include "zend_long.h"
+
 #ifdef WORDS_BIGENDIAN
 # define ZEND_ENDIAN_LOHI(lo, hi)          hi; lo;
 # define ZEND_ENDIAN_LOHI_3(lo, mi, hi)    hi; mi; lo;
@@ -40,9 +42,20 @@
 
 typedef unsigned char zend_bool;
 typedef unsigned char zend_uchar;
-typedef unsigned int zend_uint;
-typedef unsigned long zend_ulong;
-typedef unsigned short zend_ushort;
+
+#ifdef ZEND_ENABLE_INT64
+# ifdef ZEND_WIN32
+#  define ZEND_SIZE_MAX  _UI64_MAX
+# else
+#  define ZEND_SIZE_MAX  SIZE_MAX
+# endif
+#else
+# if defined(ZEND_WIN32)
+#  define ZEND_SIZE_MAX  _UI32_MAX
+# else
+#  define ZEND_SIZE_MAX SIZE_MAX
+# endif
+#endif
 
 #define HAVE_ZEND_LONG64
 #ifdef ZEND_WIN32
@@ -87,7 +100,7 @@ typedef void (*dtor_func_t)(zval *pDest);
 typedef void (*copy_ctor_func_t)(zval *pElement);
 
 typedef union _zend_value {
-	long              lval;				/* long value */
+	zend_long        lval;				/* long value */
 	double            dval;				/* double value */
 	zend_refcounted  *counted;
 	zend_string      *str;
@@ -112,61 +125,61 @@ struct _zval_struct {
 				zend_uchar    const_flags,
 				zend_uchar    reserved)	    /* various IS_VAR flags */
 		} v;
-		zend_uint type_info;
+		uint32_t type_info;
 	} u1;
 	union {
-		zend_uint     var_flags;
-		zend_uint     next;                 /* hash collision chain */
-		zend_uint     str_offset;           /* string offset */
-		zend_uint     cache_slot;           /* literal cache slot */
-		zend_uint     lineno;				/* line number (for ast nodes) */
+		uint32_t     var_flags;
+		uint32_t     next;                 /* hash collision chain */
+		uint32_t     str_offset;           /* string offset */
+		uint32_t     cache_slot;           /* literal cache slot */
+		uint32_t     lineno;               /* line number (for ast nodes) */
 	} u2;
 };
 
 struct _zend_refcounted {
-	zend_uint         refcount;			/* reference counter 32-bit */
+	uint32_t         refcount;			/* reference counter 32-bit */
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_3(
 				zend_uchar    type,
 				zend_uchar    flags,    /* used for strings & objects */
-				zend_ushort   gc_info)  /* keeps GC root number (or 0) and color */
+				uint16_t   gc_info)  /* keeps GC root number (or 0) and color */
 		} v;
-		zend_uint type_info;
+		uint32_t type_info;
 	} u;
 };
 
 struct _zend_string {
 	zend_refcounted   gc;
-	zend_ulong        h;                /* hash value */
-	int               len;
+	zend_ulong       h;                /* hash value */
+	size_t       len;
 	char              val[1];
 };
 
 typedef struct _Bucket {
-	zend_ulong        h;                /* hash value (or numeric index)   */
+	zend_ulong       h;                /* hash value (or numeric index)   */
 	zend_string      *key;              /* string key or NULL for numerics */
 	zval              val;
 } Bucket;
 
 typedef struct _HashTable {	
-	zend_uint         nTableSize;
-	zend_uint         nTableMask;
-	zend_uint         nNumUsed;
-	zend_uint         nNumOfElements;
-	long              nNextFreeElement;
+	uint32_t         nTableSize;
+	uint32_t         nTableMask;
+	uint32_t         nNumUsed;
+	uint32_t         nNumOfElements;
+	zend_long        nNextFreeElement;
 	Bucket           *arData;
-	zend_uint        *arHash;
+	uint32_t        *arHash;
 	dtor_func_t       pDestructor;
-	zend_uint         nInternalPointer; 
+	uint32_t         nInternalPointer; 
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_3(
 				zend_uchar    flags,
 				zend_uchar    nApplyCount,
-				zend_ushort   reserve)
+				uint16_t   reserve)
 		} v;
-		zend_uint flags;
+		uint32_t flags;
 	} u;
 } HashTable;
 
@@ -177,7 +190,7 @@ struct _zend_array {
 
 struct _zend_object {
 	zend_refcounted   gc;
-	zend_uint         handle; // TODO: may be removed ???
+	uint32_t         handle; // TODO: may be removed ???
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
@@ -187,7 +200,7 @@ struct _zend_object {
 
 struct _zend_resource {
 	zend_refcounted   gc;
-	long              handle; // TODO: may be removed ???
+	zend_long              handle; // TODO: may be removed ???
 	int               type;
 	void             *ptr;
 };
@@ -506,7 +519,7 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 			IS_STRING_EX;						\
 	} while (0)
 
-#define ZVAL_INT_STR(z, s) do {					\
+#define ZVAL_INTERNED_STR(z, s) do {					\
 		zval *__z = (z);						\
 		zend_string *__s = (s);					\
 		Z_STR_P(__z) = __s;						\

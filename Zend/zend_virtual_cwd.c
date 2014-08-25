@@ -178,7 +178,7 @@ static int php_check_dots(const char *element, int n)
 #define MAXIMUM_REPARSE_DATA_BUFFER_SIZE  ( 16 * 1024 )
 
 typedef struct {
-	unsigned long  ReparseTag;
+	zend_ulong  ReparseTag;
 	unsigned short ReparseDataLength;
 	unsigned short Reserved;
 	union {
@@ -187,7 +187,7 @@ typedef struct {
 			unsigned short SubstituteNameLength;
 			unsigned short PrintNameOffset;
 			unsigned short PrintNameLength;
-			unsigned long  Flags;
+			zend_ulong  Flags;
 			wchar_t        ReparseTarget[1];
 		} SymbolicLinkReparseBuffer;
 		struct {
@@ -291,7 +291,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 }
 /* }}} */
 
-CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{{ */
+CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{{ */
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	__int64 t;
@@ -299,7 +299,7 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 	ALLOCA_FLAG(use_heap_large);
 
 	if (!GetFileAttributesEx(path, GetFileExInfoStandard, &data)) {
-		return stat(path, buf);
+		return zend_stat(path, buf);
 	}
 
 	if (path_len >= 1 && path[1] == ':') {
@@ -407,7 +407,7 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 
 static int php_is_dir_ok(const cwd_state *state)  /* {{{ */
 {
-	struct stat buf;
+	zend_stat_t buf;
 
 	if (php_sys_stat(state->cwd, &buf) == 0 && S_ISDIR(buf.st_mode))
 		return (0);
@@ -418,7 +418,7 @@ static int php_is_dir_ok(const cwd_state *state)  /* {{{ */
 
 static int php_is_file_ok(const cwd_state *state)  /* {{{ */
 {
-	struct stat buf;
+	zend_stat_t buf;
 
 	if (php_sys_stat(state->cwd, &buf) == 0 && S_ISREG(buf.st_mode))
 		return (0);
@@ -582,9 +582,9 @@ CWD_API char *virtual_getcwd(char *buf, size_t size TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #ifdef PHP_WIN32
-static inline unsigned long realpath_cache_key(const char *path, int path_len TSRMLS_DC) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, int path_len TSRMLS_DC) /* {{{ */
 {
-	register unsigned long h;
+	register zend_ulong h;
 	char *bucket_key_start = tsrm_win32_get_path_sid_key(path TSRMLS_CC);
 	char *bucket_key = (char *)bucket_key_start;
 	const char *e = bucket_key + strlen(bucket_key);
@@ -593,8 +593,8 @@ static inline unsigned long realpath_cache_key(const char *path, int path_len TS
 		return 0;
 	}
 
-	for (h = 2166136261U; bucket_key < e;) {
-		h *= 16777619;
+	for (h = Z_UL(2166136261); bucket_key < e;) {
+		h *= Z_UL(16777619);
 		h ^= *bucket_key++;
 	}
 	HeapFree(GetProcessHeap(), 0, (LPVOID)bucket_key_start);
@@ -602,13 +602,13 @@ static inline unsigned long realpath_cache_key(const char *path, int path_len TS
 }
 /* }}} */
 #else
-static inline unsigned long realpath_cache_key(const char *path, int path_len) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {{{ */
 {
-	register unsigned long h;
+	register zend_ulong h;
 	const char *e = path + path_len;
 
-	for (h = 2166136261U; path < e;) {
-		h *= 16777619;
+	for (h = Z_UL(2166136261); path < e;) {
+		h *= Z_UL(16777619);
 		h ^= *path++;
 	}
 
@@ -637,11 +637,11 @@ CWD_API void realpath_cache_clean(TSRMLS_D) /* {{{ */
 CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WIN32
-	unsigned long key = realpath_cache_key(path, path_len TSRMLS_CC);
+	zend_ulong key = realpath_cache_key(path, path_len TSRMLS_CC);
 #else
-	unsigned long key = realpath_cache_key(path, path_len);
+	zend_ulong key = realpath_cache_key(path, path_len);
 #endif
-	unsigned long n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
+	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 	realpath_cache_bucket **bucket = &CWDG(realpath_cache)[n];
 
 	while (*bucket != NULL) {
@@ -668,7 +668,7 @@ CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC) /* {{{
 
 static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, int realpath_len, int is_dir, time_t t TSRMLS_DC) /* {{{ */
 {
-	long size = sizeof(realpath_cache_bucket) + path_len + 1;
+	zend_long size = sizeof(realpath_cache_bucket) + path_len + 1;
 	int same = 1;
 
 	if (realpath_len != path_len ||
@@ -679,7 +679,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 
 	if (CWDG(realpath_cache_size) + size <= CWDG(realpath_cache_size_limit)) {
 		realpath_cache_bucket *bucket = malloc(size);
-		unsigned long n;
+		zend_ulong n;
 
 		if (bucket == NULL) {
 			return;
@@ -719,12 +719,12 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 static inline realpath_cache_bucket* realpath_cache_find(const char *path, int path_len, time_t t TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WIN32
-	unsigned long key = realpath_cache_key(path, path_len TSRMLS_CC);
+	zend_ulong key = realpath_cache_key(path, path_len TSRMLS_CC);
 #else
-	unsigned long key = realpath_cache_key(path, path_len);
+	zend_ulong key = realpath_cache_key(path, path_len);
 #endif
 
-	unsigned long n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
+	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 	realpath_cache_bucket **bucket = &CWDG(realpath_cache)[n];
 
 	while (*bucket != NULL) {
@@ -756,12 +756,12 @@ CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_
 }
 /* }}} */
 
-CWD_API int realpath_cache_size(TSRMLS_D)
+CWD_API zend_long realpath_cache_size(TSRMLS_D)
 {
 	return CWDG(realpath_cache_size);
 }
 
-CWD_API int realpath_cache_max_buckets(TSRMLS_D)
+CWD_API zend_long realpath_cache_max_buckets(TSRMLS_D)
 {
 	return (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 }
@@ -784,7 +784,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 	HANDLE hFind;
 	ALLOCA_FLAG(use_heap_large)
 #else
-	struct stat st;
+	zend_stat_t st;
 #endif
 	realpath_cache_bucket *bucket;
 	char *tmp;
@@ -1739,7 +1739,7 @@ CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC) /
 }
 /* }}} */
 
-CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ */
+CWD_API int virtual_stat(const char *path, zend_stat_t *buf TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int retval;
@@ -1757,7 +1757,7 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ */
+CWD_API int virtual_lstat(const char *path, zend_stat_t *buf TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int retval;

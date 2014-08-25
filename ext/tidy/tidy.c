@@ -526,7 +526,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 		case TidyInteger:
 			if (Z_TYPE(conv) != IS_LONG) {
 				zval_copy_ctor(&conv);
-				convert_to_long(&conv);
+				convert_to_int(&conv);
 			}
 			if (tidyOptSetInt(doc, tidyOptGetId(opt), Z_LVAL(conv))) {
 				return SUCCESS;
@@ -536,7 +536,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 		case TidyBoolean:
 			if (Z_TYPE(conv) != IS_LONG) {
 				zval_copy_ctor(&conv);
-				convert_to_long(&conv);
+				convert_to_int(&conv);
 			}
 			if (tidyOptSetBool(doc, tidyOptGetId(opt), Z_LVAL(conv))) {
 				return SUCCESS;
@@ -627,7 +627,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 
 	if (is_file) {
-		STR_RELEASE(data);
+		zend_string_release(data);
 	}
 
 	tidyBufFree(errbuf);
@@ -1264,7 +1264,7 @@ static PHP_FUNCTION(tidy_parse_file)
 		RETVAL_FALSE;
 	}
 
-	STR_RELEASE(contents);
+	zend_string_release(contents);
 }
 /* }}} */
 
@@ -1577,7 +1577,7 @@ static TIDY_DOC_METHOD(__construct)
 
 		php_tidy_parse_string(obj, contents->val, contents->len, enc TSRMLS_CC);
 
-		STR_RELEASE(contents);
+		zend_string_release(contents);
 	}
 }
 
@@ -1612,7 +1612,7 @@ static TIDY_DOC_METHOD(parseFile)
 		RETVAL_TRUE;
 	}
 
-	STR_RELEASE(contents);
+	zend_string_release(contents);
 }
 
 static TIDY_DOC_METHOD(parseString)

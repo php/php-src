@@ -149,7 +149,7 @@ PHP_FUNCTION(dom_text_split_text)
 	xmlChar    *second;
 	xmlNodePtr  node;
 	xmlNodePtr  nnode;
-	long        offset;
+	zend_long        offset;
 	int         length;
 	dom_object	*intern;
 

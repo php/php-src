@@ -439,7 +439,7 @@ CPH_METHOD(LoadFromFile)
 	HRESULT res;
 	char *filename, *fullpath;
 	int filename_len;
-	long flags = 0;
+	zend_long flags = 0;
 	OLECHAR *olefilename;
 	CPH_FETCH();
 	
@@ -506,7 +506,7 @@ CPH_METHOD(GetMaxStreamSize)
 		php_com_throw_exception(res, NULL TSRMLS_CC);
 	} else {
 		/* TODO: handle 64 bit properly */
-		RETURN_LONG((LONG)size.QuadPart);
+		RETURN_LONG((zend_long)size.QuadPart);
 	}
 }
 /* }}} */

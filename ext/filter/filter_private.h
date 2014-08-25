@@ -121,7 +121,7 @@
 	if (Z_TYPE_P(zv) != IS_LONG) { \
 		zval ___tmp; \
 		ZVAL_DUP(&___tmp, zv); \
-		convert_to_long(&___tmp); \
+		convert_to_int(&___tmp); \
 		opt = Z_LVAL(___tmp); \
 	} else { \
 		opt = Z_LVAL_P(zv); \

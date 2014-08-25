@@ -41,7 +41,7 @@
 
 #define RESET_DOC_COMMENT() do { \
 	if (CG(doc_comment)) { \
-		STR_RELEASE(CG(doc_comment)); \
+		zend_string_release(CG(doc_comment)); \
 		CG(doc_comment) = NULL; \
 	} \
 } while (0)
@@ -50,7 +50,7 @@ typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
 
 typedef struct _zend_compiler_context {
-	zend_uint  opcodes_size;
+	uint32_t  opcodes_size;
 	int        vars_size;
 	int        literals_size;
 	int        current_brk_cont;
@@ -60,11 +60,11 @@ typedef struct _zend_compiler_context {
 } zend_compiler_context;
 
 typedef union _znode_op {
-	zend_uint      constant;
-	zend_uint      var;
-	zend_uint      num;
+	uint32_t      constant;
+	uint32_t      var;
+	uint32_t      num;
 	zend_ulong     hash;
-	zend_uint      opline_num; /*  Needs to be signed */
+	uint32_t      opline_num; /*  Needs to be signed */
 	zend_op       *jmp_addr;
 	zval          *zv;
 	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
@@ -82,7 +82,7 @@ typedef struct _znode { /* used only during compilation */
 typedef struct _zend_ast_znode {
 	zend_ast_kind kind;
 	zend_ast_attr attr;
-	zend_uint lineno;
+	uint32_t lineno;
 	znode node;
 } zend_ast_znode;
 ZEND_API zend_ast *zend_ast_create_znode(znode *node);
@@ -120,7 +120,7 @@ struct _zend_op {
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
-	ulong extended_value;
+	zend_ulong extended_value;
 	uint lineno;
 	zend_uchar opcode;
 	zend_uchar op1_type;
@@ -138,18 +138,22 @@ typedef struct _zend_brk_cont_element {
 
 typedef struct _zend_label {
 	int brk_cont;
-	zend_uint opline_num;
+	uint32_t opline_num;
 } zend_label;
 
 typedef struct _zend_try_catch_element {
-	zend_uint try_op;
-	zend_uint catch_op;  /* ketchup! */
-	zend_uint finally_op;
-	zend_uint finally_end;
+	uint32_t try_op;
+	uint32_t catch_op;  /* ketchup! */
+	uint32_t finally_op;
+	uint32_t finally_end;
 } zend_try_catch_element;
 
-#if SIZEOF_LONG == 8
-#define THIS_HASHVAL 6385726429UL
+#if SIZEOF_ZEND_INT == 8
+# ifdef _WIN32
+#  define THIS_HASHVAL 6385726429Ui64
+# else
+#  define THIS_HASHVAL 6385726429ULL
+# endif
 #else
 #define THIS_HASHVAL 2090759133UL
 #endif
@@ -226,13 +230,12 @@ typedef struct _zend_try_catch_element {
 
 #define ZEND_CE_IS_TRAIT(ce) (((ce)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)
 
-char *zend_visibility_string(zend_uint fn_flags);
-
+char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {
-	zend_uint flags;
+	uint32_t flags;
 	zend_string *name;
-	ulong h;
+	zend_ulong h;
 	int offset;
 	zend_string *doc_comment;
 	zend_class_entry *ce;
@@ -240,9 +243,9 @@ typedef struct _zend_property_info {
 
 typedef struct _zend_arg_info {
 	const char *name;			// TODO: convert into zend_string ???
-	zend_uint name_len;
+	uint32_t name_len;
 	const char *class_name;		// TODO: convert into zend_string ???
-	zend_uint class_name_len;
+	uint32_t class_name_len;
 	zend_uchar type_hint;
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
@@ -255,9 +258,9 @@ typedef struct _zend_arg_info {
  */
 typedef struct _zend_internal_function_info {
 	const char *_name;
-	zend_uint _name_len;
+	uint32_t _name_len;
 	const char *_class_name;
-	zend_uint required_num_args;
+	uint32_t required_num_args;
 	zend_uchar _type_hint;
 	zend_bool return_reference;
 	zend_bool _allow_null;
@@ -269,22 +272,22 @@ struct _zend_op_array {
 	zend_uchar type;
 	zend_string *function_name;
 	zend_class_entry *scope;
-	zend_uint fn_flags;
+	uint32_t fn_flags;
 	zend_function *prototype;
-	zend_uint num_args;
-	zend_uint required_num_args;
+	uint32_t num_args;
+	uint32_t required_num_args;
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
-	zend_uint *refcount;
+	uint32_t *refcount;
 
 	zend_op *opcodes;
-	zend_uint last;
+	uint32_t last;
 
 	zend_string **vars;
 	int last_var;
 
-	zend_uint T;
+	uint32_t T;
 
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
@@ -296,13 +299,13 @@ struct _zend_op_array {
 	/* static variables support */
 	HashTable *static_variables;
 
-	zend_uint this_var;
+	uint32_t this_var;
 
 	zend_string *filename;
-	zend_uint line_start;
-	zend_uint line_end;
+	uint32_t line_start;
+	uint32_t line_end;
 	zend_string *doc_comment;
-	zend_uint early_binding; /* the linked list of delayed declarations */
+	uint32_t early_binding; /* the linked list of delayed declarations */
 
 	zval *literals;
 	int last_literal;
@@ -322,10 +325,10 @@ typedef struct _zend_internal_function {
 	zend_uchar type;
 	zend_string* function_name;
 	zend_class_entry *scope;
-	zend_uint fn_flags;
+	uint32_t fn_flags;
 	zend_function *prototype;
-	zend_uint num_args;
-	zend_uint required_num_args;
+	uint32_t num_args;
+	uint32_t required_num_args;
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
@@ -342,10 +345,10 @@ union _zend_function {
 		zend_uchar type;  /* never used */
 		zend_string *function_name;
 		zend_class_entry *scope;
-		zend_uint fn_flags;
+		uint32_t fn_flags;
 		union _zend_function *prototype;
-		zend_uint num_args;
-		zend_uint required_num_args;
+		uint32_t num_args;
+		uint32_t required_num_args;
 		zend_arg_info *arg_info;
 	} common;
 
@@ -371,7 +374,7 @@ struct _zend_execute_data {
 	zend_execute_data   *call;             /* current call                   */
 	void               **run_time_cache;
 	zend_function       *func;             /* executed op_array              */
-	zend_uint            num_args;
+	uint32_t            num_args;
 	zend_uchar           flags;
 	zend_uchar           frame_kind;
 	zend_class_entry    *called_scope;
@@ -435,7 +438,7 @@ ZEND_API zend_string *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
-ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var);
+ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, uint32_t var);
 
 #ifdef ZTS
 const char *zend_get_zendtext(TSRMLS_D);
@@ -451,7 +454,7 @@ ZEND_API binary_op_type get_binary_op(int opcode);
 void zend_stop_lexing(TSRMLS_D);
 void zend_emit_final_return(zval *zv TSRMLS_DC);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
-zend_uint zend_add_member_modifier(zend_uint flags, zend_uint new_flag);
+uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
 zend_ast_list *zend_ast_append_doc_comment(zend_ast_list *list TSRMLS_DC);
 void zend_handle_encoding_declaration(zend_ast_list *declares TSRMLS_DC);
 
@@ -528,7 +531,7 @@ zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);
-zend_uint zend_get_class_fetch_type(zend_string *name);
+uint32_t zend_get_class_fetch_type(zend_string *name);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name TSRMLS_DC);
 typedef struct _zend_auto_global {

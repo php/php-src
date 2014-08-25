@@ -33,7 +33,7 @@
  */
 PHP_FUNCTION( collator_get_attribute )
 {
-	long attribute, value;
+	zend_long attribute, value;
 
 	COLLATOR_METHOD_INIT_VARS
 
@@ -64,7 +64,7 @@ PHP_FUNCTION( collator_get_attribute )
  */
 PHP_FUNCTION( collator_set_attribute )
 {
-	long attribute, value;
+	zend_long attribute, value;
 	COLLATOR_METHOD_INIT_VARS
 
 
@@ -123,7 +123,7 @@ PHP_FUNCTION( collator_get_strength )
  */
 PHP_FUNCTION( collator_set_strength )
 {
-	long strength;
+	zend_long strength;
 
 	COLLATOR_METHOD_INIT_VARS
 

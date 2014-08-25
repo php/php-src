@@ -138,7 +138,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 	zval *value;
 	char *xpath_expr;
 	zend_string *string_key;
-	ulong num_key;
+	zend_ulong num_key;
 	char **params = NULL;
 	int i = 0;
 
@@ -292,7 +292,12 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	
 	fci.size = sizeof(fci);
 	fci.function_table = EG(function_table);
-	fci.params = args;
+	if (fci.param_count > 0) {
+		fci.params = args;
+	} else {
+		fci.params = NULL;
+	}
+
 	
 	obj = valuePop(ctxt);
 	if (obj->stringval == NULL) {
@@ -357,7 +362,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 			zval_ptr_dtor(&retval);
 		}
 	}
-	STR_RELEASE(callable);
+	zend_string_release(callable);
 	zval_ptr_dtor(&handler);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {
@@ -432,7 +437,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	ZVAL_STRING(&member, "cloneDocument");
 	cloneDocu = std_hnd->read_property(id, &member, BP_VAR_IS, NULL, &rv TSRMLS_CC);
 	if (Z_TYPE_P(cloneDocu) != IS_NULL) {
-		convert_to_long(cloneDocu);
+		convert_to_int(cloneDocu);
 		clone_docu = Z_LVAL_P(cloneDocu);
 	}
 	zval_ptr_dtor(&member);
@@ -531,7 +536,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	ZVAL_STRING(&member, "doXInclude");
 	doXInclude = std_hnd->read_property(id, &member, BP_VAR_IS, NULL, &rv TSRMLS_CC);
 	if (Z_TYPE_P(doXInclude) != IS_NULL) {
-		convert_to_long(doXInclude);
+		convert_to_int(doXInclude);
 		ctxt->xinclude = Z_LVAL_P(doXInclude);
 	}
 	zval_ptr_dtor(&member);
@@ -760,7 +765,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 	zval *id;
 	zval *array_value, *entry, new_string;
 	xsl_object *intern;
-	ulong idx;
+	zend_ulong idx;
 	char *namespace;
 	int namespace_len;
 	zend_string *string_key, *name, *value;
@@ -785,7 +790,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 		
 		intern = Z_XSL_P(id);
 		
-		ZVAL_STR(&new_string, STR_COPY(value));
+		ZVAL_STR(&new_string, zend_string_copy(value));
 		
 		zend_hash_update(intern->parameter, name, &new_string);
 		RETURN_TRUE;
@@ -815,7 +820,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 	intern = Z_XSL_P(id);
 	if ((value = zend_hash_find(intern->parameter, name)) != NULL) {
 		convert_to_string_ex(value);
-		RETURN_STR(STR_COPY(Z_STR_P(value)));
+		RETURN_STR(zend_string_copy(Z_STR_P(value)));
 	} else {
 		RETURN_FALSE;
 	}
@@ -914,7 +919,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 {
 	zval *id;
 	xsl_object *intern;
-	long securityPrefs, oldSecurityPrefs;
+	zend_long securityPrefs, oldSecurityPrefs;
 
 	DOM_GET_THIS(id);
  	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &securityPrefs) == FAILURE) {

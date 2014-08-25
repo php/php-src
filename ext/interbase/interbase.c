@@ -1194,7 +1194,7 @@ PHP_FUNCTION(ibase_trans)
 				
 				tpb_len = 0;
 
-				convert_to_long_ex(&args[i]);
+				convert_to_int_ex(&args[i]);
 				trans_argl = Z_LVAL(args[i]);
 
 				if (trans_argl != PHP_IBASE_DEFAULT) {

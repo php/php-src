@@ -106,14 +106,14 @@ struct _zend_compiler_globals {
 
 	int interactive;
 
-	zend_uint start_lineno;
+	uint32_t start_lineno;
 	zend_bool increment_lineno;
 
 	znode implementing_class;
 
 	zend_string *doc_comment;
 
-	zend_uint compiler_options; /* set of ZEND_COMPILE_* constants */
+	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
 
 	zend_string *current_namespace;
 	HashTable *current_import;
@@ -179,7 +179,7 @@ struct _zend_executor_globals {
 
 	zval This;
 
-	long precision;
+	zend_long precision;
 
 	int ticks_count;
 
@@ -211,7 +211,7 @@ struct _zend_executor_globals {
 	zend_class_entry      *exception_class;
 
 	/* timeout support */
-	int timeout_seconds;
+	zend_long timeout_seconds;
 
 	int lambda_count;
 

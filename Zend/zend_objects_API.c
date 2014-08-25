@@ -25,7 +25,7 @@
 #include "zend_API.h"
 #include "zend_objects_API.h"	
 
-ZEND_API void zend_objects_store_init(zend_objects_store *objects, zend_uint init_size)
+ZEND_API void zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)
 {
 	objects->object_buckets = (zend_object **) emalloc(init_size * sizeof(zend_object*));
 	objects->top = 1; /* Skip 0 so that handles are true */
@@ -42,7 +42,7 @@ ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
 
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC)
 {
-	zend_uint i;
+	uint32_t i;
 
 	for (i = 1; i < objects->top ; i++) {
 		zend_object *obj = objects->object_buckets[i];
@@ -60,7 +60,7 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 
 ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects TSRMLS_DC)
 {
-	zend_uint i;
+	uint32_t i;
 
 	if (!objects->object_buckets) {
 		return;
@@ -76,7 +76,7 @@ ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects TSR
 
 ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects TSRMLS_DC)
 {
-	zend_uint i;
+	uint32_t i;
 
 	/* Free object properties but don't free object their selves */
 	for (i = objects->top - 1; i > 0 ; i--) {
@@ -134,7 +134,7 @@ ZEND_API void zend_objects_store_put(zend_object *object TSRMLS_DC)
 
 ZEND_API void zend_objects_store_free(zend_object *object TSRMLS_DC) /* {{{ */
 {
-	zend_uint handle = object->handle;
+	uint32_t handle = object->handle;
 	void *ptr = ((char*)object) - object->handlers->offset;
 
 	GC_REMOVE_FROM_BUFFER(object);
@@ -169,7 +169,7 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 			}
 			
 			if (GC_REFCOUNT(object) == 0) {
-				zend_uint handle = object->handle;
+				uint32_t handle = object->handle;
 				void *ptr;
 
 				EG(objects_store).object_buckets[handle] = SET_OBJ_INVALID(object);

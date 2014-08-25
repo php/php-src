@@ -323,7 +323,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	} else {
 		/* we convert numbers to integers and treat them as a string */
 		if (Z_TYPE_P(regex) == IS_DOUBLE) {
-			convert_to_long_ex(regex);	/* get rid of decimal places */
+			convert_to_int_ex(regex);	/* get rid of decimal places */
 		}
 		convert_to_string_ex(regex);
 		/* don't bother doing an extended regex with just a number */
@@ -565,32 +565,32 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	if (Z_TYPE_P(arg_pattern) == IS_STRING) {
 		if (Z_STRVAL_P(arg_pattern) && Z_STRLEN_P(arg_pattern)) {
-			pattern = STR_COPY(Z_STR_P(arg_pattern));
+			pattern = zend_string_copy(Z_STR_P(arg_pattern));
 		} else {
 			pattern = STR_EMPTY_ALLOC();
 		}
 	} else {
-		convert_to_long_ex(arg_pattern);
-		pattern = STR_ALLOC(1, 0);
+		convert_to_int_ex(arg_pattern);
+		pattern = zend_string_alloc(1, 0);
 		pattern->val[0] = (char) Z_LVAL_P(arg_pattern);
 		pattern->val[1] = '\0';
 	}
 
 	if (Z_TYPE_P(arg_replace) == IS_STRING) {
 		if (Z_STRVAL_P(arg_replace) && Z_STRLEN_P(arg_replace)) {
-			replace = STR_COPY(Z_STR_P(arg_replace));
+			replace = zend_string_copy(Z_STR_P(arg_replace));
 		} else {
 			replace = STR_EMPTY_ALLOC();
 		}
 	} else {
-		convert_to_long_ex(arg_replace);
-		replace = STR_ALLOC(1, 0);
+		convert_to_int_ex(arg_replace);
+		replace = zend_string_alloc(1, 0);
 		replace->val[0] = (char) Z_LVAL_P(arg_replace);
 		replace->val[1] = '\0';
 	}
 
 	if (arg_string) {
-		string = STR_COPY(arg_string);
+		string = zend_string_copy(arg_string);
 	} else {
 		string = STR_EMPTY_ALLOC();
 	}
@@ -604,9 +604,9 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		efree(ret);
 	}
 
-	STR_RELEASE(string);
-	STR_RELEASE(replace);
-	STR_RELEASE(pattern);
+	zend_string_release(string);
+	zend_string_release(replace);
+	zend_string_release(pattern);
 }
 /* }}} */
 
@@ -630,7 +630,7 @@ PHP_FUNCTION(eregi_replace)
  */
 static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	long count = -1;
+	zend_long count = -1;
 	regex_t re;
 	regmatch_t subs[1];
 	char *spliton, *str, *strp, *endp;

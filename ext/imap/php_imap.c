@@ -1326,16 +1326,16 @@ PHP_FUNCTION(imap_append)
 		return;
 	}
 
-	regex  = STR_INIT("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/", sizeof("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/") - 1, 0);
+	regex  = zend_string_init("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/", sizeof("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/") - 1, 0);
 
 	if (internal_date) {
 		/* Make sure the given internal_date string matches the RFC specifiedformat */
 		if ((pce = pcre_get_compiled_regex_cache(regex TSRMLS_CC))== NULL) {
-			STR_FREE(regex);
+			zend_string_free(regex);
 			RETURN_FALSE;
 		}
 
-		STR_FREE(regex);
+		zend_string_free(regex);
 		php_pcre_match_impl(pce, internal_date, internal_date_len, return_value, subpats, global,
 			0, regex_flags, start_offset TSRMLS_CC);
 
@@ -2929,7 +2929,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	}
 
 	/* allocate output buffer */
-	out = STR_ALLOC(outlen, 0);
+	out = zend_string_alloc(outlen, 0);
 
 	/* encode input string */
 	outp = (unsigned char*)out->val;
@@ -3553,11 +3553,11 @@ PHP_FUNCTION(imap_mail_compose)
 			topbod = bod;
 
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
+				convert_to_int_ex(pvalue);
 				bod->type = (short) Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "encoding", sizeof("encoding") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
+				convert_to_int_ex(pvalue);
 				bod->encoding = (short) Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
@@ -3626,11 +3626,11 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->contents.text.size = 0;
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "lines", sizeof("lines") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
+				convert_to_int_ex(pvalue);
 				bod->size.lines = Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "bytes", sizeof("bytes") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
+				convert_to_int_ex(pvalue);
 				bod->size.bytes = Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "md5", sizeof("md5") - 1)) != NULL) {
@@ -3640,7 +3640,7 @@ PHP_FUNCTION(imap_mail_compose)
 		} else if (Z_TYPE_P(data) == IS_ARRAY) {
 			short type = -1;
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
+				convert_to_int_ex(pvalue);
 				type = (short) Z_LVAL_P(pvalue);
 			}
 
@@ -3660,7 +3660,7 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "encoding", sizeof("encoding") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
+				convert_to_int_ex(pvalue);
 				bod->encoding = (short) Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
@@ -3730,11 +3730,11 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->contents.text.size = 0;
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "lines", sizeof("lines") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
+				convert_to_int_ex(pvalue);
 				bod->size.lines = Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "bytes", sizeof("bytes") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
+				convert_to_int_ex(pvalue);
 				bod->size.bytes = Z_LVAL_P(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "md5", sizeof("md5") - 1)) != NULL) {
@@ -4390,7 +4390,7 @@ static zend_string* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
 	}
 	address[0] = 0;
 	rfc822_write_address(address, addresslist);
-	return STR_INIT(address, strlen(address), 0);
+	return zend_string_init(address, strlen(address), 0);
 }
 /* }}} */
 #endif

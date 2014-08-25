@@ -27,7 +27,7 @@
 #include "intl_convert.h"
 
 #if !defined(HAVE_PTRDIFF_T) && !defined(_PTRDIFF_T_DEFINED)
-typedef long ptrdiff_t;
+typedef zend_long ptrdiff_t;
 #endif
 
 /**
@@ -232,7 +232,7 @@ static int collator_compare_func( const void* a, const void* b TSRMLS_DC )
 			return 0;
 	}
 
-	convert_to_long(&result);
+	convert_to_int(&result);
 
 	if( Z_LVAL(result) < 0 )
 		return -1;
@@ -258,7 +258,7 @@ static int collator_cmp_sort_keys( const void *p1, const void *p2 TSRMLS_DC )
 /* {{{ collator_get_compare_function
  * Choose compare function according to sort flags.
  */
-static collator_compare_func_t collator_get_compare_function( const long sort_flags )
+static collator_compare_func_t collator_get_compare_function( const zend_long sort_flags )
 {
 	collator_compare_func_t func;
 
@@ -290,7 +290,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	zval           saved_collator;
 	zval*          array            = NULL;
 	HashTable*     hash             = NULL;
-	long           sort_flags       = COLLATOR_SORT_REGULAR;
+	zend_long           sort_flags       = COLLATOR_SORT_REGULAR;
 
 	COLLATOR_METHOD_INIT_VARS
 

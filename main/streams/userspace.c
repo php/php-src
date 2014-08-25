@@ -490,7 +490,7 @@ PHP_FUNCTION(stream_wrapper_register)
 	zend_string *protocol, *classname;
 	struct php_user_stream_wrapper * uwrap;
 	zend_resource *rsrc;
-	long flags = 0;
+	zend_long flags = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &protocol, &classname, &flags) == FAILURE) {
 		RETURN_FALSE;
@@ -608,7 +608,7 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 
 	didwrite = 0;
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		convert_to_long(&retval);
+		convert_to_int(&retval);
 		didwrite = Z_LVAL(retval);
 	} else if (call_result == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " is not implemented!",
@@ -617,9 +617,9 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 
 	/* don't allow strange buffer overruns due to bogus return */
 	if (didwrite > count) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote %ld bytes more data than requested (%ld written, %ld max)",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote " ZEND_LONG_FMT " bytes more data than requested (" ZEND_LONG_FMT " written, " ZEND_LONG_FMT " max)",
 				us->wrapper->classname,
-				(long)(didwrite - count), (long)didwrite, (long)count);
+				(zend_long)(didwrite - count), (zend_long)didwrite, (zend_long)count);
 		didwrite = count;
 	}
 
@@ -654,8 +654,8 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 		convert_to_string(&retval);
 		didread = Z_STRLEN(retval);
 		if (didread > count) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %ld bytes more data than requested (%ld read, %ld max) - excess data will be lost",
-					us->wrapper->classname, (long)(didread - count), (long)didread, (long)count);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read " ZEND_LONG_FMT " bytes more data than requested (" ZEND_LONG_FMT " read, " ZEND_LONG_FMT " max) - excess data will be lost",
+					us->wrapper->classname, (zend_long)(didread - count), (zend_long)didread, (zend_long)count);
 			didread = count;
 		}
 		if (didread > 0)
@@ -831,7 +831,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 #define STAT_PROP_ENTRY_EX(name, name2)                        \
 	if (NULL != (elem = zend_hash_str_find(Z_ARRVAL_P(array), #name, sizeof(#name)-1))) {     \
 		SEPARATE_ZVAL(elem);																	 \
-		convert_to_long(elem);                                                                   \
+		convert_to_int(elem);                                                                   \
 		ssb->sb.st_##name2 = Z_LVAL_P(elem);                                                      \
 	}
 

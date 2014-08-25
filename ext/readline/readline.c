@@ -284,7 +284,7 @@ PHP_FUNCTION(readline_info)
 		} else if (!strcasecmp(what, "done")) {
 			oldval = rl_done;
 			if (value) {
-				convert_to_long_ex(value);
+				convert_to_int_ex(value);
 				rl_done = Z_LVAL_P(value);
 			}
 			RETVAL_LONG(oldval);
@@ -304,7 +304,7 @@ PHP_FUNCTION(readline_info)
 		} else if (!strcasecmp(what, "erase_empty_line")) {
 			oldval = rl_erase_empty_line;
 			if (value) {
-				convert_to_long_ex(value);
+				convert_to_int_ex(value);
 				rl_erase_empty_line = Z_LVAL_PP(value);
 			}
 			RETVAL_LONG(oldval);
@@ -322,7 +322,7 @@ PHP_FUNCTION(readline_info)
 		} else if (!strcasecmp(what, "attempted_completion_over")) {
 			oldval = rl_attempted_completion_over;
 			if (value) {
-				convert_to_long_ex(value);
+				convert_to_int_ex(value);
 				rl_attempted_completion_over = Z_LVAL_P(value);
 			}
 			RETVAL_LONG(oldval);
@@ -521,10 +521,10 @@ PHP_FUNCTION(readline_completion_function)
 
 	if (!zend_is_callable(arg, 0, &name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name->val);
-		STR_RELEASE(name);
+		zend_string_release(name);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(name);
+	zend_string_release(name);
 
 	zval_dtor(&_readline_completion);
 	ZVAL_DUP(&_readline_completion, arg);
@@ -571,10 +571,10 @@ PHP_FUNCTION(readline_callback_handler_install)
 
 	if (!zend_is_callable(callback, 0, &name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name->val);
-		STR_RELEASE(name);
+		zend_string_release(name);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(name);
+	zend_string_release(name);
 
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();

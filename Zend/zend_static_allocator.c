@@ -22,13 +22,13 @@
 
 /* Not checking emalloc() and erealloc() return values as they are supposed to bailout */
 
-inline static void block_init(Block *block, zend_uint block_size)
+inline static void block_init(Block *block, uint32_t block_size)
 {
 	block->pos = block->bp = (char *) emalloc(block_size);
 	block->end = block->bp + block_size;
 }
 
-inline static char *block_allocate(Block *block, zend_uint size)
+inline static char *block_allocate(Block *block, uint32_t size)
 {
 	char *retval = block->pos;
 	if ((block->pos += size) >= block->end) {
@@ -50,7 +50,7 @@ void static_allocator_init(StaticAllocator *sa)
 	sa->current_block = 0;
 }
 
-char *static_allocator_allocate(StaticAllocator *sa, zend_uint size)
+char *static_allocator_allocate(StaticAllocator *sa, uint32_t size)
 {
 	char *retval;
 
@@ -67,7 +67,7 @@ char *static_allocator_allocate(StaticAllocator *sa, zend_uint size)
 
 void static_allocator_destroy(StaticAllocator *sa)
 {
-	zend_uint i;
+	uint32_t i;
 
 	for (i=0; i<sa->num_blocks; i++) {
 		block_free(&sa->Blocks[i]);

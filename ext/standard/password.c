@@ -89,20 +89,20 @@ static int php_password_salt_to64(const char *str, const size_t str_len, const s
 	buffer = php_base64_encode((unsigned char*) str, (int) str_len);
 	if (buffer->len < out_len) {
 		/* Too short of an encoded string generated */
-		STR_RELEASE(buffer);
+		zend_string_release(buffer);
 		return FAILURE;
 	}
 	for (pos = 0; pos < out_len; pos++) {
 		if (buffer->val[pos] == '+') {
 			ret[pos] = '.';
 		} else if (buffer->val[pos] == '=') {
-			STR_FREE(buffer);
+			zend_string_free(buffer);
 			return FAILURE;
 		} else {
 			ret[pos] = buffer->val[pos];
 		}
 	}
-	STR_FREE(buffer);
+	zend_string_free(buffer);
 	return SUCCESS;
 }
 /* }}} */
@@ -195,8 +195,8 @@ PHP_FUNCTION(password_get_info)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 			{
-				long cost = PHP_PASSWORD_BCRYPT_COST;
-				sscanf(hash, "$2y$%ld$", &cost);
+				zend_long cost = PHP_PASSWORD_BCRYPT_COST;
+				sscanf(hash, "$2y$" ZEND_LONG_FMT "$", &cost);
 				add_assoc_long(&options, "cost", cost);
 			}
 			break;
@@ -214,7 +214,7 @@ PHP_FUNCTION(password_get_info)
 
 PHP_FUNCTION(password_needs_rehash)
 {
-	long new_algo = 0;
+	zend_long new_algo = 0;
 	php_password_algo algo;
 	int hash_len;
 	char *hash;
@@ -239,13 +239,13 @@ PHP_FUNCTION(password_needs_rehash)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 			{
-				long new_cost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
+				zend_long new_cost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
 				
 				if (options && (option_buffer = zend_symtable_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 					if (Z_TYPE_P(option_buffer) != IS_LONG) {
 						zval cast_option_buffer;
 						ZVAL_DUP(&cast_option_buffer, option_buffer);
-						convert_to_long(&cast_option_buffer);
+						convert_to_int(&cast_option_buffer);
 						new_cost = Z_LVAL(cast_option_buffer);
 						zval_dtor(&cast_option_buffer);
 					} else {
@@ -253,7 +253,7 @@ PHP_FUNCTION(password_needs_rehash)
 					}
 				}
 
-				sscanf(hash, "$2y$%ld$", &cost);
+				sscanf(hash, "$2y$" ZEND_LONG_FMT "$", &cost);
 				if (cost != new_cost) {
 					RETURN_TRUE;
 				}
@@ -283,7 +283,7 @@ PHP_FUNCTION(password_verify)
 	}
 
 	if (ret->len != hash_len || hash_len < 13) {
-		STR_FREE(ret);
+		zend_string_free(ret);
 		RETURN_FALSE;
 	}
 	
@@ -295,7 +295,7 @@ PHP_FUNCTION(password_verify)
 		status |= (ret->val[i] ^ hash[i]);
 	}
 
-	STR_FREE(ret);
+	zend_string_free(ret);
 
 	RETURN_BOOL(status == 0);
 	
@@ -307,7 +307,7 @@ Hash a password */
 PHP_FUNCTION(password_hash)
 {
 	char *hash_format, *hash, *salt, *password;
-	long algo = 0;
+	zend_long algo = 0;
 	int password_len = 0, hash_len;
 	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
@@ -321,13 +321,13 @@ PHP_FUNCTION(password_hash)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 		{
-			long cost = PHP_PASSWORD_BCRYPT_COST;
+			zend_long cost = PHP_PASSWORD_BCRYPT_COST;
 	
 			if (options && (option_buffer = zend_symtable_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 				if (Z_TYPE_P(option_buffer) != IS_LONG) {
 					zval cast_option_buffer;
 					ZVAL_DUP(&cast_option_buffer, option_buffer);
-					convert_to_long(&cast_option_buffer);
+					convert_to_int(&cast_option_buffer);
 					cost = Z_LVAL(cast_option_buffer);
 					zval_dtor(&cast_option_buffer);
 				} else {
@@ -336,7 +336,7 @@ PHP_FUNCTION(password_hash)
 			}
 	
 			if (cost < 4 || cost > 31) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: %ld", cost);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
 				RETURN_NULL();
 			}
 			
@@ -348,7 +348,7 @@ PHP_FUNCTION(password_hash)
 		break;
 		case PHP_PASSWORD_UNKNOWN:
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: %ld", algo);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: " ZEND_LONG_FMT, algo);
 			RETURN_NULL();
 	}
 
@@ -443,7 +443,7 @@ PHP_FUNCTION(password_hash)
 	efree(hash);
 
 	if (result->len < 13) {
-		STR_FREE(result);
+		zend_string_free(result);
 		RETURN_FALSE;
 	}
 

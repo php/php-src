@@ -111,7 +111,7 @@ PHP_FUNCTION(grapheme_strpos)
 	unsigned char *haystack, *needle;
 	int haystack_len, needle_len;
 	unsigned char *found;
-	long loffset = 0;
+	zend_long loffset = 0;
 	int32_t offset = 0;
 	int ret_pos;
 
@@ -178,7 +178,7 @@ PHP_FUNCTION(grapheme_stripos)
 	unsigned char *haystack, *needle, *haystack_dup, *needle_dup;
 	int haystack_len, needle_len;
 	unsigned char *found;
-	long loffset = 0;
+	zend_long loffset = 0;
 	int32_t offset = 0;
 	int ret_pos;
 	int is_ascii;
@@ -252,7 +252,7 @@ PHP_FUNCTION(grapheme_strrpos)
 {
 	unsigned char *haystack, *needle;
 	int haystack_len, needle_len;
-	long loffset = 0;
+	zend_long loffset = 0;
 	int32_t offset = 0;
 	int32_t ret_pos;
 	int is_ascii;
@@ -322,7 +322,7 @@ PHP_FUNCTION(grapheme_strripos)
 {
 	unsigned char *haystack, *needle;
 	int haystack_len, needle_len;
-	long loffset = 0;
+	zend_long loffset = 0;
 	int32_t offset = 0;
 	int32_t ret_pos;
 	int is_ascii;
@@ -401,7 +401,7 @@ PHP_FUNCTION(grapheme_substr)
 	unsigned char *str, *sub_str;
 	UChar *ustr;
 	int str_len, sub_str_len, ustr_len;
-	long lstart = 0, length = 0;
+	zend_long lstart = 0, length = 0;
 	int32_t start = 0;
 	int iter_val;
 	UErrorCode status;
@@ -816,10 +816,10 @@ PHP_FUNCTION(grapheme_extract)
 	unsigned char *str, *pstr;
 	UChar *ustr;
 	int str_len, ustr_len;
-	long size; /* maximum number of grapheme clusters, bytes, or characters (based on extract_type) to return */
-	long lstart = 0; /* starting position in str in bytes */
+	zend_long size; /* maximum number of grapheme clusters, bytes, or characters (based on extract_type) to return */
+	zend_long lstart = 0; /* starting position in str in bytes */
 	int32_t start = 0;
-	long extract_type = GRAPHEME_EXTRACT_TYPE_COUNT;
+	zend_long extract_type = GRAPHEME_EXTRACT_TYPE_COUNT;
 	UErrorCode status;
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UBreakIterator* bi = NULL;
@@ -898,7 +898,7 @@ PHP_FUNCTION(grapheme_extract)
 	 */
 
 	if ( -1 != grapheme_ascii_check(pstr, size + 1 < str_len ? size + 1 : str_len ) ) {
-        long nsize = ( size < str_len ? size : str_len );
+        zend_long nsize = ( size < str_len ? size : str_len );
 		if ( NULL != next ) {
 			ZVAL_LONG(next, start+nsize);
 		}

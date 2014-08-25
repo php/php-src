@@ -130,7 +130,7 @@ int  zend_shared_memdup_size(void *p, size_t size);
 typedef union _align_test {
 	void   *ptr;
 	double  dbl;
-	long    lng;
+	zend_long  lng;
 } align_test;
 
 #if ZEND_GCC_VERSION >= 2000

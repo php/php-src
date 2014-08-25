@@ -237,7 +237,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 		
 		if (bufz) {
-			STR_RELEASE(bufz);
+			zend_string_release(bufz);
 		}	
 		
 		if (status == Z_OK) {
@@ -1160,7 +1160,7 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
    Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_mime_type)
 {
-	long p_image_type;
+	zend_long p_image_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &p_image_type) == FAILURE) {
 		return;
@@ -1174,7 +1174,7 @@ PHP_FUNCTION(image_type_to_mime_type)
    Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_extension)
 {
-	long image_type;
+	zend_long image_type;
 	zend_bool inc_dot=1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|b", &image_type, &inc_dot) == FAILURE) {

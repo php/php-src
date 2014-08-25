@@ -7,6 +7,12 @@ UPGRADE NOTES - PHP X.Y
   b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
   c. POST data handling
   d. Arginfo changes
+  e. New data types
+  f. zend_parse_parameters() specs
+  g. sprintf() formats
+  h. HashTable API
+  i. New portable macros for large file support
+  j. New portable macros for integers
 
 2. Build system changes
   a. Unix build system changes
@@ -18,7 +24,89 @@ UPGRADE NOTES - PHP X.Y
 ========================
 
   a. zend_set_memory_limit() now takes the TSRMLS_CC macro as its last argument
+  e. New data types
 
+     String
+
+        Besides the old way of accepting the strings with 's', the new 'S' ZPP spec
+	was introduced. It expects an argument of the type zend_string *. String lengths
+	in it do no more depend on the firm 'int' datatype. The replacement
+	is a platform dependent size_t datatype called php_size_t.
+
+	String length is defined as zend_size_t inside Zend and aliased as php_size_t
+	anywhere else. The inclusion of php.h is necessary.
+
+     Integer types
+
+	Integers do no more depend on the firm 'long' type. Instead a platform
+	dependent integer type is used. That datatype is defined dynamically to
+	guarantee the consistent 64 bit support. The zval field representing user
+	land integer it bound to php_int_t.
+
+	Signed integer is defined as zend_int_t, unsigned integer as zend_uint_t
+	inside Zend. Both are aliased as php_int_t and php_uint_t anywhere else,
+	respectively. The inclusion of php.h is necessary.
+
+     Other datatypes
+
+	zend_off_t  - portable off_t analogue
+	zend_stat_t - portable 'struct stat' analogue
+
+	These datatypes are declared to be portable across platforms. Thus, direct
+	usage of the functions like fseek, stat, etc. as well as direct usage of
+	off_t and struct stat is strongly not recommended. Instead the portable
+	macros should be used.
+
+	zend_fseek - portable fseek equivalent
+	zend_ftell - portable ftell equivalent
+	zend_lseek - portable lseek equivalent
+	zend_fstat - portable fstat equivalent
+	zend_stat  - portable stat equivalent
+
+  f. zend_parse_parameters() specs
+
+       The new spec 'S' introduced, which expects an argument of type zend_string *.
+       The new specs 'i' and 'I' introduced, which expect an argument of type php_int_t.
+
+  g. sprintf() formats
+
+       New printf modifier 'p' was implemented to platform independently output php_int_t,
+       php_uint_t and php_size_t datatypes. That modifier can be used with'd', 'u', 'x' and 'o'
+       printf format specs with spprintf, snprintf and the wrapping printf implementations.
+       %pu is sufficient for both php_uint_t and php_size_t. the code using %p spec to output
+       pointer address might need to be enclosed into #ifdef when it unlickily followed by 'd',
+       'u', 'x' or 'o'.
+
+       The only exceptions are the snprintf and zend_sprintf functions yet, because in some cases
+       they can use the implemenations available on the system, not the PHP one. Fro snprintf the
+       the macros ZEND_INT_FMT ZEND_UINT_FMT should be used.
+
+  h. HashTable API
+
+       Datatype for array indexes was changed to php_uint_t, for string keys to zend_string *.
+
+  i. New portable macros for large file support
+
+      Function(s)       Alias           Comment
+      stat, _stat64     zend_stat   for use with zend_stat_t
+      fstat, _fstat64   zend_fstat  for use with zend_stat_t
+      lseek, _lseeki64  zend_lseek  for use with zend_off_t
+      ftell, _ftelli64  zend_ftell  for use with zend_off_t
+      fseek, _fseeki64  zend_fseek  for use with zend_off_t
+
+  j. New portable macros for integers
+
+      Function(s)                                         Alias             Comment
+      snprintf with "%ld" or "%lld", _ltoa_s, _i64toa_s   ZEND_ITOA         for use with zend_int_t
+      atol, atoll, _atoi64                                ZEND_ATOI         for use with zend_int_t
+      strtol, strtoll, _strtoi64                          ZEND_STRTOI       for use with zend_int_t
+      strtoul, strtoull, _strtoui64                       ZEND_STRTOUI      for use with zend_int_t
+      abs, llabs, _abs64                                  ZEND_ABS          for use with zend_int_t
+      -                                                   ZEND_INT_MAX      Aliased with PHP_INT_MAX in php.h, replaces LONG_MAX where appropriate
+      -                                                   ZEND_INT_MIN      Aliased with PHP_INT_MIN in php.h, replaces LONG_MIN where appropriate
+      -                                                   ZEND_UINT_MAX     ULONG_MAX
+      -                                                   SIZEOF_ZEND_INT   Replaces SIZEOF_ZEND_LONG where appropriate
+      -                                                   ZEND_SIZE_MAX     Max value of zend_size_t
 
 ========================
 2. Build system changes

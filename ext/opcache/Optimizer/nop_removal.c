@@ -26,12 +26,12 @@
 static void nop_removal(zend_op_array *op_array)
 {
 	zend_op *end, *opline;
-	zend_uint new_count, i, shift;
+	uint32_t new_count, i, shift;
 	int j;
-	zend_uint *shiftlist;
+	uint32_t *shiftlist;
 	ALLOCA_FLAG(use_heap);
 
-	shiftlist = (zend_uint *)DO_ALLOCA(sizeof(zend_uint) * op_array->last);
+	shiftlist = (uint32_t *)DO_ALLOCA(sizeof(uint32_t) * op_array->last);
 	i = new_count = shift = 0;
 	end = op_array->opcodes + op_array->last;
 	for (opline = op_array->opcodes; opline < end; opline++) {
@@ -120,13 +120,13 @@ static void nop_removal(zend_op_array *op_array)
 		}
 
 		/* update early binding list */
-		if (op_array->early_binding != (zend_uint)-1) {
-			zend_uint *opline_num = &op_array->early_binding;
+		if (op_array->early_binding != (uint32_t)-1) {
+			uint32_t *opline_num = &op_array->early_binding;
 
 			do {
 				*opline_num -= shiftlist[*opline_num];
 				opline_num = &ZEND_RESULT(&op_array->opcodes[*opline_num]).opline_num;
-			} while (*opline_num != (zend_uint)-1);
+			} while (*opline_num != (uint32_t)-1);
 		}
 	}
 	FREE_ALLOCA(shiftlist);

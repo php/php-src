@@ -33,7 +33,7 @@
 PHP_FUNCTION( numfmt_format )
 {
 	zval *number;
-	long type = FORMAT_TYPE_DEFAULT;
+	zend_long type = FORMAT_TYPE_DEFAULT;
 	UChar format_buf[32];
 	UChar* formatted = format_buf;
 	int formatted_len = USIZE(format_buf);
@@ -59,7 +59,7 @@ PHP_FUNCTION( numfmt_format )
 
 		if(Z_TYPE_P(number) == IS_LONG) {
 			/* take INT32 on 32-bit, int64 on 64-bit */
-			type = (sizeof(long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
+			type = (sizeof(zend_long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
 		} else if(Z_TYPE_P(number) == IS_DOUBLE) {
 			type = FORMAT_TYPE_DOUBLE;
 		} else {
@@ -74,7 +74,7 @@ PHP_FUNCTION( numfmt_format )
 
 	switch(type) {
 		case FORMAT_TYPE_INT32:
-			convert_to_long_ex(number);
+			convert_to_int_ex(number);
 			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number), 
 				formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
@@ -120,7 +120,7 @@ PHP_FUNCTION( numfmt_format )
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported format type %ld", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported format type %pd", type);
 			RETURN_FALSE;
 			break;
 	}

@@ -155,7 +155,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 	zend_op_array *new_op_array;
 	zval result;
 	php_stream *fp;
-	off_t position;
+	zend_off_t position;
 
 	switch (code) {
 		case PHAR_MIME_PHPS:
@@ -211,7 +211,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 				if (got > 0) {
 					PHPWRITE(buf, got);
 					position += got;
-					if (position == (off_t) info->uncompressed_filesize) {
+					if (position == (zend_off_t) info->uncompressed_filesize) {
 						break;
 					}
 				}
@@ -947,7 +947,7 @@ PHP_METHOD(Phar, mapPhar)
 {
 	char *alias = NULL, *error;
 	int alias_len = 0;
-	long dataoffset = 0;
+	zend_long dataoffset = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!l", &alias, &alias_len, &dataoffset) == FAILURE) {
 		return;
@@ -999,7 +999,7 @@ PHP_METHOD(Phar, apiVersion)
  * Returns whether phar extension supports compression using zlib/bzip2 */
 PHP_METHOD(Phar, canCompress)
 {
-	long method = 0;
+	zend_long method = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &method) == FAILURE) {
 		return;
@@ -1109,8 +1109,8 @@ PHP_METHOD(Phar, __construct)
 #else
 	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
 	int fname_len, alias_len = 0, arch_len, entry_len, is_data;
-	long flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS;
-	long format = 0;
+	zend_long flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS;
+	zend_long format = 0;
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
 	zval *zobj = getThis(), arg1, arg2;
@@ -1900,7 +1900,7 @@ PHP_METHOD(Phar, buildFromIterator)
 PHP_METHOD(Phar, count)
 {
 	/* mode can be ignored, maximum depth is 1 */
-	long mode;
+	zend_long mode;
 	PHAR_ARCHIVE_OBJECT();
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &mode) == FAILURE) {
@@ -1917,7 +1917,7 @@ PHP_METHOD(Phar, count)
  */
 PHP_METHOD(Phar, isFileFormat)
 {
-	long type;
+	zend_long type;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &type) == FAILURE) {
@@ -1940,7 +1940,7 @@ PHP_METHOD(Phar, isFileFormat)
 static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS_DC) /* {{{ */
 {
 	char *error;
-	off_t offset;
+	zend_off_t offset;
 	phar_entry_info *link;
 
 	if (FAILURE == phar_open_entry_fp(entry, &error, 1 TSRMLS_CC)) {
@@ -2300,7 +2300,7 @@ PHP_METHOD(Phar, convertToExecutable)
 	php_uint32 flags;
 	zend_object *ret;
 	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday, so there) */
-	long format = 9021976, method = 9021976;
+	zend_long format = 9021976, method = 9021976;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lls", &format, &method, &ext, &ext_len) == FAILURE) {
@@ -2403,7 +2403,7 @@ PHP_METHOD(Phar, convertToData)
 	php_uint32 flags;
 	zend_object *ret;
 	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday so there) */
-	long format = 9021976, method = 9021976;
+	zend_long format = 9021976, method = 9021976;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lls", &format, &method, &ext, &ext_len) == FAILURE) {
@@ -2812,7 +2812,7 @@ PHP_METHOD(Phar, setStub)
 	zval *zstub;
 	char *stub, *error;
 	int stub_len;
-	long len = -1;
+	zend_long len = -1;
 	php_stream *stream;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -2962,7 +2962,7 @@ PHP_METHOD(Phar, setDefaultStub)
  */
 PHP_METHOD(Phar, setSignatureAlgorithm)
 {
-	long algo;
+	zend_long algo;
 	char *error, *key = NULL;
 	int key_len = 0;
 
@@ -3133,7 +3133,7 @@ static int pharobj_cancompress(HashTable *manifest TSRMLS_DC) /* {{{ */
  */
 PHP_METHOD(Phar, compress)
 {
-	long method;
+	zend_long method;
 	char *ext = NULL;
 	int ext_len = 0;
 	php_uint32 flags;
@@ -3246,7 +3246,7 @@ PHP_METHOD(Phar, compressFiles)
 {
 	char *error;
 	php_uint32 flags;
-	long method;
+	zend_long method;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &method) == FAILURE) {
@@ -3889,7 +3889,7 @@ PHP_METHOD(Phar, getStub)
 
 	php_stream_rewind(fp);
 carry_on:
-	buf = STR_ALLOC(len, 0);
+	buf = zend_string_alloc(len, 0);
 
 	if (len != php_stream_read(fp, buf->val, len)) {
 		if (fp != phar_obj->archive->fp) {
@@ -3897,7 +3897,7 @@ carry_on:
 		}
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
 			"Unable to read stub");
-		STR_RELEASE(buf);
+		zend_string_release(buf);
 		return;
 	}
 
@@ -4429,7 +4429,7 @@ PHP_METHOD(PharFileInfo, getCompressedSize)
 PHP_METHOD(PharFileInfo, isCompressed)
 {
 	/* a number that is not Phar::GZ or Phar::BZ2 */
-	long method = 9021976;
+	zend_long method = 9021976;
 	PHAR_ENTRY_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &method) == FAILURE) {
@@ -4512,7 +4512,7 @@ PHP_METHOD(PharFileInfo, getPharFlags)
 PHP_METHOD(PharFileInfo, chmod)
 {
 	char *error;
-	long perms;
+	zend_long perms;
 	PHAR_ENTRY_OBJECT();
 
 	if (entry_obj->entry->is_temp_dir) {
@@ -4774,7 +4774,7 @@ PHP_METHOD(PharFileInfo, getContent)
  */
 PHP_METHOD(PharFileInfo, compress)
 {
-	long method;
+	zend_long method;
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
@@ -5267,7 +5267,7 @@ zend_function_entry phar_exception_methods[] = {
 /* }}} */
 
 #define REGISTER_PHAR_CLASS_CONST_LONG(class_name, const_name, value) \
-	zend_declare_class_constant_long(class_name, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+	zend_declare_class_constant_long(class_name, const_name, sizeof(const_name)-1, (zend_long)value TSRMLS_CC);
 
 #define phar_exception_get_default() zend_exception_get_default(TSRMLS_C)
 

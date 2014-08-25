@@ -247,7 +247,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 
 	TSRMLS_FETCH();
 
-	cmd = STR_ALLOC(2 * l, 0);
+	cmd = zend_string_alloc(2 * l, 0);
 
 	for (x = 0, y = 0; x < l; x++) {
 		int mb_len = php_mblen(str + x, (l - x));
@@ -320,7 +320,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
-		cmd = STR_REALLOC(cmd, y, 0);
+		cmd = zend_string_realloc(cmd, y, 0);
 	}
 
 	cmd->len = y;
@@ -339,7 +339,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 
 	TSRMLS_FETCH();
 
-	cmd = STR_ALLOC(4 * l + 2, 0); /* worst case */
+	cmd = zend_string_alloc(4 * l + 2, 0); /* worst case */
 
 #ifdef PHP_WIN32
 	cmd->val[y++] = '"';
@@ -387,7 +387,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
-		cmd = STR_REALLOC(cmd, y, 0);
+		cmd = zend_string_realloc(cmd, y, 0);
 	}
 	cmd->len = y;
 	return cmd;
@@ -470,7 +470,7 @@ PHP_FUNCTION(shell_exec)
    Change the priority of the current process */
 PHP_FUNCTION(proc_nice)
 {
-	long pri;
+	zend_long pri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &pri) == FAILURE) {
 		RETURN_FALSE;

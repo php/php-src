@@ -533,9 +533,9 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 		file_path = file_handle->filename;
 	}
 
-	compiled_filename = STR_INIT(file_path, strlen(file_path), 0);
+	compiled_filename = zend_string_init(file_path, strlen(file_path), 0);
 	zend_set_compiled_filename(compiled_filename TSRMLS_CC);
-	STR_RELEASE(compiled_filename);
+	zend_string_release(compiled_filename);
 
 	if (CG(start_lineno)) {
 		CG(zend_lineno) = CG(start_lineno);
@@ -658,7 +658,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 
 	/* enforce ZEND_MMAP_AHEAD trailing NULLs for flex... */
 	old_len = Z_STRLEN_P(str);
-	Z_STR_P(str) = STR_REALLOC(Z_STR_P(str), old_len + ZEND_MMAP_AHEAD, 0);
+	Z_STR_P(str) = zend_string_realloc(Z_STR_P(str), old_len + ZEND_MMAP_AHEAD, 0);
 	Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	memset(Z_STRVAL_P(str) + old_len, 0, ZEND_MMAP_AHEAD + 1);
 
@@ -687,9 +687,9 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 
 	yy_scan_buffer(buf, size TSRMLS_CC);
 
-	new_compiled_filename = STR_INIT(filename, strlen(filename), 0);
+	new_compiled_filename = zend_string_init(filename, strlen(filename), 0);
 	zend_set_compiled_filename(new_compiled_filename TSRMLS_CC);
-	STR_RELEASE(new_compiled_filename);
+	zend_string_release(new_compiled_filename);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
 	RESET_DOC_COMMENT();
@@ -955,7 +955,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 							hex_buf[1] = *(++s);
 							Z_STRLEN_P(zendlval)--;
 						}
-						*t++ = (char) strtol(hex_buf, NULL, 16);
+						*t++ = (char) ZEND_STRTOL(hex_buf, NULL, 16);
 					} else {
 						*t++ = '\\';
 						*t++ = *s;
@@ -976,7 +976,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 								Z_STRLEN_P(zendlval)--;
 							}
 						}
-						*t++ = (char) strtol(octal_buf, NULL, 8);
+						*t++ = (char) ZEND_STRTOL(octal_buf, NULL, 8);
 					} else {
 						*t++ = '\\';
 						*t++ = *s;
@@ -1520,11 +1520,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		--len;
 	}
 
-	if (len < SIZEOF_LONG * 8) {
+	if (len < SIZEOF_ZEND_INT * 8) {
 		if (len == 0) {
 			ZVAL_LONG(zendlval, 0);
 		} else {
-			ZVAL_LONG(zendlval, strtol(bin, NULL, 2));
+			ZVAL_LONG(zendlval, ZEND_STRTOL(bin, NULL, 2));
 		}
 		return T_LNUMBER;
 	} else {
@@ -1535,10 +1535,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>{LNUM} {
 	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
-		ZVAL_LONG(zendlval, strtol(yytext, NULL, 0));
+		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, NULL, 0));
 	} else {
 		errno = 0;
-		ZVAL_LONG(zendlval, strtol(yytext, NULL, 0));
+		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, NULL, 0));
 		if (errno == ERANGE) { /* Overflow */
 			if (yytext[0] == '0') { /* octal overflow */
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, NULL));
@@ -1561,11 +1561,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		len--;
 	}
 
-	if (len < SIZEOF_LONG * 2 || (len == SIZEOF_LONG * 2 && *hex <= '7')) {
+	if (len < SIZEOF_ZEND_INT * 2 || (len == SIZEOF_ZEND_INT * 2 && *hex <= '7')) {
 		if (len == 0) {
 			ZVAL_LONG(zendlval, 0);
 		} else {
-			ZVAL_LONG(zendlval, strtol(hex, NULL, 16));
+			ZVAL_LONG(zendlval, ZEND_STRTOL(hex, NULL, 16));
 		}
 		return T_LNUMBER;
 	} else {
@@ -1576,7 +1576,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_VAR_OFFSET>[0]|([1-9][0-9]*) { /* Offset could be treated as a long */
 	if (yyleng < MAX_LENGTH_OF_LONG - 1 || (yyleng == MAX_LENGTH_OF_LONG - 1 && strcmp(yytext, long_min_digits) < 0)) {
-		ZVAL_LONG(zendlval, strtol(yytext, NULL, 10));
+		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, NULL, 10));
 	} else {
 		ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
@@ -1620,7 +1620,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (!filename) {
 		ZVAL_EMPTY_STRING(zendlval);
 	} else {
-		ZVAL_STR(zendlval, STR_COPY(filename));
+		ZVAL_STR(zendlval, zend_string_copy(filename));
 	}
 	return T_FILE;
 }
@@ -1633,11 +1633,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		filename = STR_EMPTY_ALLOC();
 	}
 
-	dirname = STR_INIT(filename->val, filename->len, 0);
+	dirname = zend_string_init(filename->val, filename->len, 0);
 	zend_dirname(dirname->val, dirname->len);
 
 	if (strcmp(dirname->val, ".") == 0) {
-		dirname = STR_REALLOC(dirname, MAXPATHLEN, 0);
+		dirname = zend_string_realloc(dirname, MAXPATHLEN, 0);
 #if HAVE_GETCWD
 		VCWD_GETCWD(dirname->val, MAXPATHLEN);
 #elif HAVE_GETWD
@@ -1880,7 +1880,7 @@ inline_html:
 	HANDLE_NEWLINES(yytext, yyleng);
 
 	if (doc_com) {
-		CG(doc_comment) = STR_INIT(yytext, yyleng, 0);
+		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
 		return T_DOC_COMMENT;
 	}
 
@@ -2084,7 +2084,7 @@ inline_html:
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
-	Z_LVAL_P(zendlval) = (long) '{';
+	Z_LVAL_P(zendlval) = (zend_long) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;

@@ -93,7 +93,7 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out TSRMLS_DC)
 		if (Z_LVAL_P(val) < 0 || Z_LVAL_P(val) > UINT_MAX) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"the interface index cannot be negative or larger than %u;"
-				" given %ld", UINT_MAX, Z_LVAL_P(val));
+				" given %pd", UINT_MAX, Z_LVAL_P(val));
 			ret = FAILURE;
 		} else {
 			*out = Z_LVAL_P(val);
@@ -288,7 +288,7 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 		goto ipv4_loop_ttl;
 
 	case IP_MULTICAST_TTL:
-		convert_to_long_ex(arg4);
+		convert_to_int_ex(arg4);
 		if (Z_LVAL_P(arg4) < 0L || Z_LVAL_P(arg4) > 255L) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"Expected a value between 0 and 255");
@@ -353,7 +353,7 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 		ov = (int) Z_TYPE_P(arg4) == IS_TRUE;
 		goto ipv6_loop_hops;
 	case IPV6_MULTICAST_HOPS:
-		convert_to_long_ex(arg4);
+		convert_to_int_ex(arg4);
 		if (Z_LVAL_P(arg4) < -1L || Z_LVAL_P(arg4) > 255L) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"Expected a value between -1 and 255");

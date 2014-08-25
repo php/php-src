@@ -534,7 +534,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 				ISC_INT64 l;
 
 				case SQL_SHORT:
-					convert_to_long(val);
+					convert_to_int(val);
 					if (Z_LVAL_P(val) > SHRT_MAX || Z_LVAL_P(val) < SHRT_MIN) {
 						_php_ibase_module_error("Array parameter exceeds field width" TSRMLS_CC);
 						return FAILURE;
@@ -542,7 +542,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 					*(short *) buf = (short) Z_LVAL_P(val);
 					break;
 				case SQL_LONG:
-					convert_to_long(val);
+					convert_to_int(val);
 #if (SIZEOF_LONG > 4)
 					if (Z_LVAL_P(val) > ISC_LONG_MAX || Z_LVAL_P(val) < ISC_LONG_MIN) {
 						_php_ibase_module_error("Array parameter exceeds field width" TSRMLS_CC);
@@ -553,7 +553,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 					break;
 				case SQL_INT64:
 #if (SIZEOF_LONG >= 8)
-					convert_to_long(val);
+					convert_to_int(val);
 					*(long *) buf = Z_LVAL_P(val);
 #else
 					convert_to_string(val);

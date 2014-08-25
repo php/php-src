@@ -285,7 +285,7 @@ static int php_mssql_message_handler(DBPROCESS *dbproc, DBINT msgno,int msgstate
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "message: %s (severity %d)", msgtext, severity);
 	}
 	if (MS_SQL_G(server_message)) {
-		STR_FREE(MS_SQL_G(server_message));
+		zend_string_free(MS_SQL_G(server_message));
 		MS_SQL_G(server_message) = NULL;
 	}
 	MS_SQL_G(server_message) = estrdup(msgtext);
@@ -330,8 +330,8 @@ static void _free_result(mssql_result *result, int free_fields)
 	
 	if (free_fields && result->fields) {
 		for (i=0; i<result->num_fields; i++) {
-			STR_FREE(result->fields[i].name);
-			STR_FREE(result->fields[i].column_source);
+			zend_string_free(result->fields[i].name);
+			zend_string_free(result->fields[i].column_source);
 		}
 		efree(result->fields);
 	}
@@ -507,10 +507,10 @@ PHP_RINIT_FUNCTION(mssql)
 */
 PHP_RSHUTDOWN_FUNCTION(mssql)
 {
-	STR_FREE(MS_SQL_G(appname));
+	zend_string_free(MS_SQL_G(appname));
 	MS_SQL_G(appname) = NULL;
 	if (MS_SQL_G(server_message)) {
-		STR_FREE(MS_SQL_G(server_message));
+		zend_string_free(MS_SQL_G(server_message));
 		MS_SQL_G(server_message) = NULL;
 	}
 	return SUCCESS;
@@ -1160,7 +1160,7 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 							case SQLINT1:
 							case SQLINT2:
 							case SQLINT4:
-								convert_to_long_ex(&bind->zval);
+								convert_to_int_ex(&bind->zval);
 								/* FIXME this works only on little endian machine !!! */
 								Z_LVAL_P(bind->zval) = *((int *)(dbretdata(mssql_ptr->link,i)));
 								break;
@@ -1195,7 +1195,7 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 	if (statement->binds != NULL) {	/*	Maybe a non-parameter sp	*/
 		if (zend_hash_find(statement->binds, "RETVAL", 6, (void**)&bind)==SUCCESS) {
 			if (dbhasretstat(mssql_ptr->link)) {
-				convert_to_long_ex(&bind->zval);
+				convert_to_int_ex(&bind->zval);
 				Z_LVAL_P(bind->zval)=dbretstatus(mssql_ptr->link);
 			}
 			else {
@@ -1518,7 +1518,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	ZEND_FETCH_RESOURCE(result, mssql_result *, &mssql_result_index, -1, "MS SQL-result", le_result);	
 
 	if (MS_SQL_G(server_message)) {
-		STR_FREE(MS_SQL_G(server_message));
+		zend_string_free(MS_SQL_G(server_message));
 		MS_SQL_G(server_message) = NULL;
 	}
 
@@ -1877,7 +1877,7 @@ PHP_FUNCTION(mssql_result)
 			break;
 		}
 		default:
-			convert_to_long_ex(field);
+			convert_to_int_ex(field);
 			field_offset = Z_LVAL_PP(field);
 			if (field_offset<0 || field_offset>=result->num_fields) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
@@ -2067,7 +2067,7 @@ PHP_FUNCTION(mssql_bind)
 			case SQLINT1:
 			case SQLINT2:
 			case SQLINT4:
-				convert_to_long_ex(var);
+				convert_to_int_ex(var);
 				value=(LPBYTE)(&Z_LVAL_PP(var));
 				break;
 

@@ -99,7 +99,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
 #ifndef INADDR_NONE
-#define INADDR_NONE ((unsigned long int) -1)
+#define INADDR_NONE ((zend_ulong) -1)
 #endif
 
 #include "zend_globals.h"
@@ -395,7 +395,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge, 0, 0, 2)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
-    	
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge_recursive, 0, 0, 2)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
@@ -3914,7 +3914,7 @@ PHP_FUNCTION(ip2long)
 #ifdef HAVE_INET_PTON
 	struct in_addr ip;
 #else
-	unsigned long int ip;
+	zend_ulong ip;
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &addr, &addr_len) == FAILURE) {
@@ -3950,7 +3950,7 @@ PHP_FUNCTION(long2ip)
 	/* "It's a long but it's not, PHP ints are signed */
 	char *ip;
 	int ip_len;
-	unsigned long n;
+	zend_ulong n;
 	struct in_addr myaddr;
 #ifdef HAVE_INET_PTON
 	char str[40];
@@ -4252,7 +4252,7 @@ PHP_FUNCTION(getopt)
 
 			argv[pos++] = estrdup(arg_str->val);
 
-			STR_RELEASE(arg_str);
+			zend_string_release(arg_str);
 		} ZEND_HASH_FOREACH_END();
 
 		/* The C Standard requires argv[argc] to be NULL - this might
@@ -4297,7 +4297,7 @@ PHP_FUNCTION(getopt)
 			opts->opt_char = 0;
 			opts++;
 
-			STR_RELEASE(arg_str);
+			zend_string_release(arg_str);
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		opts = (opt_struct*) erealloc(opts, sizeof(opt_struct) * (len + 1));
@@ -4386,7 +4386,7 @@ PHP_FUNCTION(flush)
    Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
-	long num;
+	zend_long num;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num) == FAILURE) {
 		RETURN_FALSE;
@@ -4409,7 +4409,7 @@ PHP_FUNCTION(sleep)
 PHP_FUNCTION(usleep)
 {
 #if HAVE_USLEEP
-	long num;
+	zend_long num;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num) == FAILURE) {
 		return;
@@ -4428,7 +4428,7 @@ PHP_FUNCTION(usleep)
    Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {
-	long tv_sec, tv_nsec;
+	zend_long tv_sec, tv_nsec;
 	struct timespec php_req, php_rem;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &tv_sec, &tv_nsec) == FAILURE) {
@@ -4525,9 +4525,9 @@ static int add_config_entry_cb(zval *entry TSRMLS_DC, int num_args, va_list args
 
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if (hash_key->key) {
-			add_assoc_str_ex(retval, hash_key->key->val, hash_key->key->len, STR_COPY(Z_STR_P(entry)));
+			add_assoc_str_ex(retval, hash_key->key->val, hash_key->key->len, zend_string_copy(Z_STR_P(entry)));
 		} else {
-			add_index_str(retval, hash_key->h, STR_COPY(Z_STR_P(entry)));
+			add_index_str(retval, hash_key->h, zend_string_copy(Z_STR_P(entry)));
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		array_init(&tmp);
@@ -4626,7 +4626,7 @@ PHP_FUNCTION(error_log)
 	char *message, *opt = NULL, *headers = NULL;
 	int message_len, opt_len = 0, headers_len = 0;
 	int opt_err = 0, argc = ZEND_NUM_ARGS();
-	long erropt = 0;
+	zend_long erropt = 0;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|lps", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
 		return;
@@ -4858,12 +4858,12 @@ static int user_shutdown_function_call(zval *zv TSRMLS_DC) /* {{{ */
 	if (!zend_is_callable(&shutdown_function_entry->arguments[0], 0, &function_name TSRMLS_CC)) {
 		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name->val);
 		if (function_name) {
-			STR_RELEASE(function_name);
+			zend_string_release(function_name);
 		}
 		return 0;
 	}
 	if (function_name) {
-		STR_RELEASE(function_name);
+		zend_string_release(function_name);
 	}
 
 	if (call_user_function(EG(function_table), NULL,
@@ -5019,7 +5019,7 @@ PHP_FUNCTION(register_shutdown_function)
 		zend_hash_next_index_insert_mem(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry));
 	}
 	if (callback_name) {
-		STR_RELEASE(callback_name);
+		zend_string_release(callback_name);
 	}
 }
 /* }}} */
@@ -5375,13 +5375,13 @@ PHP_FUNCTION(set_include_path)
 		RETVAL_FALSE;
 	}
 
-	key = STR_INIT("include_path", sizeof("include_path") - 1, 0);
+	key = zend_string_init("include_path", sizeof("include_path") - 1, 0);
 	if (zend_alter_ini_entry_ex(key, new_value, new_value_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == FAILURE) {
-		STR_RELEASE(key);
+		zend_string_release(key);
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(key);
+	zend_string_release(key);
 }
 /* }}} */
 
@@ -5414,9 +5414,9 @@ PHP_FUNCTION(restore_include_path)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
-	key = STR_INIT("include_path", sizeof("include_path")-1, 0);
+	key = zend_string_init("include_path", sizeof("include_path")-1, 0);
 	zend_restore_ini_entry(key, PHP_INI_STAGE_RUNTIME);
-	STR_FREE(key);
+	zend_string_free(key);
 }
 /* }}} */
 
@@ -5477,9 +5477,9 @@ PHP_FUNCTION(ignore_user_abort)
 	old_setting = PG(ignore_user_abort);
 
 	if (arg) {
-		zend_string *key = STR_INIT("ignore_user_abort", sizeof("ignore_user_abort"), 0);
+		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort"), 0);
 		zend_alter_ini_entry_ex(key, arg, arg_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
-		STR_RELEASE(key);
+		zend_string_release(key);
 	}
 
 	RETURN_LONG(old_setting);
@@ -5526,7 +5526,7 @@ PHP_FUNCTION(getservbyport)
 {
 	char *proto;
 	int proto_len;
-	long port;
+	zend_long port;
 	struct servent *serv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &port, &proto, &proto_len) == FAILURE) {
@@ -5573,7 +5573,7 @@ PHP_FUNCTION(getprotobyname)
    Returns protocol name associated with protocol number proto */
 PHP_FUNCTION(getprotobynumber)
 {
-	long proto;
+	zend_long proto;
 	struct protoent *ent;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &proto) == FAILURE) {
@@ -5616,10 +5616,10 @@ PHP_FUNCTION(register_tick_function)
 	if (!zend_is_callable(&tick_fe.arguments[0], 0, &function_name TSRMLS_CC)) {
 		efree(tick_fe.arguments);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid tick callback '%s' passed", function_name->val);
-		STR_RELEASE(function_name);
+		zend_string_release(function_name);
 		RETURN_FALSE;
 	} else if (function_name) {
-		STR_RELEASE(function_name);
+		zend_string_release(function_name);
 	}
 
 	if (Z_TYPE(tick_fe.arguments[0]) != IS_ARRAY && Z_TYPE(tick_fe.arguments[0]) != IS_OBJECT) {
@@ -5778,7 +5778,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) == IS_LONG) {
-				ulong key = (ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
 					find_hash = zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash);
@@ -5839,7 +5839,7 @@ PHP_FUNCTION(parse_ini_file)
 	char *filename = NULL;
 	int filename_len = 0;
 	zend_bool process_sections = 0;
-	long scanner_mode = ZEND_INI_SCANNER_NORMAL;
+	zend_long scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
 
@@ -5880,7 +5880,7 @@ PHP_FUNCTION(parse_ini_string)
 	char *string = NULL, *str = NULL;
 	int str_len = 0;
 	zend_bool process_sections = 0;
-	long scanner_mode = ZEND_INI_SCANNER_NORMAL;
+	zend_long scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_ini_parser_cb_t ini_parser_cb;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &str, &str_len, &process_sections, &scanner_mode) == FAILURE) {

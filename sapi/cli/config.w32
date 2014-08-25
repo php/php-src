@@ -11,11 +11,11 @@ if (PHP_CLI == "yes") {
 	if (PHP_CRT_DEBUG == "yes") {
 		ADD_FLAG("CFLAGS_CLI", "/D PHP_WIN32_DEBUG_HEAP");
 	}
-	ADD_FLAG("LDFLAGS_CLI", "/stack:8388608");
+	ADD_FLAG("LDFLAGS_CLI", "/stack:67108864");
 }
 
 if (PHP_CLI_WIN32 == "yes") {
 	SAPI('cli_win32', 'cli_win32.c php_cli_process_title.c ps_title.c', 'php-win.exe');
-	ADD_FLAG("LDFLAGS_CLI_WIN32", "/stack:8388608");
+	ADD_FLAG("LDFLAGS_CLI_WIN32", "/stack:67108864");
 }
 

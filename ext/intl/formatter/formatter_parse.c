@@ -36,7 +36,7 @@
  */
 PHP_FUNCTION( numfmt_parse )
 {
-	long type = FORMAT_TYPE_DOUBLE;
+	zend_long type = FORMAT_TYPE_DOUBLE;
 	UChar* sstr = NULL;
 	int sstr_len = 0;
 	char* str = NULL;
@@ -68,7 +68,7 @@ PHP_FUNCTION( numfmt_parse )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
+		convert_to_int(zposition);
 		position = (int32_t)Z_LVAL_P( zposition );
 		position_p = &position;
 	}
@@ -86,10 +86,10 @@ PHP_FUNCTION( numfmt_parse )
 			break;
 		case FORMAT_TYPE_INT64:
 			val64 = unum_parseInt64(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, &INTL_DATA_ERROR_CODE(nfo));
-			if(val64 > LONG_MAX || val64 < LONG_MIN) {
+			if(val64 > ZEND_LONG_MAX || val64 < ZEND_LONG_MIN) {
 				RETVAL_DOUBLE(val64);
 			} else {
-				RETVAL_LONG((long)val64);
+				RETVAL_LONG((zend_long)val64);
 			}
 			break;
 		case FORMAT_TYPE_DOUBLE:
@@ -97,7 +97,7 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_DOUBLE(val_double);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported format type %ld", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported format type %pd", type);
 			RETVAL_FALSE;
 			break;
 	}
@@ -157,7 +157,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
+		convert_to_int(zposition);
 		position = (int32_t)Z_LVAL_P( zposition );
 		position_p = &position;
 	}

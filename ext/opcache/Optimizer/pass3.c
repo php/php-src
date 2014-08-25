@@ -48,13 +48,13 @@
 if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
-	zend_uint *jmp_hitlist;
+	uint32_t *jmp_hitlist;
 	int jmp_hitlist_count;
 	int i;
-	zend_uint opline_num = 0;
+	uint32_t opline_num = 0;
 	ALLOCA_FLAG(use_heap);
 
-	jmp_hitlist = (zend_uint *)DO_ALLOCA(sizeof(zend_uint)*op_array->last);
+	jmp_hitlist = (uint32_t *)DO_ALLOCA(sizeof(uint32_t)*op_array->last);
 	opline = op_array->opcodes;
 
 	while (opline < end) {

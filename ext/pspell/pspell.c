@@ -265,7 +265,7 @@ static PHP_FUNCTION(pspell_new)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	int language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
-	long mode = 0L,  speed = 0L;
+	zend_long mode = Z_I(0),  speed = Z_I(0);
 	int argc = ZEND_NUM_ARGS();
 	zval *ind;
 
@@ -362,7 +362,7 @@ static PHP_FUNCTION(pspell_new_personal)
 {
 	char *personal, *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	int personal_len, language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
-	long mode = 0L,  speed = 0L;
+	zend_long mode = Z_I(0),  speed = Z_I(0);
 	int argc = ZEND_NUM_ARGS();
 	zval *ind;
 
@@ -465,7 +465,7 @@ static PHP_FUNCTION(pspell_new_personal)
    Load a dictionary based on the given config */
 static PHP_FUNCTION(pspell_new_config)
 {
-	long conf;	
+	zend_long conf;	
 	zval *ind;
 	PspellCanHaveError *ret;
 	PspellManager *manager;
@@ -496,7 +496,7 @@ static PHP_FUNCTION(pspell_new_config)
 static PHP_FUNCTION(pspell_check)
 {
 	int word_len;
-	long scin;
+	zend_long scin;
 	char *word;
 	PspellManager *manager;
 
@@ -518,7 +518,7 @@ static PHP_FUNCTION(pspell_check)
    Returns array of suggestions */
 static PHP_FUNCTION(pspell_suggest)
 {
-	long scin;
+	zend_long scin;
 	char *word;
 	int word_len;
 	PspellManager *manager;
@@ -552,7 +552,7 @@ static PHP_FUNCTION(pspell_suggest)
 static PHP_FUNCTION(pspell_store_replacement)
 {
 	int miss_len, corr_len;
-	long scin;
+	zend_long scin;
 	char *miss, *corr;
 	PspellManager *manager;
 
@@ -577,7 +577,7 @@ static PHP_FUNCTION(pspell_store_replacement)
 static PHP_FUNCTION(pspell_add_to_personal)
 {
 	int word_len;
-	long scin;
+	zend_long scin;
 	char *word;
 	PspellManager *manager;
 
@@ -607,7 +607,7 @@ static PHP_FUNCTION(pspell_add_to_personal)
 static PHP_FUNCTION(pspell_add_to_session)
 {
 	int word_len;
-	long scin;
+	zend_long scin;
 	char *word;
 	PspellManager *manager;
 
@@ -636,7 +636,7 @@ static PHP_FUNCTION(pspell_add_to_session)
    Clears the current session */
 static PHP_FUNCTION(pspell_clear_session)
 {
-	long scin;
+	zend_long scin;
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &scin) == FAILURE) {
@@ -659,7 +659,7 @@ static PHP_FUNCTION(pspell_clear_session)
    Saves the current (personal) wordlist */
 static PHP_FUNCTION(pspell_save_wordlist)
 {
-	long scin;
+	zend_long scin;
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &scin) == FAILURE) {
@@ -752,7 +752,7 @@ static PHP_FUNCTION(pspell_config_create)
    Consider run-together words as valid components */
 static PHP_FUNCTION(pspell_config_runtogether)
 {
-	long conf;
+	zend_long conf;
 	zend_bool runtogether;
 	PspellConfig *config;
 	
@@ -772,7 +772,7 @@ static PHP_FUNCTION(pspell_config_runtogether)
    Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
 static PHP_FUNCTION(pspell_config_mode)
 {
-	long conf, mode;
+	zend_long conf, mode;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &conf, &mode) == FAILURE) {
@@ -799,7 +799,7 @@ static PHP_FUNCTION(pspell_config_mode)
 static PHP_FUNCTION(pspell_config_ignore)
 {
 	char ignore_str[MAX_LENGTH_OF_LONG + 1];	
-	long conf, ignore = 0L;
+	zend_long conf, ignore = 0L;
 	PspellConfig *config;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &conf, &ignore) == FAILURE) {
@@ -817,7 +817,7 @@ static PHP_FUNCTION(pspell_config_ignore)
 
 static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 {
-	long conf;
+	zend_long conf;
 	char *value;
 	int value_len;
 	PspellConfig *config;
@@ -865,7 +865,7 @@ static PHP_FUNCTION(pspell_config_data_dir)
    Use a personal dictionary with replacement pairs for this config */
 static PHP_FUNCTION(pspell_config_repl)
 {
-	long conf;
+	zend_long conf;
 	char *repl;
 	int repl_len;
 	PspellConfig *config;
@@ -892,7 +892,7 @@ static PHP_FUNCTION(pspell_config_repl)
    Save replacement pairs when personal list is saved for this config */
 static PHP_FUNCTION(pspell_config_save_repl)
 {
-	long conf;
+	zend_long conf;
 	zend_bool save;
 	PspellConfig *config;
 	

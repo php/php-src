@@ -1231,9 +1231,9 @@ ZEND_API zend_mm_heap *zend_mm_startup(void)
 }
 
 #if ZEND_DEBUG
-static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
+static zend_long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
 {
-	long leaks = 0;
+	zend_long leaks = 0;
 	zend_mm_block *p, *q;
 
 	p = ZEND_MM_NEXT_BLOCK(b);
@@ -1276,7 +1276,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 {
 	zend_mm_segment *segment = heap->segments_list;
 	zend_mm_block *p, *q;
-	zend_uint total = 0;
+	uint32_t total = 0;
 
 	if (!segment) {
 		return;
@@ -1291,7 +1291,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 		}
 		if (!ZEND_MM_IS_FREE_BLOCK(p)) {
 			if (p->magic == MEM_BLOCK_VALID) {
-				long repeated;
+				zend_long repeated;
 				zend_leak_info leak;
 
 				ZEND_MM_SET_MAGIC(p, MEM_BLOCK_LEAK);
@@ -1373,7 +1373,7 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 #ifdef ZTS
 	if (ZEND_MM_BAD_THREAD_ID(p)) {
 		if (!silent) {
-			zend_debug_alloc_output("Invalid pointer: ((thread_id=0x%0.8X) != (expected=0x%0.8X))\n", (long)p->thread_id, (long)tsrm_thread_id());
+			zend_debug_alloc_output("Invalid pointer: ((thread_id=0x%0.8X) != (expected=0x%0.8X))\n", (zend_long)p->thread_id, (zend_long)tsrm_thread_id());
 			had_problems = 1;
 		} else {
 			return zend_mm_check_ptr(heap, ptr, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1984,9 +1984,9 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted at %s:%d (tried to allocate %lu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted (tried to allocate %lu bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, size);
 #endif
 		}
 
@@ -2297,9 +2297,9 @@ realloc_segment:
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted at %s:%d (tried to allocate %ld bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted (tried to allocate %ld bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, size);
 #endif
 			return NULL;
 		}
@@ -2474,7 +2474,7 @@ ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
 	size_t res = nmemb;
-	unsigned long overflow = 0;
+	zend_ulong overflow = 0;
 
 	__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (overflow)
@@ -2494,7 +2494,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
         size_t res = nmemb;
-        unsigned long overflow = 0;
+        zend_ulong overflow = 0;
 
 #ifdef __ILP32__ /* x32 */
 # define LP_SUFF "l"
@@ -2523,7 +2523,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
         size_t res;
-        unsigned long overflow;
+        zend_ulong overflow;
 
         __asm__ ("umlal %0,%1,%2,%3"
              : "=r"(res), "=r"(overflow)
@@ -2544,7 +2544,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
         size_t res;
-        unsigned long overflow;
+        zend_ulong overflow;
 
         __asm__ ("mul %0,%2,%3\n\tumulh %1,%2,%3\n\tadds %0,%0,%4\n\tadc %1,%1,xzr"
              : "=&r"(res), "=&r"(overflow)
@@ -2630,7 +2630,7 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	int length;
+	size_t length;
 	char *p;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
@@ -2649,7 +2649,7 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	return p;
 }
 
-ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+ZEND_API char *_estrndup(const char *s, size_t length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
 #ifdef ZEND_SIGNALS
@@ -2670,7 +2670,7 @@ ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_
 }
 
 
-ZEND_API char *zend_strndup(const char *s, uint length)
+ZEND_API char *zend_strndup(const char *s, size_t length)
 {
 	char *p;
 #ifdef ZEND_SIGNALS

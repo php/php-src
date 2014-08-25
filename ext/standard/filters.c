@@ -1224,7 +1224,7 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 
 		*pretval_len = str->len;
 		memcpy(*pretval, str->val, str->len + 1);
-		STR_RELEASE(str);
+		zend_string_release(str);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	}
@@ -1232,7 +1232,7 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 }
 
 #if IT_WAS_USED
-static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, long *pretval, char *field_name, size_t field_name_len)
+static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, zend_long *pretval, char *field_name, size_t field_name_len)
 {
 	zval **tmpval;
 
@@ -1244,7 +1244,7 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, long *pretv
 		if (Z_TYPE_PP(tmpval) != IS_LONG) {
 			tmp = *ztval;
 			zval_copy_ctor(&tmp);
-			convert_to_long(&tmp);
+			convert_to_int(&tmp);
 			ztval = &tmp;
 		}
 		*pretval = Z_LVAL_P(ztval);
@@ -1255,7 +1255,7 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, long *pretv
 }
 #endif
 
-static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, unsigned long *pretval, char *field_name, size_t field_name_len)
+static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, zend_ulong *pretval, char *field_name, size_t field_name_len)
 {
 	zval *tmpval;
 
@@ -1266,7 +1266,7 @@ static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, unsigned l
 
 		if (Z_TYPE_P(tmpval) != IS_LONG) {
 			ZVAL_DUP(&tmp, tmpval);;
-			convert_to_long(&tmp);
+			convert_to_int(&tmp);
 			tmpval = &tmp;
 		}
 		if (Z_LVAL_P(tmpval) < 0) {
@@ -1306,7 +1306,7 @@ static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretva
 #if IT_WAS_USED
 static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
 {
-	long l;
+	zend_long l;
 	php_conv_err_t err;
 
 	*pretval = 0;
@@ -1320,7 +1320,7 @@ static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *fie
 
 static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
 {
-	unsigned long l;
+	zend_ulong l;
 	php_conv_err_t err;
 
 	*pretval = 0;

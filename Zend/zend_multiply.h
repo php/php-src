@@ -22,7 +22,7 @@
 #if defined(__i386__) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	long __tmpvar; 													\
+	zend_long __tmpvar; 													\
 	__asm__ ("imul %3,%0\n"											\
 		"adc $0,%1" 												\
 			: "=r"(__tmpvar),"=r"(usedval) 							\
@@ -34,7 +34,7 @@
 #elif defined(__x86_64__) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	long __tmpvar; 													\
+	zend_long __tmpvar; 													\
 	__asm__ ("imul %3,%0\n"											\
 		"adc $0,%1" 												\
 			: "=r"(__tmpvar),"=r"(usedval) 							\
@@ -46,7 +46,7 @@
 #elif defined(__arm__) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	long __tmpvar; 													\
+	zend_long __tmpvar; 													\
 	__asm__("smull %0, %1, %2, %3\n"								\
 		"sub %1, %1, %0, asr #31"									\
 			: "=r"(__tmpvar), "=r"(usedval)							\
@@ -58,7 +58,7 @@
 #elif defined(__aarch64__) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	long __tmpvar; 													\
+	zend_long __tmpvar; 													\
 	__asm__("mul %0, %2, %3\n"										\
 		"smulh %1, %2, %3\n"										\
 		"sub %1, %1, %0, asr #63\n"									\
@@ -68,11 +68,24 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
-#elif SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
+#elif defined(ZEND_WIN32)
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	zend_long   __lres  = (a) * (b);										\
+	long double __dres  = (long double)(a) * (long double)(b);		\
+	long double __delta = (long double) __lres - __dres;			\
+	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
+		(dval) = __dres;											\
+	} else {														\
+		(lval) = __lres;											\
+	}																\
+} while (0)
+
+#elif SIZEOF_ZEND_INT == 4 && defined(HAVE_ZEND_LONG64)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	zend_long64 __result = (zend_long64) (a) * (zend_long64) (b);	\
-	if (__result > LONG_MAX || __result < LONG_MIN) {				\
+	if (__result > ZEND_INT_MAX || __result < ZEND_INT_MIN) {				\
 		(dval) = (double) __result;									\
 		(usedval) = 1;												\
 	} else {														\

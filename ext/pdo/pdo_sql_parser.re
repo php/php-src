@@ -223,12 +223,12 @@ safe:
 							ret = -1;
 							strncpy(stmt->error_code, stmt->dbh->error_code, 6);
 							if (buf) {
-								STR_RELEASE(buf);
+								zend_string_release(buf);
 							}
 							goto clean_up;
 						}
 						if (buf) {
-							STR_RELEASE(buf);
+							zend_string_release(buf);
 						}
 					} else {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
@@ -248,7 +248,7 @@ safe:
 
 						case IS_FALSE:
 						case IS_TRUE:
-							convert_to_long(&tmp_param);
+							convert_to_int(&tmp_param);
 							/* fall through */
 						case IS_LONG:
 						case IS_DOUBLE:

@@ -92,7 +92,7 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 	zend_llist_add_element(&mh->easyh, &tmp_val);
 
-	RETURN_LONG((long)curl_multi_add_handle(mh->multi, ch->cp));	
+	RETURN_LONG((zend_long)curl_multi_add_handle(mh->multi, ch->cp));	
 }
 /* }}} */
 
@@ -140,7 +140,7 @@ PHP_FUNCTION(curl_multi_remove_handle)
 	ZEND_FETCH_RESOURCE(mh, php_curlm *, z_mh, -1, le_curl_multi_handle_name, le_curl_multi_handle);
 	ZEND_FETCH_RESOURCE(ch, php_curl *, z_ch, -1, le_curl_name, le_curl);
 
-	RETVAL_LONG((long)curl_multi_remove_handle(mh->multi, ch->cp));
+	RETVAL_LONG((zend_long)curl_multi_remove_handle(mh->multi, ch->cp));
 	zend_llist_del_element(&mh->easyh, &z_ch, (int (*)(void *, void *))curl_compare_resources);
 
 }
@@ -218,7 +218,7 @@ PHP_FUNCTION(curl_multi_exec)
 		}
 	}
 
-	convert_to_long_ex(z_still_running);
+	convert_to_int_ex(z_still_running);
 	still_running = Z_LVAL_P(z_still_running);
 	result = curl_multi_perform(mh->multi, &still_running);
 	ZVAL_LONG(z_still_running, still_running);
@@ -242,7 +242,7 @@ PHP_FUNCTION(curl_multi_getcontent)
 
 	if (ch->handlers->write->method == PHP_CURL_RETURN && ch->handlers->write->buf.s) {
 		smart_str_0(&ch->handlers->write->buf);
-		RETURN_STR(STR_COPY(ch->handlers->write->buf.s));
+		RETURN_STR(zend_string_copy(ch->handlers->write->buf.s));
 	}
 
 	RETURN_EMPTY_STRING();
@@ -357,7 +357,7 @@ void _php_curl_multi_close(zend_resource *rsrc TSRMLS_DC) /* {{{ */
          return string describing error code */
 PHP_FUNCTION(curl_multi_strerror)
 {
-	long code;
+	zend_long code;
 	const char *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &code) == FAILURE) {
@@ -375,7 +375,7 @@ PHP_FUNCTION(curl_multi_strerror)
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
-static int _php_curl_multi_setopt(php_curlm *mh, long option, zval *zvalue, zval *return_value TSRMLS_DC) /* {{{ */
+static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value TSRMLS_DC) /* {{{ */
 { 
 	CURLMcode error = CURLM_OK;
 
@@ -386,7 +386,7 @@ static int _php_curl_multi_setopt(php_curlm *mh, long option, zval *zvalue, zval
 #if LIBCURL_VERSION_NUM >= 0x071003 /* 7.16.3 */
 		case CURLMOPT_MAXCONNECTS:
 #endif
-			convert_to_long_ex(zvalue);
+			convert_to_int_ex(zvalue);
 			error = curl_multi_setopt(mh->multi, option, Z_LVAL_P(zvalue));
 			break;
 
@@ -409,7 +409,7 @@ static int _php_curl_multi_setopt(php_curlm *mh, long option, zval *zvalue, zval
 PHP_FUNCTION(curl_multi_setopt)
 {
 	zval       *z_mh, *zvalue;
-	long        options;
+	zend_long        options;
 	php_curlm *mh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &z_mh, &options, &zvalue) == FAILURE) {

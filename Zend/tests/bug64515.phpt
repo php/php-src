@@ -9,4 +9,4 @@ foo();
 echo "okey";
 ?>
 --EXPECTF--
-Fatal error: Redefinition of parameter unused in %sbug64515.php on line 2
+Fatal error: Redefinition of parameter $unused in %sbug64515.php on line 2

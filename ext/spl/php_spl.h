@@ -79,7 +79,7 @@ PHP_FUNCTION(class_parents);
 PHP_FUNCTION(class_implements);
 PHP_FUNCTION(class_uses);
 
-PHPAPI void php_spl_object_hash(zval *obj, char* md5str TSRMLS_DC);
+PHPAPI zend_string *php_spl_object_hash(zval *obj TSRMLS_DC);
 
 #endif /* PHP_SPL_H */
 
