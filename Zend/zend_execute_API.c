@@ -1243,7 +1243,7 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 		zend_on_timeout(EG(timeout_seconds) TSRMLS_CC);
 	}
 
-	zend_error(E_ERROR, "Maximum execution time of %d second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	zend_error(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
 }
 /* }}} */
 

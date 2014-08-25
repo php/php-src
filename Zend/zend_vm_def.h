@@ -5962,11 +5962,9 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 ZEND_VM_HANDLER(122, ZEND_DEFINED, CONST, ANY)
 {
 	USE_OPLINE
-	zval *name;
 	zend_constant *c;
 
 	SAVE_OPLINE();
-	name = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 	} else if ((c = zend_quick_get_constant(opline->op1.zv, 0 TSRMLS_CC)) == NULL) {

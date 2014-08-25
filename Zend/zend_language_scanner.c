@@ -1002,7 +1002,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 		s = Z_STRVAL_P(zendlval);
 		SCNG(output_filter)(&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval) TSRMLS_CC);
 		zval_ptr_dtor(zendlval);
-		ZVAL_STRINGL(zendlval, str, sz);
+		ZVAL_STRINGL(zendlval, (char *) str, sz);
 		efree(str);
 	}
 }

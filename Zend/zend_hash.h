@@ -702,6 +702,11 @@ static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPositio
 	ZEND_HASH_FOREACH(ht, 0); \
 	_h = _p->h; \
 	_key = _p->key;
+
+#define ZEND_HASH_FOREACH_NUM_KEY_VAL(ht, _h, _val) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_h = _p->h; \
+	_val = _z;
 		
 #define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \

@@ -3459,11 +3459,9 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 static int ZEND_FASTCALL  ZEND_DEFINED_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *name;
 	zend_constant *c;
 
 	SAVE_OPLINE();
-	name = opline->op1.zv;
 	if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 	} else if ((c = zend_quick_get_constant(opline->op1.zv, 0 TSRMLS_CC)) == NULL) {

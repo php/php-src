@@ -585,7 +585,7 @@ ZEND_METHOD(exception, getTraceAsString)
 {
 	zval *trace, *frame;
 	zend_ulong index;
-	zend_string *str, *key;
+	zend_string *str;
 	int num = 0, len;
 	char s_tmp[MAX_LENGTH_OF_LONG + 7 + 1 + 1];
 
@@ -594,7 +594,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	str = zend_string_alloc(0, 0);
 
 	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(trace), index, key, frame) {
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
 		_build_trace_string(frame, index, &str, &num TSRMLS_CC);
 	} ZEND_HASH_FOREACH_END();
 

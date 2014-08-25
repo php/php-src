@@ -34,12 +34,14 @@ ZEND_API zend_ulong zend_hash_func(const char *str, size_t len)
 	return zend_inline_hash_func(str, len);
 }
 
+#ifndef ZTS
 static void _str_dtor(zval *zv)
 {
 	zend_string *str = Z_STR_P(zv);
 	GC_FLAGS(str) &= ~IS_STR_INTERNED;
 	GC_REFCOUNT(str) = 1;
 }
+#endif
 
 void zend_interned_strings_init(TSRMLS_D)
 {
