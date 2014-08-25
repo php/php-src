@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
     (Daniel Lowrey)
+  . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3)
+    (Daniel Lowrey)
 
 - SPL:
   . Fixed bug #67813 (CachingIterator::__construct InvalidArgumentException
