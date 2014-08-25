@@ -761,7 +761,8 @@ SPL_METHOD(SplPriorityQueue, top)
 }
 /* }}} */
 
-/* {{{ proto int SplPriorityQueue::setIteratorMode($flags)
+
+/* {{{ proto int SplPriorityQueue::setExtractFlags($flags)
  Set the flags of extraction*/
 SPL_METHOD(SplPriorityQueue, setExtractFlags)
 {
@@ -775,6 +776,22 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 	intern = Z_SPLHEAP_P(getThis());
 
 	intern->flags = value & SPL_PQUEUE_EXTR_MASK;
+
+	RETURN_LONG(intern->flags);
+}
+/* }}} */
+
+/* {{{ proto int SplPriorityQueue::getExtractFlags()
+ Get the flags of extraction*/
+SPL_METHOD(SplPriorityQueue, getExtractFlags)
+{
+	spl_heap_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	intern = Z_SPLHEAP_P(getThis());
 
 	RETURN_LONG(intern->flags);
 }
@@ -795,6 +812,22 @@ SPL_METHOD(SplHeap, recoverFromCorruption)
 	intern->heap->flags = intern->heap->flags & ~SPL_HEAP_CORRUPTED;
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int SplHeap::isCorrupted()
+ Tells if the heap is in a corrupted state*/
+SPL_METHOD(SplHeap, isCorrupted)
+{
+	spl_heap_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	intern = Z_SPLHEAP_P(getThis());
+
+	RETURN_BOOL(intern->heap->flags & SPL_HEAP_CORRUPTED);
 }
 /* }}} */
 
@@ -1158,6 +1191,7 @@ static const zend_function_entry spl_funcs_SplPriorityQueue[] = {
 	SPL_ME(SplPriorityQueue, compare,               arginfo_heap_compare,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, insert,                arginfo_pqueue_insert,   ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, setExtractFlags,       arginfo_pqueue_setflags, ZEND_ACC_PUBLIC)
+	SPL_ME(SplPriorityQueue, getExtractFlags,       arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, top,                   arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, extract,               arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap,          count,                 arginfo_splheap_void,    ZEND_ACC_PUBLIC)
@@ -1168,6 +1202,7 @@ static const zend_function_entry spl_funcs_SplPriorityQueue[] = {
 	SPL_ME(SplHeap,          next,                  arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap,          valid,                 arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap,          recoverFromCorruption, arginfo_splheap_void,    ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap,          isCorrupted,           arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1183,6 +1218,7 @@ static const zend_function_entry spl_funcs_SplHeap[] = {
 	SPL_ME(SplHeap, next,                  arginfo_splheap_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap, valid,                 arginfo_splheap_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap, recoverFromCorruption, arginfo_splheap_void, ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, isCorrupted,           arginfo_splheap_void, ZEND_ACC_PUBLIC)
 	ZEND_FENTRY(compare, NULL, NULL, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT)
 	{NULL, NULL, NULL}
 };
