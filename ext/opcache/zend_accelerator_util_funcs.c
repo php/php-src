@@ -305,28 +305,44 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 
 static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
 {
-	int i;
-	zend_ast *node;
+	uint32_t i;
 
-	if (ast->kind == ZEND_CONST) {
-		node = emalloc(sizeof(zend_ast) + sizeof(zval));
-		node->kind = ZEND_CONST;
-		node->children = 0;
-		ZVAL_COPY_VALUE(&node->u.val, &ast->u.val);
-		zend_clone_zval(&node->u.val, 0 TSRMLS_CC);
-	} else {
-		node = emalloc(sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
-		node->kind = ast->kind;
-		node->children = ast->children;
-		for (i = 0; i < ast->children; i++) {
-			if ((&ast->u.child)[i]) {
-				(&node->u.child)[i] = zend_ast_clone((&ast->u.child)[i] TSRMLS_CC);
+	if (ast->kind == ZEND_AST_ZVAL) {
+		zend_ast_zval *copy = emalloc(sizeof(zend_ast_zval));
+		copy->kind = ZEND_AST_ZVAL;
+		copy->attr = ast->attr;
+		ZVAL_COPY_VALUE(&copy->val, zend_ast_get_zval(ast));
+		zend_clone_zval(&copy->val, 0 TSRMLS_CC);
+		return (zend_ast *) copy;
+	} else if (zend_ast_is_list(ast)) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		zend_ast_list *copy = emalloc(
+			sizeof(zend_ast_list) + sizeof(zend_ast *) * (list->children - 1));
+		copy->kind = list->kind;
+		copy->attr = list->attr;
+		copy->children = list->children;
+		for (i = 0; i < list->children; i++) {
+			if (list->child[i]) {
+				copy->child[i] = zend_ast_clone(list->child[i] TSRMLS_CC);
 			} else {
-				(&node->u.child)[i] = NULL;
+				copy->child[i] = NULL;
 			}
 		}
+		return (zend_ast *) copy;
+	} else {
+		uint32_t children = zend_ast_get_num_children(ast);
+		zend_ast *copy = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * (children - 1));
+		copy->kind = ast->kind;
+		copy->attr = ast->attr;
+		for (i = 0; i < children; i++) {
+			if (ast->child[i]) {
+				copy->child[i] = zend_ast_clone(ast->child[i] TSRMLS_CC);
+			} else {
+				copy->child[i] = NULL;
+			}
+		}
+		return copy;
 	}
-	return node;
 }
 
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)

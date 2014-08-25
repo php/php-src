@@ -53,7 +53,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast = (zend_ast_ref*)p;
 		
-				zend_ast_destroy(ast->ast);
+				zend_ast_destroy_and_free(ast->ast);
 				efree(ast);
 				break;
 			}
@@ -113,7 +113,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast = (zend_ast_ref*)p;
 
-				zend_ast_destroy(ast->ast);
+				zend_ast_destroy_and_free(ast->ast);
 				efree(ast);
 				break;
 			}

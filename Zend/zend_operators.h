@@ -448,7 +448,7 @@ END_EXTERN_C()
 	}
 
 #define convert_to_boolean_ex(pzv)	convert_to_ex_master(pzv, boolean, _IS_BOOL)
-#define convert_to_long_ex(pzv)		convert_to_ex_master(pzv, int, IS_LONG)
+#define convert_to_long_ex(pzv)		convert_to_ex_master(pzv, long, IS_LONG)
 #define convert_to_double_ex(pzv)	convert_to_ex_master(pzv, double, IS_DOUBLE)
 #define convert_to_string_ex(pzv)	convert_to_ex_master(pzv, string, IS_STRING)
 #define convert_to_array_ex(pzv)	convert_to_ex_master(pzv, array, IS_ARRAY)

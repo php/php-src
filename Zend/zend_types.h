@@ -132,6 +132,7 @@ struct _zval_struct {
 		uint32_t     next;                 /* hash collision chain */
 		uint32_t     str_offset;           /* string offset */
 		uint32_t     cache_slot;           /* literal cache slot */
+		uint32_t     lineno;               /* line number (for ast nodes) */
 	} u2;
 };
 

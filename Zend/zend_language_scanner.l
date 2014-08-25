@@ -559,11 +559,10 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 	zend_op_array *retval=NULL;
 	int compiler_result;
 	zend_bool compilation_successful=0;
-	znode retval_znode;
+	zval retval_zv;
 	zend_bool original_in_compilation = CG(in_compilation);
 
-	retval_znode.op_type = IS_CONST;
-	ZVAL_LONG(&retval_znode.u.constant, 1);
+	ZVAL_LONG(&retval_zv, 1);
 
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 
@@ -583,12 +582,17 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		CG(active_op_array) = op_array;
 		zend_stack_push(&CG(context_stack), (void *) &CG(context));
 		zend_init_compiler_context(TSRMLS_C);
+		CG(ast_arena) = zend_arena_create(1024 * 32);
 		compiler_result = zendparse(TSRMLS_C);
-		zend_do_return(&retval_znode, 0 TSRMLS_CC);
-		CG(in_compilation) = original_in_compilation;
 		if (compiler_result != 0) { /* parser error */
 			zend_bailout();
 		}
+		zend_compile_top_stmt(CG(ast) TSRMLS_CC);
+		zend_ast_destroy(CG(ast));
+		zend_arena_destroy(CG(ast_arena));
+		zend_do_end_compilation(TSRMLS_C);
+		zend_emit_final_return(&retval_zv TSRMLS_CC);
+		CG(in_compilation) = original_in_compilation;
 		compilation_successful=1;
 	}
 
@@ -750,6 +754,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		zend_stack_push(&CG(context_stack), (void *) &CG(context));
 		zend_init_compiler_context(TSRMLS_C);
 		BEGIN(ST_IN_SCRIPTING);
+		CG(ast_arena) = zend_arena_create(1024 * 32);
 		compiler_result = zendparse(TSRMLS_C);
 
 		if (SCNG(script_filtered)) {
@@ -764,7 +769,11 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 			efree(op_array);
 			retval = NULL;
 		} else {
-			zend_do_return(NULL, 0 TSRMLS_CC);
+			zend_compile_top_stmt(CG(ast) TSRMLS_CC);
+			zend_ast_destroy(CG(ast));
+			zend_arena_destroy(CG(ast_arena));
+			zend_do_end_compilation(TSRMLS_C);
+			zend_emit_final_return(NULL TSRMLS_CC);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array TSRMLS_CC);
 			zend_release_labels(0 TSRMLS_CC);
@@ -873,15 +882,6 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 	} else { \
 		ZVAL_STRINGL(zendlval, yytext, yyleng); \
 	}
-
-// TODO: some extensions might need content, but we don't copy it intentional ???
-#if 0
-# define DUMMY_STRINGL(zendlval, yytext, yyleng) \
-	ZVAL_STRINGL(zendlval, yytext, yyleng)
-#else
-# define DUMMY_STRINGL(zendlval, yytext, yyleng) \
-	ZVAL_EMPTY_STRING(zendlval)
-#endif
 
 static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type TSRMLS_DC)
 {
@@ -1192,7 +1192,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
-	DUMMY_STRINGL(zendlval, yytext, yyleng);
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_WHITESPACE;
 }
@@ -1595,71 +1594,18 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__CLASS__" {
-	zend_class_entry *ce = CG(active_class_entry);
-	if (ce && ZEND_ACC_TRAIT == (ce->ce_flags & ZEND_ACC_TRAIT)) {
-		/* We create a special __CLASS__ constant that is going to be resolved
-		   at run-time */
-		ZVAL_STRINGL(zendlval, "__CLASS__", sizeof("__CLASS__") - 1);
-		Z_TYPE_INFO_P(zendlval) = IS_CONSTANT_EX;
-	} else {
-		if (ce && ce->name) {
-			ZVAL_STR(zendlval, zend_string_copy(ce->name));
-		} else {
-			ZVAL_EMPTY_STRING(zendlval);
-		}
-	}
 	return T_CLASS_C;
 }
 
 <ST_IN_SCRIPTING>"__TRAIT__" {
-	zend_class_entry *ce = CG(active_class_entry);
-	if (ce && ce->name && ZEND_ACC_TRAIT == (ce->ce_flags & ZEND_ACC_TRAIT)) {
-		ZVAL_STR(zendlval, zend_string_copy(ce->name));
-	} else {
-		ZVAL_EMPTY_STRING(zendlval);
-	}
 	return T_TRAIT_C;
 }
 
 <ST_IN_SCRIPTING>"__FUNCTION__" {
-	zend_op_array *op_array = CG(active_op_array);
-	if (op_array && op_array->function_name) {
-		ZVAL_STR(zendlval, zend_string_copy(op_array->function_name));
-	} else {
-		ZVAL_EMPTY_STRING(zendlval);
-	}
 	return T_FUNC_C;
 }
 
 <ST_IN_SCRIPTING>"__METHOD__" {
-	if (CG(active_class_entry)) {
-		int len = 0;
-
-		if (CG(active_class_entry)->name) {
-			len += CG(active_class_entry)->name->len;
-		}
-		if (CG(active_op_array) && CG(active_op_array)->function_name) {
-			len += sizeof("::")-1;
-			len += CG(active_op_array)->function_name->len;
-		}
-		ZVAL_NEW_STR(zendlval, zend_string_alloc(len, 0));
-		len = 0;
-		if (CG(active_class_entry)->name) {
-			memcpy(Z_STRVAL_P(zendlval), CG(active_class_entry)->name->val, CG(active_class_entry)->name->len);
-			len += CG(active_class_entry)->name->len;
-		}
-		if (CG(active_op_array) && CG(active_op_array)->function_name) {
-			memcpy(Z_STRVAL_P(zendlval) + len, "::", sizeof("::")-1);
-			len += sizeof("::")-1;
-			memcpy(Z_STRVAL_P(zendlval) + len, CG(active_op_array)->function_name->val, CG(active_op_array)->function_name->len);
-			len += CG(active_op_array)->function_name->len;
-		}
-		Z_STRVAL_P(zendlval)[len] = 0;
-	} else if (CG(active_op_array) && CG(active_op_array)->function_name) {
-		ZVAL_STR(zendlval, zend_string_copy(CG(active_op_array)->function_name));
-	} else {
-		ZVAL_EMPTY_STRING(zendlval);
-	}
 	return T_METHOD_C;
 }
 
@@ -1705,11 +1651,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__NAMESPACE__" {
-	if (Z_TYPE(CG(current_namespace)) != IS_UNDEF) {
-		ZVAL_DUP(zendlval, &CG(current_namespace));
-	} else {
-		ZVAL_EMPTY_STRING(zendlval);
-	}
 	return T_NS_C;
 }
 
@@ -1723,7 +1664,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng);
-	DUMMY_STRINGL(zendlval, yytext, yyleng);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
 }
@@ -1731,7 +1671,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<%=" {
 	if (CG(asp_tags)) {
-		DUMMY_STRINGL(zendlval, yytext, yyleng);
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
@@ -1741,7 +1680,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>"<?=" {
-	DUMMY_STRINGL(zendlval, yytext, yyleng);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG_WITH_ECHO;
 }
@@ -1749,7 +1687,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<%" {
 	if (CG(asp_tags)) {
-		DUMMY_STRINGL(zendlval, yytext, yyleng);
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -1759,7 +1696,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
-	DUMMY_STRINGL(zendlval, yytext, yyleng);
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
@@ -1768,7 +1704,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
-		DUMMY_STRINGL(zendlval, yytext, yyleng);
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -1953,7 +1888,6 @@ inline_html:
 }
 
 <ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
-	DUMMY_STRINGL(zendlval, yytext, yyleng);
 	BEGIN(INITIAL);
 	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 }
@@ -1962,7 +1896,6 @@ inline_html:
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
-		DUMMY_STRINGL(zendlval, yytext, yyleng);
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
 		yyless(1);

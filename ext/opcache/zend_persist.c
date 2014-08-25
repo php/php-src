@@ -144,20 +144,33 @@ static void zend_hash_persist_immutable(HashTable *ht TSRMLS_DC)
 
 static zend_ast *zend_persist_ast(zend_ast *ast TSRMLS_DC)
 {
-	int i;
+	uint32_t i;
 	zend_ast *node;
 
-	if (ast->kind == ZEND_CONST) {
-		node = zend_accel_memdup(ast, sizeof(zend_ast));
-		zend_persist_zval(&node->u.val TSRMLS_CC);
+	if (ast->kind == ZEND_AST_ZVAL) {
+		zend_ast_zval *copy = zend_accel_memdup(ast, sizeof(zend_ast_zval));
+		zend_persist_zval(&copy->val TSRMLS_CC);
+		node = (zend_ast *) copy;
+	} else if (zend_ast_is_list(ast)) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		zend_ast_list *copy = zend_accel_memdup(ast,
+			sizeof(zend_ast_list) + sizeof(zend_ast *) * (list->children - 1));
+		for (i = 0; i < list->children; i++) {
+			if (copy->child[i]) {
+				copy->child[i] = zend_persist_ast(copy->child[i] TSRMLS_CC);
+			}
+		}
+		node = (zend_ast *) copy;
 	} else {
-		node = zend_accel_memdup(ast, sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
-		for (i = 0; i < ast->children; i++) {
-			if ((&node->u.child)[i]) {
-				(&node->u.child)[i] = zend_persist_ast((&node->u.child)[i] TSRMLS_CC);
+		uint32_t children = zend_ast_get_num_children(ast);
+		node = zend_accel_memdup(ast, sizeof(zend_ast) + sizeof(zend_ast *) * (children - 1));
+		for (i = 0; i < children; i++) {
+			if (node->child[i]) {
+				node->child[i] = zend_persist_ast(node->child[i] TSRMLS_CC);
 			}
 		}
 	}
+
 	efree(ast);
 	return node;
 }
