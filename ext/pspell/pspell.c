@@ -265,7 +265,7 @@ static PHP_FUNCTION(pspell_new)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	int language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
-	zend_long mode = Z_I(0),  speed = Z_I(0);
+	zend_long mode = Z_L(0),  speed = Z_L(0);
 	int argc = ZEND_NUM_ARGS();
 	zval *ind;
 
@@ -362,7 +362,7 @@ static PHP_FUNCTION(pspell_new_personal)
 {
 	char *personal, *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	int personal_len, language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
-	zend_long mode = Z_I(0),  speed = Z_I(0);
+	zend_long mode = Z_L(0),  speed = Z_L(0);
 	int argc = ZEND_NUM_ARGS();
 	zval *ind;
 

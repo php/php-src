@@ -2841,7 +2841,7 @@ PHP_FUNCTION(array_pad)
 
 	/* Populate the pads array */
 	num_pads = pad_size_abs - input_size;
-	if (num_pads > Z_I(1048576)) {
+	if (num_pads > Z_L(1048576)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may only pad up to 1048576 elements at a time");
 		zval_dtor(return_value);
 		RETURN_FALSE;

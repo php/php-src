@@ -813,7 +813,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 
 	/* many more are invalid, but that depends on whether it's HTML
 	 * (and which version) or XML. */
-	if (code_l > Z_I(0x10FFFF))
+	if (code_l > Z_L(0x10FFFF))
 		return FAILURE;
 
 	if (code_point != NULL)

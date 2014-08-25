@@ -2130,7 +2130,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_server_version)(const MYSQLND_CONN_DATA * 
 	p += 1; /* consume the dot */
 	patch = ZEND_STRTOL(p, &p, 10);
 
-	return (zend_ulong)(major * Z_I(10000) + (zend_ulong)(minor * Z_I(100) + patch));
+	return (zend_ulong)(major * Z_L(10000) + (zend_ulong)(minor * Z_L(100) + patch));
 }
 /* }}} */
 

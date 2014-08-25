@@ -2882,7 +2882,7 @@ PHP_FUNCTION(openssl_csr_sign)
 {
 	zval * zcert = NULL, *zcsr, *zpkey, *args = NULL;
 	zend_long num_days;
-	zend_long serial = Z_I(0);
+	zend_long serial = Z_L(0);
 	X509 * cert = NULL, *new_cert = NULL;
 	X509_REQ * csr;
 	EVP_PKEY * key = NULL, *priv_key = NULL;

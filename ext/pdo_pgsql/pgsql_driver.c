@@ -309,7 +309,7 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sq
 	if (qs == PGRES_COMMAND_OK) {
 		ZEND_ATOL(ret, PQcmdTuples(res));
 	} else {
-		ret = Z_I(0);
+		ret = Z_L(0);
 	}
 	PQclear(res);
 
