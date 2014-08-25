@@ -28,6 +28,7 @@
 # if !defined(_STDINT)
 #  define _STDINT
 #  include "win32/php_stdint.h"
+#  include "win32/php_inttypes.h"
 # endif
 # define HAVE_INT8_T   1
 # define HAVE_UINT8_T  1

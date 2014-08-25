@@ -71,12 +71,13 @@ typedef unsigned long long zend_ulong64;
 # undef HAVE_ZEND_LONG64
 #endif
 
-#ifdef _WIN64
-typedef __int64 zend_intptr_t;
-typedef unsigned __int64 zend_uintptr_t;
+/* XXX this won't work on X32 platform */
+#ifdef ZEND_ENABLE_INT64
+typedef int64_t zend_intptr_t;
+typedef uint64_t zend_uintptr_t;
 #else
-typedef long zend_intptr_t;
-typedef unsigned long zend_uintptr_t;
+typedef int32_t zend_intptr_t;
+typedef uint32_t zend_uintptr_t;
 #endif
 
 typedef struct _zend_object_handlers zend_object_handlers;
