@@ -3642,12 +3642,12 @@ void zend_compile_dim(znode *result, zend_ast *ast, int type TSRMLS_DC) {
 }
 
 static zend_bool is_this_fetch(zend_ast *ast) {
-	if (ast->kind != ZEND_AST_VAR || ast->child[0]->kind != ZEND_AST_ZVAL) {
-		return 0;
+	if (ast->kind == ZEND_AST_VAR && ast->child[0]->kind == ZEND_AST_ZVAL) {
+		zval *name = zend_ast_get_zval(ast->child[0]);
+		return Z_TYPE_P(name) == IS_STRING && zend_str_equals_literal(Z_STR_P(name), "this");
 	}
 
-	zval *name = zend_ast_get_zval(ast->child[0]);
-	return Z_TYPE_P(name) == IS_STRING && zend_str_equals_literal(Z_STR_P(name), "this");
+	return 0;
 }
 
 static zend_op *zend_delayed_compile_prop(
@@ -7141,12 +7141,10 @@ void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) {
 	ZEND_ASSERT(ast->attr == T_CLASS_C && ce && ZEND_CE_IS_TRAIT(ce));
 
 	{
-		zval const_zv;
-		ZVAL_STRING(&const_zv, "__CLASS__");
 		zend_ast *const_ast = zend_ast_create(ZEND_AST_CONST,
-			zend_ast_create_zval(&const_zv));
+			zend_ast_create_zval_from_str(STR_INIT("__CLASS__", sizeof("__CLASS__") - 1, 0)));
 		zend_compile_const(result, const_ast TSRMLS_CC);
-		zval_ptr_dtor(&const_zv);
+		zend_ast_destroy(const_ast);
 	}
 }
 
