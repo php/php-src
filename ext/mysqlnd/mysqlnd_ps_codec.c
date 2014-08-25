@@ -76,7 +76,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigne
 			case 1:uval = (uint64_t) uint1korr(*row);break;
 		}
 
-#if SIZEOF_ZEND_INT==4
+#if SIZEOF_ZEND_LONG==4
 		if (uval > INT_MAX) {
 			DBG_INF("stringify");
 			tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, uval);
@@ -105,7 +105,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigne
 			case 1:lval = (int64_t) *(int8_t*)*row;break;
 		}
 
-#if SIZEOF_ZEND_INT==4
+#if SIZEOF_ZEND_LONG==4
 		if ((L64(2147483647) < (int64_t) lval) || (L64(-2147483648) > (int64_t) lval)) {
 			DBG_INF("stringify");
 			tmp_len = sprintf((char *)&tmp, MYSQLND_LL_SPEC, lval);
@@ -663,7 +663,7 @@ mysqlnd_stmt_execute_store_types(MYSQLND_STMT_DATA * stmt, zval * copies, zend_u
 		short current_type = stmt->param_bind[i].type;
 		zval *parameter = &stmt->param_bind[i].zv;
 		/* our types are not unsigned */
-#if SIZEOF_ZEND_INT==8  
+#if SIZEOF_ZEND_LONG==8  
 		if (current_type == MYSQL_TYPE_LONG) {
 			current_type = MYSQL_TYPE_LONGLONG;
 		}

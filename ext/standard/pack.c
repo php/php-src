@@ -829,12 +829,12 @@ PHP_FUNCTION(unpack)
 							map = little_endian_long_map;
 						}
 
-						if (SIZEOF_ZEND_INT > 4 && issigned) {
+						if (SIZEOF_ZEND_LONG > 4 && issigned) {
 							v = ~INT_MAX;
 						}
 
 						v |= php_unpack(&input[inputpos], 4, issigned, map);
-						if (SIZEOF_ZEND_INT > 4) {
+						if (SIZEOF_ZEND_LONG > 4) {
  							if (type == 'l') {
 								v = (signed int) v; 
 							} else {

@@ -35,7 +35,7 @@
 
 #define SHORT_MAX (1 << (8*sizeof(short)-1))
 
-#if SIZEOF_ZEND_INT == 8 && !defined(PHP_WIN32)
+#if SIZEOF_ZEND_LONG == 8 && !defined(PHP_WIN32)
 # define LL_MASK "l"
 # define LL_LIT(lit) lit ## L
 #else

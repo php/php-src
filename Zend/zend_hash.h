@@ -258,7 +258,7 @@ static inline int _zend_handle_numeric_str(const char *key, size_t length, zend_
 	if ((*end != '\0') /* not a null terminated string */
 	 || (*tmp == '0' && length > 1) /* numbers with leading zeros */
 	 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */
-	 || (SIZEOF_ZEND_INT == 4 &&
+	 || (SIZEOF_ZEND_LONG == 4 &&
 	     end - tmp == MAX_LENGTH_OF_LONG - 1 &&
 	     *tmp > '2')) { /* overflow */
 		return 0;

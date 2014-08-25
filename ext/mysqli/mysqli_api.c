@@ -213,9 +213,9 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 				break;
 
 			case 'i': /* Integer */
-#if SIZEOF_ZEND_INT==8
+#if SIZEOF_ZEND_LONG==8
 				bind[ofs].buffer_type = MYSQL_TYPE_LONGLONG;
-#elif SIZEOF_ZEND_INT==4
+#elif SIZEOF_ZEND_LONG==4
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
 #endif
 				bind[ofs].buffer = &Z_LVAL_P(param);
@@ -284,9 +284,9 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 				type = MYSQL_TYPE_DOUBLE;
 				break;
 			case 'i': /* Integer */
-#if SIZEOF_ZEND_INT==8
+#if SIZEOF_ZEND_LONG==8
 				type = MYSQL_TYPE_LONGLONG;
-#elif SIZEOF_ZEND_INT==4
+#elif SIZEOF_ZEND_LONG==4
 				type = MYSQL_TYPE_LONG;
 #endif
 				break;
@@ -996,7 +996,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						{
 							/* unsigned int (11) */
 							uval= *(unsigned int *) stmt->result.buf[i].val;
-#if SIZEOF_ZEND_INT==4
+#if SIZEOF_ZEND_LONG==4
 							if (uval > INT_MAX) {
 								char *tmp, *p;
 								int j = 10;
@@ -1047,9 +1047,9 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 							{
 								llval= *(my_ulonglong *) stmt->result.buf[i].val;
 							}
-#if SIZEOF_ZEND_INT==8
+#if SIZEOF_ZEND_LONG==8
 							if (uns && llval > 9223372036854775807L) {
-#elif SIZEOF_ZEND_INT==4
+#elif SIZEOF_ZEND_LONG==4
 							if ((uns && llval > L64(2147483647)) ||
 								(!uns && (( L64(2147483647) < (my_longlong) llval) ||
 								(L64(-2147483648) > (my_longlong) llval))))

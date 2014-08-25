@@ -1023,7 +1023,7 @@ yy63:
 	++YYCURSOR;
 #line 588 "ext/standard/var_unserializer.re"
 	{
-#if SIZEOF_ZEND_INT == 4
+#if SIZEOF_ZEND_LONG == 4
 use_double:
 #endif
 	*p = YYCURSOR;
@@ -1134,7 +1134,7 @@ yy79:
 	++YYCURSOR;
 #line 546 "ext/standard/var_unserializer.re"
 	{
-#if SIZEOF_ZEND_INT == 4
+#if SIZEOF_ZEND_LONG == 4
 	int digits = YYCURSOR - start - 3;
 
 	if (start[2] == '-' || start[2] == '+') {

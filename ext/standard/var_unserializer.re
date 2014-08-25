@@ -544,7 +544,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 }
 
 "i:" iv ";"	{
-#if SIZEOF_ZEND_INT == 4
+#if SIZEOF_ZEND_LONG == 4
 	int digits = YYCURSOR - start - 3;
 
 	if (start[2] == '-' || start[2] == '+') {
@@ -586,7 +586,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 }
 
 "d:" (iv | nv | nvexp) ";"	{
-#if SIZEOF_ZEND_INT == 4
+#if SIZEOF_ZEND_LONG == 4
 use_double:
 #endif
 	*p = YYCURSOR;

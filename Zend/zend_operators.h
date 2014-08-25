@@ -73,7 +73,7 @@ END_EXTERN_C()
 
 #if ZEND_DVAL_TO_LVAL_CAST_OK
 # define zend_dval_to_lval(d) ((zend_long) (d))
-#elif SIZEOF_ZEND_INT == 4
+#elif SIZEOF_ZEND_LONG == 4
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
 	if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
@@ -202,7 +202,7 @@ check_digits:
 				dp_or_e = -1;
 				goto process_double;
 			}
-		} else if (!(digits < SIZEOF_ZEND_INT * 2 || (digits == SIZEOF_ZEND_INT * 2 && ptr[-digits] <= '7'))) {
+		} else if (!(digits < SIZEOF_ZEND_LONG * 2 || (digits == SIZEOF_ZEND_LONG * 2 && ptr[-digits] <= '7'))) {
 			if (dval) {
 				local_dval = zend_hex_strtod(str, &ptr);
 			}

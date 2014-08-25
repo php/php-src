@@ -3314,7 +3314,7 @@ yy200:
 		--len;
 	}
 
-	if (len < SIZEOF_ZEND_INT * 8) {
+	if (len < SIZEOF_ZEND_LONG * 8) {
 		if (len == 0) {
 			ZVAL_LONG(zendlval, 0);
 		} else {
@@ -3349,7 +3349,7 @@ yy203:
 		len--;
 	}
 
-	if (len < SIZEOF_ZEND_INT * 2 || (len == SIZEOF_ZEND_INT * 2 && *hex <= '7')) {
+	if (len < SIZEOF_ZEND_LONG * 2 || (len == SIZEOF_ZEND_LONG * 2 && *hex <= '7')) {
 		if (len == 0) {
 			ZVAL_LONG(zendlval, 0);
 		} else {

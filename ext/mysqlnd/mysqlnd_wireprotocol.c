@@ -1671,7 +1671,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
-				if (perm_bind.pack_len < SIZEOF_ZEND_INT) {
+				if (perm_bind.pack_len < SIZEOF_ZEND_LONG) {
 					/* direct conversion */
 					int64_t v =
 #ifndef PHP_WIN32
@@ -1689,9 +1689,9 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 #endif
 					zend_bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
 					/* We have to make it ASCIIZ temporarily */
-#if SIZEOF_ZEND_INT==8
+#if SIZEOF_ZEND_LONG==8
 					if (uns == TRUE && v > 9223372036854775807L)
-#elif SIZEOF_ZEND_INT==4
+#elif SIZEOF_ZEND_LONG==4
 					if ((uns == TRUE && v > L64(2147483647)) ||
 						(uns == FALSE && (( L64(2147483647) < (int64_t) v) ||
 						(L64(-2147483648) > (int64_t) v))))

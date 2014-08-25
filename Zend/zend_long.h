@@ -59,7 +59,7 @@ typedef off_t zend_off_t;
 #   error Cant enable 64 bit integers on non 64 bit platform
 #  endif
 # endif
-# define SIZEOF_ZEND_INT 8
+# define SIZEOF_ZEND_LONG 8
 #else
 typedef long zend_long;
 typedef unsigned long zend_ulong;
@@ -69,7 +69,7 @@ typedef long zend_off_t;
 # define ZEND_ULONG_MAX ULONG_MAX
 # define Z_I(i) i##L
 # define Z_UL(i) i##UL
-# define SIZEOF_ZEND_INT SIZEOF_LONG
+# define SIZEOF_ZEND_LONG SIZEOF_LONG
 #endif
 
 
