@@ -39,9 +39,9 @@ typedef unsigned __int64 zend_ulong;
 typedef __int64 zend_off_t;
 #   define ZEND_LONG_MAX _I64_MAX
 #   define ZEND_LONG_MIN _I64_MIN
-#   define ZEND_UINT_MAX _UI64_MAX
+#   define ZEND_ULONG_MAX _UI64_MAX
 #   define Z_I(i) i##i64
-#   define Z_UI(i) i##Ui64
+#   define Z_UL(i) i##Ui64
 #  else
 #   error Cant enable 64 bit integers on non 64 bit platform
 #  endif
@@ -52,9 +52,9 @@ typedef uint64_t zend_ulong;
 typedef off_t zend_off_t;
 #   define ZEND_LONG_MAX INT64_MAX
 #   define ZEND_LONG_MIN INT64_MIN
-#   define ZEND_UINT_MAX UINT64_MAX
+#   define ZEND_ULONG_MAX UINT64_MAX
 #   define Z_I(i) i##LL
-#   define Z_UI(i) i##ULL
+#   define Z_UL(i) i##ULL
 #  else
 #   error Cant enable 64 bit integers on non 64 bit platform
 #  endif
@@ -66,9 +66,9 @@ typedef unsigned long zend_ulong;
 typedef long zend_off_t;
 # define ZEND_LONG_MAX LONG_MAX
 # define ZEND_LONG_MIN LONG_MIN
-# define ZEND_UINT_MAX ULONG_MAX
+# define ZEND_ULONG_MAX ULONG_MAX
 # define Z_I(i) i##L
-# define Z_UI(i) i##UL
+# define Z_UL(i) i##UL
 # define SIZEOF_ZEND_INT SIZEOF_LONG
 #endif
 

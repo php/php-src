@@ -237,7 +237,7 @@ static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 #if ZEND_WIN32
 	return 0;
 #else
-	return php_fstat(sock->socket, &ssb->sb);
+	return zend_fstat(sock->socket, &ssb->sb);
 #endif
 }
 

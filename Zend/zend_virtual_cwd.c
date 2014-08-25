@@ -593,8 +593,8 @@ static inline zend_ulong realpath_cache_key(const char *path, int path_len TSRML
 		return 0;
 	}
 
-	for (h = Z_UI(2166136261); bucket_key < e;) {
-		h *= Z_UI(16777619);
+	for (h = Z_UL(2166136261); bucket_key < e;) {
+		h *= Z_UL(16777619);
 		h ^= *bucket_key++;
 	}
 	HeapFree(GetProcessHeap(), 0, (LPVOID)bucket_key_start);
@@ -607,8 +607,8 @@ static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {
 	register zend_ulong h;
 	const char *e = path + path_len;
 
-	for (h = Z_UI(2166136261); path < e;) {
-		h *= Z_UI(16777619);
+	for (h = Z_UL(2166136261); path < e;) {
+		h *= Z_UL(16777619);
 		h ^= *path++;
 	}
 

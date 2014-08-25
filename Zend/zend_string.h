@@ -244,7 +244,7 @@ static zend_always_inline void zend_string_release(zend_string *s)
 
 static inline zend_ulong zend_inline_hash_func(const char *str, size_t len)
 {
-	register zend_ulong hash = Z_UI(5381);
+	register zend_ulong hash = Z_UL(5381);
 
 	/* variant with the hash unrolled eight times */
 	for (; len >= 8; len -= 8) {

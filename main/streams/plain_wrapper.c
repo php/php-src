@@ -149,7 +149,7 @@ static int do_fstat(php_stdio_stream_data *d, int force)
 		int r;
 	   
 		PHP_STDIOP_GET_FD(fd, d);
-		r = php_fstat(fd, &d->sb);
+		r = zend_fstat(fd, &d->sb);
 		d->cached_fstat = r == 0;
 
 		return r;

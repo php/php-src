@@ -26,6 +26,8 @@
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "zend.h"
+#include "zend_stream.h"
 
 BEGIN_EXTERN_C()
 PHPAPI int php_file_le_stream(void);
@@ -102,16 +104,6 @@ typedef struct _php_stream_filter php_stream_filter;
 
 #include "streams/php_stream_context.h"
 #include "streams/php_stream_filter_api.h"
-
-#ifdef _WIN64
-# define php_fstat _fstat64
-# define php_stat_fn _stat64
-typedef struct __stat64 zend_stat_t;
-#else
-# define php_fstat fstat
-# define php_stat_fn stat
-typedef struct stat zend_stat_t;
-#endif
 
 typedef struct _php_stream_statbuf {
 	zend_stat_t sb; /* regular info */

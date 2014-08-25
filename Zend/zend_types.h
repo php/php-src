@@ -22,7 +22,7 @@
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
-#include "zend_int.h"
+#include "zend_long.h"
 
 #ifdef WORDS_BIGENDIAN
 # define ZEND_ENDIAN_LOHI(lo, hi)          hi; lo;
