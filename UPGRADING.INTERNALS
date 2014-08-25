@@ -1,6 +1,6 @@
 $Id$
 
-UPGRADE NOTES - PHP X.Y
+PHP 7.0 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
   a. Addition of do_operation and compare object handlers
