@@ -886,28 +886,49 @@ ZEND_API int zend_hash_index_del(HashTable *ht, zend_ulong h)
 
 ZEND_API void zend_hash_destroy(HashTable *ht)
 {
-	uint idx;
-	Bucket *p;
+	Bucket *p, *end;
 
 	IS_CONSISTENT(ht);
 
-	SET_INCONSISTENT(HT_IS_DESTROYING);
-
-	for (idx = 0 ; idx < ht->nNumUsed; idx++) {
-		p = ht->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+	if (ht->nNumUsed) {
+		p = ht->arData;
+		end = p + ht->nNumUsed;
 		if (ht->pDestructor) {
-			ht->pDestructor(&p->val);
-		}
-		if (p->key) {
-			zend_string_release(p->key);
-		}
-	}
-	if (ht->nTableMask) {
-		pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
-	}
+			SET_INCONSISTENT(HT_IS_DESTROYING);
 
-	SET_INCONSISTENT(HT_DESTROYED);
+			if (ht->u.flags & HASH_FLAG_PACKED) {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						ht->pDestructor(&p->val);
+					}
+				} while (++p != end);
+			} else {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						ht->pDestructor(&p->val);
+						if (EXPECTED(p->key)) {
+							zend_string_release(p->key);
+						}
+					}
+				} while (++p != end);
+			}
+		
+			SET_INCONSISTENT(HT_DESTROYED);
+		} else {
+			if (!(ht->u.flags & HASH_FLAG_PACKED)) {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						if (EXPECTED(p->key)) {
+							zend_string_release(p->key);
+						}
+					}
+				} while (++p != end);
+			}
+		}
+	} else if (EXPECTED(!ht->nTableMask)) {
+		return;
+	}
+	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
 }
 
 
