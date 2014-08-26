@@ -472,7 +472,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				zval t;
 
 				ZVAL_LONG(&t, Z_STRLEN(ZEND_OP1_LITERAL(opline)));
-				replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC);
+				replace_tmp_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC);
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				MAKE_NOP(opline);
 			}
@@ -485,7 +485,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					break;
 				}
 				ZVAL_TRUE(&c);
-				replace_var_by_const(op_array, opline, tv, &c TSRMLS_CC);
+				replace_tmp_by_const(op_array, opline, tv, &c TSRMLS_CC);
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				MAKE_NOP(opline);
 			}

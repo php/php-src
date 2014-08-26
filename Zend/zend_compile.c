@@ -3970,12 +3970,17 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc TSRMLS_DC) {
 		if (zend_is_variable(arg)) {
 			if (zend_is_call(arg)) {
 				zend_compile_var(&arg_node, arg, BP_VAR_R TSRMLS_CC);
-				opcode = ZEND_SEND_VAR_NO_REF;
-				flags |= ZEND_ARG_SEND_FUNCTION;
-				if (fbc && ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
-					flags |= ZEND_ARG_SEND_BY_REF;
-					if (ARG_MAY_BE_SENT_BY_REF(fbc, arg_num)) {
-						flags |= ZEND_ARG_SEND_SILENT;
+				if (arg_node.op_type & (IS_CONST|IS_TMP_VAR)) {
+					/* Function call was converted into builtin instruction */
+					opcode = ZEND_SEND_VAL;
+				} else {
+					opcode = ZEND_SEND_VAR_NO_REF;
+					flags |= ZEND_ARG_SEND_FUNCTION;
+					if (fbc && ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
+						flags |= ZEND_ARG_SEND_BY_REF;
+						if (ARG_MAY_BE_SENT_BY_REF(fbc, arg_num)) {
+							flags |= ZEND_ARG_SEND_SILENT;
+						}
 					}
 				}
 			} else if (fbc) {
@@ -4108,7 +4113,7 @@ int zend_compile_func_strlen(znode *result, zend_ast_list *args TSRMLS_DC) {
 	}
 
 	zend_compile_expr(&arg_node, args->child[0] TSRMLS_CC);
-	zend_emit_op(result, ZEND_STRLEN, &arg_node, NULL TSRMLS_CC);
+	zend_emit_op_tmp(result, ZEND_STRLEN, &arg_node, NULL TSRMLS_CC);
 	return SUCCESS;
 }
 
@@ -4121,7 +4126,7 @@ int zend_compile_func_typecheck(znode *result, zend_ast_list *args, uint32_t typ
 	}
 	
 	zend_compile_expr(&arg_node, args->child[0] TSRMLS_CC);
-	opline = zend_emit_op(result, ZEND_TYPE_CHECK, &arg_node, NULL TSRMLS_CC);
+	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL TSRMLS_CC);
 	opline->extended_value = type;
 	return SUCCESS;
 }
@@ -4140,7 +4145,7 @@ int zend_compile_func_defined(znode *result, zend_ast_list *args TSRMLS_DC) {
 		return FAILURE;
 	}
 
-	opline = zend_emit_op(result, ZEND_DEFINED, NULL, NULL TSRMLS_CC);
+	opline = zend_emit_op_tmp(result, ZEND_DEFINED, NULL, NULL TSRMLS_CC);
 	opline->op1_type = IS_CONST;
 	LITERAL_STR(opline->op1, name);
 	zend_alloc_cache_slot(opline->op1.constant TSRMLS_CC);
@@ -6857,7 +6862,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast TSRMLS_DC) {
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	opline->result_type = IS_TMP_VAR;
+	result->op_type = opline->result_type = IS_TMP_VAR;
 	opline->extended_value |= ast->kind == ZEND_AST_ISSET ? ZEND_ISSET : ZEND_ISEMPTY;
 }
 
