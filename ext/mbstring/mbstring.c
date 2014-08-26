@@ -3080,7 +3080,6 @@ PHP_FUNCTION(mb_convert_encoding)
 	char *arg_str, *arg_new;
 	int str_len, new_len;
 	zval *arg_old;
-	int i;
 	size_t size, l, n;
 	char *_from_encodings = NULL, *ret, *s_free = NULL;
 
