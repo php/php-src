@@ -643,7 +643,7 @@ int fcgi_listen(const char *path, int backlog)
 		if (namedPipe == INVALID_HANDLE_VALUE) {
 			return -1;
 		}
-		listen_socket = _open_osfhandle((long)namedPipe, 0);
+		listen_socket = _open_osfhandle((intptr_t)namedPipe, 0);
 		if (!is_initialized) {
 			fcgi_init();
 		}
@@ -724,7 +724,7 @@ int fcgi_listen(const char *path, int backlog)
 
 #ifdef _WIN32
 	if (tcp) {
-		listen_socket = _open_osfhandle((long)listen_socket, 0);
+		listen_socket = _open_osfhandle((intptr_t)listen_socket, 0);
 	}
 #else
 	fcgi_setup_signals();

@@ -4821,7 +4821,7 @@ static HashTable *date_object_get_properties_period(zval *object TSRMLS_DC) /* {
 	zend_hash_str_update(props, "interval", sizeof("interval")-1, &zv);
 	
 	/* converted to larger type (int->long); must check when unserializing */
-	ZVAL_LONG(&zv, (long) period_obj->recurrences);
+	ZVAL_LONG(&zv, (zend_long) period_obj->recurrences);
 	zend_hash_str_update(props, "recurrences", sizeof("recurrences")-1, &zv);
 
 	ZVAL_BOOL(&zv, period_obj->include_start_date);

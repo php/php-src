@@ -111,7 +111,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 
 /* Class constants */
 #define REGISTER_REFLECTION_CLASS_CONST_LONG(class_name, const_name, value)                                        \
-	zend_declare_class_constant_long(reflection_ ## class_name ## _ptr, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+	zend_declare_class_constant_long(reflection_ ## class_name ## _ptr, const_name, sizeof(const_name)-1, (zend_long)value TSRMLS_CC);
 
 /* {{{ Smart string functions */
 typedef struct _string {
@@ -668,7 +668,7 @@ static zend_op* _get_recv_op(zend_op_array *op_array, uint32_t offset)
 	++offset;
 	while (op < end) {
 		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT 
-		    || op->opcode == ZEND_RECV_VARIADIC) && op->op1.num == (long)offset)
+		    || op->opcode == ZEND_RECV_VARIADIC) && op->op1.num == (zend_long)offset)
 		{
 			return op;
 		}

@@ -390,7 +390,7 @@ static void from_zval_write_uint32(const zval *arr_value, char *field, ser_conte
 		return;
 	}
 
-	if (sizeof(long) > sizeof(uint32_t) && (lval < 0 || lval > 0xFFFFFFFF)) {
+	if (sizeof(zend_long) > sizeof(uint32_t) && (lval < 0 || lval > 0xFFFFFFFF)) {
 		do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
 				"for an unsigned 32-bit integer");
 		return;
@@ -468,13 +468,13 @@ static void from_zval_write_uid_t(const zval *arr_value, char *field, ser_contex
 
 	/* uid_t can be signed or unsigned (generally unsigned) */
 	if ((uid_t)-1 > (uid_t)0) {
-		if (sizeof(long) > sizeof(uid_t) && (lval < 0 || (uid_t)lval != lval)) {
+		if (sizeof(zend_long) > sizeof(uid_t) && (lval < 0 || (uid_t)lval != lval)) {
 			do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
 					"for a uid_t value");
 			return;
 		}
 	} else {
-		if (sizeof(long) > sizeof(uid_t) && (uid_t)lval != lval) {
+		if (sizeof(zend_long) > sizeof(uid_t) && (uid_t)lval != lval) {
 			do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
 					"for a uid_t value");
 			return;
@@ -490,49 +490,49 @@ void to_zval_read_int(const char *data, zval *zv, res_context *ctx)
 	int ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
 {
 	unsigned ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_net_uint16(const char *data, zval *zv, res_context *ctx)
 {
 	uint16_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ntohs(ival));
+	ZVAL_LONG(zv, (zend_long)ntohs(ival));
 }
 static void to_zval_read_uint32(const char *data, zval *zv, res_context *ctx)
 {
 	uint32_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_sa_family(const char *data, zval *zv, res_context *ctx)
 {
 	sa_family_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_pid_t(const char *data, zval *zv, res_context *ctx)
 {
 	pid_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_uid_t(const char *data, zval *zv, res_context *ctx)
 {
 	uid_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 
 /* CONVERSIONS for sockaddr */

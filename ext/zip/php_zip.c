@@ -373,7 +373,7 @@ static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char
 
 /* {{{ REGISTER_ZIP_CLASS_CONST_LONG */
 #define REGISTER_ZIP_CLASS_CONST_LONG(const_name, value) \
-	    zend_declare_class_constant_long(zip_class_entry, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+	    zend_declare_class_constant_long(zip_class_entry, const_name, sizeof(const_name)-1, (zend_long)value TSRMLS_CC);
 /* }}} */
 
 /* {{{ ZIP_FROM_OBJECT */
@@ -393,12 +393,12 @@ static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char
 	{ \
 		array_init(return_value); \
 		add_ascii_assoc_string(return_value, "name", (char *)(sb)->name); \
-		add_ascii_assoc_long(return_value, "index", (long) (sb)->index); \
-		add_ascii_assoc_long(return_value, "crc", (long) (sb)->crc); \
-		add_ascii_assoc_long(return_value, "size", (long) (sb)->size); \
-		add_ascii_assoc_long(return_value, "mtime", (long) (sb)->mtime); \
-		add_ascii_assoc_long(return_value, "comp_size", (long) (sb)->comp_size); \
-		add_ascii_assoc_long(return_value, "comp_method", (long) (sb)->comp_method); \
+		add_ascii_assoc_long(return_value, "index", (zend_long) (sb)->index); \
+		add_ascii_assoc_long(return_value, "crc", (zend_long) (sb)->crc); \
+		add_ascii_assoc_long(return_value, "size", (zend_long) (sb)->size); \
+		add_ascii_assoc_long(return_value, "mtime", (zend_long) (sb)->mtime); \
+		add_ascii_assoc_long(return_value, "comp_size", (zend_long) (sb)->comp_size); \
+		add_ascii_assoc_long(return_value, "comp_method", (zend_long) (sb)->comp_method); \
 	}
 /* }}} */
 
@@ -1124,7 +1124,7 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 	rsrc_int->za = zip_open(resolved_path, 0, &err);
 	if (rsrc_int->za == NULL) {
 		efree(rsrc_int);
-		RETURN_LONG((long)err);
+		RETURN_LONG((zend_long)err);
 	}
 
 	rsrc_int->index_current = 0;

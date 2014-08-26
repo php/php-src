@@ -87,7 +87,7 @@ PHP_FUNCTION(linkinfo)
 	char *link;
 	char *dirname;
 	int link_len, dir_len;
-	struct stat sb;
+	zend_stat_t sb;
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &link, &link_len) == FAILURE) {
@@ -110,7 +110,7 @@ PHP_FUNCTION(linkinfo)
 	}
 
 	efree(dirname);
-	RETURN_LONG((long) sb.st_dev);
+	RETURN_LONG((zend_long) sb.st_dev);
 }
 /* }}} */
 

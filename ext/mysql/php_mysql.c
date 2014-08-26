@@ -1299,7 +1299,7 @@ PHP_FUNCTION(mysql_thread_id)
 		ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, -1, "MySQL-Link", le_link, le_plink);
 	}
 
-	RETURN_LONG((long) mysql_thread_id(mysql->conn));
+	RETURN_LONG((zend_long) mysql_thread_id(mysql->conn));
 }
 /* }}} */
 
@@ -1837,7 +1837,7 @@ PHP_FUNCTION(mysql_affected_rows)
 	}
 
 	/* conversion from int64 to long happing here */
-	RETURN_LONG((long)mysql_affected_rows(mysql->conn));
+	RETURN_LONG((zend_long)mysql_affected_rows(mysql->conn));
 }
 /* }}} */
 
@@ -1918,7 +1918,7 @@ PHP_FUNCTION(mysql_insert_id)
 	}
 
 	/* conversion from int64 to long happing here */
-	RETURN_LONG((long)mysql_insert_id(mysql->conn));
+	RETURN_LONG((zend_long)mysql_insert_id(mysql->conn));
 }
 /* }}} */
 
@@ -2040,7 +2040,7 @@ PHP_FUNCTION(mysql_num_rows)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 
 	/* conversion from int64 to long happing here */
-	RETURN_LONG((long) mysql_num_rows(mysql_result));
+	RETURN_LONG((zend_long) mysql_num_rows(mysql_result));
 }
 /* }}} */
 

@@ -434,7 +434,7 @@ END_EXTERN_C()
 #else /* ! (CRAY || __arm) */
 
 #define XtOffset(p_type, field) \
-    ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
+    ((zend_long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 #endif /* !CRAY */
 #endif /* ! XtOffset */

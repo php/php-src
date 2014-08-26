@@ -973,7 +973,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			zval retval, ob_data, ob_mode;
 
 			ZVAL_STRINGL(&ob_data, handler->buffer.data, handler->buffer.used);
-			ZVAL_LONG(&ob_mode, (long) context->op);
+			ZVAL_LONG(&ob_mode, (zend_long) context->op);
 			zend_fcall_info_argn(&handler->func.user->fci TSRMLS_CC, 2, &ob_data, &ob_mode);
 
 #define PHP_OUTPUT_USER_SUCCESS(retval) ((Z_TYPE(retval) != IS_UNDEF) && !(Z_TYPE(retval) == IS_FALSE))

@@ -1410,10 +1410,10 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 
 			ZVAL_RES(&argv[0], ch->res);
 			Z_ADDREF(argv[0]);
-			ZVAL_LONG(&argv[1], (long)dltotal);
-			ZVAL_LONG(&argv[2], (long)dlnow);
-			ZVAL_LONG(&argv[3], (long)ultotal);
-			ZVAL_LONG(&argv[4], (long)ulnow);
+			ZVAL_LONG(&argv[1], (zend_long)dltotal);
+			ZVAL_LONG(&argv[2], (zend_long)dlnow);
+			ZVAL_LONG(&argv[3], (zend_long)ultotal);
+			ZVAL_LONG(&argv[4], (zend_long)ulnow);
 
 			fci.size = sizeof(fci);
 			fci.function_table = EG(function_table);
@@ -2558,9 +2558,9 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 					} else {
 						error = curl_formadd(&first, &last,
 											 CURLFORM_COPYNAME, string_key->val,
-											 CURLFORM_NAMELENGTH, (long)string_key->len,
+											 CURLFORM_NAMELENGTH, (zend_long)string_key->len,
 											 CURLFORM_COPYCONTENTS, postval,
-											 CURLFORM_CONTENTSLENGTH, (long)Z_STRLEN_P(current),
+											 CURLFORM_CONTENTSLENGTH, (zend_long)Z_STRLEN_P(current),
 											 CURLFORM_END);
 					}
 
