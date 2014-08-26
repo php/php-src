@@ -131,7 +131,8 @@
 #endif
 
 typedef uint32_t   zend_mm_page_info; /* 4-byte integer */
-typedef zend_ulong zend_mm_bitset;    /* 4-byte or 8-byte integer */
+/* XXX temporary fix crash on bitset computing on win64 */
+typedef unsigned long zend_mm_bitset;    /* 4-byte or 8-byte integer */
 
 #define ZEND_MM_ALIGNED_OFFSET(size, alignment) \
 	(((size_t)(size)) & ((alignment) - 1))
