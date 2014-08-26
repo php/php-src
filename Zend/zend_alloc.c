@@ -131,8 +131,7 @@
 #endif
 
 typedef uint32_t   zend_mm_page_info; /* 4-byte integer */
-/* XXX temporary fix crash on bitset computing on win64 */
-typedef unsigned long zend_mm_bitset;    /* 4-byte or 8-byte integer */
+typedef zend_ulong zend_mm_bitset;    /* 4-byte or 8-byte integer */
 
 #define ZEND_MM_ALIGNED_OFFSET(size, alignment) \
 	(((size_t)(size)) & ((alignment) - 1))
@@ -459,9 +458,9 @@ static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 	if (bitset == (zend_mm_bitset)-1) return ZEND_MM_BITSET_LEN;
 
 	n = 0;
-#if SIZEOF_LONG == 8
+#if SIZEOF_ZEND_LONG == 8
 	if (sizeof(zend_mm_bitset) == 8) {
-		if ((bitset & 0xffffffff) == 0xffffffff) {n += 32; bitset = bitset >> 32;}
+		if ((bitset & 0xffffffff) == 0xffffffff) {n += 32; bitset = bitset >> Z_UL(32);}
 	}
 #endif
 	if ((bitset & 0x0000ffff) == 0x0000ffff) {n += 16; bitset = bitset >> 16;}
@@ -483,9 +482,9 @@ static zend_always_inline int zend_mm_bitset_ntz(zend_mm_bitset bitset)
 	if (bitset == (zend_mm_bitset)0) return ZEND_MM_BITSET_LEN;
 
 	n = 1;
-#if SIZEOF_LONG == 8
+#if SIZEOF_ZEND_LONG == 8
 	if (sizeof(zend_mm_bitset) == 8) {
-		if ((bitset & 0xffffffff) == 0) {n += 32; bitset = bitset >> 32;}
+		if ((bitset & 0xffffffff) == 0) {n += 32; bitset = bitset >> Z_UL(32);}
 	}
 #endif
 	if ((bitset & 0x0000ffff) == 0) {n += 16; bitset = bitset >> 16;}
@@ -532,7 +531,7 @@ static zend_always_inline int zend_mm_bitset_find_zero_and_set(zend_mm_bitset *b
 		zend_mm_bitset tmp = bitset[i];
 		if (tmp != (zend_mm_bitset)-1) {
 			int n = zend_mm_bitset_nts(tmp);
-			bitset[i] |= 1 << n;
+			bitset[i] |= Z_UL(1) << n;
 			return i * ZEND_MM_BITSET_LEN + n;
 		}
 		i++;
@@ -542,17 +541,17 @@ static zend_always_inline int zend_mm_bitset_find_zero_and_set(zend_mm_bitset *b
 
 static zend_always_inline int zend_mm_bitset_is_set(zend_mm_bitset *bitset, int bit)
 {
-	return (bitset[bit / ZEND_MM_BITSET_LEN] & (1L << (bit & (ZEND_MM_BITSET_LEN-1)))) != 0;
+	return (bitset[bit / ZEND_MM_BITSET_LEN] & (Z_L(1) << (bit & (ZEND_MM_BITSET_LEN-1)))) != 0;
 }
 
 static zend_always_inline void zend_mm_bitset_set_bit(zend_mm_bitset *bitset, int bit)
 {
-	bitset[bit / ZEND_MM_BITSET_LEN] |= (1L << (bit & (ZEND_MM_BITSET_LEN-1)));
+	bitset[bit / ZEND_MM_BITSET_LEN] |= (Z_L(1) << (bit & (ZEND_MM_BITSET_LEN-1)));
 }
 
 static zend_always_inline void zend_mm_bitset_reset_bit(zend_mm_bitset *bitset, int bit)
 {
-	bitset[bit / ZEND_MM_BITSET_LEN] &= ~(1L << (bit & (ZEND_MM_BITSET_LEN-1)));
+	bitset[bit / ZEND_MM_BITSET_LEN] &= ~(Z_L(1) << (bit & (ZEND_MM_BITSET_LEN-1)));
 }
 
 static zend_always_inline void zend_mm_bitset_set_range(zend_mm_bitset *bitset, int start, int len)
@@ -599,7 +598,7 @@ static zend_always_inline void zend_mm_bitset_reset_range(zend_mm_bitset *bitset
 
 		if (pos != end) {
 			/* reset bits from "bit" to ZEND_MM_BITSET_LEN-1 */
-			tmp = ~((1L << bit) - 1);
+			tmp = ~((Z_L(1) << bit) - 1);
 			bitset[pos++] &= ~tmp;
 			while (pos != end) {
 				/* set all bits */
@@ -1610,7 +1609,7 @@ zend_mm_heap *zend_mm_init(void)
 	chunk->free_pages = ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE;
 	chunk->free_tail = ZEND_MM_FIRST_PAGE;
 	chunk->num = 0;
-	chunk->free_map[0] = (1L << ZEND_MM_FIRST_PAGE) - 1;
+	chunk->free_map[0] = (Z_L(1) << ZEND_MM_FIRST_PAGE) - 1;
 	chunk->map[0] = ZEND_MM_LRUN(ZEND_MM_FIRST_PAGE);
 	heap->main_chunk = chunk;
 	heap->cached_chunks = NULL;
@@ -1627,7 +1626,7 @@ zend_mm_heap *zend_mm_init(void)
 	heap->peak = 0;
 #endif
 #if ZEND_MM_LIMIT
-	heap->limit = (-1L >> 1);
+	heap->limit = (Z_L(-1) >> Z_L(1));
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM
