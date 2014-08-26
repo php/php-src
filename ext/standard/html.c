@@ -1527,7 +1527,6 @@ PHP_FUNCTION(html_entity_decode)
 {
 	zend_string *str, *hint_charset = NULL;
 	char *default_charset;
-	size_t new_len = 0;
 	zend_long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
