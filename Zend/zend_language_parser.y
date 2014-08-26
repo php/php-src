@@ -57,7 +57,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %destructor { zend_ast_destroy($$); } <ast>
 %destructor { zend_ast_destroy((zend_ast *) $$); } <list>
-%destructor { if ($$) STR_RELEASE($$); } <str>
+%destructor { if ($$) zend_string_release($$); } <str>
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
 %left ','
@@ -254,6 +254,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <num> returns_ref function is_reference is_variadic class_type variable_modifiers
 %type <num> method_modifiers trait_modifiers non_empty_member_modifiers member_modifier
 
+%type <str> backup_doc_comment
 
 %% /* Rules */
 
@@ -411,10 +412,9 @@ unset_variable:
 ;
 
 function_declaration_statement:
-	function returns_ref T_STRING '(' parameter_list ')'
-		{ $<str>$ = CG(doc_comment); CG(doc_comment) = NULL; }
+	function returns_ref T_STRING '(' parameter_list ')' backup_doc_comment
 	'{' inner_statement_list '}'
-		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2, $1, $<str>7,
+		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2, $1, $7,
 		      zend_ast_get_str($3), $<ast>5, NULL, $<ast>9); }
 ;
 
@@ -429,19 +429,13 @@ is_variadic:
 ;
 
 class_declaration_statement:
-		class_type
-			{ $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list
-			{ $<str>$ = CG(doc_comment); CG(doc_comment) = NULL; }	
-		'{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>2, $<str>6,
+		class_type { $<num>$ = CG(zend_lineno); }
+		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>2, $6,
 				  zend_ast_get_str($3), $4, $<ast>5, $<ast>8); }
-	|	T_INTERFACE
-			{ $<num>$ = CG(zend_lineno); }
-		T_STRING interface_extends_list
-			{ $<str>$ = CG(doc_comment); CG(doc_comment) = NULL; }	
-		'{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $<str>5,
+	|	T_INTERFACE { $<num>$ = CG(zend_lineno); }
+		T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $5,
 				  zend_ast_get_str($3), NULL, $<ast>4, $<ast>7); }
 ;
 
@@ -630,10 +624,9 @@ class_statement:
 			{ $$ = $<ast>2; RESET_DOC_COMMENT(); }
 	|	T_USE name_list trait_adaptations
 			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
-	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')'
-			{ $<str>$ = CG(doc_comment); CG(doc_comment) = NULL; }
+	|	method_modifiers function returns_ref T_STRING '(' parameter_list ')' backup_doc_comment
 		method_body
-			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1, $2, $<str>8,
+			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1, $2, $8,
 				  zend_ast_get_str($4), $<ast>6, NULL, $<ast>9); }
 ;
 
@@ -876,22 +869,24 @@ expr_without_variable:
 	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); }
 	|	T_YIELD expr T_DOUBLE_ARROW expr
 			{ $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); }
-	|	function returns_ref '(' parameter_list ')' lexical_vars
-			{ $<str>$ = CG(doc_comment); CG(doc_comment) = NULL; }
+	|	function returns_ref '(' parameter_list ')' lexical_vars backup_doc_comment
 		'{' inner_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2, $1, $<str>7,
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2, $1, $7,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 			      $<ast>4, $<ast>6, $<ast>9); }
-	|	T_STATIC function returns_ref '(' parameter_list ')' lexical_vars
-			{ $<str>$ = CG(doc_comment); CG(doc_comment) = NULL; }
+	|	T_STATIC function returns_ref '(' parameter_list ')' lexical_vars backup_doc_comment
 		'{' inner_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | ZEND_ACC_STATIC, $2,
-			      $<str>8, zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | ZEND_ACC_STATIC, $2, $8,
+			      zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 			      $<ast>5, $<ast>7, $<ast>10); }
 ;
 
 function:
 	T_FUNCTION { $$ = CG(zend_lineno); }
+;
+
+backup_doc_comment:
+	/* empty */ { $$ = CG(doc_comment); CG(doc_comment) = NULL; }
 ;
 
 returns_ref:
