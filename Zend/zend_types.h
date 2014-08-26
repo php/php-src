@@ -43,7 +43,7 @@
 typedef unsigned char zend_bool;
 typedef unsigned char zend_uchar;
 
-#ifdef ZEND_ENABLE_INT64
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 # ifdef ZEND_WIN32
 #  define ZEND_SIZE_MAX  _UI64_MAX
 # else
@@ -72,7 +72,7 @@ typedef unsigned long long zend_ulong64;
 #endif
 
 /* XXX this won't work on X32 platform */
-#ifdef ZEND_ENABLE_INT64
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 typedef int64_t zend_intptr_t;
 typedef uint64_t zend_uintptr_t;
 #else
