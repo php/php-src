@@ -1592,43 +1592,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__LINE__" {
-	ZVAL_LONG(zendlval, CG(zend_lineno));
 	return T_LINE;
 }
 
 <ST_IN_SCRIPTING>"__FILE__" {
-	zend_string *filename = zend_get_compiled_filename(TSRMLS_C);
-
-	if (!filename) {
-		ZVAL_EMPTY_STRING(zendlval);
-	} else {
-		ZVAL_STR(zendlval, zend_string_copy(filename));
-	}
 	return T_FILE;
 }
 
 <ST_IN_SCRIPTING>"__DIR__" {
-	zend_string *filename = zend_get_compiled_filename(TSRMLS_C);
-	zend_string *dirname;
-
-	if (!filename) {
-		filename = STR_EMPTY_ALLOC();
-	}
-
-	dirname = zend_string_init(filename->val, filename->len, 0);
-	zend_dirname(dirname->val, dirname->len);
-
-	if (strcmp(dirname->val, ".") == 0) {
-		dirname = zend_string_realloc(dirname, MAXPATHLEN, 0);
-#if HAVE_GETCWD
-		VCWD_GETCWD(dirname->val, MAXPATHLEN);
-#elif HAVE_GETWD
-		VCWD_GETWD(dirname->val);
-#endif
-	}
-
-	dirname->len = strlen(dirname->val);
-	ZVAL_STR(zendlval, dirname);
 	return T_DIR;
 }
 

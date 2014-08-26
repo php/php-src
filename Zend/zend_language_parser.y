@@ -100,11 +100,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ast> T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
 %token <ast> T_NUM_STRING "number (T_NUM_STRING)"
 
-/* TODO.AST */
-%token <ast> T_LINE            "__LINE__ (T_LINE)"
-%token <ast> T_FILE            "__FILE__ (T_FILE)"
-%token <ast> T_DIR             "__DIR__ (T_DIR)"
-
 %token END 0 "end of file"
 %token T_INCLUDE      "include (T_INCLUDE)"
 %token T_INCLUDE_ONCE "include_once (T_INCLUDE_ONCE)"
@@ -205,6 +200,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
 %token T_CALLABLE        "callable (T_CALLABLE)"
+%token T_LINE            "__LINE__ (T_LINE)"
+%token T_FILE            "__FILE__ (T_FILE)"
+%token T_DIR             "__DIR__ (T_DIR)"
 %token T_CLASS_C         "__CLASS__ (T_CLASS_C)"
 %token T_TRAIT_C         "__TRAIT__ (T_TRAIT_C)"
 %token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
@@ -963,9 +961,9 @@ dereferencable_scalar:
 scalar:
 		T_LNUMBER 	{ $$ = $1; }
 	|	T_DNUMBER 	{ $$ = $1; }
-	|	T_LINE 		{ $$ = $1; }
-	|	T_FILE 		{ $$ = $1; }
-	|	T_DIR   	{ $$ = $1; }
+	|	T_LINE 		{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_LINE); }
+	|	T_FILE 		{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_FILE); }
+	|	T_DIR   	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_DIR); }
 	|	T_TRAIT_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_TRAIT_C); }
 	|	T_METHOD_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_METHOD_C); }
 	|	T_FUNC_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_FUNC_C); }

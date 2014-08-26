@@ -6360,6 +6360,31 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast TSRMLS_DC)
 	zend_class_entry *ce = CG(active_class_entry);
 
 	switch (ast->attr) {
+		case T_LINE:
+			ZVAL_LONG(zv, CG(zend_lineno));
+			break;
+		case T_FILE:
+			ZVAL_STR(zv, zend_string_copy(CG(compiled_filename)));
+			break;
+		case T_DIR:
+		{
+			zend_string *filename = CG(compiled_filename);
+			zend_string *dirname = zend_string_init(filename->val, filename->len, 0);
+			zend_dirname(dirname->val, dirname->len);
+
+			if (strcmp(dirname->val, ".") == 0) {
+				dirname = zend_string_realloc(dirname, MAXPATHLEN, 0);
+#if HAVE_GETCWD
+				VCWD_GETCWD(dirname->val, MAXPATHLEN);
+#elif HAVE_GETWD
+				VCWD_GETWD(dirname->val);
+#endif
+			}
+
+			dirname->len = strlen(dirname->val);
+			ZVAL_STR(zv, dirname);
+			break;
+		}
 		case T_FUNC_C:
 			if (op_array && op_array->function_name) {
 				ZVAL_STR(zv, zend_string_copy(op_array->function_name));
