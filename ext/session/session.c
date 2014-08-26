@@ -1777,10 +1777,7 @@ static PHP_FUNCTION(session_set_save_handler)
 	if (argc > 0 && argc <= 2) {
 		zval *obj = NULL;
 		zend_string *func_name;
-		HashPosition pos;
-		zend_function *default_mptr, *current_mptr;
-		zend_ulong func_index;
-		php_shutdown_function_entry shutdown_function_entry;
+		zend_function *current_mptr;
 		zend_bool register_shutdown = 1;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
@@ -1788,11 +1785,8 @@ static PHP_FUNCTION(session_set_save_handler)
 		}
 
 		/* Find implemented methods - SessionHandlerInterface */
-		zend_hash_internal_pointer_reset_ex(&php_session_iface_entry->function_table, &pos);
 		i = 0;
-		while ((default_mptr = zend_hash_get_current_data_ptr_ex(&php_session_iface_entry->function_table, &pos))) {
-			zend_hash_get_current_key_ex(&php_session_iface_entry->function_table, &func_name, &func_index, 0, &pos);
-
+		ZEND_HASH_FOREACH_STR_KEY(&php_session_iface_entry->function_table, func_name) {
 			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
 				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
 					zval_ptr_dtor(&PS(mod_user_names).names[i]);
@@ -1801,21 +1795,17 @@ static PHP_FUNCTION(session_set_save_handler)
 				array_init_size(&PS(mod_user_names).names[i], 2);
 				Z_ADDREF_P(obj);
 				add_next_index_zval(&PS(mod_user_names).names[i], obj);
-				add_next_index_str(&PS(mod_user_names).names[i], func_name);
+				add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Session handler's function table is corrupt");
 				RETURN_FALSE;
 			}
 
-			zend_hash_move_forward_ex(&php_session_iface_entry->function_table, &pos);
 			++i;
-		}
+		} ZEND_HASH_FOREACH_END();
 
 		/* Find implemented methods - SessionIdInterface (optional) */
-		zend_hash_internal_pointer_reset_ex(&php_session_id_iface_entry->function_table, &pos);
-		while ((default_mptr = zend_hash_get_current_data_ptr_ex(&php_session_id_iface_entry->function_table, &pos))) {
-			zend_hash_get_current_key_ex(&php_session_id_iface_entry->function_table, &func_name, &func_index, 0, &pos);
-
+		ZEND_HASH_FOREACH_STR_KEY(&php_session_id_iface_entry->function_table, func_name) {
 			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
 				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
 					zval_ptr_dtor(&PS(mod_user_names).names[i]);
@@ -1824,15 +1814,15 @@ static PHP_FUNCTION(session_set_save_handler)
 				array_init_size(&PS(mod_user_names).names[i], 2);
 				Z_ADDREF_P(obj);
 				add_next_index_zval(&PS(mod_user_names).names[i], obj);
-				add_next_index_str(&PS(mod_user_names).names[i], func_name);
+				add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
 			}
 
-			zend_hash_move_forward_ex(&php_session_id_iface_entry->function_table, &pos);
 			++i;
-		}
+		} ZEND_HASH_FOREACH_END();
 
 		if (register_shutdown) {
 			/* create shutdown function */
+			php_shutdown_function_entry shutdown_function_entry;
 			shutdown_function_entry.arg_count = 1;
 			shutdown_function_entry.arguments = (zval *) safe_emalloc(sizeof(zval), 1, 0);
 
