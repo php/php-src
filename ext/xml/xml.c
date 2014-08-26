@@ -1439,7 +1439,7 @@ PHP_FUNCTION(xml_get_error_code)
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	RETURN_LONG((long)XML_GetErrorCode(parser->parser));
+	RETURN_LONG((zend_long)XML_GetErrorCode(parser->parser));
 }
 /* }}} */
 

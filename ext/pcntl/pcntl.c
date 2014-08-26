@@ -548,7 +548,7 @@ PHP_FUNCTION(pcntl_fork)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d", errno);
 	}
 	
-	RETURN_LONG((long) id);
+	RETURN_LONG((zend_long) id);
 }
 /* }}} */
 

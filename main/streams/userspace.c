@@ -987,7 +987,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 		case PHP_STREAM_TRUNCATE_SET_SIZE: {
 			ptrdiff_t new_size = *(ptrdiff_t*) ptrparam;
 			if (new_size >= 0 && new_size <= (ptrdiff_t)LONG_MAX) {
-				ZVAL_LONG(&args[0], (long)new_size);
+				ZVAL_LONG(&args[0], (zend_long)new_size);
 				call_result = call_user_function_ex(NULL,
 								Z_ISUNDEF(us->object)? NULL : &us->object,
 								&func_name,

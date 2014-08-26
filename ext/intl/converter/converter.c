@@ -45,7 +45,7 @@ static zend_object_handlers  php_converter_object_handlers;
 
 #define CONV_GET(pzv)  (Z_INTL_CONVERTER_P((pzv)))
 #define THROW_UFAILURE(obj, fname, error) php_converter_throw_failure(obj, error TSRMLS_CC, \
-                                          fname "() returned error %ld: %s", (long)error, u_errorName(error))
+                                          fname "() returned error " ZEND_LONG_FMT ": %s", (zend_long)error, u_errorName(error))
 
 /* {{{ php_converter_throw_failure */
 static inline void php_converter_throw_failure(php_converter_object *objval, UErrorCode error TSRMLS_DC, const char *format, ...) {

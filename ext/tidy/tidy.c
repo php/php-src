@@ -1396,11 +1396,11 @@ static PHP_FUNCTION(tidy_get_config)
 				break;
 
 			case TidyInteger:
-				add_assoc_long(return_value, opt_name, (long)opt_value);
+				add_assoc_long(return_value, opt_name, (zend_long)opt_value);
 				break;
 
 			case TidyBoolean:
-				add_assoc_bool(return_value, opt_name, (long)opt_value);
+				add_assoc_bool(return_value, opt_name, (zend_long)opt_value);
 				break;
 		}
 	}
@@ -1529,7 +1529,7 @@ static PHP_FUNCTION(tidy_getopt)
 			return;
 
 		case TidyInteger:
-			RETURN_LONG((long)optval);
+			RETURN_LONG((zend_long)optval);
 			break;
 
 		case TidyBoolean:

@@ -198,7 +198,7 @@ PHP_FUNCTION(socket_sendmsg)
 		zend_llist_destroy(allocations);
 		efree(allocations);
 
-		RETURN_LONG((long)res);
+		RETURN_LONG((zend_long)res);
 	} else {
 		PHP_SOCKET_ERROR(php_sock, "error in sendmsg", errno);
 		RETURN_FALSE;
@@ -308,7 +308,7 @@ PHP_FUNCTION(socket_cmsg_space)
 		return;
 	}
 
-	RETURN_LONG((long)CMSG_SPACE(entry->size + n * entry->var_el_size));
+	RETURN_LONG((zend_long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
 #if HAVE_IPV6

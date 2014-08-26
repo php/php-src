@@ -2523,7 +2523,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 			} else
 #endif
 			{
-				RETURN_LONG((long)oid);
+				RETURN_LONG((zend_long)oid);
 			}
 			break;
 		default:

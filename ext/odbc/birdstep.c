@@ -539,7 +539,7 @@ l1:
 			if ( res->values[indx].valtype == SQL_LONGVARCHAR ) {
 				RETURN_STRING(res->values[indx].value,TRUE);
 			} else {
-				RETURN_LONG((long)res->values[indx].value);
+				RETURN_LONG((zend_long)res->values[indx].value);
 			}
 		default:
 			if ( res->values[indx].value != NULL ) {

@@ -1331,7 +1331,7 @@ static char *zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{{
 						++idx;
 						while (op < end) {
 							if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT)
-									&& op->op1.num == (long)idx)
+									&& op->op1.num == (zend_ulong)idx)
 							{
 								precv = op;
 							}

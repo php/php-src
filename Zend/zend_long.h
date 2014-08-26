@@ -29,7 +29,7 @@
 # define ZEND_ENABLE_ZVAL_LONG64 1
 #endif
 
-/* Integer types or the old bad long. */
+/* Integer types. */
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 typedef int64_t zend_long;
 typedef uint64_t zend_ulong;
@@ -58,7 +58,7 @@ typedef int32_t zend_off_t;
 #endif
 
 
-/* conversion macros */
+/* Conversion macros. */
 #define ZEND_LTOA_BUF_LEN 65
 
 #ifdef ZEND_ENABLE_ZVAL_LONG64

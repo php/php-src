@@ -138,7 +138,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 			strlcat(cookie, dt->val, len + 100);
 			zend_string_free(dt);
 
-			snprintf(tsdelta, sizeof(tsdelta), "%li", (long) difftime(expires, time(NULL)));
+			snprintf(tsdelta, sizeof(tsdelta), ZEND_LONG_FMT, (zend_long) difftime(expires, time(NULL)));
 			strlcat(cookie, COOKIE_MAX_AGE, len + 100);
 			strlcat(cookie, tsdelta, len + 100);
 		}

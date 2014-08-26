@@ -1856,7 +1856,7 @@ PHP_FUNCTION(socket_get_option)
 				RETURN_FALSE;
 			}
 			if (php_add4_to_if_index(&if_addr, php_sock, &if_index TSRMLS_CC) == SUCCESS) {
-				RETURN_LONG((long) if_index);
+				RETURN_LONG((zend_long) if_index);
 			} else {
 				RETURN_FALSE;
 			}
