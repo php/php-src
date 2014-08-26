@@ -4897,7 +4897,11 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) {
 void zend_compile_if(zend_ast *ast TSRMLS_DC) {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
-	uint32_t *jmp_opnums = safe_emalloc(sizeof(uint32_t), list->children - 1, 0);
+	uint32_t *jmp_opnums;
+	
+	if (list->children > 1) {
+		jmp_opnums = safe_emalloc(sizeof(uint32_t), list->children - 1, 0);
+	}
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
@@ -4922,11 +4926,12 @@ void zend_compile_if(zend_ast *ast TSRMLS_DC) {
 		}
 	}
 
-	for (i = 0; i < list->children - 1; ++i) {
-		zend_update_jump_target_to_next(jmp_opnums[i] TSRMLS_CC);
+	if (list->children > 1) {
+		for (i = 0; i < list->children - 1; ++i) {
+			zend_update_jump_target_to_next(jmp_opnums[i] TSRMLS_CC);
+		}
+		efree(jmp_opnums);
 	}
-
-	efree(jmp_opnums);
 }
 
 void zend_compile_switch(zend_ast *ast TSRMLS_DC) {
