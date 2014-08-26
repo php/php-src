@@ -37,6 +37,24 @@
 #include <strings.h>
 #endif
 
+#if defined(__X86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
+typedef int64_t timelib_long;
+typedef uint64_t timelib_ulong;
+# define TIMELIB_LONG_MAX INT64_MAX
+# define TIMELIB_LONG_MIN INT64_MIN
+# define TIMELIB_ULONG_MAX UINT64_MAX
+# define TIMELIB_LONG_FMT "%" PRId64
+# define TIMELIB_ULONG_FMT "%" PRIu64
+#else
+typedef int32_t timelib_long;
+typedef uint32_t limelib_ulong;
+# define TIMELIB_LONG_MAX INT32_MAX
+# define TIMELIB_LONG_MIN INT32_MIN
+# define TIMELIB_ULONG_MAX UINT32_MAX
+# define TIMELIB_LONG_FMT "%" PRId32
+# define TIMELIB_ULONG_FMT "%" PRIu32
+#endif
+
 #if defined(_MSC_VER)
 typedef uint64_t timelib_ull;
 typedef int64_t timelib_sll;

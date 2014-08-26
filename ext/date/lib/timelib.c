@@ -176,13 +176,13 @@ void timelib_error_container_dtor(timelib_error_container *errors)
 	free(errors);
 }
 
-zend_long timelib_date_to_int(timelib_time *d, int *error)
+timelib_long timelib_date_to_int(timelib_time *d, int *error)
 {
 	timelib_sll ts;
 
 	ts = d->sse;
 
-	if (ts < ZEND_LONG_MIN || ts > ZEND_LONG_MAX) {
+	if (ts < TIMELIB_LONG_MIN || ts > TIMELIB_LONG_MAX) {
 		if (error) {
 			*error = 1;
 		}
@@ -191,7 +191,7 @@ zend_long timelib_date_to_int(timelib_time *d, int *error)
 	if (error) {
 		*error = 0;
 	}
-	return (zend_long) d->sse;
+	return (timelib_long) d->sse;
 }
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec)
@@ -286,10 +286,10 @@ void timelib_dump_rel_time(timelib_rel_time *d)
 	printf("\n");
 }
 
-long timelib_parse_tz_cor(char **ptr)
+timelib_long timelib_parse_tz_cor(char **ptr)
 {
         char *begin = *ptr, *end;
-        long  tmp;
+        timelib_long  tmp;
 
         while (isdigit(**ptr) || **ptr == ':') {
                 ++*ptr;
