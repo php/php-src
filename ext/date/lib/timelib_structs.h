@@ -47,7 +47,7 @@ typedef uint64_t timelib_ulong;
 # define TIMELIB_ULONG_FMT "%" PRIu64
 #else
 typedef int32_t timelib_long;
-typedef uint32_t limelib_ulong;
+typedef uint32_t timelib_ulong;
 # define TIMELIB_LONG_MAX INT32_MAX
 # define TIMELIB_LONG_MIN INT32_MIN
 # define TIMELIB_ULONG_MAX UINT32_MAX
