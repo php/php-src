@@ -722,64 +722,50 @@ ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D)
 zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 {
 	zend_lex_state original_lex_state;
-	zend_op_array *op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
-	zend_op_array *original_active_op_array = CG(active_op_array);
-	zend_op_array *retval;
+	zend_op_array *op_array = NULL;
 	zval tmp;
-	int compiler_result;
 	zend_bool original_in_compilation = CG(in_compilation);
 
 	if (Z_STRLEN_P(source_string)==0) {
-		efree(op_array);
 		return NULL;
 	}
-
-	CG(in_compilation) = 1;
 
 	ZVAL_DUP(&tmp, source_string);
 	convert_to_string(&tmp);
 	source_string = &tmp;
-
+	
+	CG(in_compilation) = 1;
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
-	if (zend_prepare_string_for_scanning(source_string, filename TSRMLS_CC)==FAILURE) {
-		efree(op_array);
-		retval = NULL;
-	} else {
-		init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
-		CG(active_op_array) = op_array;
-		zend_stack_push(&CG(context_stack), (void *) &CG(context));
-		zend_init_compiler_context(TSRMLS_C);
-		BEGIN(ST_IN_SCRIPTING);
+	if (zend_prepare_string_for_scanning(source_string, filename TSRMLS_CC) == SUCCESS) {
+		CG(ast) = NULL;
 		CG(ast_arena) = zend_arena_create(1024 * 32);
-		compiler_result = zendparse(TSRMLS_C);
+		BEGIN(ST_IN_SCRIPTING);
 
-		if (SCNG(script_filtered)) {
-			efree(SCNG(script_filtered));
-			SCNG(script_filtered) = NULL;
-		}
+		if (!zendparse(TSRMLS_C)) {
+			zend_op_array *original_active_op_array = CG(active_op_array);
+			op_array = emalloc(sizeof(zend_op_array));
+			init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
+			CG(active_op_array) = op_array;
 
-		if (compiler_result != 0) {
-			CG(active_op_array) = original_active_op_array;
-			CG(unclean_shutdown)=1;
-			destroy_op_array(op_array TSRMLS_CC);
-			efree(op_array);
-			retval = NULL;
-		} else {
+			zend_stack_push(&CG(context_stack), (void *) &CG(context));
+			zend_init_compiler_context(TSRMLS_C);
 			zend_compile_top_stmt(CG(ast) TSRMLS_CC);
-			zend_ast_destroy(CG(ast));
-			zend_arena_destroy(CG(ast_arena));
 			zend_do_end_compilation(TSRMLS_C);
 			zend_emit_final_return(NULL TSRMLS_CC);
-			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array TSRMLS_CC);
 			zend_release_labels(0 TSRMLS_CC);
-			retval = op_array;
+
+			CG(active_op_array) = original_active_op_array;
 		}
+
+		zend_ast_destroy(CG(ast));
+		zend_arena_destroy(CG(ast_arena));
 	}
+
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	zval_dtor(&tmp);
 	CG(in_compilation) = original_in_compilation;
-	return retval;
+	return op_array;
 }
 
 
