@@ -1169,6 +1169,8 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 	size_t real_size = size;
 	zend_mm_debug_info *dbg;
 
+	/* special handling for zero-size allocation */
+	size = MAX(size, 1);
 	size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
 #endif
 	if (size <= ZEND_MM_MAX_SMALL_SIZE) {
