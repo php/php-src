@@ -1622,9 +1622,8 @@ PHP_RINIT_FUNCTION(mbstring)
 		CG(compiler_options) |= ZEND_COMPILE_NO_BUILTIN_STRLEN;
 		while (p->type > 0) {
 			if ((MBSTRG(func_overload) & p->type) == p->type && 
-				(orig = zend_hash_str_find_ptr(EG(function_table), p->save_func,
-					strlen(p->save_func))) == NULL) {
-
+				!zend_hash_str_exists(EG(function_table), p->save_func, strlen(p->save_func))
+			) {
 				func = zend_hash_str_find_ptr(EG(function_table), p->ovld_func, strlen(p->ovld_func));
 				
 				if ((orig = zend_hash_str_find_ptr(EG(function_table), p->orig_func, strlen(p->orig_func))) == NULL) {
@@ -1633,11 +1632,14 @@ PHP_RINIT_FUNCTION(mbstring)
 				} else {
 					ZEND_ASSERT(orig->type == ZEND_INTERNAL_FUNCTION);
 					zend_hash_str_add_mem(EG(function_table), p->save_func, strlen(p->save_func), orig, sizeof(zend_internal_function));
+					function_add_ref(orig);
 
 					if (zend_hash_str_update_mem(EG(function_table), p->orig_func, strlen(p->orig_func), func, sizeof(zend_internal_function)) == NULL) {
 						php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring couldn't replace function %s.", p->orig_func);
 						return FAILURE;
 					}
+
+					function_add_ref(func);
 				}
 			}
 			p++;
@@ -1684,6 +1686,7 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 				(orig = zend_hash_str_find_ptr(EG(function_table), p->save_func, strlen(p->save_func)))) {
 				
 				zend_hash_str_update_mem(EG(function_table), p->orig_func, strlen(p->orig_func), orig, sizeof(zend_internal_function));
+				function_add_ref(orig);
 				zend_hash_str_del(EG(function_table), p->save_func, strlen(p->save_func));
 			}
 			p++;
