@@ -91,7 +91,7 @@ static uint zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
 		ADD_SIZE(zend_persist_zval_calc(zend_ast_get_zval(ast) TSRMLS_CC));
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
-		ADD_SIZE(sizeof(zend_ast_list) + sizeof(zend_ast *) * (list->children - 1));
+		ADD_SIZE(sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * list->children);
 		for (i = 0; i < list->children; i++) {
 			if (list->child[i]) {
 				ADD_SIZE(zend_persist_ast_calc(list->child[i] TSRMLS_CC));
@@ -99,7 +99,7 @@ static uint zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
 		}
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
-		ADD_SIZE(sizeof(zend_ast) + sizeof(zend_ast *) * (children - 1));
+		ADD_SIZE(sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children);
 		for (i = 0; i < children; i++) {
 			if (ast->child[i]) {
 				ADD_SIZE(zend_persist_ast_calc(ast->child[i] TSRMLS_CC));

@@ -317,7 +317,7 @@ static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		zend_ast_list *copy = emalloc(
-			sizeof(zend_ast_list) + sizeof(zend_ast *) * (list->children - 1));
+			sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * list->children);
 		copy->kind = list->kind;
 		copy->attr = list->attr;
 		copy->children = list->children;
@@ -331,7 +331,7 @@ static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
 		return (zend_ast *) copy;
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
-		zend_ast *copy = emalloc(sizeof(zend_ast) + sizeof(zend_ast *) * (children - 1));
+		zend_ast *copy = emalloc(sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children);
 		copy->kind = ast->kind;
 		copy->attr = ast->attr;
 		for (i = 0; i < children; i++) {
