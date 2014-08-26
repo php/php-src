@@ -670,7 +670,7 @@ static inline unsigned int zend_mm_high_bit(size_t _size)
 	__asm__("bsrl %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
 	return n;
 #elif defined(__GNUC__) && defined(__x86_64__)
-	unsigned long n;
+	zend_ulong n;
 
         __asm__("bsr %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
         return (unsigned int)n;
@@ -698,7 +698,7 @@ static inline unsigned int zend_mm_low_bit(size_t _size)
 	__asm__("bsfl %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
 	return n;
 #elif defined(__GNUC__) && defined(__x86_64__)
-        unsigned long n;
+        zend_ulong n;
 
         __asm__("bsf %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
         return (unsigned int)n;

@@ -525,7 +525,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 	return zend_std_cast_object_tostring(readobj, writeobj, type TSRMLS_CC);
 }
 
-static int com_object_count(zval *object, long *count TSRMLS_DC)
+static int com_object_count(zval *object, zend_long *count TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	LONG ubound = 0, lbound = 0;
