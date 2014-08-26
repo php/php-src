@@ -3879,6 +3879,7 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast TSRMLS_DC) {
 	if (zend_is_call(source_ast)) {
 		opline->extended_value = ZEND_RETURNS_FUNCTION;
 	} else if (source_ast->kind == ZEND_AST_NEW) {
+		zend_error(E_DEPRECATED, "Assigning the return value of new by reference is deprecated");
 		opline->extended_value = ZEND_RETURNS_NEW;
 	}
 }
