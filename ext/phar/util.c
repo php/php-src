@@ -2037,7 +2037,7 @@ int phar_copy_on_write(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 		return FAILURE;
 	}
 
-	phar_copy_cached_phar(&Z_PTR_P(pzv) TSRMLS_CC);
+	phar_copy_cached_phar((phar_archive_data **)&Z_PTR_P(pzv) TSRMLS_CC);
 	newpphar = Z_PTR_P(pzv);
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
