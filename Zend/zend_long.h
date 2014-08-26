@@ -32,32 +32,18 @@
 
 /* Integer types or the old bad long. */
 #ifdef ZEND_ENABLE_INT64
-# ifdef ZEND_WIN32
-#  ifdef _WIN64
-typedef __int64 zend_long;
-typedef unsigned __int64 zend_ulong;
-typedef __int64 zend_off_t;
-#   define ZEND_LONG_MAX _I64_MAX
-#   define ZEND_LONG_MIN _I64_MIN
-#   define ZEND_ULONG_MAX _UI64_MAX
-#   define Z_L(i) i##i64
-#   define Z_UL(i) i##Ui64
-#  else
-#   error Cant enable 64 bit integers on non 64 bit platform
-#  endif
-# else
-#  if defined(__X86_64__) || defined(__LP64__) || defined(_LP64)
 typedef int64_t zend_long;
 typedef uint64_t zend_ulong;
-typedef off_t zend_off_t;
-#   define ZEND_LONG_MAX INT64_MAX
-#   define ZEND_LONG_MIN INT64_MIN
-#   define ZEND_ULONG_MAX UINT64_MAX
+typedef int64_t zend_off_t;
+# define ZEND_LONG_MAX INT64_MAX
+# define ZEND_LONG_MIN INT64_MIN
+# define ZEND_ULONG_MAX UINT64_MAX
+# ifdef _WIN64
+#   define Z_L(i) i##i64
+#   define Z_UL(i) i##Ui64
+# else
 #   define Z_L(i) i##LL
 #   define Z_UL(i) i##ULL
-#  else
-#   error Cant enable 64 bit integers on non 64 bit platform
-#  endif
 # endif
 # define SIZEOF_ZEND_LONG 8
 #else
@@ -67,9 +53,9 @@ typedef int32_t zend_off_t;
 # define ZEND_LONG_MAX INT32_MAX
 # define ZEND_LONG_MIN INT32_MIN
 # define ZEND_ULONG_MAX UINT32_MAX
-# define Z_L(i) i##L
-# define Z_UL(i) i##UL
-# define SIZEOF_ZEND_LONG SIZEOF_LONG
+# define Z_L(i) i
+# define Z_UL(i) i
+# define SIZEOF_ZEND_LONG 4
 #endif
 
 
