@@ -46,7 +46,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);
 					zend_hash_destroy(&arr->ht);
-					efree(arr);
+					efree_size(arr, sizeof(zend_array));
 				}
 				break;
 			}
@@ -54,7 +54,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 				zend_ast_ref *ast = (zend_ast_ref*)p;
 		
 				zend_ast_destroy_and_free(ast->ast);
-				efree(ast);
+				efree_size(ast, sizeof(zend_ast_ref));
 				break;
 			}
 		case IS_OBJECT: {
@@ -78,7 +78,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 				zend_reference *ref = (zend_reference*)p;
 				if (--GC_REFCOUNT(ref) == 0) {
 					zval_ptr_dtor(&ref->val);
-					efree(ref);
+					efree_size(ref, sizeof(zend_reference));
 				}
 				break;
 			}
@@ -106,7 +106,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);
 					zend_hash_destroy(&arr->ht);
-					efree(arr);
+					efree_size(arr, sizeof(zend_array));
 				}
 				break;
 			}
@@ -114,7 +114,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 				zend_ast_ref *ast = (zend_ast_ref*)p;
 
 				zend_ast_destroy_and_free(ast->ast);
-				efree(ast);
+				efree_size(ast, sizeof(zend_ast_ref));
 				break;
 			}
 		case IS_OBJECT: {
@@ -136,7 +136,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 				zend_reference *ref = (zend_reference*)p;
 
 				zval_ptr_dtor(&ref->val);
-				efree(ref);
+				efree_size(ref, sizeof(zend_reference));
 				break;
 			}
 		default:
