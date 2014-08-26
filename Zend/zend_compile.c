@@ -2800,8 +2800,7 @@ static int zend_constant_ct_subst(znode *result, zval *const_name, int all_inter
 
 	if (c) {
 		result->op_type = IS_CONST;
-		result->u.constant = c->value;
-		zval_copy_ctor(&result->u.constant);
+		ZVAL_DUP(&result->u.constant, &c->value);
 		return 1;
 	}
 	return 0;
@@ -7661,6 +7660,16 @@ void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC) {
 				return;
 			}
 			break;
+		case ZEND_AST_CONST: {
+			znode result_node;
+
+			if (!zend_constant_ct_subst(&result_node, zend_ast_get_zval(ast->child[0]), 0 TSRMLS_CC)) {
+				return;
+			}
+			zend_ast_destroy(ast);
+			*ast_ptr = zend_ast_create_zval(&result_node.u.constant);
+			return;
+		}
 		default:
 			return;
 	}
