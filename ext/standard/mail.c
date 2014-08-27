@@ -79,7 +79,7 @@ extern zend_long php_getuid(TSRMLS_D);
 PHP_FUNCTION(ezmlm_hash)
 {
 	char *str = NULL;
-	zend_ulong h = Z_UL(5381);
+	unsigned int h = 5381;
 	size_t j, str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
@@ -87,10 +87,10 @@ PHP_FUNCTION(ezmlm_hash)
 	}
 
 	for (j = 0; j < str_len; j++) {
-		h = (h + (h << Z_UL(5))) ^ (zend_ulong) (unsigned char) tolower(str[j]);
+		h = (h + (h << 5)) ^ (zend_ulong) (unsigned char) tolower(str[j]);
 	}
 
-	h = (h % Z_UL(53));
+	h = (h % 53);
 
 	RETURN_LONG((zend_long) h);
 }
