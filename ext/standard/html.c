@@ -1505,7 +1505,7 @@ PHP_FUNCTION(htmlspecialchars)
 PHP_FUNCTION(htmlspecialchars_decode)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 	zend_long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
@@ -1631,7 +1631,7 @@ PHP_FUNCTION(get_html_translation_table)
 	entity_table_opt entity_table;
 	const enc_to_uni *to_uni_table = NULL;
 	char *charset_hint = NULL;
-	int charset_hint_len;
+	size_t charset_hint_len;
 	enum entity_charset charset;
 
 	/* in this function we have to jump through some loops because we're

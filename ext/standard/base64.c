@@ -216,7 +216,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 PHP_FUNCTION(base64_encode)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
@@ -237,7 +237,7 @@ PHP_FUNCTION(base64_decode)
 {
 	char *str;
 	zend_bool strict = 0;
-	int str_len;
+	size_t str_len;
 	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &str, &str_len, &strict) == FAILURE) {

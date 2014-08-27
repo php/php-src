@@ -226,7 +226,7 @@ static inline reflection_object *reflection_object_from_obj(zend_object *obj) /*
 
 static zend_object_handlers reflection_object_handlers;
 
-static zval *_default_load_entry(zval *object, char *name, int name_len TSRMLS_DC) /* {{{ */
+static zval *_default_load_entry(zval *object, char *name, size_t name_len TSRMLS_DC) /* {{{ */
 {
 	zval *value;
 
@@ -1588,7 +1588,7 @@ ZEND_METHOD(reflection_function, __construct)
 	reflection_object *intern;
 	zend_function *fptr;
 	char *name_str;
-	int name_len;
+	size_t name_len;
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
@@ -2666,7 +2666,7 @@ ZEND_METHOD(reflection_method, __construct)
 	zend_class_entry *ce;
 	zend_function *mptr;
 	char *name_str, *tmp;
-	int name_len, tmp_len;
+	size_t name_len, tmp_len;
 	zval ztmp;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {

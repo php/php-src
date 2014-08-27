@@ -178,7 +178,7 @@ static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 PHP_FUNCTION(iptcembed)
 {
 	char *iptcdata, *jpeg_file;
-	int iptcdata_len, jpeg_file_len;
+	size_t iptcdata_len, jpeg_file_len;
 	zend_long spool = 0;
 	FILE *fp;
 	unsigned int marker, done = 0;
@@ -302,7 +302,7 @@ PHP_FUNCTION(iptcparse)
 	unsigned int tagsfound = 0;
 	unsigned char *buffer, recnum, dataset, key[ 16 ];
 	char *str;
-	int str_len;
+	size_t str_len;
 	zval values, *element;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) != SUCCESS) {

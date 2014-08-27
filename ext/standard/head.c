@@ -73,7 +73,7 @@ PHPAPI int php_header(TSRMLS_D)
 }
 
 
-PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
+PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_len, time_t expires, char *path, size_t path_len, char *domain, size_t domain_len, size_t secure, size_t url_encode, size_t httponly TSRMLS_DC)
 {
 	char *cookie;
 	int len=sizeof("Set-Cookie: ");

@@ -160,7 +160,8 @@ PHP_METHOD(domelement, __construct)
 	char *name, *value = NULL, *uri = NULL;
 	char *localname = NULL, *prefix = NULL;
 	int errorcode = 0, uri_len = 0;
-	int name_len, value_len = 0, name_valid;
+	size_t name_len, value_len = 0;
+	int name_valid;
 	xmlNsPtr nsptr = NULL;
 	zend_error_handling error_handling;
 
@@ -370,7 +371,8 @@ PHP_FUNCTION(dom_element_set_attribute)
 	zval *id;
 	xmlNode *nodep;
 	xmlNodePtr attr = NULL;
-	int ret, name_len, value_len, name_valid;
+	int ret, name_valid;
+	size_t name_len, value_len;
 	dom_object *intern;
 	char *name, *value;
 
@@ -660,7 +662,7 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 	xmlNodePtr elemp;
 	xmlNsPtr nsptr;
 	dom_object *intern;
-	int uri_len = 0, name_len = 0;
+	size_t uri_len = 0, name_len = 0;
 	char *uri, *name;
 	xmlChar *strattr;
 
@@ -740,7 +742,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	xmlNodePtr elemp, nodep = NULL;
 	xmlNsPtr nsptr;
 	xmlAttr *attr;
-	int uri_len = 0, name_len = 0, value_len = 0;
+	size_t uri_len = 0, name_len = 0, value_len = 0;
 	char *uri, *name, *value;
 	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;

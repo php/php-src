@@ -522,7 +522,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 	zval *pg_rows;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
 	char *query;
 
 	PGresult *pgsql_result;
@@ -631,7 +631,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *filename, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	int  table_name_len, filename_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	size_t  table_name_len, filename_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
 	char *query;
 	PGresult *pgsql_result;
 	ExecStatusType status;
@@ -825,7 +825,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
 	char *query;
 
 	PGresult *pgsql_result;
@@ -930,9 +930,9 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 	Oid oid;
 	int lfd;
 	char *oidstr;
-	int oidstrlen;
+	size_t oidstrlen;
 	char *modestr = "rb";
-	int modestrlen;
+	size_t modestrlen;
 	int mode = INV_READ;
 	char *end_ptr;
 
@@ -981,7 +981,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 	pdo_pgsql_db_handle *H;
 	Oid oid;
 	char *oidstr, *end_ptr;
-	int oidlen;
+	size_t oidlen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 				&oidstr, &oidlen)) {

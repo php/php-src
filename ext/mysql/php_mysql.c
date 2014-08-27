@@ -725,7 +725,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *user = NULL, *passwd = NULL;
    	char *host_and_port = NULL, *socket = NULL;
 	char *tmp = NULL, *host = NULL;
-	int user_len = 0, passwd_len = 0, host_len = 0;
+	size_t user_len = 0, passwd_len = 0, host_len = 0;
 	int port = MYSQL_PORT;
 	zend_long client_flags = 0;
 	php_mysql_conn *mysql = NULL;
@@ -1145,7 +1145,7 @@ PHP_FUNCTION(mysql_close)
 PHP_FUNCTION(mysql_select_db)
 {
 	char *db;
-	int db_len;
+	size_t db_len;
 	php_mysql_conn *mysql;
 	zval *mysql_link = NULL;
 
@@ -1404,7 +1404,7 @@ PHP_FUNCTION(mysql_set_charset)
 PHP_FUNCTION(mysql_create_db)
 {
 	char *db;
-	int db_len;
+	size_t db_len;
 	php_mysql_conn *mysql;
 	zval *mysql_link = NULL;
 
@@ -1435,7 +1435,7 @@ PHP_FUNCTION(mysql_create_db)
 PHP_FUNCTION(mysql_drop_db)
 {
 	char *db;
-	int db_len;
+	size_t db_len;
 	php_mysql_conn *mysql;
 	zval *mysql_link = NULL;
 
@@ -1657,7 +1657,7 @@ PHP_FUNCTION(mysql_list_dbs)
 PHP_FUNCTION(mysql_list_tables)
 {
 	char *db;
-	int db_len;
+	size_t db_len;
 	php_mysql_conn *mysql;
 	zval *mysql_link = NULL;
 	MYSQL_RES *mysql_result;
@@ -1694,7 +1694,7 @@ PHP_FUNCTION(mysql_list_tables)
 PHP_FUNCTION(mysql_list_fields)
 {
 	char *db, *table;
-	int db_len, table_len;
+	size_t db_len, table_len;
 	zval *mysql_link = NULL;
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
@@ -1846,7 +1846,7 @@ PHP_FUNCTION(mysql_affected_rows)
 PHP_FUNCTION(mysql_escape_string)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 	zend_string *escaped_str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
@@ -1870,7 +1870,7 @@ PHP_FUNCTION(mysql_escape_string)
 PHP_FUNCTION(mysql_real_escape_string)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 	zend_string *new_str;
 	php_mysql_conn *mysql;
 	zval *mysql_link = NULL;

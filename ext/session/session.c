@@ -1644,7 +1644,8 @@ static PHP_FUNCTION(session_set_cookie_params)
 {
 	zval *lifetime;
 	char *path = NULL, *domain = NULL;
-	int path_len, domain_len, argc = ZEND_NUM_ARGS();
+	size_t path_len, domain_len;
+	int argc = ZEND_NUM_ARGS();
 	zend_bool secure = 0, httponly = 0;
 	zend_string *ini_name;
 
@@ -1990,7 +1991,7 @@ static PHP_FUNCTION(session_regenerate_id)
 static PHP_FUNCTION(session_cache_limiter)
 {
 	char *limiter = NULL;
-	int limiter_len;
+	size_t limiter_len;
 	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &limiter, &limiter_len) == FAILURE) {
@@ -2053,7 +2054,7 @@ static PHP_FUNCTION(session_encode)
 static PHP_FUNCTION(session_decode)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 
 	if (PS(session_status) == php_session_none) {
 		RETURN_FALSE;

@@ -347,7 +347,7 @@ typedef enum {
 	char *dir = NULL;                                                   \
 	int   dir_len;                                                      \
 	char *module;                                                       \
-	int   module_len;                                                   \
+	size_t   module_len;                                                   \
 	if (zend_parse_parameters (ZEND_NUM_ARGS() TSRMLS_CC,               \
 		"s|s", &module, &module_len, &dir, &dir_len) == FAILURE) {      \
 		return;                                                         \
@@ -508,8 +508,8 @@ PHP_FUNCTION(mcrypt_module_open)
 {
 	char *cipher, *cipher_dir;
 	char *mode,   *mode_dir;
-	int   cipher_len, cipher_dir_len;
-	int   mode_len,   mode_dir_len;
+	size_t   cipher_len, cipher_dir_len;
+	size_t   mode_len,   mode_dir_len;
 	MCRYPT td;
 	php_mcrypt *pm;
    
@@ -543,7 +543,7 @@ PHP_FUNCTION(mcrypt_module_open)
 PHP_FUNCTION(mcrypt_generic_init)
 {
 	char *key, *iv;
-	int key_len, iv_len;
+	size_t key_len, iv_len;
 	zval *mcryptind;
 	unsigned char *key_s, *iv_s;
 	int max_key_size, key_size, iv_size;
@@ -616,7 +616,7 @@ PHP_FUNCTION(mcrypt_generic)
 {
 	zval *mcryptind;
 	char *data;
-	int data_len;
+	size_t data_len;
 	php_mcrypt *pm;
 	char* data_s;
 	int block_size, data_size;
@@ -661,7 +661,7 @@ PHP_FUNCTION(mdecrypt_generic)
 {
 	zval *mcryptind;
 	char *data;
-	int data_len;
+	size_t data_len;
 	php_mcrypt *pm;
 	char* data_s;
 	int block_size, data_size;
@@ -949,7 +949,7 @@ PHP_FUNCTION(mcrypt_list_algorithms)
 {
 	char **modules;
 	char *lib_dir = MCG(algorithms_dir);
-	int   lib_dir_len;
+	size_t   lib_dir_len;
 	int   i, count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s",
@@ -976,7 +976,7 @@ PHP_FUNCTION(mcrypt_list_modes)
 {
 	char **modules;
 	char *lib_dir = MCG(modes_dir);
-	int   lib_dir_len;
+	size_t   lib_dir_len;
 	int   i, count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s",
@@ -1238,7 +1238,7 @@ static int php_mcrypt_ensure_valid_iv(MCRYPT td, const char *iv, int iv_size TSR
 }
 /* }}} */
 
-static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, const char *data, int data_len, char *mode, const char *iv, int iv_len, int dencrypt, zval* return_value TSRMLS_DC) /* {{{ */
+static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, const char *data, int data_len, char *mode, const char *iv, size_t iv_len, size_t dencrypt, zval* return_value TSRMLS_DC) /* {{{ */
 {
 	char *cipher_dir_string;
 	char *module_dir_string;

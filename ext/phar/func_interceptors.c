@@ -26,7 +26,7 @@
 PHAR_FUNC(phar_opendir) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zval *zcontext = NULL;
 
 	if (!PHAR_G(intercepted)) {
@@ -94,7 +94,7 @@ skip_phar:
 PHAR_FUNC(phar_file_get_contents) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zend_string *contents;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
@@ -224,7 +224,7 @@ skip_phar:
 PHAR_FUNC(phar_readfile) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	int size = 0;
 	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;
@@ -320,7 +320,7 @@ skip_phar:
 PHAR_FUNC(phar_fopen) /* {{{ */
 {
 	char *filename, *mode;
-	int filename_len, mode_len;
+	size_t filename_len, mode_len;
 	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
@@ -339,7 +339,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 	}
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
-		int arch_len, entry_len, fname_len;
+		size_t arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 		char *name;
 		phar_archive_data *phar;
@@ -805,7 +805,7 @@ void fname(INTERNAL_FUNCTION_PARAMETERS) { \
 		PHAR_G(orig)(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} else { \
 		char *filename; \
-		int filename_len; \
+		size_t filename_len; \
 		\
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) { \
 			return; \
@@ -889,7 +889,7 @@ PharFileFunction(phar_is_dir, FS_IS_DIR, orig_is_dir)
 PHAR_FUNC(phar_is_file) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 
 	if (!PHAR_G(intercepted)) {
 		goto skip_phar;
@@ -956,7 +956,7 @@ skip_phar:
 PHAR_FUNC(phar_is_link) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 
 	if (!PHAR_G(intercepted)) {
 		goto skip_phar;

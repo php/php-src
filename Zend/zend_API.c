@@ -221,7 +221,7 @@ ZEND_API zend_string *zend_get_object_classname(const zend_object *object TSRMLS
 }
 /* }}} */
 
-static int parse_arg_object_to_string(zval *arg, char **p, int *pl, int type TSRMLS_DC) /* {{{ */
+static int parse_arg_object_to_string(zval *arg, char **p, size_t *pl, int type TSRMLS_DC) /* {{{ */
 {
 	if (Z_OBJ_HANDLER_P(arg, cast_object)) {
 		zval obj;
@@ -516,7 +516,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 's':
 			{
 				char **p = va_arg(*va, char **);
-				int *pl = va_arg(*va, int *);
+				size_t *pl = va_arg(*va, size_t *);
 				switch (Z_TYPE_P(arg)) {
 					case IS_NULL:
 						if (check_null) {

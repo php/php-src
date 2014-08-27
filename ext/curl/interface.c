@@ -1852,7 +1852,7 @@ PHP_FUNCTION(curl_init)
 	php_curl *ch;
 	CURL 	 *cp;
 	char 	 *url = NULL;
-	int		  url_len = 0;
+	size_t		  url_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &url, &url_len) == FAILURE) {
 		return;
@@ -3314,7 +3314,7 @@ PHP_FUNCTION(curl_reset)
 PHP_FUNCTION(curl_escape)
 {
 	char       *str = NULL, *res = NULL;
-	int        str_len = 0;
+	size_t        str_len = 0;
 	zval       *zid;
 	php_curl   *ch;
 

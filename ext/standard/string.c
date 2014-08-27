@@ -872,33 +872,24 @@ PHP_FUNCTION(ltrim)
    Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
-	zend_string *text, *breakchar = NULL, *breakchar_save = NULL;
-	size_t newtextlen, chk;
+	zend_string *text;
+	char *breakchar = "\n";
+	size_t newtextlen, chk, breakchar_len = 1;
 	size_t alloced;
 	zend_long current = 0, laststart = 0, lastspace = 0;
 	zend_long linelength = 75;
 	zend_bool docut = 0;
 	zend_string *newtext;
 
-	breakchar = breakchar_save = zend_string_init("\n", 1, 1);
-	if (!breakchar) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|lsb", &text, &linelength, &breakchar, &breakchar_len, &docut) == FAILURE) {
 		return;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|lSb", &text, &linelength, &breakchar, &docut) == FAILURE) {
-		zend_string_free(breakchar);
-		return;
-	}
-
-	if (breakchar != breakchar_save) {
-		zend_string_free(breakchar_save);
 	}
 
 	if (text->len == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	if (breakchar->len == 0) {
+	if (breakchar_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Break string cannot be empty");
 		RETURN_FALSE;
 	}
@@ -910,21 +901,21 @@ PHP_FUNCTION(wordwrap)
 
 	/* Special case for a single-character break as it needs no
 	   additional storage space */
-	if (breakchar->len == 1 && !docut) {
+	if (breakchar_len == 1 && !docut) {
 		newtext = zend_string_init(text->val, text->len, 0);
 
 		laststart = lastspace = 0;
 		for (current = 0; current < text->len; current++) {
-			if (text->val[current] == breakchar->val[0]) {
+			if (text->val[current] == breakchar[0]) {
 				laststart = lastspace = current + 1;
 			} else if (text->val[current] == ' ') {
 				if (current - laststart >= linelength) {
-					newtext->val[current] = breakchar->val[0];
+					newtext->val[current] = breakchar[0];
 					laststart = current + 1;
 				}
 				lastspace = current;
 			} else if (current - laststart >= linelength && laststart != lastspace) {
-				newtext->val[lastspace] = breakchar->val[0];
+				newtext->val[lastspace] = breakchar[0];
 				laststart = lastspace + 1;
 			}
 		}
@@ -934,12 +925,12 @@ PHP_FUNCTION(wordwrap)
 		/* Multiple character line break or forced cut */
 		if (linelength > 0) {
 			chk = (size_t)(text->len/linelength + 1);
-			newtext = zend_string_alloc(chk * breakchar->len + text->len, 0);
-			alloced = text->len + chk * breakchar->len + 1;
+			newtext = zend_string_alloc(chk * breakchar_len + text->len, 0);
+			alloced = text->len + chk * breakchar_len + 1;
 		} else {
 			chk = text->len;
-			alloced = text->len * (breakchar->len + 1) + 1;
-			newtext = zend_string_alloc(text->len * (breakchar->len + 1), 0);
+			alloced = text->len * (breakchar_len + 1) + 1;
+			newtext = zend_string_alloc(text->len * (breakchar_len + 1), 0);
 		}
 
 		/* now keep track of the actual new text length */
@@ -948,18 +939,18 @@ PHP_FUNCTION(wordwrap)
 		laststart = lastspace = 0;
 		for (current = 0; current < text->len; current++) {
 			if (chk <= 0) {
-				alloced += (size_t) (((text->len - current + 1)/linelength + 1) * breakchar->len) + 1;
+				alloced += (size_t) (((text->len - current + 1)/linelength + 1) * breakchar_len) + 1;
 				newtext = zend_string_realloc(newtext, alloced, 0);
 				chk = (size_t) ((text->len - current)/linelength) + 1;
 			}
 			/* when we hit an existing break, copy to new buffer, and
 			 * fix up laststart and lastspace */
-			if (text->val[current] == breakchar->val[0]
-				&& current + breakchar->len < text->len
-				&& !strncmp(text->val+current, breakchar->val, breakchar->len)) {
-				memcpy(newtext->val + newtextlen, text->val + laststart, current - laststart + breakchar->len);
-				newtextlen += current - laststart + breakchar->len;
-				current += breakchar->len - 1;
+			if (text->val[current] == breakchar[0]
+				&& current + breakchar_len < text->len
+				&& !strncmp(text->val+current, breakchar, breakchar_len)) {
+				memcpy(newtext->val + newtextlen, text->val + laststart, current - laststart + breakchar_len);
+				newtextlen += current - laststart + breakchar_len;
+				current += breakchar_len - 1;
 				laststart = lastspace = current + 1;
 				chk--;
 			}
@@ -969,8 +960,8 @@ PHP_FUNCTION(wordwrap)
 				if (current - laststart >= linelength) {
 					memcpy(newtext->val + newtextlen, text->val + laststart, current - laststart);
 					newtextlen += current - laststart;
-					memcpy(newtext->val + newtextlen, breakchar->val, breakchar->len);
-					newtextlen += breakchar->len;
+					memcpy(newtext->val + newtextlen, breakchar, breakchar_len);
+					newtextlen += breakchar_len;
 					laststart = current + 1;
 					chk--;
 				}
@@ -983,8 +974,8 @@ PHP_FUNCTION(wordwrap)
 					&& docut && laststart >= lastspace) {
 				memcpy(newtext->val + newtextlen, text->val + laststart, current - laststart);
 				newtextlen += current - laststart;
-				memcpy(newtext->val + newtextlen, breakchar->val, breakchar->len);
-				newtextlen += breakchar->len;
+				memcpy(newtext->val + newtextlen, breakchar, breakchar_len);
+				newtextlen += breakchar_len;
 				laststart = lastspace = current;
 				chk--;
 			}
@@ -995,8 +986,8 @@ PHP_FUNCTION(wordwrap)
 					&& laststart < lastspace) {
 				memcpy(newtext->val + newtextlen, text->val + laststart, lastspace - laststart);
 				newtextlen += lastspace - laststart;
-				memcpy(newtext->val + newtextlen, breakchar->val, breakchar->len);
-				newtextlen += breakchar->len;
+				memcpy(newtext->val + newtextlen, breakchar, breakchar_len);
+				newtextlen += breakchar_len;
 				laststart = lastspace = lastspace + 1;
 				chk--;
 			}
@@ -1491,7 +1482,7 @@ quit_loop:
 PHP_FUNCTION(basename)
 {
 	char *string, *suffix = NULL;
-	int   string_len, suffix_len = 0;
+	size_t   string_len, suffix_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &string, &string_len, &suffix, &suffix_len) == FAILURE) {
 		return;
@@ -1515,7 +1506,7 @@ PHP_FUNCTION(dirname)
 {
 	char *str;
 	zend_string *ret;
-	int str_len;
+	size_t str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
@@ -2633,8 +2624,8 @@ PHP_FUNCTION(quotemeta)
    Returns ASCII value of character */
 PHP_FUNCTION(ord)
 {
-	char *str;
-	int   str_len;
+	char   *str;
+	size_t str_len;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
@@ -2743,7 +2734,7 @@ PHP_FUNCTION(ucwords)
 	zend_string *str;
 	char *delims = " \t\r\n\f\v";
 	register char *r, *r_end;
-	int delims_len = 6;
+	size_t delims_len = 6;
 	char mask[256];
 
 #ifndef FAST_ZPP
@@ -2966,7 +2957,7 @@ PHP_FUNCTION(strtr)
 {
 	zval *from;
 	char *str, *to = NULL;
-	int str_len, to_len = 0;
+	size_t str_len, to_len = 0;
 	int ac = ZEND_NUM_ARGS();
 
 #ifndef FAST_ZPP
@@ -3889,7 +3880,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	int block_start, block_end, block_type, block_length, i;
 	zend_long max_chars=0;
 	int begin, end, char_count, orig_begin;
-	int str_len;
+	size_t str_len;
 	zend_string *broken_str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &max_chars) == FAILURE) {
@@ -4304,7 +4295,7 @@ PHP_FUNCTION(parse_str)
 	char *arg;
 	zval *arrayArg = NULL;
 	char *res = NULL;
-	int arglen;
+	size_t arglen;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &arg, &arglen, &arrayArg) == FAILURE) {
 		return;
@@ -4703,7 +4694,7 @@ PHP_FUNCTION(str_getcsv)
 	zend_string *str;
 	char delim = ',', enc = '"', esc = '\\';
 	char *delim_str = NULL, *enc_str = NULL, *esc_str = NULL;
-	int delim_len = 0, enc_len = 0, esc_len = 0;
+	size_t delim_len = 0, enc_len = 0, esc_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|sss", &str, &delim_str, &delim_len,
 		&enc_str, &enc_len, &esc_str, &esc_len) == FAILURE) {
@@ -4986,7 +4977,7 @@ PHP_FUNCTION(substr_count)
 	zend_long offset = 0, length = 0;
 	int ac = ZEND_NUM_ARGS();
 	int count = 0;
-	int haystack_len, needle_len;
+	size_t haystack_len, needle_len;
 	char *p, *endp, cmp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &haystack, &haystack_len, &needle, &needle_len, &offset, &length) == FAILURE) {
@@ -5053,32 +5044,24 @@ PHP_FUNCTION(str_pad)
 
 	/* Helper variables */
 	size_t num_pad_chars;		/* Number of padding characters (total - input size) */
-	zend_string  *pad_str, *pad_str_save;	/* Pointer to padding string */
+	zend_string  *pad_str_save;	/* Pointer to padding string */
+	char *pad_str = " ";
+	size_t pad_str_len = 1;
 	zend_long   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
-	int	   i, left_pad=0, right_pad=0;
+	size_t	   i, left_pad=0, right_pad=0;
 	zend_string *result = NULL;	/* Resulting string */
 
-	pad_str = pad_str_save = zend_string_init(" ", 1, 1);
-        if (!pad_str) {
-            return;
-        }
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|Sl", &input, &pad_length, &pad_str, &pad_type_val) == FAILURE) {
-                zend_string_free(pad_str);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|sl", &input, &pad_length, &pad_str, &pad_str_len, &pad_type_val) == FAILURE) {
 		return;
 	}
 
-        if (pad_str != pad_str_save) {
-            zend_string_free(pad_str_save);
-        }
-
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (pad_length < 0 || pad_length <= input->len) {
+	if (pad_length <= input->len) {
 		RETURN_STRINGL(input->val, input->len);
 	}
 
-	if (pad_str->len == 0) {
+	if (pad_str_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding string cannot be empty");
 		return;
 	}
@@ -5117,7 +5100,7 @@ PHP_FUNCTION(str_pad)
 
 	/* First we pad on the left. */
 	for (i = 0; i < left_pad; i++)
-		result->val[result->len++] = pad_str->val[i % pad_str->len];
+		result->val[result->len++] = pad_str[i % pad_str_len];
 
 	/* Then we copy the input string. */
 	memcpy(result->val + result->len, input->val, input->len);
@@ -5125,7 +5108,7 @@ PHP_FUNCTION(str_pad)
 
 	/* Finally, we pad on the right. */
 	for (i = 0; i < right_pad; i++)
-		result->val[result->len++] = pad_str->val[i % pad_str->len];
+		result->val[result->len++] = pad_str[i % pad_str_len];
 
 	result->val[result->len] = '\0';
 
@@ -5231,7 +5214,7 @@ PHP_FUNCTION(str_word_count)
 {
 	zend_string *str;
 	char *char_list = NULL, *p, *e, *s, ch[256];
-	int char_list_len = 0, word_count = 0;
+	size_t char_list_len = 0, word_count = 0;
 	zend_long type = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|ls", &str, &type, &char_list, &char_list_len) == FAILURE) {
@@ -5307,7 +5290,7 @@ PHP_FUNCTION(str_word_count)
    Convert monetary value(s) to string */
 PHP_FUNCTION(money_format)
 {
-	int format_len = 0;
+	size_t format_len = 0;
 	char *format, *p, *e;
 	double value;
 	zend_bool check = 0;

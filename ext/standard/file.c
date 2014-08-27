@@ -380,7 +380,7 @@ PHP_FUNCTION(flock)
 PHP_FUNCTION(get_meta_tags)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zend_bool use_include_path = 0;
 	int in_tag = 0, done = 0;
 	int looking_for_val = 0, have_name = 0, have_content = 0;
@@ -523,7 +523,7 @@ PHP_FUNCTION(get_meta_tags)
 PHP_FUNCTION(file_get_contents)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = -1;
@@ -577,7 +577,7 @@ PHP_FUNCTION(file_put_contents)
 {
 	php_stream *stream;
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zval *data;
 	zend_long numbytes = 0;
 	zend_long flags = 0;
@@ -714,7 +714,7 @@ PHP_FUNCTION(file_put_contents)
 PHP_FUNCTION(file)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	char *p, *s, *e;
 	register int i = 0;
 	char eol_marker = '\n';
@@ -806,7 +806,7 @@ parse_eol:
 PHP_FUNCTION(tempnam)
 {
 	char *dir, *prefix;
-	int dir_len, prefix_len;
+	size_t dir_len, prefix_len;
 	char *opened_path;
 	int fd;
 	zend_string *p;
@@ -861,7 +861,7 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 PHP_NAMED_FUNCTION(php_if_fopen)
 {
 	char *filename, *mode;
-	int filename_len, mode_len;
+	size_t filename_len, mode_len;
 	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
@@ -922,7 +922,7 @@ PHPAPI PHP_FUNCTION(fclose)
 PHP_FUNCTION(popen)
 {
 	char *command, *mode;
-	int command_len, mode_len;
+	size_t command_len, mode_len;
 	FILE *fp;
 	php_stream *stream;
 	char *posix_mode;
@@ -1153,7 +1153,8 @@ PHPAPI PHP_FUNCTION(fgetss)
    Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {
-	int result, format_len, type, argc = 0;
+	int result, type, argc = 0;
+	size_t format_len;
 	zval *args = NULL;
 	zval *file_handle;
 	char *buf, *format;
@@ -1194,7 +1195,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 {
 	zval *arg1;
 	char *arg2;
-	int arg2len;
+	size_t arg2len;
 	int ret;
 	int num_bytes;
 	zend_long arg3 = 0;
@@ -1378,7 +1379,7 @@ PHP_FUNCTION(rmdir)
 PHP_FUNCTION(readfile)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	int size = 0;
 	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;
@@ -1490,7 +1491,7 @@ PHP_FUNCTION(rename)
 PHP_FUNCTION(unlink)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	php_stream_wrapper *wrapper;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -1627,7 +1628,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 PHP_FUNCTION(copy)
 {
 	char *source, *target;
-	int source_len, target_len;
+	size_t source_len, target_len;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
@@ -1837,7 +1838,7 @@ PHP_FUNCTION(fputcsv)
 	zval *fp = NULL, *fields = NULL;
 	int ret;
 	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
-	int delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
+	size_t delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|sss",
 			&fp, &fields, &delimiter_str, &delimiter_str_len,
@@ -1966,9 +1967,9 @@ PHP_FUNCTION(fgetcsv)
 		char *delimiter_str = NULL;
 		int delimiter_str_len = 0;
 		char *enclosure_str = NULL;
-		int enclosure_str_len = 0;
+		size_t enclosure_str_len = 0;
 		char *escape_str = NULL;
-		int escape_str_len = 0;
+		size_t escape_str_len = 0;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zsss",
 			&fd, &len_zv, &delimiter_str, &delimiter_str_len,
@@ -2309,7 +2310,7 @@ out:
 PHP_FUNCTION(realpath)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	char resolved_path_buff[MAXPATHLEN];
 
 #ifndef FAST_ZPP
@@ -2453,7 +2454,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
 PHP_FUNCTION(fnmatch)
 {
 	char *pattern, *filename;
-	int pattern_len, filename_len;
+	size_t pattern_len, filename_len;
 	zend_long flags = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp|l", &pattern, &pattern_len, &filename, &filename_len, &flags) == FAILURE) {

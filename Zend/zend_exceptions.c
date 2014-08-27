@@ -227,7 +227,8 @@ ZEND_METHOD(error_exception, __construct)
 	char  *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
 	zval  *object, *previous = NULL;
-	int    argc = ZEND_NUM_ARGS(), message_len, filename_len;
+	int    argc = ZEND_NUM_ARGS();
+	size_t message_len, filename_len;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, default_exception_ce) == FAILURE) {
 		zend_error(E_ERROR, "Wrong parameters for ErrorException([string $exception [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Exception $previous = NULL]]]]]])");

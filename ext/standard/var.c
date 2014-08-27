@@ -1013,7 +1013,7 @@ PHP_FUNCTION(serialize)
 PHP_FUNCTION(unserialize)
 {
 	char *buf = NULL;
-	int buf_len;
+	size_t buf_len;
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
 

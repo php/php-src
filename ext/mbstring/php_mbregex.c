@@ -689,7 +689,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	zval *arg_pattern, *array;
 	char *string;
-	int string_len;
+	size_t string_len;
 	php_mb_regex_t *re;
 	OnigRegion *regs = NULL;
 	int i, match_len, beg, end;
@@ -788,16 +788,16 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	zval *arg_pattern_zval;
 
 	char *arg_pattern;
-	int arg_pattern_len;
+	size_t arg_pattern_len;
 
 	char *replace;
-	int replace_len;
+	size_t replace_len;
 
 	zend_fcall_info arg_replace_fci;
 	zend_fcall_info_cache arg_replace_fci_cache;
 
 	char *string;
-	int string_len;
+	size_t string_len;
 
 	char *p;
 	php_mb_regex_t *re;
@@ -826,7 +826,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	eval = 0;
 	{
 		char *option_str = NULL;
-		int option_str_len = 0;
+		size_t option_str_len = 0;
 
 		if (!is_callable) {
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zss|s",
@@ -1052,12 +1052,12 @@ PHP_FUNCTION(mb_ereg_replace_callback)
 PHP_FUNCTION(mb_split)
 {
 	char *arg_pattern;
-	int arg_pattern_len;
+	size_t arg_pattern_len;
 	php_mb_regex_t *re;
 	OnigRegion *regs = NULL;
 	char *string;
 	OnigUChar *pos, *chunk_pos;
-	int string_len;
+	size_t string_len;
 
 	int n, err;
 	zend_long count = -1;
@@ -1131,10 +1131,10 @@ PHP_FUNCTION(mb_split)
 PHP_FUNCTION(mb_ereg_match)
 {
 	char *arg_pattern;
-	int arg_pattern_len;
+	size_t arg_pattern_len;
 
 	char *string;
-	int string_len;
+	size_t string_len;
 
 	php_mb_regex_t *re;
 	OnigSyntaxType *syntax;
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(mb_ereg_match)
 
 	{
 		char *option_str = NULL;
-		int option_str_len = 0;
+		size_t option_str_len = 0;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s",
 		                          &arg_pattern, &arg_pattern_len, &string, &string_len,
@@ -1180,7 +1180,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	size_t argc = ZEND_NUM_ARGS();
 	char *arg_pattern, *arg_options;
-	int arg_pattern_len, arg_options_len;
+	size_t arg_pattern_len, arg_options_len;
 	int n, i, err, pos, len, beg, end;
 	OnigOptionType option;
 	OnigUChar *str;
@@ -1435,7 +1435,7 @@ PHP_FUNCTION(mb_regex_set_options)
 	OnigOptionType opt;
 	OnigSyntaxType *syntax;
 	char *string = NULL;
-	int string_len;
+	size_t string_len;
 	char buf[16];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s",

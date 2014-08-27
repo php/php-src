@@ -299,7 +299,7 @@ PHP_FUNCTION( numfmt_set_symbol )
 {
 	zend_long       symbol;
 	char*      value     = NULL;
-	int        value_len = 0;
+	size_t        value_len = 0;
 	UChar*     svalue  = 0;
 	int        slength = 0;
 	FORMATTER_METHOD_INIT_VARS;

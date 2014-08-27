@@ -1476,7 +1476,7 @@ PHP_FUNCTION(socket_bind)
 	struct sockaddr			*sock_type = (struct sockaddr*) &sa_storage;
 	php_socket				*php_sock;
 	char					*addr;
-	int						addr_len;
+	size_t						addr_len;
 	zend_long					port = 0;
 	zend_long					retval = 0;
 
@@ -1602,7 +1602,7 @@ PHP_FUNCTION(socket_send)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	int			buf_len, retval;
+	size_t			buf_len, retval;
 	zend_long		len, flags;
 	char		*buf;
 

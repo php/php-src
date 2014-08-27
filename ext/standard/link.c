@@ -55,7 +55,7 @@
 PHP_FUNCTION(readlink)
 {
 	char *link;
-	int link_len;
+	size_t link_len;
 	char buff[MAXPATHLEN];
 	int ret;
 
@@ -119,7 +119,7 @@ PHP_FUNCTION(linkinfo)
 PHP_FUNCTION(symlink)
 {
 	char *topath, *frompath;
-	int topath_len, frompath_len;
+	size_t topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
@@ -177,7 +177,7 @@ PHP_FUNCTION(symlink)
 PHP_FUNCTION(link)
 {
 	char *topath, *frompath;
-	int topath_len, frompath_len;
+	size_t topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];

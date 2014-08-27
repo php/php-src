@@ -77,9 +77,9 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce TSRMLS_DC
 static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
 	const char	*bundlename;
-	int			bundlename_len = 0;
+	size_t			bundlename_len = 0;
 	const char	*locale;
-	int			locale_len = 0;
+	size_t			locale_len = 0;
 	zend_bool	fallback = 1;
 
 	zval                  *object = return_value;

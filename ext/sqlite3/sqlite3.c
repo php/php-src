@@ -102,7 +102,7 @@ PHP_METHOD(sqlite3, open)
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
 	char *filename, *encryption_key, *fullpath;
-	int filename_len, encryption_key_len = 0;
+	size_t filename_len, encryption_key_len = 0;
 	zend_long flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
 	zend_error_handling error_handling;
 
@@ -345,7 +345,7 @@ PHP_METHOD(sqlite3, loadExtension)
 	zval *object = getThis();
 	char *extension, *lib_path, *extension_dir, *errtext = NULL;
 	char fullpath[MAXPATHLEN];
-	int extension_len, extension_dir_len;
+	size_t extension_len, extension_dir_len;
 	db_obj = Z_SQLITE3_DB_P(object);
 
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
@@ -896,7 +896,7 @@ PHP_METHOD(sqlite3, createFunction)
 	zval *object = getThis();
 	php_sqlite3_func *func;
 	char *sql_func;
-	int sql_func_len;
+	size_t sql_func_len;
 	zval *callback_func;
 	zend_string *callback_name;
 	zend_long sql_func_num_args = -1;
@@ -947,7 +947,7 @@ PHP_METHOD(sqlite3, createAggregate)
 	php_sqlite3_func *func;
 	char *sql_func;
 	zend_string *callback_name;
-	int sql_func_len;
+	size_t sql_func_len;
 	zval *step_callback, *fini_callback;
 	zend_long sql_func_num_args = -1;
 	db_obj = Z_SQLITE3_DB_P(object);
@@ -1005,7 +1005,7 @@ PHP_METHOD(sqlite3, createCollation)
 	php_sqlite3_collation *collation;
 	char *collation_name;
 	zend_string *callback_name;
-	int collation_name_len;
+	size_t collation_name_len;
 	zval *callback_func;
 	db_obj = Z_SQLITE3_DB_P(object);
 
@@ -1186,7 +1186,7 @@ PHP_METHOD(sqlite3, openBlob)
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
 	char *table, *column, *dbname = "main";
-	int table_len, column_len, dbname_len;
+	size_t table_len, column_len, dbname_len;
 	zend_long rowid, flags = 0;
 	sqlite3_blob *blob = NULL;
 	php_stream_sqlite3_data *sqlite3_stream;

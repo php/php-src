@@ -94,7 +94,7 @@ PHP_FUNCTION(levenshtein)
 	int argc = ZEND_NUM_ARGS();
 	char *str1, *str2;
 	char *callback_name;
-	int str1_len, str2_len, callback_len;
+	size_t str1_len, str2_len, callback_len;
 	zend_long cost_ins, cost_rep, cost_del;
 	int distance = -1;
 

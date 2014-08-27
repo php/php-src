@@ -40,7 +40,7 @@ PHP_FUNCTION( numfmt_parse )
 	UChar* sstr = NULL;
 	int sstr_len = 0;
 	char* str = NULL;
-	int str_len;
+	size_t str_len;
 	int32_t val32, position = 0;
 	int64_t val64;
 	double val_double;
@@ -132,7 +132,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	char *currency_str = NULL;
 	int currency_len = 0;
 	char *str;
-	int str_len;
+	size_t str_len;
 	int32_t* position_p = NULL;
 	int32_t position = 0;
 	zval *zcurrency, *zposition = NULL;

@@ -1789,7 +1789,7 @@ PHP_FUNCTION(mb_internal_encoding)
 PHP_FUNCTION(mb_http_input)
 {
 	char *typ = NULL;
-	int typ_len;
+	size_t typ_len;
 	int retname;
 	char *list, *temp;
 	const mbfl_encoding *result = NULL;
@@ -2059,7 +2059,7 @@ PHP_FUNCTION(mb_parse_str)
 {
 	zval *track_vars_array = NULL;
 	char *encstr = NULL;
-	int encstr_len;
+	size_t encstr_len;
 	php_mb_encoding_handler_info_t info;
 	const mbfl_encoding *detected;
 
@@ -2108,7 +2108,7 @@ PHP_FUNCTION(mb_parse_str)
 PHP_FUNCTION(mb_output_handler)
 {
 	char *arg_string;
-	int arg_string_len;
+	size_t arg_string_len;
 	zend_long arg_status;
 	mbfl_string string, result;
 	const char *charset;
@@ -2412,7 +2412,7 @@ PHP_FUNCTION(mb_stripos)
 	zend_long offset;
 	mbfl_string haystack, needle;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
-	int from_encoding_len;
+	size_t from_encoding_len;
 	n = -1;
 	offset = 0;
 
@@ -2441,7 +2441,7 @@ PHP_FUNCTION(mb_strripos)
 	zend_long offset;
 	mbfl_string haystack, needle;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
-	int from_encoding_len;
+	size_t from_encoding_len;
 	n = -1;
 	offset = 0;
 
@@ -2833,7 +2833,7 @@ PHP_FUNCTION(mb_strcut)
 	size_t argc = ZEND_NUM_ARGS();
 	char *encoding;
 	zend_long from, len;
-	int encoding_len;
+	size_t encoding_len;
 	zval *z_len = NULL;
 	mbfl_string string, result, *ret;
 
@@ -2936,7 +2936,7 @@ PHP_FUNCTION(mb_strimwidth)
 {
 	char *str, *trimmarker, *encoding;
 	zend_long from, width;
-	int str_len, trimmarker_len, encoding_len;
+	size_t str_len, trimmarker_len, encoding_len;
 	mbfl_string string, result, marker, *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll|ss", &str, &str_len, &from, &width, &trimmarker, &trimmarker_len, &encoding, &encoding_len) == FAILURE) {
@@ -3081,7 +3081,7 @@ MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length, co
 PHP_FUNCTION(mb_convert_encoding)
 {
 	char *arg_str, *arg_new;
-	int str_len, new_len;
+	size_t str_len, new_len;
 	zval *arg_old;
 	size_t size, l, n;
 	char *_from_encodings = NULL, *ret, *s_free = NULL;
@@ -3548,7 +3548,8 @@ PHP_FUNCTION(mb_convert_variables)
 	const mbfl_encoding *from_encoding, *to_encoding;
 	mbfl_encoding_detector *identd;
 	mbfl_buffer_converter *convd;
-	int n, to_enc_len, argc, stack_level, stack_max;
+	int n, argc, stack_level, stack_max;
+	size_t to_enc_len;
 	size_t elistsz;
 	const mbfl_encoding **elist;
 	char *to_enc;
@@ -4042,14 +4043,14 @@ PHP_FUNCTION(mb_send_mail)
 {
 	int n;
 	char *to = NULL;
-	int to_len;
+	size_t to_len;
 	char *message = NULL;
-	int message_len;
+	size_t message_len;
 	char *headers = NULL;
-	int headers_len;
+	size_t headers_len;
 	char *subject = NULL;
 	zend_string *extra_cmd = NULL;
-	int subject_len;
+	size_t subject_len;
 	int i;
 	char *to_r = NULL;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
@@ -4328,7 +4329,7 @@ PHP_FUNCTION(mb_send_mail)
 PHP_FUNCTION(mb_get_info)
 {
 	char *typ = NULL;
-	int typ_len;
+	size_t typ_len;
 	size_t n;
 	char *name;
 	const struct mb_overload_def *over_func;
@@ -4506,9 +4507,9 @@ PHP_FUNCTION(mb_get_info)
 PHP_FUNCTION(mb_check_encoding)
 {
 	char *var = NULL;
-	int var_len;
+	size_t var_len;
 	char *enc = NULL;
-	int enc_len;
+	size_t enc_len;
 	mbfl_buffer_converter *convd;
 	const mbfl_encoding *encoding = MBSTRG(current_internal_encoding);
 	mbfl_string string, result, *ret = NULL;

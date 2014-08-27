@@ -93,7 +93,7 @@ static int le_zip_entry;
 # define add_ascii_assoc_long add_assoc_long
 
 /* Flatten a path by making a relative path (to .)*/
-static char * php_zip_make_relative_path(char *path, int path_len) /* {{{ */
+static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 {
 	char *path_begin = path;
 	size_t i;
@@ -1203,7 +1203,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_open)
 	zval * zip;
 	zval * zip_entry;
 	char *mode = NULL;
-	int mode_len = 0;
+	size_t mode_len = 0;
 	zip_read_rsrc * zr_rsrc;
 	zip_rsrc *z_rsrc;
 
@@ -1696,7 +1696,7 @@ static ZIPARCHIVE_METHOD(addFile)
 	struct zip *intern;
 	zval *self = getThis();
 	char *entry_name = NULL;
-	int entry_name_len = 0;
+	size_t entry_name_len = 0;
 	zend_long offset_start = 0, offset_len = 0;
 	zend_string *filename;
 
@@ -1737,7 +1737,7 @@ static ZIPARCHIVE_METHOD(addFromString)
 	zval *self = getThis();
 	zend_string *buffer;
 	char *name;
-	int name_len;
+	size_t name_len;
 	ze_zip_object *ze_obj;
 	struct zip_source *zs;
 	int pos = 0;
@@ -2032,7 +2032,7 @@ static ZIPARCHIVE_METHOD(setExternalAttributesName)
 {
 	struct zip *intern;
 	zval *self = getThis();
-	int name_len;
+	size_t name_len;
 	char *name;
 	zend_long flags=0, opsys, attr;
 	zip_int64_t idx;
@@ -2099,7 +2099,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 {
 	struct zip *intern;
 	zval *self = getThis(), *z_opsys, *z_attr;
-	int name_len;
+	size_t name_len;
 	char *name;
 	zend_long flags=0;
 	zip_uint8_t opsys;
@@ -2274,7 +2274,7 @@ static ZIPARCHIVE_METHOD(deleteName)
 {
 	struct zip *intern;
 	zval *self = getThis();
-	int name_len;
+	size_t name_len;
 	char *name;
 	struct zip_stat sb;
 
@@ -2307,7 +2307,7 @@ static ZIPARCHIVE_METHOD(renameIndex)
 	zval *self = getThis();
 
 	char *new_name;
-	int new_name_len;
+	size_t new_name_len;
 	zend_long index;
 
 	if (!self) {
@@ -2407,7 +2407,7 @@ static ZIPARCHIVE_METHOD(unchangeName)
 	zval *self = getThis();
 	struct zip_stat sb;
 	char *name;
-	int name_len;
+	size_t name_len;
 
 	if (!self) {
 		RETURN_FALSE;
@@ -2491,7 +2491,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 	zval *zval_file = NULL;
 	php_stream_statbuf ssb;
 	char *pathto;
-	int pathto_len;
+	size_t pathto_len;
 	int ret, i;
 
 	int nelems;

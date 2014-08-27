@@ -562,9 +562,9 @@ ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, __construct) {
 	php_converter_object *objval = CONV_GET(getThis());
 	char *src = "utf-8";
-	int src_len = sizeof("utf-8") - 1;
+	size_t src_len = sizeof("utf-8") - 1;
 	char *dest = src;
-	int dest_len = src_len;
+	size_t dest_len = src_len;
 
 	intl_error_reset(NULL TSRMLS_CC);
 
@@ -763,7 +763,7 @@ ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, convert) {
         php_converter_object *objval = CONV_GET(getThis());
 	char *str, *dest;
-	int str_len, dest_len;
+	size_t str_len, dest_len;
 	zend_bool reverse = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
@@ -924,7 +924,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_getaliases_arginfo, 0, ZEND_RETURN_VALUE, 0
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, getAliases) {
 	char *name;
-	int name_len;
+	size_t name_len;
 	UErrorCode error = U_ZERO_ERROR;
 	uint16_t i, count;
 

@@ -205,7 +205,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 	xmlNode *nodep;
 	dom_object *intern;
 	char *arg;
-	int arg_len;
+	size_t arg_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_characterdata_class_entry, &arg, &arg_len) == FAILURE) {
 		return;

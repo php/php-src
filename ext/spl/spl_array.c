@@ -1776,7 +1776,7 @@ SPL_METHOD(Array, unserialize)
 	spl_array_object *intern = Z_SPLARRAY_P(getThis());
 
 	char *buf;
-	int buf_len;
+	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	zval members, zflags;

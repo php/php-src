@@ -287,7 +287,7 @@ static void birdstep_del_result(HashTable *list,int ind)
 PHP_FUNCTION(birdstep_connect)
 {
 	char *serv, *user, *pass;
-	int serv_len, user_len, pass_len;
+	size_t serv_len, user_len, pass_len;
 	RETCODE stat;
 	HDBC hdbc;
 	VConn *new;
@@ -347,7 +347,7 @@ PHP_FUNCTION(birdstep_exec)
 {
 	char *query;
 	zend_long ind;
-	int query_len, indx;
+	size_t query_len, indx;
 	VConn *conn;
 	Vresult *res;
 	RETCODE stat;

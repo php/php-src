@@ -294,11 +294,11 @@ PHP_MINFO_FUNCTION(ldap)
 PHP_FUNCTION(ldap_connect)
 {
 	char *host = NULL;
-	int hostlen;
+	size_t hostlen;
 	zend_long port = 389; /* Default port */
 #ifdef HAVE_ORALDAP
 	char *wallet = NULL, *walletpasswd = NULL;
-	int walletlen = 0, walletpasswdlen = 0;
+	size_t walletlen = 0, walletpasswdlen = 0;
 	zend_long authmode = GSLC_SSL_NO_AUTH;
 	int ssl=0;
 #endif
@@ -394,7 +394,7 @@ PHP_FUNCTION(ldap_bind)
 {
 	zval *link;
 	char *ldap_bind_dn = NULL, *ldap_bind_pw = NULL;
-	int ldap_bind_dnlen, ldap_bind_pwlen;
+	size_t ldap_bind_dnlen, ldap_bind_pwlen;
 	ldap_linkdata *ld;
 	int rc;
 
@@ -1247,7 +1247,7 @@ PHP_FUNCTION(ldap_explode_dn)
 PHP_FUNCTION(ldap_dn2ufn)
 {
 	char *dn, *ufn;
-	int dn_len;
+	size_t dn_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &dn, &dn_len) != SUCCESS) {
 		return;
@@ -1500,7 +1500,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	zval *attrib, *modtype, *vals;
 	zval *fetched;
 	char *dn;
-	int dn_len;
+	size_t dn_len;
 	int i, j, k;
 	int num_mods, num_modprops, num_modvals;
 	LDAPMod **ldap_mods;
@@ -1878,7 +1878,7 @@ PHP_FUNCTION(ldap_sort)
 	zval *link, *result;
 	ldap_linkdata *ld;
 	char *sortfilter;
-	int sflen;
+	size_t sflen;
 	zend_resource *le;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrs", &link, &result, &sortfilter, &sflen) != SUCCESS) {
@@ -2520,7 +2520,8 @@ static void php_ldap_escape_map_set_chars(zend_bool *map, const char *chars, con
 PHP_FUNCTION(ldap_escape)
 {
 	char *value, *ignores, *result;
-	int valuelen = 0, ignoreslen = 0, i;
+	size_t valuelen = 0, ignoreslen = 0;
+	int i;
 	size_t resultlen;
 	zend_long flags = 0;
 	zend_bool map[256] = {0}, havecharlist = 0;
@@ -2617,7 +2618,7 @@ PHP_FUNCTION(ldap_control_paged_result)
 	zend_bool iscritical;
 	zval *link;
 	char *cookie = NULL;
-	int cookie_len = 0;
+	size_t cookie_len = 0;
 	struct berval lcookie = { 0, NULL };
 	ldap_linkdata *ld;
 	LDAP *ldap;

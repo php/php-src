@@ -87,9 +87,9 @@ int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index TSRMLS
 
 /* com_olechar.c */
 PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring,
-		uint *string_len, int codepage TSRMLS_DC);
+		size_t *string_len, int codepage TSRMLS_DC);
 PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string,
-		uint string_len, int codepage TSRMLS_DC);
+		size_t string_len, int codepage TSRMLS_DC);
 
 
 /* com_com.c */

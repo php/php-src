@@ -322,7 +322,7 @@ static void phar_do_403(char *entry, int entry_len TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void phar_do_404(phar_archive_data *phar, char *fname, int fname_len, char *f404, int f404_len, char *entry, int entry_len TSRMLS_DC) /* {{{ */
+static void phar_do_404(phar_archive_data *phar, char *fname, int fname_len, char *f404, size_t f404_len, char *entry, size_t entry_len TSRMLS_DC) /* {{{ */
 {
 	sapi_header_line ctr = {0};
 	phar_entry_info	*info;
@@ -545,7 +545,7 @@ PHP_METHOD(Phar, webPhar)
 {
 	zval *mimeoverride = NULL, *rewrite = NULL;
 	char *alias = NULL, *error, *index_php = NULL, *f404 = NULL, *ru = NULL;
-	int alias_len = 0, f404_len = 0, free_pathinfo = 0, ru_len = 0;
+	size_t alias_len = 0, f404_len = 0, free_pathinfo = 0, ru_len = 0;
 	char *fname, *path_info, *mime_type = NULL, *entry, *pt;
 	const char *basename;
 	int fname_len, entry_len, code, index_php_len = 0, not_cgi;
@@ -921,7 +921,7 @@ PHP_METHOD(Phar, interceptFileFuncs)
 PHP_METHOD(Phar, createDefaultStub)
 {
 	char *index = NULL, *webindex = NULL, *stub, *error;
-	int index_len = 0, webindex_len = 0;
+	size_t index_len = 0, webindex_len = 0;
 	size_t stub_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
@@ -1846,7 +1846,7 @@ PHP_METHOD(Phar, buildFromIterator)
 {
 	zval *obj;
 	char *error;
-	uint base_len = 0;
+	size_t base_len = 0;
 	char *base = NULL;
 	struct _phar_t pass;
 
@@ -1993,7 +1993,7 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 	zend_class_entry *ce;
 	char *error;
 	const char *pcr_error;
-	int ext_len = ext ? strlen(ext) : 0;
+	size_t ext_len = ext ? strlen(ext) : 0;
 	int oldname_len;
 	phar_archive_data *pphar = NULL;
 	php_stream_statbuf ssb;
@@ -2964,7 +2964,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 {
 	zend_long algo;
 	char *error, *key = NULL;
-	int key_len = 0;
+	size_t key_len = 0;
 
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3547,7 +3547,7 @@ PHP_METHOD(Phar, offsetGet)
 
 /* {{{ add a file within the phar archive from a string or resource
  */
-static void phar_add_file(phar_archive_data **pphar, char *filename, int filename_len, char *cont_str, int cont_len, zval *zresource TSRMLS_DC)
+static void phar_add_file(phar_archive_data **pphar, char *filename, int filename_len, char *cont_str, size_t cont_len, zval *zresource TSRMLS_DC)
 {
 	char *error;
 	size_t contents_len;
@@ -3805,7 +3805,7 @@ PHP_METHOD(Phar, addFile)
 PHP_METHOD(Phar, addFromString)
 {
 	char *localname, *cont_str;
-	int localname_len, cont_len;
+	size_t localname_len, cont_len;
 
 	PHAR_ARCHIVE_OBJECT();
 
@@ -4186,7 +4186,7 @@ PHP_METHOD(Phar, extractTo)
 	php_stream_statbuf ssb;
 	phar_entry_info *entry;
 	char *pathto, *filename, *actual;
-	int pathto_len, filename_len;
+	size_t pathto_len, filename_len;
 	int ret, i;
 	int nelems;
 	zval *zval_files = NULL;

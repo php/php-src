@@ -714,7 +714,7 @@ PHPAPI int php_raw_url_decode(char *str, int len)
 PHP_FUNCTION(get_headers)
 {
 	char *url;
-	int url_len;
+	size_t url_len;
 	php_stream_context *context;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL, *h;

@@ -1427,7 +1427,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 {
 	zval *oid, *value, *type;
 	char *a1, *a2, *a3, *a4, *a5, *a6, *a7;
-	int a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
+	size_t a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
 	zend_bool use_orignames = 0, suffix_keys = 0;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
 	zend_long retries = SNMP_DEFAULT_RETRIES;
@@ -1790,7 +1790,7 @@ PHP_FUNCTION(snmp_get_valueretrieval)
 PHP_FUNCTION(snmp_read_mib)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
@@ -1812,7 +1812,7 @@ PHP_METHOD(snmp, __construct)
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
 	char *a1, *a2;
-	int a1_len, a2_len;
+	size_t a1_len, a2_len;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	zend_long version = SNMP_DEFAULT_VERSION;
@@ -1915,7 +1915,7 @@ PHP_METHOD(snmp, setSecurity)
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
 	char *a1 = "", *a2 = "", *a3 = "", *a4 = "", *a5 = "", *a6 = "", *a7 = "";
-	int a1_len = 0, a2_len = 0, a3_len = 0, a4_len = 0, a5_len = 0, a6_len = 0, a7_len = 0;
+	size_t a1_len = 0, a2_len = 0, a3_len = 0, a4_len = 0, a5_len = 0, a6_len = 0, a7_len = 0;
 	int argc = ZEND_NUM_ARGS();
 
 	snmp_object = Z_SNMP_P(object);

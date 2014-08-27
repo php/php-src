@@ -352,7 +352,7 @@ PHP_MINFO_FUNCTION(wddx)
 
 /* {{{ php_wddx_packet_start
  */
-void php_wddx_packet_start(wddx_packet *packet, char *comment, int comment_len)
+void php_wddx_packet_start(wddx_packet *packet, char *comment, size_t comment_len)
 {
 	php_wddx_add_chunk_static(packet, WDDX_PACKET_S);
 	if (comment) {

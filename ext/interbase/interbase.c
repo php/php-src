@@ -464,7 +464,7 @@ ZEND_GET_MODULE(ibase)
 #endif
 
 /* True globals, no need for thread safety */
-int le_link, le_plink, le_trans;
+size_t le_link, le_plink, le_trans;
 
 /* }}} */
 
@@ -1425,7 +1425,7 @@ PHP_FUNCTION(ibase_gen_id)
 {
 	zval *link = NULL;
 	char query[128], *generator;
-	int gen_len;
+	size_t gen_len;
 	long inc = 1;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;

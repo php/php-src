@@ -50,7 +50,7 @@ void grapheme_register_constants( INIT_FUNC_ARGS )
 }
 /* }}} */
 
-/* {{{ proto int grapheme_strlen(string str)
+/* {{{ proto size_t grapheme_strlen(string str)
    Get number of graphemes in a string */
 PHP_FUNCTION(grapheme_strlen)
 {

@@ -301,7 +301,7 @@ ZEND_API int zend_print_zval(zval *expr, int indent TSRMLS_DC) /* {{{ */
 ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC) /* {{{ */
 {
 	zend_string *str = zval_get_string(expr);
-	int len = str->len;
+	size_t len = str->len;
 
 	if (len != 0) {
 		write_func(str->val, len);

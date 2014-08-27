@@ -750,7 +750,7 @@ PHP_FUNCTION(pcntl_exec)
 	int pair_length;
 	zend_string *key;
 	char *path;
-	int path_len;
+	size_t path_len;
 	zend_ulong key_num;
 		
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|aa", &path, &path_len, &args, &envs) == FAILURE) {

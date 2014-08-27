@@ -676,7 +676,7 @@ ZEND_FUNCTION(each)
 ZEND_FUNCTION(error_reporting)
 {
 	char *err;
-	int err_len;
+	size_t err_len;
 	int old_error_reporting;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &err, &err_len) == FAILURE) {
@@ -1398,7 +1398,7 @@ ZEND_FUNCTION(trait_exists)
 ZEND_FUNCTION(function_exists)
 {
 	char *name;
-	int name_len;
+	size_t name_len;
 	zend_function *func;
 	zend_string *lcname;
 	
@@ -1440,7 +1440,7 @@ ZEND_FUNCTION(class_alias)
 	zend_string *class_name;
 	char *alias_name;
 	zend_class_entry *ce;
-	int alias_name_len;
+	size_t alias_name_len;
 	zend_bool autoload = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ss|b", &class_name, &alias_name, &alias_name_len, &autoload) == FAILURE) {
@@ -1543,7 +1543,7 @@ ZEND_FUNCTION(trigger_error)
 {
 	zend_long error_type = E_USER_NOTICE;
 	char *message;
-	int message_len;
+	size_t message_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &message, &message_len, &error_type) == FAILURE) {
 		return;
@@ -1836,7 +1836,7 @@ ZEND_FUNCTION(create_function)
 {
     zend_string *function_name;
 	char *eval_code, *function_args, *function_code;
-	int eval_code_length, function_args_len, function_code_len;
+	size_t eval_code_length, function_args_len, function_code_len;
 	int retval;
 	char *eval_name;
 
@@ -2567,7 +2567,7 @@ ZEND_FUNCTION(debug_backtrace)
 ZEND_FUNCTION(extension_loaded)
 {
 	char *extension_name;
-	int extension_name_len;
+	size_t extension_name_len;
 	zend_string *lcname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &extension_name, &extension_name_len) == FAILURE) {
@@ -2592,7 +2592,8 @@ ZEND_FUNCTION(get_extension_funcs)
 {
 	char *extension_name;
 	zend_string *lcname;
-	int extension_name_len, array;
+	size_t extension_name_len;
+	int array;
 	zend_module_entry *module;
 	zend_function *zif;
 	

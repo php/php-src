@@ -270,7 +270,7 @@ char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int reso
 
 #ifdef LIBXML_SCHEMAS_ENABLED
 /* {{{ _xmlreader_get_relaxNG */
-static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int type,
+static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, size_t type,
 											xmlRelaxNGValidityErrorFunc error_func,
 											xmlRelaxNGValidityWarningFunc warn_func TSRMLS_DC)
 {
@@ -398,7 +398,7 @@ zend_object *xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 /* {{{ php_xmlreader_string_arg */
 static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_one_char_t internal_function) {
 	zval *id;
-	int name_len = 0;
+	size_t name_len = 0;
 	char *retchar = NULL;
 	xmlreader_object *intern;
 	char *name;
@@ -587,7 +587,7 @@ Get value of a attribute via name and namespace from current element */
 PHP_METHOD(xmlreader, getAttributeNs)
 {
 	zval *id;
-	int name_len = 0, ns_uri_len = 0;
+	size_t name_len = 0, ns_uri_len = 0;
 	xmlreader_object *intern;
 	char *name, *ns_uri, *retchar = NULL;
 
@@ -846,7 +846,7 @@ Sets the URI that the XMLReader will parse. */
 PHP_METHOD(xmlreader, open)
 {
 	zval *id;
-	int source_len = 0, encoding_len = 0;
+	size_t source_len = 0, encoding_len = 0;
 	zend_long options = 0;
 	xmlreader_object *intern = NULL;
 	char *source, *valid_file = NULL;
@@ -1029,7 +1029,7 @@ Sets the string that the XMLReader will parse. */
 PHP_METHOD(xmlreader, XML)
 {
 	zval *id;
-	int source_len = 0, encoding_len = 0;
+	size_t source_len = 0, encoding_len = 0;
 	zend_long options = 0;
 	xmlreader_object *intern = NULL;
 	char *source, *uri = NULL, *encoding = NULL;

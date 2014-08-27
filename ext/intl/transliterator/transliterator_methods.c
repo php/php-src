@@ -136,7 +136,7 @@ PHP_FUNCTION( transliterator_create )
 PHP_FUNCTION( transliterator_create_from_rules )
 {
 	char		    *str_rules;
-	int             str_rules_len;
+	size_t             str_rules_len;
 	UChar		    *ustr_rules    = NULL;
 	int32_t         ustr_rules_len = 0;
 	zend_long            direction      = TRANSLITERATOR_FORWARD;
@@ -303,7 +303,7 @@ PHP_FUNCTION( transliterator_transliterate )
 	char	    *str;
 	UChar		*ustr		= NULL,
 				*uresult	= NULL;
-	int			str_len;
+	size_t			str_len;
 	int32_t		ustr_len	= 0,
 				capacity,
 				uresult_len;

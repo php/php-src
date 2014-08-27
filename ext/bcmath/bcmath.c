@@ -208,7 +208,7 @@ PHP_FUNCTION(bcadd)
 	char *left, *right;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
-	int left_len, right_len;
+	size_t left_len, right_len;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
@@ -243,7 +243,7 @@ PHP_FUNCTION(bcadd)
 PHP_FUNCTION(bcsub)
 {
 	char *left, *right;
-	int left_len, right_len;
+	size_t left_len, right_len;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
@@ -280,7 +280,7 @@ PHP_FUNCTION(bcsub)
 PHP_FUNCTION(bcmul)
 {
 	char *left, *right;
-	int left_len, right_len;
+	size_t left_len, right_len;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
@@ -317,7 +317,7 @@ PHP_FUNCTION(bcmul)
 PHP_FUNCTION(bcdiv)
 {
 	char *left, *right;
-	int left_len, right_len;
+	size_t left_len, right_len;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
@@ -360,7 +360,7 @@ PHP_FUNCTION(bcdiv)
 PHP_FUNCTION(bcmod)
 {
 	char *left, *right;
-	int left_len, right_len;
+	size_t left_len, right_len;
 	bc_num first, second, result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &left, &left_len, &right, &right_len) == FAILURE) {
@@ -394,7 +394,7 @@ PHP_FUNCTION(bcmod)
 PHP_FUNCTION(bcpowmod)
 {
 	char *left, *right, *modulous;
-	int left_len, right_len, modulous_len;
+	size_t left_len, right_len, modulous_len;
 	bc_num first, second, mod, result;
 	zend_long scale = BCG(bc_precision);
 	int scale_int;
@@ -435,7 +435,7 @@ PHP_FUNCTION(bcpowmod)
 PHP_FUNCTION(bcpow)
 {
 	char *left, *right;
-	int left_len, right_len;
+	size_t left_len, right_len;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
@@ -507,7 +507,7 @@ PHP_FUNCTION(bcsqrt)
 PHP_FUNCTION(bccomp)
 {
 	char *left, *right;
-	int left_len, right_len;
+	size_t left_len, right_len;
 	zend_long scale_param = 0;
 	bc_num first, second;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();

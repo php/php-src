@@ -674,7 +674,7 @@ static ZEND_FUNCTION(opcache_reset)
 static ZEND_FUNCTION(opcache_invalidate)
 {
 	char *script_name;
-	int script_name_len;
+	size_t script_name_len;
 	zend_bool force = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &script_name, &script_name_len, &force) == FAILURE) {
@@ -695,7 +695,7 @@ static ZEND_FUNCTION(opcache_invalidate)
 static ZEND_FUNCTION(opcache_compile_file)
 {
 	char *script_name;
-	int script_name_len;
+	size_t script_name_len;
 	zend_file_handle handle;
 	zend_op_array *op_array = NULL;
 	zend_execute_data *orig_execute_data = NULL;
@@ -738,7 +738,7 @@ static ZEND_FUNCTION(opcache_compile_file)
 static ZEND_FUNCTION(opcache_is_script_cached)
 {
 	char *script_name;
-	int script_name_len;
+	size_t script_name_len;
 
 	if (!validate_api_restriction(TSRMLS_C)) {
 		RETURN_FALSE;

@@ -424,7 +424,7 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 	enchant_broker *pbroker;
 	zend_long dict_type;
 	char *value;
-	int value_len;
+	size_t value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &broker, &dict_type, &value, &value_len) == FAILURE) {
 		RETURN_FALSE;
@@ -583,7 +583,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 	enchant_dict *dict;
 	EnchantDict *d;
 	char *pwl;
-	int pwllen;
+	size_t pwllen;
 	int pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &broker, &pwl, &pwllen) == FAILURE) {
@@ -713,7 +713,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 {
 	zval *dict, *sugg = NULL;
 	char *word;
-	int wordlen;
+	size_t wordlen;
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|z/", &dict, &word, &wordlen, &sugg) == FAILURE) {
@@ -759,7 +759,7 @@ PHP_FUNCTION(enchant_dict_check)
 {
 	zval *dict;
 	char *word;
-	int wordlen;
+	size_t wordlen;
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &dict, &word, &wordlen) == FAILURE) {
@@ -778,7 +778,7 @@ PHP_FUNCTION(enchant_dict_suggest)
 {
 	zval *dict;
 	char *word;
-	int wordlen;
+	size_t wordlen;
 	char **suggs;
 	enchant_dict *pdict;
 	int n_sugg;
@@ -811,7 +811,7 @@ PHP_FUNCTION(enchant_dict_add_to_personal)
 {
 	zval *dict;
 	char *word;
-	int wordlen;
+	size_t wordlen;
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &dict, &word, &wordlen) == FAILURE) {
@@ -830,7 +830,7 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 {
 	zval *dict;
 	char *word;
-	int wordlen;
+	size_t wordlen;
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &dict, &word, &wordlen) == FAILURE) {
@@ -849,7 +849,7 @@ PHP_FUNCTION(enchant_dict_is_in_session)
 {
 	zval *dict;
 	char *word;
-	int wordlen;
+	size_t wordlen;
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &dict, &word, &wordlen) == FAILURE) {
@@ -871,7 +871,7 @@ PHP_FUNCTION(enchant_dict_store_replacement)
 {
 	zval *dict;
 	char *mis, *cor;
-	int mislen, corlen;
+	size_t mislen, corlen;
 
 	enchant_dict *pdict;
 

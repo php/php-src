@@ -521,7 +521,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	struct pdo_sqlite_func *func;
 	zval *callback;
 	char *func_name;
-	int func_name_len;
+	size_t func_name_len;
 	zend_long argc = -1;
 	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
@@ -591,7 +591,7 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	struct pdo_sqlite_func *func;
 	zval *step_callback, *fini_callback;
 	char *func_name;
-	int func_name_len;
+	size_t func_name_len;
 	zend_long argc = -1;
 	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
@@ -652,7 +652,7 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	struct pdo_sqlite_collation *collation;
 	zval *callback;
 	char *collation_name;
-	int collation_name_len;
+	size_t collation_name_len;
 	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;

@@ -1764,10 +1764,10 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
    Quote regular expression characters plus an optional character */
 static PHP_FUNCTION(preg_quote)
 {
-	int		 in_str_len;
+	size_t		 in_str_len;
 	char	*in_str;		/* Input string argument */
 	char	*in_str_end;    /* End of the input string */
-	int		 delim_len = 0;
+	size_t		 delim_len = 0;
 	char	*delim = NULL;	/* Additional delimiter argument */
 	zend_string	*out_str;	/* Output string with quoted characters */
 	char 	*p,				/* Iterator for input string */

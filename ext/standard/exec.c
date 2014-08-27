@@ -171,7 +171,7 @@ err:
 static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *cmd;
-	int cmd_len;
+	size_t cmd_len;
 	zval *ret_code=NULL, *ret_array=NULL;
 	int ret;
 
@@ -399,7 +399,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 PHP_FUNCTION(escapeshellcmd)
 {
 	char *command;
-	int command_len;
+	size_t command_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
 		return;
@@ -436,7 +436,7 @@ PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
 	char *command;
-	int command_len;
+	size_t command_len;
 	zend_string *ret;
 	php_stream *stream;
 

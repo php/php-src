@@ -86,9 +86,9 @@ char *strptime(const char *s, const char *format, struct tm *tm);
 PHP_FUNCTION(strptime)
 {
 	char      *ts;
-	int        ts_length;
+	size_t        ts_length;
 	char      *format;
-	int        format_length;
+	size_t        format_length;
 	struct tm  parsed_time;
 	char      *unparsed_part;
 

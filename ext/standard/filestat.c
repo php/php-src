@@ -420,7 +420,7 @@ PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid TSRMLS_DC)
 static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zval *group;
 #if !defined(WINDOWS)
 	gid_t gid;
@@ -557,7 +557,7 @@ PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid TSRMLS_DC)
 static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zval *user;
 #if !defined(WINDOWS)
 	uid_t uid;
@@ -667,7 +667,7 @@ PHP_FUNCTION(lchown)
 PHP_FUNCTION(chmod)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zend_long mode;
 	int ret;
 	mode_t imode;
@@ -713,7 +713,7 @@ PHP_FUNCTION(chmod)
 PHP_FUNCTION(touch)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zend_long filetime = 0, fileatime = 0;
 	int ret, argc = ZEND_NUM_ARGS();
 	FILE *file;
@@ -1081,7 +1081,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 # define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
-	int filename_len; \
+	size_t filename_len; \
 	\
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) { \
 		return; \
@@ -1093,7 +1093,7 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 # define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
-	int filename_len; \
+	size_t filename_len; \
 	\
 	ZEND_PARSE_PARAMETERS_START(1, 1) \
 		Z_PARAM_PATH(filename, filename_len) \

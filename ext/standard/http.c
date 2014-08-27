@@ -34,7 +34,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	zend_string *key = NULL;
 	char *newprefix, *p;
 	const char *prop_name;
-	int arg_sep_len, newprefix_len, prop_len;
+	size_t arg_sep_len, newprefix_len, prop_len;
 	zend_ulong idx;
 	zval *zdata = NULL, copyzval;
 

@@ -70,7 +70,7 @@ Since:
 */
 PHP_METHOD(domimplementation, hasFeature)
 {
-	int feature_len, version_len;
+	size_t feature_len, version_len;
 	char *feature, *version;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
@@ -92,7 +92,8 @@ Since: DOM Level 2
 PHP_METHOD(domimplementation, createDocumentType)
 {
 	xmlDtd *doctype;
-	int ret, name_len = 0, publicid_len = 0, systemid_len = 0;
+	int ret;
+	size_t name_len = 0, publicid_len = 0, systemid_len = 0;
 	char *name = NULL, *publicid = NULL, *systemid = NULL;
 	xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
 	xmlURIPtr uri;
@@ -155,7 +156,8 @@ PHP_METHOD(domimplementation, createDocument)
 	xmlNode *nodep;
 	xmlDtdPtr doctype = NULL;
 	xmlNsPtr nsptr = NULL;
-	int ret, uri_len = 0, name_len = 0, errorcode = 0;
+	int ret, errorcode = 0;
+	size_t uri_len = 0, name_len = 0;
 	char *uri = NULL, *name = NULL;
 	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;

@@ -870,7 +870,8 @@ PHP_FUNCTION(filter_list)
  * Returns the filter ID belonging to a named filter */
 PHP_FUNCTION(filter_id)
 {
-	int i, filter_len;
+	int i;
+	size_t filter_len;
 	int size = sizeof(filter_list) / sizeof(filter_list_entry);
 	char *filter;
 

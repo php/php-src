@@ -79,20 +79,20 @@ extern zend_long php_getuid(TSRMLS_D);
 PHP_FUNCTION(ezmlm_hash)
 {
 	char *str = NULL;
-	unsigned int h = 5381;
-	int j, str_len;
+	zend_ulong h = 5381;
+	size_t j, str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
 	for (j = 0; j < str_len; j++) {
-		h = (h + (h << 5)) ^ (unsigned long) (unsigned char) tolower(str[j]);
+		h = (h + (h << Z_UL(5))) ^ (zend_ulong) (unsigned char) tolower(str[j]);
 	}
 
-	h = (h % 53);
+	h = (h % Z_UL(53));
 
-	RETURN_LONG((int) h);
+	RETURN_LONG((zend_long) h);
 }
 /* }}} */
 
@@ -103,8 +103,8 @@ PHP_FUNCTION(mail)
 	char *to=NULL, *message=NULL, *headers=NULL, *headers_trimmed=NULL;
 	char *subject=NULL;
 	zend_string *extra_cmd=NULL;
-	int to_len, message_len, headers_len = 0;
-	int subject_len, i;
+	size_t to_len, message_len, headers_len = 0;
+	size_t subject_len, i;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
 	char *p, *e;

@@ -1353,7 +1353,7 @@ PHP_FUNCTION(number_format)
 	zend_long dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	char thousand_sep_chr = ',', dec_point_chr = '.';
-	int thousand_sep_len = 0, dec_point_len = 0;
+	size_t thousand_sep_len = 0, dec_point_len = 0;
 	
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|ls!s!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {

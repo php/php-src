@@ -447,7 +447,7 @@ static void php_zlib_cleanup_ob_gzhandler_mess(TSRMLS_D)
 static PHP_FUNCTION(ob_gzhandler)
 {
 	char *in_str;
-	int in_len;
+	size_t in_len;
 	zend_long flags = 0;
 	php_output_context ctx = {0};
 	int encoding, rv;
@@ -533,7 +533,7 @@ static PHP_FUNCTION(zlib_get_coding_type)
 static PHP_FUNCTION(gzfile)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	int flags = REPORT_ERRORS;
 	char buf[8192] = {0};
 	register int i = 0;
@@ -575,7 +575,7 @@ static PHP_FUNCTION(gzopen)
 {
 	char *filename;
 	char *mode;
-	int filename_len, mode_len;
+	size_t filename_len, mode_len;
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
 	zend_long use_include_path = 0;
@@ -602,7 +602,7 @@ static PHP_FUNCTION(gzopen)
 static PHP_FUNCTION(readgzfile)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
 	int size;
@@ -665,7 +665,7 @@ static PHP_FUNCTION(name) \
 static PHP_FUNCTION(name) \
 { \
 	char *in_buf, *out_buf; \
-	int in_len; \
+	size_t in_len; \
 	size_t out_len; \
 	zend_long max_len = 0; \
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &in_buf, &in_len, &max_len)) { \

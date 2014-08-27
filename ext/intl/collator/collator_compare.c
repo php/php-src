@@ -33,8 +33,8 @@ PHP_FUNCTION( collator_compare )
 {
 	char*            str1      = NULL;
 	char*            str2      = NULL;
-	int              str1_len  = 0;
-	int              str2_len  = 0;
+	size_t              str1_len  = 0;
+	size_t              str2_len  = 0;
 
 	UChar*           ustr1     = NULL;
 	UChar*           ustr2     = NULL;

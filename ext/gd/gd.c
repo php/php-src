@@ -2343,7 +2343,7 @@ PHP_FUNCTION(imagecreatefromstring)
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)())
 {
 	char *file;
-	int file_len;
+	size_t file_len;
 	zend_long srcx, srcy, width, height;
 	gdImagePtr im = NULL;
 	php_stream *stream;
@@ -3514,7 +3514,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zval *IM;
 	zend_long SIZE, X, Y, COL;
 	char *C;
-	int C_len;
+	size_t C_len;
 	gdImagePtr im;
 	int ch = 0, col, x, y, size, i, l = 0;
 	unsigned char *str = NULL;
@@ -3805,7 +3805,8 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	zval *IM, *EXT = NULL;
 	gdImagePtr im=NULL;
 	zend_long col = -1, x = -1, y = -1;
-	int str_len, fontname_len, i, brect[8];
+	size_t str_len, fontname_len;
+	int i, brect[8];
 	double ptsize, angle;
 	char *str = NULL, *fontname = NULL;
 	char *error = NULL;
@@ -4022,7 +4023,7 @@ PHP_FUNCTION(imagepsencodefont)
 {
 	zval *fnt;
 	char *enc, **enc_vector;
-	int enc_len, *f_ind;
+	size_t enc_len, *f_ind;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &fnt, &enc, &enc_len) == FAILURE) {
 		return;
@@ -4422,7 +4423,7 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 {
 	char *f_org, *f_dest;
-	int f_org_len, f_dest_len;
+	size_t f_org_len, f_dest_len;
 	zend_long height, width, threshold;
 	gdImagePtr im_org, im_dest, im_tmp;
 	char *fn_org = NULL;

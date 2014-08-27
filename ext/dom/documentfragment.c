@@ -122,7 +122,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	xmlNode *nodep;
 	dom_object *intern;
 	char *data = NULL;
-	int data_len = 0;
+	size_t data_len = 0;
 	int err;
 	xmlNodePtr lst;
 

@@ -1161,7 +1161,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 	zval flags, elem;
 	char *buf;
-	int buf_len;
+	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	

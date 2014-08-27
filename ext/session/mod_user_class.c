@@ -39,7 +39,7 @@
 PHP_METHOD(SessionHandler, open)
 {
 	char *save_path = NULL, *session_name = NULL;
-	int save_path_len, session_name_len;
+	size_t save_path_len, session_name_len;
 
 	PS_SANITY_CHECK;
 

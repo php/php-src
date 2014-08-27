@@ -174,7 +174,7 @@ static int php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
 PHP_FUNCTION(password_get_info)
 {
 	php_password_algo algo;
-	int hash_len;
+	size_t hash_len;
 	char *hash, *algo_name;
 	zval options;
 
@@ -216,7 +216,7 @@ PHP_FUNCTION(password_needs_rehash)
 {
 	zend_long new_algo = 0;
 	php_password_algo algo;
-	int hash_len;
+	size_t hash_len;
 	char *hash;
 	HashTable *options = 0;
 	zval *option_buffer;
@@ -271,7 +271,7 @@ Verify a hash created using crypt() or password_hash() */
 PHP_FUNCTION(password_verify)
 {
 	int status = 0, i;
-	int password_len, hash_len;
+	size_t password_len, hash_len;
 	char *password, *hash;
 	zend_string *ret;
 	

@@ -697,7 +697,8 @@ PHP_FUNCTION(dom_document_create_element)
 	xmlNode *node;
 	xmlDocPtr docp;
 	dom_object *intern;
-	int ret, name_len, value_len;
+	int ret;
+	size_t name_len, value_len;
 	char *name, *value = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_document_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
@@ -756,7 +757,8 @@ PHP_FUNCTION(dom_document_create_text_node)
 	zval *id;
 	xmlNode *node;
 	xmlDocPtr docp;
-	int ret, value_len;
+	int ret;
+	size_t value_len;
 	dom_object *intern;
 	char *value;
 
@@ -941,7 +943,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 {
 	zval *id;
 	xmlDocPtr docp;
-	int name_len;
+	size_t name_len;
 	dom_object *intern, *namednode;
 	char *name;
 	xmlChar *local;
@@ -1150,7 +1152,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name_ns)
 {
 	zval *id;
 	xmlDocPtr docp;
-	int uri_len, name_len;
+	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
 	char *uri, *name;
 	xmlChar *local, *nsuri;
@@ -1247,7 +1249,7 @@ PHP_METHOD(domdocument, __construct)
 	xmlDoc *docp = NULL, *olddoc;
 	dom_object *intern;
 	char *encoding, *version = NULL;
-	int encoding_len = 0, version_len = 0, refcount;
+	size_t encoding_len = 0, version_len = 0, refcount;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
@@ -1341,7 +1343,7 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 }
 /* }}} */
 
-static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int source_len, int options TSRMLS_DC) /* {{{ */
+static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t source_len, size_t options TSRMLS_DC) /* {{{ */
 {
     xmlDocPtr ret;
     xmlParserCtxtPtr ctxt = NULL;
@@ -1543,7 +1545,7 @@ PHP_FUNCTION(dom_document_save)
 {
 	zval *id;
 	xmlDoc *docp;
-	int file_len = 0, bytes, format, saveempty = 0;
+	size_t file_len = 0, bytes, format, saveempty = 0;
 	dom_object *intern;
 	dom_doc_propsptr doc_props;
 	char *file;

@@ -666,7 +666,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 	char *outBuf;
 	zval *vals, *out_opts = NULL;
 	char *method = NULL;
-	int method_len;
+	size_t method_len;
 	php_output_options out;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!z|a", &method, &method_len, &vals, &out_opts) == FAILURE) {
@@ -775,7 +775,7 @@ PHP_FUNCTION(xmlrpc_decode_request)
 {
 	char *xml, *encoding = NULL;
 	zval *method;
-	int xml_len, encoding_len = 0;
+	size_t xml_len, encoding_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|s", &xml, &xml_len, &method, &encoding, &encoding_len) == FAILURE) {
 		return;
@@ -792,7 +792,7 @@ PHP_FUNCTION(xmlrpc_decode_request)
 PHP_FUNCTION(xmlrpc_decode)
 {
 	char *arg1, *arg2 = NULL;
-	int arg1_len, arg2_len = 0;
+	size_t arg1_len, arg2_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &arg1, &arg1_len, &arg2, &arg2_len) == FAILURE) {
 		return;
@@ -958,7 +958,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 PHP_FUNCTION(xmlrpc_server_register_method)
 {
 	char *method_key;
-	int method_key_len;
+	size_t method_key_len;
 	zval *handle, *method_name;
 	xmlrpc_server_data* server;
 
@@ -1020,7 +1020,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	xmlrpc_server_data* server;
 	zval *caller_params, *handle, *output_opts = NULL;
 	char *rawxml;
-	int rawxml_len;
+	size_t rawxml_len;
 	php_output_options out;
 	int argc = ZEND_NUM_ARGS();
 	
@@ -1375,7 +1375,7 @@ PHP_FUNCTION(xmlrpc_set_type)
 {
 	zval *arg;
 	char *type;
-	int type_len;
+	size_t type_len;
 	XMLRPC_VALUE_TYPE vtype;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/s", &arg, &type, &type_len) == FAILURE) {
