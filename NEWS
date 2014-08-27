@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 - GMP:
   . Fixed bug #67917 (Using GMP objects with overloaded operators can cause
     memory exhaustion). (Nikita)
+  . Implemented gmp_import() and gmp_export(). (Leigh, Nikita)
 
 - MySQLi:
   . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
