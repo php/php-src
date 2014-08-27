@@ -548,7 +548,7 @@ PHP_FUNCTION(mysqli_query)
 	MYSQLI_RESOURCE		*mysqli_resource;
 	MYSQL_RES 			*result = NULL;
 	char				*query = NULL;
-	int 				query_len;
+	size_t 				query_len;
 	zend_long 				resultmode = MYSQLI_STORE_RESULT;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|l", &mysql_link, mysqli_link_class_entry, &query, &query_len, &resultmode) == FAILURE) {
@@ -944,7 +944,7 @@ PHP_FUNCTION(mysqli_set_charset)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char		*cs_name;
-	int			csname_len;
+	size_t		csname_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &cs_name, &csname_len) == FAILURE) {
 		return;

@@ -1707,7 +1707,7 @@ static PHP_FUNCTION(session_get_cookie_params)
 static PHP_FUNCTION(session_name)
 {
 	char *name = NULL;
-	int name_len;
+	size_t name_len;
 	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
@@ -1729,7 +1729,7 @@ static PHP_FUNCTION(session_name)
 static PHP_FUNCTION(session_module_name)
 {
 	char *name = NULL;
-	int name_len;
+	size_t name_len;
 	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
@@ -1893,7 +1893,7 @@ static PHP_FUNCTION(session_set_save_handler)
 static PHP_FUNCTION(session_save_path)
 {
 	char *name = NULL;
-	int name_len;
+	size_t name_len;
 	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {

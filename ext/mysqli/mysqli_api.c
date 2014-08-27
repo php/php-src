@@ -325,7 +325,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 	MY_STMT			*stmt;
 	zval			*mysql_stmt;
 	char			*types;
-	int				types_len;
+	size_t			types_len;
 	zend_ulong	rc;
 
 	/* calculate and check number of parameters */
@@ -1924,7 +1924,7 @@ PHP_FUNCTION(mysqli_real_query)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char		*query = NULL;
-	int			query_len;
+	size_t		query_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
 		return;
@@ -1954,7 +1954,7 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link = NULL;
 	char		*escapestr;
-	int			escapestr_len;
+	size_t			escapestr_len;
 	zend_string *newstr;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &escapestr, &escapestr_len) == FAILURE) {
@@ -2238,7 +2238,7 @@ PHP_FUNCTION(mysqli_ssl_set)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char		*ssl_parm[5];
-	int			ssl_parm_len[5], i;
+	size_t			ssl_parm_len[5], i;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osssss", &mysql_link, mysqli_link_class_entry, &ssl_parm[0], &ssl_parm_len[0], &ssl_parm[1], &ssl_parm_len[1], &ssl_parm[2], &ssl_parm_len[2], &ssl_parm[3], &ssl_parm_len[3], &ssl_parm[4], &ssl_parm_len[4])   == FAILURE) {
 		return;
@@ -2460,7 +2460,7 @@ PHP_FUNCTION(mysqli_stmt_prepare)
 	MY_STMT	*stmt;
 	zval 	*mysql_stmt;
 	char	*query;
-	int		query_len;
+	size_t		query_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_stmt, mysqli_stmt_class_entry, &query, &query_len) == FAILURE) {
 		return;

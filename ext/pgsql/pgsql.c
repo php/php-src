@@ -1748,7 +1748,7 @@ PHP_FUNCTION(pg_parameter_status)
 	int id;
 	PGconn *pgsql;
 	char *param;
-	int len;
+	size_t len;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &param, &len) == SUCCESS) {
 		id = -1;
@@ -1818,7 +1818,8 @@ PHP_FUNCTION(pg_query)
 {
 	zval *pgsql_link = NULL;
 	char *query;
-	int id = -1, query_len, argc = ZEND_NUM_ARGS();
+	int id = -1, argc = ZEND_NUM_ARGS();
+	size_t query_len;
 	int leftover = 0;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
@@ -2035,7 +2036,8 @@ PHP_FUNCTION(pg_prepare)
 {
 	zval *pgsql_link = NULL;
 	char *query, *stmtname;
-	int query_len, stmtname_len, id = -1, argc = ZEND_NUM_ARGS();
+	size_t query_len, stmtname_len;
+	int id = -1, argc = ZEND_NUM_ARGS();
 	int leftover = 0;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
@@ -2119,7 +2121,8 @@ PHP_FUNCTION(pg_execute)
 	zval *pgsql_link = NULL;
 	zval *pv_param_arr, *tmp;
 	char *stmtname;
-	size_t stmtname_len, id = -1, argc = ZEND_NUM_ARGS();
+	size_t stmtname_len;
+	int id = -1, argc = ZEND_NUM_ARGS();
 	int leftover = 0;
 	int num_params = 0;
 	char **params = NULL;
@@ -2570,7 +2573,7 @@ PHP_FUNCTION(pg_field_num)
 {
 	zval *result;
 	char *field;
-	int field_len;
+	size_t field_len;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 
@@ -3853,7 +3856,7 @@ PHP_FUNCTION(pg_set_error_verbosity)
 PHP_FUNCTION(pg_set_client_encoding)
 {
 	char *encoding;
-	int encoding_len;
+	size_t encoding_len;
 	zval *pgsql_link = NULL;
 	int id = -1, argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
@@ -3954,7 +3957,8 @@ PHP_FUNCTION(pg_put_line)
 {
 	char *query;
 	zval *pgsql_link = NULL;
-	int query_len, id = -1;
+	size_t query_len;
+	int id = -1;
 	PGconn *pgsql;
 	int result = 0, argc = ZEND_NUM_ARGS();
 
@@ -4292,7 +4296,8 @@ PHP_FUNCTION(pg_escape_bytea)
 {
 	char *from = NULL, *to = NULL;
 	size_t to_len;
-	int from_len, id = -1;
+	size_t from_len;
+	int id = -1;
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
 	PGconn *pgsql;
 #endif
@@ -4439,7 +4444,7 @@ PHP_FUNCTION(pg_unescape_bytea)
 {
 	char *from = NULL, *to = NULL, *tmp = NULL;
 	size_t to_len;
-	int from_len;
+	size_t from_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 							  &from, &from_len) == FAILURE) {
 		return;
@@ -4467,7 +4472,7 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	char *from = NULL;
 	zval *pgsql_link = NULL;
 	PGconn *pgsql;
-	int from_len;
+	size_t from_len;
 	int id = -1;
 	char *tmp;
 
@@ -4763,7 +4768,7 @@ PHP_FUNCTION(pg_send_query)
 {
 	zval *pgsql_link;
 	char *query;
-	int len;
+	size_t len;
 	int id = -1;
 	PGconn *pgsql;
 	int is_non_blocking;
@@ -4835,7 +4840,8 @@ PHP_FUNCTION(pg_send_query_params)
 	int num_params = 0;
 	char **params = NULL;
 	char *query;
-	int query_len, id = -1;
+	size_t query_len;
+	int id = -1;
 	PGconn *pgsql;
 	int is_non_blocking;
 	int ret;

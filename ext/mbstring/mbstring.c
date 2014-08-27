@@ -1733,7 +1733,7 @@ PHP_MINFO_FUNCTION(mbstring)
 PHP_FUNCTION(mb_language)
 {
 	char *name = NULL;
-	int name_len = 0;
+	size_t name_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
 		return;
@@ -1758,7 +1758,7 @@ PHP_FUNCTION(mb_language)
 PHP_FUNCTION(mb_internal_encoding)
 {
 	const char *name = NULL;
-	int name_len;
+	size_t name_len;
 	const mbfl_encoding *encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {

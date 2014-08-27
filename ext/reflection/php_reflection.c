@@ -3635,7 +3635,7 @@ ZEND_METHOD(reflection_class, hasMethod)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	char *name, *lc_name;
-	int name_len;
+	size_t name_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
@@ -3665,7 +3665,7 @@ ZEND_METHOD(reflection_class, getMethod)
 	zend_function *mptr;
 	zval obj_tmp;
 	char *name, *lc_name;
-	int name_len;
+	size_t name_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
@@ -4734,7 +4734,8 @@ ZEND_METHOD(reflection_property, __construct)
 	zval propname, cname, *classname;
 	char *name_str;
 	const char *class_name, *prop_name;
-	int name_len, dynam_prop = 0;
+	size_t name_len;
+	int dynam_prop = 0;
 	zval *object;
 	reflection_object *intern;
 	zend_class_entry *ce;
@@ -5129,7 +5130,7 @@ ZEND_METHOD(reflection_extension, __construct)
 	reflection_object *intern;
 	zend_module_entry *module;
 	char *name_str;
-	int name_len;
+	size_t name_len;
 	ALLOCA_FLAG(use_heap)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
@@ -5489,7 +5490,7 @@ ZEND_METHOD(reflection_zend_extension, __construct)
 	reflection_object *intern;
 	zend_extension *extension;
 	char *name_str;
-	int name_len;
+	size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
 		return;

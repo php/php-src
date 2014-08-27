@@ -240,7 +240,8 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	xmlNodePtr  node;
 	char		*arg;
 	zend_long        offset;
-	int         length, arg_len;
+	int         length;
+	size_t arg_len;
 	dom_object	*intern;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len) == FAILURE) {
@@ -343,7 +344,8 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	xmlNodePtr  node;
 	char		*arg;
 	zend_long        offset, count;
-	int         length, arg_len;
+	int         length;
+	size_t arg_len;
 	dom_object	*intern;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olls", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len) == FAILURE) {

@@ -579,7 +579,7 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_tem
 	HashTable *rv;
 	zend_string *pnstr;
 	char *path;
-	int  path_len;
+	size_t  path_len;
 	char stmp[2];
 
 	*is_temp = 1;
@@ -675,7 +675,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 {
 	spl_filesystem_object *intern;
 	char *path;
-	int parsed, len;
+	size_t parsed, len;
 	zend_long flags;
 	zend_error_handling error_handling;
 
@@ -858,7 +858,7 @@ SPL_METHOD(SplFileInfo, getPath)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *path;
-	int path_len;
+	size_t path_len;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -874,7 +874,7 @@ SPL_METHOD(SplFileInfo, getPath)
 SPL_METHOD(SplFileInfo, getFilename)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	int path_len;
+	size_t path_len;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -912,7 +912,8 @@ SPL_METHOD(SplFileInfo, getExtension)
 	char *fname = NULL;
 	const char *p;
 	size_t flen;
-	int path_len, idx;
+	size_t path_len;
+	int idx;
 	zend_string *ret;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1004,7 +1005,7 @@ SPL_METHOD(DirectoryIterator, getBasename)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *suffix = 0;
-	int slen = 0;
+	size_t slen = 0;
 	zend_string *fname;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &suffix, &slen) == FAILURE) {
@@ -1023,7 +1024,7 @@ SPL_METHOD(SplFileInfo, getPathname)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *path;
-	int path_len;
+	size_t path_len;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1106,7 +1107,7 @@ SPL_METHOD(SplFileInfo, __construct)
 {
 	spl_filesystem_object *intern;
 	char *path;
-	int len;
+	size_t len;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
@@ -2262,7 +2263,7 @@ SPL_METHOD(SplFileObject, __construct)
 	zend_bool use_include_path = 0;
 	char *p1, *p2;
 	char *tmp_path;
-	int   tmp_path_len;
+	size_t   tmp_path_len;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
@@ -2624,7 +2625,8 @@ SPL_METHOD(SplFileObject, fputcsv)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
 	char *delim = NULL, *enclo = NULL;
-	int d_len = 0, e_len = 0, ret;
+	size_t d_len = 0, e_len = 0;
+	int ret;
 	zval *fields = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|ss", &fields, &delim, &d_len, &enclo, &e_len) == SUCCESS) {

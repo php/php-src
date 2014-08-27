@@ -775,7 +775,7 @@ static PHP_METHOD(UConverter, convert) {
 	intl_errors_reset(&objval->error TSRMLS_CC);
 
 	if (php_converter_do_convert(reverse ? objval->src : objval->dest,
-	                             &dest, &dest_len,
+	                             &dest, (int32_t *)&dest_len,
                                  reverse ? objval->dest : objval->src,
 	                             str,   str_len,
 	                             objval TSRMLS_CC)) {

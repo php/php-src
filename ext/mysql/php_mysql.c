@@ -1555,7 +1555,7 @@ static void php_mysql_do_query_general(php_mysql_conn *mysql, char *query, int q
 static void php_mysql_do_query(INTERNAL_FUNCTION_PARAMETERS, int use_store)
 {
 	char *query;
-	int query_len;
+	size_t query_len;
 	zval *mysql_link = NULL;
 	php_mysql_conn *mysql;
 
@@ -1596,7 +1596,7 @@ PHP_FUNCTION(mysql_unbuffered_query)
 PHP_FUNCTION(mysql_db_query)
 {
 	char *db, *query;
-	int db_len, query_len;
+	size_t db_len, query_len;
 	php_mysql_conn *mysql;
 	zval *mysql_link = NULL;
 

@@ -1525,7 +1525,8 @@ PHP_FUNCTION(pathinfo)
 {
 	zval tmp;
 	char *path, *dirname;
-	int path_len, have_basename;
+	size_t path_len;
+	int have_basename;
 	zend_long opt = PHP_PATHINFO_ALL;
 	zend_string *ret = NULL;
 
@@ -2183,7 +2184,7 @@ PHP_FUNCTION(chunk_split)
 {
 	zend_string *str;
 	char *end    = "\r\n";
-	int endlen   = 2;
+	size_t endlen   = 2;
 	zend_long chunklen = 76;
 	zend_string *result;
 
@@ -5044,8 +5045,7 @@ PHP_FUNCTION(str_pad)
 
 	/* Helper variables */
 	size_t num_pad_chars;		/* Number of padding characters (total - input size) */
-	zend_string  *pad_str_save;	/* Pointer to padding string */
-	char *pad_str = " ";
+	char *pad_str = " "; /* Pointer to padding string */
 	size_t pad_str_len = 1;
 	zend_long   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
 	size_t	   i, left_pad=0, right_pad=0;
@@ -5057,7 +5057,7 @@ PHP_FUNCTION(str_pad)
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (pad_length <= input->len) {
+	if (pad_length == 0  || pad_length <= input->len) {
 		RETURN_STRINGL(input->val, input->len);
 	}
 
@@ -5072,7 +5072,7 @@ PHP_FUNCTION(str_pad)
 	}
 
 	num_pad_chars = pad_length - input->len;
-	if (num_pad_chars >= INT_MAX) {
+	if (num_pad_chars >= ZEND_LONG_MAX) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding length is too long");
 		return;
 	}
@@ -5122,7 +5122,7 @@ PHP_FUNCTION(sscanf)
 {
 	zval *args = NULL;
 	char *str, *format;
-	int str_len, format_len, result, num_args = 0;
+	size_t str_len, format_len, result, num_args = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss*", &str, &str_len, &format, &format_len,
 		&args, &num_args) == FAILURE) {

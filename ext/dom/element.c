@@ -159,8 +159,8 @@ PHP_METHOD(domelement, __construct)
 	dom_object *intern;
 	char *name, *value = NULL, *uri = NULL;
 	char *localname = NULL, *prefix = NULL;
-	int errorcode = 0, uri_len = 0;
-	size_t name_len, value_len = 0;
+	int errorcode = 0;
+	size_t name_len, value_len = 0, uri_len = 0;
 	int name_valid;
 	xmlNsPtr nsptr = NULL;
 	zend_error_handling error_handling;
@@ -331,7 +331,7 @@ PHP_FUNCTION(dom_element_get_attribute)
 	xmlChar *value = NULL;
 	dom_object *intern;
 	xmlNodePtr attr;
-	int name_len;
+	size_t name_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
 		return;
@@ -438,7 +438,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 	zval *id;
 	xmlNodePtr nodep, attrp;
 	dom_object *intern;
-	int name_len;
+	size_t name_len;
 	char *name;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
@@ -485,7 +485,8 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 {
 	zval *id;
 	xmlNodePtr nodep, attrp;
-	int name_len, ret;
+	size_t name_len;
+	int ret;
 	dom_object *intern;
 	char *name;
 
@@ -634,7 +635,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 {
 	zval *id;
 	xmlNodePtr elemp;
-	int name_len;
+	size_t name_len;
 	dom_object *intern, *namednode;
 	char *name;
 	xmlChar *local;
@@ -871,7 +872,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 	xmlAttr *attrp;
 	xmlNsPtr nsptr;
 	dom_object *intern;
-	int name_len, uri_len;
+	size_t name_len, uri_len;
 	char *name, *uri;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
@@ -927,7 +928,8 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 	xmlNodePtr elemp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
-	int uri_len, name_len, ret;
+	size_t uri_len, name_len;
+	int ret;
 	char *uri, *name;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
@@ -1028,7 +1030,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 {
 	zval *id;
 	xmlNodePtr elemp;
-	int uri_len, name_len;
+	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
 	char *uri, *name;
 	xmlChar *local, *nsuri;
@@ -1058,7 +1060,7 @@ PHP_FUNCTION(dom_element_has_attribute)
 	xmlNode *nodep;
 	dom_object *intern;
 	char *name;
-	int name_len;
+	size_t name_len;
 	xmlNodePtr attr;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
@@ -1086,7 +1088,7 @@ PHP_FUNCTION(dom_element_has_attribute_ns)
 	xmlNodePtr elemp;
 	xmlNs *nsp;
 	dom_object *intern;
-	int uri_len, name_len;
+	size_t uri_len, name_len;
 	char *uri, *name;
 	xmlChar *value;
 
@@ -1144,7 +1146,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 	xmlAttrPtr attrp;
 	dom_object *intern;
 	char *name;
-	int name_len;
+	size_t name_len;
 	zend_bool is_id;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osb", &id, dom_element_class_entry, &name, &name_len, &is_id) == FAILURE) {
@@ -1179,7 +1181,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 	xmlNodePtr elemp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
-	int uri_len, name_len;
+	size_t uri_len, name_len;
 	char *uri, *name;
 	zend_bool is_id;
 

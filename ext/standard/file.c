@@ -1339,7 +1339,7 @@ PHPAPI int php_mkdir(const char *dir, zend_long mode TSRMLS_DC)
 PHP_FUNCTION(mkdir)
 {
 	char *dir;
-	int dir_len;
+	size_t dir_len;
 	zval *zcontext = NULL;
 	zend_long mode = 0777;
 	zend_bool recursive = 0;
@@ -1360,7 +1360,7 @@ PHP_FUNCTION(mkdir)
 PHP_FUNCTION(rmdir)
 {
 	char *dir;
-	int dir_len;
+	size_t dir_len;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 

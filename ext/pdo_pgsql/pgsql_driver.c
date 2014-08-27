@@ -730,7 +730,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL, *filename = NULL;
-	int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len, filename_len;
+	size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len, filename_len;
 	char *query;
 
 	PGresult *pgsql_result;

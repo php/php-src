@@ -472,7 +472,7 @@ PHP_FUNCTION(bcpow)
 PHP_FUNCTION(bcsqrt)
 {
 	char *left;
-	int left_len;
+	size_t left_len;
 	zend_long scale_param = 0;
 	bc_num result;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();

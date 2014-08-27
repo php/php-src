@@ -813,7 +813,7 @@ PHP_FUNCTION(com_message_pump)
 PHP_FUNCTION(com_load_typelib)
 {
 	char *name;
-	int namelen;
+	size_t namelen;
 	ITypeLib *pTL = NULL;
 	zend_bool cs = TRUE;
 	int codepage = COMG(code_page);

@@ -543,7 +543,8 @@ static PHP_FUNCTION(bzcompress)
 static PHP_FUNCTION(bzdecompress)
 {
 	char *source, *dest;
-	int source_len, error;
+	size_t source_len;
+	int error;
 	zend_long small = 0;
 #if defined(PHP_WIN32)
 	unsigned __int64 size = 0;

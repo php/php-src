@@ -2114,7 +2114,7 @@ PHP_FUNCTION(simplexml_load_file)
 {
 	php_sxe_object *sxe;
 	char           *filename;
-	int             filename_len;
+	size_t             filename_len;
 	xmlDocPtr       docp;
 	char           *ns = NULL;
 	size_t             ns_len = 0;

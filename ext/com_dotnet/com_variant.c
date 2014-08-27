@@ -222,7 +222,7 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 		case VT_BSTR:
 			olestring = V_BSTR(v);
 			if (olestring) {
-				int len;
+				size_t len;
 				char *str = php_com_olestring_to_string(olestring,
 					&len, codepage TSRMLS_CC);
 				ZVAL_STRINGL(z, str, len);

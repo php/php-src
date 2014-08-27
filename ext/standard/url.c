@@ -375,7 +375,7 @@ end:
 PHP_FUNCTION(parse_url)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 	php_url *resource;
 	zend_long key = -1;
 
