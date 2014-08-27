@@ -159,7 +159,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC
 			*is_temp = 1;
 			ALLOC_HASHTABLE(ht);
 			*ht = *Z_ARRVAL(retval);
-			efree(Z_ARR(retval));
+			efree_size(Z_ARR(retval), sizeof(zend_array));
 			return ht;
 		} else {
 			*is_temp = 0;
@@ -951,7 +951,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 	zval_ptr_dtor(&method_name);
 
 	/* destruct the function also, then - we have allocated it in get_method */
-	efree(func);
+	efree_size(func, sizeof(zend_internal_function));
 }
 /* }}} */
 
@@ -1168,7 +1168,7 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 	zval_ptr_dtor(&method_name);
 
 	/* destruct the function also, then - we have allocated it in get_method */
-	efree(func);
+	efree_size(func, sizeof(zend_internal_function));
 }
 /* }}} */
 

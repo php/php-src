@@ -716,7 +716,7 @@ ZEND_API void convert_to_object(zval *op) /* {{{ */
 				memcpy(properties, Z_ARRVAL_P(op), sizeof(HashTable));
 				object_and_properties_init(op, zend_standard_class_def, properties);
 				if (--GC_REFCOUNT(arr) == 0) {
-					efree(arr);
+					efree_size(arr, sizeof(zend_array));
 				}
 				break;
 			}

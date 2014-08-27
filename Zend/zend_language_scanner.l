@@ -602,7 +602,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 			pass_two(op_array TSRMLS_CC);
 			zend_release_labels(0 TSRMLS_CC);
 		} else {
-			efree(op_array);
+			efree_size(op_array, sizeof(zend_op_array));
 			retval = NULL;
 		}
 	}

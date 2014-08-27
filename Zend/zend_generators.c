@@ -130,7 +130,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* Free a clone of closure */
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 			destroy_op_array(op_array TSRMLS_CC);
-			efree(op_array);
+			efree_size(op_array, sizeof(zend_op_array));
 		}
 
 		efree(generator->stack);

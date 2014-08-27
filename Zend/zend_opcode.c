@@ -123,7 +123,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 	if (function->type == ZEND_INTERNAL_FUNCTION) {
 		pefree(function, 1);
 	} else if (!function->common.function_name) {
-		efree(function);
+		efree_size(function, sizeof(zend_op_array));
 	}
 }
 
@@ -330,7 +330,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		return;
 	}
 
-	efree(op_array->refcount);
+	efree_size(op_array->refcount, sizeof(*(op_array->refcount)));
 
 	if (op_array->vars) {
 		i = op_array->last_var;

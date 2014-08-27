@@ -746,7 +746,7 @@ END_EXTERN_C()
 		ZEND_ASSERT(Z_ISREF_P(_z));						\
 		ref = Z_REF_P(_z);								\
 		ZVAL_COPY_VALUE(_z, &ref->val);					\
-		efree(ref);										\
+		efree_size(ref, sizeof(zend_reference));		\
 	} while (0)
 
 #define SEPARATE_STRING(zv) do {						\
