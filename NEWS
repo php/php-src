@@ -305,8 +305,6 @@ PHP                                                                        NEWS
     fields). (Keyur Govande)
 
 - OpenSSL:
-  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads)
-    (Daniel Lowrey).
   . Fixed missing type checks in OpenSSL options (Yussuf Khalil, Stas).
   . Fixed bug #67609 (TLS connections fail behind HTTP proxy). (Daniel Lowrey)
   . Fixed broken build against OpenSSL older than 0.9.8 where ECDH unavailable.
