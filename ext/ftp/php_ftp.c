@@ -555,7 +555,7 @@ PHP_FUNCTION(ftp_mkdir)
 	ftpbuf_t	*ftp;
 	char		*dir;
 	zend_string *tmp;
-	int		dir_len;
+	size_t		dir_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
@@ -580,7 +580,7 @@ PHP_FUNCTION(ftp_rmdir)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*dir;
-	int		dir_len;
+	size_t		dir_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
@@ -659,7 +659,7 @@ PHP_FUNCTION(ftp_nlist)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		**nlist, **ptr, *dir;
-	int		dir_len;
+	size_t		dir_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
@@ -687,7 +687,7 @@ PHP_FUNCTION(ftp_rawlist)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		**llist, **ptr, *dir;
-	int		dir_len;
+	size_t		dir_len;
 	zend_bool	recursive = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|b", &z_ftp, &dir, &dir_len, &recursive) == FAILURE) {
@@ -918,7 +918,8 @@ PHP_FUNCTION(ftp_nb_get)
 	ftptype_t	xtype;
 	php_stream	*outstream;
 	char		*local, *remote;
-	int		local_len, remote_len, ret;
+	size_t		local_len, remote_len;
+	int ret;
 	zend_long		mode, resumepos=0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssl|l", &z_ftp, &local, &local_len, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
@@ -1071,8 +1072,9 @@ PHP_FUNCTION(ftp_nb_fput)
 	zval		*z_ftp, *z_file;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
-	int		remote_len, ret;
-	zend_long		mode, startpos=0;
+	size_t		remote_len;
+	int             ret;
+	zend_long	mode, startpos=0;
 	php_stream	*stream;
 	char		*remote;
 
@@ -1124,7 +1126,7 @@ PHP_FUNCTION(ftp_put)
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	char		*remote, *local;
-	zend_long		remote_len, local_len;
+	size_t		remote_len, local_len;
 	zend_long		mode, startpos=0;
 	php_stream 	*instream;
 
@@ -1177,7 +1179,7 @@ PHP_FUNCTION(ftp_nb_put)
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	char		*remote, *local;
-	int		remote_len, local_len;
+	size_t		remote_len, local_len;
 	zend_long		mode, startpos=0, ret;
 	php_stream 	*instream;
 
@@ -1326,7 +1328,7 @@ PHP_FUNCTION(ftp_site)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*cmd;
-	int		cmd_len;
+	size_t		cmd_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &cmd, &cmd_len) == FAILURE) {
 		return;
