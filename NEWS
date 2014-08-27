@@ -1,21 +1,26 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.0 ???
+
+?? ??? 2014, PHP 5.6.1
 
 - Core:
   . Fixed bug #67878 (program_prefix not honoured in man pages). (Remi)
+
+- GD
+  . Made fontFetch's path parser thread-safe. (Sara)
+
+- OpenSSL
+  . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3)
+    (Daniel Lowrey)
+
+28 Aug 2014, PHP 5.6.0
 
 - Fileinfo:
   . Fixed bug #67716 (Segfault in cdf.c). (CVE-2014-3587) (Remi)
 
 - GD
-  . Made fontFetch's path parser thread-safe. (Sara)
   . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
     (CVE-2014-5120) (Ryan Mauger)
-
-- OpenSSL
-  . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3)
-    (Daniel Lowrey)
 
 - Zlib:
   . Fixed bug #67865 (internal corruption phar error). Mike
