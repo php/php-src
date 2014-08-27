@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - GD
   . Made fontFetch's path parser thread-safe. (Sara)
 
+- MySQLi:
+  . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
+
 - OpenSSL
   . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3)
     (Daniel Lowrey)
@@ -22,11 +25,14 @@ PHP                                                                        NEWS
   . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
     (CVE-2014-5120) (Ryan Mauger)
 
-- Zlib:
-  . Fixed bug #67865 (internal corruption phar error). Mike
+- Network:
+  . Fixed bug #67717 (segfault in dns_get_record). (CVE-2014-3597) (Remi)
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
+
+- Zlib:
+  . Fixed bug #67865 (internal corruption phar error). Mike
 
 14 Aug 2014, PHP 5.6.0 Release Candidate 4
 
@@ -53,9 +59,6 @@ PHP                                                                        NEWS
 - Milter:
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
 
-- Network:
-  . Fixed bug #67717 (segfault in dns_get_record). (CVE-2014-3597) (Remi)
-
 - OpenSSL:
   . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads)
     (Daniel Lowrey).
@@ -69,9 +72,6 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #66091 (memory leaks in DateTime constructor) (Tjerk).
-
-- MySQLi:
-  . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
 
 31 Jul 2014, PHP 5.6.0 Release Candidate 3
 
