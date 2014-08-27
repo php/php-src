@@ -1055,7 +1055,7 @@ char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 /* }}} */
 
 /* {{{ date_format - (gm)date helper */
-static zend_string *date_format(char *format, size_t format_len, timelib_time *t, size_t localtime TSRMLS_DC)
+static zend_string *date_format(char *format, size_t format_len, timelib_time *t, int localtime TSRMLS_DC)
 {
 	smart_str            string = {0};
 	int                  i, length = 0;
