@@ -764,7 +764,8 @@ ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, convert) {
         php_converter_object *objval = CONV_GET(getThis());
 	char *str, *dest;
-	size_t str_len, dest_len;
+	size_t str_len;
+	int32_t dest_len;
 	zend_bool reverse = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
@@ -776,7 +777,7 @@ static PHP_METHOD(UConverter, convert) {
 	intl_errors_reset(&objval->error TSRMLS_CC);
 
 	if (php_converter_do_convert(reverse ? objval->src : objval->dest,
-	                             &dest, (int32_t *)&dest_len,
+	                             &dest, &dest_len,
                                  reverse ? objval->dest : objval->src,
 	                             str,   str_len,
 	                             objval TSRMLS_CC)) {
