@@ -57,7 +57,7 @@ typedef smart_str wddx_packet;
 wddx_packet* php_wddx_constructor(void);
 void		 php_wddx_destructor(wddx_packet *packet);
 
-void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, size_tt comment_len);
+void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, size_t comment_len);
 void 		 php_wddx_packet_end(wddx_packet *packet);
 
 void 		 php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name TSRMLS_DC);
