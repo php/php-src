@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Added PHP_INT_MIN constant. (Andrea)
+  . Added Closure::apply() method. (Andrea)
 
 - Reflection
   . Fixed inheritance chain of Reflector interface (Tjerk)
