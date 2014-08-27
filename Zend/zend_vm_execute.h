@@ -3388,12 +3388,14 @@ static int ZEND_FASTCALL  ZEND_STRLEN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zend_string_release(str);
 		} else if (Z_TYPE_P(value) == IS_OBJECT) {
 			zend_string *str;
+			zval tmp;
 
-			if (parse_arg_object_to_str(value, &str, IS_STRING TSRMLS_CC) == FAILURE) {
+			ZVAL_COPY(&tmp, value);
+			if (parse_arg_object_to_str(&tmp, &str, IS_STRING TSRMLS_CC) == FAILURE) {
 				goto strlen_error;
 			}
 			ZVAL_LONG(EX_VAR(opline->result.var), str->len);
-			zend_string_release(str);
+			zval_dtor(&tmp);
 		} else {
 strlen_error:
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
@@ -10187,12 +10189,14 @@ static int ZEND_FASTCALL  ZEND_STRLEN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_string_release(str);
 		} else if (Z_TYPE_P(value) == IS_OBJECT) {
 			zend_string *str;
+			zval tmp;
 
-			if (parse_arg_object_to_str(value, &str, IS_STRING TSRMLS_CC) == FAILURE) {
+			ZVAL_COPY(&tmp, value);
+			if (parse_arg_object_to_str(&tmp, &str, IS_STRING TSRMLS_CC) == FAILURE) {
 				goto strlen_error;
 			}
 			ZVAL_LONG(EX_VAR(opline->result.var), str->len);
-			zend_string_release(str);
+			zval_dtor(&tmp);
 		} else {
 strlen_error:
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
@@ -16981,12 +16985,14 @@ static int ZEND_FASTCALL  ZEND_STRLEN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_string_release(str);
 		} else if (Z_TYPE_P(value) == IS_OBJECT) {
 			zend_string *str;
+			zval tmp;
 
-			if (parse_arg_object_to_str(value, &str, IS_STRING TSRMLS_CC) == FAILURE) {
+			ZVAL_COPY(&tmp, value);
+			if (parse_arg_object_to_str(&tmp, &str, IS_STRING TSRMLS_CC) == FAILURE) {
 				goto strlen_error;
 			}
 			ZVAL_LONG(EX_VAR(opline->result.var), str->len);
-			zend_string_release(str);
+			zval_dtor(&tmp);
 		} else {
 strlen_error:
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
@@ -34233,12 +34239,14 @@ static int ZEND_FASTCALL  ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_string_release(str);
 		} else if (Z_TYPE_P(value) == IS_OBJECT) {
 			zend_string *str;
+			zval tmp;
 
-			if (parse_arg_object_to_str(value, &str, IS_STRING TSRMLS_CC) == FAILURE) {
+			ZVAL_COPY(&tmp, value);
+			if (parse_arg_object_to_str(&tmp, &str, IS_STRING TSRMLS_CC) == FAILURE) {
 				goto strlen_error;
 			}
 			ZVAL_LONG(EX_VAR(opline->result.var), str->len);
-			zend_string_release(str);
+			zval_dtor(&tmp);
 		} else {
 strlen_error:
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));

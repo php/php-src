@@ -5891,12 +5891,14 @@ ZEND_VM_HANDLER(121, ZEND_STRLEN, CONST|TMP|VAR|CV, ANY)
 			zend_string_release(str);
 		} else if (Z_TYPE_P(value) == IS_OBJECT) {
 			zend_string *str;
+			zval tmp;
 
-			if (parse_arg_object_to_str(value, &str, IS_STRING TSRMLS_CC) == FAILURE) {
+			ZVAL_COPY(&tmp, value);
+			if (parse_arg_object_to_str(&tmp, &str, IS_STRING TSRMLS_CC) == FAILURE) {
 				ZEND_VM_C_GOTO(strlen_error);
 			}
 			ZVAL_LONG(EX_VAR(opline->result.var), str->len);
-			zend_string_release(str);
+			zval_dtor(&tmp);
 		} else {
 ZEND_VM_C_LABEL(strlen_error):
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
