@@ -64,18 +64,6 @@ static void zend_extension_fcall_end_handler(const zend_extension *extension, ze
 
 #define RETURN_VALUE_USED(opline) (!((opline)->result_type & EXT_TYPE_UNUSED))
 
-#define TEMP_VAR_STACK_LIMIT 2000
-
-static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free)
-{
-	should_free->var = NULL;
-	if (Z_REFCOUNTED_P(z) && !Z_DELREF_P(z)) {
-		Z_SET_REFCOUNT_P(z, 1);
-		should_free->var = z;
-		/* should_free->is_var = 1; */
-	}
-}
-
 static ZEND_FUNCTION(pass)
 {
 }
@@ -97,9 +85,11 @@ static const zend_internal_function zend_pass_function = {
 #define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC TSRMLS_CC)
 #define zval_ptr_dtor_nogc(zv) i_zval_ptr_dtor_nogc(zv ZEND_FILE_LINE_CC TSRMLS_CC)
 
-#define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f)
 #define PZVAL_LOCK(z) if (Z_REFCOUNTED_P(z)) Z_ADDREF_P((z))
 #define SELECTIVE_PZVAL_LOCK(pzv, opline)	if (RETURN_VALUE_USED(opline)) { PZVAL_LOCK(pzv); }
+
+#define READY_TO_DESTROY(zv) \
+	(zv && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
 #define EXTRACT_ZVAL_PTR(zv) do {						\
 		zval *__zv = (zv);								\
@@ -439,11 +429,12 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(uint32_t var, const zend_e
 	if (EXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
 		should_free->var = NULL;
 		return Z_INDIRECT_P(ret);
-	} else if (!Z_REFCOUNTED_P(ret)) {
-		should_free->var = ret; //???
+	} else if (!Z_REFCOUNTED_P(ret) || Z_REFCOUNT_P(ret) == 1) {
+		should_free->var = ret;
 		return ret;
 	} else {
-		PZVAL_UNLOCK(ret, should_free);
+		Z_DELREF_P(ret);
+		should_free->var = NULL;
 		return ret;
 	}
 }

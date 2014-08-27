@@ -820,9 +820,6 @@ END_EXTERN_C()
 		}												\
 	} while (0)
 
-#define READY_TO_DESTROY(zv) \
-	(Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
-
 #define ZEND_MAX_RESERVED_RESOURCES	4
 
 #include "zend_gc.h"
