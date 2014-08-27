@@ -28,6 +28,7 @@
 #include "zend_objects.h"
 #include "zend_objects_API.h"
 #include "zend_globals.h"
+#include "php_stdint.h"
 
 #define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
@@ -63,6 +64,61 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	/* destruct the function also, then - we have allocated it in get_method */
 	zend_string_release(func->internal_function.function_name);
 	efree(func);
+}
+/* }}} */
+
+/* {{{ proto mixed Closure::call(object $to [, mixed $parameter] [, mixed $...] )
+   Call closure, binding to a given object with its class as the scope */
+ZEND_METHOD(Closure, call) /* {{{ */
+{
+	zval *zclosure, *newthis, closure_result;
+	zend_closure *closure;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+	zval *my_params;
+	uint32_t my_param_count = 0;
+	zend_function my_function;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o*", &newthis, &my_params, &my_param_count) == FAILURE) {
+		return;
+	}
+	
+	zclosure = getThis();
+	closure = (zend_closure *)Z_OBJ_P(zclosure);
+	
+	if (closure->func.common.fn_flags & ZEND_ACC_STATIC) {
+		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
+		return;
+	}
+
+	if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
+		/* verify that we aren't binding internal function to a wrong object */
+		if ((closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+				!instanceof_function(Z_OBJCE_P(newthis), closure->func.common.scope TSRMLS_CC)) {
+			zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", closure->func.common.scope->name->val, closure->func.common.function_name->val, Z_OBJCE_P(newthis)->name->val);
+			return;
+		}
+	}
+
+	/* This should never happen as closures will always be callable */
+	if (zend_fcall_info_init(zclosure, 0, &fci, &fci_cache, NULL, NULL TSRMLS_CC) != SUCCESS) {
+		ZEND_ASSERT(0);
+	}
+
+	fci.retval = &closure_result;
+	fci.params = my_params;
+	fci.param_count = my_param_count;
+	fci.object = fci_cache.object = Z_OBJ_P(newthis);
+	fci_cache.initialized = 1;
+	
+	my_function = *fci_cache.function_handler;
+	/* use scope of passed object */
+	my_function.common.scope = Z_OBJCE_P(newthis);
+	fci_cache.function_handler = &my_function;
+
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(closure_result) != IS_UNDEF) {
+		ZVAL_COPY_VALUE(return_value, &closure_result);
+	}
 }
 /* }}} */
 
@@ -370,10 +426,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bind, 0, 0, 2)
 	ZEND_ARG_INFO(0, newscope)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_call, 0, 0, 1)
+	ZEND_ARG_INFO(0, newthis)
+	ZEND_ARG_VARIADIC_INFO(0, parameters)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry closure_functions[] = {
 	ZEND_ME(Closure, __construct, NULL, ZEND_ACC_PRIVATE)
 	ZEND_ME(Closure, bind, arginfo_closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_MALIAS(Closure, bindTo, bind, arginfo_closure_bindto, ZEND_ACC_PUBLIC)
+	ZEND_ME(Closure, call, arginfo_closure_call, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
