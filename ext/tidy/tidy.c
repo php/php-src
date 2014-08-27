@@ -627,7 +627,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 
 	if (is_file) {
-		STR_RELEASE(data);
+		zend_string_release(data);
 	}
 
 	tidyBufFree(errbuf);
@@ -1264,7 +1264,7 @@ static PHP_FUNCTION(tidy_parse_file)
 		RETVAL_FALSE;
 	}
 
-	STR_RELEASE(contents);
+	zend_string_release(contents);
 }
 /* }}} */
 
@@ -1396,11 +1396,11 @@ static PHP_FUNCTION(tidy_get_config)
 				break;
 
 			case TidyInteger:
-				add_assoc_long(return_value, opt_name, (long)opt_value);
+				add_assoc_long(return_value, opt_name, (zend_long)opt_value);
 				break;
 
 			case TidyBoolean:
-				add_assoc_bool(return_value, opt_name, (long)opt_value);
+				add_assoc_bool(return_value, opt_name, (zend_long)opt_value);
 				break;
 		}
 	}
@@ -1529,7 +1529,7 @@ static PHP_FUNCTION(tidy_getopt)
 			return;
 
 		case TidyInteger:
-			RETURN_LONG((long)optval);
+			RETURN_LONG((zend_long)optval);
 			break;
 
 		case TidyBoolean:
@@ -1577,7 +1577,7 @@ static TIDY_DOC_METHOD(__construct)
 
 		php_tidy_parse_string(obj, contents->val, contents->len, enc TSRMLS_CC);
 
-		STR_RELEASE(contents);
+		zend_string_release(contents);
 	}
 }
 
@@ -1612,7 +1612,7 @@ static TIDY_DOC_METHOD(parseFile)
 		RETVAL_TRUE;
 	}
 
-	STR_RELEASE(contents);
+	zend_string_release(contents);
 }
 
 static TIDY_DOC_METHOD(parseString)

@@ -2334,7 +2334,7 @@ static char * exif_get_markername(int marker)
 	Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
-	long tag;
+	zend_long tag;
 	char *szTemp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &tag) == FAILURE) {
@@ -3847,7 +3847,7 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all TSRMLS_DC)
 {
 	int ret;
-	struct stat st;
+	zend_stat_t st;
 	zend_string *base;
 	
 	/* Start with an empty image information structure. */
@@ -3884,7 +3884,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 
 	base = php_basename(FileName, strlen(FileName), NULL, 0 TSRMLS_CC);
 	ImageInfo->FileName          = estrndup(base->val, base->len);
-	STR_RELEASE(base);
+	zend_string_release(base);
 	ImageInfo->read_thumbnail = read_thumbnail;
 	ImageInfo->read_all = read_all;
 	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;

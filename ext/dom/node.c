@@ -345,7 +345,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 			{
 				zend_string *str = zval_get_string(newval);
 				xmlNodeSetContentLen(nodep, str->val, str->len + 1);
-				STR_RELEASE(str);
+				zend_string_release(str);
 				break;
 			}
 		default:
@@ -745,14 +745,14 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 				}
 
 				if (ns == NULL) {
-					STR_RELEASE(str);
+					zend_string_release(str);
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document) TSRMLS_CC);
 					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
 			}
-			STR_RELEASE(str);
+			zend_string_release(str);
 			break;
 		default:
 			break;
@@ -1334,7 +1334,7 @@ PHP_FUNCTION(dom_node_clone_node)
 	xmlNode *n, *node;
 	int ret;
 	dom_object *intern;
-	long recursive = 0;
+	zend_long recursive = 0;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &id, dom_node_class_entry, &recursive) == FAILURE) {
 		return;

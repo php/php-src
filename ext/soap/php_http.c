@@ -50,7 +50,7 @@ int proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 		smart_str_append_const(soap_headers, "Proxy-Authorization: Basic ");
 		smart_str_appendl(soap_headers, (char*)buf->val, buf->len);
 		smart_str_append_const(soap_headers, "\r\n");
-		STR_RELEASE(buf);
+		zend_string_release(buf);
 		smart_str_free(&auth);
 		return 1;
 	}
@@ -77,7 +77,7 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 		smart_str_append_const(soap_headers, "Authorization: Basic ");
 		smart_str_appendl(soap_headers, (char*)buf->val, buf->len);
 		smart_str_append_const(soap_headers, "\r\n");
-		STR_RELEASE(buf);
+		zend_string_release(buf);
 		smart_str_free(&auth);
 		return 1;
 	}
@@ -161,7 +161,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	char *host;
 	char *name;
 	char *protocol;
-	long namelen;
+	zend_long namelen;
 	int port;
 	int old_error_reporting;
 	struct timeval tv;
@@ -347,7 +347,7 @@ int make_http_soap_request(zval  *this_ptr,
 	int http_1_1;
 	int http_status;
 	int content_type_xml = 0;
-	long redirect_max = 20;
+	zend_long redirect_max = 20;
 	char *content_encoding;
 	char *http_msg = NULL;
 	zend_bool old_allow_url_fopen;
@@ -631,7 +631,7 @@ try_again:
 					unsigned char hash[16];
 
 					PHP_MD5Init(&md5ctx);
-					snprintf(cnonce, sizeof(cnonce), "%ld", php_rand(TSRMLS_C));
+					snprintf(cnonce, sizeof(cnonce), ZEND_LONG_FMT, php_rand(TSRMLS_C));
 					PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, strlen(cnonce));
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(cnonce, hash);
@@ -787,7 +787,7 @@ try_again:
 				smart_str_append_const(&soap_headers, "Authorization: Basic ");
 				smart_str_appendl(&soap_headers, (char*)buf->val, buf->len);
 				smart_str_append_const(&soap_headers, "\r\n");
-				STR_RELEASE(buf);
+				zend_string_release(buf);
 				smart_str_free(&auth);
 			}
 		}

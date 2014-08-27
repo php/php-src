@@ -138,7 +138,7 @@ PHP_FUNCTION(settype)
 PHP_FUNCTION(intval)
 {
 	zval *num;
-	long base = 10;
+	zend_long base = 10;
 
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
@@ -401,7 +401,7 @@ PHP_FUNCTION(is_callable)
 		//??? is it necessary to be consistent with old PHP ("\0" support)
 		if (UNEXPECTED(name->len) != strlen(name->val)) {
 			ZVAL_STRINGL(callable_name, name->val, strlen(name->val));
-			STR_RELEASE(name);
+			zend_string_release(name);
 		} else {
 			ZVAL_STR(callable_name, name);
 		}

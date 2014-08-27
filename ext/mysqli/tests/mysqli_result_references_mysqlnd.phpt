@@ -10,7 +10,7 @@ require_once('connect.inc');
 if (!$IS_MYSQLND)
 	die("skip Test for mysqlnd only");
 
-if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1))
+if ((version_compare(PHP_VERSION, '6.0', '==') == 1))
 	die("skip (TODO) PHP 6.0 has a difference debug_zval_dump output format");
 ?>
 <?php require_once('skipifemb.inc'); ?>

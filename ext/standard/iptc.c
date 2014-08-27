@@ -179,7 +179,7 @@ PHP_FUNCTION(iptcembed)
 {
 	char *iptcdata, *jpeg_file;
 	int iptcdata_len, jpeg_file_len;
-	long spool = 0;
+	zend_long spool = 0;
 	FILE *fp;
 	unsigned int marker, done = 0;
 	int inx;
@@ -334,8 +334,8 @@ PHP_FUNCTION(iptcparse)
 			if((inx+6) >= str_len) {
 				break;
 			}
-			len = (((long) buffer[ inx + 2 ]) << 24) + (((long) buffer[ inx + 3 ]) << 16) + 
-				  (((long) buffer[ inx + 4 ]) <<  8) + (((long) buffer[ inx + 5 ]));
+			len = (((zend_long) buffer[ inx + 2 ]) << 24) + (((zend_long) buffer[ inx + 3 ]) << 16) + 
+				  (((zend_long) buffer[ inx + 4 ]) <<  8) + (((zend_long) buffer[ inx + 5 ]));
 			inx += 6;
 		} else { /* short tag */
 			len = (((unsigned short) buffer[ inx ])<<8) | (unsigned short)buffer[ inx+1 ];

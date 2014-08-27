@@ -25,10 +25,10 @@ typedef struct {
 	zend_object_iterator  intern;
 	ResourceBundle_object *subject;
 	zend_bool             is_table;
-	long                  length;
+	zend_long                  length;
 	zval                  current;
 	char                  *currentkey;
-	long                  i;
+	zend_long                  i;
 } ResourceBundle_iterator;
 
 zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *object, int byref TSRMLS_DC );

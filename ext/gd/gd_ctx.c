@@ -79,7 +79,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	zval *imgind;
 	char *file = NULL;
 	int file_len = 0;
-	long quality, basefilter;
+	zend_long quality, basefilter;
 	gdImagePtr im;
 	int argc = ZEND_NUM_ARGS();
 	int q = -1, i;
@@ -124,6 +124,11 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 				RETURN_FALSE;
 			}
 		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
+			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid 2nd parameter, filename must not contain null bytes");
+				RETURN_FALSE;
+			}
+
 			stream = php_stream_open_wrapper(Z_STRVAL_P(to_zval), "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
 			if (stream == NULL) {
 				RETURN_FALSE;

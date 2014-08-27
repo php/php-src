@@ -223,12 +223,12 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 			} else {
 				zend_string *str = zval_get_string(&retval);
 				valuePush(ctxt, xmlXPathNewString(str->val));
-				STR_RELEASE(str);
+				zend_string_release(str);
 			}
 			zval_ptr_dtor(&retval);
 		}
 	}
-	STR_RELEASE(callable);
+	zend_string_release(callable);
 	zval_dtor(&fci.function_name);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {
@@ -527,7 +527,7 @@ PHP_FUNCTION(dom_xpath_register_php_functions)
 			ZVAL_LONG(&new_string,1);
 			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
 			zend_hash_move_forward(Z_ARRVAL_P(array_value));
-			STR_RELEASE(str);
+			zend_string_release(str);
 		}
 		intern->registerPhpFunctions = 2;
 		RETURN_TRUE;

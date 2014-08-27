@@ -84,7 +84,7 @@ void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_fla
 
 		if ((tmp = zend_hash_find(Z_ARRVAL_P(list), pce->name)) == NULL) {
 			zval t;
-			STR_ADDREF(pce->name);
+			zend_string_addref(pce->name);
 			ZVAL_STR(&t, pce->name);
 			zend_hash_add(Z_ARRVAL_P(list), pce->name, &t);
 		}
@@ -95,7 +95,7 @@ void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_fla
 /* {{{ spl_add_interfaces */
 void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC)
 {
-	zend_uint num_interfaces;
+	uint32_t num_interfaces;
 
 	for (num_interfaces = 0; num_interfaces < pce->num_interfaces; num_interfaces++) {
 		spl_add_class_name(list, pce->interfaces[num_interfaces], allow, ce_flags TSRMLS_CC);
@@ -106,7 +106,7 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 /* {{{ spl_add_traits */
 void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC)
 {
-	zend_uint num_traits;
+	uint32_t num_traits;
   
 	for (num_traits = 0; num_traits < pce->num_traits; num_traits++) {
 		spl_add_class_name(list, pce->traits[num_traits], allow, ce_flags TSRMLS_CC);

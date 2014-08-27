@@ -1138,9 +1138,9 @@ static char *php_mcrypt_get_key_size_str(
 		return str;
 	} else {
 		int i;
+		char *result = NULL;
 		smart_str str = {0};
 		smart_str_appends(&str, "Only keys of sizes ");
-		char *result = NULL;
 		
 		for (i = 0; i < key_size_count; ++i) {
 			if (i == key_size_count - 1) {
@@ -1400,8 +1400,8 @@ PHP_FUNCTION(mcrypt_ofb)
 PHP_FUNCTION(mcrypt_create_iv)
 {
 	char *iv;
-	long source = URANDOM;
-	long size;
+	zend_long source = URANDOM;
+	zend_long size;
 	int n = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &size, &source) == FAILURE) {

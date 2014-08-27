@@ -290,7 +290,7 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node TSRMLS_DC) {
 		if (Z_TYPE_P(data) == IS_OBJECT) {
 			data = (zval*)Z_OBJ_P(data);
 		}
-		if ((node_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (ulong)data)) != NULL) {
+		if ((node_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (zend_ulong)data)) != NULL) {
 			xmlAttrPtr attr = node_ptr->properties;
 			char *id;
 			smart_str prefix = {0};
@@ -344,7 +344,7 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node TSRMLS_DC) {
 			smart_str_free(&prefix);
 			return 1;
 		} else {
-			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (ulong)data, node);
+			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (zend_ulong)data, node);
 		}
 	}
 	return 0;
@@ -355,7 +355,7 @@ static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 	zval *data_ptr;
 
 	if (SOAP_GLOBAL(ref_map)) {
-		if ((data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (ulong)node)) != NULL) {
+		if ((data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (zend_ulong)node)) != NULL) {
 			if (!Z_REFCOUNTED_P(data) ||
 			    !Z_REFCOUNTED_P(data_ptr) ||
 			    Z_COUNTED_P(data) != Z_COUNTED_P(data_ptr)) {
@@ -371,7 +371,7 @@ static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 static void soap_add_xml_ref(zval *data, xmlNodePtr node TSRMLS_DC)
 {
 	if (SOAP_GLOBAL(ref_map)) {
-		zend_hash_index_update(SOAP_GLOBAL(ref_map), (ulong)node, data);
+		zend_hash_index_update(SOAP_GLOBAL(ref_map), (zend_ulong)node, data);
 	}
 }
 
@@ -789,7 +789,7 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data TSRML
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 			return ret;
 		}
-		str = STR_ALLOC(strlen((char*)data->children->content) / 2, 0);
+		str = zend_string_alloc(strlen((char*)data->children->content) / 2, 0);
 		for (i = j = 0; i < str->len; i++) {
 			c = data->children->content[j++];
 			if (c >= '0' && c <= '9') {
@@ -921,7 +921,7 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 		str = php_base64_encode((unsigned char*)Z_STRVAL_P(data), Z_STRLEN_P(data));
 		text = xmlNewTextLen(BAD_CAST(str->val), str->len);
 		xmlAddChild(ret, text);
-		STR_RELEASE(str);
+		zend_string_release(str);
 	} else {
 		zval tmp;
 		
@@ -930,7 +930,7 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 		str = php_base64_encode((unsigned char*)Z_STRVAL(tmp), Z_STRLEN(tmp));
 		text = xmlNewTextLen(BAD_CAST(str->val), str->len);
 		xmlAddChild(ret, text);
-		STR_RELEASE(str);
+		zend_string_release(str);
 		zval_dtor(&tmp);
 	}
 
@@ -986,7 +986,7 @@ static zval *to_zval_double(zval *ret, encodeTypePtr type, xmlNodePtr data TSRML
 
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
-			long lval;
+			zend_long lval;
 			double dval;
 
 			whiteSpace_collapse(data->children->content);
@@ -1024,7 +1024,7 @@ static zval *to_zval_long(zval *ret, encodeTypePtr type, xmlNodePtr data TSRMLS_
 
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
-			long lval;
+			zend_long lval;
 			double dval;
 
 			whiteSpace_collapse(data->children->content);
@@ -2689,7 +2689,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 {
 	zval *temp_data;
 	zend_string *key_val;
-	ulong int_val;
+	zend_ulong int_val;
 	xmlNodePtr xmlParam;
 	xmlNodePtr xparam, item;
 	xmlNodePtr key;
@@ -2901,7 +2901,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 		ta = php_localtime_r(&timestamp, &tmbuf);
 		/*ta = php_gmtime_r(&timestamp, &tmbuf);*/
 		if (!ta) {
-			soap_error1(E_ERROR, "Encoding: Invalid timestamp %ld", Z_LVAL_P(data));
+			soap_error1(E_ERROR, "Encoding: Invalid timestamp %pd", Z_LVAL_P(data));
 		}
 
 		buf = (char *) emalloc(buf_len);
@@ -3498,7 +3498,7 @@ encodePtr get_conversion(int encode)
 
 static int is_map(zval *array)
 {
-	ulong index;
+	zend_ulong index;
 	zend_string *key;
 	int i = 0;
 

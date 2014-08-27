@@ -50,7 +50,7 @@ ZEND_BEGIN_MODULE_GLOBALS(intl)
 	collator_compare_func_t compare_func;
 	UBreakIterator* grapheme_iterator;
 	intl_error g_error;
-	long error_level;
+	zend_long error_level;
 	zend_bool use_exceptions;
 ZEND_END_MODULE_GLOBALS(intl)
 

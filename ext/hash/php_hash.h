@@ -55,7 +55,7 @@ typedef struct _php_hash_data {
 	const php_hash_ops *ops;
 	void *context;
 
-	long options;
+	zend_long options;
 	unsigned char *key;
 } php_hash_data;
 

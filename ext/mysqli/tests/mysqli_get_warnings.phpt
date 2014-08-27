@@ -129,8 +129,7 @@ if (!$TEST_EXPERIMENTAL)
 	$warning = new mysqli_warning($mysqli);
 		$i = 1;
 	while ($warning->next() && ('' != ($tmp = $warning->message))) {
-		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
-		    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+		if ((version_compare(PHP_VERSION, '6.0', '==') == 1) &&
 		    !is_unicode($tmp))
 			printf("[033a] Warning should have been a unicode string, got %s/%s", gettype($tmp), $tmp);
 		$i++;

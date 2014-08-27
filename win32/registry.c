@@ -240,7 +240,7 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 		if (pht != NULL) {
 			HashTable *ht = pht;
 			zend_string *index;
-			ulong num;
+			zend_ulong num;
 			zval *data;
 
 			ZEND_HASH_FOREACH_KEY_VAL(ht, num, index, data) {

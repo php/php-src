@@ -45,6 +45,9 @@ Currently we have the following branches in use::
 
   master    The active development branch. 
 
+  PHP-5.6   Is used to release the PHP 5.6.x series. This is a current
+            stable version and is open for bugfixes only.
+
   PHP-5.5   Is used to release the PHP 5.5.x series. This is a current
             stable version and is open for bugfixes only.
 
@@ -58,6 +61,9 @@ Currently we have the following branches in use::
   PHP-5.1   This branch is closed.
 
   PHP-4.4   This branch is closed.
+
+  PHP-X.Y.Z These branches are used for the release managers for tagging
+            the releases, hence they are closed to the general public.
 
 The next few rules are more of a technical nature::
 

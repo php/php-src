@@ -343,7 +343,7 @@ static PHP_MINFO_FUNCTION(bz2)
 static PHP_FUNCTION(bzread)
 {
 	zval *bz;
-	long len = 1024;
+	zend_long len = 1024;
 	php_stream *stream;
 	zend_string *data;
 
@@ -357,11 +357,11 @@ static PHP_FUNCTION(bzread)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length may not be negative");
 		RETURN_FALSE;
 	}
-	data = STR_ALLOC(len, 0);
+	data = zend_string_alloc(len, 0);
 	data->len = php_stream_read(stream, data->val, data->len);
 
 	if (data->len < 0) {
-		STR_FREE(data);
+		zend_string_free(data);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not read valid bz2 data from stream");
 		RETURN_FALSE;
 	}
@@ -406,7 +406,7 @@ static PHP_FUNCTION(bzopen)
 	} else if (Z_TYPE_P(file) == IS_RESOURCE) {
 		/* If it is a resource, than its a stream resource */
 		php_socket_t fd;
-		int stream_mode_len;
+		size_t stream_mode_len;
 
 		php_stream_from_zval(stream, file);
 		stream_mode_len = strlen(stream->mode);
@@ -490,8 +490,8 @@ static PHP_FUNCTION(bzerror)
 static PHP_FUNCTION(bzcompress)
 {
 	char             *source;          /* Source data to compress */
-	long              zblock_size = 0; /* Optional block size to use */
-	long              zwork_factor = 0;/* Optional work factor to use */
+	zend_long              zblock_size = 0; /* Optional block size to use */
+	zend_long              zwork_factor = 0;/* Optional work factor to use */
 	zend_string      *dest = NULL;     /* Destination to place the compressed data into */
 	int               error,           /* Error Container */
 					  block_size  = 4, /* Block size for compression algorithm */
@@ -513,7 +513,7 @@ static PHP_FUNCTION(bzcompress)
 	dest_len = (unsigned int) (source_len + (0.01 * source_len) + 600);
 	
 	/* Allocate the destination buffer */
-	dest = STR_ALLOC(dest_len, 0);
+	dest = zend_string_alloc(dest_len, 0);
 	
 	/* Handle the optional arguments */
 	if (argc > 1) {
@@ -526,7 +526,7 @@ static PHP_FUNCTION(bzcompress)
 
 	error = BZ2_bzBuffToBuffCompress(dest->val, &dest_len, source, source_len, block_size, 0, work_factor);
 	if (error != BZ_OK) {
-		STR_FREE(dest);
+		zend_string_free(dest);
 		RETURN_LONG(error);
 	} else {
 		/* Copy the buffer, we have perhaps allocate a lot more than we need,
@@ -544,7 +544,7 @@ static PHP_FUNCTION(bzdecompress)
 {
 	char *source, *dest;
 	int source_len, error;
-	long small = 0;
+	zend_long small = 0;
 #if defined(PHP_WIN32)
 	unsigned __int64 size = 0;
 #else

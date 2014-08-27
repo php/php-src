@@ -71,20 +71,10 @@ typedef struct _zend_ini_entry zend_ini_entry;
 
 
 struct _zend_compiler_globals {
-	zend_stack bp_stack;
 	zend_stack switch_cond_stack;
 	zend_stack foreach_copy_stack;
-	zend_stack object_stack;
-	zend_stack declare_stack;
 
 	zend_class_entry *active_class_entry;
-
-	/* variables for list() compilation */
-	zend_llist list_llist;
-	zend_llist dimension_llist;
-	zend_stack list_stack;
-
-	zend_stack function_call_stack;
 
 	zend_string *compiled_filename;
 
@@ -112,24 +102,18 @@ struct _zend_compiler_globals {
 
 	zend_llist open_files;
 
-	long catch_begin;
-
 	struct _zend_ini_parser_param *ini_parser_param;
 
-	int interactive;
-
-	zend_uint start_lineno;
+	uint32_t start_lineno;
 	zend_bool increment_lineno;
 
 	znode implementing_class;
 
-	zend_uint access_type;
-
 	zend_string *doc_comment;
 
-	zend_uint compiler_options; /* set of ZEND_COMPILE_* constants */
+	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
 
-	zval       current_namespace;
+	zend_string *current_namespace;
 	HashTable *current_import;
 	HashTable *current_import_function;
 	HashTable *current_import_const;
@@ -153,6 +137,11 @@ struct _zend_compiler_globals {
 	zend_bool multibyte;
 	zend_bool detect_unicode;
 	zend_bool encoding_declared;
+
+	zend_ast *ast;
+	zend_arena *ast_arena;
+
+	zend_stack delayed_oplines_stack;
 
 #ifdef ZTS
 	zval **static_members_table;
@@ -188,7 +177,7 @@ struct _zend_executor_globals {
 
 	zval This;
 
-	long precision;
+	zend_long precision;
 
 	int ticks_count;
 
@@ -220,7 +209,7 @@ struct _zend_executor_globals {
 	zend_class_entry      *exception_class;
 
 	/* timeout support */
-	int timeout_seconds;
+	zend_long timeout_seconds;
 
 	int lambda_count;
 

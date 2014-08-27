@@ -110,7 +110,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 	xmlNodeSetContentLen(nodep, str->val, str->len + 1);
 
-	STR_RELEASE(str);
+	zend_string_release(str);
 	return SUCCESS;
 }
 
@@ -156,7 +156,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	xmlChar    *cur;
 	xmlChar    *substring;
 	xmlNodePtr  node;
-	long        offset, count;
+	zend_long        offset, count;
 	int         length;
 	dom_object	*intern;
 
@@ -239,7 +239,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	xmlChar		*cur, *first, *second;
 	xmlNodePtr  node;
 	char		*arg;
-	long        offset;
+	zend_long        offset;
 	int         length, arg_len;
 	dom_object	*intern;
 
@@ -286,7 +286,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 	zval *id;
 	xmlChar    *cur, *substring, *second;
 	xmlNodePtr  node;
-	long        offset, count;
+	zend_long        offset, count;
 	int         length;
 	dom_object	*intern;
 
@@ -342,7 +342,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	xmlChar		*cur, *substring, *second = NULL;
 	xmlNodePtr  node;
 	char		*arg;
-	long        offset, count;
+	zend_long        offset, count;
 	int         length, arg_len;
 	dom_object	*intern;
 

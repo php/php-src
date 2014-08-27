@@ -289,7 +289,7 @@ PHP_FUNCTION(com_get_active_object)
 	CLSID clsid;
 	char *module_name;
 	int module_name_len;
-	long code_page = COMG(code_page);
+	zend_long code_page = COMG(code_page);
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
@@ -784,7 +784,7 @@ PHP_FUNCTION(com_print_typeinfo)
    Process COM messages, sleeping for up to timeoutms milliseconds */
 PHP_FUNCTION(com_message_pump)
 {
-	long timeoutms = 0;
+	zend_long timeoutms = 0;
 	MSG msg;
 	DWORD result;
 	

@@ -208,7 +208,7 @@ static void _breakiter_no_args_ret_int32(
 
 	int32_t res = (bio->biter->*func)();
 
-	RETURN_LONG((long)res);
+	RETURN_LONG((zend_long)res);
 }
 
 static void _breakiter_int32_ret_int32(
@@ -217,7 +217,7 @@ static void _breakiter_int32_ret_int32(
 		INTERNAL_FUNCTION_PARAMETERS)
 {
 	char	*msg;
-	long	arg;
+	zend_long	arg;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
 
@@ -240,7 +240,7 @@ static void _breakiter_int32_ret_int32(
 
 	int32_t res = (bio->biter->*func)((int32_t)arg);
 
-	RETURN_LONG((long)res);
+	RETURN_LONG((zend_long)res);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_first)
@@ -308,7 +308,7 @@ U_CFUNC PHP_FUNCTION(breakiter_current)
 
 	int32_t res = bio->biter->current();
 
-	RETURN_LONG((long)res);
+	RETURN_LONG((zend_long)res);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_following)
@@ -327,7 +327,7 @@ U_CFUNC PHP_FUNCTION(breakiter_preceding)
 
 U_CFUNC PHP_FUNCTION(breakiter_is_boundary)
 {
-	long offset;
+	zend_long offset;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
 
@@ -349,12 +349,12 @@ U_CFUNC PHP_FUNCTION(breakiter_is_boundary)
 
 	UBool res = bio->biter->isBoundary((int32_t)offset);
 
-	RETURN_BOOL((long)res);
+	RETURN_BOOL((zend_long)res);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_get_locale)
 {
-	long	locale_type;
+	zend_long	locale_type;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
 
@@ -382,7 +382,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_locale)
 
 U_CFUNC PHP_FUNCTION(breakiter_get_parts_iterator)
 {
-	long key_type = 0;
+	zend_long key_type = 0;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
 
@@ -422,7 +422,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_code)
 	if (bio == NULL)
 		RETURN_FALSE;
 
-	RETURN_LONG((long)BREAKITER_ERROR_CODE(bio));
+	RETURN_LONG((zend_long)BREAKITER_ERROR_CODE(bio));
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_get_error_message)

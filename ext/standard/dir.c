@@ -273,7 +273,7 @@ PHP_FUNCTION(closedir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -387,7 +387,7 @@ PHP_FUNCTION(rewinddir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -406,7 +406,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -430,7 +430,7 @@ PHP_FUNCTION(glob)
 #endif
 	char *pattern = NULL;
 	int pattern_len;
-	long flags = 0;
+	zend_long flags = 0;
 	glob_t globbuf;
 	int n;
 	int ret;
@@ -524,7 +524,7 @@ no_results:
 		 * able to filter directories out. 
 		 */
 		if (flags & GLOB_ONLYDIR) {
-			struct stat s;
+			zend_stat_t s;
 
 			if (0 != VCWD_STAT(globbuf.gl_pathv[n], &s)) {
 				continue;
@@ -553,7 +553,7 @@ PHP_FUNCTION(scandir)
 {
 	char *dirn;
 	int dirn_len;
-	long flags = 0;
+	zend_long flags = 0;
 	zend_string **namelist;
 	int n, i;
 	zval *zcontext = NULL;

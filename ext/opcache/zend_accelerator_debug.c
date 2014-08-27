@@ -57,7 +57,7 @@ void zend_accel_error(int type, const char *format, ...)
 	}
 
 #ifdef ZTS
-    fprintf(fLog, "%s (%lu): ", time_string, (unsigned long)tsrm_thread_id());
+    fprintf(fLog, "%s (" ZEND_ULONG_FMT "): ", time_string, (zend_ulong)tsrm_thread_id());
 #else
     fprintf(fLog, "%s (%d): ", time_string, getpid());
 #endif

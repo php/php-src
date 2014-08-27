@@ -53,7 +53,7 @@ static const short base64_reverse_table[256] = {
 };
 /* }}} */
 
-PHPAPI zend_string *php_base64_encode(const unsigned char *str, int length) /* {{{ */
+PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) /* {{{ */
 {
 	const unsigned char *current = str;
 	unsigned char *p;
@@ -63,7 +63,7 @@ PHPAPI zend_string *php_base64_encode(const unsigned char *str, int length) /* {
 		return NULL;
 	}
 
-	result = STR_ALLOC(((length + 2) / 3) * 4 * sizeof(char), 0);
+	result = zend_string_alloc(((length + 2) / 3) * 4 * sizeof(char), 0);
 	p = (unsigned char *)result->val;
 
 	while (length > 2) { /* keep going until we have less than 24 bits */
@@ -131,20 +131,20 @@ void php_base64_init(void)
 */
 /* }}} */
 
-PHPAPI zend_string *php_base64_decode(const unsigned char *str, int length) /* {{{ */
+PHPAPI zend_string *php_base64_decode(const unsigned char *str, size_t length) /* {{{ */
 {
 	return php_base64_decode_ex(str, length, 0);
 }
 /* }}} */
 
-PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, int length, zend_bool strict) /* {{{ */
+PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, zend_bool strict) /* {{{ */
 {
 	const unsigned char *current = str;
 	int ch, i = 0, j = 0, k;
 	/* this sucks for threaded environments */
 	zend_string *result;
 
-	result = STR_ALLOC(length, 0);
+	result = zend_string_alloc(length, 0);
 
 	/* run through the whole string, converting as we go */
 	while ((ch = *current++) != '\0' && length-- > 0) {
@@ -158,7 +158,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, int length, z
 						continue;
 					}
 				}
-				STR_FREE(result);
+				zend_string_free(result);
 				return NULL;
 			}
 			continue;
@@ -168,7 +168,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, int length, z
 		if ((!strict && ch < 0) || ch == -1) { /* a space or some other separator character, we simply skip over */
 			continue;
 		} else if (ch == -2) {
-			STR_FREE(result);
+			zend_string_free(result);
 			return NULL;
 		}
 
@@ -196,7 +196,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, int length, z
 	if (ch == base64_pad) {
 		switch(i % 4) {
 		case 1:
-			STR_FREE(result);
+			zend_string_free(result);
 			return NULL;
 		case 2:
 			k++;

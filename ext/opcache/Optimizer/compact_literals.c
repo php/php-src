@@ -44,7 +44,7 @@
 #define LITERAL_NUM_SLOTS(info)   ((info & LITERAL_NUM_SLOTS_MASK) >> LITERAL_NUM_SLOTS_SHIFT)
 
 typedef struct _literal_info {
-	zend_uint  flags; /* bitmask (see defines above) */
+	uint32_t  flags; /* bitmask (see defines above) */
 	union {
 		int    num;   /* variable number or class name literal number */
 	} u;
@@ -71,9 +71,9 @@ static void optimizer_literal_obj_info(literal_info   *info,
                                        zend_uchar      op_type,
                                        znode_op        op,
                                        int             constant,
-                                       zend_uint       kind,
-                                       zend_uint       slots,
-                                       zend_uint       related,
+                                       uint32_t       kind,
+                                       uint32_t       slots,
+                                       uint32_t       related,
                                        zend_op_array  *op_array)
 {
 	/* For now we merge only $this object properties and methods.
@@ -92,9 +92,9 @@ static void optimizer_literal_class_info(literal_info   *info,
                                          zend_uchar      op_type,
                                          znode_op        op,
                                          int             constant,
-                                         zend_uint       kind,
-                                         zend_uint       slots,
-                                         zend_uint       related,
+                                         uint32_t       kind,
+                                         uint32_t       slots,
+                                         uint32_t       related,
                                          zend_op_array  *op_array)
 {
 	if (op_type == IS_CONST) {
@@ -378,20 +378,20 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 					if (info[i].flags & LITERAL_MAY_MERGE) {
 						if (info[i].flags & LITERAL_EX_OBJ) {
 							int key_len = MAX_LENGTH_OF_LONG + sizeof("->") + Z_STRLEN(op_array->literals[i]);
-							key = STR_ALLOC(key_len, 0);
+							key = zend_string_alloc(key_len, 0);
 							key->len = snprintf(key->val, key->len-1, "%d->%s", info[i].u.num, Z_STRVAL(op_array->literals[i]));
 						} else if (info[i].flags & LITERAL_EX_CLASS) {
 							int key_len;
 							zval *class_name = &op_array->literals[(info[i].u.num < i) ? map[info[i].u.num] : info[i].u.num];
 							key_len = Z_STRLEN_P(class_name) + sizeof("::") + Z_STRLEN(op_array->literals[i]);
-							key = STR_ALLOC(key_len, 0);
+							key = zend_string_alloc(key_len, 0);
 							memcpy(key->val, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
 							memcpy(key->val + Z_STRLEN_P(class_name), "::", sizeof("::") - 1);
 							memcpy(key->val + Z_STRLEN_P(class_name) + sizeof("::") - 1,
 								Z_STRVAL(op_array->literals[i]),
 								Z_STRLEN(op_array->literals[i]) + 1);
 						} else {
-							key = STR_INIT(Z_STRVAL(op_array->literals[i]), Z_STRLEN(op_array->literals[i]), 0);
+							key = zend_string_init(Z_STRVAL(op_array->literals[i]), Z_STRLEN(op_array->literals[i]), 0);
 						}
 						key->h = zend_hash_func(key->val, key->len);
 						key->h += info[i].flags;
@@ -401,7 +401,7 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 					   	Z_TYPE(op_array->literals[i]) == Z_TYPE(op_array->literals[Z_LVAL_P(pos)]) &&
 						info[i].flags == info[Z_LVAL_P(pos)].flags) {
 
-						STR_RELEASE(key);
+						zend_string_release(key);
 						map[i] = Z_LVAL_P(pos);
 						zval_dtor(&op_array->literals[i]);
 						n = LITERAL_NUM_RELATED(info[i].flags);
@@ -415,7 +415,7 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 						if (info[i].flags & LITERAL_MAY_MERGE) {
 							ZVAL_LONG(&zv, j);
 							zend_hash_add(&hash, key, &zv);
-							STR_RELEASE(key);
+							zend_string_release(key);
 						}
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];

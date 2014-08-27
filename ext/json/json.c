@@ -177,7 +177,7 @@ static int json_determine_array_type(zval *val TSRMLS_DC) /* {{{ */
 	i = myht ? zend_hash_num_elements(myht) : 0;
 	if (i > 0) {
 		zend_string *key;
-		ulong index, idx;
+		zend_ulong index, idx;
 
 		idx = 0;
 		ZEND_HASH_FOREACH_KEY(myht, index, key) {
@@ -252,7 +252,7 @@ static void json_encode_array(smart_str *buf, zval *val, int options TSRMLS_DC) 
 	if (i > 0) {
 		zend_string *key;
 		zval *data;
-		ulong index;
+		zend_ulong index;
 		HashTable *tmp_ht;
 
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
@@ -308,7 +308,7 @@ static void json_encode_array(smart_str *buf, zval *val, int options TSRMLS_DC) 
 					json_pretty_print_indent(buf, options TSRMLS_CC);
 
 					smart_str_appendc(buf, '"');
-					smart_str_append_long(buf, (long) index);
+					smart_str_append_long(buf, (zend_long) index);
 					smart_str_appendc(buf, '"');
 					smart_str_appendc(buf, ':');
 
@@ -365,7 +365,7 @@ static int json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{
 			}
 		}
 	} else {
-		/* Only check if utf8 string is valid, and compute utf16 lenght */
+		/* Only check if utf8 string is valid, and compute utf16 length */
 		for (j=0 ; pos < len ; j++) {
 			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
 			if (status != SUCCESS) {
@@ -395,7 +395,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 	if (options & PHP_JSON_NUMERIC_CHECK) {
 		double d;
 		int type;
-		long p;
+		zend_long p;
 
 		if ((type = is_numeric_string(s, len, &p, &d, 0)) != 0) {
 			if (type == IS_LONG) {
@@ -651,7 +651,7 @@ again:
 }
 /* }}} */
 
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len, int options, long depth TSRMLS_DC) /* {{{ */
+PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len, int options, zend_long depth TSRMLS_DC) /* {{{ */
 {
 	int utf16_len;
 	unsigned short *utf16;
@@ -678,7 +678,7 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 	if (!parse_JSON_ex(jp, return_value, utf16, utf16_len, options TSRMLS_CC)) {
 		double d;
 		int type, overflow_info;
-		long p;
+		zend_long p;
 		char *trim = str;
 		int trim_len = str_len;
 
@@ -758,8 +758,8 @@ static PHP_FUNCTION(json_encode)
 {
 	zval *parameter;
 	smart_str buf = {0};
-	long options = 0;
-    long depth = JSON_PARSER_DEFAULT_DEPTH;
+	zend_long options = 0;
+    zend_long depth = JSON_PARSER_DEFAULT_DEPTH;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ll", &parameter, &options, &depth) == FAILURE) {
 		return;
@@ -788,8 +788,8 @@ static PHP_FUNCTION(json_decode)
 	char *str;
 	int str_len;
 	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
-	long depth = JSON_PARSER_DEFAULT_DEPTH;
-	long options = 0;
+	zend_long depth = JSON_PARSER_DEFAULT_DEPTH;
+	zend_long options = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bll", &str, &str_len, &assoc, &depth, &options) == FAILURE) {
 		return;

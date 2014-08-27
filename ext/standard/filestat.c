@@ -158,7 +158,7 @@ static int php_disk_total_space(char *path, double *space TSRMLS_DC) /* {{{ */
 
 			/* i know - this is ugly, but i works <thies@thieso.net> */
 			bytestotal  = TotalNumberOfBytes.HighPart *
-				(double) (((unsigned long)1) << 31) * 2.0 +
+				(double) (((zend_ulong)1) << 31) * 2.0 +
 				TotalNumberOfBytes.LowPart;
 		} else { /* If it's not available, we just use GetDiskFreeSpace */
 			if (GetDiskFreeSpace(path,
@@ -290,7 +290,7 @@ static int php_disk_free_space(char *path, double *space TSRMLS_DC) /* {{{ */
 
 			/* i know - this is ugly, but i works <thies@thieso.net> */
 			bytesfree  = FreeBytesAvailableToCaller.HighPart *
-				(double) (((unsigned long)1) << 31) * 2.0 +
+				(double) (((zend_ulong)1) << 31) * 2.0 +
 				FreeBytesAvailableToCaller.LowPart;
 		} else { /* If it's not available, we just use GetDiskFreeSpace */
 			if (GetDiskFreeSpace(path,
@@ -668,7 +668,7 @@ PHP_FUNCTION(chmod)
 {
 	char *filename;
 	int filename_len;
-	long mode;
+	zend_long mode;
 	int ret;
 	mode_t imode;
 	php_stream_wrapper *wrapper;
@@ -714,7 +714,7 @@ PHP_FUNCTION(touch)
 {
 	char *filename;
 	int filename_len;
-	long filetime = 0, fileatime = 0;
+	zend_long filetime = 0, fileatime = 0;
 	int ret, argc = ZEND_NUM_ARGS();
 	FILE *file;
 	struct utimbuf newtimebuf;
@@ -850,7 +850,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 {
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
 		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
-	struct stat *stat_sb;
+	zend_stat_t *stat_sb;
 	php_stream_statbuf ssb;
 	int flags = 0, rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13] = {
@@ -962,21 +962,21 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 	switch (type) {
 	case FS_PERMS:
-		RETURN_LONG((long)ssb.sb.st_mode);
+		RETURN_LONG((zend_long)ssb.sb.st_mode);
 	case FS_INODE:
-		RETURN_LONG((long)ssb.sb.st_ino);
+		RETURN_LONG((zend_long)ssb.sb.st_ino);
 	case FS_SIZE:
-		RETURN_LONG((long)ssb.sb.st_size);
+		RETURN_LONG((zend_long)ssb.sb.st_size);
 	case FS_OWNER:
-		RETURN_LONG((long)ssb.sb.st_uid);
+		RETURN_LONG((zend_long)ssb.sb.st_uid);
 	case FS_GROUP:
-		RETURN_LONG((long)ssb.sb.st_gid);
+		RETURN_LONG((zend_long)ssb.sb.st_gid);
 	case FS_ATIME:
-		RETURN_LONG((long)ssb.sb.st_atime);
+		RETURN_LONG((zend_long)ssb.sb.st_atime);
 	case FS_MTIME:
-		RETURN_LONG((long)ssb.sb.st_mtime);
+		RETURN_LONG((zend_long)ssb.sb.st_mtime);
 	case FS_CTIME:
-		RETURN_LONG((long)ssb.sb.st_ctime);
+		RETURN_LONG((zend_long)ssb.sb.st_ctime);
 	case FS_TYPE:
 		if (S_ISLNK(ssb.sb.st_mode)) {
 			RETURN_STRING("link");
@@ -1223,7 +1223,7 @@ PHP_FUNCTION(realpath_cache_get)
 			array_init(&entry);
 
 			/* bucket->key is unsigned long */
-			if (LONG_MAX >= bucket->key) {
+			if (ZEND_LONG_MAX >= bucket->key) {
 				add_assoc_long(&entry, "key", bucket->key);
 			} else {
 				add_assoc_double(&entry, "key", (double)bucket->key);
