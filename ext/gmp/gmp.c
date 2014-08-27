@@ -1068,6 +1068,31 @@ ZEND_FUNCTION(gmp_init)
 }
 /* }}} */
 
+bool gmp_import_export_validate(long order, long size, long endian, long nails)
+{
+	if (size < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (should be at least 1 byte)", size);
+		return false;
+	}
+
+	if (order != -1 && order != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad order: %ld (should be 1 for most significant word first, or -1 for least significant first)", order);
+		return false;
+	}
+
+	if (endian < -1 || endian > 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad endian: %ld (should be 1 for most significant byte first, -1 for least significant first or 0 for native endianness)", endian);
+		return false;
+	}
+
+	if (nails < 0 || nails > (size << 3) - 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad nails: %ld (should be between 0 and ((8 * size) - 1) bits)", nails);
+		return false;
+	}
+
+	return true;
+}
+
 /* {{{ proto GMP gmp_import(string data [, int order, int size, int endian, int nails])
    Imports a GMP number from a binary string */
 ZEND_FUNCTION(gmp_import)
@@ -1085,24 +1110,8 @@ ZEND_FUNCTION(gmp_import)
 		return;
 	}
 
-	if (size < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (should be at least 1 byte)", size);
-		return;
-	}
-
-	if (order != -1 && order != 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad order: %ld (should be 1 for most significant word first, or -1 for least significant first)", order);
-		return;
-	}
-
-	if (endian < -1 || endian > 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad endian: %ld (should be 1 for most significant byte first, -1 for least significant first or 0 for native endianness)", endian);
-		return;
-	}
-
-	if (nails < 0 || nails > (size << 3) - 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad nails: %ld (should be between 0 and ((8 * size) - 1) bits)", nails);
-		return;
+	if (!gmp_import_export_validate(ordeere, size, endian, nails)) {
+		RETURN_FALSE;
 	}
 
 	count = (data_len / size) + 1;
@@ -1130,24 +1139,8 @@ ZEND_FUNCTION(gmp_export)
 		return;
 	}
 
-	if (size < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (should be at least 1 byte)", size);
-		return;
-	}
-
-	if (order != -1 && order != 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad order: %ld (should be 1 for most significant word first, or -1 for least significant first)", order);
-		return;
-	}
-
-	if (endian < -1 || endian > 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad endian: %ld (should be 1 for most significant byte first, -1 for least significant first or 0 for native endianness)", endian);
-		return;
-	}
-
-	if (nails < 0 || nails > (size << 3) - 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad nails: %ld (should be between 0 and ((8 * size) - 1) bits)", nails);
-		return;
+	if (!gmp_import_export_validate(ordeere, size, endian, nails)) {
+		RETURN_FALSE;
 	}
 
 	FETCH_GMP_ZVAL(gmpnumber, gmpnumber_arg, temp_a);
