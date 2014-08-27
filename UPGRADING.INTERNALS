@@ -61,6 +61,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   f. zend_parse_parameters() specs
 
        The new spec 'S' introduced, which expects an argument of type zend_string *.
+       The 'l' spec expects a parameter of the type zend_long, not long anymore.
 
   g. sprintf() formats
 
