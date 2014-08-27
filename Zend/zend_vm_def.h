@@ -867,8 +867,8 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 	SAVE_OPLINE();
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_increment_function(var_ptr);
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MAX)) {
+		Z_LVAL_P(var_ptr)++;
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -897,7 +897,7 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 		zval rv;
 		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
-		fast_increment_function(val);
+		increment_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(val);
 	} else {
@@ -922,8 +922,8 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 	SAVE_OPLINE();
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_decrement_function(var_ptr);
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MIN)) {
+		Z_LVAL_P(var_ptr)--;
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -952,7 +952,7 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 		zval rv;
 		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
-		fast_decrement_function(val);
+		decrement_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(val);
 	} else {
@@ -977,9 +977,9 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 	SAVE_OPLINE();
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MAX)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_increment_function(var_ptr);
+		Z_LVAL_P(var_ptr)++;
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -1010,7 +1010,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 		zval rv;
 		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
-		fast_increment_function(val);
+		increment_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(val);
 	} else {
@@ -1031,9 +1031,9 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	SAVE_OPLINE();
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MIN)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_decrement_function(var_ptr);
+		Z_LVAL_P(var_ptr)--;
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -1064,7 +1064,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 		zval rv;
 		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
-		fast_decrement_function(val);
+		decrement_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(val);
 	} else {
