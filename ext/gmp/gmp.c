@@ -523,7 +523,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 	gmp_zval_unary_op(result, op1, op TSRMLS_CC); \
 	return SUCCESS;
 
-static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	switch (opcode) {
 	case ZEND_ADD:
@@ -557,6 +557,26 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 	default:
 		return FAILURE;
 	}
+}
+/* }}} */
+
+static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	zval op1_copy;
+	int retval;
+
+	if (result == op1) {
+		ZVAL_COPY_VALUE(&op1_copy, op1);
+		op1 = &op1_copy;
+	}
+
+	retval = gmp_do_operation_ex(opcode, result, op1, op2 TSRMLS_CC);
+
+	if (retval == SUCCESS && op1 == &op1_copy) {
+		zval_dtor(op1);
+	}
+
+	return retval;
 }
 /* }}} */
 
