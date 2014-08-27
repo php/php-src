@@ -2504,7 +2504,7 @@ static void update_errors_warnings(timelib_error_container *last_errors TSRMLS_D
 	DATEG(last_errors) = last_errors;
 } /* }}} */
 
-PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, size_t time_str_len, char *format, zval *timezone_object, size_t ctor TSRMLS_DC) /* {{{ */
+PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, size_t time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC) /* {{{ */
 {
 	timelib_time   *now;
 	timelib_tzinfo *tzi = NULL;
