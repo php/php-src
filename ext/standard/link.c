@@ -86,7 +86,7 @@ PHP_FUNCTION(linkinfo)
 {
 	char *link;
 	char *dirname;
-	int link_len, dir_len;
+	size_t link_len, dir_len;
 	zend_stat_t sb;
 	int ret;
 
