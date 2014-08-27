@@ -81,7 +81,7 @@
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
 	zend_long64 __result = (zend_long64) (a) * (zend_long64) (b);	\
-	if (__result > ZEND_INT_MAX || __result < ZEND_INT_MIN) {		\
+	if (__result > ZEND_LONG_MAX || __result < ZEND_LONG_MIN) {		\
 		zend_bigint *__out = zend_bigint_init_alloc();				\
 		zend_bigint_long_multiply_long(__out, a, b);				\
 		(big) = __out;												\
