@@ -1919,7 +1919,8 @@ PHP_FUNCTION(pg_query_params)
 	zval *pgsql_link = NULL;
 	zval *pv_param_arr, *tmp;
 	char *query;
-	size_t query_len, id = -1, argc = ZEND_NUM_ARGS();
+	size_t query_len;
+	int id = -1, argc = ZEND_NUM_ARGS();
 	int leftover = 0;
 	int num_params = 0;
 	char **params = NULL;
@@ -3755,7 +3756,7 @@ PHP_FUNCTION(pg_lo_seek)
 PHP_FUNCTION(pg_lo_tell)
 {
 	zval *pgsql_id = NULL;
-	long offset = 0;
+	zend_long offset = 0;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
