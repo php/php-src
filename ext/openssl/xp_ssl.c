@@ -1177,7 +1177,8 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx TSRMLS_DC) 
 		return FAILURE;
 	}
 #else
-	if (SUCCESS == php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "ecdh_curve", &val)) {
+	val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "ecdh_curve");
+	if (val != NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"ECDH curve support not compiled into the OpenSSL lib against which PHP is linked");
 
