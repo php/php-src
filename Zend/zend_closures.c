@@ -28,7 +28,6 @@
 #include "zend_objects.h"
 #include "zend_objects_API.h"
 #include "zend_globals.h"
-#include "php_stdint.h"
 
 #define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
@@ -76,7 +75,7 @@ ZEND_METHOD(Closure, call)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 	zval *my_params;
-	uint32_t my_param_count = 0;
+	int my_param_count = 0;
 	zend_function my_function;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o*", &newthis, &my_params, &my_param_count) == FAILURE) {
