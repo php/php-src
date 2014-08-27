@@ -96,7 +96,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 	const char *slocale = NULL;
 	size_t         slocale_len = 0;
 	char       *source = NULL;
-	int         src_len = 0;
+	size_t         src_len = 0;
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 

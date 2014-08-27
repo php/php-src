@@ -5057,7 +5057,7 @@ PHP_FUNCTION(str_pad)
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (pad_length == 0  || pad_length <= input->len) {
+	if (pad_length < 0  || pad_length <= input->len) {
 		RETURN_STRINGL(input->val, input->len);
 	}
 
@@ -5072,7 +5072,7 @@ PHP_FUNCTION(str_pad)
 	}
 
 	num_pad_chars = pad_length - input->len;
-	if (num_pad_chars >= ZEND_LONG_MAX) {
+	if (num_pad_chars >= INT_MAX) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding length is too long");
 		return;
 	}

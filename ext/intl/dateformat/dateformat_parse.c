@@ -167,9 +167,9 @@ PHP_FUNCTION(datefmt_parse)
 PHP_FUNCTION(datefmt_localtime)
 {
 	char*           text_to_parse = NULL;
-	int32_t         text_len =0;
+	size_t          text_len =0;
 	zval*         	z_parse_pos = NULL;
-	int32_t			parse_pos = -1;
+	int32_t		parse_pos = -1;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 

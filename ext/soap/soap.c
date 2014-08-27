@@ -1490,7 +1490,7 @@ PHP_METHOD(SoapServer, handle)
 	soapHeader *soap_headers = NULL;
 	sdlFunctionPtr function;
 	char *arg = NULL;
-	int arg_len = 0;
+	size_t arg_len = 0;
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map, *old_typemap;
 	int old_features;
@@ -2848,7 +2848,8 @@ static void verify_soap_headers_array(HashTable *ht TSRMLS_DC)
 PHP_METHOD(SoapClient, __call)
 {
 	char *function, *location=NULL, *soap_action = NULL, *uri = NULL;
-	int function_len, i = 0;
+	size_t function_len;
+	int i = 0;
 	HashTable* soap_headers = NULL;
 	zval *options = NULL;
 	zval *headers = NULL;

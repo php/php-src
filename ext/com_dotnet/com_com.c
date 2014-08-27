@@ -667,7 +667,7 @@ PHP_FUNCTION(com_create_guid)
 
 	php_com_initialize(TSRMLS_C);
 	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {
-		int len;
+		size_t len;
 		char *str;
 
 		str = php_com_olestring_to_string(guid_string, &len, CP_ACP TSRMLS_CC);

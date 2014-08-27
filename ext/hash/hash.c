@@ -120,7 +120,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 {
 	zend_string *digest;
 	char *algo, *data;
-	int algo_len, data_len;
+	size_t algo_len, data_len;
 	zend_bool raw_output = raw_output_default;
 	const php_hash_ops *ops;
 	void *context;
@@ -237,7 +237,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	zend_string *digest;
 	char *algo, *data, *key;
 	unsigned char *K;
-	int algo_len, data_len, key_len;
+	size_t algo_len, data_len, key_len;
 	zend_bool raw_output = raw_output_default;
 	const php_hash_ops *ops;
 	void *context;
@@ -329,7 +329,8 @@ Initialize a hashing context */
 PHP_FUNCTION(hash_init)
 {
 	char *algo, *key = NULL;
-	int algo_len, key_len = 0, argc = ZEND_NUM_ARGS();
+	size_t algo_len, key_len = 0;
+	int argc = ZEND_NUM_ARGS();
 	zend_long options = 0;
 	void *context;
 	const php_hash_ops *ops;

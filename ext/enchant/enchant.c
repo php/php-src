@@ -535,7 +535,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	enchant_dict *dict;
 	EnchantDict *d;
 	char *tag;
-	int taglen;
+	size_t taglen;
 	int pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &broker, &tag, &taglen) == FAILURE) {
@@ -648,7 +648,7 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 {
 	zval *broker;
 	char *tag;
-	int taglen;
+	size_t taglen;
 	enchant_broker * pbroker;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &broker, &tag, &taglen) == FAILURE) {
@@ -672,9 +672,9 @@ PHP_FUNCTION(enchant_broker_set_ordering)
 {
 	zval *broker;
 	char *pordering;
-	int porderinglen;
+	size_t porderinglen;
 	char *ptag;
-	int ptaglen;
+	size_t ptaglen;
 	enchant_broker * pbroker;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss", &broker, &ptag, &ptaglen, &pordering, &porderinglen) == FAILURE) {

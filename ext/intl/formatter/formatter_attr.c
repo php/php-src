@@ -211,7 +211,7 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 	UChar *svalue = NULL;
 	zend_long attribute;
 	char *value;
-	int len;
+	size_t len;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -387,7 +387,7 @@ PHP_FUNCTION( numfmt_get_pattern )
 PHP_FUNCTION( numfmt_set_pattern )
 {
 	char*       value = NULL;
-	int         value_len = 0;
+	size_t      value_len = 0;
 	int         slength = 0;
 	UChar*	    svalue  = NULL;
 	FORMATTER_METHOD_INIT_VARS;

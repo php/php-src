@@ -1454,7 +1454,7 @@ PHPAPI PHP_FUNCTION(fpassthru)
 PHP_FUNCTION(rename)
 {
 	char *old_name, *new_name;
-	int old_name_len, new_name_len;
+	size_t old_name_len, new_name_len;
 	zval *zcontext = NULL;
 	php_stream_wrapper *wrapper;
 	php_stream_context *context;

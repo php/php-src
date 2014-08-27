@@ -138,7 +138,7 @@ PHP_FUNCTION(hash_algos);
 PHP_FUNCTION(hash_pbkdf2);
 PHP_FUNCTION(hash_equals);
 
-PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
 PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);
 

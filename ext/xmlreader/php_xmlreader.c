@@ -480,7 +480,8 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int type) {
 #ifdef LIBXML_SCHEMAS_ENABLED
 	zval *id;
-	int source_len = 0, retval = -1;
+	size_t source_len = 0;
+	int retval = -1;
 	xmlreader_object *intern;
 	xmlRelaxNGPtr schema = NULL;
 	char *source;
@@ -664,7 +665,8 @@ Positions reader at specified attribute - Returns TRUE on success and FALSE on f
 PHP_METHOD(xmlreader, moveToAttribute)
 {
 	zval *id;
-	int name_len = 0, retval;
+	size_t name_len = 0;
+	int retval;
 	xmlreader_object *intern;
 	char *name;
 
@@ -725,7 +727,8 @@ Returns TRUE on success and FALSE on failure */
 PHP_METHOD(xmlreader, moveToAttributeNs)
 {
 	zval *id;
-	int name_len=0, ns_uri_len=0, retval;
+	size_t name_len=0, ns_uri_len=0;
+	int retval;
 	xmlreader_object *intern;
 	char *name, *ns_uri;
 
@@ -805,7 +808,8 @@ Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, next)
 {
 	zval *id;
-	int retval, name_len=0;
+	int retval;
+	size_t name_len=0;
 	xmlreader_object *intern;
 	char *name = NULL;
 
@@ -936,7 +940,8 @@ PHP_METHOD(xmlreader, setSchema)
 {
 #ifdef LIBXML_SCHEMAS_ENABLED
 	zval *id;
-	int source_len = 0, retval = -1;
+	size_t source_len = 0;
+	int retval = -1;
 	xmlreader_object *intern;
 	char *source;
 

@@ -1421,7 +1421,8 @@ PHP_FUNCTION(imageloadfont)
 {
 	zval *ind;
 	char *file;
-	int file_name, hdr_size = sizeof(gdFont) - sizeof(char *);
+	size_t file_name;
+	int hdr_size = sizeof(gdFont) - sizeof(char *);
 	int body_size, n = 0, b, i, body_size_check;
 	gdFontPtr font;
 	php_stream *stream;
@@ -2555,7 +2556,8 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	gdImagePtr im;
 	char *fn = NULL;
 	FILE *fp;
-	int file_len = 0, argc = ZEND_NUM_ARGS();
+	size_t file_len = 0;
+	int argc = ZEND_NUM_ARGS();
 	int q = -1, i, t = 1;
 
 	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */

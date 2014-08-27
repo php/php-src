@@ -1881,7 +1881,7 @@ PHP_FUNCTION(mb_http_input)
 PHP_FUNCTION(mb_http_output)
 {
 	const char *name = NULL;
-	int name_len;
+	size_t name_len;
 	const mbfl_encoding *encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
@@ -2028,7 +2028,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 {
 	enum mbfl_no_encoding no_encoding;
 	char *name = NULL;
-	int name_len;
+	size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
@@ -2214,7 +2214,7 @@ PHP_FUNCTION(mb_strlen)
 	int n;
 	mbfl_string string;
 	char *enc_name = NULL;
-	int enc_name_len;
+	size_t enc_name_len;
 
 	mbfl_string_init(&string);
 
@@ -2250,7 +2250,7 @@ PHP_FUNCTION(mb_strpos)
 	zend_long offset;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
-	int enc_name_len;
+	size_t enc_name_len;
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
@@ -2313,7 +2313,7 @@ PHP_FUNCTION(mb_strrpos)
 	int n;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
-	int enc_name_len;
+	size_t enc_name_len;
 	zval *zoffset = NULL;
 	long offset = 0, str_flg;
 	char *enc_name2 = NULL;
@@ -2466,7 +2466,7 @@ PHP_FUNCTION(mb_strstr)
 	int n, len, mblen;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	char *enc_name = NULL;
-	int enc_name_len;
+	size_t enc_name_len;
 	zend_bool part = 0;
 
 	mbfl_string_init(&haystack);
@@ -2528,7 +2528,7 @@ PHP_FUNCTION(mb_strrchr)
 	int n, len, mblen;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	char *enc_name = NULL;
-	int enc_name_len;
+	size_t enc_name_len;
 	zend_bool part = 0;
 
 	mbfl_string_init(&haystack);
@@ -2590,7 +2590,7 @@ PHP_FUNCTION(mb_strrchr)
 PHP_FUNCTION(mb_stristr)
 {
 	zend_bool part = 0;
-	unsigned int from_encoding_len, len, mblen;
+	size_t from_encoding_len, len, mblen;
 	int n;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
@@ -2653,7 +2653,8 @@ PHP_FUNCTION(mb_stristr)
 PHP_FUNCTION(mb_strrichr)
 {
 	zend_bool part = 0;
-	int n, from_encoding_len, len, mblen;
+	int n, len, mblen;
+	size_t from_encoding_len;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->name;
 	mbfl_string_init(&haystack);
@@ -2712,7 +2713,7 @@ PHP_FUNCTION(mb_substr_count)
 	int n;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
-	int enc_name_len;
+	size_t enc_name_len;
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
@@ -2754,7 +2755,8 @@ PHP_FUNCTION(mb_substr)
 	size_t argc = ZEND_NUM_ARGS();
 	char *str, *encoding;
 	zend_long from, len;
-	int mblen, str_len, encoding_len;
+	int mblen;
+	size_t str_len, encoding_len;
 	zval *z_len = NULL;
 	mbfl_string string, result, *ret;
 
@@ -2902,7 +2904,7 @@ PHP_FUNCTION(mb_strwidth)
 	int n;
 	mbfl_string string;
 	char *enc_name = NULL;
-	int enc_name_len;
+	size_t enc_name_len;
 
 	mbfl_string_init(&string);
 
@@ -3149,7 +3151,7 @@ PHP_FUNCTION(mb_convert_case)
 {
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
 	char *str;
-	int str_len, from_encoding_len;
+	size_t str_len, from_encoding_len;
 	zend_long case_mode = 0;
 	char *newstr;
 	size_t ret_len;
@@ -3177,7 +3179,7 @@ PHP_FUNCTION(mb_strtoupper)
 {
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
 	char *str;
-	int str_len, from_encoding_len;
+	size_t str_len, from_encoding_len;
 	char *newstr;
 	size_t ret_len;
 
@@ -3204,7 +3206,7 @@ PHP_FUNCTION(mb_strtolower)
 {
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
 	char *str;
-	int str_len, from_encoding_len;
+	size_t str_len, from_encoding_len;
 	char *newstr;
 	size_t ret_len;
 
@@ -3229,7 +3231,7 @@ PHP_FUNCTION(mb_strtolower)
 PHP_FUNCTION(mb_detect_encoding)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 	zend_bool strict=0;
 	zval *encoding_list;
 
@@ -3324,7 +3326,7 @@ PHP_FUNCTION(mb_encoding_aliases)
 {
 	const mbfl_encoding *encoding;
 	char *name = NULL;
-	int name_len;
+	size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
@@ -3353,11 +3355,11 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	enum mbfl_no_encoding charset, transenc;
 	mbfl_string  string, result, *ret;
 	char *charset_name = NULL;
-	int charset_name_len;
+	size_t charset_name_len;
 	char *trans_enc_name = NULL;
-	int trans_enc_name_len;
+	size_t trans_enc_name_len;
 	char *linefeed = "\r\n";
-	int linefeed_len;
+	size_t linefeed_len;
 	zend_long indent = 0;
 
 	mbfl_string_init(&string);
@@ -3438,9 +3440,9 @@ PHP_FUNCTION(mb_convert_kana)
 	int opt, i;
 	mbfl_string string, result, *ret;
 	char *optstr = NULL;
-	int optstr_len;
+	size_t optstr_len;
 	char *encname = NULL;
-	int encname_len;
+	size_t encname_len;
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(language);
@@ -3771,10 +3773,10 @@ static void
 php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	char *str, *encoding;
-	int str_len, encoding_len;
+	size_t str_len, encoding_len;
 	zval *zconvmap, *hash_entry;
 	HashTable *target_hash;
-	size_t argc = ZEND_NUM_ARGS();
+	int argc = ZEND_NUM_ARGS();
 	int i, *convmap, *mapelm, mapsize=0;
 	zend_bool is_hex = 0;
 	mbfl_string string, result, *ret;

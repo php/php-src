@@ -224,7 +224,7 @@ PHP_NAMED_FUNCTION(zif_locale_get_default)
 PHP_NAMED_FUNCTION(zif_locale_set_default)
 {
 	char* locale_name = NULL;
-	int   len=0;	
+	size_t   len = 0;	
 	zend_string *ini_name;
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC,  "s",
@@ -685,7 +685,7 @@ PHP_FUNCTION( locale_get_keywords )
     int32_t         kw_key_len    = 0;
 
     const char*       	loc_name        = NULL;
-    int        	 	loc_name_len    = 0;
+    size_t        	 	loc_name_len    = 0;
 
 /* 
 	ICU expects the buffer to be allocated  before calling the function 
@@ -1099,7 +1099,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name 
 PHP_FUNCTION(locale_parse)
 {
     const char* loc_name        = NULL;
-    int         loc_name_len    = 0;
+    size_t         loc_name_len    = 0;
     int         grOffset    	= 0;
 
     intl_error_reset( NULL TSRMLS_CC );
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(locale_parse)
 PHP_FUNCTION(locale_get_all_variants)
 {
 	const char*  	loc_name        = NULL;
-	int    		loc_name_len    = 0;
+	size_t    		loc_name_len    = 0;
 
 	int	result		= 0;
 	char*	token		= NULL;
@@ -1531,7 +1531,7 @@ PHP_FUNCTION(locale_lookup)
 	char*      	fallback_loc  		= NULL;
 	size_t        	fallback_loc_len	= 0;
 	const char*    	loc_range      		= NULL;
-	int        	loc_range_len  		= 0;
+	size_t        	loc_range_len  		= 0;
 
 	zval*		arr				= NULL;
 	HashTable*	hash_arr		= NULL;

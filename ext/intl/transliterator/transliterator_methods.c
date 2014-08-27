@@ -104,7 +104,7 @@ static int create_transliterator( char *str_id, int str_id_len, zend_long direct
 PHP_FUNCTION( transliterator_create )
 {
 	char  *str_id;
-	int   str_id_len;
+	size_t   str_id_len;
 	zend_long  direction   = TRANSLITERATOR_FORWARD;
 	int res;
 

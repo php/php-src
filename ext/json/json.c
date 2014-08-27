@@ -799,7 +799,7 @@ static PHP_FUNCTION(json_encode)
 static PHP_FUNCTION(json_decode)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
 	zend_long depth = JSON_PARSER_DEFAULT_DEPTH;
 	zend_long options = 0;

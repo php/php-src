@@ -1075,8 +1075,9 @@ PHP_FUNCTION(socket_write)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	int			retval, str_len;
-	zend_long		length = 0;
+	int			retval;
+	size_t      str_len;
+	zend_long	length = 0;
 	char		*str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &str, &str_len, &length) == FAILURE) {
@@ -1372,7 +1373,8 @@ PHP_FUNCTION(socket_connect)
 	zval				*arg1;
 	php_socket			*php_sock;
 	char				*addr;
-	int					retval, addr_len;
+	int					retval;
+	size_t              addr_len;
 	zend_long				port = 0;
 	int					argc = ZEND_NUM_ARGS();
 
@@ -1758,8 +1760,9 @@ PHP_FUNCTION(socket_sendto)
 #if HAVE_IPV6
 	struct sockaddr_in6	sin6;
 #endif
-	int					retval, buf_len, addr_len;
-	zend_long				len, flags, port = 0;
+	int					retval;
+	size_t              buf_len, addr_len;
+	zend_long			len, flags, port = 0;
 	char				*buf, *addr;
 	int					argc = ZEND_NUM_ARGS();
 

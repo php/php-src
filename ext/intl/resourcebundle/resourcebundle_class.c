@@ -315,7 +315,7 @@ ZEND_END_ARG_INFO()
 PHP_FUNCTION( resourcebundle_locales )
 {
 	char * bundlename;
-	int    bundlename_len = 0;
+	size_t    bundlename_len = 0;
 	const char * entry;
 	int entry_len;
 	UEnumeration *icuenum;

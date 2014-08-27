@@ -422,7 +422,7 @@ ZEND_END_ARG_INFO();
 static void php_converter_do_set_encoding(UConverter *cnv, INTERNAL_FUNCTION_PARAMETERS) {
 	php_converter_object *objval = CONV_GET(getThis());
 	char *enc;
-	int enc_len;
+	size_t enc_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &enc, &enc_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Bad arguments, "
@@ -590,7 +590,8 @@ ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, setSubstChars) {
 	php_converter_object *objval = CONV_GET(getThis());
 	char *chars;
-	int chars_len, ret = 1;
+	size_t chars_len;
+	int ret = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &chars, &chars_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -799,7 +800,7 @@ ZEND_END_ARG_INFO();
 
 static PHP_METHOD(UConverter, transcode) {
 	char *str, *src, *dest;
-	int str_len, src_len, dest_len;
+	size_t str_len, src_len, dest_len;
 	zval *options = NULL;
 	UConverter *src_cnv = NULL, *dest_cnv = NULL;
 

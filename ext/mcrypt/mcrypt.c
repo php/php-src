@@ -345,7 +345,7 @@ typedef enum {
 
 #define MCRYPT_GET_MODE_DIR_ARGS(DIRECTORY)								\
 	char *dir = NULL;                                                   \
-	int   dir_len;                                                      \
+	size_t   dir_len;                                                      \
 	char *module;                                                       \
 	size_t   module_len;                                                   \
 	if (zend_parse_parameters (ZEND_NUM_ARGS() TSRMLS_CC,               \
@@ -1003,7 +1003,7 @@ PHP_FUNCTION(mcrypt_get_key_size)
 {
 	char *cipher;
 	char *module;
-	int   cipher_len, module_len; 
+	size_t   cipher_len, module_len; 
 	char *cipher_dir_string;
 	char *module_dir_string;
 	MCRYPT td;
@@ -1032,7 +1032,7 @@ PHP_FUNCTION(mcrypt_get_block_size)
 {
 	char *cipher;
 	char *module;
-	int   cipher_len, module_len; 
+	size_t   cipher_len, module_len; 
 	char *cipher_dir_string;
 	char *module_dir_string;
 	MCRYPT td;
@@ -1061,7 +1061,7 @@ PHP_FUNCTION(mcrypt_get_iv_size)
 {
 	char *cipher;
 	char *module;
-	int   cipher_len, module_len; 
+	size_t   cipher_len, module_len; 
 	char *cipher_dir_string;
 	char *module_dir_string;
 	MCRYPT td;
@@ -1092,7 +1092,7 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 	char *module_dir_string;
 	char *cipher_name;
 	char *cipher;
-	int   cipher_len;
+	size_t   cipher_len;
 	MCRYPT td;
 
 	MCRYPT_GET_INI
@@ -1304,7 +1304,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 PHP_FUNCTION(mcrypt_encrypt)
 {
 	char *cipher, *key, *data, *mode, *iv = NULL;
-	int cipher_len, key_len, data_len, mode_len, iv_len = 0;
+	size_t cipher_len, key_len, data_len, mode_len, iv_len = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|s", &cipher, &cipher_len,
 		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
@@ -1320,7 +1320,7 @@ PHP_FUNCTION(mcrypt_encrypt)
 PHP_FUNCTION(mcrypt_decrypt)
 {
 	char *cipher, *key, *data, *mode, *iv = NULL;
-	int cipher_len, key_len, data_len, mode_len, iv_len = 0;
+	size_t cipher_len, key_len, data_len, mode_len, iv_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|s", &cipher, &cipher_len,
 		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {

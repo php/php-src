@@ -455,7 +455,7 @@ PHP_METHOD(Phar, running)
 PHP_METHOD(Phar, mount)
 {
 	char *fname, *arch = NULL, *entry = NULL, *path, *actual;
-	int fname_len, arch_len, entry_len, path_len, actual_len;
+	size_t fname_len, arch_len, entry_len, path_len, actual_len;
 	phar_archive_data *pphar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &path, &path_len, &actual, &actual_len) == FAILURE) {
@@ -548,7 +548,8 @@ PHP_METHOD(Phar, webPhar)
 	size_t alias_len = 0, f404_len = 0, free_pathinfo = 0, ru_len = 0;
 	char *fname, *path_info, *mime_type = NULL, *entry, *pt;
 	const char *basename;
-	int fname_len, entry_len, code, index_php_len = 0, not_cgi;
+	size_t fname_len, index_php_len = 0;
+	int entry_len, code, not_cgi;
 	phar_archive_data *phar = NULL;
 	phar_entry_info *info = NULL;
 
@@ -726,7 +727,7 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	if (entry_len) {
-		phar_postprocess_ru_web(fname, fname_len, &entry, &entry_len, &ru, &ru_len TSRMLS_CC);
+		phar_postprocess_ru_web(fname, fname_len, &entry, (int *)&entry_len, &ru, (int *)&ru_len TSRMLS_CC);
 	}
 
 	if (!entry_len || (entry_len == 1 && entry[0] == '/')) {
@@ -946,7 +947,7 @@ PHP_METHOD(Phar, createDefaultStub)
 PHP_METHOD(Phar, mapPhar)
 {
 	char *alias = NULL, *error;
-	int alias_len = 0;
+	size_t alias_len = 0;
 	zend_long dataoffset = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!l", &alias, &alias_len, &dataoffset) == FAILURE) {
@@ -968,7 +969,7 @@ PHP_METHOD(Phar, mapPhar)
 PHP_METHOD(Phar, loadPhar)
 {
 	char *fname, *alias = NULL, *error;
-	int fname_len, alias_len = 0;
+	size_t fname_len, alias_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &fname, &fname_len, &alias, &alias_len) == FAILURE) {
 		return;
@@ -1046,7 +1047,8 @@ PHP_METHOD(Phar, isValidPharFilename)
 {
 	char *fname;
 	const char *ext_str;
-	int fname_len, ext_len, is_executable;
+	size_t fname_len;
+	int ext_len, is_executable;
 	zend_bool executable = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &fname, &fname_len, &executable) == FAILURE) {
@@ -1108,7 +1110,8 @@ PHP_METHOD(Phar, __construct)
 	zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Cannot instantiate Phar object without SPL extension");
 #else
 	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
-	int fname_len, alias_len = 0, arch_len, entry_len, is_data;
+	size_t fname_len, alias_len = 0;
+	int arch_len, entry_len, is_data;
 	zend_long flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS;
 	zend_long format = 0;
 	phar_archive_object *phar_obj;
@@ -1289,7 +1292,7 @@ PHP_METHOD(Phar, getSupportedCompression)
 PHP_METHOD(Phar, unlinkArchive)
 {
 	char *fname, *error, *zname, *arch, *entry;
-	int fname_len, zname_len, arch_len, entry_len;
+	size_t fname_len, zname_len, arch_len, entry_len;
 	phar_archive_data *phar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
@@ -1713,7 +1716,7 @@ after_open_fp:
 PHP_METHOD(Phar, buildFromDirectory)
 {
 	char *dir, *error, *regex = NULL;
-	int dir_len, regex_len = 0;
+	size_t dir_len, regex_len = 0;
 	zend_bool apply_reg = 0;
 	zval arg, arg2, iter, iteriter, regexiter;
 	struct _phar_t pass;
@@ -2044,7 +2047,7 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 					ext = "phar";
 			}
 		}
-	} else if (phar_path_check(&ext, &ext_len, &pcr_error) > pcr_is_ok) {
+	} else if (phar_path_check(&ext, (int *)&ext_len, &pcr_error) > pcr_is_ok) {
 
 		if (phar->is_data) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "data phar converted from \"%s\" has invalid extension %s", phar->fname, ext);
@@ -2296,7 +2299,8 @@ no_copy:
 PHP_METHOD(Phar, convertToExecutable)
 {
 	char *ext = NULL;
-	int is_data, ext_len = 0;
+	int is_data;
+	size_t ext_len = 0;
 	php_uint32 flags;
 	zend_object *ret;
 	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday, so there) */
@@ -2399,7 +2403,8 @@ PHP_METHOD(Phar, convertToExecutable)
 PHP_METHOD(Phar, convertToData)
 {
 	char *ext = NULL;
-	int is_data, ext_len = 0;
+	int is_data;
+	size_t ext_len = 0;
 	php_uint32 flags;
 	zend_object *ret;
 	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday so there) */
@@ -2551,7 +2556,7 @@ PHP_METHOD(Phar, isWritable)
 PHP_METHOD(Phar, delete)
 {
 	char *fname;
-	int fname_len;
+	size_t fname_len;
 	char *error;
 	phar_entry_info *entry;
 	PHAR_ARCHIVE_OBJECT();
@@ -2636,7 +2641,8 @@ PHP_METHOD(Phar, setAlias)
 {
 	char *alias, *error, *oldalias;
 	phar_archive_data *fd_ptr;
-	int alias_len, oldalias_len, old_temp, readd = 0;
+	size_t alias_len, oldalias_len;
+	int old_temp, readd = 0;
 
 	PHAR_ARCHIVE_OBJECT();
 
@@ -2811,7 +2817,7 @@ PHP_METHOD(Phar, setStub)
 {
 	zval *zstub;
 	char *stub, *error;
-	int stub_len;
+	size_t stub_len;
 	zend_long len = -1;
 	php_stream *stream;
 	PHAR_ARCHIVE_OBJECT();
@@ -2889,7 +2895,8 @@ PHP_METHOD(Phar, setStub)
 PHP_METHOD(Phar, setDefaultStub)
 {
 	char *index = NULL, *webindex = NULL, *error = NULL, *stub = NULL;
-	int index_len = 0, webindex_len = 0, created_stub = 0;
+	size_t index_len = 0, webindex_len = 0;
+	int created_stub = 0;
 	size_t stub_len = 0;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3135,7 +3142,7 @@ PHP_METHOD(Phar, compress)
 {
 	zend_long method;
 	char *ext = NULL;
-	int ext_len = 0;
+	size_t ext_len = 0;
 	php_uint32 flags;
 	zend_object *ret;
 	PHAR_ARCHIVE_OBJECT();
@@ -3203,7 +3210,7 @@ PHP_METHOD(Phar, compress)
 PHP_METHOD(Phar, decompress)
 {
 	char *ext = NULL;
-	int ext_len = 0;
+	size_t ext_len = 0;
 	zend_object *ret;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3368,7 +3375,7 @@ PHP_METHOD(Phar, copy)
 {
 	char *oldfile, *newfile, *error;
 	const char *pcr_error;
-	int oldfile_len, newfile_len;
+	size_t oldfile_len, newfile_len;
 	phar_entry_info *oldentry, newentry = {0}, *temp;
 
 	PHAR_ARCHIVE_OBJECT();
@@ -3466,7 +3473,7 @@ PHP_METHOD(Phar, copy)
 PHP_METHOD(Phar, offsetExists)
 {
 	char *fname;
-	int fname_len;
+	size_t fname_len;
 	phar_entry_info *entry;
 
 	PHAR_ARCHIVE_OBJECT();
@@ -3503,7 +3510,7 @@ PHP_METHOD(Phar, offsetExists)
 PHP_METHOD(Phar, offsetGet)
 {
 	char *fname, *error;
-	int fname_len;
+	size_t fname_len;
 	zval zfname;
 	phar_entry_info *entry;
 	zend_string *sfname;
@@ -3647,7 +3654,7 @@ static void phar_mkdir(phar_archive_data **pphar, char *dirname, int dirname_len
 PHP_METHOD(Phar, offsetSet)
 {
 	char *fname, *cont_str = NULL;
-	int fname_len, cont_len;
+	size_t fname_len, cont_len;
 	zval *zresource;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3686,7 +3693,7 @@ PHP_METHOD(Phar, offsetSet)
 PHP_METHOD(Phar, offsetUnset)
 {
 	char *fname, *error;
-	int fname_len;
+	size_t fname_len;
 	phar_entry_info *entry;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3738,7 +3745,7 @@ PHP_METHOD(Phar, offsetUnset)
 PHP_METHOD(Phar, addEmptyDir)
 {
 	char *dirname;
-	int dirname_len;
+	size_t dirname_len;
 
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3761,7 +3768,7 @@ PHP_METHOD(Phar, addEmptyDir)
 PHP_METHOD(Phar, addFile)
 {
 	char *fname, *localname = NULL;
-	int fname_len, localname_len = 0;
+	size_t fname_len, localname_len = 0;
 	php_stream *resource;
 	zval zresource;
 
@@ -4320,7 +4327,7 @@ all_files:
 PHP_METHOD(PharFileInfo, __construct)
 {
 	char *fname, *arch, *entry, *error;
-	int fname_len, arch_len, entry_len;
+	size_t fname_len, arch_len, entry_len;
 	phar_entry_object *entry_obj;
 	phar_entry_info *entry_info;
 	phar_archive_data *phar_data;

@@ -4091,7 +4091,8 @@ PHP_FUNCTION(exif_thumbnail)
 {
 	zval *p_width = 0, *p_height = 0, *p_imagetype = 0;
 	char *p_name;
-	int p_name_len, ret, arg_c = ZEND_NUM_ARGS();
+	size_t p_name_len;
+	int ret, arg_c = ZEND_NUM_ARGS();
 	image_info_type ImageInfo;
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));

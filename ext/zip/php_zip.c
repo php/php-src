@@ -1439,7 +1439,7 @@ static ZIPARCHIVE_METHOD(setPassword)
 	struct zip *intern;
 	zval *self = getThis();
 	char *password;
-	int	password_len;
+	size_t	password_len;
 
 	if (!self) {
 		RETURN_FALSE;
@@ -1522,7 +1522,7 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 	struct zip *intern;
 	zval *self = getThis();
 	char *dirname;
-	int   dirname_len;
+	size_t   dirname_len;
 	int idx;
 	struct zip_stat sb;
 	char *s;
@@ -1575,7 +1575,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	char *path = NULL;
 	char *remove_path = NULL;
 	char *add_path = NULL;
-	int  add_path_len, remove_path_len = 0, path_len = 0;
+	size_t  add_path_len, remove_path_len = 0, path_len = 0;
 	zend_long remove_all_path = 0;
 	zend_long flags = 0;
 	zval *options = NULL;
@@ -1915,7 +1915,7 @@ static ZIPARCHIVE_METHOD(setArchiveComment)
 {
 	struct zip *intern;
 	zval *self = getThis();
-	int comment_len;
+	size_t comment_len;
 	char * comment;
 
 	if (!self) {
@@ -1969,7 +1969,7 @@ static ZIPARCHIVE_METHOD(setCommentName)
 {
 	struct zip *intern;
 	zval *self = getThis();
-	int comment_len, name_len;
+	size_t comment_len, name_len;
 	char * comment, *name;
 	int idx;
 
@@ -2003,7 +2003,7 @@ static ZIPARCHIVE_METHOD(setCommentIndex)
 	struct zip *intern;
 	zval *self = getThis();
 	zend_long index;
-	int comment_len;
+	size_t comment_len;
 	char * comment;
 	struct zip_stat sb;
 
@@ -2179,7 +2179,8 @@ static ZIPARCHIVE_METHOD(getCommentName)
 {
 	struct zip *intern;
 	zval *self = getThis();
-	int name_len, idx;
+	size_t name_len;
+	int idx;
 	zend_long flags = 0;
 	int comment_len = 0;
 	const char * comment;
@@ -2343,7 +2344,7 @@ static ZIPARCHIVE_METHOD(renameName)
 	zval *self = getThis();
 	struct zip_stat sb;
 	char *name, *new_name;
-	int name_len, new_name_len;
+	size_t name_len, new_name_len;
 
 	if (!self) {
 		RETURN_FALSE;

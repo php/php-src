@@ -808,7 +808,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 {
 	zval *id;
 	char *namespace;
-	int namespace_len = 0;
+	size_t namespace_len = 0;
 	zval *value;
 	zend_string *name;
 	xsl_object *intern;
@@ -833,7 +833,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 {
 	zval *id;
-	int namespace_len = 0;
+	size_t namespace_len = 0;
 	char *namespace;
 	zend_string *name;
 	xsl_object *intern;

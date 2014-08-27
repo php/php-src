@@ -1083,7 +1083,7 @@ PHP_FUNCTION(wddx_serialize_value)
 {
 	zval *var;
 	char *comment = NULL;
-	int comment_len = 0;
+	size_t comment_len = 0;
 	wddx_packet *packet;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s", &var, &comment, &comment_len) == FAILURE) {
@@ -1167,7 +1167,7 @@ void php_wddx_destructor(wddx_packet *packet)
 PHP_FUNCTION(wddx_packet_start)
 {
 	char *comment = NULL;
-	int comment_len = 0;
+	size_t comment_len = 0;
 	wddx_packet *packet;
 
 	comment = NULL;

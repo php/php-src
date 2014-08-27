@@ -655,7 +655,7 @@ PHP_FUNCTION(mb_regex_encoding)
 {
 	size_t argc = ZEND_NUM_ARGS();
 	char *encoding;
-	int encoding_len;
+	size_t encoding_len;
 	OnigEncoding mbctype;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &encoding, &encoding_len) == FAILURE) {
@@ -1311,7 +1311,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	size_t argc = ZEND_NUM_ARGS();
 	zval *arg_str;
 	char *arg_pattern = NULL, *arg_options = NULL;
-	int arg_pattern_len = 0, arg_options_len = 0;
+	size_t arg_pattern_len = 0, arg_options_len = 0;
 	OnigSyntaxType *syntax = NULL;
 	OnigOptionType option;
 

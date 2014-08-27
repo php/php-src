@@ -1141,7 +1141,7 @@ PHP_FUNCTION(xmlrpc_server_add_introspection_data)
 PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 {
 	char *arg1;
-	int arg1_len;
+	size_t arg1_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg1, &arg1_len) == FAILURE) {
 		return;

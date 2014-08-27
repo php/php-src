@@ -173,7 +173,7 @@ static zend_object *spl_filesystem_object_new_check(zend_class_entry *class_type
 }
 /* }}} */
 
-PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_t *len TSRMLS_DC) /* {{{ */
+PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len TSRMLS_DC) /* {{{ */
 {
 #ifdef HAVE_GLOB
 	if (intern->type == SPL_FS_DIR) {
