@@ -1952,7 +1952,7 @@ static void zend_block_optimization(zend_op_array *op_array, zend_optimizer_ctx 
 	fflush(stderr);
 #endif
 
-	if (op_array->has_finally_block) {
+	if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 		return;
 	}
 

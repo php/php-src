@@ -153,7 +153,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 				break;
 
 			case ZEND_JMP:
-				if (op_array->has_finally_block) {
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
 
@@ -174,7 +174,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 
 			case ZEND_JMP_SET:
 			case ZEND_JMP_SET_VAR:
-				if (op_array->has_finally_block) {
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
 
@@ -189,7 +189,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 				break;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
-				if (op_array->has_finally_block) {
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
 
@@ -245,7 +245,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 					zend_uchar T_type = opline->result_type;
 					znode_op T = opline->result;
 
-					if (op_array->has_finally_block) {
+					if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 						break;
 					}
 
@@ -379,7 +379,7 @@ continue_jmp_ex_optimization:
 				break;
 
 			case ZEND_JMPZNZ:
-				if (op_array->has_finally_block) {
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
 

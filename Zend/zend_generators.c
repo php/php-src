@@ -146,7 +146,7 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 	uint32_t op_num, finally_op_num;
 	int i;
 
-	if (!ex || !ex->func->op_array.has_finally_block) {
+	if (!ex || !(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
 		return;
 	}
 

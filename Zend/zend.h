@@ -476,14 +476,14 @@ struct _zend_class_entry {
 	int refcount;
 	uint32_t ce_flags;
 
-	HashTable function_table;
-	HashTable properties_info;
+	int default_properties_count;
+	int default_static_members_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
 	zval *static_members_table;
+	HashTable function_table;
+	HashTable properties_info;
 	HashTable constants_table;
-	int default_properties_count;
-	int default_static_members_count;
 
 	union _zend_function *constructor;
 	union _zend_function *destructor;
@@ -511,11 +511,11 @@ struct _zend_class_entry {
 	int (*serialize)(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC);
 	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, uint32_t buf_len, zend_unserialize_data *data TSRMLS_DC);
 
-	zend_class_entry **interfaces;
 	uint32_t num_interfaces;
+	uint32_t num_traits;
+	zend_class_entry **interfaces;
 	
 	zend_class_entry **traits;
-	uint32_t num_traits;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 

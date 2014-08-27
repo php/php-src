@@ -5095,7 +5095,7 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = opnum_jmp + 1;
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_end
 			= get_next_op_number(CG(active_op_array));
-		CG(active_op_array)->has_finally_block = 1;
+		CG(active_op_array)->fn_flags |= ZEND_ACC_HAS_FINALLY_BLOCK;
 
 		zend_emit_op(NULL, ZEND_FAST_RET, NULL, NULL TSRMLS_CC);
 
