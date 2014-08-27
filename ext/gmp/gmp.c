@@ -1085,7 +1085,27 @@ ZEND_FUNCTION(gmp_import)
 		return;
 	}
 
-	count = data_len / size;
+	if (size < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (should be at least 1 byte)", size);
+		return;
+	}
+
+	if (order != -1 && order != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad order: %ld (should be 1 for most significant word first, or -1 for least significant first)", order);
+		return;
+	}
+
+	if (endian < -1 || endian > 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad endian: %ld (should be 1 for most significant byte first, -1 for least significant first or 0 for native endianness)", endian);
+		return;
+	}
+
+	if (nails < 0 || nails > (size << 3) - 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad nails: %ld (should be between 0 and ((8 * size) - 1) bits)", nails);
+		return;
+	}
+
+	count = (data_len / size) + 1;
 
 	INIT_GMP_RETVAL(gmpnumber);
 
@@ -1098,7 +1118,7 @@ ZEND_FUNCTION(gmp_import)
 ZEND_FUNCTION(gmp_export)
 {
 	zval *gmpnumber_arg;
-	long count = 1;
+	long count;
 	long order = -1;
 	long size = 1;
 	long endian = 0;
@@ -1110,26 +1130,41 @@ ZEND_FUNCTION(gmp_export)
 		return;
 	}
 
-	FETCH_GMP_ZVAL(gmpnumber, gmpnumber_arg, temp_a);
-
-	int num_len;
-	char *out_string;
-
-	num_len = mpz_sizeinbase(gmpnumber, 16) / 2;
-
-	out_string = emalloc(num_len + 1);
-
-	count = (num_len / size) + 1;
-
-	mpz_export(out_string, &count, order, size, endian, nails, gmpnumber);
-
-	if (out_string[num_len - 1] == '\0') {
-		num_len--;
-	} else {
-		out_string[num_len] = '\0';
+	if (size < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (should be at least 1 byte)", size);
+		return;
 	}
 
-	ZVAL_STRINGL(return_value, out_string, num_len, 0);
+	if (order != -1 && order != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad order: %ld (should be 1 for most significant word first, or -1 for least significant first)", order);
+		return;
+	}
+
+	if (endian < -1 || endian > 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad endian: %ld (should be 1 for most significant byte first, -1 for least significant first or 0 for native endianness)", endian);
+		return;
+	}
+
+	if (nails < 0 || nails > (size << 3) - 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad nails: %ld (should be between 0 and ((8 * size) - 1) bits)", nails);
+		return;
+	}
+
+	FETCH_GMP_ZVAL(gmpnumber, gmpnumber_arg, temp_a);
+
+	long bits_per_word;
+	long out_len;
+	char *out_string;
+
+	bits_per_word = (size << 3) - nails;
+	count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
+	out_len = (count * size);
+
+	out_string = emalloc(out_len + 1);
+	mpz_export(out_string, &count, order, size, endian, nails, gmpnumber);
+	out_string[out_len] = '\0';
+
+	ZVAL_STRINGL(return_value, out_string, out_len, 0);
 
 	FREE_GMP_TEMP(temp_a);
 
