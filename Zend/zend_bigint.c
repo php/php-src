@@ -76,7 +76,7 @@
 	/* This logic is based on logic for gmp overflow error in gmp's source
 	 * See /mpz/realloc.c there */ 									\
 	if (sizeof(size_t) == sizeof (int))	{							\
-		if (UNEXPECTED(new_limbs > ZEND_ULONG_MAX / GMP_NUMB_BITS)) {	\
+		if (UNEXPECTED(new_limbs > ULONG_MAX / GMP_NUMB_BITS)) {	\
 			zend_error(E_ERROR, "Result of integer operation would be too large to represent"); \
 			return;													\
 		}															\
@@ -429,7 +429,7 @@ ZEND_API double zend_bigint_to_double(const zend_bigint *big) /* {{{ */
 /* }}} */
 
 /* Converts to decimal C string
- * HERE BE DRAGONS: String allocated  is non-persistent */
+ * HERE BE DRAGONS: String allocated is non-persistent */
 ZEND_API char* zend_bigint_to_string(const zend_bigint *big) /* {{{ */
 {
 	return mpz_get_str(NULL, 10, big->mpz);
@@ -528,7 +528,7 @@ ZEND_API void zend_bigint_long_subtract_long(zend_bigint *out, zend_long op1, ze
 		? long_limbs(op1) + long_limbs(op2) + 1
 		: 0 ); /* if it's a subtraction, the result is guaranteed to be smaller */
 	WITH_TEMP_MPZ_FROM_ZEND_LONG(op1, op1_mpz, WITH_TEMP_MPZ_FROM_ZEND_LONG(op2, op2_mpz, {
-		mpz_sub(out->mpz, op1_mpz, op2_mpz);		
+		mpz_sub(out->mpz, op1_mpz, op2_mpz);
 	}))
 }
 /* }}} */
