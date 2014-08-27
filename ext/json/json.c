@@ -664,7 +664,7 @@ again:
 }
 /* }}} */
 
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, size_t options, zend_long depth TSRMLS_DC) /* {{{ */
+PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth TSRMLS_DC) /* {{{ */
 {
 	size_t utf16_len;
 	unsigned short *utf16;
