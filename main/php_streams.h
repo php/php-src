@@ -297,6 +297,9 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 #define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str) TSRMLS_CC)
 #define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count) TSRMLS_CC)
 
+PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_DC);
+#define php_stream_fill_read_buffer(stream, size)	_php_stream_fill_read_buffer((stream), (size) TSRMLS_CC)
+
 #ifdef ZTS
 PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 #else
