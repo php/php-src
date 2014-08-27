@@ -235,7 +235,7 @@ typedef struct _zend_accel_globals {
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	/* cache to save hash lookup on the same INCLUDE opcode */
-	zend_op                *cache_opline;
+	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
 	int                     key_len;

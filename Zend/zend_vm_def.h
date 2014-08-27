@@ -1815,7 +1815,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		EG(scope) = EX(scope);
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			zend_op *opline = EX(opline);
+			const zend_op *opline = EX(opline);
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			if (RETURN_VALUE_USED(opline)) {
 				zval_ptr_dtor(EX_VAR(opline->result.var));

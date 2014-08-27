@@ -1029,7 +1029,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
 		zend_execute_data *ex;
-		zend_op *opline;
+		const zend_op *opline;
 
 		switch (type) {
 			case E_CORE_ERROR:

@@ -2475,7 +2475,7 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC) /* {{{ */
+ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC) /* {{{ */
 {
 	zend_function *function, *new_function;
 	zval *op1, *op2;

@@ -668,7 +668,7 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t ar
 	}
 }
 
-static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *property_name, int value_type, znode_op *value_op, const zend_execute_data *execute_data, int opcode, void **cache_slot TSRMLS_DC)
+static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *property_name, int value_type, const znode_op *value_op, const zend_execute_data *execute_data, int opcode, void **cache_slot TSRMLS_DC)
 {
 	zend_free_op free_value;
  	zval *value = get_zval_ptr(value_type, value_op, execute_data, &free_value, BP_VAR_R);
@@ -1751,7 +1751,7 @@ ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_ar
 }
 /* }}} */
 
-static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(zend_op *opline, zend_execute_data *call TSRMLS_DC) /* {{{ */
+static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(const zend_op *opline, zend_execute_data *call TSRMLS_DC) /* {{{ */
 {
 	uint32_t arg_num = opline->extended_value & ZEND_FETCH_ARG_MASK;
 	return ARG_SHOULD_BE_SENT_BY_REF(call->func, arg_num);

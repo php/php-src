@@ -306,7 +306,7 @@ static zend_uchar zend_user_opcodes[256] = {0,
 	241,242,243,244,245,246,247,248,249,250,251,252,253,254,255
 };
 
-static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* op);
+static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);
 
 
 #undef OPLINE
@@ -316,7 +316,7 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* o
 #undef SAVE_OPLINE
 #define OPLINE EX(opline)
 #define DCL_OPLINE
-#define USE_OPLINE zend_op *opline = EX(opline);
+#define USE_OPLINE const zend_op *opline = EX(opline);
 #define LOAD_OPLINE()
 #define SAVE_OPLINE()
 #undef CHECK_EXCEPTION
@@ -420,7 +420,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		EG(scope) = EX(scope);
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			zend_op *opline = EX(opline);
+			const zend_op *opline = EX(opline);
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			if (RETURN_VALUE_USED(opline)) {
 				zval_ptr_dtor(EX_VAR(opline->result.var));
@@ -47851,7 +47851,7 @@ void zend_init_opcodes_handlers(void)
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;
 }
-static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* op)
+static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)
 {
 		static const int zend_vm_decode[] = {
 			_UNUSED_CODE, /* 0              */

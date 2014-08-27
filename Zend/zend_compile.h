@@ -362,7 +362,7 @@ typedef enum _vm_frame_kind {
 } vm_frame_kind;
 
 struct _zend_execute_data {
-	struct _zend_op     *opline;           /* executed opline                */
+	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
 	void               **run_time_cache;
 	zend_function       *func;             /* executed op_array              */
@@ -376,7 +376,7 @@ struct _zend_execute_data {
 	zval                *return_value;
 	zend_class_entry    *scope;            /* function scope (self)          */
 	zend_array          *symbol_table;
-	struct _zend_op     *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
+	const zend_op       *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 	zend_object         *delayed_exception;
 	zval                 old_error_reporting;
 };
@@ -453,7 +453,7 @@ void zend_handle_encoding_declaration(zend_ast_list *declares TSRMLS_DC);
 /* parser-driven code generators */
 void zend_do_free(znode *op1 TSRMLS_DC);
 
-ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC);
+ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC);
 ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface TSRMLS_DC);
