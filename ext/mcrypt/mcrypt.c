@@ -1242,7 +1242,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 {
 	char *cipher_dir_string;
 	char *module_dir_string;
-	unsigned long int data_size;
+	zend_long data_size;
 	char *data_s;
 	MCRYPT td;
 
@@ -1337,7 +1337,7 @@ PHP_FUNCTION(mcrypt_ecb)
 {
 	zval *mode;
 	char *cipher, *key, *data, *iv = NULL;
-	int cipher_len, key_len, data_len, iv_len = 0;
+	size_t cipher_len, key_len, data_len, iv_len = 0;
 	
 	MCRYPT_GET_CRYPT_ARGS
 
@@ -1353,7 +1353,7 @@ PHP_FUNCTION(mcrypt_cbc)
 {
 	zval *mode;
 	char *cipher, *key, *data, *iv = NULL;
-	int cipher_len, key_len, data_len, iv_len = 0;
+	size_t cipher_len, key_len, data_len, iv_len = 0;
 
 	MCRYPT_GET_CRYPT_ARGS
 
@@ -1369,7 +1369,7 @@ PHP_FUNCTION(mcrypt_cfb)
 {
 	zval *mode;
 	char *cipher, *key, *data, *iv = NULL;
-	int cipher_len, key_len, data_len, iv_len = 0;
+	size_t cipher_len, key_len, data_len, iv_len = 0;
 	
 	MCRYPT_GET_CRYPT_ARGS
 
@@ -1385,7 +1385,7 @@ PHP_FUNCTION(mcrypt_ofb)
 {
 	zval *mode;
 	char *cipher, *key, *data, *iv = NULL;
-	int cipher_len, key_len, data_len, iv_len = 0;
+	size_t cipher_len, key_len, data_len, iv_len = 0;
 	
 	MCRYPT_GET_CRYPT_ARGS
 
