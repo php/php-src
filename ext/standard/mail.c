@@ -79,7 +79,7 @@ extern zend_long php_getuid(TSRMLS_D);
 PHP_FUNCTION(ezmlm_hash)
 {
 	char *str = NULL;
-	zend_ulong h = 5381;
+	zend_ulong h = Z_UL(5381);
 	size_t j, str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {

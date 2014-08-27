@@ -153,7 +153,7 @@ PHP_FUNCTION(gethostname)
 PHP_FUNCTION(gethostbyaddr)
 {
 	char *addr;
-	int addr_len;
+	size_t addr_len;
 	zend_string *hostname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &addr, &addr_len) == FAILURE) {

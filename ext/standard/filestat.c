@@ -233,7 +233,7 @@ PHP_FUNCTION(disk_total_space)
 {
 	double bytestotal;
 	char *path;
-	int path_len;
+	size_t path_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &path, &path_len) == FAILURE) {
 		return;
@@ -368,7 +368,7 @@ PHP_FUNCTION(disk_free_space)
 {
 	double bytesfree;
 	char *path;
-	int path_len;
+	size_t path_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &path, &path_len) == FAILURE) {
 		return;
@@ -829,7 +829,7 @@ PHP_FUNCTION(clearstatcache)
 {
 	zend_bool  clear_realpath_cache = 0;
 	char      *filename             = NULL;
-	int        filename_len         = 0;
+	size_t     filename_len         = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bp", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
 		return;

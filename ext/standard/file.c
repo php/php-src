@@ -1209,7 +1209,11 @@ PHPAPI PHP_FUNCTION(fwrite)
 	if (ZEND_NUM_ARGS() == 2) {
 		num_bytes = arg2len;
 	} else {
-		num_bytes = MAX(0, MIN((int)arg3, arg2len));
+		if (arg3 > 0) {
+			num_bytes = MAX(0, MIN((size_t)arg3, arg2len));
+		} else {
+			num_bytes = 0;
+		}
 	}
 
 	if (!num_bytes) {
@@ -1965,7 +1969,7 @@ PHP_FUNCTION(fgetcsv)
 	{
 		zval *fd, *len_zv = NULL;
 		char *delimiter_str = NULL;
-		int delimiter_str_len = 0;
+		size_t delimiter_str_len = 0;
 		char *enclosure_str = NULL;
 		size_t enclosure_str_len = 0;
 		char *escape_str = NULL;

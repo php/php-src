@@ -311,7 +311,7 @@ static int php_zip_add_file(struct zip *za, const char *filename, size_t filenam
 }
 /* }}} */
 
-static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char **remove_path, int *remove_path_len, char **add_path, int *add_path_len TSRMLS_DC) /* {{{ */
+static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char **remove_path, size_t *remove_path_len, char **add_path, size_t *add_path_len TSRMLS_DC) /* {{{ */
 {
 	zval *option;
 	if ((option = zend_hash_str_find(HASH_OF(options), "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {

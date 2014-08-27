@@ -173,7 +173,7 @@ static zend_object *spl_filesystem_object_new_check(zend_class_entry *class_type
 }
 /* }}} */
 
-PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len TSRMLS_DC) /* {{{ */
+PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_t *len TSRMLS_DC) /* {{{ */
 {
 #ifdef HAVE_GLOB
 	if (intern->type == SPL_FS_DIR) {
@@ -490,7 +490,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 			} else {
 				intern->file_name = estrndup(source->file_name, source->file_name_len);
 				intern->file_name_len = source->file_name_len;
-				intern->_path = spl_filesystem_object_get_path(source, &intern->_path_len TSRMLS_CC);
+				intern->_path = spl_filesystem_object_get_path(source, (size_t *)&intern->_path_len TSRMLS_CC);
 				intern->_path = estrndup(intern->_path, intern->_path_len);
 			}
 			break;
@@ -514,7 +514,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 			} else {
 				intern->file_name = source->file_name;
 				intern->file_name_len = source->file_name_len;
-				intern->_path = spl_filesystem_object_get_path(source, &intern->_path_len TSRMLS_CC);
+				intern->_path = spl_filesystem_object_get_path(source, (size_t *)&intern->_path_len TSRMLS_CC);
 				intern->_path = estrndup(intern->_path, intern->_path_len);
 
 				intern->u.file.open_mode = "r";
@@ -554,7 +554,7 @@ static int spl_filesystem_is_invalid_or_dot(const char * d_name) /* {{{ */
 }
 /* }}} */
 
-static char *spl_filesystem_object_get_pathname(spl_filesystem_object *intern, int *len TSRMLS_DC) { /* {{{ */
+static char *spl_filesystem_object_get_pathname(spl_filesystem_object *intern, size_t *len TSRMLS_DC) { /* {{{ */
 	switch (intern->type) {
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
@@ -1384,7 +1384,7 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|C", &ce) == SUCCESS) {
-		int path_len;
+		size_t path_len;
 		char *path = spl_filesystem_object_get_pathname(intern, &path_len TSRMLS_CC);
 		if (path) {
 			char *dpath = estrndup(path, path_len);

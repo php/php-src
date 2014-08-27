@@ -418,7 +418,7 @@ PHP_FUNCTION(escapeshellcmd)
 PHP_FUNCTION(escapeshellarg)
 {
 	char *argument;
-	int argument_len;
+	size_t argument_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &argument, &argument_len) == FAILURE) {
 		return;

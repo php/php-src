@@ -3840,7 +3840,8 @@ PHP_FUNCTION(constant)
 PHP_NAMED_FUNCTION(php_inet_ntop)
 {
 	char *address;
-	int address_len, af = AF_INET;
+	size_t address_len;
+	int af = AF_INET;
 	char buffer[40];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &address, &address_len) == FAILURE) {
@@ -3874,7 +3875,7 @@ PHP_NAMED_FUNCTION(php_inet_pton)
 {
 	int ret, af = AF_INET;
 	char *address;
-	int address_len;
+	size_t address_len;
 	char buffer[17];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &address, &address_len) == FAILURE) {
@@ -3910,7 +3911,7 @@ PHP_NAMED_FUNCTION(php_inet_pton)
 PHP_FUNCTION(ip2long)
 {
 	char *addr;
-	int addr_len;
+	size_t addr_len;
 #ifdef HAVE_INET_PTON
 	struct in_addr ip;
 #else
@@ -3949,7 +3950,7 @@ PHP_FUNCTION(long2ip)
 {
 	/* "It's a long but it's not, PHP ints are signed */
 	char *ip;
-	int ip_len;
+	size_t ip_len;
 	zend_ulong n;
 	struct in_addr myaddr;
 #ifdef HAVE_INET_PTON
@@ -5493,7 +5494,7 @@ PHP_FUNCTION(ignore_user_abort)
 PHP_FUNCTION(getservbyname)
 {
 	char *name, *proto;
-	int name_len, proto_len;
+	size_t name_len, proto_len;
 	struct servent *serv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &proto, &proto_len) == FAILURE) {

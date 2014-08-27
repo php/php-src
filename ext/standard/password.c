@@ -308,7 +308,7 @@ PHP_FUNCTION(password_hash)
 {
 	char *hash_format, *hash, *salt, *password;
 	zend_long algo = 0;
-	int password_len = 0, hash_len;
+	size_t password_len = 0, hash_len;
 	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
 	zval *option_buffer;
