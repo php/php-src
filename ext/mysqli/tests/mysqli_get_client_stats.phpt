@@ -119,7 +119,7 @@ mysqlnd.collect_memory_statistics=1
 	mysqli_get_client_stats_assert_eq('result_set_queries', $new_info, $info, $test_counter);
 
 	/* we need to skip this test in unicode - we send set names utf8 during mysql_connect */
-	if (!(version_compare(PHP_VERSION, '5.9.9', '>') == 1))
+	if (!(version_compare(PHP_VERSION, '6.0', '==') == 1))
 		mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('buffered_sets', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('unbuffered_sets', $new_info, $info, $test_counter);

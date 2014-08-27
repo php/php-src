@@ -60,7 +60,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				ZEND_OP2_TYPE(opline) == IS_CONST) {
 				/* binary operation with constant operands */
 				int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) = get_binary_op(opline->opcode);
-				zend_uint tv = ZEND_RESULT(opline).var;		/* temporary variable */
+				uint32_t tv = ZEND_RESULT(opline).var;		/* temporary variable */
 				zval result;
 				int er;
 
@@ -92,7 +92,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				opline->extended_value != IS_OBJECT &&
 				opline->extended_value != IS_RESOURCE) {
 				/* cast of constant operand */
-				zend_uint tv = ZEND_RESULT(opline).var;		/* temporary variable */
+				uint32_t tv = ZEND_RESULT(opline).var;		/* temporary variable */
 				zval res;
 				res = ZEND_OP1_LITERAL(opline);
 				zval_copy_ctor(&res);
@@ -135,7 +135,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				/* unary operation on constant operand */
 				unary_op_type unary_op = get_unary_op(opline->opcode);
 				zval result;
-				zend_uint tv = ZEND_RESULT(opline).var;		/* temporary variable */
+				uint32_t tv = ZEND_RESULT(opline).var;		/* temporary variable */
 				int er;
 
 				er = EG(error_reporting);
@@ -183,7 +183,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				}
 				last_op = next_op;
 				final_length += (requires_conversion? 1 : Z_STRLEN(ZEND_OP2_LITERAL(opline)));
-				str = STR_ALLOC(final_length, 0);
+				str = zend_string_alloc(final_length, 0);
 				ptr = str->val;
 				ptr[final_length] = '\0';
 				if (requires_conversion) { /* ZEND_ADD_CHAR */
@@ -195,7 +195,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					ptr++;
 				} else { /* ZEND_ADD_STRING */
 					memcpy(ptr, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
-					STR_RELEASE(Z_STR(ZEND_OP2_LITERAL(opline)));
+					zend_string_release(Z_STR(ZEND_OP2_LITERAL(opline)));
 					Z_STR(ZEND_OP2_LITERAL(opline)) = str;
 					ptr += Z_STRLEN(ZEND_OP2_LITERAL(opline));
 				}
@@ -238,7 +238,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				fake_execute_data.func = (zend_function*)op_array;
 				EG(current_execute_data) = &fake_execute_data;
 				if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1 TSRMLS_CC)) != NULL) {
-					zend_uint tv = ZEND_RESULT(opline).var;
+					uint32_t tv = ZEND_RESULT(opline).var;
 
 					literal_dtor(&ZEND_OP2_LITERAL(opline));
 					MAKE_NOP(opline);
@@ -252,7 +252,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				ZEND_OP2_TYPE(opline) == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 				/* substitute persistent constants */
-				zend_uint tv = ZEND_RESULT(opline).var;
+				uint32_t tv = ZEND_RESULT(opline).var;
 				zval c;
 
 				if (!zend_get_persistent_constant(Z_STR(ZEND_OP2_LITERAL(opline)), &c, 1 TSRMLS_CC)) {
@@ -300,7 +300,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				}
 
 				if (ce) {
-					zend_uint tv = ZEND_RESULT(opline).var;
+					uint32_t tv = ZEND_RESULT(opline).var;
 					zval *c, t;
 
 					if ((c = zend_hash_find(&ce->constants_table,
@@ -480,7 +480,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 		case ZEND_DEFINED:
 			{
 				zval c;
-				zend_uint tv = ZEND_RESULT(opline).var;
+				uint32_t tv = ZEND_RESULT(opline).var;
 				if (!zend_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline)), &c, 0 TSRMLS_CC)) {
 					break;
 				}

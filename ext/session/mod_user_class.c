@@ -125,7 +125,7 @@ PHP_METHOD(SessionHandler, destroy)
    Wraps the old gc handler */
 PHP_METHOD(SessionHandler, gc)
 {
-	long maxlifetime;
+	zend_long maxlifetime;
 	int nrdels;
 
 	PS_SANITY_CHECK_IS_OPEN;

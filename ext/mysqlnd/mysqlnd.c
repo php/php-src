@@ -440,7 +440,7 @@ mysqlnd_switch_to_ssl_if_needed(
 			MYSQLND_CONN_DATA * conn,
 			const MYSQLND_PACKET_GREET * const greet_packet,
 			const MYSQLND_OPTIONS * const options,
-			unsigned long mysql_flags
+			zend_ulong mysql_flags
 			TSRMLS_DC
 		)
 {
@@ -546,7 +546,7 @@ mysqlnd_run_authentication(
 			const char * const auth_protocol,
 			unsigned int charset_no,
 			const MYSQLND_OPTIONS * const options,
-			unsigned long mysql_flags,
+			zend_ulong mysql_flags,
 			zend_bool silent,
 			zend_bool is_change_user
 			TSRMLS_DC)
@@ -678,7 +678,7 @@ mysqlnd_connect_run_authentication(
 			size_t passwd_len,
 			const MYSQLND_PACKET_GREET * const greet_packet,
 			const MYSQLND_OPTIONS * const options,
-			unsigned long mysql_flags
+			zend_ulong mysql_flags
 			TSRMLS_DC)
 {
 	enum_func_status ret = FAIL;
@@ -1588,7 +1588,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, sqlstate)(const MYSQLND_CONN_DATA * const conn
 
 
 /* {{{ mysqlnd_old_escape_string */
-PHPAPI ulong 
+PHPAPI  zend_ulong
 mysqlnd_old_escape_string(char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_old_escape_string");
@@ -1622,11 +1622,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, ssl_set)(MYSQLND_CONN_DATA * const conn, const
 
 
 /* {{{ mysqlnd_conn_data::escape_string */
-static ulong
+static zend_ulong
 MYSQLND_METHOD(mysqlnd_conn_data, escape_string)(MYSQLND_CONN_DATA * const conn, char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, escape_string);
-	ulong ret = FAIL;
+	zend_ulong ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::escape_string");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
@@ -1750,7 +1750,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 
 			if (PASS == (ret = PACKET_READ(stats_header, conn))) {
 				/* will be freed by Zend, thus don't use the mnd_ allocator */
-				*message = STR_INIT(stats_header->message, stats_header->message_len, 0); 
+				*message = zend_string_init(stats_header->message, stats_header->message_len, 0); 
 				DBG_INF((*message)->val);
 			}
 			PACKET_FREE(stats_header);
@@ -2114,23 +2114,23 @@ MYSQLND_METHOD(mysqlnd_conn_data, thread_id)(const MYSQLND_CONN_DATA * const con
 
 
 /* {{{ mysqlnd_conn_data::get_server_version */
-static unsigned long
+static zend_ulong
 MYSQLND_METHOD(mysqlnd_conn_data, get_server_version)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
-	long major, minor, patch;
+	zend_long major, minor, patch;
 	char *p;
 
 	if (!(p = conn->server_version)) {
 		return 0;
 	}
 
-	major = strtol(p, &p, 10);
+	major = ZEND_STRTOL(p, &p, 10);
 	p += 1; /* consume the dot */
-	minor = strtol(p, &p, 10);
+	minor = ZEND_STRTOL(p, &p, 10);
 	p += 1; /* consume the dot */
-	patch = strtol(p, &p, 10);
+	patch = ZEND_STRTOL(p, &p, 10);
 
-	return (unsigned long)(major * 10000L + (unsigned long)(minor * 100L + patch));
+	return (zend_ulong)(major * Z_L(10000) + (zend_ulong)(minor * Z_L(100) + patch));
 }
 /* }}} */
 
@@ -2496,7 +2496,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
 				zval attrz;
-				ZVAL_STR(&attrz, STR_INIT(value, strlen(value), 1));
+				ZVAL_STR(&attrz, zend_string_init(value, strlen(value), 1));
 				zend_hash_str_update(conn->options->connect_attr, key, strlen(key), &attrz);
 			}
 			break;

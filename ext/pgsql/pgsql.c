@@ -66,18 +66,18 @@
 #define PGSQL_MAX_LENGTH_OF_LONG   30
 #define PGSQL_MAX_LENGTH_OF_DOUBLE 60
 
-#if LONG_MAX < UINT_MAX
+#if ZEND_LONG_MAX < UINT_MAX
 #define PGSQL_RETURN_OID(oid) do { \
-	if (oid > LONG_MAX) { \
+	if (oid > ZEND_LONG_MAX) { \
 		smart_str s = {0}; \
 		smart_str_append_unsigned(&s, oid); \
 		smart_str_0(&s); \
 		RETURN_STR(s.s); \
 	} \
-	RETURN_LONG((long)oid); \
+	RETURN_LONG((zend_long)oid); \
 } while(0)
 #else
-#define PGSQL_RETURN_OID(oid) (RETURN_LONG((long)oid))
+#define PGSQL_RETURN_OID(oid) RETURN_LONG((zend_long)oid)
 #endif
 
 #if HAVE_PQSETNONBLOCKING
@@ -968,7 +968,7 @@ static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 		if (PGG(log_notices)) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", notice->message);
 		}
-		zend_hash_index_update_ptr(&PGG(notices), (ulong)resource_id, notice);
+		zend_hash_index_update_ptr(&PGG(notices), (zend_ulong)resource_id, notice);
 	}
 }
 /* }}} */
@@ -1254,9 +1254,9 @@ PHP_MINFO_FUNCTION(pgsql)
 	php_info_print_table_row(2, "SSL support", "disabled");
 #endif
 #endif /* HAVE_PG_CONFIG_H */
-	snprintf(buf, sizeof(buf), "%ld", PGG(num_persistent));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, PGG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
-	snprintf(buf, sizeof(buf), "%ld", PGG(num_links));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, PGG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_end();
 
@@ -1333,12 +1333,12 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			
 			if (PGG(max_links) != -1 && PGG(num_links) >= PGG(max_links)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,
-								 "Cannot create new link. Too many open links (%ld)", PGG(num_links));
+								 "Cannot create new link. Too many open links (%pd)", PGG(num_links));
 				goto err;
 			}
 			if (PGG(max_persistent) != -1 && PGG(num_persistent) >= PGG(max_persistent)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,
-								 "Cannot create new link. Too many open persistent links (%ld)", PGG(num_persistent));
+								 "Cannot create new link. Too many open persistent links (%pd)", PGG(num_persistent));
 				goto err;
 			}
 
@@ -1431,7 +1431,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (PGG(max_links) != -1 && PGG(num_links) >= PGG(max_links)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create new link. Too many open links (%ld)", PGG(num_links));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create new link. Too many open links (%pd)", PGG(num_links));
 			goto err;
 		}
 
@@ -2387,7 +2387,7 @@ PHP_FUNCTION(pg_field_table)
 {
 	zval *result;
 	pgsql_result_handle *pg_result;
-	long fnum = -1;
+	zend_long fnum = -1;
 	zend_bool return_oid = 0;
 	Oid oid;
 	smart_str hash_key = {0};
@@ -2412,15 +2412,15 @@ PHP_FUNCTION(pg_field_table)
 	}
 
 	if (return_oid) {
-#if UINT_MAX > LONG_MAX /* Oid is unsigned int, we don't need this code, where LONG is wider */
-		if (oid > LONG_MAX) {
+#if UINT_MAX > ZEND_LONG_MAX /* Oid is unsigned int, we don't need this code, where LONG is wider */
+		if (oid > ZEND_LONG_MAX) {
 			smart_str oidstr = {0};
 			smart_str_append_unsigned(&oidstr, oid);
 			smart_str_0(&oidstr);
 			RETURN_STR(oidstr.s);
 		} else
 #endif
-			RETURN_LONG((long)oid);
+			RETURN_LONG((zend_long)oid);
 	}
 
 	/* try to lookup the table name in the resource list */
@@ -2480,7 +2480,7 @@ PHP_FUNCTION(pg_field_table)
 static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval *result;
-	long field;
+	zend_long field;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	Oid oid;
@@ -2514,8 +2514,8 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 		case PHP_PG_FIELD_TYPE_OID:
 			
 			oid = PQftype(pgsql_result, field);
-#if UINT_MAX > LONG_MAX
-			if (oid > LONG_MAX) {
+#if UINT_MAX > ZEND_LONG_MAX
+			if (oid > ZEND_LONG_MAX) {
 				smart_str s = {0};
 				smart_str_append_unsigned(&s, oid);
 				smart_str_0(&s);
@@ -2523,7 +2523,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 			} else
 #endif
 			{
-				RETURN_LONG((long)oid);
+				RETURN_LONG((zend_long)oid);
 			}
 			break;
 		default:
@@ -2591,7 +2591,7 @@ PHP_FUNCTION(pg_field_num)
 PHP_FUNCTION(pg_fetch_result)
 {
 	zval *result, *field=NULL;
-	long row;
+	zend_long row;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int field_offset, pgsql_row, argc = ZEND_NUM_ARGS();
@@ -2620,7 +2620,7 @@ PHP_FUNCTION(pg_fetch_result)
 	} else {
 		pgsql_row = row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on PostgreSQL result index %ld",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -2649,13 +2649,13 @@ PHP_FUNCTION(pg_fetch_result)
 /* }}} */
 
 /* {{{ void php_pgsql_fetch_hash */
-static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type, int into_object)
+static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_type, int into_object)
 {
 	zval                *result, *zrow = NULL;
 	PGresult            *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int             i, num_fields, pgsql_row, use_row;
-	long            row = -1;
+	zend_long            row = -1;
 	char            *field_name;
 	zval            *ctor_params = NULL;
 	zend_class_entry *ce = NULL;
@@ -2706,7 +2706,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 		pgsql_row = row;
 		pg_result->row = pgsql_row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on PostgreSQL result index %ld",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -2876,7 +2876,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 	zval *result;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	unsigned long colno=0;
+	zend_long colno=0;
 	int pg_numrows, pg_row;
 	size_t num_fields;
 
@@ -2890,7 +2890,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 
 	num_fields = PQnfields(pgsql_result);
 	if (colno >= num_fields || colno < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column number '%ld'", colno);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column number '%pd'", colno);
 		RETURN_FALSE;
 	}
 
@@ -2915,7 +2915,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 PHP_FUNCTION(pg_result_seek)
 {
 	zval *result;
-	long row;
+	zend_long row;
 	pgsql_result_handle *pg_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &result, &row) == FAILURE) {
@@ -2942,7 +2942,7 @@ PHP_FUNCTION(pg_result_seek)
 static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval *result, *field;
-	long row;
+	zend_long row;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int field_offset, pgsql_row, argc = ZEND_NUM_ARGS();
@@ -2971,7 +2971,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	} else {
 		pgsql_row = row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on PostgreSQL result index %ld",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -3187,7 +3187,7 @@ PHP_FUNCTION(pg_lo_create)
 			}
 			break;
 		case IS_LONG:
-			if (Z_LVAL_P(oid) < (long)InvalidOid) {
+			if (Z_LVAL_P(oid) < (zend_long)InvalidOid) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
 				RETURN_FALSE;
 			}
@@ -3220,7 +3220,7 @@ PHP_FUNCTION(pg_lo_create)
 PHP_FUNCTION(pg_lo_unlink)
 {
 	zval *pgsql_link = NULL;
-	long oid_long;
+	zend_long oid_long;
 	char *oid_string, *end_ptr;
 	int oid_strlen;
 	PGconn *pgsql;
@@ -3290,7 +3290,7 @@ PHP_FUNCTION(pg_lo_unlink)
 PHP_FUNCTION(pg_lo_open)
 {
 	zval *pgsql_link = NULL;
-	long oid_long;
+	zend_long oid_long;
 	char *oid_string, *end_ptr, *mode_string;
 	int oid_strlen, mode_strlen;
 	PGconn *pgsql;
@@ -3437,7 +3437,7 @@ PHP_FUNCTION(pg_lo_close)
 PHP_FUNCTION(pg_lo_read)
 {
 	zval *pgsql_id;
-	long len;
+	zend_long len;
 	int buf_len = PGSQL_LO_READ_BUF_SIZE, nbytes, argc = ZEND_NUM_ARGS();
 	zend_string *buf;
 	pgLofp *pgsql;
@@ -3452,9 +3452,9 @@ PHP_FUNCTION(pg_lo_read)
 		buf_len = len;
 	}
 	
-	buf = STR_ALLOC(buf_len, 0);
+	buf = zend_string_alloc(buf_len, 0);
 	if ((nbytes = lo_read((PGconn *)pgsql->conn, pgsql->lofd, buf->val, buf->len))<0) {
-		STR_FREE(buf);
+		zend_string_free(buf);
 		RETURN_FALSE;
 	}
 
@@ -3470,7 +3470,7 @@ PHP_FUNCTION(pg_lo_write)
 {
   	zval *pgsql_id;
   	char *str;
-  	long z_len;
+  	zend_long z_len;
 	int str_len, nbytes;
 	int len;
 	pgLofp *pgsql;
@@ -3482,11 +3482,11 @@ PHP_FUNCTION(pg_lo_write)
 
 	if (argc > 2) {
 		if (z_len > str_len) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write more than buffer size %d. Tried to write %ld", str_len, z_len);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write more than buffer size %d. Tried to write %pd", str_len, z_len);
 			RETURN_FALSE;
 		}
 		if (z_len < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Buffer size must be larger than 0, but %ld was specified", z_len);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Buffer size must be larger than 0, but %pd was specified", z_len);
 			RETURN_FALSE;
 		}
 		len = z_len;
@@ -3587,7 +3587,7 @@ PHP_FUNCTION(pg_lo_import)
 			}
 			break;
 		case IS_LONG:
-			if (Z_LVAL_P(oid) < (long)InvalidOid) {
+			if (Z_LVAL_P(oid) < (zend_long)InvalidOid) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
 				RETURN_FALSE;
 			}
@@ -3625,7 +3625,7 @@ PHP_FUNCTION(pg_lo_export)
 	char *file_out, *oid_string, *end_ptr;
 	int oid_strlen;
 	int id = -1, name_len;
-	long oid_long;
+	zend_long oid_long;
 	Oid oid;
 	PGconn *pgsql;
 	int argc = ZEND_NUM_ARGS();
@@ -3714,7 +3714,7 @@ PHP_FUNCTION(pg_lo_export)
 PHP_FUNCTION(pg_lo_seek)
 {
 	zval *pgsql_id = NULL;
-	long result, offset = 0, whence = SEEK_CUR;
+	zend_long result, offset = 0, whence = SEEK_CUR;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3814,7 +3814,7 @@ PHP_FUNCTION(pg_lo_truncate)
 PHP_FUNCTION(pg_set_error_verbosity)
 {
 	zval *pgsql_link = NULL;
-	long verbosity;
+	zend_long verbosity;
 	int id = -1, argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
 
@@ -4268,7 +4268,7 @@ PHP_FUNCTION(pg_escape_string)
 			break;
 	}
 
-	to = STR_ALLOC(from->len * 2, 0);
+	to = zend_string_alloc(from->len * 2, 0);
 #ifdef HAVE_PQESCAPE_CONN
 	if (pgsql_link != NULL || id != -1) {
 		ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
@@ -4279,7 +4279,7 @@ PHP_FUNCTION(pg_escape_string)
 		to->len = (int) PQescapeString(to->val, from->val, (size_t)from->len);
 	}
 
-	to = STR_REALLOC(to, to->len, 0);
+	to = zend_string_realloc(to, to->len, 0);
 	RETURN_STR(to);
 }
 /* }}} */
@@ -4559,7 +4559,7 @@ PHP_FUNCTION(pg_result_error)
 PHP_FUNCTION(pg_result_error_field)
 {
 	zval *result;
-	long fieldcode;
+	zend_long fieldcode;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	char *field = NULL;
@@ -5144,7 +5144,7 @@ PHP_FUNCTION(pg_get_result)
 PHP_FUNCTION(pg_result_status)
 {
 	zval *result;
-	long result_type = PGSQL_STATUS_LONG;
+	zend_long result_type = PGSQL_STATUS_LONG;
 	ExecStatusType status;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
@@ -5177,7 +5177,7 @@ PHP_FUNCTION(pg_get_notify)
 {
 	zval *pgsql_link;
 	int id = -1;
-	long result_type = PGSQL_ASSOC;
+	zend_long result_type = PGSQL_ASSOC;
 	PGconn *pgsql;
 	PGnotify *pgsql_notify;
 
@@ -5708,10 +5708,10 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free TSRMLS_DC)
 /* {{{ php_pgsql_convert
  * check and convert array values (fieldname=>vlaue pair) for sql
  */
-PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, ulong opt TSRMLS_DC) 
+PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, zend_ulong opt TSRMLS_DC) 
 {
 	zend_string *field = NULL;
-	ulong num_idx = -1;
+	zend_ulong num_idx = -1;
 	zval meta, *def, *type, *not_null, *has_default, *is_enum, *val, new_val;
 	int err = 0, skip_field;
 	php_pgsql_data_type data_type;
@@ -5951,10 +5951,10 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						else {
 							zend_string *str;
 							/* PostgreSQL ignores \0 */
-							str = STR_ALLOC(Z_STRLEN_P(val) * 2, 0);
+							str = zend_string_alloc(Z_STRLEN_P(val) * 2, 0);
 							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
 							str->len = (int)PQescapeStringConn(pg_link, str->val, Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
-							str = STR_REALLOC(str, str->len, 0);
+							str = zend_string_realloc(str, str->len, 0);
 							ZVAL_STR(&new_val, str);
 							php_pgsql_add_quotes(&new_val, 1 TSRMLS_CC);
 						}
@@ -6352,7 +6352,7 @@ PHP_FUNCTION(pg_convert)
 	zval *pgsql_link, *values;
 	char *table_name;
 	int table_name_len;
-	ulong option = 0;
+	zend_ulong option = 0;
 	PGconn *pg_link;
 	int id = -1;
 
@@ -6382,7 +6382,7 @@ PHP_FUNCTION(pg_convert)
 }
 /* }}} */
 
-static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, ulong opt TSRMLS_DC) /* {{{ */
+static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, zend_ulong opt TSRMLS_DC) /* {{{ */
 {
 	if (opt & PGSQL_DML_ASYNC) {
 		if (PQsendQuery(pg_link, querystr->s->val)) {
@@ -6441,14 +6441,14 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 
 /* {{{ php_pgsql_insert
  */
-PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, ulong opt, zend_string **sql TSRMLS_DC)
+PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, zend_ulong opt, zend_string **sql TSRMLS_DC)
 {
 	zval *val, converted;
 	char buf[256];
 	char *tmp;
 	smart_str querystr = {0};
 	int ret = FAILURE;
-	ulong num_idx;
+	zend_ulong num_idx;
 	zend_string *fld;
 
 	assert(pg_link != NULL);
@@ -6563,7 +6563,7 @@ PHP_FUNCTION(pg_insert)
 	zval *pgsql_link, *values;
 	char *table;
 	int table_len;
-	ulong option = PGSQL_DML_EXEC, return_sql;
+	zend_ulong option = PGSQL_DML_EXEC, return_sql;
 	PGconn *pg_link;
 	PGresult *pg_result;
 	ExecStatusType status;
@@ -6641,11 +6641,11 @@ PHP_FUNCTION(pg_insert)
 }
 /* }}} */
 
-static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, HashTable *ht, int where_cond, const char *pad, int pad_len, ulong opt TSRMLS_DC) /* {{{ */
+static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, HashTable *ht, int where_cond, const char *pad, int pad_len, zend_ulong opt TSRMLS_DC) /* {{{ */
 {
 	char *tmp;
 	char buf[256];
-	ulong num_idx;
+	zend_ulong num_idx;
 	zend_string *fld;
 	zval *val;
 
@@ -6706,7 +6706,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 
 /* {{{ php_pgsql_update
  */
-PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array, zval *ids_array, ulong opt, zend_string **sql TSRMLS_DC) 
+PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array, zval *ids_array, zend_ulong opt, zend_string **sql TSRMLS_DC) 
 {
 	zval var_converted, ids_converted;
 	smart_str querystr = {0};
@@ -6779,7 +6779,7 @@ PHP_FUNCTION(pg_update)
 	zval *pgsql_link, *values, *ids;
 	char *table;
 	int table_len;
-	ulong option =  PGSQL_DML_EXEC;
+	zend_ulong option =  PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	zend_string *sql = NULL;
 	int id = -1, argc = ZEND_NUM_ARGS();
@@ -6810,7 +6810,7 @@ PHP_FUNCTION(pg_update)
 
 /* {{{ php_pgsql_delete
  */
-PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array, ulong opt, zend_string **sql TSRMLS_DC) 
+PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array, zend_ulong opt, zend_string **sql TSRMLS_DC) 
 {
 	zval ids_converted;
 	smart_str querystr = {0};
@@ -6869,7 +6869,7 @@ PHP_FUNCTION(pg_delete)
 	zval *pgsql_link, *ids;
 	char *table;
 	int table_len;
-	ulong option = PGSQL_DML_EXEC;
+	zend_ulong option = PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	zend_string *sql;
 	int id = -1, argc = ZEND_NUM_ARGS();
@@ -6936,7 +6936,7 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TS
 
 /* {{{ php_pgsql_select
  */
-PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, ulong opt, zend_string **sql TSRMLS_DC)
+PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, zend_ulong opt, zend_string **sql TSRMLS_DC)
 {
 	zval ids_converted;
 	smart_str querystr = {0};
@@ -6999,7 +6999,7 @@ PHP_FUNCTION(pg_select)
 	zval *pgsql_link, *ids;
 	char *table;
 	int table_len;
-	ulong option = PGSQL_DML_EXEC;
+	zend_ulong option = PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	zend_string *sql = NULL;
 	int id = -1, argc = ZEND_NUM_ARGS();

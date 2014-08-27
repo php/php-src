@@ -119,13 +119,13 @@
 	__dest->len = __nl;												\
 } while (0)
 
-static inline char *smart_string_print_long(char *buf, long num) {
+static inline char *smart_string_print_long(char *buf, zend_long num) {
 	char *r; 
 	_zend_print_signed_to_buf(buf, num, unsigned long, r); 
 	return r;
 }
 
-static inline char *smart_string_print_unsigned(char *buf, long num) {
+static inline char *smart_string_print_unsigned(char *buf, zend_long num) {
 	char *r; 
 	_zend_print_unsigned_to_buf(buf, num, unsigned long, r); 
 	return r;

@@ -48,7 +48,7 @@ PHP_FUNCTION( intl_get_error_message )
  */
 PHP_FUNCTION( intl_is_failure )
 {
-	long err_code;
+	zend_long err_code;
 
 	/* Parse parameters. */
 	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "l",
@@ -70,7 +70,7 @@ PHP_FUNCTION( intl_is_failure )
  */
 PHP_FUNCTION( intl_error_name )
 {
-	long err_code;
+	zend_long err_code;
 
 	/* Parse parameters. */
 	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "l",

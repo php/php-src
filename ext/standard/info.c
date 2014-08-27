@@ -69,7 +69,7 @@ static int php_info_print_html_esc(const char *str, int len) /* {{{ */
 
 	new_str = php_escape_html_entities((unsigned char *) str, len, 0, ENT_QUOTES, "utf-8" TSRMLS_CC);
 	written = php_output_write(new_str->val, new_str->len TSRMLS_CC);
-	STR_FREE(new_str);
+	zend_string_free(new_str);
 	return written;
 }
 /* }}} */
@@ -196,10 +196,10 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 {
 	zval *data, *tmp, tmp2;
 	zend_string *string_key;
-	ulong num_key;
+	zend_ulong num_key;
 	zend_string *key;
 	
-	key = STR_INIT(name, name_length, 0);
+	key = zend_string_init(name, name_length, 0);
 	zend_is_auto_global(key TSRMLS_CC);
 
 	if ((data = zend_hash_find(&EG(symbol_table).ht, key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
@@ -219,7 +219,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					php_info_print(string_key->val);
 				}
 			} else {
-				php_info_printf("%ld", num_key);
+				php_info_printf("%pd", num_key);
 			}
 			php_info_print("\"]");
 			if (!sapi_module.phpinfo_as_text) {
@@ -264,7 +264,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
-	STR_FREE(key);
+	zend_string_free(key);
 }
 /* }}} */
 
@@ -655,7 +655,7 @@ PHPAPI zend_string *php_get_uname(char mode)
 	php_uname = PHP_UNAME;
 #endif
 #endif
-	return STR_INIT(php_uname, strlen(php_uname), 0);
+	return zend_string_init(php_uname, strlen(php_uname), 0);
 }
 /* }}} */
 
@@ -833,7 +833,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			zend_html_puts(zend_version, strlen(zend_version) TSRMLS_CC);
 		}
 		php_info_print_box_end();
-		STR_FREE(php_uname);
+		zend_string_free(php_uname);
 	}
 
 	zend_ini_sort_entries(TSRMLS_C);
@@ -1166,7 +1166,7 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
    Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
-	long flag = PHP_INFO_ALL;
+	zend_long flag = PHP_INFO_ALL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flag) == FAILURE) {
 		return;
@@ -1210,7 +1210,7 @@ PHP_FUNCTION(phpversion)
    Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
 {
-	long flag = PHP_CREDITS_ALL;
+	zend_long flag = PHP_CREDITS_ALL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flag) == FAILURE) {
 		return;

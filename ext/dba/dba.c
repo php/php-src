@@ -256,7 +256,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 	zval *key;													\
 	char *key_str, *key_free;									\
 	size_t key_len; 											\
-	long skip = 0;  											\
+	zend_long skip = 0;  											\
 	switch(ac) {												\
 	case 2: 													\
 		if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { \
@@ -1243,7 +1243,7 @@ PHP_FUNCTION(dba_handlers)
    List opened databases */
 PHP_FUNCTION(dba_list)
 {
-	ulong numitems, i;
+	zend_ulong numitems, i;
 	zend_resource *le;
 	dba_info *info;
 

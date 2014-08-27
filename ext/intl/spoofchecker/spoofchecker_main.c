@@ -115,7 +115,7 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
  */
 PHP_METHOD(Spoofchecker, setChecks)
 {
-	long checks;
+	zend_long checks;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 		
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &checks)) {

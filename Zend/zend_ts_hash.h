@@ -25,7 +25,7 @@
 
 typedef struct _zend_ts_hashtable {
 	HashTable hash;
-	zend_uint reader;
+	uint32_t reader;
 #ifdef ZTS
 	MUTEX_T mx_reader;
 	MUTEX_T mx_writer;
@@ -55,7 +55,7 @@ ZEND_API zval *_zend_ts_hash_add_or_update(TsHashTable *ht, zend_string *key, zv
 #define zend_ts_hash_add(ht, key, pData) \
 		_zend_ts_hash_add_or_update(ht, key, pData, HASH_ADD ZEND_FILE_LINE_CC)
 
-ZEND_API zval *_zend_ts_hash_index_update_or_next_insert(TsHashTable *ht, ulong h, zval *pData, int flag ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_ts_hash_index_update_or_next_insert(TsHashTable *ht, zend_ulong h, zval *pData, int flag ZEND_FILE_LINE_DC);
 #define zend_ts_hash_index_update(ht, h, pData) \
 		_zend_ts_hash_index_update_or_next_insert(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_ts_hash_next_index_insert(ht, pData) \
@@ -73,15 +73,15 @@ ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_fun
 
 /* Deletes */
 ZEND_API int zend_ts_hash_del(TsHashTable *ht, zend_string *key);
-ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, ulong h);
+ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h);
 
 /* Data retreival */
 ZEND_API zval *zend_ts_hash_find(TsHashTable *ht, zend_string *key);
-ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, ulong);
+ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_ulong);
 
 /* Misc */
 ZEND_API int zend_ts_hash_exists(TsHashTable *ht, zend_string *key);
-ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, ulong h);
+ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h);
 
 /* Copying, merging and sorting */
 ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor);

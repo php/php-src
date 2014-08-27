@@ -450,7 +450,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 	zend_string *name = NULL;
 	zval *tmp, tmp2;
 	int keytype;
-	ulong pid;
+	zend_ulong pid;
 
 	if (disp->dispid_to_name == NULL) {
 		ALLOC_HASHTABLE(disp->dispid_to_name);
@@ -467,29 +467,29 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 				&pid, 0, &pos))) {
 			char namebuf[32];
 			if (keytype == HASH_KEY_IS_LONG) {
-				snprintf(namebuf, sizeof(namebuf), "%d", pid);
-				name = STR_INIT(namebuf, strlen(namebuf), 0);
+				snprintf(namebuf, sizeof(namebuf), ZEND_ULONG_FMT, pid);
+				name = zend_string_init(namebuf, strlen(namebuf), 0);
 			} else {
-				STR_ADDREF(name);
+				zend_string_addref(name);
 			}
 
 			zend_hash_move_forward_ex(Z_OBJPROP(disp->object), &pos);
 
 			/* Find the existing id */
 			if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
-				STR_RELEASE(name);
+				zend_string_release(name);
 				continue;
 			}
 
 			/* add the mappings */
-			ZVAL_STR(&tmp2, STR_COPY(name));
+			ZVAL_STR(&tmp2, zend_string_copy(name));
 			pid = zend_hash_next_free_element(disp->dispid_to_name);
 			zend_hash_index_update(disp->dispid_to_name, pid, &tmp2);
 			
 			ZVAL_LONG(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
 
-			STR_RELEASE(name);
+			zend_string_release(name);
 		}
 	}
 	
@@ -503,28 +503,28 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 			char namebuf[32];
 			if (keytype == HASH_KEY_IS_LONG) {
 				snprintf(namebuf, sizeof(namebuf), "%d", pid);
-				name = STR_INIT(namebuf, strlen(namebuf), 0);
+				name = zend_string_init(namebuf, strlen(namebuf), 0);
 			} else {
-				STR_ADDREF(name);
+				zend_string_addref(name);
 			}
 
 			zend_hash_move_forward_ex(&Z_OBJCE(disp->object)->function_table, &pos);
 
 			/* Find the existing id */
 			if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
-				STR_RELEASE(name);
+				zend_string_release(name);
 				continue;
 			}
 
 			/* add the mappings */
-			ZVAL_STR(&tmp2, STR_COPY(name));
+			ZVAL_STR(&tmp2, zend_string_copy(name));
 			pid = zend_hash_next_free_element(disp->dispid_to_name);
 			zend_hash_index_update(disp->dispid_to_name, pid, &tmp2);
 
 			ZVAL_LONG(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
 
-			STR_RELEASE(name);
+			zend_string_release(name);
 		}
 	}
 }
@@ -590,7 +590,7 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 	zend_string *name = NULL;
 	zval tmp, *ntmp;
 	int keytype;
-	ulong pid;
+	zend_ulong pid;
 
 	disp->dispid_to_name = id_to_name;
 

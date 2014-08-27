@@ -135,7 +135,7 @@ PHP_MSHUTDOWN_FUNCTION(syslog)
 PHP_FUNCTION(openlog)
 {
 	char *ident;
-	long option, facility;
+	zend_long option, facility;
 	int ident_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll", &ident,
@@ -175,7 +175,7 @@ PHP_FUNCTION(closelog)
    Generate a system log message */
 PHP_FUNCTION(syslog)
 {
-	long priority;
+	zend_long priority;
 	char *message;
 	int message_len;
 

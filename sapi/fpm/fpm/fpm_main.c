@@ -298,7 +298,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 #endif
 }
 
-static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
+static size_t sapi_cgibin_ub_write(const char *str, size_t str_length TSRMLS_DC)
 {
 	const char *ptr = str;
 	uint remaining = str_length;
@@ -497,7 +497,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 # define STDIN_FILENO 0
 #endif
 
-static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 {
 	uint read_bytes = 0;
 	int tmp_read_bytes;
@@ -598,7 +598,7 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 		? PARSE_ENV : PARSE_SERVER;
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(request->env, var, val) {
-		unsigned int new_val_len;
+		size_t new_val_len;
 
 		if (var && sapi_module.input_filter(filter_arg, var->val, &val, strlen(val), &new_val_len TSRMLS_CC)) {
 			php_register_variable_safe(var->val, val, new_val_len, array_ptr TSRMLS_CC);
@@ -608,7 +608,7 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
-	unsigned int php_self_len;
+	size_t php_self_len;
 	char *php_self;
 
 	/* In CGI mode, we consider the environment to be a part of the server
@@ -1866,7 +1866,6 @@ consult the installation file that came with this distribution, or visit \n\
 			request_body_fd = -1;
 			SG(server_context) = (void *) &request;
 			init_request_info(TSRMLS_C);
-			CG(interactive) = 0;
 			char *primary_script = NULL;
 
 			fpm_request_info();

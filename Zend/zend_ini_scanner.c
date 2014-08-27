@@ -134,7 +134,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #define EAT_TRAILING_WHITESPACE()	EAT_TRAILING_WHITESPACE_EX('X')
 
 #define zend_ini_copy_value(retval, str, len)	\
-	ZVAL_NEW_STR(retval, STR_INIT(str, len, 1))
+	ZVAL_NEW_STR(retval, zend_string_init(str, len, 1))
 
 
 #define RETURN_TOKEN(type, str, len) {           \
@@ -1897,7 +1897,7 @@ yy140:
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 445 "Zend/zend_ini_scanner.l"
 		{ /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
-	char *sc = NULL;
+	unsigned char *sc = NULL;
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR) {
 			case '\n':

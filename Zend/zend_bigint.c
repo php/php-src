@@ -440,7 +440,7 @@ ZEND_API char* zend_bigint_to_string(const zend_bigint *big) /* {{{ */
 ZEND_API zend_string* zend_bigint_to_zend_string(const zend_bigint *big, int persistent) /* {{{ */
 {
 	char *temp_string = zend_bigint_to_string(big);
-	zend_string *return_value = STR_INIT(temp_string, strlen(temp_string), persistent);
+	zend_string *return_value = zend_string_init(temp_string, strlen(temp_string), persistent);
 	efree(temp_string);
 	return return_value;
 }

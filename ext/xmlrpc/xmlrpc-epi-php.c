@@ -504,8 +504,10 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 
 	if (in_val) {
 		zval val;
+		XMLRPC_VALUE_TYPE type;
+
 		ZVAL_UNDEF(&val);
-		XMLRPC_VALUE_TYPE type = get_zval_xmlrpc_type(in_val, &val);
+		type = get_zval_xmlrpc_type(in_val, &val);
 	
 		if (!Z_ISUNDEF(val)) {
 			switch (type) {
@@ -943,7 +945,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid callback '%s' passed", php_function_name->val);
 		}
-		STR_RELEASE(php_function_name);
+		zend_string_release(php_function_name);
 	} ZEND_HASH_FOREACH_END();
 	
 	/* so we don't call the same callbacks ever again */
@@ -1116,6 +1118,7 @@ PHP_FUNCTION(xmlrpc_server_add_introspection_data)
 {
 	zval *handle, *desc;
 	xmlrpc_server_data* server;
+	XMLRPC_VALUE xDesc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra", &handle, &desc) == FAILURE) {
 		return;
@@ -1123,7 +1126,7 @@ PHP_FUNCTION(xmlrpc_server_add_introspection_data)
 
 	ZEND_FETCH_RESOURCE(server, xmlrpc_server_data*, handle, -1, "xmlrpc server", le_xmlrpc_server);
 
-	XMLRPC_VALUE xDesc = PHP_to_XMLRPC(desc TSRMLS_CC);
+	xDesc = PHP_to_XMLRPC(desc TSRMLS_CC);
 	if (xDesc) {
 		int retval = XMLRPC_ServerAddIntrospectionData(server->server_ptr, xDesc);
 		XMLRPC_CleanupValue(xDesc);

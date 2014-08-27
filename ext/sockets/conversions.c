@@ -303,9 +303,9 @@ static void to_zval_read_aggregation(const char *structure,
 }
 
 /* CONVERSIONS for integers */
-static long from_zval_integer_common(const zval *arr_value, ser_context *ctx)
+static zend_long from_zval_integer_common(const zval *arr_value, ser_context *ctx)
 {
-	long ret = 0;
+	zend_long ret = 0;
 	zval lzval;
 
 	ZVAL_NULL(&lzval);
@@ -328,7 +328,7 @@ double_case:
 
 	case IS_OBJECT:
 	case IS_STRING: {
-		long lval;
+		zend_long lval;
 		double dval;
 
 		convert_to_string(&lzval);
@@ -363,7 +363,7 @@ double_case:
 }
 void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	zend_long lval;
 	int ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -382,7 +382,7 @@ void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx)
 }
 static void from_zval_write_uint32(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	zend_long lval;
 	uint32_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -390,7 +390,7 @@ static void from_zval_write_uint32(const zval *arr_value, char *field, ser_conte
 		return;
 	}
 
-	if (sizeof(long) > sizeof(uint32_t) && (lval < 0 || lval > 0xFFFFFFFF)) {
+	if (sizeof(zend_long) > sizeof(uint32_t) && (lval < 0 || lval > 0xFFFFFFFF)) {
 		do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
 				"for an unsigned 32-bit integer");
 		return;
@@ -401,7 +401,7 @@ static void from_zval_write_uint32(const zval *arr_value, char *field, ser_conte
 }
 static void from_zval_write_net_uint16(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	zend_long lval;
 	uint16_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -420,7 +420,7 @@ static void from_zval_write_net_uint16(const zval *arr_value, char *field, ser_c
 }
 static void from_zval_write_sa_family(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	zend_long lval;
 	sa_family_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -439,7 +439,7 @@ static void from_zval_write_sa_family(const zval *arr_value, char *field, ser_co
 }
 static void from_zval_write_pid_t(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	zend_long lval;
 	pid_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -458,7 +458,7 @@ static void from_zval_write_pid_t(const zval *arr_value, char *field, ser_contex
 }
 static void from_zval_write_uid_t(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	zend_long lval;
 	uid_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -468,13 +468,13 @@ static void from_zval_write_uid_t(const zval *arr_value, char *field, ser_contex
 
 	/* uid_t can be signed or unsigned (generally unsigned) */
 	if ((uid_t)-1 > (uid_t)0) {
-		if (sizeof(long) > sizeof(uid_t) && (lval < 0 || (uid_t)lval != lval)) {
+		if (sizeof(zend_long) > sizeof(uid_t) && (lval < 0 || (uid_t)lval != lval)) {
 			do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
 					"for a uid_t value");
 			return;
 		}
 	} else {
-		if (sizeof(long) > sizeof(uid_t) && (uid_t)lval != lval) {
+		if (sizeof(zend_long) > sizeof(uid_t) && (uid_t)lval != lval) {
 			do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
 					"for a uid_t value");
 			return;
@@ -490,49 +490,49 @@ void to_zval_read_int(const char *data, zval *zv, res_context *ctx)
 	int ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
 {
 	unsigned ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_net_uint16(const char *data, zval *zv, res_context *ctx)
 {
 	uint16_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ntohs(ival));
+	ZVAL_LONG(zv, (zend_long)ntohs(ival));
 }
 static void to_zval_read_uint32(const char *data, zval *zv, res_context *ctx)
 {
 	uint32_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_sa_family(const char *data, zval *zv, res_context *ctx)
 {
 	sa_family_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_pid_t(const char *data, zval *zv, res_context *ctx)
 {
 	pid_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_uid_t(const char *data, zval *zv, res_context *ctx)
 {
 	uid_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
-	ZVAL_LONG(zv, (long)ival);
+	ZVAL_LONG(zv, (zend_long)ival);
 }
 
 /* CONVERSIONS for sockaddr */
@@ -565,7 +565,7 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 {
 	const struct in_addr *addr = (const struct in_addr *)data;
 	socklen_t size = INET_ADDRSTRLEN;
-	zend_string *str = STR_ALLOC(size - 1, 0);
+	zend_string *str = zend_string_alloc(size - 1, 0);
 	memset(str->val, '\0', size);
 
 	ZVAL_STR(zv, str);
@@ -623,7 +623,7 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 {
 	const struct in6_addr *addr = (const struct in6_addr *)data;
 	socklen_t size = INET6_ADDRSTRLEN;
-	zend_string *str = STR_ALLOC(size - 1, 0);
+	zend_string *str = zend_string_alloc(size - 1, 0);
 
 	memset(str->val, '\0', size);
 
@@ -984,8 +984,8 @@ static void to_zval_read_cmsg_data(const char *cmsghdr_c, zval *zv, res_context 
 	}
 	if (CMSG_LEN(entry->size) > cmsg->cmsg_len) {
 		do_to_zval_err(ctx, "the cmsghdr structure is unexpectedly small; "
-				"expected a length of at least %ld, but got %ld",
-				(long)CMSG_LEN(entry->size), (long)cmsg->cmsg_len);
+				"expected a length of at least %pd, but got %pd",
+				(zend_long)CMSG_LEN(entry->size), (zend_long)cmsg->cmsg_len);
 		return;
 	}
 
@@ -1072,7 +1072,7 @@ static void to_zval_read_name(const char *sockaddr_p, zval *zv, res_context *ctx
 }
 static void from_zval_write_msghdr_buffer_size(const zval *elem, char *msghdr_c, ser_context *ctx)
 {
-	long lval;
+	zend_long lval;
 	struct msghdr *msghdr = (struct msghdr *)msghdr_c;
 
 	lval = from_zval_integer_common(elem, ctx);
@@ -1081,8 +1081,8 @@ static void from_zval_write_msghdr_buffer_size(const zval *elem, char *msghdr_c,
 	}
 
 	if (lval < 0 || lval > MAX_USER_BUFF_SIZE) {
-		do_from_zval_err(ctx, "the buffer size must be between 1 and %ld; "
-				"given %ld", (long)MAX_USER_BUFF_SIZE, lval);
+		do_from_zval_err(ctx, "the buffer size must be between 1 and %pd; "
+				"given %pd", (zend_long)MAX_USER_BUFF_SIZE, lval);
 		return;
 	}
 
@@ -1224,7 +1224,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 	for (i = 0; bytes_left > 0 && i < (uint)iovlen; i++) {
 		zval elem;
 		size_t len = MIN(msghdr->msg_iov[i].iov_len, (size_t)bytes_left);
-		zend_string	*buf = STR_ALLOC(len, 0);
+		zend_string	*buf = zend_string_alloc(len, 0);
 
 		memcpy(buf->val, msghdr->msg_iov[i].iov_base, buf->len);
 		buf->val[buf->len] = '\0';
@@ -1260,7 +1260,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 	if (Z_TYPE_P(zv) == IS_LONG) {
 		if (Z_LVAL_P(zv) < 0 || Z_LVAL_P(zv) > UINT_MAX) { /* allow 0 (unspecified interface) */
 			do_from_zval_err(ctx, "the interface index cannot be negative or "
-					"larger than %u; given %ld", UINT_MAX, Z_LVAL_P(zv));
+					"larger than %u; given %pd", UINT_MAX, Z_LVAL_P(zv));
 		} else {
 			ret = (unsigned)Z_LVAL_P(zv);
 		}
@@ -1431,7 +1431,7 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 
 	if (*cmsg_len < data_offset) {
 		do_to_zval_err(ctx, "length of cmsg is smaller than its data member "
-				"offset (%ld vs %ld)", (long)*cmsg_len, (long)data_offset);
+				"offset (%pd vs %pd)", (zend_long)*cmsg_len, (zend_long)data_offset);
 		return;
 	}
 	num_elems = (*cmsg_len - data_offset) / sizeof(int);

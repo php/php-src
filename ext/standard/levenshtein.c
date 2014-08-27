@@ -95,7 +95,7 @@ PHP_FUNCTION(levenshtein)
 	char *str1, *str2;
 	char *callback_name;
 	int str1_len, str2_len, callback_len;
-	long cost_ins, cost_rep, cost_del;
+	zend_long cost_ins, cost_rep, cost_del;
 	int distance = -1;
 
 	switch (argc) {

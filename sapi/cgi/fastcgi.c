@@ -19,6 +19,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "php_network.h"
 #include "fastcgi.h"
 
 #include <string.h>
@@ -642,7 +643,7 @@ int fcgi_listen(const char *path, int backlog)
 		if (namedPipe == INVALID_HANDLE_VALUE) {
 			return -1;
 		}
-		listen_socket = _open_osfhandle((long)namedPipe, 0);
+		listen_socket = _open_osfhandle((intptr_t)namedPipe, 0);
 		if (!is_initialized) {
 			fcgi_init();
 		}
@@ -723,7 +724,7 @@ int fcgi_listen(const char *path, int backlog)
 
 #ifdef _WIN32
 	if (tcp) {
-		listen_socket = _open_osfhandle((long)listen_socket, 0);
+		listen_socket = _open_osfhandle((intptr_t)listen_socket, 0);
 	}
 #else
 	fcgi_setup_signals();
@@ -1511,7 +1512,7 @@ void fcgi_impersonate(void)
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
-	ZVAL_NEW_STR(&zvalue, STR_INIT(value, value_len, 1));
+	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
 	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
 }
 

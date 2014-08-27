@@ -167,7 +167,7 @@ typedef struct _php_basic_globals {
 	char *locale_string;
 	char *strtok_last;
 	char strtok_table[256];
-	ulong strtok_len;
+	zend_ulong strtok_len;
 	char str_ebuf[40];
 	zend_fcall_info array_walk_fci;
 	zend_fcall_info_cache array_walk_fci_cache;
@@ -178,9 +178,9 @@ typedef struct _php_basic_globals {
 	zval active_ini_file_section;
 	
 	/* pageinfo.c */
-	long page_uid;
-	long page_gid;
-	long page_inode;
+	zend_long page_uid;
+	zend_long page_gid;
+	zend_long page_inode;
 	time_t page_mtime;
 
 	/* filestat.c && main/streams/streams.c */

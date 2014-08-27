@@ -1,12 +1,12 @@
-.TH php\-config 1 "2010" "The PHP Group" "Scripting Language"
+.TH @program_prefix@php\-config 1 "2014" "The PHP Group" "Scripting Language"
 .SH NAME
-php\-config \- get information about PHP configuration and compile options
+@program_prefix@php\-config \- get information about PHP configuration and compile options
 .SH SYNOPSIS
-.B php\-config
+.B @program_prefix@php\-config
 [options]
 .LP
 .SH DESCRIPTION
-.B php\-config
+.B @program_prefix@php\-config
 is a simple shell script for obtaining information about installed PHP configuration.
 .SH OPTIONS
 .TP 15
@@ -57,15 +57,15 @@ PHP version
 .PD 0
 .B \-\-vernum
 PHP version as integer
-.TP
+.RS
 .PD 1
 .P
 .SH SEE ALSO
-.BR php (1)
+.BR @program_prefix@php (1)
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2010 The PHP Group
+Copyright \(co 1997\-2014 The PHP Group
 .LP
 This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is

@@ -57,14 +57,14 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 	if(result > LONG_MAX || result < -LONG_MAX) {
 		ZVAL_DOUBLE(return_value, result<0?ceil(result):floor(result));
 	} else {
-		ZVAL_LONG(return_value, (long)result);
+		ZVAL_LONG(return_value, (zend_long)result);
 	}
 }
 /* }}} */
 
-static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_value, const UCalendar *parsed_calendar, long calendar_field, char* key_name TSRMLS_DC)
+static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_value, const UCalendar *parsed_calendar, zend_long calendar_field, char* key_name TSRMLS_DC)
 {
-	long calendar_field_val = ucal_get( parsed_calendar, calendar_field, &INTL_DATA_ERROR_CODE(dfo));	
+	zend_long calendar_field_val = ucal_get( parsed_calendar, calendar_field, &INTL_DATA_ERROR_CODE(dfo));	
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing - localtime failed : could not get a field from calendar" );
 
 	if( strcmp(key_name, CALENDAR_YEAR )==0 ){
@@ -86,7 +86,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 	UCalendar      *parsed_calendar = NULL;
 	UChar*  	text_utf16  = NULL;
 	int32_t 	text_utf16_len = 0;
-	long 		isInDST = 0;
+	zend_long 		isInDST = 0;
 
 	/* Convert timezone to UTF-16. */
 	intl_convert_utf8_to_utf16(&text_utf16, &text_utf16_len, text_to_parse, text_len, &INTL_DATA_ERROR_CODE(dfo));

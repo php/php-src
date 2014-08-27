@@ -44,7 +44,7 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 	{
 		/* -1 required because we want the last run opcode, not the
 		 * next to-be-run one. */
-		zend_uint op_num = execute_data->opline - op_array->opcodes - 1;
+		uint32_t op_num = execute_data->opline - op_array->opcodes - 1;
 
 		int i;
 		for (i = 0; i < op_array->last_brk_cont; ++i) {
@@ -143,7 +143,7 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*) object;
 	zend_execute_data *ex = generator->execute_data;
-	zend_uint op_num, finally_op_num;
+	uint32_t op_num, finally_op_num;
 	int i;
 
 	if (!ex || !ex->func->op_array.has_finally_block) {

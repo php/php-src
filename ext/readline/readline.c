@@ -521,10 +521,10 @@ PHP_FUNCTION(readline_completion_function)
 
 	if (!zend_is_callable(arg, 0, &name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name->val);
-		STR_RELEASE(name);
+		zend_string_release(name);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(name);
+	zend_string_release(name);
 
 	zval_dtor(&_readline_completion);
 	ZVAL_DUP(&_readline_completion, arg);
@@ -571,10 +571,10 @@ PHP_FUNCTION(readline_callback_handler_install)
 
 	if (!zend_is_callable(callback, 0, &name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name->val);
-		STR_RELEASE(name);
+		zend_string_release(name);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(name);
+	zend_string_release(name);
 
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();

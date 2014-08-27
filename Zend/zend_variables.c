@@ -35,7 +35,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
 				CHECK_ZVAL_STRING_REL(str);
-				STR_RELEASE(str);
+				zend_string_release(str);
 				break;
 			}
 		case IS_ARRAY: {
@@ -47,7 +47,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);
 					zend_hash_destroy(&arr->ht);
-					efree(arr);
+					efree_size(arr, sizeof(zend_array));
 				}
 				break;
 			}
@@ -63,8 +63,8 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast = (zend_ast_ref*)p;
 		
-				zend_ast_destroy(ast->ast);
-				efree(ast);
+				zend_ast_destroy_and_free(ast->ast);
+				efree_size(ast, sizeof(zend_ast_ref));
 				break;
 			}
 		case IS_OBJECT: {
@@ -88,7 +88,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 				zend_reference *ref = (zend_reference*)p;
 				if (--GC_REFCOUNT(ref) == 0) {
 					zval_ptr_dtor(&ref->val);
-					efree(ref);
+					efree_size(ref, sizeof(zend_reference));
 				}
 				break;
 			}
@@ -104,7 +104,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
 				CHECK_ZVAL_STRING_REL(str);
-				STR_FREE(str);
+				zend_string_free(str);
 				break;
 			}
 		case IS_ARRAY: {
@@ -116,7 +116,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);
 					zend_hash_destroy(&arr->ht);
-					efree(arr);
+					efree_size(arr, sizeof(zend_array));
 				}
 				break;
 			}
@@ -130,8 +130,8 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast = (zend_ast_ref*)p;
 
-				zend_ast_destroy(ast->ast);
-				efree(ast);
+				zend_ast_destroy_and_free(ast->ast);
+				efree_size(ast, sizeof(zend_ast_ref));
 				break;
 			}
 		case IS_OBJECT: {
@@ -153,7 +153,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 				zend_reference *ref = (zend_reference*)p;
 
 				zval_ptr_dtor(&ref->val);
-				efree(ref);
+				efree_size(ref, sizeof(zend_reference));
 				break;
 			}
 		default:
@@ -167,7 +167,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
-			STR_RELEASE(Z_STR_P(zvalue));
+			zend_string_release(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
 		case IS_BIGINT:
@@ -199,7 +199,7 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
-			STR_FREE(Z_STR_P(zvalue));
+			zend_string_free(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
 		case IS_BIGINT:
@@ -253,7 +253,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT:
 		case IS_STRING:
 			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
-			Z_STR_P(zvalue) = STR_DUP(Z_STR_P(zvalue), 0);
+			Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
 			break;
 		case IS_ARRAY: {
 				HashTable *ht;
