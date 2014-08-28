@@ -326,31 +326,15 @@ PHP_MSHUTDOWN_FUNCTION(miconv)
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(miconv)
 {
-	char *iconv_impl;
-	char *version = "unknown";
+	zval *iconv_impl, *iconv_ver;
 
-#ifdef PHP_ICONV_IMPL
-	iconv_impl = PHP_ICONV_IMPL;
-#elif HAVE_LIBICONV
-	iconv_impl = "libiconv";
-	{
-		static char buf[16];
-		snprintf(buf, sizeof(buf), "%d.%d",
-		    ((_libiconv_version >> 8) & 0x0f), (_libiconv_version & 0x0f));
-		version = buf;
-	}
-#elif defined(NETWARE)
-	iconv_impl = "Novell";
-	version = "OS built-in";
-#else
-	iconv_impl = "unknown";
-	version = (char *)gnu_get_libc_version();
-#endif
+	iconv_impl = zend_get_constant_str("ICONV_IMPL", sizeof("ICONV_IMPL")-1 TSRMLS_CC);
+	iconv_ver = zend_get_constant_str("ICONV_VERSION", sizeof("ICONV_VERSION")-1 TSRMLS_CC);
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "iconv support", "enabled");
-	php_info_print_table_row(2, "iconv implementation", iconv_impl);
-	php_info_print_table_row(2, "iconv library version", version);
+	php_info_print_table_row(2, "iconv implementation", Z_STRVAL_P(iconv_impl));
+	php_info_print_table_row(2, "iconv library version", Z_STRVAL_P(iconv_ver));
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
