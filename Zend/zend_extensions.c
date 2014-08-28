@@ -106,7 +106,7 @@ int zend_load_extension(const char *path TSRMLS_DC)
 		DL_UNLOAD(handle);
 		return FAILURE;
 	} else if (zend_get_extension(new_extension->name)) {
-		fprintf(stderr, "Cannot load %s - it was already loade\n", new_extension->name);
+		fprintf(stderr, "Cannot load %s - it was already loaded\n", new_extension->name);
 /* See http://support.microsoft.com/kb/190351 */
 #ifdef PHP_WIN32
 		fflush(stderr);
