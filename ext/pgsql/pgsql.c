@@ -2741,7 +2741,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		} else {
 			char *element = PQgetvalue(pgsql_result, pgsql_row, i);
 			if (element) {
-				const uint element_len = strlen(element);
+				const size_t element_len = strlen(element);
 
 				if (result_type & PGSQL_NUM) {
 					add_index_stringl(return_value, i, element, element_len);
@@ -3481,7 +3481,7 @@ PHP_FUNCTION(pg_lo_write)
   	char *str;
   	zend_long z_len;
 	size_t str_len, nbytes;
-	int len;
+	size_t len;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
@@ -4284,11 +4284,11 @@ PHP_FUNCTION(pg_escape_string)
 #ifdef HAVE_PQESCAPE_CONN
 	if (pgsql_link != NULL || id != -1) {
 		ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
-		to->len = (int) PQescapeStringConn(pgsql, to->val, from->val, (size_t)from->len, NULL);
+		to->len = PQescapeStringConn(pgsql, to->val, from->val, from->len, NULL);
 	} else
 #endif
 	{
-		to->len = (int) PQescapeString(to->val, from->val, (size_t)from->len);
+		to->len = PQescapeString(to->val, from->val, from->len);
 	}
 
 	to = zend_string_realloc(to, to->len, 0);
@@ -5641,7 +5641,7 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	regmatch_t *subs;
 	int regopt = REG_EXTENDED;
 	int regerr, ret = SUCCESS;
-	int i;
+	size_t i;
 
 	/* Check invalid chars for POSIX regex */
 	for (i = 0; i < str_len; i++) {
@@ -5969,7 +5969,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							/* PostgreSQL ignores \0 */
 							str = zend_string_alloc(Z_STRLEN_P(val) * 2, 0);
 							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
-							str->len = (int)PQescapeStringConn(pg_link, str->val, Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
+							str->len = PQescapeStringConn(pg_link, str->val, Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
 							str = zend_string_realloc(str, str->len, 0);
 							ZVAL_STR(&new_val, str);
 							php_pgsql_add_quotes(&new_val, 1 TSRMLS_CC);
