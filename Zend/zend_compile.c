@@ -5293,7 +5293,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 			zend_bool has_null_default = default_ast
 				&& (Z_TYPE(default_node.u.constant) == IS_NULL
 					|| (Z_TYPE(default_node.u.constant) == IS_CONSTANT
-						&& strcasecmp(Z_STRVAL(default_node.u.constant), "NULL"))
+						&& strcasecmp(Z_STRVAL(default_node.u.constant), "NULL") == 0)
 					|| Z_TYPE(default_node.u.constant) == IS_CONSTANT_AST); // ???
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
