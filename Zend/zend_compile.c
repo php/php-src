@@ -5303,7 +5303,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 							"with array type hint can only be an array or NULL");
 					}
 				} else if (arg_info->type_hint == IS_CALLABLE && default_ast) {
-					if (default_ast && !has_null_default) {
+					if (!has_null_default) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with callable type hint can only be NULL");
 					}
