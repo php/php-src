@@ -44,7 +44,7 @@
 #define IBDEBUG(a)
 #endif
 
-extern int le_link, le_plink, le_trans;
+extern size_t le_link, le_plink, le_trans;
 
 #define LE_LINK "Firebird/InterBase link"
 #define LE_PLINK "Firebird/InterBase persistent link"
