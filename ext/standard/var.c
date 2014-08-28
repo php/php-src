@@ -494,6 +494,11 @@ again:
 			smart_str_appendl(buf, tmp_str, tmp_len);
 			efree(tmp_str);
 			break;
+		case IS_BIGINT:
+			ztmp = zend_bigint_to_zend_string(Z_BIG_P(struc), 0);
+			smart_str_appendl(buf, ztmp->val, ztmp->len);
+			zend_string_release(ztmp);
+			break;
 		case IS_STRING:
 			ztmp = php_addcslashes(Z_STRVAL_P(struc), Z_STRLEN_P(struc), 0, "'\\", 2 TSRMLS_CC);
 			ztmp2 = php_str_to_str_ex(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
