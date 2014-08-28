@@ -45,7 +45,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_import, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, count)
 	ZEND_ARG_INFO(0, order)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, endian)
@@ -54,7 +53,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, gmpnumber)
-	ZEND_ARG_INFO(1, count)
 	ZEND_ARG_INFO(0, order)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, endian)
@@ -1070,13 +1068,8 @@ ZEND_FUNCTION(gmp_init)
 }
 /* }}} */
 
-int gmp_import_export_validate(long count, long order, long size, long endian, long nails)
+int gmp_import_export_validate(long order, long size, long endian, long nails)
 {
-	if (count < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad count: %ld (should be 0 or greater)", count);
-		return 0;
-	}
-
 	if (size < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (should be at least 1 byte)", size);
 		return 0;
@@ -1107,24 +1100,23 @@ ZEND_FUNCTION(gmp_import)
 	unsigned char *data;
 	int data_len;
 	long count;
-	long count_max;
 	long order = -1;
 	long size = 1;
 	long endian = 0;
 	long nails = 0;
 	mpz_ptr gmpnumber;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lllll", &data, &data_len, &count, &order, &size, &endian, &nails) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llll", &data, &data_len, &order, &size, &endian, &nails) == FAILURE) {
 		return;
 	}
 
-	if (!gmp_import_export_validate(count, order, size, endian, nails)) {
+	if (!gmp_import_export_validate(order, size, endian, nails)) {
 		RETURN_FALSE;
 	}
 
-	count_max = (data_len / size) + 1;
-	if (count > count_max) {
-		count = count_max;
+	count = (data_len / size);
+	if (data_len % size) {
+		count++;
 	}
 
 	INIT_GMP_RETVAL(gmpnumber);
@@ -1138,8 +1130,7 @@ ZEND_FUNCTION(gmp_import)
 ZEND_FUNCTION(gmp_export)
 {
 	zval *gmpnumber_arg;
-	zval *count;
-	long count_max;
+	long count;
 	long order = -1;
 	long size = 1;
 	long endian = 0;
@@ -1147,11 +1138,11 @@ ZEND_FUNCTION(gmp_export)
 	mpz_ptr gmpnumber;
 	gmp_temp_t temp_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|zllll", &gmpnumber_arg, &count, &order, &size, &endian, &nails) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|llll", &gmpnumber_arg, &order, &size, &endian, &nails) == FAILURE) {
 		return;
 	}
 
-	if (!gmp_import_export_validate(Z_LVAL(*count), order, size, endian, nails)) {
+	if (!gmp_import_export_validate(order, size, endian, nails)) {
 		RETURN_FALSE;
 	}
 
@@ -1162,22 +1153,16 @@ ZEND_FUNCTION(gmp_export)
 	char *out_string;
 
 	bits_per_word = (size << 3) - nails;
-	count_max = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
-
-	if (Z_LVAL(*count) > count_max) {
-		Z_LVAL(*count) = count_max;
-	}
-
-	out_len = (Z_LVAL(*count) * size);
+	count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
+	out_len = (count * size);
 
 	out_string = emalloc(out_len + 1);
-	mpz_export(out_string, &Z_LVAL(*count), order, size, endian, nails, gmpnumber);
+	mpz_export(out_string, &count, order, size, endian, nails, gmpnumber);
 	out_string[out_len] = '\0';
 
 	ZVAL_STRINGL(return_value, out_string, out_len, 0);
 
 	FREE_GMP_TEMP(temp_a);
-
 }
 /* }}} */
 

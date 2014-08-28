@@ -83,7 +83,10 @@ $export = [
 print "Import:\n";
 $passed = true;
 foreach ($import as $k => $test) {
-    $gmp = gmp_import(hex2bin($test[6]), $test[1], $test[2], $test[3], $test[4], $test[5]);
+    // count * size
+    $data = substr(hex2bin($test[6]), 0, $test[1] * $test[3]);
+    // data, order, size, endian, nails
+    $gmp = gmp_import($data, $test[2], $test[3], $test[4], $test[5]);
     $result = gmp_strval($gmp, 16);
     if ($result !== $test[0]) {
         print "$k: '$result' !== '{$test[0]}'\n";
@@ -97,11 +100,12 @@ print "Export:\n";
 $passed = true;
 foreach ($export as $k => $test) {
     $gmp = gmp_init($test[0], 16);
-    $want_count = $test[1];
-    $str = gmp_export($gmp, $want_count, $test[2], $test[3], $test[4], $test[5]);
-    $result = bin2hex($str);
-    if ($result !== $test[6] || $want_count != $test[1]) {
-        print "$k: '$result' !== '{$test[6]}' or $want_count !== {$test[1]}\n";
+    // gmpumber, order, size, endian, nails
+    $str = gmp_export($gmp, $test[2], $test[3], $test[4], $test[5]);
+    // count * size
+    $result = bin2hex(substr($str, 0, $test[1] * $test[3]));
+    if ($result !== $test[6]) {
+        print "$k: '$result' !== '{$test[6]}'\n";
         $passed = false;
     }
 }
