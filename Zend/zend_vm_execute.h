@@ -325,7 +325,6 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend
 #define CHECK_EXCEPTION() LOAD_OPLINE()
 #define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()
 #define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()
-#define LOAD_REGS()
 #define ZEND_VM_CONTINUE()         return  0
 #define ZEND_VM_RETURN()           return -1
 #define ZEND_VM_ENTER()            return  1
@@ -340,7 +339,6 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 
 
-	LOAD_REGS();
 	LOAD_OPLINE();
 
 	while (1) {
