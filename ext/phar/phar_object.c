@@ -3420,7 +3420,7 @@ PHP_METHOD(Phar, copy)
 		}
 	}
 
-	if (phar_path_check(&newfile, &newfile_len, &pcr_error) > pcr_is_ok) {
+	if (phar_path_check(&newfile, (int *) &newfile_len, &pcr_error) > pcr_is_ok) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"file \"%s\" contains invalid characters %s, cannot be copied from \"%s\" in phar %s", newfile, pcr_error, oldfile, phar_obj->archive->fname);
 		RETURN_FALSE;
