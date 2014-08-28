@@ -245,7 +245,7 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 /* {{{ proto bool is_null(mixed var)
    Returns true if variable is null
-   Warning: This function is special-cased by zend_compile.c and so is usually not actually used */
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_null)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_NULL);
@@ -254,7 +254,7 @@ PHP_FUNCTION(is_null)
 
 /* {{{ proto bool is_resource(mixed var)
    Returns true if variable is a resource
-   Warning: This function is special-cased by zend_compile.c and so is usually not actually used */
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_resource)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_RESOURCE);
@@ -263,7 +263,7 @@ PHP_FUNCTION(is_resource)
 
 /* {{{ proto bool is_bool(mixed var)
    Returns true if variable is a boolean
-   Warning: This function is special-cased by zend_compile.c and so is usually not actually used */
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_bool)
 {
 	zval *arg;
@@ -279,7 +279,7 @@ PHP_FUNCTION(is_bool)
 
 /* {{{ proto bool is_long(mixed var)
    Returns true if variable is a long (integer)
-   Warning: This function is special-cased by zend_compile.c and so is usually not actually used */
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_long)
 {
 	zval *arg;
@@ -295,7 +295,7 @@ PHP_FUNCTION(is_long)
 
 /* {{{ proto bool is_float(mixed var)
    Returns true if variable is float point
-   Warning: This function is special-cased by zend_compile.c and so is usually not actually used */
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_float)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE);
@@ -304,7 +304,7 @@ PHP_FUNCTION(is_float)
 
 /* {{{ proto bool is_string(mixed var)
    Returns true if variable is a string
-   Warning: This function is special-cased by zend_compile.c and so is usually not actually used */
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_string)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
@@ -313,7 +313,7 @@ PHP_FUNCTION(is_string)
 
 /* {{{ proto bool is_array(mixed var)
    Returns true if variable is an array
-   Warning: This function is special-cased by zend_compile.c and so is usually not actually used */
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_array)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY);
@@ -322,7 +322,7 @@ PHP_FUNCTION(is_array)
 
 /* {{{ proto bool is_object(mixed var)
    Returns true if variable is an object
-   Warning: This function is special-cased by zend_compile.c and so is usually not actually used */
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_object)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
