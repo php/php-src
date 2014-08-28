@@ -877,9 +877,9 @@ static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 #endif
 
 /* {{{ _php_pgsql_trim_message */
-static char * _php_pgsql_trim_message(const char *message, int *len)
+static char * _php_pgsql_trim_message(const char *message, size_t *len)
 {
-	register int i = strlen(message)-1;
+	register size_t i = strlen(message)-1;
 
 	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
 		--i;
@@ -964,7 +964,7 @@ static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 	TSRMLS_FETCH();
 	if (! PGG(ignore_notices)) {
 		notice = (php_pgsql_notice *)emalloc(sizeof(php_pgsql_notice));
-		notice->message = _php_pgsql_trim_message(message, (int *)&notice->len);
+		notice->message = _php_pgsql_trim_message(message, &notice->len);
 		if (PGG(log_notices)) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", notice->message);
 		}
@@ -2305,7 +2305,7 @@ PHP_FUNCTION(pg_affected_rows)
    Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice) 
 {
-	zval *pgsql_link;
+	zval *pgsql_link = NULL;
 	PGconn *pg_link;
 	int id = -1;
 	php_pgsql_notice *notice;
@@ -2313,10 +2313,15 @@ PHP_FUNCTION(pg_last_notice)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &pgsql_link) == FAILURE) {
 		return;
 	}
+
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}
+
 	/* Just to check if user passed valid resoruce */
 	ZEND_FETCH_RESOURCE2(pg_link, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	if ((notice = zend_hash_index_find_ptr(&PGG(notices), Z_RES_HANDLE_P(pgsql_link))) == NULL) {
+	if ((notice = zend_hash_index_find_ptr(&PGG(notices), (zend_ulong)Z_RES_HANDLE_P(pgsql_link))) == NULL) {
 		RETURN_FALSE;
 	}
 	RETURN_STRINGL(notice->message, notice->len);

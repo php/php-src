@@ -37,7 +37,7 @@
 
 #if !defined(MYSQLI_USE_MYSQLND)
 /* {{{ mysqli_tx_cor_options_to_string */
-static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str * str, const unsigned size_t mode)
+static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str * str, const size_t mode)
 {
 	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
 		if (str->s && str->s->len) {
