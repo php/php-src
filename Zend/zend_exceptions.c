@@ -547,7 +547,7 @@ static void _build_trace_string(zval *frame, zend_ulong index, zend_string **str
 				line = 0;
 			}
 			s_tmp = emalloc(Z_STRLEN_P(file) + MAX_LENGTH_OF_LONG + 4 + 1);
-			len = sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_P(file), line);
+			len = sprintf(s_tmp, "%s(" ZEND_LONG_FMT "): ", Z_STRVAL_P(file), line);
 			TRACE_APPEND_STRL(s_tmp, len);
 			efree(s_tmp);
 		}
