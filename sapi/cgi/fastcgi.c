@@ -73,7 +73,9 @@
 # include <netdb.h>
 # include <signal.h>
 
-# define closesocket(s) close(s)
+# ifndef closesocket
+#  define closesocket(s) close(s)
+# endif
 
 # if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
 #  include <sys/poll.h>
