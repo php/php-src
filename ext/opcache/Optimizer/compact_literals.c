@@ -360,7 +360,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					} else {
 						map[i] = j;
 						ZVAL_LONG(&zv, j);
-						zend_hash_index_update(&hash, Z_LVAL(op_array->literals[i]), &zv);
+						zend_hash_index_add_new(&hash, Z_LVAL(op_array->literals[i]), &zv);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
@@ -423,7 +423,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						map[i] = j;
 						if (info[i].flags & LITERAL_MAY_MERGE) {
 							ZVAL_LONG(&zv, j);
-							zend_hash_add(&hash, key, &zv);
+							zend_hash_add_new(&hash, key, &zv);
 							zend_string_release(key);
 						}
 						if (i != j) {
