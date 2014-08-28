@@ -32,8 +32,8 @@
 
 typedef struct _zend_constant {
 	zval value;
-	int flags;
 	zend_string *name;
+	int flags;
 	int module_number;
 } zend_constant;
 
