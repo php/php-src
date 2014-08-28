@@ -32,7 +32,7 @@
 PHP_FUNCTION(ftok)
 {
 	char *pathname, *proj;
-	int pathname_len, proj_len;
+	size_t pathname_len, proj_len;
 	key_t k;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps", &pathname, &pathname_len, &proj, &proj_len) == FAILURE) {

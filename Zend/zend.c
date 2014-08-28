@@ -305,7 +305,7 @@ ZEND_API int zend_print_zval(zval *expr, int indent TSRMLS_DC) /* {{{ */
 ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC) /* {{{ */
 {
 	zend_string *str = zval_get_string(expr);
-	int len = str->len;
+	size_t len = str->len;
 
 	if (len != 0) {
 		write_func(str->val, len);
@@ -1034,7 +1034,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
 		zend_execute_data *ex;
-		zend_op *opline;
+		const zend_op *opline;
 
 		switch (type) {
 			case E_CORE_ERROR:
@@ -1325,7 +1325,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
 				}
 			}
 			destroy_op_array(op_array TSRMLS_CC);
-			efree(op_array);
+			efree_size(op_array, sizeof(zend_op_array));
 		} else if (type==ZEND_REQUIRE) {
 			va_end(files);
 			return FAILURE;

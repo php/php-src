@@ -272,7 +272,7 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 PHP_FUNCTION(convert_cyr_string)
 {
 	char *input, *fr_cs, *to_cs;
-	int input_len, fr_cs_len, to_cs_len;
+	size_t input_len, fr_cs_len, to_cs_len;
 	zend_string *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {

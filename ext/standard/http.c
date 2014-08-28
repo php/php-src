@@ -34,7 +34,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	zend_string *key = NULL;
 	char *newprefix, *p;
 	const char *prop_name;
-	int arg_sep_len, newprefix_len, prop_len;
+	size_t arg_sep_len, newprefix_len, prop_len;
 	zend_ulong idx;
 	zval *zdata = NULL, copyzval;
 
@@ -66,7 +66,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					/* private or protected property access outside of the class */
 					continue;
 				}
-				zend_unmangle_property_name_ex(key->val, key->len, &tmp, &prop_name, &prop_len);
+				zend_unmangle_property_name_ex(key->val, key->len, &tmp, &prop_name, (int *)&prop_len);
 			} else {
 				prop_name = key->val;
 				prop_len = key->len;
@@ -239,7 +239,7 @@ PHP_FUNCTION(http_build_query)
 {
 	zval *formdata;
 	char *prefix = NULL, *arg_sep=NULL;
-	int arg_sep_len = 0, prefix_len = 0;
+	size_t arg_sep_len = 0, prefix_len = 0;
 	smart_str formstr = {0};
 	zend_long enc_type = PHP_QUERY_RFC1738;
 

@@ -54,7 +54,8 @@ PHP_METHOD(domprocessinginstruction, __construct)
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
-	int name_len, value_len, name_valid;
+	size_t name_len, value_len;
+	int name_valid;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);

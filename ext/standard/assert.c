@@ -140,7 +140,8 @@ PHP_MINFO_FUNCTION(assert) /* {{{ */
 PHP_FUNCTION(assert)
 {
 	zval *assertion;
-	int val, description_len = 0;
+	int val;
+	size_t description_len = 0;
 	char *myeval = NULL;
 	char *compiled_string_description, *description = NULL;
 

@@ -228,7 +228,8 @@ ZEND_METHOD(error_exception, __construct)
 	char  *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
 	zval  *object, *previous = NULL;
-	int    argc = ZEND_NUM_ARGS(), message_len, filename_len;
+	int    argc = ZEND_NUM_ARGS();
+	size_t message_len, filename_len;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, default_exception_ce) == FAILURE) {
 		zend_error(E_ERROR, "Wrong parameters for ErrorException([string $exception [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Exception $previous = NULL]]]]]])");
@@ -554,7 +555,7 @@ static void _build_trace_string(zval *frame, zend_ulong index, zend_string **str
 				line = 0;
 			}
 			s_tmp = emalloc(Z_STRLEN_P(file) + MAX_LENGTH_OF_LONG + 4 + 1);
-			len = sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_P(file), line);
+			len = sprintf(s_tmp, "%s(" ZEND_LONG_FMT "): ", Z_STRVAL_P(file), line);
 			TRACE_APPEND_STRL(s_tmp, len);
 			efree(s_tmp);
 		}

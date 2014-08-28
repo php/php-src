@@ -1177,7 +1177,8 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx TSRMLS_DC) 
 		return FAILURE;
 	}
 #else
-	if (SUCCESS == php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "ecdh_curve", &val)) {
+	val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "ecdh_curve");
+	if (val != NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"ECDH curve support not compiled into the OpenSSL lib against which PHP is linked");
 
@@ -2145,6 +2146,19 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret TS
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			if (ret) {
+				if (sslsock->ssl_active) {
+					/* OpenSSL has an internal buffer which select() cannot see. If we don't
+					   fetch it into the stream's buffer, no activity will be reported on the
+					   stream even though there is data waiting to be read - but we only fetch
+					   the number of bytes OpenSSL has ready to give us since we weren't asked
+					   for any data at this stage. This is only likely to cause issues with
+					   non-blocking streams, but it's harmless to always do it. */
+					int bytes;
+					while ((bytes = SSL_pending(sslsock->ssl_handle)) > 0) {
+						php_stream_fill_read_buffer(stream, (size_t)bytes);
+					}
+				}
+
 				*(php_socket_t *)ret = sslsock->s.socket;
 			}
 			return SUCCESS;

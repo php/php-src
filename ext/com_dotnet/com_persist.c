@@ -349,7 +349,7 @@ CPH_METHOD(GetCurFileName)
 		res = IPersistFile_GetCurFile(helper->ipf, &olename);
 
 		if (res == S_OK) {
-			int len;
+			size_t len;
 			char *str = php_com_olestring_to_string(olename,
 				   &len, helper->codepage TSRMLS_CC);
 			RETVAL_STRINGL(str, len);
@@ -375,7 +375,7 @@ CPH_METHOD(SaveToFile)
 {
 	HRESULT res;
 	char *filename, *fullpath = NULL;
-	int filename_len;
+	size_t filename_len;
 	zend_bool remember = TRUE;
 	OLECHAR *olefilename = NULL;
 	CPH_FETCH();
@@ -438,7 +438,7 @@ CPH_METHOD(LoadFromFile)
 {
 	HRESULT res;
 	char *filename, *fullpath;
-	int filename_len;
+	size_t filename_len;
 	zend_long flags = 0;
 	OLECHAR *olefilename;
 	CPH_FETCH();

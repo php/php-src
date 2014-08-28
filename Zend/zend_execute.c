@@ -64,27 +64,15 @@ static void zend_extension_fcall_end_handler(const zend_extension *extension, ze
 
 #define RETURN_VALUE_USED(opline) (!((opline)->result_type & EXT_TYPE_UNUSED))
 
-#define TEMP_VAR_STACK_LIMIT 2000
-
-static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free)
-{
-	should_free->var = NULL;
-	if (Z_REFCOUNTED_P(z) && !Z_DELREF_P(z)) {
-		Z_SET_REFCOUNT_P(z, 1);
-		should_free->var = z;
-		/* should_free->is_var = 1; */
-	}
-}
-
 static ZEND_FUNCTION(pass)
 {
 }
 
 static const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
+	0,                      /* fn_flags          */
 	NULL,                   /* name              */
 	NULL,                   /* scope             */
-	0,                      /* fn_flags          */
 	NULL,                   /* prototype         */
 	0,                      /* num_args          */
 	0,                      /* required_num_args */
@@ -97,9 +85,11 @@ static const zend_internal_function zend_pass_function = {
 #define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC TSRMLS_CC)
 #define zval_ptr_dtor_nogc(zv) i_zval_ptr_dtor_nogc(zv ZEND_FILE_LINE_CC TSRMLS_CC)
 
-#define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f)
 #define PZVAL_LOCK(z) if (Z_REFCOUNTED_P(z)) Z_ADDREF_P((z))
 #define SELECTIVE_PZVAL_LOCK(pzv, opline)	if (RETURN_VALUE_USED(opline)) { PZVAL_LOCK(pzv); }
+
+#define READY_TO_DESTROY(zv) \
+	(zv && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
 #define EXTRACT_ZVAL_PTR(zv) do {						\
 		zval *__zv = (zv);								\
@@ -439,11 +429,12 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(uint32_t var, const zend_e
 	if (EXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
 		should_free->var = NULL;
 		return Z_INDIRECT_P(ret);
-	} else if (!Z_REFCOUNTED_P(ret)) {
-		should_free->var = ret; //???
+	} else if (!Z_REFCOUNTED_P(ret) || Z_REFCOUNT_P(ret) == 1) {
+		should_free->var = ret;
 		return ret;
 	} else {
-		PZVAL_UNLOCK(ret, should_free);
+		Z_DELREF_P(ret);
+		should_free->var = NULL;
 		return ret;
 	}
 }
@@ -677,7 +668,7 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t ar
 	}
 }
 
-static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *property_name, int value_type, znode_op *value_op, const zend_execute_data *execute_data, int opcode, void **cache_slot TSRMLS_DC)
+static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *property_name, int value_type, const znode_op *value_op, const zend_execute_data *execute_data, int opcode, void **cache_slot TSRMLS_DC)
 {
 	zend_free_op free_value;
  	zval *value = get_zval_ptr(value_type, value_op, execute_data, &free_value, BP_VAR_R);
@@ -768,11 +759,14 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 static void zend_assign_to_string_offset(zval *str_offset, zval *value, int value_type, zval *result TSRMLS_DC)
 {
 	zval *str = Z_STR_OFFSET_STR_P(str_offset);
-	uint32_t offset = Z_STR_OFFSET_IDX_P(str_offset);
+	/* XXX String offset is uint32_t in _zval_struct, so can address only 2^32+1 space.
+		To make the offset get over that barier, we need to make str_offset size_t and that
+		would grow zval size by 8 bytes (currently from 16 to 24) on 64 bit build. */
+	size_t offset = (size_t)Z_STR_OFFSET_IDX_P(str_offset);
 	zend_string *old_str;
 
-	if ((int)offset < 0) {
-		zend_error(E_WARNING, "Illegal string offset:  %d", offset);
+	if ((zend_long)offset < 0) {
+		zend_error(E_WARNING, "Illegal string offset:  %zd", offset);
 		zend_string_release(Z_STR_P(str));
 		if (result) {
 			ZVAL_NULL(result);
@@ -782,7 +776,7 @@ static void zend_assign_to_string_offset(zval *str_offset, zval *value, int valu
 
 	old_str = Z_STR_P(str);
 	if (offset >= Z_STRLEN_P(str)) {
-		int old_len = Z_STRLEN_P(str);
+		size_t old_len = Z_STRLEN_P(str);
 		Z_STR_P(str) = zend_string_realloc(Z_STR_P(str), offset + 1, 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
@@ -1775,7 +1769,7 @@ ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_ar
 }
 /* }}} */
 
-static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(zend_op *opline, zend_execute_data *call TSRMLS_DC) /* {{{ */
+static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(const zend_op *opline, zend_execute_data *call TSRMLS_DC) /* {{{ */
 {
 	uint32_t arg_num = opline->extended_value & ZEND_FETCH_ARG_MASK;
 	return ARG_SHOULD_BE_SENT_BY_REF(call->func, arg_num);

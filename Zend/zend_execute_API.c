@@ -607,7 +607,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 		zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope TSRMLS_CC);
 		if (inline_change) {
 			zend_ast_destroy_and_free(Z_ASTVAL_P(p));
-			efree(Z_AST_P(p));
+			efree_size(Z_AST_P(p), sizeof(zend_ast_ref));
 		}
 		ZVAL_COPY_VALUE(p, &tmp);
 	}
@@ -1092,7 +1092,7 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 			zend_execute(new_op_array, &local_retval TSRMLS_CC);
 		} zend_catch {
 			destroy_op_array(new_op_array TSRMLS_CC);
-			efree(new_op_array);
+			efree_size(new_op_array, sizeof(zend_op_array));
 			zend_bailout();
 		} zend_end_try();
 
@@ -1110,7 +1110,7 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 
 		EG(no_extensions)=0;
 		destroy_op_array(new_op_array TSRMLS_CC);
-		efree(new_op_array);
+		efree_size(new_op_array, sizeof(zend_op_array));
 		retval = SUCCESS;
 	} else {
 		retval = FAILURE;

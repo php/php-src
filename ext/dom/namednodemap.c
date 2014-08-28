@@ -126,7 +126,8 @@ Since:
 PHP_FUNCTION(dom_namednodemap_get_named_item)
 {
 	zval *id;
-	int ret, namedlen=0;
+	int ret;
+	size_t namedlen=0;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
 	char *named;
@@ -258,7 +259,8 @@ Since: DOM Level 2
 PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 {
 	zval *id;
-	int ret, namedlen=0, urilen=0;
+	int ret;
+	size_t namedlen=0, urilen=0;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
 	char *uri, *named;

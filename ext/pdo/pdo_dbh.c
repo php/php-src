@@ -200,10 +200,10 @@ static PHP_METHOD(PDO, dbh_constructor)
 	pdo_dbh_t *dbh = NULL;
 	zend_bool is_persistent = 0;
 	char *data_source;
-	int data_source_len;
+	size_t data_source_len;
 	char *colon;
 	char *username=NULL, *password=NULL;
-	int usernamelen, passwordlen;
+	size_t usernamelen, passwordlen;
 	pdo_driver_t *driver = NULL;
 	zval *options = NULL;
 	char alt_dsn[512];
@@ -480,7 +480,7 @@ static PHP_METHOD(PDO, prepare)
 {
 	pdo_stmt_t *stmt;
 	char *statement;
-	int statement_len;
+	size_t statement_len;
 	zval *options = NULL, *opt, *item, ctor_args;
 	zend_class_entry *dbstmt_ce, *pce;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(getThis());
@@ -923,7 +923,7 @@ static PHP_METHOD(PDO, exec)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
 	char *statement;
-	int statement_len;
+	size_t statement_len;
 	zend_long ret;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &statement, &statement_len)) {
@@ -952,7 +952,7 @@ static PHP_METHOD(PDO, lastInsertId)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
 	char *name = NULL;
-	int namelen;
+	size_t namelen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!", &name, &namelen)) {
 		RETURN_FALSE;
@@ -1058,7 +1058,7 @@ static PHP_METHOD(PDO, query)
 {
 	pdo_stmt_t *stmt;
 	char *statement;
-	int statement_len;
+	size_t statement_len;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(getThis());
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
@@ -1135,7 +1135,7 @@ static PHP_METHOD(PDO, quote)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
 	char *str;
-	int str_len;
+	size_t str_len;
 	zend_long paramtype = PDO_PARAM_STR;
 	char *qstr;
 	int qlen;
@@ -1271,7 +1271,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind TSRMLS_DC)
 	const zend_function_entry *funcs;
 	zend_function func;
 	zend_internal_function *ifunc = (zend_internal_function*)&func;
-	int namelen;
+	size_t namelen;
 	char *lc_name;
 	pdo_dbh_t *dbh = dbh_obj->inner;
 

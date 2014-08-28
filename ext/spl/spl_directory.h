@@ -45,7 +45,7 @@ typedef struct _spl_filesystem_object  spl_filesystem_object;
 typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object TSRMLS_DC);
 typedef void (*spl_foreign_clone_t)(spl_filesystem_object *src, spl_filesystem_object *dst TSRMLS_DC);
 
-PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len TSRMLS_DC);
+PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_t *len TSRMLS_DC);
 
 typedef struct _spl_other_handler {
 	spl_foreign_dtor_t     dtor;

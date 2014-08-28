@@ -80,7 +80,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->static_variables = NULL;
 	op_array->last_try_catch = 0;
-	op_array->has_finally_block = 0;
 
 	op_array->this_var = -1;
 
@@ -123,7 +122,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 	if (function->type == ZEND_INTERNAL_FUNCTION) {
 		pefree(function, 1);
 	} else if (!function->common.function_name) {
-		efree(function);
+		efree_size(function, sizeof(zend_op_array));
 	}
 }
 
@@ -330,7 +329,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		return;
 	}
 
-	efree(op_array->refcount);
+	efree_size(op_array->refcount, sizeof(*(op_array->refcount)));
 
 	if (op_array->vars) {
 		i = op_array->last_var;
@@ -678,7 +677,7 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 	if (!ZEND_USER_CODE(op_array->type)) {
 		return 0;
 	}
-	if (op_array->has_finally_block) {
+	if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 		zend_resolve_finally_calls(op_array TSRMLS_CC);
 	}
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {

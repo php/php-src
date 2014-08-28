@@ -35,8 +35,7 @@
 
 #define IB_STATUS (IBG(status))
 
-/* XXX ZEND_DEBUG_ is misleading, it should be something like IBASE_DEBUG. */
-#ifdef ZEND_DEBUG_
+#ifdef IBASE_DEBUG
 #define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
 #endif
 
@@ -44,7 +43,7 @@
 #define IBDEBUG(a)
 #endif
 
-extern int le_link, le_plink, le_trans;
+extern size_t le_link, le_plink, le_trans;
 
 #define LE_LINK "Firebird/InterBase link"
 #define LE_PLINK "Firebird/InterBase persistent link"

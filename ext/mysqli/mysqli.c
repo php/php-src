@@ -1047,7 +1047,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 	MY_STMT				*stmt;
 	MYSQLI_RESOURCE		*mysqli_resource;
 	char				*statement;
-	int					statement_len;
+	size_t					statement_len;
 
 	switch (ZEND_NUM_ARGS())
 	{

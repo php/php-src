@@ -792,7 +792,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(getThis());
 
 	char *buf;
-	int buf_len;
+	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	zval entry, pmembers, pcount, inf;

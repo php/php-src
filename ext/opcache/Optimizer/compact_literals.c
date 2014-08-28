@@ -20,6 +20,15 @@
 /* pass 11
  * - compact literals table
  */
+
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
 #define DEBUG_COMPACT_LITERALS 0
 
 #define LITERAL_VALUE                        0x0100
@@ -104,7 +113,7 @@ static void optimizer_literal_class_info(literal_info   *info,
 	}
 }
 
-static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC)
+void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC)
 {
 	zend_op *opline, *end;
 	int i, j, n, *map, cache_slots;
@@ -351,7 +360,7 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 					} else {
 						map[i] = j;
 						ZVAL_LONG(&zv, j);
-						zend_hash_index_update(&hash, Z_LVAL(op_array->literals[i]), &zv);
+						zend_hash_index_add_new(&hash, Z_LVAL(op_array->literals[i]), &zv);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
@@ -414,7 +423,7 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 						map[i] = j;
 						if (info[i].flags & LITERAL_MAY_MERGE) {
 							ZVAL_LONG(&zv, j);
-							zend_hash_add(&hash, key, &zv);
+							zend_hash_add_new(&hash, key, &zv);
 							zend_string_release(key);
 						}
 						if (i != j) {

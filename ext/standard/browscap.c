@@ -438,7 +438,7 @@ static void browscap_zval_copy_ctor(zval *p) /* {{{ */
 PHP_FUNCTION(get_browser)
 {
 	char *agent_name = NULL;
-	int agent_name_len = 0;
+	size_t agent_name_len = 0;
 	zend_bool return_array = 0;
 	zval *agent, *z_agent_name, *http_user_agent;
 	zval found_browser_entry;

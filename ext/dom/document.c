@@ -697,7 +697,8 @@ PHP_FUNCTION(dom_document_create_element)
 	xmlNode *node;
 	xmlDocPtr docp;
 	dom_object *intern;
-	int ret, name_len, value_len;
+	int ret;
+	size_t name_len, value_len;
 	char *name, *value = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_document_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
@@ -756,7 +757,8 @@ PHP_FUNCTION(dom_document_create_text_node)
 	zval *id;
 	xmlNode *node;
 	xmlDocPtr docp;
-	int ret, value_len;
+	int ret;
+	size_t value_len;
 	dom_object *intern;
 	char *value;
 
@@ -784,7 +786,8 @@ PHP_FUNCTION(dom_document_create_comment)
 	zval *id;
 	xmlNode *node;
 	xmlDocPtr docp;
-	int ret, value_len;
+	int ret;
+	size_t value_len;
 	dom_object *intern;
 	char *value;
 
@@ -812,7 +815,8 @@ PHP_FUNCTION(dom_document_create_cdatasection)
 	zval *id;
 	xmlNode *node;
 	xmlDocPtr docp;
-	int ret, value_len;
+	int ret;
+	size_t value_len;
 	dom_object *intern;
 	char *value;
 
@@ -840,7 +844,8 @@ PHP_FUNCTION(dom_document_create_processing_instruction)
 	zval *id;
 	xmlNode *node;
 	xmlDocPtr docp;
-	int ret, value_len, name_len = 0;
+	int ret;
+	size_t value_len, name_len = 0;
 	dom_object *intern;
 	char *name, *value = NULL;
 
@@ -875,7 +880,8 @@ PHP_FUNCTION(dom_document_create_attribute)
 	zval *id;
 	xmlAttrPtr node;
 	xmlDocPtr docp;
-	int ret, name_len;
+	int ret;
+	size_t name_len;
 	dom_object *intern;
 	char *name;
 
@@ -910,7 +916,8 @@ PHP_FUNCTION(dom_document_create_entity_reference)
 	xmlNode *node;
 	xmlDocPtr docp = NULL;
 	dom_object *intern;
-	int ret, name_len;
+	int ret;
+	size_t name_len;
 	char *name;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_document_class_entry, &name, &name_len) == FAILURE) {
@@ -941,7 +948,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 {
 	zval *id;
 	xmlDocPtr docp;
-	int name_len;
+	size_t name_len;
 	dom_object *intern, *namednode;
 	char *name;
 	xmlChar *local;
@@ -1024,7 +1031,8 @@ PHP_FUNCTION(dom_document_create_element_ns)
 	xmlDocPtr docp;
 	xmlNodePtr nodep = NULL;
 	xmlNsPtr nsptr = NULL;
-	int ret, uri_len = 0, name_len = 0, value_len = 0;
+	int ret;
+	size_t uri_len = 0, name_len = 0, value_len = 0;
 	char *uri, *name, *value = NULL;
 	char *localname = NULL, *prefix = NULL;
 	int errorcode;
@@ -1087,7 +1095,8 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 	xmlDocPtr docp;
 	xmlNodePtr nodep = NULL, root;
 	xmlNsPtr nsptr;
-	int ret, uri_len = 0, name_len = 0;
+	int ret;
+	size_t uri_len = 0, name_len = 0;
 	char *uri, *name;
 	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;
@@ -1150,7 +1159,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name_ns)
 {
 	zval *id;
 	xmlDocPtr docp;
-	int uri_len, name_len;
+	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
 	char *uri, *name;
 	xmlChar *local, *nsuri;
@@ -1178,7 +1187,8 @@ PHP_FUNCTION(dom_document_get_element_by_id)
 	zval *id;
 	xmlDocPtr docp;
 	xmlAttrPtr  attrp;
-	int ret, idname_len;
+	int ret;
+	size_t idname_len;
 	dom_object *intern;
 	char *idname;
 
@@ -1247,7 +1257,8 @@ PHP_METHOD(domdocument, __construct)
 	xmlDoc *docp = NULL, *olddoc;
 	dom_object *intern;
 	char *encoding, *version = NULL;
-	int encoding_len = 0, version_len = 0, refcount;
+	size_t encoding_len = 0, version_len = 0;
+	int refcount;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
@@ -1341,7 +1352,7 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 }
 /* }}} */
 
-static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int source_len, int options TSRMLS_DC) /* {{{ */
+static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t source_len, size_t options TSRMLS_DC) /* {{{ */
 {
     xmlDocPtr ret;
     xmlParserCtxtPtr ctxt = NULL;
@@ -1464,7 +1475,8 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	dom_doc_propsptr doc_prop;
 	dom_object *intern;
 	char *source;
-	int source_len, refcount, ret;
+	size_t source_len;
+	int refcount, ret;
 	zend_long options = 0;
 
 	id = getThis();
@@ -1543,7 +1555,8 @@ PHP_FUNCTION(dom_document_save)
 {
 	zval *id;
 	xmlDoc *docp;
-	int file_len = 0, bytes, format, saveempty = 0;
+	size_t file_len = 0;
+	int bytes, format, saveempty = 0;
 	dom_object *intern;
 	dom_doc_propsptr doc_props;
 	char *file;
@@ -1771,7 +1784,8 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	xmlDoc *docp;
 	dom_object *intern;
 	char *source = NULL, *valid_file = NULL;
-	int source_len = 0, valid_opts = 0;
+	size_t source_len = 0;
+	int valid_opts = 0;
 	zend_long flags = 0;
 	xmlSchemaParserCtxtPtr  parser;
 	xmlSchemaPtr            sptr;
@@ -1868,7 +1882,7 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 	xmlDoc *docp;
 	dom_object *intern;
 	char *source = NULL, *valid_file = NULL;
-	int source_len = 0;
+	size_t source_len = 0;
 	xmlRelaxNGParserCtxtPtr parser;
 	xmlRelaxNGPtr           sptr;
 	xmlRelaxNGValidCtxtPtr  vptr;
@@ -1962,7 +1976,8 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	dom_object *intern;
 	dom_doc_propsptr doc_prop;
 	char *source;
-	int source_len, refcount, ret;
+	size_t source_len;
+	int refcount, ret;
 	zend_long options = 0;
 	htmlParserCtxtPtr ctxt;
 	
@@ -2060,7 +2075,8 @@ PHP_FUNCTION(dom_document_save_html_file)
 {
 	zval *id;
 	xmlDoc *docp;
-	int file_len, bytes, format;
+	size_t file_len;
+	int bytes, format;
 	dom_object *intern;
 	dom_doc_propsptr doc_props;
 	char *file;

@@ -19,6 +19,14 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
 #define GET_AVAILABLE_T()		\
 	for (i = 0; i < T; i++) {	\
 		if (!taken_T[i]) {		\
@@ -30,7 +38,7 @@
 		max = i;				\
 	}
 
-static void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	int T = op_array->T;
 	int offset = op_array->last_var;

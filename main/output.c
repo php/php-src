@@ -1566,7 +1566,7 @@ PHP_FUNCTION(output_reset_rewrite_vars)
 PHP_FUNCTION(output_add_rewrite_var)
 {
 	char *name, *value;
-	int name_len, value_len;
+	size_t name_len, value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;

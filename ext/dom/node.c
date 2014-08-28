@@ -1413,7 +1413,7 @@ Since: DOM Level 2
 PHP_FUNCTION(dom_node_is_supported)
 {
 	zval *id;
-	int feature_len, version_len;
+	size_t feature_len, version_len;
 	char *feature, *version;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss", &id, dom_node_class_entry, &feature, &feature_len, &version, &version_len) == FAILURE) {
@@ -1501,7 +1501,7 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 	xmlNodePtr nodep, lookupp = NULL;
 	dom_object *intern;
 	xmlNsPtr nsptr;
-	int uri_len = 0;
+	size_t uri_len = 0;
 	char *uri;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
@@ -1551,7 +1551,7 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 	xmlNodePtr nodep;
 	dom_object *intern;
 	xmlNsPtr nsptr;
-	int uri_len = 0;
+	size_t uri_len = 0;
 	char *uri;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
@@ -1584,7 +1584,7 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	xmlNodePtr nodep;
 	dom_object *intern;
 	xmlNsPtr nsptr;
-	int prefix_len = 0;
+	size_t prefix_len = 0;
 	char *prefix=NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!", &id, dom_node_class_entry, &prefix, &prefix_len) == FAILURE) {
@@ -1659,7 +1659,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	zend_bool exclusive=0, with_comments=0;
 	xmlChar **inclusive_ns_prefixes = NULL;
 	char *file = NULL;
-	int ret = -1, file_len = 0;
+	int ret = -1;
+	size_t file_len = 0;
 	xmlOutputBufferPtr buf;
 	xmlXPathContextPtr ctxp=NULL;
 	xmlXPathObjectPtr xpathobjp=NULL;

@@ -551,7 +551,7 @@ PHP_MINFO_FUNCTION(dba)
  */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	int val_len;
+	size_t val_len;
 	zval *id;
 	dba_info *info = NULL;
 	int ac = ZEND_NUM_ARGS();
@@ -1054,7 +1054,7 @@ PHP_FUNCTION(dba_key_split)
 {
 	zval *zkey;
 	char *key, *name;
-	int key_len;
+	size_t key_len;
 
 	if (ZEND_NUM_ARGS() != 1) {
 		WRONG_PARAM_COUNT;

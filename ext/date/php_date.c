@@ -1055,7 +1055,7 @@ char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 /* }}} */
 
 /* {{{ date_format - (gm)date helper */
-static zend_string *date_format(char *format, int format_len, timelib_time *t, int localtime TSRMLS_DC)
+static zend_string *date_format(char *format, size_t format_len, timelib_time *t, int localtime TSRMLS_DC)
 {
 	smart_str            string = {0};
 	int                  i, length = 0;
@@ -1216,7 +1216,7 @@ static zend_string *date_format(char *format, int format_len, timelib_time *t, i
 static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 {
 	char   *format;
-	int     format_len;
+	size_t     format_len;
 	zend_long    ts;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
@@ -1372,7 +1372,7 @@ PHP_FUNCTION(gmdate)
 PHP_FUNCTION(idate)
 {
 	char   *format;
-	int     format_len;
+	size_t     format_len;
 	zend_long    ts = 0;
 	int ret; 
 
@@ -1440,7 +1440,8 @@ PHPAPI zend_long php_parse_date(char *string, zend_long *now)
 PHP_FUNCTION(strtotime)
 {
 	char *times, *initial_ts;
-	int   time_len, error1, error2;
+	size_t   time_len;
+	int error1, error2;
 	struct timelib_error_container *error;
 	zend_long preset_ts = 0, ts;
 
@@ -1625,7 +1626,7 @@ PHP_FUNCTION(checkdate)
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	char                *format;
-	int                  format_len;
+	size_t                  format_len;
 	zend_long                 timestamp = 0;
 	struct tm            ta;
 	int                  max_reallocs = 5;
@@ -2503,7 +2504,7 @@ static void update_errors_warnings(timelib_error_container *last_errors TSRMLS_D
 	DATEG(last_errors) = last_errors;
 } /* }}} */
 
-PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC) /* {{{ */
+PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, size_t time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC) /* {{{ */
 {
 	timelib_time   *now;
 	timelib_tzinfo *tzi = NULL;
@@ -2595,7 +2596,7 @@ PHP_FUNCTION(date_create)
 {
 	zval           *timezone_object = NULL;
 	char           *time_str = NULL;
-	int             time_str_len = 0;
+	size_t          time_str_len = 0;
 	zval            datetime_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
@@ -2618,7 +2619,7 @@ PHP_FUNCTION(date_create_immutable)
 {
 	zval           *timezone_object = NULL;
 	char           *time_str = NULL;
-	int             time_str_len = 0;
+	size_t          time_str_len = 0;
 	zval            datetime_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
@@ -2641,7 +2642,7 @@ PHP_FUNCTION(date_create_from_format)
 {
 	zval           *timezone_object = NULL;
 	char           *time_str = NULL, *format_str = NULL;
-	int             time_str_len = 0, format_str_len = 0;
+	size_t             time_str_len = 0, format_str_len = 0;
 	zval            datetime_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|O", &format_str, &format_str_len, &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
@@ -2664,7 +2665,7 @@ PHP_FUNCTION(date_create_immutable_from_format)
 {
 	zval           *timezone_object = NULL;
 	char           *time_str = NULL, *format_str = NULL;
-	int             time_str_len = 0, format_str_len = 0;
+	size_t          time_str_len = 0, format_str_len = 0;
 	zval            datetime_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|O", &format_str, &format_str_len, &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
@@ -2687,7 +2688,7 @@ PHP_METHOD(DateTime, __construct)
 {
 	zval *timezone_object = NULL;
 	char *time_str = NULL;
-	int time_str_len = 0;
+	size_t time_str_len = 0;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
@@ -2707,7 +2708,7 @@ PHP_METHOD(DateTimeImmutable, __construct)
 {
 	zval *timezone_object = NULL;
 	char *time_str = NULL;
-	int time_str_len = 0;
+	size_t time_str_len = 0;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
@@ -2979,7 +2980,7 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 PHP_FUNCTION(date_parse)
 {
 	char                           *date;
-	int                             date_len;
+	size_t                          date_len;
 	struct timelib_error_container *error;
 	timelib_time                   *parsed_time;
 	
@@ -2998,7 +2999,7 @@ PHP_FUNCTION(date_parse)
 PHP_FUNCTION(date_parse_from_format)
 {
 	char                           *date, *format;
-	int                             date_len, format_len;
+	size_t                          date_len, format_len;
 	struct timelib_error_container *error;
 	timelib_time                   *parsed_time;
 	
@@ -3019,7 +3020,7 @@ PHP_FUNCTION(date_format)
 	zval         *object;
 	php_date_obj *dateobj;
 	char         *format;
-	int           format_len;
+	size_t       format_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_interface, &format, &format_len) == FAILURE) {
 		RETURN_FALSE;
@@ -3099,7 +3100,7 @@ PHP_FUNCTION(date_modify)
 {
 	zval         *object;
 	char         *modify;
-	int           modify_len;
+	size_t        modify_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_date, &modify, &modify_len) == FAILURE) {
 		RETURN_FALSE;
@@ -3119,7 +3120,7 @@ PHP_METHOD(DateTimeImmutable, modify)
 {
 	zval *object, new_object;
 	char *modify;
-	int   modify_len;
+	size_t   modify_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_immutable, &modify, &modify_len) == FAILURE) {
 		RETURN_FALSE;
@@ -3651,7 +3652,7 @@ static int timezone_initialize(php_timezone_obj *tzobj, /*const*/ char *tz TSRML
 PHP_FUNCTION(timezone_open)
 {
 	char *tz;
-	int   tz_len;
+	size_t tz_len;
 	php_timezone_obj *tzobj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &tz, &tz_len) == FAILURE) {
@@ -3670,7 +3671,7 @@ PHP_FUNCTION(timezone_open)
 PHP_METHOD(DateTimeZone, __construct)
 {
 	char *tz;
-	int tz_len;
+	size_t tz_len;
 	php_timezone_obj *tzobj;
 	zend_error_handling error_handling;
 	
@@ -3781,7 +3782,7 @@ PHP_FUNCTION(timezone_name_from_abbr)
 {
 	char    *abbr;
 	char    *tzid;
-	int      abbr_len;
+	size_t      abbr_len;
 	zend_long     gmtoffset = -1;
 	zend_long     isdst = -1;
 
@@ -4091,7 +4092,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 PHP_METHOD(DateInterval, __construct)
 {
 	char *interval_string = NULL;
-	int   interval_string_length;
+	size_t   interval_string_length;
 	php_interval_obj *diobj;
 	timelib_rel_time *reltime;
 	zend_error_handling error_handling;
@@ -4199,7 +4200,7 @@ PHP_METHOD(DateInterval, __wakeup)
 PHP_FUNCTION(date_interval_create_from_date_string)
 {
 	char           *time_str = NULL;
-	int             time_str_len = 0;
+	size_t          time_str_len = 0;
 	timelib_time   *time;
 	timelib_error_container *err = NULL;
 	php_interval_obj *diobj;
@@ -4289,7 +4290,7 @@ PHP_FUNCTION(date_interval_format)
 	zval             *object;
 	php_interval_obj *diobj;
 	char             *format;
-	int               format_len;
+	size_t            format_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_interval, &format, &format_len) == FAILURE) {
 		RETURN_FALSE;
@@ -4336,7 +4337,7 @@ PHP_METHOD(DatePeriod, __construct)
 	zval *start, *end = NULL, *interval;
 	zend_long  recurrences = 0, options = 0;
 	char *isostr = NULL;
-	int   isostr_len = 0;
+	size_t   isostr_len = 0;
 	timelib_time *clone;
 	zend_error_handling error_handling;
 	
@@ -4439,7 +4440,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 	int                             i, item_count;
 	zend_long                            what = PHP_DATE_TIMEZONE_GROUP_ALL;
 	char                           *option = NULL;
-	int                             option_len = 0;
+	size_t                             option_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ls", &what, &option, &option_len) == FAILURE) {
 		RETURN_FALSE;
@@ -4521,7 +4522,7 @@ PHP_FUNCTION(timezone_abbreviations_list)
 PHP_FUNCTION(date_default_timezone_set)
 {
 	char *zone;
-	int   zone_len;
+	size_t   zone_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &zone, &zone_len) == FAILURE) {
 		RETURN_FALSE;

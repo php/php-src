@@ -130,7 +130,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* Free a clone of closure */
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 			destroy_op_array(op_array TSRMLS_CC);
-			efree(op_array);
+			efree_size(op_array, sizeof(zend_op_array));
 		}
 
 		efree(generator->stack);
@@ -146,7 +146,7 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 	uint32_t op_num, finally_op_num;
 	int i;
 
-	if (!ex || !ex->func->op_array.has_finally_block) {
+	if (!ex || !(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
 		return;
 	}
 

@@ -150,7 +150,7 @@ PHP_FUNCTION(shmop_open)
 	struct php_shmop *shmop;	
 	struct shmid_ds shm;
 	char *flags;
-	int flags_len;
+	size_t flags_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsll", &key, &flags, &flags_len, &mode, &size) == FAILURE) {
 		return;

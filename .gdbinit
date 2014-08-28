@@ -48,7 +48,7 @@ define print_cvs
 end
 
 define dump_bt
-	set $ex = $arg0->prev_execute_data
+	set $ex = $arg0
 	while $ex
 		printf "[%p] ", $ex
 		set $func = $ex->func
@@ -65,7 +65,11 @@ define dump_bt
 				end
 			end
 
-			printf "%s(", $func->common.function_name->val
+			if $func->common.function_name
+				printf "%s(", $func->common.function_name->val
+			else
+				printf "(main"
+			end
 
 			set $callFrameSize = (sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval)
 
@@ -119,7 +123,11 @@ define dump_bt
 			printf "??? "
 		end
 		if $func != 0
-			printf "%s:%d ", $func->op_array.filename->val, $ex->opline->lineno
+			if $func->type == 2
+				printf "%s:%d ", $func->op_array.filename->val, $ex->opline->lineno
+			else
+				printf "[internal function]"
+			end
 		end
 		set $ex = $ex->prev_execute_data
 		printf "\n"

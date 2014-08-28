@@ -221,15 +221,17 @@ typedef struct _zend_try_catch_element {
 /* function has arguments with type hinting */
 #define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
 
+/* op_array has finally blocks */
+#define ZEND_ACC_HAS_FINALLY_BLOCK		0x20000000
+
 #define ZEND_CE_IS_TRAIT(ce) (((ce)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)
 
 char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {
 	uint32_t flags;
-	zend_string *name;
-	zend_ulong h;
 	int offset;
+	zend_string *name;
 	zend_string *doc_comment;
 	zend_class_entry *ce;
 } zend_property_info;
@@ -263,9 +265,9 @@ typedef struct _zend_internal_function_info {
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
+	uint32_t fn_flags;
 	zend_string *function_name;
 	zend_class_entry *scope;
-	uint32_t fn_flags;
 	zend_function *prototype;
 	uint32_t num_args;
 	uint32_t required_num_args;
@@ -274,25 +276,22 @@ struct _zend_op_array {
 
 	uint32_t *refcount;
 
-	zend_op *opcodes;
+	uint32_t this_var;
+
 	uint32_t last;
+	zend_op *opcodes;
 
-	zend_string **vars;
 	int last_var;
-
 	uint32_t T;
+	zend_string **vars;
 
-	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
-
-	zend_try_catch_element *try_catch_array;
 	int last_try_catch;
-	zend_bool has_finally_block;
+	zend_brk_cont_element *brk_cont_array;
+	zend_try_catch_element *try_catch_array;
 
 	/* static variables support */
 	HashTable *static_variables;
-
-	uint32_t this_var;
 
 	zend_string *filename;
 	uint32_t line_start;
@@ -300,11 +299,11 @@ struct _zend_op_array {
 	zend_string *doc_comment;
 	uint32_t early_binding; /* the linked list of delayed declarations */
 
-	zval *literals;
 	int last_literal;
+	zval *literals;
 
-	void **run_time_cache;
 	int  last_cache_slot;
+	void **run_time_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -316,9 +315,9 @@ struct _zend_op_array {
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
+	uint32_t fn_flags;
 	zend_string* function_name;
 	zend_class_entry *scope;
-	uint32_t fn_flags;
 	zend_function *prototype;
 	uint32_t num_args;
 	uint32_t required_num_args;
@@ -336,9 +335,9 @@ union _zend_function {
 
 	struct {
 		zend_uchar type;  /* never used */
+		uint32_t fn_flags;
 		zend_string *function_name;
 		zend_class_entry *scope;
-		uint32_t fn_flags;
 		union _zend_function *prototype;
 		uint32_t num_args;
 		uint32_t required_num_args;
@@ -363,7 +362,7 @@ typedef enum _vm_frame_kind {
 } vm_frame_kind;
 
 struct _zend_execute_data {
-	struct _zend_op     *opline;           /* executed opline                */
+	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
 	void               **run_time_cache;
 	zend_function       *func;             /* executed op_array              */
@@ -377,7 +376,7 @@ struct _zend_execute_data {
 	zval                *return_value;
 	zend_class_entry    *scope;            /* function scope (self)          */
 	zend_array          *symbol_table;
-	struct _zend_op     *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
+	const zend_op       *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 	zend_object         *delayed_exception;
 	zval                 old_error_reporting;
 };
@@ -454,7 +453,7 @@ void zend_handle_encoding_declaration(zend_ast_list *declares TSRMLS_DC);
 /* parser-driven code generators */
 void zend_do_free(znode *op1 TSRMLS_DC);
 
-ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC);
+ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC);
 ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface TSRMLS_DC);

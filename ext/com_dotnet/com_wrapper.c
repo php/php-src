@@ -176,7 +176,7 @@ static HRESULT STDMETHODCALLTYPE disp_getidsofnames(
 
 	for (i = 0; i < cNames; i++) {
 		char *name;
-		unsigned int namelen;
+		size_t namelen;
 		zval *tmp;
 		
 		name = php_com_olestring_to_string(rgszNames[i], &namelen, COMG(code_page) TSRMLS_CC);
@@ -220,7 +220,7 @@ static HRESULT STDMETHODCALLTYPE disp_getdispid(
 {
 	HRESULT ret = DISP_E_UNKNOWNNAME;
 	char *name;
-	unsigned int namelen;
+	size_t namelen;
 	zval *tmp;
 	FETCH_DISP("GetDispID");
 

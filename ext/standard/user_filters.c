@@ -498,7 +498,7 @@ PHP_FUNCTION(stream_bucket_new)
 	php_stream *stream;
 	char *buffer;
 	char *pbuffer;
-	int buffer_len;
+	size_t buffer_len;
 	php_stream_bucket *bucket;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zstream, &buffer, &buffer_len) == FAILURE) {

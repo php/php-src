@@ -224,7 +224,7 @@ PHP_NAMED_FUNCTION(zif_locale_get_default)
 PHP_NAMED_FUNCTION(zif_locale_set_default)
 {
 	char* locale_name = NULL;
-	int   len=0;	
+	size_t   len = 0;	
 	zend_string *ini_name;
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC,  "s",
@@ -373,7 +373,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 {
 
 	const char* loc_name        	= NULL;
-	int         loc_name_len    	= 0;
+	size_t         loc_name_len    	= 0;
 
 	char*       tag_value		= NULL;
 	char*       empty_result	= "";
@@ -471,10 +471,10 @@ PHP_FUNCTION(locale_get_primary_language )
 static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS) 
 {
 	const char* loc_name        	= NULL;
-	int         loc_name_len    	= 0;
+	size_t         loc_name_len    	= 0;
 
 	const char* disp_loc_name       = NULL;
-	int         disp_loc_name_len   = 0;
+	size_t         disp_loc_name_len   = 0;
 	int         free_loc_name       = 0;
 
 	UChar*      disp_name      	= NULL;
@@ -685,7 +685,7 @@ PHP_FUNCTION( locale_get_keywords )
     int32_t         kw_key_len    = 0;
 
     const char*       	loc_name        = NULL;
-    int        	 	loc_name_len    = 0;
+    size_t        	 	loc_name_len    = 0;
 
 /* 
 	ICU expects the buffer to be allocated  before calling the function 
@@ -1099,7 +1099,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name 
 PHP_FUNCTION(locale_parse)
 {
     const char* loc_name        = NULL;
-    int         loc_name_len    = 0;
+    size_t         loc_name_len    = 0;
     int         grOffset    	= 0;
 
     intl_error_reset( NULL TSRMLS_CC );
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(locale_parse)
 PHP_FUNCTION(locale_get_all_variants)
 {
 	const char*  	loc_name        = NULL;
-	int    		loc_name_len    = 0;
+	size_t    		loc_name_len    = 0;
 
 	int	result		= 0;
 	char*	token		= NULL;
@@ -1238,9 +1238,9 @@ static int strToMatch(const char* str ,char *retstr)
 PHP_FUNCTION(locale_filter_matches)
 {
 	char*       	lang_tag        = NULL;
-	int         	lang_tag_len    = 0;
+	size_t         	lang_tag_len    = 0;
 	const char*     loc_range       = NULL;
-	int         	loc_range_len   = 0;
+	size_t         	loc_range_len   = 0;
 
 	int		result		= 0;
 	char*		token		= 0;
@@ -1529,9 +1529,9 @@ static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int ca
 PHP_FUNCTION(locale_lookup)
 {
 	char*      	fallback_loc  		= NULL;
-	int        	fallback_loc_len	= 0;
+	size_t        	fallback_loc_len	= 0;
 	const char*    	loc_range      		= NULL;
-	int        	loc_range_len  		= 0;
+	size_t        	loc_range_len  		= 0;
 
 	zval*		arr				= NULL;
 	HashTable*	hash_arr		= NULL;
@@ -1582,7 +1582,7 @@ PHP_FUNCTION(locale_accept_from_http)
 {
 	UEnumeration *available;
 	char *http_accept = NULL;
-	int http_accept_len;
+	size_t http_accept_len;
 	UErrorCode status = 0;
 	int len;
 	char resultLocale[INTL_MAX_LOCALE_LEN+1];

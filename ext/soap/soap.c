@@ -807,7 +807,7 @@ PHP_METHOD(SoapParam, SoapParam)
 {
 	zval *data;
 	char *name;
-	int name_length;
+	size_t name_length;
 	zval *this_ptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &data, &name, &name_length) == FAILURE) {
@@ -831,7 +831,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 {
 	zval *data = NULL, *actor = NULL;
 	char *name, *ns;
-	int name_len, ns_len;
+	size_t name_len, ns_len;
 	zend_bool must_understand = 0;
 	zval *this_ptr;
 
@@ -872,7 +872,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 PHP_METHOD(SoapFault, SoapFault)
 {
 	char *fault_string = NULL, *fault_code = NULL, *fault_actor = NULL, *name = NULL, *fault_code_ns = NULL;
-	int fault_string_len, fault_actor_len = 0, name_len = 0, fault_code_len = 0;
+	size_t fault_string_len, fault_actor_len = 0, name_len = 0, fault_code_len = 0;
 	zval *code = NULL, *details = NULL, *headerfault = NULL, *this_ptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|s!z!s!z",
@@ -972,7 +972,7 @@ PHP_METHOD(SoapVar, SoapVar)
 {
 	zval *data, *type, *this_ptr;
 	char *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
-	int stype_len = 0, ns_len = 0, name_len = 0, namens_len = 0;
+	size_t stype_len = 0, ns_len = 0, name_len = 0, namens_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z!z|ssss", &data, &type, &stype, &stype_len, &ns, &ns_len, &name, &name_len, &namens, &namens_len) == FAILURE) {
 		return;
@@ -1490,7 +1490,7 @@ PHP_METHOD(SoapServer, handle)
 	soapHeader *soap_headers = NULL;
 	sdlFunctionPtr function;
 	char *arg = NULL;
-	int arg_len = 0;
+	size_t arg_len = 0;
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map, *old_typemap;
 	int old_features;
@@ -2007,7 +2007,7 @@ fail:
 PHP_METHOD(SoapServer, fault)
 {
 	char *code, *string, *actor=NULL, *name=NULL;
-	int code_len, string_len, actor_len = 0, name_len = 0;
+	size_t code_len, string_len, actor_len = 0, name_len = 0;
 	zval* details = NULL;
 	soapServicePtr service;
 	xmlCharEncodingHandlerPtr old_encoding;
@@ -2623,7 +2623,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 
 static void do_soap_call(zval* this_ptr,
                          char* function,
-                         int function_len,
+                         size_t function_len,
                          int arg_count,
                          zval* real_args,
                          zval* return_value,
@@ -2848,7 +2848,8 @@ static void verify_soap_headers_array(HashTable *ht TSRMLS_DC)
 PHP_METHOD(SoapClient, __call)
 {
 	char *function, *location=NULL, *soap_action = NULL, *uri = NULL;
-	int function_len, i = 0;
+	size_t function_len;
+	int i = 0;
 	HashTable* soap_headers = NULL;
 	zval *options = NULL;
 	zval *headers = NULL;
@@ -3081,7 +3082,7 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 PHP_METHOD(SoapClient, __doRequest)
 {
   char *buf, *location, *action;
-  int   buf_size, location_size, action_size;
+  size_t   buf_size, location_size, action_size;
   zend_long  version;
   zend_long  one_way = 0;
   zval *this_ptr = getThis();
@@ -3116,7 +3117,7 @@ PHP_METHOD(SoapClient, __setCookie)
 {
 	char *name;
 	char *val = NULL;
-	int  name_len, val_len = 0;
+	size_t  name_len, val_len = 0;
 	zval *cookies;
 	zval *this_ptr = getThis();
 
@@ -3214,7 +3215,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 PHP_METHOD(SoapClient, __setLocation)
 {
 	char *location = NULL;
-	int  location_len = 0;
+	size_t  location_len = 0;
 	zval *tmp;
 	zval *this_ptr = getThis();
 

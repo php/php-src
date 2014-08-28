@@ -477,14 +477,14 @@ struct _zend_class_entry {
 	int refcount;
 	uint32_t ce_flags;
 
-	HashTable function_table;
-	HashTable properties_info;
+	int default_properties_count;
+	int default_static_members_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
 	zval *static_members_table;
+	HashTable function_table;
+	HashTable properties_info;
 	HashTable constants_table;
-	int default_properties_count;
-	int default_static_members_count;
 
 	union _zend_function *constructor;
 	union _zend_function *destructor;
@@ -512,11 +512,11 @@ struct _zend_class_entry {
 	int (*serialize)(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC);
 	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, uint32_t buf_len, zend_unserialize_data *data TSRMLS_DC);
 
-	zend_class_entry **interfaces;
 	uint32_t num_interfaces;
+	uint32_t num_traits;
+	zend_class_entry **interfaces;
 	
 	zend_class_entry **traits;
-	uint32_t num_traits;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 
@@ -747,7 +747,7 @@ END_EXTERN_C()
 		ZEND_ASSERT(Z_ISREF_P(_z));						\
 		ref = Z_REF_P(_z);								\
 		ZVAL_COPY_VALUE(_z, &ref->val);					\
-		efree(ref);										\
+		efree_size(ref, sizeof(zend_reference));		\
 	} while (0)
 
 #define SEPARATE_STRING(zv) do {						\
@@ -820,9 +820,6 @@ END_EXTERN_C()
 			Z_ADDREF_P(varptr); 						\
 		}												\
 	} while (0)
-
-#define READY_TO_DESTROY(zv) \
-	(Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
 #define ZEND_MAX_RESERVED_RESOURCES	4
 

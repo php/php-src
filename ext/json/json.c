@@ -664,9 +664,9 @@ again:
 }
 /* }}} */
 
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len, int options, zend_long depth TSRMLS_DC) /* {{{ */
+PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth TSRMLS_DC) /* {{{ */
 {
-	int utf16_len;
+	size_t utf16_len;
 	unsigned short *utf16;
 	JSON_parser jp;
 
@@ -799,7 +799,7 @@ static PHP_FUNCTION(json_encode)
 static PHP_FUNCTION(json_decode)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
 	zend_long depth = JSON_PARSER_DEFAULT_DEPTH;
 	zend_long options = 0;

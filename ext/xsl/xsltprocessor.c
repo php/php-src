@@ -695,7 +695,8 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	zval *id, *docp = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
-	int ret, uri_len;
+	int ret;
+	size_t uri_len;
 	char *uri;
 	xsl_object *intern;
 	
@@ -767,7 +768,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 	xsl_object *intern;
 	zend_ulong idx;
 	char *namespace;
-	int namespace_len;
+	size_t namespace_len;
 	zend_string *string_key, *name, *value;
 	DOM_GET_THIS(id);
 
@@ -807,7 +808,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 {
 	zval *id;
 	char *namespace;
-	int namespace_len = 0;
+	size_t namespace_len = 0;
 	zval *value;
 	zend_string *name;
 	xsl_object *intern;
@@ -832,7 +833,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 {
 	zval *id;
-	int namespace_len = 0;
+	size_t namespace_len = 0;
 	char *namespace;
 	zend_string *name;
 	xsl_object *intern;
@@ -894,7 +895,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 	zval *id;
 	xsl_object *intern;
 	char *filename = NULL;
-	int filename_len;
+	size_t filename_len;
 	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p!", &filename, &filename_len) == SUCCESS) {

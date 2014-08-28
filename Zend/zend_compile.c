@@ -2477,7 +2477,7 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC) /* {{{ */
+ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC) /* {{{ */
 {
 	zend_function *function, *new_function;
 	zval *op1, *op2;
@@ -2497,7 +2497,7 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, Ha
 		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
 		zend_function *old_function;
 
-		efree(new_function);
+		efree_size(new_function, sizeof(zend_op_array));
 		if ((old_function = zend_hash_find_ptr(function_table, Z_STR_P(op2))) != NULL
 			&& old_function->type == ZEND_USER_FUNCTION
 			&& old_function->op_array.last > 0) {
@@ -4276,9 +4276,15 @@ int zend_try_compile_special_func(
 		return zend_compile_func_typecheck(result, args, IS_NULL TSRMLS_CC);
 	} else if (zend_string_equals_literal(lcname, "is_bool")) {
 		return zend_compile_func_typecheck(result, args, _IS_BOOL TSRMLS_CC);
-	} else if (zend_string_equals_literal(lcname, "is_long") || zend_string_equals_literal(lcname, "is_int" || zend_string_equals_literal(lcname, "is_integer"))) {
+	} else if (zend_string_equals_literal(lcname, "is_long")
+		|| zend_string_equals_literal(lcname, "is_int")
+		|| zend_string_equals_literal(lcname, "is_integer")
+	) {
 		return zend_compile_func_typecheck(result, args, IS_BIGINT_OR_LONG TSRMLS_CC);
-	} else if (zend_string_equals_literal(lcname, "is_float")) {
+	} else if (zend_string_equals_literal(lcname, "is_float")
+		|| zend_string_equals_literal(lcname, "is_double")
+		|| zend_string_equals_literal(lcname, "is_real")
+	) {
 		return zend_compile_func_typecheck(result, args, IS_DOUBLE TSRMLS_CC);
 	} else if (zend_string_equals_literal(lcname, "is_string")) {
 		return zend_compile_func_typecheck(result, args, IS_STRING TSRMLS_CC);
@@ -5097,7 +5103,7 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) {
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = opnum_jmp + 1;
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_end
 			= get_next_op_number(CG(active_op_array));
-		CG(active_op_array)->has_finally_block = 1;
+		CG(active_op_array)->fn_flags |= ZEND_ACC_HAS_FINALLY_BLOCK;
 
 		zend_emit_op(NULL, ZEND_FAST_RET, NULL, NULL TSRMLS_CC);
 
@@ -5305,7 +5311,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) {
 							"with array type hint can only be an array or NULL");
 					}
 				} else if (arg_info->type_hint == IS_CALLABLE && default_ast) {
-					if (default_ast && !has_null_default) {
+					if (!has_null_default) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with callable type hint can only be NULL");
 					}

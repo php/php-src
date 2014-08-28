@@ -21,6 +21,14 @@
  * - optimize INIT_FCALL_BY_NAME to DO_FCALL
  */
 
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
 #define ZEND_OP2_IS_CONST_STRING(opline) \
 	(ZEND_OP2_TYPE(opline) == IS_CONST && \
 	Z_TYPE(op_array->literals[(opline)->op2.constant]) == IS_STRING)
@@ -30,7 +38,8 @@ typedef struct _optimizer_call_info {
 	zend_op       *opline;
 } optimizer_call_info;
 
-static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC) {
+void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC)
+{
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
 	int call = 0;

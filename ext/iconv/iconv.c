@@ -326,31 +326,15 @@ PHP_MSHUTDOWN_FUNCTION(miconv)
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(miconv)
 {
-	char *iconv_impl;
-	char *version = "unknown";
+	zval *iconv_impl, *iconv_ver;
 
-#ifdef PHP_ICONV_IMPL
-	iconv_impl = PHP_ICONV_IMPL;
-#elif HAVE_LIBICONV
-	iconv_impl = "libiconv";
-	{
-		static char buf[16];
-		snprintf(buf, sizeof(buf), "%d.%d",
-		    ((_libiconv_version >> 8) & 0x0f), (_libiconv_version & 0x0f));
-		version = buf;
-	}
-#elif defined(NETWARE)
-	iconv_impl = "Novell";
-	version = "OS built-in";
-#else
-	iconv_impl = "unknown";
-	version = (char *)gnu_get_libc_version();
-#endif
+	iconv_impl = zend_get_constant_str("ICONV_IMPL", sizeof("ICONV_IMPL")-1 TSRMLS_CC);
+	iconv_ver = zend_get_constant_str("ICONV_VERSION", sizeof("ICONV_VERSION")-1 TSRMLS_CC);
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "iconv support", "enabled");
-	php_info_print_table_row(2, "iconv implementation", iconv_impl);
-	php_info_print_table_row(2, "iconv library version", version);
+	php_info_print_table_row(2, "iconv implementation", Z_STRVAL_P(iconv_impl));
+	php_info_print_table_row(2, "iconv library version", Z_STRVAL_P(iconv_ver));
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -2034,7 +2018,7 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
 PHP_FUNCTION(iconv_strlen)
 {
 	char *charset = get_internal_encoding(TSRMLS_C);
-	int charset_len = 0;
+	size_t charset_len = 0;
 	zend_string *str;
 
 	php_iconv_err_t err;
@@ -2066,7 +2050,7 @@ PHP_FUNCTION(iconv_strlen)
 PHP_FUNCTION(iconv_substr)
 {
 	char *charset = get_internal_encoding(TSRMLS_C);
-	int charset_len = 0;
+	size_t charset_len = 0;
 	zend_string *str;
 	zend_long offset, length = 0;
 
@@ -2105,7 +2089,7 @@ PHP_FUNCTION(iconv_substr)
 PHP_FUNCTION(iconv_strpos)
 {
 	char *charset = get_internal_encoding(TSRMLS_C);
-	int charset_len = 0;
+	size_t charset_len = 0;
 	zend_string *haystk;
 	zend_string *ndl;
 	zend_long offset = 0;
@@ -2151,7 +2135,7 @@ PHP_FUNCTION(iconv_strpos)
 PHP_FUNCTION(iconv_strrpos)
 {
 	char *charset = get_internal_encoding(TSRMLS_C);
-	int charset_len = 0;
+	size_t charset_len = 0;
 	zend_string *haystk;
 	zend_string *ndl;
 
@@ -2304,7 +2288,7 @@ PHP_FUNCTION(iconv_mime_decode)
 {
 	zend_string *encoded_str;
 	char *charset = get_internal_encoding(TSRMLS_C);
-	int charset_len = 0;
+	size_t charset_len = 0;
 	zend_long mode = 0;
 
 	smart_str retval = {0};
@@ -2344,7 +2328,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 {
 	zend_string *encoded_str;
 	char *charset = get_internal_encoding(TSRMLS_C);
-	int charset_len = 0;
+	size_t charset_len = 0;
 	zend_long mode = 0;
 	char *enc_str_tmp;
 	size_t enc_str_len_tmp;
@@ -2442,7 +2426,7 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 {
 	char *in_charset, *out_charset;
 	zend_string *in_buffer;
-	int in_charset_len = 0, out_charset_len = 0;
+	size_t in_charset_len = 0, out_charset_len = 0;
 	php_iconv_err_t err;
 	zend_string *out_buffer;
 
@@ -2473,7 +2457,7 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 PHP_FUNCTION(iconv_set_encoding)
 {
 	char *type, *charset;
-	int type_len, charset_len = 0, retval;
+	size_t type_len, charset_len = 0, retval;
 	zend_string *name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &type, &type_len, &charset, &charset_len) == FAILURE)

@@ -47,7 +47,7 @@ U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
 U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 {
 	char	*str_id;
-	int		str_id_len;
+	size_t		str_id_len;
 	intl_error_reset(NULL TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
@@ -209,7 +209,7 @@ double_offset:
 U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 {
 	char	*str_id;
-	int		str_id_len;
+	size_t		str_id_len;
 	intl_error_reset(NULL TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
@@ -237,7 +237,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 	zend_long	zoneType,
 			offset_arg;
 	char	*region		= NULL;
-	int		region_len	= 0;
+	size_t		region_len	= 0;
 	int32_t	offset,
 			*offsetp	= NULL;
 	int		arg3isnull	= 0;
@@ -291,7 +291,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 {
 	char	*str_id;
-	int		str_id_len;
+	size_t		str_id_len;
 	zval	*is_systemid = NULL;
 	intl_error_reset(NULL TSRMLS_CC);
 
@@ -335,7 +335,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 U_CFUNC PHP_FUNCTION(intltz_get_region)
 {
 	char	*str_id;
-	int		str_id_len;
+	size_t		str_id_len;
 	char	outbuf[3];
 	intl_error_reset(NULL TSRMLS_CC);
 
@@ -382,7 +382,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
 U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 {
 	char	*str_id;
-	int		str_id_len;
+	size_t		str_id_len;
 	zend_long	index;
 	intl_error_reset(NULL TSRMLS_CC);
 
@@ -547,7 +547,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 	zend_bool	daylight		= 0;
 	zend_long		display_type	= TimeZone::LONG;
 	const char	*locale_str		= NULL;
-	int			dummy			= 0;
+	size_t			dummy			= 0;
 	TIMEZONE_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),

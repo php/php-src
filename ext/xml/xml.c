@@ -1092,10 +1092,10 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	int auto_detect = 0;
 
 	char *encoding_param = NULL;
-	int encoding_param_len = 0;
+	size_t encoding_param_len = 0;
 
 	char *ns_param = NULL;
-	int ns_param_len = 0;
+	size_t ns_param_len = 0;
 	
 	XML_Char *encoding;
 	
@@ -1365,7 +1365,8 @@ PHP_FUNCTION(xml_parse)
 	xml_parser *parser;
 	zval *pind;
 	char *data;
-	int data_len, ret;
+	size_t data_len;
+	int ret;
 	zend_long isFinal = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &pind, &data, &data_len, &isFinal) == FAILURE) {
@@ -1389,7 +1390,8 @@ PHP_FUNCTION(xml_parse_into_struct)
 	xml_parser *parser;
 	zval *pind, *xdata, *info = NULL;
 	char *data;
-	int data_len, ret;
+	size_t data_len;
+	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz/|z/", &pind, &data, &data_len, &xdata, &info) == FAILURE) {
 		return;
@@ -1620,7 +1622,7 @@ PHP_FUNCTION(xml_parser_get_option)
 PHP_FUNCTION(utf8_encode)
 {
 	char *arg;
-	int arg_len;
+	size_t arg_len;
 	zend_string *encoded;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
@@ -1640,7 +1642,7 @@ PHP_FUNCTION(utf8_encode)
 PHP_FUNCTION(utf8_decode)
 {
 	char *arg;
-	int arg_len;
+	size_t arg_len;
 	zend_string *decoded;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {

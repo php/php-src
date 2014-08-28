@@ -1090,7 +1090,7 @@ SPL_METHOD(RecursiveTreeIterator, setPrefixPart)
 {
 	zend_long  part;
 	char* prefix;
-	int   prefix_len;
+	size_t   prefix_len;
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &part, &prefix, &prefix_len) == FAILURE) {
@@ -1131,7 +1131,7 @@ SPL_METHOD(RecursiveTreeIterator, setPostfix)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 	char* postfix;
-	int   postfix_len;
+	size_t   postfix_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &postfix, &postfix_len) == FAILURE) {
 		return;

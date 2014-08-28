@@ -23,7 +23,15 @@
  * - remove NOPs
  */
 
-static void nop_removal(zend_op_array *op_array)
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
+void zend_optimizer_nop_removal(zend_op_array *op_array)
 {
 	zend_op *end, *opline;
 	uint32_t new_count, i, shift;

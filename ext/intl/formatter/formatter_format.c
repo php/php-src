@@ -141,7 +141,7 @@ PHP_FUNCTION( numfmt_format_currency )
 	UChar*     formatted     = format_buf;
 	int        formatted_len = USIZE(format_buf);
 	char*      currency      = NULL;
-	int        currency_len  = 0;
+	size_t        currency_len  = 0;
 	UChar*     scurrency     = NULL;
 	int        scurrency_len = 0;
 	FORMATTER_METHOD_INIT_VARS;

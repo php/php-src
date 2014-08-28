@@ -536,7 +536,7 @@ PHP_FUNCTION( collator_asort )
 PHP_FUNCTION( collator_get_sort_key )
 {
 	char*            str      = NULL;
-	int              str_len  = 0;
+	size_t              str_len  = 0;
 	UChar*           ustr     = NULL;
 	int              ustr_len = 0;
 	uint8_t*         key     = NULL;
