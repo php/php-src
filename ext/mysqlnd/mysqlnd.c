@@ -28,6 +28,7 @@
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
 #include "ext/standard/php_smart_str.h"
+#include "ext/standard/file.h"
 
 /*
   TODO :
@@ -769,6 +770,18 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 		goto err;
 	}
 
+	// Set the read timeout to make a connect timeout work as expected
+	if (net->data->options.timeout_connect) {
+		php_stream * net_stream = net->data->m.get_stream(net TSRMLS_CC);
+
+		if (net_stream) {
+			struct timeval tv;
+			tv.tv_sec = net->data->options.timeout_connect;
+			tv.tv_usec = 0;
+			php_stream_set_option(net_stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+		}
+	}
+
 	DBG_INF_FMT("stream=%p", net->data->m.get_stream(net TSRMLS_CC));
 
 	if (FAIL == PACKET_READ(greet_packet, conn)) {
@@ -809,10 +822,24 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	{
 		goto err;
 	}
+
 	memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
 	conn->upsert_status->warning_count = 0;
 	conn->upsert_status->server_status = greet_packet->server_status;
 	conn->upsert_status->affected_rows = 0;
+
+	// Restore the original read timeout if we set it
+	if (net->data->options.timeout_connect) {
+		php_stream * net_stream = net->data->m.get_stream(net TSRMLS_CC);
+
+		if (net_stream) {
+			struct timeval tv;
+			tv.tv_sec = FG(default_socket_timeout);
+			tv.tv_usec = 0;
+			php_stream_set_option(net_stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+		}
+
+	}
 
 	PACKET_FREE(greet_packet);
 	DBG_RETURN(PASS);
