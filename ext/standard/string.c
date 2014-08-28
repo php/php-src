@@ -3878,9 +3878,9 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 {
 	char *str;
 	char *heb_str, *tmp, *target;
-	int block_start, block_end, block_type, block_length, i;
+	size_t block_start, block_end, block_type, block_length, i;
 	zend_long max_chars=0;
-	int begin, end, char_count, orig_begin;
+	size_t begin, end, char_count, orig_begin;
 	size_t str_len;
 	zend_string *broken_str;
 
@@ -3915,8 +3915,8 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				block_end++;
 				block_length++;
 			}
-			for (i = block_start; i<= block_end; i++) {
-				*target = str[i];
+			for (i = block_start+1; i<= block_end+1; i++) {
+				*target = str[i-1];
 				switch (*target) {
 					case '(':
 						*target = ')';
@@ -3964,8 +3964,8 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				tmp--;
 				block_end--;
 			}
-			for (i = block_end; i >= block_start; i--) {
-				*target = str[i];
+			for (i = block_end+1; i >= block_start+1; i--) {
+				*target = str[i-1];
 				target--;
 			}
 			block_type = _HEB_BLOCK_TYPE_HEB;
@@ -3980,7 +3980,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 
 	while (1) {
 		char_count=0;
-		while ((!max_chars || char_count < max_chars) && begin > 0) {
+		while ((!max_chars || max_chars > 0 && char_count < max_chars) && begin > 0) {
 			char_count++;
 			begin--;
 			if (begin <= 0 || _isnewline(heb_str[begin])) {
@@ -3991,8 +3991,8 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				break;
 			}
 		}
-		if (char_count == max_chars) { /* try to avoid breaking words */
-			int new_char_count=char_count, new_begin=begin;
+		if (max_chars >= 0 && char_count == max_chars) { /* try to avoid breaking words */
+			size_t new_char_count=char_count, new_begin=begin;
 
 			while (new_char_count > 0) {
 				if (_isblank(heb_str[new_begin]) || _isnewline(heb_str[new_begin])) {
@@ -4146,7 +4146,7 @@ PHP_FUNCTION(strip_tags)
 	zend_string *str;
 	zval *allow=NULL;
 	char *allowed_tags=NULL;
-	int allowed_tags_len=0;
+	size_t allowed_tags_len=0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|z", &str, &allow) == FAILURE) {
 		return;
@@ -4417,8 +4417,9 @@ PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *stateptr, char *allow,
 PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, char *allow, size_t allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
-	int br, i=0, depth=0, in_q = 0;
-	int state = 0, pos;
+	int br, depth=0, in_q = 0;
+	int state = 0;
+	size_t pos, i = 0;
 	char *allow_free = NULL;
 
 	if (stateptr)
@@ -5122,7 +5123,8 @@ PHP_FUNCTION(sscanf)
 {
 	zval *args = NULL;
 	char *str, *format;
-	size_t str_len, format_len, result, num_args = 0;
+	size_t str_len, format_len;
+	int result, num_args = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss*", &str, &str_len, &format, &format_len,
 		&args, &num_args) == FAILURE) {
