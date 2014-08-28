@@ -204,13 +204,6 @@ static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_STRING, "strtolower", "mb_strtolower", "mb_orig_strtolower"},
 	{MB_OVERLOAD_STRING, "strtoupper", "mb_strtoupper", "mb_orig_strtoupper"},
 	{MB_OVERLOAD_STRING, "substr_count", "mb_substr_count", "mb_orig_substr_count"},
-#if HAVE_MBREGEX
-	{MB_OVERLOAD_REGEX, "ereg", "mb_ereg", "mb_orig_ereg"},
-	{MB_OVERLOAD_REGEX, "eregi", "mb_eregi", "mb_orig_eregi"},
-	{MB_OVERLOAD_REGEX, "ereg_replace", "mb_ereg_replace", "mb_orig_ereg_replace"},
-	{MB_OVERLOAD_REGEX, "eregi_replace", "mb_eregi_replace", "mb_orig_eregi_replace"},
-	{MB_OVERLOAD_REGEX, "split", "mb_split", "mb_orig_split"},
-#endif
 	{0, NULL, NULL, NULL}
 }; 
 /* }}} */
