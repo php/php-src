@@ -3425,7 +3425,6 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 	value = opline->op1.zv;
 	switch (opline->extended_value) {
 		case IS_NULL:
-		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
@@ -3433,6 +3432,9 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 			break;
 		case _IS_BOOL:
 			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_BIGINT_OR_LONG:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT);
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {
@@ -10354,7 +10356,6 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 	value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	switch (opline->extended_value) {
 		case IS_NULL:
-		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
@@ -10362,6 +10363,9 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 			break;
 		case _IS_BOOL:
 			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_BIGINT_OR_LONG:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT);
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {
@@ -17278,7 +17282,6 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 	value = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	switch (opline->extended_value) {
 		case IS_NULL:
-		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
@@ -17286,6 +17289,9 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 			break;
 		case _IS_BOOL:
 			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_BIGINT_OR_LONG:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT);
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {
@@ -34858,7 +34864,6 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 	value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 	switch (opline->extended_value) {
 		case IS_NULL:
-		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
@@ -34866,6 +34871,9 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 			break;
 		case _IS_BOOL:
 			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_BIGINT_OR_LONG:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT);
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {

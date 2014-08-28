@@ -5972,7 +5972,6 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	switch (opline->extended_value) {
 		case IS_NULL:
-		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
@@ -5980,6 +5979,9 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 			break;
 		case _IS_BOOL:
 			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_BIGINT_OR_LONG:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT);
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {

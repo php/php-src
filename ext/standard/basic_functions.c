@@ -4712,7 +4712,8 @@ PHP_FUNCTION(error_get_last)
 /* }}} */
 
 /* {{{ proto mixed call_user_func(mixed function_name [, mixed parmeter] [, mixed ...])
-   Call a user function which is the first parameter */
+   Call a user function which is the first parameter
+   Warning: This function is special-cased by zend_compile.c and so is usually not actually used */
 PHP_FUNCTION(call_user_func)
 {
 	zval retval;
@@ -4739,7 +4740,8 @@ PHP_FUNCTION(call_user_func)
 /* }}} */
 
 /* {{{ proto mixed call_user_func_array(string function_name, array parameters)
-   Call a user function which is the first parameter with the arguments contained in array */
+   Call a user function which is the first parameter with the arguments contained in array
+   Warning: This function is special-cased by zend_compile.c and so is usually not actually used */
 PHP_FUNCTION(call_user_func_array)
 {
 	zval *params, retval;

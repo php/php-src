@@ -31,6 +31,13 @@ $valid_ints = array(
   01912,       // should be quivalent to octal 1
   -020000000000, // max negative integer as octal
   017777777777,  // max positive integer as octal
+  /* bigint values */
+  -2147483649,
+  2147483648,
+  -0x80000001, // beyond max negative int
+  0x800000001, // beyond max positive int
+  020000000001, // beyond max positive int 
+  -020000000001 // beyond max negative int 
 );
 /* loop to check that is_int() recognizes different 
    integer values, expected output: bool(true) */
@@ -54,13 +61,6 @@ unset ($unset_var);
 
 // other types in a array 
 $not_int_types = array (
-  /* float values */
-  -2147483649, // float value
-  2147483648,  // float value
-  -0x80000001, // float value, beyond max negative int
-  0x800000001, // float value, beyond max positive int
-  020000000001, // float value, beyond max positive int 
-  -020000000001, // float value, beyond max negative int 
   0.0,  
   -0.1,
   1.0,
@@ -165,9 +165,9 @@ bool(true)
 bool(true)
 bool(true)
 --Iteration 4--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 --Iteration 5--
 bool(true)
 bool(true)
@@ -197,9 +197,9 @@ bool(true)
 bool(true)
 bool(true)
 --Iteration 12--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 --Iteration 13--
 bool(true)
 bool(true)
@@ -217,10 +217,34 @@ bool(true)
 bool(true)
 bool(true)
 --Iteration 17--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 --Iteration 18--
+bool(true)
+bool(true)
+bool(true)
+--Iteration 19--
+bool(true)
+bool(true)
+bool(true)
+--Iteration 20--
+bool(true)
+bool(true)
+bool(true)
+--Iteration 21--
+bool(true)
+bool(true)
+bool(true)
+--Iteration 22--
+bool(true)
+bool(true)
+bool(true)
+--Iteration 23--
+bool(true)
+bool(true)
+bool(true)
+--Iteration 24--
 bool(true)
 bool(true)
 bool(true)
@@ -415,30 +439,6 @@ bool(false)
 bool(false)
 bool(false)
 --Iteration 48--
-bool(false)
-bool(false)
-bool(false)
---Iteration 49--
-bool(false)
-bool(false)
-bool(false)
---Iteration 50--
-bool(false)
-bool(false)
-bool(false)
---Iteration 51--
-bool(false)
-bool(false)
-bool(false)
---Iteration 52--
-bool(false)
-bool(false)
-bool(false)
---Iteration 53--
-bool(false)
-bool(false)
-bool(false)
---Iteration 54--
 bool(false)
 bool(false)
 bool(false)
