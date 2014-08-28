@@ -307,7 +307,7 @@ ZEND_API int zend_declare_property_bool(zend_class_entry *ce, const char *name, 
 ZEND_API int zend_declare_property_long(zend_class_entry *ce, const char *name, int name_length, zend_long value, int access_type TSRMLS_DC);
 ZEND_API int zend_declare_property_double(zend_class_entry *ce, const char *name, int name_length, double value, int access_type TSRMLS_DC);
 ZEND_API int zend_declare_property_string(zend_class_entry *ce, const char *name, int name_length, const char *value, int access_type TSRMLS_DC);
-ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *name, int name_length, const char *value, int value_len, int access_type TSRMLS_DC);
+ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *name, int name_length, const char *value, size_t value_len, int access_type TSRMLS_DC);
 
 ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value TSRMLS_DC);
 ZEND_API int zend_declare_class_constant_null(zend_class_entry *ce, const char *name, size_t name_length TSRMLS_DC);
@@ -325,7 +325,7 @@ ZEND_API void zend_update_property_long(zend_class_entry *scope, zval *object, c
 ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object, const char *name, int name_length, double value TSRMLS_DC);
 ZEND_API void zend_update_property_str(zend_class_entry *scope, zval *object, const char *name, int name_length, zend_string *value TSRMLS_DC);
 ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, const char *name, int name_length, const char *value TSRMLS_DC);
-ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object, const char *name, int name_length, const char *value, int value_length TSRMLS_DC);
+ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object, const char *name, int name_length, const char *value, size_t value_length TSRMLS_DC);
 
 ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *name, int name_length, zval *value TSRMLS_DC);
 ZEND_API int zend_update_static_property_null(zend_class_entry *scope, const char *name, int name_length TSRMLS_DC);
@@ -333,7 +333,7 @@ ZEND_API int zend_update_static_property_bool(zend_class_entry *scope, const cha
 ZEND_API int zend_update_static_property_long(zend_class_entry *scope, const char *name, int name_length, zend_long value TSRMLS_DC);
 ZEND_API int zend_update_static_property_double(zend_class_entry *scope, const char *name, int name_length, double value TSRMLS_DC);
 ZEND_API int zend_update_static_property_string(zend_class_entry *scope, const char *name, int name_length, const char *value TSRMLS_DC);
-ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const char *name, int name_length, const char *value, int value_length TSRMLS_DC);
+ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const char *name, int name_length, const char *value, size_t value_length TSRMLS_DC);
 
 ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, int name_length, zend_bool silent TSRMLS_DC);
 
@@ -381,7 +381,7 @@ ZEND_API int add_assoc_resource_ex(zval *arg, const char *key, uint key_len, zen
 ZEND_API int add_assoc_double_ex(zval *arg, const char *key, uint key_len, double d);
 ZEND_API int add_assoc_str_ex(zval *arg, const char *key, uint key_len, zend_string *str);
 ZEND_API int add_assoc_string_ex(zval *arg, const char *key, uint key_len, char *str);
-ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, uint key_len, char *str, uint length);
+ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, uint key_len, char *str, size_t length);
 ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value);
 
 #define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key), __n)
@@ -407,7 +407,7 @@ ZEND_API int add_index_resource(zval *arg, zend_ulong idx, zend_resource *r);
 ZEND_API int add_index_double(zval *arg, zend_ulong idx, double d);
 ZEND_API int add_index_str(zval *arg, zend_ulong idx, zend_string *str);
 ZEND_API int add_index_string(zval *arg, zend_ulong idx, const char *str);
-ZEND_API int add_index_stringl(zval *arg, zend_ulong idx, const char *str, uint length);
+ZEND_API int add_index_stringl(zval *arg, zend_ulong idx, const char *str, size_t length);
 ZEND_API int add_index_zval(zval *arg, zend_ulong index, zval *value);
 
 ZEND_API int add_next_index_long(zval *arg, zend_long n);
@@ -417,11 +417,11 @@ ZEND_API int add_next_index_resource(zval *arg, zend_resource *r);
 ZEND_API int add_next_index_double(zval *arg, double d);
 ZEND_API int add_next_index_str(zval *arg, zend_string *str);
 ZEND_API int add_next_index_string(zval *arg, const char *str);
-ZEND_API int add_next_index_stringl(zval *arg, const char *str, uint length);
+ZEND_API int add_next_index_stringl(zval *arg, const char *str, size_t length);
 ZEND_API int add_next_index_zval(zval *arg, zval *value);
 
 ZEND_API zval *add_get_assoc_string_ex(zval *arg, const char *key, uint key_len, const char *str);
-ZEND_API zval *add_get_assoc_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, uint length);
+ZEND_API zval *add_get_assoc_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, size_t length);
 
 #define add_get_assoc_string(__arg, __key, __str) add_get_assoc_string_ex(__arg, __key, strlen(__key), __str)
 #define add_get_assoc_stringl(__arg, __key, __str, __length) add_get_assoc_stringl_ex(__arg, __key, strlen(__key), __str, __length)
@@ -430,7 +430,7 @@ ZEND_API zval *add_get_index_long(zval *arg, zend_ulong idx, zend_long l);
 ZEND_API zval *add_get_index_double(zval *arg, zend_ulong idx, double d);
 ZEND_API zval *add_get_index_str(zval *arg, zend_ulong index, zend_string *str);
 ZEND_API zval *add_get_index_string(zval *arg, zend_ulong idx, const char *str);
-ZEND_API zval *add_get_index_stringl(zval *arg, zend_ulong idx, const char *str, uint length);
+ZEND_API zval *add_get_index_stringl(zval *arg, zend_ulong idx, const char *str, size_t length);
 
 ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value TSRMLS_DC);
 
@@ -441,7 +441,7 @@ ZEND_API int add_property_resource_ex(zval *arg, const char *key, uint key_len, 
 ZEND_API int add_property_double_ex(zval *arg, const char *key, uint key_len, double d TSRMLS_DC);
 ZEND_API int add_property_str_ex(zval *arg, const char *key, uint key_len, zend_string *str TSRMLS_DC);
 ZEND_API int add_property_string_ex(zval *arg, const char *key, uint key_len, const char *str TSRMLS_DC);
-ZEND_API int add_property_stringl_ex(zval *arg, const char *key, uint key_len,  const char *str, uint length TSRMLS_DC);
+ZEND_API int add_property_stringl_ex(zval *arg, const char *key, uint key_len,  const char *str, size_t length TSRMLS_DC);
 ZEND_API int add_property_zval_ex(zval *arg, const char *key, uint key_len, zval *value TSRMLS_DC);
 
 #define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key), __n TSRMLS_CC)
