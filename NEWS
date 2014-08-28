@@ -6,14 +6,18 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #67878 (program_prefix not honoured in man pages). (Remi)
 
-- GD
+- GD:
   . Made fontFetch's path parser thread-safe. (Sara)
+
+- GMP:
+  . Fixed bug #67917 (Using GMP objects with overloaded operators can cause
+    memory exhaustion). (Nikita Popov)
 
 - MySQLi:
   . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
 
-- OpenSSL
-  . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3)
+- OpenSSL:
+  . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3).
     (Daniel Lowrey)
 
 28 Aug 2014, PHP 5.6.0
