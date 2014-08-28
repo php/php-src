@@ -85,7 +85,7 @@
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	zend_long64 __result = (zend_long64) (a) * (zend_long64) (b);	\
-	if (__result > ZEND_INT_MAX || __result < ZEND_INT_MIN) {				\
+	if (__result > ZEND_LONG_MAX || __result < ZEND_LONG_MIN) {		\
 		(dval) = (double) __result;									\
 		(usedval) = 1;												\
 	} else {														\
