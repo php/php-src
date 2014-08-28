@@ -1365,11 +1365,14 @@ PHP_FUNCTION(extract)
 	int extract_refs = 0;
 	zend_array *symbol_table;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
 		return;
 	}
 
 	extract_refs = (extract_type & EXTR_REFS);
+	if (extract_refs) {
+		SEPARATE_ZVAL(var_array);
+	}
 	extract_type &= 0xff;
 
 	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
