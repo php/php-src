@@ -1527,7 +1527,7 @@ PHP_FUNCTION(pg_connect_poll)
 		return;
 	}
 
-	if (pgsql_link == NULL && id == -1) {
+	if (pgsql_link == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -2314,7 +2314,7 @@ PHP_FUNCTION(pg_last_notice)
 		return;
 	}
 
-	if (pgsql_link == NULL && id == -1) {
+	if (pgsql_link == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -4856,7 +4856,7 @@ PHP_FUNCTION(pg_send_query_params)
 		return;
 	}
 
-	if (pgsql_link == NULL && id == -1) {
+	if (pgsql_link == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -4961,7 +4961,7 @@ PHP_FUNCTION(pg_send_prepare)
 		return;
 	}
 
-	if (pgsql_link == NULL && id == -1) {
+	if (pgsql_link == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -5039,7 +5039,7 @@ PHP_FUNCTION(pg_send_execute)
 		return;
 	}
 
-	if (pgsql_link == NULL && id == -1) {
+	if (pgsql_link == NULL) {
 		RETURN_FALSE;
 	}
 
