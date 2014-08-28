@@ -781,7 +781,7 @@ static inline int php_charmask(unsigned char *input, size_t len, char *mask TSRM
 PHPAPI char *php_trim(char *c, size_t len, char *what, size_t what_len, zval *return_value, int mode TSRMLS_DC)
 {
 	register zend_long i;
-	int trimmed = 0;
+	size_t trimmed = 0;
 	char mask[256];
 
 	if (what) {
@@ -1257,7 +1257,7 @@ PHP_FUNCTION(strtok)
 	char *token_end;
 	char *p;
 	char *pe;
-	int skipped = 0;
+	size_t skipped = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &str, &tok) == FAILURE) {
 		return;
@@ -1465,7 +1465,7 @@ quit_loop:
 	if (state == 1) {
 		cend = c;
 	}
-	if (suffix != NULL && sufflen < (uint)(cend - comp) &&
+	if (suffix != NULL && sufflen < (size_t)(cend - comp) &&
 			memcmp(cend - sufflen, suffix, sufflen) == 0) {
 		cend -= sufflen;
 	}
@@ -1554,7 +1554,7 @@ PHP_FUNCTION(pathinfo)
 
 	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
 		const char *p;
-		int idx;
+		ptrdiff_t idx;
 
 		if (!have_basename) {
 			ret = php_basename(path, path_len, NULL, 0 TSRMLS_CC);
@@ -1570,7 +1570,7 @@ PHP_FUNCTION(pathinfo)
 
 	if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
 		const char *p;
-		int idx;
+		ptrdiff_t idx;
 
 		/* Have we already looked up the basename? */
 		if (!have_basename && !ret) {
