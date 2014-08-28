@@ -85,7 +85,7 @@ typedef int32_t zend_off_t;
 #  define ZEND_STRTOUL(s0, s1, base) strtoull((s0), (s1), (base))
 #  define ZEND_STRTOL_PTR strtoll
 #  define ZEND_STRTOUL_PTR strtoull
-#  define ZEND_ABS llabs
+#  define ZEND_ABS imaxabs
 # endif
 #else
 # define ZEND_STRTOL(s0, s1, base) strtol((s0), (s1), (base))
