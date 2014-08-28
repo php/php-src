@@ -37,7 +37,7 @@
 
 #if !defined(MYSQLI_USE_MYSQLND)
 /* {{{ mysqli_tx_cor_options_to_string */
-static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str * str, const size_t mode)
+static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str * str, const uint32_t mode)
 {
 	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
 		if (str->s && str->s->len) {
@@ -108,7 +108,7 @@ mysqli_escape_string_for_tx_name_in_comment(const char * const name TSRMLS_DC)
 /* }}} */
 
 /* {{{ mysqli_commit_or_rollback_libmysql */
-static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, const unsigned int mode, const char * const name TSRMLS_DC)
+static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, const uint32_t mode, const char * const name TSRMLS_DC)
 {
 	int ret;
 	smart_str tmp_str = {0};
