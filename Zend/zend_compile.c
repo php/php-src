@@ -4274,9 +4274,15 @@ int zend_try_compile_special_func(
 		return zend_compile_func_typecheck(result, args, IS_NULL TSRMLS_CC);
 	} else if (zend_string_equals_literal(lcname, "is_bool")) {
 		return zend_compile_func_typecheck(result, args, _IS_BOOL TSRMLS_CC);
-	} else if (zend_string_equals_literal(lcname, "is_long")) {
+	} else if (zend_string_equals_literal(lcname, "is_long")
+		|| zend_string_equals_literal(lcname, "is_int")
+		|| zend_string_equals_literal(lcname, "is_integer")
+	) {
 		return zend_compile_func_typecheck(result, args, IS_LONG TSRMLS_CC);
-	} else if (zend_string_equals_literal(lcname, "is_float")) {
+	} else if (zend_string_equals_literal(lcname, "is_float")
+		|| zend_string_equals_literal(lcname, "is_double")
+		|| zend_string_equals_literal(lcname, "is_real")
+	) {
 		return zend_compile_func_typecheck(result, args, IS_DOUBLE TSRMLS_CC);
 	} else if (zend_string_equals_literal(lcname, "is_string")) {
 		return zend_compile_func_typecheck(result, args, IS_STRING TSRMLS_CC);
