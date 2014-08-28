@@ -4369,7 +4369,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type TSRMLS
 	if (is_this_fetch(obj_ast)) {
 		obj_node.op_type = IS_UNUSED;
 	} else {
-		zend_compile_var(&obj_node, obj_ast, type TSRMLS_CC);
+		zend_compile_expr(&obj_node, obj_ast TSRMLS_CC);
 	}
 
 	zend_compile_expr(&method_node, method_ast TSRMLS_CC);
