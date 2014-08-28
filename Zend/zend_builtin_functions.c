@@ -519,7 +519,8 @@ ZEND_FUNCTION(func_get_args)
 /* }}} */
 
 /* {{{ proto int strlen(string str)
-   Get string length */
+   Get string length
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 ZEND_FUNCTION(strlen)
 {
 	zend_string *s;
@@ -776,7 +777,8 @@ repeat:
 
 
 /* {{{ proto bool defined(string constant_name)
-   Check whether a constant exists */
+   Check whether a constant exists
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 ZEND_FUNCTION(defined)
 {
 	zend_string *name;
