@@ -25,6 +25,14 @@
  * - change $i++ to ++$i where possible
  */
 
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
 /* compares opcodes with allowing oc1 be _EX of oc2 */
 #define SAME_OPCODE_EX(oc1, oc2) ((oc1 == oc2) || (oc1 == ZEND_JMPZ_EX && oc2 == ZEND_JMPZ) || (oc1 == ZEND_JMPNZ_EX && oc2 == ZEND_JMPNZ))
 
@@ -45,7 +53,8 @@
 	}										\
 	jmp_hitlist[jmp_hitlist_count++] = ZEND_OP2(&op_array->opcodes[target]).opline_num;
 
-if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
+void zend_optimizer_pass3(zend_op_array *op_array TSRMLS_DC)
+{
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
 	uint32_t *jmp_hitlist;

@@ -25,7 +25,16 @@
  * - optimize static BRKs and CONTs
  */
 
-if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
+void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
+{
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
 
