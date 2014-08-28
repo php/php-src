@@ -1088,7 +1088,7 @@ ZEND_FUNCTION(gmp_init)
 }
 /* }}} */
 
-int gmp_import_export_validate(long order, long size, long endian, long nails)
+int gmp_import_export_validate(long order, long size, long endian, long nails TSRMLS_DC)
 {
 	if (size < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (should be at least 1 byte)", size);
@@ -1130,7 +1130,7 @@ ZEND_FUNCTION(gmp_import)
 		return;
 	}
 
-	if (!gmp_import_export_validate(order, size, endian, nails)) {
+	if (!gmp_import_export_validate(order, size, endian, nails TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -1162,7 +1162,7 @@ ZEND_FUNCTION(gmp_export)
 		return;
 	}
 
-	if (!gmp_import_export_validate(order, size, endian, nails)) {
+	if (!gmp_import_export_validate(order, size, endian, nails TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
