@@ -603,9 +603,8 @@ PHP_FUNCTION(hash_pbkdf2)
 	zend_string *returnval;
 	char *algo, *salt, *pass = NULL;
 	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
-	zend_long loops, i, j, iterations, digest_length = 0;
-	size_t algo_len, pass_len, length = 0;
-	size_t salt_len = 0;
+	zend_long loops, i, j, iterations, digest_length = 0, length = 0;
+	size_t algo_len, pass_len, salt_len = 0;
 	zend_bool raw_output = 0;
 	const php_hash_ops *ops;
 	void *context;
@@ -631,7 +630,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 
 	if (salt_len > INT_MAX - 4) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long, max of INT_MAX - 4 bytes: %d supplied", salt_len);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long, max of INT_MAX - 4 bytes: %zd supplied", salt_len);
 		RETURN_FALSE;
 	}
 
