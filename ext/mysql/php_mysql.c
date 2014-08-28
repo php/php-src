@@ -1372,7 +1372,7 @@ PHP_FUNCTION(mysql_client_encoding)
 PHP_FUNCTION(mysql_set_charset)
 {
 	char *csname;
-	int csname_len;
+	size_t csname_len;
 	php_mysql_conn *mysql;
 	zval *mysql_link = NULL;
 
