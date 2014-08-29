@@ -338,7 +338,9 @@ fi
 dnl
 dnl Check for available functions
 dnl
-AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p log2 hypot glob strfmon nice fpclass isinf isnan mempcpy strpncpy)
+dnl log2 could be used to improve the log function, however it requires C99. The check for log2 should be turned on,
+dnl as soon as we support C99.
+AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan mempcpy strpncpy)
 AC_FUNC_FNMATCH	
 
 dnl
