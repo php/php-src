@@ -122,7 +122,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
-    zend_stat_t sbuf;
+    struct stat sbuf;
 #endif
 
 	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
@@ -150,7 +150,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 #else
 		/* Check to make sure that the opened file is not outside of allowable dirs. 
 		   This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
-		if(PG(open_basedir) && zend_lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC)) {
+		if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC)) {
 			return;
 		}
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
