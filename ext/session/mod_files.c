@@ -122,7 +122,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
-    struct stat sbuf;
+    zend_stat_t sbuf;
 #endif
 
 	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
@@ -336,7 +336,7 @@ PS_CLOSE_FUNC(files)
 PS_READ_FUNC(files)
 {
 	zend_long n;
-	struct stat sbuf;
+	zend_stat_t sbuf;
 	PS_FILES_DATA;
 
 	/* If strict mode, check session id existence */

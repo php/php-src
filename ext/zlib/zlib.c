@@ -605,7 +605,7 @@ static PHP_FUNCTION(readgzfile)
 	size_t filename_len;
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
-	int size;
+	size_t size;
 	zend_long use_include_path = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &use_include_path) == FAILURE) {

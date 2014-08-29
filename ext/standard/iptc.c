@@ -184,7 +184,7 @@ PHP_FUNCTION(iptcembed)
 	unsigned int marker, done = 0;
 	int inx;
 	unsigned char *spoolbuf = NULL, *poi = NULL;
-	struct stat sb;
+	zend_stat_t sb;
 	zend_bool written = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {

@@ -3917,7 +3917,7 @@ PHP_FUNCTION(imagepsloadfont)
 	char *file;
 	int file_len, f_ind, *font;
 #ifdef PHP_WIN32
-	struct stat st;
+	zend_stat_t st;
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
