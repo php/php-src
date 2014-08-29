@@ -201,7 +201,7 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (spool < 2) {
-		fstat(fileno(fp), &sb);
+		zend_fstat(fileno(fp), &sb);
 
 		poi = spoolbuf = safe_emalloc(1, iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 1);
 		memset(poi, 0, iptcdata_len + sizeof(psheader) + sb.st_size + 1024 + 1);
