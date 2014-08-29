@@ -206,12 +206,12 @@ PHP                                                                        NEWS
   . Fixed bug #66307 (Fileinfo crashes with powerpoint files). (Anatol)
 
 - FPM:
-  . Fix bug #67606 (revised fix 67541, broke mod_fastcgi BC). (David Zuelke)
+  . Fixed bug #67606 (revised fix 67541, broke mod_fastcgi BC). (David Zuelke)
   . Fixed bug #67530 (error_log=syslog ignored). (Remi)
   . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
     (pacho@gentoo.org, Remi)
-  . Fix bug #67531 (syslog cannot be set in pool configuration). (Remi)
-  . Fix bug #67541 (Fix Apache 2.4.10+ SetHandler proxy:fcgi://
+  . Fixed bug #67531 (syslog cannot be set in pool configuration). (Remi)
+  . Fixed bug #67541 (Fix Apache 2.4.10+ SetHandler proxy:fcgi://
     incompatibilities). (David Zuelke)
   . Included apparmor support in fpm
     (RFC: https://wiki.php.net/rfc/fpm_change_hat). (Gernot Vormayr)
@@ -233,9 +233,9 @@ PHP                                                                        NEWS
     (Scott)
   . Fixed bug #66356 (Heap Overflow Vulnerability in imagecrop()).
     (CVE-2013-7226)
-  . Fixed bug #66815 (imagecrop(): insufficient fix for NULL defer
-    CVE-2013-7327). (Tomas Hoger, Remi).
-  . Fixed #66869 (Invalid 2nd argument crashes imageaffinematrixget) (Pierre)
+  . Fixed bug #66815 (imagecrop(): insufficient fix for NULL defer).
+    (CVE-2013-7327). (Tomas Hoger, Remi).
+  . Fixed bug #66869 (Invalid 2nd argument crashes imageaffinematrixget) (Pierre)
   . Fixed bug #66887 (imagescale - poor quality of scaled image). (Remi)
   . Fixed bug #66890 (imagescale segfault). (Remi)
   . Fixed bug #66893 (imagescale ignore method argument). (Remi)
@@ -410,9 +410,9 @@ PHP                                                                        NEWS
   . Encrypted TLS servers now support the server name indication TLS extension
     via the new  "SNI_server_certs" SSL context option. (Daniel Lowrey)
   . Fixed bug #66833 (Default disgest algo is still MD5, switch to SHA1). (Remi)
-  . Fix bug #66942 (memory leak in openssl_seal()). (Chuan Ma)
-  . Fix bug #66952 (memory leak in openssl_open()). (Chuan Ma)
-  . Fix bug #66840 (Fix broken build when extension built separately).
+  . Fixed bug #66942 (memory leak in openssl_seal()). (Chuan Ma)
+  . Fixed bug #66952 (memory leak in openssl_open()). (Chuan Ma)
+  . Fixed bug #66840 (Fix broken build when extension built separately).
     (Daniel Lowrey)
 
 - OPcache:
@@ -435,7 +435,7 @@ PHP                                                                        NEWS
   . Added support for (*MARK) backtracking verbs. (Nikita)
 
 - pgsql:
-  . Fix bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
+  . Fixed bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
     which affected builds against libpq < 7.3. (Adam)
   . pg_insert()/pg_select()/pg_update()/pg_delete() are no longer EXPERIMENTAL.
     (Yasuo)
@@ -463,7 +463,7 @@ PHP                                                                        NEWS
 - phpdbg
   . Fixed bug #67575 (Compilation fails for phpdbg when the
     build directory != src directory). (Andy Thompson)
-  . Fix Bug #67499 (readline feature not enabled when build with libedit). (Remi)
+  . Fixed Bug #67499 (readline feature not enabled when build with libedit). (Remi)
   . Fix issue krakjoe/phpdbg#94 (List behavior is inconsistent). (Bob)
   . Fix issue krakjoe/phpdbg#97 (The prompt should always ensure it is on a
     newline). (Bob)
@@ -507,7 +507,7 @@ PHP                                                                        NEWS
   . Fixed Bug #66071 (memory corruption in error handling) (Popa)
 
 - Phar:
-  . Fix bug #64498 ($phar->buildFromDirectory can't compress file with an accent
+  . Fixed bug #64498 ($phar->buildFromDirectory can't compress file with an accent
     in its name). (PR #588)
   . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
 
