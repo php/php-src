@@ -464,7 +464,7 @@ ZEND_GET_MODULE(ibase)
 #endif
 
 /* True globals, no need for thread safety */
-size_t le_link, le_plink, le_trans;
+int le_link, le_plink, le_trans;
 
 /* }}} */
 
