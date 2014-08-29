@@ -3091,7 +3091,7 @@ zend_ast *zend_ast_append_str(zend_ast *left_ast, zend_ast *right_ast) /* {{{ */
 /* }}} */
 
 /* A hacky way that is used to store the doc comment for properties */
-zend_ast_list *zend_ast_append_doc_comment(zend_ast_list *list TSRMLS_DC) /* {{{ */
+zend_ast *zend_ast_append_doc_comment(zend_ast *list TSRMLS_DC) /* {{{ */
 {
 	if (CG(doc_comment)) {
 		list = zend_ast_list_add(list, zend_ast_create_zval_from_str(CG(doc_comment)));
@@ -5267,8 +5267,9 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /* Encoding declarations must already be handled during parsing */
-void zend_handle_encoding_declaration(zend_ast_list *declares TSRMLS_DC) /* {{{ */
+void zend_handle_encoding_declaration(zend_ast *ast TSRMLS_DC) /* {{{ */
 {
+	zend_ast_list *declares = zend_ast_get_list(ast);
 	uint32_t i;
 	for (i = 0; i < declares->children; ++i) {
 		zend_ast *declare_ast = declares->child[i];
@@ -7166,7 +7167,7 @@ void zend_compile_shell_exec(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 
 	ZVAL_STRING(&fn_name, "shell_exec");
 	name_ast = zend_ast_create_zval(&fn_name);
-	args_ast = (zend_ast *) zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast);
+	args_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast);
 	call_ast = zend_ast_create(ZEND_AST_CALL, name_ast, args_ast);
 
 	zend_compile_expr(result, call_ast TSRMLS_CC);

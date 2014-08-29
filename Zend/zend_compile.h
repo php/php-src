@@ -89,7 +89,6 @@ static inline znode *zend_ast_get_znode(zend_ast *ast) {
 
 typedef union _zend_parser_stack_elem {
 	zend_ast *ast;
-	zend_ast_list *list;
 	zend_string *str;
 	zend_ulong num;
 } zend_parser_stack_elem;
@@ -447,8 +446,8 @@ void zend_stop_lexing(TSRMLS_D);
 void zend_emit_final_return(zval *zv TSRMLS_DC);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
-zend_ast_list *zend_ast_append_doc_comment(zend_ast_list *list TSRMLS_DC);
-void zend_handle_encoding_declaration(zend_ast_list *declares TSRMLS_DC);
+zend_ast *zend_ast_append_doc_comment(zend_ast *list TSRMLS_DC);
+void zend_handle_encoding_declaration(zend_ast *ast TSRMLS_DC);
 
 /* parser-driven code generators */
 void zend_do_free(znode *op1 TSRMLS_DC);
