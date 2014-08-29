@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #41577 (DOTNET is successful once per server run)
     (Aidas Kasparas)
 
+- FPM:
+  . Fixed #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable when
+    using Apache). (David Zuelke)
+
 - OpenSSL:
   . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
     (Daniel Lowrey)
