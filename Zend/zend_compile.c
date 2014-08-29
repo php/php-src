@@ -3051,14 +3051,11 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 uint32_t zend_get_class_fetch_type(zend_string *name) /* {{{ */ 
 {
-	if (name->len == sizeof("self") - 1 &&
-		!strncasecmp(name->val, "self", sizeof("self") - 1)) {
+	if (zend_string_equals_literal_ci(name, "self")) {
 		return ZEND_FETCH_CLASS_SELF;
-	} else if (name->len == sizeof("parent") - 1 &&
-		!strncasecmp(name->val, "parent", sizeof("parent") - 1)) {
+	} else if (zend_string_equals_literal_ci(name, "parent")) {
 		return ZEND_FETCH_CLASS_PARENT;
-	} else if (name->len == sizeof("static") - 1 &&
-		!strncasecmp(name->val, "static", sizeof("static") - 1)) {
+	} else if (zend_string_equals_literal_ci(name, "static")) {
 		return ZEND_FETCH_CLASS_STATIC;
 	} else {
 		return ZEND_FETCH_CLASS_DEFAULT;
@@ -3252,10 +3249,6 @@ static inline zend_bool zend_string_equals_str_ci(zend_string *str1, zend_string
 		&& !zend_binary_strcasecmp(str1->val, str1->len, str2->val, str2->len);
 }
 /* }}} */
-
-#define zend_string_equals_literal_ci(str, c) \
-	((str)->len == sizeof(c) - 1 \
-	 && !zend_binary_strcasecmp((str)->val, (str)->len, (c), sizeof(c) - 1))
 
 static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */ 
 {
