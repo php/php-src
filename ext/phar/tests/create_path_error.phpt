@@ -75,11 +75,11 @@ string(5) "query"
 6:
 7:
 8:
-9:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-10:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-11:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-12:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-13:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+9:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+10:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+11:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+12:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+13:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
 Exception: Entry a does not exist and cannot be created: phar error: invalid path "a" contains illegal character
 ===DONE===
 
