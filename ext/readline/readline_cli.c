@@ -435,7 +435,7 @@ static char *cli_completion_generator_ht(const char *text, int textlen, int *sta
 static char *cli_completion_generator_var(const char *text, int textlen, int *state TSRMLS_DC) /* {{{ */
 {
 	char *retval, *tmp;
-	zend_array *symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
+	zend_array *symbol_table = &EG(symbol_table);
 
 	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, symbol_table ? &symbol_table->ht : NULL, NULL TSRMLS_CC);
 	if (retval) {
