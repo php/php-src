@@ -762,11 +762,11 @@ static void zend_assign_to_string_offset(zval *str_offset, zval *value, int valu
 	/* XXX String offset is uint32_t in _zval_struct, so can address only 2^32+1 space.
 		To make the offset get over that barier, we need to make str_offset size_t and that
 		would grow zval size by 8 bytes (currently from 16 to 24) on 64 bit build. */
-	size_t offset = (size_t)Z_STR_OFFSET_IDX_P(str_offset);
+	uint32_t offset = Z_STR_OFFSET_IDX_P(str_offset);
 	zend_string *old_str;
 
-	if ((zend_long)offset < 0) {
-		zend_error(E_WARNING, "Illegal string offset:  %zd", offset);
+	if ((int)offset < 0) {
+		zend_error(E_WARNING, "Illegal string offset:  %d", offset);
 		zend_string_release(Z_STR_P(str));
 		if (result) {
 			ZVAL_NULL(result);
@@ -776,7 +776,7 @@ static void zend_assign_to_string_offset(zval *str_offset, zval *value, int valu
 
 	old_str = Z_STR_P(str);
 	if (offset >= Z_STRLEN_P(str)) {
-		size_t old_len = Z_STRLEN_P(str);
+		int old_len = Z_STRLEN_P(str);
 		Z_STR_P(str) = zend_string_realloc(Z_STR_P(str), offset + 1, 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
