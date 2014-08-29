@@ -7,13 +7,17 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
-    (Daniel Lowrey).
+    (Daniel Lowrey)
 
 - Date:
-  . Fixed bug #66091 (memory leaks in DateTime constructor). (Tjerk).
+  . Fixed bug #66091 (memory leaks in DateTime constructor). (Tjerk)
 
-- GD
-  . Made fontFetch's path parser thread-safe. (Sara).
+- FPM:
+  . Fixed #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable when 
+    using Apache). (David Zuelke)
+
+- GD:
+  . Made fontFetch's path parser thread-safe. (Sara)
 
 - Wddx:
   . Fixed bug #67873 (Segfaults in php_wddx_serialize_var). (Anatol, Remi)
@@ -23,11 +27,11 @@ PHP                                                                        NEWS
     data). (Mike)
   . Fixed bug #67865 (internal corruption phar error). (Mike)
 
-?? ??? 2014, PHP 5.4.32
+21 Aug 2014, PHP 5.4.32
 
 - COM:
-  . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
-  . Fixed bug #41577 (DOTNET is successful once per server run)
+  . Fixed missing type checks in com_event_sink. (Yussuf Khalil, Stas)
+  . Fixed bug #41577 (DOTNET is successful once per server run).
     (Aidas Kasparas)
 
 - Fileinfo:
