@@ -1577,7 +1577,19 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	ZVAL_LONG(&stat_uid, stat_ssb.sb.st_uid);
 	ZVAL_LONG(&stat_gid, stat_ssb.sb.st_gid);
 #ifdef HAVE_ST_RDEV
+# ifdef PHP_WIN32
+	/* It is unsigned, so if a negative came from userspace, it'll
+	   convert to UINT_MAX, but we wan't to keep the userspace value.
+	   Almost the same as in php_fstat. This is ugly, but otherwise
+	   we would have to maintain a fully compatible struct stat. */
+	if ((int)stat_ssb.sb.st_rdev < 0) {
+		ZVAL_LONG(&stat_rdev, (int)stat_ssb.sb.st_rdev);
+	} else {
+		ZVAL_LONG(&stat_rdev, stat_ssb.sb.st_rdev);
+	}
+# else
 	ZVAL_LONG(&stat_rdev, stat_ssb.sb.st_rdev);
+# endif
 #else
 	ZVAL_LONG(&stat_rdev, -1);
 #endif
