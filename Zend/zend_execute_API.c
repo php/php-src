@@ -190,7 +190,6 @@ void init_executor(TSRMLS_D) /* {{{ */
 	ZVAL_OBJ(&EG(This), NULL);
 
 	EG(active) = 1;
-	EG(start_op) = NULL;
 }
 /* }}} */
 

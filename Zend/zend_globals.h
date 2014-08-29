@@ -71,8 +71,7 @@ typedef struct _zend_ini_entry zend_ini_entry;
 
 
 struct _zend_compiler_globals {
-	zend_stack switch_cond_stack;
-	zend_stack foreach_copy_stack;
+	zend_stack loop_var_stack;
 
 	zend_class_entry *active_class_entry;
 
@@ -230,8 +229,6 @@ struct _zend_executor_globals {
 
 	zend_bool active;
 	zend_bool valid_symbol_table;
-
-	zend_op *start_op;
 
 	void *saved_fpu_cw_ptr;
 #if XPFPA_HAVE_CW

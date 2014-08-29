@@ -55,11 +55,6 @@
 		} \
 	} while (0)
 
-#define COPY_NODE(target, src) do { \
-		target ## _type = src ## _type; \
-		target = src; \
-	} while (0)
-
 static inline void zend_alloc_cache_slot(uint32_t literal TSRMLS_DC) {
 	zend_op_array *op_array = CG(active_op_array);
 	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->last_cache_slot++;
@@ -180,8 +175,7 @@ void zend_init_compiler_context(TSRMLS_D) /* {{{ */
 
 void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 {
-	zend_stack_init(&CG(switch_cond_stack), sizeof(zend_switch_entry));
-	zend_stack_init(&CG(foreach_copy_stack), sizeof(zend_op));
+	zend_stack_init(&CG(loop_var_stack), sizeof(znode));
 	zend_stack_init(&CG(delayed_oplines_stack), sizeof(zend_op));
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;
@@ -223,8 +217,7 @@ void init_compiler(TSRMLS_D) /* {{{ */
 
 void shutdown_compiler(TSRMLS_D) /* {{{ */
 {
-	zend_stack_destroy(&CG(switch_cond_stack));
-	zend_stack_destroy(&CG(foreach_copy_stack));
+	zend_stack_destroy(&CG(loop_var_stack));
 	zend_stack_destroy(&CG(delayed_oplines_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_hash_destroy(&CG(const_filenames));
@@ -881,38 +874,22 @@ void zend_release_labels(int temporary TSRMLS_DC) /* {{{ */
 
 static zend_bool zend_is_call(zend_ast *ast);
 
-static int generate_free_switch_expr(zend_switch_entry *switch_entry TSRMLS_DC) /* {{{ */
+static int generate_free_loop_var(znode *var TSRMLS_DC) /* {{{ */
 {
-	zend_op *opline;
+	switch (var->op_type) {
+		case IS_UNUSED:
+			/* Stack separator on function boundary, stop applying */
+			return 1;
+		case IS_VAR:
+		case IS_TMP_VAR:
+		{
+			zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	if (switch_entry->cond.op_type != IS_VAR && switch_entry->cond.op_type != IS_TMP_VAR) {
-		return (switch_entry->cond.op_type == IS_UNUSED);
+			opline->opcode = var->op_type == IS_TMP_VAR ? ZEND_FREE : ZEND_SWITCH_FREE;
+			SET_NODE(opline->op1, var);
+			SET_UNUSED(opline->op2);
+		}
 	}
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = (switch_entry->cond.op_type == IS_TMP_VAR) ? ZEND_FREE : ZEND_SWITCH_FREE;
-	SET_NODE(opline->op1, &switch_entry->cond);
-	SET_UNUSED(opline->op2);
-
-	return 0;
-}
-/* }}} */
-
-static int generate_free_foreach_copy(const zend_op *foreach_copy TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline;
-
-	/* If we reach the separator then stop applying the stack */
-	if (foreach_copy->result_type == IS_UNUSED) {
-		return 1;
-	}
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = (foreach_copy->result_type == IS_TMP_VAR) ? ZEND_FREE : ZEND_SWITCH_FREE;
-	COPY_NODE(opline->op1, foreach_copy->result);
-	SET_UNUSED(opline->op2);
 
 	return 0;
 }
@@ -4708,11 +4685,9 @@ static void zend_free_foreach_and_switch_variables(TSRMLS_D) /* {{{ */
 	opnum_start = get_next_op_number(CG(active_op_array));
 
 #ifdef ZTS
-	zend_stack_apply_with_argument(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_switch_expr TSRMLS_CC);
-	zend_stack_apply_with_argument(&CG(foreach_copy_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_foreach_copy TSRMLS_CC);
+	zend_stack_apply_with_argument(&CG(loop_var_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_loop_var TSRMLS_CC);
 #else
-	zend_stack_apply(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_switch_expr);
-	zend_stack_apply(&CG(foreach_copy_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_foreach_copy);
+	zend_stack_apply(&CG(loop_var_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_loop_var);
 #endif
 
 	opnum_end = get_next_op_number(CG(active_op_array));
@@ -4962,7 +4937,6 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) /* {{{ */
 	znode expr_node, reset_node, value_node, key_node, dummy_node;
 	zend_op *opline;
 	uint32_t opnum_reset, opnum_fetch;
-	zend_op foreach_stack_opline;
 
 	if (key_ast) {
 		if (key_ast->kind == ZEND_AST_REF) {
@@ -4989,8 +4963,7 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) /* {{{ */
 		opline->extended_value = ZEND_FE_RESET_VARIABLE | ZEND_FE_RESET_REFERENCE; // ???
 	}
 
-	SET_NODE(foreach_stack_opline.result, &reset_node);
-	zend_stack_push(&CG(foreach_copy_stack), &foreach_stack_opline);
+	zend_stack_push(&CG(loop_var_stack), &reset_node);
 
 	opnum_fetch = get_next_op_number(CG(active_op_array));
 	opline = zend_emit_op(&value_node, ZEND_FE_FETCH, &reset_node, NULL TSRMLS_CC);
@@ -5042,11 +5015,8 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) /* {{{ */
 
 	zend_end_loop(opnum_fetch, 1 TSRMLS_CC);
 
-	{
-		zend_op *container_ptr = zend_stack_top(&CG(foreach_copy_stack));
-		generate_free_foreach_copy(container_ptr TSRMLS_CC);
-		zend_stack_del_top(&CG(foreach_copy_stack));
-	}
+	generate_free_loop_var(&reset_node TSRMLS_CC);
+	zend_stack_del_top(&CG(loop_var_stack));
 }
 /* }}} */
 
@@ -5099,7 +5069,6 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) /* {{{ */
 
 	uint32_t i;
 	zend_bool has_default_case = 0;
-	zend_switch_entry switch_entry;
 
 	znode expr_node, case_node;
 	zend_op *opline;
@@ -5108,10 +5077,7 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) /* {{{ */
 
 	zend_compile_expr(&expr_node, expr_ast TSRMLS_CC);
 
-	switch_entry.cond = expr_node;
-	switch_entry.default_case = -1;
-	switch_entry.control_var = -1;
-	zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry);
+	zend_stack_push(&CG(loop_var_stack), &expr_node);
 
 	zend_begin_loop(TSRMLS_C);
 
@@ -5168,7 +5134,7 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) /* {{{ */
 		zval_dtor(&expr_node.u.constant);
 	}
 
-	zend_stack_del_top(&CG(switch_cond_stack));
+	zend_stack_del_top(&CG(loop_var_stack));
 	efree(jmpnz_opnums);
 }
 /* }}} */
@@ -5800,23 +5766,11 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	}
 
 	{
-		/* Push a separator to the switch stack */
-		zend_switch_entry switch_entry;
+		/* Push a separator to the loop variable stack */
+		znode dummy_var;
+		dummy_var.op_type = IS_UNUSED;
 
-		switch_entry.cond.op_type = IS_UNUSED;
-		switch_entry.default_case = 0;
-		switch_entry.control_var = 0;
-
-		zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry);
-	}
-
-	{
-		/* Push a separator to the foreach stack */
-		zend_op dummy_opline;
-
-		dummy_opline.result_type = IS_UNUSED;
-
-		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline);
+		zend_stack_push(&CG(loop_var_stack), (void *) &dummy_var);
 	}
 
 	zend_compile_params(params_ast TSRMLS_CC);
@@ -5836,9 +5790,8 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	pass_two(CG(active_op_array) TSRMLS_CC);
 	zend_release_labels(0 TSRMLS_CC);
 
-	/* Pop the switch and foreach separators */
-	zend_stack_del_top(&CG(switch_cond_stack));
-	zend_stack_del_top(&CG(foreach_copy_stack));
+	/* Pop the loop variable stack separator */
+	zend_stack_del_top(&CG(loop_var_stack));
 
 	CG(active_op_array) = orig_op_array;
 }

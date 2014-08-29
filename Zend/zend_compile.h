@@ -347,12 +347,6 @@ union _zend_function {
 	zend_internal_function internal_function;
 };
 
-typedef struct _zend_switch_entry {
-	znode cond;
-	int default_case;
-	int control_var;
-} zend_switch_entry;
-
 typedef enum _vm_frame_kind {
 	VM_FRAME_NESTED_FUNCTION,	/* stackless VM call to function */
 	VM_FRAME_NESTED_CODE,		/* stackless VM call to include/require/eval */
