@@ -153,6 +153,8 @@ PHP                                                                        NEWS
     (Freek Lijten)
 
 - Date:
+  . Fixed bug #66060 (Heap buffer over-read in DateInterval). (CVE-2013-6712)
+    (Remi)
   . Fixed bug #66091 (memory leaks in DateTime constructor) (Tjerk).
   . Fixed bug #67308 (Serialize of DateTime truncates fractions of second).
     (Adam)
