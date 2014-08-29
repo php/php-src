@@ -227,7 +227,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
 %type <ast> class_declaration_statement use_declaration const_decl inner_statement
-%type <ast> expr while_statement for_statement foreach_variable
+%type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
 %type <ast> extends_from parameter optional_type argument expr_without_variable global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
@@ -235,7 +235,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> new_expr class_name class_name_reference simple_variable internal_functions_in_yacc
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name
 %type <ast> variable_class_name dereferencable_scalar class_name_scalar constant dereferencable
-%type <ast> callable_expr callable_variable dim_offset static_member new_variable
+%type <ast> callable_expr callable_variable static_member new_variable
 %type <ast> assignment_list_element array_pair encaps_var encaps_var_offset isset_variables
 %type <ast> isset_variable
 
@@ -359,12 +359,9 @@ statement:
 			{ $$ = zend_ast_create(ZEND_AST_FOR, $<ast>3, $<ast>5, $<ast>7, $9); }
 	|	T_SWITCH '(' expr ')' switch_case_list
 			{ $$ = zend_ast_create(ZEND_AST_SWITCH, $3, $<ast>5); }
-	|	T_BREAK ';'			{ $$ = zend_ast_create(ZEND_AST_BREAK, NULL); }
-	|	T_BREAK expr ';'	{ $$ = zend_ast_create(ZEND_AST_BREAK, $2); }
-	|	T_CONTINUE ';'		{ $$ = zend_ast_create(ZEND_AST_CONTINUE, NULL); }
-	|	T_CONTINUE expr ';'	{ $$ = zend_ast_create(ZEND_AST_CONTINUE, $2); }
-	|	T_RETURN ';'		{ $$ = zend_ast_create(ZEND_AST_RETURN, NULL); }
-	|	T_RETURN expr ';'	{ $$ = zend_ast_create(ZEND_AST_RETURN, $2); }
+	|	T_BREAK optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_BREAK, $2); }
+	|	T_CONTINUE optional_expr ';'	{ $$ = zend_ast_create(ZEND_AST_CONTINUE, $2); }
+	|	T_RETURN optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_RETURN, $2); }
 	|	T_GLOBAL global_var_list ';'	{ $$ = $<ast>2; }
 	|	T_STATIC static_var_list ';'	{ $$ = $<ast>2; }
 	|	T_ECHO echo_expr_list ';'		{ $$ = $<ast>2; }
@@ -929,9 +926,8 @@ class_name_reference:
 ;
 
 exit_expr:
-		/* empty */		{ $$ = NULL; }
-	|	'(' ')'			{ $$ = NULL; }
-	|	'(' expr ')'	{ $$ = $2; }
+		/* empty */				{ $$ = NULL; }
+	|	'(' optional_expr ')'	{ $$ = $2; }
 ;
 
 backticks_expr:
@@ -993,6 +989,11 @@ expr:
 	|	expr_without_variable		{ $$ = $1; }
 ;
 
+optional_expr:
+		/* empty */	{ $$ = NULL; }
+	|	expr		{ $$ = $1; }
+;
+
 variable_class_name:
 	dereferencable { $$ = $1; }
 ;
@@ -1012,9 +1013,9 @@ callable_expr:
 callable_variable:
 		simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
-	|	dereferencable '[' dim_offset ']'
+	|	dereferencable '[' optional_expr ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
-	|	constant '[' dim_offset ']'
+	|	constant '[' optional_expr ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
 	|	dereferencable '{' expr '}'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
@@ -1051,7 +1052,7 @@ static_member:
 new_variable:
 		simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
-	|	new_variable '[' dim_offset ']'
+	|	new_variable '[' optional_expr ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
 	|	new_variable '{' expr '}'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
@@ -1061,11 +1062,6 @@ new_variable:
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 	|	new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
-;
-
-dim_offset:
-		/* empty */		{ $$ = NULL; }
-	|	expr			{ $$ = $1; }
 ;
 
 member_name:
