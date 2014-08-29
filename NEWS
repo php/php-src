@@ -180,24 +180,26 @@ PHP                                                                        NEWS
   . Fixed bug #67705 (extensive backtracking in rule regular expression).
     (CVE-2014-3538) (Remi)
   . Fixed bug #67327 (fileinfo: CDF infinite loop in nelements DoS).
+   (CVE-2014-0238)
   . Fixed bug #67328 (fileinfo: fileinfo: numerous file_printf calls resulting in
-    performance degradation).
+    performance degradation). (CVE-2014-0237)
   . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary check).
+    (CVE-2014-0207)
   . Fixed bug #67329 (fileinfo: NULL pointer deference flaw by processing certain
-    CDF files).
+    CDF files). (CVE-2014-0236)
   . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
-    string size). (Francisco Alonso, Jan Kaluza, Remi)
+    string size). (CVE-2014-3478) (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67411 (fileinfo: cdf_check_stream_offset insufficient boundary
-    check). (Francisco Alonso, Jan Kaluza, Remi)
+    check). (CVE-2014-3479) (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67412 (fileinfo: cdf_count_chain insufficient boundary check).
-    (Francisco Alonso, Jan Kaluza, Remi)
+    (CVE-2014-3480) (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
-    check). (Francisco Alonso, Jan Kaluza, Remi)
+    check). (CVE-2014-3487) (Francisco Alonso, Jan Kaluza, Remi)
   . Upgraded to libmagic-5.17 (Anatol)
   . Fixed bug #66731 (file: infinite recursion). (CVE-2014-1943) (Remi)
-  . Fixed bug #66820 (out-of-bounds memory access in fileinfo)
+  . Fixed bug #66820 (out-of-bounds memory access in fileinfo).
     (CVE-2014-2270). (Remi)
-  . Fixed bug #66946i (fileinfo: extensive backtracking in awk rule regular
+  . Fixed bug #66946 (fileinfo: extensive backtracking in awk rule regular
     expression). (CVE-2013-7345) (Remi)
   . Fixed bug #66987 (Memory corruption in fileinfo ext / bigendian).
     (Remi)
