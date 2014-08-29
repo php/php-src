@@ -579,10 +579,8 @@ non_empty_argument_list:
 ;
 
 argument:
-		expr_without_variable	{ $$ = $1; }
-	|	variable				{ $$ = $1; }
-	/*|	'&' variable 			{ ZEND_ASSERT(0); } */
-	|	T_ELLIPSIS expr			{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
+		expr			{ $$ = $1; }
+	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
 ;
 
 global_var_list:
