@@ -231,7 +231,8 @@ PHP                                                                        NEWS
   . Fixed bug #67248 (imageaffinematrixget missing check of parameters). (Stas)
   . Fixed imagettftext to load the correct character map rather than the last one.
     (Scott)
-  . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
+  . Fixed bug #66356 (Heap Overflow Vulnerability in imagecrop()).
+    (CVE-2013-7226)
   . Fixed bug #66815 (imagecrop(): insufficient fix for NULL defer
     CVE-2013-7327). (Tomas Hoger, Remi).
   . Fixed #66869 (Invalid 2nd argument crashes imageaffinematrixget) (Pierre)
