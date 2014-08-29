@@ -227,7 +227,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
 %type <ast> class_declaration_statement use_declaration const_decl inner_statement
-%type <ast> parenthesis_expr expr while_statement for_statement foreach_variable
+%type <ast> expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
 %type <ast> extends_from parameter optional_type argument expr_without_variable global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
@@ -351,14 +351,14 @@ statement:
 		'{' inner_statement_list '}' { $$ = $<ast>2; }
 	|	if_stmt { $$ = $<ast>1; }
 	|	alt_if_stmt { $$ = $<ast>1; }
-	|	T_WHILE parenthesis_expr while_statement
-			{ $$ = zend_ast_create(ZEND_AST_WHILE, $2, $3); }
-	|	T_DO statement T_WHILE parenthesis_expr ';'
-			{ $$ = zend_ast_create(ZEND_AST_DO_WHILE, $2, $4); }
+	|	T_WHILE '(' expr ')' while_statement
+			{ $$ = zend_ast_create(ZEND_AST_WHILE, $3, $5); }
+	|	T_DO statement T_WHILE '(' expr ')' ';'
+			{ $$ = zend_ast_create(ZEND_AST_DO_WHILE, $2, $5); }
 	|	T_FOR '(' for_exprs ';' for_exprs ';' for_exprs ')' for_statement
 			{ $$ = zend_ast_create(ZEND_AST_FOR, $<ast>3, $<ast>5, $<ast>7, $9); }
-	|	T_SWITCH parenthesis_expr switch_case_list
-			{ $$ = zend_ast_create(ZEND_AST_SWITCH, $2, $<ast>3); }
+	|	T_SWITCH '(' expr ')' switch_case_list
+			{ $$ = zend_ast_create(ZEND_AST_SWITCH, $3, $<ast>5); }
 	|	T_BREAK ';'			{ $$ = zend_ast_create(ZEND_AST_BREAK, NULL); }
 	|	T_BREAK expr ';'	{ $$ = zend_ast_create(ZEND_AST_BREAK, $2); }
 	|	T_CONTINUE ';'		{ $$ = zend_ast_create(ZEND_AST_CONTINUE, NULL); }
@@ -508,12 +508,12 @@ while_statement:
 
 
 if_stmt_without_else:
-		T_IF parenthesis_expr statement
+		T_IF '(' expr ')' statement
 			{ $$ = zend_ast_create_list(1, ZEND_AST_IF,
-			      zend_ast_create(ZEND_AST_IF_ELEM, $2, $3)); }
-	|	if_stmt_without_else T_ELSEIF parenthesis_expr statement
+			      zend_ast_create(ZEND_AST_IF_ELEM, $3, $5)); }
+	|	if_stmt_without_else T_ELSEIF '(' expr ')' statement
 			{ $$ = zend_ast_list_add($1,
-			      zend_ast_create(ZEND_AST_IF_ELEM, $3, $4)); }
+			      zend_ast_create(ZEND_AST_IF_ELEM, $4, $6)); }
 ;
 
 if_stmt:
@@ -523,12 +523,12 @@ if_stmt:
 ;
 
 alt_if_stmt_without_else:
-		T_IF parenthesis_expr ':' inner_statement_list
+		T_IF '(' expr ')' ':' inner_statement_list
 			{ $$ = zend_ast_create_list(1, ZEND_AST_IF,
-			      zend_ast_create(ZEND_AST_IF_ELEM, $2, $<ast>4)); }
-	|	alt_if_stmt_without_else T_ELSEIF parenthesis_expr ':' inner_statement_list
+			      zend_ast_create(ZEND_AST_IF_ELEM, $3, $<ast>6)); }
+	|	alt_if_stmt_without_else T_ELSEIF '(' expr ')' ':' inner_statement_list
 			{ $$ = zend_ast_list_add($1,
-			      zend_ast_create(ZEND_AST_IF_ELEM, $3, $<ast>5)); }
+			      zend_ast_create(ZEND_AST_IF_ELEM, $4, $<ast>7)); }
 ;
 
 alt_if_stmt:
@@ -833,7 +833,7 @@ expr_without_variable:
 			{ $$ = zend_ast_create(ZEND_AST_GREATER_EQUAL, $1, $3); }
 	|	expr T_INSTANCEOF class_name_reference
 			{ $$ = zend_ast_create(ZEND_AST_INSTANCEOF, $1, $3); }
-	|	parenthesis_expr { $$ = $1; }
+	|	'(' expr ')' { $$ = $2; }
 	|	new_expr { $$ = $1; }
 	|	expr '?' expr ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, $3, $5); }
@@ -929,9 +929,9 @@ class_name_reference:
 ;
 
 exit_expr:
-		/* empty */			{ $$ = NULL; }
-	|	'(' ')'				{ $$ = NULL; }
-	|	parenthesis_expr	{ $$ = $1; }
+		/* empty */		{ $$ = NULL; }
+	|	'(' ')'			{ $$ = NULL; }
+	|	'(' expr ')'	{ $$ = $2; }
 ;
 
 backticks_expr:
@@ -991,10 +991,6 @@ possible_comma:
 expr:
 		variable					{ $$ = $1; }
 	|	expr_without_variable		{ $$ = $1; }
-;
-
-parenthesis_expr:
-		'(' expr ')' { $$ = $2; }
 ;
 
 variable_class_name:
