@@ -1131,7 +1131,7 @@ ZEND_FUNCTION(gmp_import)
 	extra_bytes = data_len % size;
 	if (!data_len || extra_bytes) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not enough input, need %ld, have %ld", size, extra_bytes);
-		return 0;
+		return;
 	}
 
 	INIT_GMP_RETVAL(gmpnumber);
