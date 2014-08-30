@@ -93,24 +93,24 @@ foreach ($export as $k => $test) {
 var_dump($passed);
 
 print "bad orders\n";
-gmp_import('a', 2, 1, 1);
-gmp_import('a', 0, 1, 1);
-gmp_import('a', -2, 1, 1);
+var_dump(gmp_import('a', 2, 1, 1));
+var_dump(gmp_import('a', 0, 1, 1));
+var_dump(gmp_import('a', -2, 1, 1));
 
 print "good orders\n";
 gmp_import('a', -1, 1, 1);
 gmp_import('a', 1, 1, 1);
 
 print "bad sizes\n";
-gmp_import('a', -1, -1, 1);
-gmp_import('a', -1, 0, 1);
+var_dump(gmp_import('a', -1, -1, 1));
+var_dump(gmp_import('a', -1, 0, 1));
 
 print "good sizes\n";
 gmp_import('a', -1, 1, 1);
 
 print "bad endians\n";
-gmp_import('a', -1, 1, 2);
-gmp_import('a', -1, 1, -2);
+var_dump(gmp_import('a', -1, 1, 2));
+var_dump(gmp_import('a', -1, 1, -2));
 
 print "good endians\n";
 gmp_import('a', -1, 1, 1);
@@ -118,10 +118,10 @@ gmp_import('a', -1, 1, 0);
 gmp_import('a', -1, 1, -1);
 
 print "bad sizes for data length\n";
-gmp_import('a', -1, 2, 1);
-gmp_import('aa', -1, 3, 1);
-gmp_import(str_repeat('a', 100), -1, 64, 1);
-gmp_import('', -1, 1, 1);
+var_dump(gmp_import('a', -1, 2, 1));
+var_dump(gmp_import('aa', -1, 3, 1));
+var_dump(gmp_import(str_repeat('a', 100), -1, 64, 1));
+var_dump(gmp_import('', -1, 1, 1));
 
 --EXPECTF--
 Import:
@@ -176,29 +176,40 @@ bool(true)
 bad orders
 
 Warning: gmp_import(): Bad order: 2 (should be 1 for most significant word first, or -1 for least significant first) in %s on line %d
+NULL
 
 Warning: gmp_import(): Bad order: 0 (should be 1 for most significant word first, or -1 for least significant first) in %s on line %d
+NULL
 
 Warning: gmp_import(): Bad order: -2 (should be 1 for most significant word first, or -1 for least significant first) in %s on line %d
+NULL
 good orders
 bad sizes
 
 Warning: gmp_import(): Bad word size: -1 (should be at least 1 byte) in %s on line %d
+NULL
 
 Warning: gmp_import(): Bad word size: 0 (should be at least 1 byte) in %s on line %d
+NULL
 good sizes
 bad endians
 
 Warning: gmp_import(): Bad endian: 2 (should be 1 for most significant byte first, -1 for least significant first or 0 for native endianness) in %s on line %d
+NULL
 
 Warning: gmp_import(): Bad endian: -2 (should be 1 for most significant byte first, -1 for least significant first or 0 for native endianness) in %s on line %d
+NULL
 good endians
 bad sizes for data length
 
 Warning: gmp_import(): Not enough input, need 2, have 1 in %s on line %d
+NULL
 
 Warning: gmp_import(): Not enough input, need 3, have 2 in %s on line %d
+NULL
 
 Warning: gmp_import(): Not enough input, need 64, have 36 in %s on line %d
+NULL
 
 Warning: gmp_import(): Not enough input, need 1, have 0 in %s on line %d
+NULL
