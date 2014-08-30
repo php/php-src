@@ -48,7 +48,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_import, 0, 0, 1)
 	ZEND_ARG_INFO(0, order)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, endian)
-	ZEND_ARG_INFO(0, nails)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_export, 0, 0, 1)
@@ -56,7 +55,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, order)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, endian)
-	ZEND_ARG_INFO(0, nails)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_intval, 0, 0, 1)
@@ -1088,7 +1086,7 @@ ZEND_FUNCTION(gmp_init)
 }
 /* }}} */
 
-int gmp_import_export_validate(long order, long size, long endian, long nails TSRMLS_DC)
+int gmp_import_export_validate(long order, long size, long endian TSRMLS_DC)
 {
 	if (size < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (should be at least 1 byte)", size);
@@ -1105,15 +1103,10 @@ int gmp_import_export_validate(long order, long size, long endian, long nails TS
 		return 0;
 	}
 
-	if (nails < 0 || nails > (size << 3) - 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad nails: %ld (should be between 0 and ((8 * size) - 1) bits)", nails);
-		return 0;
-	}
-
 	return 1;
 }
 
-/* {{{ proto GMP gmp_import(string data [, int order, int size, int endian, int nails])
+/* {{{ proto GMP gmp_import(string data [, int order, int size, int endian])
    Imports a GMP number from a binary string */
 ZEND_FUNCTION(gmp_import)
 {
@@ -1123,29 +1116,31 @@ ZEND_FUNCTION(gmp_import)
 	long order = -1;
 	long size = 1;
 	long endian = 0;
-	long nails = 0;
+	long extra_bytes;
 	mpz_ptr gmpnumber;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llll", &data, &data_len, &order, &size, &endian, &nails) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lll", &data, &data_len, &order, &size, &endian) == FAILURE) {
 		return;
 	}
 
-	if (!gmp_import_export_validate(order, size, endian, nails TSRMLS_CC)) {
-		RETURN_FALSE;
+	if (!gmp_import_export_validate(order, size, endian TSRMLS_CC)) {
+		return;
 	}
 
 	count = (data_len / size);
-	if (data_len % size) {
-		count++;
+	extra_bytes = data_len % size;
+	if (!data_len || extra_bytes) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not enough input, need %ld, have %ld", size, extra_bytes);
+		return 0;
 	}
 
 	INIT_GMP_RETVAL(gmpnumber);
 
-	mpz_import(gmpnumber, count, order, size, endian, nails, data);
+	mpz_import(gmpnumber, count, order, size, endian, 0, data);
 }
 /* }}} */
 
-/* {{{ proto string gmp_export(GMP gmpnumber [, int order, int size, int endian, int nails])
+/* {{{ proto string gmp_export(GMP gmpnumber [, int order, int size, int endian])
    Exports a GMP number to a binary string */
 ZEND_FUNCTION(gmp_export)
 {
@@ -1154,30 +1149,28 @@ ZEND_FUNCTION(gmp_export)
 	long order = -1;
 	long size = 1;
 	long endian = 0;
-	long nails = 0;
+	long bits_per_word;
+	long out_len;
+	char *out_string;
 	mpz_ptr gmpnumber;
 	gmp_temp_t temp_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|llll", &gmpnumber_arg, &order, &size, &endian, &nails) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|lll", &gmpnumber_arg, &order, &size, &endian) == FAILURE) {
 		return;
 	}
 
-	if (!gmp_import_export_validate(order, size, endian, nails TSRMLS_CC)) {
-		RETURN_FALSE;
+	if (!gmp_import_export_validate(order, size, endian TSRMLS_CC)) {
+		return;
 	}
 
 	FETCH_GMP_ZVAL(gmpnumber, gmpnumber_arg, temp_a);
 
-	long bits_per_word;
-	long out_len;
-	char *out_string;
-
-	bits_per_word = (size << 3) - nails;
+	bits_per_word = (size << 3);
 	count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
 	out_len = (count * size);
 
 	out_string = emalloc(out_len + 1);
-	mpz_export(out_string, &count, order, size, endian, nails, gmpnumber);
+	mpz_export(out_string, &count, order, size, endian, 0, gmpnumber);
 	out_string[out_len] = '\0';
 
 	ZVAL_STRINGL(return_value, out_string, out_len, 0);
