@@ -210,6 +210,10 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 		}
 	}
 
+	if (op_array->return_type.kind == IS_OBJECT) {
+		ADD_STRING(op_array->return_type.name);
+	}
+
 	if (op_array->brk_cont_array) {
 		ADD_DUP_SIZE(op_array->brk_cont_array, sizeof(zend_brk_cont_element) * op_array->last_brk_cont);
 	}

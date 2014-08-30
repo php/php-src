@@ -2211,6 +2211,11 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			internal_function->num_args = 0;
 			internal_function->required_num_args = 0;
 		}
+
+		/* TODO: allow internal functions to declare return types somehow */
+		internal_function->return_type.name = NULL;
+		internal_function->return_type.kind = IS_UNDEF;
+
 		if (ptr->flags & ZEND_ACC_ABSTRACT) {
 			if (scope) {
 				/* This is a class that must be abstract itself. Here we set the check info. */

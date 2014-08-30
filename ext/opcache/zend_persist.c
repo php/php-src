@@ -430,6 +430,14 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		}
 	}
 
+	if (op_array->return_type.kind == IS_OBJECT) {
+		if (already_stored) {
+			op_array->return_type.name = zend_shared_alloc_get_xlat_entry(op_array->return_type.name);
+		} else {
+			zend_accel_store_string(op_array->return_type.name);
+		}
+	}
+
 	if (op_array->brk_cont_array) {
 		zend_accel_store(op_array->brk_cont_array, sizeof(zend_brk_cont_element) * op_array->last_brk_cont);
 	}

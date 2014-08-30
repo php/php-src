@@ -446,14 +446,6 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zend_string *nam
 		op.constant = zend_add_literal(CG(active_op_array), &_c TSRMLS_CC); \
 	} while (0)
 
-#define MAKE_NOP(opline) do { \
-	opline->opcode = ZEND_NOP; \
-	memset(&opline->result, 0, sizeof(opline->result)); \
-	memset(&opline->op1, 0, sizeof(opline->op1)); \
-	memset(&opline->op2, 0, sizeof(opline->op2)); \
-	opline->result_type = opline->op1_type = opline->op2_type = IS_UNUSED; \
-} while (0)
-
 void zend_stop_lexing(TSRMLS_D) {
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
 }
@@ -1033,9 +1025,10 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 
 				parent_name = &CONSTANT(fetch_class_opline->op2.constant);
 				if (((ce = zend_lookup_class(Z_STR_P(parent_name) TSRMLS_CC)) == NULL) ||
+				    (ce->ce_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 				    ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) &&
 				     (ce->type == ZEND_INTERNAL_CLASS))) {
-				    if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
+					if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
 						uint32_t *opline_num = &CG(active_op_array)->early_binding;
 
 						while (*opline_num != -1) {
@@ -1086,7 +1079,8 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS
 
 		CG(in_compilation) = 1;
 		while (opline_num != -1) {
-			if ((ce = zend_lookup_class(Z_STR_P(op_array->opcodes[opline_num-1].op2.zv) TSRMLS_CC)) != NULL) {
+			if ((ce = zend_lookup_class(Z_STR_P(op_array->opcodes[opline_num-1].op2.zv) TSRMLS_CC)) != NULL
+				&& (ce->ce_flags & ZEND_ACC_HAS_RETURN_TYPE) == 0) {
 				do_bind_inherited_class(op_array, &op_array->opcodes[opline_num], EG(class_table), ce, 0 TSRMLS_CC);
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
@@ -3107,6 +3101,45 @@ static void zend_free_foreach_and_switch_variables(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+
+static void zend_emit_return_type_check(znode *expr, zend_type_decl *return_type TSRMLS_DC) /* {{{ */
+{
+	/* Up to two opcodes are emitted: ZEND_FETCH_CLASS and
+	 * ZEND_VERIFY_RETURN_TYPE.
+	 * The ZEND_VERIFY_RETURN_TYPE handler takes up to 2 operands:
+	 *   - 0 operands: issues an error because there must be a return value
+	 *     if a return type is specified.
+	 *   - 1 operand: check if op1 (return_value) is of type array or
+	 *     callable depending on function return type.
+	 *   - 2 operands: check if op1 (return_value) is an instance of op2
+	 *     (expected return type). ZEND_FETCH_CLASS is used to fetch the
+	 *     expected return type's zend_class_entry*.
+	 *
+	 * If used op2 should be IS_CONST with the name of the expected class.
+	 */
+	if (expr && return_type->kind == IS_OBJECT) {
+		zend_op *opline;
+		znode name_node;
+		uint32_t fetch_type = zend_get_class_fetch_type(return_type->name);
+
+		opline = zend_emit_op(&name_node, ZEND_FETCH_CLASS, NULL, NULL TSRMLS_CC);
+		/* If the return type is not loaded then the returned object
+		 * cannot fulfill that type; no need to autoload it */
+		opline->extended_value = fetch_type | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT;
+
+		if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), zend_string_copy(return_type->name) TSRMLS_CC);
+		}
+
+		opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, &name_node TSRMLS_CC);
+	} else {
+		zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL TSRMLS_CC);
+	}
+}
+/* }}} */
+
+
 void zend_compile_return(zend_ast *ast TSRMLS_DC) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -3132,6 +3165,9 @@ void zend_compile_return(zend_ast *ast TSRMLS_DC) /* {{{ */
 		opline->op1.var = CG(context).fast_call_var;
 	}
 
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		zend_emit_return_type_check(&expr_node, &CG(active_op_array)->return_type TSRMLS_CC);
+	}
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL TSRMLS_CC);
 
@@ -4140,12 +4176,45 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 }
 /* }}} */
 
+
+static void zend_compile_return_type(zend_function *func, zend_bool is_method, zend_ast *ast TSRMLS_DC) /* {{{ */
+{
+	zend_string *class_name;
+	zend_string *resolved_name;
+
+	func->common.fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
+	if (ast->kind == ZEND_AST_TYPE) {
+		zend_type_decl_ctor(&func->common.return_type, ast->attr, NULL);
+		return;
+	}
+
+	assert(ast->kind == ZEND_AST_ZVAL);
+
+	class_name = zend_ast_get_str(ast);
+
+	if (zend_is_const_default_class_ref(ast)) {
+		resolved_name = zend_resolve_class_name(class_name, ast->attr TSRMLS_CC);
+	} else {
+		if (!is_method) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare a return type of %s outside of a class scope", class_name->val);
+			return;
+		}
+		resolved_name = zend_string_copy(class_name); // self, parent, static
+	}
+
+	zend_type_decl_ctor(&func->common.return_type, IS_OBJECT, resolved_name);
+
+	zend_string_release(resolved_name);
+}
+/* }}} */
+
 void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *params_ast = decl->child[0];
 	zend_ast *uses_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
+	zend_ast *return_type_ast = decl->child[3];
 	zend_bool is_method = decl->kind == ZEND_AST_METHOD;
 
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -4170,6 +4239,10 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 		zend_begin_method_decl(op_array, decl->name, has_body TSRMLS_CC);
 	} else {
 		zend_begin_func_decl(result, op_array, decl TSRMLS_CC);
+	}
+
+	if (return_type_ast) {
+		zend_compile_return_type((zend_function *) op_array, is_method, return_type_ast TSRMLS_CC);
 	}
 
 	CG(active_op_array) = op_array;
@@ -4198,8 +4271,14 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	if (is_method) {
 		zend_check_magic_method_implementation(
 			CG(active_class_entry), (zend_function *) op_array, E_COMPILE_ERROR TSRMLS_CC);
+		if ((op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) && (op_array->fn_flags & (ZEND_ACC_PROTECTED | ZEND_ACC_PUBLIC))) {
+			CG(active_class_entry)->ce_flags |= ZEND_ACC_HAS_RETURN_TYPE;
+		}
 	}
 
+	if (return_type_ast) {
+		zend_emit_return_type_check(NULL, &op_array->return_type TSRMLS_CC);
+	}
 	zend_do_extended_info(TSRMLS_C);
 	zend_emit_final_return(NULL TSRMLS_CC);
 
@@ -4580,6 +4659,10 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static",
 				ce->name->val, ce->constructor->common.function_name->val);
+		} else if (ce->constructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Constructor %s::%s() cannot declare a return type",
+				ce->name->val, ce->constructor->common.function_name->val);
 		}
 	}
 	if (ce->destructor) {
@@ -4587,12 +4670,20 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static",
 				ce->name->val, ce->destructor->common.function_name->val);
+		} else if (ce->destructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Destructor %s::%s() cannot declare a return type",
+				ce->name->val, ce->destructor->common.function_name->val);
 		}
 	}
 	if (ce->clone) {
 		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
 		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static",
+				ce->name->val, ce->clone->common.function_name->val);
+		} else if (ce->clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"%s::%s() cannot declare a return type",
 				ce->name->val, ce->clone->common.function_name->val);
 		}
 	}
@@ -5403,6 +5494,19 @@ void zend_compile_yield(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	if (!CG(active_op_array)->function_name) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"The \"yield\" expression can only be used inside a function");
+	}
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		const char *msg = "Generators may only declare a return type of Generator, Iterator or Traversable, %s is not permitted";
+		if (CG(active_op_array)->return_type.kind != IS_OBJECT) {
+			zend_error_noreturn(E_COMPILE_ERROR, msg,
+				zend_get_type_by_const(CG(active_op_array)->return_type.kind));
+		}
+		if (!zend_string_equals_literal_ci(CG(active_op_array)->return_type.name, "Traversable")
+			&& !zend_string_equals_literal_ci(CG(active_op_array)->return_type.name, "Iterator")
+			&& !zend_string_equals_literal_ci(CG(active_op_array)->return_type.name, "Generator")
+		) {
+			zend_error_noreturn(E_COMPILE_ERROR, msg, CG(active_op_array)->return_type.name->val);
+		}
 	}
 
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
@@ -6404,6 +6508,27 @@ void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC) /* {{{ */
 
 	zend_ast_destroy(ast);
 	*ast_ptr = zend_ast_create_zval(&result);
+}
+/* }}} */
+
+void zend_type_decl_ctor(zend_type_decl *type, zend_uchar kind, zend_string *name) /* {{{ */
+{
+	assert(kind == IS_UNDEF || kind == IS_ARRAY || kind == IS_CALLABLE || kind == IS_OBJECT);
+	if (name) {
+		zend_string_addref(name);
+	}
+	type->kind = kind;
+	type->name = name;
+}
+/* }}} */
+
+void zend_type_decl_dtor(zend_type_decl *type) /* {{{ */
+{
+	if (type->name) {
+		zend_string_release(type->name);
+	}
+	type->kind = IS_UNDEF;
+	type->name = NULL;
 }
 /* }}} */
 

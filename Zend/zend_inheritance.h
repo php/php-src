@@ -33,6 +33,8 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
 void zend_do_early_binding(TSRMLS_D);
 
+void zend_verify_class_return_type_variance(zend_class_entry *child_ce, zend_class_entry *parent_ce TSRMLS_DC);
+
 END_EXTERN_C()
 
 #endif
