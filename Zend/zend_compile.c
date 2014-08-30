@@ -3258,7 +3258,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	 * go through all the parameters of the function and not just those present in the
 	 * prototype. */
 	num_args = proto->common.num_args;
-	if ((fe->common.fn_flags & ZEND_ACC_VARIADIC)
+	if ((proto->common.fn_flags & ZEND_ACC_VARIADIC)
 		&& fe->common.num_args > proto->common.num_args) {
 		num_args = fe->common.num_args;
 	}
