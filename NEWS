@@ -6,6 +6,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #67878 (program_prefix not honoured in man pages). (Remi)
 
+- Fileinfo:
+  . Fixed bug #67731 (finfo::file() returns invalid mime type
+    for binary files). (Anatol)
+
 - GD:
   . Made fontFetch's path parser thread-safe. (Sara)
 
