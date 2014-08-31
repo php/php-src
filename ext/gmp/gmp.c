@@ -45,16 +45,14 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_import, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, order)
 	ZEND_ARG_INFO(0, size)
-	ZEND_ARG_INFO(0, endian)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, gmpnumber)
-	ZEND_ARG_INFO(0, order)
 	ZEND_ARG_INFO(0, size)
-	ZEND_ARG_INFO(0, endian)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_intval, 0, 0, 1)
@@ -219,6 +217,12 @@ typedef struct _gmp_temp {
 #define GMP_ROUND_ZERO      0
 #define GMP_ROUND_PLUSINF   1
 #define GMP_ROUND_MINUSINF  2
+
+#define GMP_ORDER_MSW_FIRST 0
+#define GMP_ORDER_LSW_FIRST 1
+#define GMP_ENDIAN_LITTLE 2
+#define GMP_ENDIAN_BIG 4
+#define GMP_ENDIAN_NATIVE 8
 
 #define GMP_42_OR_NEWER \
 	((__GNU_MP_VERSION >= 5) || (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2))
@@ -713,6 +717,12 @@ ZEND_MINIT_FUNCTION(gmp)
 #endif
 	REGISTER_STRING_CONSTANT("GMP_VERSION", (char *)gmp_version, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("GMP_ORDER_MSW_FIRST", GMP_ORDER_MSW_FIRST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_ORDER_LSW_FIRST", GMP_ORDER_LSW_FIRST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_ENDIAN_LITTLE", GMP_ENDIAN_LITTLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_ENDIAN_BIG", GMP_ENDIAN_BIG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_ENDIAN_NATIVE", GMP_ENDIAN_NATIVE, CONST_CS | CONST_PERSISTENT);
+
 	mp_set_memory_functions(gmp_emalloc, gmp_erealloc, gmp_efree);
 
 	return SUCCESS;
@@ -1086,44 +1096,51 @@ ZEND_FUNCTION(gmp_init)
 }
 /* }}} */
 
-int gmp_import_export_validate(long order, long size, long endian TSRMLS_DC)
+int gmp_import_export_validate(long size, long options, long *order, long *endian TSRMLS_DC)
 {
 	if (size < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (should be at least 1 byte)", size);
 		return 0;
 	}
 
-	if (order != -1 && order != 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad order: %ld (should be 1 for most significant word first, or -1 for least significant first)", order);
-		return 0;
+	if (options & GMP_ORDER_LSW_FIRST) {
+		*order = -1;
+	}
+	else { // GMP_ORDER_MSW_FIRST == 0
+		*order = 1;
 	}
 
-	if (endian < -1 || endian > 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad endian: %ld (should be 1 for most significant byte first, -1 for least significant first or 0 for native endianness)", endian);
-		return 0;
+	switch (options & 14) { // 8 | 4 | 2
+	case GMP_ENDIAN_LITTLE:
+		*endian = -1;
+		break;
+	case GMP_ENDIAN_BIG:
+		*endian = 1;
+		break;
+	case GMP_ENDIAN_NATIVE:
+	default:
+		*endian = 0;
 	}
 
 	return 1;
 }
 
-/* {{{ proto GMP gmp_import(string data [, int order, int size, int endian])
+/* {{{ proto GMP gmp_import(string data [, int size, int options])
    Imports a GMP number from a binary string */
 ZEND_FUNCTION(gmp_import)
 {
 	unsigned char *data;
 	int data_len;
-	long count;
-	long order = -1;
 	long size = 1;
-	long endian = 0;
-	long extra_bytes;
+	long options = GMP_ORDER_MSW_FIRST | GMP_ENDIAN_NATIVE;;
+	long order, endian, count, extra_bytes;
 	mpz_ptr gmpnumber;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lll", &data, &data_len, &order, &size, &endian) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &data, &data_len, &size, &options) == FAILURE) {
 		return;
 	}
 
-	if (!gmp_import_export_validate(order, size, endian TSRMLS_CC)) {
+	if (!gmp_import_export_validate(size, options, &order, &endian TSRMLS_CC)) {
 		return;
 	}
 
@@ -1140,26 +1157,23 @@ ZEND_FUNCTION(gmp_import)
 }
 /* }}} */
 
-/* {{{ proto string gmp_export(GMP gmpnumber [, int order, int size, int endian])
+/* {{{ proto string gmp_export(GMP gmpnumber [, int size, int options])
    Exports a GMP number to a binary string */
 ZEND_FUNCTION(gmp_export)
 {
 	zval *gmpnumber_arg;
-	long count;
-	long order = -1;
 	long size = 1;
-	long endian = 0;
-	long bits_per_word;
-	long out_len;
+	long options = GMP_ORDER_MSW_FIRST | GMP_ENDIAN_NATIVE;;
+	long order, endian, count, bits_per_word, out_len;
 	char *out_string;
 	mpz_ptr gmpnumber;
 	gmp_temp_t temp_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|lll", &gmpnumber_arg, &order, &size, &endian) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ll", &gmpnumber_arg, &size, &options) == FAILURE) {
 		return;
 	}
 
-	if (!gmp_import_export_validate(order, size, endian TSRMLS_CC)) {
+	if (!gmp_import_export_validate(size, options, &order, &endian TSRMLS_CC)) {
 		return;
 	}
 
