@@ -218,11 +218,11 @@ typedef struct _gmp_temp {
 #define GMP_ROUND_PLUSINF   1
 #define GMP_ROUND_MINUSINF  2
 
-#define GMP_ORDER_MSW_FIRST 0
-#define GMP_ORDER_LSW_FIRST 1
-#define GMP_ENDIAN_LITTLE 2
-#define GMP_ENDIAN_BIG 4
-#define GMP_ENDIAN_NATIVE 8
+#define GMP_MSW_FIRST 1
+#define GMP_LSW_FIRST 2
+#define GMP_LITTLE_ENDIAN 4
+#define GMP_BIG_ENDIAN 8
+#define GMP_NATIVE_ENDIAN 16
 
 #define GMP_42_OR_NEWER \
 	((__GNU_MP_VERSION >= 5) || (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2))
@@ -717,11 +717,11 @@ ZEND_MINIT_FUNCTION(gmp)
 #endif
 	REGISTER_STRING_CONSTANT("GMP_VERSION", (char *)gmp_version, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("GMP_ORDER_MSW_FIRST", GMP_ORDER_MSW_FIRST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GMP_ORDER_LSW_FIRST", GMP_ORDER_LSW_FIRST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GMP_ENDIAN_LITTLE", GMP_ENDIAN_LITTLE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GMP_ENDIAN_BIG", GMP_ENDIAN_BIG, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GMP_ENDIAN_NATIVE", GMP_ENDIAN_NATIVE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_MSW_FIRST", GMP_MSW_FIRST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_LSW_FIRST", GMP_LSW_FIRST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_LITTLE_ENDIAN", GMP_LITTLE_ENDIAN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_BIG_ENDIAN", GMP_BIG_ENDIAN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GMP_NATIVE_ENDIAN", GMP_NATIVE_ENDIAN, CONST_CS | CONST_PERSISTENT);
 
 	mp_set_memory_functions(gmp_emalloc, gmp_erealloc, gmp_efree);
 
@@ -1103,23 +1103,35 @@ int gmp_import_export_validate(long size, long options, long *order, long *endia
 		return 0;
 	}
 
-	if (options & GMP_ORDER_LSW_FIRST) {
+	switch (options & 3) {
+	case GMP_LSW_FIRST:
 		*order = -1;
-	}
-	else { // GMP_ORDER_MSW_FIRST == 0
+		break;
+	case GMP_MSW_FIRST:
 		*order = 1;
+		break;
+	case 0: // no order specified, leave the default alone
+		break;
+	default:
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid options: Conflicting word orders specified");
+		return 0;
 	}
 
-	switch (options & 14) { // 8 | 4 | 2
-	case GMP_ENDIAN_LITTLE:
+	switch (options & 28) { // 16 | 8 | 4
+	case GMP_LITTLE_ENDIAN:
 		*endian = -1;
 		break;
-	case GMP_ENDIAN_BIG:
+	case GMP_BIG_ENDIAN:
 		*endian = 1;
 		break;
-	case GMP_ENDIAN_NATIVE:
-	default:
+	case GMP_NATIVE_ENDIAN:
 		*endian = 0;
+		break;
+	case 0: // no endianness specified, leave the default alone
+		break;
+	default:
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid options: Conflicting word endianness specified");
+		return 0;
 	}
 
 	return 1;
@@ -1132,8 +1144,8 @@ ZEND_FUNCTION(gmp_import)
 	unsigned char *data;
 	int data_len;
 	long size = 1;
-	long options = GMP_ORDER_MSW_FIRST | GMP_ENDIAN_NATIVE;;
-	long order, endian, count, extra_bytes;
+	long options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN;;
+	long order = 1, endian = 0, count, extra_bytes;
 	mpz_ptr gmpnumber;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &data, &data_len, &size, &options) == FAILURE) {
@@ -1163,8 +1175,8 @@ ZEND_FUNCTION(gmp_export)
 {
 	zval *gmpnumber_arg;
 	long size = 1;
-	long options = GMP_ORDER_MSW_FIRST | GMP_ENDIAN_NATIVE;;
-	long order, endian, count, bits_per_word, out_len;
+	long options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN;;
+	long order = 1, endian = 0, count, bits_per_word, out_len;
 	char *out_string;
 	mpz_ptr gmpnumber;
 	gmp_temp_t temp_a;
