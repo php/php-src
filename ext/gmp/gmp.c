@@ -1098,8 +1098,8 @@ ZEND_FUNCTION(gmp_init)
 
 int gmp_import_export_validate(long size, long options, long *order, long *endian TSRMLS_DC)
 {
-	if (size < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (should be at least 1 byte)", size);
+	if (size < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad word size: %ld (cannot be negative)", size);
 		return 0;
 	}
 
@@ -1113,7 +1113,7 @@ int gmp_import_export_validate(long size, long options, long *order, long *endia
 	case 0: // no order specified, leave the default alone
 		break;
 	default:
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid options: Conflicting word orders specified");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid options: Conflicting word orders");
 		return 0;
 	}
 
@@ -1130,7 +1130,7 @@ int gmp_import_export_validate(long size, long options, long *order, long *endia
 	case 0: // no endianness specified, leave the default alone
 		break;
 	default:
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid options: Conflicting word endianness specified");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid options: Conflicting word endianness");
 		return 0;
 	}
 
@@ -1156,11 +1156,16 @@ ZEND_FUNCTION(gmp_import)
 		return;
 	}
 
-	count = (data_len / size);
-	extra_bytes = data_len % size;
-	if (!data_len || extra_bytes) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not enough input, need %ld, have %ld", size, extra_bytes);
-		return;
+	if (size) {
+		count = (data_len / size);
+		extra_bytes = data_len % size;
+		if (data_len && extra_bytes) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input length must be a multiple of word size");
+			return;
+		}
+	}
+	else {
+		count = 1;
 	}
 
 	INIT_GMP_RETVAL(gmpnumber);
@@ -1191,11 +1196,17 @@ ZEND_FUNCTION(gmp_export)
 
 	FETCH_GMP_ZVAL(gmpnumber, gmpnumber_arg, temp_a);
 
-	bits_per_word = (size << 3);
-	count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
-	out_len = (count * size);
+	if (size) {
+		bits_per_word = (size << 3);
+		count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
+		out_len = count * size;
+	}
+	else {
+		out_len = 0;
+	}
 
 	out_string = emalloc(out_len + 1);
+	memset(out_string, 0, out_len);
 	mpz_export(out_string, &count, order, size, endian, 0, gmpnumber);
 	out_string[out_len] = '\0';
 
