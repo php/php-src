@@ -35,6 +35,12 @@ var_dump( strrchr("Hello, World", "o") );
 var_dump( strrchr("Hello, World", "ooo") );
 
 var_dump( strrchr("Hello, World", "Zzzz") ); //non-existent needle in haystack
+
+echo "*** Testing part argument ***\n";
+
+var_dump( strrchr("Hello, World", "o", true) );
+var_dump( strrchr("Hello, World", "t", true) );
+
 echo "*** Done ***";
 ?>
 --EXPECTF--
@@ -53,5 +59,8 @@ string(12) "Hello, World"
 string(12) "Hello, World"
 string(4) "orld"
 string(4) "orld"
+bool(false)
+*** Testing part argument ***
+string(%d) "Hello, W"
 bool(false)
 *** Done ***
