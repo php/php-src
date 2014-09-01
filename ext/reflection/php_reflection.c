@@ -958,7 +958,7 @@ static int _extension_ini_string(zval *el TSRMLS_DC, int num_args, va_list args,
 	char *comma = "";
 
 	if (number == ini_entry->module_number) {
-		string_printf(str, "    %sEntry [ %s <", indent, ini_entry->name);
+		string_printf(str, "    %sEntry [ %s <", indent, ini_entry->name->val);
 		if (ini_entry->modifiable == ZEND_INI_ALL) {
 			string_printf(str, "ALL");
 		} else {
@@ -976,9 +976,9 @@ static int _extension_ini_string(zval *el TSRMLS_DC, int num_args, va_list args,
 		}
 
 		string_printf(str, "> ]\n");
-		string_printf(str, "    %s  Current = '%s'\n", indent, ini_entry->value ? ini_entry->value : "");
+		string_printf(str, "    %s  Current = '%s'\n", indent, ini_entry->value ? ini_entry->value->val : "");
 		if (ini_entry->modified) {
-			string_printf(str, "    %s  Default = '%s'\n", indent, ini_entry->orig_value ? ini_entry->orig_value : "");
+			string_printf(str, "    %s  Default = '%s'\n", indent, ini_entry->orig_value ? ini_entry->orig_value->val : "");
 		}
 		string_printf(str, "    %s}\n", indent);
 	}
@@ -5278,9 +5278,12 @@ static int _addinientry(zval *el TSRMLS_DC, int num_args, va_list args, zend_has
 
 	if (number == ini_entry->module_number) {
 		if (ini_entry->value) {
-			add_assoc_stringl(retval, ini_entry->name, ini_entry->value, ini_entry->value_length);
+			zval zv;
+
+			ZVAL_STR(&zv, ini_entry->value);
+			zend_symtable_update(Z_ARRVAL_P(retval), ini_entry->name, &zv);
 		} else {
-			add_assoc_null(retval, ini_entry->name);
+			zend_symtable_update(Z_ARRVAL_P(retval), ini_entry->name, &EG(uninitialized_zval));
 		}
 	}
 	return ZEND_HASH_APPLY_KEEP;

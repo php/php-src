@@ -58,7 +58,7 @@ static PHP_INI_MH(OnUpdateTags)
 	
 	ctx = &BG(url_adapt_state_ex);
 	
-	tmp = estrndup(new_value, new_value_length);
+	tmp = estrndup(new_value->val, new_value->len);
 	
 	if (ctx->tags)
 		zend_hash_destroy(ctx->tags);

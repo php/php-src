@@ -5234,27 +5234,30 @@ static int php_ini_get_option(zval *zv TSRMLS_DC, int num_args, va_list args, ze
 			array_init(&option);
 
 			if (ini_entry->orig_value) {
-				add_assoc_stringl(&option, "global_value", ini_entry->orig_value, ini_entry->orig_value_length);
+				add_assoc_stringl(&option, "global_value", ini_entry->orig_value->val, ini_entry->orig_value->len);
 			} else if (ini_entry->value) {
-				add_assoc_stringl(&option, "global_value", ini_entry->value, ini_entry->value_length);
+				add_assoc_stringl(&option, "global_value", ini_entry->value->val, ini_entry->value->len);
 			} else {
 				add_assoc_null(&option, "global_value");
 			}
 
 			if (ini_entry->value) {
-				add_assoc_stringl(&option, "local_value", ini_entry->value, ini_entry->value_length);
+				add_assoc_stringl(&option, "local_value", ini_entry->value->val, ini_entry->value->len);
 			} else {
 				add_assoc_null(&option, "local_value");
 			}
 
 			add_assoc_long(&option, "access", ini_entry->modifiable);
 
-			add_assoc_zval_ex(ini_array, ini_entry->name, ini_entry->name_length, &option);
+			zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &option);
 		} else {
 			if (ini_entry->value) {
-				add_assoc_stringl(ini_array, ini_entry->name, ini_entry->value, ini_entry->value_length);
+				zval zv;
+
+				ZVAL_STR(&zv, ini_entry->value);
+				zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &zv);
 			} else {
-				add_assoc_null(ini_array, ini_entry->name);
+				zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &EG(uninitialized_zval));
 			}
 		}
 	}
@@ -5305,11 +5308,10 @@ static int php_ini_check_path(char *option_name, int option_len, char *new_optio
 PHP_FUNCTION(ini_set)
 {
 	zend_string *varname;
-	char *new_value;
-	size_t new_value_len;
+	zend_string *new_value;
 	char *old_value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ss", &varname, &new_value, &new_value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &varname, &new_value) == FAILURE) {
 		return;
 	}
 
@@ -5331,14 +5333,14 @@ PHP_FUNCTION(ini_set)
 			_CHECK_PATH(varname->val, varname->len, "mail.log") ||
 			_CHECK_PATH(varname->val, varname->len, "java.library.path") ||
 			_CHECK_PATH(varname->val, varname->len, "vpopmail.directory")) {
-			if (php_check_open_basedir(new_value TSRMLS_CC)) {
+			if (php_check_open_basedir(new_value->val TSRMLS_CC)) {
 				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
 		}
 	}
 
-	if (zend_alter_ini_entry_ex(varname, new_value, new_value_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == FAILURE) {
+	if (zend_alter_ini_entry_ex(varname, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -5363,12 +5365,11 @@ PHP_FUNCTION(ini_restore)
    Sets the include_path configuration option */
 PHP_FUNCTION(set_include_path)
 {
-	char *new_value;
-	size_t new_value_len;
+	zend_string *new_value;
 	char *old_value;
 	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &new_value, &new_value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &new_value) == FAILURE) {
 		return;
 	}
 
@@ -5381,7 +5382,7 @@ PHP_FUNCTION(set_include_path)
 	}
 
 	key = zend_string_init("include_path", sizeof("include_path") - 1, 0);
-	if (zend_alter_ini_entry_ex(key, new_value, new_value_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == FAILURE) {
+	if (zend_alter_ini_entry_ex(key, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == FAILURE) {
 		zend_string_release(key);
 		zval_dtor(return_value);
 		RETURN_FALSE;
@@ -5471,11 +5472,10 @@ PHP_FUNCTION(connection_status)
    Set whether we want to ignore a user abort event or not */
 PHP_FUNCTION(ignore_user_abort)
 {
-	char *arg = NULL;
-	size_t arg_len = 0;
+	zend_string *arg = NULL;
 	int old_setting;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &arg) == FAILURE) {
 		return;
 	}
 
@@ -5483,7 +5483,7 @@ PHP_FUNCTION(ignore_user_abort)
 
 	if (arg) {
 		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort"), 0);
-		zend_alter_ini_entry_ex(key, arg, arg_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+		zend_alter_ini_entry_ex(key, arg, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 		zend_string_release(key);
 	}
 

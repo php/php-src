@@ -163,7 +163,7 @@ static PHP_INI_MH(OnSetPrecision)
 {
 	zend_long i;
 
-	ZEND_ATOL(i, new_value);
+	ZEND_ATOL(i, new_value->val);
 	if (i >= 0) {
 		EG(precision) = i;
 		return SUCCESS;
@@ -178,7 +178,7 @@ static PHP_INI_MH(OnSetPrecision)
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	if (new_value) {
-		PG(memory_limit) = zend_atol(new_value, new_value_length);
+		PG(memory_limit) = zend_atol(new_value->val, new_value->len);
 	} else {
 		PG(memory_limit) = 1<<30;		/* effectively, no limit */
 	}
@@ -319,11 +319,11 @@ static PHP_INI_MH(OnUpdateTimeout)
 {
 	if (stage==PHP_INI_STAGE_STARTUP) {
 		/* Don't set a timeout on startup, only per-request */
-		ZEND_ATOL(EG(timeout_seconds), new_value);
+		ZEND_ATOL(EG(timeout_seconds), new_value->val);
 		return SUCCESS;
 	}
 	zend_unset_timeout(TSRMLS_C);
-	ZEND_ATOL(EG(timeout_seconds), new_value);
+	ZEND_ATOL(EG(timeout_seconds), new_value->val);
 	zend_set_timeout(EG(timeout_seconds), 0);
 	return SUCCESS;
 }
@@ -364,7 +364,7 @@ static int php_get_display_errors_mode(char *value, int value_length)
  */
 static PHP_INI_MH(OnUpdateDisplayErrors)
 {
-	PG(display_errors) = (zend_bool) php_get_display_errors_mode(new_value, new_value_length);
+	PG(display_errors) = (zend_bool) php_get_display_errors_mode(new_value->val, new_value->len);
 
 	return SUCCESS;
 }
@@ -379,11 +379,11 @@ static PHP_INI_DISP(display_errors_mode)
 	TSRMLS_FETCH();
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-		tmp_value = (ini_entry->orig_value ? ini_entry->orig_value : NULL );
-		tmp_value_length = ini_entry->orig_value_length;
+		tmp_value = (ini_entry->orig_value ? ini_entry->orig_value->val : NULL );
+		tmp_value_length = ini_entry->orig_value->len;
 	} else if (ini_entry->value) {
-		tmp_value = ini_entry->value;
-		tmp_value_length = ini_entry->value_length;
+		tmp_value = ini_entry->value->val;
+		tmp_value_length = ini_entry->value->len;
 	} else {
 		tmp_value = NULL;
 		tmp_value_length = 0;
@@ -423,9 +423,10 @@ static PHP_INI_DISP(display_errors_mode)
 static PHP_INI_MH(OnUpdateInternalEncoding)
 {
 	if (new_value) {
-		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
-		OnUpdateString(entry, SG(default_charset), strlen(SG(default_charset))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		zend_string *val = zend_string_init(SG(default_charset), strlen(SG(default_charset)), stage != ZEND_INI_STAGE_RUNTIME);
+		OnUpdateString(entry, val, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	}
 	return SUCCESS;
 }
@@ -436,9 +437,10 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 static PHP_INI_MH(OnUpdateInputEncoding)
 {
 	if (new_value) {
-		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
-		OnUpdateString(entry, SG(default_charset), strlen(SG(default_charset))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		zend_string *val = zend_string_init(SG(default_charset), strlen(SG(default_charset)), stage != ZEND_INI_STAGE_RUNTIME);
+		OnUpdateString(entry, val, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	}
 	return SUCCESS;
 }
@@ -449,9 +451,10 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 static PHP_INI_MH(OnUpdateOutputEncoding)
 {
 	if (new_value) {
-		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
-		OnUpdateString(entry, SG(default_charset), strlen(SG(default_charset))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		zend_string *val = zend_string_init(SG(default_charset), strlen(SG(default_charset)), stage != ZEND_INI_STAGE_RUNTIME);
+		OnUpdateString(entry, val, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	}
 	return SUCCESS;
 }
@@ -462,12 +465,12 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 static PHP_INI_MH(OnUpdateErrorLog)
 {
 	/* Only do the safemode/open_basedir check at runtime */
-	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value && strcmp(new_value, "syslog")) {
-		if (PG(open_basedir) && php_check_open_basedir(new_value TSRMLS_CC)) {
+	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value && strcmp(new_value->val, "syslog")) {
+		if (PG(open_basedir) && php_check_open_basedir(new_value->val TSRMLS_CC)) {
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */
@@ -478,11 +481,11 @@ static PHP_INI_MH(OnUpdateMailLog)
 {
 	/* Only do the safemode/open_basedir check at runtime */
 	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value) {
-		if (PG(open_basedir) && php_check_open_basedir(new_value TSRMLS_CC)) {
+		if (PG(open_basedir) && php_check_open_basedir(new_value->val TSRMLS_CC)) {
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */
@@ -1341,7 +1344,7 @@ PHP_FUNCTION(set_time_limit)
 	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
 
 	key = zend_string_init("max_execution_time", sizeof("max_execution_time")-1, 0);
-	if (zend_alter_ini_entry_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
+	if (zend_alter_ini_entry_chars_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -1439,16 +1442,9 @@ static char *php_resolve_path_for_zend(const char *filename, int filename_len TS
 
 /* {{{ php_get_configuration_directive_for_zend
  */
-static int php_get_configuration_directive_for_zend(const char *name, uint name_length, zval *contents)
+static zval *php_get_configuration_directive_for_zend(zend_string *name)
 {
-	zval *retval = cfg_get_entry(name, name_length);
-
-	if (retval) {
-		*contents = *retval;
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
+	return cfg_get_entry_ex(name);
 }
 /* }}} */
 

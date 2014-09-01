@@ -485,7 +485,7 @@ static void _close_mysql_plink(zend_resource *rsrc TSRMLS_DC)
 static PHP_INI_MH(OnMySQLPort)
 {
 	if (new_value != NULL) { /* default port */
-		MySG(default_port) = atoi(new_value);
+		MySG(default_port) = atoi(new_value->val);
 	} else {
 		MySG(default_port) = -1;
 	}

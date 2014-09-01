@@ -62,14 +62,14 @@ ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRML
 void (*zend_on_timeout)(int seconds TSRMLS_DC);
 
 static void (*zend_message_dispatcher_p)(zend_long message, const void *data TSRMLS_DC);
-static int (*zend_get_configuration_directive_p)(const char *name, uint name_length, zval *contents);
+static zval *(*zend_get_configuration_directive_p)(zend_string *name);
 
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
 	if (!new_value) {
 		EG(error_reporting) = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED;
 	} else {
-		EG(error_reporting) = atoi(new_value);
+		EG(error_reporting) = atoi(new_value->val);
 	}
 	return SUCCESS;
 }
@@ -77,7 +77,7 @@ static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 {
-	OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
 	if (GC_G(gc_enabled)) {
 		gc_init(TSRMLS_C);
@@ -95,7 +95,7 @@ static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 	if (!zend_multibyte_get_functions(TSRMLS_C)) {
 		return SUCCESS;
 	}
-	return zend_multibyte_set_script_encoding_by_string(new_value, new_value_length TSRMLS_CC);
+	return zend_multibyte_set_script_encoding_by_string(new_value->val, new_value->len TSRMLS_CC);
 }
 /* }}} */
 
@@ -979,12 +979,12 @@ ZEND_API void zend_message_dispatcher(zend_long message, const void *data TSRMLS
 /* }}} */
 END_EXTERN_C()
 
-ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents) /* {{{ */
+ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 {
 	if (zend_get_configuration_directive_p) {
-		return zend_get_configuration_directive_p(name, name_length, contents);
+		return zend_get_configuration_directive_p(name);
 	} else {
-		return FAILURE;
+		return NULL;
 	}
 }
 /* }}} */

@@ -208,7 +208,7 @@ static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 {
 	zend_long long_value;
 
-	ZEND_ATOL(long_value, new_value);
+	ZEND_ATOL(long_value, new_value->val);
 	if (long_value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
 		return FAILURE;
 	}

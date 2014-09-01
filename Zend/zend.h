@@ -542,7 +542,7 @@ typedef struct _zend_utility_functions {
 	void (*message_handler)(zend_long message, const void *data TSRMLS_DC);
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
-	int (*get_configuration_directive)(const char *name, uint name_length, zval *contents);
+	zval *(*get_configuration_directive)(zend_string *name);
 	void (*ticks_function)(int ticks TSRMLS_DC);
 	void (*on_timeout)(int seconds TSRMLS_DC);
 	int (*stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
@@ -689,7 +689,7 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 ZEND_API void zend_message_dispatcher(zend_long message, const void *data TSRMLS_DC);
 
-ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents);
+ZEND_API zval *zend_get_configuration_directive(zend_string *name);
 END_EXTERN_C()
 
 /* Messages for applications of Zend */

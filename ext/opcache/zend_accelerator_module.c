@@ -109,10 +109,10 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 #endif
 
 	/* keep the compiler happy */
-	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
+	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
 	p = (zend_long *) (base + (size_t)mh_arg1);
-	memsize = atoi(new_value);
+	memsize = atoi(new_value->val);
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
 		const char *new_new_value = "8";
@@ -128,8 +128,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 			return FAILURE;
 		}
 
-		ini_entry->value = strdup(new_new_value);
-		ini_entry->value_length = strlen(new_new_value);
+		ini_entry->value = zend_string_init(new_new_value, 1, 1);
 	}
 	*p = memsize * (1024 * 1024);
 	return SUCCESS;
@@ -146,10 +145,10 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 #endif
 
 	/* keep the compiler happy */
-	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
+	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
 	p = (zend_long *) (base + (size_t)mh_arg1);
-	size = atoi(new_value);
+	size = atoi(new_value->val);
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
 
 	if (size < MIN_ACCEL_FILES || size > MAX_ACCEL_FILES) {
@@ -173,8 +172,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 					sizeof("opcache.max_accelerated_files")-1)) == NULL) {
 			return FAILURE;
 		}
-		ini_entry->value = strdup(new_new_value);
-		ini_entry->value_length = strlen(new_new_value);
+		ini_entry->value = zend_string_init(new_new_value, strlen(new_new_value), 1);
 	}
 	*p = size;
 	return SUCCESS;
@@ -191,10 +189,10 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 #endif
 
 	/* keep the compiler happy */
-	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
+	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
 	p = (double *) (base + (size_t)mh_arg1);
-	percentage = atoi(new_value);
+	percentage = atoi(new_value->val);
 
 	if (percentage <= 0 || percentage > 50) {
 		const char *new_new_value = "5";
@@ -208,8 +206,7 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 					sizeof("opcache.max_wasted_percentage")-1)) == NULL) {
 			return FAILURE;
 		}
-		ini_entry->value = strdup(new_new_value);
-		ini_entry->value_length = strlen(new_new_value);
+		ini_entry->value = zend_string_init(new_new_value, strlen(new_new_value), 1);
 	}
 	*p = (double)percentage / 100.0;
 	return SUCCESS;
@@ -220,7 +217,7 @@ static ZEND_INI_MH(OnEnable)
 	if (stage == ZEND_INI_STAGE_STARTUP ||
 	    stage == ZEND_INI_STAGE_SHUTDOWN ||
 	    stage == ZEND_INI_STAGE_DEACTIVATE) {
-		return OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
 		/* It may be only temporary disabled */
 		zend_bool *p;
@@ -231,10 +228,10 @@ static ZEND_INI_MH(OnEnable)
 #endif
 
 		p = (zend_bool *) (base+(size_t) mh_arg1);
-		if ((new_value_length == 2 && strcasecmp("on", new_value) == 0) ||
-		    (new_value_length == 3 && strcasecmp("yes", new_value) == 0) ||
-		    (new_value_length == 4 && strcasecmp("true", new_value) == 0) ||
-			atoi(new_value) != 0) {
+		if ((new_value->len == 2 && strcasecmp("on", new_value->val) == 0) ||
+		    (new_value->len == 3 && strcasecmp("yes", new_value->val) == 0) ||
+		    (new_value->len == 4 && strcasecmp("true", new_value->val) == 0) ||
+			atoi(new_value->val) != 0) {
 			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
 			return FAILURE;
 		} else {

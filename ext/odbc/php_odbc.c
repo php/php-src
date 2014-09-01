@@ -524,9 +524,9 @@ static PHP_INI_DISP(display_link_nums)
 	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
+		value = ini_entry->orig_value->val;
 	} else if (ini_entry->value) {
-		value = ini_entry->value;
+		value = ini_entry->value->val;
 	} else {
 		value = NULL;
 	}
@@ -549,9 +549,9 @@ static PHP_INI_DISP(display_defPW)
 	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
+		value = ini_entry->orig_value->val;
 	} else if (ini_entry->value) {
-		value = ini_entry->value;
+		value = ini_entry->value->val;
 	} else {
 		value = NULL;
 	}
@@ -580,9 +580,9 @@ static PHP_INI_DISP(display_binmode)
 	TSRMLS_FETCH();
 	
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
+		value = ini_entry->orig_value->val;
 	} else if (ini_entry->value) {
-		value = ini_entry->value;
+		value = ini_entry->value->val;
 	} else {
 		value = NULL;
 	}
@@ -611,9 +611,9 @@ static PHP_INI_DISP(display_lrl)
 	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
+		value = ini_entry->orig_value->val;
 	} else if (ini_entry->value) {
-		value = ini_entry->value;
+		value = ini_entry->value->val;
 	} else {
 		value = NULL;
 	}
@@ -637,9 +637,9 @@ static PHP_INI_DISP(display_cursortype)
 	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
+		value = ini_entry->orig_value->val;
 	} else if (ini_entry->value) {
-		value = ini_entry->value;
+		value = ini_entry->value->val;
 	} else {
 		value = NULL;
 	}

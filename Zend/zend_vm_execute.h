@@ -1131,15 +1131,17 @@ static int ZEND_FASTCALL  ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 				}
 				if (EXPECTED(zend_hash_str_add_ptr(EG(modified_ini_directives), "error_reporting", sizeof("error_reporting")-1, EG(error_reporting_ini_entry)) != NULL)) {
 					EG(error_reporting_ini_entry)->orig_value = EG(error_reporting_ini_entry)->value;
-					EG(error_reporting_ini_entry)->orig_value_length = EG(error_reporting_ini_entry)->value_length;
 					EG(error_reporting_ini_entry)->orig_modifiable = EG(error_reporting_ini_entry)->modifiable;
 					EG(error_reporting_ini_entry)->modified = 1;
 				}
 			} else if (EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value) {
-				efree(EG(error_reporting_ini_entry)->value);
+				zend_string_release(EG(error_reporting_ini_entry)->value);
 			}
-			EG(error_reporting_ini_entry)->value = estrndup("0", sizeof("0")-1);
-			EG(error_reporting_ini_entry)->value_length = sizeof("0")-1;
+			if (CG(one_char_string)['0']) {
+				EG(error_reporting_ini_entry)->value = CG(one_char_string)['0'];
+			} else {
+				EG(error_reporting_ini_entry)->value = zend_string_init("0", sizeof("0")-1, 0);
+			}
 		} while (0);
 	}
 	CHECK_EXCEPTION();
@@ -1372,7 +1374,7 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 		ZVAL_LONG(&restored_error_reporting, Z_LVAL(EX(old_error_reporting)));
 		convert_to_string(&restored_error_reporting);
 		key = zend_string_init("error_reporting", sizeof("error_reporting")-1, 0);
-		zend_alter_ini_entry_ex(key, Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME, 1 TSRMLS_CC);
+		zend_alter_ini_entry_ex(key, Z_STR(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME, 1 TSRMLS_CC);
 		zend_string_free(key);
 		zval_dtor(&restored_error_reporting);
 	}
@@ -10040,10 +10042,9 @@ static int ZEND_FASTCALL  ZEND_END_SILENCE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 		if (EXPECTED(EG(error_reporting_ini_entry) != NULL)) {
 			if (EXPECTED(EG(error_reporting_ini_entry)->modified &&
 			    EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value)) {
-				efree(EG(error_reporting_ini_entry)->value);
+				zend_string_release(EG(error_reporting_ini_entry)->value);
 			}
-			EG(error_reporting_ini_entry)->value_length = buf + sizeof(buf) - 1 - res;
-			EG(error_reporting_ini_entry)->value = estrndup(res, EG(error_reporting_ini_entry)->value_length);
+			EG(error_reporting_ini_entry)->value = zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
 		}
 	}
 //???	if (EX(old_error_reporting) == EX_VAR(opline->op1.var)) {

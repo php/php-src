@@ -141,12 +141,12 @@ static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 */
 static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 {
-	zval curval;
+	zval *curval;
 	char *envvar;
 
 	/* Fetch configuration option value */
-	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRLEN_P(name), &curval) == SUCCESS) {
-		ZVAL_PSTRINGL(result, Z_STRVAL(curval), Z_STRLEN(curval));
+	if ((curval = zend_get_configuration_directive(Z_STR_P(name))) != NULL) {
+		ZVAL_PSTRINGL(result, Z_STRVAL_P(curval), Z_STRLEN_P(curval));
 	/* ..or if not found, try ENV */
 	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name) TSRMLS_CC)) != NULL ||
 			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {

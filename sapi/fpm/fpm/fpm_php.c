@@ -26,22 +26,21 @@ static char **limit_extensions = NULL;
 static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage TSRMLS_DC) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
-	char *duplicate;
+	zend_string *duplicate;
 
 	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length))) {
 		return FAILURE;
 	}
 
-	duplicate = strdup(new_value);
+	duplicate = zend_string_init(new_value, new_value_length, 1);
 
 	if (!ini_entry->on_modify
-			|| ini_entry->on_modify(ini_entry, duplicate, new_value_length,
+			|| ini_entry->on_modify(ini_entry, duplicate,
 				ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage TSRMLS_CC) == SUCCESS) {
 		ini_entry->value = duplicate;
-		ini_entry->value_length = new_value_length;
 		ini_entry->modifiable = mode;
 	} else {
-		free(duplicate);
+		zend_string_release(duplicate);
 	}
 
 	return SUCCESS;
@@ -92,7 +91,7 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 		return Z_TYPE(zv) == IS_TRUE;
 	}
 
-	if (fpm_php_zend_ini_alter_master(name, name_len+1, value, value_len, mode, PHP_INI_STAGE_ACTIVATE TSRMLS_CC) == FAILURE) {
+	if (fpm_php_zend_ini_alter_master(name, name_len, value, value_len, mode, PHP_INI_STAGE_ACTIVATE TSRMLS_CC) == FAILURE) {
 		return -1;
 	}
 

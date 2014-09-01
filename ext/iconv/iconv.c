@@ -223,39 +223,39 @@ static char _generic_superset_name[] = ICONV_UCS4_ENCODING;
 
 static PHP_INI_MH(OnUpdateInputEncoding)
 {
-	if (new_value_length >= ICONV_CSNMAXLEN) {
+	if (new_value->len >= ICONV_CSNMAXLEN) {
 		return FAILURE;
 	}
 	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
 		php_error_docref("ref.iconv" TSRMLS_CC, E_DEPRECATED, "Use of iconv.input_encoding is deprecated");
 	}
-	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
 }
 
 
 static PHP_INI_MH(OnUpdateOutputEncoding)
 {
-	if(new_value_length >= ICONV_CSNMAXLEN) {
+	if(new_value->len >= ICONV_CSNMAXLEN) {
 		return FAILURE;
 	}
 	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
 		php_error_docref("ref.iconv" TSRMLS_CC, E_DEPRECATED, "Use of iconv.output_encoding is deprecated");
 	}
-	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
 }
 
 
 static PHP_INI_MH(OnUpdateInternalEncoding)
 {
-	if(new_value_length >= ICONV_CSNMAXLEN) {
+	if(new_value->len >= ICONV_CSNMAXLEN) {
 		return FAILURE;
 	}
 	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
 		php_error_docref("ref.iconv" TSRMLS_CC, E_DEPRECATED, "Use of iconv.internal_encoding is deprecated");
 	}
-	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
 }
 
@@ -2456,14 +2456,15 @@ PHP_NAMED_FUNCTION(php_if_iconv)
    Sets internal encoding and output encoding for ob_iconv_handler() */
 PHP_FUNCTION(iconv_set_encoding)
 {
-	char *type, *charset;
-	size_t type_len, charset_len = 0, retval;
+	char *type;
+	zend_string *charset;
+	size_t type_len, retval;
 	zend_string *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &type, &type_len, &charset, &charset_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sS", &type, &type_len, &charset) == FAILURE)
 		return;
 
-	if (charset_len >= ICONV_CSNMAXLEN) {
+	if (charset->len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
@@ -2478,7 +2479,7 @@ PHP_FUNCTION(iconv_set_encoding)
 		RETURN_FALSE;
 	}
 		
-	retval = zend_alter_ini_entry(name, charset, charset_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	retval = zend_alter_ini_entry(name, charset, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	zend_string_release(name);
 
 	if (retval == SUCCESS) {
