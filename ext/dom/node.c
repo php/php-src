@@ -845,6 +845,21 @@ int dom_node_text_content_read(dom_object *obj, zval *retval TSRMLS_DC)
 
 int dom_node_text_content_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
+	xmlNode *nodep = dom_object_get_node(obj);
+	zend_string *str;
+	xmlChar *enc_str;
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
+	str = zval_get_string(newval);
+	enc_str = xmlEncodeEntitiesReentrant(nodep->doc, str->val);
+	xmlNodeSetContent(nodep, enc_str);
+	xmlFree(enc_str);
+	zend_string_release(str);
+
 	return SUCCESS;
 }
 
