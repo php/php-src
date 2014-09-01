@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 - Core:
   . Added PHP_INT_MIN constant. (Andrea)
   . Added Closure::apply() method. (Andrea)
+  . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
 
 - Reflection
   . Fixed inheritance chain of Reflector interface (Tjerk)
