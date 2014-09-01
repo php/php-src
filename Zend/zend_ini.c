@@ -251,7 +251,7 @@ static int zend_ini_refresh_cache(zval *el, void *arg TSRMLS_DC) /* {{{ */
 	int stage = (int)(zend_intptr_t)arg;
 
 	if (p->on_modify) {
-		p->on_modify(p, p->value, p->value_length, p->mh_arg1, p->mh_arg2, p->mh_arg3, stage TSRMLS_CC);
+		p->on_modify(p, p->value, p->mh_arg1, p->mh_arg2, p->mh_arg3, stage TSRMLS_CC);
 	}
 	return 0;
 }
