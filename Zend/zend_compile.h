@@ -491,6 +491,8 @@ ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC);
 ZEND_API void zend_cleanup_internal_classes(TSRMLS_D);
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array);
+ZEND_API int clean_non_persistent_function_full(zval *zv TSRMLS_DC);
+ZEND_API int clean_non_persistent_class_full(zval *zv TSRMLS_DC);
 
 ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
 ZEND_API void zend_function_dtor(zval *zv);
