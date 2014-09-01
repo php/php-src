@@ -822,6 +822,20 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 	zend_shutdown_timeout_thread();
 #endif
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
+
+	if (EG(active))
+	{
+		/*
+		 * The order of destruction is important here.
+		 * See bugs #65463 and 66036.
+		 */
+		zend_hash_reverse_apply(GLOBAL_FUNCTION_TABLE, (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
+		zend_hash_reverse_apply(GLOBAL_CLASS_TABLE, (apply_func_t) zend_cleanup_user_class_data TSRMLS_CC);
+		zend_cleanup_internal_classes(TSRMLS_C);
+		zend_hash_reverse_apply(GLOBAL_FUNCTION_TABLE, (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
+		zend_hash_reverse_apply(GLOBAL_CLASS_TABLE, (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
+	}
+
 	zend_destroy_modules();
 
  	virtual_cwd_deactivate(TSRMLS_C);
