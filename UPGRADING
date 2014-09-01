@@ -256,6 +256,11 @@ PHP 5.6 UPGRADE NOTES
   Manipulated serialization strings for objects implementing Serializable by
   replacing "C:" with "O:" at the start will now produce an error.
 
+- parse_ini_file():
+- parse_ini_string():
+  Added scanner mode INI_SCANNER_TYPED to yield typed .ini values. 
+  For PHP >= 5.6.1
+
 ========================================
 6. New Functions
 ========================================
