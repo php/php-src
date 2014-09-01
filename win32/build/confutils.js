@@ -1892,6 +1892,7 @@ function generate_config_h()
 		outfile.WriteLine("");
 		outfile.WriteLine("#define HAVE_ACOSH 1");
 		outfile.WriteLine("#define HAVE_ASINH 1");
+		outfile.WriteLine("#define HAVE_ATANH 1");
 	}
 
 	
