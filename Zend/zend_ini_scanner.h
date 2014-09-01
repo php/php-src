@@ -25,6 +25,7 @@
 /* Scanner modes */
 #define ZEND_INI_SCANNER_NORMAL 0 /* Normal mode. [DEFAULT] */
 #define ZEND_INI_SCANNER_RAW    1 /* Raw mode. Option values are not parsed */
+#define ZEND_INI_SCANNER_TYPED  2 /* Typed mode. */
 
 BEGIN_EXTERN_C()
 int zend_ini_scanner_get_lineno(TSRMLS_D);
