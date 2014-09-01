@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #47358 (glob returns error, should be empty array()). (Pierre)
+  . Fixed bug #65463 (SIGSEGV during zend_shutdown()). (Keyur Govande)
+  . Fixed bug #66036 (Crash on SIGTERM in apache process). (Keyur Govande)
 
 - OpenSSL:
   . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
