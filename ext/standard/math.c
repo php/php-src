@@ -240,7 +240,15 @@ static double php_acosh(double x)
 #ifdef HAVE_ACOSH
 	return(acosh(x));
 #else
+# ifdef _WIN64
+	if (x >= 1) {
+		return log(x + sqrt(x * x - 1));
+	} else {
+		return (DBL_MAX+DBL_MAX)-(DBL_MAX+DBL_MAX);
+	}
+# else
 	return(log(x + sqrt(x * x - 1)));
+# endif
 #endif
 }
 /* }}} */
