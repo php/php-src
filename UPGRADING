@@ -76,6 +76,8 @@ PHP X.Y UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- DOM
+  . DOMNode::textContent is now writeable.
 
 ========================================
 10. New Global Constants
