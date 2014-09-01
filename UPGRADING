@@ -374,6 +374,9 @@ PHP 5.6 UPGRADE NOTES
   - Added LISTEN/NOTIFY support via PDO::pgsqlGetNotify / PDO::pgsqlGetPid()
     as described in https://bugs.php.net/bug.php?id=42614.
 
+- DOM:
+  - DOMNode::textContent is now a writeable property. (>= 5.6.1)
+
 ========================================
 10. New Global Constants
 ========================================
