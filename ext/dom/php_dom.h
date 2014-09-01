@@ -146,6 +146,20 @@ entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not yet implemented"); \
 	return;
 
+#define convert_to_copy_master(orig, copy, lower_type, upper_type) \
+	if (Z_TYPE_P(orig) != IS_##upper_type) { \
+		if (Z_REFCOUNT_P(orig) > 1) {        \
+			copy = *orig;                    \
+			zval_copy_ctor(&copy);           \
+			orig = &copy;                    \
+		}                                    \
+		convert_to_##lower_type(orig);       \
+	}
+
+#define convert_to_string_copy(orig, copy)  convert_to_copy_master(orig, copy, string, STRING);
+#define convert_to_long_copy(orig, copy)    convert_to_copy_master(orig, copy, long, LONG);
+#define convert_to_boolean_copy(orig, copy) convert_to_copy_master(orig, copy, boolean, BOOL);
+
 #define DOM_NODELIST 0
 #define DOM_NAMEDNODEMAP 1
 

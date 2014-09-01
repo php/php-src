@@ -183,14 +183,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		node_list_unlink(attrp->children TSRMLS_CC);
 	}
 
-	if (newval->type != IS_STRING) {
-		if(Z_REFCOUNT_P(newval) > 1) {
-			value_copy = *newval;
-			zval_copy_ctor(&value_copy);
-			newval = &value_copy;
-		}
-		convert_to_string(newval);
-	}
+	convert_to_string_copy(newval, value_copy);
 
 	xmlNodeSetContentLen((xmlNodePtr) attrp, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 

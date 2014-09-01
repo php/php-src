@@ -112,14 +112,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	if (newval->type != IS_STRING) {
-		if(Z_REFCOUNT_P(newval) > 1) {
-			value_copy = *newval;
-			zval_copy_ctor(&value_copy);
-			newval = &value_copy;
-		}
-		convert_to_string(newval);
-	}
+	convert_to_string_copy(newval, value_copy);
 
 	xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 

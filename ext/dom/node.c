@@ -352,14 +352,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
-			if (newval->type != IS_STRING) {
-				if(Z_REFCOUNT_P(newval) > 1) {
-					value_copy = *newval;
-					zval_copy_ctor(&value_copy);
-					newval = &value_copy;
-				}
-				convert_to_string(newval);
-			}
+			convert_to_string_copy(newval, value_copy);
 			xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 			if (newval == &value_copy) {
 				zval_dtor(newval);
@@ -794,14 +787,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 					nsnode = xmlDocGetRootElement(nodep->doc);
 				}
 			}
-			if (newval->type != IS_STRING) {
-				if(Z_REFCOUNT_P(newval) > 1) {
-					value_copy = *newval;
-					zval_copy_ctor(&value_copy);
-					newval = &value_copy;
-				}
-				convert_to_string(newval);
-			}
+			convert_to_string_copy(newval, value_copy);
 			prefix = Z_STRVAL_P(newval);
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
 				strURI = (char *) nodep->ns->href;
@@ -942,6 +928,23 @@ int dom_node_text_content_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 int dom_node_text_content_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
+	xmlNode *nodep = dom_object_get_node(obj);
+	zval value_copy;
+	xmlChar *enc_str;
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
+	convert_to_string_copy(newval, value_copy);
+	enc_str = xmlEncodeEntitiesReentrant(nodep->doc, Z_STRVAL_P(newval));
+	xmlNodeSetContent(nodep, enc_str);
+	xmlFree(enc_str);
+	if (newval == &value_copy) {
+		zval_dtor(newval);
+	}
+
 	return SUCCESS;
 }
 
