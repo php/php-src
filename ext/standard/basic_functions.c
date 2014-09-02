@@ -5234,15 +5234,15 @@ static int php_ini_get_option(zval *zv TSRMLS_DC, int num_args, va_list args, ze
 			array_init(&option);
 
 			if (ini_entry->orig_value) {
-				add_assoc_stringl(&option, "global_value", ini_entry->orig_value->val, ini_entry->orig_value->len);
+				add_assoc_str(&option, "global_value", zend_string_copy(ini_entry->orig_value));
 			} else if (ini_entry->value) {
-				add_assoc_stringl(&option, "global_value", ini_entry->value->val, ini_entry->value->len);
+				add_assoc_str(&option, "global_value", zend_string_copy(ini_entry->value));
 			} else {
 				add_assoc_null(&option, "global_value");
 			}
 
 			if (ini_entry->value) {
-				add_assoc_stringl(&option, "local_value", ini_entry->value->val, ini_entry->value->len);
+				add_assoc_str(&option, "local_value", zend_string_copy(ini_entry->value));
 			} else {
 				add_assoc_null(&option, "local_value");
 			}
