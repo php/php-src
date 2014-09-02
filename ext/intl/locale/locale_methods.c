@@ -243,6 +243,9 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 	ini_name = zend_string_init(LOCALE_INI_NAME, sizeof(LOCALE_INI_NAME) - 1, 0);
 	zend_alter_ini_entry(ini_name, locale_name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);	
 	zend_string_release(ini_name);
+	if (default_locale != NULL) {
+		zend_string_release(locale_name);
+	}
 
 	RETURN_TRUE;
 }

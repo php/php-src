@@ -244,7 +244,7 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 			zval *data;
 
 			ZEND_HASH_FOREACH_KEY_VAL(ht, num, index, data) {
-				zend_alter_ini_entry(index, Z_STRVAL_P(data), Z_STRLEN_P(data), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+				zend_alter_ini_entry(index, Z_STR_P(data), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			} ZEND_HASH_FOREACH_END();	
 /*
 			for (zend_hash_internal_pointer_reset_ex(ht, &pos);
