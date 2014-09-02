@@ -215,8 +215,11 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int 
 
 		config_directive_success = 0;
 		if (zend_hash_add_ptr(directives, p->name, (void*)p) == NULL) {
-			if (p->orig_value) {
-				zend_string_release(p->orig_value);
+			if (p->name) {
+				zend_string_release(p->name);
+			}
+			if (p->value) {
+				zend_string_release(p->value);
 			}
 			zend_unregister_ini_entries(module_number TSRMLS_CC);
 			return FAILURE;
