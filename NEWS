@@ -7,10 +7,11 @@ PHP                                                                        NEWS
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
   . Fixed bug #65463 (SIGSEGV during zend_shutdown()). (Keyur Govande)
   . Fixed bug #66036 (Crash on SIGTERM in apache process). (Keyur Govande)
+  . Fixed bug #67644 (Memory corruption & crash during ob_start function
+    callback). (Stas)
   . Fixed bug #67878 (program_prefix not honoured in man pages). (Remi)
   . Fixed bug #67938 (Segfault when extending interface method with variadic).
     (Nikita)
-
 
 - Fileinfo:
   . Fixed bug #67731 (finfo::file() returns invalid mime type
