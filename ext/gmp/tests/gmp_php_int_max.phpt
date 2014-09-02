@@ -1,7 +1,10 @@
 --TEST--
 PHP_INT_MAX tests
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+<?php
+if (!extension_loaded("gmp")) print "skip";
+if (PHP_INT_SIZE != 8) print "skip";
+?>
 --FILE--
 <?php
 

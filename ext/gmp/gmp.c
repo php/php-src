@@ -319,7 +319,7 @@ if (IS_GMP(zval)) {                                               \
 	gmp_create(return_value, &gmpnumber TSRMLS_CC)
 
 static void gmp_strval(zval *result, mpz_t gmpnum, zend_long base);
-static int convert_to_gmp(mpz_t gmpnumber, zval *val, int base TSRMLS_DC);
+static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base TSRMLS_DC);
 static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg TSRMLS_DC);
 
 /*
@@ -722,7 +722,7 @@ ZEND_MODULE_INFO_D(gmp)
 
 /* {{{ convert_to_gmp
  * Convert zval to be gmp number */
-static int convert_to_gmp(mpz_t gmpnumber, zval *val, int base TSRMLS_DC)
+static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base TSRMLS_DC)
 {
 	switch (Z_TYPE_P(val)) {
 	case IS_LONG:
@@ -733,7 +733,7 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, int base TSRMLS_DC)
 	}
 	case IS_STRING: {
 		char *numstr = Z_STRVAL_P(val);
-		int skip_lead = 0;
+		zend_bool skip_lead = 0;
 		int ret;
 
 		if (Z_STRLEN_P(val) > 2) {
@@ -748,7 +748,7 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, int base TSRMLS_DC)
 			}
 		}
 
-		ret = mpz_set_str(gmpnumber, (skip_lead ? &numstr[2] : numstr), base);
+		ret = mpz_set_str(gmpnumber, (skip_lead ? &numstr[2] : numstr), (int) base);
 		if (-1 == ret) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"Unable to convert variable to GMP - string is not an integer");
@@ -767,7 +767,7 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, int base TSRMLS_DC)
 
 static void gmp_strval(zval *result, mpz_t gmpnum, zend_long base) /* {{{ */
 {
-	int num_len;
+	size_t num_len;
 	zend_string *str;
 
 	num_len = mpz_sizeinbase(gmpnum, abs(base));
