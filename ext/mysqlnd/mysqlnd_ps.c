@@ -905,7 +905,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, unsigned i
 #endif
 					if (!Z_ISNULL_P(data)) {
 						if ((Z_TYPE_P(data) == IS_STRING) &&
-								(meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
+								(meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
 							meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
 						ZVAL_COPY_VALUE(result, data);
@@ -1093,7 +1093,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 
 					if (!Z_ISNULL_P(data)) {
 						if ((Z_TYPE_P(data) == IS_STRING) &&
-								(meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
+								(meta->fields[i].max_length < (zend_ulong) Z_STRLEN_P(data))) {
 							meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
 						ZVAL_COPY_VALUE(result, data);
