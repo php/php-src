@@ -1879,18 +1879,20 @@ ZEND_FUNCTION(gmp_scan1)
 PHP_METHOD(GMP, __construct)
 {
 	zval *number = NULL;
+	zval *object = getThis();
 	long base = 0;
-	zend_error_handling error_handling;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zl", &number, &base) == SUCCESS) {
 		if (base && (base < 2 || base > MAX_BASE)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %ld (should be between 2 and %d)", base, MAX_BASE);
-			ZVAL_NULL(getThis());
+			zval_dtor(object);
+			ZVAL_NULL(object);
 			return;
 		}
 
 		if (number && convert_to_gmp(GET_GMP_FROM_ZVAL(getThis()), number, base TSRMLS_CC) == FAILURE) {
-			ZVAL_NULL(getThis());
+			zval_dtor(object);
+			ZVAL_NULL(object);
 			return;
 		}
 	}
