@@ -331,14 +331,14 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg TSRMLS_DC);
 typedef void (*gmp_unary_op_t)(mpz_ptr, mpz_srcptr);
 typedef int (*gmp_unary_opl_t)(mpz_srcptr);
 
-typedef void (*gmp_unary_ui_op_t)(mpz_ptr, zend_ulong);
+typedef void (*gmp_unary_ui_op_t)(mpz_ptr, unsigned long);
 
 typedef void (*gmp_binary_op_t)(mpz_ptr, mpz_srcptr, mpz_srcptr);
 typedef int (*gmp_binary_opl_t)(mpz_srcptr, mpz_srcptr);
 
-typedef void (*gmp_binary_ui_op_t)(mpz_ptr, mpz_srcptr, zend_ulong);
+typedef void (*gmp_binary_ui_op_t)(mpz_ptr, mpz_srcptr, unsigned long);
 typedef void (*gmp_binary_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, mpz_srcptr);
-typedef void (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, zend_ulong);
+typedef void (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, unsigned long);
 
 static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero TSRMLS_DC);
 static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op2_t gmp_op, gmp_binary_ui_op2_t gmp_ui_op, int check_b_zero TSRMLS_DC);
@@ -483,7 +483,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 
 		FETCH_GMP_ZVAL(gmpnum_op, op1, temp);
 		INIT_GMP_RETVAL(gmpnum_result);
-		op(gmpnum_result, gmpnum_op, (zend_ulong) shift);
+		op(gmpnum_result, gmpnum_op, (unsigned long) shift);
 		FREE_GMP_TEMP(temp);
 	}
 }
@@ -862,7 +862,7 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 	INIT_GMP_RETVAL(gmpnum_result);
 
 	if (use_ui) {
-		gmp_ui_op(gmpnum_result, gmpnum_a, (zend_ulong) Z_LVAL_P(b_arg));
+		gmp_ui_op(gmpnum_result, gmpnum_a, (unsigned long) Z_LVAL_P(b_arg));
 	} else {
 		gmp_op(gmpnum_result, gmpnum_a, gmpnum_b);
 	}
@@ -916,7 +916,7 @@ static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval 
 	add_next_index_zval(return_value, &result2);
 
 	if (use_ui) {
-		gmp_ui_op(gmpnum_result1, gmpnum_result2, gmpnum_a, (zend_ulong) Z_LVAL_P(b_arg));
+		gmp_ui_op(gmpnum_result1, gmpnum_result2, gmpnum_a, (unsigned long) Z_LVAL_P(b_arg));
 	} else {
 		gmp_op(gmpnum_result1, gmpnum_result2, gmpnum_a, gmpnum_b);
 	}
