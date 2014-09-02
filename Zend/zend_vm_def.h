@@ -5061,6 +5061,9 @@ ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 			}
 		}
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), EG(error_reporting_ini_entry)->value);
+		if (EG(error_reporting_ini_entry)->value) {
+			zend_string_addref(EG(error_reporting_ini_entry)->value);
+		}
 		if (Z_TYPE(EX(old_error_reporting)) == IS_UNDEF) {
 			ZVAL_NEW_STR(&EX(old_error_reporting), EG(error_reporting_ini_entry)->value);
 		}
@@ -5076,6 +5079,8 @@ ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 					EG(error_reporting_ini_entry)->orig_modifiable = EG(error_reporting_ini_entry)->modifiable;
 					EG(error_reporting_ini_entry)->modified = 1;
 				}
+			} else if (EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value) {
+				zend_string_release(EG(error_reporting_ini_entry)->value);
 			}
 			if (CG(one_char_string)['0']) {
 				EG(error_reporting_ini_entry)->value = CG(one_char_string)['0'];
@@ -5103,8 +5108,7 @@ ZEND_VM_HANDLER(58, ZEND_END_SILENCE, TMP, ANY)
 		EG(error_reporting) = EX_VAR(opline->op1.var)->u2.error_reporting;
 		if (EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_STRING)) {
 			if (EXPECTED(EG(error_reporting_ini_entry)->modified &&
-			    EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value) &&
-			    EG(error_reporting_ini_entry)->value != Z_STR_P(EX_VAR(opline->op1.var))) {
+			    EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value)) {
 				zend_string_release(EG(error_reporting_ini_entry)->value);
 			}
 			EG(error_reporting_ini_entry)->value = Z_STR_P(EX_VAR(opline->op1.var));
