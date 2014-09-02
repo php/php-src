@@ -31,6 +31,8 @@ ZEND_MODULE_DEACTIVATE_D(gmp);
 ZEND_MODULE_INFO_D(gmp);
 
 ZEND_FUNCTION(gmp_init);
+ZEND_FUNCTION(gmp_import);
+ZEND_FUNCTION(gmp_export);
 ZEND_FUNCTION(gmp_intval);
 ZEND_FUNCTION(gmp_strval);
 ZEND_FUNCTION(gmp_add);
