@@ -75,6 +75,15 @@ ZEND_FUNCTION(gmp_popcount);
 ZEND_FUNCTION(gmp_hamdist);
 ZEND_FUNCTION(gmp_nextprime);
 
+/* GMP and MPIR use different datatypes on different platforms */
+#ifdef PHP_WIN32
+typedef zend_long gmp_long;
+typedef zend_ulong gmp_ulong;
+#else
+typedef long gmp_long;
+typedef unsigned long gmp_ulong;
+#endif
+
 ZEND_BEGIN_MODULE_GLOBALS(gmp)
 	zend_bool rand_initialized;
 	gmp_randstate_t rand_state;
