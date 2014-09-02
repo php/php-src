@@ -738,11 +738,9 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base TSRMLS_DC)
 
 		if (Z_STRLEN_P(val) > 2) {
 			if (numstr[0] == '0') {
-				if (numstr[1] == 'x' || numstr[1] == 'X') {
-					base = 16;
+				if (base == 16 && (numstr[1] == 'x' || numstr[1] == 'X')) {
 					skip_lead = 1;
-				} else if (base != 16 && (numstr[1] == 'b' || numstr[1] == 'B')) {
-					base = 2;
+				} else if (base == 2 && (numstr[1] == 'b' || numstr[1] == 'B')) {
 					skip_lead = 1;
 				}
 			}
