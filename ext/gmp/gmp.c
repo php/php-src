@@ -1112,7 +1112,7 @@ ZEND_FUNCTION(gmp_import)
 	char *data;
 	size_t data_len;
 	zend_long size = 1;
-	zend_long options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN;;
+	zend_long options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN;
 	int order, endian;
 	mpz_ptr gmpnumber;
 
@@ -1142,7 +1142,7 @@ ZEND_FUNCTION(gmp_export)
 {
 	zval *gmpnumber_arg;
 	zend_long size = 1;
-	zend_long options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN;;
+	zend_long options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN;
 	int order, endian;
 	mpz_ptr gmpnumber;
 	gmp_temp_t temp_a;
