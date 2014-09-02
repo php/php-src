@@ -1145,7 +1145,7 @@ ZEND_FUNCTION(gmp_import)
 	char *data;
 	int data_len;
 	long size = 1;
-	long options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN;;
+	long options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN;
 	int order, endian;
 	mpz_ptr gmpnumber;
 
@@ -1175,7 +1175,7 @@ ZEND_FUNCTION(gmp_export)
 {
 	zval *gmpnumber_arg;
 	long size = 1;
-	long options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN;;
+	long options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN;
 	int order, endian;
 	mpz_ptr gmpnumber;
 	gmp_temp_t temp_a;
@@ -1191,7 +1191,7 @@ ZEND_FUNCTION(gmp_export)
 	FETCH_GMP_ZVAL(gmpnumber, gmpnumber_arg, temp_a);
 
 	if (mpz_sgn(gmpnumber) == 0) {
-		ZVAL_STRING(return_value, "", 1);
+		RETURN_EMPTY_STRING();
 	} else {
 		size_t bits_per_word = size * 8;
 		size_t count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
@@ -1201,7 +1201,7 @@ ZEND_FUNCTION(gmp_export)
 		mpz_export(out_string, NULL, order, size, endian, 0, gmpnumber);
 		out_string[out_len] = '\0';
 
-		ZVAL_STRINGL(return_value, out_string, out_len, 0);
+		RETURN_STRINGL(out_string, out_len, 0);
 	}
 
 	FREE_GMP_TEMP(temp_a);
