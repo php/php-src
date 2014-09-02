@@ -405,7 +405,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 			{
 				zend_string *str = Z_STR_P(op);
 
-				ZVAL_LONG(op, strtol(str->val, NULL, base));
+				ZVAL_LONG(op, ZEND_STRTOL(str->val, NULL, base));
 				zend_string_release(str);
 			}
 			break;
