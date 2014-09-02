@@ -425,8 +425,7 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
-		zend_string *val = zend_string_init(SG(default_charset), strlen(SG(default_charset)), stage != ZEND_INI_STAGE_RUNTIME);
-		OnUpdateString(entry, val, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		PG(internal_encoding) = SG(default_charset);
 	}
 	return SUCCESS;
 }
@@ -439,8 +438,7 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
-		zend_string *val = zend_string_init(SG(default_charset), strlen(SG(default_charset)), stage != ZEND_INI_STAGE_RUNTIME);
-		OnUpdateString(entry, val, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		PG(input_encoding) = SG(default_charset);
 	}
 	return SUCCESS;
 }
@@ -453,8 +451,7 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
-		zend_string *val = zend_string_init(SG(default_charset), strlen(SG(default_charset)), stage != ZEND_INI_STAGE_RUNTIME);
-		OnUpdateString(entry, val, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		PG(output_encoding) = SG(default_charset);
 	}
 	return SUCCESS;
 }
