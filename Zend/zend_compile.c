@@ -3604,9 +3604,13 @@ static void zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type 
 static void zend_separate_if_call_and_write(znode *node, zend_ast *ast, uint32_t type TSRMLS_DC) /* {{{ */
 {
 	if (type != BP_VAR_R && type != BP_VAR_IS && zend_is_call(ast)) {
-		zend_op *opline = zend_emit_op(NULL, ZEND_SEPARATE, node, NULL TSRMLS_CC);
-		opline->result_type = IS_VAR;
-		opline->result.var = opline->op1.var;
+		if (node->op_type == IS_VAR) {
+			zend_op *opline = zend_emit_op(NULL, ZEND_SEPARATE, node, NULL TSRMLS_CC);
+			opline->result_type = IS_VAR;
+			opline->result.var = opline->op1.var;
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use result of built-in function in write context");
+		}
 	}
 }
 /* }}} */
