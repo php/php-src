@@ -63,16 +63,6 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC 
 	}
 }
 
-static zend_always_inline void i_zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
-{
-	if (Z_REFCOUNTED_P(zval_ptr)) {
-		if (!Z_DELREF_P(zval_ptr)) {
-			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
-			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_CC);
-		}
-	}
-}
-
 static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
 {
 	int result;
@@ -237,7 +227,7 @@ static zend_always_inline void zend_vm_stack_free_extra_args(zend_execute_data *
  		zval *p = end + (call->num_args - first_extra_arg);
 		do {
 			p--;
-			i_zval_ptr_dtor_nogc(p ZEND_FILE_LINE_CC TSRMLS_CC);
+			zval_ptr_dtor_nogc(p);
 		} while (p != end);
  	}
 }
@@ -252,7 +242,7 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call T
 
 		do {
 			p--;
-			i_zval_ptr_dtor_nogc(p ZEND_FILE_LINE_CC TSRMLS_CC);
+			zval_ptr_dtor_nogc(p);
 		} while (p != end);
 	}
 }

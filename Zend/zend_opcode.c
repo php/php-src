@@ -343,7 +343,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	if (literal) {
 	 	end = literal + op_array->last_literal;
 	 	while (literal < end) {
-			zval_dtor(literal);
+			zval_ptr_dtor_nogc(literal);
 			literal++;
 		}
 		efree(op_array->literals);
