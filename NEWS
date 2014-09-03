@@ -35,6 +35,9 @@ PHP                                                                        NEWS
 - DOM:
   . Made DOMNode::textContent writeable. (Tjerk)
 
+- SOAP:
+  . Fixed bug #67955 (SoapClient prepends 0-byte to cookie names). (Philip Hofstetter)
+
 28 Aug 2014, PHP 5.6.0
 
 - Apache2 Handler SAPI:
