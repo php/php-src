@@ -1410,13 +1410,13 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 	cnt = len;
 	state = 0;
 	while (cnt > 0) {
-		inc_len = (*c == '\0' ? 1: php_mblen(c, cnt));
+		inc_len = (*c == '\0' ? 1 : php_mblen(c, cnt));
 
 		switch (inc_len) {
 			case -2:
 			case -1:
 				inc_len = 1;
-				php_ignore_value(php_mblen(NULL, 0));
+				php_mb_reset();
 				break;
 			case 0:
 				goto quit_loop;
