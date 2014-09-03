@@ -159,13 +159,17 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
 #endif
 
-#if ZEND_GCC_VERSION >= 2007
+/* Format string checks are disabled by default, because we use custom format modifiers (like %p),
+ * which cause a large amount of false positives. You can enable format checks by adding
+ * -DZEND_CHECK_FORMAT_STRINGS to CFLAGS. */
+
+#if ZEND_GCC_VERSION >= 2007 && defined(ZEND_CHECK_FORMAT_STRINGS)
 # define ZEND_ATTRIBUTE_FORMAT(type, idx, first) __attribute__ ((format(type, idx, first)))
 #else
 # define ZEND_ATTRIBUTE_FORMAT(type, idx, first)
 #endif
 
-#if ZEND_GCC_VERSION >= 3001 && !defined(__INTEL_COMPILER)
+#if ZEND_GCC_VERSION >= 3001 && !defined(__INTEL_COMPILER) && defined(ZEND_CHECK_FORMAT_STRINGS)
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first) __attribute__ ((format(type, idx, first)))
 #else
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first)
