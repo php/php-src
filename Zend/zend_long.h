@@ -52,8 +52,8 @@ typedef int32_t zend_off_t;
 # define ZEND_LONG_MAX INT32_MAX
 # define ZEND_LONG_MIN INT32_MIN
 # define ZEND_ULONG_MAX UINT32_MAX
-# define Z_L(i) i
-# define Z_UL(i) i
+# define Z_L(i) INT32_C(i)
+# define Z_UL(i) UINT32_C(i)
 # define SIZEOF_ZEND_LONG 4
 #endif
 
