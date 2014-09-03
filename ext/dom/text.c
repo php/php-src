@@ -126,7 +126,7 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval TSRMLS_DC)
 	}
 
 	if (wholetext != NULL) {
-		ZVAL_STRING(retval, wholetext);
+		ZVAL_STRING(retval, (char *) wholetext);
 		xmlFree(wholetext);
 	} else {
 		ZVAL_EMPTY_STRING(retval);
