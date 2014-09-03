@@ -1108,27 +1108,23 @@ static int ZEND_FASTCALL  ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 	USE_OPLINE
 
 	SAVE_OPLINE();
+	ZVAL_LONG(EX_VAR(opline->result.var), EG(error_reporting));
+	if (Z_TYPE(EX(old_error_reporting)) == IS_UNDEF) {
+		ZVAL_LONG(&EX(old_error_reporting), EG(error_reporting));
+		EX(old_error_reporting).u2.silence_num = opline->op2.num;
+	}
 
-	EX_VAR(opline->result.var)->u2.error_reporting = EG(error_reporting);
-	do {
-		if (!EG(error_reporting_ini_entry)) {
-			zend_ini_entry *p = zend_hash_str_find_ptr(EG(ini_directives), "error_reporting", sizeof("error_reporting")-1);
-			if (p) {
-				EG(error_reporting_ini_entry) = p;
-			} else {
-				EG(error_reporting) = 0;
-				break;
-			}
-		}
-		ZVAL_NEW_STR(EX_VAR(opline->result.var), EG(error_reporting_ini_entry)->value);
-		if (EG(error_reporting_ini_entry)->value) {
-			zend_string_addref(EG(error_reporting_ini_entry)->value);
-		}
-		if (Z_TYPE(EX(old_error_reporting)) == IS_UNDEF) {
-			ZVAL_NEW_STR(&EX(old_error_reporting), EG(error_reporting_ini_entry)->value);
-		}
-		if (EG(error_reporting)) {
+	if (EG(error_reporting)) {
+		do {
 			EG(error_reporting) = 0;
+			if (!EG(error_reporting_ini_entry)) {
+				zend_ini_entry *p = zend_hash_str_find_ptr(EG(ini_directives), "error_reporting", sizeof("error_reporting")-1);
+				if (p) {
+					EG(error_reporting_ini_entry) = p;
+				} else {
+					break;
+				}
+			}
 			if (!EG(error_reporting_ini_entry)->modified) {
 				if (!EG(modified_ini_directives)) {
 					ALLOC_HASHTABLE(EG(modified_ini_directives));
@@ -1139,16 +1135,10 @@ static int ZEND_FASTCALL  ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 					EG(error_reporting_ini_entry)->orig_modifiable = EG(error_reporting_ini_entry)->modifiable;
 					EG(error_reporting_ini_entry)->modified = 1;
 				}
-			} else if (EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value) {
-				zend_string_release(EG(error_reporting_ini_entry)->value);
 			}
-			if (CG(one_char_string)['0']) {
-				EG(error_reporting_ini_entry)->value = CG(one_char_string)['0'];
-			} else {
-				EG(error_reporting_ini_entry)->value = zend_string_init("0", sizeof("0")-1, 0);
-			}
-		}
-	} while (0);
+		} while (0);
+	}
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -1371,19 +1361,10 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	}
 
 	/* restore previous error_reporting value */
-	if (Z_TYPE(EX(old_error_reporting)) != IS_UNDEF) {
-		if (!EG(error_reporting)) {
-			zend_string *key;
-
-			key = zend_string_init("error_reporting", sizeof("error_reporting")-1, 0);
-			zend_alter_ini_entry_ex(key, Z_STR(EX(old_error_reporting)), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME, 1 TSRMLS_CC);
-			zend_string_free(key);
-		}
-		if (Z_STR(EX(old_error_reporting))) {
-			zend_string_release(Z_STR(EX(old_error_reporting)));
-		}
-		ZVAL_UNDEF(&EX(old_error_reporting));
+	if (!EG(error_reporting) && Z_TYPE(EX(old_error_reporting)) != IS_UNDEF && Z_LVAL(EX(old_error_reporting)) != 0) {
+		EG(error_reporting) = Z_LVAL(EX(old_error_reporting));
 	}
+	ZVAL_UNDEF(&EX(old_error_reporting));
 
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
 		if (EX(delayed_exception)) {
@@ -10039,27 +10020,12 @@ static int ZEND_FASTCALL  ZEND_END_SILENCE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	if (!EG(error_reporting)) {
-		EG(error_reporting) = EX_VAR(opline->op1.var)->u2.error_reporting;
-		if (EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_STRING)) {
-			if (EXPECTED(EG(error_reporting_ini_entry)->modified &&
-			    EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value)) {
-				zend_string_release(EG(error_reporting_ini_entry)->value);
-			}
-			EG(error_reporting_ini_entry)->value = Z_STR_P(EX_VAR(opline->op1.var));
-			if (Z_TYPE(EX(old_error_reporting)) != IS_UNDEF &&
-			    Z_STR(EX(old_error_reporting)) == EG(error_reporting_ini_entry)->value) {
-				ZVAL_UNDEF(&EX(old_error_reporting));
-			}
-		}
-	} else {
-		if (EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_STRING)) {
-			zend_string_release(Z_STR_P(EX_VAR(opline->op1.var)));
-			if (Z_TYPE(EX(old_error_reporting)) != IS_UNDEF &&
-			    Z_STR(EX(old_error_reporting)) == Z_STR_P(EX_VAR(opline->op1.var))) {
-				ZVAL_UNDEF(&EX(old_error_reporting));
-			}
-		}
+	if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(opline->op1.var)) != 0) {
+		EG(error_reporting) = Z_LVAL_P(EX_VAR(opline->op1.var));
+	}
+	if (Z_TYPE(EX(old_error_reporting)) != IS_UNDEF &&
+		EX(old_error_reporting).u2.silence_num == opline->op2.num) {
+		ZVAL_UNDEF(&EX(old_error_reporting));
 	}
 	ZEND_VM_NEXT_OPCODE();
 }

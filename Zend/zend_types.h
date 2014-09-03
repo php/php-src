@@ -134,7 +134,7 @@ struct _zval_struct {
 		uint32_t     str_offset;           /* string offset */
 		uint32_t     cache_slot;           /* literal cache slot */
 		uint32_t     lineno;               /* line number (for ast nodes) */
-		int          error_reporting;      /* old error_reporting (@) */
+		uint32_t     silence_num;          /* BEGIN_SILENCE op number */
 	} u2;
 };
 
