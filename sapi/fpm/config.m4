@@ -567,14 +567,41 @@ if test "$PHP_FPM" != "no"; then
   [  --with-fpm-systemd      Activate systemd integration], no, no)
 
   if test "$PHP_FPM_SYSTEMD" != "no" ; then
-    AC_CHECK_LIB(systemd-daemon, sd_notify, SYSTEMD_LIBS="-lsystemd-daemon")
+    if test -z "$PKG_CONFIG"; then
+      AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+    fi
+    unset SYSTEMD_LIBS
+    unset SYSTEMD_INCS
+
+    if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd; then
+      dnl systemd version >= 209 provides libsystemd
+      AC_MSG_CHECKING([for libsystemd])
+      SYSTEMD_LIBS=`$PKG_CONFIG --libs libsystemd`
+      SYSTEMD_INCS=`$PKG_CONFIG --cflags-only-I libsystemd`
+      SYSTEMD_VERS=`$PKG_CONFIG --modversion libsystemd`
+      AC_MSG_RESULT([version $SYSTEMD_VERS])
+
+    elif test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd-daemon; then
+      dnl systemd version < 209 provides libsystemd-daemon
+      AC_MSG_CHECKING([for libsystemd-daemon])
+      SYSTEMD_LIBS=`$PKG_CONFIG --libs libsystemd-daemon`
+      SYSTEMD_INCS=`$PKG_CONFIG --cflags-only-I libsystemd-daemon`
+      SYSTEMD_VERS=`$PKG_CONFIG --modversion libsystemd-daemon`
+      AC_MSG_RESULT([version $SYSTEMD_VERS])
+
+    else
+      dnl failback when no pkg-config
+      AC_CHECK_LIB(systemd-daemon, sd_notify, SYSTEMD_LIBS="-lsystemd-daemon")
+    fi
+
     AC_CHECK_HEADERS(systemd/sd-daemon.h, [HAVE_SD_DAEMON_H="yes"], [HAVE_SD_DAEMON_H="no"])
     if test $HAVE_SD_DAEMON_H = "no" || test -z "${SYSTEMD_LIBS}"; then
       AC_MSG_ERROR([Your system does not support systemd.])
     else
       AC_DEFINE(HAVE_SYSTEMD, 1, [FPM use systemd integration])
       PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
-      PHP_ADD_LIBRARY(systemd-daemon)
+      PHP_EVAL_LIBLINE($SYSTEMD_LIBS)
+      PHP_EVAL_INCLINE($SYSTEMD_INCS)
       php_fpm_systemd=notify
     fi
   else

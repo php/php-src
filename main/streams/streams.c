@@ -568,7 +568,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 /* {{{ generic stream operations */
 
-static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_DC)
+PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_DC)
 {
 	/* allocate/fill the buffer */
 
@@ -736,7 +736,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 				break;
 			}
 		} else {
-			php_stream_fill_read_buffer(stream, size TSRMLS_CC);
+			php_stream_fill_read_buffer(stream, size);
 
 			toread = stream->writepos - stream->readpos;
 			if (toread > size) {
@@ -972,7 +972,7 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 				}
 			}
 
-			php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
+			php_stream_fill_read_buffer(stream, toread);
 
 			if (stream->writepos - stream->readpos == 0) {
 				break;
@@ -1047,7 +1047,7 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 
 		to_read_now = MIN(maxlen - buffered_len, stream->chunk_size);
 
-		php_stream_fill_read_buffer(stream, buffered_len + to_read_now TSRMLS_CC);
+		php_stream_fill_read_buffer(stream, buffered_len + to_read_now);
 
 		just_read = STREAM_BUFFERED_AMOUNT(stream) - buffered_len;
 

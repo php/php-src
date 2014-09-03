@@ -2324,8 +2324,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_lcfirst, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 	
-ZEND_BEGIN_ARG_INFO(arginfo_ucwords, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ucwords, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, delimiters)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strtr, 0, 0, 2)

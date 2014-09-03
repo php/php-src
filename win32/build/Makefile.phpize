@@ -6,6 +6,7 @@ MT="$(MT)"
 PHPSDK_DIR=$(PHP_DIR)
 PHPLIB=$(PHPSDK_DIR)\lib\$(PHPLIB)
 LDFLAGS=$(LDFLAGS) /libpath:"$(PHPSDK_DIR)\lib\;$(PHPSDK_DIR)"
+BUILD_DIR_DEV=$(PHPSDK_DIR)
 
 all: $(EXT_TARGETS) $(PECL_TARGETS)
 
@@ -32,4 +33,6 @@ _VC_MANIFEST_EMBED_DLL=
 _VC_MANIFEST_EMBED_EXE= if exist $@.manifest $(MT) -nologo -manifest $@.manifest -outputresource:$@;1
 _VC_MANIFEST_EMBED_DLL= if exist $@.manifest $(MT) -nologo -manifest $@.manifest -outputresource:$@;2
 !endif
+
+install: build-headers  build-bins
 

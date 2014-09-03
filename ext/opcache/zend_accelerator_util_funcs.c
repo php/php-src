@@ -979,7 +979,6 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		if (zend_hash_num_elements(&persistent_script->class_table) > 0) {
 			zend_accel_class_hash_copy(CG(class_table), &persistent_script->class_table, NULL TSRMLS_CC);
 		}
-		free_persistent_script(persistent_script, 0); /* free only hashes */
 	}
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
@@ -990,6 +989,10 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		CG(compiled_filename) = orig_compiled_filename;
 	}
 #endif
+
+	if (!from_shared_memory) {
+		free_persistent_script(persistent_script, 0); /* free only hashes */
+	}
 
 	return op_array;
 }

@@ -2,6 +2,7 @@
 Phar front controller $_SERVER munging success zip-based
 --INI--
 default_charset=UTF-8
+cgi.fix_pathinfo=1
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>

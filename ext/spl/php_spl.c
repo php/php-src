@@ -326,7 +326,7 @@ PHP_FUNCTION(spl_autoload)
 		RETURN_FALSE;
 	}
 
-	if (file_exts == NULL) { /* autoload_extensions is not intialzed, set to defaults */
+	if (file_exts == NULL) { /* autoload_extensions is not initialized, set to defaults */
 		copy = pos1 = estrndup(SPL_DEFAULT_FILE_EXTENSIONS, sizeof(SPL_DEFAULT_FILE_EXTENSIONS)-1);
 	} else {
 		copy = pos1 = estrndup(file_exts, file_exts_len);

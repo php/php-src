@@ -1,9 +1,99 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.5.16
+?? ??? 2014, PHP 5.5.18
 
 
-?? ??? 2014, PHP 5.5.15
+
+11 Sep 2014, PHP 5.5.17
+
+- Core:
+  . Fixed bug #47358 (glob returns error, should be empty array()). (Pierre)
+  . Fixed bug #65463 (SIGSEGV during zend_shutdown()). (Keyur Govande)
+  . Fixed bug #66036 (Crash on SIGTERM in apache process). (Keyur Govande)
+  . Fixed bug #67878 (program_prefix not honoured in man pages). (Remi)
+
+- COM:
+  . Fixed bug #41577 (DOTNET is successful once per server run)
+    (Aidas Kasparas)
+
+- FPM:
+  . Fixed #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable when
+    using Apache). (David Zuelke)
+
+- OpenSSL:
+  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
+    (Daniel Lowrey)
+  . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3)
+    (Daniel Lowrey)
+
+- SPL:
+  . Fixed bug #67813 (CachingIterator::__construct InvalidArgumentException
+    wrong message). (tim_siebels_aurich at yahoo dot de)
+
+- Date:
+  . Fixed bug #66091 (memory leaks in DateTime constructor). (Tjerk)
+  . Fixed bug #66985 (Some timezones are no longer valid in PHP 5.5.10).
+    (Derick)
+  . Fixed bug #67109 (First uppercase letter breaks date string parsing).
+    (Derick)
+
+- GD
+  . Made fontFetch's path parser thread-safe. (Sara).
+
+- MySQLi:
+  . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
+
+- Zlib:
+  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
+    data). (Mike)
+  . Fixed bug #67865 (internal corruption phar error). Mike
+
+21 Aug 2014, PHP 5.5.16
+
+- COM:
+  . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
+
+- Fileinfo:
+  . Fixed bug #67705 (extensive backtracking in rule regular expression).
+    (CVE-2014-3538) (Remi)
+  . Fixed bug #67716 (Segfault in cdf.c). (CVE-2014-3587) (Remi)
+
+- FPM:
+  . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
+    (pacho@gentoo.org, Remi)
+
+- GD:
+  . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
+    (CVE-2014-2497) (Remi)
+  . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
+    (CVE-2014-5120) (Ryan Mauger)
+
+- Milter:
+  . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
+  
+- Network:
+  . Fixed bug #67717 (segfault in dns_get_record). (CVE-2014-3597) (Remi)
+
+- OpenSSL:
+  . Fixed missing type checks in OpenSSL options. (Yussuf Khalil, Stas)
+
+- readline:
+  . Fixed bug #55496 (Interactive mode doesn't force a newline before the
+    prompt). (Bob, Johannes)
+  . Fixed bug #67496 (Save command history when exiting interactive shell
+    with control-c). (Dmitry Saprykin, Johannes)
+
+- Sessions:
+  . Fixed missing type checks in php_session_create_id (Yussuf Khalil, Stas).
+
+- Core:
+  . Fixed bug #67693 (incorrect push to the empty array) (Tjerk)
+
+- ODBC:
+  . Fixed bug #60616 (odbc_fetch_into returns junk data at end of multi-byte
+    char fields). (Keyur)
+
+24 Jul 2014, PHP 5.5.15
 
 - Core:
   . Fixed bug #67428 (header('Location: foo') will override a 308-399 response
@@ -17,12 +107,17 @@ PHP                                                                        NEWS
   . Fixed bug #67151 (strtr with empty array crashes). (Nikita)
   . Fixed bug #67407 (Windows 8.1/Server 2012 R2 reported as Windows 8/Server
     2012). (Christian Wenz)
+  . Fixed bug #66608 (Incorrect behavior with nested "finally" blocks).
+    (Laruence, Dmitry)
+  . Implemented FR #34407 (ucwords and Title Case). (Tjerk)
 
 - CLI server:
   . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
     (Adam)
   . Fixed bug #66830 (Empty header causes PHP built-in web server to hang).
     (Adam)
+  . Fixed bug #67594 (Unable to access to apache_request_headers() elements).
+    (Tjerk)
 
 - FPM:
   . Fixed bug #67530 (error_log=syslog ignored). (Remi)
@@ -47,11 +142,15 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #67539 (ArrayIterator use-after-free due to object change during 
-    sorting). (research at insighti dot org, Laruence)
+    sorting). (CVE-2014-4698) (research at insighti dot org, Laruence)
   . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
 
 - Streams:
   . Fixed bug #67430 (http:// wrapper doesn't follow 308 redirects). (Adam)
+
+- Session:
+  . Fixed bug #66827 (Session raises E_NOTICE when session name variable is array).
+    (Yasuo)
 
 27 Jun 2014, PHP 5.5.14
 
@@ -106,6 +205,8 @@ PHP                                                                        NEWS
   . Fixed bug #66127 (Segmentation fault with ArrayObject unset). (Stas)
   . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
   . Fixed bug #67360 (Missing element after ArrayObject::getIterator). (Adam)
+  . Fixed bug #67492 (unserialize() SPL ArrayObject / SPLObjectStorage Type
+    Confusion). (CVE-2014-3515) (Stefan Esser)
 
 29 May 2014, PHP 5.5.13
 
