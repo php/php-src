@@ -830,7 +830,7 @@ try_again:
 						      (zend_hash_index_find(Z_ARRVAL_PP(data), 2, (void**)&tmp) == FAILURE ||
 						       in_domain(phpurl->host,Z_STRVAL_PP(tmp))) &&
 						      (use_ssl || zend_hash_index_find(Z_ARRVAL_PP(data), 3, (void**)&tmp) == FAILURE)) {
-								smart_str_appendl(&soap_headers, key, key_len);
+								smart_str_appendl(&soap_headers, key, key_len-1);
 								smart_str_appendc(&soap_headers, '=');
 								smart_str_appendl(&soap_headers, Z_STRVAL_PP(value), Z_STRLEN_PP(value));
 								smart_str_appendc(&soap_headers, ';');
