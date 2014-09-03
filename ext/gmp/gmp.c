@@ -1065,7 +1065,7 @@ int gmp_import_export_validate(zend_long size, zend_long options, int *order, in
 {
 	if (size < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-			"Word size must be positive, %ld given", size);
+			"Word size must be positive, %pd given", size);
 		return FAILURE;
 	}
 

@@ -1305,7 +1305,7 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 
 		if (UNEXPECTED(offset < 0) || UNEXPECTED(Z_STRLEN_P(container) <= offset)) {
 			if (type != BP_VAR_IS) {
-				zend_error(E_NOTICE, "Uninitialized string offset: %ld", offset);
+				zend_error(E_NOTICE, "Uninitialized string offset: %pd", offset);
 			}
 			ZVAL_EMPTY_STRING(result);
 		} else {

@@ -342,7 +342,7 @@ PHP_FUNCTION(password_hash)
 			
 			required_salt_len = 22;
 			hash_format = emalloc(8);
-			sprintf(hash_format, "$2y$%02ld$", cost);
+			sprintf(hash_format, "$2y$%02ld$", (long) cost);
 			hash_format_len = 7;
 		}
 		break;
