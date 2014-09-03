@@ -154,7 +154,7 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 
 		if (!new_object->properties) {
 			ALLOC_HASHTABLE(new_object->properties);
-			zend_hash_init(new_object->properties, 8, NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_init(new_object->properties, zend_hash_num_elements(old_object->properties), NULL, ZVAL_PTR_DTOR, 0);
 		}
 
 		ZEND_HASH_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {

@@ -1062,7 +1062,7 @@ ZEND_FUNCTION(get_object_vars)
 
 	zobj = Z_OBJ_P(obj);
 
-	array_init(return_value);
+	array_init_size(return_value, zend_hash_num_elements(properties));
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(properties, key, value) {
 		if (key) {
