@@ -92,6 +92,10 @@ foreach ($export as $k => $test) {
 
 var_dump($passed);
 
+// Invalid arguments (zpp failure)
+var_dump(gmp_import());
+var_dump(gmp_export());
+
 // Invalid word sizes
 var_dump(gmp_import('a', -1));
 var_dump(gmp_import('a', 0));
@@ -116,6 +120,12 @@ bool(true)
 
 Export:
 bool(true)
+
+Warning: gmp_import() expects at least 1 parameter, 0 given in %s on line %d
+NULL
+
+Warning: gmp_export() expects at least 1 parameter, 0 given in %s on line %d
+NULL
 
 Warning: gmp_import(): Word size must be positive, -1 given in %s on line %d
 bool(false)
