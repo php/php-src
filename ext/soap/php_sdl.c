@@ -975,7 +975,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 
 					input = get_node_ex(portTypeOperation->children, "input", WSDL_NAMESPACE);
 					if (input != NULL) {
-						xmlAttrPtr message, name;
+						xmlAttrPtr message;
 
 						message = get_attribute(input->properties, "message");
 						if (message == NULL) {
@@ -983,8 +983,8 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 						}
 						function->requestParameters = wsdl_message(&ctx, message->children->content);
 
-						name = get_attribute(input->properties, "name");
 /* FIXME
+						xmlAttrPtr name = get_attribute(input->properties, "name");
 						if (name != NULL) {
 							function->requestName = estrdup(name->children->content);
 						} else {
@@ -1004,7 +1004,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 
 					output = get_node_ex(portTypeOperation->children, "output", WSDL_NAMESPACE);
 					if (output != NULL) {
-						xmlAttrPtr message, name;
+						xmlAttrPtr message;
 
 						message = get_attribute(output->properties, "message");
 						if (message == NULL) {
@@ -1012,8 +1012,8 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 						}
 						function->responseParameters = wsdl_message(&ctx, message->children->content);
 
-						name = get_attribute(output->properties, "name");
 /* FIXME
+						xmlAttrPtr name = get_attribute(output->properties, "name");
 						if (name != NULL) {
 							function->responseName = estrdup(name->children->content);
 						} else if (input == NULL) {

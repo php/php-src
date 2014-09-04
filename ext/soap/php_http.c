@@ -930,7 +930,7 @@ try_again:
 	*/
 	cookie_itt = strstr(http_headers->val, "Set-Cookie: ");
 	while (cookie_itt) {
-		char *end_pos, *cookie;
+		char *cookie;
 		char *eqpos, *sempos;
 		zval *cookies;
 
@@ -940,7 +940,6 @@ try_again:
 			cookies = zend_hash_str_update(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1, &tmp_cookies);
 		}
 
-		end_pos = strstr(cookie_itt,"\r\n");
 		cookie = get_http_header_value(cookie_itt,"Set-Cookie: ");
 
 		eqpos = strstr(cookie, "=");

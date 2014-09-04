@@ -1717,7 +1717,6 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 		}
 		case XSD_CONTENT_ANY: {
 			zval *data;
-			xmlNodePtr property;
 			encodePtr enc;
 			zval rv;
 
@@ -1731,10 +1730,10 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 					zval *val;
 
 					ZEND_HASH_FOREACH_VAL(ht, val) {
-						property = master_to_xml(enc, val, style, node TSRMLS_CC);
+						master_to_xml(enc, val, style, node TSRMLS_CC);
 					} ZEND_HASH_FOREACH_END();
 				} else {
-					property = master_to_xml(enc, data, style, node TSRMLS_CC);
+					master_to_xml(enc, data, style, node TSRMLS_CC);
 				}
 				return 1;
 			} else if (model->min_occurs == 0) {
@@ -2485,14 +2484,12 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data TSRMLS
 	int* dims = NULL;
 	int* pos = NULL;
 	xmlAttrPtr attr;
-	sdlPtr sdl;
 	sdlAttributePtr arrayType;
 	sdlExtraAttributePtr ext;
 	sdlTypePtr elementType;
 
 	ZVAL_NULL(ret);
 	FIND_XML_NULL(data, ret);
-	sdl = SOAP_GLOBAL(sdl);
 
 	if (data &&
 	    (attr = get_attribute(data->properties,"arrayType")) &&
