@@ -64,7 +64,8 @@ Type specifiers
  O  - object of specific type given by class entry (zval*, zend_class_entry)
  p  - valid path (string without null bytes in the middle) and its length (char*, int)
  r  - resource (zval*)
- s  - string (with possible null bytes) and its length (char*, int)
+ s  - string (with possible null bytes) and its length (char*, size_t)
+ S  - string (zend_string*)
  z  - the actual zval (zval*)
  Z  - the actual zval (zval**)
  *  - variable arguments list (0 or more)
@@ -97,7 +98,7 @@ it's "l", not "i" btw).
 Both mistakes cause memory corruptions and segfaults on 64bit OSes:
 1)
   char *str;
-  long str_len; /* XXX THIS IS WRONG!! Use int instead. */
+  long str_len; /* XXX THIS IS WRONG!! Use size_t instead. */
   zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len)
 
 2)
@@ -115,7 +116,7 @@ Examples
 /* Gets a long, a string and its length, and a zval */
 long l;
 char *s;
-int s_len;
+size_t s_len;
 zval *param;
 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsz",
                           &l, &s, &s_len, &param) == FAILURE) {
@@ -154,13 +155,13 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/!",
 long l1, l2, l3;
 char *s;
 /* 
- * The function expects a pointer to a integer in this case, not a long
+ * The function expects a pointer to a size_t (unsigned long) in this case, not a long
  * or any other type.  If you specify a type which is larger
- * than a 'int', the upper bits might not be initialized
+ * than a 'size_t', the upper bits might not be initialized
  * properly, leading to random crashes on platforms like
- * Tru64 or Linux/Alpha.
+ * Tru64 or Linux/Alpha/Darwin.
  */
-int length;
+size_t length;
 
 if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
                              "lll", &l1, &l2, &l3) == SUCCESS) {
@@ -197,7 +198,7 @@ if (varargs) {
 /* Function that accepts a string, followed by varargs (1 or more) */
 
 char *str;
-int str_len;
+size_t str_len;
 int i, num_varargs;
 zval ***varargs = NULL;
 
