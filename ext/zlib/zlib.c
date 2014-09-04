@@ -1006,7 +1006,7 @@ static PHP_MINFO_FUNCTION(zlib)
 /* }}} */
 
 /* {{{ ZEND_MODULE_GLOBALS_CTOR */
-static ZEND_MODULE_GLOBALS_CTOR_D(zlib)
+static PHP_GINIT_FUNCTION(zlib)
 {
 	zlib_globals->ob_gzhandler = NULL;
     zlib_globals->handler_registered = 0;
@@ -1025,7 +1025,7 @@ zend_module_entry php_zlib_module_entry = {
 	PHP_MINFO(zlib),
 	"2.0",
 	PHP_MODULE_GLOBALS(zlib),
-	ZEND_MODULE_GLOBALS_CTOR_N(zlib),
+	PHP_GINIT(zlib),
 	NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
