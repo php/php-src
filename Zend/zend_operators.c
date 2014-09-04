@@ -135,52 +135,6 @@ ZEND_API zend_long zend_atol(const char *str, int str_len) /* {{{ */
 }
 /* }}} */
 
-ZEND_API double zend_string_to_double(const char *number, uint32_t length) /* {{{ */
-{
-	double divisor = 10.0;
-	double result = 0.0;
-	double exponent;
-	const char *end = number+length;
-	const char *digit = number;
-
-	if (!length) {
-		return result;
-	}
-
-	while (digit < end) {
-		if ((*digit <= '9' && *digit >= '0')) {
-			result *= 10;
-			result += *digit - '0';
-		} else if (*digit == '.') {
-			digit++;
-			break;
-		} else if (toupper(*digit) == 'E') {
-			exponent = (double) atoi(digit+1);
-			result *= pow(10.0, exponent);
-			return result;
-		} else {
-			return result;
-		}
-		digit++;
-	}
-
-	while (digit < end) {
-		if ((*digit <= '9' && *digit >= '0')) {
-			result += (*digit - '0') / divisor;
-			divisor *= 10;
-		} else if (toupper(*digit) == 'E') {
-			exponent = (double) atoi(digit+1);
-			result *= pow(10.0, exponent);
-			return result;
-		} else {
-			return result;
-		}
-		digit++;
-	}
-	return result;
-}
-/* }}} */
-
 ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 {
 try_again:
