@@ -186,9 +186,9 @@ static zend_always_inline void zend_vm_stack_destroy(TSRMLS_D)
 	}
 }
 
-static zend_always_inline void zend_vm_stack_extend(int count TSRMLS_DC)
+static zend_always_inline void zend_vm_stack_extend(uint32_t count TSRMLS_DC)
 {
-	int size = count * ZEND_MM_ALIGNED_SIZE(sizeof(zval));
+	uint32_t size = count * ZEND_MM_ALIGNED_SIZE(sizeof(zval));
 	zend_vm_stack p = zend_vm_stack_new_page(
 		(size >= (ZEND_VM_STACK_PAGE_SIZE - ZEND_VM_STACK_HEADER_SLOT) * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) ? 
 		(size + ((ZEND_VM_STACK_HEADER_SLOT + ZEND_VM_STACK_PAGE_SIZE) * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) - 1) & 
@@ -200,7 +200,7 @@ static zend_always_inline void zend_vm_stack_extend(int count TSRMLS_DC)
 
 static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_function *func, uint32_t num_args, zend_uchar flags, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
 {
-	int used_stack = ZEND_CALL_FRAME_SLOT + num_args;
+	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args;
 	zend_execute_data *call;
 	
 	if (ZEND_USER_CODE(func->type)) {
