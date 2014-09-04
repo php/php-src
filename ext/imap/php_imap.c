@@ -1145,7 +1145,7 @@ PHP_MINFO_FUNCTION(imap)
 static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *mailbox, *user, *passwd;
-	int mailbox_len, user_len, passwd_len;
+	size_t mailbox_len, user_len, passwd_len;
 	long retries = 0, flags = NIL, cl_flags = NIL;
 	MAILSTREAM *imap_stream;
 	pils *imap_le_struct;
@@ -1266,7 +1266,7 @@ PHP_FUNCTION(imap_reopen)
 {
 	zval *streamind;
 	char *mailbox;
-	int mailbox_len;
+	size_t mailbox_len;
 	long options = 0, retries = 0;
 	pils *imap_le_struct;
 	long flags=NIL;
@@ -1312,7 +1312,7 @@ PHP_FUNCTION(imap_append)
 {
 	zval *streamind;
 	char *folder, *message, *internal_date = NULL, *flags = NULL;
-	int folder_len, message_len, internal_date_len = 0, flags_len = 0;
+	size_t folder_len, message_len, internal_date_len = 0, flags_len = 0;
 	pils *imap_le_struct;
 	STRING st;
 	zend_string* regex;
@@ -1415,7 +1415,7 @@ PHP_FUNCTION(imap_get_quota)
 {
 	zval *streamind;
 	char *qroot;
-	int qroot_len;
+	size_t qroot_len;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &streamind, &qroot, &qroot_len) == FAILURE) {
@@ -1443,7 +1443,7 @@ PHP_FUNCTION(imap_get_quotaroot)
 {
 	zval *streamind;
 	char *mbox;
-	int mbox_len;
+	size_t mbox_len;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &streamind, &mbox, &mbox_len) == FAILURE) {
@@ -1471,7 +1471,7 @@ PHP_FUNCTION(imap_set_quota)
 {
 	zval *streamind;
 	char *qroot;
-	int qroot_len;
+	size_t qroot_len;
 	long mailbox_size;
 	pils *imap_le_struct;
 	STRINGLIST	limits;
@@ -1496,7 +1496,7 @@ PHP_FUNCTION(imap_setacl)
 {
 	zval *streamind;
 	char *mailbox, *id, *rights;
-	int mailbox_len, id_len, rights_len;
+	size_t mailbox_len, id_len, rights_len;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsss", &streamind, &mailbox, &mailbox_len, &id, &id_len, &rights, &rights_len) == FAILURE) {
@@ -1515,7 +1515,7 @@ PHP_FUNCTION(imap_getacl)
 {
 	zval *streamind;
 	char *mailbox;
-	int mailbox_len;
+	size_t mailbox_len;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &streamind, &mailbox, &mailbox_len) == FAILURE) {
@@ -1725,7 +1725,8 @@ PHP_FUNCTION(imap_mail_copy)
 	zval *streamind;
 	long options = 0;
 	char *seq, *folder;
-	int seq_len, folder_len, argc = ZEND_NUM_ARGS();
+	size_t seq_len, folder_len;
+	int argc = ZEND_NUM_ARGS();
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "rss|l", &streamind, &seq, &seq_len, &folder, &folder_len, &options) == FAILURE) {
@@ -1748,7 +1749,7 @@ PHP_FUNCTION(imap_mail_move)
 {
 	zval *streamind;
 	char *seq, *folder;
-	int seq_len, folder_len;
+	size_t seq_len, folder_len;
 	long options = 0;
 	pils *imap_le_struct;
 	int argc = ZEND_NUM_ARGS();
@@ -1773,7 +1774,7 @@ PHP_FUNCTION(imap_createmailbox)
 {
 	zval *streamind;
 	char *folder;
-	int folder_len;
+	size_t folder_len;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &streamind, &folder, &folder_len) == FAILURE) {
@@ -1796,7 +1797,7 @@ PHP_FUNCTION(imap_renamemailbox)
 {
 	zval *streamind;
 	char *old_mailbox, *new_mailbox;
-	int old_mailbox_len, new_mailbox_len;
+	size_t old_mailbox_len, new_mailbox_len;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss", &streamind, &old_mailbox, &old_mailbox_len, &new_mailbox, &new_mailbox_len) == FAILURE) {
@@ -1819,7 +1820,7 @@ PHP_FUNCTION(imap_deletemailbox)
 {
 	zval *streamind;
 	char *folder;
-	int folder_len;
+	size_t folder_len;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &streamind, &folder, &folder_len) == FAILURE) {
@@ -1842,7 +1843,7 @@ PHP_FUNCTION(imap_list)
 {
 	zval *streamind;
 	char *ref, *pat;
-	int ref_len, pat_len;
+	size_t ref_len, pat_len;
 	pils *imap_le_struct;
 	STRINGLIST *cur=NIL;
 
@@ -1880,7 +1881,7 @@ PHP_FUNCTION(imap_list_full)
 {
 	zval *streamind, mboxob;
 	char *ref, *pat;
-	int ref_len, pat_len;
+	size_t ref_len, pat_len;
 	pils *imap_le_struct;
 	FOBJECTLIST *cur=NIL;
 	char *delim=NIL;
@@ -1929,7 +1930,7 @@ PHP_FUNCTION(imap_listscan)
 {
 	zval *streamind;
 	char *ref, *pat, *content;
-	int ref_len, pat_len, content_len;
+	size_t ref_len, pat_len, content_len;
 	pils *imap_le_struct;
 	STRINGLIST *cur=NIL;
 
@@ -2039,7 +2040,8 @@ PHP_FUNCTION(imap_headerinfo)
 {
 	zval *streamind;
 	char *defaulthost = NULL;
-	int defaulthost_len = 0, argc = ZEND_NUM_ARGS();
+	size_t defaulthost_len = 0;
+	int argc = ZEND_NUM_ARGS();
 	long msgno, fromlength, subjectlength;
 	pils *imap_le_struct;
 	MESSAGECACHE *cache;
@@ -2122,7 +2124,8 @@ PHP_FUNCTION(imap_rfc822_parse_headers)
 {
 	char *headers, *defaulthost = NULL;
 	ENVELOPE *en;
-	int headers_len, defaulthost_len = 0, argc = ZEND_NUM_ARGS();
+	size_t headers_len, defaulthost_len = 0;
+	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|s", &headers, &headers_len, &defaulthost, &defaulthost_len) == FAILURE) {
 		return;
@@ -2148,7 +2151,7 @@ PHP_FUNCTION(imap_lsub)
 {
 	zval *streamind;
 	char *ref, *pat;
-	int ref_len, pat_len;
+	size_t ref_len, pat_len;
 	pils *imap_le_struct;
 	STRINGLIST *cur=NIL;
 
@@ -2185,7 +2188,7 @@ PHP_FUNCTION(imap_lsub_full)
 {
 	zval *streamind, mboxob;
 	char *ref, *pat;
-	int ref_len, pat_len;
+	size_t ref_len, pat_len;
 	pils *imap_le_struct;
 	FOBJECTLIST *cur=NIL;
 	char *delim=NIL;
@@ -2234,7 +2237,7 @@ PHP_FUNCTION(imap_subscribe)
 {
 	zval *streamind;
 	char *folder;
-	int folder_len;
+	size_t folder_len;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &streamind, &folder, &folder_len) == FAILURE) {
@@ -2257,7 +2260,7 @@ PHP_FUNCTION(imap_unsubscribe)
 {
 	zval *streamind;
 	char *folder;
-	int folder_len;
+	size_t folder_len;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &streamind, &folder, &folder_len) == FAILURE) {
@@ -2330,7 +2333,7 @@ PHP_FUNCTION(imap_fetchbody)
 	long msgno, flags = 0;
 	pils *imap_le_struct;
 	char *body, *sec;
-	int sec_len;
+	size_t sec_len;
 	unsigned long len;
 	int argc = ZEND_NUM_ARGS();
 
@@ -2370,7 +2373,7 @@ PHP_FUNCTION(imap_fetchmime)
 	long msgno, flags = 0;
 	pils *imap_le_struct;
 	char *body, *sec;
-	int sec_len;
+	size_t sec_len;
 	unsigned long len;
 	int argc = ZEND_NUM_ARGS();
 
@@ -2409,7 +2412,8 @@ PHP_FUNCTION(imap_savebody)
 	pils *imap_ptr = NULL;
 	php_stream *writer = NULL;
 	char *section = "";
-	int section_len = 0, close_stream = 1;
+	size_t section_len = 0;
+	int close_stream = 1;
 	long msgno, flags = 0;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzl|sl", &stream, &out, &msgno, &section, &section_len, &flags)) {
@@ -2459,7 +2463,7 @@ PHP_FUNCTION(imap_savebody)
 PHP_FUNCTION(imap_base64)
 {
 	char *text, *decode;
-	int text_len;
+	size_t text_len;
 	unsigned long newlength;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &text, &text_len) == FAILURE) {
@@ -2482,7 +2486,7 @@ PHP_FUNCTION(imap_base64)
 PHP_FUNCTION(imap_qprint)
 {
 	char *text, *decode;
-	int text_len;
+	size_t text_len;
 	unsigned long newlength;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &text, &text_len) == FAILURE) {
@@ -2505,7 +2509,7 @@ PHP_FUNCTION(imap_qprint)
 PHP_FUNCTION(imap_8bit)
 {
 	char *text, *decode;
-	int text_len;
+	size_t text_len;
 	unsigned long newlength;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &text, &text_len) == FAILURE) {
@@ -2528,7 +2532,7 @@ PHP_FUNCTION(imap_8bit)
 PHP_FUNCTION(imap_binary)
 {
 	char *text, *decode;
-	int text_len;
+	size_t text_len;
 	unsigned long newlength;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &text, &text_len) == FAILURE) {
@@ -2598,7 +2602,7 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 PHP_FUNCTION(imap_rfc822_write_address)
 {
 	char *mailbox, *host, *personal;
-	int mailbox_len, host_len, personal_len;
+	size_t mailbox_len, host_len, personal_len;
 	ADDRESS *addr;
 	zend_string *string;
 
@@ -2639,7 +2643,7 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 {
 	zval tovals;
 	char *str, *defaulthost, *str_copy;
-	int str_len, defaulthost_len;
+	size_t str_len, defaulthost_len;
 	ADDRESS *addresstmp;
 	ENVELOPE *env;
 
@@ -2684,7 +2688,7 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 PHP_FUNCTION(imap_utf8)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 	SIZEDTEXT src, dest;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
@@ -2742,7 +2746,7 @@ PHP_FUNCTION(imap_utf7_decode)
 	const unsigned char *in, *inp, *endp;
 	unsigned char *out, *outp;
 	unsigned char c;
-	int arg_len, inlen, outlen;
+	size_t arg_len, inlen, outlen;
 	enum {
 		ST_NORMAL,	/* printable text */
 		ST_DECODE0,	/* encoded text rotation... */
@@ -2882,7 +2886,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	zend_string *out;
 	unsigned char *outp;
 	unsigned char c;
-	int arg_len, inlen, outlen;
+	size_t arg_len, inlen, outlen;
 	enum {
 		ST_NORMAL,	/* printable text */
 		ST_ENCODE0,	/* encoded text rotation... */
@@ -2992,7 +2996,7 @@ PHP_FUNCTION(imap_utf7_encode)
 static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *in;
-	int in_len;
+	size_t in_len;
 	unsigned char *out;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in, &in_len) == FAILURE) {
@@ -3040,7 +3044,7 @@ PHP_FUNCTION(imap_setflag_full)
 {
 	zval *streamind;
 	char *sequence, *flag;
-	int sequence_len, flag_len;
+	size_t sequence_len, flag_len;
 	long flags = 0;
 	pils *imap_le_struct;
 
@@ -3061,7 +3065,7 @@ PHP_FUNCTION(imap_clearflag_full)
 {
 	zval *streamind;
 	char *sequence, *flag;
-	int sequence_len, flag_len;
+	size_t sequence_len, flag_len;
 	long flags = 0;
 	pils *imap_le_struct;
 	int argc = ZEND_NUM_ARGS();
@@ -3083,7 +3087,7 @@ PHP_FUNCTION(imap_sort)
 {
 	zval *streamind;
 	char *criteria = NULL, *charset = NULL;
-	int criteria_len, charset_len;
+	size_t criteria_len, charset_len;
 	long pgm, rev, flags = 0;
 	pils *imap_le_struct;
 	unsigned long *slst, *sl;
@@ -3221,7 +3225,7 @@ PHP_FUNCTION(imap_status)
 {
 	zval *streamind;
 	char *mbx;
-	int mbx_len;
+	size_t mbx_len;
 	long flags;
 	pils *imap_le_struct;
 
@@ -3263,7 +3267,7 @@ PHP_FUNCTION(imap_bodystruct)
 	zval *streamind;
 	long msg;
 	char *section;
-	int section_len;
+	size_t section_len;
 	pils *imap_le_struct;
 	zval parametres, param, dparametres, dparam;
 	PARAMETER *par, *dpar;
@@ -3374,7 +3378,7 @@ PHP_FUNCTION(imap_fetch_overview)
 {
 	zval *streamind;
 	char *sequence;
-	int sequence_len;
+	size_t sequence_len;
 	pils *imap_le_struct;
 	zval myoverview;
 	zend_string *address;
@@ -4027,7 +4031,8 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 PHP_FUNCTION(imap_mail)
 {
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
-	int to_len, message_len, headers_len, subject_len, cc_len, bcc_len, rpath_len, argc = ZEND_NUM_ARGS();
+	size_t to_len, message_len, headers_len, subject_len, cc_len, bcc_len, rpath_len;
+	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "sss|ssss", &to, &to_len, &subject, &subject_len, &message, &message_len,
 		&headers, &headers_len, &cc, &cc_len, &bcc, &bcc_len, &rpath, &rpath_len) == FAILURE) {
@@ -4067,7 +4072,7 @@ PHP_FUNCTION(imap_search)
 {
 	zval *streamind;
 	char *criteria, *charset = NULL;
-	int criteria_len, charset_len = 0;
+	size_t criteria_len, charset_len = 0;
 	long flags = SE_FREE;
 	pils *imap_le_struct;
 	char *search_criteria;
@@ -4195,7 +4200,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 	/* Author: Ted Parnefors <ted@mtv.se> */
 	zval myobject;
 	char *str, *string, *charset, encoding, *text, *decode;
-	int str_len;
+	size_t str_len;
 	long charset_token, encoding_token, end_token, end, offset=0, i;
 	unsigned long newlength;
 
