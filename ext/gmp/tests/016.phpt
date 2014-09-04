@@ -19,6 +19,9 @@ var_dump(gmp_strval(gmp_powm($n,$e,1000)));
 $m = gmp_init(900);
 var_dump(gmp_strval(gmp_powm($n,$e,$m)));
 
+var_dump(gmp_powm(5, 11, 0));
+var_dump(gmp_powm(5, "11", gmp_init(0)));
+
 var_dump(gmp_powm(array(),$e,$m));
 var_dump(gmp_powm($n,array(),$m));
 var_dump(gmp_powm($n,$e,array()));
@@ -45,6 +48,12 @@ string(3) "533"
 string(3) "331"
 string(3) "171"
 string(3) "371"
+
+Warning: gmp_powm(): Modulus may not be zero in %s on line %d
+bool(false)
+
+Warning: gmp_powm(): Modulus may not be zero in %s on line %d
+bool(false)
 
 Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
