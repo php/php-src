@@ -79,7 +79,7 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
 static char php_last_char = '\0';
 static FILE *pager_pipe = NULL;
 
-static size_t readline_shell_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+static size_t readline_shell_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 	if (CLIR_G(prompt_str)) {
 		smart_str_appendl(CLIR_G(prompt_str), str, str_length);
@@ -97,7 +97,7 @@ static size_t readline_shell_write(const char *str, uint str_length TSRMLS_DC) /
 }
 /* }}} */
 
-static int readline_shell_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+static size_t readline_shell_ub_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 	/* We just store the last char here and then pass back to the
 	   caller (sapi_cli_single_write in sapi/cli) which will actually
