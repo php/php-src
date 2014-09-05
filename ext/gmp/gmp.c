@@ -1451,10 +1451,9 @@ ZEND_FUNCTION(gmp_powm)
 	FETCH_GMP_ZVAL_DEP_DEP(gmpnum_mod, mod_arg, temp_mod, temp_exp, temp_base);
 
 	if (!mpz_cmp_ui(gmpnum_mod, 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Modulus may not be zero");
 		FREE_GMP_TEMP(temp_base);
-		if (use_ui) {
-			FREE_GMP_TEMP(temp_exp);
-		}
+		FREE_GMP_TEMP(temp_exp);
 		FREE_GMP_TEMP(temp_mod);
 		RETURN_FALSE;
 	}

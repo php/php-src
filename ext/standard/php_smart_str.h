@@ -158,9 +158,11 @@ static inline char *smart_str_print_unsigned(char *buf, zend_long num) {
 #define smart_str_append_off_t_ex(dest, num, type) \
 	smart_str_append_generic_ex((dest), (num), (type), zend_off_t, _signed)
 
-#define smart_str_append_ex(dest, src, what) 						\
-	smart_str_appendl_ex((dest), ((smart_str *)(src))->s->val, 		\
-		((smart_str *)(src))->s->len, (what));
+#define smart_str_append_ex(dest, src, what) do {							\
+	if ((src)->s && (src)->s->len) {										\
+		smart_str_appendl_ex((dest), (src)->s->val, (src)->s->len, (what));	\
+	}																		\
+} while(0)
 
 #define smart_str_setl(dest, src, nlen) do {						\
 	smart_str_free((dest));											\

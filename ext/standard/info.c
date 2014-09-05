@@ -1187,7 +1187,7 @@ PHP_FUNCTION(phpinfo)
 PHP_FUNCTION(phpversion)
 {
 	char *ext_name = NULL;
-	int ext_name_len = 0;
+	size_t ext_name_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext_name, &ext_name_len) == FAILURE) {
 		return;
