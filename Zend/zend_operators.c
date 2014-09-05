@@ -2023,7 +2023,7 @@ static void increment_string(zval *str) /* {{{ */
 	}
 	s = Z_STRVAL_P(str);
 
-	while (pos >= 0) {
+	do {
 		ch = s[pos];
 		if (ch >= 'a' && ch <= 'z') {
 			if (ch == 'z') {
@@ -2059,8 +2059,7 @@ static void increment_string(zval *str) /* {{{ */
 		if (carry == 0) {
 			break;
 		}
-		pos--;
-	}
+	} while (pos-- > 0);
 
 	if (carry) {
 		t = zend_string_alloc(Z_STRLEN_P(str)+1, 0);
