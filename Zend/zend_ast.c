@@ -348,7 +348,7 @@ ZEND_API void zend_ast_addref(zend_ast *ast) /* {{{ */
 	if (ast == NULL) {
 		return;
 	} else if (ast->kind == ZEND_AST_ZVAL) {
-		Z_ADDREF_P(zend_ast_get_zval(ast));
+		Z_TRY_ADDREF_P(zend_ast_get_zval(ast));
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		uint32_t i;
