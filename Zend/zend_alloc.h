@@ -220,8 +220,6 @@ ZEND_API int is_zend_mm(TSRMLS_D);
 ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC);
 ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC);
 
-END_EXTERN_C()
-
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\
 	(ht) = (HashTable *) emalloc(sizeof(HashTable))
@@ -261,6 +259,8 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t),
                                           void  (*_free)(void*),
                                           void* (*_realloc)(void*, size_t));
+
+END_EXTERN_C()
 
 #endif
 
