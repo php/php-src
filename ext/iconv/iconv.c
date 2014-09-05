@@ -2407,7 +2407,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 			}
 		}
 		enc_str_len_tmp -= next_pos - enc_str_tmp;
-		enc_str_tmp = next_pos;
+		enc_str_tmp = (char *)next_pos;
 
 		smart_str_free(&decoded_header);
 	}

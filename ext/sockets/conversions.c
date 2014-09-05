@@ -310,7 +310,7 @@ static zend_long from_zval_integer_common(const zval *arr_value, ser_context *ct
 
 	ZVAL_NULL(&lzval);
 	if (Z_TYPE_P(arr_value) != IS_LONG) {
-		ZVAL_COPY(&lzval, arr_value);
+		ZVAL_COPY(&lzval, (zval *)arr_value);
 		arr_value = &lzval;
 	}
 
@@ -545,7 +545,7 @@ static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_co
 
 	ZVAL_NULL(&lzval);
 	if (Z_TYPE_P(zaddr_str) != IS_STRING) {
-		ZVAL_COPY(&lzval, zaddr_str);
+		ZVAL_COPY(&lzval, (zval *)zaddr_str);
 		convert_to_string(&lzval);
 		zaddr_str = &lzval;
 	}
@@ -602,7 +602,7 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 
 	ZVAL_NULL(&lzval);
 	if (Z_TYPE_P(zaddr_str) != IS_STRING) {
-		ZVAL_COPY(&lzval, zaddr_str);
+		ZVAL_COPY(&lzval, (zval *)zaddr_str);
 		convert_to_string(&lzval);
 		zaddr_str = &lzval;
 	}
@@ -661,7 +661,7 @@ static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_
 
 	ZVAL_NULL(&lzval);
 	if (Z_TYPE_P(path) != IS_STRING) {
-		ZVAL_COPY(&lzval, path);
+		ZVAL_COPY(&lzval, (zval *)path);
 		convert_to_string(&lzval);
 		path = &lzval;
 	}
@@ -1266,7 +1266,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 		}
 	} else {
 		if (Z_TYPE_P(zv) != IS_STRING) {
-			ZVAL_COPY_VALUE(&lzval, zv);
+			ZVAL_COPY_VALUE(&lzval, (zval *)zv);
 			zval_copy_ctor(&lzval);
 			convert_to_string(&lzval);
 			zv = &lzval;

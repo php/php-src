@@ -2534,11 +2534,11 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 								"The usage of the @filename API for file uploading is deprecated. Please use the CURLFile class instead");
 
 						name = estrndup(postval, Z_STRLEN_P(current));
-						if ((type = php_memnstr(name, ";type=", sizeof(";type=") - 1,
+						if ((type = (char *)php_memnstr(name, ";type=", sizeof(";type=") - 1,
 										name + Z_STRLEN_P(current)))) {
 							*type = '\0';
 						}
-						if ((filename = php_memnstr(name, ";filename=", sizeof(";filename=") - 1,
+						if ((filename = (char *)php_memnstr(name, ";filename=", sizeof(";filename=") - 1,
 										name + Z_STRLEN_P(current)))) {
 							*filename = '\0';
 						}
