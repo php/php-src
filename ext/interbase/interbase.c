@@ -883,7 +883,8 @@ int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db T
 static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* {{{ */
 {
 	char *c, hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
-	int i, len[] = { 0, 0, 0, 0, 0 };
+	size_t len[] = { 0, 0, 0, 0, 0 };
+	int i;
 	long largs[] = { 0, 0, 0 };
 	PHP_MD5_CTX hash_context;
 	zend_resource new_index_ptr, *le;

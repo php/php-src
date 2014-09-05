@@ -208,7 +208,8 @@ PHP_FUNCTION(ibase_delete_user)
    Connect to the service manager */
 PHP_FUNCTION(ibase_service_attach)
 {
-	size_t hlen, ulen, plen, spb_len;
+	size_t hlen, ulen, plen;
+	int spb_len;
 	ibase_service *svm;
 	char buf[128], *host, *user, *pass, *loc;
 	isc_svc_handle handle = NULL;
@@ -425,7 +426,8 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 	 */
 	zval *res;
 	char *db, *bk, buf[200];
-	size_t dblen, bklen, spb_len;
+	size_t dblen, bklen;
+	int spb_len;
 	long opts = 0;
 	zend_bool verbose = 0;
 	ibase_service *svm;
@@ -489,7 +491,8 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 {
 	zval *res;
 	char buf[128], *db;
-	int dblen, spb_len;
+	size_t dblen;
+	int spb_len;
 	long action, argument = 0;
 	ibase_service *svm;
 
