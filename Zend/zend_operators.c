@@ -1529,29 +1529,28 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 		op2 = &op2_copy;
 	}
 
-	if (result==op1 && !IS_INTERNED(Z_STR_P(op1))) {	/* special case, perform operations on result */
+	{
 		size_t op1_len = Z_STRLEN_P(op1);
-		size_t op2_len = Z_STRLEN_P(op2);
-		size_t res_len = op1_len + op2_len;
+		size_t result_len = op1_len + Z_STRLEN_P(op2);
+		zend_string *result_str;
 
-		if (Z_STRLEN_P(result) < 0 || (size_t) (op1_len + op2_len) < 0) {
-			ZVAL_EMPTY_STRING(result);
-			zend_error(E_ERROR, "String size overflow");
+		if (op1_len > SIZE_MAX - Z_STRLEN_P(op2)) {
+			zend_error_noreturn(E_ERROR, "String size overflow");
 		}
 
-		Z_STR_P(result) = zend_string_realloc(Z_STR_P(result), res_len, 0 );
-		Z_TYPE_INFO_P(result) = IS_STRING_EX;
-		memcpy(Z_STRVAL_P(result) + op1_len, Z_STRVAL_P(op2), op2_len);
-		Z_STRVAL_P(result)[res_len]=0;
-	} else {
-		size_t length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
-		zend_string *buf = zend_string_alloc(length, 0);
+		if (result == op1 && !IS_INTERNED(Z_STR_P(op1))) {
+			/* special case, perform operations on result */
+			result_str = zend_string_realloc(Z_STR_P(result), result_len, 0);
+		} else {
+			result_str = zend_string_alloc(result_len, 0);
+			memcpy(result_str->val, Z_STRVAL_P(op1), op1_len);
+		}
 
-		memcpy(buf->val, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
-		memcpy(buf->val + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
-		buf->val[length] = 0;
-		ZVAL_NEW_STR(result, buf);
+		memcpy(result_str->val + op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+		result_str->val[result_len] = '\0';
+		ZVAL_NEW_STR(result, result_str);
 	}
+
 	if (UNEXPECTED(use_copy1)) {
 		zval_dtor(op1);
 	}
