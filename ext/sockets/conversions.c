@@ -540,26 +540,20 @@ static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_co
 {
 	int					res;
 	struct sockaddr_in	saddr = {0};
-	zval				lzval;
+	zend_string			*addr_str;
 	TSRMLS_FETCH();
 
-	ZVAL_NULL(&lzval);
-	if (Z_TYPE_P(zaddr_str) != IS_STRING) {
-		ZVAL_COPY(&lzval, (zval *)zaddr_str);
-		convert_to_string(&lzval);
-		zaddr_str = &lzval;
-	}
-
-	res = php_set_inet_addr(&saddr, Z_STRVAL_P(zaddr_str), ctx->sock TSRMLS_CC);
+	addr_str = zval_get_string((zval *) zaddr_str);
+	res = php_set_inet_addr(&saddr, addr_str->val, ctx->sock TSRMLS_CC);
 	if (res) {
 		memcpy(inaddr, &saddr.sin_addr, sizeof saddr.sin_addr);
 	} else {
 		/* error already emitted, but let's emit another more relevant */
 		do_from_zval_err(ctx, "could not resolve address '%s' to get an AF_INET "
-				"address", Z_STRVAL_P(zaddr_str));
+				"address", addr_str->val);
 	}
 
-	zval_dtor(&lzval);
+	zend_string_release(addr_str);
 }
 static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 {
@@ -597,18 +591,11 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 {
 	int					res;
 	struct sockaddr_in6	saddr6 = {0};
-	zval				lzval;
+	zend_string			*addr_str;
 	TSRMLS_FETCH();
 
-	ZVAL_NULL(&lzval);
-	if (Z_TYPE_P(zaddr_str) != IS_STRING) {
-		ZVAL_COPY(&lzval, (zval *)zaddr_str);
-		convert_to_string(&lzval);
-		zaddr_str = &lzval;
-	}
-
-	res = php_set_inet6_addr(&saddr6,
-			Z_STRVAL_P(zaddr_str), ctx->sock TSRMLS_CC);
+	addr_str = zval_get_string((zval *) zaddr_str);
+	res = php_set_inet6_addr(&saddr6, addr_str->val, ctx->sock TSRMLS_CC);
 	if (res) {
 		memcpy(addr6, &saddr6.sin6_addr, sizeof saddr6.sin6_addr);
 	} else {
@@ -617,7 +604,7 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 				"address", Z_STRVAL_P(zaddr_str));
 	}
 
-	zval_dtor(&lzval);
+	zend_string_release(addr_str);
 }
 static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 {
@@ -656,33 +643,29 @@ static void to_zval_read_sockaddr_in6(const char *data, zval *zv, res_context *c
 #endif /* HAVE_IPV6 */
 static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_context *ctx)
 {
-	zval				lzval;
+	zend_string			*path_str;
 	struct sockaddr_un	*saddr = (struct sockaddr_un*)sockaddr_un_c;
+	TSRMLS_FETCH();
 
-	ZVAL_NULL(&lzval);
-	if (Z_TYPE_P(path) != IS_STRING) {
-		ZVAL_COPY(&lzval, (zval *)path);
-		convert_to_string(&lzval);
-		path = &lzval;
-	}
+	path_str = zval_get_string((zval *) path);
 
 	/* code in this file relies on the path being nul terminated, even though
 	 * this is not required, at least on linux for abstract paths. It also
 	 * assumes that the path is not empty */
-	if (Z_STRLEN_P(path) == 0) {
+	if (path_str->len == 0) {
 		do_from_zval_err(ctx, "%s", "the path is cannot be empty");
 		return;
 	}
-	if (Z_STRLEN_P(path) >= sizeof(saddr->sun_path)) {
+	if (path_str->len >= sizeof(saddr->sun_path)) {
 		do_from_zval_err(ctx, "the path is too long, the maximum permitted "
 				"length is %ld", sizeof(saddr->sun_path) - 1);
 		return;
 	}
 
-	memcpy(&saddr->sun_path, Z_STRVAL_P(path), Z_STRLEN_P(path));
-	saddr->sun_path[Z_STRLEN_P(path)] = '\0';
+	memcpy(&saddr->sun_path, path_str->val, path_str->len);
+	saddr->sun_path[path_str->len] = '\0';
 
-	zval_dtor(&lzval);
+	zend_string_release(path_str);
 }
 static void to_zval_read_sun_path(const char *data, zval *zv, res_context *ctx) {
 	struct sockaddr_un	*saddr = (struct sockaddr_un*)data;
@@ -1252,10 +1235,7 @@ void to_zval_read_msghdr(const char *msghdr_c, zval *zv, res_context *ctx)
 /* CONVERSIONS for if_index */
 static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context *ctx)
 {
-	unsigned	ret = 0;
-	zval		lzval;
-
-	ZVAL_NULL(&lzval);
+	unsigned ret = 0;
 
 	if (Z_TYPE_P(zv) == IS_LONG) {
 		if (Z_LVAL_P(zv) < 0 || Z_LVAL_P(zv) > UINT_MAX) { /* allow 0 (unspecified interface) */
@@ -1265,34 +1245,30 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 			ret = (unsigned)Z_LVAL_P(zv);
 		}
 	} else {
-		if (Z_TYPE_P(zv) != IS_STRING) {
-			ZVAL_COPY_VALUE(&lzval, (zval *)zv);
-			zval_copy_ctor(&lzval);
-			convert_to_string(&lzval);
-			zv = &lzval;
-		}
+		zend_string *str;
+		TSRMLS_FETCH();
+		
+		str = zval_get_string((zval *) zv);
 
 #if HAVE_IF_NAMETOINDEX
-		ret = if_nametoindex(Z_STRVAL_P(zv));
+		ret = if_nametoindex(str->val);
 		if (ret == 0) {
-			do_from_zval_err(ctx, "no interface with name \"%s\" could be "
-					"found", Z_STRVAL_P(zv));
+			do_from_zval_err(ctx, "no interface with name \"%s\" could be found", str->val);
 		}
 #elif defined(SIOCGIFINDEX)
 		{
 			struct ifreq ifr;
-			if (strlcpy(ifr.ifr_name, Z_STRVAL_P(zv), sizeof(ifr.ifr_name))
+			if (strlcpy(ifr.ifr_name, str->val, sizeof(ifr.ifr_name))
 					>= sizeof(ifr.ifr_name)) {
-				do_from_zval_err(ctx, "the interface name \"%s\" is too large ",
-						Z_STRVAL_P(zv));
+				do_from_zval_err(ctx, "the interface name \"%s\" is too large ", str->val);
 			} else if (ioctl(ctx->sock->bsd_socket, SIOCGIFINDEX, &ifr) < 0) {
 				if (errno == ENODEV) {
 					do_from_zval_err(ctx, "no interface with name \"%s\" could be "
-							"found", Z_STRVAL_P(zv));
+							"found", str->val);
 				} else {
 					do_from_zval_err(ctx, "error fetching interface index for "
 							"interface with name \"%s\" (errno %d)",
-							Z_STRVAL_P(zv), errno);
+							str->val, errno);
 				}
 			} else {
 				ret = (unsigned)ifr.ifr_ifindex;
@@ -1303,13 +1279,13 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 				"this platform does not support looking up an interface by "
 				"name, an integer interface index must be supplied instead");
 #endif
+
+		zend_string_release(str);
 	}
 
 	if (!ctx->err.has_error) {
 		memcpy(uinteger, &ret, sizeof(ret));
 	}
-
-	zval_dtor(&lzval);
 }
 
 /* CONVERSIONS for struct in6_pktinfo */
