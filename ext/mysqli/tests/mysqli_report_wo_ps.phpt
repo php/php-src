@@ -97,15 +97,15 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d
+Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d
 
-Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
+Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_change_user(): (%d/%d): Access denied for user '%s'@'%s' (using password: %s) in %s on line %d
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
 
-Warning: mysqli_real_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
+Warning: mysqli_real_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
 [011] Access denied for user '%s'@'%s' (using password: YES)

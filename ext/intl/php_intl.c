@@ -445,7 +445,7 @@ ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_idarg_static, 0, 0, 1 )
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_from_date_time_zone, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, dateTimeZone, IntlDateTimeZone, 0 )
+	ZEND_ARG_OBJ_INFO( 0, dateTimeZone, DateTimeZone, 0 )
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_create_enumeration, 0, 0, 0 )

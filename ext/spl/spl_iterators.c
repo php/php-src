@@ -848,6 +848,8 @@ static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char
 				*object_ptr = zobj;
 				function_handler = Z_OBJ_HT_P(*object_ptr)->get_method(object_ptr, method, method_len, key TSRMLS_CC);
 			}
+		} else {
+			*object_ptr = zobj;
 		}
 	}
 	return function_handler;
@@ -1412,7 +1414,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			if (spl_cit_check_flags(flags) != SUCCESS) {
-				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
+				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER", 0 TSRMLS_CC);
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				return NULL;
 			}

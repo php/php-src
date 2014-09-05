@@ -1,14 +1,7 @@
 --TEST--
 CURL file uploading
 --SKIPIF--
-<?php
-if (!extension_loaded("curl")) {
-	exit("skip curl extension not loaded");
-}
-if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  {
-	exit("skip PHP_CURL_HTTP_REMOTE_SERVER env variable is not defined");
-}
-?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 
@@ -25,7 +18,8 @@ function testcurl($ch, $name, $mime = '', $postname = '')
 	var_dump(curl_exec($ch));
 }
 
-$host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+include 'server.inc';
+$host = curl_cli_server_start();
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "{$host}/get.php?test=file");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

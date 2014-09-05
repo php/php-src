@@ -661,17 +661,22 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 	char * thestr;
 	long gmadjust = 0;
 
-	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME) {
+	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME && ASN1_STRING_type(timestr) != V_ASN1_GENERALIZEDTIME) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "illegal ASN1 data type for timestamp");
 		return (time_t)-1;
 	}
 
-	if (ASN1_STRING_length(timestr) != strlen(ASN1_STRING_data(timestr))) {
+	if (ASN1_STRING_length(timestr) != strlen((char *)ASN1_STRING_data(timestr))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "illegal length in timestamp");
 		return (time_t)-1;
 	}
 
 	if (ASN1_STRING_length(timestr) < 13) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to parse time string %s correctly", timestr->data);
+		return (time_t)-1;
+	}
+
+	if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && ASN1_STRING_length(timestr) < 15) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to parse time string %s correctly", timestr->data);
 		return (time_t)-1;
 	}
@@ -697,13 +702,20 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 	*thestr = '\0';
 	thestr -= 2;
 	thetime.tm_mon = atoi(thestr)-1;
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_year = atoi(thestr);
 
-	if (thetime.tm_year < 68) {
-		thetime.tm_year += 100;
+	*thestr = '\0';
+	if( ASN1_STRING_type(timestr) == V_ASN1_UTCTIME ) {
+		thestr -= 2;
+		thetime.tm_year = atoi(thestr);
+
+		if (thetime.tm_year < 68) {
+			thetime.tm_year += 100;
+		}
+	} else if( ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME ) {
+		thestr -= 4;
+		thetime.tm_year = atoi(thestr) - 1900;
 	}
+
 
 	thetime.tm_isdst = -1;
 	ret = mktime(&thetime);
@@ -782,13 +794,13 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 			req->config_filename, req->var, req->req_config TSRMLS_CC) == FAILURE) return FAILURE
 
 #define SET_OPTIONAL_STRING_ARG(key, varname, defval)	\
-	if (optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), key, sizeof(key), (void**)&item) == SUCCESS) \
+	if (optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), key, sizeof(key), (void**)&item) == SUCCESS && Z_TYPE_PP(item) == IS_STRING) \
 		varname = Z_STRVAL_PP(item); \
 	else \
 		varname = defval
 
 #define SET_OPTIONAL_LONG_ARG(key, varname, defval)	\
-	if (optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), key, sizeof(key), (void**)&item) == SUCCESS) \
+	if (optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), key, sizeof(key), (void**)&item) == SUCCESS && Z_TYPE_PP(item) == IS_LONG) \
 		varname = Z_LVAL_PP(item); \
 	else \
 		varname = defval
@@ -847,7 +859,8 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		}
 	}
 
-	if (req->priv_key_encrypt && optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), "encrypt_key_cipher", sizeof("encrypt_key_cipher"), (void**)&item) == SUCCESS) {
+	if (req->priv_key_encrypt && optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), "encrypt_key_cipher", sizeof("encrypt_key_cipher"), (void**)&item) == SUCCESS 
+		&& Z_TYPE_PP(item) == IS_LONG) {
 		long cipher_algo = Z_LVAL_PP(item);
 		const EVP_CIPHER* cipher = php_openssl_get_evp_cipher_from_algo(cipher_algo);
 		if (cipher == NULL) {
@@ -1962,7 +1975,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	}
 
 	/* parse extra config from args array, promote this to an extra function */
-	if (args && zend_hash_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name"), (void**)&item) == SUCCESS)
+	if (args && zend_hash_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name"), (void**)&item) == SUCCESS && Z_TYPE_PP(item) == IS_STRING)
 		friendly_name = Z_STRVAL_PP(item);
 	/* certpbe (default RC2-40)
 	   keypbe (default 3DES)
@@ -2040,7 +2053,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	}
 
 	/* parse extra config from args array, promote this to an extra function */
-	if (args && zend_hash_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name"), (void**)&item) == SUCCESS)
+	if (args && zend_hash_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name"), (void**)&item) == SUCCESS && Z_TYPE_PP(item) == IS_STRING)
 		friendly_name = Z_STRVAL_PP(item);
 
 	if (args && zend_hash_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts"), (void**)&item) == SUCCESS)

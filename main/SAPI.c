@@ -821,7 +821,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			} else if (!STRCASECMP(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
-					SG(sapi_headers).http_response_code > 307) &&
+					SG(sapi_headers).http_response_code > 399) &&
 					SG(sapi_headers).http_response_code != 201) {
 					/* Return a Found Redirect if one is not already specified */
 					if (http_response_code) { /* user specified redirect code */

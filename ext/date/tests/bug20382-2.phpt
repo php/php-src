@@ -95,18 +95,18 @@ result = Monday 2037-10-05 00:00:00 NZDT
 wanted = Monday            00:00:00
 
 Australia/Adelaide
-ts     = Friday 1971-01-01 17:17:17 CST
-result = Monday 1971-01-04 00:00:00 CST
+ts     = Friday 1971-01-01 17:17:17 ACST
+result = Monday 1971-01-04 00:00:00 ACST
 wanted = Monday            00:00:00
 
 Australia/Darwin
-ts     = Monday 1971-03-29 17:17:17 CST
-result = Monday 1971-04-05 00:00:00 CST
+ts     = Monday 1971-03-29 17:17:17 ACST
+result = Monday 1971-04-05 00:00:00 ACST
 wanted = Monday            00:00:00
 
 Australia/Perth
-ts     = Friday 1971-01-01 17:17:17 WST
-result = Monday 1971-01-04 00:00:00 WST
+ts     = Friday 1971-01-01 17:17:17 AWST
+result = Monday 1971-01-04 00:00:00 AWST
 wanted = Monday            00:00:00
 
 America/Aruba

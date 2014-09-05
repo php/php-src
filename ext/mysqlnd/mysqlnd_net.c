@@ -929,7 +929,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	DBG_RETURN(PASS);
 #else
 	DBG_ENTER("mysqlnd_net::enable_ssl");
-	DBG_INFO("MYSQLND_SSL_SUPPORTED is not defined");
+	DBG_INF("MYSQLND_SSL_SUPPORTED is not defined");
 	DBG_RETURN(PASS);
 #endif
 }

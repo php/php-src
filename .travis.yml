@@ -5,7 +5,11 @@ php:
     - 5.4
 
 notifications:
-    email: false
+    email: 
+       on_failure: change
+
+cache: 
+    - apt
 
 env:
     global:
@@ -19,6 +23,10 @@ env:
     matrix:
       - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
       - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
+
+before_install:
+    - sudo cp ./travis/de /var/lib/locales/supported.d/de
+    - sudo dpkg-reconfigure locales
 
 before_script:
     # Compile PHP

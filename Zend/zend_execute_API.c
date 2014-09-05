@@ -109,7 +109,7 @@ static int clean_non_persistent_function(zend_function *function TSRMLS_DC) /* {
 }
 /* }}} */
 
-static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC) /* {{{ */
+ZEND_API int clean_non_persistent_function_full(zend_function *function TSRMLS_DC) /* {{{ */
 {
 	return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
@@ -121,7 +121,7 @@ static int clean_non_persistent_class(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC) /* {{{ */
+ZEND_API int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 {
 	return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
@@ -447,8 +447,6 @@ ZEND_API int zend_is_true(zval *op) /* {{{ */
 	return i_zend_is_true(op);
 }
 /* }}} */
-
-#include "../TSRM/tsrm_strtok_r.h"
 
 #define IS_VISITED_CONSTANT			IS_CONSTANT_INDEX
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)

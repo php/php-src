@@ -1,6 +1,214 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.5.13
+?? ??? 2014, PHP 5.5.18
+
+
+
+11 Sep 2014, PHP 5.5.17
+
+- Core:
+  . Fixed bug #47358 (glob returns error, should be empty array()). (Pierre)
+  . Fixed bug #65463 (SIGSEGV during zend_shutdown()). (Keyur Govande)
+  . Fixed bug #66036 (Crash on SIGTERM in apache process). (Keyur Govande)
+  . Fixed bug #67878 (program_prefix not honoured in man pages). (Remi)
+
+- COM:
+  . Fixed bug #41577 (DOTNET is successful once per server run)
+    (Aidas Kasparas)
+
+- FPM:
+  . Fixed #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable when
+    using Apache). (David Zuelke)
+
+- OpenSSL:
+  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
+    (Daniel Lowrey)
+  . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3)
+    (Daniel Lowrey)
+
+- SPL:
+  . Fixed bug #67813 (CachingIterator::__construct InvalidArgumentException
+    wrong message). (tim_siebels_aurich at yahoo dot de)
+
+- Date:
+  . Fixed bug #66091 (memory leaks in DateTime constructor). (Tjerk)
+  . Fixed bug #66985 (Some timezones are no longer valid in PHP 5.5.10).
+    (Derick)
+  . Fixed bug #67109 (First uppercase letter breaks date string parsing).
+    (Derick)
+
+- GD
+  . Made fontFetch's path parser thread-safe. (Sara).
+
+- MySQLi:
+  . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
+
+- Zlib:
+  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
+    data). (Mike)
+  . Fixed bug #67865 (internal corruption phar error). Mike
+
+21 Aug 2014, PHP 5.5.16
+
+- COM:
+  . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
+
+- Fileinfo:
+  . Fixed bug #67705 (extensive backtracking in rule regular expression).
+    (CVE-2014-3538) (Remi)
+  . Fixed bug #67716 (Segfault in cdf.c). (CVE-2014-3587) (Remi)
+
+- FPM:
+  . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
+    (pacho@gentoo.org, Remi)
+
+- GD:
+  . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
+    (CVE-2014-2497) (Remi)
+  . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
+    (CVE-2014-5120) (Ryan Mauger)
+
+- Milter:
+  . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
+  
+- Network:
+  . Fixed bug #67717 (segfault in dns_get_record). (CVE-2014-3597) (Remi)
+
+- OpenSSL:
+  . Fixed missing type checks in OpenSSL options. (Yussuf Khalil, Stas)
+
+- readline:
+  . Fixed bug #55496 (Interactive mode doesn't force a newline before the
+    prompt). (Bob, Johannes)
+  . Fixed bug #67496 (Save command history when exiting interactive shell
+    with control-c). (Dmitry Saprykin, Johannes)
+
+- Sessions:
+  . Fixed missing type checks in php_session_create_id (Yussuf Khalil, Stas).
+
+- Core:
+  . Fixed bug #67693 (incorrect push to the empty array) (Tjerk)
+
+- ODBC:
+  . Fixed bug #60616 (odbc_fetch_into returns junk data at end of multi-byte
+    char fields). (Keyur)
+
+24 Jul 2014, PHP 5.5.15
+
+- Core:
+  . Fixed bug #67428 (header('Location: foo') will override a 308-399 response
+    code). (Adam)
+  . Fixed bug #67436 (Autoloader isn't called if two method definitions don't
+    match). (Bob)
+  . Fixed bug #67091 (make install fails to install libphp5.so on FreeBSD 10.0).
+    (Ferenc)
+  . Fixed bug #67497 (eval with parse error causes segmentation fault in
+    generator). (Nikita)
+  . Fixed bug #67151 (strtr with empty array crashes). (Nikita)
+  . Fixed bug #67407 (Windows 8.1/Server 2012 R2 reported as Windows 8/Server
+    2012). (Christian Wenz)
+  . Fixed bug #66608 (Incorrect behavior with nested "finally" blocks).
+    (Laruence, Dmitry)
+  . Implemented FR #34407 (ucwords and Title Case). (Tjerk)
+
+- CLI server:
+  . Implemented FR #67429 (CLI server is missing some new HTTP response codes).
+    (Adam)
+  . Fixed bug #66830 (Empty header causes PHP built-in web server to hang).
+    (Adam)
+  . Fixed bug #67594 (Unable to access to apache_request_headers() elements).
+    (Tjerk)
+
+- FPM:
+  . Fixed bug #67530 (error_log=syslog ignored). (Remi)
+  . Fixed bug #67531 (syslog cannot be set in pool configuration). (Remi)
+
+- Intl:
+  . Fixed bug #66921 (Wrong argument type hint for function 
+    intltz_from_date_time_zone). (Stas)
+  . Fixed bug #67052 (NumberFormatter::parse() resets LC_NUMERIC setting).
+    (Stas)
+
+- OPCache:
+  . Fixed bug #67215 (php-cgi work with opcache, may be segmentation fault
+    happen) (Dmitry, Laruence)
+
+- pgsql:
+  . Fixed bug #67550 (Error in code "form" instead of "from", pgsql.c, line 756),
+    which affected builds against libpq < 7.3. (Adam)
+
+- Phar:
+  . Fixed bug #67587 (Redirection loop on nginx with FPM). (Christian Weiske)
+
+- SPL:
+  . Fixed bug #67539 (ArrayIterator use-after-free due to object change during 
+    sorting). (CVE-2014-4698) (research at insighti dot org, Laruence)
+  . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
+
+- Streams:
+  . Fixed bug #67430 (http:// wrapper doesn't follow 308 redirects). (Adam)
+
+- Session:
+  . Fixed bug #66827 (Session raises E_NOTICE when session name variable is array).
+    (Yasuo)
+
+27 Jun 2014, PHP 5.5.14
+
+- Core:
+  . Fixed BC break introduced by patch for bug #67072. (Anatol, Stas)
+  . Fixed bug #66622 (Closures do not correctly capture the late bound class
+    (static::) in some cases). (Levi Morrison)
+  . Fixed bug #67390 (insecure temporary file use in the configure script).
+    (Remi) (CVE-2014-3981)
+  . Fixed bug #67399 (putenv with empty variable may lead to crash). (Stas)
+
+- CLI server:
+  . Fixed Bug #67406 (built-in web-server segfaults on startup). (Remi)
+
+- Date:
+  . Fixed bug #67308 (Serialize of DateTime truncates fractions of second).
+    (Adam)
+  . Fixed regression in fix for bug #67118 (constructor can't be called twice).
+    (Remi)
+
+- Fileinfo:
+  . Fixed bug #67326 (fileinfo: cdf_read_short_sector insufficient boundary check).
+  . Fixed bug #67410 (fileinfo: mconvert incorrect handling of truncated pascal
+    string size). (Francisco Alonso, Jan Kaluza, Remi)
+  . Fixed bug #67411 (fileinfo: cdf_check_stream_offset insufficient boundary
+    check). (Francisco Alonso, Jan Kaluza, Remi)
+  . Fixed bug #67412 (fileinfo: cdf_count_chain insufficient boundary check).
+    (Francisco Alonso, Jan Kaluza, Remi)
+  . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
+    check). (Francisco Alonso, Jan Kaluza, Remi)
+
+- Network:
+  . Fixed bug #67432 (Fix potential segfault in dns_get_record()).
+    (CVE-2014-4049). (Sara)
+
+- OPCache:
+  . Fixed issue #183 (TMP_VAR is not only used once). (Dmitry, Laruence)
+
+- OpenSSL:
+  . Fixed bug #65698 (certificates validity parsing does not work past 2050).
+    (Paul Oehler)
+  . Fixed bug #66636 (openssl_x509_parse warning with V_ASN1_GENERALIZEDTIME).
+    (Paul Oehler)
+
+- PDO-ODBC:
+  . Fixed bug #50444 (PDO-ODBC changes for 64-bit).
+
+- SOAP:
+  . Implemented FR #49898 (Add SoapClient::__getCookies()). (Boro Sitnikovski)
+
+- SPL:
+  . Fixed bug #66127 (Segmentation fault with ArrayObject unset). (Stas)
+  . Fixed bug #67359 (Segfault in recursiveDirectoryIterator). (Laruence)
+  . Fixed bug #67360 (Missing element after ArrayObject::getIterator). (Adam)
+  . Fixed bug #67492 (unserialize() SPL ArrayObject / SPLObjectStorage Type
+    Confusion). (CVE-2014-3515) (Stefan Esser)
+
+29 May 2014, PHP 5.5.13
 
 - CLI server:
   . Fixed bug #67079 (Missing MIME types for XML/XSL files). (Anatol)
@@ -12,12 +220,20 @@ PHP                                                                        NEWS
   . Fixed bug #65701 (copy() doesn't work when destination filename is created
     by tempnam()). (Boro Sitnikovski)
   . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
+  . Fixed bug #67245 (usage of memcpy() with overlapping src and dst in
+    zend_exceptions.c). (Bob)
+  . Fixed bug #67247 (spl_fixedarray_resize integer overflow). (Stas)
+  . Fixed bug #67249 (printf out-of-bounds read). (Stas)
+  . Fixed bug #67250 (iptcparse out-of-bounds read). (Stas)
+  . Fixed bug #67252 (convert_uudecode out-of-bounds read). (Stas)
 
 - Curl:
   . Fixed bug #64247 (CURLOPT_INFILE doesn't allow reset). (Mike)
 
 - Date:
   . Fixed bug #67118 (DateTime constructor crash with invalid data). (Anatol)
+  . Fixed bug #67251 (date_parse_from_format out-of-bounds read). (Stas)
+  . Fixed bug #67253 (timelib_meridian_with_check out-of-bounds read). (Stas)
 
 - DOM:
   . Fixed bug #67081 (DOMDocumentType->internalSubset returns entire DOCTYPE tag,
@@ -25,10 +241,20 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #66307 (Fileinfo crashes with powerpoint files). (Anatol)
+  . Fixed bug #67327 (fileinfo: CDF infinite loop in nelements DoS) (CVE-2014-0238).
+  . Fixed bug #67328 (fileinfo: fileinfo: numerous file_printf calls resulting in
+    performance degradation) (CVE-2014-0237).
 
 - FPM:
   . Fixed bug #66908 (php-fpm reload leaks epoll_create() file descriptor).
     (Julio Pintos)
+
+- GD:
+  . Fixed bug #67248 (imageaffinematrixget missing check of parameters). (Stas)
+
+- PCRE:
+  . Fixed bug #67238 (Ungreedy and min/max quantifier bug, applied patch
+    from the upstream). (Anatol)
 
 - Phar:
   . Fix bug #64498 ($phar->buildFromDirectory can't compress file with an accent

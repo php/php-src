@@ -284,19 +284,40 @@ static void replace_tmp_by_const(zend_op_array *op_array,
 		if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
 			ZEND_OP1(opline).var == var) {
 
-			update_op1_const(op_array, opline, val TSRMLS_CC);
-			/* TMP_VAR my be used only once */
-			break;
+			/* In most cases IS_TMP_VAR operand may be used only once.
+			 * The operands are usually destroyed by the opcode handler.
+			 * ZEND_CASE is an exception, that keeps operand unchanged,
+			 * and allows its reuse. The number of ZEND_CASE instructions
+			 * usually terminated by ZEND_FREE that finally kills the value.
+			 */
+			if (opline->opcode == ZEND_CASE) {
+				zval old_val;
+				old_val = *val;
+				zval_copy_ctor(val);
+				update_op1_const(op_array, opline, val TSRMLS_CC);
+				*val = old_val;
+			} else if (opline->opcode == ZEND_FREE) {
+				MAKE_NOP(opline);
+				break;
+			} else {				
+				update_op1_const(op_array, opline, val TSRMLS_CC);
+				val = NULL;
+				break;
+			}
 		}
 
 		if (ZEND_OP2_TYPE(opline) == IS_TMP_VAR &&
 			ZEND_OP2(opline).var == var) {
 
 			update_op2_const(op_array, opline, val TSRMLS_CC);
-			/* TMP_VAR my be used only once */
+			/* TMP_VAR may be used only once */
+			val = NULL;
 			break;
 		}
 		opline++;
+	}
+	if (val) {
+		zval_dtor(val);
 	}
 }
 

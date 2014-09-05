@@ -302,7 +302,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 	data->strm.zalloc = (alloc_func) php_zlib_alloc;
 	data->strm.zfree = (free_func) php_zlib_free;
-	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 2048;
+	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 0x8000;
 	data->strm.next_in = data->inbuf = (Bytef *) pemalloc(data->inbuf_len, persistent);
 	if (!data->inbuf) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes", data->inbuf_len);

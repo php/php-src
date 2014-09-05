@@ -1,12 +1,12 @@
-.TH phpize 1 "2010" "The PHP Group" "Scripting Language"
+.TH @program_prefix@phpize 1 "2014" "The PHP Group" "Scripting Language"
 .SH NAME
-phpize \- prepare a PHP extension for compiling
+@program_prefix@phpize \- prepare a PHP extension for compiling
 .SH SYNOPSIS
-.B phpize
+.B @program_prefix@phpize
 [options]
 .LP
 .SH DESCRIPTION
-.B phpize
+.B @program_prefix@phpize
 is a shell script to prepare PHP extension for compiling.
 .SH OPTIONS
 .TP 15
@@ -24,15 +24,15 @@ Prints usage information
 .PD 1
 .B \-v
 Prints API version information
-.TP
+.RS
 .PD 1
 .P
 .SH SEE ALSO
-.BR php (1)
+.BR @program_prefix@php (1)
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2010 The PHP Group
+Copyright \(co 1997\-2014 The PHP Group
 .LP
 This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is

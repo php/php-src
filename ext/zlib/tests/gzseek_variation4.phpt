@@ -24,7 +24,7 @@ gzclose($h);
 echo "\nreading the output file\n";
 $h = gzopen($f, 'r');
 echo gzread($h, strlen($str1))."\n";
-echo var_dump(bin2hex(gzread($h, 20)));
+var_dump(bin2hex(gzread($h, 20)));
 echo gzread($h, strlen($str2))."\n";
 gzclose($h);
 unlink($f);

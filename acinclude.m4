@@ -1711,7 +1711,7 @@ int main(int argc, char *argv[])
 {
   FILE *fp;
   long position;
-  char *filename = "/tmp/phpglibccheck";
+  char *filename = tmpnam(NULL);
   
   fp = fopen(filename, "w");
   if (fp == NULL) {
@@ -2800,7 +2800,7 @@ AC_DEFUN([PHP_DETECT_ICC],
 
 dnl PHP_DETECT_SUNCC
 dnl Detect if the systems default compiler is suncc.
-dnl We also set some usefull CFLAGS if the user didn't set any
+dnl We also set some useful CFLAGS if the user didn't set any
 AC_DEFUN([PHP_DETECT_SUNCC],[
   SUNCC="no"
   AC_MSG_CHECKING([for suncc])

@@ -9,10 +9,11 @@ if [[ "$ENABLE_DEBUG" == 1 ]]; then
 else
 	DEBUG="";
 fi
-./buildconf
+./buildconf --force
 ./configure --quiet \
 $DEBUG \
 $TS \
+--enable-fpm \
 --with-pdo-mysql=mysqlnd \
 --with-mysql=mysqlnd \
 --with-mysqli=mysqlnd \

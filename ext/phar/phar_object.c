@@ -606,6 +606,7 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	if ((strlen(sapi_module.name) == sizeof("cgi-fcgi")-1 && !strncmp(sapi_module.name, "cgi-fcgi", sizeof("cgi-fcgi")-1))
+		|| (strlen(sapi_module.name) == sizeof("fpm-fcgi")-1 && !strncmp(sapi_module.name, "fpm-fcgi", sizeof("fpm-fcgi")-1))
 		|| (strlen(sapi_module.name) == sizeof("cgi")-1 && !strncmp(sapi_module.name, "cgi", sizeof("cgi")-1))) {
 
 		if (PG(http_globals)[TRACK_VARS_SERVER]) {
@@ -1477,7 +1478,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 			}
 
 			close_fp = 0;
-			opened = (char *) estrndup(str, sizeof("[stream]") + 1);
+			opened = (char *) estrndup(str, sizeof("[stream]") - 1);
 			goto after_open_fp;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_PP(value), spl_ce_SplFileInfo TSRMLS_CC)) {

@@ -837,16 +837,11 @@ static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_co
 				if (p->nKeyLength > 0 && p->arKey[0] == 0) {
 					/* Mangled key */
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-					if (((zend_function*)p->pData)->common.fn_flags & ZEND_ACC_CLOSURE) {
-						/* update closure */
-						if (zend_hash_quick_update(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t) == SUCCESS) {
-							if (pCopyConstructor) {
-								pCopyConstructor(t);
-							}
+					if (zend_hash_quick_update(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t) == SUCCESS) {
+						if (pCopyConstructor) {
+							pCopyConstructor(t);
 						}
-					} else {
-						/* ignore and wait for runtime */
-					} 
+					}
 #endif
 				} else if (!ignore_dups && zend_hash_quick_find(target, p->arKey, p->nKeyLength, p->h, &t) == SUCCESS) {
 					*fail_data = p->pData;
@@ -984,7 +979,6 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		if (zend_hash_num_elements(&persistent_script->class_table) > 0) {
 			zend_accel_class_hash_copy(CG(class_table), &persistent_script->class_table, NULL TSRMLS_CC);
 		}
-		free_persistent_script(persistent_script, 0); /* free only hashes */
 	}
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
@@ -995,6 +989,10 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		CG(compiled_filename) = orig_compiled_filename;
 	}
 #endif
+
+	if (!from_shared_memory) {
+		free_persistent_script(persistent_script, 0); /* free only hashes */
+	}
 
 	return op_array;
 }
