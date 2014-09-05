@@ -5091,6 +5091,11 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) /* {{{ */
 		znode cond_node;
 
 		if (!cond_ast) {
+			if (has_default_case) {
+				CG(zend_lineno) = case_ast->lineno;
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Switch statements may only contain one default clause");
+			}
 			has_default_case = 1;
 			continue;
 		}
