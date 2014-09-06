@@ -855,7 +855,7 @@ PHP_METHOD(xmlreader, open)
 	xmlreader_object *intern = NULL;
 	char *source, *valid_file = NULL;
 	char *encoding = NULL;
-	char resolved_path[MAXPATHLEN + 1];
+	char resolved_path[MAXPATHLEN];
 	xmlTextReaderPtr reader = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {

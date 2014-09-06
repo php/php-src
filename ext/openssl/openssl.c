@@ -3652,7 +3652,8 @@ PHP_FUNCTION(openssl_pkey_export)
 {
 	struct php_x509_request req;
 	zval * zpkey, * args = NULL, *out;
-	char * passphrase = NULL; size_t passphrase_len = 0;
+	char * passphrase = NULL;
+	size_t passphrase_len = 0;
 	zend_resource *key_resource = NULL;
 	EVP_PKEY * key;
 	BIO * bio_out = NULL;
@@ -3750,7 +3751,7 @@ PHP_FUNCTION(openssl_pkey_get_private)
 	zval *cert;
 	EVP_PKEY *pkey;
 	char * passphrase = "";
-	size_t passphrase_len = sizeof("")-1;
+	size_t passphrase_len = 0;
 	zend_resource *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s", &cert, &passphrase, &passphrase_len) == FAILURE) {

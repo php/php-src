@@ -522,7 +522,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 	zval *pg_rows;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len = 0;
 	char *query;
 
 	PGresult *pgsql_result;
@@ -631,7 +631,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *filename, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	size_t  table_name_len, filename_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	size_t  table_name_len, filename_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len = 0;
 	char *query;
 	PGresult *pgsql_result;
 	ExecStatusType status;
@@ -730,7 +730,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL, *filename = NULL;
-	size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len, filename_len;
+	size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len = 0, filename_len;
 	char *query;
 
 	PGresult *pgsql_result;

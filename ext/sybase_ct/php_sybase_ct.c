@@ -730,7 +730,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *user = NULL, *passwd = NULL, *host = NULL, *charset = NULL, *appname = NULL;
 	char *hashed_details;
-	int hashed_details_length, len;
+	size_t hashed_details_length, len;
 	zend_bool new = 0;
 	sybase_link *sybase_ptr;
 
@@ -1061,7 +1061,8 @@ PHP_FUNCTION(sybase_select_db)
 {
 	zval *sybase_link_index = NULL;
 	char *db, *cmdbuf;
-	int id, len;
+	size_t len;
+	int id;
 	sybase_link *sybase_ptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &len, &sybase_link_index) == FAILURE) {
@@ -1426,7 +1427,8 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	zval *sybase_link_index = NULL;
 	zend_bool store = 1;
 	char *query;
-	size_t len, id, deadlock_count;
+	size_t len, deadlock_count;
+	int id;
 	sybase_link *sybase_ptr;
 	sybase_result *result;
 	CS_INT restype;
