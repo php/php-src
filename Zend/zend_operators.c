@@ -1531,14 +1531,15 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 
 	{
 		size_t op1_len = Z_STRLEN_P(op1);
-		size_t result_len = op1_len + Z_STRLEN_P(op2);
+		size_t op2_len = Z_STRLEN_P(op2);
+		size_t result_len = op1_len + op2_len;
 		zend_string *result_str;
 
-		if (op1_len > SIZE_MAX - Z_STRLEN_P(op2)) {
+		if (op1_len > SIZE_MAX - op2_len) {
 			zend_error_noreturn(E_ERROR, "String size overflow");
 		}
 
-		if (result == op1 && !IS_INTERNED(Z_STR_P(op1))) {
+		if (result == op1 && !IS_INTERNED(Z_STR_P(result))) {
 			/* special case, perform operations on result */
 			result_str = zend_string_realloc(Z_STR_P(result), result_len, 0);
 		} else {
@@ -1546,9 +1547,13 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 			memcpy(result_str->val, Z_STRVAL_P(op1), op1_len);
 		}
 
-		memcpy(result_str->val + op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
-		result_str->val[result_len] = '\0';
+		/* This has to happen first to account for the cases where result == op1 == op2 and
+		 * the realloc is done. In this case this line will also update Z_STRVAL_P(op2) to
+		 * point to the new string. The first op2_len bytes of result will still be the same. */
 		ZVAL_NEW_STR(result, result_str);
+
+		memcpy(result_str->val + op1_len, Z_STRVAL_P(op2), op2_len);
+		result_str->val[result_len] = '\0';
 	}
 
 	if (UNEXPECTED(use_copy1)) {
