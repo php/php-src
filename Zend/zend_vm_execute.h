@@ -18345,14 +18345,33 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 		zend_free_op free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = opline->op2.zv;
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CONST TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CONST TSRMLS_CC);
+		}
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -18394,9 +18413,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER
 	value = opline->op2.zv;
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_assign_to_string_offset(variable_ptr, value, IS_CONST, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
-	} else if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
+	if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
 		}
@@ -20584,15 +20601,34 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 		zend_free_op free_op2, free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_TMP_VAR TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_TMP_VAR TSRMLS_CC);
+		}
 		zval_dtor(free_op2.var);
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -20634,9 +20670,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 	value = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_assign_to_string_offset(variable_ptr, value, IS_TMP_VAR, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
-	} else if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
+	if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (1) {
 			zval_dtor(value);
 		}
@@ -22732,15 +22766,34 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		zend_free_op free_op2, free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_VAR TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_VAR TSRMLS_CC);
+		}
 		zval_ptr_dtor_nogc(free_op2.var);
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -22782,9 +22835,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 	value = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_assign_to_string_offset(variable_ptr, value, IS_VAR, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
-	} else if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
+	if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
 		}
@@ -24388,14 +24439,33 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 		zend_free_op free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = NULL;
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_UNUSED TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_UNUSED TSRMLS_CC);
+		}
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -26129,14 +26199,33 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		zend_free_op free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CV TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CV TSRMLS_CC);
+		}
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -26178,9 +26267,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_assign_to_string_offset(variable_ptr, value, IS_CV, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
-	} else if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
+	if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
 		}
@@ -35598,14 +35685,33 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 		zend_free_op free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = opline->op2.zv;
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CONST TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CONST TSRMLS_CC);
+		}
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -35647,9 +35753,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	value = opline->op2.zv;
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
-	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_assign_to_string_offset(variable_ptr, value, IS_CONST, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
-	} else if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
+	if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
 		}
@@ -37651,15 +37755,34 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		zend_free_op free_op2, free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_TMP_VAR TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_TMP_VAR TSRMLS_CC);
+		}
 		zval_dtor(free_op2.var);
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -37701,9 +37824,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 	value = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
-	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_assign_to_string_offset(variable_ptr, value, IS_TMP_VAR, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
-	} else if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
+	if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (1) {
 			zval_dtor(value);
 		}
@@ -39680,15 +39801,34 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		zend_free_op free_op2, free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_VAR TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_VAR TSRMLS_CC);
+		}
 		zval_ptr_dtor_nogc(free_op2.var);
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -39730,9 +39870,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	value = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
-	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_assign_to_string_offset(variable_ptr, value, IS_VAR, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
-	} else if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
+	if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
 		}
@@ -41216,14 +41354,33 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		zend_free_op free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = NULL;
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_UNUSED TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_UNUSED TSRMLS_CC);
+		}
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -42821,14 +42978,33 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		zend_free_op free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CV TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CV TSRMLS_CC);
+		}
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -42870,9 +43046,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
-	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_assign_to_string_offset(variable_ptr, value, IS_CV, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
-	} else if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
+	if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
 		}

@@ -1635,15 +1635,34 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		zend_free_op free_op2, free_op_data1, free_op_data2;
 		zval *value;
 		zval *dim = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
-		zval *variable_ptr;
+		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
+		zend_long offset = 0;
 
-		zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, OP2_TYPE TSRMLS_CC);
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+
+			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
+				goto string_failed;
+			}
+			if (dim == NULL) {
+				zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+			}
+
+			SEPARATE_STRING(object_ptr);
+
+			offset = zend_fetch_dimension_str_offset(dim, BP_VAR_W TSRMLS_CC);
+
+			if (!IS_INTERNED(Z_STR_P(object_ptr))) zend_string_addref(Z_STR_P(object_ptr));
+			ZVAL_STR_OFFSET(variable_ptr, object_ptr, offset);
+		} else {
+string_failed:
+			zend_fetch_dimension_address_W(EX_VAR((opline+1)->op2.var), object_ptr, dim, OP2_TYPE TSRMLS_CC);
+		}
 		FREE_OP2();
 
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
+			zend_assign_to_string_offset(variable_ptr, offset, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -1685,9 +1704,7 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 	value = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_assign_to_string_offset(variable_ptr, value, OP2_TYPE, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
-	} else if (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
+	if (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (IS_OP2_TMP_FREE()) {
 			zval_dtor(value);
 		}

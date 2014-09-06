@@ -755,17 +755,46 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 	FREE_OP_IF_VAR(free_value);
 }
 
-static void zend_assign_to_string_offset(zval *str_offset, zval *value, int value_type, zval *result TSRMLS_DC)
+static zend_always_inline zend_long zend_fetch_dimension_str_offset(zval *dim, int type TSRMLS_DC)
+{
+	zend_long offset;
+
+	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+		switch(Z_TYPE_P(dim)) {
+			case IS_STRING:
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+					break;
+				}
+				if (type != BP_VAR_UNSET) {
+					zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
+				}
+				break;
+			case IS_DOUBLE:
+			case IS_NULL:
+			case IS_FALSE:
+			case IS_TRUE:
+				zend_error(E_NOTICE, "String offset cast occurred");
+				break;
+			default:
+				zend_error(E_WARNING, "Illegal offset type");
+				break;
+		}
+
+		offset = zval_get_long(dim);
+	} else {
+		offset = Z_LVAL_P(dim);
+	}
+
+	return offset;
+}
+
+static void zend_assign_to_string_offset(zval *str_offset, zend_long offset, zval *value, int value_type, zval *result TSRMLS_DC)
 {
 	zval *str = Z_STR_OFFSET_STR_P(str_offset);
-	/* XXX String offset is uint32_t in _zval_struct, so can address only 2^32+1 space.
-		To make the offset get over that barier, we need to make str_offset size_t and that
-		would grow zval size by 8 bytes (currently from 16 to 24) on 64 bit build. */
-	uint32_t offset = Z_STR_OFFSET_IDX_P(str_offset);
 	zend_string *old_str;
 
-	if ((int)offset < 0) {
-		zend_error(E_WARNING, "Illegal string offset:  %d", offset);
+	if (offset < 0) {
+		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);
 		zend_string_release(Z_STR_P(str));
 		if (result) {
 			ZVAL_NULL(result);
@@ -775,7 +804,7 @@ static void zend_assign_to_string_offset(zval *str_offset, zval *value, int valu
 
 	old_str = Z_STR_P(str);
 	if (offset >= Z_STRLEN_P(str)) {
-		int old_len = Z_STRLEN_P(str);
+		zend_long old_len = Z_STRLEN_P(str);
 		Z_STR_P(str) = zend_string_realloc(Z_STR_P(str), offset + 1, 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
@@ -1141,6 +1170,7 @@ convert_to_array:
 			zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
 			goto fetch_from_array;
 		}
+
 		if (dim == NULL) {
 			zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
 		}
@@ -1149,34 +1179,13 @@ convert_to_array:
 			SEPARATE_STRING(container);
 		}
 
-		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-			switch(Z_TYPE_P(dim)) {
-				case IS_STRING:
-					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
-						break;
-					}
-					if (type != BP_VAR_UNSET) {
-						zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
-					}
-					break;
-				case IS_DOUBLE:
-				case IS_NULL:
-				case IS_FALSE:
-				case IS_TRUE:
-					zend_error(E_NOTICE, "String offset cast occurred");
-					break;
-				default:
-					zend_error(E_WARNING, "Illegal offset type");
-					break;
-			}
-
-			offset = zval_get_long(dim);
-		} else {
-			offset = Z_LVAL_P(dim);
-		}
+		/* This is a dummy, the offset is broken if we're here.
+		   What matters is merely the IS_STR_OFFSET type set below.*/
+		offset = zend_fetch_dimension_str_offset(dim, type TSRMLS_CC);
 
 		if (!IS_INTERNED(Z_STR_P(container))) zend_string_addref(Z_STR_P(container));
 		ZVAL_STR_OFFSET(result, container, offset);
+
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
 			zend_error_noreturn(E_ERROR, "Cannot use object as array");

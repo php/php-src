@@ -131,7 +131,6 @@ struct _zval_struct {
 	union {
 		uint32_t     var_flags;
 		uint32_t     next;                 /* hash collision chain */
-		uint32_t     str_offset;           /* string offset */
 		uint32_t     cache_slot;           /* literal cache slot */
 		uint32_t     lineno;               /* line number (for ast nodes) */
 		uint32_t     silence_num;          /* BEGIN_SILENCE op number */
@@ -656,12 +655,8 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_STR_OFFSET_STR(zval)		Z_INDIRECT(zval)
 #define Z_STR_OFFSET_STR_P(zval_p)	Z_STR_OFFSET_STR(*(zval_p))
 
-#define Z_STR_OFFSET_IDX(zval)		(zval).u2.str_offset
-#define Z_STR_OFFSET_IDX_P(zval_p)	Z_STR_OFFSET_IDX(*(zval_p))
-
 #define ZVAL_STR_OFFSET(z, s, i) do {							\
 		Z_STR_OFFSET_STR_P(z) = (s);							\
-		Z_STR_OFFSET_IDX_P(z) = (i);							\
 		Z_TYPE_INFO_P(z) = IS_STR_OFFSET;						\
 	} while (0)
 
