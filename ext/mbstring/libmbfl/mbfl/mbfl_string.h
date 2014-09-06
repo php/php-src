@@ -42,7 +42,7 @@ typedef struct _mbfl_string {
 	enum mbfl_no_language no_language;
 	enum mbfl_no_encoding no_encoding;
 	unsigned char *val;
-	unsigned int len;
+	size_t len;
 } mbfl_string;
 
 MBFLAPI extern void mbfl_string_init(mbfl_string *string);
