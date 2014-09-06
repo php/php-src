@@ -1879,7 +1879,7 @@ PHP_FUNCTION(mb_http_input)
 PHP_FUNCTION(mb_http_output)
 {
 	const char *name = NULL;
-	size_t name_len;
+	size_t name_len = 0;
 	const mbfl_encoding *encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
@@ -2212,14 +2212,15 @@ PHP_FUNCTION(mb_strlen)
 	int n;
 	mbfl_string string;
 	char *enc_name = NULL;
-	size_t enc_name_len;
+	size_t enc_name_len, string_len;
 
 	mbfl_string_init(&string);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", (char **)&string.val, &string.len, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", (char **)&string.val, &string_len, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
 
+	string.len = string_len;
 	string.no_language = MBSTRG(language);
 	if (enc_name == NULL) {
 		string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
@@ -2248,7 +2249,7 @@ PHP_FUNCTION(mb_strpos)
 	zend_long offset;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
-	size_t enc_name_len;
+	size_t enc_name_len, haystack_len, needle_len;
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
@@ -2258,9 +2259,12 @@ PHP_FUNCTION(mb_strpos)
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 	offset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &offset, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
+
+	haystack.len = haystack_len;
+	needle.len = needle_len;
 
 	if (enc_name != NULL) {
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
@@ -2311,7 +2315,7 @@ PHP_FUNCTION(mb_strrpos)
 	int n;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
-	size_t enc_name_len;
+	size_t enc_name_len, haystack_len, needle_len;
 	zval *zoffset = NULL;
 	long offset = 0, str_flg;
 	char *enc_name2 = NULL;
@@ -2324,9 +2328,12 @@ PHP_FUNCTION(mb_strrpos)
 	needle.no_language = MBSTRG(language);
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &zoffset, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zs", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &zoffset, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
+
+	haystack.len = haystack_len;
+	needle.len = needle_len;
 
 	if (zoffset) {
 		if (Z_TYPE_P(zoffset) == IS_STRING) {
@@ -2410,13 +2417,17 @@ PHP_FUNCTION(mb_stripos)
 	zend_long offset;
 	mbfl_string haystack, needle;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
-	size_t from_encoding_len;
+	size_t from_encoding_len, haystack_len, needle_len;
 	n = -1;
 	offset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, (int *)&haystack.len, (char **)&needle.val, (int *)&needle.len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
+
+	haystack.len = haystack_len;
+	needle.len = needle_len;
+
 	if (needle.len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
@@ -2439,13 +2450,16 @@ PHP_FUNCTION(mb_strripos)
 	zend_long offset;
 	mbfl_string haystack, needle;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
-	size_t from_encoding_len;
+	size_t from_encoding_len, haystack_len, needle_len;
 	n = -1;
 	offset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, (int *)&haystack.len, (char **)&needle.val, (int *)&needle.len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
+
+	haystack.len = haystack_len;
+	needle.len = needle_len;
 
 	n = php_mb_stripos(1, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding TSRMLS_CC);
 
@@ -2464,7 +2478,7 @@ PHP_FUNCTION(mb_strstr)
 	int n, len, mblen;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	char *enc_name = NULL;
-	size_t enc_name_len;
+	size_t enc_name_len, haystack_len, needle_len;
 	zend_bool part = 0;
 
 	mbfl_string_init(&haystack);
@@ -2474,9 +2488,12 @@ PHP_FUNCTION(mb_strstr)
 	needle.no_language = MBSTRG(language);
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, (int *)&haystack.len, (char **)&needle.val, (int *)&needle.len, &part, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &part, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
+
+	haystack.len = haystack_len;
+	needle.len = needle_len;
 
 	if (enc_name != NULL) {
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
@@ -2526,7 +2543,7 @@ PHP_FUNCTION(mb_strrchr)
 	int n, len, mblen;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	char *enc_name = NULL;
-	size_t enc_name_len;
+	size_t enc_name_len, haystack_len, needle_len;
 	zend_bool part = 0;
 
 	mbfl_string_init(&haystack);
@@ -2536,9 +2553,12 @@ PHP_FUNCTION(mb_strrchr)
 	needle.no_language = MBSTRG(language);
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &part, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
+
+	haystack.len = haystack_len;
+	needle.len = needle_len;
 
 	if (enc_name != NULL) {
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
@@ -2588,8 +2608,8 @@ PHP_FUNCTION(mb_strrchr)
 PHP_FUNCTION(mb_stristr)
 {
 	zend_bool part = 0;
-	size_t from_encoding_len, len, mblen;
-	int n;
+	size_t from_encoding_len, haystack_len, needle_len;
+	int n, mblen, len;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
 	mbfl_string_init(&haystack);
@@ -2600,9 +2620,12 @@ PHP_FUNCTION(mb_stristr)
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
+
+	haystack.len = haystack_len;
+	needle.len = needle_len;
 
 	if (!needle.len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
@@ -2652,7 +2675,7 @@ PHP_FUNCTION(mb_strrichr)
 {
 	zend_bool part = 0;
 	int n, len, mblen;
-	size_t from_encoding_len;
+	size_t from_encoding_len, haystack_len, needle_len;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->name;
 	mbfl_string_init(&haystack);
@@ -2663,9 +2686,12 @@ PHP_FUNCTION(mb_strrichr)
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
+
+	haystack.len = haystack_len;
+	needle.len = needle_len;
 
 	haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(from_encoding);
 	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
@@ -2711,7 +2737,7 @@ PHP_FUNCTION(mb_substr_count)
 	int n;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
-	size_t enc_name_len;
+	size_t enc_name_len, haystack_len, needle_len;
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
@@ -2720,9 +2746,12 @@ PHP_FUNCTION(mb_substr_count)
 	needle.no_language = MBSTRG(language);
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
+
+	haystack.len = haystack_len;
+	needle.len = needle_len;
 
 	if (enc_name != NULL) {
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
@@ -2833,7 +2862,7 @@ PHP_FUNCTION(mb_strcut)
 	size_t argc = ZEND_NUM_ARGS();
 	char *encoding;
 	zend_long from, len;
-	size_t encoding_len;
+	size_t encoding_len, string_len;
 	zval *z_len = NULL;
 	mbfl_string string, result, *ret;
 
@@ -2841,9 +2870,11 @@ PHP_FUNCTION(mb_strcut)
 	string.no_language = MBSTRG(language);
 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|zs", (char **)&string.val, (int **)&string.len, &from, &z_len, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|zs", (char **)&string.val, &string_len, &from, &z_len, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
+
+	string.len = string_len;
 
 	if (argc == 4) {
 		string.no_encoding = mbfl_name2no_encoding(encoding);
@@ -2902,16 +2933,18 @@ PHP_FUNCTION(mb_strwidth)
 	int n;
 	mbfl_string string;
 	char *enc_name = NULL;
-	size_t enc_name_len;
+	size_t enc_name_len, string_len;
 
 	mbfl_string_init(&string);
 
 	string.no_language = MBSTRG(language);
 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", (char **)&string.val, &string.len, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", (char **)&string.val, &string_len, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
+
+	string.len = string_len;
 
 	if (enc_name != NULL) {
 		string.no_encoding = mbfl_name2no_encoding(enc_name);
@@ -3352,6 +3385,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 {
 	enum mbfl_no_encoding charset, transenc;
 	mbfl_string  string, result, *ret;
+	size_t string_len;
 	char *charset_name = NULL;
 	size_t charset_name_len;
 	char *trans_enc_name = NULL;
@@ -3364,9 +3398,11 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	string.no_language = MBSTRG(language);
 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sssl", (char **)&string.val, &string.len, &charset_name, &charset_name_len, &trans_enc_name, &trans_enc_name_len, &linefeed, &linefeed_len, &indent) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sssl", (char **)&string.val, &string_len, &charset_name, &charset_name_len, &trans_enc_name, &trans_enc_name_len, &linefeed, &linefeed_len, &indent) == FAILURE) {
 		return;
 	}
+
+	string.len = string_len;
 
 	charset = mbfl_no_encoding_pass;
 	transenc = mbfl_no_encoding_base64;
@@ -3410,14 +3446,17 @@ PHP_FUNCTION(mb_encode_mimeheader)
 PHP_FUNCTION(mb_decode_mimeheader)
 {
 	mbfl_string string, result, *ret;
+	size_t string_len;
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(language);
 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", (char **)&string.val, &string.len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", (char **)&string.val, &string_len) == FAILURE) {
 		return;
 	}
+
+	string.len = string_len;
 
 	mbfl_string_init(&result);
 	ret = mbfl_mime_header_decode(&string, &result, MBSTRG(current_internal_encoding)->no_encoding);
@@ -3437,6 +3476,7 @@ PHP_FUNCTION(mb_convert_kana)
 {
 	int opt, i;
 	mbfl_string string, result, *ret;
+	size_t string_len;
 	char *optstr = NULL;
 	size_t optstr_len;
 	char *encname = NULL;
@@ -3446,9 +3486,11 @@ PHP_FUNCTION(mb_convert_kana)
 	string.no_language = MBSTRG(language);
 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ss", (char **)&string.val, &string.len, &optstr, &optstr_len, &encname, &encname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ss", (char **)&string.val, &string_len, &optstr, &optstr_len, &encname, &encname_len) == FAILURE) {
 		return;
 	}
+
+	string.len = string_len;
 
 	/* option */
 	if (optstr != NULL) {
