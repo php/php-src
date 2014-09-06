@@ -23,6 +23,7 @@
 
 #include "php.h"
 #include "php_math.h"
+#include "zend_multiply.h"
 
 #include <math.h>
 #include <float.h>
