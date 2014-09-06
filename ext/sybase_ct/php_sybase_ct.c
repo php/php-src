@@ -1427,8 +1427,8 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	zval *sybase_link_index = NULL;
 	zend_bool store = 1;
 	char *query;
-	size_t len, deadlock_count;
-	int id;
+	size_t len;
+	int id, deadlock_count;
 	sybase_link *sybase_ptr;
 	sybase_result *result;
 	CS_INT restype;
