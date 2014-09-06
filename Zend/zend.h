@@ -260,10 +260,11 @@ char *alloca ();
 #define ZTS_V 0
 #endif
 
-#include "zend_errors.h"
-#include "zend_alloc.h"
+#include "../TSRM/TSRM.h"
 
+#include "zend_errors.h"
 #include "zend_types.h"
+#include "zend_alloc.h"
 
 #ifdef HAVE_LIMITS_H
 # include <limits.h>

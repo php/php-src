@@ -24,8 +24,6 @@
 #include "ext/standard/url.h"
 #include "ext/pcre/php_pcre.h"
 
-#include "zend_multiply.h"
-
 #if HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
