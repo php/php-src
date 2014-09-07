@@ -2804,12 +2804,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 					smart_str_free(&tmp_str);
 					break;
 				} else if (mode & TRANS_START_READ_WRITE) {
-					if (tmp_str.s->len) {
+					if (tmp_str.s && tmp_str.s->len) {
 						smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 					}
 					smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
 				} else if (mode & TRANS_START_READ_ONLY) {
-					if (tmp_str.s->len) {
+					if (tmp_str.s && tmp_str.s->len) {
 						smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 					}
 					smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
