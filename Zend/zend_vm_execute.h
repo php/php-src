@@ -18348,7 +18348,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;
@@ -20604,7 +20605,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;
@@ -22769,7 +22771,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;
@@ -24442,7 +24445,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;
@@ -26202,7 +26206,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;
@@ -35688,7 +35693,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;
@@ -37758,7 +37764,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;
@@ -39804,7 +39811,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;
@@ -41357,7 +41365,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;
@@ -42981,7 +42990,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;

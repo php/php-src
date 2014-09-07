@@ -1638,7 +1638,8 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		zval *variable_ptr = EX_VAR((opline+1)->op2.var);
 		zend_long offset = 0;
 
-		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) || (UNEXPECTED(Z_ISREF_P(object_ptr)) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_STRING)) {
+			ZVAL_DEREF(object_ptr);
 
 			if (UNEXPECTED(Z_STRLEN_P(object_ptr) == 0)) {
 				goto string_failed;
