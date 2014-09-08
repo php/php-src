@@ -198,9 +198,7 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist_immutable(Z_ARRVAL_P(z) TSRMLS_CC);
 				} else {
-					if (!zend_shared_alloc_get_xlat_entry(Z_ARR_P(z))) {
-						GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
-					}
+					GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
 					/* make immutable array */
@@ -254,9 +252,7 @@ static void zend_persist_zval_const(zval *z TSRMLS_DC)
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist_immutable(Z_ARRVAL_P(z) TSRMLS_CC);
 				} else {
-					if (!zend_shared_alloc_get_xlat_entry(Z_ARR_P(z))) {
-						GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
-					}
+					GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
 					/* make immutable array */
