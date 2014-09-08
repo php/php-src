@@ -195,7 +195,7 @@ void zend_shutdown_extensions(TSRMLS_D)
 void zend_extension_dtor(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT && !ZEND_DEBUG
-	if (extension->handle) {
+	if (extension->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
 		DL_UNLOAD(extension->handle);
 	}
 #endif
