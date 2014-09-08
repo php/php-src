@@ -239,7 +239,6 @@ struct _zend_ast_ref {
 
 /* internal types */
 #define IS_INDIRECT             	15
-#define IS_STR_OFFSET				16
 #define IS_PTR						17
 
 static inline zend_uchar zval_get_type(const zval* pz) {
@@ -649,15 +648,6 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define ZVAL_CE(z, c) do {										\
 		Z_CE_P(z) = (c);										\
 		Z_TYPE_INFO_P(z) = IS_PTR;								\
-	} while (0)
-
-
-#define Z_STR_OFFSET_STR(zval)		Z_INDIRECT(zval)
-#define Z_STR_OFFSET_STR_P(zval_p)	Z_STR_OFFSET_STR(*(zval_p))
-
-#define ZVAL_STR_OFFSET(z, s, i) do {							\
-		Z_STR_OFFSET_STR_P(z) = (s);							\
-		Z_TYPE_INFO_P(z) = IS_STR_OFFSET;						\
 	} while (0)
 
 #endif /* ZEND_TYPES_H */

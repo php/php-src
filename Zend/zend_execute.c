@@ -755,42 +755,8 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 	FREE_OP_IF_VAR(free_value);
 }
 
-static zend_always_inline zend_long zend_fetch_dimension_str_offset(zval *dim, int type TSRMLS_DC)
+static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *value, int value_type, zval *result TSRMLS_DC)
 {
-	zend_long offset;
-
-	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-		switch(Z_TYPE_P(dim)) {
-			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
-					break;
-				}
-				if (type != BP_VAR_UNSET) {
-					zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
-				}
-				break;
-			case IS_DOUBLE:
-			case IS_NULL:
-			case IS_FALSE:
-			case IS_TRUE:
-				zend_error(E_NOTICE, "String offset cast occurred");
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type");
-				break;
-		}
-
-		offset = zval_get_long(dim);
-	} else {
-		offset = Z_LVAL_P(dim);
-	}
-
-	return offset;
-}
-
-static void zend_assign_to_string_offset(zval *str_offset, zend_long offset, zval *value, int value_type, zval *result TSRMLS_DC)
-{
-	zval *str = Z_STR_OFFSET_STR_P(str_offset);
 	zend_string *old_str;
 
 	if (offset < 0) {
@@ -1135,7 +1101,7 @@ str_index:
 	return retval;
 }
 
-static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *container_ptr, zval *dim, int dim_type, int type, int is_ref TSRMLS_DC)
+static zend_always_inline zval *zend_fetch_dimension_address(zval *result, zval *container_ptr, zval *dim, int dim_type, int type, int is_ref, int allow_str_offset TSRMLS_DC)
 {
     zval *retval;
     zval *container = container_ptr;
@@ -1175,17 +1141,40 @@ convert_to_array:
 			zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
 		}
 
-		if (type != BP_VAR_UNSET) {
-			SEPARATE_STRING(container);
+		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+			switch(Z_TYPE_P(dim)) {
+				case IS_STRING:
+					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+						break;
+					}
+					if (type != BP_VAR_UNSET) {
+						zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
+					}
+					break;
+				case IS_DOUBLE:
+				case IS_NULL:
+				case IS_FALSE:
+				case IS_TRUE:
+					zend_error(E_NOTICE, "String offset cast occurred");
+					break;
+				default:
+					zend_error(E_WARNING, "Illegal offset type");
+					break;
+			}
+
+			offset = zval_get_long(dim);
+		} else {
+			offset = Z_LVAL_P(dim);
 		}
 
-		/* This is a dummy, the offset is broken if we're here.
-		   What matters is merely the IS_STR_OFFSET type set below.*/
-		offset = zend_fetch_dimension_str_offset(dim, type TSRMLS_CC);
-
-		if (!IS_INTERNED(Z_STR_P(container))) zend_string_addref(Z_STR_P(container));
-		ZVAL_STR_OFFSET(result, container, offset);
-
+		if (allow_str_offset) {
+			SEPARATE_STRING(container);
+			if (!IS_INTERNED(Z_STR_P(container))) zend_string_addref(Z_STR_P(container));
+			ZVAL_LONG(result, offset);
+			return container; /* assignment to string offset */
+		} else {
+			ZVAL_INDIRECT(result, NULL); /* wrong string offset */
+		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
 			zend_error_noreturn(E_ERROR, "Cannot use object as array");
@@ -1250,26 +1239,32 @@ convert_to_array:
 			ZVAL_INDIRECT(result, &EG(error_zval));
 		}
 	}
+	return NULL; /* not an assignment to string offset */
 }
 
 static zend_never_inline void zend_fetch_dimension_address_W(zval *result, zval *container_ptr, zval *dim, int dim_type TSRMLS_DC)
 {
-	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_W, 0 TSRMLS_CC);
+	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_W, 0, 0 TSRMLS_CC);
+}
+
+static zend_never_inline zval *zend_fetch_dimension_address_W_str(zval *result, zval *container_ptr, zval *dim, int dim_type TSRMLS_DC)
+{
+	return zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_W, 0, 1 TSRMLS_CC);
 }
 
 static zend_never_inline void zend_fetch_dimension_address_W_ref(zval *result, zval *container_ptr, zval *dim, int dim_type TSRMLS_DC)
 {
-	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_W, 1 TSRMLS_CC);
+	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_W, 1, 0 TSRMLS_CC);
 }
 
 static zend_never_inline void zend_fetch_dimension_address_RW(zval *result, zval *container_ptr, zval *dim, int dim_type TSRMLS_DC)
 {
-	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_RW, 0 TSRMLS_CC);
+	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_RW, 0, 0 TSRMLS_CC);
 }
 
 static zend_never_inline void zend_fetch_dimension_address_UNSET(zval *result, zval *container_ptr, zval *dim, int dim_type TSRMLS_DC)
 {
-	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET, 0 TSRMLS_CC);
+	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET, 0, 0 TSRMLS_CC);
 }
 
 static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type TSRMLS_DC)
