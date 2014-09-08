@@ -38,6 +38,9 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #67955 (SoapClient prepends 0-byte to cookie names). (Philip Hofstetter)
 
+- Session:
+  . Fixed bug #67972 (SessionHandler Invalid memory read create_sid()). (Adam)
+
 28 Aug 2014, PHP 5.6.0
 
 - Apache2 Handler SAPI:
