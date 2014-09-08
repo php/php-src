@@ -986,14 +986,13 @@ static zend_always_inline void zend_mm_free_large(zend_mm_heap *heap, zend_mm_ch
 /* Small Runs */
 /**************/
 
-/* higher set bit number (0->0, 1->1, 2->2, 4->3, 8->4, 127->7, 128->8 etc) */
+/* higher set bit number (0->N/A, 1->1, 2->2, 4->3, 8->4, 127->7, 128->8 etc) */
 static zend_always_inline int zend_mm_small_size_to_bit(int size)
 {
 #if defined(__GNUC__)
 	return (__builtin_clz(size) ^ 0x1f) + 1;
 #else
 	int n = 16;
-	if (size == 0) return 0;
 	if (size <= 0x00ff) {n -= 8; size = size << 8;}
 	if (size <= 0x0fff) {n -= 4; size = size << 4;}
 	if (size <= 0x3fff) {n -= 2; size = size << 2;}
