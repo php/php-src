@@ -1751,6 +1751,7 @@ int main(int argc, char *argv[])
 	char *bindpath = NULL;
 	int fcgi_fd = 0;
 	fcgi_request *request = NULL;
+	int warmup_repeats = 0;
 	int repeats = 1;
 	int benchmark = 0;
 #if HAVE_GETTIMEOFDAY
@@ -2094,7 +2095,15 @@ consult the installation file that came with this distribution, or visit \n\
 			switch (c) {
 				case 'T':
 					benchmark = 1;
-					repeats = atoi(php_optarg);
+					{
+						char *comma = strchr(php_optarg, ',');
+						if (comma) {
+							warmup_repeats = atoi(php_optarg);
+							repeats = atoi(comma + 1);
+						} else {
+							repeats = atoi(php_optarg);
+						}
+					}
 #ifdef HAVE_GETTIMEOFDAY
 					gettimeofday(&start, NULL);
 #else
@@ -2512,12 +2521,24 @@ fastcgi_request_done:
 
 			if (!fastcgi) {
 				if (benchmark) {
-					repeats--;
-					if (repeats > 0) {
-						script_file = NULL;
-						php_optind = orig_optind;
-						php_optarg = orig_optarg;
+					if (warmup_repeats) {
+						warmup_repeats--;
+						if (!warmup_repeats) {
+#ifdef HAVE_GETTIMEOFDAY
+							gettimeofday(&start, NULL);
+#else
+							time(&start);						
+#endif
+						}
 						continue;
+					} else {
+						repeats--;
+						if (repeats > 0) {
+							script_file = NULL;
+							php_optind = orig_optind;
+							php_optarg = orig_optarg;
+							continue;
+						}
 					}
 				}
 				break;
