@@ -144,6 +144,8 @@ PHP_METHOD(SessionHandler, create_sid)
 {
 	zend_string *id;
 
+	PS_SANITY_CHECK;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 	    return;
 	}
