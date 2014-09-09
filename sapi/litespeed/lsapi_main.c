@@ -311,6 +311,8 @@ static void sapi_lsapi_register_variables(zval *track_vars_array TSRMLS_DC)
         if ( (SG(request_info).request_uri ) )
             php_self = (SG(request_info).request_uri );
 
+        litespeed_php_import_environment_variables(track_vars_array TSRMLS_CC);
+
 #if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
         if (!PG(magic_quotes_gpc)) {
 #endif
@@ -324,7 +326,6 @@ static void sapi_lsapi_register_variables(zval *track_vars_array TSRMLS_DC)
             add_variable_magic_quote("PHP_SELF", 8, php_self, strlen( php_self ), track_vars_array );
         }
 #endif
-        litespeed_php_import_environment_variables(track_vars_array TSRMLS_CC);
     } else {
         php_import_environment_variables(track_vars_array TSRMLS_CC);
 
