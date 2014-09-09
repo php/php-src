@@ -377,7 +377,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 
 /* {{{ php_oci_statement_get_column()
  Get column from the result set */
-php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, long column_index, char *column_name, int column_name_len TSRMLS_DC)
+php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, zend_long column_index, char *column_name, int column_name_len TSRMLS_DC)
 {
 	php_oci_out_column *column = NULL;
 	int i;
@@ -1079,7 +1079,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 
 /* {{{ php_oci_bind_by_name()
  Bind zval to the given placeholder */
-int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len, zval *var, long maxlength, ub2 type TSRMLS_DC)
+int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len, zval *var, zend_long maxlength, ub2 type TSRMLS_DC)
 {
 	php_oci_collection *bind_collection = NULL;
 	php_oci_descriptor *bind_descriptor = NULL;
@@ -1466,7 +1466,7 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 		convert_to_long(&tmp);
 		column = php_oci_statement_get_column(statement, Z_LVAL(tmp), NULL, 0 TSRMLS_CC);
 		if (!column) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column index \"%ld\"", Z_LVAL(tmp));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column index \"%pd\"", Z_LVAL(tmp));
 			zval_dtor(&tmp);
 			return NULL;
 		}
@@ -1524,7 +1524,7 @@ int php_oci_statement_get_numrows(php_oci_statement *statement, ub4 *numrows TSR
 
 /* {{{ php_oci_bind_array_by_name()
  Bind arrays to PL/SQL types */
-int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int name_len, zval *var, long max_table_length, long maxlength, long type TSRMLS_DC)
+int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int name_len, zval *var, zend_long max_table_length, zend_long maxlength, zend_long type TSRMLS_DC)
 {
 	php_oci_bind *bind, *bindp;
 	sword errstatus;
@@ -1532,7 +1532,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 	convert_to_array(var);
 
 	if (maxlength < -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid max length value (%ld)", maxlength);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid max length value (%pd)", maxlength);
 		return 1;
 	}
 	
@@ -1563,7 +1563,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 			bind = php_oci_bind_array_helper_date(var, max_table_length, statement->connection TSRMLS_CC);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or unsupported datatype given: %ld", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or unsupported datatype given: %pd", type);
 			return 1;
 			break;
 	}
@@ -1626,7 +1626,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 
 /* {{{ php_oci_bind_array_helper_string()
  Bind arrays to PL/SQL types */
-php_oci_bind *php_oci_bind_array_helper_string(zval *var, long max_table_length, long maxlength TSRMLS_DC)
+php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_length, zend_long maxlength TSRMLS_DC)
 {
 	php_oci_bind *bind;
 	ub4 i;
@@ -1696,7 +1696,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, long max_table_length,
 
 /* {{{ php_oci_bind_array_helper_number()
  Bind arrays to PL/SQL types */
-php_oci_bind *php_oci_bind_array_helper_number(zval *var, long max_table_length TSRMLS_DC)
+php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_length TSRMLS_DC)
 {
 	php_oci_bind *bind;
 	ub4 i;
@@ -1735,7 +1735,7 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, long max_table_length 
 
 /* {{{ php_oci_bind_array_helper_double()
  Bind arrays to PL/SQL types */
-php_oci_bind *php_oci_bind_array_helper_double(zval *var, long max_table_length TSRMLS_DC)
+php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_length TSRMLS_DC)
 {
 	php_oci_bind *bind;
 	ub4 i;
@@ -1774,7 +1774,7 @@ php_oci_bind *php_oci_bind_array_helper_double(zval *var, long max_table_length 
 
 /* {{{ php_oci_bind_array_helper_date()
  Bind arrays to PL/SQL types */
-php_oci_bind *php_oci_bind_array_helper_date(zval *var, long max_table_length, php_oci_connection *connection TSRMLS_DC)
+php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_length, php_oci_connection *connection TSRMLS_DC)
 {
 	php_oci_bind *bind;
 	ub4 i;

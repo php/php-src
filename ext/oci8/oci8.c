@@ -1383,9 +1383,9 @@ PHP_MINFO_FUNCTION(oci)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Statistics", "");
-	snprintf(buf, sizeof(buf), "%ld", OCI_G(num_persistent));
+	snprintf(buf, sizeof(buf), "%pd", OCI_G(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Connections", buf);
-	snprintf(buf, sizeof(buf), "%ld", OCI_G(num_links));
+	snprintf(buf, sizeof(buf), "%pd", OCI_G(num_links));
 	php_info_print_table_row(2, "Active Connections", buf);
 	php_info_print_table_end();
 }
@@ -1758,9 +1758,9 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 	php_oci_connection *connection;
 	char *username, *password;
 	char *dbname = NULL, *charset = NULL;
-	int username_len = 0, password_len = 0;
-	int dbname_len = 0, charset_len = 0;
-	long session_mode = OCI_DEFAULT;
+	size_t username_len = 0, password_len = 0;
+	size_t dbname_len = 0, charset_len = 0;
+	zend_long session_mode = OCI_DEFAULT;
 
 	/* if a fourth parameter is handed over, it is the charset identifier (but is only used in Oracle 9i+) */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ssl", &username, &username_len, &password, &password_len, &dbname, &dbname_len, &charset, &charset_len, &session_mode) == FAILURE) {
@@ -1799,7 +1799,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
  * The real connect function. Allocates all the resources needed, establishes the connection and
  * returns the result handle (or NULL)
  */
-php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, long session_mode, int persistent, int exclusive TSRMLS_DC)
+php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, zend_long session_mode, int persistent, int exclusive TSRMLS_DC)
 {
 	zval *zvp;
 	zend_resource *le;
@@ -1815,7 +1815,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	ub2 charsetid_nls_lang = 0;
 
 	if (session_mode & ~(OCI_SYSOPER | OCI_SYSDBA | PHP_OCI_CRED_EXT)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid session mode specified (%ld)", session_mode);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid session mode specified (%pd)", session_mode);
 		return NULL;
 	}
 	if (session_mode & (OCI_SYSOPER | OCI_SYSDBA | PHP_OCI_CRED_EXT)) {
@@ -1889,7 +1889,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
 
 	if (password_len) {
-		ulong password_hash;
+		zend_ulong password_hash;
 		password_hash = zend_inline_hash_func(password, password_len);
 		smart_str_append_unsigned_ex(&hashed_details, password_hash, 0);
 	}
@@ -2083,7 +2083,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 			if (OCI_G(max_persistent) != -1 && OCI_G(num_persistent) >= OCI_G(max_persistent)) {
 				/* all persistent connactions are in use, fallback to non-persistent connection creation */
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Too many open persistent connections (%ld)", OCI_G(num_persistent));
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Too many open persistent connections (%pd)", OCI_G(num_persistent));
 				alloc_non_persistent = 1;
 			}
 		}
@@ -2648,7 +2648,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 	php_oci_out_column *column;
 	ub4 nrows = 1;
 	int i;
-	long fetch_mode = 0;
+	zend_long fetch_mode = 0;
 
 	if (expected_args > 2) {
 		/* only for ocifetchinto BC */
@@ -2987,7 +2987,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	}
 	smart_str_appendl_ex(&spool_hashed_details, "**", sizeof("**") - 1, 0);
 	if (password_len) {
-		ulong password_hash;
+		zend_ulong password_hash;
 		password_hash = zend_inline_hash_func(password, password_len);
 		smart_str_append_unsigned_ex(&spool_hashed_details, password_hash, 0);
 	}
