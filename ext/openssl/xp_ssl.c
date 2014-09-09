@@ -249,7 +249,7 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 		   to hang forever. To avoid this scenario we poll with a timeout before performing
 		   the actual read. If it times out we're finished.
 		*/
-		if (sock->is_blocked) {
+		if (sock->is_blocked && SSL_pending(sslsock->ssl_handle) == 0) {
 			php_openssl_stream_wait_for_data(sock);
 			if (sock->timeout_event) {
 				stream->eof = 1;
@@ -881,17 +881,19 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret TS
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			if (ret) {
-				if (sslsock->ssl_active) {
-					/* OpenSSL has an internal buffer which select() cannot see. If we don't
-					   fetch it into the stream's buffer, no activity will be reported on the
-					   stream even though there is data waiting to be read - but we only fetch
-					   the number of bytes OpenSSL has ready to give us since we weren't asked
-					   for any data at this stage. This is only likely to cause issues with
-					   non-blocking streams, but it's harmless to always do it. */
-					int bytes;
-					while ((bytes = SSL_pending(sslsock->ssl_handle)) > 0) {
-						php_stream_fill_read_buffer(stream, (size_t)bytes);
-					}
+				/* OpenSSL has an internal buffer which select() cannot see. If we don't
+				 * fetch it into the stream's buffer, no activity will be reported on the
+				 * stream even though there is data waiting to be read - but we only fetch
+				 * the lower of bytes OpenSSL has ready to give us or chunk_size since we
+				 * weren't asked for any data at this stage. This is only likely to cause
+				 * issues with non-blocking streams, but it's harmless to always do it. */
+				size_t pending;
+				if (stream->writepos == stream->readpos
+					&& sslsock->ssl_active
+					&& (pending = (size_t)SSL_pending(sslsock->ssl_handle)) > 0) {
+						php_stream_fill_read_buffer(stream, pending < stream->chunk_size
+							? pending
+							: stream->chunk_size);
 				}
 
 				*(php_socket_t *)ret = sslsock->s.socket;
