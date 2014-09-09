@@ -989,8 +989,6 @@ int lex_scan(zval *zendlval TSRMLS_DC)
 restart:
 	SCNG(yy_text) = YYCURSOR;
 
-yymore_restart:
-
 /*!re2c
 re2c:yyfill:check = 0;
 LNUM	[0-9]+
@@ -1607,44 +1605,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_NS_C;
 }
 
-<INITIAL>"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"'php'"){WHITESPACE}*">" {
-	YYCTYPE *bracket = (YYCTYPE*)zend_memrchr(yytext, '<', yyleng - (sizeof("script language=php>") - 1));
-
-	if (bracket != SCNG(yy_text)) {
-		/* Handle previously scanned HTML, as possible <script> tags found are assumed to not be PHP's */
-		YYCURSOR = bracket;
-		goto inline_html;
-	}
-
-	HANDLE_NEWLINES(yytext, yyleng);
-	BEGIN(ST_IN_SCRIPTING);
-	return T_OPEN_TAG;
-}
-
-
-<INITIAL>"<%=" {
-	if (CG(asp_tags)) {
-		BEGIN(ST_IN_SCRIPTING);
-		return T_OPEN_TAG_WITH_ECHO;
-	} else {
-		goto inline_char_handler;
-	}
-}
-
 
 <INITIAL>"<?=" {
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG_WITH_ECHO;
-}
-
-
-<INITIAL>"<%" {
-	if (CG(asp_tags)) {
-		BEGIN(ST_IN_SCRIPTING);
-		return T_OPEN_TAG;
-	} else {
-		goto inline_char_handler;
-	}
 }
 
 
@@ -1676,35 +1640,19 @@ inline_char_handler:
 
 		YYCURSOR = ptr ? ptr + 1 : YYLIMIT;
 
-		if (YYCURSOR < YYLIMIT) {
-			switch (*YYCURSOR) {
-				case '?':
-					if (CG(short_tags) || !strncasecmp((char*)YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=')) { /* Assume [ \t\n\r] follows "php" */
-						break;
-					}
-					continue;
-				case '%':
-					if (CG(asp_tags)) {
-						break;
-					}
-					continue;
-				case 's':
-				case 'S':
-					/* Probably NOT an opening PHP <script> tag, so don't end the HTML chunk yet
-					 * If it is, the PHP <script> tag rule checks for any HTML scanned before it */
-					YYCURSOR--;
-					yymore();
-				default:
-					continue;
-			}
-
-			YYCURSOR--;
+		if (YYCURSOR >= YYLIMIT) {
+			break;
 		}
 
-		break;
+		if (*YYCURSOR == '?') {
+			if (CG(short_tags) || !strncasecmp((char*)YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=')) { /* Assume [ \t\n\r] follows "php" */
+
+				YYCURSOR--;
+				break;
+			}
+		}
 	}
 
-inline_html:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
 	if (SCNG(output_filter)) {
@@ -1785,11 +1733,6 @@ inline_html:
 			case '\n':
 				CG(zend_lineno)++;
 				break;
-			case '%':
-				if (!CG(asp_tags)) {
-					continue;
-				}
-				/* fall through */
 			case '?':
 				if (*YYCURSOR == '>') {
 					YYCURSOR--;
@@ -1841,20 +1784,9 @@ inline_html:
 	return T_COMMENT;
 }
 
-<ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
+<ST_IN_SCRIPTING>"?>"{NEWLINE}? {
 	BEGIN(INITIAL);
 	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
-}
-
-
-<ST_IN_SCRIPTING>"%>"{NEWLINE}? {
-	if (CG(asp_tags)) {
-		BEGIN(INITIAL);
-		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
-	} else {
-		yyless(1);
-		return yytext[0];
-	}
 }
 
 

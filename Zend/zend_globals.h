@@ -91,7 +91,6 @@ struct _zend_compiler_globals {
 	zend_bool parse_error;
 	zend_bool in_compilation;
 	zend_bool short_tags;
-	zend_bool asp_tags;
 
 	zend_declarables declarables;
 

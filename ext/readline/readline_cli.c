@@ -270,12 +270,6 @@ static int cli_is_valid_code(char *code, int len, zend_string **prompt TSRMLS_DC
 						}
 						valid_end = 0;
 						break;
-					case '%':
-						if (!CG(asp_tags)) {
-							valid_end = 0;
-							break;
-						}
-						/* no break */
 					case '?':
 						if (code[i+1] == '>') {
 							i++;
@@ -360,7 +354,6 @@ static int cli_is_valid_code(char *code, int len, zend_string **prompt TSRMLS_DC
 				break;
 			case outside:
 				if ((CG(short_tags) && !strncmp(code+i-1, "<?", 2))
-				||  (CG(asp_tags) && !strncmp(code+i-1, "<%", 2))
 				||  (i > 3 && !strncmp(code+i-4, "<?php", 5))
 				) {
 					code_type = body;
