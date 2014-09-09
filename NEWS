@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.18
 
+- Core:
+  . Fixed bug #67985 (Incorrect last used array index copied to new array after
+    unset). (Tjerk)
+
 - Session:
   . Fixed bug #67972 (SessionHandler Invalid memory read create_sid()). (Adam)
 
