@@ -18,52 +18,26 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_PROMPT_H
-#define PHPDBG_PROMPT_H
+#ifndef PHPDBG_WEBHELPER_H
+#define PHPDBG_WEBHELPER_H
 
-/* {{{ */
-void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC);
-void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC);
-int phpdbg_interactive(TSRMLS_D);
-int phpdbg_compile(TSRMLS_D);
-void phpdbg_clean(zend_bool full TSRMLS_DC); /* }}} */
+#define phpdbg_notice(...)
 
-/* {{{ phpdbg command handlers */
-PHPDBG_COMMAND(exec);
-PHPDBG_COMMAND(step);
-PHPDBG_COMMAND(continue);
-PHPDBG_COMMAND(run);
-PHPDBG_COMMAND(ev);
-PHPDBG_COMMAND(until);
-PHPDBG_COMMAND(finish);
-PHPDBG_COMMAND(leave);
-PHPDBG_COMMAND(frame);
-PHPDBG_COMMAND(print);
-PHPDBG_COMMAND(break);
-PHPDBG_COMMAND(back);
-PHPDBG_COMMAND(list);
-PHPDBG_COMMAND(info);
-PHPDBG_COMMAND(clean);
-PHPDBG_COMMAND(clear);
-PHPDBG_COMMAND(help);
-PHPDBG_COMMAND(sh);
-PHPDBG_COMMAND(dl);
-PHPDBG_COMMAND(set);
-PHPDBG_COMMAND(source);
-PHPDBG_COMMAND(export);
-PHPDBG_COMMAND(register);
-PHPDBG_COMMAND(quit);
-PHPDBG_COMMAND(watch);
-PHPDBG_COMMAND(wait); /* }}} */
+#include "phpdbg_webdata_transfer.h"
 
-/* {{{ prompt commands */
-extern const phpdbg_command_t phpdbg_prompt_commands[]; /* }}} */
+extern zend_module_entry phpdbg_webhelper_module_entry;
+#define phpext_phpdbg_webhelper_ptr &phpdbg_webhelper_module_entry
 
-/* {{{ */
-#if PHP_VERSION_ID >= 50500
-void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
+#ifdef ZTS
+# define PHPDBG_WG(v) TSRMG(phpdbg_webhelper_globals_id, zend_phpdbg_webhelper_globals *, v)
 #else
-void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC);
-#endif /* }}} */
+# define PHPDBG_WG(v) (phpdbg_webhelper_globals.v)
+#endif
 
-#endif /* PHPDBG_PROMPT_H */
+/* {{{ structs */
+ZEND_BEGIN_MODULE_GLOBALS(phpdbg_webhelper)
+	char *auth;
+	char *path;
+ZEND_END_MODULE_GLOBALS(phpdbg_webhelper) /* }}} */
+
+#endif /* PHPDBG_WEBHELPER_H */

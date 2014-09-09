@@ -792,9 +792,7 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC)
 PHPDBG_API char* phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 {
 	char *cmd = NULL;
-#if !defined(HAVE_LIBREADLINE) && !defined(HAVE_LIBEDIT)
 	char buf[PHPDBG_MAX_CMD];
-#endif
 	char *buffer = NULL;
 
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -832,7 +830,6 @@ readline:
 			/* note: EOF makes readline write prompt again in local console mode */
 readline:
 			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
-				char buf[PHPDBG_MAX_CMD];
 				if (fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
 					cmd = buf;
 				} else goto disconnect;

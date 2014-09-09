@@ -43,6 +43,10 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("phpdbg.path", "", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateString, socket_path, zend_phpdbg_globals, phpdbg_globals)
+PHP_INI_END()
+
 static zend_bool phpdbg_booted = 0;
 
 #if PHP_VERSION_ID >= 50500
@@ -77,6 +81,8 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 {
 	ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
+	REGISTER_INI_ENTRIES();
+
 #if PHP_VERSION_ID >= 50500
 	zend_execute_old = zend_execute_ex;
 	zend_execute_ex = phpdbg_execute_ex;
@@ -86,7 +92,7 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 #endif
 
 	REGISTER_STRINGL_CONSTANT("PHPDBG_VERSION", PHPDBG_VERSION, sizeof(PHPDBG_VERSION)-1, CONST_CS|CONST_PERSISTENT);
-	
+
 	REGISTER_LONG_CONSTANT("PHPDBG_FILE",   FILE_PARAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_METHOD", METHOD_PARAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_LINENO", NUMERIC_PARAM, CONST_CS|CONST_PERSISTENT);

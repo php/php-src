@@ -64,7 +64,7 @@
 # include "TSRM.h"
 #endif
 
-#ifdef HAVE_LIBREADLINE
+#ifdef LIBREADLINE
 #   include <readline/readline.h>
 #   include <readline/history.h>
 #endif
@@ -72,6 +72,16 @@
 #   include <editline/readline.h>
 #endif
 
+/* {{{ strings */
+#define PHPDBG_NAME "phpdbg"
+#define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
+#define PHPDBG_URL "http://phpdbg.com"
+#define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
+#define PHPDBG_VERSION "0.4.0"
+#define PHPDBG_INIT_FILENAME ".phpdbginit"
+/* }}} */
+
+#ifndef PHPDBG_WEBHELPER_H
 #include "phpdbg_lexer.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
@@ -158,15 +168,6 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET|PHPDBG_IS_BP_ENABLED)
 #endif /* }}} */
 
-/* {{{ strings */
-#define PHPDBG_NAME "phpdbg"
-#define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
-#define PHPDBG_URL "http://phpdbg.com"
-#define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.4.0"
-#define PHPDBG_INIT_FILENAME ".phpdbginit"
-/* }}} */
-
 /* {{{ output descriptors */
 #define PHPDBG_STDIN 			0
 #define PHPDBG_STDOUT			1
@@ -210,6 +211,8 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	char *buffer;                                /* buffer */
 
 	zend_ulong flags;                            /* phpdbg flags */
+
+	char *socket_path;                           /* phpdbg.path ini setting */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 /* the beginning (= the important part) of the _zend_mm_heap struct defined in Zend/zend_alloc.c
@@ -226,5 +229,7 @@ struct _zend_mm_heap {
 	zend_mm_segment    *segments_list;
 	zend_mm_storage    *storage;
 };
+
+#endif
 
 #endif /* PHPDBG_H */

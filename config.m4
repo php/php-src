@@ -3,12 +3,15 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(phpdbg, for phpdbg support,
-[  --enable-phpdbg         Build phpdbg], no, no)
+[  --enable-phpdbg            Build phpdbg], no, no)
+
+PHP_ARG_ENABLE(phpdbg-webhelper, for phpdbg web SAPI support,
+[  --enable-phpdbg-webhelper  Build phpdbg web SAPI support], yes, yes)
 
 PHP_ARG_ENABLE(phpdbg-debug, for phpdbg debug build,
-[  --enable-phpdbg-debug   Build phpdbg in debug mode], no, no)
+[  --enable-phpdbg-debug      Build phpdbg in debug mode], no, no)
 
-if test "$PHP_PHPDBG" != "no"; then
+if test "$BUILD_PHPDBG" == "" && test "$PHP_PHPDBG" != "no"; then
   AC_HEADER_TIOCGWINSZ
   AC_DEFINE(HAVE_PHPDBG, 1, [ ])
 
@@ -16,6 +19,17 @@ if test "$PHP_PHPDBG" != "no"; then
     AC_DEFINE(PHPDBG_DEBUG, 1, [ ])
   else
     AC_DEFINE(PHPDBG_DEBUG, 0, [ ])
+  fi
+
+  if test "$PHP_PHPDBG_WEBHELPER" != "no"; then
+    if ! test -d ext/phpdbg_webhelper; then
+      ln -s ../sapi/phpdbg ext/phpdbg_webhelper
+    fi
+    if test "$PHP_JSON" != "no"; then
+      PHP_NEW_EXTENSION(phpdbg_webhelper, phpdbg_rinit_hook.c, $ext_shared)
+    else
+      AC_MSG_ERROR(Webhelper extension of phpdbg needs json enabled)
+    fi
   fi
 
   PHP_PHPDBG_CFLAGS="-D_GNU_SOURCE"
