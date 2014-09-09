@@ -85,7 +85,7 @@ PHP_FUNCTION(oci_define_by_name)
 	define->name = (text*) estrndup(name, name_len);
 	define->name_len = name_len;
 	define->type = type;
-	define->zval = var;
+	memmove(&define->zval, var, sizeof(zval));
 	zval_add_ref(&var);
 
 	RETURN_TRUE;
@@ -1386,7 +1386,8 @@ PHP_FUNCTION(ocifetchinto)
    Fetch all rows of result data into an array */
 PHP_FUNCTION(oci_fetch_all)
 {
-	zval *z_statement, *array, *element, *tmp;
+	zval *z_statement, *array;
+	zval element, tmp;
 	php_oci_statement *statement;
 	php_oci_out_column **columns;
 	zval ***outarrs;
@@ -1417,19 +1418,17 @@ PHP_FUNCTION(oci_fetch_all)
 		}
 
 		while (!php_oci_statement_fetch(statement, nrows TSRMLS_CC)) {
-			zval *row;
+			zval row;
 			
-			MAKE_STD_ZVAL(row);
-			array_init(row);
+			array_init(&row);
 
 			for (i = 0; i < statement->ncolumns; i++) {
-				MAKE_STD_ZVAL(element);
-				php_oci_column_to_zval(columns[ i ], element, PHP_OCI_RETURN_LOBS TSRMLS_CC);
+				php_oci_column_to_zval(columns[ i ], &element, PHP_OCI_RETURN_LOBS TSRMLS_CC);
 
 				if (flags & PHP_OCI_NUM) {
-					zend_hash_next_index_insert(Z_ARRVAL_P(row), &element, sizeof(zval*), NULL);
+					zend_hash_next_index_insert(Z_ARRVAL(row), &element, sizeof(zval*), NULL);
 				} else { /* default to ASSOC */
-					zend_symtable_update(Z_ARRVAL_P(row), columns[ i ]->name, columns[ i ]->name_len+1, &element, sizeof(zval*), NULL);
+					zend_symtable_update(Z_ARRVAL(row), columns[ i ]->name, columns[ i ]->name_len+1, &element, sizeof(zval*), NULL);
 				}
 			}
 
@@ -1451,25 +1450,22 @@ PHP_FUNCTION(oci_fetch_all)
 			for (i = 0; i < statement->ncolumns; i++) {
 				columns[ i ] = php_oci_statement_get_column(statement, i + 1, NULL, 0 TSRMLS_CC);
 				
-				MAKE_STD_ZVAL(tmp);
-				array_init(tmp);
+				array_init(&tmp);
 				zend_hash_next_index_insert(Z_ARRVAL_P(array), &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
 			}
 		} else { /* default to ASSOC */
 			for (i = 0; i < statement->ncolumns; i++) {
 				columns[ i ] = php_oci_statement_get_column(statement, i + 1, NULL, 0 TSRMLS_CC);
 				
-				MAKE_STD_ZVAL(tmp);
-				array_init(tmp);
+				array_init(&tmp);
 				zend_symtable_update(Z_ARRVAL_P(array), columns[ i ]->name, columns[ i ]->name_len+1, (void *) &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
 			}
 		}
 
 		while (!php_oci_statement_fetch(statement, nrows TSRMLS_CC)) {
 			for (i = 0; i < statement->ncolumns; i++) {
-				MAKE_STD_ZVAL(element);
-				php_oci_column_to_zval(columns[ i ], element, PHP_OCI_RETURN_LOBS TSRMLS_CC);
-				zend_hash_index_update((*(outarrs[ i ]))->value.ht, rows, (void *)&element, sizeof(zval*), NULL);
+				php_oci_column_to_zval(columns[ i ], &element, PHP_OCI_RETURN_LOBS TSRMLS_CC);
+				zend_hash_index_update(&(*(outarrs[ i ]))->value.arr->ht, &rows, (void *)&element, sizeof(zval*), NULL);
 			}
 
 			rows++;
@@ -1707,7 +1703,7 @@ PHP_FUNCTION(oci_parse)
 	statement = php_oci_statement_create(connection, query, query_len TSRMLS_CC);
 
 	if (statement) {
-		RETURN_RESOURCE(statement->id);
+		RETURN_RES(statement->id);
 	}
 	RETURN_FALSE;
 }
@@ -2006,7 +2002,7 @@ PHP_FUNCTION(oci_password_change)
 		if (!connection) {
 			RETURN_FALSE;
 		}
-		RETURN_RESOURCE(connection->id);
+		RETURN_RES(connection->id);
 	}
 	WRONG_PARAM_COUNT;
 }
@@ -2029,7 +2025,7 @@ PHP_FUNCTION(oci_new_cursor)
 	statement = php_oci_statement_create(connection, NULL, 0 TSRMLS_CC);
 	
 	if (statement) {
-		RETURN_RESOURCE(statement->id);
+		RETURN_RES(statement->id);
 	}
 	RETURN_FALSE;
 }
@@ -2226,7 +2222,7 @@ PHP_FUNCTION(oci_collection_element_get)
 	zval **tmp, *z_collection = getThis();
 	php_oci_collection *collection;
 	zend_long element_index;
-	zval *value;
+	zval value;
 
 	if (getThis()) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &element_index) == FAILURE) {
@@ -2250,9 +2246,7 @@ PHP_FUNCTION(oci_collection_element_get)
 		RETURN_FALSE;
 	}
 	
-	*return_value = *value;
-	zval_copy_ctor(return_value);
-	zval_ptr_dtor(&value);
+	RETURN_ZVAL(&value, 1, 1);
 }
 /* }}} */
 
@@ -2463,7 +2457,7 @@ PHP_FUNCTION(oci_get_implicit_resultset)
 	if (imp_statement) {
 		if (php_oci_statement_execute(imp_statement, (ub4)OCI_DEFAULT TSRMLS_CC))
 			RETURN_FALSE;
-		RETURN_RESOURCE(imp_statement->id);
+		RETURN_RES(imp_statement->id);
 	}
 	RETURN_FALSE;
 }

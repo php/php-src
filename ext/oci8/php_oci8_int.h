@@ -449,7 +449,7 @@ int php_oci_collection_size(php_oci_collection *collection, sb4 *size TSRMLS_DC)
 int php_oci_collection_max(php_oci_collection *collection, zend_long *max TSRMLS_DC);
 int php_oci_collection_trim(php_oci_collection *collection, zend_long trim_size TSRMLS_DC);
 int php_oci_collection_append(php_oci_collection *collection, char *element, int element_len TSRMLS_DC);
-int php_oci_collection_element_get(php_oci_collection *collection, zend_long index, zval **result_element TSRMLS_DC);
+int php_oci_collection_element_get(php_oci_collection *collection, zend_long index, zval *result_element TSRMLS_DC);
 int php_oci_collection_element_set(php_oci_collection *collection, zend_long index, char *value, int value_len TSRMLS_DC);
 int php_oci_collection_element_set_null(php_oci_collection *collection, zend_long index TSRMLS_DC);
 int php_oci_collection_element_set_date(php_oci_collection *collection, zend_long index, char *date, int date_len TSRMLS_DC);

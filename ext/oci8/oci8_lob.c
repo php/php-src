@@ -71,7 +71,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 	descriptor = ecalloc(1, sizeof(php_oci_descriptor));
 	descriptor->type = type;
 	descriptor->connection = connection;
-	zend_list_addref(descriptor->connection->id);
+	Z_ADDREF_P(descriptor->connection->id);
 
 	PHP_OCI_CALL_RETURN(errstatus, OCIDescriptorAlloc, (connection->env, (dvoid*)&(descriptor->descriptor), descriptor->type, (size_t) 0, (dvoid **) 0));
 

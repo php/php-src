@@ -1789,7 +1789,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 	if (!connection) {
 		RETURN_FALSE;
 	}
-	RETURN_RESOURCE(connection->id);
+	RETURN_RES(connection->id);
 
 }
 /* }}} */
@@ -1949,9 +1949,8 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				int type, link;
 				void *ptr;
 
-				link = OCI8_PTR_TO_INT(le->ptr);
-				ptr = zend_list_find(link, &type); /* PHPNG TODO */
-				if (ptr && (type == le_connection)) {
+				ptr = le->ptr; /* PHPNG TODO */
+				if (ptr && (le->type == le_connection)) {
 					connection = (php_oci_connection *)ptr;
 				}
 			}
@@ -2007,10 +2006,10 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 							/* okay, the connection is open and the server is still alive */
 							connection->used_this_request = 1;
-							tmp = (php_oci_connection *)zend_list_find(connection->id, &rsrc_type);
+							tmp = (php_oci_connection *)connection->id->ptr;
 
 							if (tmp != NULL && rsrc_type == le_pconnection && tmp->hash_key->len == hashed_details.s->len &&
-								memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0 && zend_list_addref(connection->id) == SUCCESS) {
+								memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0 && Z_ADDREF_P(connection->id) == SUCCESS) {
 								/* do nothing */
 							} else {
 								PHP_OCI_REGISTER_RESOURCE(connection, le_pconnection);
@@ -2020,7 +2019,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 								 * decremented in the persistent helper
 								 */
 								if (OCI_G(old_oci_close_semantics)) {
-									zend_list_addref(connection->id);
+									Z_ADDREF_P(connection->id);
 								}
 							}
 							smart_str_free_ex(&hashed_details, 0);
@@ -2031,7 +2030,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				} else {
 					/* we do not ping non-persistent connections */
 					smart_str_free_ex(&hashed_details, 0);
-					zend_list_addref(connection->id);
+					Z_ADDREF_P(connection->id);
 					return connection;
 				}
 			} /* is_open is true? */
@@ -2048,7 +2047,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				/* We have to do a hash_del but need to preserve the resource if there is a positive
 				 * refcount. Set the data pointer in the list entry to NULL
 				 */
-				if (connection == zend_list_find(connection->id, &rsrc_type) && rsrc_type == le_pconnection) {
+				if (connection == connection->id->ptr && rsrc_type == le_pconnection) {
 					le->ptr = NULL;
 				}
 
@@ -2181,14 +2180,14 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		 * refcount is decremented in the persistent helper
 		 */
 		if (OCI_G(old_oci_close_semantics)) {
-			zend_list_addref(connection->id);
+			Z_ADDREF_P(connection->id);
 		}
 		zend_hash_update_mem(&EG(persistent_list), connection->hash_key, (void *)&new_le, sizeof(zend_resource));
 		OCI_G(num_persistent)++;
 		OCI_G(num_links)++;
 	} else if (!exclusive) {
 		PHP_OCI_REGISTER_RESOURCE(connection, le_connection);
-		new_le.ptr = OCI8_INT_TO_PTR(connection->id);
+		new_le.ptr = connection->id;
 		new_le.type = le_index_ptr;
 		zend_hash_update_mem(&EG(regular_list), connection->hash_key, (void *)&new_le, sizeof(zend_resource));
 		OCI_G(num_links)++;
@@ -2564,15 +2563,15 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 	}
 
 	if (column->is_cursor) { /* REFCURSOR -> simply return the statement id */
-		ZVAL_RESOURCE(value, column->stmtid);
-		zend_list_addref(column->stmtid);
+		zend_register_resource(value, column->stmtid, 0 TSRMLS_CC); /* XXX type correct? */
+		Z_ADDREF_P(column->stmtid);
 	} else if (column->is_descr) {
 
 		if (column->data_type != SQLT_RDD) {
 			int rsrc_type;
 
 			/* reset descriptor's length */
-			descriptor = (php_oci_descriptor *) zend_list_find(column->descid, &rsrc_type);
+			descriptor = (php_oci_descriptor *) column->descid->ptr;
 
 			if (!descriptor || rsrc_type != le_descriptor) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find LOB descriptor #%d", column->descid);
@@ -2608,7 +2607,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 			/* return the locator */
 			object_init_ex(value, oci_lob_class_entry_ptr);
 			add_property_resource(value, "descriptor", column->descid);
-			zend_list_addref(column->descid);
+			Z_ADDREF_P(column->descid);
 		}
 	} else {
 		switch (column->retcode) {
@@ -2762,19 +2761,18 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		}
 
 		if (!(column->indicator == -1)) {
-			zval *element;
+			zval element;
 
-			MAKE_STD_ZVAL(element);
-			php_oci_column_to_zval(column, element, fetch_mode TSRMLS_CC);
+			php_oci_column_to_zval(column, &element, fetch_mode TSRMLS_CC);
 
 			if (fetch_mode & PHP_OCI_NUM || !(fetch_mode & PHP_OCI_ASSOC)) {
-				add_index_zval(return_value, i, element);
+				add_index_zval(return_value, i, &element);
 			}
 			if (fetch_mode & PHP_OCI_ASSOC) {
 				if (fetch_mode & PHP_OCI_NUM) {
-					Z_ADDREF_P(element);
+					Z_ADDREF(element);
 				}
-				add_assoc_zval(return_value, column->name, element);
+				add_assoc_zval(return_value, column->name, &element);
 			}
 
 		} else {
@@ -2789,7 +2787,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 
 	if (expected_args > 2) {
 		/* Only for ocifetchinto BC.  In all other cases we return array, not long */
-		REPLACE_ZVAL_VALUE(&array, return_value, 1); /* copy return_value to given reference */
+		ZVAL_COPY_VALUE(&array, return_value); /* copy return_value to given reference */
 		zval_dtor(return_value);
 		RETURN_LONG(statement->ncolumns);
 	}

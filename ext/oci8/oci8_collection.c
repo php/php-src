@@ -56,7 +56,7 @@ php_oci_collection *php_oci_collection_create(php_oci_connection *connection, ch
 
 	collection->connection = connection;
 	collection->collection = NULL;
-	zend_list_addref(collection->connection->id);
+	Z_ADDREF_P(collection->connection->id);
 
 	/* get type handle by name */
 	PHP_OCI_CALL_RETURN(errstatus, OCITypeByName,
@@ -473,7 +473,7 @@ int php_oci_collection_append(php_oci_collection *collection, char *element, int
 
 /* {{{ php_oci_collection_element_get()
  Get the element with the given index */
-int php_oci_collection_element_get(php_oci_collection *collection, zend_long index, zval **result_element TSRMLS_DC)
+int php_oci_collection_element_get(php_oci_collection *collection, zend_long index, zval *result_element TSRMLS_DC)
 {
 	php_oci_connection *connection = collection->connection;
 	dvoid *element;
@@ -483,8 +483,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, zend_long ind
 	ub4 buff_len = 1024;
 	sword errstatus;
 	
-	MAKE_STD_ZVAL(*result_element);
-	ZVAL_NULL(*result_element);
+	ZVAL_NULL(result_element);
 
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 
@@ -503,13 +502,11 @@ int php_oci_collection_element_get(php_oci_collection *collection, zend_long ind
 	if (errstatus != OCI_SUCCESS) {
 		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-		FREE_ZVAL(*result_element);
 		return 1;
 	}
 	
 	if (exists == 0) {
 		/* element doesn't exist */
-		FREE_ZVAL(*result_element);
 		return 1;
 	}
 
@@ -525,12 +522,11 @@ int php_oci_collection_element_get(php_oci_collection *collection, zend_long ind
 			if (errstatus != OCI_SUCCESS) {
 				connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 				PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-				FREE_ZVAL(*result_element);
 				return 1;
 			}
 
-			ZVAL_STRINGL(*result_element, (char *)buff, buff_len, 1);
-			Z_STRVAL_P(*result_element)[buff_len] = '\0';
+			ZVAL_STRINGL(result_element, (char *)buff, buff_len, 1);
+			Z_STRVAL_P(result_element)[buff_len] = '\0';
 			
 			return 0;
 			break;
@@ -543,7 +539,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, zend_long ind
 			PHP_OCI_CALL_RETURN(str, OCIStringPtr, (connection->env, oci_string));
 			
 			if (str) {
-				ZVAL_STRING(*result_element, (char *)str, 1);
+				ZVAL_STRING(result_element, (char *)str);
 			}
 			return 0;
 		}
@@ -568,18 +564,16 @@ int php_oci_collection_element_get(php_oci_collection *collection, zend_long ind
 			if (errstatus != OCI_SUCCESS) {
 				connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 				PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-				FREE_ZVAL(*result_element);
 				return 1;
 			}
 			
-			ZVAL_DOUBLE(*result_element, double_number);
+			ZVAL_DOUBLE(result_element, double_number);
 
 			return 0;
 		}
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown or unsupported type of element: %d", collection->element_typecode);
-			FREE_ZVAL(*result_element);
 			return 1;
 			break;
 	}
