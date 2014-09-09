@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #67878 (program_prefix not honoured in man pages). (Remi)
   . Fixed bug #67938 (Segfault when extending interface method with variadic).
     (Nikita)
+  . Fixed bug #67985 (Incorrect last used array index copied to new array after
+    unset). (Tjerk)
 
 - Fileinfo:
   . Fixed bug #67731 (finfo::file() returns invalid mime type
