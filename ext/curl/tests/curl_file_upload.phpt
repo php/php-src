@@ -43,12 +43,6 @@ var_dump($file->getPostFilename());
 curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
 var_dump(curl_exec($ch));
 
-curl_setopt($ch, CURLOPT_SAFE_UPLOAD, 0);
-$params = array('file' => '@' . __DIR__ . '/curl_testdata1.txt');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-var_dump(curl_exec($ch));
-
-curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true);
 $params = array('file' => '@' . __DIR__ . '/curl_testdata1.txt');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 var_dump(curl_exec($ch));
@@ -70,9 +64,6 @@ string(%d) "%s/curl_testdata1.txt"
 string(%d) "curl_testdata1.txt|text/plain"
 string(%d) "foo.txt"
 string(%d) "foo.txt|application/octet-stream"
-
-Deprecated: curl_setopt(): The usage of the @filename API for file uploading is deprecated. Please use the CURLFile class instead in %s on line %d
-string(%d) "curl_testdata1.txt|application/octet-stream"
 string(0) ""
 string(%d) "array(1) {
   ["file"]=>

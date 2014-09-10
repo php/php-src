@@ -1199,7 +1199,6 @@ PHP_MINIT_FUNCTION(curl)
 #if CURLOPT_PASSWDFUNCTION != 0
 	REGISTER_CURL_CONSTANT(CURLOPT_PASSWDFUNCTION);
 #endif
-	REGISTER_CURL_CONSTANT(CURLOPT_SAFE_UPLOAD);
 
 #ifdef PHP_CURL_NEED_OPENSSL_TSL
 	if (!CRYPTO_get_id_callback()) {
@@ -1727,7 +1726,6 @@ static php_curl *alloc_curl_handle()
 
 	zend_llist_init(&ch->to_free->str,   sizeof(char *),          (llist_dtor_func_t)curl_free_string, 0);
 	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost), (llist_dtor_func_t)curl_free_post,   0);
-	ch->safe_upload = 1; /* for now, for BC reason we allow unsafe API */
 
 	ch->to_free->slist = emalloc(sizeof(HashTable));
 	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
@@ -2158,10 +2156,6 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 #endif
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_P(zvalue));
 			break;
-		case CURLOPT_SAFE_UPLOAD:
-			convert_to_long_ex(zvalue);
-			ch->safe_upload = (Z_LVAL_P(zvalue) != 0);
-			break;
 
 		/* String options */
 		case CURLOPT_CAINFO:
@@ -2523,46 +2517,12 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 
 					postval = Z_STRVAL_P(current);
 
-					/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
-					 * must be explicitly cast to long in curl_formadd
-					 * use since curl needs a long not an int. */
-					if (!ch->safe_upload && *postval == '@') {
-						char *name, *type, *filename;
-						++postval;
-
-						php_error_docref("curl.curlfile" TSRMLS_CC, E_DEPRECATED,
-								"The usage of the @filename API for file uploading is deprecated. Please use the CURLFile class instead");
-
-						name = estrndup(postval, Z_STRLEN_P(current));
-						if ((type = (char *)php_memnstr(name, ";type=", sizeof(";type=") - 1,
-										name + Z_STRLEN_P(current)))) {
-							*type = '\0';
-						}
-						if ((filename = (char *)php_memnstr(name, ";filename=", sizeof(";filename=") - 1,
-										name + Z_STRLEN_P(current)))) {
-							*filename = '\0';
-						}
-						/* open_basedir check */
-						if (php_check_open_basedir(name TSRMLS_CC)) {
-							efree(name);
-							return FAILURE;
-						}
-						error = curl_formadd(&first, &last,
-										CURLFORM_COPYNAME, string_key->val,
-										CURLFORM_NAMELENGTH, string_key->len,
-										CURLFORM_FILENAME, filename ? filename + sizeof(";filename=") - 1 : name,
-										CURLFORM_CONTENTTYPE, type ? type + sizeof(";type=") - 1 : "application/octet-stream",
-										CURLFORM_FILE, name,
-										CURLFORM_END);
-						efree(name);
-					} else {
-						error = curl_formadd(&first, &last,
-											 CURLFORM_COPYNAME, string_key->val,
-											 CURLFORM_NAMELENGTH, (zend_long)string_key->len,
-											 CURLFORM_COPYCONTENTS, postval,
-											 CURLFORM_CONTENTSLENGTH, (zend_long)Z_STRLEN_P(current),
-											 CURLFORM_END);
-					}
+					error = curl_formadd(&first, &last,
+										 CURLFORM_COPYNAME, string_key->val,
+										 CURLFORM_NAMELENGTH, (zend_long)string_key->len,
+										 CURLFORM_COPYCONTENTS, postval,
+										 CURLFORM_CONTENTSLENGTH, (zend_long)Z_STRLEN_P(current),
+										 CURLFORM_END);
 
 					zend_string_release(string_key);
 				} ZEND_HASH_FOREACH_END();
@@ -2753,7 +2713,7 @@ PHP_FUNCTION(curl_setopt)
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
 
-	if (options <= 0 && options != CURLOPT_SAFE_UPLOAD) {
+	if (options <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid curl configuration option");
 		RETURN_FALSE;
 	}
