@@ -1818,10 +1818,6 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ASSIGN);
-	} else if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		if (!OP2_FREE) {
-			PZVAL_LOCK(value_ptr);
-		}
 	}
 
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
@@ -1838,12 +1834,6 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 		variable_ptr = &EG(uninitialized_zval);
 	} else {
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
-	}
-
-	if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		if (!OP2_FREE) {
-			Z_DELREF_P(variable_ptr);
-		}
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {

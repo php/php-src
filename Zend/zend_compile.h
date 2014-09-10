@@ -858,8 +858,7 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 
 
 #define ZEND_RETURNS_FUNCTION 1<<0
-#define ZEND_RETURNS_NEW      1<<1
-#define ZEND_RETURNS_VALUE    1<<2
+#define ZEND_RETURNS_VALUE    1<<1
 
 #define ZEND_FAST_RET_TO_CATCH		1
 #define ZEND_FAST_RET_TO_FINALLY	2

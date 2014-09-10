@@ -54,6 +54,7 @@ PHP X.Y UPGRADE NOTES
   . zend_function.common.num_args don't include the variadic argument anymore.
   . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
     output buffer is created in an output buffer handler.
+  . Removed support for assigning the result of new by reference.
   . Removed support for scoped calls to non-static methods from an incompatible
     $this context. See details in https://wiki.php.net/rfc/incompat_ctx.
   . Removed support for #-style comments in ini files. Use ;-style comments

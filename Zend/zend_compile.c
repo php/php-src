@@ -2341,9 +2341,6 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 	if (zend_is_call(source_ast)) {
 		opline->extended_value = ZEND_RETURNS_FUNCTION;
-	} else if (source_ast->kind == ZEND_AST_NEW) {
-		zend_error(E_DEPRECATED, "Assigning the return value of new by reference is deprecated");
-		opline->extended_value = ZEND_RETURNS_NEW;
 	}
 }
 /* }}} */
@@ -6361,11 +6358,8 @@ void zend_compile_var(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 			if (type == BP_VAR_W || type == BP_VAR_REF
 				|| type == BP_VAR_RW || type == BP_VAR_UNSET
 			) {
-				/* For BC reasons =& new Foo is allowed */
-				if (type != BP_VAR_REF || ast->kind != ZEND_AST_NEW) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot use temporary expression in write context");
-				}
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use temporary expression in write context");
 			}
 
 			zend_compile_expr(result, ast);
