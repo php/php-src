@@ -108,6 +108,7 @@
   . Fix user session handlers (See rfc:session.user.return-value). (Sara)
   . Added intdiv() function. (Andrea)
   . Improved precision of log() function for base 2 and 10. (Marc Bennewitz)
+  . Remove string category support in setlocale(). (Nikita)
 
 - Streams:
   . Fixed bug #68532 (convert.base64-encode omits padding bytes).

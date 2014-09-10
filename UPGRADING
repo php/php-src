@@ -75,6 +75,10 @@ PHP X.Y UPGRADE NOTES
   . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
     them consistent with other GMP functions.
 
+- Standard:
+  . Removed string category support in setlocale(). Use the LC_* constants
+    instead.
+
 ========================================
 2. New Features
 ========================================

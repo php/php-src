@@ -4450,49 +4450,18 @@ PHP_FUNCTION(strip_tags)
 PHP_FUNCTION(setlocale)
 {
 	zval *args = NULL;
-	zval *pcategory, *plocale;
+	zval *plocale;
 	zend_string *loc;
 	char *retval;
-	int num_args, cat, i = 0;
+	zend_long cat;
+	int num_args, i = 0;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z+", &pcategory, &args, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l+", &cat, &args, &num_args) == FAILURE) {
 		return;
 	}
 
 #ifdef HAVE_SETLOCALE
-	if (Z_TYPE_P(pcategory) == IS_LONG) {
-		cat = (int)Z_LVAL_P(pcategory);
-	} else {
-		/* FIXME: The following behaviour should be removed. */
-		zend_string *category = zval_get_string(pcategory);
-
-		php_error_docref(NULL, E_DEPRECATED, "Passing locale category name as string is deprecated. Use the LC_* -constants instead");
-		if (!strcasecmp("LC_ALL", category->val)) {
-			cat = LC_ALL;
-		} else if (!strcasecmp("LC_COLLATE", category->val)) {
-			cat = LC_COLLATE;
-		} else if (!strcasecmp("LC_CTYPE", category->val)) {
-			cat = LC_CTYPE;
-#ifdef LC_MESSAGES
-		} else if (!strcasecmp("LC_MESSAGES", category->val)) {
-			cat = LC_MESSAGES;
-#endif
-		} else if (!strcasecmp("LC_MONETARY", category->val)) {
-			cat = LC_MONETARY;
-		} else if (!strcasecmp("LC_NUMERIC", category->val)) {
-			cat = LC_NUMERIC;
-		} else if (!strcasecmp("LC_TIME", category->val)) {
-			cat = LC_TIME;
-		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME", category->val);
-
-			zend_string_release(category);
-			RETURN_FALSE;
-		}
-		zend_string_release(category);
-	}
-
 	if (Z_TYPE(args[0]) == IS_ARRAY) {
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL(args[0]), &pos);
 	}
