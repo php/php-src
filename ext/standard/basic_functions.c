@@ -3100,7 +3100,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FALIAS(set_file_buffer, stream_set_write_buffer,					arginfo_stream_set_write_buffer)
 	PHP_FE(stream_set_chunk_size,											arginfo_stream_set_chunk_size)
 
-	PHP_DEP_FALIAS(set_socket_blocking, stream_set_blocking,				arginfo_stream_set_blocking)
 	PHP_FE(stream_set_blocking,												arginfo_stream_set_blocking)
 	PHP_FALIAS(socket_set_blocking, stream_set_blocking,					arginfo_stream_set_blocking)
 

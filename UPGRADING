@@ -80,6 +80,9 @@ PHP X.Y UPGRADE NOTES
     instead.
   . Removed set_magic_quotes_runtime() and its alias magic_quotes_runtime().
 
+- Stream:
+  . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
+
 ========================================
 2. New Features
 ========================================

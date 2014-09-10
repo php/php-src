@@ -115,6 +115,8 @@
 - Streams:
   . Fixed bug #68532 (convert.base64-encode omits padding bytes).
     (blaesius at krumedia dot de)
+  . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
+    (Nikita)
 
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
