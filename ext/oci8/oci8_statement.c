@@ -683,7 +683,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 
 			/* find a user-set define */
 			if (statement->defines) {
-				if ((outcol->define = zend_hash_find_ptr(statement->defines, zend_string_init(outcol->name, outcol->name_len, 0))) != NULL) {
+				if ((outcol->define = zend_hash_str_find_ptr(statement->defines, outcol->name, outcol->name_len)) != NULL) {
 					if (outcol->define->type) {
 						outcol->data_type = outcol->define->type;
 					}
@@ -1098,7 +1098,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 		{
 			zval *tmp;
 			
-			if (Z_TYPE_P(var) != IS_OBJECT || (tmp = zend_hash_find(Z_OBJPROP_P(var), zend_string_init("collection", sizeof("collection"), 0))) == NULL) {
+			if (Z_TYPE_P(var) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(var), "collection", sizeof("collection"))) == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find collection property");
 				return 1;
 			}
@@ -1120,7 +1120,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 		{
 			zval *tmp;
 			
-			if (Z_TYPE_P(var) != IS_OBJECT || (tmp = zend_hash_find(Z_OBJPROP_P(var), zend_string_init("descriptor", sizeof("descriptor"), 0))) == NULL) {
+			if (Z_TYPE_P(var) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(var), "descriptor", sizeof("descriptor"))) == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find descriptor property");
 				return 1;
 			}
@@ -1213,7 +1213,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	}
 
 	memset((void*)&bind,0,sizeof(php_oci_bind));
-	if ((old_bind = zend_hash_find_ptr(statement->binds, zend_string_init(name, name_len + 1, 0))) != NULL) {
+	if ((old_bind = zend_hash_str_find_ptr(statement->binds, name, name_len)) != NULL) {
 		bindp = old_bind;
 		zval_ptr_dtor(&bindp->zval);
 	} else {
@@ -1395,7 +1395,7 @@ sb4 php_oci_bind_out_callback(
 		 * out-bind as the contents would have been changed for in/out
 		 * binds (Bug #46994).
 		 */
-		if ((tmp = zend_hash_find(Z_OBJPROP_P(val), zend_string_init("descriptor", sizeof("descriptor"), 0))) == NULL) {
+		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(val), "descriptor", sizeof("descriptor"))) == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find object outbind descriptor property");
 			return OCI_ERROR;
 		}
