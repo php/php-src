@@ -71,11 +71,20 @@ PHP X.Y UPGRADE NOTES
 8. Removed Extensions
 ========================================
 
+- ereg
 
 ========================================
 9. Other Changes to Extensions
 ========================================
 
+- mbstring
+  . Removed constant 'MB_OVERLOAD_REGEX'
+
+- opcache
+  . Now uses PCRE for blacklist filtering
+
+- pgsql
+  . Now uses PCRE for column type detection
 
 ========================================
 10. New Global Constants
