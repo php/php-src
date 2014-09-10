@@ -24,9 +24,8 @@ $sec = 45;
 $month = 7;
 $day = 2;
 $year = 1963;
-$is_dst = 0; 
 $extra_arg = 10;
-var_dump( mktime($hour, $minute, $sec, $month, $day, $year, $is_dst, $extra_arg) );
+var_dump( mktime($hour, $minute, $sec, $month, $day, $year, $extra_arg) );
 
 ?>
 ===DONE===
@@ -40,6 +39,6 @@ int(%d)
 
 -- Testing mktime() function with more than expected no. of arguments --
 
-Warning: mktime() expects at most 7 parameters, 8 given in %s on line %d
+Warning: mktime() expects at most 6 parameters, 7 given in %s on line %d
 bool(false)
 ===DONE===
