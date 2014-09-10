@@ -129,13 +129,6 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-PHP_INI_BEGIN()
-/* Default is not allowing any write operations.
-   XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_WRITE_FILE == 44
-*/
-PHP_INI_ENTRY("xsl.security_prefs", "44", PHP_INI_ALL, NULL)
-PHP_INI_END()
-
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(xsl)
@@ -180,8 +173,6 @@ PHP_MINIT_FUNCTION(xsl)
 	REGISTER_LONG_CONSTANT("LIBEXSLT_VERSION",           LIBEXSLT_VERSION,            CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBEXSLT_DOTTED_VERSION",  LIBEXSLT_DOTTED_VERSION,     CONST_CS | CONST_PERSISTENT);
 #endif
-
-    REGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }
@@ -259,8 +250,6 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
 				   (const xmlChar *) "http://php.net/xsl");
 	xsltSetGenericErrorFunc(NULL, NULL);
 	xsltCleanupGlobals();
-
-	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }

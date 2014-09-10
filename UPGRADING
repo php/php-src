@@ -395,6 +395,10 @@ Other
 - Stream:
   . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
 
+- XSL:
+  . Removed xsl.security_prefs ini option. Use XsltProcessor::setSecurityPrefs()
+    instead.
+
 ========================================
 2. New Features
 ========================================

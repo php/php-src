@@ -169,5 +169,6 @@
 
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
+  . Removed xsl.security_prefs ini option. (Nikita)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
