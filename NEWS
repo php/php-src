@@ -41,6 +41,7 @@
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
     internally. (Derick)
+  . Removed $is_dst parameter from mktime() and gmmktime(). (Nikita)
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
