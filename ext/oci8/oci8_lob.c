@@ -71,7 +71,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 	descriptor = ecalloc(1, sizeof(php_oci_descriptor));
 	descriptor->type = type;
 	descriptor->connection = connection;
-	Z_ADDREF_P(descriptor->connection->id);
+	++GC_REFCOUNT(descriptor->connection->id);
 
 	PHP_OCI_CALL_RETURN(errstatus, OCIDescriptorAlloc, (connection->env, (dvoid*)&(descriptor->descriptor), descriptor->type, (size_t) 0, (dvoid **) 0));
 
@@ -109,7 +109,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 			return NULL;
 		}
 
-		zend_hash_index_update(connection->descriptors,descriptor->index,&descriptor,sizeof(php_oci_descriptor *),NULL);
+		zend_hash_index_update_ptr(connection->descriptors, descriptor->index, &descriptor);
 	}
 	return descriptor;
 

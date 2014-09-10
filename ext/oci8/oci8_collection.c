@@ -56,7 +56,7 @@ php_oci_collection *php_oci_collection_create(php_oci_connection *connection, ch
 
 	collection->connection = connection;
 	collection->collection = NULL;
-	Z_ADDREF_P(collection->connection->id);
+	++GC_REFCOUNT(collection->connection->id);
 
 	/* get type handle by name */
 	PHP_OCI_CALL_RETURN(errstatus, OCITypeByName,
@@ -525,7 +525,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, zend_long ind
 				return 1;
 			}
 
-			ZVAL_STRINGL(result_element, (char *)buff, buff_len, 1);
+			ZVAL_STRINGL(result_element, (char *)buff, buff_len);
 			Z_STRVAL_P(result_element)[buff_len] = '\0';
 			
 			return 0;

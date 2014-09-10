@@ -361,20 +361,20 @@ typedef struct {
 	} while (0)
 
 #define PHP_OCI_ZVAL_TO_CONNECTION(zval, connection) \
-	ZEND_FETCH_RESOURCE2(connection, php_oci_connection *, &zval, -1, "oci8 connection", le_connection, le_pconnection)
+	ZEND_FETCH_RESOURCE2(connection, php_oci_connection *, zval, -1, "oci8 connection", le_connection, le_pconnection)
 
 #define PHP_OCI_ZVAL_TO_STATEMENT(zval, statement) \
 	ZEND_FETCH_RESOURCE(statement, php_oci_statement *, zval, -1, "oci8 statement", le_statement)
 
 #define PHP_OCI_ZVAL_TO_DESCRIPTOR(zval, descriptor) \
-	ZEND_FETCH_RESOURCE(descriptor, php_oci_descriptor *, &zval, -1, "oci8 descriptor", le_descriptor)
+	ZEND_FETCH_RESOURCE(descriptor, php_oci_descriptor *, zval, -1, "oci8 descriptor", le_descriptor)
 
 #define PHP_OCI_ZVAL_TO_COLLECTION(zval, collection) \
-	ZEND_FETCH_RESOURCE(collection, php_oci_collection *, &zval, -1, "oci8 collection", le_collection)
+	ZEND_FETCH_RESOURCE(collection, php_oci_collection *, zval, -1, "oci8 collection", le_collection)
 
 #define PHP_OCI_FETCH_RESOURCE_EX(zval, var, type, name, resource_type)						 \
 	do { \
-		var = (type) zend_fetch_resource(&zval TSRMLS_CC, -1, name, NULL, 1, resource_type); \
+		var = (type) zend_fetch_resource(zval TSRMLS_CC, -1, name, NULL, 1, resource_type); \
 		if (!var) {																			 \
 			return 1;																		 \
 		} \

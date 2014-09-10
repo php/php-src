@@ -2009,7 +2009,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 							tmp = (php_oci_connection *)connection->id->ptr;
 
 							if (tmp != NULL && rsrc_type == le_pconnection && tmp->hash_key->len == hashed_details.s->len &&
-								memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0 && Z_ADDREF_P(connection->id) == SUCCESS) {
+								memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0 && ++GC_REFCOUNT(connection->id) == SUCCESS) {
 								/* do nothing */
 							} else {
 								PHP_OCI_REGISTER_RESOURCE(connection, le_pconnection);
@@ -2019,7 +2019,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 								 * decremented in the persistent helper
 								 */
 								if (OCI_G(old_oci_close_semantics)) {
-									Z_ADDREF_P(connection->id);
+									++GC_REFCOUNT(connection->id);
 								}
 							}
 							smart_str_free_ex(&hashed_details, 0);
@@ -2030,7 +2030,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				} else {
 					/* we do not ping non-persistent connections */
 					smart_str_free_ex(&hashed_details, 0);
-					Z_ADDREF_P(connection->id);
+					++GC_REFCOUNT(connection->id);
 					return connection;
 				}
 			} /* is_open is true? */
@@ -2180,7 +2180,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		 * refcount is decremented in the persistent helper
 		 */
 		if (OCI_G(old_oci_close_semantics)) {
-			Z_ADDREF_P(connection->id);
+			++GC_REFCOUNT(connection->id);
 		}
 		zend_hash_update_mem(&EG(persistent_list), connection->hash_key, (void *)&new_le, sizeof(zend_resource));
 		OCI_G(num_persistent)++;
@@ -2564,7 +2564,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 
 	if (column->is_cursor) { /* REFCURSOR -> simply return the statement id */
 		zend_register_resource(value, column->stmtid, 0 TSRMLS_CC); /* XXX type correct? */
-		Z_ADDREF_P(column->stmtid);
+		++GC_REFCOUNT(column->stmtid);
 	} else if (column->is_descr) {
 
 		if (column->data_type != SQLT_RDD) {
@@ -2607,7 +2607,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 			/* return the locator */
 			object_init_ex(value, oci_lob_class_entry_ptr);
 			add_property_resource(value, "descriptor", column->descid);
-			Z_ADDREF_P(column->descid);
+			++GC_REFCOUNT(column->descid);
 		}
 	} else {
 		switch (column->retcode) {
@@ -2787,7 +2787,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 
 	if (expected_args > 2) {
 		/* Only for ocifetchinto BC.  In all other cases we return array, not long */
-		ZVAL_COPY_VALUE(&array, return_value); /* copy return_value to given reference */
+		ZVAL_COPY_VALUE(array, return_value); /* copy return_value to given reference */
 		zval_dtor(return_value);
 		RETURN_LONG(statement->ncolumns);
 	}
@@ -2974,6 +2974,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	zend_resource spool_le = {0};
 	zend_resource *spool_out_le = NULL;
 	zend_bool iserror = 0;
+	zval *spool_out_zv = NULL;
 
 	/* {{{ Create the spool hash key */
 	smart_str_appendl_ex(&spool_hashed_details, "oci8spool***", sizeof("oci8spool***") - 1, 0);
@@ -3005,7 +3006,12 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	php_strtolower(spool_hashed_details.s->val, spool_hashed_details.s->len);
 	/* }}} */
 
-	if ((spool_out_le = zend_hash_find(&EG(persistent_list), spool_hashed_details.s)) == NULL) {
+	spool_out_zv = zend_hash_find(&EG(persistent_list), spool_hashed_details.s);
+	if (spool_out_zv != NULL) {
+		spool_out_le = Z_RES_P(spool_out_zv);
+	}
+
+	if (spool_out_le == NULL) {
 
 		session_pool = php_oci_create_spool(username, username_len, password, password_len, dbname, dbname_len, spool_hashed_details.s, charsetid TSRMLS_CC);
 
