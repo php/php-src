@@ -79,6 +79,10 @@ PHP X.Y UPGRADE NOTES
   . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
     them consistent with other GMP functions.
 
+- PCRE:
+  . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use
+    preg_reaplace_callback() instead.
+
 - Standard:
   . Removed string category support in setlocale(). Use the LC_* constants
     instead.
