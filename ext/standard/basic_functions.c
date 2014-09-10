@@ -607,10 +607,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_get_magic_quotes_runtime, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_set_magic_quotes_runtime, 0, 0, 1)
-	ZEND_ARG_INFO(0, new_setting)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_constant, 0)
 	ZEND_ARG_INFO(0, const_name)
 ZEND_END_ARG_INFO()
@@ -2937,8 +2933,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(header_register_callback,										arginfo_header_register_callback)
 	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
 
-	PHP_DEP_FALIAS(magic_quotes_runtime,	set_magic_quotes_runtime,		arginfo_set_magic_quotes_runtime)
-	PHP_DEP_FE(set_magic_quotes_runtime,									arginfo_set_magic_quotes_runtime)
 	PHP_FE(get_magic_quotes_gpc,										arginfo_get_magic_quotes_gpc)
 	PHP_FE(get_magic_quotes_runtime,									arginfo_get_magic_quotes_runtime)
 
@@ -4569,23 +4563,6 @@ PHP_FUNCTION(get_cfg_var)
 	} else {
 		RETURN_FALSE;
 	}
-}
-/* }}} */
-
-/* {{{ proto bool set_magic_quotes_runtime(int new_setting)
-   magic_quotes_runtime is not supported anymore */
-PHP_FUNCTION(set_magic_quotes_runtime)
-{
-	zend_bool new_setting;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &new_setting) == FAILURE) {
-		return;
-	}
-
-	if (new_setting) {
-		php_error_docref(NULL, E_CORE_ERROR, "magic_quotes_runtime is not supported anymore");
-	}
-	RETURN_FALSE;
 }
 /* }}} */
 

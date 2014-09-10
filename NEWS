@@ -109,6 +109,8 @@
   . Added intdiv() function. (Andrea)
   . Improved precision of log() function for base 2 and 10. (Marc Bennewitz)
   . Remove string category support in setlocale(). (Nikita)
+  . Remove set_magic_quotes_runtime() and its alias magic_quotes_runtime().
+    (Nikita)
 
 - Streams:
   . Fixed bug #68532 (convert.base64-encode omits padding bytes).

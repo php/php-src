@@ -78,6 +78,7 @@ PHP X.Y UPGRADE NOTES
 - Standard:
   . Removed string category support in setlocale(). Use the LC_* constants
     instead.
+  . Removed set_magic_quotes_runtime() and its alias magic_quotes_runtime().
 
 ========================================
 2. New Features
