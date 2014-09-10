@@ -120,6 +120,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_scan, 0, 0, 2)
 	ZEND_ARG_INFO(0, start)
 ZEND_END_ARG_INFO()
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_construct, 0, 0, 0)
+	ZEND_ARG_INFO(0, number)
+	ZEND_ARG_INFO(0, base)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(gmp)
@@ -173,6 +179,14 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_popcount,	arginfo_gmp_unary)
 	ZEND_FE(gmp_hamdist,	arginfo_gmp_binary)
 	ZEND_FE(gmp_nextprime,	arginfo_gmp_unary)
+	PHP_FE_END
+};
+/* }}} */
+
+/* {{{ gmp_class_functions[]
+ */
+const zend_function_entry gmp_class_functions[] = {
+	PHP_ME(GMP, __construct, arginfo_gmp_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -696,7 +710,7 @@ static ZEND_GINIT_FUNCTION(gmp)
 ZEND_MINIT_FUNCTION(gmp)
 {
 	zend_class_entry tmp_ce;
-	INIT_CLASS_ENTRY(tmp_ce, "GMP", NULL);
+	INIT_CLASS_ENTRY(tmp_ce, "GMP", gmp_class_functions);
 	gmp_ce = zend_register_internal_class(&tmp_ce TSRMLS_CC);
 	gmp_ce->create_object = gmp_create_object;
 	gmp_ce->serialize = gmp_serialize;
@@ -1993,6 +2007,33 @@ ZEND_FUNCTION(gmp_scan1)
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
+
+/* {{{ proto GMP::__construct([mixed number, int base])
+   Creates new GMP object.
+*/
+PHP_METHOD(GMP, __construct)
+{
+	zval *number = NULL;
+	zval *object = getThis();
+	long base = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zl", &number, &base) == SUCCESS) {
+		if (base && (base < 2 || base > MAX_BASE)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %ld (should be between 2 and %d)", base, MAX_BASE);
+			zval_dtor(object);
+			ZVAL_NULL(object);
+			return;
+		}
+
+		if (number && convert_to_gmp(GET_GMP_FROM_ZVAL(getThis()), number, base TSRMLS_CC) == FAILURE) {
+			zval_dtor(object);
+			ZVAL_NULL(object);
+			return;
+		}
+	}
+}
+/* }}} */
+
 
 #endif	/* HAVE_GMP */
 
