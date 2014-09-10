@@ -18,10 +18,11 @@
 
 #include "phpdbg_wait.h"
 #include "phpdbg_prompt.h"
-#include "ext/json/php_json.h"
+#include "ext/json/JSON_parser.h"
 #include "ext/standard/basic_functions.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(json);
 
 static void phpdbg_rebuild_http_globals_array(int type, const char *name TSRMLS_DC) {
 	zval **zvpp;
@@ -97,7 +98,7 @@ static int phpdbg_array_intersect(phpdbg_intersect_ptr *info, zval ***ptr) {
 
 		zend_hash_move_forward_ex(info->ht[invalid], &info->pos[invalid]);
 
-		return invalid ? -1 : 1;
+		return invalid ? 1 : -1;
 	}
 
 	if (zend_hash_get_current_data_ex(info->ht[0], (void **) &zvpp[0], &info->pos[0]) == FAILURE) {
@@ -128,6 +129,12 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 	zval zv, **zvpp;
 	HashTable *ht;
 	php_json_decode(&zv, msg, len, 1, 1000 /* enough */ TSRMLS_CC);
+
+	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE) {
+		phpdbg_error("Malformed JSON was sent to this socket, arborting");
+		return;
+	}
+
 	ht = Z_ARRVAL(zv);
 
 	/* Reapply symbol table */
@@ -205,7 +212,7 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 		for (zend_hash_internal_pointer_reset_ex(&module_registry, &position);
 		     zend_hash_get_current_data_ex(&module_registry, (void **) &mod, &position) == SUCCESS;
 		     zend_hash_move_forward_ex(&module_registry, &position)) {
-			if (mod->name && (!sapi_module.name || strcmp(sapi_module.name, mod->name))) {
+			if (mod->name) {
 				zval **value = emalloc(sizeof(zval *));
 				MAKE_STD_ZVAL(*value);
 				ZVAL_STRING(*value, mod->name, 1);
@@ -218,10 +225,14 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 			int mode = phpdbg_array_intersect(&pos, &module);
 			if (mode < 0) {
 				// loaded module, but not needed
-				zend_hash_del(&module_registry, Z_STRVAL_PP(module), Z_STRLEN_PP(module) + 1);
+				if (strcmp(PHPDBG_NAME, Z_STRVAL_PP(module))) {
+					zend_hash_del(&module_registry, Z_STRVAL_PP(module), Z_STRLEN_PP(module) + 1);
+				}
 			} else if (mode > 0) {
 				// not loaded module
-				phpdbg_notice("The module %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/module.so", Z_STRLEN_PP(module), Z_STRVAL_PP(module));
+				if (!sapi_module.name || strcmp(sapi_module.name, Z_STRVAL_PP(module))) {
+					phpdbg_notice("The module %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/module/%.*s.so", Z_STRLEN_PP(module), Z_STRVAL_PP(module), Z_STRLEN_PP(module), Z_STRVAL_PP(module));
+				}
 			}
 		} while (module);
 
