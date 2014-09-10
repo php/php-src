@@ -543,23 +543,6 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 
 	secPrefsValue = intern->securityPrefs;
 	
-	/* This whole if block can be removed, when we remove the xsl.security_prefs php.ini option in PHP 6+ */
-	secPrefsIni= INI_INT("xsl.security_prefs");
-	/* if secPrefsIni has the same value as secPrefsValue, all is fine */
-	if (secPrefsIni != secPrefsValue) {
-		if (secPrefsIni != XSL_SECPREF_DEFAULT) {
-			/* if the ini value is not set to the default, throw an E_DEPRECATED warning */
-			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "The xsl.security_prefs php.ini option is deprecated; use XsltProcessor->setSecurityPrefs() instead");
-			if (intern->securityPrefsSet == 0) {
-				/* if securityPrefs were not set through the setSecurityPrefs method, take the ini setting */
-				secPrefsValue = secPrefsIni;
-			} else {
-				/* else throw a notice, that the ini setting was not used */
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The xsl.security_prefs php.ini was not used, since the  XsltProcessor->setSecurityPrefs() method was used");
-			}
-		}
-	}
-
 	/* if securityPrefs is set to NONE, we don't have to do any checks, but otherwise... */
 	if (secPrefsValue != XSL_SECPREF_NONE) {
 		secPrefs = xsltNewSecurityPrefs(); 
