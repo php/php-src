@@ -636,6 +636,7 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 
 		need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
 		zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "none", "", NULL TSRMLS_CC);
+		return 0;
 	} else if (cur_arg_info->type_hint) {
 		if (cur_arg_info->type_hint == IS_ARRAY) {
 			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "", NULL TSRMLS_CC);
@@ -646,8 +647,9 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 			zend_error(E_ERROR, "Unknown typehint");
 #endif
 		}
+		return 0;
 	}
-	return 0;
+	return 1;
 }
 
 static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num TSRMLS_DC)
