@@ -34,6 +34,8 @@
   . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
   . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint and conversion error messages. (Andrea)
   . Implemented FR #55428 (E_RECOVERABLE_ERROR when output buffering in output buffering handler). (Kalle)
+  . Removed scoped calls of non-static methods from an incompatible $this
+    context. (Nikita)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values

@@ -54,6 +54,8 @@ PHP X.Y UPGRADE NOTES
   . zend_function.common.num_args don't include the variadic argument anymore.
   . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
     output buffer is created in an output buffer handler.
+  . Remove support for scoped calls to non-static methods from an incompatible
+    $this context. See details in https://wiki.php.net/rfc/incompat_ctx.
   . Added zend_memnstr_ex, which is based on string matching sunday algo.
   . Added zend_memnrstr, zend_memnrstr_ex.
   . Added hybrid sorting algo zend_sort for better performance.
