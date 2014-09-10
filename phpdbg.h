@@ -72,6 +72,14 @@
 #   include <editline/readline.h>
 #endif
 
+/* {{{ remote console headers */
+#ifndef _WIN32
+#	include <sys/socket.h>
+#	include <sys/un.h>
+#	include <sys/select.h>
+#	include <sys/types.h>
+#endif /* }}} */
+
 /* {{{ strings */
 #define PHPDBG_NAME "phpdbg"
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
@@ -81,7 +89,7 @@
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
 /* }}} */
 
-#ifndef PHPDBG_WEBHELPER_H
+#if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
 #include "phpdbg_lexer.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
@@ -213,6 +221,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_ulong flags;                            /* phpdbg flags */
 
 	char *socket_path;                           /* phpdbg.path ini setting */
+	char *sapi_name_ptr;                         /* store sapi name to free it if necessary to not leak memory */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 /* the beginning (= the important part) of the _zend_mm_heap struct defined in Zend/zend_alloc.c

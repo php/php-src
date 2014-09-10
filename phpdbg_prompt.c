@@ -24,8 +24,6 @@
 #include "zend_compile.h"
 #include "phpdbg.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
-
 #include "phpdbg_help.h"
 #include "phpdbg_print.h"
 #include "phpdbg_info.h"
@@ -40,7 +38,9 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 #include "phpdbg_frame.h"
 #include "phpdbg_lexer.h"
 #include "phpdbg_parser.h"
-#include "phpdbg_webdata_transfer.h"
+#include "phpdbg_wait.h"
+
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 #ifdef HAVE_LIBDL
 #ifdef PHP_WIN32
@@ -1189,50 +1189,6 @@ PHPDBG_COMMAND(watch) /* {{{ */
 
 		phpdbg_default_switch_case();
 	}
-
-	return SUCCESS;
-} /* }}} */
-
-PHPDBG_COMMAND(wait) /* {{{ */
-{
-	struct sockaddr_un local, remote;
-	int rlen, len, sr, sl = socket(AF_UNIX, SOCK_STREAM, 0);
-	unlink(PHPDBG_G(socket_path));
-
-	local.sun_family = AF_UNIX;
-	strcpy(local.sun_path, PHPDBG_G(socket_path));
-	len = strlen(local.sun_path) + sizeof(local.sun_family);
-	if (bind(sl, (struct sockaddr *)&local, len) == -1) {
-		phpdbg_error("Unable to connect to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
-		return FAILURE;
-	}
-
-	chmod(PHPDBG_G(socket_path), 0666);
-
-	listen(sl, 2);
-
-	rlen = sizeof(remote);
-	sr = accept(sl, (struct sockaddr *) &remote, (socklen_t *) &rlen);
-
-	char msglen[5];
-	int recvd = 4;
-
-	do {
-		recvd -= recv(sr, &(msglen[4 - recvd]), recvd, 0);
-	} while (recvd > 0);
-
-	recvd = *(size_t *) msglen;
-	char *data = emalloc(recvd);
-
-	do {
-		recvd -= recv(sr, &(data[(*(int *) msglen) - recvd]), recvd, 0);
-	} while (recvd > 0);
-
-	phpdbg_webdata_decompress(data, *(int *) msglen TSRMLS_CC);
-
-	efree(data);
-
-	phpdbg_notice("Successfully imported request data, stopped before executing");
 
 	return SUCCESS;
 } /* }}} */

@@ -76,6 +76,8 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->io[PHPDBG_STDOUT] = NULL;
 	pg->io[PHPDBG_STDERR] = NULL;
 	pg->frame.num = 0;
+
+	pg->sapi_name_ptr = NULL;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
@@ -192,7 +194,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 		efree(PHPDBG_G(buffer));
 		PHPDBG_G(buffer) = NULL;
 	}
-	
+
 	if (PHPDBG_G(exec)) {
 		efree(PHPDBG_G(exec));
 		PHPDBG_G(exec) = NULL;
@@ -1283,6 +1285,8 @@ phpdbg_main:
 		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 #endif
 
+		PHPDBG_G(sapi_name_ptr) = sapi_name;
+
 		if (php_request_startup(TSRMLS_C) == SUCCESS) {
 			int i;
 		
@@ -1516,10 +1520,10 @@ phpdbg_out:
 	}
 #endif
 
-	if (sapi_name) {
-		free(sapi_name);
+	if (PHPDBG_G(sapi_name_ptr)) {
+		free(PHPDBG_G(sapi_name_ptr));
 	}
-	
+
 #ifdef _WIN32
 	free(bp_tmp_file);
 #else
