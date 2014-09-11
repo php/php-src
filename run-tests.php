@@ -2572,7 +2572,7 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 
 	if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
 		echo "$result $tested [$tested_file] $extra\n";
-	} else {
+	} else if (!$SHOW_ONLY_GROUPS) {
 		// Write over the last line to avoid random trailing chars on next echo
 		echo str_repeat(" ", $line_length), "\r";
 	}
