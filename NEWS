@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? 2014, PHP 5.6.1
+11 Sep 2014, PHP 5.6.1RC1
 
 - Core:
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
