@@ -66,6 +66,7 @@ PHP X.Y UPGRADE NOTES
   . Invalid octal literals in source code now produce compile errors, fixing
     PHPSadness #31. Previously, the invalid digits (and any following valid 
     digits) were simply ignored, such that 0781 became 7.
+  . Removed dl() function on fpm-fcgi.
 
 - Date:
   . Removed $is_dst parameter from mktime() and gmmktime().

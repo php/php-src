@@ -39,6 +39,7 @@
   . Removed support for #-style comments in ini files. (Nikita)
   . Removed support for assigning the result of new by reference. (Nikita)
   . Invalid octal literals in source code now produce compile errors, fixes PHPSadness #31. (Andrea)
+  . Removed dl() function on fpm-fcgi. (Nikita)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
