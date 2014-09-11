@@ -31,6 +31,7 @@
 #endif
 
 #include "zend.h"
+#include "ext/ereg/php_regex.h"
 #include "php_compat.h"
 
 #ifdef HAVE_OPENSSL_EXT

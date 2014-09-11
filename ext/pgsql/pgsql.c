@@ -36,7 +36,7 @@
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/php_smart_str.h"
-#include "ext/pcre/php_pcre.h"
+#include "ext/ereg/php_regex.h"
 #ifdef PHP_WIN32
 # include "win32/time.h"
 #endif
@@ -5637,10 +5637,10 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
  */
 static int php_pgsql_convert_match(const char *str, size_t str_len, const char *regex , int icase TSRMLS_DC)
 {
-	pcre *re;
-	const char *err_msg;
-	int err_offset;
-	int options = PCRE_NO_AUTO_CAPTURE, res;
+	regex_t re;
+	regmatch_t *subs;
+	int regopt = REG_EXTENDED;
+	int regerr, ret = SUCCESS;
 	size_t i;
 
 	/* Check invalid chars for POSIX regex */
@@ -5653,27 +5653,31 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	}
 
 	if (icase) {
-		options |= PCRE_CASELESS;
+		regopt |= REG_ICASE;
 	}
 
-	if ((re = pcre_compile(regex, options, &err_msg, &err_offset, NULL)) == NULL) {
+	regerr = regcomp(&re, regex, regopt);
+	if (regerr) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot compile regex");
+		regfree(&re);
 		return FAILURE;
 	}
+	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t), re.re_nsub+1);
 
-	res = pcre_exec(re, NULL, str, str_len, 0, 0, NULL, 0);
-	pcre_free(re);
-
-	if (res == PCRE_ERROR_NOMATCH) {
+	regerr = regexec(&re, str, re.re_nsub+1, subs, 0);
+	if (regerr == REG_NOMATCH) {
 #ifdef PHP_DEBUG
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "'%s' does not match with '%s'", str, regex);
 #endif
-		return FAILURE;
-	} else if (res) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot exec regex");
-		return FAILURE;
+		ret = FAILURE;
 	}
-	return SUCCESS;
+	else if (regerr) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot exec regex");
+		ret = FAILURE;
+	}
+	regfree(&re);
+	efree(subs);
+	return ret;
 }
 
 /* }}} */

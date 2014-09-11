@@ -11,6 +11,7 @@
 
 #include "zend.h"
 #include "zend_stack.h"
+#include "ext/ereg/php_regex.h"
 
 #include "httpd.h"
 #include "http_config.h"
