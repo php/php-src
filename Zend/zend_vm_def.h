@@ -5102,10 +5102,15 @@ ZEND_VM_HANDLER(152, ZEND_JMP_SET, CONST|TMP|VAR|CV, ANY)
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *value;
+	int is_ref = 0;
 
 	SAVE_OPLINE();
-	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
+	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) && Z_ISREF_P(value)) {
+		is_ref = 1;
+		value = Z_REFVAL_P(value);
+	}
 	if (i_zend_is_true(value TSRMLS_CC)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (OP1_TYPE == IS_CONST) {
@@ -5114,6 +5119,9 @@ ZEND_VM_HANDLER(152, ZEND_JMP_SET, CONST|TMP|VAR|CV, ANY)
 			}
 		} else if (OP1_TYPE == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+		} else if (OP1_TYPE == IS_VAR && is_ref) {
+			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+			FREE_OP1();
 		}
 		ZEND_VM_JMP(opline->op2.jmp_addr);
 	}
@@ -5130,15 +5138,20 @@ ZEND_VM_HANDLER(22, ZEND_QM_ASSIGN, CONST|TMP|VAR|CV, ANY)
 	zval *value;
 
 	SAVE_OPLINE();
-	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
-	if (OP1_TYPE == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			zval_copy_ctor_func(EX_VAR(opline->result.var));
+	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) && Z_ISREF_P(value)) {
+		ZVAL_COPY(EX_VAR(opline->result.var), Z_REFVAL_P(value));
+		FREE_OP1();
+	} else {
+		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
+		if (OP1_TYPE == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
+				zval_copy_ctor_func(EX_VAR(opline->result.var));
+			}
+		} else if (OP1_TYPE == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		}
-	} else if (OP1_TYPE == IS_CV) {
-		if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
