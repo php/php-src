@@ -738,7 +738,6 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
 			case ZEND_JMP_SET:
-			case ZEND_JMP_SET_VAR:
 			case ZEND_NEW:
 			case ZEND_FE_RESET:
 			case ZEND_FE_FETCH:

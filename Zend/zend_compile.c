@@ -560,7 +560,7 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 			if (opline->opcode == ZEND_FETCH_R ||
 			    opline->opcode == ZEND_FETCH_DIM_R ||
 			    opline->opcode == ZEND_FETCH_OBJ_R ||
-			    opline->opcode == ZEND_QM_ASSIGN_VAR) {
+			    opline->opcode == ZEND_QM_ASSIGN) {
 				/* It's very rare and useless case. It's better to use
 				   additional FREE opcode and simplify the FETCH handlers
 				   their selves */
@@ -6870,23 +6870,13 @@ static void zend_compile_shorthand_conditional(znode *result, zend_ast *ast TSRM
 	zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
 
 	opnum_jmp_set = get_next_op_number(CG(active_op_array));
-	zend_emit_op_tmp(result, ZEND_JMP_SET, &cond_node, NULL TSRMLS_CC);
+	zend_emit_op(result, ZEND_JMP_SET, &cond_node, NULL TSRMLS_CC);
 
 	zend_compile_expr(&false_node, false_ast TSRMLS_CC);
 
 	opline_jmp_set = &CG(active_op_array)->opcodes[opnum_jmp_set];
 	opline_jmp_set->op2.opline_num = get_next_op_number(CG(active_op_array)) + 1;
-	if (cond_node.op_type == IS_VAR || cond_node.op_type == IS_CV
-		|| false_node.op_type == IS_VAR || false_node.op_type == IS_CV
-	) {
-		opline_jmp_set->opcode = ZEND_JMP_SET_VAR;
-		opline_jmp_set->result_type = IS_VAR;
-		GET_NODE(result, opline_jmp_set->result);
-
-		opline_qm_assign = zend_emit_op(NULL, ZEND_QM_ASSIGN_VAR, &false_node, NULL TSRMLS_CC);
-	} else {
-		opline_qm_assign = zend_emit_op(NULL, ZEND_QM_ASSIGN, &false_node, NULL TSRMLS_CC);
-	}
+	opline_qm_assign = zend_emit_op(NULL, ZEND_QM_ASSIGN, &false_node, NULL TSRMLS_CC);
 	SET_NODE(opline_qm_assign->result, result);
 }
 /* }}} */
@@ -6922,14 +6912,6 @@ void zend_compile_conditional(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_compile_expr(&false_node, false_ast TSRMLS_CC);
 
 	opline_qm_assign1 = &CG(active_op_array)->opcodes[opnum_qm_assign1];
-	if (true_node.op_type == IS_VAR || true_node.op_type == IS_CV
-		|| false_node.op_type == IS_VAR || false_node.op_type == IS_CV
-	) {
-		opline_qm_assign1->opcode = ZEND_QM_ASSIGN_VAR;
-		opline_qm_assign1->result_type = IS_VAR;
-		GET_NODE(result, opline_qm_assign1->result);
-	}
-
 	opline_qm_assign2 = zend_emit_op(NULL, opline_qm_assign1->opcode, &false_node, NULL TSRMLS_CC);
 	SET_NODE(opline_qm_assign2->result, result);
 

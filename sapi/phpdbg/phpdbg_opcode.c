@@ -104,9 +104,6 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 #ifdef ZEND_JMP_SET
 	case ZEND_JMP_SET:
 #endif
-#ifdef ZEND_JMP_SET_VAR
-	case ZEND_JMP_SET_VAR:
-#endif
 		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
 		asprintf(
 			&decode[2], "J%ld", op->op2.jmp_addr - ops->opcodes);
@@ -332,12 +329,6 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 #endif
 #ifdef ZEND_SEPARATE
 		CASE(ZEND_SEPARATE);
-#endif
-#ifdef ZEND_QM_ASSIGN_VAR
-		CASE(ZEND_QM_ASSIGN_VAR);
-#endif
-#ifdef ZEND_JMP_SET_VAR
-		CASE(ZEND_JMP_SET_VAR);
 #endif
 #ifdef ZEND_DISCARD_EXCEPTION
 		CASE(ZEND_DISCARD_EXCEPTION);
