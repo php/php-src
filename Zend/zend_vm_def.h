@@ -1643,7 +1643,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, OP2_TYPE TSRMLS_CC);
 		FREE_OP2();
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -1657,13 +1657,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -1687,7 +1681,7 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 	zval *variable_ptr;
 
 	SAVE_OPLINE();
-	value = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	value = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
@@ -1698,13 +1692,7 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	} else {
-		if (OP2_TYPE == IS_TMP_VAR) {
-		 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-		} else if (OP2_TYPE == IS_CONST) {
-		 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-		} else {
-		 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-		}
+	 	value = zend_assign_to_variable(variable_ptr, value, OP2_TYPE TSRMLS_CC);
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}

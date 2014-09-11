@@ -18216,7 +18216,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CONST TSRMLS_CC);
 
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -18230,13 +18230,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -18271,13 +18265,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	} else {
-		if (IS_CONST == IS_TMP_VAR) {
-		 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-		} else if (IS_CONST == IS_CONST) {
-		 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-		} else {
-		 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-		}
+	 	value = zend_assign_to_variable(variable_ptr, value, IS_CONST TSRMLS_CC);
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
@@ -20457,7 +20445,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_TMP_VAR TSRMLS_CC);
 		zval_dtor(free_op2.var);
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -20471,13 +20459,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -20512,13 +20494,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	} else {
-		if (IS_TMP_VAR == IS_TMP_VAR) {
-		 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-		} else if (IS_TMP_VAR == IS_CONST) {
-		 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-		} else {
-		 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-		}
+	 	value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR TSRMLS_CC);
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
@@ -22606,7 +22582,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_VAR TSRMLS_CC);
 		zval_ptr_dtor_nogc(free_op2.var);
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -22620,13 +22596,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -22650,7 +22620,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 	zval *variable_ptr;
 
 	SAVE_OPLINE();
-	value = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+	value = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
@@ -22661,13 +22631,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	} else {
-		if (IS_VAR == IS_TMP_VAR) {
-		 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-		} else if (IS_VAR == IS_CONST) {
-		 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-		} else {
-		 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-		}
+	 	value = zend_assign_to_variable(variable_ptr, value, IS_VAR TSRMLS_CC);
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
@@ -24263,7 +24227,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_UNUSED TSRMLS_CC);
 
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -24277,13 +24241,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -26006,7 +25964,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CV TSRMLS_CC);
 
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -26020,13 +25978,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -26050,7 +26002,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 	zval *variable_ptr;
 
 	SAVE_OPLINE();
-	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+	value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
@@ -26061,13 +26013,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	} else {
-		if (IS_CV == IS_TMP_VAR) {
-		 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-		} else if (IS_CV == IS_CONST) {
-		 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-		} else {
-		 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-		}
+	 	value = zend_assign_to_variable(variable_ptr, value, IS_CV TSRMLS_CC);
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
@@ -35444,7 +35390,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CONST TSRMLS_CC);
 
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -35458,13 +35404,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -35499,13 +35439,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	} else {
-		if (IS_CONST == IS_TMP_VAR) {
-		 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-		} else if (IS_CONST == IS_CONST) {
-		 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-		} else {
-		 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-		}
+	 	value = zend_assign_to_variable(variable_ptr, value, IS_CONST TSRMLS_CC);
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
@@ -37499,7 +37433,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_TMP_VAR TSRMLS_CC);
 		zval_dtor(free_op2.var);
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -37513,13 +37447,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -37554,13 +37482,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	} else {
-		if (IS_TMP_VAR == IS_TMP_VAR) {
-		 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-		} else if (IS_TMP_VAR == IS_CONST) {
-		 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-		} else {
-		 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-		}
+	 	value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR TSRMLS_CC);
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
@@ -39529,7 +39451,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_VAR TSRMLS_CC);
 		zval_ptr_dtor_nogc(free_op2.var);
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -39543,13 +39465,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -39573,7 +39489,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	zval *variable_ptr;
 
 	SAVE_OPLINE();
-	value = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+	value = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
@@ -39584,13 +39500,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	} else {
-		if (IS_VAR == IS_TMP_VAR) {
-		 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-		} else if (IS_VAR == IS_CONST) {
-		 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-		} else {
-		 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-		}
+	 	value = zend_assign_to_variable(variable_ptr, value, IS_VAR TSRMLS_CC);
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
@@ -41066,7 +40976,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_UNUSED TSRMLS_CC);
 
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -41080,13 +40990,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -42673,7 +42577,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 
 		variable_ptr = zend_fetch_dimension_address_W_str(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CV TSRMLS_CC);
 
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		value = get_zval_ptr_deref((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		if (UNEXPECTED(variable_ptr != NULL)) {
 			zend_assign_to_string_offset(variable_ptr, Z_LVAL_P(EX_VAR((opline+1)->op2.var)), value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else {
@@ -42687,13 +42591,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 				}
 				FREE_OP_VAR_PTR(free_op_data2);
 			} else {
-				if ((opline+1)->op1_type == IS_TMP_VAR) {
-				 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-				} else if ((opline+1)->op1_type == IS_CONST) {
-				 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-				} else {
-				 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-				}
+			 	value = zend_assign_to_variable(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC);
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -42717,7 +42615,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	zval *variable_ptr;
 
 	SAVE_OPLINE();
-	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+	value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
@@ -42728,13 +42626,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	} else {
-		if (IS_CV == IS_TMP_VAR) {
-		 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
-		} else if (IS_CV == IS_CONST) {
-		 	value = zend_assign_const_to_variable(variable_ptr, value TSRMLS_CC);
-		} else {
-		 	value = zend_assign_to_variable(variable_ptr, value TSRMLS_CC);
-		}
+	 	value = zend_assign_to_variable(variable_ptr, value, IS_CV TSRMLS_CC);
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
