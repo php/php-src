@@ -99,6 +99,7 @@ ZEND_API void gc_reset(TSRMLS_D)
 {
 	GC_G(gc_runs) = 0;
 	GC_G(collected) = 0;
+	GC_G(gc_full) = 0;
 
 #if GC_BENCH
 	GC_G(root_buf_length) = 0;
