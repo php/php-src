@@ -213,18 +213,18 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC);
 typedef struct _realpath_cache_bucket {
 	zend_ulong                    key;
 	char                          *path;
-	int                            path_len;
 	char                          *realpath;
+	struct _realpath_cache_bucket *next;
+	time_t                         expires;
+	int                            path_len;
 	int                            realpath_len;
 	int                            is_dir;
-	time_t                         expires;
 #ifdef PHP_WIN32
 	unsigned char                  is_rvalid;
 	unsigned char                  is_readable;
 	unsigned char                  is_wvalid;
 	unsigned char                  is_writable;
 #endif
-	struct _realpath_cache_bucket *next;
 } realpath_cache_bucket;
 
 typedef struct _virtual_cwd_globals {
