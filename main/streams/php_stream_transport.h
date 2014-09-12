@@ -191,18 +191,18 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRML
 END_EXTERN_C()
 
 typedef struct _php_stream_xport_crypto_param {
-	enum {
-		STREAM_XPORT_CRYPTO_OP_SETUP,
-		STREAM_XPORT_CRYPTO_OP_ENABLE
-	} op;
 	struct {
+		php_stream *session;
 		int activate;
 		php_stream_xport_crypt_method_t method;
-		php_stream *session;
 	} inputs;
 	struct {
 		int returncode;
 	} outputs;
+	enum {
+		STREAM_XPORT_CRYPTO_OP_SETUP,
+		STREAM_XPORT_CRYPTO_OP_ENABLE
+	} op;
 } php_stream_xport_crypto_param;
 
 BEGIN_EXTERN_C()
