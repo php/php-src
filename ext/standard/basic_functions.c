@@ -5011,7 +5011,11 @@ PHP_FUNCTION(register_shutdown_function)
 
 	/* Prevent entering of anything but valid callback (syntax check only!) */
 	if (!zend_is_callable(&shutdown_function_entry.arguments[0], 0, &callback_name TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", callback_name->val);
+		if (callback_name) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", callback_name->val);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback passed");
+		}
 		efree(shutdown_function_entry.arguments);
 		RETVAL_FALSE;
 	} else {
