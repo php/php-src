@@ -2462,7 +2462,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 				zval *current;
 				HashTable *postfields;
 				zend_string *string_key;
-				ulong  num_key;
+				zend_ulong  num_key;
 				struct HttpPost *first = NULL;
 				struct HttpPost *last  = NULL;
 
