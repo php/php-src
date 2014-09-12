@@ -142,21 +142,21 @@ typedef struct _php_stream_xport_param {
 	struct {
 		char *name;
 		size_t namelen;
-		int backlog;
 		struct timeval *timeout;
 		struct sockaddr *addr;
-		socklen_t addrlen;
 		char *buf;
 		size_t buflen;
 		zend_long flags;
+		socklen_t addrlen;
+		int backlog;
 	} inputs;
 	struct {
 		php_stream *client;
-		int returncode;
 		struct sockaddr *addr;
 		socklen_t addrlen;
 		zend_string *textaddr;
 		zend_string *error_text;
+		int returncode;
 		int error_code;
 	} outputs;
 } php_stream_xport_param;
