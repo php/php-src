@@ -492,8 +492,11 @@ tail_call:
 			} else if (GC_G(first_unused) != GC_G(last_unused)) {
 				buf = GC_G(first_unused);
 				GC_G(first_unused)++;
+			} else {
+				/* TODO: find a perfect way to handle such case */
+				GC_G(gc_full) = 1;
 			}
-			/* TODO: what should we do if we don't have room ??? */
+
 			if (buf) {
 				buf->ref = ref;
 				buf->next = GC_G(roots).next;
@@ -609,6 +612,18 @@ static int gc_collect_roots(TSRMLS_D)
 		}
 		current = current->next;
 	}
+
+	if (GC_G(gc_full) == 1) {
+		current = GC_G(roots).next;
+		while (current != &GC_G(roots)) {
+			GC_SET_ADDRESS(GC_INFO(current->ref), 0);
+			GC_SET_BLACK(GC_INFO(current->ref));
+			current = current->next;
+		}
+		gc_reset(TSRMLS_CC);
+		return 0;
+	}
+
 	/* relink remaining roots into list to free */
 	if (GC_G(roots).next != &GC_G(roots)) {
 		if (GC_G(to_free).next == &GC_G(to_free)) {
