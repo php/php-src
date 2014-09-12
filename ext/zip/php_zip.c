@@ -956,7 +956,7 @@ static HashTable *php_zip_get_properties(zval *object TSRMLS_DC)/* {{{ */
 	HashTable *props;
 	zip_prop_handler *hnd;
 	zend_string *key;
-	ulong num_key;
+	zend_ulong num_key;
 
 	obj = Z_ZIP_P(object);
 	props = zend_std_get_properties(object TSRMLS_CC);
