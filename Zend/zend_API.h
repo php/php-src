@@ -46,10 +46,10 @@ typedef struct _zend_fcall_info {
 	zval function_name;
 	zend_array *symbol_table;
 	zval *retval;
-	uint32_t param_count;
 	zval *params;
 	zend_object *object;
 	zend_bool no_separation;
+	uint32_t param_count;
 } zend_fcall_info;
 
 typedef struct _zend_fcall_info_cache {
