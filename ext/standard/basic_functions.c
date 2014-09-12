@@ -4861,9 +4861,11 @@ static int user_shutdown_function_call(zval *zv TSRMLS_DC) /* {{{ */
 	zend_string *function_name;
 
 	if (!zend_is_callable(&shutdown_function_entry->arguments[0], 0, &function_name TSRMLS_CC)) {
-		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name->val);
 		if (function_name) {
+			php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name->val);
 			zend_string_release(function_name);
+		} else {
+			php_error(E_WARNING, "(Registered shutdown functions) Unable to call - function does not exist");
 		}
 		return 0;
 	}
