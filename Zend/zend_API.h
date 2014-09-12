@@ -1193,7 +1193,7 @@ static zend_always_inline int _z_param_string(zval *arg, char **dest, size_t *de
 static zend_always_inline int _z_param_path_str(zval *arg, zend_string **dest, int check_null TSRMLS_DC)
 {
 	if (!_z_param_str(arg, dest, check_null TSRMLS_CC) ||
-		(check_null && UNEXPECTED(!(*dest)->val)) ||
+		(check_null && UNEXPECTED(!(*dest)->val[0])) ||
 	    UNEXPECTED(CHECK_NULL_PATH((*dest)->val, (*dest)->len))) {
 		return 0;
 	}
