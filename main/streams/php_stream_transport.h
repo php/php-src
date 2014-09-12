@@ -148,7 +148,7 @@ typedef struct _php_stream_xport_param {
 		socklen_t addrlen;
 		char *buf;
 		size_t buflen;
-		long flags;
+		zend_long flags;
 	} inputs;
 	struct {
 		php_stream *client;
