@@ -289,7 +289,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	zval retval;
 	zval *ent;
 	zend_string *key;
-	ulong idx;
+	zend_ulong idx;
 	int ret;
 
 	if (vallen == 0) {
@@ -442,7 +442,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	zval *ent, fname, *varname;
 	zval retval;
 	zend_string *key;
-	ulong idx;
+	zend_ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
 	HashTable *objhash, *sleephash;
 	TSRMLS_FETCH();
@@ -532,10 +532,10 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 	zval *ent;
 	zend_string *key;
 	int is_struct = 0;
-	ulong idx;
+	zend_ulong idx;
 	HashTable *target_hash;
 	char tmp_buf[WDDX_BUF_LEN];
-	ulong ind = 0;
+	zend_ulong ind = 0;
 	TSRMLS_FETCH();
 
 	target_hash = HASH_OF(arr);
