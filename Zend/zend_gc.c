@@ -621,7 +621,7 @@ static int gc_collect_roots(TSRMLS_D)
 			GC_SET_BLACK(GC_INFO(current->ref));
 			current = current->next;
 		}
-		gc_reset(TSRMLS_CC);
+		gc_reset(TSRMLS_C);
 		return 0;
 	}
 
