@@ -437,7 +437,7 @@ finish:
 			/* Remove newlines and spaces from start and end php_trim will estrndup() */
 			tmp = php_trim(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval), NULL, 0, NULL, 3 TSRMLS_CC);
 		}
-		if (tmp && strlen(tmp) > 0) {
+		if (tmp && tmp[0] != '\0') {
 			char *s;
 
 			user_headers = estrdup(tmp);
