@@ -509,7 +509,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
 	if (compiler_globals->last_static_member) {
-		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member, sizeof(zval**));
+		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member, sizeof(zval*));
 	} else {
 		compiler_globals->static_members_table = NULL;
 	}
