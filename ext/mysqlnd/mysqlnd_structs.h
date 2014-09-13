@@ -1055,6 +1055,8 @@ struct st_mysqlnd_buffered_result_c
 
 struct st_mysqlnd_unbuffered_result
 {
+	struct st_mysqlnd_result_unbuffered_methods m;
+	uint64_t			row_count;
 
 	/* For unbuffered (both normal and PS) */
 	zval				*last_row_data;
@@ -1070,14 +1072,13 @@ struct st_mysqlnd_unbuffered_result
 
 	struct st_mysqlnd_packet_row * row_packet;
 
-	uint64_t			row_count;
+	unsigned int		field_count;
+
 	zend_bool			eof_reached;
 
-	unsigned int		field_count;
 	zend_bool			ps;
 	zend_bool			persistent;
 
-	struct st_mysqlnd_result_unbuffered_methods m;
 };
 
 
