@@ -38,7 +38,7 @@ void        intl_error_set_code( intl_error* err, UErrorCode err_code TSRMLS_DC 
 void        intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_DC );
 void        intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg TSRMLS_DC );
 UErrorCode  intl_error_get_code( intl_error* err TSRMLS_DC );
-char*       intl_error_get_message( intl_error* err TSRMLS_DC );
+zend_string* intl_error_get_message( intl_error* err TSRMLS_DC );
 
 // Wrappers to synchonize object's and global error structures.
 void        intl_errors_reset( intl_error* err TSRMLS_DC );

@@ -106,7 +106,7 @@ PHP_HASH_API void make_digest(char *md5str, unsigned char *digest)
 PHP_NAMED_FUNCTION(php_if_md5)
 {
 	char *arg;
-	int arg_len;
+	size_t arg_len;
 	zend_bool raw_output = 0;
 	char md5str[33];
 	PHP_MD5_CTX context;
@@ -121,10 +121,10 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	PHP_MD5Update(&context, arg, arg_len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_STRINGL(digest, 16);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		RETVAL_STRING(md5str);
 	}
 
 }
@@ -168,10 +168,10 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	}
 
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_STRINGL(digest, 16);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		RETVAL_STRING(md5str);
 	}
 }
 /* }}} */

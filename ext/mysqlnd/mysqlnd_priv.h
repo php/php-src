@@ -41,13 +41,6 @@
 #define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
 #endif
 
-#define mysqlnd_array_init(arg, field_count) \
-{ \
-	ALLOC_HASHTABLE_REL(Z_ARRVAL_P(arg));\
-	zend_hash_init(Z_ARRVAL_P(arg), (field_count), NULL, ZVAL_PTR_DTOR, 0); \
-	Z_TYPE_P(arg) = IS_ARRAY;\
-}
-
 #define MYSQLND_STR_W_LEN(str)  str, (sizeof(str) - 1)
 
 #define MYSQLND_DEBUG_DUMP_TIME				1
@@ -216,7 +209,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 						const char * const db,
 						const size_t db_len,
 						const MYSQLND_OPTIONS * const options,
-						unsigned long mysql_flags,
+						zend_ulong mysql_flags,
 						unsigned int server_charset_no,
 						zend_bool use_full_blown_auth_packet,
 						const char * const auth_protocol,

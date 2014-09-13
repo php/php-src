@@ -2,7 +2,7 @@
 Phar: test edge cases of fopen() function interception #2 (PHP 6)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (version_compare(PHP_VERSION, "6.0.0-dev", "<")) die("skip Unicode support required"); ?>
+<?php if (version_compare(PHP_VERSION, "6.0", "!=")) die("skip Unicode support required"); ?>
 --INI--
 phar.readonly=0
 --FILE--

@@ -45,15 +45,16 @@ Currently we have the following branches in use::
 
   master    The active development branch. 
 
+  PHP-5.6   Is used to release the PHP 5.6.x series. This is a current
+            stable version and is open for bugfixes only.
+
   PHP-5.5   Is used to release the PHP 5.5.x series. This is a current
             stable version and is open for bugfixes only.
 
   PHP-5.4   Is used to release the PHP 5.4.x series. This is a current
             stable version and is open for bugfixes only.
 
-  PHP-5.3   Is used to release the PHP 5.3.x series. This is currently 
-            in extended support and open forsecurity fixes only. Triaged
-            via security@php.net
+  PHP-5.3   This branch is closed.
 
   PHP-5.2   This branch is closed.
 
@@ -61,9 +62,12 @@ Currently we have the following branches in use::
 
   PHP-4.4   This branch is closed.
 
+  PHP-X.Y.Z These branches are used for the release managers for tagging
+            the releases, hence they are closed to the general public.
+
 The next few rules are more of a technical nature::
 
-   1. All changes should first go to the lowest branch (i.e. 5.3) and then 
+   1. All changes should first go to the lowest branch (i.e. 5.4) and then
       get merged up to all other branches. If a change is not needed for
       later branches (i.e. fixes for features which where dropped from later
       branches) an empty merge should be done.

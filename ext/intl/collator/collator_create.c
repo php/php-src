@@ -28,7 +28,7 @@
 static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char*      locale;
-	int              locale_len = 0;
+	size_t              locale_len = 0;
 	zval*            object;
 	Collator_object* co;
 
@@ -72,8 +72,16 @@ PHP_FUNCTION( collator_create )
  */
 PHP_METHOD( Collator, __construct )
 {
+	zval orig_this = *getThis();
+
 	return_value = getThis();
 	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+		zend_object_store_ctor_failed(Z_OBJ(orig_this) TSRMLS_CC);
+		zval_dtor(&orig_this);
+		ZEND_CTOR_MAKE_NULL();
+	}
 }
 /* }}} */
 

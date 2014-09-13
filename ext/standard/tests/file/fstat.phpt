@@ -69,6 +69,6 @@ array(26) {
   int(%i)
 }
 
-Warning: fstat(): %d is not a valid stream resource in %s on line %d
+Warning: fstat(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 Done

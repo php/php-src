@@ -29,7 +29,7 @@
 PHP_FUNCTION(soundex)
 {
 	char	*str;
-	int	i, _small, str_len, code, last;
+	size_t	i, _small, str_len, code, last;
 	char	soundex[4 + 1];
 
 	static char soundex_table[26] =
@@ -101,7 +101,7 @@ PHP_FUNCTION(soundex)
 	}
 	soundex[_small] = '\0';
 
-	RETURN_STRINGL(soundex, _small, 1);
+	RETURN_STRINGL(soundex, _small);
 }
 /* }}} */
 

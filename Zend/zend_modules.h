@@ -33,7 +33,7 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module TSRMLS_DC
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module TSRMLS_CC
 
-#define ZEND_MODULE_API_NO 20131227
+#define ZEND_MODULE_API_NO 20140815
 #ifdef ZTS
 #define USING_ZTS 1
 #else
@@ -125,11 +125,9 @@ struct _zend_module_dep {
 extern ZEND_API HashTable module_registry;
 
 void module_destructor(zend_module_entry *module);
-int module_registry_cleanup(zend_module_entry *module TSRMLS_DC);
 int module_registry_request_startup(zend_module_entry *module TSRMLS_DC);
 int module_registry_unload_temp(const zend_module_entry *module TSRMLS_DC);
 
-#define ZEND_MODULE_DTOR (void (*)(void *)) module_destructor
 #endif
 
 /*

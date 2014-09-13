@@ -4,6 +4,10 @@ php:
     # We only specify one version so we only get one worker
     - 5.4
 
+branches:
+    except:
+        - phpng
+
 notifications:
     email: 
        on_failure: change
@@ -43,4 +47,3 @@ before_script:
 # Run PHPs run-tests.php 
 script:
     - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --show-diff --set-timeout 120
-    - ./sapi/cli/php sapi/phpdbg/tests/run-tests.php -diff2stdout --phpdbg sapi/phpdbg/phpdbg

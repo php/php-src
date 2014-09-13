@@ -56,7 +56,7 @@ static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count 
 	return (wrote < 0) ? 0 : wrote;
 }
 
-static int php_gziop_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 

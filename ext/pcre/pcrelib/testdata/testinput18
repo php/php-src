@@ -207,7 +207,7 @@ correctly, but that messes up comparisons). --/
     CDBABC
     \x{2000}ABC 
 
-/\R*A/SI8
+/\R*A/SI8<bsr_unicode>
     CDBABC
     \x{2028}A  
 

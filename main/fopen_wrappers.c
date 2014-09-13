@@ -94,24 +94,24 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
 		/* We're in a PHP_INI_SYSTEM context, no restrictions */
-		*p = new_value;
+		*p = new_value ? new_value->val : NULL;
 		return SUCCESS;
 	}
 
 	/* Otherwise we're in runtime */
 	if (!*p || !**p) {
 		/* open_basedir not set yet, go ahead and give it a value */
-		*p = new_value;
+		*p = new_value->val;
 		return SUCCESS;
 	}
 
 	/* Shortcut: When we have a open_basedir and someone tries to unset, we know it'll fail */
-	if (!new_value || !*new_value) {
+	if (!new_value || !*new_value->val) {
 		return FAILURE;
 	}
 
 	/* Is the proposed open_basedir at least as restrictive as the current setting? */
-	ptr = pathbuf = estrdup(new_value);
+	ptr = pathbuf = estrdup(new_value->val);
 	while (ptr && *ptr) {
 		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
 		if (end != NULL) {
@@ -128,7 +128,7 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 	efree(pathbuf);
 
 	/* Everything checks out, set it */
-	*p = new_value;
+	*p = new_value->val;
 
 	return SUCCESS;
 }
@@ -433,14 +433,18 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 
 	if (!resolved_path) {
 		if (SG(request_info).path_translated != filename) {
-			STR_FREE(filename);
+			if (filename) {
+				efree(filename);
+			}
 		}
 		/* we have to free SG(request_info).path_translated here because
 		 * php_destroy_request_info assumes that it will get
 		 * freed when the include_names hash is emptied, but
 		 * we're not adding it in this case */
-		STR_FREE(SG(request_info).path_translated);
-		SG(request_info).path_translated = NULL;
+		if (SG(request_info).path_translated) {
+			efree(SG(request_info).path_translated);
+			SG(request_info).path_translated = NULL;
+		}
 		return FAILURE;
 	}
 	efree(resolved_path);
@@ -450,16 +454,22 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 	if (zend_stream_open(filename, file_handle TSRMLS_CC) == FAILURE) {
 		PG(display_errors) = orig_display_errors;
 		if (SG(request_info).path_translated != filename) {
-			STR_FREE(filename);
+			if (filename) {
+				efree(filename);
+			}
 		}
-		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
-		SG(request_info).path_translated = NULL;
+		if (SG(request_info).path_translated) {
+			efree(SG(request_info).path_translated);
+			SG(request_info).path_translated = NULL;
+		}
 		return FAILURE;
 	}
 	PG(display_errors) = orig_display_errors;
 
 	if (SG(request_info).path_translated != filename) {
-		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
+		if (SG(request_info).path_translated) {
+			efree(SG(request_info).path_translated);
+		}
 		SG(request_info).path_translated = filename;
 	}
 

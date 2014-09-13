@@ -39,15 +39,14 @@
 	} \
 }
 
-PHP_SXE_API zend_object_value sxe_object_new(zend_class_entry *ce TSRMLS_DC);
-/* {{{ php_sxe_fetch_object()
- */
-static inline php_sxe_object *
-php_sxe_fetch_object(zval *object TSRMLS_DC)
-{
-	return (php_sxe_object *) zend_object_store_get_object(object TSRMLS_CC);
+PHP_SXE_API zend_object *sxe_object_new(zend_class_entry *ce TSRMLS_DC);
+
+static inline php_sxe_object *php_sxe_fetch_object(zend_object *obj) /* {{{ */ {
+	return (php_sxe_object *)((char*)(obj) - XtOffsetOf(php_sxe_object, zo));
 }
 /* }}} */
+
+#define Z_SXEOBJ_P(zv) php_sxe_fetch_object(Z_OBJ_P((zv)))
 
 typedef struct {
 	zend_object_iterator  intern;

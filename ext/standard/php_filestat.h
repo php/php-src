@@ -61,11 +61,6 @@ PHP_FUNCTION(touch);
 #endif
 PHP_FUNCTION(clearstatcache);
 
-#define MAKE_LONG_ZVAL_INCREF(name, val)\
-	MAKE_STD_ZVAL(name); \
-	ZVAL_LONG(name, val); \
-	Z_ADDREF_P(name); 
-
 #ifdef PHP_WIN32
 #define S_IRUSR S_IREAD
 #define S_IWUSR S_IWRITE

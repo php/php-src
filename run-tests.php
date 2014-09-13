@@ -1189,6 +1189,7 @@ function run_test($php, $file, $env)
 	global $no_clean;
 	global $valgrind_version;
 	global $JUNIT;
+	global $SHOW_ONLY_GROUPS;
 	$temp_filenames = null;
 	$org_file = $file;
 
@@ -1363,7 +1364,9 @@ TEST $file
 		}
 	}
 
-	show_test($test_idx, $shortname);
+	if (!$SHOW_ONLY_GROUPS) {
+		show_test($test_idx, $shortname);
+	}
 
 	if (is_array($IN_REDIRECT)) {
 		$temp_dir = $test_dir = $IN_REDIRECT['dir'];

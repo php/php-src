@@ -84,7 +84,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		char ret[100];
 
 		snprintf(ret, 100, "%.8F %ld", tp.tv_usec / MICRO_IN_SEC, tp.tv_sec);
-		RETURN_STRING(ret, 1);
+		RETURN_STRING(ret);
 	}
 }
 
@@ -111,7 +111,7 @@ PHP_FUNCTION(gettimeofday)
 PHP_FUNCTION(getrusage)
 {
 	struct rusage usg;
-	long pwho = 0;
+	zend_long pwho = 0;
 	int who = RUSAGE_SELF;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &pwho) == FAILURE) {

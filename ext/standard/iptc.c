@@ -178,13 +178,13 @@ static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 PHP_FUNCTION(iptcembed)
 {
 	char *iptcdata, *jpeg_file;
-	int iptcdata_len, jpeg_file_len;
-	long spool = 0;
+	size_t iptcdata_len, jpeg_file_len;
+	zend_long spool = 0;
 	FILE *fp;
 	unsigned int marker, done = 0;
 	int inx;
 	unsigned char *spoolbuf = NULL, *poi = NULL;
-	struct stat sb;
+	zend_stat_t sb;
 	zend_bool written = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
@@ -201,7 +201,7 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (spool < 2) {
-		fstat(fileno(fp), &sb);
+		zend_fstat(fileno(fp), &sb);
 
 		poi = spoolbuf = safe_emalloc(1, iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 1);
 		memset(poi, 0, iptcdata_len + sizeof(psheader) + sb.st_size + 1024 + 1);
@@ -285,7 +285,9 @@ PHP_FUNCTION(iptcembed)
 	fclose(fp);
 
 	if (spool < 2) {
-		RETVAL_STRINGL(spoolbuf, poi - spoolbuf, 0);
+		// TODO: avoid reallocation ???
+		RETVAL_STRINGL(spoolbuf, poi - spoolbuf);
+		efree(spoolbuf);
 	} else {
 		RETURN_TRUE;
 	}
@@ -300,8 +302,8 @@ PHP_FUNCTION(iptcparse)
 	unsigned int tagsfound = 0;
 	unsigned char *buffer, recnum, dataset, key[ 16 ];
 	char *str;
-	int str_len;
-	zval *values, **element;
+	size_t str_len;
+	zval values, *element;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) != SUCCESS) {
 		return;
@@ -332,8 +334,8 @@ PHP_FUNCTION(iptcparse)
 			if((inx+6) >= str_len) {
 				break;
 			}
-			len = (((long) buffer[ inx + 2 ]) << 24) + (((long) buffer[ inx + 3 ]) << 16) + 
-				  (((long) buffer[ inx + 4 ]) <<  8) + (((long) buffer[ inx + 5 ]));
+			len = (((zend_long) buffer[ inx + 2 ]) << 24) + (((zend_long) buffer[ inx + 3 ]) << 16) + 
+				  (((zend_long) buffer[ inx + 4 ]) <<  8) + (((zend_long) buffer[ inx + 5 ]));
 			inx += 6;
 		} else { /* short tag */
 			len = (((unsigned short) buffer[ inx ])<<8) | (unsigned short)buffer[ inx+1 ];
@@ -350,14 +352,13 @@ PHP_FUNCTION(iptcparse)
 			array_init(return_value);
 		}
 
-		if (zend_hash_find(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void **) &element) == FAILURE) {
-			MAKE_STD_ZVAL(values);
-			array_init(values);
+		if ((element = zend_hash_str_find(Z_ARRVAL_P(return_value), key, strlen(key))) == NULL) {
+			array_init(&values);
 			
-			zend_hash_update(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void *) &values, sizeof(zval*), (void **) &element);
+			element = zend_hash_str_update(Z_ARRVAL_P(return_value), key, strlen(key), &values);
 		} 
 			
-		add_next_index_stringl(*element, buffer+inx, len, 1);
+		add_next_index_stringl(element, buffer+inx, len);
 		inx += len;
 		tagsfound++;
 	}

@@ -121,7 +121,9 @@ static void ps_files_close(ps_files *data)
 static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
+#if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
     struct stat sbuf;
+#endif
 
 	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
 		if (data->lastkey) {
@@ -185,7 +187,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 	DIR *dir;
 	char dentry[sizeof(struct dirent) + MAXPATHLEN];
 	struct dirent *entry = (struct dirent *) &dentry;
-	struct stat sbuf;
+	zend_stat_t sbuf;
 	char buf[MAXPATHLEN];
 	time_t now;
 	int nrdels = 0;
@@ -236,7 +238,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 static int ps_files_key_exists(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
-	struct stat sbuf;
+	zend_stat_t sbuf;
 
 	if (!key || !ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;
@@ -281,7 +283,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 1) {
 		errno = 0;
-		dirdepth = (size_t) strtol(argv[0], NULL, 10);
+		dirdepth = (size_t) ZEND_STRTOL(argv[0], NULL, 10);
 		if (errno == ERANGE) {
 			php_error(E_WARNING, "The first parameter in session.save_path is invalid");
 			return FAILURE;
@@ -290,7 +292,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 2) {
 		errno = 0;
-		filemode = strtol(argv[1], NULL, 8);
+		filemode = ZEND_STRTOL(argv[1], NULL, 8);
 		if (errno == ERANGE || filemode < 0 || filemode > 07777) {
 			php_error(E_WARNING, "The second parameter in session.save_path is invalid");
 			return FAILURE;
@@ -333,19 +335,19 @@ PS_CLOSE_FUNC(files)
 
 PS_READ_FUNC(files)
 {
-	long n;
-	struct stat sbuf;
+	zend_long n;
+	zend_stat_t sbuf;
 	PS_FILES_DATA;
 
 	/* If strict mode, check session id existence */
 	if (PS(use_strict_mode) &&
-		ps_files_key_exists(data, key TSRMLS_CC) == FAILURE) {
+		ps_files_key_exists(data, key? key->val : NULL TSRMLS_CC) == FAILURE) {
 		/* key points to PS(id), but cannot change here. */
 		if (key) {
-			efree(PS(id));
+			zend_string_release(PS(id));
 			PS(id) = NULL;
 		}
-		PS(id) = PS(mod)->s_create_sid((void **)&data, NULL TSRMLS_CC);
+		PS(id) = PS(mod)->s_create_sid((void **)&data TSRMLS_CC);
 		if (!PS(id)) {
 			return FAILURE;
 		}
@@ -356,29 +358,29 @@ PS_READ_FUNC(files)
 		PS(session_status) = php_session_active;
 	}
 
-	ps_files_open(data, PS(id) TSRMLS_CC);
+	ps_files_open(data, PS(id)->val TSRMLS_CC);
 	if (data->fd < 0) {
 		return FAILURE;
 	}
 
-	if (fstat(data->fd, &sbuf)) {
+	if (zend_fstat(data->fd, &sbuf)) {
 		return FAILURE;
 	}
 
-	data->st_size = *vallen = sbuf.st_size;
+	data->st_size = sbuf.st_size;
 
 	if (sbuf.st_size == 0) {
 		*val = STR_EMPTY_ALLOC();
 		return SUCCESS;
 	}
 
-	*val = emalloc(sbuf.st_size);
+	*val = zend_string_alloc(sbuf.st_size, 0);
 
 #if defined(HAVE_PREAD)
-	n = pread(data->fd, *val, sbuf.st_size, 0);
+	n = pread(data->fd, (*val)->val, (*val)->len, 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
-	n = read(data->fd, *val, sbuf.st_size);
+	n = read(data->fd, (*val)->val, (*val)->len);
 #endif
 
 	if (n != sbuf.st_size) {
@@ -387,7 +389,7 @@ PS_READ_FUNC(files)
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "read returned less bytes than requested");
 		}
-		efree(*val);
+		zend_string_release(*val);
 		return FAILURE;
 	}
 
@@ -396,28 +398,28 @@ PS_READ_FUNC(files)
 
 PS_WRITE_FUNC(files)
 {
-	long n;
+	zend_long n;
 	PS_FILES_DATA;
 
-	ps_files_open(data, key TSRMLS_CC);
+	ps_files_open(data, key->val TSRMLS_CC);
 	if (data->fd < 0) {
 		return FAILURE;
 	}
 
 	/* Truncate file if the amount of new data is smaller than the existing data set. */
 
-	if (vallen < (int)data->st_size) {
+	if (val->len < (int)data->st_size) {
 		php_ignore_value(ftruncate(data->fd, 0));
 	}
 
 #if defined(HAVE_PWRITE)
-	n = pwrite(data->fd, val, vallen, 0);
+	n = pwrite(data->fd, val->val, val->len, 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
-	n = write(data->fd, val, vallen);
+	n = write(data->fd, val->val, val->len);
 #endif
 
-	if (n != vallen) {
+	if (n != val->len) {
 		if (n == -1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
 		} else {
@@ -434,7 +436,7 @@ PS_DESTROY_FUNC(files)
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, key->val)) {
 		return FAILURE;
 	}
 
@@ -470,16 +472,16 @@ PS_GC_FUNC(files)
 
 PS_CREATE_SID_FUNC(files)
 {
-	char *sid;
+	zend_string *sid;
 	int maxfail = 3;
 	PS_FILES_DATA;
 
 	do {
-		sid = php_session_create_id((void **)&data, newlen TSRMLS_CC);
+		sid = php_session_create_id((void**)&data TSRMLS_CC);
 		/* Check collision */
-		if (data && ps_files_key_exists(data, sid TSRMLS_CC) == SUCCESS) {
+		if (data && ps_files_key_exists(data, sid? sid->val : NULL TSRMLS_CC) == SUCCESS) {
 			if (sid) {
-				efree(sid);
+				zend_string_release(sid);
 				sid = NULL;
 			}
 			if (!(maxfail--)) {

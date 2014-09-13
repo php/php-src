@@ -86,9 +86,9 @@ char *strptime(const char *s, const char *format, struct tm *tm);
 PHP_FUNCTION(strptime)
 {
 	char      *ts;
-	int        ts_length;
+	size_t        ts_length;
 	char      *format;
-	int        format_length;
+	size_t        format_length;
 	struct tm  parsed_time;
 	char      *unparsed_part;
 
@@ -112,7 +112,7 @@ PHP_FUNCTION(strptime)
 	add_assoc_long(return_value, "tm_year",  parsed_time.tm_year);
 	add_assoc_long(return_value, "tm_wday",  parsed_time.tm_wday);
 	add_assoc_long(return_value, "tm_yday",  parsed_time.tm_yday);
-	add_assoc_string(return_value, "unparsed", unparsed_part, 1);
+	add_assoc_string(return_value, "unparsed", unparsed_part);
 }
 /* }}} */
 

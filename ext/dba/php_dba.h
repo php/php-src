@@ -46,7 +46,7 @@ typedef struct dba_info {
 	int fd;
 	/* arg[cv] are only available when the dba_open handler is called! */
 	int argc;
-	zval ***argv;
+	zval *argv;
 	/* private */
 	int flags; /* whether and how dba did locking and other flags*/
 	struct dba_handler *hnd;	

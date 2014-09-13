@@ -55,6 +55,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 	int full, encode;
 	char *short_syntax, *short_post;
 	char *full_pre, *full_syntax, *full_post, *full_separator;
+	zend_string *_GET_str;
 
 	if (!SG(request_info).request_uri) {
 		return 0;
@@ -126,13 +127,14 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		}
 
 		/* full status ? */
-		full = (fpm_php_get_string_from_table("_GET", "full" TSRMLS_CC) != NULL);
+		_GET_str = zend_string_init("_GET", sizeof("_GET")-1, 0);
+		full = (fpm_php_get_string_from_table(_GET_str, "full" TSRMLS_CC) != NULL);
 		short_syntax = short_post = NULL;
 		full_separator = full_pre = full_syntax = full_post = NULL;
 		encode = 0;
 
 		/* HTML */
-		if (fpm_php_get_string_from_table("_GET", "html" TSRMLS_CC)) {
+		if (fpm_php_get_string_from_table(_GET_str, "html" TSRMLS_CC)) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/html"), 1, 1 TSRMLS_CC);
 			time_format = "%d/%b/%Y:%H:%M:%S %z";
 			encode = 1;
@@ -207,7 +209,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 			}
 
 		/* XML */
-		} else if (fpm_php_get_string_from_table("_GET", "xml" TSRMLS_CC)) {
+		} else if (fpm_php_get_string_from_table(_GET_str, "xml" TSRMLS_CC)) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/xml"), 1, 1 TSRMLS_CC);
 			time_format = "%s";
 			encode = 1;
@@ -259,7 +261,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				}
 
 			/* JSON */
-		} else if (fpm_php_get_string_from_table("_GET", "json" TSRMLS_CC)) {
+		} else if (fpm_php_get_string_from_table(_GET_str, "json" TSRMLS_CC)) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: application/json"), 1, 1 TSRMLS_CC);
 			time_format = "%s";
 
@@ -376,6 +378,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 
 		PUTS(buffer);
 		efree(buffer);
+		zend_string_release(_GET_str);
 
 		if (short_post) {
 			PUTS(short_post);
@@ -384,7 +387,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		/* no need to test the var 'full' */
 		if (full_syntax) {
 			int i, first;
-			size_t len;
+			zend_string *tmp_query_string;
 			char *query_string;
 			struct timeval duration, now;
 #ifdef HAVE_FPM_LQ
@@ -413,12 +416,13 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				}
 
 				query_string = NULL;
-				len = 0;
+				tmp_query_string = NULL;
 				if (proc.query_string[0] != '\0') {
 					if (!encode) {
 						query_string = proc.query_string;
 					} else {
-						query_string = php_escape_html_entities_ex((unsigned char *)proc.query_string, strlen(proc.query_string), &len, 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, 1 TSRMLS_CC);
+						tmp_query_string = php_escape_html_entities_ex((unsigned char *)proc.query_string, strlen(proc.query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, 1 TSRMLS_CC);
+						query_string = tmp_query_string->val;
 					}
 				}
 
@@ -458,8 +462,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				PUTS(buffer);
 				efree(buffer);
 
-				if (len > 0 && query_string) {
-					efree(query_string);
+				if (tmp_query_string) {
+					zend_string_free(tmp_query_string);
 				}
 			}
 

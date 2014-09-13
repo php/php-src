@@ -308,7 +308,7 @@ static PHP_FUNCTION(phpdbg_color)
 {
 	long element = 0L;
 	char *color = NULL;
-	int color_len = 0;
+	size_t color_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &element, &color, &color_len) == FAILURE) {
 		return;
@@ -329,7 +329,7 @@ static PHP_FUNCTION(phpdbg_color)
 static PHP_FUNCTION(phpdbg_prompt)
 {
 	char *prompt = NULL;
-	int prompt_len = 0;
+	size_t prompt_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &prompt, &prompt_len) == FAILURE) {
 		return;

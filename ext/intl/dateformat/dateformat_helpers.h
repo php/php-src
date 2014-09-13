@@ -32,7 +32,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 								 const char *func_name,
 								 intl_error *err,
 								 Calendar*& cal,
-								 long& cal_int_type,
+								 zend_long& cal_int_type,
 								 bool& calendar_owned TSRMLS_DC);
 
 #endif	/* DATEFORMAT_HELPERS_H */

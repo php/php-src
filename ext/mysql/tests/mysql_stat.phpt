@@ -25,7 +25,9 @@ if ((!is_string($stat = mysql_stat($link))) || ('' === $stat))
 	printf("[003] Expecting non empty string, got %s/'%s', [%d] %s\n",
 		gettype($stat), $stat, mysql_errno($link), mysql_error($link));
 
-if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($stat)) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+    !is_unicode($stat)) {
 	printf("[004] Expecting Unicode error message!\n");
 	var_inspect($stat);
 }
@@ -46,5 +48,5 @@ print "done!";
 --EXPECTF--
 Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 
-Warning: mysql_stat(): %d is not a valid MySQL-Link resource in %s on line %d
+Warning: mysql_stat(): supplied resource is not a valid MySQL-Link resource in %s on line %d
 done!

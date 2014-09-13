@@ -34,11 +34,11 @@ test('test2');
 ===DONE===
 --EXPECTF--
 Direct Call
-string(5) "test1" refcount(1)
+string(5) "test1" refcount(%d)
 User Func
-string(5) "test1" refcount(1)
+string(5) "test1" refcount(%d)
 Direct Call
-string(5) "test2" refcount(2)
+string(5) "test2" refcount(%d)
 User Func
-string(5) "test2" refcount(1)
+string(5) "test2" refcount(%d)
 ===DONE===

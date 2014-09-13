@@ -123,12 +123,11 @@ typedef struct _php_output_handler *(*php_output_handler_alias_ctor_t)(const cha
 typedef struct _php_output_handler_user_func_t {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
-	zval *zoh;
+	zval zoh;
 } php_output_handler_user_func_t;
 
 typedef struct _php_output_handler {
-	char *name;
-	size_t name_len;
+	zend_string *name;
 	int flags;
 	int level;
 	size_t size;
@@ -144,12 +143,12 @@ typedef struct _php_output_handler {
 } php_output_handler;
 
 ZEND_BEGIN_MODULE_GLOBALS(output)
-	int flags;
 	zend_stack handlers;
 	php_output_handler *active;
 	php_output_handler *running;
 	const char *output_start_filename;
 	int output_start_lineno;
+	int flags;
 ZEND_END_MODULE_GLOBALS(output)
 
 /* there should not be a need to use OG() from outside of output.c */
@@ -244,7 +243,7 @@ PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_n
 PHPAPI int php_output_handler_conflict_register(const char *handler_name, size_t handler_name_len, php_output_handler_conflict_check_t check_func TSRMLS_DC);
 PHPAPI int php_output_handler_reverse_conflict_register(const char *handler_name, size_t handler_name_len, php_output_handler_conflict_check_t check_func TSRMLS_DC);
 
-PHPAPI php_output_handler_alias_ctor_t *php_output_handler_alias(const char *handler_name, size_t handler_name_len TSRMLS_DC);
+PHPAPI php_output_handler_alias_ctor_t php_output_handler_alias(const char *handler_name, size_t handler_name_len TSRMLS_DC);
 PHPAPI int php_output_handler_alias_register(const char *handler_name, size_t handler_name_len, php_output_handler_alias_ctor_t func TSRMLS_DC);
 
 END_EXTERN_C()

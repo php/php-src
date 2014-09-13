@@ -32,8 +32,8 @@ gzread($h, 20);
 --EXPECTF--
 bool(true)
 
-Warning: gzread(): %d is not a valid stream resource in %s on line %d
+Warning: gzread(): supplied resource is not a valid stream resource in %s on line %d
 bool(true)
 
-Warning: gzread(): %d is not a valid stream resource in %s on line %d
+Warning: gzread(): supplied resource is not a valid stream resource in %s on line %d
 ===DONE===

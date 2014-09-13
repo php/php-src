@@ -42,6 +42,8 @@
 
 static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC) /* {{{ */
 {
+// TODO: fpm_php_trace_dump() has to be reimplemented ???
+#if 0
 	int callers_limit = 20;
 	pid_t pid = child->pid;
 	struct timeval tv;
@@ -131,6 +133,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC
 			break;
 		}
 	}
+#endif
 	return 0;
 }
 /* }}} */

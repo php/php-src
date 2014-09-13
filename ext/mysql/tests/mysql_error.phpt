@@ -39,7 +39,9 @@ $tmp = mysql_error($link);
 if (!is_string($tmp) || !preg_match("/Table '\w*\.test' doesn't exist/su", $tmp))
 	printf("[006] Expecting string/[Table... doesn't exit], got %s/%s. [%d] %s\n", gettype($tmp), $tmp, mysql_errno($link), mysql_error($link));
 
-if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp)) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+    !is_unicode($tmp)) {
 	printf("[007] Expecting Unicode error message!\n");
 	var_inspect($tmp);
 }
@@ -64,6 +66,6 @@ require_once("clean_table.inc");
 --EXPECTF--
 Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 
-Warning: mysql_error(): %d is not a valid MySQL-Link resource in %s on line %d
+Warning: mysql_error(): supplied resource is not a valid MySQL-Link resource in %s on line %d
 bool(false)
 done!

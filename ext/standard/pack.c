@@ -84,13 +84,13 @@ static int little_endian_long_map[4];
 
 /* {{{ php_pack
  */
-static void php_pack(zval **val, int size, int *map, char *output)
+static void php_pack(zval *val, size_t size, int *map, char *output)
 {
 	int i;
 	char *v;
 
 	convert_to_long_ex(val);
-	v = (char *) &Z_LVAL_PP(val);
+	v = (char *) &Z_LVAL_P(val);
 
 	for (i = 0; i < size; i++) {
 		*output++ = v[map[i]];
@@ -105,7 +105,7 @@ static void php_pack(zval **val, int size, int *map, char *output)
    Takes one or more arguments and packs them into a binary string according to the format argument */
 PHP_FUNCTION(pack)
 {
-	zval ***argv = NULL;
+	zval *argv = NULL;
 	int num_args, i;
 	int currentarg;
 	char *format;
@@ -120,13 +120,13 @@ PHP_FUNCTION(pack)
 		return;
 	}
 
-	if (Z_ISREF_PP(argv[0])) {
-		SEPARATE_ZVAL(argv[0]);
+	if (Z_ISREF(argv[0])) {
+		SEPARATE_ZVAL(&argv[0]);
 	}
-	convert_to_string_ex(argv[0]);
+	convert_to_string_ex(&argv[0]);
 
-	format = Z_STRVAL_PP(argv[0]);
-	formatlen = Z_STRLEN_PP(argv[0]);
+	format = Z_STRVAL(argv[0]);
+	formatlen = Z_STRLEN(argv[0]);
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
@@ -174,7 +174,6 @@ PHP_FUNCTION(pack)
 			case 'h': 
 			case 'H':
 				if (currentarg >= num_args) {
-					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough arguments", code);
@@ -182,11 +181,11 @@ PHP_FUNCTION(pack)
 				}
 
 				if (arg < 0) {
-					if (Z_ISREF_PP(argv[currentarg])) {
-						SEPARATE_ZVAL(argv[currentarg]);
+					if (Z_ISREF(argv[currentarg])) {
+						SEPARATE_ZVAL(&argv[currentarg]);
 					}
-					convert_to_string_ex(argv[currentarg]);
-					arg = Z_STRLEN_PP(argv[currentarg]);
+					convert_to_string_ex(&argv[currentarg]);
+					arg = Z_STRLEN(argv[currentarg]);
 					if (code == 'Z') {
 						/* add one because Z is always NUL-terminated:
 						 * pack("Z*", "aa") === "aa\0"
@@ -220,7 +219,6 @@ PHP_FUNCTION(pack)
 				currentarg += arg;
 
 				if (currentarg > num_args) {
-					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: too few arguments", code);
@@ -229,7 +227,6 @@ PHP_FUNCTION(pack)
 				break;
 
 			default:
-				efree(argv);
 				efree(formatcodes);
 				efree(formatargs);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: unknown format code", code);
@@ -318,22 +315,21 @@ PHP_FUNCTION(pack)
 	for (i = 0; i < formatcount; i++) {
 	    int code = (int) formatcodes[i];
 		int arg = formatargs[i];
-		zval **val;
 
 		switch ((int) code) {
 			case 'a': 
 			case 'A': 
 			case 'Z': {
 				int arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
+
+				zend_string *str = zval_get_string(&argv[currentarg++]);
+
 				memset(&output[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
-				val = argv[currentarg++];
-				if (Z_ISREF_PP(val)) {
-					SEPARATE_ZVAL(val);
-				}
-				convert_to_string_ex(val);
-				memcpy(&output[outputpos], Z_STRVAL_PP(val),
-					   (Z_STRLEN_PP(val) < arg_cp) ? Z_STRLEN_PP(val) : arg_cp);
+				memcpy(&output[outputpos], str->val,
+					   (str->len < arg_cp) ? str->len : arg_cp);
+
 				outputpos += arg;
+				zend_string_release(str);
 				break;
 			}
 
@@ -341,18 +337,14 @@ PHP_FUNCTION(pack)
 			case 'H': {
 				int nibbleshift = (code == 'h') ? 0 : 4;
 				int first = 1;
-				char *v;
 
-				val = argv[currentarg++];
-				if (Z_ISREF_PP(val)) {
-					SEPARATE_ZVAL(val);
-				}
-				convert_to_string_ex(val);
-				v = Z_STRVAL_PP(val);
+				zend_string *str = zval_get_string(&argv[currentarg++]);
+				char *v = str->val; 
+
 				outputpos--;
-				if(arg > Z_STRLEN_PP(val)) {
+				if(arg > str->len) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough characters in string", code);
-					arg = Z_STRLEN_PP(val);
+					arg = str->len;
 				}
 
 				while (arg-- > 0) {
@@ -380,13 +372,14 @@ PHP_FUNCTION(pack)
 				}
 
 				outputpos++;
+				zend_string_release(str);
 				break;
 			}
 
 			case 'c': 
 			case 'C':
 				while (arg-- > 0) {
-					php_pack(argv[currentarg++], 1, byte_map, &output[outputpos]);
+					php_pack(&argv[currentarg++], 1, byte_map, &output[outputpos]);
 					outputpos++;
 				}
 				break;
@@ -404,7 +397,7 @@ PHP_FUNCTION(pack)
 				}
 
 				while (arg-- > 0) {
-					php_pack(argv[currentarg++], 2, map, &output[outputpos]);
+					php_pack(&argv[currentarg++], 2, map, &output[outputpos]);
 					outputpos += 2;
 				}
 				break;
@@ -413,7 +406,7 @@ PHP_FUNCTION(pack)
 			case 'i': 
 			case 'I': 
 				while (arg-- > 0) {
-					php_pack(argv[currentarg++], sizeof(int), int_map, &output[outputpos]);
+					php_pack(&argv[currentarg++], sizeof(int), int_map, &output[outputpos]);
 					outputpos += sizeof(int);
 				}
 				break;
@@ -431,19 +424,15 @@ PHP_FUNCTION(pack)
 				}
 
 				while (arg-- > 0) {
-					php_pack(argv[currentarg++], 4, map, &output[outputpos]);
+					php_pack(&argv[currentarg++], 4, map, &output[outputpos]);
 					outputpos += 4;
 				}
 				break;
 			}
 
 			case 'f': {
-				float v;
-
 				while (arg-- > 0) {
-					val = argv[currentarg++];
-					convert_to_double_ex(val);
-					v = (float) Z_DVAL_PP(val);
+					float v = (float) zval_get_double(&argv[currentarg++]);
 					memcpy(&output[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -451,12 +440,8 @@ PHP_FUNCTION(pack)
 			}
 
 			case 'd': {
-				double v;
-
 				while (arg-- > 0) {
-					val = argv[currentarg++];
-					convert_to_double_ex(val);
-					v = (double) Z_DVAL_PP(val);
+					double v = (double) zval_get_double(&argv[currentarg++]);
 					memcpy(&output[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -485,20 +470,19 @@ PHP_FUNCTION(pack)
 		}
 	}
 
-	efree(argv);
 	efree(formatcodes);
 	efree(formatargs);
 	output[outputpos] = '\0';
-	RETVAL_STRINGL(output, outputpos, 1);
+	RETVAL_STRINGL(output, outputpos);
 	efree(output);
 }
 /* }}} */
 
 /* {{{ php_unpack
  */
-static long php_unpack(char *data, int size, int issigned, int *map)
+static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
 {
-	long result;
+	zend_long result;
 	char *cresult = (char *) &result;
 	int i;
 
@@ -528,19 +512,20 @@ static long php_unpack(char *data, int size, int issigned, int *map)
    Unpack binary string into named array elements according to format argument */
 PHP_FUNCTION(unpack)
 {
-	char *format, *input, *formatarg, *inputarg;
-	int formatlen, formatarg_len, inputarg_len;
-	int inputpos, inputlen, i;
+	char *format, *input;
+	zend_string *formatarg, *inputarg;
+	size_t formatlen, inputpos, inputlen;
+	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &formatarg, &formatarg_len,
-		&inputarg, &inputarg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &formatarg, 
+		&inputarg) == FAILURE) {
 		return;
 	}
 
-	format = formatarg;
-	formatlen = formatarg_len;
-	input = inputarg;
-	inputlen = inputarg_len;
+	format = formatarg->val;
+	formatlen = formatarg->len;
+	input = inputarg->val;
+	inputlen = inputarg->len;
 	inputpos = 0;
 
 	array_init(return_value);
@@ -672,11 +657,11 @@ PHP_FUNCTION(unpack)
 				inputpos = 0;
 			}
 
-			if ((inputpos + size) <= inputlen) {
+			if ((size >=0 && (inputpos + size) <= inputlen) || (size < 0 && -size <= (inputlen - inputpos))) {
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
-						int len = inputlen - inputpos;	/* Remaining string */
+						size_t len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -685,13 +670,13 @@ PHP_FUNCTION(unpack)
 
 						size = len;
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len, 1);
+						add_assoc_stringl(return_value, n, &input[inputpos], len);
 						break;
 					}
 					case 'A': {
 						/* A will strip any trailing whitespace */
 						char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
-						int len = inputlen - inputpos;	/* Remaining string */
+						size_t len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -711,14 +696,14 @@ PHP_FUNCTION(unpack)
 								break;
 						}
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len + 1, 1);
+						add_assoc_stringl(return_value, n, &input[inputpos], len + 1);
 						break;
 					}
 					/* New option added for Z to remain in-line with the Perl implementation */
 					case 'Z': {
 						/* Z will strip everything after the first null character */
 						char pad = '\0';
-						int	 s,
+						size_t	 s,
 							 len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
@@ -735,18 +720,18 @@ PHP_FUNCTION(unpack)
 						}
 						len = s;
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len, 1);
+						add_assoc_stringl(return_value, n, &input[inputpos], len);
 						break;
 					}
 
 					
 					case 'h': 
 					case 'H': {
-						int len = (inputlen - inputpos) * 2;	/* Remaining */
+						size_t len = (inputlen - inputpos) * 2;	/* Remaining */
 						int nibbleshift = (type == 'h') ? 0 : 4;
 						int first = 1;
 						char *buf;
-						int ipos, opos;
+						size_t ipos, opos;
 
 						/* If size was given take minimum of len and size */
 						if (size >= 0 && len > (size * 2)) {
@@ -778,7 +763,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						buf[len] = '\0';
-						add_assoc_stringl(return_value, n, buf, len, 1);
+						add_assoc_stringl(return_value, n, buf, len);
 						efree(buf);
 						break;
 					}
@@ -786,7 +771,7 @@ PHP_FUNCTION(unpack)
 					case 'c': 
 					case 'C': {
 						int issigned = (type == 'c') ? (input[inputpos] & 0x80) : 0;
-						long v = php_unpack(&input[inputpos], 1, issigned, byte_map);
+						zend_long v = php_unpack(&input[inputpos], 1, issigned, byte_map);
 						add_assoc_long(return_value, n, v);
 						break;
 					}
@@ -795,7 +780,7 @@ PHP_FUNCTION(unpack)
 					case 'S': 
 					case 'n': 
 					case 'v': {
-						long v;
+						zend_long v;
 						int issigned = 0;
 						int *map = machine_endian_short_map;
 
@@ -814,7 +799,7 @@ PHP_FUNCTION(unpack)
 
 					case 'i': 
 					case 'I': {
-						long v;
+						zend_long v;
 						int issigned = 0;
 
 						if (type == 'i') {
@@ -832,7 +817,7 @@ PHP_FUNCTION(unpack)
 					case 'V': {
 						int issigned = 0;
 						int *map = machine_endian_long_map;
-						long v = 0;
+						zend_long v = 0;
 
 						if (type == 'l' || type == 'L') {
 							issigned = input[inputpos + (machine_little_endian ? 3 : 0)] & 0x80;
@@ -844,12 +829,12 @@ PHP_FUNCTION(unpack)
 							map = little_endian_long_map;
 						}
 
-						if (sizeof(long) > 4 && issigned) {
+						if (SIZEOF_ZEND_LONG > 4 && issigned) {
 							v = ~INT_MAX;
 						}
 
 						v |= php_unpack(&input[inputpos], 4, issigned, map);
-						if (sizeof(long) > 4) {
+						if (SIZEOF_ZEND_LONG > 4) {
  							if (type == 'l') {
 								v = (signed int) v; 
 							} else {
@@ -919,8 +904,10 @@ PHP_FUNCTION(unpack)
 			}
 		}
 
-		formatlen--;	/* Skip '/' separator, does no harm if inputlen == 0 */
-		format++;
+		if (formatlen > 0) {
+			formatlen--;	/* Skip '/' separator, does no harm if inputlen == 0 */
+			format++;
+		}
 	}
 }
 /* }}} */

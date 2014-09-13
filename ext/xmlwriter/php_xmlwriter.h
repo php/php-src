@@ -45,9 +45,15 @@ typedef struct _xmlwriter_object {
 
 /* Extends zend object */
 typedef struct _ze_xmlwriter_object {
-	zend_object zo;
 	xmlwriter_object *xmlwriter_ptr;
+	zend_object std;
 } ze_xmlwriter_object;
+
+static inline ze_xmlwriter_object *php_xmlwriter_fetch_object(zend_object *obj) {
+	return (ze_xmlwriter_object *)((char*)(obj) - XtOffsetOf(ze_xmlwriter_object, std));
+}
+
+#define Z_XMLWRITER_P(zv) php_xmlwriter_fetch_object(Z_OBJ_P((zv)))
 
 #endif	/* PHP_XMLWRITER_H */
 
