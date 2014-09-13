@@ -758,10 +758,11 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 	cwd_state new_state;
 	char cwd[MAXPATHLEN];
 	int copy_len;
+	int path_len = strlen(filepath);
 
 	if (!filepath[0]) {
 		return NULL;
-	} else if (IS_ABSOLUTE_PATH(filepath, strlen(filepath))) {
+	} else if (IS_ABSOLUTE_PATH(filepath, path_len)) {
 		cwd[0] = '\0';
 	} else {
 		const char *iam = SG(request_info).path_translated;
@@ -784,7 +785,7 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 				/* return a relative file path if for any reason
 				 * we cannot cannot getcwd() and the requested,
 				 * relatively referenced file is accessible */
-				copy_len = strlen(filepath) > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : strlen(filepath);
+				copy_len = path_len > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : path_len;
 				if (real_path) {
 					memcpy(real_path, filepath, copy_len);
 					real_path[copy_len] = '\0';
