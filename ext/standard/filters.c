@@ -1831,9 +1831,9 @@ static php_stream_filter_factory strfilter_convert_factory = {
 
 /* {{{ consumed filter implementation */
 typedef struct _php_consumed_filter_data {
-	int persistent;
 	size_t consumed;
-	off_t offset;
+	zend_off_t offset;
+	int persistent;
 } php_consumed_filter_data;
 
 static php_stream_filter_status_t consumed_filter_filter(
@@ -1926,8 +1926,8 @@ typedef enum _php_chunked_filter_state {
 } php_chunked_filter_state;
 
 typedef struct _php_chunked_filter_data {
-	php_chunked_filter_state state;
 	size_t chunk_size;
+	php_chunked_filter_state state;
 	int persistent;
 } php_chunked_filter_data;
 
