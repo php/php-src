@@ -14,6 +14,8 @@ echo "M_LN2= ";
 var_dump(M_LN2);
 echo "M_LN10= ";
 var_dump(M_LN10);
+echo "M_TAU= ";
+var_dump(M_TAU);
 echo "M_PI= ";
 var_dump(M_PI);
 echo "M_PI_2= ";
@@ -49,6 +51,7 @@ M_LOG2E= float(1.442695040889)
 M_LOG10E= float(0.43429448190325)
 M_LN2= float(0.69314718055995)
 M_LN10= float(2.302585092994)
+M_TAU= float(6.2831853071796)
 M_PI= float(3.1415926535898)
 M_PI_2= float(1.5707963267949)
 M_PI_4= float(0.78539816339745)
