@@ -57,13 +57,13 @@
 #endif
 
 typedef struct {
-	int fd;
 	char *lastkey;
 	char *basedir;
 	size_t basedir_len;
 	size_t dirdepth;
 	size_t st_size;
 	int filemode;
+	int fd;
 } ps_files;
 
 ps_module ps_mod_files = {
