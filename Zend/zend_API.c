@@ -188,10 +188,45 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 }
 /* }}} */
 
+ZEND_API char *zend_get_friendly_type_by_const(int type) /* {{{ */
+{
+	switch(type) {
+		case IS_FALSE:
+		case IS_TRUE:
+			return "bool";
+		case IS_LONG:
+			return "int";
+		case IS_DOUBLE:
+			return "float";
+		case IS_STRING:
+			return "string";
+		case IS_OBJECT:
+			return "object";
+		case IS_RESOURCE:
+			return "resource";
+		case IS_NULL:
+			return "null";
+		case IS_CALLABLE:
+			return "callable";
+		case IS_ARRAY:
+			return "array";
+		default:
+			return "unknown";
+	}
+}
+/* }}} */
+
 ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 {
 	ZVAL_DEREF(arg);
 	return zend_get_type_by_const(Z_TYPE_P(arg));
+}
+/* }}} */
+
+ZEND_API char *zend_zval_friendly_type_name(const zval *arg) /* {{{ */
+{
+	ZVAL_DEREF(arg);
+	return zend_get_friendly_type_by_const(Z_TYPE_P(arg));
 }
 /* }}} */
 

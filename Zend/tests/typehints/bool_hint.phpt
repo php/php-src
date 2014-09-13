@@ -24,29 +24,29 @@ foo(false); // bool(false)
 foo(NULL); // E_RECOVERABLE_ERROR
 ?>
 --EXPECTF--
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, integer given, called in %s on line 7 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, int given, called in %s on line 7 and defined in %s on line 4
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, string given, called in %s on line 8 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, string given, called in %s on line 8 and defined in %s on line 4
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, double given, called in %s on line 9 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, float given, called in %s on line 9 and defined in %s on line 4
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, integer given, called in %s on line 10 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, int given, called in %s on line 10 and defined in %s on line 4
 bool(false)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, string given, called in %s on line 11 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, string given, called in %s on line 11 and defined in %s on line 4
 bool(false)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, string given, called in %s on line 12 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, string given, called in %s on line 12 and defined in %s on line 4
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, string given, called in %s on line 13 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, string given, called in %s on line 13 and defined in %s on line 4
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, double given, called in %s on line 14 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, float given, called in %s on line 14 and defined in %s on line 4
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, array given, called in %s on line 15 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, array given, called in %s on line 15 and defined in %s on line 4
 bool(false)
 bool(true)
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, resource given, called in %s on line 18 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, resource given, called in %s on line 18 and defined in %s on line 4
 bool(true)
 bool(true)
 bool(false)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type boolean, null given, called in %s on line 21 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, null given, called in %s on line 21 and defined in %s on line 4
 bool(false)

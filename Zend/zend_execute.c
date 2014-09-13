@@ -585,7 +585,7 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg,
 	if (cur_arg_info->type_hint) {
 		char *type;
 		if (arg) {
-			type = zend_zval_type_name(arg);
+			type = zend_zval_friendly_type_name(arg);
 		}
 		switch(cur_arg_info->type_hint) {
 			case IS_STRING:
@@ -605,7 +605,7 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg,
 			case _IS_BOOL:
 				ZVAL_DEREF(arg);
 				if (!(cur_arg_info->allow_null && Z_TYPE_P(arg) == IS_NULL) && FAILURE == convert_to_boolean_safe_ex(arg)) {
-					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type boolean", "", type, "", arg TSRMLS_CC);
+					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type bool", "", type, "", arg TSRMLS_CC);
 				}
 				break;
 
@@ -706,7 +706,7 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 		} else if (cur_arg_info->type_hint == IS_DOUBLE) {
 			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type float", "", "none", "", NULL TSRMLS_CC);
 		} else if (cur_arg_info->type_hint == _IS_BOOL) {
-			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type boolean", "", "none", "", NULL TSRMLS_CC);
+			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type bool", "", "none", "", NULL TSRMLS_CC);
 		} else if (cur_arg_info->type_hint == IS_LONG) {
 			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type int", "", "none", "", NULL TSRMLS_CC);
 		} else if (cur_arg_info->type_hint == IS_NUMERIC) {

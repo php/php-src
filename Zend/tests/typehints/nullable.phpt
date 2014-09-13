@@ -55,6 +55,6 @@ NULL
 E_RECOVERABLE_ERROR: Argument 1 passed to stringable() must be of the type string, null given, called in %s on line 31 and defined in %s on line 24
 string(0) ""
 NULL
-E_RECOVERABLE_ERROR: Argument 1 passed to boolable() must be of the type boolean, null given, called in %s on line 41 and defined in %s on line 34
+E_RECOVERABLE_ERROR: Argument 1 passed to boolable() must be of the type bool, null given, called in %s on line 41 and defined in %s on line 34
 bool(false)
 NULL

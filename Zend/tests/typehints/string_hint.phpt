@@ -36,9 +36,9 @@ string(6) "Object"
 string(2) "a3"
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, resource given, called in %s on line 16 and defined in %s on line 4
 string(%d) "%s"
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, boolean given, called in %s on line 17 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, bool given, called in %s on line 17 and defined in %s on line 4
 string(1) "1"
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, boolean given, called in %s on line 18 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, bool given, called in %s on line 18 and defined in %s on line 4
 string(0) ""
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type string, null given, called in %s on line 19 and defined in %s on line 4
 string(0) ""
