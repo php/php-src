@@ -587,6 +587,9 @@ finish:
 		/* ensure the header is only sent if user_agent is not blank */
 		if (ua_len > sizeof(_UA_HEADER)) {
 			ua = emalloc(ua_len + 1);
+			if (NULL == ua) {
+				return NULL;
+			}
 			if ((ua_len = slprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
 				ua[ua_len] = 0;
 				php_stream_write(stream, ua, ua_len);
