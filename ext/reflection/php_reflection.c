@@ -3906,7 +3906,7 @@ static int _adddynproperty(zval *ptr TSRMLS_DC, int num_args, va_list args, zend
 {
 	zval property;
 	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
-	zval *retval = va_arg(args, zval*), member;
+	zval *retval = va_arg(args, zval*);
 
 	/* under some circumstances, the properties hash table may contain numeric
 	 * properties (e.g. when casting from array). This is a WONT FIX bug, at
@@ -3919,8 +3919,7 @@ static int _adddynproperty(zval *ptr TSRMLS_DC, int num_args, va_list args, zend
 		return 0; /* non public cannot be dynamic */
 	}
 
-	ZVAL_STR(&member, hash_key->key);
-	if (zend_get_property_info(ce, &member, 1 TSRMLS_CC) == &EG(std_property_info)) {
+	if (zend_get_property_info(ce, hash_key->key, 1 TSRMLS_CC) == &EG(std_property_info)) {
 		EG(std_property_info).flags = ZEND_ACC_IMPLICIT_PUBLIC;
 		reflection_property_factory(ce, &EG(std_property_info), &property TSRMLS_CC);
 		add_next_index_zval(retval, &property);

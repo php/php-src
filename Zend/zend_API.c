@@ -1268,13 +1268,12 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 {
 	object->properties = properties;
 	if (object->ce->default_properties_count) {
-	    zval *prop, tmp;
+	    zval *prop;
     	zend_string *key;
     	zend_property_info *property_info;
 
     	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
-		    ZVAL_STR(&tmp, key);
-			property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
+			property_info = zend_get_property_info(object->ce, key, 1 TSRMLS_CC);
 			if (property_info &&
 			    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
 			    property_info->offset >= 0) {
@@ -1293,8 +1292,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties 
    	zend_property_info *property_info;
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
-	    ZVAL_STR(&tmp, key);
-		property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
+		property_info = zend_get_property_info(object->ce, key, 1 TSRMLS_CC);
 		if (property_info &&
 		    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
 		    property_info->offset >= 0) {
