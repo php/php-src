@@ -1699,7 +1699,7 @@ static int strfilter_convert_append_bucket(
 		}
 	}
 
-	if (out_buf_size - ocnt > 0) {
+	if (out_buf_size > ocnt) {
 		if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent TSRMLS_CC))) {
 			goto out_failure;
 		}
