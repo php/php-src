@@ -585,6 +585,12 @@ PHPAPI zend_string *php_get_uname(char mode)
 		char *winver = php_get_windows_name();
 		char wincpu[20];
 
+		if (NULL == winver) {
+			TSRMLS_FETCH();
+			/* This should never happen */
+			return STR_EMPTY_ALLOC();
+		}
+
 		php_get_windows_cpu(wincpu, sizeof(wincpu));
 		dwBuild = (DWORD)(HIWORD(dwVersion));
 		
