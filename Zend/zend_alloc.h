@@ -45,8 +45,8 @@ typedef struct _zend_leak_info {
 	void *addr;
 	size_t size;
 	const char *filename;
-	uint lineno;
 	const char *orig_filename;
+	uint lineno;
 	uint orig_lineno;
 } zend_leak_info;
 
