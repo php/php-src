@@ -1144,258 +1144,258 @@ typedef struct {
 /* {{{ Start of double code point tables for HTML5 */
 
 static const entity_multicodepoint_row multi_cp_html5_0003C[] = {
-	{ {"lt",                      01,             2} },
-	{ {"nvlt",                    0x020D2,        4} },
+	{ {"lt",                 	01,		 2} },
+	{ {"nvlt",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0003D[] = {
-	{ {"equals",                  01,             6} },
-	{ {"bne",                     0x020E5,        3} },
+	{ {"equals",             	01,		 6} },
+	{ {"bne",                	0x020E5,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0003E[] = {
-	{ {"gt",                      01,             2} },
-	{ {"nvgt",                    0x020D2,        4} },
+	{ {"gt",                 	01,		 2} },
+	{ {"nvgt",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_00066[] = {
-	{ {NULL,                      01,             0} },
-	{ {"fjlig",                   0x0006A,        5} },
+	{ {NULL,                 	01,		0} },
+	{ {"fjlig",              	0x0006A,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0205F[] = {
-	{ {"MediumSpace",             01,             11} },
-	{ {"ThickSpace",              0x0200A,        10} },
+	{ {"MediumSpace",        	01,		11} },
+	{ {"ThickSpace",         	0x0200A,	10} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0219D[] = {
-	{ {"rarrw",                   01,             5} },
-	{ {"nrarrw",                  0x00338,        6} },
+	{ {"rarrw",              	01,		 5} },
+	{ {"nrarrw",             	0x00338,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02202[] = {
-	{ {"part",                    01,             4} },
-	{ {"npart",                   0x00338,        5} },
+	{ {"part",               	01,		 4} },
+	{ {"npart",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02220[] = {
-	{ {"angle",                   01,             5} },
-	{ {"nang",                    0x020D2,        4} },
+	{ {"angle",              	01,		 5} },
+	{ {"nang",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02229[] = {
-	{ {"cap",                     01,             3} },
-	{ {"caps",                    0x0FE00,        4} },
+	{ {"cap",                	01,		 3} },
+	{ {"caps",               	0x0FE00,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0222A[] = {
-	{ {"cup",                     01,             3} },
-	{ {"cups",                    0x0FE00,        4} },
+	{ {"cup",                	01,		 3} },
+	{ {"cups",               	0x0FE00,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0223C[] = {
-	{ {"sim",                     01,             3} },
-	{ {"nvsim",                   0x020D2,        5} },
+	{ {"sim",                	01,		 3} },
+	{ {"nvsim",              	0x020D2,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0223D[] = {
-	{ {"bsim",                    01,             4} },
-	{ {"race",                    0x00331,        4} },
+	{ {"bsim",               	01,		 4} },
+	{ {"race",               	0x00331,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0223E[] = {
-	{ {"ac",                      01,             2} },
-	{ {"acE",                     0x00333,        3} },
+	{ {"ac",                 	01,		 2} },
+	{ {"acE",                	0x00333,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02242[] = {
-	{ {"esim",                    01,             4} },
-	{ {"nesim",                   0x00338,        5} },
+	{ {"esim",               	01,		 4} },
+	{ {"nesim",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0224B[] = {
-	{ {"apid",                    01,             4} },
-	{ {"napid",                   0x00338,        5} },
+	{ {"apid",               	01,		 4} },
+	{ {"napid",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0224D[] = {
-	{ {"CupCap",                  01,             6} },
-	{ {"nvap",                    0x020D2,        4} },
+	{ {"CupCap",             	01,		 6} },
+	{ {"nvap",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0224E[] = {
-	{ {"bump",                    01,             4} },
-	{ {"nbump",                   0x00338,        5} },
+	{ {"bump",               	01,		 4} },
+	{ {"nbump",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0224F[] = {
-	{ {"HumpEqual",               01,             9} },
-	{ {"nbumpe",                  0x00338,        6} },
+	{ {"HumpEqual",          	01,		 9} },
+	{ {"nbumpe",             	0x00338,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02250[] = {
-	{ {"esdot",                   01,             5} },
-	{ {"nedot",                   0x00338,        5} },
+	{ {"esdot",              	01,		 5} },
+	{ {"nedot",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02261[] = {
-	{ {"Congruent",               01,             9} },
-	{ {"bnequiv",                 0x020E5,        7} },
+	{ {"Congruent",          	01,		 9} },
+	{ {"bnequiv",            	0x020E5,	 7} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02264[] = {
-	{ {"leq",                     01,             3} },
-	{ {"nvle",                    0x020D2,        4} },
+	{ {"leq",                	01,		 3} },
+	{ {"nvle",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02265[] = {
-	{ {"ge",                      01,             2} },
-	{ {"nvge",                    0x020D2,        4} },
+	{ {"ge",                 	01,		 2} },
+	{ {"nvge",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02266[] = {
-	{ {"lE",                      01,             2} },
-	{ {"nlE",                     0x00338,        3} },
+	{ {"lE",                 	01,		 2} },
+	{ {"nlE",                	0x00338,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02267[] = {
-	{ {"geqq",                    01,             4} },
-	{ {"NotGreaterFullEqual",     0x00338,        19} },
+	{ {"geqq",               	01,		 4} },
+	{ {"NotGreaterFullEqual",	0x00338,	19} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02268[] = {
-	{ {"lneqq",                   01,             5} },
-	{ {"lvertneqq",               0x0FE00,        9} },
+	{ {"lneqq",              	01,		 5} },
+	{ {"lvertneqq",          	0x0FE00,	 9} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02269[] = {
-	{ {"gneqq",                   01,             5} },
-	{ {"gvertneqq",               0x0FE00,        9} },
+	{ {"gneqq",              	01,		 5} },
+	{ {"gvertneqq",          	0x0FE00,	 9} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0226A[] = {
-	{ {"ll",                      02,             2} },
-	{ {"nLtv",                    0x00338,        4} },
-	{ {"nLt",                     0x020D2,        3} },
+	{ {"ll",                 	02,		 2} },
+	{ {"nLtv",               	0x00338,	 4} },
+	{ {"nLt",                	0x020D2,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0226B[] = {
-	{ {"gg",                      02,             2} },
-	{ {"NotGreaterGreater",       0x00338,        17} },
-	{ {"nGt",                     0x020D2,        3} },
+	{ {"gg",                 	02,		 2} },
+	{ {"NotGreaterGreater",  	0x00338,	17} },
+	{ {"nGt",                	0x020D2,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0227F[] = {
-	{ {"SucceedsTilde",           01,             13} },
-	{ {"NotSucceedsTilde",        0x00338,        16} },
+	{ {"SucceedsTilde",      	01,		13} },
+	{ {"NotSucceedsTilde",   	0x00338,	16} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02282[] = {
-	{ {"sub",                     01,             3} },
-	{ {"vnsub",                   0x020D2,        5} },
+	{ {"sub",                	01,		 3} },
+	{ {"vnsub",              	0x020D2,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02283[] = {
-	{ {"sup",                     01,             3} },
-	{ {"nsupset",                 0x020D2,        7} },
+	{ {"sup",                	01,		 3} },
+	{ {"nsupset",            	0x020D2,	 7} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0228A[] = {
-	{ {"subsetneq",               01,             9} },
-	{ {"vsubne",                  0x0FE00,        6} },
+	{ {"subsetneq",          	01,		 9} },
+	{ {"vsubne",             	0x0FE00,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0228B[] = {
-	{ {"supsetneq",               01,             9} },
-	{ {"vsupne",                  0x0FE00,        6} },
+	{ {"supsetneq",          	01,		 9} },
+	{ {"vsupne",             	0x0FE00,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0228F[] = {
-	{ {"sqsub",                   01,             5} },
-	{ {"NotSquareSubset",         0x00338,        15} },
+	{ {"sqsub",              	01,		 5} },
+	{ {"NotSquareSubset",    	0x00338,	15} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02290[] = {
-	{ {"sqsupset",                01,             8} },
-	{ {"NotSquareSuperset",       0x00338,        17} },
+	{ {"sqsupset",           	01,		 8} },
+	{ {"NotSquareSuperset",  	0x00338,	17} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02293[] = {
-	{ {"sqcap",                   01,             5} },
-	{ {"sqcaps",                  0x0FE00,        6} },
+	{ {"sqcap",              	01,		 5} },
+	{ {"sqcaps",             	0x0FE00,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02294[] = {
-	{ {"sqcup",                   01,             5} },
-	{ {"sqcups",                  0x0FE00,        6} },
+	{ {"sqcup",              	01,		 5} },
+	{ {"sqcups",             	0x0FE00,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022B4[] = {
-	{ {"LeftTriangleEqual",       01,             17} },
-	{ {"nvltrie",                 0x020D2,        7} },
+	{ {"LeftTriangleEqual",  	01,		17} },
+	{ {"nvltrie",            	0x020D2,	 7} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022B5[] = {
-	{ {"RightTriangleEqual",      01,             18} },
-	{ {"nvrtrie",                 0x020D2,        7} },
+	{ {"RightTriangleEqual", 	01,		18} },
+	{ {"nvrtrie",            	0x020D2,	 7} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022D8[] = {
-	{ {"Ll",                      01,             2} },
-	{ {"nLl",                     0x00338,        3} },
+	{ {"Ll",                 	01,		 2} },
+	{ {"nLl",                	0x00338,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022D9[] = {
-	{ {"Gg",                      01,             2} },
-	{ {"nGg",                     0x00338,        3} },
+	{ {"Gg",                 	01,		 2} },
+	{ {"nGg",                	0x00338,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022DA[] = {
-	{ {"lesseqgtr",               01,             9} },
-	{ {"lesg",                    0x0FE00,        4} },
+	{ {"lesseqgtr",          	01,		 9} },
+	{ {"lesg",               	0x0FE00,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022DB[] = {
-	{ {"gtreqless",               01,             9} },
-	{ {"gesl",                    0x0FE00,        4} },
+	{ {"gtreqless",          	01,		 9} },
+	{ {"gesl",               	0x0FE00,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022F5[] = {
-	{ {"isindot",                 01,             7} },
-	{ {"notindot",                0x00338,        8} },
+	{ {"isindot",            	01,		 7} },
+	{ {"notindot",           	0x00338,	 8} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022F9[] = {
-	{ {"isinE",                   01,             5} },
-	{ {"notinE",                  0x00338,        6} },
+	{ {"isinE",              	01,		 5} },
+	{ {"notinE",             	0x00338,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02933[] = {
-	{ {"rarrc",                   01,             5} },
-	{ {"nrarrc",                  0x00338,        6} },
+	{ {"rarrc",              	01,		 5} },
+	{ {"nrarrc",             	0x00338,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_029CF[] = {
-	{ {"LeftTriangleBar",         01,             15} },
-	{ {"NotLeftTriangleBar",      0x00338,        18} },
+	{ {"LeftTriangleBar",    	01,		15} },
+	{ {"NotLeftTriangleBar", 	0x00338,	18} },
 };
 static const entity_multicodepoint_row multi_cp_html5_029D0[] = {
-	{ {"RightTriangleBar",        01,             16} },
-	{ {"NotRightTriangleBar",     0x00338,        19} },
+	{ {"RightTriangleBar",   	01,		16} },
+	{ {"NotRightTriangleBar",	0x00338,	19} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02A6D[] = {
-	{ {"congdot",                 01,             7} },
-	{ {"ncongdot",                0x00338,        8} },
+	{ {"congdot",            	01,		 7} },
+	{ {"ncongdot",           	0x00338,	 8} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02A70[] = {
-	{ {"apE",                     01,             3} },
-	{ {"napE",                    0x00338,        4} },
+	{ {"apE",                	01,		 3} },
+	{ {"napE",               	0x00338,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02A7D[] = {
-	{ {"les",                     01,             3} },
-	{ {"nles",                    0x00338,        4} },
+	{ {"les",                	01,		 3} },
+	{ {"nles",               	0x00338,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02A7E[] = {
-	{ {"ges",                     01,             3} },
-	{ {"nges",                    0x00338,        4} },
+	{ {"ges",                	01,		 3} },
+	{ {"nges",               	0x00338,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AA1[] = {
-	{ {"LessLess",                01,             8} },
-	{ {"NotNestedLessLess",       0x00338,        17} },
+	{ {"LessLess",           	01,		 8} },
+	{ {"NotNestedLessLess",  	0x00338,	17} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AA2[] = {
-	{ {"GreaterGreater",          01,             14} },
-	{ {"NotNestedGreaterGreater", 0x00338,        23} },
+	{ {"GreaterGreater",     	01,		14} },
+	{ {"NotNestedGreaterGreater",	0x00338,	23} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AAC[] = {
-	{ {"smte",                    01,             4} },
-	{ {"smtes",                   0x0FE00,        5} },
+	{ {"smte",               	01,		 4} },
+	{ {"smtes",              	0x0FE00,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AAD[] = {
-	{ {"late",                    01,             4} },
-	{ {"lates",                   0x0FE00,        5} },
+	{ {"late",               	01,		 4} },
+	{ {"lates",              	0x0FE00,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AAF[] = {
-	{ {"preceq",                  01,             6} },
-	{ {"NotPrecedesEqual",        0x00338,        16} },
+	{ {"preceq",             	01,		 6} },
+	{ {"NotPrecedesEqual",   	0x00338,	16} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AB0[] = {
-	{ {"SucceedsEqual",           01,             13} },
-	{ {"NotSucceedsEqual",        0x00338,        16} },
+	{ {"SucceedsEqual",      	01,		13} },
+	{ {"NotSucceedsEqual",   	0x00338,	16} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AC5[] = {
-	{ {"subE",                    01,             4} },
-	{ {"nsubE",                   0x00338,        5} },
+	{ {"subE",               	01,		 4} },
+	{ {"nsubE",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AC6[] = {
-	{ {"supseteqq",               01,             9} },
-	{ {"nsupseteqq",              0x00338,        10} },
+	{ {"supseteqq",          	01,		 9} },
+	{ {"nsupseteqq",         	0x00338,	10} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02ACB[] = {
-	{ {"subsetneqq",              01,             10} },
-	{ {"vsubnE",                  0x0FE00,        6} },
+	{ {"subsetneqq",         	01,		10} },
+	{ {"vsubnE",             	0x0FE00,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02ACC[] = {
-	{ {"supnE",                   01,             5} },
-	{ {"varsupsetneqq",           0x0FE00,        13} },
+	{ {"supnE",              	01,		 5} },
+	{ {"varsupsetneqq",      	0x0FE00,	13} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AFD[] = {
-	{ {"parsl",                   01,             5} },
-	{ {"nparsl",                  0x020E5,        6} },
+	{ {"parsl",              	01,		 5} },
+	{ {"nparsl",             	0x020E5,	 6} },
 };
 
 /* End of double code point tables }}} */
