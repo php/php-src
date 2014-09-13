@@ -330,7 +330,6 @@ typedef struct _php_conv_base64_encode {
 	int lbchars_dup;
 	int persistent;
 	unsigned char erem[3];
-	unsigned char dummy_pad[1]; /* one padding byte which can be replaced if there were another 1 byte member*/
 } php_conv_base64_encode;
 
 static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *inst, const char **in_p, size_t *in_left, char **out_p, size_t *out_left);
