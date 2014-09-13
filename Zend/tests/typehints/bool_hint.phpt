@@ -14,6 +14,7 @@ foo(0); // E_RECOVERABLE_ERROR
 foo("0"); // E_RECOVERABLE_ERROR
 foo("1a"); // E_RECOVERABLE_ERROR
 foo("a"); // E_RECOVERABLE_ERROR
+foo(""); // E_RECOVERABLE_ERROR
 foo(1.5); // E_RECOVERABLE_ERROR
 foo(array()); // E_RECOVERABLE_ERROR
 foo(new StdClass); // bool(true)
@@ -38,15 +39,17 @@ E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, string
 bool(true)
 E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, string given, called in %s on line 13 and defined in %s on line 4
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, float given, called in %s on line 14 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, string given, called in %s on line 14 and defined in %s on line 4
+bool(false)
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, float given, called in %s on line 15 and defined in %s on line 4
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, array given, called in %s on line 15 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, array given, called in %s on line 16 and defined in %s on line 4
 bool(false)
 bool(true)
 bool(true)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, resource given, called in %s on line 18 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, resource given, called in %s on line 19 and defined in %s on line 4
 bool(true)
 bool(true)
 bool(false)
-E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, null given, called in %s on line 21 and defined in %s on line 4
+E_RECOVERABLE_ERROR: Argument 1 passed to foo() must be of the type bool, null given, called in %s on line 22 and defined in %s on line 4
 bool(false)

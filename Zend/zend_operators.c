@@ -348,7 +348,7 @@ ZEND_API int _convert_to_long_base_safe(zval *op, int base, int separate)
 				lval = strtol(Z_STRVAL_P(op), &endptr, base);
 				
 				/* If the string was well-formed, endptr would've been set to its end */
-				if (errno != ERANGE && endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+				if (errno != ERANGE && Z_STRLEN_P(op) && endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
 					zend_string_release(Z_STR_P(op));
 					ZVAL_LONG(op, lval);
 					return SUCCESS;
@@ -405,7 +405,7 @@ ZEND_API int _convert_to_double_safe(zval *op, int separate)
 				dval = zend_strtod(Z_STRVAL_P(op), &endptr);
 
 				/* If the string was well-formed, endptr would've been set to its end */
-				if (endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+				if (Z_STRLEN_P(op) && endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
 					zend_string_release(Z_STR_P(op));
 					ZVAL_DOUBLE(op, dval);
 					return SUCCESS;
@@ -466,7 +466,7 @@ ZEND_API int _convert_to_numeric_safe(zval *op, int separate)
 				lval = strtol(Z_STRVAL_P(op), &lval_endptr, 10);
 				did_overflow = errno == ERANGE;
 				/* If the string was well-formed, endptr would've been set to its end */
-				if (!did_overflow && lval_endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+				if (!did_overflow && Z_STRLEN_P(op) && lval_endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
 					zend_string_release(Z_STR_P(op));
 					ZVAL_LONG(op, lval);
 					return SUCCESS;
@@ -474,7 +474,7 @@ ZEND_API int _convert_to_numeric_safe(zval *op, int separate)
 				
 				dval = zend_strtod(Z_STRVAL_P(op), &dval_endptr);
 				/* If the string was well-formed, endptr would've been set to its end */
-				if (dval_endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+				if (Z_STRLEN_P(op) && dval_endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
 					zend_string_release(Z_STR_P(op));
 					ZVAL_DOUBLE(op, dval);
 					return SUCCESS;
