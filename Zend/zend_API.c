@@ -1303,7 +1303,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties 
 			zval_add_ref(&object->properties_table[property_info->offset]);
 			if (object->properties) {
 				ZVAL_INDIRECT(&tmp, &object->properties_table[property_info->offset]);
-				prop = zend_hash_update(object->properties, key, &tmp);
+				zend_hash_update(object->properties, key, &tmp);
 			}
 		} else {
 			if (!object->properties) {

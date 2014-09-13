@@ -1937,7 +1937,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 				ALLOC_HASHTABLE(*overriden);
 				zend_hash_init_ex(*overriden, 8, NULL, ptr_dtor, 0, 0);
 			}
-			fn = zend_hash_update_mem(*overriden, key, fn, sizeof(zend_function));
+			zend_hash_update_mem(*overriden, key, fn, sizeof(zend_function));
 			return;
 		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			/* Make sure the trait method is compatible with previosly declared abstract method */
@@ -4551,7 +4551,7 @@ void zend_compile_new(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
 
 	opnum = get_next_op_number(CG(active_op_array));
-	opline = zend_emit_op(result, ZEND_NEW, &class_node, NULL TSRMLS_CC);
+	zend_emit_op(result, ZEND_NEW, &class_node, NULL TSRMLS_CC);
 
 	zend_compile_call_common(&ctor_result, args_ast, NULL TSRMLS_CC);
 	zend_do_free(&ctor_result TSRMLS_CC);
