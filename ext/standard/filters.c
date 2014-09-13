@@ -322,14 +322,15 @@ struct _php_conv {
 typedef struct _php_conv_base64_encode {
 	php_conv _super;
 
-	unsigned char erem[3];
+	const char *lbchars;
+	size_t lbchars_len;
 	size_t erem_len;
 	unsigned int line_ccnt;
 	unsigned int line_len;
-	const char *lbchars;
 	int lbchars_dup;
-	size_t lbchars_len;
 	int persistent;
+	unsigned char erem[3];
+	unsigned char dummy_pad[1]; /* one padding byte which can be replaced if there were another 1 byte member*/
 } php_conv_base64_encode;
 
 static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *inst, const char **in_p, size_t *in_left, char **out_p, size_t *out_left);
@@ -735,12 +736,12 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 typedef struct _php_conv_qprint_encode {
 	php_conv _super;
 
+	const char *lbchars;
+	size_t lbchars_len;
 	int opts;
 	unsigned int line_ccnt;
 	unsigned int line_len;
-	const char *lbchars;
 	int lbchars_dup;
-	size_t lbchars_len;
 	int persistent;
 	unsigned int lb_ptr;
 	unsigned int lb_cnt;
@@ -987,11 +988,11 @@ static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst, 
 typedef struct _php_conv_qprint_decode {
 	php_conv _super;
 
+	const char *lbchars;
+	size_t lbchars_len;
 	int scan_stat;
 	unsigned int next_char;
-	const char *lbchars;
 	int lbchars_dup;
-	size_t lbchars_len;
 	int persistent;
 	unsigned int lb_ptr;
 	unsigned int lb_cnt;	
