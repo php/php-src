@@ -3575,7 +3575,6 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 
 	zend_compile_expr(&name_node, name_ast TSRMLS_CC);
 
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline = zend_emit_op(result, ZEND_FETCH_R, &name_node, NULL TSRMLS_CC);
 
 	opline->extended_value = ZEND_FETCH_LOCAL;
