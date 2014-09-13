@@ -659,12 +659,12 @@ found:
 			}
 		}
 	} else if (EXPECTED(property_info != NULL)) {
+		zval tmp;
+
 write_std_property:
-		/* if we assign referenced variable, we should separate it */
 		if (Z_REFCOUNTED_P(value)) {
 			if (Z_ISREF_P(value)) {
-				zval tmp;
-
+				/* if we assign referenced variable, we should separate it */
 				ZVAL_DUP(&tmp, Z_REFVAL_P(value));
 				value = &tmp;
 			} else {
