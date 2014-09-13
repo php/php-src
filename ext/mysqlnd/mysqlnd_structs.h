@@ -994,14 +994,17 @@ struct st_mysqlnd_result_metadata
 {
 	MYSQLND_FIELD					*fields;
 	struct mysqlnd_field_hash_key	*zend_hash_keys;
-	unsigned int					current_field;
-	unsigned int					field_count;
-	/* We need this to make fast allocs in rowp_read */
-	unsigned int					bit_fields_count;
-	size_t							bit_fields_total_len; /* trailing \0 not counted */
-	zend_bool						persistent;
 
 	struct st_mysqlnd_res_meta_methods * m;
+
+	size_t							bit_fields_total_len; /* trailing \0 not counted */
+	/* We need this to make fast allocs in rowp_read */
+	unsigned int					bit_fields_count;
+
+	unsigned int					current_field;
+	unsigned int					field_count;
+
+	zend_bool						persistent;
 };
 
 
