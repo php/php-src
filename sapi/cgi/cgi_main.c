@@ -2405,8 +2405,8 @@ consult the installation file that came with this distribution, or visit \n\
 							/* handle situations where line is terminated by \r\n */
 							if (c == '\r') {
 								if (fgetc(file_handle.handle.fp) != '\n') {
-									long pos = ftell(file_handle.handle.fp);
-									fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+									zend_long pos = zend_ftell(file_handle.handle.fp);
+									zend_fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
 								}
 							}
 							CG(start_lineno) = 2;
