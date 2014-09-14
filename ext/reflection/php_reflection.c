@@ -1298,15 +1298,18 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	zval classname;
 	property_reference *reference;
 	const char *class_name, *prop_name;
+	int prop_name_len;
 
 	zend_unmangle_property_name(prop->name->val, prop->name->len, &class_name, &prop_name);
+
+	prop_name_len = (int)strlen(prop_name);
 
 	if (!(prop->flags & ZEND_ACC_PRIVATE)) {
 		/* we have to search the class hierarchy for this (implicit) public or protected property */
 		zend_class_entry *tmp_ce = ce, *store_ce = ce;
 		zend_property_info *tmp_info = NULL;
 
-		while (tmp_ce && (tmp_info = zend_hash_str_find_ptr(&tmp_ce->properties_info, prop_name, strlen(prop_name))) == NULL) {
+		while (tmp_ce && (tmp_info = zend_hash_str_find_ptr(&tmp_ce->properties_info, prop_name, prop_name_len)) == NULL) {
 			ce = tmp_ce;
 			tmp_ce = tmp_ce->parent;
 		}
@@ -1318,7 +1321,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 		}
 	}
 
-	ZVAL_STRING(&name, prop_name);
+	ZVAL_STRINGL(&name, prop_name, prop_name_len);
 	ZVAL_STR(&classname, zend_string_copy(prop->ce->name));
 
 	reflection_instantiate(reflection_property_ptr, object TSRMLS_CC);
