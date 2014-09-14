@@ -1609,9 +1609,11 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		RETURN_FALSE;
 	}
 
-	if (remove_path && remove_path_len > 1 && (remove_path[strlen(remove_path) - 1] == '/' ||
-		remove_path[strlen(remove_path) - 1] == '\\')) {
-		remove_path[strlen(remove_path) - 1] = '\0';
+	if (remove_path && remove_path_len > 1) {
+		int tmp_idx = (int)strlen(remove_path) - 1;
+		if (remove_path[tmp_idx] == '/' || remove_path[tmp_idx] == '\\') {
+			remove_path[tmp_idx] = '\0';
+		}
 	}
 
 	if (type == 1) {
