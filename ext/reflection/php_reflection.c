@@ -209,10 +209,10 @@ typedef enum {
 /* Struct for reflection objects */
 typedef struct {
 	zval dummy; /* holder for the second property */
-	void *ptr;
-	reflection_type_t ref_type;
 	zval obj;
+	void *ptr;
 	zend_class_entry *ce;
+	reflection_type_t ref_type;
 	unsigned int ignore_visibility:1;
 	zend_object zo;
 } reflection_object;
