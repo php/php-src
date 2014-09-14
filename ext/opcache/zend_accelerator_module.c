@@ -242,7 +242,7 @@ static ZEND_INI_MH(OnEnable)
 }
 
 ZEND_INI_BEGIN()
-    STD_PHP_INI_BOOLEAN("opcache.enable"             , "1", PHP_INI_ALL,    OnEnable,     enabled                             , zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("opcache.enable"             , "1", PHP_INI_ALL,    OnEnable,     enabled                             , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.use_cwd"            , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.use_cwd            , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.validate_timestamps", "1", PHP_INI_ALL   , OnUpdateBool, accel_directives.validate_timestamps, zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.inherited_hack"     , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.inherited_hack     , zend_accel_globals, accel_globals)
@@ -448,7 +448,7 @@ static zend_module_entry accel_module_entry = {
 	NULL,
 	NULL,
 	zend_accel_info,
-    ACCELERATOR_VERSION "FE",
+	ACCELERATOR_VERSION "FE",
 	STANDARD_MODULE_PROPERTIES
 };
 
