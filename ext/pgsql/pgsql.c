@@ -5484,26 +5484,26 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 		char *name;
 		array_init(&elem);
 		/* pg_attribute.attnum */
-		add_assoc_long(&elem, "num", atoi(PQgetvalue(pg_result,i,1)));
+		add_assoc_long_ex(&elem, "num", sizeof("num") - 1, atoi(PQgetvalue(pg_result, i, 1)));
 		/* pg_type.typname */
-		add_assoc_string(&elem, "type", PQgetvalue(pg_result,i,2));
+		add_assoc_string_ex(&elem, "type", sizeof("type") - 1, PQgetvalue(pg_result, i, 2));
 		/* pg_attribute.attlen */
-		add_assoc_long(&elem, "len", atoi(PQgetvalue(pg_result,i,3)));
+		add_assoc_long_ex(&elem, "len", sizeof("len") - 1, atoi(PQgetvalue(pg_result,i,3)));
 		/* pg_attribute.attnonull */
-		add_assoc_bool(&elem, "not null", !strcmp(PQgetvalue(pg_result,i,4), "t"));
+		add_assoc_bool_ex(&elem, "not null", sizeof("not null") - 1, !strcmp(PQgetvalue(pg_result, i, 4), "t"));
 		/* pg_attribute.atthasdef */
-		add_assoc_bool(&elem, "has default", !strcmp(PQgetvalue(pg_result,i,5), "t"));
+		add_assoc_bool_ex(&elem, "has default", sizeof("has default") - 1, !strcmp(PQgetvalue(pg_result,i,5), "t"));
 		/* pg_attribute.attndims */
-		add_assoc_long(&elem, "array dims", atoi(PQgetvalue(pg_result,i,6)));
+		add_assoc_long_ex(&elem, "array dims", sizeof("array dims") - 1, atoi(PQgetvalue(pg_result, i, 6)));
 		/* pg_type.typtype */
-		add_assoc_bool(&elem, "is enum", !strcmp(PQgetvalue(pg_result,i,7), "e"));
+		add_assoc_bool_ex(&elem, "is enum", sizeof("is enum") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "e"));
 		if (extended) {
 			/* pg_type.typtype */
-			add_assoc_bool(&elem, "is base", !strcmp(PQgetvalue(pg_result,i,7), "b"));
-			add_assoc_bool(&elem, "is composite", !strcmp(PQgetvalue(pg_result,i,7), "c"));
-			add_assoc_bool(&elem, "is pesudo", !strcmp(PQgetvalue(pg_result,i,7), "p"));
+			add_assoc_bool_ex(&elem, "is base", sizeof("is base") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "b"));
+			add_assoc_bool_ex(&elem, "is composite", sizeof("is composite") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "c"));
+			add_assoc_bool_ex(&elem, "is pesudo", sizeof("is pesudo") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "p"));
 			/* pg_description.description */
-			add_assoc_string(&elem, "description", PQgetvalue(pg_result,i,8));
+			add_assoc_string_ex(&elem, "description", sizeof("description") - 1, PQgetvalue(pg_result, i, 8));
 		}
 		/* pg_attribute.attname */
 		name = PQgetvalue(pg_result,i,0);
