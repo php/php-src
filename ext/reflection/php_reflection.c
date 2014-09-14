@@ -1300,9 +1300,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	const char *class_name, *prop_name;
 	int prop_name_len;
 
-	zend_unmangle_property_name(prop->name->val, prop->name->len, &class_name, &prop_name);
-
-	prop_name_len = (int)strlen(prop_name);
+	zend_unmangle_property_name_ex(prop->name->val, prop->name->len, &class_name, &prop_name, &prop_name_len);
 
 	if (!(prop->flags & ZEND_ACC_PRIVATE)) {
 		/* we have to search the class hierarchy for this (implicit) public or protected property */
