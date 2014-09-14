@@ -58,8 +58,8 @@ struct st_mysqlnd_memory_pool_chunk
 	zend_uchar			*ptr;
 	enum_func_status	(*resize_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size TSRMLS_DC);
 	void				(*free_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk TSRMLS_DC);
-	zend_bool			from_pool;
 	unsigned int		size;
+	zend_bool			from_pool;
 };
 
 
