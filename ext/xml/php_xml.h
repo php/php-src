@@ -134,8 +134,8 @@ PHP_FUNCTION(utf8_decode);
 PHP_FUNCTION(xml_parse_into_struct);
 
 PHPAPI char *_xml_zval_strdup(zval *);
-PHPAPI zend_string *xml_utf8_decode(const XML_Char *, int, const XML_Char *);
-PHPAPI zend_string *xml_utf8_encode(const char *, int, const XML_Char *);
+PHPAPI zend_string *xml_utf8_decode(const XML_Char *, size_t, const XML_Char *);
+PHPAPI zend_string *xml_utf8_encode(const char *, size_t, const XML_Char *);
 
 #endif /* HAVE_LIBEXPAT */
 
