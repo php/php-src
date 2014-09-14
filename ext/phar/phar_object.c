@@ -1382,10 +1382,10 @@ struct _phar_t {
 	phar_archive_object *p;
 	zend_class_entry *c;
 	char *b;
-	uint l;
 	zval *ret;
-	int count;
 	php_stream *fp;
+	uint l;
+	int count;
 };
 
 static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
