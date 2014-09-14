@@ -869,11 +869,10 @@ struct st_mysqlnd_net_data
 
 struct st_mysqlnd_net
 {
-	struct st_mysqlnd_net_data * data;
+	/* cmd buffer */
+	MYSQLND_CMD_BUFFER	cmd_buffer;
 
-	/* sequence for simple checking of correct packets */
-	zend_uchar			packet_no;
-	zend_uchar			compressed_envelope_packet_no;
+	struct st_mysqlnd_net_data * data;
 
 #ifdef MYSQLND_COMPRESSION_ENABLED
 	MYSQLND_READ_BUFFER	* uncompressed_data;
@@ -881,10 +880,11 @@ struct st_mysqlnd_net
 	void * 				unused_pad1;
 #endif
 
-	/* cmd buffer */
-	MYSQLND_CMD_BUFFER	cmd_buffer;
-
 	zend_bool persistent;
+
+	/* sequence for simple checking of correct packets */
+	zend_uchar			packet_no;
+	zend_uchar			compressed_envelope_packet_no;
 };
 
 
