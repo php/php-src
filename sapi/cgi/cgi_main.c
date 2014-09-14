@@ -159,6 +159,8 @@ static const opt_struct OPTIONS[] = {
 };
 
 typedef struct _php_cgi_globals_struct {
+	HashTable user_config_cache;
+	char *redirect_status_env;
 	zend_bool rfc2616_headers;
 	zend_bool nph;
 	zend_bool check_shebang_line;
@@ -166,11 +168,9 @@ typedef struct _php_cgi_globals_struct {
 	zend_bool force_redirect;
 	zend_bool discard_path;
 	zend_bool fcgi_logging;
-	char *redirect_status_env;
 #ifdef PHP_WIN32
 	zend_bool impersonate;
 #endif
-	HashTable user_config_cache;
 } php_cgi_globals_struct;
 
 /* {{{ user_config_cache
