@@ -1610,9 +1610,9 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	}
 
 	if (remove_path && remove_path_len > 1) {
-		int tmp_idx = (int)strlen(remove_path) - 1;
-		if (remove_path[tmp_idx] == '/' || remove_path[tmp_idx] == '\\') {
-			remove_path[tmp_idx] = '\0';
+		size_t real_len = strlen(remove_path);
+		if (real_len > 1 && remove_path[real_len - 1] == '/' || remove_path[real_len - 1] == '\\') {
+			remove_path[real_len - 1] = '\0';
 		}
 	}
 
