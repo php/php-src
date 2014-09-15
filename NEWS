@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #67985 (Incorrect last used array index copied to new array after
     unset). (Tjerk)
+  . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
+    as 6.2 (instead of 6.3)). (Christian Wenz)
 
 - Session:
   . Fixed bug #67972 (SessionHandler Invalid memory read create_sid()). (Adam)
