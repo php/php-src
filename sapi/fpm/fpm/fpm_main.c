@@ -1237,6 +1237,17 @@ static void init_request_info(TSRMLS_D)
 										SG(request_info).request_uri = orig_script_name;
 									}
 									path_info[0] = old;
+								} else if (apache_was_here && env_script_name) {
+									/* Using mod_proxy_fcgi and ProxyPass, apache cannot set PATH_INFO
+									 * As we can extract PATH_INFO from PATH_TRANSLATED
+									 * it is probably also in SCRIPT_NAME and need to be removed
+									 */
+									int snlen = strlen(env_script_name);
+									if (snlen>slen && !strcmp(env_script_name+snlen-slen, path_info)) {
+										_sapi_cgibin_putenv("ORIG_SCRIPT_NAME", orig_script_name TSRMLS_CC);
+										env_script_name[snlen-slen] = 0;
+										SG(request_info).request_uri = _sapi_cgibin_putenv("SCRIPT_NAME", env_script_name TSRMLS_CC);
+									}
 								}
 								env_path_info = _sapi_cgibin_putenv("PATH_INFO", path_info TSRMLS_CC);
 							}
