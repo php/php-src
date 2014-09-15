@@ -856,7 +856,7 @@ ZEND_API int zend_hash_index_del(HashTable *ht, zend_ulong h)
 	IS_CONSISTENT(ht);
 
 	if (ht->u.flags & HASH_FLAG_PACKED) {
-		if (h >=0 && h < ht->nNumUsed) {
+		if (h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
 				HANDLE_BLOCK_INTERRUPTIONS();
@@ -1455,7 +1455,7 @@ ZEND_API zval *zend_hash_index_find(const HashTable *ht, zend_ulong h)
 	IS_CONSISTENT(ht);
 
 	if (ht->u.flags & HASH_FLAG_PACKED) {
-		if (h >= 0 && h < ht->nNumUsed) {
+		if (h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
 				return &p->val;
@@ -1476,7 +1476,7 @@ ZEND_API zend_bool zend_hash_index_exists(const HashTable *ht, zend_ulong h)
 	IS_CONSISTENT(ht);
 
 	if (ht->u.flags & HASH_FLAG_PACKED) {
-		if (h >= 0 && h < ht->nNumUsed) {
+		if (h < ht->nNumUsed) {
 			if (Z_TYPE(ht->arData[h].val) != IS_UNDEF) {
 				return 1;
 			}
