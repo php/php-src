@@ -415,7 +415,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 		}
 
 		if (mimetype != NULL && !(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
-			zend_long len;
+			size_t len;
 			char *p = strstr(get_output_encoding(TSRMLS_C), "//");
 
 			if (p) {
@@ -2076,7 +2076,7 @@ PHP_FUNCTION(iconv_substr)
 	err = _php_iconv_substr(&retval, str->val, str->len, offset, length, charset);
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 
-	if (err == PHP_ICONV_ERR_SUCCESS && str->val != NULL && retval.s != NULL) {
+	if (err == PHP_ICONV_ERR_SUCCESS && str->val[0] != '\0' && retval.s != NULL) {
 		RETURN_STR(retval.s);
 	}
 	smart_str_free(&retval);
