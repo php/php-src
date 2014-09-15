@@ -1296,14 +1296,14 @@ phpdbg_main:
 		
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
-#if defined(ZEND_SIGNALS) && !defined(_WIN32)
-		if (listen[0] < 0) {
-			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC); } zend_end_try();
-		}
-#elif !defined(_WIN32)
+#ifndef _WIN32
 		if (listen[0] < 0) {
 #endif
+#if defined(ZEND_SIGNALS) && !defined(_WIN32)
+			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC); } zend_end_try();
+#else
 			signal(SIGINT, phpdbg_sigint_handler);
+#endif
 #ifndef _WIN32
 		}
 #endif
