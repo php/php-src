@@ -714,147 +714,87 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 #ifndef _WIN32
 int phpdbg_open_socket(const char *interface, short port) /* {{{ */
 {
+	int reuse = 1;
+	struct sockaddr_in address;
 	int fd = socket(AF_INET, SOCK_STREAM, 0);
 
-	switch (fd) {
-		case -1:
-			return -1;
-
-		default: {
-			int reuse = 1;
-
-			switch (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*) &reuse, sizeof(reuse))) {
-				case -1:
-					close(fd);
-					return -2;
-
-				default: {
-					struct sockaddr_in address;
-
-					memset(&address, 0, sizeof(address));
-
-					address.sin_port = htons(port);
-					address.sin_family = AF_INET;
-
-					if ((*interface == '*')) {
-						address.sin_addr.s_addr = htonl(INADDR_ANY);
-					} else if (!inet_pton(AF_INET, interface, &address.sin_addr)) {
-						close(fd);
-						return -3;
-					}
-
-					switch (bind(fd, (struct sockaddr *)&address, sizeof(address))) {
-						case -1:
-							close(fd);
-							return -4;
-
-						default: {
-							listen(fd, 5);
-						}
-					}
-				}
-			}
-		}
+	if (fd == -1) {
+		return -1;
 	}
+
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*) &reuse, sizeof(reuse)) == -1) {
+		close(fd);
+		return -2;
+	}
+
+
+	memset(&address, 0, sizeof(address));
+
+	address.sin_port = htons(port);
+	address.sin_family = AF_INET;
+
+	if ((*interface == '*')) {
+		address.sin_addr.s_addr = htonl(INADDR_ANY);
+	} else if (!inet_pton(AF_INET, interface, &address.sin_addr)) {
+		close(fd);
+		return -3;
+	}
+
+	if (bind(fd, (struct sockaddr *)&address, sizeof(address)) == -1) {
+		close(fd);
+		return -4;
+	}
+
+	listen(fd, 5);
 
 	return fd;
 } /* }}} */
 
-static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {{{ */
-{
-	if ((*socket)[0] >= 0) {
-		shutdown(
-			(*socket)[0], SHUT_RDWR);
-		close((*socket)[0]);
+static void phpdbg_remote_close(int socket, FILE *stream) {
+	if (socket >= 0) {
+		shutdown(socket, SHUT_RDWR);
+		close(socket);
 	}
 
-	if (streams[0]) {
-		fclose(streams[0]);
+	if (stream) {
+		fclose(stream);
 	}
-
-	if ((*socket)[1] >= 0) {
-		shutdown(
-			(*socket)[1], SHUT_RDWR);
-		close((*socket)[1]);
-	}
-
-	if (streams[1]) {
-		fclose(streams[1]);
-	}
-} /* }}} */
+}
 
 /* don't inline this, want to debug it easily, will inline when done */
+static int phpdbg_remote_init(const char* address, short port, int *server, int *socket, FILE **stream) {
+	phpdbg_remote_close(*socket, *stream);
 
-int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*socket)[2], FILE* streams[2]) /* {{{ */
-{
-	if (((*listen)[0]) < 0 && ((*listen)[1]) < 0) {
-		((*listen)[0]) = phpdbg_open_socket(address, (short)port[0]);
-		((*listen)[1]) = phpdbg_open_socket(address, (short)port[1]);
-	}
+	*server = phpdbg_open_socket(address, port);
 
-	streams[0] = NULL;
-	streams[1] = NULL;
-
-	if ((*listen)[0] < 0 || (*listen)[1] < 0) {
-		if ((*listen)[0] < 0) {
-			phpdbg_rlog(stderr,
-				"console failed to initialize (stdin) on %s:%d", address, port[0]);
-		}
-
-		if ((*listen)[1] < 0) {
-			phpdbg_rlog(stderr,
-				"console failed to initialize (stdout) on %s:%d", address, port[1]);
-		}
-
-		if ((*listen)[0] >= 0) {
-			close((*listen)[0]);
-		}
-
-		if ((*listen)[1] >= 0) {
-			close((*listen)[1]);
-		}
+	if (*server < 0) {
+		phpdbg_rlog(stderr, "Initializing connection on %s:%d failed", address, port);
 
 		return FAILURE;
 	}
 
-	phpdbg_close_sockets(socket, streams);
-
-	phpdbg_rlog(stderr,
-		"accepting connections on %s:%d/%d", address, port[0], port[1]);
+	phpdbg_rlog(stderr, "accepting connections on %s:%d", address, port);
 	{
 		struct sockaddr_in address;
 		socklen_t size = sizeof(address);
 		char buffer[20] = {0};
 
-		{
-			memset(&address, 0, size);
-			(*socket)[0] = accept(
-				(*listen)[0], (struct sockaddr *) &address, &size);
-			inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
+		memset(&address, 0, size);
+		*socket = accept(*server, (struct sockaddr *) &address, &size);
+		inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
 
-			phpdbg_rlog(stderr, "connection (stdin) from %s", buffer);
-		}
-
-		{
-			memset(&address, 0, size);
-			(*socket)[1] = accept(
-				(*listen)[1], (struct sockaddr *) &address, &size);
-		    inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
-
-			phpdbg_rlog(stderr, "connection (stdout) from %s", buffer);
-		}
+		phpdbg_rlog(stderr, "connection established from %s", buffer);
 	}
 
-	dup2((*socket)[0], fileno(stdin));
-	dup2((*socket)[1], fileno(stdout));
+	dup2(*socket, fileno(stdout));
+	dup2(*socket, fileno(stdin));
 
 	setbuf(stdout, NULL);
 
-	streams[0] = fdopen((*socket)[0], "r");
-	streams[1] = fdopen((*socket)[1], "w");
+	*stream = fdopen(*socket, "r+");
 
 	return SUCCESS;
-} /* }}} */
+}
 
 void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 {
@@ -938,10 +878,10 @@ int main(int argc, char **argv) /* {{{ */
 
 #ifndef _WIN32
 	char *address;
-	int listen[2];
-	int server[2];
-	int socket[2];
-	FILE* streams[2] = {NULL, NULL};
+	int listen = -1;
+	int server = -1;
+	int socket = -1;
+	FILE* stream = NULL;
 #endif
 
 #ifdef ZTS
@@ -954,14 +894,6 @@ int main(int argc, char **argv) /* {{{ */
 	signal_struct.sa_flags = SA_SIGINFO | SA_NODEFER;
 
 	address = strdup("127.0.0.1");
-	socket[0] = -1;
-	socket[1] = -1;
-	listen[0] = -1;
-	listen[1] = -1;
-	server[0] = -1;
-	server[1] = -1;
-	streams[0] = NULL;
-	streams[1] = NULL;
 #endif
 
 #ifdef PHP_WIN32
@@ -1126,20 +1058,12 @@ phpdbg_main:
 			break;
 
 #ifndef _WIN32
-			/* if you pass a listen port, we will accept input on listen port */
-			/* and write output to listen port * 2 */
-
-			case 'l': { /* set listen ports */
-				if (sscanf(php_optarg, "%d/%d", &listen[0], &listen[1]) != 2) {
-					if (sscanf(php_optarg, "%d", &listen[0]) != 1) {
-						/* default to hardcoded ports */
-						listen[0] = 4000;
-						listen[1] = 8000;
-					} else {
-						listen[1] = (listen[0] * 2);
-					}
+			/* if you pass a listen port, we will read and write on listen port */
+			case 'l': /* set listen ports */
+				if (sscanf(php_optarg, "%d", &listen) != 1) {
+					listen = 8000;
 				}
-			} break;
+				break;
 
 			case 'a': { /* set bind address */
 				free(address);
@@ -1182,12 +1106,11 @@ phpdbg_main:
 
 #ifndef _WIN32
 	/* setup remote server if necessary */
-	if (!cleaning &&
-		(listen[0] > 0 && listen[1] > 0)) {
-		if (phpdbg_open_sockets(address, listen, &server, &socket, streams) == FAILURE) {
-			remote = 0;
+	if (!cleaning && listen > 0) {
+		if (phpdbg_remote_init(address, listen, &server, &socket, &stream) == FAILURE) {
 			exit(0);
 		}
+
 		/* set remote flag to stop service shutting down upon quit */
 		remote = 1;
 	}
@@ -1293,11 +1216,11 @@ phpdbg_main:
 		/* make sure to turn off buffer for ev command */
 		php_output_activate(TSRMLS_C);
 		php_output_deactivate(TSRMLS_C);
-		
+
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
 #ifndef _WIN32
-		if (listen[0] < 0) {
+		if (listen < 0) {
 #endif
 #if defined(ZEND_SIGNALS) && !defined(_WIN32)
 			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC); } zend_end_try();
@@ -1315,7 +1238,7 @@ phpdbg_main:
 
 #ifndef _WIN32
 		/* setup io here */
-		if (streams[0] && streams[1]) {
+		if (stream) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
 
 			signal(SIGPIPE, SIG_IGN);
@@ -1415,11 +1338,10 @@ phpdbg_interact:
 					
 						if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 							/* renegociate connections */
-							phpdbg_open_sockets(
-								address, listen, &server, &socket, streams);
+							phpdbg_remote_init(address, listen, &server, &socket, &stream);
 				
 							/* set streams */
-							if (streams[0] && streams[1]) {
+							if (stream) {
 								PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
 							}
 				

@@ -386,9 +386,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "bind address using the **-a** option. If **-a** is specied without an argument, then phpdbg "
 "will bind to all available interfaces.  You should be aware of the security implications of "
 "doing this, so measures should be taken to secure this service if bound to a publicly accessible "
-"interface/port." CR CR
-
-"Specify both stdin and stdout with -lstdin/stdout; by default stdout is stdin * 2."
+"interface/port."
 },
 
 {"phpdbginit", CR
