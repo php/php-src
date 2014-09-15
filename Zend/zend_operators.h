@@ -1036,7 +1036,7 @@ static zend_always_inline void fast_is_not_identical_function(zval *result, zval
 /* buf points to the END of the buffer */
 #define _zend_print_signed_to_buf(buf, num, vartype, result) do {               \
 	if (num < 0) {                                                              \
-	    _zend_print_unsigned_to_buf((buf), -(vartype)(num), vartype, (result)); \
+	    _zend_print_unsigned_to_buf((buf), (~((vartype)(num)) + 1), vartype, (result)); \
 	    *--(result) = '-';                                                      \
 	} else {                                                                    \
 	    _zend_print_unsigned_to_buf((buf), (num), vartype, (result));           \
