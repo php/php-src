@@ -1489,58 +1489,6 @@ ZEND_API zend_bool zend_hash_index_exists(const HashTable *ht, zend_ulong h)
 }
 
 
-ZEND_API zend_bool zend_hash_get_pointer(const HashTable *ht, HashPointer *ptr)
-{
-	ptr->pos = ht->nInternalPointer;
-	ptr->ht = (HashTable*)ht;
-	if (ht->nInternalPointer != INVALID_IDX) {
-		ptr->h = ht->arData[ht->nInternalPointer].h;
-		return 1;
-	} else {
-		ptr->h = 0;
-		return 0;
-	}
-}
-
-ZEND_API zend_bool zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr)
-{
-	uint32_t idx;
-
-	if (ptr->pos == INVALID_IDX) {
-		ht->nInternalPointer = INVALID_IDX;
-	} else if (ptr->ht != ht) {
-		IS_CONSISTENT(ht);
-		for (idx = 0; idx < ht->nNumUsed; idx++) {
-			if (Z_TYPE(ht->arData[idx].val) != IS_UNDEF) {
-				ht->nInternalPointer = idx;
-				return 0;
-			}
-		}
-		idx = INVALID_IDX;
-		return 0;
-	} else if (ht->nInternalPointer != ptr->pos) {
-		IS_CONSISTENT(ht);
-		if (ht->u.flags & HASH_FLAG_PACKED) {
-			if (ptr->h < ht->nNumUsed &&
-			    Z_TYPE(ht->arData[ptr->h].val) != IS_UNDEF) {
-				ht->nInternalPointer = ptr->h;
-				return 1;
-			}
-		} else {
-			idx = ht->arHash[ptr->h & ht->nTableMask];
-			while (idx != INVALID_IDX) {
-				if (ht->arData[idx].h == ptr->h && idx == ptr->pos) {
-					ht->nInternalPointer = idx;
-					return 1;
-				}
-				idx = Z_NEXT(ht->arData[idx].val);
-			}
-		}
-		return 0;
-	}
-	return 1;
-}
-
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos)
 {
     uint32_t idx;

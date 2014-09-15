@@ -177,9 +177,6 @@ typedef struct _HashPointer {
 	zend_ulong h;
 } HashPointer;
 
-ZEND_API zend_bool zend_hash_get_pointer(const HashTable *ht, HashPointer *ptr);
-ZEND_API zend_bool zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr);
-
 #define zend_hash_has_more_elements(ht) \
 	zend_hash_has_more_elements_ex(ht, &(ht)->nInternalPointer)
 #define zend_hash_move_forward(ht) \
