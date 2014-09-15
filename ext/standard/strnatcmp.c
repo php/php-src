@@ -109,23 +109,7 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 	short leading = 1;
 
 	if (a_len == 0 || b_len == 0) {
-		result = 0;
-
-		if (a_len > b_len) {
-			if (a_len - b_len <= INT_MAX) {
-				result = (int)(a_len - b_len);
-			} else {
-				result = 1;
-			}
-		} else {
-			if (b_len - a_len <= (size_t)(-INT_MIN)) {
-				result = -(int)(b_len - a_len);
-			} else {
-				result = -1;
-			}
-		}
-
-		return result;
+		return (a_len == b_len ? 0 : (a_len > b_len ? 1 : -1));
 	}
 
 	ap = a;
