@@ -415,7 +415,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 		}
 
 		if (mimetype != NULL && !(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
-			zend_long len;
+			size_t len;
 			char *p = strstr(get_output_encoding(TSRMLS_C), "//");
 
 			if (p) {
