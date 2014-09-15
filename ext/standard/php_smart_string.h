@@ -121,13 +121,13 @@
 
 static inline char *smart_string_print_long(char *buf, zend_long num) {
 	char *r; 
-	_zend_print_signed_to_buf(buf, num, unsigned long, r); 
+	_zend_print_signed_to_buf(buf, num, zend_long, r);
 	return r;
 }
 
 static inline char *smart_string_print_unsigned(char *buf, zend_long num) {
 	char *r; 
-	_zend_print_unsigned_to_buf(buf, num, unsigned long, r); 
+	_zend_print_unsigned_to_buf(buf, num, zend_ulong, r);
 	return r;
 }
 
@@ -139,13 +139,13 @@ static inline char *smart_string_print_unsigned(char *buf, zend_long num) {
 } while (0)
 	
 #define smart_string_append_unsigned_ex(dest, num, type) \
-	smart_string_append_generic_ex((dest), (num), (type), unsigned long, _unsigned)
+	smart_string_append_generic_ex((dest), (num), (type), zend_ulong, _unsigned)
 
 #define smart_string_append_long_ex(dest, num, type) \
-	smart_string_append_generic_ex((dest), (num), (type), unsigned long, _signed)
+	smart_string_append_generic_ex((dest), (num), (type), zend_ulong, _signed)
 
 #define smart_string_append_off_t_ex(dest, num, type) \
-	smart_string_append_generic_ex((dest), (num), (type), off_t, _signed)
+	smart_string_append_generic_ex((dest), (num), (type), zend_off_t, _signed)
 
 #define smart_string_append_ex(dest, src, what) \
 	smart_string_appendl_ex((dest), ((smart_string *)(src))->c, \
