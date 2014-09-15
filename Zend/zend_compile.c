@@ -732,6 +732,13 @@ zend_string *zend_resolve_const_name(zend_string *name, uint32_t type, zend_bool
 }
 /* }}} */
 
+/* This function is copy-on-write. The returned string is either a new string,
+   or the passed string with an incremented refcount. Do not free the returned
+   string if you mean to free the inputted string. Free the inputted string
+   instead.
+   If this is confusing, pretend the returned string is always a new string.
+   The observed effect is the same.
+*/
 zend_string *zend_resolve_class_name(zend_string *name, uint32_t type TSRMLS_DC) /* {{{ */
 {
 	char *compound;
