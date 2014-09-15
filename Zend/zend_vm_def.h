@@ -4811,9 +4811,9 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 							}
 						} else {
 							const char *class_name, *prop_name;
-							int prop_name_len;
+							size_t prop_name_len;
 							zend_unmangle_property_name_ex(
-								p->key->val, p->key->len, &class_name, &prop_name, &prop_name_len);
+								p->key, &class_name, &prop_name, &prop_name_len);
 							ZVAL_STRINGL(EX_VAR((opline+1)->result.var), prop_name, prop_name_len);
 						}
 					}

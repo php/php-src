@@ -16791,9 +16791,9 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 							}
 						} else {
 							const char *class_name, *prop_name;
-							int prop_name_len;
+							size_t prop_name_len;
 							zend_unmangle_property_name_ex(
-								p->key->val, p->key->len, &class_name, &prop_name, &prop_name_len);
+								p->key, &class_name, &prop_name, &prop_name_len);
 							ZVAL_STRINGL(EX_VAR((opline+1)->result.var), prop_name, prop_name_len);
 						}
 					}

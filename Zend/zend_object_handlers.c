@@ -397,10 +397,10 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 	const char *class_name = NULL;
 	const char *prop_name;
 	zend_string *member;
-	int prop_name_len;
+	size_t prop_name_len;
 
 	if (prop_info_name->val[0] == 0) {
-		zend_unmangle_property_name_ex(prop_info_name->val, prop_info_name->len, &class_name, &prop_name, &prop_name_len);
+		zend_unmangle_property_name_ex(prop_info_name, &class_name, &prop_name, &prop_name_len);
 		member = zend_string_init(prop_name, prop_name_len, 0);
 	} else {
 		member = zend_string_copy(prop_info_name);
@@ -434,10 +434,12 @@ static zend_long *zend_get_property_guard(zend_object *zobj, zend_property_info 
 		info.name = Z_STR_P(member);
 	} else if(property_info->name->val[0] == '\0'){
 		const char *class_name = NULL, *prop_name = NULL;
-		zend_unmangle_property_name(property_info->name->val, property_info->name->len, &class_name, &prop_name);
+		size_t prop_name_len;
+		zend_unmangle_property_name_ex(property_info->name, &class_name,
+			&prop_name, &prop_name_len);
 		if (class_name) {
 			/* use unmangled name for protected properties */
-			str = info.name = zend_string_init(prop_name, strlen(prop_name), 0);
+			str = info.name = zend_string_init(prop_name, prop_name_len, 0);
 			property_info = &info;
 		}
 	}

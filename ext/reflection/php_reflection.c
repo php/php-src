@@ -941,7 +941,7 @@ static void _property_string(string *str, zend_property_info *prop, char *prop_n
 			string_printf(str, "static ");
 		}
 
-		zend_unmangle_property_name(prop->name->val, prop->name->len, &class_name, (const char**)&prop_name);
+		zend_unmangle_property_name(prop->name, &class_name, (const char**)&prop_name);
 		string_printf(str, "$%s", prop_name);
 	}
 
@@ -1298,9 +1298,9 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	zval classname;
 	property_reference *reference;
 	const char *class_name, *prop_name;
-	int prop_name_len;
+	size_t prop_name_len;
 
-	zend_unmangle_property_name_ex(prop->name->val, prop->name->len, &class_name, &prop_name, &prop_name_len);
+	zend_unmangle_property_name_ex(prop->name, &class_name, &prop_name, &prop_name_len);
 
 	if (!(prop->flags & ZEND_ACC_PRIVATE)) {
 		/* we have to search the class hierarchy for this (implicit) public or protected property */
@@ -4733,7 +4733,6 @@ ZEND_METHOD(reflection_property, __construct)
 {
 	zval propname, cname, *classname;
 	char *name_str;
-	const char *class_name, *prop_name;
 	size_t name_len;
 	int dynam_prop = 0;
 	zval *object;
@@ -4797,9 +4796,11 @@ ZEND_METHOD(reflection_property, __construct)
 	}
 
 	if (dynam_prop == 0) {
-		zend_unmangle_property_name(property_info->name->val, property_info->name->len, &class_name, &prop_name);
+		const char *class_name, *prop_name;
+		size_t prop_name_len;
+		zend_unmangle_property_name_ex(property_info->name, &class_name, &prop_name, &prop_name_len);
 		ZVAL_STR(&cname, zend_string_copy(property_info->ce->name));
-		ZVAL_STRING(&propname, prop_name);
+		ZVAL_STRINGL(&propname, prop_name, prop_name_len);
 	} else {
 		ZVAL_STR(&cname, zend_string_copy(ce->name));
 		ZVAL_STRINGL(&propname, name_str, name_len);
@@ -4950,12 +4951,14 @@ ZEND_METHOD(reflection_property, getValue)
 		ZVAL_DUP(return_value, &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]);
 	} else {
 		const char *class_name, *prop_name;
+		size_t prop_name_len;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
 			return;
 		}
-		zend_unmangle_property_name(ref->prop.name->val, ref->prop.name->len, &class_name, &prop_name);
-		member_p = zend_read_property(ref->ce, object, prop_name, strlen(prop_name), 1 TSRMLS_CC);
+
+		zend_unmangle_property_name_ex(ref->prop.name, &class_name, &prop_name, &prop_name_len);
+		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 1 TSRMLS_CC);
 		ZVAL_DUP(return_value, member_p);
 	}
 }
@@ -5024,12 +5027,14 @@ ZEND_METHOD(reflection_property, setValue)
 		}
 	} else {
 		const char *class_name, *prop_name;
+		size_t prop_name_len;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
 			return;
 		}
-		zend_unmangle_property_name(ref->prop.name->val, ref->prop.name->len, &class_name, &prop_name);
-		zend_update_property(ref->ce, object, prop_name, strlen(prop_name), value TSRMLS_CC);
+
+		zend_unmangle_property_name_ex(ref->prop.name, &class_name, &prop_name, &prop_name_len);
+		zend_update_property(ref->ce, object, prop_name, prop_name_len, value TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -5043,18 +5048,17 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	zend_class_entry *tmp_ce, *ce;
 	zend_property_info *tmp_info;
 	const char *prop_name, *class_name;
-	int prop_name_len;
+	size_t prop_name_len;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (zend_unmangle_property_name(ref->prop.name->val, ref->prop.name->len, &class_name, &prop_name) != SUCCESS) {
+	if (zend_unmangle_property_name_ex(ref->prop.name, &class_name, &prop_name, &prop_name_len) != SUCCESS) {
 		RETURN_FALSE;
 	}
 
-	prop_name_len = strlen(prop_name);
 	ce = tmp_ce = ref->ce;
 	while (tmp_ce && (tmp_info = zend_hash_str_find_ptr(&tmp_ce->properties_info, prop_name, prop_name_len)) != NULL) {
 		if (tmp_info->flags & ZEND_ACC_PRIVATE || tmp_info->flags & ZEND_ACC_SHADOW) {

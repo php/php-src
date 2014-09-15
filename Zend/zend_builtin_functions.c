@@ -1036,8 +1036,6 @@ ZEND_FUNCTION(get_object_vars)
 	zval *value;
 	HashTable *properties;
 	zend_string *key;
-	const char *prop_name, *class_name;
-	uint prop_len;
 	zend_object *zobj;
 
 #ifndef FAST_ZPP
@@ -1070,7 +1068,9 @@ ZEND_FUNCTION(get_object_vars)
 				/* Not separating references */
 				if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 				if (key->val[0] == 0) {
-					zend_unmangle_property_name_ex(key->val, key->len, &class_name, &prop_name, (int*) &prop_len);
+					const char *prop_name, *class_name;
+					size_t prop_len;
+					zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
 					zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
 				} else {
 					zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);

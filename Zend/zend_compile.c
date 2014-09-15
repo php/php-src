@@ -2300,10 +2300,10 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 				prop_name = zend_string_copy(property_info->name);
 			} else {
 				const char *pname;
-				int pname_len;
+				size_t pname_len;
 
 				/* for private and protected we need to unmangle the names */
-				zend_unmangle_property_name_ex(property_info->name->val, property_info->name->len,
+				zend_unmangle_property_name_ex(property_info->name,
 											&class_name_unused, &pname, &pname_len);
 				prop_name = zend_string_init(pname, pname_len, 0);
 			}
@@ -2668,13 +2668,11 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS
 }
 /* }}} */
 
-ZEND_API zend_string *zend_mangle_property_name(const char *src1, int src1_length, const char *src2, int src2_length, int internal) /* {{{ */
+ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_length, const char *src2, size_t src2_length, int internal) /* {{{ */
 {
-	zend_string *prop_name;
-	int prop_name_length;
+	size_t prop_name_length = 1 + src1_length + 1 + src2_length;
+	zend_string *prop_name = zend_string_alloc(prop_name_length, internal);
 
-	prop_name_length = 1 + src1_length + 1 + src2_length;
-	prop_name = zend_string_alloc(prop_name_length, internal);
 	prop_name->val[0] = '\0';
 	memcpy(prop_name->val + 1, src1, src1_length+1);
 	memcpy(prop_name->val + 1 + src1_length + 1, src2, src2_length+1);
@@ -2682,49 +2680,50 @@ ZEND_API zend_string *zend_mangle_property_name(const char *src1, int src1_lengt
 }
 /* }}} */
 
-static int zend_strnlen(const char* s, int maxlen) /* {{{ */
+static int zend_strnlen(const char* s, size_t maxlen) /* {{{ */
 {
-	int len = 0;
+	size_t len = 0;
 	while (*s++ && maxlen--) len++;
 	return len;
 }
 /* }}} */
 
-ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int len, const char **class_name, const char **prop_name, int *prop_len) /* {{{ */
+ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char **class_name, const char **prop_name, size_t *prop_len) /* {{{ */
 {
-	int class_name_len;
+	size_t class_name_len;
 
 	*class_name = NULL;
 
-	if (mangled_property[0]!=0) {
-		*prop_name = mangled_property;
+	if (name->val[0] != '\0') {
+		*prop_name = name->val;
 		if (prop_len) {
-			*prop_len = len;
+			*prop_len = name->len;
 		}
 		return SUCCESS;
 	}
-	if (len < 3 || mangled_property[1]==0) {
+	if (name->len < 3 || name->val[1] == '\0') {
 		zend_error(E_NOTICE, "Illegal member variable name");
-		*prop_name = mangled_property;
+		*prop_name = name->val;
 		if (prop_len) {
-			*prop_len = len;
+			*prop_len = name->len;
 		}
 		return FAILURE;
 	}
 
-	class_name_len = zend_strnlen(mangled_property + 1, --len - 1) + 1;
-	if (class_name_len >= len || mangled_property[class_name_len]!=0) {
+	class_name_len = zend_strnlen(name->val + 1, name->len - 2);
+	if (class_name_len >= name->len - 2 || name->val[class_name_len + 1] != '\0') {
 		zend_error(E_NOTICE, "Corrupt member variable name");
-		*prop_name = mangled_property;
+		*prop_name = name->val;
 		if (prop_len) {
-			*prop_len = len + 1;
+			*prop_len = name->len;
 		}
 		return FAILURE;
 	}
-	*class_name = mangled_property + 1;
-	*prop_name = (*class_name) + class_name_len;
+
+	*class_name = name->val + 1;
+	*prop_name = name->val + class_name_len + 2;
 	if (prop_len) {
-		*prop_len = len - class_name_len;
+		*prop_len = name->len - class_name_len - 2;
 	}
 	return SUCCESS;
 }

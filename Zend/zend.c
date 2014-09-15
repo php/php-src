@@ -156,8 +156,8 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 		if (string_key) {
 			if (is_object) {
 				const char *prop_name, *class_name;
-				int prop_len;
-				int mangled = zend_unmangle_property_name_ex(string_key->val, string_key->len, &class_name, &prop_name, &prop_len);
+				size_t prop_len;
+				int mangled = zend_unmangle_property_name_ex(string_key, &class_name, &prop_name, &prop_len);
 
 				ZEND_WRITE_EX(prop_name, prop_len);
 				if (class_name && mangled == SUCCESS) {

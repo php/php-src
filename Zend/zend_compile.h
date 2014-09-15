@@ -499,10 +499,10 @@ ZEND_API void zend_function_dtor(zval *zv);
 ZEND_API void destroy_zend_class(zval *zv);
 void zend_class_add_ref(zval *zv);
 
-ZEND_API zend_string *zend_mangle_property_name(const char *src1, int src1_length, const char *src2, int src2_length, int internal);
-#define zend_unmangle_property_name(mangled_property, mangled_property_len, class_name, prop_name) \
-        zend_unmangle_property_name_ex(mangled_property, mangled_property_len, class_name, prop_name, NULL)
-ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int mangled_property_len, const char **class_name, const char **prop_name, int *prop_len);
+ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_length, const char *src2, size_t src2_length, int internal);
+#define zend_unmangle_property_name(mangled_property, class_name, prop_name) \
+        zend_unmangle_property_name_ex(mangled_property, class_name, prop_name, NULL)
+ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char **class_name, const char **prop_name, size_t *prop_len);
 
 #define ZEND_FUNCTION_DTOR zend_function_dtor
 #define ZEND_CLASS_DTOR destroy_zend_class

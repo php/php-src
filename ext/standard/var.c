@@ -74,7 +74,7 @@ static void php_object_property_dump(zval *zv, zend_ulong index, zend_string *ke
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
-		int unmangle = zend_unmangle_property_name(key->val, key->len, &class_name, &prop_name);
+		int unmangle = zend_unmangle_property_name(key, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
 
 		if (class_name && unmangle == SUCCESS) {
@@ -247,7 +247,7 @@ static void zval_object_property_dump(zval *zv, zend_ulong index, zend_string *k
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
-		zend_unmangle_property_name(key->val, key->len, &class_name, &prop_name);
+		zend_unmangle_property_name(key, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
 
 		if (class_name) {
@@ -430,13 +430,12 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 {
 	buffer_append_spaces(buf, level + 2);
 	if (key != NULL) {
-		const char *class_name; /* ignored, but must be passed to unmangle */
-		const char *pname;
+		const char *class_name, *prop_name;
+		size_t prop_name_len;
 		zend_string *pname_esc;
 		
-		zend_unmangle_property_name(key->val, key->len,
-				&class_name, &pname);
-		pname_esc = php_addcslashes(pname, strlen(pname), 0, "'\\", 2 TSRMLS_CC);
+		zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len);
+		pname_esc = php_addcslashes(prop_name, prop_name_len, 0, "'\\", 2 TSRMLS_CC);
 
 		smart_str_appendc(buf, '\'');
 		smart_str_appendl(buf, pname_esc->val, pname_esc->len);
