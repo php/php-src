@@ -415,7 +415,7 @@ ZEND_FUNCTION(func_num_args)
    Get the $arg_num'th argument that was passed to the function */
 ZEND_FUNCTION(func_get_arg)
 {
-	int arg_count, first_extra_arg;
+	uint32_t arg_count, first_extra_arg;
 	zval *arg;
 	zend_long requested_offset;
 	zend_execute_data *ex;
@@ -460,8 +460,8 @@ ZEND_FUNCTION(func_get_arg)
 ZEND_FUNCTION(func_get_args)
 {
 	zval *p;
-	int arg_count, first_extra_arg;
-	int i;
+	uint32_t arg_count, first_extra_arg;
+	uint32_t i;
 	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
 
 	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
@@ -2104,15 +2104,15 @@ ZEND_FUNCTION(get_defined_constants)
 
 static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array TSRMLS_DC)
 {
-	int num_args = call->num_args;
+	uint32_t num_args = call->num_args;
 
 	array_init_size(arg_array, num_args);
 	if (num_args) {
-		int i = 0;
+		uint32_t i = 0;
 		zval *p = ZEND_CALL_ARG(call, 1);
 
 		if (call->func->type == ZEND_USER_FUNCTION) {
-			int first_extra_arg = call->func->op_array.num_args;
+			uint32_t first_extra_arg = call->func->op_array.num_args;
 			
 			if (call->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
 			 	first_extra_arg--;
