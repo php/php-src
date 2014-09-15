@@ -1590,7 +1590,7 @@ PHP_FUNCTION(pathinfo)
 	if (opt == PHP_PATHINFO_ALL) {
 		RETURN_ZVAL(&tmp, 0, 1);
 	} else {
-		zval *element;t
+		zval *element;
 		if ((element = zend_hash_get_current_data(Z_ARRVAL(tmp))) != NULL) {
 			RETVAL_ZVAL(element, 1, 0);
 		} else {
