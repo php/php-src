@@ -1590,7 +1590,7 @@ PHP_FUNCTION(pathinfo)
 	if (opt == PHP_PATHINFO_ALL) {
 		RETURN_ZVAL(&tmp, 0, 1);
 	} else {
-		zval *element;
+		zval *element;t
 		if ((element = zend_hash_get_current_data(Z_ARRVAL(tmp))) != NULL) {
 			RETVAL_ZVAL(element, 1, 0);
 		} else {
@@ -3170,7 +3170,7 @@ PHP_FUNCTION(addcslashes)
 		RETURN_STRINGL(str->val, str->len);
 	}
 	
-	if (what_len >= 256 ) {
+	if (what->len >= 256 ) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "charlist more than 256 bytes");
         	RETURN_FALSE;
 	}
