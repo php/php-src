@@ -650,21 +650,28 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_SEND_BY_REF     1
 #define ZEND_SEND_PREFER_REF 2
 
-#define CHECK_ARG_SEND_TYPE(zf, arg_num, m) \
-	(EXPECTED((zf)->common.arg_info != NULL) && \
-	(EXPECTED(arg_num <= (zf)->common.num_args) \
-		? ((zf)->common.arg_info[arg_num-1].pass_by_reference & (m)) \
-		: (UNEXPECTED((zf)->common.fn_flags & ZEND_ACC_VARIADIC) != 0) && \
-		   ((zf)->common.arg_info[(zf)->common.num_args-1].pass_by_reference & (m))))
+static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
+{
+	if (UNEXPECTED(zf->common.arg_info == NULL)) {
+		return 0;
+	}
+	if (UNEXPECTED(arg_num > zf->common.num_args)) {
+		if (EXPECTED((zf->common.fn_flags & ZEND_ACC_VARIADIC) == 0)) {
+			return 0;
+		}
+		arg_num = zf->common.num_args;
+	}
+	return UNEXPECTED((zf->common.arg_info[arg_num-1].pass_by_reference & mask) != 0);
+}
 
 #define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
-	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF)
+	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_BY_REF)
 
 #define ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num) \
-	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF)
+	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF)
 
 #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
-	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_PREFER_REF)
+	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_PREFER_REF)
 
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1
