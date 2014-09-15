@@ -771,7 +771,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	}
 
 	old_str = Z_STR_P(str);
-	if (offset >= Z_STRLEN_P(str)) {
+	if (offset >= (zend_long)Z_STRLEN_P(str)) {
 		zend_long old_len = Z_STRLEN_P(str);
 		Z_STR_P(str) = zend_string_realloc(Z_STR_P(str), offset + 1, 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
@@ -1226,7 +1226,7 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 			offset = Z_LVAL_P(dim);
 		}
 
-		if (UNEXPECTED(offset < 0) || UNEXPECTED(Z_STRLEN_P(container) <= offset)) {
+		if (UNEXPECTED(offset < 0) || UNEXPECTED((zend_long)Z_STRLEN_P(container) <= offset)) {
 			if (type != BP_VAR_IS) {
 				zend_error(E_NOTICE, "Uninitialized string offset: %pd", offset);
 			}
@@ -1654,7 +1654,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	if (num_args > 0) {
 		zval *arg_src = ZEND_CALL_ARG(call, 1);
 		zval *arg_dst = ZEND_CALL_ARG(execute_data, 1);
-		int i;
+		uint32_t i;
 
 		for (i = 0; i < num_args; i++) {
 			ZVAL_COPY_VALUE(arg_dst + i, arg_src + i);
