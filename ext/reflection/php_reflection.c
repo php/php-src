@@ -2427,6 +2427,86 @@ ZEND_METHOD(reflection_parameter, isArray)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionParameter::isInt()
+   Returns whether parameter MUST be an int */
+ZEND_METHOD(reflection_parameter, isInt)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_LONG);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isFloat()
+   Returns whether parameter MUST be a float */
+ZEND_METHOD(reflection_parameter, isFloat)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_DOUBLE);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isNumeric()
+   Returns whether parameter MUST be numeric */
+ZEND_METHOD(reflection_parameter, isNumeric)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_NUMERIC);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isString()
+   Returns whether parameter MUST be a string */
+ZEND_METHOD(reflection_parameter, isString)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_STRING);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isBool()
+   Returns whether parameter MUST be an boolean */
+ZEND_METHOD(reflection_parameter, isBool)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == _IS_BOOL);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionParameter::isCallable()
    Returns whether parameter MUST be callable */
 ZEND_METHOD(reflection_parameter, isCallable)
@@ -5983,6 +6063,11 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isArray, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isInt, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isFloat, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isNumeric, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isString, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isBool, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isCallable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, allowsNull, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getPosition, arginfo_reflection__void, 0)

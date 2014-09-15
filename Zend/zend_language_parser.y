@@ -199,6 +199,11 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
 %token T_CALLABLE        "callable (T_CALLABLE)"
+%token T_INT             "int (T_INT)"
+%token T_FLOAT           "float (T_FLOAT)"
+%token T_STRING_TYPE     "string (T_STRING_TYPE)"
+%token T_BOOL            "bool (T_BOOL)"
+%token T_NUMERIC         "numeric (T_NUMERIC)"
 %token T_LINE            "__LINE__ (T_LINE)"
 %token T_FILE            "__FILE__ (T_FILE)"
 %token T_DIR             "__DIR__ (T_DIR)"
@@ -548,10 +553,15 @@ parameter:
 
 
 optional_type:
-		/* empty */	{ $$ = NULL; }
-	|	T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
-	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
-	|	name		{ $$ = $1; }
+		/* empty */		{ $$ = NULL; }
+	|	T_ARRAY			{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
+	|	T_CALLABLE		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
+	|	T_INT			{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_LONG); }
+	|	T_FLOAT			{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_DOUBLE); }
+	|	T_STRING_TYPE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_STRING); }
+	|	T_BOOL			{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, _IS_BOOL); }
+	|	T_NUMERIC		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_NUMERIC); }
+	|	name			{ $$ = $1; }
 ;
 
 argument_list:

@@ -340,6 +340,14 @@ ZEND_API void convert_to_null(zval *op);
 ZEND_API void convert_to_boolean(zval *op);
 ZEND_API void convert_to_array(zval *op);
 ZEND_API void convert_to_object(zval *op);
+
+ZEND_API int _convert_to_long_safe(zval *op, int separate);
+ZEND_API int _convert_to_long_base_safe(zval *op, int base, int separate);
+ZEND_API int _convert_to_double_safe(zval *op, int separate);
+ZEND_API int _convert_to_boolean_safe(zval *op, int separate);
+ZEND_API int _convert_to_string_safe(zval *op, int separate);
+ZEND_API int _convert_to_numeric_safe(zval *op, int separate);
+
 ZEND_API void multi_convert_to_long_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
@@ -458,6 +466,20 @@ END_EXTERN_C()
 		SEPARATE_ZVAL_IF_NOT_REF(pzv);								\
 		convert_scalar_to_number(pzv TSRMLS_CC);					\
 	}
+
+#define convert_to_long_safe(ppzv)		_convert_to_long_safe(ppzv, 0)
+#define convert_to_long_base_safe(ppzv, base)	_convert_to_long_base_safe(ppzv, base, 0)
+#define convert_to_double_safe(ppzv)		_convert_to_double_safe(ppzv, 0)
+#define convert_to_boolean_safe(ppzv)		_convert_to_boolean_safe(ppzv, 0)
+#define convert_to_string_safe(ppzv)		_convert_to_string_safe(ppzv, 0)
+#define convert_to_numeric_safe(ppzv)		_convert_to_numeric_safe(ppzv, 0)
+
+#define convert_to_long_safe_ex(ppzv)			_convert_to_long_safe(ppzv, 1)
+#define convert_to_long_base_safe_ex(ppzv, base)	_convert_to_long_base_safe(ppzv, base, 1)
+#define convert_to_double_safe_ex(ppzv)			_convert_to_double_safe(ppzv, 1)
+#define convert_to_boolean_safe_ex(ppzv)		_convert_to_boolean_safe(ppzv, 1)
+#define convert_to_string_safe_ex(ppzv)			_convert_to_string_safe(ppzv, 1)
+#define convert_to_numeric_safe_ex(ppzv)		_convert_to_numeric_safe(ppzv, 1)
 
 #if HAVE_SETLOCALE && defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER) && (_MSC_VER >= 1400)
 /* This is performance improvement of tolower() on Windows and VC2005

@@ -26,7 +26,7 @@ class Integer
 }
 
 // class declaration for string objects
-class String
+class StringObj
 {
   public $class_value;
   // initializing object member value
@@ -50,10 +50,10 @@ $unsorted_int_obj = array (
 
 // array of string objects
 $unsorted_str_obj = array ( 
-  "axx" => new String("axx"), "t" => new String("t"),
-  "w" => new String("w"), "py" => new String("py"),
-  "apple" => new String("apple"), "Orange" => new String("Orange"),
-  "Lemon" => new String("Lemon"), "aPPle" => new String("aPPle")
+  "axx" => new StringObj("axx"), "t" => new StringObj("t"),
+  "w" => new StringObj("w"), "py" => new StringObj("py"),
+  "apple" => new StringObj("apple"), "Orange" => new StringObj("Orange"),
+  "Lemon" => new StringObj("Lemon"), "aPPle" => new StringObj("aPPle")
 );
 echo "\n-- Testing ksort() by supplying various object arrays, 'flag' value is defualt --\n";
 
@@ -120,42 +120,42 @@ array(6) {
 bool(true)
 array(8) {
   ["Lemon"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "Lemon"
   }
   ["Orange"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(6) "Orange"
   }
   ["aPPle"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "aPPle"
   }
   ["apple"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "apple"
   }
   ["axx"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(3) "axx"
   }
   ["py"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(2) "py"
   }
   ["t"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(1) "t"
   }
   ["w"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(1) "w"
   }
@@ -198,42 +198,42 @@ array(6) {
 bool(true)
 array(8) {
   ["Lemon"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "Lemon"
   }
   ["Orange"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(6) "Orange"
   }
   ["aPPle"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "aPPle"
   }
   ["apple"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "apple"
   }
   ["axx"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(3) "axx"
   }
   ["py"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(2) "py"
   }
   ["t"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(1) "t"
   }
   ["w"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(1) "w"
   }

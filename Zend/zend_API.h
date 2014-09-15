@@ -252,6 +252,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, const char *type_spec, ...);
 ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, const char *type_spec, ...);
 ZEND_API char *zend_zval_type_name(const zval *arg);
+ZEND_API char *zend_zval_friendly_type_name(const zval *arg);
 
 ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr, const char *type_spec, ...);
 ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, const char *type_spec, ...);
@@ -342,6 +343,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 ZEND_API zend_class_entry *zend_get_class_entry(const zend_object *object TSRMLS_DC);
 ZEND_API zend_string *zend_get_object_classname(const zend_object *object TSRMLS_DC);
 ZEND_API char *zend_get_type_by_const(int type);
+ZEND_API char *zend_get_friendly_type_by_const(int type);
 
 #define getThis() (Z_OBJ(EG(This)) ? &EG(This) : NULL)
 

@@ -302,14 +302,16 @@ try_again:
 
 /* }}} */
 
-/* {{{ convert_object_to_type */
-#define convert_object_to_type(op, dst, ctype, conv_func)									\
+/* {{{ convert_object_to_type_ex */
+#define convert_object_to_type_ex(op, dst, ctype, conv_func, raise_error)					\
 	ZVAL_UNDEF(dst);																		\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
 		if (Z_OBJ_HT_P(op)->cast_object(op, dst, ctype TSRMLS_CC) == FAILURE) {				\
-			zend_error(E_RECOVERABLE_ERROR,													\
-				"Object of class %s could not be converted to %s", Z_OBJCE_P(op)->name->val,\
-			zend_get_type_by_const(ctype));													\
+			if (raise_error) {																\
+				zend_error(E_RECOVERABLE_ERROR,												\
+					"Object of class %s could not be converted to %s", Z_OBJCE_P(op)->name->val,\
+				zend_get_type_by_const(ctype));												\
+			}																				\
 		} 																					\
 	} else if (Z_OBJ_HT_P(op)->get) {														\
 		zval *newop = Z_OBJ_HT_P(op)->get(op, dst TSRMLS_CC);								\
@@ -319,8 +321,325 @@ try_again:
 			conv_func(dst);																	\
 		}																					\
 	}
-
 /* }}} */
+
+#define convert_object_to_type(op, dst, ctype, conv_func) convert_object_to_type_ex(op, dst, ctype, conv_func, 1)
+
+ZEND_API int _convert_to_long_safe(zval *op_ptr, int separate)
+{
+	if (Z_TYPE_P(op_ptr) != IS_LONG) {
+		return _convert_to_long_base_safe(op_ptr, 10, separate);
+	}
+	return SUCCESS;
+}
+
+ZEND_API int _convert_to_long_base_safe(zval *op, int base, int separate)
+{
+	if (separate && Z_TYPE_P(op) != IS_LONG) {
+		SEPARATE_ZVAL_IF_NOT_REF(op);
+	}
+	switch (Z_TYPE_P(op)) {
+		case IS_STRING:
+			{
+				long lval;
+				char *endptr;
+				
+				errno = 0;
+				lval = strtol(Z_STRVAL_P(op), &endptr, base);
+				
+				/* If the string was well-formed, endptr would've been set to its end */
+				if (errno != ERANGE && Z_STRLEN_P(op) && endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+					zend_string_release(Z_STR_P(op));
+					ZVAL_LONG(op, lval);
+					return SUCCESS;
+				}
+				break;
+			}
+		case IS_DOUBLE:
+			if (Z_DVAL_P(op) == (double)(long) Z_DVAL_P(op)) {
+				/* Exactly representable as long */
+				ZVAL_LONG(op, zend_dval_to_lval(Z_DVAL_P(op)));
+				return SUCCESS;
+			}
+			break;
+		case IS_LONG:
+			return SUCCESS;
+		case IS_OBJECT:
+		{
+			zval dst;
+			TSRMLS_FETCH();
+
+			convert_object_to_type_ex(op, &dst, IS_LONG, convert_to_long, 0);
+			
+			if (Z_TYPE(dst) == IS_LONG) {
+				zval_dtor(op);
+				ZVAL_COPY_VALUE(op, &dst);
+				return SUCCESS;
+			}
+			break;
+		}
+
+		default:
+		case IS_RESOURCE:
+		case IS_NULL:
+		case IS_TRUE:
+		case IS_FALSE:
+		case IS_ARRAY:
+			break;
+	}
+	convert_to_long_base(op, base);
+	return FAILURE;
+}
+
+ZEND_API int _convert_to_double_safe(zval *op, int separate)
+{
+	if (separate && Z_TYPE_P(op) != IS_DOUBLE) {
+		SEPARATE_ZVAL_IF_NOT_REF(op);
+	}
+	switch (Z_TYPE_P(op)) {
+		case IS_STRING:
+			{
+				double dval;
+				char *endptr;
+				
+				dval = zend_strtod(Z_STRVAL_P(op), &endptr);
+
+				/* If the string was well-formed, endptr would've been set to its end */
+				if (Z_STRLEN_P(op) && endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+					zend_string_release(Z_STR_P(op));
+					ZVAL_DOUBLE(op, dval);
+					return SUCCESS;
+				}
+				break;
+			}
+		case IS_LONG:
+			if (Z_LVAL_P(op) == (long) (double) Z_LVAL_P(op)) {
+				/* Exactly representable as double */
+				ZVAL_DOUBLE(op, (double) Z_LVAL_P(op));
+				return SUCCESS;
+			}
+			break;
+		case IS_DOUBLE:
+			return SUCCESS;
+		case IS_OBJECT:
+		{
+			zval dst;
+			TSRMLS_FETCH();
+
+			convert_object_to_type_ex(op, &dst, IS_DOUBLE, convert_to_double, 0);
+		
+			if (Z_TYPE(dst) == IS_DOUBLE) {
+				zval_dtor(op);
+				ZVAL_COPY_VALUE(op, &dst);
+				return SUCCESS;
+			}
+			break;
+		}
+
+		case IS_RESOURCE:
+		case IS_NULL:
+		case IS_TRUE:
+		case IS_FALSE:
+		case IS_ARRAY:
+		default:
+			break;
+	}
+	convert_to_double(op);
+	return FAILURE;
+}
+
+ZEND_API int _convert_to_numeric_safe(zval *op, int separate)
+{
+	if (separate && Z_TYPE_P(op) != IS_DOUBLE) {
+		SEPARATE_ZVAL_IF_NOT_REF(op);
+	}
+	switch (Z_TYPE_P(op)) {
+		case IS_STRING:
+			{
+				long lval;
+				char *lval_endptr;
+				double dval;
+				char *dval_endptr;
+				zend_bool did_overflow;
+				
+				errno = 0;
+				lval = strtol(Z_STRVAL_P(op), &lval_endptr, 10);
+				did_overflow = errno == ERANGE;
+				/* If the string was well-formed, endptr would've been set to its end */
+				if (!did_overflow && Z_STRLEN_P(op) && lval_endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+					zend_string_release(Z_STR_P(op));
+					ZVAL_LONG(op, lval);
+					return SUCCESS;
+				}
+				
+				dval = zend_strtod(Z_STRVAL_P(op), &dval_endptr);
+				/* If the string was well-formed, endptr would've been set to its end */
+				if (Z_STRLEN_P(op) && dval_endptr - Z_STRVAL_P(op) == Z_STRLEN_P(op)) {
+					zend_string_release(Z_STR_P(op));
+					ZVAL_DOUBLE(op, dval);
+					return SUCCESS;
+				}
+				
+				zend_string_release(Z_STR_P(op));
+				if (dval_endptr > lval_endptr || did_overflow) {
+					ZVAL_DOUBLE(op, dval);
+				} else {
+					ZVAL_LONG(op, lval);
+				}
+				return FAILURE;
+			}
+		case IS_LONG:
+			return SUCCESS;
+		case IS_TRUE:
+			ZVAL_LONG(op, 1);
+			return FAILURE;
+		case IS_FALSE:
+			ZVAL_LONG(op, 0);
+			return FAILURE;
+		case IS_RESOURCE:
+			{
+				TSRMLS_FETCH();
+				zend_list_delete(Z_LVAL_P(op));
+				ZVAL_LONG(op, (long) Z_LVAL_P(op));
+				return FAILURE;
+			}
+		case IS_DOUBLE:
+			return SUCCESS;
+		case IS_NULL:
+			ZVAL_LONG(op, 0);
+			return FAILURE;
+		case IS_ARRAY: 
+			{
+				long temp;
+				temp = (zend_hash_num_elements(Z_ARRVAL_P(op)) ? 1 : 0);
+				zval_dtor(op);
+				ZVAL_LONG(op, temp);
+				return FAILURE;
+			}
+		case IS_OBJECT:
+		{
+			zval dst;
+			TSRMLS_FETCH();
+
+			convert_object_to_type_ex(op, &dst, IS_LONG, convert_to_long, 0);
+		
+			if (Z_TYPE(dst) == IS_LONG) {
+				zval_dtor(op);
+				ZVAL_COPY_VALUE(op, &dst);
+				return SUCCESS;
+			}
+			
+			convert_object_to_type_ex(op, &dst, IS_DOUBLE, convert_to_double, 0);
+		
+			if (Z_TYPE(dst) == IS_DOUBLE) {
+				zval_dtor(op);
+				ZVAL_COPY_VALUE(op, &dst);
+				return SUCCESS;
+			}
+			/* intentional fall-through */
+		}
+			
+		default:
+			zval_dtor(op);
+			ZVAL_LONG(op, 0);
+			return FAILURE;
+		
+	}
+}
+
+
+ZEND_API int _convert_to_boolean_safe(zval *op, int separate)
+{
+	if (separate && Z_TYPE_P(op) != IS_TRUE && Z_TYPE_P(op) != IS_FALSE) {
+		SEPARATE_ZVAL_IF_NOT_REF(op);
+	}
+
+	switch (Z_TYPE_P(op)) {
+		case IS_TRUE:
+		case IS_FALSE:
+			return SUCCESS;
+		case IS_OBJECT:
+		{
+			zval dst;
+			TSRMLS_FETCH();
+
+			convert_object_to_type_ex(op, &dst, _IS_BOOL, convert_to_boolean, 0);
+	
+			if (Z_TYPE(dst) == IS_TRUE || Z_TYPE(dst) == IS_FALSE) {
+				zval_dtor(op);
+				ZVAL_COPY_VALUE(op, &dst);
+				return SUCCESS;
+			}
+			break;
+		}
+		
+		case IS_NULL:
+		case IS_STRING:
+		case IS_RESOURCE:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_ARRAY:
+		default:
+			break;
+	}
+	convert_to_boolean(op);
+	return FAILURE;
+}
+
+ZEND_API int _convert_to_string_safe(zval *op, int separate)
+{
+	if (separate && Z_TYPE_P(op) != IS_LONG) {
+		SEPARATE_ZVAL_IF_NOT_REF(op);
+	}
+
+	switch (Z_TYPE_P(op)) {
+		case IS_STRING:
+			return SUCCESS;
+		case IS_LONG: 
+			{
+				ZVAL_NEW_STR(op, zend_long_to_str(Z_LVAL_P(op)));
+				return SUCCESS;
+			}
+		case IS_DOUBLE:
+			{
+				zend_string *str;
+				double dval = Z_DVAL_P(op);
+				TSRMLS_FETCH();
+
+				str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
+				/* %G already handles removing trailing zeros from the fractional part, yay */
+				ZVAL_NEW_STR(op, str);
+				return SUCCESS;
+			}
+		case IS_OBJECT:
+			{
+				zval dst;
+				TSRMLS_FETCH();
+
+				convert_object_to_type_ex(op, &dst, IS_STRING, convert_to_string, 0);
+		
+				zval_dtor(op);
+		
+				if (Z_TYPE(dst) == IS_STRING) {
+					ZVAL_COPY_VALUE(op, &dst);
+					return SUCCESS;
+				}
+				
+				ZVAL_STRING(op, "Object");
+				return FAILURE;
+			}
+
+		case IS_NULL:
+		case IS_RESOURCE:
+		case IS_TRUE:
+		case IS_FALSE:
+		case IS_ARRAY:
+		default:
+			break;
+	}
+	convert_to_string(op);
+	return FAILURE;
+}
 
 ZEND_API void convert_to_long(zval *op) /* {{{ */
 {

@@ -36,7 +36,7 @@ class TestClass
 class DerivedClass extends TestClass {}
 
 interface TestInterface {
-    public function int();
+    public function inter();
 }
 
 reflectMethod("DerivedClass", "foo");
@@ -44,7 +44,7 @@ reflectMethod("TestClass", "stat");
 reflectMethod("TestClass", "priv");
 reflectMethod("TestClass", "prot");
 reflectMethod("DerivedClass", "prot");
-reflectMethod("TestInterface", "int");
+reflectMethod("TestInterface", "inter");
 reflectMethod("ReflectionProperty", "__construct");
 reflectMethod("TestClass", "__destruct");
 
@@ -131,16 +131,16 @@ string(%d) "Method [ <user, inherits TestClass> protected method prot ] {
 
 **********************************
 **********************************
-Reflecting on method TestInterface::int()
+Reflecting on method TestInterface::inter()
 
 __toString():
-string(%d) "Method [ <user> abstract public method int ] {
+string(%d) "Method [ <user> abstract public method inter ] {
   @@ %s 36 - 36
 }
 "
 
 export():
-string(%d) "Method [ <user> abstract public method int ] {
+string(%d) "Method [ <user> abstract public method inter ] {
   @@ %s 36 - 36
 }
 "

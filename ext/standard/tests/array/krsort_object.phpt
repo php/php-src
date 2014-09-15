@@ -25,7 +25,7 @@ class Integer
 }
 
 // class declaration for string objects
-class String
+class StringObj
 {
   public $class_value;
   // initializing object member value
@@ -49,10 +49,10 @@ $unsorted_int_obj = array (
 
 // array of string objects with different key values
 $unsorted_str_obj = array ( 
-  "axx" => new String("axx"), "t" => new String("t"),
-  "w" => new String("w"), "py" => new String("py"),
-  "apple" => new String("apple"), "Orange" => new String("Orange"),
-  "Lemon" => new String("Lemon"), "aPPle" => new String("aPPle")
+  "axx" => new StringObj("axx"), "t" => new StringObj("t"),
+  "w" => new StringObj("w"), "py" => new StringObj("py"),
+  "apple" => new StringObj("apple"), "Orange" => new StringObj("Orange"),
+  "Lemon" => new StringObj("Lemon"), "aPPle" => new StringObj("aPPle")
 );
 
 
@@ -121,42 +121,42 @@ array(6) {
 bool(true)
 array(8) {
   ["w"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(1) "w"
   }
   ["t"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(1) "t"
   }
   ["py"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(2) "py"
   }
   ["axx"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(3) "axx"
   }
   ["apple"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "apple"
   }
   ["aPPle"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "aPPle"
   }
   ["Orange"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(6) "Orange"
   }
   ["Lemon"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "Lemon"
   }
@@ -199,42 +199,42 @@ array(6) {
 bool(true)
 array(8) {
   ["w"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(1) "w"
   }
   ["t"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(1) "t"
   }
   ["py"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(2) "py"
   }
   ["axx"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(3) "axx"
   }
   ["apple"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "apple"
   }
   ["aPPle"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "aPPle"
   }
   ["Orange"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(6) "Orange"
   }
   ["Lemon"]=>
-  object(String)#%d (1) {
+  object(StringObj)#%d (1) {
     ["class_value"]=>
     string(5) "Lemon"
   }
