@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-11 Sep 2014, PHP 5.6.1RC1
+25 Sep 2014, PHP 5.6.1
 
 - Core:
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
@@ -38,6 +38,9 @@ PHP                                                                        NEWS
 
 - DOM:
   . Made DOMNode::textContent writeable. (Tjerk)
+
+- phpdbg:
+  . Fixed issue krakjoe/phpdbg#111 (compile error without ZEND_SIGNALS). (Bob)
 
 - SOAP:
   . Fixed bug #67955 (SoapClient prepends 0-byte to cookie names). (Philip Hofstetter)
