@@ -186,14 +186,6 @@ ZEND_API void gc_remove_from_buffer(zend_refcounted *ref TSRMLS_DC)
 {
 	gc_root_buffer *root;
 
-	if (UNEXPECTED(/*GC_ADDRESS(GC_INFO(ref)) &&*/
-	               GC_GET_COLOR(GC_INFO(ref)) == GC_BLACK &&
-		           GC_ADDRESS(GC_INFO(ref)) >= GC_G(last_unused) - GC_G(buf))) {
-		/* The given zval is a garbage that is going to be deleted by
-		 * currently running GC */
-		return;
-	}
-
 	root = GC_G(buf) + GC_ADDRESS(GC_INFO(ref));
 	GC_BENCH_INC(zval_remove_from_buffer);
 	GC_REMOVE_FROM_ROOTS(root);
