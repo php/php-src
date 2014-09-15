@@ -1502,7 +1502,7 @@ ZEND_API int zend_delete_global_variable(zend_string *name TSRMLS_DC) /* {{{ */
 
 ZEND_API zend_array *zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 {
-	uint32_t i;
+	int i;
 	zend_execute_data *ex;
 	zend_array *symbol_table;
 
