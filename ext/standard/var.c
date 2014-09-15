@@ -855,7 +855,7 @@ again:
 				if (ce && ce->serialize != NULL) {
 					/* has custom handler */
 					unsigned char *serialized_data = NULL;
-					uint32_t serialized_length;
+					size_t serialized_length;
 
 					if (ce->serialize(struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
 						smart_str_appendl(buf, "C:", 2);

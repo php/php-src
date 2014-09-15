@@ -515,8 +515,8 @@ struct _zend_class_entry {
 	union _zend_function *(*get_static_method)(zend_class_entry *ce, zend_string* method TSRMLS_DC);
 
 	/* serializer callbacks */
-	int (*serialize)(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC);
-	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, uint32_t buf_len, zend_unserialize_data *data TSRMLS_DC);
+	int (*serialize)(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC);
+	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data TSRMLS_DC);
 
 	uint32_t num_interfaces;
 	uint32_t num_traits;
