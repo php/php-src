@@ -2278,7 +2278,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 
 		/* If types of arguments have to be checked */
 		if (reg_function->common.arg_info && reg_function->common.num_args) {
-			int i;
+			uint32_t i;
 			for (i = 0; i < reg_function->common.num_args; i++) {
 				if (reg_function->common.arg_info[i].class_name ||
 				    reg_function->common.arg_info[i].type_hint) {
@@ -3448,7 +3448,7 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* {{{ */
 {
 	if (fci->params) {
-		int i;
+		uint32_t i;
 
 		for (i = 0; i < fci->param_count; i++) {
 			zval_ptr_dtor(&fci->params[i]);
@@ -3482,7 +3482,7 @@ ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count
 ZEND_API int zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, zval *args TSRMLS_DC) /* {{{ */
 {
 	zval *arg, *params;
-	int n = 1;
+	uint32_t n = 1;
 
 	zend_fcall_info_args_clear(fci, !args);
 
