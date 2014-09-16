@@ -1813,7 +1813,7 @@ PHP_FUNCTION(strpos)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	if (offset < 0 || offset > haystack->len) {
+	if (offset < 0 || (size_t)offset > haystack->len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
@@ -1863,7 +1863,7 @@ PHP_FUNCTION(stripos)
 		return;
 	}
 
-	if (offset < 0 || offset > haystack->len) {
+	if (offset < 0 || (size_t)offset > haystack->len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
@@ -1951,20 +1951,20 @@ PHP_FUNCTION(strrpos)
 	}
 
 	if (offset >= 0) {
-		if (offset > haystack->len) {
+		if ((size_t)offset > haystack->len) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
-		p = haystack->val + offset;
+		p = haystack->val + (size_t)offset;
 		e = haystack->val + haystack->len - needle_len;
 	} else {
-		if (offset < -INT_MAX || -offset > haystack->len) {
+		if (offset < -INT_MAX || (size_t)(-offset) > haystack->len) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 
 		p = haystack->val;
-		if (needle_len > -offset) {
+		if (needle_len > (size_t)(-offset)) {
 			e = haystack->val + haystack->len - needle_len;
 		} else {
 			e = haystack->val + haystack->len + offset;
