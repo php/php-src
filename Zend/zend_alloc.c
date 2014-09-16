@@ -882,6 +882,13 @@ not_found:
 				chunk = (zend_mm_chunk*)zend_mm_chunk_alloc(ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE);
 				if (UNEXPECTED(chunk == NULL)) {
 					/* insufficient memory */
+#if !ZEND_MM_LIMIT
+					zend_mm_safe_error(heap, "Out of memory");
+#elif ZEND_DEBUG
+					zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %lu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+#else
+					zend_mm_safe_error(heap, "Out of memory (allocated %ld) (tried to allocate %lu bytes)", heap->real_size, ZEND_MM_PAGE_SIZE * pages_count);
+#endif
 					return NULL;
 				}
 #if ZEND_MM_STAT
@@ -1545,6 +1552,13 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	ptr = zend_mm_chunk_alloc(new_size, ZEND_MM_CHUNK_SIZE);
 	if (UNEXPECTED(ptr == NULL)) {
 		/* insufficient memory */
+#if !ZEND_MM_LIMIT
+		zend_mm_safe_error(heap, "Out of memory");
+#elif ZEND_DEBUG
+		zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %lu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+#else
+		zend_mm_safe_error(heap, "Out of memory (allocated %ld) (tried to allocate %lu bytes)", heap->real_size, size);
+#endif
 		return NULL;
 	}
 #if ZEND_DEBUG
