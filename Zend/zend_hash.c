@@ -643,19 +643,18 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 
 static zend_always_inline void _zend_hash_del_el(HashTable *ht, uint32_t idx, Bucket *p)
 {
-	uint32_t nIndex;
 	Bucket *prev = NULL;
 
 	if (!(ht->u.flags & HASH_FLAG_PACKED)) {
-		nIndex = p->h & ht->nTableMask;
-		idx = ht->arHash[nIndex];
-		if (p != ht->arData + idx) {
-			prev = ht->arData + idx;
-			while (ht->arData + Z_NEXT(prev->val) != p) {
-				idx = Z_NEXT(prev->val);
-				prev = ht->arData + idx;
+		uint32_t nIndex = p->h & ht->nTableMask;
+		uint32_t i = ht->arHash[nIndex];
+
+		if (i != idx) {
+			prev = ht->arData + i;
+			while (Z_NEXT(prev->val) != idx) {
+				i = Z_NEXT(prev->val);
+				prev = ht->arData + i;
 			}
-			idx = Z_NEXT(prev->val);
 	 	}
 	}
 
