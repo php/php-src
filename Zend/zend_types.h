@@ -101,7 +101,7 @@ typedef void (*dtor_func_t)(zval *pDest);
 typedef void (*copy_ctor_func_t)(zval *pElement);
 
 typedef union _zend_value {
-	zend_long        lval;				/* long value */
+	zend_long         lval;				/* long value */
 	double            dval;				/* double value */
 	zend_refcounted  *counted;
 	zend_string      *str;
@@ -144,7 +144,7 @@ struct _zend_refcounted {
 			ZEND_ENDIAN_LOHI_3(
 				zend_uchar    type,
 				zend_uchar    flags,    /* used for strings & objects */
-				uint16_t   gc_info)  /* keeps GC root number (or 0) and color */
+				uint16_t      gc_info)  /* keeps GC root number (or 0) and color */
 		} v;
 		uint32_t type_info;
 	} u;
@@ -152,33 +152,33 @@ struct _zend_refcounted {
 
 struct _zend_string {
 	zend_refcounted   gc;
-	zend_ulong       h;                /* hash value */
-	size_t       len;
+	zend_ulong        h;                /* hash value */
+	size_t            len;
 	char              val[1];
 };
 
 typedef struct _Bucket {
-	zend_ulong       h;                /* hash value (or numeric index)   */
+	zend_ulong        h;                /* hash value (or numeric index)   */
 	zend_string      *key;              /* string key or NULL for numerics */
 	zval              val;
 } Bucket;
 
 typedef struct _HashTable {	
-	uint32_t         nTableSize;
-	uint32_t         nTableMask;
-	uint32_t         nNumUsed;
-	uint32_t         nNumOfElements;
-	zend_long        nNextFreeElement;
+	uint32_t          nTableSize;
+	uint32_t          nTableMask;
+	uint32_t          nNumUsed;
+	uint32_t          nNumOfElements;
+	zend_long         nNextFreeElement;
 	Bucket           *arData;
-	uint32_t        *arHash;
+	uint32_t         *arHash;
 	dtor_func_t       pDestructor;
-	uint32_t         nInternalPointer; 
+	uint32_t          nInternalPointer; 
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_3(
 				zend_uchar    flags,
 				zend_uchar    nApplyCount,
-				uint16_t   reserve)
+				uint16_t      reserve)
 		} v;
 		uint32_t flags;
 	} u;
@@ -191,7 +191,7 @@ struct _zend_array {
 
 struct _zend_object {
 	zend_refcounted   gc;
-	uint32_t         handle; // TODO: may be removed ???
+	uint32_t          handle; // TODO: may be removed ???
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
@@ -201,7 +201,7 @@ struct _zend_object {
 
 struct _zend_resource {
 	zend_refcounted   gc;
-	zend_long              handle; // TODO: may be removed ???
+	zend_long         handle; // TODO: may be removed ???
 	int               type;
 	void             *ptr;
 };
@@ -519,10 +519,10 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 			IS_STRING_EX;						\
 	} while (0)
 
-#define ZVAL_INTERNED_STR(z, s) do {					\
-		zval *__z = (z);						\
-		zend_string *__s = (s);					\
-		Z_STR_P(__z) = __s;						\
+#define ZVAL_INTERNED_STR(z, s) do {				\
+		zval *__z = (z);							\
+		zend_string *__s = (s);						\
+		Z_STR_P(__z) = __s;							\
 		Z_TYPE_INFO_P(__z) = IS_INTERNED_STRING_EX;	\
 	} while (0)
 
@@ -572,26 +572,26 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 
 #define ZVAL_NEW_RES(z, h, p, t) do {							\
 		zend_resource *_res = emalloc(sizeof(zend_resource));	\
-		zval *__z;										\
+		zval *__z;												\
 		GC_REFCOUNT(_res) = 1;									\
 		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
 		_res->handle = (h);										\
 		_res->type = (t);										\
 		_res->ptr = (p);										\
-		__z = (z);										\
+		__z = (z);												\
 		Z_RES_P(__z) = _res;									\
 		Z_TYPE_INFO_P(__z) = IS_RESOURCE_EX;					\
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_RES(z, h, p, t) do {				\
 		zend_resource *_res = malloc(sizeof(zend_resource));	\
-		zval *__z;										\
+		zval *__z;												\
 		GC_REFCOUNT(_res) = 1;									\
 		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
 		_res->handle = (h);										\
 		_res->type = (t);										\
 		_res->ptr = (p);										\
-		__z = (z);										\
+		__z = (z);												\
 		Z_RES_P(__z) = _res;									\
 		Z_TYPE_INFO_P(__z) = IS_RESOURCE_EX;					\
 	} while (0)
