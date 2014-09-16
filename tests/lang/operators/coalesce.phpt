@@ -19,6 +19,11 @@ $arr = [
 	]
 ];
 
+function foobar() {
+	echo "called\n";
+	return ['a'];
+}
+
 var_dump($nonexistant_variable ?? 3);
 echo PHP_EOL;
 var_dump($var ?? 3);
@@ -35,6 +40,8 @@ var_dump($arr["foobar"] ?? 3);
 var_dump($arr["qux"] ?? 3);
 var_dump($arr["bing"][0] ?? 3);
 var_dump($arr["bing"][1] ?? 3);
+echo PHP_EOL;
+var_dump(foobar()[0] ?? false);
 ?>
 --EXPECTF--
 int(3)
@@ -56,3 +63,6 @@ object(stdClass)#%d (%d) {
 }
 string(4) "bang"
 int(3)
+
+called
+string(1) "a"
