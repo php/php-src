@@ -200,6 +200,7 @@ ZEND_API zend_ast *zend_ast_list_add(zend_ast *list, zend_ast *op);
 
 ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope TSRMLS_DC);
 
+ZEND_API void zend_ast_addref(zend_ast *ast);
 ZEND_API zend_ast *zend_ast_copy(zend_ast *ast);
 ZEND_API void zend_ast_destroy(zend_ast *ast);
 ZEND_API void zend_ast_destroy_and_free(zend_ast *ast);

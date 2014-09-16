@@ -6895,8 +6895,24 @@ void zend_compile_conditional(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	uint32_t opnum_jmpz, opnum_jmp, opnum_qm_assign1;
 
 	if (!true_ast) {
-		zend_compile_shorthand_conditional(result, ast TSRMLS_CC);
-		return;
+		/* if variable is isset()able, rewrite $a ?: $b to empty($a) ? $b : $a */
+		if (zend_is_variable(cond_ast) && !zend_is_call(cond_ast))
+		{
+			zend_ast *swap_temp = cond_ast;
+
+			cond_ast = ast->child[0] = zend_ast_create(ZEND_AST_EMPTY, cond_ast);
+
+			true_ast = ast->child[1] = false_ast;
+			false_ast = ast->child[2] = swap_temp;
+
+			/* avoid any zvals being double-freed due to cond_ast being referenced twice */
+			zend_ast_addref(swap_temp);
+		}
+		else
+		{
+			zend_compile_shorthand_conditional(result, ast TSRMLS_CC);
+			return;
+		}
 	}
 	
 	zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
