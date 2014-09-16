@@ -27,7 +27,6 @@
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
 #define HASH_KEY_NON_EXISTENT 3
-#define HASH_KEY_NON_EXISTANT HASH_KEY_NON_EXISTENT /* Keeping old define (with typo) for backward compatibility */
 
 #define HASH_UPDATE 			(1<<0)
 #define HASH_ADD				(1<<1)
