@@ -4586,7 +4586,8 @@ void zend_compile_global_var(zend_ast *ast TSRMLS_DC) /* {{{ */
 	}
 
 	if (zend_try_compile_cv(&result, var_ast TSRMLS_CC) == SUCCESS) {
-		zend_emit_op(NULL, ZEND_BIND_GLOBAL, &result, &name_node TSRMLS_CC);
+		zend_op *opline = zend_emit_op(NULL, ZEND_BIND_GLOBAL, &result, &name_node TSRMLS_CC);
+		zend_alloc_cache_slot(opline->op2.constant TSRMLS_CC);
 	} else {
 		zend_emit_op(&result, ZEND_FETCH_W, &name_node, NULL TSRMLS_CC);
 
