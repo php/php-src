@@ -416,65 +416,64 @@ static zend_always_inline zval *_zend_hash_index_update_or_next_insert_i(HashTab
 	if (flag & HASH_NEXT_INSERT) {
 		h = ht->nNextFreeElement;
 	}
-	CHECK_INIT(ht, h >= 0 && h < ht->nTableSize);
+	CHECK_INIT(ht, h < ht->nTableSize);
 
 	if (ht->u.flags & HASH_FLAG_PACKED) {
-		if (EXPECTED(h >= 0))  {
-			if (h < ht->nNumUsed) {
-				p = ht->arData + h;
-				if (Z_TYPE(p->val) != IS_UNDEF) {
-					if (flag & (HASH_NEXT_INSERT | HASH_ADD)) {
-						return NULL;
-					}
-					if (ht->pDestructor) {
-						ht->pDestructor(&p->val);
-					}
-					ZVAL_COPY_VALUE(&p->val, pData);
-					if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-						ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
-					}
-					return &p->val;
-				} else { /* we have to keep the order :( */
-				    goto convert_to_hash;
+		if (h < ht->nNumUsed) {
+			p = ht->arData + h;
+			if (Z_TYPE(p->val) != IS_UNDEF) {
+				if (flag & (HASH_NEXT_INSERT | HASH_ADD)) {
+					return NULL;
 				}
-			} else if (EXPECTED(h < ht->nTableSize)) {
-				p = ht->arData + h;
-			} else if (h < ht->nTableSize * 2 &&
-			           ht->nTableSize - ht->nNumOfElements < ht->nTableSize / 2) {
-				zend_hash_packed_grow(ht);
-				p = ht->arData + h;
-			} else {
-			    goto convert_to_hash;
-			}
-			HANDLE_BLOCK_INTERRUPTIONS();
-			/* incremental initialization of empty Buckets */
-			if (h >= ht->nNumUsed) {
-				Bucket *q = ht->arData + ht->nNumUsed;
-				while (q != p) {
-					ZVAL_UNDEF(&q->val);
-					q++;
+				if (ht->pDestructor) {
+					ht->pDestructor(&p->val);
 				}
-				ht->nNumUsed = h + 1;
+				ZVAL_COPY_VALUE(&p->val, pData);
+				if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
+					ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
+				}
+				return &p->val;
+			} else { /* we have to keep the order :( */
+				goto convert_to_hash;
 			}
-			ht->nNumOfElements++;
-			if (ht->nInternalPointer == INVALID_IDX) {
-				ht->nInternalPointer = h;
-			}
-			if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-				ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
-			}
-			p->h = h;
-			p->key = NULL;
-			ZVAL_COPY_VALUE(&p->val, pData);
-			Z_NEXT(p->val) = INVALID_IDX;
-
-			HANDLE_UNBLOCK_INTERRUPTIONS();
-
-			return &p->val;
+		} else if (EXPECTED(h < ht->nTableSize)) {
+			p = ht->arData + h;
+		} else if (h < ht->nTableSize * 2 &&
+				   ht->nTableSize - ht->nNumOfElements < ht->nTableSize / 2) {
+			zend_hash_packed_grow(ht);
+			p = ht->arData + h;
 		} else {
-convert_to_hash:
-			zend_hash_packed_to_hash(ht);
+			goto convert_to_hash;
 		}
+
+		HANDLE_BLOCK_INTERRUPTIONS();
+		/* incremental initialization of empty Buckets */
+		if (h >= ht->nNumUsed) {
+			Bucket *q = ht->arData + ht->nNumUsed;
+			while (q != p) {
+				ZVAL_UNDEF(&q->val);
+				q++;
+			}
+			ht->nNumUsed = h + 1;
+		}
+		ht->nNumOfElements++;
+		if (ht->nInternalPointer == INVALID_IDX) {
+			ht->nInternalPointer = h;
+		}
+		if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
+			ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
+		}
+		p->h = h;
+		p->key = NULL;
+		ZVAL_COPY_VALUE(&p->val, pData);
+		Z_NEXT(p->val) = INVALID_IDX;
+
+		HANDLE_UNBLOCK_INTERRUPTIONS();
+
+		return &p->val;
+
+convert_to_hash:
+		zend_hash_packed_to_hash(ht);
 	}
 
 	if ((flag & HASH_ADD_NEW) == 0) {
