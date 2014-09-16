@@ -945,7 +945,6 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 	SQLUSMALLINT	colfieldid;
 	int		charextraalloc;
 
-	colfieldid = SQL_COLUMN_DISPLAY_SIZE;
 	charextraalloc = 0;
 	result->values = (odbc_result_value *) safe_emalloc(sizeof(odbc_result_value), result->numcols, 0);
 
@@ -953,6 +952,8 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 	result->binmode = ODBCG(defaultbinmode);
 
 	for(i = 0; i < result->numcols; i++) {
+		colfieldid = SQL_COLUMN_DISPLAY_SIZE; /* This needs to be reset for each column */
+
 		rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_NAME, 
 				result->values[i].name, sizeof(result->values[i].name), &colnamelen, 0);
 		rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_TYPE, 
