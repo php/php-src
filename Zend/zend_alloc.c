@@ -372,6 +372,30 @@ static ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 	exit(1);
 }
 
+#ifdef _WIN32
+void
+stderr_last_error(char *msg)
+{
+	LPSTR buf = NULL;
+	DWORD err = GetLastError();
+
+	if (!FormatMessage(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,
+			err,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPSTR)&buf,
+		0, NULL)) {
+		fprintf(stderr, "\n%s: [0x%08x]\n", msg, err);
+	}
+	else {
+		fprintf(stderr, "\n%s: [0x%08x] %s\n", msg, err, buf);
+	}
+}
+#endif
+
 /*****************/
 /* OS Allocation */
 /*****************/
@@ -408,7 +432,7 @@ static void *zend_mm_mmap(size_t size)
 
 	if (ptr == NULL) {
 #if ZEND_MM_ERROR
-		fprintf(stderr, "\nVirtualAlloc() failed: [%d]\n", GetLastError());
+		stderr_last_error("VirtualAlloc() failed");
 #endif
 		return NULL;
 	}
@@ -431,7 +455,7 @@ static void zend_mm_munmap(void *addr, size_t size)
 #ifdef _WIN32
 	if (VirtualFree(addr, 0, MEM_RELEASE) == 0) {
 #if ZEND_MM_ERROR
-		fprintf(stderr, "\nVirtualFree() failed: [%d]\n", GetLastError());
+		stderr_last_error("VirtualFree() failed");
 #endif
 	}
 #else
@@ -1611,7 +1635,11 @@ zend_mm_heap *zend_mm_init(void)
 
 	if (UNEXPECTED(chunk == NULL)) {
 #if ZEND_MM_ERROR
+#ifdef _WIN32
+		stderr_last_error("Can't initialize heap");
+#else
 		fprintf(stderr, "\nCan't initialize heap: [%d] %s\n", errno, strerror(errno));
+#endif
 #endif
 		return NULL;
 	}
