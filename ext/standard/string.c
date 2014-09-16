@@ -780,7 +780,7 @@ static inline int php_charmask(unsigned char *input, size_t len, char *mask TSRM
  */
 PHPAPI char *php_trim(char *c, size_t len, char *what, size_t what_len, zval *return_value, int mode TSRMLS_DC)
 {
-	register zend_long i;
+	register size_t i;
 	size_t trimmed = 0;
 	char mask[256];
 
@@ -802,12 +802,15 @@ PHPAPI char *php_trim(char *c, size_t len, char *what, size_t what_len, zval *re
 		c += trimmed;
 	}
 	if (mode & 2) {
-		for (i = len - 1; i >= 0; i--) {
-			if (mask[(unsigned char)c[i]]) {
-				len--;
-			} else {
-				break;
-			}
+		if (len > 0) {
+			i = len - 1;
+			do {
+				if (mask[(unsigned char)c[i]]) {
+					len--;
+				} else {
+					break;
+				}
+			} while (i-- != 0);
 		}
 	}
 
