@@ -760,7 +760,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	}
 
 	old_str = Z_STR_P(str);
-	if (offset >= (zend_long)Z_STRLEN_P(str)) {
+	if ((size_t)offset >= Z_STRLEN_P(str)) {
 		zend_long old_len = Z_STRLEN_P(str);
 		Z_STR_P(str) = zend_string_realloc(Z_STR_P(str), offset + 1, 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
@@ -1215,7 +1215,7 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 			offset = Z_LVAL_P(dim);
 		}
 
-		if (UNEXPECTED(offset < 0) || UNEXPECTED((zend_long)Z_STRLEN_P(container) <= offset)) {
+		if (UNEXPECTED(offset < 0) || UNEXPECTED(Z_STRLEN_P(container) <= (size_t)offset)) {
 			if (type != BP_VAR_IS) {
 				zend_error(E_NOTICE, "Uninitialized string offset: %pd", offset);
 			}
