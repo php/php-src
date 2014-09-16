@@ -59,8 +59,8 @@ ZEND_BEGIN_MODULE_GLOBALS(filter)
 	zval env_array;
 	zval server_array;
 	zval session_array;
-	long default_filter;
-	long default_filter_flags;
+	zend_long default_filter;
+	zend_long default_filter_flags;
 ZEND_END_MODULE_GLOBALS(filter)
 
 #ifdef ZTS
@@ -70,7 +70,7 @@ ZEND_END_MODULE_GLOBALS(filter)
 #endif
 
 
-#define PHP_INPUT_FILTER_PARAM_DECL zval *value, long flags, zval *option_array, char *charset TSRMLS_DC
+#define PHP_INPUT_FILTER_PARAM_DECL zval *value, zend_long flags, zval *option_array, char *charset TSRMLS_DC
 void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL);

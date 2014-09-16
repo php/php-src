@@ -122,7 +122,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	xmlNode *nodep;
 	dom_object *intern;
 	char *data = NULL;
-	int data_len = 0;
+	size_t data_len = 0;
 	int err;
 	xmlNodePtr lst;
 
@@ -138,7 +138,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	}
 
 	if (data) {
-		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, data, &lst);
+		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, (xmlChar *) data, &lst);
 		if (err != 0) {
 			RETURN_FALSE;
 		}

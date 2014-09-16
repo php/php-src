@@ -170,8 +170,6 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_ADD_TRAIT                       154
 #define ZEND_BIND_TRAITS                     155
 #define ZEND_SEPARATE                        156
-#define ZEND_QM_ASSIGN_VAR                   157
-#define ZEND_JMP_SET_VAR                     158
 #define ZEND_DISCARD_EXCEPTION               159
 #define ZEND_YIELD                           160
 #define ZEND_GENERATOR_RETURN                161

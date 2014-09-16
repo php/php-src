@@ -1476,7 +1476,8 @@ static void fpm_conf_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback
 int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 {
 	int error = 0;
-	char buf[1024+1];
+	char *buf = NULL, *newbuf = NULL;
+	int bufsize = 0;
 	int fd, n;
 	int nb_read = 1;
 	char c = '*';
@@ -1503,19 +1504,36 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 	ini_lineno = 0;
 	while (nb_read > 0) {
 		int tmp;
-		memset(buf, 0, sizeof(char) * (1024 + 1));
-		for (n = 0; n < 1024 && (nb_read = read(fd, &c, sizeof(char))) == sizeof(char) && c != '\n'; n++) {
-			buf[n] = c;
-		}
-		buf[n++] = '\n';
 		ini_lineno++;
 		ini_filename = filename;
+		for (n = 0; (nb_read = read(fd, &c, sizeof(char))) == sizeof(char) && c != '\n'; n++) {
+			if (n == bufsize) {
+				bufsize += 1024;
+				newbuf = (char*) realloc(buf, sizeof(char) * (bufsize + 2));
+				if (newbuf == NULL) {
+					ini_recursion--;
+					close(fd);
+					free(buf);
+					return -1;
+				}
+				buf = newbuf;
+			}
+
+			buf[n] = c;
+		}
+		if (n == 0) {
+			continue;
+		}
+		/* always append newline and null terminate */
+		buf[n++] = '\n';
+		buf[n] = '\0';
 		tmp = zend_parse_ini_string(buf, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fpm_conf_ini_parser, &error TSRMLS_CC);
 		ini_filename = filename;
 		if (error || tmp == FAILURE) {
 			if (ini_include) free(ini_include);
 			ini_recursion--;
 			close(fd);
+			free(buf);
 			return -1;
 		}
 		if (ini_include) {
@@ -1527,16 +1545,17 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 				free(tmp);
 				ini_recursion--;
 				close(fd);
+				free(buf);
 				return -1;
 			}
 			free(tmp);
 		}
 	}
+	free(buf);
 
 	ini_recursion--;
 	close(fd);
 	return ret;
-
 }
 /* }}} */
 

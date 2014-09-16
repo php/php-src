@@ -171,8 +171,8 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	char       cache_mode;
 	char       cache_enabled;
 	char*      cache_dir;
-	long       cache_ttl;
-	long       cache_limit;
+	zend_long       cache_ttl;
+	zend_long       cache_limit;
 	HashTable *mem_cache;
 	xmlCharEncodingHandlerPtr encoding;
 	HashTable *class_map;

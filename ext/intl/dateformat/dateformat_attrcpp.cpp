@@ -220,7 +220,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	Calendar	*cal;
-	long		cal_type;
+	zend_long		cal_type;
 	bool		cal_owned;
 	Locale		locale = Locale::createFromName(dfo->requested_locale);
 	// getting the actual locale from the DateFormat is not enough

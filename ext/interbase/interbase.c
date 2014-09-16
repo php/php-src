@@ -1425,7 +1425,7 @@ PHP_FUNCTION(ibase_gen_id)
 {
 	zval *link = NULL;
 	char query[128], *generator;
-	int gen_len;
+	size_t gen_len;
 	long inc = 1;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;

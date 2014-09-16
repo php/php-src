@@ -41,19 +41,19 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zval		*object;
 
 	const char	*locale_str;
-	int			locale_len		= 0;
+	size_t			locale_len		= 0;
 	Locale		locale;
-    long		date_type		= 0;
-    long		time_type		= 0;
+    zend_long		date_type		= 0;
+    zend_long		time_type		= 0;
 	zval		*calendar_zv	= NULL;
 	Calendar	*calendar		= NULL;
-	long		calendar_type;
+	zend_long		calendar_type;
 	bool		calendar_owned;
 	zval		*timezone_zv	= NULL;
 	TimeZone	*timezone		= NULL;
 	bool		explicit_tz;
     char*       pattern_str		= NULL;
-    int         pattern_str_len	= 0;
+    size_t         pattern_str_len	= 0;
     UChar*      svalue			= NULL;		/* UTF-16 pattern_str */
     int         slength			= 0;
 	IntlDateFormatter_object* dfo;

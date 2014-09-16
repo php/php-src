@@ -153,7 +153,7 @@ PHP_FUNCTION(gethostname)
 PHP_FUNCTION(gethostbyaddr)
 {
 	char *addr;
-	int addr_len;
+	size_t addr_len;
 	zend_string *hostname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &addr, &addr_len) == FAILURE) {
@@ -203,10 +203,10 @@ static zend_string *php_gethostbyaddr(char *ip)
 #endif
 
 	if (!hp || hp->h_name == NULL || hp->h_name[0] == '\0') {
-		return STR_INIT(ip, strlen(ip), 0);
+		return zend_string_init(ip, strlen(ip), 0);
 	}
 
-	return STR_INIT(hp->h_name, strlen(hp->h_name), 0);
+	return zend_string_init(hp->h_name, strlen(hp->h_name), 0);
 }
 /* }}} */
 
@@ -215,7 +215,7 @@ static zend_string *php_gethostbyaddr(char *ip)
 PHP_FUNCTION(gethostbyname)
 {
 	char *hostname;
-	int hostname_len;
+	size_t hostname_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hostname, &hostname_len) == FAILURE) {
 		return;
@@ -230,7 +230,7 @@ PHP_FUNCTION(gethostbyname)
 PHP_FUNCTION(gethostbynamel)
 {
 	char *hostname;
-	int hostname_len;
+	size_t hostname_len;
 	struct hostent *hp;
 	struct in_addr in;
 	int i;
@@ -263,13 +263,13 @@ static zend_string *php_gethostbyname(char *name)
 	hp = gethostbyname(name);
 
 	if (!hp || !*(hp->h_addr_list)) {
-		return STR_INIT(name, strlen(name), 0);
+		return zend_string_init(name, strlen(name), 0);
 	}
 
 	memcpy(&in.s_addr, *(hp->h_addr_list), sizeof(in.s_addr));
 
 	address = inet_ntoa(in);
-	return STR_INIT(address, strlen(address), 0);
+	return zend_string_init(address, strlen(address), 0);
 }
 /* }}} */
 
@@ -345,7 +345,7 @@ PHP_FUNCTION(dns_check_record)
 #endif
 	u_char ans[MAXPACKET];
 	char *hostname, *rectype = NULL;
-	int hostname_len, rectype_len = 0;
+	size_t hostname_len, rectype_len = 0;
 	int type = T_MX, i;
 #if defined(HAVE_DNS_SEARCH)
 	struct sockaddr_storage from;
@@ -523,7 +523,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 				zend_string *tp;
 
 				add_assoc_string(subarray, "type", "TXT");
-				tp = STR_ALLOC(dlen, 0);
+				tp = zend_string_alloc(dlen, 0);
 				
 				array_init(&entries);
 				
@@ -753,7 +753,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
-	int hostname_len;
+	size_t hostname_len;
 	long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type_to_fetch;
@@ -965,7 +965,7 @@ PHP_FUNCTION(dns_get_record)
 PHP_FUNCTION(dns_get_mx)
 {
 	char *hostname;
-	int hostname_len;
+	size_t hostname_len;
 	zval *mx_list, *weight_list = NULL;
 	int count, qdc;
 	u_short type, weight;

@@ -100,7 +100,7 @@ if test "$PHP_APXS2" != "no"; then
     MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
     PHP_SUBST(MH_BUNDLE_FLAGS)
     PHP_SELECT_SAPI(apache2handler, bundle, mod_php5.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
-    SAPI_SHARED=libs/libphp5.so
+    SAPI_SHARED=libs/libphp7.so
     INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
     ;;
   *beos*)

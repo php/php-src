@@ -107,7 +107,7 @@ int dom_entity_notation_name_read(dom_object *obj, zval *retval TSRMLS_DC)
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
 		ZVAL_NULL(retval);
 	} else {
-		content = xmlNodeGetContent((xmlNodePtr) nodep);
+		content = (char *) xmlNodeGetContent((xmlNodePtr) nodep);
 		ZVAL_STRING(retval, content);
 		xmlFree(content);
 	}

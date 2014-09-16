@@ -9,6 +9,7 @@
 *.gcno
 *.la
 *.lo
+*.loT
 *.o
 *.a
 *.ncb
@@ -117,6 +118,12 @@ tests/*/*.php
 tests/*/*.exp
 tests/*/*.log
 tests/*/*.sh
+tests/*/*/*.diff
+tests/*/*/*.out
+tests/*/*/*.php
+tests/*/*/*.exp
+tests/*/*/*.log
+tests/*/*/*.sh
 */tests/*.diff
 */tests/*.out
 */tests/*.php
@@ -129,6 +136,12 @@ tests/*/*.sh
 */tests/*/*.exp
 */tests/*/*.log
 */tests/*/*.sh
+*/tests/*/*/*.diff
+*/tests/*/*/*.out
+*/tests/*/*/*.php
+*/tests/*/*/*.exp
+*/tests/*/*/*.log
+*/tests/*/*/*.sh
 */*/tests/*.diff
 */*/tests/*.out
 */*/tests/*.php
@@ -141,6 +154,18 @@ tests/*/*.sh
 */*/tests/*/*.exp
 */*/tests/*/*.log
 */*/tests/*/*.sh
+*/*/tests/*/*/*.diff
+*/*/tests/*/*/*.out
+*/*/tests/*/*/*.php
+*/*/tests/*/*/*.exp
+*/*/tests/*/*/*.log
+*/*/tests/*/*/*.sh
+*/*/tests/*/*/*/*.diff
+*/*/tests/*/*/*/*.out
+*/*/tests/*/*/*/*.php
+*/*/tests/*/*/*/*.exp
+*/*/tests/*/*/*/*.log
+*/*/tests/*/*/*/*.sh
 
 # Extension specifc ignores
 ext/*/configure.in

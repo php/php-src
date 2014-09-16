@@ -288,7 +288,7 @@ static size_t zend_shared_alloc_get_largest_free_block(void)
 #define MIN_FREE_MEMORY 64*1024
 
 #define SHARED_ALLOC_FAILED() do {		\
-		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %ld bytes (%ld bytes free)", (long)size, (long)ZSMMG(shared_free)); \
+		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %pd bytes (%pd bytes free)", (zend_long)size, (zend_long)ZSMMG(shared_free)); \
 		if (zend_shared_alloc_get_largest_free_block() < MIN_FREE_MEMORY) { \
 			ZSMMG(memory_exhausted) = 1; \
 		} \
@@ -327,7 +327,7 @@ int zend_shared_memdup_size(void *source, size_t size)
 {
 	void *old_p;
 
-	if ((old_p = zend_hash_index_find_ptr(&xlat_table, (ulong)source)) != NULL) {
+	if ((old_p = zend_hash_index_find_ptr(&xlat_table, (zend_ulong)source)) != NULL) {
 		/* we already duplicated this pointer */
 		return 0;
 	}
@@ -339,7 +339,7 @@ void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source TSRML
 {
 	void *old_p, *retval;
 
-	if ((old_p = zend_hash_index_find_ptr(&xlat_table, (ulong)source)) != NULL) {
+	if ((old_p = zend_hash_index_find_ptr(&xlat_table, (zend_ulong)source)) != NULL) {
 		/* we already duplicated this pointer */
 		return old_p;
 	}
@@ -431,14 +431,14 @@ void zend_shared_alloc_clear_xlat_table(void)
 
 void zend_shared_alloc_register_xlat_entry(const void *old, const void *new)
 {
-	zend_hash_index_update_ptr(&xlat_table, (ulong)old, (void*)new);
+	zend_hash_index_update_ptr(&xlat_table, (zend_ulong)old, (void*)new);
 }
 
 void *zend_shared_alloc_get_xlat_entry(const void *old)
 {
 	void *retval;
 
-	if ((retval = zend_hash_index_find_ptr(&xlat_table, (ulong)old)) == NULL) {
+	if ((retval = zend_hash_index_find_ptr(&xlat_table, (zend_ulong)old)) == NULL) {
 		return NULL;
 	}
 	return retval;

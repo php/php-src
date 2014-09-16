@@ -531,10 +531,10 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 			(tmpzval = php_stream_context_get_option(context, "ftp", "resume_pos")) != NULL &&
 			Z_TYPE_P(tmpzval) == IS_LONG &&
 			Z_LVAL_P(tmpzval) > 0) {
-			php_stream_printf(stream TSRMLS_CC, "REST %ld\r\n", Z_LVAL_P(tmpzval));
+			php_stream_printf(stream TSRMLS_CC, "REST %pd\r\n", Z_LVAL_P(tmpzval));
 			result = GET_FTP_RESULT(stream);
 			if (result < 300 || result > 399) {			
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to resume from offset %ld", Z_LVAL_P(tmpzval));
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to resume from offset %pd", Z_LVAL_P(tmpzval));
 				goto errexit;
 			}
 		}
@@ -632,7 +632,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	tmp_len = MIN(sizeof(ent->d_name), basename->len - 1);
 	memcpy(ent->d_name, basename->val, tmp_len);
 	ent->d_name[tmp_len - 1] = '\0';
-	STR_RELEASE(basename);
+	zend_string_release(basename);
 
 	/* Trim off trailing whitespace characters */
 	tmp_len--;

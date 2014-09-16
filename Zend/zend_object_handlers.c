@@ -159,7 +159,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC
 			*is_temp = 1;
 			ALLOC_HASHTABLE(ht);
 			*ht = *Z_ARRVAL(retval);
-			efree(Z_ARR(retval));
+			efree_size(Z_ARR(retval), sizeof(zend_array));
 			return ht;
 		} else {
 			*is_temp = 0;
@@ -385,9 +385,9 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 }
 /* }}} */
 
-ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC) /* {{{ */
+ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent TSRMLS_DC) /* {{{ */
 {
-	return zend_get_property_info_quick(ce, Z_STR_P(member), silent, NULL TSRMLS_CC);
+	return zend_get_property_info_quick(ce, member, silent, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -397,16 +397,16 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 	const char *class_name = NULL;
 	const char *prop_name;
 	zend_string *member;
-	int prop_name_len;
+	size_t prop_name_len;
 
 	if (prop_info_name->val[0] == 0) {
-		zend_unmangle_property_name_ex(prop_info_name->val, prop_info_name->len, &class_name, &prop_name, &prop_name_len);
-		member = STR_INIT(prop_name, prop_name_len, 0);
+		zend_unmangle_property_name_ex(prop_info_name, &class_name, &prop_name, &prop_name_len);
+		member = zend_string_init(prop_name, prop_name_len, 0);
 	} else {
-		member = STR_COPY(prop_info_name);
+		member = zend_string_copy(prop_info_name);
 	}
 	property_info = zend_get_property_info_quick(zobj->ce, member, 1, NULL TSRMLS_CC);
-	STR_RELEASE(member);
+	zend_string_release(member);
 	if (!property_info) {
 		return FAILURE;
 	}
@@ -423,7 +423,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 }
 /* }}} */
 
-static long *zend_get_property_guard(zend_object *zobj, zend_property_info *property_info, zval *member) /* {{{ */
+static zend_long *zend_get_property_guard(zend_object *zobj, zend_property_info *property_info, zval *member) /* {{{ */
 {
 	zend_property_info info;
 	zval stub, *guard;
@@ -434,10 +434,12 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 		info.name = Z_STR_P(member);
 	} else if(property_info->name->val[0] == '\0'){
 		const char *class_name = NULL, *prop_name = NULL;
-		zend_unmangle_property_name(property_info->name->val, property_info->name->len, &class_name, &prop_name);
+		size_t prop_name_len;
+		zend_unmangle_property_name_ex(property_info->name, &class_name,
+			&prop_name, &prop_name_len);
 		if (class_name) {
 			/* use unmangled name for protected properties */
-			str = info.name = STR_INIT(prop_name, strlen(prop_name), 0);
+			str = info.name = zend_string_init(prop_name, prop_name_len, 0);
 			property_info = &info;
 		}
 	}
@@ -446,7 +448,7 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 		zend_hash_init(zobj->guards, 8, NULL, NULL, 0);
 	} else if ((guard = zend_hash_find(zobj->guards, property_info->name)) != NULL) {
 		if (str) {
-			STR_RELEASE(str);
+			zend_string_release(str);
 		}
 		return &Z_LVAL_P(guard);
 	}
@@ -454,7 +456,7 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 	ZVAL_LONG(&stub, 0);
 	guard = zend_hash_add_new(zobj->guards, property_info->name, &stub);
 	if (str) {
-		STR_RELEASE(str);
+		zend_string_release(str);
 	}
 	return &Z_LVAL_P(guard);
 }
@@ -501,7 +503,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 
 	/* magic get */
 	if (zobj->ce->__get) {
-		long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_long *guard = zend_get_property_guard(zobj, property_info, member);
 		if (!((*guard) & IN_GET)) {
 			zval tmp_object;
 
@@ -635,7 +637,7 @@ found:
 
 	/* magic set */
 	if (zobj->ce->__set) {
-		long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_long *guard = zend_get_property_guard(zobj, property_info, member);
 
 	    if (!((*guard) & IN_SET)) {
 			zval tmp_object;
@@ -659,12 +661,12 @@ found:
 			}
 		}
 	} else if (EXPECTED(property_info != NULL)) {
+		zval tmp;
+
 write_std_property:
-		/* if we assign referenced variable, we should separate it */
 		if (Z_REFCOUNTED_P(value)) {
 			if (Z_ISREF_P(value)) {
-				zval tmp;
-
+				/* if we assign referenced variable, we should separate it */
 				ZVAL_DUP(&tmp, Z_REFVAL_P(value));
 				value = &tmp;
 			} else {
@@ -778,7 +780,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 	zval tmp_member;
 	zval *retval, tmp;
 	zend_property_info *property_info;
-	long *guard;
+	zend_long *guard;
 
 	zobj = Z_OBJ_P(object);
 
@@ -875,7 +877,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 	
 	/* magic unset */
 	if (zobj->ce->__unset) {
-		long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_long *guard = zend_get_property_guard(zobj, property_info, member);
 		if (!((*guard) & IN_UNSET)) {
 			zval tmp_object;
 
@@ -951,7 +953,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 	zval_ptr_dtor(&method_name);
 
 	/* destruct the function also, then - we have allocated it in get_method */
-	efree(func);
+	efree_size(func, sizeof(zend_internal_function));
 }
 /* }}} */
 
@@ -1046,9 +1048,9 @@ static inline union _zend_function *zend_get_user_call_function(zend_class_entry
 	//??? keep compatibility for "\0" characters
 	//??? see: Zend/tests/bug46238.phpt
 	if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
-		call_user_call->function_name = STR_INIT(method_name->val, strlen(method_name->val), 0);
+		call_user_call->function_name = zend_string_init(method_name->val, strlen(method_name->val), 0);
 	} else {
-		call_user_call->function_name = STR_COPY(method_name);
+		call_user_call->function_name = zend_string_copy(method_name);
 	}
 
 	return (union _zend_function *)call_user_call;
@@ -1168,7 +1170,7 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 	zval_ptr_dtor(&method_name);
 
 	/* destruct the function also, then - we have allocated it in get_method */
-	efree(func);
+	efree_size(func, sizeof(zend_internal_function));
 }
 /* }}} */
 
@@ -1185,9 +1187,9 @@ static inline union _zend_function *zend_get_user_callstatic_function(zend_class
 	//??? keep compatibility for "\0" characters
 	//??? see: Zend/tests/bug46238.phpt
 	if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
-		callstatic_user_call->function_name = STR_INIT(method_name->val, strlen(method_name->val), 0);
+		callstatic_user_call->function_name = zend_string_init(method_name->val, strlen(method_name->val), 0);
 	} else {
-		callstatic_user_call->function_name = STR_COPY(method_name);
+		callstatic_user_call->function_name = zend_string_copy(method_name);
 	}
 
 	return (zend_function *)callstatic_user_call;
@@ -1205,7 +1207,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	if (EXPECTED(key != NULL)) {
 		lc_function_name = Z_STR_P(key);
 	} else {
-		lc_function_name = STR_ALLOC(function_name->len, 0);
+		lc_function_name = zend_string_alloc(function_name->len, 0);
 		zend_str_tolower_copy(lc_function_name->val, function_name->val, function_name->len);
 	}
 
@@ -1226,7 +1228,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			fbc = Z_FUNC_P(func);
 		} else {
 			if (UNEXPECTED(!key)) {
-				STR_FREE(lc_function_name);
+				zend_string_free(lc_function_name);
 			}
 			if (ce->__call &&
 			    Z_OBJ(EG(This)) &&
@@ -1278,7 +1280,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	}
 
 	if (UNEXPECTED(!key)) {
-		STR_FREE(lc_function_name);
+		zend_string_free(lc_function_name);
 	}
 
 	return fbc;
@@ -1485,7 +1487,7 @@ found:
 
 	result = 0;
 	if ((has_set_exists != 2) && zobj->ce->__isset) {
-		long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_long *guard = zend_get_property_guard(zobj, property_info, member);
 
 		if (!((*guard) & IN_ISSET)) {
 			zval rv;
@@ -1546,7 +1548,7 @@ zend_string* zend_std_object_get_class_name(const zend_object *zobj, int parent 
 		ce = zobj->ce;
 	}
 
-	return STR_COPY(ce->name);
+	return zend_string_copy(ce->name);
 }
 /* }}} */
 

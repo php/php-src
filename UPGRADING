@@ -13,7 +13,8 @@ PHP X.Y UPGRADE NOTES
 9. Other Changes to Extensions
 10. New Global Constants
 11. Changes to INI File Handling
-12. Other Changes
+12. Windows Support
+13. Other Changes
 
 
 ========================================
@@ -28,6 +29,10 @@ PHP X.Y UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core
+  . Support for strings with length >= 2^31 bytes in 64 bit builds
+  . Closure::apply() method added
+
 - Standard
   . intdiv() function for integer division added.
 
@@ -35,6 +40,8 @@ PHP X.Y UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- FPM
+  . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes).
 
 ========================================
 4. Deprecated Functionality
@@ -44,6 +51,10 @@ PHP X.Y UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+
+- parse_ini_file():
+- parse_ini_string():
+  Added scanner mode INI_SCANNER_TYPED to yield typed .ini values.
 
 
 ========================================
@@ -77,9 +88,16 @@ PHP X.Y UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+========================================
+12. Windows Support
+========================================
+
+- Core
+  . Support for native 64 bit integers in 64 bit builds
+  . Support for large files in 64 bit builds
 
 ========================================
-12. Other Changes
+13. Other Changes
 ========================================
 
 - Standard

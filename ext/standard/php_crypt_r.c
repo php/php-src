@@ -206,7 +206,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	}
 
 	/* Don't leave anything around in vm they could use. */
-	memset(final, 0, sizeof(final));
+	RtlSecureZeroMemory(final, sizeof(final));
 
 	/* Then something really weird... */
 	for (i = pwl; i != 0; i >>= 1) {
@@ -288,7 +288,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 
 	*p = '\0';
 
-	memset(final, 0, sizeof(final));
+	RtlSecureZeroMemory(final, sizeof(final));
 
 
 _destroyCtx1:

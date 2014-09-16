@@ -56,7 +56,7 @@ static PHP_INI_MH(OnUpdateTags)
 	
 	ctx = &BG(url_adapt_state_ex);
 	
-	tmp = estrndup(new_value, new_value_length);
+	tmp = estrndup(new_value->val, new_value->len);
 	
 	if (ctx->tags)
 		zend_hash_destroy(ctx->tags);
@@ -509,7 +509,7 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 	smart_str_appends(&BG(url_adapt_state_ex).form_app, "\" />");
 
 	if (urlencode) {
-		STR_FREE(encoded);
+		zend_string_free(encoded);
 	}
 	smart_str_free(&val);
 

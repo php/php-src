@@ -20,12 +20,26 @@
 /* pass 4
  * - optimize INIT_FCALL_BY_NAME to DO_FCALL
  */
+
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
+#define ZEND_OP2_IS_CONST_STRING(opline) \
+	(ZEND_OP2_TYPE(opline) == IS_CONST && \
+	Z_TYPE(op_array->literals[(opline)->op2.constant]) == IS_STRING)
+
 typedef struct _optimizer_call_info {
 	zend_function *func;
 	zend_op       *opline;
 } optimizer_call_info;
 
-static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC) {
+void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC)
+{
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
 	int call = 0;
@@ -42,7 +56,7 @@ static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		switch (opline->opcode) {
 			case ZEND_INIT_FCALL_BY_NAME:
 			case ZEND_INIT_NS_FCALL_BY_NAME:
-				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
+				if (ZEND_OP2_IS_CONST_STRING(opline)) {
 					zend_function *func;
 					zval *function_name = &op_array->literals[opline->op2.constant + 1];
 					if ((func = zend_hash_find_ptr(&ctx->script->function_table,
@@ -78,10 +92,10 @@ static void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					} else {
 						ZEND_ASSERT(0);
 					}
-				} else if (opline->extended_value == 0 &&
-				           call_stack[call].opline &&
+				} else if (call_stack[call].opline &&
 				           call_stack[call].opline->opcode == ZEND_INIT_FCALL_BY_NAME &&
-				           ZEND_OP2_TYPE(call_stack[call].opline) == IS_CONST) {
+				           call_stack[call].opline->extended_value == 0 &&
+						   ZEND_OP2_IS_CONST_STRING(call_stack[call].opline)) {
 
 					zend_op *fcall = call_stack[call].opline;
 

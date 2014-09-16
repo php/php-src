@@ -258,7 +258,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 	if( pe->line > 0 )
 	{
 		smart_str_appends( &ret, "on line " );
-		smart_str_append_long( &ret, (long ) pe->line );
+		smart_str_append_long( &ret, (zend_long ) pe->line );
 		any = 1;
 	}
 	if( pe->offset >= 0 ) {
@@ -268,7 +268,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 			smart_str_appends( &ret, "at " );
 
 		smart_str_appends( &ret, "offset " );
-		smart_str_append_long( &ret, (long ) pe->offset ); 
+		smart_str_append_long( &ret, (zend_long ) pe->offset ); 
 		any = 1;
 	}
 

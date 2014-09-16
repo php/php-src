@@ -305,8 +305,6 @@ $op1_free_op_var_ptr = array(
 	"UNUSED" => "",
 	"CV"     => "",
 );
-$op1_free_op_var_ptr_fast = $op1_free_op_var_ptr;
-$op1_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor_nogc(free_op1.var)";
 
 $op2_free_op_var_ptr = array(
 	"ANY"    => "if (free_op2.var) {zval_ptr_dtor_nogc(free_op2.var);}",
@@ -316,8 +314,6 @@ $op2_free_op_var_ptr = array(
 	"UNUSED" => "",
 	"CV"     => "",
 );
-$op2_free_op_var_ptr_fast = $op2_free_op_var_ptr;
-$op2_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor_nogc(free_op2.var)";
 
 $list    = array(); // list of opcode handlers and helpers in original order
 $opcodes = array(); // opcode handlers by code
@@ -372,8 +368,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 		$op1_get_obj_zval_ptr_ptr, $op2_get_obj_zval_ptr_ptr,
 		$op1_is_tmp_free, $op2_is_tmp_free, $op1_free, $op2_free,
 		$op1_free_op, $op2_free_op, $op1_free_op_if_var, $op2_free_op_if_var,
-		$op1_free_op_var_ptr, $op2_free_op_var_ptr, $prefix,
-		$op1_free_op_var_ptr_fast, $op2_free_op_var_ptr_fast;
+		$op1_free_op_var_ptr, $op2_free_op_var_ptr, $prefix;
 
 	// Specializing
 	$code = preg_replace(
@@ -404,8 +399,6 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			"/FREE_OP2_IF_VAR\(\)/",
 			"/FREE_OP1_VAR_PTR\(\)/",
 			"/FREE_OP2_VAR_PTR\(\)/",
-			"/FREE_OP1_VAR_PTR_FAST\(\)/",
-			"/FREE_OP2_VAR_PTR_FAST\(\)/",
 			"/^#ifdef\s+ZEND_VM_SPEC\s*\n/m",
 			"/^#ifndef\s+ZEND_VM_SPEC\s*\n/m",
 			"/\!defined\(ZEND_VM_SPEC\)/m",
@@ -444,8 +437,6 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			$op2_free_op_if_var[$op2],
 			$op1_free_op_var_ptr[$op1],
 			$op2_free_op_var_ptr[$op2],
-			$op1_free_op_var_ptr_fast[$op1],
-			$op2_free_op_var_ptr_fast[$op2],
 			($op1!="ANY"||$op2!="ANY")?"#if 1\n":"#if 0\n",
 			($op1!="ANY"||$op2!="ANY")?"#if 0\n":"#if 1\n",
 			($op1!="ANY"||$op2!="ANY")?"0":"1",
@@ -893,7 +884,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 					if (ZEND_VM_OLD_EXECUTOR && $spec) {
 						out($f,"static int zend_vm_old_executor = 0;\n\n");
 					}
-					out($f,"static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* op);\n\n");
+					out($f,"static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);\n\n");
 					switch ($kind) {
 						case ZEND_VM_KIND_CALL:
 							out($f,"\n");								
@@ -904,7 +895,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#undef SAVE_OPLINE\n");
 							out($f,"#define OPLINE EX(opline)\n");
 							out($f,"#define DCL_OPLINE\n");
-							out($f,"#define USE_OPLINE zend_op *opline = EX(opline);\n");
+							out($f,"#define USE_OPLINE const zend_op *opline = EX(opline);\n");
 							out($f,"#define LOAD_OPLINE()\n");
 							out($f,"#define SAVE_OPLINE()\n");
 							out($f,"#undef CHECK_EXCEPTION\n");
@@ -913,7 +904,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define CHECK_EXCEPTION() LOAD_OPLINE()\n");
 							out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
-							out($f,"#define LOAD_REGS()\n");
 							out($f,"#define ZEND_VM_CONTINUE()         return  0\n");
 							out($f,"#define ZEND_VM_RETURN()           return -1\n");
 							out($f,"#define ZEND_VM_ENTER()            return  1\n");
@@ -939,7 +929,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define CHECK_EXCEPTION() LOAD_OPLINE()\n");
 							out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
-							out($f,"#define LOAD_REGS()\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
 							out($f,"#define ZEND_VM_RETURN()   return\n");
 							out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
@@ -971,7 +960,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 								out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
 								out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
 							}
-							out($f,"#define LOAD_REGS()\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(OPLINE->handler)\n");
 							out($f,"#define ZEND_VM_RETURN()   return\n");
 							out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
@@ -1342,7 +1330,7 @@ function gen_vm($def, $skel) {
 	}
 
 	// Generate zend_vm_get_opcode_handler() function
-	out($f, "static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* op)\n");
+	out($f, "static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)\n");
 	out($f, "{\n");
 	if (!ZEND_VM_SPEC) {
 		out($f, "\treturn zend_opcode_handlers[opcode];\n");
@@ -1395,7 +1383,7 @@ function gen_vm($def, $skel) {
 		out($f,"#undef SAVE_OPLINE\n");
 		out($f,"#define OPLINE EX(opline)\n");
 		out($f,"#define DCL_OPLINE\n");
-		out($f,"#define USE_OPLINE zend_op *opline = EX(opline);\n");
+		out($f,"#define USE_OPLINE const zend_op *opline = EX(opline);\n");
 		out($f,"#define LOAD_OPLINE()\n");
 		out($f,"#define SAVE_OPLINE()\n");
 		out($f,"#undef CHECK_EXCEPTION\n");

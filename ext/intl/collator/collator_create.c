@@ -28,7 +28,7 @@
 static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char*      locale;
-	int              locale_len = 0;
+	size_t              locale_len = 0;
 	zval*            object;
 	Collator_object* co;
 

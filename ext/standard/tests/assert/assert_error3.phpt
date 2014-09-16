@@ -14,7 +14,7 @@ $sa = "0 $ 0";
 var_dump($r2 = assert($sa));
 --EXPECTF--
 
-Parse error: syntax error, unexpected '$' in %s(3) : assert code on line 1
+Parse error: syntax error, %s in %s(3) : assert code on line 1
 
 Catchable fatal error: assert(): Failure evaluating code: 
 0 $ 0 in %s on line 3

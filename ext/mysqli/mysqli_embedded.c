@@ -32,7 +32,7 @@
 PHP_FUNCTION(mysqli_embedded_server_start)
 {
 #ifdef HAVE_EMBEDDED_MYSQLI
-	long start;
+	zend_long start;
 	zval *args;
 	zval *grps;
 
