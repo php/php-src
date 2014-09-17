@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Dmitry, Laruence)
   . Fixed bug #67626 (User exceptions not properly handled in streams). 
     (Julian)
+  . Fixed bug #68021 (get_browser() browser_name_regex returns non-utf-8
+    characters). (Tjerk)
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
   . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
     configuration options). (Anatol Belski)
