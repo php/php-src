@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #67985 (Incorrect last used array index copied to new array after
     unset). (Tjerk)
+  . Fixed bug #68021 (get_browser() browser_name_regex returns non-utf-8 
+    characters). (Tjerk)
 
 ?? ??? 2014, PHP 5.4.33
 
