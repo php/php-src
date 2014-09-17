@@ -83,7 +83,9 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 #elif SIZEOF_ZEND_LONG == 4
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
-	if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
+	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+		return 0;
+	} else if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 		double	two_pow_32 = pow(2., 32.),
 				dmod;
 
@@ -94,16 +96,16 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 			dmod = ceil(dmod) + two_pow_32;
 		}
 		return (zend_long)(zend_ulong)dmod;
-	} else if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
-		return 0;
 	}
 	return (zend_long)d;
 }
 #else
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
+	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+		return 0;
 	/* >= as (double)ZEND_LONG_MAX is outside signed range */
-	if (d >= ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
+	} else if (d >= ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 		double	two_pow_64 = pow(2., 64.),
 				dmod;
 
@@ -114,8 +116,6 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 			dmod += two_pow_64;
 		}
 		return (zend_long)(zend_ulong)dmod;
-	} else if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
-		return 0;
 	}
 	return (zend_long)d;
 }
