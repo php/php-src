@@ -406,10 +406,10 @@ yy45:
 
 struct placeholder {
 	char *pos;
+	char *quoted;	/* quoted value */
 	int len;
 	int bindno;
 	int qlen;		/* quoted length of value */
-	char *quoted;	/* quoted value */
 	int freeq;
 	struct placeholder *next;
 };
