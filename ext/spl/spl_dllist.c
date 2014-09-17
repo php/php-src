@@ -101,8 +101,8 @@ struct _spl_dllist_object {
 /* define an overloaded iterator structure */
 struct _spl_dllist_it {
 	zend_user_iterator     intern;
-	int                    traverse_position;
 	spl_ptr_llist_element *traverse_pointer;
+	int                    traverse_position;
 	int                    flags;
 };
 
