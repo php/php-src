@@ -5067,7 +5067,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 			}
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
-			if (offset->value.lval >= 0 && offset->value.lval < (zend_long)Z_STRLEN_P(container)) {
+			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
 				if ((opline->extended_value & ZEND_ISSET) ||
 				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
@@ -5891,19 +5891,46 @@ ZEND_VM_HANDLER(168, ZEND_BIND_GLOBAL, CV, CONST)
 	zval *varname;
 	zval *value;
 	zval *variable_ptr;
-	zend_string *name;
+	Bucket *p;
+	uint32_t idx;
 
 	SAVE_OPLINE();
 	varname = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	name = Z_STR_P(varname);
-	value = zend_hash_find(&EG(symbol_table).ht, name);
-	if (value == NULL) {
-		value = zend_hash_add_new(&EG(symbol_table).ht, name, &EG(uninitialized_zval));
+	idx = (uint32_t)(uintptr_t)CACHED_PTR(Z_CACHE_SLOT_P(varname));
+	/* index 0 can't be cached (NULL is a mark of uninitialized cache slot) */
+	p = EG(symbol_table).ht.arData + idx; 
+	if (EXPECTED(idx > 0) &&
+	    EXPECTED(idx < EG(symbol_table).ht.nNumUsed) &&
+	    EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
+        (EXPECTED(p->key == Z_STR_P(varname)) ||
+         (EXPECTED(p->h == Z_STR_P(varname)->h) &&
+          EXPECTED(p->key != NULL) &&
+          EXPECTED(p->key->len == Z_STRLEN_P(varname)) &&
+          EXPECTED(memcmp(p->key->val, Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)))) {
+		value = &EG(symbol_table).ht.arData[idx].val;
 		/* GLOBAL variable may be an INDIRECT pointer to CV */
-	} else if (Z_TYPE_P(value) == IS_INDIRECT) {
-		value = Z_INDIRECT_P(value);
-		if (Z_TYPE_P(value) == IS_UNDEF) {
-			ZVAL_NULL(value);
+		if (UNEXPECTED(Z_TYPE_P(value) == IS_INDIRECT)) {
+			value = Z_INDIRECT_P(value);
+			if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				ZVAL_NULL(value);
+			}
+		}
+	} else {
+		value = zend_hash_find(&EG(symbol_table).ht, Z_STR_P(varname));
+		if (UNEXPECTED(value == NULL)) {
+			value = zend_hash_add_new(&EG(symbol_table).ht, Z_STR_P(varname), &EG(uninitialized_zval));
+			idx = ((char*)value - (char*)EG(symbol_table).ht.arData) / sizeof(Bucket);
+			CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)idx);
+		} else {
+			idx = ((char*)value - (char*)EG(symbol_table).ht.arData) / sizeof(Bucket);
+			CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)idx);
+			/* GLOBAL variable may be an INDIRECT pointer to CV */
+			if (UNEXPECTED(Z_TYPE_P(value) == IS_INDIRECT)) {
+				value = Z_INDIRECT_P(value);
+				if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+					ZVAL_NULL(value);
+				}
+			}
 		}
 	}
 

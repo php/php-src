@@ -4586,7 +4586,8 @@ void zend_compile_global_var(zend_ast *ast TSRMLS_DC) /* {{{ */
 	}
 
 	if (zend_try_compile_cv(&result, var_ast TSRMLS_CC) == SUCCESS) {
-		zend_emit_op(NULL, ZEND_BIND_GLOBAL, &result, &name_node TSRMLS_CC);
+		zend_op *opline = zend_emit_op(NULL, ZEND_BIND_GLOBAL, &result, &name_node TSRMLS_CC);
+		zend_alloc_cache_slot(opline->op2.constant TSRMLS_CC);
 	} else {
 		zend_emit_op(&result, ZEND_FETCH_W, &name_node, NULL TSRMLS_CC);
 
@@ -5089,6 +5090,11 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) /* {{{ */
 		znode cond_node;
 
 		if (!cond_ast) {
+			if (has_default_case) {
+				CG(zend_lineno) = case_ast->lineno;
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Switch statements may only contain one default clause");
+			}
 			has_default_case = 1;
 			continue;
 		}

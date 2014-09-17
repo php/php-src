@@ -2963,7 +2963,7 @@ PHP_FUNCTION(mb_strimwidth)
 	string.val = (unsigned char *)str;
 	string.len = str_len;
 
-	if (from < 0 || from > str_len) {
+	if (from < 0 || (size_t)from > str_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Start position is out of range");
 		RETURN_FALSE;
 	}

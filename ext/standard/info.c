@@ -219,7 +219,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					php_info_print(string_key->val);
 				}
 			} else {
-				php_info_printf("%pd", num_key);
+				php_info_printf(ZEND_ULONG_FMT, num_key);
 			}
 			php_info_print("\"]");
 			if (!sapi_module.phpinfo_as_text) {

@@ -27,13 +27,11 @@
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
 #define HASH_KEY_NON_EXISTENT 3
-#define HASH_KEY_NON_EXISTANT HASH_KEY_NON_EXISTENT /* Keeping old define (with typo) for backward compatibility */
 
 #define HASH_UPDATE 			(1<<0)
 #define HASH_ADD				(1<<1)
-#define HASH_NEXT_INSERT		(1<<2)
-#define HASH_UPDATE_INDIRECT	(1<<3)
-#define HASH_ADD_NEW			(1<<4)
+#define HASH_UPDATE_INDIRECT	(1<<2)
+#define HASH_ADD_NEW			(1<<3)
 
 #define INVALID_IDX ((uint32_t) -1)
 
@@ -97,7 +95,7 @@ ZEND_API zval *_zend_hash_str_add_new(HashTable *ht, const char *key, size_t len
 #define zend_hash_str_add_new(ht, key, len, pData) \
 		_zend_hash_str_add_new(ht, key, len, pData ZEND_FILE_LINE_CC)
 
-ZEND_API zval *_zend_hash_index_update_or_next_insert(HashTable *ht, zend_ulong h, zval *pData, uint32_t flag ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_index_add_or_update(HashTable *ht, zend_ulong h, zval *pData, uint32_t flag ZEND_FILE_LINE_DC);
 ZEND_API zval *_zend_hash_index_add(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC);
 ZEND_API zval *_zend_hash_index_add_new(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC);
 ZEND_API zval *_zend_hash_index_update(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC);

@@ -4178,8 +4178,9 @@ static int parse_opts(char * opts, opt_struct ** result)
 {
 	opt_struct * paras = NULL;
 	unsigned int i, count = 0;
+	unsigned int opts_len = (unsigned int)strlen(opts);
 
-	for (i = 0; i < strlen(opts); i++) {
+	for (i = 0; i < opts_len; i++) {
 		if ((opts[i] >= 48 && opts[i] <= 57) ||
 			(opts[i] >= 65 && opts[i] <= 90) ||
 			(opts[i] >= 97 && opts[i] <= 122)

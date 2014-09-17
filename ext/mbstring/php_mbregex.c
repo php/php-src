@@ -1081,7 +1081,7 @@ PHP_FUNCTION(mb_split)
 	err = 0;
 	regs = onig_region_new();
 	/* churn through str, generating array entries as we go */
-	while (count != 0 && (pos - (OnigUChar *)string) < string_len) {
+	while (count != 0 && (pos - (OnigUChar *)string) < (ptrdiff_t)string_len) {
 		int beg, end;
 		err = onig_search(re, (OnigUChar *)string, (OnigUChar *)(string + string_len), pos, (OnigUChar *)(string + string_len), regs, 0);
 		if (err < 0) {
@@ -1403,7 +1403,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 		return;
 	}
 
-	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && position >= Z_STRLEN(MBREX(search_str)))) {
+	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && (size_t)position >= Z_STRLEN(MBREX(search_str)))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;
 		RETURN_FALSE;

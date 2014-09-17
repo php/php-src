@@ -55,11 +55,11 @@ ZEND_API zval *_zend_ts_hash_add_or_update(TsHashTable *ht, zend_string *key, zv
 #define zend_ts_hash_add(ht, key, pData) \
 		_zend_ts_hash_add_or_update(ht, key, pData, HASH_ADD ZEND_FILE_LINE_CC)
 
-ZEND_API zval *_zend_ts_hash_index_update_or_next_insert(TsHashTable *ht, zend_ulong h, zval *pData, int flag ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_ts_hash_index_add_or_update(TsHashTable *ht, zend_ulong h, zval *pData, int flag ZEND_FILE_LINE_DC);
 #define zend_ts_hash_index_update(ht, h, pData) \
-		_zend_ts_hash_index_update_or_next_insert(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
+		_zend_ts_hash_index_add_or_update(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_ts_hash_next_index_insert(ht, pData) \
-		_zend_ts_hash_index_update_or_next_insert(ht, 0, pData, HASH_NEXT_INSERT ZEND_FILE_LINE_CC)
+		_zend_ts_hash_index_add_or_update(ht, ht->nNextFreeElement, pData, HASH_ADD ZEND_FILE_LINE_CC)
 
 ZEND_API zval* zend_ts_hash_add_empty_element(TsHashTable *ht, zend_string *key);
 

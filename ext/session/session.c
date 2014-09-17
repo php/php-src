@@ -1268,7 +1268,8 @@ static void php_session_remove_cookie(TSRMLS_D) {
 	zend_llist_element *current;
 	char *session_cookie;
 	zend_string *e_session_name;
-	int session_cookie_len, len = sizeof("Set-Cookie")-1;
+	int session_cookie_len;
+	uint len = sizeof("Set-Cookie")-1;
 
 	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
 	spprintf(&session_cookie, 0, "Set-Cookie: %s=", e_session_name->val);

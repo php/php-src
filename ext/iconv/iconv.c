@@ -824,16 +824,16 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 		}
 	}
 
-	if(len > (zend_long)total_len) {
+	if((size_t)len > total_len) {
 		len = total_len;
 	}
 
 
-	if (offset >= (zend_long)total_len) {
+	if ((size_t)offset >= total_len) {
 		return PHP_ICONV_ERR_SUCCESS;
 	}
 
-	if ((offset + len) > (zend_long)total_len ) {
+	if ((size_t)(offset + len) > total_len ) {
 		/* trying to compute the length */
 		len = total_len - offset;
 	}
