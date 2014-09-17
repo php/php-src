@@ -1457,49 +1457,59 @@ void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* 
 
 static zend_always_inline void i_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
-	uint32_t first_extra_arg;
+	uint32_t first_extra_arg, num_args;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
 
-	EX(return_value) = return_value;
-	EX(frame_kind) = frame_kind;
-	ZVAL_UNDEF(&EX(old_error_reporting));
-	EX(delayed_exception) = NULL;
-	EX(call) = NULL;
-
 	EX(opline) = op_array->opcodes;
-	if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
-		/* Skip useless ZEND_RECV opcodes */
-		EX(opline) += MIN(EX(num_args), op_array->required_num_args);
-	}
+	EX(call) = NULL;
+	EX(frame_kind) = frame_kind;
+	EX(return_value) = return_value;
 	EX(scope) = EG(scope);
+	EX(delayed_exception) = NULL;
+	ZVAL_UNDEF(&EX(old_error_reporting));
 
+	/* Handle arguments */
 	first_extra_arg = op_array->num_args;
-
 	if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0)) {
 		first_extra_arg--;
 	}
-	if (UNEXPECTED(EX(num_args) > first_extra_arg)) {
-		/* move extra args into separate array after all CV and TMP vars */
-		zval *extra_args = EX_VAR_NUM(op_array->last_var + op_array->T);
+	num_args = EX(num_args);
+	if (UNEXPECTED(num_args > first_extra_arg)) {
+		zval *end, *src, *dst;
 
-		memmove(extra_args, EX_VAR_NUM(first_extra_arg), sizeof(zval) * (EX(num_args) - first_extra_arg));
+		if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
+			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
+			EX(opline) += first_extra_arg;
+		}
+
+		/* move extra args into separate array after all CV and TMP vars */
+		end = EX_VAR_NUM(first_extra_arg - 1);
+		src = end + (num_args - first_extra_arg);
+		dst = src + (op_array->last_var + op_array->T - first_extra_arg);
+		if (EXPECTED(src != dst)) {
+			do {
+				ZVAL_COPY_VALUE(dst, src);
+				ZVAL_UNDEF(src);
+				src--;
+				dst--;
+			} while (src != end);
+		}
+	} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
+		/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
+		EX(opline) += num_args;
 	}
 
-	do {
-		/* Initialize CV variables (skip arguments) */
-		int num_args = MIN(op_array->num_args, EX(num_args));
+	/* Initialize CV variables (skip arguments) */
+	if (EXPECTED(num_args < op_array->last_var)) {
+		zval *var = EX_VAR_NUM(num_args);
+		zval *end = EX_VAR_NUM(op_array->last_var);
 
-		if (EXPECTED(num_args < op_array->last_var)) {
-			zval *var = EX_VAR_NUM(num_args);
-			zval *end = EX_VAR_NUM(op_array->last_var);
-
-			do {
-				ZVAL_UNDEF(var);
-				var++;
-			} while (var != end);
-		}
-	} while (0);
+		do {
+			ZVAL_UNDEF(var);
+			var++;
+		} while (var != end);
+	}
 
 	if (op_array->this_var != -1 && EX(object)) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), EX(object));
@@ -1507,11 +1517,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	}
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
-		if (op_array->function_name) {
-			op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
-		} else {
-			op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
-		}
+		op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
 	}
 	EX(run_time_cache) = op_array->run_time_cache;
 
@@ -1524,23 +1530,18 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
 
-	EX(return_value) = return_value;
-	EX(frame_kind) = frame_kind;
-	ZVAL_UNDEF(&EX(old_error_reporting));
-	EX(delayed_exception) = NULL;
-	EX(call) = NULL;
-
 	EX(opline) = op_array->opcodes;
+	EX(call) = NULL;
+	EX(frame_kind) = frame_kind;
+	EX(return_value) = return_value;
 	EX(scope) = EG(scope);
+	EX(delayed_exception) = NULL;
+	ZVAL_UNDEF(&EX(old_error_reporting));
 
 	zend_attach_symbol_table(execute_data);
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
-		if (op_array->function_name) {
-			op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
-		} else {
-			op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
-		}
+		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
 	}
 	EX(run_time_cache) = op_array->run_time_cache;
 
@@ -1553,44 +1554,60 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
 
-	EX(return_value) = return_value;
-	EX(frame_kind) = frame_kind;
-	ZVAL_UNDEF(&EX(old_error_reporting));
-	EX(delayed_exception) = NULL;
-	EX(call) = NULL;
-
 	EX(opline) = op_array->opcodes;
+	EX(call) = NULL;
+	EX(frame_kind) = frame_kind;
+	EX(return_value) = return_value;
 	EX(scope) = EG(scope);
+	EX(delayed_exception) = NULL;
+	ZVAL_UNDEF(&EX(old_error_reporting));
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
 		zend_attach_symbol_table(execute_data);
 	} else {
-		uint32_t first_extra_arg = op_array->num_args;
+		uint32_t first_extra_arg, num_args;
 		
+		/* Handle arguments */
+		first_extra_arg = op_array->num_args;
 		if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0)) {
 			first_extra_arg--;
 		}
-		if (UNEXPECTED(EX(num_args) > first_extra_arg)) {
-			/* move extra args into separate array after all CV and TMP vars */
-			zval *extra_args = EX_VAR_NUM(op_array->last_var + op_array->T);
+		num_args = EX(num_args);
+		if (UNEXPECTED(num_args > first_extra_arg)) {
+			zval *end, *src, *dst;
 
-			memmove(extra_args, EX_VAR_NUM(first_extra_arg), sizeof(zval) * (EX(num_args) - first_extra_arg));
+			if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
+				/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
+				EX(opline) += first_extra_arg;
+			}
+
+			/* move extra args into separate array after all CV and TMP vars */
+			end = EX_VAR_NUM(first_extra_arg - 1);
+			src = end + (num_args - first_extra_arg);
+			dst = src + (op_array->last_var + op_array->T - first_extra_arg);
+			if (EXPECTED(src != dst)) {
+				do {
+					ZVAL_COPY_VALUE(dst, src);
+					ZVAL_UNDEF(src);
+					src--;
+					dst--;
+				} while (src != end);
+			}
+		} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
+			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
+			EX(opline) += num_args;
 		}
 
-		do {
-			/* Initialize CV variables (skip arguments) */
-			int num_args = MIN(op_array->num_args, EX(num_args));
+		/* Initialize CV variables (skip arguments) */
+		if (EXPECTED(num_args < op_array->last_var)) {
+			zval *var = EX_VAR_NUM(num_args);
+			zval *end = EX_VAR_NUM(op_array->last_var);
 
-			if (EXPECTED(num_args < op_array->last_var)) {
-				zval *var = EX_VAR_NUM(num_args);
-				zval *end = EX_VAR_NUM(op_array->last_var);
-
-				do {
-					ZVAL_UNDEF(var);
-					var++;
-				} while (var != end);
-			}
-		} while (0);
+			do {
+				ZVAL_UNDEF(var);
+				var++;
+			} while (var != end);
+		}
 
 		if (op_array->this_var != -1 && EX(object)) {
 			ZVAL_OBJ(EX_VAR(op_array->this_var), EX(object));
