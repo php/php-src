@@ -430,7 +430,7 @@ PHP_HASH_API void PHP_WHIRLPOOLFinal(unsigned char digest[64], PHP_WHIRLPOOL_CTX
         digest += 8;
     }
     
-    memset(context, 0, sizeof(*context));
+    ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
 const php_hash_ops php_hash_whirlpool_ops = {
