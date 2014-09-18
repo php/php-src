@@ -549,7 +549,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 	compiler_globals->last_static_member = 0;
 
 #ifdef ZTS
-	free(compiler_globals->empty_string);
+	zend_string_release(compiler_globals->empty_string);
 #endif
 }
 /* }}} */
