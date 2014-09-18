@@ -110,6 +110,17 @@ typedef int32_t zend_off_t;
 # define ZEND_ABS abs
 #endif
 
+#if SIZEOF_ZEND_LONG == 4
+# define MAX_LENGTH_OF_LONG 11
+# define LONG_MIN_DIGITS "2147483648"
+#elif SIZEOF_ZEND_LONG == 8
+# define MAX_LENGTH_OF_LONG 20
+# define LONG_MIN_DIGITS "9223372036854775808"
+#else
+# error "Unknown SIZEOF_ZEND_LONG"
+#endif
+
+static const char long_min_digits[] = LONG_MIN_DIGITS;
 
 #endif /* ZEND_LONG_H */
 
