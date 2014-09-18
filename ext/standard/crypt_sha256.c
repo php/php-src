@@ -571,6 +571,20 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
      inside the SHA256 implementation as well.  */
 	sha256_init_ctx(&ctx);
 	sha256_finish_ctx(&ctx, alt_result);
+#ifdef PHP_WIN32
+	RtlSecureZeroMemory(temp_result, sizeof(temp_result));
+	RtlSecureZeroMemory(p_bytes, key_len);
+	RtlSecureZeroMemory(s_bytes, salt_len);
+	RtlSecureZeroMemory(&ctx, sizeof(ctx));
+	RtlSecureZeroMemory(&alt_ctx, sizeof(alt_ctx));
+
+	if (copied_key != NULL) {
+		RtlSecureZeroMemory(copied_key, key_len);
+	}
+	if (copied_salt != NULL) {
+		RtlSecureZeroMemory(copied_salt, salt_len);
+	}
+#else
 	memset(temp_result, '\0', sizeof(temp_result));
 	memset(p_bytes, '\0', key_len);
 	memset(s_bytes, '\0', salt_len);
@@ -579,11 +593,11 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 
 	if (copied_key != NULL) {
 		memset(copied_key, '\0', key_len);
-
 	}
 	if (copied_salt != NULL) {
 		memset(copied_salt, '\0', salt_len);
 	}
+#endif
 
 	return buffer;
 }
