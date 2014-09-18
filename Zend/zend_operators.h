@@ -150,6 +150,12 @@ static inline zend_uchar is_numeric_string_ex(const char *str, size_t length, ze
 		str++;
 		length--;
 	}
+	ptr = str + length - 1;
+	while (*ptr == ' ' || *ptr == '\t' || *ptr == '\n' || *ptr == '\r' || *ptr == '\v' || *ptr == '\f') {
+		ptr--;
+		length--;
+	}
+
 	ptr = str;
 
 	if (*ptr == '-' || *ptr == '+') {
