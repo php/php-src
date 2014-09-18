@@ -229,10 +229,11 @@ END_EXTERN_C()
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 
-static inline int _zend_handle_numeric_str(const char *key, size_t length, zend_ulong *idx)
+ZEND_API int _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx);
+
+static zend_always_inline int _zend_handle_numeric_str(const char *key, size_t length, zend_ulong *idx)
 {
 	register const char *tmp = key;
-	const char *end;
 
 	if (*tmp > '9') {
 		return 0;
@@ -245,45 +246,14 @@ static inline int _zend_handle_numeric_str(const char *key, size_t length, zend_
 			return 0;
 		}
 	}
-
-	/* possibly a numeric index */
-	end = key + length;
-
-	if ((*end != '\0') /* not a null terminated string */
-	 || (*tmp == '0' && length > 1) /* numbers with leading zeros */
-	 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */
-	 || (SIZEOF_ZEND_LONG == 4 &&
-	     end - tmp == MAX_LENGTH_OF_LONG - 1 &&
-	     *tmp > '2')) { /* overflow */
-		return 0;
-	}
-	*idx = (*tmp - '0');
-	while (1) {
-		++tmp;
-		if (tmp == end) {
-			if (*key == '-') {
-				if (*idx-1 > ZEND_LONG_MAX) { /* overflow */
-					return 0;
-				}
-				*idx = 0 - *idx;
-			} else if (*idx > ZEND_LONG_MAX) { /* overflow */
-				return 0;
-			}
-			return 1;
-		}
-		if (*tmp <= '9' && *tmp >= '0') {
-			*idx = (*idx * 10) + (*tmp - '0');
-		} else {
-			return 0;
-		}
-	}
+	return _zend_handle_numeric_str_ex(key, length, idx);
 }
 
 #define ZEND_HANDLE_NUMERIC_STR(key, length, idx) \
 	_zend_handle_numeric_str(key, length, &idx)
 
 #define ZEND_HANDLE_NUMERIC(key, idx) \
-	_zend_handle_numeric_str((key)->val, (key)->len, &idx)
+	ZEND_HANDLE_NUMERIC_STR((key)->val, (key)->len, idx)
 
 
 static zend_always_inline zval *zend_hash_find_ind(const HashTable *ht, zend_string *key)
