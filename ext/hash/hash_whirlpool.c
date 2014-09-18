@@ -263,8 +263,8 @@ static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context)
     context->state[5] ^= state[5] ^ block[5];
     context->state[6] ^= state[6] ^ block[6];
     context->state[7] ^= state[7] ^ block[7];
-    
-    memset(state, 0, sizeof(state));
+
+	ZEND_SECURE_ZERO(state, sizeof(state));
 }
 
 PHP_HASH_API void PHP_WHIRLPOOLInit(PHP_WHIRLPOOL_CTX *context)

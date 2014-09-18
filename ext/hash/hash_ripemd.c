@@ -244,7 +244,7 @@ static void RIPEMD128Transform(php_hash_uint32 state[4], const unsigned char blo
 	state[0] = tmp;
 
 	tmp = 0;
-	memset(x, 0, sizeof(x));
+	ZEND_SECURE_ZERO(x, sizeof(x));
 }
 /* }}} */
 
@@ -342,7 +342,7 @@ static void RIPEMD256Transform(php_hash_uint32 state[8], const unsigned char blo
 	state[7] += dd;
 
 	tmp = 0;
-	memset(x, 0, sizeof(x));
+	ZEND_SECURE_ZERO(x, sizeof(x));
 }
 /* }}} */
 
@@ -441,7 +441,7 @@ static void RIPEMD160Transform(php_hash_uint32 state[5], const unsigned char blo
 	state[0] = tmp;
 
 	tmp = 0;
-	memset(x, 0, sizeof(x));
+	ZEND_SECURE_ZERO(x, sizeof(x));
 }
 /* }}} */
 
@@ -549,7 +549,7 @@ static void RIPEMD320Transform(php_hash_uint32 state[10], const unsigned char bl
 	state[9] += ee;
 
 	tmp = 0;
-	memset(x, 0, sizeof(x));
+	ZEND_SECURE_ZERO(x, sizeof(x));
 }
 /* }}} */
 

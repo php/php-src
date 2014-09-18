@@ -382,6 +382,12 @@ char *alloca();
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
 
+#ifdef ZEND_WIN32
+#define ZEND_SECURE_ZERO(var, size) RtlSecureZeroMemory((var), (size))
+#else
+#define ZEND_SECURE_ZERO(var, size) memset((var), 0, (size))
+#endif
+
 #endif /* ZEND_PORTABILITY_H */
 
 /*
