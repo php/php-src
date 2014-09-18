@@ -59,10 +59,6 @@ PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) /
 	unsigned char *p;
 	zend_string *result;
 
-	if (length < 0) {
-		return NULL;
-	}
-
 	result = zend_string_alloc(((length + 2) / 3) * 4 * sizeof(char), 0);
 	p = (unsigned char *)result->val;
 
