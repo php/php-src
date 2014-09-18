@@ -166,19 +166,19 @@ char *alloca();
  * which cause a large amount of false positives. You can enable format checks by adding
  * -DZEND_CHECK_FORMAT_STRINGS to CFLAGS. */
 
-#if ZEND_GCC_VERSION >= 2007 && defined(ZEND_CHECK_FORMAT_STRINGS)
+#if defined(ZEND_CHECK_FORMAT_STRINGS) && (ZEND_GCC_VERSION >= 2007 || __has_attribute(format))
 # define ZEND_ATTRIBUTE_FORMAT(type, idx, first) __attribute__ ((format(type, idx, first)))
 #else
 # define ZEND_ATTRIBUTE_FORMAT(type, idx, first)
 #endif
 
-#if ZEND_GCC_VERSION >= 3001 && !defined(__INTEL_COMPILER) && defined(ZEND_CHECK_FORMAT_STRINGS)
+#if defined(ZEND_CHECK_FORMAT_STRINGS) && ((ZEND_GCC_VERSION >= 3001 && !defined(__INTEL_COMPILER)) || __has_attribute(format))
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first) __attribute__ ((format(type, idx, first)))
 #else
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first)
 #endif
 
-#if ZEND_GCC_VERSION >= 3001
+#if ZEND_GCC_VERSION >= 3001 || __has_attribute(deprecated)
 # define ZEND_ATTRIBUTE_DEPRECATED  __attribute__((deprecated))
 #elif defined(ZEND_WIN32) && defined(_MSC_VER) && _MSC_VER >= 1300
 # define ZEND_ATTRIBUTE_DEPRECATED  __declspec(deprecated)
@@ -208,7 +208,7 @@ char *alloca();
 #endif
 #define restrict __restrict__
 
-#if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
 # define HAVE_NORETURN
 # define ZEND_NORETURN __attribute__((noreturn))
 #elif defined(ZEND_WIN32)
@@ -234,8 +234,16 @@ char *alloca();
 #  define zend_always_inline __forceinline
 #  define zend_never_inline
 # else
-#  define zend_always_inline inline
-#  define zend_never_inline
+#  if __has_attribute(always_inline)
+#   define zend_always_inline inline __attribute__((always_inline))
+#  else
+#   define zend_always_inline inline
+#  endif
+#  if __has_attribute(noinline)
+#   define zend_never_inline __attribute__((noinline))
+#  else
+#   define zend_never_inline
+#  endif
 # endif
 #endif /* ZEND_DEBUG */
 
