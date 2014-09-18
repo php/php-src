@@ -253,7 +253,7 @@ static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_str
  *                  -- Ralf S. Engelschall <rse@engelschall.com>
  */
 
-static inline zend_ulong zend_inline_hash_func(const char *str, size_t len)
+static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size_t len)
 {
 	register zend_ulong hash = Z_UL(5381);
 
