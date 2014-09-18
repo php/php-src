@@ -120,7 +120,6 @@ static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
 static HashTable *global_persistent_list = NULL;
-static zend_string *default_empty_string = NULL;
 #endif
 
 ZEND_API zend_utility_values zend_uv;
