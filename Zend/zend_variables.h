@@ -39,7 +39,7 @@ static zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 static zend_always_inline void _zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LINE_DC)
 {
 	if (Z_REFCOUNTED_P(zval_ptr) && !Z_DELREF_P(zval_ptr)) {
-		_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_CC);
+		_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
 	}
 }
 

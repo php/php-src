@@ -85,6 +85,7 @@ static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t
 	size_t size;
 	void *ret;
 
+	(void)d;
 	ZEND_SIGNED_MULTIPLY_LONG(unit_size, count, size, d, overflow);
 	ZEND_ASSERT(overflow == 0);
 	ret = zend_arena_alloc(arena_ptr, size);
