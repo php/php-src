@@ -57,6 +57,7 @@
 #include "zend_alloc.h"
 #include "zend_globals.h"
 #include "zend_operators.h"
+#include "zend_multiply.h"
 
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
@@ -2121,124 +2122,17 @@ ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE
 	return zend_mm_size(AG(mm_heap), ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
 
-#if defined(__GNUC__) && (defined(__native_client__) || defined(i386))
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
+static zend_always_inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
-	size_t res = nmemb;
-	zend_ulong overflow = 0;
-
-	__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
-	     : "=&a"(res), "=&d" (overflow)
-	     : "%0"(res),
-	       "rm"(size),
-	       "rm"(offset));
+	int overflow;
+	size_t ret = zend_safe_address(nmemb, size, offset, &overflow);
 
 	if (UNEXPECTED(overflow)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
 		return 0;
 	}
-	return res;
+	return ret;
 }
-
-#elif defined(__GNUC__) && defined(__x86_64__)
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-        size_t res = nmemb;
-        zend_ulong overflow = 0;
-
-#ifdef __ILP32__ /* x32 */
-# define LP_SUFF "l"
-#else /* amd64 */
-# define LP_SUFF "q"
-#endif
-
-        __asm__ ("mul" LP_SUFF  " %3\n\t"
-                 "add %4,%0\n\t"
-                 "adc $0,%1"
-             : "=&a"(res), "=&d" (overflow)
-             : "%0"(res),
-               "rm"(size),
-               "rm"(offset));
-
-#undef LP_SUFF
-        if (UNEXPECTED(overflow)) {
-                zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-                return 0;
-        }
-        return res;
-}
-
-#elif defined(__GNUC__) && defined(__arm__)
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-        size_t res;
-        zend_ulong overflow;
-
-        __asm__ ("umlal %0,%1,%2,%3"
-             : "=r"(res), "=r"(overflow)
-             : "r"(nmemb),
-               "r"(size),
-               "0"(offset),
-               "1"(0));
-
-        if (UNEXPECTED(overflow)) {
-                zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-                return 0;
-        }
-        return res;
-}
-
-#elif defined(__GNUC__) && defined(__aarch64__)
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-        size_t res;
-        zend_ulong overflow;
-
-        __asm__ ("mul %0,%2,%3\n\tumulh %1,%2,%3\n\tadds %0,%0,%4\n\tadc %1,%1,xzr"
-             : "=&r"(res), "=&r"(overflow)
-             : "r"(nmemb),
-               "r"(size),
-               "r"(offset));
-
-        if (UNEXPECTED(overflow)) {
-                zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-                return 0;
-        }
-        return res;
-}
-
-#elif SIZEOF_SIZE_T == 4 && defined(HAVE_ZEND_LONG64)
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-	zend_ulong64 res = (zend_ulong64)nmemb * (zend_ulong64)size + (zend_ulong64)offset;
-
-	if (UNEXPECTED(res > (zend_ulong64)0xFFFFFFFFL)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-		return 0;
-	}
-	return (size_t) res;
-}
-
-#else
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-	size_t res = nmemb * size + offset;
-	double _d  = (double)nmemb * (double)size + (double)offset;
-	double _delta = (double)res - _d;
-
-	if (UNEXPECTED((_d + _delta ) != _d)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-		return 0;
-	}
-	return res;
-}
-#endif
 
 
 ZEND_API void* ZEND_FASTCALL _safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
