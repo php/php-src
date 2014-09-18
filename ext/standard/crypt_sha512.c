@@ -555,7 +555,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 
 	if (rounds_custom) {
 #ifdef PHP_WIN32
-	  int n = _snprintf(cp, MAX(0, buflen), "%s%u$", sha512_rounds_prefix, rounds);
+	  int n = _snprintf(cp, MAX(0, buflen), "%s%I64u$", sha512_rounds_prefix, rounds);
 #else
 	  int n = snprintf(cp, MAX(0, buflen), "%s%zu$", sha512_rounds_prefix, rounds);
 #endif
