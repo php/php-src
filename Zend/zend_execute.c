@@ -38,6 +38,7 @@
 #include "zend_generators.h"
 #include "zend_vm.h"
 #include "zend_dtrace.h"
+#include "zend_inheritance.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"

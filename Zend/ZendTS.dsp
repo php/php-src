@@ -205,6 +205,10 @@ SOURCE=.\zend_indent.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_inheritance.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_ini.c
 # End Source File
 # Begin Source File

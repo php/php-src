@@ -27,6 +27,7 @@
 #include "zend_constants.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_inheritance.h"
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
