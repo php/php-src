@@ -211,7 +211,11 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				return NULL;
 			} else {
 				result = zend_string_init(output, strlen(output), 0);
+#ifdef PHP_WIN32
+				RtlSecureZeroMemory(output, PHP_MAX_SALT_LEN + 1);
+#else
 				memset(output, 0, PHP_MAX_SALT_LEN + 1);
+#endif
 				return result;
 			}
 		} else {
