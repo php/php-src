@@ -717,7 +717,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		/* don't bother doing an extended regex with just a number */
 	}
 
-	if (!Z_STRVAL_P(arg_pattern) || Z_STRLEN_P(arg_pattern) == 0) {
+	if (!Z_STRVAL_P(arg_pattern)[0] || Z_STRLEN_P(arg_pattern) == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "empty pattern");
 		RETVAL_FALSE;
 		goto out;
