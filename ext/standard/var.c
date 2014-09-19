@@ -865,7 +865,7 @@ again:
 
 						smart_str_append_long(buf, (int)serialized_length);
 						smart_str_appendl(buf, ":{", 2);
-						smart_str_appendl(buf, serialized_data, serialized_length);
+						smart_str_appendl(buf, (char *) serialized_data, serialized_length);
 						smart_str_appendc(buf, '}');
 					} else {
 						smart_str_appendl(buf, "N;", 2);

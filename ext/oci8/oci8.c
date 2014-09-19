@@ -1971,7 +1971,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		 */
 		if (connection && connection->is_persistent && connection->is_stub) {
 			if (php_oci_create_session(connection, NULL, dbname, dbname_len, username, username_len, password, password_len, new_password, new_password_len, session_mode TSRMLS_CC)) {
-				smart_str_free_ex(&hashed_details, 0);
+				smart_str_free(&hashed_details);
 				zend_hash_del(&EG(persistent_list), connection->hash_key);
 
 				return NULL;
@@ -2022,14 +2022,14 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 									++GC_REFCOUNT(connection->id);
 								}
 							}
-							smart_str_free_ex(&hashed_details, 0);
+							smart_str_free(&hashed_details);
 							return connection;
 						}
 					}
 					/* server died */
 				} else {
 					/* we do not ping non-persistent connections */
-					smart_str_free_ex(&hashed_details, 0);
+					smart_str_free(&hashed_details);
 					++GC_REFCOUNT(connection->id);
 					return connection;
 				}
@@ -2130,7 +2130,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		if ((session_pool = php_oci_get_spool(username, username_len, password, password_len, dbname, dbname_len, charsetid ? charsetid:charsetid_nls_lang TSRMLS_CC))==NULL)
 		{
 			php_oci_connection_close(connection TSRMLS_CC);
-			smart_str_free_ex(&hashed_details, 0);
+			smart_str_free(&hashed_details);
 			return NULL;
 		}
 	}
@@ -2141,7 +2141,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	/* Mark password as unchanged by PHP during the duration of the database session */
 	connection->passwd_changed = 0;
 
-	smart_str_free_ex(&hashed_details, 0);
+	smart_str_free(&hashed_details);
 
 	if (charsetid) {
 		connection->charset = charsetid;
@@ -3031,7 +3031,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	}
 
 exit_get_spool:
-	smart_str_free_ex(&spool_hashed_details, 0);
+	smart_str_free(&spool_hashed_details);
 	if (iserror && session_pool) {
 		php_oci_spool_close(session_pool TSRMLS_CC);
 		session_pool = NULL;

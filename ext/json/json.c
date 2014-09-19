@@ -384,7 +384,7 @@ static void json_escape_string(smart_str *buf, char *s, size_t len, int options 
 {
 	int status;
 	unsigned int us, next_us = 0;
-	size_t pos, checkpoint, newlen;
+	size_t pos, checkpoint;
 
 	if (len == 0) {
 		smart_str_appendl(buf, "\"\"", 2);

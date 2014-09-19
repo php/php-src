@@ -1908,7 +1908,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 
 		chunk = php_cli_server_chunk_heap_new(buffer.s, buffer.s->val, buffer.s->len);
 		if (!chunk) {
-			smart_str_free_ex(&buffer, 1);
+			smart_str_free(&buffer);
 			goto fail;
 		}
 		php_cli_server_buffer_prepend(&client->content_sender.buffer, chunk);
@@ -1998,7 +1998,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		chunk = php_cli_server_chunk_heap_new(buffer.s, buffer.s->val, buffer.s->len);
 		if (!chunk) {
-			smart_str_free_ex(&buffer, 1);
+			smart_str_free(&buffer);
 			php_cli_server_log_response(client, 500, NULL TSRMLS_CC);
 			return FAILURE;
 		}

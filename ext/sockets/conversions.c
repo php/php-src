@@ -175,7 +175,7 @@ static void do_from_to_zval_err(struct err_s *err,
 	err->should_free = 1;
 
 	efree(user_msg);
-	smart_str_free_ex(&path, 0);
+	smart_str_free(&path);
 }
 ZEND_ATTRIBUTE_FORMAT(printf, 2 ,3)
 static void do_from_zval_err(ser_context *ctx, const char *fmt, ...)

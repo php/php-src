@@ -468,7 +468,7 @@ static void thttpd_request_ctor(TSRMLS_D)
 
 static void thttpd_request_dtor(TSRMLS_D)
 {
-	smart_str_free_ex(&TG(sbuf), 1);
+	smart_str_free(&TG(sbuf));
 	if (SG(request_info).query_string)
 		free(SG(request_info).query_string);
 	free(SG(request_info).request_uri);
