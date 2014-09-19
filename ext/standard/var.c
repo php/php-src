@@ -657,10 +657,10 @@ static inline void php_var_serialize_long(smart_str *buf, zend_long val) /* {{{ 
 }
 /* }}} */
 
-static inline void php_var_serialize_string(smart_str *buf, char *str, int len) /* {{{ */
+static inline void php_var_serialize_string(smart_str *buf, char *str, size_t len) /* {{{ */
 {
 	smart_str_appendl(buf, "s:", 2);
-	smart_str_append_long(buf, len);
+	smart_str_append_unsigned(buf, len);
 	smart_str_appendl(buf, ":\"", 2);
 	smart_str_appendl(buf, str, len);
 	smart_str_appendl(buf, "\";", 2);
@@ -673,7 +673,7 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 
 	PHP_SET_CLASS_ATTRIBUTES(struc);
 	smart_str_appendl(buf, "O:", 2);
-	smart_str_append_long(buf, (int)class_name->len);
+	smart_str_append_unsigned(buf, class_name->len);
 	smart_str_appendl(buf, ":\"", 2);
 	smart_str_appendl(buf, class_name->val, class_name->len);
 	smart_str_appendl(buf, "\":", 2);
@@ -684,7 +684,7 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 
 static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, HashTable *var_hash TSRMLS_DC) /* {{{ */
 {
-	int count;
+	uint32_t count;
 	zend_bool incomplete_class;
 
 	incomplete_class = php_var_serialize_class_name(buf, struc TSRMLS_CC);
@@ -694,7 +694,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 	if (incomplete_class) {
 		--count;
 	}
-	smart_str_append_long(buf, count);
+	smart_str_append_unsigned(buf, count);
 	smart_str_appendl(buf, ":{", 2);
 
 	if (count > 0) {
@@ -782,7 +782,6 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 
 static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var_hash TSRMLS_DC) /* {{{ */
 {
-	int i;
 	zval var_already;
 	HashTable *myht;
 
@@ -858,12 +857,12 @@ again:
 
 					if (ce->serialize(struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
 						smart_str_appendl(buf, "C:", 2);
-						smart_str_append_long(buf, (int)Z_OBJCE_P(struc)->name->len);
+						smart_str_append_unsigned(buf, Z_OBJCE_P(struc)->name->len);
 						smart_str_appendl(buf, ":\"", 2);
 						smart_str_appendl(buf, Z_OBJCE_P(struc)->name->val, Z_OBJCE_P(struc)->name->len);
 						smart_str_appendl(buf, "\":", 2);
 
-						smart_str_append_long(buf, (int)serialized_length);
+						smart_str_append_unsigned(buf, serialized_length);
 						smart_str_appendl(buf, ":{", 2);
 						smart_str_appendl(buf, (char *) serialized_data, serialized_length);
 						smart_str_appendc(buf, '}');
@@ -908,6 +907,7 @@ again:
 				/* fall-through */
 			}
 		case IS_ARRAY: {
+			uint32_t i;
 			zend_bool incomplete_class = 0;
 			if (Z_TYPE_P(struc) == IS_ARRAY) {
 				smart_str_appendl(buf, "a:", 2);
@@ -922,7 +922,7 @@ again:
 			if (i > 0 && incomplete_class) {
 				--i;
 			}
-			smart_str_append_long(buf, i);
+			smart_str_append_unsigned(buf, i);
 			smart_str_appendl(buf, ":{", 2);
 			if (i > 0) {
 				zend_string *key;
