@@ -3480,10 +3480,10 @@ PHP_FUNCTION(pg_lo_write)
   	zval *pgsql_id;
   	char *str;
   	zend_long z_len;
-	size_t str_len, nbytes;
+	size_t str_len;
 	size_t len;
 	pgLofp *pgsql;
-	int argc = ZEND_NUM_ARGS();
+	int argc = ZEND_NUM_ARGS(), nbytes;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "rs|l", &pgsql_id, &str, &str_len, &z_len) == FAILURE) {
 		return;
@@ -4001,9 +4001,9 @@ PHP_FUNCTION(pg_copy_to)
 {
 	zval *pgsql_link;
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL;
-	size_t table_name_len, pg_delim_len, pg_null_as_len, free_pg_null = 0;
+	size_t table_name_len, pg_delim_len, pg_null_as_len;
 	char *query;
-	int id = -1;
+	int free_pg_null = 0, id = -1;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
 	ExecStatusType status;
@@ -4328,7 +4328,7 @@ PHP_FUNCTION(pg_escape_bytea)
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
 	if (pgsql_link != NULL || id != -1) {
 		ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
-		to = (char *)PQescapeByteaConn(pgsql, (unsigned char *)from, (size_t)from_len, &to_len);
+		to = (char *)PQescapeByteaConn(pgsql, (unsigned char *)from, from_len, &to_len);
 	} else
 #endif
 		to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
@@ -4510,9 +4510,9 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	}
 
 	if (escape_literal) {
-		tmp = PGSQLescapeLiteral(pgsql, from, (size_t)from_len);
+		tmp = PGSQLescapeLiteral(pgsql, from, from_len);
 	} else {
-		tmp = PGSQLescapeIdentifier(pgsql, from, (size_t)from_len);
+		tmp = PGSQLescapeIdentifier(pgsql, from, from_len);
 	}
 	if (!tmp) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Failed to escape");

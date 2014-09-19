@@ -164,7 +164,7 @@ PHP_FUNCTION(module_name_drawtext)
     char *text = NULL;
     int argc = ZEND_NUM_ARGS();
     int image_id = -1;
-    int text_len;
+    size_t text_len;
     int font_id = -1;
     long x;
     long y;

@@ -288,7 +288,7 @@ PHP_FUNCTION(com_get_active_object)
 {
 	CLSID clsid;
 	char *module_name;
-	int module_name_len;
+	size_t module_name_len;
 	zend_long code_page = COMG(code_page);
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;

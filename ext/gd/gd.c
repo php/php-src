@@ -3915,7 +3915,8 @@ static void php_free_ps_enc(zend_resource *rsrc TSRMLS_DC)
 PHP_FUNCTION(imagepsloadfont)
 {
 	char *file;
-	int file_len, f_ind, *font;
+	size_t file_len;
+	int f_ind, *font;
 #ifdef PHP_WIN32
 	zend_stat_t st;
 #endif
@@ -4122,7 +4123,7 @@ PHP_FUNCTION(imagepstext)
 	T1_OUTLINE *char_path, *str_path;
 	T1_TMATRIX *transform = NULL;
 	char *str;
-	int str_len;
+	size_t str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrlllll|lldl", &img, &str, &str_len, &fnt, &size, &_fg, &_bg, &x, &y, &space, &width, &angle, &aa_steps) == FAILURE) {
 		return;
@@ -4248,11 +4249,12 @@ PHP_FUNCTION(imagepsbbox)
 	zval *fnt;
 	zend_long sz = 0, sp = 0, wd = 0;
 	char *str;
+	size_t str_len;
 	int i, space = 0, add_width = 0, char_width, amount_kern;
 	int cur_x, cur_y, dx, dy;
 	int x1, y1, x2, y2, x3, y3, x4, y4;
 	int *f_ind;
-	int str_len, per_char = 0;
+	int per_char = 0;
 	int argc = ZEND_NUM_ARGS();
 	double angle = 0, sin_a = 0, cos_a = 0;
 	BBox char_bbox, str_bbox = {0, 0, 0, 0};

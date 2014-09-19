@@ -347,7 +347,8 @@ PHP_FUNCTION(birdstep_exec)
 {
 	char *query;
 	zend_long ind;
-	size_t query_len, indx;
+	size_t query_len;
+	int indx;
 	VConn *conn;
 	Vresult *res;
 	RETCODE stat;

@@ -1097,7 +1097,7 @@ ZEND_GET_MODULE(zip)
 Create new zip using source uri for output */
 static PHP_NAMED_FUNCTION(zif_zip_open)
 {
-	char resolved_path[MAXPATHLEN + 1];
+	char resolved_path[MAXPATHLEN];
 	zip_rsrc *rsrc_int;
 	int err = 0;
 	zend_string *filename;

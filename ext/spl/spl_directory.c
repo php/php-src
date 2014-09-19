@@ -675,7 +675,8 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 {
 	spl_filesystem_object *intern;
 	char *path;
-	size_t parsed, len;
+	size_t len;
+	int parsed;
 	zend_long flags;
 	zend_error_handling error_handling;
 

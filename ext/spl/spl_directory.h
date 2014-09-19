@@ -66,7 +66,7 @@ struct _spl_filesystem_object {
 	int                _path_len;
 	char               *orig_path;
 	char               *file_name;
-	int                file_name_len;
+	size_t             file_name_len;
 	SPL_FS_OBJ_TYPE    type;
 	zend_long               flags;
 	zend_class_entry   *file_class;
@@ -88,7 +88,7 @@ struct _spl_filesystem_object {
 			php_stream_context *context;
 			zval               *zcontext;
 			char               *open_mode;
-			int                open_mode_len;
+			size_t             open_mode_len;
 			zval               current_zval;
 			char               *current_line;
 			size_t             current_line_len;

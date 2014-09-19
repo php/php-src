@@ -948,7 +948,8 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 PHP_FUNCTION(posix_access)
 {
 	zend_long mode = 0;
-	size_t filename_len, ret;
+	size_t filename_len;
+	int ret;
 	char *filename, *path;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l", &filename, &filename_len, &mode) == FAILURE) {

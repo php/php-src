@@ -695,7 +695,8 @@ static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_rea
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name;
-	size_t name_len, retval;
+	size_t name_len;
+	int retval;
 
 	zval *self = getThis();
 	
@@ -1548,7 +1549,8 @@ static PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name;
-	size_t name_len, retval;
+	size_t name_len;
+	int retval;
 	zend_bool isparm;
 	zval *self = getThis();
 

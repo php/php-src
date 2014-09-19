@@ -521,7 +521,8 @@ PHP_FUNCTION(ldap_sasl_bind)
 	char *sasl_authz_id = NULL;
 	char *sasl_authc_id = NULL;
 	char *props = NULL;
-	size_t rc, dn_len, passwd_len, mech_len, realm_len, authc_id_len, authz_id_len, props_len;
+	int rc;
+	size_t dn_len, passwd_len, mech_len, realm_len, authc_id_len, authz_id_len, props_len;
 	php_ldap_bictx *ctx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|sssssss", &link, &binddn, &dn_len, &passwd, &passwd_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authc_id, &authc_id_len, &sasl_authz_id, &authz_id_len, &props, &props_len) != SUCCESS) {
@@ -2570,8 +2571,9 @@ PHP_FUNCTION(ldap_escape)
 static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way) 
 {
 	char *value;
-	int result, ldap_len;
-		
+	size_t value_len;
+	int result;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &value, &value_len) != SUCCESS) {
 		return;
 	}
