@@ -394,7 +394,6 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 		if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
 			if ((len == 4) /* sizeof (none|auto|pass) */ &&
 					(!memcmp("pass", charset_hint, 4) ||
-					 !memcmp("auto", charset_hint, 4) ||
 					 !memcmp("auto", charset_hint, 4))) {
 				charset_hint = NULL;
 				len = 0;
