@@ -1442,16 +1442,20 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC) /* {
 		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
 			path = cwd;
 		}
-	} else if (!IS_ABSOLUTE_PATH(path, strlen(path))) {
-		CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	} else {
-		new_state.cwd = (char*)emalloc(1);
-		if (new_state.cwd == NULL) {
-			retval = NULL;
-			goto end;
+		size_t path_len = strlen(path);
+
+		if (!IS_ABSOLUTE_PATH(path, path_len)) {
+			CWD_STATE_COPY(&new_state, &CWDG(cwd));
+		} else {
+			new_state.cwd = (char*)emalloc(1);
+			if (new_state.cwd == NULL) {
+				retval = NULL;
+				goto end;
+			}
+			new_state.cwd[0] = '\0';
+			new_state.cwd_length = 0;
 		}
-		new_state.cwd[0] = '\0';
-		new_state.cwd_length = 0;
 	}
 
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH TSRMLS_CC)==0) {
@@ -1967,17 +1971,21 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
 			path = cwd;
 		}
-	} else if (!IS_ABSOLUTE_PATH(path, strlen(path)) &&
-					VCWD_GETCWD(cwd, MAXPATHLEN)) {
-		new_state.cwd = estrdup(cwd);
-		new_state.cwd_length = strlen(cwd);
 	} else {
-		new_state.cwd = (char*)emalloc(1);
-		if (new_state.cwd == NULL) {
-			return NULL;
+		size_t path_len = strlen(path);
+
+		if (!IS_ABSOLUTE_PATH(path, strlen(path)) &&
+			VCWD_GETCWD(cwd, MAXPATHLEN)) {
+			new_state.cwd = estrdup(cwd);
+			new_state.cwd_length = strlen(cwd);
+		} else {
+			new_state.cwd = (char*)emalloc(1);
+			if (new_state.cwd == NULL) {
+				return NULL;
+			}
+			new_state.cwd[0] = '\0';
+			new_state.cwd_length = 0;
 		}
-		new_state.cwd[0] = '\0';
-		new_state.cwd_length = 0;
 	}
 
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH TSRMLS_CC)) {
