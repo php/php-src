@@ -477,6 +477,19 @@ static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 {
 #if defined(__GNUC__)
 	return __builtin_ctzl(~bitset);
+#elif defined(_WIN32)
+	unsigned long index;
+
+#if defined(_WIN64)
+	if (!BitScanForward64(&index, ~bitset)) {
+#else
+	if (!BitScanForward(&index, ~bitset)) {
+#endif
+		/* undefined behavior */
+		return 32;
+	}
+
+	return (int)index;
 #else
 	int n;
 
@@ -501,6 +514,19 @@ static zend_always_inline int zend_mm_bitset_ntz(zend_mm_bitset bitset)
 {
 #if defined(__GNUC__)
 	return __builtin_ctzl(bitset);
+#elif defined(_WIN32)
+	unsigned long index;
+
+#if defined(_WIN64)
+	if (!BitScanForward64(&index, bitset)) {
+#else
+	if (!BitScanForward(&index, bitset)) {
+#endif
+		/* undefined behavior */
+		return 32;
+	}
+
+	return (int)index;
 #else
 	int n;
 
@@ -1023,6 +1049,15 @@ static zend_always_inline int zend_mm_small_size_to_bit(int size)
 {
 #if defined(__GNUC__)
 	return (__builtin_clz(size) ^ 0x1f) + 1;
+#elif defined(_WIN32)
+	unsigned long index;
+
+	if (!BitScanReverse(&index, (unsigned long)size)) {
+		/* undefined behavior */
+		return 32;
+	}
+
+	return (((31 - (int)index) ^ 0x1f) + 1);
 #else
 	int n = 16;
 	if (size <= 0x00ff) {n -= 8; size = size << 8;}
