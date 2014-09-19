@@ -759,11 +759,15 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 	cwd_state new_state;
 	char cwd[MAXPATHLEN];
 	int copy_len;
-	int path_len = (int)strlen(filepath);
+	int path_len;
 
 	if (!filepath[0]) {
 		return NULL;
-	} else if (IS_ABSOLUTE_PATH(filepath, path_len)) {
+	}
+
+	path_len = (int)strlen(filepath);
+
+	if (IS_ABSOLUTE_PATH(filepath, path_len)) {
 		cwd[0] = '\0';
 	} else {
 		const char *iam = SG(request_info).path_translated;
