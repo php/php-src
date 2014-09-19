@@ -1011,12 +1011,12 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	if (name->val[0] == '\\') {
 		ZVAL_STRINGL(&args[0], name->val + 1, name->len - 1);
 	} else {
-		ZVAL_STR(&args[0], zend_string_copy(name));
+		ZVAL_STR_COPY(&args[0], name);
 	}
 
 	fcall_info.size = sizeof(fcall_info);
 	fcall_info.function_table = EG(function_table);
-	ZVAL_STR(&fcall_info.function_name, zend_string_copy(EG(autoload_func)->common.function_name));
+	ZVAL_STR_COPY(&fcall_info.function_name, EG(autoload_func)->common.function_name);
 	fcall_info.symbol_table = NULL;
 	fcall_info.retval = &local_retval;
 	fcall_info.param_count = 1;

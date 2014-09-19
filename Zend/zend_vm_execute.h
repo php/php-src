@@ -4311,8 +4311,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 			ZVAL_DUP(EX_VAR(opline->result.var), value);
 		} else if (Z_STRLEN_P(opline->op2.zv) == sizeof("class")-1 && memcmp(Z_STRVAL_P(opline->op2.zv), "class", sizeof("class") - 1) == 0) {
 			/* "class" is assigned as a case-sensitive keyword from zend_do_resolve_class_name */
-			ZVAL_STR(EX_VAR(opline->result.var), ce->name);
-			zend_string_addref(ce->name);
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
 		} else {
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(opline->op2.zv));
 		}
@@ -16676,11 +16675,8 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			if (opline->extended_value & ZEND_FE_FETCH_WITH_KEY) {
 				if (!p->key) {
 					ZVAL_LONG(EX_VAR((opline+1)->result.var), p->h);
-				} else if (IS_INTERNED(p->key)) {
-					ZVAL_INTERNED_STR(EX_VAR((opline+1)->result.var), p->key);
 				} else {
-					ZVAL_NEW_STR(EX_VAR((opline+1)->result.var), p->key);
-					GC_REFCOUNT(p->key)++;
+					ZVAL_STR_COPY(EX_VAR((opline+1)->result.var), p->key);
 				}
 			}
 			break;
@@ -16756,12 +16752,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				} else if (zend_check_property_access(zobj, p->key TSRMLS_CC) == SUCCESS) {
 					if (opline->extended_value & ZEND_FE_FETCH_WITH_KEY) {
 						if (p->key->val[0]) {
-							if (IS_INTERNED(p->key)) {
-								ZVAL_INTERNED_STR(EX_VAR((opline+1)->result.var), p->key);
-							} else {
-								ZVAL_NEW_STR(EX_VAR((opline+1)->result.var), p->key);
-								GC_REFCOUNT(p->key)++;
-							}
+							ZVAL_STR_COPY(EX_VAR((opline+1)->result.var), p->key);
 						} else {
 							const char *class_name, *prop_name;
 							size_t prop_name_len;
@@ -18714,8 +18705,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 			ZVAL_DUP(EX_VAR(opline->result.var), value);
 		} else if (Z_STRLEN_P(opline->op2.zv) == sizeof("class")-1 && memcmp(Z_STRVAL_P(opline->op2.zv), "class", sizeof("class") - 1) == 0) {
 			/* "class" is assigned as a case-sensitive keyword from zend_do_resolve_class_name */
-			ZVAL_STR(EX_VAR(opline->result.var), ce->name);
-			zend_string_addref(ce->name);
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
 		} else {
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(opline->op2.zv));
 		}
@@ -27977,8 +27967,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 			ZVAL_DUP(EX_VAR(opline->result.var), value);
 		} else if (Z_STRLEN_P(opline->op2.zv) == sizeof("class")-1 && memcmp(Z_STRVAL_P(opline->op2.zv), "class", sizeof("class") - 1) == 0) {
 			/* "class" is assigned as a case-sensitive keyword from zend_do_resolve_class_name */
-			ZVAL_STR(EX_VAR(opline->result.var), ce->name);
-			zend_string_addref(ce->name);
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
 		} else {
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(opline->op2.zv));
 		}

@@ -2559,7 +2559,7 @@ PHP_FUNCTION(substr_replace)
 			if (str_index) {
 				zval tmp;
 
-				ZVAL_STR(&tmp, result);
+				ZVAL_NEW_STR(&tmp, result);
 				zend_symtable_update(Z_ARRVAL_P(return_value), str_index, &tmp);
 			} else {
 				add_index_str(return_value, num_index, result);

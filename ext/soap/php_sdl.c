@@ -3288,9 +3288,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl TSRMLS_DC)
 		}
 
 		smart_str_0(&headers);
-		ZVAL_STR(&str_headers, zend_string_copy(headers.s));
+		ZVAL_NEW_STR(&str_headers, headers.s);
 		php_stream_context_set_option(context, "http", "header", &str_headers);
-		smart_str_free(&headers);
 		zval_ptr_dtor(&str_headers);
 	}
 

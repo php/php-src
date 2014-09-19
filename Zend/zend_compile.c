@@ -6528,7 +6528,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast TSRMLS_DC)
 			ZVAL_LONG(zv, CG(zend_lineno));
 			break;
 		case T_FILE:
-			ZVAL_STR(zv, zend_string_copy(CG(compiled_filename)));
+			ZVAL_STR_COPY(zv, CG(compiled_filename));
 			break;
 		case T_DIR:
 		{
@@ -6551,7 +6551,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast TSRMLS_DC)
 		}
 		case T_FUNC_C:
 			if (op_array && op_array->function_name) {
-				ZVAL_STR(zv, zend_string_copy(op_array->function_name));
+				ZVAL_STR_COPY(zv, op_array->function_name);
 			} else {
 				ZVAL_EMPTY_STRING(zv);
 			}
@@ -6562,10 +6562,10 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast TSRMLS_DC)
 					ZVAL_NEW_STR(zv, zend_concat3(ce->name->val, ce->name->len, "::", 2,
 						op_array->function_name->val, op_array->function_name->len));
 				} else {
-					ZVAL_STR(zv, zend_string_copy(ce->name));
+					ZVAL_STR_COPY(zv, ce->name);
 				}
 			} else if (op_array && op_array->function_name) {
-				ZVAL_STR(zv, zend_string_copy(op_array->function_name));
+				ZVAL_STR_COPY(zv, op_array->function_name);
 			} else {
 				ZVAL_EMPTY_STRING(zv);
 			}
@@ -6575,7 +6575,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast TSRMLS_DC)
 				if (ZEND_CE_IS_TRAIT(ce)) {
 					return 0;
 				} else {
-					ZVAL_STR(zv, zend_string_copy(ce->name));
+					ZVAL_STR_COPY(zv, ce->name);
 				}
 			} else {
 				ZVAL_EMPTY_STRING(zv);
@@ -6583,14 +6583,14 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast TSRMLS_DC)
 			break;
 		case T_TRAIT_C:
 			if (ce && ZEND_CE_IS_TRAIT(ce)) {
-				ZVAL_STR(zv, zend_string_copy(ce->name));
+				ZVAL_STR_COPY(zv, ce->name);
 			} else {
 				ZVAL_EMPTY_STRING(zv);
 			}
 			break;
 		case T_NS_C:
 			if (CG(current_namespace)) {
-				ZVAL_STR(zv, zend_string_copy(CG(current_namespace)));
+				ZVAL_STR_COPY(zv, CG(current_namespace));
 			} else {
 				ZVAL_EMPTY_STRING(zv);
 			}
@@ -7265,7 +7265,7 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast TSRMLS_DC) /* 
 					"Cannot access self::class when no class scope is active");
 			}
 			result->op_type = IS_CONST;
-			ZVAL_STR(&result->u.constant, zend_string_copy(CG(active_class_entry)->name));
+			ZVAL_STR_COPY(&result->u.constant, CG(active_class_entry)->name);
 			break;
         case ZEND_FETCH_CLASS_STATIC:
         case ZEND_FETCH_CLASS_PARENT:
@@ -7469,7 +7469,7 @@ void zend_compile_const_expr_resolve_class_name(zend_ast **ast_ptr TSRMLS_DC) /*
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot access self::class when no class scope is active");
 			}
-			ZVAL_STR(&result, zend_string_copy(CG(active_class_entry)->name));
+			ZVAL_STR_COPY(&result, CG(active_class_entry)->name);
 			break;
         case ZEND_FETCH_CLASS_STATIC:
         case ZEND_FETCH_CLASS_PARENT:

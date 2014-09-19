@@ -278,7 +278,7 @@ again:
 		case IS_REFERENCE:
 			expr = Z_REFVAL_P(expr);
 			if (Z_TYPE_P(expr) == IS_STRING) {
-				ZVAL_STR(expr_copy, zend_string_copy(Z_STR_P(expr)));
+				ZVAL_STR_COPY(expr_copy, Z_STR_P(expr));
 				return 1;
 			}
 			goto again;

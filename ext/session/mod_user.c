@@ -44,7 +44,7 @@ ps_module ps_mod_user = {
 
 #define SESS_ZVAL_STR(vl, a)						\
 {													\
-	ZVAL_STR(a, zend_string_copy(vl));						\
+	ZVAL_STR_COPY(a, vl);							\
 }
 
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval TSRMLS_DC)

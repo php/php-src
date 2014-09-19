@@ -660,7 +660,7 @@ ZEND_FUNCTION(each)
 
 	/* add the key elements */
 	if (zend_hash_get_current_key(target_hash, &key, &num_key, 0) == HASH_KEY_IS_STRING) {
-		ZVAL_STR(&tmp, zend_string_copy(key));
+		ZVAL_STR_COPY(&tmp, key);
 		if (Z_REFCOUNTED(tmp)) Z_ADDREF(tmp);
 	} else {
 		ZVAL_LONG(&tmp, num_key);
@@ -1131,7 +1131,7 @@ ZEND_FUNCTION(get_class_methods)
 
 			/* Do not display old-style inherited constructors */
 			if (!key) {
-				ZVAL_STR(&method_name, zend_string_copy(mptr->common.function_name));
+				ZVAL_STR_COPY(&method_name, mptr->common.function_name);
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 			} else if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0 ||
 			    mptr->common.scope == ce ||
@@ -1141,10 +1141,10 @@ ZEND_FUNCTION(get_class_methods)
 				    *mptr->op_array.refcount > 1 &&
 			    	(len != key->len ||
 			    	 !same_name(key->val, mptr->common.function_name->val, len))) {
-					ZVAL_STR(&method_name, zend_string_copy(zend_find_alias_name(mptr->common.scope, key)));
+					ZVAL_STR_COPY(&method_name, zend_find_alias_name(mptr->common.scope, key));
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 				} else {
-					ZVAL_STR(&method_name, zend_string_copy(mptr->common.function_name));
+					ZVAL_STR_COPY(&method_name, mptr->common.function_name);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 				}
 			}

@@ -1178,7 +1178,7 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSR
 	reflection_object *intern;
 	zval name;
 
-	ZVAL_STR(&name, zend_string_copy(ce->name));
+	ZVAL_STR_COPY(&name, ce->name);
 	reflection_instantiate(reflection_class_ptr, object TSRMLS_CC);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = ce;
@@ -1251,7 +1251,7 @@ static void reflection_function_factory(zend_function *function, zval *closure_o
 	reflection_object *intern;
 	zval name;
 
-	ZVAL_STR(&name, zend_string_copy(function->common.function_name));
+	ZVAL_STR_COPY(&name, function->common.function_name);
 
 	reflection_instantiate(reflection_function_ptr, object TSRMLS_CC);
 	intern = Z_REFLECTION_P(object);
@@ -1273,9 +1273,9 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 	zval name;
 	zval classname;
 
-	ZVAL_STR(&name, zend_string_copy((method->common.scope && method->common.scope->trait_aliases)?
-			zend_resolve_method_name(ce, method) : method->common.function_name));
-	ZVAL_STR(&classname, zend_string_copy(method->common.scope->name));
+	ZVAL_STR_COPY(&name, (method->common.scope && method->common.scope->trait_aliases)?
+			zend_resolve_method_name(ce, method) : method->common.function_name);
+	ZVAL_STR_COPY(&classname, method->common.scope->name);
 	reflection_instantiate(reflection_method_ptr, object TSRMLS_CC);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = method;
@@ -1320,7 +1320,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	}
 
 	ZVAL_STRINGL(&name, prop_name, prop_name_len);
-	ZVAL_STR(&classname, zend_string_copy(prop->ce->name));
+	ZVAL_STR_COPY(&classname, prop->ce->name);
 
 	reflection_instantiate(reflection_property_ptr, object TSRMLS_CC);
 	intern = Z_REFLECTION_P(object);
@@ -1623,7 +1623,7 @@ ZEND_METHOD(reflection_function, __construct)
 		return;
 	}
 
-	ZVAL_STR(&name, zend_string_copy(fptr->common.function_name));
+	ZVAL_STR_COPY(&name, fptr->common.function_name);
 	reflection_update_property(object, "name", &name);
 	intern->ptr = fptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
@@ -2740,9 +2740,9 @@ ZEND_METHOD(reflection_method, __construct)
 	}
 	efree(lcname);
 
-	ZVAL_STR(&name, zend_string_copy(mptr->common.scope->name));
+	ZVAL_STR_COPY(&name, mptr->common.scope->name);
 	reflection_update_property(object, "class", &name);
-	ZVAL_STR(&name, zend_string_copy(mptr->common.function_name));
+	ZVAL_STR_COPY(&name, mptr->common.function_name);
 	reflection_update_property(object, "name", &name);
 	intern->ptr = mptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
@@ -3305,7 +3305,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 	}
 
 	if (Z_TYPE_P(argument) == IS_OBJECT) {
-		ZVAL_STR(&classname, zend_string_copy(Z_OBJCE_P(argument)->name));
+		ZVAL_STR_COPY(&classname, Z_OBJCE_P(argument)->name);
 		reflection_update_property(object, "name", &classname);
 		intern->ptr = Z_OBJCE_P(argument);
 		if (is_object) {
@@ -3321,7 +3321,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 			return;
 		}
 
-		ZVAL_STR(&classname, zend_string_copy(ce->name));
+		ZVAL_STR_COPY(&classname, ce->name);
 		reflection_update_property(object, "name", &classname);
 
 		intern->ptr = ce;
@@ -3795,7 +3795,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 		RETURN_TRUE;
 	} else {
 		if (Z_TYPE(intern->obj) != IS_UNDEF && Z_OBJ_HANDLER(intern->obj, has_property)) {
-			ZVAL_STR(&property, zend_string_copy(name));
+			ZVAL_STR_COPY(&property, name);
 			if (Z_OBJ_HANDLER(intern->obj, has_property)(&intern->obj, &property, 2, NULL TSRMLS_CC)) {
 				zval_ptr_dtor(&property);
 				RETURN_TRUE;
@@ -4799,10 +4799,10 @@ ZEND_METHOD(reflection_property, __construct)
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
 		zend_unmangle_property_name_ex(property_info->name, &class_name, &prop_name, &prop_name_len);
-		ZVAL_STR(&cname, zend_string_copy(property_info->ce->name));
+		ZVAL_STR_COPY(&cname, property_info->ce->name);
 		ZVAL_STRINGL(&propname, prop_name, prop_name_len);
 	} else {
-		ZVAL_STR(&cname, zend_string_copy(ce->name));
+		ZVAL_STR_COPY(&cname, ce->name);
 		ZVAL_STRINGL(&propname, name_str, name_len);
 	}
 	reflection_update_property(object, "class", &cname);
@@ -5284,7 +5284,7 @@ static int _addinientry(zval *el TSRMLS_DC, int num_args, va_list args, zend_has
 		if (ini_entry->value) {
 			zval zv;
 
-			ZVAL_STR(&zv, zend_string_copy(ini_entry->value));
+			ZVAL_STR_COPY(&zv, ini_entry->value);
 			zend_symtable_update(Z_ARRVAL_P(retval), ini_entry->name, &zv);
 		} else {
 			zend_symtable_update(Z_ARRVAL_P(retval), ini_entry->name, &EG(uninitialized_zval));

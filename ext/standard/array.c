@@ -706,12 +706,12 @@ static int php_array_user_key_compare(const void *a, const void *b TSRMLS_DC) /*
 	if (f->key == NULL) {
 		ZVAL_LONG(&args[0], f->h);
 	} else {
-		ZVAL_STR(&args[0], zend_string_copy(f->key));
+		ZVAL_STR_COPY(&args[0], f->key);
 	}
 	if (s->key == NULL) {
 		ZVAL_LONG(&args[1], s->h);
 	} else {
-		ZVAL_STR(&args[1], zend_string_copy(s->key));
+		ZVAL_STR_COPY(&args[1], s->key);
 	}
 
 	BG(user_compare_fci).param_count = 2;
@@ -1427,7 +1427,7 @@ PHP_FUNCTION(extract)
 				if (var_exists && var_name->len == sizeof("this")-1  && !strcmp(var_name->val, "this") && EG(scope) && EG(scope)->name->len != 0) {
 					break;
 				}
-				ZVAL_STR(&final_name, zend_string_copy(var_name));
+				ZVAL_STR_COPY(&final_name, var_name);
 				break;
 
 			case EXTR_PREFIX_IF_EXISTS:
@@ -1438,7 +1438,7 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_SAME:
 				if (!var_exists && var_name->len != 0) {
-					ZVAL_STR(&final_name, zend_string_copy(var_name));
+					ZVAL_STR_COPY(&final_name, var_name);
 				}
 				/* break omitted intentionally */
 
@@ -1453,14 +1453,14 @@ PHP_FUNCTION(extract)
 					if (!php_valid_var_name(var_name->val, var_name->len)) {
 						php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1 TSRMLS_CC);
 					} else {
-						ZVAL_STR(&final_name, zend_string_copy(var_name));
+						ZVAL_STR_COPY(&final_name, var_name);
 					}
 				}
 				break;
 
 			default:
 				if (!var_exists) {
-					ZVAL_STR(&final_name, zend_string_copy(var_name));
+					ZVAL_STR_COPY(&final_name, var_name);
 				}
 				break;
 		}
@@ -2605,7 +2605,7 @@ PHP_FUNCTION(array_keys)
 
 		if (add_key) {
 			if (str_idx) {
-				ZVAL_STR(&new_val, zend_string_copy(str_idx));
+				ZVAL_STR_COPY(&new_val, str_idx);
 			} else {
 				ZVAL_LONG(&new_val, num_idx);
 			}
@@ -2889,14 +2889,14 @@ PHP_FUNCTION(array_flip)
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 		if (Z_TYPE_P(entry) == IS_LONG) {
 			if (str_idx) {
-				ZVAL_STR(&data, zend_string_copy(str_idx));
+				ZVAL_STR_COPY(&data, str_idx);
 			} else {
 				ZVAL_LONG(&data, num_idx);
 			}
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), &data);
 		} else if (Z_TYPE_P(entry) == IS_STRING) {
 			if (str_idx) {
-				ZVAL_STR(&data, zend_string_copy(str_idx));
+				ZVAL_STR_COPY(&data, str_idx);
 			} else {
 				ZVAL_LONG(&data, num_idx);
 			}
@@ -4366,9 +4366,9 @@ PHP_FUNCTION(array_filter)
 					}
 				} else {
 					if (use_type == ARRAY_FILTER_USE_BOTH) {
-						ZVAL_STR(&args[1], zend_string_copy(string_key));
+						ZVAL_STR_COPY(&args[1], string_key);
 					} else if (use_type == ARRAY_FILTER_USE_KEY) {
-						ZVAL_STR(&args[0], zend_string_copy(string_key));
+						ZVAL_STR_COPY(&args[0], string_key);
 					}
 				}
 			}

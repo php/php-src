@@ -59,7 +59,7 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 			ZVAL_UNDEF(&ASSERTG(callback));
 		}
 		if (new_value && (Z_TYPE(ASSERTG(callback)) != IS_UNDEF || new_value->len)) {
-			ZVAL_STR(&ASSERTG(callback), zend_string_copy(new_value));
+			ZVAL_STR_COPY(&ASSERTG(callback), new_value);
 		}
 	} else {
 		if (ASSERTG(cb)) {

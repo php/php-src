@@ -537,8 +537,20 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		zval *__z = (z);						\
 		zend_string *__s = (s);					\
 		Z_STR_P(__z) = __s;						\
-		/* interned strings support */			\
 		Z_TYPE_INFO_P(__z) = IS_STRING_EX;		\
+	} while (0)
+
+#define ZVAL_STR_COPY(z, s) do {						\
+		zval *__z = (z);								\
+		zend_string *__s = (s);							\
+		Z_STR_P(__z) = __s;								\
+		/* interned strings support */					\
+		if (IS_INTERNED(__s)) {							\
+			Z_TYPE_INFO_P(__z) = IS_INTERNED_STRING_EX;	\
+		} else {										\
+			GC_REFCOUNT(__s)++;							\
+			Z_TYPE_INFO_P(__z) = IS_STRING_EX;			\
+		}												\
 	} while (0)
 
 #define ZVAL_ARR(z, a) do {						\

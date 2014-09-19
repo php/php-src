@@ -1599,8 +1599,7 @@ ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, 
 	} else {
 		p = ht->arData + idx;
 		if (p->key) {
-			ZVAL_STR(key, p->key);
-			zend_string_addref(p->key);
+			ZVAL_STR_COPY(key, p->key);
 		} else {
 			ZVAL_LONG(key, p->h);
 		}

@@ -5261,7 +5261,7 @@ static int php_ini_get_option(zval *zv TSRMLS_DC, int num_args, va_list args, ze
 			if (ini_entry->value) {
 				zval zv;
 
-				ZVAL_STR(&zv, zend_string_copy(ini_entry->value));
+				ZVAL_STR_COPY(&zv, ini_entry->value);
 				zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &zv);
 			} else {
 				zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &EG(uninitialized_zval));
