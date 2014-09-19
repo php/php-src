@@ -1974,7 +1974,7 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 	} else {
 		size_t path_len = strlen(path);
 
-		if (!IS_ABSOLUTE_PATH(path, strlen(path)) &&
+		if (!IS_ABSOLUTE_PATH(path, path_len) &&
 			VCWD_GETCWD(cwd, MAXPATHLEN)) {
 			new_state.cwd = estrdup(cwd);
 			new_state.cwd_length = strlen(cwd);
