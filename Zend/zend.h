@@ -22,9 +22,9 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "2.8.0-dev"
+#define ZEND_VERSION "3.0.0-dev"
 
-#define ZEND_ENGINE_2
+#define ZEND_ENGINE_3
 
 #define ZEND_MAX_RESERVED_RESOURCES	4
 
