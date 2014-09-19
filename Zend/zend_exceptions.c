@@ -362,7 +362,7 @@ ZEND_METHOD(error_exception, getSeverity)
 
 
 #define TRACE_ARG_APPEND(vallen) do { \
-		int len = str->len; \
+		size_t len = str->len; \
 		str = zend_string_realloc(str, len + vallen, 0); \
 		memmove(str->val + len - l_added + 1 + vallen, str->val + len - l_added + 1, l_added); \
 	} while (0)
@@ -620,10 +620,10 @@ ZEND_METHOD(exception, getPrevious)
 	RETURN_ZVAL(previous, 1, 0);
 } /* }}} */
 
-int zend_spprintf(char **message, int max_len, const char *format, ...) /* {{{ */
+size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) /* {{{ */
 {
 	va_list arg;
-	int len;
+	size_t len;
 
 	va_start(arg, format);
 	len = zend_vspprintf(message, max_len, format, arg);
@@ -632,7 +632,7 @@ int zend_spprintf(char **message, int max_len, const char *format, ...) /* {{{ *
 }
 /* }}} */
 
-zend_string *zend_strpprintf(int max_len, const char *format, ...) /* {{{ */
+zend_string *zend_strpprintf(size_t max_len, const char *format, ...) /* {{{ */
 {
 	va_list arg;
 	zend_string *str;

@@ -53,8 +53,8 @@ extern ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 ZEND_API void zend_exception_error(zend_object *exception, int severity TSRMLS_DC);
 
 /* do not export, in php it's available thru spprintf directly */
-int zend_spprintf(char **message, int max_len, const char *format, ...);
-zend_string *zend_strpprintf(int max_len, const char *format, ...);
+size_t zend_spprintf(char **message, size_t max_len, const char *format, ...);
+zend_string *zend_strpprintf(size_t max_len, const char *format, ...);
 
 END_EXTERN_C()
 
