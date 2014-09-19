@@ -50,8 +50,6 @@
 	smart_str_setl((dest), (src), strlen(src));
 #define smart_str_append_long(dest, val) \
 	smart_str_append_long_ex((dest), (val), 0)
-#define smart_str_append_off_t(dest, val) \
-	smart_str_append_off_t_ex((dest), (val), 0)
 #define smart_str_append_unsigned(dest, val) \
 	smart_str_append_unsigned_ex((dest), (val), 0)
 
@@ -106,37 +104,21 @@ static zend_always_inline void smart_str_append_ex(smart_str *dest, const smart_
 	}
 }
 
+static zend_always_inline void smart_str_append_long_ex(smart_str *dest, zend_long num, zend_bool persistent) {
+	char buf[32];
+	char *result = zend_print_long_to_buf(buf + sizeof(buf) - 1, num);
+	smart_str_appendl_ex(dest, result, buf + sizeof(buf) - 1 - result, persistent);
+}
+
+static zend_always_inline void smart_str_append_unsigned_ex(smart_str *dest, zend_ulong num, zend_bool persistent) {
+	char buf[32];
+	char *result = zend_print_ulong_to_buf(buf + sizeof(buf) - 1, num);
+	smart_str_appendl_ex(dest, result, buf + sizeof(buf) - 1 - result, persistent);
+}
+
 static zend_always_inline void smart_str_setl(smart_str *dest, const char *src, size_t len) {
 	smart_str_free(dest);
 	smart_str_appendl(dest, src, len);
 }
- 
-static inline char *smart_str_print_long(char *buf, zend_long num) {
-	char *r; 
-	_zend_print_signed_to_buf(buf, num, zend_long, r); 
-	return r;
-}
-
-static inline char *smart_str_print_unsigned(char *buf, zend_long num) {
-	char *r; 
-	_zend_print_unsigned_to_buf(buf, num, zend_ulong, r); 
-	return r;
-}
-
-#define smart_str_append_generic_ex(dest, num, type, vartype, func) do {	\
-	char __b[32];															\
-	char *__t;																\
-   	_zend_print##func##_to_buf (__b + sizeof(__b) - 1, (num), vartype, __t);	\
-	smart_str_appendl_ex((dest), __t, __b + sizeof(__b) - 1 - __t, (type));	\
-} while (0)
-	
-#define smart_str_append_unsigned_ex(dest, num, type) \
-	smart_str_append_generic_ex((dest), (num), (type), zend_ulong, _unsigned)
-
-#define smart_str_append_long_ex(dest, num, type) \
-	smart_str_append_generic_ex((dest), (num), (type), zend_ulong, _signed)
-
-#define smart_str_append_off_t_ex(dest, num, type) \
-	smart_str_append_generic_ex((dest), (num), (type), zend_off_t, _signed)
 
 #endif

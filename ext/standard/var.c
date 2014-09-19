@@ -611,17 +611,17 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var_ptr, zval *var
 		var = Z_REFVAL_P(var);
 	}
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
-		p = smart_str_print_long(id + sizeof(id) - 1,
+		p = zend_print_long_to_buf(id + sizeof(id) - 1,
 				(zend_long) Z_OBJ_P(var));
 		*(--p) = 'O';
 		len = id + sizeof(id) - 1 - p;
 	} else if (var_ptr != var) {
-		p = smart_str_print_long(id + sizeof(id) - 1,
+		p = zend_print_long_to_buf(id + sizeof(id) - 1,
 				(zend_long) Z_REF_P(var_ptr));
 		*(--p) = 'R';
 		len = id + sizeof(id) - 1 - p;
 	} else {
-		p = smart_str_print_long(id + sizeof(id) - 1, (zend_long) var);
+		p = zend_print_long_to_buf(id + sizeof(id) - 1, (zend_long) var);
 		len = id + sizeof(id) - 1 - p;
 	}
 

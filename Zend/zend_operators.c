@@ -2520,8 +2520,7 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 ZEND_API zend_string *zend_long_to_str(zend_long num) /* {{{ */
 {
 	char buf[MAX_LENGTH_OF_LONG + 1];
-	char *res;
-	_zend_print_signed_to_buf(buf + sizeof(buf) - 1, num, zend_ulong, res);
+	char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, num);
 	return zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
 }
 /* }}} */

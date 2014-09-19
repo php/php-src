@@ -894,27 +894,26 @@ static zend_always_inline void fast_is_not_identical_function(zval *result, zval
 		return SUCCESS;                                                                           \
 	}
 
-/* input: buf points to the END of the buffer */
-#define _zend_print_unsigned_to_buf(buf, num, vartype, result) do {    \
-	char *__p = (buf);                                                 \
-	vartype __num = (num);                                             \
-	*__p = '\0';                                                       \
-	do {                                                               \
-		*--__p = (char) (__num % 10) + '0';                            \
-		__num /= 10;                                                   \
-	} while (__num > 0);                                               \
-	result = __p;                                                      \
-} while (0)
+/* buf points to the END of the buffer */
+static zend_always_inline char *zend_print_ulong_to_buf(char *buf, zend_ulong num) {
+	*buf = '\0';
+	do {
+		*--buf = (char) (num % 10) + '0';
+		num /= 10;
+	} while (num > 0);
+	return buf;
+}
 
 /* buf points to the END of the buffer */
-#define _zend_print_signed_to_buf(buf, num, vartype, result) do {               \
-	if (num < 0) {                                                              \
-	    _zend_print_unsigned_to_buf((buf), (~((vartype)(num)) + 1), vartype, (result)); \
-	    *--(result) = '-';                                                      \
-	} else {                                                                    \
-	    _zend_print_unsigned_to_buf((buf), (num), vartype, (result));           \
-	}                                                                           \
-} while (0)
+static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num) {
+	if (num < 0) {
+	    char *result = zend_print_ulong_to_buf(buf, ~((zend_ulong) num) + 1);
+	    *--result = '-';
+		return result;
+	} else {
+	    return zend_print_ulong_to_buf(buf, num);
+	}
+}
 
 ZEND_API zend_string *zend_long_to_str(zend_long num);
 

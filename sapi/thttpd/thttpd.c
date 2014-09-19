@@ -181,7 +181,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	
 	if (!SG(sapi_headers).http_status_line) {
 		ADD_VEC_S("HTTP/1.1 ");
-		p = smart_str_print_long(buf+sizeof(buf)-1, 
+		p = zend_print_long_to_buf(buf+sizeof(buf)-1, 
 				SG(sapi_headers).http_response_code);
 		ADD_VEC(p, strlen(p));
 		ADD_VEC_S(" HTTP\r\n");
@@ -293,7 +293,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 	ADD_STRING_EX("REMOTE_HOST", p);
 
 	ADD_STRING_EX("SERVER_PORT",
-			smart_str_print_long(buf + sizeof(buf) - 1,
+			zend_print_long_to_buf(buf + sizeof(buf) - 1,
 				TG(hc)->hs->port));
 
 	buf[0] = '/';
@@ -323,7 +323,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 
 	if (TG(hc)->contentlength != -1) {
 		ADD_STRING_EX("CONTENT_LENGTH",
-				smart_str_print_long(buf + sizeof(buf) - 1, 
+				zend_print_long_to_buf(buf + sizeof(buf) - 1, 
 					TG(hc)->contentlength));
 	}
 
