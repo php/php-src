@@ -790,7 +790,7 @@ static void gmp_strval(zval *result, mpz_t gmpnum, zend_long base) /* {{{ */
 		str->val[str->len] = '\0';
 	}
 
-	ZVAL_STR(result, str);
+	ZVAL_NEW_STR(result, str);
 }
 /* }}} */
 

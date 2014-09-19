@@ -204,7 +204,7 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval TSRMLS_D
 
 		if (ret_buf.s) {
 			smart_str_0(&ret_buf);
-			ZVAL_STR(retval, ret_buf.s);
+			ZVAL_NEW_STR(retval, ret_buf.s);
 			return SUCCESS;
 		}
 	}

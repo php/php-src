@@ -789,7 +789,7 @@ static PHP_FUNCTION(json_encode)
 		ZVAL_FALSE(return_value);
 	} else {
 		smart_str_0(&buf); /* copy? */
-		ZVAL_STR(return_value, buf.s);
+		ZVAL_NEW_STR(return_value, buf.s);
 	}
 }
 /* }}} */

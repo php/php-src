@@ -5701,7 +5701,7 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free TSRMLS_DC)
 	if (should_free) {
 		zval_ptr_dtor(src);
 	}
-	ZVAL_STR(src, str.s);
+	ZVAL_NEW_STR(src, str.s);
 
 	return SUCCESS;
 }
@@ -5971,7 +5971,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
 							str->len = PQescapeStringConn(pg_link, str->val, Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
 							str = zend_string_realloc(str, str->len, 0);
-							ZVAL_STR(&new_val, str);
+							ZVAL_NEW_STR(&new_val, str);
 							php_pgsql_add_quotes(&new_val, 1 TSRMLS_CC);
 						}
 						break;
@@ -6268,7 +6268,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							smart_str_appendl(&s, Z_STRVAL(new_val), Z_STRLEN(new_val));
 							smart_str_0(&s);
 							zval_ptr_dtor(&new_val);
-							ZVAL_STR(&new_val, s.s);
+							ZVAL_NEW_STR(&new_val, s.s);
 						}
 						break;
 

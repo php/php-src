@@ -766,7 +766,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
-	} else if (IS_INTERNED(Z_STR_P(str))) {
+	} else if (!Z_REFCOUNTED_P(str)) {
 		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	}
@@ -1076,8 +1076,13 @@ convert_to_array:
 		}
 
 		if (allow_str_offset) {
-			SEPARATE_STRING(container);
-			if (!IS_INTERNED(Z_STR_P(container))) zend_string_addref(Z_STR_P(container));
+			if (Z_REFCOUNTED_P(container)) {
+				if (Z_REFCOUNT_P(container) > 1) {
+					Z_DELREF_P(container);
+					zval_copy_ctor_func(container);
+				}
+				Z_ADDREF_P(container);
+			}
 			ZVAL_LONG(result, offset);
 			return container; /* assignment to string offset */
 		} else {

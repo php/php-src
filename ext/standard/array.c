@@ -1826,7 +1826,7 @@ static void php_array_data_shuffle(zval *array TSRMLS_DC) /* {{{ */
 
 	for (j = 0; j < n_elems; j++) {
 		p = hash->arData + j;
-		if (p->key && !IS_INTERNED(p->key)) {
+		if (p->key) {
 			zend_string_release(p->key);
 		}
 		p->h = j;

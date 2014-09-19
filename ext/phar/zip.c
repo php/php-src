@@ -241,7 +241,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 					mydata->metadata_len = 0;
 					/* if not valid serialized data, it is a regular string */
 
-					ZVAL_STR(&mydata->metadata, zend_string_init(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent));
+					ZVAL_NEW_STR(&mydata->metadata, zend_string_init(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent));
 				}
 			} else {
 				ZVAL_UNDEF(&mydata->metadata);
@@ -529,7 +529,7 @@ foundit:
 				entry.metadata_len = 0;
 				/* if not valid serialized data, it is a regular string */
 
-				ZVAL_STR(&entry.metadata, zend_string_init(buf, PHAR_GET_16(zipentry.comment_len), entry.is_persistent));
+				ZVAL_NEW_STR(&entry.metadata, zend_string_init(buf, PHAR_GET_16(zipentry.comment_len), entry.is_persistent));
 			}
 		} else {
 			ZVAL_UNDEF(&entry.metadata);

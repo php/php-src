@@ -813,7 +813,7 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data TSRML
 			}
 		}
 		str->val[str->len] = '\0';
-		ZVAL_STR(ret, str);
+		ZVAL_NEW_STR(ret, str);
 	} else {
 		ZVAL_EMPTY_STRING(ret);
 	}

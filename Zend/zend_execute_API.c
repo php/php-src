@@ -580,8 +580,8 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				if (!inline_change) {
 					ZVAL_STRINGL(p, actual, actual_len);
 				} else {
-					Z_TYPE_INFO_P(p) = IS_INTERNED(Z_STR_P(p)) ?
-						IS_INTERNED_STRING_EX : IS_STRING_EX;
+					Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
+						IS_STRING_EX : IS_INTERNED_STRING_EX;
 					if (save && save->val != actual) {
 						zend_string_release(save);
 					}

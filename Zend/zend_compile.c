@@ -315,7 +315,7 @@ static inline void zend_insert_literal(zend_op_array *op_array, zval *zv, int li
 	if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
 		zend_string_hash_val(Z_STR_P(zv));
 		Z_STR_P(zv) = zend_new_interned_string(Z_STR_P(zv) TSRMLS_CC);
-		if (IS_INTERNED(Z_STR_P(zv))) {
+		if (!Z_REFCOUNTED_P(zv)) {
 			Z_TYPE_FLAGS_P(zv) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 		}
 	}
@@ -6559,7 +6559,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast TSRMLS_DC)
 		case T_METHOD_C:
 			if (ce) {
 				if (op_array && op_array->function_name) {
-					ZVAL_STR(zv, zend_concat3(ce->name->val, ce->name->len, "::", 2,
+					ZVAL_NEW_STR(zv, zend_concat3(ce->name->val, ce->name->len, "::", 2,
 						op_array->function_name->val, op_array->function_name->len));
 				} else {
 					ZVAL_STR(zv, zend_string_copy(ce->name));
@@ -7415,7 +7415,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) /* {{{ */
 		class_name->val, class_name->len, "::", 2, const_name->val, const_name->len);
 
 	Z_TYPE_INFO(result) = IS_CONSTANT_EX;
-	if (IS_INTERNED(Z_STR(result))) {
+	if (!Z_REFCOUNTED(result)) {
 		Z_TYPE_FLAGS(result) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 	}
 	Z_CONST_FLAGS(result) = fetch_type;

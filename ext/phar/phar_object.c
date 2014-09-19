@@ -87,7 +87,7 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 		zend_string *str = strpprintf(4096, "phar://%s%s", fname, entry);
 
 		ZVAL_STR(&temp, Z_STR_P(stuff));
-		ZVAL_STR(stuff, str);
+		ZVAL_NEW_STR(stuff, str);
 
 		zend_hash_str_update(_SERVER, "PHAR_PATH_TRANSLATED", sizeof("PHAR_PATH_TRANSLATED")-1, &temp);
 	}
@@ -134,7 +134,7 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 			zend_string *str = strpprintf(4096, "phar://%s%s", fname, entry);
 
 			ZVAL_STR(&temp, Z_STR_P(stuff));
-			ZVAL_STR(stuff, str);
+			ZVAL_NEW_STR(stuff, str);
 
 			zend_hash_str_update(_SERVER, "PHAR_SCRIPT_FILENAME", sizeof("PHAR_SCRIPT_FILENAME")-1, &temp);
 		}
@@ -3551,7 +3551,7 @@ PHP_METHOD(Phar, offsetGet)
 		}
 
 		sfname = strpprintf(0, "phar://%s/%s", phar_obj->archive->fname, fname);
-		ZVAL_STR(&zfname, sfname);
+		ZVAL_NEW_STR(&zfname, sfname);
 		spl_instantiate_arg_ex1(phar_obj->spl.info_class, return_value, &zfname TSRMLS_CC);
 		zval_ptr_dtor(&zfname);
 	}

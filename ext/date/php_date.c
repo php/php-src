@@ -2220,7 +2220,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC) /* {{{ */
 					abs(utc_offset / 60),
 					abs((utc_offset % 60)));
 
-				ZVAL_STR(&zv, tmpstr);
+				ZVAL_NEW_STR(&zv, tmpstr);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
@@ -2312,7 +2312,7 @@ static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC) /*
 			abs(tzobj->tzi.utc_offset / 60),
 			abs((tzobj->tzi.utc_offset % 60)));
 
-			ZVAL_STR(&zv, tmpstr);
+			ZVAL_NEW_STR(&zv, tmpstr);
 			}
 			break;
 		case TIMELIB_ZONETYPE_ABBR:

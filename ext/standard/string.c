@@ -4159,7 +4159,7 @@ PHP_FUNCTION(strip_tags)
 	if (allow != NULL) {
 		convert_to_string_ex(allow);
 // TODO: reimplement to avoid reallocation ???
-		if (IS_INTERNED(Z_STR_P(allow))) {
+		if (!Z_REFCOUNTED_P(allow)) {
 			allowed_tags = estrndup(Z_STRVAL_P(allow), Z_STRLEN_P(allow));
 			allowed_tags_len = Z_STRLEN_P(allow);
 		} else {
@@ -4172,7 +4172,7 @@ PHP_FUNCTION(strip_tags)
 	buf->len = php_strip_tags_ex(buf->val, str->len, NULL, allowed_tags, allowed_tags_len, 0);
 
 // TODO: reimplement to avoid reallocation ???
-	if (allow && IS_INTERNED(Z_STR_P(allow))) {
+	if (allow && !Z_REFCOUNTED_P(allow)) {
 		efree(allowed_tags);
 	}
 	RETURN_STR(buf);

@@ -52,7 +52,7 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 
 	smart_str_0(&str);
 	zval_ptr_dtor(value);
-	ZVAL_STR(value, str.s);
+	ZVAL_NEW_STR(value, str.s);
 }
 
 static const unsigned char hexchars[] = "0123456789ABCDEF";
@@ -105,7 +105,7 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 	*p = '\0';
 	str->len = p - (unsigned char *)str->val;
 	zval_ptr_dtor(value);
-	ZVAL_STR(value, str);
+	ZVAL_NEW_STR(value, str);
 }
 
 static void php_filter_strip(zval *value, zend_long flags)
@@ -135,7 +135,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 	buf->val[c] = '\0';
 	buf->len = c;
 	zval_ptr_dtor(value);
-	ZVAL_STR(value, buf);
+	ZVAL_NEW_STR(value, buf);
 }
 /* }}} */
 
@@ -174,7 +174,7 @@ static void filter_map_apply(zval *value, filter_map *map)
 	buf->val[c] = '\0';
 	buf->len = c;
 	zval_ptr_dtor(value);
-	ZVAL_STR(value, buf);
+	ZVAL_NEW_STR(value, buf);
 }
 /* }}} */
 
@@ -184,7 +184,7 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	size_t new_len;
 	unsigned char enc[256] = {0};
 
-	if (IS_INTERNED(Z_STR_P(value))) {
+	if (!Z_REFCOUNTED_P(value)) {
 		ZVAL_STRINGL(value, Z_STRVAL_P(value), Z_STRLEN_P(value));
 	}
 

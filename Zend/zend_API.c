@@ -1144,9 +1144,8 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties TSRMLS_DC) 
 		if (key) {
 			zval member;
 
-			ZVAL_STR(&member, zend_string_copy(key));
+			ZVAL_STR(&member, key);
 			obj_ht->write_property(obj, &member, value, NULL TSRMLS_CC);
-			zval_ptr_dtor(&member);
 		}
 	} ZEND_HASH_FOREACH_END();
 	EG(scope) = old_scope;

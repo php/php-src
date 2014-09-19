@@ -1541,7 +1541,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 			zend_error_noreturn(E_ERROR, "String size overflow");
 		}
 
-		if (result == op1 && !IS_INTERNED(Z_STR_P(result))) {
+		if (result == op1 && Z_REFCOUNTED_P(result)) {
 			/* special case, perform operations on result */
 			result_str = zend_string_realloc(Z_STR_P(result), result_len, 0);
 		} else {
@@ -2019,7 +2019,7 @@ static void increment_string(zval *str) /* {{{ */
 		return;
 	}
 
-	if (IS_INTERNED(Z_STR_P(str))) {
+	if (!Z_REFCOUNTED_P(str)) {
 		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	} else if (Z_REFCOUNT_P(str) > 1) {
