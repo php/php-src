@@ -66,7 +66,7 @@ static zend_always_inline size_t smart_str_alloc(smart_str *str, size_t len, zen
 		newlen = str->s->len + len;
 		if (newlen >= str->a) {
 			str->a = newlen + SMART_STR_PREALLOC;
-			str->s = perealloc(str->s, _STR_HEADER_SIZE + str->a + 1, persistent);
+			str->s = (zend_string *) perealloc(str->s, _STR_HEADER_SIZE + str->a + 1, persistent);
 		}
 	}
 	return newlen;
