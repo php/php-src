@@ -100,11 +100,7 @@ PHP_FUNCTION(oci_bind_by_name)
 {
 	ub2	bind_type = SQLT_CHR; /* unterminated string */
 	size_t name_len;
-<<<<<<< HEAD
 	zend_long maxlen = -1, type = 0;
-=======
-	long maxlen = -1, type = 0;
->>>>>>> mbstring, mssql and oci8
 	char *name;
 	zval *z_statement;
 	zval *bind_var = NULL;
@@ -132,15 +128,9 @@ PHP_FUNCTION(oci_bind_by_name)
 PHP_FUNCTION(oci_bind_array_by_name)
 {
 	size_t name_len;
-<<<<<<< HEAD
 	zend_long max_item_len = -1;
 	zend_long max_array_len = 0;
 	zend_long type = SQLT_AFC;
-=======
-	long max_item_len = -1;
-	long max_array_len = 0;
-	long type = SQLT_AFC;
->>>>>>> mbstring, mssql and oci8
 	char *name;
 	zval *z_statement;
 	zval *bind_var = NULL;
@@ -201,11 +191,7 @@ PHP_FUNCTION(oci_lob_save)
 	php_oci_descriptor *descriptor;
 	char *data;
 	size_t data_len;
-<<<<<<< HEAD
 	zend_long offset = 0;
-=======
-	long offset = 0;
->>>>>>> mbstring, mssql and oci8
 	ub4 bytes_written;
 
 	if (getThis()) {
@@ -534,11 +520,7 @@ PHP_FUNCTION(oci_lob_write)
 	zval *tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
 	size_t data_len;
-<<<<<<< HEAD
 	zend_long write_len = 0;
-=======
-	long write_len = 0;
->>>>>>> mbstring, mssql and oci8
 	ub4 bytes_written;
 	char *data;
 	
@@ -897,11 +879,7 @@ PHP_FUNCTION(oci_lob_export)
 	char *filename;
 	char *buffer;
 	size_t filename_len;
-<<<<<<< HEAD
 	zend_long start = -1, length = -1, block_length;
-=======
-	long start = -1, length = -1, block_length;
->>>>>>> mbstring, mssql and oci8
 	php_stream *stream;
 	ub4 lob_length;
 
@@ -1033,11 +1011,7 @@ PHP_FUNCTION(oci_lob_write_temporary)
 	php_oci_descriptor *descriptor;
 	char *data;
 	size_t data_len;
-<<<<<<< HEAD
 	zend_long type = OCI_TEMP_CLOB;
-=======
-	long type = OCI_TEMP_CLOB;
->>>>>>> mbstring, mssql and oci8
 
 	if (getThis()) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &data, &data_len, &type) == FAILURE) {
@@ -2322,11 +2296,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 	zval *tmp, *z_collection = getThis();
 	php_oci_collection *collection;
 	size_t value_len;
-<<<<<<< HEAD
 	zend_long element_index;
-=======
-	long element_index;
->>>>>>> mbstring, mssql and oci8
 	char *value;
 
 	if (getThis()) {
