@@ -5872,9 +5872,6 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) /* {{{ */
 		class_name->val, class_name->len, "::", 2, const_name->val, const_name->len);
 
 	Z_TYPE_INFO(result) = IS_CONSTANT_EX;
-	if (!Z_REFCOUNTED(result)) {
-		Z_TYPE_FLAGS(result) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
-	}
 	Z_CONST_FLAGS(result) = fetch_type;
 
 	zend_ast_destroy(ast);
