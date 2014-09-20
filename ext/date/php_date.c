@@ -4496,12 +4496,12 @@ PHP_FUNCTION(timezone_abbreviations_list)
 
 	do {
 		array_init(&element);
-		add_assoc_bool(&element, "dst", entry->type);
-		add_assoc_long(&element, "offset", entry->gmtoffset);
+		add_assoc_bool_ex(&element, "dst", sizeof("dst") -1, entry->type);
+		add_assoc_long_ex(&element, "offset", sizeof("offset") - 1, entry->gmtoffset);
 		if (entry->full_tz_name) {
-			add_assoc_string(&element, "timezone_id", entry->full_tz_name);
+			add_assoc_string_ex(&element, "timezone_id", sizeof("timezone_id") - 1, entry->full_tz_name);
 		} else {
-			add_assoc_null(&element, "timezone_id");
+			add_assoc_null_ex(&element, "timezone_id", sizeof("timezone_id") - 1);
 		}
 
 		abbr_array_p = zend_hash_str_find(HASH_OF(return_value), entry->name, strlen(entry->name));
