@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     unset). (Tjerk)
   . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
     as 6.2 (instead of 6.3)). (Christian Wenz)
+  . Fixed bug #67633 (A foreach on an array returned from a function not doing
+    copy-on-write). (Nikita)
 
 - FPM:
   . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
