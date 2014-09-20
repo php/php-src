@@ -1054,7 +1054,7 @@ static zend_always_inline int zend_mm_small_size_to_bit(int size)
 
 	if (!BitScanReverse(&index, (unsigned long)size)) {
 		/* undefined behavior */
-		return 32;
+		return 64;
 	}
 
 	return (((31 - (int)index) ^ 0x1f) + 1);
