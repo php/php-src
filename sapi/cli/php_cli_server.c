@@ -112,6 +112,8 @@
 #define OUTPUT_IS_TTY 1
 #define OUTPUT_NOT_TTY 0
 
+TSRMG_D(zend_cli_server_globals, cli_server_globals_id);
+
 typedef struct php_cli_server_poller {
 	fd_set rfds, wfds;
 	struct {
@@ -515,7 +517,7 @@ zend_module_entry cli_server_module_entry = {
 	NULL,
 	PHP_MINFO(cli_server),
 	PHP_VERSION,
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -2353,7 +2355,7 @@ static int php_cli_server_send_event(php_cli_server *server, php_cli_server_clie
 /* }}} */
 
 typedef struct php_cli_server_do_event_for_each_fd_callback_params {
-#ifdef ZTS
+#ifdef PASS_TSRMLS
 	void ***tsrm_ls;
 #endif
 	php_cli_server *server;
