@@ -50,7 +50,11 @@
 
 #define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0, ZEND_MODULE_BUILD_ID
 
+#ifdef ZTS
+#define NO_MODULE_GLOBALS 0, NULL, NULL, NULL, NULL
+#else
 #define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
+#endif
 
 #ifdef ZTS
 # define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals_id, &module_name##_globals_id_offset
