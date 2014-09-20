@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 2009 The PHP Group                                     |
    +----------------------------------------------------------------------+
@@ -184,7 +184,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, return_value);
 		} else {
 			zval zv;
-			ZVAL_STR(&zv, buffer);
+			ZVAL_NEW_STR(&zv, buffer);
 			buffer_used = 1;
 			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, &zv);
 		}

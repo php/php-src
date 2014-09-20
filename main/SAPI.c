@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -739,7 +739,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 		return SUCCESS;
 	} else {
 		/* new line/NUL character safety check */
-		int i;
+		uint i;
 		for (i = 0; i < header_line_len; i++) {
 			/* RFC 2616 allows new lines if followed by SP or HT */
 			int illegal_break =
@@ -790,7 +790,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				/* Disable possible output compression for images */
 				if (!strncmp(ptr, "image/", sizeof("image/")-1)) {
 					zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
-					zend_alter_ini_entry(key, "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+					zend_alter_ini_entry_chars(key, "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 					zend_string_release(key);
 				}
 
@@ -818,7 +818,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
 				zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
-				zend_alter_ini_entry(key,
+				zend_alter_ini_entry_chars(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				zend_string_release(key);
 			} else if (!STRCASECMP(header_line, "Location")) {

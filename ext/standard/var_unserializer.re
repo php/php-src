@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -391,7 +391,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	(*p) += 2;
 
 	if (datalen < 0 || (*p) + datalen >= max) {
-		zend_error(E_WARNING, "Insufficient data for unserializing - %ld required, %pd present", datalen, (zend_long)(max - (*p)));
+		zend_error(E_WARNING, "Insufficient data for unserializing - %pd required, %pd present", datalen, (zend_long)(max - (*p)));
 		return 0;
 	}
 
@@ -755,7 +755,7 @@ object ":" uiv ":" ["]	{
 		/* Call unserialize callback */
 		ZVAL_STRING(&user_func, PG(unserialize_callback_func));
 		
-		ZVAL_STR(&args[0], zend_string_copy(class_name));
+		ZVAL_STR_COPY(&args[0], class_name);
 		BG(serialize_lock)++;
 		if (call_user_function_ex(CG(function_table), NULL, &user_func, &retval, 1, args, 0, NULL TSRMLS_CC) != SUCCESS) {
 			BG(serialize_lock)--;

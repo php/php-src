@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -154,12 +154,12 @@ typedef struct _spl_dual_it_object {
 		} append;
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 		struct {
-			int              use_flags;
-			zend_long             flags;
-			regex_mode       mode;
-			zend_long             preg_flags;
+			zend_long        flags;
+			zend_long        preg_flags;
 			pcre_cache_entry *pce;
 			zend_string      *regex;
+			regex_mode       mode;
+			int              use_flags;
 		} regex;
 #endif
 		_spl_cbfilter_it_intern *cbfilter;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -4386,7 +4386,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 	if (successful) {
 		zval_dtor(crypted);
 		cryptedbuf->val[cryptedlen] = '\0';
-		ZVAL_STR(crypted, cryptedbuf);
+		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
 	}
@@ -4451,7 +4451,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 	if (successful) {
 		zval_dtor(crypted);
 		cryptedbuf->val[cryptedlen] = '\0';
-		ZVAL_STR(crypted, cryptedbuf);
+		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
 	}
@@ -4509,7 +4509,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 	if (successful) {
 		zval_dtor(crypted);
 		cryptedbuf->val[cryptedlen] = '\0';
-		ZVAL_STR(crypted, cryptedbuf);
+		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
 	}
@@ -4576,7 +4576,7 @@ PHP_FUNCTION(openssl_public_decrypt)
 	if (successful) {
 		zval_dtor(crypted);
 		cryptedbuf->val[cryptedlen] = '\0';
-		ZVAL_STR(crypted, cryptedbuf);
+		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
 	}
@@ -4660,7 +4660,7 @@ PHP_FUNCTION(openssl_sign)
 		zval_dtor(signature);
 		sigbuf->val[siglen] = '\0';
 		sigbuf->len = siglen;
-		ZVAL_STR(signature, sigbuf);
+		ZVAL_NEW_STR(signature, sigbuf);
 		RETVAL_TRUE;
 	} else {
 		efree(sigbuf);
@@ -4812,7 +4812,7 @@ PHP_FUNCTION(openssl_seal)
 	if (len1 + len2 > 0) {
 		zval_dtor(sealdata);
 		buf[len1 + len2] = '\0';
-		ZVAL_STR(sealdata, zend_string_init((char*)buf, len1 + len2, 0));
+		ZVAL_NEW_STR(sealdata, zend_string_init((char*)buf, len1 + len2, 0));
 		efree(buf);
 
 		zval_dtor(ekeys);
@@ -4903,7 +4903,7 @@ PHP_FUNCTION(openssl_open)
 		} else {
 			zval_dtor(opendata);
 			buf[len1 + len2] = '\0';
-			ZVAL_STR(opendata, zend_string_init((char*)buf, len1 + len2, 0));
+			ZVAL_NEW_STR(opendata, zend_string_init((char*)buf, len1 + len2, 0));
 			efree(buf);
 			RETVAL_TRUE;
 		}

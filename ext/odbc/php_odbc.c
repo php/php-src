@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -524,9 +524,9 @@ static PHP_INI_DISP(display_link_nums)
 	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
+		value = ini_entry->orig_value->val;
 	} else if (ini_entry->value) {
-		value = ini_entry->value;
+		value = ini_entry->value->val;
 	} else {
 		value = NULL;
 	}
@@ -549,9 +549,9 @@ static PHP_INI_DISP(display_defPW)
 	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
+		value = ini_entry->orig_value->val;
 	} else if (ini_entry->value) {
-		value = ini_entry->value;
+		value = ini_entry->value->val;
 	} else {
 		value = NULL;
 	}
@@ -580,9 +580,9 @@ static PHP_INI_DISP(display_binmode)
 	TSRMLS_FETCH();
 	
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
+		value = ini_entry->orig_value->val;
 	} else if (ini_entry->value) {
-		value = ini_entry->value;
+		value = ini_entry->value->val;
 	} else {
 		value = NULL;
 	}
@@ -611,9 +611,9 @@ static PHP_INI_DISP(display_lrl)
 	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
+		value = ini_entry->orig_value->val;
 	} else if (ini_entry->value) {
-		value = ini_entry->value;
+		value = ini_entry->value->val;
 	} else {
 		value = NULL;
 	}
@@ -637,9 +637,9 @@ static PHP_INI_DISP(display_cursortype)
 	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
+		value = ini_entry->orig_value->val;
 	} else if (ini_entry->value) {
-		value = ini_entry->value;
+		value = ini_entry->value->val;
 	} else {
 		value = NULL;
 	}
@@ -2615,13 +2615,13 @@ try_and_get_another_connection:
 		zend_resource *index_ptr, new_index_ptr;
 		
 		if ((index_ptr = zend_hash_str_find_ptr(&EG(regular_list), hashed_details, hashed_len)) != NULL) {
-			int conn_id;
+			zend_ulong conn_id;
 			zend_resource *p;
 
 			if (index_ptr->type != le_index_ptr) {
 				RETURN_FALSE;
 			}
-			conn_id = (int)index_ptr->ptr;
+			conn_id = (zend_ulong)index_ptr->ptr;
 			p = zend_hash_index_find_ptr(&EG(regular_list), conn_id);   /* check if the connection is still there */
 
 			if (p && p->ptr && (p->type == le_conn || p->type == le_pconn)) {

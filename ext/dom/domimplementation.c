@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -107,14 +107,16 @@ PHP_METHOD(domimplementation, createDocumentType)
 		RETURN_FALSE;
 	}
 
-	if (publicid_len > 0)
-		pch1 = publicid;
-	if (systemid_len > 0)
-		pch2 = systemid;
+	if (publicid_len > 0) {
+		pch1 = (xmlChar *) publicid;
+	}
+	if (systemid_len > 0) {
+		pch2 = (xmlChar *) systemid;
+	}
 
 	uri = xmlParseURI(name);
 	if (uri != NULL && uri->opaque != NULL) {
-		localname = xmlStrdup(uri->opaque);
+		localname = xmlStrdup((xmlChar *) uri->opaque);
 		if (xmlStrchr(localname, (xmlChar) ':') != NULL) {
 			php_dom_throw_error(NAMESPACE_ERR, 1 TSRMLS_CC);
 			xmlFreeURI(uri);
@@ -122,7 +124,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 			RETURN_FALSE;
 		}
 	} else {
-		localname = xmlStrdup(name);
+		localname = xmlStrdup((xmlChar *) name);
 	}
 
 	/* TODO: Test that localname has no invalid chars 
@@ -182,7 +184,9 @@ PHP_METHOD(domimplementation, createDocument)
 
 	if (name_len > 0) {
 		errorcode = dom_check_qname(name, &localname, &prefix, 1, name_len);
-		if (errorcode == 0 && uri_len > 0 && ((nsptr = xmlNewNs(NULL, uri, prefix)) == NULL)) {
+		if (errorcode == 0 && uri_len > 0
+			&& ((nsptr = xmlNewNs(NULL, (xmlChar *) uri, (xmlChar *) prefix)) == NULL)
+		) {
 			errorcode = NAMESPACE_ERR;
 		}
 	}
@@ -217,7 +221,7 @@ PHP_METHOD(domimplementation, createDocument)
 	}
 
 	if (localname != NULL) {
-		nodep = xmlNewDocNode (docp, nsptr, localname, NULL);
+		nodep = xmlNewDocNode(docp, nsptr, (xmlChar *) localname, NULL);
 		if (!nodep) {
 			if (doctype != NULL) {
 				docp->intSubset = NULL;

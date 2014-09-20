@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -281,9 +281,12 @@ ssize_t pread(int, void *, size_t, off64_t);
 BEGIN_EXTERN_C()
 void phperror(char *error);
 PHPAPI size_t php_write(void *buf, size_t size TSRMLS_DC);
-PHPAPI size_t php_printf(const char *format, ...);
+PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
+		2);
 PHPAPI int php_get_module_initialized(void);
 PHPAPI void php_log_err(char *log_message TSRMLS_DC);
+int Debug(char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
+int cfgparse(void);
 END_EXTERN_C()
 
 #define php_error zend_error
@@ -305,9 +308,12 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 #endif
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
-PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...);
-PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...);
-PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...);
+PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 3, PHP_ATTR_FMT_OFFSET + 4);
+PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 4, PHP_ATTR_FMT_OFFSET + 5);
+PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 5, PHP_ATTR_FMT_OFFSET + 6);
 #ifdef PHP_WIN32
 PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2 TSRMLS_DC);
 #endif

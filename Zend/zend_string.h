@@ -140,7 +140,7 @@ static zend_always_inline zend_string *zend_string_init(const char *str, size_t 
 static zend_always_inline zend_string *zend_string_copy(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
-		zend_string_addref(s);
+		GC_REFCOUNT(s)++;
 	}
 	return s;
 }
@@ -161,14 +161,14 @@ static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_
 	if (IS_INTERNED(s)) {
 		ret = zend_string_alloc(len, persistent);
 		memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
-	} else if (EXPECTED(zend_string_refcount(s) == 1)) {
+	} else if (EXPECTED(GC_REFCOUNT(s) == 1)) {
 		ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
 		ret->len = len;
 		zend_string_forget_hash_val(ret);
 	} else {
 		ret = zend_string_alloc(len, persistent);
 		memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
-		zend_string_delref(s);
+		GC_REFCOUNT(s)--;
 	}
 	return ret;
 }
@@ -180,14 +180,14 @@ static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, 
 	if (IS_INTERNED(s)) {
 		ret = zend_string_safe_alloc(n, m, l, persistent);
 		memcpy(ret->val, s->val, ((n * m) + l > (size_t)s->len ? (size_t)s->len : ((n * m) + l)) + 1);
-	} else if (zend_string_refcount(s) == 1) {
+	} else if (GC_REFCOUNT(s) == 1) {
 		ret = (zend_string *)safe_perealloc(s, n, m, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + l + 1), persistent);
 		ret->len = (n * m) + l;
 		zend_string_forget_hash_val(ret);
 	} else {
 		ret = zend_string_safe_alloc(n, m, l, persistent);
 		memcpy(ret->val, s->val, ((n * m) + l > (size_t)s->len ? (size_t)s->len : ((n * m) + l)) + 1);
-		zend_string_delref(s);
+		GC_REFCOUNT(s)--;
 	}
 	return ret;
 }
@@ -195,7 +195,7 @@ static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, 
 static zend_always_inline void zend_string_free(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
-		ZEND_ASSERT(zend_string_refcount(s) <= 1);
+		ZEND_ASSERT(GC_REFCOUNT(s) <= 1);
 		pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
 	}
 }
@@ -203,7 +203,7 @@ static zend_always_inline void zend_string_free(zend_string *s)
 static zend_always_inline void zend_string_release(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
-		if (zend_string_delref(s) == 0) {
+		if (--GC_REFCOUNT(s) == 0) {
 			pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
 		}
 	}
@@ -253,7 +253,7 @@ static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_str
  *                  -- Ralf S. Engelschall <rse@engelschall.com>
  */
 
-static inline zend_ulong zend_inline_hash_func(const char *str, size_t len)
+static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size_t len)
 {
 	register zend_ulong hash = Z_UL(5381);
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -185,7 +185,7 @@ PHP_FUNCTION(token_get_all)
 		return;
 	}
 
-	ZVAL_STR(&source_zval, zend_string_copy(source));
+	ZVAL_STR_COPY(&source_zval, source);
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 
 	if (zend_prepare_string_for_scanning(&source_zval, "" TSRMLS_CC) == FAILURE) {

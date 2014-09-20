@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -84,8 +84,7 @@ void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_fla
 
 		if ((tmp = zend_hash_find(Z_ARRVAL_P(list), pce->name)) == NULL) {
 			zval t;
-			zend_string_addref(pce->name);
-			ZVAL_STR(&t, pce->name);
+			ZVAL_STR_COPY(&t, pce->name);
 			zend_hash_add(Z_ARRVAL_P(list), pce->name, &t);
 		}
 	}

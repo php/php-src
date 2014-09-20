@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -2883,7 +2883,12 @@ SPL_METHOD(SplFileObject, fwrite)
 	}
 
 	if (ZEND_NUM_ARGS() > 1) {
-		str_len = MAX(0, MIN(length, str_len));
+		if (length >= 0) {
+			str_len = MAX(0, MIN((size_t)length, str_len));
+		} else {
+			/* Negative length given, nothing to write */
+			str_len = 0;
+		}
 	}
 	if (!str_len) {
 		RETURN_LONG(0);
@@ -2911,7 +2916,7 @@ SPL_METHOD(SplFileObject, fread)
 		RETURN_FALSE;
 	}
 
-	ZVAL_STR(return_value, zend_string_alloc(length, 0));
+	ZVAL_NEW_STR(return_value, zend_string_alloc(length, 0));
 	Z_STRLEN_P(return_value) = php_stream_read(intern->u.file.stream, Z_STRVAL_P(return_value), length);
 
 	/* needed because recv/read/gzread doesnt put a null at the end*/

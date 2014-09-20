@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -219,7 +219,16 @@ static double php_asinh(double z)
 #ifdef HAVE_ASINH
 	return(asinh(z));
 #else
+# ifdef _WIN64
+	if (z > 0) {
+		return log(z + sqrt(z * z + 1));
+	}
+	else {
+		return -log(-z + sqrt(z * z + 1));
+	}
+# else
 	return(log(z + sqrt(1 + pow(z, 2))) / log(M_E));
+# endif
 #endif
 }
 /* }}} */
@@ -231,7 +240,15 @@ static double php_acosh(double x)
 #ifdef HAVE_ACOSH
 	return(acosh(x));
 #else
+# ifdef _WIN64
+	if (x >= 1) {
+		return log(x + sqrt(x * x - 1));
+	} else {
+		return (DBL_MAX+DBL_MAX)-(DBL_MAX+DBL_MAX);
+	}
+# else
 	return(log(x + sqrt(x * x - 1)));
+# endif
 #endif
 }
 /* }}} */

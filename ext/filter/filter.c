@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -160,7 +160,7 @@ static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
 	for (i = 0; i < size; ++i) {
-		if ((strcasecmp(new_value, filter_list[i].name) == 0)) {
+		if ((strcasecmp(new_value->val, filter_list[i].name) == 0)) {
 			IF_G(default_filter) = filter_list[i].id;
 			return SUCCESS;
 		}
@@ -178,7 +178,7 @@ static PHP_INI_MH(OnUpdateFlags)
 	if (!new_value) {
 		IF_G(default_filter_flags) = FILTER_FLAG_NO_ENCODE_QUOTES;
 	} else {
-		IF_G(default_filter_flags) = atoi(new_value);
+		IF_G(default_filter_flags) = atoi(new_value->val);
 	}
 	return SUCCESS;
 }

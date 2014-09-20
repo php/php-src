@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1336,7 +1336,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 			break;
 #endif
 		case PHP_STREAM_META_ACCESS:
-			mode = (mode_t)*(long *)value;
+			mode = (mode_t)*(zend_long *)value;
 			ret = VCWD_CHMOD(url, mode);
 			break;
 		default:

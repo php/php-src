@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -466,10 +466,8 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		} else if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);
 		}
-			
-		if (fci.params) {
-			efree(fci.params);
-		}
+
+		zend_fcall_info_args_clear(&fci, 1);
 	}
 }
 /* }}} */

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -956,7 +956,7 @@ static HashTable *php_zip_get_properties(zval *object TSRMLS_DC)/* {{{ */
 	HashTable *props;
 	zip_prop_handler *hnd;
 	zend_string *key;
-	ulong num_key;
+	zend_ulong num_key;
 
 	obj = Z_ZIP_P(object);
 	props = zend_std_get_properties(object TSRMLS_CC);
@@ -1609,9 +1609,11 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		RETURN_FALSE;
 	}
 
-	if (remove_path && remove_path_len > 1 && (remove_path[strlen(remove_path) - 1] == '/' ||
-		remove_path[strlen(remove_path) - 1] == '\\')) {
-		remove_path[strlen(remove_path) - 1] = '\0';
+	if (remove_path && remove_path_len > 1) {
+		size_t real_len = strlen(remove_path);
+		if (real_len > 1 && remove_path[real_len - 1] == '/' || remove_path[real_len - 1] == '\\') {
+			remove_path[real_len - 1] = '\0';
+		}
 	}
 
 	if (type == 1) {

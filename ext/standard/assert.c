@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -58,17 +58,17 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 			zval_ptr_dtor(&ASSERTG(callback));
 			ZVAL_UNDEF(&ASSERTG(callback));
 		}
-		if (new_value && (Z_TYPE(ASSERTG(callback)) != IS_UNDEF || new_value_length)) {
-			ZVAL_STRINGL(&ASSERTG(callback), new_value, new_value_length);
+		if (new_value && (Z_TYPE(ASSERTG(callback)) != IS_UNDEF || new_value->len)) {
+			ZVAL_STR_COPY(&ASSERTG(callback), new_value);
 		}
 	} else {
 		if (ASSERTG(cb)) {
 			pefree(ASSERTG(cb), 1);
 		}
-		if (new_value && new_value_length) {
-			ASSERTG(cb) = pemalloc(new_value_length + 1, 1);
-			memcpy(ASSERTG(cb), new_value, new_value_length);
-			ASSERTG(cb)[new_value_length] = '\0';
+		if (new_value && new_value->len) {
+			ASSERTG(cb) = pemalloc(new_value->len + 1, 1);
+			memcpy(ASSERTG(cb), new_value->val, new_value->len);
+			ASSERTG(cb)[new_value->len] = '\0';
 		} else {
 			ASSERTG(cb) = NULL;
 		}
@@ -272,7 +272,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.active", sizeof("assert.active")-1, 0);
-			zend_alter_ini_entry_ex(key, value_str->val, value_str->len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 			zend_string_release(key);
 			zend_string_release(value_str);
 		}
@@ -284,7 +284,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.bail", sizeof("assert.bail")-1, 0);
-			zend_alter_ini_entry_ex(key, value_str->val, value_str->len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 			zend_string_release(key);
 			zend_string_release(value_str);
 		}
@@ -296,7 +296,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.quiet_eval", sizeof("assert.quiet_eval")-1, 0);
-			zend_alter_ini_entry_ex(key, value_str->val, value_str->len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 			zend_string_release(key);
 			zend_string_release(value_str);
 		}
@@ -308,7 +308,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.warning", sizeof("assert.warning")-1, 0);
-			zend_alter_ini_entry_ex(key, value_str->val, value_str->len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 			zend_string_release(key);
 			zend_string_release(value_str);
 		}

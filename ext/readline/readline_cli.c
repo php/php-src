@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -79,7 +79,7 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
 static char php_last_char = '\0';
 static FILE *pager_pipe = NULL;
 
-static size_t readline_shell_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+static size_t readline_shell_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 	if (CLIR_G(prompt_str)) {
 		smart_str_appendl(CLIR_G(prompt_str), str, str_length);
@@ -97,7 +97,7 @@ static size_t readline_shell_write(const char *str, uint str_length TSRMLS_DC) /
 }
 /* }}} */
 
-static int readline_shell_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+static size_t readline_shell_ub_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 	/* We just store the last char here and then pass back to the
 	   caller (sapi_cli_single_write in sapi/cli) which will actually
@@ -409,7 +409,7 @@ static int cli_is_valid_code(char *code, int len, zend_string **prompt TSRMLS_DC
 static char *cli_completion_generator_ht(const char *text, int textlen, int *state, HashTable *ht, void **pData TSRMLS_DC) /* {{{ */
 {
 	zend_string *name;
-	ulong number;
+	zend_ulong number;
 
 	if (!(*state % 2)) {
 		zend_hash_internal_pointer_reset(ht);
@@ -633,7 +633,7 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 				param++;
 				cmd = zend_string_init(&line[1], param - &line[1] - 1, 0);
 
-				zend_alter_ini_entry_ex(cmd, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+				zend_alter_ini_entry_chars_ex(cmd, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 				zend_string_release(cmd);
 				add_history(line);
 

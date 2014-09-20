@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1210,7 +1210,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 		num_bytes = arg2len;
 	} else {
 		if (arg3 > 0) {
-			num_bytes = MAX(0, MIN((size_t)arg3, arg2len));
+			num_bytes = MIN((size_t)arg3, arg2len);
 		} else {
 			num_bytes = 0;
 		}
@@ -1809,12 +1809,12 @@ static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t le
 	unsigned char last_chars[2] = { 0, 0 };
 
 	while (len > 0) {
-		inc_len = (*ptr == '\0' ? 1: php_mblen(ptr, len));
+		inc_len = (*ptr == '\0' ? 1 : php_mblen(ptr, len));
 		switch (inc_len) {
 			case -2:
 			case -1:
 				inc_len = 1;
-				php_ignore_value(php_mblen(NULL, 0));
+				php_mb_reset();
 				break;
 			case 0:
 				goto quit_loop;
@@ -2070,7 +2070,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 	zend_bool first_field = 1;
 
 	/* initialize internal state */
-	php_ignore_value(php_mblen(NULL, 0));
+	php_mb_reset();
 
 	/* Now into new section that parses buf for delimiter/enclosure fields */
 
@@ -2096,7 +2096,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 
 		tptr = temp;
 
-		inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
+		inc_len = (bptr < limit ? (*bptr == '\0' ? 1 : php_mblen(bptr, limit - bptr)): 0);
 		if (inc_len == 1) {
 			char *tmp = bptr;
 			while ((*tmp != delimiter) && isspace((int)*(unsigned char *)tmp)) {
@@ -2185,7 +2185,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 
 					case -2:
 					case -1:
-						php_ignore_value(php_mblen(NULL, 0));
+						php_mb_reset();
 						/* break is omitted intentionally */
 					case 1:
 						/* we need to determine if the enclosure is
@@ -2240,7 +2240,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 						}
 						break;
 				}
-				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1 : php_mblen(bptr, limit - bptr)): 0);
 			}
 
 		quit_loop_2:
@@ -2253,7 +2253,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 					case -2:
 					case -1:
 						inc_len = 1;
-						php_ignore_value(php_mblen(NULL, 0));
+						php_mb_reset();
 						/* break is omitted intentionally */
 					case 1:
 						if (*bptr == delimiter) {
@@ -2264,7 +2264,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 						break;
 				}
 				bptr += inc_len;
-				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1 : php_mblen(bptr, limit - bptr)): 0);
 			}
 
 		quit_loop_3:
@@ -2284,7 +2284,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 					case -2:
 					case -1:
 						inc_len = 1;
-						php_ignore_value(php_mblen(NULL, 0));
+						php_mb_reset();
 						/* break is omitted intentionally */
 					case 1:
 						if (*bptr == delimiter) {
@@ -2295,7 +2295,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 						break;
 				}
 				bptr += inc_len;
-				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1 : php_mblen(bptr, limit - bptr)): 0);
 			}
 		quit_loop_4:
 			memcpy(tptr, hunk_begin, bptr - hunk_begin);

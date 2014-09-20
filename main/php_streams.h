@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -299,9 +299,9 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_
 #define php_stream_fill_read_buffer(stream, size)	_php_stream_fill_read_buffer((stream), (size) TSRMLS_CC)
 
 #ifdef ZTS
-PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...);
+PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 #else
-PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...);
+PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 #endif
 
 /* php_stream_printf macro & function require TSRMLS_CC */
@@ -560,9 +560,9 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf TS
 
 /* pushes an error message onto the stack for a wrapper instance */
 #ifdef ZTS
-PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...);
+PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
 #else
-PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...);
+PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 #endif
 
 #define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */

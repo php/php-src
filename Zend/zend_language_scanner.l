@@ -126,7 +126,7 @@ BEGIN_EXTERN_C()
 static size_t encoding_filter_script_to_internal(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
 {
 	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
-	assert(internal_encoding && zend_multibyte_check_lexer_compatibility(internal_encoding));
+	ZEND_ASSERT(internal_encoding);
 	return zend_multibyte_encoding_converter(to, to_length, from, from_length, internal_encoding, LANG_SCNG(script_encoding) TSRMLS_CC);
 }
 
@@ -144,7 +144,7 @@ LANG_SCNG(script_encoding), zend_multibyte_encoding_utf8 TSRMLS_CC);
 static size_t encoding_filter_intermediate_to_internal(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
 {
 	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
-	assert(internal_encoding && zend_multibyte_check_lexer_compatibility(internal_encoding));
+	ZEND_ASSERT(internal_encoding);
 	return zend_multibyte_encoding_converter(to, to_length, from, from_length,
 internal_encoding, zend_multibyte_encoding_utf8 TSRMLS_CC);
 }
@@ -556,7 +556,6 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	zend_op_array *original_active_op_array = CG(active_op_array);
-	zend_op_array *retval=NULL;
 	int compiler_result;
 	zend_bool compilation_successful=0;
 	zval retval_zv;
@@ -565,8 +564,6 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 	ZVAL_LONG(&retval_zv, 1);
 
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
-
-	retval = op_array; /* success oriented */
 
 	if (open_file_for_scanning(file_handle TSRMLS_CC)==FAILURE) {
 		if (type==ZEND_REQUIRE) {
@@ -596,18 +593,17 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		compilation_successful=1;
 	}
 
-	if (retval) {
-		CG(active_op_array) = original_active_op_array;
-		if (compilation_successful) {
-			pass_two(op_array TSRMLS_CC);
-			zend_release_labels(0 TSRMLS_CC);
-		} else {
-			efree_size(op_array, sizeof(zend_op_array));
-			retval = NULL;
-		}
+	CG(active_op_array) = original_active_op_array;
+	if (compilation_successful) {
+		pass_two(op_array TSRMLS_CC);
+		zend_release_labels(0 TSRMLS_CC);
+	} else {
+		efree_size(op_array, sizeof(zend_op_array));
+		op_array = NULL;
 	}
+
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
-	return retval;
+	return op_array;
 }
 
 
@@ -847,7 +843,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 	SCNG(yy_cursor) = new_yy_start + (SCNG(yy_cursor) - SCNG(yy_start));
 	SCNG(yy_marker) = new_yy_start + (SCNG(yy_marker) - SCNG(yy_start));
 	SCNG(yy_text) = new_yy_start + (SCNG(yy_text) - SCNG(yy_start));
-	SCNG(yy_limit) = new_yy_start + (SCNG(yy_limit) - SCNG(yy_start));
+	SCNG(yy_limit) = new_yy_start + length;
 
 	SCNG(yy_start) = new_yy_start;
 }
@@ -1764,6 +1760,7 @@ inline_html:
 	/* Invalid rule to return a more explicit parse error with proper line number */
 	yyless(0);
 	yy_pop_state(TSRMLS_C);
+	ZVAL_NULL(zendlval);
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
@@ -1878,6 +1875,7 @@ inline_html:
 			/* Unclosed single quotes; treat similar to double quotes, but without a separate token
 			 * for ' (unrecognized by parser), instead of old flex fallback to "Unexpected character..."
 			 * rule, which continued in ST_IN_SCRIPTING state after the quote */
+			ZVAL_NULL(zendlval);
 			return T_ENCAPSED_AND_WHITESPACE;
 		}
 	}

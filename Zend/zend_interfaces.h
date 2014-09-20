@@ -61,11 +61,11 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 
 ZEND_API void zend_register_interfaces(TSRMLS_D);
 
-ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC);
-ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, uint32_t buf_len, zend_unserialize_data *data TSRMLS_DC);
+ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC);
+ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data TSRMLS_DC);
 
-ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC);
-ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, uint32_t buf_len, zend_unserialize_data *data TSRMLS_DC);
+ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC);
+ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data TSRMLS_DC);
 
 END_EXTERN_C()
 

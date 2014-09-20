@@ -27,6 +27,7 @@
 #include "zend_constants.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_inheritance.h"
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
@@ -1144,9 +1145,8 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties TSRMLS_DC) 
 		if (key) {
 			zval member;
 
-			ZVAL_STR(&member, zend_string_copy(key));
+			ZVAL_STR(&member, key);
 			obj_ht->write_property(obj, &member, value, NULL TSRMLS_CC);
-			zval_ptr_dtor(&member);
 		}
 	} ZEND_HASH_FOREACH_END();
 	EG(scope) = old_scope;
@@ -1268,13 +1268,12 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 {
 	object->properties = properties;
 	if (object->ce->default_properties_count) {
-	    zval *prop, tmp;
+	    zval *prop;
     	zend_string *key;
     	zend_property_info *property_info;
 
     	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
-		    ZVAL_STR(&tmp, key);
-			property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
+			property_info = zend_get_property_info(object->ce, key, 1 TSRMLS_CC);
 			if (property_info &&
 			    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
 			    property_info->offset >= 0) {
@@ -1293,8 +1292,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties 
    	zend_property_info *property_info;
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
-	    ZVAL_STR(&tmp, key);
-		property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
+		property_info = zend_get_property_info(object->ce, key, 1 TSRMLS_CC);
 		if (property_info &&
 		    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
 		    property_info->offset >= 0) {
@@ -1303,7 +1301,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties 
 			zval_add_ref(&object->properties_table[property_info->offset]);
 			if (object->properties) {
 				ZVAL_INDIRECT(&tmp, &object->properties_table[property_info->offset]);
-				prop = zend_hash_update(object->properties, key, &tmp);
+				zend_hash_update(object->properties, key, &tmp);
 			}
 		} else {
 			if (!object->properties) {
@@ -2280,7 +2278,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 
 		/* If types of arguments have to be checked */
 		if (reg_function->common.arg_info && reg_function->common.num_args) {
-			int i;
+			uint32_t i;
 			for (i = 0; i < reg_function->common.num_args; i++) {
 				if (reg_function->common.arg_info[i].class_name ||
 				    reg_function->common.arg_info[i].type_hint) {
@@ -3450,7 +3448,7 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* {{{ */
 {
 	if (fci->params) {
-		int i;
+		uint32_t i;
 
 		for (i = 0; i < fci->param_count; i++) {
 			zval_ptr_dtor(&fci->params[i]);
@@ -3484,7 +3482,7 @@ ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count
 ZEND_API int zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, zval *args TSRMLS_DC) /* {{{ */
 {
 	zval *arg, *params;
-	int n = 1;
+	uint32_t n = 1;
 
 	zend_fcall_info_args_clear(fci, !args);
 

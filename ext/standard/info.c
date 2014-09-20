@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -219,7 +219,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					php_info_print(string_key->val);
 				}
 			} else {
-				php_info_printf("%pd", num_key);
+				php_info_printf(ZEND_ULONG_FMT, num_key);
 			}
 			php_info_print("\"]");
 			if (!sapi_module.phpinfo_as_text) {
@@ -584,6 +584,8 @@ PHPAPI zend_string *php_get_uname(char mode)
 	} else { /* assume mode == 'a' */
 		char *winver = php_get_windows_name();
 		char wincpu[20];
+
+		ZEND_ASSERT(winver != NULL);
 
 		php_get_windows_cpu(wincpu, sizeof(wincpu));
 		dwBuild = (DWORD)(HIWORD(dwVersion));
@@ -1187,7 +1189,7 @@ PHP_FUNCTION(phpinfo)
 PHP_FUNCTION(phpversion)
 {
 	char *ext_name = NULL;
-	int ext_name_len = 0;
+	size_t ext_name_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext_name, &ext_name_len) == FAILURE) {
 		return;

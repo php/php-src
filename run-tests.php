@@ -2,7 +2,7 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1189,6 +1189,7 @@ function run_test($php, $file, $env)
 	global $no_clean;
 	global $valgrind_version;
 	global $JUNIT;
+	global $SHOW_ONLY_GROUPS;
 	$temp_filenames = null;
 	$org_file = $file;
 
@@ -1363,7 +1364,9 @@ TEST $file
 		}
 	}
 
-	show_test($test_idx, $shortname);
+	if (!$SHOW_ONLY_GROUPS) {
+		show_test($test_idx, $shortname);
+	}
 
 	if (is_array($IN_REDIRECT)) {
 		$temp_dir = $test_dir = $IN_REDIRECT['dir'];
@@ -2569,7 +2572,7 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 
 	if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
 		echo "$result $tested [$tested_file] $extra\n";
-	} else {
+	} else if (!$SHOW_ONLY_GROUPS) {
 		// Write over the last line to avoid random trailing chars on next echo
 		echo str_repeat(" ", $line_length), "\r";
 	}

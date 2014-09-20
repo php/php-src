@@ -254,7 +254,7 @@ struct _zend_ini_scanner_globals {
 	char *filename;
 	int lineno;
 
-	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW */
+	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW, ZEND_INI_SCANNER_TYPED */
 	int scanner_mode;
 };
 

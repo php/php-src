@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -90,20 +90,20 @@ typedef struct st_mysqlnd_packet_greet {
 /* Client authenticates */
 typedef struct st_mysqlnd_packet_auth {
 	MYSQLND_PACKET_HEADER		header;
-	uint32_t	client_flags;
-	uint32_t	max_packet_size;
-	uint8_t		charset_no;
 	const char	*user;
 	const zend_uchar	*auth_data;
 	size_t		auth_data_len;
 	const char	*db;
 	const char	*auth_plugin_name;
+	uint32_t	client_flags;
+	uint32_t	max_packet_size;
+	uint8_t		charset_no;
 	/* Here the packet ends. This is user supplied data */
-	size_t		db_len;
 	zend_bool	send_auth_data;
 	zend_bool	is_change_user_packet;
 	zend_bool	silent;
 	HashTable	*connect_attr;
+	size_t		db_len;
 } MYSQLND_PACKET_AUTH;
 
 /* Auth response packet */

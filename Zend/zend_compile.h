@@ -83,7 +83,7 @@ typedef struct _zend_ast_znode {
 } zend_ast_znode;
 ZEND_API zend_ast *zend_ast_create_znode(znode *node);
 
-static inline znode *zend_ast_get_znode(zend_ast *ast) {
+static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
 }
 
@@ -449,14 +449,6 @@ void zend_do_free(znode *op1 TSRMLS_DC);
 ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC);
-ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface TSRMLS_DC);
-ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC);
-
-ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC);
-ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
-
-ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
-void zend_do_early_binding(TSRMLS_D);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS_DC);
 
 /* Functions for a null terminated pointer list, used for traits parsing and compilation */
@@ -491,16 +483,18 @@ ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC);
 ZEND_API void zend_cleanup_internal_classes(TSRMLS_D);
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array);
+ZEND_API int clean_non_persistent_function_full(zval *zv TSRMLS_DC);
+ZEND_API int clean_non_persistent_class_full(zval *zv TSRMLS_DC);
 
 ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
 ZEND_API void zend_function_dtor(zval *zv);
 ZEND_API void destroy_zend_class(zval *zv);
 void zend_class_add_ref(zval *zv);
 
-ZEND_API zend_string *zend_mangle_property_name(const char *src1, int src1_length, const char *src2, int src2_length, int internal);
-#define zend_unmangle_property_name(mangled_property, mangled_property_len, class_name, prop_name) \
-        zend_unmangle_property_name_ex(mangled_property, mangled_property_len, class_name, prop_name, NULL)
-ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int mangled_property_len, const char **class_name, const char **prop_name, int *prop_len);
+ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_length, const char *src2, size_t src2_length, int internal);
+#define zend_unmangle_property_name(mangled_property, class_name, prop_name) \
+        zend_unmangle_property_name_ex(mangled_property, class_name, prop_name, NULL)
+ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char **class_name, const char **prop_name, size_t *prop_len);
 
 #define ZEND_FUNCTION_DTOR zend_function_dtor
 #define ZEND_CLASS_DTOR destroy_zend_class
@@ -648,21 +642,28 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_SEND_BY_REF     1
 #define ZEND_SEND_PREFER_REF 2
 
-#define CHECK_ARG_SEND_TYPE(zf, arg_num, m) \
-	(EXPECTED((zf)->common.arg_info != NULL) && \
-	(EXPECTED(arg_num <= (zf)->common.num_args) \
-		? ((zf)->common.arg_info[arg_num-1].pass_by_reference & (m)) \
-		: (UNEXPECTED((zf)->common.fn_flags & ZEND_ACC_VARIADIC) != 0) && \
-		   ((zf)->common.arg_info[(zf)->common.num_args-1].pass_by_reference & (m))))
+static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
+{
+	if (UNEXPECTED(zf->common.arg_info == NULL)) {
+		return 0;
+	}
+	if (UNEXPECTED(arg_num > zf->common.num_args)) {
+		if (EXPECTED((zf->common.fn_flags & ZEND_ACC_VARIADIC) == 0)) {
+			return 0;
+		}
+		arg_num = zf->common.num_args;
+	}
+	return UNEXPECTED((zf->common.arg_info[arg_num-1].pass_by_reference & mask) != 0);
+}
 
 #define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
-	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF)
+	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_BY_REF)
 
 #define ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num) \
-	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF)
+	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF)
 
 #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
-	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_PREFER_REF)
+	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_PREFER_REF)
 
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1

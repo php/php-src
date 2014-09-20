@@ -232,14 +232,14 @@ static inline zend_string *zend_clone_str(zend_string *str TSRMLS_DC)
 
 	if (IS_INTERNED(str)) {		
 		ret = str;
-	} else if (zend_string_refcount(str) <= 1 || (ret = accel_xlat_get(str)) == NULL) {
+	} else if (GC_REFCOUNT(str) <= 1 || (ret = accel_xlat_get(str)) == NULL) {
 		ret = zend_string_dup(str, 0);
 		GC_FLAGS(ret) = GC_FLAGS(str);
-		if (zend_string_refcount(str) > 1) {
+		if (GC_REFCOUNT(str) > 1) {
 			accel_xlat_set(str, ret);
 		}
 	} else {
-		zend_string_addref(ret);
+		GC_REFCOUNT(ret)++;
 	}
 	return ret;
 }

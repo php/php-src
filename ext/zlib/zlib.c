@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -863,22 +863,28 @@ static const zend_function_entry php_zlib_functions[] = {
 /* {{{ OnUpdate_zlib_output_compression */
 static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
-	int status, int_value;
+	int int_value;
 	char *ini_value;
+	zend_long *p;
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base;
+
+	base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
 
 	if (new_value == NULL) {
 		return FAILURE;
 	}
 
-	if (!strncasecmp(new_value, "off", sizeof("off"))) {
-		new_value = "0";
-		new_value_length = sizeof("0");
-	} else if (!strncasecmp(new_value, "on", sizeof("on"))) {
-		new_value = "1";
-		new_value_length = sizeof("1");
+	if (!strncasecmp(new_value->val, "off", sizeof("off"))) {
+		int_value = 0;
+	} else if (!strncasecmp(new_value->val, "on", sizeof("on"))) {
+		int_value = 1;
+	} else {
+		int_value = zend_atoi(new_value->val, new_value->len);
 	}
-
-	int_value = zend_atoi(new_value, new_value_length);
 	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0);
 
 	if (ini_value && *ini_value && int_value) {
@@ -886,14 +892,15 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		return FAILURE;
 	}
 	if (stage == PHP_INI_STAGE_RUNTIME) {
-		status = php_output_get_status(TSRMLS_C);
+		int status = php_output_get_status(TSRMLS_C);
 		if (status & PHP_OUTPUT_SENT) {
 			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "Cannot change zlib.output_compression - headers already sent");
 			return FAILURE;
 		}
 	}
 
-	status = OnUpdateLong(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	p = (zend_long *) (base+(size_t) mh_arg1);
+	*p = int_value;
 
 	ZLIBG(output_compression) = ZLIBG(output_compression_default);
 	if (stage == PHP_INI_STAGE_RUNTIME && int_value) {
@@ -902,7 +909,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		}
 	}
 
-	return status;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -914,7 +921,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_handler)
 		return FAILURE;
 	}
 
-	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 /* }}} */
  
@@ -999,7 +1006,7 @@ static PHP_MINFO_FUNCTION(zlib)
 /* }}} */
 
 /* {{{ ZEND_MODULE_GLOBALS_CTOR */
-static ZEND_MODULE_GLOBALS_CTOR_D(zlib)
+static PHP_GINIT_FUNCTION(zlib)
 {
 	zlib_globals->ob_gzhandler = NULL;
     zlib_globals->handler_registered = 0;
@@ -1018,7 +1025,7 @@ zend_module_entry php_zlib_module_entry = {
 	PHP_MINFO(zlib),
 	"2.0",
 	PHP_MODULE_GLOBALS(zlib),
-	ZEND_MODULE_GLOBALS_CTOR_N(zlib),
+	PHP_GINIT(zlib),
 	NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX

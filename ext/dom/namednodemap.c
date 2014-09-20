@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -149,9 +149,9 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
 				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (xmlChar *) named);
 				} else {
-					notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
+					notep = (xmlNotation *)xmlHashLookup(objmap->ht, (xmlChar *) named);
 					if (notep) {
 						itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
 					}
@@ -160,7 +160,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 		} else {
 			nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
-				itemnode = (xmlNodePtr)xmlHasProp(nodep, named);
+				itemnode = (xmlNodePtr)xmlHasProp(nodep, (xmlChar *) named);
 			}
 		}
 	}
@@ -282,9 +282,9 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
 				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (xmlChar *) named);
 				} else {
-					notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
+					notep = (xmlNotation *)xmlHashLookup(objmap->ht, (xmlChar *) named);
 					if (notep) {
 						itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
 					}
@@ -293,7 +293,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 		} else {
 			nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
-				itemnode = (xmlNodePtr)xmlHasNsProp(nodep, named, uri);
+				itemnode = (xmlNodePtr)xmlHasNsProp(nodep, (xmlChar *) named, (xmlChar *) uri);
 			}
 		}
 	}

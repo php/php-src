@@ -62,14 +62,14 @@ ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRML
 void (*zend_on_timeout)(int seconds TSRMLS_DC);
 
 static void (*zend_message_dispatcher_p)(zend_long message, const void *data TSRMLS_DC);
-static int (*zend_get_configuration_directive_p)(const char *name, uint name_length, zval *contents);
+static zval *(*zend_get_configuration_directive_p)(zend_string *name);
 
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
 	if (!new_value) {
 		EG(error_reporting) = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED;
 	} else {
-		EG(error_reporting) = atoi(new_value);
+		EG(error_reporting) = atoi(new_value->val);
 	}
 	return SUCCESS;
 }
@@ -77,7 +77,7 @@ static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 {
-	OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
 	if (GC_G(gc_enabled)) {
 		gc_init(TSRMLS_C);
@@ -95,7 +95,7 @@ static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 	if (!zend_multibyte_get_functions(TSRMLS_C)) {
 		return SUCCESS;
 	}
-	return zend_multibyte_set_script_encoding_by_string(new_value, new_value_length TSRMLS_CC);
+	return zend_multibyte_set_script_encoding_by_string(new_value->val, new_value->len TSRMLS_CC);
 }
 /* }}} */
 
@@ -156,8 +156,8 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 		if (string_key) {
 			if (is_object) {
 				const char *prop_name, *class_name;
-				int prop_len;
-				int mangled = zend_unmangle_property_name_ex(string_key->val, string_key->len, &class_name, &prop_name, &prop_len);
+				size_t prop_len;
+				int mangled = zend_unmangle_property_name_ex(string_key, &class_name, &prop_name, &prop_len);
 
 				ZEND_WRITE_EX(prop_name, prop_len);
 				if (class_name && mangled == SUCCESS) {
@@ -278,7 +278,7 @@ again:
 		case IS_REFERENCE:
 			expr = Z_REFVAL_P(expr);
 			if (Z_TYPE_P(expr) == IS_STRING) {
-				ZVAL_STR(expr_copy, zend_string_copy(Z_STR_P(expr)));
+				ZVAL_STR_COPY(expr_copy, Z_STR_P(expr));
 				return 1;
 			}
 			goto again;
@@ -509,11 +509,20 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
 	if (compiler_globals->last_static_member) {
-		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member, sizeof(zval**));
+		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member, sizeof(zval*));
 	} else {
 		compiler_globals->static_members_table = NULL;
 	}
 	compiler_globals->script_encoding_list = NULL;
+
+#ifdef ZTS
+	compiler_globals->empty_string = zend_string_alloc(sizeof("")-1, 1);
+	compiler_globals->empty_string->val[0] = '\000';
+	zend_string_hash_val(compiler_globals->empty_string);
+	compiler_globals->empty_string->gc.u.v.flags |= IS_STR_INTERNED;
+
+	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
+#endif
 }
 /* }}} */
 
@@ -538,6 +547,10 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
+
+#ifdef ZTS
+	zend_string_release(compiler_globals->empty_string);
+#endif
 }
 /* }}} */
 
@@ -812,10 +825,35 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 	zend_shutdown_timeout_thread();
 #endif
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
+	if (EG(active))
+	{
+		/*
+		 * The order of destruction is important here.
+		 * See bugs #65463 and 66036.
+		 */
+		zend_function *func;
+		zend_class_entry *ce;
+
+		ZEND_HASH_REVERSE_FOREACH_PTR(GLOBAL_FUNCTION_TABLE, func) {
+			if (func->type == ZEND_USER_FUNCTION) {
+				zend_cleanup_op_array_data((zend_op_array *) func);
+			}
+		} ZEND_HASH_FOREACH_END();
+		ZEND_HASH_REVERSE_FOREACH_PTR(GLOBAL_CLASS_TABLE, ce) {
+			if (ce->type == ZEND_USER_CLASS) {
+				zend_cleanup_user_class_data(ce TSRMLS_CC);
+			} else {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+		zend_cleanup_internal_classes(TSRMLS_C);
+		zend_hash_reverse_apply(GLOBAL_FUNCTION_TABLE, (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
+		zend_hash_reverse_apply(GLOBAL_CLASS_TABLE, (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
+	}
 	zend_destroy_modules();
 
- 	virtual_cwd_deactivate(TSRMLS_C);
- 	virtual_cwd_shutdown();
+	virtual_cwd_deactivate(TSRMLS_C);
+	virtual_cwd_shutdown();
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
@@ -979,12 +1017,12 @@ ZEND_API void zend_message_dispatcher(zend_long message, const void *data TSRMLS
 /* }}} */
 END_EXTERN_C()
 
-ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents) /* {{{ */
+ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 {
 	if (zend_get_configuration_directive_p) {
-		return zend_get_configuration_directive_p(name, name_length, contents);
+		return zend_get_configuration_directive_p(name);
 	} else {
-		return FAILURE;
+		return NULL;
 	}
 }
 /* }}} */
@@ -1006,11 +1044,17 @@ ZEND_API int zend_get_configuration_directive(const char *name, uint name_length
 		} \
 	} while (0)
 
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
+#else
+static void zend_error_va_list(int type, const char *format, va_list args)
+#endif
 {
 	char *str;
 	int len;
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 	va_list args;
+#endif
 	va_list usr_copy;
 	zval params[5];
 	zval retval;
@@ -1113,7 +1157,9 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	}
 #endif /* HAVE_DTRACE */
 
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 	va_start(args, format);
+#endif
 
 	/* if we don't have a user defined error handler */
 	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
@@ -1224,7 +1270,9 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			break;
 	}
 
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 	va_end(args);
+#endif
 
 	if (type == E_PARSE) {
 		/* eval() errors do not affect exit_status */
@@ -1239,8 +1287,27 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 }
 /* }}} */
 
-#if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
+#elif defined(ZEND_WIN32) || defined(DARWIN)
+ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
+{
+	va_list va;
+
+	va_start(va, format);
+	zend_error_va_list(type, format, va);
+	va_end(va);
+}
+
+ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
+{
+	va_list va;
+
+	va_start(va, format);
+	zend_error_va_list(type, format, va);
+	va_end(va);
+}
+/* }}} */
 #endif
 
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
@@ -1357,6 +1424,7 @@ void free_estring(char **str_p) /* {{{ */
 {
 	efree(*str_p);
 }
+/* }}} */
 
 void free_string_zval(zval *zv) /* {{{ */
 {

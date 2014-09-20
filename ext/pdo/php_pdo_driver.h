@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -528,10 +528,10 @@ static inline pdo_dbh_object_t *php_pdo_dbh_fetch_object(zend_object *obj) {
 /* describes a column */
 struct pdo_column_data {
 	char *name;
-	int namelen;
 	zend_ulong maxlen;
-	enum pdo_param_type param_type;
 	zend_ulong precision;
+	enum pdo_param_type param_type;
+	int namelen;
 
 	/* don't touch this unless your name is dbdo */
 	void *dbdo_data;
@@ -539,18 +539,21 @@ struct pdo_column_data {
 
 /* describes a bound parameter */
 struct pdo_bound_param_data {
+	zval parameter;				/* the variable itself */
+
+	zval driver_params;			/* optional parameter(s) for the driver */
+
 	zend_long paramno; /* if -1, then it has a name, and we don't know the index *yet* */
 	zend_string *name;
 
 	zend_long max_value_len;	/* as a hint for pre-allocation */
-	
-	zval parameter;				/* the variable itself */
-	enum pdo_param_type param_type; /* desired or suggested type */
 
-	zval driver_params;			/* optional parameter(s) for the driver */
 	void *driver_data;
 
 	pdo_stmt_t *stmt;	/* for convenience in dtor */
+
+	enum pdo_param_type param_type; /* desired or suggested variable type */
+
 	int is_param;		/* parameter or column ? */
 };
 

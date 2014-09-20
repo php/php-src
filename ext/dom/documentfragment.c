@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -138,7 +138,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	}
 
 	if (data) {
-		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, data, &lst);
+		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, (xmlChar *) data, &lst);
 		if (err != 0) {
 			RETURN_FALSE;
 		}

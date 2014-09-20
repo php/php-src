@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -34,17 +34,17 @@ enum strm_status {
 };
 
 typedef struct _php_bz2_filter_data {
-	int persistent;
 	bz_stream strm;
 	char *inbuf;
-	size_t inbuf_len;
 	char *outbuf;
+	size_t inbuf_len;
 	size_t outbuf_len;
 	
-	/* Decompress options */
-	enum strm_status status;
-	unsigned int small_footprint : 1;
-	unsigned int expect_concatenated : 1;
+	enum strm_status status;              /* Decompress option */
+	unsigned int small_footprint : 1;     /* Decompress option */
+	unsigned int expect_concatenated : 1; /* Decompress option */
+
+	int persistent;
 } php_bz2_filter_data;
 
 /* }}} */

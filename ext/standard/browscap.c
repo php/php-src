@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -296,7 +296,7 @@ PHP_INI_MH(OnChangeBrowscap)
 		if (bdata->filename[0] != '\0') {
 			browscap_bdata_dtor(bdata, 0 TSRMLS_CC);
 		}
-		if (VCWD_REALPATH(new_value, bdata->filename) == NULL) {
+		if (VCWD_REALPATH(new_value->val, bdata->filename) == NULL) {
 			return FAILURE;
 		}
 		return SUCCESS;

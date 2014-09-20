@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -932,7 +932,7 @@ timelib_tzinfo *php_date_parse_tzfile_wrapper(char *formal_tzname, const timelib
 /* {{{ static PHP_INI_MH(OnUpdate_date_timezone) */
 static PHP_INI_MH(OnUpdate_date_timezone)
 {
-	if (OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
+	if (OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -959,11 +959,11 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 	/* Check config setting for default timezone */
 	if (!DATEG(default_timezone)) {
 		/* Special case: ext/date wasn't initialized yet */
-		zval ztz;
+		zval *ztz;
 
-		if (SUCCESS == zend_get_configuration_directive("date.timezone", sizeof("date.timezone"), &ztz)
-			&& Z_TYPE(ztz) == IS_STRING && Z_STRLEN(ztz) > 0 && timelib_timezone_id_is_valid(Z_STRVAL(ztz), tzdb)) {
-			return Z_STRVAL(ztz);
+		if (NULL != (ztz = cfg_get_entry("date.timezone", sizeof("date.timezone")))
+			&& Z_TYPE_P(ztz) == IS_STRING && Z_STRLEN_P(ztz) > 0 && timelib_timezone_id_is_valid(Z_STRVAL_P(ztz), tzdb)) {
+			return Z_STRVAL_P(ztz);
 		}
 	} else if (*DATEG(default_timezone)) {
 		if (DATEG(timezone_valid) == 1) {
@@ -2220,7 +2220,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC) /* {{{ */
 					abs(utc_offset / 60),
 					abs((utc_offset % 60)));
 
-				ZVAL_STR(&zv, tmpstr);
+				ZVAL_NEW_STR(&zv, tmpstr);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
@@ -2312,7 +2312,7 @@ static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC) /*
 			abs(tzobj->tzi.utc_offset / 60),
 			abs((tzobj->tzi.utc_offset % 60)));
 
-			ZVAL_STR(&zv, tmpstr);
+			ZVAL_NEW_STR(&zv, tmpstr);
 			}
 			break;
 		case TIMELIB_ZONETYPE_ABBR:

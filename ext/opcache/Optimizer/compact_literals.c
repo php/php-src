@@ -40,6 +40,7 @@
 #define LITERAL_STATIC_PROPERTY              0x0700
 #define LITERAL_METHOD                       0x0800
 #define LITERAL_PROPERTY                     0x0900
+#define LITERAL_GLOBAL                       0x0A00
 
 #define LITERAL_EX_CLASS                     0x4000
 #define LITERAL_EX_OBJ                       0x2000
@@ -278,6 +279,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						}
 					}
 					break;
+				case ZEND_BIND_GLOBAL:
+					LITERAL_INFO(opline->op2.constant, LITERAL_GLOBAL, 0, 1, 1);
+					break;
 				default:
 					if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 1);
@@ -311,7 +315,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 
 		/* Merge equal constants */
 		j = 0; cache_slots = 0;
-		zend_hash_init(&hash, 16, NULL, NULL, 0);
+		zend_hash_init(&hash, op_array->last_literal, NULL, NULL, 0);
 		map = (int*)zend_arena_alloc(&ctx->arena, op_array->last_literal * sizeof(int));
 		memset(map, 0, op_array->last_literal * sizeof(int));
 		for (i = 0; i < op_array->last_literal; i++) {

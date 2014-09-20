@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -143,6 +143,8 @@ PHP_METHOD(SessionHandler, gc)
 PHP_METHOD(SessionHandler, create_sid)
 {
 	zend_string *id;
+
+	PS_SANITY_CHECK;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 	    return;

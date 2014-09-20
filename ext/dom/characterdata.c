@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -87,7 +87,7 @@ int dom_characterdata_data_read(dom_object *obj, zval *retval TSRMLS_DC)
 	}
 
 	if ((content = xmlNodeGetContent(nodep)) != NULL) {
-		ZVAL_STRING(retval, content);
+		ZVAL_STRING(retval, (char *) content);
 		xmlFree(content);
 	} else {
 		ZVAL_EMPTY_STRING(retval);
@@ -108,7 +108,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 	str = zval_get_string(newval);
 
-	xmlNodeSetContentLen(nodep, str->val, str->len + 1);
+	xmlNodeSetContentLen(nodep, (xmlChar *) str->val, str->len + 1);
 
 	zend_string_release(str);
 	return SUCCESS;
@@ -187,7 +187,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	xmlFree(cur);
 
 	if (substring) {
-		RETVAL_STRING(substring);
+		RETVAL_STRING((char *) substring);
 		xmlFree(substring);
 	} else {
 		RETVAL_EMPTY_STRING();
@@ -223,7 +223,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
     }
     nodep->properties = NULL;
 #else
-	xmlTextConcat(nodep, arg, arg_len);
+	xmlTextConcat(nodep, (xmlChar *) arg, arg_len);
 #endif
 	RETURN_TRUE;
 }
@@ -268,7 +268,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	xmlFree(cur);
 
 	xmlNodeSetContent(node, first);
-	xmlNodeAddContent(node, arg);
+	xmlNodeAddContent(node, (xmlChar *) arg);
 	xmlNodeAddContent(node, second);
 	
 	xmlFree(first);
@@ -381,7 +381,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 		second = xmlUTF8Strsub(cur, offset + count, length - offset);
 	}
 
-	substring = xmlStrcat(substring, arg);
+	substring = xmlStrcat(substring, (xmlChar *) arg);
 	substring = xmlStrcat(substring, second);
 
 	xmlNodeSetContent(node, substring);

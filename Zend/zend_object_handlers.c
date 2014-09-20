@@ -385,9 +385,9 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 }
 /* }}} */
 
-ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC) /* {{{ */
+ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent TSRMLS_DC) /* {{{ */
 {
-	return zend_get_property_info_quick(ce, Z_STR_P(member), silent, NULL TSRMLS_CC);
+	return zend_get_property_info_quick(ce, member, silent, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -397,10 +397,10 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 	const char *class_name = NULL;
 	const char *prop_name;
 	zend_string *member;
-	int prop_name_len;
+	size_t prop_name_len;
 
 	if (prop_info_name->val[0] == 0) {
-		zend_unmangle_property_name_ex(prop_info_name->val, prop_info_name->len, &class_name, &prop_name, &prop_name_len);
+		zend_unmangle_property_name_ex(prop_info_name, &class_name, &prop_name, &prop_name_len);
 		member = zend_string_init(prop_name, prop_name_len, 0);
 	} else {
 		member = zend_string_copy(prop_info_name);
@@ -434,10 +434,12 @@ static zend_long *zend_get_property_guard(zend_object *zobj, zend_property_info 
 		info.name = Z_STR_P(member);
 	} else if(property_info->name->val[0] == '\0'){
 		const char *class_name = NULL, *prop_name = NULL;
-		zend_unmangle_property_name(property_info->name->val, property_info->name->len, &class_name, &prop_name);
+		size_t prop_name_len;
+		zend_unmangle_property_name_ex(property_info->name, &class_name,
+			&prop_name, &prop_name_len);
 		if (class_name) {
 			/* use unmangled name for protected properties */
-			str = info.name = zend_string_init(prop_name, strlen(prop_name), 0);
+			str = info.name = zend_string_init(prop_name, prop_name_len, 0);
 			property_info = &info;
 		}
 	}
@@ -659,12 +661,12 @@ found:
 			}
 		}
 	} else if (EXPECTED(property_info != NULL)) {
+		zval tmp;
+
 write_std_property:
-		/* if we assign referenced variable, we should separate it */
 		if (Z_REFCOUNTED_P(value)) {
 			if (Z_ISREF_P(value)) {
-				zval tmp;
-
+				/* if we assign referenced variable, we should separate it */
 				ZVAL_DUP(&tmp, Z_REFVAL_P(value));
 				value = &tmp;
 			} else {

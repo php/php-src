@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -2128,7 +2128,7 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				php_stream_printf(out TSRMLS_CC, "Key: Position #%pd:\n", num);
 			}
 
-			php_stream_printf(out TSRMLS_CC, "paramno=%ld\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+			php_stream_printf(out TSRMLS_CC, "paramno=%pd\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
 					param->paramno, param->name? param->name->len : 0, param->name? param->name->len : 0,
 					param->name ? param->name->val : "",
 					param->is_param,
@@ -2267,7 +2267,7 @@ static zend_object *dbstmt_clone_obj(zval *zobject TSRMLS_DC)
 }
 
 zend_object_handlers pdo_dbstmt_object_handlers;
-static int pdo_row_serialize(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC);
+static int pdo_row_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC);
 
 void pdo_stmt_init(TSRMLS_D)
 {
@@ -2700,7 +2700,7 @@ zend_object *pdo_row_new(zend_class_entry *ce TSRMLS_DC)
 	return &row->std;
 }
 
-static int pdo_row_serialize(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC)
+static int pdo_row_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "PDORow instances may not be serialized");
 	return FAILURE;

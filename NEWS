@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Core:
   . Added PHP_INT_MIN constant. (Andrea)
   . Added Closure::apply() method. (Andrea)
+  . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
+  . Fixed #67959 (Segfault when calling phpversion('spl')). (Florian)
 
 - Reflection
   . Fixed inheritance chain of Reflector interface (Tjerk)
@@ -38,5 +40,8 @@ PHP                                                                        NEWS
 - SPL:
   . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
     nor curruption state). (Julien)
+
+- DOM:
+  . Made DOMNode::textContent writeable. (Tjerk)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

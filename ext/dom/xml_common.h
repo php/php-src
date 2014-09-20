@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -68,7 +68,8 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_LIBXML_NODE_P(__id); \
 	if (__intern->node == NULL || !(__ptr = (__prtype)__intern->node->node)) { \
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
+  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", \
+			__intern->std.ce->name->val);\
   		RETURN_NULL();\
   	} \
 }

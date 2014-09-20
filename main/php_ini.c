@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -83,9 +83,9 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type TSRMLS_DC)
 		uint display_string_length, esc_html=0;
 
 		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-			if (ini_entry->orig_value && ini_entry->orig_value[0]) {
-				display_string = ini_entry->orig_value;
-				display_string_length = ini_entry->orig_value_length;
+			if (ini_entry->orig_value && ini_entry->orig_value->val[0]) {
+				display_string = ini_entry->orig_value->val;
+				display_string_length = ini_entry->orig_value->len;
 				esc_html = !sapi_module.phpinfo_as_text;
 			} else {
 				if (!sapi_module.phpinfo_as_text) {
@@ -96,9 +96,9 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type TSRMLS_DC)
 					display_string_length = sizeof("no value") - 1;
 				}
 			}
-		} else if (ini_entry->value && ini_entry->value[0]) {
-			display_string = ini_entry->value;
-			display_string_length = ini_entry->value_length;
+		} else if (ini_entry->value && ini_entry->value->val[0]) {
+			display_string = ini_entry->value->val;
+			display_string_length = ini_entry->value->len;
 			esc_html = !sapi_module.phpinfo_as_text;
 		} else {
 			if (!sapi_module.phpinfo_as_text) {
@@ -132,14 +132,14 @@ static int php_ini_displayer(zval *el, void *arg TSRMLS_DC)
 	if (!sapi_module.phpinfo_as_text) {
 		PUTS("<tr>");
 		PUTS("<td class=\"e\">");
-		PHPWRITE(ini_entry->name, ini_entry->name_length);
+		PHPWRITE(ini_entry->name->val, ini_entry->name->len);
 		PUTS("</td><td class=\"v\">");
 		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE TSRMLS_CC);
 		PUTS("</td><td class=\"v\">");
 		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG TSRMLS_CC);
 		PUTS("</td></tr>\n");
 	} else {
-		PHPWRITE(ini_entry->name, ini_entry->name_length);
+		PHPWRITE(ini_entry->name->val, ini_entry->name->len);
 		PUTS(" => ");
 		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE TSRMLS_CC);
 		PUTS(" => ");
@@ -786,7 +786,7 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 		zend_hash_move_forward(source_hash)
 	) {
 		data = zend_hash_get_current_data(source_hash);
-		zend_alter_ini_entry_ex(str, Z_STRVAL_P(data), Z_STRLEN_P(data), modify_type, stage, 0 TSRMLS_CC);
+		zend_alter_ini_entry_ex(str, Z_STR_P(data), modify_type, stage, 0 TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -862,6 +862,14 @@ PHPAPI void php_ini_activate_per_host_config(const char *host, uint host_len TSR
 			php_ini_activate_config(Z_ARRVAL_P(tmp), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE TSRMLS_CC);
 		}
 	}
+}
+/* }}} */
+
+/* {{{ cfg_get_entry
+ */
+PHPAPI zval *cfg_get_entry_ex(zend_string *name)
+{
+	return zend_hash_find(&configuration_hash, name);
 }
 /* }}} */
 

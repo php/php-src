@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -154,12 +154,13 @@ PHPAPI char *php_strerror(int errnum);
 
 #ifndef HAVE_MBLEN
 # define php_mblen(ptr, len) 1
+# define php_mb_reset()
+#elif defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
+# define php_mblen(ptr, len) ((int) mbrlen(ptr, len, &BG(mblen_state)))
+# define php_mb_reset() memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)))
 #else
-# if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
-#  define php_mblen(ptr, len) ((ptr) == NULL ? memset(&BG(mblen_state), 0, sizeof(BG(mblen_state))): (int)mbrlen(ptr, len, &BG(mblen_state)))
-# else
-#  define php_mblen(ptr, len) mblen(ptr, len)
-# endif
+# define php_mblen(ptr, len) mblen(ptr, len)
+# define php_mb_reset() mblen(NULL, 0)
 #endif
 
 void register_string_constants(INIT_FUNC_ARGS);

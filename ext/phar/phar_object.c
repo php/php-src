@@ -87,7 +87,7 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 		zend_string *str = strpprintf(4096, "phar://%s%s", fname, entry);
 
 		ZVAL_STR(&temp, Z_STR_P(stuff));
-		ZVAL_STR(stuff, str);
+		ZVAL_NEW_STR(stuff, str);
 
 		zend_hash_str_update(_SERVER, "PHAR_PATH_TRANSLATED", sizeof("PHAR_PATH_TRANSLATED")-1, &temp);
 	}
@@ -134,7 +134,7 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 			zend_string *str = strpprintf(4096, "phar://%s%s", fname, entry);
 
 			ZVAL_STR(&temp, Z_STR_P(stuff));
-			ZVAL_STR(stuff, str);
+			ZVAL_NEW_STR(stuff, str);
 
 			zend_hash_str_update(_SERVER, "PHAR_SCRIPT_FILENAME", sizeof("PHAR_SCRIPT_FILENAME")-1, &temp);
 		}
@@ -553,6 +553,7 @@ PHP_METHOD(Phar, webPhar)
 	int entry_len, code, not_cgi;
 	phar_archive_data *phar = NULL;
 	phar_entry_info *info = NULL;
+	size_t sapi_mod_name_len = strlen(sapi_module.name);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!saz", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrite) == FAILURE) {
 		return;
@@ -587,9 +588,9 @@ PHP_METHOD(Phar, webPhar)
 		++basename;
 	}
 
-	if ((strlen(sapi_module.name) == sizeof("cgi-fcgi")-1 && !strncmp(sapi_module.name, "cgi-fcgi", sizeof("cgi-fcgi")-1))
-		|| (strlen(sapi_module.name) == sizeof("fpm-fcgi")-1 && !strncmp(sapi_module.name, "fpm-fcgi", sizeof("fpm-fcgi")-1))
-		|| (strlen(sapi_module.name) == sizeof("cgi")-1 && !strncmp(sapi_module.name, "cgi", sizeof("cgi")-1))) {
+	if ((sapi_mod_name_len == sizeof("cgi-fcgi") - 1 && !strncmp(sapi_module.name, "cgi-fcgi", sizeof("cgi-fcgi") - 1))
+		|| (sapi_mod_name_len == sizeof("fpm-fcgi") - 1 && !strncmp(sapi_module.name, "fpm-fcgi", sizeof("fpm-fcgi") - 1))
+		|| (sapi_mod_name_len == sizeof("cgi") - 1 && !strncmp(sapi_module.name, "cgi", sizeof("cgi") - 1))) {
 
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) != IS_UNDEF) {
 			HashTable *_server = Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]);
@@ -1382,10 +1383,10 @@ struct _phar_t {
 	phar_archive_object *p;
 	zend_class_entry *c;
 	char *b;
-	uint l;
 	zval *ret;
-	int count;
 	php_stream *fp;
+	uint l;
+	int count;
 };
 
 static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
@@ -3550,7 +3551,7 @@ PHP_METHOD(Phar, offsetGet)
 		}
 
 		sfname = strpprintf(0, "phar://%s/%s", phar_obj->archive->fname, fname);
-		ZVAL_STR(&zfname, sfname);
+		ZVAL_NEW_STR(&zfname, sfname);
 		spl_instantiate_arg_ex1(phar_obj->spl.info_class, return_value, &zfname TSRMLS_CC);
 		zval_ptr_dtor(&zfname);
 	}

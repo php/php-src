@@ -35,7 +35,7 @@
 
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -472,7 +472,7 @@ static void set_output_options(php_output_options* options, zval* output_opts)
 static XMLRPC_VECTOR_TYPE determine_vector_type (HashTable *ht)
 {
 	int bArray = 0, bStruct = 0, bMixed = 0;
-	unsigned long num_index, last_num = 0;
+	zend_ulong num_index, last_num = 0;
 	zend_string* my_key;
 
 	ZEND_HASH_FOREACH_KEY(ht, num_index, my_key) {
@@ -541,7 +541,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					break;
 				case xmlrpc_vector:
 					{
-						unsigned long num_index;
+						zend_ulong num_index;
 						zval* pIter;
 						zend_string* my_key;
 						HashTable *ht = NULL;

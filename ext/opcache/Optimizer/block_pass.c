@@ -169,7 +169,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			case ZEND_FE_RESET:
 			case ZEND_NEW:
 			case ZEND_JMP_SET:
-			case ZEND_JMP_SET_VAR:
 				START_BLOCK_OP(ZEND_OP2(opline).opline_num);
 				START_BLOCK_OP(opno + 1);
 				break;
@@ -297,7 +296,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				case ZEND_FE_RESET:
 				case ZEND_NEW:
 				case ZEND_JMP_SET:
-				case ZEND_JMP_SET_VAR:
 				case ZEND_FE_FETCH:
 					cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
 					/* break missing intentionally */
@@ -614,7 +612,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 	end = opline + block->len;
 	while ((op_array->T) && (opline < end)) {
 		/* strip X = QM_ASSIGN(const) */
-		if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
+		if ((ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
 			VAR_SOURCE(opline->op1) &&
 			VAR_SOURCE(opline->op1)->opcode == ZEND_QM_ASSIGN &&
 			ZEND_OP1_TYPE(VAR_SOURCE(opline->op1)) == IS_CONST &&
@@ -633,7 +631,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 		}
 
 		/* T = QM_ASSIGN(C), F(T) => NOP, F(C) */
-		if (ZEND_OP2_TYPE(opline) == IS_TMP_VAR &&
+		if ((ZEND_OP2_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
 			VAR_SOURCE(opline->op2) &&
 			VAR_SOURCE(opline->op2)->opcode == ZEND_QM_ASSIGN &&
 			ZEND_OP1_TYPE(VAR_SOURCE(opline->op2)) == IS_CONST) {
@@ -880,10 +878,10 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode == ZEND_JMPNZ_EX ||
 			opline->opcode == ZEND_JMPNZ ||
 			opline->opcode == ZEND_JMPZNZ) &&
-			ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
+			(ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
 			VAR_SOURCE(opline->op1) != NULL &&
 			(!used_ext[VAR_NUM(ZEND_OP1(opline).var)] ||
-			(ZEND_RESULT_TYPE(opline) == IS_TMP_VAR &&
+			((ZEND_RESULT_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
 			 ZEND_RESULT(opline).var == ZEND_OP1(opline).var)) &&
 			(VAR_SOURCE(opline->op1)->opcode == ZEND_BOOL ||
 			VAR_SOURCE(opline->op1)->opcode == ZEND_QM_ASSIGN)) {
@@ -913,7 +911,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			}
 			old_len = Z_STRLEN(ZEND_OP1_LITERAL(last_op));
 			l = old_len + Z_STRLEN(ZEND_OP1_LITERAL(opline));
-			if (IS_INTERNED(Z_STR(ZEND_OP1_LITERAL(last_op)))) {
+			if (!Z_REFCOUNTED(ZEND_OP1_LITERAL(last_op))) {
 				zend_string *tmp = zend_string_alloc(l, 0);
 				memcpy(tmp->val, Z_STRVAL(ZEND_OP1_LITERAL(last_op)), old_len);
 				Z_STR(ZEND_OP1_LITERAL(last_op)) = tmp;
@@ -925,7 +923,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			Z_STRVAL(ZEND_OP1_LITERAL(last_op))[l] = '\0';
 			zval_dtor(&ZEND_OP1_LITERAL(opline));
 			Z_STR(ZEND_OP1_LITERAL(opline)) = zend_new_interned_string(Z_STR(ZEND_OP1_LITERAL(last_op)) TSRMLS_CC);
-			if (IS_INTERNED(Z_STR(ZEND_OP1_LITERAL(opline)))) {
+			if (!Z_REFCOUNTED(ZEND_OP1_LITERAL(opline))) {
 				Z_TYPE_FLAGS(ZEND_OP1_LITERAL(opline)) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 			}
 			ZVAL_NULL(&ZEND_OP1_LITERAL(last_op));
@@ -957,7 +955,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			COPY_NODE(opline->op1, src->op1);
 			old_len = Z_STRLEN(ZEND_OP2_LITERAL(src));
 			l = old_len + Z_STRLEN(ZEND_OP2_LITERAL(opline));
-			if (IS_INTERNED(Z_STR(ZEND_OP2_LITERAL(src)))) {
+			if (!Z_REFCOUNTED(ZEND_OP2_LITERAL(src))) {
 				zend_string *tmp = zend_string_alloc(l, 0);
 				memcpy(tmp->val, Z_STRVAL(ZEND_OP2_LITERAL(src)), old_len);
 				Z_STR(ZEND_OP2_LITERAL(last_op)) = tmp;
@@ -969,7 +967,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			Z_STRVAL(ZEND_OP2_LITERAL(src))[l] = '\0';
 			zend_string_release(Z_STR(ZEND_OP2_LITERAL(opline)));
 			Z_STR(ZEND_OP2_LITERAL(opline)) = zend_new_interned_string(Z_STR(ZEND_OP2_LITERAL(src)) TSRMLS_CC);
-			if (IS_INTERNED(Z_STR(ZEND_OP2_LITERAL(opline)))) {
+			if (!Z_REFCOUNTED(ZEND_OP2_LITERAL(opline))) {
 				Z_TYPE_FLAGS(ZEND_OP2_LITERAL(opline)) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 			}
 			ZVAL_NULL(&ZEND_OP2_LITERAL(src));
@@ -1049,7 +1047,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode = ZEND_QM_ASSIGN;
 			zend_optimizer_update_op1_const(op_array, opline, &result TSRMLS_CC);
 		} else if ((opline->opcode == ZEND_RETURN || opline->opcode == ZEND_EXIT) &&
-					ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
+					(ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
 				   	VAR_SOURCE(opline->op1) &&
 				   	VAR_SOURCE(opline->op1)->opcode == ZEND_QM_ASSIGN) {
 			/* T = QM_ASSIGN(X), RETURN(T) to RETURN(X) */
@@ -1133,8 +1131,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode = ZEND_CONCAT;
 			MAKE_NOP(src);
 		} else if (opline->opcode == ZEND_QM_ASSIGN &&
-					ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
-					ZEND_RESULT_TYPE(opline) == IS_TMP_VAR &&
+					ZEND_OP1_TYPE(opline) == ZEND_RESULT_TYPE(opline) &&
 					ZEND_OP1(opline).var == ZEND_RESULT(opline).var) {
 			/* strip T = QM_ASSIGN(T) */
 			MAKE_NOP(opline);

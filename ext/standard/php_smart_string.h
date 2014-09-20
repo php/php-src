@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -89,8 +89,6 @@
 	smart_string_append_ex((dest), (src), 0)
 #define smart_string_append_long(dest, val) \
 	smart_string_append_long_ex((dest), (val), 0)
-#define smart_string_append_off_t(dest, val) \
-	smart_string_append_off_t_ex((dest), (val), 0)
 #define smart_string_append_unsigned(dest, val) \
 	smart_string_append_unsigned_ex((dest), (val), 0)
 
@@ -119,33 +117,17 @@
 	__dest->len = __nl;												\
 } while (0)
 
-static inline char *smart_string_print_long(char *buf, zend_long num) {
-	char *r; 
-	_zend_print_signed_to_buf(buf, num, unsigned long, r); 
-	return r;
-}
-
-static inline char *smart_string_print_unsigned(char *buf, zend_long num) {
-	char *r; 
-	_zend_print_unsigned_to_buf(buf, num, unsigned long, r); 
-	return r;
-}
-
 #define smart_string_append_generic_ex(dest, num, type, vartype, func) do {	\
 	char __b[32];															\
-	char *__t;																\
-   	_zend_print##func##_to_buf(__b + sizeof(__b) - 1, (num), vartype, __t);	\
+	char *__t = zend_print##func##_to_buf(__b + sizeof(__b) - 1, (num));	\
 	smart_string_appendl_ex((dest), __t, __b + sizeof(__b) - 1 - __t, (type));	\
 } while (0)
 	
 #define smart_string_append_unsigned_ex(dest, num, type) \
-	smart_string_append_generic_ex((dest), (num), (type), unsigned long, _unsigned)
+	smart_string_append_generic_ex((dest), (num), (type), zend_ulong, _ulong)
 
 #define smart_string_append_long_ex(dest, num, type) \
-	smart_string_append_generic_ex((dest), (num), (type), unsigned long, _signed)
-
-#define smart_string_append_off_t_ex(dest, num, type) \
-	smart_string_append_generic_ex((dest), (num), (type), off_t, _signed)
+	smart_string_append_generic_ex((dest), (num), (type), zend_ulong, _long)
 
 #define smart_string_append_ex(dest, src, what) \
 	smart_string_appendl_ex((dest), ((smart_string *)(src))->c, \

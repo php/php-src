@@ -174,3 +174,8 @@
 # define _USE_32BIT_TIME_T 1
 #endif
 #define HAVE_STDLIB_H 1
+
+#define _REENTRANT 1
+#define HAVE_MBRLEN 1
+#define HAVE_MBSTATE_T 1
+

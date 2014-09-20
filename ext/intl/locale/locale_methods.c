@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -223,12 +223,11 @@ PHP_NAMED_FUNCTION(zif_locale_get_default)
    Set default locale */
 PHP_NAMED_FUNCTION(zif_locale_set_default)
 {
-	char* locale_name = NULL;
-	size_t   len = 0;	
+	zend_string* locale_name;
 	zend_string *ini_name;
+	char *default_locale = NULL;
 
-	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC,  "s",
-		&locale_name ,&len ) == FAILURE)
+	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC,  "S", &locale_name) == FAILURE)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 	"locale_set_default: unable to parse input params", 0 TSRMLS_CC );
@@ -236,14 +235,17 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 		RETURN_FALSE;
 	}
 
-	if(len == 0) {
-		locale_name =  (char *)uloc_getDefault() ;
-		len = strlen(locale_name);
+	if (locale_name->len == 0) {
+		default_locale = (char *)uloc_getDefault();
+		locale_name = zend_string_init(default_locale, strlen(default_locale), 0);
 	}
 	
 	ini_name = zend_string_init(LOCALE_INI_NAME, sizeof(LOCALE_INI_NAME) - 1, 0);
-	zend_alter_ini_entry(ini_name, locale_name, len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);	
+	zend_alter_ini_entry(ini_name, locale_name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);	
 	zend_string_release(ini_name);
+	if (default_locale != NULL) {
+		zend_string_release(locale_name);
+	}
 
 	RETURN_TRUE;
 }

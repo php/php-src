@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -186,7 +186,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 		}
 		return; 
 	}
-	ZVAL_STRING(&fci.function_name, obj->stringval);
+	ZVAL_STRING(&fci.function_name, (char *) obj->stringval);
 	xmlXPathFreeObject(obj);
 
 	fci.symbol_table = NULL;
@@ -222,7 +222,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 				valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
 			} else {
 				zend_string *str = zval_get_string(&retval);
-				valuePush(ctxt, xmlXPathNewString(str->val));
+				valuePush(ctxt, xmlXPathNewString((xmlChar *) str->val));
 				zend_string_release(str);
 			}
 			zval_ptr_dtor(&retval);
@@ -412,7 +412,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
     ctxp->namespaces = ns;
     ctxp->nsNr = nsnbr;
 
-	xpathobjp = xmlXPathEvalExpression(expr, ctxp);
+	xpathobjp = xmlXPathEvalExpression((xmlChar *) expr, ctxp);
 	ctxp->node = NULL;
 
 	if (ns != NULL) {
@@ -453,12 +453,12 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 						nsparent = node->_private;
 						curns = xmlNewNs(NULL, node->name, NULL);
 						if (node->children) {
-							curns->prefix = xmlStrdup((char *) node->children);
+							curns->prefix = xmlStrdup((xmlChar *) node->children);
 						}
 						if (node->children) {
-							node = xmlNewDocNode(docp, NULL, (char *) node->children, node->name);
+							node = xmlNewDocNode(docp, NULL, (xmlChar *) node->children, node->name);
 						} else {
-							node = xmlNewDocNode(docp, NULL, "xmlns", node->name);
+							node = xmlNewDocNode(docp, NULL, (xmlChar *) "xmlns", node->name);
 						}
 						node->type = XML_NAMESPACE_DECL;
 						node->parent = nsparent;
@@ -483,7 +483,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			break;
 
 		case XPATH_STRING:
-			RETVAL_STRING(xpathobjp->stringval);
+			RETVAL_STRING((char *) xpathobjp->stringval);
 			break;
 
 		default:

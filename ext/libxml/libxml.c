@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1030,20 +1030,20 @@ static PHP_FUNCTION(libxml_get_errors)
 			zval z_error;
 
 			object_init_ex(&z_error, libxmlerror_class_entry);
-			add_property_long(&z_error, "level", error->level);
-			add_property_long(&z_error, "code", error->code);
-			add_property_long(&z_error, "column", error->int2);
+			add_property_long_ex(&z_error, "level", sizeof("level") - 1, error->level TSRMLS_CC);
+			add_property_long_ex(&z_error, "code", sizeof("code") - 1, error->code TSRMLS_CC);
+			add_property_long_ex(&z_error, "column", sizeof("column") - 1, error->int2  TSRMLS_CC);
 			if (error->message) {
-				add_property_string(&z_error, "message", error->message);
+				add_property_string_ex(&z_error, "message", sizeof("message") - 1, error->message TSRMLS_CC);
 			} else {
-				add_property_stringl(&z_error, "message", "", 0);
+				add_property_stringl_ex(&z_error, "message", sizeof("message") - 1, "", 0 TSRMLS_CC);
 			}
 			if (error->file) {
-				add_property_string(&z_error, "file", error->file);
+				add_property_string_ex(&z_error, "file", sizeof("file") - 1, error->file TSRMLS_CC);
 			} else {
-				add_property_stringl(&z_error, "file", "", 0);
+				add_property_stringl_ex(&z_error, "file", sizeof("file") - 1, "", 0 TSRMLS_CC);
 			}
-			add_property_long(&z_error, "line", error->line);
+			add_property_long_ex(&z_error, "line", sizeof("line") - 1, error->line TSRMLS_CC);
 			add_next_index_zval(return_value, &z_error);
 
 			error = zend_llist_get_next(LIBXML(error_list));

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -166,17 +166,17 @@ ZEND_DECLARE_MODULE_GLOBALS(exif)
 
 ZEND_INI_MH(OnUpdateEncode)
 {
-	if (new_value && new_value_length) {
+	if (new_value && new_value->len) {
 		const zend_encoding **return_list;
 		size_t return_size;
-		if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length,
+		if (FAILURE == zend_multibyte_parse_encoding_list(new_value->val, new_value->len,
 	&return_list, &return_size, 0 TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value->val);
 			return FAILURE;
 		}
 		efree(return_list);
 	}
-	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 
 ZEND_INI_MH(OnUpdateDecode)
@@ -184,14 +184,14 @@ ZEND_INI_MH(OnUpdateDecode)
 	if (new_value) {
 		const zend_encoding **return_list;
 		size_t return_size;
-		if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length,
+		if (FAILURE == zend_multibyte_parse_encoding_list(new_value->val, new_value->len,
 	&return_list, &return_size, 0 TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value->val);
 			return FAILURE;
 		}
 		efree(return_list);
 	}
-	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 
 PHP_INI_BEGIN()

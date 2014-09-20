@@ -52,6 +52,10 @@ PHP X.Y UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- parse_ini_file():
+- parse_ini_string():
+  Added scanner mode INI_SCANNER_TYPED to yield typed .ini values.
+
 
 ========================================
 6. New Functions

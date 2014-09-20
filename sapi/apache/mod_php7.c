@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -567,7 +567,7 @@ static void init_request_info(TSRMLS_D)
 static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry TSRMLS_DC)
 {
 	zend_string *key = STR_INIT(per_dir_entry->key, per_dir_entry->key_length, 0);
-	zend_alter_ini_entry(key, per_dir_entry->value, per_dir_entry->value_length, per_dir_entry->type, per_dir_entry->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE);
+	zend_alter_ini_entry_chars(key, per_dir_entry->value, per_dir_entry->value_length, per_dir_entry->type, per_dir_entry->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE);
 	STR_RELEASE(key);
 	return 0;
 }

@@ -50,28 +50,28 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 {
 	zend_bool old, ini;
 
-	if (entry->name_length == sizeof("phar.readonly")-1) {
+	if (entry->name->len == sizeof("phar.readonly")-1) {
 		old = PHAR_G(readonly_orig);
 	} else {
 		old = PHAR_G(require_hash_orig);
 	}
 
-	if (new_value_length == 2 && !strcasecmp("on", new_value)) {
+	if (new_value->len == 2 && !strcasecmp("on", new_value->val)) {
 		ini = (zend_bool) 1;
 	}
-	else if (new_value_length == 3 && !strcasecmp("yes", new_value)) {
+	else if (new_value->len == 3 && !strcasecmp("yes", new_value->val)) {
 		ini = (zend_bool) 1;
 	}
-	else if (new_value_length == 4 && !strcasecmp("true", new_value)) {
+	else if (new_value->len == 4 && !strcasecmp("true", new_value->val)) {
 		ini = (zend_bool) 1;
 	}
 	else {
-		ini = (zend_bool) atoi(new_value);
+		ini = (zend_bool) atoi(new_value->val);
 	}
 
 	/* do not allow unsetting in runtime */
 	if (stage == ZEND_INI_STAGE_STARTUP) {
-		if (entry->name_length == sizeof("phar.readonly")-1) {
+		if (entry->name->len == sizeof("phar.readonly")-1) {
 			PHAR_G(readonly_orig) = ini;
 		} else {
 			PHAR_G(require_hash_orig) = ini;
@@ -80,7 +80,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 		return FAILURE;
 	}
 
-	if (entry->name_length == sizeof("phar.readonly")-1) {
+	if (entry->name->len == sizeof("phar.readonly")-1) {
 		PHAR_G(readonly) = ini;
 		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arHash) {
 			zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_fname_map), phar_set_writeable_bit, (void *)&ini TSRMLS_CC);
@@ -183,7 +183,7 @@ finish_error:
 
 ZEND_INI_MH(phar_ini_cache_list) /* {{{ */
 {
-	PHAR_G(cache_list) = new_value;
+	PHAR_G(cache_list) = new_value->val;
 
 	if (stage == ZEND_INI_STAGE_STARTUP) {
 		phar_split_cache_list(TSRMLS_C);
@@ -1618,7 +1618,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 #ifndef MAX_WBITS
 #define MAX_WBITS 15
 #endif
-				add_assoc_long(&filterparams, "window", MAX_WBITS + 32);
+				add_assoc_long_ex(&filterparams, "window", sizeof("window") - 1, MAX_WBITS + 32);
 
 				/* entire file is gzip-compressed, uncompress to temporary file */
 				if (!(temp = php_stream_fopen_tmpfile())) {
@@ -1630,7 +1630,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 
 				if (!filter) {
 					err = 1;
-					add_assoc_long(&filterparams, "window", MAX_WBITS);
+					add_assoc_long_ex(&filterparams, "window", sizeof("window") - 1, MAX_WBITS);
 					filter = php_stream_filter_create("zlib.inflate", &filterparams, php_stream_is_persistent(fp) TSRMLS_CC);
 					zval_dtor(&filterparams);
 

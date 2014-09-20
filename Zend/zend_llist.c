@@ -126,32 +126,26 @@ ZEND_API void zend_llist_clean(zend_llist *l)
 }
 
 
-ZEND_API void *zend_llist_remove_tail(zend_llist *l)
+ZEND_API void zend_llist_remove_tail(zend_llist *l)
 {
-	zend_llist_element *old_tail;
-	void *data;
-
-	if ((old_tail = l->tail)) {
-		if (old_tail->prev) {
-			old_tail->prev->next = NULL;
-		} else {
-			l->head = NULL;
-		}
-        
-		data = old_tail->data;
-
-		l->tail = old_tail->prev;
-		if (l->dtor) {
-			l->dtor(data);
-		}
-		pefree(old_tail, l->persistent);
-
-		--l->count;
-
-		return data;
+	zend_llist_element *old_tail = l->tail;
+	if (!old_tail) {
+		return;
 	}
 
-	return NULL;
+	if (old_tail->prev) {
+		old_tail->prev->next = NULL;
+	} else {
+		l->head = NULL;
+	}
+
+	l->tail = old_tail->prev;
+	--l->count;
+	
+	if (l->dtor) {
+		l->dtor(old_tail->data);
+	}
+	pefree(old_tail, l->persistent);
 }
 
 
