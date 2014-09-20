@@ -3413,6 +3413,10 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) /* {{{ */
 		zend_compile_expr(&expr_node, expr_ast TSRMLS_CC);
 	}
 
+	if (by_ref) {
+		zend_separate_if_call_and_write(&expr_node, expr_ast, BP_VAR_W TSRMLS_CC);
+	}
+
 	opnum_reset = get_next_op_number(CG(active_op_array));
 	opline = zend_emit_op(&reset_node, ZEND_FE_RESET, &expr_node, NULL TSRMLS_CC);
 	if (by_ref && is_variable) {
