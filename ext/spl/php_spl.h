@@ -68,7 +68,7 @@ ZEND_END_MODULE_GLOBALS(spl)
 
 #ifdef ZTS
 # define SPL_G(v) TSRMG(spl_globals_id, zend_spl_globals *, v)
-extern int spl_globals_id;
+TSRMG_DH(zend_spl_globals, sapi_globals_id);
 #else
 # define SPL_G(v) (spl_globals.v)
 extern zend_spl_globals spl_globals;
