@@ -627,8 +627,6 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_FE_FETCH_BYREF	1
 #define ZEND_FE_FETCH_WITH_KEY	2
 
-#define ZEND_FE_RESET_VARIABLE 		(1<<0)
-#define ZEND_FE_RESET_REFERENCE		(1<<1)
 #define EXT_TYPE_FREE_ON_RETURN		(1<<2)
 
 #define ZEND_MEMBER_FUNC_CALL	1<<0

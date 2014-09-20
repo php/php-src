@@ -4460,18 +4460,14 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 
 	if ((OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) &&
-	    (opline->extended_value & ZEND_FE_RESET_VARIABLE)) {
+	    (opline->extended_value & ZEND_FE_FETCH_BYREF)) {
 		array_ptr = array_ref = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
 		ZVAL_DEREF(array_ptr);
 		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
 			SEPARATE_ARRAY(array_ptr);
 			if (!Z_ISREF_P(array_ref)) {
-				array_ref = array_ptr;
-				if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
-					ZVAL_NEW_REF(array_ptr, array_ptr);
-					array_ref = array_ptr;
-					array_ptr = Z_REFVAL_P(array_ptr);						
-				}
+				ZVAL_NEW_REF(array_ref, array_ref);
+				array_ptr = Z_REFVAL_P(array_ref);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -4550,16 +4546,16 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 	}
 
 	if (ce && ce->get_iterator) {
-		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
+		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_FETCH_BYREF TSRMLS_CC);
 
-		if (OP1_TYPE == IS_VAR && !(opline->extended_value & ZEND_FE_RESET_VARIABLE)) {
+		if (OP1_TYPE == IS_VAR && !(opline->extended_value & ZEND_FE_FETCH_BYREF)) {
 			FREE_OP1_IF_VAR();
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
 			ZVAL_OBJ(&iterator, &iter->std);
 			array_ptr = array_ref = &iterator;
 		} else {
-			if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+			if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_FETCH_BYREF) {
 				FREE_OP1_VAR_PTR();
 			}
 			if (!EG(exception)) {
@@ -4578,7 +4574,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			iter->funcs->rewind(iter TSRMLS_CC);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				zval_ptr_dtor(array_ref);
-				if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+				if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_FETCH_BYREF) {
 					FREE_OP1_VAR_PTR();
 				}
 				HANDLE_EXCEPTION();
@@ -4587,7 +4583,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		is_empty = iter->funcs->valid(iter TSRMLS_CC) != SUCCESS;
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor(array_ref);
-			if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+			if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_FETCH_BYREF) {
 				FREE_OP1_VAR_PTR();
 			}
 			HANDLE_EXCEPTION();
@@ -4601,7 +4597,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		while (1) {
 			if (pos >= fe_ht->nNumUsed) {
 				is_empty = 1;
-				if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+				if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_FETCH_BYREF) {
 					FREE_OP1_VAR_PTR();
 				}
 				ZEND_VM_JMP(opline->op2.jmp_addr);
@@ -4630,7 +4626,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		is_empty = 1;
 	}
 
-	if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+	if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_FETCH_BYREF) {
 		FREE_OP1_VAR_PTR();
 	}
 	if (is_empty) {

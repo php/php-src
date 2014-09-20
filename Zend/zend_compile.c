@@ -3416,7 +3416,7 @@ void zend_compile_foreach(zend_ast *ast TSRMLS_DC) /* {{{ */
 	opnum_reset = get_next_op_number(CG(active_op_array));
 	opline = zend_emit_op(&reset_node, ZEND_FE_RESET, &expr_node, NULL TSRMLS_CC);
 	if (by_ref && is_variable) {
-		opline->extended_value = ZEND_FE_RESET_VARIABLE | ZEND_FE_RESET_REFERENCE; // ???
+		opline->extended_value = ZEND_FE_FETCH_BYREF;
 	}
 
 	zend_stack_push(&CG(loop_var_stack), &reset_node);
