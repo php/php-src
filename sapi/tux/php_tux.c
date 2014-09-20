@@ -21,7 +21,7 @@
 #include "php_main.h"
 #include "php_variables.h"
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #include "tuxmodule.h"
 

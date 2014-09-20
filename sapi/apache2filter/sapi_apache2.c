@@ -30,7 +30,7 @@
 #include "php_variables.h"
 #include "SAPI.h"
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #ifndef NETWARE
 #include "ext/standard/php_standard.h"
 #else

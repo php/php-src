@@ -519,7 +519,7 @@ PHP_MSHUTDOWN_FUNCTION(dba)
 }
 /* }}} */
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 /* {{{ PHP_MINFO_FUNCTION
  */

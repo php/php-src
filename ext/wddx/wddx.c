@@ -35,7 +35,7 @@
 #include "ext/standard/php_incomplete_class.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/html.h"
 #include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"

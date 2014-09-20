@@ -25,7 +25,7 @@
 #include "php_gmp.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
-#include "ext/standard/php_smart_str_public.h"
+#include "zend_smart_str_public.h"
 #include "zend_exceptions.h"
 
 #if HAVE_GMP

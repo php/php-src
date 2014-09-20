@@ -40,7 +40,7 @@
 
 #define url_scanner url_scanner_ex
 
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 
 static void tag_dtor(zval *zv)
 {

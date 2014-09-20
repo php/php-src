@@ -35,7 +35,7 @@
 #include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 
 #include <stdio.h>
 #include <stdlib.h>

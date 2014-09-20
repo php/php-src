@@ -27,7 +27,7 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_reverse_api.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 /* {{{ mysqlnd_functions[]
  *

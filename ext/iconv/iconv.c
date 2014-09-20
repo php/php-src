@@ -55,7 +55,7 @@
 #undef iconv
 #endif
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/quot_print.h"
 

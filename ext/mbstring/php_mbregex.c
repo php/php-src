@@ -28,7 +28,7 @@
 
 #if HAVE_MBREGEX
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "php_mbregex.h"
 #include "mbstring.h"

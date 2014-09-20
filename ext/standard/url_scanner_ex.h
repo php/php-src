@@ -31,7 +31,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC);
 PHPAPI int php_url_scanner_reset_vars(TSRMLS_D);
 
-#include "php_smart_str_public.h"
+#include "zend_smart_str_public.h"
 
 typedef struct {
 	/* Used by the mainloop of the scanner */

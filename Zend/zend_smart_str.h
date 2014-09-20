@@ -16,15 +16,11 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
+#ifndef ZEND_SMART_STR_H
+#define ZEND_SMART_STR_H
 
-#ifndef PHP_SMART_STR_H
-#define PHP_SMART_STR_H
-
-#include "php_smart_str_public.h"
-
-#include <stdlib.h>
 #include <zend.h>
+#include "zend_smart_str_public.h"
 
 #ifndef SMART_STR_PREALLOC
 #define SMART_STR_PREALLOC 128
@@ -33,8 +29,6 @@
 #ifndef SMART_STR_START_SIZE
 #define SMART_STR_START_SIZE 78
 #endif
-
-/* wrapper */
 
 #define smart_str_appends_ex(dest, src, what) \
 	smart_str_appendl_ex((dest), (src), strlen(src), (what))
@@ -122,3 +116,4 @@ static zend_always_inline void smart_str_setl(smart_str *dest, const char *src, 
 }
 
 #endif
+

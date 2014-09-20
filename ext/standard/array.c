@@ -45,7 +45,7 @@
 #include "basic_functions.h"
 #include "php_string.h"
 #include "php_rand.h"
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 #ifdef HAVE_SPL
 #include "ext/spl/spl_array.h"
 #endif

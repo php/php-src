@@ -56,7 +56,7 @@
 #include "zend_execute.h"
 #include "php_globals.h"
 #include "basic_functions.h"
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 #include <Zend/zend_exceptions.h>
 #ifdef ZTS
 #include "TSRM.h"

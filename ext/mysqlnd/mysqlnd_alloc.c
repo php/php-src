@@ -539,7 +539,7 @@ void _mysqlnd_free(void *ptr MYSQLND_MEM_D)
 
 #define SMART_STR_START_SIZE 2048
 #define SMART_STR_PREALLOC 512
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 
 /* {{{ _mysqlnd_pestrndup */

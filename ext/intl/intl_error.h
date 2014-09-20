@@ -21,7 +21,7 @@
 
 #include <unicode/utypes.h>
 #include <unicode/parseerr.h>
-#include <ext/standard/php_smart_str.h>
+#include <zend_smart_str_public.h>
 
 #define INTL_ERROR_CODE(e) (e).code
 

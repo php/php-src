@@ -35,6 +35,7 @@
 #include "zend_operators.h"
 #include "zend_qsort.h"
 #include "zend_vm.h"
+#include "zend_smart_str.h"
 #include "main/php_streams.h"
 #include "main/streams/php_stream_plain_wrapper.h"
 #include "main/SAPI.h"
@@ -49,7 +50,6 @@
 #include "ext/standard/md5.h"
 #include "ext/standard/sha1.h"
 #include "ext/standard/php_var.h"
-#include "ext/standard/php_smart_str.h"
 #include "ext/standard/php_versioning.h"
 #ifndef PHP_WIN32
 #include "TSRM/tsrm_strtok_r.h"

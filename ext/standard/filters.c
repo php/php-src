@@ -27,7 +27,7 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 /* {{{ rot13 stream filter implementation */
 static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

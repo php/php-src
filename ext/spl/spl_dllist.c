@@ -29,7 +29,7 @@
 #include "php_spl.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "spl_functions.h"
 #include "spl_engine.h"
 #include "spl_iterators.h"

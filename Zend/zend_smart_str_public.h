@@ -16,12 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
-#ifndef PHP_SMART_STR_PUBLIC_H
-#define PHP_SMART_STR_PUBLIC_H
-
-#include <sys/types.h>
+#ifndef ZEND_SMART_STR_PUBLIC_H
+#define ZEND_SMART_STR_PUBLIC_H
 
 typedef struct {
 	zend_string *s;

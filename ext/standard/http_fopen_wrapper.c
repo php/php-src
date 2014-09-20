@@ -27,7 +27,7 @@
 #include "php_network.h"
 #include "php_ini.h"
 #include "ext/standard/basic_functions.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -48,7 +48,7 @@
 #include "ext/standard/url_scanner_ex.h"
 #include "ext/standard/php_rand.h" /* for RAND_MAX */
 #include "ext/standard/info.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/url.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/head.h"
