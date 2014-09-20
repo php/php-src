@@ -21,6 +21,7 @@
 #include "zend_API.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
+#include "zend_smart_str.h"
 
 static void ptr_dtor(zval *zv) /* {{{ */
 {
@@ -324,38 +325,22 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 }
 /* }}} */
 
-#define REALLOC_BUF_IF_EXCEED(buf, offset, length, size) \
-	if (UNEXPECTED(offset - buf + size >= length)) { 	\
-		length += size + 1; 				\
-		buf = erealloc(buf, length); 		\
-	}
-
-static char *zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{{ */
+static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{{ */
 {
-	char *offset, *buf;
-	uint32_t length = 1024;
+	smart_str str = {0};
 
-	offset = buf = (char *)emalloc(length * sizeof(char));
 	if (fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-		*(offset++) = '&';
-		*(offset++) = ' ';
+		smart_str_appends(&str, "& ");
 	}
 
 	if (fptr->common.scope) {
-		memcpy(offset, fptr->common.scope->name->val, fptr->common.scope->name->len);
-		offset += fptr->common.scope->name->len;
-		*(offset++) = ':';
-		*(offset++) = ':';
+		smart_str_appendl(&str, fptr->common.scope->name->val, fptr->common.scope->name->len);
+		smart_str_appends(&str, "::");
 	}
 
-	{
-		size_t name_len = fptr->common.function_name->len;
-		REALLOC_BUF_IF_EXCEED(buf, offset, length, name_len);
-		memcpy(offset, fptr->common.function_name->val, name_len);
-		offset += name_len;
-	}
+	smart_str_appendl(&str, fptr->common.function_name->val, fptr->common.function_name->len);
+	smart_str_appendc(&str, '(');
 
-	*(offset++) = '(';
 	if (fptr->common.arg_info) {
 		uint32_t i, required;
 		zend_arg_info *arg_info = fptr->common.arg_info;
@@ -365,7 +350,7 @@ static char *zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{{
 			if (arg_info->class_name) {
 				const char *class_name;
 				uint32_t class_name_len;
-				if (!strcasecmp(arg_info->class_name, "self") && fptr->common.scope ) {
+				if (!strcasecmp(arg_info->class_name, "self") && fptr->common.scope) {
 					class_name = fptr->common.scope->name->val;
 					class_name_len = fptr->common.scope->name->len;
 				} else if (!strcasecmp(arg_info->class_name, "parent") && fptr->common.scope->parent) {
@@ -375,55 +360,40 @@ static char *zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{{
 					class_name = arg_info->class_name;
 					class_name_len = arg_info->class_name_len;
 				}
-				REALLOC_BUF_IF_EXCEED(buf, offset, length, class_name_len);
-				memcpy(offset, class_name, class_name_len);
-				offset += class_name_len;
-				*(offset++) = ' ';
+
+				smart_str_appendl(&str, class_name, class_name_len);
+				smart_str_appendc(&str, ' ');
 			} else if (arg_info->type_hint) {
-				uint32_t type_name_len;
-				char *type_name = zend_get_type_by_const(arg_info->type_hint);
-				type_name_len = strlen(type_name);
-				REALLOC_BUF_IF_EXCEED(buf, offset, length, type_name_len);
-				memcpy(offset, type_name, type_name_len);
-				offset += type_name_len;
-				*(offset++) = ' ';
+				const char *type_name = zend_get_type_by_const(arg_info->type_hint);
+				smart_str_appends(&str, type_name);
+				smart_str_appendc(&str, ' ');
 			}
 
 			if (arg_info->pass_by_reference) {
-				*(offset++) = '&';
+				smart_str_appendc(&str, '&');
 			}
 
 			if (arg_info->is_variadic) {
-				*(offset++) = '.';
-				*(offset++) = '.';
-				*(offset++) = '.';
+				smart_str_appends(&str, "...");
 			}
 
-			*(offset++) = '$';
+			smart_str_appendc(&str, '$');
 
 			if (arg_info->name) {
-				REALLOC_BUF_IF_EXCEED(buf, offset, length, arg_info->name_len);
-				memcpy(offset, arg_info->name, arg_info->name_len);
-				offset += arg_info->name_len;
+				smart_str_appendl(&str, arg_info->name, arg_info->name_len);
 			} else {
-				uint32_t idx = i;
-				memcpy(offset, "param", 5);
-				offset += 5;
-				do {
-					*(offset++) = (char) (idx % 10) + '0';
-					idx /= 10;
-				} while (idx > 0);
+				smart_str_appends(&str, "param");
+				smart_str_append_unsigned(&str, i);
 			}
+
 			if (i >= required && !arg_info->is_variadic) {
-				*(offset++) = ' ';
-				*(offset++) = '=';
-				*(offset++) = ' ';
+				smart_str_appends(&str, " = ");
 				if (fptr->type == ZEND_USER_FUNCTION) {
 					zend_op *precv = NULL;
 					{
 						uint32_t idx  = i;
-						zend_op *op = ((zend_op_array *)fptr)->opcodes;
-						zend_op *end = op + ((zend_op_array *)fptr)->last;
+						zend_op *op = fptr->op_array.opcodes;
+						zend_op *end = op + fptr->op_array.last;
 
 						++idx;
 						while (op < end) {
@@ -439,61 +409,46 @@ static char *zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{{
 						zval *zv = precv->op2.zv;
 
 						if (Z_TYPE_P(zv) == IS_CONSTANT) {
-							REALLOC_BUF_IF_EXCEED(buf, offset, length, Z_STRLEN_P(zv));
-							memcpy(offset, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
-							offset += Z_STRLEN_P(zv);
+							smart_str_appendl(&str, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
 						} else if (Z_TYPE_P(zv) == IS_FALSE) {
-							memcpy(offset, "false", 5);
-							offset += 5;
+							smart_str_appends(&str, "false");
 						} else if (Z_TYPE_P(zv) == IS_TRUE) {
-							memcpy(offset, "true", 4);
-							offset += 4;
+							smart_str_appends(&str, "true");
 						} else if (Z_TYPE_P(zv) == IS_NULL) {
-							memcpy(offset, "NULL", 4);
-							offset += 4;
+							smart_str_appends(&str, "NULL");
 						} else if (Z_TYPE_P(zv) == IS_STRING) {
-							*(offset++) = '\'';
-							REALLOC_BUF_IF_EXCEED(buf, offset, length, MIN(Z_STRLEN_P(zv), 10));
-							memcpy(offset, Z_STRVAL_P(zv), MIN(Z_STRLEN_P(zv), 10));
-							offset += MIN(Z_STRLEN_P(zv), 10);
+							smart_str_appendc(&str, '\'');
+							smart_str_appendl(&str, Z_STRVAL_P(zv), MIN(Z_STRLEN_P(zv), 10));
 							if (Z_STRLEN_P(zv) > 10) {
-								*(offset++) = '.';
-								*(offset++) = '.';
-								*(offset++) = '.';
+								smart_str_appends(&str, "...");
 							}
-							*(offset++) = '\'';
+							smart_str_appendc(&str, '\'');
 						} else if (Z_TYPE_P(zv) == IS_ARRAY) {
-							memcpy(offset, "Array", 5);
-							offset += 5;
+							smart_str_appends(&str, "Array");
 						} else if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
-							memcpy(offset, "<expression>", 12);
-							offset += 12;
+							smart_str_appends(&str, "<expression>");
 						} else {
-							zend_string *str = zval_get_string(zv);
-							REALLOC_BUF_IF_EXCEED(buf, offset, length, str->len);
-							memcpy(offset, str->val, str->len);
-							offset += str->len;
-							zend_string_release(str);
+							zend_string *zv_str = zval_get_string(zv);
+							smart_str_appendl(&str, zv_str->val, zv_str->len);
+							zend_string_release(zv_str);
 						}
 					}
 				} else {
-					memcpy(offset, "NULL", 4);
-					offset += 4;
+					smart_str_appends(&str, "NULL");
 				}
 			}
 
 			if (++i < fptr->common.num_args) {
-				*(offset++) = ',';
-				*(offset++) = ' ';
+				smart_str_appends(&str, ", ");
 			}
 			arg_info++;
-			REALLOC_BUF_IF_EXCEED(buf, offset, length, 32);
 		}
 	}
-	*(offset++) = ')';
-	*offset = '\0';
 
-	return buf;
+	smart_str_appendc(&str, ')');
+	smart_str_0(&str);
+
+	return str.s;
 }
 /* }}} */
 
@@ -557,13 +512,13 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 	if (child->common.prototype && (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name->val, zend_get_function_declaration(child->common.prototype TSRMLS_CC));
+			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name->val, zend_get_function_declaration(child->common.prototype TSRMLS_CC)->val);
 		}
 	} else if (EG(error_reporting) & E_STRICT || Z_TYPE(EG(user_error_handler)) != IS_UNDEF) { /* Check E_STRICT (or custom error handler) before the check so that we save some time */
 		if (!zend_do_perform_implementation_check(child, parent TSRMLS_CC)) {
-			char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
-			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name->val, method_prototype);
-			efree(method_prototype);
+			zend_string *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
+			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name->val, method_prototype->val);
+			zend_string_free(method_prototype);
 		}
 	}
 }
@@ -1039,15 +994,15 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 						/* Make sure the trait method is compatible with previosly declared abstract method */
 						if (!zend_traits_method_compatibility_check(fn, existing_fn TSRMLS_CC)) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
-								zend_get_function_declaration(fn TSRMLS_CC),
-								zend_get_function_declaration(existing_fn TSRMLS_CC));
+								zend_get_function_declaration(fn TSRMLS_CC)->val,
+								zend_get_function_declaration(existing_fn TSRMLS_CC)->val);
 						}
 					} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the abstract declaration is compatible with previous declaration */
 						if (!zend_traits_method_compatibility_check(existing_fn, fn TSRMLS_CC)) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
-								zend_get_function_declaration(fn TSRMLS_CC),
-								zend_get_function_declaration(existing_fn TSRMLS_CC));
+								zend_get_function_declaration(fn TSRMLS_CC)->val,
+								zend_get_function_declaration(existing_fn TSRMLS_CC)->val);
 						}
 						return;
 					}
@@ -1062,15 +1017,15 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 			/* Make sure the trait method is compatible with previosly declared abstract method */
 			if (!zend_traits_method_compatibility_check(fn, existing_fn TSRMLS_CC)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
-					zend_get_function_declaration(fn TSRMLS_CC),
-					zend_get_function_declaration(existing_fn TSRMLS_CC));
+					zend_get_function_declaration(fn TSRMLS_CC)->val,
+					zend_get_function_declaration(existing_fn TSRMLS_CC)->val);
 			}
 		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			/* Make sure the abstract declaration is compatible with previous declaration */
 			if (!zend_traits_method_compatibility_check(existing_fn, fn TSRMLS_CC)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
-					zend_get_function_declaration(fn TSRMLS_CC),
-					zend_get_function_declaration(existing_fn TSRMLS_CC));
+					zend_get_function_declaration(fn TSRMLS_CC)->val,
+					zend_get_function_declaration(existing_fn TSRMLS_CC)->val);
 			}
 			return;
 		} else if ((existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
