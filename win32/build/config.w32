@@ -221,7 +221,7 @@ if (PHP_DEBUG == "yes") {
 }
 
 if (PHP_ZTS == "yes") {
-	ADD_FLAG("CFLAGS", "/D ZTS=1");
+	ADD_FLAG("CFLAGS", "/D ZTS=1 /D USE___THREAD=1");
 	ADD_FLAG("ZTS", "1");
 } else {
 	ADD_FLAG("ZTS", "0");
