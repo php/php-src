@@ -231,4 +231,3 @@ for (i = 0; i < num_varargs; i++) {
 if (varargs) {
     efree(varargs);
 }
-

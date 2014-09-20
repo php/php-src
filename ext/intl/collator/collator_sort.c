@@ -203,7 +203,7 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2 TSRM
 /* }}} */
 
 /* {{{ collator_compare_func
- * Taken from PHP5 source (array_data_compare).
+ * Taken from PHP7 source (array_data_compare).
  */
 static int collator_compare_func( const void* a, const void* b TSRMLS_DC )
 {

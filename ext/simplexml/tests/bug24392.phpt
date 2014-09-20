@@ -13,7 +13,7 @@ foreach ($s->item as $item) {
 EU Parliament to Vote on New Patent Rules
 Most Powerful Amateur Rocket in Canada
 GF FX 5900 Ultra vs. ATi Radeon 9800 Pro
-PHP 5 Beta 1
+PHP 7 Beta 1
 Engaging with the OSS Community
 Pure Math, Pure Joy
 Windows Tech Writer Looks at Linux

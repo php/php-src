@@ -39,7 +39,7 @@ $(STAMP): build/buildcheck.sh
 snapshot:
 	distname='$(DISTNAME)'; \
 	if test -z "$$distname"; then \
-		distname='php5-snapshot'; \
+		distname='php7-snapshot'; \
 	fi; \
 	myname=`basename \`pwd\`` ; \
 	cd .. && cp -rp $$myname $$distname; \

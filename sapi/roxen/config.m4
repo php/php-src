@@ -36,7 +36,7 @@ if test "$PHP_ROXEN" != "no"; then
   PHP_ADD_INCLUDE($PIKE_INCLUDE_DIR)
   AC_DEFINE(HAVE_ROXEN, 1, [Whether you use Roxen])
   PHP_SELECT_SAPI(roxen, shared, roxen.c)
-  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $PIKE_MODULE_DIR/PHP5.so"
+  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $PIKE_MODULE_DIR/PHP7.so"
   RESULT="yes
   Pike binary used:      $PIKE
   Pike include dir:      $PIKE_INCLUDE_DIR

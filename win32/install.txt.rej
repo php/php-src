@@ -1,0 +1,72 @@
+--- win32/install.txt
++++ win32/install.txt
+@@ -337,38 +337,38 @@
+    |
+    |-php.ini-production   -- recommended php.ini settings for production
+    |
+-   |-php5activescript.dll
++   |-php7activescript.dll
+    |
+-   |-php5apache.dll
++   |-php7apache.dll
+    |
+-   |-php5apache2.dll
++   |-php7apache2.dll
+    |
+    |-..
+    |
+-   |-php5ts.dll           -- core PHP DLL
++   |-php7ts.dll           -- core PHP DLL
+    |
+    |-...
+ 
+-   Notice the differences and similarities. Both PHP 4 and PHP 5 have a
++   Notice the differences and similarities. Both PHP 4 and PHP 7 have a
+    CGI executable, a CLI executable, and server modules, but they are
+    located in different folders and/or have different names. While PHP 4
+-   packages have the server modules in the sapi folder, PHP 5
++   packages have the server modules in the sapi folder, PHP 7
+    distributions have no such directory and instead they're in the PHP
+-   folder root. The supporting DLLs for the PHP 5 extensions are also not
++   folder root. The supporting DLLs for the PHP 7 extensions are also not
+    in a separate directory.
+ 
+      Note: In PHP 4, you should move all files located in the dll and
+      sapi folders to the main folder (e.g. C:\php).
+ 
+-   Here is a list of server modules shipped with PHP 5:
++   Here is a list of server modules shipped with PHP 7:
+ 
+-     * sapi/php5apache2_2.dll - Apache 2.2.x module.
+-     * sapi/php5apache.dll (php5apache.dll) - Apache 1.x module
+-     * sapi/php5apache2.dll (php5apache2.dll) -  - Apache 2.0.x module.
+-     * sapi/php5isapi.dll - ISAPI Module for ISAPI compliant web servers 
++     * sapi/php7apache2_2.dll - Apache 2.2.x module.
++     * sapi/php7apache.dll (php7apache.dll) - Apache 1.x module
++     * sapi/php7apache2.dll (php7apache2.dll) -  - Apache 2.0.x module.
++     * sapi/php7isapi.dll - ISAPI Module for ISAPI compliant web servers
+        like IIS 5.0 or newer. However the FCGI SAPI is recommended with
+        IIS
+-     * sapi/php5nsapi.dll (php5nsapi.dll) - Sun/iPlanet/Netscape server
++     * sapi/php7nsapi.dll (php7nsapi.dll) - Sun/iPlanet/Netscape server
+        module.
+ 
+    Server modules provide significantly better performance and additional
+@@ -808,7 +808,7 @@
+ 
+      Note: Remember to substitute your actual path to PHP for the c:/php/
+      in the above examples. Take care to use either
+-     php5apache2.dll in your LoadModule directive and not php5apache.dll 
++     php7apache2.dll in your LoadModule directive and not php7apache.dll
+      as the latter ones are designed to run with Apache 1.3.x.
+ 
+      Note: If you want to use content negotiation, read related FAQ.
+@@ -1106,7 +1106,7 @@
+ extension=php_bz2.dll
+ 
+      * Some of the extensions need extra DLLs to work. Couple of them can
+-       be found in the distribution package, in in the main folder in PHP 5, 
++       be found in the distribution package, in in the main folder in PHP 7,
+        but some, for example Oracle (php_oci8.dll) require DLLs which are
+        not bundled with the distribution package.
+      * Some of these DLLs are not bundled with the PHP distribution. See
