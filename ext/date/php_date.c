@@ -325,12 +325,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_name_from_abbr, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_offset_get, 0, 0, 2)
-	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, datetime)
+	ZEND_ARG_OBJ_INFO(0, object, DateTimeZone, 0)
+	ZEND_ARG_OBJ_INFO(0, datetime, DateTimeInterface, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_method_offset_get, 0, 0, 1)
-	ZEND_ARG_INFO(0, datetime)
+	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_transitions_get, 0, 0, 1)
@@ -3799,7 +3799,7 @@ PHP_FUNCTION(timezone_name_from_abbr)
 }
 /* }}} */
 
-/* {{{ proto long timezone_offset_get(DateTimeZone object, DateTime object)
+/* {{{ proto long timezone_offset_get(DateTimeZone object, DateTimeInterface datetime)
    Returns the timezone offset.
 */
 PHP_FUNCTION(timezone_offset_get)
@@ -3809,13 +3809,13 @@ PHP_FUNCTION(timezone_offset_get)
 	php_date_obj        *dateobj;
 	timelib_time_offset *offset;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &object, date_ce_timezone, &dateobject, date_ce_date) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &object, date_ce_timezone, &dateobject, date_ce_interface) == FAILURE) {
 		RETURN_FALSE;
 	}
 	tzobj = Z_PHPTIMEZONE_P(object);
 	DATE_CHECK_INITIALIZED(tzobj->initialized, DateTimeZone);
 	dateobj = Z_PHPDATE_P(dateobject);
-	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTimeInterface);
 
 	switch (tzobj->type) {
 		case TIMELIB_ZONETYPE_ID:
