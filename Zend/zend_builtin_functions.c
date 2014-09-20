@@ -339,7 +339,7 @@ zend_module_entry zend_builtin_module = { /* {{{ */
 	NULL,
 	NULL,
 	ZEND_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 

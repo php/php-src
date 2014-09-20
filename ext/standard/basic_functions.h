@@ -232,7 +232,7 @@ typedef struct _php_basic_globals {
 
 #ifdef ZTS
 #define BG(v) TSRMG(basic_globals_id, php_basic_globals *, v)
-PHPAPI extern int basic_globals_id;
+TSRMG_DH(php_basic_globals, basic_globals_id);
 #else
 #define BG(v) (basic_globals.v)
 PHPAPI extern php_basic_globals basic_globals;

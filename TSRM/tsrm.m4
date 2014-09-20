@@ -21,6 +21,72 @@ AC_DEFUN([TSRM_CHECK_GCC_ARG],[
   fi
 ])
 
+AC_DEFUN([TSRM___THREAD_CHECKS],[
+ AC_ARG_WITH(tsrm-native-tls,
+ [ --with-tsrm-native-tls
+                    Use native TLS],[
+    USE___THREAD=yes
+ ],[
+    USE___THREAD=no
+])
+
+if test $USE___THREAD = yes; then
+ AC_CACHE_CHECK([for __thread specifier], ac_cv_tsrm_have___thread, [
+ AC_TRY_RUN([
+     __thread int foo = 42;
+     int main() {
+     return foo - 42;
+     }
+ ],[
+    ac_cv_tsrm_have___thread=yes
+ ],[
+    ac_cv_tsrm_have___thread=no
+ ])
+ ])
+ AC_MSG_CHECKING(wether to use native TLS)
+ if test $ac_cv_tsrm_have___thread = yes; then
+    AC_DEFINE(USE___THREAD, 1, [wether to use native TLS])
+ else
+    AC_MSG_ERROR([__thread specifier not available])
+ fi
+    AC_MSG_RESULT(yes)
+ fi
+])
+
+dnl test and set the memory alignment
+AC_DEFUN([TSRM_MM_ALIGN_CHECK], [
+ AC_CACHE_CHECK([for MM alignment], ac_cv_tsrm_mm_align, [
+ AC_TRY_RUN([
+     #include <stdio.h>
+
+     typedef union _mm_align_test {
+         void *ptr;
+         double dbl;
+         long lng;
+     } mm_align_test;
+
+     #if (defined (__GNUC__) && __GNUC__ >= 2)
+     #  define TSRM_MM_ALIGNMENT (__alignof__ (mm_align_test))
+     #else
+     #  define TSRM_MM_ALIGNMENT (sizeof(mm_align_test))
+     #endif
+
+     int main()
+     {
+         FILE *fp;
+         fp = fopen("conftest.tsrm", "w");
+         fprintf(fp, "%d\n", TSRM_MM_ALIGNMENT);
+         fclose(fp);
+         return 0;
+     }
+ ],[
+    ac_cv_tsrm_mm_align=`cat conftest.tsrm | cut -d ' ' -f 1`
+ ])
+ ])
+ AC_DEFINE_UNQUOTED(TSRM_MM_ALIGNMENT, $ac_cv_tsrm_mm_align, [ ])
+])
+
+
 AC_DEFUN([TSRM_BASIC_CHECKS],[
 
 AC_REQUIRE([AC_PROG_CC])dnl
@@ -29,7 +95,7 @@ AC_REQUIRE([AC_PROG_CC_C_O])dnl
 AC_REQUIRE([AC_PROG_RANLIB])dnl
 
 AC_CHECK_HEADERS(stdarg.h)
-
+TSRM_MM_ALIGN_CHECK()
 AC_CHECK_FUNCS(sigprocmask)
 
 ])

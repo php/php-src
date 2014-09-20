@@ -451,6 +451,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	}
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
+	TSRMLS_INIT();
 #endif
 	sapi_startup(&apache2_sapi_module);
 	apache2_sapi_module.startup(&apache2_sapi_module);
@@ -540,7 +541,7 @@ static int php_handler(request_rec *r)
 	apr_bucket *bucket;
 	apr_status_t rv;
 	request_rec * volatile parent_req = NULL;
-	TSRMLS_FETCH();
+	TSRMLS_INIT();
 
 #define PHPAP_INI_OFF php_apache_ini_dtor(r, parent_req TSRMLS_CC);
 

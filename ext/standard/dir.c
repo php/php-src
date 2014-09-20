@@ -57,7 +57,7 @@ typedef struct {
 
 #ifdef ZTS
 #define DIRG(v) TSRMG(dir_globals_id, php_dir_globals *, v)
-int dir_globals_id;
+TSRMG_D(php_dir_globals, dir_globals_id);
 #else
 #define DIRG(v) (dir_globals.v)
 php_dir_globals dir_globals;
@@ -137,7 +137,7 @@ PHP_MINIT_FUNCTION(dir)
 	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry TSRMLS_CC);
 
 #ifdef ZTS
-	ts_allocate_id(&dir_globals_id, sizeof(php_dir_globals), NULL, NULL);
+	TSRMG_ALLOCATE(dir_globals_id, sizeof(php_dir_globals), NULL, NULL);
 #endif
 
 	dirsep_str[0] = DEFAULT_SLASH;

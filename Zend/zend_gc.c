@@ -26,7 +26,7 @@
 #define GC_ROOT_BUFFER_MAX_ENTRIES 10001
 
 #ifdef ZTS
-ZEND_API int gc_globals_id;
+TSRMG_D(zend_gc_globals, gc_globals_id);
 #else
 ZEND_API zend_gc_globals gc_globals;
 #endif
@@ -82,7 +82,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals TSRMLS_DC)
 ZEND_API void gc_globals_ctor(TSRMLS_D)
 {
 #ifdef ZTS
-	ts_allocate_id(&gc_globals_id, sizeof(zend_gc_globals), (ts_allocate_ctor) gc_globals_ctor_ex, (ts_allocate_dtor) root_buffer_dtor);
+	TSRMG_ALLOCATE(gc_globals_id, sizeof(zend_gc_globals), (ts_allocate_ctor) gc_globals_ctor_ex, (ts_allocate_dtor) root_buffer_dtor);
 #else
 	gc_globals_ctor_ex(&gc_globals);
 #endif

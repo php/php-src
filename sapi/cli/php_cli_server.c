@@ -515,7 +515,7 @@ zend_module_entry cli_server_module_entry = {
 	NULL,
 	PHP_MINFO(cli_server),
 	PHP_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -1188,7 +1188,7 @@ static void php_cli_server_logf(const char *format TSRMLS_DC, ...) /* {{{ */
 {
 	char *buf = NULL;
 	va_list ap;
-#ifdef ZTS
+#ifdef PASS_TSRMLS
 	va_start(ap, tsrm_ls);
 #else
 	va_start(ap, format);
@@ -2364,9 +2364,6 @@ typedef struct php_cli_server_do_event_for_each_fd_callback_params {
 static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socket_t fd, int event) /* {{{ */
 {
 	php_cli_server_do_event_for_each_fd_callback_params *params = _params;
-#ifdef ZTS
-	void ***tsrm_ls = params->tsrm_ls;
-#endif
 	php_cli_server *server = params->server;
 	if (server->server_sock == fd) {
 		php_cli_server_client *client = NULL;
@@ -2418,7 +2415,7 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 static void php_cli_server_do_event_for_each_fd(php_cli_server *server, int(*rhandler)(php_cli_server*, php_cli_server_client* TSRMLS_DC), int(*whandler)(php_cli_server*, php_cli_server_client* TSRMLS_DC) TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_do_event_for_each_fd_callback_params params = {
-#ifdef ZTS
+#ifdef PASS_TSRMLS
 		tsrm_ls,
 #endif
 		server,

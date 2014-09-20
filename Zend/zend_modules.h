@@ -53,7 +53,7 @@
 #define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
 
 #ifdef ZTS
-# define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals_id
+# define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals_id, &module_name##_globals_id_offset
 #else
 # define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals
 #endif
@@ -88,6 +88,7 @@ struct _zend_module_entry {
 	size_t globals_size;
 #ifdef ZTS
 	ts_rsrc_id* globals_id_ptr;
+	ts_rsrc_offset* globals_offset;
 #else
 	void* globals_ptr;
 #endif

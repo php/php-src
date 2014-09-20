@@ -106,7 +106,7 @@ extern int fclose(FILE *);
 #include "zend_API.h"
 
 #ifdef ZTS
-int file_globals_id;
+TSRMG_D(php_file_globals, file_globals_id);
 #else
 php_file_globals file_globals;
 #endif
@@ -181,7 +181,7 @@ PHP_MINIT_FUNCTION(file)
 	le_stream_context = zend_register_list_destructors_ex(file_context_dtor, NULL, "stream-context", module_number);
 
 #ifdef ZTS
-	ts_allocate_id(&file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
+	TSRMG_ALLOCATE(file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
 #else
 	file_globals_ctor(&file_globals TSRMLS_CC);
 #endif

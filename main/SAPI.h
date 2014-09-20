@@ -143,7 +143,7 @@ typedef struct _sapi_globals_struct {
 BEGIN_EXTERN_C()
 #ifdef ZTS
 # define SG(v) TSRMG(sapi_globals_id, sapi_globals_struct *, v)
-SAPI_API extern int sapi_globals_id;
+TSRMG_DH(sapi_globals_struct, sapi_globals_id);
 #else
 # define SG(v) (sapi_globals.v)
 extern SAPI_API sapi_globals_struct sapi_globals;

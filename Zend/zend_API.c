@@ -1876,7 +1876,7 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC) /* {{{ 
 	/* Initialize module globals */
 	if (module->globals_size) {
 #ifdef ZTS
-		ts_allocate_id(module->globals_id_ptr, module->globals_size, (ts_allocate_ctor) module->globals_ctor, (ts_allocate_dtor) module->globals_dtor);
+		TSRMG_ALLOCATE_EX((*module->globals_id_ptr), (*module->globals_offset), module->globals_size, module->globals_ctor, module->globals_dtor);
 #else
 		if (module->globals_ctor) {
 			module->globals_ctor(module->globals_ptr TSRMLS_CC);

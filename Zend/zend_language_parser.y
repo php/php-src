@@ -49,7 +49,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %expect 2
 
 %code requires {
-#ifdef ZTS
+#ifdef PASS_TSRMLS
 # define YYPARSE_PARAM tsrm_ls
 # define YYLEX_PARAM tsrm_ls
 #endif

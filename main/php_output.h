@@ -153,6 +153,7 @@ ZEND_END_MODULE_GLOBALS(output)
 
 /* there should not be a need to use OG() from outside of output.c */
 #ifdef ZTS
+TSRMG_DH(php_output_globals, output_globals_id);
 # define OG(v) TSRMG(output_globals_id, zend_output_globals *, v)
 #else
 # define OG(v) (output_globals.v)
