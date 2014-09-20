@@ -6337,6 +6337,15 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 		/* save the location of FETCH_W instruction(s) */
 		open_brackets_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
 		zend_do_end_variable_parse(array, BP_VAR_W, 0 TSRMLS_CC);
+
+		if (zend_is_function_or_method_call(array)) {
+			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+			opline->opcode = ZEND_SEPARATE;
+			SET_NODE(opline->op1, array);
+			SET_UNUSED(opline->op2);
+			opline->result_type = IS_VAR;
+			opline->result.var = opline->op1.var;
+		}
 	} else {
 		is_variable = 0;
 		open_brackets_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
