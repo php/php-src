@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -366,8 +366,8 @@ static unsigned short php_read2(php_stream * stream TSRMLS_DC)
 {
 	unsigned char a[2];
 
-	/* just return 0 if we hit the end-of-file */
-	if((php_stream_read(stream, (char*)a, sizeof(a))) <= 0) return 0;
+	/* return 0 if we couldn't read enough data */
+	if((php_stream_read(stream, a, sizeof(a))) < sizeof(a)) return 0;
 
 	return (((unsigned short)a[0]) << 8) + ((unsigned short)a[1]);
 }
@@ -647,7 +647,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 #endif
 
 	result->channels = php_read2(stream TSRMLS_CC); /* Csiz */
-	if (result->channels < 0 || result->channels > 256) {
+	if (result->channels == 0 && php_stream_eof(stream) || result->channels > 256) {
 		efree(result);
 		return NULL;
 	}

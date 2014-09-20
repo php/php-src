@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -292,7 +292,7 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri TSRMLS_DC)
 						zval new_header;
 				    	
 						rest += 2;
-						ZVAL_STR(&new_header, zend_string_alloc(Z_STRLEN_P(header) - (rest - s), 0));
+						ZVAL_NEW_STR(&new_header, zend_string_alloc(Z_STRLEN_P(header) - (rest - s), 0));
 						memcpy(Z_STRVAL(new_header), Z_STRVAL_P(header), s - Z_STRVAL_P(header));
 						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_P(header)), rest, Z_STRLEN_P(header) - (rest - Z_STRVAL_P(header)) + 1);
 						ZVAL_COPY(&ctx->old_header, header);
@@ -3250,8 +3250,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl TSRMLS_DC)
 		smart_str_appends(&proxy,Z_STRVAL(str_port));
 		smart_str_0(&proxy);
 		zval_dtor(&str_port);
-		ZVAL_STR(&str_proxy, zend_string_copy(proxy.s));
-		smart_str_free(&proxy);
+		ZVAL_NEW_STR(&str_proxy, proxy.s);
 		
 		if (!context) {
 			context = php_stream_context_alloc(TSRMLS_C);
@@ -3289,9 +3288,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl TSRMLS_DC)
 		}
 
 		smart_str_0(&headers);
-		ZVAL_STR(&str_headers, zend_string_copy(headers.s));
+		ZVAL_NEW_STR(&str_headers, headers.s);
 		php_stream_context_set_option(context, "http", "header", &str_headers);
-		smart_str_free(&headers);
 		zval_ptr_dtor(&str_headers);
 	}
 

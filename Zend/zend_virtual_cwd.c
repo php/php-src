@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -205,15 +205,15 @@ typedef struct {
 
 #define SECS_BETWEEN_EPOCHS (__int64)11644473600
 #define SECS_TO_100NS (__int64)10000000
-static inline time_t FileTimeToUnixTime(const FILETIME FileTime)
+static inline time_t FileTimeToUnixTime(const FILETIME *FileTime)
 {
 	__int64 UnixTime;
 	long *nsec = NULL;
 	SYSTEMTIME SystemTime;
-	FileTimeToSystemTime(&FileTime, &SystemTime);
+	FileTimeToSystemTime(FileTime, &SystemTime);
 
-	UnixTime = ((__int64)FileTime.dwHighDateTime << 32) +
-	FileTime.dwLowDateTime;
+	UnixTime = ((__int64)FileTime->dwHighDateTime << 32) +
+	FileTime->dwLowDateTime;
 
 	UnixTime -= (SECS_BETWEEN_EPOCHS * SECS_TO_100NS);
 
@@ -397,9 +397,9 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	t = t << 32;
 	t |= data.nFileSizeLow;
 	buf->st_size = t;
-	buf->st_atime = FileTimeToUnixTime(data.ftLastAccessTime);
-	buf->st_ctime = FileTimeToUnixTime(data.ftCreationTime);
-	buf->st_mtime = FileTimeToUnixTime(data.ftLastWriteTime);
+	buf->st_atime = FileTimeToUnixTime(&data.ftLastAccessTime);
+	buf->st_ctime = FileTimeToUnixTime(&data.ftCreationTime);
+	buf->st_mtime = FileTimeToUnixTime(&data.ftLastWriteTime);
 	return 0;
 }
 /* }}} */

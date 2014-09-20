@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -1429,7 +1429,7 @@ PHP_METHOD(SoapServer, addFunction)
 					return;
 				}
 
-				ZVAL_STR(&function_copy, zend_string_copy(f->common.function_name));
+				ZVAL_STR_COPY(&function_copy, f->common.function_name);
 				zend_hash_update(service->soap_functions.ft, key, &function_copy);
 
 				zend_string_release(key);
@@ -1452,7 +1452,7 @@ PHP_METHOD(SoapServer, addFunction)
 			zend_hash_init(service->soap_functions.ft, 0, NULL, ZVAL_PTR_DTOR, 0);
 		}
 
-		ZVAL_STR(&function_copy, zend_string_copy(f->common.function_name));
+		ZVAL_STR_COPY(&function_copy, f->common.function_name);
 		zend_hash_update(service->soap_functions.ft, key, &function_copy);
 		zend_string_release(key);
 	} else if (Z_TYPE_P(function_name) == IS_LONG) {
@@ -1713,7 +1713,7 @@ PHP_METHOD(SoapServer, handle)
 				if (zend_hash_str_exists(&Z_OBJCE(tmp_soap)->function_table, php_strtolower(class_name, class_name_len), class_name_len)) {
 					zval c_ret, constructor;
 
-					ZVAL_STR(&constructor, zend_string_copy(service->soap_class.ce->name));
+					ZVAL_STR_COPY(&constructor, service->soap_class.ce->name);
 					if (call_user_function(NULL, &tmp_soap, &constructor, &c_ret, service->soap_class.argc, service->soap_class.argv TSRMLS_CC) == FAILURE) {
 						php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error calling constructor");
 					}

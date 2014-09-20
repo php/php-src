@@ -278,7 +278,7 @@ again:
 		case IS_REFERENCE:
 			expr = Z_REFVAL_P(expr);
 			if (Z_TYPE_P(expr) == IS_STRING) {
-				ZVAL_STR(expr_copy, zend_string_copy(Z_STR_P(expr)));
+				ZVAL_STR_COPY(expr_copy, Z_STR_P(expr));
 				return 1;
 			}
 			goto again;
@@ -514,6 +514,15 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 		compiler_globals->static_members_table = NULL;
 	}
 	compiler_globals->script_encoding_list = NULL;
+
+#ifdef ZTS
+	compiler_globals->empty_string = zend_string_alloc(sizeof("")-1, 1);
+	compiler_globals->empty_string->val[0] = '\000';
+	zend_string_hash_val(compiler_globals->empty_string);
+	compiler_globals->empty_string->gc.u.v.flags |= IS_STR_INTERNED;
+
+	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
+#endif
 }
 /* }}} */
 
@@ -538,6 +547,10 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
+
+#ifdef ZTS
+	zend_string_release(compiler_globals->empty_string);
+#endif
 }
 /* }}} */
 
@@ -1031,7 +1044,7 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 		} \
 	} while (0)
 
-#ifndef ZEND_WIN32
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 #else
 static void zend_error_va_list(int type, const char *format, va_list args)
@@ -1039,7 +1052,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 {
 	char *str;
 	int len;
-#ifndef ZEND_WIN32
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 	va_list args;
 #endif
 	va_list usr_copy;
@@ -1144,7 +1157,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	}
 #endif /* HAVE_DTRACE */
 
-#ifndef ZEND_WIN32
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 	va_start(args, format);
 #endif
 
@@ -1257,7 +1270,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			break;
 	}
 
-#ifndef ZEND_WIN32
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 	va_end(args);
 #endif
 
@@ -1274,9 +1287,9 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 }
 /* }}} */
 
-#if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
-#elif defined(ZEND_WIN32)
+#elif defined(ZEND_WIN32) || defined(DARWIN)
 ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 {
 	va_list va;
@@ -1294,6 +1307,7 @@ ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ..
 	zend_error_va_list(type, format, va);
 	va_end(va);
 }
+/* }}} */
 #endif
 
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
@@ -1410,6 +1424,7 @@ void free_estring(char **str_p) /* {{{ */
 {
 	efree(*str_p);
 }
+/* }}} */
 
 void free_string_zval(zval *zv) /* {{{ */
 {

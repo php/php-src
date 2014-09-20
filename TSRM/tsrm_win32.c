@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -212,8 +212,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 		DWORD type;
 		return GetBinaryType(pathname, &type) ? 0 : -1;
 	} else {
-		size_t pathname_len = strlen(pathname) + 1;
-		if(!IS_ABSOLUTE_PATH(pathname, pathname_len)) {
+		if(!IS_ABSOLUTE_PATH(pathname, strlen(pathname)+1)) {
 			real_path = (char *)malloc(MAX_PATH);
 			if(tsrm_realpath(pathname, real_path TSRMLS_CC) == NULL) {
 				goto Finished;

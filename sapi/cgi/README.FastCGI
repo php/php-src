@@ -69,7 +69,7 @@ a line in your config like:
 
 Don't load mod_php, by the way. Make sure it is commented out!
 
-    #LoadModule php5_module /usr/lib/apache/2.0/libphp5.so
+    #LoadModule php7_module /usr/lib/apache/2.0/libphp7.so
 
 Now, we'll create a fcgi-bin directory, just like you would do with normal
 CGI scripts. You'll need to create a directory somewhere to store your

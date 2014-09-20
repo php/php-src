@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -263,8 +263,8 @@ static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context)
     context->state[5] ^= state[5] ^ block[5];
     context->state[6] ^= state[6] ^ block[6];
     context->state[7] ^= state[7] ^ block[7];
-    
-    memset(state, 0, sizeof(state));
+
+	ZEND_SECURE_ZERO(state, sizeof(state));
 }
 
 PHP_HASH_API void PHP_WHIRLPOOLInit(PHP_WHIRLPOOL_CTX *context)
@@ -430,7 +430,7 @@ PHP_HASH_API void PHP_WHIRLPOOLFinal(unsigned char digest[64], PHP_WHIRLPOOL_CTX
         digest += 8;
     }
     
-    memset(context, 0, sizeof(*context));
+    ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
 const php_hash_ops php_hash_whirlpool_ops = {

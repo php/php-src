@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -462,10 +462,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 	if (in_p != NULL) {
 		while (in_left > 0) {
 			out_left = buf_growth - out_left;
-			{
-				size_t newlen;
-				smart_str_alloc((d), out_left, 0);
-			}
+			smart_str_alloc(d, out_left, 0);
 
 			out_p = (d)->s->val + (d)->s->len;
 
@@ -499,10 +496,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 	} else {
 		for (;;) {
 			out_left = buf_growth - out_left;
-			{
-				size_t newlen;
-				smart_str_alloc((d), out_left, 0);
-			}
+			smart_str_alloc(d, out_left, 0);
 
 			out_p = (d)->s->val + (d)->s->len;
 

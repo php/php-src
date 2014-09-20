@@ -246,7 +246,7 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 			if ((c = zend_hash_find_ptr(EG(zend_constants), const_name)) == NULL) {
 				c = emalloc(sizeof(zend_constant));
 				memset(c, 0, sizeof(zend_constant));
-				ZVAL_STR(&c->value, zend_string_copy(EG(scope)->name));
+				ZVAL_STR_COPY(&c->value, EG(scope)->name);
 				zend_hash_add_ptr(EG(zend_constants), const_name, c);
 			}
 			zend_string_release(const_name);

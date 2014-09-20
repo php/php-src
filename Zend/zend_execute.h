@@ -56,7 +56,7 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC 
 	if (Z_REFCOUNTED_P(zval_ptr)) {
 		if (!Z_DELREF_P(zval_ptr)) {
 			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
-			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_CC);
+			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
 		} else {
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
 		}

@@ -12,9 +12,9 @@ if (PHP_APACHE_HOOKS != "no") {
 				";" + PHP_PHP_BUILD + "\\apache\\src\\corer")) {
 		// We need to play tricks to get our readdir.h used by apache
 		// headers
-		SAPI('apache_hooks', 'mod_php5.c sapi_apache.c php_apache.c',
+		SAPI('apache_hooks', 'mod_php7.c sapi_apache.c php_apache.c',
 				'php' + PHP_VERSION + 'apache_hooks.dll',
-				'/D APACHEPHP5_EXPORTS /D APACHE_READDIR_H /I win32');
+				'/D APACHEPHP7_EXPORTS /D APACHE_READDIR_H /I win32');
 	} else {
 		WARNING("Could not find apache libraries/headers");
 	}

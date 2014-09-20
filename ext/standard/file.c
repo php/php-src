@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1210,7 +1210,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 		num_bytes = arg2len;
 	} else {
 		if (arg3 > 0) {
-			num_bytes = MAX(0, MIN((size_t)arg3, arg2len));
+			num_bytes = MIN((size_t)arg3, arg2len);
 		} else {
 			num_bytes = 0;
 		}

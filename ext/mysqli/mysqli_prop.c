@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -84,7 +84,7 @@ static zval *__func(mysqli_object *obj, zval *retval TSRMLS_DC) \
 		if (l < ZEND_LONG_MAX) {\
 			ZVAL_LONG(retval, (zend_long) l);\
 		} else { \
-			ZVAL_STR(retval, strpprintf(0, __ret_type_sprint_mod, l)); \
+			ZVAL_NEW_STR(retval, strpprintf(0, __ret_type_sprint_mod, l)); \
 		} \
 	}\
 	return retval;\
@@ -170,7 +170,7 @@ static zval *link_affected_rows_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 		if (rc < ZEND_LONG_MAX) {
 			ZVAL_LONG(retval, (zend_long) rc);
 		} else {
-			ZVAL_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
+			ZVAL_NEW_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
 		}
 	}
 	return retval;
@@ -357,7 +357,7 @@ static zval *stmt_affected_rows_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 		if (rc < ZEND_LONG_MAX) {
 			ZVAL_LONG(retval, (zend_long) rc);
 		} else {
-			ZVAL_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
+			ZVAL_NEW_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
 		}
 	}
 	return retval;

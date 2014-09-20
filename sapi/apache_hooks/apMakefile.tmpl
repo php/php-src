@@ -1,38 +1,38 @@
 ##
 ##  Apache 1.3 Makefile template for PHP 4.0 Module
-##  [src/modules/php5/Makefile.tmpl]
+##  [src/modules/php7/Makefile.tmpl]
 ##
 
 #   the parametrized target
-LIB=libphp5.$(LIBEXT)
+LIB=libphp7.$(LIBEXT)
 
 #   objects for building the static library
-OBJS=mod_php5.o
-OBJS_LIB=libmodphp5.a
+OBJS=mod_php7.o
+OBJS_LIB=libmodphp7.a
 
 #   objects for building the shared object library
-SHLIB_OBJS=mod_php5.so-o
-SHLIB_OBJS_LIB=libmodphp5.a
+SHLIB_OBJS=mod_php7.so-o
+SHLIB_OBJS_LIB=libmodphp7.a
 
 #   the general targets
 all: lib
 lib: $(LIB)
 
 #   build the static library by merging the object files
-libphp5.a: $(OBJS) $(OBJS_LIB)
+libphp7.a: $(OBJS) $(OBJS_LIB)
 	cp $(OBJS_LIB) $@
 	ar r $@ $(OBJS)
 	$(RANLIB) $@
 
 #   ugly hack to support older Apache-1.3 betas that don't set $LIBEXT
-libphp5.: $(OBJS) $(OBJS_LIB)
+libphp7.: $(OBJS) $(OBJS_LIB)
 	cp $(OBJS_LIB) $@
 	ar r $@ $(OBJS)
 	$(RANLIB) $@
-	cp libphp5. libphp5.a
+	cp libphp7. libphp7.a
 
 #   build the shared object library by linking the object files
-libphp5.so: $(SHLIB_OBJS) $(SHLIB_OBJS_LIB)
+libphp7.so: $(SHLIB_OBJS) $(SHLIB_OBJS_LIB)
 	rm -f $@
 	$(LD_SHLIB) $(LDFLAGS_SHLIB) -o $@ $(SHLIB_OBJS) $(SHLIB_OBJS_LIB) $(LIBS) $(PHP_LIBS) 
 
@@ -69,9 +69,9 @@ depend:
 $(OBJS): Makefile
 
 # DO NOT REMOVE
-mod_php5.o: mod_php5.c $(INCDIR)/httpd.h $(INCDIR)/conf.h \
+mod_php7.o: mod_php7.c $(INCDIR)/httpd.h $(INCDIR)/conf.h \
  $(INCDIR)/buff.h \
  $(INCDIR)/http_config.h \
  $(INCDIR)/http_core.h $(INCDIR)/http_main.h \
  $(INCDIR)/http_protocol.h $(INCDIR)/http_request.h \
- $(INCDIR)/http_log.h $(INCDIR)/util_script.h mod_php5.h
+ $(INCDIR)/http_log.h $(INCDIR)/util_script.h mod_php7.h

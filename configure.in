@@ -335,10 +335,10 @@ case $host_alias in
     PHP_BUILD_PROGRAM
     PHP_ADD_SOURCES(/main, internal_functions.c,,PHP_GLOBAL_OBJS)
     PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS, PHP_GLOBAL_OBJS)
-    PHP5LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
+    PHP7LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
     EXTENSION_DIR=sys:/php$PHP_MAJOR_VERSION/ext
-    PHP_SUBST(PHP5LIB_SHARED_LIBADD)
-    PHP_SHARED_MODULE(php5lib, PHP_GLOBAL_OBJS, netware)
+    PHP_SUBST(PHP7LIB_SHARED_LIBADD)
+    PHP_SHARED_MODULE(php7lib, PHP_GLOBAL_OBJS, netware)
     ;;
 esac
 
@@ -1490,11 +1490,8 @@ PHP_ADD_SOURCES(Zend, \
     zend_ini.c zend_qsort.c zend_multibyte.c zend_ts_hash.c zend_stream.c \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
     zend_closures.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
-    zend_virtual_cwd.c zend_ast.c)
-
-if test -r "$abs_srcdir/Zend/zend_objects.c"; then
-  PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c zend_default_classes.c)
-fi
+    zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
+    zend_default_classes.c zend_inheritance.c)
 
 dnl Selectively disable optimization due to high RAM usage during
 dnl compiling the executor.
@@ -1523,7 +1520,7 @@ $php_shtool mkdir -p pear/scripts
 $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 
-ALL_OUTPUT_FILES="php5.spec main/build-defs.h \
+ALL_OUTPUT_FILES="php7.spec main/build-defs.h \
 scripts/phpize scripts/man1/phpize.1 \
 scripts/php-config scripts/man1/php-config.1 \
 $PHP_OUTPUT_FILES"

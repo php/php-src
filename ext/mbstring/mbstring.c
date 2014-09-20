@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -4195,7 +4195,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	/* Subject: */
-	if (subject != NULL && subject_len >= 0) {
+	if (subject != NULL) {
 		orig_str.no_language = MBSTRG(language);
 		orig_str.val = (unsigned char *)subject;
 		orig_str.len = subject_len;

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -287,7 +287,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	php_hash_hmac_round((unsigned char *) digest->val, ops, context, K, (unsigned char *) digest->val, ops->digest_size);
 
 	/* Zero the key */
-	memset(K, 0, ops->block_size);
+	ZEND_SECURE_ZERO(K, ops->block_size);
 	efree(K);
 	efree(context);
 
@@ -515,7 +515,7 @@ PHP_FUNCTION(hash_final)
 		hash->ops->hash_final((unsigned char *) digest->val, hash->context);
 
 		/* Zero the key */
-		memset(hash->key, 0, hash->ops->block_size);
+		ZEND_SECURE_ZERO(hash->key, hash->ops->block_size);
 		efree(hash->key);
 		hash->key = NULL;
 	}
@@ -698,9 +698,9 @@ PHP_FUNCTION(hash_pbkdf2)
 		memcpy(result + ((i - 1) * ops->digest_size), temp, ops->digest_size);
 	}
 	/* Zero potentially sensitive variables */
-	memset(K1, 0, ops->block_size);
-	memset(K2, 0, ops->block_size);
-	memset(computed_salt, 0, salt_len + 4);
+	ZEND_SECURE_ZERO(K1, ops->block_size);
+	ZEND_SECURE_ZERO(K2, ops->block_size);
+	ZEND_SECURE_ZERO(computed_salt, salt_len + 4);
 	efree(K1);
 	efree(K2);
 	efree(computed_salt);
@@ -975,7 +975,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 				}
 
 				RETVAL_STRINGL(key, bytes);
-				memset(key, 0, bytes);
+				ZEND_SECURE_ZERO(key, bytes);
 				efree(digest);
 				efree(context);
 				efree(key);

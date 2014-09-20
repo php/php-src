@@ -79,12 +79,12 @@ if test "$PHP_CAUDIUM" != "no"; then
       AC_MSG_RESULT(not found)
     fi
   else
-    AC_MSG_ERROR([Caudium PHP5 requires Pike 7.0 or newer])
+    AC_MSG_ERROR([Caudium PHP7 requires Pike 7.0 or newer])
   fi
   PIKE_VERSION=`$PIKE -e 'string v; int rel;sscanf(version(), "Pike v%s release %d", v, rel); write(v+"."+rel);'`   
   AC_DEFINE(HAVE_CAUDIUM,1,[Whether to compile with Caudium support])
   PHP_SELECT_SAPI(caudium, shared, caudium.c)
-  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $PHP_CAUDIUM/lib/$PIKE_VERSION/PHP5.so"
+  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $PHP_CAUDIUM/lib/$PIKE_VERSION/PHP7.so"
   RESULT="  *** Pike binary used:         $PIKE
   *** Pike include dir(s) used: $PIKE_INCLUDE_DIR
   *** Pike version:             $PIKE_VERSION"

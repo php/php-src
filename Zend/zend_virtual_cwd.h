@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -70,7 +70,7 @@ typedef unsigned short mode_t;
 #define IS_UNC_PATH(path, len) \
 	(len >= 2 && IS_SLASH(path[0]) && IS_SLASH(path[1]))
 #define IS_ABSOLUTE_PATH(path, len) \
-	(len >= 2 && ((isalpha(path[0]) && path[1] == ':') || IS_UNC_PATH(path, len)))
+	(len >= 2 && ((/* is local */isalpha(path[0]) && path[1] == ':') || /* is UNC */IS_SLASH(path[0]) && IS_SLASH(path[1])))
 
 #elif defined(NETWARE)
 #ifdef HAVE_DIRENT_H
