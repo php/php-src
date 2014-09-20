@@ -89,7 +89,7 @@ ZEND_EXTENSION();
 #ifndef ZTS
 zend_accel_globals accel_globals;
 #else
-int accel_globals_id;
+TSRMG_D(zend_accel_globals, accel_globals_id);
 #endif
 
 /* Points to the structure shared across all PHP processes */
@@ -2264,7 +2264,7 @@ static int accel_startup(zend_extension *extension)
 	TSRMLS_FETCH();
 
 #ifdef ZTS
-	accel_globals_id = ts_allocate_id(&accel_globals_id, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);
+	TSRMG_ALLOCATE(accel_globals_id, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);
 #else
 	accel_globals_ctor(&accel_globals);
 #endif

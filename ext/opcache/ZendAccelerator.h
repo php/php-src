@@ -282,7 +282,7 @@ extern zend_accel_shared_globals *accel_shared_globals;
 
 #ifdef ZTS
 # define ZCG(v)	TSRMG(accel_globals_id, zend_accel_globals *, v)
-extern int accel_globals_id;
+TSRMG_DH(zend_accel_globals, accel_globals_id);
 #else
 # define ZCG(v) (accel_globals.v)
 extern zend_accel_globals accel_globals;
