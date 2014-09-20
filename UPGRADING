@@ -21,6 +21,15 @@ PHP X.Y UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core
+  . Bitwise shifts by negative numbers of bits are disallowed (throws E_WARNING
+    and gives FALSE, like a division by zero).
+  . Left bitwise shifts by a number of bits beyond the bit width of an integer
+    will always result in 0, even on CPUs which wrap around.
+  . Right bitwise shifts by a number of bits beyond the bit width of an integer
+    will always result in 0 or -1 (depending on sign), even on CPUs which wrap
+    around.
+
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile 
     handler, too.
@@ -99,6 +108,10 @@ PHP X.Y UPGRADE NOTES
 ========================================
 13. Other Changes
 ========================================
+
+- Core
+  . Instead of being undefined and platform-dependant, NaN and Infinity will
+    always be zero when casted to integer.
 
 - Standard
   . call_user_method() and call_user_method_array() no longer exists.
