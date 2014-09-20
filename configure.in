@@ -335,10 +335,10 @@ case $host_alias in
     PHP_BUILD_PROGRAM
     PHP_ADD_SOURCES(/main, internal_functions.c,,PHP_GLOBAL_OBJS)
     PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS, PHP_GLOBAL_OBJS)
-    PHP5LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
+    PHP7LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
     EXTENSION_DIR=sys:/php$PHP_MAJOR_VERSION/ext
-    PHP_SUBST(PHP5LIB_SHARED_LIBADD)
-    PHP_SHARED_MODULE(php5lib, PHP_GLOBAL_OBJS, netware)
+    PHP_SUBST(PHP7LIB_SHARED_LIBADD)
+    PHP_SHARED_MODULE(php7lib, PHP_GLOBAL_OBJS, netware)
     ;;
 esac
 
@@ -1520,7 +1520,7 @@ $php_shtool mkdir -p pear/scripts
 $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 
-ALL_OUTPUT_FILES="php5.spec main/build-defs.h \
+ALL_OUTPUT_FILES="php7.spec main/build-defs.h \
 scripts/phpize scripts/man1/phpize.1 \
 scripts/php-config scripts/man1/php-config.1 \
 $PHP_OUTPUT_FILES"

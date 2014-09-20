@@ -221,4 +221,3 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a*l", &array, &varargs, &n
 for (i = 0; i < num_varargs; i++) {
     /* do something with varargs[i] */
 }
-

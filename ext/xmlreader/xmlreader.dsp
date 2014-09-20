@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 php5ts_debug.lib resolv.lib kernel32.lib user32.lib gdi32.lib winspool.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"msvcrt" /out:"..\..\Debug_TS/php_xmlreader.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\bindlib_w32\Release"
+# ADD LINK32 php7ts_debug.lib resolv.lib kernel32.lib user32.lib gdi32.lib winspool.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"msvcrt" /out:"..\..\Debug_TS/php_xmlreader.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\bindlib_w32\Release"
 
 !ELSEIF  "$(CFG)" == "xmlreader - Win32 Release_TS"
 
@@ -80,8 +80,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 php5ts_debug.lib resolv.lib kernel32.lib user32.lib gdi32.lib winspool.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"msvcrt" /out:"..\..\Debug_TS/php_xmlreader.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\bindlib_w32\Release"
-# ADD LINK32 php5ts.lib resolv.lib kernel32.lib user32.lib gdi32.lib winspool.lib /nologo /dll /incremental:no /machine:I386 /out:"..\..\Release_TS/php_xmlreader.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\bindlib_w32\Release"
+# ADD BASE LINK32 php7ts_debug.lib resolv.lib kernel32.lib user32.lib gdi32.lib winspool.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"msvcrt" /out:"..\..\Debug_TS/php_xmlreader.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\bindlib_w32\Release"
+# ADD LINK32 php7ts.lib resolv.lib kernel32.lib user32.lib gdi32.lib winspool.lib /nologo /dll /incremental:no /machine:I386 /out:"..\..\Release_TS/php_xmlreader.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\bindlib_w32\Release"
 # SUBTRACT LINK32 /debug
 
 !ENDIF 

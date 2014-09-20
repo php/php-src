@@ -1,25 +1,25 @@
-# Microsoft Developer Studio Project File - Name="php5" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="php7" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
 
-CFG=php5 - Win32 Debug
+CFG=php7 - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "php5.mak".
+!MESSAGE NMAKE /f "php7.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "php5.mak" CFG="php5 - Win32 Debug"
+!MESSAGE NMAKE /f "php7.mak" CFG="php7 - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "php5 - Win32 Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "php5 - Win32 Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "php5 - Win32 Release_inline" (based on "Win32 (x86) Console Application")
+!MESSAGE "php7 - Win32 Release" (based on "Win32 (x86) Console Application")
+!MESSAGE "php7 - Win32 Debug" (based on "Win32 (x86) Console Application")
+!MESSAGE "php7 - Win32 Release_inline" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -29,7 +29,7 @@ CFG=php5 - Win32 Debug
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "php5 - Win32 Release"
+!IF  "$(CFG)" == "php7 - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -52,9 +52,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 php5nts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release\php.exe" /libpath:"..\Release"
+# ADD LINK32 php7nts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release\php.exe" /libpath:"..\Release"
 
-!ELSEIF  "$(CFG)" == "php5 - Win32 Debug"
+!ELSEIF  "$(CFG)" == "php7 - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -77,15 +77,15 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5nts_debug.lib /nologo /version:4.0 /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd" /nodefaultlib:"libcmt" /out:"c:\php-fcgi\php.exe" /pdbtype:sept /libpath:"..\Debug"
+# ADD LINK32 winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php7nts_debug.lib /nologo /version:4.0 /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd" /nodefaultlib:"libcmt" /out:"c:\php-fcgi\php.exe" /pdbtype:sept /libpath:"..\Debug"
 # SUBTRACT LINK32 /pdb:none
 
-!ELSEIF  "$(CFG)" == "php5 - Win32 Release_inline"
+!ELSEIF  "$(CFG)" == "php7 - Win32 Release_inline"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "php5___Win32_Release_inline"
-# PROP BASE Intermediate_Dir "php5___Win32_Release_inline"
+# PROP BASE Output_Dir "php7___Win32_Release_inline"
+# PROP BASE Intermediate_Dir "php7___Win32_Release_inline"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
@@ -104,16 +104,16 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 php5nts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"Release\php.exe" /libpath:"Release"
-# ADD LINK32 php5nts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release\php.exe" /libpath:"..\Release_inline"
+# ADD BASE LINK32 php7nts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"Release\php.exe" /libpath:"Release"
+# ADD LINK32 php7nts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release\php.exe" /libpath:"..\Release_inline"
 
 !ENDIF 
 
 # Begin Target
 
-# Name "php5 - Win32 Release"
-# Name "php5 - Win32 Debug"
-# Name "php5 - Win32 Release_inline"
+# Name "php7 - Win32 Release"
+# Name "php7 - Win32 Debug"
+# Name "php7 - Win32 Release_inline"
 # Begin Group "Source Files"
 
 # PROP Default_Filter ".c"

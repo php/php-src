@@ -1,5 +1,5 @@
 //
-// php5dllts.RC2 - resources Microsoft Visual C++ does not edit directly
+// php7dllts.RC2 - resources Microsoft Visual C++ does not edit directly
 //
 
 #ifdef APSTUDIO_INVOKED
@@ -28,7 +28,7 @@ VS_VERSION_INFO VERSIONINFO
  FILEFLAGS 0x0L
 #endif
  FILEOS VOS__WINDOWS32
- FILETYPE VFT_APP
+ FILETYPE VFT_DLL
  FILESUBTYPE VFT2_UNKNOWN
 BEGIN
     BLOCK "StringFileInfo"
@@ -39,12 +39,12 @@ BEGIN
             VALUE "CompanyName", "The PHP Group\0"
             VALUE "FileDescription", "PHP Script Interpreter\0"
             VALUE "FileVersion", STRVER4(PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION, PHP_RELEASE_VERSION)
-            VALUE "InternalName", "php-cli\0"
-            VALUE "LegalCopyright", "Copyright © 1997-2006 The PHP Group\0"
+            VALUE "InternalName", "php\0"
+            VALUE "LegalCopyright", "Copyright © 1997-2007 The PHP Group\0"
             VALUE "LegalTrademarks", "php\0"
-            VALUE "OriginalFilename", "php.exe\0"
+            VALUE "OriginalFilename", "php7ts.dll\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "PHP Thread Safe Command Line Interface\0"
+            VALUE "ProductName", "PHP Thread Safe\0"
             VALUE "ProductVersion", STRVER3(PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION)
             VALUE "SpecialBuild", PHP_EXTRA_VERSION "\0"
 			VALUE "URL", "http://www.php.net"

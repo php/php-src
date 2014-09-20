@@ -1,26 +1,26 @@
-# Microsoft Developer Studio Project File - Name="php5ts_cli" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="php7ts_cli" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
 
-CFG=php5ts_cli - Win32 Debug_TS
+CFG=php7ts_cli - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "php5ts_cli.mak".
+!MESSAGE NMAKE /f "php7ts_cli.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "php5ts_cli.mak" CFG="php5ts_cli - Win32 Debug_TS"
+!MESSAGE NMAKE /f "php7ts_cli.mak" CFG="php7ts_cli - Win32 Debug_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "php5ts_cli - Win32 Release_TS" (based on "Win32 (x86) Console Application")
-!MESSAGE "php5ts_cli - Win32 Debug_TS" (based on "Win32 (x86) Console Application")
-!MESSAGE "php5ts_cli - Win32 Release_TS_inline" (based on "Win32 (x86) Console Application")
-!MESSAGE "php5ts_cli - Win32 Release_TSDbg" (based on "Win32 (x86) Console Application")
+!MESSAGE "php7ts_cli - Win32 Release_TS" (based on "Win32 (x86) Console Application")
+!MESSAGE "php7ts_cli - Win32 Debug_TS" (based on "Win32 (x86) Console Application")
+!MESSAGE "php7ts_cli - Win32 Release_TS_inline" (based on "Win32 (x86) Console Application")
+!MESSAGE "php7ts_cli - Win32 Release_TSDbg" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -30,7 +30,7 @@ CFG=php5ts_cli - Win32 Debug_TS
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "php5ts_cli - Win32 Release_TS"
+!IF  "$(CFG)" == "php7ts_cli - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -53,9 +53,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 php5ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TS\cli\php.exe" /libpath:"..\Release_TS"
+# ADD LINK32 php7ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TS\cli\php.exe" /libpath:"..\Release_TS"
 
-!ELSEIF  "$(CFG)" == "php5ts_cli - Win32 Debug_TS"
+!ELSEIF  "$(CFG)" == "php7ts_cli - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -78,15 +78,15 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib netapi32.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts_debug.lib /nologo /version:4.0 /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd" /nodefaultlib:"libcmt" /out:"..\Debug_TS\cli\php.exe" /pdbtype:sept /libpath:"..\Debug_TS"
+# ADD LINK32 winmm.lib netapi32.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php7ts_debug.lib /nologo /version:4.0 /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd" /nodefaultlib:"libcmt" /out:"..\Debug_TS\cli\php.exe" /pdbtype:sept /libpath:"..\Debug_TS"
 # SUBTRACT LINK32 /pdb:none
 
-!ELSEIF  "$(CFG)" == "php5ts_cli - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7ts_cli - Win32 Release_TS_inline"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "php5ts___Win32_Release_TS_inline"
-# PROP BASE Intermediate_Dir "php5ts___Win32_Release_TS_inline"
+# PROP BASE Output_Dir "php7ts___Win32_Release_TS_inline"
+# PROP BASE Intermediate_Dir "php7ts___Win32_Release_TS_inline"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
@@ -105,15 +105,15 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 php5ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"Release_TS\php.exe" /libpath:"Release_TS"
-# ADD LINK32 php5ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TS_inline\cli\php.exe" /libpath:"..\Release_TS_inline"
+# ADD BASE LINK32 php7ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"Release_TS\php.exe" /libpath:"Release_TS"
+# ADD LINK32 php7ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TS_inline\cli\php.exe" /libpath:"..\Release_TS_inline"
 
-!ELSEIF  "$(CFG)" == "php5ts_cli - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7ts_cli - Win32 Release_TSDbg"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "php5ts___Win32_Release_TSDbg"
-# PROP BASE Intermediate_Dir "php5ts___Win32_Release_TSDbg"
+# PROP BASE Output_Dir "php7ts___Win32_Release_TSDbg"
+# PROP BASE Intermediate_Dir "php7ts___Win32_Release_TSDbg"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
@@ -132,17 +132,17 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 php5ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TS\php.exe" /libpath:"..\Release_TS"
-# ADD LINK32 php5ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /debug /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TSDbg\php.exe" /libpath:"..\Release_TSDbg"
+# ADD BASE LINK32 php7ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TS\php.exe" /libpath:"..\Release_TS"
+# ADD LINK32 php7ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /debug /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TSDbg\php.exe" /libpath:"..\Release_TSDbg"
 
 !ENDIF 
 
 # Begin Target
 
-# Name "php5ts_cli - Win32 Release_TS"
-# Name "php5ts_cli - Win32 Debug_TS"
-# Name "php5ts_cli - Win32 Release_TS_inline"
-# Name "php5ts_cli - Win32 Release_TSDbg"
+# Name "php7ts_cli - Win32 Release_TS"
+# Name "php7ts_cli - Win32 Debug_TS"
+# Name "php7ts_cli - Win32 Release_TS_inline"
+# Name "php7ts_cli - Win32 Release_TSDbg"
 # Begin Group "Source Files"
 
 # PROP Default_Filter ".c"
@@ -165,11 +165,11 @@ SOURCE=..\sapi\cli\php_getopt.h
 # End Group
 # Begin Source File
 
-SOURCE=.\php5ts_cli.rc
+SOURCE=.\php7ts_cli.rc
 # End Source File
 # Begin Source File
 
-SOURCE=.\php5ts_cli.rc2
+SOURCE=.\php7ts_cli.rc2
 # End Source File
 # End Target
 # End Project

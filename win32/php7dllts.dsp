@@ -1,26 +1,26 @@
-# Microsoft Developer Studio Project File - Name="php5dllts" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="php7dllts" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=php5dllts - Win32 Debug_TS
+CFG=php7dllts - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "php5dllts.mak".
+!MESSAGE NMAKE /f "php7dllts.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "php5dllts.mak" CFG="php5dllts - Win32 Debug_TS"
+!MESSAGE NMAKE /f "php7dllts.mak" CFG="php7dllts - Win32 Debug_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "php5dllts - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php5dllts - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php5dllts - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php5dllts - Win32 Release_TSDbg" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php7dllts - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php7dllts - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php7dllts - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php7dllts - Win32 Release_TSDbg" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -31,7 +31,7 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -44,8 +44,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP5DLLTS_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\..\zlib" /I "..\Zend" /I "..\TSRM" /I "..\..\libxml\include" /I "..\ext\sqlite\libsqlite\src" /D "_DEBUG" /D ZEND_DEBUG=1 /D "_WINDOWS" /D "_USRDLL" /D "PHP5DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /D "LIBXML_THREAD_ENABLED" /D "LIBXML_STATIC" /FR /YX /FD /GZ /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP7DLLTS_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\..\zlib" /I "..\Zend" /I "..\TSRM" /I "..\..\libxml\include" /I "..\ext\sqlite\libsqlite\src" /D "_DEBUG" /D ZEND_DEBUG=1 /D "_WINDOWS" /D "_USRDLL" /D "PHP7DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /D "LIBXML_THREAD_ENABLED" /D "LIBXML_STATIC" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -55,9 +55,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib ws2_32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib zlib.lib libxml2_a.lib Urlmon.lib libsqlite.lib iconv_a.lib /nologo /version:4.0 /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"msvcrt" /out:"..\Debug_TS\php5ts_debug.dll" /pdbtype:sept /libpath:"..\TSRM\Debug_TS" /libpath:"..\Zend\Debug_TS" /libpath:"..\..\bindlib_w32\Debug" /libpath:"Debug_TS" /libpath:"..\..\zlib\Debug" /libpath:"..\..\libxml\lib\Debug" /libpath:"..\ext\sqlite\Debug_TS" /libpath:"..\..\libiconv\lib"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib ws2_32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib zlib.lib libxml2_a.lib Urlmon.lib libsqlite.lib iconv_a.lib /nologo /version:4.0 /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"msvcrt" /out:"..\Debug_TS\php7ts_debug.dll" /pdbtype:sept /libpath:"..\TSRM\Debug_TS" /libpath:"..\Zend\Debug_TS" /libpath:"..\..\bindlib_w32\Debug" /libpath:"Debug_TS" /libpath:"..\..\zlib\Debug" /libpath:"..\..\libxml\lib\Debug" /libpath:"..\ext\sqlite\Debug_TS" /libpath:"..\..\libiconv\lib"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -70,8 +70,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Release_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP5DLLTS_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\..\zlib" /I "..\Zend" /I "..\TSRM" /I "..\..\libxml\include" /I "..\ext\sqlite\libsqlite\src" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP5DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /D "LIBXML_STATIC" /FR /YX /FD /c
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP7DLLTS_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\..\zlib" /I "..\Zend" /I "..\TSRM" /I "..\..\libxml\include" /I "..\ext\sqlite\libsqlite\src" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP7DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /D "LIBXML_STATIC" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -81,14 +81,14 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib ws2_32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib zlib.lib libxml2_a.lib Urlmon.lib libsqlite.lib iconv_a.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libcmt" /out:"..\Release_TS\php5ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"Release_TS" /libpath:"..\ext\sqlite\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\..\zlib\Release" /libpath:"..\..\libxml\lib\Release" /libpath:"..\..\libiconv\lib"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib ws2_32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib zlib.lib libxml2_a.lib Urlmon.lib libsqlite.lib iconv_a.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libcmt" /out:"..\Release_TS\php7ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"Release_TS" /libpath:"..\ext\sqlite\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\..\zlib\Release" /libpath:"..\..\libxml\lib\Release" /libpath:"..\..\libiconv\lib"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "php5dllts___Win32_Release_TS_inline"
-# PROP BASE Intermediate_Dir "php5dllts___Win32_Release_TS_inline"
+# PROP BASE Output_Dir "php7dllts___Win32_Release_TS_inline"
+# PROP BASE Intermediate_Dir "php7dllts___Win32_Release_TS_inline"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
@@ -97,8 +97,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Release_TS_inline"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /I "regex" /I "..\bindlib_w32" /I "Zend" /I "tsrm" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP5DLLTS_EXPORTS" /D "MSVC5" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "ZTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\..\zlib" /I "..\Zend" /I "..\TSRM" /I "..\..\libxml\include" /I "..\ext\sqlite\libsqlite\src" /D "NDEBUG" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "_WINDOWS" /D "_USRDLL" /D "PHP5DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /D "LIBXML_THREAD_ENABLED" /D "LIBXML_STATIC" /FR /YX /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /I "regex" /I "..\bindlib_w32" /I "Zend" /I "tsrm" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP7DLLTS_EXPORTS" /D "MSVC5" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "ZTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\..\zlib" /I "..\Zend" /I "..\TSRM" /I "..\..\libxml\include" /I "..\ext\sqlite\libsqlite\src" /D "NDEBUG" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "_WINDOWS" /D "_USRDLL" /D "PHP7DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /D "LIBXML_THREAD_ENABLED" /D "LIBXML_STATIC" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -107,15 +107,15 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"Release_TS/php5ts.dll" /libpath:"TSRM\Release_TS" /libpath:"Zend\Release_TS" /libpath:"..\bindlib_w32\Release"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib ws2_32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib zlib.lib libxml2_a.lib Urlmon.lib libsqlite.lib iconv_a.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libcmt" /out:"..\Release_TS_inline\php5ts.dll" /libpath:"..\TSRM\Release_TS_inline" /libpath:"..\Zend\Release_TS_inline" /libpath:"Release_TS_Inline" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\..\zlib\Release" /libpath:"..\..\libxml\lib\Release" /libpath:"..\..\libiconv\lib" /libpath:"..\ext\sqlite\Release_TS"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"Release_TS/php7ts.dll" /libpath:"TSRM\Release_TS" /libpath:"Zend\Release_TS" /libpath:"..\bindlib_w32\Release"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib ws2_32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib zlib.lib libxml2_a.lib Urlmon.lib libsqlite.lib iconv_a.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libcmt" /out:"..\Release_TS_inline\php7ts.dll" /libpath:"..\TSRM\Release_TS_inline" /libpath:"..\Zend\Release_TS_inline" /libpath:"Release_TS_Inline" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\..\zlib\Release" /libpath:"..\..\libxml\lib\Release" /libpath:"..\..\libiconv\lib" /libpath:"..\ext\sqlite\Release_TS"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "php5dllts___Win32_Release_TSDbg"
-# PROP BASE Intermediate_Dir "php5dllts___Win32_Release_TSDbg"
+# PROP BASE Output_Dir "php7dllts___Win32_Release_TSDbg"
+# PROP BASE Intermediate_Dir "php7dllts___Win32_Release_TSDbg"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
@@ -124,8 +124,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Release_TSDbg"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP5DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /Zi /Od /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\..\zlib" /I "..\Zend" /I "..\TSRM" /I "..\..\libxml\include" /I "..\ext\sqlite\libsqlite\src" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP5DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /D "LIBXML_THREAD_ENABLED" /D "LIBXML_STATIC" /FR /YX /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP7DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /Zi /Od /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\..\zlib" /I "..\Zend" /I "..\TSRM" /I "..\..\libxml\include" /I "..\ext\sqlite\libsqlite\src" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP7DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /D "LIBXML_THREAD_ENABLED" /D "LIBXML_STATIC" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -134,17 +134,17 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS\php5ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"Release_TS"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib ws2_32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib zlib.lib libxml2_a.lib Urlmon.lib libsqlite.lib iconv_a.lib /nologo /version:4.0 /dll /debug /machine:I386 /nodefaultlib:"libcmt" /out:"..\Release_TSDbg\php5ts.dll" /libpath:"..\TSRM\Release_TSDbg" /libpath:"..\Zend\Release_TSDbg" /libpath:"Release_TSDbg" /libpath:"..\ext\sqlite\Release_TSDbg" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\..\zlib\Release" /libpath:"..\..\libxml\lib\Release" /libpath:"..\..\libiconv\lib"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS\php7ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"Release_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib ws2_32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib zlib.lib libxml2_a.lib Urlmon.lib libsqlite.lib iconv_a.lib /nologo /version:4.0 /dll /debug /machine:I386 /nodefaultlib:"libcmt" /out:"..\Release_TSDbg\php7ts.dll" /libpath:"..\TSRM\Release_TSDbg" /libpath:"..\Zend\Release_TSDbg" /libpath:"Release_TSDbg" /libpath:"..\ext\sqlite\Release_TSDbg" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\..\zlib\Release" /libpath:"..\..\libxml\lib\Release" /libpath:"..\..\libiconv\lib"
 
 !ENDIF 
 
 # Begin Target
 
-# Name "php5dllts - Win32 Debug_TS"
-# Name "php5dllts - Win32 Release_TS"
-# Name "php5dllts - Win32 Release_TS_inline"
-# Name "php5dllts - Win32 Release_TSDbg"
+# Name "php7dllts - Win32 Debug_TS"
+# Name "php7dllts - Win32 Release_TS"
+# Name "php7dllts - Win32 Release_TS_inline"
+# Name "php7dllts - Win32 Release_TSDbg"
 # Begin Group "Core"
 
 # PROP Default_Filter ""
@@ -987,22 +987,22 @@ SOURCE=..\ext\iconv\php_iconv.h
 
 SOURCE=..\ext\bcmath\libbcmath\src\add.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1016,22 +1016,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\add.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\compare.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1045,22 +1045,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\compare.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\debug.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1074,22 +1074,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\debug.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\div.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1103,22 +1103,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\div.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\divmod.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1132,22 +1132,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\divmod.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\doaddsub.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1161,22 +1161,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\doaddsub.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\init.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1190,22 +1190,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\init.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\int2num.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1219,22 +1219,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\int2num.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\nearzero.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1248,22 +1248,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\nearzero.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\neg.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1277,22 +1277,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\neg.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\num2long.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1306,22 +1306,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\num2long.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\num2str.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1335,22 +1335,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\num2str.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\outofmem.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1364,22 +1364,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\outofmem.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\output.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1393,22 +1393,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\output.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\raise.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1422,22 +1422,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\raise.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\raisemod.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1451,22 +1451,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\raisemod.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\recmul.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1480,22 +1480,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\recmul.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\rmzero.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1509,22 +1509,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\rmzero.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\rt.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1538,22 +1538,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\rt.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\sqrt.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1567,22 +1567,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\sqrt.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\str2num.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1596,22 +1596,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\str2num.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\sub.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1625,22 +1625,22 @@ SOURCE=..\ext\bcmath\libbcmath\src\sub.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\zero.c
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 # ADD CPP /I "..\ext\bcmath\libbcmath\src"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1658,19 +1658,19 @@ SOURCE=..\ext\bcmath\libbcmath\src\zero.c
 
 SOURCE=..\ext\bcmath\libbcmath\src\bcmath.h
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1682,19 +1682,19 @@ SOURCE=..\ext\bcmath\libbcmath\src\bcmath.h
 
 SOURCE=..\ext\bcmath\libbcmath\src\config.h
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -1706,19 +1706,19 @@ SOURCE=..\ext\bcmath\libbcmath\src\config.h
 
 SOURCE=..\ext\bcmath\libbcmath\src\private.h
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # PROP BASE Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
 # PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
@@ -2265,7 +2265,7 @@ SOURCE=..\ext\date\lib\timelib.c
 
 SOURCE=..\ext\date\lib\timelib_config.h.win32
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 # Begin Custom Build
 InputDir=\Projects\php-5.2\ext\date\lib
@@ -2276,7 +2276,7 @@ InputPath=..\ext\date\lib\timelib_config.h.win32
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 # Begin Custom Build
 InputDir=\Projects\php-5.2\ext\date\lib
@@ -2287,7 +2287,7 @@ InputPath=..\ext\date\lib\timelib_config.h.win32
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 # Begin Custom Build
 InputDir=\Projects\php-5.2\ext\date\lib
@@ -2298,7 +2298,7 @@ InputPath=..\ext\date\lib\timelib_config.h.win32
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # Begin Custom Build
 InputDir=\Projects\php-5.2\ext\date\lib
@@ -2401,13 +2401,13 @@ SOURCE=..\win32\wsyslog.c
 
 SOURCE=.\build\wsyslog.mc
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 # Begin Custom Build
 InputDir=.\build
@@ -2658,17 +2658,17 @@ SOURCE=..\ext\com_dotnet\com_variant.c
 # End Group
 # Begin Source File
 
-SOURCE=.\php5dllts.rc
+SOURCE=.\php7dllts.rc
 # End Source File
 # Begin Source File
 
-SOURCE=.\php5dllts.rc2
+SOURCE=.\php7dllts.rc2
 # End Source File
 # Begin Source File
 
 SOURCE=.\phpts.def
 
-!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php7dllts - Win32 Debug_TS"
 
 USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	"..\ext\libxml\php_libxml2.def"	
 # Begin Custom Build - Generating $(InputPath)
@@ -2679,7 +2679,7 @@ InputPath=.\phpts.def
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS"
 
 USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	"..\ext\libxml\php_libxml2.def"	
 # Begin Custom Build - Generating $(InputPath)
@@ -2690,7 +2690,7 @@ InputPath=.\phpts.def
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TS_inline"
 
 USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	"..\ext\libxml\php_libxml2.def"	
 # Begin Custom Build - Generating $(InputPath)
@@ -2701,7 +2701,7 @@ InputPath=.\phpts.def
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+!ELSEIF  "$(CFG)" == "php7dllts - Win32 Release_TSDbg"
 
 USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	"..\ext\libxml\php_libxml2.def"	
 # Begin Custom Build - Generating $(InputPath)
