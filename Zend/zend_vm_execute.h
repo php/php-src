@@ -3069,16 +3069,14 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		array_ptr = array_ref = NULL;
 		ZVAL_DEREF(array_ptr);
 		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
+			SEPARATE_ARRAY(array_ptr);
 			if (!Z_ISREF_P(array_ref)) {
-				SEPARATE_ARRAY(array_ptr);
 				array_ref = array_ptr;
 				if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 					ZVAL_NEW_REF(array_ptr, array_ptr);
 					array_ref = array_ptr;
 					array_ptr = Z_REFVAL_P(array_ptr);
 				}
-			} else if (Z_IMMUTABLE_P(array_ptr) || Z_REFCOUNT_P(array_ptr) > 1) {
-				zval_copy_ctor(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -9789,16 +9787,14 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		array_ptr = array_ref = NULL;
 		ZVAL_DEREF(array_ptr);
 		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
+			SEPARATE_ARRAY(array_ptr);
 			if (!Z_ISREF_P(array_ref)) {
-				SEPARATE_ARRAY(array_ptr);
 				array_ref = array_ptr;
 				if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 					ZVAL_NEW_REF(array_ptr, array_ptr);
 					array_ref = array_ptr;
 					array_ptr = Z_REFVAL_P(array_ptr);
 				}
-			} else if (Z_IMMUTABLE_P(array_ptr) || Z_REFCOUNT_P(array_ptr) > 1) {
-				zval_copy_ctor(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -16424,16 +16420,14 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		array_ptr = array_ref = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		ZVAL_DEREF(array_ptr);
 		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
+			SEPARATE_ARRAY(array_ptr);
 			if (!Z_ISREF_P(array_ref)) {
-				SEPARATE_ARRAY(array_ptr);
 				array_ref = array_ptr;
 				if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 					ZVAL_NEW_REF(array_ptr, array_ptr);
 					array_ref = array_ptr;
 					array_ptr = Z_REFVAL_P(array_ptr);
 				}
-			} else if (Z_IMMUTABLE_P(array_ptr) || Z_REFCOUNT_P(array_ptr) > 1) {
-				zval_copy_ctor(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -33854,16 +33848,14 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		array_ptr = array_ref = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		ZVAL_DEREF(array_ptr);
 		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
+			SEPARATE_ARRAY(array_ptr);
 			if (!Z_ISREF_P(array_ref)) {
-				SEPARATE_ARRAY(array_ptr);
 				array_ref = array_ptr;
 				if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 					ZVAL_NEW_REF(array_ptr, array_ptr);
 					array_ref = array_ptr;
 					array_ptr = Z_REFVAL_P(array_ptr);
 				}
-			} else if (Z_IMMUTABLE_P(array_ptr) || Z_REFCOUNT_P(array_ptr) > 1) {
-				zval_copy_ctor(array_ptr);
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
