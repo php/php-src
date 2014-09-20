@@ -39,7 +39,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5dll
+    Project_Dep_Name php7dll
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name TSRM
@@ -51,7 +51,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php5"=.\php5.dsp - Package Owner=<4>
+Project: "php7"=.\php7.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -60,7 +60,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5dll
+    Project_Dep_Name php7dll
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name Zend
@@ -72,7 +72,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php5dll"=.\php5dll.dsp - Package Owner=<4>
+Project: "php7dll"=.\php7dll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

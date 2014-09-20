@@ -109,7 +109,11 @@ extern "C" {
 # define TSRM_TLS __thread
 # endif
 
+#ifdef TSRM_WIN32
+extern TSRM_TLS void *tsrm_ls_cache;
+#else
 TSRM_API extern TSRM_TLS void *tsrm_ls_cache;
+#endif
 
 #define TSRMG(id, type, element) \
  ((type)((tsrm_uintptr_t)tsrm_ls_cache + id##_offset))->element

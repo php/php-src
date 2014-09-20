@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5nts.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /machine:I386 /out:"Release/php_imap.dll" /libpath:"..\..\Release" /libpath:"..\..\..\php_build\IMAP\C-Client"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php7nts.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /machine:I386 /out:"Release/php_imap.dll" /libpath:"..\..\Release" /libpath:"..\..\..\php_build\IMAP\C-Client"
 
 !ELSEIF  "$(CFG)" == "imap - Win32 Debug"
 
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5nts_debug.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /debug /machine:I386 /out:"Debug/php_imap.dll" /pdbtype:sept /libpath:"..\..\Debug" /libpath:"..\..\..\php_build\IMAP\C-Client"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php7nts_debug.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /debug /machine:I386 /out:"Debug/php_imap.dll" /pdbtype:sept /libpath:"..\..\Debug" /libpath:"..\..\..\php_build\IMAP\C-Client"
 
 !ELSEIF  "$(CFG)" == "imap - Win32 Debug_TS"
 
@@ -107,7 +107,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts_debug.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_imap.dll" /pdbtype:sept /libpath:"..\..\..\\" /libpath:"..\..\Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php7ts_debug.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_imap.dll" /pdbtype:sept /libpath:"..\..\..\\" /libpath:"..\..\Debug_TS"
 
 !ELSEIF  "$(CFG)" == "imap - Win32 Release_TS"
 
@@ -133,7 +133,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts.lib wsock32.lib winmm.lib cclient.lib Secur32.lib CertIdl.Lib /nologo /dll /machine:I386 /nodefaultlib:"LIBCMT" /out:"..\..\Release_TS/php_imap.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\..\php_build\imap"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php7ts.lib wsock32.lib winmm.lib cclient.lib Secur32.lib CertIdl.Lib /nologo /dll /machine:I386 /nodefaultlib:"LIBCMT" /out:"..\..\Release_TS/php_imap.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\..\php_build\imap"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ENDIF 

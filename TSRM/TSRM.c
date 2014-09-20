@@ -63,7 +63,11 @@ static int tsrm_error_level;
 static FILE *tsrm_error_file;
 
 #ifdef USE___THREAD
+#ifdef TSRM_WIN32
+TSRM_TLS void *tsrm_ls_cache = 0;
+#else
 TSRM_API TSRM_TLS void *tsrm_ls_cache = 0;
+#endif
 #endif
 
 #ifdef PASS_TSRMLS

@@ -4,7 +4,7 @@ PROJECT_ROOT = ..\..
 
 # Module details
 MODULE_NAME = php_xml
-MODULE_DESC = "PHP 5 - XML Extension"
+MODULE_DESC = "PHP 7 - XML Extension"
 VMAJ = 3
 VMIN = 0
 VREV = 0
