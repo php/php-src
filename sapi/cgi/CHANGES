@@ -31,4 +31,3 @@ In PHP5.3 all additional configure options (except --enable-cgi) are removed:
 
                             Now it is disabled by default, but can be enabled
                             with ini directive "cgi.discard_path=1".
-

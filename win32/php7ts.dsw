@@ -57,7 +57,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php5aolserver"=..\sapi\aolserver\php5aolserver.dsp - Package Owner=<4>
+Project: "php7aolserver"=..\sapi\aolserver\php7aolserver.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -66,13 +66,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5dllts
+    Project_Dep_Name php7dllts
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "php5apache"=..\sapi\apache\php5apache.dsp - Package Owner=<4>
+Project: "php7apache"=..\sapi\apache\php7apache.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -81,13 +81,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5dllts
+    Project_Dep_Name php7dllts
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "php5apache2"=..\SAPI\APACHE2HANDLER\php5apache2.dsp - Package Owner=<4>
+Project: "php7apache2"=..\SAPI\APACHE2HANDLER\php7apache2.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -96,13 +96,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5dllts
+    Project_Dep_Name php7dllts
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "php5dllts"=.\php5dllts.dsp - Package Owner=<4>
+Project: "php7dllts"=.\php7dllts.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -123,7 +123,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php5isapi"=..\sapi\isapi\php5isapi.dsp - Package Owner=<4>
+Project: "php7isapi"=..\sapi\isapi\php7isapi.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -132,13 +132,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5dllts
+    Project_Dep_Name php7dllts
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "php5nsapi"=..\sapi\nsapi\php5nsapi.dsp - Package Owner=<4>
+Project: "php7nsapi"=..\sapi\nsapi\php7nsapi.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -147,13 +147,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5dllts
+    Project_Dep_Name php7dllts
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "php5pi3web"=..\sapi\pi3web\php5pi3web.dsp - Package Owner=<4>
+Project: "php7pi3web"=..\sapi\pi3web\php7pi3web.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -162,13 +162,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5dllts
+    Project_Dep_Name php7dllts
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "php5ts"=.\php5ts.dsp - Package Owner=<4>
+Project: "php7ts"=.\php7ts.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -177,13 +177,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5dllts
+    Project_Dep_Name php7dllts
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "php5ts_cli"=.\php5ts_cli.dsp - Package Owner=<4>
+Project: "php7ts_cli"=.\php7ts_cli.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -192,7 +192,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5dllts
+    Project_Dep_Name php7dllts
     End Project Dependency
 }}}
 
@@ -207,7 +207,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name php5ts
+    Project_Dep_Name php7ts
     End Project Dependency
 }}}
 

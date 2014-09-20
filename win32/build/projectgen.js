@@ -142,14 +142,14 @@ function generate_parsers_or_scanners(arr, type)
 	return ret;
 }
 
-/* generate .defs file for php5[ts].dll */
+/* generate .defs file for php7[ts].dll */
 function generate_php_defs()
 {
 	var defs = get_define("PHP_DLL_DEF_SOURCES").split(" ");
 	var bdir = get_define("BUILD_DIR") + "\\";
 	var file = get_define("PHPLIB").replace("lib", "def");
 	var path = "..\\" + bdir + file;
-	var deps = "USERDEP__PHP5TS=";
+	var deps = "USERDEP__PHP7TS=";
 	var cmds = "BuildCmds= \\\r\n";
 	var cmd = '$(SOURCE) "$(INTDIR)" "$(OUTDIR)"\r\n\t$(BuildCmds)\r\n';
 
@@ -168,7 +168,7 @@ function generate_php_defs()
 	return ret;
 }
 
-/* generate win32\wsyslog.h for php5[ts].dll */
+/* generate win32\wsyslog.h for php7[ts].dll */
 function generate_wsyslog()
 {
 	var path = ".\\build\\wsyslog.mc\r\n\r\n";
@@ -183,7 +183,7 @@ function generate_wsyslog()
 	return ret;
 }
 
-/* generate ext\date\lib\timelib_config.h for php5[ts].dll */
+/* generate ext\date\lib\timelib_config.h for php7[ts].dll */
 function generate_timelib_conf(headers)
 {
 	var file = "timelib_config.h";
@@ -202,11 +202,11 @@ function generate_timelib_conf(headers)
 	return headers;
 }
 
-/* generate php5[ts].dsp */
+/* generate php7[ts].dsp */
 function generate_core_dsp(core_headers, core_sources, headers, sources, cflags, ldflags, libs)
 {
 	var ts = (PHP_ZTS != "no" ? "ts" : "");
-	var extname = "php5" + ts;
+	var extname = "php7" + ts;
 	var tmpl = generate_dsp_file(extname, ".", false, false);
 
 	cflags += get_define("CFLAGS_PHP").replace("/D _USRDLL", "");
@@ -232,8 +232,8 @@ function generate_core_dsp(core_headers, core_sources, headers, sources, cflags,
 	defs = generate_php_defs();
 	tmpl = tmpl.replace(/DEFS/, defs);
 
-	dsp = FSO.CreateTextFile("win32\\php5" + ts + ".dsp", true);
-	STDOUT.WriteLine("\tGenerating win32\\php5" + ts + ".dsp");
+	dsp = FSO.CreateTextFile("win32\\php7" + ts + ".dsp", true);
+	STDOUT.WriteLine("\tGenerating win32\\php7" + ts + ".dsp");
 	dsp.Write(tmpl);
 	dsp.Close();
 
@@ -250,8 +250,8 @@ function generate_dsw_files(sblocks, mblocks)
 	/* push all the sapi blocks to the same tag */
 	stmpl = stmpl.replace("INSERT", sblocks);
 	stmpl = (PHP_ZTS != "no" ? stmpl : stmpl.replace(/dllts/g, "dll"));
-	sdsw = FSO.CreateTextFile("win32\\php5" + ts + ".dsw", true);
-	STDOUT.WriteLine("\tGenerating win32\\php5" + ts + ".dsw");
+	sdsw = FSO.CreateTextFile("win32\\php7" + ts + ".dsw", true);
+	STDOUT.WriteLine("\tGenerating win32\\php7" + ts + ".dsw");
 	sdsw.Write(stmpl);
 	sdsw.Close();
 
@@ -345,8 +345,8 @@ function copy_dsp_files()
 
 			} else {
 
-				/* there's always one... most sapis just get a 'php5' prefix */
-				newext = (ext.match(/apache2handler/) ? "php5apache2" : "php5" + ext);
+				/* there's always one... most sapis just get a 'php7' prefix */
+				newext = (ext.match(/apache2handler/) ? "php7apache2" : "php7" + ext);
 				address = address.replace(ext + ".dsp", newext + ".dsp");
 				srcpath = ".\\";
 				oldext = new RegExp(('[^=\\\\]'+ext), "g");
@@ -361,7 +361,7 @@ function copy_dsp_files()
 			dsp.Write(contents);
 			dsp.Close();
 
-			/* add all configured sapis to the list in php5ts.dsw */
+			/* add all configured sapis to the list in php7ts.dsw */
 			sblocks += file_get_contents("win32\\build\\block.template.dsw");
 			sblocks = sblocks.replace("ADDRESS", address);
 			sblocks = sblocks.replace("EXTNAME", newext);
@@ -389,7 +389,7 @@ function copy_dsp_files()
 
 		} else {
 
-			/* bound for php5[ts].dsp */
+			/* bound for php7[ts].dsp */
 			cflags = get_define("CFLAGS_" + EXT);
 			cflags = cflags ? cflags.replace(/-(I|D)/g, " /$1") : "";
 			cflags = cflags? cflags.replace(/\/(I|D)\s+/g, "/$1") : "";
@@ -539,7 +539,7 @@ function generate_dsp_file(ext, ext_dir, files, shared)
 	var baseflags = "";
 
 	/* store the final path and value of shared in the tmp file */
-	if (!ext.match("php5")) {
+	if (!ext.match("php7")) {
 		tmpl = ext_dir + "\\" + ext + ".dsp#" + shared + tmpl;
 	}
 
@@ -568,7 +568,7 @@ function generate_dsp_file(ext, ext_dir, files, shared)
 			path += "..\\";
 		}
 		type = ".lib";
-	} else if (ext.match("php5")) {
+	} else if (ext.match("php7")) {
 		path = "..\\";
 		type = ".dll";
 	} else {
@@ -599,7 +599,7 @@ function generate_dsp_file(ext, ext_dir, files, shared)
 	incs = incs.replace('"' + path + '."', '".."');
 	lcflags = cflags.replace(/\$\(BASE_INCLUDES\)/, incs + (type == ".exe" ? '/I "..\\sapi" ' : "") + '/I "' + path + '..\\bindlib_w32"');
 	tmpl = tmpl.replace(/BASECPP/, (type == ".dll" ? lcflags : lcflags.replace(ld + " ", "")));
-	tmpl = tmpl.replace(/BASELIBS/, "/nologo " + get_define("LIBS") + " " + (ext.match("php5") ? "" : get_define("PHPLIB")));
+	tmpl = tmpl.replace(/BASELIBS/, "/nologo " + get_define("LIBS") + " " + (ext.match("php7") ? "" : get_define("PHPLIB")));
 	ldflags = get_define("LDFLAGS").replace(/\s?(\/nologo|\/libpath:\S+)\s?/g, "");
 	tmpl = tmpl.replace(/BASELDFLAGS/, ldflags + (type == ".dll" ? " " + get_define("DLL_LDFLAGS") : "") + (debug ? ' /nodefaultlib:"msvcrt"' : ""));
 	out = '/out:"' + outpath + "\\" + ext + type + '"' + ' /libpath:"' + outpath + '"' + ' /libpath:"..\\' + path + 'bindlib_w32\\' + status + '"';
@@ -611,7 +611,7 @@ function generate_dsp_file(ext, ext_dir, files, shared)
 	tmpl = tmpl.replace(/TEXTFILES/, txt);
 	tmpl = tmpl.replace(/RESOURCEFILES/, res);
 
-	if (ext.match("php5")) {
+	if (ext.match("php7")) {
 		return tmpl;
 	}
 

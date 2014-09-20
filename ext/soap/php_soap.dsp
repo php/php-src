@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts.lib libxml2.lib wsock32.lib resolv.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS\php_soap.dll" /libpath:"..\..\\" /libpath:"..\..\..\libxml2-2.4.12\lib" /libpath:"..\..\Release_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php7ts.lib libxml2.lib wsock32.lib resolv.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS\php_soap.dll" /libpath:"..\..\\" /libpath:"..\..\..\libxml2-2.4.12\lib" /libpath:"..\..\Release_TS"
 
 !ELSEIF  "$(CFG)" == "php_soap - Win32 Debug_TS"
 
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts_debug.lib libxml2.lib wsock32.lib resolv.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS\php_soap.dll" /pdbtype:sept /libpath:"..\..\\" /libpath:"..\..\..\libxml2-2.4.12\lib" /libpath:"..\..\Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php7ts_debug.lib libxml2.lib wsock32.lib resolv.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS\php_soap.dll" /pdbtype:sept /libpath:"..\..\\" /libpath:"..\..\..\libxml2-2.4.12\lib" /libpath:"..\..\Debug_TS"
 # SUBTRACT LINK32 /pdb:none /incremental:no
 
 !ENDIF 

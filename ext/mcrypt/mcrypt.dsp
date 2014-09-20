@@ -53,8 +53,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_65_Release/php_mssql.dll" /libpath:"..\..\Release_TS"
-# ADD LINK32 php5ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmcrypt.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_mcrypt.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\mcrypt" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\TSRM\Release_TS" /libpath:"..\..\TSRM\Release_TS_Inline"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php7ts.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_65_Release/php_mssql.dll" /libpath:"..\..\Release_TS"
+# ADD LINK32 php7ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmcrypt.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_mcrypt.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\mcrypt" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\TSRM\Release_TS" /libpath:"..\..\TSRM\Release_TS_Inline"
 
 !ELSEIF  "$(CFG)" == "mcrypt - Win32 Debug_TS"
 
@@ -80,8 +80,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_65_Release/php_mssql.dll" /libpath:"..\..\Release_TS" /libpath:"mssql-70"
-# ADD LINK32 php5ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmcrypt.lib /nologo /dll /machine:I386 /out:"..\..\Debug_TS/php_mcrypt.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\mcrypt\lib"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php7ts.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_65_Release/php_mssql.dll" /libpath:"..\..\Release_TS" /libpath:"mssql-70"
+# ADD LINK32 php7ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmcrypt.lib /nologo /dll /machine:I386 /out:"..\..\Debug_TS/php_mcrypt.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\mcrypt\lib"
 
 !ENDIF 
 
