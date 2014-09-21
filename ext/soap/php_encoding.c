@@ -2441,7 +2441,7 @@ iterator_done:
 					smart_str_appendl(&array_type,"xsd:ur-type",sizeof("xsd:ur-type")-1);
 				}
 				smart_str_appendc(&array_type, '[');
-				smart_str_append(&array_type, &array_size);
+				smart_str_append_smart_str(&array_type, &array_size);
 				smart_str_appendc(&array_type, ']');
 				smart_str_0(&array_type);
 				set_ns_prop(xmlParam, SOAP_1_1_ENC_NAMESPACE, "arrayType", array_type.s->val);
