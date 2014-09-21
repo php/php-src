@@ -161,6 +161,9 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 				fci.param_count = 0;
 			}
 
+			phpdbg_activate_err_buf(0 TSRMLS_CC);
+			phpdbg_free_err_buf(TSRMLS_C);
+
 			phpdbg_debug("created %d params from arguments", fci.param_count);
 
 			zend_call_function(&fci, NULL TSRMLS_CC);
@@ -603,11 +606,11 @@ PHPDBG_COMMAND(run) /* {{{ */
 		}
 
 		zend_try {
-			php_output_activate(TSRMLS_C);
+//			php_output_activate(TSRMLS_C);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
-			php_output_deactivate(TSRMLS_C);
+//			php_output_deactivate(TSRMLS_C);
 		} zend_catch {
 			EG(active_op_array) = orig_op_array;
 			EG(opline_ptr) = orig_opline;

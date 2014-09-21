@@ -763,6 +763,9 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack TSRMLS_DC) {
 
 			if (handler) {
 				if (phpdbg_stack_verify(handler, &top TSRMLS_CC) == SUCCESS) {
+					phpdbg_activate_err_buf(0 TSRMLS_CC);
+					phpdbg_free_err_buf(TSRMLS_C);
+
 					return handler->handler(top TSRMLS_CC);
 				}
 			}

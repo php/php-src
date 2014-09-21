@@ -539,11 +539,11 @@ static size_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t co
 		}
 
 		if (stat[0].st_dev == stat[1].st_dev && stat[0].st_ino == stat[1].st_ino) {
-			phpdbg_script(P_STDOUT, "%.*s", buf, count);
+			phpdbg_script(P_STDOUT, "%.*s", (int) count, buf);
 			return count;
 		}
 		if (stat[2].st_dev == stat[1].st_dev && stat[2].st_ino == stat[1].st_ino) {
-			phpdbg_script(P_STDERR, "%.*s", buf, count);
+			phpdbg_script(P_STDERR, "%.*s", (int) count, buf);
 			return count;
 		}
 		break;
@@ -1244,10 +1244,15 @@ phpdbg_main:
 		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 #endif
 
+		php_output_activate(TSRMLS_C);
+		php_output_deactivate(TSRMLS_C);
+
+		php_output_activate(TSRMLS_C);
+
 		if (php_request_startup(TSRMLS_C) == SUCCESS) {
 			int i;
-		
-			SG(request_info).argc = argc - php_optind + 1;		
+
+			SG(request_info).argc = argc - php_optind + 1;
 			SG(request_info).argv = emalloc(SG(request_info).argc * sizeof(char *));
 			for (i = SG(request_info).argc; --i;) {
 				SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
@@ -1256,10 +1261,6 @@ phpdbg_main:
 
 			php_hash_environment(TSRMLS_C);
 		}
-
-		/* make sure to turn off buffer for ev command */
-		php_output_activate(TSRMLS_C);
-		php_output_deactivate(TSRMLS_C);
 
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
@@ -1425,7 +1426,7 @@ phpdbg_out:
 	}
 phpdbg_out:
 #endif
-	
+
 		{
 			int i;
 			/* free argv */
@@ -1438,8 +1439,7 @@ phpdbg_out:
 #ifndef ZTS
 		/* force cleanup of auto and core globals */
 		zend_hash_clean(CG(auto_globals));
-		memset(
-			&core_globals, 0, sizeof(php_core_globals));
+		memset(	&core_globals, 0, sizeof(php_core_globals));
 #endif
 		if (ini_entries) {
 			free(ini_entries);
@@ -1448,14 +1448,16 @@ phpdbg_out:
 		if (ini_override) {
 			free(ini_override);
 		}
-		
+
 		/* this must be forced */
 		CG(unclean_shutdown) = 0;
-		
+
 		/* this is just helpful */
 		PG(report_memleaks) = 0;
 
 		php_request_shutdown((void*)0);
+
+		php_output_deactivate(TSRMLS_C);
 
 		zend_try {
 			php_module_shutdown(TSRMLS_C);
@@ -1468,7 +1470,7 @@ phpdbg_out:
 	if (cleaning || remote) {
 		goto phpdbg_main;
 	}
-	
+
 #ifdef ZTS
 	/* bugggy */
 	/* tsrm_shutdown(); */
@@ -1483,7 +1485,7 @@ phpdbg_out:
 	if (sapi_name) {
 		free(sapi_name);
 	}
-	
+
 #ifdef _WIN32
 	free(bp_tmp_file);
 #else
