@@ -61,6 +61,11 @@ void pretty_print(char *text TSRMLS_DC)
 	unsigned int last_blank_count = 0;    /* printable char offset of last blank char */
 	unsigned int line_count = 0;          /* number printable chars on current line */
 
+	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+		phpdbg_xml("<help msg=\"%s\" />", text);
+		return;
+	}
+
 	/* First pass calculates a safe size for the pretty print version */
 	for (p = text; *p; p++) {
 		if (UNEXPECTED(p[0] == '*') && p[1] == '*') {
@@ -128,10 +133,10 @@ void pretty_print(char *text TSRMLS_DC)
 	*q++ = '\0';
 
 	if ((q-new)>size) {
-		phpdbg_error("Output overrun of %lu bytes", ((q-new) - size));
+		phpdbg_error("help", "overrun=\"%lu\"", "Output overrun of %lu bytes", ((q-new) - size));
 	}
 
-	phpdbg_write("%s\n", new);
+	phpdbg_out("%s", new);
 	efree(new);
 }  /* }}} */
 
@@ -201,7 +206,7 @@ static int get_command(
 
 	return num_matches;
 
-} /* }}} */	
+} /* }}} */
 
 PHPDBG_COMMAND(help) /* {{{ */
 {
@@ -231,7 +236,7 @@ PHPDBG_COMMAND(help) /* {{{ */
 				pretty_print(get_help("duplicate!" TSRMLS_CC) TSRMLS_CC);
 				return SUCCESS;
 			} else {
-				phpdbg_error("Internal help error, non-unique alias \"%c\"", param->str[0]);
+				phpdbg_error("help", "type=\"ambiguousalias\" alias=\"%s\"", "Internal help error, non-unique alias \"%c\"", param->str[0]);
 				return FAILURE;
 			}
 
@@ -259,33 +264,40 @@ PHPDBG_HELP(aliases) /* {{{ */
 	int len;
 
 	/* Print out aliases for all commands except help as this one comes last */
-	phpdbg_writeln("Below are the aliased, short versions of all supported commands");
+	phpdbg_writeln("help", "", "Below are the aliased, short versions of all supported commands");
+	phpdbg_xml("<helpcommands>");
 	for(c = phpdbg_prompt_commands; c->name; c++) {
 		if (c->alias && c->alias != 'h') {
-			phpdbg_writeln(" %c     %-20s  %s", c->alias, c->name, c->tip);
+			phpdbg_writeln("command", "name=\"%s\" alias=\"%c\" tip=\"%s\"", " %c     %-20s  %s", c->alias, c->name, c->tip);
 			if (c->subs) {
 				len = 20 - 1 - c->name_len;
 				for(c_sub = c->subs; c_sub->alias; c_sub++) {
 					if (c_sub->alias) {
-						phpdbg_writeln(" %c %c   %s %-*s  %s",
-							c->alias, c_sub->alias, (char *)c->name, len, c_sub->name, c_sub->tip);
+						phpdbg_writeln("subcommand", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
+							c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 					}
 				}
 			}
 		}
 	}
 
+	phpdbg_xml("</helpcommands>");
+
 	/* Print out aliases for help as this one comes last, with the added text on how aliases are used */
 	get_command("h", 1, &c, phpdbg_prompt_commands TSRMLS_CC);
-	phpdbg_writeln(" %c     %-20s  %s\n", c->alias, c->name, c->tip);
+	phpdbg_writeln("aliasinfo", "alias=\"%c\" name=\"%-*s\" tip=\"%s\"", " %c     %-20s  %s\n", c->alias, c->name, c->tip);
+
+	phpdbg_xml("<helpaliases>");
 
 	len = 20 - 1 - c->name_len;
 	for(c_sub = c->subs; c_sub->alias; c_sub++) {
 		if (c_sub->alias) {
-			phpdbg_writeln(" %c %c   %s %-*s  %s",
+			phpdbg_writeln("alias", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
 				c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 		}
 	}
+
+	phpdbg_xml("</helpaliases>");
 
 	pretty_print(get_help("aliases!" TSRMLS_CC) TSRMLS_CC);
 	return SUCCESS;
@@ -362,7 +374,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-c**      **-c**/my/php.ini       Set php.ini file to load" CR
 "  **-d**      **-d**memory_limit=4G   Set a php.ini directive" CR
 "  **-n**                          Disable default php.ini" CR
-"  **-q**                          Supress welcome banner" CR
+"  **-q**                          Suppress welcome banner" CR
 "  **-v**                          Enable oplog output" CR
 "  **-s**                          Enable stepping" CR
 "  **-b**                          Disable colour" CR
@@ -543,7 +555,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "    $P break ZEND_ADD" CR
 "    $P b ZEND_ADD" CR
-"    Break on any occurence of the opcode ZEND_ADD" CR CR
+"    Break on any occurrence of the opcode ZEND_ADD" CR CR
 
 "    $P break del 2" CR
 "    $P b ~ 2" CR

@@ -72,6 +72,9 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->io[PHPDBG_STDOUT] = NULL;
 	pg->io[PHPDBG_STDERR] = NULL;
 	pg->frame.num = 0;
+
+	pg->err_buf.active = 0;
+	pg->err_buf.type = 0;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
@@ -86,7 +89,7 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 #endif
 
 	REGISTER_STRINGL_CONSTANT("PHPDBG_VERSION", PHPDBG_VERSION, sizeof(PHPDBG_VERSION)-1, CONST_CS|CONST_PERSISTENT);
-	
+
 	REGISTER_LONG_CONSTANT("PHPDBG_FILE",   FILE_PARAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_METHOD", METHOD_PARAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_LINENO", NUMERIC_PARAM, CONST_CS|CONST_PERSISTENT);
@@ -186,7 +189,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 		efree(PHPDBG_G(buffer));
 		PHPDBG_G(buffer) = NULL;
 	}
-	
+
 	if (PHPDBG_G(exec)) {
 		efree(PHPDBG_G(exec));
 		PHPDBG_G(exec) = NULL;
@@ -226,7 +229,7 @@ static PHP_FUNCTION(phpdbg_exec)
 {
 	char *exec = NULL;
 	int exec_len = 0;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &exec, &exec_len) == FAILURE) {
 		return;
 	}
@@ -308,7 +311,7 @@ static PHP_FUNCTION(phpdbg_color)
 {
 	long element = 0L;
 	char *color = NULL;
-	int color_len = 0;
+	size_t color_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &element, &color, &color_len) == FAILURE) {
 		return;
@@ -329,7 +332,7 @@ static PHP_FUNCTION(phpdbg_color)
 static PHP_FUNCTION(phpdbg_prompt)
 {
 	char *prompt = NULL;
-	int prompt_len = 0;
+	size_t prompt_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &prompt, &prompt_len) == FAILURE) {
 		return;
@@ -426,7 +429,7 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 	* We must not request TSRM before being boot
 	*/
 	if (phpdbg_booted) {
-		phpdbg_error("%s", message);
+		phpdbg_error("php", "msg=\"%s\"", "%s", message);
 
 		switch (PG(last_error_type)) {
 			case E_ERROR:
@@ -516,8 +519,38 @@ static void php_sapi_phpdbg_register_vars(zval *track_vars_array TSRMLS_DC) /* {
 
 static inline int php_sapi_phpdbg_ub_write(const char *message, unsigned int length TSRMLS_DC) /* {{{ */
 {
-	return phpdbg_write("%s", message);
+	return phpdbg_script(P_STDOUT, "%.*s", length, message);
 } /* }}} */
+
+/* beginning of struct, see main/streams/plain_wrapper.c line 111 */
+typedef struct {
+	FILE *file;
+	int fd;
+} php_stdio_stream_data;
+
+static size_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) {
+	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
+
+	while (data->fd >= 0) {
+		struct stat stat[3];
+		memset(stat, 0, sizeof(stat));
+		if ((fstat(fileno(stderr), &stat[2]) < 0 && fstat(fileno(stdout), &stat[0]) < 0) || fstat(data->fd, &stat[1]) < 0) {
+			break;
+		}
+
+		if (stat[0].st_dev == stat[1].st_dev && stat[0].st_ino == stat[1].st_ino) {
+			phpdbg_script(P_STDOUT, "%.*s", buf, count);
+			return count;
+		}
+		if (stat[2].st_dev == stat[1].st_dev && stat[2].st_ino == stat[1].st_ino) {
+			phpdbg_script(P_STDERR, "%.*s", buf, count);
+			return count;
+		}
+		break;
+	}
+
+	return PHPDBG_G(php_stdiop_write)(stream, buf, count TSRMLS_CC);
+}
 
 #if PHP_VERSION_ID >= 50700
 static inline void php_sapi_phpdbg_flush(void *context TSRMLS_DC)  /* {{{ */
@@ -648,6 +681,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'l', 1, "listen"},
 	{'a', 1, "address-or-any"},
 #endif
+	{'x', 0, "xml output"},
 	{'V', 0, "version"},
 	{'-', 0, NULL}
 }; /* }}} */
@@ -679,17 +713,23 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 {
 	/* print blurb */
 	if (!cleaning) {
-		phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
-				PHPDBG_VERSION);
-		phpdbg_writeln("To get help using phpdbg type \"help\" and press enter");
-		phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
+		phpdbg_notice("intro", "version=\"%s\"", "Welcome to phpdbg, the interactive PHP debugger, v%s", PHPDBG_VERSION);
+		phpdbg_writeln("intro", "help=\"help\"", "To get help using phpdbg type \"help\" and press enter");
+		phpdbg_notice("intro", "report=\"%s\"", "Please report bugs to <%s>", PHPDBG_ISSUES);
 	} else {
-		phpdbg_notice("Clean Execution Environment");
+		if (!(PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
+			phpdbg_notice(NULL, NULL, "Clean Execution Environment");
+		}
 
-		phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
-		phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
-		phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
-		phpdbg_writeln("Includes\t\t%d",  zend_hash_num_elements(&EG(included_files)));
+		phpdbg_write("cleaninfo", "classes=\"%d\" functions=\"%d\" constants=\"%d\" includes=\"%d\"",
+			"Classes              %d\n"
+			"Functions            %d\n"
+			"Constants            %d\n"
+			"Includes             %d\n",
+			zend_hash_num_elements(EG(class_table)),
+			zend_hash_num_elements(EG(function_table)),
+			zend_hash_num_elements(EG(zend_constants)),
+			zend_hash_num_elements(&EG(included_files)));
 	}
 } /* }}} */
 
@@ -923,7 +963,7 @@ phpdbg_main:
 		}
 
 		if (!bp_tmp_file) {
-			phpdbg_error("Unable to create temporary file");
+			phpdbg_error("tmpfile", "", "Unable to create temporary file");
 			return 1;
 		}
 #else
@@ -1072,6 +1112,10 @@ phpdbg_main:
 				} else address = strdup(php_optarg);
 			} break;
 #endif
+
+			case 'x':
+				flags |= PHPDBG_WRITE_XML;
+			break;
 
 			case 'V': {
 				sapi_startup(phpdbg);
@@ -1249,6 +1293,11 @@ phpdbg_main:
 		PHPDBG_G(io)[PHPDBG_STDOUT] = stdout;
 		PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
 
+#ifndef _WIN32
+		PHPDBG_G(php_stdiop_write) = php_stream_stdio_ops.write;
+		php_stream_stdio_ops.write = phpdbg_stdiop_write;
+#endif
+
 		if (exec) { /* set execution context */
 			PHPDBG_G(exec) = phpdbg_resolve_path(exec TSRMLS_CC);
 			PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
@@ -1259,8 +1308,7 @@ phpdbg_main:
 		if (oplog_file) { /* open oplog */
 			PHPDBG_G(oplog) = fopen(oplog_file, "w+");
 			if (!PHPDBG_G(oplog)) {
-				phpdbg_error(
-						"Failed to open oplog %s", oplog_file);
+				phpdbg_error("oplog", "path=\"%s\"", "Failed to open oplog %s", oplog_file);
 			}
 			free(oplog_file);
 		}
@@ -1271,7 +1319,7 @@ phpdbg_main:
 		phpdbg_set_color_ex(PHPDBG_COLOR_NOTICE,  PHPDBG_STRL("green") TSRMLS_CC);
 
 		/* set default prompt */
-		phpdbg_set_prompt(PROMPT TSRMLS_CC);
+		phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT TSRMLS_CC);
 
 		/* Make stdin, stdout and stderr accessible from PHP scripts */
 		phpdbg_register_file_handles(TSRMLS_C);
@@ -1373,7 +1421,7 @@ phpdbg_out:
 
 #ifdef _WIN32
 	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
-		phpdbg_error("Access violation (Segementation fault) encountered\ntrying to abort cleanly...");
+		phpdbg_error("segfault", "", "Access violation (Segementation fault) encountered\ntrying to abort cleanly...");
 	}
 phpdbg_out:
 #endif

@@ -98,7 +98,7 @@ struct _phpdbg_command_t {
 	phpdbg_command_handler_t handler;   /* Command handler */
 	const phpdbg_command_t *subs;       /* Sub Commands */
 	char *args;							/* Argument Spec */
-	const phpdbg_command_t *parent;		/* Parent Command */							
+	const phpdbg_command_t *parent;		/* Parent Command */
 };
 /* }}} */
 
@@ -106,7 +106,7 @@ struct _phpdbg_command_t {
 #define PHPDBG_STRL(s) s, sizeof(s)-1
 #define PHPDBG_MAX_CMD 500
 #define PHPDBG_FRAME(v) (PHPDBG_G(frame).v)
-#define PHPDBG_EX(v) (EG(current_execute_data)->v) 
+#define PHPDBG_EX(v) (EG(current_execute_data)->v)
 
 typedef struct {
 	int num;
@@ -133,9 +133,9 @@ PHPDBG_API void phpdbg_destroy_input(char** TSRMLS_DC);
  * Stack Management
  */
 PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param);
-PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top, char **why);
-PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack, char **why TSRMLS_DC);
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC);
+PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top TSRMLS_DC);
+PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack TSRMLS_DC);
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack TSRMLS_DC);
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
 
 /*
@@ -175,7 +175,7 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 */
 #define phpdbg_default_switch_case() \
 	default: \
-		phpdbg_error("Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC)); \
+		phpdbg_error("command", "type=\"wrongarg\" got=\"%s\"", "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC)); \
 	break
 
 #endif /* PHPDBG_CMD_H */

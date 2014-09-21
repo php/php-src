@@ -64,7 +64,7 @@
 # include "TSRM.h"
 #endif
 
-#ifdef HAVE_LIBREADLINE
+#ifdef LIBREADLINE
 #   include <readline/readline.h>
 #   include <readline/history.h>
 #endif
@@ -74,6 +74,7 @@
 
 #include "phpdbg_lexer.h"
 #include "phpdbg_cmd.h"
+#include "phpdbg_bp.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
@@ -94,19 +95,6 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 /*
  BEGIN: DO NOT CHANGE DO NOT CHANGE DO NOT CHANGE
 */
-
-/* {{{ tables */
-#define PHPDBG_BREAK_FILE            0
-#define PHPDBG_BREAK_SYM             1
-#define PHPDBG_BREAK_OPLINE          2
-#define PHPDBG_BREAK_METHOD          3
-#define PHPDBG_BREAK_COND            4
-#define PHPDBG_BREAK_OPCODE          5
-#define PHPDBG_BREAK_FUNCTION_OPLINE 6
-#define PHPDBG_BREAK_METHOD_OPLINE   7
-#define PHPDBG_BREAK_FILE_OPLINE     8
-#define PHPDBG_BREAK_MAP             9
-#define PHPDBG_BREAK_TABLES          10 /* }}} */
 
 /* {{{ flags */
 #define PHPDBG_HAS_FILE_BP            (1<<1)
@@ -145,8 +133,9 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 #define PHPDBG_IS_BP_ENABLED          (1<<26)
 #define PHPDBG_IS_REMOTE              (1<<27)
 #define PHPDBG_IS_DISCONNECTED        (1<<28)
+#define PHPDBG_WRITE_XML              (1<<29)
 
-#define PHPDBG_SHOW_REFCOUNTS         (1<<29)
+#define PHPDBG_SHOW_REFCOUNTS         (1<<30)
 
 #define PHPDBG_SEEK_MASK              (PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE)
 #define PHPDBG_BP_RESOLVE_MASK		  (PHPDBG_HAS_FUNCTION_OPLINE_BP|PHPDBG_HAS_METHOD_OPLINE_BP|PHPDBG_HAS_FILE_OPLINE_BP)
@@ -165,6 +154,7 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
 #define PHPDBG_VERSION "0.4.0"
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
+#define PHPDBG_DEFAULT_PROMPT "prompt>"
 /* }}} */
 
 /* {{{ output descriptors */
@@ -180,7 +170,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
 	phpdbg_frame_t frame;                        /* frame */
-	zend_uint last_line;                         /* last executed line */
+	uint32_t last_line;                          /* last executed line */
 
 	phpdbg_lexer_data lexer;                     /* lexer data */
 	phpdbg_param_t *parser_stack;                /* param stack during lexer / parser phase */
@@ -204,6 +194,20 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	FILE *oplog;                                 /* opline log */
 	FILE *io[PHPDBG_IO_FDS];                     /* io */
+#ifndef _WIN32
+	size_t (*php_stdiop_write)(php_stream *, const char *, size_t TSRMLS_DC);
+#endif
+	int in_script_xml;                           /* in <stream> output mode */
+	struct {
+		zend_bool active;
+		int type;
+		FILE *fp;
+		char *tag;
+		char *msg;
+		int msglen;
+		char *xml;
+		int xmllen;
+	} err_buf;                                   /* error buffer */
 
 	char *prompt[2];                             /* prompt */
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */

@@ -52,7 +52,7 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 	int i = 0;
 
 	if (PHPDBG_FRAME(num) == frame) {
-		phpdbg_notice("Already in frame #%d", frame);
+		phpdbg_notice("frame", "id=\"%d\"", "Already in frame #%d", frame);
 		return;
 	}
 
@@ -67,7 +67,7 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 	}
 
 	if (execute_data == NULL) {
-		phpdbg_error("No frame #%d", frame);
+		phpdbg_error("frame", "type=\"maxnum\" id=\"%d\"", "No frame #%d", frame);
 		return;
 	}
 
@@ -90,7 +90,7 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 		EG(called_scope) = PHPDBG_EX(current_called_scope);
 	}
 
-	phpdbg_notice("Switched to frame #%d", frame);
+	phpdbg_notice("frame", "id=\"%d\"", "Switched to frame #%d", frame);
 	phpdbg_list_file(
 		zend_get_executed_filename(TSRMLS_C),
 		3,
@@ -114,14 +114,19 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 			(void **)&class);
 	} else {
 		zend_get_object_classname(*class, (const char **)&Z_STRVAL_PP(class),
-			(zend_uint *)&Z_STRLEN_PP(class) TSRMLS_CC);
+			(uint32_t *)&Z_STRLEN_PP(class) TSRMLS_CC);
 	}
 
 	if (is_class == SUCCESS) {
 		zend_hash_find(Z_ARRVAL_PP(tmp), "type", sizeof("type"), (void **)&type);
 	}
 
-	phpdbg_write("%s%s%s(",
+	phpdbg_xml(" symbol=\"%s%s%s\"",
+		is_class == FAILURE?"":Z_STRVAL_PP(class),
+		is_class == FAILURE?"":Z_STRVAL_PP(type),
+		Z_STRVAL_PP(funcname)
+	);
+	phpdbg_out("%s%s%s(",
 		is_class == FAILURE?"":Z_STRVAL_PP(class),
 		is_class == FAILURE?"":Z_STRVAL_PP(type),
 		Z_STRVAL_PP(funcname)
@@ -136,29 +141,41 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 		int j = 0, m = func ? func->common.num_args : 0;
 		zend_bool is_variadic = 0;
 
+		phpdbg_xml(">");
+
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(args), &iterator);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(args),
 			(void **) &argstmp, &iterator) == SUCCESS) {
 			if (j) {
-				phpdbg_write(", ");
+				phpdbg_out(", ");
 			}
+			phpdbg_xml("<arg");
 			if (m && j < m) {
 #if PHP_VERSION_ID >= 50600
 				is_variadic = arginfo[j].is_variadic;
 #endif
-				phpdbg_write("%s=%s",
+				phpdbg_xml(" variadic=\"%s\" name=\"%s\"", is_variadic ? "variadic" : "", arginfo[j].name);
+
+				phpdbg_out("%s=%s",
 					arginfo[j].name, is_variadic ? "[": "");
 			}
 			++j;
 
+			phpdbg_xml(">");
+
 			zend_print_flat_zval_r(*argstmp TSRMLS_CC);
 			zend_hash_move_forward_ex(Z_ARRVAL_PP(args), &iterator);
+
+			phpdbg_xml("</arg>");
 		}
 		if (is_variadic) {
-			phpdbg_write("]");
+			phpdbg_out("]");
 		}
+		phpdbg_xml("</frame>");
+	} else {
+		phpdbg_xml(" />");
 	}
-	phpdbg_write(")");
+	phpdbg_out(")");
 }
 
 void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
@@ -171,8 +188,10 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 	int user_defined;
 
 	if (limit < 0) {
-		phpdbg_error("Invalid backtrace size %d", limit);
+		phpdbg_error("backtrace", "type=\"minnum\"", "Invalid backtrace size %d", limit);
 	}
+
+	phpdbg_xml("<backtrace>");
 
 	zend_fetch_debug_backtrace(
 		&zbacktrace, 0, 0, limit TSRMLS_CC);
@@ -186,21 +205,25 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 
 		if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace),
 			(void**)&tmp, &position) == FAILURE) {
-			phpdbg_write("frame #%d: {main} at %s:%ld", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
+			phpdbg_write("frame", "id=\"%d\" symbol=\"{main}\" file=\"%s\" line=\"%d\"", "frame #%d: {main} at %s:%ld", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			break;
 		}
 
 		if (user_defined == SUCCESS) {
-			phpdbg_write("frame #%d: ", i++);
+			phpdbg_xml("<frame id=\"%d\" file=\"%s\" line=\"%d\"", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
+			phpdbg_out("frame #%d: ", i++);
 			phpdbg_dump_prototype(tmp TSRMLS_CC);
-			phpdbg_writeln(" at %s:%ld", Z_STRVAL_PP(file), Z_LVAL_PP(line));
+			phpdbg_out(" at %s:%ld\n", Z_STRVAL_PP(file), Z_LVAL_PP(line));
 		} else {
-			phpdbg_write(" => ");
+			phpdbg_xml("<frame id=\"%d\" internal=\"internal\"", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
+			phpdbg_out(" => ");
 			phpdbg_dump_prototype(tmp TSRMLS_CC);
-			phpdbg_writeln(" (internal function)");
+			phpdbg_out(" (internal function)\n");
 		}
 	}
 
-	phpdbg_writeln(EMPTY);
+	phpdbg_out("\n");
 	zval_dtor(&zbacktrace);
+
+	phpdbg_xml("<backtrace>");
 } /* }}} */
