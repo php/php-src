@@ -128,7 +128,7 @@ static zend_string *zend_build_runtime_definition_key(zend_string *name, unsigne
 	/* NULL, name length, filename length, last accepting char position length */
 	result = zend_string_alloc(1 + name->len + filename_len + char_pos_len, 0);
  	sprintf(result->val, "%c%s%s%s", '\0', name->val, filename, char_pos_buf);
-	return result;
+	return zend_new_interned_string(result TSRMLS_CC);
 }
 /* }}} */
 
@@ -4864,6 +4864,7 @@ void zend_compile_const_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 		}
 
 		name = zend_prefix_with_ns(name TSRMLS_CC);
+		name = zend_new_interned_string(name TSRMLS_CC);
 
 		if (CG(current_import_const)
 			&& (import_name = zend_hash_find_ptr(CG(current_import_const), name))
