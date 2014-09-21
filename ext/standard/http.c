@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -66,7 +66,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					/* private or protected property access outside of the class */
 					continue;
 				}
-				zend_unmangle_property_name_ex(key->val, key->len, &tmp, &prop_name, (int *)&prop_len);
+				zend_unmangle_property_name_ex(key, &tmp, &prop_name, &prop_len);
 			} else {
 				prop_name = key->val;
 				prop_len = key->len;

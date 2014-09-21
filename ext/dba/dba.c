@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -470,19 +470,19 @@ ZEND_INI_MH(OnUpdateDefaultHandler)
 {
 	dba_handler *hptr;
 
-	if (!strlen(new_value)) {
+	if (!new_value->len) {
 		DBA_G(default_hptr) = NULL;
-		return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	}
 
-	for (hptr = handler; hptr->name && strcasecmp(hptr->name, new_value); hptr++);
+	for (hptr = handler; hptr->name && strcasecmp(hptr->name, new_value->val); hptr++);
 
 	if (!hptr->name) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such handler: %s", new_value);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such handler: %s", new_value->val);
 		return FAILURE;
 	}
 	DBA_G(default_hptr) = hptr;
-	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 
 PHP_INI_BEGIN()

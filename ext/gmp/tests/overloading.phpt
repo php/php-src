@@ -16,6 +16,10 @@ var_dump($a - $b);
 var_dump($a - 17);
 var_dump(42 - $b);
 
+var_dump($a * $b);
+var_dump($a * 17);
+var_dump(42 * $b);
+
 var_dump($a / $b);
 var_dump($a / 17);
 var_dump(42 / $b);
@@ -26,7 +30,9 @@ var_dump($a % 17);
 var_dump(42 % $b);
 var_dump($a % 0);
 
-// sl, sr
+var_dump($a ** $b);
+var_dump($a ** 17);
+var_dump(42 ** $b);
 
 var_dump($a | $b);
 var_dump($a | 17);
@@ -46,6 +52,9 @@ var_dump(42 << $b);
 
 var_dump($a >> 2);
 var_dump(-$a >> 2);
+
+var_dump($a << -1);
+var_dump($a >> -1);
 
 var_dump(~$a);
 var_dump(-$a);
@@ -83,9 +92,14 @@ var_dump(--$a);
 var_dump($a--);
 var_dump($a);
 
-$x = gmp_init(3);
-$y = gmp_init(2);
-var_dump($x ** $y);
+// Test operator that was not overloaded
+
+var_dump($a . $b);
+var_dump($a . '17');
+var_dump('42' . $b);
+
+$a .= '17';
+var_dump($a);
 
 ?>
 --EXPECTF--
@@ -115,6 +129,18 @@ object(GMP)#%d (1) {
 }
 object(GMP)#%d (1) {
   ["num"]=>
+  string(3) "714"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(3) "714"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(3) "714"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
   string(1) "2"
 }
 object(GMP)#%d (1) {
@@ -143,6 +169,18 @@ object(GMP)#%d (1) {
 
 Warning: main(): Zero operand not allowed in %s on line %d
 bool(false)
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(28) "3937657486715347520027492352"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(28) "3937657486715347520027492352"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(28) "3937657486715347520027492352"
+}
 object(GMP)#%d (1) {
   ["num"]=>
   string(2) "59"
@@ -199,6 +237,12 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(3) "-11"
 }
+
+Warning: main(): Shift cannot be negative in %s on line %d
+bool(false)
+
+Warning: main(): Shift cannot be negative in %s on line %d
+bool(false)
 object(GMP)#%d (1) {
   ["num"]=>
   string(3) "-43"
@@ -260,7 +304,7 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(2) "42"
 }
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "9"
-}
+string(4) "4217"
+string(4) "4217"
+string(4) "4217"
+string(4) "4217"

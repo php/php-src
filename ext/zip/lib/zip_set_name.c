@@ -58,7 +58,7 @@ _zip_set_name(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t fl
 	return -1;
     }
 
-    if (name && strlen(name) > 0) {
+    if (name && name[0] != '\0') {
         /* TODO: check for string too long */
 	if ((str=_zip_string_new((const zip_uint8_t *)name, (zip_uint16_t)strlen(name), flags, &za->error)) == NULL)
 	    return -1;

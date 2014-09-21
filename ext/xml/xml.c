@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -554,9 +554,9 @@ static xml_encoding *xml_get_encoding(const XML_Char *name)
 /* }}} */
 
 /* {{{ xml_utf8_encode() */
-PHPAPI zend_string *xml_utf8_encode(const char *s, int len, const XML_Char *encoding)
+PHPAPI zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Char *encoding)
 {
-	int pos = len;
+	size_t pos = len;
 	zend_string *str;
 	unsigned int c;
 	unsigned short (*encoder)(unsigned char) = NULL;
@@ -605,7 +605,7 @@ PHPAPI zend_string *xml_utf8_encode(const char *s, int len, const XML_Char *enco
 /* }}} */
 
 /* {{{ xml_utf8_decode() */
-PHPAPI zend_string *xml_utf8_decode(const XML_Char *s, int len, const XML_Char *encoding)
+PHPAPI zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Char *encoding)
 {
 	size_t pos = 0;
 	unsigned int c;
@@ -627,7 +627,7 @@ PHPAPI zend_string *xml_utf8_decode(const XML_Char *s, int len, const XML_Char *
 
 	str = zend_string_alloc(len, 0);
 	str->len = 0;
-	while (pos < (size_t)len) {
+	while (pos < len) {
 		int status = FAILURE;
 		c = php_next_utf8_char((const unsigned char*)s, (size_t) len, &pos, &status);
 

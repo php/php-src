@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -712,7 +712,7 @@ PHP_FUNCTION(dom_document_create_element)
 		RETURN_FALSE;
 	}
 
-	node = xmlNewDocNode(docp, NULL, name, value);
+	node = xmlNewDocNode(docp, NULL, (xmlChar *) name, (xmlChar *) value);
 	if (!node) {
 		RETURN_FALSE;
 	}
@@ -931,7 +931,7 @@ PHP_FUNCTION(dom_document_create_entity_reference)
 		RETURN_FALSE;
 	}
 
-	node = xmlNewReference(docp, name);
+	node = xmlNewReference(docp, (xmlChar *) name);
 	if (!node) {
 		RETURN_FALSE;
 	}
@@ -1048,9 +1048,9 @@ PHP_FUNCTION(dom_document_create_element_ns)
 
 	if (errorcode == 0) {
 		if (xmlValidateName((xmlChar *) localname, 0) == 0) {
-			nodep = xmlNewDocNode (docp, NULL, localname, value);
+			nodep = xmlNewDocNode(docp, NULL, (xmlChar *) localname, (xmlChar *) value);
 			if (nodep != NULL && uri != NULL) {
-				nsptr = xmlSearchNsByHref (nodep->doc, nodep, uri);
+				nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar *) uri);
 				if (nsptr == NULL) {
 					nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
 				}
@@ -1113,9 +1113,9 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 		if (errorcode == 0) {
 			if (xmlValidateName((xmlChar *) localname, 0) == 0) {
-				nodep = (xmlNodePtr) xmlNewDocProp(docp, localname, NULL);
+				nodep = (xmlNodePtr) xmlNewDocProp(docp, (xmlChar *) localname, NULL);
 				if (nodep != NULL && uri_len > 0) {
-					nsptr = xmlSearchNsByHref (nodep->doc, root, uri);
+					nsptr = xmlSearchNsByHref(nodep->doc, root, (xmlChar *) uri);
 					if (nsptr == NULL) {
 						nsptr = dom_get_ns(root, uri, &errorcode, prefix);
 					}
@@ -1268,7 +1268,7 @@ PHP_METHOD(domdocument, __construct)
 	}
 
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
-	docp = xmlNewDoc(version);
+	docp = xmlNewDoc((xmlChar *) version);
 
 	if (!docp) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
@@ -1276,7 +1276,7 @@ PHP_METHOD(domdocument, __construct)
 	}
 
 	if (encoding_len > 0) {
-		docp->encoding = (const xmlChar*)xmlStrdup(encoding);
+		docp->encoding = (const xmlChar *) xmlStrdup((xmlChar *) encoding);
 	}
 
 	intern = Z_DOMOBJ_P(id);
@@ -1306,8 +1306,8 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 	int isFileUri = 0;
 
 	uri = xmlCreateURI();
-	escsource = xmlURIEscapeStr(source, ":");
-	xmlParseURIReference(uri, escsource);
+	escsource = xmlURIEscapeStr((xmlChar *) source, (xmlChar *) ":");
+	xmlParseURIReference(uri, (char *) escsource);
 	xmlFree(escsource);
 
 	if (uri->scheme != NULL) {
@@ -1454,7 +1454,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 		}
 		/* If loading from memory, set the base reference uri for the document */
 		if (ret && ret->URL == NULL && ctxt->directory != NULL) {
-			ret->URL = xmlStrdup(ctxt->directory);
+			ret->URL = xmlStrdup((xmlChar *) ctxt->directory);
 		}
 	} else {
 		ret = NULL;
@@ -1642,7 +1642,7 @@ PHP_FUNCTION(dom_document_savexml)
 			xmlBufferFree(buf);
 			RETURN_FALSE;
 		}
-		RETVAL_STRING(mem);
+		RETVAL_STRING((char *) mem);
 		xmlBufferFree(buf);
 	} else {
 		if (options & LIBXML_SAVE_NOEMPTYTAG) {
@@ -1657,7 +1657,7 @@ PHP_FUNCTION(dom_document_savexml)
 		if (!size) {
 			RETURN_FALSE;
 		}
-		RETVAL_STRINGL(mem, size);
+		RETVAL_STRINGL((char *) mem, size);
 		xmlFree(mem);
 	}
 }
@@ -1995,7 +1995,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	if (mode == DOM_LOAD_FILE) {
 		ctxt = htmlCreateFileParserCtxt(source, NULL);
 	} else {
-		source_len = xmlStrlen(source);
+		source_len = xmlStrlen((xmlChar *) source);
 		ctxt = htmlCreateMemoryParserCtxt(source, source_len);
 	}
 

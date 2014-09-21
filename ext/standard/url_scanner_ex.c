@@ -2,7 +2,7 @@
 #line 1 "ext/standard/url_scanner_ex.re"
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -58,7 +58,7 @@ static PHP_INI_MH(OnUpdateTags)
 	
 	ctx = &BG(url_adapt_state_ex);
 	
-	tmp = estrndup(new_value, new_value_length);
+	tmp = estrndup(new_value->val, new_value->len);
 	
 	if (ctx->tags)
 		zend_hash_destroy(ctx->tags);

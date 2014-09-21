@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -414,7 +414,7 @@ PHP_FUNCTION(ftp_login)
 	zval 		*z_ftp;
 	ftpbuf_t	*ftp;
 	char *user, *pass;
-	int user_len, pass_len;
+	size_t user_len, pass_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss", &z_ftp, &user, &user_len, &pass, &pass_len) == FAILURE) {
 		return;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -43,7 +43,7 @@
 #define IBDEBUG(a)
 #endif
 
-extern size_t le_link, le_plink, le_trans;
+extern int le_link, le_plink, le_trans;
 
 #define LE_LINK "Firebird/InterBase link"
 #define LE_PLINK "Firebird/InterBase persistent link"

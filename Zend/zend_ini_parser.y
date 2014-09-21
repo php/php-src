@@ -141,12 +141,12 @@ static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 */
 static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 {
-	zval curval;
+	zval *curval;
 	char *envvar;
 
 	/* Fetch configuration option value */
-	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRLEN_P(name), &curval) == SUCCESS) {
-		ZVAL_PSTRINGL(result, Z_STRVAL(curval), Z_STRLEN(curval));
+	if ((curval = zend_get_configuration_directive(Z_STR_P(name))) != NULL) {
+		ZVAL_PSTRINGL(result, Z_STRVAL_P(curval), Z_STRLEN_P(curval));
 	/* ..or if not found, try ENV */
 	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name) TSRMLS_CC)) != NULL ||
 			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {
@@ -264,6 +264,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 %token TC_QUOTED_STRING
 %token BOOL_TRUE
 %token BOOL_FALSE
+%token NULL_NULL
 %token END_OF_LINE
 %token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@' '{' '}'
 %left '|' '&' '^'
@@ -290,7 +291,7 @@ statement:
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$3, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
 			zend_string_release(Z_STR($1));
-			zend_string_release(Z_STR($3));
+			zval_ptr_dtor(&$3);
 		}
 	|	TC_OFFSET option_offset ']' '=' string_or_value {
 #if DEBUG_CFG_PARSER
@@ -299,7 +300,7 @@ statement:
 			ZEND_INI_PARSER_CB(&$1, &$5, &$2, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
 			zend_string_release(Z_STR($1));
 			zend_string_release(Z_STR($2));
-			zend_string_release(Z_STR($5));
+			zval_ptr_dtor(&$5);
 		}
 	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); zend_string_release(Z_STR($1)); }
 	|	END_OF_LINE
@@ -314,6 +315,7 @@ string_or_value:
 		expr							{ $$ = $1; }
 	|	BOOL_TRUE						{ $$ = $1; }
 	|	BOOL_FALSE						{ $$ = $1; }
+	|	NULL_NULL						{ $$ = $1; }
 	|	END_OF_LINE						{ zend_ini_init_string(&$$); }
 ;
 

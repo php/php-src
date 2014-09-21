@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -581,7 +581,7 @@ static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 	ps_module *tmp;
 	SESSION_CHECK_ACTIVE_STATE;
 
-	tmp = _php_find_ps_module(new_value TSRMLS_CC);
+	tmp = _php_find_ps_module(new_value->val TSRMLS_CC);
 
 	if (PG(modules_activated) && !tmp) {
 		int err_type;
@@ -594,7 +594,7 @@ static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find save handler '%s'", new_value);
+			php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find save handler '%s'", new_value->val);
 		}
 		return FAILURE;
 	}
@@ -611,7 +611,7 @@ static PHP_INI_MH(OnUpdateSerializer) /* {{{ */
 	const ps_serializer *tmp;
 	SESSION_CHECK_ACTIVE_STATE;
 
-	tmp = _php_find_ps_serializer(new_value TSRMLS_CC);
+	tmp = _php_find_ps_serializer(new_value->val TSRMLS_CC);
 
 	if (PG(modules_activated) && !tmp) {
 		int err_type;
@@ -624,7 +624,7 @@ static PHP_INI_MH(OnUpdateSerializer) /* {{{ */
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find serialization handler '%s'", new_value);
+			php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find serialization handler '%s'", new_value->val);
 		}
 		return FAILURE;
 	}
@@ -638,10 +638,10 @@ static PHP_INI_MH(OnUpdateTransSid) /* {{{ */
 {
 	SESSION_CHECK_ACTIVE_STATE;
 
-	if (!strncasecmp(new_value, "on", sizeof("on"))) {
+	if (!strncasecmp(new_value->val, "on", sizeof("on"))) {
 		PS(use_trans_sid) = (zend_bool) 1;
 	} else {
-		PS(use_trans_sid) = (zend_bool) atoi(new_value);
+		PS(use_trans_sid) = (zend_bool) atoi(new_value->val);
 	}
 
 	return SUCCESS;
@@ -654,19 +654,19 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
 		char *p;
 
-		if (memchr(new_value, '\0', new_value_length) != NULL) {
+		if (memchr(new_value->val, '\0', new_value->len) != NULL) {
 			return FAILURE;
 		}
 
 		/* we do not use zend_memrchr() since path can contain ; itself */
-		if ((p = strchr(new_value, ';'))) {
+		if ((p = strchr(new_value->val, ';'))) {
 			char *p2;
 			p++;
 			if ((p2 = strchr(p, ';'))) {
 				p = p2 + 1;
 			}
 		} else {
-			p = new_value;
+			p = new_value->val;
 		}
 
 		if (PG(open_basedir) && *p && php_check_open_basedir(p TSRMLS_CC)) {
@@ -674,7 +674,7 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 		}
 	}
 
-	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */
@@ -682,7 +682,7 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 static PHP_INI_MH(OnUpdateName) /* {{{ */
 {
 	/* Numeric session.name won't work at all */
-	if ((!new_value_length || is_numeric_string(new_value, new_value_length, NULL, NULL, 0))) {
+	if ((!new_value->len || is_numeric_string(new_value->val, new_value->len, NULL, NULL, 0))) {
 		int err_type;
 
 		if (stage == ZEND_INI_STAGE_RUNTIME || stage == ZEND_INI_STAGE_ACTIVATE || stage == ZEND_INI_STAGE_STARTUP) {
@@ -693,12 +693,12 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL TSRMLS_CC, err_type, "session.name cannot be a numeric or empty '%s'", new_value);
+			php_error_docref(NULL TSRMLS_CC, err_type, "session.name cannot be a numeric or empty '%s'", new_value->val);
 		}
 		return FAILURE;
 	}
 
-	OnUpdateStringUnempty(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateStringUnempty(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */
@@ -712,7 +712,7 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 	PS(hash_ops) = NULL;
 #endif
 
-	val = ZEND_STRTOL(new_value, &endptr, 10);
+	val = ZEND_STRTOL(new_value->val, &endptr, 10);
 	if (endptr && (*endptr == '\0')) {
 		/* Numeric value */
 		PS(hash_func) = val ? 1 : 0;
@@ -720,15 +720,15 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 		return SUCCESS;
 	}
 
-	if (new_value_length == (sizeof("md5") - 1) &&
-		strncasecmp(new_value, "md5", sizeof("md5") - 1) == 0) {
+	if (new_value->len == (sizeof("md5") - 1) &&
+		strncasecmp(new_value->val, "md5", sizeof("md5") - 1) == 0) {
 		PS(hash_func) = PS_HASH_FUNC_MD5;
 
 		return SUCCESS;
 	}
 
-	if (new_value_length == (sizeof("sha1") - 1) &&
-		strncasecmp(new_value, "sha1", sizeof("sha1") - 1) == 0) {
+	if (new_value->len == (sizeof("sha1") - 1) &&
+		strncasecmp(new_value->val, "sha1", sizeof("sha1") - 1) == 0) {
 		PS(hash_func) = PS_HASH_FUNC_SHA1;
 
 		return SUCCESS;
@@ -736,7 +736,7 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH) /* {{{ */
 {
-	php_hash_ops *ops = (php_hash_ops*)php_hash_fetch_ops(new_value, new_value_length);
+	php_hash_ops *ops = (php_hash_ops*)php_hash_fetch_ops(new_value->val, new_value->len);
 
 	if (ops) {
 		PS(hash_func) = PS_HASH_FUNC_OTHER;
@@ -747,7 +747,7 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 }
 #endif /* HAVE_HASH_EXT }}} */
 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "session.configuration 'session.hash_function' must be existing hash function. %s does not exist.", new_value);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "session.configuration 'session.hash_function' must be existing hash function. %s does not exist.", new_value->val);
 	return FAILURE;
 }
 /* }}} */
@@ -755,12 +755,12 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 {
 	int tmp;
-	tmp = zend_atoi(new_value, new_value_length);
+	tmp = zend_atoi(new_value->val, new_value->len);
 	if(tmp < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "session.upload_progress.freq must be greater than or equal to zero");
 		return FAILURE;
 	}
-	if(new_value_length > 0 && new_value[new_value_length-1] == '%') {
+	if(new_value->len > 0 && new_value->val[new_value->len-1] == '%') {
 		if(tmp > 100) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "session.upload_progress.freq cannot be over 100%%");
 			return FAILURE;
@@ -1268,7 +1268,8 @@ static void php_session_remove_cookie(TSRMLS_D) {
 	zend_llist_element *current;
 	char *session_cookie;
 	zend_string *e_session_name;
-	int session_cookie_len, len = sizeof("Set-Cookie")-1;
+	int session_cookie_len;
+	uint len = sizeof("Set-Cookie")-1;
 
 	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
 	spprintf(&session_cookie, 0, "Set-Cookie: %s=", e_session_name->val);
@@ -1643,42 +1644,41 @@ PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t
 static PHP_FUNCTION(session_set_cookie_params)
 {
 	zval *lifetime;
-	char *path = NULL, *domain = NULL;
-	size_t path_len, domain_len;
+	zend_string *path = NULL, *domain = NULL;
 	int argc = ZEND_NUM_ARGS();
 	zend_bool secure = 0, httponly = 0;
 	zend_string *ini_name;
 
 	if (!PS(use_cookies) ||
-		zend_parse_parameters(argc TSRMLS_CC, "z|ssbb", &lifetime, &path, &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
+		zend_parse_parameters(argc TSRMLS_CC, "z|SSbb", &lifetime, &path, &domain, &secure, &httponly) == FAILURE) {
 		return;
 	}
 
 	convert_to_string_ex(lifetime);
 
 	ini_name = zend_string_init("session.cookie_lifetime", sizeof("session.cookie_lifetime") - 1, 0);
-	zend_alter_ini_entry(ini_name,  Z_STRVAL_P(lifetime), Z_STRLEN_P(lifetime), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	zend_alter_ini_entry(ini_name,  Z_STR_P(lifetime), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	zend_string_release(ini_name);
 
 	if (path) {
 		ini_name = zend_string_init("session.cookie_path", sizeof("session.cookie_path") - 1, 0);
-		zend_alter_ini_entry(ini_name, path, path_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry(ini_name, path, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(ini_name);
 	}
 	if (domain) {
 		ini_name = zend_string_init("session.cookie_domain", sizeof("session.cookie_domain") - 1, 0);
-		zend_alter_ini_entry(ini_name, domain, domain_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry(ini_name, domain, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(ini_name);
 	}
 
 	if (argc > 3) {
 		ini_name = zend_string_init("session.cookie_secure", sizeof("session.cookie_secure") - 1, 0);
-		zend_alter_ini_entry(ini_name, secure ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry_chars(ini_name, secure ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(ini_name);
 	}
 	if (argc > 4) {
 		ini_name = zend_string_init("session.cookie_httponly", sizeof("session.cookie_httponly") - 1, 0);
-		zend_alter_ini_entry(ini_name, httponly ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry_chars(ini_name, httponly ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(ini_name);
 	}
 }
@@ -1706,11 +1706,10 @@ static PHP_FUNCTION(session_get_cookie_params)
    Return the current session name. If newname is given, the session name is replaced with newname */
 static PHP_FUNCTION(session_name)
 {
-	char *name = NULL;
-	size_t name_len;
+	zend_string *name = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &name) == FAILURE) {
 		return;
 	}
 
@@ -1718,7 +1717,7 @@ static PHP_FUNCTION(session_name)
 
 	if (name) {
 		ini_name = zend_string_init("session.name", sizeof("session.name") - 1, 0);
-		zend_alter_ini_entry(ini_name, name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(ini_name);
 	}
 }
@@ -1728,11 +1727,10 @@ static PHP_FUNCTION(session_name)
    Return the current module name used for accessing session data. If newname is given, the module name is replaced with newname */
 static PHP_FUNCTION(session_module_name)
 {
-	char *name = NULL;
-	size_t name_len;
+	zend_string *name = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &name) == FAILURE) {
 		return;
 	}
 
@@ -1744,8 +1742,8 @@ static PHP_FUNCTION(session_module_name)
 	}
 
 	if (name) {
-		if (!_php_find_ps_module(name TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find named PHP session module (%s)", name);
+		if (!_php_find_ps_module(name->val TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find named PHP session module (%s)", name->val);
 
 			zval_dtor(return_value);
 			RETURN_FALSE;
@@ -1756,7 +1754,7 @@ static PHP_FUNCTION(session_module_name)
 		PS(mod_data) = NULL;
 
 		ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
-		zend_alter_ini_entry(ini_name, name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(ini_name);
 	}
 }
@@ -1769,7 +1767,7 @@ static PHP_FUNCTION(session_set_save_handler)
 	zval *args = NULL;
 	int i, num_args, argc = ZEND_NUM_ARGS();
 	zend_string *name;
-	zend_string *ini_name;
+	zend_string *ini_name, *ini_val;
 
 	if (PS(session_status) != php_session_none) {
 		RETURN_FALSE;
@@ -1843,7 +1841,9 @@ static PHP_FUNCTION(session_set_save_handler)
 
 		if (PS(mod) && PS(session_status) == php_session_none && PS(mod) != &ps_mod_user) {
 			ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
-			zend_alter_ini_entry(ini_name, "user", sizeof("user") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			ini_val = zend_string_init("user", sizeof("user") - 1, 0);
+			zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			zend_string_release(ini_val);
 			zend_string_release(ini_name);
 		}
 
@@ -1873,7 +1873,9 @@ static PHP_FUNCTION(session_set_save_handler)
 	
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
 		ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
-		zend_alter_ini_entry(ini_name, "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ini_val = zend_string_init("user", sizeof("user") - 1, 0);
+		zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_string_release(ini_val);
 		zend_string_release(ini_name);
 	}
 
@@ -1892,24 +1894,23 @@ static PHP_FUNCTION(session_set_save_handler)
    Return the current save path passed to module_name. If newname is given, the save path is replaced with newname */
 static PHP_FUNCTION(session_save_path)
 {
-	char *name = NULL;
-	size_t name_len;
+	zend_string *name = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &name) == FAILURE) {
 		return;
 	}
 
 	RETVAL_STRING(PS(save_path));
 
 	if (name) {
-		if (memchr(name, '\0', name_len) != NULL) {
+		if (memchr(name->val, '\0', name->len) != NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The save_path cannot contain NULL characters");
 			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
 		ini_name = zend_string_init("session.save_path", sizeof("session.save_path") - 1, 0);
-		zend_alter_ini_entry(ini_name, name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(ini_name);
 	}
 }
@@ -1990,11 +1991,10 @@ static PHP_FUNCTION(session_regenerate_id)
    Return the current cache limiter. If new_cache_limited is given, the current cache_limiter is replaced with new_cache_limiter */
 static PHP_FUNCTION(session_cache_limiter)
 {
-	char *limiter = NULL;
-	size_t limiter_len;
+	zend_string *limiter = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &limiter, &limiter_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &limiter) == FAILURE) {
 		return;
 	}
 
@@ -2002,7 +2002,7 @@ static PHP_FUNCTION(session_cache_limiter)
 
 	if (limiter) {
 		ini_name = zend_string_init("session.cache_limiter", sizeof("session.cache_limiter") - 1, 0);
-		zend_alter_ini_entry(ini_name, limiter, limiter_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry(ini_name, limiter, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(ini_name);
 	}
 }
@@ -2024,7 +2024,7 @@ static PHP_FUNCTION(session_cache_expire)
 	if (expires) {
 		convert_to_string_ex(expires);
 		ini_name = zend_string_init("session.cache_expire", sizeof("session.cache_expire") - 1, 0);
-		zend_alter_ini_entry(ini_name, Z_STRVAL_P(expires), Z_STRLEN_P(expires), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry(ini_name, Z_STR_P(expires), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 		zend_string_release(ini_name);
 	}
 }

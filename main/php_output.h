@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -143,12 +143,12 @@ typedef struct _php_output_handler {
 } php_output_handler;
 
 ZEND_BEGIN_MODULE_GLOBALS(output)
-	int flags;
 	zend_stack handlers;
 	php_output_handler *active;
 	php_output_handler *running;
 	const char *output_start_filename;
 	int output_start_lineno;
+	int flags;
 ZEND_END_MODULE_GLOBALS(output)
 
 /* there should not be a need to use OG() from outside of output.c */

@@ -97,7 +97,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 				case ZEND_FE_RESET:
 				case ZEND_NEW:
 				case ZEND_JMP_SET:
-				case ZEND_JMP_SET_VAR:
 					ZEND_OP2(opline).opline_num -= shiftlist[ZEND_OP2(opline).opline_num];
 					break;
 				case ZEND_JMPZNZ:

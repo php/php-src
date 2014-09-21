@@ -43,8 +43,10 @@ static inline size_t zend_ast_list_size(uint32_t children) {
 }
 
 ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
+	zend_ast_znode *ast;
 	TSRMLS_FETCH();
-	zend_ast_znode *ast = zend_ast_alloc(sizeof(zend_ast_znode) TSRMLS_CC);
+
+	ast = zend_ast_alloc(sizeof(zend_ast_znode) TSRMLS_CC);
 	ast->kind = ZEND_AST_ZNODE;
 	ast->attr = 0;
 	ast->lineno = CG(zend_lineno);
@@ -53,8 +55,10 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
 }
 
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
+	zend_ast_zval *ast;
 	TSRMLS_FETCH();
-	zend_ast_zval *ast = zend_ast_alloc(sizeof(zend_ast_zval) TSRMLS_CC);
+
+	ast = zend_ast_alloc(sizeof(zend_ast_zval) TSRMLS_CC);
 	ast->kind = ZEND_AST_ZVAL;
 	ast->attr = attr;
 	ZVAL_COPY_VALUE(&ast->val, zv);
@@ -66,9 +70,10 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2
 ) {
+	zend_ast_decl *ast;
 	TSRMLS_FETCH();
-	zend_ast_decl *ast = zend_ast_alloc(sizeof(zend_ast_decl) TSRMLS_CC);
 
+	ast = zend_ast_alloc(sizeof(zend_ast_decl) TSRMLS_CC);
 	ast->kind = kind;
 	ast->attr = 0;
 	ast->start_lineno = start_lineno;
@@ -85,9 +90,11 @@ ZEND_API zend_ast *zend_ast_create_decl(
 }
 
 static zend_ast *zend_ast_create_from_va_list(zend_ast_kind kind, zend_ast_attr attr, va_list va) {
-	TSRMLS_FETCH();
 	uint32_t i, children = kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
-	zend_ast *ast = zend_ast_alloc(zend_ast_size(children) TSRMLS_CC);
+	zend_ast *ast;
+	TSRMLS_FETCH();
+
+	ast = zend_ast_alloc(zend_ast_size(children) TSRMLS_CC);
 	ast->kind = kind;
 	ast->attr = attr;
 	ast->lineno = (uint32_t) -1;
@@ -131,9 +138,13 @@ ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...) {
 	return ast;
 }
 
-ZEND_API zend_ast_list *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...) {
+ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...) {
+	zend_ast *ast;
+	zend_ast_list *list;
 	TSRMLS_FETCH();
-	zend_ast_list *list = zend_ast_alloc(zend_ast_list_size(4) TSRMLS_CC);
+
+	ast = zend_ast_alloc(zend_ast_list_size(4) TSRMLS_CC);
+	list = (zend_ast_list *) ast;
 	list->kind = kind;
 	list->attr = 0;
 	list->lineno = CG(zend_lineno);
@@ -144,26 +155,27 @@ ZEND_API zend_ast_list *zend_ast_create_list(uint32_t init_children, zend_ast_ki
 		uint32_t i;
 		va_start(va, kind);
 		for (i = 0; i < init_children; ++i) {
-			list = zend_ast_list_add(list, va_arg(va, zend_ast *));
+			ast = zend_ast_list_add(ast, va_arg(va, zend_ast *));
 		}
 		va_end(va);
 	}
 
-	return list;
+	return ast;
 }
 
 static inline zend_bool is_power_of_two(uint32_t n) {
-	return n == (n & -n);
+	return ((n != 0) && (n == (n & (~n + 1))));
 }
 
-ZEND_API zend_ast_list *zend_ast_list_add(zend_ast_list *list, zend_ast *op) {
+ZEND_API zend_ast *zend_ast_list_add(zend_ast *ast, zend_ast *op) {
+	zend_ast_list *list = zend_ast_get_list(ast);
 	if (list->children >= 4 && is_power_of_two(list->children)) {
 		TSRMLS_FETCH();
 		list = zend_ast_realloc(list,
 			zend_ast_list_size(list->children), zend_ast_list_size(list->children * 2) TSRMLS_CC);
 	}
 	list->child[list->children++] = op;
-	return list;
+	return (zend_ast *) list;
 }
 
 static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr TSRMLS_DC)
@@ -383,16 +395,11 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 
 	switch (ast->kind) {
 		case ZEND_AST_ZVAL:
-		{
 			/* Destroy value without using GC: When opcache moves arrays into SHM it will
 			 * free the zend_array structure, so references to it from outside the op array
 			 * become invalid. GC would cause such a reference in the root buffer. */
-			zval *zv = zend_ast_get_zval(ast);
-			if (Z_REFCOUNTED_P(zv) && !Z_DELREF_P(zv)) {
-				_zval_dtor_func_for_ptr(Z_COUNTED_P(zv) ZEND_FILE_LINE_CC);
-			}
+			zval_ptr_dtor_nogc(zend_ast_get_zval(ast));
 			break;
-		}
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_CLOSURE:
 		case ZEND_AST_METHOD:

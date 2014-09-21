@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -127,7 +127,7 @@ int dom_processinginstruction_data_read(dom_object *obj, zval *retval TSRMLS_DC)
 	}
 
 	if ((content = xmlNodeGetContent(nodep)) != NULL) {
-		ZVAL_STRING(retval, content);
+		ZVAL_STRING(retval, (char *) content);
 		xmlFree(content);
 	} else {
 		ZVAL_EMPTY_STRING(retval);
@@ -148,7 +148,7 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval TSRMLS_DC
 
 	str = zval_get_string(newval);
 
-	xmlNodeSetContentLen(nodep, str->val, str->len + 1);
+	xmlNodeSetContentLen(nodep, (xmlChar *) str->val, str->len + 1);
 
 	zend_string_release(str);
 	return SUCCESS;

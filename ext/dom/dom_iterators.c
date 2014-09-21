@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -218,7 +218,8 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC) 
 					} else {
 						goto err;
 					}
-					curnode = dom_get_elements_by_tag_name_ns_raw(basenode, objmap->ns, objmap->local, &previndex, iter->index);
+					curnode = dom_get_elements_by_tag_name_ns_raw(
+						basenode, (char *) objmap->ns, (char *) objmap->local, &previndex, iter->index);
 				}
 			}
 		} else {
@@ -294,7 +295,8 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 					} else {
 						nodep = nodep->children;
 					}
-					curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &curindex, 0);
+					curnode = dom_get_elements_by_tag_name_ns_raw(
+						nodep, (char *) objmap->ns, (char *) objmap->local, &curindex, 0);
 				}
 			}
 		} else {

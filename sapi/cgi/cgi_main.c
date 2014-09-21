@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -159,6 +159,8 @@ static const opt_struct OPTIONS[] = {
 };
 
 typedef struct _php_cgi_globals_struct {
+	HashTable user_config_cache;
+	char *redirect_status_env;
 	zend_bool rfc2616_headers;
 	zend_bool nph;
 	zend_bool check_shebang_line;
@@ -166,11 +168,9 @@ typedef struct _php_cgi_globals_struct {
 	zend_bool force_redirect;
 	zend_bool discard_path;
 	zend_bool fcgi_logging;
-	char *redirect_status_env;
 #ifdef PHP_WIN32
 	zend_bool impersonate;
 #endif
-	HashTable user_config_cache;
 } php_cgi_globals_struct;
 
 /* {{{ user_config_cache
@@ -1751,6 +1751,7 @@ int main(int argc, char *argv[])
 	char *bindpath = NULL;
 	int fcgi_fd = 0;
 	fcgi_request *request = NULL;
+	int warmup_repeats = 0;
 	int repeats = 1;
 	int benchmark = 0;
 #if HAVE_GETTIMEOFDAY
@@ -2094,7 +2095,15 @@ consult the installation file that came with this distribution, or visit \n\
 			switch (c) {
 				case 'T':
 					benchmark = 1;
-					repeats = atoi(php_optarg);
+					{
+						char *comma = strchr(php_optarg, ',');
+						if (comma) {
+							warmup_repeats = atoi(php_optarg);
+							repeats = atoi(comma + 1);
+						} else {
+							repeats = atoi(php_optarg);
+						}
+					}
 #ifdef HAVE_GETTIMEOFDAY
 					gettimeofday(&start, NULL);
 #else
@@ -2396,8 +2405,8 @@ consult the installation file that came with this distribution, or visit \n\
 							/* handle situations where line is terminated by \r\n */
 							if (c == '\r') {
 								if (fgetc(file_handle.handle.fp) != '\n') {
-									long pos = ftell(file_handle.handle.fp);
-									fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+									zend_long pos = zend_ftell(file_handle.handle.fp);
+									zend_fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
 								}
 							}
 							CG(start_lineno) = 2;
@@ -2512,12 +2521,24 @@ fastcgi_request_done:
 
 			if (!fastcgi) {
 				if (benchmark) {
-					repeats--;
-					if (repeats > 0) {
-						script_file = NULL;
-						php_optind = orig_optind;
-						php_optarg = orig_optarg;
+					if (warmup_repeats) {
+						warmup_repeats--;
+						if (!warmup_repeats) {
+#ifdef HAVE_GETTIMEOFDAY
+							gettimeofday(&start, NULL);
+#else
+							time(&start);						
+#endif
+						}
 						continue;
+					} else {
+						repeats--;
+						if (repeats > 0) {
+							script_file = NULL;
+							php_optind = orig_optind;
+							php_optarg = orig_optarg;
+							continue;
+						}
 					}
 				}
 				break;

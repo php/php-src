@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -142,21 +142,21 @@ typedef struct _php_stream_xport_param {
 	struct {
 		char *name;
 		size_t namelen;
-		int backlog;
 		struct timeval *timeout;
 		struct sockaddr *addr;
-		socklen_t addrlen;
 		char *buf;
 		size_t buflen;
-		long flags;
+		zend_long flags;
+		socklen_t addrlen;
+		int backlog;
 	} inputs;
 	struct {
 		php_stream *client;
-		int returncode;
 		struct sockaddr *addr;
 		socklen_t addrlen;
 		zend_string *textaddr;
 		zend_string *error_text;
+		int returncode;
 		int error_code;
 	} outputs;
 } php_stream_xport_param;
@@ -191,18 +191,18 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRML
 END_EXTERN_C()
 
 typedef struct _php_stream_xport_crypto_param {
-	enum {
-		STREAM_XPORT_CRYPTO_OP_SETUP,
-		STREAM_XPORT_CRYPTO_OP_ENABLE
-	} op;
 	struct {
+		php_stream *session;
 		int activate;
 		php_stream_xport_crypt_method_t method;
-		php_stream *session;
 	} inputs;
 	struct {
 		int returncode;
 	} outputs;
+	enum {
+		STREAM_XPORT_CRYPTO_OP_SETUP,
+		STREAM_XPORT_CRYPTO_OP_ENABLE
+	} op;
 } php_stream_xport_crypto_param;
 
 BEGIN_EXTERN_C()

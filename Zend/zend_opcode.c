@@ -343,7 +343,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	if (literal) {
 	 	end = literal + op_array->last_literal;
 	 	while (literal < end) {
-			zval_dtor(literal);
+			zval_ptr_dtor_nogc(literal);
 			literal++;
 		}
 		efree(op_array->literals);
@@ -444,7 +444,7 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 
 static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num, uint32_t dst_num TSRMLS_DC)
 {
-	uint32_t i;
+	int i;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
 		if ((op_num < op_array->try_catch_array[i].finally_op ||
@@ -738,7 +738,6 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
 			case ZEND_JMP_SET:
-			case ZEND_JMP_SET_VAR:
 			case ZEND_NEW:
 			case ZEND_FE_RESET:
 			case ZEND_FE_FETCH:

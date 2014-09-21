@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -99,13 +99,17 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 		PHP_MD5Update(&context, buf, n);
 	}
 
-	PHP_MD5Final(digest, &context);
+	/* XXX this probably can be improved with some number of retries */
+	if (!php_stream_eof(stream)) {
+		php_stream_close(stream);
+		PHP_MD5Final(digest, &context);
+
+		RETURN_FALSE;
+	}
 
 	php_stream_close(stream);
 
-	if (n<0) {
-		RETURN_FALSE;
-	}
+	PHP_MD5Final(digest, &context);
 
 	if (raw_output) {
 		RETURN_STRINGL(digest, 16);
@@ -384,5 +388,5 @@ PHPAPI void PHP_MD5Final(unsigned char *result, PHP_MD5_CTX *ctx)
 	result[14] = ctx->d >> 16;
 	result[15] = ctx->d >> 24;
 
-	memset(ctx, 0, sizeof(*ctx));
+	ZEND_SECURE_ZERO(ctx, sizeof(*ctx));
 }

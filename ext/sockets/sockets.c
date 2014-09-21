@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1586,7 +1586,7 @@ PHP_FUNCTION(socket_recv)
 
 		/* Rebuild buffer zval */
 		zval_dtor(buf);
-		ZVAL_STR(buf, recv_buf);
+		ZVAL_NEW_STR(buf, recv_buf);
 	}
 
 	if (retval == -1) {
@@ -1673,7 +1673,7 @@ PHP_FUNCTION(socket_recvfrom)
 			zval_dtor(arg2);
 			zval_dtor(arg5);
 
-			ZVAL_STR(arg2, recv_buf);
+			ZVAL_NEW_STR(arg2, recv_buf);
 			ZVAL_STRING(arg5, s_un.sun_path);
 			break;
 
@@ -1703,7 +1703,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			address = inet_ntoa(sin.sin_addr);
 
-			ZVAL_STR(arg2, recv_buf);
+			ZVAL_NEW_STR(arg2, recv_buf);
 			ZVAL_STRING(arg5, address ? address : "0.0.0.0");
 			ZVAL_LONG(arg6, ntohs(sin.sin_port));
 			break;
@@ -1735,7 +1735,7 @@ PHP_FUNCTION(socket_recvfrom)
 			memset(addr6, 0, INET6_ADDRSTRLEN);
 			inet_ntop(AF_INET6, &sin6.sin6_addr, addr6, INET6_ADDRSTRLEN);
 
-			ZVAL_STR(arg2, recv_buf);
+			ZVAL_NEW_STR(arg2, recv_buf);
 			ZVAL_STRING(arg5, addr6[0] ? addr6 : "::");
 			ZVAL_LONG(arg6, ntohs(sin6.sin6_port));
 			break;

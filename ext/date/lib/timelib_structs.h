@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -173,10 +173,10 @@ typedef struct timelib_error_message {
 } timelib_error_message;
 
 typedef struct timelib_error_container {
-	int                           warning_count;
+	struct timelib_error_message *error_messages;
 	struct timelib_error_message *warning_messages;
 	int                           error_count;
-	struct timelib_error_message *error_messages;
+	int                           warning_count;
 } timelib_error_container;
 
 typedef struct _timelib_tz_lookup_table {

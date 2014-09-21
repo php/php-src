@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -200,17 +200,27 @@ ps_fetch_float(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_l
 		/* The following cast is guaranteed to do the right thing */
 		dval = (double) d32val;
 	}
+#elif defined(PHP_WIN32)
+	{
+		/* float datatype on Winows is already 4 byte but has a precision of 7 digits */
+		char num_buf[2048];
+		(void)_gcvt_s(num_buf, 2048, fval, field->decimals >= 31 ? 7 : field->decimals);
+		dval = zend_strtod(num_buf, NULL);
+	}
 #else
 	{
 		char num_buf[2048]; /* Over allocated */
 		char *s;
 
+#ifndef FLT_DIG
+# define FLT_DIG 6
+#endif
 		/* Convert to string. Ignoring localization, etc.
 		 * Following MySQL's rules. If precision is undefined (NOT_FIXED_DEC i.e. 31)
 		 * or larger than 31, the value is limited to 6 (FLT_DIG).
 		 */
 		s = php_gcvt(fval,
-			     field->decimals >= 31 ? 6 : field->decimals,
+			     field->decimals >= 31 ? FLT_DIG : field->decimals,
 			     '.',
 			     'e',
 			     num_buf);

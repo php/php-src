@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -281,7 +281,7 @@ PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *inp
 		}
 		
 		memcpy(context->buffer, input + i, r);
-		memset(&context->buffer[r], 0, 32 - r);
+		ZEND_SECURE_ZERO(&context->buffer[r], 32 - r);
 		context->length = r;
 	}
 }
@@ -306,7 +306,7 @@ PHP_HASH_API void PHP_GOSTFinal(unsigned char digest[32], PHP_GOST_CTX *context)
 		digest[j + 3] = (unsigned char) ((context->state[i] >> 24) & 0xff);
 	}
 	
-	memset(context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
 const php_hash_ops php_hash_gost_ops = {

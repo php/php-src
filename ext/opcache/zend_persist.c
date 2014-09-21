@@ -198,6 +198,7 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist_immutable(Z_ARRVAL_P(z) TSRMLS_CC);
 				} else {
+					GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
 					/* make immutable array */
@@ -251,6 +252,7 @@ static void zend_persist_zval_const(zval *z TSRMLS_DC)
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist_immutable(Z_ARRVAL_P(z) TSRMLS_CC);
 				} else {
+					GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval TSRMLS_CC);
 					/* make immutable array */
@@ -371,7 +373,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
 					case ZEND_JMP_SET:
-					case ZEND_JMP_SET_VAR:
 					case ZEND_NEW:
 					case ZEND_FE_RESET:
 					case ZEND_FE_FETCH:

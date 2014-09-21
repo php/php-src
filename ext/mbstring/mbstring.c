@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1209,7 +1209,7 @@ static PHP_INI_MH(OnUpdate_mbstring_language)
 {
 	enum mbfl_no_language no_language;
 
-	no_language = mbfl_name2no_language(new_value);
+	no_language = mbfl_name2no_language(new_value->val);
 	if (no_language == mbfl_no_language_invalid) {
 		MBSTRG(language) = mbfl_no_language_neutral;
 		return FAILURE;
@@ -1235,7 +1235,7 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 		return SUCCESS;
 	}
 
-	if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, 1 TSRMLS_CC)) {
+	if (FAILURE == php_mb_parse_encoding_list(new_value->val, new_value->len, &list, &size, 1 TSRMLS_CC)) {
 		return FAILURE;
 	}
 
@@ -1268,7 +1268,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 		return SUCCESS;
 	}
 
-	if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, 1 TSRMLS_CC)) {
+	if (FAILURE == php_mb_parse_encoding_list(new_value->val, new_value->len, &list, &size, 1 TSRMLS_CC)) {
 		return FAILURE;
 	}
 
@@ -1291,7 +1291,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 {
 	const mbfl_encoding *encoding;
 
-	if (new_value == NULL || new_value_length == 0) {
+	if (new_value == NULL || new_value->len == 0) {
 		encoding = mbfl_name2encoding(get_output_encoding(TSRMLS_C));
 		if (!encoding) {
 			MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
@@ -1299,7 +1299,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 			return SUCCESS;
 		}
 	} else {
-		encoding = mbfl_name2encoding(new_value);
+		encoding = mbfl_name2encoding(new_value->val);
 		if (!encoding) {
 			MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
 			MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
@@ -1350,13 +1350,13 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 		php_error_docref("ref.mbstring" TSRMLS_CC, E_DEPRECATED, "Use of mbstring.internal_encoding is deprecated");
 	}
 
-	if (OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
+	if (OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 
 	if (stage & (PHP_INI_STAGE_STARTUP | PHP_INI_STAGE_SHUTDOWN | PHP_INI_STAGE_RUNTIME)) {
-		if (new_value_length) {
-			return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
+		if (new_value && new_value->len) {
+			return _php_mb_ini_mbstring_internal_encoding_set(new_value->val, new_value->len TSRMLS_CC);
 		} else {
 			return _php_mb_ini_mbstring_internal_encoding_set(get_internal_encoding(TSRMLS_C), strlen(get_internal_encoding(TSRMLS_C))+1 TSRMLS_CC);
 		}
@@ -1379,20 +1379,20 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 	char *endptr = NULL;
 
 	if (new_value != NULL) {
-		if (strcasecmp("none", new_value) == 0) {
+		if (strcasecmp("none", new_value->val) == 0) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
 			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
-		} else if (strcasecmp("long", new_value) == 0) {
+		} else if (strcasecmp("long", new_value->val) == 0) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
 			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
-		} else if (strcasecmp("entity", new_value) == 0) {
+		} else if (strcasecmp("entity", new_value->val) == 0) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 		} else {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-			if (new_value_length >0) {
-				c = strtol(new_value, &endptr, 0);
+			if (new_value->len >0) {
+				c = strtol(new_value->val, &endptr, 0);
 				if (*endptr == '\0') {
 					MBSTRG(filter_illegal_substchar) = c;
 					MBSTRG(current_filter_illegal_substchar) = c;
@@ -1417,7 +1417,7 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 		return FAILURE;
 	}
 
-	OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
 	if (MBSTRG(encoding_translation)) {
 		sapi_unregister_post_entry(php_post_entries TSRMLS_CC);
@@ -1439,9 +1439,8 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 
 	if (!new_value) {
 		new_value = entry->orig_value;
-		new_value_length = entry->orig_value_length;
 	}
-	php_trim(new_value, new_value_length, NULL, 0, &tmp, 3 TSRMLS_CC);
+	php_trim(new_value->val, new_value->len, NULL, 0, &tmp, 3 TSRMLS_CC);
 
 	if (Z_STRLEN(tmp) > 0) {
 		if (!(re = _php_mb_compile_regex(Z_STRVAL(tmp) TSRMLS_CC))) {
@@ -1732,18 +1731,17 @@ PHP_MINFO_FUNCTION(mbstring)
    Sets the current language or Returns the current language as a string */
 PHP_FUNCTION(mb_language)
 {
-	char *name = NULL;
-	size_t name_len = 0;
+	zend_string *name = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &name) == FAILURE) {
 		return;
 	}
 	if (name == NULL) {
 		RETVAL_STRING((char *)mbfl_no_language2name(MBSTRG(language)));
 	} else {
 		zend_string *ini_name = zend_string_init("mbstring.language", sizeof("mbstring.language") - 1, 0);
-		if (FAILURE == zend_alter_ini_entry(ini_name, name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown language \"%s\"", name);
+		if (FAILURE == zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown language \"%s\"", name->val);
 			RETVAL_FALSE;
 		} else {
 			RETVAL_TRUE;
@@ -2965,7 +2963,7 @@ PHP_FUNCTION(mb_strimwidth)
 	string.val = (unsigned char *)str;
 	string.len = str_len;
 
-	if (from < 0 || from > str_len) {
+	if (from < 0 || (size_t)from > str_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Start position is out of range");
 		RETURN_FALSE;
 	}
@@ -4197,7 +4195,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	/* Subject: */
-	if (subject != NULL && subject_len >= 0) {
+	if (subject != NULL) {
 		orig_str.no_language = MBSTRG(language);
 		orig_str.val = (unsigned char *)subject;
 		orig_str.len = subject_len;

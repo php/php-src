@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1111,7 +1111,7 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 
 				shutdown(req->fd, 1);
 				/* read the last FCGI_STDIN header (it may be omitted) */
-				recv(req->fd, (char *)&buf, sizeof(buf), 0);
+				recv(req->fd, (char *)(&buf), sizeof(buf), 0);
 			}
 			closesocket(req->fd);
 		}
@@ -1121,7 +1121,7 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 
 			shutdown(req->fd, 1);
 			/* read the last FCGI_STDIN header (it may be omitted) */
-			recv(req->fd, &buf, sizeof(buf), 0);
+			recv(req->fd, (char *)(&buf), sizeof(buf), 0);
 		}
 		close(req->fd);
 #endif

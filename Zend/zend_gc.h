@@ -83,6 +83,7 @@ typedef struct _gc_root_buffer {
 typedef struct _zend_gc_globals {
 	zend_bool         gc_enabled;
 	zend_bool         gc_active;
+	zend_bool         gc_full;
 
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 	gc_root_buffer    roots;			/* list of possible roots of cycles */

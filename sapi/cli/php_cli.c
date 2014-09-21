@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -627,8 +627,8 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 		/* handle situations where line is terminated by \r\n */
 		if (c == '\r') {
 			if (fgetc(file_handle->handle.fp) != '\n') {
-				long pos = ftell(file_handle->handle.fp);
-				fseek(file_handle->handle.fp, pos - 1, SEEK_SET);
+				zend_long pos = zend_ftell(file_handle->handle.fp);
+				zend_fseek(file_handle->handle.fp, pos - 1, SEEK_SET);
 			}
 		}
 		*lineno = 2;

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -207,7 +207,7 @@ PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, const unsigned char *i
 			i = 64 - context->length;
 			memcpy(&context->buffer[context->length], input, i);
 			tiger_compress(context->passes, ((const php_hash_uint64 *) context->buffer), context->state);
-			memset(context->buffer, 0, 64);
+			ZEND_SECURE_ZERO(context->buffer, 64);
 			context->passed += 512;
 		}
 		
@@ -216,7 +216,7 @@ PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, const unsigned char *i
 			tiger_compress(context->passes, ((const php_hash_uint64 *) context->buffer), context->state);
 			context->passed += 512;
 		}
-		memset(&context->buffer[r], 0, 64-r);
+		ZEND_SECURE_ZERO(&context->buffer[r], 64-r);
 		memcpy(context->buffer, &input[i], r);
 		context->length = r;
 	}
@@ -226,21 +226,21 @@ PHP_HASH_API void PHP_TIGER128Final(unsigned char digest[16], PHP_TIGER_CTX *con
 {
 	TigerFinalize(context);
 	TigerDigest(digest, 16, context);
-	memset(context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
 PHP_HASH_API void PHP_TIGER160Final(unsigned char digest[20], PHP_TIGER_CTX *context)
 {
 	TigerFinalize(context);
 	TigerDigest(digest, 20, context);
-	memset(context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
 PHP_HASH_API void PHP_TIGER192Final(unsigned char digest[24], PHP_TIGER_CTX *context)
 {
 	TigerFinalize(context);
 	TigerDigest(digest, 24, context);
-	memset(context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
 #define PHP_HASH_TIGER_OPS(p, b) \

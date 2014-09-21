@@ -570,7 +570,7 @@ bail:
 			phar_destroy_phar_data(myphar TSRMLS_CC);
 			return FAILURE;
 		}
-	} while (read != 0);
+	} while (!php_stream_eof(fp));
 
 	if (zend_hash_str_exists(&(myphar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 		myphar->is_data = 0;

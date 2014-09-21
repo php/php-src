@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -264,8 +264,6 @@ PHPAPI void			_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_L
 #define MYSQLND_METHOD_PRIVATE(class, method) php_##class##_##method##_priv
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
-	zend_bool		collect_statistics;
-	zend_bool		collect_memory_statistics;
 	char *			debug;	/* The actual string */
 	char *			trace_alloc_settings;	/* The actual string */
 	MYSQLND_DEBUG *	dbg;	/* The DBG object for standard tracing */
@@ -283,6 +281,8 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	zend_long		debug_realloc_fail_threshold;
 	char *			sha256_server_public_key;
 	zend_bool		fetch_data_copy;
+	zend_bool		collect_statistics;
+	zend_bool		collect_memory_statistics;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)

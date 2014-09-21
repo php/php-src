@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -392,9 +392,9 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 	if (zenc != NULL) {
 		charset_hint = (char *)zend_multibyte_get_encoding_name(zenc);
 		if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
-			if ((len == 4) /* sizeof (none|auto|pass) */ &&
+			if ((len == 4) /* sizeof (auto|pass) */ &&
+					/* XXX should the "wchar" be ignored as well?? */
 					(!memcmp("pass", charset_hint, 4) ||
-					 !memcmp("auto", charset_hint, 4) ||
 					 !memcmp("auto", charset_hint, 4))) {
 				charset_hint = NULL;
 				len = 0;

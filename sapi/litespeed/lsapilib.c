@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1912,9 +1912,13 @@ int LSAPI_ForeachOrgHeader_r( LSAPI_Request * pReq,
     int ret;
     int count = 0;
     struct _headerInfo headers[512];
+
     if ( !pReq || !fn )
         return -1;
-    
+
+    if ( !pReq->m_pHeaderIndex )
+        return 0;
+
     for( i = 0; i < H_TRANSFER_ENCODING; ++i )
     {
         if ( pReq->m_pHeaderIndex->m_headerOff[i] )

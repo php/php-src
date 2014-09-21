@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -84,7 +84,7 @@
 *
 *     gcc -shared `php-config --includes` `php-config --ldflags` \
 *         `php-config --libs` -o php_ibase_udf.so php_ibase_udf.c \
-*         /usr/lib/libphp5.a
+*         /usr/lib/libphp7.a
 *
 * If you use the super server, you should also link against the embedded
 * library, but be sure to enable thread safety, as the super server is
@@ -404,4 +404,3 @@ void udf_call_php8(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARA
 	PARAMDSC *args[8] = { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 };
 	call_php(name, r, 8, args);
 }
-

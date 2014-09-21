@@ -23,7 +23,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 # ifdef FILE_DESCRIPTION
 #define INTERNAL_NAME FILE_DESCRIPTION /* e.g. 'PHP Script Interpreter', 'GD imaging' */
 # else
-#define INTERNAL_NAME FILE_NAME /* e.g. 'php5ts.dll', 'php_bz2.dll' */
+#define INTERNAL_NAME FILE_NAME /* e.g. 'php7ts.dll', 'php_bz2.dll' */
 # endif
 #endif
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -791,7 +791,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 		
 		intern = Z_XSL_P(id);
 		
-		ZVAL_STR(&new_string, zend_string_copy(value));
+		ZVAL_STR_COPY(&new_string, value);
 		
 		zend_hash_update(intern->parameter, name, &new_string);
 		RETURN_TRUE;

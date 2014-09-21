@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -1080,14 +1080,14 @@ static PHP_INI_MH(php_tidy_set_clean_output)
 	int status;
 	zend_bool value;
 
-	if (new_value_length==2 && strcasecmp("on", new_value)==0) {
+	if (new_value->len==2 && strcasecmp("on", new_value->val)==0) {
 		value = (zend_bool) 1;
-	} else if (new_value_length==3 && strcasecmp("yes", new_value)==0) {
+	} else if (new_value->len==3 && strcasecmp("yes", new_value->val)==0) {
 		value = (zend_bool) 1;
-	} else if (new_value_length==4 && strcasecmp("true", new_value)==0) {
+	} else if (new_value->len==4 && strcasecmp("true", new_value->val)==0) {
 		value = (zend_bool) 1;
 	} else {
-		value = (zend_bool) atoi(new_value);
+		value = (zend_bool) atoi(new_value->val);
 	}
 
 	if (stage == PHP_INI_STAGE_RUNTIME) {
@@ -1103,7 +1103,7 @@ static PHP_INI_MH(php_tidy_set_clean_output)
 		}
 	}
 
-	status = OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	status = OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
 	if (stage == PHP_INI_STAGE_RUNTIME && value) {
 		if (!php_output_handler_started(ZEND_STRL("ob_tidyhandler") TSRMLS_CC)) {

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -482,7 +482,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 			}
 
 			/* add the mappings */
-			ZVAL_STR(&tmp2, zend_string_copy(name));
+			ZVAL_STR_COPY(&tmp2, name);
 			pid = zend_hash_next_free_element(disp->dispid_to_name);
 			zend_hash_index_update(disp->dispid_to_name, pid, &tmp2);
 			
@@ -517,7 +517,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 			}
 
 			/* add the mappings */
-			ZVAL_STR(&tmp2, zend_string_copy(name));
+			ZVAL_STR_COPY(&tmp2, name);
 			pid = zend_hash_next_free_element(disp->dispid_to_name);
 			zend_hash_index_update(disp->dispid_to_name, pid, &tmp2);
 

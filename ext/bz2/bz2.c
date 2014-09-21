@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -359,12 +359,6 @@ static PHP_FUNCTION(bzread)
 	}
 	data = zend_string_alloc(len, 0);
 	data->len = php_stream_read(stream, data->val, data->len);
-
-	if (data->len < 0) {
-		zend_string_free(data);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not read valid bz2 data from stream");
-		RETURN_FALSE;
-	}
 	data->val[data->len] = '\0';
 
 	RETURN_STR(data);

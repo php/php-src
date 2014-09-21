@@ -1913,7 +1913,7 @@ convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
 	t->val[j]='\0';
 	t->len = j;
 
-	ZVAL_STR(pattern, t);
+	ZVAL_NEW_STR(pattern, t);
 }
 
 private int

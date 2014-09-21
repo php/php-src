@@ -192,13 +192,13 @@ void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason T
  */
 static ZEND_INI_MH(accel_include_path_on_modify)
 {
-	int ret = orig_include_path_on_modify(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	int ret = orig_include_path_on_modify(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
 	ZCG(include_path_key) = NULL;
 	if (ret == SUCCESS) {
-		ZCG(include_path) = new_value;
+		ZCG(include_path) = new_value->val;
 		if (ZCG(include_path) && *ZCG(include_path)) {
-			ZCG(include_path_len) = new_value_length;
+			ZCG(include_path_len) = new_value->len;
 
 			if (ZCG(enabled) && accel_startup_ok &&
 			    (ZCG(counted) || ZCSG(accelerator_enabled))) {
@@ -1913,6 +1913,7 @@ static void accel_activate(void)
  * allocated block separately, but we like to call all the destructors and
  * callbacks in exactly the same order.
  */
+static void accel_fast_zval_dtor(zval *zvalue);
 
 static void accel_fast_hash_destroy(HashTable *ht)
 {
@@ -1922,7 +1923,7 @@ static void accel_fast_hash_destroy(HashTable *ht)
 	for (idx = 0; idx < ht->nNumUsed; idx++) {	
 		p = ht->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		ht->pDestructor(&p->val);
+		accel_fast_zval_dtor(&p->val);
 	}
 }
 
@@ -1936,7 +1937,6 @@ static void accel_fast_zval_dtor(zval *zvalue)
 					if (Z_ARR_P(zvalue) != &EG(symbol_table)) {
 						/* break possible cycles */
 						ZVAL_NULL(zvalue);
-						Z_ARRVAL_P(zvalue)->pDestructor = accel_fast_zval_dtor;
 						accel_fast_hash_destroy(Z_ARRVAL_P(zvalue));
 					}
 				}
@@ -1978,61 +1978,29 @@ static int accel_clean_non_persistent_function(zval *zv TSRMLS_DC)
 		return ZEND_HASH_APPLY_STOP;
 	} else {
 		if (function->op_array.static_variables) {
-			function->op_array.static_variables->pDestructor = accel_fast_zval_dtor;
 			accel_fast_hash_destroy(function->op_array.static_variables);
 			function->op_array.static_variables = NULL;
-		}
-		return (--(*function->op_array.refcount) <= 0) ?
-			ZEND_HASH_APPLY_REMOVE :
-			ZEND_HASH_APPLY_KEEP;
-	}
-}
-
-static int accel_cleanup_function_data(zval *zv TSRMLS_DC)
-{
-	zend_function *function = Z_PTR_P(zv);
-
-	if (function->type == ZEND_USER_FUNCTION) {
-		if (function->op_array.static_variables) {
-			function->op_array.static_variables->pDestructor = accel_fast_zval_dtor;
-			accel_fast_hash_destroy(function->op_array.static_variables);
-			function->op_array.static_variables = NULL;
-		}
-	}
-	return 0;
-}
-
-static int accel_clean_non_persistent_class(zval *zv TSRMLS_DC)
-{
-	zend_class_entry *ce = Z_PTR_P(zv);
-
-	if (ce->type == ZEND_INTERNAL_CLASS) {
-		return ZEND_HASH_APPLY_STOP;
-	} else {
-		if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-			zend_hash_apply(&ce->function_table, (apply_func_t) accel_cleanup_function_data TSRMLS_CC);
-		}
-		if (ce->static_members_table) {
-			int i;
-
-			for (i = 0; i < ce->default_static_members_count; i++) {
-				accel_fast_zval_dtor(&ce->static_members_table[i]);
-				ZVAL_UNDEF(&ce->static_members_table[i]);
-			}
-			ce->static_members_table = NULL;
 		}
 		return ZEND_HASH_APPLY_REMOVE;
 	}
 }
 
-static int accel_clean_non_persistent_constant(zval *zv TSRMLS_DC)
+static inline void zend_accel_fast_del_bucket(HashTable *ht, uint32_t idx, Bucket *p)
 {
-	zend_constant *c = Z_PTR_P(zv);
+	uint32_t nIndex = p->h & ht->nTableMask;
+	uint32_t i = ht->arHash[nIndex];
 
-	if (c->flags & CONST_PERSISTENT) {
-		return ZEND_HASH_APPLY_STOP;
-	} else {
-		return ZEND_HASH_APPLY_REMOVE;
+	ht->nNumUsed--;
+	ht->nNumOfElements--;
+	if (idx != i) {
+		Bucket *prev = ht->arData + i;
+		while (Z_NEXT(prev->val) != idx) {
+			i = Z_NEXT(prev->val);
+			prev = ht->arData + i;
+		}
+		Z_NEXT(prev->val) = Z_NEXT(p->val);
+ 	} else {
+		ht->arHash[p->h & ht->nTableMask] = Z_NEXT(p->val);
 	}
 }
 
@@ -2054,18 +2022,60 @@ static void zend_accel_fast_shutdown(TSRMLS_D)
 			EG(symbol_table).ht.pDestructor = old_destructor;
 		}
 		zend_hash_init(&EG(symbol_table).ht, 8, NULL, NULL, 0);
-		old_destructor = EG(function_table)->pDestructor;
-		EG(function_table)->pDestructor = NULL;
-		zend_hash_reverse_apply(EG(function_table), (apply_func_t) accel_clean_non_persistent_function TSRMLS_CC);
-		EG(function_table)->pDestructor = old_destructor;
-		old_destructor = EG(class_table)->pDestructor;
-		EG(class_table)->pDestructor = NULL;
-		zend_hash_reverse_apply(EG(class_table), (apply_func_t) accel_clean_non_persistent_class TSRMLS_CC);
-		EG(class_table)->pDestructor = old_destructor;
-		old_destructor = EG(zend_constants)->pDestructor;
-		EG(zend_constants)->pDestructor = NULL;
-		zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) accel_clean_non_persistent_constant TSRMLS_CC);
-		EG(zend_constants)->pDestructor = old_destructor;
+
+		ZEND_HASH_REVERSE_FOREACH(EG(function_table), 0) {
+			zend_function *func = Z_PTR(_p->val);
+		
+			if (func->type == ZEND_INTERNAL_FUNCTION) {
+				break;
+			} else {
+				if (func->op_array.static_variables) {
+					accel_fast_hash_destroy(func->op_array.static_variables);
+				}
+				zend_accel_fast_del_bucket(EG(function_table), _idx-1, _p);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		ZEND_HASH_REVERSE_FOREACH(EG(class_table), 0) {
+			zend_class_entry *ce = Z_PTR(_p->val);
+
+			if (ce->type == ZEND_INTERNAL_CLASS) {
+				break;
+			} else {
+				if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
+					zend_function *func;
+
+					ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
+						if (func->type == ZEND_USER_FUNCTION) {
+							if (func->op_array.static_variables) {
+								accel_fast_hash_destroy(func->op_array.static_variables);
+								func->op_array.static_variables = NULL;
+							}
+						}
+					} ZEND_HASH_FOREACH_END();
+				}
+				if (ce->static_members_table) {
+					int i;
+
+					for (i = 0; i < ce->default_static_members_count; i++) {
+						accel_fast_zval_dtor(&ce->static_members_table[i]);
+						ZVAL_UNDEF(&ce->static_members_table[i]);
+					}
+					ce->static_members_table = NULL;
+				}
+				zend_accel_fast_del_bucket(EG(class_table), _idx-1, _p);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		ZEND_HASH_REVERSE_FOREACH(EG(zend_constants), 0) {
+			zend_constant *c = Z_PTR(_p->val);
+
+			if (c->flags & CONST_PERSISTENT) {
+				break;
+			} else {
+				zend_accel_fast_del_bucket(EG(zend_constants), _idx-1, _p);
+			}
+		} ZEND_HASH_FOREACH_END();
 	}
 	CG(unclean_shutdown) = 1;
 }

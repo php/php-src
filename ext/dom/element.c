@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -201,7 +201,7 @@ PHP_METHOD(domelement, __construct)
 		}
 	} else {
 	    /* If you don't pass a namespace uri, then you can't set a prefix */
-	    localname = xmlSplitQName2((xmlChar *)name, (xmlChar **) &prefix);
+	    localname = (char *) xmlSplitQName2((xmlChar *) name, (xmlChar **) &prefix);
 	    if (prefix != NULL) {
 			xmlFree(localname);
 			xmlFree(prefix);

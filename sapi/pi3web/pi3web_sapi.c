@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -342,7 +342,7 @@ static sapi_module_struct pi3web_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-MODULE_API DWORD PHP5_wrapper(LPCONTROL_BLOCK lpCB)
+MODULE_API DWORD PHP7_wrapper(LPCONTROL_BLOCK lpCB)
 {
 	zend_file_handle file_handle = {0};
 	int iRet = PIAPI_COMPLETED;
@@ -411,7 +411,7 @@ MODULE_API DWORD PHP5_wrapper(LPCONTROL_BLOCK lpCB)
 	return iRet;
 }
 
-MODULE_API BOOL PHP5_startup() {
+MODULE_API BOOL PHP7_startup() {
 	tsrm_startup(1, 1, 0, NULL);
 	sapi_startup(&pi3web_sapi_module);
 	if (pi3web_sapi_module.startup) {
@@ -421,7 +421,7 @@ MODULE_API BOOL PHP5_startup() {
 	return IWasLoaded;
 };
 
-MODULE_API BOOL PHP5_shutdown() {
+MODULE_API BOOL PHP7_shutdown() {
 	if (pi3web_sapi_module.shutdown) {
 		pi3web_sapi_module.shutdown(&pi3web_sapi_module);
 	};

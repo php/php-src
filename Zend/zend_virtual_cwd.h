@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -70,7 +70,7 @@ typedef unsigned short mode_t;
 #define IS_UNC_PATH(path, len) \
 	(len >= 2 && IS_SLASH(path[0]) && IS_SLASH(path[1]))
 #define IS_ABSOLUTE_PATH(path, len) \
-	(len >= 2 && ((isalpha(path[0]) && path[1] == ':') || IS_UNC_PATH(path, len)))
+	(len >= 2 && ((/* is local */isalpha(path[0]) && path[1] == ':') || /* is UNC */IS_SLASH(path[0]) && IS_SLASH(path[1])))
 
 #elif defined(NETWARE)
 #ifdef HAVE_DIRENT_H
@@ -213,18 +213,18 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC);
 typedef struct _realpath_cache_bucket {
 	zend_ulong                    key;
 	char                          *path;
-	int                            path_len;
 	char                          *realpath;
+	struct _realpath_cache_bucket *next;
+	time_t                         expires;
+	int                            path_len;
 	int                            realpath_len;
 	int                            is_dir;
-	time_t                         expires;
 #ifdef PHP_WIN32
 	unsigned char                  is_rvalid;
 	unsigned char                  is_readable;
 	unsigned char                  is_wvalid;
 	unsigned char                  is_writable;
 #endif
-	struct _realpath_cache_bucket *next;
 } realpath_cache_bucket;
 
 typedef struct _virtual_cwd_globals {

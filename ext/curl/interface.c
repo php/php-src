@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1832,10 +1832,10 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20); /* prevent infinite redirects */
 
 	cainfo = INI_STR("openssl.cafile");
-	if (!(cainfo && strlen(cainfo) > 0)) {
+	if (!(cainfo && cainfo[0] != '\0')) {
 		cainfo = INI_STR("curl.cainfo");
 	}
-	if (cainfo && strlen(cainfo) > 0) {
+	if (cainfo && cainfo[0] != '\0') {
 		curl_easy_setopt(ch->cp, CURLOPT_CAINFO, cainfo);
 	}
 
@@ -2462,7 +2462,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 				zval *current;
 				HashTable *postfields;
 				zend_string *string_key;
-				ulong  num_key;
+				zend_ulong  num_key;
 				struct HttpPost *first = NULL;
 				struct HttpPost *last  = NULL;
 
@@ -2534,11 +2534,11 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 								"The usage of the @filename API for file uploading is deprecated. Please use the CURLFile class instead");
 
 						name = estrndup(postval, Z_STRLEN_P(current));
-						if ((type = php_memnstr(name, ";type=", sizeof(";type=") - 1,
+						if ((type = (char *)php_memnstr(name, ";type=", sizeof(";type=") - 1,
 										name + Z_STRLEN_P(current)))) {
 							*type = '\0';
 						}
-						if ((filename = php_memnstr(name, ";filename=", sizeof(";filename=") - 1,
+						if ((filename = (char *)php_memnstr(name, ";filename=", sizeof(";filename=") - 1,
 										name + Z_STRLEN_P(current)))) {
 							*filename = '\0';
 						}

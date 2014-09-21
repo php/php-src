@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -479,7 +479,7 @@ ZEND_INI_MH(OnUpdateCacheMode)
 
 	p = (char*) (base+(size_t) mh_arg1);
 
-	*p = (char)atoi(new_value);
+	*p = (char)atoi(new_value->val);
 
 	return SUCCESS;
 }
@@ -490,19 +490,19 @@ static PHP_INI_MH(OnUpdateCacheDir)
 	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
 		char *p;
 
-		if (memchr(new_value, '\0', new_value_length) != NULL) {
+		if (memchr(new_value->val, '\0', new_value->len) != NULL) {
 			return FAILURE;
 		}
 
 		/* we do not use zend_memrchr() since path can contain ; itself */
-		if ((p = strchr(new_value, ';'))) {
+		if ((p = strchr(new_value->val, ';'))) {
 			char *p2;
 			p++;
 			if ((p2 = strchr(p, ';'))) {
 				p = p2 + 1;
 			}
 		} else {
-			p = new_value;
+			p = new_value->val;
 		}
 
 		if (PG(open_basedir) && *p && php_check_open_basedir(p TSRMLS_CC)) {
@@ -510,7 +510,7 @@ static PHP_INI_MH(OnUpdateCacheDir)
 		}
 	}
 
-	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
 }
 
@@ -1429,7 +1429,7 @@ PHP_METHOD(SoapServer, addFunction)
 					return;
 				}
 
-				ZVAL_STR(&function_copy, zend_string_copy(f->common.function_name));
+				ZVAL_STR_COPY(&function_copy, f->common.function_name);
 				zend_hash_update(service->soap_functions.ft, key, &function_copy);
 
 				zend_string_release(key);
@@ -1452,7 +1452,7 @@ PHP_METHOD(SoapServer, addFunction)
 			zend_hash_init(service->soap_functions.ft, 0, NULL, ZVAL_PTR_DTOR, 0);
 		}
 
-		ZVAL_STR(&function_copy, zend_string_copy(f->common.function_name));
+		ZVAL_STR_COPY(&function_copy, f->common.function_name);
 		zend_hash_update(service->soap_functions.ft, key, &function_copy);
 		zend_string_release(key);
 	} else if (Z_TYPE_P(function_name) == IS_LONG) {
@@ -1713,7 +1713,7 @@ PHP_METHOD(SoapServer, handle)
 				if (zend_hash_str_exists(&Z_OBJCE(tmp_soap)->function_table, php_strtolower(class_name, class_name_len), class_name_len)) {
 					zval c_ret, constructor;
 
-					ZVAL_STR(&constructor, zend_string_copy(service->soap_class.ce->name));
+					ZVAL_STR_COPY(&constructor, service->soap_class.ce->name);
 					if (call_user_function(NULL, &tmp_soap, &constructor, &c_ret, service->soap_class.argc, service->soap_class.argv TSRMLS_CC) == FAILURE) {
 						php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error calling constructor");
 					}

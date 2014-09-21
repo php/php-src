@@ -1,5 +1,5 @@
 #  +----------------------------------------------------------------------+
-#  | PHP Version 5                                                        |
+#  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
 #  | Copyright (c) 1997-2008 The PHP Group                                |
 #  +----------------------------------------------------------------------+
@@ -62,9 +62,9 @@ Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
 !endif
 
 !if $(PGOMGR) != ""
-PHP5_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php5.pgd
+PHP7_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php7.pgd
 !else
-PHP5_PGD_OPTION=
+PHP7_PGD_OPTION=
 !endif
 
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
@@ -89,7 +89,7 @@ $(PHPDLL_RES): win32\build\template.rc
 		win32\build\template.rc
 
 $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
-	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP5_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
+	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP7_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	-@$(_VC_MANIFEST_EMBED_DLL)
 
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)

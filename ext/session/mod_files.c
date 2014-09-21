@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -57,13 +57,13 @@
 #endif
 
 typedef struct {
-	int fd;
 	char *lastkey;
 	char *basedir;
 	size_t basedir_len;
 	size_t dirdepth;
 	size_t st_size;
 	int filemode;
+	int fd;
 } ps_files;
 
 ps_module ps_mod_files = {
@@ -336,7 +336,7 @@ PS_CLOSE_FUNC(files)
 PS_READ_FUNC(files)
 {
 	zend_long n;
-	struct stat sbuf;
+	zend_stat_t sbuf;
 	PS_FILES_DATA;
 
 	/* If strict mode, check session id existence */
@@ -363,7 +363,7 @@ PS_READ_FUNC(files)
 		return FAILURE;
 	}
 
-	if (fstat(data->fd, &sbuf)) {
+	if (zend_fstat(data->fd, &sbuf)) {
 		return FAILURE;
 	}
 

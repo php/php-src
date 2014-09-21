@@ -520,7 +520,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 
 	if (rounds_custom) {
 #ifdef PHP_WIN32
-		int n = _snprintf(cp, MAX(0, buflen), "%s%u$", sha256_rounds_prefix, rounds);
+		int n = _snprintf(cp, MAX(0, buflen), "%s" ZEND_ULONG_FMT "$", sha256_rounds_prefix, rounds);
 #else
 		int n = snprintf(cp, MAX(0, buflen), "%s%zu$", sha256_rounds_prefix, rounds);
 #endif
@@ -571,18 +571,17 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
      inside the SHA256 implementation as well.  */
 	sha256_init_ctx(&ctx);
 	sha256_finish_ctx(&ctx, alt_result);
-	memset(temp_result, '\0', sizeof(temp_result));
-	memset(p_bytes, '\0', key_len);
-	memset(s_bytes, '\0', salt_len);
-	memset(&ctx, '\0', sizeof(ctx));
-	memset(&alt_ctx, '\0', sizeof(alt_ctx));
+	ZEND_SECURE_ZERO(temp_result, sizeof(temp_result));
+	ZEND_SECURE_ZERO(p_bytes, key_len);
+	ZEND_SECURE_ZERO(s_bytes, salt_len);
+	ZEND_SECURE_ZERO(&ctx, sizeof(ctx));
+	ZEND_SECURE_ZERO(&alt_ctx, sizeof(alt_ctx));
 
 	if (copied_key != NULL) {
-		memset(copied_key, '\0', key_len);
-
+		ZEND_SECURE_ZERO(copied_key, key_len);
 	}
 	if (copied_salt != NULL) {
-		memset(copied_salt, '\0', salt_len);
+		ZEND_SECURE_ZERO(copied_salt, salt_len);
 	}
 
 	return buffer;
