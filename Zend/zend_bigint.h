@@ -58,6 +58,7 @@ ZEND_API zend_bool zend_bigint_long_divisible(zend_long num, const zend_bigint *
 /*** CONVERTORS ***/
 
 ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big);
+ZEND_API zend_long zend_bigint_to_long_saturate(const zend_bigint *big);
 ZEND_API zend_long zend_bigint_to_long_ex(const zend_bigint *big, zend_bool *overflow);
 ZEND_API zend_ulong zend_bigint_to_ulong(const zend_bigint *big);
 ZEND_API zend_bool zend_bigint_to_bool(const zend_bigint *big);

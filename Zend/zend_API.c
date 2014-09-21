@@ -474,16 +474,10 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 
 					case IS_BIGINT:
 						{
-							zend_bool overflow;
-							*p = zend_bigint_to_long_ex(Z_BIG_P(arg), &overflow);
-							if (overflow) {
-								*severity = E_RECOVERABLE_ERROR;
-#								if SIZEOF_LONG == 4
-									*error = estrdup("to be a 32-bit integer (within the range -2147483648 to 2147483647 inclusive), integer given was too large");
-#								else
-									*error = estrdup("to be a 64-bit integer (within the range -9223372036854775808 to 9223372036854775807 inclusive), integer given was too large");
-#								endif
-								return "";
+							if (c == 'L') {
+								*p = zend_bigint_to_long_saturate(Z_BIG_P(arg));
+							} else {
+								*p = zend_bigint_to_long(Z_BIG_P(arg));
 							}
 						}
 						break;

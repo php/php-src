@@ -366,8 +366,35 @@ ZEND_API zend_bool zend_bigint_long_divisible(zend_long num, const zend_bigint *
 
 /*** CONVERTORS ***/
 
-/* Converts to long; if it won't fit, saturates (caps at ZEND_LONG_MAX/_MIN) */
+/* Converts to long; if it won't fit, wraps around (like zend_dval_to_lval) */
 ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big) /* {{{ */
+{
+	mpz_t bmod;
+	zend_long result;
+	mpz_init(bmod);
+	
+	mpz_tdiv_r_2exp(bmod, big->mpz, SIZEOF_ZEND_LONG * 8);
+	
+	if (mpz_sgn(bmod) < 0) {
+		/* we're going to make this number positive */
+		mpz_t two_pow_bits;
+		mpz_init(two_pow_bits);
+		
+		mpz_ui_pow_ui(two_pow_bits, 2, SIZEOF_ZEND_LONG * 8);
+		mpz_add(bmod, bmod, two_pow_bits);
+		
+		mpz_clear(two_pow_bits);
+	}
+	
+	result = mpz_get_si(bmod);
+	mpz_clear(bmod);
+	
+	return result;
+}
+/* }}} */
+
+/* Converts to long; if it won't fit, saturates (caps at ZEND_LONG_MAX/_MIN) */
+ZEND_API zend_long zend_bigint_to_long_saturate(const zend_bigint *big) /* {{{ */
 {
 	if (mpz_fits_slong_p(big->mpz)) {
 		return mpz_get_si(big->mpz);
@@ -381,21 +408,12 @@ ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big) /* {{{ */
 }
 /* }}} */
 
-/* Converts to long; if it won't fit, saturates (caps at ZEND_LONG_MAX/_MIN)
+/* Converts to long; if it won't fit, may return garbage
  * If it didn't fit, sets overflow to 1, else to 0 */
 ZEND_API zend_long zend_bigint_to_long_ex(const zend_bigint *big, zend_bool *overflow) /* {{{ */
 {
-	if (mpz_fits_slong_p(big->mpz)) {
-		*overflow = 0;
-		return mpz_get_si(big->mpz);
-	} else {
-		*overflow = 1;
-		if (mpz_sgn(big->mpz) == 1) {
-			return ZEND_LONG_MAX;
-		} else {
-			return ZEND_LONG_MIN;
-		}
-	}
+	*overflow = mpz_fits_slong_p(big->mpz);
+	return mpz_get_si(big->mpz);
 }
 /* }}} */
 

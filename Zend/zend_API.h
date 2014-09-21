@@ -1090,6 +1090,8 @@ static zend_always_inline int _z_param_long(zval *arg, zend_long *dest, zend_boo
 		} else {
 			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
 		}
+	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		*dest = zend_bigint_to_long_saturate(Z_BIG_P(arg));
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
 		zend_bigint *big;
