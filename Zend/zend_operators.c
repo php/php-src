@@ -1755,7 +1755,7 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 					FREE_OP1_OP2();
 					ZVAL_BIGINT(result, out);
 				} else {
-					double out = zend_bigint_to_double(Z_BIG_P(op1)) / zend_bigint_to_double(Z_BIG_P(op2));
+					double out = zend_bigint_divide_as_double(Z_BIG_P(op1), Z_BIG_P(op2));
 					FREE_OP1_OP2();
 					ZVAL_DOUBLE(result, out);
 				}
@@ -1774,7 +1774,7 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 					FREE_OP1_OP2();
 					ZVAL_BIGINT(result, out);
 				} else {
-					double out = zend_bigint_to_double(Z_BIG_P(op1)) / (double)Z_LVAL_P(op2);
+					double out = zend_bigint_divide_long_as_double(Z_BIG_P(op1), Z_LVAL_P(op2));
 					FREE_OP1_OP2();
 					ZVAL_DOUBLE(result, out);
 				}
@@ -1793,8 +1793,9 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 					FREE_OP1_OP2();
 					ZVAL_BIGINT(result, out);
 				} else {
-					ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / zend_bigint_to_double(Z_BIG_P(op2)));
+					double out = zend_bigint_long_divide_as_double(Z_LVAL_P(op1), Z_BIG_P(op2));
 					FREE_OP1_OP2();
+					ZVAL_DOUBLE(result, out);
 				}
 				return SUCCESS;
 

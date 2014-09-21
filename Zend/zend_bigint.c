@@ -66,6 +66,26 @@
 	mpz_clear(temp);		\
 }
 
+/* Convenience macro to create a temporary mpq_t from an mpz_t
+ * We use this to get higher accuracy in floating-point division */
+#define WITH_TEMP_MPQ_FROM_MPZ(mpz, temp, codeblock) { \
+	mpq_t temp;				\
+	mpq_init(temp);			\
+	mpq_set_z(temp, mpz);	\
+	codeblock				\
+	mpq_clear(temp);		\
+}
+
+/* Convenience macro to create a temporary mpq_t from a zend_long
+ * We use this to get higher accuracy in floating-point division */
+#define WITH_TEMP_MPQ_FROM_ZEND_LONG(long, temp, codeblock) { \
+	mpq_t temp;				\
+	mpq_init(temp);			\
+	mpq_set_si(temp, long, 1); \
+	codeblock				\
+	mpq_clear(temp);		\
+}
+
 /* Throws error if gmp "limbs" exceed maximum permissible
  * We use this to catch GMP's "overflow" scenarios before GMP does
  * We need to do this because GMP will print an error and abort() otherwise 
@@ -615,6 +635,21 @@ ZEND_API void zend_bigint_divide(zend_bigint *out, const zend_bigint *num, const
 }
 /* }}} */
 
+/* Divides a bigint by a bigint and returns result as a double */
+ZEND_API double zend_bigint_divide_as_double(const zend_bigint *num, const zend_bigint *divisor) /* {{{ */
+{
+	/* We use rational arithmetic for higher accuracy
+	   The alternative would be to convert both operands to double, then divide */
+	double result;
+	WITH_TEMP_MPQ_FROM_MPZ(num->mpz, num_mpq, WITH_TEMP_MPQ_FROM_MPZ(divisor->mpz, divisor_mpq, {
+		mpq_div(num_mpq, num_mpq, divisor_mpq);
+		result = mpq_get_d(num_mpq);
+	}))
+	
+	return result;
+}
+/* }}} */
+
 /* Divides a bigint by a long and stores result in out */
 ZEND_API void zend_bigint_divide_long(zend_bigint *out, const zend_bigint *num, zend_long divisor) /* {{{ */
 {
@@ -625,6 +660,21 @@ ZEND_API void zend_bigint_divide_long(zend_bigint *out, const zend_bigint *num, 
 }
 /* }}} */
 
+/* Divides a bigint by a long and returns result as a double */
+ZEND_API double zend_bigint_divide_long_as_double(const zend_bigint *num, zend_long divisor) /* {{{ */
+{
+	/* We use rational arithmetic for higher accuracy
+	   The alternative would be to convert both operands to double, then divide */
+	double result;
+	WITH_TEMP_MPQ_FROM_MPZ(num->mpz, num_mpq, WITH_TEMP_MPQ_FROM_ZEND_LONG(divisor, divisor_mpq, {
+		mpq_div(num_mpq, num_mpq, divisor_mpq);
+		result = mpq_get_d(num_mpq);
+	}))
+	
+	return result;
+}
+/* }}} */
+
 /* Divides a long by a bigint and stores result in out */
 ZEND_API void zend_bigint_long_divide(zend_bigint *out, zend_long num, const zend_bigint *divisor) /* {{{ */
 {
@@ -632,6 +682,21 @@ ZEND_API void zend_bigint_long_divide(zend_bigint *out, zend_long num, const zen
 	WITH_TEMP_MPZ_FROM_ZEND_LONG(num, num_mpz, {
 		mpz_fdiv_q(out->mpz, num_mpz, divisor->mpz);
 	})
+}
+/* }}} */
+
+/* Divides a long by a bigint and returns result as a double */
+ZEND_API double zend_bigint_long_divide_as_double(zend_long num, const zend_bigint *divisor) /* {{{ */
+{
+	/* We use rational arithmetic for higher accuracy
+	   The alternative would be to convert both operands to double, then divide */
+	double result;
+	WITH_TEMP_MPQ_FROM_ZEND_LONG(num, num_mpq, WITH_TEMP_MPQ_FROM_MPZ(divisor->mpz, divisor_mpq, {
+		mpq_div(num_mpq, num_mpq, divisor_mpq);
+		result = mpq_get_d(num_mpq);
+	}))
+	
+	return result;
 }
 /* }}} */
 
