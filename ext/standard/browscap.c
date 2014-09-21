@@ -414,7 +414,7 @@ static int browser_reg_compare(zval *browser TSRMLS_DC, int num_args, va_list ar
 
 			/* Pick which browser pattern replaces the least amount of
 			   characters when compared to the original user agent string... */
-			if (ua_len - prev_len > ua_len - curr_len) {
+			if (prev_len < curr_len) {
 				ZVAL_COPY_VALUE(found_browser_entry, browser);
 			}
 		}
