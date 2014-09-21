@@ -367,7 +367,7 @@ ZEND_API zend_bool zend_bigint_long_divisible(zend_long num, const zend_bigint *
 /*** CONVERTORS ***/
 
 /* Converts to long; if it won't fit, saturates (caps at ZEND_LONG_MAX/_MIN) */
-ZEND_API long zend_bigint_to_long(const zend_bigint *big) /* {{{ */
+ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big) /* {{{ */
 {
 	if (mpz_fits_slong_p(big->mpz)) {
 		return mpz_get_si(big->mpz);
@@ -383,7 +383,7 @@ ZEND_API long zend_bigint_to_long(const zend_bigint *big) /* {{{ */
 
 /* Converts to long; if it won't fit, saturates (caps at ZEND_LONG_MAX/_MIN)
  * If it didn't fit, sets overflow to 1, else to 0 */
-ZEND_API long zend_bigint_to_long_ex(const zend_bigint *big, zend_bool *overflow) /* {{{ */
+ZEND_API zend_long zend_bigint_to_long_ex(const zend_bigint *big, zend_bool *overflow) /* {{{ */
 {
 	if (mpz_fits_slong_p(big->mpz)) {
 		*overflow = 0;
@@ -400,7 +400,7 @@ ZEND_API long zend_bigint_to_long_ex(const zend_bigint *big, zend_bool *overflow
 /* }}} */
 
 /* Converts to unsigned long; this will cap at the max value of an unsigned long */
-ZEND_API unsigned long zend_bigint_to_ulong(const zend_bigint *big) /* {{{ */
+ZEND_API zend_ulong zend_bigint_to_ulong(const zend_bigint *big) /* {{{ */
 {
 	if (mpz_fits_ulong_p(big->mpz)) {
 		return mpz_get_ui(big->mpz);
