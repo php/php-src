@@ -38,7 +38,10 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC);
 
 PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC);
 
-typedef HashTable* php_serialize_data_t;
+struct php_serialize_data {
+	HashTable ht;
+	uint32_t n;
+};
 
 struct php_unserialize_data {
 	void *first;
@@ -47,71 +50,67 @@ struct php_unserialize_data {
 	void *last_dtor;
 };
 
-typedef struct php_unserialize_data* php_unserialize_data_t;
+typedef struct php_serialize_data *php_serialize_data_t;
+typedef struct php_unserialize_data *php_unserialize_data_t;
 
-PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t *var_hash TSRMLS_DC);
+PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t *data TSRMLS_DC);
 PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
 PHPAPI int php_var_unserialize_ref(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
 PHPAPI int php_var_unserialize_intern(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
 
-#define PHP_VAR_SERIALIZE_INIT(var_hash_ptr) \
+#define PHP_VAR_SERIALIZE_INIT(d) \
 do  { \
 	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */ \
 	if (BG(serialize_lock) || !BG(serialize).level) { \
-		ALLOC_HASHTABLE(var_hash_ptr); \
-		zend_hash_init((var_hash_ptr), 16, NULL, NULL, 0); \
+		(d) = (php_serialize_data_t) emalloc(sizeof(struct php_serialize_data)); \
+		zend_hash_init(&(d)->ht, 16, NULL, ZVAL_PTR_DTOR, 0); \
+		(d)->n = 0; \
 		if (!BG(serialize_lock)) { \
-			BG(serialize).var_hash = (void *)(var_hash_ptr); \
+			BG(serialize).data = d; \
 			BG(serialize).level = 1; \
 		} \
 	} else { \
-		(var_hash_ptr) = (php_serialize_data_t)BG(serialize).var_hash; \
+		(d) = BG(serialize).data; \
 		++BG(serialize).level; \
 	} \
 } while(0)
 
-#define PHP_VAR_SERIALIZE_DESTROY(var_hash_ptr) \
+#define PHP_VAR_SERIALIZE_DESTROY(d) \
 do { \
 	/* fprintf(stderr, "SERIALIZE_DESTROY   == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */ \
-	if (BG(serialize_lock) || !BG(serialize).level) { \
-		zend_hash_destroy((var_hash_ptr)); \
-		FREE_HASHTABLE(var_hash_ptr); \
-	} else { \
-		if (!--BG(serialize).level) { \
-			zend_hash_destroy((php_serialize_data_t)BG(serialize).var_hash); \
-			FREE_HASHTABLE((php_serialize_data_t)BG(serialize).var_hash); \
-			BG(serialize).var_hash = NULL; \
-		} \
+	if (BG(serialize_lock) || BG(serialize).level == 1) { \
+		zend_hash_destroy(&(d)->ht); \
+		efree((d)); \
+	} \
+	if (!BG(serialize_lock) && !--BG(serialize).level) { \
+		BG(serialize).data = NULL; \
 	} \
 } while (0)
 
-#define PHP_VAR_UNSERIALIZE_INIT(var_hash_ptr) \
+#define PHP_VAR_UNSERIALIZE_INIT(d) \
 do { \
 	/* fprintf(stderr, "UNSERIALIZE_INIT    == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */ \
 	if (BG(serialize_lock) || !BG(unserialize).level) { \
-		(var_hash_ptr) = (php_unserialize_data_t)ecalloc(1, sizeof(struct php_unserialize_data)); \
+		(d) = (php_unserialize_data_t)ecalloc(1, sizeof(struct php_unserialize_data)); \
 		if (!BG(serialize_lock)) { \
-			BG(unserialize).var_hash = (void *)(var_hash_ptr); \
+			BG(unserialize).data = (d); \
 			BG(unserialize).level = 1; \
 		} \
 	} else { \
-		(var_hash_ptr) = (php_unserialize_data_t)BG(unserialize).var_hash; \
+		(d) = BG(unserialize).data; \
 		++BG(unserialize).level; \
 	} \
 } while (0)
 
-#define PHP_VAR_UNSERIALIZE_DESTROY(var_hash_ptr) \
+#define PHP_VAR_UNSERIALIZE_DESTROY(d) \
 do { \
 	/* fprintf(stderr, "UNSERIALIZE_DESTROY == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */ \
-	if (BG(serialize_lock) || !BG(unserialize).level) { \
-		var_destroy(&(var_hash_ptr)); \
-		efree(var_hash_ptr); \
-	} else { \
-		if (!--BG(unserialize).level) { \
-			var_destroy(&(var_hash_ptr)); \
-			efree((var_hash_ptr)); \
-			BG(unserialize).var_hash = NULL; \
-		} \
+	if (BG(serialize_lock) || BG(unserialize).level == 1) { \
+		var_destroy(&(d)); \
+		efree((d)); \
+	} \
+	if (!BG(serialize_lock) && !--BG(unserialize).level) { \
+		BG(unserialize).data = NULL; \
 	} \
 } while (0)
 
