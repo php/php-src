@@ -1150,7 +1150,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
 again:
 		switch (Z_TYPE_P(tmp)) {
 			case IS_STRING:
-				smart_str_appendl(&implstr, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+				smart_str_append(&implstr, Z_STR_P(tmp));
 				break;
 
 			case IS_LONG:
@@ -1179,14 +1179,14 @@ again:
 
 			default:
 				str = zval_get_string(tmp);
-				smart_str_appendl(&implstr, str->val, str->len);
+				smart_str_append(&implstr, str);
 				zend_string_release(str);
 				break;
 
 		}
 
 		if (++i != numelems) {
-			smart_str_appendl(&implstr, Z_STRVAL_P(delim), Z_STRLEN_P(delim));
+			smart_str_append(&implstr, Z_STR_P(delim));
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2907,7 +2907,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
 					zend_string *str = zval_get_string(entry);
-					smart_str_appendl(&result, str->val, str->len);
+					smart_str_append(&result, str);
 					pos += len;
 					found = 1;
 					zend_string_release(str);
@@ -2932,7 +2932,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
 					zend_string *str = zval_get_string(entry);
-					smart_str_appendl(&result, str->val, str->len);
+					smart_str_append(&result, str);
 					pos += len;
 					found = 1;
 					zend_string_release(str);

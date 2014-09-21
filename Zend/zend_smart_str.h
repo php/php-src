@@ -38,6 +38,8 @@
 	smart_str_appendc_ex((dest), (c), 0)
 #define smart_str_appendl(dest, src, len) \
 	smart_str_appendl_ex((dest), (src), (len), 0)
+#define smart_str_append(dest, src) \
+	smart_str_append_ex((dest), (src), 0)
 #define smart_str_append_smart_str(dest, src) \
 	smart_str_append_smart_str_ex((dest), (src), 0)
 #define smart_str_sets(dest, src) \
@@ -92,9 +94,13 @@ static zend_always_inline void smart_str_appendl_ex(smart_str *dest, const char 
 	dest->s->len = new_len;
 }
 
+static zend_always_inline void smart_str_append_ex(smart_str *dest, const zend_string *src, zend_bool persistent) {
+	smart_str_appendl_ex(dest, src->val, src->len, persistent);
+}
+
 static zend_always_inline void smart_str_append_smart_str_ex(smart_str *dest, const smart_str *src, zend_bool persistent) {
 	if (src->s && src->s->len) {
-		smart_str_appendl_ex(dest, src->s->val, src->s->len, persistent);
+		smart_str_append_ex(dest, src->s, persistent);
 	}
 }
 

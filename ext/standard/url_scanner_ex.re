@@ -410,7 +410,7 @@ static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_
 	}
 	smart_str_0(&ctx->result);
 	if (do_flush) {
-		smart_str_appendl(&ctx->result, ctx->buf.s->val, ctx->buf.s->len);
+		smart_str_append(&ctx->result, ctx->buf.s);
 		*newlen += ctx->buf.s->len;
 		smart_str_free(&ctx->buf);
 		smart_str_free(&ctx->val);
@@ -459,7 +459,7 @@ static void php_url_scanner_output_handler(char *output, uint output_len, char *
 	} else if (BG(url_adapt_state_ex).url_app.s->len == 0) {
 		url_adapt_state_ex_t *ctx = &BG(url_adapt_state_ex);
 		if (ctx->buf.s && ctx->buf.s->len) {
-			smart_str_appendl(&ctx->result, ctx->buf.s->val, ctx->buf.s->len);
+			smart_str_append(&ctx->result, ctx->buf.s);
 			smart_str_appendl(&ctx->result, output, output_len);
 
 			*handled_output = estrndup(ctx->result.s->val, ctx->result.s->len);

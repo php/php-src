@@ -23,7 +23,7 @@
 #define _PHP_CURL_H
 
 #include "php.h"
-#include "zend_smart_str_public.h"
+#include "zend_smart_str.h"
 
 #ifdef COMPILE_DL_CURL
 #undef HAVE_CURL

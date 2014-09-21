@@ -342,7 +342,7 @@ ZEND_METHOD(error_exception, getSeverity)
 				zend_error(E_WARNING, "Value for %s is no string", key);    \
 				smart_str_appends(str, "[unknown]");                        \
 			} else {                                                        \
-				smart_str_appendl(str, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));   \
+				smart_str_append(str, Z_STR_P(tmp));   \
 			}                                                               \
 		} \
 	} while (0)
@@ -454,14 +454,11 @@ static void _build_trace_args(zval *arg, smart_str *str TSRMLS_DC) /* {{{ */
 		case IS_ARRAY:
 			smart_str_appends(str, "Array, ");
 			break;
-		case IS_OBJECT: {
-			zend_string *class_name = zend_get_object_classname(Z_OBJ_P(arg) TSRMLS_CC);
-
+		case IS_OBJECT:
 			smart_str_appends(str, "Object(");
-			smart_str_appendl(str, class_name->val, class_name->len);
+			smart_str_append(str, zend_get_object_classname(Z_OBJ_P(arg) TSRMLS_CC));
 			smart_str_appends(str, "), ");
 			break;
-		}
 	}
 }
 /* }}} */
@@ -492,7 +489,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num TSRM
 			} else {
 				line = 0;
 			}
-			smart_str_appendl(str, Z_STRVAL_P(file), Z_STRLEN_P(file));
+			smart_str_append(str, Z_STR_P(file));
 			smart_str_appendc(str, '(');
 			smart_str_append_long(str, line);
 			smart_str_appends(str, "): ");

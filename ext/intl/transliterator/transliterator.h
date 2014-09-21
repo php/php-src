@@ -21,7 +21,7 @@
 #include <unicode/utypes.h>
 #include <unicode/utrans.h>
 
-#include "zend_smart_str_public.h"
+#include "zend_smart_str.h"
 
 void transliterator_register_constants( INIT_FUNC_ARGS );
 smart_str transliterator_parse_error_to_string( UParseError* pe );

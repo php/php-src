@@ -263,7 +263,7 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(filterparams), tmp) {
 				convert_to_string_ex(tmp);
 				smart_str_appendc(&tags_ss, '<');
-				smart_str_appendl(&tags_ss, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+				smart_str_append(&tags_ss, Z_STR_P(tmp));
 				smart_str_appendc(&tags_ss, '>');
 			} ZEND_HASH_FOREACH_END();
 			smart_str_0(&tags_ss);

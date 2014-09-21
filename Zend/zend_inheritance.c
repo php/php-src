@@ -334,11 +334,11 @@ static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC)
 	}
 
 	if (fptr->common.scope) {
-		smart_str_appendl(&str, fptr->common.scope->name->val, fptr->common.scope->name->len);
+		smart_str_append(&str, fptr->common.scope->name);
 		smart_str_appends(&str, "::");
 	}
 
-	smart_str_appendl(&str, fptr->common.function_name->val, fptr->common.function_name->len);
+	smart_str_append(&str, fptr->common.function_name);
 	smart_str_appendc(&str, '(');
 
 	if (fptr->common.arg_info) {
@@ -409,7 +409,7 @@ static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC)
 						zval *zv = precv->op2.zv;
 
 						if (Z_TYPE_P(zv) == IS_CONSTANT) {
-							smart_str_appendl(&str, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
+							smart_str_append(&str, Z_STR_P(zv));
 						} else if (Z_TYPE_P(zv) == IS_FALSE) {
 							smart_str_appends(&str, "false");
 						} else if (Z_TYPE_P(zv) == IS_TRUE) {
@@ -429,7 +429,7 @@ static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC)
 							smart_str_appends(&str, "<expression>");
 						} else {
 							zend_string *zv_str = zval_get_string(zv);
-							smart_str_appendl(&str, zv_str->val, zv_str->len);
+							smart_str_append(&str, zv_str);
 							zend_string_release(zv_str);
 						}
 					}
