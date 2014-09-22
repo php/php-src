@@ -1,5 +1,7 @@
 --TEST--
 Test strftime() function : usage variation - Checking large positive and negative float values to timestamp.
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
 /* Prototype  : string strftime(string format [, int timestamp])

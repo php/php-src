@@ -1,5 +1,7 @@
 --TEST--
 Test localtime() function : usage variation - Passing higher positive and negetive float values to timestamp.
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
 /* Prototype  : array localtime([int timestamp [, bool associative_array]])

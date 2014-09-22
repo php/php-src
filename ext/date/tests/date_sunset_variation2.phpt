@@ -1,5 +1,7 @@
 --TEST--
 Test date_sunset() function : usage variation - Passing unexpected values to second argument format.
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
 /* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])

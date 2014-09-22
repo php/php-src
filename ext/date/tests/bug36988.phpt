@@ -1,5 +1,7 @@
 --TEST--
 Bug #36988 (mktime freezes on long numbers)
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
 date_default_timezone_set('GMT');

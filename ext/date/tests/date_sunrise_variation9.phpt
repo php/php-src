@@ -1,5 +1,7 @@
 --TEST--
 Test date_sunrise() function : usage variation -  Passing high positive and negative float values to time argument.
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
 /* Prototype  : mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
