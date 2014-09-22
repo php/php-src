@@ -4251,28 +4251,36 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	zval tmp, *varname;
 	HashTable *target_symbol_table;
 	zend_free_op free_op1;
-	zend_bool tmp_is_dup = 0;
 
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV &&
 	    OP2_TYPE == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-	    ZVAL_COPY_VALUE(&tmp, EX_VAR(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR(opline->op1.var));
-		zval_ptr_dtor(&tmp);
+		zval *var = EX_VAR(opline->op1.var);
+
+		if (Z_REFCOUNTED_P(var)) {
+			zend_refcounted *garbage = Z_COUNTED_P(var);
+
+			if (!--GC_REFCOUNT(garbage)) {
+				ZVAL_UNDEF(var);
+				_zval_dtor_func_for_ptr(garbage ZEND_FILE_LINE_CC);
+			} else {
+				GC_ZVAL_CHECK_POSSIBLE_ROOT(var);
+				ZVAL_UNDEF(var);
+			}
+		} else {
+			ZVAL_UNDEF(var);
+		}
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
 
 	varname = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
+	ZVAL_UNDEF(&tmp);
 	if (OP1_TYPE != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
 		ZVAL_DUP(&tmp, varname);
 		convert_to_string(&tmp);
-		varname = &tmp;
-		tmp_is_dup = 1;
-	} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
-		ZVAL_COPY(&tmp, varname);
 		varname = &tmp;
 	}
 
@@ -4285,10 +4293,8 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 			} else {
 				ce = zend_fetch_class_by_name(Z_STR_P(opline->op2.zv), opline->op2.zv + 1, 0 TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					if (OP1_TYPE != IS_CONST && tmp_is_dup) {
+					if (OP1_TYPE != IS_CONST) {
 						zval_dtor(&tmp);
-					} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
-						zval_ptr_dtor(&tmp);
 					}
 					FREE_OP1();
 					HANDLE_EXCEPTION();
@@ -4307,10 +4313,8 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
 	}
 
-	if (OP1_TYPE != IS_CONST && tmp_is_dup) {
+	if (OP1_TYPE != IS_CONST) {
 		zval_dtor(&tmp);
-	} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
-		zval_ptr_dtor(&tmp);
 	}
 	FREE_OP1();
 	CHECK_EXCEPTION();
@@ -4351,27 +4355,15 @@ ZEND_VM_C_LABEL(num_index_dim):
 					zend_hash_index_del(ht, hval);
 					break;
 				case IS_STRING:
-					if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
-						if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
-					}
 					if (OP2_TYPE != IS_CONST) {
 						if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), hval)) {
-							ZEND_VM_C_GOTO(numeric_index_dim);
+							ZEND_VM_C_GOTO(num_index_dim);
 						}
 					}
 					if (ht == &EG(symbol_table).ht) {
 						zend_delete_global_variable(Z_STR_P(offset) TSRMLS_CC);
 					} else {
 						zend_hash_del(ht, Z_STR_P(offset));
-					}
-					if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
-						zval_ptr_dtor(offset);
-					}
-					break;
-ZEND_VM_C_LABEL(numeric_index_dim):
-					zend_hash_index_del(ht, hval);
-					if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
-						zval_ptr_dtor(offset);
 					}
 					break;
 				case IS_NULL:
