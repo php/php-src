@@ -34,7 +34,7 @@ extern zend_module_entry libxml_module_entry;
 #	define PHP_LIBXML_API
 #endif
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include <libxml/tree.h>
 
 #define LIBXML_SAVE_NOEMPTYTAG 1<<2

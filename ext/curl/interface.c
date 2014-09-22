@@ -82,7 +82,7 @@
 
 #define SMART_STR_PREALLOC 4096
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/url.h"

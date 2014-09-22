@@ -4,8 +4,8 @@
 #define JSON_PARSER_H
 
 #include "php.h"
-#include "ext/standard/php_smart_str.h"
 #include "php_json.h"
+#include "zend_smart_str.h"
 
 #define JSON_PARSER_DEFAULT_DEPTH 512
 

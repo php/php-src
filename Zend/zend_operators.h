@@ -72,11 +72,20 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
 END_EXTERN_C()
 
 #if ZEND_DVAL_TO_LVAL_CAST_OK
-# define zend_dval_to_lval(d) ((zend_long) (d))
+static zend_always_inline zend_long zend_dval_to_lval(double d)
+{
+    if (EXPECTED(zend_finite(d)) && EXPECTED(!zend_isnan(d))) {
+        return (zend_long)d;
+    } else {
+        return 0;
+    }
+}
 #elif SIZEOF_ZEND_LONG == 4
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
-	if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
+	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+		return 0;
+	} else if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 		double	two_pow_32 = pow(2., 32.),
 				dmod;
 
@@ -93,8 +102,10 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 #else
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
+	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+		return 0;
 	/* >= as (double)ZEND_LONG_MAX is outside signed range */
-	if (d >= ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
+	} else if (d >= ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 		double	two_pow_64 = pow(2., 64.),
 				dmod;
 

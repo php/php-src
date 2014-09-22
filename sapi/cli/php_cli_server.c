@@ -96,7 +96,7 @@
 #endif
 
 #include "ext/standard/file.h" /* for php_set_sock_blocking() :-( */
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/html.h"
 #include "ext/standard/url.h" /* for php_url_decode() */
 #include "ext/standard/php_string.h" /* for php_dirname() */

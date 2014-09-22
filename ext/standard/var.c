@@ -28,7 +28,7 @@
 #include "php.h"
 #include "php_string.h"
 #include "php_var.h"
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
 
@@ -413,7 +413,7 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 		buffer_append_spaces(buf, level + 1);
 
 		smart_str_appendc(buf, '\'');
-		smart_str_appendl(buf, tmp_str->val, tmp_str->len);
+		smart_str_append(buf, tmp_str);
 		smart_str_appendl(buf, "' => ", 5);
 
 		zend_string_free(ckey);
@@ -438,7 +438,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		pname_esc = php_addcslashes(prop_name, prop_name_len, 0, "'\\", 2 TSRMLS_CC);
 
 		smart_str_appendc(buf, '\'');
-		smart_str_appendl(buf, pname_esc->val, pname_esc->len);
+		smart_str_append(buf, pname_esc);
 		smart_str_appendc(buf, '\'');
 		zend_string_release(pname_esc);
 	} else {
@@ -486,7 +486,7 @@ again:
 			ztmp2 = php_str_to_str_ex(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
 
 			smart_str_appendc(buf, '\'');
-			smart_str_appendl(buf, ztmp2->val, ztmp2->len);
+			smart_str_append(buf, ztmp2);
 			smart_str_appendc(buf, '\'');
 
 			zend_string_free(ztmp);
@@ -535,7 +535,7 @@ again:
 			}
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc), 0 TSRMLS_CC);
 
-			smart_str_appendl(buf, class_name->val, class_name->len);
+			smart_str_append(buf, class_name);
 			smart_str_appendl(buf, "::__set_state(array(\n", 21);
 
 			zend_string_release(class_name);
@@ -675,7 +675,7 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 	smart_str_appendl(buf, "O:", 2);
 	smart_str_append_unsigned(buf, class_name->len);
 	smart_str_appendl(buf, ":\"", 2);
-	smart_str_appendl(buf, class_name->val, class_name->len);
+	smart_str_append(buf, class_name);
 	smart_str_appendl(buf, "\":", 2);
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
 	return incomplete_class;
@@ -859,7 +859,7 @@ again:
 						smart_str_appendl(buf, "C:", 2);
 						smart_str_append_unsigned(buf, Z_OBJCE_P(struc)->name->len);
 						smart_str_appendl(buf, ":\"", 2);
-						smart_str_appendl(buf, Z_OBJCE_P(struc)->name->val, Z_OBJCE_P(struc)->name->len);
+						smart_str_append(buf, Z_OBJCE_P(struc)->name);
 						smart_str_appendl(buf, "\":", 2);
 
 						smart_str_append_unsigned(buf, serialized_length);

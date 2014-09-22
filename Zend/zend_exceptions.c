@@ -28,6 +28,7 @@
 #include "zend_exceptions.h"
 #include "zend_vm.h"
 #include "zend_dtrace.h"
+#include "zend_smart_str.h"
 
 static zend_class_entry *default_exception_ce;
 static zend_class_entry *error_exception_ce;
@@ -334,45 +335,78 @@ ZEND_METHOD(error_exception, getSeverity)
 }
 /* }}} */
 
-/* {{{ gettraceasstring() macros */
-#define TRACE_APPEND_CHR(chr)                                        \
-	str = zend_string_realloc(str, str->len + 1, 0);                         \
-    str->val[str->len - 1] = chr
-
-#define TRACE_APPEND_STRL(v, l)                                      \
-	{                                                                \
-		str = zend_string_realloc(str, str->len + (l), 0);                   \
-		memcpy(str->val + str->len - (l), (v), (l));                 \
-	}
-
-#define TRACE_APPEND_STR(v)                                          \
-	TRACE_APPEND_STRL((v), sizeof((v))-1)
-
 #define TRACE_APPEND_KEY(key) do {                                          \
 		tmp = zend_hash_str_find(ht, key, sizeof(key)-1);                   \
 		if (tmp) {                                                          \
 			if (Z_TYPE_P(tmp) != IS_STRING) {                               \
 				zend_error(E_WARNING, "Value for %s is no string", key);    \
-				TRACE_APPEND_STR("[unknown]");                              \
+				smart_str_appends(str, "[unknown]");                        \
 			} else {                                                        \
-				TRACE_APPEND_STRL(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));        \
+				smart_str_append(str, Z_STR_P(tmp));   \
 			}                                                               \
 		} \
 	} while (0)
 
+/* Windows uses VK_ESCAPE instead of \e */
+#ifndef VK_ESCAPE
+#define VK_ESCAPE '\e'
+#endif
 
-#define TRACE_ARG_APPEND(vallen) do { \
-		size_t len = str->len; \
-		str = zend_string_realloc(str, len + vallen, 0); \
-		memmove(str->val + len - l_added + 1 + vallen, str->val + len - l_added + 1, l_added); \
-	} while (0)
+static size_t compute_escaped_string_len(const char *s, size_t l) {
+	size_t i, len = l;
+	for (i = 0; i < l; ++i) {
+		char c = s[i];
+		if (c == '\n' || c == '\r' || c == '\t' ||
+			c == '\f' || c == '\v' || c == '\\' || c == VK_ESCAPE) {
+			len += 1;
+		} else if (c < 32 || c > 126) {
+			len += 3;
+		}
+	}
+	return len;
+}
 
-/* }}} */
+static void smart_str_append_escaped(smart_str *str, const char *s, size_t l) {
+	char *res;
+	size_t i, len = compute_escaped_string_len(s, l);
 
-static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{ */
+	smart_str_alloc(str, len, 0);
+	res = &str->s->val[str->s->len];
+	str->s->len += len;
+
+	for (i = 0; i < l; ++i) {
+		char c = s[i];
+		if (c < 32 || c == '\\' || c > 126) {
+			*res++ = '\\';
+			switch (c) {
+				case '\n': *res++ = 'n'; break;
+				case '\r': *res++ = 'r'; break;
+				case '\t': *res++ = 't'; break;
+				case '\f': *res++ = 'f'; break;
+				case '\v': *res++ = 'v'; break;
+				case '\\': *res++ = '\\'; break;
+				case VK_ESCAPE: *res++ = 'e'; break;
+				default:
+					*res++ = 'x';
+					if ((c >> 4) < 10) {
+						*res++ = (c >> 4) + '0';
+					} else {
+						*res++ = (c >> 4) + 'A' - 10;
+					}
+					if ((c & 0xf) < 10) {
+						*res++ = (c & 0xf) + '0';
+					} else {
+						*res++ = (c & 0xf) + 'A' - 10;
+					}
+			}
+		} else {
+			*res++ = c;
+		}
+	}
+}
+
+static void _build_trace_args(zval *arg, smart_str *str TSRMLS_DC) /* {{{ */
 {
-	zend_string *str = *str_ptr;
-
 	/* the trivial way would be to do:
 	 * convert_to_string_ex(arg);
 	 * append it and kill the now tmp arg.
@@ -382,159 +416,68 @@ static void _build_trace_args(zval *arg, zend_string **str_ptr TSRMLS_DC) /* {{{
 	ZVAL_DEREF(arg);
 	switch (Z_TYPE_P(arg)) {
 		case IS_NULL:
-			TRACE_APPEND_STR("NULL, ");
+			smart_str_appends(str, "NULL, ");
 			break;
-		case IS_STRING: {
-			int l_added;
-			TRACE_APPEND_CHR('\'');
+		case IS_STRING:
+			smart_str_appendc(str, '\'');
+			smart_str_append_escaped(str, Z_STRVAL_P(arg), MIN(Z_STRLEN_P(arg), 15));
 			if (Z_STRLEN_P(arg) > 15) {
-				TRACE_APPEND_STRL(Z_STRVAL_P(arg), 15);
-				TRACE_APPEND_STR("...', ");
-				l_added = 15 + 6 + 1; /* +1 because of while (--l_added) */
+				smart_str_appends(str, "...', ");
 			} else {
-				l_added = Z_STRLEN_P(arg);
-				TRACE_APPEND_STRL(Z_STRVAL_P(arg), l_added);
-				TRACE_APPEND_STR("', ");
-				l_added += 3 + 1;
-			}
-			while (--l_added) {
-				unsigned char chr = str->val[str->len - l_added];
-				if (chr < 32 || chr == '\\' || chr > 126) {
-					str->val[str->len - l_added] = '\\';
-
-					switch (chr) {
-						case '\n':
-							TRACE_ARG_APPEND(1);
-							str->val[str->len - l_added] = 'n';
-							break;
-						case '\r':
-							TRACE_ARG_APPEND(1);
-							str->val[str->len - l_added] = 'r';
-							break;
-						case '\t':
-							TRACE_ARG_APPEND(1);
-							str->val[str->len - l_added] = 't';
-							break;
-						case '\f':
-							TRACE_ARG_APPEND(1);
-							str->val[str->len - l_added] = 'f';
-							break;
-						case '\v':
-							TRACE_ARG_APPEND(1);
-							str->val[str->len - l_added] = 'v';
-							break;
-#ifndef PHP_WIN32
-						case '\e':
-#else
-						case VK_ESCAPE:
-#endif
-							TRACE_ARG_APPEND(1);
-							str->val[str->len - l_added] = 'e';
-							break;
-						case '\\':
-							TRACE_ARG_APPEND(1);
-							str->val[str->len - l_added] = '\\';
-							break;
-						default:
-							TRACE_ARG_APPEND(3);
-							str->val[str->len - l_added - 2] = 'x';
-							if ((chr >> 4) < 10) {
-								str->val[str->len - l_added - 1] = (chr >> 4) + '0';
-							} else {
-								str->val[str->len - l_added - 1] = (chr >> 4) + 'A' - 10;
-							}
-							if (chr % 16 < 10) {
-								str->val[str->len - l_added] = chr % 16 + '0';
-							} else {
-								str->val[str->len - l_added] = chr % 16 + 'A' - 10;
-							}
-					}
-				}
+				smart_str_appends(str, "', ");
 			}
 			break;
-		}
 		case IS_FALSE:
-			TRACE_APPEND_STR("false, ");
+			smart_str_appends(str, "false, ");
 			break;
 		case IS_TRUE:
-			TRACE_APPEND_STR("true, ");
+			smart_str_appends(str, "true, ");
 			break;
-		case IS_RESOURCE: {
-			zend_long lval = Z_RES_HANDLE_P(arg);
-			char s_tmp[MAX_LENGTH_OF_LONG + 1];
-			int l_tmp = zend_sprintf(s_tmp, ZEND_LONG_FMT, lval);  /* SAFE */
-			TRACE_APPEND_STR("Resource id #");
-			TRACE_APPEND_STRL(s_tmp, l_tmp);
-			TRACE_APPEND_STR(", ");
+		case IS_RESOURCE:
+			smart_str_appends(str, "Resource id #");
+			smart_str_append_long(str, Z_RES_HANDLE_P(arg));
+			smart_str_appends(str, ", ");
 			break;
-		}
-		case IS_LONG: {
-			zend_long lval = Z_LVAL_P(arg);
-			char s_tmp[MAX_LENGTH_OF_LONG + 1];
-			int l_tmp = zend_sprintf(s_tmp, ZEND_LONG_FMT, lval);  /* SAFE */
-			TRACE_APPEND_STRL(s_tmp, l_tmp);
-			TRACE_APPEND_STR(", ");
+		case IS_LONG:
+			smart_str_append_long(str, Z_LVAL_P(arg));
+			smart_str_appends(str, ", ");
 			break;
-		}
 		case IS_DOUBLE: {
 			double dval = Z_DVAL_P(arg);
-			char *s_tmp;
-			int l_tmp;
-
-			s_tmp = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
-			l_tmp = zend_sprintf(s_tmp, "%.*G", (int) EG(precision), dval);  /* SAFE */
-			TRACE_APPEND_STRL(s_tmp, l_tmp);
-			/* %G already handles removing trailing zeros from the fractional part, yay */
+			char *s_tmp = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
+			int l_tmp = zend_sprintf(s_tmp, "%.*G", (int) EG(precision), dval);  /* SAFE */
+			smart_str_appendl(str, s_tmp, l_tmp);
+			smart_str_appends(str, ", ");
 			efree(s_tmp);
-			TRACE_APPEND_STR(", ");
 			break;
 		}
 		case IS_ARRAY:
-			TRACE_APPEND_STR("Array, ");
+			smart_str_appends(str, "Array, ");
 			break;
-		case IS_OBJECT: {
-			zend_string *class_name;
-
-			TRACE_APPEND_STR("Object(");
-
-			class_name = zend_get_object_classname(Z_OBJ_P(arg) TSRMLS_CC);
-
-			TRACE_APPEND_STRL(class_name->val, class_name->len);
-			TRACE_APPEND_STR("), ");
-			break;
-		}
-		default:
+		case IS_OBJECT:
+			smart_str_appends(str, "Object(");
+			smart_str_append(str, zend_get_object_classname(Z_OBJ_P(arg) TSRMLS_CC));
+			smart_str_appends(str, "), ");
 			break;
 	}
-	*str_ptr = str;
 }
 /* }}} */
 
-static void _build_trace_string(zval *frame, zend_ulong index, zend_string **str_ptr, int *num TSRMLS_DC) /* {{{ */
+static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num TSRMLS_DC) /* {{{ */
 {
-	char *s_tmp;
-	int len;
-	zend_long line;
-	HashTable *ht;
 	zval *file, *tmp;
-	zend_string *str = *str_ptr;
 
-	if (Z_TYPE_P(frame) != IS_ARRAY) {
-		zend_error(E_WARNING, "Expected array for frame %pu", index);
-		return;
-	}
+	smart_str_appendc(str, '#');
+	smart_str_append_long(str, num);
+	smart_str_appendc(str, ' ');
 
-	ht = Z_ARRVAL_P(frame);
-	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
-	len = sprintf(s_tmp, "#%d ", (*num)++);
-	TRACE_APPEND_STRL(s_tmp, len);
-	efree(s_tmp);
 	file = zend_hash_str_find(ht, "file", sizeof("file")-1);
 	if (file) {
 		if (Z_TYPE_P(file) != IS_STRING) {
 			zend_error(E_WARNING, "Function name is no string");
-			TRACE_APPEND_STR("[unknown function]");
+			smart_str_appends(str, "[unknown function]");
 		} else{
+			zend_long line;
 			tmp = zend_hash_str_find(ht, "line", sizeof("line")-1);
 			if (tmp) {
 				if (Z_TYPE_P(tmp) == IS_LONG) {
@@ -546,37 +489,36 @@ static void _build_trace_string(zval *frame, zend_ulong index, zend_string **str
 			} else {
 				line = 0;
 			}
-			s_tmp = emalloc(Z_STRLEN_P(file) + MAX_LENGTH_OF_LONG + 4 + 1);
-			len = sprintf(s_tmp, "%s(" ZEND_LONG_FMT "): ", Z_STRVAL_P(file), line);
-			TRACE_APPEND_STRL(s_tmp, len);
-			efree(s_tmp);
+			smart_str_append(str, Z_STR_P(file));
+			smart_str_appendc(str, '(');
+			smart_str_append_long(str, line);
+			smart_str_appends(str, "): ");
 		}
 	} else {
-		TRACE_APPEND_STR("[internal function]: ");
+		smart_str_appends(str, "[internal function]: ");
 	}
 	TRACE_APPEND_KEY("class");
 	TRACE_APPEND_KEY("type");
 	TRACE_APPEND_KEY("function");
-	TRACE_APPEND_CHR('(');
+	smart_str_appendc(str, '(');
 	tmp = zend_hash_str_find(ht, "args", sizeof("args")-1);
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
-			int last_len = str->len;
+			size_t last_len = str->s->len;
 			zval *arg;
 			
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmp), arg) {
-				_build_trace_args(arg, &str TSRMLS_CC);
+				_build_trace_args(arg, str TSRMLS_CC);
 			} ZEND_HASH_FOREACH_END();
 
-			if (last_len != str->len) {
-				str->len -= 2; /* remove last ', ' */
+			if (last_len != str->s->len) {
+				str->s->len -= 2; /* remove last ', ' */
 			}
 		} else {
 			zend_error(E_WARNING, "args element is no array");
 		}
 	}
-	TRACE_APPEND_STR(")\n");
-	*str_ptr = str;
+	smart_str_appends(str, ")\n");
 }
 /* }}} */
 
@@ -586,25 +528,27 @@ ZEND_METHOD(exception, getTraceAsString)
 {
 	zval *trace, *frame;
 	zend_ulong index;
-	zend_string *str;
-	int num = 0, len;
-	char s_tmp[MAX_LENGTH_OF_LONG + 7 + 1 + 1];
+	smart_str str = {0};
+	uint32_t num = 0;
 
 	DEFAULT_0_PARAMS;
 	
-	str = zend_string_alloc(0, 0);
-
 	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
-		_build_trace_string(frame, index, &str, &num TSRMLS_CC);
+		if (Z_TYPE_P(frame) != IS_ARRAY) {
+			zend_error(E_WARNING, "Expected array for frame %pu", index);
+			continue;
+		}
+
+		_build_trace_string(&str, Z_ARRVAL_P(frame), num++ TSRMLS_CC);
 	} ZEND_HASH_FOREACH_END();
 
-	len = sprintf(s_tmp, "#%d {main}", num);
-	TRACE_APPEND_STRL(s_tmp, len);
+	smart_str_appendc(&str, '#');
+	smart_str_append_long(&str, num);
+	smart_str_appends(&str, " {main}");
+	smart_str_0(&str);
 
-	str->val[str->len] = '\0';	
-
-	RETURN_NEW_STR(str); 
+	RETURN_NEW_STR(str.s); 
 }
 /* }}} */
 

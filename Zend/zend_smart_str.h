@@ -16,15 +16,11 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
+#ifndef ZEND_SMART_STR_H
+#define ZEND_SMART_STR_H
 
-#ifndef PHP_SMART_STR_H
-#define PHP_SMART_STR_H
-
-#include "php_smart_str_public.h"
-
-#include <stdlib.h>
 #include <zend.h>
+#include "zend_smart_str_public.h"
 
 #ifndef SMART_STR_PREALLOC
 #define SMART_STR_PREALLOC 128
@@ -33,8 +29,6 @@
 #ifndef SMART_STR_START_SIZE
 #define SMART_STR_START_SIZE 78
 #endif
-
-/* wrapper */
 
 #define smart_str_appends_ex(dest, src, what) \
 	smart_str_appendl_ex((dest), (src), strlen(src), (what))
@@ -46,6 +40,8 @@
 	smart_str_appendl_ex((dest), (src), (len), 0)
 #define smart_str_append(dest, src) \
 	smart_str_append_ex((dest), (src), 0)
+#define smart_str_append_smart_str(dest, src) \
+	smart_str_append_smart_str_ex((dest), (src), 0)
 #define smart_str_sets(dest, src) \
 	smart_str_setl((dest), (src), strlen(src));
 #define smart_str_append_long(dest, val) \
@@ -98,9 +94,13 @@ static zend_always_inline void smart_str_appendl_ex(smart_str *dest, const char 
 	dest->s->len = new_len;
 }
 
-static zend_always_inline void smart_str_append_ex(smart_str *dest, const smart_str *src, zend_bool persistent) {
+static zend_always_inline void smart_str_append_ex(smart_str *dest, const zend_string *src, zend_bool persistent) {
+	smart_str_appendl_ex(dest, src->val, src->len, persistent);
+}
+
+static zend_always_inline void smart_str_append_smart_str_ex(smart_str *dest, const smart_str *src, zend_bool persistent) {
 	if (src->s && src->s->len) {
-		smart_str_appendl_ex(dest, src->s->val, src->s->len, persistent);
+		smart_str_append_ex(dest, src->s, persistent);
 	}
 }
 
@@ -122,3 +122,4 @@ static zend_always_inline void smart_str_setl(smart_str *dest, const char *src, 
 }
 
 #endif
+

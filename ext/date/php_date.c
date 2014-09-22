@@ -999,7 +999,7 @@ PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D)
 
 
 /* {{{ date() and gmdate() data */
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 static char *mon_full_names[] = {
 	"January", "February", "March", "April",

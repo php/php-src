@@ -23,7 +23,7 @@
 #include "php.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/credits.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "php_variables.h"
 #include "php_globals.h"
 #include "php_content_types.h"

@@ -28,7 +28,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/url.h"
 #include "streams/php_streams_int.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "php_openssl.h"
 #include "php_network.h"
 #include <openssl/ssl.h>

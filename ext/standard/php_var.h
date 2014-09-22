@@ -22,7 +22,7 @@
 #define PHP_VAR_H
 
 #include "ext/standard/basic_functions.h"
-#include "ext/standard/php_smart_str_public.h"
+#include "zend_smart_str_public.h"
 
 PHP_FUNCTION(var_dump);
 PHP_FUNCTION(var_export);

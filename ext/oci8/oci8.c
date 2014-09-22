@@ -33,7 +33,7 @@
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_ini.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #if HAVE_OCI8
 

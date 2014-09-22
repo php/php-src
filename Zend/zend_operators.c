@@ -1449,6 +1449,18 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 		op1_lval = Z_LVAL_P(op1);
 	}
 
+	/* prevent wrapping quirkiness on some processors where << 64 + x == << x */
+	if (Z_LVAL_P(op2) >= SIZEOF_ZEND_LONG * 8) {
+		ZVAL_LONG(result, 0);
+		return SUCCESS;
+	}
+
+	if (Z_LVAL_P(op2) < 0) {
+		zend_error(E_WARNING, "Bit shift by negative number");
+		ZVAL_FALSE(result);
+		return FAILURE;
+	}
+
 	ZVAL_LONG(result, op1_lval << Z_LVAL_P(op2));
 	return SUCCESS;
 }
@@ -1467,6 +1479,18 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 		zendi_convert_to_long(op2, op2_copy, result);
 	} else {
 		op1_lval = Z_LVAL_P(op1);
+	}
+
+	/* prevent wrapping quirkiness on some processors where >> 64 + x == >> x */
+	if (Z_LVAL_P(op2) >= SIZEOF_ZEND_LONG * 8) {
+		ZVAL_LONG(result, (Z_LVAL_P(op1) < 0) ? -1 : 0);
+		return SUCCESS;
+	}
+
+	if (Z_LVAL_P(op2) < 0) {
+		zend_error(E_WARNING, "Bit shift by negative number");
+		ZVAL_FALSE(result);
+		return FAILURE;
 	}
 
 	ZVAL_LONG(result, op1_lval >> Z_LVAL_P(op2));
