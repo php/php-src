@@ -168,10 +168,6 @@ SOURCE=.\zend_default_classes.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_dynamic_array.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\zend_exceptions.c
 # End Source File
 # Begin Source File
