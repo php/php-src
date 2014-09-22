@@ -667,17 +667,17 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
  	zval *object = object_ptr;
 
  	ZVAL_DEREF(object);
-	if (Z_TYPE_P(object) != IS_OBJECT) {
-		if (object == &EG(error_zval)) {
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		if (UNEXPECTED(object == &EG(error_zval))) {
  			if (retval) {
  				ZVAL_NULL(retval);
 			}
 			FREE_OP(free_value);
 			return;
 		}
-		if (Z_TYPE_P(object) == IS_NULL ||
+		if (EXPECTED(Z_TYPE_P(object) == IS_NULL ||
 		    Z_TYPE_P(object) == IS_FALSE ||
-		    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0)) {
+		    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 			zend_object *obj;
 
 			zval_ptr_dtor(object);
@@ -1021,7 +1021,7 @@ static zend_always_inline zval *zend_fetch_dimension_address(zval *result, zval 
 fetch_from_array:
 		if (dim == NULL) {
 			retval = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
-			if (retval == NULL) {
+			if (UNEXPECTED(retval == NULL)) {
 				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
 				retval = &EG(error_zval);
 			}
@@ -1100,7 +1100,7 @@ convert_to_array:
 
 				ZVAL_NULL(result);
 				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name->val);
-			} else if (retval && Z_TYPE_P(retval) != IS_UNDEF) {
+			} else if (EXPECTED(retval && Z_TYPE_P(retval) != IS_UNDEF)) {
 				if (!Z_ISREF_P(retval)) {
 					if (Z_REFCOUNTED_P(retval) &&
 					    Z_REFCOUNT_P(retval) > 1) {
@@ -1132,7 +1132,7 @@ convert_to_array:
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_NULL)) {
-		if (container == &EG(error_zval)) {
+		if (UNEXPECTED(container == &EG(error_zval))) {
 			ZVAL_INDIRECT(result, &EG(error_zval));
 		} else if (type != BP_VAR_UNSET) {
 			goto convert_to_array;
@@ -1276,15 +1276,15 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 	zval *container = container_ptr;
 
 	ZVAL_DEREF(container);
-	if (Z_TYPE_P(container) != IS_OBJECT) {
-		if (container == &EG(error_zval)) {
+	if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+		if (UNEXPECTED(container == &EG(error_zval))) {
 			ZVAL_INDIRECT(result, &EG(error_zval));
 			return;
 		}
 
 		/* this should modify object only if it's empty */
 		if (type != BP_VAR_UNSET &&
-		    ((Z_TYPE_P(container) == IS_NULL ||
+		    EXPECTED((Z_TYPE_P(container) == IS_NULL ||
 		      Z_TYPE_P(container) == IS_FALSE ||
 		      (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0)))) {
 			zval_ptr_dtor_nogc(container);
@@ -1296,7 +1296,7 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 		}
 	}
 
-	if (Z_OBJ_HT_P(container)->get_property_ptr_ptr) {
+	if (EXPECTED(Z_OBJ_HT_P(container)->get_property_ptr_ptr)) {
 		zval *ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr, type, cache_slot TSRMLS_CC);
 		if (NULL == ptr) {
 			if (Z_OBJ_HT_P(container)->read_property &&
@@ -1322,7 +1322,7 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 				ZVAL_INDIRECT(result, ptr);
 			}
 		}
-	} else if (Z_OBJ_HT_P(container)->read_property) {
+	} else if (EXPECTED(Z_OBJ_HT_P(container)->read_property)) {
 		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, cache_slot, result TSRMLS_CC);
 		if (ptr != result) {
 			if (is_ref && ptr != &EG(uninitialized_zval)) {
