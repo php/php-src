@@ -1090,7 +1090,8 @@ static int phpdbg_process_print(FILE *fp, int type, const char *tag, const char 
 		case P_WRITE:
 			severity = "normal";
 			if (msg) {
-				msgoutlen = asprintf(&msgout, "%.*s\n", msglen, msg);
+				msgout = strndup(msg, msglen);
+				msgoutlen = msglen;
 			} else {
 				msgoutlen = 0;
 				msgout = strdup("");

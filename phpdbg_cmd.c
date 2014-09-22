@@ -750,12 +750,18 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack TSRMLS_DC) {
 
 	switch (top->type) {
 		case EVAL_PARAM:
+			phpdbg_activate_err_buf(0 TSRMLS_CC);
+			phpdbg_free_err_buf(TSRMLS_C);
 			return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
 
 		case RUN_PARAM:
+			phpdbg_activate_err_buf(0 TSRMLS_CC);
+			phpdbg_free_err_buf(TSRMLS_C);
 			return PHPDBG_COMMAND_HANDLER(run)(top TSRMLS_CC);
 
 		case SHELL_PARAM:
+			phpdbg_activate_err_buf(0 TSRMLS_CC);
+			phpdbg_free_err_buf(TSRMLS_C);
 			return PHPDBG_COMMAND_HANDLER(sh)(top TSRMLS_CC);
 
 		case STR_PARAM: {
@@ -765,7 +771,6 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack TSRMLS_DC) {
 				if (phpdbg_stack_verify(handler, &top TSRMLS_CC) == SUCCESS) {
 					phpdbg_activate_err_buf(0 TSRMLS_CC);
 					phpdbg_free_err_buf(TSRMLS_C);
-
 					return handler->handler(top TSRMLS_CC);
 				}
 			}

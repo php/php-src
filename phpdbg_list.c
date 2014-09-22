@@ -159,12 +159,12 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 
 		if (offset <= line) {
 			if (!highlight) {
-				phpdbg_write("line", "num=\"%d\" code=\"%s\"", "%05ld: %s", line, buffer);
+				phpdbg_write("line", "num=\"%d\" code=\"%s\"", " %05ld: %s", line, buffer);
 			} else {
 				if (highlight != line) {
-					phpdbg_write("line", "num=\"%d\" code=\"%s\"", "%05ld: %s", " %05ld: %s", line, buffer);
+					phpdbg_write("line", "num=\"%ld\" code=\"%s\"", " %05ld: %s", line, buffer);
 				} else {
-					phpdbg_write("line", "num=\"%d\" code=\"%s\" current=\"current\"", "%05ld: %s", ">%05ld: %s", line, buffer);
+					phpdbg_write("line", "num=\"%ld\" code=\"%s\" current=\"current\"", ">%05ld: %s", line, buffer);
 				}
 			}
 
