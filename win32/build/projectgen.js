@@ -46,7 +46,6 @@ function write_src_file(fname, path, intpath, arr)
 			if (arr[i].match('alloca.c') ||
 				arr[i].match(/internal_functions_(nw|win32)\.c/) ||
 				arr[i].match(/flock\.(c|h)/) ||
-				arr[i].match(/zend_static_allocator\.(c|h)/) ||
 				arr[i].match(/zend_(ini|language)_scanner_defs\.h/)) {
 				continue;
 			}

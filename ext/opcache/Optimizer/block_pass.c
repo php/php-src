@@ -1116,7 +1116,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 					opline->opcode == ZEND_ADD_CHAR ||
 					opline->opcode == ZEND_ADD_VAR ||
 					opline->opcode == ZEND_CONCAT) &&
-					ZEND_OP1_TYPE(opline) == (IS_TMP_VAR|IS_VAR) &&
+					(ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
 					VAR_SOURCE(opline->op1) &&
 					VAR_SOURCE(opline->op1)->opcode == ZEND_CAST &&
 					VAR_SOURCE(opline->op1)->extended_value == IS_STRING) {

@@ -2067,6 +2067,17 @@ static void zend_separate_if_call_and_write(znode *node, zend_ast *ast, uint32_t
 /* }}} */
 
 void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type TSRMLS_DC);
+void zend_compile_assign(znode *result, zend_ast *ast TSRMLS_DC);
+
+static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node TSRMLS_DC) /* {{{ */
+{
+	znode dummy_node;
+	zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, var_ast,
+		zend_ast_create_znode(value_node));
+	zend_compile_assign(&dummy_node, assign_ast TSRMLS_CC);
+	zend_do_free(&dummy_node TSRMLS_CC);
+}
+/* }}} */
 
 static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t type TSRMLS_DC) /* {{{ */
 {
@@ -2227,7 +2238,7 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *var_ast = list->child[i];
-		znode fetch_result, dim_node, var_node, assign_result;
+		znode fetch_result, dim_node;
 		zend_op *opline;
 
 		if (var_ast == NULL) {
@@ -2246,13 +2257,9 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 		opline->extended_value |= ZEND_FETCH_ADD_LOCK;
 
 		if (var_ast->kind != ZEND_AST_LIST) {
-			if (is_this_fetch(var_ast)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
-			}
-			zend_compile_var(&var_node, var_ast, BP_VAR_W TSRMLS_CC);
-			zend_emit_op(&assign_result, ZEND_ASSIGN, &var_node, &fetch_result TSRMLS_CC);
-			zend_do_free(&assign_result TSRMLS_CC);
+			zend_emit_assign_znode(var_ast, &fetch_result TSRMLS_CC);
 		} else {
+			znode assign_result;
 			zend_compile_list_assign(&assign_result, var_ast, &fetch_result TSRMLS_CC);
 			zend_do_free(&assign_result TSRMLS_CC);
 		}
@@ -2354,16 +2361,6 @@ void zend_compile_assign(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
-}
-/* }}} */
-
-static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node TSRMLS_DC) /* {{{ */
-{
-	znode dummy_node;
-	zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, var_ast,
-		zend_ast_create_znode(value_node));
-	zend_compile_assign(&dummy_node, assign_ast TSRMLS_CC);
-	zend_do_free(&dummy_node TSRMLS_CC);
 }
 /* }}} */
 
