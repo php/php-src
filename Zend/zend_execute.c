@@ -1030,11 +1030,8 @@ fetch_from_array:
 		}
 		if (is_ref) {
 			ZVAL_MAKE_REF(retval);
-			Z_ADDREF_P(retval);
-			ZVAL_REF(result, Z_REF_P(retval));
-		} else {
-			ZVAL_INDIRECT(result, retval);
 		}
+		ZVAL_INDIRECT(result, retval);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_long offset;
 
@@ -1121,11 +1118,8 @@ convert_to_array:
 				if (result != retval) {
 					if (is_ref) {
 						ZVAL_MAKE_REF(retval);
-						Z_ADDREF_P(retval);
-						ZVAL_REF(result, Z_REF_P(retval));
-					} else {
-						ZVAL_INDIRECT(result, retval);
 					}
+					ZVAL_INDIRECT(result, retval);
 				}
 			} else {
 				ZVAL_INDIRECT(result, &EG(error_zval));
@@ -1304,11 +1298,8 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 				if (ptr != result) {
 					if (is_ref && ptr != &EG(uninitialized_zval)) {
 						ZVAL_MAKE_REF(ptr);
-						Z_ADDREF_P(ptr);
-						ZVAL_REF(result, Z_REF_P(ptr));
-					} else {
-						ZVAL_INDIRECT(result, ptr);
 					}
+					ZVAL_INDIRECT(result, ptr);
 				}
 			} else {
 				zend_error_noreturn(E_ERROR, "Cannot access undefined property for object with overloaded property access");
@@ -1316,22 +1307,16 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 		} else {
 			if (is_ref) {
 				ZVAL_MAKE_REF(ptr);
-				Z_ADDREF_P(ptr);
-				ZVAL_REF(result, Z_REF_P(ptr));
-			} else {
-				ZVAL_INDIRECT(result, ptr);
 			}
+			ZVAL_INDIRECT(result, ptr);
 		}
 	} else if (EXPECTED(Z_OBJ_HT_P(container)->read_property)) {
 		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, cache_slot, result TSRMLS_CC);
 		if (ptr != result) {
 			if (is_ref && ptr != &EG(uninitialized_zval)) {
 				ZVAL_MAKE_REF(ptr);
-				Z_ADDREF_P(ptr);
-				ZVAL_REF(result, Z_REF_P(ptr));
-			} else {
-				ZVAL_INDIRECT(result, ptr);
 			}
+			ZVAL_INDIRECT(result, ptr);
 		}
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
