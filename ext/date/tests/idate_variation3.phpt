@@ -24,12 +24,16 @@ var_dump( idate($format, $timestamp) );
       
 ?>
 ===DONE===
---EXPECTREGEX--
-\*\*\* Testing idate\(\) : usage variation \*\*\*
+--EXPECTF--
+*** Testing idate() : usage variation ***
 
--- Testing idate\(\) function with float 12.3456789000e10 to timestamp --
-int\((1935|5882)\)
+-- Testing idate() function with float 12.3456789000e10 to timestamp --
 
--- Testing idate\(\) function with float -12.3456789000e10 to timestamp --
-int\((2004|1901|-1943)\)
+Warning: idate() expects parameter 2 to be long, double given in %s on line %d
+bool(false)
+
+-- Testing idate() function with float -12.3456789000e10 to timestamp --
+
+Warning: idate() expects parameter 2 to be long, double given in %s on line %d
+bool(false)
 ===DONE===

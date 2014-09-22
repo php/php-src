@@ -114,12 +114,12 @@ bool(false)
 
 --float 12.3456789000e10--
 
-Warning: date_sunrise(): Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be long, double given in %s on line %d
 bool(false)
 
 --float -12.3456789000e10--
 
-Warning: date_sunrise(): Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be long, double given in %s on line %d
 bool(false)
 
 --float .5--

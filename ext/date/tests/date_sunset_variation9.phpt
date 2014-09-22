@@ -32,16 +32,28 @@ var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $zen
 
 ?>
 ===DONE===
---EXPECTREGEX--
-\*\*\* Testing date_sunset\(\) : usage variation \*\*\*
+--EXPECTF--
+*** Testing date_sunset() : usage variation ***
 
--- Testing date_sunset\(\) function by passing float 12.3456789000e10 value to time --
-string\(5\) "(19:49|19:28)"
-float\((19.830[0-9]*|19.830[0-9]*|19.480[0-9]*)\)
-int\((-1097212211|123456853728)\)
+-- Testing date_sunset() function by passing float 12.3456789000e10 value to time --
 
--- Testing date_sunset\(\) function by passing float -12.3456789000e10 value to time --
-string\(5\) "(19:03|18:12|18:48)"
-float\((19.056[0-9]*|18.213[0-9]*|18.808[0-9]*)\)
-int\((1097345002|-2147410031|-123456723090)\)
+Warning: date_sunset() expects parameter 1 to be long, double given in %s on line %d
+bool(false)
+
+Warning: date_sunset() expects parameter 1 to be long, double given in %s on line %d
+bool(false)
+
+Warning: date_sunset() expects parameter 1 to be long, double given in %s on line %d
+bool(false)
+
+-- Testing date_sunset() function by passing float -12.3456789000e10 value to time --
+
+Warning: date_sunset() expects parameter 1 to be long, double given in %s on line %d
+bool(false)
+
+Warning: date_sunset() expects parameter 1 to be long, double given in %s on line %d
+bool(false)
+
+Warning: date_sunset() expects parameter 1 to be long, double given in %s on line %d
+bool(false)
 ===DONE===
