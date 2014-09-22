@@ -1758,7 +1758,7 @@ mssql.secure_connection = Off
 ;mbstring.encoding_translation = Off
 
 ; automatic encoding detection order.
-; "auto" detect order is changed accoding to mbstring.language
+; "auto" detect order is changed according to mbstring.language
 ; http://php.net/mbstring.detect-order
 ;mbstring.detect_order = auto
 
