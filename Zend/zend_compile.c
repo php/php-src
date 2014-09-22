@@ -3256,10 +3256,8 @@ void zend_compile_goto(zend_ast *ast TSRMLS_DC) /* {{{ */
 
 void zend_compile_label(zend_ast *ast TSRMLS_DC) /* {{{ */
 {
-	zval *label = zend_ast_get_zval(ast->child[0]);
+	zend_string *label = zend_ast_get_str(ast->child[0]);
 	zend_label dest;
-
-	ZEND_ASSERT(Z_TYPE_P(label) == IS_STRING);
 
 	if (!CG(context).labels) {
 		ALLOC_HASHTABLE(CG(context).labels);
@@ -3269,8 +3267,8 @@ void zend_compile_label(zend_ast *ast TSRMLS_DC) /* {{{ */
 	dest.brk_cont = CG(context).current_brk_cont;
 	dest.opline_num = get_next_op_number(CG(active_op_array));
 
-	if (!zend_hash_add_mem(CG(context).labels, Z_STR_P(label), &dest, sizeof(zend_label))) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Label '%s' already defined", Z_STRVAL_P(label));
+	if (!zend_hash_add_mem(CG(context).labels, label, &dest, sizeof(zend_label))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Label '%s' already defined", label->val);
 	}
 }
 /* }}} */
