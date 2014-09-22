@@ -69,6 +69,7 @@ typedef struct {
 
 #ifdef ZTS
 # define TWG(v) TSRMG(win32_globals_id, tsrm_win32_globals *, v)
+TSRMG_DH(win32_globals, win32_globals_id);
 #else
 # define TWG(v) (win32_globals.v)
 #endif

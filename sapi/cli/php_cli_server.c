@@ -112,8 +112,6 @@
 #define OUTPUT_IS_TTY 1
 #define OUTPUT_NOT_TTY 0
 
-TSRMG_D(zend_cli_server_globals, cli_server_globals_id);
-
 typedef struct php_cli_server_poller {
 	fd_set rfds, wfds;
 	struct {

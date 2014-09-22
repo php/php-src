@@ -145,7 +145,7 @@ typedef struct _zend_fcall_info_cache {
 #ifdef ZTS
 
 #define ZEND_DECLARE_MODULE_GLOBALS(module_name)							\
-	TSRMG_D(zend_##module_name##_globals, module_name##_globals_id);
+	TSRMG_DE(zend_##module_name##_globals, module_name##_globals_id);
 #define ZEND_EXTERN_MODULE_GLOBALS(module_name)								\
 	TSRMG_DH(zend_##module_name##_globals, module_name##_globals_id);
 #define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)	\

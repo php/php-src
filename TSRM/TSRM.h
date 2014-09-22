@@ -26,10 +26,13 @@
 #	else
 #		define TSRM_API __declspec(dllimport)
 #	endif
+#	define TSRM_EXP_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
 #	define TSRM_API __attribute__ ((visibility("default")))
+#	define TSRM_EXP_API TSRM_API
 #else
 #	define TSRM_API
+#	define TSRM_EXP_API
 #endif
 
 #ifdef _WIN64
@@ -109,16 +112,14 @@ extern "C" {
 # define TSRM_TLS __thread
 # endif
 
-#ifdef TSRM_WIN32
-extern TSRM_TLS void *tsrm_ls_cache;
-#else
-TSRM_API extern TSRM_TLS void *tsrm_ls_cache;
-#endif
-
 #define TSRMG(id, type, element) \
- ((type)((tsrm_uintptr_t)tsrm_ls_cache + id##_offset))->element
+ ((type)((tsrm_uintptr_t) get_tsrm_ls_cache() + id##_offset))->element
 
-#define TSRMLS_INIT() tsrm_ls_cache = (void *) ts_resource_ex(0, NULL);
+#define TSRMLS_INIT() do { \
+	void *cache = (void *) ts_resource_ex(0, NULL); \
+	set_tsrm_ls_cache(&cache); \
+	} while (0)
+
 #define TSRMLS_FETCH()
 #define TSRMLS_FETCH_FROM_CTX(ctx)
 #define TSRMLS_SET_CTX(ctx)
@@ -145,13 +146,21 @@ TSRM_API extern TSRM_TLS void *tsrm_ls_cache;
 
 #endif /* USE___THREAD */
 
+#define TSRMG_DHE(type, id) \
+ TSRM_EXP_API extern ts_rsrc_id id; \
+ TSRM_EXP_API extern ts_rsrc_offset id##_offset
+
+#define TSRMG_DE(type, id) \
+ TSRM_EXP_API ts_rsrc_id id; \
+ TSRM_EXP_API ts_rsrc_offset id##_offset
+
 #define TSRMG_DH(type, id) \
  TSRM_API extern ts_rsrc_id id; \
- TSRM_API extern ts_rsrc_offset id##_offset;
+ TSRM_API extern ts_rsrc_offset id##_offset
 
 #define TSRMG_D(type, id) \
  TSRM_API ts_rsrc_id id; \
- TSRM_API ts_rsrc_offset id##_offset;
+ TSRM_API ts_rsrc_offset id##_offset
 
 #define TSRMG_ALLOCATE(id, size, ctor, dtor) \
  TSRMG_ALLOCATE_EX(id, id##_offset, size, ctor, dtor);
@@ -215,6 +224,9 @@ TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread
 TSRM_API void *tsrm_new_interpreter_context(void);
 TSRM_API void *tsrm_set_interpreter_context(void *new_ctx);
 TSRM_API void tsrm_free_interpreter_context(void *context);
+
+TSRM_API void *get_tsrm_ls_cache(void);
+TSRM_API void set_tsrm_ls_cache(void **tsrm_ls_cache);
 
 #ifdef __cplusplus
 }

@@ -63,11 +63,7 @@ static int tsrm_error_level;
 static FILE *tsrm_error_file;
 
 #ifdef USE___THREAD
-#ifdef TSRM_WIN32
 TSRM_TLS void *tsrm_ls_cache = 0;
-#else
-TSRM_API TSRM_TLS void *tsrm_ls_cache = 0;
-#endif
 #endif
 
 #ifdef PASS_TSRMLS
@@ -831,6 +827,16 @@ void tsrm_error_set(int level, char *debug_filename)
 		tsrm_error_file = stderr;
 	}
 #endif
+}
+
+TSRM_API void *get_tsrm_ls_cache(void)
+{
+	return tsrm_ls_cache;
+}
+
+TSRM_API void set_tsrm_ls_cache(void **cache)
+{
+	tsrm_ls_cache = *cache;
 }
 
 #endif /* ZTS */

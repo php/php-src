@@ -35,7 +35,7 @@
 #include "zend_virtual_cwd.h"
 
 #ifdef ZTS
-static ts_rsrc_id win32_globals_id;
+TSRMG_D(win32_globals, win32_globals_id);
 #else
 static tsrm_win32_globals win32_globals;
 #endif

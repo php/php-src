@@ -49,7 +49,7 @@
 #include "php_apache.h"
 
 #ifdef ZTS
-TSRMG_D(php_apache2_info_struct, php_apache2_info_id);
+TSRMG_DE(php_apache2_info_struct, php_apache2_info_id);
 #else
 php_apache2_info_struct php_apache2_info;
 #endif
