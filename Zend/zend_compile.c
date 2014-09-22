@@ -5846,7 +5846,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) /* {{{ */
 	zend_ast *ast = *ast_ptr;
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *const_ast = ast->child[1];
-	zend_string *class_name = zend_ast_get_str(class_ast);
+	zend_string *class_name;
 	zend_string *const_name = zend_ast_get_str(const_ast);
 	zval result;
 	int fetch_type;
@@ -5856,6 +5856,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr TSRMLS_DC) /* {{{ */
 			"Dynamic class names are not allowed in compile-time class constant references");
 	}
 
+	class_name = zend_ast_get_str(class_ast);
 	fetch_type = zend_get_class_fetch_type(class_name);
 
 	if (ZEND_FETCH_CLASS_STATIC == fetch_type) {
