@@ -1683,7 +1683,7 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
-		if (IS_OP2_TMP_FREE()) {
+		if (OP2_TYPE == IS_TMP_VAR) {
 			zval_dtor(value);
 		}
 		if (RETURN_VALUE_USED(opline)) {
@@ -3911,7 +3911,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 		FREE_OP1_VAR_PTR();
 	} else {
 		expr_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-		if (IS_OP1_TMP_FREE()) { /* temporary variable */
+		if (OP1_TYPE == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 		} else if (OP1_TYPE == IS_CONST) {
@@ -4085,7 +4085,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 					}
 				} else {
 					ZVAL_COPY_VALUE(result, expr);
-					if (!IS_OP1_TMP_FREE()) {
+					if (OP1_TYPE != IS_TMP_VAR) {
 						zval_opt_copy_ctor(result);
 					}
 					convert_to_array(result);
@@ -4105,7 +4105,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 					}
 				} else {
 					ZVAL_COPY_VALUE(result, expr);
-					if (!IS_OP1_TMP_FREE()) {
+					if (OP1_TYPE != IS_TMP_VAR) {
 						zval_opt_copy_ctor(result);
 					}
 					convert_to_object(result);
@@ -4487,7 +4487,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 	} else {
 		array_ptr = array_ref = GET_OP1_ZVAL_PTR(BP_VAR_R);
 		ZVAL_DEREF(array_ptr);
-		if (IS_OP1_TMP_FREE()) { /* IS_TMP_VAR */
+		if (OP1_TYPE == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&tmp, array_ptr);
 			array_ptr = &tmp;
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
@@ -5695,7 +5695,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
-				if (!IS_OP1_TMP_FREE()) {
+				if (OP1_TYPE != IS_TMP_VAR) {
 					zval_copy_ctor(&generator->value);
 				}
 			} else {
