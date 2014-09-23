@@ -42,6 +42,14 @@ var_dump($arr["bing"][0] ?? 3);
 var_dump($arr["bing"][1] ?? 3);
 echo PHP_EOL;
 var_dump(foobar()[0] ?? false);
+echo PHP_EOL;
+function f($x)
+{
+    printf("%s(%d)\n", __FUNCTION__, $x);
+    return $x;
+}
+
+$a = f(null) ?? f(1) ?? f(2);
 ?>
 --EXPECTF--
 int(3)
@@ -66,3 +74,6 @@ int(3)
 
 called
 string(1) "a"
+
+f(0)
+f(1)
