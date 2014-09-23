@@ -30,6 +30,9 @@
 #include "streamsfuncs.h"
 #include "php_network.h"
 #include "php_string.h"
+#include "ext/posix/php_posix.h"
+
+ZEND_EXTERN_MODULE_GLOBALS(posix)
 
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
@@ -62,6 +65,7 @@ PHP_FUNCTION(stream_socket_pair)
 
 	if (0 != socketpair((int)domain, (int)type, (int)protocol, pair)) {
 		char errbuf[256];
+		POSIX_G(last_error) = php_socket_errno();
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create sockets: [%d]: %s",
 			php_socket_errno(), php_socket_strerror(php_socket_errno(), errbuf, sizeof(errbuf)));
 		RETURN_FALSE;
@@ -809,6 +813,7 @@ PHP_FUNCTION(stream_select)
 	retval = php_select(max_fd+1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
+		POSIX_G(last_error) = errno;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to select [%d]: %s (max_fd=%d)",
 				errno, strerror(errno), max_fd);
 		RETURN_FALSE;
