@@ -104,6 +104,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random, 0, 0, 0)
 	ZEND_ARG_INFO(0, limiter)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random_bits, 0, 0, 1)
+	ZEND_ARG_INFO(0, bits)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random_range, 0, 0, 2)
+	ZEND_ARG_INFO(0, min)
+	ZEND_ARG_INFO(0, max)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_setbit, 0, 0, 2)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, index)
@@ -161,6 +170,8 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_cmp,		arginfo_gmp_binary)
 	ZEND_FE(gmp_sign,		arginfo_gmp_unary)
 	ZEND_FE(gmp_random,		arginfo_gmp_random)
+	ZEND_FE(gmp_random_bits,  arginfo_gmp_random_bits)
+	ZEND_FE(gmp_random_range, arginfo_gmp_random_range)
 	ZEND_FE(gmp_and,		arginfo_gmp_binary)
 	ZEND_FE(gmp_or,			arginfo_gmp_binary)
 	ZEND_FE(gmp_com,		arginfo_gmp_unary)
@@ -1784,6 +1795,19 @@ ZEND_FUNCTION(gmp_sign)
 }
 /* }}} */
 
+void gmp_init_random()
+{
+	if (!GMPG(rand_initialized)) {
+		/* Initialize */
+		gmp_randinit_mt(GMPG(rand_state));
+
+		/* Seed */
+		gmp_randseed_ui(GMPG(rand_state), GENERATE_SEED());
+
+		GMPG(rand_initialized) = 1;
+	}
+}
+
 /* {{{ proto GMP gmp_random([int limiter])
    Gets random number */
 ZEND_FUNCTION(gmp_random)
@@ -1796,21 +1820,64 @@ ZEND_FUNCTION(gmp_random)
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
+	gmp_init_random();
 
-	if (!GMPG(rand_initialized)) {
-		/* Initialize */
-		gmp_randinit_mt(GMPG(rand_state));
-
-		/* Seed */
-		gmp_randseed_ui(GMPG(rand_state), GENERATE_SEED());
-
-		GMPG(rand_initialized) = 1;
-	}
 #ifdef GMP_LIMB_BITS
 	mpz_urandomb(gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * GMP_LIMB_BITS);
 #else
 	mpz_urandomb(gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * __GMP_BITS_PER_MP_LIMB);
 #endif
+}
+/* }}} */
+
+/* {{{ proto GMP gmp_random_bits(int bits)
+   Gets a random number in the range 0 to (2 ** n) - 1 */
+ZEND_FUNCTION(gmp_random_bits)
+{
+	long bits;
+	mpz_ptr gmpnum_result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &bits) == FAILURE) {
+		return;
+	}
+
+	if (bits < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The number of bits must be positive");
+		RETURN_FALSE;
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	gmp_init_random();
+
+	mpz_urandomb(gmpnum_result, GMPG(rand_state), bits);
+}
+/* }}} */
+
+/* {{{ proto GMP gmp_random_range(mixed min, mixed max)
+   Gets a random number in the range min to max */
+ZEND_FUNCTION(gmp_random_range)
+{
+	zval *min_arg, *max_arg;
+	mpz_ptr gmpnum_min, gmpnum_max, gmpnum_result;
+	gmp_temp_t temp_a, temp_b;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &min_arg, &max_arg) == FAILURE) {
+		return;
+	}
+
+	FETCH_GMP_ZVAL(gmpnum_min, min_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_max, max_arg, temp_b);
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	gmp_init_random();
+
+	mpz_sub(gmpnum_max, gmpnum_max, gmpnum_min);
+	mpz_add_ui(gmpnum_max, gmpnum_max, 1);
+	mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_max);
+	mpz_add(gmpnum_result, gmpnum_result, gmpnum_min);
+
+	FREE_GMP_TEMP(temp_a);
+	FREE_GMP_TEMP(temp_b);
 }
 /* }}} */
 
