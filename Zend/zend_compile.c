@@ -2640,7 +2640,7 @@ int zend_compile_func_defined(znode *result, zend_ast_list *args TSRMLS_DC) /* {
 }
 /* }}} */
 
-static int zend_try_compile_ct_bound_init_user_func(znode *result, zend_ast *name_ast, uint32_t num_args TSRMLS_DC) /* {{{ */
+static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t num_args TSRMLS_DC) /* {{{ */
 {
 	zend_string *name, *lcname;
 	zend_function *fbc;
@@ -2673,12 +2673,12 @@ static int zend_try_compile_ct_bound_init_user_func(znode *result, zend_ast *nam
 }
 /* }}} */
 
-static void zend_compile_init_user_func(znode *result, zend_ast *name_ast, uint32_t num_args, zend_string *orig_func_name TSRMLS_DC) /* {{{ */
+static void zend_compile_init_user_func(zend_ast *name_ast, uint32_t num_args, zend_string *orig_func_name TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	znode name_node;
 
-	if (zend_try_compile_ct_bound_init_user_func(result, name_ast, num_args TSRMLS_CC) == SUCCESS) {
+	if (zend_try_compile_ct_bound_init_user_func(name_ast, num_args TSRMLS_CC) == SUCCESS) {
 		return;
 	}
 
@@ -2700,7 +2700,7 @@ int zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcna
 		return FAILURE;
 	}
 
-	zend_compile_init_user_func(NULL, args->child[0], 1, lcname TSRMLS_CC);
+	zend_compile_init_user_func(args->child[0], 1, lcname TSRMLS_CC);
 	zend_compile_expr(&arg_node, args->child[1] TSRMLS_CC);
 	zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL TSRMLS_CC);
 	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL TSRMLS_CC);
@@ -2718,7 +2718,7 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 		return FAILURE;
 	}
 
-	zend_compile_init_user_func(NULL, args->child[0], args->children - 1, lcname TSRMLS_CC);
+	zend_compile_init_user_func(args->child[0], args->children - 1, lcname TSRMLS_CC);
 	for (i = 1; i < args->children; ++i) {
 		zend_ast *arg_ast = args->child[i];
 		znode arg_node;
