@@ -223,6 +223,9 @@ typedef struct _zend_try_catch_element {
 /* op_array has finally blocks */
 #define ZEND_ACC_HAS_FINALLY_BLOCK		0x20000000
 
+/* internal function is allocated at arena */
+#define ZEND_ACC_ARENA_ALLOCATED		0x20000000
+
 #define ZEND_CE_IS_TRAIT(ce) (((ce)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)
 
 char *zend_visibility_string(uint32_t fn_flags);
