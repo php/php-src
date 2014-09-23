@@ -483,8 +483,7 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 			&& opline->result.var == op1->u.op.var) {
 			if (opline->opcode == ZEND_FETCH_R ||
 			    opline->opcode == ZEND_FETCH_DIM_R ||
-			    opline->opcode == ZEND_FETCH_OBJ_R ||
-			    opline->opcode == ZEND_QM_ASSIGN) {
+			    opline->opcode == ZEND_FETCH_OBJ_R) {
 				/* It's very rare and useless case. It's better to use
 				   additional FREE opcode and simplify the FETCH handlers
 				   their selves */
@@ -1708,7 +1707,9 @@ static zend_op *zend_emit_op_tmp(znode *result, zend_uchar opcode, znode *op1, z
 		SET_NODE(opline->op2, op2);
 	}
 
-	zend_make_tmp_result(result, opline TSRMLS_CC);
+	if (result) {
+		zend_make_tmp_result(result, opline TSRMLS_CC);
+	}
 
 	return opline;
 }
@@ -5259,7 +5260,7 @@ void zend_compile_cast(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 
 	zend_compile_expr(&expr_node, expr_ast TSRMLS_CC);
 
-	opline = zend_emit_op(result, ZEND_CAST, &expr_node, NULL TSRMLS_CC);
+	opline = zend_emit_op_tmp(result, ZEND_CAST, &expr_node, NULL TSRMLS_CC);
 	opline->extended_value = ast->attr;
 }
 /* }}} */
@@ -5278,13 +5279,13 @@ static void zend_compile_shorthand_conditional(znode *result, zend_ast *ast TSRM
 	zend_compile_expr(&cond_node, cond_ast TSRMLS_CC);
 
 	opnum_jmp_set = get_next_op_number(CG(active_op_array));
-	zend_emit_op(result, ZEND_JMP_SET, &cond_node, NULL TSRMLS_CC);
+	zend_emit_op_tmp(result, ZEND_JMP_SET, &cond_node, NULL TSRMLS_CC);
 
 	zend_compile_expr(&false_node, false_ast TSRMLS_CC);
 
 	opline_jmp_set = &CG(active_op_array)->opcodes[opnum_jmp_set];
 	opline_jmp_set->op2.opline_num = get_next_op_number(CG(active_op_array)) + 1;
-	opline_qm_assign = zend_emit_op(NULL, ZEND_QM_ASSIGN, &false_node, NULL TSRMLS_CC);
+	opline_qm_assign = zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &false_node, NULL TSRMLS_CC);
 	SET_NODE(opline_qm_assign->result, result);
 }
 /* }}} */
@@ -5311,7 +5312,7 @@ void zend_compile_conditional(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_compile_expr(&true_node, true_ast TSRMLS_CC);
 
 	opnum_qm_assign1 = get_next_op_number(CG(active_op_array));
-	zend_emit_op(result, ZEND_QM_ASSIGN, &true_node, NULL TSRMLS_CC);
+	zend_emit_op_tmp(result, ZEND_QM_ASSIGN, &true_node, NULL TSRMLS_CC);
 
 	opnum_jmp = zend_emit_jump(0 TSRMLS_CC);
 
