@@ -2646,7 +2646,7 @@ static int zend_try_compile_ct_bound_init_user_func(znode *result, zend_ast *nam
 	zend_function *fbc;
 	zend_op *opline;
 
-	if (name_ast->kind != ZEND_AST_CONST || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
+	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
 		return FAILURE;
 	}
 
@@ -2663,9 +2663,11 @@ static int zend_try_compile_ct_bound_init_user_func(znode *result, zend_ast *nam
 	}
 
 	opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, NULL TSRMLS_CC);
+	opline->extended_value = num_args;
+
 	opline->op2_type = IS_CONST;
 	LITERAL_STR(opline->op2, lcname);
-	opline->extended_value = num_args;
+	zend_alloc_cache_slot(opline->op2.constant TSRMLS_CC);
 
 	return SUCCESS;
 }
