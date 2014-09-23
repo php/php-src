@@ -321,18 +321,10 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC) /* {{{ */
 
 static int zend_add_func_name_literal(zend_op_array *op_array, zval *zv TSRMLS_DC) /* {{{ */
 {
-	int ret;
 	zend_string *lc_name;
 	zval c;
 
-	if (op_array->last_literal > 0 &&
-	    &op_array->literals[op_array->last_literal - 1] == zv &&
-	    Z_CACHE_SLOT(op_array->literals[op_array->last_literal - 1]) == -1) {
-		/* we already have function name as last literal (do nothing) */
-		ret = op_array->last_literal - 1;
-	} else {
-		ret = zend_add_literal(op_array, zv TSRMLS_CC);
-	}
+	int ret = zend_add_literal(op_array, zv TSRMLS_CC);
 
 	lc_name = zend_string_alloc(Z_STRLEN_P(zv), 0);
 	zend_str_tolower_copy(lc_name->val, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
@@ -345,20 +337,12 @@ static int zend_add_func_name_literal(zend_op_array *op_array, zval *zv TSRMLS_D
 
 static int zend_add_ns_func_name_literal(zend_op_array *op_array, zval *zv TSRMLS_DC) /* {{{ */
 {
-	int ret;
 	zend_string *lc_name;
 	const char *ns_separator;
 	int lc_len;
 	zval c;
 
-	if (op_array->last_literal > 0 &&
-	    &op_array->literals[op_array->last_literal - 1] == zv &&
-	    Z_CACHE_SLOT(op_array->literals[op_array->last_literal - 1]) == -1) {
-		/* we already have function name as last literal (do nothing) */
-		ret = op_array->last_literal - 1;
-	} else {
-		ret = zend_add_literal(op_array, zv TSRMLS_CC);
-	}
+	int ret = zend_add_literal(op_array, zv TSRMLS_CC);
 
 	lc_name = zend_string_alloc(Z_STRLEN_P(zv), 0);
 	zend_str_tolower_copy(lc_name->val, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
@@ -380,7 +364,8 @@ static int zend_add_ns_func_name_literal(zend_op_array *op_array, zval *zv TSRML
 }
 /* }}} */
 
-static int zend_add_class_name_literal(zend_op_array *op_array, zend_string *name TSRMLS_DC) /* {{{ */ {
+static int zend_add_class_name_literal(zend_op_array *op_array, zend_string *name TSRMLS_DC) /* {{{ */
+{
 	int ret;
 	zend_string *lc_name;
 
@@ -404,30 +389,16 @@ static int zend_add_class_name_literal(zend_op_array *op_array, zend_string *nam
 
 static int zend_add_const_name_literal(zend_op_array *op_array, zval *zv, int unqualified TSRMLS_DC) /* {{{ */
 {
-	int ret;
 	char *name;
 	zend_string *tmp_name;
 	const char *ns_separator;
 	int name_len, ns_len;
 	zval c;
 
-	if (op_array->last_literal > 0 &&
-	    &op_array->literals[op_array->last_literal - 1] == zv &&
-	    Z_CACHE_SLOT(op_array->literals[op_array->last_literal - 1]) == -1) {
-		/* we already have function name as last literal (do nothing) */
-		ret = op_array->last_literal - 1;
-	} else {
-		ret = zend_add_literal(op_array, zv TSRMLS_CC);
-	}
+	int ret = zend_add_literal(op_array, zv TSRMLS_CC);
 
-	/* skip leading '\\' */
-	if (Z_STRVAL_P(zv)[0] == '\\') {
-		name_len = Z_STRLEN_P(zv) - 1;
-		name = Z_STRVAL_P(zv) + 1;
-	} else {
-		name_len = Z_STRLEN_P(zv);
-		name = Z_STRVAL_P(zv);
-	}
+	name_len = Z_STRLEN_P(zv);
+	name = Z_STRVAL_P(zv);
 	ns_separator = zend_memrchr(name, '\\', name_len);
 	if (ns_separator) {
 		ns_len = ns_separator - name;
