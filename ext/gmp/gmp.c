@@ -1799,7 +1799,7 @@ ZEND_FUNCTION(gmp_random)
 
 	if (!GMPG(rand_initialized)) {
 		/* Initialize */
-		gmp_randinit_lc_2exp_size(GMPG(rand_state), 32L);
+		gmp_randinit_mt(GMPG(rand_state));
 
 		/* Seed */
 		gmp_randseed_ui(GMPG(rand_state), GENERATE_SEED());
