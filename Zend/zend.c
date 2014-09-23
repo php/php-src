@@ -216,79 +216,10 @@ ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy TSRMLS_DC) /* 
 {
 	if (Z_TYPE_P(expr) == IS_STRING) {
 		return 0;
+	} else {
+		ZVAL_STR(expr_copy, _zval_get_string_func(expr TSRMLS_CC));
+		return 1;
 	}
-
-again:
-	switch (Z_TYPE_P(expr)) {
-		case IS_NULL:
-		case IS_FALSE:
-			ZVAL_EMPTY_STRING(expr_copy);
-		    break;
-		case IS_TRUE:
-		    if (CG(one_char_string)['1']) {
-				ZVAL_INTERNED_STR(expr_copy, CG(one_char_string)['1']);
-			} else {
-				ZVAL_NEW_STR(expr_copy, zend_string_init("1", 1, 0));
-			}
-		    break;
-		case IS_RESOURCE: {
-				char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
-				int len;
-
-				len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, Z_RES_HANDLE_P(expr));
-				ZVAL_NEW_STR(expr_copy, zend_string_init(buf, len, 0));
-			}
-			break;
-		case IS_ARRAY:
-			zend_error(E_NOTICE, "Array to string conversion");
-			// TODO: use interned string ???
-			ZVAL_NEW_STR(expr_copy, zend_string_init("Array", sizeof("Array") - 1, 0));
-			break;
-		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(expr, cast_object)) {
-				Z_ADDREF_P(expr);
-				if (Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-					zval_ptr_dtor(expr);
-					break;
-				}
-				zval_ptr_dtor(expr);
-			}
-			if (!Z_OBJ_HANDLER_P(expr, cast_object) && Z_OBJ_HANDLER_P(expr, get)) {
-				zval rv;
-				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr, &rv TSRMLS_CC);
-
-				Z_ADDREF_P(z);
-				if (Z_TYPE_P(z) != IS_OBJECT) {
-					if (zend_make_printable_zval(z, expr_copy TSRMLS_CC)) {
-						zval_ptr_dtor(z);
-					} else {
-						ZVAL_ZVAL(expr_copy, z, 0, 1);
-					}
-					return 1;
-				}
-				zval_ptr_dtor(z);
-			}
-			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name->val);
-			ZVAL_EMPTY_STRING(expr_copy);
-			break;
-		case IS_DOUBLE:
-			ZVAL_DUP(expr_copy, expr);
-			zend_locale_sprintf_double(expr_copy ZEND_FILE_LINE_CC);
-			break;
-		case IS_REFERENCE:
-			expr = Z_REFVAL_P(expr);
-			if (Z_TYPE_P(expr) == IS_STRING) {
-				ZVAL_STR_COPY(expr_copy, Z_STR_P(expr));
-				return 1;
-			}
-			goto again;
-			break;
-		default:
-			ZVAL_DUP(expr_copy, expr);
-			convert_to_string(expr_copy);
-			break;
-	}
-	return 1;
 }
 /* }}} */
 
