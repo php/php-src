@@ -1334,9 +1334,6 @@ again:
 			if (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1] != '>') {
 				CG(increment_lineno) = 1;
 			}
-			if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
-				goto again;
-			}
 			retval = ';'; /* implicit ; */
 			break;
 		case T_OPEN_TAG_WITH_ECHO:
