@@ -1799,8 +1799,11 @@ void gmp_init_random()
 {
 	if (!GMPG(rand_initialized)) {
 		/* Initialize */
+#if GMP_42_OR_NEWER
 		gmp_randinit_mt(GMPG(rand_state));
-
+#else
+		gmp_randinit_lc_2exp(GMPG(rand_state), 32L);
+#endif
 		/* Seed */
 		gmp_randseed_ui(GMPG(rand_state), GENERATE_SEED());
 
