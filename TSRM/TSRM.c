@@ -31,7 +31,7 @@ struct _tsrm_tls_entry {
 
 
 typedef struct {
-    ts_rsrc_offset offset;
+	ts_rsrc_offset offset;
 	size_t size;
 	ts_allocate_ctor ctor;
 	ts_allocate_dtor dtor;
@@ -100,11 +100,11 @@ TSRM_TLS void *tsrm_ls_cache = 0;
 		int unshuffled_id = TSRM_UNSHUFFLE_RSRC_ID(id);																    \
 																														\
 		if (id==0) {                                                                                                    \
-            return TSRM_RETURN_TSRM_LS(array);                                                                          \
-        } else if ((unshuffled_id)>=0 && (unshuffled_id)<(range)) {												        \
+	        return TSRM_RETURN_TSRM_LS(array);                                                                          \
+	    } else if ((unshuffled_id)>=0 && (unshuffled_id)<(range)) {												        \
 			TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Successfully fetched resource id %d for thread id %ld - 0x%0.8X",		\
 			    unshuffled_id, (long) thread_resources->thread_id, TSRMG_PTR(array, resource_types_table[unshuffled_id].offset))); \
-            return TSRMG_PTR(array, resource_types_table[unshuffled_id].offset);										\
+	        return TSRMG_PTR(array, resource_types_table[unshuffled_id].offset);										\
 		} else {																										\
 			TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Resource id %d is out of range (%d..%d)",								\
 						unshuffled_id, TSRM_SHUFFLE_RSRC_ID(0), TSRM_SHUFFLE_RSRC_ID(thread_resources->count-1)));      \
@@ -208,8 +208,8 @@ TSRM_API void tsrm_shutdown(void)
 				next_p = p->next;
 				for (j=0; j<p->count; j++) {
 					if (resource_types_table && !resource_types_table[j].done && resource_types_table[j].dtor) {
-                        CALL_TSRMG_CTOR(resource_types_table[j].dtor, TSRMG_PTR(p->storage, resource_types_table[j].offset), &p->storage);
-                    }
+					    CALL_TSRMG_CTOR(resource_types_table[j].dtor, TSRMG_PTR(p->storage, resource_types_table[j].offset), &p->storage);
+					}
 				}
 				free(p->storage);
 				free(p);
@@ -244,7 +244,7 @@ TSRM_API void tsrm_shutdown(void)
 TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, ts_rsrc_offset *rsrc_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
 {
 	int i;
-    ts_rsrc_offset offset = 0;
+	ts_rsrc_offset offset = 0;
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new resource id, %d bytes", size));
 
@@ -266,16 +266,16 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, ts_rsrc_offset *rsrc_off
 		resource_types_table_size = id_count;
 	}
 
-    if (TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id) > 0) {
-        offset = resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id-1)].offset
-                +resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id-1)].size;
-    }
-    offset = ((TSRM_MM_ALIGNMENT + offset - 1) & ~(TSRM_MM_ALIGNMENT - 1));
-    if (rsrc_offset) {
-        *rsrc_offset = offset;
-    }
-    
-    resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].offset = offset;
+	if (TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id) > 0) {
+	    offset = resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id-1)].offset
+	            +resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id-1)].size;
+	}
+	offset = ((TSRM_MM_ALIGNMENT + offset - 1) & ~(TSRM_MM_ALIGNMENT - 1));
+	if (rsrc_offset) {
+	    *rsrc_offset = offset;
+	}
+
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].offset = offset;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].size = size;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
@@ -291,7 +291,7 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, ts_rsrc_offset *rsrc_off
 
 				p->storage = realloc(p->storage, offset + size);
 #ifdef USE___THREAD
-                tsrm_ls_cache = p->storage;
+				tsrm_ls_cache = p->storage;
 #endif
 				for (j=p->count; j<id_count; j++) {
 					if (resource_types_table[j].ctor) {
@@ -326,7 +326,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	tsrm_tls_set(*thread_resources_ptr);
 
 #ifdef USE___THREAD
-    tsrm_ls_cache = (*thread_resources_ptr)->storage;
+	tsrm_ls_cache = (*thread_resources_ptr)->storage;
 #endif
 
 	if (tsrm_new_thread_begin_handler) {
@@ -457,7 +457,7 @@ void *tsrm_set_interpreter_context(void *new_ctx)
 	tsrm_tls_set(new_ctx);
 	
 #ifdef USE___THREAD
-    tsrm_ls_cache = ((tsrm_tls_entry*)new_ctx)->storage;
+	tsrm_ls_cache = ((tsrm_tls_entry*)new_ctx)->storage;
 #endif
 
 	/* return old context, so caller can restore it when they're done */
