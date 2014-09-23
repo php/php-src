@@ -1719,7 +1719,7 @@ static zend_module_entry cgi_module_entry = {
 	NULL,
 	PHP_MINFO(cgi),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES
 };
 
 /* {{{ main
