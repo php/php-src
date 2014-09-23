@@ -658,6 +658,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **funcs**    **f**      show loaded classes" CR
 "  **error**    **e**      show last error" CR
 "  **vars**     **v**      show active variables" CR
+"  **globals**  **g**      show superglobal variables" CR
 "  **literal**  **l**      show active literal constants" CR
 "  **memory**   **m**      show memory manager stats"
 },

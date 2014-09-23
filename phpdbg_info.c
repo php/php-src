@@ -37,6 +37,7 @@ const phpdbg_command_t phpdbg_info_commands[] = {
 	PHPDBG_INFO_COMMAND_D(funcs,    "show loaded classes",           'f', info_funcs,   NULL, 0),
 	PHPDBG_INFO_COMMAND_D(error,    "show last error",               'e', info_error,   NULL, 0),
 	PHPDBG_INFO_COMMAND_D(vars,     "show active variables",         'v', info_vars,    NULL, 0),
+	PHPDBG_INFO_COMMAND_D(globals,  "show superglobals",             'g', info_globals, NULL, 0),
 	PHPDBG_INFO_COMMAND_D(literal,  "show active literal constants", 'l', info_literal, NULL, 0),
 	PHPDBG_INFO_COMMAND_D(memory,   "show memory manager stats",     'm', info_memory,  NULL, 0),
 	PHPDBG_END_COMMAND
@@ -86,9 +87,16 @@ PHPDBG_INFO(error) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_INFO(vars) /* {{{ */
-{
-	HashTable vars;
+static int phpdbg_arm_auto_global(zend_auto_global *auto_global TSRMLS_DC) {
+	if (auto_global->armed) {
+		auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
+	}
+
+	return 0;
+}
+
+static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
+	HashTable vars, *symtable;
 	HashPosition pos;
 	char *var;
 	zval **data;
@@ -107,20 +115,29 @@ PHPDBG_INFO(vars) /* {{{ */
 		}
 	}
 
-	zend_hash_init(&vars, 8, NULL, NULL, 0);
 
-	zend_hash_internal_pointer_reset_ex(EG(active_symbol_table), &pos);
-	while (zend_hash_get_current_key_ex(EG(active_symbol_table), &var,
-		NULL, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
-		zend_hash_get_current_data_ex(EG(active_symbol_table), (void **)&data, &pos);
-		if (*var != '_') {
-			zend_hash_update(
-				&vars, var, strlen(var)+1, (void**)data, sizeof(zval*), NULL);
-		}
-		zend_hash_move_forward_ex(EG(active_symbol_table), &pos);
+	if (show_globals) {
+		zend_hash_apply(CG(auto_globals), (apply_func_t) phpdbg_arm_auto_global TSRMLS_CC);
+		symtable = &EG(symbol_table);
+	} else {
+		symtable = EG(active_symbol_table);
 	}
 
-	{
+	zend_hash_init(&vars, 8, NULL, NULL, 0);
+
+	zend_hash_internal_pointer_reset_ex(symtable, &pos);
+	while (zend_hash_get_current_key_ex(symtable, &var,
+		NULL, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
+		zend_hash_get_current_data_ex(symtable, (void **)&data, &pos);
+		if (zend_is_auto_global(var, strlen(var) TSRMLS_CC) ^ !show_globals) {
+			zend_hash_update(&vars, var, strlen(var)+1, (void**)data, sizeof(zval*), NULL);
+		}
+		zend_hash_move_forward_ex(symtable, &pos);
+	}
+
+	if (show_globals) {
+		phpdbg_notice("variableinfo", "count=\"%d\"", "Superglobal variables (%d)", zend_hash_num_elements(&vars));
+	} else {
 		zend_op_array *ops = EG(active_op_array);
 
 		if (ops->function_name) {
@@ -169,6 +186,16 @@ PHPDBG_INFO(vars) /* {{{ */
 
 	return SUCCESS;
 } /* }}} */
+
+PHPDBG_INFO(vars) /* {{{ */
+{
+	return phpdbg_print_symbols(0 TSRMLS_CC);
+}
+
+PHPDBG_INFO(globals) /* {{{ */
+{
+	return phpdbg_print_symbols(1 TSRMLS_CC);
+}
 
 PHPDBG_INFO(literal) /* {{{ */
 {

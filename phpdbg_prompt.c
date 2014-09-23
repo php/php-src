@@ -611,6 +611,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
 //			php_output_deactivate(TSRMLS_C);
+			phpdbg_notice("run", "type=\"end\"", "Script ended normally");
 		} zend_catch {
 			EG(active_op_array) = orig_op_array;
 			EG(opline_ptr) = orig_opline;
