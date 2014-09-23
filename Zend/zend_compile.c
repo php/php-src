@@ -2322,6 +2322,10 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_compile_var(&target_node, target_ast, BP_VAR_W TSRMLS_CC);
 	zend_compile_var(&source_node, source_ast, BP_VAR_REF TSRMLS_CC);
 
+	if (source_node.op_type != IS_VAR && zend_is_call(source_ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use result of built-in function in write context");
+	}
+
 	opline = zend_emit_op(result, ZEND_ASSIGN_REF, &target_node, &source_node TSRMLS_CC);
 	if (!result) {
 		opline->result_type |= EXT_TYPE_UNUSED;
