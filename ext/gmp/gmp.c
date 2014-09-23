@@ -1841,9 +1841,9 @@ ZEND_FUNCTION(gmp_random_bits)
 		return;
 	}
 
-	if (bits < 0) {
+	if (bits <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The number of bits must be positive");
-		RETURN_FALSE;
+		return;
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
