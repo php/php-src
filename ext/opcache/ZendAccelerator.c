@@ -384,6 +384,9 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key TSRMLS_CC);
 		}
+		if (Z_FUNC(p->val)->common.function_name) {
+			Z_FUNC(p->val)->common.function_name = accel_new_interned_string(Z_FUNC(p->val)->common.function_name TSRMLS_CC);
+		}
 	}
 
 	/* class table hash keys, class names, properties, methods, constants, etc */
@@ -424,6 +427,9 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = accel_new_interned_string(q->key TSRMLS_CC);
+			}
+			if (Z_FUNC(q->val)->common.function_name) {
+				Z_FUNC(q->val)->common.function_name = accel_new_interned_string(Z_FUNC(q->val)->common.function_name TSRMLS_CC);
 			}
 		}
 
