@@ -57,19 +57,9 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 			} else if (brk_cont->brk > op_num) {
 				zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
 
-				switch (brk_opline->opcode) {
-					case ZEND_SWITCH_FREE:
-						{
-							zval *var = EX_VAR_2(execute_data, brk_opline->op1.var);
-							zval_ptr_dtor(var);
-						}
-						break;
-					case ZEND_FREE:
-						{
-							zval *var = EX_VAR_2(execute_data, brk_opline->op1.var);
-							zval_dtor(var);
-						}
-						break;
+				if (brk_opline->opcode == ZEND_FREE) {
+					zval *var = EX_VAR_2(execute_data, brk_opline->op1.var);
+					zval_ptr_dtor_nogc(var);
 				}
 			}
 		}

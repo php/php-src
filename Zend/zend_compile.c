@@ -859,7 +859,7 @@ static int generate_free_loop_var(znode *var TSRMLS_DC) /* {{{ */
 		{
 			zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-			opline->opcode = var->op_type == IS_TMP_VAR ? ZEND_FREE : ZEND_SWITCH_FREE;
+			opline->opcode = ZEND_FREE;
 			SET_NODE(opline->op1, var);
 			SET_UNUSED(opline->op2);
 		}
@@ -3588,7 +3588,7 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_end_loop(get_next_op_number(CG(active_op_array)), 1 TSRMLS_CC);
 
 	if (expr_node.op_type == IS_VAR || expr_node.op_type == IS_TMP_VAR) {
-		zend_emit_op(NULL, expr_node.op_type == IS_TMP_VAR ? ZEND_FREE : ZEND_SWITCH_FREE,
+		zend_emit_op(NULL, ZEND_FREE,
 			&expr_node, NULL TSRMLS_CC);
 	} else if (expr_node.op_type == IS_CONST) {
 		zval_dtor(&expr_node.u.constant);

@@ -203,14 +203,12 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 		j = 0;
 		for (i = 0; i< op_array->last_brk_cont; i++) {
 			if (op_array->brk_cont_array[i].start >= 0 &&
-			    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
-			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_SWITCH_FREE)) {
+			    op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE) {
 				int parent = op_array->brk_cont_array[i].parent;
 
 				while (parent >= 0 &&
 				       op_array->brk_cont_array[parent].start < 0 &&
-				       op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE &&
-				       op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_SWITCH_FREE) {
+				       op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE) {
 					parent = op_array->brk_cont_array[parent].parent;
 				}
 				op_array->brk_cont_array[i].parent = parent;
@@ -224,8 +222,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			j = 0;
 			for (i = 0; i< op_array->last_brk_cont; i++) {
 				if (op_array->brk_cont_array[i].start >= 0 &&
-				    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
-				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_SWITCH_FREE)) {
+				    op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE) {
 					if (i != j) {
 						op_array->brk_cont_array[j] = op_array->brk_cont_array[i];
 					}
@@ -1363,10 +1360,9 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 				} else if (0&& block->op1_to != block &&
 			           block->op1_to != blocks &&
 						   op_array->last_try_catch == 0 &&
-				           target->opcode != ZEND_FREE &&
-				           target->opcode != ZEND_SWITCH_FREE) {
+				           target->opcode != ZEND_FREE) {
 				    /* Block Reordering (saves one JMP on each "for" loop iteration)
-				     * It is disabled for some cases (ZEND_FREE/ZEND_SWITCH_FREE)
+				     * It is disabled for some cases (ZEND_FREE)
 				     * which may break register allocation.
             	     */
 					zend_bool can_reorder = 0;
