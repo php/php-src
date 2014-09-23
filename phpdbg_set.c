@@ -69,9 +69,9 @@ PHPDBG_SET(break) /* {{{ */
 			} else {
 				phpdbg_breakbase_t *brake = phpdbg_find_breakbase(param->num TSRMLS_CC);
 				if (brake) {
-					phpdbg_writeln("setbreak", "id=\"%d\" active=\"%s\"", "Breakpoint #%d %s", param->num, brake->disabled ? "off" : "on");
+					phpdbg_writeln("setbreak", "id=\"%ld\" active=\"%s\"", "Breakpoint #%ld %s", param->num, brake->disabled ? "off" : "on");
 				} else {
-					phpdbg_error("setbreak", "type=\"nobreak\" id=\"%d\"", "Failed to find breakpoint #%ld", param->num);
+					phpdbg_error("setbreak", "type=\"nobreak\" id=\"%ld\"", "Failed to find breakpoint #%ld", param->num);
 				}
 			}
 		} break;
