@@ -150,7 +150,7 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 		offset = 0;
 	}
 
-	phpdbg_xml("<list>");
+	phpdbg_xml("<list file=\"%s\">", filename);
 
 	while (php_stream_gets(stream, buffer, sizeof(buffer)) != NULL) {
 		long linelen = strlen(buffer);
@@ -159,12 +159,12 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 
 		if (offset <= line) {
 			if (!highlight) {
-				phpdbg_write("line", "num=\"%d\" code=\"%s\"", " %05ld: %s", line, buffer);
+				phpdbg_write("line", "line=\"%d\" code=\"%s\"", " %05ld: %s", line, buffer);
 			} else {
 				if (highlight != line) {
-					phpdbg_write("line", "num=\"%ld\" code=\"%s\"", " %05ld: %s", line, buffer);
+					phpdbg_write("line", "line=\"%ld\" code=\"%s\"", " %05ld: %s", line, buffer);
 				} else {
-					phpdbg_write("line", "num=\"%ld\" code=\"%s\" current=\"current\"", ">%05ld: %s", line, buffer);
+					phpdbg_write("line", "line=\"%ld\" code=\"%s\" current=\"current\"", ">%05ld: %s", line, buffer);
 				}
 			}
 
