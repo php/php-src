@@ -3101,10 +3101,11 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 			}
 		} else if (Z_IMMUTABLE_P(array_ref)) {
 			if (IS_CONST == IS_CV) {
-				zval_copy_ctor(array_ref);
+				zval_copy_ctor_func(array_ref);
 				Z_ADDREF_P(array_ref);
 			} else {
-				ZVAL_DUP(&tmp, array_ref);
+				ZVAL_COPY_VALUE(&tmp, array_ref);
+				zval_copy_ctor_func(&tmp);
 				array_ptr = array_ref = &tmp;
 			}
 		} else if (Z_REFCOUNTED_P(array_ref)) {
@@ -3125,14 +3126,13 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
 				}
-				if (Z_IMMUTABLE_P(array_ptr) ||
-				    (Z_ISREF_P(array_ref) &&
-				     Z_REFCOUNTED_P(array_ptr) &&
-				     Z_REFCOUNT_P(array_ptr) > 1)) {
-					if (!Z_IMMUTABLE_P(array_ptr)) {
-						Z_DELREF_P(array_ptr);
-					}
-					zval_copy_ctor(array_ptr);
+				if (Z_IMMUTABLE_P(array_ptr)) {
+					zval_copy_ctor_func(array_ptr);
+				} else if (Z_ISREF_P(array_ref) &&
+				           Z_COPYABLE_P(array_ptr) &&
+				           Z_REFCOUNT_P(array_ptr) > 1) {
+					Z_DELREF_P(array_ptr);
+					zval_copy_ctor_func(array_ptr);
 				}
 				if (IS_CONST == IS_CV) {
 					Z_ADDREF_P(array_ref);
@@ -4789,7 +4789,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_CONST != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -5814,7 +5814,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_CONST != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -7146,7 +7146,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_CONST != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -7893,7 +7893,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_CONST != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -8950,7 +8950,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_CONST != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -9802,10 +9802,11 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			}
 		} else if (Z_IMMUTABLE_P(array_ref)) {
 			if (IS_TMP_VAR == IS_CV) {
-				zval_copy_ctor(array_ref);
+				zval_copy_ctor_func(array_ref);
 				Z_ADDREF_P(array_ref);
 			} else {
-				ZVAL_DUP(&tmp, array_ref);
+				ZVAL_COPY_VALUE(&tmp, array_ref);
+				zval_copy_ctor_func(&tmp);
 				array_ptr = array_ref = &tmp;
 			}
 		} else if (Z_REFCOUNTED_P(array_ref)) {
@@ -9826,14 +9827,13 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
 				}
-				if (Z_IMMUTABLE_P(array_ptr) ||
-				    (Z_ISREF_P(array_ref) &&
-				     Z_REFCOUNTED_P(array_ptr) &&
-				     Z_REFCOUNT_P(array_ptr) > 1)) {
-					if (!Z_IMMUTABLE_P(array_ptr)) {
-						Z_DELREF_P(array_ptr);
-					}
-					zval_copy_ctor(array_ptr);
+				if (Z_IMMUTABLE_P(array_ptr)) {
+					zval_copy_ctor_func(array_ptr);
+				} else if (Z_ISREF_P(array_ref) &&
+				           Z_COPYABLE_P(array_ptr) &&
+				           Z_REFCOUNT_P(array_ptr) > 1) {
+					Z_DELREF_P(array_ptr);
+					zval_copy_ctor_func(array_ptr);
 				}
 				if (IS_TMP_VAR == IS_CV) {
 					Z_ADDREF_P(array_ref);
@@ -11331,7 +11331,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_TMP_VAR != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -12313,7 +12313,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_TMP_VAR != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -13602,7 +13602,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_TMP_VAR != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -14208,7 +14208,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_TMP_VAR != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -15168,7 +15168,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_TMP_VAR != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -16408,10 +16408,11 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			}
 		} else if (Z_IMMUTABLE_P(array_ref)) {
 			if (IS_VAR == IS_CV) {
-				zval_copy_ctor(array_ref);
+				zval_copy_ctor_func(array_ref);
 				Z_ADDREF_P(array_ref);
 			} else {
-				ZVAL_DUP(&tmp, array_ref);
+				ZVAL_COPY_VALUE(&tmp, array_ref);
+				zval_copy_ctor_func(&tmp);
 				array_ptr = array_ref = &tmp;
 			}
 		} else if (Z_REFCOUNTED_P(array_ref)) {
@@ -16432,14 +16433,13 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
 				}
-				if (Z_IMMUTABLE_P(array_ptr) ||
-				    (Z_ISREF_P(array_ref) &&
-				     Z_REFCOUNTED_P(array_ptr) &&
-				     Z_REFCOUNT_P(array_ptr) > 1)) {
-					if (!Z_IMMUTABLE_P(array_ptr)) {
-						Z_DELREF_P(array_ptr);
-					}
-					zval_copy_ctor(array_ptr);
+				if (Z_IMMUTABLE_P(array_ptr)) {
+					zval_copy_ctor_func(array_ptr);
+				} else if (Z_ISREF_P(array_ref) &&
+				           Z_COPYABLE_P(array_ptr) &&
+				           Z_REFCOUNT_P(array_ptr) > 1) {
+					Z_DELREF_P(array_ptr);
+					zval_copy_ctor_func(array_ptr);
 				}
 				if (IS_VAR == IS_CV) {
 					Z_ADDREF_P(array_ref);
@@ -16556,7 +16556,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		array = Z_REFVAL_P(array);
 		// TODO: referenced value might be changed to different array ???
 		if (Z_IMMUTABLE_P(array)) {
-			zval_copy_ctor(array);
+			zval_copy_ctor_func(array);
 		}
 	}
 
@@ -19221,7 +19221,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_VAR != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -21189,7 +21189,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_VAR != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -23528,7 +23528,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_VAR != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -24733,7 +24733,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_VAR != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -26739,7 +26739,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_VAR != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -28187,7 +28187,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_UNUSED != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -29457,7 +29457,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_UNUSED != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -30727,7 +30727,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_UNUSED != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -31243,7 +31243,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_UNUSED != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -32504,7 +32504,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_UNUSED != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = NULL;
@@ -33712,10 +33712,11 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			}
 		} else if (Z_IMMUTABLE_P(array_ref)) {
 			if (IS_CV == IS_CV) {
-				zval_copy_ctor(array_ref);
+				zval_copy_ctor_func(array_ref);
 				Z_ADDREF_P(array_ref);
 			} else {
-				ZVAL_DUP(&tmp, array_ref);
+				ZVAL_COPY_VALUE(&tmp, array_ref);
+				zval_copy_ctor_func(&tmp);
 				array_ptr = array_ref = &tmp;
 			}
 		} else if (Z_REFCOUNTED_P(array_ref)) {
@@ -33736,14 +33737,13 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 					ZVAL_UNREF(array_ref);
 					array_ptr = array_ref;
 				}
-				if (Z_IMMUTABLE_P(array_ptr) ||
-				    (Z_ISREF_P(array_ref) &&
-				     Z_REFCOUNTED_P(array_ptr) &&
-				     Z_REFCOUNT_P(array_ptr) > 1)) {
-					if (!Z_IMMUTABLE_P(array_ptr)) {
-						Z_DELREF_P(array_ptr);
-					}
-					zval_copy_ctor(array_ptr);
+				if (Z_IMMUTABLE_P(array_ptr)) {
+					zval_copy_ctor_func(array_ptr);
+				} else if (Z_ISREF_P(array_ref) &&
+				           Z_COPYABLE_P(array_ptr) &&
+				           Z_REFCOUNT_P(array_ptr) > 1) {
+					Z_DELREF_P(array_ptr);
+					zval_copy_ctor_func(array_ptr);
 				}
 				if (IS_CV == IS_CV) {
 					Z_ADDREF_P(array_ref);
@@ -36068,7 +36068,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_CV != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
@@ -37974,7 +37974,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_CV != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
@@ -40193,7 +40193,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_CV != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
@@ -41262,7 +41262,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_CV != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
@@ -43148,7 +43148,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 				/* Temporary variables don't need ctor copying */
 				if (IS_CV != IS_TMP_VAR) {
-					zval_copy_ctor(&generator->value);
+					zval_opt_copy_ctor(&generator->value);
 				}
 			} else {
 				zval *value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
