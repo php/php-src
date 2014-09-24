@@ -1178,12 +1178,12 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 				KillTimer(timeout_window, wParam);
 			} else {
 #ifdef ZTS
-				void ***tsrm_ls;
+				void *tsrm_ls_cache;
 #endif
 				SetTimer(timeout_window, wParam, lParam*1000, NULL);
 #ifdef ZTS
-				tsrm_ls = ts_resource_ex(0, &wParam);
-				if (!tsrm_ls) {
+				tsrm_ls_cache = get_tsrm_ls_cache();
+				if (!tsrm_ls_cache) {
 					/* shouldn't normally happen */
 					break;
 				}
@@ -1197,10 +1197,10 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 			break;
 		case WM_TIMER: {
 #ifdef ZTS
-				void ***tsrm_ls;
+				void *tsrm_ls_cache;
 
-				tsrm_ls = ts_resource_ex(0, &wParam);
-				if (!tsrm_ls) {
+				tsrm_ls_cache = get_tsrm_ls_cache();
+				if (!tsrm_ls_cache) {
 					/* Thread died before receiving its timeout? */
 					break;
 				}
@@ -1280,8 +1280,6 @@ void zend_shutdown_timeout_thread(void) /* {{{ */
 
 void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	EG(timeout_seconds) = seconds;
 
 #ifdef ZEND_WIN32
