@@ -333,7 +333,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 		CALL_NEW_THREAD_BEGIN_HANDLER(thread_id, &(*thread_resources_ptr)->storage);
 	}
 	for (i=0; i<id_count; i++) {
-		if (resource_types_table[i].done) {
+		if (!resource_types_table[i].done) {
 			if (resource_types_table[i].ctor) {
 				CALL_TSRMG_CTOR(resource_types_table[i].ctor, TSRMG_PTR((*thread_resources_ptr)->storage, resource_types_table[i].offset), &(*thread_resources_ptr)->storage);
 			}
