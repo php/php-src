@@ -63,6 +63,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->exec = NULL;
 	pg->exec_len = 0;
 	pg->buffer = NULL;
+	pg->last_was_newline = 1;
 	pg->ops = NULL;
 	pg->vmret = 0;
 	pg->bp_count = 0;

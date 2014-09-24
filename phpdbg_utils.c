@@ -1061,6 +1061,14 @@ static int phpdbg_process_print(FILE *fp, int type, const char *tag, const char 
 	switch (type) {
 		case P_ERROR:
 			severity = "error";
+			if (!PHPDBG_G(last_was_newline)) {
+				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+					fprintf(fp, "<phpdbg>\n</phpdbg>");
+				} else {
+					fprintf(fp, "\n");
+				}
+				PHPDBG_G(last_was_newline) = 1;
+			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
 				msgoutlen = asprintf(&msgout, "\033[%sm[%.*s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_ERROR]->code, msglen, msg);
 			} else {
@@ -1070,6 +1078,14 @@ static int phpdbg_process_print(FILE *fp, int type, const char *tag, const char 
 
 		case P_NOTICE:
 			severity = "notice";
+			if (!PHPDBG_G(last_was_newline)) {
+				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+					fprintf(fp, "<phpdbg>\n</phpdbg>");
+				} else {
+					fprintf(fp, "\n");
+				}
+				PHPDBG_G(last_was_newline) = 1;
+			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
 				msgoutlen = asprintf(&msgout, "\033[%sm[%.*s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_NOTICE]->code, msglen, msg);
 			} else {
@@ -1085,6 +1101,7 @@ static int phpdbg_process_print(FILE *fp, int type, const char *tag, const char 
 				msgoutlen = 1;
 				msgout = strdup("\n");
 			}
+			PHPDBG_G(last_was_newline) = 1;
 			break;
 
 		case P_WRITE:
@@ -1092,6 +1109,7 @@ static int phpdbg_process_print(FILE *fp, int type, const char *tag, const char 
 			if (msg) {
 				msgout = strndup(msg, msglen);
 				msgoutlen = msglen;
+				PHPDBG_G(last_was_newline) = msg[msglen - 1] == '\n';
 			} else {
 				msgoutlen = 0;
 				msgout = strdup("");
@@ -1101,6 +1119,7 @@ static int phpdbg_process_print(FILE *fp, int type, const char *tag, const char 
 		case P_STDOUT:
 		case P_STDERR:
 			if (msg) {
+				PHPDBG_G(last_was_newline) = msg[msglen - 1] == '\n';
 				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
 					if (PHPDBG_G(in_script_xml) != type) {
 						fprintf(fp, "<stream type=\"%s\">", type == P_STDERR ? "stderr" : "stdout");
