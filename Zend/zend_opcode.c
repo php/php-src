@@ -100,16 +100,12 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
 {
-	switch (function->type) {
-		case ZEND_USER_FUNCTION:
-			destroy_op_array((zend_op_array *) function TSRMLS_CC);
-			break;
-		case ZEND_INTERNAL_FUNCTION:
-			if (function->common.function_name) {
-				zend_string_release(function->common.function_name);
-			}
-			/* do nothing */
-			break;
+	if (function->type == ZEND_USER_FUNCTION) {
+		destroy_op_array(&function->op_array TSRMLS_CC);
+	} else {
+		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
+		ZEND_ASSERT(function->common.function_name);
+		zend_string_release(function->common.function_name);
 	}
 }
 
@@ -118,11 +114,18 @@ ZEND_API void zend_function_dtor(zval *zv)
 	zend_function *function = Z_PTR_P(zv);
 	TSRMLS_FETCH();
 
-	destroy_zend_function(function TSRMLS_CC);
-	if (function->type == ZEND_INTERNAL_FUNCTION) {
-		pefree(function, 1);
-	} else if (!function->common.function_name) {
-		efree_size(function, sizeof(zend_op_array));
+	if (function->type == ZEND_USER_FUNCTION) {
+		ZEND_ASSERT(function->common.function_name);
+		destroy_op_array(&function->op_array TSRMLS_CC);
+		/* op_arrays are allocated on arena, so we don't have to free them */
+//???		efree_size(function, sizeof(zend_op_array));
+	} else {
+		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
+		ZEND_ASSERT(function->common.function_name);
+		zend_string_release(function->common.function_name);
+		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
+			pefree(function, 1);
+		}
 	}
 }
 

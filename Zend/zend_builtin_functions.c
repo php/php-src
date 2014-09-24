@@ -1773,23 +1773,8 @@ ZEND_FUNCTION(get_defined_functions)
 
 	zend_hash_apply_with_arguments(EG(function_table) TSRMLS_CC, copy_function_name, 2, &internal, &user);
 
-	ret = zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
-
-	if (!ret) {
-		zval_ptr_dtor(&internal);
-		zval_ptr_dtor(&user);
-		zval_dtor(return_value);
-		zend_error(E_WARNING, "Cannot add internal functions to return value from get_defined_functions()");
-		RETURN_FALSE;
-	}
-
-	ret = zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);
-	if (!ret) {		
-		zval_ptr_dtor(&user);
-		zval_dtor(return_value);
-		zend_error(E_WARNING, "Cannot add user functions to return value from get_defined_functions()");
-		RETURN_FALSE;
-	}
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);
 }
 /* }}} */
 

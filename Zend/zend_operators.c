@@ -827,8 +827,6 @@ try_again:
 		case IS_NULL:
 		case IS_FALSE:
 			return STR_EMPTY_ALLOC();
-		case IS_STRING:
-			return zend_string_copy(Z_STR_P(op));
 		case IS_TRUE:
 			return zend_string_init("1", 1, 0);
 		case IS_RESOURCE: {
@@ -868,6 +866,8 @@ try_again:
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
 			goto try_again;
+		case IS_STRING:
+			return zend_string_copy(Z_STR_P(op));
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;

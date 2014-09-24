@@ -119,8 +119,14 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC) /* {{{
 	if ((function = zend_hash_str_find_ptr(&ce->parent->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1)) != NULL) {
 		/* inherit parent's constructor */
 		if (function->type == ZEND_INTERNAL_FUNCTION) {
-			new_function = pemalloc(sizeof(zend_internal_function), 1);
-			memcpy(new_function, function, sizeof(zend_internal_function));
+			if (ce->type & ZEND_INTERNAL_CLASS) {
+				new_function = pemalloc(sizeof(zend_internal_function), 1);
+				memcpy(new_function, function, sizeof(zend_internal_function));
+			} else {
+				new_function = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
+				memcpy(new_function, function, sizeof(zend_internal_function));
+				new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
+			}
 		} else {
 			new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 			memcpy(new_function, function, sizeof(zend_op_array));
@@ -141,8 +147,19 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC) /* {{{
 					(function = zend_hash_find_ptr(&ce->parent->function_table, lc_parent_class_name)) != NULL) {
 				if (function->common.fn_flags & ZEND_ACC_CTOR) {
 					/* inherit parent's constructor */
-					new_function = pemalloc(sizeof(zend_function), function->type == ZEND_INTERNAL_FUNCTION);
-					memcpy(new_function, function, sizeof(zend_function));
+					if (function->type == ZEND_INTERNAL_FUNCTION) {
+						if (ce->type & ZEND_INTERNAL_CLASS) {
+							new_function = pemalloc(sizeof(zend_internal_function), 1);
+							memcpy(new_function, function, sizeof(zend_internal_function));
+						} else {
+							new_function = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
+							memcpy(new_function, function, sizeof(zend_internal_function));
+							new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
+						}
+					} else {
+						new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+						memcpy(new_function, function, sizeof(zend_op_array));
+					}
 					zend_hash_update_ptr(&ce->function_table, lc_parent_class_name, new_function);
 					function_add_ref(new_function);
 				}
@@ -170,13 +187,19 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
-static zend_function *do_inherit_method(zend_function *old_function TSRMLS_DC) /* {{{ */
+static zend_function *do_inherit_method(zend_function *old_function, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	zend_function *new_function;
 
 	if (old_function->type == ZEND_INTERNAL_FUNCTION) {
-		new_function = pemalloc(sizeof(zend_internal_function), 1);
-		memcpy(new_function, old_function, sizeof(zend_internal_function));
+		if (ce->type & ZEND_INTERNAL_CLASS) {
+			new_function = pemalloc(sizeof(zend_internal_function), 1);
+			memcpy(new_function, old_function, sizeof(zend_internal_function));
+		} else {
+			new_function = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
+			memcpy(new_function, old_function, sizeof(zend_internal_function));
+			new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
+		}
 	} else {
 		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_function, old_function, sizeof(zend_op_array));
@@ -796,7 +819,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
 		if (do_inherit_method_check(&ce->function_table, func, key, ce)) {
-			zend_function *new_func = do_inherit_method(func TSRMLS_CC);
+			zend_function *new_func = do_inherit_method(func, ce TSRMLS_CC);
 			zend_hash_add_new_ptr(&ce->function_table, key, new_func);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -884,7 +907,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
 			if (do_inherit_method_check(&ce->function_table, func, key, ce)) {
-				zend_function *new_func = do_inherit_method(func TSRMLS_CC);
+				zend_function *new_func = do_inherit_method(func, ce TSRMLS_CC);
 				zend_hash_add_new_ptr(&ce->function_table, key, new_func);
 			}
 		} ZEND_HASH_FOREACH_END();

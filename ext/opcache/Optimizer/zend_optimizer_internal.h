@@ -112,14 +112,11 @@ void zend_optimizer_update_op1_const(zend_op_array *op_array,
 void zend_optimizer_update_op2_const(zend_op_array *op_array,
                                      zend_op       *opline,
                                      zval          *val TSRMLS_DC);
-int  zend_optimizer_replace_var_by_const(zend_op_array *op_array,
-                                         zend_op       *opline,
-                                         uint32_t      var,
-                                         zval          *val TSRMLS_DC);
-void zend_optimizer_replace_tmp_by_const(zend_op_array *op_array,
-                                         zend_op       *opline,
-                                         uint32_t      var,
-                                         zval          *val TSRMLS_DC);
+int  zend_optimizer_replace_by_const(zend_op_array *op_array,
+                                     zend_op       *opline,
+                                     zend_uchar     type,
+                                     uint32_t       var,
+                                     zval          *val TSRMLS_DC);
 
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC);
 void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC);

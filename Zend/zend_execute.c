@@ -100,15 +100,6 @@ static const zend_internal_function zend_pass_function = {
 
 #define FREE_OP(should_free) \
 	if (should_free.var) { \
-		if ((zend_uintptr_t)should_free.var & 1L) { \
-			zval_dtor((zval*)((zend_uintptr_t)should_free.var & ~1L)); \
-		} else { \
-			zval_ptr_dtor_nogc(should_free.var); \
-		} \
-	}
-
-#define FREE_OP_IF_VAR(should_free) \
-	if (should_free.var != NULL && (((zend_uintptr_t)should_free.var & 1L) == 0)) { \
 		zval_ptr_dtor_nogc(should_free.var); \
 	}
 
@@ -116,10 +107,6 @@ static const zend_internal_function zend_pass_function = {
 	if (should_free.var) { \
 		zval_ptr_dtor_nogc(should_free.var); \
 	}
-
-#define TMP_FREE(z) (zval*)(((zend_uintptr_t)(z)) | 1L)
-
-#define IS_TMP_FREE(should_free) ((zend_uintptr_t)should_free.var & 1L)
 
 /* End of zend_execute_locks.h */
 
@@ -362,7 +349,7 @@ static inline zval *_get_zval_ptr(int op_type, const znode_op *node, const zend_
 			break;
 		case IS_TMP_VAR:
 			ret = EX_VAR(node->var);
-			should_free->var = TMP_FREE(ret);
+			should_free->var = ret;
 			return ret;
 			break;
 		case IS_VAR:
@@ -392,7 +379,7 @@ static inline zval *_get_zval_ptr_deref(int op_type, const znode_op *node, const
 			break;
 		case IS_TMP_VAR:
 			ret = EX_VAR(node->var);
-			should_free->var = TMP_FREE(ret);
+			should_free->var = ret;
 			return ret;
 			break;
 		case IS_VAR:
@@ -744,10 +731,12 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 		ZVAL_COPY(retval, value);
 	}
 	zval_ptr_dtor(value);
-	FREE_OP_IF_VAR(free_value);
+	if (value_type == IS_VAR) {
+		FREE_OP(free_value);
+	}
 }
 
-static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *value, int value_type, zval *result TSRMLS_DC)
+static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *value, zval *result TSRMLS_DC)
 {
 	zend_string *old_str;
 
@@ -779,12 +768,6 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 		zend_string_release(tmp);
 	} else {
 		Z_STRVAL_P(str)[offset] = Z_STRVAL_P(value)[0];
-		if (value_type == IS_TMP_VAR) {
-			/* we can safely free final_value here
-			 * because separation is done only
-			 * in case value_type == IS_VAR */
-			zval_dtor(value);
-		}
 	}
 	/*
 	 * the value of an assignment to a string offset is undefined
@@ -824,7 +807,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 				return variable_ptr;
 			}
 			garbage = Z_COUNTED_P(variable_ptr);
-			if (GC_REFCOUNT(garbage) == 1) {
+			if (--GC_REFCOUNT(garbage) == 0) {
 				ZVAL_COPY_VALUE(variable_ptr, value);
 				if (value_type == IS_CONST) {
 					/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
@@ -836,10 +819,9 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 						Z_ADDREF_P(variable_ptr);
 					}
 				}
-				_zval_dtor_func(garbage ZEND_FILE_LINE_CC);
+				_zval_dtor_func_for_ptr(garbage ZEND_FILE_LINE_CC);
 				return variable_ptr;
 			} else { /* we need to split */
-				GC_REFCOUNT(garbage)--;
 				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
 				if ((Z_COLLECTABLE_P(variable_ptr)) &&
 		    		UNEXPECTED(!GC_INFO(garbage))) {
@@ -1036,7 +1018,7 @@ fetch_from_array:
 		zend_long offset;
 
 		if (type != BP_VAR_UNSET && UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-			zval_dtor(container);
+			zval_ptr_dtor_nogc(container);
 convert_to_array:
 			ZVAL_NEW_ARR(container);
 			zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
@@ -1337,13 +1319,9 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 		if (nest_levels>1) {
 			zend_op *brk_opline = &op_array->opcodes[jmp_to->brk];
 
-			if (brk_opline->opcode == ZEND_SWITCH_FREE) {
+			if (brk_opline->opcode == ZEND_FREE) {
 				if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-					zval_ptr_dtor(EX_VAR(brk_opline->op1.var));
-				}
-			} else if (brk_opline->opcode == ZEND_FREE) {
-				if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-					zval_dtor(EX_VAR(brk_opline->op1.var));
+					zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
 				}
 			}
 		}

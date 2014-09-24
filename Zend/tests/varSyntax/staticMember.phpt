@@ -19,6 +19,7 @@ var_dump($A_str::$b);
 var_dump($A_obj::$b);
 var_dump(('A' . '')::$b);
 var_dump('A'::$b);
+var_dump('\A'::$b);
 var_dump('A'[0]::$b);
 var_dump(A::$$b_str);
 var_dump(A::$$c_str[1]);
@@ -26,6 +27,7 @@ var_dump(A::$A_str::$b);
 
 ?>
 --EXPECT--
+int(0)
 int(0)
 int(0)
 int(0)

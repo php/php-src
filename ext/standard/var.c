@@ -604,15 +604,16 @@ static inline uint32_t php_add_var_hash(php_serialize_data_t data, zval *var TSR
 {
 	zval *zv;
 	zend_ulong key;
+	zend_bool is_ref = Z_ISREF_P(var);
 
 	data->n += 1;
 
-	if (Z_TYPE_P(var) != IS_OBJECT && Z_TYPE_P(var) != IS_REFERENCE) {
+	if (!is_ref && Z_TYPE_P(var) != IS_OBJECT) {
 		return 0;
 	}
 
 	/* References to objects are treated as if the reference didn't exist */
-	if (Z_TYPE_P(var) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(var)) == IS_OBJECT) {
+	if (is_ref && Z_TYPE_P(Z_REFVAL_P(var)) == IS_OBJECT) {
 		var = Z_REFVAL_P(var);
 	}
 
@@ -622,6 +623,11 @@ static inline uint32_t php_add_var_hash(php_serialize_data_t data, zval *var TSR
 	zv = zend_hash_index_find(&data->ht, key);
 
 	if (zv) {
+		/* References are only counted once, undo the data->n increment above */
+		if (is_ref) {
+			data->n -= 1;
+		}
+
 		return Z_LVAL_P(zv);
 	} else {
 		zval zv_n;
