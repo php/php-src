@@ -13,7 +13,7 @@ PHP                                                                        NEWS
     when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
 
 - OpenSSL:
-  . Fixed bug #68074i (Allow to use system cipher list instead of hardcoded
+  . Fixed bug #68074 (Allow to use system cipher list instead of hardcoded
     value). (Remi)
 
 
