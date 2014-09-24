@@ -1795,7 +1795,7 @@ ZEND_FUNCTION(gmp_sign)
 }
 /* }}} */
 
-void gmp_init_random()
+static void gmp_init_random(TSRMLS_D)
 {
 	if (!GMPG(rand_initialized)) {
 		/* Initialize */
@@ -1823,7 +1823,7 @@ ZEND_FUNCTION(gmp_random)
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
-	gmp_init_random();
+	gmp_init_random(TSRMLS_C);
 
 #ifdef GMP_LIMB_BITS
 	mpz_urandomb(gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * GMP_LIMB_BITS);
@@ -1846,11 +1846,11 @@ ZEND_FUNCTION(gmp_random_bits)
 
 	if (bits <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The number of bits must be positive");
-		return;
+		RETURN_FALSE;
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
-	gmp_init_random();
+	gmp_init_random(TSRMLS_C);
 
 	mpz_urandomb(gmpnum_result, GMPG(rand_state), bits);
 }
@@ -1868,26 +1868,53 @@ ZEND_FUNCTION(gmp_random_range)
 		return;
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_min, min_arg, temp_a);
-	FETCH_GMP_ZVAL(gmpnum_max, max_arg, temp_b);
+	gmp_init_random(TSRMLS_C);
 
-	if (mpz_cmp(gmpnum_min, gmpnum_max) > 0) {
+	FETCH_GMP_ZVAL(gmpnum_max, max_arg, temp_a);
+
+	if (Z_TYPE_P(min_arg) == IS_LONG && Z_LVAL_P(min_arg) >= 0) {
+		if (mpz_cmp_ui(gmpnum_max, Z_LVAL_P(min_arg)) <= 0) {
+			FREE_GMP_TEMP(temp_a);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The minimum value must be less than the maximum value");
+			RETURN_FALSE;
+		}
+
+		INIT_GMP_RETVAL(gmpnum_result);
+
+		if (Z_LVAL_P(min_arg)) {
+			mpz_sub_ui(gmpnum_max, gmpnum_max, Z_LVAL_P(min_arg));
+		}
+
+		mpz_add_ui(gmpnum_max, gmpnum_max, 1);
+		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_max);
+
+		if (Z_LVAL_P(min_arg)) {
+			mpz_add_ui(gmpnum_result, gmpnum_result, Z_LVAL_P(min_arg));
+		}
+
 		FREE_GMP_TEMP(temp_a);
-		FREE_GMP_TEMP(temp_b);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The minimum value must be lower than the maximum value");
-		return;	
+
 	}
+	else {
+		FETCH_GMP_ZVAL_DEP(gmpnum_min, min_arg, temp_b, temp_a);
 
-	INIT_GMP_RETVAL(gmpnum_result);
-	gmp_init_random();
+		if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
+			FREE_GMP_TEMP(temp_b);
+			FREE_GMP_TEMP(temp_a);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The minimum value must be less than the maximum value");
+			RETURN_FALSE;
+		}
 
-	mpz_sub(gmpnum_max, gmpnum_max, gmpnum_min);
-	mpz_add_ui(gmpnum_max, gmpnum_max, 1);
-	mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_max);
-	mpz_add(gmpnum_result, gmpnum_result, gmpnum_min);
+		INIT_GMP_RETVAL(gmpnum_result);
 
-	FREE_GMP_TEMP(temp_a);
-	FREE_GMP_TEMP(temp_b);
+		mpz_sub(gmpnum_max, gmpnum_max, gmpnum_min);
+		mpz_add_ui(gmpnum_max, gmpnum_max, 1);
+		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_max);
+		mpz_add(gmpnum_result, gmpnum_result, gmpnum_min);
+
+		FREE_GMP_TEMP(temp_b);
+		FREE_GMP_TEMP(temp_a);
+	}
 }
 /* }}} */
 
