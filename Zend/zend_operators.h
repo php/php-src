@@ -285,7 +285,6 @@ ZEND_API int zend_atoi(const char *str, int str_len);
 ZEND_API zend_long zend_atol(const char *str, int str_len);
 
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
-END_EXTERN_C()
 
 #define convert_to_ex_master(pzv, lower_type, upper_type)	\
 	if (Z_TYPE_P(pzv)!=upper_type) {					\
@@ -927,6 +926,8 @@ static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num)
 }
 
 ZEND_API zend_string *zend_long_to_str(zend_long num);
+
+END_EXTERN_C()
 
 #endif
 
