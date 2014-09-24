@@ -1871,6 +1871,13 @@ ZEND_FUNCTION(gmp_random_range)
 	FETCH_GMP_ZVAL(gmpnum_min, min_arg, temp_a);
 	FETCH_GMP_ZVAL(gmpnum_max, max_arg, temp_b);
 
+	if (mpz_cmp(gmpnum_min, gmpnum_max) > 0) {
+		FREE_GMP_TEMP(temp_a);
+		FREE_GMP_TEMP(temp_b);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The minimum value must be lower than the maximum value");
+		return;	
+	}
+
 	INIT_GMP_RETVAL(gmpnum_result);
 	gmp_init_random();
 
