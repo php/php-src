@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #67985 (Incorrect last used array index copied to new array after
     unset). (Tjerk)
+  . Fixed bug #68088 (New Posthandler Potential Illegal efree() vulnerability).
+    (Mike) (CVE-2014-3622)
 
 - Fileinfo:
   . Fixed bug #67731 (finfo::file() returns invalid mime type
