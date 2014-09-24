@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #67985 (Incorrect last used array index copied to new array after
     unset). (Tjerk)
 
+- DOM:
+  . Made DOMNode::textContent writeable. (Tjerk)
+
 - Fileinfo:
   . Fixed bug #67731 (finfo::file() returns invalid mime type
     for binary files). (Anatol)
@@ -35,9 +38,6 @@ PHP                                                                        NEWS
     (Daniel Lowrey)
   . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3).
     (Daniel Lowrey)
-
-- DOM:
-  . Made DOMNode::textContent writeable. (Tjerk)
 
 - phpdbg:
   . Fixed issue krakjoe/phpdbg#111 (compile error without ZEND_SIGNALS). (Bob)
