@@ -1849,7 +1849,7 @@ ZEND_FUNCTION(gmp_setbit)
 
 	if (index < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
-		return;
+		RETURN_FALSE;
 	}
 
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
@@ -1876,7 +1876,7 @@ ZEND_FUNCTION(gmp_clrbit)
 
 	if (index < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
-		return;
+		RETURN_FALSE;
 	}
 
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
