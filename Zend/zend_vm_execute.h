@@ -3085,7 +3085,10 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		ZVAL_DEREF(array_ptr);
 		if (IS_CONST == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&tmp, array_ptr);
-			array_ptr = &tmp;
+			if (Z_OPT_IMMUTABLE_P(&tmp)) {
+				zval_copy_ctor_func(&tmp);
+			}
+			array_ref = array_ptr = &tmp;
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 				ce = Z_OBJCE_P(array_ptr);
 				if (ce && ce->get_iterator) {
@@ -9786,7 +9789,10 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		ZVAL_DEREF(array_ptr);
 		if (IS_TMP_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&tmp, array_ptr);
-			array_ptr = &tmp;
+			if (Z_OPT_IMMUTABLE_P(&tmp)) {
+				zval_copy_ctor_func(&tmp);
+			}
+			array_ref = array_ptr = &tmp;
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 				ce = Z_OBJCE_P(array_ptr);
 				if (ce && ce->get_iterator) {
@@ -16392,7 +16398,10 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		ZVAL_DEREF(array_ptr);
 		if (IS_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&tmp, array_ptr);
-			array_ptr = &tmp;
+			if (Z_OPT_IMMUTABLE_P(&tmp)) {
+				zval_copy_ctor_func(&tmp);
+			}
+			array_ref = array_ptr = &tmp;
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 				ce = Z_OBJCE_P(array_ptr);
 				if (ce && ce->get_iterator) {
@@ -33696,7 +33705,10 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		ZVAL_DEREF(array_ptr);
 		if (IS_CV == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&tmp, array_ptr);
-			array_ptr = &tmp;
+			if (Z_OPT_IMMUTABLE_P(&tmp)) {
+				zval_copy_ctor_func(&tmp);
+			}
+			array_ref = array_ptr = &tmp;
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 				ce = Z_OBJCE_P(array_ptr);
 				if (ce && ce->get_iterator) {

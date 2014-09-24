@@ -4458,7 +4458,10 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		ZVAL_DEREF(array_ptr);
 		if (OP1_TYPE == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&tmp, array_ptr);
-			array_ptr = &tmp;
+			if (Z_OPT_IMMUTABLE_P(&tmp)) {
+				zval_copy_ctor_func(&tmp);
+			}
+			array_ref = array_ptr = &tmp;
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 				ce = Z_OBJCE_P(array_ptr);
 				if (ce && ce->get_iterator) {
