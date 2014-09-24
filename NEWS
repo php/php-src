@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
     when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
 
+- OpenSSL:
+  . Fixed bug #68074i (Allow to use system cipher list instead of hardcoded
+    value). (Remi)
+
 
 25 Sep 2014, PHP 5.6.1
 
