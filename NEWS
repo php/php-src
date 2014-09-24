@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug #68088 (New Posthandler Potential Illegal efree() vulnerability).
     (Mike) (CVE-2014-3622)
 
+- DOM:
+  . Made DOMNode::textContent writeable. (Tjerk)
+
 - Fileinfo:
   . Fixed bug #67731 (finfo::file() returns invalid mime type
     for binary files). (Anatol)
@@ -49,9 +52,6 @@ PHP                                                                        NEWS
     (Daniel Lowrey)
   . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3).
     (Daniel Lowrey)
-
-- DOM:
-  . Made DOMNode::textContent writeable. (Tjerk)
 
 - phpdbg:
   . Fixed issue krakjoe/phpdbg#111 (compile error without ZEND_SIGNALS). (Bob)
