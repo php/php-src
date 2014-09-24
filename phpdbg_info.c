@@ -286,7 +286,6 @@ PHPDBG_INFO(classes) /* {{{ */
 		zend_hash_move_forward_ex(&classes, &position)) {
 
 		phpdbg_print_class_name(ce TSRMLS_CC);
-		phpdbg_out("\n");
 
 		if ((*ce)->parent) {
 			phpdbg_xml("<parents>");
@@ -305,7 +304,6 @@ PHPDBG_INFO(classes) /* {{{ */
 		} else {
 			phpdbg_writeln("classsource", "", "|---- no source code");
 		}
-	    	phpdbg_out("\n");
 	}
 
 	zend_hash_destroy(&classes);

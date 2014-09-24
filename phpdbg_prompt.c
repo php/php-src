@@ -872,7 +872,7 @@ PHPDBG_COMMAND(clean) /* {{{ */
 		return SUCCESS;
 	}
 
-	phpdbg_out("Cleaning Execution Environment");
+	phpdbg_out("Cleaning Execution Environment\n");
 	phpdbg_xml("<cleaninfo>");
 
 	phpdbg_writeln("clean", "classes=\"%d\"", "Classes    %d", zend_hash_num_elements(EG(class_table)));
@@ -889,7 +889,7 @@ PHPDBG_COMMAND(clean) /* {{{ */
 
 PHPDBG_COMMAND(clear) /* {{{ */
 {
-	phpdbg_out("Clearing Breakpoints");
+	phpdbg_out("Clearing Breakpoints\n");
 	phpdbg_xml("<clearinfo>");
 
 	phpdbg_writeln("clear", "files=\"%d\"", "File              %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]));
