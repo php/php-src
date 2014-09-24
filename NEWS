@@ -53,6 +53,9 @@ PHP                                                                        NEWS
 - DOM:
   . Made DOMNode::textContent writeable. (Tjerk)
 
+- phpdbg:
+  . Fixed issue krakjoe/phpdbg#111 (compile error without ZEND_SIGNALS). (Bob)
+
 - SOAP:
   . Fixed bug #67955 (SoapClient prepends 0-byte to cookie names). (Philip Hofstetter)
 
