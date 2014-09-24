@@ -240,6 +240,10 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 
 	switch (type) {
 		case P_ERROR:
+			if (!PHPDBG_G(last_was_newline)) {
+				fprintf(fp, "\n");
+				PHPDBG_G(last_was_newline) = 1;
+			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
 				rc = fprintf(fp,
 						"\033[%sm[%s]\033[0m\n",
@@ -250,6 +254,10 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 		break;
 
 		case P_NOTICE:
+			if (!PHPDBG_G(last_was_newline)) {
+				fprintf(fp, "\n");
+				PHPDBG_G(last_was_newline) = 1;
+			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
 				rc = fprintf(fp,
 						"\033[%sm[%s]\033[0m\n",
@@ -265,11 +273,13 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 			} else {
 				rc = fprintf(fp, "\n");
 			}
+			PHPDBG_G(last_was_newline) = 1;
 		} break;
 
 		case P_WRITE:
 			if (buffer) {
 				rc = fprintf(fp, "%s", buffer);
+				PHPDBG_G(last_was_newline) = buffer[strlen(buffer) - 1] == '\n';
 			}
 		break;
 

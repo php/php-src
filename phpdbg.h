@@ -64,7 +64,7 @@
 # include "TSRM.h"
 #endif
 
-#ifdef HAVE_LIBREADLINE
+#ifdef LIBREADLINE
 #   include <readline/readline.h>
 #   include <readline/history.h>
 #endif
@@ -208,6 +208,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	char *prompt[2];                             /* prompt */
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */
 	char *buffer;                                /* buffer */
+	zend_bool last_was_newline;                  /* check if we don't need to output a newline upon next phpdbg_error or phpdbg_notice */
 
 	zend_ulong flags;                            /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */

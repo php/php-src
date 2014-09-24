@@ -816,6 +816,7 @@ disconnect:
 				if (!phpdbg_write("%s", phpdbg_get_prompt(TSRMLS_C))) {
 					goto disconnect;
 				}
+				PHPDBG_G(last_was_newline) = 1;
 			}
 			
 			/* note: EOF is ignored */
@@ -836,7 +837,10 @@ readline:
 				if (fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
 					cmd = buf;
 				} else goto disconnect;
-			} else cmd = readline(phpdbg_get_prompt(TSRMLS_C));
+			} else {
+				cmd = readline(phpdbg_get_prompt(TSRMLS_C));
+				PHPDBG_G(last_was_newline) = 1;
+			}
 
 			if (!cmd) {
 				goto readline;
