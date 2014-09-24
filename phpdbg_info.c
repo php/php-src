@@ -136,21 +136,21 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 	}
 
 	if (show_globals) {
-		phpdbg_notice("variableinfo", "count=\"%d\"", "Superglobal variables (%d)", zend_hash_num_elements(&vars));
+		phpdbg_notice("variableinfo", "num=\"%d\"", "Superglobal variables (%d)", zend_hash_num_elements(&vars));
 	} else {
 		zend_op_array *ops = EG(active_op_array);
 
 		if (ops->function_name) {
 			if (ops->scope) {
-				phpdbg_notice("variableinfo", "method=\"%s::%s\" count=\"%d\"", "Variables in %s::%s() (%d)", ops->scope->name, ops->function_name, zend_hash_num_elements(&vars));
+				phpdbg_notice("variableinfo", "method=\"%s::%s\" num=\"%d\"", "Variables in %s::%s() (%d)", ops->scope->name, ops->function_name, zend_hash_num_elements(&vars));
 			} else {
-				phpdbg_notice("variableinfo", "function=\"%s\" count=\"%d\"", "Variables in %s() (%d)", ops->function_name, zend_hash_num_elements(&vars));
+				phpdbg_notice("variableinfo", "function=\"%s\" num=\"%d\"", "Variables in %s() (%d)", ops->function_name, zend_hash_num_elements(&vars));
 			}
 		} else {
 			if (ops->filename) {
-				phpdbg_notice("variableinfo", "file=\"%s\" count=\"%d\"", "Variables in %s (%d)", ops->filename, zend_hash_num_elements(&vars));
+				phpdbg_notice("variableinfo", "file=\"%s\" num=\"%d\"", "Variables in %s (%d)", ops->filename, zend_hash_num_elements(&vars));
 			} else {
-				phpdbg_notice("variableinfo", "opline=\"%p\" count=\"%d\"", "Variables @ %p (%d)", ops, zend_hash_num_elements(&vars));
+				phpdbg_notice("variableinfo", "opline=\"%p\" num=\"%d\"", "Variables @ %p (%d)", ops, zend_hash_num_elements(&vars));
 			}
 		}
 	}
@@ -205,15 +205,15 @@ PHPDBG_INFO(literal) /* {{{ */
 
 		if (ops->function_name) {
 			if (ops->scope) {
-				phpdbg_notice("literalinfo", "method=\"%s::%s\" count=\"%d\"", "Literal Constants in %s::%s() (%d)", ops->scope->name, ops->function_name, count);
+				phpdbg_notice("literalinfo", "method=\"%s::%s\" num=\"%d\"", "Literal Constants in %s::%s() (%d)", ops->scope->name, ops->function_name, count);
 			} else {
-				phpdbg_notice("literalinfo", "function=\"%s\" count=\"%d\"", "Literal Constants in %s() (%d)", ops->function_name, count);
+				phpdbg_notice("literalinfo", "function=\"%s\" num=\"%d\"", "Literal Constants in %s() (%d)", ops->function_name, count);
 			}
 		} else {
 			if (ops->filename) {
-				phpdbg_notice("literalinfo", "file=\"%s\" count=\"%d\"", "Literal Constants in %s (%d)", ops->filename, count);
+				phpdbg_notice("literalinfo", "file=\"%s\" num=\"%d\"", "Literal Constants in %s (%d)", ops->filename, count);
 			} else {
-				phpdbg_notice("literalinfo", "opline=\"%p\" count=\"%d\"", "Literal Constants @ %p (%d)", ops, count);
+				phpdbg_notice("literalinfo", "opline=\"%p\" num=\"%d\"", "Literal Constants @ %p (%d)", ops, count);
 			}
 		}
 
@@ -279,7 +279,7 @@ PHPDBG_INFO(classes) /* {{{ */
 		}
 	}
 
-	phpdbg_notice("classinfo", "count=\"%d\"", "User Classes (%d)", zend_hash_num_elements(&classes));
+	phpdbg_notice("classinfo", "num=\"%d\"", "User Classes (%d)", zend_hash_num_elements(&classes));
 
 	for (zend_hash_internal_pointer_reset_ex(&classes, &position);
 		zend_hash_get_current_data_ex(&classes, (void**)&ce, &position) == SUCCESS;
@@ -331,17 +331,22 @@ PHPDBG_INFO(funcs) /* {{{ */
 		}
 	}
 
-	phpdbg_notice("functioninfo", "count=\"%d\"", "User Functions (%d)", zend_hash_num_elements(&functions));
+	phpdbg_notice("functioninfo", "num=\"%d\"", "User Functions (%d)", zend_hash_num_elements(&functions));
 
 	for (zend_hash_internal_pointer_reset_ex(&functions, &position);
 		zend_hash_get_current_data_ex(&functions, (void**)&pzf, &position) == SUCCESS;
 		zend_hash_move_forward_ex(&functions, &position)) {
 		zend_op_array *op_array = &((*pzf)->op_array);
 
-		phpdbg_writeln("function", "name=\"%s\" file=\"%s\" line=\"%d\"", "|-------- %s in %s on line %d",
-			op_array->function_name ? op_array->function_name : "{main}",
-			op_array->filename ? op_array->filename : "(no source code)",
-			op_array->line_start);
+		phpdbg_write("function", "name=\"%s\"", "|-------- %s", op_array->function_name ? op_array->function_name : "{main}");
+
+		if (op_array->filename) {
+			phpdbg_writeln("functionsource", "file=\"%s\" line=\"%d\"", " in %s on line %d",
+				op_array->filename,
+				op_array->line_start);
+		} else {
+			phpdbg_writeln("functionsource", "", " (no source code)");
+		}
 	}
 
 	zend_hash_destroy(&functions);
