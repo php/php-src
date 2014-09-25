@@ -32,13 +32,7 @@
 #define YYERROR_VERBOSE
 #define YYSTYPE zval
 
-#ifdef ZTS
-#define YYPARSE_PARAM tsrm_ls
-#define YYLEX_PARAM tsrm_ls
-int ini_parse(void *arg);
-#else
 int ini_parse(void);
-#endif
 
 #define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
 #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
