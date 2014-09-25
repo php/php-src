@@ -1383,7 +1383,7 @@ PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(TSRMLS_D) /* {{{ */
 
 PHPDBG_API int phpdbg_get_element(const char *name, size_t len TSRMLS_DC) {
 	const phpdbg_element_t *element = elements;
-	
+
 	while (element && element->name) {
 		if (len == element->name_length) {
 			if (strncasecmp(name, element->name, len) == SUCCESS) {
@@ -1392,7 +1392,7 @@ PHPDBG_API int phpdbg_get_element(const char *name, size_t len TSRMLS_DC) {
 		}
 		element++;
 	}
-	
+
 	return PHPDBG_COLOR_INVALID;
 }
 
@@ -1441,7 +1441,7 @@ PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
 
 int phpdbg_rebuild_symtable(TSRMLS_D) {
 	if (!EG(active_op_array)) {
-		phpdbg_error("symtable", "type=\"noops\"", "No active op array!");
+		phpdbg_error("inactive", "type=\"op_array\"", "No active op array!");
 		return FAILURE;
 	}
 
@@ -1449,7 +1449,7 @@ int phpdbg_rebuild_symtable(TSRMLS_D) {
 		zend_rebuild_symbol_table(TSRMLS_C);
 
 		if (!EG(active_symbol_table)) {
-			phpdbg_error("symtable", "type=\"nosymtable\"", "No active symbol table!");
+			phpdbg_error("inactive", "type=\"symbol_table\"", "No active symbol table!");
 			return FAILURE;
 		}
 	}
@@ -1459,7 +1459,7 @@ int phpdbg_rebuild_symtable(TSRMLS_D) {
 
 PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D) /* {{{ */
 {
-	int columns;	
+	int columns;
 #ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 

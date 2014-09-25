@@ -48,7 +48,7 @@ const phpdbg_command_t phpdbg_set_commands[] = {
 PHPDBG_SET(prompt) /* {{{ */
 {
 	if (!param || param->type == EMPTY_PARAM) {
-		phpdbg_writeln("prompt", "str=\"%s\"", "Current prompt: %s", phpdbg_get_prompt(TSRMLS_C));
+		phpdbg_writeln("setprompt", "str=\"%s\"", "Current prompt: %s", phpdbg_get_prompt(TSRMLS_C));
 	} else {
 		phpdbg_set_prompt(param->str TSRMLS_CC);
 	}
@@ -107,12 +107,12 @@ PHPDBG_SET(breaks) /* {{{ */
 PHPDBG_SET(color) /* {{{ */
 {
 	const phpdbg_color_t *color = phpdbg_get_color(param->next->str, param->next->len TSRMLS_CC);
-	
+
 	if (!color) {
 		phpdbg_error("setcolor", "type=\"nocolor\"", "Failed to find the requested color (%s)", param->next->str);
 		return SUCCESS;
 	}
-	
+
 	switch (phpdbg_get_element(param->str, param->len TSRMLS_CC)) {
 		case PHPDBG_COLOR_PROMPT:
 			phpdbg_notice("setcolor", "type=\"prompt\" color=\"%s\" code=\"%s\"", "setting prompt color to %s (%s)", color->name, color->code);
@@ -122,19 +122,19 @@ PHPDBG_SET(color) /* {{{ */
 			}
 			phpdbg_set_color(PHPDBG_COLOR_PROMPT, color TSRMLS_CC);
 		break;
-		
+
 		case PHPDBG_COLOR_ERROR:
 			phpdbg_notice("setcolor", "type=\"error\" color=\"%s\" code=\"%s\"", "setting error color to %s (%s)", color->name, color->code);
 			phpdbg_set_color(PHPDBG_COLOR_ERROR, color TSRMLS_CC);
 		break;
-		
+
 		case PHPDBG_COLOR_NOTICE:
 			phpdbg_notice("setcolor", "type=\"notice\" color=\"%s\" code=\"%s\"", "setting notice color to %s (%s)", color->name, color->code);
 			phpdbg_set_color(PHPDBG_COLOR_NOTICE, color TSRMLS_CC);
 		break;
-		
+
 		default:
-			phpdbg_error("setcolor", "type=\"invalidelement\"", "Failed to find the requested element (%s)", param->str);
+			phpdbg_error("setcolor", "type=\"invalidtype\"", "Failed to find the requested element (%s)", param->str);
 	}
 
 	return SUCCESS;
@@ -152,7 +152,7 @@ PHPDBG_SET(colors) /* {{{ */
 				PHPDBG_G(flags) &= ~PHPDBG_IS_COLOURED;
 			}
 		} break;
-		
+
 		default:
 			phpdbg_error("setcolors", "type=\"wrongargs\"", "set colors used incorrectly: set colors <on|off>");
 	}
@@ -172,7 +172,7 @@ PHPDBG_SET(oplog) /* {{{ */
 
 			PHPDBG_G(oplog) = fopen(param->str, "w+");
 			if (!PHPDBG_G(oplog)) {
-				phpdbg_error("setoplog", "file=\"%s\"", "Failed to open %s for oplog", param->str);
+				phpdbg_error("setoplog", "type=\"openfailure\" file=\"%s\"", "Failed to open %s for oplog", param->str);
 				PHPDBG_G(oplog) = old;
 			} else {
 				if (old) {
