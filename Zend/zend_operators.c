@@ -2235,7 +2235,7 @@ try_again:
 			if (Z_OBJ_HANDLER_P(op1, get)
 			   && Z_OBJ_HANDLER_P(op1, set)) {
 				/* proxy object */
-                TSRMLS_FETCH();
+				TSRMLS_FETCH();
 				zval rv;
 				zval *val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
 				Z_ADDREF_P(val);
