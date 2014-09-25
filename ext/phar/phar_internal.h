@@ -197,7 +197,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 #ifdef ZTS
 #	include "TSRM.h"
 #	define PHAR_G(v) TSRMG(phar_globals_id, zend_phar_globals *, v)
-#	define PHAR_GLOBALS ((zend_phar_globals *) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(phar_globals_id)])
+#	define PHAR_GLOBALS ((zend_phar_globals *) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(phar_globals_id)])
 #else
 #	define PHAR_G(v) (phar_globals.v)
 #	define PHAR_GLOBALS (&phar_globals)

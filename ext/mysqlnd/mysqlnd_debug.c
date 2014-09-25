@@ -39,8 +39,6 @@ static const char * const mysqlnd_debug_empty_string = "";
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, open)(MYSQLND_DEBUG * self, zend_bool reopen)
 {
-	MYSQLND_ZTS(self);
-
 	if (!self->file_name) {
 		return FAIL;
 	}
@@ -67,7 +65,6 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	unsigned int flags = self->flags;
 	char pid_buffer[10], time_buffer[30], file_buffer[200],
 		 line_buffer[6], level_buffer[7];
-	MYSQLND_ZTS(self);
 
 	if (!self->stream && FAIL == self->m->open(self, FALSE)) {
 		return FAIL;
@@ -165,7 +162,6 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	unsigned int flags = self->flags;
 	char pid_buffer[10], time_buffer[30], file_buffer[200],
 		 line_buffer[6], level_buffer[7];
-	MYSQLND_ZTS(self);
 
 	if (!self->stream && FAIL == self->m->open(self, FALSE)) {
 		return FAIL;
@@ -436,7 +432,6 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 {
-	MYSQLND_ZTS(self);
 	if (self->stream) {
 #ifndef MYSQLND_PROFILING_DISABLED
 		if (!(self->flags & MYSQLND_DEBUG_FLUSH) && (self->flags & MYSQLND_DEBUG_PROFILE_CALLS)) {
@@ -719,7 +714,7 @@ mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC)
 {
 	MYSQLND_DEBUG *ret = calloc(1, sizeof(MYSQLND_DEBUG));
 #ifdef ZTS
-	ret->TSRMLS_C = TSRMLS_C;
+	ret->tsrm_ls = tsrm_get_ls_cache();
 #endif
 	ret->nest_level_limit = 0;
 	ret->pid = getpid();

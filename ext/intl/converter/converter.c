@@ -230,7 +230,7 @@ static void php_converter_to_u_callback(const void *context,
 	zval retval;
 	zval zargs[4];
 #ifdef ZTS
-	TSRMLS_D = objval->tsrm_ls;
+	void ***tsrm_ls = objval->tsrm_ls;
 #endif
 
 	ZVAL_LONG(&zargs[0], reason);
@@ -309,7 +309,7 @@ static void php_converter_from_u_callback(const void *context,
 	zval zargs[4];
 	int i;
 #ifdef ZTS
-	TSRMLS_D = objval->tsrm_ls;
+	void ***tsrm_ls = objval->tsrm_ls;
 #endif
 
 	ZVAL_LONG(&zargs[0], reason);
@@ -1046,7 +1046,7 @@ static zend_object *php_converter_object_ctor(zend_class_entry *ce, php_converte
 
 	zend_object_std_init(&objval->obj, ce TSRMLS_CC );
 #ifdef ZTS
-	objval->tsrm_ls = TSRMLS_C;
+	objval->tsrm_ls = tsrm_get_ls_cache();
 #endif
 	intl_error_init(&(objval->error) TSRMLS_CC);
 

@@ -46,7 +46,7 @@ struct st_mysqlnd_debug
 {
 	php_stream	*stream;
 #ifdef ZTS
-	TSRMLS_D;
+	void ***tsrm_ls;
 #endif
 	unsigned int flags;
 	unsigned int nest_level_limit;
