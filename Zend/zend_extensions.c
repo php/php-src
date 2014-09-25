@@ -105,6 +105,14 @@ int zend_load_extension(const char *path TSRMLS_DC)
 #endif
 		DL_UNLOAD(handle);
 		return FAILURE;
+	} else if (zend_get_extension(new_extension->name)) {
+		fprintf(stderr, "Cannot load %s - it was already loaded\n", new_extension->name);
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef PHP_WIN32
+		fflush(stderr);
+#endif
+		DL_UNLOAD(handle);
+		return FAILURE;
 	}
 
 	return zend_register_extension(new_extension, handle TSRMLS_CC);
@@ -187,7 +195,7 @@ void zend_shutdown_extensions(TSRMLS_D)
 void zend_extension_dtor(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT && !ZEND_DEBUG
-	if (extension->handle) {
+	if (extension->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
 		DL_UNLOAD(extension->handle);
 	}
 #endif

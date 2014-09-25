@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -55,7 +55,7 @@ typedef struct _php_hash_data {
 	const php_hash_ops *ops;
 	void *context;
 
-	long options;
+	zend_long options;
 	unsigned char *key;
 } php_hash_data;
 
@@ -138,7 +138,7 @@ PHP_FUNCTION(hash_algos);
 PHP_FUNCTION(hash_pbkdf2);
 PHP_FUNCTION(hash_equals);
 
-PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
 PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);
 

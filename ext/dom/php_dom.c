@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -321,7 +321,7 @@ static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, void
 		retval = std_hnd->get_property_ptr_ptr(object, member, type, cache_slot TSRMLS_CC);
 	}
 
-	STR_RELEASE(member_str);
+	zend_string_release(member_str);
 	return retval;
 }
 /* }}} */
@@ -352,7 +352,7 @@ zval *dom_read_property(zval *object, zval *member, int type, void **cache_slot,
 		retval = std_hnd->read_property(object, member, type, cache_slot, rv TSRMLS_CC);
 	}
 
-	STR_RELEASE(member_str);
+	zend_string_release(member_str);
 	return retval;
 }
 /* }}} */
@@ -374,7 +374,7 @@ void dom_write_property(zval *object, zval *member, zval *value, void **cache_sl
 		std_hnd->write_property(object, member, value, cache_slot TSRMLS_CC);
 	}
 
-	STR_RELEASE(member_str);
+	zend_string_release(member_str);
 }
 /* }}} */
 
@@ -407,7 +407,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, void
 		retval = std_hnd->has_property(object, member, check_empty, cache_slot TSRMLS_CC);
 	}
 
-	STR_RELEASE(member_str);
+	zend_string_release(member_str);
 	return retval;
 }
 /* }}} */
@@ -440,7 +440,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp TSRMLS_DC
 			zend_hash_move_forward_ex(prop_handlers, &pos)) {
 		zval value;
 		zend_string *string_key;
-		ulong num_key;
+		zend_ulong num_key;
 
 		if (entry->read_func(obj, &value TSRMLS_CC) == FAILURE) {
 			continue;

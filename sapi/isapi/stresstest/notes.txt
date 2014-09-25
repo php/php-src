@@ -44,7 +44,7 @@ Run: stresstest L files.txt
 supply the path to the parent of the "tests" directory (expect a couple
 long pauses for a couple of the larger tests)
 
-Run: stresstest T c:\php5-source
+Run: stresstest T c:\php7-source
 
 
 

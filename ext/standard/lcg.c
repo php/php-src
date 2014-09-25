@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -83,9 +83,9 @@ static void lcg_seed(TSRMLS_D) /* {{{ */
 		LCG(s1) = 1;
 	}
 #ifdef ZTS
-	LCG(s2) = (long) tsrm_thread_id();
+	LCG(s2) = (zend_long) tsrm_thread_id();
 #else
-	LCG(s2) = (long) getpid();
+	LCG(s2) = (zend_long) getpid();
 #endif
 
 	/* Add entropy to s2 by calling gettimeofday() again */

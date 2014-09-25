@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -272,14 +272,14 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 PHP_FUNCTION(convert_cyr_string)
 {
 	char *input, *fr_cs, *to_cs;
-	int input_len, fr_cs_len, to_cs_len;
+	size_t input_len, fr_cs_len, to_cs_len;
 	zend_string *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
 		return;
 	}
 
-	str = STR_INIT(input, input_len, 0);
+	str = zend_string_init(input, input_len, 0);
 
 	php_convert_cyr_string(str->val, str->len, fr_cs[0], to_cs[0] TSRMLS_CC);
 	RETVAL_NEW_STR(str);

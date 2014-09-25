@@ -377,7 +377,7 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 
 	got = php_stream_read(data->fp, buf, MIN(count, entry->uncompressed_filesize - data->position));
 	data->position = php_stream_tell(data->fp) - data->zero;
-	stream->eof = (data->position == (off_t) entry->uncompressed_filesize);
+	stream->eof = (data->position == (zend_off_t) entry->uncompressed_filesize);
 
 	return got;
 }
@@ -386,12 +386,12 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 /**
  * Used for fseek($fp) on a phar file handle
  */
-static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
+static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	phar_entry_info *entry;
 	int res;
-	off_t temp;
+	zend_off_t temp;
 
 	if (data->internal_file->link) {
 		entry = phar_get_link_source(data->internal_file TSRMLS_CC);
@@ -412,7 +412,7 @@ static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t 
 		default:
 			temp = 0;
 	}
-	if (temp > data->zero + (off_t) entry->uncompressed_filesize) {
+	if (temp > data->zero + (zend_off_t) entry->uncompressed_filesize) {
 		*newoffset = -1;
 		return -1;
 	}
@@ -440,7 +440,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 		return -1;
 	}
 	data->position = php_stream_tell(data->fp);
-	if (data->position > (off_t)data->internal_file->uncompressed_filesize) {
+	if (data->position > (zend_off_t)data->internal_file->uncompressed_filesize) {
 		data->internal_file->uncompressed_filesize = data->position;
 	}
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize;
@@ -906,7 +906,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
 				IS_SLASH(str_key->val[from_len])) {
 
-				new_str_key = STR_ALLOC(str_key->len + to_len - from_len, 0);
+				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
 				memcpy(new_str_key->val, resource_to->path + 1, to_len);
 				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
 				new_str_key->val[new_str_key->len] = 0;
@@ -918,8 +918,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				entry->filename = estrndup(new_str_key->val, new_str_key->len);
 				entry->filename_len = new_str_key->len;
 
-				STR_RELEASE(str_key);
-				b->h = STR_HASH_VAL(new_str_key);
+				zend_string_release(str_key);
+				b->h = zend_string_hash_val(new_str_key);
 				b->key = new_str_key;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -931,13 +931,13 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
 				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
 
-				new_str_key = STR_ALLOC(str_key->len + to_len - from_len, 0);
+				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
 				memcpy(new_str_key->val, resource_to->path + 1, to_len);
 				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
 				new_str_key->val[new_str_key->len] = 0;
 
-				STR_RELEASE(str_key);
-				b->h = STR_HASH_VAL(new_str_key);
+				zend_string_release(str_key);
+				b->h = zend_string_hash_val(new_str_key);
 				b->key = new_str_key;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -949,13 +949,13 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
 				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
 
-				new_str_key = STR_ALLOC(str_key->len + to_len - from_len, 0);
+				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
 				memcpy(new_str_key->val, resource_to->path + 1, to_len);
 				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
 				new_str_key->val[new_str_key->len] = 0;
 
-				STR_RELEASE(str_key);
-				b->h = STR_HASH_VAL(new_str_key);
+				zend_string_release(str_key);
+				b->h = zend_string_hash_val(new_str_key);
 				b->key = new_str_key;
 			}
 		} ZEND_HASH_FOREACH_END();

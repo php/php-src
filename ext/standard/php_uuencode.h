@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,8 +24,8 @@
 PHP_FUNCTION(convert_uudecode);
 PHP_FUNCTION(convert_uuencode);
 
-PHPAPI zend_string *php_uudecode(char *src, int src_len);
-PHPAPI zend_string *php_uuencode(char *src, int src_len);
+PHPAPI zend_string *php_uudecode(char *src, size_t src_len);
+PHPAPI zend_string *php_uuencode(char *src, size_t src_len);
 
 #endif /* PHP_UUENCODE_H */
 

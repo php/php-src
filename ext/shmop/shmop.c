@@ -146,11 +146,11 @@ PHP_MINFO_FUNCTION(shmop)
    gets and attaches a shared memory segment */
 PHP_FUNCTION(shmop_open)
 {
-	long key, mode, size;
+	zend_long key, mode, size;
 	struct php_shmop *shmop;	
 	struct shmid_ds shm;
 	char *flags;
-	int flags_len;
+	size_t flags_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsll", &key, &flags, &flags_len, &mode, &size) == FAILURE) {
 		return;
@@ -227,7 +227,7 @@ err:
    reads from a shm segment */
 PHP_FUNCTION(shmop_read)
 {
-	long shmid, start, count;
+	zend_long shmid, start, count;
 	struct php_shmop *shmop;
 	char *startaddr;
 	int bytes;
@@ -252,7 +252,7 @@ PHP_FUNCTION(shmop_read)
 	startaddr = shmop->addr + start;
 	bytes = count ? count : shmop->size - start;
 
-	return_string = STR_INIT(startaddr, bytes, 0);
+	return_string = zend_string_init(startaddr, bytes, 0);
 
 	RETURN_STR(return_string);
 }
@@ -262,7 +262,7 @@ PHP_FUNCTION(shmop_read)
    closes a shared memory segment */
 PHP_FUNCTION(shmop_close)
 {
-	long shmid;
+	zend_long shmid;
 	zval *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &shmid) == FAILURE) {
@@ -280,7 +280,7 @@ PHP_FUNCTION(shmop_close)
    returns the shm size */
 PHP_FUNCTION(shmop_size)
 {
-	long shmid;
+	zend_long shmid;
 	struct php_shmop *shmop;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &shmid) == FAILURE) {
@@ -299,11 +299,10 @@ PHP_FUNCTION(shmop_write)
 {
 	struct php_shmop *shmop;
 	int writesize;
-	long shmid, offset;
-	char *data;
-	int data_len;
+	zend_long shmid, offset;
+	zend_string *data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsl", &shmid, &data, &data_len, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lSl", &shmid, &data, &offset) == FAILURE) {
 		return;
 	}
 
@@ -319,8 +318,8 @@ PHP_FUNCTION(shmop_write)
 		RETURN_FALSE;
 	}
 
-	writesize = (data_len < shmop->size - offset) ? data_len : shmop->size - offset;
-	memcpy(shmop->addr + offset, data, writesize);
+	writesize = (data->len < shmop->size - offset) ? data->len : shmop->size - offset;
+	memcpy(shmop->addr + offset, data->val, writesize);
 
 	RETURN_LONG(writesize);
 }
@@ -330,7 +329,7 @@ PHP_FUNCTION(shmop_write)
    mark segment for deletion */
 PHP_FUNCTION(shmop_delete)
 {
-	long shmid;
+	zend_long shmid;
 	struct php_shmop *shmop;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &shmid) == FAILURE) {

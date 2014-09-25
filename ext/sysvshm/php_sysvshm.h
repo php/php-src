@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -34,27 +34,27 @@ extern zend_module_entry sysvshm_module_entry;
 
 typedef struct {
 	int le_shm;
-	long init_mem;
+	zend_long init_mem;
 } sysvshm_module;
 
 typedef struct {
-	long key;
-	long length;
-	long next;
+	zend_long key;
+	zend_long length;
+	zend_long next;
 	char mem;
 } sysvshm_chunk;
 
 typedef struct {
 	char magic[8];
-	long start;
-	long end;
-	long free;
-	long total;
+	zend_long start;
+	zend_long end;
+	zend_long free;
+	zend_long total;
 } sysvshm_chunk_head;
 
 typedef struct {
 	key_t key;               /* key set by user */
-	long id;                 /* returned by shmget */
+	zend_long id;                 /* returned by shmget */
 	sysvshm_chunk_head *ptr; /* memory address of shared memory */
 } sysvshm_shm;
 

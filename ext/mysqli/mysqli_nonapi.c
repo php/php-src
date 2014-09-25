@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -29,7 +29,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 
@@ -42,7 +42,7 @@
 
 /* {{{ php_mysqli_set_error
  */
-static void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRMLS_DC)
+static void php_mysqli_set_error(zend_long mysql_errno, char *mysql_err TSRMLS_DC)
 {
 	MyG(error_no) = mysql_errno;
 	if (MyG(error_msg)) {
@@ -62,9 +62,9 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	MYSQLI_RESOURCE		*mysqli_resource = NULL;
 	zval				*object = getThis();
 	char				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
-	int					hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
+	size_t					hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
 	zend_bool			persistent = FALSE;
-	long				port = 0, flags = 0;
+	zend_long				port = 0, flags = 0;
 	zend_string			*hash_key = NULL;
 	zend_bool			new_connection = FALSE;
 	zend_resource		*le;
@@ -200,14 +200,14 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		}
 	}
 	if (MyG(max_links) != -1 && MyG(num_links) >= MyG(max_links)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MyG(num_links));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%pd)", MyG(num_links));
 		goto err;
 	}
 
 	if (persistent && MyG(max_persistent) != -1 &&
 		(MyG(num_active_persistent) + MyG(num_inactive_persistent))>= MyG(max_persistent))
 	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%ld)",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%pd)",
 								MyG(num_active_persistent) + MyG(num_inactive_persistent));
 		goto err;
 	}
@@ -291,7 +291,7 @@ end:
 
 err:
 	if (mysql->hash_key) {
-		STR_RELEASE(mysql->hash_key);
+		zend_string_release(mysql->hash_key);
 		mysql->hash_key = NULL;
 		mysql->persistent = FALSE;
 	}
@@ -360,7 +360,7 @@ PHP_FUNCTION(mysqli_fetch_all)
 {
 	MYSQL_RES	*result;
 	zval		*mysql_result;
-	long		mode = MYSQLND_FETCH_NUM;
+	zend_long		mode = MYSQLND_FETCH_NUM;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &mode) == FAILURE) {
 		return;
@@ -503,7 +503,7 @@ PHP_FUNCTION(mysqli_multi_query)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char		*query = NULL;
-	int 		query_len;
+	size_t 		query_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
 		return;
@@ -548,8 +548,8 @@ PHP_FUNCTION(mysqli_query)
 	MYSQLI_RESOURCE		*mysqli_resource;
 	MYSQL_RES 			*result = NULL;
 	char				*query = NULL;
-	int 				query_len;
-	long 				resultmode = MYSQLI_STORE_RESULT;
+	size_t 				query_len;
+	zend_long 				resultmode = MYSQLI_STORE_RESULT;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|l", &mysql_link, mysqli_link_class_entry, &query, &query_len, &resultmode) == FAILURE) {
 		return;
@@ -750,7 +750,7 @@ PHP_FUNCTION(mysqli_poll)
 {
 	zval			*r_array, *e_array, *dont_poll_array;
 	MYSQLND			**new_r_array = NULL, **new_e_array = NULL, **new_dont_poll_array = NULL;
-	long			sec = 0, usec = 0;
+	zend_long			sec = 0, usec = 0;
 	enum_func_status ret;
 	int 			desc_num;
 
@@ -944,7 +944,7 @@ PHP_FUNCTION(mysqli_set_charset)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char		*cs_name;
-	int			csname_len;
+	size_t		csname_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &cs_name, &csname_len) == FAILURE) {
 		return;
@@ -1076,9 +1076,9 @@ PHP_FUNCTION(mysqli_begin_transaction)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
-	long		flags = TRANS_START_NO_OPT;
+	zend_long		flags = TRANS_START_NO_OPT;
 	char *		name = NULL;
-	int			name_len = -1;
+	size_t			name_len = -1;
 	zend_bool	err = FALSE;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ls", &mysql_link, mysqli_link_class_entry, &flags, &name, &name_len) == FAILURE) {
@@ -1086,7 +1086,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	if (flags < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for parameter flags (%ld)", flags);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for parameter flags (%pd)", flags);
 		err = TRUE;
 	}
 	if (!name_len) {
@@ -1131,7 +1131,7 @@ PHP_FUNCTION(mysqli_savepoint)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char *		name = NULL;
-	int			name_len = -1;
+	size_t			name_len = -1;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &name, &name_len) == FAILURE) {
 		return;
@@ -1160,7 +1160,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char *		name = NULL;
-	int			name_len = -1;
+	size_t			name_len = -1;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &name, &name_len) == FAILURE) {
 		return;

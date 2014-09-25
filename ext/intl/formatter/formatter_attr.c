@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@
  */
 PHP_FUNCTION( numfmt_get_attribute )
 {
-	long attribute, value;
+	zend_long attribute, value;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -101,7 +101,7 @@ PHP_FUNCTION( numfmt_get_attribute )
  */
 PHP_FUNCTION( numfmt_get_text_attribute )
 {
-	long   attribute;
+	zend_long   attribute;
 	UChar  value_buf[64];
 	int    value_buf_size = USIZE( value_buf );
 	UChar* value  = value_buf;
@@ -145,7 +145,7 @@ PHP_FUNCTION( numfmt_get_text_attribute )
  */
 PHP_FUNCTION( numfmt_set_attribute )
 {
-	long attribute;
+	zend_long attribute;
 	zval *value;
 	FORMATTER_METHOD_INIT_VARS;
 
@@ -209,9 +209,9 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 {
 	int slength = 0;
 	UChar *svalue = NULL;
-	long attribute;
+	zend_long attribute;
 	char *value;
-	int len;
+	size_t len;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -249,7 +249,7 @@ PHP_FUNCTION( numfmt_set_text_attribute )
  */
 PHP_FUNCTION( numfmt_get_symbol )
 {
-	long symbol;
+	zend_long symbol;
 	UChar value_buf[4];
 	UChar *value = value_buf;
 	int length = USIZE(value_buf);
@@ -297,9 +297,9 @@ PHP_FUNCTION( numfmt_get_symbol )
  */
 PHP_FUNCTION( numfmt_set_symbol )
 {
-	long       symbol;
+	zend_long       symbol;
 	char*      value     = NULL;
-	int        value_len = 0;
+	size_t        value_len = 0;
 	UChar*     svalue  = 0;
 	int        slength = 0;
 	FORMATTER_METHOD_INIT_VARS;
@@ -387,7 +387,7 @@ PHP_FUNCTION( numfmt_get_pattern )
 PHP_FUNCTION( numfmt_set_pattern )
 {
 	char*       value = NULL;
-	int         value_len = 0;
+	size_t      value_len = 0;
 	int         slength = 0;
 	UChar*	    svalue  = NULL;
 	FORMATTER_METHOD_INIT_VARS;
@@ -426,7 +426,7 @@ PHP_FUNCTION( numfmt_set_pattern )
  */
 PHP_FUNCTION( numfmt_get_locale )
 {
-	long type = ULOC_ACTUAL_LOCALE;
+	zend_long type = ULOC_ACTUAL_LOCALE;
 	char* loc;
 	FORMATTER_METHOD_INIT_VARS;
 

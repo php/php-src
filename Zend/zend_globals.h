@@ -71,20 +71,9 @@ typedef struct _zend_ini_entry zend_ini_entry;
 
 
 struct _zend_compiler_globals {
-	zend_stack bp_stack;
-	zend_stack switch_cond_stack;
-	zend_stack foreach_copy_stack;
-	zend_stack object_stack;
-	zend_stack declare_stack;
+	zend_stack loop_var_stack;
 
 	zend_class_entry *active_class_entry;
-
-	/* variables for list() compilation */
-	zend_llist list_llist;
-	zend_llist dimension_llist;
-	zend_stack list_stack;
-
-	zend_stack function_call_stack;
 
 	zend_string *compiled_filename;
 
@@ -112,24 +101,18 @@ struct _zend_compiler_globals {
 
 	zend_llist open_files;
 
-	long catch_begin;
-
 	struct _zend_ini_parser_param *ini_parser_param;
 
-	int interactive;
-
-	zend_uint start_lineno;
+	uint32_t start_lineno;
 	zend_bool increment_lineno;
 
 	znode implementing_class;
 
-	zend_uint access_type;
-
 	zend_string *doc_comment;
 
-	zend_uint compiler_options; /* set of ZEND_COMPILE_* constants */
+	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
 
-	zval       current_namespace;
+	zend_string *current_namespace;
 	HashTable *current_import;
 	HashTable *current_import_function;
 	HashTable *current_import_const;
@@ -153,6 +136,11 @@ struct _zend_compiler_globals {
 	zend_bool multibyte;
 	zend_bool detect_unicode;
 	zend_bool encoding_declared;
+
+	zend_ast *ast;
+	zend_arena *ast_arena;
+
+	zend_stack delayed_oplines_stack;
 
 #ifdef ZTS
 	zval **static_members_table;
@@ -188,7 +176,7 @@ struct _zend_executor_globals {
 
 	zval This;
 
-	long precision;
+	zend_long precision;
 
 	int ticks_count;
 
@@ -220,7 +208,7 @@ struct _zend_executor_globals {
 	zend_class_entry      *exception_class;
 
 	/* timeout support */
-	int timeout_seconds;
+	zend_long timeout_seconds;
 
 	int lambda_count;
 
@@ -230,7 +218,7 @@ struct _zend_executor_globals {
 
 	zend_objects_store objects_store;
 	zend_object *exception, *prev_exception;
-	zend_op *opline_before_exception;
+	const zend_op *opline_before_exception;
 	zend_op exception_op[3];
 
 	struct _zend_execute_data *current_execute_data;
@@ -241,8 +229,6 @@ struct _zend_executor_globals {
 
 	zend_bool active;
 	zend_bool valid_symbol_table;
-
-	zend_op *start_op;
 
 	void *saved_fpu_cw_ptr;
 #if XPFPA_HAVE_CW
@@ -268,7 +254,7 @@ struct _zend_ini_scanner_globals {
 	char *filename;
 	int lineno;
 
-	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW */
+	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW, ZEND_INI_SCANNER_TYPED */
 	int scanner_mode;
 };
 

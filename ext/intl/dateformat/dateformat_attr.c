@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -128,7 +128,7 @@ PHP_FUNCTION( datefmt_get_pattern )
 PHP_FUNCTION( datefmt_set_pattern )
 {
 	char*       value = NULL;
-	int         value_len = 0;
+	size_t         value_len = 0;
 	int         slength = 0;
 	UChar*	    svalue  = NULL;
 	zend_bool   is_pattern_localized =FALSE;
@@ -170,7 +170,7 @@ PHP_FUNCTION( datefmt_set_pattern )
 PHP_FUNCTION( datefmt_get_locale )
 {
 	char *loc;
-	long  loc_type =ULOC_ACTUAL_LOCALE;
+	zend_long  loc_type =ULOC_ACTUAL_LOCALE;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 

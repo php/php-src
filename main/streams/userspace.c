@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -490,7 +490,7 @@ PHP_FUNCTION(stream_wrapper_register)
 	zend_string *protocol, *classname;
 	struct php_user_stream_wrapper * uwrap;
 	zend_resource *rsrc;
-	long flags = 0;
+	zend_long flags = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &protocol, &classname, &flags) == FAILURE) {
 		RETURN_FALSE;
@@ -531,7 +531,7 @@ PHP_FUNCTION(stream_wrapper_register)
 PHP_FUNCTION(stream_wrapper_unregister)
 {
 	char *protocol;
-	int protocol_len;
+	size_t protocol_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &protocol, &protocol_len) == FAILURE) {
 		RETURN_FALSE;
@@ -617,9 +617,9 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 
 	/* don't allow strange buffer overruns due to bogus return */
 	if (didwrite > count) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote %ld bytes more data than requested (%ld written, %ld max)",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote " ZEND_LONG_FMT " bytes more data than requested (" ZEND_LONG_FMT " written, " ZEND_LONG_FMT " max)",
 				us->wrapper->classname,
-				(long)(didwrite - count), (long)didwrite, (long)count);
+				(zend_long)(didwrite - count), (zend_long)didwrite, (zend_long)count);
 		didwrite = count;
 	}
 
@@ -654,8 +654,8 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 		convert_to_string(&retval);
 		didread = Z_STRLEN(retval);
 		if (didread > count) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %ld bytes more data than requested (%ld read, %ld max) - excess data will be lost",
-					us->wrapper->classname, (long)(didread - count), (long)didread, (long)count);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read " ZEND_LONG_FMT " bytes more data than requested (" ZEND_LONG_FMT " read, " ZEND_LONG_FMT " max) - excess data will be lost",
+					us->wrapper->classname, (zend_long)(didread - count), (zend_long)didread, (zend_long)count);
 			didread = count;
 		}
 		if (didread > 0)
@@ -751,7 +751,7 @@ static int php_userstreamop_flush(php_stream *stream TSRMLS_DC)
 	return call_result;
 }
 
-static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	zval func_name;
 	zval retval;
@@ -987,7 +987,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 		case PHP_STREAM_TRUNCATE_SET_SIZE: {
 			ptrdiff_t new_size = *(ptrdiff_t*) ptrparam;
 			if (new_size >= 0 && new_size <= (ptrdiff_t)LONG_MAX) {
-				ZVAL_LONG(&args[0], (long)new_size);
+				ZVAL_LONG(&args[0], (zend_long)new_size);
 				call_result = call_user_function_ex(NULL,
 								Z_ISUNDEF(us->object)? NULL : &us->object,
 								&func_name,
@@ -1454,7 +1454,7 @@ static int php_userstreamop_closedir(php_stream *stream, int close_handle TSRMLS
 	return 0;
 }
 
-static int php_userstreamop_rewinddir(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_userstreamop_rewinddir(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	zval func_name;
 	zval retval;

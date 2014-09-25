@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -308,7 +308,7 @@ static PHP_FUNCTION(phpdbg_color)
 {
 	long element = 0L;
 	char *color = NULL;
-	int color_len = 0;
+	size_t color_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &element, &color, &color_len) == FAILURE) {
 		return;
@@ -329,7 +329,7 @@ static PHP_FUNCTION(phpdbg_color)
 static PHP_FUNCTION(phpdbg_prompt)
 {
 	char *prompt = NULL;
-	int prompt_len = 0;
+	size_t prompt_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &prompt, &prompt_len) == FAILURE) {
 		return;
@@ -1296,14 +1296,14 @@ phpdbg_main:
 		
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
-#if defined(ZEND_SIGNALS) && !defined(_WIN32)
-		if (listen[0] < 0) {
-			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC); } zend_end_try();
-		}
-#elif !defined(_WIN32)
+#ifndef _WIN32
 		if (listen[0] < 0) {
 #endif
+#if defined(ZEND_SIGNALS) && !defined(_WIN32)
+			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC); } zend_end_try();
+#else
 			signal(SIGINT, phpdbg_sigint_handler);
+#endif
 #ifndef _WIN32
 		}
 #endif

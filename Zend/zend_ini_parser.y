@@ -53,10 +53,10 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 	char str_result[MAX_LENGTH_OF_LONG];
 
 	i_op1 = atoi(Z_STRVAL_P(op1));
-	STR_FREE(Z_STR_P(op1));
+	zend_string_free(Z_STR_P(op1));
 	if (op2) {
 		i_op2 = atoi(Z_STRVAL_P(op2));
-		STR_FREE(Z_STR_P(op2));
+		zend_string_free(Z_STR_P(op2));
 	} else {
 		i_op2 = 0;
 	}
@@ -102,7 +102,7 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 	int op1_len = Z_STRLEN_P(op1);
 	int length = op1_len + Z_STRLEN_P(op2);
 
-	ZVAL_NEW_STR(result, STR_REALLOC(Z_STR_P(op1), length, 1));
+	ZVAL_NEW_STR(result, zend_string_realloc(Z_STR_P(op1), length, 1));
 	memcpy(Z_STRVAL_P(result)+op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 	Z_STRVAL_P(result)[length] = 0;
 }
@@ -130,7 +130,7 @@ static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 		if (c == &tmp) {
 			zval_dtor(&tmp);
 		}
-		STR_FREE(Z_STR_P(name));
+		zend_string_free(Z_STR_P(name));
 	} else {
 		*result = *name;
 	}
@@ -141,12 +141,12 @@ static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 */
 static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 {
-	zval curval;
+	zval *curval;
 	char *envvar;
 
 	/* Fetch configuration option value */
-	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRLEN_P(name), &curval) == SUCCESS) {
-		ZVAL_PSTRINGL(result, Z_STRVAL(curval), Z_STRLEN(curval));
+	if ((curval = zend_get_configuration_directive(Z_STR_P(name))) != NULL) {
+		ZVAL_PSTRINGL(result, Z_STRVAL_P(curval), Z_STRLEN_P(curval));
 	/* ..or if not found, try ENV */
 	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name) TSRMLS_CC)) != NULL ||
 			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {
@@ -264,6 +264,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 %token TC_QUOTED_STRING
 %token BOOL_TRUE
 %token BOOL_FALSE
+%token NULL_NULL
 %token END_OF_LINE
 %token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@' '{' '}'
 %left '|' '&' '^'
@@ -282,26 +283,26 @@ statement:
 			printf("SECTION: [%s]\n", Z_STRVAL($2));
 #endif
 			ZEND_INI_PARSER_CB(&$2, NULL, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			STR_RELEASE(Z_STR($2));
+			zend_string_release(Z_STR($2));
 		}
 	|	TC_LABEL '=' string_or_value {
 #if DEBUG_CFG_PARSER
 			printf("NORMAL: '%s' = '%s'\n", Z_STRVAL($1), Z_STRVAL($3));
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$3, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			STR_RELEASE(Z_STR($1));
-			STR_RELEASE(Z_STR($3));
+			zend_string_release(Z_STR($1));
+			zval_ptr_dtor(&$3);
 		}
 	|	TC_OFFSET option_offset ']' '=' string_or_value {
 #if DEBUG_CFG_PARSER
 			printf("OFFSET: '%s'[%s] = '%s'\n", Z_STRVAL($1), Z_STRVAL($2), Z_STRVAL($5));
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$5, &$2, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			STR_RELEASE(Z_STR($1));
-			STR_RELEASE(Z_STR($2));
-			STR_RELEASE(Z_STR($5));
+			zend_string_release(Z_STR($1));
+			zend_string_release(Z_STR($2));
+			zval_ptr_dtor(&$5);
 		}
-	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); STR_RELEASE(Z_STR($1)); }
+	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); zend_string_release(Z_STR($1)); }
 	|	END_OF_LINE
 ;
 
@@ -314,6 +315,7 @@ string_or_value:
 		expr							{ $$ = $1; }
 	|	BOOL_TRUE						{ $$ = $1; }
 	|	BOOL_FALSE						{ $$ = $1; }
+	|	NULL_NULL						{ $$ = $1; }
 	|	END_OF_LINE						{ zend_ini_init_string(&$$); }
 ;
 
@@ -323,8 +325,8 @@ option_offset:
 ;
 
 encapsed_list:
-		encapsed_list cfg_var_ref		{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
-	|	encapsed_list TC_QUOTED_STRING	{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
+		encapsed_list cfg_var_ref		{ zend_ini_add_string(&$$, &$1, &$2); zend_string_free(Z_STR($2)); }
+	|	encapsed_list TC_QUOTED_STRING	{ zend_ini_add_string(&$$, &$1, &$2); zend_string_free(Z_STR($2)); }
 	|	/* empty */						{ zend_ini_init_string(&$$); }
 ;
 
@@ -332,18 +334,18 @@ var_string_list_section:
 		cfg_var_ref						{ $$ = $1; }
 	|	constant_literal				{ $$ = $1; }
 	|	'"' encapsed_list '"'			{ $$ = $2; }
-	|	var_string_list_section cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
-	|	var_string_list_section constant_literal	{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
-	|	var_string_list_section '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); STR_FREE(Z_STR($3)); }
+	|	var_string_list_section cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); zend_string_free(Z_STR($2)); }
+	|	var_string_list_section constant_literal	{ zend_ini_add_string(&$$, &$1, &$2); zend_string_free(Z_STR($2)); }
+	|	var_string_list_section '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); zend_string_free(Z_STR($3)); }
 ;
 
 var_string_list:
 		cfg_var_ref						{ $$ = $1; }
 	|	constant_string					{ $$ = $1; }
 	|	'"' encapsed_list '"'			{ $$ = $2; }
-	|	var_string_list cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
-	|	var_string_list constant_string	{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
-	|	var_string_list '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); STR_FREE(Z_STR($3)); }
+	|	var_string_list cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); zend_string_free(Z_STR($2)); }
+	|	var_string_list constant_string	{ zend_ini_add_string(&$$, &$1, &$2); zend_string_free(Z_STR($2)); }
+	|	var_string_list '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); zend_string_free(Z_STR($3)); }
 ;
 
 expr:
@@ -357,7 +359,7 @@ expr:
 ;
 
 cfg_var_ref:
-		TC_DOLLAR_CURLY TC_VARNAME '}'	{ zend_ini_get_var(&$$, &$2 TSRMLS_CC); STR_FREE(Z_STR($2)); }
+		TC_DOLLAR_CURLY TC_VARNAME '}'	{ zend_ini_get_var(&$$, &$2 TSRMLS_CC); zend_string_free(Z_STR($2)); }
 ;
 
 constant_literal:

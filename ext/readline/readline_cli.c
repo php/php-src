@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -42,7 +42,7 @@
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #ifdef __riscos__
 #include <unixlib/local.h>
@@ -79,7 +79,7 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
 static char php_last_char = '\0';
 static FILE *pager_pipe = NULL;
 
-static size_t readline_shell_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+static size_t readline_shell_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 	if (CLIR_G(prompt_str)) {
 		smart_str_appendl(CLIR_G(prompt_str), str, str_length);
@@ -97,7 +97,7 @@ static size_t readline_shell_write(const char *str, uint str_length TSRMLS_DC) /
 }
 /* }}} */
 
-static int readline_shell_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+static size_t readline_shell_ub_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 	/* We just store the last char here and then pass back to the
 	   caller (sapi_cli_single_write in sapi/cli) which will actually
@@ -409,7 +409,7 @@ static int cli_is_valid_code(char *code, int len, zend_string **prompt TSRMLS_DC
 static char *cli_completion_generator_ht(const char *text, int textlen, int *state, HashTable *ht, void **pData TSRMLS_DC) /* {{{ */
 {
 	zend_string *name;
-	ulong number;
+	zend_ulong number;
 
 	if (!(*state % 2)) {
 		zend_hash_internal_pointer_reset(ht);
@@ -435,7 +435,7 @@ static char *cli_completion_generator_ht(const char *text, int textlen, int *sta
 static char *cli_completion_generator_var(const char *text, int textlen, int *state TSRMLS_DC) /* {{{ */
 {
 	char *retval, *tmp;
-	zend_array *symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
+	zend_array *symbol_table = &EG(symbol_table);
 
 	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, symbol_table ? &symbol_table->ht : NULL, NULL TSRMLS_CC);
 	if (retval) {
@@ -530,10 +530,10 @@ TODO:
 		class_name_end = strstr(text, "::");
 		if (class_name_end) {
 			class_name_len = class_name_end - text;
-			class_name = STR_ALLOC(class_name_len, 0);
+			class_name = zend_string_alloc(class_name_len, 0);
 			zend_str_tolower_copy(class_name->val, text, class_name_len);
 			if ((ce = zend_lookup_class(class_name TSRMLS_CC)) == NULL) {
-				STR_RELEASE(class_name);
+				zend_string_release(class_name);
 				return NULL;
 			}
 			lc_text = zend_str_tolower_dup(class_name_end + 2, textlen - 2 - class_name_len);
@@ -564,7 +564,7 @@ TODO:
 		}
 		efree(lc_text);
 		if (class_name_end) {
-			STR_RELEASE(class_name);
+			zend_string_release(class_name);
 		}
 		if (ce && retval) {
 			int len = class_name_len + 2 + strlen(retval) + 1;
@@ -631,13 +631,13 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 			if (param) {
 				zend_string *cmd;
 				param++;
-				cmd = STR_INIT(&line[1], param - &line[1] - 1, 0);
+				cmd = zend_string_init(&line[1], param - &line[1] - 1, 0);
 
-				zend_alter_ini_entry_ex(cmd, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
-				STR_RELEASE(cmd);
+				zend_alter_ini_entry_chars_ex(cmd, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+				zend_string_release(cmd);
 				add_history(line);
 
-				STR_RELEASE(prompt);
+				zend_string_release(prompt);
 				/* TODO: This might be wrong! */
 				prompt = cli_get_prompt("php", '>' TSRMLS_CC);
 				continue;
@@ -659,7 +659,7 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 		}
 
 		free(line);
-		STR_RELEASE(prompt);
+		zend_string_release(prompt);
 
 		if (!cli_is_valid_code(code, pos, &prompt TSRMLS_CC)) {
 			continue;
@@ -697,7 +697,7 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 	}
 	free(history_file);
 	efree(code);
-	STR_RELEASE(prompt);
+	zend_string_release(prompt);
 	return EG(exit_status);
 }
 /* }}} */

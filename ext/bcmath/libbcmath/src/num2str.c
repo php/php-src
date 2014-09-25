@@ -52,9 +52,9 @@ zend_string
 	/* Allocate the string memory. */
 	signch = ( num->n_sign == PLUS ? 0 : 1 );  /* Number of sign chars. */
 	if (num->n_scale > 0)
-		str = STR_ALLOC(num->n_len + num->n_scale + signch + 1, 0);
+		str = zend_string_alloc(num->n_len + num->n_scale + signch + 1, 0);
 	else
-		str = STR_ALLOC(num->n_len + signch, 0);
+		str = zend_string_alloc(num->n_len + signch, 0);
 	if (str == NULL) bc_out_of_memory();
 
 	/* The negative sign if needed. */

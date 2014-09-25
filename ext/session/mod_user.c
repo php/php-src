@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -44,7 +44,7 @@ ps_module ps_mod_user = {
 
 #define SESS_ZVAL_STR(vl, a)						\
 {													\
-	ZVAL_STR(a, STR_COPY(vl));						\
+	ZVAL_STR_COPY(a, vl);							\
 }
 
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval TSRMLS_DC)
@@ -150,7 +150,7 @@ PS_READ_FUNC(user)
 
 	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) == IS_STRING) {
-			*val = STR_COPY(Z_STR(retval));
+			*val = zend_string_copy(Z_STR(retval));
 			ret = SUCCESS;
 		}
 		zval_ptr_dtor(&retval);
@@ -207,7 +207,7 @@ PS_CREATE_SID_FUNC(user)
 
 		if (!Z_ISUNDEF(retval)) {
 			if (Z_TYPE(retval) == IS_STRING) {
-				id = STR_COPY(Z_STR(retval));
+				id = zend_string_copy(Z_STR(retval));
 			}
 			zval_ptr_dtor(&retval);
 		} else {

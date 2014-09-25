@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -39,7 +39,7 @@
 PHP_METHOD(SessionHandler, open)
 {
 	char *save_path = NULL, *session_name = NULL;
-	int save_path_len, session_name_len;
+	size_t save_path_len, session_name_len;
 
 	PS_SANITY_CHECK;
 
@@ -125,7 +125,7 @@ PHP_METHOD(SessionHandler, destroy)
    Wraps the old gc handler */
 PHP_METHOD(SessionHandler, gc)
 {
-	long maxlifetime;
+	zend_long maxlifetime;
 	int nrdels;
 
 	PS_SANITY_CHECK_IS_OPEN;
@@ -143,6 +143,8 @@ PHP_METHOD(SessionHandler, gc)
 PHP_METHOD(SessionHandler, create_sid)
 {
 	zend_string *id;
+
+	PS_SANITY_CHECK;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 	    return;

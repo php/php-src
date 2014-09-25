@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -208,7 +208,7 @@ PHP_FUNCTION(ibase_delete_user)
    Connect to the service manager */
 PHP_FUNCTION(ibase_service_attach)
 {
-	int hlen, ulen, plen, spb_len;
+	size_t hlen, ulen, plen, spb_len;
 	ibase_service *svm;
 	char buf[128], *host, *user, *pass, *loc;
 	isc_svc_handle handle = NULL;
@@ -425,7 +425,7 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 	 */
 	zval *res;
 	char *db, *bk, buf[200];
-	int dblen, bklen, spb_len;
+	size_t dblen, bklen, spb_len;
 	long opts = 0;
 	zend_bool verbose = 0;
 	ibase_service *svm;

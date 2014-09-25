@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -42,7 +42,7 @@ static void incomplete_class_message(zval *object, int error_type TSRMLS_DC)
 
 	if (class_name) {
 		php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, class_name->val);
-		STR_RELEASE(class_name);
+		zend_string_release(class_name);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, "unknown");
 	}
@@ -141,7 +141,7 @@ PHPAPI zend_string *php_lookup_class_name(zval *object)
 	object_properties = Z_OBJPROP_P(object);
 
 	if ((val = zend_hash_str_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)) != NULL) {
-		return STR_COPY(Z_STR_P(val));
+		return zend_string_copy(Z_STR_P(val));
 	}
 
 	return NULL;
@@ -150,7 +150,7 @@ PHPAPI zend_string *php_lookup_class_name(zval *object)
 
 /* {{{ php_store_class_name
  */
-PHPAPI void php_store_class_name(zval *object, const char *name, zend_uint len)
+PHPAPI void php_store_class_name(zval *object, const char *name, uint32_t len)
 {
 	zval val;
 	TSRMLS_FETCH();

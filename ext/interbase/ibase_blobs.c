@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -239,7 +239,7 @@ PHP_FUNCTION(ibase_blob_create)
 PHP_FUNCTION(ibase_blob_open)
 {
 	char *blob_id;
-	int blob_id_len;
+	size_t blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
@@ -406,7 +406,7 @@ PHP_FUNCTION(ibase_blob_cancel)
 PHP_FUNCTION(ibase_blob_info)
 {
 	char *blob_id;
-	int blob_id_len;
+	size_t blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
@@ -482,7 +482,7 @@ PHP_FUNCTION(ibase_blob_info)
 PHP_FUNCTION(ibase_blob_echo)
 {
 	char *blob_id;
-	int blob_id_len;
+	size_t blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;

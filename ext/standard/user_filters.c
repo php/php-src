@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -397,7 +397,7 @@ static php_stream_filter_factory user_filter_factory = {
 static void filter_item_dtor(zval *zv)
 {
 	struct php_user_filter_data *fdat = Z_PTR_P(zv);
-	STR_RELEASE(fdat->classname);
+	zend_string_release(fdat->classname);
 	efree(fdat);
 }
 
@@ -498,7 +498,7 @@ PHP_FUNCTION(stream_bucket_new)
 	php_stream *stream;
 	char *buffer;
 	char *pbuffer;
-	int buffer_len;
+	size_t buffer_len;
 	php_stream_bucket *bucket;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zstream, &buffer, &buffer_len) == FAILURE) {
@@ -547,7 +547,7 @@ PHP_FUNCTION(stream_get_filters)
 	if (filters_hash) {
 		ZEND_HASH_FOREACH_STR_KEY(filters_hash, filter_name) {
 			if (filter_name) {
-				add_next_index_str(return_value, STR_COPY(filter_name));
+				add_next_index_str(return_value, zend_string_copy(filter_name));
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -584,13 +584,13 @@ PHP_FUNCTION(stream_filter_register)
 	}
 
 	fdat = ecalloc(1, sizeof(struct php_user_filter_data));
-	fdat->classname = STR_COPY(classname);
+	fdat->classname = zend_string_copy(classname);
 
 	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL &&
 			php_stream_filter_register_factory_volatile(filtername->val, &user_filter_factory TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
-		STR_RELEASE(classname);
+		zend_string_release(classname);
 		efree(fdat);
 	}
 }

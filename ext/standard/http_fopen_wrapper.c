@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,7 +27,7 @@
 #include "php_network.h"
 #include "php_ini.h"
 #include "ext/standard/basic_functions.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -218,7 +218,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			
 	if (errstr) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", errstr->val);
-		STR_RELEASE(errstr);
+		zend_string_release(errstr);
 		errstr = NULL;
 	}
 
@@ -422,7 +422,7 @@ finish:
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmpzval), tmpheader) {
 				if (Z_TYPE_P(tmpheader) == IS_STRING) {
-					smart_str_appendl(&tmpstr, Z_STRVAL_P(tmpheader), Z_STRLEN_P(tmpheader));
+					smart_str_append(&tmpstr, Z_STR_P(tmpheader));
 					smart_str_appendl(&tmpstr, "\r\n", sizeof("\r\n") - 1);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -437,7 +437,7 @@ finish:
 			/* Remove newlines and spaces from start and end php_trim will estrndup() */
 			tmp = php_trim(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval), NULL, 0, NULL, 3 TSRMLS_CC);
 		}
-		if (tmp && strlen(tmp) > 0) {
+		if (tmp && tmp[0] != '\0') {
 			char *s;
 
 			user_headers = estrdup(tmp);
@@ -537,7 +537,7 @@ finish:
 			php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
 		}
 
-		STR_FREE(stmp);
+		zend_string_free(stmp);
 	}
 
 	/* if the user has configured who they are, send a From: line */
@@ -749,7 +749,7 @@ finish:
 
 				/* create filter to decode response body */
 				if (!(options & STREAM_ONLY_GET_HEADERS)) {
-					long decode = 1;
+					zend_long decode = 1;
 
 					if (context && (tmpzval = php_stream_context_get_option(context, "http", "auto_decode")) != NULL) {
 						decode = zend_is_true(tmpzval TSRMLS_CC);

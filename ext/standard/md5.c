@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -46,20 +46,19 @@ PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /
    Calculate the md5 hash of a string */
 PHP_NAMED_FUNCTION(php_if_md5)
 {
-	char *arg;
-	int arg_len;
+	zend_string *arg;
 	zend_bool raw_output = 0;
 	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &raw_output) == FAILURE) {
 		return;
 	}
 	
 	md5str[0] = '\0';
 	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, arg, arg_len);
+	PHP_MD5Update(&context, arg->val, arg->len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
 		RETURN_STRINGL(digest, 16);
@@ -76,13 +75,13 @@ PHP_NAMED_FUNCTION(php_if_md5)
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
 	char          *arg;
-	int           arg_len;
+	size_t           arg_len;
 	zend_bool raw_output = 0;
 	char          md5str[33];
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
-	int           n;
+	size_t           n;
 	php_stream    *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
@@ -100,13 +99,17 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 		PHP_MD5Update(&context, buf, n);
 	}
 
-	PHP_MD5Final(digest, &context);
+	/* XXX this probably can be improved with some number of retries */
+	if (!php_stream_eof(stream)) {
+		php_stream_close(stream);
+		PHP_MD5Final(digest, &context);
+
+		RETURN_FALSE;
+	}
 
 	php_stream_close(stream);
 
-	if (n<0) {
-		RETURN_FALSE;
-	}
+	PHP_MD5Final(digest, &context);
 
 	if (raw_output) {
 		RETURN_STRINGL(digest, 16);
@@ -385,5 +388,5 @@ PHPAPI void PHP_MD5Final(unsigned char *result, PHP_MD5_CTX *ctx)
 	result[14] = ctx->d >> 16;
 	result[15] = ctx->d >> 24;
 
-	memset(ctx, 0, sizeof(*ctx));
+	ZEND_SECURE_ZERO(ctx, sizeof(*ctx));
 }

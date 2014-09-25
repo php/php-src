@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -102,7 +102,7 @@ static zend_object *Calendar_clone_obj(zval *object TSRMLS_DC)
 				"Could not clone IntlCalendar", 0 TSRMLS_CC);
 			err_msg = intl_error_get_message(CALENDAR_ERROR_P(co_orig) TSRMLS_CC);
 			zend_throw_exception(NULL, err_msg->val, 0 TSRMLS_CC);
-			STR_FREE(err_msg);
+			zend_string_free(err_msg);
 		} else {
 			co_new->ucal = newCalendar;
 		}
@@ -209,7 +209,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		const char	*name	= debug_info_fields[i].name; 
 		int32_t		res		= cal->get(debug_info_fields[i].field, uec);
 		if (U_SUCCESS(uec)) {
-			add_assoc_long(&zfields, name, (long)res);
+			add_assoc_long(&zfields, name, (zend_long)res);
 		} else {
 			add_assoc_string(&zfields, name, const_cast<char*>(u_errorName(uec)));
 		}

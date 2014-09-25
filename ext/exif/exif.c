@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -166,17 +166,17 @@ ZEND_DECLARE_MODULE_GLOBALS(exif)
 
 ZEND_INI_MH(OnUpdateEncode)
 {
-	if (new_value && new_value_length) {
+	if (new_value && new_value->len) {
 		const zend_encoding **return_list;
 		size_t return_size;
-		if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length,
+		if (FAILURE == zend_multibyte_parse_encoding_list(new_value->val, new_value->len,
 	&return_list, &return_size, 0 TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value->val);
 			return FAILURE;
 		}
 		efree(return_list);
 	}
-	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 
 ZEND_INI_MH(OnUpdateDecode)
@@ -184,14 +184,14 @@ ZEND_INI_MH(OnUpdateDecode)
 	if (new_value) {
 		const zend_encoding **return_list;
 		size_t return_size;
-		if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length,
+		if (FAILURE == zend_multibyte_parse_encoding_list(new_value->val, new_value->len,
 	&return_list, &return_size, 0 TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value->val);
 			return FAILURE;
 		}
 		efree(return_list);
 	}
-	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 
 PHP_INI_BEGIN()
@@ -2334,7 +2334,7 @@ static char * exif_get_markername(int marker)
 	Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
-	long tag;
+	zend_long tag;
 	char *szTemp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &tag) == FAILURE) {
@@ -3847,7 +3847,7 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all TSRMLS_DC)
 {
 	int ret;
-	struct stat st;
+	zend_stat_t st;
 	zend_string *base;
 	
 	/* Start with an empty image information structure. */
@@ -3884,7 +3884,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 
 	base = php_basename(FileName, strlen(FileName), NULL, 0 TSRMLS_CC);
 	ImageInfo->FileName          = estrndup(base->val, base->len);
-	STR_RELEASE(base);
+	zend_string_release(base);
 	ImageInfo->read_thumbnail = read_thumbnail;
 	ImageInfo->read_all = read_all;
 	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
@@ -3912,7 +3912,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 PHP_FUNCTION(exif_read_data)
 {
 	char *p_name, *p_sections_needed = NULL;
-	int p_name_len, p_sections_needed_len = 0;
+	size_t p_name_len, p_sections_needed_len = 0;
 	zend_bool sub_arrays=0, read_thumbnail=0, read_all=0;
 
 	int i, ret, sections_needed=0;
@@ -4091,7 +4091,8 @@ PHP_FUNCTION(exif_thumbnail)
 {
 	zval *p_width = 0, *p_height = 0, *p_imagetype = 0;
 	char *p_name;
-	int p_name_len, ret, arg_c = ZEND_NUM_ARGS();
+	size_t p_name_len;
+	int ret, arg_c = ZEND_NUM_ARGS();
 	image_info_type ImageInfo;
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
@@ -4154,7 +4155,7 @@ PHP_FUNCTION(exif_thumbnail)
 PHP_FUNCTION(exif_imagetype)
 {
 	char *imagefile;
-	int imagefile_len;
+	size_t imagefile_len;
 	php_stream * stream;
  	int itype = 0;
 

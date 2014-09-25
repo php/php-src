@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -38,9 +38,9 @@
 
 /* Structure for SQLite Statement Parameter. */
 struct php_sqlite3_bound_param  {
-	long param_number;
+	zend_long param_number;
 	zend_string *name;
-	long type;
+	zend_long type;
 	zval parameter;
 };
 
@@ -91,7 +91,7 @@ static inline php_sqlite3_db_object *php_sqlite3_db_from_obj(zend_object *obj) {
 /* Structure for SQLite Database object. */
 typedef struct _php_sqlite3_agg_context  {
 	zval zval_context;
-	long row_count;
+	zend_long row_count;
 } php_sqlite3_agg_context;
 
 typedef struct _php_sqlite3_stmt_object php_sqlite3_stmt;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -376,8 +376,8 @@ struct objid_query {
 	int count;
 	int offset;
 	int step;
-	long non_repeaters;
-	long max_repetitions;
+	zend_long non_repeaters;
+	zend_long max_repetitions;
 	int valueretrieval;
 	int array_output;
 	int oid_increasing_check;
@@ -1427,10 +1427,10 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 {
 	zval *oid, *value, *type;
 	char *a1, *a2, *a3, *a4, *a5, *a6, *a7;
-	int a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
+	size_t a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
 	zend_bool use_orignames = 0, suffix_keys = 0;
-	long timeout = SNMP_DEFAULT_TIMEOUT;
-	long retries = SNMP_DEFAULT_RETRIES;
+	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
+	zend_long retries = SNMP_DEFAULT_RETRIES;
 	int argc = ZEND_NUM_ARGS();
 	struct objid_query objid_query;
 	php_snmp_session *session;
@@ -1619,7 +1619,7 @@ PHP_FUNCTION(snmp_get_quick_print)
    Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmp_set_quick_print)
 {
-	long a1;
+	zend_long a1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &a1) == FAILURE) {
 		RETURN_FALSE;
@@ -1634,7 +1634,7 @@ PHP_FUNCTION(snmp_set_quick_print)
    Return all values that are enums with their enum value instead of the raw integer */
 PHP_FUNCTION(snmp_set_enum_print)
 {
-	long a1;
+	zend_long a1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &a1) == FAILURE) {
 		RETURN_FALSE;
@@ -1649,7 +1649,7 @@ PHP_FUNCTION(snmp_set_enum_print)
    Set the OID output format. */
 PHP_FUNCTION(snmp_set_oid_output_format)
 {
-	long a1;
+	zend_long a1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &a1) == FAILURE) {
 		RETURN_FALSE;
@@ -1757,7 +1757,7 @@ PHP_FUNCTION(snmp3_set)
    Specify the method how the SNMP values will be returned */
 PHP_FUNCTION(snmp_set_valueretrieval)
 {
-	long method;
+	zend_long method;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &method) == FAILURE) {
 		RETURN_FALSE;
@@ -1767,7 +1767,7 @@ PHP_FUNCTION(snmp_set_valueretrieval)
 			SNMP_G(valueretrieval) = method;
 			RETURN_TRUE;
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", method);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%pd'", method);
 		RETURN_FALSE;
 	}
 }
@@ -1790,7 +1790,7 @@ PHP_FUNCTION(snmp_get_valueretrieval)
 PHP_FUNCTION(snmp_read_mib)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
@@ -1812,10 +1812,10 @@ PHP_METHOD(snmp, __construct)
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
 	char *a1, *a2;
-	int a1_len, a2_len;
-	long timeout = SNMP_DEFAULT_TIMEOUT;
-	long retries = SNMP_DEFAULT_RETRIES;
-	long version = SNMP_DEFAULT_VERSION;
+	size_t a1_len, a2_len;
+	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
+	zend_long retries = SNMP_DEFAULT_RETRIES;
+	zend_long version = SNMP_DEFAULT_VERSION;
 	int argc = ZEND_NUM_ARGS();
 	zend_error_handling error_handling;
 
@@ -1915,7 +1915,7 @@ PHP_METHOD(snmp, setSecurity)
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
 	char *a1 = "", *a2 = "", *a3 = "", *a4 = "", *a5 = "", *a6 = "", *a7 = "";
-	int a1_len = 0, a2_len = 0, a3_len = 0, a4_len = 0, a5_len = 0, a6_len = 0, a7_len = 0;
+	size_t a1_len = 0, a2_len = 0, a3_len = 0, a4_len = 0, a5_len = 0, a6_len = 0, a7_len = 0;
 	int argc = ZEND_NUM_ARGS();
 
 	snmp_object = Z_SNMP_P(object);
@@ -2097,7 +2097,7 @@ static HashTable *php_snmp_get_properties(zval *object TSRMLS_DC)
 	HashTable *props;
 	zval rv;
 	zend_string *key;
-	ulong num_key;
+	zend_ulong num_key;
 
 	obj = Z_SNMP_P(object);
 	props = zend_std_get_properties(object TSRMLS_CC);
@@ -2203,7 +2203,7 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval TS
 	if (Z_LVAL_P(newval) > 0) {
 		snmp_object->max_oids = Z_LVAL_P(newval);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "max_oids should be positive integer or NULL, got %ld", Z_LVAL_P(newval));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "max_oids should be positive integer or NULL, got %pd", Z_LVAL_P(newval));
 	}
 	
 	if (newval == &ztmp) {
@@ -2230,7 +2230,7 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 	if (Z_LVAL_P(newval) >= 0 && Z_LVAL_P(newval) <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
 		snmp_object->valueretrieval = Z_LVAL_P(newval);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", Z_LVAL_P(newval));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%pd'", Z_LVAL_P(newval));
 		ret = FAILURE;
 	}
 	
@@ -2280,7 +2280,7 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 			snmp_object->oid_output_format = Z_LVAL_P(newval);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP output print format '%ld'", Z_LVAL_P(newval));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP output print format '%pd'", Z_LVAL_P(newval));
 			ret = FAILURE;
 			break;
 	}

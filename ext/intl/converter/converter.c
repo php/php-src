@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,7 +45,7 @@ static zend_object_handlers  php_converter_object_handlers;
 
 #define CONV_GET(pzv)  (Z_INTL_CONVERTER_P((pzv)))
 #define THROW_UFAILURE(obj, fname, error) php_converter_throw_failure(obj, error TSRMLS_CC, \
-                                          fname "() returned error %ld: %s", (long)error, u_errorName(error))
+                                          fname "() returned error " ZEND_LONG_FMT ": %s", (zend_long)error, u_errorName(error))
 
 /* {{{ php_converter_throw_failure */
 static inline void php_converter_throw_failure(php_converter_object *objval, UErrorCode error TSRMLS_DC, const char *format, ...) {
@@ -62,7 +62,7 @@ static inline void php_converter_throw_failure(php_converter_object *objval, UEr
 /* }}} */
 
 /* {{{ php_converter_default_callback */
-static void php_converter_default_callback(zval *return_value, zval *zobj, long reason, zval *error TSRMLS_DC) {
+static void php_converter_default_callback(zval *return_value, zval *zobj, zend_long reason, zval *error TSRMLS_DC) {
 	ZVAL_DEREF(error);
 	zval_dtor(error);
 	ZVAL_LONG(error, U_ZERO_ERROR);
@@ -117,7 +117,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_toUCallback_arginfo, 0, ZEND_RETURN_VALUE, 
 	ZEND_ARG_INFO(1, error)
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, toUCallback) {
-	long reason;
+	zend_long reason;
 	zval *source, *codeUnits, *error;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lzzz",
@@ -139,7 +139,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_fromUCallback_arginfo, 0, ZEND_RETURN_VALUE
 	ZEND_ARG_INFO(1, error)
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, fromUCallback) {
-	long reason;
+	zend_long reason;
 	zval *source, *codePoint, *error;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lzzz",
@@ -152,9 +152,9 @@ static PHP_METHOD(UConverter, fromUCallback) {
 /* }}} */
 
 /* {{{ php_converter_check_limits */
-static inline zend_bool php_converter_check_limits(php_converter_object *objval, long available, long needed TSRMLS_DC) {
+static inline zend_bool php_converter_check_limits(php_converter_object *objval, zend_long available, zend_long needed TSRMLS_DC) {
 	if (available < needed) {
-		php_converter_throw_failure(objval, U_BUFFER_OVERFLOW_ERROR TSRMLS_CC, "Buffer overrun %ld bytes needed, %ld available", needed, available);
+		php_converter_throw_failure(objval, U_BUFFER_OVERFLOW_ERROR TSRMLS_CC, "Buffer overrun %pd bytes needed, %pd available", needed, available);
 		return 0;
 	}
 	return 1;
@@ -171,7 +171,7 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 			return;
 		case IS_LONG:
 		{
-			long lval = Z_LVAL_P(val);
+			zend_long lval = Z_LVAL_P(val);
 			if ((lval < 0) || (lval > 0x10FFFF)) {
 				php_converter_throw_failure(objval, U_ILLEGAL_ARGUMENT_ERROR TSRMLS_CC, "Invalid codepoint U+%04lx", lval);
 				return;
@@ -422,7 +422,7 @@ ZEND_END_ARG_INFO();
 static void php_converter_do_set_encoding(UConverter *cnv, INTERNAL_FUNCTION_PARAMETERS) {
 	php_converter_object *objval = CONV_GET(getThis());
 	char *enc;
-	int enc_len;
+	size_t enc_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &enc, &enc_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Bad arguments, "
@@ -562,9 +562,9 @@ ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, __construct) {
 	php_converter_object *objval = CONV_GET(getThis());
 	char *src = "utf-8";
-	int src_len = sizeof("utf-8") - 1;
+	size_t src_len = sizeof("utf-8") - 1;
 	char *dest = src;
-	int dest_len = src_len;
+	size_t dest_len = src_len;
 
 	intl_error_reset(NULL TSRMLS_CC);
 
@@ -590,7 +590,8 @@ ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, setSubstChars) {
 	php_converter_object *objval = CONV_GET(getThis());
 	char *chars;
-	int chars_len, ret = 1;
+	size_t chars_len;
+	int ret = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &chars, &chars_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -731,7 +732,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_reasontext_arginfo, 0, ZEND_RETURN_VALUE, 0
 	ZEND_ARG_INFO(0, reason)
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, reasonText) {
-	long reason;
+	zend_long reason;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &reason) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -748,7 +749,7 @@ static PHP_METHOD(UConverter, reasonText) {
 		UCNV_REASON_CASE(CLOSE)
 		UCNV_REASON_CASE(CLONE)
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown UConverterCallbackReason: %ld", reason);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown UConverterCallbackReason: %pd", reason);
 			RETURN_FALSE;
 	}
 }
@@ -763,7 +764,8 @@ ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, convert) {
         php_converter_object *objval = CONV_GET(getThis());
 	char *str, *dest;
-	int str_len, dest_len;
+	size_t str_len;
+	int32_t dest_len;
 	zend_bool reverse = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
@@ -799,7 +801,7 @@ ZEND_END_ARG_INFO();
 
 static PHP_METHOD(UConverter, transcode) {
 	char *str, *src, *dest;
-	int str_len, src_len, dest_len;
+	size_t str_len, src_len, dest_len;
 	zval *options = NULL;
 	UConverter *src_cnv = NULL, *dest_cnv = NULL;
 
@@ -924,7 +926,7 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_getaliases_arginfo, 0, ZEND_RETURN_VALUE, 0
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, getAliases) {
 	char *name;
-	int name_len;
+	size_t name_len;
 	UErrorCode error = U_ZERO_ERROR;
 	uint16_t i, count;
 
@@ -1081,7 +1083,7 @@ static zend_object *php_converter_clone_object(zval *object TSRMLS_DC) {
 
 		err_msg = intl_error_get_message(&oldobj->error TSRMLS_CC);
 		zend_throw_exception(NULL, err_msg->val, 0 TSRMLS_CC);
-		STR_RELEASE(err_msg);
+		zend_string_release(err_msg);
 
 		return retval;
 	}

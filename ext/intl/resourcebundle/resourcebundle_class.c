@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,9 +77,9 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce TSRMLS_DC
 static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
 	const char	*bundlename;
-	int			bundlename_len = 0;
+	size_t			bundlename_len = 0;
 	const char	*locale;
-	int			locale_len = 0;
+	size_t			locale_len = 0;
 	zend_bool	fallback = 1;
 
 	zval                  *object = return_value;
@@ -259,7 +259,7 @@ PHP_FUNCTION( resourcebundle_get )
 /* }}} */
 
 /* {{{ resourcebundle_array_count */
-int resourcebundle_array_count(zval *object, long *count TSRMLS_DC) 
+int resourcebundle_array_count(zval *object, zend_long *count TSRMLS_DC) 
 {
 	ResourceBundle_object *rb;
 	RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK;
@@ -315,7 +315,7 @@ ZEND_END_ARG_INFO()
 PHP_FUNCTION( resourcebundle_locales )
 {
 	char * bundlename;
-	int    bundlename_len = 0;
+	size_t    bundlename_len = 0;
 	const char * entry;
 	int entry_len;
 	UEnumeration *icuenum;

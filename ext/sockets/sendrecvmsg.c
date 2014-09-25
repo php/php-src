@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -71,7 +71,7 @@ inline ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags)
 #define LONG_CHECK_VALID_INT(l) \
 	do { \
 		if ((l) < INT_MIN && (l) > INT_MAX) { \
-			php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The value %ld does not fit inside " \
+			php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The value %pd does not fit inside " \
 					"the boundaries of a native integer", (l)); \
 			return; \
 		} \
@@ -167,7 +167,7 @@ PHP_FUNCTION(socket_sendmsg)
 {
 	zval			*zsocket,
 					*zmsg;
-	long			flags = 0;
+	zend_long			flags = 0;
 	php_socket		*php_sock;
 	struct msghdr	*msghdr;
 	zend_llist		*allocations;
@@ -198,7 +198,7 @@ PHP_FUNCTION(socket_sendmsg)
 		zend_llist_destroy(allocations);
 		efree(allocations);
 
-		RETURN_LONG((long)res);
+		RETURN_LONG((zend_long)res);
 	} else {
 		PHP_SOCKET_ERROR(php_sock, "error in sendmsg", errno);
 		RETURN_FALSE;
@@ -209,7 +209,7 @@ PHP_FUNCTION(socket_recvmsg)
 {
 	zval			*zsocket,
 					*zmsg;
-	long			flags = 0;
+	zend_long			flags = 0;
 	php_socket		*php_sock;
 	ssize_t			res;
 	struct msghdr	*msghdr;
@@ -268,12 +268,12 @@ PHP_FUNCTION(socket_recvmsg)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG((long)res);
+	RETURN_LONG((zend_long)res);
 }
 
 PHP_FUNCTION(socket_cmsg_space)
 {
-	long				level,
+	zend_long				level,
 						type,
 						n = 0;
 	ancillary_reg_entry	*entry;
@@ -295,20 +295,20 @@ PHP_FUNCTION(socket_cmsg_space)
 
 	entry = get_ancillary_reg_entry(level, type);
 	if (entry == NULL) {
-		php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The pair level %ld/type %ld is "
+		php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The pair level %pd/type %pd is "
 				"not supported by PHP", level, type);
 		return;
 	}
 
-	if (entry->var_el_size > 0 && n > (LONG_MAX - (long)entry->size -
-			(long)CMSG_SPACE(0) - 15L) / entry->var_el_size) {
+	if (entry->var_el_size > 0 && n > (ZEND_LONG_MAX - (zend_long)entry->size -
+			(zend_long)CMSG_SPACE(0) - 15L) / entry->var_el_size) {
 		/* the -15 is to account for any padding CMSG_SPACE may add after the data */
 		php_error_docref0(NULL TSRMLS_CC, E_WARNING, "The value for the "
-				"third argument (%ld) is too large", n);
+				"third argument (%pd) is too large", n);
 		return;
 	}
 
-	RETURN_LONG((long)CMSG_SPACE(entry->size + n * entry->var_el_size));
+	RETURN_LONG((zend_long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
 #if HAVE_IPV6

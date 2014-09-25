@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -101,9 +101,9 @@ PHP_FUNCTION( msgfmt_format_message )
 	UChar      *spattern = NULL;
 	int         spattern_len = 0;
 	char       *pattern = NULL;
-	int         pattern_len = 0;
+	size_t         pattern_len = 0;
 	const char *slocale = NULL;
-	int         slocale_len = 0;
+	size_t         slocale_len = 0;
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 

@@ -366,13 +366,13 @@ check_fmt(struct magic_set *ms, struct magic *m)
 		return 0;
 
 	(void)setlocale(LC_CTYPE, "C");
-	pattern = STR_INIT("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
+	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
 	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options TSRMLS_CC)) == NULL) {
 		rv = -1;
 	} else {
 	 	rv = !pcre_exec(pce, re_extra, m->desc, strlen(m->desc), 0, re_options, NULL, 0);
 	}
-	STR_RELEASE(pattern);
+	zend_string_release(pattern);
 	(void)setlocale(LC_CTYPE, "");
 	return rv;
 }
@@ -1887,7 +1887,7 @@ convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
 	int i, j=0;
 	zend_string *t;
 
-	t = STR_ALLOC(len * 2 + 4, 0);
+	t = zend_string_alloc(len * 2 + 4, 0);
 
 	t->val[j++] = '~';
 
@@ -1913,7 +1913,7 @@ convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
 	t->val[j]='\0';
 	t->len = j;
 
-	ZVAL_STR(pattern, t);
+	ZVAL_NEW_STR(pattern, t);
 }
 
 private int

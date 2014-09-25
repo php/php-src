@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -65,7 +65,7 @@ php_stream_ops php_stream_output_ops = {
 
 typedef struct php_stream_input { /* {{{ */
 	php_stream *body;
-	off_t position;
+	zend_off_t position;
 } php_stream_input_t;
 /* }}} */
 
@@ -118,7 +118,7 @@ static int php_stream_input_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int php_stream_input_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
+static int php_stream_input_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	php_stream_input_t *input = stream->abstract;
 
@@ -178,7 +178,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	int mode_rw = 0;
 	php_stream * stream = NULL;
 	char *p, *token, *pathdup;
-	long max_memory;
+	zend_long max_memory;
 	FILE *file = NULL;
 
 	if (!strncasecmp(path, "php://", 6)) {
@@ -190,7 +190,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		max_memory = PHP_STREAM_MAX_MEM;
 		if (!strncasecmp(path, "/maxmemory:", 11)) {
 			path += 11;
-			max_memory = strtol(path, NULL, 10);
+			max_memory = ZEND_STRTOL(path, NULL, 10);
 			if (max_memory < 0) {
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Max memory must be >= 0");
 				return NULL;
@@ -286,7 +286,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	} else if (!strncasecmp(path, "fd/", 3)) {
 		const char *start;
 		char       *end;
-		long	   fildes_ori;
+		zend_long  fildes_ori;
 		int		   dtablesize;
 
 		if (strcmp(sapi_module.name, "cli")) {
@@ -304,7 +304,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		}
 
 		start = &path[3];
-		fildes_ori = strtol(start, &end, 10);
+		fildes_ori = ZEND_STRTOL(start, &end, 10);
 		if (end == start || *end != '\0') {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC,
 				"php://fd/ stream must be specified in the form php://fd/<orig fd>");
@@ -326,7 +326,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		fd = dup(fildes_ori);
 		if (fd == -1) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC,
-				"Error duping file descriptor %ld; possibly it doesn't exist: "
+				"Error duping file descriptor " ZEND_LONG_FMT "; possibly it doesn't exist: "
 				"[%d]: %s", fildes_ori, errno, strerror(errno));
 			return NULL;
 		}
@@ -380,9 +380,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 
 #if defined(S_IFSOCK) && !defined(WIN32) && !defined(__BEOS__)
 	do {
-		struct stat st;
+		zend_stat_t st;
 		memset(&st, 0, sizeof(st));
-		if (fstat(fd, &st) == 0 && (st.st_mode & S_IFMT) == S_IFSOCK) {
+		if (zend_fstat(fd, &st) == 0 && (st.st_mode & S_IFMT) == S_IFSOCK) {
 			stream = php_stream_sock_open_from_socket(fd, NULL);
 			if (stream) {
 				stream->ops = &php_stream_socket_ops;

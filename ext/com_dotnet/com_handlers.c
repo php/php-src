@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -238,7 +238,7 @@ static void function_dtor(zval *zv)
 {
 	zend_internal_function *f = (zend_internal_function*)Z_PTR_P(zv);
 
-	STR_RELEASE(f->function_name);
+	zend_string_release(f->function_name);
 	if (f->arg_info) {
 		efree(f->arg_info);
 	}
@@ -277,7 +277,7 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 		f.arg_info = NULL;
 		f.scope = obj->ce;
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-		f.function_name = STR_COPY(name);
+		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
 
 		fptr = &f;
@@ -434,7 +434,7 @@ static zend_string* com_class_name_get(const zend_object *object, int parent TSR
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
 
-	return STR_COPY(obj->ce->name);
+	return zend_string_copy(obj->ce->name);
 }
 
 /* This compares two variants for equality */
@@ -525,7 +525,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 	return zend_std_cast_object_tostring(readobj, writeobj, type TSRMLS_CC);
 }
 
-static int com_object_count(zval *object, long *count TSRMLS_DC)
+static int com_object_count(zval *object, zend_long *count TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	LONG ubound = 0, lbound = 0;

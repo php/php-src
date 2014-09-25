@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -111,7 +111,7 @@ PHP_FUNCTION(gettimeofday)
 PHP_FUNCTION(getrusage)
 {
 	struct rusage usg;
-	long pwho = 0;
+	zend_long pwho = 0;
 	int who = RUSAGE_SELF;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &pwho) == FAILURE) {

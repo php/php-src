@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -23,7 +23,7 @@
 #define _PHP_CURL_H
 
 #include "php.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #ifdef COMPILE_DL_CURL
 #undef HAVE_CURL
@@ -179,7 +179,7 @@ typedef struct {
 	php_curl_handlers       *handlers;
 	zend_resource           *res;
 	zend_bool                in_callback;
-	zend_uint				 clone;
+	uint32_t				 clone;
 	zend_bool                safe_upload;
 } php_curl;
 

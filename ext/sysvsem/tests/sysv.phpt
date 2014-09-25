@@ -9,8 +9,8 @@ if(!extension_loaded('sysvsem') || !extension_loaded('sysvshm')) {
 --FILE--
 <?php
 $MEMSIZE = 512;  //  size of shared memory to allocate
-$SEMKEY	 =   1;  //  Semaphore key
-$SHMKEY	 =   2;  //  Shared memory key
+$SEMKEY	 =   ftok(__FILE__, 'P');  //  Semaphore key
+$SHMKEY	 =   ftok(__FILE__, 'Q');  //  Shared memory key
 
 echo "Start.\n";
 // Get semaphore

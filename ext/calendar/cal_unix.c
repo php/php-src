@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -53,7 +53,7 @@ PHP_FUNCTION(unixtojd)
    Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
 {
-	long uday;
+	zend_long uday;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uday) == FAILURE) {
 		return;

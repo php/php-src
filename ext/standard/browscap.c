@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -61,7 +61,7 @@ static void browscap_entry_dtor_request(zval *zvalue) /* {{{ */
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
 		efree(Z_ARR_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		STR_RELEASE(Z_STR_P(zvalue));
+		zend_string_release(Z_STR_P(zvalue));
 	}
 }
 /* }}} */
@@ -71,7 +71,7 @@ static void browscap_entry_dtor_persistent(zval *zvalue) /* {{{ */ {
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
 		free(Z_ARR_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		STR_RELEASE(Z_STR_P(zvalue));
+		zend_string_release(Z_STR_P(zvalue));
 	}
 }
 /* }}} */
@@ -83,7 +83,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	zend_string *res;
 	char *lc_pattern;
 
-	res = STR_SAFE_ALLOC(Z_STRLEN_P(pattern), 2, 4, persistent);
+	res = zend_string_safe_alloc(Z_STRLEN_P(pattern), 2, 4, persistent);
 	t = res->val;
 
 	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
@@ -167,7 +167,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
 					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
 				) {
-					ZVAL_NEW_STR(&new_property, STR_INIT("1", sizeof("1")-1, persistent));
+					ZVAL_NEW_STR(&new_property, zend_string_init("1", sizeof("1")-1, persistent));
 				} else if (
 					(Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
 					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
@@ -175,14 +175,14 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
 				) {
 					// TODO: USE STR_EMPTY_ALLOC()?
-					ZVAL_NEW_STR(&new_property, STR_INIT("", sizeof("")-1, persistent));
+					ZVAL_NEW_STR(&new_property, zend_string_init("", sizeof("")-1, persistent));
 				} else { /* Other than true/false setting */
-					ZVAL_STR(&new_property, STR_DUP(Z_STR_P(arg2), persistent));
+					ZVAL_STR(&new_property, zend_string_dup(Z_STR_P(arg2), persistent));
 				}
-				new_key = STR_DUP(Z_STR_P(arg1), persistent);
+				new_key = zend_string_dup(Z_STR_P(arg1), persistent);
 				zend_str_tolower(new_key->val, new_key->len);
 				zend_hash_update(Z_ARRVAL(bdata->current_section), new_key, &new_property);
-				STR_RELEASE(new_key);
+				zend_string_release(new_key);
 			}
 			break;
 		case ZEND_INI_PARSER_SECTION: {
@@ -208,7 +208,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				zend_hash_update(bdata->htab, Z_STR_P(arg1), &bdata->current_section);
 
 				ZVAL_STR(&processed, Z_STR_P(arg1));
-				ZVAL_STR(&unprocessed, STR_DUP(Z_STR_P(arg1), persistent));
+				ZVAL_STR(&unprocessed, zend_string_dup(Z_STR_P(arg1), persistent));
 
 				convert_browscap_pattern(&processed, persistent);
 				zend_hash_str_update(Z_ARRVAL(bdata->current_section), "browser_name_regex", sizeof("browser_name_regex")-1, &processed);
@@ -296,7 +296,7 @@ PHP_INI_MH(OnChangeBrowscap)
 		if (bdata->filename[0] != '\0') {
 			browscap_bdata_dtor(bdata, 0 TSRMLS_CC);
 		}
-		if (VCWD_REALPATH(new_value, bdata->filename) == NULL) {
+		if (VCWD_REALPATH(new_value->val, bdata->filename) == NULL) {
 			return FAILURE;
 		}
 		return SUCCESS;
@@ -414,7 +414,7 @@ static int browser_reg_compare(zval *browser TSRMLS_DC, int num_args, va_list ar
 
 			/* Pick which browser pattern replaces the least amount of
 			   characters when compared to the original user agent string... */
-			if (ua_len - prev_len > ua_len - curr_len) {
+			if (prev_len < curr_len) {
 				ZVAL_COPY_VALUE(found_browser_entry, browser);
 			}
 		}
@@ -438,7 +438,7 @@ static void browscap_zval_copy_ctor(zval *p) /* {{{ */
 PHP_FUNCTION(get_browser)
 {
 	char *agent_name = NULL;
-	int agent_name_len = 0;
+	size_t agent_name_len = 0;
 	zend_bool return_array = 0;
 	zval *agent, *z_agent_name, *http_user_agent;
 	zval found_browser_entry;
@@ -465,9 +465,9 @@ PHP_FUNCTION(get_browser)
 	}
 
 	if (agent_name == NULL) {
-		zend_string *key = STR_INIT("_SERVER", sizeof("_SERVER") - 1, 0);
+		zend_string *key = zend_string_init("_SERVER", sizeof("_SERVER") - 1, 0);
 		zend_is_auto_global(key TSRMLS_CC);
-		STR_RELEASE(key);
+		zend_string_release(key);
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) != IS_UNDEF ||
 			(http_user_agent = zend_hash_str_find(HASH_OF(&PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1)) == NULL
 		) {

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -112,18 +112,18 @@ PHP_FUNCTION(mysql_set_charset);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	zend_resource *default_link;
-	long num_links,num_persistent;
-	long max_links,max_persistent;
-	long allow_persistent;
-	long default_port;
+	zend_long num_links,num_persistent;
+	zend_long max_links,max_persistent;
+	zend_long allow_persistent;
+	zend_long default_port;
 	char *default_host, *default_user, *default_password;
 	char *default_socket;
 	char *connect_error;
-	long connect_errno;
-	long connect_timeout;
-	long result_allocated;
-	long trace_mode;
-	long allow_local_infile;
+	zend_long connect_errno;
+	zend_long connect_timeout;
+	zend_long result_allocated;
+	zend_long trace_mode;
+	zend_long allow_local_infile;
 ZEND_END_MODULE_GLOBALS(mysql)
 
 #ifdef ZTS

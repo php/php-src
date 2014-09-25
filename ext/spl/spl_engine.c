@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -40,9 +40,9 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 }
 /* }}} */
 
-PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
+PHPAPI zend_long spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
 {
-	ulong idx;
+	zend_ulong idx;
 
 	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
@@ -51,7 +51,7 @@ PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
 		}
 		break;
 	case IS_DOUBLE:
-		return (long)Z_DVAL_P(offset);
+		return (zend_long)Z_DVAL_P(offset);
 	case IS_LONG:
 		return Z_LVAL_P(offset);
 	case IS_FALSE:

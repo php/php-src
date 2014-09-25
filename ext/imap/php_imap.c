@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -40,7 +40,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/pcre/php_pcre.h"
 
 #ifdef ERROR
@@ -1326,16 +1326,16 @@ PHP_FUNCTION(imap_append)
 		return;
 	}
 
-	regex  = STR_INIT("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/", sizeof("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/") - 1, 0);
+	regex  = zend_string_init("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/", sizeof("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/") - 1, 0);
 
 	if (internal_date) {
 		/* Make sure the given internal_date string matches the RFC specifiedformat */
 		if ((pce = pcre_get_compiled_regex_cache(regex TSRMLS_CC))== NULL) {
-			STR_FREE(regex);
+			zend_string_free(regex);
 			RETURN_FALSE;
 		}
 
-		STR_FREE(regex);
+		zend_string_free(regex);
 		php_pcre_match_impl(pce, internal_date, internal_date_len, return_value, subpats, global,
 			0, regex_flags, start_offset TSRMLS_CC);
 
@@ -2929,7 +2929,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	}
 
 	/* allocate output buffer */
-	out = STR_ALLOC(outlen, 0);
+	out = zend_string_alloc(outlen, 0);
 
 	/* encode input string */
 	outp = (unsigned char*)out->val;
@@ -4390,7 +4390,7 @@ static zend_string* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
 	}
 	address[0] = 0;
 	rfc822_write_address(address, addresslist);
-	return STR_INIT(address, strlen(address), 0);
+	return zend_string_init(address, strlen(address), 0);
 }
 /* }}} */
 #endif

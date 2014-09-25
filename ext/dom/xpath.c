@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -186,7 +186,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 		}
 		return; 
 	}
-	ZVAL_STRING(&fci.function_name, obj->stringval);
+	ZVAL_STRING(&fci.function_name, (char *) obj->stringval);
 	xmlXPathFreeObject(obj);
 
 	fci.symbol_table = NULL;
@@ -222,13 +222,13 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 				valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
 			} else {
 				zend_string *str = zval_get_string(&retval);
-				valuePush(ctxt, xmlXPathNewString(str->val));
-				STR_RELEASE(str);
+				valuePush(ctxt, xmlXPathNewString((xmlChar *) str->val));
+				zend_string_release(str);
 			}
 			zval_ptr_dtor(&retval);
 		}
 	}
-	STR_RELEASE(callable);
+	zend_string_release(callable);
 	zval_dtor(&fci.function_name);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {
@@ -319,7 +319,7 @@ PHP_FUNCTION(dom_xpath_register_ns)
 {
 	zval *id;
 	xmlXPathContextPtr ctxp;
-	int prefix_len, ns_uri_len;
+	size_t prefix_len, ns_uri_len;
 	dom_xpath_object *intern;
 	unsigned char *prefix, *ns_uri;
 
@@ -357,7 +357,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	xmlXPathContextPtr ctxp;
 	xmlNodePtr nodep = NULL;
 	xmlXPathObjectPtr xpathobjp;
-	int expr_len, nsnbr = 0, xpath_type;
+	size_t expr_len, nsnbr = 0, xpath_type;
 	dom_xpath_object *intern;
 	dom_object *nodeobj;
 	char *expr;
@@ -412,7 +412,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
     ctxp->namespaces = ns;
     ctxp->nsNr = nsnbr;
 
-	xpathobjp = xmlXPathEvalExpression(expr, ctxp);
+	xpathobjp = xmlXPathEvalExpression((xmlChar *) expr, ctxp);
 	ctxp->node = NULL;
 
 	if (ns != NULL) {
@@ -453,12 +453,12 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 						nsparent = node->_private;
 						curns = xmlNewNs(NULL, node->name, NULL);
 						if (node->children) {
-							curns->prefix = xmlStrdup((char *) node->children);
+							curns->prefix = xmlStrdup((xmlChar *) node->children);
 						}
 						if (node->children) {
-							node = xmlNewDocNode(docp, NULL, (char *) node->children, node->name);
+							node = xmlNewDocNode(docp, NULL, (xmlChar *) node->children, node->name);
 						} else {
-							node = xmlNewDocNode(docp, NULL, "xmlns", node->name);
+							node = xmlNewDocNode(docp, NULL, (xmlChar *) "xmlns", node->name);
 						}
 						node->type = XML_NAMESPACE_DECL;
 						node->parent = nsparent;
@@ -483,7 +483,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			break;
 
 		case XPATH_STRING:
-			RETVAL_STRING(xpathobjp->stringval);
+			RETVAL_STRING((char *) xpathobjp->stringval);
 			break;
 
 		default:
@@ -527,7 +527,7 @@ PHP_FUNCTION(dom_xpath_register_php_functions)
 			ZVAL_LONG(&new_string,1);
 			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
 			zend_hash_move_forward(Z_ARRVAL_P(array_value));
-			STR_RELEASE(str);
+			zend_string_release(str);
 		}
 		intern->registerPhpFunctions = 2;
 		RETURN_TRUE;

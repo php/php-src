@@ -41,7 +41,7 @@
 #include "ext/bcmath/libbcmath/src/bcmath.h"
 #endif
 
-#define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
+#define LONG_SIGN_MASK (((zend_long)1) << (8*sizeof(zend_long)-1))
 
 BEGIN_EXTERN_C()
 ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
@@ -72,11 +72,20 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
 END_EXTERN_C()
 
 #if ZEND_DVAL_TO_LVAL_CAST_OK
-# define zend_dval_to_lval(d) ((long) (d))
-#elif SIZEOF_LONG == 4
-static zend_always_inline long zend_dval_to_lval(double d)
+static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
-	if (d > LONG_MAX || d < LONG_MIN) {
+    if (EXPECTED(zend_finite(d)) && EXPECTED(!zend_isnan(d))) {
+        return (zend_long)d;
+    } else {
+        return 0;
+    }
+}
+#elif SIZEOF_ZEND_LONG == 4
+static zend_always_inline zend_long zend_dval_to_lval(double d)
+{
+	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+		return 0;
+	} else if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 		double	two_pow_32 = pow(2., 32.),
 				dmod;
 
@@ -86,15 +95,17 @@ static zend_always_inline long zend_dval_to_lval(double d)
 			 * to simulate rounding towards 0 of the negative number */
 			dmod = ceil(dmod) + two_pow_32;
 		}
-		return (long)(unsigned long)dmod;
+		return (zend_long)(zend_ulong)dmod;
 	}
-	return (long)d;
+	return (zend_long)d;
 }
 #else
-static zend_always_inline long zend_dval_to_lval(double d)
+static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
-	/* >= as (double)LONG_MAX is outside signed range */
-	if (d >= LONG_MAX || d < LONG_MIN) {
+	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+		return 0;
+	/* >= as (double)ZEND_LONG_MAX is outside signed range */
+	} else if (d >= ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 		double	two_pow_64 = pow(2., 64.),
 				dmod;
 
@@ -104,9 +115,9 @@ static zend_always_inline long zend_dval_to_lval(double d)
 			 * fractional part, hence dmod does not have one either */
 			dmod += two_pow_64;
 		}
-		return (long)(unsigned long)dmod;
+		return (zend_long)(zend_ulong)dmod;
 	}
-	return (long)d;
+	return (zend_long)d;
 }
 #endif
 /* }}} */
@@ -127,162 +138,39 @@ static zend_always_inline long zend_dval_to_lval(double d)
  *
  * This variant also gives information if a string that represents an integer
  * could not be represented as such due to overflow. It writes 1 to oflow_info
- * if the integer is larger than LONG_MAX and -1 if it's smaller than LONG_MIN.
+ * if the integer is larger than ZEND_LONG_MAX and -1 if it's smaller than ZEND_LONG_MIN.
  */
-static inline zend_uchar is_numeric_string_ex(const char *str, int length, long *lval, double *dval, int allow_errors, int *oflow_info)
+ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info);
+
+static zend_always_inline zend_uchar is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info)
 {
-	const char *ptr;
-	int base = 10, digits = 0, dp_or_e = 0;
-	double local_dval = 0.0;
-	zend_uchar type;
-
-	if (!length) {
+	if (*str > '9') {
 		return 0;
 	}
-
-	if (oflow_info != NULL) {
-		*oflow_info = 0;
-	}
-
-	/* Skip any whitespace
-	 * This is much faster than the isspace() function */
-	while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r' || *str == '\v' || *str == '\f') {
-		str++;
-		length--;
-	}
-	ptr = str;
-
-	if (*ptr == '-' || *ptr == '+') {
-		ptr++;
-	}
-
-	if (ZEND_IS_DIGIT(*ptr)) {
-		/* Handle hex numbers
-		 * str is used instead of ptr to disallow signs and keep old behavior */
-		if (length > 2 && *str == '0' && (str[1] == 'x' || str[1] == 'X')) {
-			base = 16;
-			ptr += 2;
-		}
-
-		/* Skip any leading 0s */
-		while (*ptr == '0') {
-			ptr++;
-		}
-
-		/* Count the number of digits. If a decimal point/exponent is found,
-		 * it's a double. Otherwise, if there's a dval or no need to check for
-		 * a full match, stop when there are too many digits for a long */
-		for (type = IS_LONG; !(digits >= MAX_LENGTH_OF_LONG && (dval || allow_errors == 1)); digits++, ptr++) {
-check_digits:
-			if (ZEND_IS_DIGIT(*ptr) || (base == 16 && ZEND_IS_XDIGIT(*ptr))) {
-				continue;
-			} else if (base == 10) {
-				if (*ptr == '.' && dp_or_e < 1) {
-					goto process_double;
-				} else if ((*ptr == 'e' || *ptr == 'E') && dp_or_e < 2) {
-					const char *e = ptr + 1;
-
-					if (*e == '-' || *e == '+') {
-						ptr = e++;
-					}
-					if (ZEND_IS_DIGIT(*e)) {
-						goto process_double;
-					}
-				}
-			}
-
-			break;
-		}
-
-		if (base == 10) {
-			if (digits >= MAX_LENGTH_OF_LONG) {
-				if (oflow_info != NULL) {
-					*oflow_info = *str == '-' ? -1 : 1;
-				}
-				dp_or_e = -1;
-				goto process_double;
-			}
-		} else if (!(digits < SIZEOF_LONG * 2 || (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
-			if (dval) {
-				local_dval = zend_hex_strtod(str, &ptr);
-			}
-			if (oflow_info != NULL) {
-				*oflow_info = 1;
-			}
-			type = IS_DOUBLE;
-		}
-	} else if (*ptr == '.' && ZEND_IS_DIGIT(ptr[1])) {
-process_double:
-		type = IS_DOUBLE;
-
-		/* If there's a dval, do the conversion; else continue checking
-		 * the digits if we need to check for a full match */
-		if (dval) {
-			local_dval = zend_strtod(str, &ptr);
-		} else if (allow_errors != 1 && dp_or_e != -1) {
-			dp_or_e = (*ptr++ == '.') ? 1 : 2;
-			goto check_digits;
-		}
-	} else {
-		return 0;
-	}
-
-	if (ptr != str + length) {
-		if (!allow_errors) {
-			return 0;
-		}
-		if (allow_errors == -1) {
-			zend_error(E_NOTICE, "A non well formed numeric value encountered");
-		}
-	}
-
-	if (type == IS_LONG) {
-		if (digits == MAX_LENGTH_OF_LONG - 1) {
-			int cmp = strcmp(&ptr[-digits], long_min_digits);
-
-			if (!(cmp < 0 || (cmp == 0 && *str == '-'))) {
-				if (dval) {
-					*dval = zend_strtod(str, NULL);
-				}
-				if (oflow_info != NULL) {
-					*oflow_info = *str == '-' ? -1 : 1;
-				}
-
-				return IS_DOUBLE;
-			}
-		}
-
-		if (lval) {
-			*lval = strtol(str, NULL, base);
-		}
-
-		return IS_LONG;
-	} else {
-		if (dval) {
-			*dval = local_dval;
-		}
-
-		return IS_DOUBLE;
-	}
+	return _is_numeric_string_ex(str, length, lval, dval, allow_errors, oflow_info);
 }
 
-static inline zend_uchar is_numeric_string(const char *str, int length, long *lval, double *dval, int allow_errors) {
+static zend_always_inline zend_uchar is_numeric_string(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors) {
     return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
-ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, long *lval, double *dval);
+ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval);
 
-static inline const char *
-zend_memnstr(const char *haystack, const char *needle, int needle_len, char *end)
+static zend_always_inline const char *
+zend_memnstr(const char *haystack, const char *needle, size_t needle_len, char *end)
 {
 	const char *p = haystack;
 	const char ne = needle[needle_len-1];
+	ptrdiff_t off_p;
+	size_t off_s;
 
 	if (needle_len == 1) {
 		return (char *)memchr(p, *needle, (end-p));
 	}
 
-	if (needle_len > end-haystack) {
+	off_p = end - haystack;
+	off_s = (off_p > 0) ? (size_t)off_p : 0;
+	if (needle_len > off_s) {
 		return NULL;
 	}
 
@@ -305,7 +193,7 @@ zend_memnstr(const char *haystack, const char *needle, int needle_len, char *end
 	return NULL;
 }
 
-static inline const void *zend_memrchr(const void *s, int c, size_t n)
+static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
 	register const unsigned char *e;
 
@@ -340,18 +228,18 @@ ZEND_API void multi_convert_to_long_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 
-ZEND_API long _zval_get_long_func(zval *op TSRMLS_DC);
+ZEND_API zend_long _zval_get_long_func(zval *op TSRMLS_DC);
 ZEND_API double _zval_get_double_func(zval *op TSRMLS_DC);
 ZEND_API zend_string *_zval_get_string_func(zval *op TSRMLS_DC);
 
-static zend_always_inline long _zval_get_long(zval *op TSRMLS_DC) {
+static zend_always_inline zend_long _zval_get_long(zval *op TSRMLS_DC) {
 	return Z_TYPE_P(op) == IS_LONG ? Z_LVAL_P(op) : _zval_get_long_func(op TSRMLS_CC);
 }
 static zend_always_inline double _zval_get_double(zval *op TSRMLS_DC) {
 	return Z_TYPE_P(op) == IS_DOUBLE ? Z_DVAL_P(op) : _zval_get_double_func(op TSRMLS_CC);
 }
 static zend_always_inline zend_string *_zval_get_string(zval *op TSRMLS_DC) {
-	return Z_TYPE_P(op) == IS_STRING ? STR_COPY(Z_STR_P(op)) : _zval_get_string_func(op TSRMLS_CC);
+	return Z_TYPE_P(op) == IS_STRING ? zend_string_copy(Z_STR_P(op)) : _zval_get_string_func(op TSRMLS_CC);
 }
 
 #define zval_get_long(op) _zval_get_long((op) TSRMLS_CC)
@@ -363,8 +251,6 @@ ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2
 #define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
 
-ZEND_API double zend_string_to_double(const char *number, zend_uint length);
-
 ZEND_API int zval_is_true(zval *op);
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
@@ -375,20 +261,20 @@ ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2 TSR
 ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 #endif
 
-ZEND_API void zend_str_tolower(char *str, unsigned int length);
-ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned int length);
-ZEND_API char *zend_str_tolower_dup(const char *source, unsigned int length);
+ZEND_API void zend_str_tolower(char *str, size_t length);
+ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, size_t length);
+ZEND_API char *zend_str_tolower_dup(const char *source, size_t length);
 
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
 ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
-ZEND_API int zend_binary_strcmp(const char *s1, uint len1, const char *s2, uint len2);
-ZEND_API int zend_binary_strncmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
-ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, uint len2);
-ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
-ZEND_API int zend_binary_strcasecmp_l(const char *s1, uint len1, const char *s2, uint len2);
-ZEND_API int zend_binary_strncasecmp_l(const char *s1, uint len1, const char *s2, uint len2, uint length);
+ZEND_API int zend_binary_strcmp(const char *s1, size_t len1, const char *s2, size_t len2);
+ZEND_API int zend_binary_strncmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
+ZEND_API int zend_binary_strcasecmp(const char *s1, size_t len1, const char *s2, size_t len2);
+ZEND_API int zend_binary_strncasecmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
+ZEND_API int zend_binary_strcasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2);
+ZEND_API int zend_binary_strncasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2 TSRMLS_DC);
@@ -396,10 +282,9 @@ ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2 TSRMLS_DC);
 ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC);
 
 ZEND_API int zend_atoi(const char *str, int str_len);
-ZEND_API long zend_atol(const char *str, int str_len);
+ZEND_API zend_long zend_atol(const char *str, int str_len);
 
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
-END_EXTERN_C()
 
 #define convert_to_ex_master(pzv, lower_type, upper_type)	\
 	if (Z_TYPE_P(pzv)!=upper_type) {					\
@@ -504,9 +389,9 @@ static zend_always_inline int fast_increment_function(zval *op1)
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
 #else
-		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MAX)) {
+		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
 			/* switch to double */
-			ZVAL_DOUBLE(op1, (double)LONG_MAX + 1.0);
+			ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
 		} else {
 			Z_LVAL_P(op1)++;
 		}
@@ -546,9 +431,9 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
 #else
-		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MIN)) {
+		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
 			/* switch to double */
-			ZVAL_DOUBLE(op1, (double)LONG_MIN - 1.0);
+			ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
 		} else {
 			Z_LVAL_P(op1)--;
 		}
@@ -726,7 +611,7 @@ static zend_always_inline int fast_mul_function(zval *result, zval *op1, zval *o
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			long overflow;
+			zend_long overflow;
 
 			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
 			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
@@ -756,9 +641,9 @@ static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *o
 				zend_error(E_WARNING, "Division by zero");
 				ZVAL_BOOL(result, 0);
 				return FAILURE;
-			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == LONG_MIN)) {
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
 				/* Prevent overflow error/crash */
-				ZVAL_DOUBLE(result, (double) LONG_MIN / -1);
+				ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
 			} else if (EXPECTED(Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0)) {
 				/* integer */
 				ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
@@ -807,7 +692,7 @@ static zend_always_inline int fast_mod_function(zval *result, zval *op1, zval *o
 				ZVAL_BOOL(result, 0);
 				return FAILURE;
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
-				/* Prevent overflow error/crash if op1==LONG_MIN */
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
 				return SUCCESS;
 			}
@@ -1019,29 +904,30 @@ static zend_always_inline void fast_is_not_identical_function(zval *result, zval
 		return SUCCESS;                                                                           \
 	}
 
-/* input: buf points to the END of the buffer */
-#define _zend_print_unsigned_to_buf(buf, num, vartype, result) do {    \
-	char *__p = (buf);                                                 \
-	vartype __num = (num);                                             \
-	*__p = '\0';                                                       \
-	do {                                                               \
-		*--__p = (char) (__num % 10) + '0';                            \
-		__num /= 10;                                                   \
-	} while (__num > 0);                                               \
-	result = __p;                                                      \
-} while (0)
+/* buf points to the END of the buffer */
+static zend_always_inline char *zend_print_ulong_to_buf(char *buf, zend_ulong num) {
+	*buf = '\0';
+	do {
+		*--buf = (char) (num % 10) + '0';
+		num /= 10;
+	} while (num > 0);
+	return buf;
+}
 
 /* buf points to the END of the buffer */
-#define _zend_print_signed_to_buf(buf, num, vartype, result) do {               \
-	if (num < 0) {                                                              \
-	    _zend_print_unsigned_to_buf((buf), -(vartype)(num), vartype, (result)); \
-	    *--(result) = '-';                                                      \
-	} else {                                                                    \
-	    _zend_print_unsigned_to_buf((buf), (num), vartype, (result));           \
-	}                                                                           \
-} while (0)
+static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num) {
+	if (num < 0) {
+	    char *result = zend_print_ulong_to_buf(buf, ~((zend_ulong) num) + 1);
+	    *--result = '-';
+		return result;
+	} else {
+	    return zend_print_ulong_to_buf(buf, num);
+	}
+}
 
-ZEND_API zend_string *zend_long_to_str(long num);
+ZEND_API zend_string *zend_long_to_str(zend_long num);
+
+END_EXTERN_C()
 
 #endif
 

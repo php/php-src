@@ -107,8 +107,8 @@ static void (*orig_chdir)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 
 #ifdef ZEND_WIN32
-# define INCREMENT(v) InterlockedIncrement(&ZCSG(v))
-# define DECREMENT(v) InterlockedDecrement(&ZCSG(v))
+# define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
+# define DECREMENT(v) InterlockedDecrement64(&ZCSG(v))
 # define LOCKVAL(v)   (ZCSG(v))
 #endif
 
@@ -192,13 +192,13 @@ void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason T
  */
 static ZEND_INI_MH(accel_include_path_on_modify)
 {
-	int ret = orig_include_path_on_modify(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	int ret = orig_include_path_on_modify(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
 	ZCG(include_path_key) = NULL;
 	if (ret == SUCCESS) {
-		ZCG(include_path) = new_value;
+		ZCG(include_path) = new_value->val;
 		if (ZCG(include_path) && *ZCG(include_path)) {
-			ZCG(include_path_len) = new_value_length;
+			ZCG(include_path_len) = new_value->len;
 
 			if (ZCG(enabled) && accel_startup_ok &&
 			    (ZCG(counted) || ZCSG(accelerator_enabled))) {
@@ -299,7 +299,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 {
 /* for now interned strings are supported only for non-ZTS build */
 #ifndef ZTS
-	ulong h;
+	zend_ulong h;
 	uint nIndex;
 	uint idx;
 	Bucket *p;
@@ -309,7 +309,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 		return str;
 	}
 
-	h = STR_HASH_VAL(str);
+	h = zend_string_hash_val(str);
 	nIndex = h & ZCSG(interned_strings).nTableMask;
 
 	/* check for existing interned string */
@@ -318,7 +318,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 		p = ZCSG(interned_strings).arData + idx;
 		if ((p->h == h) && (p->key->len == str->len)) {
 			if (!memcmp(p->key->val, str->val, str->len)) {
-				STR_RELEASE(str);
+				zend_string_release(str);
 				return p->key;
 			}
 		}
@@ -354,7 +354,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 	ZVAL_STR(&p->val, p->key);
 	Z_NEXT(p->val) = ZCSG(interned_strings).arHash[nIndex];
 	ZCSG(interned_strings).arHash[nIndex] = idx;
-	STR_RELEASE(str);
+	zend_string_release(str);
 	return p->key;
 #else
 	return str;
@@ -374,7 +374,7 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 		char s[2];
 		s[0] = j;
 		s[1] = 0;
-		CG(one_char_string)[j] = accel_new_interned_string(STR_INIT(s, 1, 0) TSRMLS_CC);
+		CG(one_char_string)[j] = accel_new_interned_string(zend_string_init(s, 1, 0) TSRMLS_CC);
 	}
 
 	/* function table hash keys */
@@ -383,6 +383,9 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key TSRMLS_CC);
+		}
+		if (Z_FUNC(p->val)->common.function_name) {
+			Z_FUNC(p->val)->common.function_name = accel_new_interned_string(Z_FUNC(p->val)->common.function_name TSRMLS_CC);
 		}
 	}
 
@@ -424,6 +427,9 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = accel_new_interned_string(q->key TSRMLS_CC);
+			}
+			if (Z_FUNC(q->val)->common.function_name) {
+				Z_FUNC(q->val)->common.function_name = accel_new_interned_string(Z_FUNC(q->val)->common.function_name TSRMLS_CC);
 			}
 		}
 
@@ -632,7 +638,7 @@ static inline int accel_is_inactive(TSRMLS_D)
 	return FAILURE;
 }
 
-static int zend_get_stream_timestamp(const char *filename, struct stat *statbuf TSRMLS_DC)
+static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf TSRMLS_DC)
 {
 	php_stream_wrapper *wrapper;
 	php_stream_statbuf stream_statbuf;
@@ -715,7 +721,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 
 static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size TSRMLS_DC)
 {
-	struct stat statbuf;
+	zend_stat_t statbuf;
 #ifdef ZEND_WIN32
 	accel_time_t res;
 #endif
@@ -724,7 +730,7 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 	    !EG(current_execute_data) &&
 	    file_handle->filename == SG(request_info).path_translated) {
 
-		struct stat *tmpbuf = sapi_module.get_stat(TSRMLS_C);
+		zend_stat_t *tmpbuf = sapi_module.get_stat(TSRMLS_C);
 
 		if (tmpbuf) {
 			if (size) {
@@ -743,12 +749,12 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FD:
-			if (fstat(file_handle->handle.fd, &statbuf) == -1) {
+			if (zend_fstat(file_handle->handle.fd, &statbuf) == -1) {
 				return 0;
 			}
 			break;
 		case ZEND_HANDLE_FP:
-			if (fstat(fileno(file_handle->handle.fp), &statbuf) == -1) {
+			if (zend_fstat(fileno(file_handle->handle.fp), &statbuf) == -1) {
 				if (zend_get_stream_timestamp(file_handle->filename, &statbuf TSRMLS_CC) != SUCCESS) {
 					return 0;
 				}
@@ -1268,8 +1274,8 @@ static void zend_accel_init_auto_globals(TSRMLS_D)
 	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
 
 	for (i = 0; i < ag_size ; i++) {
-		jit_auto_globals_str[i] = STR_INIT(jit_auto_globals_info[i].name, jit_auto_globals_info[i].len, 1);
-		STR_HASH_VAL(jit_auto_globals_str[i]);
+		jit_auto_globals_str[i] = zend_string_init(jit_auto_globals_info[i].name, jit_auto_globals_info[i].len, 1);
+		zend_string_hash_val(jit_auto_globals_str[i]);
 		jit_auto_globals_str[i] = accel_new_interned_string(jit_auto_globals_str[i] TSRMLS_CC);
 	}
 }
@@ -1283,7 +1289,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 	zend_op_array *op_array;
 	int do_bailout = 0;
 	accel_time_t timestamp = 0;
-	zend_uint orig_compiler_options = 0;
+	uint32_t orig_compiler_options = 0;
 
     /* Try to open file */
     if (file_handle->type == ZEND_HANDLE_FILENAME) {
@@ -1427,11 +1433,11 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 	}
 
 	if (file_handle->opened_path) {
-		new_persistent_script->full_path = STR_INIT(file_handle->opened_path, strlen(file_handle->opened_path), 0);
+		new_persistent_script->full_path = zend_string_init(file_handle->opened_path, strlen(file_handle->opened_path), 0);
 	} else {
-		new_persistent_script->full_path = STR_INIT(file_handle->filename, strlen(file_handle->filename), 0);
+		new_persistent_script->full_path = zend_string_init(file_handle->filename, strlen(file_handle->filename), 0);
 	}
-	STR_HASH_VAL(new_persistent_script->full_path);
+	zend_string_hash_val(new_persistent_script->full_path);
 
 	/* Now persistent_script structure is ready in process memory */
 	return cache_script_in_shared_memory(new_persistent_script, key, key_length, from_shared_memory TSRMLS_CC);
@@ -1448,7 +1454,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 	if (!file_handle->filename ||
 		!ZCG(enabled) || !accel_startup_ok ||
 		(!ZCG(counted) && !ZCSG(accelerator_enabled)) ||
-	    CG(interactive) ||
 	    (ZCSG(restart_in_progress) && accel_restart_is_active(TSRMLS_C)) ||
 	    (is_stream_path(file_handle->filename) && 
 	     !is_cacheable_stream_path(file_handle->filename))) {
@@ -1581,7 +1586,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 
 	/* If script was not found or invalidated by validate_timestamps */
 	if (!persistent_script) {
-		zend_uint old_const_num = zend_hash_next_free_element(EG(zend_constants));
+		uint32_t old_const_num = zend_hash_next_free_element(EG(zend_constants));
 		zend_op_array *op_array;
 
 		/* Cache miss.. */
@@ -1608,7 +1613,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 		}
 		if (from_shared_memory) {
 			/* Delete immutable arrays moved into SHM */
-			zend_uint new_const_num = zend_hash_next_free_element(EG(zend_constants));
+			uint32_t new_const_num = zend_hash_next_free_element(EG(zend_constants));
 			while (new_const_num > old_const_num) {
 				new_const_num--;
 				zend_hash_index_del(EG(zend_constants), new_const_num);
@@ -1620,8 +1625,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 		ZCSG(hits)++; /* TBFixed: may lose one hit */
 		persistent_script->dynamic_members.hits++; /* see above */
 #else
-		InterlockedIncrement(&ZCSG(hits));
-		InterlockedIncrement(&persistent_script->dynamic_members.hits);
+		INCREMENT(hits);
+		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #endif
 
 		/* see bug #15471 (old BTS) */
@@ -1667,7 +1672,6 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 {
 	if (ZCG(enabled) && accel_startup_ok &&
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
-	    !CG(interactive) &&
 	    !ZCSG(restart_in_progress)) {
 
 		/* check if callback is called from include_once or it's a main request */
@@ -1727,7 +1731,6 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 {
 	if (ZCG(enabled) && accel_startup_ok &&
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
-	    !CG(interactive) &&
 	    !ZCSG(restart_in_progress)) {
 
 		/* check if callback is called from include_once or it's a main request */
@@ -1916,6 +1919,7 @@ static void accel_activate(void)
  * allocated block separately, but we like to call all the destructors and
  * callbacks in exactly the same order.
  */
+static void accel_fast_zval_dtor(zval *zvalue);
 
 static void accel_fast_hash_destroy(HashTable *ht)
 {
@@ -1925,7 +1929,7 @@ static void accel_fast_hash_destroy(HashTable *ht)
 	for (idx = 0; idx < ht->nNumUsed; idx++) {	
 		p = ht->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		ht->pDestructor(&p->val);
+		accel_fast_zval_dtor(&p->val);
 	}
 }
 
@@ -1939,7 +1943,6 @@ static void accel_fast_zval_dtor(zval *zvalue)
 					if (Z_ARR_P(zvalue) != &EG(symbol_table)) {
 						/* break possible cycles */
 						ZVAL_NULL(zvalue);
-						Z_ARRVAL_P(zvalue)->pDestructor = accel_fast_zval_dtor;
 						accel_fast_hash_destroy(Z_ARRVAL_P(zvalue));
 					}
 				}
@@ -1981,61 +1984,29 @@ static int accel_clean_non_persistent_function(zval *zv TSRMLS_DC)
 		return ZEND_HASH_APPLY_STOP;
 	} else {
 		if (function->op_array.static_variables) {
-			function->op_array.static_variables->pDestructor = accel_fast_zval_dtor;
 			accel_fast_hash_destroy(function->op_array.static_variables);
 			function->op_array.static_variables = NULL;
-		}
-		return (--(*function->op_array.refcount) <= 0) ?
-			ZEND_HASH_APPLY_REMOVE :
-			ZEND_HASH_APPLY_KEEP;
-	}
-}
-
-static int accel_cleanup_function_data(zval *zv TSRMLS_DC)
-{
-	zend_function *function = Z_PTR_P(zv);
-
-	if (function->type == ZEND_USER_FUNCTION) {
-		if (function->op_array.static_variables) {
-			function->op_array.static_variables->pDestructor = accel_fast_zval_dtor;
-			accel_fast_hash_destroy(function->op_array.static_variables);
-			function->op_array.static_variables = NULL;
-		}
-	}
-	return 0;
-}
-
-static int accel_clean_non_persistent_class(zval *zv TSRMLS_DC)
-{
-	zend_class_entry *ce = Z_PTR_P(zv);
-
-	if (ce->type == ZEND_INTERNAL_CLASS) {
-		return ZEND_HASH_APPLY_STOP;
-	} else {
-		if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-			zend_hash_apply(&ce->function_table, (apply_func_t) accel_cleanup_function_data TSRMLS_CC);
-		}
-		if (ce->static_members_table) {
-			int i;
-
-			for (i = 0; i < ce->default_static_members_count; i++) {
-				accel_fast_zval_dtor(&ce->static_members_table[i]);
-				ZVAL_UNDEF(&ce->static_members_table[i]);
-			}
-			ce->static_members_table = NULL;
 		}
 		return ZEND_HASH_APPLY_REMOVE;
 	}
 }
 
-static int accel_clean_non_persistent_constant(zval *zv TSRMLS_DC)
+static inline void zend_accel_fast_del_bucket(HashTable *ht, uint32_t idx, Bucket *p)
 {
-	zend_constant *c = Z_PTR_P(zv);
+	uint32_t nIndex = p->h & ht->nTableMask;
+	uint32_t i = ht->arHash[nIndex];
 
-	if (c->flags & CONST_PERSISTENT) {
-		return ZEND_HASH_APPLY_STOP;
-	} else {
-		return ZEND_HASH_APPLY_REMOVE;
+	ht->nNumUsed--;
+	ht->nNumOfElements--;
+	if (idx != i) {
+		Bucket *prev = ht->arData + i;
+		while (Z_NEXT(prev->val) != idx) {
+			i = Z_NEXT(prev->val);
+			prev = ht->arData + i;
+		}
+		Z_NEXT(prev->val) = Z_NEXT(p->val);
+ 	} else {
+		ht->arHash[p->h & ht->nTableMask] = Z_NEXT(p->val);
 	}
 }
 
@@ -2057,18 +2028,60 @@ static void zend_accel_fast_shutdown(TSRMLS_D)
 			EG(symbol_table).ht.pDestructor = old_destructor;
 		}
 		zend_hash_init(&EG(symbol_table).ht, 8, NULL, NULL, 0);
-		old_destructor = EG(function_table)->pDestructor;
-		EG(function_table)->pDestructor = NULL;
-		zend_hash_reverse_apply(EG(function_table), (apply_func_t) accel_clean_non_persistent_function TSRMLS_CC);
-		EG(function_table)->pDestructor = old_destructor;
-		old_destructor = EG(class_table)->pDestructor;
-		EG(class_table)->pDestructor = NULL;
-		zend_hash_reverse_apply(EG(class_table), (apply_func_t) accel_clean_non_persistent_class TSRMLS_CC);
-		EG(class_table)->pDestructor = old_destructor;
-		old_destructor = EG(zend_constants)->pDestructor;
-		EG(zend_constants)->pDestructor = NULL;
-		zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) accel_clean_non_persistent_constant TSRMLS_CC);
-		EG(zend_constants)->pDestructor = old_destructor;
+
+		ZEND_HASH_REVERSE_FOREACH(EG(function_table), 0) {
+			zend_function *func = Z_PTR(_p->val);
+		
+			if (func->type == ZEND_INTERNAL_FUNCTION) {
+				break;
+			} else {
+				if (func->op_array.static_variables) {
+					accel_fast_hash_destroy(func->op_array.static_variables);
+				}
+				zend_accel_fast_del_bucket(EG(function_table), _idx-1, _p);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		ZEND_HASH_REVERSE_FOREACH(EG(class_table), 0) {
+			zend_class_entry *ce = Z_PTR(_p->val);
+
+			if (ce->type == ZEND_INTERNAL_CLASS) {
+				break;
+			} else {
+				if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
+					zend_function *func;
+
+					ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
+						if (func->type == ZEND_USER_FUNCTION) {
+							if (func->op_array.static_variables) {
+								accel_fast_hash_destroy(func->op_array.static_variables);
+								func->op_array.static_variables = NULL;
+							}
+						}
+					} ZEND_HASH_FOREACH_END();
+				}
+				if (ce->static_members_table) {
+					int i;
+
+					for (i = 0; i < ce->default_static_members_count; i++) {
+						accel_fast_zval_dtor(&ce->static_members_table[i]);
+						ZVAL_UNDEF(&ce->static_members_table[i]);
+					}
+					ce->static_members_table = NULL;
+				}
+				zend_accel_fast_del_bucket(EG(class_table), _idx-1, _p);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		ZEND_HASH_REVERSE_FOREACH(EG(zend_constants), 0) {
+			zend_constant *c = Z_PTR(_p->val);
+
+			if (c->flags & CONST_PERSISTENT) {
+				break;
+			} else {
+				zend_accel_fast_del_bucket(EG(zend_constants), _idx-1, _p);
+			}
+		} ZEND_HASH_FOREACH_END();
 	}
 	CG(unclean_shutdown) = 1;
 }
@@ -2185,13 +2198,13 @@ static int zend_accel_init_shm(TSRMLS_D)
 	if (ZCG(accel_directives).interned_strings_buffer) {
 		ZCSG(interned_strings).nTableMask = ZCSG(interned_strings).nTableSize - 1;
 		ZCSG(interned_strings).arData = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket));
-		ZCSG(interned_strings).arHash = (zend_uint*)zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(zend_uint));
+		ZCSG(interned_strings).arHash = (uint32_t*)zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(uint32_t));
 		ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
 		if (!ZCSG(interned_strings).arData || !ZCSG(interned_strings_start)) {
 			zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
 			return FAILURE;
 		}
-		memset(ZCSG(interned_strings).arHash, INVALID_IDX, ZCSG(interned_strings).nTableSize * sizeof(zend_uint));
+		memset(ZCSG(interned_strings).arHash, INVALID_IDX, ZCSG(interned_strings).nTableSize * sizeof(uint32_t));
 		ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
 		ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
 

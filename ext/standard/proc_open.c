@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -110,7 +110,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
 		zend_string *str = zval_get_string(element);
 		uint el_len = str->len;
-		STR_RELEASE(str);
+		zend_string_release(str);
 
 		if (el_len == 0) {
 			continue;
@@ -162,7 +162,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			p += str->len + 1;
 		}
 next_element:
-		STR_RELEASE(str);
+		zend_string_release(str);
 	} ZEND_HASH_FOREACH_END();
 
 	assert((uint)(p - env.envp) <= sizeenv);
@@ -260,7 +260,7 @@ PHP_FUNCTION(proc_terminate)
 {
 	zval *zproc;
 	struct php_process_handle *proc;
-	long sig_no = SIGTERM;
+	zend_long sig_no = SIGTERM;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zproc, &sig_no) == FAILURE) {
 		RETURN_FALSE;
@@ -328,7 +328,7 @@ PHP_FUNCTION(proc_get_status)
 	array_init(return_value);
 
 	add_assoc_string(return_value, "command", proc->command);
-	add_assoc_long(return_value, "pid", (long) proc->child);
+	add_assoc_long(return_value, "pid", (zend_long) proc->child);
 
 #ifdef PHP_WIN32
 
@@ -417,7 +417,7 @@ struct php_proc_open_descriptor_item {
 PHP_FUNCTION(proc_open)
 {
 	char *command, *cwd=NULL;
-	int command_len, cwd_len = 0;
+	size_t command_len, cwd_len = 0;
 	zval *descriptorspec;
 	zval *pipes;
 	zval *environment = NULL;
@@ -427,7 +427,7 @@ PHP_FUNCTION(proc_open)
 	int i;
 	zval *descitem = NULL;
 	zend_string *str_index;
-	ulong nindex;
+	zend_ulong nindex;
 	struct php_proc_open_descriptor_item descriptors[PHP_PROC_OPEN_MAX_DESCRIPTORS];
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
@@ -534,7 +534,7 @@ PHP_FUNCTION(proc_open)
 #else
 			descriptors[ndesc].childend = dup(fd);
 			if (descriptors[ndesc].childend < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to dup File-Handle for descriptor %ld - %s", nindex, strerror(errno));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to dup File-Handle for descriptor %pd - %s", nindex, strerror(errno));
 				goto exit_fail;
 			}
 #endif

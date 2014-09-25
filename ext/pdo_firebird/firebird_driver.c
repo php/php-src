@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -33,11 +33,11 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, long, XSQLDA*, isc_stmt_handle*,
+static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, zend_long, XSQLDA*, isc_stmt_handle*,
 	HashTable* TSRMLS_DC);
 
 /* map driver specific error message to PDO error */
-void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long line TSRMLS_DC) /* {{{ */
+void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line TSRMLS_DC) /* {{{ */
 {
 #if 0
 	pdo_firebird_db_handle *H = stmt ? ((pdo_firebird_stmt *)stmt->driver_data)->H 
@@ -132,7 +132,7 @@ static int firebird_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /* called by PDO to prepare an SQL query */
-static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, /* {{{ */
+static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, /* {{{ */
 	pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
@@ -218,7 +218,7 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_le
 /* }}} */
 
 /* called by PDO to execute a statement that doesn't produce a result set */
-static long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC) /* {{{ */
+static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	isc_stmt_handle stmt = NULL;
@@ -391,12 +391,12 @@ static int firebird_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /* used by prepare and exec to allocate a statement handle and prepare the SQL */
-static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, long sql_len, /* {{{ */
+static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, /* {{{ */
 	XSQLDA *out_sqlda, isc_stmt_handle *s, HashTable *named_params TSRMLS_DC)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char *c, *new_sql, in_quote, in_param, pname[64], *ppname;
-	long l, pindex = -1;
+	zend_long l, pindex = -1;
 		
 	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
 	if (sql_len > 65536) {
@@ -470,7 +470,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, long sql
 /* }}} */
 	
 /* called by PDO to set a driver-specific dbh attribute */
-static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC) /* {{{ */
+static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -545,7 +545,7 @@ static void firebird_info_cb(void *arg, char const *s) /* {{{ */
 /* }}} */
 
 /* called by PDO to get a driver-specific dbh attribute */
-static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC) /* {{{ */
+static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -606,7 +606,7 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	const ISC_STATUS *s = H->isc_status;
 	char buf[400];
-	long i = 0, l, sqlcode = isc_sqlcode(s);
+	zend_long i = 0, l, sqlcode = isc_sqlcode(s);
 
 	if (sqlcode) {
 		add_next_index_long(info, sqlcode);

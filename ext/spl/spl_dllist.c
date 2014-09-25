@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -29,7 +29,7 @@
 #include "php_spl.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "spl_functions.h"
 #include "spl_engine.h"
 #include "spl_iterators.h"
@@ -101,8 +101,8 @@ struct _spl_dllist_object {
 /* define an overloaded iterator structure */
 struct _spl_dllist_it {
 	zend_user_iterator     intern;
-	int                    traverse_position;
 	spl_ptr_llist_element *traverse_pointer;
+	int                    traverse_position;
 	int                    flags;
 };
 
@@ -143,9 +143,9 @@ static spl_ptr_llist *spl_ptr_llist_init(spl_ptr_llist_ctor_func ctor, spl_ptr_l
 }
 /* }}} */
 
-static long spl_ptr_llist_count(spl_ptr_llist *llist) /* {{{ */
+static zend_long spl_ptr_llist_count(spl_ptr_llist *llist) /* {{{ */
 {
-	return (long)llist->count;
+	return (zend_long)llist->count;
 }
 /* }}} */
 
@@ -167,7 +167,7 @@ static void spl_ptr_llist_destroy(spl_ptr_llist *llist TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static spl_ptr_llist_element *spl_ptr_llist_offset(spl_ptr_llist *llist, long offset, int backward) /* {{{ */
+static spl_ptr_llist_element *spl_ptr_llist_offset(spl_ptr_llist *llist, zend_long offset, int backward) /* {{{ */
 {
 
 	spl_ptr_llist_element *current;
@@ -474,7 +474,7 @@ static zend_object *spl_dllist_object_clone(zval *zobject TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int spl_dllist_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+static int spl_dllist_object_count_elements(zval *object, zend_long *count TSRMLS_DC) /* {{{ */
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
 
@@ -485,7 +485,7 @@ static int spl_dllist_object_count_elements(zval *object, long *count TSRMLS_DC)
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 			convert_to_long(&intern->retval);
-			*count = (long) Z_LVAL(intern->retval);
+			*count = (zend_long) Z_LVAL(intern->retval);
 			return SUCCESS;
 		}
 		*count = 0;
@@ -522,7 +522,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1 TSRMLS_CC);
 		ZVAL_LONG(&tmp, intern->flags);
 		zend_hash_add(intern->debug_info, pnstr, &tmp);
-		STR_RELEASE(pnstr);
+		zend_string_release(pnstr);
 
 		array_init(&dllist_array);
 
@@ -540,7 +540,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 
 		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1 TSRMLS_CC);
 		zend_hash_add(intern->debug_info, pnstr, &dllist_array);
-		STR_RELEASE(pnstr);
+		zend_string_release(pnstr);
 	}
 
 	return intern->debug_info;
@@ -673,7 +673,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
  Return the number of elements in the datastructure. */
 SPL_METHOD(SplDoublyLinkedList, count)
 {
-	long count;
+	zend_long count;
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -689,7 +689,7 @@ SPL_METHOD(SplDoublyLinkedList, count)
  Return true if the SplDoublyLinkedList is empty. */
 SPL_METHOD(SplDoublyLinkedList, isEmpty)
 {
-	long count;
+	zend_long count;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -704,7 +704,7 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
  Set the mode of iteration */
 SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 {
-	long value;
+	zend_long value;
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &value) == FAILURE) {
@@ -747,7 +747,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 {
 	zval              *zindex;
 	spl_dllist_object *intern;
-	long               index;
+	zend_long               index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zindex) == FAILURE) {
 		return;
@@ -764,7 +764,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 SPL_METHOD(SplDoublyLinkedList, offsetGet)
 {
 	zval                  *zindex;
-	long                   index;
+	zend_long                   index;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
 
@@ -808,7 +808,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		spl_ptr_llist_push(intern->llist, value TSRMLS_CC);
 	} else {
 		/* $obj[$foo] = ... */
-		long                   index;
+		zend_long                   index;
 		spl_ptr_llist_element *element;
 
 		index = spl_offset_convert_to_long(zindex TSRMLS_CC);
@@ -849,7 +849,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 {
 	zval                  *zindex;
-	long                   index;
+	zend_long             index;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
 	spl_ptr_llist         *llist;
@@ -1161,7 +1161,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 	zval flags, elem;
 	char *buf;
-	int buf_len;
+	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	
@@ -1209,7 +1209,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 
 error:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %pd of %d bytes", (zend_long)((char*)p - buf), buf_len);
 	return;
 
 } /* }}} */
@@ -1221,7 +1221,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 	zval                  *zindex, *value;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
-	long                  index;
+	zend_long                  index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zindex, &value) == FAILURE) {
 		return;

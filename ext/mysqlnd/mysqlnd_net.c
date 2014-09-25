@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -193,7 +193,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 		SET_CLIENT_ERROR(*error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr->val);
 		if (errstr) {
 			/* no mnd_ since we don't allocate it */
-			STR_RELEASE(errstr);
+			zend_string_release(errstr);
 		}
 		DBG_RETURN(NULL);
 	}
@@ -676,7 +676,7 @@ MYSQLND_METHOD(mysqlnd_net, receive_ex)(MYSQLND_NET * const net, zend_uchar * co
 			}
 			net->compressed_envelope_packet_no++;
 #ifdef MYSQLND_DUMP_HEADER_N_BODY
-			DBG_INF_FMT("HEADER: hwd_packet_no=%u size=%3u", packet_no, (unsigned long) net_payload_size);
+			DBG_INF_FMT("HEADER: hwd_packet_no=%u size=%3u", packet_no, (zend_ulong) net_payload_size);
 #endif
 			/* Now let's read from the wire, decompress it and fill the read buffer */
 			net->data->m.read_compressed_packet_from_stream_and_fill_read_buffer(net, net_payload_size, conn_stats, error_info TSRMLS_CC);
@@ -950,7 +950,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	DBG_RETURN(PASS);
 #else
 	DBG_ENTER("mysqlnd_net::enable_ssl");
-	DBG_INFO("MYSQLND_SSL_SUPPORTED is not defined");
+	DBG_INF("MYSQLND_SSL_SUPPORTED is not defined");
 	DBG_RETURN(PASS);
 #endif
 }

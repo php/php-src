@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -635,7 +635,7 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 		dir_len = php_dirname(file_dirname, strlen(source));
 
 		if (dir_len > 0) {
-			struct stat buf;
+			zend_stat_t buf;
 			if (php_sys_stat(file_dirname, &buf) != 0) {
 				xmlFreeURI(uri);
 				return NULL;
@@ -695,7 +695,7 @@ static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_rea
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name;
-	int name_len, retval;
+	size_t name_len, retval;
 
 	zval *self = getThis();
 	
@@ -833,7 +833,8 @@ static PHP_FUNCTION(xmlwriter_start_attribute_ns)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *prefix, *uri;
-	int name_len, prefix_len, uri_len, retval;
+	size_t name_len, prefix_len, uri_len;
+	int retval;
 	zval *self = getThis();
 	
 	if (self) {
@@ -874,7 +875,8 @@ static PHP_FUNCTION(xmlwriter_write_attribute)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *content;
-	int name_len, content_len, retval;
+	size_t name_len, content_len;
+	int retval;
 	zval *self = getThis();
 	
 	if (self) {
@@ -915,7 +917,8 @@ static PHP_FUNCTION(xmlwriter_write_attribute_ns)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *prefix, *uri, *content;
-	int name_len, prefix_len, uri_len, content_len, retval;
+	size_t name_len, prefix_len, uri_len, content_len;
+	int retval;
 
 	zval *self = getThis();
 	
@@ -965,7 +968,8 @@ static PHP_FUNCTION(xmlwriter_start_element_ns)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *prefix, *uri;
-	int name_len, prefix_len, uri_len, retval;
+	size_t name_len, prefix_len, uri_len;
+	int retval;
 	zval *self = getThis();
 	
 	if (self) {
@@ -1022,7 +1026,8 @@ static PHP_FUNCTION(xmlwriter_write_element)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *content = NULL;
-	int name_len, content_len, retval;
+	size_t name_len, content_len;
+	int retval;
 	zval *self = getThis();
 	
 	if (self) {
@@ -1073,7 +1078,8 @@ static PHP_FUNCTION(xmlwriter_write_element_ns)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *prefix, *uri, *content = NULL;
-	int name_len, prefix_len, uri_len, content_len, retval;
+	size_t name_len, prefix_len, uri_len, content_len;
+	int retval;
 	zval *self = getThis();
 	
 	if (self) {
@@ -1140,7 +1146,8 @@ static PHP_FUNCTION(xmlwriter_write_pi)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *content;
-	int name_len, content_len, retval;
+	size_t name_len, content_len;
+	int retval;
 
 	zval *self = getThis();
 	
@@ -1296,7 +1303,8 @@ static PHP_FUNCTION(xmlwriter_start_document)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *version = NULL, *enc = NULL, *alone = NULL;
-	int version_len, enc_len, alone_len, retval;
+	size_t version_len, enc_len, alone_len;
+	int retval;
 
 	zval *self = getThis();
 
@@ -1341,7 +1349,8 @@ static PHP_FUNCTION(xmlwriter_start_dtd)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *pubid = NULL, *sysid = NULL;
-	int name_len, pubid_len, sysid_len, retval;
+	size_t name_len, pubid_len, sysid_len;
+	int retval;
 	zval *self = getThis();
 
 	if (self) {
@@ -1386,7 +1395,8 @@ static PHP_FUNCTION(xmlwriter_write_dtd)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *pubid = NULL, *sysid = NULL, *subset = NULL;
-	int name_len, pubid_len, sysid_len, subset_len, retval;
+	size_t name_len, pubid_len, sysid_len, subset_len;
+	int retval;
 	zval *self = getThis();
 
 	if (self) {
@@ -1440,7 +1450,8 @@ static PHP_FUNCTION(xmlwriter_write_dtd_element)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *content;
-	int name_len, content_len, retval;
+	size_t name_len, content_len;
+	int retval;
 	zval *self = getThis();
 
 	if (self) {
@@ -1496,7 +1507,8 @@ static PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *content;
-	int name_len, content_len, retval;
+	size_t name_len, content_len;
+	int retval;
 	zval *self = getThis();
 
 	if (self) {
@@ -1536,7 +1548,7 @@ static PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name;
-	int name_len, retval;
+	size_t name_len, retval;
 	zend_bool isparm;
 	zval *self = getThis();
 
@@ -1583,11 +1595,12 @@ static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name, *content;
-	int name_len, content_len, retval;
+	size_t name_len, content_len;
+	int retval;
 	/* Optional parameters */
 	char *pubid = NULL, *sysid = NULL, *ndataid = NULL;
 	zend_bool pe = 0;
-	int pubid_len, sysid_len, ndataid_len;
+	size_t pubid_len, sysid_len, ndataid_len;
 	zval *self = getThis();
 
 	if (self) {
@@ -1631,7 +1644,7 @@ static PHP_FUNCTION(xmlwriter_open_uri)
 	xmlTextWriterPtr ptr;
 	char *source;
 	char resolved_path[MAXPATHLEN + 1];
-	int source_len;
+	size_t source_len;
 	zval *self = getThis();
 	ze_xmlwriter_object *ze_obj = NULL;
 

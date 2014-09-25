@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,6 +21,8 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include <intsafe.h>
 
 #include "php.h"
 #include "php_ini.h"
@@ -270,7 +272,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 	char *strtok_buf = NULL;
 	int cached;
 
-	if (!new_value || !new_value[0] || (typelib_file = VCWD_FOPEN(new_value, "r"))==NULL) {
+	if (NULL == new_value || !new_value->val[0] || (typelib_file = VCWD_FOPEN(new_value->val, "r"))==NULL) {
 		return FAILURE;
 	}
 
@@ -382,6 +384,12 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	REGISTER_INI_ENTRIES();
 
 #define COM_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS|CONST_PERSISTENT)
+
+#define COM_ERR_CONST(x) { \
+	zend_long __tmp; \
+	ULongToUIntPtr(x, &__tmp); \
+	REGISTER_LONG_CONSTANT(#x, __tmp, CONST_CS|CONST_PERSISTENT); \
+}
 	
 	COM_CONST(CLSCTX_INPROC_SERVER);
 	COM_CONST(CLSCTX_INPROC_HANDLER);
@@ -441,10 +449,10 @@ PHP_MINIT_FUNCTION(com_dotnet)
 #ifdef NORM_IGNOREKASHIDA
 	COM_CONST(NORM_IGNOREKASHIDA);
 #endif
-	COM_CONST(DISP_E_DIVBYZERO);
-	COM_CONST(DISP_E_OVERFLOW);
-	COM_CONST(DISP_E_BADINDEX);
-	COM_CONST(MK_E_UNAVAILABLE);
+	COM_ERR_CONST(DISP_E_DIVBYZERO);
+	COM_ERR_CONST(DISP_E_OVERFLOW);
+	COM_ERR_CONST(DISP_E_BADINDEX);
+	COM_ERR_CONST(MK_E_UNAVAILABLE);
 
 	return SUCCESS;
 }

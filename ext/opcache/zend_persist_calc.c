@@ -38,7 +38,7 @@
 			zend_string *tmp = accel_new_interned_string(str TSRMLS_CC); \
 			if (tmp != (str)) { \
 				if (do_free) { \
-					/*STR_RELEASE(str);*/ \
+					/*zend_string_release(str);*/ \
 				} \
 				(str) = tmp; \
 			} else { \
@@ -61,7 +61,7 @@ static uint zend_hash_persist_calc(HashTable *ht, uint (*pPersistElement)(zval *
 	if (ht->u.flags & HASH_FLAG_PACKED) {
 		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed);
 	} else {
-		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed + sizeof(zend_uint) * ht->nTableSize);
+		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed + sizeof(uint32_t) * ht->nTableSize);
 	}
 
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
@@ -83,17 +83,26 @@ static uint zend_hash_persist_calc(HashTable *ht, uint (*pPersistElement)(zval *
 
 static uint zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
 {
-	int i;
+	uint32_t i;
 	START_SIZE();
 
-	if (ast->kind == ZEND_CONST) {
-		ADD_SIZE(sizeof(zend_ast));
-		ADD_SIZE(zend_persist_zval_calc(&ast->u.val TSRMLS_CC));
+	if (ast->kind == ZEND_AST_ZVAL) {
+		ADD_SIZE(sizeof(zend_ast_zval));
+		ADD_SIZE(zend_persist_zval_calc(zend_ast_get_zval(ast) TSRMLS_CC));
+	} else if (zend_ast_is_list(ast)) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		ADD_SIZE(sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * list->children);
+		for (i = 0; i < list->children; i++) {
+			if (list->child[i]) {
+				ADD_SIZE(zend_persist_ast_calc(list->child[i] TSRMLS_CC));
+			}
+		}
 	} else {
-		ADD_SIZE(sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
-		for (i = 0; i < ast->children; i++) {
-			if ((&ast->u.child)[i]) {
-				ADD_SIZE(zend_persist_ast_calc((&ast->u.child)[i] TSRMLS_CC));
+		uint32_t children = zend_ast_get_num_children(ast);
+		ADD_SIZE(sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children);
+		for (i = 0; i < children; i++) {
+			if (ast->child[i]) {
+				ADD_SIZE(zend_persist_ast_calc(ast->child[i] TSRMLS_CC));
 			}
 		}
 	}
@@ -111,7 +120,7 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 		case IS_CONSTANT:
 			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			ADD_INTERNED_STRING(Z_STR_P(z), 0);
-			if (IS_INTERNED(Z_STR_P(z))) {
+			if (!Z_REFCOUNTED_P(z)) {
 				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 			}
 			Z_GC_FLAGS_P(z) |= flags;
@@ -194,7 +203,7 @@ static uint zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (op_array->arg_info) {
-		zend_uint i;
+		uint32_t i;
 
 		ADD_DUP_SIZE(op_array->arg_info, sizeof(zend_arg_info) * op_array->num_args);
 		for (i = 0; i < op_array->num_args; i++) {

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -69,7 +69,7 @@ PHP_METHOD(domtext, __construct)
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *value = NULL;
-	int value_len;
+	size_t value_len;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
@@ -126,7 +126,7 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval TSRMLS_DC)
 	}
 
 	if (wholetext != NULL) {
-		ZVAL_STRING(retval, wholetext);
+		ZVAL_STRING(retval, (char *) wholetext);
 		xmlFree(wholetext);
 	} else {
 		ZVAL_EMPTY_STRING(retval);
@@ -149,7 +149,7 @@ PHP_FUNCTION(dom_text_split_text)
 	xmlChar    *second;
 	xmlNodePtr  node;
 	xmlNodePtr  nnode;
-	long        offset;
+	zend_long        offset;
 	int         length;
 	dom_object	*intern;
 

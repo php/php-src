@@ -25,7 +25,16 @@
  * - optimize static BRKs and CONTs
  */
 
-if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
+void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
+{
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
 
@@ -196,8 +205,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 						array_offset = jmp_to->parent;
 						if (--nest_levels > 0) {
 							if (opline->opcode == ZEND_BRK &&
-							    (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE ||
-							     op_array->opcodes[jmp_to->brk].opcode == ZEND_SWITCH_FREE)) {
+							    op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE) {
 								dont_optimize = 1;
 								break;
 							}

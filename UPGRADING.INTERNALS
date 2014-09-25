@@ -1,12 +1,18 @@
 $Id$
 
-UPGRADE NOTES - PHP X.Y
+PHP 7.0 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
   a. Addition of do_operation and compare object handlers
   b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
   c. POST data handling
   d. Arginfo changes
+  e. New data types
+  f. zend_parse_parameters() specs
+  g. sprintf() formats
+  h. HashTable API
+  i. New portable macros for large file support
+  j. New portable macros for integers
 
 2. Build system changes
   a. Unix build system changes
@@ -18,7 +24,85 @@ UPGRADE NOTES - PHP X.Y
 ========================
 
   a. zend_set_memory_limit() now takes the TSRMLS_CC macro as its last argument
+  e. New data types
 
+     String
+
+        Besides the old way of accepting the strings with 's', the new 'S' ZPP spec
+	was introduced. It expects an argument of the type zend_string *. String lengths
+	in it are bound to the size_t datatype.
+
+     Integer types
+
+	Integers do no more depend on the firm 'long' type. Instead a platform
+	dependent integer type is used, it is called zend_long. That datatype is
+	defined dynamically to guarantee the consistent 64 bit support. The zval 
+	field representing user land integer it bound to zend_long.
+
+	Signed integer is defined as zend_long, unsigned integer as zend_ulong
+	inside Zend. 
+
+     Other datatypes
+
+	zend_off_t  - portable off_t analogue
+	zend_stat_t - portable 'struct stat' analogue
+
+	These datatypes are declared to be portable across platforms. Thus, direct
+	usage of the functions like fseek, stat, etc. as well as direct usage of
+	off_t and struct stat is strongly not recommended. Instead the portable
+	macros should be used.
+
+	zend_fseek - portable fseek equivalent
+	zend_ftell - portable ftell equivalent
+	zend_lseek - portable lseek equivalent
+	zend_fstat - portable fstat equivalent
+	zend_stat  - portable stat equivalent
+
+  f. zend_parse_parameters() specs
+
+       The new spec 'S' introduced, which expects an argument of type zend_string *.
+       The 'l' spec expects a parameter of the type zend_long, not long anymore.
+       The 's' spec expects parameters of the type char * and size_t, no int anymore.
+
+  g. sprintf() formats
+
+       New printf modifier 'p' was implemented to platform independently output zend_long,
+       zend_ulong and php_size_t datatypes. That modifier can be used with'd', 'u', 'x' and 'o'
+       printf format specs with spprintf, snprintf and the wrapping printf implementations.
+       %pu is sufficient for both zend_ulong and php_size_t. the code using %p spec to output
+       pointer address might need to be enclosed into #ifdef when it unlickily followed by 'd',
+       'u', 'x' or 'o'.
+
+       The only exceptions are the snprintf and zend_sprintf functions yet, because in some cases
+       they can use the implemenations available on the system, not the PHP one. Fro snprintf the
+       the macros ZEND_INT_FMT ZEND_UINT_FMT should be used.
+
+  h. HashTable API
+
+       Datatype for array indexes was changed to zend_ulong, for string keys to zend_string *.
+
+  i. New portable macros for large file support
+
+      Function(s)       Alias           Comment
+      stat, _stat64     zend_stat   for use with zend_stat_t
+      fstat, _fstat64   zend_fstat  for use with zend_stat_t
+      lseek, _lseeki64  zend_lseek  for use with zend_off_t
+      ftell, _ftelli64  zend_ftell  for use with zend_off_t
+      fseek, _fseeki64  zend_fseek  for use with zend_off_t
+
+  j. New portable macros for integers
+
+      Function(s)                                         Alias             Comment
+      snprintf with "%ld" or "%lld", _ltoa_s, _i64toa_s   ZEND_LTOA         for use with zend_long
+      atol, atoll, _atoi64                                ZEND_ATOL         for use with zend_long
+      strtol, strtoll, _strtoi64                          ZEND_STRTOL       for use with zend_long
+      strtoul, strtoull, _strtoui64                       ZEND_STRTOUL      for use with zend_long
+      abs, llabs, _abs64                                  ZEND_ABS          for use with zend_long
+      -                                                   ZEND_LONG_MAX     replaces LONG_MAX where appropriate
+      -                                                   ZEND_LONG_MIN     replaces LONG_MIN where appropriate
+      -                                                   ZEND_ULONG_MAX    replaces ULONG_MAX where appropriate
+      -                                                   SIZEOF_ZEND_LONG  reworked SIZEOF_ZEND_LONG representing the size of zend_long datatype
+      -                                                   ZEND_SIZE_MAX     Max value of size_t
 
 ========================
 2. Build system changes

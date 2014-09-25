@@ -110,12 +110,12 @@ ZEND_API zval *_zend_ts_hash_add_or_update(TsHashTable *ht, zend_string *key, zv
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_index_update_or_next_insert(TsHashTable *ht, ulong h, zval *pData, int flag ZEND_FILE_LINE_DC)
+ZEND_API zval *_zend_ts_hash_index_add_or_update(TsHashTable *ht, zend_ulong h, zval *pData, int flag ZEND_FILE_LINE_DC)
 {
 	zval *retval;
 
 	begin_write(ht);
-	retval = _zend_hash_index_update_or_next_insert(TS_HASH(ht), h, pData, flag ZEND_FILE_LINE_RELAY_CC);
+	retval = _zend_hash_index_add_or_update(TS_HASH(ht), h, pData, flag ZEND_FILE_LINE_RELAY_CC);
 	end_write(ht);
 
 	return retval;
@@ -187,7 +187,7 @@ ZEND_API int zend_ts_hash_del(TsHashTable *ht, zend_string *key)
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, ulong h)
+ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h)
 {
 	int retval;
 
@@ -209,7 +209,7 @@ ZEND_API zval *zend_ts_hash_find(TsHashTable *ht, zend_string *key)
 	return retval;
 }
 
-ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, ulong h)
+ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_ulong h)
 {
 	zval *retval;
 
@@ -231,7 +231,7 @@ ZEND_API int zend_ts_hash_exists(TsHashTable *ht, zend_string *key)
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, ulong h)
+ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h)
 {
 	int retval;
 

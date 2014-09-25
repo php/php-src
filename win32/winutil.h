@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-PHPAPI char *php_win32_error_to_msg(int error);
+PHPAPI char *php_win32_error_to_msg(HRESULT error);
 
 #define php_win_err()	php_win32_error_to_msg(GetLastError())
 int php_win32_check_trailing_space(const char * path, const int path_len);

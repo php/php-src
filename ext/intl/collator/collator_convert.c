@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,7 +41,7 @@
 
 /* {{{ collator_convert_hash_item_from_utf8_to_utf16 */
 static void collator_convert_hash_item_from_utf8_to_utf16(
-	HashTable* hash, zval *hashData, zend_string *hashKey, ulong hashIndex,
+	HashTable* hash, zval *hashData, zend_string *hashKey, zend_ulong hashIndex,
 	UErrorCode* status )
 {
 	const char* old_val;
@@ -82,7 +82,7 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 
 /* {{{ collator_convert_hash_item_from_utf16_to_utf8 */
 static void collator_convert_hash_item_from_utf16_to_utf8(
-	HashTable* hash, zval * hashData, zend_string* hashKey, ulong hashIndex,
+	HashTable* hash, zval * hashData, zend_string* hashKey, zend_ulong hashIndex,
 	UErrorCode* status )
 {
 	const char* old_val;
@@ -125,7 +125,7 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
  */
 void collator_convert_hash_from_utf8_to_utf16( HashTable* hash, UErrorCode* status )
 {
-	ulong    hashIndex;
+	zend_ulong    hashIndex;
 	zval *hashData;
 	zend_string *hashKey;
 
@@ -144,7 +144,7 @@ void collator_convert_hash_from_utf8_to_utf16( HashTable* hash, UErrorCode* stat
  */
 void collator_convert_hash_from_utf16_to_utf8( HashTable* hash, UErrorCode* status )
 {
-	ulong hashIndex;
+	zend_ulong hashIndex;
 	zend_string *hashKey;
 	zval *hashData;
 
@@ -359,7 +359,7 @@ zval* collator_convert_string_to_double( zval* str, zval *rv )
 zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 {
 	int is_numeric = 0;
-	long lval      = 0;
+	zend_long lval      = 0;
 	double dval    = 0;
 
 	if( Z_TYPE_P( str ) != IS_STRING )

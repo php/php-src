@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,27 +25,25 @@
 #include "php.h"
 #include "php_metaphone.h"
 
-static int metaphone(unsigned char *word, int word_len, long max_phonemes, zend_string **phoned_word, int traditional);
+static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional);
 
 /* {{{ proto string metaphone(string text[, int phones])
    Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
 {
-	char *str;
+	zend_string *str;
 	zend_string *result = NULL;
-	int str_len;
-	long phones = 0;
+	zend_long phones = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len,
-							  &phones) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &str, &phones) == FAILURE) {
 		return;
 	}
 
-	if (metaphone((unsigned char *)str, str_len, phones, &result, 1) == 0) {
+	if (metaphone((unsigned char *)str->val, str->len, phones, &result, 1) == 0) {
 		RETVAL_STR(result);
 	} else {
 		if (result) {
-			STR_FREE(result);
+			zend_string_free(result);
 		}
 		RETURN_FALSE;
 	}
@@ -144,7 +142,7 @@ static char Lookahead(char *word, int how_far)
  * could be one though; or more too). */
 #define Phonize(c)	{ \
 						if (p_idx >= max_buffer_len) { \
-							*phoned_word = STR_REALLOC(*phoned_word, 2 * sizeof(char) + max_buffer_len, 0); \
+							*phoned_word = zend_string_realloc(*phoned_word, 2 * sizeof(char) + max_buffer_len, 0); \
 							max_buffer_len += 2; \
 						} \
 						(*phoned_word)->val[p_idx++] = c; \
@@ -153,7 +151,7 @@ static char Lookahead(char *word, int how_far)
 /* Slap a null character on the end of the phoned word */
 #define End_Phoned_Word	{ \
 							if (p_idx == max_buffer_len) { \
-								*phoned_word = STR_REALLOC(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
+								*phoned_word = zend_string_realloc(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
 								max_buffer_len += 1; \
 							} \
 							(*phoned_word)->val[p_idx] = '\0'; \
@@ -167,11 +165,11 @@ static char Lookahead(char *word, int how_far)
 
 /* {{{ metaphone
  */
-static int metaphone(unsigned char *word, int word_len, long max_phonemes, zend_string **phoned_word, int traditional)
+static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
 	int p_idx = 0;				/* end of the phoned phrase */
-	int max_buffer_len = 0;		/* maximum length of the destination buffer */
+	size_t max_buffer_len = 0;		/* maximum length of the destination buffer */
 
 /*-- Parameter checks --*/
 	/* Negative phoneme length is meaningless */
@@ -189,10 +187,10 @@ static int metaphone(unsigned char *word, int word_len, long max_phonemes, zend_
 /*-- Allocate memory for our phoned_phrase --*/
 	if (max_phonemes == 0) {	/* Assume largest possible */
 		max_buffer_len = word_len;
-		*phoned_word = STR_ALLOC(sizeof(char) * word_len + 1, 0);
+		*phoned_word = zend_string_alloc(sizeof(char) * word_len + 1, 0);
 	} else {
 		max_buffer_len = max_phonemes;
-		*phoned_word = STR_ALLOC(sizeof(char) * max_phonemes + 1, 0);
+		*phoned_word = zend_string_alloc(sizeof(char) * max_phonemes + 1, 0);
 	}
 
 

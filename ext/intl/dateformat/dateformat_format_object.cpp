@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,9 +47,9 @@ static const DateFormat::EStyle valid_styles[] = {
 
 static bool valid_format(zval *z) {
 	if (Z_TYPE_P(z) == IS_LONG) {
-		long lval = Z_LVAL_P(z);
+		zend_long lval = Z_LVAL_P(z);
 		for (int i = 0; i < sizeof(valid_styles) / sizeof(*valid_styles); i++) {
-			if ((long)valid_styles[i] == lval) {
+			if ((zend_long)valid_styles[i] == lval) {
 				return true;
 			}
 		}
@@ -63,7 +63,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	zval				*object,
 						*format = NULL;
 	const char			*locale_str	= NULL;
-	int					locale_len;
+	size_t					locale_len;
 	bool				pattern		= false;
 	UDate				date;
 	TimeZone			*timeZone	= NULL;

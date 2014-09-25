@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -219,7 +219,7 @@ void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 #define mysqlnd_escape_string(newstr, escapestr, escapestr_len) \
 		mysqlnd_old_escape_string((newstr), (escapestr), (escapestr_len) TSRMLS_CC)
 
-PHPAPI ulong mysqlnd_old_escape_string(char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC);
+PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC);
 
 
 /* PS */
@@ -264,25 +264,25 @@ PHPAPI void			_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_L
 #define MYSQLND_METHOD_PRIVATE(class, method) php_##class##_##method##_priv
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
-	zend_bool		collect_statistics;
-	zend_bool		collect_memory_statistics;
 	char *			debug;	/* The actual string */
 	char *			trace_alloc_settings;	/* The actual string */
 	MYSQLND_DEBUG *	dbg;	/* The DBG object for standard tracing */
 	MYSQLND_DEBUG *	trace_alloc;	/* The DBG object for allocation tracing */
-	long			net_cmd_buffer_size;
-	long			net_read_buffer_size;
-	long			log_mask;
-	long			net_read_timeout;
-	long			mempool_default_size;
-	long			debug_emalloc_fail_threshold;
-	long			debug_ecalloc_fail_threshold;
-	long			debug_erealloc_fail_threshold;
-	long			debug_malloc_fail_threshold;
-	long			debug_calloc_fail_threshold;
-	long			debug_realloc_fail_threshold;
+	zend_long		net_cmd_buffer_size;
+	zend_long		net_read_buffer_size;
+	zend_long		log_mask;
+	zend_long		net_read_timeout;
+	zend_long		mempool_default_size;
+	zend_long		debug_emalloc_fail_threshold;
+	zend_long		debug_ecalloc_fail_threshold;
+	zend_long		debug_erealloc_fail_threshold;
+	zend_long		debug_malloc_fail_threshold;
+	zend_long		debug_calloc_fail_threshold;
+	zend_long		debug_realloc_fail_threshold;
 	char *			sha256_server_public_key;
 	zend_bool		fetch_data_copy;
+	zend_bool		collect_statistics;
+	zend_bool		collect_memory_statistics;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)

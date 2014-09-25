@@ -27,9 +27,18 @@
  * - pre-evaluate constant function calls
  */
 
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
 #define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
 
-if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
+void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC)
+{
 	int i = 0;
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
@@ -60,7 +69,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				ZEND_OP2_TYPE(opline) == IS_CONST) {
 				/* binary operation with constant operands */
 				int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) = get_binary_op(opline->opcode);
-				zend_uint tv = ZEND_RESULT(opline).var;		/* temporary variable */
+				uint32_t tv = ZEND_RESULT(opline).var;		/* temporary variable */
 				zval result;
 				int er;
 
@@ -82,7 +91,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
 				MAKE_NOP(opline);
 
-				replace_tmp_by_const(op_array, opline + 1, tv, &result TSRMLS_CC);
+				zend_optimizer_replace_by_const(op_array, opline + 1, IS_TMP_VAR, tv, &result TSRMLS_CC);
 			}
 			break;
 
@@ -92,7 +101,8 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				opline->extended_value != IS_OBJECT &&
 				opline->extended_value != IS_RESOURCE) {
 				/* cast of constant operand */
-				zend_uint tv = ZEND_RESULT(opline).var;		/* temporary variable */
+				zend_uchar type = opline->result_type;
+				uint32_t tv = ZEND_RESULT(opline).var;		/* temporary variable */
 				zval res;
 				res = ZEND_OP1_LITERAL(opline);
 				zval_copy_ctor(&res);
@@ -117,11 +127,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				MAKE_NOP(opline);
 
-				if (opline->result_type == IS_TMP_VAR) {
-					replace_tmp_by_const(op_array, opline + 1, tv, &res TSRMLS_CC);
-				} else /* if (opline->result_type == IS_VAR) */ {
-					replace_var_by_const(op_array, opline + 1, tv, &res TSRMLS_CC);
-				}
+				zend_optimizer_replace_by_const(op_array, opline + 1, type, tv, &res TSRMLS_CC);
 			} else if (opline->extended_value == _IS_BOOL) {
 				/* T = CAST(X, IS_BOOL) => T = BOOL(X) */
 				opline->opcode = ZEND_BOOL;
@@ -135,7 +141,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				/* unary operation on constant operand */
 				unary_op_type unary_op = get_unary_op(opline->opcode);
 				zval result;
-				zend_uint tv = ZEND_RESULT(opline).var;		/* temporary variable */
+				uint32_t tv = ZEND_RESULT(opline).var;		/* temporary variable */
 				int er;
 
 				er = EG(error_reporting);
@@ -148,7 +154,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				MAKE_NOP(opline);
 
-				replace_tmp_by_const(op_array, opline + 1, tv, &result TSRMLS_CC);
+				zend_optimizer_replace_by_const(op_array, opline + 1, IS_TMP_VAR, tv, &result TSRMLS_CC);
 			}
 			break;
 
@@ -183,7 +189,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				}
 				last_op = next_op;
 				final_length += (requires_conversion? 1 : Z_STRLEN(ZEND_OP2_LITERAL(opline)));
-				str = STR_ALLOC(final_length, 0);
+				str = zend_string_alloc(final_length, 0);
 				ptr = str->val;
 				ptr[final_length] = '\0';
 				if (requires_conversion) { /* ZEND_ADD_CHAR */
@@ -195,7 +201,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					ptr++;
 				} else { /* ZEND_ADD_STRING */
 					memcpy(ptr, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
-					STR_RELEASE(Z_STR(ZEND_OP2_LITERAL(opline)));
+					zend_string_release(Z_STR(ZEND_OP2_LITERAL(opline)));
 					Z_STR(ZEND_OP2_LITERAL(opline)) = str;
 					ptr += Z_STRLEN(ZEND_OP2_LITERAL(opline));
 				}
@@ -238,11 +244,11 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				fake_execute_data.func = (zend_function*)op_array;
 				EG(current_execute_data) = &fake_execute_data;
 				if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1 TSRMLS_CC)) != NULL) {
-					zend_uint tv = ZEND_RESULT(opline).var;
+					uint32_t tv = ZEND_RESULT(opline).var;
 
 					literal_dtor(&ZEND_OP2_LITERAL(opline));
 					MAKE_NOP(opline);
-					replace_tmp_by_const(op_array, opline, tv, offset TSRMLS_CC);
+					zend_optimizer_replace_by_const(op_array, opline, IS_TMP_VAR, tv, offset TSRMLS_CC);
 				}
 				EG(current_execute_data) = orig_execute_data;
 				break;
@@ -252,17 +258,17 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				ZEND_OP2_TYPE(opline) == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 				/* substitute persistent constants */
-				zend_uint tv = ZEND_RESULT(opline).var;
+				uint32_t tv = ZEND_RESULT(opline).var;
 				zval c;
 
-				if (!zend_get_persistent_constant(Z_STR(ZEND_OP2_LITERAL(opline)), &c, 1 TSRMLS_CC)) {
+				if (!zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP2_LITERAL(opline)), &c, 1 TSRMLS_CC)) {
 					if (!ctx->constants || !zend_optimizer_get_collected_constant(ctx->constants, &ZEND_OP2_LITERAL(opline), &c)) {
 						break;
 					}
 				}
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
 				MAKE_NOP(opline);
-				replace_tmp_by_const(op_array, opline, tv, &c TSRMLS_CC);
+				zend_optimizer_replace_by_const(op_array, opline, IS_TMP_VAR, tv, &c TSRMLS_CC);
 			}
 
 			/* class constant */
@@ -300,14 +306,14 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				}
 
 				if (ce) {
-					zend_uint tv = ZEND_RESULT(opline).var;
+					uint32_t tv = ZEND_RESULT(opline).var;
 					zval *c, t;
 
 					if ((c = zend_hash_find(&ce->constants_table,
 							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL) {
 						ZVAL_DEREF(c);
 						if (ZEND_IS_CONSTANT_TYPE(Z_TYPE_P(c))) { 
-							if (!zend_get_persistent_constant(Z_STR_P(c), &t, 1 TSRMLS_CC) ||
+							if (!zend_optimizer_get_persistent_constant(Z_STR_P(c), &t, 1 TSRMLS_CC) ||
 							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {
 								break;
 							}
@@ -323,7 +329,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						}
 						literal_dtor(&ZEND_OP2_LITERAL(opline));
 						MAKE_NOP(opline);
-						replace_tmp_by_const(op_array, opline, tv, &t TSRMLS_CC);
+						zend_optimizer_replace_by_const(op_array, opline, IS_TMP_VAR, tv, &t TSRMLS_CC);
 					}
 				}
 			}
@@ -379,7 +385,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 							func->module->type == MODULE_PERSISTENT) {
 						zval t;
 						ZVAL_BOOL(&t, 1);
-						if (replace_var_by_const(op_array, opline + 3, ZEND_RESULT(opline + 2).var, &t TSRMLS_CC)) {
+						if (zend_optimizer_replace_by_const(op_array, opline + 3, IS_VAR, ZEND_RESULT(opline + 2).var, &t TSRMLS_CC)) {
 							literal_dtor(&ZEND_OP2_LITERAL(opline));
 							MAKE_NOP(opline);
 							literal_dtor(&ZEND_OP1_LITERAL(opline + 1));
@@ -412,7 +418,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						}
 					} 
 
-					if (replace_var_by_const(op_array, opline + 3, ZEND_RESULT(opline + 2).var, &t TSRMLS_CC)) {
+					if (zend_optimizer_replace_by_const(op_array, opline + 3, IS_VAR, ZEND_RESULT(opline + 2).var, &t TSRMLS_CC)) {
 						literal_dtor(&ZEND_OP2_LITERAL(opline));
 						MAKE_NOP(opline);
 						literal_dtor(&ZEND_OP1_LITERAL(opline + 1));
@@ -424,10 +430,10 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						"defined", sizeof("defined")-1)) {
 					zval t;
 
-					if (zend_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline + 1)), &t, 0 TSRMLS_CC)) {
+					if (zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline + 1)), &t, 0 TSRMLS_CC)) {
 
 						ZVAL_BOOL(&t, 1);
-						if (replace_var_by_const(op_array, opline + 3, ZEND_RESULT(opline + 2).var, &t TSRMLS_CC)) {
+						if (zend_optimizer_replace_by_const(op_array, opline + 3, IS_VAR, ZEND_RESULT(opline + 2).var, &t TSRMLS_CC)) {
 							literal_dtor(&ZEND_OP2_LITERAL(opline));
 							MAKE_NOP(opline);
 							literal_dtor(&ZEND_OP1_LITERAL(opline + 1));
@@ -440,8 +446,8 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						"constant", sizeof("constant")-1)) {
 					zval t;
 					
-					if (zend_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline + 1)), &t, 1 TSRMLS_CC)) {
-						if (replace_var_by_const(op_array, opline + 3, ZEND_RESULT(opline + 2).var, &t TSRMLS_CC)) {
+					if (zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline + 1)), &t, 1 TSRMLS_CC)) {
+						if (zend_optimizer_replace_by_const(op_array, opline + 3, IS_VAR, ZEND_RESULT(opline + 2).var, &t TSRMLS_CC)) {
 							literal_dtor(&ZEND_OP2_LITERAL(opline));
 							MAKE_NOP(opline);
 							literal_dtor(&ZEND_OP1_LITERAL(opline + 1));
@@ -456,7 +462,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					zval t;
 
 					ZVAL_LONG(&t, Z_STRLEN(ZEND_OP1_LITERAL(opline + 1)));
-					if (replace_var_by_const(op_array, opline + 3, ZEND_RESULT(opline + 2).var, &t TSRMLS_CC)) {
+					if (zend_optimizer_replace_by_const(op_array, opline + 3, IS_VAR, ZEND_RESULT(opline + 2).var, &t TSRMLS_CC)) {
 						literal_dtor(&ZEND_OP2_LITERAL(opline));
 						MAKE_NOP(opline);
 						literal_dtor(&ZEND_OP1_LITERAL(opline + 1));
@@ -472,7 +478,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				zval t;
 
 				ZVAL_LONG(&t, Z_STRLEN(ZEND_OP1_LITERAL(opline)));
-				replace_tmp_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC);
+				zend_optimizer_replace_by_const(op_array, opline + 1, IS_TMP_VAR, ZEND_RESULT(opline).var, &t TSRMLS_CC);
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				MAKE_NOP(opline);
 			}
@@ -480,12 +486,12 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 		case ZEND_DEFINED:
 			{
 				zval c;
-				zend_uint tv = ZEND_RESULT(opline).var;
-				if (!zend_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline)), &c, 0 TSRMLS_CC)) {
+				uint32_t tv = ZEND_RESULT(opline).var;
+				if (!zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline)), &c, 0 TSRMLS_CC)) {
 					break;
 				}
 				ZVAL_TRUE(&c);
-				replace_tmp_by_const(op_array, opline, tv, &c TSRMLS_CC);
+				zend_optimizer_replace_by_const(op_array, opline, IS_TMP_VAR, tv, &c TSRMLS_CC);
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				MAKE_NOP(opline);
 			}
@@ -520,7 +526,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 		case ZEND_NEW:
 		case ZEND_DO_FCALL:
 		case ZEND_JMP_SET:
-		case ZEND_JMP_SET_VAR:
 			collect_constants = 0;
 			break;
 		case ZEND_FETCH_R:

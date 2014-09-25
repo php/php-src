@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -28,7 +28,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/url.h"
 #include "streams/php_streams_int.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "php_openssl.h"
 #include "php_network.h"
 #include <openssl/ssl.h>
@@ -89,9 +89,9 @@ typedef struct _php_openssl_sni_cert_t {
 
 /* Provides leaky bucket handhsake renegotiation rate-limiting  */
 typedef struct _php_openssl_handshake_bucket_t {
-	long prev_handshake;
-	long limit;
-	long window;
+	zend_long prev_handshake;
+	zend_long limit;
+	zend_long window;
 	float tokens;
 	unsigned should_close;
 } php_openssl_handshake_bucket_t;
@@ -146,7 +146,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 	int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
 	char esbuf[512];
 	smart_str ebuf = {0};
-	unsigned long ecode;
+	zend_ulong ecode;
 	int retry = 1;
 
 	switch(err) {
@@ -230,7 +230,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 	SSL *ssl;
 	int err, depth, ret;
 	zval *val;
-	unsigned long allowed_depth = OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
+	zend_ulong allowed_depth = OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
 
 	TSRMLS_FETCH();
 
@@ -254,7 +254,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 
 	/* check the depth */
 	GET_VER_OPT_LONG("verify_depth", allowed_depth);
-	if ((unsigned long)depth > allowed_depth) {
+	if ((zend_ulong)depth > allowed_depth) {
 		ret = 0;
 		X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
 	}
@@ -271,7 +271,7 @@ static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *
 	fingerprint = php_openssl_x509_fingerprint(peer, method, 0 TSRMLS_CC);
 	if (fingerprint) {
 		result = strcmp(expected, fingerprint->val);
-		STR_RELEASE(fingerprint);
+		zend_string_release(fingerprint);
 	}
 
 	return result;
@@ -531,7 +531,7 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
-	zval **val;
+	zval *val;
 	zend_bool is_self_signed = 0;
 
 	TSRMLS_FETCH();
@@ -673,7 +673,7 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 		if (chain_policy_status.dwError != 0) {
 			/* The chain does not match the policy */
 			if (is_self_signed && chain_policy_status.dwError == CERT_E_UNTRUSTEDROOT
-				&& GET_VER_OPT("allow_self_signed") && zend_is_true(*val TSRMLS_CC)) {
+				&& GET_VER_OPT("allow_self_signed") && zend_is_true(val TSRMLS_CC)) {
 				/* allow self-signed certs */
 				X509_STORE_CTX_set_error(x509_store_ctx, X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT);
 			} else {
@@ -880,7 +880,7 @@ static int set_local_cert(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static const SSL_METHOD *php_select_crypto_method(long method_value, int is_client TSRMLS_DC) /* {{{ */
+static const SSL_METHOD *php_select_crypto_method(zend_long method_value, int is_client TSRMLS_DC) /* {{{ */
 {
 	if (method_value == STREAM_CRYPTO_METHOD_SSLv2) {
 #ifndef OPENSSL_NO_SSL2
@@ -891,7 +891,13 @@ static const SSL_METHOD *php_select_crypto_method(long method_value, int is_clie
 		return NULL;
 #endif
 	} else if (method_value == STREAM_CRYPTO_METHOD_SSLv3) {
+#ifndef OPENSSL_NO_SSL3
 		return is_client ? SSLv3_client_method() : SSLv3_server_method();
+#else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"SSLv3 support is not compiled into the OpenSSL library PHP is linked against");
+		return NULL;
+#endif
 	} else if (method_value == STREAM_CRYPTO_METHOD_TLSv1_0) {
 		return is_client ? TLSv1_client_method() : TLSv1_server_method();
 	} else if (method_value == STREAM_CRYPTO_METHOD_TLSv1_1) {
@@ -918,9 +924,9 @@ static const SSL_METHOD *php_select_crypto_method(long method_value, int is_clie
 }
 /* }}} */
 
-static long php_get_crypto_method_ctx_flags(long method_flags TSRMLS_DC) /* {{{ */
+static zend_long php_get_crypto_method_ctx_flags(zend_long method_flags TSRMLS_DC) /* {{{ */
 {
-	long ssl_ctx_options = SSL_OP_ALL;
+	zend_long ssl_ctx_options = SSL_OP_ALL;
 
 #ifndef OPENSSL_NO_SSL2
 	if (!(method_flags & STREAM_CRYPTO_METHOD_SSLv2)) {
@@ -956,7 +962,7 @@ static void limit_handshake_reneg(const SSL *ssl) /* {{{ */
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
 	struct timeval now;
-	long elapsed_time;
+	zend_long elapsed_time;
 
 	stream = php_openssl_get_stream_from_ssl_handle(ssl);
 	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
@@ -1025,8 +1031,8 @@ static void info_callback(const SSL *ssl, int where, int ret) /* {{{ */
 static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
 {
 	zval *val;
-	long limit = OPENSSL_DEFAULT_RENEG_LIMIT;
-	long window = OPENSSL_DEFAULT_RENEG_WINDOW;
+	zend_long limit = OPENSSL_DEFAULT_RENEG_LIMIT;
+	zend_long window = OPENSSL_DEFAULT_RENEG_WINDOW;
 
 	if (PHP_STREAM_CONTEXT(stream) &&
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
@@ -1171,7 +1177,8 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx TSRMLS_DC) 
 		return FAILURE;
 	}
 #else
-	if (SUCCESS == php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "ecdh_curve", &val)) {
+	val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "ecdh_curve");
+	if (val != NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"ECDH curve support not compiled into the OpenSSL lib against which PHP is linked");
 
@@ -1255,7 +1262,7 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 	zval *val;
 	zval *current;
 	zend_string *key;
-	ulong key_index;
+	zend_ulong key_index;
 	int i = 0;
 	char resolved_path_buff[MAXPATHLEN];
 	SSL_CTX *ctx;
@@ -1446,13 +1453,16 @@ int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 	GET_VER_OPT_STRING("ciphers", cipherlist);
+#ifndef USE_OPENSSL_SYSTEM_CIPHERS
 	if (!cipherlist) {
 		cipherlist = OPENSSL_DEFAULT_STREAM_CIPHERS;
 	}
-	if (SSL_CTX_set_cipher_list(sslsock->ctx, cipherlist) != 1) {
-		return FAILURE;
+#endif
+	if (cipherlist) {
+		if (SSL_CTX_set_cipher_list(sslsock->ctx, cipherlist) != 1) {
+			return FAILURE;
+		}
 	}
-
 	if (FAILURE == set_local_cert(sslsock->ctx, stream TSRMLS_CC)) {
 		return FAILURE;
 	}
@@ -1813,7 +1823,7 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 		   to hang forever. To avoid this scenario we poll with a timeout before performing
 		   the actual read. If it times out we're finished.
 		*/
-		if (sock->is_blocked) {
+		if (sock->is_blocked && SSL_pending(sslsock->ssl_handle) == 0) {
 			php_openssl_stream_wait_for_data(sock);
 			if (sock->timeout_event) {
 				stream->eof = 1;
@@ -2139,6 +2149,21 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret TS
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			if (ret) {
+				/* OpenSSL has an internal buffer which select() cannot see. If we don't
+				 * fetch it into the stream's buffer, no activity will be reported on the
+				 * stream even though there is data waiting to be read - but we only fetch
+				 * the lower of bytes OpenSSL has ready to give us or chunk_size since we
+				 * weren't asked for any data at this stage. This is only likely to cause
+				 * issues with non-blocking streams, but it's harmless to always do it. */
+				size_t pending;
+				if (stream->writepos == stream->readpos
+					&& sslsock->ssl_active
+					&& (pending = (size_t)SSL_pending(sslsock->ssl_handle)) > 0) {
+						php_stream_fill_read_buffer(stream, pending < stream->chunk_size
+							? pending
+							: stream->chunk_size);
+				}
+
 				*(php_socket_t *)ret = sslsock->s.socket;
 			}
 			return SUCCESS;
@@ -2167,13 +2192,13 @@ php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_set_option,
 };
 
-static long get_crypto_method(php_stream_context *ctx, long crypto_method)
+static zend_long get_crypto_method(php_stream_context *ctx, zend_long crypto_method)
 {
 	zval *val;
 
 	if (ctx && (val = php_stream_context_get_option(ctx, "ssl", "crypto_method")) != NULL) {
 		convert_to_long_ex(val);
-		crypto_method = (long)Z_LVAL_P(val);
+		crypto_method = (zend_long)Z_LVAL_P(val);
 	        crypto_method |= STREAM_CRYPTO_IS_CLIENT;
 	}
 
@@ -2262,8 +2287,13 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		sslsock->method = STREAM_CRYPTO_METHOD_SSLv2_CLIENT;
 #endif
 	} else if (strncmp(proto, "sslv3", protolen) == 0) {
+#ifdef OPENSSL_NO_SSL3
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv3 support is not compiled into the OpenSSL library PHP is linked against");
+		return NULL;
+#else
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_SSLv3_CLIENT;
+#endif
 	} else if (strncmp(proto, "tls", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
 		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_TLS_CLIENT);

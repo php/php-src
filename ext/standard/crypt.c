@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -136,7 +136,7 @@ PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-static void php_to64(char *s, long v, int n) /* {{{ */
+static void php_to64(char *s, zend_long v, int n) /* {{{ */
 {
 	while (--n >= 0) {
 		*s++ = itoa64[v&0x3f];
@@ -160,7 +160,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 
 			out = php_md5_crypt_r(password, salt, output);
 			if (out) {
-				return STR_INIT(out, strlen(out), 0);
+				return zend_string_init(out, strlen(out), 0);
 			}
 			return NULL;
 		} else if (salt[0]=='$' && salt[1]=='6' && salt[2]=='$') {
@@ -173,7 +173,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				efree(output);
 				return NULL;
 			} else {
-				result = STR_INIT(output, strlen(output), 0);
+				result = zend_string_init(output, strlen(output), 0);
 				memset(output, 0, PHP_MAX_SALT_LEN);
 				efree(output);
 				return result;
@@ -188,7 +188,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				efree(output);
 				return NULL;
 			} else {
-				result = STR_INIT(output, strlen(output), 0);
+				result = zend_string_init(output, strlen(output), 0);
 				memset(output, 0, PHP_MAX_SALT_LEN);
 				efree(output);
 				return result;
@@ -207,11 +207,11 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 
 			crypt_res = php_crypt_blowfish_rn(password, salt, output, sizeof(output));
 			if (!crypt_res) {
-				memset(output, 0, PHP_MAX_SALT_LEN + 1);
+				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return NULL;
 			} else {
-				result = STR_INIT(output, strlen(output), 0);
-				memset(output, 0, PHP_MAX_SALT_LEN + 1);
+				result = zend_string_init(output, strlen(output), 0);
+				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return result;
 			}
 		} else {
@@ -222,7 +222,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 			if (!crypt_res) {
 				return NULL;
 			} else {
-				result = STR_INIT(crypt_res, strlen(crypt_res), 0);
+				result = zend_string_init(crypt_res, strlen(crypt_res), 0);
 				return result;
 			}
 		}
@@ -243,7 +243,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 		if (!crypt_res) {
 			return FAILURE;
 		} else {
-			result = STR_INIT(crypt_res, strlen(crypt_res), 0);
+			result = zend_string_init(crypt_res, strlen(crypt_res), 0);
 			return result;
 		}
 	}
@@ -259,7 +259,7 @@ PHP_FUNCTION(crypt)
 {
 	char salt[PHP_MAX_SALT_LEN + 1];
 	char *str, *salt_in = NULL;
-	int str_len, salt_in_len = 0;
+	size_t str_len, salt_in_len = 0;
 	zend_string *result;
 
 	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';

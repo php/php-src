@@ -34,8 +34,8 @@ PHP_FUNCTION( normalizer_normalize )
 {
 	char*			input = NULL;
 	/* form is optional, defaults to FORM_C */
-	long			form = NORMALIZER_DEFAULT;
-	int			input_len = 0;
+	zend_long			form = NORMALIZER_DEFAULT;
+	size_t			input_len = 0;
 		
 	UChar*			uinput = NULL;
 	int			uinput_len = 0;
@@ -174,8 +174,8 @@ PHP_FUNCTION( normalizer_is_normalized )
 {
 	char*	 	input = NULL;
 	/* form is optional, defaults to FORM_C */
-	long		form = NORMALIZER_DEFAULT;
-	int		input_len = 0;
+	zend_long		form = NORMALIZER_DEFAULT;
+	size_t		input_len = 0;
 
 	UChar*	 	uinput = NULL;
 	int		uinput_len = 0;

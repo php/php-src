@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,7 +25,7 @@
 PHPAPI zend_string *_php_math_number_format(double, int, char, char);
 PHPAPI zend_string *_php_math_number_format_ex(double, int, char *, size_t, char *, size_t);
 PHPAPI zend_string * _php_math_longtobase(zval *arg, int base TSRMLS_DC);
-PHPAPI long _php_math_basetolong(zval *arg, int base);
+PHPAPI zend_long _php_math_basetolong(zval *arg, int base);
 PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret);
 PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC);
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -47,7 +47,7 @@ typedef zend_object* (*create_object_func_t)(zend_class_entry *class_type TSRMLS
 	spl_register_property(spl_ce_ ## class_name, prop_name, sizeof(prop_name)-1, prop_flags TSRMLS_CC);
 
 #define REGISTER_SPL_CLASS_CONST_LONG(class_name, const_name, value) \
-	zend_declare_class_constant_long(spl_ce_ ## class_name, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+	zend_declare_class_constant_long(spl_ce_ ## class_name, const_name, sizeof(const_name)-1, (zend_long)value TSRMLS_CC);
 
 void spl_register_std_class(zend_class_entry ** ppce, char * class_name, create_object_func_t ctor, const zend_function_entry * function_list TSRMLS_DC);
 void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * parent_ce, char * class_name, create_object_func_t ctor, const zend_function_entry * function_list TSRMLS_DC);

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -93,7 +93,7 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out TSRMLS_DC)
 		if (Z_LVAL_P(val) < 0 || Z_LVAL_P(val) > UINT_MAX) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"the interface index cannot be negative or larger than %u;"
-				" given %ld", UINT_MAX, Z_LVAL_P(val));
+				" given %pd", UINT_MAX, Z_LVAL_P(val));
 			ret = FAILURE;
 		} else {
 			*out = Z_LVAL_P(val);

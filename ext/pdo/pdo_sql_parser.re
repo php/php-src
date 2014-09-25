@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -223,12 +223,12 @@ safe:
 							ret = -1;
 							strncpy(stmt->error_code, stmt->dbh->error_code, 6);
 							if (buf) {
-								STR_RELEASE(buf);
+								zend_string_release(buf);
 							}
 							goto clean_up;
 						}
 						if (buf) {
-							STR_RELEASE(buf);
+							zend_string_release(buf);
 						}
 					} else {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);

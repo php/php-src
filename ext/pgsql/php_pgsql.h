@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -211,11 +211,11 @@ PHP_FUNCTION(pg_select);
 
 /* exported functions */
 PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, zend_bool extended TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, ulong opt TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, ulong opt, zend_string **sql TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, ulong opt , zend_string **sql TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, ulong opt, zend_string **sql TSRMLS_DC);
-PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, ulong opt, zend_string **sql  TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, zend_ulong opt TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, zend_ulong opt, zend_string **sql TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, zend_ulong opt , zend_string **sql TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, zend_ulong opt, zend_string **sql TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, zend_ulong opt, zend_string **sql  TSRMLS_DC);
 PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC);
 
 /* internal functions */
@@ -309,10 +309,10 @@ static php_stream_ops php_stream_pgsql_fd_ops = {
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(pgsql)
-	long num_links,num_persistent;
-	long max_links,max_persistent;
-	long allow_persistent;
-	long auto_reset_persistent;
+	zend_long num_links,num_persistent;
+	zend_long max_links,max_persistent;
+	zend_long allow_persistent;
+	zend_long auto_reset_persistent;
 	int le_lofp,le_string;
 	int ignore_notices,log_notices;
 	HashTable notices;  /* notice message for each connection */

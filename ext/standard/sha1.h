@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -31,7 +31,7 @@ typedef struct {
 } PHP_SHA1_CTX;
 
 PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX *);
-PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, unsigned int);
+PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, size_t);
 PHPAPI void PHP_SHA1Final(unsigned char[20], PHP_SHA1_CTX *);
 PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest);
 

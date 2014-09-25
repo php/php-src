@@ -61,8 +61,63 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	efree(arguments);
 
 	/* destruct the function also, then - we have allocated it in get_method */
-	STR_RELEASE(func->internal_function.function_name);
+	zend_string_release(func->internal_function.function_name);
 	efree(func);
+}
+/* }}} */
+
+/* {{{ proto mixed Closure::call(object $to [, mixed $parameter] [, mixed $...] )
+   Call closure, binding to a given object with its class as the scope */
+ZEND_METHOD(Closure, call) 
+{
+	zval *zclosure, *newthis, closure_result;
+	zend_closure *closure;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+	zval *my_params;
+	int my_param_count = 0;
+	zend_function my_function;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o*", &newthis, &my_params, &my_param_count) == FAILURE) {
+		return;
+	}
+	
+	zclosure = getThis();
+	closure = (zend_closure *)Z_OBJ_P(zclosure);
+	
+	if (closure->func.common.fn_flags & ZEND_ACC_STATIC) {
+		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
+		return;
+	}
+
+	if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
+		/* verify that we aren't binding internal function to a wrong object */
+		if ((closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+				!instanceof_function(Z_OBJCE_P(newthis), closure->func.common.scope TSRMLS_CC)) {
+			zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", closure->func.common.scope->name->val, closure->func.common.function_name->val, Z_OBJCE_P(newthis)->name->val);
+			return;
+		}
+	}
+
+	/* This should never happen as closures will always be callable */
+	if (zend_fcall_info_init(zclosure, 0, &fci, &fci_cache, NULL, NULL TSRMLS_CC) != SUCCESS) {
+		ZEND_ASSERT(0);
+	}
+
+	fci.retval = &closure_result;
+	fci.params = my_params;
+	fci.param_count = my_param_count;
+	fci.object = fci_cache.object = Z_OBJ_P(newthis);
+	fci_cache.initialized = 1;
+	
+	my_function = *fci_cache.function_handler;
+	/* use scope of passed object */
+	my_function.common.scope = Z_OBJCE_P(newthis);
+	fci_cache.function_handler = &my_function;
+
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(closure_result) != IS_UNDEF) {
+		ZVAL_COPY_VALUE(return_value, &closure_result);
+	}
 }
 /* }}} */
 
@@ -91,15 +146,14 @@ ZEND_METHOD(Closure, bind)
 			ce = NULL;
 		} else {
 			zend_string *class_name = zval_get_string(scope_arg);
-			if ((class_name->len == sizeof("static") - 1) &&
-				(memcmp("static", class_name->val, sizeof("static") - 1) == 0)) {
+			if (zend_string_equals_literal(class_name, "static")) {
 				ce = closure->func.common.scope;
 			} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1 TSRMLS_CC)) == NULL) {
 				zend_error(E_WARNING, "Class '%s' not found", class_name->val);
-				STR_RELEASE(class_name);
+				zend_string_release(class_name);
 				RETURN_NULL();
 			}
-			STR_RELEASE(class_name);
+			zend_string_release(class_name);
 		}
 	} else { /* scope argument not given; do not change the scope by default */
 		ce = closure->func.common.scope;
@@ -133,7 +187,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object TSRML
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
-	invoke->internal_function.function_name = STR_INIT(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1, 0);
+	invoke->internal_function.function_name = zend_string_init(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1, 0);
 	return invoke;
 }
 /* }}} */
@@ -156,15 +210,13 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 {
 	zend_string *lc_name;
 
-	lc_name = STR_ALLOC(method->len, 0);
+	lc_name = zend_string_alloc(method->len, 0);
 	zend_str_tolower_copy(lc_name->val, method->val, method->len);
-	if ((method->len == sizeof(ZEND_INVOKE_FUNC_NAME)-1) &&
-		memcmp(lc_name->val, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-	) {
-		STR_FREE(lc_name);
+	if (zend_string_equals_literal(method, ZEND_INVOKE_FUNC_NAME)) {
+		zend_string_free(lc_name);
 		return zend_get_closure_invoke_method(*object TSRMLS_CC);
 	}
-	STR_FREE(lc_name);
+	zend_string_free(lc_name);
 	return std_object_handlers.get_method(object, method, key TSRMLS_CC);
 }
 /* }}} */
@@ -308,7 +360,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 		}
 
 		if (arg_info) {
-			zend_uint i, required = closure->func.common.required_num_args;
+			uint32_t i, required = closure->func.common.required_num_args;
 
 			array_init(&val);
 
@@ -324,9 +376,9 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 							arg_info->pass_by_reference ? "&" : "",
 							i + 1);
 				}
-				ZVAL_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
+				ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
 				zend_hash_update(Z_ARRVAL(val), name, &info);
-				STR_RELEASE(name);
+				zend_string_release(name);
 				arg_info++;
 			}
 			zend_hash_str_update(closure->debug_info, "parameter", sizeof("parameter")-1, &val);
@@ -373,10 +425,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bind, 0, 0, 2)
 	ZEND_ARG_INFO(0, newscope)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_call, 0, 0, 1)
+	ZEND_ARG_INFO(0, newthis)
+	ZEND_ARG_VARIADIC_INFO(0, parameters)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry closure_functions[] = {
 	ZEND_ME(Closure, __construct, NULL, ZEND_ACC_PRIVATE)
 	ZEND_ME(Closure, bind, arginfo_closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_MALIAS(Closure, bindTo, bind, arginfo_closure_bindto, ZEND_ACC_PUBLIC)
+	ZEND_ME(Closure, call, arginfo_closure_call, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

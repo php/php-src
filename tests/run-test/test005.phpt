@@ -19,7 +19,8 @@ var_dump(ini_get('track_errors'));
 ini_set('display_errors', 0);
 var_dump(ini_get('display_errors'));
 var_dump($php_errormsg);
-$error = 1 / 0;
+$zero = 0;
+$error = 1 / $zero;
 var_dump($php_errormsg);
 ?>
 --EXPECTF--

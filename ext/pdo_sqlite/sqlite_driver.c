@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -175,7 +175,7 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	pdo_sqlite_stmt *S = ecalloc(1, sizeof(pdo_sqlite_stmt));
@@ -203,7 +203,7 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len,
 	return 0;
 }
 
-static long sqlite_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
+static zend_long sqlite_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len TSRMLS_DC)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	char *errmsg = NULL;
@@ -280,7 +280,7 @@ static int sqlite_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	return 1;
 }
 
-static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)
+static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value TSRMLS_DC)
 {
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
@@ -295,7 +295,7 @@ static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_valu
 	return 1;
 }
 
-static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
+static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_DC)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -521,8 +521,8 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	struct pdo_sqlite_func *func;
 	zval *callback;
 	char *func_name;
-	int func_name_len;
-	long argc = -1;
+	size_t func_name_len;
+	zend_long argc = -1;
 	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
@@ -538,10 +538,10 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 
 	if (!zend_is_callable(callback, 0, &cbname TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname->val);
-		STR_RELEASE(cbname);
+		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(cbname);
+	zend_string_release(cbname);
 	
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -591,8 +591,8 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	struct pdo_sqlite_func *func;
 	zval *step_callback, *fini_callback;
 	char *func_name;
-	int func_name_len;
-	long argc = -1;
+	size_t func_name_len;
+	zend_long argc = -1;
 	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
@@ -608,16 +608,16 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 
 	if (!zend_is_callable(step_callback, 0, &cbname TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname->val);
-		STR_RELEASE(cbname);
+		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(cbname);
+	zend_string_release(cbname);
 	if (!zend_is_callable(fini_callback, 0, &cbname TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname->val);
-		STR_RELEASE(cbname);
+		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(cbname);
+	zend_string_release(cbname);
 	
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -652,7 +652,7 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	struct pdo_sqlite_collation *collation;
 	zval *callback;
 	char *collation_name;
-	int collation_name_len;
+	size_t collation_name_len;
 	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
@@ -668,10 +668,10 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 
 	if (!zend_is_callable(callback, 0, &cbname TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname->val);
-		STR_RELEASE(cbname);
+		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(cbname);
+	zend_string_release(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -792,7 +792,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS
 {
 	pdo_sqlite_db_handle *H;
 	int i, ret = 0;
-	long timeout = 60;
+	zend_long timeout = 60;
 	char *filename;
 
 	H = pecalloc(1, sizeof(pdo_sqlite_db_handle), dbh->is_persistent);

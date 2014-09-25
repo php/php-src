@@ -9,6 +9,7 @@
 *.gcno
 *.la
 *.lo
+*.loT
 *.o
 *.a
 *.ncb
@@ -81,7 +82,7 @@ mkinstalldirs
 modules
 php
 php-*.tar.gz
-php5.spec
+php7.spec
 php_lcov.info
 php_test_results_*.txt
 php_version.h
@@ -117,6 +118,12 @@ tests/*/*.php
 tests/*/*.exp
 tests/*/*.log
 tests/*/*.sh
+tests/*/*/*.diff
+tests/*/*/*.out
+tests/*/*/*.php
+tests/*/*/*.exp
+tests/*/*/*.log
+tests/*/*/*.sh
 */tests/*.diff
 */tests/*.out
 */tests/*.php
@@ -129,6 +136,12 @@ tests/*/*.sh
 */tests/*/*.exp
 */tests/*/*.log
 */tests/*/*.sh
+*/tests/*/*/*.diff
+*/tests/*/*/*.out
+*/tests/*/*/*.php
+*/tests/*/*/*.exp
+*/tests/*/*/*.log
+*/tests/*/*/*.sh
 */*/tests/*.diff
 */*/tests/*.out
 */*/tests/*.php
@@ -141,6 +154,18 @@ tests/*/*.sh
 */*/tests/*/*.exp
 */*/tests/*/*.log
 */*/tests/*/*.sh
+*/*/tests/*/*/*.diff
+*/*/tests/*/*/*.out
+*/*/tests/*/*/*.php
+*/*/tests/*/*/*.exp
+*/*/tests/*/*/*.log
+*/*/tests/*/*/*.sh
+*/*/tests/*/*/*/*.diff
+*/*/tests/*/*/*/*.out
+*/*/tests/*/*/*/*.php
+*/*/tests/*/*/*/*.exp
+*/*/tests/*/*/*/*.log
+*/*/tests/*/*/*/*.sh
 
 # Extension specifc ignores
 ext/*/configure.in
@@ -235,9 +260,9 @@ pear/phpize
 pear/run-tests
 pear/php-config
 pear/scripts
-sapi/apache/libphp5.module
-sapi/apache2handler/libphp5.module
-sapi/apache_hooks/libphp5.module
+sapi/apache/libphp7.module
+sapi/apache2handler/libphp7.module
+sapi/apache_hooks/libphp7.module
 sapi/cgi/php-cgi
 sapi/cgi/php-cgi.1
 sapi/cli/php.1

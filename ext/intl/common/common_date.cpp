@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -174,7 +174,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TSRMLS_DC)
 {
 	double	rv = NAN;
-	long	lv;
+	zend_long	lv;
 	int		type;
 	char	*message;
 

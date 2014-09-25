@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -164,7 +164,7 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 	zend_constant c;
 	zval *exists, results, value;
 	char *const_name;
-	int len;
+	size_t len;
 
 	if (TL == NULL) {
 		return FAILURE;
@@ -186,7 +186,7 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 				}
 
 				const_name = php_com_olestring_to_string(bstr_ids, &len, codepage TSRMLS_CC);
-				c.name = STR_INIT(const_name, len, 1);
+				c.name = zend_string_init(const_name, len, 1);
 				// TODO: avoid reallocation???
 				efree(const_name);
 				if(c.name == NULL) {
@@ -201,7 +201,7 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 					if (COMG(autoreg_verbose) && !compare_function(&results, &c.value, exists TSRMLS_CC)) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type library constant %s is already defined", c.name);
 					}
-					STR_RELEASE(c.name);
+					zend_string_release(c.name);
 					ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 					continue;
 				}
@@ -437,7 +437,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 	int i;
 	OLECHAR *olename;
 	char *ansiname = NULL;
-	unsigned int ansinamelen;
+	size_t ansinamelen;
 	int ret = 0;
 
 	if (FAILED(ITypeInfo_GetTypeAttr(typeinfo, &attr))) {
@@ -491,7 +491,8 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 				if (printdef) {
 					int j;
 					char *funcdesc;
-					unsigned int funcdesclen, cnames = 0;
+					size_t funcdesclen;
+					unsigned int cnames = 0;
 					BSTR *names;
 
 					names = (BSTR*)safe_emalloc((func->cParams + 1), sizeof(BSTR), 0);

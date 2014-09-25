@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -44,7 +44,7 @@
 
 /* {{{ macros and type definitions */
 typedef struct _php_fileinfo {
-	long options;
+	zend_long options;
 	struct magic_set *magic;
 } php_fileinfo;
 
@@ -176,7 +176,7 @@ zend_function_entry finfo_class_functions[] = {
 
 #define FINFO_SET_OPTION(magic, options) \
 	if (magic_setflags(magic, options) == -1) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to set option '%ld' %d:%s", \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to set option '%pd' %d:%s", \
 				options, magic_errno(magic), magic_error(magic)); \
 		RETURN_FALSE; \
 	}
@@ -295,9 +295,9 @@ PHP_MINFO_FUNCTION(fileinfo)
    Create a new fileinfo resource. */
 PHP_FUNCTION(finfo_open)
 {
-	long options = MAGIC_NONE;
+	zend_long options = MAGIC_NONE;
 	char *file = NULL;
-	int file_len = 0;
+	size_t file_len = 0;
 	php_fileinfo *finfo;
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 	char resolved_path[MAXPATHLEN];
@@ -339,7 +339,7 @@ PHP_FUNCTION(finfo_open)
 
 	if (finfo->magic == NULL) {
 		efree(finfo);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid mode '%ld'.", options);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid mode '%pd'.", options);
 		FILEINFO_DESTROY_OBJECT(object);
 		RETURN_FALSE;
 	}
@@ -382,7 +382,7 @@ PHP_FUNCTION(finfo_close)
    Set libmagic configuration options. */
 PHP_FUNCTION(finfo_set_flags)
 {
-	long options;
+	zend_long options;
 	php_fileinfo *finfo;
 	zval *zfinfo;
 	FILEINFO_DECLARE_INIT_OBJECT(object)
@@ -412,9 +412,9 @@ PHP_FUNCTION(finfo_set_flags)
 
 static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mimetype_emu) /* {{{ */
 {
-	long options = 0;
+	zend_long options = 0;
 	char *ret_val = NULL, *buffer = NULL;
-	int buffer_len;
+	size_t buffer_len;
 	php_fileinfo *finfo = NULL;
 	zval *zfinfo, *zcontext = NULL;
 	zval *what;
@@ -480,7 +480,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		case FILEINFO_MODE_STREAM:
 		{
 				php_stream *stream;
-				off_t streampos;
+				zend_off_t streampos;
 
 				php_stream_from_zval_no_verify(stream, what);
 				if (!stream) {

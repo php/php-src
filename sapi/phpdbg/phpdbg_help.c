@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -362,7 +362,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-c**      **-c**/my/php.ini       Set php.ini file to load" CR
 "  **-d**      **-d**memory_limit=4G   Set a php.ini directive" CR
 "  **-n**                          Disable default php.ini" CR
-"  **-q**                          Supress welcome banner" CR
+"  **-q**                          Suppress welcome banner" CR
 "  **-v**                          Enable oplog output" CR
 "  **-s**                          Enable stepping" CR
 "  **-b**                          Disable colour" CR
@@ -545,7 +545,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "    $P break ZEND_ADD" CR
 "    $P b ZEND_ADD" CR
-"    Break on any occurence of the opcode ZEND_ADD" CR CR
+"    Break on any occurrence of the opcode ZEND_ADD" CR CR
 
 "    $P break del 2" CR
 "    $P b ~ 2" CR

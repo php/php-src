@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -138,7 +138,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 	zval *value;
 	char *xpath_expr;
 	zend_string *string_key;
-	ulong num_key;
+	zend_ulong num_key;
 	char **params = NULL;
 	int i = 0;
 
@@ -292,7 +292,12 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	
 	fci.size = sizeof(fci);
 	fci.function_table = EG(function_table);
-	fci.params = args;
+	if (fci.param_count > 0) {
+		fci.params = args;
+	} else {
+		fci.params = NULL;
+	}
+
 	
 	obj = valuePop(ctxt);
 	if (obj->stringval == NULL) {
@@ -357,7 +362,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 			zval_ptr_dtor(&retval);
 		}
 	}
-	STR_RELEASE(callable);
+	zend_string_release(callable);
 	zval_ptr_dtor(&handler);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {
@@ -690,7 +695,8 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	zval *id, *docp = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
-	int ret, uri_len;
+	int ret;
+	size_t uri_len;
 	char *uri;
 	xsl_object *intern;
 	
@@ -760,9 +766,9 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 	zval *id;
 	zval *array_value, *entry, new_string;
 	xsl_object *intern;
-	ulong idx;
+	zend_ulong idx;
 	char *namespace;
-	int namespace_len;
+	size_t namespace_len;
 	zend_string *string_key, *name, *value;
 	DOM_GET_THIS(id);
 
@@ -785,7 +791,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 		
 		intern = Z_XSL_P(id);
 		
-		ZVAL_STR(&new_string, STR_COPY(value));
+		ZVAL_STR_COPY(&new_string, value);
 		
 		zend_hash_update(intern->parameter, name, &new_string);
 		RETURN_TRUE;
@@ -802,7 +808,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 {
 	zval *id;
 	char *namespace;
-	int namespace_len = 0;
+	size_t namespace_len = 0;
 	zval *value;
 	zend_string *name;
 	xsl_object *intern;
@@ -815,7 +821,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 	intern = Z_XSL_P(id);
 	if ((value = zend_hash_find(intern->parameter, name)) != NULL) {
 		convert_to_string_ex(value);
-		RETURN_STR(STR_COPY(Z_STR_P(value)));
+		RETURN_STR(zend_string_copy(Z_STR_P(value)));
 	} else {
 		RETURN_FALSE;
 	}
@@ -827,7 +833,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 {
 	zval *id;
-	int namespace_len = 0;
+	size_t namespace_len = 0;
 	char *namespace;
 	zend_string *name;
 	xsl_object *intern;
@@ -889,7 +895,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 	zval *id;
 	xsl_object *intern;
 	char *filename = NULL;
-	int filename_len;
+	size_t filename_len;
 	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p!", &filename, &filename_len) == SUCCESS) {
@@ -914,7 +920,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 {
 	zval *id;
 	xsl_object *intern;
-	long securityPrefs, oldSecurityPrefs;
+	zend_long securityPrefs, oldSecurityPrefs;
 
 	DOM_GET_THIS(id);
  	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &securityPrefs) == FAILURE) {

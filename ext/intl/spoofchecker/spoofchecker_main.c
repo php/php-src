@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 {
 	int ret;
 	char *text;
-	int text_len;
+	size_t text_len;
 	zval *error_code = NULL;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 	
@@ -60,7 +60,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 {
 	int ret;
 	char *s1, *s2;
-	int s1_len, s2_len;
+	size_t s1_len, s2_len;
 	zval *error_code = NULL;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 	
@@ -92,7 +92,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 PHP_METHOD(Spoofchecker, setAllowedLocales)
 {
 	char *locales;
-	int locales_len;
+	size_t locales_len;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 	
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &locales, &locales_len)) {
@@ -115,7 +115,7 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
  */
 PHP_METHOD(Spoofchecker, setChecks)
 {
-	long checks;
+	zend_long checks;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 		
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &checks)) {

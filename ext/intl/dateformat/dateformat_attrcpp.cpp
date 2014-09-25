@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -220,7 +220,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	Calendar	*cal;
-	long		cal_type;
+	zend_long		cal_type;
 	bool		cal_owned;
 	Locale		locale = Locale::createFromName(dfo->requested_locale);
 	// getting the actual locale from the DateFormat is not enough

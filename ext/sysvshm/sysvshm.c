@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -36,7 +36,7 @@
 
 #include "php_sysvshm.h"
 #include "ext/standard/php_var.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "php_ini.h"
 
 /* {{{ arginfo */
@@ -116,9 +116,9 @@ ZEND_GET_MODULE(sysvshm)
 
 THREAD_LS sysvshm_module php_sysvshm;
 
-static int php_put_shm_data(sysvshm_chunk_head *ptr, long key, const char *data, long len);
-static long php_check_shm_data(sysvshm_chunk_head *ptr, long key);
-static int php_remove_shm_data(sysvshm_chunk_head *ptr, long shm_varpos);
+static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len);
+static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
+static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 
 /* {{{ php_release_sysvshm
  */
@@ -150,7 +150,7 @@ PHP_FUNCTION(shm_attach)
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
-	long shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
+	zend_long shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ll", &shm_key, &shm_size, &shm_flag)) {
 		return;
@@ -166,19 +166,19 @@ PHP_FUNCTION(shm_attach)
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
 		if (shm_size < sizeof(sysvshm_chunk_head)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%lx: memorysize too small", shm_key);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%px: memorysize too small", shm_key);
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 		if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL)) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%lx: %s", shm_key, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%px: %s", shm_key, strerror(errno));
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%lx: %s", shm_key, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%px: %s", shm_key, strerror(errno));
 		efree(shm_list_ptr);
 		RETURN_FALSE;
 	}
@@ -243,7 +243,7 @@ PHP_FUNCTION(shm_put_var)
 {
 	zval *shm_id, *arg_var;
 	int ret;
-	long shm_key;
+	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	smart_str shm_var = {0};
 	php_serialize_data_t var_hash;
@@ -282,10 +282,10 @@ PHP_FUNCTION(shm_put_var)
 PHP_FUNCTION(shm_get_var)
 {
 	zval *shm_id;
-	long shm_key;
+	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	char *shm_data;
-	long shm_varpos;
+	zend_long shm_varpos;
 	sysvshm_chunk *shm_var;
 	php_unserialize_data_t var_hash;
 	
@@ -299,7 +299,7 @@ PHP_FUNCTION(shm_get_var)
 	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
 
 	if (shm_varpos < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable key %ld doesn't exist", shm_key);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable key %pd doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
 	shm_var = (sysvshm_chunk*) ((char *)shm_list_ptr->ptr + shm_varpos);
@@ -319,7 +319,7 @@ PHP_FUNCTION(shm_get_var)
 PHP_FUNCTION(shm_has_var)
 {
 	zval *shm_id;
-	long shm_key;
+	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
@@ -335,7 +335,7 @@ PHP_FUNCTION(shm_has_var)
 PHP_FUNCTION(shm_remove_var)
 {
 	zval *shm_id;
-	long shm_key, shm_varpos;
+	zend_long shm_key, shm_varpos;
 	sysvshm_shm *shm_list_ptr;
 	
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
@@ -346,7 +346,7 @@ PHP_FUNCTION(shm_remove_var)
 	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
 
 	if (shm_varpos < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable key %ld doesn't exist", shm_key);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable key %pd doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
 	php_remove_shm_data((shm_list_ptr->ptr), shm_varpos);
@@ -356,13 +356,13 @@ PHP_FUNCTION(shm_remove_var)
 
 /* {{{ php_put_shm_data
  * inserts an ascii-string into shared memory */
-static int php_put_shm_data(sysvshm_chunk_head *ptr, long key, const char *data, long len)
+static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len)
 {
 	sysvshm_chunk *shm_var;
-	long total_size;
-	long shm_varpos;
+	zend_long total_size;
+	zend_long shm_varpos;
 
-	total_size = ((long) (len + sizeof(sysvshm_chunk) - 1) / sizeof(long)) * sizeof(long) + sizeof(long); /* long alligment */
+	total_size = ((zend_long) (len + sizeof(sysvshm_chunk) - 1) / sizeof(zend_long)) * sizeof(zend_long) + sizeof(zend_long); /* zend_long alligment */
 
 	if ((shm_varpos = php_check_shm_data(ptr, key)) > 0) {
 		php_remove_shm_data(ptr, shm_varpos);
@@ -385,9 +385,9 @@ static int php_put_shm_data(sysvshm_chunk_head *ptr, long key, const char *data,
 
 /* {{{ php_check_shm_data
  */
-static long php_check_shm_data(sysvshm_chunk_head *ptr, long key)
+static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 {
-	long pos;
+	zend_long pos;
 	sysvshm_chunk *shm_var;
 
 	pos = ptr->start;
@@ -412,10 +412,10 @@ static long php_check_shm_data(sysvshm_chunk_head *ptr, long key)
 
 /* {{{ php_remove_shm_data
  */
-static int php_remove_shm_data(sysvshm_chunk_head *ptr, long shm_varpos)
+static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 {
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;
-	long memcpy_len;
+	zend_long memcpy_len;
 	
 	chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos);
 	next_chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos + chunk_ptr->next);

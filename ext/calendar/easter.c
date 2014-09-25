@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,14 +24,14 @@
 #include "sdncal.h"
 #include <time.h>
 
-static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
+static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 {
 
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
 	struct tm te;
-	long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
-	long method = CAL_EASTER_DEFAULT;
+	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
+	zend_long method = CAL_EASTER_DEFAULT;
 
 	/* Default to the current year if year parameter is not given */
 	{

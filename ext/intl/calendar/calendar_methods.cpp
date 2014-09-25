@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,7 +51,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 {
 	zval		*zv_timezone	= NULL;
 	const char	*locale_str		= NULL;
-	int			dummy;
+	size_t			dummy;
 	TimeZone	*timeZone;
 	UErrorCode	status			= U_ZERO_ERROR;
 	intl_error_reset(NULL TSRMLS_CC);
@@ -143,7 +143,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 	UErrorCode	status = U_ZERO_ERROR;
 	char		*key,
 				*locale;
-	int			key_len,
+	size_t			key_len,
 				locale_len;
 	zend_bool	commonly_used;
 	intl_error_reset(NULL TSRMLS_CC);
@@ -219,7 +219,7 @@ static void _php_intlcal_field_uec_ret_in32t_method(
 		const char *method_name,
 		INTERNAL_FUNCTION_PARAMETERS)
 {
-	long	field;
+	zend_long	field;
 	char	*message;
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -244,7 +244,7 @@ static void _php_intlcal_field_uec_ret_in32t_method(
 		(UCalendarDateFields)field, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
-	RETURN_LONG((long)result);
+	RETURN_LONG((zend_long)result);
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get)
@@ -295,7 +295,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time)
 
 U_CFUNC PHP_FUNCTION(intlcal_add)
 {
-	long	field,
+	zend_long	field,
 			amount;
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -399,7 +399,7 @@ U_CFUNC PHP_FUNCTION(intlcal_before)
 
 U_CFUNC PHP_FUNCTION(intlcal_set)
 {
-	long	arg1, arg2, arg3, arg4, arg5, arg6;
+	zend_long	arg1, arg2, arg3, arg4, arg5, arg6;
 	zval	args_a[7] = {0},
 			*args = args_a;
 	int		i;
@@ -462,7 +462,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 
 U_CFUNC PHP_FUNCTION(intlcal_roll)
 {
-	long		field,
+	zend_long		field,
 				value;
 	zval		args_a[3]		 = {0},
 				*args			 = args_a;
@@ -524,7 +524,7 @@ U_CFUNC PHP_FUNCTION(intlcal_clear)
 {
 	zval	args_a[2] = {0},
 			*args		= &args_a[0];
-	long	field;
+	zend_long	field;
 	int		variant;
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -572,7 +572,7 @@ U_CFUNC PHP_FUNCTION(intlcal_clear)
 
 U_CFUNC PHP_FUNCTION(intlcal_field_difference)
 {
-	long	field;
+	zend_long	field;
 	double	when;
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -596,7 +596,7 @@ U_CFUNC PHP_FUNCTION(intlcal_field_difference)
 	INTL_METHOD_CHECK_STATUS(co,
 		"intlcal_field_difference: Call to ICU method has failed");
 
-	RETURN_LONG((long)result);
+	RETURN_LONG((zend_long)result);
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get_actual_maximum)
@@ -614,7 +614,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_actual_minimum)
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 {
-	long	dow;
+	zend_ulong	dow;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
@@ -637,7 +637,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 	INTL_METHOD_CHECK_STATUS(co,
 		"intlcal_get_day_of_week_type: Call to ICU method has failed");
 
-	RETURN_LONG((long)result);
+	RETURN_LONG((zend_long)result);
 }
 #endif
 
@@ -658,7 +658,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_first_day_of_week)
 	INTL_METHOD_CHECK_STATUS(co,
 		"intlcal_get_first_day_of_week: Call to ICU method has failed");
 
-	RETURN_LONG((long)result);
+	RETURN_LONG((zend_long)result);
 }
 
 static void _php_intlcal_field_ret_in32t_method(
@@ -666,7 +666,7 @@ static void _php_intlcal_field_ret_in32t_method(
 		const char *method_name,
 		INTERNAL_FUNCTION_PARAMETERS)
 {
-	long	field;
+	zend_long	field;
 	char	*message;
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -690,7 +690,7 @@ static void _php_intlcal_field_ret_in32t_method(
 	int32_t result = (co->ucal->*func)((UCalendarDateFields)field);
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
-	RETURN_LONG((long)result);
+	RETURN_LONG((zend_long)result);
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get_greatest_minimum)
@@ -707,7 +707,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_least_maximum)
 
 U_CFUNC PHP_FUNCTION(intlcal_get_locale)
 {
-	long	locale_type;
+	zend_long	locale_type;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
@@ -756,7 +756,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_minimal_days_in_first_week)
 	INTL_METHOD_CHECK_STATUS(co,
 		"intlcal_get_first_day_of_week: Call to ICU method has failed");
 
-	RETURN_LONG((long)result);
+	RETURN_LONG((zend_long)result);
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get_minimum)
@@ -807,7 +807,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_type)
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 {
-	long	dow;
+	zend_long	dow;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
@@ -830,7 +830,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 	INTL_METHOD_CHECK_STATUS(co, "intlcal_get_weekend_transition: "
 		"Error calling ICU method");
 
-	RETURN_LONG((long)res);
+	RETURN_LONG((zend_long)res);
 }
 #endif
 
@@ -898,7 +898,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_lenient)
 
 U_CFUNC PHP_FUNCTION(intlcal_is_set)
 {
-	long field;
+	zend_long field;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
@@ -953,7 +953,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 
 U_CFUNC PHP_FUNCTION(intlcal_set_first_day_of_week)
 {
-	long	dow;
+	zend_long	dow;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
@@ -997,7 +997,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_lenient)
 
 U_CFUNC PHP_FUNCTION(intlcal_set_minimal_days_in_first_week)
 {
-	long	num_days;
+	zend_long	num_days;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
@@ -1085,7 +1085,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_skipped_wall_time_option)
 
 U_CFUNC PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
 {
-	long	option;
+	zend_long	option;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
@@ -1110,7 +1110,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
 
 U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 {
-	long	option;
+	zend_long	option;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
@@ -1144,7 +1144,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 					zv_timestamp;
 	php_date_obj	*datetime;
 	char			*locale_str			= NULL;
-	int				locale_str_len;
+	size_t				locale_str_len;
 	TimeZone		*timeZone;
 	UErrorCode		status				= U_ZERO_ERROR;
 	Calendar        *cal;
@@ -1322,7 +1322,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_error_code)
 	if (co == NULL)
 		RETURN_FALSE;
 
-	RETURN_LONG((long)CALENDAR_ERROR_CODE(co));
+	RETURN_LONG((zend_long)CALENDAR_ERROR_CODE(co));
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get_error_message)

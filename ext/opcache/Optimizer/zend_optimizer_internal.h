@@ -25,7 +25,7 @@
 #include "ZendAccelerator.h"
 
 #define VAR_NUM(v) EX_VAR_TO_NUM(v)
-#define NUM_VAR(v) ((zend_uint)(zend_uintptr_t)EX_VAR_NUM_2(0, v))
+#define NUM_VAR(v) ((uint32_t)(zend_uintptr_t)EX_VAR_NUM_2(0, v))
 
 #define INV_COND(op)       ((op) == ZEND_JMPZ    ? ZEND_JMPNZ    : ZEND_JMPZ)
 #define INV_EX_COND(op)    ((op) == ZEND_JMPZ_EX ? ZEND_JMPNZ    : ZEND_JMPZ)
@@ -75,5 +75,56 @@ struct _zend_block_source {
 	zend_code_block    *from;
 	zend_block_source  *next;
 };
+
+#define OPTIMIZATION_LEVEL \
+	ZCG(accel_directives).optimization_level
+
+#define LITERAL_LONG(op, val) do { \
+		zval _c; \
+		ZVAL_LONG(&_c, val); \
+		op.constant = zend_optimizer_add_literal(op_array, &_c TSRMLS_CC); \
+	} while (0)
+
+#define LITERAL_BOOL(op, val) do { \
+		zval _c; \
+		ZVAL_BOOL(&_c, val); \
+		op.constant = zend_optimizer_add_literal(op_array, &_c TSRMLS_CC); \
+	} while (0)
+
+#define literal_dtor(zv) do { \
+		zval_dtor(zv); \
+		ZVAL_NULL(zv); \
+	} while (0)
+
+#define COPY_NODE(target, src) do { \
+		target ## _type = src ## _type; \
+		target = src; \
+	} while (0)
+
+int  zend_optimizer_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
+int  zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy TSRMLS_DC);
+void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value);
+int  zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value);
+int  zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name);
+void zend_optimizer_update_op1_const(zend_op_array *op_array,
+                                     zend_op       *opline,
+                                     zval          *val TSRMLS_DC);
+void zend_optimizer_update_op2_const(zend_op_array *op_array,
+                                     zend_op       *opline,
+                                     zval          *val TSRMLS_DC);
+int  zend_optimizer_replace_by_const(zend_op_array *op_array,
+                                     zend_op       *opline,
+                                     zend_uchar     type,
+                                     uint32_t       var,
+                                     zval          *val TSRMLS_DC);
+
+void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC);
+void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC);
+void zend_optimizer_pass3(zend_op_array *op_array TSRMLS_DC);
+void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC);
+void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC);
+void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+void zend_optimizer_nop_removal(zend_op_array *op_array);
+void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC);
 
 #endif

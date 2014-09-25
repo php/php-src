@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -59,7 +59,7 @@
  */
 PHPAPI void php_statpage(TSRMLS_D)
 {
-	struct stat *pstat;
+	zend_stat_t *pstat;
 
 	pstat = sapi_get_stat(TSRMLS_C);
 
@@ -79,14 +79,14 @@ PHPAPI void php_statpage(TSRMLS_D)
 
 /* {{{ php_getuid
  */
-long php_getuid(TSRMLS_D)
+zend_long php_getuid(TSRMLS_D)
 {
 	php_statpage(TSRMLS_C);
 	return (BG(page_uid));
 }
 /* }}} */
 
-long php_getgid(TSRMLS_D)
+zend_long php_getgid(TSRMLS_D)
 {
 	php_statpage(TSRMLS_C);
 	return (BG(page_gid));
@@ -96,7 +96,7 @@ long php_getgid(TSRMLS_D)
    Get PHP script owner's UID */
 PHP_FUNCTION(getmyuid)
 {
-	long uid;
+	zend_long uid;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -115,7 +115,7 @@ PHP_FUNCTION(getmyuid)
    Get PHP script owner's GID */
 PHP_FUNCTION(getmygid)
 {
-	long gid;
+	zend_long gid;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -134,7 +134,7 @@ PHP_FUNCTION(getmygid)
    Get current process ID */
 PHP_FUNCTION(getmypid)
 {
-	int pid;
+	zend_long pid;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -144,7 +144,7 @@ PHP_FUNCTION(getmypid)
 	if (pid < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG((long) pid);
+		RETURN_LONG(pid);
 	}
 }
 /* }}} */
@@ -166,7 +166,7 @@ PHP_FUNCTION(getmyinode)
 }
 /* }}} */
 
-PHPAPI long php_getlastmod(TSRMLS_D)
+PHPAPI time_t php_getlastmod(TSRMLS_D)
 {
 	php_statpage(TSRMLS_C);
 	return BG(page_mtime);
@@ -176,7 +176,7 @@ PHPAPI long php_getlastmod(TSRMLS_D)
    Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {
-	long lm;
+	zend_long lm;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;

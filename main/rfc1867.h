@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -51,7 +51,7 @@ typedef struct _multipart_event_file_start {
 
 typedef struct _multipart_event_file_data {
 	size_t	post_bytes_processed;
-	off_t	offset;
+	zend_off_t	offset;
 	char	*data;
 	size_t	length;
 	size_t	*newlength;	

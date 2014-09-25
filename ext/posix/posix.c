@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -380,7 +380,7 @@ ZEND_GET_MODULE(posix)
 	RETURN_LONG(func_name());
 
 #define PHP_POSIX_SINGLE_ARG_FUNC(func_name)	\
-	long val;	\
+	zend_long val;	\
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &val) == FAILURE) RETURN_FALSE;	\
 	if (func_name(val) < 0) {	\
 		POSIX_G(last_error) = errno;	\
@@ -393,7 +393,7 @@ ZEND_GET_MODULE(posix)
 
 PHP_FUNCTION(posix_kill)
 {
-	long pid, sig;
+	zend_long pid, sig;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &pid, &sig) == FAILURE) {
 		RETURN_FALSE;
@@ -558,7 +558,7 @@ PHP_FUNCTION(posix_setsid)
    Set process group id for job control (POSIX.1, 4.3.3) */
 PHP_FUNCTION(posix_setpgid)
 {
-	long pid, pgid;
+	zend_long pid, pgid;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &pid, &pgid) == FAILURE) {
 		RETURN_FALSE;
@@ -578,7 +578,7 @@ PHP_FUNCTION(posix_setpgid)
 #ifdef HAVE_GETPGID
 PHP_FUNCTION(posix_getpgid)
 {
-	long val;
+	zend_long val;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &val) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -597,7 +597,7 @@ PHP_FUNCTION(posix_getpgid)
 #ifdef HAVE_GETSID
 PHP_FUNCTION(posix_getsid)
 {
-	long val;
+	zend_long val;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &val) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -724,7 +724,7 @@ PHP_FUNCTION(posix_ttyname)
 	char *p;
 	int fd;
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
-	long buflen;
+	zend_long buflen;
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE) {
@@ -835,8 +835,8 @@ PHP_FUNCTION(posix_getcwd)
 PHP_FUNCTION(posix_mkfifo)
 {
 	char *path;
-	int path_len;
-	long mode;
+	size_t path_len;
+	zend_long mode;
 	int     result;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pl", &path, &path_len, &mode) == FAILURE) {
@@ -864,9 +864,9 @@ PHP_FUNCTION(posix_mkfifo)
 PHP_FUNCTION(posix_mknod)
 {
 	char *path;
-	int path_len;
-	long mode;
-	long major = 0, minor = 0;
+	size_t path_len;
+	zend_long mode;
+	zend_long major = 0, minor = 0;
 	int result;
 	dev_t php_dev;
 
@@ -947,8 +947,8 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
    Determine accessibility of a file (POSIX.1 5.6.3) */
 PHP_FUNCTION(posix_access)
 {
-	long mode = 0;
-	int filename_len, ret;
+	zend_long mode = 0;
+	size_t filename_len, ret;
 	char *filename, *path;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l", &filename, &filename_len, &mode) == FAILURE) {
@@ -992,7 +992,7 @@ PHP_FUNCTION(posix_getgrnam)
 {
 	char *name;
 	struct group *g;
-	int name_len;
+	size_t name_len;
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	struct group gbuf;
 	long buflen;
@@ -1039,7 +1039,7 @@ PHP_FUNCTION(posix_getgrnam)
    Group database access (POSIX.1, 9.2.1) */
 PHP_FUNCTION(posix_getgrgid)
 {
-	long gid;
+	zend_long gid;
 #if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	int ret;
 	struct group _g;
@@ -1111,7 +1111,7 @@ PHP_FUNCTION(posix_getpwnam)
 {
 	struct passwd *pw;
 	char *name;
-	int name_len;
+	size_t name_len;
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	struct passwd pwbuf;
 	long buflen;
@@ -1158,7 +1158,7 @@ PHP_FUNCTION(posix_getpwnam)
    User database access (POSIX.1, 9.2.2) */
 PHP_FUNCTION(posix_getpwuid)
 {
-	long uid;
+	zend_long uid;
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
 	struct passwd _pw;
 	struct passwd *retpwptr = NULL;
@@ -1336,7 +1336,7 @@ PHP_FUNCTION(posix_get_last_error)
    Retrieve the system error message associated with the given errno. */
 PHP_FUNCTION(posix_strerror)
 {
-	long error;
+	zend_long error;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &error) == FAILURE) {
 		RETURN_FALSE;
@@ -1353,9 +1353,9 @@ PHP_FUNCTION(posix_strerror)
    Calculate the group access list for the user specified in name. */
 PHP_FUNCTION(posix_initgroups)
 {
-	long basegid;
+	zend_long basegid;
 	char *name;
-	int name_len;
+	size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &name, &name_len, &basegid) == FAILURE) {
 		RETURN_FALSE;

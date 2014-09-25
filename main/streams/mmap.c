@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -51,7 +51,7 @@ PHPAPI int _php_stream_mmap_unmap(php_stream *stream TSRMLS_DC)
 	return php_stream_set_option(stream, PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_UNMAP, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0;
 }
 
-PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, off_t readden TSRMLS_DC)
+PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden TSRMLS_DC)
 {
 	int ret = 1;
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -281,8 +281,8 @@ static void _free_sybase_result(sybase_result *result)
 
 	if (result->fields) {
 		for (i=0; i<result->num_fields; i++) {
-			STR_FREE(result->fields[i].name);
-			STR_FREE(result->fields[i].column_source);
+			zend_string_free(result->fields[i].name);
+			zend_string_free(result->fields[i].column_source);
 		}
 		efree(result->fields);
 	}
@@ -390,7 +390,7 @@ static CS_RETCODE CS_PUBLIC _client_message_handler(CS_CONTEXT *context, CS_CONN
 	if (CS_SEVERITY(errmsg->msgnumber) >= SybCtG(min_client_severity)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Client message:  %s (severity %ld)", errmsg->msgstring, (long)CS_SEVERITY(errmsg->msgnumber));
 	}
-	STR_FREE(SybCtG(server_message));
+	zend_string_free(SybCtG(server_message));
 	SybCtG(server_message) = estrdup(errmsg->msgstring);
 
 
@@ -470,7 +470,7 @@ static CS_RETCODE CS_PUBLIC _server_message_handler(CS_CONTEXT *context, CS_CONN
 	TSRMLS_FETCH();
 
 	/* Remember the last server message in any case */
-	STR_FREE(SybCtG(server_message));
+	zend_string_free(SybCtG(server_message));
 	SybCtG(server_message) = estrdup(srvmsg->text);
 
 	/* Retrieve sybase link */
@@ -620,7 +620,7 @@ PHP_RSHUTDOWN_FUNCTION(sybase)
 		zval_ptr_dtor(&SybCtG(callback_name));
 		SybCtG(callback_name)= NULL;
 	}
-	STR_FREE(SybCtG(server_message));
+	zend_string_free(SybCtG(server_message));
 	SybCtG(server_message) = NULL;
 	return SUCCESS;
 }
@@ -1426,7 +1426,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	zval *sybase_link_index = NULL;
 	zend_bool store = 1;
 	char *query;
-	int len, id, deadlock_count;
+	size_t len, id, deadlock_count;
 	sybase_link *sybase_ptr;
 	sybase_result *result;
 	CS_INT restype;

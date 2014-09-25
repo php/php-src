@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
 
 #include <zend_exceptions.h>
 
-static int create_transliterator( char *str_id, int str_id_len, long direction, zval *object TSRMLS_DC )
+static int create_transliterator( char *str_id, int str_id_len, zend_long direction, zval *object TSRMLS_DC )
 {
 	Transliterator_object *to;
 	UChar	              *ustr_id    = NULL;
@@ -104,8 +104,8 @@ static int create_transliterator( char *str_id, int str_id_len, long direction, 
 PHP_FUNCTION( transliterator_create )
 {
 	char  *str_id;
-	int   str_id_len;
-	long  direction   = TRANSLITERATOR_FORWARD;
+	size_t   str_id_len;
+	zend_long  direction   = TRANSLITERATOR_FORWARD;
 	int res;
 
 	TRANSLITERATOR_METHOD_INIT_VARS;
@@ -136,10 +136,10 @@ PHP_FUNCTION( transliterator_create )
 PHP_FUNCTION( transliterator_create_from_rules )
 {
 	char		    *str_rules;
-	int             str_rules_len;
+	size_t             str_rules_len;
 	UChar		    *ustr_rules    = NULL;
 	int32_t         ustr_rules_len = 0;
-	long            direction      = TRANSLITERATOR_FORWARD;
+	zend_long            direction      = TRANSLITERATOR_FORWARD;
 	UParseError     parse_error    = {0, -1};
 	UTransliterator *utrans;
 	UChar           id[] = {0x52, 0x75, 0x6C, 0x65, 0x73, 0x54, 0x72,
@@ -303,11 +303,11 @@ PHP_FUNCTION( transliterator_transliterate )
 	char	    *str;
 	UChar		*ustr		= NULL,
 				*uresult	= NULL;
-	int			str_len;
+	size_t			str_len;
 	int32_t		ustr_len	= 0,
 				capacity,
 				uresult_len;
-	long		start		= 0,
+	zend_long		start		= 0,
 				limit		= -1;
 	int			success     = 0;
 	zval 		tmp_object;
@@ -349,7 +349,7 @@ PHP_FUNCTION( transliterator_transliterate )
 				zend_string *message = intl_error_get_message( NULL TSRMLS_CC );
 				php_error_docref0( NULL TSRMLS_CC, E_WARNING, "Could not create "
 					"transliterator with ID \"%s\" (%s)", Z_STRVAL_P( arg1 ), message->val );
-				STR_FREE( message );
+				zend_string_free( message );
 				/* don't set U_ILLEGAL_ARGUMENT_ERROR to allow fetching of inner error */
 				goto cleanup;
 			}
@@ -497,7 +497,7 @@ PHP_FUNCTION( transliterator_get_error_code )
 	if (to == NULL )
 		RETURN_FALSE;
 
-	RETURN_LONG( (long) TRANSLITERATOR_ERROR_CODE( to ) );
+	RETURN_LONG( (zend_long) TRANSLITERATOR_ERROR_CODE( to ) );
 }
 /* }}} */
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -139,11 +139,11 @@ typedef struct _spl_dual_it_object {
 	dual_it_type             dit_type;
 	union {
 		struct {
-			long             offset;
-			long             count;
+			zend_long             offset;
+			zend_long             count;
 		} limit;
 		struct {
-			long             flags; /* CIT_* */
+			zend_long             flags; /* CIT_* */
 			zval             zstr;
 			zval             zchildren;
 			zval             zcache;
@@ -154,12 +154,12 @@ typedef struct _spl_dual_it_object {
 		} append;
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 		struct {
-			int              use_flags;
-			long             flags;
-			regex_mode       mode;
-			long             preg_flags;
+			zend_long        flags;
+			zend_long        preg_flags;
 			pcre_cache_entry *pce;
 			zend_string      *regex;
+			regex_mode       mode;
+			int              use_flags;
 		} regex;
 #endif
 		_spl_cbfilter_it_intern *cbfilter;

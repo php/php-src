@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -70,7 +70,7 @@ typedef unsigned short mode_t;
 #define IS_UNC_PATH(path, len) \
 	(len >= 2 && IS_SLASH(path[0]) && IS_SLASH(path[1]))
 #define IS_ABSOLUTE_PATH(path, len) \
-	(len >= 2 && ((isalpha(path[0]) && path[1] == ':') || IS_UNC_PATH(path, len)))
+	(len >= 2 && ((/* is local */isalpha(path[0]) && path[1] == ':') || /* is UNC */IS_SLASH(path[0]) && IS_SLASH(path[1])))
 
 #elif defined(NETWARE)
 #ifdef HAVE_DIRENT_H
@@ -130,7 +130,7 @@ typedef unsigned short mode_t;
 #endif
 
 #ifdef TSRM_WIN32
-CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat);
+CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
 # define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
 # define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
 CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len);
@@ -164,8 +164,8 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC);
 CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...);
 CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC);
-CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC);
-CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC);
+CWD_API int virtual_stat(const char *path, zend_stat_t *buf TSRMLS_DC);
+CWD_API int virtual_lstat(const char *path, zend_stat_t *buf TSRMLS_DC);
 CWD_API int virtual_unlink(const char *path TSRMLS_DC);
 CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rmdir(const char *pathname TSRMLS_DC);
@@ -211,27 +211,27 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC);
 #define REALPATH_CACHE_SIZE 0      /* disabled while php.ini isn't loaded */
 
 typedef struct _realpath_cache_bucket {
-	unsigned long                  key;
+	zend_ulong                    key;
 	char                          *path;
-	int                            path_len;
 	char                          *realpath;
+	struct _realpath_cache_bucket *next;
+	time_t                         expires;
+	int                            path_len;
 	int                            realpath_len;
 	int                            is_dir;
-	time_t                         expires;
 #ifdef PHP_WIN32
 	unsigned char                  is_rvalid;
 	unsigned char                  is_readable;
 	unsigned char                  is_wvalid;
 	unsigned char                  is_writable;
 #endif
-	struct _realpath_cache_bucket *next;
 } realpath_cache_bucket;
 
 typedef struct _virtual_cwd_globals {
 	cwd_state cwd;
-	long                   realpath_cache_size;
-	long                   realpath_cache_size_limit;
-	long                   realpath_cache_ttl;
+	zend_long                   realpath_cache_size;
+	zend_long                   realpath_cache_size_limit;
+	zend_long                   realpath_cache_ttl;
 	realpath_cache_bucket *realpath_cache[1024];
 } virtual_cwd_globals;
 
@@ -246,8 +246,8 @@ extern virtual_cwd_globals cwd_globals;
 CWD_API void realpath_cache_clean(TSRMLS_D);
 CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC);
 CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t TSRMLS_DC);
-CWD_API int realpath_cache_size(TSRMLS_D);
-CWD_API int realpath_cache_max_buckets(TSRMLS_D);
+CWD_API zend_long realpath_cache_size(TSRMLS_D);
+CWD_API zend_long realpath_cache_max_buckets(TSRMLS_D);
 CWD_API realpath_cache_bucket** realpath_cache_get_buckets(TSRMLS_D);
 
 /* The actual macros to be used in programs using TSRM

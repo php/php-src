@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -33,7 +33,7 @@ extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC
    sets report level */
 PHP_FUNCTION(mysqli_report)
 {
-	long flags;
+	zend_long flags;
 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {

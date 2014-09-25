@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
  */
 PHP_FUNCTION( collator_get_locale )
 {
-	long   type        = 0;
+	zend_long   type        = 0;
 	char*  locale_name = NULL;
 
 	COLLATOR_METHOD_INIT_VARS

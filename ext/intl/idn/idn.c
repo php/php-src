@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 2009 The PHP Group                                     |
    +----------------------------------------------------------------------+
@@ -140,14 +140,14 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	UIDNA		  *uts46;
 	int32_t		  len;
 	int32_t		  buffer_capac = 255; /* no domain name may exceed this */
-	zend_string	  *buffer = STR_ALLOC(buffer_capac, 0);
+	zend_string	  *buffer = zend_string_alloc(buffer_capac, 0);
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
 	int			  buffer_used = 0;
 	
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance",
 			mode TSRMLS_CC) == FAILURE) {
-		STR_FREE(buffer);
+		zend_string_free(buffer);
 		RETURN_FALSE;
 	}
 
@@ -161,7 +161,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	if (php_intl_idn_check_status(status, "failed to convert name",
 			mode TSRMLS_CC) == FAILURE) {
 		uidna_close(uts46);
-		STR_FREE(buffer);
+		zend_string_free(buffer);
 		RETURN_FALSE;
 	}
 	if (len >= 255) {
@@ -184,17 +184,17 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, return_value);
 		} else {
 			zval zv;
-			ZVAL_STR(&zv, buffer);
+			ZVAL_NEW_STR(&zv, buffer);
 			buffer_used = 1;
 			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, &zv);
 		}
 		add_assoc_bool_ex(idna_info, "isTransitionalDifferent",
 				sizeof("isTransitionalDifferent")-1, info.isTransitionalDifferent);
-		add_assoc_long_ex(idna_info, "errors", sizeof("errors")-1, (long)info.errors);
+		add_assoc_long_ex(idna_info, "errors", sizeof("errors")-1, (zend_long)info.errors);
 	}
 
 	if (!buffer_used) {
-		STR_FREE(buffer);
+		zend_string_free(buffer);
 	}
 
 	uidna_close(uts46);
@@ -264,8 +264,8 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	char *domain;
-	int domain_len;
-	long option = 0,
+	size_t domain_len;
+	zend_long option = 0,
 		 variant = INTL_IDN_VARIANT_2003;
 	zval *idna_info = NULL;
 

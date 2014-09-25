@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -2169,7 +2169,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 
 							zend_hash_move_forward(tmp->attributes);
 						} else {
-							ulong index;
+							zend_ulong index;
 
 							schema_attributegroup_fixup(ctx, tmp_attr, ht);
 							zend_hash_get_current_key(tmp->attributes, NULL, &index, 0);
@@ -2268,7 +2268,7 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 	}
 	if (type->attributes) {
 		zend_string *str_key;
-		ulong index;
+		zend_ulong index;
 
 		ZEND_HASH_FOREACH_KEY_PTR(type->attributes, index, str_key, attr) {
 			if (str_key) {

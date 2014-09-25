@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -80,8 +80,8 @@
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
 
-static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
-	long ctx_value;
+static int php_filter_parse_int(const char *str, unsigned int str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
+	zend_long ctx_value;
 	int sign = 0, digit = 0;
 	const char *end = str + str_len;
 
@@ -115,9 +115,9 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 	while (str < end) {
 		if (*str >= '0' && *str <= '9') {
 			digit = (*(str++) - '0');
-			if ( (!sign) && ctx_value <= (LONG_MAX-digit)/10 ) {
+			if ( (!sign) && ctx_value <= (ZEND_LONG_MAX-digit)/10 ) {
 				ctx_value = (ctx_value * 10) + digit;
-			} else if ( sign && ctx_value >= (LONG_MIN+digit)/10) {
+			} else if ( sign && ctx_value >= (ZEND_LONG_MIN+digit)/10) {
 				ctx_value = (ctx_value * 10) - digit;
 			} else {
 				return -1;
@@ -132,16 +132,16 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 }
 /* }}} */
 
-static int php_filter_parse_octal(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
-	unsigned long ctx_value = 0;
+static int php_filter_parse_octal(const char *str, unsigned int str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
+	zend_ulong ctx_value = 0;
 	const char *end = str + str_len;
 
 	while (str < end) {
 		if (*str >= '0' && *str <= '7') {
-			unsigned long n = ((*(str++)) - '0');
+			zend_ulong n = ((*(str++)) - '0');
 
-			if ((ctx_value > ((unsigned long)(~(long)0)) / 8) ||
-				((ctx_value = ctx_value * 8) > ((unsigned long)(~(long)0)) - n)) {
+			if ((ctx_value > ((zend_ulong)(~(zend_long)0)) / 8) ||
+				((ctx_value = ctx_value * 8) > ((zend_ulong)(~(zend_long)0)) - n)) {
 				return -1;
 			}
 			ctx_value += n;
@@ -150,15 +150,15 @@ static int php_filter_parse_octal(const char *str, unsigned int str_len, long *r
 		}
 	}
 	
-	*ret = (long)ctx_value;
+	*ret = (zend_long)ctx_value;
 	return 1;
 }
 /* }}} */
 
-static int php_filter_parse_hex(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
-	unsigned long ctx_value = 0;
+static int php_filter_parse_hex(const char *str, unsigned int str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
+	zend_ulong ctx_value = 0;
 	const char *end = str + str_len;
-	unsigned long n;
+	zend_ulong n;
 
 	while (str < end) {
 		if (*str >= '0' && *str <= '9') {
@@ -170,14 +170,14 @@ static int php_filter_parse_hex(const char *str, unsigned int str_len, long *ret
 		} else {
 			return -1;
 		}
-		if ((ctx_value > ((unsigned long)(~(long)0)) / 16) ||
-			((ctx_value = ctx_value * 16) > ((unsigned long)(~(long)0)) - n)) {
+		if ((ctx_value > ((zend_ulong)(~(zend_long)0)) / 16) ||
+			((ctx_value = ctx_value * 16) > ((zend_ulong)(~(zend_long)0)) - n)) {
 			return -1;
 		}
 		ctx_value += n;
 	}
 
-	*ret = (long)ctx_value;
+	*ret = (zend_long)ctx_value;
 	return 1;
 }
 /* }}} */
@@ -185,11 +185,11 @@ static int php_filter_parse_hex(const char *str, unsigned int str_len, long *ret
 void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	zval *option_val;
-	long  min_range, max_range, option_flags;
+	zend_long  min_range, max_range, option_flags;
 	int   min_range_set, max_range_set;
 	int   allow_octal = 0, allow_hex = 0;
 	int	  len, error = 0;
-	long  ctx_value;
+	zend_long  ctx_value;
 	char *p;
 
 	/* Parse options */
@@ -327,7 +327,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	char dec_sep = '.';
 	char tsd_sep[3] = "',.";
 
-	long lval;
+	zend_long lval;
 	double dval;
 
 	int first, n;
@@ -422,7 +422,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	zval *option_val;
 	zend_string *regexp;
-	long option_flags;
+	zend_long option_flags;
 	int regexp_set, option_flags_set;
 	pcre *re = NULL;
 	pcre_extra *pcre_extra = NULL;
@@ -547,13 +547,13 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	sregexp = STR_INIT(regexp, sizeof(regexp) - 1, 0);
+	sregexp = zend_string_init(regexp, sizeof(regexp) - 1, 0);
 	re = pcre_get_compiled_regex(sregexp, &pcre_extra, &preg_options TSRMLS_CC);
 	if (!re) {
-		STR_RELEASE(sregexp);
+		zend_string_release(sregexp);
 		RETURN_VALIDATION_FAILED
 	}
-	STR_RELEASE(sregexp);
+	zend_string_release(sregexp);
 	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, 0, ovector, 3);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
@@ -796,7 +796,7 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int tokens, length, i, offset, exp_separator_set, exp_separator_len;
 	char separator;
 	char *exp_separator;
-	long ret = 0;
+	zend_long ret = 0;
 	zval *option_val;
 
 	FETCH_STRING_OPTION(exp_separator, "separator");

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,7 +27,7 @@
 
 PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC);
 
-PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC);
+PHPAPI zend_long spl_offset_convert_to_long(zval *offset TSRMLS_DC);
 
 /* {{{ spl_instantiate_arg_ex1 */
 static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval *retval, zval *arg1 TSRMLS_DC)

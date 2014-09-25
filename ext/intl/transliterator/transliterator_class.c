@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -183,7 +183,7 @@ err:
 
 			err_msg = intl_error_get_message( TRANSLITERATOR_ERROR_P( to_orig ) TSRMLS_CC );
 			php_error_docref( NULL TSRMLS_CC, E_ERROR, "%s", err_msg->val );
-			STR_FREE( err_msg ); /* if it's changed into a warning */
+			zend_string_free( err_msg ); /* if it's changed into a warning */
 			/* do not destroy tempz; we need to return something */
 		}
 	}

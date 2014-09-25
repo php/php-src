@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -77,10 +77,10 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC);
 PHPAPI int php_copy_file(const char *src, const char *dest TSRMLS_DC);
 PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk TSRMLS_DC);
 PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx TSRMLS_DC);
-PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC);
-PHPAPI int php_mkdir(const char *dir, long mode TSRMLS_DC);
+PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options TSRMLS_DC);
+PHPAPI int php_mkdir(const char *dir, zend_long mode TSRMLS_DC);
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value TSRMLS_DC);
-PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC);
+PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC);
 
 #define META_DEF_BUFSIZE 8192
 
@@ -117,8 +117,8 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data * TSRMLS_DC);
 typedef struct {
 	int pclose_ret;
 	size_t def_chunk_size;
-	long auto_detect_line_endings;
-	long default_socket_timeout;
+	zend_long auto_detect_line_endings;
+	zend_long default_socket_timeout;
 	char *user_agent; /* for the http wrapper */
 	char *from_address; /* for the ftp and http wrappers */
 	const char *user_stream_current_filename; /* for simple recursion protection */

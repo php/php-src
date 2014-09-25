@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -236,10 +236,10 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		}
 		add_soap_fault(this_ptr, faultcode, faultstring ? faultstring->val : NULL, faultactor ? faultactor->val : NULL, &details TSRMLS_CC);
 		if (faultstring) {
-			STR_RELEASE(faultstring);
+			zend_string_release(faultstring);
 		}
 		if (faultactor) {
-			STR_RELEASE(faultactor);
+			zend_string_release(faultactor);
 		}
 		if (Z_REFCOUNTED(details)) {
 			Z_DELREF(details);

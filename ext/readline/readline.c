@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -213,7 +213,7 @@ PHP_MINFO_FUNCTION(readline)
 PHP_FUNCTION(readline)
 {
 	char *prompt = NULL;
-	int prompt_len;
+	size_t prompt_len;
 	char *result;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!", &prompt, &prompt_len)) {
@@ -240,7 +240,7 @@ PHP_FUNCTION(readline_info)
 {
 	char *what = NULL;
 	zval *value = NULL;
-	int what_len, oldval;
+	size_t what_len, oldval;
 	char *oldstr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sz", &what, &what_len, &value) == FAILURE) {
@@ -336,7 +336,7 @@ PHP_FUNCTION(readline_info)
 PHP_FUNCTION(readline_add_history)
 {
 	char *arg;
-	int arg_len;
+	size_t arg_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
 		return;
@@ -396,7 +396,7 @@ PHP_FUNCTION(readline_list_history)
 PHP_FUNCTION(readline_read_history)
 {
 	char *arg = NULL;
-	int arg_len;
+	size_t arg_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
 		return;
@@ -420,7 +420,7 @@ PHP_FUNCTION(readline_read_history)
 PHP_FUNCTION(readline_write_history)
 {
 	char *arg = NULL;
-	int arg_len;
+	size_t arg_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
 		return;
@@ -521,10 +521,10 @@ PHP_FUNCTION(readline_completion_function)
 
 	if (!zend_is_callable(arg, 0, &name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name->val);
-		STR_RELEASE(name);
+		zend_string_release(name);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(name);
+	zend_string_release(name);
 
 	zval_dtor(&_readline_completion);
 	ZVAL_DUP(&_readline_completion, arg);
@@ -563,7 +563,7 @@ PHP_FUNCTION(readline_callback_handler_install)
 	zval *callback;
 	zend_string *name = NULL;
 	char *prompt;
-	int prompt_len;
+	size_t prompt_len;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &prompt, &prompt_len, &callback)) {
 		return;
@@ -571,10 +571,10 @@ PHP_FUNCTION(readline_callback_handler_install)
 
 	if (!zend_is_callable(callback, 0, &name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name->val);
-		STR_RELEASE(name);
+		zend_string_release(name);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(name);
+	zend_string_release(name);
 
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();

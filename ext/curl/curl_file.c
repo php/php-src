@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -32,7 +32,7 @@ PHP_CURL_API zend_class_entry *curl_CURLFile_class;
 static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char *fname = NULL, *mime = NULL, *postname = NULL;
-	int fname_len, mime_len, postname_len;
+	size_t fname_len, mime_len, postname_len;
 	zval *cf = return_value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ss", &fname, &fname_len, &mime, &mime_len, &postname, &postname_len) == FAILURE) {
@@ -83,7 +83,7 @@ static void curlfile_get_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 static void curlfile_set_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 {
 	char *arg = NULL;
-	int arg_len;
+	size_t arg_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
 		return;

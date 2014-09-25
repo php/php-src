@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -87,7 +87,7 @@ int dom_characterdata_data_read(dom_object *obj, zval *retval TSRMLS_DC)
 	}
 
 	if ((content = xmlNodeGetContent(nodep)) != NULL) {
-		ZVAL_STRING(retval, content);
+		ZVAL_STRING(retval, (char *) content);
 		xmlFree(content);
 	} else {
 		ZVAL_EMPTY_STRING(retval);
@@ -108,9 +108,9 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 	str = zval_get_string(newval);
 
-	xmlNodeSetContentLen(nodep, str->val, str->len + 1);
+	xmlNodeSetContentLen(nodep, (xmlChar *) str->val, str->len + 1);
 
-	STR_RELEASE(str);
+	zend_string_release(str);
 	return SUCCESS;
 }
 
@@ -156,7 +156,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	xmlChar    *cur;
 	xmlChar    *substring;
 	xmlNodePtr  node;
-	long        offset, count;
+	zend_long        offset, count;
 	int         length;
 	dom_object	*intern;
 
@@ -187,7 +187,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	xmlFree(cur);
 
 	if (substring) {
-		RETVAL_STRING(substring);
+		RETVAL_STRING((char *) substring);
 		xmlFree(substring);
 	} else {
 		RETVAL_EMPTY_STRING();
@@ -205,7 +205,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 	xmlNode *nodep;
 	dom_object *intern;
 	char *arg;
-	int arg_len;
+	size_t arg_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_characterdata_class_entry, &arg, &arg_len) == FAILURE) {
 		return;
@@ -223,7 +223,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
     }
     nodep->properties = NULL;
 #else
-	xmlTextConcat(nodep, arg, arg_len);
+	xmlTextConcat(nodep, (xmlChar *) arg, arg_len);
 #endif
 	RETURN_TRUE;
 }
@@ -239,8 +239,9 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	xmlChar		*cur, *first, *second;
 	xmlNodePtr  node;
 	char		*arg;
-	long        offset;
-	int         length, arg_len;
+	zend_long        offset;
+	int         length;
+	size_t arg_len;
 	dom_object	*intern;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len) == FAILURE) {
@@ -267,7 +268,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	xmlFree(cur);
 
 	xmlNodeSetContent(node, first);
-	xmlNodeAddContent(node, arg);
+	xmlNodeAddContent(node, (xmlChar *) arg);
 	xmlNodeAddContent(node, second);
 	
 	xmlFree(first);
@@ -286,7 +287,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 	zval *id;
 	xmlChar    *cur, *substring, *second;
 	xmlNodePtr  node;
-	long        offset, count;
+	zend_long        offset, count;
 	int         length;
 	dom_object	*intern;
 
@@ -342,8 +343,9 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	xmlChar		*cur, *substring, *second = NULL;
 	xmlNodePtr  node;
 	char		*arg;
-	long        offset, count;
-	int         length, arg_len;
+	zend_long        offset, count;
+	int         length;
+	size_t arg_len;
 	dom_object	*intern;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olls", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len) == FAILURE) {
@@ -379,7 +381,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 		second = xmlUTF8Strsub(cur, offset + count, length - offset);
 	}
 
-	substring = xmlStrcat(substring, arg);
+	substring = xmlStrcat(substring, (xmlChar *) arg);
 	substring = xmlStrcat(substring, second);
 
 	xmlNodeSetContent(node, substring);

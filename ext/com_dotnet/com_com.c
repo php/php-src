@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -37,7 +37,7 @@ PHP_FUNCTION(com_create_instance)
 	php_com_dotnet_object *obj;
 	char *module_name, *typelib_name = NULL, *server_name = NULL;
 	char *user_name = NULL, *domain_name = NULL, *password = NULL;
-	int module_name_len, typelib_name_len, server_name_len,
+	size_t module_name_len, typelib_name_len, server_name_len,
 		user_name_len, domain_name_len, password_len;
 	OLECHAR *moniker;
 	CLSID clsid;
@@ -289,7 +289,7 @@ PHP_FUNCTION(com_get_active_object)
 	CLSID clsid;
 	char *module_name;
 	int module_name_len;
-	long code_page = COMG(code_page);
+	zend_long code_page = COMG(code_page);
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
@@ -349,7 +349,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 
 	if (silent == 0 && FAILED(hr)) {
 		char *source = NULL, *desc = NULL, *msg = NULL;
-		int source_len, desc_len;
+		size_t source_len, desc_len;
 
 		switch (hr) {
 			case DISP_E_EXCEPTION:
@@ -416,7 +416,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 
 /* map an ID to a name */
 HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
-		int namelen, DISPID *dispid TSRMLS_DC)
+		size_t namelen, DISPID *dispid TSRMLS_DC)
 {
 	OLECHAR *olename;
 	HRESULT hr;
@@ -667,7 +667,7 @@ PHP_FUNCTION(com_create_guid)
 
 	php_com_initialize(TSRMLS_C);
 	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {
-		int len;
+		size_t len;
 		char *str;
 
 		str = php_com_olestring_to_string(guid_string, &len, CP_ACP TSRMLS_CC);
@@ -750,7 +750,7 @@ PHP_FUNCTION(com_print_typeinfo)
 	zval *arg1;
 	char *ifacename = NULL;
 	char *typelibname = NULL;
-	int ifacelen;
+	size_t ifacelen;
 	zend_bool wantsink = 0;
 	php_com_dotnet_object *obj = NULL;
 	ITypeInfo *typeinfo;
@@ -784,7 +784,7 @@ PHP_FUNCTION(com_print_typeinfo)
    Process COM messages, sleeping for up to timeoutms milliseconds */
 PHP_FUNCTION(com_message_pump)
 {
-	long timeoutms = 0;
+	zend_long timeoutms = 0;
 	MSG msg;
 	DWORD result;
 	
@@ -813,7 +813,7 @@ PHP_FUNCTION(com_message_pump)
 PHP_FUNCTION(com_load_typelib)
 {
 	char *name;
-	int namelen;
+	size_t namelen;
 	ITypeLib *pTL = NULL;
 	zend_bool cs = TRUE;
 	int codepage = COMG(code_page);

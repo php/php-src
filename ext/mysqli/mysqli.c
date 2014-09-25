@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -185,7 +185,7 @@ void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC)
 /* {{{ php_clear_mysql */
 void php_clear_mysql(MY_MYSQL *mysql) {
 	if (mysql->hash_key) {
-		STR_RELEASE(mysql->hash_key);
+		zend_string_release(mysql->hash_key);
 		mysql->hash_key = NULL;
 	}
 	if (!Z_ISUNDEF(mysql->li_read)) {
@@ -375,11 +375,11 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysqli_read_t r_func, mysqli_write_t w_func TSRMLS_DC) {
 	mysqli_prop_handler	p;
 
-	p.name = STR_INIT(pname, pname_len, 1);
+	p.name = zend_string_init(pname, pname_len, 1);
 	p.read_func = (r_func) ? r_func : mysqli_read_na;
 	p.write_func = (w_func) ? w_func : mysqli_write_na;
 	zend_hash_add_mem(h, p.name, &p, sizeof(mysqli_prop_handler));
-	STR_RELEASE(p.name);
+	zend_string_release(p.name);
 }
 /* }}} */
 
@@ -884,7 +884,7 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 #ifndef MYSQLI_USE_MYSQLND
 #if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
-	unsigned long client_ver = mysql_get_client_version();
+	zend_ulong client_ver = mysql_get_client_version();
 	/*
 	  Can't call mysql_server_end() multiple times prior to 5.0.46 on Windows.
 	  PHP bug#41350 MySQL bug#25621
@@ -976,11 +976,11 @@ PHP_MINFO_FUNCTION(mysqli)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "MysqlI Support", "enabled");
 	php_info_print_table_row(2, "Client API library version", mysql_get_client_info());
-	snprintf(buf, sizeof(buf), "%ld", MyG(num_active_persistent));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_active_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
-	snprintf(buf, sizeof(buf), "%ld", MyG(num_inactive_persistent));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_inactive_persistent));
 	php_info_print_table_row(2, "Inactive Persistent Links", buf);
-	snprintf(buf, sizeof(buf), "%ld", MyG(num_links));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 #if !defined(MYSQLI_USE_MYSQLND)
 	php_info_print_table_row(2, "Client API header version", MYSQL_SERVER_VERSION);
@@ -1047,7 +1047,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 	MY_STMT				*stmt;
 	MYSQLI_RESOURCE		*mysqli_resource;
 	char				*statement;
-	int					statement_len;
+	size_t					statement_len;
 
 	switch (ZEND_NUM_ARGS())
 	{
@@ -1105,7 +1105,7 @@ PHP_FUNCTION(mysqli_result_construct)
 	MYSQL_RES			*result = NULL;
 	zval				*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	long				resmode = MYSQLI_STORE_RESULT;
+	zend_long				resmode = MYSQLI_STORE_RESULT;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1149,13 +1149,13 @@ PHP_FUNCTION(mysqli_result_construct)
 
 /* {{{ php_mysqli_fetch_into_hash_aux
  */
-void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, long fetchtype TSRMLS_DC)
+void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype TSRMLS_DC)
 {
 #if !defined(MYSQLI_USE_MYSQLND)
 	MYSQL_ROW row;
 	unsigned int	i;
 	MYSQL_FIELD		*fields;
-	unsigned long	*field_len;
+	zend_ulong	*field_len;
 	
 	if (!(row = mysql_fetch_row(result))) {
 		RETURN_NULL();
@@ -1238,7 +1238,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 {
 	MYSQL_RES		*result;
 	zval			*mysql_result;
-	long			fetchtype;
+	zend_long			fetchtype;
 	zval			*ctor_params = NULL;
 	zend_class_entry *ce = NULL;
 

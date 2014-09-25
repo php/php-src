@@ -138,7 +138,7 @@ dflt_printout:
 			case T_WHITESPACE:
 				break;
 			default:
-				STR_RELEASE(Z_STR(token));
+				zend_string_release(Z_STR(token));
 				break;
 			}
 		}

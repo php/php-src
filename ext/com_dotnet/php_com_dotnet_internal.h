@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -38,7 +38,7 @@ typedef struct _php_com_dotnet_object {
 	int modified;
 
 	ITypeInfo *typeinfo;
-	long code_page;
+	zend_long code_page;
 
 	zend_class_entry *ce;
 
@@ -87,9 +87,9 @@ int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index TSRMLS
 
 /* com_olechar.c */
 PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring,
-		uint *string_len, int codepage TSRMLS_DC);
+		size_t *string_len, int codepage TSRMLS_DC);
 PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string,
-		uint string_len, int codepage TSRMLS_DC);
+		size_t string_len, int codepage TSRMLS_DC);
 
 
 /* com_com.c */
@@ -104,7 +104,7 @@ PHP_FUNCTION(com_get_active_object);
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent, int allow_noarg TSRMLS_DC);
 HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
-		int namelen, DISPID *dispid TSRMLS_DC);
+		size_t namelen, DISPID *dispid TSRMLS_DC);
 int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 		WORD flags,	VARIANT *v, int nargs, zval *args, int silent, int allow_noarg TSRMLS_DC);
 int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -39,6 +39,13 @@
 # define MSG_PEEK 0
 #endif
 
+#ifdef PHP_WIN32
+/* send/recv family on windows expects int */
+# define XP_SOCK_BUF_SIZE(sz) (((sz) > INT_MAX) ? INT_MAX : (int)(sz))
+#else
+# define XP_SOCK_BUF_SIZE(sz) (sz)
+#endif
+
 php_stream_ops php_stream_generic_socket_ops;
 PHPAPI php_stream_ops php_stream_socket_ops;
 php_stream_ops php_stream_udp_socket_ops;
@@ -67,7 +74,7 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 		ptimeout = &sock->timeout;
 
 retry:
-	didwrite = send(sock->socket, buf, count, (sock->is_blocked && ptimeout) ? MSG_DONTWAIT : 0);
+	didwrite = send(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && ptimeout) ? MSG_DONTWAIT : 0);
 
 	if (didwrite <= 0) {
 		long err = php_socket_errno();
@@ -95,8 +102,8 @@ retry:
 			} while (err == EINTR);
 		}
 		estr = php_socket_strerror(err, NULL, 0);
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of %ld bytes failed with errno=%ld %s",
-				(long)count, err, estr);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of " ZEND_LONG_FMT " bytes failed with errno=%ld %s",
+				(zend_long)count, err, estr);
 		efree(estr);
 	}
 
@@ -144,7 +151,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	int nr_bytes = 0;
+	ssize_t nr_bytes = 0;
 
 	if (!sock || sock->socket == -1) {
 		return 0;
@@ -156,7 +163,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 			return 0;
 	}
 
-	nr_bytes = recv(sock->socket, buf, count, (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
+	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
 
 	stream->eof = (nr_bytes == 0 || (nr_bytes == -1 && php_socket_errno() != EWOULDBLOCK));
 
@@ -230,7 +237,7 @@ static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 #if ZEND_WIN32
 	return 0;
 #else
-	return fstat(sock->socket, &ssb->sb);
+	return zend_fstat(sock->socket, &ssb->sb);
 #endif
 }
 
@@ -240,7 +247,8 @@ static inline int sock_sendto(php_netstream_data_t *sock, const char *buf, size_
 {
 	int ret;
 	if (addr) {
-		ret = sendto(sock->socket, buf, buflen, flags, addr, addrlen);
+		ret = sendto(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags, addr, XP_SOCK_BUF_SIZE(addrlen));
+
 		return (ret == SOCK_CONN_ERR) ? -1 : ret;
 	}
 	return ((ret = send(sock->socket, buf, buflen, flags)) == SOCK_CONN_ERR) ? -1 : ret;
@@ -257,12 +265,12 @@ static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t bu
 	int want_addr = textaddr || addr;
 
 	if (want_addr) {
-		ret = recvfrom(sock->socket, buf, buflen, flags, (struct sockaddr*)&sa, &sl);
+		ret = recvfrom(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags, (struct sockaddr*)&sa, &sl);
 		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
 		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 			textaddr, addr, addrlen TSRMLS_CC);
 	} else {
-		ret = recv(sock->socket, buf, buflen, flags);
+		ret = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags);
 		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
 	}
 

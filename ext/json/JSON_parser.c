@@ -326,7 +326,7 @@ static void json_create_zval(zval *z, smart_str *buf, int type, int options TSRM
 			}
 		}
 
-		ZVAL_LONG(z, strtol(buf->s->val, NULL, 10));
+		ZVAL_LONG(z, ZEND_STRTOL(buf->s->val, NULL, 10));
     }
     else if (type == IS_DOUBLE)
     {
@@ -373,7 +373,7 @@ static void utf16_to_utf8(smart_str *buf, unsigned short utf16)
                 && ((unsigned char) buf->s->val[buf->s->len - 1] & 0xc0) == 0x80)
     {
         /* found surrogate pair */
-        unsigned long utf32;
+        zend_ulong utf32;
 
         utf32 = (((buf->s->val[buf->s->len - 2] & 0xf) << 16)
                     | ((buf->s->val[buf->s->len - 1] & 0x3f) << 10)

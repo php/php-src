@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -270,7 +270,7 @@ char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int reso
 
 #ifdef LIBXML_SCHEMAS_ENABLED
 /* {{{ _xmlreader_get_relaxNG */
-static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int type,
+static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, size_t type,
 											xmlRelaxNGValidityErrorFunc error_func,
 											xmlRelaxNGValidityWarningFunc warn_func TSRMLS_DC)
 {
@@ -398,7 +398,7 @@ zend_object *xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 /* {{{ php_xmlreader_string_arg */
 static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_one_char_t internal_function) {
 	zval *id;
-	int name_len = 0;
+	size_t name_len = 0;
 	char *retchar = NULL;
 	xmlreader_object *intern;
 	char *name;
@@ -480,7 +480,8 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int type) {
 #ifdef LIBXML_SCHEMAS_ENABLED
 	zval *id;
-	int source_len = 0, retval = -1;
+	size_t source_len = 0;
+	int retval = -1;
 	xmlreader_object *intern;
 	xmlRelaxNGPtr schema = NULL;
 	char *source;
@@ -561,7 +562,7 @@ Get value of an attribute at index from current element */
 PHP_METHOD(xmlreader, getAttributeNo)
 {
 	zval *id;
-	long attr_pos;
+	zend_long attr_pos;
 	char *retchar = NULL;
 	xmlreader_object *intern;
 
@@ -587,7 +588,7 @@ Get value of a attribute via name and namespace from current element */
 PHP_METHOD(xmlreader, getAttributeNs)
 {
 	zval *id;
-	int name_len = 0, ns_uri_len = 0;
+	size_t name_len = 0, ns_uri_len = 0;
 	xmlreader_object *intern;
 	char *name, *ns_uri, *retchar = NULL;
 
@@ -618,7 +619,7 @@ Indicates whether given property (one of the parser option constants) is set or 
 PHP_METHOD(xmlreader, getParserProperty)
 {
 	zval *id;
-	long property;
+	zend_long property;
 	int retval = -1;
 	xmlreader_object *intern;
 
@@ -664,7 +665,8 @@ Positions reader at specified attribute - Returns TRUE on success and FALSE on f
 PHP_METHOD(xmlreader, moveToAttribute)
 {
 	zval *id;
-	int name_len = 0, retval;
+	size_t name_len = 0;
+	int retval;
 	xmlreader_object *intern;
 	char *name;
 
@@ -697,7 +699,7 @@ Returns TRUE on success and FALSE on failure */
 PHP_METHOD(xmlreader, moveToAttributeNo)
 {
 	zval *id;
-	long attr_pos;
+	zend_long attr_pos;
 	int retval;
 	xmlreader_object *intern;
 
@@ -725,7 +727,8 @@ Returns TRUE on success and FALSE on failure */
 PHP_METHOD(xmlreader, moveToAttributeNs)
 {
 	zval *id;
-	int name_len=0, ns_uri_len=0, retval;
+	size_t name_len=0, ns_uri_len=0;
+	int retval;
 	xmlreader_object *intern;
 	char *name, *ns_uri;
 
@@ -805,7 +808,8 @@ Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, next)
 {
 	zval *id;
-	int retval, name_len=0;
+	int retval;
+	size_t name_len=0;
 	xmlreader_object *intern;
 	char *name = NULL;
 
@@ -846,8 +850,8 @@ Sets the URI that the XMLReader will parse. */
 PHP_METHOD(xmlreader, open)
 {
 	zval *id;
-	int source_len = 0, encoding_len = 0;
-	long options = 0;
+	size_t source_len = 0, encoding_len = 0;
+	zend_long options = 0;
 	xmlreader_object *intern = NULL;
 	char *source, *valid_file = NULL;
 	char *encoding = NULL;
@@ -936,7 +940,8 @@ PHP_METHOD(xmlreader, setSchema)
 {
 #ifdef LIBXML_SCHEMAS_ENABLED
 	zval *id;
-	int source_len = 0, retval = -1;
+	size_t source_len = 0;
+	int retval = -1;
 	xmlreader_object *intern;
 	char *source;
 
@@ -978,7 +983,7 @@ Properties must be set after open() or XML() and before the first read() is call
 PHP_METHOD(xmlreader, setParserProperty)
 {
 	zval *id;
-	long property;
+	zend_long property;
 	int retval = -1;
 	zend_bool value;
 	xmlreader_object *intern;
@@ -1029,8 +1034,8 @@ Sets the string that the XMLReader will parse. */
 PHP_METHOD(xmlreader, XML)
 {
 	zval *id;
-	int source_len = 0, encoding_len = 0;
-	long options = 0;
+	size_t source_len = 0, encoding_len = 0;
+	zend_long options = 0;
 	xmlreader_object *intern = NULL;
 	char *source, *uri = NULL, *encoding = NULL;
 	int resolved_path_len, ret = 0;

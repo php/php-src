@@ -48,14 +48,14 @@
 
 typedef struct _zend_objects_store {
 	zend_object **object_buckets;
-	zend_uint top;
-	zend_uint size;
+	uint32_t top;
+	uint32_t size;
 	int free_list_head;
 } zend_objects_store;
 
 /* Global store handling functions */
 BEGIN_EXTERN_C()
-ZEND_API void zend_objects_store_init(zend_objects_store *objects, zend_uint init_size);
+ZEND_API void zend_objects_store_init(zend_objects_store *objects, uint32_t init_size);
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC);
 ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects TSRMLS_DC);
 ZEND_API void zend_objects_store_destroy(zend_objects_store *objects);

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -61,7 +61,7 @@ PHP_FUNCTION(pcntl_setpriority);
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
-	long signo;
+	zend_long signo;
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)

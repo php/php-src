@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -230,10 +230,10 @@ stmt_retry:
 	}
 
 	if (status == PGRES_COMMAND_OK) {
-		stmt->row_count = (long)atoi(PQcmdTuples(S->result));
+		ZEND_ATOL(stmt->row_count, PQcmdTuples(S->result));
 		H->pgoid = PQoidValue(S->result);
 	} else {
-		stmt->row_count = (long)PQntuples(S->result);
+		stmt->row_count = (zend_long)PQntuples(S->result);
 	}
 
 	return 1;
@@ -256,14 +256,15 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				/* decode name from $1, $2 into 0, 1 etc. */
 				if (param->name) {
 					if (param->name->val[0] == '$') {
-						param->paramno = atoi(param->name->val + 1);
+						ZEND_ATOL(param->paramno, param->name->val + 1);
 					} else {
 						/* resolve parameter name to rewritten name */
 						char *namevar;
 
 						if (stmt->bound_param_map && (namevar = zend_hash_find_ptr(stmt->bound_param_map,
 								param->name)) != NULL) {
-							param->paramno = atoi(namevar + 1) - 1;
+							ZEND_ATOL(param->paramno, namevar + 1);
+							param->paramno--;
 						} else {
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY093", param->name->val TSRMLS_CC);
 							return 0;
@@ -390,7 +391,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 }
 
 static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
@@ -404,8 +405,8 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			case PDO_FETCH_ORI_PRIOR:	spprintf(&ori_str, 0, "BACKWARD"); break;
 			case PDO_FETCH_ORI_FIRST:	spprintf(&ori_str, 0, "FIRST"); break;
 			case PDO_FETCH_ORI_LAST:	spprintf(&ori_str, 0, "LAST"); break;
-			case PDO_FETCH_ORI_ABS:		spprintf(&ori_str, 0, "ABSOLUTE %ld", offset); break;
-			case PDO_FETCH_ORI_REL:		spprintf(&ori_str, 0, "RELATIVE %ld", offset); break;
+			case PDO_FETCH_ORI_ABS:		spprintf(&ori_str, 0, "ABSOLUTE %pd", offset); break;
+			case PDO_FETCH_ORI_REL:		spprintf(&ori_str, 0, "RELATIVE %pd", offset); break;
 			default:
 				return 0;
 		}
@@ -479,7 +480,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 			break;
 
 		case INT8OID:
-			if (sizeof(long)>=8) {
+			if (sizeof(zend_long)>=8) {
 				cols[colno].param_type = PDO_PARAM_INT;
 			} else {
 				cols[colno].param_type = PDO_PARAM_STR;
@@ -497,7 +498,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees  TSRMLS_DC)
+static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees  TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
@@ -518,9 +519,9 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 		switch (cols[colno].param_type) {
 
 			case PDO_PARAM_INT:
-				S->cols[colno].intval = atol(*ptr);
+				ZEND_ATOL(S->cols[colno].intval, *ptr);
 				*ptr = (char *) &(S->cols[colno].intval);
-				*len = sizeof(long);
+				*len = sizeof(zend_long);
 				break;
 
 			case PDO_PARAM_BOOL:
@@ -576,7 +577,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 	return 1;
 }
 
-static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return_value TSRMLS_DC)
+static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	PGresult *res;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -39,8 +39,8 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 	HashPosition pos;
 	int keytype;
 	zend_string *strindex;
-	long intindex = -1;
-	long max_index = 0;
+	zend_long intindex = -1;
+	zend_long max_index = 0;
 	VARIANT *va;
 	zval *item;
 		
@@ -187,28 +187,28 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 			ZVAL_NULL(z);
 			break;
 		case VT_UI1:
-			ZVAL_LONG(z, (long)V_UI1(v));
+			ZVAL_LONG(z, (zend_long)V_UI1(v));
 			break;
 		case VT_I1:
-			ZVAL_LONG(z, (long)V_I1(v));
+			ZVAL_LONG(z, (zend_long)V_I1(v));
 			break;
 		case VT_UI2:
-			ZVAL_LONG(z, (long)V_UI2(v));
+			ZVAL_LONG(z, (zend_long)V_UI2(v));
 			break;
 		case VT_I2:
-			ZVAL_LONG(z, (long)V_I2(v));
+			ZVAL_LONG(z, (zend_long)V_I2(v));
 			break;
 		case VT_UI4:  /* TODO: promote to double if large? */
-			ZVAL_LONG(z, (long)V_UI4(v));
+			ZVAL_LONG(z, (zend_long)V_UI4(v));
 			break;
 		case VT_I4:
-			ZVAL_LONG(z, (long)V_I4(v));
+			ZVAL_LONG(z, (zend_long)V_I4(v));
 			break;
 		case VT_INT:
 			ZVAL_LONG(z, V_INT(v));
 			break;
 		case VT_UINT: /* TODO: promote to double if large? */
-			ZVAL_LONG(z, (long)V_UINT(v));
+			ZVAL_LONG(z, (zend_long)V_UINT(v));
 			break;
 		case VT_R4:
 			ZVAL_DOUBLE(z, (double)V_R4(v));
@@ -222,7 +222,7 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 		case VT_BSTR:
 			olestring = V_BSTR(v);
 			if (olestring) {
-				int len;
+				size_t len;
 				char *str = php_com_olestring_to_string(olestring,
 					&len, codepage TSRMLS_CC);
 				ZVAL_STRINGL(z, str, len);
@@ -406,8 +406,8 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar TSR
 /* {{{ com_variant_create_instance - ctor for new VARIANT() */
 PHP_FUNCTION(com_variant_create_instance)
 {
-	/* VARTYPE == unsigned short */ long vt = VT_EMPTY;
-	long codepage = CP_ACP;
+	/* VARTYPE == unsigned short */ zend_long vt = VT_EMPTY;
+	zend_long codepage = CP_ACP;
 	zval *object = getThis();
 	php_com_dotnet_object *obj;
 	zval *zvalue = NULL;
@@ -444,7 +444,7 @@ PHP_FUNCTION(com_variant_create_instance)
 			  but will probably fail (original behavior)
 		*/
 		if ((vt & VT_ARRAY) && (V_VT(&obj->v) & VT_ARRAY)) {
-			long orig_vt = vt;
+			zend_long orig_vt = vt;
 
 			vt &= ~VT_ARRAY;
 			if (vt) {
@@ -832,7 +832,7 @@ PHP_FUNCTION(variant_round)
 	zval *zleft = NULL;
 	php_com_dotnet_object *obj;
 	int codepage = CP_ACP;
-	long decimals = 0;
+	zend_long decimals = 0;
 
 	VariantInit(&left_val);
 	VariantInit(&vres);
@@ -867,8 +867,8 @@ PHP_FUNCTION(variant_cmp)
 	zval *zleft = NULL, *zright = NULL;
 	php_com_dotnet_object *obj;
 	int codepage = CP_ACP;
-	long lcid = LOCALE_SYSTEM_DEFAULT;
-	long flags = 0;
+	zend_long lcid = LOCALE_SYSTEM_DEFAULT;
+	zend_long flags = 0;
 	/* it is safe to ignore the warning for this line; see the comments in com_handlers.c */
 	STDAPI VarCmp(LPVARIANT pvarLeft, LPVARIANT pvarRight, LCID lcid, DWORD flags);
 
@@ -959,7 +959,7 @@ PHP_FUNCTION(variant_date_to_timestamp)
    Returns a variant date representation of a unix timestamp */
 PHP_FUNCTION(variant_date_from_timestamp)
 {
-	long timestamp;
+	zend_long timestamp;
 	time_t ttstamp;
 	SYSTEMTIME systime;
 	struct tm *tmv;
@@ -1020,7 +1020,7 @@ PHP_FUNCTION(variant_set_type)
 {
 	zval *zobj;
 	php_com_dotnet_object *obj;
-	/* VARTYPE == unsigned short */ long vt;
+	/* VARTYPE == unsigned short */ zend_long vt;
 	HRESULT res;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -1055,7 +1055,7 @@ PHP_FUNCTION(variant_cast)
 {
 	zval *zobj;
 	php_com_dotnet_object *obj;
-	/* VARTYPE == unsigned short */ long vt;
+	/* VARTYPE == unsigned short */ zend_long vt;
 	VARIANT vres;
 	HRESULT res;
 

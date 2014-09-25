@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
 PHP_FUNCTION( numfmt_format )
 {
 	zval *number;
-	long type = FORMAT_TYPE_DEFAULT;
+	zend_long type = FORMAT_TYPE_DEFAULT;
 	UChar format_buf[32];
 	UChar* formatted = format_buf;
 	int formatted_len = USIZE(format_buf);
@@ -59,7 +59,7 @@ PHP_FUNCTION( numfmt_format )
 
 		if(Z_TYPE_P(number) == IS_LONG) {
 			/* take INT32 on 32-bit, int64 on 64-bit */
-			type = (sizeof(long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
+			type = (sizeof(zend_long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
 		} else if(Z_TYPE_P(number) == IS_DOUBLE) {
 			type = FORMAT_TYPE_DOUBLE;
 		} else {
@@ -120,7 +120,7 @@ PHP_FUNCTION( numfmt_format )
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported format type %ld", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported format type %pd", type);
 			RETURN_FALSE;
 			break;
 	}
@@ -141,7 +141,7 @@ PHP_FUNCTION( numfmt_format_currency )
 	UChar*     formatted     = format_buf;
 	int        formatted_len = USIZE(format_buf);
 	char*      currency      = NULL;
-	int        currency_len  = 0;
+	size_t        currency_len  = 0;
 	UChar*     scurrency     = NULL;
 	int        scurrency_len = 0;
 	FORMATTER_METHOD_INIT_VARS;

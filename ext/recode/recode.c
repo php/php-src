@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -146,7 +146,7 @@ PHP_FUNCTION(recode_string)
 	RECODE_REQUEST request = NULL;
 	char *r = NULL;
 	size_t r_len = 0, r_alen = 0;
-	int req_len, str_len;
+	size_t req_len, str_len;
 	char *req, *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &req, &req_len, &str, &str_len) == FAILURE) {

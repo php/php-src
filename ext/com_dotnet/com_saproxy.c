@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -340,7 +340,7 @@ static zend_class_entry *saproxy_class_entry_get(const zend_object *object TSRML
 
 static zend_string* saproxy_class_name_get(const zend_object *object, int parent TSRMLS_DC)
 {
-	return STR_COPY(php_com_saproxy_class_entry->name);
+	return zend_string_copy(php_com_saproxy_class_entry->name);
 }
 
 static int saproxy_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
@@ -353,7 +353,7 @@ static int saproxy_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC
 	return FAILURE;
 }
 
-static int saproxy_count_elements(zval *object, long *count TSRMLS_DC)
+static int saproxy_count_elements(zval *object, zend_long *count TSRMLS_DC)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	LONG ubound, lbound;

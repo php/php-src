@@ -1,7 +1,7 @@
 // Utils for configure script
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2008 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -1521,7 +1521,7 @@ function output_as_table(header, ar_out)
 {
 	var l = header.length;
 	var cols = 80;
-	var fixedlenght = "";
+	var fixedlength = "";
 	var t = 0;
 	var i,j,k,m;
 	var out = "| ";
@@ -1887,6 +1887,14 @@ function generate_config_h()
 		
 		outfile.WriteLine("#define " + keys[i] + " " + pieces);
 	}
+
+	if (VCVERS >= 1800) {
+		outfile.WriteLine("");
+		outfile.WriteLine("#define HAVE_ACOSH 1");
+		outfile.WriteLine("#define HAVE_ASINH 1");
+		outfile.WriteLine("#define HAVE_ATANH 1");
+	}
+
 	
 	outfile.Close();
 }

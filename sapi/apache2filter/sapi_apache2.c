@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -30,7 +30,7 @@
 #include "php_variables.h"
 #include "SAPI.h"
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #ifndef NETWARE
 #include "ext/standard/php_standard.h"
 #else
@@ -456,7 +456,7 @@ static void php_apache_request_dtor(ap_filter_t *f TSRMLS_DC)
 static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 {
 	php_struct *ctx;
-	void *conf = ap_get_module_config(f->r->per_dir_config, &php5_module);
+	void *conf = ap_get_module_config(f->r->per_dir_config, &php7_module);
 	char *p = get_php_config(conf, "engine", sizeof("engine"));
 	zend_file_handle zfd;
 	php_apr_bucket_brigade *pbb;
@@ -740,7 +740,7 @@ static size_t php_apache_fsizer_stream(void *handle TSRMLS_DC)
 	return 0;
 }
 
-AP_MODULE_DECLARE_DATA module php5_module = {
+AP_MODULE_DECLARE_DATA module php7_module = {
 	STANDARD20_MODULE_STUFF,
 	create_php_config,		/* create per-directory config structure */
 	merge_php_config,		/* merge per-directory config structures */

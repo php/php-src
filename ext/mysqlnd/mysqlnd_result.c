@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -71,7 +71,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, initialize_result_set_rest)(MYSQLND
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE(data_cursor[i]) == IS_STRING) {
-					unsigned long len = Z_STRLEN(data_cursor[i]);
+					zend_ulong len = Z_STRLEN(data_cursor[i]);
 					if (meta->fields[i].max_length < len) {
 						meta->fields[i].max_length = len;
 					}
@@ -126,7 +126,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE(current_row[i]) == IS_STRING) {
-					unsigned long len = Z_STRLEN(current_row[i]);
+					zend_ulong len = Z_STRLEN(current_row[i]);
 					if (meta->fields[i].max_length < len) {
 						meta->fields[i].max_length = len;
 					}
@@ -599,7 +599,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
   of PHP, to be called as separate function. But let's have it for
   completeness.
 */
-static unsigned long *
+static zend_ulong *
 MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(MYSQLND_RES_BUFFERED * const result TSRMLS_DC)
 {
 	const MYSQLND_RES_BUFFERED_ZVAL * set = (MYSQLND_RES_BUFFERED_ZVAL *) result;
@@ -631,7 +631,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(MYSQLND_RES_BUFFERED
   of PHP, to be called as separate function. But let's have it for
   completeness.
 */
-static unsigned long *
+static zend_ulong *
 MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(MYSQLND_RES_BUFFERED * const result TSRMLS_DC)
 {
 	const MYSQLND_RES_BUFFERED_C * set = (MYSQLND_RES_BUFFERED_C *) result;
@@ -648,7 +648,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(MYSQLND_RES_BUFFERED * 
 
 
 /* {{{ mysqlnd_result_unbuffered::fetch_lengths */
-static unsigned long *
+static zend_ulong *
 MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(MYSQLND_RES_UNBUFFERED * const result TSRMLS_DC)
 {
 	/* simulate output of libmysql */
@@ -658,10 +658,10 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(MYSQLND_RES_UNBUFFERED 
 
 
 /* {{{ mysqlnd_res::fetch_lengths */
-static unsigned long *
+static zend_ulong *
 MYSQLND_METHOD(mysqlnd_res, fetch_lengths)(MYSQLND_RES * const result TSRMLS_DC)
 {
-	unsigned long * ret;
+	zend_ulong * ret;
 	DBG_ENTER("mysqlnd_res::fetch_lengths");
 	ret = result->stored_data && result->stored_data->m.fetch_lengths ?
 					result->stored_data->m.fetch_lengths(result->stored_data TSRMLS_CC) :
@@ -731,7 +731,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 				*row = mnd_malloc(field_count * sizeof(char *));
 				if (*row) {
 					MYSQLND_FIELD * field = meta->fields;
-					unsigned long * lengths = result->unbuf->lengths;
+					zend_ulong * lengths = result->unbuf->lengths;
 
 					for (i = 0; i < field_count; i++, field++) {
 						zval * data = &result->unbuf->last_row_data[i];
@@ -849,7 +849,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 			{
 				HashTable * row_ht = Z_ARRVAL_P(row);
 				MYSQLND_FIELD * field = meta->fields;
-				unsigned long * lengths = result->unbuf->lengths;
+				zend_ulong * lengths = result->unbuf->lengths;
 
 				for (i = 0; i < field_count; i++, field++) {
 					zval * data = &result->unbuf->last_row_data[i];
@@ -1002,7 +1002,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 					  Thus for NULL and zero-length we are quite efficient.
 					*/
 					if (Z_TYPE(current_row[i]) == IS_STRING) {
-						unsigned long len = Z_STRLEN(current_row[i]);
+						zend_ulong len = Z_STRLEN(current_row[i]);
 						if (meta->fields[i].max_length < len) {
 							meta->fields[i].max_length = len;
 						}
@@ -1093,7 +1093,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE(current_row[i]) == IS_STRING) {
-					unsigned long len = Z_STRLEN(current_row[i]);
+					zend_ulong len = Z_STRLEN(current_row[i]);
 					if (meta->fields[i].max_length < len) {
 						meta->fields[i].max_length = len;
 					}
@@ -1188,7 +1188,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE(current_row[i]) == IS_STRING) {
-					unsigned long len = Z_STRLEN(current_row[i]);
+					zend_ulong len = Z_STRLEN(current_row[i]);
 					if (meta->fields[i].max_length < len) {
 						meta->fields[i].max_length = len;
 					}
@@ -1343,7 +1343,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 		  No need to FREE_ALLOCA as we can reuse the
 		  'lengths' and 'fields' arrays. For lengths its absolutely safe.
 		  'fields' is reused because the ownership of the strings has been
-		  transfered above. 
+		  transferred above.
 		*/
 	}
 	/* Overflow ? */
@@ -1776,7 +1776,7 @@ static void
 MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	zval  row;
-	ulong i = 0;
+	zend_ulong i = 0;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
 
 	DBG_ENTER("mysqlnd_res::fetch_all");
@@ -1927,7 +1927,7 @@ mysqlnd_result_unbuffered_init(unsigned int field_count, zend_bool ps, zend_bool
 		DBG_RETURN(NULL);
 	}
 
-	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(unsigned long), persistent))) {
+	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(zend_ulong), persistent))) {
 		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}
@@ -1967,7 +1967,7 @@ mysqlnd_result_buffered_zval_init(unsigned int field_count, zend_bool ps, zend_b
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
-	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(unsigned long), persistent))) {
+	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(zend_ulong), persistent))) {
 		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}
@@ -2010,7 +2010,7 @@ mysqlnd_result_buffered_c_init(unsigned int field_count, zend_bool ps, zend_bool
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
-	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(unsigned long), persistent))) {
+	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(zend_ulong), persistent))) {
 		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}

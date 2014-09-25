@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -252,10 +252,10 @@ static inline int sapi_cli_select(int fd TSRMLS_DC)
 	return ret != -1;
 }
 
-PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+PHP_CLI_API size_t sapi_cli_single_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
-	long ret;
+	zend_long ret;
 #else
 	size_t ret;
 #endif
@@ -285,10 +285,10 @@ PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS
 }
 /* }}} */
 
-static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+static size_t sapi_cli_ub_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
 {
 	const char *ptr = str;
-	uint remaining = str_length;
+	size_t remaining = str_length;
 	size_t ret;
 
 	if (!str_length) {
@@ -296,7 +296,7 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 	}
 
 	if (cli_shell_callbacks.cli_shell_ub_write) {
-		int ub_wrote;
+		size_t ub_wrote;
 		ub_wrote = cli_shell_callbacks.cli_shell_ub_write(str, str_length TSRMLS_CC);
 		if (ub_wrote > -1) {
 			return ub_wrote;
@@ -338,7 +338,7 @@ static char *script_filename = "";
 
 static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{ */
 {
-	unsigned int len;
+	size_t len;
 	char   *docroot = "";
 
 	/* In CGI mode, we consider the environment to be a part of the server
@@ -425,7 +425,7 @@ static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 
 /* overwriteable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
-	ZVAL_NEW_STR(&tmp, STR_INIT(value, sizeof(value)-1, 1));\
+	ZVAL_NEW_STR(&tmp, zend_string_init(value, sizeof(value)-1, 1));\
 	zend_hash_str_update(configuration_hash, name, sizeof(name)-1, &tmp);\
 
 static void sapi_cli_ini_defaults(HashTable *configuration_hash)
@@ -581,19 +581,19 @@ static void cli_register_file_handles(TSRMLS_D) /* {{{ */
 	
 	ZVAL_COPY_VALUE(&ic.value, &zin);
 	ic.flags = CONST_CS;
-	ic.name = STR_INIT("STDIN", sizeof("STDIN")-1, 1);
+	ic.name = zend_string_init("STDIN", sizeof("STDIN")-1, 1);
 	ic.module_number = 0;
 	zend_register_constant(&ic TSRMLS_CC);
 
 	ZVAL_COPY_VALUE(&oc.value, &zout);
 	oc.flags = CONST_CS;
-	oc.name = STR_INIT("STDOUT", sizeof("STDOUT")-1, 1);
+	oc.name = zend_string_init("STDOUT", sizeof("STDOUT")-1, 1);
 	oc.module_number = 0;
 	zend_register_constant(&oc TSRMLS_CC);
 
 	ZVAL_COPY_VALUE(&ec.value, &zerr);
 	ec.flags = CONST_CS;
-	ec.name = STR_INIT("STDERR", sizeof("STDERR")-1, 1);
+	ec.name = zend_string_init("STDERR", sizeof("STDERR")-1, 1);
 	ec.module_number = 0;
 	zend_register_constant(&ec TSRMLS_CC);
 }
@@ -627,8 +627,8 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 		/* handle situations where line is terminated by \r\n */
 		if (c == '\r') {
 			if (fgetc(file_handle->handle.fp) != '\n') {
-				long pos = ftell(file_handle->handle.fp);
-				fseek(file_handle->handle.fp, pos - 1, SEEK_SET);
+				zend_long pos = zend_ftell(file_handle->handle.fp);
+				zend_fseek(file_handle->handle.fp, pos - 1, SEEK_SET);
 			}
 		}
 		*lineno = 2;
@@ -902,8 +902,6 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 			fflush(stdout);
 		}
 
-		CG(interactive) = interactive;
-
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
 		if (argc > php_optind 
 		  && !script_file 
@@ -963,9 +961,9 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 			}
 		}
 
-		key = STR_INIT("_SERVER", sizeof("_SERVER")-1, 0);
+		key = zend_string_init("_SERVER", sizeof("_SERVER")-1, 0);
 		zend_is_auto_global(key TSRMLS_CC);
-		STR_RELEASE(key);
+		zend_string_release(key);
 
 		PG(during_request_startup) = 0;
 		switch (behavior) {

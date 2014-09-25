@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -94,7 +94,7 @@ PHP_FUNCTION(settype)
 {
 	zval *var;
 	char *type;
-	int type_len = 0;
+	size_t type_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &var, &type, &type_len) == FAILURE) {
 		return;
@@ -138,7 +138,7 @@ PHP_FUNCTION(settype)
 PHP_FUNCTION(intval)
 {
 	zval *num;
-	long base = 10;
+	zend_long base = 10;
 
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
@@ -243,7 +243,8 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 
 /* {{{ proto bool is_null(mixed var)
-   Returns true if variable is null */
+   Returns true if variable is null
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_null)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_NULL);
@@ -251,7 +252,8 @@ PHP_FUNCTION(is_null)
 /* }}} */
 
 /* {{{ proto bool is_resource(mixed var)
-   Returns true if variable is a resource */
+   Returns true if variable is a resource
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_resource)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_RESOURCE);
@@ -259,7 +261,8 @@ PHP_FUNCTION(is_resource)
 /* }}} */
 
 /* {{{ proto bool is_bool(mixed var)
-   Returns true if variable is a boolean */
+   Returns true if variable is a boolean
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_bool)
 {
 	zval *arg;
@@ -274,7 +277,8 @@ PHP_FUNCTION(is_bool)
 /* }}} */
 
 /* {{{ proto bool is_long(mixed var)
-   Returns true if variable is a long (integer) */
+   Returns true if variable is a long (integer)
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_long)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
@@ -282,7 +286,8 @@ PHP_FUNCTION(is_long)
 /* }}} */
 
 /* {{{ proto bool is_float(mixed var)
-   Returns true if variable is float point*/
+   Returns true if variable is float point
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_float)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE);
@@ -290,7 +295,8 @@ PHP_FUNCTION(is_float)
 /* }}} */
 
 /* {{{ proto bool is_string(mixed var)
-   Returns true if variable is a string */
+   Returns true if variable is a string
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_string)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
@@ -298,7 +304,8 @@ PHP_FUNCTION(is_string)
 /* }}} */
 
 /* {{{ proto bool is_array(mixed var)
-   Returns true if variable is an array */
+   Returns true if variable is an array
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_array)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY);
@@ -306,7 +313,8 @@ PHP_FUNCTION(is_array)
 /* }}} */
 
 /* {{{ proto bool is_object(mixed var)
-   Returns true if variable is an object */
+   Returns true if variable is an object
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_object)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
@@ -401,7 +409,7 @@ PHP_FUNCTION(is_callable)
 		//??? is it necessary to be consistent with old PHP ("\0" support)
 		if (UNEXPECTED(name->len) != strlen(name->val)) {
 			ZVAL_STRINGL(callable_name, name->val, strlen(name->val));
-			STR_RELEASE(name);
+			zend_string_release(name);
 		} else {
 			ZVAL_STR(callable_name, name);
 		}

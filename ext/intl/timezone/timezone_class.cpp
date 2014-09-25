@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -249,7 +249,7 @@ static zend_object *TimeZone_clone_obj(zval *object TSRMLS_DC)
 				"Could not clone IntlTimeZone", 0 TSRMLS_CC);
 			err_msg = intl_error_get_message(TIMEZONE_ERROR_P(to_orig) TSRMLS_CC);
 			zend_throw_exception(NULL, err_msg->val, 0 TSRMLS_CC);
-			STR_FREE(err_msg);
+			zend_string_free(err_msg);
 		} else {
 			to_new->utimezone = newTimeZone;
 		}
@@ -331,9 +331,9 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		return debug_info;
 	}
 	
-	ZVAL_LONG(&zv, (long)rawOffset);
+	ZVAL_LONG(&zv, (zend_long)rawOffset);
 	zend_hash_str_update(debug_info,"rawOffset", sizeof("rawOffset") - 1, &zv); 
-	ZVAL_LONG(&zv, (long)(rawOffset + dstOffset));
+	ZVAL_LONG(&zv, (zend_long)(rawOffset + dstOffset));
 	zend_hash_str_update(debug_info,"currentOffset", sizeof("currentOffset") - 1, &zv); 
 
 	return debug_info;

@@ -407,7 +407,6 @@ struct magic_set {
 /* Type for Unicode characters */
 typedef unsigned long unichar;
 
-struct stat;
 #define FILE_T_LOCAL	1
 #define FILE_T_WINDOWS	2
 protected const char *file_fmttime(uint64_t, int, char *);
@@ -415,7 +414,7 @@ protected struct magic_set *file_ms_alloc(int);
 protected void file_ms_free(struct magic_set *);
 protected int file_buffer(struct magic_set *, php_stream *, const char *, const void *,
     size_t);
-protected int file_fsmagic(struct magic_set *, const char *, struct stat *, php_stream *);
+protected int file_fsmagic(struct magic_set *, const char *, zend_stat_t *, php_stream *);
 protected int file_pipe2file(struct magic_set *, int, const void *, size_t);
 protected int file_replace(struct magic_set *, const char *, const char *);
 protected int file_printf(struct magic_set *, const char *, ...);

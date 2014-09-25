@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -112,7 +112,7 @@ static HashTable *umsg_get_numeric_types(MessageFormatter_object *mfo,
 
 	for (int i = 0; i < parts_count; i++) {
 		const Formattable::Type t = types[i];
-		if (zend_hash_index_update_mem(ret, (ulong)i, (void*)&t, sizeof(t)) == NULL) {
+		if (zend_hash_index_update_mem(ret, (zend_ulong)i, (void*)&t, sizeof(t)) == NULL) {
 			intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
 				"Write to argument types hash table failed", 0 TSRMLS_CC);
 			break;
@@ -200,10 +200,10 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 					"Found part with negative number", 0 TSRMLS_CC);
 				continue;
 			}
-			if ((storedType = (Formattable::Type*)zend_hash_index_find_ptr(ret, (ulong)argNumber)) == NULL) {
+			if ((storedType = (Formattable::Type*)zend_hash_index_find_ptr(ret, (zend_ulong)argNumber)) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				if ((storedType = (Formattable::Type*)zend_hash_index_update_mem(ret, (ulong)argNumber, (void*)&bogusType, sizeof(bogusType))) == NULL) {
+				if ((storedType = (Formattable::Type*)zend_hash_index_update_mem(ret, (zend_ulong)argNumber, (void*)&bogusType, sizeof(bogusType))) == NULL) {
 					intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
 						"Write to argument types hash table failed", 0 TSRMLS_CC);
 					continue;
@@ -388,7 +388,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 
 	// Key related variables
 	zend_string		*str_index;
-	ulong			num_index;
+	zend_ulong			num_index;
 
 	ZEND_HASH_FOREACH_KEY_VAL(args, num_index, str_index, elem) {
 		Formattable& formattable = fargs[argNum];
@@ -401,7 +401,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 		/* Process key and retrieve type */
 		if (str_index == NULL) {
 			/* includes case where index < 0 because it's exposed as unsigned */
-			if (num_index > (ulong)INT32_MAX) {
+			if (num_index > (zend_ulong)INT32_MAX) {
 				intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
 					"Found negative or too large array key", 0 TSRMLS_CC);
 				continue;
@@ -411,7 +411,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 		   int32_t len = u_sprintf(temp, "%u", (uint32_t)num_index);
 		   key.append(temp, len);
 
-		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, (ulong)num_index);
+		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, (zend_ulong)num_index);
 		} else { //string; assumed to be in UTF-8
 			intl_stringFromChar(key, str_index->val, str_index->len, &err.code);
 
@@ -663,10 +663,10 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
 
         case Formattable::kInt64:
             aInt64 = fargs[i].getInt64();
-			if(aInt64 > LONG_MAX || aInt64 < -LONG_MAX) {
+			if(aInt64 > ZEND_LONG_MAX || aInt64 < -ZEND_LONG_MAX) {
 				ZVAL_DOUBLE(&(*args)[i], (double)aInt64);
 			} else {
-				ZVAL_LONG(&(*args)[i], (long)aInt64);
+				ZVAL_LONG(&(*args)[i], (zend_long)aInt64);
 			}
             break;
 

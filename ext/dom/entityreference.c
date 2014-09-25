@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -53,7 +53,7 @@ PHP_METHOD(domentityreference, __construct)
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name;
-	int name_len, name_valid;
+	size_t name_len, name_valid;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
@@ -70,7 +70,7 @@ PHP_METHOD(domentityreference, __construct)
 		RETURN_FALSE;
 	}
 
-	node = xmlNewReference(NULL, name);
+	node = xmlNewReference(NULL, (xmlChar *) name);
 
 	if (!node) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);

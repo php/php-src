@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -52,11 +52,11 @@ PHP_FUNCTION(msg_queue_exists);
 
 typedef struct {
 	key_t key;
-	long id;
+	zend_long id;
 } sysvmsg_queue_t;
 
 struct php_msgbuf {
-	long mtype;
+	zend_long mtype;
 	char mtext[1];
 };
 

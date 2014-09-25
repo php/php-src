@@ -24,6 +24,9 @@
 #ifndef ZEND_STREAM_H
 #define ZEND_STREAM_H
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 /* Lightweight stream implementation for the ZE scanners.
  * These functions are private to the engine.
  * */
@@ -60,14 +63,14 @@ typedef struct _zend_stream {
 } zend_stream;
 
 typedef struct _zend_file_handle {
-	zend_stream_type  type;
-	const char        *filename;
-	char              *opened_path;
 	union {
 		int           fd;
 		FILE          *fp;
 		zend_stream   stream;
 	} handle;
+	const char        *filename;
+	char              *opened_path;
+	zend_stream_type  type;
 	zend_bool free_filename;
 } zend_file_handle;
 
@@ -77,5 +80,21 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 ZEND_API void zend_file_handle_dtor(zend_file_handle *fh TSRMLS_DC);
 ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
 END_EXTERN_C()
+
+#ifdef _WIN64
+# define zend_fseek _fseeki64
+# define zend_ftell _ftelli64
+# define zend_lseek _lseeki64
+# define zend_fstat _fstat64
+# define zend_stat  _stat64
+typedef struct __stat64 zend_stat_t;
+#else
+# define zend_fseek fseek
+# define zend_ftell ftell
+# define zend_lseek lseek
+# define zend_fstat fstat
+# define zend_stat stat
+typedef struct stat zend_stat_t;
+#endif
 
 #endif

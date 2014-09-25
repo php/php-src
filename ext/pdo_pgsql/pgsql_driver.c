@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -151,8 +151,8 @@ static int pgsql_lob_flush(php_stream *stream TSRMLS_DC)
 	return 0;
 }
 
-static int pgsql_lob_seek(php_stream *stream, off_t offset, int whence,
-		off_t *newoffset TSRMLS_DC)
+static int pgsql_lob_seek(php_stream *stream, zend_off_t offset, int whence,
+		zend_off_t *newoffset TSRMLS_DC)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
 	int pos = lo_lseek(self->conn, self->lfd, offset, whence);
@@ -214,7 +214,7 @@ static int pgsql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_pgsql_stmt *S = ecalloc(1, sizeof(pdo_pgsql_stmt));
@@ -287,11 +287,11 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	return 1;
 }
 
-static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
+static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	PGresult *res;
-	long ret = 1;
+	zend_long ret = 1;
 	ExecStatusType qs;
 
 	if (!(res = PQexec(H->server, sql))) {
@@ -306,7 +306,11 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 		return -1;
 	}
 	H->pgoid = PQoidValue(res);
-	ret = (qs == PGRES_COMMAND_OK) ? atol(PQcmdTuples(res)) : 0L;
+	if (qs == PGRES_COMMAND_OK) {
+		ZEND_ATOL(ret, PQcmdTuples(res));
+	} else {
+		ret = Z_L(0);
+	}
 	PQclear(res);
 
 	return ret;
@@ -350,7 +354,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 		if (H->pgoid == InvalidOid) {
 			return NULL;
 		}
-		*len = spprintf(&id, 0, "%ld", (long) H->pgoid);
+		*len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
 	} else {
 		PGresult *res;
 		ExecStatusType status;
@@ -373,7 +377,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 	return id;
 }
 
-static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)
+static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
@@ -518,7 +522,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 	zval *pg_rows;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
 	char *query;
 
 	PGresult *pgsql_result;
@@ -627,7 +631,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *filename, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	int  table_name_len, filename_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	size_t  table_name_len, filename_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
 	char *query;
 	PGresult *pgsql_result;
 	ExecStatusType status;
@@ -726,7 +730,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL, *filename = NULL;
-	int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len, filename_len;
+	size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len, filename_len;
 	char *query;
 
 	PGresult *pgsql_result;
@@ -821,7 +825,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
 	char *query;
 
 	PGresult *pgsql_result;
@@ -906,7 +910,7 @@ static PHP_METHOD(PDO, pgsqlLOBCreate)
 	lfd = lo_creat(H->server, INV_READ|INV_WRITE);
 
 	if (lfd != InvalidOid) {
-		zend_string *buf = strpprintf(0, "%lu", (long) lfd);
+		zend_string *buf = strpprintf(0, ZEND_ULONG_FMT, (zend_long) lfd);
 
 		RETURN_STR(buf);
 	}
@@ -926,9 +930,9 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 	Oid oid;
 	int lfd;
 	char *oidstr;
-	int oidstrlen;
+	size_t oidstrlen;
 	char *modestr = "rb";
-	int modestrlen;
+	size_t modestrlen;
 	int mode = INV_READ;
 	char *end_ptr;
 
@@ -977,7 +981,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 	pdo_pgsql_db_handle *H;
 	Oid oid;
 	char *oidstr, *end_ptr;
-	int oidlen;
+	size_t oidlen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 				&oidstr, &oidlen)) {
@@ -1011,8 +1015,8 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
-	long result_type = PDO_FETCH_USE_DEFAULT;
-	long ms_timeout = 0;
+	zend_long result_type = PDO_FETCH_USE_DEFAULT;
+	zend_long ms_timeout = 0;
 	PGnotify *pgsql_notify;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll",
@@ -1107,7 +1111,7 @@ static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, i
 	}
 }
 
-static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
+static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
@@ -1154,7 +1158,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	int ret = 0;
 	char *conn_str, *p, *e;
 	char *tmp_pass;
-	long connect_timeout = 30;
+	zend_long connect_timeout = 30;
 
 	H = pecalloc(1, sizeof(pdo_pgsql_db_handle), dbh->is_persistent);
 	dbh->driver_data = H;
@@ -1200,13 +1204,13 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	/* support both full connection string & connection string + login and/or password */
 	if (dbh->username && dbh->password) {
-		spprintf(&conn_str, 0, "%s user=%s password=%s connect_timeout=%ld", dbh->data_source, dbh->username, tmp_pass, connect_timeout);
+		spprintf(&conn_str, 0, "%s user=%s password=%s connect_timeout=%pd", dbh->data_source, dbh->username, tmp_pass, connect_timeout);
 	} else if (dbh->username) {
-		spprintf(&conn_str, 0, "%s user=%s connect_timeout=%ld", dbh->data_source, dbh->username, connect_timeout);
+		spprintf(&conn_str, 0, "%s user=%s connect_timeout=%pd", dbh->data_source, dbh->username, connect_timeout);
 	} else if (dbh->password) {
-		spprintf(&conn_str, 0, "%s password=%s connect_timeout=%ld", dbh->data_source, tmp_pass, connect_timeout);
+		spprintf(&conn_str, 0, "%s password=%s connect_timeout=%pd", dbh->data_source, tmp_pass, connect_timeout);
 	} else {
-		spprintf(&conn_str, 0, "%s connect_timeout=%ld", (char *) dbh->data_source, connect_timeout);
+		spprintf(&conn_str, 0, "%s connect_timeout=%pd", (char *) dbh->data_source, connect_timeout);
 	}
 
 	H->server = PQconnectdb(conn_str);

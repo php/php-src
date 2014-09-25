@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 2008-2009 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -44,7 +44,7 @@
 PHP_FUNCTION(dns_get_mx) /* {{{ */
 {
 	char *hostname;
-	int hostname_len;
+	size_t hostname_len;
 	zval *mx_list, *weight_list = NULL;
 
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
@@ -93,7 +93,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 PHP_FUNCTION(dns_check_record)
 {
 	char *hostname, *rectype = NULL;
-	int hostname_len, rectype_len = 0;
+	size_t hostname_len, rectype_len = 0;
 	int type = DNS_TYPE_MX;
 
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
@@ -219,7 +219,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 					txt_len += strlen(data_txt->pStringArray[i]) + 1;
 				}
 
-				txt = STR_SAFE_ALLOC(txt_len, 2, 0, 0);
+				txt = zend_string_safe_alloc(txt_len, 2, 0, 0);
 				txt_dst = txt->val;
 				for (i = 0; i < count; i++) {
 					int len = strlen(data_txt->pStringArray[i]);
@@ -346,7 +346,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
-	int hostname_len;
+	size_t hostname_len;
 	long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;

@@ -58,7 +58,7 @@ struct _zend_object_iterator {
 	zend_object std;
 	zval data;
 	zend_object_iterator_funcs *funcs;
-	ulong index; /* private to fe_reset/fe_fetch opcodes */
+	zend_ulong index; /* private to fe_reset/fe_fetch opcodes */
 };
 
 typedef struct _zend_class_iterator_funcs {
@@ -71,16 +71,9 @@ typedef struct _zend_class_iterator_funcs {
 	union _zend_function *zf_rewind;
 } zend_class_iterator_funcs;
 
-enum zend_object_iterator_kind {
-	ZEND_ITER_INVALID,
-	ZEND_ITER_PLAIN_ARRAY,
-	ZEND_ITER_PLAIN_OBJECT,
-	ZEND_ITER_OBJECT
-};
-
 BEGIN_EXTERN_C()
 /* given a zval, returns stuff that can be used to iterate it. */
-ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(zval *array_ptr, zend_object_iterator **iter TSRMLS_DC);
+ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr TSRMLS_DC);
 
 /* given an iterator, wrap it up as a zval for use by the engine opcodes */
 ZEND_API void zend_iterator_init(zend_object_iterator *iter TSRMLS_DC);

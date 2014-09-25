@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,7 @@ static void _breakiterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 
 	int32_t pos = biter->next();
 	if (pos != BreakIterator::DONE) {
-		ZVAL_LONG(&zoi_iter->current, (long)pos);
+		ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
 	} //else we've reached the end of the enum, nothing more is required
 }
 
@@ -77,7 +77,7 @@ static void _breakiterator_rewind(zend_object_iterator *iter TSRMLS_DC)
 	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
 
 	int32_t pos = biter->first();
-	ZVAL_LONG(&zoi_iter->current, (long)pos);
+	ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
 }
 
 static zend_object_iterator_funcs breakiterator_iterator_funcs = {
@@ -175,7 +175,7 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter TSRMLS_
 		next = slen;
 	}
 	assert(next <= slen && next >= cur);
-	res = STR_ALLOC(next - cur, 0);
+	res = zend_string_alloc(next - cur, 0);
 
 	memcpy(res->val, &s[cur], res->len);
 	res->val[res->len] = '\0';

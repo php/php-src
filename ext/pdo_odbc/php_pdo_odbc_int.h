@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -135,7 +135,7 @@ typedef struct {
 
 typedef struct {
 	char *data;
-	unsigned long datalen;
+	zend_ulong datalen;
 	SQLLEN fetched_len;
 	SWORD	coltype;
 	char colname[128];
@@ -150,7 +150,7 @@ typedef struct {
 	pdo_odbc_db_handle *H;
 	pdo_odbc_errinfo einfo;
 	char *convbuf;
-	unsigned long convbufsize;
+	zend_ulong convbufsize;
 	unsigned going_long:1;
 	unsigned assume_utf8:1;
 	unsigned _spare:30;

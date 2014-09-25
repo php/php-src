@@ -87,9 +87,9 @@ char LocalHost[HOST_NAME_LEN];
 #endif
 char seps[] = " ,\t\n";
 #ifndef NETWARE
-char *php_mailer = "PHP 5 WIN32";
+char *php_mailer = "PHP 7 WIN32";
 #else
-char *php_mailer = "PHP 5 NetWare";
+char *php_mailer = "PHP 7 NetWare";
 #endif	/* NETWARE */
 
 /* Error messages */
@@ -165,7 +165,7 @@ static zend_string *php_win32_mail_trim_header(char *header TSRMLS_DC)
 	}
 
 	ZVAL_STRINGL(&replace, PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE));
-	regex = STR_INIT(PHP_WIN32_MAIL_UNIFY_REPLACE, sizeof(PHP_WIN32_MAIL_UNIFY_REPLACE)-1, 0);
+	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_REPLACE, sizeof(PHP_WIN32_MAIL_UNIFY_REPLACE)-1, 0);
 
 //zend_string *php_pcre_replace(zend_string *regex, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count TSRMLS_DC);
 
@@ -178,12 +178,12 @@ static zend_string *php_win32_mail_trim_header(char *header TSRMLS_DC)
 
 	if (NULL == result) {
 		zval_ptr_dtor(&replace);
-		STR_FREE(regex);
+		zend_string_free(regex);
 		return NULL;
 	}
 
 	ZVAL_STRING(&replace, PHP_WIN32_MAIL_RMVDBL_PATTERN);
-	regex = STR_INIT(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
+	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
 							   result->val, result->len,
@@ -247,7 +247,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
-		if (NULL == (headers_lc = STR_COPY(headers_trim))) {
+		if (NULL == (headers_lc = zend_string_copy(headers_trim))) {
 			*error = OUT_OF_MEMORY;
 			return FAILURE;
 		}
@@ -276,7 +276,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		}
 	} else {
 		if (headers_lc) {
-			STR_FREE(headers_lc);
+			zend_string_free(headers_lc);
 		}
 		*error = W32_SM_SENDMAIL_FROM_NOT_SET;
 		return FAILURE;
@@ -360,6 +360,9 @@ PHPAPI char *GetSMErrorText(int index)
 	}
 }
 
+PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
+		size_t needle_len, char *str, size_t str_len);
+	
 
 /*********************************************************************
 // Name:  SendText
@@ -635,19 +638,19 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 			c = *e2;
 			*e2 = '\0';
 			if ((res = Post(p)) != SUCCESS) {
-				STR_FREE(data_cln);
+				zend_string_free(data_cln);
 				return(res);
 			}
 			*e2 = c;
 			p = e2;
 		}
 		if ((res = Post(p)) != SUCCESS) {
-			STR_FREE(data_cln);
+			zend_string_free(data_cln);
 			return(res);
 		}
 	}
 
-	STR_FREE(data_cln);
+	zend_string_free(data_cln);
 
 	/*send termination dot */
 	if ((res = Post("\r\n.\r\n")) != SUCCESS)
@@ -706,7 +709,7 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders T
 		zend_string *dt = php_format_date("r", 1, tNow, 1 TSRMLS_CC);
 
 		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", dt->val);
-		STR_FREE(dt);
+		zend_string_free(dt);
 	}
 
 	if (!headers_lc || !strstr(headers_lc, "from:")) {

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
 #include "intl_convert.h"
 
 #if !defined(HAVE_PTRDIFF_T) && !defined(_PTRDIFF_T_DEFINED)
-typedef long ptrdiff_t;
+typedef zend_long ptrdiff_t;
 #endif
 
 /**
@@ -203,7 +203,7 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2 TSRM
 /* }}} */
 
 /* {{{ collator_compare_func
- * Taken from PHP5 source (array_data_compare).
+ * Taken from PHP7 source (array_data_compare).
  */
 static int collator_compare_func( const void* a, const void* b TSRMLS_DC )
 {
@@ -258,7 +258,7 @@ static int collator_cmp_sort_keys( const void *p1, const void *p2 TSRMLS_DC )
 /* {{{ collator_get_compare_function
  * Choose compare function according to sort flags.
  */
-static collator_compare_func_t collator_get_compare_function( const long sort_flags )
+static collator_compare_func_t collator_get_compare_function( const zend_long sort_flags )
 {
 	collator_compare_func_t func;
 
@@ -290,7 +290,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	zval           saved_collator;
 	zval*          array            = NULL;
 	HashTable*     hash             = NULL;
-	long           sort_flags       = COLLATOR_SORT_REGULAR;
+	zend_long           sort_flags       = COLLATOR_SORT_REGULAR;
 
 	COLLATOR_METHOD_INIT_VARS
 
@@ -536,7 +536,7 @@ PHP_FUNCTION( collator_asort )
 PHP_FUNCTION( collator_get_sort_key )
 {
 	char*            str      = NULL;
-	int              str_len  = 0;
+	size_t              str_len  = 0;
 	UChar*           ustr     = NULL;
 	int              ustr_len = 0;
 	uint8_t*         key     = NULL;

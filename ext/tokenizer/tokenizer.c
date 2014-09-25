@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -185,7 +185,7 @@ PHP_FUNCTION(token_get_all)
 		return;
 	}
 
-	ZVAL_STR(&source_zval, STR_COPY(source));
+	ZVAL_STR_COPY(&source_zval, source);
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 
 	if (zend_prepare_string_for_scanning(&source_zval, "" TSRMLS_CC) == FAILURE) {
@@ -206,7 +206,7 @@ PHP_FUNCTION(token_get_all)
  */
 PHP_FUNCTION(token_name)
 {
-	long type;
+	zend_long type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &type) == FAILURE) {
 		return;

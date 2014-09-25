@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -30,11 +30,11 @@
 #endif
 
 
-extern PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS_DC);
+extern PHP_CLI_API size_t sapi_cli_single_write(const char *str, size_t str_length TSRMLS_DC);
 
 typedef struct  {
-	size_t (*cli_shell_write)(const char *str, uint str_length TSRMLS_DC);
-	int (*cli_shell_ub_write)(const char *str, uint str_length TSRMLS_DC);
+	size_t (*cli_shell_write)(const char *str, size_t str_length TSRMLS_DC);
+	size_t (*cli_shell_ub_write)(const char *str, size_t str_length TSRMLS_DC);
 	int (*cli_shell_run)(TSRMLS_D);
 } cli_shell_callbacks_t;
 

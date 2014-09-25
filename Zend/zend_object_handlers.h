@@ -106,7 +106,7 @@ typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int type TSRMLS_D
 
 /* updates *count to hold the number of elements present and returns SUCCESS.
  * Returns FAILURE if the object does not have any sense of overloaded dimensions */
-typedef int (*zend_object_count_elements_t)(zval *object, long *count TSRMLS_DC);
+typedef int (*zend_object_count_elements_t)(zval *object, zend_long *count TSRMLS_DC);
 
 typedef int (*zend_object_get_closure_t)(zval *obj, zend_class_entry **ce_ptr, union _zend_function **fptr_ptr, zend_object **obj_ptr TSRMLS_DC);
 
@@ -159,7 +159,7 @@ ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, 
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent, void **cache_slot TSRMLS_DC);
 ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name, void **cache_slot TSRMLS_DC);
 ZEND_API union _zend_function *zend_std_get_constructor(zend_object *object TSRMLS_DC);
-ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC);
+ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent TSRMLS_DC);
 ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC);
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC);
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC);

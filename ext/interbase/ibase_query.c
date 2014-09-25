@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1735,7 +1735,7 @@ PHP_FUNCTION(ibase_prepare)
 	zval *link_arg, *trans_arg;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
-	int query_len, trans_res_id = 0;
+	size_t query_len, trans_res_id = 0;
 	ibase_query *ib_query;
 	char *query;
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 	const int32_t*         vfield;
 	int32_t                ilen;
 	int                    i;
-	long                   lfield;
+	zend_long                   lfield;
 	ResourceBundle_object* newrb;
 
 	restype = ures_getType( source->child );

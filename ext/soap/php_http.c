@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -26,7 +26,7 @@
 
 static char *get_http_header_value(char *headers, char *type);
 static int get_http_body(php_stream *socketd, int close, char *headers,  char **response, int *out_size TSRMLS_DC);
-static int get_http_headers(php_stream *socketd,char **response, int *out_size TSRMLS_DC);
+static zend_string *get_http_headers(php_stream *socketd TSRMLS_DC);
 
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
@@ -50,7 +50,7 @@ int proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 		smart_str_append_const(soap_headers, "Proxy-Authorization: Basic ");
 		smart_str_appendl(soap_headers, (char*)buf->val, buf->len);
 		smart_str_append_const(soap_headers, "\r\n");
-		STR_RELEASE(buf);
+		zend_string_release(buf);
 		smart_str_free(&auth);
 		return 1;
 	}
@@ -77,7 +77,7 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 		smart_str_append_const(soap_headers, "Authorization: Basic ");
 		smart_str_appendl(soap_headers, (char*)buf->val, buf->len);
 		smart_str_append_const(soap_headers, "\r\n");
-		STR_RELEASE(buf);
+		zend_string_release(buf);
 		smart_str_free(&auth);
 		return 1;
 	}
@@ -161,7 +161,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	char *host;
 	char *name;
 	char *protocol;
-	long namelen;
+	zend_long namelen;
 	int port;
 	int old_error_reporting;
 	struct timeval tv;
@@ -236,8 +236,6 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	/* SSL & proxy */
 	if (stream && *use_proxy && use_ssl) {
 		smart_str soap_headers = {0};
-		char *http_headers;
-		int http_header_size;
 
 		smart_str_append_const(&soap_headers, "CONNECT ");
 		smart_str_appends(&soap_headers, phpurl->host);
@@ -260,12 +258,12 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
  	 	smart_str_free(&soap_headers);
 
  	 	if (stream) {
-			if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC) || http_headers == NULL) {
+			zend_string *http_headers = get_http_headers(stream TSRMLS_CC);
+			if (http_headers) {
+				zend_string_free(http_headers);
+			} else {
 				php_stream_close(stream);
 				stream = NULL;
-			}
-			if (http_headers) {
-				efree(http_headers);
 			}
 		}
 		/* enable SSL transport layer */
@@ -341,13 +339,14 @@ int make_http_soap_request(zval  *this_ptr,
 	zval *trace, *tmp;
 	int use_proxy = 0;
 	int use_ssl;
-	char *http_headers, *http_body, *content_type, *http_version, *cookie_itt;
-	int http_header_size, http_body_size, http_close;
+	char *http_body, *content_type, *http_version, *cookie_itt;
+	int http_body_size, http_close;
+	zend_string *http_headers;
 	char *connection;
 	int http_1_1;
 	int http_status;
 	int content_type_xml = 0;
-	long redirect_max = 20;
+	zend_long redirect_max = 20;
 	char *content_encoding;
 	char *http_msg = NULL;
 	zend_bool old_allow_url_fopen;
@@ -596,7 +595,7 @@ try_again:
 			smart_str_append_const(&soap_headers, "User-Agent: PHP-SOAP/"PHP_VERSION"\r\n");
 		}
 
-		smart_str_append(&soap_headers, &soap_headers_z);
+		smart_str_append_smart_str(&soap_headers, &soap_headers_z);
 
 		if (soap_version == SOAP_1_2) {
 			smart_str_append_const(&soap_headers,"Content-Type: application/soap+xml; charset=utf-8");
@@ -631,7 +630,7 @@ try_again:
 					unsigned char hash[16];
 
 					PHP_MD5Init(&md5ctx);
-					snprintf(cnonce, sizeof(cnonce), "%ld", php_rand(TSRMLS_C));
+					snprintf(cnonce, sizeof(cnonce), ZEND_LONG_FMT, php_rand(TSRMLS_C));
 					PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, strlen(cnonce));
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(cnonce, hash);
@@ -787,7 +786,7 @@ try_again:
 				smart_str_append_const(&soap_headers, "Authorization: Basic ");
 				smart_str_appendl(&soap_headers, (char*)buf->val, buf->len);
 				smart_str_append_const(&soap_headers, "\r\n");
-				STR_RELEASE(buf);
+				zend_string_release(buf);
 				smart_str_free(&auth);
 			}
 		}
@@ -874,8 +873,8 @@ try_again:
 	}
 
 	do {
-		if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
-			if (http_headers) {efree(http_headers);}
+		http_headers = get_http_headers(stream TSRMLS_CC);
+		if (!http_headers) {
 			if (request != buf) {efree(request);}
 			php_stream_close(stream);
 			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
@@ -887,13 +886,13 @@ try_again:
 
 		if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
 		    Z_LVAL_P(trace) > 0) {
-			add_property_stringl(this_ptr, "__last_response_headers", http_headers, http_header_size);
+			add_property_str(this_ptr, "__last_response_headers", zend_string_copy(http_headers));
 		}
 
 		/* Check to see what HTTP status was sent */
 		http_1_1 = 0;
 		http_status = 0;
-		http_version = get_http_header_value(http_headers,"HTTP/");
+		http_version = get_http_header_value(http_headers->val, "HTTP/");
 		if (http_version) {
 			char *tmp;
 
@@ -918,7 +917,7 @@ try_again:
 
 			/* Try and get headers again */
 			if (http_status == 100) {
-				efree(http_headers);
+				zend_string_release(http_headers);
 			}
 		}
 	} while (http_status == 100);
@@ -929,9 +928,9 @@ try_again:
 	   we shouldn't be changing urls so path dont
 	   matter too much
 	*/
-	cookie_itt = strstr(http_headers,"Set-Cookie: ");
+	cookie_itt = strstr(http_headers->val, "Set-Cookie: ");
 	while (cookie_itt) {
-		char *end_pos, *cookie;
+		char *cookie;
 		char *eqpos, *sempos;
 		zval *cookies;
 
@@ -941,7 +940,6 @@ try_again:
 			cookies = zend_hash_str_update(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1, &tmp_cookies);
 		}
 
-		end_pos = strstr(cookie_itt,"\r\n");
 		cookie = get_http_header_value(cookie_itt,"Set-Cookie: ");
 
 		eqpos = strstr(cookie, "=");
@@ -1007,7 +1005,7 @@ try_again:
 	if (http_1_1) {
 		http_close = FALSE;
 		if (use_proxy && !use_ssl) {
-			connection = get_http_header_value(http_headers,"Proxy-Connection: ");
+			connection = get_http_header_value(http_headers->val, "Proxy-Connection: ");
 			if (connection) {
 				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
 					http_close = TRUE;
@@ -1016,7 +1014,7 @@ try_again:
 			}
 		}
 		if (http_close == FALSE) {
-			connection = get_http_header_value(http_headers,"Connection: ");
+			connection = get_http_header_value(http_headers->val, "Connection: ");
 			if (connection) {
 				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
 					http_close = TRUE;
@@ -1027,7 +1025,7 @@ try_again:
 	} else {
 		http_close = TRUE;
 		if (use_proxy && !use_ssl) {
-			connection = get_http_header_value(http_headers,"Proxy-Connection: ");
+			connection = get_http_header_value(http_headers->val, "Proxy-Connection: ");
 			if (connection) {
 				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
 					http_close = FALSE;
@@ -1036,7 +1034,7 @@ try_again:
 			}
 		}
 		if (http_close == TRUE) {
-			connection = get_http_header_value(http_headers,"Connection: ");
+			connection = get_http_header_value(http_headers->val, "Connection: ");
 			if (connection) {
 				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
 					http_close = FALSE;
@@ -1046,10 +1044,10 @@ try_again:
 		}
 	}	
 
-	if (!get_http_body(stream, http_close, http_headers, &http_body, &http_body_size TSRMLS_CC)) {
+	if (!get_http_body(stream, http_close, http_headers->val, &http_body, &http_body_size TSRMLS_CC)) {
 		if (request != buf) {efree(request);}
 		php_stream_close(stream);
-		efree(http_headers);
+		zend_string_release(http_headers);
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL TSRMLS_CC);
@@ -1073,11 +1071,11 @@ try_again:
 	if (http_status >= 300 && http_status < 400) {
 		char *loc;
 
-		if ((loc = get_http_header_value(http_headers,"Location: ")) != NULL) {
+		if ((loc = get_http_header_value(http_headers->val, "Location: ")) != NULL) {
 			php_url *new_url  = php_url_parse(loc);
 
 			if (new_url != NULL) {
-				efree(http_headers);
+				zend_string_release(http_headers);
 				efree(http_body);
 				efree(loc);
 				if (new_url->scheme == NULL && new_url->path != NULL) {
@@ -1119,7 +1117,7 @@ try_again:
 	} else if (http_status == 401) {
 		/* Digest authentication */
 		zval *digest, *login, *password;
-		char *auth = get_http_header_value(http_headers, "WWW-Authenticate: ");
+		char *auth = get_http_header_value(http_headers->val, "WWW-Authenticate: ");
 
 		if (auth &&
 				strstr(auth, "Digest") == auth &&
@@ -1185,7 +1183,7 @@ try_again:
 				phpurl = new_url;
 
 				efree(auth);
-				efree(http_headers);
+				zend_string_release(http_headers);
 				efree(http_body);
 
 				goto try_again;
@@ -1196,7 +1194,7 @@ try_again:
 	smart_str_free(&soap_headers_z);
 
 	/* Check and see if the server even sent a xml document */
-	content_type = get_http_header_value(http_headers,"Content-Type: ");
+	content_type = get_http_header_value(http_headers->val, "Content-Type: ");
 	if (content_type) {
 		char *pos = NULL;
 		int cmplen;
@@ -1216,7 +1214,7 @@ try_again:
 				ZVAL_STRINGL(err, http_body, http_body_size, 1);
 				add_soap_fault(this_ptr, "HTTP", "Didn't receive an xml document", NULL, err TSRMLS_CC);
 				efree(content_type);
-				efree(http_headers);
+				zend_string_release(http_headers);
 				efree(http_body);
 				return FALSE;
 			}
@@ -1226,7 +1224,7 @@ try_again:
 	}
 
 	/* Decompress response */
-	content_encoding = get_http_header_value(http_headers,"Content-Encoding: ");
+	content_encoding = get_http_header_value(http_headers->val, "Content-Encoding: ");
 	if (content_encoding) {
 		zval func;
 		zval retval;
@@ -1243,7 +1241,7 @@ try_again:
 			ZVAL_STRINGL(&params[0], http_body, http_body_size);
 		} else {
 			efree(content_encoding);
-			efree(http_headers);
+			zend_string_release(http_headers);
 			efree(http_body);
 			if (http_msg) {
 				efree(http_msg);
@@ -1261,7 +1259,7 @@ try_again:
 			zval_ptr_dtor(&params[0]);
 			zval_ptr_dtor(&func);
 			efree(content_encoding);
-			efree(http_headers);
+			zend_string_release(http_headers);
 			efree(http_body);
 			add_soap_fault(this_ptr, "HTTP", "Can't uncompress compressed response", NULL, NULL TSRMLS_CC);
 			if (http_msg) {
@@ -1278,7 +1276,7 @@ try_again:
 		efree(http_body);
 	}
 
-	efree(http_headers);
+	zend_string_release(http_headers);
 
 	if (http_status >= 400) {
 		int error = 0;
@@ -1486,31 +1484,25 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 	return TRUE;
 }
 
-static int get_http_headers(php_stream *stream, char **response, int *out_size TSRMLS_DC)
+static zend_string *get_http_headers(php_stream *stream TSRMLS_DC)
 {
-	int done = FALSE;
 	smart_str tmp_response = {0};
 	char headerbuf[8192];
 
-	while (!done) {
-		if (!php_stream_gets(stream, headerbuf, sizeof(headerbuf))) {
-			break;
-		}
-
+	while (php_stream_gets(stream, headerbuf, sizeof(headerbuf))) {
 		if ((headerbuf[0] == '\r' && headerbuf[1] == '\n') ||
 		    (headerbuf[0] == '\n')) {
 			/* empty line marks end of headers */
-			done = TRUE;
-			break;
+			smart_str_0(&tmp_response);
+			return tmp_response.s;
 		}
 
 		/* add header to collection */
 		smart_str_appends(&tmp_response, headerbuf);
 	}
-	smart_str_0(&tmp_response);
-	(*response) = tmp_response.s->val;
-	(*out_size) = tmp_response.s->len;
-	return done;
+
+	smart_str_free(&tmp_response);
+	return NULL;
 }
 /*
  * Local variables:

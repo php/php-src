@@ -1145,7 +1145,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 	uint32_t i, j;
 	size_t files = 0, maxfiles = 0;
 	char **filearr = NULL;
-	struct stat st;
+	zend_stat_t st;
 	struct magic_map *map;
 	struct magic_entry_set mset[MAGIC_SETS];
 	php_stream *dir;
@@ -1187,7 +1187,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 				php_stream_closedir(dir);
 				goto out;
 			}
-			if (stat(mfn, &st) == -1 || !S_ISREG(st.st_mode)) {
+			if (zend_stat(mfn, &st) == -1 || !S_ISREG(st.st_mode)) {
 				continue;
 			}
 			if (files >= maxfiles) {
@@ -1272,7 +1272,7 @@ file_signextend(struct magic_set *ms, struct magic *m, uint64_t v)
 		 * the sign extension must have happened.
 		 */
 		case FILE_BYTE:
-			v = (char) v;
+			v = (signed char) v;
 			break;
 		case FILE_SHORT:
 		case FILE_BESHORT:
@@ -2698,7 +2698,7 @@ internal_loaded:
 	if (NULL != fn) {
 		nentries = (uint32_t)(st.sb.st_size / sizeof(struct magic));
 		entries = (uint32_t)(st.sb.st_size / sizeof(struct magic));
-		if ((off_t)(entries * sizeof(struct magic)) != st.sb.st_size) {
+		if ((zend_off_t)(entries * sizeof(struct magic)) != st.sb.st_size) {
 			file_error(ms, 0, "Size of `%s' %llu is not a multiple of %zu",
 				dbname, (unsigned long long)st.sb.st_size,
 				sizeof(struct magic));
@@ -2788,7 +2788,7 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 
 	assert(nm + sizeof(ar) < m);
 
-	if (php_stream_seek(stream,(off_t)sizeof(struct magic), SEEK_SET) != sizeof(struct magic)) {
+	if (php_stream_seek(stream,(zend_off_t)sizeof(struct magic), SEEK_SET) != sizeof(struct magic)) {
 		file_error(ms, errno, "error seeking `%s'", dbname);
 		goto out;
 	}

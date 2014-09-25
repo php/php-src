@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -32,7 +32,7 @@
 PHP_FUNCTION(mysqli_embedded_server_start)
 {
 #ifdef HAVE_EMBEDDED_MYSQLI
-	long start;
+	zend_long start;
 	zval *args;
 	zval *grps;
 

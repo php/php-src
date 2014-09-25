@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.7.0 
+?? ??? 20??, PHP 7.0.0
 
 - CLI server:
   . Refactor MIME type handling to use a hash table instead of linear search.
@@ -9,9 +9,18 @@ PHP                                                                        NEWS
 
 - Core:
   . Added PHP_INT_MIN constant. (Andrea)
+  . Added Closure::apply() method. (Andrea)
+  . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
+  . Fixed #67959 (Segfault when calling phpversion('spl')). (Florian)
+
+- Reflection
+  . Fixed inheritance chain of Reflector interface (Tjerk)
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
+
+- FPM:
+  . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
 
 - Standard:
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)
@@ -21,5 +30,18 @@ PHP                                                                        NEWS
 
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
+
+- GD:
+  . Made fontFetch's path parser thread-safe. (Sara)
+
+- Session:
+  . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
+
+- SPL:
+  . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
+    nor curruption state). (Julien)
+
+- DOM:
+  . Made DOMNode::textContent writeable. (Tjerk)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

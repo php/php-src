@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -237,7 +237,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 		
 		if (bufz) {
-			STR_RELEASE(bufz);
+			zend_string_release(bufz);
 		}	
 		
 		if (status == Z_OK) {
@@ -366,8 +366,8 @@ static unsigned short php_read2(php_stream * stream TSRMLS_DC)
 {
 	unsigned char a[2];
 
-	/* just return 0 if we hit the end-of-file */
-	if((php_stream_read(stream, (char*)a, sizeof(a))) <= 0) return 0;
+	/* return 0 if we couldn't read enough data */
+	if((php_stream_read(stream, a, sizeof(a))) < sizeof(a)) return 0;
 
 	return (((unsigned short)a[0]) << 8) + ((unsigned short)a[1]);
 }
@@ -425,13 +425,13 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int co
  * skip over a variable-length block; assumes proper length marker */
 static int php_skip_variable(php_stream * stream TSRMLS_DC)
 {
-	off_t length = ((unsigned int)php_read2(stream TSRMLS_CC));
+	zend_off_t length = ((unsigned int)php_read2(stream TSRMLS_CC));
 
 	if (length < 2)	{
 		return 0;
 	}
 	length = length - 2;
-	php_stream_seek(stream, (long)length, SEEK_CUR);
+	php_stream_seek(stream, (zend_long)length, SEEK_CUR);
 	return 1;
 }
 /* }}} */
@@ -453,7 +453,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSR
 
 	buffer = emalloc(length);
 
-	if (php_stream_read(stream, buffer, (long) length) <= 0) {
+	if (php_stream_read(stream, buffer, (zend_long) length) <= 0) {
 		efree(buffer);
 		return 0;
 	}
@@ -647,7 +647,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 #endif
 
 	result->channels = php_read2(stream TSRMLS_CC); /* Csiz */
-	if (result->channels < 0 || result->channels > 256) {
+	if (result->channels == 0 && php_stream_eof(stream) || result->channels > 256) {
 		efree(result);
 		return NULL;
 	}
@@ -1160,7 +1160,7 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
    Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_mime_type)
 {
-	long p_image_type;
+	zend_long p_image_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &p_image_type) == FAILURE) {
 		return;
@@ -1174,7 +1174,7 @@ PHP_FUNCTION(image_type_to_mime_type)
    Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_extension)
 {
-	long image_type;
+	zend_long image_type;
 	zend_bool inc_dot=1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|b", &image_type, &inc_dot) == FAILURE) {
@@ -1393,7 +1393,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	zval *info = NULL;
 	php_stream *stream = NULL;
 	char *input;
-	int input_len;
+	size_t input_len;
 	const int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|z/", &input, &input_len, &info) == FAILURE) {

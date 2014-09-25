@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -35,8 +35,7 @@
 
 #define IB_STATUS (IBG(status))
 
-/* XXX ZEND_DEBUG_ is misleading, it should be something like IBASE_DEBUG. */
-#ifdef ZEND_DEBUG_
+#ifdef IBASE_DEBUG
 #define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
 #endif
 

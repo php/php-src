@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,8 +29,8 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern = NULL;
-	int         locale_len = 0, pattern_len = 0;
-	long        style;
+	size_t         locale_len = 0, pattern_len = 0;
+	zend_long        style;
 	UChar*      spattern     = NULL;
 	int         spattern_len = 0;
 	FORMATTER_METHOD_INIT_VARS;

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -58,7 +58,7 @@ static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SWORD sqltype)
 }
 
 static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf, 
-	unsigned long buflen, unsigned long *outlen)
+	zend_ulong buflen, zend_ulong *outlen)
 {
 #ifdef PHP_WIN32
 	if (is_unicode && buflen) {
@@ -93,7 +93,7 @@ static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 }
 
 static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, const char *buf, 
-	unsigned long buflen, unsigned long *outlen)
+	zend_ulong buflen, zend_ulong *outlen)
 {
 #ifdef PHP_WIN32
 	if (is_unicode && buflen) {
@@ -190,7 +190,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			}
 			if (Z_TYPE_P(parameter) != IS_RESOURCE) {
 				/* they passed in a string */
-				unsigned long ulen;
+				zend_ulong ulen;
 				convert_to_string(parameter);
 
 				switch (pdo_odbc_utf82ucs2(stmt, P->is_unicode, 
@@ -458,7 +458,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				} else {
 					convert_to_string(parameter);
 					if (P->outbuf) {
-						unsigned long ulen;
+						zend_ulong ulen;
 						switch (pdo_odbc_utf82ucs2(stmt, P->is_unicode,
 								Z_STRVAL_P(parameter),
 								Z_STRLEN_P(parameter),
@@ -483,9 +483,9 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				P = param->driver_data;
 
 				if (P->outbuf) {
-					unsigned long ulen;
+					zend_ulong ulen;
 					char *srcbuf;
-					unsigned long srclen = 0;
+					zend_ulong srclen = 0;
 
 					if (Z_ISREF(param->parameter)) {
 						parameter = Z_REFVAL(param->parameter);
@@ -512,7 +512,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 									break;
 							}
 										
-							ZVAL_NEW_STR(parameter, STR_ALLOC(srclen, 0));
+							ZVAL_NEW_STR(parameter, zend_string_alloc(srclen, 0));
 							memcpy(Z_STRVAL_P(parameter), srcbuf, srclen);
 							Z_STRVAL_P(parameter)[Z_STRLEN_P(parameter)] = '\0';
 					}
@@ -524,7 +524,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 }
 
 static int odbc_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC)
 {
 	RETCODE rc;
 	SQLSMALLINT odbcori;
@@ -628,15 +628,15 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees TSRMLS_DC)
+static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees TSRMLS_DC)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	pdo_odbc_column *C = &S->cols[colno];
-	unsigned long ulen;
+	zend_ulong ulen;
 
 	/* if it is a column containing "long" data, perform late binding now */
 	if (C->is_long) {
-		unsigned long used = 0;
+		zend_ulong used = 0;
 		char *buf;
 		RETCODE rc;
 
@@ -755,7 +755,7 @@ in_data:
 	return 1;
 }
 
-static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
+static int odbc_stmt_set_param(pdo_stmt_t *stmt, zend_long attr, zval *val TSRMLS_DC)
 {
 	SQLRETURN rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -782,7 +782,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 	}
 }
 
-static int odbc_stmt_get_attr(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
+static int odbc_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val TSRMLS_DC)
 {
 	SQLRETURN rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;

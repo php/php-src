@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -219,7 +219,16 @@ static double php_asinh(double z)
 #ifdef HAVE_ASINH
 	return(asinh(z));
 #else
+# ifdef _WIN64
+	if (z > 0) {
+		return log(z + sqrt(z * z + 1));
+	}
+	else {
+		return -log(-z + sqrt(z * z + 1));
+	}
+# else
 	return(log(z + sqrt(1 + pow(z, 2))) / log(M_E));
+# endif
 #endif
 }
 /* }}} */
@@ -231,7 +240,15 @@ static double php_acosh(double x)
 #ifdef HAVE_ACOSH
 	return(acosh(x));
 #else
+# ifdef _WIN64
+	if (x >= 1) {
+		return log(x + sqrt(x * x - 1));
+	} else {
+		return (DBL_MAX+DBL_MAX)-(DBL_MAX+DBL_MAX);
+	}
+# else
 	return(log(x + sqrt(x * x - 1)));
+# endif
 #endif
 }
 /* }}} */
@@ -286,8 +303,8 @@ PHP_FUNCTION(abs)
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
-		if (Z_LVAL_P(value) == LONG_MIN) {
-			RETURN_DOUBLE(-(double)LONG_MIN);
+		if (Z_LVAL_P(value) == ZEND_LONG_MIN) {
+			RETURN_DOUBLE(-(double)ZEND_LONG_MIN);
 		} else {
 			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
 		}
@@ -342,8 +359,8 @@ PHP_FUNCTION(round)
 {
 	zval *value;
 	int places = 0;
-	long precision = 0;
-	long mode = PHP_ROUND_HALF_UP;
+	zend_long precision = 0;
+	zend_long mode = PHP_ROUND_HALF_UP;
 	double return_val;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ll", &value, &precision, &mode) == FAILURE) {
@@ -926,9 +943,9 @@ PHP_FUNCTION(rad2deg)
 /*
  * Convert a string representation of a base(2-36) number to a long.
  */
-PHPAPI long _php_math_basetolong(zval *arg, int base)
+PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 {
-	long num = 0, digit, onum;
+	zend_long num = 0, digit, onum;
 	int i;
 	char c, *s;
 
@@ -959,7 +976,7 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
 			TSRMLS_FETCH();
 
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number '%s' is too big to fit in long", s);
-			return LONG_MAX;
+			return ZEND_LONG_MAX;
 		}
 	}
 
@@ -973,12 +990,12 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
  */
 PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 {
-	long num = 0;
+	zend_long num = 0;
 	double fnum = 0;
 	int i;
 	int mode = 0;
 	char c, *s;
-	long cutoff;
+	zend_long cutoff;
 	int cutlim;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
@@ -987,8 +1004,8 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 
 	s = Z_STRVAL_P(arg);
 
-	cutoff = LONG_MAX / base;
-	cutlim = LONG_MAX % base;
+	cutoff = ZEND_LONG_MAX / base;
+	cutlim = ZEND_LONG_MAX % base;
 	
 	for (i = Z_STRLEN_P(arg); i > 0; i--) {
 		c = *s++;
@@ -1038,9 +1055,9 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 PHPAPI zend_string * _php_math_longtobase(zval *arg, int base TSRMLS_DC)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-	char buf[(sizeof(unsigned long) << 3) + 1];
+	char buf[(sizeof(zend_ulong) << 3) + 1];
 	char *ptr, *end;
-	unsigned long value;
+	zend_ulong value;
 
 	if (Z_TYPE_P(arg) != IS_LONG || base < 2 || base > 36) {
 		return STR_EMPTY_ALLOC();
@@ -1056,7 +1073,7 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base TSRMLS_DC)
 		value /= base;
 	} while (ptr > buf && value);
 
-	return STR_INIT(ptr, end - ptr, 0);
+	return zend_string_init(ptr, end - ptr, 0);
 }
 /* }}} */
 
@@ -1092,7 +1109,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
 			fvalue /= base;
 		} while (ptr > buf && fabs(fvalue) >= 1);
 
-		return STR_INIT(ptr, end - ptr, 0);
+		return zend_string_init(ptr, end - ptr, 0);
 	}
 	
 	return _php_math_longtobase(arg, base TSRMLS_CC);
@@ -1200,7 +1217,7 @@ PHP_FUNCTION(dechex)
 PHP_FUNCTION(base_convert)
 {
 	zval *number, temp;
-	long frombase, tobase;
+	zend_long frombase, tobase;
 	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zll", &number, &frombase, &tobase) == FAILURE) {
@@ -1209,11 +1226,11 @@ PHP_FUNCTION(base_convert)
 	convert_to_string_ex(number);
 	
 	if (frombase < 2 || frombase > 36) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `from base' (%ld)", frombase);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `from base' (%pd)", frombase);
 		RETURN_FALSE;
 	}
 	if (tobase < 2 || tobase > 36) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `to base' (%ld)", tobase);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `to base' (%pd)", tobase);
 		RETURN_FALSE;
 	}
 
@@ -1292,7 +1309,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	if (is_negative) {
 		reslen++;
 	}
-	res = STR_ALLOC(reslen, 0);
+	res = zend_string_alloc(reslen, 0);
 
 	s = tmpbuf->val + tmpbuf->len - 1;
 	t = res->val + reslen;
@@ -1341,7 +1358,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	}
 
 	res->len = reslen;
-	STR_RELEASE(tmpbuf);
+	zend_string_release(tmpbuf);
 	return res;
 }
 
@@ -1350,10 +1367,10 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 PHP_FUNCTION(number_format)
 {
 	double num;
-	long dec = 0;
+	zend_long dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	char thousand_sep_chr = ',', dec_point_chr = '.';
-	int thousand_sep_len = 0, dec_point_len = 0;
+	size_t thousand_sep_len = 0, dec_point_len = 0;
 	
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|ls!s!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
@@ -1422,7 +1439,7 @@ PHP_FUNCTION(fmod)
    Returns the integer division of the numerator by the divisor */
 PHP_FUNCTION(intdiv) 
 {
-	long numerator, divisor;
+	zend_long numerator, divisor;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &numerator, &divisor) == FAILURE) {
 		return;
@@ -1431,7 +1448,7 @@ PHP_FUNCTION(intdiv)
 	if (divisor == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
 		RETURN_BOOL(0);
-	} else if (divisor == -1 && numerator == LONG_MIN) {
+	} else if (divisor == -1 && numerator == ZEND_LONG_MIN) {
 		/* Prevent overflow error/crash 
 		   We don't return a float here as that violates function contract */
 		RETURN_LONG(0);

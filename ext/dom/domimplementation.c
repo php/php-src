@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -70,7 +70,7 @@ Since:
 */
 PHP_METHOD(domimplementation, hasFeature)
 {
-	int feature_len, version_len;
+	size_t feature_len, version_len;
 	char *feature, *version;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
@@ -92,7 +92,8 @@ Since: DOM Level 2
 PHP_METHOD(domimplementation, createDocumentType)
 {
 	xmlDtd *doctype;
-	int ret, name_len = 0, publicid_len = 0, systemid_len = 0;
+	int ret;
+	size_t name_len = 0, publicid_len = 0, systemid_len = 0;
 	char *name = NULL, *publicid = NULL, *systemid = NULL;
 	xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
 	xmlURIPtr uri;
@@ -106,14 +107,16 @@ PHP_METHOD(domimplementation, createDocumentType)
 		RETURN_FALSE;
 	}
 
-	if (publicid_len > 0)
-		pch1 = publicid;
-	if (systemid_len > 0)
-		pch2 = systemid;
+	if (publicid_len > 0) {
+		pch1 = (xmlChar *) publicid;
+	}
+	if (systemid_len > 0) {
+		pch2 = (xmlChar *) systemid;
+	}
 
 	uri = xmlParseURI(name);
 	if (uri != NULL && uri->opaque != NULL) {
-		localname = xmlStrdup(uri->opaque);
+		localname = xmlStrdup((xmlChar *) uri->opaque);
 		if (xmlStrchr(localname, (xmlChar) ':') != NULL) {
 			php_dom_throw_error(NAMESPACE_ERR, 1 TSRMLS_CC);
 			xmlFreeURI(uri);
@@ -121,7 +124,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 			RETURN_FALSE;
 		}
 	} else {
-		localname = xmlStrdup(name);
+		localname = xmlStrdup((xmlChar *) name);
 	}
 
 	/* TODO: Test that localname has no invalid chars 
@@ -155,7 +158,8 @@ PHP_METHOD(domimplementation, createDocument)
 	xmlNode *nodep;
 	xmlDtdPtr doctype = NULL;
 	xmlNsPtr nsptr = NULL;
-	int ret, uri_len = 0, name_len = 0, errorcode = 0;
+	int ret, errorcode = 0;
+	size_t uri_len = 0, name_len = 0;
 	char *uri = NULL, *name = NULL;
 	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;
@@ -180,7 +184,9 @@ PHP_METHOD(domimplementation, createDocument)
 
 	if (name_len > 0) {
 		errorcode = dom_check_qname(name, &localname, &prefix, 1, name_len);
-		if (errorcode == 0 && uri_len > 0 && ((nsptr = xmlNewNs(NULL, uri, prefix)) == NULL)) {
+		if (errorcode == 0 && uri_len > 0
+			&& ((nsptr = xmlNewNs(NULL, (xmlChar *) uri, (xmlChar *) prefix)) == NULL)
+		) {
 			errorcode = NAMESPACE_ERR;
 		}
 	}
@@ -215,7 +221,7 @@ PHP_METHOD(domimplementation, createDocument)
 	}
 
 	if (localname != NULL) {
-		nodep = xmlNewDocNode (docp, nsptr, localname, NULL);
+		nodep = xmlNewDocNode(docp, nsptr, (xmlChar *) localname, NULL);
 		if (!nodep) {
 			if (doctype != NULL) {
 				docp->intSubset = NULL;

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -96,10 +96,10 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry * TSRMLS_DC
 	mysql->multi_query = 1; \
 }
 
-#define MYSQLI_RETURN_LONG_LONG(__val) \
+#define MYSQLI_RETURN_LONG_INT(__val) \
 { \
-	if ((__val) < LONG_MAX) {		\
-		RETURN_LONG((long) (__val));		\
+	if ((__val) < ZEND_LONG_MAX) {		\
+		RETURN_LONG((zend_long) (__val));		\
 	} else {				\
 		/* always used with my_ulonglong -> %llu */ \
 		RETURN_STR(strpprintf(0, MYSQLI_LLU_SPEC, (__val)));	\

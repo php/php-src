@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 								 const char *func_name,
 								 intl_error *err,
 								 Calendar*& cal,
-								 long& cal_int_type,
+								 zend_long& cal_int_type,
 								 bool& calendar_owned TSRMLS_DC)
 {
 	char *msg;
@@ -49,8 +49,8 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 
 	} else if (Z_TYPE_P(calendar_zv) == IS_LONG) {
 
-		long v = Z_LVAL_P(calendar_zv);
-		if (v != (long)UCAL_TRADITIONAL && v != (long)UCAL_GREGORIAN) {
+		zend_long v = Z_LVAL_P(calendar_zv);
+		if (v != (zend_long)UCAL_TRADITIONAL && v != (zend_long)UCAL_GREGORIAN) {
 			spprintf(&msg, 0, "%s: invalid value for calendar type; it must be "
 					"one of IntlDateFormatter::TRADITIONAL (locale's default "
 					"calendar) or IntlDateFormatter::GREGORIAN. "
@@ -59,7 +59,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
 			efree(msg);
 			return FAILURE;
-		} else if (v == (long)UCAL_TRADITIONAL) {
+		} else if (v == (zend_long)UCAL_TRADITIONAL) {
 			cal = Calendar::createInstance(locale, status);
 		} else { //UCAL_GREGORIAN
 			cal = new GregorianCalendar(locale, status);

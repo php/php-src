@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -114,7 +114,7 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 			(void **)&class);
 	} else {
 		zend_get_object_classname(*class, (const char **)&Z_STRVAL_PP(class),
-			(zend_uint *)&Z_STRLEN_PP(class) TSRMLS_CC);
+			(uint32_t *)&Z_STRLEN_PP(class) TSRMLS_CC);
 	}
 
 	if (is_class == SUCCESS) {

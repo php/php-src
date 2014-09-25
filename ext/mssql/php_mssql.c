@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -285,7 +285,7 @@ static int php_mssql_message_handler(DBPROCESS *dbproc, DBINT msgno,int msgstate
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "message: %s (severity %d)", msgtext, severity);
 	}
 	if (MS_SQL_G(server_message)) {
-		STR_FREE(MS_SQL_G(server_message));
+		zend_string_free(MS_SQL_G(server_message));
 		MS_SQL_G(server_message) = NULL;
 	}
 	MS_SQL_G(server_message) = estrdup(msgtext);
@@ -330,8 +330,8 @@ static void _free_result(mssql_result *result, int free_fields)
 	
 	if (free_fields && result->fields) {
 		for (i=0; i<result->num_fields; i++) {
-			STR_FREE(result->fields[i].name);
-			STR_FREE(result->fields[i].column_source);
+			zend_string_free(result->fields[i].name);
+			zend_string_free(result->fields[i].column_source);
 		}
 		efree(result->fields);
 	}
@@ -489,7 +489,7 @@ PHP_RINIT_FUNCTION(mssql)
 {
 	MS_SQL_G(default_link) = -1;
 	MS_SQL_G(num_links) = MS_SQL_G(num_persistent);
-	MS_SQL_G(appname) = estrndup("PHP 5", 5);
+	MS_SQL_G(appname) = estrndup("PHP 7", 5);
 	MS_SQL_G(server_message) = NULL;
 	MS_SQL_G(min_error_severity) = MS_SQL_G(cfg_min_error_severity);
 	MS_SQL_G(min_message_severity) = MS_SQL_G(cfg_min_message_severity);
@@ -507,10 +507,10 @@ PHP_RINIT_FUNCTION(mssql)
 */
 PHP_RSHUTDOWN_FUNCTION(mssql)
 {
-	STR_FREE(MS_SQL_G(appname));
+	zend_string_free(MS_SQL_G(appname));
 	MS_SQL_G(appname) = NULL;
 	if (MS_SQL_G(server_message)) {
-		STR_FREE(MS_SQL_G(server_message));
+		zend_string_free(MS_SQL_G(server_message));
 		MS_SQL_G(server_message) = NULL;
 	}
 	return SUCCESS;
@@ -1518,7 +1518,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	ZEND_FETCH_RESOURCE(result, mssql_result *, &mssql_result_index, -1, "MS SQL-result", le_result);	
 
 	if (MS_SQL_G(server_message)) {
-		STR_FREE(MS_SQL_G(server_message));
+		zend_string_free(MS_SQL_G(server_message));
 		MS_SQL_G(server_message) = NULL;
 	}
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -105,7 +105,7 @@ static void spl_ptr_heap_zval_ctor(zval *elem TSRMLS_DC) { /* {{{ */
 }
 /* }}} */
 
-static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, long *result TSRMLS_DC) { /* {{{ */
+static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, zend_long *result TSRMLS_DC) { /* {{{ */
 	zval zresult;
 
 	zend_call_method_with_2_params(object, heap_object->std.ce, &heap_object->fptr_cmp, "compare", &zresult, a, b);
@@ -155,7 +155,7 @@ static int spl_ptr_heap_zval_max_cmp(zval *a, zval *b, zval *object TSRMLS_DC) {
 	if (object) {
 		spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 		if (heap_object->fptr_cmp) {
-			long lval = 0;
+			zend_long lval = 0;
 			if (spl_ptr_heap_cmp_cb_helper(object, heap_object, a, b, &lval TSRMLS_CC) == FAILURE) {
 				/* exception or call failure */
 				return 0;
@@ -179,7 +179,7 @@ static int spl_ptr_heap_zval_min_cmp(zval *a, zval *b, zval *object TSRMLS_DC) {
 	if (object) {
 		spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 		if (heap_object->fptr_cmp) {
-			long lval = 0;
+			zend_long lval = 0;
 			if (spl_ptr_heap_cmp_cb_helper(object, heap_object, a, b, &lval TSRMLS_CC) == FAILURE) {
 				/* exception or call failure */
 				return 0;
@@ -210,7 +210,7 @@ static int spl_ptr_pqueue_zval_cmp(zval *a, zval *b, zval *object TSRMLS_DC) { /
 	if (object) {
 		spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 		if (heap_object->fptr_cmp) {
-			long lval = 0;
+			zend_long lval = 0;
 			if (spl_ptr_heap_cmp_cb_helper((zval *)object, heap_object, a_priority_p, b_priority_p, &lval TSRMLS_CC) == FAILURE) {
 				/* exception or call failure */
 				return 0;
@@ -483,7 +483,7 @@ static zend_object *spl_heap_object_clone(zval *zobject TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int spl_heap_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+static int spl_heap_object_count_elements(zval *object, zend_long *count TSRMLS_DC) /* {{{ */
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(object);
 
@@ -494,7 +494,7 @@ static int spl_heap_object_count_elements(zval *object, long *count TSRMLS_DC) /
 			zval_ptr_dtor(&intern->retval);
 			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
 			convert_to_long(&intern->retval);
-			*count = (long) Z_LVAL(intern->retval);
+			*count = (zend_long) Z_LVAL(intern->retval);
 			return SUCCESS;
 		}
 		*count = 0;
@@ -531,12 +531,12 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 		pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1 TSRMLS_CC);
 		ZVAL_LONG(&tmp, intern->flags);
 		zend_hash_update(intern->debug_info, pnstr, &tmp);
-		STR_RELEASE(pnstr);
+		zend_string_release(pnstr);
 
 		pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1 TSRMLS_CC);
 		ZVAL_BOOL(&tmp, intern->heap->flags&SPL_HEAP_CORRUPTED);
 		zend_hash_update(intern->debug_info, pnstr, &tmp);
-		STR_RELEASE(pnstr);
+		zend_string_release(pnstr);
 
 		array_init(&heap_array);
 
@@ -549,7 +549,7 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 
 		pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1 TSRMLS_CC);
 		zend_hash_update(intern->debug_info, pnstr, &heap_array);
-		STR_RELEASE(pnstr);
+		zend_string_release(pnstr);
 	}
 
 	return intern->debug_info;
@@ -572,7 +572,7 @@ static HashTable* spl_pqueue_object_get_debug_info(zval *obj, int *is_temp TSRML
  Return the number of elements in the heap. */
 SPL_METHOD(SplHeap, count)
 {
-	long count;
+	zend_long count;
 	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -761,11 +761,12 @@ SPL_METHOD(SplPriorityQueue, top)
 }
 /* }}} */
 
-/* {{{ proto int SplPriorityQueue::setIteratorMode($flags)
+
+/* {{{ proto int SplPriorityQueue::setExtractFlags($flags)
  Set the flags of extraction*/
 SPL_METHOD(SplPriorityQueue, setExtractFlags)
 {
-	long value;
+	zend_long value;
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &value) == FAILURE) {
@@ -775,6 +776,22 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 	intern = Z_SPLHEAP_P(getThis());
 
 	intern->flags = value & SPL_PQUEUE_EXTR_MASK;
+
+	RETURN_LONG(intern->flags);
+}
+/* }}} */
+
+/* {{{ proto int SplPriorityQueue::getExtractFlags()
+ Get the flags of extraction*/
+SPL_METHOD(SplPriorityQueue, getExtractFlags)
+{
+	spl_heap_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	intern = Z_SPLHEAP_P(getThis());
 
 	RETURN_LONG(intern->flags);
 }
@@ -795,6 +812,22 @@ SPL_METHOD(SplHeap, recoverFromCorruption)
 	intern->heap->flags = intern->heap->flags & ~SPL_HEAP_CORRUPTED;
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int SplHeap::isCorrupted()
+ Tells if the heap is in a corrupted state*/
+SPL_METHOD(SplHeap, isCorrupted)
+{
+	spl_heap_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	intern = Z_SPLHEAP_P(getThis());
+
+	RETURN_BOOL(intern->heap->flags & SPL_HEAP_CORRUPTED);
 }
 /* }}} */
 
@@ -1158,6 +1191,7 @@ static const zend_function_entry spl_funcs_SplPriorityQueue[] = {
 	SPL_ME(SplPriorityQueue, compare,               arginfo_heap_compare,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, insert,                arginfo_pqueue_insert,   ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, setExtractFlags,       arginfo_pqueue_setflags, ZEND_ACC_PUBLIC)
+	SPL_ME(SplPriorityQueue, getExtractFlags,       arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, top,                   arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, extract,               arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap,          count,                 arginfo_splheap_void,    ZEND_ACC_PUBLIC)
@@ -1168,6 +1202,7 @@ static const zend_function_entry spl_funcs_SplPriorityQueue[] = {
 	SPL_ME(SplHeap,          next,                  arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap,          valid,                 arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap,          recoverFromCorruption, arginfo_splheap_void,    ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap,          isCorrupted,           arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1183,6 +1218,7 @@ static const zend_function_entry spl_funcs_SplHeap[] = {
 	SPL_ME(SplHeap, next,                  arginfo_splheap_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap, valid,                 arginfo_splheap_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap, recoverFromCorruption, arginfo_splheap_void, ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, isCorrupted,           arginfo_splheap_void, ZEND_ACC_PUBLIC)
 	ZEND_FENTRY(compare, NULL, NULL, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT)
 	{NULL, NULL, NULL}
 };

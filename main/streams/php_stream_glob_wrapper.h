@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -23,10 +23,10 @@ PHPAPI extern php_stream_ops      php_glob_stream_ops;
 
 BEGIN_EXTERN_C()
 
-PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, int *plen STREAMS_DC TSRMLS_DC);
+PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, size_t *plen STREAMS_DC TSRMLS_DC);
 #define php_glob_stream_get_path(stream, copy, plen)	_php_glob_stream_get_path((stream), (copy), (plen) STREAMS_CC TSRMLS_CC)
 
-PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, int *plen STREAMS_DC TSRMLS_DC);
+PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, size_t *plen STREAMS_DC TSRMLS_DC);
 #define php_glob_stream_get_pattern(stream, copy, plen)	_php_glob_stream_get_pattern((stream), (copy), (plen) STREAMS_CC TSRMLS_CC)
 
 PHPAPI int   _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC TSRMLS_DC);

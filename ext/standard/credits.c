@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -69,6 +69,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 		CREDIT_LINE("Streams Abstraction Layer", "Wez Furlong, Sara Golemon");
 		CREDIT_LINE("PHP Data Objects Layer", "Wez Furlong, Marcus Boerger, Sterling Hughes, George Schlossnagle, Ilia Alshanetsky");
 		CREDIT_LINE("Output Handler", "Zeev Suraski, Thies C. Arntzen, Marcus Boerger, Michael Wallner");
+		CREDIT_LINE("Consistent 64 bit support", "Anthony Ferrara, Anatol Belski");
 		php_info_print_table_end();
 	}
 

@@ -27,28 +27,37 @@
 
 #define ZEND_INI_ALL (ZEND_INI_USER|ZEND_INI_PERDIR|ZEND_INI_SYSTEM)
 
-#define ZEND_INI_MH(name) int name(zend_ini_entry *entry, char *new_value, uint new_value_length, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage TSRMLS_DC)
+#define ZEND_INI_MH(name) int name(zend_ini_entry *entry, zend_string *new_value, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage TSRMLS_DC)
 #define ZEND_INI_DISP(name) void name(zend_ini_entry *ini_entry, int type)
 
-struct _zend_ini_entry {
-	int module_number;
-	int modifiable;
-	char *name;					// TODO: convert into zend_string ???
-	uint name_length;
+typedef struct _zend_ini_entry_def {
+	const char *name;
 	ZEND_INI_MH((*on_modify));
 	void *mh_arg1;
 	void *mh_arg2;
 	void *mh_arg3;
+	const char *value;
+	void (*displayer)(zend_ini_entry *ini_entry, int type);
+	int modifiable;
 
-	char *value;				// TODO: convert into zend_string ???
+	uint name_length;
 	uint value_length;
+} zend_ini_entry_def;
 
-	char *orig_value;			// TODO: convert into zend_string ???
-	uint orig_value_length;
+struct _zend_ini_entry {
+	zend_string *name;
+	ZEND_INI_MH((*on_modify));
+	void *mh_arg1;
+	void *mh_arg2;
+	void *mh_arg3;
+	zend_string *value;
+	zend_string *orig_value;
+	void (*displayer)(zend_ini_entry *ini_entry, int type);
+	int modifiable;
+
 	int orig_modifiable;
 	int modified;
-
-	void (*displayer)(zend_ini_entry *ini_entry, int type);
+	int module_number;
 };
 
 BEGIN_EXTERN_C()
@@ -61,15 +70,17 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D);
 
 ZEND_API void zend_ini_sort_entries(TSRMLS_D);
 
-ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int module_number TSRMLS_DC);
+ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int module_number TSRMLS_DC);
 ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC);
 ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC);
-ZEND_API int zend_alter_ini_entry(zend_string *name, char *new_value, uint new_value_length, int modify_type, int stage);
-ZEND_API int zend_alter_ini_entry_ex(zend_string *name, char *new_value, uint new_value_length, int modify_type, int stage, int force_change TSRMLS_DC);
+ZEND_API int zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage);
+ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, int force_change TSRMLS_DC);
+ZEND_API int zend_alter_ini_entry_chars(zend_string *name, const char *value, size_t value_length, int modify_type, int stage);
+ZEND_API int zend_alter_ini_entry_chars_ex(zend_string *name, const char *value, size_t value_length, int modify_type, int stage, int force_change TSRMLS_DC);
 ZEND_API int zend_restore_ini_entry(zend_string *name, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
-ZEND_API long zend_ini_long(char *name, uint name_length, int orig);
+ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig);
 ZEND_API double zend_ini_double(char *name, uint name_length, int orig);
 ZEND_API char *zend_ini_string(char *name, uint name_length, int orig);
 ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_bool *exists);
@@ -81,11 +92,11 @@ ZEND_API ZEND_INI_DISP(zend_ini_color_displayer_cb);
 ZEND_API ZEND_INI_DISP(display_link_numbers);
 END_EXTERN_C()
 
-#define ZEND_INI_BEGIN()		static const zend_ini_entry ini_entries[] = {
-#define ZEND_INI_END()		{ 0, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, 0, 0, NULL } };
+#define ZEND_INI_BEGIN()		static const zend_ini_entry_def ini_entries[] = {
+#define ZEND_INI_END()		{ NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0} };
 
 #define ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, arg1, arg2, arg3, displayer) \
-	{ 0, modifiable, name, sizeof(name)-1, on_modify, arg1, arg2, arg3, default_value, sizeof(default_value)-1, NULL, 0, 0, 0, displayer },
+	{ name, on_modify, arg1, arg2, arg3, default_value, displayer, modifiable, sizeof(name)-1, sizeof(default_value)-1 },
 
 #define ZEND_INI_ENTRY3(name, default_value, modifiable, on_modify, arg1, arg2, arg3) \
 	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, arg1, arg2, arg3, NULL)

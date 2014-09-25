@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -572,7 +572,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 /* {{{ generic stream operations */
 
-static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_DC)
+PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_DC)
 {
 	/* allocate/fill the buffer */
 
@@ -675,7 +675,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 	} else {
 		/* is there enough data in the buffer ? */
-		if (stream->writepos - stream->readpos < (off_t)size) {
+		if (stream->writepos - stream->readpos < (zend_off_t)size) {
 			size_t justread = 0;
 
 			/* reduce buffer memory consumption if possible, to avoid a realloc */
@@ -740,7 +740,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 				break;
 			}
 		} else {
-			php_stream_fill_read_buffer(stream, size TSRMLS_CC);
+			php_stream_fill_read_buffer(stream, size);
 
 			toread = stream->writepos - stream->readpos;
 			if (toread > size) {
@@ -976,7 +976,7 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 				}
 			}
 
-			php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
+			php_stream_fill_read_buffer(stream, toread);
 
 			if (stream->writepos - stream->readpos == 0) {
 				break;
@@ -1051,7 +1051,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 
 		to_read_now = MIN(maxlen - buffered_len, stream->chunk_size);
 
-		php_stream_fill_read_buffer(stream, buffered_len + to_read_now TSRMLS_CC);
+		php_stream_fill_read_buffer(stream, buffered_len + to_read_now);
 
 		just_read = STREAM_BUFFERED_AMOUNT(stream) - buffered_len;
 
@@ -1101,7 +1101,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 		}
 	}
 
-	ret_buf = STR_ALLOC(tent_ret_len, 0);
+	ret_buf = zend_string_alloc(tent_ret_len, 0);
 	/* php_stream_read will not call ops->read here because the necessary
 	 * data is guaranteedly buffered */
 	ret_buf->len = php_stream_read(stream, ret_buf->val, tent_ret_len);
@@ -1269,12 +1269,12 @@ PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, 
 	return count;
 }
 
-PHPAPI off_t _php_stream_tell(php_stream *stream TSRMLS_DC)
+PHPAPI zend_off_t _php_stream_tell(php_stream *stream TSRMLS_DC)
 {
 	return stream->position;
 }
 
-PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
+PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence TSRMLS_DC)
 {
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 		/* flush to commit data written to the fopencookie FILE* */
@@ -1445,7 +1445,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	}
 
 	if (maxlen > 0) {
-		result = STR_ALLOC(maxlen, persistent);
+		result = zend_string_alloc(maxlen, persistent);
 		ptr = result->val;
 		while ((len < maxlen) && !php_stream_eof(src)) {
 			ret = php_stream_read(src, ptr, maxlen - len);
@@ -1459,7 +1459,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 			*ptr = '\0';
 			result->len = len;
 		} else {
-			STR_FREE(result);
+			zend_string_free(result);
 			result = NULL;
 		}
 		return result;
@@ -1477,13 +1477,13 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		max_len = step;
 	}
 
-	result = STR_ALLOC(max_len, persistent);
+	result = zend_string_alloc(max_len, persistent);
 	ptr = result->val;
 
 	while ((ret = php_stream_read(src, ptr, max_len - len)))	{
 		len += ret;
 		if (len + min_room >= max_len) {
-			result = STR_REALLOC(result, max_len + step, persistent);
+			result = zend_string_realloc(result, max_len + step, persistent);
 			max_len += step;
 			ptr = result->val + len;
 		} else {
@@ -1491,10 +1491,10 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		}
 	}
 	if (len) {
-		result = STR_REALLOC(result, len, persistent);
+		result = zend_string_realloc(result, len, persistent);
 		result->val[len] = '\0';
 	} else {
-		STR_FREE(result);
+		zend_string_free(result);
 		result = NULL;
 	}
 
@@ -2136,7 +2136,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (stream && stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && strchr(mode, 'a') && stream->position == 0) {
-		off_t newpos = 0;
+		zend_off_t newpos = 0;
 
 		/* if opened for append, we need to revise our idea of the initial file position */
 		if (0 == stream->ops->seek(stream, 0, SEEK_CUR, &newpos TSRMLS_CC)) {
@@ -2310,7 +2310,7 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 			vector = (zend_string **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
 		}
 
-		vector[nfiles] = STR_INIT(sdp.d_name, strlen(sdp.d_name), 0);
+		vector[nfiles] = zend_string_init(sdp.d_name, strlen(sdp.d_name), 0);
 
 		nfiles++;
 		if(vector_size < 10 || nfiles == 0) {

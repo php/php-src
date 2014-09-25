@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,7 +79,7 @@ static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
 		} else {
 			if (Z_LVAL_P(ele_value) > INT32_MAX ||
 					Z_LVAL_P(ele_value) < INT32_MIN) {
-				spprintf(&message, 0, "datefmt_format: value %ld is out of "
+				spprintf(&message, 0, "datefmt_format: value %pd is out of "
 						"bounds for a 32-bit integer in key '%s'",
 						Z_LVAL_P(ele_value), key_name);
 				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
