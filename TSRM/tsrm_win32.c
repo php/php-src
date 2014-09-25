@@ -35,7 +35,7 @@
 #include "zend_virtual_cwd.h"
 
 #ifdef ZTS
-TSRMG_D(win32_globals, win32_globals_id);
+static ts_rsrc_id win32_globals_id;
 #else
 static tsrm_win32_globals win32_globals;
 #endif
@@ -90,7 +90,7 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals TSRMLS_DC)
 TSRM_API void tsrm_win32_startup(void)
 {
 #ifdef ZTS
-	TSRMG_ALLOCATE(win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_dtor)tsrm_win32_dtor);
+	ts_allocate_id(&win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_ctor)tsrm_win32_dtor);
 #else
 	tsrm_win32_ctor(&win32_globals TSRMLS_CC);
 #endif

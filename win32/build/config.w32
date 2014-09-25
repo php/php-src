@@ -221,8 +221,7 @@ if (PHP_DEBUG == "yes") {
 }
 
 if (PHP_ZTS == "yes") {
-	var tsrm_align = X64 ? 8 : 4;
-	ADD_FLAG("CFLAGS", "/D ZTS=1 /D USE___THREAD=1 /D TSRM_MM_ALIGNMENT=" + tsrm_align);
+	ADD_FLAG("CFLAGS", "/D ZTS=1");
 	ADD_FLAG("ZTS", "1");
 } else {
 	ADD_FLAG("ZTS", "0");

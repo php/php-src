@@ -236,7 +236,7 @@ typedef struct _virtual_cwd_globals {
 } virtual_cwd_globals;
 
 #ifdef ZTS
-TSRMG_DH(virtual_cwd_globals, cwd_globals_id);
+extern ts_rsrc_id cwd_globals_id;
 # define CWDG(v) TSRMG(cwd_globals_id, virtual_cwd_globals *, v)
 #else
 extern virtual_cwd_globals cwd_globals;

@@ -44,8 +44,8 @@
 #ifdef ZTS
 
 BEGIN_EXTERN_C()
-TSRMG_DH(zend_compiler_globals, compiler_globals_id);
-TSRMG_DH(zend_executor_globals, executor_globals_id);
+ZEND_API extern int compiler_globals_id;
+ZEND_API extern int executor_globals_id;
 END_EXTERN_C()
 
 #endif

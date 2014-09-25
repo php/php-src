@@ -32,7 +32,7 @@
 #endif
 
 #ifdef ZTS
-TSRMG_D(php_lcg_globals, lcg_globals_id);
+int lcg_globals_id;
 #else
 static php_lcg_globals lcg_globals;
 #endif
@@ -106,7 +106,7 @@ static void lcg_init_globals(php_lcg_globals *lcg_globals_p TSRMLS_DC) /* {{{ */
 PHP_MINIT_FUNCTION(lcg) /* {{{ */
 {
 #ifdef ZTS
-	TSRMG_ALLOCATE(lcg_globals_id, sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
+	ts_allocate_id(&lcg_globals_id, sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
 #else
 	lcg_init_globals(&lcg_globals);
 #endif

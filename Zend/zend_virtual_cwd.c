@@ -76,7 +76,7 @@ MUTEX_T cwd_mutex;
 #endif
 
 #ifdef ZTS
-TSRMG_D(virtual_cwd_globals, cwd_globals_id);
+ts_rsrc_id cwd_globals_id;
 #else
 virtual_cwd_globals cwd_globals;
 #endif
@@ -475,7 +475,7 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 	main_cwd_state.cwd = strdup(cwd);
 
 #ifdef ZTS
-	TSRMG_ALLOCATE(cwd_globals_id, sizeof(virtual_cwd_globals), (ts_allocate_ctor) cwd_globals_ctor, (ts_allocate_dtor) cwd_globals_dtor);
+	ts_allocate_id(&cwd_globals_id, sizeof(virtual_cwd_globals), (ts_allocate_ctor) cwd_globals_ctor, (ts_allocate_dtor) cwd_globals_dtor);
 #else
 	cwd_globals_ctor(&cwd_globals TSRMLS_CC);
 #endif

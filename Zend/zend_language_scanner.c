@@ -90,7 +90,7 @@
 /* Globals Macros */
 #define SCNG	LANG_SCNG
 #ifdef ZTS
-TSRMG_D(zend_php_scanner_globals, language_scanner_globals_id);
+ZEND_API ts_rsrc_id language_scanner_globals_id;
 #else
 ZEND_API zend_php_scanner_globals language_scanner_globals;
 #endif

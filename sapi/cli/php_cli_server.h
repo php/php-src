@@ -33,7 +33,6 @@ ZEND_END_MODULE_GLOBALS(cli_server)
 
 #ifdef ZTS
 #define CLI_SERVER_G(v) TSRMG(cli_server_globals_id, zend_cli_server_globals *, v)
-TSRMG_DHE(zend_cli_server_globals, cli_server_globals_id);
 #else
 #define CLI_SERVER_G(v) (cli_server_globals.v)
 #endif

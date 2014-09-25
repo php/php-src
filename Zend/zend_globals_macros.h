@@ -36,12 +36,8 @@ BEGIN_EXTERN_C()
 # define CG(v) (compiler_globals.v)
 extern ZEND_API struct _zend_compiler_globals compiler_globals;
 #endif
+int zendparse(void);
 
-#ifdef PASS_TSRMLS
-int zendparse(void *compiler_globals);
-#else
-int zend_parse(void);
-#endif
 
 /* Executor */
 #ifdef ZTS
@@ -54,7 +50,7 @@ extern ZEND_API zend_executor_globals executor_globals;
 /* Language Scanner */
 #ifdef ZTS
 # define LANG_SCNG(v) TSRMG(language_scanner_globals_id, zend_php_scanner_globals *, v)
-TSRMG_DH(zend_php_scanner_globals, language_scanner_globals_id);
+extern ZEND_API ts_rsrc_id language_scanner_globals_id;
 #else
 # define LANG_SCNG(v) (language_scanner_globals.v)
 extern ZEND_API zend_php_scanner_globals language_scanner_globals;
@@ -64,7 +60,7 @@ extern ZEND_API zend_php_scanner_globals language_scanner_globals;
 /* INI Scanner */
 #ifdef ZTS
 # define INI_SCNG(v) TSRMG(ini_scanner_globals_id, zend_ini_scanner_globals *, v)
-TSRMG_DH(zend_ini_scanner_globals, ini_scanner_globals_id);
+extern ZEND_API ts_rsrc_id ini_scanner_globals_id;
 #else
 # define INI_SCNG(v) (ini_scanner_globals.v)
 extern ZEND_API zend_ini_scanner_globals ini_scanner_globals;

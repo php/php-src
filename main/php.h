@@ -301,7 +301,7 @@ static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
 
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
-#ifdef PASS_TSRMLS
+#ifdef ZTS
 #define PHP_ATTR_FMT_OFFSET 1
 #else
 #define PHP_ATTR_FMT_OFFSET 0

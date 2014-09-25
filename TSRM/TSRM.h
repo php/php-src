@@ -21,8 +21,6 @@
 #endif
 
 #ifdef TSRM_WIN32
-#	define TSRM_EXP_API __declspec(dllexport)
-#	define TSRM_IMP_API __declspec(dllimport)
 #	ifdef TSRM_EXPORTS
 #		define TSRM_API __declspec(dllexport)
 #	else
@@ -30,12 +28,8 @@
 #	endif
 #elif defined(__GNUC__) && __GNUC__ >= 4
 #	define TSRM_API __attribute__ ((visibility("default")))
-#	define TSRM_EXP_API TSRM_API
-#	define TSRM_IMP_API TSRM_API
 #else
 #	define TSRM_API
-#	define TSRM_EXP_API
-#	define TSRM_IMP_API
 #endif
 
 #ifdef _WIN64
@@ -67,7 +61,6 @@ typedef unsigned long tsrm_uintptr_t;
 #endif
 
 typedef int ts_rsrc_id;
-typedef tsrm_uintptr_t ts_rsrc_offset;
 
 /* Define THREAD_T and MUTEX_T */
 #ifdef TSRM_WIN32
@@ -101,88 +94,21 @@ typedef struct {
 #include <signal.h>
 #endif
 
+typedef void (*ts_allocate_ctor)(void *, void ***);
+typedef void (*ts_allocate_dtor)(void *, void ***);
+
 #define THREAD_HASH_OF(thr,ts)  (unsigned long)thr%(unsigned long)ts
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifdef USE___THREAD
-
-# ifdef TSRM_WIN32
-# define TSRM_TLS __declspec(thread)
-# else
-# define TSRM_TLS __thread
-# endif
-
-#define TSRMG(id, type, element) \
- ((type)((tsrm_uintptr_t) get_tsrm_ls_cache() + id##_offset))->element
-
-#define TSRMLS_INIT() do { \
-	void *cache = (void *) ts_resource_ex(0, NULL); \
-	set_tsrm_ls_cache(&cache); \
-	} while (0)
-
-#define TSRMLS_FETCH()
-#define TSRMLS_FETCH_FROM_CTX(ctx)
-#define TSRMLS_SET_CTX(ctx)
-#define TSRMLS_D void
-#define TSRMLS_DC
-#define TSRMLS_C
-#define TSRMLS_CC
-
-#else /* USE___THREAD */
-
-#define TSRMG(id, type, element) \
- ((type)(*(tsrm_uintptr_t *)tsrm_ls + id##_offset))->element
-
-#define TSRMLS_INIT() TSRMLS_FETCH()
-#define TSRMLS_FETCH() void **tsrm_ls = (void **) ts_resource_ex(0, NULL);
-
-#define TSRMLS_FETCH_FROM_CTX(ctx) void **tsrm_ls = (void **) ctx
-#define TSRMLS_SET_CTX(ctx) ctx = (void **) tsrm_ls
-#define TSRMLS_D void **tsrm_ls
-#define TSRMLS_DC , TSRMLS_D
-#define TSRMLS_C tsrm_ls
-#define TSRMLS_CC , TSRMLS_C
-#define PASS_TSRMLS 1
-
-#endif /* USE___THREAD */
-
-#define TSRMG_DHE(type, id) \
- TSRM_EXP_API extern ts_rsrc_id id; \
- TSRM_EXP_API extern ts_rsrc_offset id##_offset
-
-#define TSRMG_DE(type, id) \
- TSRM_EXP_API ts_rsrc_id id; \
- TSRM_EXP_API ts_rsrc_offset id##_offset
-
-#define TSRMG_DH(type, id) \
- TSRM_API extern ts_rsrc_id id; \
- TSRM_API extern ts_rsrc_offset id##_offset
-
-#define TSRMG_D(type, id) \
- TSRM_API ts_rsrc_id id; \
- TSRM_API ts_rsrc_offset id##_offset
-
-#define TSRMG_ALLOCATE(id, size, ctor, dtor) \
- TSRMG_ALLOCATE_EX(id, id##_offset, size, ctor, dtor);
-
-#define TSRMG_ALLOCATE_EX(id, offset, size, ctor, dtor) \
- ts_allocate_id(&(id), &(offset), (size), (ctor), (dtor));
-
-#define TSRM_SHUFFLE_RSRC_ID(rsrc_id) ((rsrc_id)+1)
-#define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id) ((rsrc_id)-1)
-
-typedef void (*ts_allocate_ctor)(void * TSRMLS_DC);
-typedef void (*ts_allocate_dtor)(void * TSRMLS_DC);
-
 /* startup/shutdown */
 TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level, char *debug_filename);
 TSRM_API void tsrm_shutdown(void);
 
 /* allocates a new thread-safe-resource id */
-TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, ts_rsrc_offset *rsrc_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
+TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
 /* fetches the requested resource for the current thread */
 TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id);
@@ -203,8 +129,9 @@ TSRM_API void ts_free_id(ts_rsrc_id id);
 #define TSRM_ERROR_LEVEL_CORE	2
 #define TSRM_ERROR_LEVEL_INFO	3
 
-typedef void (*tsrm_thread_begin_func_t)(THREAD_T thread_id TSRMLS_DC);
-typedef void (*tsrm_thread_end_func_t)(THREAD_T thread_id TSRMLS_DC);
+typedef void (*tsrm_thread_begin_func_t)(THREAD_T thread_id, void ***tsrm_ls);
+typedef void (*tsrm_thread_end_func_t)(THREAD_T thread_id, void ***tsrm_ls);
+
 
 TSRM_API int tsrm_error(int level, const char *format, ...);
 TSRM_API void tsrm_error_set(int level, char *debug_filename);
@@ -228,8 +155,19 @@ TSRM_API void *tsrm_new_interpreter_context(void);
 TSRM_API void *tsrm_set_interpreter_context(void *new_ctx);
 TSRM_API void tsrm_free_interpreter_context(void *context);
 
-TSRM_API void *get_tsrm_ls_cache(void);
-TSRM_API void set_tsrm_ls_cache(void **tsrm_ls_cache);
+TSRM_API inline void *tsrm_get_ls_cache(void);
+
+#define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
+#define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)-1)
+
+#define TSRMLS_FETCH()			void ***tsrm_ls = (void ***) ts_resource_ex(0, NULL)
+#define TSRMLS_FETCH_FROM_CTX(ctx)	void ***tsrm_ls = (void ***) ctx
+#define TSRMLS_SET_CTX(ctx)		ctx = (void ***) tsrm_get_ls_cache()
+#define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
+#define TSRMLS_D
+#define TSRMLS_DC
+#define TSRMLS_C	
+#define TSRMLS_CC
 
 #ifdef __cplusplus
 }
@@ -237,7 +175,6 @@ TSRM_API void set_tsrm_ls_cache(void **tsrm_ls_cache);
 
 #else /* non ZTS */
 
-#define TSRMLS_INIT()
 #define TSRMLS_FETCH()
 #define TSRMLS_FETCH_FROM_CTX(ctx)
 #define TSRMLS_SET_CTX(ctx)

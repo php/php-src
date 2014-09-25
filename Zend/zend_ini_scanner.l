@@ -101,7 +101,7 @@
 /* Globals Macros */
 #define SCNG	INI_SCNG
 #ifdef ZTS
-TSRMG_D(zend_ini_scanner_globals, ini_scanner_globals_id);
+ZEND_API ts_rsrc_id ini_scanner_globals_id;
 #else
 ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #endif

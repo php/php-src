@@ -32,7 +32,7 @@
 #define YYERROR_VERBOSE
 #define YYSTYPE zval
 
-#ifdef PASS_TSRMLS
+#ifdef ZTS
 #define YYPARSE_PARAM tsrm_ls
 #define YYLEX_PARAM tsrm_ls
 int ini_parse(void *arg);

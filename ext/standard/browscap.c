@@ -311,7 +311,8 @@ PHP_MINIT_FUNCTION(browscap) /* {{{ */
 	char *browscap = INI_STR("browscap");
 
 #ifdef ZTS
-	TSRMG_ALLOCATE(browscap_globals_id, sizeof(browser_data), (ts_allocate_ctor) browscap_globals_ctor, NULL);
+	ts_allocate_id(&browscap_globals_id, sizeof(browser_data),
+		browscap_globals_ctor, NULL);
 #endif
 	/* ctor call not really needed for non-ZTS */
 

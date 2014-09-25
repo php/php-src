@@ -108,7 +108,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include "php_ticks.h"
 
 #ifdef ZTS
-TSRMG_D(php_basic_globals, basic_globals_id);
+PHPAPI int basic_globals_id;
 #else
 PHPAPI php_basic_globals basic_globals;
 #endif
@@ -3375,7 +3375,7 @@ zend_module_entry basic_functions_module = { /* {{{ */
 	PHP_RSHUTDOWN(basic),		/* request shutdown */
 	PHP_MINFO(basic),			/* extension info */
 	PHP_VERSION,				/* extension version */
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -3530,9 +3530,9 @@ PHPAPI double php_get_inf(void) /* {{{ */
 PHP_MINIT_FUNCTION(basic) /* {{{ */
 {
 #ifdef ZTS
-	TSRMG_ALLOCATE(basic_globals_id, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
+	ts_allocate_id(&basic_globals_id, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
 #ifdef PHP_WIN32
-	TSRMG_ALLOCATE(php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, (ts_allocate_dtor)php_win32_core_globals_dtor);
+	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, (ts_allocate_dtor)php_win32_core_globals_dtor );
 #endif
 #else
 	basic_globals_ctor(&basic_globals TSRMLS_CC);

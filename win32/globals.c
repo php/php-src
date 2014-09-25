@@ -23,7 +23,7 @@
 #include "syslog.h"
 
 #ifdef ZTS
-TSRMG_D(php_win32_core_globals, php_win32_core_globals_id);
+PHPAPI int php_win32_core_globals_id;
 #else
 php_win32_core_globals the_php_win32_core_globals;
 #endif

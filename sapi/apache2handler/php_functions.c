@@ -49,7 +49,7 @@
 #include "php_apache.h"
 
 #ifdef ZTS
-TSRMG_DE(php_apache2_info_struct, php_apache2_info_id);
+int php_apache2_info_id;
 #else
 php_apache2_info_struct php_apache2_info;
 #endif
@@ -536,7 +536,7 @@ PHP_INI_END()
 static PHP_MINIT_FUNCTION(apache)
 {
 #ifdef ZTS
-	TSRMG_ALLOCATE(php_apache2_info_id, sizeof(php_apache2_info_struct), NULL, NULL);
+	ts_allocate_id(&php_apache2_info_id, sizeof(php_apache2_info_struct), (ts_allocate_ctor) NULL, NULL);
 #endif
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;

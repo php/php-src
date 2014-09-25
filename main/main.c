@@ -124,7 +124,7 @@ PHPAPI int (*php_register_internal_extensions_func)(TSRMLS_D) = php_register_int
 #ifndef ZTS
 php_core_globals core_globals;
 #else
-TSRMG_D(php_core_globals, core_globals_id);
+PHPAPI int core_globals_id;
 #endif
 
 #ifdef PHP_WIN32
@@ -2048,6 +2048,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_module_entry *module;
 #ifdef ZTS
 	zend_executor_globals *executor_globals;
+	void ***tsrm_ls;
 	php_core_globals *core_globals;
 #endif
 
@@ -2072,7 +2073,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 
 #ifdef ZTS
-	TSRMLS_INIT();
+	tsrm_ls = ts_resource(0);
 #endif
 
 #ifdef PHP_WIN32
@@ -2111,10 +2112,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #ifdef ZTS
 	executor_globals = ts_resource(executor_globals_id);
-    TSRMG_ALLOCATE(core_globals_id, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
+	ts_allocate_id(&core_globals_id, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
 	core_globals = ts_resource(core_globals_id);
 #ifdef PHP_WIN32
-	TSRMG_ALLOCATE(php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
+	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
 #endif
 #else
 	php_startup_ticks(TSRMLS_C);

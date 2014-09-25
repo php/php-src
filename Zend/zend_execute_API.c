@@ -1178,17 +1178,19 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 				KillTimer(timeout_window, wParam);
 			} else {
 #ifdef ZTS
-				void *tsrm_ls_cache;
+				void ***tsrm_ls;
 #endif
 				SetTimer(timeout_window, wParam, lParam*1000, NULL);
 #ifdef ZTS
-				tsrm_ls_cache = get_tsrm_ls_cache();
-				if (!tsrm_ls_cache) {
+				tsrm_ls = ts_resource_ex(0, &wParam);
+				if (!tsrm_ls) {
 					/* shouldn't normally happen */
 					break;
 				}
 #endif
-				EG(timed_out) = 0;
+				/* XXX this won't work with TLS enabled, EG is on a different thread. 
+					But nothing happened anyway, no timeout here. */
+				/* EG(timed_out) = 0; */
 			}
 			break;
 		case WM_UNREGISTER_ZEND_TIMEOUT:
@@ -1197,16 +1199,19 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 			break;
 		case WM_TIMER: {
 #ifdef ZTS
-				void *tsrm_ls_cache;
+				void ***tsrm_ls;
 
-				tsrm_ls_cache = get_tsrm_ls_cache();
-				if (!tsrm_ls_cache) {
+				tsrm_ls = ts_resource_ex(0, &wParam);
+				if (!tsrm_ls) {
 					/* Thread died before receiving its timeout? */
 					break;
 				}
 #endif
 				KillTimer(timeout_window, wParam);
-				EG(timed_out) = 1;
+
+				/* XXX this won't work with TLS enabled, EG is on a different thread.
+					Maybe an ide were to throw the timeout window right from here. */
+				/*EG(timed_out) = 1; */
 			}
 			break;
 		default:
@@ -1280,6 +1285,8 @@ void zend_shutdown_timeout_thread(void) /* {{{ */
 
 void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 {
+	TSRMLS_FETCH();
+
 	EG(timeout_seconds) = seconds;
 
 #ifdef ZEND_WIN32

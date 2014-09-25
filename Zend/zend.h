@@ -71,11 +71,6 @@ void zend_error_noreturn(int type, const char *format, ...) ZEND_NORETURN;
 # define zend_error_noreturn zend_error
 #endif
 
-#ifdef ZTS
-TSRMG_DH(zend_compiler_globals, compiler_globals_id);
-TSRMG_DH(zend_executor_globals, executor_globals_id);
-#endif
-
 /* overloaded elements data types */
 #define OE_IS_ARRAY					(1<<0)
 #define OE_IS_OBJECT				(1<<1)

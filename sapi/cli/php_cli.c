@@ -1177,6 +1177,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 int main(int argc, char *argv[])
 #endif
 {
+#ifdef ZTS
+	void ***tsrm_ls;
+#endif
 #ifdef PHP_CLI_WIN32_NO_CONSOLE
 	int argc = __argc;
 	char **argv = __argv;
@@ -1232,7 +1235,7 @@ int main(int argc, char *argv[])
 
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
-	TSRMLS_INIT();
+	tsrm_ls = ts_resource_ex(0, NULL);
 #endif
 
 #ifdef PHP_WIN32

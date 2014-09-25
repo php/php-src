@@ -78,7 +78,7 @@ typedef struct {
 extern zend_module_entry apache2_module_entry;
 
 #ifdef ZTS
-TSRMG_DHE(php_apache2_info_struct, php_apache2_info_id);
+extern int php_apache2_info_id;
 #define AP2(v) TSRMG(php_apache2_info_id, php_apache2_info_struct *, v)
 #else
 extern php_apache2_info_struct php_apache2_info;

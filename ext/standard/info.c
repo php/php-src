@@ -778,11 +778,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 #endif
 
 #ifdef ZTS
-#   ifdef USE___THREAD
-        php_info_print_table_row(2, "Thread Safety", "enabled, native TLS" );
-#   else
 		php_info_print_table_row(2, "Thread Safety", "enabled" );
-#   endif
 #else
 		php_info_print_table_row(2, "Thread Safety", "disabled" );
 #endif

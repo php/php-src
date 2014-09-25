@@ -23,7 +23,7 @@
 typedef struct _tsrm_tls_entry tsrm_tls_entry;
 
 struct _tsrm_tls_entry {
-	void *storage;
+	void **storage;
 	int count;
 	THREAD_T thread_id;
 	tsrm_tls_entry *next;
@@ -31,7 +31,6 @@ struct _tsrm_tls_entry {
 
 
 typedef struct {
-	ts_rsrc_offset offset;
 	size_t size;
 	ts_allocate_ctor ctor;
 	ts_allocate_dtor dtor;
@@ -43,7 +42,7 @@ typedef struct {
 static tsrm_tls_entry	**tsrm_tls_table=NULL;
 static int				tsrm_tls_table_size;
 static ts_rsrc_id		id_count;
-static size_t           rsrcs_size;
+
 /* The resource sizes table */
 static tsrm_resource_type	*resource_types_table=NULL;
 static int					resource_types_table_size;
@@ -62,62 +61,31 @@ int tsrm_error(int level, const char *format, ...);
 static int tsrm_error_level;
 static FILE *tsrm_error_file;
 
-#ifdef USE___THREAD
-TSRM_TLS void *tsrm_ls_cache = 0;
-#endif
-
-#ifdef PASS_TSRMLS
-# define CALL_TSRMG_CTOR(ctor, globale, storage)                 (ctor)((globale), (storage))
-# define CALL_TSRMG_DTOR(ctor, globale, storage)                 (ctor)((globale), (storage))
-# define CALL_NEW_THREAD_BEGIN_HANDLER(thread_id, storage)       tsrm_new_thread_begin_handler((thread_id), (storage))
-# define CALL_NEW_THREAD_END_HANDLER(thread_id, storage)         tsrm_new_thread_end_handler((thread_id), (storage))
-#else
-# define CALL_TSRMG_CTOR(ctor, globale, storage)                 (ctor)((globale))
-# define CALL_TSRMG_DTOR(ctor, globale, storage)                 (ctor)((globale))
-# define CALL_NEW_THREAD_BEGIN_HANDLER(thread_id, storage)       tsrm_new_thread_begin_handler((thread_id))
-# define CALL_NEW_THREAD_END_HANDLER(thread_id, storage)         tsrm_new_thread_end_handler((thread_id))
-#endif
-
-#ifndef TSRM_MM_ALIGNMENT
-# define TSRM_MM_ALIGNMENT 8
-#elif TSRM_MM_ALIGNMENT < 4
-# undef TSRM_MM_ALIGNMENT
-# define TSRM_MM_ALIGNMENT 8
-#endif
-
-#define TSRMG_PTR(storage, offset) ((void *)((tsrm_uintptr_t)storage + offset))
-
-#ifdef USE___THREAD
-# define TSRM_RETURN_TSRM_LS(array) array
-#else
-# define TSRM_RETURN_TSRM_LS(array) &array
-#endif
-
 #if TSRM_DEBUG
 #define TSRM_ERROR(args) tsrm_error args
-#define TSRM_SAFE_RETURN_RSRC(array, id, range)                                                                         \
+#define TSRM_SAFE_RETURN_RSRC(array, offset, range)																		\
 	{																													\
-		int unshuffled_id = TSRM_UNSHUFFLE_RSRC_ID(id);																    \
+		int unshuffled_offset = TSRM_UNSHUFFLE_RSRC_ID(offset);															\
 																														\
-		if (id==0) {                                                                                                    \
-	        return TSRM_RETURN_TSRM_LS(array);                                                                          \
-	    } else if ((unshuffled_id)>=0 && (unshuffled_id)<(range)) {												        \
+		if (offset==0) {																								\
+			return &array;																								\
+		} else if ((unshuffled_offset)>=0 && (unshuffled_offset)<(range)) {												\
 			TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Successfully fetched resource id %d for thread id %ld - 0x%0.8X",		\
-			    unshuffled_id, (long) thread_resources->thread_id, TSRMG_PTR(array, resource_types_table[unshuffled_id].offset))); \
-	        return TSRMG_PTR(array, resource_types_table[unshuffled_id].offset);										\
+						unshuffled_offset, (long) thread_resources->thread_id, array[unshuffled_offset]));				\
+			return array[unshuffled_offset];																			\
 		} else {																										\
 			TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Resource id %d is out of range (%d..%d)",								\
-						unshuffled_id, TSRM_SHUFFLE_RSRC_ID(0), TSRM_SHUFFLE_RSRC_ID(thread_resources->count-1)));      \
+						unshuffled_offset, TSRM_SHUFFLE_RSRC_ID(0), TSRM_SHUFFLE_RSRC_ID(thread_resources->count-1)));	\
 			return NULL;																								\
 		}																												\
 	}
 #else
 #define TSRM_ERROR(args)
-#define TSRM_SAFE_RETURN_RSRC(array, id, range)		                                        \
-	if (id==0) {									                                        \
-		return TSRM_RETURN_TSRM_LS(array);                                                  \
-	} else {											                                    \
-		return TSRMG_PTR(array, resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(id)].offset);	\
+#define TSRM_SAFE_RETURN_RSRC(array, offset, range)		\
+	if (offset==0) {									\
+		return &array;									\
+	} else {											\
+		return array[TSRM_UNSHUFFLE_RSRC_ID(offset)];	\
 	}
 #endif
 
@@ -207,8 +175,11 @@ TSRM_API void tsrm_shutdown(void)
 
 				next_p = p->next;
 				for (j=0; j<p->count; j++) {
-					if (resource_types_table && !resource_types_table[j].done && resource_types_table[j].dtor) {
-					    CALL_TSRMG_CTOR(resource_types_table[j].dtor, TSRMG_PTR(p->storage, resource_types_table[j].offset), &p->storage);
+					if (p->storage[j]) {
+						if (resource_types_table && !resource_types_table[j].done && resource_types_table[j].dtor) {
+							resource_types_table[j].dtor(p->storage[j], &p->storage);
+						}
+						free(p->storage[j]);
 					}
 				}
 				free(p->storage);
@@ -241,10 +212,9 @@ TSRM_API void tsrm_shutdown(void)
 
 
 /* allocates a new thread-safe-resource id */
-TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, ts_rsrc_offset *rsrc_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
+TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
 {
 	int i;
-	ts_rsrc_offset offset = 0;
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new resource id, %d bytes", size));
 
@@ -265,17 +235,6 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, ts_rsrc_offset *rsrc_off
 		}
 		resource_types_table_size = id_count;
 	}
-
-	if (TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id) > 0) {
-	    offset = resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id-1)].offset
-	            +resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id-1)].size;
-	}
-	offset = ((TSRM_MM_ALIGNMENT + offset - 1) & ~(TSRM_MM_ALIGNMENT - 1));
-	if (rsrc_offset) {
-	    *rsrc_offset = offset;
-	}
-
-	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].offset = offset;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].size = size;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
@@ -289,13 +248,11 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, ts_rsrc_offset *rsrc_off
 			if (p->count < id_count) {
 				int j;
 
-				p->storage = realloc(p->storage, offset + size);
-#ifdef USE___THREAD
-				tsrm_ls_cache = p->storage;
-#endif
+				p->storage = (void *) realloc(p->storage, sizeof(void *)*id_count);
 				for (j=p->count; j<id_count; j++) {
+					p->storage[j] = (void *) malloc(resource_types_table[j].size);
 					if (resource_types_table[j].ctor) {
-						CALL_TSRMG_CTOR(resource_types_table[j].ctor, TSRMG_PTR(p->storage, resource_types_table[j].offset), &p->storage);
+						resource_types_table[j].ctor(p->storage[j], &p->storage);
 					}
 				}
 				p->count = id_count;
@@ -303,10 +260,9 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, ts_rsrc_offset *rsrc_off
 			p = p->next;
 		}
 	}
-	rsrcs_size = offset + size;
 	tsrm_mutex_unlock(tsmm_mutex);
 
-	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d, offset %u", *rsrc_id, *rsrc_offset));
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", *rsrc_id));
 	return *rsrc_id;
 }
 
@@ -317,7 +273,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Creating data structures for thread %x", thread_id));
 	(*thread_resources_ptr) = (tsrm_tls_entry *) malloc(sizeof(tsrm_tls_entry));
-	(*thread_resources_ptr)->storage = malloc(rsrcs_size);
+	(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
 	(*thread_resources_ptr)->count = id_count;
 	(*thread_resources_ptr)->thread_id = thread_id;
 	(*thread_resources_ptr)->next = NULL;
@@ -325,23 +281,23 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	/* Set thread local storage to this new thread resources structure */
 	tsrm_tls_set(*thread_resources_ptr);
 
-#ifdef USE___THREAD
-	tsrm_ls_cache = (*thread_resources_ptr)->storage;
-#endif
-
 	if (tsrm_new_thread_begin_handler) {
-		CALL_NEW_THREAD_BEGIN_HANDLER(thread_id, &(*thread_resources_ptr)->storage);
+		tsrm_new_thread_begin_handler(thread_id, &((*thread_resources_ptr)->storage));
 	}
 	for (i=0; i<id_count; i++) {
-		if (!resource_types_table[i].done) {
+		if (resource_types_table[i].done) {
+			(*thread_resources_ptr)->storage[i] = NULL;
+		} else
+		{
+			(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
 			if (resource_types_table[i].ctor) {
-				CALL_TSRMG_CTOR(resource_types_table[i].ctor, TSRMG_PTR((*thread_resources_ptr)->storage, resource_types_table[i].offset), &(*thread_resources_ptr)->storage);
+				resource_types_table[i].ctor((*thread_resources_ptr)->storage[i], &(*thread_resources_ptr)->storage);
 			}
 		}
 	}
 
 	if (tsrm_new_thread_end_handler) {
-		CALL_NEW_THREAD_END_HANDLER(thread_id, &(*thread_resources_ptr)->storage);
+		tsrm_new_thread_end_handler(thread_id, &((*thread_resources_ptr)->storage));
 	}
 
 	tsrm_mutex_unlock(tsmm_mutex);
@@ -434,10 +390,12 @@ void tsrm_free_interpreter_context(void *context)
 
 		for (i=0; i<thread_resources->count; i++) {
 			if (resource_types_table[i].dtor) {
-				CALL_TSRMG_DTOR(resource_types_table[i].dtor, TSRMG_PTR(thread_resources->storage, resource_types_table[i].offset), &thread_resources->storage);
+				resource_types_table[i].dtor(thread_resources->storage[i], &thread_resources->storage);
 			}
 		}
-		
+		for (i=0; i<thread_resources->count; i++) {
+			free(thread_resources->storage[i]);
+		}
 		free(thread_resources->storage);
 		free(thread_resources);
 		thread_resources = next;
@@ -455,10 +413,6 @@ void *tsrm_set_interpreter_context(void *new_ctx)
 
 	/* Set thread local storage to this new thread resources structure */
 	tsrm_tls_set(new_ctx);
-	
-#ifdef USE___THREAD
-	tsrm_ls_cache = ((tsrm_tls_entry*)new_ctx)->storage;
-#endif
 
 	/* return old context, so caller can restore it when they're done */
 	return current;
@@ -501,8 +455,11 @@ void ts_free_thread(void)
 		if (thread_resources->thread_id == thread_id) {
 			for (i=0; i<thread_resources->count; i++) {
 				if (resource_types_table[i].dtor) {
-					CALL_TSRMG_DTOR(resource_types_table[i].dtor, TSRMG_PTR(thread_resources->storage, resource_types_table[i].offset), &thread_resources->storage);
+					resource_types_table[i].dtor(thread_resources->storage[i], &thread_resources->storage);
 				}
+			}
+			for (i=0; i<thread_resources->count; i++) {
+				free(thread_resources->storage[i]);
 			}
 			free(thread_resources->storage);
 			if (last) {
@@ -540,8 +497,11 @@ void ts_free_worker_threads(void)
 		if (thread_resources->thread_id != thread_id) {
 			for (i=0; i<thread_resources->count; i++) {
 				if (resource_types_table[i].dtor) {
-					CALL_TSRMG_DTOR(resource_types_table[i].dtor, TSRMG_PTR(thread_resources->storage, resource_types_table[i].offset), &thread_resources->storage);
+					resource_types_table[i].dtor(thread_resources->storage[i], &thread_resources->storage);
 				}
+			}
+			for (i=0; i<thread_resources->count; i++) {
+				free(thread_resources->storage[i]);
 			}
 			free(thread_resources->storage);
 			if (last) {
@@ -581,10 +541,12 @@ void ts_free_id(ts_rsrc_id id)
 			tsrm_tls_entry *p = tsrm_tls_table[i];
 
 			while (p) {
-				if (p->count > j) {
+				if (p->count > j && p->storage[j]) {
 					if (resource_types_table && resource_types_table[j].dtor) {
-						CALL_TSRMG_DTOR(resource_types_table[j].dtor, TSRMG_PTR(p->storage, resource_types_table[j].offset), &p->storage);
+						resource_types_table[j].dtor(p->storage[j], &p->storage);
 					}
+					free(p->storage[j]);
+					p->storage[j] = NULL;
 				}
 				p = p->next;
 			}
@@ -829,14 +791,9 @@ void tsrm_error_set(int level, char *debug_filename)
 #endif
 }
 
-TSRM_API void *get_tsrm_ls_cache(void)
+TSRM_API inline void *tsrm_get_ls_cache(void)
 {
-	return tsrm_ls_cache;
-}
-
-TSRM_API void set_tsrm_ls_cache(void **cache)
-{
-	tsrm_ls_cache = *cache;
+	return tsrm_tls_get();
 }
 
 #endif /* ZTS */

@@ -155,6 +155,9 @@ static const zend_function_entry additional_functions[] = {
 EMBED_SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC)
 {
 	zend_llist global_vars;
+#ifdef ZTS
+	void ***tsrm_ls = NULL;
+#endif
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -169,8 +172,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC)
 
 #ifdef ZTS
   tsrm_startup(1, 1, 0, NULL);
-  TSRMLS_INIT();
-  *ptsrm_ls = ts_resource_ex(0, NULL);
+  tsrm_ls = ts_resource(0);
+  *ptsrm_ls = tsrm_ls;
 #endif
 
   sapi_startup(&php_embed_module);

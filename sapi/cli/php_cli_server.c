@@ -1188,11 +1188,8 @@ static void php_cli_server_logf(const char *format TSRMLS_DC, ...) /* {{{ */
 {
 	char *buf = NULL;
 	va_list ap;
-#ifdef PASS_TSRMLS
-	va_start(ap, tsrm_ls);
-#else
+
 	va_start(ap, format);
-#endif
 	vspprintf(&buf, 0, format, ap);
 	va_end(ap);
 
@@ -2353,7 +2350,7 @@ static int php_cli_server_send_event(php_cli_server *server, php_cli_server_clie
 /* }}} */
 
 typedef struct php_cli_server_do_event_for_each_fd_callback_params {
-#ifdef PASS_TSRMLS
+#ifdef ZTS
 	void ***tsrm_ls;
 #endif
 	php_cli_server *server;
@@ -2364,6 +2361,9 @@ typedef struct php_cli_server_do_event_for_each_fd_callback_params {
 static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socket_t fd, int event) /* {{{ */
 {
 	php_cli_server_do_event_for_each_fd_callback_params *params = _params;
+#ifdef ZTS
+	void ***tsrm_ls = params->tsrm_ls;
+#endif
 	php_cli_server *server = params->server;
 	if (server->server_sock == fd) {
 		php_cli_server_client *client = NULL;
@@ -2415,8 +2415,8 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 static void php_cli_server_do_event_for_each_fd(php_cli_server *server, int(*rhandler)(php_cli_server*, php_cli_server_client* TSRMLS_DC), int(*whandler)(php_cli_server*, php_cli_server_client* TSRMLS_DC) TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_do_event_for_each_fd_callback_params params = {
-#ifdef PASS_TSRMLS
-		tsrm_ls,
+#ifdef ZTS
+		(void ***) tsrm_get_ls_cache(),
 #endif
 		server,
 		rhandler,
