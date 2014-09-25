@@ -974,11 +974,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 		ZVAL_DUP(EX_VAR(opline->result.var), var_ptr);
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		if (Z_OPT_IMMUTABLE_P(var_ptr) || Z_OPT_COPYABLE_P(var_ptr)) {
-			zval_copy_ctor_func(var_ptr);
-		} else if (Z_OPT_REFCOUNTED_P(var_ptr)) {
-			Z_ADDREF_P(var_ptr);
-		}
+		zval_opt_copy_ctor(var_ptr);
 	}
 
 	increment_function(var_ptr);
@@ -1018,11 +1014,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 		ZVAL_DUP(EX_VAR(opline->result.var), var_ptr);
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		if (Z_OPT_IMMUTABLE_P(var_ptr) || Z_OPT_COPYABLE_P(var_ptr)) {
-			zval_copy_ctor_func(var_ptr);
-		} else if (Z_OPT_REFCOUNTED_P(var_ptr)) {
-			Z_ADDREF_P(var_ptr);
-		}
+		zval_opt_copy_ctor(var_ptr);
 	}
 
 	decrement_function(var_ptr);

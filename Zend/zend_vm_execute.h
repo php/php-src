@@ -15426,11 +15426,7 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		ZVAL_DUP(EX_VAR(opline->result.var), var_ptr);
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		if (Z_OPT_IMMUTABLE_P(var_ptr) || Z_OPT_COPYABLE_P(var_ptr)) {
-			zval_copy_ctor_func(var_ptr);
-		} else if (Z_OPT_REFCOUNTED_P(var_ptr)) {
-			Z_ADDREF_P(var_ptr);
-		}
+		zval_opt_copy_ctor(var_ptr);
 	}
 
 	increment_function(var_ptr);
@@ -15470,11 +15466,7 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		ZVAL_DUP(EX_VAR(opline->result.var), var_ptr);
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		if (Z_OPT_IMMUTABLE_P(var_ptr) || Z_OPT_COPYABLE_P(var_ptr)) {
-			zval_copy_ctor_func(var_ptr);
-		} else if (Z_OPT_REFCOUNTED_P(var_ptr)) {
-			Z_ADDREF_P(var_ptr);
-		}
+		zval_opt_copy_ctor(var_ptr);
 	}
 
 	decrement_function(var_ptr);
@@ -32700,11 +32692,7 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		ZVAL_DUP(EX_VAR(opline->result.var), var_ptr);
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		if (Z_OPT_IMMUTABLE_P(var_ptr) || Z_OPT_COPYABLE_P(var_ptr)) {
-			zval_copy_ctor_func(var_ptr);
-		} else if (Z_OPT_REFCOUNTED_P(var_ptr)) {
-			Z_ADDREF_P(var_ptr);
-		}
+		zval_opt_copy_ctor(var_ptr);
 	}
 
 	increment_function(var_ptr);
@@ -32743,11 +32731,7 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		ZVAL_DUP(EX_VAR(opline->result.var), var_ptr);
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		if (Z_OPT_IMMUTABLE_P(var_ptr) || Z_OPT_COPYABLE_P(var_ptr)) {
-			zval_copy_ctor_func(var_ptr);
-		} else if (Z_OPT_REFCOUNTED_P(var_ptr)) {
-			Z_ADDREF_P(var_ptr);
-		}
+		zval_opt_copy_ctor(var_ptr);
 	}
 
 	decrement_function(var_ptr);
