@@ -10822,7 +10822,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -10840,7 +10840,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -11993,7 +11992,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
@@ -12001,7 +12000,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 		}
 
 		zend_error(E_RECOVERABLE_ERROR, "Call to a member function %s() on %s",  Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-		zval_dtor(free_op2.var);
+		zval_ptr_dtor_nogc(free_op2.var);
 
 		if (EG(exception) != NULL) {
 			HANDLE_EXCEPTION();
@@ -12011,7 +12010,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -13163,7 +13161,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
@@ -13181,7 +13179,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -14926,7 +14923,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -14944,7 +14941,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -18475,7 +18471,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -18494,7 +18490,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -20728,7 +20723,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
@@ -20736,7 +20731,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 		}
 
 		zend_error(E_RECOVERABLE_ERROR, "Call to a member function %s() on %s",  Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-		zval_dtor(free_op2.var);
+		zval_ptr_dtor_nogc(free_op2.var);
 		zval_ptr_dtor_nogc(free_op1.var);
 
 		if (EG(exception) != NULL) {
@@ -20747,7 +20742,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -22948,7 +22942,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
@@ -22967,7 +22961,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -26355,7 +26348,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -26374,7 +26367,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -27965,7 +27957,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -27983,7 +27975,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -29365,7 +29356,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
@@ -29373,7 +29364,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 		}
 
 		zend_error(E_RECOVERABLE_ERROR, "Call to a member function %s() on %s",  Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-		zval_dtor(free_op2.var);
+		zval_ptr_dtor_nogc(free_op2.var);
 
 		if (EG(exception) != NULL) {
 			HANDLE_EXCEPTION();
@@ -29383,7 +29374,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -30672,7 +30662,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
@@ -30690,7 +30680,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -32489,7 +32478,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -32507,7 +32496,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -35777,7 +35765,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -35795,7 +35783,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -37871,7 +37858,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
@@ -37879,7 +37866,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 		}
 
 		zend_error(E_RECOVERABLE_ERROR, "Call to a member function %s() on %s",  Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-		zval_dtor(free_op2.var);
+		zval_ptr_dtor_nogc(free_op2.var);
 
 		if (EG(exception) != NULL) {
 			HANDLE_EXCEPTION();
@@ -37889,7 +37876,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -39970,7 +39956,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op2.var);
@@ -39988,7 +39974,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
@@ -43120,7 +43105,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_uint nesting = 1;
+		uint32_t nesting = 1;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -43138,7 +43123,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 		 * nesting level. Return NULL (except when return value unused) */
 		do {
 			opline++;
-
 			if (opline->opcode == ZEND_INIT_FCALL ||
 				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
