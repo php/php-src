@@ -370,7 +370,7 @@ int phpdbg_compile(TSRMLS_D) /* {{{ */
 	zend_file_handle fh;
 
 	if (!PHPDBG_G(exec)) {
-		phpdbg_error("inactivee", "type=\"nocontext\"", "No execution context");
+		phpdbg_error("inactive", "type=\"nocontext\"", "No execution context");
 		return SUCCESS;
 	}
 
