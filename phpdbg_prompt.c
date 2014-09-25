@@ -344,14 +344,14 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				PHPDBG_G(exec) = res;
 				PHPDBG_G(exec_len) = res_len;
-				
+
 				*SG(request_info).argv = PHPDBG_G(exec);
 				php_hash_environment(TSRMLS_C);
 
 				phpdbg_notice("exec", "type=\"set\" context=\"%s\"", "Set execution context: %s", PHPDBG_G(exec));
 
 				if (phpdbg_compile(TSRMLS_C) == FAILURE) {
-					phpdbg_error("compile", "context=\"%s\"", "Failed to compile %s", PHPDBG_G(exec));
+					phpdbg_error("compile", "type=\"compilefailure\" context=\"%s\"", "Failed to compile %s", PHPDBG_G(exec));
 				}
 			} else {
 				phpdbg_notice("exec", "type=\"unchanged\"", "Execution context not changed");
@@ -370,12 +370,12 @@ int phpdbg_compile(TSRMLS_D) /* {{{ */
 	zend_file_handle fh;
 
 	if (!PHPDBG_G(exec)) {
-		phpdbg_error("compile", "type=\"nocontext\"", "No execution context");
+		phpdbg_error("inactivee", "type=\"nocontext\"", "No execution context");
 		return SUCCESS;
 	}
 
 	if (EG(in_execution)) {
-		phpdbg_error("compile", "type=\"isrunning\"", "Cannot compile while in execution");
+		phpdbg_error("inactive", "type=\"isrunning\"", "Cannot compile while in execution");
 		return FAILURE;
 	}
 
@@ -410,7 +410,7 @@ PHPDBG_COMMAND(continue) /* {{{ */
 PHPDBG_COMMAND(until) /* {{{ */
 {
 	if (!EG(in_execution)) {
-		phpdbg_error("until", "type=\"noexec\"", "Not executing");
+		phpdbg_error("inactive", "type=\"noexec\"", "Not executing");
 		return SUCCESS;
 	}
 
@@ -433,7 +433,7 @@ PHPDBG_COMMAND(until) /* {{{ */
 PHPDBG_COMMAND(finish) /* {{{ */
 {
 	if (!EG(in_execution)) {
-		phpdbg_error("finish", "type=\"noexec\"", "Not executing");
+		phpdbg_error("inactive", "type=\"noexec\"", "Not executing");
 		return SUCCESS;
 	}
 
@@ -461,7 +461,7 @@ PHPDBG_COMMAND(finish) /* {{{ */
 PHPDBG_COMMAND(leave) /* {{{ */
 {
 	if (!EG(in_execution)) {
-		phpdbg_error("leave", "type=\"noexec\"", "Not executing");
+		phpdbg_error("inactive", "type=\"noexec\"", "Not executing");
 		return SUCCESS;
 	}
 
@@ -489,7 +489,7 @@ PHPDBG_COMMAND(leave) /* {{{ */
 PHPDBG_COMMAND(frame) /* {{{ */
 {
 	if (!param) {
-		phpdbg_notice("frame", "num=\"%d\"", "Currently in frame #%d", PHPDBG_G(frame).num);
+		phpdbg_notice("frame", "id=\"%d\"", "Currently in frame #%d", PHPDBG_G(frame).num);
 	} else {
 		phpdbg_switch_frame(param->num TSRMLS_CC);
 	}
@@ -543,7 +543,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 PHPDBG_COMMAND(run) /* {{{ */
 {
 	if (EG(in_execution)) {
-		phpdbg_error("run", "type=\"isrunning\"", "Cannot start another execution while one is in progress");
+		phpdbg_error("inactive", "type=\"isrunning\"", "Cannot start another execution while one is in progress");
 		return SUCCESS;
 	}
 
@@ -553,10 +553,10 @@ PHPDBG_COMMAND(run) /* {{{ */
 		zval **orig_retval_ptr = EG(return_value_ptr_ptr);
 		zend_bool restore = 1;
 		zend_execute_data *ex = EG(current_execute_data);
-		
+
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
-				phpdbg_error("run", "type=\"compilefailure\" context=\"%s\"", "Failed to compile %s, cannot run", PHPDBG_G(exec));
+				phpdbg_error("compile", "type=\"compilefailure\" context=\"%s\"", "Failed to compile %s, cannot run", PHPDBG_G(exec));
 				goto out;
 			}
 		}
@@ -585,7 +585,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 			int argc = 0;
 			int i;
 			char *argv_str = strtok(param->str, " ");
-			
+
 			while (argv_str) {
 				if (argc >= 4 && argc == (argc & -argc)) {
 					argv = erealloc(argv, (argc * 2 + 1) * sizeof(char *));
@@ -601,16 +601,14 @@ PHPDBG_COMMAND(run) /* {{{ */
 			efree(SG(request_info).argv);
 			SG(request_info).argv = erealloc(argv, ++argc * sizeof(char *));
 			SG(request_info).argc = argc;
-			
+
 			php_hash_environment(TSRMLS_C);
 		}
 
 		zend_try {
-//			php_output_activate(TSRMLS_C);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
-//			php_output_deactivate(TSRMLS_C);
 			phpdbg_notice("run", "type=\"end\"", "Script ended normally");
 		} zend_catch {
 			EG(active_op_array) = orig_op_array;
@@ -633,7 +631,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 			EG(return_value_ptr_ptr) = orig_retval_ptr;
 		}
 	} else {
-		phpdbg_error("run", "type=\"noexec\"", "Nothing to execute!");
+		phpdbg_error("inactive", "type=\"nocontext\"", "Nothing to execute!");
 	}
 
 out:
@@ -676,7 +674,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 PHPDBG_COMMAND(back) /* {{{ */
 {
 	if (!EG(in_execution)) {
-		phpdbg_error("back", "type=\"noexec\"", "Not executing!");
+s		phpdbg_error("inactive", "type=\"noexec\"", "Not executing!");
 		return SUCCESS;
 	}
 
@@ -757,7 +755,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 			if (PHPDBG_G(exec)) {
 				phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
 			} else {
-				phpdbg_error("break", "type=\"noexec\"", "Execution context not set!");
+				phpdbg_error("inactive", "type=\"noexec\"", "Execution context not set!");
 			}
 			break;
 		case METHOD_PARAM:
@@ -811,7 +809,7 @@ PHPDBG_COMMAND(source) /* {{{ */
 	if (VCWD_STAT(param->str, &sb) != -1) {
 		phpdbg_try_file_init(param->str, param->len, 0 TSRMLS_CC);
 	} else {
-		phpdbg_error("source", "type=\"nofile\" file=\"%s\"", "Failed to stat %s, file does not exist", param->str);
+		phpdbg_error("source", "type=\"notfound\" file=\"%s\"", "Failed to stat %s, file does not exist", param->str);
 	}
 
 	return SUCCESS;
@@ -844,7 +842,7 @@ PHPDBG_COMMAND(register) /* {{{ */
 
 			phpdbg_notice("register", "function=\"%s\"", "Registered %s", lcname);
 		} else {
-			phpdbg_error("register", "type=\"notfound\" function=\"%s\"", "The requested function (%s) could not be found", param->str);
+			phpdbg_error("register", "type=\"notfoundc\" function=\"%s\"", "The requested function (%s) could not be found", param->str);
 		}
 	} else {
 		phpdbg_error("register", "type=\"inuse\" function=\"%s\"", "The requested name (%s) is already in use", lcname);
@@ -868,7 +866,7 @@ PHPDBG_COMMAND(quit) /* {{{ */
 PHPDBG_COMMAND(clean) /* {{{ */
 {
 	if (EG(in_execution)) {
-		phpdbg_error("clean", "type=\"isrunning\"", "Cannot clean environment while executing");
+		phpdbg_error("inactive", "type=\"isrunning\"", "Cannot clean environment while executing");
 		return SUCCESS;
 	}
 
