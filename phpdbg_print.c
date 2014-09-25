@@ -63,14 +63,14 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
 				end = op_array->last-1;
 
 				if (method->common.scope) {
-					phpdbg_writeln("printoplineinfo", "startline=\"%d\" endline=\"%d\" method=\"%s::%s\" file=\"%s\"", "\tL%d-%d %s::%s() %s",
+					phpdbg_writeln("printoplineinfo", "type=\"User\" startline=\"%d\" endline=\"%d\" method=\"%s::%s\" file=\"%s\"", "\tL%d-%d %s::%s() %s",
 						op_array->line_start,
 						op_array->line_end,
 						method->common.scope->name,
 						method->common.function_name,
 						op_array->filename ? op_array->filename : "unknown");
 				} else {
-					phpdbg_writeln("printoplineinfo", "startline=\"%d\" endline=\"%d\" function=\"%s\" file=\"%s\"", "\tL%d-%d %s() %s",
+					phpdbg_writeln("printoplineinfo", "type=\"User\" startline=\"%d\" endline=\"%d\" function=\"%s\" file=\"%s\"", "\tL%d-%d %s() %s",
 						method->common.function_name ? op_array->line_start : 0,
 						method->common.function_name ? op_array->line_end : 0,
 						method->common.function_name ? method->common.function_name : "{main}",
@@ -98,9 +98,9 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
 
 		default: {
 			if (method->common.scope) {
-				phpdbg_writeln("printoplineinfo", "type=\"internal\" method=\"%s::%s\"", "Internal %s::%s()", method->common.scope->name, method->common.function_name);
+				phpdbg_writeln("printoplineinfo", "type=\"Internal\" method=\"%s::%s\"", "Internal %s::%s()", method->common.scope->name, method->common.function_name);
 			} else {
-				phpdbg_writeln("printoplineinfo", "type=\"internal\" function=\"%s\"", "\tInternal %s()", method->common.function_name);
+				phpdbg_writeln("printoplineinfo", "type=\"Internal\" function=\"%s\"", "\tInternal %s()", method->common.function_name);
 			}
 		}
 	}
@@ -114,7 +114,7 @@ PHPDBG_PRINT(exec) /* {{{ */
 		}
 
 		if (PHPDBG_G(ops)) {
-			phpdbg_notice("printinfo", "file=\"%s\" count=\"%d\"", "Context %s (%d ops)", PHPDBG_G(exec), PHPDBG_G(ops)->last);
+			phpdbg_notice("printinfo", "file=\"%s\" num=\"%d\"", "Context %s (%d ops)", PHPDBG_G(exec), PHPDBG_G(ops)->last);
 
 			phpdbg_print_function_helper((zend_function*) PHPDBG_G(ops) TSRMLS_CC);
 		}
@@ -132,15 +132,15 @@ PHPDBG_PRINT(stack) /* {{{ */
 	if (EG(in_execution) && ops) {
 		if (ops->function_name) {
 			if (ops->scope) {
-				phpdbg_notice("printinfo", "method=\"%s::%s\" count=\"%d\"", "Stack in %s::%s() (%d ops)", ops->scope->name, ops->function_name, ops->last);
+				phpdbg_notice("printinfo", "method=\"%s::%s\" num=\"%d\"", "Stack in %s::%s() (%d ops)", ops->scope->name, ops->function_name, ops->last);
 			} else {
-				phpdbg_notice("printinfo", "function=\"%s\" count=\"%d\"", "Stack in %s() (%d ops)", ops->function_name, ops->last);
+				phpdbg_notice("printinfo", "function=\"%s\" num=\"%d\"", "Stack in %s() (%d ops)", ops->function_name, ops->last);
 			}
 		} else {
 			if (ops->filename) {
-				phpdbg_notice("printinfo", "file=\"%s\" count=\"%d\"", "Stack in %s (%d ops)", ops->filename, ops->last);
+				phpdbg_notice("printinfo", "file=\"%s\" num=\"%d\"", "Stack in %s (%d ops)", ops->filename, ops->last);
 			} else {
-				phpdbg_notice("printinfo", "opline=\"%p\" count=\"%d\"", "Stack @ %p (%d ops)", ops, ops->last);
+				phpdbg_notice("printinfo", "opline=\"%p\" num=\"%d\"", "Stack @ %p (%d ops)", ops, ops->last);
 			}
 		}
 		phpdbg_print_function_helper((zend_function*) ops TSRMLS_CC);
@@ -156,7 +156,7 @@ PHPDBG_PRINT(class) /* {{{ */
 	zend_class_entry **ce;
 
 	if (zend_lookup_class(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
-		phpdbg_notice("printinfo", "type=\"%s\" flag=\"%s\" class=\"%s\" count=\"%d\"", "%s %s: %s (%d methods)",
+		phpdbg_notice("printinfo", "type=\"%s\" flag=\"%s\" class=\"%s\" num=\"%d\"", "%s %s: %s (%d methods)",
 			((*ce)->type == ZEND_USER_CLASS) ?
 				"User" : "Internal",
 			((*ce)->ce_flags & ZEND_ACC_INTERFACE) ?
@@ -197,7 +197,7 @@ PHPDBG_PRINT(method) /* {{{ */
 		char *lcname = zend_str_tolower_dup(param->method.name, strlen(param->method.name));
 
 		if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**)&fbc) == SUCCESS) {
-			phpdbg_notice("printinfo", "type=\"%s\" flag=\"Method\" symbol=\"%s\" count=\"%d\"", "%s Method %s (%d ops)",
+			phpdbg_notice("printinfo", "type=\"%s\" flags=\"Method\" symbol=\"%s\" num=\"%d\"", "%s Method %s (%d ops)",
 				(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
 				fbc->common.function_name,
 				(fbc->type == ZEND_USER_FUNCTION) ? fbc->op_array.last : 0);
@@ -243,7 +243,7 @@ PHPDBG_PRINT(func) /* {{{ */
 	lcname  = zend_str_tolower_dup(func_name, func_name_len);
 
 	if (zend_hash_find(func_table, lcname, strlen(lcname)+1, (void**)&fbc) == SUCCESS) {
-		phpdbg_notice("printinfo", "type=\"%s\" flag=\"%s\" symbol=\"%s\" count=\"%d\"", "%s %s %s (%d ops)",
+		phpdbg_notice("printinfo", "type=\"%s\" flags=\"%s\" symbol=\"%s\" num=\"%d\"", "%s %s %s (%d ops)",
 			(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
 			(fbc->common.scope) ? "Method" : "Function",
 			fbc->common.function_name,
