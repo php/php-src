@@ -2162,9 +2162,11 @@ try_again:
 			if (Z_OBJ_HANDLER_P(op1, get)
 			   && Z_OBJ_HANDLER_P(op1, set)) {
 				/* proxy object */
-				TSRMLS_FETCH();
 				zval rv;
-				zval *val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
+				zval *val;
+				TSRMLS_FETCH();
+
+				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
 				Z_ADDREF_P(val);
 				fast_increment_function(val);
 				Z_OBJ_HANDLER_P(op1, set)(op1, val TSRMLS_CC);
@@ -2235,9 +2237,11 @@ try_again:
 			if (Z_OBJ_HANDLER_P(op1, get)
 			   && Z_OBJ_HANDLER_P(op1, set)) {
 				/* proxy object */
-				TSRMLS_FETCH();
 				zval rv;
-				zval *val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
+				zval *val;
+				TSRMLS_FETCH();
+
+				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
 				Z_ADDREF_P(val);
 				fast_decrement_function(val);
 				Z_OBJ_HANDLER_P(op1, set)(op1, val TSRMLS_CC);
