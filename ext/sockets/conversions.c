@@ -541,7 +541,6 @@ static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_co
 	int					res;
 	struct sockaddr_in	saddr = {0};
 	zend_string			*addr_str;
-	TSRMLS_FETCH();
 
 	addr_str = zval_get_string((zval *) zaddr_str);
 	res = php_set_inet_addr(&saddr, addr_str->val, ctx->sock TSRMLS_CC);
@@ -592,7 +591,6 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 	int					res;
 	struct sockaddr_in6	saddr6 = {0};
 	zend_string			*addr_str;
-	TSRMLS_FETCH();
 
 	addr_str = zval_get_string((zval *) zaddr_str);
 	res = php_set_inet6_addr(&saddr6, addr_str->val, ctx->sock TSRMLS_CC);
@@ -645,7 +643,6 @@ static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_
 {
 	zend_string			*path_str;
 	struct sockaddr_un	*saddr = (struct sockaddr_un*)sockaddr_un_c;
-	TSRMLS_FETCH();
 
 	path_str = zval_get_string((zval *) path);
 
@@ -1246,7 +1243,6 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 		}
 	} else {
 		zend_string *str;
-		TSRMLS_FETCH();
 		
 		str = zval_get_string((zval *) zv);
 
@@ -1350,7 +1346,6 @@ size_t calculate_scm_rights_space(const zval *arr, ser_context *ctx)
 static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, ser_context *ctx)
 {
 	int *iarr = args[0];
-	TSRMLS_FETCH();
 
 	if (Z_TYPE_P(elem) == IS_RESOURCE) {
 		php_stream *stream;
@@ -1395,7 +1390,6 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 					i;
 	struct cmsghdr	*dummy_cmsg = 0;
 	size_t			data_offset;
-	TSRMLS_FETCH();
 
 	data_offset = (unsigned char *)CMSG_DATA(dummy_cmsg)
 			- (unsigned char *)dummy_cmsg;
