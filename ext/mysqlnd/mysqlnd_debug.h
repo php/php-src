@@ -45,9 +45,6 @@ struct st_mysqlnd_debug_methods
 struct st_mysqlnd_debug
 {
 	php_stream	*stream;
-#ifdef ZTS
-	void ***tsrm_ls;
-#endif
 	unsigned int flags;
 	unsigned int nest_level_limit;
 	int pid;

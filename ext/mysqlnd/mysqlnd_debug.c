@@ -713,9 +713,7 @@ PHPAPI MYSQLND_DEBUG *
 mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC)
 {
 	MYSQLND_DEBUG *ret = calloc(1, sizeof(MYSQLND_DEBUG));
-#ifdef ZTS
-	ret->tsrm_ls = tsrm_get_ls_cache();
-#endif
+
 	ret->nest_level_limit = 0;
 	ret->pid = getpid();
 	zend_stack_init(&ret->call_stack, sizeof(char *));
