@@ -6,7 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #67985 (Incorrect last used array index copied to new array after
     unset). (Tjerk)
 
-?? ??? 2014, PHP 5.4.33
+- OpenSSL:
+  . Reverted fixes for bug #41631, due to regressions. (Stas) 
+
+18 Sep 2014, PHP 5.4.33
 
 - Core:
   . Fixed bug #47358 (glob returns error, should be empty array()). (Pierre)
