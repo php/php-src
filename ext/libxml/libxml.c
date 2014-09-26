@@ -302,8 +302,6 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	int isescaped=0;
 	xmlURI *uri;
 
-	TSRMLS_FETCH();
-
 	uri = xmlParseURI(filename);
 	if (uri && (uri->scheme == NULL ||
 			(xmlStrncmp(BAD_CAST uri->scheme, BAD_CAST "file", 4) == 0))) {
@@ -358,19 +356,16 @@ static void *php_libxml_streams_IO_open_write_wrapper(const char *filename)
 
 static int php_libxml_streams_IO_read(void *context, char *buffer, int len)
 {
-	TSRMLS_FETCH();
 	return php_stream_read((php_stream*)context, buffer, len);
 }
 
 static int php_libxml_streams_IO_write(void *context, const char *buffer, int len)
 {
-	TSRMLS_FETCH();
 	return php_stream_write((php_stream*)context, buffer, len);
 }
 
 static int php_libxml_streams_IO_close(void *context)
 {
-	TSRMLS_FETCH();
 	return php_stream_close((php_stream*)context);
 }
 
@@ -379,7 +374,6 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 {
 	xmlParserInputBufferPtr ret;
 	void *context = NULL;
-	TSRMLS_FETCH();
 
 	if (LIBXML(entity_loader_disabled)) {
 		return NULL;
@@ -463,8 +457,6 @@ static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
 	xmlError error_copy;
 	int ret;
 
-	TSRMLS_FETCH();
-
 	memset(&error_copy, 0, sizeof(xmlError));
 
 	if (error) {
@@ -520,8 +512,6 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 	char *buf;
 	int len, len_iter, output = 0;
 
-	TSRMLS_FETCH();
-
 	len = vspprintf(&buf, 0, *msg, ap);
 	len_iter = len;
 
@@ -563,7 +553,6 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 	zval				params[3];
 	int					status;
 	zend_fcall_info		*fci;
-	TSRMLS_FETCH();
 
 	fci = &LIBXML(entity_loader).fci;
 	
@@ -680,8 +669,6 @@ is_string:
 static xmlParserInputPtr _php_libxml_pre_ext_ent_loader(const char *URL,
 		const char *ID, xmlParserCtxtPtr context)
 {
-	TSRMLS_FETCH();
-
 	/* Check whether we're running in a PHP context, since the entity loader
 	 * we've defined is an application level (true global) setting.
 	 * If we are, we also want to check whether we've finished activating
@@ -889,7 +876,6 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 
 static int php_libxml_post_deactivate(void)
 {
-	TSRMLS_FETCH();
 	/* reset libxml generic error handling */
 	if (_php_libxml_per_request_initialization) {
 		xmlSetGenericErrorFunc(NULL, NULL);
