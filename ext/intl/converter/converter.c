@@ -24,9 +24,6 @@
 #include "../intl_error.h"
 
 typedef struct _php_converter_object {
-#ifdef ZTS
-	void ***tsrm_ls;
-#endif
 	UConverter *src, *dest;
 	zend_fcall_info to_cb, from_cb;
 	zend_fcall_info_cache to_cache, from_cache;
@@ -229,9 +226,6 @@ static void php_converter_to_u_callback(const void *context,
 	php_converter_object *objval = (php_converter_object*)context;
 	zval retval;
 	zval zargs[4];
-#ifdef ZTS
-	void ***tsrm_ls = objval->tsrm_ls;
-#endif
 
 	ZVAL_LONG(&zargs[0], reason);
 	ZVAL_STRINGL(&zargs[1], args->source, args->sourceLimit - args->source);
@@ -308,9 +302,6 @@ static void php_converter_from_u_callback(const void *context,
 	zval retval;
 	zval zargs[4];
 	int i;
-#ifdef ZTS
-	void ***tsrm_ls = objval->tsrm_ls;
-#endif
 
 	ZVAL_LONG(&zargs[0], reason);
 	array_init(&zargs[1]);
@@ -1045,9 +1036,6 @@ static zend_object *php_converter_object_ctor(zend_class_entry *ce, php_converte
 	objval = ecalloc(1, sizeof(php_converter_object) + sizeof(zval) * (ce->default_properties_count - 1));
 
 	zend_object_std_init(&objval->obj, ce TSRMLS_CC );
-#ifdef ZTS
-	objval->tsrm_ls = tsrm_get_ls_cache();
-#endif
 	intl_error_init(&(objval->error) TSRMLS_CC);
 
 	objval->obj.handlers = &php_converter_object_handlers;
