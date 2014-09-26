@@ -445,7 +445,6 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	zend_ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
 	HashTable *objhash, *sleephash;
-	TSRMLS_FETCH();
 
 	ZVAL_STRING(&fname, "__sleep");
 	/*
@@ -537,7 +536,6 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 	HashTable *target_hash;
 	char tmp_buf[WDDX_BUF_LEN];
 	zend_ulong ind = 0;
-	TSRMLS_FETCH();
 
 	target_hash = HASH_OF(arr);
 	ZEND_HASH_FOREACH_KEY(target_hash, idx, key) {
@@ -666,7 +664,6 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 {
 	zval *val;
 	HashTable *target_hash;
-	TSRMLS_FETCH();
 
 	if (Z_TYPE_P(name_var) == IS_STRING) {
 		zend_array *symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
@@ -714,7 +711,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 {
 	st_entry ent;
 	wddx_stack *stack = (wddx_stack *)user_data;
-	TSRMLS_FETCH();
+
 	if (!strcmp((char *)name, EL_PACKET)) {
 		int i;
 		
@@ -870,7 +867,6 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 	HashTable 			*target_hash;
 	zend_class_entry 	*pce;
 	zval				obj;
-	TSRMLS_FETCH();
 
 /* OBJECTS_FIXME */
 	if (stack->top == 0) {
@@ -986,7 +982,6 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 {
 	st_entry *ent;
 	wddx_stack *stack = (wddx_stack *)user_data;
-	TSRMLS_FETCH();
 
 	if (!wddx_stack_is_empty(stack) && !stack->done) {
 		wddx_stack_top(stack, (void**)&ent);
