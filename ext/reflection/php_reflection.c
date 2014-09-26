@@ -995,9 +995,12 @@ static int _extension_class_string(zval *el TSRMLS_DC, int num_args, va_list arg
 	int *num_classes = va_arg(args, int*);
 
 	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module && !strcasecmp(ce->info.internal.module->name, module->name)) {
-		string_printf(str, "\n");
-		_class_string(str, ce, NULL, indent TSRMLS_CC);
-		(*num_classes)++;
+		/* dump class if it is not an alias */
+		if (!zend_binary_strcasecmp(ce->name->val, ce->name->len, hash_key->key->val, hash_key->key->len)) {
+			string_printf(str, "\n");
+			_class_string(str, ce, NULL, indent TSRMLS_CC);
+			(*num_classes)++;
+		}
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
@@ -5320,11 +5323,20 @@ static int add_extension_class(zval *zv TSRMLS_DC, int num_args, va_list args, z
 	int add_reflection_class = va_arg(args, int);
 
 	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module && !strcasecmp(ce->info.internal.module->name, module->name)) {
+		zend_string *name;
+
+		if (zend_binary_strcasecmp(ce->name->val, ce->name->len, hash_key->key->val, hash_key->key->len)) {
+			/* This is an class alias, use alias name */
+			name = hash_key->key;
+		} else {
+			/* Use class name */
+			name = ce->name;
+		}
 		if (add_reflection_class) {
 			zend_reflection_class_factory(ce, &zclass TSRMLS_CC);
-			zend_hash_update(Z_ARRVAL_P(class_array), ce->name, &zclass);
+			zend_hash_update(Z_ARRVAL_P(class_array), name, &zclass);
 		} else {
-			add_next_index_str(class_array, zend_string_copy(ce->name));
+			add_next_index_str(class_array, zend_string_copy(name));
 		}
 	}
 	return ZEND_HASH_APPLY_KEEP;
