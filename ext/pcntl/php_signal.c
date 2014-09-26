@@ -28,9 +28,7 @@
 Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 {
 	struct sigaction act,oact;
-#ifdef ZEND_SIGNALS
-	TSRMLS_FETCH();
-#endif
+
 	act.sa_handler = func;
 	if (mask_all) {
 		sigfillset(&act.sa_mask);
