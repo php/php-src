@@ -994,8 +994,6 @@ static int php_openssl_write_rand_file(const char * file, int egdsocket, int see
 {
 	char buffer[MAXPATHLEN];
 
-	TSRMLS_FETCH();
-
 	if (egdsocket || !seeded) {
 		/* if we did not manage to read the seed file, we should not write
 		 * a low-entropy seed file back */
@@ -2058,7 +2056,6 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 	STACK_OF(X509) *stack=NULL, *ret=NULL;
 	BIO *in=NULL;
 	X509_INFO *xi;
-	TSRMLS_FETCH();
 
 	if(!(stack = sk_X509_new_null())) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "memory allocation failure");
@@ -2111,7 +2108,6 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 {
 	int ret=0;
 	X509_STORE_CTX *csc;
-	TSRMLS_FETCH();
 
 	csc = X509_STORE_CTX_new();
 	if (csc == NULL) {
