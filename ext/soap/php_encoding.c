@@ -3413,7 +3413,6 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns)
 	}
 	if (xmlns == NULL) {
 		xmlChar* prefix;
-        TSRMLS_FETCH();
 
 		if ((prefix = zend_hash_str_find_ptr(&SOAP_GLOBAL(defEncNs), (char*)ns, strlen(ns))) != NULL) {
 			xmlns = xmlNewNs(node->doc->children, BAD_CAST(ns), prefix);
@@ -3457,7 +3456,6 @@ static void set_xsi_type(xmlNodePtr node, char *type)
 
 void encode_reset_ns()
 {
-	TSRMLS_FETCH();
 	SOAP_GLOBAL(cur_uniq_ns) = 0;
 	SOAP_GLOBAL(cur_uniq_ref) = 0;
 	if (SOAP_GLOBAL(ref_map)) {
@@ -3470,7 +3468,6 @@ void encode_reset_ns()
 
 void encode_finish()
 {
-	TSRMLS_FETCH();
 	SOAP_GLOBAL(cur_uniq_ns) = 0;
 	SOAP_GLOBAL(cur_uniq_ref) = 0;
 	if (SOAP_GLOBAL(ref_map)) {
@@ -3483,7 +3480,6 @@ void encode_finish()
 encodePtr get_conversion(int encode)
 {
 	encodePtr enc;
-	TSRMLS_FETCH();
 
 	if ((enc = zend_hash_index_find_ptr(&SOAP_GLOBAL(defEncIndex), encode)) == NULL) {
 		soap_error0(E_ERROR,  "Encoding: Cannot find encoding");
@@ -3610,8 +3606,6 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type TS
 
 static void get_type_str(xmlNodePtr node, const char* ns, const char* type, smart_str* ret)
 {
-	TSRMLS_FETCH();
-
 	if (ns) {
 		xmlNsPtr xmlns;
 		if (SOAP_GLOBAL(soap_version) == SOAP_1_2 &&
