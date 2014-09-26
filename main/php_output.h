@@ -102,12 +102,7 @@ typedef struct _php_output_context {
 	int op;
 	php_output_buffer in;
 	php_output_buffer out;
-#ifdef ZTS
-	void ***tsrm_ls;
-#endif
 } php_output_context;
-
-#define PHP_OUTPUT_TSRMLS(ctx) TSRMLS_FETCH_FROM_CTX((ctx)->tsrm_ls)
 
 /* old-style, stateless callback */
 typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC);

@@ -1156,8 +1156,6 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 
 PHPAPI void _php_emit_fd_setsize_warning(int max_fd)
 {
-	TSRMLS_FETCH();
-
 #ifdef PHP_WIN32
 	php_error_docref(NULL TSRMLS_CC, E_WARNING,
 		"PHP needs to be recompiled with a larger value of FD_SETSIZE.\n"

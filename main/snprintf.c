@@ -787,7 +787,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			 */
 			switch (*fmt) {
 				case 'Z': {
-				    TSRMLS_FETCH();
 				    zvp = (zval*) va_arg(ap, zval*);
 					free_zcopy = zend_make_printable_zval(zvp, &zcopy TSRMLS_CC);
 					if (free_zcopy) {
