@@ -371,7 +371,6 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-				TSRMLS_FETCH();
 
 				convert_object_to_type(op, &dst, IS_LONG, convert_to_long);
 				zval_dtor(op);
@@ -429,7 +428,6 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-				TSRMLS_FETCH();
 
 				convert_object_to_type(op, &dst, IS_DOUBLE, convert_to_double);
 				zval_dtor(op);
@@ -453,7 +451,6 @@ ZEND_API void convert_to_null(zval *op) /* {{{ */
 	if (Z_TYPE_P(op) == IS_OBJECT) {
 		if (Z_OBJ_HT_P(op)->cast_object) {
 			zval org;
-			TSRMLS_FETCH();
 
 			ZVAL_COPY_VALUE(&org, op);
 			if (Z_OBJ_HT_P(op)->cast_object(&org, op, IS_NULL TSRMLS_CC) == SUCCESS) {
@@ -514,7 +511,6 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-				TSRMLS_FETCH();
 
 				convert_object_to_type(op, &dst, _IS_BOOL, convert_to_boolean);
 				zval_dtor(op);
@@ -543,7 +539,6 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		case IS_UNDEF:
 		case IS_NULL:
 		case IS_FALSE: {
-			TSRMLS_FETCH();
 			ZVAL_EMPTY_STRING(op);
 			break;
 		}
@@ -565,7 +560,6 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		case IS_DOUBLE: {
 			zend_string *str;
 			double dval = Z_DVAL_P(op);
-			TSRMLS_FETCH();
 
 			str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
 			/* %G already handles removing trailing zeros from the fractional part, yay */
@@ -579,7 +573,6 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		case IS_OBJECT: {
 			zval dst;
-			TSRMLS_FETCH();
 
 			convert_object_to_type(op, &dst, IS_STRING, convert_to_string);
 
@@ -612,8 +605,6 @@ static void convert_scalar_to_array(zval *op TSRMLS_DC) /* {{{ */
 
 ZEND_API void convert_to_array(zval *op) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
 			break;
@@ -660,8 +651,6 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 
 ZEND_API void convert_to_object(zval *op) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
 			{
@@ -2164,7 +2153,6 @@ try_again:
 				/* proxy object */
 				zval rv;
 				zval *val;
-				TSRMLS_FETCH();
 
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
 				Z_ADDREF_P(val);
@@ -2174,7 +2162,6 @@ try_again:
 			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
-				TSRMLS_FETCH();
 
 				ZVAL_LONG(&op2, 1);
 				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, &op2 TSRMLS_CC);
@@ -2239,7 +2226,6 @@ try_again:
 				/* proxy object */
 				zval rv;
 				zval *val;
-				TSRMLS_FETCH();
 
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
 				Z_ADDREF_P(val);
@@ -2249,7 +2235,6 @@ try_again:
 			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
-				TSRMLS_FETCH();
 
 				ZVAL_LONG(&op2, 1);
 				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, &op2 TSRMLS_CC);
@@ -2558,7 +2543,6 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC) /
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
 	zend_string *str;
-	TSRMLS_FETCH();
 
 	str = zend_strpprintf(0, "%.*G", (int) EG(precision), (double)Z_DVAL_P(op));
 	ZVAL_NEW_STR(op, str);

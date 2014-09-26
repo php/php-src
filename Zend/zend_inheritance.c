@@ -551,7 +551,6 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 {
 	uint32_t parent_flags = parent->common.fn_flags;
 	zend_function *child;
-	TSRMLS_FETCH();
 
 	if ((child = zend_hash_find_ptr(child_function_table, key)) == NULL) {
 		if (parent_flags & (ZEND_ACC_ABSTRACT)) {
