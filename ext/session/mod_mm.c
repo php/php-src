@@ -122,8 +122,6 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key)
 
 	sd = mm_malloc(data->mm, sizeof(ps_sd) + keylen);
 	if (!sd) {
-		TSRMLS_FETCH();
-
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mm_malloc failed, avail %ld, err %s", mm_available(data->mm), mm_error());
 		return NULL;
 	}
