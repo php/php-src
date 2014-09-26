@@ -48,7 +48,6 @@ static void php_sqlite3_error(php_sqlite3_db_object *db_obj, char *format, ...)
 {
 	va_list arg;
 	char 	*message;
-	TSRMLS_FETCH();
 
 	va_start(arg, format); 
 	vspprintf(&message, 0, format, arg);
@@ -812,7 +811,6 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 static void php_sqlite3_callback_func(sqlite3_context *context, int argc, sqlite3_value **argv) /* {{{ */
 {
 	php_sqlite3_func *func = (php_sqlite3_func *)sqlite3_user_data(context);
-	TSRMLS_FETCH();
 
 	sqlite3_do_callback(&func->afunc, &func->func, argc, argv, context, 0 TSRMLS_CC);
 }
@@ -823,7 +821,6 @@ static void php_sqlite3_callback_step(sqlite3_context *context, int argc, sqlite
 	php_sqlite3_func *func = (php_sqlite3_func *)sqlite3_user_data(context);
 	php_sqlite3_agg_context *agg_context = (php_sqlite3_agg_context *)sqlite3_aggregate_context(context, sizeof(php_sqlite3_agg_context));
 
-	TSRMLS_FETCH();
 	agg_context->row_count++;
 
 	sqlite3_do_callback(&func->astep, &func->step, argc, argv, context, 1 TSRMLS_CC);
@@ -835,7 +832,6 @@ static void php_sqlite3_callback_final(sqlite3_context *context) /* {{{ */
 	php_sqlite3_func *func = (php_sqlite3_func *)sqlite3_user_data(context);
 	php_sqlite3_agg_context *agg_context = (php_sqlite3_agg_context *)sqlite3_aggregate_context(context, sizeof(php_sqlite3_agg_context));
 
-	TSRMLS_FETCH();
 	agg_context->row_count = 0;
 
 	sqlite3_do_callback(&func->afini, &func->fini, 0, NULL, context, 1 TSRMLS_CC);
@@ -848,8 +844,6 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	zval *zargs = NULL;
 	zval retval;
 	int ret;
-
-	TSRMLS_FETCH();
 
 	collation->fci.fci.size = (sizeof(collation->fci.fci));
 	collation->fci.fci.function_table = EG(function_table);
@@ -1966,7 +1960,6 @@ static int php_sqlite3_authorizer(void *autharg, int access_type, const char *ar
 		case SQLITE_ATTACH:
 		{
 			if (memcmp(arg3, ":memory:", sizeof(":memory:")) && *arg3) {
-				TSRMLS_FETCH();
 
 #if PHP_API_VERSION < 20100412
 				if (PG(safe_mode) && (!php_checkuid(arg3, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
