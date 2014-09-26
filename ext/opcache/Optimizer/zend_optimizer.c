@@ -304,7 +304,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					ZVAL_COPY_VALUE(&old_val, val);
 					zval_copy_ctor(val);
 					zend_optimizer_update_op1_const(op_array, opline, val TSRMLS_CC);
-					zval_dtor(&old_val);
+					ZVAL_COPY_VALUE(val, &old_val);
 					opline++;
 					continue;
 				}
