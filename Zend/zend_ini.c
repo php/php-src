@@ -292,8 +292,6 @@ ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC) /* {{{ */
 
 ZEND_API int zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	return zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0 TSRMLS_CC);
 }
 /* }}} */
@@ -302,7 +300,6 @@ ZEND_API int zend_alter_ini_entry_chars(zend_string *name, const char *value, si
 {
     int ret;
     zend_string *new_value;
-	TSRMLS_FETCH();
 
 	new_value = zend_string_init(value, value_length, stage != ZEND_INI_STAGE_RUNTIME);
 	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0 TSRMLS_CC);
@@ -378,7 +375,6 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, 
 ZEND_API int zend_restore_ini_entry(zend_string *name, int stage) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
-	TSRMLS_FETCH();
 
 	if ((ini_entry = zend_hash_find_ptr(EG(ini_directives), name)) == NULL ||
 		(stage == ZEND_INI_STAGE_RUNTIME && (ini_entry->modifiable & ZEND_INI_USER) == 0)) {
@@ -418,7 +414,6 @@ ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*di
 ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
-	TSRMLS_FETCH();
 
 	ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
 	if (ini_entry) {
@@ -436,7 +431,6 @@ ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig) /* {{{ 
 ZEND_API double zend_ini_double(char *name, uint name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
-	TSRMLS_FETCH();
 
 	ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
 	if (ini_entry) {
@@ -454,7 +448,6 @@ ZEND_API double zend_ini_double(char *name, uint name_length, int orig) /* {{{ *
 ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_bool *exists) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
-	TSRMLS_FETCH();
 
 	ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
 	if (ini_entry) {

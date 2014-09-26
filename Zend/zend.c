@@ -831,8 +831,6 @@ void zenderror(const char *error) /* {{{ */
 BEGIN_EXTERN_C()
 ZEND_API void _zend_bailout(char *filename, uint lineno) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	if (!EG(bailout)) {
 		zend_output_debug_string(1, "%s(%d) : Bailed out without a bailout address!", filename, lineno);
 		exit(-1);
@@ -998,7 +996,6 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	zend_stack delayed_oplines_stack;
 	zend_stack context_stack;
 	zend_array *symbol_table;
-	TSRMLS_FETCH();
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {

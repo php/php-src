@@ -112,7 +112,6 @@ ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
 ZEND_API void zend_function_dtor(zval *zv)
 {
 	zend_function *function = Z_PTR_P(zv);
-	TSRMLS_FETCH();
 
 	if (function->type == ZEND_USER_FUNCTION) {
 		ZEND_ASSERT(function->common.function_name);

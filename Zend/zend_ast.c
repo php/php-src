@@ -43,7 +43,6 @@ static inline size_t zend_ast_list_size(uint32_t children) {
 
 ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
 	zend_ast_znode *ast;
-	TSRMLS_FETCH();
 
 	ast = zend_ast_alloc(sizeof(zend_ast_znode) TSRMLS_CC);
 	ast->kind = ZEND_AST_ZNODE;
@@ -55,7 +54,6 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
 
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
 	zend_ast_zval *ast;
-	TSRMLS_FETCH();
 
 	ast = zend_ast_alloc(sizeof(zend_ast_zval) TSRMLS_CC);
 	ast->kind = ZEND_AST_ZVAL;
@@ -70,7 +68,6 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2
 ) {
 	zend_ast_decl *ast;
-	TSRMLS_FETCH();
 
 	ast = zend_ast_alloc(sizeof(zend_ast_decl) TSRMLS_CC);
 	ast->kind = kind;
@@ -91,7 +88,6 @@ ZEND_API zend_ast *zend_ast_create_decl(
 static zend_ast *zend_ast_create_from_va_list(zend_ast_kind kind, zend_ast_attr attr, va_list va) {
 	uint32_t i, children = kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
 	zend_ast *ast;
-	TSRMLS_FETCH();
 
 	ast = zend_ast_alloc(zend_ast_size(children) TSRMLS_CC);
 	ast->kind = kind;
@@ -140,7 +136,6 @@ ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...) {
 ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...) {
 	zend_ast *ast;
 	zend_ast_list *list;
-	TSRMLS_FETCH();
 
 	ast = zend_ast_alloc(zend_ast_list_size(4) TSRMLS_CC);
 	list = (zend_ast_list *) ast;
@@ -169,7 +164,6 @@ static inline zend_bool is_power_of_two(uint32_t n) {
 ZEND_API zend_ast *zend_ast_list_add(zend_ast *ast, zend_ast *op) {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	if (list->children >= 4 && is_power_of_two(list->children)) {
-		TSRMLS_FETCH();
 		list = zend_ast_realloc(list,
 			zend_ast_list_size(list->children), zend_ast_list_size(list->children * 2) TSRMLS_CC);
 	}

@@ -165,8 +165,6 @@ void list_entry_destructor(zval *zv)
 	zend_resource *res = Z_RES_P(zv);
 
 	if (res->type >= 0) {
-		TSRMLS_FETCH();
-	
 		zend_resource_dtor(res TSRMLS_CC);
 	}
 	efree_size(res, sizeof(zend_resource));
@@ -178,7 +176,6 @@ void plist_entry_destructor(zval *zv)
 
 	if (res->type >= 0) {
 		zend_rsrc_list_dtors_entry *ld;
-		TSRMLS_FETCH();
 	
 		ld = zend_hash_index_find_ptr(&list_destructors, res->type);
 		if (ld) {
