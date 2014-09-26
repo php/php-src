@@ -189,8 +189,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	xsl_object *intern;
 	zend_string *callable = NULL;
 	
-	TSRMLS_FETCH();
-
 	if (! zend_is_executing(TSRMLS_C)) {
 		xsltGenericError(xsltGenericErrorContext,
 		"xsltExtFunctionTest: Function called from outside of PHP\n");
