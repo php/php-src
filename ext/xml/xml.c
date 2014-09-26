@@ -470,7 +470,6 @@ static void xml_set_handler(zval *handler, zval *data)
 static void xml_call_handler(xml_parser *parser, zval *handler, zend_function *function_ptr, int argc, zval *argv, zval *retval)
 {
 	int i;	
-	TSRMLS_FETCH();
 
 	ZVAL_UNDEF(retval);
 	if (parser && handler && !EG(exception)) {
@@ -786,7 +785,6 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
 				parser->ctag = zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
 			} else if (parser->level == (XML_MAXLEVEL + 1)) {
-				TSRMLS_FETCH();
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Maximum depth exceeded - Results truncated");
 			}
 		}
@@ -928,7 +926,6 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 
 						zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
 					} else if (parser->level == (XML_MAXLEVEL + 1)) {
-						TSRMLS_FETCH();
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Maximum depth exceeded - Results truncated");
 					}
 				}
