@@ -20,7 +20,7 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #67972 (SessionHandler Invalid memory read create_sid()). (Adam)
 
-11 Sep 2014, PHP 5.5.17
+18 Sep 2014, PHP 5.5.17
 
 - Core:
   . Fixed bug #47358 (glob returns error, should be empty array()). (Pierre)
