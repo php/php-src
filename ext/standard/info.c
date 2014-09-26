@@ -65,7 +65,6 @@ static int php_info_print_html_esc(const char *str, int len) /* {{{ */
 {
 	int written;
 	zend_string *new_str;
-	TSRMLS_FETCH();
 
 	new_str = php_escape_html_entities((unsigned char *) str, len, 0, ENT_QUOTES, "utf-8" TSRMLS_CC);
 	written = php_output_write(new_str->val, new_str->len TSRMLS_CC);
@@ -79,7 +78,6 @@ static int php_info_printf(const char *fmt, ...) /* {{{ */
 	char *buf;
 	int len, written;
 	va_list argv;
-	TSRMLS_FETCH();
 
 	va_start(argv, fmt);
 	len = vspprintf(&buf, 0, fmt, argv);
@@ -93,7 +91,6 @@ static int php_info_printf(const char *fmt, ...) /* {{{ */
 
 static int php_info_print(const char *str) /* {{{ */
 {
-	TSRMLS_FETCH();
 	return php_output_write(str, strlen(str) TSRMLS_CC);
 }
 /* }}} */
