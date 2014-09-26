@@ -1825,8 +1825,6 @@ static void zend_reset_cache_vars(TSRMLS_D)
 
 static void accel_activate(void)
 {
-	TSRMLS_FETCH();
-
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
 	}
@@ -1938,7 +1936,6 @@ static void accel_fast_zval_dtor(zval *zvalue)
 	if (Z_REFCOUNTED_P(zvalue) && Z_DELREF_P(zvalue) == 0) {
 		switch (Z_TYPE_P(zvalue)) {
 			case IS_ARRAY: {
-					TSRMLS_FETCH();
 					GC_REMOVE_FROM_BUFFER(Z_ARR_P(zvalue));
 					if (Z_ARR_P(zvalue) != &EG(symbol_table)) {
 						/* break possible cycles */
@@ -1949,15 +1946,11 @@ static void accel_fast_zval_dtor(zval *zvalue)
 				break;
 			case IS_OBJECT:
 				{
-					TSRMLS_FETCH();
-
 					OBJ_RELEASE(Z_OBJ_P(zvalue));
 				}
 				break;
 			case IS_RESOURCE:
 				{
-					TSRMLS_FETCH();
-
 					/* destroy resource */
 					zend_list_delete(Z_RES_P(zvalue));
 				}
@@ -2093,7 +2086,6 @@ static void accel_deactivate(void)
 	 * In general, they're restored by persistent_compile_file(), but in case
 	 * the script is aborted abnormally, they may become messed up.
 	 */
-	TSRMLS_FETCH();
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
@@ -2267,7 +2259,6 @@ static int accel_startup(zend_extension *extension)
 {
 	zend_function *func;
 	zend_ini_entry *ini_entry;
-	TSRMLS_FETCH();
 
 #ifdef ZTS
 	accel_globals_id = ts_allocate_id(&accel_globals_id, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);

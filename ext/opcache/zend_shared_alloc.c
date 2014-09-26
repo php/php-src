@@ -157,8 +157,6 @@ int zend_shared_alloc_startup(size_t requested_size)
 	const zend_shared_memory_handler_entry *he;
 	int res = ALLOC_FAILURE;
 
-	TSRMLS_FETCH();
-
 	/* shared_free must be valid before we call zend_shared_alloc()
 	 * - make it temporarily point to a local variable
 	 */
@@ -298,7 +296,6 @@ void *zend_shared_alloc(size_t size)
 {
 	int i;
 	unsigned int block_size = ZEND_ALIGNED_SIZE(size);
-	TSRMLS_FETCH();
 
 #if 1
 	if (!ZCG(locked)) {
