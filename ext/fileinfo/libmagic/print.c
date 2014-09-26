@@ -60,7 +60,6 @@ file_magwarn(struct magic_set *ms, const char *f, ...)
 {
 	va_list va;
 	char *expanded_format;
-	TSRMLS_FETCH();
 
 	va_start(va, f);
 	if (vasprintf(&expanded_format, f, va)); /* silence */

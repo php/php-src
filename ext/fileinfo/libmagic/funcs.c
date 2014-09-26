@@ -221,7 +221,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 	/* Check if we have a CDF file */
 	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
 		php_socket_t fd;
-		TSRMLS_FETCH();
+
 		if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
 			if ((m = file_trycdf(ms, fd, ubuf, nb)) != 0) {
 				if ((ms->flags & MAGIC_DEBUG) != 0)
@@ -445,7 +445,6 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	zend_string *res;
 	zval repl;
 	int  rep_cnt = 0;
-	TSRMLS_FETCH();
 
 	(void)setlocale(LC_CTYPE, "C");
 
