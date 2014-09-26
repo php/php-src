@@ -29,13 +29,11 @@ static void _php_image_output_putc(struct gdIOCtx *ctx, int c) /* {{{ */
 	 * big endian architectures:
 	 */
 	unsigned char ch = (unsigned char) c;
-	TSRMLS_FETCH();
 	php_write(&ch, 1 TSRMLS_CC);
 } /* }}} */
 
 static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
 {
-	TSRMLS_FETCH();
 	return php_write((void *)buf, l TSRMLS_CC);
 } /* }}} */
 
@@ -49,21 +47,19 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
 	char ch = (char) c;
 	php_stream * stream = (php_stream *)ctx->data;
-	TSRMLS_FETCH();
+
 	php_stream_write(stream, &ch, 1);
 } /* }}} */
 
 static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
 {
 	php_stream * stream = (php_stream *)ctx->data;
-	TSRMLS_FETCH();
+
 	return php_stream_write(stream, (void *)buf, l);
 } /* }}} */
 
 static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	if(ctx->data) {
 		php_stream_close((php_stream *) ctx->data);
 		ctx->data = NULL;
