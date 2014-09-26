@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
     when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
 
+- Reflection:
+  . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
+
 - Session:
   . Fixed bug #67972 (SessionHandler Invalid memory read create_sid()). (Adam)
 
