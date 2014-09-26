@@ -4927,8 +4927,6 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe TSRMLS_DC)
 
 static void run_user_tick_functions(int tick_count) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	zend_llist_apply(BG(user_tick_functions), (llist_apply_func_t) user_tick_function_call TSRMLS_CC);
 }
 /* }}} */
@@ -4938,7 +4936,6 @@ static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_
 	zval *func1 = &tick_fe1->arguments[0];
 	zval *func2 = &tick_fe2->arguments[0];
 	int ret;
-	TSRMLS_FETCH();
 
 	if (Z_TYPE_P(func1) == IS_STRING && Z_TYPE_P(func2) == IS_STRING) {
 		ret = (zend_binary_zval_strcmp(func1, func2) == 0);
