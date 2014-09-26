@@ -130,11 +130,9 @@ mysqlnd_plugin_subsystem_end(TSRMLS_D)
 /* {{{ mysqlnd_plugin_register */
 PHPAPI unsigned int mysqlnd_plugin_register()
 {
-	TSRMLS_FETCH();
 	return mysqlnd_plugin_register_ex(NULL TSRMLS_CC);
 }
 /* }}} */
-
 
 /* {{{ mysqlnd_plugin_register_ex */
 PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin TSRMLS_DC)
