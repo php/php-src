@@ -448,7 +448,6 @@ static void php_sqlite3_func_callback(sqlite3_context *context, int argc,
 	sqlite3_value **argv)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
-	TSRMLS_FETCH();
 
 	do_callback(&func->afunc, &func->func, argc, argv, context, 0 TSRMLS_CC);
 }
@@ -457,7 +456,6 @@ static void php_sqlite3_func_step_callback(sqlite3_context *context, int argc,
 	sqlite3_value **argv)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
-	TSRMLS_FETCH();
 
 	do_callback(&func->astep, &func->step, argc, argv, context, 1 TSRMLS_CC);
 }
@@ -465,7 +463,6 @@ static void php_sqlite3_func_step_callback(sqlite3_context *context, int argc,
 static void php_sqlite3_func_final_callback(sqlite3_context *context)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
-	TSRMLS_FETCH();
 
 	do_callback(&func->afini, &func->fini, 0, NULL, context, 1 TSRMLS_CC);
 }
@@ -478,7 +475,6 @@ static int php_sqlite3_collation_callback(void *context,
 	zval zargs[2];
 	zval retval;
 	struct pdo_sqlite_collation *collation = (struct pdo_sqlite_collation*) context;
-	TSRMLS_FETCH();
 
 	collation->fc.fci.size = sizeof(collation->fc.fci);
 	collation->fc.fci.function_table = EG(function_table);
@@ -763,7 +759,6 @@ static int authorizer(void *autharg, int access_type, const char *arg3, const ch
 	char *filename;
 	switch (access_type) {
 		case SQLITE_COPY: {
-			TSRMLS_FETCH();
 			filename = make_filename_safe(arg4 TSRMLS_CC);
 			if (!filename) {
 				return SQLITE_DENY;
@@ -773,7 +768,6 @@ static int authorizer(void *autharg, int access_type, const char *arg3, const ch
 		}
 
 		case SQLITE_ATTACH: {
-			TSRMLS_FETCH();
 			filename = make_filename_safe(arg3 TSRMLS_CC);
 			if (!filename) {
 				return SQLITE_DENY;
