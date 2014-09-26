@@ -521,7 +521,6 @@ static void _close_odbc_pconn(zend_resource *rsrc TSRMLS_DC)
 static PHP_INI_DISP(display_link_nums)
 {
 	char *value;
-	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value->val;
@@ -546,7 +545,6 @@ static PHP_INI_DISP(display_link_nums)
 static PHP_INI_DISP(display_defPW)
 {
 	char *value;
-	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value->val;
@@ -577,7 +575,6 @@ static PHP_INI_DISP(display_defPW)
 static PHP_INI_DISP(display_binmode)
 {
 	char *value;
-	TSRMLS_FETCH();
 	
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value->val;
@@ -608,7 +605,6 @@ static PHP_INI_DISP(display_binmode)
 static PHP_INI_DISP(display_lrl)
 {
 	char *value;
-	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value->val;
@@ -634,7 +630,6 @@ static PHP_INI_DISP(display_lrl)
 static PHP_INI_DISP(display_cursortype)
 {
 	char *value;
-	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value->val;
@@ -868,7 +863,6 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 	RETCODE rc;
 	ODBC_SQL_ENV_T henv;
 	ODBC_SQL_CONN_T conn;
-	TSRMLS_FETCH();
 
 	if (conn_resource) {
 		henv = conn_resource->henv;

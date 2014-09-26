@@ -400,8 +400,6 @@ zval* collator_make_printable_zval( zval* arg, zval *rv)
 
 	if( Z_TYPE_P(arg) != IS_STRING )
 	{
-	    TSRMLS_FETCH();
-	    
 		use_copy = zend_make_printable_zval(arg, &arg_copy TSRMLS_CC);
 
 		if( use_copy )
