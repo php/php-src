@@ -89,7 +89,7 @@ static void free_prop_handler(zval *el) {
 void php_mysqli_dtor_p_elements(void *data)
 {
 	MYSQL *mysql = (MYSQL *)data;
-	TSRMLS_FETCH();
+
 	mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT);
 }
 
@@ -930,7 +930,6 @@ PHP_RINIT_FUNCTION(mysqli)
 #if defined(A0) && defined(MYSQLI_USE_MYSQLND)
 static void php_mysqli_persistent_helper_for_every(void *p)
 {
-	TSRMLS_FETCH();
 	mysqlnd_end_psession((MYSQLND *) p);
 } /* }}} */
 
