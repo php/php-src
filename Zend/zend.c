@@ -372,11 +372,9 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path TSRMLS_
 /* }}} */
 
 #ifdef ZTS
-static zend_bool asp_tags_default		  = 0;
-static zend_bool short_tags_default		  = 1;
+static zend_bool short_tags_default      = 1;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
-# define asp_tags_default			0
 # define short_tags_default			1
 # define compiler_options_default	ZEND_COMPILE_DEFAULT
 #endif
@@ -384,7 +382,6 @@ static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 static void zend_set_default_compile_time_values(TSRMLS_D) /* {{{ */
 {
 	/* default compile-time values */
-	CG(asp_tags) = asp_tags_default;
 	CG(short_tags) = short_tags_default;
 	CG(compiler_options) = compiler_options_default;
 }
@@ -721,7 +718,6 @@ void zend_post_startup(TSRMLS_D) /* {{{ */
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
 	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
 
-	asp_tags_default = CG(asp_tags);
 	short_tags_default = CG(short_tags);
 	compiler_options_default = CG(compiler_options);
 
