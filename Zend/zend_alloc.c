@@ -2007,7 +2007,8 @@ typedef struct _zend_alloc_globals {
 
 #ifdef ZTS
 static int alloc_globals_id;
-# define AG(v) TSRMG(alloc_globals_id, zend_alloc_globals *, v)
+TSRMX_D(alloc);
+# define AG(v) TSRMGX(TSRMX(alloc), alloc_globals_id, zend_alloc_globals *, v)
 #else
 # define AG(v) (alloc_globals.v)
 static zend_alloc_globals alloc_globals;
@@ -2311,7 +2312,9 @@ static void alloc_globals_dtor(zend_alloc_globals *alloc_globals TSRMLS_DC)
 ZEND_API void start_memory_manager(TSRMLS_D)
 {
 #ifdef ZTS
-	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
+	ts_allocate_id
+	    (&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
+	TSRMX(alloc) = tsrm_get_ls_cache();
 #else
 	alloc_globals_ctor(&alloc_globals);
 #endif

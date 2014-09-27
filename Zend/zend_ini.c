@@ -169,6 +169,7 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D) /* {{{ */
 	EG(ini_directives) = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(EG(ini_directives), registered_zend_ini_directives->nNumOfElements, NULL, free_ini_entry, 1, 0);
 	zend_hash_copy(EG(ini_directives), registered_zend_ini_directives, copy_ini_entry);
+
 	return SUCCESS;
 }
 /* }}} */
