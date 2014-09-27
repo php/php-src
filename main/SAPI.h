@@ -137,6 +137,7 @@ typedef struct _sapi_globals_struct {
 	zval callback_func;
 	zend_fcall_info_cache fci_cache;
 	zend_bool callback_run;
+	HashTable *cookies;
 } sapi_globals_struct;
 
 
