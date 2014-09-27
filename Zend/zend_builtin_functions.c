@@ -2396,6 +2396,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		/* $this may be passed into regular internal functions */
 		object = call ? call->object : NULL;
 		if (object &&
+		    call->func &&
 		    call->func->type == ZEND_INTERNAL_FUNCTION &&
 		    !call->func->common.scope) {
 			object = NULL;
