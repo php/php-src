@@ -481,7 +481,6 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 	zval params[3];
 	int i;
 	char **matches = NULL;
-	TSRMLS_FETCH();
 
 	_readline_string_zval(&params[0], text);
 	_readline_long_zval(&params[1], start);
@@ -544,7 +543,6 @@ static void php_rl_callback_handler(char *the_line)
 {
 	zval params[1];
 	zval dummy;
-	TSRMLS_FETCH();
 
 	ZVAL_NULL(&dummy);
 
