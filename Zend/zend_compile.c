@@ -5336,11 +5336,11 @@ void zend_compile_coalesce(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_compile_var(&expr_node, expr_ast, BP_VAR_IS TSRMLS_CC);
 
 	opnum = get_next_op_number(CG(active_op_array));
-	zend_emit_op(result, ZEND_COALESCE, &expr_node, NULL TSRMLS_CC);
+	zend_emit_op_tmp(result, ZEND_COALESCE, &expr_node, NULL TSRMLS_CC);
 
 	zend_compile_expr(&default_node, default_ast TSRMLS_CC);
 
-	opline = zend_emit_op(NULL, ZEND_QM_ASSIGN, &default_node, NULL TSRMLS_CC);
+	opline = zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &default_node, NULL TSRMLS_CC);
 	SET_NODE(opline->result, result);
 
 	opline = &CG(active_op_array)->opcodes[opnum];
