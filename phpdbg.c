@@ -36,6 +36,7 @@
 #	include <sys/select.h>
 #	include <sys/time.h>
 #	include <sys/types.h>
+#	include <sys/poll.h>
 #	include <netinet/in.h>
 #	include <unistd.h>
 #	include <arpa/inet.h>
@@ -69,10 +70,10 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->bp_count = 0;
 	pg->flags = PHPDBG_DEFAULT_FLAGS;
 	pg->oplog = NULL;
-	pg->io[PHPDBG_STDIN] = NULL;
-	pg->io[PHPDBG_STDOUT] = NULL;
-	pg->io[PHPDBG_STDERR] = NULL;
+	memset(pg->io, 0, sizeof(pg->io));
 	pg->frame.num = 0;
+	pg->input_buflen = 0;
+	pg->sigsafe_mem.mem = NULL;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
@@ -529,7 +530,9 @@ static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 	TSRMLS_FETCH();
 #endif
 
-	fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
+	if (!phpdbg_active_sigsafe_mem(TSRMLS_C)) {
+		fflush(PHPDBG_G(io)[PHPDBG_STDOUT].ptr);
+	}
 } /* }}} */
 
 /* copied from sapi/cli/php_cli.c cli_register_file_handles */
@@ -698,16 +701,26 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 {
 	TSRMLS_FETCH();
 
-	if (EG(in_execution)) {
-		/* set signalled only when not interactive */
-		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
-			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
-		}
-	} else {
+	if (PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE) {
 		/* we quit remote consoles on recv SIGINT */
 		if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 			PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
 			zend_bailout();
+		}
+	} else {
+		/* set signalled only when not interactive */
+		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
+			if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
+				char mem[PHPDBG_SIGSAFE_MEM_SIZE + 1];
+
+				phpdbg_set_sigsafe_mem(mem TSRMLS_CC);
+				zend_try {
+					phpdbg_force_interruption(TSRMLS_C);
+				} zend_end_try()
+				phpdbg_clear_sigsafe_mem(TSRMLS_C);
+				return;
+			}
+			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 		}
 	}
 } /* }}} */
@@ -769,12 +782,12 @@ static int phpdbg_remote_init(const char* address, short port, int *server, int 
 	*server = phpdbg_open_socket(address, port);
 
 	if (*server < 0) {
-		phpdbg_rlog(stderr, "Initializing connection on %s:%d failed", address, port);
+		phpdbg_rlog(fileno(stderr), "Initializing connection on %s:%d failed", address, port);
 
 		return FAILURE;
 	}
 
-	phpdbg_rlog(stderr, "accepting connections on %s:%d", address, port);
+	phpdbg_rlog(fileno(stderr), "accepting connections on %s:%d", address, port);
 	{
 		struct sockaddr_in address;
 		socklen_t size = sizeof(address);
@@ -784,7 +797,7 @@ static int phpdbg_remote_init(const char* address, short port, int *server, int 
 		*socket = accept(*server, (struct sockaddr *) &address, &size);
 		inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
 
-		phpdbg_rlog(stderr, "connection established from %s", buffer);
+		phpdbg_rlog(fileno(stderr), "connection established from %s", buffer);
 	}
 
 	dup2(*socket, fileno(stdout));
@@ -794,8 +807,60 @@ static int phpdbg_remote_init(const char* address, short port, int *server, int 
 
 	*stream = fdopen(*socket, "r+");
 
+	phpdbg_set_async_io(*socket);
+
 	return SUCCESS;
 }
+
+/* This function *strictly* assumes that SIGIO is *only* used on the remote connection stream */
+void phpdbg_sigio_handler(int sig, siginfo_t *info, void *context) /* {{{ */
+{
+	int flags;
+	size_t newlen;
+	size_t i;
+	TSRMLS_FETCH();
+
+//	if (!(info->si_band & POLLIN)) {
+//		return; /* Not interested in writeablility etc., just interested in incoming data */
+//	}
+
+	/* only non-blocking reading, avoid non-blocking writing */
+	flags = fcntl(PHPDBG_G(io)[PHPDBG_STDIN].fd, F_GETFL, 0);
+	fcntl(PHPDBG_G(io)[PHPDBG_STDIN].fd, F_SETFL, flags | O_NONBLOCK);
+
+	do {
+		char mem[PHPDBG_SIGSAFE_MEM_SIZE + 1];
+		size_t off = 0;
+
+		if ((newlen = recv(PHPDBG_G(io)[PHPDBG_STDIN].fd, mem, PHPDBG_SIGSAFE_MEM_SIZE, MSG_PEEK)) == (size_t) -1) {
+			break;
+		}
+		for (i = 0; i < newlen; i++) {
+			switch (mem[off + i]) {
+				case '\x03': /* ^C char */
+					if (PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE) {
+						break; /* or quit ??? */
+					}
+					if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
+						phpdbg_set_sigsafe_mem(mem TSRMLS_CC);
+						zend_try {
+							phpdbg_force_interruption(TSRMLS_C);
+						} zend_end_try();
+						phpdbg_clear_sigsafe_mem(TSRMLS_C);
+						break;
+					}
+					if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
+						PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
+					}
+					break;
+			}
+		}
+		off += i;
+	} while (0);
+
+
+	fcntl(PHPDBG_G(io)[PHPDBG_STDIN].fd, F_SETFL, flags);
+} /* }}} */
 
 void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 {
@@ -890,9 +955,13 @@ int main(int argc, char **argv) /* {{{ */
 #endif
 
 #ifndef _WIN32
+	struct sigaction sigio_struct;
 	struct sigaction signal_struct;
 	signal_struct.sa_sigaction = phpdbg_signal_handler;
 	signal_struct.sa_flags = SA_SIGINFO | SA_NODEFER;
+	sigio_struct.sa_sigaction = phpdbg_sigio_handler;
+	sigio_struct.sa_flags = SA_SIGINFO;
+
 
 	address = strdup("127.0.0.1");
 #endif
@@ -1105,18 +1174,6 @@ phpdbg_main:
 		php_optind++;
 	}
 
-#ifndef _WIN32
-	/* setup remote server if necessary */
-	if (!cleaning && listen > 0) {
-		if (phpdbg_remote_init(address, listen, &server, &socket, &stream) == FAILURE) {
-			exit(0);
-		}
-
-		/* set remote flag to stop service shutting down upon quit */
-		remote = 1;
-	}
-#endif
-
 	if (sapi_name) {
 		phpdbg->name = sapi_name;
 	}
@@ -1171,7 +1228,23 @@ phpdbg_main:
     EXCEPTION_POINTERS *xp;
     __try {
 #endif
-		zend_mm_heap *mm_heap = phpdbg_mm_get_heap();
+		zend_mm_heap *mm_heap;
+
+#ifndef _WIN32
+	/* setup remote server if necessary */
+	if (!cleaning && listen > 0) {
+		if (phpdbg_remote_init(address, listen, &server, &socket, &stream) == FAILURE) {
+			exit(0);
+		}
+
+		sigaction(SIGIO, &sigio_struct, NULL);
+
+		/* set remote flag to stop service shutting down upon quit */
+		remote = 1;
+	}
+#endif
+
+		mm_heap = phpdbg_mm_get_heap();
 
 		if (mm_heap->use_zend_alloc) {
 			mm_heap->_malloc = phpdbg_malloc_wrapper;
@@ -1246,9 +1319,12 @@ phpdbg_main:
 		}
 #endif
 
-		PHPDBG_G(io)[PHPDBG_STDIN] = stdin;
-		PHPDBG_G(io)[PHPDBG_STDOUT] = stdout;
-		PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
+		PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
+		PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);
+		PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
+		PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
+		PHPDBG_G(io)[PHPDBG_STDERR].ptr = stderr;
+		PHPDBG_G(io)[PHPDBG_STDERR].fd = fileno(stderr);
 
 		if (exec) { /* set execution context */
 			PHPDBG_G(exec) = phpdbg_resolve_path(exec TSRMLS_CC);

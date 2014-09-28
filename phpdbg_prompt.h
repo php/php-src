@@ -64,4 +64,6 @@ void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC);
 #endif /* }}} */
 
+void phpdbg_force_interruption(TSRMLS_D);
+
 #endif /* PHPDBG_PROMPT_H */

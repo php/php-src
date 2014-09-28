@@ -72,6 +72,13 @@
 #   include <editline/readline.h>
 #endif
 
+#ifdef ZTS
+# define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
+#else
+# define PHPDBG_G(v) (phpdbg_globals.v)
+#endif
+
+#include "phpdbg_sigsafe.h"
 #include "phpdbg_lexer.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
@@ -79,12 +86,6 @@
 #include "phpdbg_watch.h"
 
 int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
-
-#ifdef ZTS
-# define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
-#else
-# define PHPDBG_G(v) (phpdbg_globals.v)
-#endif
 
 #define PHPDBG_NEXT   2
 #define PHPDBG_UNTIL  3
@@ -203,29 +204,21 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	int vmret;                                   /* return from last opcode handler execution */
 
 	FILE *oplog;                                 /* opline log */
-	FILE *io[PHPDBG_IO_FDS];                     /* io */
+	struct {
+		FILE *ptr;
+		int fd;
+	} io[PHPDBG_IO_FDS];                         /* io */
 
 	char *prompt[2];                             /* prompt */
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */
 	char *buffer;                                /* buffer */
 	zend_bool last_was_newline;                  /* check if we don't need to output a newline upon next phpdbg_error or phpdbg_notice */
 
+	char input_buffer[PHPDBG_MAX_CMD];           /* stdin input buffer */
+	int input_buflen;                            /* length of stdin input buffer */
+	phpdbg_signal_safe_mem sigsafe_mem;          /* memory to use in async safe environment (only once!) */
+
 	zend_ulong flags;                            /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
-
-/* the beginning (= the important part) of the _zend_mm_heap struct defined in Zend/zend_alloc.c
-   Needed for realizing watchpoints */
-struct _zend_mm_heap {
-	int   use_zend_alloc;
-	void *(*_malloc)(size_t);
-	void  (*_free)(void *);
-	void *(*_realloc)(void *, size_t);
-	size_t              free_bitmap;
-	size_t              large_free_bitmap;
-	size_t              block_size;
-	size_t              compact_size;
-	zend_mm_segment    *segments_list;
-	zend_mm_storage    *storage;
-};
 
 #endif /* PHPDBG_H */

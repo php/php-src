@@ -792,54 +792,71 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC)
 PHPDBG_API char* phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 {
 	char *cmd = NULL;
-#if !defined(HAVE_LIBREADLINE) && !defined(HAVE_LIBEDIT)
-	char buf[PHPDBG_MAX_CMD];
-#endif
 	char *buffer = NULL;
 
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) &&
-			(buffered == NULL)) {
-			fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
+		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && (buffered == NULL) && !phpdbg_active_sigsafe_mem(TSRMLS_C)) {
+			fflush(PHPDBG_G(io)[PHPDBG_STDOUT].ptr);
 		}
 
 		if (buffered == NULL) {
-disconnect:
 			if (0) {
+disconnect:
 				PHPDBG_G(flags) |= (PHPDBG_IS_QUITTING|PHPDBG_IS_DISCONNECTED);
 				zend_bailout();
 				return NULL;
 			}
 
-#if !defined(HAVE_LIBREADLINE) && !defined(HAVE_LIBEDIT)
+#define USE_LIB_STAR (defined(HAVE_LIBREADLINE) && defined(HAVE_LIBEDIT))
+#if !USE_LIB_STAR
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 				if (!phpdbg_write("%s", phpdbg_get_prompt(TSRMLS_C))) {
 					goto disconnect;
 				}
 				PHPDBG_G(last_was_newline) = 1;
 			}
-			
-			/* note: EOF is ignored */
-readline:	
-			if (!fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
-				/* the user has gone away */
-				if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
-					goto disconnect;
-				} else goto readline;
-			}
+#endif
 
-			cmd = buf;
-#else
-			/* note: EOF makes readline write prompt again in local console mode */
+			/* note: EOF makes readline write prompt again in local console mode - and ignored if compiled without readline */
+			/* strongly assuming to be in blocking mode... */
+#if USE_LIB_STAR
 readline:
-			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
+			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE)
+#endif
+			{
 				char buf[PHPDBG_MAX_CMD];
-				if (fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
-					cmd = buf;
-				} else goto disconnect;
-			} else {
+				int bytes = 0, len = PHPDBG_G(input_buflen);
+				if (PHPDBG_G(input_buflen)) {
+					memcpy(buf, PHPDBG_G(input_buffer), len);
+				}
+
+				while ((bytes = read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len)) > 0) {
+					int i;
+					for (i = len; i < len + bytes; i++) {
+						if (buf[i] == '\n') {
+							PHPDBG_G(input_buflen) = len + bytes - 1 - i;
+							if (PHPDBG_G(input_buflen)) {
+								memcpy(PHPDBG_G(input_buffer), buf + i + 1, PHPDBG_G(input_buflen));
+							}
+							if (i != PHPDBG_MAX_CMD - 1) {
+								buf[i + 1] = 0;
+							}
+							cmd = buf;
+							goto end;
+						}
+					}
+					len += bytes;
+				}
+
+				if (bytes <= 0) {
+					goto disconnect;
+				}
+
+				cmd = buf;
+			}
+#if USE_LIB_STAR
+			else {
 				cmd = readline(phpdbg_get_prompt(TSRMLS_C));
-				PHPDBG_G(last_was_newline) = 1;
 			}
 
 			if (!cmd) {
@@ -850,13 +867,15 @@ readline:
 				add_history(cmd);
 			}
 #endif
-		} else cmd = buffered;
-		
+		} else {
+			cmd = buffered;
+		}
+end:
+		PHPDBG_G(last_was_newline) = 1;
 		buffer = estrdup(cmd);
 
-#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
-		if (!buffered && cmd &&
-			!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
+#if USE_LIB_STAR
+		if (!buffered && cmd &&	!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 			free(cmd);
 		}
 #endif

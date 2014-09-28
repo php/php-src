@@ -1334,3 +1334,17 @@ next:
 	}
 	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
 } /* }}} */
+
+void phpdbg_force_interruption(TSRMLS_D) {
+	zend_execute_data *data = EG(current_execute_data); /* should be always readable if not NULL */
+
+	if (data) {
+		if (data->op_array) {
+			phpdbg_notice("Current opline: %p (op #%lu) in %s:%u", data->opline, (data->opline - data->op_array->opcodes) / sizeof(data->opline), data->op_array->filename, data->opline->lineno);
+		} else {
+			phpdbg_notice("Current opline: %p (op_array information unavailable)", data->opline);
+		}
+	} else {
+		phpdbg_notice("No information available about executing context");
+	}
+}

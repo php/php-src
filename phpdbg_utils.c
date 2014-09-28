@@ -224,10 +224,9 @@ PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{
 
 } /* }}} */
 
-PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ...) /* {{{ */
-{
+PHPDBG_API int phpdbg_print(int type TSRMLS_DC, int fd, const char *format, ...) { /* {{{ */
 	int rc = 0;
-	char *buffer = NULL;
+	char *buffer = NULL, *outbuf = NULL;
 	va_list args;
 
 	if (format != NULL && strlen(format) > 0L) {
@@ -241,44 +240,41 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 	switch (type) {
 		case P_ERROR:
 			if (!PHPDBG_G(last_was_newline)) {
-				fprintf(fp, "\n");
+				write(fd, "\n", 1);
 				PHPDBG_G(last_was_newline) = 1;
 			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-				rc = fprintf(fp,
-						"\033[%sm[%s]\033[0m\n",
-						PHPDBG_G(colors)[PHPDBG_COLOR_ERROR]->code, buffer);
+				rc = spprintf(&outbuf, 0, "\033[%sm[%s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_ERROR]->code, buffer);
 			} else {
-				rc = fprintf(fp, "[%s]\n", buffer);
+				rc = spprintf(&outbuf, 0, "[%s]\n", buffer);
 			}
 		break;
 
 		case P_NOTICE:
 			if (!PHPDBG_G(last_was_newline)) {
-				fprintf(fp, "\n");
+				write(fd, "\n", 1);
 				PHPDBG_G(last_was_newline) = 1;
 			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-				rc = fprintf(fp,
-						"\033[%sm[%s]\033[0m\n",
-						PHPDBG_G(colors)[PHPDBG_COLOR_NOTICE]->code, buffer);
+				rc = spprintf(&outbuf, 0, "\033[%sm[%s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_NOTICE]->code, buffer);
 			} else {
-				rc = fprintf(fp, "[%s]\n", buffer);
+				rc = spprintf(&outbuf, 0, "[%s]\n", buffer);
 			}
 		break;
 
 		case P_WRITELN: {
 			if (buffer) {
-				rc = fprintf(fp, "%s\n", buffer);
+				rc = spprintf(&outbuf, 0, "%s\n", buffer);
 			} else {
-				rc = fprintf(fp, "\n");
+				rc = 1;
+				outbuf = estrdup("\n");
 			}
 			PHPDBG_G(last_was_newline) = 1;
 		} break;
 
 		case P_WRITE:
 			if (buffer) {
-				rc = fprintf(fp, "%s", buffer);
+				rc = spprintf(&outbuf, 0, "%s", buffer);
 				PHPDBG_G(last_was_newline) = buffer[strlen(buffer) - 1] == '\n';
 			}
 		break;
@@ -288,12 +284,17 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 			if (buffer) {
 				struct timeval tp;
 				if (gettimeofday(&tp, NULL) == SUCCESS) {
-					rc = fprintf(fp, "[%ld %.8F]: %s\n", tp.tv_sec, tp.tv_usec / 1000000.00, buffer);
+					rc = spprintf(&outbuf, 0, "[%ld %.8F]: %s\n", tp.tv_sec, tp.tv_usec / 1000000.00, buffer);
 				} else {
 					rc = FAILURE;
 				}
 			}
 			break;
+	}
+
+	if (outbuf) {
+		rc = write(fd, outbuf, rc);
+		efree(outbuf);
 	}
 
 	if (buffer) {
@@ -303,7 +304,7 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 	return rc;
 } /* }}} */
 
-PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
+PHPDBG_API int phpdbg_rlog(int fd, const char *fmt, ...) { /* {{{ */
 	int rc = 0;
 
 	va_list args;
@@ -312,19 +313,21 @@ PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
 	va_start(args, fmt);
 	if (gettimeofday(&tp, NULL) == SUCCESS) {
 		char friendly[100];
-		char *format = NULL, *buffer = NULL;
+		char *format = NULL, *buffer = NULL, *outbuf = NULL;
 		const time_t tt = tp.tv_sec;
 
 		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tt));
-		asprintf(
-			&buffer, friendly, tp.tv_usec/1000);
-		asprintf(
-			&format, "[%s]: %s\n", buffer, fmt);
-		rc = vfprintf(
-			fp, format, args);
+		spprintf(&buffer, 0,  friendly, tp.tv_usec/1000);
+		spprintf(&format, 0, "[%s]: %s\n", buffer, fmt);
+		rc = vspprintf(&outbuf, 0, format, args);
 
-		free(format);
-		free(buffer);
+		if (outbuf) {
+			rc = write(fd, outbuf, rc);
+			efree(outbuf);
+		}
+
+		efree(format);
+		efree(buffer);
 	}
 	va_end(args);
 
@@ -463,3 +466,12 @@ PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D) /* {{{ */
 #endif
 	return columns;
 } /* }}} */
+
+PHPDBG_API void phpdbg_set_async_io(int fd) {
+#ifndef _WIN32
+	int flags;
+	fcntl(STDIN_FILENO, F_SETOWN, getpid());
+	flags = fcntl(STDIN_FILENO, F_GETFL);
+	fcntl(STDIN_FILENO, F_SETFL, flags | FASYNC);
+#endif
+}
