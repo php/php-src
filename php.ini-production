@@ -293,20 +293,17 @@ serialize_precision = 17
 
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
-; or per-virtualhost web server configuration file. This directive is
-; *NOT* affected by whether Safe Mode is turned On or Off.
+; or per-virtualhost web server configuration file.
 ; http://php.net/open-basedir
 ;open_basedir =
 
 ; This directive allows you to disable certain functions for security reasons.
-; It receives a comma-delimited list of function names. This directive is
-; *NOT* affected by whether Safe Mode is turned On or Off.
+; It receives a comma-delimited list of function names.
 ; http://php.net/disable-functions
 disable_functions =
 
 ; This directive allows you to disable certain classes for security reasons.
-; It receives a comma-delimited list of class names. This directive is
-; *NOT* affected by whether Safe Mode is turned On or Off.
+; It receives a comma-delimited list of class names.
 ; http://php.net/disable-classes
 disable_classes =
 
@@ -1005,7 +1002,7 @@ smtp_port = 25
 
 ; Force the addition of the specified parameters to be passed as extra parameters
 ; to the sendmail binary. These parameters will always replace the value of
-; the 5th parameter to mail(), even in safe mode.
+; the 5th parameter to mail().
 ;mail.force_extra_parameters =
 
 ; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename
