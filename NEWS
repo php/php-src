@@ -8,12 +8,15 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #67985 (Incorrect last used array index copied to new array after
     unset). (Tjerk)
+  . Fixed bug #68044 (Integer overflow in unserialize() (32-bits only)). 
+    (CVE-2014-3669) (Stas)
 
 - OpenSSL:
   . Reverted fixes for bug #41631, due to regressions. (Stas) 
 
 - XMLRPC:
-  . Fixed bug #68027 (Global buffer overflow in mkgmtime() function). (Stas)
+  . Fixed bug #68027 (Global buffer overflow in mkgmtime() function). 
+    (CVE-2014-3668) (Stas)
 
 18 Sep 2014, PHP 5.4.33
 
