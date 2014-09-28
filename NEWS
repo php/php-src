@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.4.34
+16 Oct 2014, PHP 5.4.34
 
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 
 - cURL:
   . Fixed bug #68089 (NULL byte injection - cURL lib). (Stas)
+
+- EXIF:
+  . Fixed bug #68113 (Heap corruption in exif_thumbnail()). (CVE-2014-3670)
+    (Stas)
 
 - OpenSSL:
   . Reverted fixes for bug #41631, due to regressions. (Stas) 
