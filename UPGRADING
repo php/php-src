@@ -35,6 +35,7 @@ PHP X.Y UPGRADE NOTES
     handler, too.
 
 - GMP
+  . Requires libgmp version 4.2 or newer now.
   . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
     them consistent with other GMP functions.
 
