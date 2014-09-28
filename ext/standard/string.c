@@ -3983,7 +3983,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 
 	while (1) {
 		char_count=0;
-		while ((!max_chars || max_chars > 0 && char_count < max_chars) && begin > 0) {
+		while ((!max_chars || (max_chars > 0 && char_count < max_chars)) && begin > 0) {
 			char_count++;
 			begin--;
 			if (begin <= 0 || _isnewline(heb_str[begin])) {
