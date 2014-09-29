@@ -361,7 +361,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 				if (0 == avail_read) {
 					usleep(100000);
 				}
-			} while (0 == avail_read && retry++ < 180);
+			} while (0 == avail_read && retry++ < 320);
 
 			/* Reduce the required data amount to what is available, otherwise read()
 				will block.*/
