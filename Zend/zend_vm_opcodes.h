@@ -75,7 +75,6 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_BRK                              50
 #define ZEND_CONT                             51
 #define ZEND_BOOL                             52
-#define ZEND_INIT_STRING                      53
 #define ZEND_ADD_CHAR                         54
 #define ZEND_ADD_STRING                       55
 #define ZEND_ADD_VAR                          56
