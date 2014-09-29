@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #68044 (Integer overflow in unserialize() (32-bits only)). 
     (CVE-2014-3669) (Stas)
 
+- cURL:
+  . Fixed bug #68089 (NULL byte injection - cURL lib). (Stas)
+
 - OpenSSL:
   . Reverted fixes for bug #41631, due to regressions. (Stas) 
 
