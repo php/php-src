@@ -169,6 +169,11 @@ static int php_curl_option_str(php_curl *ch, long option, const char *str, const
 {
 	CURLcode error = CURLE_OK;
 
+	if (strlen(str) != len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Curl option contains invalid characters (\\0)");
+		return 0;
+	}
+
 #if LIBCURL_VERSION_NUM >= 0x071100
 	if (make_copy) {
 #endif
