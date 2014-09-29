@@ -137,7 +137,9 @@ ZEND_API int zval_update_constant_no_inline_change(zval *pp, zend_class_entry *s
 ZEND_API int zval_update_constant_ex(zval *pp, zend_bool inline_change, zend_class_entry *scope TSRMLS_DC);
 
 /* dedicated Zend executor functions - do not use! */
-#define ZEND_VM_STACK_PAGE_SIZE (16 * 1024) /* should be a power of 2 */
+#define ZEND_VM_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
+
+#define ZEND_VM_STACK_PAGE_SIZE  (ZEND_VM_STACK_PAGE_SLOTS * sizeof(zval))
 
 struct _zend_vm_stack {
 	zval *top;
@@ -145,33 +147,30 @@ struct _zend_vm_stack {
 	zend_vm_stack prev;
 };
 
-#define ZEND_VM_STACK_HEADER_SLOT \
+#define ZEND_VM_STACK_HEADER_SLOTS \
 	((ZEND_MM_ALIGNED_SIZE(sizeof(struct _zend_vm_stack)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
 
+#define ZEND_VM_STACK_FREE_PAGE_SIZE \
+	((ZEND_VM_STACK_PAGE_SLOTS - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
+
+#define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size) \
+	(((size) + (ZEND_VM_STACK_FREE_PAGE_SIZE - 1)) & ~ZEND_VM_STACK_PAGE_SIZE)
+
 #define ZEND_VM_STACK_ELEMETS(stack) \
-	(((zval*)(stack)) + ZEND_VM_STACK_HEADER_SLOT)
+	(((zval*)(stack)) + ZEND_VM_STACK_HEADER_SLOTS)
 
-#define ZEND_VM_STACK_GROW_IF_NEEDED(count)								\
-	do {																\
-		if (UNEXPECTED(((count) * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) >	\
-			(size_t)(((char*)EG(argument_stack)->end) -					\
-		    ((char*)EG(argument_stack)->top)))) {						\
-			zend_vm_stack_extend((count) TSRMLS_CC);					\
-		}																\
-	} while (0)
-
-static zend_always_inline zend_vm_stack zend_vm_stack_new_page(int count) {
-	zend_vm_stack page = (zend_vm_stack)emalloc(count * ZEND_MM_ALIGNED_SIZE(sizeof(zval)));
+static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
+	zend_vm_stack page = (zend_vm_stack)emalloc(size);
 
 	page->top = ZEND_VM_STACK_ELEMETS(page);
-	page->end = (zval*)page + count;
-	page->prev = NULL;
+	page->end = (zval*)((char*)page + size);
+	page->prev = prev;
 	return page;
 }
 
 static zend_always_inline void zend_vm_stack_init(TSRMLS_D)
 {
-	EG(argument_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE);
+	EG(argument_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, NULL);
 	EG(argument_stack)->top++;
 }
 
@@ -186,16 +185,24 @@ static zend_always_inline void zend_vm_stack_destroy(TSRMLS_D)
 	}
 }
 
-static zend_always_inline void zend_vm_stack_extend(uint32_t count TSRMLS_DC)
+static zend_always_inline void zend_vm_stack_extend(size_t size TSRMLS_DC)
 {
-	uint32_t size = count * ZEND_MM_ALIGNED_SIZE(sizeof(zval));
-	zend_vm_stack p = zend_vm_stack_new_page(
-		(size >= (ZEND_VM_STACK_PAGE_SIZE - ZEND_VM_STACK_HEADER_SLOT) * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) ? 
-		(size + ((ZEND_VM_STACK_HEADER_SLOT + ZEND_VM_STACK_PAGE_SIZE) * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) - 1) & 
-			~((ZEND_VM_STACK_PAGE_SIZE * ZEND_MM_ALIGNED_SIZE(sizeof(zval))) - 1) : 
-		ZEND_VM_STACK_PAGE_SIZE);
-	p->prev = EG(argument_stack);
-	EG(argument_stack) = p;
+	EG(argument_stack) = zend_vm_stack_new_page(
+		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
+			ZEND_VM_STACK_PAGE_SIZE : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size), 
+		EG(argument_stack));
+}
+
+static zend_always_inline zval* zend_vm_stack_alloc(size_t size TSRMLS_DC)
+{
+	char *top = (char*)EG(argument_stack)->top;
+
+	if (UNEXPECTED(size > (size_t)(((char*)EG(argument_stack)->end) - top))) {
+		zend_vm_stack_extend(size TSRMLS_CC);
+		top = (char*)EG(argument_stack)->top;
+	}
+	EG(argument_stack)->top = (zval*)(top + size);
+	return (zval*)top;
 }
 
 static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_function *func, uint32_t num_args, zend_uchar flags, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
@@ -206,9 +213,7 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_
 	if (ZEND_USER_CODE(func->type)) {
 		used_stack += func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args);
 	}
-	ZEND_VM_STACK_GROW_IF_NEEDED(used_stack);
-	call = (zend_execute_data*)EG(argument_stack)->top;
-	EG(argument_stack)->top += used_stack;
+	call = (zend_execute_data*)zend_vm_stack_alloc(used_stack * sizeof(zval) TSRMLS_CC);
 	call->func = func;
 	call->num_args = 0;
 	call->flags = flags;
