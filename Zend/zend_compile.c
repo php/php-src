@@ -3935,8 +3935,6 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	}
 
 	if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {
-		//zend_op *opline;
-
 		if (op_array->fn_flags & ZEND_ACC_PRIVATE) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private",
 				in_interface ? "Interface" : "Abstract", ce->name->val, name->val);
@@ -3948,11 +3946,6 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 		}
 
 		ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
-
-		/*opline = get_next_op(op_array TSRMLS_CC);
-		opline->opcode = ZEND_RAISE_ABSTRACT_ERROR;
-		SET_UNUSED(opline->op1);
-		SET_UNUSED(opline->op2);*/
 	} else if (!has_body) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Non-abstract method %s::%s() must contain body",
 			ce->name->val, name->val);
