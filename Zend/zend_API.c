@@ -3926,9 +3926,11 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 				zval garbage;
 
 				ZVAL_COPY_VALUE(&garbage, property);
-				Z_ADDREF_P(value);
-				if (Z_ISREF_P(value)) {
-					SEPARATE_ZVAL(value);
+				if (Z_REFCOUNTED_P(value)) {
+					Z_ADDREF_P(value);
+					if (Z_ISREF_P(value)) {
+						SEPARATE_ZVAL(value);
+					}
 				}
 				ZVAL_COPY_VALUE(property, value);
 				zval_ptr_dtor(&garbage);
