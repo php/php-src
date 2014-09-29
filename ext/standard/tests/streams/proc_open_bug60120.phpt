@@ -4,7 +4,11 @@ Bug #60120 proc_open hangs with stdin/out with 2048+ bytes
 <?php
 error_reporting(E_ALL);
 
-$cmd = PHP_BINARY . ' -n -r "fwrite(STDOUT, $in = file_get_contents(\'php://stdin\')); fwrite(STDERR, $in);"';
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+	$cmd = PHP_BINARY . ' -n -r "fwrite(STDOUT, $in = file_get_contents(\'php://stdin\')); fwrite(STDERR, $in);"';
+} else {
+	$cmd = PHP_BINARY . ' -n -r \'fwrite(STDOUT, $in = file_get_contents("php://stdin")); fwrite(STDERR, $in);\'';
+}
 $descriptors = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));
 $stdin = str_repeat('*', 1024 * 16) . '!';
 $stdin = str_repeat('*', 2049 );

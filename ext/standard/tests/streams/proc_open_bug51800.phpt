@@ -2,6 +2,7 @@
 Bug #51800 proc_open on Windows hangs forever
 --SKIPIF--
 <?php
+	echo 'skip expected to fail or take too long';
 	if (getenv("SKIP_SLOW_TESTS")) {
 		die("skip slow test");
 	}
@@ -17,7 +18,7 @@ so then the pipe buffer is emptied more often and the child has chance to contin
 write. The behaviour might look some better if write/read in a separate thread, however
 this is much more resource greedy and complexer to integrate into the user script. */
 
-$callee = dirname(__FILE__) . "/process" . md5(uniqid()) . ".php";
+$callee = dirname(__FILE__) . "/process_proc_open_bug51800.php";
 $php = PHP_BINARY;
 $cmd = "$php $callee";
 
@@ -72,10 +73,13 @@ var_dump(array(
         "stderr" => $stderr,
 ), strlen($stdout), strlen($stderr));
 
-unlink($callee);
-
 ?>
 ===DONE===
+--CLEAN--
+<?php
+$callee = dirname(__FILE__) . "/process_proc_open_bug51800.php";
+unlink($callee);
+?>
 --EXPECTF--
 array(3) {
   ["status"]=>

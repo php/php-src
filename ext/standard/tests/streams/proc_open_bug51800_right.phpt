@@ -2,7 +2,7 @@
 Bug #51800 proc_open on Windows hangs forever, the right way to do it
 --FILE--
 <?php
-$callee = dirname(__FILE__) . "/process" . md5(uniqid()) . ".php";
+$callee = dirname(__FILE__) . "/process_proc_open_bug51800_right.php";
 $php = PHP_BINARY;
 $cmd = "$php $callee";
 
@@ -56,10 +56,13 @@ var_dump(array(
         "stderr" => $stderr,
 ), strlen($stdout), strlen($stderr));
 
-unlink($callee);
-
 ?>
 ===DONE===
+--CLEAN--
+<?php
+$callee = dirname(__FILE__) . "/process_proc_open_bug51800_right.php";
+unlink($callee);
+?>
 --EXPECTF--
 array(3) {
   ["status"]=>
