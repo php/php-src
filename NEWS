@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.4.34
 
--Fileinfo:
+- Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
 
 - Core:
@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Reverted fixes for bug #41631, due to regressions. (Stas) 
+
+- XMLRPC:
+  . Fixed bug #68027 (Global buffer overflow in mkgmtime() function). (Stas)
 
 18 Sep 2014, PHP 5.4.33
 
