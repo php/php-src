@@ -35,7 +35,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/ereg/php_regex.h"
 #ifdef PHP_WIN32
 # include "win32/time.h"

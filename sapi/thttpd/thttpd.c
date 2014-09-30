@@ -27,7 +27,7 @@
 #include "php_ini.h"
 #include "zend_highlight.h"
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #include <sys/time.h>
 #include <sys/types.h>

@@ -26,7 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/html.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "JSON_parser.h"
 #include "php_json.h"
 #include <zend_exceptions.h>

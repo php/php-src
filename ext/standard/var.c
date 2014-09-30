@@ -28,7 +28,7 @@
 #include "php.h"
 #include "php_string.h"
 #include "php_var.h"
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
 
@@ -425,7 +425,7 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 		buffer_append_spaces(buf, level + 1);
 
 		smart_str_appendc(buf, '\'');
-		smart_str_appendl(buf, tmp_str->val, tmp_str->len);
+		smart_str_append(buf, tmp_str);
 		smart_str_appendl(buf, "' => ", 5);
 
 		zend_string_free(ckey);
@@ -450,7 +450,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		pname_esc = php_addcslashes(prop_name, prop_name_len, 0, "'\\", 2 TSRMLS_CC);
 
 		smart_str_appendc(buf, '\'');
-		smart_str_appendl(buf, pname_esc->val, pname_esc->len);
+		smart_str_append(buf, pname_esc);
 		smart_str_appendc(buf, '\'');
 		zend_string_release(pname_esc);
 	} else {
@@ -503,7 +503,7 @@ again:
 			ztmp2 = php_str_to_str_ex(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
 
 			smart_str_appendc(buf, '\'');
-			smart_str_appendl(buf, ztmp2->val, ztmp2->len);
+			smart_str_append(buf, ztmp2);
 			smart_str_appendc(buf, '\'');
 
 			zend_string_free(ztmp);
@@ -552,7 +552,7 @@ again:
 			}
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc), 0 TSRMLS_CC);
 
-			smart_str_appendl(buf, class_name->val, class_name->len);
+			smart_str_append(buf, class_name);
 			smart_str_appendl(buf, "::__set_state(array(\n", 21);
 
 			zend_string_release(class_name);
@@ -615,54 +615,51 @@ PHP_FUNCTION(var_export)
 }
 /* }}} */
 
-static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var_hash TSRMLS_DC);
+static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash TSRMLS_DC);
 
-static inline int php_add_var_hash(HashTable *var_hash, zval *var_ptr, zval *var_old TSRMLS_DC) /* {{{ */
+static inline uint32_t php_add_var_hash(php_serialize_data_t data, zval *var TSRMLS_DC) /* {{{ */
 {
-	zval var_no, *zv;
-	char id[32], *p;
-	register int len;
-	zval *var = var_ptr;
+	zval *zv;
+	zend_ulong key;
+	zend_bool is_ref = Z_ISREF_P(var);
 
-	if (Z_ISREF_P(var)) {
+	data->n += 1;
+
+	if (!is_ref && Z_TYPE_P(var) != IS_OBJECT) {
+		return 0;
+	}
+
+	/* References to objects are treated as if the reference didn't exist */
+	if (is_ref && Z_TYPE_P(Z_REFVAL_P(var)) == IS_OBJECT) {
 		var = Z_REFVAL_P(var);
 	}
-	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
-		p = zend_print_long_to_buf(id + sizeof(id) - 1,
-				(zend_long) Z_OBJ_P(var));
-		*(--p) = 'O';
-		len = id + sizeof(id) - 1 - p;
-	} else if (var_ptr != var) {
-		p = zend_print_long_to_buf(id + sizeof(id) - 1,
-				(zend_long) Z_REF_P(var_ptr));
-		*(--p) = 'R';
-		len = id + sizeof(id) - 1 - p;
-	} else {
-		p = zend_print_long_to_buf(id + sizeof(id) - 1, (zend_long) var);
-		len = id + sizeof(id) - 1 - p;
-	}
 
-	if ((zv = zend_hash_str_find(var_hash, p, len)) != NULL) {
-		ZVAL_COPY_VALUE(var_old, zv);
-		if (var == var_ptr) {
-			/* we still need to bump up the counter, since non-refs will
-			 * be counted separately by unserializer */
-			ZVAL_LONG(&var_no, -1);
-			zend_hash_next_index_insert(var_hash, &var_no);
+	/* Index for the variable is stored using the numeric value of the pointer to
+	 * the zend_refcounted struct */
+	key = (zend_ulong) (zend_uintptr_t) Z_COUNTED_P(var);
+	zv = zend_hash_index_find(&data->ht, key);
+
+	if (zv) {
+		/* References are only counted once, undo the data->n increment above */
+		if (is_ref) {
+			data->n -= 1;
 		}
-#if 0
-		fprintf(stderr, "- had var (%d): %lu\n", Z_TYPE_P(var), **(zend_ulong**)var_old);
-#endif
-		return FAILURE;
-	}
 
-	/* +1 because otherwise hash will think we are trying to store NULL pointer */
-	ZVAL_LONG(&var_no, zend_hash_num_elements(var_hash) + 1);
-	zend_hash_str_add(var_hash, p, len, &var_no);
-#if 0
-	fprintf(stderr, "+ add var (%d): %lu\n", Z_TYPE_P(var), Z_LVAL(var_no));
-#endif
-	return SUCCESS;
+		return Z_LVAL_P(zv);
+	} else {
+		zval zv_n;
+		ZVAL_LONG(&zv_n, data->n);
+		zend_hash_index_add_new(&data->ht, key, &zv_n);
+
+		/* Additionally to the index, we also store the variable, to ensure that it is
+		 * not destroyed during serialization and its pointer reused. The variable is
+		 * stored at the numeric value of the pointer + 1, which cannot be the location
+		 * of another zend_refcounted structure. */
+		zend_hash_index_add_new(&data->ht, key + 1, var);
+		Z_ADDREF_P(var);
+
+		return 0;
+	}
 }
 /* }}} */
 
@@ -692,14 +689,14 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 	smart_str_appendl(buf, "O:", 2);
 	smart_str_append_unsigned(buf, class_name->len);
 	smart_str_appendl(buf, ":\"", 2);
-	smart_str_appendl(buf, class_name->val, class_name->len);
+	smart_str_append(buf, class_name);
 	smart_str_appendl(buf, "\":", 2);
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
 	return incomplete_class;
 }
 /* }}} */
 
-static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, HashTable *var_hash TSRMLS_DC) /* {{{ */
+static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash TSRMLS_DC) /* {{{ */
 {
 	uint32_t count;
 	zend_bool incomplete_class;
@@ -797,27 +794,24 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 }
 /* }}} */
 
-static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var_hash TSRMLS_DC) /* {{{ */
+static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash TSRMLS_DC) /* {{{ */
 {
-	zval var_already;
+	uint32_t var_already;
 	HashTable *myht;
 
 	if (EG(exception)) {
 		return;
 	}
 
-	ZVAL_UNDEF(&var_already);
-
-	if (var_hash &&
-		php_add_var_hash(var_hash, struc, &var_already TSRMLS_CC) == FAILURE) {
+	if (var_hash && (var_already = php_add_var_hash(var_hash, struc TSRMLS_CC))) {
 		if (Z_ISREF_P(struc)) {
 			smart_str_appendl(buf, "R:", 2);
-			smart_str_append_long(buf, Z_LVAL(var_already));
+			smart_str_append_long(buf, var_already);
 			smart_str_appendc(buf, ';');
 			return;
 		} else if (Z_TYPE_P(struc) == IS_OBJECT) {
 			smart_str_appendl(buf, "r:", 2);
-			smart_str_append_long(buf, Z_LVAL(var_already));
+			smart_str_append_long(buf, var_already);
 			smart_str_appendc(buf, ';');
 			return;
 		}
@@ -876,7 +870,7 @@ again:
 						smart_str_appendl(buf, "C:", 2);
 						smart_str_append_unsigned(buf, Z_OBJCE_P(struc)->name->len);
 						smart_str_appendl(buf, ":\"", 2);
-						smart_str_appendl(buf, Z_OBJCE_P(struc)->name->val, Z_OBJCE_P(struc)->name->len);
+						smart_str_append(buf, Z_OBJCE_P(struc)->name);
 						smart_str_appendl(buf, "\":", 2);
 
 						smart_str_append_unsigned(buf, serialized_length);
@@ -988,9 +982,9 @@ again:
 }
 /* }}} */
 
-PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t *var_hash TSRMLS_DC) /* {{{ */
+PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t *data TSRMLS_DC) /* {{{ */
 {
-	php_var_serialize_intern(buf, struc, *var_hash TSRMLS_CC);
+	php_var_serialize_intern(buf, struc, *data TSRMLS_CC);
 	smart_str_0(buf);
 }
 /* }}} */

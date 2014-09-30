@@ -6,7 +6,7 @@
 #endif
 
 #include <Zend/zend_llist.h>
-#include <ext/standard/php_smart_str.h>
+#include <zend_smart_str.h>
 
 #ifndef PHP_WIN32
 # include <sys/types.h>

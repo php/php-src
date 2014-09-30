@@ -28,7 +28,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/url.h"
 #include "streams/php_streams_int.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "php_openssl.h"
 #include "php_network.h"
 #include <openssl/ssl.h>
@@ -1453,13 +1453,16 @@ int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 	GET_VER_OPT_STRING("ciphers", cipherlist);
+#ifndef USE_OPENSSL_SYSTEM_CIPHERS
 	if (!cipherlist) {
 		cipherlist = OPENSSL_DEFAULT_STREAM_CIPHERS;
 	}
-	if (SSL_CTX_set_cipher_list(sslsock->ctx, cipherlist) != 1) {
-		return FAILURE;
+#endif
+	if (cipherlist) {
+		if (SSL_CTX_set_cipher_list(sslsock->ctx, cipherlist) != 1) {
+			return FAILURE;
+		}
 	}
-
 	if (FAILURE == set_local_cert(sslsock->ctx, stream TSRMLS_CC)) {
 		return FAILURE;
 	}

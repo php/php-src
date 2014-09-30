@@ -20,7 +20,7 @@
 
 #include "php_filter.h"
 #include "filter_private.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 /* {{{ STRUCTS */
 typedef unsigned long filter_map[256];

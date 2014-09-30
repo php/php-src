@@ -1192,8 +1192,6 @@ try_again:
 		case IS_NULL:
 		case IS_FALSE:
 			return STR_EMPTY_ALLOC();
-		case IS_STRING:
-			return zend_string_copy(Z_STR_P(op));
 		case IS_TRUE:
 			return zend_string_init("1", 1, 0);
 		case IS_RESOURCE: {
@@ -1236,6 +1234,8 @@ try_again:
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
 			goto try_again;
+		case IS_STRING:
+			return zend_string_copy(Z_STR_P(op));
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
@@ -3040,7 +3040,19 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+			if (Z_OBJ_HANDLER_P(op1, get)
+			   && Z_OBJ_HANDLER_P(op1, set)) {
+				/* proxy object */
+				zval rv;
+				zval *val;
+				TSRMLS_FETCH();
+
+				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
+				Z_ADDREF_P(val);
+				increment_function(val);
+				Z_OBJ_HANDLER_P(op1, set)(op1, val TSRMLS_CC);
+				zval_ptr_dtor(val);
+			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
 				TSRMLS_FETCH();
@@ -3121,7 +3133,19 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+			if (Z_OBJ_HANDLER_P(op1, get)
+			   && Z_OBJ_HANDLER_P(op1, set)) {
+				/* proxy object */
+				zval rv;
+				zval *val;
+				TSRMLS_FETCH();
+
+				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
+				Z_ADDREF_P(val);
+				decrement_function(val);
+				Z_OBJ_HANDLER_P(op1, set)(op1, val TSRMLS_CC);
+				zval_ptr_dtor(val);
+			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
 				TSRMLS_FETCH();

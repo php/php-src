@@ -232,7 +232,6 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 		CASE(ZEND_JMPZ_EX);
 		CASE(ZEND_JMPNZ_EX);
 		CASE(ZEND_CASE);
-		CASE(ZEND_SWITCH_FREE);
 		CASE(ZEND_BRK);
 		CASE(ZEND_CONT);
 		CASE(ZEND_BOOL);

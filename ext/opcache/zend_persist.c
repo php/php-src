@@ -373,6 +373,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
 					case ZEND_JMP_SET:
+					case ZEND_COALESCE:
 					case ZEND_NEW:
 					case ZEND_FE_RESET:
 					case ZEND_FE_FETCH:

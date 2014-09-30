@@ -27,7 +27,7 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 /* {{{ rot13 stream filter implementation */
 static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -263,7 +263,7 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(filterparams), tmp) {
 				convert_to_string_ex(tmp);
 				smart_str_appendc(&tags_ss, '<');
-				smart_str_appendl(&tags_ss, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+				smart_str_append(&tags_ss, Z_STR_P(tmp));
 				smart_str_appendc(&tags_ss, '>');
 			} ZEND_HASH_FOREACH_END();
 			smart_str_0(&tags_ss);

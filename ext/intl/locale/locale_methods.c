@@ -36,7 +36,7 @@
 #include <zend.h>
 #include <php.h>
 #include "main/php_ini.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 

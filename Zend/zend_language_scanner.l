@@ -1203,6 +1203,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_ELLIPSIS;
 }
 
+<ST_IN_SCRIPTING>"??" {
+	return T_COALESCE;
+}
+
 <ST_IN_SCRIPTING>"new" {
 	return T_NEW;
 }
