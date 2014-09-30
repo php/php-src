@@ -1761,7 +1761,7 @@ static int copy_function_name(zval *zv TSRMLS_DC, int num_args, va_list args, ze
    Returns an array of all defined functions */
 ZEND_FUNCTION(get_defined_functions)
 {
-	zval internal, user, *ret;
+	zval internal, user;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2396,6 +2396,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		/* $this may be passed into regular internal functions */
 		object = call ? call->object : NULL;
 		if (object &&
+		    call->func &&
 		    call->func->type == ZEND_INTERNAL_FUNCTION &&
 		    !call->func->common.scope) {
 			object = NULL;

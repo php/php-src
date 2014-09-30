@@ -1610,11 +1610,13 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	 */
 	zend_execute_data *execute_data;
 	uint32_t num_args = call->num_args;
+	size_t stack_size = (ZEND_CALL_FRAME_SLOT + MAX(op_array->last_var + op_array->T, num_args)) * sizeof(zval);
 
 	EG(argument_stack) = zend_vm_stack_new_page(
-		MAX(ZEND_VM_STACK_PAGE_SIZE, 
-			ZEND_CALL_FRAME_SLOT + MAX(op_array->last_var + op_array->T, num_args)));
-	EG(argument_stack)->prev = NULL;
+		EXPECTED(stack_size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
+			ZEND_VM_STACK_PAGE_SIZE :
+			ZEND_VM_STACK_PAGE_ALIGNED_SIZE(stack_size),
+		NULL);
 
 	execute_data = zend_vm_stack_push_call_frame(
 		(zend_function*)op_array,
@@ -1664,7 +1666,7 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	int used_stack = (EG(argument_stack)->top - (zval*)call) + additional_args;
 		
 	/* copy call frame into new stack segment */
-	zend_vm_stack_extend(used_stack TSRMLS_CC);
+	zend_vm_stack_extend(used_stack * sizeof(zval) TSRMLS_CC);
 	new_call = (zend_execute_data*)EG(argument_stack)->top;
 	EG(argument_stack)->top += used_stack;		
 	*new_call = *call;

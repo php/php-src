@@ -1985,17 +1985,6 @@ ZEND_VM_HANDLER(70, ZEND_FREE, TMP|VAR, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(53, ZEND_INIT_STRING, ANY, ANY)
-{
-	USE_OPLINE
-	zval *tmp = EX_VAR(opline->result.var);
-
-	SAVE_OPLINE();
-	ZVAL_EMPTY_STRING(tmp);
-	/*CHECK_EXCEPTION();*/
-	ZEND_VM_NEXT_OPCODE();
-}
-
 ZEND_VM_HANDLER(54, ZEND_ADD_CHAR, TMP|UNUSED, CONST)
 {
 	USE_OPLINE
@@ -5082,13 +5071,6 @@ ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(142, ZEND_RAISE_ABSTRACT_ERROR, ANY, ANY)
-{
-	SAVE_OPLINE();
-	zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EX(scope)->name->val, EX(func)->op_array.function_name->val);
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
-}
-
 ZEND_VM_HANDLER(58, ZEND_END_SILENCE, TMP, ANY)
 {
 	USE_OPLINE
@@ -5119,6 +5101,41 @@ ZEND_VM_HANDLER(152, ZEND_JMP_SET, CONST|TMP|VAR|CV, ANY)
 		value = Z_REFVAL_P(value);
 	}
 	if (i_zend_is_true(value TSRMLS_CC)) {
+		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
+		if (OP1_TYPE == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
+				zval_copy_ctor_func(EX_VAR(opline->result.var));
+			}
+		} else if (OP1_TYPE == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+		} else if (OP1_TYPE == IS_VAR && is_ref) {
+			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+			FREE_OP1();
+		}
+		ZEND_VM_JMP(opline->op2.jmp_addr);
+	}
+
+	FREE_OP1();
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(169, ZEND_COALESCE, CONST|TMP|VAR|CV, ANY)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *value;
+	int is_ref = 0;
+
+	SAVE_OPLINE();
+	value = GET_OP1_ZVAL_PTR(BP_VAR_IS);
+
+	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) && Z_ISREF_P(value)) {
+		is_ref = 1;
+		value = Z_REFVAL_P(value);
+	}
+
+	if (Z_TYPE_P(value) > IS_NULL) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (OP1_TYPE == IS_CONST) {
 			if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {

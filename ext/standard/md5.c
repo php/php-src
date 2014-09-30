@@ -61,7 +61,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	PHP_MD5Update(&context, arg->val, arg->len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16);
+		RETURN_STRINGL((char *) digest, 16);
 	} else {
 		make_digest_ex(md5str, digest, 16);
 		RETVAL_STRING(md5str);
@@ -112,7 +112,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	PHP_MD5Final(digest, &context);
 
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16);
+		RETURN_STRINGL((char *) digest, 16);
 	} else {
 		make_digest_ex(md5str, digest, 16);
 		RETVAL_STRING(md5str);

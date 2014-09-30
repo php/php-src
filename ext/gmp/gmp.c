@@ -224,16 +224,7 @@ typedef struct _gmp_temp {
 #define GMP_BIG_ENDIAN    (1 << 3)
 #define GMP_NATIVE_ENDIAN (1 << 4)
 
-#define GMP_42_OR_NEWER \
-	((__GNU_MP_VERSION >= 5) || (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2))
-
-/* The maximum base for input and output conversions is 62 from GMP 4.2
- * onwards. */
-#if GMP_42_OR_NEWER
-#	define MAX_BASE 62
-#else
-#	define MAX_BASE 36
-#endif
+#define GMP_MAX_BASE 62
 
 #define IS_GMP(zval) \
 	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), gmp_ce TSRMLS_CC))
@@ -1048,8 +1039,8 @@ ZEND_FUNCTION(gmp_init)
 		return;
 	}
 
-	if (base && (base < 2 || base > MAX_BASE)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d)", base, MAX_BASE);
+	if (base && (base < 2 || base > GMP_MAX_BASE)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d)", base, GMP_MAX_BASE);
 		RETURN_FALSE;
 	}
 
@@ -1204,15 +1195,10 @@ ZEND_FUNCTION(gmp_strval)
 		return;
 	}
 
-#if MAX_BASE == 62
-	/* Although the maximum base in general in GMP >= 4.2 is 62, mpz_get_str()
+	/* Although the maximum base in general in GMP is 62, mpz_get_str()
 	 * is explicitly limited to -36 when dealing with negative bases. */
-	if ((base < 2 && base > -2) || base > MAX_BASE || base < -36) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d or -2 and -36)", base, MAX_BASE);
-#else
-	if (base < 2 || base > MAX_BASE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d)", base, MAX_BASE);
-#endif
+	if ((base < 2 && base > -2) || base > GMP_MAX_BASE || base < -36) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d or -2 and -36)", base, GMP_MAX_BASE);
 		RETURN_FALSE;
 	}
 
@@ -1596,14 +1582,7 @@ ZEND_FUNCTION(gmp_rootrem)
 	add_next_index_zval(return_value, &result1);
 	add_next_index_zval(return_value, &result2);
 
-#if GMP_42_OR_NEWER
 	mpz_rootrem(gmpnum_result1, gmpnum_result2, gmpnum_a, (gmp_ulong) nth);
-#else
-	mpz_root(gmpnum_result1, gmpnum_a, (gmp_ulong) nth);
-	mpz_pow_ui(gmpnum_result2, gmpnum_result1, (gmp_ulong) nth);
-	mpz_sub(gmpnum_result2, gmpnum_a, gmpnum_result2);
-	mpz_abs(gmpnum_result2, gmpnum_result2);
-#endif
 
 	FREE_GMP_TEMP(temp_a);
 }
@@ -1779,7 +1758,7 @@ ZEND_FUNCTION(gmp_random)
 
 	if (!GMPG(rand_initialized)) {
 		/* Initialize */
-		gmp_randinit_lc_2exp_size(GMPG(rand_state), 32L);
+		gmp_randinit_mt(GMPG(rand_state));
 
 		/* Seed */
 		gmp_randseed_ui(GMPG(rand_state), GENERATE_SEED());
@@ -1849,7 +1828,7 @@ ZEND_FUNCTION(gmp_setbit)
 
 	if (index < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
-		return;
+		RETURN_FALSE;
 	}
 
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
@@ -1876,7 +1855,7 @@ ZEND_FUNCTION(gmp_clrbit)
 
 	if (index < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
-		return;
+		RETURN_FALSE;
 	}
 
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
