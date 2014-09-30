@@ -157,6 +157,12 @@ TSRM_API void tsrm_free_interpreter_context(void *context);
 
 TSRM_API inline void *tsrm_get_ls_cache(void);
 
+#ifdef TSRM_WIN32
+# define TSRM_TLS __declspec(thread)
+#else
+# define TSRM_TLS __thread
+#endif
+
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
 #define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)-1)
 
@@ -164,6 +170,7 @@ TSRM_API inline void *tsrm_get_ls_cache(void);
 #define TSRMLS_FETCH_FROM_CTX(ctx)	void ***tsrm_ls = (void ***) ctx
 #define TSRMLS_SET_CTX(ctx)		ctx = (void ***) tsrm_get_ls_cache()
 #define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
+#define TSRMGP(id, type, element)	(((type) (*((void ***) tsrm_ls_cache))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
 #define TSRMLS_D
 #define TSRMLS_DC
 #define TSRMLS_C	
