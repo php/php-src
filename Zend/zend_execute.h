@@ -254,13 +254,12 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call T
 
 static zend_always_inline void zend_vm_stack_free_call_frame(zend_execute_data *call TSRMLS_DC)
 {
-	if (UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (zval*)call)) {
-		zend_vm_stack p = EG(argument_stack);
-
+	zend_vm_stack p = EG(argument_stack);
+	if (UNEXPECTED(ZEND_VM_STACK_ELEMETS(p) == (zval*)call)) {
 		EG(argument_stack) = p->prev;
 		efree(p);
 	} else {
-		EG(argument_stack)->top = (zval*)call;
+		p->top = (zval*)call;
 	}
 }
 
