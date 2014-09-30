@@ -160,13 +160,10 @@ TSRM_API inline void *tsrm_get_ls_cache(void);
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
 #define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)-1)
 
-#define TSRMLS_FETCH()			           void ***tsrm_ls = (void ***) ts_resource_ex(0, NULL)
-#define TSRMLS_FETCH_FROM_CTX(ctx)	       void ***tsrm_ls = (void ***) ctx
-#define TSRMLS_SET_CTX(ctx)		           ctx = (void ***) tsrm_get_ls_cache()
-#define TSRMX(name)                        tsrm_ls_cache_##name
-#define TSRMX_D(name)                      static void*** TSRMX(name)
-#define TSRMGX(cache, id, type, element)   (((type) (*((void ***) cache))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
-#define TSRMG(id, type, element)	       TSRMGX(tsrm_get_ls_cache(), id, type, element)
+#define TSRMLS_FETCH()			void ***tsrm_ls = (void ***) ts_resource_ex(0, NULL)
+#define TSRMLS_FETCH_FROM_CTX(ctx)	void ***tsrm_ls = (void ***) ctx
+#define TSRMLS_SET_CTX(ctx)		ctx = (void ***) tsrm_get_ls_cache()
+#define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
 #define TSRMLS_D
 #define TSRMLS_DC
 #define TSRMLS_C	
