@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.5.18
+02 Oct 2014, PHP 5.5.18RC1
 
 - Core:
   . Fixed bug #67985 (Incorrect last used array index copied to new array after
@@ -14,6 +14,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
     when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
+
+- OpenSSL:
+  . Revert regression introduced by fix of bug #41631
 
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
