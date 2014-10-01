@@ -171,7 +171,6 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 	return retry;
 }
 
-
 static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
@@ -234,29 +233,13 @@ static void php_openssl_stream_wait_for_data(php_netstream_data_t *sock TSRMLS_D
 	}
 }
 
-static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-	php_netstream_data_t *sock;
 	int nr_bytes = 0;
 
 	if (sslsock->ssl_active) {
 		int retry = 1;
-		sock = (php_netstream_data_t*)stream->abstract;
-
-		/* The SSL_read() function will block indefinitely waiting for data on a blocking
-		   socket. If we don't poll for readability first this operation has the potential
-		   to hang forever. To avoid this scenario we poll with a timeout before performing
-		   the actual read. If it times out we're finished.
-		*/
-		if (sock->is_blocked) {
-			php_openssl_stream_wait_for_data(sock);
-			if (sock->timeout_event) {
-				stream->eof = 1;
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL read operation timed out");
-				return nr_bytes;
-			}
-		}
 
 		do {
 			nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
