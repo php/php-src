@@ -170,7 +170,13 @@ TSRM_API inline void *tsrm_get_ls_cache(void);
 #define TSRMLS_FETCH_FROM_CTX(ctx)	void ***tsrm_ls = (void ***) ctx
 #define TSRMLS_SET_CTX(ctx)		ctx = (void ***) tsrm_get_ls_cache()
 #define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
-#define TSRMGP(id, type, element)	(((type) (*((void ***) tsrm_ls_cache))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
+
+#define TSRMG_STATIC(id, type, element)	(((type) (*((void ***) _tsrm_ls_cache))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
+#define TSRMLS_CACHE_EXTERN TSRM_TLS extern void *_tsrm_ls_cache
+#define TSRMLS_CACHE_DEFINE TSRM_TLS void *_tsrm_ls_cache
+#define TSRMLS_CACHE_UPDATE _tsrm_ls_cache = tsrm_get_ls_cache()
+
+/* BC only */
 #define TSRMLS_D
 #define TSRMLS_DC
 #define TSRMLS_C	
@@ -185,6 +191,13 @@ TSRM_API inline void *tsrm_get_ls_cache(void);
 #define TSRMLS_FETCH()
 #define TSRMLS_FETCH_FROM_CTX(ctx)
 #define TSRMLS_SET_CTX(ctx)
+
+#define TSRMG_STATIC(id, type, element)
+#define TSRMLS_CACHE_EXTERN
+#define TSRMLS_CACHE_DEFINE
+#define TSRMLS_CACHE_UPDATE
+
+/* BC only */
 #define TSRMLS_D	void
 #define TSRMLS_DC
 #define TSRMLS_C

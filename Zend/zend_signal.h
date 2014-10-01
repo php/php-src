@@ -65,7 +65,7 @@ typedef struct _zend_signal_globals_t {
 } zend_signal_globals_t;
 
 #ifdef ZTS
-# define SIGG(v) TSRMG(zend_signal_globals_id, zend_signal_globals_t *, v)
+# define SIGG(v) ZEND_TSRMG(zend_signal_globals_id, zend_signal_globals_t *, v)
 BEGIN_EXTERN_C()
 ZEND_API extern int zend_signal_globals_id;
 END_EXTERN_C()

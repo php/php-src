@@ -112,7 +112,7 @@ typedef struct _zend_gc_globals {
 BEGIN_EXTERN_C()
 ZEND_API extern int gc_globals_id;
 END_EXTERN_C()
-#define GC_G(v) TSRMG(gc_globals_id, zend_gc_globals *, v)
+#define GC_G(v) ZEND_TSRMG(gc_globals_id, zend_gc_globals *, v)
 #else
 #define GC_G(v) (gc_globals.v)
 extern ZEND_API zend_gc_globals gc_globals;

@@ -61,6 +61,20 @@
 	 !ZEND_USER_CODE(EG(current_execute_data)->prev_execute_data->func->common.type) || \
 	 !(EG(current_execute_data)->prev_execute_data->opline->result_type & EXT_TYPE_UNUSED))
 
+#ifdef ZEND_ENABLE_STATIC_TSRMLS_CACHE
+#define ZEND_TSRMG TSRMG_STATIC
+#define ZEND_TSRMLS_CACHE_EXTERN TSRMLS_CACHE_EXTERN
+#define ZEND_TSRMLS_CACHE_DEFINE TSRMLS_CACHE_DEFINE
+#define ZEND_TSRMLS_CACHE_UPDATE TSRMLS_CACHE_UPDATE
+#else
+#define ZEND_TSRMG TSRMG
+#define ZEND_TSRMLS_CACHE_EXTERN
+#define ZEND_TSRMLS_CACHE_DEFINE
+#define ZEND_TSRMLS_CACHE_UPDATE
+#endif
+
+ZEND_TSRMLS_CACHE_EXTERN;
+
 #ifdef HAVE_NORETURN
 # if defined(ZEND_WIN32)
 ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...);
