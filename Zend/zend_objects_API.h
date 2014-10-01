@@ -37,14 +37,7 @@
 	} while (0)
 
 
-#define OBJ_RELEASE(obj) do { \
-		zend_object *_obj = (obj); \
-		if (--GC_REFCOUNT(_obj) == 0) { \
-			zend_objects_store_del(_obj TSRMLS_CC); \
-		} else { \
-			gc_possible_root(&_obj->gc TSRMLS_CC); \
-		} \
-	} while (0)
+#define OBJ_RELEASE(obj) zend_object_release(obj TSRMLS_CC)
 
 typedef struct _zend_objects_store {
 	zend_object **object_buckets;
@@ -77,6 +70,15 @@ ZEND_API zend_object *zend_object_create_proxy(zval *object, zval *member TSRMLS
 
 ZEND_API zend_object_handlers *zend_get_std_object_handlers(void);
 END_EXTERN_C()
+
+static zend_always_inline void zend_object_release(zend_object *obj TSRMLS_CC)
+{
+	if (--GC_REFCOUNT(obj) == 0) {
+		zend_objects_store_del(obj TSRMLS_CC);
+	} else if (UNEXPECTED(!GC_INFO(obj))) {
+		gc_possible_root(&obj->gc TSRMLS_CC);
+	}
+}
 
 #endif /* ZEND_OBJECTS_H */
 
