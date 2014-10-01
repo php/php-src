@@ -85,7 +85,7 @@ void zend_exception_restore(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
+ZEND_API void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
 #ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
