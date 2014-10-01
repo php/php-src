@@ -2534,7 +2534,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	zend_function *fbc = call->func;
 
 	SAVE_OPLINE();
-	EX(call) = call->prev_nested_call;
+	EX(call) = call->prev_execute_data;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
 			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name->val, fbc->common.function_name->val);
@@ -5409,7 +5409,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 				}
 				OBJ_RELEASE(call->object);
 			}
-			EX(call) = call->prev_nested_call;
+			EX(call) = call->prev_execute_data;
 			zend_vm_stack_free_call_frame(call TSRMLS_CC);
 			call = EX(call);
 		} while (call);

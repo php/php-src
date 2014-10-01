@@ -367,7 +367,6 @@ struct _zend_execute_data {
 	zend_uchar           frame_kind;
 	zend_class_entry    *called_scope;
 	zend_object         *object;
-	zend_execute_data   *prev_nested_call;
 	zend_execute_data   *prev_execute_data;
 	zval                *return_value;
 	zend_class_entry    *scope;            /* function scope (self)          */

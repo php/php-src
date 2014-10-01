@@ -71,7 +71,7 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 		if (execute_data->call->object) {
 			OBJ_RELEASE(execute_data->call->object);
 		}
-		execute_data->call = execute_data->call->prev_nested_call;
+		execute_data->call = execute_data->call->prev_execute_data;
 	}
 }
 /* }}} */

@@ -703,7 +703,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		dummy_execute_data = *EG(current_execute_data);
 		dummy_execute_data.prev_execute_data = EG(current_execute_data);
 		dummy_execute_data.call = NULL;
-		dummy_execute_data.prev_nested_call = NULL;
 		dummy_execute_data.opline = NULL;
 		dummy_execute_data.func = NULL;
 		EG(current_execute_data) = &dummy_execute_data;
