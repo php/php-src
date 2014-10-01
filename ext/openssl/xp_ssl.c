@@ -203,37 +203,7 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
 	return didwrite;
 }
 
-static void php_openssl_stream_wait_for_data(php_netstream_data_t *sock TSRMLS_DC)
-{
-	int retval;
-	struct timeval *ptimeout;
-
-	if (sock->socket == -1) {
-		return;
-	}
-	
-	sock->timeout_event = 0;
-
-	if (sock->timeout.tv_sec == -1)
-		ptimeout = NULL;
-	else
-		ptimeout = &sock->timeout;
-
-	while(1) {
-		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
-
-		if (retval == 0)
-			sock->timeout_event = 1;
-
-		if (retval >= 0)
-			break;
-
-		if (php_socket_errno() != EINTR)
-			break;
-	}
-}
-
-static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
+static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 	int nr_bytes = 0;
