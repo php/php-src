@@ -2710,11 +2710,7 @@ ZEND_VM_C_LABEL(fcall_end_change_scope):
 				zend_object_store_ctor_failed(Z_OBJ(EG(This)) TSRMLS_CC);
 			}
 		}
-		if (!Z_DELREF(EG(This))) {
-			_zval_dtor_func_for_ptr(Z_COUNTED(EG(This)) ZEND_FILE_LINE_CC);
-		} else if (UNEXPECTED(!Z_GC_INFO(EG(This)))) {
-			gc_possible_root(Z_COUNTED(EG(This)) TSRMLS_CC);
-		}
+		OBJ_RELEASE(Z_OBJ(EG(This)));
 	}
 	Z_OBJ(EG(This)) = EX(object);
 	EG(scope) = EX(scope);
