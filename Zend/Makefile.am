@@ -20,6 +20,7 @@ libZend_la_SOURCES=\
 	zend_strtod.c zend_closures.c zend_float.c zend_string.c zend_signal.c \
 	zend_generators.c zend_virtual_cwd.c zend_ast.c
 
+libZend_la_CFLAGS = -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1
 libZend_la_LDFLAGS =
 libZend_la_LIBADD = @ZEND_EXTRA_LIBS@
 
