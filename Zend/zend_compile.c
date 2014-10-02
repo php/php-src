@@ -5559,15 +5559,13 @@ void zend_compile_array(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_op *opline;
-	uint32_t i, opnum_init;
+	uint32_t i, opnum_init = -1;
 	zend_bool packed = 1;
 
 	if (zend_try_ct_eval_array(&result->u.constant, ast TSRMLS_CC)) {
 		result->op_type = IS_CONST;
 		return;
 	}
-
-	opnum_init = get_next_op_number(CG(active_op_array));
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
@@ -5591,6 +5589,7 @@ void zend_compile_array(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 		}
 
 		if (i == 0) {
+			opnum_init = get_next_op_number(CG(active_op_array));
 			opline = zend_emit_op_tmp(result, ZEND_INIT_ARRAY, &value_node, key_node_ptr TSRMLS_CC);
 			opline->extended_value = list->children << ZEND_ARRAY_SIZE_SHIFT;
 		} else {
@@ -5612,6 +5611,7 @@ void zend_compile_array(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 
 	/* Add a flag to INIT_ARRAY if we know this array cannot be packed */
 	if (!packed) {
+		ZEND_ASSERT(opnum_init != -1);
 		opline = &CG(active_op_array)->opcodes[opnum_init];
 		opline->extended_value |= ZEND_ARRAY_NOT_PACKED;
 	}
