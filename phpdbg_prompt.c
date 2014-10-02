@@ -674,7 +674,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 PHPDBG_COMMAND(back) /* {{{ */
 {
 	if (!EG(in_execution)) {
-s		phpdbg_error("inactive", "type=\"noexec\"", "Not executing!");
+		phpdbg_error("inactive", "type=\"noexec\"", "Not executing!");
 		return SUCCESS;
 	}
 
