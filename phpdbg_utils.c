@@ -475,3 +475,34 @@ PHPDBG_API void phpdbg_set_async_io(int fd) {
 	fcntl(STDIN_FILENO, F_SETFL, flags | FASYNC);
 #endif
 }
+
+int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC) {
+	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
+		char *lc_name, *lc_free;
+		int lc_length, ret = FAILURE;
+
+		if (name == NULL || !name_length) {
+			return FAILURE;
+		}
+
+		lc_free = lc_name = emalloc(name_length + 1);
+		zend_str_tolower_copy(lc_name, name, name_length);
+		lc_length = name_length + 1;
+
+		if (lc_name[0] == '\\') {
+			lc_name += 1;
+			lc_length -= 1;
+		}
+
+		phpdbg_try_access {
+			ret = zend_hash_find(EG(class_table), lc_name, lc_length, (void **) &ce);
+		} phpdbg_catch_access {
+			phpdbg_error("Could not fetch class %.*s, invalid data source", name_length, name);
+		} phpdbg_end_try_access();
+
+		efree(lc_free);
+		return ret;
+	} else {
+		return zend_lookup_class(name, name_length, ce TSRMLS_CC);
+	}
+}

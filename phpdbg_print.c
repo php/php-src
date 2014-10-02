@@ -26,16 +26,16 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-#define PHPDBG_PRINT_COMMAND_D(f, h, a, m, l, s) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[9])
+#define PHPDBG_PRINT_COMMAND_D(f, h, a, m, l, s, flags) \
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[9], flags)
 
 const phpdbg_command_t phpdbg_print_commands[] = {
-	PHPDBG_PRINT_COMMAND_D(exec,       "print out the instructions in the execution context",  'e', print_exec,   NULL, 0),
-	PHPDBG_PRINT_COMMAND_D(opline,     "print out the instruction in the current opline",      'o', print_opline, NULL, 0),
-	PHPDBG_PRINT_COMMAND_D(class,      "print out the instructions in the specified class",    'c', print_class,  NULL, "s"),
-	PHPDBG_PRINT_COMMAND_D(method,     "print out the instructions in the specified method",   'm', print_method, NULL, "m"),
-	PHPDBG_PRINT_COMMAND_D(func,       "print out the instructions in the specified function", 'f', print_func,   NULL, "s"),
-	PHPDBG_PRINT_COMMAND_D(stack,      "print out the instructions in the current stack",      's', print_stack,  NULL, 0),
+	PHPDBG_PRINT_COMMAND_D(exec,       "print out the instructions in the execution context",  'e', print_exec,   NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(opline,     "print out the instruction in the current opline",      'o', print_opline, NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(class,      "print out the instructions in the specified class",    'c', print_class,  NULL, "s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(method,     "print out the instructions in the specified method",   'm', print_method, NULL, "m", PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(func,       "print out the instructions in the specified function", 'f', print_func,   NULL, "s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(stack,      "print out the instructions in the current stack",      's', print_stack,  NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_END_COMMAND
 };
 
@@ -108,7 +108,7 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
 PHPDBG_PRINT(exec) /* {{{ */
 {
 	if (PHPDBG_G(exec)) {
-		if (!PHPDBG_G(ops)) {
+		if (!PHPDBG_G(ops) && !(PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER)) {
 			phpdbg_compile(TSRMLS_C);
 		}
 
@@ -154,7 +154,7 @@ PHPDBG_PRINT(class) /* {{{ */
 {
 	zend_class_entry **ce;
 
-	if (zend_lookup_class(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
+	if (phpdbg_safe_class_lookup(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
 		phpdbg_notice("%s %s: %s",
 			((*ce)->type == ZEND_USER_CLASS) ?
 				"User" : "Internal",
@@ -187,7 +187,7 @@ PHPDBG_PRINT(method) /* {{{ */
 {
 	zend_class_entry **ce;
 
-	if (zend_lookup_class(param->method.class, strlen(param->method.class), &ce TSRMLS_CC) == SUCCESS) {
+	if (phpdbg_safe_class_lookup(param->method.class, strlen(param->method.class), &ce TSRMLS_CC) == SUCCESS) {
 		zend_function *fbc;
 		char *lcname = zend_str_tolower_dup(param->method.name, strlen(param->method.name));
 
@@ -234,18 +234,22 @@ PHPDBG_PRINT(func) /* {{{ */
 		func_table = EG(function_table);
 	}
 
-	lcname  = zend_str_tolower_dup(func_name, func_name_len);
+	lcname = zend_str_tolower_dup(func_name, func_name_len);
 
-	if (zend_hash_find(func_table, lcname, strlen(lcname)+1, (void**)&fbc) == SUCCESS) {
-		phpdbg_notice("%s %s %s",
-			(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
-			(fbc->common.scope) ? "Method" : "Function",
-			fbc->common.function_name);
+	phpdbg_try_access {
+		if (zend_hash_find(func_table, lcname, func_name_len + 1, (void **) &fbc) == SUCCESS) {
+			phpdbg_notice("%s %s %s",
+				(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
+				(fbc->common.scope) ? "Method" : "Function",
+				fbc->common.function_name);
 
-		phpdbg_print_function_helper(fbc TSRMLS_CC);
-	} else {
-		phpdbg_error("The function %s could not be found", func_name);
-	}
+			phpdbg_print_function_helper(fbc TSRMLS_CC);
+		} else {
+			phpdbg_error("The function %s could not be found", func_name);
+		}
+	} phpdbg_catch_access {
+		phpdbg_error("Couldn't fetch function %.*s, invalid data source", func_name_len, func_name);
+	} phpdbg_end_try_access();
 
 	efree(lcname);
 

@@ -7,7 +7,7 @@
 
 typedef struct {
 	char *mem;
-	zend_bool allocated;;
+	zend_bool allocated;
 	zend_mm_heap heap;
 	zend_mm_heap *old_heap;
 	zend_mm_storage storage;
@@ -19,5 +19,7 @@ zend_bool phpdbg_active_sigsafe_mem(TSRMLS_D);
 
 void phpdbg_set_sigsafe_mem(char *mem TSRMLS_DC);
 void phpdbg_clear_sigsafe_mem(TSRMLS_D);
+
+zend_mm_heap *phpdbg_original_heap_sigsafe_mem(TSRMLS_D);
 
 #endif

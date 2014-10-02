@@ -40,30 +40,30 @@
 
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
-	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, "s"),
-	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 0),
-	PHPDBG_COMMAND_D(continue,"continue execution",                       'c', NULL, 0),
-	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, "|s"),
-	PHPDBG_COMMAND_D(ev,      "evaluate some code",                        0, NULL, "i"),
-	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
-	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0),
-	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
-	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 0),
-	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, "|*c"),
-	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, "|n"),
-	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, "|n"),
-	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands, "*"),
-	PHPDBG_COMMAND_D(info,    "displays some informations",               'i', phpdbg_info_commands, "s"),
-	PHPDBG_COMMAND_D(clean,   "clean the execution environment",          'X', NULL, 0),
-	PHPDBG_COMMAND_D(clear,   "clear breakpoints",                        'C', NULL, 0),
-	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, "|s"),
-	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s"),
-	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, "s"),
-	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '<', NULL, "s"),
-	PHPDBG_COMMAND_D(export,  "export breaks to a .phpdbginit script",    '>', NULL, "s"),
-	PHPDBG_COMMAND_D(sh,   	  "shell a command",                           0, NULL, "i"),
-	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
-	PHPDBG_COMMAND_D(watch,   "set watchpoint",                           'w', phpdbg_watch_commands, "|ss"),
+	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, "s", 0),
+	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(continue,"continue execution",                       'c', NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, "|s", 0),
+	PHPDBG_COMMAND_D(ev,      "evaluate some code",                        0 , NULL, "i", 0), /* restricted ASYNC_SAFE */
+	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0, 0),
+	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0, 0),
+	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0, 0),
+	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 0, 0),
+	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, "|*c", 0),
+	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, "|n", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, "|n", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands, "*", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(info,    "displays some informations",               'i', phpdbg_info_commands, "s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(clean,   "clean the execution environment",          'X', NULL, 0, 0),
+	PHPDBG_COMMAND_D(clear,   "clear breakpoints",                        'C', NULL, 0, 0),
+	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, "|s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, "s", 0),
+	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '<', NULL, "s", 0),
+	PHPDBG_COMMAND_D(export,  "export breaks to a .phpdbginit script",    '>', NULL, "s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(sh,   	  "shell a command",                           0 , NULL, "i", 0),
+	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(watch,   "set watchpoint",                           'w', phpdbg_watch_commands, "|ss", 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
 
@@ -250,21 +250,17 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 						phpdbg_init_param(&stack, STACK_PARAM);
 
 						if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
-							switch (phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
+							switch (phpdbg_stack_execute(&stack, &why, 1 /* allow_async_unsafe == 1 */ TSRMLS_CC)) {
 								case FAILURE:
-//									if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-										if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
-											phpdbg_error(
-												"Unrecognized command in %s:%d: %s, %s!", 
-												init_file, line, input, why);
-										}
-//									}
+									if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
+										phpdbg_error("Unrecognized command in %s:%d: %s, %s!", init_file, line, input, why);
+									}
 								break;
 							}
 						}
 
 						if (why) {
-							free(why);
+							efree(why);
 							why = NULL;
 						}
 
@@ -992,7 +988,7 @@ PHPDBG_COMMAND(watch) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-int phpdbg_interactive(TSRMLS_D) /* {{{ */
+int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC) /* {{{ */
 {
 	int ret = SUCCESS;
 	char *why = NULL;
@@ -1008,10 +1004,10 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			phpdbg_init_param(&stack, STACK_PARAM);
 
 			if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
-				switch (ret = phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
+				switch (ret = phpdbg_stack_execute(&stack, &why, allow_async_unsafe TSRMLS_CC)) {
 					case FAILURE:
 						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-							if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
+							if (!allow_async_unsafe || phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
 								if (why) {
 									phpdbg_error("%s", why);
 								}
@@ -1019,7 +1015,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 						}
 
 						if (why) {
-							free(why);
+							efree(why);
 							why = NULL;
 						}
 					break;
@@ -1037,13 +1033,12 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			}
 
 			if (why) {
-				free(why);
+				efree(why);
 				why = NULL;
 			}
 
 			phpdbg_stack_free(&stack);
 			phpdbg_destroy_input(&input TSRMLS_CC);
-
 		} while ((input = phpdbg_read_input(NULL TSRMLS_CC)));
 	}
 
@@ -1054,7 +1049,7 @@ out:
 	}
 
 	if (why) {
-		free(why);
+		efree(why);
 	}
 
 	if (EG(in_execution)) {
@@ -1145,6 +1140,27 @@ static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_ar
 #endif
 } /* }}} */
 
+#define DO_INTERACTIVE(allow_async_unsafe) do { \
+	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \
+		phpdbg_list_file( \
+			zend_get_executed_filename(TSRMLS_C), \
+			3, \
+			zend_get_executed_lineno(TSRMLS_C)-1, \
+			zend_get_executed_lineno(TSRMLS_C) \
+			TSRMLS_CC \
+		); \
+	} \
+	\
+	switch (phpdbg_interactive(allow_async_unsafe TSRMLS_CC)) { \
+		case PHPDBG_LEAVE: \
+		case PHPDBG_FINISH: \
+		case PHPDBG_UNTIL: \
+		case PHPDBG_NEXT:{ \
+			goto next; \
+		} \
+	} \
+} while (0)
+
 #if PHP_VERSION_ID >= 50500
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
@@ -1181,40 +1197,16 @@ zend_vm_enter:
 #endif
 
 	while (1) {
-	
 		if ((PHPDBG_G(flags) & PHPDBG_BP_RESOLVE_MASK)) {
 			/* resolve nth opline breakpoints */
 			phpdbg_resolve_op_array_breaks(EG(active_op_array) TSRMLS_CC);
 		}
-		
+
 #ifdef ZEND_WIN32
 		if (EG(timed_out)) {
 			zend_timeout(0);
 		}
 #endif
-
-#define DO_INTERACTIVE() do { \
-	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \
-		phpdbg_list_file( \
-			zend_get_executed_filename(TSRMLS_C), \
-			3, \
-			zend_get_executed_lineno(TSRMLS_C)-1, \
-			zend_get_executed_lineno(TSRMLS_C) \
-			TSRMLS_CC \
-		); \
-	} \
-	\
-/*	do { */\
-		switch (phpdbg_interactive(TSRMLS_C)) { \
-			case PHPDBG_LEAVE: \
-			case PHPDBG_FINISH: \
-			case PHPDBG_UNTIL: \
-			case PHPDBG_NEXT:{ \
-				goto next; \
-			} \
-		} \
-/*	} while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)); */\
-} while (0)
 
 		/* allow conditional breakpoints and
 			initialization to access the vm uninterrupted */
@@ -1263,7 +1255,7 @@ zend_vm_enter:
 						zend_get_executed_filename(TSRMLS_C),
 						zend_get_executed_lineno(TSRMLS_C)
 					);
-					DO_INTERACTIVE();
+					DO_INTERACTIVE(1);
 				} else {
 					/* skip possible breakpoints */
 					goto next;
@@ -1277,13 +1269,13 @@ zend_vm_enter:
 
 		if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING && (PHPDBG_G(flags) & PHPDBG_STEP_OPCODE || execute_data->opline->lineno != PHPDBG_G(last_line))) {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
-			DO_INTERACTIVE();
+			DO_INTERACTIVE(1);
 		}
 
 		/* check if some watchpoint was hit */
 		{
 			if (phpdbg_print_changed_zvals(TSRMLS_C) == SUCCESS) {
-				DO_INTERACTIVE();
+				DO_INTERACTIVE(1);
 			}
 		}
 
@@ -1295,17 +1287,18 @@ zend_vm_enter:
 			    && (brake = phpdbg_find_breakpoint(execute_data TSRMLS_CC))
 			    && (brake->type != PHPDBG_BREAK_FILE || execute_data->opline->lineno != PHPDBG_G(last_line))) {
 				phpdbg_hit_breakpoint(brake, 1 TSRMLS_CC);
-				DO_INTERACTIVE();
+				DO_INTERACTIVE(1);
 			}
 		}
 
-next:
 		if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
 			phpdbg_writeln(EMPTY);
 			phpdbg_notice("Program received signal SIGINT");
-			PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
-			DO_INTERACTIVE();
+			DO_INTERACTIVE(1);
 		}
+
+		PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
+next:
 
 		PHPDBG_G(last_line) = execute_data->opline->lineno;
 
@@ -1335,8 +1328,11 @@ next:
 	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
 } /* }}} */
 
+/* only if *not* interactive and while executing */
 void phpdbg_force_interruption(TSRMLS_D) {
 	zend_execute_data *data = EG(current_execute_data); /* should be always readable if not NULL */
+
+	PHPDBG_G(flags) |= PHPDBG_IN_SIGNAL_HANDLER;
 
 	if (data) {
 		if (data->op_array) {
@@ -1346,5 +1342,14 @@ void phpdbg_force_interruption(TSRMLS_D) {
 		}
 	} else {
 		phpdbg_notice("No information available about executing context");
+	}
+
+	DO_INTERACTIVE(0);
+
+next:
+	PHPDBG_G(flags) &= ~PHPDBG_IN_SIGNAL_HANDLER;
+
+	if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+		zend_bailout();
 	}
 }

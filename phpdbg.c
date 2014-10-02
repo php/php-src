@@ -74,6 +74,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->frame.num = 0;
 	pg->input_buflen = 0;
 	pg->sigsafe_mem.mem = NULL;
+	pg->sigsegv_bailout = NULL;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
@@ -181,6 +182,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
 	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(registered));
+	zend_hash_destroy(&PHPDBG_G(file_sources));
 	zend_hash_destroy(&PHPDBG_G(watchpoints));
 	zend_llist_destroy(&PHPDBG_G(watchlist_mem));
 
@@ -188,7 +190,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 		efree(PHPDBG_G(buffer));
 		PHPDBG_G(buffer) = NULL;
 	}
-	
+
 	if (PHPDBG_G(exec)) {
 		efree(PHPDBG_G(exec));
 		PHPDBG_G(exec) = NULL;
@@ -448,7 +450,7 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 				}
 
 				do {
-					switch (phpdbg_interactive(TSRMLS_C)) {
+					switch (phpdbg_interactive(1 TSRMLS_CC)) {
 						case PHPDBG_LEAVE:
 						case PHPDBG_FINISH:
 						case PHPDBG_UNTIL:
@@ -817,7 +819,7 @@ void phpdbg_sigio_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 {
 	int flags;
 	size_t newlen;
-	size_t i;
+	size_t i/*, last_nl*/;
 	TSRMLS_FETCH();
 
 //	if (!(info->si_band & POLLIN)) {
@@ -853,7 +855,11 @@ void phpdbg_sigio_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 						PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 					}
 					break;
-			}
+/*				case '\n':
+					zend_llist_add_element(PHPDBG_G(stdin), strndup()
+					last_nl = PHPDBG_G(stdin_buf).len + i;
+					break;
+*/			}
 		}
 		off += i;
 	} while (0);
@@ -870,6 +876,9 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 	switch (sig) {
 		case SIGBUS:
 		case SIGSEGV:
+			if (PHPDBG_G(sigsegv_bailout)) {
+				LONGJMP(*PHPDBG_G(sigsegv_bailout), FAILURE);
+			}
 			is_handled = phpdbg_watchpoint_segfault_handler(info, context TSRMLS_CC);
 			if (is_handled == FAILURE) {
 #ifdef ZEND_SIGNALS
@@ -1255,6 +1264,8 @@ phpdbg_main:
 
 		zend_activate(TSRMLS_C);
 
+		phpdbg_init_list(TSRMLS_C);
+
 		PHPDBG_G(original_free_function) = mm_heap->_free;
 		mm_heap->_free = phpdbg_watch_efree;
 
@@ -1290,6 +1301,8 @@ phpdbg_main:
 		/* make sure to turn off buffer for ev command */
 		php_output_activate(TSRMLS_C);
 		php_output_deactivate(TSRMLS_C);
+
+		php_output_activate(TSRMLS_C);
 
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
@@ -1397,7 +1410,7 @@ phpdbg_interact:
 		/* phpdbg main() */
 		do {
 			zend_try {
-				phpdbg_interactive(TSRMLS_C);
+				phpdbg_interactive(1 TSRMLS_CC);
 			} zend_catch {
 				if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
 					FILE *bp_tmp_fp = fopen(bp_tmp_file, "w");

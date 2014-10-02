@@ -24,9 +24,11 @@
 /* {{{ */
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC);
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC);
-int phpdbg_interactive(TSRMLS_D);
+int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC);
 int phpdbg_compile(TSRMLS_D);
-void phpdbg_clean(zend_bool full TSRMLS_DC); /* }}} */
+void phpdbg_clean(zend_bool full TSRMLS_DC);
+void phpdbg_force_interruption(TSRMLS_D);
+/* }}} */
 
 /* {{{ phpdbg command handlers */
 PHPDBG_COMMAND(exec);
@@ -63,7 +65,5 @@ void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 #else
 void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC);
 #endif /* }}} */
-
-void phpdbg_force_interruption(TSRMLS_D);
 
 #endif /* PHPDBG_PROMPT_H */

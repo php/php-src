@@ -146,4 +146,6 @@ static void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, Ha
 }
 #endif
 
+int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
+
 #endif /* PHPDBG_UTILS_H */

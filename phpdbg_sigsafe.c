@@ -96,9 +96,13 @@ void phpdbg_set_sigsafe_mem(char *buffer TSRMLS_DC) {
 	mem->heap.reserve_size = 0;
 }
 
+zend_mm_heap *phpdbg_original_heap_sigsafe_mem(TSRMLS_D) {
+	return PHPDBG_G(sigsafe_mem).old_heap;
+}
+
 void phpdbg_clear_sigsafe_mem(TSRMLS_D) {
+	zend_mm_set_heap(phpdbg_original_heap_sigsafe_mem(TSRMLS_C) TSRMLS_CC);
 	PHPDBG_G(sigsafe_mem).mem = NULL;
-	zend_mm_set_heap(PHPDBG_G(sigsafe_mem).old_heap TSRMLS_CC);
 }
 
 zend_bool phpdbg_active_sigsafe_mem(TSRMLS_D) {

@@ -644,9 +644,9 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 	phpdbg_param_t *name = *top;
 	const phpdbg_command_t *matched[3] = {NULL, NULL, NULL};
 	ulong matches = 0L;
-	
+
 	while (command && command->name && command->handler) {
-		if ((name->len == 1) || (command->name_len >= name->len)) {
+		if (name->len == 1 || command->name_len >= name->len) {
 			/* match single letter alias */
 			if (command->alias && (name->len == 1)) {
 				if (command->alias == (*name->str)) {
@@ -654,81 +654,72 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 					matches++;
 				}
 			} else {
-
 				/* match full, case insensitive, command name */
 				if (strncasecmp(command->name, name->str, name->len) == SUCCESS) {
 					if (matches < 3) {
-						
 						/* only allow abbreviating commands that can be aliased */
 						if (((name->len != command->name_len) && command->alias) ||
 							(name->len == command->name_len)) {
 							matched[matches] = command;
 							matches++;
 						}
-						
-						
+
 						/* exact match */
-						if (name->len == command->name_len)
+						if (name->len == command->name_len) {
 							break;
-					} else break;
+						}
+					} else {
+						break;
+					}
 				}
 			}
 		}
-		
+
 		command++;
 	}
-	
+
 	switch (matches) {
-		case 0: {
+		case 0:
 			if (parent) {
-				asprintf(
-				why,
-				"The command \"%s %s\" could not be found", 
-				parent->name, name->str);
-			} else asprintf(
-				why,
-				"The command \"%s\" could not be found", 
-				name->str);
-		} return parent;
-		
-		case 1: {
+				spprintf(why, 0, "The command \"%s %s\" could not be found", parent->name, name->str);
+			} else {
+				spprintf(why, 0, "The command \"%s\" could not be found", name->str);
+			}
+			return parent;
+
+		case 1:
 			(*top) = (*top)->next;
 
 			command = matched[0];
-		} break;
-		
+			break;
+
 		default: {
 			char *list = NULL;
 			zend_uint it = 0;
 			size_t pos = 0;
-			
+
 			while (it < matches) {
 				if (!list) {
-					list = malloc(
-						matched[it]->name_len + 1 + 
-						((it+1) < matches ? sizeof(", ")-1 : 0));
+					list = emalloc(matched[it]->name_len + 1 + (it + 1 < matches ? sizeof(", ") - 1 : 0));
 				} else {
-					list = realloc(list, 
-						(pos + matched[it]->name_len) + 1  + 
-						((it+1) < matches ? sizeof(", ")-1 : 0));
+					list = erealloc(list, (pos + matched[it]->name_len) + 1 + (it + 1 < matches ? sizeof(", ") - 1 : 0));
 				}
 				memcpy(&list[pos], matched[it]->name, matched[it]->name_len);
 				pos += matched[it]->name_len;
-				if ((it+1) < matches) {
-					memcpy(&list[pos], ", ", sizeof(", ")-1);
+				if ((it + 1) < matches) {
+					memcpy(&list[pos], ", ", sizeof(", ") - 1);
 					pos += (sizeof(", ") - 1);
 				}
-				
+
 				list[pos] = 0;
 				it++;
 			}
-			
-			asprintf(
-				why,
-				"The command \"%s\" is ambigious, matching %lu commands (%s)", 
-				name->str, matches, list);
-			free(list);
-		} return NULL;
+
+			spprintf(why, 0, "The command \"%s\" is ambigious, matching %lu commands (%s)", name->str, matches, list);
+			efree(list);
+
+			return NULL;
+		}
 	}
 
 	if (command->subs && (*top) && ((*top)->type == STR_PARAM)) {
@@ -741,51 +732,64 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 } /* }}} */
 
 /* {{{ */
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC) {
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why, zend_bool allow_async_unsafe TSRMLS_DC) {
 	phpdbg_param_t *top = NULL;
 	const phpdbg_command_t *handler = NULL;
-	
+
 	if (stack->type != STACK_PARAM) {
-		asprintf(
-			why, "The passed argument was not a stack !!");
+		spprintf(why, 0, "The passed argument was not a stack !!");
 		return FAILURE;
 	}
-	
+
 	if (!stack->len) {
-		asprintf(
-			why, "The stack contains nothing !!");
+		spprintf(why, 0, "The stack contains nothing !!");
 		return FAILURE;
 	}
-	
+
 	top = (phpdbg_param_t*) stack->next;
-	
+
 	switch (top->type) {
 		case EVAL_PARAM:
-			return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
+			if (allow_async_unsafe) {
+				return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
+			}
+			spprintf(why, 0, "ev command is disallowed during hard interrupt");
+			return FAILURE;
 
 		case RUN_PARAM:
-			return PHPDBG_COMMAND_HANDLER(run)(top TSRMLS_CC);
-		
+			if (allow_async_unsafe) {
+				return PHPDBG_COMMAND_HANDLER(run)(top TSRMLS_CC);
+			}
+			spprintf(why, 0, "run command is disallowed during hard interrupt");
+			return FAILURE;
+
 		case SHELL_PARAM:
-			return PHPDBG_COMMAND_HANDLER(sh)(top TSRMLS_CC);
-		
+			if (allow_async_unsafe) {
+				return PHPDBG_COMMAND_HANDLER(sh)(top TSRMLS_CC);
+			}
+			spprintf(why, 0, "sh command is disallowed during hard interrupt");
+			return FAILURE;
+
 		case STR_PARAM: {
-			handler = phpdbg_stack_resolve(
-				phpdbg_prompt_commands, NULL, &top, why);
-			
+			handler = phpdbg_stack_resolve(phpdbg_prompt_commands, NULL, &top, why);
+
 			if (handler) {
+				if (!allow_async_unsafe && !(handler->flags & PHPDBG_ASYNC_SAFE)) {
+					spprintf(why, 0, "%s command is disallowed during hard interrupt", handler->name);
+					return FAILURE;
+				}
+
 				if (phpdbg_stack_verify(handler, &top, why TSRMLS_CC) == SUCCESS) {
 					return handler->handler(top TSRMLS_CC);
 				}
 			}
 		} return FAILURE;
-		
+
 		default:
-			asprintf(
-				why, "The first parameter makes no sense !!");
+			spprintf(why, 0, "The first parameter makes no sense !!");
 			return FAILURE;
 	}
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -909,4 +913,3 @@ PHPDBG_API void phpdbg_destroy_input(char **input TSRMLS_DC) /*{{{ */
 {
 	efree(*input);
 } /* }}} */
-
