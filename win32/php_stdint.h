@@ -33,6 +33,10 @@
 #error "Use this header only with Microsoft Visual C++ compilers!"
 #endif // _MSC_VER ]
 
+// Starting with VS2014, many of the C11 features are now included, so we only
+// need many of these typedefs and defines for older VS suites
+#if _MSC_VER < 1900
+
 #ifndef _MSC_STDINT_H_ // [
 #define _MSC_STDINT_H_
 
@@ -84,9 +88,6 @@ typedef __int64           int64_t;
 #endif
 #ifndef uint8_t
 typedef unsigned __int8   uint8_t;
-#endif
-#ifndef u_char
-typedef unsigned __int8   u_char;
 #endif
 typedef unsigned __int16  uint16_t;
 #ifndef uint32_t
@@ -254,3 +255,11 @@ static __inline int64_t llabs(int64_t i)
 
 
 #endif // _MSC_STDINT_H_ ]
+
+#else
+#include <stdint.h>
+#endif
+
+#ifndef u_char
+typedef unsigned __int8   u_char;
+#endif
