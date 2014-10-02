@@ -71,7 +71,7 @@ ZEND_API zend_object *zend_object_create_proxy(zval *object, zval *member TSRMLS
 ZEND_API zend_object_handlers *zend_get_std_object_handlers(void);
 END_EXTERN_C()
 
-static zend_always_inline void zend_object_release(zend_object *obj TSRMLS_CC)
+static zend_always_inline void zend_object_release(zend_object *obj TSRMLS_DC)
 {
 	if (--GC_REFCOUNT(obj) == 0) {
 		zend_objects_store_del(obj TSRMLS_CC);
