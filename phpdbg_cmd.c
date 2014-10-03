@@ -750,11 +750,7 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why, zend_bool
 
 	switch (top->type) {
 		case EVAL_PARAM:
-			if (allow_async_unsafe) {
-				return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
-			}
-			spprintf(why, 0, "ev command is disallowed during hard interrupt");
-			return FAILURE;
+			return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
 
 		case RUN_PARAM:
 			if (allow_async_unsafe) {

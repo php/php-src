@@ -44,7 +44,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(continue,"continue execution",                       'c', NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, "|s", 0),
-	PHPDBG_COMMAND_D(ev,      "evaluate some code",                        0 , NULL, "i", 0), /* restricted ASYNC_SAFE */
+	PHPDBG_COMMAND_D(ev,      "evaluate some code",                        0 , NULL, "i", PHPDBG_ASYNC_SAFE), /* restricted ASYNC_SAFE */
 	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0, 0),
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0, 0),
@@ -671,13 +671,32 @@ out:
 	return SUCCESS;
 } /* }}} */
 
+int phpdbg_output_ev_variable(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval **zv TSRMLS_DC) {
+	phpdbg_notice("Printing variable %.*s", (int) len, name);
+	zend_print_zval_r(*zv, 0 TSRMLS_CC);
+	phpdbg_writeln(EMPTY);
+	efree(name);
+	efree(keyname);
+
+	return SUCCESS;
+}
+
 PHPDBG_COMMAND(ev) /* {{{ */
 {
 	zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)==PHPDBG_IS_STEPPING);
 	zval retval;
 
+	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
+		phpdbg_try_access {
+			phpdbg_parse_variable(param->str, param->len, &EG(symbol_table), 0, phpdbg_output_ev_variable, 0 TSRMLS_CC);
+		} phpdbg_catch_access {
+			phpdbg_error("Could not fetch data, invalid data source");
+		} phpdbg_end_try_access();
+		return SUCCESS;
+	}
+
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
-		PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
+		PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
 	}
 
 	/* disable stepping while eval() in progress */
@@ -685,8 +704,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	zend_try {
 		if (zend_eval_stringl(param->str, param->len,
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-			zend_print_zval_r(
-				&retval, 0 TSRMLS_CC);
+			zend_print_zval_r(&retval, 0 TSRMLS_CC);
 			phpdbg_writeln(EMPTY);
 			zval_dtor(&retval);
 		}
@@ -1292,12 +1310,13 @@ zend_vm_enter:
 		}
 
 		if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
+			PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
+
 			phpdbg_writeln(EMPTY);
 			phpdbg_notice("Program received signal SIGINT");
 			DO_INTERACTIVE(1);
 		}
 
-		PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
 next:
 
 		PHPDBG_G(last_line) = execute_data->opline->lineno;

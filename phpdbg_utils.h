@@ -148,4 +148,12 @@ static void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, Ha
 
 int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
 
+char *phpdbg_get_property_key(char *key);
+
+typedef int (*phpdbg_parse_var_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval **zv TSRMLS_DC);
+typedef int (*phpdbg_parse_var_with_arg_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval **zv, void *arg TSRMLS_DC);
+
+PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent TSRMLS_DC);
+PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, zend_bool silent, void *arg TSRMLS_DC);
+
 #endif /* PHPDBG_UTILS_H */

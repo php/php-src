@@ -506,3 +506,117 @@ int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry
 		return zend_lookup_class(name, name_length, ce TSRMLS_CC);
 	}
 }
+
+char *phpdbg_get_property_key(char *key) {
+	if (*key != 0) {
+		return key;
+	}
+	return strchr(key + 1, 0) + 1;
+}
+
+static int phpdbg_parse_variable_arg_wrapper(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval **zv, phpdbg_parse_var_func callback TSRMLS_DC) {
+	return callback(name, len, keyname, keylen, parent, zv TSRMLS_CC);
+}
+
+PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent TSRMLS_DC) {
+	return phpdbg_parse_variable_with_arg(input, len, parent, i, (phpdbg_parse_var_with_arg_func) phpdbg_parse_variable_arg_wrapper, silent, callback TSRMLS_CC);
+}
+
+PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, zend_bool silent, void *arg TSRMLS_DC) {
+	int ret = FAILURE;
+	zend_bool new_index = 1;
+	char *last_index;
+	size_t index_len = 0;
+	zval **zv;
+
+	if (len < 2 || *input != '$') {
+		goto error;
+	}
+
+	while (i++ < len) {
+		if (i == len) {
+			new_index = 1;
+		} else {
+			switch (input[i]) {
+				case '[':
+					new_index = 1;
+					break;
+				case ']':
+					break;
+				case '>':
+					if (last_index[index_len - 1] == '-') {
+						new_index = 1;
+						index_len--;
+					}
+					break;
+
+				default:
+					if (new_index) {
+						last_index = input + i;
+						new_index = 0;
+					}
+					if (input[i - 1] == ']') {
+						goto error;
+					}
+					index_len++;
+			}
+		}
+
+		if (new_index && index_len == 0) {
+			HashPosition position;
+			for (zend_hash_internal_pointer_reset_ex(parent, &position);
+			     zend_hash_get_current_data_ex(parent, (void **)&zv, &position) == SUCCESS;
+			     zend_hash_move_forward_ex(parent, &position)) {
+				if (i == len || (i == len - 1 && input[len - 1] == ']')) {
+					zval *key = emalloc(sizeof(zval));
+					size_t namelen;
+					char *name;
+					char *keyname = estrndup(last_index, index_len);
+					zend_hash_get_current_key_zval_ex(parent, key, &position);
+					convert_to_string(key);
+					name = emalloc(i + Z_STRLEN_P(key) + 2);
+					namelen = sprintf(name, "%.*s%s%s", (int)i, input, phpdbg_get_property_key(Z_STRVAL_P(key)), input[len - 1] == ']'?"]":"");
+					efree(key);
+
+					ret = callback(name, namelen, keyname, index_len, parent, zv, arg TSRMLS_CC) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+				} else if (Z_TYPE_PP(zv) == IS_OBJECT) {
+					phpdbg_parse_variable_with_arg(input, len, Z_OBJPROP_PP(zv), i, callback, silent, arg TSRMLS_CC);
+				} else if (Z_TYPE_PP(zv) == IS_ARRAY) {
+					phpdbg_parse_variable_with_arg(input, len, Z_ARRVAL_PP(zv), i, callback, silent, arg TSRMLS_CC);
+				} else {
+					/* Ignore silently */
+				}
+			}
+			return ret;
+		} else if (new_index) {
+			char last_chr = last_index[index_len];
+			last_index[index_len] = 0;
+			if (zend_symtable_find(parent, last_index, index_len + 1, (void **)&zv) == FAILURE) {
+				if (!silent) {
+					phpdbg_error("%.*s is undefined", (int)i, input);
+				}
+				return FAILURE;
+			}
+			last_index[index_len] = last_chr;
+			if (i == len) {
+				char *name = estrndup(input, len);
+				char *keyname = estrndup(last_index, index_len);
+
+				ret = callback(name, len, keyname, index_len, parent, zv, arg TSRMLS_CC) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+			} else if (Z_TYPE_PP(zv) == IS_OBJECT) {
+				parent = Z_OBJPROP_PP(zv);
+			} else if (Z_TYPE_PP(zv) == IS_ARRAY) {
+				parent = Z_ARRVAL_PP(zv);
+			} else {
+				phpdbg_error("%.*s is nor an array nor an object", (int)i, input);
+				return FAILURE;
+			}
+			index_len = 0;
+		}
+	}
+
+	return ret;
+	error:
+		phpdbg_error("Malformed input");
+		return FAILURE;
+}
