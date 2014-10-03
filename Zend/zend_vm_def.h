@@ -1985,17 +1985,6 @@ ZEND_VM_HANDLER(70, ZEND_FREE, TMP|VAR, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(53, ZEND_INIT_STRING, ANY, ANY)
-{
-	USE_OPLINE
-	zval *tmp = EX_VAR(opline->result.var);
-
-	SAVE_OPLINE();
-	ZVAL_EMPTY_STRING(tmp);
-	/*CHECK_EXCEPTION();*/
-	ZEND_VM_NEXT_OPCODE();
-}
-
 ZEND_VM_HANDLER(54, ZEND_ADD_CHAR, TMP|UNUSED, CONST)
 {
 	USE_OPLINE
@@ -2545,7 +2534,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	zend_function *fbc = call->func;
 
 	SAVE_OPLINE();
-	EX(call) = call->prev_nested_call;
+	EX(call) = call->prev_execute_data;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
 			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name->val, fbc->common.function_name->val);
@@ -2669,11 +2658,12 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			zend_vm_stack_free_call_frame(call TSRMLS_CC);
 		} else {
 			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, return_value, EXPECTED(zend_execute_ex == execute_ex) ? VM_FRAME_NESTED_FUNCTION : VM_FRAME_TOP_FUNCTION TSRMLS_CC);
+			i_init_func_execute_data(call, &fbc->op_array, return_value, VM_FRAME_NESTED_FUNCTION TSRMLS_CC);
 
 			if (EXPECTED(zend_execute_ex == execute_ex)) {
 				ZEND_VM_ENTER();
 			} else {
+				call->frame_kind = VM_FRAME_TOP_FUNCTION;
 				zend_execute_ex(call TSRMLS_CC);
 			}
 		}
@@ -2721,11 +2711,7 @@ ZEND_VM_C_LABEL(fcall_end_change_scope):
 				zend_object_store_ctor_failed(Z_OBJ(EG(This)) TSRMLS_CC);
 			}
 		}
-		if (!Z_DELREF(EG(This))) {
-			_zval_dtor_func_for_ptr(Z_COUNTED(EG(This)) ZEND_FILE_LINE_CC);
-		} else if (UNEXPECTED(!Z_GC_INFO(EG(This)))) {
-			gc_possible_root(Z_COUNTED(EG(This)) TSRMLS_CC);
-		}
+		OBJ_RELEASE(Z_OBJ(EG(This)));
 	}
 	Z_OBJ(EG(This)) = EX(object);
 	EG(scope) = EX(scope);
@@ -4145,10 +4131,11 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value, EXPECTED(zend_execute_ex == execute_ex) ? VM_FRAME_NESTED_CODE : VM_FRAME_TOP_CODE TSRMLS_CC);
+	    i_init_code_execute_data(call, new_op_array, return_value, VM_FRAME_NESTED_CODE TSRMLS_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
+			call->frame_kind = VM_FRAME_TOP_CODE;
 			zend_execute_ex(call TSRMLS_CC);
 		}
 
@@ -5082,13 +5069,6 @@ ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(142, ZEND_RAISE_ABSTRACT_ERROR, ANY, ANY)
-{
-	SAVE_OPLINE();
-	zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EX(scope)->name->val, EX(func)->op_array.function_name->val);
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
-}
-
 ZEND_VM_HANDLER(58, ZEND_END_SILENCE, TMP, ANY)
 {
 	USE_OPLINE
@@ -5427,7 +5407,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 				}
 				OBJ_RELEASE(call->object);
 			}
-			EX(call) = call->prev_nested_call;
+			EX(call) = call->prev_execute_data;
 			zend_vm_stack_free_call_frame(call TSRMLS_CC);
 			call = EX(call);
 		} while (call);

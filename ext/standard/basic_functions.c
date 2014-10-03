@@ -5126,7 +5126,7 @@ PHP_FUNCTION(php_strip_whitespace)
 	char *filename;
 	size_t filename_len;
 	zend_lex_state original_lex_state;
-	zend_file_handle file_handle = {0};
+	zend_file_handle file_handle = {{0}};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;

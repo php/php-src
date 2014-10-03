@@ -1055,25 +1055,6 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			COPY_NODE(opline->op1, src->op1);
 			MAKE_NOP(src);
 		} else if ((opline->opcode == ZEND_ADD_STRING ||
-					opline->opcode == ZEND_ADD_CHAR) &&
-				  	ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
-				  	VAR_SOURCE(opline->op1) &&
-				  	VAR_SOURCE(opline->op1)->opcode == ZEND_INIT_STRING) {
-			/* convert T = INIT_STRING(), T = ADD_STRING(T, X) to T = QM_ASSIGN(X) */
-			/* CHECKME: Remove ZEND_ADD_VAR optimization, since some conversions -
-			   namely, BOOL(false)->string - don't allocate memory but use empty_string
-			   and ADD_CHAR fails */
-			zend_op *src = VAR_SOURCE(opline->op1);
-			VAR_UNSET(opline->op1);
-			COPY_NODE(opline->op1, opline->op2);
-			if (opline->opcode == ZEND_ADD_CHAR) {
-				char c = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
-				ZVAL_STRINGL(&ZEND_OP1_LITERAL(opline), &c, 1);
-			}
-			SET_UNUSED(opline->op2);
-			MAKE_NOP(src);
-			opline->opcode = ZEND_QM_ASSIGN;
-		} else if ((opline->opcode == ZEND_ADD_STRING ||
 				   	opline->opcode == ZEND_ADD_CHAR ||
 				   	opline->opcode == ZEND_ADD_VAR ||
 				   	opline->opcode == ZEND_CONCAT) &&
@@ -1094,23 +1075,6 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode = ZEND_CONCAT;
 			literal_dtor(&ZEND_OP2_LITERAL(src)); /* will take care of empty_string too */
 			MAKE_NOP(src);
-//??? This optimization can't work anymore because ADD_VAR returns IS_TMP_VAR
-//??? and ZEND_CAST returns IS_VAR.
-//??? BTW: it wan't used for long time, because we don't use INIT_STRING
-#if 0
-		} else if (opline->opcode == ZEND_ADD_VAR &&
-					ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
-					VAR_SOURCE(opline->op1) &&
-					VAR_SOURCE(opline->op1)->opcode == ZEND_INIT_STRING) {
-			/* convert T = INIT_STRING(), T = ADD_VAR(T, X) to T = CAST(STRING, X) */
-			zend_op *src = VAR_SOURCE(opline->op1);
-			VAR_UNSET(opline->op1);
-			COPY_NODE(opline->op1, opline->op2);
-			SET_UNUSED(opline->op2);
-			MAKE_NOP(src);
-			opline->opcode = ZEND_CAST;
-			opline->extended_value = IS_STRING;
-#endif
 		} else if ((opline->opcode == ZEND_ADD_STRING ||
 					opline->opcode == ZEND_ADD_CHAR ||
 					opline->opcode == ZEND_ADD_VAR ||

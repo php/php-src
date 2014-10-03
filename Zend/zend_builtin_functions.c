@@ -1761,7 +1761,7 @@ static int copy_function_name(zval *zv TSRMLS_DC, int num_args, va_list args, ze
    Returns an array of all defined functions */
 ZEND_FUNCTION(get_defined_functions)
 {
-	zval internal, user, *ret;
+	zval internal, user;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
